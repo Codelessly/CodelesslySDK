@@ -1,0 +1,173 @@
+### Front page
+project savedIds=[] saved
+project offlineIds=[] saved
+project textSize=18 saved
+project theme="light" saved
+state section="Top stories"
+state breaking=true
+state stories=[{"id":"s1","sec":"World","title":"Coastal cities sign landmark flood-defence pact","dek":"Eleven mayors commit to a shared sea wall fund over twenty years.","by":"Marta Ilves","mins":6,"img":"https://images.example.com/seawall.jpg"},{"id":"s2","sec":"Business","title":"Rail freight rebounds as ports clear backlog","dek":"Volumes rose 8% in October.","by":"Dev Anand","mins":4,"img":"https://images.example.com/rail.jpg"},{"id":"s3","sec":"Science","title":"A cheaper way to read ancient ink without opening the scroll","dek":"","by":"Hana Okoye","mins":5,"img":"https://images.example.com/scroll.jpg"},{"id":"s4","sec":"Sport","title":"Late goal sends the Harriers into the final","dek":"","by":"Tom Brandt","mins":3,"img":"https://images.example.com/harriers.jpg"},{"id":"s5","sec":"Culture","title":"The quiet revival of the neighbourhood cinema","dek":"","by":"Ines Duarte","mins":7,"img":"https://images.example.com/cinema.jpg"},{"id":"s6","sec":"Politics","title":"Budget vote delayed again as talks stall","dek":"","by":"Carl Neumann","mins":4,"img":"https://images.example.com/vote.jpg"}]
+App
+  Sidebar
+    Brand "Broadsheet" icon="newspaper"
+    NavItem "Front page" icon="home" selected={true}
+    NavItem "Saved" icon="bookmark" badge="{length(savedIds)}" onTap={go saved}
+    Spacer grow
+    Text.muted "Tuesday, 17 November"
+  Main
+    Nav
+      Heading "Front page" level=1
+      Row gap=8
+        IconButton "search" tooltip="Search" onTap={open search}
+        IconButton "bookmark" tooltip="Saved" onTap={go saved}
+    Column pad=24 gap=16 scroll
+      if breaking
+        Banner.error "BREAKING" "Storm warning extended for the north coast until midnight" icon="warning" dismissible onDismiss={breaking=false} onTap={go article}
+      Row scroll gap=8
+        ChoiceChip "Top stories" selected={section=="Top stories"} onTap={section="Top stories"}
+        ChoiceChip "World" selected={section=="World"} onTap={section="World"}
+        ChoiceChip "Politics" selected={section=="Politics"} onTap={section="Politics"}
+        ChoiceChip "Business" selected={section=="Business"} onTap={section="Business"}
+        ChoiceChip "Science" selected={section=="Science"} onTap={section="Science"}
+        ChoiceChip "Sport" selected={section=="Sport"} onTap={section="Sport"}
+        ChoiceChip "Culture" selected={section=="Culture"} onTap={section="Culture"}
+      Grid cols=3 gap=16
+        Card gap=8 span=2 animate=fade onTap={go article}
+          Image "{stories[0].img}" h=260
+          Badge.primary "{stories[0].sec}"
+          Text.pageTitle "{stories[0].title}"
+          Text.bodySecondary "{stories[0].dek}"
+          Text.caption "{stories[0].by} · {stories[0].mins} min read"
+        Column gap=16
+          Card gap=8 onTap={go article}
+            Badge.neutral "{stories[1].sec}"
+            Text.heading3 "{stories[1].title}"
+            Text.caption "{stories[1].by} · {stories[1].mins} min"
+          Card gap=8 onTap={go article}
+            Badge.neutral "{stories[2].sec}"
+            Text.heading3 "{stories[2].title}"
+            Text.caption "{stories[2].by} · {stories[2].mins} min"
+      Text.sectionTitle "More stories"
+      Grid cols=3 gap=16
+        each s in slice(stories,3,6)
+          Card gap=8 stagger=80 onTap={go article}
+            Image "{s.img}" h=120
+            Text.caption "{upper(s.sec)}"
+            Text.heading3 "{s.title}"
+            Row between
+              Text.caption "{s.mins} min"
+              IconButton "{contains(savedIds,s.id) ? 'bookmark' : 'bookmark_border'}" tooltip="Save for later" onTap={savedIds=contains(savedIds,s.id) ? without(savedIds,s.id) : append(savedIds,s.id)}
+  Dialog#search "Search Broadsheet"
+    Input "Search stories" bind=q
+    Button "Search" onTap={emit search q; close}
+
+### Article
+project savedIds=[] saved
+project offlineIds=[] saved
+project textSize=18 saved
+project theme="light" saved
+state readPct=0
+state barShown=true
+state lastY=0
+state live=true
+state queued=[]
+state updates=[{"time":"14:02","text":"Mayors confirm the fund will open to smaller harbour towns from 2028."},{"time":"13:40","text":"Opposition delegates walk out of the morning session."}]
+state incoming=[{"time":"14:11","text":"Draft text published: signatories must report spending annually."},{"time":"14:19","text":"Insurers welcome the pact, shares in reinsurers edge up."},{"time":"14:30","text":"Protesters gather outside the harbour authority."}]
+every 10s when live && length(incoming)>0 onTick={queued=append(queued,first(incoming)); incoming=removeAt(incoming,0)}
+App
+  Main
+    Nav sticky
+      IconButton "arrow_back" tooltip="Back" onTap={go front_page}
+      Progress bind=readPct grow
+      Row gap=4
+        IconButton "text_decrease" tooltip="Smaller text" onTap={textSize=max(14,textSize-2)}
+        IconButton "text_increase" tooltip="Larger text" onTap={textSize=min(28,textSize+2)}
+        IconButton "palette" tooltip="Theme" onTap={open themeMenu}
+    Column pad=24 gap=16 scroll maxw=720 onScroll={readPct=clamp(result.fraction,0,1); barShown=result.y<lastY || result.y<80; lastY=result.y}
+      Badge.primary "World"
+      Heading "Coastal cities sign landmark flood-defence pact" level=1
+      Text.bodySecondary "Eleven mayors commit to a shared sea wall fund over twenty years."
+      Row gap=12 middle
+        Avatar "Marta Ilves" size=40
+        Column
+          Text.strong "Marta Ilves"
+          Text.caption "Updated 14:02 · 6 min read"
+      Image "https://images.example.com/seawall.jpg" h=260
+      Text.caption "A section of the Rotterdam barrier at low tide."
+      Card gap=8
+        Row between
+          Row gap=8 middle
+            Badge.error "LIVE"
+            Text.strong "Live updates"
+          Toggle "Auto" bind=live
+        if length(queued)>0
+          Button.tonal "{length(queued)} new updates" icon="arrow_upward" animate=pop onTap={updates=concat(reverse(queued),updates); queued=[]; scroll top}
+        each u in updates
+          Row gap=12 top animate=slide-up
+            Text.mono "{u.time}" w=56
+            Text "{u.text}" grow
+      Text "Mayors from eleven coastal cities signed an agreement on Tuesday to build a shared flood-defence fund, the largest of its kind in Europe." size={textSize}
+      Text "Under the pact each city will contribute a fixed share of its harbour revenue, with the money pooled and spent where the risk is greatest. Engineers say the first barriers could be standing within six years." size={textSize}
+      Text "Critics argue the deal leaves smaller towns exposed. Supporters say the fund can be widened once the first projects prove their worth." size={textSize}
+      Divider
+      Text.sectionTitle "Related stories"
+      Grid cols=2 gap=16
+        Card gap=4 onTap={go article}
+          Text.heading3 "How Rotterdam learned to live with water"
+          Text.caption "Science · 8 min"
+        Card gap=4 onTap={go article}
+          Text.heading3 "Insurers rethink coastal premiums"
+          Text.caption "Business · 5 min"
+        Card gap=4 onTap={go article}
+          Text.heading3 "The mayor who wants a seawall made of oysters"
+          Text.caption "Culture · 6 min"
+        Card gap=4 onTap={go article}
+          Text.heading3 "Rising tides, rising bills"
+          Text.caption "Politics · 4 min"
+    Footer visible={barShown} animate=slide-up
+      Row between pad=8
+        Row gap=8
+          Button.outline "{contains(savedIds,'s1') ? 'Saved' : 'Save'}" icon="{contains(savedIds,'s1') ? 'bookmark' : 'bookmark_border'}" onTap={savedIds=contains(savedIds,'s1') ? without(savedIds,'s1') : append(savedIds,'s1'); toast contains(savedIds,'s1') ? "Removed from saved" : "Saved for later"}
+          Button.outline "{contains(offlineIds,'s1') ? 'Available offline' : 'Download'}" icon="download_for_offline" onTap={offlineIds=append(offlineIds,'s1'); toast "Downloaded for offline reading"}
+        Button "Share" icon="share" onTap={open share}
+  Menu#themeMenu end
+    MenuItem "Light" icon="light_mode" onTap={theme="light"}
+    MenuItem "Sepia" icon="auto_stories" onTap={theme="sepia"}
+    MenuItem "Dark" icon="dark_mode" onTap={theme="dark"}
+  Sheet#share "Share this story"
+    Row gap=12
+      Button.outline "Copy link" icon="link" onTap={copy "https://broadsheet.example.com/s1"; toast "Link copied"; close}
+      Button.outline "Email" icon="mail" onTap={link mailto:?subject=Coastal%20cities%20sign%20landmark%20flood-defence%20pact; close}
+      Button.outline "Message" icon="chat" onTap={emit shareMessage; close}
+
+### Saved
+project savedIds=[] saved
+project offlineIds=[] saved
+state filter="All"
+state stories=[{"id":"s1","sec":"World","title":"Coastal cities sign landmark flood-defence pact","mins":6,"size":"1.2 MB"},{"id":"s2","sec":"Business","title":"Rail freight rebounds as ports clear backlog","mins":4,"size":"0.9 MB"},{"id":"s3","sec":"Science","title":"A cheaper way to read ancient ink without opening the scroll","mins":5,"size":"1.5 MB"},{"id":"s5","sec":"Culture","title":"The quiet revival of the neighbourhood cinema","mins":7,"size":"2.1 MB"}]
+App
+  Sidebar
+    Brand "Broadsheet" icon="newspaper"
+    NavItem "Front page" icon="home" onTap={go front_page}
+    NavItem "Saved" icon="bookmark" badge="{length(savedIds)}" selected={true}
+    Spacer grow
+    Text.muted "{length(offlineIds)} stories offline"
+  Main
+    Nav
+      Heading "Saved for later" level=1
+      Button.ghost "Clear all" onTap={savedIds=[]; toast "Cleared"}
+    Column pad=24 gap=16 scroll
+      SegmentedButton bind=filter items=["All","Offline","Online only"]
+      if length(savedIds)==0
+        EmptyState "Nothing saved yet" "Tap the bookmark on any story to read it later." icon="bookmark_border"
+          Button "Browse the front page" onTap={go front_page}
+      each s in filter=="Offline" ? filter(stories,x=>contains(offlineIds,x.id) && contains(savedIds,x.id)) : filter=="Online only" ? filter(stories,x=>!contains(offlineIds,x.id) && contains(savedIds,x.id)) : filter(stories,x=>contains(savedIds,x.id))
+        ListTile "{s.title}" "{s.sec} · {s.mins} min" onTap={go article}
+          if contains(offlineIds,s.id)
+            Badge.success "Offline · {s.size}"
+          if !contains(offlineIds,s.id)
+            Badge.neutral "Online only"
+          IconButton "more_vert" tooltip="More" onTap={sel=s.id; open rowMenu}
+  Menu#rowMenu end
+    MenuItem "Download for offline" icon="download_for_offline" onTap={offlineIds=append(offlineIds,sel); toast "Downloaded"}
+    MenuItem "Remove download" icon="cloud_off" onTap={offlineIds=without(offlineIds,sel)}
+    MenuItem "Remove from saved" icon="delete" onTap={savedIds=without(savedIds,sel); offlineIds=without(offlineIds,sel)}

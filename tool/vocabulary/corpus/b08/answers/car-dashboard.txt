@@ -1,0 +1,198 @@
+### Drive
+state mode="normal"
+state night=false
+state speed=62
+state gear="D"
+state fuel=0.64
+state range=312
+state battery=0.82
+state tab="drive"
+state leftSignal=false
+state seatbelt=false
+state engineTemp=96
+state tirePressureLow=true
+state blink=true
+every 500 onTick={blink=!blink}
+every 1s onTick={speed=clamp(speed+(mode=="sport" ? 3 : mode=="eco" ? -1 : 1),0,180)}
+App
+  Main
+    Nav fill={night ? "#FF05070A" : mode=="eco" ? "#FF0B2A1A" : mode=="sport" ? "#FF2A0B0B" : "#FF0B1426"}
+      Brand "Roadwise" icon="speed"
+      Row gap=8
+        Badge.success "ECO" visible={mode=="eco"}
+        Badge.primary "NORMAL" visible={mode=="normal"}
+        Badge.error "SPORT" visible={mode=="sport"}
+        Text.muted "{formatDate(today(),"MMM d")}"
+        Text.strong "21:47"
+        IconButton "dark_mode" tooltip="Night mode" onTap={night=!night}
+    Column pad=24 gap=16 fill={night ? "#FF05070A" : mode=="eco" ? "#FF0B2A1A" : mode=="sport" ? "#FF2A0B0B" : "#FF0B1426"} animate=fade duration=400
+      Row gap=24 middle
+        Column grow center gap=8
+          Stack center middle
+            Gauge bind=speed min=0 max=180 limit=130 unit="km/h"
+            Column center gap=0
+              Text "{speed}" size=96 weight=700 color={night ? "#FF8A8F98" : "#FFFFFFFF"} center
+              Text.muted "km/h" center
+          Row gap=16 center middle
+            Text "{gear}" size=48 weight=700 color={mode=="sport" ? "#FFFF4D4D" : mode=="eco" ? "#FF4DFF9A" : "#FF4DA3FF"}
+            Text.muted "Gear"
+        Column w=320 gap=12
+          Card gap=8
+            Row between
+              Text.strong "Range"
+              Icon "local_gas_station"
+            Text "{range} km" size=40 weight=700
+            Progress bind=fuel
+            Text.muted "{round(fuel*100,0)}% fuel"
+          Card gap=8
+            Row between
+              Text.strong "Battery"
+              Icon "battery_charging_full"
+            Progress bind=battery
+            Text.muted "{round(battery*100,0)}%"
+          Card gap=4
+            Row between
+              Text.muted "Engine"
+              Text.strong "{engineTemp} C"
+            Row between
+              Text.muted "Mode"
+              Text.strong "{upper(mode)}"
+      Row gap=16 center middle
+        Icon "warning" color={tirePressureLow && blink ? "#FFFFB020" : "#FF3A3F47"} size=32
+        Icon "airline_seat_recline_extra" color={seatbelt ? "#FF3A3F47" : (blink ? "#FFFF4D4D" : "#FF3A3F47")} size=32
+        Icon "thermostat" color={engineTemp>110 ? "#FFFF4D4D" : "#FF3A3F47"} size=32
+        Icon "arrow_back" color={leftSignal && blink ? "#FF4DFF9A" : "#FF3A3F47"} size=32 onTap={leftSignal=!leftSignal}
+        Icon "battery_alert" color={battery<0.2 ? "#FFFF4D4D" : "#FF3A3F47"} size=32
+        Icon "highlight" color="#FF4DA3FF" size=32
+      Row gap=12 center
+        IconButton "directions_car" tooltip="Drive" onTap={tab="drive"; go drive}
+        IconButton "map" tooltip="Map" onTap={go map}
+        IconButton "music_note" tooltip="Media" onTap={go media}
+        IconButton "videocam" tooltip="Reverse camera" onTap={go reverse}
+        IconButton "autorenew" tooltip="Cycle drive mode" onTap={mode=(mode=="eco" ? "normal" : mode=="normal" ? "sport" : "eco"); toast "Mode: {mode}"}
+        IconButton "mode_night" tooltip="Night mode" onTap={night=!night}
+    Footer
+      Row between
+        Text.muted "Roadwise 4.2"
+        Text.muted "Mode: {upper(mode)}  {night ? "Night" : "Day"}"
+
+### Map
+state mode="normal"
+state night=false
+state distToTurn=450
+state turnIcon="turn_right"
+state street="Harbor Avenue"
+state eta="22:14"
+state remaining=18.4
+every 1s onTick={distToTurn=max(0,distToTurn-14)}
+App
+  Main
+    Nav fill={night ? "#FF05070A" : "#FF0B1426"}
+      Brand "Roadwise" icon="navigation"
+      Row gap=8
+        Badge.info "ETA {eta}"
+        Text.muted "{remaining} km"
+        IconButton "dark_mode" tooltip="Night mode" onTap={night=!night}
+    Stack
+      Map center="Harbor Avenue" zoom=15 route=true heading=true dark={night} h=480
+      Card w=280 gap=8 fill={night ? "#FF10141A" : "#FF152038"}
+        Row gap=16 middle
+          Icon "{turnIcon}" size=64 color="#FFFFFFFF"
+          Column gap=0
+            Text "{distToTurn} m" size=40 weight=700 color="#FFFFFFFF"
+            Text.muted "{street}"
+        Progress {1-distToTurn/450}
+      Row end bottom pad=16
+        Card gap=4
+          Text.strong "Next"
+          Text.muted "Then left on Pier Road in 1.2 km"
+    Column pad=16 gap=12
+      Row gap=12 center
+        Button.outline "Zoom out" onTap={emit zoomOut}
+        Button.outline "Zoom in" onTap={emit zoomIn}
+        Button.outline "Recenter" onTap={emit recenter}
+        Button.destructive "End route" onTap={open endRoute}
+      Row gap=12 center
+        Button.ghost "Drive" onTap={go drive}
+        Button.ghost "Media" onTap={go media}
+        Button.ghost "Camera" onTap={go reverse}
+  Dialog#endRoute "End route?" "Navigation to 214 Pier Road will stop."
+    Row gap=8 end
+      Button.outline "Keep going" onTap={close}
+      Button.destructive "End route" onTap={emit endRoute; close; go drive}
+
+### Media
+state mode="normal"
+state night=false
+state playing=true
+state pos=84
+state trackIndex=0
+state tracks=[{"title":"Midnight City","artist":"M83","len":243},{"title":"Nightcall","artist":"Kavinsky","len":258},{"title":"Resonance","artist":"HOME","len":212}]
+state volume=40
+every 1s when playing onTick={pos=pos+1}
+every 1s when pos>=tracks[trackIndex].len onTick={trackIndex=(trackIndex+1)%length(tracks); pos=0}
+App
+  Main
+    Nav fill={night ? "#FF05070A" : "#FF0B1426"}
+      Brand "Roadwise" icon="music_note"
+      Row gap=8
+        Text.muted "{upper(mode)}"
+        IconButton "dark_mode" tooltip="Night mode" onTap={night=!night}
+    Column pad=24 gap=16
+      Row gap=16 stretch
+        Box grow h=240 radius=16 fill={night ? "#FF10141A" : "#FF152038"} center middle onTap={trackIndex=(trackIndex+length(tracks)-1)%length(tracks); pos=0} onSwipeRight={trackIndex=(trackIndex+length(tracks)-1)%length(tracks); pos=0}
+          Icon "skip_previous" size=64
+          Text.muted "Previous"
+        Column grow gap=8 center middle
+          Image "https://images.example.com/covers/{tracks[trackIndex].title}.jpg" w=160 h=160 radius=12
+          Text.heading "{tracks[trackIndex].title}" center
+          Text.muted "{tracks[trackIndex].artist}" center
+        Box grow h=240 radius=16 fill={night ? "#FF10141A" : "#FF152038"} center middle onTap={trackIndex=(trackIndex+1)%length(tracks); pos=0} onSwipeLeft={trackIndex=(trackIndex+1)%length(tracks); pos=0}
+          Icon "skip_next" size=64
+          Text.muted "Next"
+      Column gap=4
+        Slider bind=pos min=0 max={tracks[trackIndex].len}
+        Row between
+          Text.muted "{duration(pos)}"
+          Text.muted "{duration(tracks[trackIndex].len)}"
+      Row gap=24 center middle
+        IconButton "volume_down" tooltip="Volume down" onTap={volume=max(0,volume-10)}
+        IconButton "{playing ? "pause" : "play_arrow"}" tooltip="Play or pause" onTap={playing=!playing}
+        IconButton "volume_up" tooltip="Volume up" onTap={volume=min(100,volume+10)}
+      Slider bind=volume min=0 max=100
+      Row gap=12 center
+        Button.ghost "Drive" onTap={go drive}
+        Button.ghost "Map" onTap={go map}
+        Button.ghost "Camera" onTap={go reverse}
+
+### Reverse
+state night=false
+state gear="R"
+state distance=1.8
+state sensorLeft=0.9
+state sensorRight=0.4
+state blink=true
+every 400 onTick={blink=!blink}
+every 1s onTick={distance=max(0.2,distance-0.1)}
+App
+  Main
+    Nav fill="#FF000000"
+      Brand "Reverse camera" icon="videocam"
+      Row gap=8
+        Badge.error "R"
+        Text.strong "{fixed(distance,1)} m"
+    Stack
+      Image "camera://rear" h=420 animate=fade
+      Column center bottom pad=24 gap=8
+        Row gap=0 center
+          Box w=4 h=200 fill="#FFFF4D4D" visible={distance<0.6}
+          Box w=4 h=200 fill="#FFFFB020" visible={distance>=0.6 && distance<1.2}
+          Box w=4 h=200 fill="#FF4DFF9A" visible={distance>=1.2}
+        Text "Guide lines" color="#FFFFFFFF" size=12
+      Row between bottom pad=16
+        Icon "warning" size=48 color={sensorLeft<0.5 && blink ? "#FFFF4D4D" : "#FF4DFF9A"}
+        Icon "warning" size=48 color={sensorRight<0.5 && blink ? "#FFFF4D4D" : "#FF4DFF9A"}
+    Row gap=12 pad=16 center
+      Switch "Guide lines" bind=guides
+      Button.outline "Zoom" onTap={emit zoomCamera}
+      Button "Done" onTap={gear="D"; go drive}

@@ -1,0 +1,192 @@
+### Drill
+state queue=[{"a":7,"b":8,"op":"×","ans":56},{"a":9,"b":6,"op":"×","ans":54},{"a":12,"b":4,"op":"×","ans":48},{"a":63,"b":9,"op":"÷","ans":7},{"a":8,"b":8,"op":"×","ans":64}]
+state typed=""
+state streak=0
+state speed=0
+state limit=10
+state left=10
+state running=true
+state score=0
+state asked=0
+state wrong=[]
+state times=[]
+state screen="drill"
+every 100ms when running onTick={left=max(0,left-0.1)}
+every 100ms when running && left<=0 onTick={wrong=append(wrong,first(queue)); streak=0; asked=asked+1; queue=append(removeAt(queue,0),{"a":6,"b":7,"op":"×","ans":42}); typed=""; left=limit}
+App
+  Sidebar
+    Brand "Sum Sprint" icon="bolt"
+    NavItem "Drill" icon="timer" selected={screen=="drill"} onTap={go drill}
+    NavItem "Setup" icon="tune" onTap={go setup}
+    NavItem "Retry round" icon="replay" badge="{length(wrong)}" onTap={go retry}
+    NavItem "Times grid" icon="grid_on" onTap={go grid}
+    Spacer grow
+    Text.muted "Question {asked+1} of 20"
+    Progress {asked/20}
+  Main
+    Nav
+      Heading "Mixed drill" level=1
+      Row gap=8
+        Badge.success "Score {score}"
+        Button.outline "Pause" onTap={running=!running}
+        Button.ghost "Finish" onTap={go certificate}
+    Column pad=24 gap=16 center
+      Progress {left/limit} animate=fade
+      Row gap=24 center top
+        Column grow gap=16 center
+          Text.muted "{round(left,1)}s left"
+          Text "{first(queue).a} {first(queue).op} {first(queue).b}" size=96 weight=700 center
+          Box fill=#FFF1F3F5 radius=12 pad=16 w=240
+            Text "{typed==\"\" ? \"?\" : typed}" size=48 weight=700 center
+          Grid cols=3 gap=8 w=280
+            each d in [1,2,3,4,5,6,7,8,9]
+              Button.outline "{d}" size=large onTap={typed=concat(typed,"")+d}
+            Button.outline "Delete" icon="backspace" onTap={typed=slice(typed,0,length(typed)-1)}
+            Button.outline "0" size=large onTap={typed=typed+"0"}
+            Button "Enter" onTap={typed==fixed(first(queue).ans,0) ? {score=score+1; streak=streak+1; speed=round(60/max(1,limit-left),0); times=append(times,limit-left)} : {wrong=append(wrong,first(queue)); streak=0}; asked=asked+1; queue=append(removeAt(queue,0),{"a":11,"b":3,"op":"×","ans":33}); typed=""; left=limit}
+        Column w=260 gap=12 center
+          Gauge bind=speed min=0 max=60 limit=45 unit="per min"
+          Text.strong "Streak {streak}"
+          Divider
+          Text.caption "Up next"
+          each n in slice(queue,1,4)
+            Text "{n.a} {n.op} {n.b}" size=28 color=#FFB0B7C3 stagger=80
+
+### Setup
+state tables=[{"n":2,"on":true},{"n":3,"on":true},{"n":4,"on":false},{"n":5,"on":true},{"n":6,"on":false},{"n":7,"on":false},{"n":8,"on":false},{"n":9,"on":false},{"n":12,"on":false}]
+state mode="tables"
+state ops=["×"]
+state limit=10
+state total=20
+App
+  Sidebar
+    Brand "Sum Sprint" icon="bolt"
+    NavItem "Drill" icon="timer" onTap={go drill}
+    NavItem "Setup" icon="tune" selected={true}
+    NavItem "Retry round" icon="replay" onTap={go retry}
+    NavItem "Times grid" icon="grid_on" onTap={go grid}
+  Main
+    Nav
+      Heading "Set up a drill" level=1
+      Button "Start" onTap={emit start; go drill}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Text.strong "What to practise"
+        SegmentedButton bind=mode items=["tables","mixed"]
+        if mode=="tables"
+          Text.muted "Pick the times tables to include"
+          Grid cols=3 gap=8
+            each t in tables
+              Checkbox "{t.n} times table" bind=t.on
+          Row gap=8
+            Button.ghost "Select all" onTap={tables=map(tables,t=>with(t,"on",true))}
+            Button.ghost "Clear" onTap={tables=map(tables,t=>with(t,"on",false))}
+        if mode=="mixed"
+          Text.muted "Operations to mix"
+          Row gap=8
+            FilterChip "Add" selected={contains(ops,"+")} onTap={ops=contains(ops,"+") ? without(ops,"+") : append(ops,"+")}
+            FilterChip "Subtract" selected={contains(ops,"-")} onTap={ops=contains(ops,"-") ? without(ops,"-") : append(ops,"-")}
+            FilterChip "Multiply" selected={contains(ops,"×")} onTap={ops=contains(ops,"×") ? without(ops,"×") : append(ops,"×")}
+            FilterChip "Divide" selected={contains(ops,"÷")} onTap={ops=contains(ops,"÷") ? without(ops,"÷") : append(ops,"÷")}
+      Card gap=12
+        Text.strong "Pace"
+        Row between
+          Text "Seconds per question"
+          Text.strong "{limit}s"
+        Slider bind=limit min=3 max=30
+        Row between
+          Text "Questions"
+          Text.strong "{total}"
+        Slider bind=total min=10 max=50
+
+### Retry round
+state wrong=[{"a":7,"b":8,"op":"×","ans":56},{"a":9,"b":6,"op":"×","ans":54},{"a":12,"b":4,"op":"×","ans":48}]
+state idx=0
+state typed=""
+state fixedCount=0
+App
+  Sidebar
+    Brand "Sum Sprint" icon="bolt"
+    NavItem "Drill" icon="timer" onTap={go drill}
+    NavItem "Setup" icon="tune" onTap={go setup}
+    NavItem "Retry round" icon="replay" badge="{length(wrong)}" selected={true}
+    NavItem "Times grid" icon="grid_on" onTap={go grid}
+  Main
+    Nav
+      Heading "Retry the ones you missed" level=1
+      Text.muted "{fixedCount} fixed"
+    Column pad=24 gap=16
+      if isEmpty(wrong)
+        Card gap=12 center
+          Icon "emoji_events" size=48
+          Text.heading "Nothing left to retry"
+          Button "Back to drill" onTap={go drill}
+      if !isEmpty(wrong)
+        Card gap=16 center
+          Text.muted "{idx+1} of {length(wrong)}"
+          Text "{wrong[idx].a} {wrong[idx].op} {wrong[idx].b}" size=72 weight=700
+          Input "Your answer" type=number bind=typed w=200
+          Row gap=8
+            Button "Check" onTap={typed==fixed(wrong[idx].ans,0) ? {wrong=removeAt(wrong,idx); fixedCount=fixedCount+1; idx=0; typed=""; toast "Right"} : {toast "Not quite, the answer is {wrong[idx].ans}"; idx=(idx+1)%length(wrong); typed=""}}
+            Button.outline "Skip" onTap={idx=(idx+1)%length(wrong); typed=""}
+        Card gap=8
+          Text.strong "Still to practise"
+          each w in wrong
+            ListTile "{w.a} {w.op} {w.b}" icon="close"
+
+### Times grid
+state known=[[5,5,5,5,5,5,5,5,5,5,5,5],[5,5,4,5,5,4,5,5,5,5,5,5],[4,3,2,3,4,4,3,3,4,3,5,4],[5,4,3,3,5,4,3,2,4,3,5,4],[3,3,2,2,3,3,2,2,3,2,4,3]]
+state sel=""
+App
+  Sidebar
+    Brand "Sum Sprint" icon="bolt"
+    NavItem "Drill" icon="timer" onTap={go drill}
+    NavItem "Setup" icon="tune" onTap={go setup}
+    NavItem "Retry round" icon="replay" onTap={go retry}
+    NavItem "Times grid" icon="grid_on" selected={true}
+  Main
+    Nav
+      Heading "How well you know your tables" level=1
+      Button "Print certificate" onTap={go certificate}
+    Column pad=24 gap=16
+      Row gap=12
+        Badge.error "Shaky"
+        Badge.warning "Getting there"
+        Badge.success "Known"
+      Card gap=4
+        Row scroll gap=4
+          HeatGrid values={known} rows=12 cols=12 rowLabels=[1,2,3,4,5,6,7,8,9,10,11,12] colLabels=[1,2,3,4,5,6,7,8,9,10,11,12] scale=["#FFE53935","#FFFFB300","#FF43A047"] onTap={sel="{result.row} × {result.col}"}
+      if sel!=""
+        Card gap=8
+          Text.strong "{sel}"
+          Text.muted "Average time and misses for this fact"
+          Button "Drill this one" onTap={emit drillFact sel; go drill}
+
+### Certificate
+state name="Maya Reyes"
+Page
+  Nav
+    Brand "Sum Sprint" icon="bolt"
+    Button.outline "Back to drill" onTap={go drill}
+  Section center
+    Card gap=16 center maxw=720 pad=48
+      Icon "workspace_premium" size=64
+      Text.muted "Certificate of achievement"
+      Input "Name on certificate" bind=name w=280
+      Heading "{name}" level=1
+      Text.muted "completed a 20 question mental maths drill"
+      Row gap=32 center
+        Column center
+          Text.strong "18 / 20"
+          Text.caption "Correct"
+        Column center
+          Text.strong "4.2s"
+          Text.caption "Average time"
+        Column center
+          Text.strong "11"
+          Text.caption "Best streak"
+      Text.caption "{formatDate(today(),\"MMM d, yyyy\")}"
+      Row gap=8
+        Button "Download" icon="download" onTap={emit download}
+        Button.outline "Share" icon="share" onTap={emit share}
+        Button.ghost "New drill" onTap={go setup}

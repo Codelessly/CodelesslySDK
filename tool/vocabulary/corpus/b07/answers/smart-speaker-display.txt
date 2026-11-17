@@ -1,0 +1,155 @@
+### Idle
+state now="7:42"
+state seconds=0
+state date="Tuesday, 17 November"
+state alarmRinging=false
+state night=false
+every 1s onTick={seconds=seconds+1}
+every 1s when seconds==20 onTick={alarmRinging=true}
+App
+  Main
+    Nav
+      Brand "Hearth Hub" icon="speaker"
+      Row gap=8
+        Badge.success "Kitchen"
+        IconButton "bedtime" tooltip="Night clock" onTap={go night-clock}
+        IconButton "mic" tooltip="Talk to Hearth" onTap={go listening}
+    Column pad=24 gap=24 center middle
+      Text "{now}" size=120 weight=300 center
+      Text.muted "{date}" size=24 center
+      Row gap=32 center middle
+        Row gap=12 middle
+          Icon "partly_cloudy_day" size=64
+          Text "14°" size=56 weight=600
+        Column gap=4
+          Text.strong "Partly cloudy"
+          Text.muted "High 16°, low 8°, rain after 6 pm"
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.caption "Next alarm"
+          Text.strong "6:30 am"
+        Card gap=4
+          Text.caption "Next timer"
+          Text.strong "Pasta, 08:12"
+        Card gap=4
+          Text.caption "Today"
+          Text.strong "Dentist at 3:15 pm"
+      Text.muted "Say \"Hey Hearth\" to ask anything" center
+      Row gap=8 center
+        Button.outline "Timers" onTap={go timers-and-playing}
+        Button.outline "Night clock" onTap={night=true; go night-clock}
+  Dialog#alarm "Wake up" "Morning run, 7:42"
+    Column gap=16 center
+      Icon "alarm" size=72 animate=shake
+      Button "Stop alarm" size=large onTap={alarmRinging=false; toast "Alarm stopped"; close}
+      Button.ghost "Snooze 9 minutes" onTap={alarmRinging=false; toast "Snoozed until 7:51"; close}
+
+### Listening
+state heard=""
+state words=["How","many","tablespoons","are","in","a","third","of","a","cup"]
+state shown=0
+state phase="listening"
+state step=0
+state answers=[{"kind":"convert","title":"Unit conversion","big":"5 1/3 tbsp","line":"1/3 cup equals 5 tablespoons and 1 teaspoon"},{"kind":"timer","title":"Timer set","big":"10:00","line":"Rice, 10 minutes"},{"kind":"recipe","title":"Shakshuka, step 3 of 6","big":"Simmer 8 min","line":"Crack in the eggs, cover, and cook until the whites are set."}]
+every 400 when phase=="listening" onTick={shown=min(length(words),shown+1); heard=join(take(words,shown)," ")}
+every 400 when phase=="listening" && shown>=length(words) onTick={phase="answer"}
+App
+  Main
+    Nav
+      Brand "Hearth Hub" icon="speaker"
+      IconButton "close" tooltip="Dismiss" onTap={go idle}
+    Column pad=24 gap=20
+      if phase=="listening"
+        Column gap=16 center middle
+          Text.muted "Listening..." center animate=pulse
+          Waveform active=true colors=["#FF6C5CE7","#FF00B8D9","#FFFF7AB6"] h=120 animate=pulse
+          Text "{heard}" size=36 weight=500 center
+      if phase=="answer"
+        Text.muted "\"How many tablespoons are in a third of a cup\"" center
+        Pages bind=step items=answers h=320 peek=0.9
+          Card gap=12 pad=24
+            Row between
+              Text.sectionTitle "{item.title}"
+              Badge.info "{item.kind}"
+            Text "{item.big}" size=72 weight=700
+            Text.muted "{item.line}" size=22
+        Dots bind=step count=3
+        Row gap=8 center
+          Button.outline "Ask another" onTap={heard=""; shown=0; phase="listening"}
+          Button.ghost "Read it aloud" onTap={emit speak step}
+          Button "Done" onTap={go idle}
+
+### Timers and Playing
+state timers=[{"id":1,"name":"Pasta","left":492,"total":600,"running":true},{"id":2,"name":"Garlic bread","left":205,"total":420,"running":true},{"id":3,"name":"Laundry","left":2710,"total":3600,"running":false}]
+state volume=45
+state playing=true
+state elapsed=83
+state track={"title":"Golden Hour","artist":"Mira Okafor","album":"Slow Mornings","length":214}
+every 1s onTick={timers=map(timers,t=>t.running && t.left>0 ? with(t,"left",t.left-1) : t); elapsed=playing ? min(track.length,elapsed+1) : elapsed}
+App
+  Main
+    Nav
+      Brand "Hearth Hub" icon="speaker"
+      Row gap=8
+        IconButton "add_alarm" tooltip="New timer" onTap={open newTimer}
+        IconButton "home" tooltip="Home" onTap={go idle}
+    Column pad=24 gap=20
+      Text.sectionTitle "Timers"
+      Grid cols=3 gap=16
+        each t in timers
+          Card gap=8
+            Text.strong "{t.name}"
+            Stack center middle
+              Ring {1 - t.left/t.total} size=140
+              Text "{duration(t.left)}" size=28 weight=700
+            Row gap=8 center
+              IconButton "{t.running ? 'pause' : 'play_arrow'}" tooltip="Pause or resume" onTap={timers=updateWhere(timers,x=>x.id==t.id,x=>with(x,"running",!x.running))}
+              IconButton "add" tooltip="Add one minute" onTap={timers=updateWhere(timers,x=>x.id==t.id,x=>with(x,"left",x.left+60))}
+              IconButton "close" tooltip="Cancel timer" onTap={timers=removeWhere(timers,x=>x.id==t.id)}
+      Card gap=16 pad=20
+        Row gap=16 middle
+          Image "https://images.hearth.example/album/slow-mornings.jpg" w=96 h=96 radius=12
+          Column grow gap=4
+            Text.caption "Now playing"
+            Text.title "{track.title}"
+            Text.muted "{track.artist}, {track.album}"
+          IconButton "skip_previous" tooltip="Previous" onTap={emit previous}
+          IconButton "{playing ? 'pause_circle' : 'play_circle'}" tooltip="Play or pause" size=48 onTap={playing=!playing}
+          IconButton "skip_next" tooltip="Next" onTap={emit next}
+        Row gap=8 middle
+          Text.caption "{duration(elapsed)}"
+          Progress {elapsed/track.length} grow
+          Text.caption "{duration(track.length)}"
+        Row gap=12 middle
+          Icon "volume_down"
+          Slider bind=volume min=0 max=100 h=48 grow
+          Icon "volume_up"
+          Text.strong "{volume}" w=40
+  Dialog#newTimer "New timer"
+    Input "Name" "Tea" bind=newName
+    Row gap=8
+      Button.outline "5 min" onTap={timers=append(timers,{"id":length(timers)+10,"name":coalesce(newName,"Timer"),"left":300,"total":300,"running":true}); close}
+      Button.outline "10 min" onTap={timers=append(timers,{"id":length(timers)+10,"name":coalesce(newName,"Timer"),"left":600,"total":600,"running":true}); close}
+      Button.outline "20 min" onTap={timers=append(timers,{"id":length(timers)+10,"name":coalesce(newName,"Timer"),"left":1200,"total":1200,"running":true}); close}
+
+### Night Clock
+state now="2:07"
+state dim=15
+state ringing=false
+state nextAlarm="6:30 am"
+every 1s when ringing==false onTick={emit tick}
+App
+  Main fill=#FF000000
+    Column pad=24 gap=16 center middle h=fill onTap={ringing ? (ringing=false; toast "Alarm stopped") : (dim=dim<50 ? 60 : 15)}
+      Text "{now}" size=160 weight=200 color=#FF8A3B2E center
+      Row gap=8 middle
+        Icon "alarm" color=#FF5C2A22
+        Text "{nextAlarm}" size=24 color=#FF5C2A22
+      if ringing
+        Text "Tap anywhere to stop" size=32 color=#FFB04A3A animate=pulse
+      Row gap=8 hide=phone
+        Text "Dimming to {dim}%" size=16 color=#FF4A2019
+        Slider bind=dim min=5 max=100 w=200
+      Row gap=12
+        Button.ghost "Wake screen" onTap={dim=60; go idle}
+        Button.ghost "Alarm off" onTap={nextAlarm="Off"; toast "Alarm off"}

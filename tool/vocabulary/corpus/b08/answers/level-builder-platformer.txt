@@ -1,0 +1,190 @@
+### Editor
+state tiles=[{"x":0,"y":11,"t":"ground"},{"x":1,"y":11,"t":"ground"},{"x":2,"y":11,"t":"ground"}]
+state history=[]
+state future=[]
+state tool="ground"
+state mode="paint"
+state playing=false
+state zoom=1
+state levelName="Cinder Canyon"
+state difficulty="Medium"
+state checked=false
+state canFinish=false
+state checkMessage=""
+App
+  Sidebar
+    Brand "Blockyard" icon="grid_view"
+    NavItem "Editor" icon="edit" selected={true}
+    NavItem "My levels" icon="folder" onTap={go my-levels}
+    NavItem "Level details" icon="tune" onTap={go details}
+    Spacer grow
+    Text.caption "Palette"
+    Grid cols=3 gap=8
+      ChoiceChip "Ground" icon="landscape" selected={tool=="ground"} onTap={tool="ground"; mode="paint"}
+      ChoiceChip "Spikes" icon="change_history" selected={tool=="spikes"} onTap={tool="spikes"; mode="paint"}
+      ChoiceChip "Coin" icon="paid" selected={tool=="coin"} onTap={tool="coin"; mode="paint"}
+      ChoiceChip "Spring" icon="upgrade" selected={tool=="spring"} onTap={tool="spring"; mode="paint"}
+      ChoiceChip "Slime" icon="bug_report" selected={tool=="slime"} onTap={tool="slime"; mode="paint"}
+      ChoiceChip "Bat" icon="flutter_dash" selected={tool=="bat"} onTap={tool="bat"; mode="paint"}
+    Divider
+    Text.caption "Place once"
+    Button.outline "Start flag" icon="flag" onTap={tool="start"; mode="paint"}
+    Button.outline "Goal" icon="sports_score" onTap={tool="goal"; mode="paint"}
+  Main
+    Nav
+      Column
+        Heading "{levelName}" level=1
+        Text.caption "{difficulty} - {length(tiles)} tiles"
+      Row gap=8
+        IconButton "undo" tooltip="Undo" disabled={length(history)==0} onTap={length(history)>0 ? {future=append(future,tiles); tiles=last(history); history=removeAt(history,length(history)-1)} : toast "Nothing to undo"}
+        IconButton "redo" tooltip="Redo" disabled={length(future)==0} onTap={length(future)>0 ? {history=append(history,tiles); tiles=last(future); future=removeAt(future,length(future)-1)} : toast "Nothing to redo"}
+        SegmentedButton bind=mode items=["paint","erase","rect"]
+        Button.outline "Play-test" icon="play_arrow" hide=phone onTap={playing=true}
+        Button "Publish" icon="publish" onTap={checked=false; open publish}
+    Column pad=24 gap=16
+      if playing
+        Card gap=12
+          Row between
+            Text.strong "Play-testing"
+            Button.destructive "Back to editing" icon="stop" onTap={playing=false}
+          GamePlayer tiles={tiles} h=420 autoplay onFinish={playing=false; toast "You reached the goal"} onDie={toast "Ouch. Try again"} onRestart={emit restart}
+          Text.muted "Arrows to move, space to jump."
+      if !playing
+        Card gap=12
+          Row between
+            Text.strong "Tile grid"
+            Row gap=8
+              IconButton "remove" tooltip="Zoom out" onTap={zoom=max(0.5,zoom-0.25)}
+              Text.small "{round(zoom*100,0)}%"
+              IconButton "add" tooltip="Zoom in" onTap={zoom=min(2,zoom+0.25)}
+          TileGrid bind=tiles cols=120 rows=14 size=32 zoom={zoom} scroll=horizontal tool={tool} mode={mode} h=460 onPaintStart={history=append(history,tiles); future=[]} onChange={canFinish=any(result,t=>t.t=="start") && any(result,t=>t.t=="goal")}
+          Row gap=8 between
+            Text.muted "Drag to paint. Erase removes tiles. Rect fills a rectangle."
+            Row gap=8
+              Button.ghost "Clear all" icon="delete_sweep" onTap={open clearAll}
+              Button.outline "Level details" icon="tune" onTap={go details}
+  Dialog#clearAll "Clear the whole level?" "This removes every tile. You can still undo."
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Clear" onTap={history=append(history,tiles); future=[]; tiles=[]; close}
+  Dialog#publish "Publish level" "We check that the level can be finished first."
+    Column gap=12
+      Row gap=8
+        Icon "flag"
+        Text "Start flag placed"
+        Spacer grow
+        if any(tiles,t=>t.t=="start")
+          Badge.success "Yes"
+        if !any(tiles,t=>t.t=="start")
+          Badge.error "Missing"
+      Row gap=8
+        Icon "sports_score"
+        Text "Goal placed"
+        Spacer grow
+        if any(tiles,t=>t.t=="goal")
+          Badge.success "Yes"
+        if !any(tiles,t=>t.t=="goal")
+          Badge.error "Missing"
+      if checked
+        Text.success "A route from start to goal exists."
+      Button.outline "Run finish check" icon="rule" onTap={emit checkLevel tiles; checked=canFinish; canFinish ? toast "Level can be finished" : toast "No route from start to goal"}
+      Row gap=8 end
+        Button.ghost "Cancel" onTap={close}
+        Button "Publish" disabled={!checked} onTap={emit publish {"name":levelName,"difficulty":difficulty,"tiles":tiles}; toast "Published"; close}
+
+### Level details
+state levelName="Cinder Canyon"
+state difficulty="Medium"
+state description=""
+state tags=["lava","vertical"]
+state lives=3
+state timeLimit=180
+state allowSpin=true
+App
+  Sidebar
+    Brand "Blockyard" icon="grid_view"
+    NavItem "Editor" icon="edit" onTap={go editor}
+    NavItem "My levels" icon="folder" onTap={go my-levels}
+    NavItem "Level details" icon="tune" selected={true}
+  Main
+    Nav
+      Heading "Level details" level=1
+      Row gap=8
+        Button.ghost "Back to editor" onTap={go editor}
+        Button "Save" icon="save" onTap={emit saveDetails; toast "Details saved"}
+    Column pad=24 gap=16 maxw=720
+      Card gap=16
+        Input "Level name" "Name your level" bind=levelName
+        Text.fieldLabel "Difficulty"
+        SegmentedButton bind=difficulty items=["Easy","Medium","Hard","Brutal"]
+        Input "Description" "What makes this level fun?" bind=description multiline
+        Text.fieldLabel "Tags"
+        Row gap=8
+          each tag in tags
+            Chip "{tag}" onTap={tags=without(tags,tag)}
+          IconButton "add" tooltip="Add tag" onTap={open addTag}
+      Card gap=16
+        Text.strong "Rules"
+        Row gap=16
+          Column grow gap=4
+            Text.fieldLabel "Lives: {lives}"
+            Slider bind=lives min=1 max=9
+          Column grow gap=4
+            Text.fieldLabel "Time limit: {duration(timeLimit)}"
+            Slider bind=timeLimit min=30 max=600
+        Toggle "Allow wall-slide" bind=allowSpin
+      Card gap=8
+        Text.strong "Preview"
+        Row gap=8
+          Badge.primary "{difficulty}"
+          Text "{levelName}"
+        Text.muted "{lives} lives, {duration(timeLimit)}"
+  Dialog#addTag "Add a tag"
+    Input "Tag" bind=newTag
+    Button "Add" onTap={newTag!="" ? {tags=append(tags,trim(lower(newTag))); newTag=""; close} : toast "Type a tag"}
+
+### My levels
+state q=""
+state filter="All"
+state sel=""
+state levels=[{"id":"l1","name":"Cinder Canyon","difficulty":"Medium","status":"Draft","plays":0,"updated":"2026-11-14"},{"id":"l2","name":"Mossy Ruins","difficulty":"Easy","status":"Published","plays":1284,"updated":"2026-11-02"},{"id":"l3","name":"Skyline Sprint","difficulty":"Hard","status":"Published","plays":312,"updated":"2026-10-21"},{"id":"l4","name":"Spike Garden","difficulty":"Brutal","status":"Draft","plays":0,"updated":"2026-10-09"}]
+App
+  Sidebar
+    Brand "Blockyard" icon="grid_view"
+    NavItem "Editor" icon="edit" onTap={go editor}
+    NavItem "My levels" icon="folder" badge="{length(levels)}" selected={true}
+    NavItem "Level details" icon="tune" onTap={go details}
+  Main
+    Nav
+      Heading "My levels" level=1
+      Row gap=8
+        Input "Search" bind=q w=220
+        Button "New level" icon="add" onTap={emit newLevel; go editor}
+    Column pad=24 gap=16
+      Row gap=8
+        ChoiceChip "All" selected={filter=="All"} onTap={filter="All"}
+        ChoiceChip "Draft" selected={filter=="Draft"} onTap={filter="Draft"}
+        ChoiceChip "Published" selected={filter=="Published"} onTap={filter="Published"}
+      Grid cols=3 gap=16
+        each l in filter("All"==filter ? levels : filter(levels,x=>x.status==filter),x=>contains(lower(x.name),lower(q)))
+          Card gap=8 menu=levelMenu
+            LevelThumbnail levelId={l.id} h=120
+            Row between
+              Text.strong "{l.name}"
+              IconButton "more_vert" tooltip="More" onTap={sel=l.id; open levelMenu}
+            Row gap=8
+              Badge.info "{l.difficulty}"
+              if l.status=="Published"
+                Badge.success "Published"
+              if l.status=="Draft"
+                Badge.warning "Draft"
+            Text.caption "{l.plays} plays - updated {formatDate(l.updated,"MMM d")}"
+            Button.outline "Open" onTap={emit openLevel l.id; go editor}
+  Menu#levelMenu
+    MenuItem "Duplicate" icon="content_copy" onTap={emit duplicate sel; toast "Duplicated"}
+    MenuItem "Rename" icon="edit" onTap={go details}
+    MenuItem "Delete" icon="delete" onTap={open confirmDelete}
+  Dialog#confirmDelete "Delete this level?" "This cannot be undone."
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Delete" onTap={levels=removeWhere(levels,x=>x.id==sel); toast "Level deleted"; close}

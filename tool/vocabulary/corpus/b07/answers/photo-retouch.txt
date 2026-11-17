@@ -1,0 +1,149 @@
+### Editor
+state tool="brush"
+state exposure=0
+state contrast=0
+state warmth=0
+state clarity=0
+state split=0.5
+state compare=true
+state brushSize=48
+state brushFeather=40
+state zoom=100
+state sel=""
+App
+  Sidebar w=72
+    IconButton "crop" tooltip="Crop (C)" selected={tool=="crop"} onTap={tool="crop"}
+    IconButton "healing" tooltip="Heal (J)" selected={tool=="heal"} onTap={tool="heal"}
+    IconButton "brush" tooltip="Brush (B)" selected={tool=="brush"} onTap={tool="brush"}
+    IconButton "gradient" tooltip="Gradient (G)" selected={tool=="gradient"} onTap={tool="gradient"}
+    Spacer grow
+    IconButton "undo" tooltip="Undo" onTap={undo}
+    IconButton "redo" tooltip="Redo" onTap={redo}
+  Main
+    Nav
+      Column gap=0
+        Heading "Portrait_0412.jpg" level=3
+        Text.caption "6000 x 4000 px, edited 2 minutes ago"
+      Row gap=8
+        Toggle "Before / after" bind=compare
+        IconButton "layers" tooltip="Layers and history" onTap={go layers}
+        Button "Export" icon="ios_share" onTap={open export}
+    Column pad=24 gap=16
+      Card pad=0
+        Stack h=460
+          BeforeAfter before="https://images.example.com/retouch/portrait_0412_original.jpg" after="https://images.example.com/retouch/portrait_0412_edit.jpg" bind=split visible={compare} exposure={exposure} contrast={contrast} warmth={warmth} clarity={clarity}
+          Image "https://images.example.com/retouch/portrait_0412_edit.jpg" hidden={compare}
+          BrushCursor size={brushSize} feather={brushFeather} visible={tool=="brush"}
+          CropOverlay ratio="4:5" onChange={emit cropChange result} visible={tool=="crop"}
+          GradientHandles onChange={emit gradientChange result} visible={tool=="gradient"}
+      Row between
+        Row gap=8
+          IconButton "remove" tooltip="Zoom out" onTap={zoom=max(25,zoom-25)}
+          Text.strong "{zoom}%"
+          IconButton "add" tooltip="Zoom in" onTap={zoom=min(400,zoom+25)}
+        if tool=="brush"
+          Row gap=16
+            Column gap=4 w=220
+              Row between
+                Text.fieldLabel "Size"
+                Text.muted "{brushSize} px"
+              Slider bind=brushSize min=2 max=300
+            Column gap=4 w=220
+              Row between
+                Text.fieldLabel "Feather"
+                Text.muted "{brushFeather}%"
+              Slider bind=brushFeather min=0 max=100
+        if tool=="heal"
+          Text.muted "Click a blemish to heal it, drag to cover a larger area."
+        if tool=="crop"
+          Row gap=8
+            ChoiceChip "Free"
+            ChoiceChip "1:1"
+            ChoiceChip "4:5" selected
+            ChoiceChip "16:9"
+        if tool=="gradient"
+          Text.muted "Drag across the photo to set where the effect fades."
+    Footer
+      Row between pad=12
+        Text.muted "History: {length(history)} steps"
+        Button.ghost "Reset all" onTap={exposure=0; contrast=0; warmth=0; clarity=0; toast "All adjustments reset"}
+  Pane w=320 pad=16 gap=12
+    Heading "Adjust" level=3
+    Histogram exposure={exposure} contrast={contrast} warmth={warmth} clarity={clarity} h=96
+    Column gap=4
+      Row between
+        Text.fieldLabel "Exposure"
+        Row gap=8
+          Text.muted "{exposure}"
+          IconButton "fiber_manual_record" tooltip="Reset exposure" size=small hidden={exposure==0} onTap={exposure=0}
+      Slider bind=exposure min=-100 max=100
+    Column gap=4
+      Row between
+        Text.fieldLabel "Contrast"
+        Row gap=8
+          Text.muted "{contrast}"
+          IconButton "fiber_manual_record" tooltip="Reset contrast" size=small hidden={contrast==0} onTap={contrast=0}
+      Slider bind=contrast min=-100 max=100
+    Column gap=4
+      Row between
+        Text.fieldLabel "Warmth"
+        Row gap=8
+          Text.muted "{warmth}"
+          IconButton "fiber_manual_record" tooltip="Reset warmth" size=small hidden={warmth==0} onTap={warmth=0}
+      Slider bind=warmth min=-100 max=100
+    Column gap=4
+      Row between
+        Text.fieldLabel "Clarity"
+        Row gap=8
+          Text.muted "{clarity}"
+          IconButton "fiber_manual_record" tooltip="Reset clarity" size=small hidden={clarity==0} onTap={clarity=0}
+      Slider bind=clarity min=-100 max=100
+  Dialog#export "Export" "Save the edited photo"
+    state format="JPEG"
+    state quality=90
+    state longEdge="3000"
+    SegmentedButton bind=format items=["JPEG","PNG","WebP"]
+    Select "Long edge" bind=longEdge items=["1080","2048","3000","6000 (original)"]
+    Column gap=4
+      Row between
+        Text.fieldLabel "Quality"
+        Text.muted "{quality}"
+      Slider bind=quality min=10 max=100
+    Text.caption "Estimated file size: {fixed(quality*0.05,1)} MB"
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Export" onTap={emit export {"format":format,"quality":quality,"longEdge":longEdge}; toast "Exported Portrait_0412.jpg"; close}
+
+### Layers and history
+state layers=[{"id":1,"name":"Skin smoothing","visible":true,"opacity":60},{"id":2,"name":"Eye brighten","visible":true,"opacity":45},{"id":3,"name":"Warm grade","visible":false,"opacity":80},{"id":4,"name":"Background","visible":true,"opacity":100}]
+state history=[{"id":1,"label":"Open Portrait_0412.jpg","time":"10:02"},{"id":2,"label":"Exposure +18","time":"10:04"},{"id":3,"label":"Heal blemish","time":"10:06"},{"id":4,"label":"Brush: eye brighten","time":"10:09"},{"id":5,"label":"Warmth +12","time":"10:11"}]
+state at=5
+state sel=0
+App
+  Sidebar w=72
+    IconButton "arrow_back" tooltip="Back to editor" onTap={go editor}
+  Main
+    Nav
+      Heading "Layers and history" level=3
+      Button.outline "Add layer" icon="add" onTap={layers=append(layers,{"id":length(layers)+10,"name":"New layer","visible":true,"opacity":100})}
+    Column pad=24 gap=16
+      Card gap=0 pad=0
+        each l in layers
+          Row between pad=12 border-bottom=#1F000000
+            Row gap=12
+              IconButton "{l.visible ? 'visibility' : 'visibility_off'}" tooltip="Show or hide" onTap={layers=updateWhere(layers,x=>x.id==l.id,x=>with(x,"visible",!x.visible))}
+              Image "https://images.example.com/retouch/thumb_{l.id}.jpg" w=48 h=48 radius=6
+              Text.strong "{l.name}"
+            Row gap=12
+              Slider bind=l.opacity min=0 max=100 w=140
+              Text.muted "{l.opacity}%" w=44
+              IconButton "more_vert" tooltip="Layer menu" onTap={sel=l.id; open layerMenu}
+  Pane w=320 pad=16 gap=12
+    Heading "History" level=3
+    each h in history
+      ListTile "{h.label}" subtitle="{h.time}" selected={h.id==at} onTap={at=h.id; emit historyJump h.id; toast "Back to: {h.label}"}
+    Button.outline "Clear history" onTap={history=take(history,1); at=1}
+  Menu#layerMenu end
+    MenuItem "Duplicate" icon="content_copy" onTap={layers=append(layers,with(find(layers,x=>x.id==sel),"id",sel+100))}
+    MenuItem "Merge down" icon="merge_type" onTap={emit mergeDown sel}
+    MenuItem "Delete" icon="delete" onTap={layers=removeWhere(layers,x=>x.id==sel)}

@@ -1,0 +1,135 @@
+### Home
+state screen="home"
+state focusRow=0
+state focusCol=0
+state menuFocus=false
+state menuItem=0
+state profile="Ray"
+state titles=[{"id":"t1","title":"The Salt Road","year":2025,"rating":"TV-14","genre":"Drama","poster":"https://img.couchlight.tv/p/salt-road.jpg","summary":"A cartographer and a smuggler cross a drying sea bed to reach a port that may no longer exist.","seasons":2},{"id":"t2","title":"Night Shift at Pier 9","year":2026,"rating":"TV-MA","genre":"Thriller","poster":"https://img.couchlight.tv/p/pier-9.jpg","summary":"A dock inspector finds one container too many, and every night it gets heavier.","seasons":1},{"id":"t3","title":"Gardens of Halden","year":2024,"rating":"TV-G","genre":"Family","poster":"https://img.couchlight.tv/p/halden.jpg","summary":"Three siblings inherit a greenhouse where the plants answer back.","seasons":3},{"id":"t4","title":"Static","year":2026,"rating":"TV-14","genre":"Sci-Fi","poster":"https://img.couchlight.tv/p/static.jpg","summary":"A radio astronomer hears her own voice in a signal from forty light years away.","seasons":1},{"id":"t5","title":"Brass Quartet","year":2023,"rating":"TV-PG","genre":"Comedy","poster":"https://img.couchlight.tv/p/brass.jpg","summary":"Four retired session players reunite for one last wedding gig.","seasons":4}]
+state rows=[{"name":"Continue watching","items":["t1","t4","t2"]},{"name":"Trending tonight","items":["t2","t5","t3","t4","t1"]},{"name":"New this week","items":["t4","t3","t5"]}]
+state topMenu=["Home","Search","Series","Movies","My list"]
+state cur="t1"
+App
+  Main
+    Nav
+      Brand "Couchlight" icon="live_tv"
+      Row gap=8
+        each m in topMenu
+          Chip "{m}" selected={topMenu[menuItem]==m && menuFocus} onTap={menuItem=indexOf(topMenu,m); screen=lower(m); menuFocus=true; m=="Search" ? go search : toast "Opening {m}"}
+      Row gap=8
+        Avatar "{profile}" size=36
+    Column pad=24 gap=20 scroll onKeyUp={focusRow==0 ? menuFocus=true : focusRow=focusRow-1} onKeyDown={menuFocus ? menuFocus=false : focusRow=min(length(rows)-1,focusRow+1)} onKeyLeft={menuFocus ? menuItem=max(0,menuItem-1) : focusCol=max(0,focusCol-1)} onKeyRight={menuFocus ? menuItem=min(length(topMenu)-1,menuItem+1) : focusCol=focusCol+1} onKeyOk={go player}
+      Stack h=260 radius=16 fill=#FF101018
+        Image "{find(titles,t=>t.id==cur).poster}" animate=fade
+        Box fill=#99000000 pad=24 gap=8 bottom
+          Row gap=8
+            Badge.neutral "{find(titles,t=>t.id==cur).rating}"
+            Text color=#FFCCCCDD "{find(titles,t=>t.id==cur).year} · {find(titles,t=>t.id==cur).genre}"
+          Text "{find(titles,t=>t.id==cur).title}" size=36 weight=700 color=#FFFFFFFF
+          Text "{find(titles,t=>t.id==cur).summary}" color=#FFEEEEF5 maxw=640
+          Row gap=12
+            Button "Play" icon="play_arrow" onTap={go player}
+            Button.outline "My list" icon="add" onTap={toast "Added to My list"}
+      each row in rows
+        Column gap=8
+          Text.sectionTitle "{row.name}"
+          Row scroll gap=16 pad=[8,8,8,8]
+            each id in row.items
+              Box#poster radius=12 fill=#FF22222E animate=scale focus={cur==id} onFocus={cur=id} onTap={cur=id; go player} glow={cur==id} w={cur==id ? 180 : 150} h={cur==id ? 270 : 225}
+                Image "{find(titles,t=>t.id==id).poster}" radius=12
+    Footer
+      Row between
+        Text.muted "Arrows to move, OK to play, Back to return"
+        Text.muted "{profile}'s Couchlight"
+
+### Player
+state playing=true
+state pos=754
+state total=3120
+state introVisible=true
+state introStart=40
+state introEnd=130
+state scrubbing=false
+state scrubPos=754
+state panel=""
+state audio="English 5.1"
+state subs="Off"
+state audioOpts=["English 5.1","English Stereo","Spanish","French"]
+state subOpts=["Off","English","English (CC)","Spanish","French"]
+state thumbs=[{"t":0,"url":"https://img.couchlight.tv/th/0.jpg"},{"t":600,"url":"https://img.couchlight.tv/th/600.jpg"},{"t":1200,"url":"https://img.couchlight.tv/th/1200.jpg"},{"t":1800,"url":"https://img.couchlight.tv/th/1800.jpg"},{"t":2400,"url":"https://img.couchlight.tv/th/2400.jpg"},{"t":3000,"url":"https://img.couchlight.tv/th/3000.jpg"}]
+every 1s when playing onTick={pos=min(total,pos+1); introVisible=pos>=introStart && pos<=introEnd}
+App
+  Main
+    Stack fill=#FF000000 h=640 onKeyOk={playing=!playing} onKeyLeft={scrubbing=true; scrubPos=max(0,scrubPos-10)} onKeyRight={scrubbing=true; scrubPos=min(total,scrubPos+10)} onKeyUp={open audiosubs} onKeyBack={go home}
+      Image "https://img.couchlight.tv/stills/salt-road-s1e4.jpg"
+      Column between pad=32
+        Row between
+          Column gap=4
+            Text "The Salt Road" size=28 weight=700 color=#FFFFFFFF
+            Text color=#FFCCCCDD "S1 E4 · The Drying Sea"
+          IconButton "closed_caption" tooltip="Audio and subtitles" onTap={open audiosubs}
+        if introVisible
+          Row end
+            Button.elevated "Skip intro" icon="skip_next" animate=slide-left onTap={pos=introEnd; introVisible=false}
+        Column gap=8
+          if scrubbing
+            Stack h=110
+              Row gap=0 left={clamp(scrubPos/total*100,5,95)}
+                Column center gap=4
+                  Image "{last(filter(thumbs,x=>x.t<=scrubPos)).url}" w=180 h=100 radius=8
+                  Text.small color=#FFFFFFFF "{duration(scrubPos)}"
+          Slider bind=scrubPos min=0 max={total} onChange={scrubbing=true; pos=scrubPos}
+          Row between
+            Text color=#FFFFFFFF "{duration(pos)}"
+            Row gap=12
+              IconButton "replay_10" tooltip="Back 10 seconds" onTap={pos=max(0,pos-10); scrubPos=pos}
+              IconButton "{playing ? 'pause' : 'play_arrow'}" tooltip="Play or pause" onTap={playing=!playing}
+              IconButton "forward_10" tooltip="Forward 10 seconds" onTap={pos=min(total,pos+10); scrubPos=pos}
+            Text color=#FFFFFFFF "-{duration(total-pos)}"
+  Sheet#audiosubs "Audio and subtitles"
+    Row gap=24 top
+      Column grow gap=4
+        Text.sectionTitle "Audio"
+        ListView
+          each a in audioOpts
+            ListTile "{a}" icon={audio==a ? "check" : "volume_up"} selected={audio==a} onTap={audio=a; toast "Audio: {a}"}
+      Column grow gap=4
+        Text.sectionTitle "Subtitles"
+        ListView
+          each s in subOpts
+            ListTile "{s}" icon={subs==s ? "check" : "subtitles"} selected={subs==s} onTap={subs=s; toast "Subtitles: {s}"}
+    Button "Done" onTap={close}
+
+### Search
+state q=""
+state letters=["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","1","2","3","4","5","6","7","8","9","0"]
+state catalog=[{"id":"t1","title":"The Salt Road","genre":"Drama","poster":"https://img.couchlight.tv/p/salt-road.jpg"},{"id":"t2","title":"Night Shift at Pier 9","genre":"Thriller","poster":"https://img.couchlight.tv/p/pier-9.jpg"},{"id":"t3","title":"Gardens of Halden","genre":"Family","poster":"https://img.couchlight.tv/p/halden.jpg"},{"id":"t4","title":"Static","genre":"Sci-Fi","poster":"https://img.couchlight.tv/p/static.jpg"},{"id":"t5","title":"Brass Quartet","genre":"Comedy","poster":"https://img.couchlight.tv/p/brass.jpg"}]
+state kbFocus=0
+App
+  Main
+    Nav
+      Brand "Couchlight" icon="live_tv"
+      Row gap=8
+        Heading "Search" level=1
+      Button.ghost "Home" icon="home" onTap={go home}
+    Row pad=24 gap=32 top
+      Column w=320 gap=12
+        Box fill=#FF1B1B26 radius=12 pad=16
+          Text "{q==\"\" ? \"Type a title\" : q}" size=28 weight=600 color=#FFFFFFFF
+        Grid cols=6 gap=8 onKeyOk={q=q+letters[kbFocus]} onKeyLeft={kbFocus=max(0,kbFocus-1)} onKeyRight={kbFocus=min(length(letters)-1,kbFocus+1)} onKeyUp={kbFocus=max(0,kbFocus-6)} onKeyDown={kbFocus=min(length(letters)-1,kbFocus+6)}
+          each l in letters
+            Button.outline "{l}" selected={letters[kbFocus]==l} onTap={q=q+l; kbFocus=indexOf(letters,l)}
+        Row gap=8
+          Button.secondary "Space" icon="space_bar" grow onTap={q=q+" "}
+          Button.secondary "Delete" icon="backspace" grow onTap={q=slice(q,0,length(q)-1)}
+          Button.ghost "Clear" onTap={q=""}
+      Column grow gap=12
+        Text.sectionTitle "{q==\"\" ? \"Popular right now\" : \"Results for \" + q}"
+        if length(filter(catalog,c=>contains(lower(c.title),lower(q))))==0
+          Text.muted "Nothing matches \"{q}\". Try fewer letters."
+        Grid cols=4 gap=16
+          each c in filter(catalog,c=>contains(lower(c.title),lower(q)))
+            Card gap=8 animate=fade onTap={go player}
+              Image "{c.poster}" h=200 radius=8
+              Text.strong "{c.title}"
+              Badge.neutral "{c.genre}"

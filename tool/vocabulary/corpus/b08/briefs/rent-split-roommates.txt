@@ -1,0 +1,3 @@
+App: Housemates, shared household money. Members as avatars with balances shown as green owed and red owing; add a shared bill with a payer, amount, split equal or by shares with sliders, or by who was home with day ticks; recurring bills on a calendar; a settle up suggestion with the fewest payments drawn as arrows; a chores wheel that assigns weekly jobs and a done tick; a house rules note; a monthly summary chart.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

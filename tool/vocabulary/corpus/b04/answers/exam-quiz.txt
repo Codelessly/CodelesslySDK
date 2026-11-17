@@ -1,0 +1,187 @@
+### Exam
+state cur=0
+state left=3600
+state running=true
+state seen=[0]
+state flagged=[]
+state single=-1
+state multi=[]
+state order=["Mitosis","Prophase","Cytokinesis","Metaphase"]
+state pairs=[]
+state blank=""
+state spot=null
+state answered=[]
+every 1s when running onTick={left=left-1; left==300 ? toast "Five minutes left" : ; left<=0 ? go review : }
+App
+  Sidebar
+    Brand "Viva" icon="school"
+    Text.strong "Biology 201, Midterm"
+    Text.muted "Question {cur+1} of 6"
+    Divider
+    Text.fieldLabel "Questions"
+    Grid cols=3 gap=8
+      each i in range(6)
+        Button "{i+1}" variant={cur==i ? "primary" : contains(flagged,i) ? "elevated" : contains(answered,i) ? "secondary" : "outline"} onTap={cur=i; seen=unique(append(seen,i))}
+    Column gap=4
+      Row gap=8 middle
+        Badge.success "Answered"
+        Text.small "{length(answered)}"
+      Row gap=8 middle
+        Badge.warning "Flagged"
+        Text.small "{length(flagged)}"
+      Row gap=8 middle
+        Badge.neutral "Unseen"
+        Text.small "{6-length(seen)}"
+    Spacer grow
+    Button.outline "Review and submit" onTap={go review}
+  Main
+    Nav
+      Heading "Cell division" level=1
+      Row gap=12 middle
+        Badge.danger "{duration(left)}" visible={left<=300} animate=pulse
+        Badge.neutral "{duration(left)}" visible={left>300}
+        IconButton "flag" tooltip="Flag for review" onTap={flagged=contains(flagged,cur) ? without(flagged,cur) : append(flagged,cur)}
+    Column pad=24 gap=16 scroll maxw=820
+      Progress {length(answered)/6}
+      if left<=300
+        Card fill=#FFFDECEA gap=4
+          Text.danger "Less than five minutes left. Answer what you can, then submit."
+      if cur==0
+        Card gap=12
+          Text.caption "Single choice, 1 mark"
+          Text.title "Which phase of mitosis aligns chromosomes along the cell's equator?"
+          each o in ["Prophase","Metaphase","Anaphase","Telophase"]
+            Radio "{o}" selected={single==index} onTap={single=index; answered=unique(append(answered,0))}
+      if cur==1
+        Card gap=12
+          Text.caption "Multiple choice, 2 marks, select all that apply"
+          Text.title "Which of these occur during interphase?"
+          each o in ["DNA replication","Spindle formation","Cell growth","Chromosome condensation","Organelle duplication"]
+            Checkbox "{o}" selected={contains(multi,o)} onTap={multi=contains(multi,o) ? without(multi,o) : append(multi,o); answered=unique(append(answered,1))}
+      if cur==2
+        Card gap=12
+          Text.caption "Ordering, 2 marks, drag into sequence"
+          Text.title "Put the stages of the cell cycle in order, first at the top."
+          Column gap=8 drop=step onDrop={order=result.data; answered=unique(append(answered,2))}
+            each s in order
+              ListTile "{s}" icon="drag_indicator" drag=step(s)
+      if cur==3
+        Card gap=12
+          Text.caption "Matching, 3 marks, draw a line from each term to its meaning"
+          Text.title "Match each structure to its function."
+          MatchLines bind=pairs left=["Mitochondrion","Ribosome","Golgi apparatus"] right=["Packages proteins","Makes ATP","Builds proteins"] onChange={answered=unique(append(answered,3))}
+      if cur==4
+        Card gap=12
+          Text.caption "Fill the blank, 1 mark"
+          Row gap=8 middle wrap
+            Text.title "The enzyme that unwinds DNA at the replication fork is"
+            Input "Answer" bind=blank w=160 onChange={blank!="" ? answered=unique(append(answered,4)) : answered=without(answered,4)}
+            Text.title "."
+      if cur==5
+        Card gap=12
+          Text.caption "Hotspot, 2 marks, tap the image"
+          Text.title "Tap the nucleolus in this micrograph."
+          Hotspot "https://img.viva.example/bio/cell-micrograph.jpg" bind=spot h=300 onChange={answered=unique(append(answered,5))}
+          Text.muted "Marked at {spot}" visible={spot!=null}
+    Footer
+      Row between pad=12
+        Button.outline "Previous" visible={cur>0} onTap={cur=cur-1; seen=unique(append(seen,cur-1))}
+        Spacer grow
+        Button "Next" visible={cur<5} onTap={cur=cur+1; seen=unique(append(seen,cur+1))}
+        Button "Review" visible={cur==5} onTap={go review}
+
+### Review
+project cur=0
+project left=3600
+project flagged=[]
+project answered=[]
+project running=true
+App
+  Sidebar
+    Brand "Viva" icon="school"
+    NavItem "Back to questions" icon="arrow_back" onTap={go exam}
+    Spacer grow
+    Badge.neutral "{duration(left)} left"
+  Main
+    Nav
+      Heading "Review before you submit" level=1
+    Column pad=24 gap=16 maxw=720
+      Grid cols=3 gap=12
+        Card gap=4
+          Text.muted "Answered"
+          Text.strong "{length(answered)} of 6" size=28
+        Card gap=4
+          Text.muted "Flagged"
+          Text.strong "{length(flagged)}" size=28
+        Card gap=4
+          Text.muted "Unanswered"
+          Text.strong "{6-length(answered)}" size=28
+      Card gap=8
+        Text.strong "Questions"
+        each i in range(6)
+          ListTile "Question {i+1}" subtitle={contains(answered,i) ? "Answered" : "Not answered"} onTap={cur=i; go exam}
+            Badge.warning "Flagged" visible={contains(flagged,i)}
+            Badge.success "Done" visible={contains(answered,i)}
+            Badge.danger "Empty" visible={!contains(answered,i)}
+      if length(answered)<6
+        Card fill=#FFFFF4E5
+          Text "You have {6-length(answered)} unanswered. Unanswered questions score zero."
+    Footer
+      Row between pad=12
+        Button.outline "Keep working" onTap={go exam}
+        Button "Submit exam" onTap={open confirm}
+  Dialog#confirm "Submit your exam?" "You cannot change answers after this."
+    Text "{length(answered)} of 6 answered, {length(flagged)} flagged."
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button "Submit" onTap={running=false; close; go result}
+
+### Result
+state topics=["Mitosis","Cell cycle","Organelles","Replication"]
+state scores=[1,2,2,1]
+state totals=[1,2,3,3]
+App
+  Sidebar
+    Brand "Viva" icon="school"
+    NavItem "Result" icon="grade" selected={true}
+    NavItem "Worked answers" icon="menu_book" onTap={scroll worked}
+    Spacer grow
+    Button.outline "Back to dashboard" onTap={go home}
+  Main
+    Nav
+      Heading "Your result" level=1
+      Button.outline "Download report" onTap={emit download}
+    Column pad=24 gap=16 scroll maxw=900
+      Grid cols=3 gap=16
+        Card gap=8 center
+          Ring 0.67
+          Text.strong "6 of 9 marks"
+        Card gap=8
+          Text.muted "Grade"
+          Text.strong "B" size=48
+          Badge.success "Pass"
+        Card gap=8
+          Text.muted "Time used"
+          Text.strong "{duration(3180)}" size=32
+      Card gap=12
+        Heading "Score by topic" level=3
+        BarChart values={map(range(4),i=>round(scores[i]/totals[i]*100,0))} labels={topics} h=220
+      Heading "Worked answers" level=2 id=worked
+      Accordion "1. Phase aligning chromosomes at the equator"
+        Badge.success "Correct"
+        Text "Chromosomes line up on the metaphase plate so spindle fibres can pull sister chromatids apart evenly. Your answer: Metaphase."
+      Accordion "2. Events of interphase"
+        Badge.warning "Partly correct, 1 of 2"
+        Text "DNA replication, cell growth and organelle duplication happen in interphase. Spindle formation and chromosome condensation belong to mitosis. You missed organelle duplication."
+      Accordion "3. Order of the cell cycle"
+        Badge.success "Correct"
+        Text "Prophase, metaphase, mitosis, cytokinesis is the sequence you gave, matching the notes in week 4."
+      Accordion "4. Matching structures"
+        Badge.danger "Incorrect"
+        Text "Mitochondrion makes ATP, ribosome builds proteins, Golgi packages proteins. You paired the ribosome with packaging."
+      Accordion "5. Enzyme that unwinds DNA"
+        Badge.success "Correct"
+        Text "Helicase breaks the hydrogen bonds between base pairs at the replication fork."
+      Accordion "6. Nucleolus hotspot"
+        Badge.danger "Missed"
+        Text "The nucleolus is the dense, dark region inside the nucleus, where ribosomal RNA is made."

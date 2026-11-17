@@ -1,0 +1,3 @@
+App: Stride, a treadmill console. A big speed and incline readout with plus and minus quick buttons and number keys for exact values; a heart-rate band connecting state; a program chooser of hills, intervals and a custom one drawn as a profile of bars; the workout running with a moving dot along the profile and a countdown to the next change; a cool-down; an emergency stop clip warning; a finished summary.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

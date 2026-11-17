@@ -1,0 +1,3 @@
+App: Moonmark, a cycle tracker. A month calendar with period days in solid colour, predicted days dotted, fertile window shaded; tap a day to log flow, symptoms and mood with icon chips; a today ring showing the day of the cycle and a phase word; cycle length chart over the last year with an average line; a reminder setting; a private lock with a code; a report to share with a doctor.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

@@ -1,0 +1,152 @@
+### Today
+state tab="today"
+state unit="C"
+state placeIdx=0
+state places=[{"id":"sea","name":"Seattle","region":"WA","temp":14,"hi":17,"lo":9,"sky":"rain"},{"id":"pdx","name":"Portland","region":"OR","temp":16,"hi":19,"lo":10,"sky":"cloudy"},{"id":"sfo","name":"San Francisco","region":"CA","temp":18,"hi":21,"lo":12,"sky":"clear"},{"id":"van","name":"Vancouver","region":"BC","temp":12,"hi":15,"lo":8,"sky":"rain"}]
+state hours=[{"t":"Now","icon":"rainy","temp":14,"rain":70},{"t":"1 PM","icon":"rainy","temp":14,"rain":80},{"t":"2 PM","icon":"rainy","temp":15,"rain":60},{"t":"3 PM","icon":"cloud","temp":15,"rain":40},{"t":"4 PM","icon":"cloud","temp":16,"rain":30},{"t":"5 PM","icon":"partly_cloudy_day","temp":16,"rain":20},{"t":"6 PM","icon":"partly_cloudy_day","temp":15,"rain":10},{"t":"7 PM","icon":"wb_twilight","temp":13,"rain":10},{"t":"8 PM","icon":"nights_stay","temp":12,"rain":5},{"t":"9 PM","icon":"nights_stay","temp":11,"rain":5}]
+state days=[{"d":"Today","icon":"rainy","lo":9,"hi":17,"rain":70},{"d":"Wed","icon":"cloud","lo":8,"hi":15,"rain":30},{"d":"Thu","icon":"partly_cloudy_day","lo":7,"hi":16,"rain":10},{"d":"Fri","icon":"sunny","lo":8,"hi":19,"rain":0},{"d":"Sat","icon":"sunny","lo":10,"hi":21,"rain":0},{"d":"Sun","icon":"partly_cloudy_day","lo":11,"hi":20,"rain":10},{"d":"Mon","icon":"rainy","lo":9,"hi":15,"rain":60},{"d":"Tue","icon":"thunderstorm","lo":8,"hi":14,"rain":80},{"d":"Wed","icon":"rainy","lo":7,"hi":13,"rain":50},{"d":"Thu","icon":"cloud","lo":6,"hi":14,"rain":20}]
+state hour=0
+App
+  Sidebar
+    Brand "Barometer" icon="speed"
+    NavItem "Today" icon="wb_sunny" selected={tab=="today"} onTap={tab="today"}
+    NavItem "Radar" icon="radar" onTap={go radar}
+    NavItem "Places" icon="place" badge="{length(places)}" onTap={go places}
+    Spacer grow
+    SegmentedButton bind=unit items=["C","F"]
+  Main
+    Nav
+      Column
+        Heading "{places[placeIdx].name}" level=1
+        Text.muted "{places[placeIdx].region} · Tuesday 12:42 PM"
+      Row gap=8
+        IconButton "refresh" tooltip="Refresh" onTap={toast "Updated just now"}
+        IconButton "more_vert" tooltip="More" onTap={open placeMenu}
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Stack h=300
+          Sky weather={places[placeIdx].sky} time="day" animate=fade
+          Column center middle gap=4
+            Text "{unit=="C" ? places[placeIdx].temp : round(places[placeIdx].temp*9/5+32,0)}°" size=96 weight=200 color=#FFFFFFFF
+            Text "Light rain" size=20 color=#FFFFFFFF
+            Text "H:{unit=="C" ? places[placeIdx].hi : round(places[placeIdx].hi*9/5+32,0)}°  L:{unit=="C" ? places[placeIdx].lo : round(places[placeIdx].lo*9/5+32,0)}°" color=#FFFFFFFF
+      Card gap=12
+        Text.sectionTitle "Hourly"
+        Text.muted "Rain likely until 3 PM, clearing by evening."
+        Row scroll gap=16
+          each h in hours
+            Column center gap=6 w=56
+              Text.caption "{h.t}"
+              Icon "{h.icon}"
+              Text.strong "{unit=="C" ? h.temp : round(h.temp*9/5+32,0)}°"
+              BarChart values=[h.rain] max=100 h=60 w=24
+              Text.caption "{h.rain}%"
+      Card gap=12
+        Text.sectionTitle "10-day forecast"
+        each d in days
+          Row gap=12 middle
+            Text.strong "{d.d}" w=56
+            Icon "{d.icon}"
+            Text.caption "{d.rain}%" w=36
+            Text.muted "{unit=="C" ? d.lo : round(d.lo*9/5+32,0)}°" w=36
+            RangeBar low={d.lo} high={d.hi} min=min(map(days,x=>x.lo)) max=max(map(days,x=>x.hi)) grow
+            Text.strong "{unit=="C" ? d.hi : round(d.hi*9/5+32,0)}°" w=36
+      Grid cols=3 gap=16
+        Card gap=8
+          Text.sectionTitle "Wind"
+          Compass direction=225 speed=18 unit="km/h"
+          Text.muted "SW, gusts to 31 km/h"
+        Card gap=8
+          Text.sectionTitle "UV index"
+          Gauge 3 min=0 max=11 limit=6
+          Text.muted "Moderate. Sunscreen after 11 AM."
+        Card gap=8
+          Text.sectionTitle "Humidity"
+          Gauge 82 min=0 max=100 unit="%"
+          Text.muted "Dew point 11°"
+      Card gap=8
+        Text.sectionTitle "Sun"
+        SunArc sunrise="6:48 AM" sunset="5:02 PM" now="12:42 PM"
+        Row between
+          Text.muted "Sunrise 6:48 AM"
+          Text.muted "Sunset 5:02 PM"
+  Menu#placeMenu end
+    MenuItem "Share forecast" icon="share" onTap={copy "Seattle, 14° and rain"; toast "Copied"}
+    MenuItem "Manage places" icon="place" onTap={go places}
+
+### Radar
+state playing=false
+state frame=6
+state layer="Rain"
+state frames=["11:00","11:10","11:20","11:30","11:40","11:50","12:00","12:10","12:20","12:30","12:40","12:50","1:00","1:10","1:20"]
+every 600 when playing onTick={frame=frame>=14 ? 0 : frame+1}
+App
+  Sidebar
+    Brand "Barometer" icon="speed"
+    NavItem "Today" icon="wb_sunny" onTap={go today}
+    NavItem "Radar" icon="radar" selected={true}
+    NavItem "Places" icon="place" onTap={go places}
+  Main
+    Nav
+      Heading "Rain radar" level=1
+      Row gap=8
+        SegmentedButton bind=layer items=["Rain","Clouds","Wind"]
+        IconButton "my_location" tooltip="Center on me" onTap={toast "Centered on Seattle"}
+    Column pad=24 gap=16
+      Card gap=12
+        Stack h=460
+          RadarMap center=[47.61,-122.33] zoom=8 layer={layer} frame={frame} animate=fade
+          Box pad=8 fill=#CC000000 radius=8
+            Text "{frames[frame]} {frame<6 ? "past" : frame==6 ? "now" : "forecast"}" color=#FFFFFFFF
+        Row gap=12 middle
+          IconButton "{playing ? "pause" : "play_arrow"}" tooltip="Play" onTap={playing=!playing}
+          Slider bind=frame min=0 max=14 grow
+          Text.mono "{frames[frame]}"
+        Row between
+          Text.caption "-2 h"
+          Text.caption "Now"
+          Text.caption "+1 h"
+        Row gap=8
+          Text.caption "Light"
+          Progress 1 grow
+          Text.caption "Heavy"
+      Card gap=4
+        Text.strong "Rain clearing from the west"
+        Text.muted "Heaviest band passes Seattle by 2 PM, dry after 5 PM."
+
+### Places
+state places=[{"id":"sea","name":"Seattle","region":"WA","temp":14,"sky":"Light rain"},{"id":"pdx","name":"Portland","region":"OR","temp":16,"sky":"Cloudy"},{"id":"sfo","name":"San Francisco","region":"CA","temp":18,"sky":"Clear"},{"id":"van","name":"Vancouver","region":"BC","temp":12,"sky":"Rain"}]
+state q=""
+state sel=""
+App
+  Sidebar
+    Brand "Barometer" icon="speed"
+    NavItem "Today" icon="wb_sunny" onTap={go today}
+    NavItem "Radar" icon="radar" onTap={go radar}
+    NavItem "Places" icon="place" badge="{length(places)}" selected={true}
+  Main
+    Nav
+      Heading "Saved places" level=1
+      Button "Add place" icon="add" onTap={open addPlace}
+    Column pad=24 gap=16
+      Input "Search places" bind=q
+      Text.muted "Drag a place or use the arrows to reorder. The first one opens by default."
+      Column gap=8 drop=place onDrop={places=filter(places,p=>true)}
+        each p in places
+          if q=="" || contains(lower(p.name),lower(q))
+            ListTile drag=place(p.id) menu=rowMenu
+              Icon "drag_indicator"
+              Column grow
+                Text.strong "{p.name}, {p.region}"
+                Text.muted "{p.sky}"
+              Text.heading "{p.temp}°"
+              IconButton "arrow_upward" tooltip="Move up" hidden={index==0} onTap={places=setAt(setAt(places,index,places[index-1]),index-1,places[index])}
+              IconButton "arrow_downward" tooltip="Move down" hidden={index==length(places)-1} onTap={places=setAt(setAt(places,index,places[index+1]),index+1,places[index])}
+              IconButton "more_vert" tooltip="More" onTap={sel=p.id; open rowMenu}
+  Menu#rowMenu end
+    MenuItem "Open" icon="open_in_new" onTap={go today}
+    MenuItem "Move to top" icon="vertical_align_top" onTap={places=concat([find(places,p=>p.id==sel)],removeWhere(places,p=>p.id==sel))}
+    MenuItem "Remove" icon="delete" onTap={places=removeWhere(places,p=>p.id==sel); toast "Place removed"}
+  Dialog#addPlace "Add place" "Search a city or a postcode"
+    Input "City" "e.g. Tacoma" bind=newCity
+    Button "Add" onTap={places=append(places,{"id":lower(newCity),"name":newCity,"region":"","temp":15,"sky":"Cloudy"}); newCity=""; close}

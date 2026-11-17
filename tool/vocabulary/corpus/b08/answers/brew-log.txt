@@ -1,0 +1,260 @@
+### Batches
+state sel=""
+state filter="all"
+state nb_name=""
+state nb_style="Pale Ale"
+state nb_size=5
+state batches=[{"id":"b14","name":"Harbor Pale Ale","style":"American Pale Ale","status":"conditioning","brewed":"2026-10-28","ready":"2026-11-25","og":1.054,"fg":1.012},{"id":"b15","name":"Winter Stout","style":"Oatmeal Stout","status":"fermenting","brewed":"2026-11-09","ready":"2026-12-14","og":1.062,"fg":0},{"id":"b13","name":"Saison Farmhouse","style":"Saison","status":"ready","brewed":"2026-09-30","ready":"2026-11-04","og":1.050,"fg":1.006},{"id":"b12","name":"Amber Ale","style":"American Amber","status":"ready","brewed":"2026-09-02","ready":"2026-10-07","og":1.056,"fg":1.014}]
+App
+  Sidebar
+    Brand "Wort" icon="sports_bar"
+    NavItem "Batches" icon="list_alt" selected={true} onTap={go batches}
+    NavItem "Recipe" icon="menu_book" onTap={go recipe}
+    NavItem "Brew day" icon="timer" onTap={go brew-day}
+    NavItem "Fermentation" icon="show_chart" onTap={go fermentation}
+    Spacer grow
+    Text.muted "{count(batches,b=>b.status!='ready')} batches in progress"
+  Main
+    Nav
+      Heading "Batches" level=1
+      Row gap=8
+        Input "Search" bind=q w=200
+        Button "New batch" icon="add" onTap={open newbatch}
+    Column pad=24 gap=16 scroll
+      Row gap=8
+        FilterChip "All" selected={filter=="all"} onTap={filter="all"}
+        FilterChip "Fermenting" selected={filter=="fermenting"} onTap={filter="fermenting"}
+        FilterChip "Conditioning" selected={filter=="conditioning"} onTap={filter="conditioning"}
+        FilterChip "Ready" selected={filter=="ready"} onTap={filter="ready"}
+      Row gap=16 top
+        Column grow gap=8
+          each b in batches
+            if filter=="all" || filter==b.status
+              Card gap=8 onTap={sel=b.id} menu=batchMenu
+                Row between
+                  Column gap=2
+                    Text.strong "{b.name}"
+                    Text.muted "{b.style}, brewed {formatDate(b.brewed,'MMM d')}"
+                  Row gap=8
+                    Badge.success "Ready" visible={b.status=="ready"}
+                    Badge.warning "Conditioning" visible={b.status=="conditioning"}
+                    Badge.info "Fermenting" visible={b.status=="fermenting"}
+                    IconButton "more_vert" tooltip="Batch actions" onTap={sel=b.id; open batchMenu}
+                Row gap=24
+                  Text.caption "OG {fixed(b.og,3)}"
+                  Text.caption "FG {b.fg==0 ? '-' : fixed(b.fg,3)}"
+                  Text.caption "ABV {b.fg==0 ? '-' : fixed((b.og-b.fg)*131.25,1)}%"
+        Card w=320 gap=12
+          Heading "Conditioning calendar" level=3
+          Calendar bind=day marks={map(filter(batches,b=>b.status!="fermenting"),b=>b.ready)} month="2026-11"
+          each b in filter(batches,b=>b.status=="conditioning")
+            Row between
+              Text.strong "{b.name}"
+              Text "{max(0,daysBetween(today(),b.ready))} days to ready"
+            Progress {clamp(1-daysBetween(today(),b.ready)/35,0,1)}
+          Text.muted "Ready dates count 35 days from brew day."
+  Menu#batchMenu end
+    MenuItem "Open recipe" icon="menu_book" onTap={go recipe}
+    MenuItem "Log a reading" icon="show_chart" onTap={go fermentation}
+    MenuItem "Mark ready" icon="check_circle" onTap={batches=updateWhere(batches,b=>b.id==sel,b=>with(b,"status","ready")); toast "Marked ready"}
+    MenuItem "Delete" icon="delete" onTap={batches=removeWhere(batches,b=>b.id==sel); toast "Batch deleted"}
+  Dialog#newbatch "New batch" "Start a log for the next brew"
+    Input "Name" bind=nb_name
+    Select "Style" bind=nb_style items=["Pale Ale","IPA","Stout","Saison","Pilsner","Wheat"]
+    Slider "Batch size (gal)" bind=nb_size min=1 max=10
+    Button "Create batch" onTap={nb_name!="" ? {batches=append(batches,{"id":"b"+(length(batches)+20),"name":nb_name,"style":nb_style,"status":"fermenting","brewed":today(),"ready":today(),"og":1.050,"fg":0}); nb_name=""; close; toast "Batch added"} : toast "Give the batch a name"}
+
+### Recipe
+state batch=5.5
+state eff=72
+state fg=1.012
+state grains=[{"name":"Pale Malt 2-Row","lb":9.5,"ppg":37,"lov":2},{"name":"Munich Malt","lb":1.0,"ppg":37,"lov":9},{"name":"Crystal 60L","lb":0.75,"ppg":34,"lov":60}]
+state hops=[{"name":"Magnum","oz":0.5,"aa":12.0,"at":60,"util":0.24},{"name":"Cascade","oz":1.0,"aa":5.5,"at":15,"util":0.13},{"name":"Citra","oz":1.0,"aa":12.0,"at":5,"util":0.06},{"name":"Citra","oz":2.0,"aa":12.0,"at":0,"util":0}]
+state yeast=[{"name":"SafAle US-05","form":"Dry","atten":78,"temp":"60-72 F"}]
+App
+  Sidebar
+    Brand "Wort" icon="sports_bar"
+    NavItem "Batches" icon="list_alt" onTap={go batches}
+    NavItem "Recipe" icon="menu_book" selected={true} onTap={go recipe}
+    NavItem "Brew day" icon="timer" onTap={go brew-day}
+    NavItem "Fermentation" icon="show_chart" onTap={go fermentation}
+  Main
+    Nav
+      Heading "Harbor Pale Ale" level=1
+      Row gap=8
+        Button.outline "Scale recipe" icon="open_in_full" onTap={open scale}
+        Button "Start brew day" onTap={go brew-day}
+    Column pad=24 gap=16 scroll
+      Grid cols=4 gap=16
+        Card gap=8
+          Text.caption "Colour"
+          Row gap=12
+            ColorSwatch srm={round(sum(grains,g=>g.lb*g.lov)/batch*0.9,0)} size=48
+            Text.strong "{round(sum(grains,g=>g.lb*g.lov)/batch*0.9,0)} SRM"
+        Card gap=8
+          Text.caption "Original gravity"
+          Text "{fixed(1+sum(grains,g=>g.lb*g.ppg)*eff/100/batch/1000,3)}" size=32 weight=700
+        Card gap=8
+          Text.caption "Bitterness"
+          Text "{round(sum(hops,h=>h.oz*h.aa*h.util*74.9)/batch,0)} IBU" size=32 weight=700
+        Card gap=8
+          Text.caption "Strength"
+          Text "{fixed((sum(grains,g=>g.lb*g.ppg)*eff/100/batch/1000-(fg-1))*131.25,1)}% ABV" size=32 weight=700
+      Card gap=12
+        Heading "Batch" level=3
+        Row gap=24
+          Input "Batch size (gal)" bind=batch type=number w=160
+          Input "Mash efficiency %" bind=eff type=number w=160
+          Input "Final gravity" bind=fg type=number w=160
+      Card gap=12
+        Row between
+          Heading "Grains" level=3
+          Button.outline "Add grain" icon="add" onTap={grains=append(grains,{"name":"New grain","lb":1,"ppg":35,"lov":3})}
+        Row
+          Text.caption "Malt" grow
+          Text.caption "lb" w=90
+          Text.caption "PPG" w=70
+          Text.caption "Lovibond" w=90
+          Spacer w=40
+        each g in grains
+          Row gap=8 middle
+            Input bind=g.name grow
+            Input bind=g.lb type=number w=90
+            Input bind=g.ppg type=number w=70
+            Input bind=g.lov type=number w=90
+            IconButton "delete" tooltip="Remove grain" onTap={grains=removeWhere(grains,x=>x.name==g.name)}
+        Text.muted "Total grain: {fixed(sum(grains,g=>g.lb),2)} lb"
+      Card gap=12
+        Row between
+          Heading "Hops" level=3
+          Button.outline "Add hop" icon="add" onTap={hops=append(hops,{"name":"New hop","oz":1,"aa":5,"at":10,"util":0.1})}
+        Row
+          Text.caption "Variety" grow
+          Text.caption "oz" w=80
+          Text.caption "Alpha %" w=80
+          Text.caption "Minutes" w=90
+          Spacer w=40
+        each h in hops
+          Row gap=8 middle
+            Input bind=h.name grow
+            Input bind=h.oz type=number w=80
+            Input bind=h.aa type=number w=80
+            Input bind=h.at type=number w=90
+            IconButton "delete" tooltip="Remove hop" onTap={hops=removeWhere(hops,x=>x.name==h.name&&x.at==h.at)}
+      Card gap=12
+        Heading "Yeast" level=3
+        Table columns=["Strain","Form","Attenuation","Temperature"] rows={map(yeast,y=>[y.name,y.form,y.atten+"%",y.temp])}
+  Dialog#scale "Scale recipe" "Change the batch size and the amounts follow"
+    Slider "Batch size (gal)" bind=batch min=1 max=15 step=0.5
+    Text.muted "Grain and hop amounts are used as written; adjust them above."
+    Button "Done" onTap={close}
+
+### Brew Day
+state boil=3600
+state running=false
+state mashleft=3600
+state mashing=false
+state steps=[{"t":"Sanitize fermenter and airlock","done":true},{"t":"Heat strike water to 163 F","done":true},{"t":"Mash in at 152 F","done":false},{"t":"Sparge and collect 7 gal","done":false},{"t":"Boil 60 minutes","done":false},{"t":"Chill to 68 F","done":false},{"t":"Transfer, aerate and pitch yeast","done":false}]
+state adds=[{"label":"Magnum 0.5 oz","at":60,"rung":false},{"label":"Cascade 1 oz","at":15,"rung":false},{"label":"Citra 1 oz","at":5,"rung":false},{"label":"Citra 2 oz, flameout","at":0,"rung":false}]
+every 1s when running onTick={boil=max(0,boil-1); adds=updateWhere(adds,a=>a.at*60>=boil&&!a.rung,a=>with(a,"rung",true)); boil==0 ? {running=false; emit boilDone; play bell; toast "Boil complete"} : }
+every 1s when mashing onTick={mashleft=max(0,mashleft-1); mashleft==0 ? {mashing=false; play bell; toast "Mash is done, start the sparge"} : }
+App
+  Sidebar
+    Brand "Wort" icon="sports_bar"
+    NavItem "Batches" icon="list_alt" onTap={go batches}
+    NavItem "Recipe" icon="menu_book" onTap={go recipe}
+    NavItem "Brew day" icon="timer" selected={true} onTap={go brew-day}
+    NavItem "Fermentation" icon="show_chart" onTap={go fermentation}
+  Main
+    Nav
+      Heading "Brew day: Harbor Pale Ale" level=1
+      Text.muted "{count(steps,s=>s.done)} of {length(steps)} steps"
+    Column pad=24 gap=16 scroll
+      Progress {count(steps,s=>s.done)/length(steps)}
+      Row gap=16 top
+        Card grow gap=8
+          Heading "Checklist" level=3
+          each s in steps
+            Checkbox "{s.t}" bind=s.done
+        Column grow gap=16
+          Card gap=12
+            Heading "Mash timer" level=3
+            Text "{duration(mashleft)}" size=40 weight=700
+            Progress {1-mashleft/3600}
+            Row gap=8
+              Button "{mashing ? 'Pause' : 'Start mash'}" onTap={mashing=!mashing}
+              Button.outline "Reset" onTap={mashing=false; mashleft=3600}
+          Card gap=12
+            Heading "Boil timer" level=3
+            Text "{duration(boil)}" size=40 weight=700 color={boil<=300 ? "#FFC62828" : "#FF212121"}
+            Progress {1-boil/3600}
+            Row gap=8
+              Button "{running ? 'Pause' : 'Start boil'}" onTap={running=!running}
+              Button.outline "Reset" onTap={running=false; boil=3600; adds=map(adds,a=>with(a,"rung",false))}
+          Card gap=8
+            Heading "Hop additions" level=3
+            each a in adds
+              Row between middle
+                Column gap=2
+                  Text.strong "{a.label}"
+                  Text.muted "{a.at==0 ? 'at flameout' : 'at ' + a.at + ' min left'}"
+                if a.rung
+                  Badge.success "Rang" animate=pulse
+                if !a.rung
+                  Text.muted "in {duration(max(0,boil-a.at*60))}"
+
+### Fermentation
+state readings=[{"day":0,"sg":1.054},{"day":2,"sg":1.040},{"day":4,"sg":1.026},{"day":7,"sg":1.016},{"day":10,"sg":1.012}]
+state day=12
+state sg=1.012
+state aroma=6
+state bitter=5
+state malt=4
+state body=5
+state overall=7
+state note=""
+state notes=[{"date":"2026-11-14","aroma":7,"bitter":5,"overall":7,"text":"Grapefruit and pine on the nose, clean finish, a touch of sweetness."}]
+App
+  Sidebar
+    Brand "Wort" icon="sports_bar"
+    NavItem "Batches" icon="list_alt" onTap={go batches}
+    NavItem "Recipe" icon="menu_book" onTap={go recipe}
+    NavItem "Brew day" icon="timer" onTap={go brew-day}
+    NavItem "Fermentation" icon="show_chart" selected={true} onTap={go fermentation}
+  Main
+    Nav
+      Heading "Fermentation and tasting" level=1
+      Badge.info "Harbor Pale Ale"
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=12
+          Heading "Gravity readings" level=3
+          LineChart values={map(readings,r=>r.sg)} labels={map(readings,r=>"Day "+r.day)} h=220
+          Row gap=24
+            Text.caption "Latest {fixed(last(readings).sg,3)}"
+            Text.caption "Apparent attenuation {round((first(readings).sg-last(readings).sg)/(first(readings).sg-1)*100,0)}%"
+            Text.caption "ABV {fixed((first(readings).sg-last(readings).sg)*131.25,1)}%"
+        Card w=320 gap=12
+          Heading "Add a reading" level=3
+          Input "Day of fermentation" bind=day type=number
+          Input "Specific gravity" "1.012" bind=sg type=number
+          Button "Add reading" onTap={sg>=0.99&&sg<=1.15 ? {readings=append(readings,{"day":day,"sg":sg}); toast "Reading added"} : toast "Enter a gravity like 1.012"}
+          Button.outline "Remove last" onTap={readings=slice(readings,0,length(readings)-1)}
+      Row gap=16 top
+        Card grow gap=12
+          Heading "Tasting notes" level=3
+          Slider "Aroma: {aroma}" bind=aroma min=0 max=10 step=1
+          Slider "Bitterness: {bitter}" bind=bitter min=0 max=10 step=1
+          Slider "Malt: {malt}" bind=malt min=0 max=10 step=1
+          Slider "Body: {body}" bind=body min=0 max=10 step=1
+          Rating "Overall" bind=overall max=10
+          Input "Notes" bind=note multiline
+          Button "Save tasting" onTap={note!="" ? {notes=append(notes,{"date":today(),"aroma":aroma,"bitter":bitter,"overall":overall,"text":note}); note=""; toast "Tasting saved"} : toast "Write a note first"}
+        Column grow gap=8
+          each n in reverse(notes)
+            Card gap=4
+              Row between
+                Text.strong "{formatDate(n.date,'MMM d')}"
+                Badge.primary "{n.overall}/10"
+              Text.caption "Aroma {n.aroma}, bitterness {n.bitter}"
+              Text "{n.text}"

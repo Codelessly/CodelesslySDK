@@ -1,0 +1,3 @@
+App: Slots, a volunteer sign-up sheet. A grid of shifts by day with each cell showing slots needed and filled as dots, an open cell tapped to add your name with a note, a full cell greyed with a waitlist; my commitments list with a cancel and swap; a reminder before a shift; an organiser view to add shifts by copying a day and a count of who is missing; a message to all with a template.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

@@ -1,0 +1,157 @@
+### Player
+state playing=false
+state bar=12
+state tempo=92
+state loopA=0
+state loopB=0
+state loopSet="a"
+state autoTurn=true
+state pageNo=1
+state tool="none"
+state beat=1
+state flash=false
+state accents=[1,0,0,0]
+state metOn=true
+state strokes=[]
+state setlist=[{"id":"p1","title":"Clair de lune","composer":"Debussy","bars":72,"pages":4},{"id":"p2","title":"Gymnopedie No. 1","composer":"Satie","bars":80,"pages":3},{"id":"p3","title":"Nocturne Op. 9 No. 2","composer":"Chopin","bars":34,"pages":4}]
+state current="p1"
+every 1000 onTick={bar=bar+1; flash=false} when playing
+every 500 onTick={flash=!flash; beat=beat%4+1} when playing && metOn
+App
+  Sidebar
+    Brand "Downbeat" icon="music_note"
+    NavItem "Player" icon="play_circle" selected={true}
+    NavItem "Setlist" icon="queue_music" onTap={go setlist}
+    NavItem "Practice log" icon="history" onTap={go log}
+    Spacer grow
+    Text.muted "Tonight: 3 pieces"
+  Main
+    Nav
+      Column
+        Text.strong "{find(setlist,p=>p.id==current).title}"
+        Text.caption "{find(setlist,p=>p.id==current).composer} - bar {bar} of {find(setlist,p=>p.id==current).bars}"
+      Row gap=8
+        SegmentedButton bind=tool items=["none","pencil","eraser"]
+        IconButton "delete_sweep" tooltip="Clear annotations" onTap={strokes=[]; toast "Annotations cleared"}
+        IconButton "more_vert" tooltip="More" onTap={open scoreMenu}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Column grow gap=12
+          Card gap=12
+            Row between
+              Text.caption "Page {pageNo} of {find(setlist,p=>p.id==current).pages}"
+              Row gap=8
+                IconButton "chevron_left" tooltip="Previous page" onTap={pageNo=max(1,pageNo-1)}
+                IconButton "chevron_right" tooltip="Next page" onTap={pageNo=pageNo+1; toast "Page turned"}
+            ScoreView page={pageNo} bar={bar} tool={tool} strokes={strokes} loopA={loopA} loopB={loopB} h=420 onBarTap={loopSet=="a" ? {loopA=result; loopB=0; loopSet="b"} : {loopB=max(result,loopA); loopSet="a"; toast "Loop set"}} onDraw={strokes=append(strokes,result)} onErase={strokes=removeWhere(strokes,s=>s.id==result)} onPageEnd={autoTurn ? {pageNo=pageNo+1} : {toast "End of page"}}
+            if loopA>0
+              Row gap=8 middle
+                Badge.info "Loop A: bar {loopA}"
+                if loopB>0
+                  Badge.info "B: bar {loopB}"
+                Spacer grow
+                Button.ghost "Clear loop" onTap={loopA=0; loopB=0; loopSet="a"}
+          Card gap=8
+            Row between
+              Text.strong "Position"
+              Text.caption "bar {bar}"
+            Slider bind=bar min=1 max=72
+        Column w=280 gap=12
+          Card gap=12
+            Text.strong "Tempo"
+            Row between middle
+              Text "{tempo}" size=48 weight=700
+              Text.muted "BPM"
+            Row gap=8
+              Button.outline "-" onTap={tempo=max(40,tempo-1)}
+              Slider bind=tempo min=40 max=208 grow
+              Button.outline "+" onTap={tempo=min(208,tempo+1)}
+            Button.tertiary "Tap tempo" onTap={emit tapTempo}
+          Card gap=12
+            Row between
+              Text.strong "Metronome"
+              Toggle bind=metOn
+            Row gap=12 center middle
+              each a in accents
+                Box w=32 h=32 radius=16 fill={index==beat-1 && flash ? "#FFE53935" : (a==1 ? "#FF1E88E5" : "#FFB0BEC5")} onTap={accents=setAt(accents,index,1-a)}
+            Text.caption "Tap a dot to accent it"
+          Card gap=8
+            Toggle "Turn page a bar early" bind=autoTurn
+            Button "{playing ? 'Pause' : 'Play'}" icon={playing ? "pause" : "play_arrow"} onTap={playing=!playing}
+            Button.outline "Back to loop start" onTap={bar=max(1,loopA)}
+  Menu#scoreMenu end
+    MenuItem "Rename piece" icon="edit" onTap={emit rename}
+    MenuItem "Share PDF" icon="share" onTap={emit share}
+    MenuItem "Open setlist" icon="queue_music" onTap={go setlist}
+
+### Setlist
+state setlist=[{"id":"p1","title":"Clair de lune","composer":"Debussy","bars":72,"pages":4},{"id":"p2","title":"Gymnopedie No. 1","composer":"Satie","bars":80,"pages":3},{"id":"p3","title":"Nocturne Op. 9 No. 2","composer":"Chopin","bars":34,"pages":4}]
+state current="p1"
+state q=""
+state sel=""
+App
+  Sidebar
+    Brand "Downbeat" icon="music_note"
+    NavItem "Player" icon="play_circle" onTap={go player}
+    NavItem "Setlist" icon="queue_music" selected={true}
+    NavItem "Practice log" icon="history" onTap={go log}
+    Spacer grow
+    Text.muted "Recital, Nov 21"
+  Main
+    Nav
+      Heading "Setlist" level=1
+      Row gap=8
+        Input "Search pieces" bind=q w=220
+        Button "Add piece" icon="add" onTap={open addPiece}
+    Column pad=24 gap=16
+      Text.muted "Drag a piece to change its place in the order."
+      Column gap=8 drop=piece onDrop={setlist=concat(without(setlist,find(setlist,p=>p.id==result.data)),[find(setlist,p=>p.id==result.data)])}
+        each p in filter(setlist,x=>contains(lower(x.title),lower(q)))
+          Card drag=piece(p.id) drop=piece onDrop={setlist=concat(take(without(setlist,find(setlist,x=>x.id==result.data)),indexOf(setlist,p)),concat([find(setlist,x=>x.id==result.data)],slice(without(setlist,find(setlist,x=>x.id==result.data)),indexOf(setlist,p),length(setlist))))}
+            Row gap=12 middle
+              Icon "drag_indicator"
+              Text.strong "{index+1}" w=24
+              Column grow
+                Text.strong "{p.title}"
+                Text.caption "{p.composer} - {p.bars} bars, {p.pages} pages"
+              if current==p.id
+                Badge.primary "Now playing"
+              Button.outline "Open" onTap={current=p.id; go player}
+              IconButton "more_vert" tooltip="More" onTap={sel=p.id; open rowMenu}
+      if isEmpty(setlist)
+        Text.muted "No pieces yet."
+  Menu#rowMenu end
+    MenuItem "Move to top" icon="vertical_align_top" onTap={setlist=concat([find(setlist,p=>p.id==sel)],without(setlist,find(setlist,p=>p.id==sel)))}
+    MenuItem "Remove" icon="delete" onTap={setlist=removeWhere(setlist,p=>p.id==sel)}
+  Dialog#addPiece "Add a piece" "Import from a PDF or MusicXML file"
+    Input "Title" bind=newTitle
+    Input "Composer" bind=newComposer
+    Button "Add to setlist" onTap={setlist=append(setlist,{"id":"n{length(setlist)+1}","title":newTitle,"composer":newComposer,"bars":64,"pages":2}); close}
+
+### Practice log
+state sessions=[{"piece":"Clair de lune","date":"2026-11-15","minutes":42,"avgTempo":84},{"piece":"Gymnopedie No. 1","date":"2026-11-16","minutes":25,"avgTempo":72},{"piece":"Nocturne Op. 9 No. 2","date":"2026-11-16","minutes":38,"avgTempo":96}]
+App
+  Sidebar
+    Brand "Downbeat" icon="music_note"
+    NavItem "Player" icon="play_circle" onTap={go player}
+    NavItem "Setlist" icon="queue_music" onTap={go setlist}
+    NavItem "Practice log" icon="history" selected={true}
+  Main
+    Nav
+      Heading "Practice log" level=1
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "This week"
+          Text "{sum(sessions,s=>s.minutes)} min" size=32 weight=700
+        Card gap=4
+          Text.muted "Sessions"
+          Text "{length(sessions)}" size=32 weight=700
+        Card gap=4
+          Text.muted "Average tempo"
+          Text "{round(sum(sessions,s=>s.avgTempo)/length(sessions),0)} BPM" size=32 weight=700
+      Card gap=8
+        Text.strong "Minutes per session"
+        BarChart values={map(sessions,s=>s.minutes)} labels={map(sessions,s=>s.piece)} h=200
+      each s in sessions
+        ListTile "{s.piece}" subtitle="{s.date} - {s.minutes} min at {s.avgTempo} BPM"

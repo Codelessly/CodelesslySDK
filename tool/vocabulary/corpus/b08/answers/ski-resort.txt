@@ -1,0 +1,240 @@
+### Trail Map
+state run=null
+state lifts=[{"name":"Summit Express","status":"open","wait":4},{"name":"Eagle Chair","status":"open","wait":12},{"name":"Sunrise Gondola","status":"open","wait":7},{"name":"Bluebird Quad","status":"hold","wait":0},{"name":"Magic Carpet","status":"closed","wait":0}]
+state runs=[{"id":"r1","name":"Ridgeline","level":"black","len":2.4,"groomed":"6:10 am","snow":"Packed powder","base":142},{"id":"r2","name":"Aspen Glide","level":"blue","len":3.1,"groomed":"5:40 am","snow":"Fresh groomed","base":118},{"id":"r3","name":"Cub Alley","level":"green","len":1.2,"groomed":"5:15 am","snow":"Corduroy","base":96},{"id":"r4","name":"Widowmaker","level":"black","len":1.8,"groomed":"Not groomed","snow":"Powder, moguls","base":165}]
+App
+  Sidebar
+    Brand "Powder Day" icon="downhill_skiing"
+    NavItem "Trail map" icon="map" selected onTap={go trail-map}
+    NavItem "Tracker" icon="speed" onTap={go tracker}
+    NavItem "Weather" icon="cloud" onTap={go weather}
+    NavItem "Buddies" icon="group" badge="3" onTap={go buddies}
+    NavItem "Snow report" icon="ac_unit" onTap={go snow-report}
+    Spacer grow
+    Text.muted "Season pass: Alex Moreau"
+  Main
+    Nav
+      Heading "Trail map"
+      Row gap=8
+        Chip "{count(lifts,l=>l.status=='open')} lifts open"
+        IconButton "my_location" tooltip="Centre on me" onTap={emit centerMap}
+    Column pad=24 gap=16
+      Row gap=16
+        Column grow gap=12
+          Card gap=8
+            TrailMap h=420 image="https://cdn.powderday.app/maps/winter-trails.png" zoom=true pan=true onSelectRun={run=find(runs,r=>r.id==result); open runInfo}
+              Lift "Summit Express" from=[120,380] to=[300,90]
+              Lift "Eagle Chair" from=[310,350] to=[480,140]
+              Lift "Sunrise Gondola" from=[60,400] to=[200,160]
+              Lift "Bluebird Quad" from=[520,300] to=[640,120]
+              Run "Ridgeline" id="r1" level="black" points=[[300,90],[260,200],[190,330]]
+              Run "Aspen Glide" id="r2" level="blue" points=[[480,140],[420,240],[330,350]]
+              Run "Cub Alley" id="r3" level="green" points=[[200,160],[150,280],[70,395]]
+              Run "Widowmaker" id="r4" level="black" points=[[640,120],[600,220],[530,300]]
+            Row gap=12
+              Row gap=4
+                Icon "circle" color=#FF2E7D32
+                Text.caption "Green"
+              Row gap=4
+                Icon "circle" color=#FF1565C0
+                Text.caption "Blue"
+              Row gap=4
+                Icon "circle" color=#FF212121
+                Text.caption "Black"
+              Row gap=4
+                Icon "remove" color=#FF616161
+                Text.caption "Lift"
+        Pane w=320 pad=0 gap=12
+          Text.strong "Lift status"
+          each l in lifts
+            Card gap=4
+              Row between
+                Text.strong "{l.name}"
+                if l.status=="open"
+                  Badge.success "Open"
+                if l.status=="hold"
+                  Badge.warning "On hold"
+                if l.status=="closed"
+                  Badge.error "Closed"
+              if l.status=="open"
+                Row gap=4
+                  Icon "schedule" size=16
+                  Text.muted "{l.wait} min wait"
+              if l.status!="open"
+                Text.muted "No queue information"
+  Sheet#runInfo "{run.name}"
+    Row gap=8
+      Badge.info "{upper(run.level)}"
+      Text.muted "{run.len} km"
+    Grid cols=3 gap=12
+      Card gap=4
+        Text.caption "Groomed"
+        Text.strong "{run.groomed}"
+      Card gap=4
+        Text.caption "Conditions"
+        Text.strong "{run.snow}"
+      Card gap=4
+        Text.caption "Base"
+        Text.strong "{run.base} cm"
+    Row gap=8
+      Button "Track this run" onTap={emit trackRun run.id; close; go tracker}
+      Button.outline "Share with buddies" onTap={emit shareRun run.id; toast "Sent to buddies"}
+
+### Tracker
+state tracking=false
+state secs=0
+state runsDone=[{"name":"Aspen Glide","vert":412,"top":58,"time":"6:12"},{"name":"Ridgeline","vert":538,"top":71,"time":"5:20"},{"name":"Cub Alley","vert":190,"top":34,"time":"3:05"}]
+state speed=0
+every 1s when tracking onTick={secs=secs+1; speed=clamp(speed+((secs%7)-3)*4,0,82)}
+App
+  Sidebar
+    Brand "Powder Day" icon="downhill_skiing"
+    NavItem "Trail map" icon="map" onTap={go trail-map}
+    NavItem "Tracker" icon="speed" selected onTap={go tracker}
+    NavItem "Weather" icon="cloud" onTap={go weather}
+    NavItem "Buddies" icon="group" badge="3" onTap={go buddies}
+    NavItem "Snow report" icon="ac_unit" onTap={go snow-report}
+    Spacer grow
+    Text.muted "Season pass: Alex Moreau"
+  Main
+    Nav
+      Heading "Live tracker"
+      Row gap=8
+        if tracking
+          Badge.danger "Recording"
+        Button.outline "Save day" onTap={emit saveDay runsDone; toast "Day saved"}
+    Column pad=24 gap=16
+      Row gap=16
+        Card grow gap=12
+          Text.caption "Current speed"
+          Gauge bind=speed min=0 max=100 limit=80 unit="km/h"
+          Text.muted "Time on mountain {duration(secs)}"
+        Card grow gap=12
+          Text.caption "Today"
+          Grid cols=2 gap=12
+            Column gap=2
+              Text.caption "Runs"
+              Text "{length(runsDone)}" size=36 weight=700
+            Column gap=2
+              Text.caption "Vertical"
+              Text "{sum(runsDone,r=>r.vert)} m" size=36 weight=700
+            Column gap=2
+              Text.caption "Top speed"
+              Text "{max(71,speed)} km/h" size=36 weight=700
+            Column gap=2
+              Text.caption "Distance"
+              Text "{round(length(runsDone)*2.1,1)} km" size=36 weight=700
+      Row gap=8
+        if !tracking
+          Button "Start tracking" onTap={tracking=true; emit trackStart}
+        if tracking
+          Button.destructive "Finish run" onTap={runsDone=append(runsDone,{"name":"Free ski","vert":280+secs,"top":max(40,speed),"time":duration(secs)}); secs=0; speed=0; tracking=false; toast "Run recorded"}
+      Card gap=8
+        Text.strong "Vertical per run"
+        BarChart values={map(runsDone,r=>r.vert)} labels={map(runsDone,r=>r.name)} h=180
+      Card gap=8
+        Text.strong "Runs"
+        each r in runsDone
+          ListTile "{r.name}" subtitle="{r.vert} m vertical, top {r.top} km/h" trailing="{r.time}" leading="downhill_skiing"
+            IconButton "delete" tooltip="Remove run" onTap={runsDone=removeWhere(runsDone,x=>x.name==r.name && x.time==r.time)}
+
+### Weather and Snow
+state tab="weather"
+state alt="mid"
+state days=[{"d":"Today","new":0,"depth":186},{"d":"Mon","new":12,"depth":198},{"d":"Tue","new":8,"depth":206},{"d":"Wed","new":0,"depth":203},{"d":"Thu","new":3,"depth":207},{"d":"Fri","new":15,"depth":222}]
+state levels=[{"id":"top","name":"Summit 3,100 m","temp":-11,"wind":38,"sky":"Snow showers","icon":"weather_snowy"},{"id":"mid","name":"Mid-mountain 2,400 m","temp":-6,"wind":22,"sky":"Light snow","icon":"cloudy_snowing"},{"id":"base","name":"Base 1,700 m","temp":-1,"wind":9,"sky":"Overcast","icon":"cloud"}]
+App
+  Sidebar
+    Brand "Powder Day" icon="downhill_skiing"
+    NavItem "Trail map" icon="map" onTap={go trail-map}
+    NavItem "Tracker" icon="speed" onTap={go tracker}
+    NavItem "Weather" icon="cloud" selected={tab=="weather"} onTap={tab="weather"}
+    NavItem "Buddies" icon="group" badge="3" onTap={go buddies}
+    NavItem "Snow report" icon="ac_unit" selected={tab=="snow"} onTap={tab="snow"}
+    Spacer grow
+    Text.muted "Season pass: Alex Moreau"
+  Main
+    Nav
+      Heading "{tab=='weather' ? 'Weather by altitude' : 'Snow report'}"
+      Row gap=8
+        Chip "Updated 7:05 am"
+        IconButton "refresh" tooltip="Refresh" onTap={emit refresh; toast "Refreshed"}
+    Column pad=24 gap=16
+      if tab=="weather"
+        Row gap=8
+          ChoiceChip "Summit" selected={alt=="top"} onTap={alt="top"}
+          ChoiceChip "Mid-mountain" selected={alt=="mid"} onTap={alt="mid"}
+          ChoiceChip "Base" selected={alt=="base"} onTap={alt="base"}
+        Grid cols=3 gap=16
+          each l in levels
+            Card gap=8 onTap={alt=l.id}
+              Row between
+                Text.strong "{l.name}"
+                Icon "{l.icon}"
+              Text "{l.temp}°C" size=40 weight=700
+              Text.muted "{l.sky}"
+              Row gap=4
+                Icon "air" size=16
+                Text.caption "{l.wind} km/h wind"
+        Card gap=8
+          Text.strong "Temperature through the day"
+          LineChart labels=["8am","10am","12pm","2pm","4pm"] series=[{"name":"Summit","values":[-13,-12,-10,-9,-11]},{"name":"Mid","values":[-8,-7,-5,-4,-6]},{"name":"Base","values":[-3,-2,0,1,-1]}] h=200
+      if tab=="snow"
+        Grid cols=3 gap=16
+          Card gap=4
+            Text.caption "Base depth"
+            Text "186 cm" size=36 weight=700
+          Card gap=4
+            Text.caption "Last 24 hours"
+            Text "0 cm" size=36 weight=700
+          Card gap=4
+            Text.caption "Next 5 days"
+            Text "38 cm" size=36 weight=700
+        Card gap=8
+          Text.strong "Snow depth"
+          BarChart values={map(days,x=>x.depth)} labels={map(days,x=>x.d)} h=220
+        Card gap=8
+          Text.strong "New snow"
+          BarChart values={map(days,x=>x.new)} labels={map(days,x=>x.d)} h=160
+
+### Ski Buddies
+state sel=null
+state friends=[{"id":"f1","name":"Maya Reyes","x":0.32,"y":0.4,"where":"Eagle Chair","status":"On the lift","share":true},{"id":"f2","name":"Tom Becker","x":0.58,"y":0.62,"where":"Aspen Glide","status":"Skiing","share":true},{"id":"f3","name":"Priya Nair","x":0.75,"y":0.28,"where":"Summit Lodge","status":"Lunch break","share":true},{"id":"f4","name":"Jonas Weiss","x":0.2,"y":0.8,"where":"","status":"Sharing off","share":false}]
+state msg=""
+App
+  Sidebar
+    Brand "Powder Day" icon="downhill_skiing"
+    NavItem "Trail map" icon="map" onTap={go trail-map}
+    NavItem "Tracker" icon="speed" onTap={go tracker}
+    NavItem "Weather" icon="cloud" onTap={go weather}
+    NavItem "Buddies" icon="group" badge="3" selected onTap={go buddies}
+    NavItem "Snow report" icon="ac_unit" onTap={go snow-report}
+    Spacer grow
+    Text.muted "Season pass: Alex Moreau"
+  Main
+    Nav
+      Heading "Ski buddies"
+      Row gap=8
+        Button.outline "Invite a friend" onTap={open invite}
+    Row gap=16 pad=24
+      Card grow gap=8
+        BuddyMap h=440 image="https://cdn.powderday.app/maps/winter-trails.png" zoom=true pan=true
+          each f in filter(friends,x=>x.share)
+            Dot "{f.name}" x={f.x} y={f.y} selected={sel==f.id} onTap={sel=f.id}
+        Text.caption "Friends appear while they share their location. You can pause sharing at any time."
+        Toggle "Share my location" bind=sharing
+      Pane w=320 pad=0 gap=12
+        Text.strong "Friends"
+        each f in friends
+          ListTile "{f.name}" subtitle="{f.share ? f.status + ' at ' + f.where : f.status}" selected={sel==f.id} onTap={sel=f.id}
+            Avatar "{f.name}" size=40
+        if sel!=null
+          Card gap=8
+            Text.strong "{find(friends,x=>x.id==sel).name}"
+            Input "Message" "Meet at the lodge?" bind=msg
+            Row gap=8
+              Button "Send" onTap={emit message {"to":sel,"text":msg}; msg=""; toast "Sent"}
+              Button.outline "Navigate to" onTap={emit navigateTo sel; go trail-map}
+  Dialog#invite "Invite a friend" "They will see you once they accept"
+    Input "Phone number" type=phone bind=invitePhone
+    Button "Send invite" onTap={emit invite invitePhone; toast "Invite sent"; close}

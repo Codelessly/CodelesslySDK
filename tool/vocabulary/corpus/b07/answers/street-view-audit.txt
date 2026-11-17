@@ -1,0 +1,184 @@
+### Survey
+state tab="survey"
+state at=0
+state photos=[{"url":"https://img.kerbcheck.app/hollins/01.jpg","street":"Hollins Road, 12 to 40","lat":53.4821,"lng":-2.2418},{"url":"https://img.kerbcheck.app/hollins/02.jpg","street":"Hollins Road, 40 to 66","lat":53.4826,"lng":-2.2409},{"url":"https://img.kerbcheck.app/hollins/03.jpg","street":"Hollins Road at Dale Street","lat":53.4831,"lng":-2.2401},{"url":"https://img.kerbcheck.app/hollins/04.jpg","street":"Dale Street, 3 to 21","lat":53.4836,"lng":-2.2393}]
+state marks=[{"id":1,"photo":0,"x":0.31,"y":0.74,"kind":"Kerb","severity":2,"note":"Dropped kerb lip 40 mm","status":"confirmed"},{"id":2,"photo":2,"x":0.58,"y":0.69,"kind":"Crossing","severity":1,"note":"Tactile paving worn","status":"pending"},{"id":3,"photo":3,"x":0.44,"y":0.62,"kind":"Blocked path","severity":3,"note":"Bins across the footway","status":"pending"}]
+state draft={"x":0,"y":0}
+state kind="Kerb"
+state severity=2
+state note=""
+state tape=""
+state width=""
+state placing=false
+App
+  Sidebar
+    Brand "Kerbcheck" icon="accessible"
+    NavItem "Survey" icon="photo_camera" selected={tab=="survey"} onTap={tab="survey"}
+    NavItem "Review queue" icon="fact_check" badge="{count(marks,m=>m.status=="pending")}" onTap={go review}
+    NavItem "Export" icon="ios_share" onTap={go export}
+    Spacer grow
+    Text.muted "Surveyor: Amara Okafor"
+    Text.caption "Hollins Road audit, ward 7"
+  Main
+    Nav
+      Heading "{photos[at].street}" level=1
+      Row gap=8
+        Badge.info "{at+1} of {length(photos)}"
+        Button.outline "Export for council" icon="ios_share" onTap={go export}
+    Column pad=24 gap=16 scroll
+      Row gap=24 top
+        Column grow gap=12
+          Stack
+            Image "{photos[at].url}" h=420 radius=12 onTap={draft=with(with(draft,"x",result.x),"y",result.y); placing=true; open markDialog}
+            each m in filter(marks,k=>k.photo==at)
+              MapPin "{m.kind}" x={m.x} y={m.y} color={m.severity==3 ? "#FFD32F2F" : m.severity==2 ? "#FFF9A825" : "#FF2E7D32"} onTap={draft=with(with(draft,"x",m.x),"y",m.y); kind=m.kind; severity=m.severity; note=m.note; open markDialog}
+          Row between
+            IconButton "chevron_left" tooltip="Previous photo" onTap={at=max(0,at-1)}
+            Dots bind=at count={length(photos)}
+            IconButton "chevron_right" tooltip="Next photo" onTap={at=min(length(photos)-1,at+1)}
+          Text.muted "Tap the picture where the problem is, then choose its type and severity."
+        Column w=320 gap=12
+          Card gap=8
+            Text.strong "Route"
+            Map h=200 center={[photos[at].lat,photos[at].lng]} zoom=17
+              Polyline points={map(photos,p=>[p.lat,p.lng])} colorBy=score
+              each p in photos
+                Marker lat={p.lat} lng={p.lng} selected={index==at} onTap={at=index}
+            Row gap=8
+              Badge.success "Good"
+              Badge.warning "Fair"
+              Badge.error "Poor"
+            Text.caption "Line colour is the street score for each stretch."
+          Card gap=8
+            Text.strong "Street score"
+            Row between
+              Text "Hollins Road"
+              Text.strong "{round(100-sum(marks,m=>m.severity*9),0)} / 100"
+            Progress {clamp((100-sum(marks,m=>m.severity*9))/100,0,1)}
+          Card gap=8
+            Text.strong "Marks on this photo"
+            if count(marks,m=>m.photo==at)==0
+              Text.muted "Nothing marked yet."
+            each m in filter(marks,k=>k.photo==at)
+              ListTile "{m.kind}" subtitle="{m.note}" onTap={draft=with(with(draft,"x",m.x),"y",m.y); kind=m.kind; severity=m.severity; note=m.note; open markDialog}
+                Badge.neutral "Level {m.severity}"
+  Dialog#markDialog "Mark an issue" "Placed at {round(draft.x*100,0)}% across, {round(draft.y*100,0)}% down"
+    SegmentedButton bind=kind items=["Kerb","Ramp","Crossing","Blocked path"]
+    Text.fieldLabel "Severity"
+    SegmentedButton bind=severity items=[1,2,3]
+    Text.caption "1 passable with care, 2 hard for a wheelchair, 3 impassable"
+    Input "Note" "What did you see?" bind=note multiline
+    Input "Measurement" "Height or width in mm" bind=width type=number
+    Row gap=12 middle
+      PhotoPicker "Photo of tape measure" bind=tape accept="image" capture=true
+      if tape!=""
+        Image "{tape}" w=96 h=72 radius=8
+    Row end gap=8
+      Button.ghost "Cancel" onTap={note=""; width=""; tape=""; close}
+      Button "Save mark" onTap={marks=append(marks,{"id":length(marks)+1,"photo":at,"x":draft.x,"y":draft.y,"kind":kind,"severity":severity,"note":trim(note)+(width!="" ? " ("+width+" mm)" : ""),"tape":tape,"status":"pending"}); note=""; width=""; tape=""; toast "Mark saved, sent to review"; close}
+
+### Review queue
+state sel=0
+state reviewer="Tomas Brandt"
+state filterKind="All"
+state marks=[{"id":1,"photo":0,"kind":"Kerb","severity":2,"note":"Dropped kerb lip 40 mm","status":"confirmed","by":"Amara Okafor","street":"Hollins Road, 12 to 40"},{"id":2,"photo":2,"kind":"Crossing","severity":1,"note":"Tactile paving worn","status":"pending","by":"Amara Okafor","street":"Hollins Road at Dale Street"},{"id":3,"photo":3,"kind":"Blocked path","severity":3,"note":"Bins across the footway","status":"pending","by":"Amara Okafor","street":"Dale Street, 3 to 21"},{"id":4,"photo":3,"kind":"Ramp","severity":2,"note":"Ramp gradient looks above 1 in 12 (measured 96 mm rise over 800 mm)","status":"pending","by":"Priya Nair","street":"Dale Street, 3 to 21"}]
+App
+  Sidebar
+    Brand "Kerbcheck" icon="accessible"
+    NavItem "Survey" icon="photo_camera" onTap={go survey}
+    NavItem "Review queue" icon="fact_check" badge="{count(marks,m=>m.status=="pending")}" selected={true}
+    NavItem "Export" icon="ios_share" onTap={go export}
+    Spacer grow
+    Text.muted "Reviewer: {reviewer}"
+  Main
+    Nav
+      Heading "Review queue" level=1
+      Row gap=8
+        Select bind=filterKind items=["All","Kerb","Ramp","Crossing","Blocked path"] w=180
+        Button.outline "Confirm all level 1" onTap={marks=updateWhere(marks,m=>m.status=="pending" && m.severity==1,m=>with(with(m,"status","confirmed"),"reviewer",reviewer)); toast "Level 1 marks confirmed"}
+    Row top
+      Column grow pad=24 gap=12 scroll
+        Row gap=8
+          Chip "Pending {count(marks,m=>m.status=="pending")}"
+          Chip "Confirmed {count(marks,m=>m.status=="confirmed")}"
+          Chip "Rejected {count(marks,m=>m.status=="rejected")}"
+        each m in filter(marks,k=>filterKind=="All" || k.kind==filterKind)
+          Card gap=8 menu=rowMenu onTap={sel=m.id}
+            Row between
+              Row gap=12 middle
+                Image "https://img.kerbcheck.app/hollins/0{m.photo+1}.jpg" w=80 h=60 radius=8
+                Column gap=2
+                  Text.strong "{m.kind}, level {m.severity}"
+                  Text.muted "{m.street}"
+              Row gap=8 middle
+                Badge.success "Confirmed" visible={m.status=="confirmed"}
+                Badge.warning "Pending" visible={m.status=="pending"}
+                Badge.error "Rejected" visible={m.status=="rejected"}
+                IconButton "more_vert" tooltip="More" onTap={sel=m.id; open rowMenu}
+            Text.muted "{m.note}"
+            Text.caption "Marked by {m.by}"
+      Pane w=320 pad=16 gap=12
+        if sel==0
+          Text.muted "Choose a mark to review it."
+        if sel!=0
+          Heading "{find(marks,m=>m.id==sel).kind}" level=3
+          Image "https://img.kerbcheck.app/hollins/0{find(marks,m=>m.id==sel).photo+1}.jpg" h=180 radius=12
+          Text "{find(marks,m=>m.id==sel).note}"
+          Text.caption "Marked by {find(marks,m=>m.id==sel).by}. A second person must confirm; you cannot confirm your own marks."
+          Text.fieldLabel "Severity"
+          SegmentedButton items=[1,2,3] value={find(marks,m=>m.id==sel).severity} onChange={marks=updateWhere(marks,m=>m.id==sel,m=>with(m,"severity",result))}
+          Row gap=8
+            Button "Confirm" icon="check" grow onTap={find(marks,m=>m.id==sel).by==reviewer ? toast "Another person must confirm this one" : {marks=updateWhere(marks,m=>m.id==sel,m=>with(with(m,"status","confirmed"),"reviewer",reviewer)); toast "Confirmed"}}
+            Button.destructive "Reject" icon="close" grow onTap={open rejectDialog}
+  Menu#rowMenu end
+    MenuItem "Open" icon="visibility" onTap={go survey}
+    MenuItem "Confirm" icon="check" onTap={marks=updateWhere(marks,m=>m.id==sel && m.by!=reviewer,m=>with(with(m,"status","confirmed"),"reviewer",reviewer)); toast "Confirmed"}
+    MenuItem "Reject" icon="close" onTap={open rejectDialog}
+  Dialog#rejectDialog "Reject this mark" "Tell the surveyor why"
+    state reason=""
+    Select "Reason" bind=reason items=["Not an access issue","Wrong place","Photo unclear","Duplicate"]
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Reject mark" onTap={reason=="" ? toast "Choose a reason" : {marks=updateWhere(marks,m=>m.id==sel,m=>with(with(m,"status","rejected"),"reason",reason)); toast "Rejected"; close}}
+
+### Export
+state format="PDF report"
+state scope="Confirmed only"
+state includePhotos=true
+state includeScore=true
+state council="Northfield City Council"
+state marks=[{"id":1,"kind":"Kerb","severity":2,"status":"confirmed"},{"id":2,"kind":"Crossing","severity":1,"status":"pending"},{"id":3,"kind":"Blocked path","severity":3,"status":"pending"},{"id":4,"kind":"Ramp","severity":2,"status":"pending"}]
+App
+  Sidebar
+    Brand "Kerbcheck" icon="accessible"
+    NavItem "Survey" icon="photo_camera" onTap={go survey}
+    NavItem "Review queue" icon="fact_check" onTap={go review}
+    NavItem "Export" icon="ios_share" selected={true}
+    Spacer grow
+    Text.muted "Surveyor: Amara Okafor"
+  Main
+    Nav
+      Heading "Export for the council" level=1
+      Button "Download" icon="download" onTap={emit exportAudit format; toast "Preparing {format}"}
+    Column pad=24 gap=16 maxw=720 scroll
+      Card gap=12
+        Text.strong "What goes in"
+        Select "Council" bind=council items=["Northfield City Council","Eastbank Borough Council"]
+        SegmentedButton bind=scope items=["Confirmed only","All marks"]
+        Select "Format" bind=format items=["PDF report","CSV of marks","GeoJSON for the map"]
+        Toggle "Include photos and tape measurements" bind=includePhotos
+        Toggle "Include street score by stretch" bind=includeScore
+      Card gap=8
+        Text.strong "Summary"
+        Row between
+          Text "Marks in this export"
+          Text.strong "{scope=="Confirmed only" ? count(marks,m=>m.status=="confirmed") : length(marks)}"
+        Row between
+          Text "Level 3, impassable"
+          Text.strong "{count(marks,m=>m.severity==3 && (scope=="All marks" || m.status=="confirmed"))}"
+        if scope=="Confirmed only" && count(marks,m=>m.status=="pending")>0
+          Text.muted "{count(marks,m=>m.status=="pending")} marks are still waiting for a second person and are left out."
+          Button.outline "Go to review queue" onTap={go review}
+      Card gap=8
+        Text.strong "Street score by stretch"
+        BarChart values=[82,64,41,57] labels=["Hollins 12-40","Hollins 40-66","Dale St junction","Dale St 3-21"] h=160

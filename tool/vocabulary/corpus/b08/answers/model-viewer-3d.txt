@@ -1,0 +1,110 @@
+### Viewer
+state parts=[{"id":"body","name":"Body shell","visible":true,"color":"#FFC0392B","rough":0.35,"metal":0.8},{"id":"wheel_fl","name":"Wheel front left","visible":true,"color":"#FF222222","rough":0.8,"metal":0.1},{"id":"wheel_fr","name":"Wheel front right","visible":true,"color":"#FF222222","rough":0.8,"metal":0.1},{"id":"glass","name":"Windscreen","visible":true,"color":"#FF9ED8F5","rough":0.05,"metal":0.0},{"id":"seat","name":"Driver seat","visible":true,"color":"#FF5D4037","rough":0.9,"metal":0.0},{"id":"engine","name":"Engine block","visible":true,"color":"#FF8D8D8D","rough":0.5,"metal":1.0}]
+state selected="body"
+state isolated=""
+state wireframe=false
+state view="Front"
+state tool="orbit"
+state lightX=0.4
+state lightY=0.7
+state sectionOn=false
+state section=50
+state zoom=1
+state pts=[]
+state q=""
+App
+  Sidebar w=280
+    Brand "Turntable" icon="view_in_ar"
+    Input "Filter parts" bind=q
+    Text.caption "Hierarchy, {count(parts,p=>p.visible)} of {length(parts)} visible"
+    each p in parts
+      if contains(lower(p.name),lower(q))
+        ListTile "{p.name}" selected={selected==p.id} onTap={selected=p.id; isolated=(isolated==p.id ? "" : p.id)}
+          IconButton "{p.visible ? 'visibility' : 'visibility_off'}" tooltip="Show or hide" onTap={parts=updateWhere(parts,x=>x.id==p.id,x=>with(x,"visible",!x.visible))}
+    Spacer grow
+    if isolated!=""
+      Button.outline "Show all parts" onTap={isolated=""}
+  Main
+    Nav
+      Heading "Roadster-v2.glb" level=3
+      Row gap=8
+        SegmentedButton bind=tool items=["orbit","pan","measure"]
+        Toggle "Wireframe" bind=wireframe
+        IconButton "restart_alt" tooltip="Reset camera" onTap={zoom=1; view="Front"; lightX=0.4; lightY=0.7}
+        Button "Export" onTap={open export}
+    Stack grow
+      Viewport3D src="roadster-v2.glb" mode={tool} wireframe={wireframe} view={view} zoom={zoom} isolate={isolated} section={sectionOn ? section : -1} light=[lightX,lightY] hidden={map(filter(parts,p=>!p.visible),p=>p.id)} onOrbit={emit orbit result} onPinch={zoom=clamp(zoom*result,0.3,6)} onWheel={zoom=clamp(zoom-result*0.001,0.3,6)} onPan={emit pan result} onPick={selected=result.part} onMeasurePoint={pts=(length(pts)>=2 ? [result] : append(pts,result))}
+      Column top right pad=16 gap=8
+        ViewCube bind=view faces=["Front","Back","Left","Right","Top","Bottom"]
+        LightBall x=lightX y=lightY onChange={lightX=result.x; lightY=result.y}
+      if tool=="measure"
+        Column bottom left pad=16
+          Card gap=4
+            Text.strong "Measure"
+            if length(pts)<2
+              Text.muted "Tap {2-length(pts)} more point(s) on the model"
+            if length(pts)==2
+              Text.heading "{fixed(distance(pts[0],pts[1]),2)} mm"
+            Button.ghost "Clear points" onTap={pts=[]}
+    Footer
+      Row between pad=8
+        Text.muted "View: {view}"
+        Text.muted "Zoom {round(zoom*100,0)}%"
+  Pane w=320 pad=16 gap=12
+    Heading "Material" level=3
+    Text.caption "{find(parts,p=>p.id==selected).name}"
+    ColorPicker "Colour" value={find(parts,p=>p.id==selected).color} onChange={parts=updateWhere(parts,x=>x.id==selected,x=>with(x,"color",result))}
+    Text.fieldLabel "Roughness {fixed(find(parts,p=>p.id==selected).rough,2)}"
+    Slider value={find(parts,p=>p.id==selected).rough} min=0 max=1 onChange={parts=updateWhere(parts,x=>x.id==selected,x=>with(x,"rough",result))}
+    Text.fieldLabel "Metal {fixed(find(parts,p=>p.id==selected).metal,2)}"
+    Slider value={find(parts,p=>p.id==selected).metal} min=0 max=1 onChange={parts=updateWhere(parts,x=>x.id==selected,x=>with(x,"metal",result))}
+    Divider
+    Heading "Section plane" level=3
+    Toggle "Cut the model" bind=sectionOn
+    if sectionOn
+      Slider bind=section min=0 max=100
+      Text.caption "Cut at {section}% of the height"
+    Divider
+    Button.outline "Open measurements" onTap={go measurements}
+  Dialog#export "Export view" "Save what you see"
+    Select "Format" items=["PNG","JPG","GLB"] bind=fmt
+    Button "Save" onTap={emit exportView; toast "Exported"; close}
+
+### Measurements
+state saved=[{"id":1,"label":"Wheelbase","mm":2640.5},{"id":2,"label":"Roof height","mm":1305.2},{"id":3,"label":"Windscreen width","mm":1180.0}]
+state unit="mm"
+state sel=0
+App
+  Sidebar w=240
+    Brand "Turntable" icon="view_in_ar"
+    NavItem "Viewer" icon="view_in_ar" onTap={go viewer}
+    NavItem "Measurements" icon="straighten" selected={true}
+  Main
+    Nav
+      Heading "Measurements" level=1
+      Row gap=8
+        SegmentedButton bind=unit items=["mm","cm","in"]
+        Button.outline "Clear all" onTap={saved=[]}
+    Column pad=24 gap=16
+      if isEmpty(saved)
+        Card center gap=8
+          Icon "straighten"
+          Text.muted "No measurements yet. Use the measure tool in the viewer."
+          Button "Back to viewer" onTap={go viewer}
+      Card gap=0
+        Row pad=8
+          Text.fieldLabel "Name" grow
+          Text.fieldLabel "Length" w=120
+          Text.fieldLabel "" w=40
+        each m in saved
+          Row pad=8 middle border-top=#FFE0E0E0
+            Text "{m.label}" grow
+            Text.strong "{unit=='mm' ? fixed(m.mm,1) : (unit=='cm' ? fixed(m.mm/10,2) : fixed(m.mm/25.4,2))} {unit}" w=120
+            IconButton "more_vert" tooltip="More" onTap={sel=m.id; open rowMenu}
+      Card gap=8
+        Text.strong "Longest"
+        Text.heading "{isEmpty(saved) ? '-' : fixed(max(first(sortByDesc(saved,m=>m.mm)).mm,0),1)} mm"
+  Menu#rowMenu end
+    MenuItem "Rename" icon="edit" onTap={emit renameMeasure sel}
+    MenuItem "Show in viewer" icon="visibility" onTap={emit showMeasure sel; go viewer}
+    MenuItem "Delete" icon="delete" onTap={saved=removeWhere(saved,m=>m.id==sel)}

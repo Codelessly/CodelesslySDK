@@ -1,0 +1,255 @@
+### Chart
+state tab="chart"
+state vital="HR"
+state range="24h"
+state ews=6
+state obs=[{"time":"14:00","hr":104,"rr":22,"spo2":93,"sbp":104,"temp":38.1,"by":"J. Okafor RN"},{"time":"10:00","hr":96,"rr":20,"spo2":94,"sbp":110,"temp":37.8,"by":"M. Reyes RN"},{"time":"06:00","hr":88,"rr":18,"spo2":96,"sbp":118,"temp":37.4,"by":"M. Reyes RN"}]
+state handover="72 y/o, day 3 of community-acquired pneumonia on IV ceftriaxone. Febrile overnight, oxygen weaned to 2 L. EWS rising since 10:00: review by medical registrar requested. Chest X-ray repeat due 16:00. Strict fluid balance. Daughter is next of kin, updated at 09:30."
+App
+  Sidebar
+    Brand "Bedside" icon="monitor_heart"
+    NavItem "Chart" icon="monitor_heart" selected={tab=="chart"} onTap={go chart}
+    NavItem "Medications" icon="medication" badge="2" selected={tab=="mar"} onTap={go medications}
+    NavItem "Orders and notes" icon="assignment" selected={tab=="orders"} onTap={go orders-and-notes}
+    Spacer grow
+    Text.muted "Ward 4B, bed 12"
+    Text.muted "J. Okafor RN"
+  Main
+    Nav
+      Row gap=12
+        Avatar "Harold Whitmore" size=40
+        Column gap=2
+          Heading "Harold Whitmore" level=3
+          Text.muted "72 y, male, MRN 4471920, DOB 14 Mar 1954"
+      Row gap=8
+        Badge.error "EWS {ews}" animate=pulse
+        Button.outline "Handover" icon="swap_horiz" onTap={open handover}
+        Button "Record observations" icon="add" onTap={open newobs}
+    Column pad=24 gap=16
+      Card fill=#FFFDECEA gap=4
+        Row gap=8
+          Icon "warning" color=#FFC62828
+          Text "Allergies" weight=700 color=#FFC62828
+        Row gap=8
+          Badge.error "Penicillin: anaphylaxis"
+          Badge.error "Latex: rash"
+          Badge.warning "Codeine: nausea"
+      Grid cols=5 gap=12
+        Card gap=4
+          Text.muted "Heart rate"
+          Text "{obs[0].hr}" size=40 weight=700 color=#FFC62828
+          Text.caption "bpm, normal 60 to 100"
+        Card gap=4
+          Text.muted "Resp rate"
+          Text "{obs[0].rr}" size=40 weight=700 color=#FFC62828
+          Text.caption "per min, normal 12 to 20"
+        Card gap=4
+          Text.muted "SpO2"
+          Text "{obs[0].spo2}%" size=40 weight=700 color=#FFEF6C00
+          Text.caption "normal 95 to 100"
+        Card gap=4
+          Text.muted "Systolic BP"
+          Text "{obs[0].sbp}" size=40 weight=700
+          Text.caption "mmHg, normal 100 to 140"
+        Card gap=4
+          Text.muted "Temperature"
+          Text "{obs[0].temp}" size=40 weight=700 color=#FFC62828
+          Text.caption "deg C, normal 36.1 to 37.8"
+      Card gap=12
+        Row between
+          Text.strong "Vitals trend"
+          Row gap=8
+            SegmentedButton bind=range items=["12h","24h","72h"]
+        Row gap=8
+          ChoiceChip "HR" selected={vital=="HR"} onTap={vital="HR"}
+          ChoiceChip "RR" selected={vital=="RR"} onTap={vital="RR"}
+          ChoiceChip "SpO2" selected={vital=="SpO2"} onTap={vital="SpO2"}
+          ChoiceChip "BP" selected={vital=="BP"} onTap={vital="BP"}
+          ChoiceChip "Temp" selected={vital=="Temp"} onTap={vital="Temp"}
+        if vital=="HR"
+          LineChart labels=["06:00","10:00","14:00"] values=[88,96,104] band=[60,100] bandLabel="Normal range" h=220
+        if vital=="RR"
+          LineChart labels=["06:00","10:00","14:00"] values=[18,20,22] band=[12,20] bandLabel="Normal range" h=220
+        if vital=="SpO2"
+          LineChart labels=["06:00","10:00","14:00"] values=[96,94,93] band=[95,100] bandLabel="Normal range" h=220
+        if vital=="BP"
+          LineChart labels=["06:00","10:00","14:00"] values=[118,110,104] band=[100,140] bandLabel="Normal range" h=220
+        if vital=="Temp"
+          LineChart labels=["06:00","10:00","14:00"] values=[37.4,37.8,38.1] band=[36.1,37.8] bandLabel="Normal range" h=220
+      Card gap=8
+        Row between
+          Text.strong "Early-warning score"
+          Badge.error "{ews} high"
+        Progress {ews/10}
+        Text.muted "Score 5 to 6: urgent review by a clinician within 30 minutes. 7 or more: emergency response."
+        Row gap=8
+          Button.destructive "Escalate" icon="campaign" onTap={emit escalate ews; toast "Medical registrar paged"}
+          Button.outline "Repeat in 30 min" onTap={toast "Reminder set for 30 minutes"}
+  Dialog#handover "Handover summary" "Bed 12, Harold Whitmore"
+    Input "Summary" bind=handover multiline h=160
+    Row gap=8 end
+      Button.outline "Copy" icon="content_copy" onTap={copy handover; toast "Copied"}
+      Button "Save" onTap={emit saveHandover handover; toast "Handover saved"; close}
+  Sheet#newobs "Record observation set"
+    state nHr=""
+    state nRr=""
+    state nSpo2=""
+    state nSbp=""
+    state nTemp=""
+    state nAvpu="Alert"
+    state nO2=false
+    Grid cols=2 gap=12
+      Input "Heart rate (bpm)" bind=nHr type=number
+      Input "Resp rate (per min)" bind=nRr type=number
+      Input "SpO2 (%)" bind=nSpo2 type=number
+      Input "Systolic BP (mmHg)" bind=nSbp type=number
+      Input "Temperature (deg C)" bind=nTemp type=number
+      Select "Consciousness" bind=nAvpu items=["Alert","Voice","Pain","Unresponsive"]
+    Toggle "On supplemental oxygen" bind=nO2
+    Text.muted "Score: {(nHr!="" && nHr>130 ? 3 : nHr!="" && nHr>110 ? 2 : nHr!="" && nHr>90 ? 1 : 0) + (nRr!="" && nRr>24 ? 3 : nRr!="" && nRr>20 ? 2 : 0) + (nO2 ? 2 : 0) + (nAvpu!="Alert" ? 3 : 0)} so far"
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button "Save observations" onTap={nHr!="" && nRr!="" && nSpo2!="" && nSbp!="" && nTemp!="" ? {obs=concat([{"time":"now","hr":nHr,"rr":nRr,"spo2":nSpo2,"sbp":nSbp,"temp":nTemp,"by":"J. Okafor RN"}],obs); nHr=""; nRr=""; nSpo2=""; nSbp=""; nTemp=""; emit obsRecorded; toast "Observations saved"; close} : toast "Fill in every measurement"}
+
+### Medications
+state tab="mar"
+state day="Today"
+state sel=""
+state mar=[{"id":1,"drug":"Ceftriaxone 1 g IV","freq":"Every 24 h","slots":{"06:00":"given","10:00":"none","14:00":"none","18:00":"none","22:00":"none"}},{"id":2,"drug":"Paracetamol 1 g oral","freq":"Every 6 h","slots":{"06:00":"given","10:00":"given","14:00":"due","18:00":"none","22:00":"none"}},{"id":3,"drug":"Enoxaparin 40 mg SC","freq":"Daily","slots":{"06:00":"none","10:00":"missed","14:00":"none","18:00":"none","22:00":"none"}},{"id":4,"drug":"Salbutamol 2.5 mg neb","freq":"Every 4 h","slots":{"06:00":"given","10:00":"given","14:00":"due","18:00":"none","22:00":"none"}}]
+state times=["06:00","10:00","14:00","18:00","22:00"]
+App
+  Sidebar
+    Brand "Bedside" icon="monitor_heart"
+    NavItem "Chart" icon="monitor_heart" selected={tab=="chart"} onTap={go chart}
+    NavItem "Medications" icon="medication" badge="2" selected={tab=="mar"} onTap={go medications}
+    NavItem "Orders and notes" icon="assignment" selected={tab=="orders"} onTap={go orders-and-notes}
+    Spacer grow
+    Text.muted "Ward 4B, bed 12"
+  Main
+    Nav
+      Column gap=2
+        Heading "Medication administration" level=1
+        Text.muted "Harold Whitmore, MRN 4471920"
+      Row gap=8
+        SegmentedButton bind=day items=["Yesterday","Today"]
+        Button.outline "Print" icon="print" onTap={emit print}
+    Column pad=24 gap=16
+      Card fill=#FFFDECEA
+        Row gap=8
+          Icon "warning" color=#FFC62828
+          Text "Allergies: penicillin (anaphylaxis), latex, codeine" color=#FFC62828 weight=700
+      Row gap=16
+        Row gap=4
+          Badge.success "Given"
+        Row gap=4
+          Badge.warning "Due"
+        Row gap=4
+          Badge.error "Missed"
+        Row gap=4
+          Badge.neutral "Not scheduled"
+      Card gap=8
+        Row scroll gap=8
+          Text.muted "Medication" w=220
+          each t in times
+            Text.muted "{t}" w=90 center
+        Divider
+        each m in mar
+          Row gap=8 middle
+            Column w=220 gap=2
+              Text.strong "{m.drug}"
+              Text.caption "{m.freq}"
+            each t in times
+              if m.slots[t]=="given"
+                Badge.success "Given" w=90 icon="check"
+              if m.slots[t]=="due"
+                Button.outline "Due" w=90 onTap={sel=m.id; open give}
+              if m.slots[t]=="missed"
+                Badge.error "Missed" w=90 icon="close" onTap={sel=m.id; open missed}
+              if m.slots[t]=="none"
+                Text.muted "-" w=90 center
+  Dialog#give "Give medication" "Check the five rights before you confirm"
+    Text.strong "{find(mar,x=>x.id==sel).drug}"
+    Text.muted "Patient wristband scanned, allergies checked."
+    Input "Dose given" bind=dose
+    Input "Note" multiline bind=giveNote
+    Row gap=8 end
+      Button.outline "Withhold" onTap={mar=updateWhere(mar,x=>x.id==sel,x=>with(x,"slots",with(x.slots,"14:00","missed"))); emit withheld sel; toast "Marked as withheld"; close}
+      Button "Confirm given" onTap={mar=updateWhere(mar,x=>x.id==sel,x=>with(x,"slots",with(x.slots,"14:00","given"))); emit given sel; toast "Dose recorded"; close}
+  Dialog#missed "Missed dose" "Enoxaparin 40 mg SC, due 10:00"
+    Select "Reason" bind=missReason items=["Patient refused","Nil by mouth","Drug unavailable","Not recorded in time"]
+    Input "Note" multiline bind=missNote
+    Row gap=8 end
+      Button.outline "Close" onTap={close}
+      Button "Notify prescriber" onTap={emit notifyPrescriber sel; toast "Prescriber notified"; close}
+
+### Orders and notes
+state tab="orders"
+state filter="All"
+state author="All"
+state draft=""
+state orders=[{"id":1,"name":"Chest X-ray, repeat","due":"16:00","by":"Dr. Lindqvist","status":"Pending"},{"id":2,"name":"Blood cultures x2","due":"Today 08:15","by":"Dr. Lindqvist","status":"Completed"},{"id":3,"name":"Full blood count and CRP","due":"18:00","by":"Dr. Shah","status":"Pending"},{"id":4,"name":"Oxygen target SpO2 94 to 98%","due":"Ongoing","by":"Dr. Shah","status":"Active"},{"id":5,"name":"Physiotherapy review","due":"Tomorrow","by":"Dr. Lindqvist","status":"Cancelled"}]
+state notes=[{"date":"17 Nov 14:20","author":"J. Okafor RN","kind":"Nursing","text":"Febrile 38.1, tachycardic. Paracetamol due. Registrar review requested."},{"date":"17 Nov 09:30","author":"Dr. Shah","kind":"Medical","text":"Ward round. Improving cough, still productive. Continue IV antibiotics, repeat CXR this afternoon."},{"date":"16 Nov 21:10","author":"M. Reyes RN","kind":"Nursing","text":"Settled overnight, 2 L oxygen via nasal cannula. Fluids encouraged."},{"date":"16 Nov 11:00","author":"A. Brandt PT","kind":"Therapy","text":"Chest physiotherapy, sitting out of bed for 20 minutes, tolerated well."}]
+App
+  Sidebar
+    Brand "Bedside" icon="monitor_heart"
+    NavItem "Chart" icon="monitor_heart" selected={tab=="chart"} onTap={go chart}
+    NavItem "Medications" icon="medication" badge="2" selected={tab=="mar"} onTap={go medications}
+    NavItem "Orders and notes" icon="assignment" selected={tab=="orders"} onTap={go orders-and-notes}
+    Spacer grow
+    Text.muted "Ward 4B, bed 12"
+  Main
+    Nav
+      Heading "Orders and notes" level=1
+      Row gap=8
+        Badge.error "EWS 6"
+        Button "Add note" icon="edit_note" onTap={open addnote}
+    Column pad=24 gap=16
+      Card fill=#FFFDECEA
+        Text "Allergies: penicillin (anaphylaxis), latex, codeine" color=#FFC62828 weight=700
+      Card gap=8
+        Row between
+          Text.strong "Orders"
+          Row gap=8
+            FilterChip "All" selected={filter=="All"} onTap={filter="All"}
+            FilterChip "Pending" selected={filter=="Pending"} onTap={filter="Pending"}
+            FilterChip "Active" selected={filter=="Active"} onTap={filter="Active"}
+            FilterChip "Completed" selected={filter=="Completed"} onTap={filter="Completed"}
+        Row gap=8
+          Text.muted "Order" grow
+          Text.muted "Due" w=110
+          Text.muted "Ordered by" w=120
+          Text.muted "Status" w=100
+        Divider
+        each o in filter=="All" ? orders : filter(orders,x=>x.status==filter)
+          Row gap=8 middle
+            Text.strong "{o.name}" grow
+            Text "{o.due}" w=110
+            Text.muted "{o.by}" w=120
+            if o.status=="Pending"
+              Badge.warning "Pending" w=100
+            if o.status=="Active"
+              Badge.info "Active" w=100
+            if o.status=="Completed"
+              Badge.success "Completed" w=100
+            if o.status=="Cancelled"
+              Badge.neutral "Cancelled" w=100
+      Card gap=12
+        Row between
+          Text.strong "Notes"
+          Select bind=author items=["All","Nursing","Medical","Therapy"] w=160
+        each n in author=="All" ? notes : filter(notes,x=>x.kind==author)
+          Column gap=4
+            Row between
+              Row gap=8
+                Avatar "{n.author}" size=28
+                Text.strong "{n.author}"
+                Badge.neutral "{n.kind}"
+              Text.muted "{n.date}"
+            Text "{n.text}"
+            Divider
+  Dialog#addnote "Add note" "Signed as J. Okafor RN"
+    Select "Type" bind=noteKind items=["Nursing","Medical","Therapy"]
+    Input "Note" bind=draft multiline h=140
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button "Save note" onTap={trim(draft)!="" ? {notes=concat([{"date":"17 Nov now","author":"J. Okafor RN","kind":coalesce(noteKind,"Nursing"),"text":draft}],notes); draft=""; emit noteAdded; toast "Note added"; close} : toast "Write a note first"}

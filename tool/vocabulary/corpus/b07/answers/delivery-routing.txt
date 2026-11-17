@@ -1,0 +1,158 @@
+### Route
+state stops=[{"id":1,"name":"Harlow Bakery","addr":"14 Mill Lane","from":"09:00","to":"10:00","parcels":3,"mins":12,"status":"pending","phone":"555-0142"},{"id":2,"name":"Dr. Amara Osei","addr":"88 Queen St","from":"09:30","to":"11:00","parcels":1,"mins":9,"status":"pending","phone":"555-0177"},{"id":3,"name":"Birch & Co Studio","addr":"3 Foundry Yard","from":"10:00","to":"12:00","parcels":5,"mins":15,"status":"pending","phone":"555-0119"},{"id":4,"name":"Tomas Lindqvist","addr":"41 Alder Court","from":"11:00","to":"13:00","parcels":2,"mins":8,"status":"pending","phone":"555-0160"},{"id":5,"name":"Greenway Pharmacy","addr":"200 High St","from":"12:00","to":"14:00","parcels":4,"mins":11,"status":"pending","phone":"555-0133"}]
+state tab="route"
+state sel=0
+state reason=""
+state proof="photo"
+state photo=""
+state sig=""
+state code=""
+state startMins=540
+state view="list"
+App
+  Sidebar
+    Brand "Dropoff" icon="local_shipping"
+    NavItem "Route" icon="route" badge="{count(stops,s=>s.status==\"pending\")}" selected={tab=="route"} onTap={tab="route"}
+    NavItem "Summary" icon="summarize" selected={tab=="summary"} onTap={go summary}
+    Spacer grow
+    Text.muted "Van 12 · Jess Moreno"
+  Main
+    Nav
+      Heading "Today's route" level=1
+      Row gap=8
+        Badge.info "Finish about {formatTime(startMins + sum(filter(stops,s=>s.status==\"pending\"),s=>s.mins) + 8 * count(stops,s=>s.status==\"pending\"))}"
+        SegmentedButton bind=view items=["list","map"] show=phone
+        Button.outline "Optimise" icon="auto_fix_high" onTap={stops=sortBy(stops,s=>s.to); toast "Route optimised"}
+    Row gap=16 pad=24 top
+      Column grow gap=12 hide={view=="map"}
+        Row between
+          Text.strong "{count(stops,s=>s.status==\"pending\")} stops left"
+          Text.muted "{sum(stops,s=>s.parcels)} parcels"
+        ListView reorder bind=stops onReorder={emit routeChanged; toast "Route redrawn"}
+          each stop in stops
+            Card gap=8 drag=stop(stop.id) drop=stop
+              Row gap=12 middle
+                Icon "drag_indicator"
+                Avatar "{index+1}" size=32
+                Column grow gap=2
+                  Text.strong "{stop.name}" strike={stop.status!="pending"}
+                  Text.muted "{stop.addr}"
+                Column end gap=2
+                  Badge.neutral "{stop.from}-{stop.to}"
+                  Text.caption "{stop.parcels} parcels"
+                IconButton "more_vert" tooltip="Stop options" onTap={sel=stop.id; open stopMenu}
+              if stop.status=="failed"
+                Badge.error "Not delivered"
+              if stop.status=="done"
+                Badge.success "Delivered"
+      Column grow gap=12 hide={view=="list"}
+        Card gap=8
+          Map h=360 route={map(stops,s=>s.addr)} start="Depot, 1 Canal Road"
+            each stop in stops
+              MapPin "{index+1}" address="{stop.addr}" selected={sel==stop.id} onTap={sel=stop.id}
+          Row between
+            Text.muted "Distance {fixed(18.4,1)} km"
+            Text.muted "Drive time {duration(sum(stops,s=>s.mins)*60)}"
+      Column w=320 gap=12 hide=phone
+        Card gap=12
+          Text.caption "NEXT STOP"
+          Heading "{first(filter(stops,s=>s.status==\"pending\")).name}" level=3
+          Text.muted "{first(filter(stops,s=>s.status==\"pending\")).addr}"
+          Row gap=8
+            Badge.neutral "{first(filter(stops,s=>s.status==\"pending\")).from}-{first(filter(stops,s=>s.status==\"pending\")).to}"
+            Badge.primary "{first(filter(stops,s=>s.status==\"pending\")).parcels} parcels"
+          Button "Navigate" icon="navigation" onTap={emit navigate first(filter(stops,s=>s.status=="pending")).addr}
+          Row gap=8
+            Button.outline "Call" icon="call" grow onTap={emit call first(filter(stops,s=>s.status=="pending")).phone}
+            Button.outline "Delivered" icon="check" grow onTap={sel=first(filter(stops,s=>s.status=="pending")).id; go proof}
+          Button.ghost "Could not deliver" onTap={sel=first(filter(stops,s=>s.status=="pending")).id; open failed}
+  Menu#stopMenu
+    MenuItem "Navigate" icon="navigation" onTap={emit navigate find(stops,s=>s.id==sel).addr}
+    MenuItem "Call" icon="call" onTap={emit call find(stops,s=>s.id==sel).phone}
+    MenuItem "Proof of delivery" icon="photo_camera" onTap={go proof}
+    MenuItem "Could not deliver" icon="report" onTap={open failed}
+    MenuItem "Skip for now" icon="skip_next" onTap={stops=concat(without(stops,find(stops,s=>s.id==sel)),[find(stops,s=>s.id==sel)])}
+  Dialog#failed "Could not deliver" "Pick a reason. The customer is told."
+    Radio bind=reason items=["Nobody home","Address not found","Refused by customer","Access blocked","Parcel damaged","Closed business"]
+    Input "Note" "Gate code, neighbour, anything useful" bind=code multiline
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Mark failed" onTap={reason=="" ? toast "Choose a reason" : {stops=updateWhere(stops,s=>s.id==sel,s=>with(s,"status","failed")); emit failedDelivery {"stop":sel,"reason":reason}; toast "Marked as failed"; reason=""; close}}
+
+### Proof
+App
+  Sidebar
+    Brand "Dropoff" icon="local_shipping"
+    NavItem "Route" icon="route" onTap={go route}
+    NavItem "Proof" icon="verified" selected={true}
+    NavItem "Summary" icon="summarize" onTap={go summary}
+  Main
+    Nav
+      Heading "Proof of delivery" level=1
+      Text.muted "{find(stops,s=>s.id==sel).name} · {find(stops,s=>s.id==sel).addr}"
+    maxw=720
+    Column pad=24 gap=16
+      SegmentedButton bind=proof items=["photo","signature","code"]
+      if proof=="photo"
+        Card gap=12
+          Text.strong "Photograph the parcel at the door"
+          CameraCapture bind=photo h=280 facing="back"
+          if photo!=""
+            Button.outline "Retake" icon="refresh" onTap={photo=""}
+      if proof=="signature"
+        Card gap=12
+          Text.strong "Recipient signs below"
+          SignaturePad bind=sig h=200
+          Row between
+            Text.muted "Signed by recipient"
+            Button.ghost "Clear" onTap={sig=""}
+      if proof=="code"
+        Card gap=12
+          Text.strong "Ask the recipient for their 6-digit code"
+          Input "Delivery code" "000000" bind=code type=number maxlength=6
+          Text.danger "That code does not match" visible={length(code)==6 && code!="482913"}
+      Row gap=8
+        Button.outline "Back" grow onTap={go route}
+        Button "Confirm delivery" grow icon="check" onTap={(proof=="photo" && photo=="") || (proof=="signature" && sig=="") || (proof=="code" && code!="482913") ? toast "Proof is missing" : {stops=updateWhere(stops,s=>s.id==sel,s=>with(s,"status","done")); emit delivered sel; toast "Delivered"; photo=""; sig=""; code=""; go route}}
+
+### Summary
+App
+  Sidebar
+    Brand "Dropoff" icon="local_shipping"
+    NavItem "Route" icon="route" onTap={go route}
+    NavItem "Summary" icon="summarize" selected={true}
+  Main
+    Nav
+      Heading "Day summary" level=1
+      Button.outline "Send to depot" icon="send" onTap={emit sendSummary; toast "Sent to depot"}
+    Column pad=24 gap=16 scroll
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.caption "DELIVERED"
+          Text "{count(stops,s=>s.status==\"done\")}" size=40 weight=700
+        Card gap=4
+          Text.caption "FAILED"
+          Text "{count(stops,s=>s.status==\"failed\")}" size=40 weight=700
+        Card gap=4
+          Text.caption "PARCELS"
+          Text "{sum(filter(stops,s=>s.status==\"done\"),s=>s.parcels)}" size=40 weight=700
+        Card gap=4
+          Text.caption "ESTIMATED FINISH"
+          Text "{formatTime(startMins + sum(filter(stops,s=>s.status==\"pending\"),s=>s.mins))}" size=40 weight=700
+      Card gap=12
+        Text.strong "Time per stop (minutes)"
+        BarChart values={map(stops,s=>s.mins)} labels={map(stops,s=>s.name)} h=200
+      Card gap=8
+        Text.strong "Failed deliveries"
+        if count(stops,s=>s.status=="failed")==0
+          Text.muted "None so far today."
+        each stop in filter(stops,s=>s.status=="failed")
+          ListTile "{stop.name}" subtitle="{stop.addr}" icon="report_problem"
+      Card gap=8
+        Text.strong "Route"
+        each stop in stops
+          Row between
+            Text "{index+1}. {stop.name}"
+            Badge.success "Delivered" visible={stop.status=="done"}
+            Badge.error "Failed" visible={stop.status=="failed"}
+            Badge.neutral "Pending" visible={stop.status=="pending"}

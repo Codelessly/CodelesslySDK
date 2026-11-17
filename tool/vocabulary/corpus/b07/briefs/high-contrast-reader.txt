@@ -1,0 +1,3 @@
+App: Bold Page, a low-vision reader. Text in very large letters with a white on black, a yellow on black and a black on cream choice shown as samples; line spacing, letter spacing and a font made for low vision set by steppers with a live preview; a line focus bar that dims the other lines and moves with a swipe; a read-aloud button highlighting the spoken word; a magnifier circle dragged over the page; a simple list of books.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

@@ -1,0 +1,156 @@
+### Chat
+state convs=[{"id":1,"title":"Debounce a search input","day":"Today"},{"id":2,"title":"Quarterly churn summary","day":"Today"},{"id":3,"title":"Trip plan: Lisbon","day":"Yesterday"},{"id":4,"title":"SQL window functions","day":"Yesterday"},{"id":5,"title":"Cover letter edits","day":"Last week"}]
+state current=1
+state sel=0
+state newTitle=""
+state model="Sidekick Pro"
+state draft=""
+state streaming=false
+state shown=0
+state words=["Debouncing","delays","a","function","call","until","the","user","has","stopped","typing.","Here","is","a","small","helper","and","a","comparison","of","the","options."]
+state upload=1
+state fileName="churn-q3.csv"
+state attached=true
+state messages=[{"id":1,"role":"user","text":"How do I debounce a search input in JavaScript?","vote":""},{"id":2,"role":"bot","text":"Wrap the handler so it only runs after the user stops typing for a short delay. **Debounce** resets a timer on every keystroke, while *throttle* runs at most once per interval.","vote":""}]
+state followups=["Show a React hook version","Explain throttle vs debounce","Add a cancel method"]
+every 250 when streaming onTick={shown=shown+1; streaming=shown+1<length(words)}
+every 300 when attached && upload<1 onTick={upload=min(1,upload+0.25)}
+App
+  Sidebar
+    Brand "Sidekick" icon="auto_awesome"
+    Button "New chat" icon="add" onTap={current=0; messages=[]}
+    Input "Search chats" bind=q
+    Column scroll gap=4 grow
+      Text.caption "Today"
+      each c in filter(convs,c=>c.day=="Today")
+        NavItem "{c.title}" icon="chat_bubble_outline" selected={current==c.id} onTap={current=c.id} menu=convMenu onLongPress={sel=c.id}
+      Text.caption "Yesterday"
+      each c in filter(convs,c=>c.day=="Yesterday")
+        NavItem "{c.title}" icon="chat_bubble_outline" selected={current==c.id} onTap={current=c.id} menu=convMenu
+      Text.caption "Last week"
+      each c in filter(convs,c=>c.day=="Last week")
+        NavItem "{c.title}" icon="chat_bubble_outline" selected={current==c.id} onTap={current=c.id} menu=convMenu
+    Avatar "Maya Reyes" size=32
+  Main
+    Nav
+      Heading "{find(convs,c=>c.id==current).title}" level=3
+      Row gap=8
+        Button.outline "{model}" icon="expand_more" onTap={open modelMenu}
+        IconButton "more_vert" tooltip="Conversation options" onTap={sel=current; open convMenu}
+    Column pad=24 gap=16 scroll maxw=820
+      each m in messages
+        if m.role=="user"
+          Row end
+            ChatBubble "{m.text}" role="user"
+        if m.role=="bot"
+          Column gap=8
+            ChatBubble role="assistant" markdown text="{m.text}"
+            CodeBlock language="javascript" code="function debounce(fn, wait = 300) {\n  let timer;\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), wait);\n  };\n}" onCopy={copy result; toast "Code copied"}
+            Table columns=["Technique","Runs","Best for"] rows=[["Debounce","After typing stops","Search boxes"],["Throttle","Once per interval","Scroll, resize"]]
+            Image "https://images.example.com/diagrams/debounce-timeline.png" radius=8 h=160
+            Row gap=4
+              IconButton "thumb_up" tooltip="Good answer" selected={m.vote=="up"} onTap={messages=updateWhere(messages,x=>x.id==m.id,x=>with(x,"vote","up"))}
+              IconButton "thumb_down" tooltip="Bad answer" selected={m.vote=="down"} onTap={messages=updateWhere(messages,x=>x.id==m.id,x=>with(x,"vote","down"))}
+              IconButton "content_copy" tooltip="Copy" onTap={copy m.text; toast "Copied"}
+      if streaming
+        Column gap=8
+          ChatBubble role="assistant" streaming markdown text="{join(take(words,shown),' ')}"
+          Row gap=8
+            Progress.indeterminate
+            Button.outline "Stop" icon="stop" onTap={streaming=false}
+      if !streaming
+        Row gap=8 scroll
+          each f in followups
+            Chip "{f}" onTap={draft=f}
+    Footer
+      Column pad=16 gap=8
+        if attached
+          Row gap=8
+            Chip "{fileName}" icon="attach_file" onDelete={attached=false; upload=0}
+            Progress bind=upload w=160
+            Text.caption "{round(upload*100,0)}%"
+        Row gap=8
+          IconButton "attach_file" tooltip="Attach a file" onTap={attached=true; upload=0; fileName="churn-q3.csv"}
+          Input "Message Sidekick" bind=draft multiline grow onSubmit={draft!="" ? {messages=append(messages,{"id":length(messages)+1,"role":"user","text":draft,"vote":""}); draft=""; shown=0; streaming=true} : toast "Type a message"}
+          if streaming
+            IconButton "stop_circle" tooltip="Stop generating" onTap={streaming=false}
+          if !streaming
+            IconButton "send" tooltip="Send" onTap={draft!="" ? {messages=append(messages,{"id":length(messages)+1,"role":"user","text":draft,"vote":""}); draft=""; shown=0; streaming=true} : toast "Type a message"}
+Menu#modelMenu end
+  MenuItem "Sidekick Pro" icon="bolt" onTap={model="Sidekick Pro"}
+  MenuItem "Sidekick Fast" icon="speed" onTap={model="Sidekick Fast"}
+  MenuItem "Sidekick Mini" icon="eco" onTap={model="Sidekick Mini"}
+Menu#convMenu
+  MenuItem "Rename" icon="edit" onTap={newTitle=find(convs,c=>c.id==sel).title; open renameChat}
+  MenuItem "Delete" icon="delete" onTap={open deleteChat}
+Dialog#renameChat "Rename chat" "Give it a name you will recognise"
+  Input "Title" bind=newTitle
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button "Save" onTap={newTitle!="" ? {convs=updateWhere(convs,c=>c.id==sel,c=>with(c,"title",newTitle)); toast "Renamed"; close} : toast "Enter a title"}
+Dialog#deleteChat "Delete this chat?" "This cannot be undone."
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button.destructive "Delete" onTap={convs=removeWhere(convs,c=>c.id==sel); current=first(convs).id; toast "Chat deleted"; close}
+
+### Conversations
+state convs=[{"id":1,"title":"Debounce a search input","day":"Today","count":6},{"id":2,"title":"Quarterly churn summary","day":"Today","count":14},{"id":3,"title":"Trip plan: Lisbon","day":"Yesterday","count":22},{"id":4,"title":"SQL window functions","day":"Yesterday","count":9},{"id":5,"title":"Cover letter edits","day":"Last week","count":5}]
+state sel=0
+state newTitle=""
+state q=""
+Page
+  Nav
+    Brand "Sidekick" icon="auto_awesome"
+    Row gap=4
+      Link "Chat" onTap={go chat}
+      Link "Conversations"
+      Link "Settings" onTap={go settings}
+    Button "New chat" onTap={go chat}
+  Section narrow
+    Column gap=16
+      Heading "Your conversations" level=1
+      Input "Search conversations" bind=q
+      each day in ["Today","Yesterday","Last week"]
+        Text.sectionTitle "{day}"
+        each c in filter(convs,c=>c.day==day && contains(lower(c.title),lower(q)))
+          ListTile "{c.title}" subtitle="{c.count} messages" icon="chat_bubble_outline" onTap={go chat}
+            IconButton "more_vert" tooltip="Options" onTap={sel=c.id; open rowMenu}
+  Menu#rowMenu end
+    MenuItem "Rename" icon="edit" onTap={newTitle=find(convs,c=>c.id==sel).title; open renameConv}
+    MenuItem "Delete" icon="delete" onTap={open deleteConv}
+  Dialog#renameConv "Rename conversation"
+    Input "Title" bind=newTitle
+    Button "Save" onTap={convs=updateWhere(convs,c=>c.id==sel,c=>with(c,"title",newTitle)); toast "Renamed"; close}
+  Dialog#deleteConv "Delete conversation?" "Its messages will be removed."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Delete" onTap={convs=removeWhere(convs,c=>c.id==sel); toast "Deleted"; close}
+
+### Settings
+state model="Sidekick Pro"
+state stream=true
+state temperature=0.7
+state sendOnEnter=true
+Page
+  Nav
+    Brand "Sidekick" icon="auto_awesome"
+    Row gap=4
+      Link "Chat" onTap={go chat}
+      Link "Conversations" onTap={go conversations}
+      Link "Settings"
+    Avatar "Maya Reyes" size=32
+  Section narrow
+    Column gap=20
+      Heading "Settings" level=1
+      Card gap=12
+        Heading "Model" level=3
+        Select "Default model" items=["Sidekick Pro","Sidekick Fast","Sidekick Mini"] bind=model
+        Text.muted "Pro is slower and better at long reasoning. Mini is best for quick questions."
+        Slider "Creativity" bind=temperature min=0 max=1
+      Card gap=12
+        Heading "Answers" level=3
+        Toggle "Stream answers word by word" bind=stream
+        Toggle "Send with Enter" bind=sendOnEnter
+      Row end gap=8
+        Button.ghost "Cancel" onTap={go chat}
+        Button "Save" onTap={emit saveSettings; toast "Settings saved"; go chat}

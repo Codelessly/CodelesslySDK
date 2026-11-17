@@ -1,0 +1,196 @@
+### Album
+state tab="album"
+state photos=[{"id":1,"url":"https://images.example.com/reel/beach-sunset.jpg","caption":"Beach sunset","by":"Maya Reyes","likes":14,"liked":false,"ratings":[5,4,5],"myRating":0,"score":9.4,"trend":"up"},{"id":2,"url":"https://images.example.com/reel/cabin-porch.jpg","caption":"Cabin porch","by":"Dan Okafor","likes":9,"liked":true,"ratings":[4,4,3],"myRating":4,"score":7.8,"trend":"down"},{"id":3,"url":"https://images.example.com/reel/group-hike.jpg","caption":"Group hike","by":"Priya Nair","likes":21,"liked":false,"ratings":[5,5,4],"myRating":0,"score":9.9,"trend":"up"},{"id":4,"url":"https://images.example.com/reel/campfire.jpg","caption":"Campfire","by":"Maya Reyes","likes":6,"liked":false,"ratings":[3,4],"myRating":0,"score":6.2,"trend":"down"},{"id":5,"url":"https://images.example.com/reel/lake-dawn.jpg","caption":"Lake at dawn","by":"Tom Berg","likes":17,"liked":false,"ratings":[5,4,4],"myRating":0,"score":8.7,"trend":"up"},{"id":6,"url":"https://images.example.com/reel/market.jpg","caption":"Morning market","by":"Dan Okafor","likes":4,"liked":false,"ratings":[3,3],"myRating":0,"score":5.1,"trend":"down"}]
+state selected=[]
+state at=0
+state uploader="Maya Reyes"
+state days=12
+state hours=7
+state mins=45
+state secs=30
+every 1s onTick={secs=secs>0?secs-1:59; mins=secs==0?(mins>0?mins-1:59):mins}
+App
+  Sidebar
+    Brand "Reel Vote" icon="photo_library"
+    NavItem "Album" icon="grid_view" badge="{length(photos)}" selected={tab=="album"} onTap={tab="album"}
+    NavItem "Top picks" icon="emoji_events" selected={tab=="top"} onTap={go top-picks}
+    NavItem "Voting round" icon="how_to_vote" onTap={go voting-round}
+    NavItem "Faces" icon="face" onTap={go faces}
+    Spacer grow
+    Card gap=4
+      Text.caption "Final book closes in"
+      Text.strong "{days}d {hours}h {mins}m"
+    Avatar "Maya Reyes" size=32
+  Main
+    Nav
+      Heading "Summer Trip Album" level=1
+      Row gap=8
+        Input "Your name tag" bind=uploader w=180
+        Button.outline "Add photos" icon="add_a_photo" onTap={open upload}
+        Button "Download selected ({length(selected)})" icon="download" onTap={length(selected)>0 ? emit download selected : toast "Select some photos first"}
+    Column pad=24 gap=16 scroll
+      Row between
+        Text.muted "{length(photos)} photos from {length(unique(map(photos,p=>p.by)))} people"
+        Row gap=8
+          Button.ghost "Select all" onTap={selected=map(photos,p=>p.id)}
+          Button.ghost "Clear" onTap={selected=[]}
+      Grid cols=3 gap=16
+        each p in photos
+          Card gap=8 animate=fade stagger=60
+            Image "{p.url}" h=180 radius=8 onTap={at=index; open viewer}
+            Row between
+              Column gap=2
+                Text.strong "{p.caption}"
+                Row gap=4
+                  Avatar "{p.by}" size=20
+                  Badge.neutral "{p.by}"
+              Checkbox bind=selected value={p.id}
+            Row between
+              Row gap=4
+                IconButton "{p.liked ? 'favorite' : 'favorite_border'}" tooltip="Like" onTap={photos=updateWhere(photos,x=>x.id==p.id,x=>with(with(x,"liked",!x.liked),"likes",x.liked?x.likes-1:x.likes+1))}
+                Text.muted "{p.likes}"
+              Row gap=2
+                Icon "star"
+                Text.muted "{p.myRating>0 ? p.myRating : '-'}"
+  Lightbox#viewer photos={photos} bind=at
+  Dialog#upload "Add photos" "Everyone in the album can see them"
+    Input "Name tag" bind=uploader
+    FileDrop "Drop photos here" accept="image/*" onUpload={photos=append(photos,with(with(with(result,"by",uploader),"likes",0),"liked",false)); toast "Photos added"; close}
+    Button "Done" onTap={close}
+
+### Photo
+state at=0
+state photos=[{"id":1,"url":"https://images.example.com/reel/beach-sunset.jpg","caption":"Beach sunset","by":"Maya Reyes","likes":14,"liked":false,"ratings":[5,4,5],"myRating":0},{"id":2,"url":"https://images.example.com/reel/cabin-porch.jpg","caption":"Cabin porch","by":"Dan Okafor","likes":9,"liked":true,"ratings":[4,4,3],"myRating":4},{"id":3,"url":"https://images.example.com/reel/group-hike.jpg","caption":"Group hike","by":"Priya Nair","likes":21,"liked":false,"ratings":[5,5,4],"myRating":0}]
+Page
+  Nav
+    Brand "Reel Vote" icon="photo_library"
+    Link "Album" onTap={go album}
+    Button.ghost "Close" icon="close" onTap={go album}
+  Section
+    Row gap=32 top
+      Column grow gap=12
+        Pages bind=at items=photos h=420 onSwipeLeft={at=min(at+1,length(photos)-1)}
+          Image "{item.url}" radius=12
+        Row between
+          IconButton "chevron_left" tooltip="Previous" onTap={at=max(0,at-1)}
+          Dots bind=at count={length(photos)}
+          IconButton "chevron_right" tooltip="Next" onTap={at=min(length(photos)-1,at+1)}
+        Text.muted center "{at+1} of {length(photos)}"
+      Column w=320 gap=16
+        Heading "{photos[at].caption}" level=2
+        Row gap=8
+          Avatar "{photos[at].by}" size=32
+          Column gap=0
+            Text.strong "{photos[at].by}"
+            Text.caption "Uploaded to the album"
+        Divider
+        Row gap=8
+          IconButton "{photos[at].liked ? 'favorite' : 'favorite_border'}" tooltip="Like" onTap={photos=updateWhere(photos,x=>x.id==photos[at].id,x=>with(with(x,"liked",!x.liked),"likes",x.liked?x.likes-1:x.likes+1))}
+          Text.strong "{photos[at].likes} likes"
+        Text.fieldLabel "Your rating"
+        Rating bind=myRating max=5 value={photos[at].myRating} onChange={photos=updateWhere(photos,x=>x.id==photos[at].id,x=>with(x,"myRating",result)); toast "Rated {result} of 5"}
+        Text.muted "Average {fixed(sum(photos[at].ratings,r=>r)/length(photos[at].ratings),1)} from {length(photos[at].ratings)} votes"
+        Button.outline "Download" icon="download" onTap={emit download photos[at].id}
+
+### Top picks
+state photos=[{"id":3,"caption":"Group hike","url":"https://images.example.com/reel/group-hike.jpg","score":9.9,"trend":"up","change":2},{"id":1,"caption":"Beach sunset","url":"https://images.example.com/reel/beach-sunset.jpg","score":9.4,"trend":"up","change":1},{"id":5,"caption":"Lake at dawn","url":"https://images.example.com/reel/lake-dawn.jpg","score":8.7,"trend":"up","change":3},{"id":2,"caption":"Cabin porch","url":"https://images.example.com/reel/cabin-porch.jpg","score":7.8,"trend":"down","change":2},{"id":4,"caption":"Campfire","url":"https://images.example.com/reel/campfire.jpg","score":6.2,"trend":"down","change":1},{"id":6,"caption":"Morning market","url":"https://images.example.com/reel/market.jpg","score":5.1,"trend":"down","change":2}]
+state range="This week"
+App
+  Sidebar
+    Brand "Reel Vote" icon="photo_library"
+    NavItem "Album" icon="grid_view" onTap={go album}
+    NavItem "Top picks" icon="emoji_events" selected={true}
+    NavItem "Voting round" icon="how_to_vote" onTap={go voting-round}
+    NavItem "Faces" icon="face" onTap={go faces}
+  Main
+    Nav
+      Heading "Top picks" level=1
+      SegmentedButton bind=range items=["Today","This week","All time"]
+    Column pad=24 gap=16 scroll
+      Text.muted "Ranked by score. The best twelve go into the final book."
+      Card gap=0
+        Row pad=12 border-bottom=#FFE0E0E0
+          Text.fieldLabel "Rank" w=60
+          Text.fieldLabel "Photo" grow
+          Text.fieldLabel "Score" w=80
+          Text.fieldLabel "Trend" w=100
+        each p in sortByDesc(photos,x=>x.score)
+          Row pad=12 middle gap=12 border-bottom=#FFEEEEEE animate=slide-up stagger=60
+            Text.strong "{index+1}" w=60
+            Row grow gap=12 middle
+              Image "{p.url}" w=56 h=56 radius=8
+              Text.strong "{p.caption}"
+            Text.strong "{fixed(p.score,1)}" w=80
+            Row w=100 gap=4 middle
+              Icon "{p.trend=='up' ? 'arrow_upward' : 'arrow_downward'}" color="{p.trend=='up' ? '#FF2E7D32' : '#FFC62828'}"
+              Text "{p.change}" color="{p.trend=='up' ? '#FF2E7D32' : '#FFC62828'}"
+
+### Voting round
+state a={"id":3,"caption":"Group hike","url":"https://images.example.com/reel/group-hike.jpg"}
+state b={"id":5,"caption":"Lake at dawn","url":"https://images.example.com/reel/lake-dawn.jpg"}
+state picked=0
+state round=4
+state total=10
+state days=12
+state hours=7
+state mins=45
+state secs=30
+every 1s onTick={secs=secs>0?secs-1:59; mins=secs==0?(mins>0?mins-1:59):mins}
+Page
+  Nav
+    Brand "Reel Vote" icon="photo_library"
+    Row gap=4
+      Link "Album" onTap={go album}
+      Link "Top picks" onTap={go top-picks}
+      Link "Faces" onTap={go faces}
+    Badge.warning "{days}d {hours}h {mins}m left"
+  Section center
+    Column gap=8 center
+      Heading "Which one makes the book?" level=1
+      Text.muted "Round {round} of {total}"
+      Progress {round/total}
+    Row gap=24
+      Card grow gap=12 selected={picked==a.id}
+        Image "{a.url}" h=320 radius=8 onTap={open zoomA}
+        Text.strong center "{a.caption}"
+        Button "{picked==a.id ? 'Picked' : 'Pick this one'}" onTap={picked=a.id}
+      Card grow gap=12 selected={picked==b.id}
+        Image "{b.url}" h=320 radius=8 onTap={open zoomB}
+        Text.strong center "{b.caption}"
+        Button "{picked==b.id ? 'Picked' : 'Pick this one'}" onTap={picked=b.id}
+    Row gap=12 center
+      Button.ghost "Skip" onTap={picked=0; round=min(total,round+1); toast "Skipped"}
+      Button "Submit vote" onTap={picked==0 ? toast "Pick a photo first" : {emit vote picked; round=min(total,round+1); picked=0; toast "Vote counted"}}
+  Lightbox#zoomA "{a.url}" "{a.caption}"
+  Lightbox#zoomB "{b.url}" "{b.caption}"
+
+### Faces
+state people=[{"id":1,"name":"Maya Reyes","count":18,"cover":"https://images.example.com/reel/faces/maya.jpg"},{"id":2,"name":"Dan Okafor","count":12,"cover":"https://images.example.com/reel/faces/dan.jpg"},{"id":3,"name":"Priya Nair","count":15,"cover":"https://images.example.com/reel/faces/priya.jpg"},{"id":4,"name":"Unnamed face","count":3,"cover":"https://images.example.com/reel/faces/unknown.jpg"}]
+state sel=0
+state renameTo=""
+App
+  Sidebar
+    Brand "Reel Vote" icon="photo_library"
+    NavItem "Album" icon="grid_view" onTap={go album}
+    NavItem "Top picks" icon="emoji_events" onTap={go top-picks}
+    NavItem "Voting round" icon="how_to_vote" onTap={go voting-round}
+    NavItem "Faces" icon="face" selected={true}
+  Main
+    Nav
+      Heading "Faces" level=1
+      Text.muted "{length(people)} groups"
+    Column pad=24 gap=16 scroll
+      Grid cols=4 gap=16
+        each p in people
+          Card gap=8 center menu=faceMenu onTap={sel=p.id; go album}
+            Avatar src="{p.cover}" size=96
+            Text.strong "{p.name}"
+            Text.muted "{p.count} photos"
+            IconButton "more_vert" tooltip="More" onTap={sel=p.id; open faceMenu}
+  Menu#faceMenu
+    MenuItem "Rename" icon="edit" onTap={open rename}
+    MenuItem "Show photos" icon="photo" onTap={go album}
+    MenuItem "Merge with another" icon="merge" onTap={emit mergeFace sel}
+  Dialog#rename "Name this person"
+    Input "Name" bind=renameTo
+    Button "Save" onTap={people=updateWhere(people,x=>x.id==sel,x=>with(x,"name",renameTo)); renameTo=""; close}

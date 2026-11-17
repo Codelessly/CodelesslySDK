@@ -1,0 +1,3 @@
+App: Daybook Health, a symptom diary. Today with a body outline where you tap spots and choose pain, itch or ache; a severity slider with faces; triggers and food as chips; mood and sleep in one line each; a timeline of the month with coloured dots; a pattern screen showing which triggers go with bad days as bars; a note to take to the doctor built from the last two weeks; an export.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

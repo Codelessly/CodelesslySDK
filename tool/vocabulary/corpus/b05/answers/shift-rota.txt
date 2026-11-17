@@ -1,0 +1,207 @@
+### Schedule
+state tab="schedule"
+state weekLabel="Mon 17 Nov - Sun 23 Nov"
+state days=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+state people=[{"id":1,"name":"Maya Reyes","role":"Barista","rate":16,"max":40},{"id":2,"name":"Tom Okafor","role":"Cook","rate":19,"max":40},{"id":3,"name":"Lena Fischer","role":"Server","rate":15,"max":32},{"id":4,"name":"Dev Patel","role":"Barista","rate":16,"max":24},{"id":5,"name":"Ines Alvarez","role":"Manager","rate":28,"max":45}]
+state shifts=[{"id":1,"person":1,"day":0,"start":7,"end":15,"role":"Barista"},{"id":2,"person":1,"day":1,"start":7,"end":15,"role":"Barista"},{"id":3,"person":2,"day":0,"start":10,"end":20,"role":"Cook"},{"id":4,"person":2,"day":1,"start":10,"end":22,"role":"Cook"},{"id":5,"person":2,"day":2,"start":10,"end":22,"role":"Cook"},{"id":6,"person":2,"day":3,"start":10,"end":22,"role":"Cook"},{"id":7,"person":2,"day":4,"start":10,"end":22,"role":"Cook"},{"id":8,"person":3,"day":0,"start":16,"end":23,"role":"Server"},{"id":9,"person":3,"day":0,"start":22,"end":24,"role":"Server"},{"id":10,"person":4,"day":2,"start":7,"end":13,"role":"Barista"},{"id":11,"person":5,"day":3,"start":8,"end":17,"role":"Manager"},{"id":12,"person":5,"day":4,"start":8,"end":17,"role":"Manager"}]
+state openShifts=[{"id":101,"day":4,"start":16,"end":23,"role":"Server","offered":2},{"id":102,"day":5,"start":7,"end":15,"role":"Barista","offered":0},{"id":103,"day":6,"start":10,"end":18,"role":"Cook","offered":1}]
+state nextId=200
+state copyMode=false
+state sel=0
+state published=[{"id":1,"person":1,"day":0,"start":7,"end":15,"role":"Barista"}]
+state roleFilter="All"
+state roleColors={"Barista":"#FF8D6E63","Cook":"#FFE57373","Server":"#FF4DB6AC","Manager":"#FF7986CB"}
+App
+  Sidebar
+    Brand "Rota" icon="calendar_month"
+    NavItem "Schedule" icon="view_week" selected={tab=="schedule"} onTap={go schedule}
+    NavItem "Open shifts" icon="event_available" badge="{length(openShifts)}" onTap={go open-shifts}
+    NavItem "Requests" icon="inbox" badge="3" onTap={go requests}
+    Spacer grow
+    Text.muted "Harbour Cafe"
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "chevron_left" tooltip="Previous week" onTap={emit prevWeek}
+        Heading "{weekLabel}" level=1
+        IconButton "chevron_right" tooltip="Next week" onTap={emit nextWeek}
+      Row gap=8 middle
+        Select bind=roleFilter items=["All","Barista","Cook","Server","Manager"] w=140
+        Toggle "Copy on drop" bind=copyMode
+        Badge.warning "{count(people,p=>sum(filter(shifts,x=>x.person==p.id),x=>x.end-x.start)>p.max)} over hours"
+        Button "Publish" icon="send" onTap={open publish}
+    Column pad=24 gap=12
+      Row gap=12
+        Badge.neutral "Hours {sum(shifts,x=>x.end-x.start)}"
+        Badge.neutral "Cost {money(sum(shifts,x=>(x.end-x.start)*find(people,p=>p.id==x.person).rate),"$",0)}"
+        Text.muted "Drag a block to move it, hold copy on to duplicate it, drag its edge to change hours."
+      Row scroll
+        Column gap=4
+          Row gap=4
+            Text.strong "" w=150
+            each d in days
+              Text.strong "{d}" w=130 center
+          each p in people
+            if roleFilter=="All" || p.role==roleFilter
+              Row gap=4 top
+                Column w=150 gap=2
+                  Row gap=8 middle
+                    Avatar "{p.name}" size=32
+                    Column
+                      Text.strong "{p.name}"
+                      Text.caption "{p.role}"
+                  Text.caption "{sum(filter(shifts,x=>x.person==p.id),x=>x.end-x.start)} / {p.max} h"
+                  if sum(filter(shifts,x=>x.person==p.id),x=>x.end-x.start)>p.max
+                    Badge.error "Overtime"
+                each d in days
+                  Column w=130 gap=4 pad=4 fill=#FFF5F5F5 radius=6 drop=shift onDrop={copyMode ? {shifts=append(shifts,with(with(with(find(shifts,x=>x.id==result.data),"id",nextId),"person",p.id),"day",index)); nextId=nextId+1; toast "Shift copied"} : {shifts=updateWhere(shifts,x=>x.id==result.data,x=>with(with(x,"person",p.id),"day",index)); toast "Shift moved"}}
+                    each s in filter(shifts,x=>x.person==p.id && x.day==index)
+                      ShiftBlock "{s.start}:00 - {s.end}:00" role={s.role} color={roleColors[s.role]} drag=shift(s.id) resizable=true onResizeStart={shifts=updateWhere(shifts,x=>x.id==s.id,x=>with(x,"start",clamp(result,0,x.end-1)))} onResizeEnd={shifts=updateWhere(shifts,x=>x.id==s.id,x=>with(x,"end",clamp(result,x.start+1,24)))} onTap={sel=s.id; open shiftMenu} menu=shiftMenu
+                        if count(shifts,x=>x.person==p.id && x.day==s.day && x.start<s.end && x.end>s.start)>1
+                          Badge.error "Overlap"
+                        if s.end-s.start>10
+                          Badge.warning "Long"
+                    IconButton "add" tooltip="Add shift" onTap={sel=p.id; open addShift}
+          Row gap=4
+            Text.strong "Hours" w=150
+            each d in days
+              Text.strong "{sum(filter(shifts,x=>x.day==index),x=>x.end-x.start)} h" w=130 center
+          Row gap=4
+            Text.strong "Cost" w=150
+            each d in days
+              Text.strong "{money(sum(filter(shifts,x=>x.day==index),x=>(x.end-x.start)*find(people,p=>p.id==x.person).rate),"$",0)}" w=130 center
+  Menu#shiftMenu
+    MenuItem "Duplicate" icon="content_copy" onTap={shifts=append(shifts,with(find(shifts,x=>x.id==sel),"id",nextId)); nextId=nextId+1}
+    MenuItem "Offer as open shift" icon="campaign" onTap={openShifts=append(openShifts,{"id":nextId,"day":find(shifts,x=>x.id==sel).day,"start":find(shifts,x=>x.id==sel).start,"end":find(shifts,x=>x.id==sel).end,"role":find(shifts,x=>x.id==sel).role,"offered":0}); shifts=removeWhere(shifts,x=>x.id==sel); nextId=nextId+1; toast "Offered to the team"}
+    MenuItem "Delete" icon="delete" onTap={shifts=removeWhere(shifts,x=>x.id==sel); toast "Shift deleted"}
+  Dialog#addShift "Add a shift" "For {find(people,p=>p.id==sel).name}"
+    state newDay="Mon"
+    state newStart=9
+    state newEnd=17
+    Select "Day" bind=newDay items=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+    TimePicker "Starts" bind=newStart
+    TimePicker "Ends" bind=newEnd
+    Button "Add" onTap={newEnd>newStart ? {shifts=append(shifts,{"id":nextId,"person":sel,"day":indexOf(days,newDay),"start":newStart,"end":newEnd,"role":find(people,p=>p.id==sel).role}); nextId=nextId+1; close} : toast "End must be after start"}
+  Dialog#publish "Publish this week" "Staff are notified of what changed"
+    Text.strong "{abs(length(shifts)-length(published))} shifts differ from the last published week"
+    Column gap=4
+      each s in filter(shifts,x=>!any(published,y=>y.id==x.id))
+        Row gap=8
+          Badge.success "Added"
+          Text "{find(people,p=>p.id==s.person).name}, {days[s.day]} {s.start}:00-{s.end}:00"
+      each s in filter(published,x=>!any(shifts,y=>y.id==x.id))
+        Row gap=8
+          Badge.error "Removed"
+          Text "{find(people,p=>p.id==s.person).name}, {days[s.day]}"
+    if count(people,p=>sum(filter(shifts,x=>x.person==p.id),x=>x.end-x.start)>p.max)>0
+      Badge.warning "Some people are over their weekly hours"
+    Input "Note to staff" multiline bind=publishNote
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Publish and notify" onTap={published=shifts; emit publish publishNote; toast "Rota published"; close}
+
+### Open shifts
+state tab="open"
+state me=3
+state openShifts=[{"id":101,"day":"Fri","start":16,"end":23,"role":"Server","offered":2,"claimedBy":""},{"id":102,"day":"Sat","start":7,"end":15,"role":"Barista","offered":0,"claimedBy":""},{"id":103,"day":"Sun","start":10,"end":18,"role":"Cook","offered":1,"claimedBy":""}]
+state sel=0
+state roleFilter="All"
+App
+  Sidebar
+    Brand "Rota" icon="calendar_month"
+    NavItem "Schedule" icon="view_week" onTap={go schedule}
+    NavItem "Open shifts" icon="event_available" badge="{count(openShifts,s=>s.claimedBy=="")}" selected={tab=="open"} onTap={tab="open"}
+    NavItem "Requests" icon="inbox" badge="3" onTap={go requests}
+    Spacer grow
+    Text.muted "Harbour Cafe"
+  Main
+    Nav
+      Heading "Open shifts" level=1
+      Row gap=8
+        Select bind=roleFilter items=["All","Barista","Cook","Server","Manager"] w=140
+        Button "Offer a shift" icon="add" onTap={open offer}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        each s in filter(openShifts,x=>roleFilter=="All" || x.role==roleFilter)
+          Card gap=8
+            Row between
+              Text.heading "{s.day} {s.start}:00-{s.end}:00"
+              Badge.info "{s.role}"
+            Text.muted "{s.end-s.start} hours"
+            Text.caption "{s.offered} people offered to take it"
+            if s.claimedBy==""
+              Row gap=8
+                Button "Claim" onTap={openShifts=updateWhere(openShifts,x=>x.id==s.id,x=>with(x,"claimedBy","Lena Fischer")); toast "Claimed, waiting for approval"}
+                Button.outline "Offer to..." onTap={sel=s.id; open offerTo}
+            else
+              Badge.success "Claimed by {s.claimedBy}"
+              Row gap=8
+                Button "Approve" onTap={emit approveClaim s.id; openShifts=removeWhere(openShifts,x=>x.id==s.id); toast "Shift assigned"}
+                Button.outline "Release" onTap={openShifts=updateWhere(openShifts,x=>x.id==s.id,x=>with(x,"claimedBy",""))}
+      if isEmpty(openShifts)
+        Text.muted "No open shifts. Every shift is covered."
+  Dialog#offer "Offer a shift to the team"
+    state offDay="Fri"
+    state offStart=9
+    state offEnd=17
+    state offRole="Server"
+    Select "Day" bind=offDay items=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+    TimePicker "Starts" bind=offStart
+    TimePicker "Ends" bind=offEnd
+    Select "Role" bind=offRole items=["Barista","Cook","Server","Manager"]
+    Button "Offer" onTap={openShifts=append(openShifts,{"id":length(openShifts)+104,"day":offDay,"start":offStart,"end":offEnd,"role":offRole,"offered":0,"claimedBy":""}); toast "Offered to everyone with that role"; close}
+  Sheet#offerTo "Offer to specific people"
+    Checkbox "Maya Reyes" bind=pickMaya
+    Checkbox "Dev Patel" bind=pickDev
+    Checkbox "Tom Okafor" bind=pickTom
+    Button "Send offer" onTap={openShifts=updateWhere(openShifts,x=>x.id==sel,x=>with(x,"offered",x.offered+1)); toast "Offer sent"; close}
+
+### Requests
+state tab="requests"
+state kind="All"
+state requests=[{"id":1,"who":"Maya Reyes","type":"Time off","detail":"Wed 19 - Thu 20 Nov","note":"Dentist and a family visit","status":"pending","conflicts":1},{"id":2,"who":"Dev Patel","type":"Availability","detail":"Not available Tue and Thu evenings from 1 Dec","note":"New evening class","status":"pending","conflicts":0},{"id":3,"who":"Lena Fischer","type":"Time off","detail":"Sat 22 Nov","note":"","status":"pending","conflicts":2},{"id":4,"who":"Tom Okafor","type":"Availability","detail":"Can start at 9am on Mondays","note":"","status":"approved","conflicts":0}]
+state sel=0
+state reason=""
+App
+  Sidebar
+    Brand "Rota" icon="calendar_month"
+    NavItem "Schedule" icon="view_week" onTap={go schedule}
+    NavItem "Open shifts" icon="event_available" onTap={go open-shifts}
+    NavItem "Requests" icon="inbox" badge="{count(requests,r=>r.status=="pending")}" selected={tab=="requests"} onTap={tab="requests"}
+    Spacer grow
+    Text.muted "Harbour Cafe"
+  Main
+    Nav
+      Heading "Requests" level=1
+      Row gap=8
+        SegmentedButton bind=kind items=["All","Time off","Availability"]
+    Column pad=24 gap=12
+      each r in filter(requests,x=>kind=="All" || x.type==kind)
+        Card gap=8
+          Row between middle
+            Row gap=12 middle
+              Avatar "{r.who}" size=40
+              Column
+                Text.strong "{r.who}"
+                Text.muted "{r.type}: {r.detail}"
+            if r.status=="pending"
+              Badge.warning "Pending"
+            else if r.status=="approved"
+              Badge.success "Approved"
+            else
+              Badge.error "Declined"
+          if r.note!=""
+            Text.bodySecondary "{r.note}"
+          if r.conflicts>0 && r.status=="pending"
+            Row gap=8
+              Icon "warning" color=#FFF9A825
+              Text.caption "Clashes with {r.conflicts} scheduled shift(s); approving unassigns them and offers them as open shifts"
+          if r.status=="pending"
+            Row gap=8 end
+              Button.outline "Decline" onTap={sel=r.id; open decline}
+              Button "Approve" onTap={requests=updateWhere(requests,x=>x.id==r.id,x=>with(x,"status","approved")); emit approveRequest r.id; toast "Approved for {r.who}"}
+  Dialog#decline "Decline request" "{find(requests,r=>r.id==sel).who} will be told why"
+    Input "Reason" multiline bind=reason
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Decline" onTap={requests=updateWhere(requests,x=>x.id==sel,x=>with(x,"status","declined")); emit declineRequest reason; reason=""; toast "Declined"; close}

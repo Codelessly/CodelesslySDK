@@ -1,0 +1,237 @@
+### Floor plan
+project snags=[{"id":1,"title":"Cracked tile at entry","trade":"Tiling","priority":"High","assignee":"Dana Ruiz","due":"2026-11-24","status":"Open","x":0.22,"y":0.31,"photo":"https://example.com/snag1.jpg","after":"https://example.com/snag1-fixed.jpg"},{"id":2,"title":"Paint drip on skirting","trade":"Painting","priority":"Low","assignee":"Omar Haddad","due":"2026-11-28","status":"Fixed","x":0.55,"y":0.44,"photo":"https://example.com/snag2.jpg","after":"https://example.com/snag2-fixed.jpg"},{"id":3,"title":"Socket cover missing","trade":"Electrical","priority":"Medium","assignee":"Lena Fischer","due":"2026-11-26","status":"In progress","x":0.74,"y":0.68,"photo":"https://example.com/snag3.jpg","after":""}]
+project sel=0
+project draft={"title":"","trade":"Electrical","priority":"Medium","assignee":"Lena Fischer","due":"","photo":"","marks":[]}
+state level="Level 2"
+state pending={"x":0,"y":0}
+state tab="plan"
+App
+  Sidebar
+    Brand "Snag" icon="fact_check"
+    NavItem "Floor plan" icon="map" badge="{length(snags)}" selected={tab=="plan"} onTap={tab="plan"}
+    NavItem "By trade" icon="list_alt" selected={tab=="list"} onTap={go snag-list}
+    NavItem "Sign-off" icon="draw" onTap={go signoff}
+    NavItem "Report" icon="description" onTap={go report}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Priya Nair" size=32
+      Text.muted "Priya Nair"
+  Main
+    Nav
+      Heading "Harbor Point, {level}" level=1
+      Row gap=8
+        Select bind=level items=["Level 1","Level 2","Level 3"] w=140
+        Chip "{count(snags,s=>s.status!='Closed')} open"
+        Button "Report" icon="description" onTap={go report}
+    Column pad=24 gap=16
+      Text.muted "Tap the plan to drop a pin where the defect is."
+      Row gap=16 top
+        Card grow
+          FloorPlan src="https://example.com/plan-level2.png" pins={snags} h=460 onTapPlan={pending=result; draft=with(with(draft,"title",""),"marks",[]); open pinform} onTapPin={sel=result.id; open pinsheet}
+        Pane w=320 pad=16 gap=12
+          Text.strong "Pins on this level"
+          each s in snags
+            ListTile "{s.id}. {s.title}" subtitle="{s.trade}, due {formatDate(s.due,'MMM d')}" onTap={sel=s.id; open pinsheet}
+              Badge.error "{s.priority}" hidden={s.priority!="High"}
+              Badge.success "Fixed" hidden={s.status!="Fixed"}
+
+Dialog#pinform "New snag" "Pin {length(snags)+1} at the spot you tapped"
+  Column gap=12 scroll
+    Input "Title" "What is wrong" bind=draft.title
+    Row gap=12
+      Select "Trade" bind=draft.trade items=["Electrical","Plumbing","Tiling","Painting","Joinery","HVAC"] grow
+      Select "Priority" bind=draft.priority items=["Low","Medium","High"] grow
+    Row gap=12
+      Select "Assignee" bind=draft.assignee items=["Dana Ruiz","Omar Haddad","Lena Fischer","Tomas Berg"] grow
+      DatePicker "Due date" bind=draft.due grow
+    Text.fieldLabel "Photo"
+    Button.outline "Take photo" icon="photo_camera" onTap={emit takePhoto} hidden={draft.photo!=""}
+    if draft.photo!=""
+      PhotoMarkup src="{draft.photo}" bind=draft.marks tools=["arrow","circle","pen"] h=240
+      Row gap=8
+        Button.ghost "Undo" icon="undo" onTap={draft=with(draft,"marks",removeAt(draft.marks,length(draft.marks)-1))}
+        Button.ghost "Clear" onTap={draft=with(draft,"marks",[])}
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Drop pin" onTap={trim(draft.title)!="" ? {snags=append(snags,with(with(with(draft,"id",length(snags)+1),"x",pending.x),"y",pending.y)); toast "Pin dropped"; close} : toast "Give the snag a title"}
+
+Sheet#pinsheet "Snag details"
+  each s in filter(snags,x=>x.id==sel)
+    Column gap=12
+      Row between
+        Heading "{s.id}. {s.title}" level=3
+        Badge.warning "{s.status}"
+      Row gap=8
+        Chip "{s.trade}"
+        Chip "{s.priority}"
+        Chip "{s.assignee}"
+        Chip "Due {formatDate(s.due,'MMM d')}"
+      Image "{s.photo}" h=160 radius=8
+      Row gap=8
+        Button "Mark fixed" icon="check" onTap={snags=updateWhere(snags,x=>x.id==s.id,x=>with(x,"status","Fixed")); toast "Marked fixed"; close}
+        Button.outline "Compare" icon="compare" hidden={s.after==""} onTap={close; go snag-compare}
+        Button.ghost "Close" onTap={close}
+
+### By trade
+project snags=[]
+state trade="All"
+state status="All"
+state q=""
+App
+  Sidebar
+    Brand "Snag" icon="fact_check"
+    NavItem "Floor plan" icon="map" onTap={go floor-plan}
+    NavItem "By trade" icon="list_alt" badge="{length(snags)}" selected={true}
+    NavItem "Sign-off" icon="draw" onTap={go signoff}
+    NavItem "Report" icon="description" onTap={go report}
+    Spacer grow
+    Text.muted "Priya Nair"
+  Main
+    Nav
+      Heading "Snags by trade" level=1
+      Row gap=8
+        Input "Search" bind=q w=220
+        IconButton "filter_alt_off" tooltip="Clear filters" onTap={trade="All"; status="All"; q=""}
+    Column pad=24 gap=16 scroll
+      Row gap=8
+        ChoiceChip "All" selected={trade=="All"} onTap={trade="All"}
+        ChoiceChip "Electrical" selected={trade=="Electrical"} onTap={trade="Electrical"}
+        ChoiceChip "Plumbing" selected={trade=="Plumbing"} onTap={trade="Plumbing"}
+        ChoiceChip "Tiling" selected={trade=="Tiling"} onTap={trade="Tiling"}
+        ChoiceChip "Painting" selected={trade=="Painting"} onTap={trade="Painting"}
+        ChoiceChip "Joinery" selected={trade=="Joinery"} onTap={trade="Joinery"}
+      Row gap=8
+        FilterChip "Open" selected={status=="Open"} onTap={status=status=="Open" ? "All" : "Open"}
+        FilterChip "In progress" selected={status=="In progress"} onTap={status=status=="In progress" ? "All" : "In progress"}
+        FilterChip "Fixed" selected={status=="Fixed"} onTap={status=status=="Fixed" ? "All" : "Fixed"}
+        FilterChip "Signed off" selected={status=="Closed"} onTap={status=status=="Closed" ? "All" : "Closed"}
+      Card gap=0 pad=0
+        Row gap=12 pad=12 border-bottom=#FFE0E0E0
+          Text.fieldLabel "#" w=40
+          Text.fieldLabel "Snag" grow
+          Text.fieldLabel "Trade" w=100
+          Text.fieldLabel "Assignee" w=120
+          Text.fieldLabel "Due" w=80
+          Text.fieldLabel "Status" w=110
+        each s in filter(snags,x=>(trade=="All"||x.trade==trade)&&(status=="All"||x.status==status)&&contains(lower(x.title),lower(q)))
+          Row gap=12 pad=12 middle border-bottom=#FFEEEEEE onTap={sel=s.id; go floor-plan}
+            Text.strong "{s.id}" w=40
+            Column grow
+              Text "{s.title}"
+              Text.caption "{s.priority} priority"
+            Text.muted "{s.trade}" w=100
+            Text.muted "{s.assignee}" w=120
+            Text.muted "{formatDate(s.due,'MMM d')}" w=80
+            Badge.warning "{s.status}" w=110 hidden={s.status!="Open"&&s.status!="In progress"}
+            Badge.success "{s.status}" w=110 hidden={s.status!="Fixed"&&s.status!="Closed"}
+      if length(filter(snags,x=>(trade=="All"||x.trade==trade)&&(status=="All"||x.status==status)))==0
+        Text.muted "No snags match these filters." center
+
+### Before and after
+project snags=[]
+project sel=2
+state tab="plan"
+App
+  Sidebar
+    Brand "Snag" icon="fact_check"
+    NavItem "Floor plan" icon="map" onTap={go floor-plan}
+    NavItem "By trade" icon="list_alt" onTap={go snag-list}
+    NavItem "Sign-off" icon="draw" onTap={go signoff}
+    NavItem "Report" icon="description" onTap={go report}
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Back" onTap={go snag-list}
+        Heading "Snag {sel}: fixed" level=1
+      Row gap=8
+        Button.outline "Reopen" icon="replay" onTap={snags=updateWhere(snags,s=>s.id==sel,s=>with(s,"status","Open")); toast "Snag reopened"; go snag-list}
+        Button "Approve fix" icon="check" onTap={snags=updateWhere(snags,s=>s.id==sel,s=>with(s,"status","Closed")); toast "Fix approved"; go signoff}
+    Column pad=24 gap=16
+      each s in filter(snags,x=>x.id==sel)
+        Card gap=12
+          Row between
+            Column
+              Text.strong "{s.title}"
+              Text.muted "{s.trade}, fixed by {s.assignee}"
+            Badge.success "Fixed"
+          CompareSlider before="{s.photo}" after="{s.after}" beforeLabel="Before" afterLabel="After" h=380
+          Text.caption "Drag the handle to compare."
+        Card gap=8
+          Text.strong "Note to the contractor"
+          Input "Comment" "Optional" multiline bind=note
+          Row end
+            Button.secondary "Send note" onTap={emit contractorNote note; toast "Note sent"}
+
+### Sign-off and report
+project snags=[]
+state signed=false
+state signature=""
+state signerName=""
+state agree=false
+state tab="report"
+App
+  Sidebar
+    Brand "Snag" icon="fact_check"
+    NavItem "Floor plan" icon="map" onTap={go floor-plan}
+    NavItem "By trade" icon="list_alt" onTap={go snag-list}
+    NavItem "Sign-off" icon="draw" selected={tab=="signoff"} onTap={tab="signoff"}
+    NavItem "Report" icon="description" selected={tab=="report"} onTap={tab="report"}
+  Main
+    Nav
+      Heading "{tab=='report' ? 'Report preview' : 'Sign-off'}" level=1
+      Row gap=8
+        Button.outline "Download PDF" icon="download" onTap={emit exportPdf}
+        Button "Send to client" icon="send" onTap={open sendmenu}
+    if tab=="signoff"
+      Column pad=24 gap=16 maxw=720
+        Card gap=8
+          Text.strong "Handover summary"
+          Row between
+            Text.muted "Total snags"
+            Text.strong "{length(snags)}"
+          Row between
+            Text.muted "Signed off"
+            Text.strong "{count(snags,s=>s.status=='Closed')}"
+          Row between
+            Text.muted "Still open"
+            Text.strong "{count(snags,s=>s.status!='Closed')}"
+          Progress {count(snags,s=>s.status=='Closed')/max(1,length(snags))}
+        Card gap=12
+          Input "Full name" bind=signerName
+          Text.fieldLabel "Signature"
+          SignaturePad bind=signature h=140
+          Row between
+            Button.ghost "Clear" onTap={signature=""}
+            Text.caption "{formatDate(today(),'MMM d, yyyy')}"
+          Checkbox "I confirm the work listed above is accepted" bind=agree
+          Button "Sign off" onTap={signature!="" && agree && trim(signerName)!="" ? {signed=true; emit signedOff {name:signerName}; toast "Signed off"} : toast "Add your name, signature and confirmation"}
+          if signed
+            Text.success "Signed by {signerName} on {formatDate(today(),'MMM d')}"
+    if tab=="report"
+      Column pad=24 gap=16
+        ReportPreview title="Snag report, Harbor Point Level 2" pages=3 h=520
+          Section
+            Heading "Snag report" level=1
+            Text.muted "Harbor Point, Level 2. Prepared {formatDate(today(),'MMM d, yyyy')}"
+            Row gap=24
+              Column
+                Text "{length(snags)}" size=32 weight=700
+                Text.caption "Snags"
+              Column
+                Text "{count(snags,s=>s.status=='Closed')}" size=32 weight=700
+                Text.caption "Signed off"
+            each s in snags
+              Row gap=12 middle
+                Text.strong "{s.id}" w=30
+                Column grow
+                  Text "{s.title}"
+                  Text.caption "{s.trade}, {s.assignee}"
+                Badge.neutral "{s.status}"
+          Image "{signature}" hidden={!signed} h=60
+        Row gap=8
+          Switch "Include photos" bind=withPhotos
+          Switch "Include signature" bind=withSig
+
+Menu#sendmenu end
+  MenuItem "Email to client" icon="mail" onTap={emit sendReport email; toast "Report emailed"}
+  MenuItem "Copy link" icon="link" onTap={copy "https://snag.app/r/harbor-point-l2"; toast "Link copied"}

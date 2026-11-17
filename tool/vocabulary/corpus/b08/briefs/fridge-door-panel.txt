@@ -1,0 +1,3 @@
+App: Icebox, a refrigerator door screen. A family board with a calendar of the week in coloured columns per person and a note that can be handwritten with a finger; a shopping list that adds items when you say them, and shows what is nearly out; a camera view inside the fridge with expiry dates in tags; a temperature control per compartment; a door-open alarm banner; a recipe step viewer with large text.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

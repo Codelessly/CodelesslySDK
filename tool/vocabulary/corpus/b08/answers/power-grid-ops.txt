@@ -1,0 +1,173 @@
+### Network
+state subs=[{"id":"S1","name":"Marlow 400kV","load":0.62,"mw":1240},{"id":"S2","name":"Ketton 275kV","load":0.81,"mw":970},{"id":"S3","name":"Brae Hill 132kV","load":0.93,"mw":410},{"id":"S4","name":"Oldmoor 132kV","load":0.38,"mw":180}]
+state lines=[{"from":"S1","to":"S2","load":0.7,"mw":640},{"from":"S2","to":"S3","load":0.95,"mw":380},{"from":"S2","to":"S4","load":0.34,"mw":120}]
+state breakers=[{"id":"CB-114","sub":"S2","name":"Ketton feeder 114","closed":true},{"id":"CB-221","sub":"S3","name":"Brae Hill bus coupler","closed":true},{"id":"CB-307","sub":"S4","name":"Oldmoor transformer T1","closed":false}]
+state sel="CB-114"
+state reason=""
+state confirmed=false
+state freq=50.0
+state t=0
+state wob=[0.02,-0.03,0.04,-0.01,0.03,-0.04,0.01,-0.02]
+every 1s onTick={t=t+1; freq=50+wob[t%8]}
+App
+  Sidebar
+    Brand "Gridwatch" icon="bolt"
+    NavItem "Network" icon="account_tree" selected={true}
+    NavItem "Alarms" icon="notifications_active" badge="5" onTap={go alarms}
+    NavItem "Switching plan" icon="checklist" onTap={go switching-plan}
+    NavItem "Handover" icon="assignment" onTap={go handover}
+    Spacer grow
+    Text.muted "Control room 2, night shift"
+  Main
+    Nav
+      Heading "Network overview" level=1
+      Row gap=8
+        Badge.success "Frequency {fixed(freq,2)} Hz"
+        Button.outline "Refresh" icon="refresh" onTap={toast "Telemetry refreshed"}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Card grow gap=12
+          Row between
+            Heading "Single-line diagram" level=3
+            Row gap=8
+              Badge.success "under 60%"
+              Badge.warning "60 to 85%"
+              Badge.error "over 85%"
+          SingleLineDiagram nodes={subs} lines={lines} h=320 colorBy=load scale="green-red" showFigures onSelectNode={sel=result.id}
+        Card w=320 gap=8
+          Heading "System frequency" level=3
+          Gauge bind=freq min=49.5 max=50.5 limit=50.2 unit="Hz"
+          Text.muted "Target 50.00 Hz, limits 49.80 to 50.20"
+      Card gap=8
+        Heading "Substations" level=3
+        each s in subs
+          ListTile "{s.name}" subtitle="{s.mw} MW"
+            Progress {s.load}
+            Text.strong "{round(s.load*100,0)}%" color={s.load>0.85 ? #FFC62828 : s.load>0.6 ? #FFEF6C00 : #FF2E7D32}
+      Card gap=8
+        Heading "Breakers" level=3
+        each b in breakers
+          Row between middle
+            Column gap=2
+              Text.strong "{b.id}  {b.name}"
+              Text.muted "Substation {b.sub}"
+            Row gap=12 middle
+              Badge.success "Closed" visible={b.closed}
+              Badge.neutral "Open" visible={!b.closed}
+              Toggle "Closed" selected={b.closed} onTap={sel=b.id; reason=""; confirmed=false; open breaker}
+  Dialog#breaker "Operate breaker" "Confirm the switching and record why"
+    Text.strong "{sel}"
+    Text.muted "This will {find(breakers,b=>b.id==sel).closed ? 'OPEN' : 'CLOSE'} the breaker on the live network."
+    Input "Reason for operation" "Planned outage, fault isolation..." bind=reason multiline
+    Checkbox "I have the control engineer's approval and have checked the loads either side" bind=confirmed
+    Row end gap=8
+      Button.outline "Cancel" onTap={close}
+      Button.destructive "Operate" onTap={trim(reason)!="" && confirmed ? {breakers=updateWhere(breakers,b=>b.id==sel,b=>with(b,"closed",!b.closed)); emit breakerOperated sel; toast "{sel} operated"; close} : toast "Give a reason and tick the confirmation"}
+
+### Alarms
+state alarms=[{"id":1,"time":"02:14:07","site":"Brae Hill 132kV","text":"Line S2-S3 overload 95%","sev":"critical","acked":false},{"id":2,"time":"02:11:52","site":"Ketton 275kV","text":"Transformer T2 winding temperature high","sev":"major","acked":false},{"id":3,"time":"02:03:30","site":"Marlow 400kV","text":"Frequency deviation 49.93 Hz","sev":"minor","acked":false},{"id":4,"time":"01:48:19","site":"Oldmoor 132kV","text":"Breaker CB-307 open, local operation","sev":"minor","acked":false},{"id":5,"time":"01:22:41","site":"Ketton 275kV","text":"SCADA link latency","sev":"minor","acked":false}]
+state showAcked=false
+state selAlarm=0
+App
+  Sidebar
+    Brand "Gridwatch" icon="bolt"
+    NavItem "Network" icon="account_tree" onTap={go network}
+    NavItem "Alarms" icon="notifications_active" badge="{count(alarms,a=>!a.acked)}" selected={true}
+    NavItem "Switching plan" icon="checklist" onTap={go switching-plan}
+    NavItem "Handover" icon="assignment" onTap={go handover}
+    Spacer grow
+    Text.muted "Control room 2, night shift"
+  Main
+    Nav
+      Heading "Alarms" level=1
+      Row gap=8
+        Toggle "Show acknowledged" bind=showAcked
+        Button.outline "Acknowledge all" onTap={alarms=map(alarms,a=>with(a,"acked",true)); toast "All alarms acknowledged"}
+    Column pad=24 gap=12
+      Text.muted "{count(alarms,a=>!a.acked)} unacknowledged of {length(alarms)}"
+      each a in sortByDesc(filter(alarms,x=>showAcked || !x.acked),x=>x.id)
+        Card gap=8 animate=slide-up stagger=60
+          Row between middle
+            Row gap=12 middle
+              Badge.error "Critical" visible={a.sev=="critical"}
+              Badge.warning "Major" visible={a.sev=="major"}
+              Badge.neutral "Minor" visible={a.sev=="minor"}
+              Column gap=2
+                Text.strong "{a.text}"
+                Text.muted "{a.time}  {a.site}"
+            Row gap=8
+              Badge.success "Acknowledged" visible={a.acked}
+              Button.outline "Acknowledge" hidden={a.acked} onTap={selAlarm=a.id; open ack}
+  Dialog#ack "Acknowledge alarm" "The alarm moves to the acknowledged list"
+    Text.strong "{find(alarms,a=>a.id==selAlarm).text}"
+    Row end gap=8
+      Button.outline "Cancel" onTap={close}
+      Button "Acknowledge" onTap={alarms=updateWhere(alarms,a=>a.id==selAlarm,a=>with(a,"acked",true)); emit alarmAcknowledged selAlarm; close}
+
+### Switching plan
+state steps=[{"n":1,"text":"Confirm Brae Hill load below 300 MW with the control engineer","done":false},{"n":2,"text":"Open breaker CB-221 (Brae Hill bus coupler)","done":false},{"n":3,"text":"Apply earths at Brae Hill bay 2","done":false},{"n":4,"text":"Issue permit to work 4471 to the field team","done":false},{"n":5,"text":"Confirm voltage on Oldmoor 132kV bus within limits","done":false}]
+state demand=[2.8,2.6,2.5,2.7,3.2,3.9,4.4,4.1,3.8,4.0,4.5,4.9]
+state actual=[2.9,2.6,2.4,2.8,3.3,3.8,4.6,4.3,3.7,4.2,4.8,5.1]
+state done=0
+App
+  Sidebar
+    Brand "Gridwatch" icon="bolt"
+    NavItem "Network" icon="account_tree" onTap={go network}
+    NavItem "Alarms" icon="notifications_active" badge="5" onTap={go alarms}
+    NavItem "Switching plan" icon="checklist" selected={true}
+    NavItem "Handover" icon="assignment" onTap={go handover}
+    Spacer grow
+    Text.muted "Control room 2, night shift"
+  Main
+    Nav
+      Heading "Switching plan SP-2291" level=1
+      Badge.info "{count(steps,s=>s.done)} of {length(steps)} done"
+    Column pad=24 gap=16
+      Row gap=16 top
+        Card grow gap=8
+          Heading "Steps" level=3
+          Progress {count(steps,s=>s.done)/length(steps)}
+          each s in steps
+            Row gap=12 middle
+              Checkbox bind=s.done enabled={s.n==count(steps,x=>x.done)+1 || s.done} onChange={result ? toast "Step {s.n} ticked" : steps=map(steps,x=>x.n>=s.n ? with(x,"done",false) : x)}
+              Text "{s.n}. {s.text}" strike={s.done}
+          Button "Complete plan" enabled={count(steps,s=>s.done)==length(steps)} onTap={emit planComplete; toast "Plan SP-2291 complete"}
+        Card grow gap=8
+          Heading "Demand: forecast against actual (GW)" level=3
+          LineChart labels=["00","02","04","06","08","10","12","14","16","18","20","22"] series=[{"name":"Forecast","values":[2.8,2.6,2.5,2.7,3.2,3.9,4.4,4.1,3.8,4.0,4.5,4.9]},{"name":"Actual","values":[2.9,2.6,2.4,2.8,3.3,3.8,4.6,4.3,3.7,4.2,4.8,5.1]}] h=240
+          Text.muted "Actual is running {fixed((last(actual)-last(demand))/last(demand)*100,1)}% above forecast"
+
+### Handover
+state note="Brae Hill S2-S3 line at 95%, watching. CB-307 open for T1 maintenance, back by 06:00. Two minor alarms still unacknowledged."
+state ack=false
+state outgoing="Dana Okafor"
+state incoming="Select"
+App
+  Sidebar
+    Brand "Gridwatch" icon="bolt"
+    NavItem "Network" icon="account_tree" onTap={go network}
+    NavItem "Alarms" icon="notifications_active" badge="5" onTap={go alarms}
+    NavItem "Switching plan" icon="checklist" onTap={go switching-plan}
+    NavItem "Handover" icon="assignment" selected={true}
+    Spacer grow
+    Text.muted "Control room 2, night shift"
+  Main
+    Nav
+      Heading "Shift handover" level=1
+      Text.muted "{formatDate(today(),'MMM d')}, night to day"
+    Column pad=24 gap=16 maxw=720
+      Card gap=12
+        Row gap=16
+          Column grow gap=4
+            Text.fieldLabel "Outgoing"
+            Text.strong "{outgoing}"
+          Select "Incoming operator" items=["Priya Nair","Tom Becker","Lena Haas"] bind=incoming grow
+        Input "Handover note" bind=note multiline h=160
+        Row between
+          Text.muted "{length(note)} characters"
+          Button.outline "Insert open alarms" onTap={note=note+" Open alarms: 5."}
+      Card gap=8
+        Checkbox "I have briefed the incoming operator on open alarms and the active switching plan" bind=ack
+        Row end gap=8
+          Button.outline "Save draft" onTap={toast "Draft saved"}
+          Button "Hand over" onTap={ack && incoming!="Select" ? {emit handover incoming; toast "Handed over to {incoming}"} : toast "Choose the incoming operator and confirm the briefing"}

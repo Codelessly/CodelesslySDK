@@ -1,0 +1,3 @@
+App: Tickerline, a stock watchlist. A list of symbols with price, change coloured and a tiny sparkline, reordered and grouped; a symbol page with a chart with range tabs (1D to 5Y), a crosshair that reads the price and date under the finger, volume bars, key stats in a grid, news; a price alert with above or below and a value; pre-market badge.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

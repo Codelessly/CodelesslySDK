@@ -1,0 +1,3 @@
+App: Barrowboy, a market stall till. A few large pictures of what the stall sells with price tags, tap to add and long press to remove; a scale reading brought in as grams and priced per kilo; a running total with a big cash button and a change calculator; a card reader state with waiting and done; a stock count that falls with a low warning; a day's takings graph by hour; works offline with a queue.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

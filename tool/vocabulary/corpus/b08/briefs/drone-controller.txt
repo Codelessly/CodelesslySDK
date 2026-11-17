@@ -1,0 +1,3 @@
+App: Updraft, a drone flight controller. A live video with an overlay of height, distance, speed and battery; two virtual sticks at the lower corners held and moved with a thumb, a centre mark; a takeoff slide and a return-home button with a confirm and a countdown; a map inset with the drone, home point and a no-fly zone shaded; a signal strength; a camera shutter and a record dot; a low battery alert taking over.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

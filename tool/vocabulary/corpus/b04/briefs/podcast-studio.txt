@@ -1,0 +1,3 @@
+App: Take Two, podcast recording. Participants as tiles with level meters and mute; a big record button with elapsed time and a red state; markers dropped while recording; separate tracks listed with waveforms after; a soundboard of pads; a pre-flight check of mic, headphones and connection with pass or fail; upload progress per track.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

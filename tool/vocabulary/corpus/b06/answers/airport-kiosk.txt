@@ -1,0 +1,219 @@
+### Welcome
+project lang="en"
+project idle=0
+project booking=""
+every 1s onTick={idle=idle+1}
+App
+  Main
+    Nav
+      Brand "Checkpoint" icon="flight_takeoff"
+      Row gap=12
+        Text.muted "Gate-ready in under three minutes"
+    Column pad=48 gap=32 center middle
+      Heading "Welcome. Choose your language" level=1
+      Text.muted "Bienvenue / Bienvenido / Willkommen / ようこそ" center
+      Grid cols=3 gap=24
+        Card onTap={lang="en"; idle=0; go find-booking} animate=scale
+          Column center gap=8 pad=16
+            Flag "gb" size=96
+            Text.heading "English"
+        Card onTap={lang="es"; idle=0; go find-booking}
+          Column center gap=8 pad=16
+            Flag "es" size=96
+            Text.heading "Español"
+        Card onTap={lang="fr"; idle=0; go find-booking}
+          Column center gap=8 pad=16
+            Flag "fr" size=96
+            Text.heading "Français"
+        Card onTap={lang="de"; idle=0; go find-booking}
+          Column center gap=8 pad=16
+            Flag "de" size=96
+            Text.heading "Deutsch"
+        Card onTap={lang="ja"; idle=0; go find-booking}
+          Column center gap=8 pad=16
+            Flag "jp" size=96
+            Text.heading "日本語"
+        Card onTap={lang="ar"; idle=0; go find-booking}
+          Column center gap=8 pad=16
+            Flag "sa" size=96
+            Text.heading "العربية"
+      Button "Touch anywhere to start" size=large onTap={go find-booking}
+    Footer
+      Row between middle pad=8
+        Text.muted "Terminal 2, Kiosk 14"
+        Button.destructive "Call for assistance" icon="support_agent" size=large onTap={open help}
+  Dialog#help "Help is on the way" "An agent will be with you in about a minute"
+    Row gap=12 middle
+      Spinner
+      Text.strong "Calling Terminal 2 service desk"
+    Button.outline "Cancel call" size=large onTap={close}
+
+### Find booking
+project lang="en"
+project idle=0
+project booking=""
+state mode="scan"
+state code=""
+state scanning=false
+state error=""
+every 1s onTick={idle=idle+1}
+every 1s when scanning onTick={scanning=false; booking="QX7K2M"; go flight}
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go welcome}
+      Heading "Find your booking" level=1
+      Progress 0.25 w=160
+    Column pad=32 gap=24
+      SegmentedButton bind=mode items=["Scan passport","Booking code"] size=large
+      if mode=="scan"
+        Card gap=16 center
+          Icon "document_scanner" size=96
+          Text.heading "Place your passport face down on the glass"
+          Text.muted "Close the cover and hold it flat until the light turns green."
+          if scanning
+            Progress animate=shimmer
+            Text.strong "Reading passport..."
+          Button "Start scan" size=large hidden={scanning} onTap={scanning=true; idle=0}
+      if mode=="code"
+        Card gap=16
+          Input "Booking code" "6 letters or numbers" bind=code size=large
+          if error!=""
+            Text.danger "{error}"
+          Keyboard bind=code layout="alphanumeric" maxLength=6 onEnter={code!="" ? booking=code : error="Enter your booking code"}
+          Row gap=16
+            Button.outline "Clear" size=large onTap={code=""; error=""}
+            Button "Find my flight" size=large grow onTap={length(code)==6 ? booking=upper(code); idle=0; go flight : error="Codes have 6 characters"}
+    Footer
+      Row between middle pad=8
+        Text.muted "Step 1 of 4"
+        Button.destructive "Call for assistance" icon="support_agent" size=large onTap={open help}
+  Dialog#help "Help is on the way" "An agent will be with you in about a minute"
+    Row gap=12 middle
+      Spinner
+      Text.strong "Calling Terminal 2 service desk"
+    Button.outline "Cancel call" size=large onTap={close}
+
+### Flight, seat and bags
+project lang="en"
+project idle=0
+project booking="QX7K2M"
+state step="seat"
+state seat=""
+state bags=1
+state taken=["12A","12B","14C","15D","15E","16A","17F","18C","19B","20D","21A","22E"]
+state legroom=["10A","10B","10C","10D","10E","10F"]
+state warn=false
+every 1s onTick={idle=idle+1; idle>=60 ? warn=true : warn=warn}
+every 1s when warn onTick={idle=idle+1; idle>=75 ? go welcome : warn=true}
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={step=="bags" ? step="seat" : go find-booking}
+      Heading "Your flight" level=1
+      Text.muted "Booking {booking}"
+    Column pad=32 gap=24 scroll
+      Card gap=12
+        Row between middle
+          Row gap=16 middle
+            IconTile "flight"
+            Column gap=4
+              Text.heading "SK 482  Stockholm to Lisbon"
+              Text.muted "Departs 14:35, Gate B22, boarding 13:55"
+          Badge.success "On time"
+        Divider
+        Row gap=24
+          Text "Passenger: Elena Marques"
+          Text "Seat: {seat==\"\" ? \"not chosen\" : seat}"
+          Text "Bags: {bags}"
+      if step=="seat"
+        Card gap=16
+          Text.heading "Choose your seat"
+          Row gap=16
+            Row gap=8 middle
+              Box w=24 h=24 radius=4 fill=#FFE6F4EA
+              Text.small "Free"
+            Row gap=8 middle
+              Box w=24 h=24 radius=4 fill=#FFBDBDBD
+              Text.small "Taken"
+            Row gap=8 middle
+              Box w=24 h=24 radius=4 fill=#FFFFE0B2
+              Text.small "Extra legroom, +$25"
+          SeatMap bind=seat rows=24 cols="ABC DEF" taken={taken} premium={legroom} onSelect={idle=0}
+          Button "Continue to bags" size=large disabled={seat==""} onTap={step="bags"; idle=0}
+      if step=="bags"
+        Card gap=16
+          Text.heading "How many bags will you check?"
+          Row gap=24 center middle
+            Button.outline "-" size=large onTap={bags=max(0,bags-1); idle=0}
+            Text "{bags}" size=64 weight=700
+            Button.outline "+" size=large onTap={bags=min(4,bags+1); idle=0}
+          Text.muted "One bag up to 23 kg is included. Each extra bag is $40."
+          Row between
+            Text "Extra bags: {max(0,bags-1)}"
+            Text.strong "Fee: {money(max(0,bags-1)*40,\"$\",2)}"
+          Row between
+            Text "Seat {seat}"
+            Text.strong "{money(contains(legroom,seat)?25:0,\"$\",2)}"
+          Divider
+          Row between
+            Text.heading "Total"
+            Text.heading "{money(max(0,bags-1)*40+(contains(legroom,seat)?25:0),\"$\",2)}"
+          Button "Confirm and print boarding pass" size=large onTap={idle=0; go boarding-pass}
+    Footer
+      Row between middle pad=8
+        Text.muted "Step {step==\"seat\" ? 2 : 3} of 4"
+        Button.destructive "Call for assistance" icon="support_agent" size=large onTap={open help}
+  Dialog#help "Help is on the way" "An agent will be with you in about a minute"
+    Row gap=12 middle
+      Spinner
+      Text.strong "Calling Terminal 2 service desk"
+    Button.outline "Cancel call" size=large onTap={close}
+  Dialog#timeout "Still there?" "This screen will reset to protect your booking"
+    Column center gap=16
+      Stack center middle
+        Ring {(75-idle)/15} size=160
+        Text "{max(0,75-idle)}" size=48 weight=700
+      Button "I'm still here" size=large onTap={idle=0; warn=false; close}
+      Button.ghost "Start over" onTap={go welcome}
+
+### Boarding pass
+project idle=0
+project booking="QX7K2M"
+state printed=false
+state progress=0
+every 100 when !printed onTick={progress=min(1,progress+0.02); progress>=1 ? printed=true : progress=progress}
+every 1s onTick={idle=idle+1}
+every 1s when printed onTick={idle>=20 ? go welcome : idle=idle}
+App
+  Main
+    Nav
+      Heading "Boarding pass" level=1
+      Text.muted "Booking {booking}"
+    Column pad=32 gap=24 center
+      if !printed
+        Card gap=16 center
+          Text.heading "Printing your boarding pass"
+          PrinterSlot progress={progress} animate=slide-up
+          Progress bind=progress
+          Text.muted "Please wait, do not pull the paper."
+      if printed
+        Card gap=16 center animate=pop
+          Icon "check_circle" size=96 color=#FF2E7D32
+          Text.heading "Take your boarding pass below"
+          Text.muted "Seat 10A, Gate B22, boarding 13:55"
+          Divider
+          Row gap=16
+            Button.outline "Email a copy" size=large icon="mail" onTap={toast "Sent to elena@example.com"; idle=0}
+            Button.outline "Add to wallet" size=large icon="wallet" onTap={toast "Added to your wallet"; idle=0}
+          Text.muted "Bag tags are printing next. This screen resets in {max(0,20-idle)} seconds."
+          Button "Done" size=large onTap={go welcome}
+    Footer
+      Row between middle pad=8
+        Text.muted "Step 4 of 4"
+        Button.destructive "Call for assistance" icon="support_agent" size=large onTap={open help}
+  Dialog#help "Help is on the way" "An agent will be with you in about a minute"
+    Row gap=12 middle
+      Spinner
+      Text.strong "Calling Terminal 2 service desk"
+    Button.outline "Cancel call" size=large onTap={close}

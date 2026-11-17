@@ -1,0 +1,116 @@
+### Guest list
+state tab="list"
+state q=""
+state ticket="All"
+state offline=true
+state queue=[]
+state sel=""
+state guests=[{"id":1,"name":"Amara Okafor","ticket":"VIP","in":false,"vip":true,"plus":1},{"id":2,"name":"Ben Hartley","ticket":"General","in":true,"vip":false,"plus":0},{"id":3,"name":"Chloe Martin","ticket":"General","in":false,"vip":false,"plus":2},{"id":4,"name":"Dmitri Volkov","ticket":"Speaker","in":false,"vip":false,"plus":0},{"id":5,"name":"Elena Rossi","ticket":"VIP","in":true,"vip":true,"plus":1},{"id":6,"name":"Farid Haddad","ticket":"Staff","in":false,"vip":false,"plus":0}]
+App
+  Sidebar
+    Brand "Doorlist" icon="how_to_reg"
+    NavItem "Guest list" icon="groups" badge="{count(guests,g=>!g.in)}" selected={tab=="list"} onTap={tab="list"}
+    NavItem "Scan" icon="qr_code_scanner" onTap={go scan}
+    Spacer grow
+    Text.muted "Gate B, Harbor Gala"
+  Main
+    Nav
+      Heading "Guest list" level=1
+      Row gap=8
+        Input "Search by name" bind=q w=220
+        Button "Scan" icon="qr_code_scanner" onTap={go scan}
+    Column pad=24 gap=16
+      if offline
+        Card fill=#FFFFF3CD gap=8
+          Row between middle
+            Row gap=8 middle
+              Icon "cloud_off"
+              Text.strong "Offline. {length(queue)} check-ins queued." color=#FF664D03
+            Button.outline "Sync now" onTap={offline=false; queue=[]; toast "Queued check-ins synced"}
+      Row gap=24 middle
+        Stack center middle
+          Ring {count(guests,g=>g.in)/length(guests)}
+          Text.strong "{count(guests,g=>g.in)}/{length(guests)}"
+        Column grow gap=4
+          Text.heading "Checked in"
+          Text.muted "{count(guests,g=>g.in)} of {length(guests)} guests arrived"
+      Row gap=8
+        ChoiceChip "All" selected={ticket=="All"} onTap={ticket="All"}
+        ChoiceChip "VIP" selected={ticket=="VIP"} onTap={ticket="VIP"}
+        ChoiceChip "General" selected={ticket=="General"} onTap={ticket="General"}
+        ChoiceChip "Speaker" selected={ticket=="Speaker"} onTap={ticket="Speaker"}
+        ChoiceChip "Staff" selected={ticket=="Staff"} onTap={ticket="Staff"}
+      Card gap=0
+        each g in filter(guests,x=>(ticket=="All"||x.ticket==ticket)&&contains(lower(x.name),lower(q)))
+          ListTile "{g.name}" onTap={sel=g.id; open guest}
+            Row gap=12 middle
+              Avatar "{g.name}" size=40
+              Column grow gap=2
+                Row gap=8 middle
+                  Text.strong "{g.name}"
+                  if g.vip
+                    Badge.warning "VIP"
+                Text.muted "{g.ticket} ticket, plus {g.plus}"
+              if g.in
+                Badge.success "Checked in"
+              if !g.in
+                Button "Check in" onTap={guests=updateWhere(guests,x=>x.id==g.id,x=>with(x,"in",true)); queue=offline ? append(queue,g.id) : queue; toast "{g.name} checked in" undo={guests=updateWhere(guests,x=>x.id==g.id,x=>with(x,"in",false)); queue=without(queue,g.id)}}
+  Sheet#guest "Guest"
+    each g in filter(guests,x=>x.id==sel)
+      Row gap=12 middle
+        Avatar "{g.name}" size=48
+        Column grow gap=2
+          Text.heading "{g.name}"
+          Text.muted "{g.ticket} ticket"
+      Toggle "VIP" onChange={guests=updateWhere(guests,x=>x.id==g.id,x=>with(x,"vip",result))} selected={g.vip}
+      Row between middle
+        Text.strong "Plus-ones"
+        Row gap=8 middle
+          IconButton "remove" tooltip="Fewer" onTap={guests=updateWhere(guests,x=>x.id==g.id,x=>with(x,"plus",max(0,x.plus-1)))}
+          Text.strong "{g.plus}"
+          IconButton "add" tooltip="More" onTap={guests=updateWhere(guests,x=>x.id==g.id,x=>with(x,"plus",min(4,x.plus+1)))}
+      Button "Done" onTap={close}
+
+### Scan
+state result="idle"
+state name=""
+state reason=""
+state codes=["DL-1001","DL-1002","DL-9999"]
+App
+  Sidebar
+    Brand "Doorlist" icon="how_to_reg"
+    NavItem "Guest list" icon="groups" onTap={go guest-list}
+    NavItem "Scan" icon="qr_code_scanner" selected={true}
+    Spacer grow
+    Text.muted "Gate B, Harbor Gala"
+  Main
+    Nav
+      Heading "Scan tickets" level=1
+      IconButton "flash_on" tooltip="Torch" onTap={emit torch}
+    Column pad=24 gap=16 center
+      if offline
+        Card fill=#FFFFF3CD
+          Row gap=8 middle
+            Icon "cloud_off"
+            Text.strong "Offline. Scans are saved and sync later." color=#FF664D03
+      Stack center middle h=320 maxw=420 fill=#FF111111 radius=16
+        CameraView facing="back" onScan={result=result.data=="DL-9999" ? "red" : "green"; name=result.data=="DL-9999" ? "Unknown ticket" : "Amara Okafor"; reason=result.data=="DL-9999" ? "Not on the list" : "VIP, plus 1"}
+        Box w=220 h=220 radius=12 border-top=#FFFFFFFF border-bottom=#FFFFFFFF border-left=#FFFFFFFF border-right=#FFFFFFFF
+        Text "Point at the QR code" color=#FFFFFFFF
+      if result=="green"
+        Card fill=#FF1B8A3C gap=4 animate=pop
+          Row gap=8 middle
+            Icon "check_circle" color=#FFFFFFFF
+            Text.heading "{name}" color=#FFFFFFFF
+          Text "{reason}. Checked in." color=#FFFFFFFF
+          Button.outline "Scan next" onTap={result="idle"}
+      if result=="red"
+        Card fill=#FFC62828 gap=4 animate=shake
+          Row gap=8 middle
+            Icon "cancel" color=#FFFFFFFF
+            Text.heading "{name}" color=#FFFFFFFF
+          Text "{reason}. Send to the help desk." color=#FFFFFFFF
+          Button.outline "Scan next" onTap={result="idle"}
+      Row gap=8
+        Button.outline "Test valid" onTap={result="green"; name="Amara Okafor"; reason="VIP, plus 1"; queue=offline ? append(queue,1) : queue}
+        Button.outline "Test invalid" onTap={result="red"; name="Unknown ticket"; reason="Not on the list"}

@@ -1,0 +1,165 @@
+### Generator
+state tab="generate"
+state colors=[{"id":1,"hex":"#264653","name":"Charcoal Blue","locked":false},{"id":2,"hex":"#2A9D8F","name":"Persian Green","locked":true},{"id":3,"hex":"#E9C46A","name":"Saffron","locked":false},{"id":4,"hex":"#F4A261","name":"Sandy Brown","locked":false},{"id":5,"hex":"#E76F51","name":"Burnt Sienna","locked":false}]
+state editIndex=0
+state editHex="#264653"
+state editH=200
+state editS=40
+state editL=25
+state paletteName="Coastal Sunset"
+Shortcut key="space" onPress={shuffle colors skip=locked}
+App
+  Sidebar
+    Brand "Swatchbook" icon="palette"
+    NavItem "Generator" icon="auto_awesome" selected={tab=="generate"} onTap={tab="generate"}
+    NavItem "Contrast" icon="contrast" selected={tab=="contrast"} onTap={go contrast}
+    NavItem "Shades" icon="gradient" selected={tab=="shades"} onTap={go contrast}
+    NavItem "Export" icon="code" selected={tab=="export"} onTap={go export}
+    NavItem "Saved" icon="bookmarks" badge="8" selected={tab=="saved"} onTap={go saved}
+    Spacer grow
+    Text.muted "Press space to shuffle"
+  Main
+    Nav
+      Column gap=2
+        Heading "{paletteName}" level=1
+        Text.caption "5 colors, {count(colors,c=>c.locked)} locked"
+      Row gap=8
+        Button.outline "Shuffle" icon="shuffle" onTap={shuffle colors skip=locked}
+        Button.outline "Export" icon="code" onTap={go export}
+        Button "Save palette" icon="bookmark_add" onTap={emit savePalette colors; toast "Palette saved"}
+    Row h=fill
+      each c in colors
+        Column grow center middle gap=12 fill={c.hex} drag=bar(index) drop=bar onDrop={colors=move(colors,result.data,index)} onTap={editIndex=index; editHex=c.hex; open picker}
+          Text.strong "{upper(c.hex)}" size=22 color=contrast(c.hex)
+          Text.small "{c.name}" color=contrast(c.hex)
+          Row gap=4
+            IconButton "content_copy" tooltip="Copy hex" onTap={copy c.hex; toast "Copied {c.hex}"}
+            IconButton "{c.locked ? 'lock' : 'lock_open'}" tooltip="Lock color" onTap={colors=updateWhere(colors,x=>x.id==c.id,x=>with(x,"locked",!x.locked))}
+            IconButton "drag_indicator" tooltip="Drag to reorder"
+  Dialog#picker "Edit color" "Pick a hue, then fine tune"
+    Column gap=16
+      Row gap=16
+        ColorWheel bind=editHex w=200 h=200 onChange={editH=result.h; editS=result.s; editL=result.l}
+        Column grow gap=8
+          Box h=72 radius=12 fill={editHex}
+          Input "Hex" "#264653" bind=editHex
+      Slider "Hue" bind=editH min=0 max=360 onChange={editHex=hsl(editH,editS,editL)}
+      Slider "Saturation" bind=editS min=0 max=100 onChange={editHex=hsl(editH,editS,editL)}
+      Slider "Lightness" bind=editL min=0 max=100 onChange={editHex=hsl(editH,editS,editL)}
+      Row end gap=8
+        Button.ghost "Cancel" onTap={close}
+        Button "Apply" onTap={colors=setAt(colors,editIndex,with(colors[editIndex],"hex",editHex)); toast "Color updated"; close}
+
+### Contrast and shades
+state tab="contrast"
+state palette=["#264653","#2A9D8F","#E9C46A","#F4A261","#E76F51"]
+state fg="#264653"
+state bg="#E9C46A"
+state ratio=0
+state base="#2A9D8F"
+App
+  Sidebar
+    Brand "Swatchbook" icon="palette"
+    NavItem "Generator" icon="auto_awesome" selected={tab=="generate"} onTap={go generator}
+    NavItem "Contrast" icon="contrast" selected={tab=="contrast"} onTap={tab="contrast"}
+    NavItem "Shades" icon="gradient" selected={tab=="shades"} onTap={tab="shades"; scroll shades}
+    NavItem "Export" icon="code" selected={tab=="export"} onTap={go export}
+    NavItem "Saved" icon="bookmarks" badge="8" selected={tab=="saved"} onTap={go saved}
+  Main
+    Nav
+      Heading "Contrast and shades" level=1
+      Button.outline "Swap colors" icon="swap_horiz" onTap={fg=bg; bg=fg}
+    Column pad=24 gap=24 scroll
+      Grid cols=2 gap=16
+        Card gap=12
+          Text.panelTitle "Foreground"
+          Select "Palette color" items={palette} bind=fg
+          Input "Hex" bind=fg
+        Card gap=12
+          Text.panelTitle "Background"
+          Select "Palette color" items={palette} bind=bg
+          Input "Hex" bind=bg
+      Card gap=16
+        Box fill={bg} radius=12 pad=24 gap=8
+          Text "The quick brown fox jumps over the lazy dog" size=28 weight=700 color={fg}
+          Text "Small body copy to check readability at 14px." color={fg}
+        ContrastRatio fg={fg} bg={bg} bind=ratio
+        Text.heading "{fixed(ratio,2)} : 1"
+        Row gap=8
+          Badge.success "AA normal text" hidden={ratio < 4.5}
+          Badge.error "AA normal text" hidden={ratio >= 4.5}
+          Badge.success "AA large text" hidden={ratio < 3}
+          Badge.error "AA large text" hidden={ratio >= 3}
+          Badge.success "AAA normal text" hidden={ratio < 7}
+          Badge.error "AAA normal text" hidden={ratio >= 7}
+          Badge.success "AAA large text" hidden={ratio < 4.5}
+          Badge.error "AAA large text" hidden={ratio >= 4.5}
+      Column#shades gap=12
+        Row between
+          Heading "Shades" level=3
+          Select "Base color" items={palette} bind=base w=200
+        Row h=96
+          each step in [50,100,200,300,400,500,600,700,800,900]
+            Column grow center middle fill={shade(base,step)} onTap={copy shade(base,step); toast "Copied {shade(base,step)}"}
+              Text.small "{step}" color=contrast(shade(base,step))
+        Text.muted "Tap a step to copy its hex."
+
+### Export
+state tab="export"
+state format="CSS"
+state colors=[{"name":"charcoal-blue","hex":"#264653"},{"name":"persian-green","hex":"#2A9D8F"},{"name":"saffron","hex":"#E9C46A"},{"name":"sandy-brown","hex":"#F4A261"},{"name":"burnt-sienna","hex":"#E76F51"}]
+App
+  Sidebar
+    Brand "Swatchbook" icon="palette"
+    NavItem "Generator" icon="auto_awesome" selected={tab=="generate"} onTap={go generator}
+    NavItem "Contrast" icon="contrast" selected={tab=="contrast"} onTap={go contrast-and-shades}
+    NavItem "Export" icon="code" selected={tab=="export"} onTap={tab="export"}
+    NavItem "Saved" icon="bookmarks" badge="8" selected={tab=="saved"} onTap={go saved}
+  Main
+    Nav
+      Heading "Export palette" level=1
+      Button "Copy code" icon="content_copy" onTap={copy format; toast "Code copied"}
+    Column pad=24 gap=16
+      Row gap=8
+        each c in colors
+          Box grow h=48 radius=8 fill={c.hex}
+      SegmentedButton items=["CSS","Tailwind","JSON"] bind=format
+      if format=="CSS"
+        CodeBlock lang="css" text=":root {\n  --charcoal-blue: #264653;\n  --persian-green: #2A9D8F;\n  --saffron: #E9C46A;\n  --sandy-brown: #F4A261;\n  --burnt-sienna: #E76F51;\n}"
+      if format=="Tailwind"
+        CodeBlock lang="js" text="colors: {\n  'charcoal-blue': '#264653',\n  'persian-green': '#2A9D8F',\n  saffron: '#E9C46A',\n  'sandy-brown': '#F4A261',\n  'burnt-sienna': '#E76F51',\n}"
+      if format=="JSON"
+        CodeBlock lang="json" text="{\n  \"charcoal-blue\": \"#264653\",\n  \"persian-green\": \"#2A9D8F\",\n  \"saffron\": \"#E9C46A\",\n  \"sandy-brown\": \"#F4A261\",\n  \"burnt-sienna\": \"#E76F51\"\n}"
+
+### Saved palettes
+state tab="saved"
+state picked=0
+state saved=[{"id":1,"name":"Coastal Sunset","colors":["#264653","#2A9D8F","#E9C46A","#F4A261","#E76F51"]},{"id":2,"name":"Midnight Orchid","colors":["#10002B","#240046","#5A189A","#9D4EDD","#E0AAFF"]},{"id":3,"name":"Forest Floor","colors":["#283618","#606C38","#FEFAE0","#DDA15E","#BC6C25"]},{"id":4,"name":"Pastel Candy","colors":["#FFADAD","#FFD6A5","#FDFFB6","#CAFFBF","#9BF6FF"]},{"id":5,"name":"Ocean Depth","colors":["#03045E","#0077B6","#00B4D8","#90E0EF","#CAF0F8"]},{"id":6,"name":"Autumn Ember","colors":["#780000","#C1121F","#FDF0D5","#003049","#669BBC"]}]
+App
+  Sidebar
+    Brand "Swatchbook" icon="palette"
+    NavItem "Generator" icon="auto_awesome" selected={tab=="generate"} onTap={go generator}
+    NavItem "Contrast" icon="contrast" selected={tab=="contrast"} onTap={go contrast-and-shades}
+    NavItem "Export" icon="code" selected={tab=="export"} onTap={go export}
+    NavItem "Saved" icon="bookmarks" badge="6" selected={tab=="saved"} onTap={tab="saved"}
+  Main
+    Nav
+      Heading "Saved palettes" level=1
+      Input "Search palettes" bind=q w=220
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        each p in saved
+          Card gap=12
+            Row h=80 radius=8
+              each hex in p.colors
+                Box grow fill={hex}
+            Row between
+              Text.strong "{p.name}"
+              IconButton "more_vert" tooltip="More" onTap={picked=p.id; open paletteMenu}
+            Row gap=8
+              Button.outline "Open" onTap={emit openPalette p.id; go generator}
+              Button.ghost "Copy" icon="content_copy" onTap={copy join(p.colors,", "); toast "Copied {p.name}"}
+  Menu#paletteMenu end
+    MenuItem "Rename" icon="edit" onTap={emit renamePalette picked}
+    MenuItem "Duplicate" icon="content_copy" onTap={emit duplicatePalette picked; toast "Duplicated"}
+    MenuItem "Delete" icon="delete" onTap={saved=removeWhere(saved,x=>x.id==picked); toast "Palette deleted"}

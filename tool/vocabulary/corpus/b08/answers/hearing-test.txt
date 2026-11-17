@@ -1,0 +1,179 @@
+### Headphone check
+state leftOk=false
+state rightOk=false
+state volume=40
+state ack=false
+App
+  Main
+    Nav
+      Brand "Earful" icon="hearing"
+      Row gap=8
+        Link "History" onTap={go history}
+        Avatar "Maya Reyes" size=32
+    Column pad=24 gap=16 maxw=640 center
+      Heading "Check your headphones" level=1
+      Text.muted "Wear both earbuds or cups. Each side plays a short tone; tap the side where you hear it."
+      Card gap=12
+        Row between
+          Text.strong "Left side"
+          Badge.success "Heard" visible={leftOk}
+        Row gap=12 middle
+          Button.outline "Play left tone" icon="volume_up" onTap={play tone ear="left" freq=1000 level=40}
+          Button "I heard it" onTap={leftOk=true; toast "Left side confirmed"}
+      Card gap=12
+        Row between
+          Text.strong "Right side"
+          Badge.success "Heard" visible={rightOk}
+        Row gap=12 middle
+          Button.outline "Play right tone" icon="volume_up" onTap={play tone ear="right" freq=1000 level=40}
+          Button "I heard it" onTap={rightOk=true; toast "Right side confirmed"}
+      Card gap=8
+        Row between
+          Text.strong "Volume"
+          Text.muted "{volume}%"
+        Slider bind=volume min=0 max=100
+        Text.caption "Set your device volume to about 40% and leave it there for the whole test."
+      Checkbox "I will not change the volume during the test" bind=ack
+      Row gap=12
+        Button.ghost "Loudness tips" icon="warning" onTap={open loud}
+        Spacer grow
+        Button "Start the test" icon="play_arrow" disabled={!(leftOk && rightOk && ack)} onTap={go tone-test}
+  Dialog#loud "Keep it comfortable" "Tones in this test can get louder than you expect."
+    Text "If any tone is uncomfortable, stop and lower the volume. Never test above 60% volume, and take a break if your ears ring."
+    Row end gap=8
+      Button.outline "Lower volume" onTap={volume=min(volume,30); close}
+      Button "I understand" onTap={close}
+
+### Tone test
+state ear="left"
+state freqs=[250,500,1000,2000,4000,8000]
+state fi=0
+state level=50
+state playing=true
+state heard=[]
+state secs=0
+state misses=0
+every 1s when playing onTick={secs=secs+1; level=level-5}
+every 1s when playing onTick={level<=0 ? {heard=append(heard,{"ear":ear,"freq":freqs[fi],"db":0,"found":false}); level=50; fi=fi+1} : {}}
+App
+  Main
+    Nav
+      Brand "Earful" icon="hearing"
+      Row gap=8 middle
+        Badge.info "{upper(ear)} ear"
+        Text.muted "{fi+1} of {length(freqs)} pitches"
+        IconButton "close" tooltip="End test" onTap={playing=false; open endTest}
+    Column pad=24 gap=20 center maxw=560
+      Progress {(fi + (ear=="right" ? length(freqs) : 0)) / (length(freqs)*2)}
+      Text.heading "Press the button each time you hear the tone"
+      Text.muted "It gets quieter and quieter. Press as soon as you hear it, even if it is very faint."
+      Stack center middle h=240
+        PulseRing active={playing} color=#FF3B82F6
+        Column center gap=4
+          Text "{freqs[fi]} Hz" size=32 weight=700
+          Text.caption "{level} dB"
+      Button "I hear it" size=large w=fill h=96 onTap={heard=append(heard,{"ear":ear,"freq":freqs[fi],"db":level,"found":true}); level=50; (fi<length(freqs)-1) ? {fi=fi+1} : {fi=0; ear=(ear=="left" ? "right" : "left")}}
+      Row gap=12 center
+        Button.outline playing ? "Pause" : "Resume" icon="pause" onTap={playing=!playing}
+        Button.ghost "Replay tone" icon="replay" onTap={play tone ear=ear freq=freqs[fi] level=level}
+      if length(heard) >= length(freqs)*2
+        Button "See results" w=fill onTap={playing=false; go word-in-noise}
+      Text.caption "{count(heard, h => h.found)} tones heard so far"
+  Dialog#endTest "End the test?" "Your answers so far will be thrown away."
+    Row end gap=8
+      Button.outline "Keep going" onTap={playing=true; close}
+      Button.destructive "End test" onTap={heard=[]; fi=0; level=50; close; go headphone-check}
+
+### Word in noise
+state round=0
+state picked=""
+state correct=0
+state noise=40
+state rounds=[{"say":"boat","choices":["boat","coat","goat","note"]},{"say":"seed","choices":["seed","speed","feed","need"]},{"say":"thin","choices":["thin","fin","sin","tin"]},{"say":"mouth","choices":["mouth","mouse","south","mouth"]}]
+state done=false
+App
+  Main
+    Nav
+      Brand "Earful" icon="hearing"
+      Text.muted "Word {round+1} of {length(rounds)}"
+    Column pad=24 gap=20 maxw=560 center
+      Heading "Which word did you hear?" level=1
+      Text.muted "A voice says one word through background noise. Pick the word you think it was."
+      Progress {round / length(rounds)}
+      Card gap=12
+        Row between middle
+          Row gap=8 middle
+            IconButton "play_arrow" tooltip="Play word" onTap={play word text=rounds[round].say noise=noise}
+            Waveform playing={true} h=40 grow
+          Text.caption "Noise {noise} dB"
+        Slider bind=noise min=20 max=70
+      Grid cols=2 gap=12
+        each c in rounds[round].choices
+          ChoiceChip "{c}" selected={picked==c} onTap={picked=c}
+      Button "Next word" disabled={picked==""} onTap={(picked==rounds[round].say) ? {correct=correct+1} : {}; picked=""; (round<length(rounds)-1) ? {round=round+1} : {done=true; go results}}
+      Text.caption "{correct} correct so far"
+
+### Results
+state band="all"
+state tests=[{"id":1,"date":"2026-11-02","left":12,"right":15,"words":"4 of 4"},{"id":2,"date":"2026-09-14","left":14,"right":15,"words":"3 of 4"},{"id":3,"date":"2026-06-01","left":10,"right":13,"words":"4 of 4"}]
+state sel=0
+state leftCurve=[10,10,12,15,22,35]
+state rightCurve=[12,12,14,16,20,28]
+state pitches=["250","500","1k","2k","4k","8k"]
+App
+  Sidebar
+    Brand "Earful" icon="hearing"
+    NavItem "New test" icon="play_circle" onTap={go headphone-check}
+    NavItem "Results" icon="show_chart" selected={true}
+    NavItem "History" icon="history" badge="{length(tests)}"
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Your results" level=1
+      Row gap=8
+        IconButton "share" tooltip="Share with a doctor" onTap={emit share tests[sel].id}
+        Button.outline "Test again" onTap={go headphone-check}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Card grow gap=12
+          Row between middle
+            Heading "Hearing by pitch" level=3
+            SegmentedButton bind=band items=["all","left","right"]
+          LineChart labels={pitches} series=[{"name":"Left ear","values":[10,10,12,15,22,35]},{"name":"Right ear","values":[12,12,14,16,20,28]}] h=260 reversed=true normalBand=[0,25] unit="dB"
+          Text.caption "Shaded band is the normal range, up to 25 dB. Lower is better."
+        Column w=300 gap=12
+          Card gap=8
+            Heading "Left ear" level=3
+            Text "{tests[sel].left} dB average" size=28 weight=700
+            Badge.warning "Mild loss above 4 kHz"
+          Card gap=8
+            Heading "Right ear" level=3
+            Text "{tests[sel].right} dB average" size=28 weight=700
+            Badge.success "Normal"
+      Card gap=8
+        Heading "Words in noise" level=3
+        Row gap=8 middle
+          Text "{tests[sel].words}" size=28 weight=700
+          Text.muted "words picked out of the noise"
+      Accordion "Advice for low pitches (250 to 500 Hz)"
+        Text.muted "Normal. Nothing to do."
+      Accordion "Advice for middle pitches (1 to 2 kHz)"
+        Text.muted "Normal. Speech should sound clear in quiet rooms."
+      Accordion "Advice for high pitches (4 to 8 kHz)"
+        Text.muted "Your left ear is quieter here. Consonants like s and f may blur in crowds. Rest your ears after loud events and book a check with an audiologist."
+        Button.outline "Find an audiologist" onTap={link https://www.asha.org/profession/find}
+      Card gap=8
+        Row between middle
+          Heading "History" level=3
+          Button.ghost "Clear" onTap={open clearHist}
+        each t in tests
+          ListTile "{formatDate(t.date,"MMM d, yyyy")}" subtitle="Left {t.left} dB, right {t.right} dB, words {t.words}" selected={sel==index} onTap={sel=index}
+            IconButton "more_vert" tooltip="More" onTap={sel=index; open rowMenu}
+  Menu#rowMenu end
+    MenuItem "View" icon="visibility" onTap={sel=sel}
+    MenuItem "Delete" icon="delete" onTap={tests=removeAt(tests,sel); sel=0}
+  Dialog#clearHist "Clear all tests?" "This cannot be undone."
+    Row end gap=8
+      Button.outline "Cancel" onTap={close}
+      Button.destructive "Clear" onTap={tests=[]; sel=0; close}

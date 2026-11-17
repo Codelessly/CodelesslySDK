@@ -1,0 +1,315 @@
+### Inbox
+state sel=0
+state openId=""
+state q=""
+state cmd=""
+state cmdSel=0
+state labelQ=""
+state snoozeText=""
+state labels=["Work","Receipts","Travel","Family","Follow up"]
+state msgs=[{"id":"m1","from":"Priya Nair","subject":"Q3 roadmap review notes","preview":"Attached are the notes from Tuesday. Two items need your call before Friday.","time":"9:41 AM","unread":true,"labels":["Work"],"body":"Hi,\n\nAttached are the notes from Tuesday's review. Two items need your call before Friday: the billing migration date and whether we staff the mobile pilot.\n\nThanks,\nPriya"},{"id":"m2","from":"Lufthansa","subject":"Your boarding pass for LH 457","preview":"Check-in is open. Your seat is 23A, gate B22.","time":"8:15 AM","unread":true,"labels":["Travel"],"body":"Check-in is open for LH 457 to Frankfurt. Seat 23A, gate B22, boarding 17:40."},{"id":"m3","from":"Marcus Ortega","subject":"Re: Dinner on Saturday?","preview":"Seven works. I booked the corner table.","time":"Yesterday","unread":false,"labels":["Family"],"body":"Seven works. I booked the corner table at Alma. Bring Dana if she is free."},{"id":"m4","from":"Stripe","subject":"Your receipt from Figma, $45.00","preview":"Receipt #2041-8830. Paid with Visa ending 4242.","time":"Yesterday","unread":false,"labels":["Receipts"],"body":"Receipt #2041-8830 for Figma Professional, $45.00, paid with Visa ending 4242."},{"id":"m5","from":"Hannah Berg","subject":"Contract redlines","preview":"I accepted most of your changes. Section 4 still needs a second look.","time":"Mon","unread":false,"labels":["Work","Follow up"],"body":"I accepted most of your changes. Section 4 still needs a second look, especially the termination clause."}]
+state commands=[{"name":"Archive message","key":"e"},{"name":"Snooze message","key":"b"},{"name":"Apply label","key":"l"},{"name":"Compose new message","key":"c"},{"name":"Reply","key":"r"},{"name":"Mark as unread","key":"u"},{"name":"Go to inbox","key":"g i"},{"name":"Show keyboard shortcuts","key":"?"}]
+Hotkey "j" onPress={sel=min(sel+1,length(msgs)-1)}
+Hotkey "k" onPress={sel=max(sel-1,0)}
+Hotkey "ArrowDown" onPress={sel=min(sel+1,length(msgs)-1)}
+Hotkey "ArrowUp" onPress={sel=max(sel-1,0)}
+Hotkey "Enter" onPress={openId=msgs[sel].id; go message}
+Hotkey "e" onPress={msgs=removeAt(msgs,sel); sel=clamp(sel,0,max(length(msgs)-1,0)); toast "Archived. Press z to undo"}
+Hotkey "b" onPress={snoozeText=""; open snooze}
+Hotkey "l" onPress={labelQ=""; open labels}
+Hotkey "c" onPress={go compose}
+Hotkey "?" onPress={open help}
+Hotkey "ctrl+k" onPress={cmd=""; cmdSel=0; open commands}
+Hotkey "/" onPress={focus search}
+App
+  Sidebar
+    Brand "Tabline" icon="keyboard"
+    NavItem "Inbox" icon="inbox" badge="2" selected={true} hint="g i"
+    NavItem "Snoozed" icon="schedule" hint="g s"
+    NavItem "Archive" icon="archive" hint="g a"
+    NavItem "Drafts" icon="edit_note" hint="g d"
+    Text.caption "LABELS"
+    each l in labels
+      NavItem "{l}" icon="label" onTap={q="label:{l}"}
+    Spacer grow
+    Button.ghost "Shortcuts  ?" icon="help" onTap={open help}
+  Main
+    Nav
+      Heading "Inbox" level=1
+      Row gap=8
+        Input#search "Search mail" "Press / to focus" bind=q w=240
+        Button.outline "Command bar  Ctrl K" icon="terminal" onTap={cmd=""; cmdSel=0; open commands}
+        Button "Compose  c" icon="edit" onTap={go compose}
+    Column pad=24 gap=8
+      Text.muted "{length(msgs)} conversations. j and k move, Enter opens, e archives, b snoozes, l labels."
+      each m in msgs
+        Row#row-{m.id} gap=12 pad=12 radius=8 focusable outline=#FF1A73E8 selected={index==sel} fill={index==sel ? "#FFE8F0FE" : "#00000000"} border-left={index==sel ? "#FF1A73E8" : "#00000000"} onTap={sel=index; openId=m.id; go message}
+          Icon "{m.unread ? 'mark_email_unread' : 'drafts'}"
+          Text.strong "{m.from}" w=140
+          Column grow gap=2
+            Text.strong "{m.subject}"
+            Text.muted "{m.preview}"
+          Row gap=4
+            each lb in m.labels
+              Badge.info "{lb}"
+          Text.caption "{m.time}" w=80
+  Dialog#help "Keyboard shortcuts" "Every key in Tabline"
+    Grid cols=2 gap=24
+      Column gap=6
+        Text.sectionTitle "Move"
+        Row between
+          Text "Next message"
+          Text.mono "j  or  Down"
+        Row between
+          Text "Previous message"
+          Text.mono "k  or  Up"
+        Row between
+          Text "Open message"
+          Text.mono "Enter"
+        Row between
+          Text "Back to list"
+          Text.mono "Esc"
+        Row between
+          Text "Focus search"
+          Text.mono "/"
+        Text.sectionTitle "Go to"
+        Row between
+          Text "Inbox"
+          Text.mono "g i"
+        Row between
+          Text "Snoozed"
+          Text.mono "g s"
+        Row between
+          Text "Archive"
+          Text.mono "g a"
+      Column gap=6
+        Text.sectionTitle "Act"
+        Row between
+          Text "Archive"
+          Text.mono "e"
+        Row between
+          Text "Snooze"
+          Text.mono "b"
+        Row between
+          Text "Apply label"
+          Text.mono "l"
+        Row between
+          Text "Reply"
+          Text.mono "r"
+        Row between
+          Text "Mark unread"
+          Text.mono "u"
+        Text.sectionTitle "Compose"
+        Row between
+          Text "New message"
+          Text.mono "c"
+        Row between
+          Text "Next field"
+          Text.mono "Tab"
+        Row between
+          Text "Send"
+          Text.mono "Ctrl Enter"
+        Text.sectionTitle "Anywhere"
+        Row between
+          Text "Command bar"
+          Text.mono "Ctrl K"
+        Row between
+          Text "This help"
+          Text.mono "?"
+    Button "Close  Esc" onTap={close}
+  Dialog#commands "Command bar"
+    Input#cmdInput "Type a command" "archive, snooze, label..." bind=cmd autofocus onChange={cmdSel=0}
+    Hotkey "ArrowDown" onPress={cmdSel=min(cmdSel+1,length(filter(commands,c=>contains(lower(c.name),lower(cmd))))-1)}
+    Hotkey "ArrowUp" onPress={cmdSel=max(cmdSel-1,0)}
+    Column gap=2
+      each c in filter(commands,c=>contains(lower(c.name),lower(cmd)))
+        Row between pad=10 radius=6 focusable outline=#FF1A73E8 fill={index==cmdSel ? "#FFE8F0FE" : "#00000000"} onTap={close; emit runCommand c.name}
+          Text "{c.name}"
+          Text.mono "{c.key}"
+      if length(filter(commands,c=>contains(lower(c.name),lower(cmd))))==0
+        Text.muted "No command matches {cmd}"
+    Text.caption "Up and Down choose, Enter runs, Esc closes"
+  Dialog#snooze "Snooze until" "Type a time: tomorrow nine, mon 8am, in 3 hours"
+    Input#snoozeInput "When" "tomorrow nine" bind=snoozeText autofocus onSubmit={msgs=removeAt(msgs,sel); sel=clamp(sel,0,max(length(msgs)-1,0)); toast "Snoozed until {parseTime(snoozeText)}"; close}
+    Row gap=8
+      Chip "tomorrow nine" onTap={snoozeText="tomorrow nine"}
+      Chip "tonight six" onTap={snoozeText="tonight six"}
+      Chip "monday eight" onTap={snoozeText="monday eight"}
+    if snoozeText!=""
+      Text.muted "Will return {parseTime(snoozeText)}"
+    Row end gap=8
+      Button.ghost "Cancel  Esc" onTap={close}
+      Button "Snooze  Enter" onTap={msgs=removeAt(msgs,sel); sel=clamp(sel,0,max(length(msgs)-1,0)); toast "Snoozed until {parseTime(snoozeText)}"; close}
+  Dialog#labels "Apply labels" "Type to filter, Enter to toggle"
+    Input#labelInput "Label" "Work, Travel..." bind=labelQ autofocus onSubmit={msgs=updateWhere(msgs,m=>m.id==msgs[sel].id,m=>with(m,"labels",contains(m.labels,first(filter(labels,l=>contains(lower(l),lower(labelQ))))) ? without(m.labels,first(filter(labels,l=>contains(lower(l),lower(labelQ))))) : append(m.labels,first(filter(labels,l=>contains(lower(l),lower(labelQ)))))))}
+    Column gap=2
+      each l in filter(labels,l=>contains(lower(l),lower(labelQ)))
+        Row between pad=10 radius=6 focusable outline=#FF1A73E8 onTap={msgs=updateWhere(msgs,m=>m.id==msgs[sel].id,m=>with(m,"labels",contains(m.labels,l) ? without(m.labels,l) : append(m.labels,l)))}
+          Text "{l}"
+          if contains(msgs[sel].labels,l)
+            Icon "check"
+    Button "Done" onTap={close}
+
+### Message
+state replyOpen=false
+Hotkey "Escape" onPress={go inbox}
+Hotkey "r" onPress={go compose}
+Hotkey "e" onPress={emit archive openId; toast "Archived"; go inbox}
+Hotkey "b" onPress={open snooze}
+Hotkey "l" onPress={open labels}
+Hotkey "?" onPress={open help}
+Hotkey "n" onPress={emit nextMessage}
+Hotkey "p" onPress={emit prevMessage}
+App
+  Sidebar
+    Brand "Tabline" icon="keyboard"
+    NavItem "Inbox" icon="inbox" badge="2" selected={true} onTap={go inbox}
+    NavItem "Snoozed" icon="schedule"
+    NavItem "Archive" icon="archive"
+    Spacer grow
+    Button.ghost "Shortcuts  ?" icon="help" onTap={open help}
+  Main
+    Nav
+      Row gap=8
+        IconButton "arrow_back" tooltip="Back to list (Esc)" focusable outline=#FF1A73E8 onTap={go inbox}
+        Heading "Q3 roadmap review notes" level=1
+      Row gap=4
+        IconButton "archive" tooltip="Archive (e)" focusable outline=#FF1A73E8 onTap={emit archive openId; go inbox}
+        IconButton "schedule" tooltip="Snooze (b)" focusable outline=#FF1A73E8 onTap={open snooze}
+        IconButton "label" tooltip="Labels (l)" focusable outline=#FF1A73E8 onTap={open labels}
+        IconButton "keyboard_arrow_up" tooltip="Newer (p)" focusable outline=#FF1A73E8 onTap={emit prevMessage}
+        IconButton "keyboard_arrow_down" tooltip="Older (n)" focusable outline=#FF1A73E8 onTap={emit nextMessage}
+    Column pad=24 gap=16 maxw=720
+      Row gap=12
+        Avatar "Priya Nair" size=40
+        Column grow gap=2
+          Text.strong "Priya Nair"
+          Text.muted "to me, Dana Whitfield, Luis Ferreira"
+        Text.caption "9:41 AM"
+      Row gap=8
+        Badge.info "Work"
+        Badge.neutral "Inbox"
+      Text "Hi,"
+      Text "Attached are the notes from Tuesday's review. Two items need your call before Friday: the billing migration date and whether we staff the mobile pilot."
+      Text "Thanks,"
+      Text "Priya"
+      Card gap=8
+        Row gap=8
+          Icon "attach_file"
+          Text.strong "roadmap-notes-q3.pdf"
+          Spacer grow
+          Text.caption "214 KB"
+      Row gap=8
+        Button "Reply  r" icon="reply" onTap={go compose}
+        Button.outline "Archive  e" icon="archive" onTap={emit archive openId; go inbox}
+        Button.outline "Snooze  b" icon="schedule" onTap={open snooze}
+    Footer
+      Row between
+        Text.muted "Esc back, n next, p previous, ? all shortcuts"
+        Text.caption "1 of 5"
+  Dialog#help "Keyboard shortcuts" "Every key in Tabline"
+    Column gap=6
+      Text.sectionTitle "In a message"
+      Row between
+        Text "Reply"
+        Text.mono "r"
+      Row between
+        Text "Archive"
+        Text.mono "e"
+      Row between
+        Text "Snooze"
+        Text.mono "b"
+      Row between
+        Text "Apply label"
+        Text.mono "l"
+      Row between
+        Text "Next and previous"
+        Text.mono "n  p"
+      Row between
+        Text "Back to list"
+        Text.mono "Esc"
+    Button "Close  Esc" onTap={close}
+  Dialog#snooze "Snooze until" "Type a time: tomorrow nine, mon 8am"
+    Input "When" "tomorrow nine" bind=snoozeText autofocus onSubmit={toast "Snoozed until {parseTime(snoozeText)}"; close; go inbox}
+    Row end gap=8
+      Button.ghost "Cancel  Esc" onTap={close}
+      Button "Snooze  Enter" onTap={toast "Snoozed until {parseTime(snoozeText)}"; close; go inbox}
+  Dialog#labels "Apply labels" "Type to filter, Enter to toggle"
+    Input "Label" "Work, Travel..." bind=labelQ autofocus
+    Column gap=2
+      each l in filter(labels,l=>contains(lower(l),lower(labelQ)))
+        Row between pad=10 radius=6 focusable outline=#FF1A73E8 onTap={emit toggleLabel l}
+          Text "{l}"
+    Button "Done" onTap={close}
+
+### Compose
+state to=""
+state cc=""
+state subject=""
+state body=""
+state sending=false
+Hotkey "ctrl+Enter" onPress={emit send {"to":to,"subject":subject,"body":body}; toast "Sent"; go inbox}
+Hotkey "Escape" onPress={open discard}
+Hotkey "ctrl+k" onPress={open commands}
+Hotkey "?" onPress={open help} when="notTyping"
+App
+  Sidebar
+    Brand "Tabline" icon="keyboard"
+    NavItem "Inbox" icon="inbox" onTap={go inbox}
+    NavItem "Drafts" icon="edit_note" selected={true}
+    Spacer grow
+    Button.ghost "Shortcuts  ?" icon="help" onTap={open help}
+  Main
+    Nav
+      Heading "New message" level=1
+      Row gap=8
+        Button.ghost "Discard  Esc" onTap={open discard}
+        Button "Send  Ctrl Enter" icon="send" onTap={emit send {"to":to,"subject":subject,"body":body}; toast "Sent"; go inbox}
+    Column pad=24 gap=12 maxw=720
+      Text.muted "Tab moves to the next field, Shift Tab to the previous."
+      Input#to "To" "name@example.com" bind=to type=email tabindex=1 autofocus focusable outline=#FF1A73E8
+      Input#cc "Cc" "optional" bind=cc type=email tabindex=2 focusable outline=#FF1A73E8
+      Input#subject "Subject" bind=subject tabindex=3 focusable outline=#FF1A73E8
+      Input#body "Message" "Write something" bind=body multiline tabindex=4 h=240 focusable outline=#FF1A73E8
+      Row gap=8
+        Button.outline "Attach  Ctrl U" icon="attach_file" tabindex=5 onTap={emit attach}
+        Button.outline "Labels  Ctrl L" icon="label" tabindex=6 onTap={open labels}
+        Spacer grow
+        Text.caption "{length(body)} characters"
+  Dialog#discard "Discard this draft?" "Nothing has been sent."
+    Row end gap=8
+      Button.ghost "Keep editing  Esc" onTap={close}
+      Button.destructive "Discard  Enter" autofocus onTap={close; go inbox}
+  Dialog#help "Keyboard shortcuts" "Every key while composing"
+    Column gap=6
+      Text.sectionTitle "Compose"
+      Row between
+        Text "Next field"
+        Text.mono "Tab"
+      Row between
+        Text "Previous field"
+        Text.mono "Shift Tab"
+      Row between
+        Text "Send"
+        Text.mono "Ctrl Enter"
+      Row between
+        Text "Attach file"
+        Text.mono "Ctrl U"
+      Row between
+        Text "Discard"
+        Text.mono "Esc"
+    Button "Close  Esc" onTap={close}
+  Dialog#labels "Apply labels" "Type to filter, Enter to toggle"
+    Input "Label" "Work, Travel..." bind=labelQ autofocus
+    Column gap=2
+      each l in filter(labels,l=>contains(lower(l),lower(labelQ)))
+        Row between pad=10 radius=6 focusable outline=#FF1A73E8 onTap={emit toggleLabel l}
+          Text "{l}"
+    Button "Done" onTap={close}
+  Dialog#commands "Command bar"
+    Input "Type a command" "send, discard, attach..." bind=cmd autofocus
+    Column gap=2
+      each c in filter(commands,c=>contains(lower(c.name),lower(cmd)))
+        Row between pad=10 radius=6 focusable outline=#FF1A73E8 onTap={close; emit runCommand c.name}
+          Text "{c.name}"
+          Text.mono "{c.key}"

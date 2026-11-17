@@ -1,0 +1,3 @@
+App: Hearth Hub, a countertop speaker's screen. A clock and the weather as an idle screen; when spoken to, a listening state with a rippling coloured bar and the words heard appearing; answers as large cards (a timer ring, a recipe step, a unit conversion); several timers running side by side with names; a now playing card with a big volume bar; touch to stop an alarm; a night clock that dims.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

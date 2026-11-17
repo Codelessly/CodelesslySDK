@@ -1,0 +1,328 @@
+### Campaign
+state raised=48620
+state goal=60000
+state backers=1284
+state daysLeft=17
+state tiers=[{"id":"early","name":"Early Bird","price":39,"left":42,"eta":"Mar 2027","text":"One Kickstand Mini in matte black, at the early price."},{"id":"mini","name":"Kickstand Mini","price":59,"left":310,"eta":"Apr 2027","text":"One Kickstand Mini with the travel pouch."},{"id":"duo","name":"Desk Duo","price":99,"left":120,"eta":"Apr 2027","text":"Two Minis and a magnetic cable clip set."},{"id":"studio","name":"Studio Pack","price":249,"left":18,"eta":"May 2027","text":"Five Minis, a Pro stand and your name on the backer wall."}]
+state tier=""
+state extra=0
+state step=0
+state name="" saved
+state email=""
+state cardNum=""
+state exp=""
+state cvc=""
+state tab="story"
+state updates=[{"id":1,"title":"Tooling samples arrived","date":"Nov 12","body":"The first aluminium parts came back from the factory this week. Tolerances are within 0.05 mm and the hinge feels exactly right.","likes":84},{"id":2,"title":"We passed 1,000 backers","date":"Nov 3","body":"Thank you. Because of you we are unlocking the matte white finish for every tier at no extra cost.","likes":212},{"id":3,"title":"Behind the hinge design","date":"Oct 24","body":"Why we spent four months on a single pivot, and the three prototypes that failed first.","likes":57}]
+state comments=[{"id":1,"who":"Dana Whitfield","when":"2h ago","text":"Does the Mini fit a 16 inch laptop with a case on?","likes":6,"replies":[{"who":"Kickstand Team","when":"1h ago","text":"Yes, it holds up to 3 kg and clears cases up to 12 mm thick."}]},{"id":2,"who":"Tomas Eriksen","when":"Yesterday","text":"Backed the Desk Duo. Any chance of a white cable clip?","likes":3,"replies":[]},{"id":3,"who":"Priya Nair","when":"3 days ago","text":"The hinge video sold me. Shipping to India?","likes":9,"replies":[{"who":"Kickstand Team","when":"3 days ago","text":"Yes, we ship to 48 countries including India. Duties are paid by you at delivery."}]}]
+state newComment=""
+state replyTo=0
+state wall=["Maya Reyes","Jon Okafor","Lena Fischer","Sam Patel","Ana Costa","Kenji Mori","Rosa Alvarez","Ben Clarke","Ivy Chen","Omar Haddad","Noor Siddiqui","Luca Bianchi"]
+state photos=[{"url":"https://images.kickstand.example/story/desk.jpg","caption":"The Mini on a standing desk"},{"url":"https://images.kickstand.example/story/hinge.jpg","caption":"The hinge, cut open"},{"url":"https://images.kickstand.example/story/bag.jpg","caption":"Packed flat in a jacket pocket"}]
+state at=0
+state following=false
+Page
+  Nav sticky
+    Brand "Kickstand" icon="laptop_mac"
+    Row gap=4
+      Link "Campaign" onTap={scroll top}
+      Link "Rewards" onTap={scroll rewards}
+      Link "Story" onTap={scroll story}
+      Link "Updates" onTap={scroll updates}
+      Link "Community" onTap={scroll comments}
+    Row gap=8
+      Button.outline "Manage pledge" onTap={go manage-pledge}
+      Button "Back this project" onTap={scroll rewards}
+  Section#top
+    Row gap=40
+      Column grow gap=16
+        Badge.info "Technology"
+        Heading "A laptop stand that folds to the size of a deck of cards" level=1
+        Text.muted "The Kickstand Mini is a 94 gram aluminium stand with a hinge that locks at six angles. By Studio Hollow, Rotterdam."
+        Video "https://media.kickstand.example/hero.mp4" poster="https://images.kickstand.example/hero-poster.jpg" controls h=340 radius=12
+      Card w=320 gap=16
+        Stack center middle
+          Ring {raised/goal} size=160
+          Column center gap=0
+            Text "{round(raised/goal*100,0)}%" size=32 weight=700
+            Text.caption "funded"
+        Column gap=2
+          Text "{money(raised,"$",0)}" size=28 weight=700
+          Text.muted "pledged of {money(goal,"$",0)} goal"
+        Row between
+          Column gap=0
+            Text.strong "{backers}"
+            Text.caption "backers"
+          Column gap=0
+            Text.strong "{daysLeft}"
+            Text.caption "days left"
+        Button "Back this project" size=large onTap={scroll rewards}
+        Row gap=8
+          Button.outline grow "{following ? "Following" : "Follow"}" icon="notifications" onTap={following=!following; toast following ? "You will get updates by email" : "Unfollowed"}
+          IconButton "share" tooltip="Share campaign" onTap={copy "https://kickstand.example/mini"; toast "Link copied"}
+        Text.caption "All or nothing. Funding ends Dec 4 at 11:59 PM CET."
+  Section tint#rewards
+    Column gap=16
+      Heading "Choose your reward" level=2
+      Text.muted "Pick one, then add to your pledge if you like. Shipping is calculated at checkout."
+    Grid cols=4 gap=16
+      each t in tiers
+        Card gap=10 selected={tier==t.id}
+          Text.strong "{t.name}"
+          Text "{money(t.price,"$",0)}" size=28 weight=700
+          Text.muted "{t.text}"
+          Divider
+          Row between
+            Text.caption "Estimated delivery"
+            Text.small "{t.eta}"
+          Row between
+            Text.caption "Remaining"
+            if t.left < 50
+              Badge.warning "Only {t.left} left"
+            if t.left >= 50
+              Text.small "{t.left} of 500"
+          Progress {1 - t.left/500}
+          Spacer grow
+          Button.outline "{tier==t.id ? "Selected" : "Select"}" onTap={tier=t.id; extra=0}
+    if tier != ""
+      Card gap=12 animate=slide-up
+        Row between
+          Text.strong "Your pledge: {find(tiers,x=>x.id==tier).name}"
+          Text.strong "{money(find(tiers,x=>x.id==tier).price+extra,"$",2)}"
+        Row gap=8
+          Text.muted "Add to your pledge"
+          ChoiceChip "None" selected={extra==0} onTap={extra=0}
+          ChoiceChip "+$10" selected={extra==10} onTap={extra=10}
+          ChoiceChip "+$25" selected={extra==25} onTap={extra=25}
+          ChoiceChip "+$50" selected={extra==50} onTap={extra=50}
+          Input "Other" type=number w=100 bind=extra
+        Row end gap=8
+          Button.ghost "Clear" onTap={tier=""; extra=0}
+          Button "Continue to pledge" onTap={step=0; open pledge}
+  Section#story narrow
+    Heading "The story" level=2
+    Text "Every laptop stand we tried was either too heavy to carry or too wobbly to trust. We wanted one that disappears into a bag and still holds a 16 inch machine steady at the right height for your neck."
+    Text "It took 31 prototypes, four hinge designs and one very patient machinist. The Mini is milled from a single block of 6063 aluminium, with silicone pads that will not mark your laptop."
+    Row scroll gap=12
+      each p in photos
+        Image "{p.url}" w=280 h=190 radius=8 onTap={at=index; open shots}
+    Heading "How it works" level=3
+    Text "Open the legs, pick one of six notches, and rest the laptop on top. Folded, it is 11 mm thick."
+    Image "https://images.kickstand.example/story/angles.jpg" radius=8
+    Heading "Risks and challenges" level=3
+    Text.muted "Anodising lead times can slip by two to three weeks. We have booked a second finishing partner and will publish any delay in the updates below."
+  Section tint#updates narrow
+    Row between
+      Heading "Updates" level=2
+      Badge.neutral "{length(updates)} posts"
+    each u in updates
+      Card gap=8
+        Row between
+          Text.strong "{u.title}"
+          Text.caption "{u.date}"
+        Text.muted "{u.body}"
+        Row gap=8
+          Button.ghost "{u.likes} likes" icon="favorite_border" onTap={updates=updateWhere(updates,x=>x.id==u.id,x=>with(x,"likes",x.likes+1))}
+          Button.ghost "Read more" onTap={toast "Opening post"}
+  Section#comments narrow
+    Row between
+      Heading "Comments" level=2
+      Badge.neutral "{length(comments)}"
+    Card gap=8
+      Input "Ask the maker or leave a comment" multiline bind=newComment
+      Row end
+        Button "Post comment" onTap={trim(newComment)=="" ? toast "Write something first" : {comments=concat([{"id":length(comments)+10,"who":"You","when":"Just now","text":newComment,"likes":0,"replies":[]}],comments); newComment=""}}
+    each c in comments
+      Column gap=8
+        Row gap=12 top
+          Avatar "{c.who}" size=40
+          Column grow gap=4
+            Row between
+              Text.strong "{c.who}"
+              Text.caption "{c.when}"
+            Text "{c.text}"
+            Row gap=8
+              Button.ghost "{c.likes}" icon="thumb_up_off_alt" onTap={comments=updateWhere(comments,x=>x.id==c.id,x=>with(x,"likes",x.likes+1))}
+              Button.ghost "Reply" onTap={replyTo=c.id; open reply}
+              IconButton "more_horiz" tooltip="More" onTap={replyTo=c.id; open commentMenu}
+        each r in c.replies
+          Row gap=12 top pad=[52,0,0,0]
+            Avatar "{r.who}" size=32
+            Column grow gap=2
+              Row gap=8
+                Text.strong "{r.who}"
+                Badge.primary "Maker"
+                Text.caption "{r.when}"
+              Text "{r.text}"
+        Divider
+  Section tint#wall
+    Row between
+      Heading "Backer wall" level=2
+      Text.muted "{backers} backers so far"
+    Grid cols=6 gap=12
+      each w in wall
+        Row gap=8 middle
+          Avatar "{w}" size=32
+          Text.small "{w}"
+    Button.outline "See all backers" onTap={toast "Showing all backers"}
+  Footer
+    Row between
+      Text.strong "Kickstand"
+      Row gap=16
+        Text.muted "Trust and safety" onTap={link https://kickstand.example/trust}
+        Text.muted "Terms" onTap={link https://kickstand.example/terms}
+        Text.muted "© 2026 Kickstand"
+Dialog#pledge "Back this project" "Step {step+1} of 3"
+  Progress {(step+1)/3}
+  if step==0
+    Column gap=12
+      Text.strong "{find(tiers,x=>x.id==tier).name}"
+      Row between
+        Text.muted "Reward"
+        Text "{money(find(tiers,x=>x.id==tier).price,"$",2)}"
+      Row between
+        Text.muted "Added to your pledge"
+        Text "{money(extra,"$",2)}"
+      Row between
+        Text.muted "Shipping (estimated)"
+        Text "$8.00"
+      Divider
+      Row between
+        Text.strong "Total"
+        Text.strong "{money(find(tiers,x=>x.id==tier).price+extra+8,"$",2)}"
+      Input "Full name" bind=name
+      Input "Email" "you@example.com" type=email bind=email
+      Row end gap=8
+        Button.ghost "Cancel" onTap={close}
+        Button "Continue" onTap={trim(name)=="" || !contains(email,"@") ? toast "Add your name and a valid email" : step=1}
+  if step==1
+    Column gap=12
+      Input "Card number" "1234 1234 1234 1234" type=number bind=cardNum
+      Row gap=12
+        Input "Expiry" "MM / YY" grow bind=exp
+        Input "CVC" "123" type=number grow bind=cvc
+      Text.caption "You will only be charged if the campaign reaches its goal on Dec 4."
+      Row end gap=8
+        Button.ghost "Back" onTap={step=0}
+        Button "Pledge {money(find(tiers,x=>x.id==tier).price+extra+8,"$",2)}" onTap={length(cardNum)<12 || length(cvc)<3 ? toast "Check your card details" : {raised=raised+find(tiers,x=>x.id==tier).price+extra; backers=backers+1; tiers=updateWhere(tiers,x=>x.id==tier,x=>with(x,"left",x.left-1)); step=2}}
+  if step==2
+    Column center gap=12
+      IconTile "check_circle" animate=pop
+      Heading "Thank you, {name}" level=2
+      Text.muted center "Your pledge is in. A receipt is on its way to {email}."
+      Row gap=8
+        Button.outline "Share" icon="share" onTap={copy "https://kickstand.example/mini"; toast "Link copied"}
+        Button "Manage pledge" onTap={close; go manage-pledge}
+Lightbox#shots photos={photos} bind=at
+Dialog#reply "Reply"
+  Input "Your reply" multiline bind=newComment
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button "Send" onTap={trim(newComment)=="" ? toast "Write something first" : {comments=updateWhere(comments,x=>x.id==replyTo,x=>with(x,"replies",append(x.replies,{"who":"You","when":"Just now","text":newComment}))); newComment=""; close}}
+Menu#commentMenu
+  MenuItem "Copy link" icon="link" onTap={copy "https://kickstand.example/mini#comment"; toast "Link copied"}
+  MenuItem "Report" icon="flag" onTap={toast "Reported to the moderators"}
+
+### Manage pledge
+state tier="duo"
+state extra=10
+state tiers=[{"id":"early","name":"Early Bird","price":39},{"id":"mini","name":"Kickstand Mini","price":59},{"id":"duo","name":"Desk Duo","price":99},{"id":"studio","name":"Studio Pack","price":249}]
+state address={"name":"Maya Reyes","line":"14 Vine Street","city":"Portland, OR 97205"}
+state addr1="14 Vine Street"
+state addr2="Portland, OR 97205"
+state card="Visa ending 4242"
+state status="active"
+state pick=""
+state reason=""
+state history=[{"date":"Nov 14","what":"Added $10 to pledge"},{"date":"Oct 2","what":"Pledged $99 for Desk Duo"}]
+Page
+  Nav sticky
+    Brand "Kickstand" icon="laptop_mac"
+    Row gap=4
+      Link "Campaign" onTap={go campaign}
+      Link "Manage pledge"
+    Avatar "Maya Reyes" size=32
+  Section narrow
+    Row between
+      Column gap=4
+        Heading "Your pledge" level=1
+        Text.muted "Kickstand Mini, backed Oct 2"
+      if status=="active"
+        Badge.success "Active"
+      if status=="cancelled"
+        Badge.danger "Cancelled"
+    Card gap=12
+      Row between
+        Text.strong "{find(tiers,x=>x.id==tier).name}"
+        Text.strong "{money(find(tiers,x=>x.id==tier).price+extra,"$",2)}"
+      Row between
+        Text.muted "Reward"
+        Text "{money(find(tiers,x=>x.id==tier).price,"$",2)}"
+      Row between
+        Text.muted "Added to your pledge"
+        Text "{money(extra,"$",2)}"
+      Row between
+        Text.muted "Estimated delivery"
+        Text "Apr 2027"
+      Row gap=8
+        Button.outline "Change reward" onTap={pick=tier; open change}
+        Button.outline "Change amount" onTap={open amount}
+    Card gap=8
+      Row between
+        Text.strong "Shipping address"
+        Button.ghost "Edit" onTap={open address}
+      Text "{address.name}"
+      Text.muted "{address.line}"
+      Text.muted "{address.city}"
+    Card gap=8
+      Row between
+        Text.strong "Payment method"
+        Button.ghost "Update" onTap={open payment}
+      Row gap=8 middle
+        Icon "credit_card"
+        Text "{card}"
+      Text.caption "Charged on Dec 4 if the campaign is funded."
+    Card gap=8
+      Text.strong "History"
+      each h in history
+        Row between
+          Text "{h.what}"
+          Text.caption "{h.date}"
+    if status=="active"
+      Button.destructive "Cancel my pledge" onTap={open cancel}
+    if status=="cancelled"
+      Card gap=8
+        Text.strong "Your pledge was cancelled"
+        Text.muted "You can back the project again any time before Dec 4."
+        Button "Back again" onTap={status="active"; toast "Pledge restored"}
+Dialog#change "Change reward"
+  each t in tiers
+    Radio "{t.name} {money(t.price,"$",0)}" selected={pick==t.id} onTap={pick=t.id}
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button "Save" onTap={tier=pick; toast "Reward updated"; close}
+Dialog#amount "Change amount"
+  Input "Extra amount in dollars" type=number bind=extra
+  Slider bind=extra min=0 max=200
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button "Save" onTap={extra=max(0,extra); history=concat([{"date":"Today","what":"Changed added amount to ${extra}"}],history); toast "Pledge updated"; close}
+Dialog#address "Shipping address"
+  Input "Street" bind=addr1
+  Input "City and postcode" bind=addr2
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button "Save" onTap={address=with(with(address,"line",addr1),"city",addr2); toast "Address saved"; close}
+Dialog#payment "Update card"
+  Input "Card number" "1234 1234 1234 1234" type=number bind=newCard
+  Row gap=12
+    Input "Expiry" "MM / YY" grow
+    Input "CVC" type=number grow
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button "Save card" onTap={card="Card ending {slice(newCard,length(newCard)-4,length(newCard))}"; toast "Card updated"; close}
+Dialog#cancel "Cancel your pledge?" "You will not be charged and will lose your reward."
+  Select "Why are you cancelling?" items=["Changed my mind","Found another product","Too expensive","Shipping concerns","Other"] bind=reason
+  Row end gap=8
+    Button.ghost "Keep pledge" onTap={close}
+    Button.destructive "Cancel pledge" onTap={status="cancelled"; emit pledgeCancelled reason; toast "Pledge cancelled"; close}

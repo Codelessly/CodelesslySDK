@@ -1,0 +1,224 @@
+### Hearing
+state screen="hearing"
+state programme="quiet"
+state leftVol=60
+state rightVol=55
+state leftBat=82
+state rightBat=64
+state balance=0
+state nrLevel=2
+state linked=true
+App
+  Sidebar
+    Brand "Whisper" icon="hearing"
+    NavItem "Hearing" icon="hearing" selected={screen=="hearing"} onTap={screen="hearing"; go hearing}
+    NavItem "Find my aid" icon="location_searching" selected={screen=="find"} onTap={screen="find"; go find_my_aid}
+    NavItem "Streaming" icon="bluetooth_audio" selected={screen=="stream"} onTap={screen="stream"; go streaming}
+    NavItem "Soothing sounds" icon="spa" selected={screen=="tinnitus"} onTap={screen="tinnitus"; go soothing_sounds}
+    Spacer grow
+    Text.muted "Connected to Phonak-style pair"
+  Main
+    Nav
+      Heading "Hearing" level=1
+      Row gap=8
+        Badge.success "Connected"
+        IconButton "settings" tooltip="Settings" onTap={emit openSettings}
+    Column pad=24 gap=20 scroll
+      Grid cols=2 gap=16
+        Card gap=12
+          Row between
+            Text.heading "Left ear"
+            Row gap=4
+              Icon "battery_full"
+              Text.strong "{leftBat}%"
+          EarPicture side="left" level={leftVol}
+          Row gap=8
+            Icon "volume_down"
+            Slider bind=leftVol min=0 max=100 grow onChange={linked ? rightVol=clamp(result-5,0,100) : toast "Left ear {result}"}
+            Icon "volume_up"
+          Text.muted "Volume {leftVol}"
+          if leftBat < 20
+            Badge.warning "Charge soon"
+        Card gap=12
+          Row between
+            Text.heading "Right ear"
+            Row gap=4
+              Icon "battery_5_bar"
+              Text.strong "{rightBat}%"
+          EarPicture side="right" level={rightVol}
+          Row gap=8
+            Icon "volume_down"
+            Slider bind=rightVol min=0 max=100 grow
+            Icon "volume_up"
+          Text.muted "Volume {rightVol}"
+          if rightBat < 20
+            Badge.warning "Charge soon"
+      Toggle "Link both ears" bind=linked
+      Card gap=8
+        Row between
+          Text.heading "Balance"
+          Text.muted "{balance == 0 ? 'Centered' : (balance < 0 ? 'Left ' + abs(balance) : 'Right ' + balance)}"
+        Row gap=8
+          Text.strong "L"
+          Slider bind=balance min=-10 max=10 grow
+          Text.strong "R"
+        Button.ghost "Reset to center" onTap={balance=0}
+      Text.sectionTitle "Programmes"
+      Grid cols=2 gap=16
+        Card gap=8 fill={programme=="quiet" ? "#FFE3F2FD" : "#FFFFFFFF"} onTap={programme="quiet"; toast "Quiet programme on"}
+          Row between
+            IconTile "volume_mute"
+            if programme=="quiet"
+              Badge.primary "Current"
+          Text.heading "Quiet"
+          Text.muted "Soft sounds, reading, home"
+        Card gap=8 fill={programme=="restaurant" ? "#FFE3F2FD" : "#FFFFFFFF"} onTap={programme="restaurant"; toast "Restaurant programme on"}
+          Row between
+            IconTile "restaurant"
+            if programme=="restaurant"
+              Badge.primary "Current"
+          Text.heading "Restaurant"
+          Text.muted "Speech in front, crowd lowered"
+        Card gap=8 fill={programme=="music" ? "#FFE3F2FD" : "#FFFFFFFF"} onTap={programme="music"; toast "Music programme on"}
+          Row between
+            IconTile "music_note"
+            if programme=="music"
+              Badge.primary "Current"
+          Text.heading "Music"
+          Text.muted "Wide, full sound"
+        Card gap=8 fill={programme=="outdoors" ? "#FFE3F2FD" : "#FFFFFFFF"} onTap={programme="outdoors"; toast "Outdoors programme on"}
+          Row between
+            IconTile "park"
+            if programme=="outdoors"
+              Badge.primary "Current"
+          Text.heading "Outdoors"
+          Text.muted "Wind softened"
+      Card gap=12
+        Text.heading "Noise reduction"
+        SegmentedButton bind=nrLevel items=["Off","Low","Medium","High"] onChange={emit setNoiseReduction result}
+        Text.muted "{nrLevel == 0 ? 'Every sound passes through.' : (nrLevel == 1 ? 'Gentle hush on steady noise.' : (nrLevel == 2 ? 'Balanced for most rooms.' : 'Strongest, speech stays clear.'))}"
+
+### Find my aid
+state finding=false
+state side="left"
+state signal=0
+state ticks=0
+state lastSeen="Today, 8:12 AM near Kitchen"
+App
+  Sidebar
+    Brand "Whisper" icon="hearing"
+    NavItem "Hearing" icon="hearing" onTap={go hearing}
+    NavItem "Find my aid" icon="location_searching" selected={true} onTap={go find_my_aid}
+    NavItem "Streaming" icon="bluetooth_audio" onTap={go streaming}
+    NavItem "Soothing sounds" icon="spa" onTap={go soothing_sounds}
+  Main
+    Nav
+      Heading "Find my aid" level=1
+      Row gap=8
+        Button.outline "Open map" onTap={emit openMap}
+    Column pad=24 gap=20 center
+      SegmentedButton bind=side items=["left","right"]
+      Card gap=16 center maxw=520
+        Gauge bind=signal min=0 max=100 unit="% signal" h=240
+        Text.heading "{signal < 20 ? 'Out of range' : (signal < 50 ? 'Getting warmer' : (signal < 80 ? 'Close' : 'Very close'))}"
+        Text.muted "Walk slowly. The {side} aid beeps faster as you get closer."
+        Beeper rate={signal} active={finding}
+        Row gap=12
+          Button "Start searching" hide={finding} onTap={finding=true; signal=12; emit startFind side}
+          Button.destructive "Stop" hidden={!finding} onTap={finding=false; signal=0}
+          Button.outline "Play loud tone" onTap={emit playTone side}
+        Sparkline values={history}
+      Card gap=8
+        Text.strong "Last seen"
+        Text.muted "{lastSeen}"
+        Row gap=8
+          Chip "Kitchen"
+          Chip "Bedside table"
+          Chip "Car"
+  every 1s when finding onTick={signal=clamp(signal+8,0,100); ticks=ticks+1}
+
+### Streaming
+state sources=[{"id":"tv","name":"Living room TV","kind":"tv","connected":true,"vol":70},{"id":"phone","name":"Ray's phone","kind":"smartphone","connected":false,"vol":50},{"id":"mic","name":"Partner microphone","kind":"mic","connected":false,"vol":60},{"id":"pc","name":"Office laptop","kind":"laptop","connected":false,"vol":40}]
+state active="tv"
+state mixOutside=30
+App
+  Sidebar
+    Brand "Whisper" icon="hearing"
+    NavItem "Hearing" icon="hearing" onTap={go hearing}
+    NavItem "Find my aid" icon="location_searching" onTap={go find_my_aid}
+    NavItem "Streaming" icon="bluetooth_audio" selected={true} onTap={go streaming}
+    NavItem "Soothing sounds" icon="spa" onTap={go soothing_sounds}
+  Main
+    Nav
+      Heading "Streaming" level=1
+      Button.outline "Pair new device" icon="add" onTap={open pair}
+    Column pad=24 gap=16 scroll
+      Text.sectionTitle "Sources"
+      each s in sources
+        ListTile "{s.name}" subtitle="{s.connected ? 'Streaming to both ears' : 'Available'}" icon={s.kind} selected={active==s.id}
+          Row gap=8
+            if s.connected
+              Badge.success "Live"
+            Switch bind=s.connected onChange={active=s.id; emit stream s.id}
+            IconButton "more_vert" tooltip="More" onTap={sel=s.id; open sourceMenu}
+      Card gap=8
+        Text.heading "Mix with surroundings"
+        Row gap=8
+          Text.muted "Source only"
+          Slider bind=mixOutside min=0 max=100 grow
+          Text.muted "Room sound"
+        Text.muted "{mixOutside}% of the room is let in."
+    Footer
+      Row between
+        Row gap=8
+          Icon "bluetooth_audio"
+          Text.strong "{find(sources, x=>x.id==active).name}"
+        Button.outline "Stop streaming" onTap={sources=map(sources, x=>with(x,"connected",false)); toast "Streaming stopped"}
+  Dialog#pair "Pair new device" "Hold the device's pair button until it blinks."
+    Input "Device name" bind=newName
+    Button "Search" onTap={emit pairSearch newName; close}
+  Menu#sourceMenu end
+    MenuItem "Rename" icon="edit" onTap={emit rename sel}
+    MenuItem "Forget device" icon="delete" onTap={sources=removeWhere(sources, x=>x.id==sel)}
+
+### Soothing sounds
+state playing=false
+state layers=[{"name":"Ocean waves","icon":"waves","on":true,"vol":60},{"name":"Rain","icon":"water_drop","on":false,"vol":40},{"name":"White noise","icon":"graphic_eq","on":true,"vol":25},{"name":"Soft chimes","icon":"notifications","on":false,"vol":30},{"name":"Forest","icon":"park","on":false,"vol":45}]
+state timer="30 min"
+state pitch=50
+App
+  Sidebar
+    Brand "Whisper" icon="hearing"
+    NavItem "Hearing" icon="hearing" onTap={go hearing}
+    NavItem "Find my aid" icon="location_searching" onTap={go find_my_aid}
+    NavItem "Streaming" icon="bluetooth_audio" onTap={go streaming}
+    NavItem "Soothing sounds" icon="spa" selected={true} onTap={go soothing_sounds}
+  Main
+    Nav
+      Heading "Soothing sounds" level=1
+      Row gap=8
+        Select bind=timer items=["15 min","30 min","1 hour","All night"]
+        Button "{playing ? 'Pause' : 'Play'}" icon={playing ? "pause" : "play_arrow"} onTap={playing=!playing; emit soothe playing}
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Text.heading "Your mix"
+        Waveform values={map(filter(layers, l=>l.on), l=>l.vol)} active={playing} h=80
+        Text.muted "{count(layers, l=>l.on)} layers playing for {timer}"
+      each l in layers
+        Card gap=8
+          Row between
+            Row gap=8
+              IconTile "{l.icon}"
+              Text.strong "{l.name}"
+            Toggle bind=l.on
+          Slider bind=l.vol min=0 max=100 hidden={!l.on}
+      Card gap=8
+        Text.heading "Tone matching"
+        Row gap=8
+          Text.muted "Low"
+          Slider bind=pitch min=0 max=100 grow
+          Text.muted "High"
+        Text.muted "Shape the mix to sit under your tinnitus pitch."
+      Row gap=8
+        Button.outline "Save as preset" onTap={emit savePreset layers; toast "Preset saved"}
+        Button.ghost "Reset" onTap={layers=map(layers, l=>with(l,"on",false))}

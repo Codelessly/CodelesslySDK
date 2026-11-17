@@ -1,0 +1,111 @@
+### Notes
+state pulled=false
+state q=""
+state scale=100
+state notes=[{"id":"n1","title":"Groceries for Sunday","body":"Oat milk, lemons, basil, fresh pasta","when":"Today","pinned":true},{"id":"n2","title":"Call the dentist","body":"Ask about the 9:30 slot on Thursday","when":"Today","pinned":false},{"id":"n3","title":"Trip ideas","body":"Lisbon in March, Kyoto in the autumn","when":"Yesterday","pinned":false},{"id":"n4","title":"Book list","body":"The Overstory, Piranesi, Braiding Sweetgrass","when":"Mon","pinned":false},{"id":"n5","title":"Standup notes","body":"Ship the onboarding fix, review Priya's PR","when":"Mon","pinned":false},{"id":"n6","title":"Gift for Mum","body":"Ceramic planter, the green one from the market","when":"Sun","pinned":false}]
+App scale={scale/100} onEdgeSwipeRight={go reach} onEdgeSwipeLeft={go note}
+  Main
+    ListView pulldown={pulled} onPullDown={pulled=true} onPullUp={pulled=false} gap=8 pad=16
+      Spacer h={pulled ? 320 : 0}
+      each n in filter(notes, x=>contains(lower(x.title), lower(q)))
+        Card gap=4 onTap={go note} animate=fade stagger=40
+          Row between
+            Text.strong "{n.title}"
+            if n.pinned
+              Icon "push_pin"
+          Text.muted "{n.body}"
+          Text.caption "{n.when}"
+    Footer
+      Row between pad=8
+        IconButton "search" tooltip="Search" onTap={open searchSheet}
+        IconButton "sort" tooltip="Sort" onTap={notes=sortBy(notes, x=>x.title)}
+        Button "New note" icon="add" onTap={go note}
+        IconButton "map" tooltip="Reach map" onTap={go reach}
+        IconButton "tune" tooltip="Screen size" onTap={go scaling}
+  Sheet#searchSheet
+    Input "Search notes" bind=q
+    Row gap=8
+      Button.outline "Clear" onTap={q=""}
+      Button "Done" onTap={close}
+  Sheet#pulledTitle "Thumbzone" pulled
+    Text.muted "{length(notes)} notes"
+
+### Note
+state hand="right"
+state text="Oat milk, lemons, basil, fresh pasta"
+state title="Groceries for Sunday"
+state saved=false
+App onEdgeSwipeRight={go notes} onEdgeSwipeLeft={go reach}
+  Main
+    Column pad=16 gap=12 scroll
+      Text.caption "Edited today, 9:41"
+      Input "Title" bind=title
+      Input "Note" multiline bind=text h=360
+    FloatingActions side={hand} bottom
+      IconButton "check" tooltip="Save" onTap={saved=true; toast "Saved"}
+      IconButton "format_list_bulleted" tooltip="Checklist" onTap={text=text + "\n- "}
+      IconButton "push_pin" tooltip="Pin" onTap={toast "Pinned"}
+      IconButton "delete" tooltip="Delete" onTap={open confirmDelete}
+      IconButton "swap_horiz" tooltip="Move buttons" onTap={hand = hand=="right" ? "left" : "right"}
+    Footer
+      Row between pad=8
+        IconButton "arrow_back" tooltip="Back" onTap={go notes}
+        Segmented bind=hand items=["left","right"]
+        IconButton "arrow_forward" tooltip="Forward" onTap={go reach}
+  Dialog#confirmDelete "Delete this note?" "It cannot be recovered."
+    Row end gap=8
+      Button.outline "Cancel" onTap={close}
+      Button.destructive "Delete" onTap={toast "Deleted"; close; go notes}
+
+### Reach map
+state hand="right"
+state size="large"
+App onEdgeSwipeRight={go note} onEdgeSwipeLeft={go scaling}
+  Main
+    Nav
+      Heading "Reach map"
+      SegmentedButton bind=hand items=["left","right"]
+    Column pad=16 gap=16 scroll
+      Text.muted "Green is easy, amber a stretch, red needs a second hand."
+      ReachMap hand={hand} device={size} h=420
+      Row gap=16
+        Badge.success "Easy"
+        Badge.warning "Stretch"
+        Badge.error "Hard"
+      Select "Phone size" bind=size items=["small","medium","large"]
+      Card gap=8
+        Text.strong "Where things sit"
+        Text.muted "New note, search and sort live in the bottom bar, inside the easy zone."
+        Text.muted "Pull the list down to bring the top half within reach."
+    Footer
+      Row between pad=8
+        IconButton "arrow_back" tooltip="Back" onTap={go note}
+        Button "Back to notes" onTap={go notes}
+        IconButton "arrow_forward" tooltip="Forward" onTap={go scaling}
+
+### Screen size
+state scale=100
+state hand="right"
+App onEdgeSwipeRight={go reach} onEdgeSwipeLeft={go notes}
+  Main
+    Nav
+      Heading "Screen size"
+    Column pad=16 gap=16 scale={scale/100}
+      Text.muted "Scale the whole screen down so every corner is within reach."
+      Card gap=8
+        Text.strong "Preview"
+        Text.muted "Groceries for Sunday"
+        Text.caption "Oat milk, lemons, basil, fresh pasta"
+      Row between
+        Text.strong "Scale"
+        Text.strong "{scale}%"
+      Slider bind=scale min=70 max=100 step=5
+      Row gap=8
+        Button.outline "Reset" onTap={scale=100}
+        Button.outline "One-handed 80%" onTap={scale=80}
+      Select "Floating buttons" bind=hand items=["left","right"]
+    Footer
+      Row between pad=8
+        IconButton "arrow_back" tooltip="Back" onTap={go reach}
+        Button "Done" onTap={toast "Saved"; go notes}
+        IconButton "arrow_forward" tooltip="Forward" onTap={go notes}

@@ -1,0 +1,118 @@
+### Game
+state fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+state moves=[{"n":1,"w":"e4","b":"c5"},{"n":2,"w":"Nf3","b":"d6"},{"n":3,"w":"d4","b":"cxd4"},{"n":4,"w":"Nxd4","b":"Nf6"},{"n":5,"w":"Nc3","b":"a6"},{"n":6,"w":"Bg5","b":""}]
+state ply=11
+state viewing=11
+state selected=""
+state whiteClock=412
+state blackClock=388
+state turn="white"
+state running=true
+state capturedByWhite=["p","p"]
+state capturedByBlack=["P"]
+state pending={"from":"","to":""}
+state tab="play"
+every 1s when running onTick={turn=="white" ? whiteClock=max(0,whiteClock-1) : blackClock=max(0,blackClock-1)}
+App
+  Sidebar
+    Brand "Fianchetto" icon="chess"
+    NavItem "Play" icon="sports_esports" selected={tab=="play"} onTap={tab="play"}
+    NavItem "Puzzles" icon="extension" selected={tab=="puzzles"} onTap={go puzzles}
+    NavItem "Games" icon="history" badge="3" selected={tab=="games"} onTap={go games}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Marta Kovac" size=32
+      Text.muted "Marta Kovac 1874"
+  Main
+    Nav
+      Heading "Rapid 10+0 against Tomas Lindqvist" level=1
+      Row gap=8
+        Button.outline "Offer draw" onTap={open drawConfirm}
+        Button.destructive "Resign" onTap={open resignConfirm}
+    Row gap=24 pad=24 top
+      Column grow gap=8
+        Row between middle
+          Row gap=8 middle
+            Avatar "Tomas Lindqvist" size=32
+            Text.strong "Tomas Lindqvist"
+            Text.muted "1851"
+            Row gap=2
+              each p in capturedByWhite
+                Piece "{p}" size=18
+          Box radius=8 pad=[12,6,12,6] fill={blackClock<10 ? "#FFB3261E" : "#FF262421"} animate={blackClock<10 && turn=="black" ? "pulse" : ""}
+            Text.mono "{duration(blackClock)}" size=22 color=#FFFFFFFF
+        Chessboard bind=fen orientation=white selected={selected} lastMove={ply>1 ? "d4d5" : ""} check={ply%2==0 ? "" : ""} showLegal=true onSelect={selected=result} onMove={emit move result; pending=with(with(pending,"from",result.from),"to",result.to)} onPromote={open promote}
+        Row between middle
+          Row gap=8 middle
+            Avatar "Marta Kovac" size=32
+            Text.strong "Marta Kovac"
+            Text.muted "1874"
+            Row gap=2
+              each p in capturedByBlack
+                Piece "{p}" size=18
+          Box radius=8 pad=[12,6,12,6] fill={whiteClock<10 ? "#FFB3261E" : "#FF262421"} animate={whiteClock<10 && turn=="white" ? "pulse" : ""}
+            Text.mono "{duration(whiteClock)}" size=22 color=#FFFFFFFF
+      Pane w=320 pad=16 gap=12
+        Text.panelTitle "Moves"
+        Row gap=4 between
+          Text.muted "#" w=32
+          Text.muted "White" grow
+          Text.muted "Black" grow
+        Column scroll h=360
+          each m in moves
+            Row gap=4
+              Text.muted "{m.n}" w=32
+              Text.strong "{m.w}" grow selected={viewing==m.n*2-1} onTap={viewing=m.n*2-1}
+              Text "{m.b}" grow selected={viewing==m.n*2} onTap={viewing=m.n*2}
+        Row gap=8 center
+          IconButton "first_page" tooltip="Start" onTap={viewing=0}
+          IconButton "chevron_left" tooltip="Back" onTap={viewing=max(0,viewing-1)}
+          IconButton "chevron_right" tooltip="Forward" onTap={viewing=min(ply,viewing+1)}
+          IconButton "last_page" tooltip="Latest" onTap={viewing=ply}
+        if viewing!=ply
+          Badge.warning "Viewing move {viewing}, not the live position"
+  Dialog#drawConfirm "Offer a draw?" "Tomas can accept or decline."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Offer draw" onTap={emit offerDraw; toast "Draw offered"; close}
+  Dialog#resignConfirm "Resign this game?" "You will lose 9 rating points."
+    Row end gap=8
+      Button.ghost "Keep playing" onTap={close}
+      Button.destructive "Resign" onTap={running=false; emit resign; toast "You resigned"; close}
+  Popover#promote
+    Row gap=8
+      IconButton "Q" tooltip="Queen" onTap={emit promote "q"; close}
+      IconButton "R" tooltip="Rook" onTap={emit promote "r"; close}
+      IconButton "B" tooltip="Bishop" onTap={emit promote "b"; close}
+      IconButton "N" tooltip="Knight" onTap={emit promote "n"; close}
+
+### Games
+state tab="games"
+state result="all"
+state games=[{"id":"g1","opp":"Tomas Lindqvist","rating":1851,"result":"Won","moves":42,"date":"2026-11-14","tc":"10+0"},{"id":"g2","opp":"Priya Nair","rating":1902,"result":"Lost","moves":31,"date":"2026-11-13","tc":"10+0"},{"id":"g3","opp":"Jonas Weber","rating":1790,"result":"Drew","moves":58,"date":"2026-11-12","tc":"15+10"},{"id":"g4","opp":"Elena Petrova","rating":1833,"result":"Won","moves":27,"date":"2026-11-10","tc":"5+3"}]
+App
+  Sidebar
+    Brand "Fianchetto" icon="chess"
+    NavItem "Play" icon="sports_esports" selected={tab=="play"} onTap={go game}
+    NavItem "Puzzles" icon="extension" selected={tab=="puzzles"} onTap={go puzzles}
+    NavItem "Games" icon="history" selected={tab=="games"} onTap={tab="games"}
+    Spacer grow
+    Text.muted "Marta Kovac 1874"
+  Main
+    Nav
+      Heading "Your games" level=1
+      Row gap=8
+        SegmentedButton bind=result items=["all","Won","Lost","Drew"]
+    Column pad=24 gap=16
+      Card gap=8
+        each g in filter(games,x=>result=="all" || x.result==result)
+          ListTile "{g.opp} ({g.rating})" "{g.tc}, {g.moves} moves, {formatDate(g.date,'MMM d')}" menu=gameMenu onTap={go game}
+            Badge.success "Won" visible={g.result=="Won"}
+            Badge.error "Lost" visible={g.result=="Lost"}
+            Badge.neutral "Drew" visible={g.result=="Drew"}
+      if isEmpty(filter(games,x=>result=="all" || x.result==result))
+        Text.muted "No games with that result yet."
+  Menu#gameMenu
+    MenuItem "Replay" icon="play_arrow" onTap={go game}
+    MenuItem "Copy PGN" icon="content_copy" onTap={copy "pgn"; toast "PGN copied"}
+    MenuItem "Analyse" icon="query_stats" onTap={emit analyse}

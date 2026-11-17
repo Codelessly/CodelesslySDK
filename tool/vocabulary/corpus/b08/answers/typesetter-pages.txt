@@ -1,0 +1,223 @@
+### Spread
+state view="spread"
+state at=2
+state sel="f1"
+state guides=[{"id":"g1","axis":"v","pos":36},{"id":"g2","axis":"h","pos":54}]
+state pages=[{"id":"p1","n":1,"name":"Cover"},{"id":"p2","n":2,"name":"Contents"},{"id":"p3","n":3,"name":"Feature opener"},{"id":"p4","n":4,"name":"Feature"},{"id":"p5","n":5,"name":"Portfolio"},{"id":"p6","n":6,"name":"Back page"}]
+state frames=[{"id":"f1","page":2,"title":"Intro column","style":"Body","words":412,"capacity":380,"next":"f2"},{"id":"f2","page":3,"title":"Continued column","style":"Body","words":0,"capacity":360,"next":""}]
+state styles=[{"name":"Headline","font":"Canela Bold","size":38,"lead":42,"uses":6},{"name":"Body","font":"Source Serif","size":10,"lead":14,"uses":58},{"name":"Caption","font":"Inter","size":8,"lead":10,"uses":21}]
+state fit="fill"
+state zoom=100
+App
+  Sidebar
+    Brand "Folio" icon="menu_book"
+    NavItem "Spread" icon="auto_stories" selected={view=="spread"} onTap={view="spread"}
+    NavItem "Styles" icon="text_format" selected={view=="styles"} onTap={go styles}
+    NavItem "Preflight" icon="fact_check" badge="3" onTap={go preflight}
+    Divider
+    Text.fieldLabel "Paragraph styles"
+    each s in styles
+      ListTile "{s.name}" subtitle="{s.font} {s.size}/{s.lead}" trailing="{s.uses}" onTap={emit applyStyle s.name; toast "Applied {s.name}"}
+    Spacer grow
+    Text.muted "Autumn Issue 14.indd"
+  Main
+    Nav
+      Heading "Spread {at}-{at+1}" level=3
+      Row gap=8
+        SegmentedButton bind=view items=["spread","single"]
+        IconButton "zoom_out" tooltip="Zoom out" onTap={zoom=max(25,zoom-25)}
+        Text.strong "{zoom}%"
+        IconButton "zoom_in" tooltip="Zoom in" onTap={zoom=min(400,zoom+25)}
+        Button.outline "Export proof" icon="picture_as_pdf" onTap={open proof}
+    Column pad=24 gap=16
+      Row gap=24 center
+        Spread zoom={zoom} guides={guides} onGuide={guides=append(guides,result)}
+          Page#left "{at}" side=left master="A-Master" rulers
+            Guide axis=v pos=36 draggable
+            TextFrame#f1 "Intro column" x=36 y=54 w=240 h=300 style="Body" overflow={frames[0].words>frames[0].capacity} selected={sel=="f1"} onTap={sel="f1"} next="f2"
+              Text "The harbour at dawn is quieter than anyone expects. Fishing boats idle against their moorings while the first ferries gather their crews on the quay."
+            FrameLink from="f1" to="f2" onTap={sel="f2"}
+            ImageFrame#img1 src="https://images.example.com/harbour-dawn.jpg" x=36 y=370 w=240 h=140 fit={fit} selected={sel=="img1"} onTap={sel="img1"}
+            PageNumber master="A-Master" position="bottom-left"
+          Page#right "{at+1}" side=right master="A-Master"
+            TextFrame#f2 "Continued column" x=48 y=54 w=240 h=300 style="Body" selected={sel=="f2"} onTap={sel="f2"}
+            PageNumber master="A-Master" position="bottom-right"
+        Pane w=320 pad=16 gap=12
+          Text.panelTitle "Frame properties"
+          if sel=="img1"
+            Text.fieldLabel "Image fit"
+            Row gap=8
+              Button.outline "Fill" onTap={fit="fill"}
+              Button.outline "Fit" onTap={fit="fit"}
+              Button.outline "Center" onTap={fit="center"}
+              Button.outline "Stretch" onTap={fit="stretch"}
+            Text.muted "Fit mode: {fit}"
+          if sel!="img1"
+            Select "Paragraph style" items=["Headline","Body","Caption"] bind=frameStyle onChange={emit setStyle {"frame":sel,"style":result}}
+            Row gap=8
+              Input "X" type=number bind=frameX
+              Input "Y" type=number bind=frameY
+            if frames[0].words>frames[0].capacity
+              Box fill=#FFFDECEC radius=8 pad=12 gap=8
+                Row gap=8
+                  Icon "error" color=#FFD32F2F
+                  Text.strong "Text overflows" color=#FFD32F2F
+                Text.small "{frames[0].words-frames[0].capacity} words do not fit in Intro column."
+                Button.outline "Flow into next frame" onTap={emit flow "f1"; toast "Flowed to Continued column"}
+          Divider
+          Text.panelTitle "Guides"
+          each g in guides
+            Row between
+              Text "{g.axis=="v" ? "Vertical" : "Horizontal"} at {g.pos} pt"
+              IconButton "close" tooltip="Remove guide" onTap={guides=removeWhere(guides,x=>x.id==g.id)}
+          Row gap=8
+            Button.outline "Add vertical" onTap={guides=append(guides,{"id":"g{length(guides)+1}","axis":"v","pos":144})}
+            Button.outline "Add horizontal" onTap={guides=append(guides,{"id":"g{length(guides)+1}","axis":"h","pos":200})}
+    Footer
+      Column gap=8 pad=12
+        Row between
+          Text.fieldLabel "Pages"
+          Text.muted "Drag a page to reorder"
+        Row scroll gap=8 drop=page onDrop={pages=reorder(pages,result.data,result.index)}
+          each p in pages
+            Card gap=4 drag=page(p.id) selected={at==p.n} onTap={at=p.n}
+              PageThumb page={p.id} w=56 h=72
+              Text.small "{p.n} {p.name}"
+              Badge.neutral "A-Master"
+  Menu#frameMenu
+    MenuItem "Link to next frame" icon="link" onTap={emit linkFrame sel}
+    MenuItem "Unlink" icon="link_off" onTap={emit unlinkFrame sel}
+    MenuItem "Delete frame" icon="delete" onTap={emit deleteFrame sel}
+  Dialog#proof "Export proof" "A low-resolution PDF for review"
+    Select "Pages" items=["All 6","Current spread","Range"] bind=range
+    Toggle "Include crop marks" bind=marks
+    Toggle "Show guides" bind=proofGuides
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Export" onTap={emit exportProof {"range":range,"marks":marks}; toast "Proof exported"; close}
+
+### Styles
+state selStyle="Body"
+state styles=[{"name":"Headline","font":"Canela Bold","size":38,"lead":42,"track":0,"uses":6},{"name":"Body","font":"Source Serif","size":10,"lead":14,"track":10,"uses":58},{"name":"Caption","font":"Inter","size":8,"lead":10,"track":20,"uses":21}]
+App
+  Sidebar
+    Brand "Folio" icon="menu_book"
+    NavItem "Spread" icon="auto_stories" onTap={go spread}
+    NavItem "Styles" icon="text_format" selected={true}
+    NavItem "Masters" icon="layers" onTap={go masters}
+    NavItem "Preflight" icon="fact_check" badge="3" onTap={go preflight}
+    Spacer grow
+    Text.muted "Autumn Issue 14.indd"
+  Main
+    Nav
+      Heading "Paragraph styles" level=3
+      Row gap=8
+        Button.outline "New style" icon="add" onTap={open newStyle}
+        Button "Update all uses" onTap={emit updateStyle selStyle; toast "Updated every use of {selStyle}"}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Column grow gap=8
+          each s in styles
+            Card gap=4 onTap={selStyle=s.name}
+              Row between
+                Text.strong "{s.name}"
+                Badge.neutral "{s.uses} uses"
+              Text.muted "{s.font} {s.size}/{s.lead}"
+        Pane w=320 pad=16 gap=12
+          Text.panelTitle "{selStyle}"
+          Select "Font" items=["Canela Bold","Source Serif","Inter"] bind=styles[0].font
+          Row gap=8
+            Input "Size" type=number bind=size
+            Input "Leading" type=number bind=lead
+          Slider "Tracking" bind=track min=-50 max=100
+          SegmentedButton bind=align items=["Left","Center","Right","Justify"]
+          Toggle "Hyphenate" bind=hyphen
+          Divider
+          Text.fieldLabel "Preview"
+          Box fill=#FFF7F5F0 radius=8 pad=12
+            Text.body "Fishing boats idle against their moorings." size={size} onTap={toast "Preview"}
+  Dialog#newStyle "New paragraph style"
+    Input "Name" bind=newName
+    Select "Based on" items=["Headline","Body","Caption"] bind=basedOn
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Create" onTap={newName=="" ? toast "Name the style" : {emit createStyle {"name":newName,"basedOn":basedOn}; close}}
+
+### Masters
+state masterPage="A-Master"
+state numPos="outside"
+state numStyle="Caption"
+App
+  Sidebar
+    Brand "Folio" icon="menu_book"
+    NavItem "Spread" icon="auto_stories" onTap={go spread}
+    NavItem "Styles" icon="text_format" onTap={go styles}
+    NavItem "Masters" icon="layers" selected={true}
+    NavItem "Preflight" icon="fact_check" badge="3" onTap={go preflight}
+    Spacer grow
+    Text.muted "Applied to 6 pages"
+  Main
+    Nav
+      Heading "Master page A-Master" level=3
+      Row gap=8
+        Button.outline "Apply to pages" onTap={open applyMaster}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Spread
+          Page "A" side=left master="A-Master"
+            Guide axis=v pos=36
+            PageNumber master="A-Master" position="bottom-left" format="1" style={numStyle}
+            TextFrame "Running head" x=36 y=18 w=240 h=16 style="Caption"
+          Page "A" side=right master="A-Master"
+            PageNumber master="A-Master" position="bottom-right" format="1" style={numStyle}
+        Pane w=320 pad=16 gap=12
+          Text.panelTitle "Page numbers"
+          SegmentedButton bind=numPos items=["outside","center","inside"]
+          Select "Number style" items=["Caption","Body"] bind=numStyle
+          Select "Format" items=["1, 2, 3","i, ii, iii","01, 02, 03"] bind=numFormat
+          Input "Running head" bind=runningHead
+          Toggle "Skip on first page" bind=skipFirst
+  Dialog#applyMaster "Apply master" "Choose the pages that use A-Master"
+    Select "Pages" items=["All pages","Odd pages","Even pages","Range"] bind=applyTo
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Apply" onTap={emit applyMaster applyTo; toast "Master applied"; close}
+
+### Preflight
+state warnings=[{"id":"w1","level":"error","page":2,"text":"Text frame overflows: Intro column","fixed":false},{"id":"w2","level":"warning","page":3,"text":"Image at 142 ppi, below 300 ppi","fixed":false},{"id":"w3","level":"warning","page":5,"text":"Missing font: Canela Light","fixed":false}]
+state filter="all"
+App
+  Sidebar
+    Brand "Folio" icon="menu_book"
+    NavItem "Spread" icon="auto_stories" onTap={go spread}
+    NavItem "Styles" icon="text_format" onTap={go styles}
+    NavItem "Masters" icon="layers" onTap={go masters}
+    NavItem "Preflight" icon="fact_check" badge="{count(warnings,w=>!w.fixed)}" selected={true}
+    Spacer grow
+  Main
+    Nav
+      Heading "Preflight" level=3
+      Row gap=8
+        Button.outline "Run again" icon="refresh" onTap={emit preflight; toast "Preflight complete"}
+        Button "Export proof" icon="picture_as_pdf" onTap={count(warnings,w=>w.level=="error" && !w.fixed)>0 ? toast "Fix the errors first" : open proof}
+    Column pad=24 gap=16
+      Row gap=8
+        ChoiceChip "All" selected={filter=="all"} onTap={filter="all"}
+        ChoiceChip "Errors" selected={filter=="error"} onTap={filter="error"}
+        ChoiceChip "Warnings" selected={filter=="warning"} onTap={filter="warning"}
+      Card gap=8
+        each w in warnings
+          if !w.fixed && (filter=="all" || filter==w.level)
+            ListTile "{w.text}" subtitle="Page {w.page}" icon={w.level=="error" ? "error" : "warning"}
+              Badge.error "Error" visible={w.level=="error"}
+              Button.outline "Go to page" onTap={emit goPage w.page; go spread}
+              Button.ghost "Mark fixed" onTap={warnings=updateWhere(warnings,x=>x.id==w.id,x=>with(x,"fixed",true))}
+        if count(warnings,w=>!w.fixed)==0
+          Row gap=8 center
+            Icon "check_circle" color=#FF2E7D32
+            Text.success "No problems found"
+  Dialog#proof "Export proof" "A low-resolution PDF for review"
+    Toggle "Include crop marks" bind=marks
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Export" onTap={emit exportProof; toast "Proof exported"; close}

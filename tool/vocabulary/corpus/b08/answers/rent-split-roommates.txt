@@ -1,0 +1,205 @@
+### Balances
+state members=[{"id":"maya","name":"Maya Reyes","bal":84.5},{"id":"leo","name":"Leo Park","bal":-62.25},{"id":"ines","name":"Ines Okafor","bal":15.0},{"id":"sam","name":"Sam Patel","bal":-37.25}]
+state bills=[{"id":1,"title":"Electricity","payer":"maya","amount":96,"split":"equal"},{"id":2,"title":"Groceries","payer":"ines","amount":142.8,"split":"equal"}]
+state payments=[{"from":"Leo Park","to":"Maya Reyes","amt":62.25},{"from":"Sam Patel","to":"Maya Reyes","amt":22.25},{"from":"Sam Patel","to":"Ines Okafor","amt":15}]
+state title=""
+state amount=0
+state payer="Maya Reyes"
+state mode="Equal"
+state shares={"Maya Reyes":1,"Leo Park":1,"Ines Okafor":1,"Sam Patel":1}
+state home={"Maya Reyes":[true,true,true,true,true,true,true],"Leo Park":[true,true,false,false,true,true,true],"Ines Okafor":[true,true,true,true,true,false,false],"Sam Patel":[true,false,true,true,true,true,true]}
+state tab="balances"
+App
+  Sidebar
+    Brand "Housemates" icon="home"
+    NavItem "Balances" icon="account_balance_wallet" selected={tab=="balances"} onTap={go balances}
+    NavItem "Bills calendar" icon="calendar_month" onTap={go bills_calendar}
+    NavItem "Chores" icon="cleaning_services" onTap={go chores}
+    NavItem "House and summary" icon="menu_book" onTap={go house}
+    Spacer grow
+    Text.muted "14 Alder Street"
+  Main
+    Nav
+      Heading "Balances" level=1
+      Row gap=8
+        Button.outline "Settle up" icon="swap_horiz" onTap={open settle}
+        Button "Add bill" icon="add" onTap={open addbill}
+    Column pad=24 gap=16 scroll
+      Grid cols=4 gap=16
+        each m in members
+          Card gap=8 animate=fade stagger=80
+            Row gap=12 middle
+              Avatar "{m.name}" size=48
+              Column grow
+                Text.strong "{m.name}"
+                Text.muted "{m.bal >= 0 ? 'is owed' : 'owes'}"
+            Text "{money(abs(m.bal),'$',2)}" size=28 weight=700 color={m.bal >= 0 ? "#FF2E7D32" : "#FFC62828"}
+            Progress {abs(m.bal)/100}
+      Card gap=12
+        Row between
+          Heading "Recent bills" level=3
+          Text.muted "{length(bills)} this month"
+        each b in bills
+          ListTile "{b.title}" subtitle="Paid by {b.payer}, split {b.split}"
+            Text.strong "{money(b.amount,'$',2)}"
+            IconButton "delete" tooltip="Remove bill" onTap={bills=removeWhere(bills,x=>x.id==b.id)}
+  Dialog#addbill "Add a shared bill" "Who paid, how much, and how it is split"
+    Input "What for" "Internet, groceries" bind=title
+    Row gap=12
+      Input "Amount" type=number bind=amount grow
+      Select "Paid by" items=["Maya Reyes","Leo Park","Ines Okafor","Sam Patel"] bind=payer grow
+    SegmentedButton items=["Equal","By shares","Who was home"] bind=mode
+    if mode=="By shares"
+      each n in ["Maya Reyes","Leo Park","Ines Okafor","Sam Patel"]
+        Row gap=12 middle
+          Text w=100 "{n}"
+          Slider bind=shares[n] min=0 max=5 step=1 grow
+          Text.strong "{shares[n]}"
+    if mode=="Who was home"
+      Text.muted "Tick the days each person was home this week"
+      Row gap=4
+        Text.caption w=100 ""
+        each d in ["M","T","W","T","F","S","S"]
+          Text.caption w=32 center "{d}"
+      each n in ["Maya Reyes","Leo Park","Ines Okafor","Sam Patel"]
+        Row gap=4 middle
+          Text w=100 "{n}"
+          each t in home[n]
+            Checkbox bind=t w=32
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Save bill" onTap={amount>0 && title!="" ? {bills=append(bills,{"id":length(bills)+10,"title":title,"payer":payer,"amount":amount,"split":lower(mode)}); toast "Bill added"; close} : toast "Add a name and an amount"}
+  Dialog#settle "Settle up" "The fewest payments that clear every balance"
+    each p in payments
+      Row gap=12 middle between
+        Row gap=8 middle
+          Avatar "{p.from}" size=36
+          Text "{p.from}"
+        Column center
+          Text.strong "{money(p.amt,'$',2)}"
+          Arrow w=120
+        Row gap=8 middle
+          Text "{p.to}"
+          Avatar "{p.to}" size=36
+    Text.muted "{length(payments)} payments instead of 6"
+    Row end gap=8
+      Button.ghost "Not now" onTap={close}
+      Button "Mark all settled" onTap={payments=[]; emit settled; toast "Everyone is square"; close}
+
+### Bills calendar
+state month="November 2026"
+state recurring=[{"id":1,"title":"Rent","day":1,"amount":2400},{"id":2,"title":"Internet","day":8,"amount":60},{"id":3,"title":"Electricity","day":15,"amount":96},{"id":4,"title":"Streaming","day":21,"amount":22},{"id":5,"title":"Water","day":27,"amount":48}]
+state picked=15
+state newTitle=""
+state newDay=1
+state newAmount=0
+App
+  Sidebar
+    Brand "Housemates" icon="home"
+    NavItem "Balances" icon="account_balance_wallet" onTap={go balances}
+    NavItem "Bills calendar" icon="calendar_month" selected={true} onTap={go bills_calendar}
+    NavItem "Chores" icon="cleaning_services" onTap={go chores}
+    NavItem "House and summary" icon="menu_book" onTap={go house}
+  Main
+    Nav
+      Heading "Recurring bills" level=1
+      Button "New recurring bill" icon="add" onTap={open newbill}
+    Column pad=24 gap=16 scroll
+      Row gap=24 top
+        Card grow gap=12
+          Row between
+            Heading "{month}" level=3
+            Text.muted "{money(sum(recurring,r=>r.amount),'$',2)} a month"
+          Calendar month="2026-11" marked={map(recurring,r=>r.day)} bind=picked onSelect={picked=result.day}
+        Column w=320 gap=12
+          Card gap=8
+            Heading "Day {picked}" level=3
+            if count(recurring,r=>r.day==picked)==0
+              Text.muted "Nothing due on this day."
+            each r in filter(recurring,x=>x.day==picked)
+              Row between
+                Text.strong "{r.title}"
+                Text "{money(r.amount,'$',2)}"
+          Card gap=8
+            Heading "Coming up" level=3
+            each r in sortBy(filter(recurring,x=>x.day>=picked),x=>x.day)
+              ListTile "{r.title}" subtitle="Due on the {r.day}th"
+                Text.strong "{money(r.amount,'$',2)}"
+                IconButton "close" tooltip="Stop repeating" onTap={recurring=removeWhere(recurring,x=>x.id==r.id)}
+  Dialog#newbill "New recurring bill"
+    Input "Bill" bind=newTitle
+    Input "Amount" type=number bind=newAmount
+    Slider bind=newDay min=1 max=28 step=1
+    Text.muted "Repeats on day {newDay} of every month"
+    Button "Add" onTap={newTitle!="" ? {recurring=append(recurring,{"id":length(recurring)+10,"title":newTitle,"day":newDay,"amount":newAmount}); newTitle=""; close} : toast "Name the bill"}
+
+### Chores
+state people=["Maya","Leo","Ines","Sam"]
+state jobs=["Bins","Bathroom","Kitchen","Floors"]
+state offset=0
+state done=[false,false,false,false]
+state spun=false
+App
+  Sidebar
+    Brand "Housemates" icon="home"
+    NavItem "Balances" icon="account_balance_wallet" onTap={go balances}
+    NavItem "Bills calendar" icon="calendar_month" onTap={go bills_calendar}
+    NavItem "Chores" icon="cleaning_services" selected={true} onTap={go chores}
+    NavItem "House and summary" icon="menu_book" onTap={go house}
+  Main
+    Nav
+      Heading "This week's chores" level=1
+      Button "Spin the wheel" icon="casino" onTap={offset=(offset+1+floor(random()*3))%4; done=[false,false,false,false]; spun=true; toast "New week assigned"}
+    Column pad=24 gap=16 scroll
+      Row gap=24 top
+        Card grow gap=12 center
+          Wheel items={jobs} turn={offset} animate=spin duration=900
+          Text.muted "Week of {formatDate(today(),'MMM d')}"
+        Card grow gap=8
+          Heading "Assignments" level=3
+          each p in people
+            Row gap=12 middle between
+              Row gap=12 middle
+                Avatar "{p}" size=36
+                Column
+                  Text.strong "{p}"
+                  Text.muted "{jobs[(index+offset)%4]}"
+              Checkbox bind=done[index]
+          Progress {count(done,x=>x)/4}
+          Text.muted "{count(done,x=>x)} of 4 done"
+          if all(done,x=>x)
+            Badge.success "All done, nice work" animate=pop
+
+### House and summary
+state rules="Quiet hours after 22:00 on weekdays.\nDishes done the same day.\nGuests staying over more than two nights: tell everyone first.\nBathroom rota is on the chores page."
+state editing=false
+state totals=[2800,2950,3120,2870,3010,3240]
+state range="6 months"
+App
+  Sidebar
+    Brand "Housemates" icon="home"
+    NavItem "Balances" icon="account_balance_wallet" onTap={go balances}
+    NavItem "Bills calendar" icon="calendar_month" onTap={go bills_calendar}
+    NavItem "Chores" icon="cleaning_services" onTap={go chores}
+    NavItem "House and summary" icon="menu_book" selected={true} onTap={go house}
+  Main
+    Nav
+      Heading "House and summary" level=1
+      SegmentedButton items=["3 months","6 months"] bind=range
+    Column pad=24 gap=16 scroll
+      Row gap=24 top
+        Card grow gap=12
+          Row between
+            Heading "House rules" level=3
+            Button.ghost "{editing ? 'Done' : 'Edit'}" icon={editing ? "check" : "edit"} onTap={editing=!editing}
+          if editing
+            Input "Rules" multiline bind=rules
+          if !editing
+            Text "{rules}"
+        Card grow gap=12
+          Heading "Spending per month" level=3
+          BarChart values={range=="3 months" ? slice(totals,3,6) : totals} labels={range=="3 months" ? ["Sep","Oct","Nov"] : ["Jun","Jul","Aug","Sep","Oct","Nov"]} h=220
+          Text.muted "Average {money(sum(totals,x=>x)/length(totals),'$',0)} a month"
+      Card gap=12
+        Heading "Where November went" level=3
+        Donut values=[2400,96,142,60,70] labels=["Rent","Electricity","Groceries","Internet","Other"]

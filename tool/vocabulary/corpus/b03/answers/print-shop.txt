@@ -1,0 +1,249 @@
+### Upload
+state photos=[{"id":1,"name":"IMG_2041.jpg","url":"https://images.pressroom.app/u/2041.jpg","progress":1,"lowres":false,"size":"4x6","paper":"Glossy","qty":2,"crop":"2:3"},{"id":2,"name":"beach-day.jpg","url":"https://images.pressroom.app/u/beach.jpg","progress":1,"lowres":false,"size":"5x7","paper":"Matte","qty":1,"crop":"5:7"},{"id":3,"name":"grandma_scan.jpg","url":"https://images.pressroom.app/u/scan.jpg","progress":1,"lowres":true,"size":"4x6","paper":"Glossy","qty":3,"crop":"2:3"},{"id":4,"name":"wedding-first-dance.jpg","url":"https://images.pressroom.app/u/dance.jpg","progress":0.62,"lowres":false,"size":"8x10","paper":"Lustre","qty":1,"crop":"4:5"},{"id":5,"name":"thumbnail_share.jpg","url":"https://images.pressroom.app/u/thumb.jpg","progress":1,"lowres":true,"size":"4x6","paper":"Glossy","qty":1,"crop":"2:3"},{"id":6,"name":"IMG_2077.jpg","url":"https://images.pressroom.app/u/2077.jpg","progress":0.2,"lowres":false,"size":"4x6","paper":"Glossy","qty":4,"crop":"2:3"}]
+state allSize="4x6"
+state allPaper="Glossy"
+state cropId=0
+state cropUrl=""
+state cropName=""
+state cropRatio="2:3"
+state cropZoom=1
+state cropBox={}
+every 600 onTick={photos=map(photos,p=>p.progress<1?with(p,"progress",min(1,p.progress+0.08)):p)}
+App
+  Sidebar
+    Brand "Pressroom" icon="photo_library"
+    NavItem "Photos" icon="add_photo_alternate" badge="{length(photos)}" selected={true}
+    NavItem "Checkout" icon="shopping_bag" onTap={go checkout}
+    NavItem "Track order" icon="local_shipping" onTap={go tracking}
+    Spacer grow
+    Text.muted "Free reprint if a print arrives damaged."
+  Main
+    Nav
+      Heading "Your photos" level=1
+      Row gap=8
+        Button.outline "Add more" icon="upload" onTap={emit pickFiles}
+        Button "Continue to checkout" onTap={length(photos)==0 ? toast "Add a photo first" : go checkout}
+    Column pad=24 gap=16
+      FileDrop "Drop photos here or browse" hint="JPG, PNG or HEIC, up to 50 MB each" accept="image/*" multiple onFiles={emit upload result}
+      if count(photos,p=>p.lowres)>0
+        Card gap=8 fill=#FFFFF4E5
+          Row gap=8 middle
+            Icon "warning" color=#FFB26B00
+            Text.strong "{count(photos,p=>p.lowres)} photos are low resolution and may print soft."
+          Text.muted "Pick a smaller size for those, or upload a sharper original."
+      Card gap=12
+        Text.strong "Set for all photos"
+        Row gap=12 middle
+          Select "Size" bind=allSize items=["4x6","5x7","8x10","11x14"] w=140
+          Select "Paper" bind=allPaper items=["Glossy","Matte","Lustre","Metallic"] w=160
+          Button.secondary "Apply to all" onTap={photos=map(photos,p=>with(with(p,"size",allSize),"paper",allPaper)); toast "Applied to {length(photos)} photos"}
+      if length(photos)==0
+        Card center
+          Text.muted "No photos yet. Drop some above to get started."
+      Grid cols=3 gap=16
+        each p in photos
+          Card gap=8 animate=fade
+            Stack
+              Image "{p.url}" h=150 onTap={cropId=p.id; cropUrl=p.url; cropName=p.name; cropRatio=p.crop; cropZoom=1; open crop}
+              if p.progress<1
+                Box fill=#99000000 pad=8 bottom
+                  Text "Uploading {round(p.progress*100,0)}%" color=#FFFFFFFF size=12
+            if p.progress<1
+              Progress bind=p.progress
+            Row between middle
+              Text.strong "{p.name}" size=13
+              IconButton "delete" tooltip="Remove photo" onTap={photos=removeWhere(photos,x=>x.id==p.id)}
+            Row gap=6
+              if p.lowres
+                Badge.warning "Low resolution"
+              Badge.neutral "Crop {p.crop}"
+            Row gap=8
+              Select bind=p.size items=["4x6","5x7","8x10","11x14"] grow
+              Select bind=p.paper items=["Glossy","Matte","Lustre","Metallic"] grow
+            Row between middle
+              Text.muted "Copies"
+              Row gap=8 middle
+                Button.outline "-" onTap={photos=updateWhere(photos,x=>x.id==p.id,x=>with(x,"qty",max(1,x.qty-1)))}
+                Text.strong "{p.qty}"
+                Button.outline "+" onTap={photos=updateWhere(photos,x=>x.id==p.id,x=>with(x,"qty",min(99,x.qty+1)))}
+    Footer
+      Row between middle
+        Column gap=2
+          Text.strong "{sum(photos,p=>p.qty)} prints"
+          Text.muted "Bulk discount: 5% at 10, 10% at 25, 15% at 50 prints"
+        Row gap=16 middle
+          if sum(photos,p=>p.qty)>=10
+            Badge.success "{sum(photos,p=>p.qty)>=50?15:(sum(photos,p=>p.qty)>=25?10:5)}% off"
+          Text.heading "{money(sum(photos,p=>p.qty*(p.size=="4x6"?0.29:(p.size=="5x7"?0.89:(p.size=="8x10"?2.49:6.99)))*(p.paper=="Metallic"?1.4:(p.paper=="Lustre"?1.1:1)))*(1-(sum(photos,p=>p.qty)>=50?0.15:(sum(photos,p=>p.qty)>=25?0.10:(sum(photos,p=>p.qty)>=10?0.05:0)))),"$",2)}"
+  Pane w=320 pad=16 gap=12
+    Text.panelTitle "Live price"
+    each p in photos
+      Row between
+        Text.muted "{p.qty} x {p.size} {p.paper}" size=13
+        Text "{money(p.qty*(p.size=="4x6"?0.29:(p.size=="5x7"?0.89:(p.size=="8x10"?2.49:6.99)))*(p.paper=="Metallic"?1.4:(p.paper=="Lustre"?1.1:1)),"$",2)}" size=13
+    Divider
+    Row between
+      Text "Subtotal"
+      Text "{money(sum(photos,p=>p.qty*(p.size=="4x6"?0.29:(p.size=="5x7"?0.89:(p.size=="8x10"?2.49:6.99)))*(p.paper=="Metallic"?1.4:(p.paper=="Lustre"?1.1:1))),"$",2)}"
+    Row between
+      Text.success "Bulk discount"
+      Text.success "-{money(sum(photos,p=>p.qty*(p.size=="4x6"?0.29:(p.size=="5x7"?0.89:(p.size=="8x10"?2.49:6.99)))*(p.paper=="Metallic"?1.4:(p.paper=="Lustre"?1.1:1)))*(sum(photos,p=>p.qty)>=50?0.15:(sum(photos,p=>p.qty)>=25?0.10:(sum(photos,p=>p.qty)>=10?0.05:0))),"$",2)}"
+    Divider
+    Text.strong "Discount tiers"
+    Column gap=6
+      Row between
+        Text.muted "10 to 24 prints"
+        Badge.neutral "5% off"
+      Row between
+        Text.muted "25 to 49 prints"
+        Badge.neutral "10% off"
+      Row between
+        Text.muted "50+ prints"
+        Badge.neutral "15% off"
+    Progress {min(1,sum(photos,p=>p.qty)/50)}
+    Text.muted "{sum(photos,p=>p.qty)>=50?"Top tier reached":"Add "+(sum(photos,p=>p.qty)>=25?50-sum(photos,p=>p.qty):(sum(photos,p=>p.qty)>=10?25-sum(photos,p=>p.qty):10-sum(photos,p=>p.qty)))+" more prints for the next tier"}" size=13
+Dialog#crop "Crop photo" "{cropName}"
+  Cropper "{cropUrl}" ratio={cropRatio} zoom={cropZoom} bind=cropBox h=300
+  Row gap=8
+    ChoiceChip "2:3" selected={cropRatio=="2:3"} onTap={cropRatio="2:3"}
+    ChoiceChip "5:7" selected={cropRatio=="5:7"} onTap={cropRatio="5:7"}
+    ChoiceChip "4:5" selected={cropRatio=="4:5"} onTap={cropRatio="4:5"}
+    ChoiceChip "1:1" selected={cropRatio=="1:1"} onTap={cropRatio="1:1"}
+  Row gap=12 middle
+    Icon "zoom_out"
+    Slider bind=cropZoom min=1 max=4 grow
+    Icon "zoom_in"
+  Row gap=8 end
+    Button.ghost "Reset" onTap={cropZoom=1; cropRatio="2:3"}
+    Button.outline "Cancel" onTap={close}
+    Button "Apply crop" onTap={photos=updateWhere(photos,x=>x.id==cropId,x=>with(x,"crop",cropRatio)); toast "Crop saved"; close}
+
+### Checkout
+state method="Delivery"
+state speed="Standard"
+state store="Pressroom Downtown, 214 Main St"
+state fullName="Maya Reyes"
+state street="48 Alder Lane"
+state city="Portland"
+state zip="97205"
+state phone="503 555 0142"
+state agree=false
+state subtotal=0
+App
+  Sidebar
+    Brand "Pressroom" icon="photo_library"
+    NavItem "Photos" icon="add_photo_alternate" badge="{length(photos)}" onTap={go upload}
+    NavItem "Checkout" icon="shopping_bag" selected={true}
+    NavItem "Track order" icon="local_shipping" onTap={go tracking}
+  Main
+    Nav
+      Heading "Checkout" level=1
+      Button.outline "Back to photos" icon="arrow_back" onTap={go upload}
+    Column pad=24 gap=16
+      Card gap=12
+        Text.strong "How do you want them?"
+        SegmentedButton bind=method items=["Delivery","Pickup"]
+      if method=="Delivery"
+        Card gap=12
+          Text.strong "Ship to"
+          Input "Full name" bind=fullName
+          Input "Street address" bind=street
+          Row gap=12
+            Input "City" bind=city grow
+            Input "ZIP" bind=zip type=number w=120
+          Input "Phone" bind=phone type=phone
+          Text.strong "Delivery speed"
+          Radio "Standard, 4 to 6 days, $4.99" value="Standard" bind=speed
+          Radio "Express, 2 days, $12.50" value="Express" bind=speed
+          Radio "Next day, $19.00" value="Next day" bind=speed
+      if method=="Pickup"
+        Card gap=12
+          Text.strong "Pick up at"
+          Select "Store" bind=store items=["Pressroom Downtown, 214 Main St","Pressroom Eastside, 9 Burnside Ave","Pressroom Airport Road, 1200 Airport Rd"]
+          DatePicker "Pickup day" bind=pickupDay
+          TimePicker "Pickup time" bind=pickupTime
+          Text.muted "Ready within 1 hour. Free."
+      Card gap=8
+        Text.strong "Order summary"
+        each p in photos
+          Row between middle
+            Row gap=8 middle
+              Image "{p.url}" w=48 h=48 radius=6
+              Column gap=2
+                Text "{p.name}" size=13
+                Text.muted "{p.qty} x {p.size}, {p.paper}" size=12
+            Text "{money(p.qty*(p.size=="4x6"?0.29:(p.size=="5x7"?0.89:(p.size=="8x10"?2.49:6.99)))*(p.paper=="Metallic"?1.4:(p.paper=="Lustre"?1.1:1)),"$",2)}"
+      Checkbox "I confirm the low-resolution photos may print soft" bind=agree visible={count(photos,p=>p.lowres)>0}
+    Footer
+      Row between middle
+        Column gap=2
+          Text.muted "Total"
+          Text.heading "{money(sum(photos,p=>p.qty*(p.size=="4x6"?0.29:(p.size=="5x7"?0.89:(p.size=="8x10"?2.49:6.99)))*(p.paper=="Metallic"?1.4:(p.paper=="Lustre"?1.1:1)))*(1-(sum(photos,p=>p.qty)>=50?0.15:(sum(photos,p=>p.qty)>=25?0.10:(sum(photos,p=>p.qty)>=10?0.05:0))))+(method=="Pickup"?0:(speed=="Standard"?4.99:(speed=="Express"?12.5:19))),"$",2)}"
+        Button "Place order" icon="lock" onTap={count(photos,p=>p.lowres)>0 && !agree ? toast "Please confirm the low-resolution photos" : (method=="Delivery" && trim(street)=="" ? toast "Enter a street address" : {emit placeOrder; go tracking})}
+  Pane w=320 pad=16 gap=12
+    Text.panelTitle "Price"
+    Row between
+      Text.muted "{sum(photos,p=>p.qty)} prints"
+      Text "{money(sum(photos,p=>p.qty*(p.size=="4x6"?0.29:(p.size=="5x7"?0.89:(p.size=="8x10"?2.49:6.99)))*(p.paper=="Metallic"?1.4:(p.paper=="Lustre"?1.1:1))),"$",2)}"
+    Row between
+      Text.success "Bulk discount"
+      Text.success "{sum(photos,p=>p.qty)>=50?"15%":(sum(photos,p=>p.qty)>=25?"10%":(sum(photos,p=>p.qty)>=10?"5%":"none"))}"
+    Row between
+      Text.muted "{method=="Pickup"?"Pickup":speed}"
+      Text "{method=="Pickup"?"Free":money(speed=="Standard"?4.99:(speed=="Express"?12.5:19),"$",2)}"
+    Divider
+    Text.muted "{method=="Pickup"?store:street+", "+city+" "+zip}" size=13
+
+### Tracking
+state step=2
+state trackId="PR-482913"
+every 5s when step<4 onTick={step=step+0}
+Page
+  Nav sticky
+    Brand "Pressroom" icon="photo_library"
+    Row gap=4
+      Link "Photos" onTap={go upload}
+      Link "Checkout" onTap={go checkout}
+      Link "Track order" onTap={go tracking}
+    Button.outline "Need help?" onTap={open help}
+  Section narrow
+    Column gap=16
+      Heading "Order {trackId}" level=1
+      Row gap=8 middle
+        Badge.info "In production"
+        Text.muted "Estimated {method=="Pickup"?"ready Thursday, 2:00 PM":"delivery Monday, Nov 23"}"
+      Card gap=16
+        Timeline
+          TimelineItem "Order placed" "Tue 9:12 AM" done={step>=0}
+          TimelineItem "Prints being made" "Tue 11:40 AM" done={step>=1}
+          TimelineItem "Quality check" "Wed 8:05 AM" done={step>=2}
+          TimelineItem "{method=="Pickup"?"Ready for pickup":"Shipped"}" "Expected Thu" done={step>=3}
+          TimelineItem "{method=="Pickup"?"Picked up":"Delivered"}" "Expected Mon" done={step>=4}
+        Progress {step/4}
+      Card gap=8
+        Text.strong "{method=="Pickup"?"Pickup location":"Shipping to"}"
+        Text.muted "{method=="Pickup"?store:fullName+", "+street+", "+city+" "+zip}"
+        if method=="Delivery"
+          Row between middle
+            Text "Carrier: UPS {speed}"
+            Row gap=8 middle
+              Text.mono "1Z 84A 902 03 4481 2290"
+              IconButton "content_copy" tooltip="Copy tracking number" onTap={copy "1Z84A9020344812290"; toast "Copied"}
+      Card gap=8
+        Text.strong "In this order"
+        each p in photos
+          Row between middle
+            Row gap=8 middle
+              Image "{p.url}" w=40 h=40 radius=6
+              Text "{p.name}" size=13
+            Text.muted "{p.qty} x {p.size}"
+      Row gap=8
+        Button.outline "Reorder" icon="replay" onTap={go upload}
+        Button.ghost "Download receipt" icon="download" onTap={emit receipt}
+  Footer
+    Row between
+      Text.strong "Pressroom"
+      Text.muted "Questions? help@pressroom.app"
+Dialog#help "Need help?" "We reply within a few hours."
+  Input "Message" bind=helpText multiline
+  Button "Send" onTap={emit support helpText; toast "Message sent"; close}

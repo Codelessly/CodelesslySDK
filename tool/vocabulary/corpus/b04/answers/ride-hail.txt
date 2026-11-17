@@ -1,0 +1,172 @@
+### Where to
+state q=""
+state dest=""
+state pickup="Pier 39, Embarcadero"
+state pin=[37.8087,-122.4098]
+state ride="comfort"
+state recents=[{"name":"Ferry Building","addr":"1 Ferry Building, San Francisco"},{"name":"Home","addr":"2214 Fillmore St"},{"name":"Salesforce Tower","addr":"415 Mission St"},{"name":"SFO Terminal 2","addr":"San Francisco International Airport"}]
+state rides=[{"id":"saver","name":"Saver","seats":4,"price":11.40,"eta":3,"surge":1.0},{"id":"comfort","name":"Comfort","seats":4,"price":16.90,"eta":4,"surge":1.4},{"id":"xl","name":"XL","seats":6,"price":24.30,"eta":7,"surge":1.4}]
+App
+  Main
+    Nav
+      Brand "Kerbside" icon="local_taxi"
+      Row gap=8
+        IconButton "history" tooltip="Past trips" onTap={go history}
+        Avatar "Jonah Weiss" size=36
+    Column pad=16 gap=12 scroll
+      Card gap=8
+        Row gap=8
+          Icon "trip_origin"
+          Input "Pickup" bind=pickup grow
+        Row gap=8
+          Icon "place"
+          Input "Where to?" bind=q grow onChange={dest=result}
+      if q==""
+        Text.sectionTitle "Recent places"
+        each r in recents
+          ListTile "{r.name}" subtitle="{r.addr}" icon="schedule" onTap={q=r.name; dest=r.name}
+      if q!=""
+        Map h=260 radius=12 route={true} from={pin} to={dest}
+          Pin#pickupPin draggable onDragEnd={pin=result; pickup="Adjusted pin"; toast "Pickup moved"}
+          Pin.destination
+        Row between
+          Text.caption "Drag the pin to adjust pickup"
+          Button.ghost "Reset pin" onTap={pin=[37.8087,-122.4098]; pickup="Pier 39, Embarcadero"}
+        Text.sectionTitle "Choose a ride"
+        each o in rides
+          ListTile "{o.name}" subtitle="{o.eta} min away, {o.seats} seats" icon="directions_car" selected={ride==o.id} onTap={ride=o.id}
+            Row gap=8
+              if o.surge>1
+                Badge.warning "{o.surge}x busy"
+              Text.strong "{money(o.price,'$',2)}"
+        SlideToConfirm "Slide to book {find(rides,x=>x.id==ride).name}" onConfirm={go finding}
+
+### Finding driver
+state seconds=0
+state found=false
+every 1s when !found onTick={seconds=seconds+1; found=seconds>=4}
+every 1s when found onTick={go driver}
+App
+  Main
+    Nav
+      Heading "Finding your driver"
+      Button.ghost "Cancel" onTap={open cancel}
+    Column pad=24 gap=24 center middle
+      Stack center middle h=240
+        Ring 1 animate=pulse
+        Icon "local_taxi" size=64 animate=spin
+      Text.heading "Looking for a Comfort ride nearby"
+      Text.muted "Checking drivers around Pier 39 ({seconds}s)"
+      Progress {min(1,seconds/4)}
+      Button.outline "Change ride type" onTap={go where-to}
+  Dialog#cancel "Cancel this request?" "You will not be charged."
+    Row gap=8 end
+      Button.ghost "Keep looking" onTap={close}
+      Button.destructive "Cancel request" onTap={close; go where-to}
+
+### Driver on the way
+state eta=240
+state sent=false
+every 1s when eta>0 onTick={eta=eta-1}
+every 1s when eta==0 onTick={go trip}
+App
+  Main
+    Nav
+      Heading "Your driver is coming"
+      Badge.success "Arrives in {duration(eta)}"
+    Column pad=16 gap=12 scroll
+      Map h=220 radius=12 route={true} live={true}
+        Pin.car at=[37.8021,-122.4150] heading=40
+        Pin#pickupPin at=[37.8087,-122.4098]
+      Progress {1-eta/240}
+      Card gap=12
+        Row gap=12 middle
+          Avatar "Marcus Bell" size=56
+          Column grow gap=2
+            Text.heading "Marcus Bell"
+            Row gap=4
+              Icon "star" color=#FFF5B301
+              Text.small "4.93 (2,310 trips)"
+          Column gap=2 end
+            Text.strong "7XKJ 482"
+            Text.small "Silver Toyota Camry"
+        Row gap=8
+          Button.outline "Message" icon="chat" grow onTap={open chat}
+          Button.outline "Call" icon="call" grow onTap={emit callDriver}
+      Row gap=8
+        Chip "PIN 4417"
+        Chip "Pickup: Pier 39, Embarcadero"
+    Footer
+      Row between
+        Text.muted "Comfort, {money(16.90,'$',2)}"
+        Button.ghost "Cancel ride" onTap={go where-to}
+  Sheet#chat "Marcus"
+    ChatThread items={[{"from":"driver","text":"I am at the corner by the carousel."}]} bind=thread
+    Row gap=8
+      Input "Message" bind=draft grow
+      IconButton "send" tooltip="Send" onTap={thread=append(thread,{"from":"me","text":draft}); draft=""}
+
+### Live trip
+state shared=false
+state rating=0
+state tip=0
+state note=""
+state arrived=false
+every 1s when !arrived onTick={arrived=false}
+App
+  Main
+    Nav
+      Heading "On the way to Ferry Building"
+      Badge.info "11 min"
+    Column pad=16 gap=12 scroll
+      Map h=300 radius=12 route={true} live={true}
+        Pin.car at=[37.8049,-122.4120]
+      Row between
+        Column gap=2
+          Text.caption "Drop-off"
+          Text.strong "1 Ferry Building"
+        Column gap=2 end
+          Text.caption "Arriving"
+          Text.strong "3:42 PM"
+      Row gap=8
+        Button.outline "Share trip status" icon="share" grow onTap={shared=true; emit shareTrip; toast "Link sent to your contacts"}
+        Button.destructive "Safety" icon="shield" grow onTap={open safety}
+      if shared
+        Badge.success "Sharing live with Priya Nair"
+      Button "I have arrived" onTap={go rate}
+  Sheet#safety "Safety toolkit"
+    ListTile "Call emergency services" icon="emergency" onTap={emit call911; close}
+    ListTile "Share live location" icon="location_on" onTap={shared=true; close}
+    ListTile "Report a problem" icon="flag" onTap={emit report; close}
+
+### Rate and tip
+state rating=0
+state tip=2
+state note=""
+state custom=""
+Page
+  Section narrow center
+    Column gap=16 center
+      Avatar "Marcus Bell" size=72
+      Heading "How was your ride with Marcus?" level=1
+      Text.muted "Trip total {money(16.90,'$',2)}"
+      Rating bind=rating max=5 size=40
+      if rating>0 && rating<4
+        Input "What went wrong?" multiline bind=note
+      if rating>=4
+        Row gap=8
+          ChoiceChip "Great conversation" onTap={emit tag "conversation"}
+          ChoiceChip "Clean car" onTap={emit tag "clean"}
+          ChoiceChip "Smooth driving" onTap={emit tag "smooth"}
+      Text.sectionTitle "Add a tip"
+      Row gap=8 center
+        ChoiceChip "No tip" selected={tip==0} onTap={tip=0}
+        ChoiceChip "$2" selected={tip==2} onTap={tip=2}
+        ChoiceChip "$4" selected={tip==4} onTap={tip=4}
+        ChoiceChip "$6" selected={tip==6} onTap={tip=6}
+        ChoiceChip "Other" selected={tip==-1} onTap={tip=-1}
+      if tip==-1
+        Input "Custom tip" type=number bind=custom
+      Text.strong "Total with tip: {money(16.90+(tip==-1 ? coalesce(custom,0) : tip),'$',2)}"
+      Button "Submit" size=large disabled={rating==0} onTap={emit rated {"rating":rating,"tip":tip,"note":note}; toast "Thanks for riding"; go where-to}
+      Button.ghost "Skip" onTap={go where-to}

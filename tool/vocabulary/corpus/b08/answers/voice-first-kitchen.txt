@@ -1,0 +1,136 @@
+### Cooking
+state step=0
+state steps=[{"title":"Whisk the eggs","body":"Crack three eggs into a bowl and whisk until pale and frothy."},{"title":"Add the flour","body":"Sift in 200 grams of flour, a little at a time, stirring as you go."},{"title":"Rest the batter","body":"Cover the bowl and let the batter rest for ten minutes."},{"title":"Heat the pan","body":"Warm a non-stick pan over medium heat with a knob of butter."},{"title":"Pour and flip","body":"Pour a ladle of batter, cook until bubbles form, then flip."}]
+state listening=true
+state handsFree=true
+state noisy=false
+state heard=[{"text":"next","at":"just now"}]
+state answer=""
+state timers=[{"id":1,"name":"Batter rest","left":600,"total":600,"running":true}]
+state nextId=2
+every 1s onTick={timers=map(timers,t=>t.running && t.left>0 ? with(t,"left",t.left-1) : t)}
+VoiceListener active={listening && handsFree} onCommand={heard=take(append([{"text":result.text,"at":"just now"}],heard),3); listening=true} onNext={step=min(length(steps)-1,step+1)} onBack={step=max(0,step-1)} onRepeat={emit speak steps[step].body} onTimer={timers=append(timers,{"id":nextId,"name":result.name,"left":result.seconds,"total":result.seconds,"running":true}); nextId=nextId+1; toast "Timer started"} onAsk={answer=result.answer; open ingredients} onNoise={noisy=result.level>70}
+App
+  Main
+    Nav
+      Brand "Say Chef" icon="restaurant"
+      Row gap=12 middle
+        Badge.warning "Noisy kitchen" visible={noisy}
+        Toggle "Hands-free" bind=handsFree
+        IconButton "list_alt" tooltip="Ingredients" onTap={open ingredients}
+    Column pad=24 gap=24 center
+      if noisy
+        Card gap=8
+          Row gap=12 middle
+            Icon "volume_up"
+            Column grow
+              Text.strong "It is loud in here"
+              Text.muted "I may miss you. Use the big buttons below."
+            Button.outline "Dismiss" onTap={noisy=false}
+      Text.caption "Step {step+1} of {length(steps)}" center
+      Text.pageTitle "{steps[step].title}" size=56 weight=700 center
+      Text.bodySecondary "{steps[step].body}" size=26 center
+      Progress {(step+1)/length(steps)}
+      Stack center middle h=160
+        Box w=120 h=120 radius=60 fill=#334F7CFF animate=pulse duration=1400 visible={listening && handsFree}
+        Box w=72 h=72 radius=36 fill=#FF4F7CFF visible={listening && handsFree}
+        Icon "mic" visible={listening && handsFree}
+        Icon "mic_off" visible={!(listening && handsFree)}
+      Text.muted "Listening. Say next, repeat, set a timer, or how much flour." center visible={listening && handsFree}
+      Text.muted "Voice is off. Tap the buttons below." center visible={!(listening && handsFree)}
+      Row gap=8 center
+        each h in heard
+          Chip "\"{h.text}\" {h.at}"
+      Text.success "{answer}" center visible={answer!=""}
+      if length(timers)>0
+        Row gap=24 center
+          each t in timers
+            Column gap=8 center
+              Stack center middle
+                Ring {t.left/t.total} w=140 h=140
+                Text.strong "{duration(t.left)}" size=28
+              Text.strong "{t.name}" center
+              Row gap=8
+                IconButton "pause" tooltip="Pause" visible={t.running} onTap={timers=updateWhere(timers,x=>x.id==t.id,x=>with(x,"running",false))}
+                IconButton "play_arrow" tooltip="Resume" visible={!t.running} onTap={timers=updateWhere(timers,x=>x.id==t.id,x=>with(x,"running",true))}
+                IconButton "close" tooltip="Remove" onTap={timers=removeWhere(timers,x=>x.id==t.id)}
+    Footer
+      Grid cols=4 gap=12 pad=12
+        Button.outline "Back" icon="arrow_back" size=large onTap={step=max(0,step-1)}
+        Button.outline "Repeat" icon="replay" size=large onTap={emit speak steps[step].body; heard=take(append([{"text":"repeat","at":"just now"}],heard),3)}
+        Button.outline "Timer" icon="timer" size=large onTap={open timerSheet}
+        Button "Next" icon="arrow_forward" size=large onTap={step=min(length(steps)-1,step+1); heard=take(append([{"text":"next","at":"just now"}],heard),3)}
+Sheet#timerSheet "Set a timer"
+  state mins=10
+  state tname="Timer"
+  Input "Name" bind=tname
+  Row gap=12 middle center
+    IconButton "remove" tooltip="Fewer minutes" onTap={mins=max(1,mins-1)}
+    Text.strong "{mins} min" size=40
+    IconButton "add" tooltip="More minutes" onTap={mins=mins+1}
+  Row gap=8 center
+    ChoiceChip "5" selected={mins==5} onTap={mins=5}
+    ChoiceChip "10" selected={mins==10} onTap={mins=10}
+    ChoiceChip "15" selected={mins==15} onTap={mins=15}
+    ChoiceChip "30" selected={mins==30} onTap={mins=30}
+  Button "Start timer" size=large onTap={timers=append(timers,{"id":nextId,"name":tname,"left":mins*60,"total":mins*60,"running":true}); nextId=nextId+1; toast "Timer started"; close}
+Sheet#ingredients "Ingredients"
+  Text.muted "Say how much flour, or any ingredient, to ask."
+  Button.ghost "Open the full list" onTap={close; go ingredients}
+
+### Ingredients
+state have=[]
+state items=[{"name":"Plain flour","amount":"200 g"},{"name":"Eggs","amount":"3"},{"name":"Whole milk","amount":"300 ml"},{"name":"Butter","amount":"30 g"},{"name":"Salt","amount":"1 pinch"},{"name":"Sugar","amount":"1 tbsp"}]
+state q=""
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back to cooking" onTap={go cooking}
+      Heading "Ingredients" level=1
+      Button.outline "Read aloud" icon="volume_up" onTap={emit speak join(map(items,i=>i.amount+" "+i.name),", ")}
+    Column pad=24 gap=16
+      Row gap=8 middle
+        Input "Ask or search" "how much flour" bind=q grow
+        VoiceInput onResult={q=result}
+      Text.muted "{count(have,n=>true)} of {length(items)} gathered"
+      Progress {length(have)/length(items)}
+      Card gap=4
+        each i in filter(items,x=>q=="" || contains(lower(x.name),lower(q)))
+          ListTile "{i.name}" subtitle="{i.amount}" onTap={have=contains(have,i.name) ? without(have,i.name) : append(have,i.name)}
+            Checkbox selected={contains(have,i.name)}
+      Text.muted "Nothing matches that." visible={length(filter(items,x=>contains(lower(x.name),lower(q))))==0 && q!=""}
+    Footer
+      Row pad=12 gap=12
+        Button "Back to cooking" size=large grow onTap={go cooking}
+
+### Settings
+state handsFree=true
+state sensitivity=60
+state wake="Hey Chef"
+state noiseWarn=true
+state bigButtons=false
+state voiceSpeed=1
+state voice="Warm"
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go cooking}
+      Heading "Listening" level=1
+    Column pad=24 gap=16
+      Card gap=12
+        Toggle "Hands-free mode" bind=handsFree
+        Text.muted "Say next, repeat or set a timer without touching the screen."
+        Input "Wake phrase" bind=wake
+        Text.fieldLabel "Microphone sensitivity"
+        Slider bind=sensitivity min=0 max=100
+      Card gap=12
+        Toggle "Warn me when it is too noisy" bind=noiseWarn
+        Toggle "Always show big buttons" bind=bigButtons
+        Text.muted "Big buttons appear on their own when the room gets loud."
+      Card gap=12
+        Text.strong "Voice"
+        SegmentedButton bind=voice items=["Warm","Clear","Quiet"]
+        Text.fieldLabel "Speaking speed"
+        Slider bind=voiceSpeed min=0.5 max=1.5
+        Button.outline "Hear a sample" icon="volume_up" onTap={emit speak "Next, add the flour."}
+      Button "Done" size=large onTap={go cooking}

@@ -1,0 +1,143 @@
+### Library
+state tab="library"
+state query=""
+state books=[{"id":"b1","title":"The Lighthouse Keeper's Year","author":"Mara Ellison","pages":212,"progress":0.64},{"id":"b2","title":"Letters from the Orchard","author":"Tomas Reyes","pages":156,"progress":0.18},{"id":"b3","title":"A Short History of Rain","author":"Priya Nair","pages":288,"progress":1},{"id":"b4","title":"Salt and Iron","author":"Jonas Weber","pages":344,"progress":0},{"id":"b5","title":"The Quiet Garden","author":"Helen Okafor","pages":120,"progress":0.4}]
+state current="b1"
+App
+  Sidebar
+    Brand "Bold Page" icon="menu_book"
+    NavItem "Library" icon="local_library" selected={tab=="library"} onTap={tab="library"}
+    NavItem "Reading" icon="chrome_reader_mode" onTap={go reader}
+    NavItem "Text settings" icon="format_size" onTap={go text-settings}
+    Spacer grow
+    Text.muted "Large print on"
+  Main
+    Nav
+      Heading "My books" level=1
+      Row gap=8
+        Input "Search books" bind=query w=220
+        IconButton "mic" tooltip="Search by voice" onTap={emit voiceSearch}
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Text.muted "Continue reading"
+        Text.heading "{find(books,b=>b.id==current).title}" size=32 weight=700
+        Progress {find(books,b=>b.id==current).progress}
+        Button "Open" size=large onTap={go reader}
+      each book in filter(books,b=>contains(lower(b.title),lower(query)) || contains(lower(b.author),lower(query)))
+        ListTile onTap={current=book.id; go reader} menu=bookMenu
+          Column gap=4
+            Text.heading "{book.title}" size=28 weight=700
+            Text.muted "{book.author} - {book.pages} pages" size=20
+            Progress {book.progress}
+          IconButton "more_vert" tooltip="More" onTap={current=book.id; open bookMenu}
+      if length(filter(books,b=>contains(lower(b.title),lower(query))))==0
+        Text.muted "No books match \"{query}\"" size=24
+  Menu#bookMenu end
+    MenuItem "Read now" icon="menu_book" onTap={go reader}
+    MenuItem "Mark as finished" icon="check" onTap={books=updateWhere(books,b=>b.id==current,b=>with(b,"progress",1)); toast "Marked as finished"}
+    MenuItem "Remove" icon="delete" onTap={books=removeWhere(books,b=>b.id==current); toast "Removed"}
+
+### Reader
+state passage="The keeper climbed the stairs each evening as the light faded over the water, counting the steps as his father had taught him. Forty-one, then the lamp."
+state theme="whiteOnBlack"
+state size=36
+state lineHeight=1.6
+state letterGap=2
+state font="Atkinson Hyperlegible"
+state line=0
+state focusOn=true
+state speaking=false
+state word=0
+state magOn=false
+state magX=160
+state magY=240
+state textColor=#FFFFFFFF
+state bgColor=#FF000000
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back to library" onTap={go library}
+      Heading "The Lighthouse Keeper's Year" level=3
+      Row gap=8
+        IconButton "text_fields" tooltip="Text settings" onTap={go text-settings}
+        IconButton "palette" tooltip="Colours" onTap={open colours}
+        Toggle "Line focus" bind=focusOn
+        Toggle "Magnifier" bind=magOn
+    Stack
+      Box fill={bgColor} pad=24 gap=12 h=fill
+        Text.muted "Chapter 3" color={textColor} size=20
+        if focusOn
+          LineFocus text={passage} bind=line size={size} lineHeight={lineHeight} letterSpacing={letterGap} font={font} color={textColor} dim=0.25 onSwipeUp={line=max(0,line-1)} onSwipeDown={line=line+1}
+        if !focusOn
+          HighlightedText text={passage} highlight={word} highlightColor=#FFFFD600 size={size} lineHeight={lineHeight} letterSpacing={letterGap} font={font} color={textColor}
+      if magOn
+        Magnifier zoom=2.5 size=160 x={magX} y={magY} drag onDrag={magX=result.x; magY=result.y}
+    Footer
+      Row between middle gap=12
+        IconButton "skip_previous" tooltip="Previous line" onTap={line=max(0,line-1)}
+        Button "{speaking ? \"Pause\" : \"Read aloud\"}" icon={speaking ? "pause" : "volume_up"} size=large onTap={speaking ? {speaking=false; speak stop} : {speaking=true; speak passage}}
+        IconButton "skip_next" tooltip="Next line" onTap={line=line+1}
+        Slider bind=word min=0 max=26 w=200
+        Text.strong "Page 136 of 212"
+  Sheet#colours "Reading colours"
+    Column gap=12
+      Box fill=#FF000000 pad=16 radius=12 onTap={theme="whiteOnBlack"; bgColor=#FF000000; textColor=#FFFFFFFF; close}
+        Text "White on black" color=#FFFFFFFF size=32 weight=700
+      Box fill=#FF000000 pad=16 radius=12 onTap={theme="yellowOnBlack"; bgColor=#FF000000; textColor=#FFFFEB3B; close}
+        Text "Yellow on black" color=#FFFFEB3B size=32 weight=700
+      Box fill=#FFFFF3D6 pad=16 radius=12 onTap={theme="blackOnCream"; bgColor=#FFFFF3D6; textColor=#FF000000; close}
+        Text "Black on cream" color=#FF000000 size=32 weight=700
+
+### Text settings
+state theme="whiteOnBlack"
+state size=36
+state lineHeight=1.6
+state letterGap=2
+state font="Atkinson Hyperlegible"
+state bgColor=#FF000000
+state textColor=#FFFFFFFF
+state sample="Light fell across the harbour, and every boat turned slowly to meet it."
+App
+  Sidebar
+    Brand "Bold Page" icon="menu_book"
+    NavItem "Library" icon="local_library" onTap={go library}
+    NavItem "Reading" icon="chrome_reader_mode" onTap={go reader}
+    NavItem "Text settings" icon="format_size" selected={true}
+    Spacer grow
+  Main
+    Nav
+      Heading "Text settings" level=1
+      Button.outline "Reset" onTap={size=36; lineHeight=1.6; letterGap=2; font="Atkinson Hyperlegible"; theme="whiteOnBlack"; bgColor=#FF000000; textColor=#FFFFFFFF; toast "Back to defaults"}
+    Column pad=24 gap=20 scroll
+      Row gap=24 top
+        Column grow gap=16
+          Text.sectionTitle "Colours"
+          Grid cols=3 gap=12
+            Box fill=#FF000000 pad=16 radius=12 border-bottom=#FFFFFFFF onTap={theme="whiteOnBlack"; bgColor=#FF000000; textColor=#FFFFFFFF}
+              Text "Aa" color=#FFFFFFFF size=48 weight=700 center
+              Text "White on black" color=#FFFFFFFF size=16 center
+              if theme=="whiteOnBlack"
+                Icon "check_circle" color=#FFFFFFFF
+            Box fill=#FF000000 pad=16 radius=12 onTap={theme="yellowOnBlack"; bgColor=#FF000000; textColor=#FFFFEB3B}
+              Text "Aa" color=#FFFFEB3B size=48 weight=700 center
+              Text "Yellow on black" color=#FFFFEB3B size=16 center
+              if theme=="yellowOnBlack"
+                Icon "check_circle" color=#FFFFEB3B
+            Box fill=#FFFFF3D6 pad=16 radius=12 onTap={theme="blackOnCream"; bgColor=#FFFFF3D6; textColor=#FF000000}
+              Text "Aa" color=#FF000000 size=48 weight=700 center
+              Text "Black on cream" color=#FF000000 size=16 center
+              if theme=="blackOnCream"
+                Icon "check_circle" color=#FF000000
+          Text.sectionTitle "Letter size"
+          Stepper "Size" bind=size min=20 max=96 step=4 unit="pt"
+          Text.sectionTitle "Line spacing"
+          Stepper "Line spacing" bind=lineHeight min=1 max=3 step=0.1 unit="x"
+          Text.sectionTitle "Letter spacing"
+          Stepper "Letter spacing" bind=letterGap min=0 max=12 step=1 unit="px"
+          Text.sectionTitle "Font"
+          SegmentedButton bind=font items=["Atkinson Hyperlegible","Lexend","Verdana"]
+        Column grow gap=8 sticky
+          Text.sectionTitle "Live preview"
+          Box fill={bgColor} pad=24 radius=16
+            Text "{sample}" color={textColor} size={size} lineHeight={lineHeight} letterSpacing={letterGap} fontFamily={font} weight=700
+          Button "Use in reader" size=large onTap={emit saveSettings; toast "Saved"; go reader}

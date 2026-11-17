@@ -1,0 +1,132 @@
+### Home
+state screen="home"
+state locked=false
+state voice=true
+state holdMs=500
+state dwell=false
+
+App
+  Main
+    Nav
+      Brand "Bigtap" icon="touch_app"
+      Row gap=8
+        Badge.success "Hold {holdMs} ms" hide=phone
+        IconButton "lock" tooltip="Lock touches" onTap={locked=true; open lockSheet}
+        IconButton "settings" tooltip="Settings" onTap={go settings}
+    Column pad=16 gap=16
+      Text.heading2 "What would you like to do?"
+      Grid cols=2 gap=16
+        Card#tileMessages gap=8 center hold={holdMs} onHold={voice ? speak "Messages" : go conversation} onTap={go conversation}
+          Image "https://images.example.com/bigtap/messages.jpg" h=160 radius=16
+          Text.heading1 "Messages" center
+        Card#tileCall gap=8 center hold={holdMs} onHold={emit call} onTap={toast "Hold to call"}
+          Image "https://images.example.com/bigtap/call.jpg" h=160 radius=16
+          Text.heading1 "Call" center
+        Card#tileHelp gap=8 center hold={holdMs} onHold={emit help; toast "Help is on the way"} onTap={toast "Hold to ask for help"}
+          Image "https://images.example.com/bigtap/help.jpg" h=160 radius=16
+          Text.heading1 "Help" center
+        Card#tileRead gap=8 center hold={holdMs} onHold={voice = !voice} onTap={toast "Hold to switch read-out"}
+          Image "https://images.example.com/bigtap/readout.jpg" h=160 radius=16
+          Text.heading1 "Read aloud: {voice ? 'On' : 'Off'}" center
+      if dwell
+        Row center gap=12
+          DwellPointer size=48 duration=1200
+          Text.muted "Dwell mode is on: rest the pointer on a tile to choose it"
+  Sheet#lockSheet "Touches are locked" "Nothing you touch will do anything until you unlock."
+    Column gap=16 center
+      Icon "lock" size=72
+      HoldButton "Hold to unlock" duration=1500 size=large onHold={locked=false; close}
+      Text.muted "Hold for 1.5 seconds so an accidental touch cannot unlock it"
+
+### Conversation
+state contacts=[{"id":1,"name":"Maya","photo":"https://images.example.com/bigtap/maya.jpg","last":"Are you coming for dinner tonight?","time":"6:12 pm"},{"id":2,"name":"Dad","photo":"https://images.example.com/bigtap/dad.jpg","last":"The doctor moved your visit to Thursday.","time":"4:40 pm"},{"id":3,"name":"Sam","photo":"https://images.example.com/bigtap/sam.jpg","last":"Thanks for the photos!","time":"Yesterday"}]
+state who=1
+state sent=[]
+state holdMs=500
+state voice=true
+
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go home}
+      Heading "Messages" level=1
+      IconButton "volume_up" tooltip="Read last message" onTap={speak find(contacts,c=>c.id==who).last}
+    Column pad=16 gap=16 scroll
+      Row gap=12 scroll
+        each c in contacts
+          Card gap=8 center w=160 selected={who==c.id} hold={holdMs} onHold={who=c.id; voice ? speak c.last : toast "Opened {c.name}"} onTap={toast "Hold to open"}
+            Avatar src="{c.photo}" size=96
+            Text.heading3 "{c.name}" center
+            Text.caption "{c.time}" center
+      Card gap=12
+        Row gap=12
+          Avatar src="{find(contacts,c=>c.id==who).photo}" size=56
+          Text.heading2 "{find(contacts,c=>c.id==who).name}"
+        Text.heading3 "{find(contacts,c=>c.id==who).last}"
+      Text.sectionTitle "Hold a phrase to reply"
+      if who==1
+        Grid cols=2 gap=12
+          each p in ["Yes, I am coming","Not tonight, sorry","What time?","Love you"]
+            HoldButton "{p}" duration={holdMs} size=large onHold={sent=append(sent,{"to":who,"text":p}); toast "Sent: {p}"}
+      if who==2
+        Grid cols=2 gap=12
+          each p in ["Thursday works","Can we do Friday?","Please call me","Thank you"]
+            HoldButton "{p}" duration={holdMs} size=large onHold={sent=append(sent,{"to":who,"text":p}); toast "Sent: {p}"}
+      if who==3
+        Grid cols=2 gap=12
+          each p in ["You are welcome","Want more?","Come visit soon","Talk later"]
+            HoldButton "{p}" duration={holdMs} size=large onHold={sent=append(sent,{"to":who,"text":p}); toast "Sent: {p}"}
+      if length(sent)>0
+        Text.muted "Last sent: {last(sent).text}"
+    Footer
+      Row gap=12 pad=12
+        Button.outline "Home" size=large grow onTap={go home}
+        Button "Settings" size=large grow onTap={go settings}
+
+### Settings
+state holdMs=500
+state voice=true
+state dwell=false
+state dwellMs=1200
+state locked=false
+state testing=false
+state testProgress=0
+every 50 when testing onTick={testProgress=min(1,testProgress+50/holdMs); testing=testProgress<1}
+
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go home}
+      Heading "Settings" level=1
+    Column pad=16 gap=20 scroll maxw=720
+      Card gap=12
+        Heading "Hold time" level=3
+        Text.muted "A touch must last this long before it counts."
+        Row gap=16 middle
+          Slider bind=holdMs min=100 max=2000 step=100 grow
+          Text.heading2 "{fixed(holdMs/1000,1)} s"
+        Row gap=16 middle
+          Stack center middle
+            Ring {testProgress} size=96
+            Text.strong "{round(testProgress*100,0)}%"
+          Button "Try it" size=large onTap={testProgress=0; testing=true}
+      Card gap=12
+        Heading "Dwell mode" level=3
+        Toggle "Choose by resting the pointer" bind=dwell
+        if dwell
+          Row gap=16 middle
+            Slider bind=dwellMs min=500 max=3000 step=100 grow
+            Text.strong "{fixed(dwellMs/1000,1)} s"
+          DwellPointer size=64 duration={dwellMs}
+      Card gap=12
+        Heading "Voice" level=3
+        Toggle "Read messages aloud" bind=voice
+        Button.outline "Hear a sample" onTap={speak "This is how your messages will sound"}
+      Card gap=12
+        Heading "Accidental touches" level=3
+        Text.muted "Lock the screen so nothing happens until you hold to unlock."
+        Button.destructive "Lock now" size=large onTap={locked=true; open lockDialog}
+  Dialog#lockDialog "Screen locked" "Hold the button below to unlock."
+    Column gap=16 center
+      Icon "lock" size=64
+      HoldButton "Hold to unlock" duration=1500 size=large onHold={locked=false; close}

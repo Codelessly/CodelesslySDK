@@ -1,0 +1,142 @@
+### Practice
+state playing=false
+state slow=false
+state recording=false
+state scored=false
+state pos=-1
+state loopOn=false
+state flash=""
+state goal=7
+state words=[{"w":"Could","weak":false},{"w":"you","weak":false},{"w":"tell","weak":false},{"w":"me","weak":false},{"w":"where","weak":true},{"w":"the","weak":false},{"w":"station","weak":true},{"w":"is","weak":false}]
+every 400 when playing onTick={pos=pos+1; pos>=length(words) ? {pos=-1; playing=false} : }
+App
+  Sidebar
+    Brand "Echo Lane" icon="graphic_eq"
+    NavItem "Practice" icon="mic" selected={true}
+    NavItem "Lessons" icon="menu_book" onTap={go lessons}
+    NavItem "Progress" icon="insights" onTap={go progress}
+    Spacer grow
+    Text.muted "Day streak: 12"
+  Main
+    Nav
+      Heading "Practice" level=1
+      Row gap=8
+        Toggle "Loop phrase" bind=loopOn
+        IconButton "tune" tooltip="Settings" onTap={open prefs}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Text.caption "Phrase 3 of 10 · Asking for directions"
+        Row gap=6
+          each w in words
+            Text "{w.w}" size=28 weight=600 color={index==pos ? "#FF1565C0" : "#FF222222"} onTap={flash=w.w; open translate}
+        Text.muted "Tap a word for its translation."
+        Row gap=8
+          Button "Play" icon="play_arrow" onTap={playing=true; pos=0}
+          Button.outline "Slow" icon="slow_motion_video" onTap={slow=!slow; playing=true; pos=0}
+          Button.ghost "Stop" onTap={playing=false; pos=-1}
+          Spacer grow
+          Badge.info "{slow ? '0.7x' : '1x'}"
+      Card gap=12
+        Row between
+          Text.strong "Your turn"
+          Button.destructive "Record" icon="fiber_manual_record" hidden={recording} onTap={recording=true; scored=false}
+          Button "Stop recording" icon="stop" hidden={!recording} onTap={recording=false; scored=true; toast "Saved your take"}
+        Text.caption "Original"
+        Waveform values=[2,5,8,6,9,4,7,3,6,8,5,2] h=48
+        if scored
+          Text.caption "You"
+          Waveform values=[3,4,7,7,5,3,8,2,6,7,4,3] h=48 compare=true
+      if scored
+        Card gap=12
+          Text.strong "Your score"
+          Row gap=24
+            Column center gap=4
+              Ring 0.82
+              Text.caption "Rhythm"
+            Column center gap=4
+              Ring 0.64
+              Text.caption "Sounds"
+          Text.caption "Weak words"
+          Row gap=6
+            each w in filter(words, x=>x.weak)
+              Badge.warning "{w.w}"
+          Row gap=8
+            Button "Try again" onTap={scored=false; recording=false}
+            Button.outline "Loop this phrase" onTap={loopOn=true; playing=true; pos=0}
+      Card gap=8
+        Row between
+          Text.strong "Daily goal"
+          Text.muted "{goal} of 10 phrases"
+        Row gap=16
+          Ring bind=goalShare
+          Progress {goal/10}
+  Popover#translate
+    Text.strong "{flash}"
+    Text.muted "Translation: {flash == 'station' ? 'estacion' : flash == 'where' ? 'donde' : 'traduccion'}"
+    Button.ghost "Close" onTap={close}
+  Dialog#prefs "Settings" "Voice and speed"
+    Select "Native voice" items=["Emma (US)","Oliver (UK)","Mia (AU)"] bind=voice
+    Slider bind=speed min=0.5 max=1.5
+    Button "Done" onTap={close}
+
+### Lessons
+state level="All"
+state lessons=[{"id":1,"title":"At the station","level":"Beginner","done":true},{"id":2,"title":"Ordering coffee","level":"Beginner","done":true},{"id":3,"title":"A job interview","level":"Advanced","done":false},{"id":4,"title":"Booking a hotel","level":"Intermediate","done":false}]
+state sel=1
+App
+  Sidebar
+    Brand "Echo Lane" icon="graphic_eq"
+    NavItem "Practice" icon="mic" onTap={go practice}
+    NavItem "Lessons" icon="menu_book" selected={true}
+    NavItem "Progress" icon="insights" onTap={go progress}
+  Main
+    Nav
+      Heading "Lessons" level=1
+      Row gap=8
+        Input "Search lessons" bind=q w=220
+    Column pad=24 gap=16 scroll
+      Row gap=8
+        ChoiceChip "All" selected={level=="All"} onTap={level="All"}
+        ChoiceChip "Beginner" selected={level=="Beginner"} onTap={level="Beginner"}
+        ChoiceChip "Intermediate" selected={level=="Intermediate"} onTap={level="Intermediate"}
+        ChoiceChip "Advanced" selected={level=="Advanced"} onTap={level="Advanced"}
+      each l in filter(lessons, x=>level=="All" || x.level==level)
+        ListTile "{l.title}" subtitle="{l.level}" selected={sel==l.id} onTap={sel=l.id}
+          Icon "{l.done ? 'check_circle' : 'play_circle'}"
+  Pane w=360 pad=16 gap=12
+    Text.strong "Scene: At the station"
+    ChatBubble "Excuse me, where is the station?" side=left name="Traveler" onTap={flash="station"; open tr}
+    ChatBubble "Straight ahead, then turn left." side=right name="Local" onTap={flash="left"; open tr}
+    ChatBubble "How long does it take on foot?" side=left name="Traveler"
+    ChatBubble "About five minutes." side=right name="Local"
+    Button "Practice this scene" onTap={go practice}
+  Popover#tr
+    Text.strong "{flash}"
+    Text.muted "Tap anywhere to dismiss"
+    Button.ghost "Close" onTap={close}
+
+### Progress
+App
+  Sidebar
+    Brand "Echo Lane" icon="graphic_eq"
+    NavItem "Practice" icon="mic" onTap={go practice}
+    NavItem "Lessons" icon="menu_book" onTap={go lessons}
+    NavItem "Progress" icon="insights" selected={true}
+  Main
+    Nav
+      Heading "Progress" level=1
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=8
+          Text.caption "Daily goal"
+          Ring 0.7
+          Text.strong "7 of 10 phrases"
+        Card gap=8
+          Text.caption "Rhythm, this week"
+          Sparkline values=[62,68,71,70,78,82]
+        Card gap=8
+          Text.caption "Sounds, this week"
+          Sparkline values=[55,58,60,66,63,64]
+      Card gap=8
+        Text.strong "Minutes practiced"
+        BarChart values=[10,15,8,20,12,18,14] labels=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] h=200

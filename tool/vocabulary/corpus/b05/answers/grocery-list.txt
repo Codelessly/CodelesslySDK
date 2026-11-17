@@ -1,0 +1,110 @@
+### List
+state tab="list"
+state draft=""
+state sel=""
+state shop=false
+state aisles=["Produce","Dairy","Bakery","Pantry","Frozen"]
+state suggestions=["Milk","Eggs","Bananas","Sourdough","Olive oil","Greek yogurt","Spinach"]
+state items=[{"id":1,"name":"Bananas","qty":6,"aisle":"Produce","price":0.3,"by":"Maya Reyes","done":false},{"id":2,"name":"Baby spinach","qty":1,"aisle":"Produce","price":3.5,"by":"Sam Patel","done":false},{"id":3,"name":"Whole milk","qty":2,"aisle":"Dairy","price":2.8,"by":"Sam Patel","done":false},{"id":4,"name":"Greek yogurt","qty":1,"aisle":"Dairy","price":4.2,"by":"Maya Reyes","done":true},{"id":5,"name":"Sourdough loaf","qty":1,"aisle":"Bakery","price":5.5,"by":"Jon Albright","done":false},{"id":6,"name":"Olive oil","qty":1,"aisle":"Pantry","price":9,"by":"Maya Reyes","done":false},{"id":7,"name":"Frozen peas","qty":2,"aisle":"Frozen","price":2.2,"by":"Jon Albright","done":true}]
+App
+  Sidebar
+    Brand "Trolley" icon="shopping_cart"
+    NavItem "List" icon="checklist" badge="{count(items,i=>!i.done)}" selected={tab=="list"} onTap={tab="list"}
+    NavItem "Recipes" icon="menu_book" selected={tab=="recipes"} onTap={go recipes}
+    NavItem "Shop mode" icon="storefront" onTap={go shop}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Maya Reyes" size=32
+      Avatar "Sam Patel" size=32
+      Avatar "Jon Albright" size=32
+    Text.muted "Shared with 3 people"
+  Main
+    Nav
+      Heading "Saturday shop" level=1
+      Row gap=8
+        Text.muted "Estimate"
+        Text.strong "{money(sum(items,i=>i.qty*i.price),"$",2)}"
+        Button.outline "Shop mode" icon="storefront" onTap={go shop}
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Row gap=8
+          Input "Add an item" "2 milk, 6 bananas" bind=draft grow onSubmit={addItem draft to items; draft=""}
+          Button "Add" onTap={addItem draft to items; draft=""}
+        Row scroll gap=8
+          each s in suggestions
+            Chip "{s}" onTap={draft=s}
+      each a in aisles
+        if count(items,i=>i.aisle==a && !i.done)>0
+          Column gap=4 drop=item onDrop={items=updateWhere(items,i=>i.id==result.data,i=>with(i,"aisle",a))}
+            Text.sectionTitle "{a}"
+            each row in filter(items,i=>i.aisle==a && !i.done)
+              ListTile "{row.name}" subtitle="{row.qty} x {money(row.price,"$",2)}" drag=item(row.id) onSwipeLeft={items=removeWhere(items,i=>i.id==row.id); toast "Removed {row.name}"}
+                Checkbox bind=row.done
+                Avatar "{row.by}" size=28
+                IconButton "more_vert" onTap={sel=row.id; open rowMenu}
+      Accordion "Done ({count(items,i=>i.done)})"
+        each row in filter(items,i=>i.done)
+          ListTile "{row.name}" onSwipeLeft={items=removeWhere(items,i=>i.id==row.id)}
+            Checkbox bind=row.done
+            Avatar "{row.by}" size=28
+  Menu#rowMenu end
+    MenuItem "Add one more" icon="add" onTap={items=updateWhere(items,i=>i.id==sel,i=>with(i,"qty",i.qty+1))}
+    MenuItem "Take one off" icon="remove" onTap={items=updateWhere(items,i=>i.id==sel,i=>with(i,"qty",max(1,i.qty-1)))}
+    MenuItem "Delete" icon="delete" onTap={items=removeWhere(items,i=>i.id==sel)}
+
+### Recipes
+state tab="recipes"
+state pick=""
+state recipes=[{"id":"r1","name":"Shakshuka","time":30,"ingredients":[{"name":"Eggs","qty":6,"aisle":"Dairy","price":0.4},{"name":"Canned tomatoes","qty":2,"aisle":"Pantry","price":1.6},{"name":"Red pepper","qty":2,"aisle":"Produce","price":1.1}]},{"id":"r2","name":"Banana pancakes","time":20,"ingredients":[{"name":"Bananas","qty":3,"aisle":"Produce","price":0.3},{"name":"Flour","qty":1,"aisle":"Pantry","price":2.4},{"name":"Whole milk","qty":1,"aisle":"Dairy","price":2.8}]}]
+App
+  Sidebar
+    Brand "Trolley" icon="shopping_cart"
+    NavItem "List" icon="checklist" selected={tab=="list"} onTap={go list}
+    NavItem "Recipes" icon="menu_book" selected={tab=="recipes"} onTap={tab="recipes"}
+    NavItem "Shop mode" icon="storefront" onTap={go shop}
+  Main
+    Nav
+      Heading "Recipes" level=1
+      Input "Search recipes" bind=q w=220
+    Column pad=24 gap=16 scroll
+      Grid cols=2 gap=16
+        each r in recipes
+          Card gap=8
+            Heading "{r.name}" level=3
+            Text.muted "{r.time} min, {length(r.ingredients)} ingredients"
+            Text.caption "Adds about {money(sum(r.ingredients,x=>x.qty*x.price),"$",2)}"
+            Row gap=8
+              Button "Add to list" onTap={items=concat(items,map(r.ingredients,x=>with(x,"done",false))); toast "Added {length(r.ingredients)} items from {r.name}"}
+              Button.ghost "Pick ingredients" onTap={pick=r.id; open ingredients}
+  Sheet#ingredients "Ingredients"
+    each x in find(recipes,r=>r.id==pick).ingredients
+      Row between middle
+        Text "{x.qty} x {x.name}"
+        Button.outline "Add" onTap={items=append(items,with(x,"done",false)); toast "Added {x.name}"}
+    Button "Done" onTap={close}
+
+### Shop
+state shop=true
+App
+  Main
+    Nav
+      Button.ghost "Back" icon="arrow_back" onTap={keepAwake off; go list}
+      Heading "Shopping" level=1
+      Row gap=8 middle
+        Text "Keep screen on"
+        Toggle bind=awake onChange={awake ? keepAwake on : keepAwake off}
+    Column pad=24 gap=16 scroll
+      Progress {count(items,i=>i.done)/length(items)}
+      Text.strong "{count(items,i=>i.done)} of {length(items)} in the trolley" size=28
+      each a in aisles
+        if count(items,i=>i.aisle==a && !i.done)>0
+          Text.sectionTitle "{a}" size=32
+          each row in filter(items,i=>i.aisle==a && !i.done)
+            Card
+              Row between middle
+                Text "{row.qty} x {row.name}" size=40 weight=700
+                Checkbox bind=row.done size=large
+    Footer
+      Row between middle pad=16
+        Text.muted "Estimate" size=24
+        Text.strong "{money(sum(items,i=>i.qty*i.price),"$",2)}" size=40

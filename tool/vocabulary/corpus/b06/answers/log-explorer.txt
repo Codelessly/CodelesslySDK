@@ -1,0 +1,142 @@
+### Search
+state query="service:checkout level:error AND status>=500"
+state range="Last 15 minutes"
+state from=""
+state to=""
+state filters=[{"field":"env","op":"=","value":"prod"}]
+state levels=["error","warn","info"]
+state paused=false
+state live=true
+state expanded=""
+state sel=""
+state buffer=0
+state logs=[{"id":"l1","time":"14:32:08.114","level":"error","service":"checkout","message":"Payment gateway timeout after 3000ms","fields":[{"k":"service","v":"checkout"},{"k":"status","v":"504"},{"k":"trace_id","v":"a91f33c0"},{"k":"region","v":"us-east-1"}]},{"id":"l2","time":"14:32:07.902","level":"warn","service":"cart","message":"Retrying inventory lookup (attempt 2)","fields":[{"k":"service","v":"cart"},{"k":"status","v":"200"},{"k":"trace_id","v":"b72c10de"},{"k":"region","v":"us-east-1"}]},{"id":"l3","time":"14:32:07.455","level":"info","service":"auth","message":"Session refreshed for user 48213","fields":[{"k":"service","v":"auth"},{"k":"status","v":"200"},{"k":"user_id","v":"48213"},{"k":"region","v":"eu-west-1"}]},{"id":"l4","time":"14:32:06.980","level":"error","service":"checkout","message":"Card declined: insufficient_funds","fields":[{"k":"service","v":"checkout"},{"k":"status","v":"502"},{"k":"trace_id","v":"c3380aa1"},{"k":"region","v":"us-west-2"}]}]
+state fieldList=[{"name":"service","top":[{"v":"checkout","n":412},{"v":"cart","n":188},{"v":"auth","n":97}]},{"name":"status","top":[{"v":"504","n":260},{"v":"502","n":152},{"v":"500","n":40}]},{"name":"region","top":[{"v":"us-east-1","n":301},{"v":"us-west-2","n":214},{"v":"eu-west-1","n":98}]}]
+state saved=[{"id":"s1","name":"Checkout 5xx","query":"service:checkout status>=500"},{"id":"s2","name":"Slow auth","query":"service:auth duration>1000"}]
+every 2s when live && !paused onTick={buffer=buffer+3}
+App
+  Sidebar
+    Brand "Needle" icon="manage_search"
+    NavItem "Search" icon="search" selected={true}
+    NavItem "Saved searches" icon="bookmark" badge="{length(saved)}" onTap={go saved-searches}
+    Spacer grow
+    Text.muted "Platform team"
+  Main
+    Nav
+      Heading "Search logs"
+      Row gap=8
+        Button.outline "Save search" icon="bookmark_add" onTap={saved=append(saved,{"id":"s{length(saved)+1}","name":query,"query":query}); toast "Search saved"}
+        Button.outline "Share" icon="share" onTap={open share}
+    Column pad=24 gap=16
+      Row gap=8
+        QueryInput bind=query grow hint="field:value AND level:error" onSubmit={emit search query}
+        Button "Time range: {range}" icon="schedule" onTap={open rangePicker}
+        Button "Search" onTap={emit search query}
+      Row gap=8 wrap
+        each f in filters
+          FilterChip "{f.field} {f.op} {f.value}" selected={true} onDelete={filters=removeWhere(filters,x=>x.field==f.field && x.value==f.value)}
+        Button.ghost "Clear filters" hidden={isEmpty(filters)} onTap={filters=[]}
+      Card gap=8
+        Row between
+          Text.strong "Log volume"
+          Text.muted "Drag across the chart to zoom to a window"
+        Histogram values=[120,180,160,240,520,610,300,210,190,260,330,280] labels=["14:18","14:20","14:22","14:24","14:26","14:28","14:30","14:32"] stacked=true h=140 onSelect={from=result.from; to=result.to; range="{result.from} to {result.to}"; toast "Range set"}
+      Row gap=16 top
+        Column w=240 gap=12
+          Card gap=8
+            Text.strong "Levels"
+            Checkbox "Error" onChange={levels=result ? append(levels,"error") : without(levels,"error")}
+            Checkbox "Warn" onChange={levels=result ? append(levels,"warn") : without(levels,"warn")}
+            Checkbox "Info" onChange={levels=result ? append(levels,"info") : without(levels,"info")}
+          Card gap=8
+            Text.strong "Fields"
+            each fld in fieldList
+              Accordion "{fld.name}"
+                each t in fld.top
+                  Row between
+                    Text.small "{t.v}"
+                    Row gap=4
+                      Text.muted "{t.n}"
+                      IconButton "add_circle_outline" tooltip="Add as filter" onTap={filters=append(filters,{"field":fld.name,"op":"=","value":t.v})}
+        Column grow gap=8
+          Row between
+            Text.muted "{length(logs)} results"
+            Row gap=8
+              if buffer>0
+                Badge.info "{buffer} new"
+              Toggle "Live tail" bind=live
+              IconButton paused ? "play_arrow" : "pause" tooltip={paused ? "Resume" : "Pause"} hidden={!live} onTap={paused=!paused; buffer=paused ? buffer : 0}
+          each row in logs
+            Card gap=8 menu=rowMenu
+              Row gap=12 onTap={expanded=expanded==row.id ? "" : row.id}
+                Icon expanded==row.id ? "expand_more" : "chevron_right"
+                Text.mono "{row.time}" w=110
+                Badge.error "{row.level}" hidden={row.level!="error"}
+                Badge.warning "{row.level}" hidden={row.level!="warn"}
+                Badge.neutral "{row.level}" hidden={row.level!="info"}
+                Text grow "{row.message}"
+              if expanded==row.id
+                Column gap=4 pad=[28,0,0,0]
+                  each fl in row.fields
+                    Row gap=8
+                      Text.mono "{fl.k}" w=120 color=#FF2F6FDE
+                      Text.mono grow "{fl.v}"
+                      IconButton "add" tooltip="Filter for value" onTap={filters=append(filters,{"field":fl.k,"op":"=","value":fl.v})}
+                      IconButton "remove" tooltip="Exclude value" onTap={filters=append(filters,{"field":fl.k,"op":"!=","value":fl.v})}
+                      IconButton "content_copy" tooltip="Copy value" onTap={copy fl.v; toast "Copied"}
+  Menu#rowMenu
+    MenuItem "Copy message" icon="content_copy" onTap={toast "Copied"}
+    MenuItem "Copy link to line" icon="link" onTap={copy "https://needle.app/l/a91f33c0"; toast "Link copied"}
+  Dialog#rangePicker "Time range" "Pick a preset or an exact window"
+    Grid cols=2 gap=8
+      ChoiceChip "Last 5 minutes" selected={range=="Last 5 minutes"} onTap={range="Last 5 minutes"; close}
+      ChoiceChip "Last 15 minutes" selected={range=="Last 15 minutes"} onTap={range="Last 15 minutes"; close}
+      ChoiceChip "Last hour" selected={range=="Last hour"} onTap={range="Last hour"; close}
+      ChoiceChip "Last 24 hours" selected={range=="Last 24 hours"} onTap={range="Last 24 hours"; close}
+      ChoiceChip "Last 7 days" selected={range=="Last 7 days"} onTap={range="Last 7 days"; close}
+    Divider
+    Row gap=8
+      DatePicker "From" bind=from grow
+      TimePicker "At" bind=fromTime grow
+    Row gap=8
+      DatePicker "To" bind=to grow
+      TimePicker "At" bind=toTime grow
+    Button "Apply range" onTap={range="{from} to {to}"; close}
+  Dialog#share "Share this search" "Anyone in your workspace with the link can open it"
+    Input "Link" bind=shareLink
+    Toggle "Include time range" bind=shareRange
+    Button "Copy link" icon="link" onTap={copy "https://needle.app/s/7fk2q?q={query}"; toast "Link copied"; close}
+
+### Saved searches
+state selected="s1"
+state q=""
+state saved=[{"id":"s1","name":"Checkout 5xx","query":"service:checkout status>=500","owner":"Dana"},{"id":"s2","name":"Slow auth","query":"service:auth duration>1000","owner":"Ravi"},{"id":"s3","name":"Cart retries","query":"service:cart message:\"Retrying\"","owner":"Dana"}]
+App
+  Sidebar
+    Brand "Needle" icon="manage_search"
+    NavItem "Search" icon="search" onTap={go search}
+    NavItem "Saved searches" icon="bookmark" badge="{length(saved)}" selected={true}
+    Spacer grow
+    Text.muted "Platform team"
+  Main
+    Nav
+      Heading "Saved searches"
+      Input "Filter saved searches" bind=q w=220
+    Column pad=24 gap=12
+      each s in filter(saved,x=>contains(lower(x.name),lower(q)))
+        Card gap=8 menu=savedMenu onTap={selected=s.id}
+          Row between
+            Column gap=4
+              Text.strong "{s.name}"
+              Text.mono "{s.query}"
+            Row gap=8
+              Text.muted "{s.owner}"
+              Button.outline "Run" onTap={emit runSaved s.query; go search}
+              IconButton "more_vert" tooltip="More" onTap={sel=s.id; open savedMenu}
+  Menu#savedMenu end
+    MenuItem "Rename" icon="edit" onTap={open renameSaved}
+    MenuItem "Copy share link" icon="link" onTap={copy "https://needle.app/s/{sel}"; toast "Link copied"}
+    MenuItem "Delete" icon="delete" onTap={saved=removeWhere(saved,x=>x.id==sel); toast "Deleted"}
+  Dialog#renameSaved "Rename saved search"
+    Input "Name" bind=newName
+    Button "Save" onTap={saved=updateWhere(saved,x=>x.id==sel,x=>with(x,"name",newName)); close}

@@ -1,0 +1,188 @@
+### Timeline
+state playing=false
+state time=1.2
+state duration=4
+state speed="1x"
+state loopOn=true
+state loopIn=0.5
+state loopOut=3
+state onion=true
+state onionCount=3
+state selLayer="ball"
+state selKey="k3"
+state clipboard=[]
+state layers=[{"id":"ball","name":"Ball","visible":true,"locked":false},{"id":"shadow","name":"Shadow","visible":true,"locked":false},{"id":"bg","name":"Background","visible":true,"locked":true}]
+state keys=[{"id":"k1","layer":"ball","prop":"Position X","t":0,"v":40,"ease":"ease-out"},{"id":"k2","layer":"ball","prop":"Position X","t":1.5,"v":320,"ease":"ease-in-out"},{"id":"k3","layer":"ball","prop":"Position X","t":3.2,"v":180,"ease":"linear"},{"id":"k4","layer":"ball","prop":"Scale","t":0,"v":100,"ease":"ease-out"},{"id":"k5","layer":"ball","prop":"Scale","t":0.8,"v":130,"ease":"bounce"},{"id":"k6","layer":"ball","prop":"Scale","t":2.4,"v":90,"ease":"ease-in"},{"id":"k7","layer":"ball","prop":"Opacity","t":0.4,"v":0,"ease":"linear"},{"id":"k8","layer":"ball","prop":"Opacity","t":1,"v":100,"ease":"linear"}]
+every 40ms when playing onTick={time = time + 0.04 * (speed=="0.5x" ? 0.5 : speed=="2x" ? 2 : 1); time = loopOn && time > loopOut ? loopIn : time; playing = !loopOn && time >= duration ? false : playing}
+App
+  Sidebar
+    Brand "Tween Lab" icon="animation"
+    NavItem "Timeline" icon="timeline" selected={true}
+    NavItem "Curve editor" icon="show_chart" onTap={go curve-editor}
+    NavItem "Export" icon="movie" onTap={open exportDlg}
+    Divider
+    Text.sectionTitle "Layers"
+    each l in layers
+      ListTile "{l.name}" selected={selLayer==l.id} onTap={selLayer=l.id}
+        IconButton "{l.visible ? 'visibility' : 'visibility_off'}" tooltip="Toggle visibility" onTap={layers=updateWhere(layers,x=>x.id==l.id,x=>with(x,"visible",!x.visible))}
+        IconButton "{l.locked ? 'lock' : 'lock_open'}" tooltip="Lock layer" onTap={layers=updateWhere(layers,x=>x.id==l.id,x=>with(x,"locked",!x.locked))}
+    Button.outline "Add layer" icon="add" onTap={layers=append(layers,{"id":"layer{length(layers)+1}","name":"Layer {length(layers)+1}","visible":true,"locked":false})}
+    Spacer grow
+    Text.muted "Project: bounce-intro.tween"
+  Main
+    Nav
+      Heading "Bounce intro" level=1
+      Row gap=8
+        Select bind=speed items=["0.5x","1x","2x"]
+        Toggle "Loop" bind=loopOn
+        Toggle "Onion skin" bind=onion
+        Button.outline "Export" icon="download" onTap={open exportDlg}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Stack center middle h=280 fill=#FF1B1E27 radius=8
+          Stage time={time} layer={selLayer} keys={keys} onion={onion} onionFrames={onionCount} grid=true
+          Text "{formatTime(time)} / {duration}s" color=#FFFFFFFF size=12
+        Row gap=8 center
+          IconButton "skip_previous" tooltip="Jump to start" onTap={time=0}
+          IconButton "{playing ? 'pause' : 'play_arrow'}" tooltip="Play or pause" onTap={playing=!playing}
+          IconButton "skip_next" tooltip="Jump to end" onTap={time=duration}
+          Text.mono "{fixed(time,2)}s"
+          Spacer grow
+          Text.muted "Onion frames"
+          Slider bind=onionCount min=1 max=6 w=120
+          Text.muted "Loop {loopIn}s to {loopOut}s"
+      Card gap=8
+        Row between
+          Text.strong "Keyframes"
+          Row gap=8
+            Button.outline "Copy" icon="content_copy" onTap={clipboard=filter(keys,k=>k.id==selKey); toast "Keyframe copied"}
+            Button.outline "Paste at playhead" icon="content_paste" onTap={isEmpty(clipboard) ? toast "Nothing copied" : {keys=concat(keys,map(clipboard,c=>with(with(c,"id","k{length(keys)+1}"),"t",time)))}}
+            Button.destructive "Delete" icon="delete" onTap={keys=removeWhere(keys,k=>k.id==selKey); toast "Keyframe deleted"}
+        Timeline duration={duration} time={time} zoom=1 onSeek={time=result}
+          Ruler bind=time max={duration} step=0.5 onScrub={time=result; playing=false}
+          LoopRegion start={loopIn} end={loopOut} onChangeStart={loopIn=result} onChangeEnd={loopOut=result} visible={loopOn}
+          Playhead bind=time
+          each p in ["Position X","Scale","Opacity"]
+            TimelineRow "{p}" icon="tune"
+              each k in filter(keys,x=>x.prop==p && x.layer==selLayer)
+                Keyframe#{k.id} t={k.t} selected={selKey==k.id} drag=keyframe(k.id) onTap={selKey=k.id} onDrag={keys=updateWhere(keys,x=>x.id==k.id,x=>with(x,"t",clamp(result.t,0,duration)))} menu=keyMenu
+        Row gap=12
+          Text.muted "Selected: {coalesce(selKey,'none')}"
+          Spacer grow
+          Button.ghost "Edit easing curve" onTap={go curve-editor}
+  Menu#keyMenu
+    MenuItem "Copy" icon="content_copy" onTap={clipboard=filter(keys,k=>k.id==selKey)}
+    MenuItem "Duplicate" icon="control_point_duplicate" onTap={keys=concat(keys,map(filter(keys,k=>k.id==selKey),c=>with(with(c,"id","k{length(keys)+1}"),"t",min(duration,c.t+0.2))))}
+    MenuItem "Set loop start here" icon="first_page" onTap={loopIn=time}
+    MenuItem "Set loop end here" icon="last_page" onTap={loopOut=time}
+    MenuItem "Delete" icon="delete" onTap={keys=removeWhere(keys,k=>k.id==selKey)}
+  Dialog#exportDlg "Export animation" "Render the loop region or the whole timeline"
+    state format="Video (MP4)"
+    state fps=30
+    state range="Loop region"
+    state exporting=false
+    SegmentedButton bind=format items=["Video (MP4)","Loop (GIF)"]
+    Select "Range" bind=range items=["Whole timeline","Loop region"]
+    Input "Frame rate" "30" bind=fps type=number
+    Text.muted "{round((range=='Loop region' ? loopOut-loopIn : duration)*fps,0)} frames at {fps} fps"
+    if exporting
+      Progress indeterminate=true
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Export" onTap={fps<1 || fps>120 ? toast "Frame rate must be 1 to 120" : {exporting=true; emit export {"format":format,"fps":fps,"range":range}; toast "Exporting…"; close}}
+
+### Curve editor
+state selKey="k2"
+state ease="custom"
+state p1x=0.42
+state p1y=0
+state p2x=0.58
+state p2y=1
+state preview=false
+state presets=["linear","ease-in","ease-out","ease-in-out","bounce","custom"]
+App
+  Sidebar
+    Brand "Tween Lab" icon="animation"
+    NavItem "Timeline" icon="timeline" onTap={go timeline}
+    NavItem "Curve editor" icon="show_chart" selected={true}
+    NavItem "Export" icon="movie" onTap={open exportDlg}
+    Spacer grow
+    Text.muted "Keyframe {selKey}"
+  Main
+    Nav
+      Heading "Easing curve" level=1
+      Row gap=8
+        Button.outline "Reset" onTap={p1x=0.42; p1y=0; p2x=0.58; p2y=1; ease="ease-in-out"}
+        Button "Apply to keyframe" onTap={emit applyEase {"key":selKey,"ease":ease,"curve":[p1x,p1y,p2x,p2y]}; toast "Easing applied"}
+    Row pad=24 gap=24 top
+      Card grow gap=12
+        CurveEditor bind=curve p1=[p1x,p1y] p2=[p2x,p2y] h=360 grid=true snap=0.05 onChange={p1x=result.p1[0]; p1y=result.p1[1]; p2x=result.p2[0]; p2y=result.p2[1]; ease="custom"}
+        Row between
+          Text.mono "cubic-bezier({fixed(p1x,2)}, {fixed(p1y,2)}, {fixed(p2x,2)}, {fixed(p2y,2)})"
+          Button.outline "Copy" icon="content_copy" onTap={copy "cubic-bezier({fixed(p1x,2)},{fixed(p1y,2)},{fixed(p2x,2)},{fixed(p2y,2)})"; toast "Copied"}
+      Column w=320 gap=12
+        Card gap=8
+          Text.strong "Presets"
+          Row scroll gap=8
+            each p in presets
+              ChoiceChip "{p}" selected={ease==p} onTap={ease=p}
+        Card gap=8
+          Text.strong "Handles"
+          Slider "Out handle X" bind=p1x min=0 max=1 step=0.01
+          Slider "Out handle Y" bind=p1y min=-1 max=2 step=0.01
+          Slider "In handle X" bind=p2x min=0 max=1 step=0.01
+          Slider "In handle Y" bind=p2y min=-1 max=2 step=0.01
+        Card gap=8
+          Row between
+            Text.strong "Preview"
+            Button.outline "{preview ? 'Stop' : 'Play'}" onTap={preview=!preview}
+          EasingPreview curve=[p1x,p1y,p2x,p2y] playing={preview} duration=1200 loop=true h=48
+
+### Layers and onion skin
+state layers=[{"id":"ball","name":"Ball","visible":true,"locked":false,"opacity":100,"blend":"Normal"},{"id":"shadow","name":"Shadow","visible":true,"locked":false,"opacity":60,"blend":"Multiply"},{"id":"bg","name":"Background","visible":true,"locked":true,"opacity":100,"blend":"Normal"}]
+state sel="ball"
+state onion=true
+state before=3
+state after=1
+state tint=true
+state renameTo=""
+App
+  Sidebar
+    Brand "Tween Lab" icon="animation"
+    NavItem "Timeline" icon="timeline" onTap={go timeline}
+    NavItem "Curve editor" icon="show_chart" onTap={go curve-editor}
+    NavItem "Layers" icon="layers" selected={true}
+    Spacer grow
+  Main
+    Nav
+      Heading "Layers" level=1
+      Button "New layer" icon="add" onTap={layers=append(layers,{"id":"l{length(layers)+1}","name":"Layer {length(layers)+1}","visible":true,"locked":false,"opacity":100,"blend":"Normal"})}
+    Row pad=24 gap=24 top
+      Card grow gap=8
+        Text.strong "Stack (top draws in front)"
+        each l in layers
+          ListTile "{l.name}" selected={sel==l.id} drag=layer(l.id) drop=layer onDrop={layers=concat(without(layers,find(layers,x=>x.id==result.data)),[find(layers,x=>x.id==result.data)])} onTap={sel=l.id}
+            Icon "drag_indicator"
+            IconButton "{l.visible ? 'visibility' : 'visibility_off'}" tooltip="Show or hide" onTap={layers=updateWhere(layers,x=>x.id==l.id,x=>with(x,"visible",!x.visible))}
+            IconButton "{l.locked ? 'lock' : 'lock_open'}" tooltip="Lock" onTap={layers=updateWhere(layers,x=>x.id==l.id,x=>with(x,"locked",!x.locked))}
+            IconButton "more_vert" tooltip="More" onTap={sel=l.id; open layerMenu}
+      Pane w=320 pad=16 gap=12
+        Text.strong "Onion skin"
+        Toggle "Show ghost frames" bind=onion
+        if onion
+          Slider "Frames before" bind=before min=0 max=6 step=1
+          Slider "Frames after" bind=after min=0 max=6 step=1
+          Toggle "Tint past red, future green" bind=tint
+        Divider
+        Text.strong "Selected layer"
+        each l in filter(layers,x=>x.id==sel)
+          Input "Name" bind=l.name
+          Slider "Opacity" bind=l.opacity min=0 max=100
+          Select "Blend" bind=l.blend items=["Normal","Multiply","Screen","Overlay"]
+  Menu#layerMenu
+    MenuItem "Rename" icon="edit" onTap={open renameDlg}
+    MenuItem "Duplicate" icon="content_copy" onTap={layers=append(layers,with(with(find(layers,x=>x.id==sel),"id","l{length(layers)+1}"),"name","{find(layers,x=>x.id==sel).name} copy"))}
+    MenuItem "Delete" icon="delete" onTap={layers=removeWhere(layers,x=>x.id==sel); sel=first(layers).id}
+  Dialog#renameDlg "Rename layer"
+    Input "Name" bind=renameTo
+    Button "Save" onTap={trim(renameTo)=="" ? toast "Enter a name" : {layers=updateWhere(layers,x=>x.id==sel,x=>with(x,"name",renameTo)); close}}

@@ -1,0 +1,177 @@
+### Level Select
+state stars=[3,2,1,0,0,0]
+state levels=[{"id":1,"name":"Ashford Pass","waves":10,"stars":3,"open":true},{"id":2,"name":"Miller's Ford","waves":12,"stars":2,"open":true},{"id":3,"name":"Cinder Hollow","waves":15,"stars":1,"open":true},{"id":4,"name":"Frostgate","waves":15,"stars":0,"open":false},{"id":5,"name":"The Drowned Keep","waves":20,"stars":0,"open":false},{"id":6,"name":"Bastion Line","waves":25,"stars":0,"open":false}]
+state diff="Normal"
+Page
+  Nav
+    Brand "Bastion Line" icon="shield"
+    Row gap=4
+      Link "Campaign" onTap={go level-select}
+      Link "Towers" onTap={open codex}
+      Link "Settings" onTap={open settings}
+    Row gap=8
+      Icon "star"
+      Text.strong "{sum(levels,l=>l.stars)} / 18"
+  Section
+    Column gap=16
+      Heading "Choose a battlefield" level=1
+      Text.muted "Hold the line against every wave. Three stars for finishing with all your lives."
+      SegmentedButton bind=diff items=["Easy","Normal","Hard"]
+  Section tint
+    Grid cols=3 gap=24
+      each lv in levels
+        Card gap=12 animate=fade stagger=80
+          Image "https://img.bastionline.app/maps/{lv.id}.jpg" h=140 radius=8
+          Row between
+            Heading "{lv.name}" level=3
+            Badge.neutral "{lv.waves} waves"
+          Row gap=4
+            Rating value={lv.stars} max=3 readonly
+          if lv.open
+            Button "Play" onTap={level=lv.id; go battle}
+          if !lv.open
+            Button.outline "Locked" icon="lock" disabled
+  Footer
+    Row between
+      Text.strong "Bastion Line"
+      Text.muted "v2.4.1"
+  Dialog#codex "Towers" "What each tower does"
+    ListView
+      ListTile "Archer" subtitle="Fast, single target. 60 gold" leading="gps_fixed"
+      ListTile "Cannon" subtitle="Splash damage, slow. 120 gold" leading="circle"
+      ListTile "Frost" subtitle="Slows enemies in range. 100 gold" leading="ac_unit"
+      ListTile "Mage" subtitle="Ignores armour. 150 gold" leading="auto_fix_high"
+    Button.outline "Close" onTap={close}
+  Dialog#settings "Settings"
+    Toggle "Sound effects" bind=sfx
+    Toggle "Music" bind=music
+    Toggle "Show damage numbers" bind=dmgNumbers
+    Slider bind=volume min=0 max=100
+    Button "Done" onTap={close}
+
+### Battle
+state gold=250
+state lives=20
+state wave=1
+state totalWaves=10
+state speed=1
+state paused=false
+state running=true
+state over=""
+state sel=""
+state plots=[{"id":"p1","x":0.18,"y":0.30,"tower":null},{"id":"p2","x":0.34,"y":0.52,"tower":null},{"id":"p3","x":0.50,"y":0.28,"tower":null},{"id":"p4","x":0.62,"y":0.62,"tower":null},{"id":"p5","x":0.78,"y":0.38,"tower":null},{"id":"p6","x":0.86,"y":0.70,"tower":null}]
+state towerTypes=[{"id":"archer","name":"Archer","icon":"gps_fixed","cost":60,"range":0.14},{"id":"cannon","name":"Cannon","icon":"circle","cost":120,"range":0.17},{"id":"frost","name":"Frost","icon":"ac_unit","cost":100,"range":0.15},{"id":"mage","name":"Mage","icon":"auto_fix_high","cost":150,"range":0.16}]
+state enemies=[]
+state waveActive=false
+state countdown=30
+every 1s when running && !paused && !waveActive onTick={countdown=max(0,countdown-1)}
+every 1s when running && !paused && countdown==0 && !waveActive onTick={waveActive=true; emit spawnWave wave}
+every 1s when running && lives<=0 onTick={running=false; over="defeat"; open defeat}
+every 1s when running && wave>totalWaves onTick={running=false; over="victory"; open victory}
+App
+  Main
+    Nav
+      Row gap=16
+        Row gap=4
+          Icon "paid"
+          Text.strong "{gold}"
+        Row gap=4
+          Icon "favorite"
+          Text.strong "{lives}" color={lives<=5 ? #FFD32F2F : #FF000000}
+        Row gap=4
+          Text.muted "Wave"
+          Text.strong "{min(wave,totalWaves)} / {totalWaves}"
+      Row gap=8
+        Button.outline "{speed}x" icon="fast_forward" onTap={speed=speed==3 ? 1 : speed+1; emit setSpeed speed}
+        IconButton "pause" tooltip="Pause" onTap={paused=true; open pauseMenu}
+    Stack
+      GameMap src="https://img.bastionline.app/maps/1.jpg" onTap={sel=""}
+        Path points=[[0,0.45],[0.25,0.45],[0.25,0.75],[0.55,0.75],[0.55,0.45],[0.72,0.45],[0.72,0.20],[1,0.20]] width=0.05 color=#FFC9A66B
+        Marker "Spawn" x=0 y=0.45 icon="flag"
+        Marker "Keep" x=1 y=0.20 icon="castle"
+        each e in enemies
+          Enemy kind={e.kind} progress={e.progress} hp={e.hp} maxHp={e.maxHp}
+        each plot in plots
+          if plot.tower==null
+            Plot x={plot.x} y={plot.y} selected={sel==plot.id} onTap={sel=plot.id; open towerRing}
+          if plot.tower!=null
+            Tower kind={plot.tower.kind} level={plot.tower.level} x={plot.x} y={plot.y} selected={sel==plot.id} onTap={sel=plot.id; open towerPanel}
+            if sel==plot.id
+              RangeCircle x={plot.x} y={plot.y} radius={plot.tower.range} animate=fade
+      Column top end pad=12
+        if !waveActive && wave<=totalWaves
+          Button "Next wave +{10+wave*2} gold" icon="skip_next" onTap={gold=gold+10+wave*2; countdown=0; emit earlyWave wave}
+    Footer
+      Row between pad=12
+        Text.muted "Next wave in {countdown}s" hide=phone
+        Progress {waveActive ? 0.5 : 1-countdown/30} w=240
+        Text.muted "{length(enemies)} enemies"
+  Popover#towerRing "Build"
+    RadialMenu bind=pick
+      each t in towerTypes
+        RadialItem icon={t.icon} label="{t.name} {t.cost}" disabled={gold<t.cost} onTap={gold=gold-t.cost; plots=updateWhere(plots,p=>p.id==sel,p=>with(p,"tower",{"kind":t.id,"level":1,"range":t.range,"spent":t.cost})); emit build t.id; close}
+  Sheet#towerPanel "Tower"
+    Column gap=12
+      each p in filter(plots,x=>x.id==sel)
+        Row between
+          Heading "{upper(p.tower.kind)} level {p.tower.level}" level=3
+          Badge.info "Range {round(p.tower.range*100,0)}"
+        Row gap=8
+          Button "Upgrade {p.tower.spent}" icon="arrow_upward" disabled={gold<p.tower.spent || p.tower.level>=3} onTap={gold=gold-p.tower.spent; plots=updateWhere(plots,x=>x.id==sel,x=>with(x,"tower",with(with(x.tower,"level",x.tower.level+1),"range",x.tower.range+0.02))); emit upgrade sel}
+          Button.destructive "Sell +{floor(p.tower.spent*0.7)}" icon="sell" onTap={gold=gold+floor(p.tower.spent*0.7); plots=updateWhere(plots,x=>x.id==sel,x=>with(x,"tower",null)); sel=""; emit sell sel; close}
+  Dialog#pauseMenu "Paused"
+    Column gap=12
+      Button "Resume" icon="play_arrow" onTap={paused=false; close}
+      Button.outline "Restart level" icon="replay" onTap={emit restart; paused=false; close}
+      Toggle "Sound effects" bind=sfx
+      Slider bind=volume min=0 max=100
+      Button.destructive "Quit to map" icon="logout" onTap={go level-select}
+  Dialog#victory "Victory"
+    Column gap=12 center
+      Icon "emoji_events" size=48
+      Heading "The line held" level=3
+      Rating value={lives>=20 ? 3 : lives>=10 ? 2 : 1} max=3 readonly animate=pop
+      Text.muted "{lives} lives left, {gold} gold unspent"
+      Row gap=8
+        Button.outline "Replay" onTap={emit restart; close}
+        Button "Next level" onTap={go battle}
+  Dialog#defeat "Defeat"
+    Column gap=12 center
+      Icon "heart_broken" size=48
+      Heading "The keep has fallen" level=3
+      Text.muted "You reached wave {wave} of {totalWaves}."
+      Row gap=8
+        Button.outline "Quit" onTap={go level-select}
+        Button "Try again" onTap={emit restart; close}
+
+### Wave Summary
+state wave=4
+state reward=62
+state picked=""
+state perks=[{"id":"gold","name":"War Chest","desc":"+80 gold now","icon":"paid"},{"id":"dmg","name":"Sharpened Arrows","desc":"Archers deal 15% more damage","icon":"gps_fixed"},{"id":"life","name":"Mend the Wall","desc":"Restore 3 lives","icon":"favorite"}]
+Page
+  Nav
+    Brand "Bastion Line" icon="shield"
+    Text.strong "Wave {wave} cleared"
+  Section narrow
+    Column gap=16
+      Heading "Wave {wave} cleared" level=1
+      Row gap=24
+        Card grow gap=4
+          Text.muted "Enemies defeated"
+          Text.strong "38" size=32
+        Card grow gap=4
+          Text.muted "Gold earned"
+          Text.strong "+{reward}" size=32
+        Card grow gap=4
+          Text.muted "Lives lost"
+          Text.strong "0" size=32
+      BarChart values=[14,22,30,38] labels=["W1","W2","W3","W4"] h=160
+      Heading "Choose a reward" level=3
+      Grid cols=3 gap=16
+        each p in perks
+          Card gap=8 selected={picked==p.id} onTap={picked=p.id}
+            IconTile {p.icon}
+            Text.strong "{p.name}"
+            Text.muted "{p.desc}"
+      Button "Continue to wave {wave+1}" disabled={picked==""} onTap={emit pickPerk picked; go battle}

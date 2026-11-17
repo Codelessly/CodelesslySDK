@@ -1,0 +1,225 @@
+### Files (list view)
+project view="list" saved
+project sortKey="name"
+project sortDir="asc"
+project path=["My files","Projects","Brand"]
+project sel=[]
+project anchor=""
+project renaming=""
+project clipboard=[]
+project clipMode=""
+project trash=[]
+project uploads=[]
+project folder="brand"
+project files=[{"id":"f1","name":"logo-final.svg","type":"image","size":48,"modified":"2026-11-10","folder":"brand"},{"id":"f2","name":"Brand guidelines.pdf","type":"pdf","size":5200,"modified":"2026-11-02","folder":"brand"},{"id":"f3","name":"Q4 budget.xlsx","type":"sheet","size":312,"modified":"2026-11-14","folder":"brand"},{"id":"f4","name":"Launch deck.pptx","type":"slides","size":18400,"modified":"2026-10-28","folder":"brand"},{"id":"f5","name":"hero-photo.jpg","type":"image","size":2900,"modified":"2026-11-16","folder":"brand"},{"id":"f6","name":"notes.md","type":"doc","size":6,"modified":"2026-11-15","folder":"brand"}]
+project folders=[{"id":"brand","name":"Brand","parent":"projects"},{"id":"web","name":"Website","parent":"projects"},{"id":"docs","name":"Documents","parent":"root"},{"id":"photos","name":"Photos","parent":"root"}]
+state undoItem=[]
+App
+  Sidebar
+    Brand "Shelf" icon="folder_open"
+    Button "Upload" icon="upload" onTap={open uploadDialog}
+    NavItem "My files" icon="folder" selected={folder=="root"} onTap={folder="root"}
+    Accordion "Projects" open
+      each f in filter(folders, x=>x.parent=="projects")
+        NavItem "{f.name}" icon="folder" selected={folder==f.id} onTap={folder=f.id; path=["My files","Projects",f.name]; sel=[]} drop=file onDrop={files=updateWhere(files, x=>contains(result.data, x.id), x=>with(x,"folder",f.id)); toast "Moved to {f.name}"}
+    NavItem "Documents" icon="description" selected={folder=="docs"} onTap={folder="docs"} drop=file onDrop={files=updateWhere(files, x=>contains(result.data, x.id), x=>with(x,"folder","docs"))}
+    NavItem "Photos" icon="photo_library" selected={folder=="photos"} onTap={folder="photos"} drop=file onDrop={files=updateWhere(files, x=>contains(result.data, x.id), x=>with(x,"folder","photos"))}
+    NavItem "Shared with me" icon="group"
+    NavItem "Trash" icon="delete" badge="{length(trash)}" selected={folder=="trash"} onTap={folder="trash"}
+    Spacer grow
+    Column gap=6
+      Row between
+        Text.caption "Storage"
+        Text.caption "{fixed(sum(files, x=>x.size)/1024,1)} GB of 15 GB"
+      Progress {sum(files, x=>x.size)/15360}
+      Link "Get more storage" onTap={go billing}
+  Main
+    Nav
+      Row gap=4
+        each p in path
+          Link "{p}" onTap={path=slice(path,0,index+1)}
+          if index < length(path)-1
+            Icon "chevron_right"
+      Row gap=8
+        Input "Search files" "Search" bind=q icon="search" w=240 onChange={q=result} onSubmit={go search}
+        IconButton "filter_list" tooltip="Filters" onTap={go search}
+        SegmentedButton bind=view items=["list","grid"] icons=["view_list","grid_view"]
+    Row top grow
+      Column grow pad=24 gap=12
+        Row between
+          if length(sel) == 0
+            Text.muted "{length(filter(files, x=>x.folder==folder))} items"
+          if length(sel) > 0
+            Row gap=8
+              Text.strong "{length(sel)} selected"
+              Button.ghost "Cut" icon="content_cut" onTap={clipboard=sel; clipMode="cut"}
+              Button.ghost "Copy" icon="content_copy" onTap={clipboard=sel; clipMode="copy"}
+              Button.ghost "Share" icon="share" onTap={open shareDialog}
+              Button.ghost "Delete" icon="delete" onTap={trash=concat(trash, filter(files, x=>contains(sel,x.id))); undoItem=sel; files=filter(files, x=>!contains(sel,x.id)); sel=[]; toast "Moved to trash" action="Undo" onAction={files=concat(files, filter(trash, x=>contains(undoItem,x.id))); trash=filter(trash, x=>!contains(undoItem,x.id))}}
+          Row gap=8
+            if length(clipboard) > 0
+              Button.outline "Paste {length(clipboard)}" icon="content_paste" onTap={files=clipMode=="cut" ? updateWhere(files, x=>contains(clipboard,x.id), x=>with(x,"folder",folder)) : concat(files, map(filter(files, x=>contains(clipboard,x.id)), x=>with(with(x,"id",concat(x.id,"c")),"folder",folder))); clipboard=[]}
+            Button.outline "New folder" icon="create_new_folder" onTap={emit newFolder}
+        if view=="list"
+          SelectionBox onSelect={sel=result}
+            Row pad=8 border-bottom=#FFE0E0E0
+              Checkbox onChange={sel=result ? map(files, x=>x.id) : []}
+              Row grow gap=4 onTap={sortDir=(sortKey=="name" and sortDir=="asc") ? "desc" : "asc"; sortKey="name"}
+                Text.strong "Name"
+                if sortKey=="name"
+                  Icon "{sortDir=='asc' ? 'arrow_upward' : 'arrow_downward'}" size=16
+              Row w=100 gap=4 onTap={sortDir=(sortKey=="type" and sortDir=="asc") ? "desc" : "asc"; sortKey="type"}
+                Text.strong "Type"
+                if sortKey=="type"
+                  Icon "{sortDir=='asc' ? 'arrow_upward' : 'arrow_downward'}" size=16
+              Row w=90 gap=4 onTap={sortDir=(sortKey=="size" and sortDir=="asc") ? "desc" : "asc"; sortKey="size"}
+                Text.strong "Size"
+                if sortKey=="size"
+                  Icon "{sortDir=='asc' ? 'arrow_upward' : 'arrow_downward'}" size=16
+              Row w=120 gap=4 hide=phone onTap={sortDir=(sortKey=="modified" and sortDir=="asc") ? "desc" : "asc"; sortKey="modified"}
+                Text.strong "Modified"
+                if sortKey=="modified"
+                  Icon "{sortDir=='asc' ? 'arrow_upward' : 'arrow_downward'}" size=16
+              Spacer w=32
+            each f in (sortDir=="asc" ? sortBy(filter(files, x=>x.folder==folder), x=>x[sortKey]) : sortByDesc(filter(files, x=>x.folder==folder), x=>x[sortKey]))
+              Row#row middle pad=8 radius=6 fill={contains(sel,f.id) ? "#FFE3F0FF" : "#00FFFFFF"} drag=file(sel) menu=fileMenu onClick={sel=[f.id]; anchor=f.id} onCtrlClick={sel=contains(sel,f.id) ? without(sel,f.id) : append(sel,f.id); anchor=f.id} onShiftClick={sel=map(slice(files, min(indexOf(map(files,x=>x.id),anchor), indexOf(map(files,x=>x.id),f.id)), max(indexOf(map(files,x=>x.id),anchor), indexOf(map(files,x=>x.id),f.id))+1), x=>x.id)} onContextMenu={sel=contains(sel,f.id) ? sel : [f.id]} onDoubleTap={renaming=f.id}
+                Checkbox {contains(sel,f.id)} onChange={sel=result ? append(sel,f.id) : without(sel,f.id)}
+                Icon "{f.type=='image' ? 'image' : f.type=='pdf' ? 'picture_as_pdf' : 'description'}"
+                if renaming==f.id
+                  Input bind=f.name autofocus grow onSubmit={renaming=""; files=updateWhere(files, x=>x.id==f.id, x=>with(x,"name",result))} onBlur={renaming=""}
+                if renaming!=f.id
+                  Text grow "{f.name}"
+                Text.muted w=100 "{upper(f.type)}"
+                Text.muted w=90 "{f.size >= 1024 ? fixed(f.size/1024,1) + ' MB' : f.size + ' KB'}"
+                Text.muted w=120 hide=phone "{formatDate(f.modified,'MMM d, yyyy')}"
+                IconButton "more_vert" tooltip="More" onTap={sel=[f.id]; open fileMenu}
+        if view=="grid"
+          SelectionBox onSelect={sel=result}
+            Grid cols=4 gap=16
+              each f in filter(files, x=>x.folder==folder)
+                Card#tile gap=8 center drag=file(sel) menu=fileMenu fill={contains(sel,f.id) ? "#FFE3F0FF" : "#FFFFFFFF"} onClick={sel=[f.id]; anchor=f.id} onCtrlClick={sel=contains(sel,f.id) ? without(sel,f.id) : append(sel,f.id)} onShiftClick={sel=append(sel,f.id)}
+                  Image "https://picsum.photos/seed/{f.id}/200/120" h=90 radius=6
+                  Text.small "{f.name}" center
+                  Text.caption "{f.size} KB"
+      Pane w=320 pad=16 gap=12 border-left=#FFE0E0E0 hide=tablet
+        if length(sel) == 0
+          Column center middle grow gap=8
+            Icon "touch_app" size=40
+            Text.muted "Select a file to preview it" center
+        if length(sel) == 1
+          Image "https://picsum.photos/seed/{sel[0]}/400/240" radius=8
+          Heading "{find(files, x=>x.id==sel[0]).name}" level=3
+          Row between
+            Text.muted "Type"
+            Text "{upper(find(files, x=>x.id==sel[0]).type)}"
+          Row between
+            Text.muted "Size"
+            Text "{find(files, x=>x.id==sel[0]).size} KB"
+          Row between
+            Text.muted "Modified"
+            Text "{formatDate(find(files, x=>x.id==sel[0]).modified,'MMM d, yyyy')}"
+          Row gap=8
+            Button "Open" icon="open_in_new" onTap={emit open sel[0]}
+            Button.outline "Share" icon="share" onTap={open shareDialog}
+        if length(sel) > 1
+          Heading "{length(sel)} files selected" level=3
+          Text.muted "{sum(filter(files, x=>contains(sel,x.id)), x=>x.size)} KB in total"
+    Footer
+      Row between middle pad=12
+        Row gap=12 middle
+          Icon "cloud_upload"
+          Text.small "{length(filter(uploads, u=>u.progress<1))} uploading"
+          Progress {coalesce(sum(uploads, u=>u.progress)/max(1,length(uploads)),0)} w=160
+        Button.ghost "Show tray" onTap={open uploadTray}
+  Menu#fileMenu
+    MenuItem "Open" icon="open_in_new" onTap={emit open sel[0]}
+    MenuItem "Rename" icon="edit" onTap={renaming=sel[0]}
+    MenuItem "Cut" icon="content_cut" onTap={clipboard=sel; clipMode="cut"}
+    MenuItem "Copy" icon="content_copy" onTap={clipboard=sel; clipMode="copy"}
+    MenuItem "Paste" icon="content_paste" onTap={files=clipMode=="cut" ? updateWhere(files, x=>contains(clipboard,x.id), x=>with(x,"folder",folder)) : files; clipboard=[]}
+    MenuItem "Share" icon="share" onTap={open shareDialog}
+    Divider
+    MenuItem "Move to trash" icon="delete" onTap={trash=concat(trash, filter(files, x=>contains(sel,x.id))); undoItem=sel; files=filter(files, x=>!contains(sel,x.id)); sel=[]; toast "Moved to trash" action="Undo" onAction={files=concat(files, filter(trash, x=>contains(undoItem,x.id))); trash=filter(trash, x=>!contains(undoItem,x.id))}}
+  Dialog#shareDialog "Share" "Anyone with the link can view"
+    Input "Add people" "name@company.com" bind=shareWith
+    Select "Permission" items=["Can view","Can edit"] bind=perm
+    Row gap=8
+      Button.outline "Copy link" icon="link" onTap={copy "https://shelf.app/s/k29fd"; toast "Link copied"}
+      Button "Send" onTap={emit share; toast "Shared"; close}
+  Dialog#uploadDialog "Upload files" "Drop files here or choose them"
+    DropZone onDrop={uploads=concat(uploads, map(result.files, f=>{"name":f.name,"progress":0}))} accept="*"
+      Column center gap=8 pad=24
+        Icon "cloud_upload" size=40
+        Button "Choose files" onTap={emit pickFiles; close; open uploadTray}
+  Sheet#uploadTray "Uploads"
+    each u in uploads
+      Row middle gap=12
+        Icon "insert_drive_file"
+        Column grow gap=4
+          Text "{u.name}"
+          Progress bind=u.progress
+        Text.muted w=48 "{round(u.progress*100,0)}%"
+        IconButton "close" tooltip="Cancel" onTap={uploads=without(uploads,u)}
+  every 500 when length(filter(uploads, u=>u.progress<1)) > 0 onTick={uploads=map(uploads, u=>with(u,"progress",min(1,u.progress+0.1)))}
+
+### Trash
+App
+  Sidebar
+    Brand "Shelf" icon="folder_open"
+    NavItem "My files" icon="folder" onTap={go files}
+    NavItem "Trash" icon="delete" badge="{length(trash)}" selected
+    Spacer grow
+    Column gap=6
+      Text.caption "{fixed(sum(files, x=>x.size)/1024,1)} GB of 15 GB used"
+      Progress {sum(files, x=>x.size)/15360}
+  Main
+    Nav
+      Heading "Trash" level=1
+      Row gap=8
+        Button.outline "Restore all" icon="restore" onTap={files=concat(files,trash); trash=[]; toast "Restored"}
+        Button.destructive "Empty trash" icon="delete_forever" onTap={open emptyConfirm}
+    Column pad=24 gap=12
+      Text.muted "Items in trash are deleted forever after 30 days."
+      if isEmpty(trash)
+        Column center middle gap=8 pad=48
+          Icon "delete_outline" size=48
+          Text.muted "Trash is empty"
+      each t in trash
+        Row middle gap=12 pad=8 border-bottom=#FFE0E0E0
+          Icon "description"
+          Text grow "{t.name}"
+          Text.muted "{t.size} KB"
+          Button.ghost "Restore" onTap={files=append(files,t); trash=without(trash,t)}
+          IconButton "delete_forever" tooltip="Delete forever" onTap={trash=without(trash,t)}
+  Dialog#emptyConfirm "Empty trash?" "This cannot be undone."
+    Row end gap=8
+      Button.outline "Cancel" onTap={close}
+      Button.destructive "Delete forever" onTap={trash=[]; close; toast "Trash emptied"}
+
+### Search
+state q=""
+state kind="all"
+state when="any"
+state hits=[]
+App
+  Sidebar
+    Brand "Shelf" icon="folder_open"
+    NavItem "My files" icon="folder" onTap={go files}
+    NavItem "Search" icon="search" selected
+    NavItem "Trash" icon="delete" onTap={go trash}
+  Main
+    Nav
+      Input "Search files" "Search all of Shelf" bind=q icon="search" w=420 onChange={q=result}
+      Button.ghost "Clear" onTap={q=""; kind="all"; when="any"}
+    Column pad=24 gap=16
+      Row gap=8 wrap
+        ChoiceChip "All" selected={kind=="all"} onTap={kind="all"}
+        ChoiceChip "Images" selected={kind=="image"} onTap={kind="image"}
+        ChoiceChip "PDFs" selected={kind=="pdf"} onTap={kind="pdf"}
+        ChoiceChip "Sheets" selected={kind=="sheet"} onTap={kind="sheet"}
+        ChoiceChip "Slides" selected={kind=="slides"} onTap={kind="slides"}
+        Select "Modified" items=["any","today","last 7 days","last 30 days"] bind=when
+        DatePicker "After" bind=after
+      Text.muted "{length(filter(files, x=>(kind=='all' or x.type==kind) and contains(lower(x.name), lower(q))))} results for \"{q}\""
+      each f in filter(files, x=>(kind=="all" or x.type==kind) and contains(lower(x.name), lower(q)) and (when=="any" or x.modified >= (when=="today" ? today() : when=="last 7 days" ? formatDate(today()-7,"yyyy-MM-dd") : formatDate(today()-30,"yyyy-MM-dd"))))
+        ListTile "{f.name}" subtitle="in {f.folder} · {formatDate(f.modified,'MMM d')}" icon="description" onTap={folder=f.folder; sel=[f.id]; go files}

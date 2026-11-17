@@ -1,0 +1,171 @@
+### Machines
+state sel=""
+state notify=true
+state machines=[{"id":"W1","kind":"Washer","status":"free","left":0,"total":0},{"id":"W2","kind":"Washer","status":"running","left":24,"total":45},{"id":"W3","kind":"Washer","status":"done","left":0,"total":0},{"id":"W4","kind":"Washer","status":"out","left":0,"total":0},{"id":"D1","kind":"Dryer","status":"running","left":12,"total":60},{"id":"D2","kind":"Dryer","status":"free","left":0,"total":0},{"id":"D3","kind":"Dryer","status":"done","left":0,"total":0}]
+state programme="Cottons"
+state temp="40°"
+state prices={"Cottons":3.5,"Delicates":2.5,"Quick 15":2,"Heavy duty":4.5}
+every 60s onTick={machines=map(machines,m=>m.status=="running" ? with(m,"left",max(0,m.left-1)) : m)}
+App
+  Sidebar
+    Brand "Spin Cycle" icon="local_laundry_service"
+    NavItem "Machines" icon="local_laundry_service" selected={true} onTap={go machines}
+    NavItem "Reserve" icon="schedule" onTap={go reserve}
+    NavItem "My bookings" icon="event" badge="2" onTap={go my-bookings}
+    NavItem "Report a fault" icon="build" onTap={go report}
+    Spacer grow
+    Text.muted "Flat 4B, Maple Court"
+  Main
+    Nav
+      Heading "Laundry room" level=1
+      Row gap=12
+        Toggle "Notify me when my cycle ends" bind=notify onChange={toast result ? "We will notify you" : "Notifications off"}
+        Button.outline "Reserve" icon="schedule" onTap={go reserve}
+    Column pad=24 gap=16
+      Row gap=8
+        Badge.success "2 free"
+        Badge.info "2 running"
+        Badge.warning "2 done, waiting"
+        Badge.error "1 out of order"
+      Grid cols=4 gap=16
+        each m in machines
+          Card gap=8 menu=machineMenu
+            Row between
+              Text.strong "{m.id} {m.kind}"
+              if m.status=="free"
+                Badge.success "Free"
+              if m.status=="running"
+                Badge.info "Running"
+              if m.status=="done"
+                Badge.warning "Done"
+              if m.status=="out"
+                Badge.error "Out of order"
+            if m.status=="running"
+              Stack center middle
+                Ring {1-m.left/m.total} h=96
+                Text.strong "{m.left} min"
+              Text.muted "Finishes in {m.left} minutes"
+            if m.status=="free"
+              IconTile "check_circle"
+              Button "Start cycle" onTap={sel=m.id; open start}
+              Button.outline "Reserve" onTap={sel=m.id; go reserve}
+            if m.status=="done"
+              IconTile "inventory_2"
+              Text.muted "Clothes waiting to be collected"
+              Button.outline "I collected them" onTap={machines=updateWhere(machines,x=>x.id==m.id,x=>with(x,"status","free")); toast "Machine freed"}
+            if m.status=="out"
+              IconTile "report"
+              Text.muted "Reported by Dana, awaiting repair"
+              Button.ghost "See report" onTap={go report}
+  Dialog#start "Start a cycle" "Pick a programme and temperature"
+    Text.strong "Machine {sel}"
+    Select "Programme" bind=programme items=["Cottons","Delicates","Quick 15","Heavy duty"]
+    SegmentedButton bind=temp items=["20°","30°","40°","60°"]
+    Row between
+      Text.muted "Price"
+      Text.heading "{money(prices[programme],'$',2)}"
+    Toggle "Notify me when it is done" bind=notify
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button "Pay and start" onTap={machines=updateWhere(machines,x=>x.id==sel,x=>with(with(x,"status","running"),"left",45)); emit startCycle sel; toast "Cycle started on {sel}"; close}
+  Menu#machineMenu
+    MenuItem "Reserve a slot" icon="schedule" onTap={go reserve}
+    MenuItem "Report a fault" icon="build" onTap={go report}
+
+### Reserve
+state day="Tue 18"
+state machine="W1"
+state slot=""
+state taken=["Tue 18|W1|09:00","Tue 18|W1|09:30","Tue 18|W1|18:00","Tue 18|W2|07:00"]
+state bookings=[{"id":1,"machine":"W2","day":"Tue 18","slot":"19:30","price":3.5},{"id":2,"machine":"D1","day":"Thu 20","slot":"08:00","price":2}]
+App
+  Sidebar
+    Brand "Spin Cycle" icon="local_laundry_service"
+    NavItem "Machines" icon="local_laundry_service" onTap={go machines}
+    NavItem "Reserve" icon="schedule" selected={true} onTap={go reserve}
+    NavItem "My bookings" icon="event" badge="{length(bookings)}" onTap={go my-bookings}
+    NavItem "Report a fault" icon="build" onTap={go report}
+  Main
+    Nav
+      Heading "Reserve a machine" level=1
+    Column pad=24 gap=16
+      Row gap=12 wrap
+        Select "Machine" bind=machine items=["W1","W2","W3","D1","D2","D3"]
+        DatePicker "Day" bind=day
+      Card gap=12
+        Text.strong "{machine} on {day}"
+        Timeline bind=slot start="07:00" end="22:00" step=30 taken={filter(taken,t=>startsWith(t,day+"|"+machine))} onSelect={slot=result}
+        Row gap=16 center
+          Badge.neutral "Taken"
+          Badge.primary "Your choice"
+      Card gap=8
+        Row between
+          Column gap=4
+            Text.strong "{slot=="" ? "Choose a slot on the timeline" : machine+" at "+slot}"
+            Text.muted "A slot is 30 minutes, paid when you start the cycle"
+          Button "Reserve" onTap={slot=="" ? toast "Pick a slot first" : open confirm}
+  Dialog#confirm "Confirm booking" "Machine {machine}, {day} at {slot}"
+    Toggle "Notify me 10 minutes before" bind=notify
+    Row gap=8 end
+      Button.ghost "Back" onTap={close}
+      Button "Confirm" onTap={bookings=append(bookings,{"id":length(bookings)+1,"machine":machine,"day":day,"slot":slot,"price":3}); taken=append(taken,day+"|"+machine+"|"+slot); slot=""; toast "Booked"; close; go my-bookings}
+
+### My bookings
+state bookings=[{"id":1,"machine":"W2","day":"Tue 18","slot":"19:30","price":3.5},{"id":2,"machine":"D1","day":"Thu 20","slot":"08:00","price":2}]
+state cancelId=0
+App
+  Sidebar
+    Brand "Spin Cycle" icon="local_laundry_service"
+    NavItem "Machines" icon="local_laundry_service" onTap={go machines}
+    NavItem "Reserve" icon="schedule" onTap={go reserve}
+    NavItem "My bookings" icon="event" badge="{length(bookings)}" selected={true} onTap={go my-bookings}
+    NavItem "Report a fault" icon="build" onTap={go report}
+  Main
+    Nav
+      Heading "My bookings" level=1
+      Button "New booking" icon="add" onTap={go reserve}
+    Column pad=24 gap=12
+      if isEmpty(bookings)
+        Card gap=8
+          Text.muted "No bookings yet."
+          Button "Reserve a machine" onTap={go reserve}
+      each b in bookings
+        ListTile "Machine {b.machine}, {b.day} at {b.slot}" subtitle="Paid {money(b.price,'$',2)} on start"
+          IconButton "more_vert" tooltip="Options" onTap={cancelId=b.id; open bookingMenu}
+  Menu#bookingMenu end
+    MenuItem "Cancel booking" icon="delete" onTap={bookings=removeWhere(bookings,x=>x.id==cancelId); toast "Booking cancelled"}
+    MenuItem "Change slot" icon="edit" onTap={go reserve}
+
+### Report a fault
+state machine="W4"
+state problem="Won't drain"
+state note=""
+state photo=""
+state reported=false
+App
+  Sidebar
+    Brand "Spin Cycle" icon="local_laundry_service"
+    NavItem "Machines" icon="local_laundry_service" onTap={go machines}
+    NavItem "Reserve" icon="schedule" onTap={go reserve}
+    NavItem "My bookings" icon="event" onTap={go my-bookings}
+    NavItem "Report a fault" icon="build" selected={true} onTap={go report}
+  Main
+    Nav
+      Heading "Report an out-of-order machine" level=1
+    Column pad=24 gap=16 maxw=640
+      if reported
+        Card gap=8
+          IconTile "check_circle"
+          Heading "Thank you, report sent" level=3
+          Text.muted "The caretaker has been told. {machine} is marked out of order."
+          Button.outline "Back to machines" onTap={go machines}
+      if !reported
+        Card gap=12
+          Select "Machine" bind=machine items=["W1","W2","W3","W4","D1","D2","D3"]
+          Select "What is wrong?" bind=problem items=["Won't drain","Won't start","Door will not open","Leaking","Not heating","Other"]
+          Input "Details" "Describe what happened" bind=note multiline
+          FilePicker "Add a photo" accept="image/*" bind=photo
+          if photo!=""
+            Image "{photo}" h=160 radius=8
+            Button.ghost "Remove photo" onTap={photo=""}
+          Button.destructive "Send report" onTap={trim(note)=="" ? toast "Add a few details" : (reported=true; emit reportFault {"machine":machine,"problem":problem,"note":note,"photo":photo})}

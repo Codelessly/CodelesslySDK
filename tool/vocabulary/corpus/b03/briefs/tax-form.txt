@@ -1,0 +1,3 @@
+App: Returnly, a guided tax return. A stepper of sections with done marks; questions one screen at a time with yes-no cards, amount fields with currency formatting, help that expands under a question; documents uploaded and matched to fields; a running refund-or-owed figure that updates; a review page with every answer editable; e-sign with a drawn signature.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

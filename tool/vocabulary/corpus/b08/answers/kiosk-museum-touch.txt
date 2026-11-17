@@ -1,0 +1,102 @@
+### Gallery Wall
+state lang="en"
+state idle=0
+state century=[1400,1900]
+state selected=null
+state circle="c1"
+state circles=[{"id":"c1","name":"Circle 1","color":"#FFE57373","saved":[]},{"id":"c2","name":"Circle 2","color":"#FF64B5F6","saved":[]}]
+state works=[{"id":"w1","title":"The Milkmaid","artist":"Johannes Vermeer","year":1658,"thumb":"https://img.museum.example/w1_t.jpg","url":"https://img.museum.example/w1.jpg"},{"id":"w2","title":"Wheatfield with Crows","artist":"Vincent van Gogh","year":1890,"thumb":"https://img.museum.example/w2_t.jpg","url":"https://img.museum.example/w2.jpg"},{"id":"w3","title":"The Night Watch","artist":"Rembrandt van Rijn","year":1642,"thumb":"https://img.museum.example/w3_t.jpg","url":"https://img.museum.example/w3.jpg"},{"id":"w4","title":"Primavera","artist":"Sandro Botticelli","year":1482,"thumb":"https://img.museum.example/w4_t.jpg","url":"https://img.museum.example/w4.jpg"},{"id":"w5","title":"Water Lilies","artist":"Claude Monet","year":1906,"thumb":"https://img.museum.example/w5_t.jpg","url":"https://img.museum.example/w5.jpg"},{"id":"w6","title":"Girl with a Pearl Earring","artist":"Johannes Vermeer","year":1665,"thumb":"https://img.museum.example/w6_t.jpg","url":"https://img.museum.example/w6.jpg"}]
+state strings={"en":{"title":"Gallery Wall","hint":"Drag to explore, tap a work to enlarge","reset":"Start over"},"fr":{"title":"Mur de la galerie","hint":"Faites glisser pour explorer, touchez une oeuvre pour l'agrandir","reset":"Recommencer"},"de":{"title":"Galeriewand","hint":"Ziehen zum Erkunden, Werk antippen zum Vergrössern","reset":"Neu beginnen"}}
+every 1s onTick={idle=idle+1; idle>=90 ? {century=[1400,1900]; selected=null; lang="en"; idle=0} : }
+App
+  Main
+    Nav
+      Brand "{strings[lang].title}" icon="museum"
+      Row gap=8
+        SegmentedButton bind=lang items=["en","fr","de"] onChange={idle=0}
+        Button.outline "{strings[lang].reset}" icon="restart_alt" onTap={century=[1400,1900]; selected=null; idle=0}
+    Column pad=0 gap=0 grow
+      Text.muted "{strings[lang].hint}" center
+      Canvas pannable drift=slow wrap grow onPan={idle=0}
+        each w in filter(works, x=>x.year>=century[0] && x.year<=century[1])
+          Image "{w.thumb}" w=220 h=220 radius=8 animate=fade stagger=40 onTap={selected=w; idle=0; open work}
+      Row gap=8 pad=12 middle
+        each c in circles
+          Chip "{c.name} ({length(c.saved)})" selected={circle==c.id} onTap={circle=c.id; idle=0}
+        IconButton "person_add" tooltip="New circle" onTap={circles=append(circles,{"id":"c{length(circles)+1}","name":"Circle {length(circles)+1}","color":"#FF81C784","saved":[]}); idle=0}
+      Footer
+        Column gap=4 pad=12
+          Row between
+            Text.strong "{century[0]}"
+            Text.caption "{count(works, x=>x.year>=century[0] && x.year<=century[1])} works"
+            Text.strong "{century[1]}"
+          RangeSlider bind=century min=1400 max=1900 step=100 ticks=5 labels=["15th","16th","17th","18th","19th"] onChange={idle=0}
+  Sheet#work "{selected.title}" "{selected.artist}, {selected.year}"
+    Button "Open details" onTap={close; go artwork}
+
+### Artwork
+state hotspot=null
+state at=0
+state hotspots=[{"id":"h1","x":0.32,"y":0.41,"label":"Light from the window","text":"Vermeer lets daylight enter from the left and models the maid's arm with it."},{"id":"h2","x":0.58,"y":0.66,"label":"The milk","text":"A thin stream, painted in a single unbroken stroke of cream white."},{"id":"h3","x":0.78,"y":0.22,"label":"The wall","text":"A nail and its shadow remain; the artist kept a correction visible."}]
+state related=[{"id":"w6","title":"Girl with a Pearl Earring","thumb":"https://img.museum.example/w6_t.jpg"},{"id":"w3","title":"The Night Watch","thumb":"https://img.museum.example/w3_t.jpg"},{"id":"w4","title":"Primavera","thumb":"https://img.museum.example/w4_t.jpg"}]
+every 1s onTick={idle=idle+1; idle>=90 ? {selected=null; idle=0; go gallery-wall} : }
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back to the wall" onTap={idle=0; go gallery-wall}
+      Heading "{selected.title}" level=1
+      Row gap=8
+        SegmentedButton bind=lang items=["en","fr","de"] onChange={idle=0}
+        Button "Save to my circle" icon="bookmark" onTap={circles=updateWhere(circles,c=>c.id==circle,c=>with(c,"saved",append(c.saved,selected.id))); toast "Saved"; idle=0}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Stack grow
+          ImageViewer "{selected.url}" zoom=pinch minZoom=1 maxZoom=6 h=520 onZoom={idle=0}
+          each h in hotspots
+            Hotspot x={h.x} y={h.y} pulse onTap={hotspot=h; idle=0; open note}
+        Column w=320 sticky gap=12
+          Text.muted "{selected.artist}, {selected.year}"
+          if hotspot!=null
+            Card gap=8
+              Heading "{hotspot.label}" level=3
+              Text "{hotspot.text}"
+          if hotspot==null
+            Text.muted "Tap a dot on the picture to read about a detail."
+      Heading "Related works" level=3
+      Row scroll gap=12
+        each r in related
+          Card gap=8 w=200 onTap={selected=r; hotspot=null; idle=0}
+            Image "{r.thumb}" h=140 radius=8
+            Text.strong "{r.title}"
+  Popover#note
+    Heading "{hotspot.label}" level=3
+    Text "{hotspot.text}"
+    Button.ghost "Close" onTap={close}
+
+### My Circle
+state circle="c1"
+state circles=[{"id":"c1","name":"Circle 1","color":"#FFE57373","saved":["w1","w6"]},{"id":"c2","name":"Circle 2","color":"#FF64B5F6","saved":["w3"]}]
+state works=[{"id":"w1","title":"The Milkmaid","thumb":"https://img.museum.example/w1_t.jpg"},{"id":"w3","title":"The Night Watch","thumb":"https://img.museum.example/w3_t.jpg"},{"id":"w6","title":"Girl with a Pearl Earring","thumb":"https://img.museum.example/w6_t.jpg"}]
+every 1s onTick={idle=idle+1; idle>=90 ? {circle="c1"; idle=0; go gallery-wall} : }
+App
+  Sidebar
+    Brand "Circles" icon="groups"
+    each c in circles
+      NavItem "{c.name}" icon="circle" badge="{length(c.saved)}" selected={circle==c.id} onTap={circle=c.id; idle=0}
+    Spacer grow
+    Button.outline "Add a circle" icon="person_add" onTap={circles=append(circles,{"id":"c{length(circles)+1}","name":"Circle {length(circles)+1}","color":"#FF81C784","saved":[]}); idle=0}
+  Main
+    Nav
+      Heading "{find(circles,c=>c.id==circle).name}" level=1
+      Row gap=8
+        Button.outline "Clear circle" icon="delete" onTap={circles=updateWhere(circles,c=>c.id==circle,c=>with(c,"saved",[])); idle=0}
+        Button "Back to the wall" icon="grid_view" onTap={go gallery-wall}
+    Column pad=24 gap=16
+      if isEmpty(find(circles,c=>c.id==circle).saved)
+        Text.muted "Nothing saved yet. Tap Save to my circle on any work."
+      Grid cols=3 gap=16
+        each w in filter(works,x=>contains(find(circles,c=>c.id==circle).saved,x.id))
+          Card gap=8
+            Image "{w.thumb}" h=160 radius=8
+            Text.strong "{w.title}"
+            Button.ghost "Remove" onTap={circles=updateWhere(circles,c=>c.id==circle,c=>with(c,"saved",without(c.saved,w.id))); idle=0}

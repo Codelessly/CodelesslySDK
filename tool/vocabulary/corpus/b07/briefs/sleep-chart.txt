@@ -1,0 +1,3 @@
+App: Nightshade, a sleep tracker. A night as a stage chart with awake, light, deep and dream bands as stepped blocks you scrub across to read times; a score ring; heart rate and breathing lines below on the same time scale; a bedtime consistency chart for the week; a wind-down screen with a dimming colour and a countdown; an alarm window with a gentle wake range; a note for caffeine and screens.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

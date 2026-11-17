@@ -1,0 +1,177 @@
+### Photos and basics
+state photos=[{"id":1,"url":"https://img.kindred.app/u/1.jpg"},{"id":2,"url":"https://img.kindred.app/u/2.jpg"},{"id":3,"url":"https://img.kindred.app/u/3.jpg"},{"id":4,"url":"https://img.kindred.app/u/4.jpg"},{"id":5,"url":"https://img.kindred.app/u/5.jpg"},{"id":6,"url":"https://img.kindred.app/u/6.jpg"}]
+state heightCm=172
+state maxDistance=25
+state ageRange=[26,36]
+state tab="photos"
+state name="Maya"
+state bio=""
+state interests=["Hiking","Coffee"]
+state prompt1=""
+state answer1=""
+App
+  Sidebar
+    Brand "Kindred" icon="favorite"
+    NavItem "Photos and basics" icon="photo_library" selected={tab=="photos"} onTap={tab="photos"}
+    NavItem "Prompts" icon="chat_bubble" selected={tab=="prompts"} onTap={go prompts}
+    NavItem "Interests" icon="interests" onTap={go interests}
+    NavItem "Preview" icon="visibility" onTap={go preview}
+    Spacer grow
+    Card gap=8
+      Text.strong "Profile {completeness}% complete"
+      Progress {completeness/100}
+  Main
+    Nav
+      Heading "Your photos" level=1
+      Row gap=8
+        Button.outline "Preview" onTap={go preview}
+        Button "Save" onTap={emit saveProfile; toast "Profile saved"}
+    Column pad=24 gap=24 scroll
+      Card gap=12
+        Row between
+          Text.strong "Photos"
+          Text.muted "Drag to reorder. The first is your main photo."
+        Grid cols=3 gap=12
+          each p in photos
+            Box radius=12 drag=photo(p.id) drop=photo onDrop={photos=moveItem(photos,result.data,index)}
+              Image "{p.url}" h=180 radius=12
+              if index==0
+                Badge.primary "Main"
+              IconButton "close" tooltip="Remove photo" onTap={photos=removeWhere(photos,x=>x.id==p.id)}
+      Card gap=12
+        Text.strong "About you"
+        Input "First name" bind=name
+        Input "Bio" "A line or two about you" bind=bio multiline
+        Text.caption "{length(bio)} / 300"
+      Card gap=12
+        Text.strong "Height"
+        WheelPicker bind=heightCm min=140 max=220 unit="cm"
+        Text.muted "{heightCm} cm"
+      Card gap=12
+        Text.strong "Who you want to meet"
+        Text "Within {maxDistance} km"
+        Slider bind=maxDistance min=1 max=150
+        Text "Ages {ageRange[0]} to {ageRange[1]}"
+        RangeSlider bind=ageRange min=18 max=80
+      Card gap=8
+        Row between
+          Text.strong "Completeness"
+          Text.strong "{completeness}%"
+        Ring {completeness/100}
+        if length(photos)<6
+          Text.muted "Add {6-length(photos)} more photos"
+        if length(interests)<3
+          Text.muted "Pick at least three interests"
+        if answer1==""
+          Text.muted "Answer a prompt"
+
+### Prompts
+state prompts=["A perfect Sunday looks like","I'm weirdly good at","Two truths and a lie","The way to win me over is","My most controversial opinion"]
+state answers=[{"q":"A perfect Sunday looks like","a":"Farmers market, a long run, and cooking too much pasta."}]
+state pick=""
+state draft=""
+App
+  Sidebar
+    Brand "Kindred" icon="favorite"
+    NavItem "Photos and basics" icon="photo_library" onTap={go photos-and-basics}
+    NavItem "Prompts" icon="chat_bubble" selected={true}
+    NavItem "Interests" icon="interests" onTap={go interests}
+    NavItem "Preview" icon="visibility" onTap={go preview}
+  Main
+    Nav
+      Heading "Prompts" level=1
+      Button "Add prompt" disabled={length(answers)>=3} onTap={open pickPrompt}
+    Column pad=24 gap=16 scroll
+      Text.muted "Choose up to three prompts and answer each in 140 characters or fewer."
+      each a in answers
+        Card gap=8
+          Row between
+            Text.strong "{a.q}"
+            IconButton "more_vert" tooltip="Options" onTap={pick=a.q; open promptMenu}
+          Text "{a.a}"
+          Text.caption "{length(a.a)} / 140"
+      if isEmpty(answers)
+        Card gap=8
+          Text.muted "No prompts yet. Profiles with prompts get more first messages."
+  Sheet#pickPrompt "Pick a prompt"
+    each p in prompts
+      ListTile "{p}" icon="chevron_right" onTap={pick=p; draft=""; close; open answerSheet}
+  Sheet#answerSheet "{pick}"
+    Input "Your answer" bind=draft multiline maxLength=140
+    Row between
+      Text.caption "{length(draft)} / 140"
+      Button "Save answer" disabled={trim(draft)=="" || length(draft)>140} onTap={answers=append(removeWhere(answers,x=>x.q==pick),{"q":pick,"a":draft}); close; toast "Prompt saved"}
+  Menu#promptMenu end
+    MenuItem "Edit answer" icon="edit" onTap={draft=find(answers,x=>x.q==pick).a; open answerSheet}
+    MenuItem "Remove" icon="delete" onTap={answers=removeWhere(answers,x=>x.q==pick)}
+
+### Interests
+state all=["Hiking","Coffee","Climbing","Board games","Film photography","Salsa","Vinyl","Cooking","Yoga","Poetry","Trail running","Pottery","Karaoke","Travel","Dogs","Cycling","Astronomy","Baking","Museums","Surfing"]
+state interests=["Hiking","Coffee"]
+state q=""
+App
+  Sidebar
+    Brand "Kindred" icon="favorite"
+    NavItem "Photos and basics" icon="photo_library" onTap={go photos-and-basics}
+    NavItem "Prompts" icon="chat_bubble" onTap={go prompts}
+    NavItem "Interests" icon="interests" selected={true}
+    NavItem "Preview" icon="visibility" onTap={go preview}
+  Main
+    Nav
+      Heading "Interests" level=1
+      Text.muted "{length(interests)} of 5 chosen"
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Text.strong "Your picks"
+        Row gap=8
+          each i in interests
+            Chip "{i}" icon="close" onTap={interests=without(interests,i)}
+          if isEmpty(interests)
+            Text.muted "Nothing yet"
+      Card gap=12
+        Input "Search interests" bind=q
+        Row gap=8 wrap
+          each i in filter(all,x=>contains(lower(x),lower(q)))
+            FilterChip "{i}" selected={contains(interests,i)} onTap={contains(interests,i) ? interests=without(interests,i) : (length(interests)<5 ? interests=append(interests,i) : toast "Up to five interests")}
+        if length(filter(all,x=>contains(lower(x),lower(q))))==0
+          Text.muted "No interests match {q}"
+
+### Preview
+state photos=[{"id":1,"url":"https://img.kindred.app/u/1.jpg"},{"id":2,"url":"https://img.kindred.app/u/2.jpg"},{"id":3,"url":"https://img.kindred.app/u/3.jpg"}]
+state page=0
+state name="Maya"
+state interests=["Hiking","Coffee"]
+state heightCm=172
+state maxDistance=25
+App
+  Sidebar
+    Brand "Kindred" icon="favorite"
+    NavItem "Photos and basics" icon="photo_library" onTap={go photos-and-basics}
+    NavItem "Prompts" icon="chat_bubble" onTap={go prompts}
+    NavItem "Interests" icon="interests" onTap={go interests}
+    NavItem "Preview" icon="visibility" selected={true}
+  Main
+    Nav
+      Heading "Preview" level=1
+      Text.muted "This is how others see you"
+    Column pad=24 gap=16 center
+      Card gap=12 maxw=420
+        Pages bind=page h=420 items=photos
+          Image "{item.url}" radius=12
+        Dots bind=page count={length(photos)}
+        Row between
+          Text.heading "{name}, 29"
+          Badge.success "Active now"
+        Row gap=8
+          Icon "location_on"
+          Text.muted "{maxDistance} km away"
+          Icon "height"
+          Text.muted "{heightCm} cm"
+        Text.strong "A perfect Sunday looks like"
+        Text "Farmers market, a long run, and cooking too much pasta."
+        Row gap=8 wrap
+          each i in interests
+            Badge.neutral "{i}"
+        Row center gap=24
+          IconButton "close" tooltip="Pass"
+          IconButton "favorite" tooltip="Like"

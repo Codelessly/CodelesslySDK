@@ -1,0 +1,163 @@
+### Song Select
+state songs=[{"id":1,"title":"Neon Tide","artist":"Kairo","bpm":128,"stars":3,"grade":"A"},{"id":2,"title":"Glass Orchard","artist":"Lumen Park","bpm":142,"stars":5,"grade":"S"},{"id":3,"title":"Paper Satellites","artist":"Odile","bpm":110,"stars":2,"grade":"B"},{"id":4,"title":"Hollow Engine","artist":"Vantablack Choir","bpm":170,"stars":7,"grade":"-"},{"id":5,"title":"Sunday Static","artist":"Moth Radio","bpm":96,"stars":1,"grade":"S"}]
+state at=1
+state diff="Normal"
+App
+  Sidebar
+    Brand "Beatfall" icon="music_note"
+    NavItem "Songs" icon="library_music" selected={true}
+    NavItem "Calibration" icon="tune" onTap={go calibration}
+    NavItem "Results" icon="emoji_events" onTap={go results}
+    Spacer grow
+    Text.muted "Player: Rin"
+  Main
+    Nav
+      Heading "Choose a song" level=1
+      SegmentedButton bind=diff items=["Easy","Normal","Hard"]
+    Column pad=24 gap=16
+      Row gap=24
+        Column grow gap=8
+          Wheel bind=at h=420 onSelect={at=result}
+            each s in songs
+              Card gap=4 selected={at==s.id} onTap={at=s.id}
+                Row between
+                  Text.strong "{s.title}"
+                  Badge.primary "{s.grade}"
+                Text.muted "{s.artist} - {s.bpm} BPM"
+                Row gap=2
+                  Rating value={s.stars} max=10 readonly
+        Card w=320 gap=12
+          Heading "{find(songs,s=>s.id==at).title}" level=3
+          Text.muted "{find(songs,s=>s.id==at).artist}"
+          Row between
+            Text.muted "BPM"
+            Text.strong "{find(songs,s=>s.id==at).bpm}"
+          Row between
+            Text.muted "Best grade"
+            Text.strong "{find(songs,s=>s.id==at).grade}"
+          Waveform src="preview" h=60
+          Button "Play" size=large onTap={emit start at; go play}
+          Button.outline "Preview" icon="play_arrow" onTap={emit preview at}
+
+### Play
+state score=0
+state combo=0
+state best=0
+state life=1
+state judge=""
+state running=true
+state notes=[{"id":1,"lane":0,"t":1200,"len":0},{"id":2,"lane":2,"t":1800,"len":900},{"id":3,"lane":1,"t":2400,"len":0},{"id":4,"lane":3,"t":3000,"len":0}]
+state holding=-1
+every 1s when running onTick={emit tick}
+App
+  Main
+    Nav
+      Row gap=12
+        IconButton "pause" tooltip="Pause" onTap={running=false; open pause}
+        Text.strong "Neon Tide"
+        Badge.neutral "Normal"
+      Row gap=16
+        Text.heading "{score}"
+        Text.muted "Life"
+        Progress {life} w=160
+    Stack center
+      NoteHighway lanes=4 notes={notes} speed=1.4 hitLine=0.85 holding={holding} h=520 maxw=480
+        onLaneDown={emit laneDown result; holding=result}
+        onLaneUp={emit laneUp result; holding=-1}
+        onHit={judge=result.grade; combo=result.grade=="miss" ? 0 : combo+1; best=max(best,combo); score=score+result.points; life=clamp(life+result.life,0,1)}
+        onMiss={judge="miss"; combo=0; life=clamp(life-0.08,0,1)}
+        onHoldEnd={judge="perfect"; combo=combo+1; score=score+300}
+      if judge!=""
+        Text.heading1 "{upper(judge)}" animate=pop duration=300 color={judge=="perfect" ? "#FFFFD54F" : judge=="good" ? "#FF4FC3F7" : "#FFEF5350"}
+      if combo>1
+        Column center gap=0
+          Text "{combo}" size=72 weight=700 animate=pulse
+          Text.muted "COMBO"
+    Footer
+      Row between
+        Text.muted "Best combo {best}"
+        Row gap=8
+          Button.outline "Retry" onTap={score=0; combo=0; life=1; emit restart}
+          Button.destructive "Quit" onTap={go songs}
+  Dialog#pause "Paused" "The song is stopped"
+    Button "Resume" onTap={running=true; close}
+    Button.outline "Calibrate" onTap={close; go calibration}
+    Button.destructive "Quit song" onTap={close; go songs}
+
+### Results
+state perfect=412
+state good=57
+state miss=9
+state hist=[1,3,8,19,42,88,131,96,52,24,9,4,1]
+App
+  Main
+    Nav
+      Heading "Results" level=1
+      Row gap=8
+        Button.outline "Retry" onTap={emit restart; go play}
+        Button "Song select" onTap={go songs}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Card w=280 gap=8 center
+          Text.muted "Grade"
+          Text "A" size=120 weight=700 color=#FF4FC3F7
+          Text.strong "Neon Tide - Normal"
+          Badge.success "New best"
+        Column grow gap=16
+          Grid cols=4 gap=12
+            Card gap=4
+              Text.muted "Score"
+              Text.heading "918,240"
+            Card gap=4
+              Text.muted "Max combo"
+              Text.heading "301"
+            Card gap=4
+              Text.muted "Accuracy"
+              Text.heading "96.4%"
+            Card gap=4
+              Text.muted "Mean offset"
+              Text.heading "-6 ms"
+          Card gap=8
+            Text.strong "Timing"
+            BarChart values={hist} labels=["-120","-100","-80","-60","-40","-20","0","20","40","60","80","100","120"] h=200
+            Text.caption "Early to the left, late to the right (ms)"
+          Card gap=8
+            Row between
+              Text "Perfect"
+              Text.strong "{perfect}"
+            Row between
+              Text "Good"
+              Text.strong "{good}"
+            Row between
+              Text "Miss"
+              Text.strong "{miss}"
+            Progress {perfect/(perfect+good+miss)}
+
+### Calibration
+state latency=0
+state testing=false
+state taps=[]
+App
+  Main
+    Nav
+      Heading "Calibration" level=1
+      Button.outline "Back" onTap={go songs}
+    Column pad=24 gap=16 maxw=560
+      Card gap=12
+        Text.strong "Audio latency"
+        Text.muted "Tap the pad on every beat of the metronome. Then fine tune with the slider."
+        Slider bind=latency min=-200 max=200 step=1
+        Row between
+          Text.muted "-200 ms"
+          Text.strong "{latency} ms"
+          Text.muted "+200 ms"
+      Card gap=12
+        Metronome bpm=120 running={testing} onBeat={emit beat}
+        Box fill=#FF263238 radius=12 pad=32 onTap={taps=append(taps,now()); emit calibrationTap}
+          Text "Tap here on the beat" center color=#FFFFFFFF
+        Row gap=8
+          Button "{testing ? 'Stop' : 'Start metronome'}" onTap={testing=!testing}
+          Button.outline "Use measured value" onTap={latency=round(average(taps),0); toast "Latency set"}
+      Row end gap=8
+        Button.ghost "Reset" onTap={latency=0; taps=[]}
+        Button "Save" onTap={emit saveLatency latency; toast "Saved"; go songs}

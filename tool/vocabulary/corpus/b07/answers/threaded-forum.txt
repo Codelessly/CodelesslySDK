@@ -1,0 +1,236 @@
+### Topics
+state q=""
+state tag="all"
+state sort="Latest activity"
+state sel=0
+state topics=[{"id":1,"title":"Welcome to Hedgerow: house rules and how to ask","author":"Mara Quinn","tag":"announcements","replies":12,"last":"2026-11-16","lastBy":"Tomas","pinned":true,"locked":false,"unread":0},{"id":2,"title":"Best hardy hedging for a windy coastal plot?","author":"Ines Calloway","tag":"gardening","replies":38,"last":"2026-11-17","lastBy":"Peter O","pinned":false,"locked":false,"unread":5},{"id":3,"title":"Show and tell: this year's allotment harvest","author":"Dev Patel","tag":"showcase","replies":64,"last":"2026-11-17","lastBy":"Ines Calloway","pinned":false,"locked":false,"unread":9},{"id":4,"title":"Hawthorn or blackthorn for wildlife corridors","author":"Tomas Reyes","tag":"wildlife","replies":21,"last":"2026-11-15","lastBy":"Mara Quinn","pinned":false,"locked":false,"unread":0},{"id":5,"title":"Council notice about boundary hedge height","author":"Lena Fischer","tag":"legal","replies":7,"last":"2026-11-12","lastBy":"Dev Patel","pinned":false,"locked":true,"unread":0}]
+state tags=["all","announcements","gardening","showcase","wildlife","legal"]
+App
+  Sidebar
+    Brand "Hedgerow" icon="park"
+    NavItem "Topics" icon="forum" selected={true}
+    NavItem "Unread" icon="mark_chat_unread" badge="{sum(topics,t=>t.unread)}" onTap={tag="all"; sort="Unread first"}
+    NavItem "My posts" icon="person" onTap={go my-posts}
+    NavItem "Bookmarks" icon="bookmark" onTap={go bookmarks}
+    Divider
+    Text.caption "TAGS"
+    each t in tags
+      NavItem "{t}" icon="sell" selected={tag==t} onTap={tag=t}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Sam Patel" size=32
+      Text.muted "Sam Patel"
+  Main
+    Nav
+      Heading "Topics" level=1
+      Row gap=8
+        Input "Search topics, posts and tags" bind=q w=280
+        Select bind=sort items=["Latest activity","Most replies","Unread first","Newest"]
+        Button "New topic" icon="edit" onTap={open newTopic}
+    Column pad=24 gap=12
+      Row gap=8 scroll
+        each t in tags
+          FilterChip "{t}" selected={tag==t} onTap={tag=t}
+      Card gap=0 pad=0
+        Row gap=12 pad=12 border-bottom=#FFE0E0E0
+          Text.caption "Topic" grow
+          Text.caption "Replies" w=70 hide=phone
+          Text.caption "Last activity" w=140 hide=tablet
+        each t in sortBy(filter(topics,x=>(tag=="all"||x.tag==tag)&&(q==""||contains(lower(x.title),lower(q))||contains(lower(x.tag),lower(q)))),x=>x.pinned?0:1)
+          ListTile menu=topicMenu onTap={go topic}
+            Row gap=12 middle pad=12 border-bottom=#FFEEEEEE
+              Avatar "{t.author}" size=36
+              Column grow gap=4
+                Row gap=8 middle
+                  Icon "push_pin" visible={t.pinned}
+                  Icon "lock" visible={t.locked}
+                  Text.strong "{t.title}"
+                Row gap=8
+                  Badge.neutral "{t.tag}"
+                  Text.caption "by {t.author}"
+                  Badge.primary "{t.unread} new" visible={t.unread>0}
+              Text.strong "{t.replies}" w=70 hide=phone
+              Column w=140 hide=tablet
+                Text.small "{formatDate(t.last,"MMM d")}"
+                Text.caption "{t.lastBy}"
+              IconButton "more_vert" tooltip="Moderate" onTap={sel=t.id; open topicMenu}
+        if length(filter(topics,x=>(tag=="all"||x.tag==tag)&&(q==""||contains(lower(x.title),lower(q)))))==0
+          Column center pad=32 gap=8
+            Icon "search_off"
+            Text.muted "No topics match \"{q}\"."
+            Button.outline "Clear search" onTap={q=""; tag="all"}
+  Menu#topicMenu end
+    MenuItem "Pin to top" icon="push_pin" onTap={topics=updateWhere(topics,x=>x.id==sel,x=>with(x,"pinned",!x.pinned)); toast "Pin changed"}
+    MenuItem "Lock topic" icon="lock" onTap={topics=updateWhere(topics,x=>x.id==sel,x=>with(x,"locked",!x.locked)); toast "Lock changed"}
+    MenuItem "Move to tag..." icon="drive_file_move" onTap={open moveTopic}
+    MenuItem "Delete topic" icon="delete" onTap={topics=removeWhere(topics,x=>x.id==sel); toast "Topic deleted"}
+  Dialog#moveTopic "Move topic" "Choose the tag this topic belongs under"
+    Select "New tag" bind=moveTo items=["announcements","gardening","showcase","wildlife","legal"]
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Move" onTap={topics=updateWhere(topics,x=>x.id==sel,x=>with(x,"tag",moveTo)); toast "Topic moved"; close}
+  Dialog#newTopic "New topic"
+    Input "Title" bind=newTitle
+    Select "Tag" bind=newTag items=["gardening","showcase","wildlife","legal"]
+    Input "Body" multiline bind=newBody
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Post topic" onTap={newTitle=="" ? toast "Add a title" : {topics=append(topics,{"id":length(topics)+1,"title":newTitle,"author":"Sam Patel","tag":newTag,"replies":0,"last":today(),"lastBy":"Sam Patel","pinned":false,"locked":false,"unread":0}); newTitle=""; newBody=""; close}}
+
+### Topic
+state replies=[{"id":1,"anc":[],"depth":0,"author":"Ines Calloway","time":"2 days ago","body":"Our plot faces the estuary and gets salt-laden wind from the west. What would you plant for a 40 m boundary that stays dense through winter?","likes":14,"liked":false,"reaction":"","new":false,"quote":""},{"id":2,"anc":[1],"depth":1,"author":"Peter Okafor","time":"2 days ago","body":"Griselinia and sea buckthorn both shrug off salt. Griselinia is evergreen, buckthorn gives you berries for the birds.","likes":22,"liked":true,"reaction":"","new":false,"quote":""},{"id":3,"anc":[1,2],"depth":2,"author":"Ines Calloway","time":"yesterday","body":"Buckthorn sounds lovely, but does it get thorny enough to keep the neighbour's dog out?","likes":3,"liked":false,"reaction":"","new":false,"quote":""},{"id":4,"anc":[1,2,3],"depth":3,"author":"Tomas Reyes","time":"yesterday","body":"Very. Plant it 45 cm apart, double staggered row, and in three years nothing gets through.","likes":9,"liked":false,"reaction":"","new":true,"quote":"Does it get thorny enough to keep the neighbour's dog out?"},{"id":5,"anc":[1],"depth":1,"author":"Mara Quinn","time":"yesterday","body":"Do not forget shelter while it establishes: a temporary windbreak mesh for the first two winters makes a huge difference.","likes":17,"liked":false,"reaction":"","new":true,"quote":""},{"id":6,"anc":[],"depth":0,"author":"Dev Patel","time":"5 hours ago","body":"Tamarisk is worth a look too if you can live with it going bare in winter.","likes":4,"liked":false,"reaction":"","new":true,"quote":""}]
+state folded=[]
+state replyTo=0
+state draft="" saved
+state quoteText=""
+state sel=0
+state locked=false
+state following=true
+state reactions=["thumb_up","favorite","sentiment_very_satisfied","lightbulb"]
+App
+  Sidebar
+    Brand "Hedgerow" icon="park"
+    NavItem "Topics" icon="forum" selected={true} onTap={go topics}
+    NavItem "Unread" icon="mark_chat_unread" badge="{count(replies,r=>r.new)}"
+    NavItem "Bookmarks" icon="bookmark" onTap={go bookmarks}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Sam Patel" size=32
+      Text.muted "Sam Patel"
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Back to topics" onTap={go topics}
+        Heading "Best hardy hedging for a windy coastal plot?" level=3
+      Row gap=8
+        Button.outline "Follow" icon="notifications" visible={!following} onTap={following=true; toast "Following"}
+        Button.ghost "Following" icon="notifications_active" visible={following} onTap={following=false}
+        IconButton "more_vert" tooltip="Moderation" onTap={open modMenu}
+    Column pad=24 gap=12 maxw=860
+      Row gap=8 middle
+        Badge.neutral "gardening"
+        Badge.neutral "hedging"
+        Badge.warning "Locked" visible={locked}
+        Text.caption "38 replies, started by Ines Calloway"
+      if count(replies,r=>r.new)>0
+        Card gap=8 fill=#FFEAF3FF
+          Row between middle
+            Row gap=8 middle
+              Icon "mark_chat_unread"
+              Text.strong "{count(replies,r=>r.new)} new replies since your last visit"
+            Row gap=8
+              Button "Jump to first unread" onTap={scroll "r{first(filter(replies,r=>r.new)).id}"}
+              Button.ghost "Mark all read" onTap={replies=map(replies,r=>with(r,"new",false))}
+      each r in replies
+        Row gap=0 id="r{r.id}" visible={!any(folded,f=>contains(r.anc,f))}
+          Row w={r.depth*20} hide={r.depth==0}
+            Divider
+          Box w=2 fill=#FFD0D7DE hidden={r.depth==0}
+          Column grow gap=8 pad=[12,8,0,8]
+            Row between middle
+              Row gap=8 middle
+                IconButton "{contains(folded,r.id) ? "chevron_right" : "expand_more"}" tooltip="Fold branch" onTap={folded=contains(folded,r.id) ? without(folded,r.id) : append(folded,r.id)}
+                Avatar "{r.author}" size=28
+                Text.strong "{r.author}"
+                Text.caption "{r.time}"
+                Badge.primary "New" visible={r.new}
+              IconButton "more_horiz" tooltip="Post options" onTap={sel=r.id; open postMenu}
+            if r.quote!=""
+              Box fill=#FFF3F4F6 pad=8 radius=6 border-left=#FF9CA3AF
+                Text.caption "{r.quote}"
+            if !contains(folded,r.id)
+              Text "{r.body}"
+              Row gap=8 middle
+                Button.ghost "{r.likes}" icon="{r.liked ? "thumb_up" : "thumb_up_off_alt"}" onTap={replies=updateWhere(replies,x=>x.id==r.id,x=>with(with(x,"liked",!x.liked),"likes",x.liked ? x.likes-1 : x.likes+1))}
+                Button.ghost "React" icon="add_reaction" onTap={sel=r.id; open reactPop}
+                Chip "{r.reaction}" visible={r.reaction!=""} onTap={replies=updateWhere(replies,x=>x.id==r.id,x=>with(x,"reaction",""))}
+                Button.ghost "Quote" icon="format_quote" onTap={quoteText=r.body; replyTo=r.id; scroll composer}
+                Button.ghost "Reply" icon="reply" disabled={locked} onTap={replyTo=r.id; quoteText=""}
+              if replyTo==r.id
+                Card gap=8
+                  Text.caption "Replying to {r.author}"
+                  Box fill=#FFF3F4F6 pad=8 radius=6 visible={quoteText!=""}
+                    Row between
+                      Text.caption "{quoteText}"
+                      IconButton "close" tooltip="Remove quote" onTap={quoteText=""}
+                  Input "Write a reply" multiline bind=draft
+                  Row end gap=8
+                    Button.ghost "Cancel" onTap={replyTo=0; quoteText=""}
+                    Button "Post reply" onTap={draft=="" ? toast "Write something first" : {replies=append(replies,{"id":length(replies)+1,"anc":append(r.anc,r.id),"depth":r.depth+1,"author":"Sam Patel","time":"just now","body":draft,"likes":0,"liked":false,"reaction":"","new":false,"quote":quoteText}); draft=""; quoteText=""; replyTo=0}}
+            if contains(folded,r.id)
+              Text.muted "Branch folded: {count(replies,x=>contains(x.anc,r.id))} replies hidden"
+    Footer
+      Row gap=8 middle pad=12 border-top=#FFE0E0E0 id=composer
+        Input "{locked ? "This topic is locked" : "Reply to the topic"}" bind=draft disabled={locked} grow
+        Button "Reply" icon="send" disabled={locked} onTap={draft=="" ? toast "Write something first" : {replies=append(replies,{"id":length(replies)+1,"anc":[],"depth":0,"author":"Sam Patel","time":"just now","body":draft,"likes":0,"liked":false,"reaction":"","new":false,"quote":""}); draft=""}}
+  Menu#modMenu end
+    MenuItem "Lock topic" icon="lock" onTap={locked=!locked; toast locked ? "Topic locked" : "Topic unlocked"}
+    MenuItem "Move topic" icon="drive_file_move" onTap={open moveTopic}
+    MenuItem "Pin to top" icon="push_pin" onTap={toast "Pinned"}
+    MenuItem "Merge with another topic" icon="merge" onTap={open mergeTopic}
+    MenuItem "Delete topic" icon="delete" onTap={open confirmDelete}
+  Menu#postMenu end
+    MenuItem "Copy link" icon="link" onTap={copy "https://hedgerow.example/t/2#r{sel}"; toast "Link copied"}
+    MenuItem "Bookmark" icon="bookmark_add" onTap={toast "Bookmarked"}
+    MenuItem "Report" icon="flag" onTap={toast "Reported to moderators"}
+    MenuItem "Hide post" icon="visibility_off" onTap={replies=removeWhere(replies,x=>x.id==sel); toast "Post hidden"}
+  Popover#reactPop
+    Row gap=4
+      each ic in reactions
+        IconButton "{ic}" onTap={replies=updateWhere(replies,x=>x.id==sel,x=>with(x,"reaction",ic)); close}
+  Dialog#moveTopic "Move topic" "Pick where this topic belongs"
+    Select "Tag" bind=moveTo items=["announcements","gardening","showcase","wildlife","legal"]
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Move" onTap={toast "Moved to {moveTo}"; close}
+  Dialog#mergeTopic "Merge topics"
+    Input "Topic to merge into" "Search topics" bind=mergeQ
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Merge" onTap={toast "Merged"; close; go topics}
+  Dialog#confirmDelete "Delete this topic?" "All 38 replies will be removed. This cannot be undone."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Delete" onTap={toast "Topic deleted"; close; go topics}
+
+### Search results
+state q="hedge"
+state tag="all"
+state scope="Posts"
+state results=[{"title":"Best hardy hedging for a windy coastal plot?","snippet":"...Griselinia and sea buckthorn both shrug off salt...","tag":"gardening","author":"Peter Okafor","replies":38},{"title":"Hawthorn or blackthorn for wildlife corridors","snippet":"...a mixed native hedge gives nesting cover for dunnock and wren...","tag":"wildlife","author":"Tomas Reyes","replies":21},{"title":"Council notice about boundary hedge height","snippet":"...hedges over two metres can be subject to a high hedge complaint...","tag":"legal","author":"Lena Fischer","replies":7}]
+state tags=["all","gardening","wildlife","legal","showcase","announcements"]
+Page
+  Nav sticky
+    Brand "Hedgerow" icon="park"
+    Row gap=4
+      Link "Topics" onTap={go topics}
+      Link "Unread" onTap={go topics}
+      Link "Bookmarks" onTap={go bookmarks}
+    Avatar "Sam Patel" size=32
+  Section narrow
+    Column gap=16
+      Heading "Search" level=1
+      Row gap=8
+        Input "Search the forum" bind=q grow
+        Button "Search" icon="search" onTap={emit search q}
+      Row gap=8 scroll
+        each t in tags
+          FilterChip "{t}" selected={tag==t} onTap={tag=t}
+      SegmentedButton bind=scope items=["Posts","Topics","People"]
+      Text.muted "{length(filter(results,r=>tag=="all"||r.tag==tag))} results for \"{q}\""
+      each r in filter(results,x=>tag=="all"||x.tag==tag)
+        Card gap=6 onTap={go topic}
+          Heading "{r.title}" level=3
+          Text.muted "{r.snippet}"
+          Row gap=8 middle
+            Badge.neutral "{r.tag}"
+            Text.caption "{r.author}"
+            Text.caption "{r.replies} replies"
+      if length(filter(results,r=>tag=="all"||r.tag==tag))==0
+        Column center gap=8 pad=32
+          Icon "search_off"
+          Text.muted "Nothing found. Try another tag."
+  Footer
+    Row between
+      Text.strong "Hedgerow"
+      Text.muted "Be kind. Read the house rules."

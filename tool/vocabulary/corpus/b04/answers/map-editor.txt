@@ -1,0 +1,178 @@
+### Map editor
+state tool="select"
+state snap=true
+state sel=""
+state lat=47.6062
+state lng=-122.3321
+state zoom=12
+state measuring=[]
+state layers=[{"id":"parcels","name":"Parcels","on":true,"count":148},{"id":"trails","name":"Trails","on":true,"count":23},{"id":"sites","name":"Survey sites","on":true,"count":61},{"id":"water","name":"Water bodies","on":false,"count":9}]
+state features=[{"id":"f1","layer":"sites","kind":"marker","name":"Benchmark 14","note":"Concrete monument, north gate","stroke":"#FF1565C0","fill":"#331565C0","icon":"place","coords":[[47.6101,-122.3412]]},{"id":"f2","layer":"trails","kind":"line","name":"Ridge Trail","note":"Closed after rain","stroke":"#FF2E7D32","fill":"#00000000","icon":"hiking","coords":[[47.60,-122.33],[47.61,-122.32],[47.62,-122.325]]},{"id":"f3","layer":"parcels","kind":"area","name":"Parcel 22-B","note":"Municipal, 4.2 ha","stroke":"#FFEF6C00","fill":"#33EF6C00","icon":"crop_square","coords":[[47.60,-122.35],[47.605,-122.34],[47.598,-122.337]]}]
+state strokeColor="#FF1565C0"
+state fillColor="#331565C0"
+state iconName="place"
+App
+  Sidebar
+    Brand "Cartograph" icon="map"
+    Text.caption "LAYERS"
+    each l in layers
+      Row between middle
+        Toggle "{l.name}" bind=l.on
+        Badge.neutral "{l.count}"
+    Divider
+    Text.caption "FEATURES"
+    each f in features
+      NavItem "{f.name}" icon={f.icon} selected={sel==f.id} onTap={sel=f.id}
+    Spacer grow
+    Button.outline "Import file" icon="upload_file" onTap={open importDialog}
+  Main
+    Nav
+      Heading "Harbor Survey 2026" level=1
+      Row gap=12 middle
+        SegmentedButton bind=tool items=["select","marker","line","area"]
+        Button.outline "Measure" icon="straighten" onTap={tool="measure"; measuring=[]}
+        Toggle "Snap" bind=snap
+        IconButton "undo" tooltip="Undo" onTap={emit undo}
+        IconButton "redo" tooltip="Redo" onTap={emit redo}
+    MapCanvas bind=features layers={layers} tool={tool} snap={snap} selected={sel} zoom={zoom} grow
+      onCursor={lat=result.lat; lng=result.lng}
+      onSelect={sel=result.id}
+      onAdd={features=append(features,result)}
+      onVertexDrag={features=updateWhere(features,f=>f.id==sel,f=>with(f,"coords",result.coords))}
+      onMeasure={measuring=result.points}
+      onZoom={zoom=result}
+    Footer
+      Row between middle pad=8
+        Text.mono "{fixed(lat,5)}, {fixed(lng,5)}"
+        if tool=="measure"
+          Row gap=12 middle
+            Text.strong "Distance: {fixed(sum(measuring,p=>p.leg),2)} km"
+            Text.muted "{length(measuring)} points"
+            Button.ghost "Clear" onTap={measuring=[]}
+        Row gap=8 middle
+          IconButton "remove" tooltip="Zoom out" onTap={zoom=max(1,zoom-1)}
+          Text "z{zoom}"
+          IconButton "add" tooltip="Zoom in" onTap={zoom=min(20,zoom+1)}
+  Pane w=320 pad=16 gap=12
+    Text.panelTitle "Properties"
+    if sel==""
+      Text.muted "Select a feature on the map to edit it."
+    if sel!=""
+      each f in filter(features,x=>x.id==sel)
+        Input "Name" bind=f.name
+        Input "Notes" bind=f.note multiline
+        Select "Layer" bind=f.layer items=["parcels","trails","sites","water"]
+        Divider
+        Text.fieldLabel "Stroke"
+        Row gap=8
+          ColorPicker bind=f.stroke
+          Slider bind=f.width min=1 max=12
+        Text.fieldLabel "Fill"
+        ColorPicker bind=f.fill
+        Text.fieldLabel "Icon"
+        IconPicker bind=f.icon items=["place","flag","hiking","water_drop","home","warning"]
+        Divider
+        Text.muted "{length(f.coords)} vertices. Drag a vertex on the map to reshape."
+        Row gap=8
+          Button "Done" onTap={sel=""; toast "Saved"}
+          Button.destructive "Delete" onTap={open confirmDelete}
+  Dialog#confirmDelete "Delete this feature?" "This cannot be undone."
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Delete" onTap={features=removeWhere(features,f=>f.id==sel); sel=""; close; toast "Feature deleted"}
+
+### Import wizard
+state step=1
+state fileName="parcels_2026.csv"
+state mapName="PARCEL_ID"
+state mapLat="Y"
+state mapLng="X"
+state mapLayer="ZONE"
+state skipHeader=true
+state targetLayer="parcels"
+state columns=["PARCEL_ID","X","Y","ZONE","OWNER","AREA_HA"]
+state preview=[{"PARCEL_ID":"22-B","X":"-122.350","Y":"47.600","ZONE":"Municipal","OWNER":"City","AREA_HA":"4.2"},{"PARCEL_ID":"23-A","X":"-122.341","Y":"47.604","ZONE":"Private","OWNER":"Lindqvist","AREA_HA":"1.8"}]
+Page
+  Nav
+    Brand "Cartograph" icon="map"
+    Row gap=4
+      Link "Back to map" onTap={go map-editor}
+  Section narrow
+    Column gap=16
+      Heading "Import features" level=1
+      Row gap=8
+        Badge.primary "1 File"
+        Badge.neutral "2 Map columns"
+        Badge.neutral "3 Review"
+      if step==1
+        Card gap=12
+          Text.strong "Choose a file"
+          Text.muted "GeoJSON, KML, Shapefile (zip) or CSV with coordinates."
+          FileDrop "Drop a file here" accept=[".geojson",".kml",".zip",".csv"] onPick={fileName=result.name}
+          Text "Selected: {fileName}"
+          Select "Target layer" bind=targetLayer items=["parcels","trails","sites","water"]
+          Toggle "First row is a header" bind=skipHeader
+          Row end
+            Button "Next" onTap={step=2}
+      if step==2
+        Card gap=12
+          Text.strong "Match columns to fields"
+          Select "Feature name" bind=mapName items={columns}
+          Select "Latitude" bind=mapLat items={columns}
+          Select "Longitude" bind=mapLng items={columns}
+          Select "Layer / category" bind=mapLayer items={columns}
+          Text.caption "Preview"
+          Row scroll
+            Table rows={preview} columns={columns}
+          Row between
+            Button.ghost "Back" onTap={step=1}
+            Button "Next" onTap={step=3}
+      if step==3
+        Card gap=12
+          Text.strong "Ready to import"
+          Text.muted "{length(preview)} features from {fileName} will be added to {targetLayer}."
+          Progress 0.0
+          Row between
+            Button.ghost "Back" onTap={step=2}
+            Button "Import" onTap={emit importFeatures; toast "Imported {length(preview)} features"; go map-editor}
+
+### Feature table
+state q=""
+state layerFilter="all"
+state sortKey="name"
+state sel=""
+state features=[{"id":"f1","name":"Benchmark 14","layer":"sites","kind":"marker","length":0,"area":0},{"id":"f2","name":"Ridge Trail","layer":"trails","kind":"line","length":3.8,"area":0},{"id":"f3","name":"Parcel 22-B","layer":"parcels","kind":"area","length":0,"area":4.2},{"id":"f4","name":"North Creek","layer":"water","kind":"line","length":2.1,"area":0}]
+App
+  Sidebar
+    Brand "Cartograph" icon="map"
+    NavItem "Map" icon="map" onTap={go map-editor}
+    NavItem "Features" icon="table_rows" selected={true}
+    NavItem "Import" icon="upload_file" onTap={go import-wizard}
+  Main
+    Nav
+      Heading "Features" level=1
+      Row gap=8
+        Input "Search" bind=q w=220
+        Select "Layer" bind=layerFilter items=["all","parcels","trails","sites","water"]
+        Button.outline "Export GeoJSON" icon="download" onTap={emit export}
+    Column pad=24 gap=16
+      Card gap=8
+        Row gap=8
+          Text.strong "Name" grow
+          Text.strong "Layer" w=90
+          Text.strong "Kind" w=80
+          Text.strong "Length" w=80
+          Text.strong "Area" w=80
+          Text.strong "" w=40
+        each f in sortBy(filter(features,x=>(layerFilter=="all"||x.layer==layerFilter)&&contains(lower(x.name),lower(q))),x=>x.name)
+          Row gap=8 middle menu=rowMenu onTap={sel=f.id}
+            Text f.name grow
+            Badge.info "{f.layer}" w=90
+            Text.muted "{f.kind}" w=80
+            Text "{f.length} km" w=80
+            Text "{f.area} ha" w=80
+            IconButton "more_vert" tooltip="More" onTap={sel=f.id; open rowMenu}
+  Menu#rowMenu end
+    MenuItem "Show on map" icon="my_location" onTap={emit focus sel; go map-editor}
+    MenuItem "Duplicate" icon="content_copy" onTap={features=append(features,with(find(features,x=>x.id==sel),"id",concat("c",sel)))}
+    MenuItem "Delete" icon="delete" onTap={features=removeWhere(features,x=>x.id==sel); toast "Deleted"}

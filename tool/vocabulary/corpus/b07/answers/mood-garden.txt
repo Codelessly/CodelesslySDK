@@ -1,0 +1,176 @@
+### Garden
+state sel=""
+state month="November"
+state plants=[{"id":"p1","day":3,"mood":"calm","hue":"#FF7FB5A0","kind":"fern","entry":"Slow morning, tea by the window. Felt unhurried for once."},{"id":"p2","day":7,"mood":"joy","hue":"#FFF2C14E","kind":"sunflower","entry":"Dinner with Mara. Laughed until my ribs hurt."},{"id":"p3","day":12,"mood":"low","hue":"#FF6A8CAF","kind":"moss","entry":"Grey day, skipped the gym. Called Dad in the evening and it helped."},{"id":"p4","day":16,"mood":"anxious","hue":"#FFD98E73","kind":"thistle","entry":"Deadline looming. Chest tight until lunch, better after a walk."}]
+App
+  Sidebar
+    Brand "Soil" icon="spa"
+    NavItem "Garden" icon="yard" selected={true} onTap={go garden}
+    NavItem "Today" icon="edit_note" onTap={go today}
+    NavItem "Seasons" icon="insights" onTap={go seasons}
+    NavItem "Settings" icon="settings" onTap={go settings}
+    Spacer grow
+    Text.muted "{length(plants)} plants this month"
+  Main
+    Nav
+      Heading "{month} garden" level=1
+      Row gap=8
+        IconButton "chevron_left" tooltip="Previous month" onTap={month="October"}
+        IconButton "chevron_right" tooltip="Next month" onTap={month="December"}
+        Button "Plant today" icon="add" onTap={go today}
+    Column pad=24 gap=16
+      Card gap=8
+        Text.muted "Drag to pan across the month. Tap a plant to read its entry."
+        GardenPlot days=30 h=360 pan
+          each p in plants
+            Plant "{p.kind}" day={p.day} color={p.hue} onTap={sel=p.id; open entry}
+      Row gap=8
+        Badge.success "Calm 1"
+        Badge.warning "Joy 1"
+        Badge.info "Low 1"
+        Badge.error "Anxious 1"
+  Sheet#entry "Entry"
+    each p in filter(plants, x=>x.id==sel)
+      Column gap=12
+        Row gap=12 middle
+          Avatar "{p.mood}" size=40
+          Column
+            Text.strong "{upper(p.mood)}"
+            Text.muted "{month} {p.day}"
+        Text "{p.entry}"
+        Row gap=8
+          Button.outline "Edit" onTap={close; go today}
+          Button.ghost "Close" onTap={close}
+
+### Today
+state mood=""
+state wheelAngle=0
+state g1=""
+state g2=""
+state g3=""
+state weather=[]
+state sleep=[]
+state note=""
+App
+  Sidebar
+    Brand "Soil" icon="spa"
+    NavItem "Garden" icon="yard" onTap={go garden}
+    NavItem "Today" icon="edit_note" selected={true} onTap={go today}
+    NavItem "Seasons" icon="insights" onTap={go seasons}
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main
+    Nav
+      Heading "How does today feel?" level=1
+      Button "Plant it" icon="eco" onTap={emit plant {"mood":mood,"gratitude":[g1,g2,g3],"weather":weather,"sleep":sleep,"note":note}; toast "Planted in your garden"; go garden}
+    Column pad=24 gap=16 scroll
+      Grid cols=2 gap=16
+        Card gap=12
+          Text.strong "Pick a colour"
+          Column center
+            ColorWheel bind=mood bindAngle=wheelAngle size=240 labels=["Joy","Calm","Low","Anxious","Anger","Love"] onChange={mood=result}
+          if mood!=""
+            Text.muted "You chose {mood}. Its plant will grow in this colour."
+        Card gap=12
+          Text.strong "Today's plant"
+          Stack center middle h=240
+            PlantPreview mood={mood} animate=pop
+      Card gap=12
+        Text.strong "Three things I'm grateful for"
+        Input "First" "A warm cup of tea" bind=g1 maxlength=60
+        Input "Second" "A friend's message" bind=g2 maxlength=60
+        Input "Third" "The quiet after work" bind=g3 maxlength=60
+      Card gap=12
+        Text.strong "Weather"
+        Row gap=8 scroll
+          FilterChip "Sunny" icon="wb_sunny" selected={contains(weather,"sunny")} onTap={weather=contains(weather,"sunny") ? without(weather,"sunny") : append(weather,"sunny")}
+          FilterChip "Cloudy" icon="cloud" selected={contains(weather,"cloudy")} onTap={weather=contains(weather,"cloudy") ? without(weather,"cloudy") : append(weather,"cloudy")}
+          FilterChip "Rain" icon="water_drop" selected={contains(weather,"rain")} onTap={weather=contains(weather,"rain") ? without(weather,"rain") : append(weather,"rain")}
+          FilterChip "Windy" icon="air" selected={contains(weather,"windy")} onTap={weather=contains(weather,"windy") ? without(weather,"windy") : append(weather,"windy")}
+        Text.strong "Sleep"
+        Row gap=8 scroll
+          FilterChip "Slept well" selected={contains(sleep,"well")} onTap={sleep=contains(sleep,"well") ? without(sleep,"well") : append(sleep,"well")}
+          FilterChip "Restless" selected={contains(sleep,"restless")} onTap={sleep=contains(sleep,"restless") ? without(sleep,"restless") : append(sleep,"restless")}
+          FilterChip "Under 6 hours" selected={contains(sleep,"short")} onTap={sleep=contains(sleep,"short") ? without(sleep,"short") : append(sleep,"short")}
+          FilterChip "Napped" selected={contains(sleep,"nap")} onTap={sleep=contains(sleep,"nap") ? without(sleep,"nap") : append(sleep,"nap")}
+      Card gap=8
+        Input "Anything else?" bind=note multiline
+
+### Seasons
+state range="Year"
+App
+  Sidebar
+    Brand "Soil" icon="spa"
+    NavItem "Garden" icon="yard" onTap={go garden}
+    NavItem "Today" icon="edit_note" onTap={go today}
+    NavItem "Seasons" icon="insights" selected={true} onTap={go seasons}
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main
+    Nav
+      Heading "Your seasons" level=1
+      SegmentedButton bind=range items=["Month","Season","Year"]
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Text.strong "Mood across the year"
+        AreaChart labels=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov"] series=[{"name":"Mood","values":[3.1,3.0,3.4,3.9,4.2,4.4,4.1,3.8,3.5,3.2,3.6]},{"name":"Sleep","values":[6.4,6.2,6.8,7.0,7.2,7.1,6.9,6.7,6.5,6.3,6.6]}] h=260
+      Card gap=12
+        Row middle gap=12
+          IconTile "emoji_objects"
+          Heading "What lifts you" level=3
+        Text "Your mood is about 0.8 points higher on days you walk outside and sleep more than seven hours."
+        Row gap=8
+          Badge.success "Walks +0.8"
+          Badge.success "Time with friends +0.6"
+          Badge.warning "Under 6 hours of sleep -0.9"
+        Button.outline "Show the days" onTap={go garden}
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Average mood"
+          Text "3.6" size=32 weight=700
+        Card gap=4
+          Text.muted "Plants this year"
+          Text "214" size=32 weight=700
+        Card gap=4
+          Text.muted "Longest calm streak"
+          Text "9 days" size=32 weight=700
+
+### Settings
+state locked=true
+state lockType="PIN"
+state remindersOn=true
+state reminders=[{"id":"r1","time":"08:30","label":"Morning check-in","on":true},{"id":"r2","time":"21:00","label":"Evening gratitude","on":true}]
+state newTime="12:00"
+state newLabel=""
+state pin=""
+App
+  Sidebar
+    Brand "Soil" icon="spa"
+    NavItem "Garden" icon="yard" onTap={go garden}
+    NavItem "Today" icon="edit_note" onTap={go today}
+    NavItem "Seasons" icon="insights" onTap={go seasons}
+    NavItem "Settings" icon="settings" selected={true} onTap={go settings}
+  Main
+    Nav
+      Heading "Settings" level=1
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Text.strong "Lock"
+        Toggle "Lock Soil when I leave" bind=locked
+        if locked
+          SegmentedButton bind=lockType items=["PIN","Biometric"]
+          Button.outline "Set PIN" onTap={open pinpad}
+      Card gap=12
+        Row between
+          Text.strong "Reminders"
+          Toggle bind=remindersOn
+        if remindersOn
+          each r in reminders
+            ListTile "{r.label}" subtitle="{r.time}"
+              Toggle bind=r.on
+              IconButton "delete" tooltip="Remove" onTap={reminders=removeWhere(reminders,x=>x.id==r.id)}
+          Row gap=8 middle
+            TimePicker "Time" bind=newTime
+            Input "Label" "Take a breath" bind=newLabel grow
+            Button "Add" onTap={newLabel=="" ? toast "Give it a label" : {reminders=append(reminders,{"id":newLabel,"time":newTime,"label":newLabel,"on":true}); newLabel=""}}
+  Dialog#pinpad "Set a PIN" "Four digits"
+    PinPad bind=pin length=4 onComplete={locked=true; lockType="PIN"; toast "PIN saved"; close}
+    Button.ghost "Cancel" onTap={pin=""; close}

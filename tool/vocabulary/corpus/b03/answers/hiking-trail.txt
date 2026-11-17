@@ -1,0 +1,182 @@
+### Trail
+state tab="trail"
+state at=0.3
+state saved=false
+state pack=[{"id":1,"name":"2 L of water","done":true},{"id":2,"name":"Rain shell","done":false},{"id":3,"name":"Trail map or offline download","done":true},{"id":4,"name":"Headlamp","done":false},{"id":5,"name":"First aid kit","done":false},{"id":6,"name":"Trekking poles","done":false}]
+state profile=[1240,1290,1360,1450,1530,1610,1700,1810,1920,2010,2080,2130,2090,2010,1920,1810,1700,1590,1480,1370,1290,1240]
+state conditions=[{"date":"2026-11-14","who":"Maya R.","kind":"Snow","note":"Dusting above the saddle, microspikes helpful after 2000 m.","level":"warning"},{"date":"2026-11-09","who":"Ranger station","kind":"Trail","note":"Bridge at km 3.2 repaired and open.","level":"success"},{"date":"2026-11-02","who":"Tomas L.","kind":"Mud","note":"Switchbacks below the creek are slick after rain.","level":"info"}]
+App
+  Sidebar
+    Brand "Switchback" icon="landscape"
+    NavItem "Trails" icon="terrain" selected={tab=="trail"} onTap={tab="trail"; go trail}
+    NavItem "Record" icon="fiber_manual_record" selected={tab=="record"} onTap={tab="record"; go record}
+    NavItem "Offline maps" icon="download_for_offline" badge="2" selected={tab=="offline"} onTap={tab="offline"; go offline}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Whitfield" size=32
+      Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "Eagle Ridge Loop" level=1
+      Row gap=8
+        IconButton "bookmark" tooltip="Save trail" onTap={saved=!saved; toast saved ? "Saved to your list" : "Removed from your list"}
+        IconButton "share" tooltip="Share" onTap={open share}
+        Button "Start hike" icon="play_arrow" onTap={go record}
+    Column pad=24 gap=16 scroll
+      Row gap=8 middle
+        Badge.warning "Moderate"
+        Text.muted "Cascade Foothills, WA"
+        Icon "star" color=#FFF5A623
+        Text.strong "4.7"
+        Text.muted "(1,284 reviews)"
+      Card gap=12
+        TrailMap route=[[47.6101,-121.8802],[47.6134,-121.8751],[47.6188,-121.8719],[47.6231,-121.8764],[47.6259,-121.8838],[47.6214,-121.8890],[47.6150,-121.8862],[47.6101,-121.8802]] marker={at} h=320 start="Trailhead" end="Trailhead" waypoints=[{"at":0.5,"name":"Summit"},{"at":0.3,"name":"Falls overlook"}]
+        Text.caption "Drag along the profile to move the dot on the map."
+      Card gap=12
+        Row between
+          Text.strong "Elevation"
+          Text.muted "{round(profile[floor(at*(length(profile)-1))],0)} m at km {fixed(at*11.4,1)}"
+        ElevationProfile values={profile} bind=at h=140 unit="m"
+        Slider bind=at min=0 max=1 step=0.01
+      Grid cols=4 gap=16
+        Card gap=4
+          IconTile "straighten"
+          Text.muted "Distance"
+          Text.strong "11.4 km" size=24
+        Card gap=4
+          IconTile "trending_up"
+          Text.muted "Climb"
+          Text.strong "890 m" size=24
+        Card gap=4
+          IconTile "schedule"
+          Text.muted "Est. time"
+          Text.strong "5 h 20 min" size=24
+        Card gap=4
+          IconTile "speed"
+          Text.muted "Difficulty"
+          Badge.warning "Moderate"
+      Row gap=16 top
+        Card grow gap=12
+          Row between
+            Text.strong "Recent conditions"
+            Button.ghost "Report" icon="add" onTap={open report}
+          each c in conditions
+            Row gap=12 top
+              Badge.{c.level} "{c.kind}"
+              Column grow gap=2
+                Text "{c.note}"
+                Text.caption "{formatDate(c.date,"MMM d")} by {c.who}"
+        Card grow gap=12
+          Row between
+            Text.strong "Packing checklist"
+            Text.muted "{count(pack,p=>p.done)} of {length(pack)}"
+          Progress {count(pack,p=>p.done)/length(pack)}
+          each p in pack
+            Checkbox "{p.name}" bind=p.done
+          Button.outline "Download offline map" icon="download" onTap={go offline}
+  Dialog#report "Report conditions" "Help the next hiker"
+    Select "Condition" items=["Snow","Mud","Washout","Fallen tree","Clear"] bind=newKind
+    Input "Note" "What did you see?" multiline bind=newNote
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Post report" onTap={conditions=concat([{"date":today(),"who":"You","kind":coalesce(newKind,"Trail"),"note":coalesce(newNote,""),"level":"info"}],conditions); toast "Report posted"; close}
+  Sheet#share "Share this trail"
+    Row gap=12
+      Button.outline "Copy link" icon="link" onTap={copy "https://switchback.app/t/eagle-ridge-loop"; toast "Link copied"; close}
+      Button.outline "Send to a friend" icon="send" onTap={emit shareTrail; close}
+
+### Record a hike
+state running=true
+state secs=0
+state dist=0
+state climb=0
+state ended=false
+every 1s when running onTick={secs=secs+1; dist=dist+0.0031; climb=climb+0.2}
+App
+  Sidebar
+    Brand "Switchback" icon="landscape"
+    NavItem "Trails" icon="terrain" onTap={go trail}
+    NavItem "Record" icon="fiber_manual_record" selected onTap={go record}
+    NavItem "Offline maps" icon="download_for_offline" badge="2" onTap={go offline}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Whitfield" size=32
+      Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "Recording" level=1
+      Row gap=8 middle
+        Badge.success "GPS strong" show={running}
+        Badge.warning "Paused" show={!running}
+    Column pad=24 gap=16 center
+      Text "{duration(secs)}" size=72 weight=700 center
+      Text.muted "Eagle Ridge Loop" center
+      Grid cols=3 gap=16 maxw=720
+        Card gap=4 center
+          Text.muted "Distance"
+          Text.strong "{fixed(dist,2)} km" size=28
+        Card gap=4 center
+          Text.muted "Pace"
+          Text.strong "{dist > 0.05 ? fixed(secs/60/dist,1) : "--"} min/km" size=28
+        Card gap=4 center
+          Text.muted "Climb"
+          Text.strong "{round(climb,0)} m" size=28
+      Card maxw=720 gap=8
+        TrailMap route=[[47.6101,-121.8802],[47.6134,-121.8751],[47.6188,-121.8719]] live=true follow=true h=240
+      Row gap=16 center
+        Button.outline "Pause" icon="pause" size=large show={running} onTap={running=false}
+        Button "Resume" icon="play_arrow" size=large show={!running} onTap={running=true}
+        Button.destructive "Finish" icon="stop" size=large onTap={running=false; open finish}
+  Dialog#finish "Finish this hike?" "You walked {fixed(dist,2)} km in {duration(secs)}."
+    Input "Name this hike" bind=hikeName
+    Row end gap=8
+      Button.ghost "Keep going" onTap={running=true; close}
+      Button.destructive "Discard" onTap={secs=0; dist=0; climb=0; close; go trail}
+      Button "Save hike" onTap={emit saveHike {"name":hikeName,"secs":secs,"dist":dist}; toast "Hike saved"; secs=0; dist=0; climb=0; close; go trail}
+
+### Offline maps
+state regions=[{"id":"r1","name":"Cascade Foothills","size":412,"pct":1,"state":"done"},{"id":"r2","name":"Mount Rainier NP","size":688,"pct":0.42,"state":"loading"},{"id":"r3","name":"Olympic Peninsula","size":534,"pct":0.1,"state":"loading"},{"id":"r4","name":"North Cascades","size":301,"pct":0,"state":"idle"}]
+state sel=""
+every 1s onTick={regions=map(regions,r=>r.state=="loading" ? with(with(r,"pct",min(1,r.pct+0.03)),"state",r.pct+0.03>=1 ? "done" : "loading") : r)}
+App
+  Sidebar
+    Brand "Switchback" icon="landscape"
+    NavItem "Trails" icon="terrain" onTap={go trail}
+    NavItem "Record" icon="fiber_manual_record" onTap={go record}
+    NavItem "Offline maps" icon="download_for_offline" badge="2" selected onTap={go offline}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Whitfield" size=32
+      Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "Offline maps" level=1
+      Button "Add region" icon="add" onTap={open addRegion}
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Row between
+          Text.strong "Storage"
+          Text.muted "{round(sum(regions,r=>r.size*r.pct),0)} MB of 2,048 MB used"
+        Progress {sum(regions,r=>r.size*r.pct)/2048}
+      each r in regions
+        Card gap=8
+          Row between middle
+            Column gap=2
+              Text.strong "{r.name}"
+              Text.caption "{r.size} MB"
+            Row gap=8 middle
+              Badge.success "Ready" show={r.state=="done"}
+              Badge.info "{round(r.pct*100,0)}%" show={r.state=="loading"}
+              Button.outline "Download" icon="download" show={r.state=="idle"} onTap={regions=updateWhere(regions,x=>x.id==r.id,x=>with(x,"state","loading"))}
+              IconButton "pause" tooltip="Pause" show={r.state=="loading"} onTap={regions=updateWhere(regions,x=>x.id==r.id,x=>with(x,"state","idle"))}
+              IconButton "more_vert" tooltip="More" onTap={sel=r.id; open regionMenu}
+          Progress {r.pct} show={r.state!="idle"}
+  Menu#regionMenu end
+    MenuItem "Update map" icon="refresh" onTap={regions=updateWhere(regions,x=>x.id==sel,x=>with(with(x,"pct",0),"state","loading"))}
+    MenuItem "Remove download" icon="delete" onTap={regions=updateWhere(regions,x=>x.id==sel,x=>with(with(x,"pct",0),"state","idle")); toast "Removed"}
+  Dialog#addRegion "Add a region" "Choose an area to save for offline use"
+    Input "Search places" bind=placeQuery
+    Select "Detail" items=["Standard","High (topo + trails)"] bind=detail
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Download" onTap={regions=append(regions,{"id":"r{length(regions)+1}","name":coalesce(placeQuery,"New region"),"size":250,"pct":0,"state":"loading"}); toast "Download started"; close}

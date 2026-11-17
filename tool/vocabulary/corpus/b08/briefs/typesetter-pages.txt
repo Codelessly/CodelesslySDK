@@ -1,0 +1,3 @@
+App: Folio, a page layout tool. Pages shown as a spread with facing left and right, text frames that flow text from one to the next with a link arrow, overflow marked by a red box; pull guides from the edge; a paragraph styles list that updates every use; image frames with fit buttons; a master page with page numbers; a pages strip dragged to reorder; a preflight list of warnings; export proof.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

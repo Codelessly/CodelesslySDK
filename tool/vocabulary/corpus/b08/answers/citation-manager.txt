@@ -1,0 +1,255 @@
+### Library
+state tab="library"
+state coll="all"
+state q=""
+state sortKey="year"
+state sortDir="desc"
+state tagFilter=""
+state sel=""
+state doi=""
+state fetched=false
+state refs=[{"id":"r1","author":"Vaswani, A.","year":2017,"title":"Attention Is All You Need","tags":["nlp","transformers"],"coll":"ml","journal":"NeurIPS","doi":"10.5555/3295222.3295349"},{"id":"r2","author":"Kahneman, D.","year":2011,"title":"Thinking, Fast and Slow","tags":["psychology","decision"],"coll":"psych","journal":"Farrar, Straus and Giroux","doi":"10.1037/a0025621"},{"id":"r3","author":"Hinton, G.","year":2015,"title":"Distilling the Knowledge in a Neural Network","tags":["ml","compression"],"coll":"ml","journal":"arXiv","doi":"10.48550/arXiv.1503.02531"},{"id":"r4","author":"Latour, B.","year":2005,"title":"Reassembling the Social","tags":["sociology","theory"],"coll":"soc","journal":"Oxford University Press","doi":"10.1093/oso/9780199256051.001.0001"},{"id":"r5","author":"Vaswani, A.","year":2017,"title":"Attention is all you need","tags":["nlp"],"coll":"ml","journal":"NeurIPS","doi":"10.5555/3295222.3295349"}]
+state collections=[{"id":"all","name":"All references","count":5},{"id":"ml","name":"Machine learning","count":3},{"id":"psych","name":"Psychology","count":1},{"id":"soc","name":"Sociology","count":1}]
+App
+  Sidebar
+    Brand "Footnote" icon="menu_book"
+    NavItem "Library" icon="library_books" badge="{length(refs)}" selected={tab=="library"} onTap={tab="library"}
+    NavItem "Bibliography" icon="format_list_numbered" selected={tab=="bib"} onTap={go bibliography}
+    NavItem "Duplicates" icon="content_copy" badge="1" selected={tab=="dupes"} onTap={go duplicates}
+    Divider
+    Text.caption "COLLECTIONS"
+    Tree items={collections} bind=coll labelKey="name" onSelect={coll=result.id}
+    Button.ghost "New collection" icon="create_new_folder" onTap={open newColl}
+    Spacer grow
+    Text.muted "Mira Okafor"
+  Main
+    Nav
+      Heading "Library" level=1
+      Row gap=8
+        Input "Search" "Author, title or tag" bind=q w=260
+        Select "Sort by" items=["year","author","title"] bind=sortKey w=120
+        IconButton "swap_vert" tooltip="Reverse order" onTap={sortDir=sortDir=="asc" ? "desc" : "asc"}
+        Button "Add by DOI" icon="add_link" onTap={doi=""; fetched=false; open addDoi}
+    Column pad=24 gap=16
+      Row gap=8
+        Text.muted "Tags"
+        FilterChip "nlp" selected={tagFilter=="nlp"} onTap={tagFilter=tagFilter=="nlp" ? "" : "nlp"}
+        FilterChip "ml" selected={tagFilter=="ml"} onTap={tagFilter=tagFilter=="ml" ? "" : "ml"}
+        FilterChip "psychology" selected={tagFilter=="psychology"} onTap={tagFilter=tagFilter=="psychology" ? "" : "psychology"}
+        FilterChip "theory" selected={tagFilter=="theory"} onTap={tagFilter=tagFilter=="theory" ? "" : "theory"}
+      Card gap=0
+        Row gap=12 pad=[12,8,12,8] border-bottom=#FFDDDDDD
+          Text.strong "Author" w=160 onTap={sortKey="author"}
+          Text.strong "Year" w=70 onTap={sortKey="year"}
+          Text.strong "Title" grow onTap={sortKey="title"}
+          Text.strong "Tags" w=200
+        each r in sortDir=="asc" ? sortBy(filter(refs, x => (coll=="all" || x.coll==coll) && (tagFilter=="" || contains(x.tags,tagFilter)) && (q=="" || contains(lower(x.title),lower(q)) || contains(lower(x.author),lower(q)))), x => x[sortKey]) : sortByDesc(filter(refs, x => (coll=="all" || x.coll==coll) && (tagFilter=="" || contains(x.tags,tagFilter)) && (q=="" || contains(lower(x.title),lower(q)) || contains(lower(x.author),lower(q)))), x => x[sortKey])
+          Row gap=12 pad=[12,10,12,10] border-bottom=#FFEEEEEE menu=refMenu onTap={sel=r.id; emit openRef r.id; go reference}
+            Text r.author w=160
+            Text "{r.year}" w=70
+            Text.strong "{r.title}" grow
+            Row gap=4 w=200
+              each t in r.tags
+                Badge.neutral "{t}"
+      if length(refs)==0
+        Text.muted "No references yet. Paste a DOI to add one."
+  Menu#refMenu
+    MenuItem "Open" icon="open_in_new" onTap={go reference}
+    MenuItem "Copy citation" icon="content_copy" onTap={copy find(refs, x => x.id==sel).title; toast "Citation copied"}
+    MenuItem "Move to collection" icon="drive_file_move" onTap={open moveColl}
+    MenuItem "Delete" icon="delete" onTap={refs=removeWhere(refs, x => x.id==sel); toast "Reference removed"}
+Dialog#addDoi "Add by DOI" "Paste a DOI and the fields fill in for review"
+  Input "DOI" "10.1000/xyz123" bind=doi
+  Button "Look up" icon="search" onTap={fetched=doi!="" ; doi!="" ? toast "Found 1 record" : toast "Paste a DOI first"}
+  if fetched
+    Card gap=8
+      Text.caption "REVIEW BEFORE SAVING"
+      Input "Title" bind=draftTitle
+      Input "Authors" bind=draftAuthors
+      Row gap=8
+        Input "Year" bind=draftYear type=number
+        Input "Journal" bind=draftJournal grow
+      Input "Tags" "comma separated" bind=draftTags
+      Row gap=8 end
+        Button.ghost "Cancel" onTap={close}
+        Button "Save reference" onTap={refs=append(refs,{"id":"n{length(refs)+1}","author":draftAuthors,"year":draftYear,"title":draftTitle,"tags":split(draftTags,","),"coll":"all","journal":draftJournal,"doi":doi}); toast "Reference added"; close}
+Dialog#newColl "New collection"
+  Input "Name" bind=collName
+  Button "Create" onTap={collections=append(collections,{"id":lower(collName),"name":collName,"count":0}); collName=""; close}
+Sheet#moveColl "Move to collection"
+  each c in collections
+    ListTile "{c.name}" onTap={refs=updateWhere(refs, x => x.id==sel, x => with(x,"coll",c.id)); toast "Moved"; close}
+
+### Reference
+state sel="r1"
+state tab="fields"
+state style="APA"
+state page=0
+state hl=[{"id":"h1","page":3,"text":"The Transformer allows for significantly more parallelization","note":"Key claim: removes recurrence","color":"#FFFFEB3B"},{"id":"h2","page":5,"text":"Multi-head attention allows the model to jointly attend to information","note":"","color":"#FF80DEEA"}]
+state pendingHl=""
+state fields={"author":"Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A., Kaiser, L., Polosukhin, I.","year":2017,"title":"Attention Is All You Need","journal":"Advances in Neural Information Processing Systems","volume":30,"pages":"5998-6008","doi":"10.5555/3295222.3295349"}
+state notes=[{"id":"n1","text":"Key claim: removes recurrence","hl":"h1"}]
+App
+  Sidebar
+    Brand "Footnote" icon="menu_book"
+    NavItem "Library" icon="library_books" onTap={go library}
+    NavItem "Bibliography" icon="format_list_numbered" onTap={go bibliography}
+    NavItem "Duplicates" icon="content_copy" badge="1" onTap={go duplicates}
+    Spacer grow
+    Text.muted "Mira Okafor"
+  Main
+    Nav
+      Row gap=8
+        IconButton "arrow_back" tooltip="Back to library" onTap={go library}
+        Heading "{fields.title}" level=1
+      Row gap=8
+        Button.outline "Copy citation" icon="content_copy" onTap={copy "{fields.author} ({fields.year}). {fields.title}."; toast "Copied"}
+        Button "Save" onTap={emit saveRef fields; toast "Saved"}
+    Row gap=0 top
+      Column grow gap=16 pad=24 scroll
+        SegmentedButton bind=tab items=["fields","notes","styles"]
+        if tab=="fields"
+          Card gap=12
+            Input "Authors" bind=fields.author
+            Row gap=12
+              Input "Year" bind=fields.year type=number
+              Input "Journal" bind=fields.journal grow
+            Row gap=12
+              Input "Volume" bind=fields.volume type=number
+              Input "Pages" bind=fields.pages grow
+            Input "DOI" bind=fields.doi
+            Row gap=8
+              Chip "nlp"
+              Chip "transformers"
+              IconButton "add" tooltip="Add tag"
+        if tab=="notes"
+          each n in notes
+            Card gap=8
+              Row between
+                Text.caption "From highlight on page {find(hl, h => h.id==n.hl).page}"
+                IconButton "delete" tooltip="Remove note" onTap={notes=removeWhere(notes, x => x.id==n.id)}
+              Input "Note" bind=n.text multiline
+              Button.ghost "Jump to highlight" icon="north_east" onTap={page=find(hl, h => h.id==n.hl).page - 1}
+          if length(notes)==0
+            Text.muted "Select text in the pdf and choose Add note."
+        if tab=="styles"
+          Select "Citation style" items=["APA","MLA","Chicago"] bind=style
+          Card gap=8
+            Text.caption "APA 7"
+            Text "Vaswani, A., Shazeer, N., Parmar, N., et al. ({fields.year}). {fields.title}. {fields.journal}, {fields.volume}, {fields.pages}."
+          Card gap=8
+            Text.caption "MLA 9"
+            Text "Vaswani, Ashish, et al. \"{fields.title}.\" {fields.journal}, vol. {fields.volume}, {fields.year}, pp. {fields.pages}."
+          Card gap=8
+            Text.caption "Chicago 17"
+            Text "Vaswani, Ashish, Noam Shazeer, Niki Parmar, et al. {fields.year}. \"{fields.title}.\" {fields.journal} {fields.volume}: {fields.pages}."
+          Button.outline "Copy in {style}" icon="content_copy" onTap={copy "{fields.title} ({style})"; toast "Copied in {style}"}
+      Pane w=420 pad=16 gap=12
+        Row between
+          Text.strong "attention-is-all-you-need.pdf"
+          Row gap=4
+            IconButton "chevron_left" tooltip="Previous page" onTap={page=max(0,page-1)}
+            Text "{page+1} / 15"
+            IconButton "chevron_right" tooltip="Next page" onTap={page=min(14,page+1)}
+        PdfViewer src="attention-is-all-you-need.pdf" bind=page highlights={hl} h=480 onSelect={pendingHl=result.text; open hlMenu} onHighlight={hl=append(hl,{"id":"h{length(hl)+1}","page":page+1,"text":result.text,"note":"","color":"#FFFFEB3B"})}
+        Text.caption "Highlights"
+        each h in hl
+          Row gap=8 onTap={page=h.page-1}
+            Box w=6 fill=#FFFFEB3B radius=3
+            Column grow gap=2
+              Text.small "{h.text}"
+              Text.caption "page {h.page}"
+Popover#hlMenu
+  Text.small "{pendingHl}"
+  Row gap=8
+    Button "Highlight" icon="border_color" onTap={hl=append(hl,{"id":"h{length(hl)+1}","page":page+1,"text":pendingHl,"note":"","color":"#FFFFEB3B"}); close}
+    Button.outline "Add note" icon="note_add" onTap={hl=append(hl,{"id":"h{length(hl)+1}","page":page+1,"text":pendingHl,"note":"","color":"#FFFFEB3B"}); notes=append(notes,{"id":"n{length(notes)+1}","text":"","hl":"h{length(hl)+1}"}); tab="notes"; toast "Note linked to {fields.title}"; close}
+
+### Bibliography
+state style="APA"
+state sortBy="author"
+state picked=["r1","r2","r3"]
+state refs=[{"id":"r1","author":"Vaswani, A.","year":2017,"title":"Attention Is All You Need","journal":"NeurIPS"},{"id":"r2","author":"Kahneman, D.","year":2011,"title":"Thinking, Fast and Slow","journal":"Farrar, Straus and Giroux"},{"id":"r3","author":"Hinton, G.","year":2015,"title":"Distilling the Knowledge in a Neural Network","journal":"arXiv"},{"id":"r4","author":"Latour, B.","year":2005,"title":"Reassembling the Social","journal":"Oxford University Press"}]
+App
+  Sidebar
+    Brand "Footnote" icon="menu_book"
+    NavItem "Library" icon="library_books" onTap={go library}
+    NavItem "Bibliography" icon="format_list_numbered" selected={true}
+    NavItem "Duplicates" icon="content_copy" badge="1" onTap={go duplicates}
+    Spacer grow
+    Text.muted "Mira Okafor"
+  Main
+    Nav
+      Heading "Bibliography" level=1
+      Row gap=8
+        Select "Style" items=["APA","MLA","Chicago"] bind=style w=140
+        Button "Copy bibliography" icon="content_copy" onTap={copy join(map(filter(refs, x => contains(picked,x.id)), x => "{x.author} ({x.year}). {x.title}. {x.journal}."),"\n"); toast "Bibliography copied"}
+    Row gap=24 pad=24 top
+      Column w=320 gap=12
+        Text.strong "References to include"
+        each r in refs
+          Checkbox "{r.author} {r.year}" checked={contains(picked,r.id)} onChange={picked=result ? append(picked,r.id) : without(picked,r.id)}
+        Row gap=8
+          Button.ghost "Select all" onTap={picked=map(refs, x => x.id)}
+          Button.ghost "Clear" onTap={picked=[]}
+      Column grow gap=16
+        Card gap=12
+          Row between
+            Text.caption "{style} bibliography, {length(picked)} entries"
+            SegmentedButton bind=sortBy items=["author","year","title"]
+          each r in sortBy=="year" ? sortBy(filter(refs, x => contains(picked,x.id)), x => x.year) : sortBy(filter(refs, x => contains(picked,x.id)), x => x.author)
+            Text "{r.author} ({r.year}). {r.title}. {r.journal}."
+          if length(picked)==0
+            Text.muted "Pick at least one reference."
+        Row gap=8 end
+          Button.outline "Export .bib" icon="download" onTap={emit exportBib picked}
+          Button.outline "Export .docx" icon="description" onTap={emit exportDocx picked}
+
+### Duplicates
+state dupes=[{"id":"d1","keep":{"id":"r1","title":"Attention Is All You Need","author":"Vaswani, A.","year":2017,"tags":["nlp","transformers"],"pdf":true,"notes":1},"other":{"id":"r5","title":"Attention is all you need","author":"Vaswani, A.","year":2017,"tags":["nlp"],"pdf":false,"notes":0},"reason":"Same DOI 10.5555/3295222.3295349"}]
+state picked="d1"
+state keepTitle="a"
+App
+  Sidebar
+    Brand "Footnote" icon="menu_book"
+    NavItem "Library" icon="library_books" onTap={go library}
+    NavItem "Bibliography" icon="format_list_numbered" onTap={go bibliography}
+    NavItem "Duplicates" icon="content_copy" badge="{length(dupes)}" selected={true}
+    Spacer grow
+    Text.muted "Mira Okafor"
+  Main
+    Nav
+      Heading "Duplicates" level=1
+      Text.muted "{length(dupes)} possible duplicate sets"
+    Column pad=24 gap=16
+      each d in dupes
+        Card gap=12
+          Row between
+            Badge.warning "{d.reason}"
+            Text.caption "Merging keeps both sets of tags, the pdf and all notes"
+          Grid cols=2 gap=16
+            Card gap=8
+              Radio "Keep this title" value="a" bind=keepTitle
+              Text.strong "{d.keep.title}"
+              Text "{d.keep.author}, {d.keep.year}"
+              Row gap=4
+                each t in d.keep.tags
+                  Badge.neutral "{t}"
+              Text.caption "PDF attached, {d.keep.notes} note"
+            Card gap=8
+              Radio "Keep this title" value="b" bind=keepTitle
+              Text.strong "{d.other.title}"
+              Text "{d.other.author}, {d.other.year}"
+              Row gap=4
+                each t in d.other.tags
+                  Badge.neutral "{t}"
+              Text.caption "No PDF, {d.other.notes} notes"
+          Row gap=8 end
+            Button.ghost "Not a duplicate" onTap={dupes=removeWhere(dupes, x => x.id==d.id); toast "Marked as different"}
+            Button "Merge" icon="merge" onTap={open confirmMerge}
+      if length(dupes)==0
+        Text.muted "No duplicates. Your library is clean."
+  Dialog#confirmMerge "Merge these references?" "The merged entry keeps tags {union of both}, the pdf and all notes."
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button "Merge" onTap={dupes=[]; emit merge picked; toast "Merged into one reference"; close}

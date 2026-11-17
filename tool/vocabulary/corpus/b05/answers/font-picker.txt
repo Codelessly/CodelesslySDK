@@ -1,0 +1,187 @@
+### Browse
+project sample="The quick brown fox jumps over the lazy dog"
+project size=32
+project weight=400
+project italic=false
+project compare=[]
+project collected=[]
+project current={"id":"fraunces","name":"Fraunces","cat":"serif","styles":9,"designer":"Undercase Type"}
+project fonts=[{"id":"fraunces","name":"Fraunces","cat":"serif","styles":9,"designer":"Undercase Type"},{"id":"inter","name":"Inter","cat":"sans","styles":18,"designer":"Rasmus Andersson"},{"id":"jetbrains-mono","name":"JetBrains Mono","cat":"mono","styles":8,"designer":"JetBrains"},{"id":"bebas","name":"Bebas Neue","cat":"display","styles":1,"designer":"Ryoichi Tsunekawa"},{"id":"lora","name":"Lora","cat":"serif","styles":4,"designer":"Cyreal"},{"id":"dm-sans","name":"DM Sans","cat":"sans","styles":6,"designer":"Colophon Foundry"},{"id":"space-mono","name":"Space Mono","cat":"mono","styles":4,"designer":"Colophon Foundry"},{"id":"abril","name":"Abril Fatface","cat":"display","styles":1,"designer":"TypeTogether"}]
+state cat="all"
+state minStyles=1
+state q=""
+App
+  Sidebar
+    Brand "Specimen" icon="text_fields"
+    NavItem "Browse" icon="grid_view" selected={true}
+    NavItem "Compare" icon="compare" badge="{length(compare)}" onTap={open tray}
+    NavItem "Projects" icon="folder" badge="{length(collected)}" onTap={go projects}
+    Spacer grow
+    Text.muted "Showing {length(filter(fonts,f=>(cat==\"all\" || f.cat==cat) && f.styles>=minStyles && contains(lower(f.name),lower(q))))} families"
+  Main
+    Nav
+      Heading "Typefaces" level=1
+      Row gap=8
+        Input "Search fonts" bind=q w=220
+        Button.outline "Compare ({length(compare)})" onTap={open tray}
+    Column pad=24 gap=16
+      Card gap=12
+        Input "Sample text" bind=sample multiline
+        Row gap=16 middle
+          Text.fieldLabel "Size {size}px"
+          Slider bind=size min=12 max=96 grow
+          Select "Weight" bind=weight items=[300,400,500,700,900] w=120
+          Toggle "Italic" bind=italic
+      Row gap=8
+        ChoiceChip "All" selected={cat=="all"} onTap={cat="all"}
+        ChoiceChip "Serif" selected={cat=="serif"} onTap={cat="serif"}
+        ChoiceChip "Sans" selected={cat=="sans"} onTap={cat="sans"}
+        ChoiceChip "Mono" selected={cat=="mono"} onTap={cat="mono"}
+        ChoiceChip "Display" selected={cat=="display"} onTap={cat="display"}
+        Spacer grow
+        Text.fieldLabel "Styles at least {minStyles}"
+        Slider bind=minStyles min=1 max=18 w=160
+      Grid cols=3 gap=16
+        each f in filter(fonts,f=>(cat=="all" || f.cat==cat) && f.styles>=minStyles && contains(lower(f.name),lower(q)))
+          Card gap=8 onTap={current=f; go font-page}
+            Row between
+              Text.strong "{f.name}"
+              Badge.neutral "{f.styles} styles"
+            Text "{sample}" font="{f.name}" size={size} weight={weight} italic={italic}
+            Text.caption "{f.designer}"
+            Row gap=8
+              Button.outline "Compare" onTap={contains(map(compare,c=>c.id),f.id) ? toast "Already in tray" : (length(compare)>=4 ? toast "Tray holds four" : compare=append(compare,f))}
+              Button.ghost "Collect" icon="add" onTap={open collect; current=f}
+  Drawer#tray "Compare ({length(compare)} of 4)" right
+    if length(compare)==0
+      Text.muted "Pick up to four fonts to compare."
+    each c in compare
+      Card gap=8
+        Row between
+          Text.strong "{c.name}"
+          IconButton "close" tooltip="Remove" onTap={compare=without(compare,c)}
+        Text "{sample}" font="{c.name}" size={size} weight={weight} italic={italic}
+    Button.outline "Clear" onTap={compare=[]}
+    Button "Open side by side" onTap={close; go compare}
+  Dialog#collect "Collect into a project" "Choose where {current.name} goes"
+    Select "Project" bind=target items=["Brand refresh","Annual report","Wedding invites"]
+    Button "Add" onTap={collected=append(collected,with(current,"project",target)); toast "Added {current.name}"; close}
+
+### Font page
+App
+  Sidebar
+    Brand "Specimen" icon="text_fields"
+    NavItem "Browse" icon="grid_view" onTap={go browse}
+    NavItem "Compare" icon="compare" badge="{length(compare)}" onTap={open tray}
+    NavItem "Projects" icon="folder" badge="{length(collected)}" onTap={go projects}
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Back" onTap={go browse}
+        Heading "{current.name}" level=1
+      Row gap=8
+        Button.outline "Add to compare" onTap={length(compare)>=4 ? toast "Tray holds four" : compare=append(compare,current)}
+        Button "Collect" icon="add" onTap={open collect}
+    Column pad=24 gap=16
+      state wght=400
+      state wdth=100
+      state opsz=14
+      Row gap=24 top
+        Column grow gap=16
+          Card gap=8
+            Text.fieldLabel "Variable axes"
+            Text "{sample}" font="{current.name}" size={size} weight={wght} italic={italic}
+            Row gap=12 middle
+              Text.small "Weight" w=80
+              Slider bind=wght min=100 max=900 grow
+              Text.mono "{wght}"
+            Row gap=12 middle
+              Text.small "Width" w=80
+              Slider bind=wdth min=75 max=125 grow
+              Text.mono "{wdth}"
+            Row gap=12 middle
+              Text.small "Optical size" w=80
+              Slider bind=opsz min=9 max=144 grow
+              Text.mono "{opsz}"
+          Card gap=8
+            Text.fieldLabel "Waterfall"
+            each s in [12,14,18,24,36,48,72]
+              Row gap=12 middle
+                Text.caption "{s}" w=32
+                Text "{sample}" font="{current.name}" size={s} weight={wght}
+          Card gap=8
+            Text.fieldLabel "Glyphs"
+            Grid cols=12 gap=4
+              each g in split("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789&?!@#%",
+                Text "{g}" font="{current.name}" size=28 center
+        Pane w=320 pad=16 gap=12
+          Text.panelTitle "About"
+          Text.muted "{current.designer}"
+          Row gap=8
+            Badge.info "{current.cat}"
+            Badge.neutral "{current.styles} styles"
+          Divider
+          Text.panelTitle "Pairings"
+          each p in filter(fonts,f=>f.cat!=current.cat)
+            Card gap=4 onTap={compare=[current,p]; go compare}
+              Text "Heading in {current.name}" font="{current.name}" size=20 weight=700
+              Text "Body text set in {p.name}" font="{p.name}" size=14
+              Text.caption "{p.name}"
+  Dialog#collect "Collect into a project" "Choose where {current.name} goes"
+    Select "Project" bind=target items=["Brand refresh","Annual report","Wedding invites"]
+    Button "Add" onTap={collected=append(collected,with(current,"project",target)); toast "Added {current.name}"; close}
+
+### Compare
+App
+  Sidebar
+    Brand "Specimen" icon="text_fields"
+    NavItem "Browse" icon="grid_view" onTap={go browse}
+    NavItem "Compare" icon="compare" selected={true}
+    NavItem "Projects" icon="folder" badge="{length(collected)}" onTap={go projects}
+  Main
+    Nav
+      Heading "Compare" level=1
+      Row gap=8
+        Button.outline "Clear" onTap={compare=[]}
+        Button "Collect all" onTap={collected=concat(collected,compare); toast "Collected {length(compare)} fonts"}
+    Column pad=24 gap=16
+      Card gap=8
+        Input "Sample text" bind=sample multiline
+        Row gap=16 middle
+          Slider bind=size min=12 max=96 grow
+          Toggle "Italic" bind=italic
+      if length(compare)==0
+        Text.muted "Nothing to compare yet. Add up to four fonts from Browse."
+      Grid cols=2 gap=16
+        each c in compare
+          Card gap=8
+            Row between
+              Text.strong "{c.name}"
+              IconButton "close" tooltip="Remove" onTap={compare=without(compare,c)}
+            Text "{sample}" font="{c.name}" size={size} weight={weight} italic={italic}
+            Text.caption "{c.cat} / {c.styles} styles / {c.designer}"
+            Button.outline "Collect" onTap={collected=append(collected,c); toast "Collected {c.name}"}
+
+### Projects
+App
+  Sidebar
+    Brand "Specimen" icon="text_fields"
+    NavItem "Browse" icon="grid_view" onTap={go browse}
+    NavItem "Compare" icon="compare" badge="{length(compare)}" onTap={go compare}
+    NavItem "Projects" icon="folder" selected={true}
+  Main
+    Nav
+      Heading "Projects" level=1
+      Button "Export CSS" icon="code" onTap={emit exportCss collected}
+    Column pad=24 gap=16
+      state active="Brand refresh"
+      Row gap=8
+        ChoiceChip "Brand refresh" selected={active=="Brand refresh"} onTap={active="Brand refresh"}
+        ChoiceChip "Annual report" selected={active=="Annual report"} onTap={active="Annual report"}
+        ChoiceChip "Wedding invites" selected={active=="Wedding invites"} onTap={active="Wedding invites"}
+      if count(collected,c=>c.project==active)==0
+        Text.muted "No fonts in {active} yet."
+      each c in filter(collected,c=>c.project==active)
+        ListTile "{c.name}" "{c.cat}, {c.styles} styles"
+          Text "{sample}" font="{c.name}" size=20
+          IconButton "delete" tooltip="Remove" onTap={collected=without(collected,c); toast "Removed"}

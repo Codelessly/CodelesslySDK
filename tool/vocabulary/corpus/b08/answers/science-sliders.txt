@@ -1,0 +1,192 @@
+### Lab
+state angle=30
+state friction=0.2
+state mass=2
+state running=false
+state slow=false
+state elapsed=0
+state speeds=[]
+state times=[]
+state trail=[]
+state ruler=[40,260]
+state tab="lab"
+state notebook=[]
+state note=""
+every 100 when running onTick={elapsed=round(elapsed+(slow ? 0.025 : 0.1),3)}
+App
+  Sidebar
+    Brand "Lab Bubble" icon="science"
+    NavItem "Ramp" icon="trending_down" selected={tab=="lab"} onTap={tab="lab"}
+    NavItem "Challenge" icon="flag" selected={tab=="challenge"} onTap={go challenge}
+    NavItem "Predictions" icon="psychology" selected={tab=="predict"} onTap={go predictions}
+    NavItem "Notebook" icon="menu_book" badge="{length(notebook)}" onTap={go notebook}
+    Spacer grow
+    Text.muted "Gravity 9.81 m/s2"
+  Main
+    Nav
+      Heading "Ball on a ramp" level=1
+      Row gap=8
+        Toggle "Slow motion" bind=slow
+        Button.outline "Reset" icon="restart_alt" onTap={running=false; elapsed=0; speeds=[]; times=[]; trail=[]; toast "Reset"}
+        Button "Launch" icon="play_arrow" onTap={running=true; elapsed=0; speeds=[]; times=[]; trail=[]}
+    Row gap=16 pad=24 top
+      Column grow gap=16
+        Card gap=8
+          Stack
+            Ramp#ramp angle={angle} friction={friction} mass={mass} running={running} slow={slow} h=320 onStep={speeds=append(speeds,result.speed); times=append(times,result.t); trail=append(trail,result.pos)} onFinish={running=false; toast "Reached the bottom in {fixed(elapsed,2)} s"}
+            Trail points={trail} style=dotted
+            Ruler from={ruler[0]} to={ruler[1]} unit="cm" draggable onChange={ruler=result}
+          Row between
+            Text.muted "Ruler reads {fixed(abs(ruler[1]-ruler[0]),0)} cm"
+            Text.muted "Drag the ruler's ends to measure"
+        Card gap=12
+          Row between
+            Text.strong "Speed against time"
+            Text.muted "{length(speeds)} samples"
+          LineChart labels={times} values={speeds} h=180 xLabel="Time (s)" yLabel="Speed (m/s)"
+      Column w=300 gap=16
+        Card gap=12
+          Text.strong "Stopwatch"
+          Stopwatch value={elapsed} running={running} size=40
+          Row gap=8
+            Button.outline "Lap" grow onTap={toast "Lap {fixed(elapsed,2)} s"}
+            Button.outline "Zero" grow onTap={elapsed=0}
+        Card gap=12
+          Text.strong "Set up the ramp"
+          Text.fieldLabel "Angle: {angle} degrees"
+          Slider bind=angle min=5 max=60
+          Text.fieldLabel "Friction: {fixed(friction,2)}"
+          Slider bind=friction min=0 max=1
+          Text.fieldLabel "Mass: {mass} kg"
+          Slider bind=mass min=1 max=10
+        Card gap=12
+          Text.strong "Notebook entry"
+          Input "Observation" "What did you notice?" bind=note multiline
+          Button "Save with these numbers" icon="bookmark_add" onTap={notebook=append(notebook,{"note":note,"angle":angle,"friction":friction,"mass":mass,"time":elapsed,"top":max(0,last(speeds)),"date":today()}); note=""; toast "Saved to notebook"}
+
+### Challenge
+state angle=30
+state friction=0.2
+state mass=2
+state attempts=0
+state hit=false
+state landed=null
+state best=0
+state slow=false
+App
+  Sidebar
+    Brand "Lab Bubble" icon="science"
+    NavItem "Ramp" icon="trending_down" onTap={go lab}
+    NavItem "Challenge" icon="flag" selected={true}
+    NavItem "Predictions" icon="psychology" onTap={go predictions}
+    NavItem "Notebook" icon="menu_book" onTap={go notebook}
+  Main
+    Nav
+      Heading "Land in the box" level=1
+      Row gap=8
+        Badge.info "Attempts {attempts}"
+        Badge.success "Best {best} hits"
+    Column pad=24 gap=16
+      Card gap=12
+        Text.muted "Choose an angle, friction and mass so the ball leaves the ramp and lands inside the box 1.5 m away."
+        Stack
+          Ramp#chal angle={angle} friction={friction} mass={mass} slow={slow} h=280 launchEdge=true onFinish={landed=result.x; attempts=attempts+1; hit=(result.x>=150 && result.x<=190); hit ? {best=best+1; toast "In the box!"} : {toast "Missed by {fixed(abs(result.x-170),0)} cm"}}
+          Target x=170 width=40 label="Box"
+          Trail points={chal.trail} style=dotted
+        if landed!=null
+          Row gap=8
+            Icon "{hit ? 'check_circle' : 'cancel'}"
+            Text.strong "Landed at {fixed(landed,0)} cm"
+      Grid cols=3 gap=16
+        Card gap=8
+          Text.fieldLabel "Angle: {angle} degrees"
+          Slider bind=angle min=5 max=60
+        Card gap=8
+          Text.fieldLabel "Friction: {fixed(friction,2)}"
+          Slider bind=friction min=0 max=1
+        Card gap=8
+          Text.fieldLabel "Mass: {mass} kg"
+          Slider bind=mass min=1 max=10
+      Row gap=8
+        Button "Launch" icon="play_arrow" onTap={emit launch chal}
+        Button.outline "Reset" icon="restart_alt" onTap={landed=null; hit=false}
+        Toggle "Slow motion" bind=slow
+
+### Predictions
+state angle=40
+state friction=0.1
+state guess=""
+state revealed=false
+state outcome=""
+state history=[]
+App
+  Sidebar
+    Brand "Lab Bubble" icon="science"
+    NavItem "Ramp" icon="trending_down" onTap={go lab}
+    NavItem "Challenge" icon="flag" onTap={go challenge}
+    NavItem "Predictions" icon="psychology" selected={true}
+    NavItem "Notebook" icon="menu_book" onTap={go notebook}
+  Main
+    Nav
+      Heading "Predict first" level=1
+      Text.muted "{count(history,h=>h.correct)} of {length(history)} right"
+    Column pad=24 gap=16 maxw=720
+      Card gap=12
+        Text.heading3 "A ball rolls down a {angle} degree ramp with friction {friction}."
+        Text.muted "Before you run it, what will happen when you double the mass?"
+        Column gap=8
+          ChoiceChip "It reaches the bottom faster" selected={guess=="faster"} onTap={guess="faster"}
+          ChoiceChip "It reaches the bottom at the same time" selected={guess=="same"} onTap={guess="same"}
+          ChoiceChip "It reaches the bottom slower" selected={guess=="slower"} onTap={guess="slower"}
+        Button "Run it and compare" disabled={guess==""} onTap={outcome="same"; revealed=true; history=append(history,{"guess":guess,"actual":"same","correct":guess=="same"})}
+      if revealed
+        Card gap=12 animate=slide-up
+          Row between
+            Text.strong "Your prediction: {guess}"
+            Text.strong "Actual: {outcome}"
+          Badge.success "Correct" visible={guess==outcome}
+          Badge.warning "Not quite" visible={guess!=outcome}
+          Text.muted "Mass cancels out: both gravity's pull and the friction grow with mass, so the acceleration stays the same."
+          Ramp angle={angle} friction={friction} mass=4 h=200 autoplay
+          Row gap=8
+            Button.outline "Try another" onTap={guess=""; revealed=false}
+            Button "Open in the lab" onTap={go lab}
+      if length(history)>0
+        Card gap=8
+          Text.strong "Your guesses"
+          each h in history
+            ListTile "{h.guess}" subtitle="Actual: {h.actual}" icon="{h.correct ? 'check' : 'close'}"
+
+### Notebook
+state notebook=[{"note":"Steeper ramp, faster finish","angle":45,"friction":0.1,"mass":2,"time":1.4,"top":3.9,"date":"2026-11-14"},{"note":"Friction 0.6 barely moved it","angle":20,"friction":0.6,"mass":5,"time":3.1,"top":1.2,"date":"2026-11-15"}]
+state q=""
+state sel=0
+App
+  Sidebar
+    Brand "Lab Bubble" icon="science"
+    NavItem "Ramp" icon="trending_down" onTap={go lab}
+    NavItem "Challenge" icon="flag" onTap={go challenge}
+    NavItem "Predictions" icon="psychology" onTap={go predictions}
+    NavItem "Notebook" icon="menu_book" selected={true}
+  Main
+    Nav
+      Heading "Notebook" level=1
+      Input "Search" bind=q w=220
+    Column pad=24 gap=12
+      if isEmpty(notebook)
+        Text.muted "No entries yet. Save one from the ramp."
+      each e in filter(notebook,n=>contains(lower(n.note),lower(q)))
+        Card gap=8 stagger=80
+          Row between
+            Text.strong "{e.note}"
+            IconButton "more_vert" tooltip="Entry options" onTap={sel=index; open entryMenu}
+          Row gap=8
+            Badge.neutral "{e.angle} degrees"
+            Badge.neutral "friction {e.friction}"
+            Badge.neutral "{e.mass} kg"
+            Badge.info "{e.time} s"
+            Badge.info "top {e.top} m/s"
+          Text.caption "{e.date}"
+  Menu#entryMenu end
+    MenuItem "Copy numbers" icon="content_copy" onTap={copy "{notebook[sel].angle} degrees, friction {notebook[sel].friction}, {notebook[sel].mass} kg"; toast "Copied"}
+    MenuItem "Delete" icon="delete" onTap={notebook=removeAt(notebook,sel)}

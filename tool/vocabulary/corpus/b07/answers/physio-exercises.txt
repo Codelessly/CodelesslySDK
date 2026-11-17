@@ -1,0 +1,122 @@
+### Today
+state tab="today"
+state done=["ex1"]
+state streak=12
+App
+  Sidebar
+    Brand "Mend" icon="healing"
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={tab="today"}
+    NavItem "Progress" icon="show_chart" selected={tab=="progress"} onTap={go progress}
+    NavItem "Streak" icon="local_fire_department" badge="12" onTap={go progress}
+    Spacer grow
+    Text.muted "Knee rehab, week 3"
+  Main
+    Nav
+      Heading "Today's plan" level=1
+      Row gap=8
+        Badge.success "Streak {streak} days"
+        Button "Start session" onTap={go session}
+    Column pad=24 gap=16 scroll
+      Row gap=12 middle
+        Progress {count(done, d => true) / 4} grow
+        Text.muted "{length(done)} of 4 done"
+      Card gap=4
+        ListTile "Heel slides" "3 sets of 10 reps" icon="accessibility_new" onTap={go exercise}
+          Badge.success "Done"
+      Card gap=4
+        ListTile "Quad sets" "3 sets, hold 10 s" icon="timer" onTap={go exercise}
+      Card gap=4
+        ListTile "Straight leg raise" "2 sets of 12 reps" icon="accessibility_new" onTap={go exercise}
+      Card gap=4
+        ListTile "Wall sit" "3 sets, hold 20 s" icon="timer" onTap={go exercise}
+
+### Exercise
+state liked=false
+Page
+  Nav
+    Row gap=8 middle
+      IconButton "arrow_back" tooltip="Back" onTap={go today}
+      Brand "Mend" icon="healing"
+    Button "Start" onTap={go session}
+  Section
+    Row gap=32
+      Column grow gap=12
+        Heading "Quad sets" level=1
+        Text.muted "3 sets, hold 10 seconds, 5 seconds rest"
+        Chip "Stop if sharp pain" icon="warning" fill=#FFFFE0B2
+        Heading "Steps" level=3
+        Text "1. Sit or lie with your leg straight and a small towel roll under the knee."
+        Text "2. Tighten the thigh muscle and press the back of the knee into the towel."
+        Text "3. Hold for 10 seconds, breathing normally."
+        Text "4. Relax fully, then repeat."
+        Button "Start this exercise" onTap={go session}
+      Card grow gap=8
+        AnimatedImage "https://example.com/demo/quad-set.gif" loop h=260
+        Text.caption "Demo: slow, controlled tightening"
+
+### Session
+state phase="hold"
+state secs=10
+state reps=0
+state set=1
+state rest=30
+state running=true
+state pain=0
+every 1s when running && phase=="hold" onTick={secs=max(0,secs-1)}
+every 1s when running && phase=="rest" onTick={rest=max(0,rest-1)}
+App
+  Main
+    Nav
+      Heading "Quad sets" level=1
+      Row gap=8
+        Text.muted "Set {set} of 3"
+        Button.ghost "End" onTap={open rate}
+    Column pad=24 gap=16 center
+      if phase=="hold"
+        Text "{secs}" size=96 weight=700 center
+        Text.muted "Hold the squeeze" center
+        Card gap=4
+          Row gap=8 middle
+            Icon "record_voice_over"
+            Text.muted "Voice cue: Keep breathing. Hold steady, you are doing well."
+        Text.strong "Reps {reps} of 10"
+        Button "Rep done" size=large onTap={reps=reps+1; secs=10; reps>=10 ? {phase="rest"; rest=30} : toast "Rep counted"}
+      if phase=="rest"
+        Text "{rest}" size=96 weight=700 center
+        Text.muted "Rest" center
+        Row gap=8
+          Button.outline "Skip rest" onTap={phase="hold"; reps=0; set=set+1; secs=10; set>=3 ? open rate : toast "Next set"}
+          Button.ghost "+10 s" onTap={rest=rest+10}
+      Row gap=8
+        Button.outline "Pause" onTap={running=!running}
+  Sheet#rate "Pain after"
+    Text.muted "How did that feel?"
+    Row gap=8
+      ChoiceChip "0 none" selected={pain==0} onTap={pain=0}
+      ChoiceChip "3 mild" selected={pain==3} onTap={pain=3}
+      ChoiceChip "6 strong" selected={pain==6} onTap={pain=6}
+      ChoiceChip "9 severe" selected={pain==9} onTap={pain=9}
+    Slider bind=pain min=0 max=10
+    Button "Save" onTap={emit painRated pain; toast "Logged"; close; go progress}
+
+### Progress
+state month=[1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1]
+App
+  Sidebar
+    Brand "Mend" icon="healing"
+    NavItem "Today" icon="today" onTap={go today}
+    NavItem "Progress" icon="show_chart" selected={true}
+  Main
+    Nav
+      Heading "Progress" level=1
+      Badge.success "12 day streak"
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Heading "Range of movement" level=3
+        LineChart values=[62,68,74,79,85,91] labels=["W1","W2","W3","W4","W5","W6"] h=200
+        Text.muted "Knee flexion in degrees, measured weekly"
+      Card gap=8
+        Heading "Streak calendar" level=3
+        Grid cols=7 gap=6
+          each d in month
+            Box h=28 radius=6 fill={d==1 ? #FF2E7D32 : #FFE0E0E0}

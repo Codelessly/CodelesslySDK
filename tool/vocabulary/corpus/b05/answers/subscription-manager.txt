@@ -1,0 +1,226 @@
+### Subscriptions
+state yearly=false
+state tab="subs"
+state sel=0
+state q=""
+state catalog=[{"name":"Netflix","price":15.49,"cat":"Video","color":"#FFE50914"},{"name":"Spotify","price":11.99,"cat":"Music","color":"#FF1DB954"},{"name":"Notion","price":10,"cat":"Work","color":"#FF333333"},{"name":"iCloud+","price":2.99,"cat":"Storage","color":"#FF3B82F6"},{"name":"Adobe CC","price":59.99,"cat":"Work","color":"#FFDA1F26"}]
+state subs=[{"id":1,"name":"Netflix","price":15.49,"cat":"Video","color":"#FFE50914","left":3,"cycle":"Monthly","trial":false},{"id":2,"name":"Spotify","price":11.99,"cat":"Music","color":"#FF1DB954","left":5,"cycle":"Monthly","trial":false},{"id":3,"name":"Notion","price":10,"cat":"Work","color":"#FF333333","left":9,"cycle":"Monthly","trial":false},{"id":4,"name":"Headspace","price":12.99,"cat":"Health","color":"#FFF47D31","left":2,"cycle":"Monthly","trial":true},{"id":5,"name":"iCloud+","price":2.99,"cat":"Storage","color":"#FF3B82F6","left":14,"cycle":"Monthly","trial":false},{"id":6,"name":"Adobe CC","price":59.99,"cat":"Work","color":"#FFDA1F26","left":21,"cycle":"Monthly","trial":false}]
+state newName=""
+state newPrice=""
+state newCycle="Monthly"
+state newFirst=""
+state newRemind="3 days before"
+state newRemindOn=true
+App
+  Sidebar
+    Brand "Recurring" icon="autorenew"
+    NavItem "Subscriptions" icon="list" badge="{length(subs)}" selected={tab=="subs"} onTap={tab="subs"}
+    NavItem "Calendar" icon="calendar_month" onTap={go calendar}
+    NavItem "Insights" icon="donut_large" onTap={go insights}
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Subscriptions" level=1
+      Row gap=8
+        Input "Search" bind=q w=220
+        Button "Add subscription" icon="add" onTap={open add}
+    Column pad=24 gap=16
+      if any(subs,s=>s.trial)
+        Box fill=#FFFFF4E5 radius=12 pad=16
+          Row between gap=12
+            Row gap=12 middle
+              Icon "hourglass_bottom"
+              Column gap=2
+                Text.strong "Headspace free trial ends in 2 days"
+                Text.muted "You will be charged $12.99 on Nov 19 unless you cancel."
+            Row gap=8
+              Button.outline "How to cancel" onTap={sel=4; open cancel}
+              Button.ghost "Dismiss" onTap={subs=updateWhere(subs,s=>s.trial,s=>with(s,"trial",false))}
+      Card gap=8
+        Row between
+          Text.muted "{yearly ? 'Yearly total' : 'Monthly total'}"
+          Row gap=8 middle
+            Text.muted "Monthly"
+            Toggle bind=yearly
+            Text.muted "Yearly"
+        Text "{money(yearly ? sum(subs,s=>s.price)*12 : sum(subs,s=>s.price),'$',2)}" size=48 weight=700
+        Text.muted "across {length(subs)} subscriptions, next payment in {min(first(sortBy(subs,s=>s.left)).left,99)} days"
+      Row between
+        Text.sectionTitle "Next payments"
+        Text.muted "Sorted by next payment date"
+      Card gap=0
+        each s in sortBy(filter(subs,x=>contains(lower(x.name),lower(q))),x=>x.left)
+          ListTile menu=rowMenu
+            Row gap=12 middle
+              Box fill={s.color} radius=20 w=40 h=40 center middle
+                Text "{upper(slice(s.name,0,1))}" color=#FFFFFFFF weight=700
+              Column grow gap=2
+                Text.strong "{s.name}"
+                Text.muted "{s.cat} - {s.cycle}"
+              Badge.warning "{s.left} days left" visible={s.left<=3}
+              Chip "{s.left} days left" hidden={s.left<=3}
+              Text.strong "{money(yearly ? s.price*12 : s.price,'$',2)}" w=90
+              IconButton "more_vert" tooltip="More" onTap={sel=s.id; open rowMenu}
+          Divider
+  Menu#rowMenu end
+    MenuItem "Cancel guide" icon="help_outline" onTap={open cancel}
+    MenuItem "Remove from list" icon="delete" onTap={subs=removeWhere(subs,s=>s.id==sel); toast "Removed"}
+Dialog#add "Add subscription" "Pick from the catalogue or enter it by hand"
+  Text.fieldLabel "Catalogue"
+  Row scroll gap=8
+    each c in catalog
+      ChoiceChip "{c.name}" selected={newName==c.name} onTap={newName=c.name; newPrice="{c.price}"}
+  Divider
+  Input "Name" bind=newName
+  Input "Price" bind=newPrice type=number
+  Select "Billing cycle" bind=newCycle items=["Weekly","Monthly","Quarterly","Yearly"]
+  DatePicker "First bill" bind=newFirst
+  Toggle "Remind me" bind=newRemindOn
+  if newRemindOn
+    Select "Reminder" bind=newRemind items=["1 day before","3 days before","1 week before"]
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button "Add" onTap={newName!="" && newPrice!="" ? {subs=append(subs,{"id":length(subs)+10,"name":newName,"price":newPrice*1,"cat":"Other","color":"#FF6B7280","left":10,"cycle":newCycle,"trial":false}); toast "Added {newName}"; newName=""; newPrice=""; close} : toast "Enter a name and a price"}
+Dialog#cancel "How to cancel" "Four steps, about two minutes"
+  Column gap=12
+    Row gap=12
+      IconTile "looks_one"
+      Text "Open the service's website or app and sign in."
+    Row gap=12
+      IconTile "looks_two"
+      Text "Go to Account, then Membership or Billing."
+    Row gap=12
+      IconTile "looks_3"
+      Text "Choose Cancel subscription and decline any offers."
+    Row gap=12
+      IconTile "looks_4"
+      Text "Keep the confirmation email in case you are billed again."
+    Row end gap=8
+      Button.ghost "Close" onTap={close}
+      Button.destructive "I cancelled it" onTap={subs=removeWhere(subs,s=>s.id==sel); toast "Removed from your list"; close}
+
+### Calendar
+state month="November 2026"
+state picked=17
+state subs=[{"id":1,"name":"Netflix","price":15.49,"day":20,"color":"#FFE50914"},{"id":2,"name":"Spotify","price":11.99,"day":22,"color":"#FF1DB954"},{"id":3,"name":"Notion","price":10,"day":26,"color":"#FF333333"},{"id":4,"name":"Headspace","price":12.99,"day":19,"color":"#FFF47D31"},{"id":5,"name":"iCloud+","price":2.99,"day":1,"color":"#FF3B82F6"},{"id":6,"name":"Adobe CC","price":59.99,"day":8,"color":"#FFDA1F26"}]
+App
+  Sidebar
+    Brand "Recurring" icon="autorenew"
+    NavItem "Subscriptions" icon="list" onTap={go subscriptions}
+    NavItem "Calendar" icon="calendar_month" selected={true}
+    NavItem "Insights" icon="donut_large" onTap={go insights}
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Calendar" level=1
+      Row gap=8 middle
+        IconButton "chevron_left" tooltip="Previous month" onTap={month="October 2026"}
+        Text.strong "{month}"
+        IconButton "chevron_right" tooltip="Next month" onTap={month="December 2026"}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Card grow gap=12
+          Grid cols=7 gap=4
+            Text.caption "Mon" center
+            Text.caption "Tue" center
+            Text.caption "Wed" center
+            Text.caption "Thu" center
+            Text.caption "Fri" center
+            Text.caption "Sat" center
+            Text.caption "Sun" center
+          Grid cols=7 gap=4 keep
+            Spacer
+            Spacer
+            Spacer
+            Spacer
+            Spacer
+            Spacer
+            each d in range(30)
+              Box pad=6 radius=8 gap=4 center fill={picked==d+1 ? '#FFE0E7FF' : '#00000000'} onTap={picked=d+1}
+                Text.strong "{d+1}" weight={d+1==17 ? 800 : 400}
+                if any(subs,s=>s.day==d+1)
+                  Badge.primary "{count(subs,s=>s.day==d+1)}"
+        Column w=320 gap=12
+          Card gap=8
+            Text.sectionTitle "Nov {picked}"
+            if any(subs,s=>s.day==picked)
+              each s in filter(subs,x=>x.day==picked)
+                Row gap=12 middle
+                  Box fill={s.color} radius=18 w=36 h=36 center middle
+                    Text "{upper(slice(s.name,0,1))}" color=#FFFFFFFF weight=700
+                  Text.strong grow "{s.name}"
+                  Text.strong "{money(s.price,'$',2)}"
+              Divider
+              Row between
+                Text.muted "Due this day"
+                Text.strong "{money(sum(filter(subs,x=>x.day==picked),x=>x.price),'$',2)}"
+            if !any(subs,s=>s.day==picked)
+              Text.muted "Nothing is due on this day."
+          Card gap=8
+            Text.sectionTitle "Rest of the month"
+            Text "{money(sum(filter(subs,x=>x.day>=17),x=>x.price),'$',2)}" size=32 weight=700
+            Text.muted "{count(subs,x=>x.day>=17)} payments still to come"
+
+### Insights
+state yearly=false
+state dismissed=[]
+state alerts=[{"id":1,"name":"Netflix","from":13.99,"to":15.49,"date":"Dec 1"},{"id":2,"name":"Spotify","from":10.99,"to":11.99,"date":"Jan 5"},{"id":3,"name":"Adobe CC","from":54.99,"to":59.99,"date":"Dec 14"}]
+state cats=[{"name":"Video","amount":15.49},{"name":"Music","amount":11.99},{"name":"Work","amount":69.99},{"name":"Health","amount":12.99},{"name":"Storage","amount":2.99}]
+App
+  Sidebar
+    Brand "Recurring" icon="autorenew"
+    NavItem "Subscriptions" icon="list" onTap={go subscriptions}
+    NavItem "Calendar" icon="calendar_month" onTap={go calendar}
+    NavItem "Insights" icon="donut_large" badge="{length(alerts)-length(dismissed)}" selected={true}
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Insights" level=1
+      Row gap=8 middle
+        Text.muted "Monthly"
+        Toggle bind=yearly
+        Text.muted "Yearly"
+    Column pad=24 gap=16
+      Grid cols=2 gap=16
+        Card gap=8
+          Text.sectionTitle "By category"
+          Donut values={map(cats,c=>yearly ? c.amount*12 : c.amount)} labels={map(cats,c=>c.name)}
+        Card gap=8
+          Text.muted "{yearly ? 'Yearly total' : 'Monthly total'}"
+          Text "{money(yearly ? sum(cats,c=>c.amount)*12 : sum(cats,c=>c.amount),'$',2)}" size=48 weight=700
+          Text.muted "Largest category: Work"
+          Sparkline values=[98,101,105,108,113,113]
+      Row between
+        Text.sectionTitle "Price rises"
+        Badge.warning "{length(alerts)-length(dismissed)} new"
+      Card gap=0
+        each a in alerts
+          if !contains(dismissed,a.id)
+            Row gap=12 middle pad=8
+              IconTile "trending_up"
+              Column grow gap=2
+                Text.strong "{a.name} is going up on {a.date}"
+                Text.muted "{money(a.from,'$',2)} to {money(a.to,'$',2)} a month, {money(a.to-a.from,'$',2)} more"
+              Button.outline "Cancel guide" onTap={open cancel}
+              Button.ghost "Dismiss" onTap={dismissed=append(dismissed,a.id)}
+            Divider
+        if length(dismissed)==length(alerts)
+          Text.muted "No price rises to review."
+Dialog#cancel "How to cancel" "Four steps, about two minutes"
+  Column gap=12
+    Row gap=12
+      IconTile "looks_one"
+      Text "Open the service's website or app and sign in."
+    Row gap=12
+      IconTile "looks_two"
+      Text "Go to Account, then Membership or Billing."
+    Row gap=12
+      IconTile "looks_3"
+      Text "Choose Cancel subscription and decline any offers."
+    Row gap=12
+      IconTile "looks_4"
+      Text "Keep the confirmation email in case you are billed again."
+    Button "Got it" onTap={close}

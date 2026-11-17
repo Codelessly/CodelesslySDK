@@ -1,0 +1,182 @@
+### Letters
+state tab="letters"
+state letters=[{"l":"a","word":"apple","pic":"https://img.soundbox.app/apple.png","sound":"a as in apple"},{"l":"b","word":"ball","pic":"https://img.soundbox.app/ball.png","sound":"b as in ball"},{"l":"c","word":"cat","pic":"https://img.soundbox.app/cat.png","sound":"c as in cat"},{"l":"d","word":"dog","pic":"https://img.soundbox.app/dog.png","sound":"d as in dog"},{"l":"s","word":"sun","pic":"https://img.soundbox.app/sun.png","sound":"s as in sun"},{"l":"t","word":"tent","pic":"https://img.soundbox.app/tent.png","sound":"t as in tent"}]
+state at=0
+state playing=false
+state stars=7
+every 1200 when playing onTick={playing=false}
+App
+  Sidebar
+    Brand "Soundbox" icon="graphic_eq"
+    NavItem "Letters" icon="abc" selected={tab=="letters"} onTap={tab="letters"}
+    NavItem "Catch the sound" icon="sports_esports" selected={tab=="game"} onTap={go game}
+    NavItem "Blend a word" icon="join_inner" selected={tab=="blend"} onTap={go blend}
+    NavItem "My stars" icon="star" badge="{stars}" onTap={go blend}
+    Spacer grow
+    NavItem "Parent corner" icon="lock" onTap={open gate}
+  Main
+    Nav
+      Heading "Letters" level=1
+      Row gap=8
+        Text.muted "{stars} stars"
+        Icon "star" color=#FFF5B301
+    Column pad=24 gap=20 center
+      Pages bind=at h=420 items={letters} peek=0.9
+        Card gap=16 center
+          Row gap=40 middle center
+            Text "{letters[at].l}" size=220 weight=800 color=#FF3B6FE0
+            Image "{letters[at].pic}" w=240 h=240 radius=24
+          Text.heading "{upper(letters[at].l)} is for {letters[at].word}"
+          Button "Hear it" icon="volume_up" size=large onTap={playing=true; emit speak letters[at].sound}
+          if playing
+            SoundWave active color=#FF3B6FE0 bars=24 h=60 animate=pulse
+          if !playing
+            SoundWave idle bars=24 h=60 color=#FFB8C4E0
+      Dots bind=at count={length(letters)}
+      Row gap=12 center
+        IconButton "chevron_left" tooltip="Previous letter" onTap={at=max(0,at-1)}
+        Text.muted "{at+1} of {length(letters)}"
+        IconButton "chevron_right" tooltip="Next letter" onTap={at=min(length(letters)-1,at+1)}
+  Dialog#gate "Grown-ups only" "Answer the sum to open the parent corner"
+    state a=7
+    state b=6
+    state guess=""
+    Text.heading "{a} + {b} = ?"
+    Input "Your answer" bind=guess type=number
+    Button "Open" onTap={guess==a+b ? go parent : toast "Not quite, try again"}
+
+### Catch the sound
+state target={"l":"s","word":"sun"}
+state options=[{"id":1,"word":"sun","pic":"https://img.soundbox.app/sun.png","starts":"s"},{"id":2,"word":"moon","pic":"https://img.soundbox.app/moon.png","starts":"m"},{"id":3,"word":"snake","pic":"https://img.soundbox.app/snake.png","starts":"s"}]
+state round=1
+state caught=0
+state stars=7
+state miss=false
+App
+  Sidebar
+    Brand "Soundbox" icon="graphic_eq"
+    NavItem "Letters" icon="abc" onTap={go letters}
+    NavItem "Catch the sound" icon="sports_esports" selected onTap={go game}
+    NavItem "Blend a word" icon="join_inner" onTap={go blend}
+    Spacer grow
+    NavItem "Parent corner" icon="lock" onTap={open gate}
+  Main
+    Nav
+      Heading "Catch the sound" level=1
+      Row gap=8
+        Text.muted "Round {round} of 5"
+        Progress {round/5} w=120
+    Column pad=24 gap=20 center
+      Row gap=16 middle
+        Text.heading "Which one starts with"
+        Text "{target.l}" size=72 weight=800 color=#FF3B6FE0
+        IconButton "volume_up" tooltip="Hear the sound" onTap={emit speak target.l}
+      Row gap=32 center h=260
+        each o in options
+          Card drag=pic(o.id) animate=slide-up stagger=300 gap=8 center
+            Image "{o.pic}" w=140 h=140 radius=16
+            Text.strong "{o.word}"
+      Box#basket drop=pic fill=#FFFFF3D6 radius=32 pad=24 center h=140 w=320 onDrop={
+        find(options,x=>x.id==result.data).starts==target.l ? {caught=caught+1; stars=stars+1; round=round+1; miss=false; toast "Yes! {target.word}"; emit correct} : {miss=true; emit tryAgain}
+      }
+        Icon "shopping_basket" size=56 color=#FFB26A00
+        Text.muted "Drop it in the basket"
+        if caught>0
+          Text.success "{caught} caught"
+      if miss
+        Text.danger "Listen again: {target.l}" animate=shake
+  Dialog#gate "Grown-ups only" "Answer the sum to open the parent corner"
+    state guess=""
+    Text.heading "7 + 6 = ?"
+    Input "Your answer" bind=guess type=number
+    Button "Open" onTap={guess==13 ? go parent : toast "Not quite, try again"}
+
+### Blend a word
+state tiles=["c","a","t"]
+state merged=false
+state stars=7
+state shelf=[{"w":"sun","got":true},{"w":"hat","got":true},{"w":"dog","got":true},{"w":"pig","got":true},{"w":"cup","got":true},{"w":"bus","got":true},{"w":"cat","got":false},{"w":"map","got":false}]
+state spread=0
+App
+  Sidebar
+    Brand "Soundbox" icon="graphic_eq"
+    NavItem "Letters" icon="abc" onTap={go letters}
+    NavItem "Catch the sound" icon="sports_esports" onTap={go game}
+    NavItem "Blend a word" icon="join_inner" selected onTap={go blend}
+    Spacer grow
+    NavItem "Parent corner" icon="lock" onTap={open gate}
+  Main
+    Nav
+      Heading "Blend a word" level=1
+      Text.muted "{stars} stars"
+    Column pad=24 gap=24 center
+      Text.heading "Slide the sounds together"
+      if !merged
+        Row gap=0 center
+          each t in tiles
+            Box fill=#FF3B6FE0 radius=20 pad=24 w=120 h=140 center middle animate=scale
+              Text "{t}" size=80 weight=800 color=#FFFFFFFF
+      if merged
+        Box fill=#FF2E9E5B radius=28 pad=24 center animate=pop
+          Text "{join(tiles,"")}" size=96 weight=800 color=#FFFFFFFF
+      Slider bind=spread min=0 max=100 onChange={result>=90 ? {merged=true; emit speak join(tiles,""); stars=stars+1; toast "cat!"} : {merged=false}}
+      Text.muted "Slide to push the tiles together"
+      Row gap=12
+        Button.outline "Hear each sound" icon="hearing" onTap={emit speakEach tiles}
+        Button "Again" icon="replay" onTap={merged=false; spread=0}
+      Divider
+      Text.heading "My star shelf"
+      Card gap=12
+        Grid cols=4 gap=12
+          each s in shelf
+            Column center gap=4
+              Icon "star" size=48 color={s.got ? #FFF5B301 : #FFD5D5D5}
+              Text.caption "{s.w}"
+  Dialog#gate "Grown-ups only" "Answer the sum to open the parent corner"
+    state guess=""
+    Text.heading "9 + 4 = ?"
+    Input "Your answer" bind=guess type=number
+    Button "Open" onTap={guess==13 ? go parent : toast "Not quite, try again"}
+
+### Parent corner
+state tab="progress"
+state sounds=[{"s":"s","score":92},{"s":"a","score":88},{"s":"t","score":75},{"s":"p","score":61},{"s":"m","score":54},{"s":"d","score":38}]
+state limit=20
+state sound_on=true
+App
+  Sidebar
+    Brand "Soundbox" icon="graphic_eq"
+    NavItem "Progress" icon="insights" selected={tab=="progress"} onTap={tab="progress"}
+    NavItem "Settings" icon="tune" selected={tab=="settings"} onTap={tab="settings"}
+    Spacer grow
+    NavItem "Back to play" icon="arrow_back" onTap={go letters}
+  Main
+    Nav
+      Heading "Parent corner" level=1
+      Text.muted "Maya, age 4"
+    Column pad=24 gap=16
+      if tab=="progress"
+        Grid cols=3 gap=16
+          Card gap=4
+            Text.muted "Stars this week"
+            Text "23" size=40 weight=700
+          Card gap=4
+            Text.muted "Sounds known"
+            Text "{count(sounds,x=>x.score>=70)} of {length(sounds)}"  size=40 weight=700
+          Card gap=4
+            Text.muted "Minutes played"
+            Text "46" size=40 weight=700
+        Card gap=12
+          Text.strong "Progress by sound"
+          BarChart values={map(sounds,x=>x.score)} labels={map(sounds,x=>upper(x.s))} h=220
+        Card gap=8
+          Text.strong "Needs practice"
+          each x in filter(sounds,x=>x.score<60)
+            ListTile "Sound {upper(x.s)}" "{x.score}% right" icon="record_voice_over"
+              Progress {x.score/100}
+      if tab=="settings"
+        Card gap=12
+          Toggle "Sound effects" bind=sound_on
+          Slider "Daily play limit (minutes)" bind=limit min=5 max=60
+          Text.muted "Soundbox pauses after {limit} minutes."
+          Button "Save" onTap={emit saveSettings; toast "Saved"}

@@ -1,0 +1,155 @@
+### Game
+state cols=9
+state rows=9
+state bombs=10
+state level="Beginner"
+state cells=[]
+state started=false
+state status="ready"
+state flags=0
+state seconds=0
+state customCols=16
+state customRows=16
+state customBombs=40
+state bests=[{"level":"Beginner","size":"9 x 9","time":48,"date":"Nov 2"},{"level":"Beginner","size":"9 x 9","time":61,"date":"Oct 28"},{"level":"Intermediate","size":"16 x 16","time":187,"date":"Nov 9"},{"level":"Expert","size":"30 x 16","time":412,"date":"Nov 12"}]
+every 1s when status=="playing" onTick={seconds=min(999,seconds+1)}
+App
+  Sidebar
+    Brand "Sweeper" icon="flag"
+    NavItem "Game" icon="grid_on" selected={true}
+    NavItem "Best times" icon="emoji_events" onTap={go best-times}
+    Spacer grow
+    Text.muted "{level}: {cols} x {rows}, {bombs} bombs"
+  Main
+    Nav
+      Heading "Minefield" level=1
+      Row gap=8
+        Button.outline "New game" icon="refresh" onTap={newGame cols rows bombs; seconds=0; flags=0; started=false; status="ready"}
+        Button.outline "Size" icon="tune" onTap={open size}
+    Column pad=24 gap=16 center
+      Card gap=16 maxw=720
+        Row between middle
+          Row gap=8 middle
+            Icon "flag"
+            Text.strong "{bombs - flags}" size=28
+            Text.muted "bombs left"
+          Button.ghost "Restart" icon="sentiment_satisfied" onTap={newGame cols rows bombs; seconds=0; flags=0; started=false; status="ready"}
+          Row gap=8 middle
+            Icon "timer"
+            Text.mono "{seconds}" size=28
+        if status=="lost"
+          Badge.error "Boom. Wrong flags are crossed out."
+        if status=="won"
+          Badge.success "Cleared in {seconds} seconds"
+        Row scroll center
+          Grid cols={cols} keep gap=2
+            each c in cells
+              Box w=32 h=32 center middle radius=4 fill={c.open ? (c.mine ? #FFE57373 : #FFF1F1F1) : #FFB0BEC5} onTap={c.open && c.n>0 ? chord index : reveal index} onLongPress={flag index} onDoubleTap={chord index} menu=cellHelp
+                if c.open && c.mine
+                  Icon "brightness_7" color=#FF212121
+                if c.open && !c.mine && c.n>0
+                  Text.strong "{c.n}" color={c.n==1 ? #FF1976D2 : c.n==2 ? #FF388E3C : #FFD32F2F}
+                if !c.open && c.flag && status!="lost"
+                  Icon "flag" color=#FFD32F2F
+                if !c.open && c.flag && status=="lost" && !c.mine
+                  Stack center middle
+                    Icon "flag" color=#FF757575
+                    Icon "close" color=#FFD32F2F
+                if !c.open && c.flag && status=="lost" && c.mine
+                  Icon "flag" color=#FF388E3C
+                if !c.open && !c.flag && status=="lost" && c.mine
+                  Icon "brightness_7" color=#FF212121
+        Text.caption "Tap to open, long press to flag, double tap a number to open its neighbours. Your first tap is always safe."
+        if status=="lost"
+          Row gap=8 center
+            Button "Try again" onTap={newGame cols rows bombs; seconds=0; flags=0; started=false; status="ready"}
+            Button.outline "Change size" onTap={open size}
+        if status=="won"
+          Button "Save my time" icon="emoji_events" onTap={bests=append(bests,{"level":level,"size":"{cols} x {rows}","time":seconds,"date":formatDate(today(),"MMM d")}); toast "Time saved"; go best-times}
+  Menu#cellHelp
+    MenuItem "Open" icon="touch_app" onTap={reveal index}
+    MenuItem "Flag" icon="flag" onTap={flag index}
+    MenuItem "Open neighbours" icon="open_with" onTap={chord index}
+  Dialog#size "Size and difficulty" "Pick a level or set your own."
+    SegmentedButton bind=level items=["Beginner","Intermediate","Expert","Custom"] onChange={level=="Beginner" ? {cols=9; rows=9; bombs=10} : level=="Intermediate" ? {cols=16; rows=16; bombs=40} : level=="Expert" ? {cols=30; rows=16; bombs=99} : {cols=customCols; rows=customRows; bombs=customBombs}}
+    if level=="Custom"
+      Column gap=12
+        Row between middle
+          Text "Columns"
+          Row gap=8 middle
+            IconButton "remove" tooltip="Fewer columns" onTap={customCols=max(5,customCols-1); cols=customCols}
+            Text.strong "{customCols}"
+            IconButton "add" tooltip="More columns" onTap={customCols=min(40,customCols+1); cols=customCols}
+        Row between middle
+          Text "Rows"
+          Row gap=8 middle
+            IconButton "remove" tooltip="Fewer rows" onTap={customRows=max(5,customRows-1); rows=customRows}
+            Text.strong "{customRows}"
+            IconButton "add" tooltip="More rows" onTap={customRows=min(30,customRows+1); rows=customRows}
+        Row between middle
+          Text "Bombs"
+          Row gap=8 middle
+            IconButton "remove" tooltip="Fewer bombs" onTap={customBombs=max(1,customBombs-1); bombs=customBombs}
+            Text.strong "{customBombs}"
+            IconButton "add" tooltip="More bombs" onTap={customBombs=min(customCols*customRows-9,customBombs+1); bombs=customBombs}
+        Text.caption "At most {customCols*customRows-9} bombs, so the first tap and its neighbours stay clear."
+    Text.muted "{cols} x {rows} with {bombs} bombs: {fixed(bombs/(cols*rows)*100,0)}% of squares."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Start" onTap={newGame cols rows bombs; seconds=0; flags=0; started=false; status="ready"; close}
+
+### Best times
+state filter="All"
+state bests=[{"level":"Beginner","size":"9 x 9","time":48,"date":"Nov 2"},{"level":"Beginner","size":"9 x 9","time":61,"date":"Oct 28"},{"level":"Intermediate","size":"16 x 16","time":187,"date":"Nov 9"},{"level":"Expert","size":"30 x 16","time":412,"date":"Nov 12"},{"level":"Beginner","size":"9 x 9","time":72,"date":"Oct 19"},{"level":"Intermediate","size":"16 x 16","time":241,"date":"Oct 30"}]
+App
+  Sidebar
+    Brand "Sweeper" icon="flag"
+    NavItem "Game" icon="grid_on" onTap={go game}
+    NavItem "Best times" icon="emoji_events" selected={true}
+    Spacer grow
+    Text.muted "Fastest wins, per level"
+  Main
+    Nav
+      Heading "Best times" level=1
+      Button.outline "Clear all" icon="delete" onTap={open confirmClear}
+    Column pad=24 gap=16
+      Row gap=8 wrap
+        ChoiceChip "All" selected={filter=="All"} onTap={filter="All"}
+        ChoiceChip "Beginner" selected={filter=="Beginner"} onTap={filter="Beginner"}
+        ChoiceChip "Intermediate" selected={filter=="Intermediate"} onTap={filter="Intermediate"}
+        ChoiceChip "Expert" selected={filter=="Expert"} onTap={filter="Expert"}
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Beginner best"
+          Text.strong "{coalesce(min(1000,first(sortBy(filter(bests,b=>b.level==\"Beginner\"),b=>b.time)).time),0)} s" size=32
+        Card gap=4
+          Text.muted "Intermediate best"
+          Text.strong "{coalesce(first(sortBy(filter(bests,b=>b.level==\"Intermediate\"),b=>b.time)).time,0)} s" size=32
+        Card gap=4
+          Text.muted "Expert best"
+          Text.strong "{coalesce(first(sortBy(filter(bests,b=>b.level==\"Expert\"),b=>b.time)).time,0)} s" size=32
+      Card gap=8
+        Row gap=8
+          Text.muted "#" w=40
+          Text.muted "Level" grow
+          Text.muted "Size" w=90
+          Text.muted "Time" w=80
+          Text.muted "Date" w=80
+        Divider
+        each b in sortBy(filter(bests,x=>filter=="All" || x.level==filter),x=>x.time)
+          Row gap=8 middle
+            Text.strong "{index+1}" w=40
+            Row grow gap=8
+              Text "{b.level}"
+              if index==0
+                Badge.success "Record"
+            Text.mono "{b.size}" w=90
+            Text.strong "{duration(b.time)}" w=80
+            Text.muted "{b.date}" w=80
+        if isEmpty(filter(bests,x=>filter=="All" || x.level==filter))
+          Text.muted "No times yet. Clear a board to set one."
+      LineChart labels=["Oct 19","Oct 28","Nov 2"] values=[72,61,48] h=160
+  Dialog#confirmClear "Clear best times?" "This removes every saved time."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Clear" onTap={bests=[]; toast "Best times cleared"; close}

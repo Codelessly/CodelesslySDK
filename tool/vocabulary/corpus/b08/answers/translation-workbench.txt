@@ -1,0 +1,160 @@
+### Editor
+state tab="editor"
+state onlyUnapproved=false
+state sel=2
+state commentFor=0
+state comment=""
+state segs=[{"id":1,"source":"Thank you for choosing Harbor Insurance.","target":"Vielen Dank, dass Sie sich für Harbor Versicherung entschieden haben.","status":"approved","words":6},{"id":2,"source":"Your policy number is 4471-902 and it renews on 14 March 2027.","target":"Ihre Policennummer lautet 4471-902 und sie verlängert sich am 14. März 2027.","status":"draft","words":12},{"id":3,"source":"The deductible is $500 per claim, with a yearly cap of $2,500.","target":"","status":"new","words":12},{"id":4,"source":"Click <b>Report a claim</b> to start a new claim online.","target":"","status":"new","words":10},{"id":5,"source":"Our team will review your claim within 3 business days.","target":"Unser Team prüft Ihren Schaden innerhalb von 5 Werktagen.","status":"draft","words":10},{"id":6,"source":"Contact the claims desk if the premium changes.","target":"Wenden Sie sich an die Schadenstelle, wenn sich die Prämie ändert.","status":"approved","words":8}]
+state matches=[{"id":1,"percent":100,"source":"Your policy number is 4471-902.","target":"Ihre Policennummer lautet 4471-902.","diff":["renews on 14 March 2027"]},{"id":2,"percent":84,"source":"Your policy renews on 14 March 2026.","target":"Ihre Police verlängert sich am 14. März 2026.","diff":["number is 4471-902","2026"]},{"id":3,"percent":71,"source":"Your policy number is on the first page.","target":"Ihre Policennummer steht auf der ersten Seite.","diff":["renews on 14 March 2027"]}]
+state terms=[{"source":"policy","target":"Police","approved":true},{"source":"claim","target":"Schaden","approved":true},{"source":"deductible","target":"Selbstbeteiligung","approved":true},{"source":"premium","target":"Prämie","approved":false}]
+App
+  Sidebar
+    Brand "Segment" icon="translate"
+    NavItem "Editor" icon="edit_note" selected={tab=="editor"} onTap={tab="editor"}
+    NavItem "Review" icon="rule" badge="{count(segs, s => s.status != 'approved')}" onTap={go review}
+    NavItem "Projects" icon="folder" onTap={go projects}
+    Spacer grow
+    Text.muted "Lena Brandt"
+    Text.caption "EN to DE, Harbor claims guide"
+  Main
+    Nav
+      Heading "Claims guide, EN to DE" level=1
+      Row gap=12
+        Row gap=8
+          Progress 0.64 w=160
+          Text.caption "{sum(filter(segs, s => s.status == 'approved'), s => s.words)} of {sum(segs, s => s.words)} words done"
+        FilterChip "Unapproved only" selected={onlyUnapproved} onTap={onlyUnapproved=!onlyUnapproved}
+        Button.outline "Export" icon="download" onTap={toast "Export started"}
+    Row top
+      Column grow pad=24 gap=12
+        Row gap=16
+          Text.fieldLabel "Source (English)" grow
+          Text.fieldLabel "Target (German)" grow
+        each seg in segs
+          if !onlyUnapproved || seg.status != "approved"
+            Card gap=8 selected={sel==seg.id} onTap={sel=seg.id}
+              Row gap=16 top
+                Column grow gap=4
+                  Row gap=8
+                    Text.caption "{seg.id}"
+                    Text.caption "{seg.words} words"
+                  HighlightedText "{seg.source}" terms={terms} field="source" onTermTap={sel=seg.id}
+                Column grow gap=8
+                  Input "Target" "Type the translation" bind=seg.target multiline onChange={segs=updateWhere(segs, s => s.id==seg.id, s => with(s, "status", s.status=="approved" ? "draft" : (result=="" ? "new" : "draft")))}
+                  Row between
+                    Row gap=8
+                      Chip "New" selected={seg.status=="new"}
+                      Chip "Draft" selected={seg.status=="draft"}
+                      Chip "Approved" selected={seg.status=="approved"}
+                    Row gap=4
+                      IconButton "chat_bubble_outline" tooltip="Comment to reviewer" onTap={commentFor=seg.id; open comment}
+                      IconButton "check_circle" tooltip="Approve" onTap={segs=updateWhere(segs, s => s.id==seg.id, s => with(s, "status", "approved")); toast "Segment {seg.id} approved"}
+              if seg.target != "" && seg.source != ""
+                QualityWarning check="numbers" source="{seg.source}" target="{seg.target}"
+                QualityWarning check="tags" source="{seg.source}" target="{seg.target}"
+      Pane w=340 pad=16 gap=12
+        Heading "Translation memory" level=3
+        Text.muted "Matches for segment {sel}"
+        each m in matches
+          Card gap=8
+            Row between
+              Badge.success "{m.percent}%" hidden={m.percent<90}
+              Badge.warning "{m.percent}%" hidden={m.percent>=90}
+              Text.caption "Fuzzy match"
+            DiffText "{m.source}" against={find(segs, s => s.id==sel).source} changes={m.diff}
+            Text "{m.target}"
+            Button.outline "Insert" icon="subdirectory_arrow_left" onTap={segs=updateWhere(segs, s => s.id==sel, s => with(with(s, "target", m.target), "status", "draft")); toast "Match inserted"}
+        Divider
+        Heading "Terms" level=3
+        each t in terms
+          ListTile "{t.source}" subtitle="{t.target}"
+            Badge.success "Approved" hidden={!t.approved}
+            Badge.warning "Pending" hidden={t.approved}
+  Dialog#comment "Comment to reviewer" "Segment {commentFor}"
+    Input "Comment" "Say what the reviewer should check" bind=comment multiline
+    Row end gap=8
+      Button.ghost "Cancel" onTap={comment=""; close}
+      Button "Send" onTap={comment=="" ? toast "Write a comment first" : {emit comment {"segment":commentFor,"text":comment}; toast "Sent to reviewer"; comment=""; close}}
+
+### Review
+state filter="unapproved"
+state checks=[{"id":3,"kind":"number","message":"Source has $500 and $2,500; target is empty","severity":"error"},{"id":5,"kind":"number","message":"Source says 3 business days; target says 5 Werktagen","severity":"error"},{"id":4,"kind":"tag","message":"Opening tag <b> has no closing tag in the target","severity":"warning"},{"id":2,"kind":"number","message":"Date 14 March 2027 became 14. März 2027, check the format","severity":"info"}]
+state reviewSegs=[{"id":2,"status":"draft","note":"Check the date format"},{"id":3,"status":"new","note":""},{"id":4,"status":"new","note":""},{"id":5,"status":"draft","note":"Number differs"}]
+state selCheck=3
+App
+  Sidebar
+    Brand "Segment" icon="translate"
+    NavItem "Editor" icon="edit_note" onTap={go editor}
+    NavItem "Review" icon="rule" badge="{length(checks)}" selected={true}
+    NavItem "Projects" icon="folder" onTap={go projects}
+    Spacer grow
+    Text.muted "Lena Brandt"
+  Main
+    Nav
+      Heading "Review, Claims guide" level=1
+      Row gap=8
+        SegmentedButton items=["unapproved","all"] bind=filter
+        Button "Approve all clean" icon="done_all" onTap={toast "Approved 2 clean segments"}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Words done"
+          Text "412 of 640" size=28 weight=700
+          Progress 0.64
+        Card gap=4
+          Text.muted "Quality warnings"
+          Text "{length(checks)}" size=28 weight=700
+          Text.caption "{count(checks, c => c.severity=='error')} errors"
+        Card gap=4
+          Text.muted "Unapproved segments"
+          Text "{length(reviewSegs)}" size=28 weight=700
+      Card gap=8
+        Text.strong "Quality warnings"
+        each c in checks
+          ListTile "Segment {c.id}" subtitle="{c.message}" selected={selCheck==c.id} onTap={selCheck=c.id}
+            Badge.error "{c.kind}" hidden={c.severity!="error"}
+            Badge.warning "{c.kind}" hidden={c.severity!="warning"}
+            Badge.info "{c.kind}" hidden={c.severity!="info"}
+            Button.ghost "Open" onTap={go editor}
+      Card gap=8
+        Text.strong "Segments to review"
+        each r in reviewSegs
+          if filter=="all" || r.status != "approved"
+            Row gap=12 middle
+              Text "{r.id}" w=40
+              Chip "{r.status}"
+              Text.muted "{r.note}" grow
+              IconButton "chat_bubble_outline" tooltip="Comment to reviewer" onTap={selCheck=r.id; open note}
+  Dialog#note "Note for segment {selCheck}"
+    Input "Comment" bind=reviewNote multiline
+    Button "Save note" onTap={reviewSegs=updateWhere(reviewSegs, r => r.id==selCheck, r => with(r, "note", reviewNote)); toast "Note saved"; close}
+
+### Projects
+state q=""
+state projects=[{"name":"Claims guide","pair":"EN to DE","done":0.64,"words":640,"due":"Dec 2"},{"name":"Mobile app strings","pair":"EN to FR","done":0.91,"words":2310,"due":"Nov 24"},{"name":"Terms of service","pair":"EN to ES","done":0.22,"words":5800,"due":"Jan 12"}]
+Page
+  Nav
+    Brand "Segment" icon="translate"
+    Row gap=4
+      Link "Projects"
+      Link "Memory"
+      Link "Terms"
+    Button "New project" onTap={open newProject}
+  Section
+    Column gap=16
+      Heading "Your projects" level=1
+      Input "Search projects" bind=q
+      Grid cols=3 gap=24
+        each p in filter(projects, x => contains(lower(x.name), lower(q)))
+          Card gap=8
+            Heading "{p.name}" level=3
+            Text.muted "{p.pair}, {p.words} words"
+            Progress {p.done}
+            Row between
+              Text.caption "{round(p.done*100,0)}% done"
+              Text.caption "Due {p.due}"
+            Button.outline "Open" onTap={go editor}
+  Dialog#newProject "New project" "Upload a source file to split it into segments"
+    Input "Name" bind=newName
+    Select "Target language" items=["German","French","Spanish"] bind=lang
+    Button "Create" onTap={emit createProject {"name":newName,"lang":lang}; close}

@@ -1,0 +1,141 @@
+### Lobby
+state room="TIDE-4F7"
+state meReady=false
+state themReady=true
+state players=[{"name":"You","ready":false},{"name":"Noor Haddad","ready":true}]
+Page
+  Nav
+    Brand "Rungs" icon="stairs"
+    Row gap=4
+      Link "How to play" onTap={open rules}
+      Link "Leaderboard" onTap={emit leaderboard}
+    Button.outline "Leave room" onTap={emit leave}
+  Section narrow center
+    Column gap=20 center
+      Heading "Waiting for the duel" level=1
+      Text.muted "Share the code. When both of you tick ready, the ladder drops."
+      Card gap=12 center
+        Text.caption "ROOM CODE"
+        Text.mono "{room}" size=40 weight=700
+        Row gap=8 center
+          Button.outline "Copy code" icon="content_copy" onTap={copy room; toast "Code copied"}
+          Button.outline "Share link" icon="share" onTap={share room}
+      Card gap=12
+        Text.strong "Players"
+        Row between middle
+          Row gap=12 middle
+            Avatar "You" size=40
+            Text "You"
+          Checkbox "Ready" bind=meReady
+        Divider
+        Row between middle
+          Row gap=12 middle
+            Avatar "Noor Haddad" size=40
+            Text "Noor Haddad"
+          if themReady
+            Badge.success "Ready"
+          if !themReady
+            Badge.neutral "Choosing..."
+      Row gap=12 middle
+        Text.muted "Round 1 of 3"
+        Select bind=difficulty items=["Four letters","Five letters"]
+      if meReady && themReady
+        Text.success "Both ready. Starting in 3..." animate=pulse
+        Button "Start duel" size=large onTap={go game}
+      if !(meReady && themReady)
+        Button "Start duel" size=large disabled onTap={go game}
+  Dialog#rules "How to play" "Climb from the start word to the end word."
+    Column gap=8
+      Text "1. Change exactly one letter per step."
+      Text "2. Every step must be a real word."
+      Text "3. Beat the clock and the other player."
+    Button "Got it" onTap={close}
+
+### Duel
+state start="COLD"
+state end="WARM"
+state rungs=["COLD"]
+state guess=""
+state bad=false
+state left=90
+state running=true
+state opp=["COLD","CORD","CARD"]
+state shortest=4
+state links=[{"a":"COLD","b":"CORD"},{"a":"COLD","b":"CORE"},{"a":"COLD","b":"GOLD"},{"a":"CORD","b":"CARD"},{"a":"CORD","b":"WORD"},{"a":"CORE","b":"CARE"},{"a":"CARE","b":"CARD"},{"a":"CARE","b":"WARE"},{"a":"CARD","b":"WARD"},{"a":"WORD","b":"WARD"},{"a":"WORD","b":"WORM"},{"a":"WARD","b":"WARM"},{"a":"WARE","b":"WARM"},{"a":"WORM","b":"WARM"}]
+every 1s when running onTick={left<=1 ? {left=0; running=false; go results} : left=left-1}
+App
+  Main
+    Nav
+      Heading "Rungs" level=3
+      Row gap=12 middle
+        Text.mono "{duration(left)}"
+        IconButton "flag" tooltip="Give up" onTap={running=false; go results}
+    Column pad=24 gap=16
+      Progress {left/90}
+      Row gap=24 top
+        Column grow gap=8
+          Row middle gap=8
+            Badge.primary "START"
+            Text.mono "{start}" size=28 weight=700
+          each w in rungs
+            if index > 0
+              Row middle gap=8 animate=slide-up duration=300
+                Badge.neutral "{index}"
+                Text.mono "{w}" size=28
+          if bad
+            Text.danger "Not a word one letter away" animate=shake duration=400
+          Row gap=8 middle
+            Input "Next word" "one letter changed" bind=guess maxlength=4 autofocus onSubmit={any(links,l=>(l.a==last(rungs) && l.b==upper(guess)) || (l.b==last(rungs) && l.a==upper(guess))) && !contains(rungs,upper(guess)) ? {bad=false; rungs=append(rungs,upper(guess)); guess=""; upper(guess)==end ? {running=false; go results} : {}} : {bad=true; guess=""}}
+            Button "Climb" icon="arrow_upward" onTap={any(links,l=>(l.a==last(rungs) && l.b==upper(guess)) || (l.b==last(rungs) && l.a==upper(guess))) && !contains(rungs,upper(guess)) ? {bad=false; rungs=append(rungs,upper(guess)); guess=""; upper(guess)==end ? {running=false; go results} : {}} : {bad=true; guess=""}}
+          Row middle gap=8
+            Badge.success "GOAL"
+            Text.mono "{end}" size=28 weight=700
+        Pane w=140 pad=12 gap=8
+          Text.caption "NOOR"
+          each o in opp
+            Text.mono "{o}"
+          Progress {(length(opp)-1)/shortest}
+          Text.muted "{length(opp)-1} steps"
+    Footer
+      Row between middle
+        Text.muted "Steps: {length(rungs)-1}"
+        Button.ghost "Undo step" icon="undo" onTap={length(rungs)>1 ? rungs=removeAt(rungs,length(rungs)-1) : toast "Nothing to undo"}
+
+### Results
+state yourWords=["COLD","CORD","WORD","WARD","WARM"]
+state theirWords=["COLD","CORD","CARD","WARD","WARM"]
+state best=["COLD","CORD","CARD","WARD","WARM"]
+Page
+  Nav
+    Brand "Rungs" icon="stairs"
+    Button.outline "Back to lobby" onTap={go lobby}
+  Section center
+    Column gap=24 center
+      Badge.success "You won"
+      Heading "Summit reached in 4 steps" level=1 animate=scale
+      Text.muted "You matched the shortest path with 14 seconds to spare."
+      Grid cols=3 gap=24
+        Card gap=8
+          Text.caption "YOU"
+          Text.strong "{length(yourWords)-1} steps"
+          Text.muted "Shortest is {length(best)-1}"
+          Progress {(length(best)-1)/(length(yourWords)-1)}
+          each w in yourWords
+            Text.mono "{w}"
+        Card gap=8
+          Text.caption "NOOR"
+          Text.strong "{length(theirWords)-1} steps"
+          Text.muted "Finished 6 seconds later"
+          Progress {(length(best)-1)/(length(theirWords)-1)}
+          each w in theirWords
+            Text.mono "{w}"
+        Card gap=8
+          Text.caption "SHORTEST PATH"
+          Text.strong "{length(best)-1} steps"
+          Text.muted "Par for COLD to WARM"
+          Progress 1
+          each w in best
+            Text.mono "{w}"
+      Row gap=12
+        Button "Rematch" size=large onTap={emit rematch; go lobby}
+        Button.outline "Share result" size=large onTap={share "Rungs: COLD to WARM in 4 steps"}
