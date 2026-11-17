@@ -1,0 +1,130 @@
+// The words of the twenty behaviours on one page: a shortcut, a search with what matched marked, a table worked by keys,
+// a list reordered by its handles, rows with swipe actions, a log that follows its end, a calendar with a range, a range
+// slider, a stepping number, a one-time code, a rating, a selection, a splitter, a hover card with an arrow, a guarded
+// dialog, a sheet with stops, confirm, announce, a live text, a saved value and device.hover.
+// tool/notation/notation.sh expand words.txt --design-system design_systems/cards --named --id words --width 1280 --out <site>/words.json
+// tool/render/render.sh <site> --out <dir> --sizes 1440x900,834x1112,390x844 --full-page
+//   then, for a state: --key Tab, --tap ordersTable, --tap stayCal@2026-11-23, --tap editBtn, --tap filtersBtn, --tap removeBtn, --hover author
+state q=""
+state draft="" saved
+state orders=[{"id":"o1","name":"Ada Lovelace","total":120,"status":"Paid"},{"id":"o2","name":"Grace Hopper","total":80,"status":"Open"},{"id":"o3","name":"Alan Turing","total":310,"status":"Paid"}]
+state row=-1
+state trip=["Zurich","Chur","Tirano","Milan"]
+state classes=[{"name":"Lift","full":false},{"name":"Flow","full":true},{"name":"Spin","full":false}]
+state booked=""
+state lines=["Fetching sources","Compiling","Running 214 tests","All tests passed"]
+state arrival="2026-11-20"
+state departure="2026-11-22"
+state low=40
+state high=160
+state qty=2
+state code=""
+state stars=4
+state picked=["opening"]
+state paneW=200
+state name=""
+state preview="Chur"
+key mod+k onPress={open search}
+key alt+shift+l onPress={lines=append(lines,"Rebuilt at step {length(lines)+1}")}
+Page
+  Nav
+    Brand "Tidewater" icon="waves"
+    Row gap=4
+      Link "Orders" href="#orders"
+      Link "Trip" href="#trip"
+      Link "Stay" href="#stay"
+    Row gap=8 middle
+      Text.muted "Search" shortcut="mod+k"
+      IconButton#searchBtn "search" tooltip="Search orders" onTap={open search}
+      Button.outline#filtersBtn "Filters" onTap={open filters}
+      Button#editBtn "Edit profile" onTap={open edit}
+  Section#orders
+    Heading "Orders" level=1
+    Row gap=12 middle
+      Input#find "Find a customer" bind=q w=280
+      Text.muted#count "{length(fuzzy(orders,q,x=>x.name))} of {length(orders)} orders" live
+      Link#author "About Ada" preview=bio
+    each o in fuzzy(orders,q,x=>x.name)
+      Row gap=12 middle
+        Text#match "{o.name}" mark={q} grow
+        Badge "{o.status}"
+    DataTable#ordersTable rows={orders} columns=[{"key":"name","label":"Customer"},{"key":"status","label":"Status"},{"key":"total","label":"Total"}] bind=row h=220 onSort={announce "Sorted by {result.column}"} onRowTap={toast "Row {result.rowIndex + 1}"}
+    Row gap=12 middle
+      Text.muted "Row chosen: {row}"
+      Button.outline#removeBtn "Remove all orders" onTap={confirm "Remove every order?" then {orders=[]; row=-1; announce "Orders removed"}}
+  Section#trip tint
+    Heading "Trip"
+    Row gap=32 top
+      Column grow gap=12
+        Text.strong "Stops, in order"
+        each stop in trip reorder
+          Row gap=8 middle
+            Handle
+            Text "{stop}" grow
+            Button.ghost "Preview" onTap={preview=stop}
+        if !device.hover
+          Text.muted "Tap Preview to see a stop."
+        Text.muted#previewing "Previewing {preview}"
+      Column grow gap=12
+        Text.strong "Classes"
+        each c in classes
+          SwipeAction "Book" side=end when={!c.full} onTap={booked=result.item.name; announce "Booked {result.item.name}"}
+          SwipeAction "Remove" side=start removes
+          Row gap=8 middle
+            Text "{c.name}" grow
+            IconButton "more_vert" tooltip="Class actions" onTap={booked=c.name}
+        Text.muted "Booked: {booked}"
+      Column grow gap=12
+        Text.strong "Build log"
+        Card
+          each line in lines follow h=140
+            Text.muted "{line}"
+        Button.outline#logBtn "Add a line" onTap={lines=append(lines,"Step {length(lines)+1} done")}
+  Section#stay
+    Heading "Stay"
+    Row gap=32 top
+      Card gap=12
+        Calendar#stayCal bind=arrival bindEnd=departure disabledDates=["2026-11-24","2026-11-25"] marks={"2026-11-20":"£225","2026-11-21":"£240"} label="Your stay"
+        Text.muted "{arrival} to {departure}"
+      Column grow gap=16
+        Text.strong "Price a night: {round(low,0)} to {round(high,0)}"
+        Slider#price bind=low bindEnd=high min=0 max=300 step=10 label="Price range"
+        Row gap=16 middle
+          Input#guests "Guests" bind=qty type=number min=1 max=8 step=1 w=120
+          CodeInput#otp "Booking code" bind=code length=6 digits
+        Row gap=16 middle
+          Rating "Your rating" bind=stars
+          Rating "Guest score" score=4.5 readOnly
+        SelectionList#extras bind=picked label="Extras" items=[{"key":"opening","label":"Early check-in"},{"key":"breakfast","label":"Breakfast"},{"key":"bikes","label":"Bikes"},{"key":"late","label":"Late check-out"}] columns=2
+        Text.muted "{length(picked)} extras chosen"
+    Row h=160
+      Column#notesPane w={paneW} pad=12 fill=#FFF3F4F6
+        Text.strong "Notes"
+        Input "Draft (kept across reloads)" bind=draft multiline
+      Splitter#grip bind=paneW min=140 max=480 label="Resize notes"
+      Column grow pad=12
+        Text.muted "The pane on the left is {round(paneW,0)} wide."
+  Footer
+    Row between
+      Text.strong "Tidewater"
+      Text.muted "Every word on this page is new in 33.0.0."
+
+Dialog#search "Search orders"
+  Input#searchField "Customer" bind=q
+  Button "Done" onTap={close}
+
+Dialog#edit "Edit profile" guard={name!=""}
+  Input#nameField "Name" bind=name
+  Row gap=8 end
+    Button.ghost#discard "Discard" onTap={name=""; close}
+    Button "Save" onTap={toast "Saved"; name=""; close}
+
+Sheet#filters "Filters" stops=[0.5,0.9]
+  Text.muted "Up to {round(high,0)} a night"
+  Slider bind=high min=0 max=300
+  Button "Show rooms" onTap={close}
+
+Popover#bio arrow
+  Text.strong "Ada Lovelace"
+  Text.muted "Three orders this year, all paid."
+  Link "See her orders" onTap={q="Ada"; close}

@@ -22,6 +22,48 @@
 
 ### Added
 
+- **Twenty behaviours, folded from the `dsl5/*` branches** (their notation in the 33.0.0 grammar; an example page
+  with all of them is `examples/showcase/desktop/behaviours/words.txt`):
+  - **Confirm**: the built-in confirm opens with the focus on Cancel (`onTap={confirm "Remove it?" then {rows=[]}}`).
+  - **A saved value** (`state draft="" saved`) that no longer has the shape or type of its declaration starts
+    afresh, and its stored entry is removed.
+  - **A one-time code** (`CodeInput "Code" bind=code length=6 digits`): a text field with `otpLength` is drawn as
+    boxes, still one field, one Tab stop and one semantics node.
+  - **A range slider** (`Slider bind=low bindEnd=high`): two thumbs that never cross; Space or Enter switches the
+    thumb the keys move.
+  - **A list that follows its end** (`each line in lines follow h=180`) shows a "Jump to latest" button, a Tab
+    stop, once the reader scrolls away.
+  - **Search**: the formulas `fuzzy`, `fuzzyScore`, `matchRanges`, `matchRuns`, `matchReason` (`each r in
+    fuzzy(rows,q,x=>x.title)`, `Text "{r.title}" mark={q}`).
+  - **Announcements**: the `announce` action (`onTap={announce "Saved"}`) and a live text (`Text "{n} results"
+    live`).
+  - **Overlays**: a bottom sheet with `snapHeights` rests at stops (`Sheet#filters stops=[0.5,0.9]`), dragged by
+    its handle or moved with Alt+Up/Down; tests for a live `blockBack` (`Dialog#edit guard={name!=""}`).
+  - **A splitter** (`Splitter bind=paneW min=200 max=640`): dragged, or moved by arrows, Page Up/Down, Home/End;
+    Enter collapses and restores.
+  - **A rating**: a slider with `trackShape: stars` (and `readOnly`); Cards' `Rating` block (`Rating "Your rating"
+    bind=score half`).
+  - **A selection** (`SelectionList bind=picked items=[…] columns=2`): range with Shift, add with Ctrl/Cmd, select
+    all; one stop of the page's Tab order.
+  - **A tooltip** (`IconButton "close" tooltip="Close"`) shows on keyboard focus and a touch hold too, Escape hides
+    it, and it names an icon-only button.
+  - **A hover card** (`Link "About Mara" preview=bio`, `Popover#bio arrow`): opens on a rested pointer or a
+    keyboard focus, stays while the pointer is on it; an anchored popover can draw an arrow.
+  - **Shortcuts** (`key mod+k onPress={open search}`): a combination with Ctrl/Cmd or Alt runs while a field is
+    typed in; `Text "Search" shortcut="mod+k"` shows Ctrl K or ⌘K.
+  - **Reorder** (`each stop in trip reorder`, `Handle`): Alt+Up/Down from a row's handle moves it, Alt+Left/Right
+    passes it to the next list of its group; moves are announced.
+  - **Swipe actions** (`SwipeAction "Book" side=end onTap={…}`): Left/Right reveal a row's action, Enter or Space
+    runs it, Escape hides it.
+  - **`device.hover`, `device.pointer`**: live, from the mice connected (`if !device.hover`); the render tool gives
+    a capture 1024 or wider a mouse.
+  - **A number field** (`Input "Qty" bind=qty type=number min=1 max=12 step=1`) steps by Up/Down, Page Up/Down,
+    Home/End; a click reaction with `repeat` repeats while held. Cards' Stepper, Counter, NumberInput and CartLine
+    use both.
+  - **A calendar in the page** (`Calendar bind=arrival bindEnd=departure disabledDates=[…] marks={…}`): the
+    picker's month with a range, by pointer and keys; render tool: `--tap <calendar>@<yyyy-MM-dd>`.
+  - **A table by keyboard** (`DataTable rows={orders} columns=[…] bind=row`): one Tab stop, sort from a header,
+    arrows through rows and columns, Enter or Space selects.
 - **`tool/notation/expand_all.dart`** with `compare_runs.dart`: many files expanded at once, as a card and as a
   page with Cards, and two such runs compared to the byte: the proof that a change to the parser, or a rewrite of
   the files, leaves the documents as they were.
