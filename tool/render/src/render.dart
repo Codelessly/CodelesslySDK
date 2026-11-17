@@ -716,10 +716,15 @@ Future<void> _renderAll(
           // A node hidden at this width, or of another canvas of the screen
           // (another breakpoint's design), is absent here by design: the
           // step is skipped at this size, with a note, not an error.
+          // (A page's or a modal's node: a component's node is named by its
+          // path, and one of a design system's components is no other canvas.)
           final target = step.target.split('/').last.split('#').first;
+          final pages = [for (final d in docs.values) if (!isComponentJson(d)) d];
           final elsewhere = problem.contains('no node "$target"') &&
-              (fileOfNode.containsKey(target) ||
-                  docs.values.any((d) => (api.readMap(d['nodes']) ?? const {}).values.any((n) => api.readMap(n)?['name'] == target)));
+              pages.any((d) {
+                final nodes = api.readMap(d['nodes']) ?? const {};
+                return nodes.containsKey(target) || nodes.values.any((n) => api.readMap(n)?['name'] == target);
+              });
           if (problem.startsWith(_notShownHere)) {
             skipped.add('$step (hidden at this width)');
           } else if (elsewhere) {
@@ -1500,6 +1505,117 @@ bool _shown(NodeBox b) {
   return true;
 }
 
+/// How a step names [b]: its path (a component's node by its call ids), with
+/// `#n` for the n-th copy of a node a list repeats.
+String _stepName(WidgetsBinding binding, NodeBox b) {
+  final path = b.tree.pathOf(b.id, b.instance);
+  final copies = [for (final o in _boxes(binding)) if (o.id == b.id && identical(o.tree, b.tree) && o.tree.pathOf(o.id, o.instance) == path) o];
+  if (copies.length < 2) return path;
+  return '$path#${copies.indexWhere((o) => identical(o, b))}';
+}
+
+/// Whether node box [b] takes a tap itself: a click reaction of its node,
+/// or a control drawn in it that takes input.
+bool _takesTap(NodeBox b) {
+  final n = b.source.node(b.id);
+  if (n != null && n.actions.any((a) => a.trigger.type == api.TriggerType.click)) return true;
+  if (n?.behaviors.reorderHandle ?? false) return true;
+  // Its own drawing only: not the node boxes of its children.
+  var found = false;
+  void visit(RenderObject o) {
+    if (found || (o is NodeBox && !identical(o, b))) return;
+    if ((o is RenderControl && o.enabled && o.takesInput) || o is RenderEditable) {
+      found = true;
+      return;
+    }
+    o.visitChildren(visit);
+  }
+
+  visit(b);
+  return found;
+}
+
+/// The nodes inside [box] that take a tap, shown, outermost only (a button
+/// inside a tappable card is the card's).
+List<NodeBox> _tappableInside(WidgetsBinding binding, NodeBox box) {
+  final inside = [
+    for (final b in _boxes(binding))
+      if (!identical(b, box) && _isInside(b, box) && _shown(b) && _takesTap(b)) b,
+  ];
+  return [for (final b in inside) if (!inside.any((o) => !identical(o, b) && _isInside(b, o))) b];
+}
+
+/// What a step may have meant by [id], which names no node on screen (or one
+/// that takes no tap): the nodes that take a tap inside the node its first
+/// part names (`dates` for `dates/from`), then those whose name is like its
+/// last part (`field` for `textField1`). Empty when none is near.
+List<String> _candidates(WidgetsBinding binding, String id) {
+  final out = <String>[];
+  final segments = id.split('/');
+  for (var cut = segments.length; cut >= 1; cut--) {
+    final prefix = segments.take(cut).join('/');
+    final within = _locate(binding, prefix).box;
+    if (within == null) continue;
+    for (final b in _tappableInside(binding, within)) {
+      final name = _stepName(binding, b);
+      if (!out.contains(name)) out.add(name);
+    }
+    break;
+  }
+  // What is inside the block named is what was meant; else, by name.
+  if (out.isNotEmpty) return out.take(6).toList();
+  final want = segments.last.split('#').first.split('@').first.toLowerCase();
+  if (want.isNotEmpty) {
+    final scored = <(String, int)>[];
+    final seen = <String>{};
+    for (final b in _boxes(binding)) {
+      if (!_shown(b)) continue;
+      final name = b.tree.pathOf(b.id, b.instance);
+      if (!seen.add(name)) continue;
+      // Its id, its name, and (a component's root) the call's id.
+      final words = {b.id.toLowerCase(), (b.node?.name ?? '').toLowerCase(), name.split('/').last.toLowerCase()}..remove('');
+      // A call named the way the notation numbers one (`Segments1` for the
+      // first Segments) is near its component's type.
+      final types = {(b.node?.type ?? '').toLowerCase(), if (b.tree.isInstanceRoot(b.id, b.instance)) (componentInstanceOf(b.instance)?.component ?? '').toLowerCase()}
+        ..remove('');
+      final typed = types.contains(want.replaceFirst(RegExp(r'\d+$'), ''));
+      final d = words.map((w) => _distance(want, w)).fold(1 << 20, math.min);
+      bool within(String a, String b) => a.length >= 3 && b.length >= 3 && (a.contains(b) || b.contains(a));
+      final near = typed || words.any((w) => within(w, want)) || d <= math.max(2, want.length ~/ 3);
+      if (near) scored.add((name, d - (_takesTap(b) ? 2 : 0)));
+    }
+    scored.sort((a, b) => a.$2.compareTo(b.$2));
+    for (final (name, _) in scored) {
+      if (!out.contains(name)) out.add(name);
+    }
+  }
+  return out.take(6).toList();
+}
+
+/// [problem] with the nodes [id] may have meant, when there are any.
+String _withCandidates(WidgetsBinding binding, String id, String problem) {
+  final c = _candidates(binding, id);
+  if (c.isEmpty) return problem;
+  final end = problem.endsWith('.') ? problem.substring(0, problem.length - 1) : problem;
+  return '$end. Perhaps: ${c.join(', ')}.';
+}
+
+/// Levenshtein distance between [a] and [b].
+int _distance(String a, String b) {
+  if (a == b) return 0;
+  if (a.isEmpty) return b.length;
+  if (b.isEmpty) return a.length;
+  var prev = List<int>.generate(b.length + 1, (i) => i);
+  for (var i = 0; i < a.length; i++) {
+    final cur = List<int>.filled(b.length + 1, 0)..[0] = i + 1;
+    for (var j = 0; j < b.length; j++) {
+      cur[j + 1] = math.min(math.min(cur[j] + 1, prev[j + 1] + 1), prev[j] + (a.codeUnitAt(i) == b.codeUnitAt(j) ? 0 : 1));
+    }
+    prev = cur;
+  }
+  return prev[b.length];
+}
+
 /// The canvas a node box is on (its screen, or a modal shown over it).
 String? _canvasOf(NodeBox b) {
   for (RenderObject? p = b; p != null; p = p.parent) {
@@ -1779,7 +1895,16 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         for (final b in within) {
           (byId[b.id] ??= []).add(b);
         }
-        final parts = byId.values.where((l) => l.length > 1).firstOrNull;
+        // Or its parts are numbered nodes that take a tap (a design
+        // system's Segments: cell0, cell1, cell2).
+        final numbered = <String, List<(int, NodeBox)>>{};
+        for (final b in within) {
+          final m = RegExp(r'^(.*?)(\d+)$').firstMatch(b.id);
+          if (m != null && _takesTap(b)) (numbered[m[1]!] ??= []).add((int.parse(m[2]!), b));
+        }
+        final cells = numbered.values.where((l) => l.length > 1).firstOrNull;
+        final parts = byId.values.where((l) => l.length > 1).firstOrNull ??
+            (cells == null ? null : [for (final (_, b) in (cells..sort((a, b) => a.$1.compareTo(b.$1)))) b]);
         if (parts != null) {
           if (n >= parts.length) {
             return (null, '--$verb $target: "$id" has ${parts.length} parts (@0 to @${parts.length - 1}).');
@@ -1840,7 +1965,12 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       if (owners.length == 1) return pointAt(owners.single, verb);
     }
     if (box == null) {
-      return (null, found.problem!.startsWith(_notShownHere) ? '$_notShownHere--$verb $id: ${found.problem!.substring(_notShownHere.length)}.' : '--$verb $id: ${found.problem}.');
+      return (
+        null,
+        found.problem!.startsWith(_notShownHere)
+            ? '$_notShownHere--$verb $id: ${found.problem!.substring(_notShownHere.length)}.'
+            : _withCandidates(binding, id, '--$verb $id: ${found.problem}.'),
+      );
     }
     var at = reachable(box);
     if (at == null) {
@@ -1918,13 +2048,25 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
 
   switch (step.kind) {
     case 'tap':
-      final (at, problem) = await pointAt(step.target, 'tap');
+      var (at, problem) = await pointAt(step.target, 'tap');
       if (at == null) return problem;
       if (!reactsToTap(hitAt(at))) {
-        warn('tap_no_reaction',
-            '--tap ${step.target}: neither the node nor anything around it reacts to a tap (no "click" reaction, button or input), so the tap did nothing. '
-                'Add {"trigger": "click", "actions": [...]} to the node, or tap the node that has it.',
-            step.target.split('#').first.split('@').first);
+        // A block called by its id (`DateRangePicker#dates`, a design
+        // system's component) whose one tappable part is inside it: that
+        // part is meant.
+        final named = step.target.contains('@') ? null : _boxOf(binding, step.target);
+        final inside = named == null ? const <NodeBox>[] : _tappableInside(binding, named);
+        final part = inside.length == 1 ? inside.single : null;
+        final there = part == null ? null : (reachable(part) ?? (await centerInView(part).then((_) => reachable(part))));
+        if (there != null) {
+          at = there;
+        } else {
+          final c = _candidates(binding, step.target);
+          warn('tap_no_reaction',
+              '--tap ${step.target}: neither the node nor anything around it reacts to a tap (no "click" reaction, button or input), so the tap did nothing. '
+                  '${c.isEmpty ? 'Add {"trigger": "click", "actions": [...]} to the node, or tap the node that has it.' : 'Perhaps: ${c.join(', ')}.'}',
+              step.target.split('#').first.split('@').first);
+        }
       }
       await _unfocusFieldOutside(tester, _boxOf(binding, step.target.replaceFirst(RegExp(r'@\d+$'), '')));
       await tester.tapAt(at);
@@ -2055,21 +2197,35 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       return null;
     case 'focus' || 'type':
       final verb = step.kind;
-      var field = fieldIn(step.target);
+      var target = step.target;
+      var field = fieldIn(target);
+      // A field named under its block (`quiz/field` for the one field of the
+      // TypedAnswer `quiz`): the block's one text field.
+      if (field == null && target.contains('/') && _locate(binding, target).box == null) {
+        final block = _locate(binding, target.substring(0, target.lastIndexOf('/'))).box;
+        final fields = block == null ? const <RenderTextField>[] : _descendants(block).whereType<RenderTextField>().toList();
+        if (fields.length == 1) {
+          target = target.substring(0, target.lastIndexOf('/'));
+          field = fieldIn(target);
+        }
+      }
       if (field == null) {
         final found = _locate(binding, step.target);
         if (found.box == null) {
           final p = found.problem!;
-          return p.startsWith(_notShownHere) ? '$_notShownHere--$verb ${step.target}: ${p.substring(_notShownHere.length)}.' : '--$verb ${step.target}: $p.';
+          return p.startsWith(_notShownHere)
+              ? '$_notShownHere--$verb ${step.target}: ${p.substring(_notShownHere.length)}.'
+              : _withCandidates(binding, step.target, '--$verb ${step.target}: $p.');
         }
-        return '--$verb ${step.target}: the node has no text field in it (only a textField, or a node around one, can be focused or typed into).';
+        return _withCandidates(binding, step.target,
+            '--$verb ${step.target}: the node has no text field in it (only a textField, or a node around one, can be focused or typed into).');
       }
-      final box = _locate(binding, step.target, prefer: (b) => fieldOf(b) != null).box!;
+      final box = _locate(binding, target, prefer: (b) => fieldOf(b) != null).box!;
       if (reachable(box) == null) await centerInView(box);
       field.requestFocus();
       await tester.pump();
       if (verb == 'type') {
-        field = fieldIn(step.target);
+        field = fieldIn(target);
         if (field == null) return '--type ${step.target}: the text field went away when it was focused.';
         if (!field.focusNode.hasFocus) field.requestFocus();
         tester.testTextInput.enterText(step.value ?? '');
