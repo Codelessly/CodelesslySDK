@@ -1,0 +1,3 @@
+App: Rootwork, a family tree. A tree of people as cards joined by lines, couples side by side and children below, dragged to pan and pinched to zoom; a person card with a photo, dates and a small icon for notes; add a parent, partner or child with plus marks around a card; a focus view that shows only direct ancestors; a timeline of the person's life; a map of birthplaces by generation; a printable chart with page breaks marked.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

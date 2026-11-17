@@ -1,0 +1,235 @@
+### Today
+state tab="today"
+state feeds=[{"id":1,"kind":"feed","time":"06:10","mins":18,"side":"Left","ml":0},{"id":2,"kind":"nappy","time":"06:40","what":"Wet"},{"id":3,"kind":"sleep","time":"07:30","mins":65}]
+state sleeping=false
+state napSecs=0
+state feedRunning=false
+state feedSecs=0
+state feedMode="Breast"
+state side="Left"
+state ml=90
+state nappy="Wet"
+state sharedWith="Jonas"
+every 1s when sleeping onTick={napSecs=napSecs+1}
+every 1s when feedRunning onTick={feedSecs=feedSecs+1}
+App
+  Sidebar
+    Brand "Milk & Moon" icon="bedtime"
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={go today}
+    NavItem "Patterns" icon="insights" selected={tab=="patterns"} onTap={go patterns}
+    NavItem "Growth" icon="monitor_weight" selected={tab=="growth"} onTap={go growth}
+    NavItem "Sharing" icon="group" selected={tab=="sharing"} onTap={go sharing}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Ines Moreau" size=32
+      Column
+        Text.strong "Baby Noa"
+        Text.caption "14 weeks"
+  Main
+    Nav
+      Heading "Today, {formatDate(today(),"MMM d")}" level=1
+      Row gap=8
+        Button.outline "Share day" icon="share" onTap={open shareDay}
+    Column pad=24 gap=16 scroll
+      Grid cols=4 gap=12
+        Card gap=8 center onTap={open feed}
+          IconTile "restaurant"
+          Text.strong "Feed"
+        Card gap=8 center onTap={open nappy}
+          IconTile "baby_changing_station"
+          Text.strong "Nappy"
+        Card gap=8 center onTap={sleeping ? {sleeping=false; feeds=append(feeds,{"id":length(feeds)+1,"kind":"sleep","time":"now","mins":round(napSecs/60,0)}); toast "Nap saved"} : {sleeping=true; napSecs=0; toast "Nap started"}}
+          IconTile "bedtime"
+          Text.strong "{sleeping ? 'End sleep' : 'Sleep'}"
+        Card gap=8 center onTap={open medicine}
+          IconTile "medication"
+          Text.strong "Medicine"
+      if sleeping
+        Card gap=8 fill=#FF1F2A44 animate=pulse
+          Text.caption "Noa is asleep" color=#FFCBD5F5
+          Text "{duration(napSecs)}" size=48 weight=700 color=#FFFFFFFF
+          Button.outline "Wake up" onTap={sleeping=false; feeds=append(feeds,{"id":length(feeds)+1,"kind":"sleep","time":"now","mins":round(napSecs/60,0)}); toast "Nap saved"}
+      Row gap=16 top
+        Card grow gap=12
+          Text.panelTitle "The day"
+          Row gap=12 top
+            Column gap=0 w=48
+              Text.caption "06"
+              Spacer h=40
+              Text.caption "09"
+              Spacer h=40
+              Text.caption "12"
+              Spacer h=40
+              Text.caption "15"
+              Spacer h=40
+              Text.caption "18"
+            Column grow gap=4
+              Timeline values={feeds} start="06:00" end="21:00" kinds={"feed":"#FFF59E0B","nappy":"#FF10B981","sleep":"#FF6366F1","medicine":"#FFEF4444"} h=280
+        Card grow gap=8
+          Text.panelTitle "Log"
+          each e in sortByDesc(feeds, f=>f.id)
+            ListTile "{e.kind == 'feed' ? 'Feed' : e.kind == 'nappy' ? 'Nappy' : e.kind == 'sleep' ? 'Sleep' : 'Medicine'}" subtitle="{e.time}" menu=rowMenu
+              Row gap=8 middle
+                Badge.neutral "{e.kind == 'feed' ? e.mins + ' min' : e.kind == 'nappy' ? e.what : e.kind == 'sleep' ? e.mins + ' min' : e.name}"
+                IconButton "delete" tooltip="Delete" onTap={feeds=removeWhere(feeds,f=>f.id==e.id); toast "Entry removed"}
+      Card gap=8
+        Row between
+          Text.panelTitle "Totals so far"
+          Badge.info "{count(feeds,f=>f.kind=='feed')} feeds"
+        Row gap=24
+          Column
+            Text.caption "Sleep"
+            Text.strong "{sum(filter(feeds,f=>f.kind=='sleep'),f=>f.mins)} min"
+          Column
+            Text.caption "Nappies"
+            Text.strong "{count(feeds,f=>f.kind=='nappy')}"
+          Column
+            Text.caption "Milk"
+            Text.strong "{sum(feeds,f=>coalesce(f.ml,0))} ml"
+Dialog#feed "Log a feed"
+  SegmentedButton bind=feedMode items=["Breast","Bottle"]
+  if feedMode=="Breast"
+    Row gap=8
+      ChoiceChip "Left" selected={side=="Left"} onTap={side="Left"}
+      ChoiceChip "Right" selected={side=="Right"} onTap={side="Right"}
+    Text "{duration(feedSecs)}" size=48 weight=700 center
+    Row gap=8 center
+      Button "{feedRunning ? 'Pause' : 'Start'}" onTap={feedRunning=!feedRunning}
+      Button.outline "Reset" onTap={feedRunning=false; feedSecs=0}
+  if feedMode=="Bottle"
+    Text.fieldLabel "Amount"
+    Slider bind=ml min=10 max=240
+    Text.strong "{ml} ml"
+    Input "Or type millilitres" type=number bind=ml
+  Button "Save feed" onTap={feeds=append(feeds,{"id":length(feeds)+1,"kind":"feed","time":"now","mins":round(feedSecs/60,0),"side":side,"ml":feedMode=="Bottle"?ml:0}); feedRunning=false; feedSecs=0; toast "Feed saved"; close}
+Dialog#nappy "Log a nappy"
+  Row gap=8 center
+    ChoiceChip "Wet" selected={nappy=="Wet"} onTap={nappy="Wet"}
+    ChoiceChip "Dirty" selected={nappy=="Dirty"} onTap={nappy="Dirty"}
+    ChoiceChip "Both" selected={nappy=="Both"} onTap={nappy="Both"}
+  TimePicker "Time" bind=nappyTime
+  Button "Save nappy" onTap={feeds=append(feeds,{"id":length(feeds)+1,"kind":"nappy","time":"now","what":nappy}); toast "Nappy saved"; close}
+Dialog#medicine "Log medicine"
+  Select "Medicine" items=["Vitamin D drops","Paracetamol infant","Gripe water"] bind=med
+  Input "Dose" "e.g. 1 ml" bind=dose
+  Button "Save" onTap={feeds=append(feeds,{"id":length(feeds)+1,"kind":"medicine","time":"now","name":med}); toast "Medicine saved"; close}
+Menu#rowMenu
+  MenuItem "Edit" icon="edit" onTap={toast "Editing"}
+  MenuItem "Delete" icon="delete" onTap={toast "Removed"}
+Dialog#shareDay "Share today"
+  Text.muted "Send a summary of Noa's day to {sharedWith}."
+  Button "Send summary" onTap={emit shareDay sharedWith; toast "Sent to {sharedWith}"; close}
+
+### Patterns
+state tab="patterns"
+state metric="Sleep"
+state sleepHours=[13.5,14,12.8,13.2,14.5,13,12.5,13.8,14.2,13.1,12.9,13.6,14,13.4]
+state feedCounts=[8,7,9,8,8,7,9,8,7,8,9,8,7,8]
+state nappyCounts=[6,7,6,5,7,6,6,7,6,5,6,7,6,6]
+App
+  Sidebar
+    Brand "Milk & Moon" icon="bedtime"
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={go today}
+    NavItem "Patterns" icon="insights" selected={tab=="patterns"} onTap={go patterns}
+    NavItem "Growth" icon="monitor_weight" selected={tab=="growth"} onTap={go growth}
+    NavItem "Sharing" icon="group" selected={tab=="sharing"} onTap={go sharing}
+  Main
+    Nav
+      Heading "Patterns, last 14 days" level=1
+      SegmentedButton bind=metric items=["Sleep","Feeds","Nappies"]
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Text.panelTitle "{metric} per day"
+        if metric=="Sleep"
+          BarChart values={sleepHours} labels=["1","2","3","4","5","6","7","8","9","10","11","12","13","14"] h=240
+          Text.muted "Average {fixed(sum(sleepHours,h=>h)/length(sleepHours),1)} hours a day"
+        if metric=="Feeds"
+          BarChart values={feedCounts} labels=["1","2","3","4","5","6","7","8","9","10","11","12","13","14"] h=240
+          Text.muted "Average {fixed(sum(feedCounts,h=>h)/length(feedCounts),1)} feeds a day"
+        if metric=="Nappies"
+          BarChart values={nappyCounts} labels=["1","2","3","4","5","6","7","8","9","10","11","12","13","14"] h=240
+          Text.muted "Average {fixed(sum(nappyCounts,h=>h)/length(nappyCounts),1)} nappies a day"
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.caption "Longest sleep stretch"
+          Text "4 h 20 min" size=28 weight=700
+          Badge.success "up 25 min"
+        Card gap=4
+          Text.caption "Usual bedtime"
+          Text "19:40" size=28 weight=700
+          Badge.neutral "steady"
+        Card gap=4
+          Text.caption "Night feeds"
+          Text "2" size=28 weight=700
+          Badge.success "down from 3"
+      Card gap=12
+        Text.panelTitle "Sleep against feeds"
+        LineChart labels=["Wk 1","Wk 2"] series=[{"name":"Sleep hours","values":[13.2,13.7]},{"name":"Feeds a day","values":[8.1,7.9]}] h=200
+
+### Growth
+state tab="growth"
+state entries=[{"id":1,"date":"Jul 02","kg":3.4,"cm":50},{"id":2,"date":"Jul 30","kg":4.4,"cm":54},{"id":3,"date":"Aug 27","kg":5.3,"cm":58},{"id":4,"date":"Sep 24","kg":6.0,"cm":61}]
+state kg=6.0
+state cm=61
+state measured=today()
+state metric="Weight"
+App
+  Sidebar
+    Brand "Milk & Moon" icon="bedtime"
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={go today}
+    NavItem "Patterns" icon="insights" selected={tab=="patterns"} onTap={go patterns}
+    NavItem "Growth" icon="monitor_weight" selected={tab=="growth"} onTap={go growth}
+    NavItem "Sharing" icon="group" selected={tab=="sharing"} onTap={go sharing}
+  Main
+    Nav
+      Heading "Growth" level=1
+      Button "Add measurement" icon="add" onTap={open growthEntry}
+    Column pad=24 gap=16 scroll
+      SegmentedButton bind=metric items=["Weight","Length"]
+      Card gap=12
+        Text.panelTitle "{metric} against WHO bands"
+        GrowthChart values={map(entries,e=>metric=="Weight"?e.kg:e.cm)} labels={map(entries,e=>e.date)} bands=[3,15,50,85,97] unit={metric=="Weight"?"kg":"cm"} sex="girl" h=280
+        Text.muted "Noa is tracking near the 50th percentile."
+      Card gap=8
+        Text.panelTitle "Measurements"
+        each e in reverse(entries)
+          ListTile "{e.date}" subtitle="{e.kg} kg, {e.cm} cm"
+            IconButton "delete" tooltip="Delete" onTap={entries=removeWhere(entries,x=>x.id==e.id)}
+Dialog#growthEntry "New measurement"
+  DatePicker "Date" bind=measured
+  Input "Weight (kg)" type=number bind=kg
+  Input "Length (cm)" type=number bind=cm
+  Button "Save" onTap={entries=append(entries,{"id":length(entries)+1,"date":formatDate(measured,"MMM d"),"kg":kg,"cm":cm}); toast "Measurement saved"; close}
+
+### Sharing
+state tab="sharing"
+state people=[{"name":"Jonas Moreau","role":"Parent","email":"jonas@example.com","alerts":true},{"name":"Marta Silva","role":"Grandparent","email":"marta@example.com","alerts":false}]
+state inviteEmail=""
+state inviteRole="Caregiver"
+state digest=true
+App
+  Sidebar
+    Brand "Milk & Moon" icon="bedtime"
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={go today}
+    NavItem "Patterns" icon="insights" selected={tab=="patterns"} onTap={go patterns}
+    NavItem "Growth" icon="monitor_weight" selected={tab=="growth"} onTap={go growth}
+    NavItem "Sharing" icon="group" selected={tab=="sharing"} onTap={go sharing}
+  Main
+    Nav
+      Heading "Sharing" level=1
+      Button "Invite" icon="person_add" onTap={open invite}
+    Column pad=24 gap=16 scroll maxw=720
+      Card gap=8
+        Text.panelTitle "Who sees Noa's log"
+        each p in people
+          ListTile "{p.name}" subtitle="{p.role}, {p.email}"
+            Row gap=8 middle
+              Toggle "Alerts" bind=p.alerts
+              IconButton "person_remove" tooltip="Remove" onTap={people=removeWhere(people,x=>x.email==p.email); toast "Removed {p.name}"}
+      Card gap=8
+        Toggle "Evening summary at 20:00" bind=digest
+        Button.outline "Copy invite link" icon="link" onTap={copy "https://milkandmoon.app/join/noa-4f9k"; toast "Link copied"}
+Dialog#invite "Invite someone"
+  Input "Email" "name@example.com" type=email bind=inviteEmail
+  Select "Role" items=["Parent","Grandparent","Caregiver"] bind=inviteRole
+  Button "Send invite" onTap={people=append(people,{"name":inviteEmail,"role":inviteRole,"email":inviteEmail,"alerts":true}); inviteEmail=""; toast "Invite sent"; close}

@@ -1,0 +1,154 @@
+### Viewer
+state chrom="chr7"
+state start=117480000
+state span=240
+state query=""
+state frame=0
+state showProtein=true
+state selVariant=""
+state noteDraft=""
+state variants=[{"id":"v1","pos":117559590,"ref":"G","alt":"A","name":"c.1521_1523del","note":"Common CFTR deletion, reported pathogenic.","sig":"pathogenic"},{"id":"v2","pos":117587799,"ref":"C","alt":"T","name":"c.1652G>A","note":"Uncertain significance, check segregation.","sig":"uncertain"}]
+state genes=[{"name":"CFTR","from":117480025,"to":117668665,"strand":"+"},{"name":"CTTNBP2","from":117066000,"to":117350000,"strand":"-"}]
+state exons=[{"n":1,"from":117480025,"to":117480093},{"n":2,"from":117504265,"to":117504360},{"n":3,"from":117512528,"to":117512675}]
+App
+  Sidebar
+    Brand "Helixline" icon="genetics"
+    NavItem "Viewer" icon="view_timeline" selected={true}
+    NavItem "Variants" icon="flag" badge="{length(variants)}" onTap={go variants}
+    NavItem "Search hits" icon="search" onTap={go hits}
+    Divider
+    Text.fieldLabel "Chromosome"
+    Select bind=chrom items=["chr1","chr7","chr12","chrX"]
+    Text.fieldLabel "Reading frame"
+    SegmentedButton bind=frame items=["+1","+2","+3"]
+    Toggle "Protein row" bind=showProtein
+    Spacer grow
+    Text.muted "GRCh38, 248 bp in view"
+  Main
+    Nav
+      Heading "{chrom}:{start}-{start+span}" level=1
+      Row gap=8
+        Input "Find sequence" "e.g. GATTACA" bind=query w=220
+        Badge.info "{matchCount(query)} matches" visible={query!=""}
+        IconButton "chevron_left" tooltip="Scroll left" onTap={start=start-span}
+        IconButton "chevron_right" tooltip="Scroll right" onTap={start=start+span}
+        IconButton "more_vert" tooltip="More" onTap={open viewMenu}
+    Column pad=24 gap=16
+      Card gap=8
+        Row between
+          Text.panelTitle "Genes"
+          Text.muted "Arrows show strand"
+        Row scroll gap=0
+          each g in genes
+            GeneArrow "{g.name}" from={g.from} to={g.to} strand={g.strand} onTap={start=g.from}
+      Card gap=0
+        Ruler from={start} to={start+span} tick=10 labelEvery=50
+        Row scroll gap=0
+          SequenceTrack chrom={chrom} from={start} length={span} highlight={query} colors={["#FF2E7D32","#FF1565C0","#FFF9A825","#FFC62828"]} h=48 onSelect={selVariant=""}
+          ExonBlock each={exons} h=16
+        Row scroll gap=0
+          each v in variants
+            VariantFlag pos={v.pos} label={v.name} severity={v.sig} onTap={selVariant=v.id; open variantInfo}
+        if showProtein
+          ProteinTrack frame={frame} from={start} length={span} code="three" h=32
+      Card gap=8
+        Row between
+          Text.panelTitle "Whole chromosome"
+          Text.muted "Drag the window to move"
+        Minimap chrom={chrom} window={[start,start+span]} h=40 onWindowChange={start=result.from; span=result.to-result.from}
+        Slider bind=span min=60 max=1200 step=10
+      Footer
+        Row between
+          Text.muted "Click a base to drop a variant flag"
+          Row gap=8
+            Button.outline "Add variant" icon="flag" onTap={open newVariant}
+            Button "Export view" onTap={emit exportView {"chrom":chrom,"start":start,"span":span}}
+  Dialog#variantInfo "Variant" "{find(variants,x=>x.id==selVariant).name}"
+    Column gap=8
+      Row gap=8
+        Badge.error "{find(variants,x=>x.id==selVariant).sig}"
+        Text.strong "{find(variants,x=>x.id==selVariant).ref} to {find(variants,x=>x.id==selVariant).alt}"
+      Text.body "{find(variants,x=>x.id==selVariant).note}"
+      Row end gap=8
+        Button.destructive "Remove" onTap={variants=removeWhere(variants,x=>x.id==selVariant); toast "Flag removed"; close}
+        Button "Close" onTap={close}
+  Dialog#newVariant "Drop a variant flag" "Placed at the centre of the view"
+    Input "Name" "c.123A>G" bind=vName
+    Row gap=8
+      Input "Ref" bind=vRef
+      Input "Alt" bind=vAlt
+    Select bind=vSig items=["pathogenic","likely pathogenic","uncertain","benign"]
+    Input "Note" multiline bind=noteDraft
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Add flag" onTap={variants=append(variants,{"id":"v"+(length(variants)+1),"pos":start+floor(span/2),"ref":vRef,"alt":vAlt,"name":vName,"note":noteDraft,"sig":vSig}); noteDraft=""; toast "Flag added"; close}
+  Menu#viewMenu end
+    MenuItem "Copy visible sequence" icon="content_copy" onTap={copy visibleSequence; toast "Copied"}
+    MenuItem "Reverse complement" icon="swap_horiz" onTap={emit reverseComplement}
+    MenuItem "Jump to position" icon="my_location" onTap={open jump}
+  Dialog#jump "Jump to position"
+    Input "Position" type=number bind=jumpTo
+    Button "Go" onTap={start=jumpTo; close}
+
+### Variants
+state filter="all"
+state variants=[{"id":"v1","pos":117559590,"name":"c.1521_1523del","gene":"CFTR","sig":"pathogenic","note":"Common deletion"},{"id":"v2","pos":117587799,"name":"c.1652G>A","gene":"CFTR","sig":"uncertain","note":"Check segregation"},{"id":"v3","pos":117606754,"name":"c.3846G>A","gene":"CFTR","sig":"benign","note":"Population frequency 4%"}]
+App
+  Sidebar
+    Brand "Helixline" icon="genetics"
+    NavItem "Viewer" icon="view_timeline" onTap={go viewer}
+    NavItem "Variants" icon="flag" badge="{length(variants)}" selected={true}
+    NavItem "Search hits" icon="search" onTap={go hits}
+  Main
+    Nav
+      Heading "Variant flags" level=1
+      Button "Export VCF" icon="download" onTap={emit exportVcf}
+    Column pad=24 gap=16
+      Row gap=8
+        ChoiceChip "All" selected={filter=="all"} onTap={filter="all"}
+        ChoiceChip "Pathogenic" selected={filter=="pathogenic"} onTap={filter="pathogenic"}
+        ChoiceChip "Uncertain" selected={filter=="uncertain"} onTap={filter="uncertain"}
+        ChoiceChip "Benign" selected={filter=="benign"} onTap={filter="benign"}
+      Card gap=0
+        Row gap=8
+          Text.fieldLabel "Position" w=110
+          Text.fieldLabel "Name" w=140
+          Text.fieldLabel "Class" w=100
+          Text.fieldLabel "Note" grow
+        Divider
+        each v in filter=="all" ? variants : filter(variants,x=>x.sig==filter)
+          Row gap=8 middle menu=rowMenu
+            Text.mono "{v.pos}" w=110
+            Text.strong "{v.name}" w=140
+            Badge.primary "{v.sig}" w=100
+            Text.muted "{v.note}" grow
+            IconButton "more_vert" tooltip="Actions" onTap={sel=v.id; open rowMenu}
+  Menu#rowMenu end
+    MenuItem "Show in viewer" icon="visibility" onTap={emit showVariant sel; go viewer}
+    MenuItem "Edit note" icon="edit" onTap={open editNote}
+    MenuItem "Delete" icon="delete" onTap={variants=removeWhere(variants,x=>x.id==sel); toast "Deleted"}
+  Dialog#editNote "Edit note"
+    Input "Note" multiline bind=newNote
+    Button "Save" onTap={variants=updateWhere(variants,x=>x.id==sel,x=>with(x,"note",newNote)); close}
+
+### Search hits
+state query="GATTACA"
+state hits=[{"pos":117480112,"strand":"+","context":"TTC GATTACA GGA"},{"pos":117504301,"strand":"+","context":"AAG GATTACA TCT"},{"pos":117512600,"strand":"-","context":"CCA GATTACA AGT"}]
+App
+  Sidebar
+    Brand "Helixline" icon="genetics"
+    NavItem "Viewer" icon="view_timeline" onTap={go viewer}
+    NavItem "Variants" icon="flag" onTap={go variants}
+    NavItem "Search hits" icon="search" selected={true}
+  Main
+    Nav
+      Heading "Search hits" level=1
+      Row gap=8
+        Input "Sequence" bind=query w=220
+        Checkbox "Both strands" bind=both
+        Button "Search" onTap={emit search query}
+    Column pad=24 gap=16
+      Text.heading2 "{length(hits)} matches for {query}"
+      each h in hits
+        ListTile "{h.pos}" "{h.context}" onTap={emit showHit h.pos; go viewer}
+          Badge.neutral "{h.strand}"

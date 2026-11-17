@@ -1,0 +1,200 @@
+### Headcount
+state expected=24
+state count=0
+state stop="Old Town Gate"
+state recounts=[]
+state guests=[{"id":1,"name":"Ada Moreno","boarded":true},{"id":2,"name":"Ben Okafor","boarded":true},{"id":3,"name":"Chloe Martin","boarded":false},{"id":4,"name":"Dev Patel","boarded":true},{"id":5,"name":"Elena Rossi","boarded":false},{"id":6,"name":"Farid Haddad","boarded":true}]
+state missing=""
+App
+  Sidebar
+    Brand "Count Me In" icon="groups"
+    NavItem "Headcount" icon="123" selected={true}
+    NavItem "Day plan" icon="schedule" onTap={go day-plan}
+    NavItem "Lost guest" icon="person_search" onTap={go lost-guest}
+    NavItem "Group" icon="forum" badge="3" onTap={go group}
+    Spacer grow
+    Text.muted "Guide: Marta Silva"
+  Main
+    Nav
+      Heading "Headcount" level=1
+      Row gap=8
+        Badge.info "Stop: {stop}"
+        Button.outline "Reset" onTap={count=0; recounts=[]}
+    Column pad=24 gap=16 scroll
+      if count != expected && length(recounts) > 0
+        Card gap=8 fill=#FFFDECEA
+          Row gap=8 middle
+            Icon "warning" color=#FFC62828
+            Text.strong "Mismatch at {last(recounts).stop}: counted {last(recounts).n}, expected {expected}" color=#FFC62828
+          Button.destructive "Someone is missing" onTap={go lost-guest}
+      Card gap=12 center
+        Text.muted "People on the bus"
+        Text "{count}" size=96 weight=700 center
+        Text.muted "of {expected} expected"
+        Progress {count / expected}
+        Row gap=16 center
+          IconButton "remove" tooltip="One fewer" onTap={count=max(0,count-1)}
+          IconButton "add" tooltip="One more" onTap={count=min(expected,count+1)}
+        Button "Count again at this stop" onTap={recounts=append(recounts,{"stop":stop,"n":count}); count==expected ? toast "All {expected} on board" : toast "Count is off by {abs(expected-count)}"}
+      Card gap=8
+        Row between
+          Text.strong "Boarding list"
+          Text.muted "{count(guests,g=>g.boarded)} of {length(guests)} ticked"
+        each g in guests
+          Row between middle
+            Checkbox "{g.name}" bind=g.boarded onChange={count=count(guests,x=>x.boarded)}
+            if !g.boarded
+              Badge.warning "Not yet"
+      Card gap=8
+        Text.strong "Counts today"
+        each r in recounts
+          Row between
+            Text "{r.stop}"
+            Text.strong "{r.n}" color={r.n==expected ? #FF2E7D32 : #FFC62828}
+
+### Day plan
+state now="10:40"
+state stops=[{"id":1,"name":"Old Town Gate","time":"09:00","late":0,"done":true},{"id":2,"name":"Cathedral of Saint Vitus","time":"10:15","late":10,"done":true},{"id":3,"name":"River cruise pier","time":"11:30","late":15,"done":false},{"id":4,"name":"Lunch at U Fleku","time":"13:00","late":0,"done":false},{"id":5,"name":"Castle hill viewpoint","time":"15:00","late":0,"done":false}]
+state sel=0
+App
+  Sidebar
+    Brand "Count Me In" icon="groups"
+    NavItem "Headcount" icon="123" onTap={go headcount}
+    NavItem "Day plan" icon="schedule" selected={true}
+    NavItem "Lost guest" icon="person_search" onTap={go lost-guest}
+    NavItem "Group" icon="forum" onTap={go group}
+  Main
+    Nav
+      Heading "Day plan" level=1
+      Button "Add stop" icon="add" onTap={open addStop}
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Row between
+          Text.strong "Prague, Thursday 14 May"
+          Badge.warning "Running 15 min late"
+        Progress {count(stops,s=>s.done) / length(stops)}
+      each s in stops
+        Card gap=8
+          Row between middle
+            Row gap=12 middle
+              Text.mono "{s.time}"
+              Column
+                Text.strong "{s.name}" strike={s.done}
+                if s.late > 0
+                  Text.danger "Late by {s.late} min"
+            Row gap=8
+              Checkbox "Done" bind=s.done
+              IconButton "more_vert" tooltip="Options" onTap={sel=s.id; open stopMenu}
+  Menu#stopMenu end
+    MenuItem "Mark 5 min later" icon="update" onTap={stops=updateWhere(stops,x=>x.id==sel,x=>with(x,"late",x.late+5))}
+    MenuItem "Clear late marker" icon="timer_off" onTap={stops=updateWhere(stops,x=>x.id==sel,x=>with(x,"late",0))}
+    MenuItem "Count here" icon="123" onTap={go headcount}
+    MenuItem "Remove" icon="delete" onTap={stops=removeWhere(stops,x=>x.id==sel)}
+  Dialog#addStop "Add a stop" "It joins the end of today's plan"
+    Input "Place" bind=newName
+    TimePicker "Time" bind=newTime
+    Button "Add" onTap={newName!="" ? stops=append(stops,{"id":length(stops)+10,"name":newName,"time":newTime,"late":0,"done":false}); newName=""; close : toast "Name the stop"}
+
+### Lost guest
+state last_seen={"place":"Cathedral gift shop","time":"10:32","by":"Ben Okafor"}
+state lost="Elena Rossi"
+state notified=false
+App
+  Sidebar
+    Brand "Count Me In" icon="groups"
+    NavItem "Headcount" icon="123" onTap={go headcount}
+    NavItem "Day plan" icon="schedule" onTap={go day-plan}
+    NavItem "Lost guest" icon="person_search" selected={true}
+    NavItem "Group" icon="forum" onTap={go group}
+  Main
+    Nav
+      Heading "Lost guest" level=1
+      Select bind=lost items=["Elena Rossi","Chloe Martin"]
+    Column pad=24 gap=16 scroll maxw=720
+      Card gap=12 fill=#FFFDECEA
+        Row gap=12 middle
+          Avatar "{lost}" size=56
+          Column
+            Text.heading "{lost}"
+            Text.danger "Not on the bus"
+      Card gap=12
+        Text.strong "Last seen"
+        Map pin={last_seen.place} h=180
+        Row between
+          Text "{last_seen.place}"
+          Text.muted "{last_seen.time}"
+        Text.muted "Reported by {last_seen.by}"
+      Card gap=12
+        Text.strong "Next step"
+        Row gap=12
+          Button "Call {lost}" icon="call" onTap={call "+420 601 555 018"}
+          Button.outline "Call the hotel" icon="hotel" onTap={call "+420 222 555 100"}
+        Button.secondary "Tell the group to stay put" icon="campaign" onTap={emit holdGroup; notified=true; toast "Group notified"}
+        if notified
+          Badge.success "Group told to wait"
+      Button.ghost "Found them" onTap={emit found {lost}; go headcount}
+
+### Group
+state tab="audio"
+state tips=[{"who":"Ada Moreno","amt":20},{"who":"Dev Patel","amt":15},{"who":"Farid Haddad","amt":25}]
+state tipAmt=10
+state rating=0
+state liked=""
+state comment=""
+state sent=false
+state tags=[{"photo":"https://example.com/g/group-bridge.jpg","people":["Ada Moreno","Ben Okafor"]},{"photo":"https://example.com/g/group-castle.jpg","people":["Dev Patel"]}]
+App
+  Sidebar
+    Brand "Count Me In" icon="groups"
+    NavItem "Headcount" icon="123" onTap={go headcount}
+    NavItem "Day plan" icon="schedule" onTap={go day-plan}
+    NavItem "Lost guest" icon="person_search" onTap={go lost-guest}
+    NavItem "Group" icon="forum" selected={true}
+  Main
+    Nav
+      Heading "Group" level=1
+      Row gap=8
+        Chip "Audio" onTap={tab="audio"}
+        Chip "Photos" onTap={tab="photos"}
+        Chip "Tips" onTap={tab="tips"}
+        Chip "Feedback" onTap={tab="feedback"}
+    Column pad=24 gap=16 scroll maxw=720
+      if tab=="audio"
+        Card gap=12
+          Text.strong "Voice message to all 24 phones"
+          AudioRecorder bind=clip maxDuration=60 onSend={emit sendAudio clip; toast "Sent to the group"}
+          Text.muted "Guests get it as a notification with sound."
+      if tab=="photos"
+        Card gap=12
+          Text.strong "Group photos"
+          each t in tags
+            Column gap=8
+              PhotoTag src={t.photo} tags={t.people} onTag={tags=updateWhere(tags,x=>x.photo==t.photo,x=>with(x,"people",append(x.people,result)))}
+              Row gap=8
+                each p in t.people
+                  Chip "{p}"
+          Button.outline "Add photo" icon="add_a_photo" onTap={emit addPhoto}
+      if tab=="tips"
+        Card gap=12 center
+          Text.muted "Tip pool"
+          Text "{money(sum(tips,t=>t.amt),'$',2)}" size=64 weight=700
+          Text.muted "from {length(tips)} guests, about {money(sum(tips,t=>t.amt)/length(tips),'$',2)} each"
+        Card gap=12
+          each t in tips
+            Row between
+              Text "{t.who}"
+              Text.strong "{money(t.amt,'$',2)}"
+          Divider
+          Row gap=8 middle
+            Input "Guest name" bind=tipWho grow
+            Input "Amount" bind=tipAmt type=number w=100
+            Button "Add" onTap={tips=append(tips,{"who":tipWho,"amt":tipAmt}); tipWho=""}
+      if tab=="feedback"
+        Card gap=12
+          Text.strong "How was the tour?"
+          Rating bind=rating max=5
+          Select "Best part" bind=liked items=["Old Town","Castle","River cruise","Lunch","The guide"]
+          Input "Comments" bind=comment multiline
+          Button "Send feedback" onTap={rating>0 ? emit feedback {rating}; sent=true; toast "Thank you" : toast "Pick a rating first"}
+          if sent
+            Badge.success "Feedback received"

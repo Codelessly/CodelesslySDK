@@ -1,0 +1,3 @@
+App: Shiftlog, a database migration runner. An ordered list of migrations with a state of applied, pending, failed or rolled back, and a timestamp; a plan view showing the statements for the next one with a risk tag where a table would lock; a dry run with a row count estimate; run with a progress bar and rows done; a failure with the error and a rollback step; a schema diff of before and after; a lock on production needing a typed name.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

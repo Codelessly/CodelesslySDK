@@ -1,0 +1,158 @@
+### Canvas
+state tab="canvas"
+state tables=[{"id":"users","name":"users","x":40,"y":40,"cols":[{"id":"u1","name":"id","type":"uuid","key":"pk"},{"id":"u2","name":"email","type":"varchar(255)","key":""},{"id":"u3","name":"created_at","type":"timestamp","key":""}]},{"id":"orders","name":"orders","x":380,"y":60,"cols":[{"id":"o1","name":"id","type":"uuid","key":"pk"},{"id":"o2","name":"user_id","type":"uuid","key":"fk"},{"id":"o3","name":"total","type":"numeric(10,2)","key":""}]},{"id":"items","name":"order_items","x":380,"y":300,"cols":[{"id":"i1","name":"id","type":"uuid","key":"pk"},{"id":"i2","name":"order_id","type":"uuid","key":"fk"},{"id":"i3","name":"sku","type":"varchar(64)","key":""}]}]
+state links=[{"id":"l1","from":"orders","fromCol":"user_id","to":"users","toCol":"id","kind":"many"},{"id":"l2","from":"order_items","fromCol":"order_id","to":"orders","toCol":"id","kind":"many"}]
+state sel="orders"
+state newName=""
+state newType="text"
+state sql=""
+state showSql=true
+App
+  Sidebar
+    Brand "Blueprint DB" icon="schema"
+    NavItem "Canvas" icon="account_tree" selected={tab=="canvas"} onTap={tab="canvas"}
+    NavItem "Indexes" icon="bolt" badge="3" selected={tab=="indexes"} onTap={go indexes}
+    NavItem "Validation" icon="rule" badge="2" selected={tab=="validation"} onTap={go validation}
+    Divider
+    Text.muted "Tables"
+    each t in tables
+      NavItem "{t.name}" icon="table_chart" selected={sel==t.id} onTap={sel=t.id}
+    Spacer grow
+    Button.outline "Add table" icon="add" onTap={tables=append(tables,{"id":"t{length(tables)+1}","name":"new_table","x":120,"y":120,"cols":[{"id":"c{length(tables)+1}","name":"id","type":"uuid","key":"pk"}]})}
+  Main
+    Nav
+      Heading "shop_schema" level=1
+      Row gap=8
+        Toggle "SQL pane" bind=showSql
+        IconButton "undo" tooltip="Undo" onTap={emit undo}
+        IconButton "redo" tooltip="Redo" onTap={emit redo}
+        Button "Export SQL" icon="download" onTap={emit exportSql}
+    SchemaCanvas grow zoom=1 grid=true
+      each t in tables
+        TableNode#{t.id} "{t.name}" x={t.x} y={t.y} selected={sel==t.id} drag=table(t.id) onMove={tables=updateWhere(tables,q=>q.id==t.id,q=>with(with(q,"x",result.x),"y",result.y))} onTap={sel=t.id}
+          each c in t.cols
+            Row gap=8 drag=col(c.id) drop=col onDrop={tables=updateWhere(tables,q=>q.id==t.id,q=>with(q,"cols",append(without(q.cols,find(q.cols,z=>z.id==result.data)),find(q.cols,z=>z.id==result.data))))} id="{t.id}.{c.name}"
+              Icon "drag_indicator"
+              Icon "{c.key=='pk' ? 'key' : (c.key=='fk' ? 'link' : 'circle')}"
+              Text.strong "{c.name}" grow
+              Text.mono "{c.type}"
+              IconButton "close" tooltip="Remove column" onTap={tables=updateWhere(tables,q=>q.id==t.id,q=>with(q,"cols",without(q.cols,c)))}
+          if sel==t.id
+            Row gap=8
+              Input "Column name" bind=newName
+              Select bind=newType items=["uuid","text","varchar(255)","integer","bigint","boolean","timestamp","numeric(10,2)","jsonb"]
+              IconButton "add" tooltip="Add column" onTap={newName!="" ? {tables=updateWhere(tables,q=>q.id==t.id,q=>with(q,"cols",append(q.cols,{"id":"c{length(q.cols)+1}{newName}","name":newName,"type":newType,"key":""}))); newName=""} : toast "Name the column first"}
+      each l in links
+        Relation#{l.id} from="{l.from}.{l.fromCol}" to="{l.to}.{l.toCol}" fromEnd={l.kind=="many" ? "crows-foot" : "one"} toEnd="one" menu=linkMenu onTap={sel=l.id}
+    if showSql
+      Pane w=360 pad=16 gap=12
+        Row between
+          Text.panelTitle "Generated SQL"
+          IconButton "content_copy" tooltip="Copy" onTap={copy sql; toast "Copied"}
+        CodeBlock language="sql" value={join(map(tables,t=>"CREATE TABLE " + t.name + " (\n" + join(map(t.cols,c=>"  " + c.name + " " + c.type + (c.key=="pk" ? " PRIMARY KEY" : "")),",\n") + "\n);"),"\n\n")} grow
+  Menu#linkMenu
+    MenuItem "One to many" icon="call_split" onTap={links=updateWhere(links,l=>l.id==sel,l=>with(l,"kind","many"))}
+    MenuItem "One to one" icon="trending_flat" onTap={links=updateWhere(links,l=>l.id==sel,l=>with(l,"kind","one"))}
+    Divider
+    MenuItem "Delete relationship" icon="delete" onTap={links=removeWhere(links,l=>l.id==sel)}
+
+### Indexes
+state idxs=[{"id":"x1","table":"users","name":"users_email_key","cols":"email","unique":true},{"id":"x2","table":"orders","name":"orders_user_id_idx","cols":"user_id","unique":false},{"id":"x3","table":"order_items","name":"order_items_order_id_idx","cols":"order_id, sku","unique":false}]
+state q=""
+state tableFilter="All"
+state draft={"table":"users","name":"","cols":"","unique":false}
+App
+  Sidebar
+    Brand "Blueprint DB" icon="schema"
+    NavItem "Canvas" icon="account_tree" onTap={go canvas}
+    NavItem "Indexes" icon="bolt" badge="{length(idxs)}" selected={true}
+    NavItem "Validation" icon="rule" badge="2" onTap={go validation}
+    Spacer grow
+    Text.muted "shop_schema"
+  Main
+    Nav
+      Heading "Indexes" level=1
+      Row gap=8
+        Input "Search indexes" bind=q w=220
+        Button "New index" icon="add" onTap={open newIndex}
+    Column pad=24 gap=16
+      Row gap=8
+        Select bind=tableFilter items=["All","users","orders","order_items"]
+        Spacer grow
+        Text.muted "{count(idxs,x=>(tableFilter==\"All\" || x.table==tableFilter) && contains(lower(x.name),lower(q)))} shown"
+      Card gap=0
+        Row gap=12 pad=12 border-bottom=#FFE0E0E0
+          Text.fieldLabel "Table" w=120
+          Text.fieldLabel "Name" grow
+          Text.fieldLabel "Columns" w=160
+          Text.fieldLabel "Unique" w=70
+          Text.fieldLabel "" w=40
+        each x in filter(idxs,i=>(tableFilter=="All" || i.table==tableFilter) && contains(lower(i.name),lower(q)))
+          Row gap=12 pad=12 middle border-bottom=#FFEEEEEE
+            Text "{x.table}" w=120
+            Text.mono "{x.name}" grow
+            Text.mono "{x.cols}" w=160
+            Badge.primary "unique" w=70 visible={x.unique}
+            IconButton "more_vert" tooltip="Actions" w=40 onTap={sel=x.id; open idxMenu}
+        if length(idxs)==0
+          Text.muted "No indexes yet." pad=16
+      Card gap=8
+        Text.strong "Generated statements"
+        CodeBlock language="sql" value={join(map(idxs,x=>"CREATE " + (x.unique ? "UNIQUE " : "") + "INDEX " + x.name + " ON " + x.table + " (" + x.cols + ");"),"\n")}
+  Menu#idxMenu end
+    MenuItem "Toggle unique" icon="fingerprint" onTap={idxs=updateWhere(idxs,i=>i.id==sel,i=>with(i,"unique",!i.unique))}
+    MenuItem "Delete" icon="delete" onTap={idxs=removeWhere(idxs,i=>i.id==sel)}
+  Dialog#newIndex "New index" "Pick a table and the columns to cover"
+    Select "Table" bind=draft.table items=["users","orders","order_items"]
+    Input "Index name" "orders_total_idx" bind=draft.name
+    Input "Columns" "total, created_at" bind=draft.cols
+    Toggle "Unique" bind=draft.unique
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Create index" onTap={draft.name!="" && draft.cols!="" ? {idxs=append(idxs,with(draft,"id","x{length(idxs)+1}")); draft={"table":"users","name":"","cols":"","unique":false}; toast "Index created"; close} : toast "Name and columns are required"}
+
+### Validation
+state warns=[{"id":"w1","level":"warning","table":"order_items","msg":"Foreign key order_id has no index.","fix":"Create index"},{"id":"w2","level":"error","table":"orders","msg":"Column total uses numeric without a default; NULL totals are allowed.","fix":"Set NOT NULL"},{"id":"w3","level":"warning","table":"users","msg":"Column email is unique but not marked NOT NULL.","fix":"Set NOT NULL"}]
+state show="all"
+App
+  Sidebar
+    Brand "Blueprint DB" icon="schema"
+    NavItem "Canvas" icon="account_tree" onTap={go canvas}
+    NavItem "Indexes" icon="bolt" badge="3" onTap={go indexes}
+    NavItem "Validation" icon="rule" badge="{length(warns)}" selected={true}
+    Spacer grow
+    Text.muted "shop_schema"
+  Main
+    Nav
+      Heading "Validation" level=1
+      Button "Re-run checks" icon="refresh" onTap={emit revalidate; toast "Checks complete"}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Errors"
+          Text.strong "{count(warns,w=>w.level==\"error\")}" size=32 color=#FFC62828
+        Card gap=4
+          Text.muted "Warnings"
+          Text.strong "{count(warns,w=>w.level==\"warning\")}" size=32 color=#FFB26A00
+        Card gap=4
+          Text.muted "Tables checked"
+          Text.strong "3" size=32
+      Row gap=8
+        ChoiceChip "All" selected={show=="all"} onTap={show="all"}
+        ChoiceChip "Errors" selected={show=="error"} onTap={show="error"}
+        ChoiceChip "Warnings" selected={show=="warning"} onTap={show="warning"}
+      Card gap=0
+        each w in filter(warns,x=>show=="all" || x.level==show)
+          Row gap=12 pad=12 middle border-bottom=#FFEEEEEE
+            Icon "{w.level==\"error\" ? \"error\" : \"warning\"}"
+            Column grow gap=2
+              Text.strong "{w.table}"
+              Text.muted "{w.msg}"
+            Badge.error "error" visible={w.level=="error"}
+            Badge.warning "warning" visible={w.level=="warning"}
+            Button.outline "{w.fix}" onTap={warns=without(warns,w); toast "Fixed: {w.fix}"}
+            IconButton "visibility_off" tooltip="Dismiss" onTap={warns=without(warns,w)}
+        if length(warns)==0
+          Column center pad=32 gap=8
+            Icon "check_circle"
+            Text.muted "No problems found."

@@ -1,0 +1,234 @@
+### Join
+state code=""
+state name=""
+state color="#FF7B2DFF"
+Page
+  Nav
+    Brand "Queue Jury" icon="queue_music"
+    Row gap=4
+      Link "How it works" onTap={open how}
+      Link "History" onTap={go history}
+  Section center
+    Column gap=20 center maxw=480
+      Heading "Everyone gets a vote" level=1
+      Text.muted "Join a room with its code, add songs, and let the group decide what plays next."
+      Card gap=12
+        Input "Room code" "QJ-4821" bind=code
+        Input "Your name" "Maya" bind=name
+        Text.fieldLabel "Your colour"
+        Row gap=8
+          ChoiceChip "Violet" selected={color=="#FF7B2DFF"} onTap={color="#FF7B2DFF"}
+          ChoiceChip "Coral" selected={color=="#FFFF6B57"} onTap={color="#FFFF6B57"}
+          ChoiceChip "Teal" selected={color=="#FF14B8A6"} onTap={color="#FF14B8A6"}
+        Row gap=8 middle
+          Avatar "{name}" size=40
+          Text.muted "{name == "" ? "Pick a name" : name} will appear in the room"
+        Button "Join room" size=large onTap={code=="" || name=="" ? toast "Enter a room code and your name" : {emit join code; go queue}}
+      Row gap=8 center
+        Text.muted "Starting a new one?"
+        Link "Create a room" onTap={emit createRoom; go queue}
+  Footer
+    Row between
+      Text.strong "Queue Jury"
+      Text.muted "Rooms close after 8 hours of silence"
+Dialog#how "How it works" "Three rules keep the night fair"
+  Column gap=8
+    Text "1. Anyone can add up to 3 songs at a time."
+    Text "2. Every song is voted up or down; the highest score plays next."
+    Text "3. A skip needs a majority of the room. Each person holds one veto token."
+    Button "Got it" onTap={close}
+
+### Queue
+state me="Maya"
+state room="QJ-4821"
+state people=[{"name":"Maya Reyes","host":true},{"name":"Dev Patel"},{"name":"Lena Fischer"},{"name":"Tomas Okafor"},{"name":"Priya Nair"}]
+state now={"id":0,"title":"Midnight City","artist":"M83","album":"Hurry Up, We're Dreaming","cover":"https://images.example.com/covers/hurry-up.jpg","len":243,"by":"Dev Patel"}
+state elapsed=96
+state playing=true
+state skipVotes=1
+state iSkip=false
+state vetoLeft=1
+state maxAdds=3
+state q=""
+state catalog=[{"id":11,"title":"Dreams","artist":"Fleetwood Mac","len":257},{"id":12,"title":"Blinding Lights","artist":"The Weeknd","len":200},{"id":13,"title":"Electric Feel","artist":"MGMT","len":229},{"id":14,"title":"Genesis","artist":"Grimes","len":255},{"id":15,"title":"September","artist":"Earth, Wind and Fire","len":215},{"id":16,"title":"Redbone","artist":"Childish Gambino","len":327}]
+state queue=[{"id":1,"title":"Electric Feel","artist":"MGMT","by":"Lena Fischer","up":3,"down":1,"mine":0,"len":229},{"id":2,"title":"Running Up That Hill","artist":"Kate Bush","by":"Tomas Okafor","up":4,"down":0,"mine":1,"len":298},{"id":3,"title":"Get Lucky","artist":"Daft Punk","by":"Priya Nair","up":2,"down":2,"mine":0,"len":369},{"id":4,"title":"Take On Me","artist":"a-ha","by":"Maya Reyes","up":1,"down":3,"mine":-1,"len":225}]
+state history=[{"title":"Heat Waves","artist":"Glass Animals","by":"Dev Patel"}]
+every 1s when playing onTick={elapsed=elapsed+1}
+every 6s onTick={queue=updateWhere(queue,s=>s.id==3,s=>with(s,"up",s.up+1))}
+every 1s onTick={skipVotes>=floor(length(people)/2)+1 || elapsed>=now.len ? {history=concat([now],history); now=first(sortByDesc(queue,s=>s.up-s.down+s.mine)); queue=removeWhere(queue,s=>s.id==now.id); elapsed=0; skipVotes=0; iSkip=false} : }
+App
+  Sidebar
+    Brand "Queue Jury" icon="queue_music"
+    NavItem "Queue" icon="playlist_play" badge="{length(queue)}" selected={true}
+    NavItem "History" icon="history" onTap={go history}
+    NavItem "Party mode" icon="celebration" onTap={go party}
+    Divider
+    Text.caption "IN THE ROOM"
+    each p in people
+      Row gap=8 middle
+        Avatar "{p.name}" size=32
+        Text "{p.name}"
+        if p.host
+          Badge.primary "Host"
+    Spacer grow
+    Button.outline "Invite" icon="person_add" onTap={open invite}
+  Main
+    Nav
+      Column
+        Heading "Room {room}" level=1
+        Text.caption "{length(people)} people listening"
+      Row gap=8
+        Chip "Veto tokens: {vetoLeft}"
+        IconButton "content_copy" tooltip="Copy room code" onTap={copy room; toast "Code copied"}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Row gap=16 top
+          Image "{now.cover}" w=96 h=96 radius=8
+          Column grow gap=4
+            Text.caption "NOW PLAYING"
+            Text.heading "{now.title}"
+            Text.muted "{now.artist} - {now.album}"
+            Text.caption "Added by {now.by}"
+          IconButton "{playing ? 'pause' : 'play_arrow'}" tooltip="Play or pause" onTap={playing=!playing}
+        Progress {elapsed/now.len}
+        Row between
+          Text.caption "{duration(elapsed)}"
+          Text.caption "{duration(now.len)}"
+        Divider
+        Row between middle
+          Column grow gap=4
+            Text.strong "Skip needs {floor(length(people)/2)+1} of {length(people)} votes"
+            Progress {skipVotes/(floor(length(people)/2)+1)}
+            Text.caption "{skipVotes} so far"
+          Button.outline "{iSkip ? 'Voted to skip' : 'Vote to skip'}" icon="skip_next" onTap={iSkip ? toast "You already voted" : {skipVotes=skipVotes+1; iSkip=true}}
+      Card gap=8
+        Text.strong "Add a song"
+        Row gap=8 middle
+          Input "Search songs" "Title or artist" bind=q grow
+          IconButton "close" tooltip="Clear search" hidden={q==""} onTap={q=""}
+        Text.caption "You have added {count(queue,s=>s.by==\"Maya Reyes\")} of {maxAdds} songs"
+        Progress {count(queue,s=>s.by=="Maya Reyes")/maxAdds}
+        if q!=""
+          each c in filter(catalog,c=>contains(lower(c.title),lower(q))||contains(lower(c.artist),lower(q)))
+            ListTile
+              Column grow
+                Text.strong "{c.title}"
+                Text.caption "{c.artist} - {duration(c.len)}"
+              Button.tertiary "Add" icon="add" onTap={count(queue,s=>s.by=="Maya Reyes")>=maxAdds ? toast "Limit reached: {maxAdds} songs each" : {queue=append(queue,{"id":c.id,"title":c.title,"artist":c.artist,"by":"Maya Reyes","up":0,"down":0,"mine":0,"len":c.len}); q=""; toast "Added {c.title}"}}
+      Row between middle
+        Text.sectionTitle "Up next"
+        Text.caption "Sorted by score"
+      if length(queue)==0
+        Card gap=4 center
+          Text.muted "The queue is empty. Add the first song."
+      each s in sortByDesc(queue,s=>s.up-s.down+s.mine)
+        Card animate=slide-up stagger=80
+          Row gap=12 middle
+            Text.strong "{s.up-s.down+s.mine}" size=24 w=48 center
+            Column grow gap=2
+              Text.strong "{s.title}"
+              Text.caption "{s.artist} - added by {s.by}"
+            IconButton "thumb_up" tooltip="Vote up" selected={s.mine==1} onTap={queue=updateWhere(queue,x=>x.id==s.id,x=>with(x,"mine",x.mine==1?0:1))}
+            IconButton "thumb_down" tooltip="Vote down" selected={s.mine==-1} onTap={queue=updateWhere(queue,x=>x.id==s.id,x=>with(x,"mine",x.mine==-1?0:-1))}
+            IconButton "more_vert" tooltip="More" onTap={sel=s.id; open rowMenu}
+    Footer
+      Row between middle pad=12
+        Row gap=12 middle
+          Image "{now.cover}" w=40 h=40 radius=4
+          Column
+            Text.strong "{now.title}"
+            Text.caption "{now.artist}"
+        Text.caption "{duration(elapsed)} / {duration(now.len)}"
+state sel=0
+Menu#rowMenu end
+  MenuItem "Veto this song" icon="block" onTap={vetoLeft>0 ? {queue=removeWhere(queue,s=>s.id==sel); vetoLeft=vetoLeft-1; toast "Vetoed. Token spent"} : toast "No veto token left"}
+  MenuItem "Remove my song" icon="delete" onTap={queue=removeWhere(queue,s=>s.id==sel&&s.by=="Maya Reyes")}
+Dialog#invite "Invite friends" "Share the room code"
+  Text.heading "{room}"
+  Button "Copy code" icon="content_copy" onTap={copy room; toast "Code copied"; close}
+
+### History
+state filter="all"
+state hq=""
+state history=[{"id":21,"title":"Heat Waves","artist":"Glass Animals","by":"Dev Patel","score":6,"skipped":false,"at":"21:42"},{"id":22,"title":"Dreams","artist":"Fleetwood Mac","by":"Lena Fischer","score":5,"skipped":false,"at":"21:38"},{"id":23,"title":"Gangnam Style","artist":"PSY","by":"Tomas Okafor","score":-2,"skipped":true,"at":"21:35"},{"id":24,"title":"Redbone","artist":"Childish Gambino","by":"Priya Nair","score":4,"skipped":false,"at":"21:29"},{"id":25,"title":"Genesis","artist":"Grimes","by":"Maya Reyes","score":3,"skipped":false,"at":"21:24"}]
+App
+  Sidebar
+    Brand "Queue Jury" icon="queue_music"
+    NavItem "Queue" icon="playlist_play" onTap={go queue}
+    NavItem "History" icon="history" selected={true}
+    NavItem "Party mode" icon="celebration" onTap={go party}
+    Spacer grow
+    Text.muted "Room QJ-4821"
+  Main
+    Nav
+      Heading "Played tonight" level=1
+      Row gap=8
+        Input "Search history" bind=hq w=220
+        Button.outline "Export playlist" icon="download" onTap={emit exportHistory; toast "Playlist saved"}
+    Column pad=24 gap=16 scroll
+      Row gap=8
+        ChoiceChip "All" selected={filter=="all"} onTap={filter="all"}
+        ChoiceChip "Skipped" selected={filter=="skipped"} onTap={filter="skipped"}
+        ChoiceChip "Mine" selected={filter=="mine"} onTap={filter="mine"}
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.caption "Songs played"
+          Text.strong "{length(history)}" size=32
+        Card gap=4
+          Text.caption "Skipped"
+          Text.strong "{count(history,h=>h.skipped)}" size=32
+        Card gap=4
+          Text.caption "Top adder"
+          Text.strong "Dev Patel" size=32
+      Card gap=8
+        Row gap=12
+          Text.caption "TIME" w=60
+          Text.caption "SONG" grow
+          Text.caption "ADDED BY" w=120
+          Text.caption "SCORE" w=60
+          Text.caption "" w=48
+        Divider
+        each h in filter(history,h=>(filter=="all"||(filter=="skipped"&&h.skipped)||(filter=="mine"&&h.by=="Maya Reyes"))&&(hq==""||contains(lower(h.title),lower(hq))||contains(lower(h.artist),lower(hq))))
+          Row gap=12 middle
+            Text.muted "{h.at}" w=60
+            Column grow
+              Text.strong "{h.title}"
+              Text.caption "{h.artist}"
+            Row gap=8 w=120 middle
+              Avatar "{h.by}" size=24
+              Text.caption "{h.by}"
+            Text "{h.score}" w=60
+            IconButton "replay" tooltip="Add to queue again" onTap={emit requeue h.id; toast "Back in the queue"}
+
+### Party mode
+state beat=0
+state running=true
+state palette=["#FFFF2D95","#FF7B2DFF","#FF2DD4FF","#FFFFD42D"]
+state speed=1
+state scheme="Neon"
+state strobe=false
+state title="Midnight City"
+state artist="M83"
+every 700 when running onTick={beat=beat+1}
+Page
+  Nav
+    Brand "Party mode" icon="celebration"
+    Row gap=8
+      Toggle "Colours moving" bind=running
+      Button.outline "Back to queue" onTap={go queue}
+  Section bleed
+    Stack center middle h=520
+      Box fill={palette[beat%4]} h=520
+        Text ""
+      Column gap=16 center
+        Equalizer bars=24 playing={running} color=#FFFFFFFF h=120
+        Text.heading "{title}" color=#FFFFFFFF size=48 weight=700 center
+        Text.muted "{artist}" color=#FFFFFFFF center
+        Text.strong "Next: {palette[(beat+1)%4] == palette[0] ? 'Electric Feel' : 'Electric Feel'}" color=#FFFFFFFF
+  Section
+    Column gap=16 maxw=720
+      Heading "Lighting" level=3
+      Select "Colour scheme" items=["Neon","Sunset","Ocean","Mono"] bind=scheme onChange={palette=result=="Neon"?["#FFFF2D95","#FF7B2DFF","#FF2DD4FF","#FFFFD42D"]:result=="Sunset"?["#FFFF6B57","#FFFFB347","#FFE63E6D","#FF8E2DE2"]:result=="Ocean"?["#FF0EA5E9","#FF14B8A6","#FF3B82F6","#FF06B6D4"]:["#FF111111","#FF333333","#FF555555","#FF777777"]}
+      Slider "Speed" bind=speed min=1 max=4
+      Toggle "Strobe on the drop" bind=strobe
+      Button "Light it up" size=large animate=pulse onTap={running=true; beat=beat+1; toast "Lights on"}

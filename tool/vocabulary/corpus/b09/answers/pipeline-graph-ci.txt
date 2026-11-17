@@ -1,0 +1,210 @@
+### Pipeline
+state tab="pipeline"
+state runId=4182
+state runState="running"
+state sel=""
+state q=""
+state n=6
+state gateOpen=false
+state jobs=[{"id":"checkout","name":"Checkout","stage":"build","state":"passed","dur":6,"max":60},{"id":"compile","name":"Compile","stage":"build","state":"passed","dur":142,"max":300},{"id":"lint","name":"Lint","stage":"verify","state":"passed","dur":38,"max":120},{"id":"unit","name":"Unit tests","stage":"verify","state":"failed","dur":211,"max":400},{"id":"integration","name":"Integration tests","stage":"verify","state":"running","dur":97,"max":600},{"id":"e2e","name":"E2E browser","stage":"verify","state":"queued","dur":0,"max":900},{"id":"image","name":"Docker image","stage":"package","state":"queued","dur":0,"max":240},{"id":"sbom","name":"SBOM scan","stage":"package","state":"skipped","dur":0,"max":90},{"id":"staging","name":"Deploy staging","stage":"deploy","state":"queued","dur":0,"max":180}]
+state logPool=["$ git fetch origin feature/checkout-v2","Resolving dependencies...","Running 148 tests in 12 suites","PASS  cart/cart_test.dart (1.2s)","PASS  pricing/discount_test.dart (0.9s)","FAIL  payments/refund_test.dart","  Expected: 1250","  Actual:   1205","  at refund_test.dart:84","PASS  auth/session_test.dart (0.7s)","Retrying flaky: orders/sync_test.dart","PASS  orders/sync_test.dart (2.4s)","Coverage 87.4%","Done in 3m 31s"]
+every 1s when runState=="running" onTick={n=min(n+1,length(logPool)); jobs=updateWhere(jobs,j=>j.state=="running",j=>with(j,"dur",min(j.dur+1,j.max)))}
+App
+  Sidebar
+    Brand "Conveyor" icon="conveyor_belt"
+    NavItem "Pipeline" icon="account_tree" selected={tab=="pipeline"} onTap={tab="pipeline"}
+    NavItem "Runs" icon="history" badge="3" onTap={go runs}
+    NavItem "Approvals" icon="verified_user" badge="1" onTap={go approvals}
+    Spacer grow
+    Text.muted "acme/storefront"
+  Main
+    Nav
+      Column gap=2
+        Heading "Run #{runId}" level=1
+        Text.muted "feature/checkout-v2 · 9f3c2ab · Dana Ortiz"
+      Row gap=8
+        Badge.info "{runState}" icon="sync"
+        Button.outline "Re-run failed" icon="replay" visible={count(jobs,j=>j.state=="failed")>0} onTap={jobs=updateWhere(jobs,j=>j.state=="failed",j=>with(with(j,"state","running"),"dur",0)); n=0; toast "Retrying failed jobs"}
+        Button.destructive "Cancel run" icon="cancel" visible={runState=="running"} onTap={open cancelRun}
+    Row grow top
+      Column grow scroll pad=24 gap=16
+        Row gap=16 between
+          Row gap=8
+            Badge.success "{count(jobs,j=>j.state=="passed")} passed"
+            Badge.danger "{count(jobs,j=>j.state=="failed")} failed"
+            Badge.neutral "{count(jobs,j=>j.state=="queued")} queued"
+          Text.muted "Elapsed {duration(sum(jobs,j=>j.dur))}"
+        Graph direction="right" gap=48
+          each st in ["build","verify","package","deploy","release"]
+            GraphStage#{st} "{upper(st)}"
+              if st=="release"
+                Card gap=8 w=200
+                  Row gap=8 middle
+                    Icon "front_hand"
+                    Text.strong "Manual approval"
+                  Text.muted "Waits for a release manager"
+                  if gateOpen
+                    Badge.success "Approved by Dana Ortiz"
+                  if !gateOpen
+                    Button "Approve release" icon="check" onTap={open approveGate}
+                    Button.ghost "Reject" onTap={toast "Release rejected"}
+              if st!="release"
+                each job in filter(jobs,j=>j.stage==st)
+                  Card#{job.id} gap=8 w=200 selected={sel==job.id} onTap={sel=job.id; n=6; open log}
+                    Row between middle
+                      Text.strong "{job.name}"
+                      if job.state=="running"
+                        Icon "autorenew" animate=spin
+                      if job.state=="passed"
+                        Icon "check_circle" color=#FF2E7D32
+                      if job.state=="failed"
+                        Icon "error" color=#FFC62828
+                      if job.state=="queued"
+                        Icon "schedule"
+                      if job.state=="skipped"
+                        Icon "skip_next"
+                    Row between
+                      Badge.neutral "{job.state}"
+                      Text.caption "{duration(job.dur)}"
+                    Progress {job.dur/job.max}
+                    if job.state=="failed"
+                      Button.outline "Retry" icon="replay" onTap={jobs=updateWhere(jobs,j=>j.id==job.id,j=>with(with(j,"state","running"),"dur",0)); toast "Retrying {job.name}"}
+          GraphEdge from="checkout" to="compile"
+          GraphEdge from="compile" to="lint"
+          GraphEdge from="compile" to="unit"
+          GraphEdge from="compile" to="integration"
+          GraphEdge from="unit" to="e2e"
+          GraphEdge from="integration" to="e2e"
+          GraphEdge from="e2e" to="image"
+          GraphEdge from="lint" to="sbom"
+          GraphEdge from="image" to="staging"
+          GraphEdge from="sbom" to="staging"
+        Card gap=8
+          Text.strong "Duration by job"
+          BarChart values={map(jobs,j=>j.dur)} labels={map(jobs,j=>j.name)} h=160
+      if sel!=""
+        Pane w=380 pad=16 gap=12 border-left=#FF3A3A3A
+          Row between middle
+            Column gap=2
+              Heading "{find(jobs,j=>j.id==sel).name}" level=3
+              Text.muted "{find(jobs,j=>j.id==sel).state} · {duration(find(jobs,j=>j.id==sel).dur)}"
+            IconButton "close" tooltip="Close log" onTap={sel=""}
+          Row gap=8
+            Input "Search log" bind=q hint="error, test name"
+            IconButton "content_copy" tooltip="Copy log" onTap={copy join(take(logPool,n),"\n"); toast "Copied"}
+            IconButton "download" tooltip="Download log" onTap={emit downloadLog sel}
+          Box fill=#FF101418 pad=12 radius=8 grow scroll
+            each line in filter(take(logPool,n),l=>q==""||contains(lower(l),lower(q)))
+              Text.mono "{line}" color=#FFCDD6E0
+          Row between
+            Text.caption "{n} of {length(logPool)} lines"
+            Toggle "Follow" bind=follow
+  Dialog#cancelRun "Cancel run #{runId}?" "Running jobs stop and queued jobs are skipped."
+    Text.muted "Integration tests has been running for {duration(find(jobs,j=>j.id=="integration").dur)}."
+    Row end gap=8
+      Button.ghost "Keep running" onTap={close}
+      Button.destructive "Cancel run" onTap={runState="cancelled"; jobs=updateWhere(jobs,j=>j.state=="running"||j.state=="queued",j=>with(j,"state","skipped")); close; toast "Run cancelled"}
+  Dialog#approveGate "Approve release?" "Promotes build 9f3c2ab to production."
+    Input "Comment" bind=gateNote multiline
+    Row end gap=8
+      Button.ghost "Not yet" onTap={close}
+      Button "Approve" onTap={gateOpen=true; close; toast "Release approved"}
+
+### Runs
+state branch="all"
+state runs=[{"id":4182,"branch":"feature/checkout-v2","sha":"9f3c2ab","msg":"Refund rounding for partial returns","state":"running","by":"Dana Ortiz","dur":412,"when":"2 min ago"},{"id":4181,"branch":"main","sha":"c71e0d4","msg":"Bump http client to 4.2","state":"passed","by":"Lee Park","dur":688,"when":"1 hr ago"},{"id":4180,"branch":"fix/login-loop","sha":"5ab88e1","msg":"Stop redirect loop on expired session","state":"failed","by":"Mara Jin","dur":301,"when":"3 hr ago"},{"id":4179,"branch":"main","sha":"e02f9b7","msg":"Add SBOM scan stage","state":"passed","by":"Lee Park","dur":702,"when":"Yesterday"},{"id":4178,"branch":"release/2.8","sha":"1d6a4c3","msg":"Cut 2.8.0-rc2","state":"cancelled","by":"Sam Patel","dur":95,"when":"Yesterday"}]
+state sel=0
+App
+  Sidebar
+    Brand "Conveyor" icon="conveyor_belt"
+    NavItem "Pipeline" icon="account_tree" onTap={go pipeline}
+    NavItem "Runs" icon="history" selected badge="3"
+    NavItem "Approvals" icon="verified_user" badge="1" onTap={go approvals}
+    Spacer grow
+    Text.muted "acme/storefront"
+  Main
+    Nav
+      Heading "Runs" level=1
+      Row gap=8
+        Select bind=branch items=["all","main","feature/checkout-v2","fix/login-loop","release/2.8"]
+        Input "Search commits" bind=q w=220
+        Button "Trigger run" icon="play_arrow" onTap={open trigger}
+    Column pad=24 gap=16
+      Row gap=8 scroll
+        ChoiceChip "All" selected={branch=="all"} onTap={branch="all"}
+        ChoiceChip "main" selected={branch=="main"} onTap={branch="main"}
+        ChoiceChip "Failed only" onTap={branch="failed"}
+      Card gap=0
+        Row pad=12 gap=12 border-bottom=#FF3A3A3A
+          Text.caption "Run" w=70
+          Text.caption "Status" w=110
+          Text.caption "Branch and commit" grow
+          Text.caption "Author" w=120 hide=tablet
+          Text.caption "Duration" w=90
+          Text.caption "" w=40
+        each run in filter(runs,r=>(branch=="all"||r.branch==branch||(branch=="failed"&&r.state=="failed"))&&contains(lower(r.msg),lower(q)))
+          Row pad=12 gap=12 middle border-bottom=#FF2A2A2A onTap={go pipeline}
+            Text.strong "#{run.id}" w=70
+            Badge.neutral "{run.state}" w=110
+            Column grow gap=2
+              Text.strong "{run.msg}"
+              Row gap=8
+                Chip "{run.branch}" icon="call_split"
+                Text.mono "{run.sha}"
+            Text.muted "{run.by}" w=120 hide=tablet
+            Text.caption "{duration(run.dur)}" w=90
+            IconButton "more_vert" tooltip="Actions" w=40 onTap={sel=run.id; open runMenu}
+      Card gap=8
+        Text.strong "Run time, last five runs"
+        LineChart values={reverse(map(runs,r=>r.dur))} labels={reverse(map(runs,r=>"#{r.id}"))} h=140
+  Menu#runMenu end
+    MenuItem "Open pipeline" icon="account_tree" onTap={go pipeline}
+    MenuItem "Re-run" icon="replay" onTap={toast "Run #{sel} queued again"}
+    MenuItem "Cancel run" icon="cancel" onTap={open cancelRun}
+    MenuItem "Copy commit SHA" icon="content_copy" onTap={copy find(runs,r=>r.id==sel).sha; toast "Copied"}
+  Dialog#cancelRun "Cancel run #{sel}?" "Jobs in progress stop at once."
+    Row end gap=8
+      Button.ghost "Keep" onTap={close}
+      Button.destructive "Cancel run" onTap={runs=updateWhere(runs,r=>r.id==sel,r=>with(r,"state","cancelled")); close; toast "Run cancelled"}
+  Dialog#trigger "Trigger a run" "Starts the full pipeline."
+    Select "Branch" bind=triggerBranch items=["main","feature/checkout-v2","fix/login-loop","release/2.8"]
+    Input "Commit (optional)" bind=triggerSha hint="9f3c2ab"
+    Toggle "Skip E2E" bind=skipE2e
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Start" onTap={runs=concat([{"id":4183,"branch":coalesce(triggerBranch,"main"),"sha":coalesce(triggerSha,"head"),"msg":"Manual run","state":"running","by":"You","dur":0,"when":"now"}],runs); close; toast "Run #4183 started"}
+
+### Approvals
+state items=[{"id":1,"run":4182,"what":"Release 2.8.0 to production","by":"Dana Ortiz","waiting":"14 min","state":"waiting"},{"id":2,"run":4179,"what":"Deploy to staging","by":"Lee Park","waiting":"Yesterday","state":"approved"}]
+state at=0
+App
+  Sidebar
+    Brand "Conveyor" icon="conveyor_belt"
+    NavItem "Pipeline" icon="account_tree" onTap={go pipeline}
+    NavItem "Runs" icon="history" onTap={go runs}
+    NavItem "Approvals" icon="verified_user" selected badge="{count(items,i=>i.state=="waiting")}"
+    Spacer grow
+    Text.muted "acme/storefront"
+  Main
+    Nav
+      Heading "Approvals" level=1
+      Button.outline "Notification settings" icon="notifications" onTap={open notify}
+    Column pad=24 gap=16 maxw=720
+      Text.muted "Gates pause a run until a release manager clicks approve."
+      each item in items
+        Card gap=12
+          Row between middle
+            Column gap=2
+              Text.strong "{item.what}"
+              Text.muted "Run #{item.run} · requested by {item.by} · waiting {item.waiting}"
+            Badge.warning "waiting" visible={item.state=="waiting"}
+            Badge.success "approved" visible={item.state=="approved"}
+          if item.state=="waiting"
+            Input "Comment" bind=note hint="Optional note for the audit log"
+            Row gap=8
+              Button "Approve" icon="check" onTap={items=updateWhere(items,i=>i.id==item.id,i=>with(i,"state","approved")); toast "Approved"; go pipeline}
+              Button.outline "Reject" onTap={items=updateWhere(items,i=>i.id==item.id,i=>with(i,"state","rejected")); toast "Rejected"}
+  Sheet#notify "Notify me"
+    Toggle "Gate waiting more than 10 minutes" bind=n1
+    Toggle "Failed job on main" bind=n2
+    Button "Save" onTap={emit saveNotify; close}

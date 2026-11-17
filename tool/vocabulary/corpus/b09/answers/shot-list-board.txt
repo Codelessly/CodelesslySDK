@@ -1,0 +1,187 @@
+### Shot List
+state screen="list"
+state callTime=420
+state wrapTime=1110
+state sunset=1130
+state sel=""
+state filter="all"
+state shots=[{"id":"s1","num":"12A","scene":"INT. DINER - Mara enters","frame":"wide","lens":"24mm","move":"Static","mins":35,"status":"shot","takes":[1,2,3],"circled":2,"note":"Mara's coat stays wet, left sleeve rolled.","photo":"https://picsum.photos/seed/slate1/640/360"},{"id":"s2","num":"12B","scene":"INT. DINER - Mara at counter","frame":"medium","lens":"35mm","move":"Dolly in","mins":50,"status":"shot","takes":[1,2],"circled":1,"note":"Coffee cup half full at start of take.","photo":"https://picsum.photos/seed/slate2/640/360"},{"id":"s3","num":"12C","scene":"INT. DINER - Waiter reaction","frame":"close","lens":"85mm","move":"Static","mins":25,"status":"waiting","takes":[],"circled":0,"note":"Name tag reads Eli, apron untied.","photo":"https://picsum.photos/seed/slate3/640/360"},{"id":"s4","num":"13","scene":"EXT. PARKING LOT - Car arrives","frame":"wide","lens":"18mm","move":"Pan","mins":60,"status":"waiting","takes":[],"circled":0,"note":"Headlights on, rain machine at half.","photo":"https://picsum.photos/seed/slate4/640/360"},{"id":"s5","num":"14","scene":"EXT. ROOFTOP - Final look","frame":"medium","lens":"50mm","move":"Crane up","mins":90,"status":"waiting","takes":[],"circled":0,"note":"Must catch the last light. Move early if possible.","photo":"https://picsum.photos/seed/slate5/640/360"},{"id":"s6","num":"15","scene":"EXT. ROOFTOP - Skyline insert","frame":"wide","lens":"135mm","move":"Static","mins":30,"status":"waiting","takes":[],"circled":0,"note":"Plate only, no actors.","photo":"https://picsum.photos/seed/slate6/640/360"}]
+state total=0
+App
+  Sidebar
+    Brand "Slate" icon="movie"
+    NavItem "Shot list" icon="format_list_numbered" badge="{length(shots)}" selected={screen=="list"} onTap={go shot-list}
+    NavItem "Storyboard" icon="grid_view" selected={screen=="board"} onTap={go storyboard}
+    NavItem "Call sheet" icon="assignment" onTap={go call-sheet}
+    Spacer grow
+    Card gap=4
+      Text.caption "Sunset"
+      Text.strong "{floor(sunset/60)}:{sunset%60<10?"0":""}{sunset%60}"
+      Text.muted "Wrap {floor(wrapTime/60)}:{wrapTime%60<10?"0":""}{wrapTime%60}"
+  Main
+    Nav
+      Heading "Day 4 - Tuesday, Oct 14" level=1
+      Row gap=8
+        SegmentedButton bind=filter items=["all","waiting","shot"]
+        Button.outline "Call sheet" icon="assignment" onTap={go call-sheet}
+        Button "Add shot" icon="add" onTap={shots=append(shots,{"id":"n{length(shots)+1}","num":"{16+length(shots)-6}","scene":"New set-up","frame":"medium","lens":"35mm","move":"Static","mins":30,"status":"waiting","takes":[],"circled":0,"note":"","photo":""}); toast "Shot added"}
+    Column pad=24 gap=12
+      if (callTime + sum(shots,s=>s.mins)) > wrapTime
+        Card fill=#FFFDECEA gap=4
+          Row gap=8 middle
+            Icon "warning" color=#FFC62828
+            Text.strong "Overrun: day ends {floor((callTime+sum(shots,s=>s.mins))/60)}:{(callTime+sum(shots,s=>s.mins))%60<10?"0":""}{(callTime+sum(shots,s=>s.mins))%60}, {callTime+sum(shots,s=>s.mins)-wrapTime} min past wrap" color=#FFC62828
+          Text.muted "Drag a shot to the end or cut a set-up to get back inside the day."
+      Row gap=12
+        Card grow gap=4
+          Text.caption "Set-up time"
+          Text.heading "{sum(shots,s=>s.mins)} min"
+        Card grow gap=4
+          Text.caption "Shot"
+          Text.heading "{count(shots,s=>s.status=="shot")} of {length(shots)}"
+          Progress {count(shots,s=>s.status=="shot")/length(shots)}
+        Card grow gap=4
+          Text.caption "Light left at wrap"
+          Text.heading "{sunset-wrapTime} min" color={sunset-wrapTime<0 ? #FFC62828 : #FF2E7D32}
+      Card gap=0 pad=0
+        Row pad=12 gap=12 border-bottom=#FFDDDDDD
+          Text.caption "Start" w=64
+          Text.caption "Shot" w=56
+          Text.caption "Frame" w=56 hide=phone
+          Text.caption "Scene" grow
+          Text.caption "Lens" w=56 hide=tablet
+          Text.caption "Move" w=80 hide=tablet
+          Text.caption "Min" w=64
+          Text.caption "Status" w=110
+        each shot in shots
+          if filter=="all" || shot.status==filter
+            if (callTime + sum(take(shots,index),s=>s.mins)) < sunset && (callTime + sum(take(shots,index),s=>s.mins) + shot.mins) >= sunset
+              Row pad=8 gap=8 middle fill=#FFFFF3E0
+                Icon "wb_twilight" color=#FFEF6C00
+                Text.strong "Sunset {floor(sunset/60)}:{sunset%60<10?"0":""}{sunset%60}" color=#FFEF6C00
+                Text.muted "light goes during this set-up"
+            Row pad=12 gap=12 middle drag=shot(shot.id) drop=shot onDrop={shots=without(shots,find(shots,s=>s.id==result.data)); shots=concat(take(shots,index),concat([find(shots,s=>s.id==result.data)],slice(shots,index,length(shots))))} border-bottom=#FFEEEEEE menu=rowMenu onTap={sel=shot.id; open notes}
+              Text.mono "{floor((callTime+sum(take(shots,index),s=>s.mins))/60)}:{(callTime+sum(take(shots,index),s=>s.mins))%60<10?"0":""}{(callTime+sum(take(shots,index),s=>s.mins))%60}" w=64 color={(callTime+sum(take(shots,index),s=>s.mins)+shot.mins)>wrapTime ? #FFC62828 : #FF222222}
+              Text.strong "{shot.num}" w=56
+              FramingSketch frame={shot.frame} w=56 h=32 hide=phone
+              Column grow gap=2
+                Text.strong "{shot.scene}"
+                if shot.status=="shot"
+                  Text.muted "Takes {join(shot.takes,", ")}, circled {shot.circled}"
+              Text "{shot.lens}" w=56 hide=tablet
+              Text "{shot.move}" w=80 hide=tablet
+              Input bind=shot.mins type=number w=64
+              Badge.success "Shot" w=110 hidden={shot.status!="shot"}
+              Badge.neutral "Waiting" w=110 hidden={shot.status!="waiting"}
+              Icon "drag_indicator"
+      Card gap=8
+        Text.strong "Day timeline"
+        Timeline start={callTime} end={wrapTime+60} marker={sunset} markerLabel="Sunset" segments={map(shots,s=>{"label":s.num,"mins":s.mins,"done":s.status=="shot"})} h=56
+  Menu#rowMenu
+    MenuItem "Open notes" icon="edit_note" onTap={open notes}
+    MenuItem "Mark waiting" icon="schedule" onTap={shots=updateWhere(shots,s=>s.id==sel,s=>with(s,"status","waiting"))}
+    MenuItem "Move to top" icon="vertical_align_top" onTap={shots=concat([find(shots,s=>s.id==sel)],without(shots,find(shots,s=>s.id==sel)))}
+    MenuItem "Delete shot" icon="delete" onTap={shots=removeWhere(shots,s=>s.id==sel); toast "Shot removed"}
+  Dialog#notes "Shot notes" "Continuity and takes"
+    Text.strong "{find(shots,s=>s.id==sel).num}  {find(shots,s=>s.id==sel).scene}"
+    Row gap=12
+      Select "Status" items=["waiting","shot"] value={find(shots,s=>s.id==sel).status} onChange={shots=updateWhere(shots,s=>s.id==sel,s=>with(s,"status",result))}
+      Select "Lens" items=["18mm","24mm","35mm","50mm","85mm","135mm"] value={find(shots,s=>s.id==sel).lens} onChange={shots=updateWhere(shots,s=>s.id==sel,s=>with(s,"lens",result))}
+      Select "Movement" items=["Static","Pan","Dolly in","Crane up","Handheld"] value={find(shots,s=>s.id==sel).move} onChange={shots=updateWhere(shots,s=>s.id==sel,s=>with(s,"move",result))}
+    Row gap=8 middle wrap
+      Text.fieldLabel "Takes"
+      each t in find(shots,s=>s.id==sel).takes
+        ChoiceChip "{t}" selected={find(shots,s=>s.id==sel).circled==t} onTap={shots=updateWhere(shots,s=>s.id==sel,s=>with(s,"circled",t))}
+      Button.outline "+ Take" onTap={shots=updateWhere(shots,s=>s.id==sel,s=>with(with(s,"takes",append(s.takes,length(s.takes)+1)),"status","shot"))}
+    Text.fieldLabel "Continuity photo"
+    Image "{find(shots,s=>s.id==sel).photo}" h=180 radius=8 hidden={find(shots,s=>s.id==sel).photo==""} onTap={open zoom}
+    Button.outline "Add continuity photo" icon="add_a_photo" onTap={emit pickPhoto sel}
+    Input "Notes" "Wardrobe, props, eyelines" multiline value={find(shots,s=>s.id==sel).note} onChange={shots=updateWhere(shots,s=>s.id==sel,s=>with(s,"note",result))}
+    Button "Done" onTap={close}
+  Lightbox#zoom "{find(shots,s=>s.id==sel).photo}" "Continuity"
+
+### Storyboard
+state sel=""
+state cols=3
+state shots=[{"id":"s1","num":"12A","frame":"wide","caption":"Mara enters, rain on the glass behind her","lens":"24mm"},{"id":"s2","num":"12B","frame":"medium","caption":"She slides onto the stool, hands around the cup","lens":"35mm"},{"id":"s3","num":"12C","frame":"close","caption":"Eli glances up, pen stops","lens":"85mm"},{"id":"s4","num":"13","frame":"wide","caption":"Headlights sweep the lot, car door opens","lens":"18mm"},{"id":"s5","num":"14","frame":"medium","caption":"Mara on the roof, city turning orange","lens":"50mm"},{"id":"s6","num":"15","frame":"wide","caption":"Skyline plate, no one in frame","lens":"135mm"}]
+App
+  Sidebar
+    Brand "Slate" icon="movie"
+    NavItem "Shot list" icon="format_list_numbered" onTap={go shot-list}
+    NavItem "Storyboard" icon="grid_view" selected={true}
+    NavItem "Call sheet" icon="assignment" onTap={go call-sheet}
+  Main
+    Nav
+      Heading "Storyboard" level=1
+      Row gap=8
+        SegmentedButton bind=cols items=[2,3,4]
+        Button "Add panel" icon="add" onTap={shots=append(shots,{"id":"p{length(shots)+1}","num":"new","frame":"medium","caption":"","lens":"35mm"}); toast "Panel added"}
+    Column pad=24 gap=16
+      Text.muted "Drag a panel to reorder. Captions are saved as you type."
+      Grid cols={cols} gap=16
+        each p in shots
+          Card gap=8 drag=panel(p.id) drop=panel onDrop={shots=without(shots,find(shots,s=>s.id==result.data)); shots=concat(take(shots,index),concat([find(shots,s=>s.id==result.data)],slice(shots,index,length(shots))))} menu=panelMenu
+            Box h=140 fill=#FFF4F1EA radius=6
+              FramingSketch frame={p.frame} h=140
+            Row between
+              Text.strong "Shot {p.num}"
+              Badge.neutral "{p.lens}"
+            Input "Caption" bind=p.caption multiline
+            Row gap=8
+              Select bind=p.frame items=["wide","medium","close"]
+              IconButton "delete" tooltip="Remove panel" onTap={shots=removeWhere(shots,s=>s.id==p.id)}
+  Menu#panelMenu
+    MenuItem "Duplicate panel" icon="content_copy" onTap={toast "Duplicated"}
+    MenuItem "Open shot notes" icon="edit_note" onTap={go shot-list}
+
+### Call Sheet
+state callTime=420
+state crew=[{"role":"Director","name":"Priya Nair","call":"06:30"},{"role":"DP","name":"Tomas Weiss","call":"06:30"},{"role":"1st AD","name":"Jonah Brooks","call":"06:00"},{"role":"Gaffer","name":"Lena Ortiz","call":"06:00"}]
+state cast=[{"role":"Mara","name":"Ines Calloway","call":"07:00"},{"role":"Eli","name":"Devon Park","call":"09:30"}]
+state shots=[{"num":"12A","scene":"INT. DINER - Mara enters","mins":35},{"num":"12B","scene":"INT. DINER - Mara at counter","mins":50},{"num":"12C","scene":"INT. DINER - Waiter reaction","mins":25},{"num":"13","scene":"EXT. PARKING LOT - Car arrives","mins":60},{"num":"14","scene":"EXT. ROOFTOP - Final look","mins":90},{"num":"15","scene":"EXT. ROOFTOP - Skyline insert","mins":30}]
+Page
+  Nav
+    Brand "Slate" icon="movie"
+    Row gap=4
+      Link "Shot list" onTap={go shot-list}
+      Link "Storyboard" onTap={go storyboard}
+      Link "Call sheet"
+    Row gap=8
+      Button.outline "Print" icon="print" onTap={emit print}
+      Button "Send to crew" icon="send" onTap={open send}
+  Section narrow
+    Column gap=16
+      Heading "Call sheet - Day 4" level=1
+      Text.muted "Tuesday, Oct 14. Crew call {floor(callTime/60)}:{callTime%60<10?"0":""}{callTime%60}. Sunset 18:50. Rain cover: diner interior."
+      Row gap=16
+        Card grow gap=4
+          Text.caption "Location"
+          Text.strong "Marlowe's Diner, 220 Pier St"
+        Card grow gap=4
+          Text.caption "Weather"
+          Text.strong "Rain until noon, clear after"
+      Heading "Schedule" level=3
+      each s in shots
+        Row gap=12 border-bottom=#FFEEEEEE pad=8
+          Text.mono "{floor((callTime+sum(take(shots,index),x=>x.mins))/60)}:{(callTime+sum(take(shots,index),x=>x.mins))%60<10?"0":""}{(callTime+sum(take(shots,index),x=>x.mins))%60}" w=64
+          Text.strong "{s.num}" w=56
+          Text "{s.scene}" grow
+          Text.muted "{s.mins} min" w=64
+      Heading "Cast" level=3
+      each c in cast
+        Row gap=12 pad=8 border-bottom=#FFEEEEEE
+          Text.strong "{c.role}" w=120
+          Text "{c.name}" grow
+          Text.mono "{c.call}" w=64
+      Heading "Crew" level=3
+      each c in crew
+        Row gap=12 pad=8 border-bottom=#FFEEEEEE
+          Text.strong "{c.role}" w=120
+          Text "{c.name}" grow
+          Text.mono "{c.call}" w=64
+  Footer
+    Text.muted "Slate - Day 4 call sheet"
+  Dialog#send "Send call sheet" "Crew get it by email and text"
+    Input "Message" "Parking is behind the diner" multiline
+    Toggle "Include storyboard" bind=withBoard
+    Button "Send" onTap={emit sendCallSheet; toast "Sent to 6 people"; close}

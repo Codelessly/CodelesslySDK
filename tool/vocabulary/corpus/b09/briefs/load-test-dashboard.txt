@@ -1,0 +1,3 @@
+App: Hammer, a load test dashboard. A scenario with virtual users ramped as a drawn line you edit by dragging points; start with a countdown and a live view of requests per second, latency percentiles as three lines and an error rate in red as a percent; a table of endpoints sorted by slowest; a threshold line that fails the run if crossed; a stop button; a comparison of two runs overlaid; a summary report with a pass or fail seal.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

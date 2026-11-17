@@ -1,0 +1,203 @@
+### Check-in
+project stock=[{"name":"Standard 4x3","left":412,"low":100},{"name":"Speaker 4x6","left":38,"low":50},{"name":"Staff 4x3","left":120,"low":40}]
+project printers=[{"id":"p1","name":"Lobby Zebra A","queue":2},{"id":"p2","name":"Lobby Zebra B","queue":7},{"id":"p3","name":"Registration Desk","queue":0}]
+project current={"id":"A-1042","name":"Priya Raman","company":"Northwind Labs","pronouns":"she/her","ticket":"Full Conference","role":"Speaker","paper":"Speaker 4x6","code":"LN-88213"}
+project ribbons=["Speaker"]
+state q=""
+state attendees=[{"id":"A-1042","name":"Priya Raman","company":"Northwind Labs","pronouns":"she/her","ticket":"Full Conference","role":"Speaker","paper":"Speaker 4x6","code":"LN-88213"},{"id":"A-1043","name":"Priyanka Shah","company":"Brightpath","pronouns":"","ticket":"Workshop Only","role":"Attendee","paper":"Standard 4x3","code":"LN-88214"},{"id":"A-1190","name":"Tomas Eriksen","company":"Fjord Systems","pronouns":"he/him","ticket":"Full Conference","role":"Volunteer","paper":"Staff 4x3","code":"LN-90417"}]
+state allRibbons=["Speaker","Volunteer","First-timer","Sponsor","Press"]
+state printer=""
+state printing=false
+state progress=0
+state reason=""
+state printed=0
+every 200 when printing onTick={progress>=1 ? {printing=false; printed=printed+1; stock=updateWhere(stock,s=>s.name==current.paper,s=>with(s,"left",s.left-1)); toast "Badge printed for {current.name}"} : progress=progress+0.1}
+App
+  Sidebar
+    Brand "Lanyard" icon="badge"
+    NavItem "Check-in" icon="how_to_reg" selected onTap={go check-in}
+    NavItem "Printers and paper" icon="print" onTap={go printers-and-paper}
+    NavItem "Lost badge" icon="report" onTap={go lost-badge}
+    Spacer grow
+    Text.muted "Desk 2 - Hall B"
+    Text.caption "Printed this shift: {printed}"
+  Main
+    Nav
+      Heading "Check-in" level=1
+      Row gap=8
+        Input "Name or code" "Type a name or scan a code" bind=q w=300
+        IconButton "qr_code_scanner" tooltip="Scan a badge code" onTap={emit scan}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Column grow gap=8
+          Text.sectionTitle "Matches"
+          each a in attendees
+            if q=="" || contains(lower(a.name),lower(q)) || contains(a.code,upper(q))
+              ListTile "{a.name}" "{a.company} - {a.ticket}" selected={current.id==a.id} onTap={current=a; ribbons=a.role=="Attendee" ? [] : [a.role]; printing=false; progress=0}
+                Badge.info "{a.role}"
+        Card grow gap=12
+          Row between
+            Column gap=2
+              Heading "{current.name}" level=3
+              Text.muted "{current.ticket} - {current.code}"
+            Badge.success "Checked in"
+          Divider
+          Text.fieldLabel "Badge preview"
+          Box drag=badge(current.id) radius=12 pad=0 fill=#FFFFFFFF border-top=#FFDDDDDD
+            Box fill={current.role=="Speaker" ? "#FF6A1B9A" : current.role=="Volunteer" ? "#FF2E7D32" : current.role=="Sponsor" ? "#FFEF6C00" : "#FF1565C0"} pad=8
+              Text "{upper(current.role)}" color=#FFFFFFFF weight=700 center
+            Column gap=4 pad=20 center
+              Text "{current.name}" size=40 weight=700 color=#FF111111 center
+              Text "{current.pronouns}" size=16 color=#FF555555 center
+              Text "{current.company}" size=20 color=#FF333333 center
+              Row gap=6 center
+                each r in ribbons
+                  Chip "{r}"
+          Text.caption "Drag the badge onto a printer"
+          Input "Pronouns" "e.g. she/her" bind=current.pronouns
+          Input "Company" bind=current.company
+          Text.fieldLabel "Ribbons"
+          Row gap=8
+            each r in allRibbons
+              FilterChip "{r}" selected={contains(ribbons,r)} onTap={ribbons=contains(ribbons,r) ? without(ribbons,r) : append(ribbons,r)}
+        Column w=300 gap=12
+          Text.sectionTitle "Printer"
+          each p in printers
+            Card gap=4 drop=badge onDrop={printer=p.id; toast "Sending to {p.name}"} fill={printer==p.id ? "#FFE3F2FD" : "#00000000"}
+              Row between
+                Text.strong "{p.name}"
+                Icon "{printer==p.id ? 'check_circle' : 'print'}"
+              Text.muted "{p.queue} in queue - about {p.queue*20} sec"
+          Button "Print badge" icon="print" onTap={printer=="" ? toast "Drop the badge on a printer first" : {progress=0; printing=true}}
+          if printing
+            Column gap=4
+              Text.caption "Printing on {find(printers,p=>p.id==printer).name}..."
+              Progress bind=progress
+          if !printing && progress>=1
+            Row gap=8
+              Icon "check_circle"
+              Text.success "Printed"
+            Button.outline "Reprint" icon="replay" onTap={open reprint}
+          Text.fieldLabel "Paper left"
+          each s in stock
+            Row between
+              Text "{s.name}"
+              Badge.{s.left<s.low ? "warning" : "success"} "{s.left}"
+          Button.ghost "Lost badge" icon="report" onTap={go lost-badge}
+  Dialog#reprint "Reprint badge" "Say why so the count stays honest"
+    Select "Reason" bind=reason items=["Misprint","Name changed","Damaged","Printer jam","Other"]
+    Input "Note" multiline hidden={reason!="Other"}
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Reprint" onTap={reason=="" ? toast "Pick a reason" : {emit reprint {id:current.id,reason:reason}; progress=0; printing=true; reason=""; close}}
+
+### Printers and paper
+project stock=[{"name":"Standard 4x3","left":412,"low":100},{"name":"Speaker 4x6","left":38,"low":50},{"name":"Staff 4x3","left":120,"low":40}]
+project printers=[{"id":"p1","name":"Lobby Zebra A","queue":2},{"id":"p2","name":"Lobby Zebra B","queue":7},{"id":"p3","name":"Registration Desk","queue":0}]
+state add=100
+state stockName="Speaker 4x6"
+App
+  Sidebar
+    Brand "Lanyard" icon="badge"
+    NavItem "Check-in" icon="how_to_reg" onTap={go check-in}
+    NavItem "Printers and paper" icon="print" selected onTap={go printers-and-paper}
+    NavItem "Lost badge" icon="report" onTap={go lost-badge}
+  Main
+    Nav
+      Heading "Printers and paper" level=1
+      Button.outline "Refresh" icon="refresh" onTap={emit refresh}
+    Column pad=24 gap=16
+      Text.sectionTitle "Printers"
+      Grid cols=3 gap=16
+        each p in printers
+          Card gap=8
+            Row between
+              Heading "{p.name}" level=3
+              Badge.{p.queue>5 ? "warning" : "success"} "{p.queue} queued"
+            Progress {min(1,p.queue/10)}
+            Text.muted "Wait about {p.queue*20} seconds"
+            Row gap=8
+              Button.outline "Clear queue" onTap={printers=updateWhere(printers,x=>x.id==p.id,x=>with(x,"queue",0)); toast "Queue cleared"}
+              Button.ghost "Pause" onTap={emit pause p.id}
+      Text.sectionTitle "Badges left by paper stock"
+      Grid cols=3 gap=16
+        each s in stock
+          Card gap=8
+            Text.strong "{s.name}"
+            Text "{s.left}" size=48 weight=700 color={s.left<s.low ? "#FFC62828" : "#FF2E7D32"}
+            Progress {min(1,s.left/(s.low*4))}
+            if s.left<s.low
+              Badge.warning "Running low, under {s.low}"
+      Card gap=12
+        Text.strong "Loaded new paper"
+        Row gap=8 bottom
+          Select "Stock" bind=stockName items=["Standard 4x3","Speaker 4x6","Staff 4x3"]
+          Input "Badges added" bind=add type=number w=160
+          Button "Add to count" onTap={stock=updateWhere(stock,s=>s.name==stockName,s=>with(s,"left",s.left+add)); toast "Added {add} to {stockName}"}
+
+### Lost badge
+project current={"id":"A-1042","name":"Priya Raman","company":"Northwind Labs","pronouns":"she/her","ticket":"Full Conference","role":"Speaker","paper":"Speaker 4x6","code":"LN-88213"}
+project stock=[{"name":"Standard 4x3","left":412,"low":100},{"name":"Speaker 4x6","left":38,"low":50},{"name":"Staff 4x3","left":120,"low":40}]
+state step=0
+state idCheck=false
+state voided=false
+state fee=false
+state lostNote=""
+state replacing=false
+state progress=0
+every 200 when replacing onTick={progress>=1 ? {replacing=false; step=3; stock=updateWhere(stock,s=>s.name==current.paper,s=>with(s,"left",s.left-1))} : progress=progress+0.125}
+App
+  Sidebar
+    Brand "Lanyard" icon="badge"
+    NavItem "Check-in" icon="how_to_reg" onTap={go check-in}
+    NavItem "Printers and paper" icon="print" onTap={go printers-and-paper}
+    NavItem "Lost badge" icon="report" selected onTap={go lost-badge}
+  Main
+    Nav
+      Heading "Lost badge" level=1
+      Text.muted "{current.name} - {current.code}"
+    Column pad=24 gap=16 maxw=720
+      Row gap=8
+        Chip "1 Verify"
+        Chip "2 Void old badge"
+        Chip "3 Reprint"
+        Chip "4 Done"
+      Progress {step/3}
+      if step==0
+        Card gap=12
+          Heading "Confirm who this is" level=3
+          Text "{current.name}, {current.company}, {current.ticket}"
+          Checkbox "Photo ID matches the registration" bind=idCheck
+          Input "Note" "Where was it last seen?" bind=lostNote multiline
+          Button "Continue" onTap={idCheck ? step=1 : toast "Check the ID first"}
+      if step==1
+        Card gap=12
+          Heading "Void the old badge" level=3
+          Text.muted "The code {current.code} stops scanning at every door once it is voided."
+          Toggle "Void {current.code}" bind=voided
+          Toggle "Waive the replacement fee" bind=fee
+          Row gap=8
+            Button.ghost "Back" onTap={step=0}
+            Button "Void and continue" onTap={voided ? {emit voidBadge current.id; step=2} : toast "Switch on void first"}
+      if step==2
+        Card gap=12
+          Heading "Print the replacement" level=3
+          Text.muted "New code: {replace(current.code,'LN-','LR-')}"
+          if replacing
+            Progress bind=progress
+            Text.caption "Printing on {current.paper}..."
+          Button "Print replacement" hidden={replacing} onTap={progress=0; replacing=true}
+      if step==3
+        Card gap=12
+          Row gap=8
+            Icon "check_circle"
+            Heading "Replacement printed" level=3
+          Text.muted "The old badge is void. {fee ? 'No fee charged.' : 'Collect the $5 replacement fee.'}"
+          Row gap=8
+            Button "Back to check-in" onTap={step=0; idCheck=false; voided=false; go check-in}
+            Button.outline "Print again" onTap={open lostReprint}
+  Dialog#lostReprint "Reprint replacement" "The replacement did not come out right"
+    Select "Reason" bind=reason items=["Misprint","Printer jam","Name changed"]
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Reprint" onTap={progress=0; replacing=true; step=2; close}

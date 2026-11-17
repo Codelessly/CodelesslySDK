@@ -1,0 +1,171 @@
+### Analyser
+state running=true
+state center=98.5
+state span=20
+state ref=-20
+state limit=-60
+state trace=[-92,-88,-80,-52,-85,-90,-71,-84,-91,-66,-89,-93]
+state hold=[-90,-86,-78,-48,-83,-88,-69,-82,-89,-62,-87,-91]
+state marker={"f":98.5,"db":-52}
+state markerOn=false
+state centerText="98.5"
+state spanText="20"
+state history=[]
+state signals=[{"f":98.5,"db":-52,"bw":0.2,"name":"FM broadcast"},{"f":101.1,"db":-62,"bw":0.2,"name":"FM broadcast"},{"f":95.8,"db":-66,"bw":0.15,"name":"FM broadcast"},{"f":104.3,"db":-71,"bw":0.1,"name":"Unknown"},{"f":90.2,"db":-77,"bw":0.2,"name":"FM broadcast"}]
+every 200 when running onTick={emit sweep; history=take(append(history,trace),120)}
+App
+  Sidebar
+    Brand "Bandscape" icon="graphic_eq"
+    NavItem "Analyser" icon="show_chart" selected={true}
+    NavItem "Signals" icon="list" onTap={go signals}
+    NavItem "Settings" icon="tune" onTap={go settings}
+    Spacer grow
+    Text.muted "RTL-SDR · 2.4 MS/s"
+  Main
+    Nav
+      Heading "Spectrum" level=1
+      Row gap=8
+        Badge.error "Over limit" visible={any(trace,v=>v>limit)}
+        Badge.success "Within limit" visible={!any(trace,v=>v>limit)}
+        Button.outline "Hold {running ? 'on' : 'off'}" onTap={running=!running}
+        Button.outline "Clear hold" onTap={hold=trace}
+        IconButton "more_vert" tooltip="More" onTap={open plotMenu}
+    Column pad=24 gap=16
+      Row gap=12 top
+        Input "Centre (MHz)" bind=centerText type=number w=140 onChange={center=result}
+        Input "Span (MHz)" bind=spanText type=number w=140 onChange={span=clamp(result,0.1,3000)}
+        Select "Span preset" items=["1 MHz","5 MHz","20 MHz","100 MHz"] onChange={span=replace(result," MHz","");spanText=replace(result," MHz","")}
+        Spacer grow
+        Column
+          Text.caption "Reference"
+          Text.strong "{ref} dBm"
+      Card gap=8
+        SpectrumPlot trace={trace} hold={hold} center={center} span={span} ref={ref} range=100 limit={limit} marker={marker} markerVisible={markerOn} h=300 traceColor={any(trace,v=>v>limit) ? "#FFE53935" : "#FF1E88E5"} holdColor="#661E88E5" onPinch={span=clamp(span/result.scale,0.1,3000);spanText=fixed(span,1)} onPan={center=center-result.dx*span;centerText=fixed(center,2)} onTapPeak={marker=result;markerOn=true} onRefDrag={ref=round(result.level,0)} onLimitDrag={limit=round(result.level,0)} dragRef=top
+        Row between
+          Row gap=8
+            Chip "Marker" selected={markerOn} onTap={markerOn=!markerOn}
+            Button.ghost "Peak search" onTap={marker=with(with(marker,"f",signals[0].f),"db",signals[0].db);markerOn=true}
+          Text.mono "{formatMarker(marker)}" visible={markerOn}
+      Card gap=4 visible={markerOn}
+        Row between
+          Text.strong "Marker 1"
+          IconButton "close" tooltip="Remove marker" onTap={markerOn=false}
+        Row gap=24
+          Column
+            Text.caption "Frequency"
+            Text.strong "{fixed(marker.f,3)} MHz"
+          Column
+            Text.caption "Level"
+            Text.strong "{marker.db} dBm"
+          Column
+            Text.caption "Delta to limit"
+            Text.strong "{marker.db - limit} dB"
+      Card gap=8
+        Row between
+          Text.strong "Waterfall"
+          Text.caption "Newest at top, last {length(history)} sweeps"
+        Waterfall rows={history} min={ref-100} max={ref} palette="turbo" h=160
+      Card gap=8
+        Row between
+          Text.strong "Strongest signals"
+          Button.ghost "All signals" onTap={go signals}
+        Row
+          Text.caption "#" w=30
+          Text.caption "Frequency" w=120
+          Text.caption "Level" w=90
+          Text.caption "Name" grow
+        each s in sortByDesc(take(signals,5),x=>x.db)
+          Row middle onTap={marker=s;markerOn=true;center=s.f;centerText="{s.f}"}
+            Text "{index+1}" w=30
+            Text "{fixed(s.f,2)} MHz" w=120
+            Text "{s.db} dBm" w=90
+            Text.muted "{s.name}" grow
+  Menu#plotMenu end
+    MenuItem "Save trace as CSV" icon="download" onTap={emit exportTrace; toast "Trace saved"}
+    MenuItem "Copy marker" icon="content_copy" onTap={copy "{marker.f} MHz {marker.db} dBm"; toast "Copied"}
+    MenuItem "Reset view" icon="restart_alt" onTap={center=98.5;span=20;ref=-20;centerText="98.5";spanText="20"}
+
+### Signals
+state sort="level"
+state band="All"
+state signals=[{"f":98.5,"db":-52,"bw":0.2,"name":"FM broadcast"},{"f":101.1,"db":-62,"bw":0.2,"name":"FM broadcast"},{"f":95.8,"db":-66,"bw":0.15,"name":"FM broadcast"},{"f":104.3,"db":-71,"bw":0.1,"name":"Unknown"},{"f":90.2,"db":-77,"bw":0.2,"name":"FM broadcast"},{"f":88.4,"db":-81,"bw":0.2,"name":"FM broadcast"},{"f":107.9,"db":-84,"bw":0.12,"name":"Unknown"}]
+state limit=-60
+state sel=0
+App
+  Sidebar
+    Brand "Bandscape" icon="graphic_eq"
+    NavItem "Analyser" icon="show_chart" onTap={go analyser}
+    NavItem "Signals" icon="list" selected={true}
+    NavItem "Settings" icon="tune" onTap={go settings}
+  Main
+    Nav
+      Heading "Signals" level=1
+      Row gap=8
+        Input "Search" bind=q w=200
+        Button.outline "Filters" icon="filter_list" onTap={open filters}
+    Column pad=24 gap=16
+      Row gap=8
+        SegmentedButton bind=sort items=["level","frequency","name"]
+        Spacer grow
+        Text.muted "{length(signals)} signals found"
+      Card gap=4
+        Row
+          Text.caption "Frequency" w=120
+          Text.caption "Level" w=90
+          Text.caption "Width" w=90
+          Text.caption "Name" grow
+        each s in (sort=="level" ? sortByDesc(signals,x=>x.db) : sort=="frequency" ? sortBy(signals,x=>x.f) : sortBy(signals,x=>x.name))
+          Row middle menu=rowMenu onTap={sel=index; open detail}
+            Text "{fixed(s.f,2)} MHz" w=120
+            Text.danger "{s.db} dBm" w=90 visible={s.db>limit}
+            Text "{s.db} dBm" w=90 visible={s.db<=limit}
+            Text.muted "{s.bw} MHz" w=90
+            Text.muted "{s.name}" grow
+            IconButton "more_vert" tooltip="Actions" onTap={sel=index; open rowMenu}
+  Menu#rowMenu end
+    MenuItem "Tune here" icon="my_location" onTap={emit tune signals[sel].f; go analyser}
+    MenuItem "Place marker" icon="place" onTap={emit marker signals[sel]; go analyser}
+    MenuItem "Copy frequency" icon="content_copy" onTap={copy "{signals[sel].f}"; toast "Copied"}
+  Dialog#detail "{signals[sel].name}" "{signals[sel].f} MHz"
+    Text "Level {signals[sel].db} dBm, width {signals[sel].bw} MHz"
+    Button "Tune to signal" onTap={emit tune signals[sel].f; close; go analyser}
+  Sheet#filters "Filters"
+    Select "Band" items=["All","FM 88-108","Air 118-137","ISM 433"] bind=band
+    Slider "Minimum level (dBm)" bind=minDb min=-120 max=-20
+    Button "Apply" onTap={close}
+
+### Settings
+state limit=-60
+state limitOn=true
+state avg=4
+state rbw="10 kHz"
+state detector="Sample"
+state palette="turbo"
+state units="dBm"
+App
+  Sidebar
+    Brand "Bandscape" icon="graphic_eq"
+    NavItem "Analyser" icon="show_chart" onTap={go analyser}
+    NavItem "Signals" icon="list" onTap={go signals}
+    NavItem "Settings" icon="tune" selected={true}
+  Main
+    Nav
+      Heading "Settings" level=1
+      Button "Done" onTap={go analyser}
+    Column pad=24 gap=16 maxw=720
+      Card gap=12
+        Text.strong "Limit line"
+        Toggle "Turn the trace red when it crosses the limit" bind=limitOn
+        Slider "Limit ({limit} dBm)" bind=limit min=-120 max=0 visible={limitOn}
+        Text.muted "Drag the dashed line on the plot to move it as well."
+      Card gap=12
+        Text.strong "Measurement"
+        Select "Resolution bandwidth" items=["1 kHz","10 kHz","100 kHz","1 MHz"] bind=rbw
+        Select "Detector" items=["Sample","Peak","Average","RMS"] bind=detector
+        Slider "Trace averaging ({avg} sweeps)" bind=avg min=1 max=32
+        SegmentedButton bind=units items=["dBm","dBuV","dBFS"]
+      Card gap=12
+        Text.strong "Waterfall"
+        Select "Palette" items=["turbo","viridis","magma","grey"] bind=palette
+        Slider "History (sweeps)" bind=depth min=30 max=500
+      Button.destructive "Reset all settings" onTap={limit=-60;limitOn=true;avg=4;rbw="10 kHz";detector="Sample";toast "Settings reset"}

@@ -1,0 +1,203 @@
+### Spectrum
+state tab="spectrum"
+state range=[4000,7000]
+state matched=[{"name":"H-alpha","nm":6563},{"name":"Na D","nm":5893}]
+state selected="H-alpha"
+state lines=[{"name":"H-alpha","nm":6563,"depth":0.42},{"name":"H-beta","nm":4861,"depth":0.31},{"name":"Na D","nm":5893,"depth":0.18},{"name":"Mg b","nm":5175,"depth":0.12}]
+App
+  Sidebar
+    Brand "Stellarline" icon="auto_awesome"
+    NavItem "Spectrum" icon="show_chart" selected={tab=="spectrum"} onTap={go spectrum}
+    NavItem "Calibration" icon="tune" selected={tab=="calibration"} onTap={go calibration}
+    NavItem "Exposure" icon="timer" selected={tab=="exposure"} onTap={go exposure}
+    NavItem "Targets" icon="my_location" badge="8" selected={tab=="targets"} onTap={go targets}
+    Spacer grow
+    Text.muted "Mount Alder Observatory"
+    Text.caption "Seeing 1.8 arcsec, moon 12%"
+  Main
+    Nav
+      Column
+        Heading "Vega, HD 172167" level=1
+        Text.caption "Last exposure 14:32 UT, 12 stacked"
+      Row gap=8
+        Button.outline "Reset zoom" icon="zoom_out_map" onTap={range=[4000,7000]}
+        Button.outline "Match lines" icon="manage_search" onTap={open lineMenu}
+        Button "Export FITS" icon="download" onTap={emit exportFits; toast "Spectrum exported"}
+    Column pad=24 gap=16
+      Card gap=12
+        Row between
+          Text.panelTitle "Brightness vs wavelength"
+          Text.mono "{range[0]} to {range[1]} nm"
+        SpectrumChart#plot values={spectrum} min=4000 max=7000 h=320 zoomable brush="box" bind=range matches={matched} onZoom={range=result; toast "Zoomed to {result[0]} to {result[1]} nm"} onLineTap={selected=result.name; open lineInfo}
+        Row gap=8
+          Chip "H-alpha 6563" onTap={selected="H-alpha"; open lineInfo}
+          Chip "Na D 5893" onTap={selected="Na D"; open lineInfo}
+          Text.caption "Drag a box on the graph to zoom into a range"
+      Grid cols=3 gap=16
+        Card gap=8
+          Text.fieldLabel "Matched lines"
+          Text.heading1 "{length(matched)}"
+          Text.muted "of {length(lines)} catalogued"
+        Card gap=8
+          Text.fieldLabel "Signal to noise"
+          Text.heading1 "148"
+          Sparkline values=[62,81,99,118,133,148]
+        Card gap=8
+          Text.fieldLabel "Dispersion"
+          Text.heading1 "0.47 nm/px"
+          Text.muted "Calibrated 21:05"
+      Card gap=8
+        Text.panelTitle "Absorption lines"
+        each l in lines
+          ListTile "{l.name}" subtitle="{l.nm} nm, depth {fixed(l.depth*100,0)}%" onTap={selected=l.name; open lineInfo}
+            Badge.success "matched" visible={any(matched,m=>m.name==l.name)}
+            Button.outline "Match" visible={!any(matched,m=>m.name==l.name)} onTap={matched=append(matched,{"name":l.name,"nm":l.nm}); toast "{l.name} matched"}
+Menu#lineMenu end
+  MenuItem "Match all catalogued" icon="done_all" onTap={matched=map(lines,l=>{"name":l.name,"nm":l.nm}); toast "All lines matched"}
+  MenuItem "Clear matches" icon="clear" onTap={matched=[]}
+Dialog#lineInfo "{selected}" "Absorption line"
+  Text.body "Dark dip found in the stacked spectrum."
+  Text.mono "{find(lines,l=>l.name==selected).nm} nm"
+  Progress {find(lines,l=>l.name==selected).depth}
+  Button.outline "Remove match" onTap={matched=removeWhere(matched,m=>m.name==selected); close}
+  Button "Done" onTap={close}
+
+### Calibration
+state tab="calibration"
+state peaks=[]
+state step=1
+state ref1=0
+state ref2=0
+state lampOn=true
+App
+  Sidebar
+    Brand "Stellarline" icon="auto_awesome"
+    NavItem "Spectrum" icon="show_chart" selected={tab=="spectrum"} onTap={go spectrum}
+    NavItem "Calibration" icon="tune" selected={tab=="calibration"} onTap={go calibration}
+    NavItem "Exposure" icon="timer" selected={tab=="exposure"} onTap={go exposure}
+    NavItem "Targets" icon="my_location" badge="8" selected={tab=="targets"} onTap={go targets}
+    Spacer grow
+    Text.muted "Mount Alder Observatory"
+  Main
+    Nav
+      Heading "Lamp calibration" level=1
+      Row gap=8
+        Toggle "Neon lamp" bind=lampOn
+        Button.outline "Start over" onTap={peaks=[]; step=1; ref1=0; ref2=0}
+    Column pad=24 gap=16
+      Card gap=12
+        Row between
+          Text.panelTitle "Step {step} of 3"
+          Progress {step/3} w=160
+        if step==1
+          Text.body "Tap two bright peaks on the neon lamp spectrum."
+        if step==2
+          Text.body "Give each peak its known wavelength."
+        if step==3
+          Text.success "Calibrated. Dispersion 0.47 nm per pixel."
+        SpectrumChart values={lampSpectrum} h=260 peaks={peaks} onPeakTap={peaks=length(peaks)<2 ? append(peaks,result) : peaks; length(peaks)==2 ? step=2 : step=step}
+      if step>=2
+        Grid cols=2 gap=16
+          Card gap=8
+            Text.fieldLabel "Peak A at pixel {peaks[0].px}"
+            Input "Known wavelength (nm)" "585.249" type=number bind=ref1
+          Card gap=8
+            Text.fieldLabel "Peak B at pixel {peaks[1].px}"
+            Input "Known wavelength (nm)" "640.225" type=number bind=ref2
+        Row end gap=8
+          Button.outline "Use neon table" onTap={ref1=585.249; ref2=640.225}
+          Button "Apply calibration" onTap={ref1>0 && ref2>ref1 ? step=3; emit calibrate {"a":ref1,"b":ref2}; toast "Calibration applied" : toast "Enter both wavelengths"}
+
+### Exposure
+state tab="exposure"
+state exposure=120
+state remaining=120
+state running=false
+state frames=[{"n":1,"noise":9.4},{"n":2,"noise":6.8},{"n":3,"noise":5.5},{"n":4,"noise":4.8},{"n":5,"noise":4.2},{"n":6,"noise":3.9}]
+every 1s when running onTick={remaining=remaining-1; remaining<=0 ? running=false; frames=append(frames,{"n":length(frames)+1,"noise":round(9.4/(length(frames)+1)*1.6,1)}); remaining=exposure; toast "Frame {length(frames)+1} stored" : }
+App
+  Sidebar
+    Brand "Stellarline" icon="auto_awesome"
+    NavItem "Spectrum" icon="show_chart" selected={tab=="spectrum"} onTap={go spectrum}
+    NavItem "Calibration" icon="tune" selected={tab=="calibration"} onTap={go calibration}
+    NavItem "Exposure" icon="timer" selected={tab=="exposure"} onTap={go exposure}
+    NavItem "Targets" icon="my_location" badge="8" selected={tab=="targets"} onTap={go targets}
+    Spacer grow
+    Text.muted "Mount Alder Observatory"
+  Main
+    Nav
+      Heading "Exposure" level=1
+      Badge.info "{length(frames)} frames stacked"
+    Column pad=24 gap=16
+      Row gap=16
+        Card grow gap=12 center
+          Stack center middle
+            Ring {1-remaining/exposure} w=200 h=200
+            Column center
+              Text "{duration(remaining)}" size=40 weight=700
+              Text.caption "remaining"
+          Row gap=8 center
+            Button "Start" icon="play_arrow" hidden={running} onTap={running=true; remaining=exposure}
+            Button.destructive "Stop" icon="stop" visible={running} onTap={running=false; remaining=exposure}
+        Card grow gap=12
+          Text.panelTitle "Exposure time"
+          Slider bind=exposure min=10 max=600 onChange={remaining=result}
+          Text.mono "{exposure} s"
+          Row gap=8
+            ChoiceChip "30 s" selected={exposure==30} onTap={exposure=30; remaining=30}
+            ChoiceChip "120 s" selected={exposure==120} onTap={exposure=120; remaining=120}
+            ChoiceChip "300 s" selected={exposure==300} onTap={exposure=300; remaining=300}
+          Select "Binning" items=["1x1","2x2","4x4"] bind=binning
+          Text.caption "Total on target {duration(length(frames)*exposure)}"
+      Card gap=12
+        Row between
+          Text.panelTitle "Stack of previous exposures"
+          Button.outline "Clear stack" icon="delete" onTap={open clearConfirm}
+        LineChart values={map(frames,f=>f.noise)} labels={map(frames,f=>"#{f.n}")} h=180
+        Text.muted "Noise falls from {first(frames).noise} to {last(frames).noise} counts as frames are averaged"
+        each f in reverse(frames)
+          ListTile "Frame {f.n}" subtitle="Noise {f.noise}"
+            IconButton "close" tooltip="Drop from stack" onTap={frames=removeWhere(frames,x=>x.n==f.n)}
+Dialog#clearConfirm "Clear the stack?" "All stored frames will be removed."
+  Row end gap=8
+    Button.outline "Cancel" onTap={close}
+    Button.destructive "Clear" onTap={frames=[]; close; toast "Stack cleared"}
+
+### Targets
+state tab="targets"
+state filter="All"
+state targets=[{"name":"Vega","type":"A0V star","alt":78,"set":"04:12"},{"name":"Deneb","type":"A2Ia star","alt":71,"set":"05:40"},{"name":"Altair","type":"A7V star","alt":54,"set":"02:55"},{"name":"M57 Ring Nebula","type":"Planetary nebula","alt":69,"set":"03:30"},{"name":"Albireo","type":"Double star","alt":62,"set":"03:48"},{"name":"Capella","type":"G8III star","alt":22,"set":"never"},{"name":"Arcturus","type":"K1.5III star","alt":14,"set":"23:50"}]
+state sel=""
+App
+  Sidebar
+    Brand "Stellarline" icon="auto_awesome"
+    NavItem "Spectrum" icon="show_chart" selected={tab=="spectrum"} onTap={go spectrum}
+    NavItem "Calibration" icon="tune" selected={tab=="calibration"} onTap={go calibration}
+    NavItem "Exposure" icon="timer" selected={tab=="exposure"} onTap={go exposure}
+    NavItem "Targets" icon="my_location" badge="8" selected={tab=="targets"} onTap={go targets}
+    Spacer grow
+    Text.muted "Mount Alder Observatory"
+  Main
+    Nav
+      Column
+        Heading "Tonight's targets" level=1
+        Text.caption "Ordered by height in the sky, {formatDate(today(),"MMM d")}"
+      Input "Search" bind=q w=220
+    Column pad=24 gap=16
+      Row gap=8
+        ChoiceChip "All" selected={filter=="All"} onTap={filter="All"}
+        ChoiceChip "Stars" selected={filter=="Stars"} onTap={filter="Stars"}
+        ChoiceChip "Nebulae" selected={filter=="Nebulae"} onTap={filter="Nebulae"}
+      Card gap=8
+        each t in sortByDesc(filter("All"==filter ? targets : filter(targets,x=>contains(x.type,filter=="Stars" ? "star" : "nebula")),x=>contains(lower(x.name),lower(coalesce(q,"")))),x=>x.alt)
+          ListTile "{t.name}" subtitle="{t.type}, sets {t.set}" onTap={sel=t.name; open targetSheet} menu=targetMenu
+            Text.strong "{t.alt} deg"
+            Progress {t.alt/90} w=100
+            IconButton "more_vert" tooltip="More" onTap={sel=t.name; open targetMenu}
+Menu#targetMenu end
+  MenuItem "Slew telescope" icon="gps_fixed" onTap={emit slew sel; toast "Slewing to {sel}"}
+  MenuItem "Remove from list" icon="remove_circle" onTap={targets=removeWhere(targets,t=>t.name==sel)}
+Sheet#targetSheet "{sel}"
+  Text.body "Altitude {find(targets,t=>t.name==sel).alt} degrees, sets {find(targets,t=>t.name==sel).set}."
+  Button "Slew and expose" icon="timer" onTap={emit slew sel; close; go exposure}
+  Button.outline "Close" onTap={close}

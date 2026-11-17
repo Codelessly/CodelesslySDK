@@ -1,0 +1,170 @@
+### Drum
+state stations=["ANMO","COR","HRV","KONO"]
+state station="ANMO"
+state day="2026-11-16"
+state gain=4
+state picks=[{"id":"p1","station":"ANMO","row":6,"p":"06:14:22","strong":"06:15:10","mag":5.8}]
+state sel=null
+state aligned=true
+state filterBand="all"
+state events=[{"id":"e1","place":"Off coast of Chiapas, Mexico","mag":5.8,"depth":38,"time":"06:11:47","lat":15.2,"lon":-93.6},{"id":"e2","place":"Kermadec Islands, New Zealand","mag":6.3,"depth":112,"time":"13:52:09","lat":-30.1,"lon":-178.4},{"id":"e3","place":"Central Alaska","mag":4.4,"depth":9,"time":"19:03:31","lat":63.4,"lon":-150.2}]
+App
+  Sidebar
+    Brand "Drumhead" icon="graphic_eq"
+    NavItem "Drum" icon="show_chart" selected={true}
+    NavItem "Map" icon="public" onTap={go map}
+    NavItem "Events" icon="list" badge="{length(events)}" onTap={go events}
+    Spacer grow
+    Text.muted "Station network: 4 online"
+  Main
+    Nav
+      Heading "Daily drum" level=1
+      Row gap=8
+        DatePicker bind=day
+        Select bind=filterBand items=["all","0.5-2 Hz","2-8 Hz","8-20 Hz"]
+        IconButton "download" tooltip="Export the chart" onTap={emit exportChart day}
+    Column pad=24 gap=16
+      Tabs bind=station items=stations
+      Row gap=16 top
+        Column grow gap=12
+          Row between
+            Text.muted "{station} - BHZ - {day} (UTC), one row per hour"
+            Row gap=8
+              Text.caption "Gain"
+              Slider bind=gain min=1 max=16 w=160
+              Toggle "Align stations" bind=aligned
+          Card
+            Seismogram station={station} date={day} rows=24 rowHeight=44 gain={gain} band={filterBand} picks={filter(picks,p=>p.station==station)} h=620 scroll onTapBurst={sel=result; open pick}
+        Pane w=320 pad=16 gap=12
+          Text.panelTitle "Picks"
+          if isEmpty(filter(picks,p=>p.station==station))
+            Text.muted "No picks on {station} yet. Tap a burst on the drum to mark it."
+          each p in filter(picks,p=>p.station==station)
+            Card gap=6
+              Row between
+                Text.strong "Hour {p.row}"
+                Badge.warning "M {p.mag}"
+              Text.small "First arrival {p.p}"
+              Text.small "Strong part {p.strong}"
+              Row gap=8
+                Button.outline "Open" onTap={sel=p; open pick}
+                Button.ghost "Remove" onTap={picks=removeWhere(picks,q=>q.id==p.id); toast "Pick removed"}
+          Divider
+          Text.panelTitle "Quiet hours"
+          Text.muted "{24 - length(filter(picks,p=>p.station==station))} of 24 rows show background noise only."
+  Sheet#pick "Mark the burst"
+    if sel != null
+      Column gap=12
+        Seismogram.zoom station={station} date={day} row={sel.row} h=160 span=600 cursors={[{"name":"P","at":sel.p},{"name":"Strong","at":sel.strong}]} onMoveCursor={sel=with(sel,lower(result.name),result.at)}
+        Row gap=12
+          Input "First arrival (P)" bind=sel.p
+          Input "Strong part starts" bind=sel.strong
+        Row gap=12 middle
+          Text.strong "Magnitude"
+          Slider bind=sel.mag min=2 max=9 w=240
+          Text.heading "M {fixed(sel.mag,1)}"
+        Row gap=8 end
+          Button.outline "Cancel" onTap={close}
+          Button "Save pick" onTap={picks=append(removeWhere(picks,q=>q.id==sel.id),with(sel,"station",station)); toast "Pick saved on {station}"; close}
+
+### Map
+state stations=[{"code":"ANMO","name":"Albuquerque","lat":34.9,"lon":-106.5,"dist":1820},{"code":"COR","name":"Corvallis","lat":44.6,"lon":-123.3,"dist":3310},{"code":"HRV","name":"Harvard","lat":42.5,"lon":-71.6,"dist":3590}]
+state active="e1"
+state showRings=true
+state showStations=true
+state layer="terrain"
+state events=[{"id":"e1","place":"Off coast of Chiapas, Mexico","mag":5.8,"depth":38,"time":"06:11:47","lat":15.2,"lon":-93.6},{"id":"e2","place":"Kermadec Islands, New Zealand","mag":6.3,"depth":112,"time":"13:52:09","lat":-30.1,"lon":-178.4}]
+App
+  Sidebar
+    Brand "Drumhead" icon="graphic_eq"
+    NavItem "Drum" icon="show_chart" onTap={go drum}
+    NavItem "Map" icon="public" selected={true}
+    NavItem "Events" icon="list" badge="2" onTap={go events}
+    Spacer grow
+    Text.muted "Station network: 3 online"
+  Main
+    Nav
+      Heading "Locate the epicentre" level=1
+      Row gap=8
+        Select bind=active items={map(events,e=>e.id)}
+        SegmentedButton bind=layer items=["terrain","dark","plain"]
+    Column pad=24 gap=16
+      Row gap=16 top
+        Card grow
+          Map layer={layer} center={[find(events,e=>e.id==active).lat,find(events,e=>e.id==active).lon]} zoom=4 h=520
+            each s in stations
+              if showStations
+                MapMarker lat={s.lat} lon={s.lon} label="{s.code}" icon="sensors" onTap={emit pickStation s.code}
+              if showRings
+                MapCircle lat={s.lat} lon={s.lon} radius={s.dist} unit="km" stroke=#FF3366CC fill=#143366CC
+            MapMarker lat={find(events,e=>e.id==active).lat} lon={find(events,e=>e.id==active).lon} label="Epicentre" icon="my_location" color=#FFD32F2F animate=pulse
+        Pane w=320 pad=16 gap=12
+          Text.panelTitle "Distance from three stations"
+          Text.muted "Each circle is a station's distance from the S minus P time. The three meet at the epicentre."
+          each s in stations
+            ListTile "{s.code} - {s.name}" subtitle="{s.dist} km" leading="sensors"
+          Divider
+          Toggle "Show distance circles" bind=showRings
+          Toggle "Show stations" bind=showStations
+          Card gap=4
+            Text.strong "{find(events,e=>e.id==active).place}"
+            Text.small "M {find(events,e=>e.id==active).mag} - depth {find(events,e=>e.id==active).depth} km"
+            Text.small "{find(events,e=>e.id==active).lat}, {find(events,e=>e.id==active).lon}"
+          Button "Back to the drum" onTap={go drum}
+
+### Events
+state q=""
+state minMag=0
+state sortKey="time"
+state sel=null
+state events=[{"id":"e1","place":"Off coast of Chiapas, Mexico","mag":5.8,"depth":38,"time":"06:11:47","lat":15.2,"lon":-93.6},{"id":"e2","place":"Kermadec Islands, New Zealand","mag":6.3,"depth":112,"time":"13:52:09","lat":-30.1,"lon":-178.4},{"id":"e3","place":"Central Alaska","mag":4.4,"depth":9,"time":"19:03:31","lat":63.4,"lon":-150.2},{"id":"e4","place":"Hokkaido, Japan","mag":4.9,"depth":54,"time":"22:40:05","lat":42.9,"lon":144.1}]
+App
+  Sidebar
+    Brand "Drumhead" icon="graphic_eq"
+    NavItem "Drum" icon="show_chart" onTap={go drum}
+    NavItem "Map" icon="public" onTap={go map}
+    NavItem "Events" icon="list" selected={true}
+    Spacer grow
+    Text.muted "Station network: 4 online"
+  Main
+    Nav
+      Heading "Events" level=1
+      Row gap=8
+        Input "Search" bind=q w=220
+        Select bind=sortKey items=["time","mag","depth"]
+    Column pad=24 gap=16
+      Row gap=12 middle
+        Text.fieldLabel "Minimum magnitude"
+        Slider bind=minMag min=0 max=8 w=220
+        Text.strong "{fixed(minMag,1)}"
+      Card gap=0
+        Row pad=8 border-bottom=#FFDDDDDD
+          Text.fieldLabel "Time" w=90
+          Text.fieldLabel "Mag" w=70
+          Text.fieldLabel "Depth" w=90
+          Text.fieldLabel "Place" grow
+        each e in sortBy(filter(events,x=>x.mag>=minMag && contains(lower(x.place),lower(q))),x=>sortKey=="time"?x.time:(sortKey=="mag"?0-x.mag:0-x.depth))
+          Row pad=8 middle onTap={sel=e; open detail} menu=rowMenu
+            Text "{e.time}" w=90
+            Badge.warning "{e.mag}" w=70
+            Text "{e.depth} km" w=90
+            Text "{e.place}" grow
+            IconButton "more_vert" tooltip="More" onTap={sel=e; open rowMenu}
+      if isEmpty(filter(events,x=>x.mag>=minMag && contains(lower(x.place),lower(q))))
+        Text.muted "No events match."
+  Sheet#detail "Event"
+    if sel != null
+      Column gap=12
+        Heading "{sel.place}" level=3
+        Row gap=12
+          Badge.warning "M {sel.mag}"
+          Text "Depth {sel.depth} km"
+          Text "Origin {sel.time} UTC"
+        Text.muted "{sel.lat}, {sel.lon}"
+        Row gap=8 end
+          Button.outline "Show on map" onTap={go map; close}
+          Button "Open on the drum" onTap={go drum; close}
+  Menu#rowMenu end
+    MenuItem "Show on map" icon="public" onTap={go map}
+    MenuItem "Copy coordinates" icon="content_copy" onTap={copy "{sel.lat}, {sel.lon}"; toast "Copied"}
+    MenuItem "Delete event" icon="delete" onTap={events=removeWhere(events,x=>x.id==sel.id); toast "Event removed"}

@@ -1,0 +1,3 @@
+App: Gustbook, a wind tunnel run sheet. A table of planned runs (speed, model angle, flap setting) with a done tick, the current run highlighted and the next waiting; live force readings as three needle gauges; a polar plot gaining a point after each run; a model angle entered with a step control and a repeat run flagged; a tunnel speed ramp drawn as a rising line; notes per run; a pause for a smoke test with a camera still.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

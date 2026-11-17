@@ -1,0 +1,190 @@
+### Route
+project passengers=0
+project sales=[]
+project incidents=[]
+state stops=[{"name":"Harbour Street","time":"08:12"},{"name":"Market Square","time":"08:19"},{"name":"St Anne's Hospital","time":"08:26"},{"name":"Kingsway Interchange","time":"08:34"},{"name":"University Gate","time":"08:41"}]
+state at=0
+state late=-3
+state vehicle="BX-4471"
+state announce="Next stop"
+App
+  Sidebar
+    Brand "Cabin" icon="directions_bus"
+    NavItem "Route" icon="route" selected={true}
+    NavItem "Tickets" icon="confirmation_number" onTap={go tickets}
+    NavItem "Incidents" icon="report" badge="{length(incidents)}" onTap={go incidents}
+    NavItem "End of shift" icon="flag" onTap={go end_of_shift}
+    Spacer grow
+    Text.muted "Driver: Imran Qureshi"
+    Text.caption "Vehicle {vehicle} / Route 42"
+  Main
+    Nav
+      Heading "Route 42 to University Gate" level=1
+      Row gap=8
+        Button.outline "Announce" icon="campaign" onTap={open announcePanel}
+        Button.outline "Handover" icon="swap_horiz" onTap={open handover}
+        Button.destructive "Incident" icon="warning" onTap={go incidents}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Text.caption "NEXT STOP"
+        Row between
+          Text "{stops[at].name}" size=48 weight=700
+          Column end
+            Text "{late > 0 ? '+' : ''}{late} min" size=48 weight=700 color={late > 2 ? #FFE08A00 : late > 0 ? #FFE08A00 : #FF1B7F3B}
+            Text.muted "{late > 0 ? 'late' : late < 0 ? 'early' : 'on time'} against {stops[at].time}"
+        Row gap=8
+          Button.outline "Early" icon="remove" onTap={late=late-1}
+          Button.outline "Late" icon="add" onTap={late=late+1}
+          Spacer grow
+          Button "Arrived, next stop" icon="arrow_forward" onTap={at < length(stops)-1 ? {at=at+1; late=late} : toast "Last stop reached"}
+      Row scroll gap=8
+        each s in stops
+          Chip "{s.time} {s.name}" selected={index==at} onTap={at=index}
+      Grid cols=2 gap=16
+        Card gap=12
+          Text.strong "Passengers on board"
+          Row gap=16 middle
+            IconButton "remove" tooltip="Alight" onTap={passengers=max(0,passengers-1)}
+            Text "{passengers}" size=64 weight=700
+            IconButton "add" tooltip="Board" onTap={passengers=min(52,passengers+1)}
+          Progress {passengers/52}
+          Text.muted "{52-passengers} seats free of 52"
+        Card gap=12
+          Text.strong "Break timer"
+          Text "{duration(breakLeft)}" size=48 weight=700 color={breakLeft < 300 ? #FFE08A00 : #FF1B7F3B}
+          Text.muted "Statutory 45 min break after 4.5 hours of driving"
+          Row gap=8
+            Button "Start break" onTap={breakRunning=true}
+            Button.outline "Stop" onTap={breakRunning=false}
+          Progress {1-breakLeft/2700}
+  Sheet#announcePanel "Announcement to speakers"
+    Select "Preset" bind=announce items=["Next stop","Please move down the bus","Mind the step","Service delayed","Bus terminates here"]
+    Text.muted "Plays through the cabin speakers once."
+    Button "Send to speakers" icon="volume_up" onTap={emit announce announce; toast "Sent: {announce}"; close}
+  Dialog#handover "Vehicle handover" "Confirm the vehicle you are taking over"
+    Input "Vehicle number" "BX-4471" bind=vehicle
+    Button "Confirm handover" onTap={vehicle!="" ? {emit handover vehicle; toast "Vehicle {vehicle} taken over"; close} : toast "Enter a vehicle number"}
+state breakLeft=2700
+state breakRunning=false
+every 1s when breakRunning && breakLeft > 0 onTick={breakLeft=breakLeft-1}
+
+### Tickets
+project passengers=0
+project sales=[]
+state fares=[{"name":"Single","price":2.5},{"name":"Day pass","price":5.0},{"name":"Child","price":1.25},{"name":"Concession","price":1.5}]
+state fare=0
+state qty=1
+state tendered=5
+App
+  Sidebar
+    Brand "Cabin" icon="directions_bus"
+    NavItem "Route" icon="route" onTap={go route}
+    NavItem "Tickets" icon="confirmation_number" selected={true}
+    NavItem "Incidents" icon="report" onTap={go incidents}
+    NavItem "End of shift" icon="flag" onTap={go end_of_shift}
+  Main
+    Nav
+      Heading "Ticket machine" level=1
+      Text.muted "{length(sales)} sold this shift"
+    Column pad=24 gap=16 scroll
+      Grid cols=4 gap=12
+        each f in fares
+          ChoiceChip "{f.name}  {money(f.price,'GBP ',2)}" selected={fare==index} onTap={fare=index}
+      Card gap=12
+        Row between
+          Text.strong "Tickets"
+          Row gap=8 middle
+            IconButton "remove" tooltip="Fewer" onTap={qty=max(1,qty-1)}
+            Text.strong "{qty}"
+            IconButton "add" tooltip="More" onTap={qty=qty+1}
+        Row between
+          Text.muted "Fare due"
+          Text "{money(fares[fare].price*qty,'GBP ',2)}" size=40 weight=700
+        Input "Cash tendered" bind=tendered type=number
+        Row between
+          Text.muted "Change due"
+          Text "{tendered >= fares[fare].price*qty ? money(tendered-fares[fare].price*qty,'GBP ',2) : 'Short by ' + money(fares[fare].price*qty-tendered,'GBP ',2)}" size=32 weight=700 color={tendered >= fares[fare].price*qty ? #FF1B7F3B : #FFC62828}
+        Button "Issue ticket" icon="print" onTap={tendered >= fares[fare].price*qty ? {sales=append(sales,{"fare":fares[fare].name,"qty":qty,"total":fares[fare].price*qty}); passengers=passengers+qty; emit ticketIssued fares[fare].name; toast "Ticket issued"; qty=1} : toast "Cash tendered is less than the fare"}
+      Card gap=8
+        Text.strong "Recent sales"
+        if isEmpty(sales)
+          Text.muted "No tickets sold yet."
+        each s in reverse(take(reverse(sales),5))
+          Row between
+            Text "{s.qty} x {s.fare}"
+            Text.strong "{money(s.total,'GBP ',2)}"
+
+### Incidents
+project incidents=[]
+state kind="Passenger unwell"
+state note=""
+state defect=""
+state sev="Minor"
+App
+  Sidebar
+    Brand "Cabin" icon="directions_bus"
+    NavItem "Route" icon="route" onTap={go route}
+    NavItem "Tickets" icon="confirmation_number" onTap={go tickets}
+    NavItem "Incidents" icon="report" selected={true} badge="{length(incidents)}"
+    NavItem "End of shift" icon="flag" onTap={go end_of_shift}
+  Main
+    Nav
+      Heading "Incident key" level=1
+      Button.outline "Report a defect" icon="build" onTap={open defectDialog}
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=12
+        Button.outline "Passenger unwell" icon="medical_services" onTap={kind="Passenger unwell"; open logIncident}
+        Button.outline "Collision or near miss" icon="car_crash" onTap={kind="Collision or near miss"; open logIncident}
+        Button.outline "Aggressive passenger" icon="person_alert" onTap={kind="Aggressive passenger"; open logIncident}
+        Button.outline "Road blocked" icon="block" onTap={kind="Road blocked"; open logIncident}
+        Button.outline "Lost property" icon="luggage" onTap={kind="Lost property"; open logIncident}
+        Button.destructive "Emergency call" icon="emergency" onTap={emit emergency; toast "Control room alerted"}
+      Card gap=8
+        Text.strong "Logged this shift"
+        if isEmpty(incidents)
+          Text.muted "Nothing logged."
+        each i in incidents
+          ListTile "{i.kind}" "{i.note}" trailing="{i.time}"
+  Dialog#logIncident "{kind}" "Add a short note for the control room"
+    Input "Note" bind=note multiline
+    Button "Log incident" onTap={incidents=append(incidents,{"kind":kind,"note":coalesce(note,"No note"),"time":formatDate(today(),"HH:mm")}); emit incident kind; note=""; toast "Logged"; close}
+  Dialog#defectDialog "Defect report" "Vehicle {vehicle}"
+    Select "Severity" bind=sev items=["Minor","Needs fixing today","Unsafe, withdraw vehicle"]
+    Input "What is wrong" "Offside rear door sensor sticks" bind=defect multiline
+    Button.destructive "Submit defect" onTap={defect!="" ? {emit defect {"severity":sev,"text":defect}; defect=""; toast "Defect sent to the depot"; close} : toast "Describe the defect first"}
+
+### End of shift
+project passengers=0
+project sales=[]
+project incidents=[]
+Page
+  Nav
+    Brand "Cabin" icon="directions_bus"
+    Row gap=4
+      Link "Route" onTap={go route}
+      Link "Tickets" onTap={go tickets}
+      Link "Incidents" onTap={go incidents}
+  Section
+    Column gap=16
+      Heading "End of shift totals" level=1
+      Text.muted "Vehicle BX-4471, Route 42, Imran Qureshi"
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.caption "PASSENGERS"
+          Text "{passengers}" size=40 weight=700
+        Card gap=4
+          Text.caption "TICKETS SOLD"
+          Text "{sum(sales,s=>s.qty)}" size=40 weight=700
+        Card gap=4
+          Text.caption "TAKINGS"
+          Text "{money(sum(sales,s=>s.total),'GBP ',2)}" size=40 weight=700
+        Card gap=4
+          Text.caption "INCIDENTS"
+          Text "{length(incidents)}" size=40 weight=700
+  Section tint
+    Column gap=12
+      Heading "Takings by fare" level=3
+      Donut values=[sum(filter(sales,s=>s.fare=="Single"),s=>s.total),sum(filter(sales,s=>s.fare=="Day pass"),s=>s.total),sum(filter(sales,s=>s.fare=="Child"),s=>s.total),sum(filter(sales,s=>s.fare=="Concession"),s=>s.total)] labels=["Single","Day pass","Child","Concession"]
+      Row gap=12
+        Button "Hand in cash and close shift" icon="done_all" onTap={emit closeShift {"passengers":passengers,"takings":sum(sales,s=>s.total)}; toast "Shift closed"; go route}
+        Button.outline "Print summary" icon="print" onTap={emit printSummary}

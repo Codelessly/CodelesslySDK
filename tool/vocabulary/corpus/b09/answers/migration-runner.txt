@@ -1,0 +1,250 @@
+### Migrations
+state tab="all"
+state env="staging"
+state q=""
+state sel="0043"
+state migrations=[{"id":"0038","name":"create_invoices_table","status":"applied","at":"2026-11-02 09:14"},{"id":"0039","name":"add_index_orders_customer","status":"applied","at":"2026-11-02 09:15"},{"id":"0040","name":"backfill_user_timezones","status":"rolled back","at":"2026-11-05 16:40"},{"id":"0041","name":"drop_legacy_sessions","status":"applied","at":"2026-11-09 11:02"},{"id":"0042","name":"split_address_columns","status":"failed","at":"2026-11-12 14:27"},{"id":"0043","name":"add_not_null_to_orders_status","status":"pending","at":""},{"id":"0044","name":"partition_events_by_month","status":"pending","at":""}]
+App
+  Sidebar
+    Brand "Shiftlog" icon="storage"
+    NavItem "Migrations" icon="list" badge="2" selected={true}
+    NavItem "Plan" icon="rule" onTap={go plan}
+    NavItem "Run" icon="play_circle" onTap={go run}
+    NavItem "Schema diff" icon="difference" onTap={go schema-diff}
+    Spacer grow
+    Select bind=env items=["local","staging","production"]
+    Text.muted "Connected to {env}"
+  Main
+    Nav
+      Heading "Migrations" level=1
+      Row gap=8
+        Input "Search" "name or id" bind=q w=220
+        Button.outline "Refresh" onTap={toast "Checked {env} for new migrations"}
+        Button "Plan next" onTap={sel="0043"; go plan}
+    Column pad=24 gap=16
+      Row gap=8
+        FilterChip "All" selected={tab=="all"} onTap={tab="all"}
+        FilterChip "Applied" selected={tab=="applied"} onTap={tab="applied"}
+        FilterChip "Pending" selected={tab=="pending"} onTap={tab="pending"}
+        FilterChip "Failed" selected={tab=="failed"} onTap={tab="failed"}
+        FilterChip "Rolled back" selected={tab=="rolled back"} onTap={tab="rolled back"}
+      Card gap=0 pad=0
+        Row pad=12 border-bottom=#FFE0E0E0
+          Text.caption "ID" w=60
+          Text.caption "Migration" grow
+          Text.caption "Status" w=110
+          Text.caption "Timestamp" w=140
+          Text.caption "" w=40
+        each m in migrations
+          if (tab=="all" || m.status==tab) && (q=="" || contains(m.name,lower(q)) || contains(m.id,q))
+            Row pad=12 middle border-bottom=#FFEEEEEE menu=rowMenu onTap={sel=m.id}
+              Text.mono "{m.id}" w=60
+              Text.strong "{m.name}" grow
+              if m.status=="applied"
+                Badge.success "applied" w=110
+              if m.status=="pending"
+                Badge.neutral "pending" w=110
+              if m.status=="failed"
+                Badge.error "failed" w=110
+              if m.status=="rolled back"
+                Badge.warning "rolled back" w=110
+              Text.muted "{m.at==\"\" ? \"not run\" : m.at}" w=140
+              IconButton "more_vert" tooltip="Actions" onTap={sel=m.id; open rowMenu}
+      if count(migrations,m=>m.status=="failed")>0
+        Card gap=8 fill=#FFFDECEA
+          Row gap=8 middle
+            Icon "error"
+            Text.strong "0042 split_address_columns failed on {env}"
+          Text.muted "Roll it back before applying 0043. Nothing after a failed migration can run."
+          Row gap=8
+            Button.destructive "Roll back 0042" onTap={migrations=updateWhere(migrations,m=>m.id=="0042",m=>with(m,"status","rolled back")); toast "0042 rolled back"}
+            Button.outline "View error" onTap={go run}
+  Menu#rowMenu end
+    MenuItem "Plan this migration" icon="rule" onTap={go plan}
+    MenuItem "Dry run" icon="science" onTap={go plan}
+    MenuItem "Copy id" icon="content_copy" onTap={copy sel; toast "Copied {sel}"}
+    MenuItem "Roll back" icon="undo" onTap={migrations=updateWhere(migrations,m=>m.id==sel && m.status=="applied",m=>with(m,"status","rolled back")); toast "Rolled back {sel}"}
+
+### Plan
+state env="staging"
+state sel="0043"
+state dry=false
+state estimating=false
+state estimate=0
+state acked=false
+state typed=""
+state statements=[{"sql":"ALTER TABLE orders ADD CONSTRAINT orders_status_not_null CHECK (status IS NOT NULL) NOT VALID;","risk":"safe","note":"Metadata only"},{"sql":"UPDATE orders SET status = 'open' WHERE status IS NULL;","risk":"rows","note":"Touches about 41,200 rows"},{"sql":"ALTER TABLE orders ALTER COLUMN status SET NOT NULL;","risk":"lock","note":"ACCESS EXCLUSIVE lock on orders while it scans"},{"sql":"ALTER TABLE orders VALIDATE CONSTRAINT orders_status_not_null;","risk":"safe","note":"Row-level share lock only"}]
+every 1s when estimating onTick={estimate=min(2480000,estimate+620000); estimating=estimate<2480000; dry=estimate>=2480000}
+App
+  Sidebar
+    Brand "Shiftlog" icon="storage"
+    NavItem "Migrations" icon="list" onTap={go migrations}
+    NavItem "Plan" icon="rule" selected={true}
+    NavItem "Run" icon="play_circle" onTap={go run}
+    NavItem "Schema diff" icon="difference" onTap={go schema-diff}
+    Spacer grow
+    Text.muted "Target: {env}"
+  Main
+    Nav
+      Heading "Plan for {sel}" level=1
+      Row gap=8
+        Select bind=env items=["local","staging","production"]
+        Button.outline "Dry run" onTap={estimate=0; dry=false; estimating=true}
+        Button "Run migration" onTap={env=="production" ? open prodlock : go run}
+    Column pad=24 gap=16
+      Card gap=4
+        Row between
+          Text.strong "0043 add_not_null_to_orders_status"
+          Badge.neutral "pending"
+        Text.muted "4 statements. One takes a lock that blocks reads and writes on orders."
+      if count(statements,s=>s.risk=="lock")>0
+        Card gap=8 fill=#FFFFF4E5
+          Row gap=8 middle
+            Icon "lock"
+            Text.strong "Locks orders for an estimated 6 to 9 seconds"
+          Text.muted "Run it off peak, or split the SET NOT NULL step into its own migration."
+      Text.heading3 "Statements"
+      each s in statements
+        Card gap=8
+          Row between middle
+            Text.caption "Step {index+1}"
+            if s.risk=="lock"
+              Badge.error "locks table"
+            if s.risk=="rows"
+              Badge.warning "rewrites rows"
+            if s.risk=="safe"
+              Badge.success "safe"
+          Text.mono "{s.sql}"
+          Text.muted "{s.note}"
+      Card gap=12
+        Row between middle
+          Text.heading3 "Dry run"
+          if dry
+            Badge.success "estimate ready"
+        if estimating
+          Progress {estimate/2480000}
+          Text.muted "Counting rows in orders, {estimate} of about 2,480,000"
+        if dry
+          Grid cols=3 gap=12
+            Card gap=4
+              Text.caption "Rows estimated"
+              Text "{estimate}" size=28 weight=700
+            Card gap=4
+              Text.caption "Rows changed"
+              Text "41,200" size=28 weight=700
+            Card gap=4
+              Text.caption "Estimated time"
+              Text "38 s" size=28 weight=700
+        if !dry && !estimating
+          Text.muted "Dry run reads the plan against {env} and changes nothing."
+  Dialog#prodlock "Unlock production" "Production is locked. Type its name to continue."
+    Text.muted "You are about to run 0043 on production. It locks orders."
+    Input "Type production to confirm" bind=typed
+    Checkbox "I have checked the dry run and a recent backup exists" bind=acked
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={typed=""; acked=false; close}
+      Button.destructive "Unlock and run" onTap={typed=="production" && acked ? {close; go run} : toast "Type production and tick the box"}
+
+### Run
+state env="staging"
+state running=false
+state done=0
+state total=41200
+state status="idle"
+state errorText=""
+state log=[]
+every 500 when running onTick={done=min(total,done+3400); log=append(log,"batch committed, " + done + " rows"); status=done>=total ? "applied" : (done>=27000 && env=="staging" ? "failed" : "running"); running=status=="running"; errorText=status=="failed" ? "ERROR 23502: column \"status\" of relation \"orders\" contains null values (batch 9, row id 27114)" : ""}
+App
+  Sidebar
+    Brand "Shiftlog" icon="storage"
+    NavItem "Migrations" icon="list" onTap={go migrations}
+    NavItem "Plan" icon="rule" onTap={go plan}
+    NavItem "Run" icon="play_circle" selected={true}
+    NavItem "Schema diff" icon="difference" onTap={go schema-diff}
+  Main
+    Nav
+      Heading "Run 0043" level=1
+      Row gap=8
+        Button "Start" hide=phone onTap={done=0; log=[]; errorText=""; status="running"; running=true}
+        Button.outline "Pause" onTap={running=false; status="paused"}
+        Button.destructive "Cancel" onTap={running=false; status="idle"; done=0}
+    Column pad=24 gap=16
+      Card gap=12
+        Row between middle
+          Text.heading3 "add_not_null_to_orders_status on {env}"
+          if status=="running"
+            Badge.info "running"
+          if status=="applied"
+            Badge.success "applied"
+          if status=="failed"
+            Badge.error "failed"
+          if status=="paused"
+            Badge.warning "paused"
+          if status=="idle"
+            Badge.neutral "ready"
+        Progress {done/total}
+        Row between
+          Text.strong "{done} of {total} rows"
+          Text.muted "{round(done/total*100,0)}%"
+      if status=="failed"
+        Card gap=12 fill=#FFFDECEA
+          Row gap=8 middle
+            Icon "error"
+            Text.strong "Migration failed at step 2"
+          Text.mono "{errorText}"
+          Text.muted "The transaction for batch 9 was rolled back. Batches 1 to 8 are committed."
+          Row gap=8
+            Button.destructive "Roll back to 0042" onTap={done=0; status="rolled back"; log=append(log,"rollback: restored 0043 changes"); toast "Rolled back 0043"}
+            Button.outline "Retry from batch 9" onTap={status="running"; running=true; errorText=""}
+            Button.ghost "Copy error" onTap={copy errorText; toast "Copied"}
+      if status=="rolled back"
+        Card gap=8 fill=#FFFFF4E5
+          Text.strong "Rolled back"
+          Text.muted "orders is back to its state before 0043."
+      Card gap=8
+        Text.heading3 "Log"
+        if isEmpty(log)
+          Text.muted "Nothing yet."
+        each line in log
+          Text.mono "{line}"
+
+### Schema diff
+state env="staging"
+state view="split"
+state changes=[{"table":"orders","col":"status","before":"text NULL","after":"text NOT NULL DEFAULT 'open'","kind":"changed"},{"table":"orders","col":"legacy_ref","before":"varchar(40)","after":"","kind":"removed"},{"table":"addresses","col":"street2","before":"","after":"text","kind":"added"},{"table":"addresses","col":"postcode","before":"","after":"varchar(12)","kind":"added"}]
+App
+  Sidebar
+    Brand "Shiftlog" icon="storage"
+    NavItem "Migrations" icon="list" onTap={go migrations}
+    NavItem "Plan" icon="rule" onTap={go plan}
+    NavItem "Run" icon="play_circle" onTap={go run}
+    NavItem "Schema diff" icon="difference" selected={true}
+  Main
+    Nav
+      Heading "Schema diff" level=1
+      Row gap=8
+        SegmentedButton bind=view items=["split","unified"]
+        Button.outline "Copy as SQL" onTap={copy "ALTER TABLE orders ALTER COLUMN status SET NOT NULL"; toast "Copied"}
+    Column pad=24 gap=16
+      Row gap=12
+        Badge.success "{count(changes,c=>c.kind==\"added\")} added"
+        Badge.warning "{count(changes,c=>c.kind==\"changed\")} changed"
+        Badge.error "{count(changes,c=>c.kind==\"removed\")} removed"
+        Text.muted "Before 0043 and after, on {env}"
+      each c in changes
+        Card gap=8
+          Row between middle
+            Text.mono "{c.table}.{c.col}"
+            if c.kind=="added"
+              Badge.success "added"
+            if c.kind=="changed"
+              Badge.warning "changed"
+            if c.kind=="removed"
+              Badge.error "removed"
+          Grid cols=2 gap=12
+            Box pad=8 radius=6 fill=#FFFDECEA
+              Text.caption "Before"
+              Text.mono "{c.before==\"\" ? \"(none)\" : c.before}"
+            Box pad=8 radius=6 fill=#FFE8F5E9
+              Text.caption "After"
+              Text.mono "{c.after==\"\" ? \"(none)\" : c.after}"

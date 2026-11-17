@@ -1,0 +1,151 @@
+### Scrapbook
+state tab="pages"
+state spread=0
+state editingTitle=false
+state title="Juniper's First Year"
+state recording=false
+state seconds=0
+state notes=[{"id":1,"page":1,"label":"Giggle at the dog","length":14}]
+state photos=[{"id":1,"page":1,"url":"https://images.keepsake.app/p/juniper-park.jpg","x":24,"y":20,"tilt":-4,"caption":"First day at the park"},{"id":2,"page":1,"url":"https://images.keepsake.app/p/juniper-bath.jpg","x":260,"y":60,"tilt":3,"caption":"Bath time, April"},{"id":3,"page":1,"url":"https://images.keepsake.app/p/juniper-steps.jpg","x":120,"y":250,"tilt":-2,"caption":"Three steps on her own"}]
+state stickers=[{"id":1,"page":1,"text":"Mar 14","x":300,"y":20}]
+state firsts=[{"id":1,"what":"First smile","date":"2025-02-03","done":true},{"id":2,"what":"Rolled over","date":"2025-04-19","done":true},{"id":3,"what":"First tooth","date":"2025-07-08","done":true},{"id":4,"what":"Walked alone","date":"","done":false},{"id":5,"what":"First word","date":"","done":false}]
+state milestones=[{"month":"Jan","label":"Born"},{"month":"Mar","label":"First smile"},{"month":"May","label":"Sitting up"},{"month":"Jul","label":"First tooth"},{"month":"Sep","label":"Crawling"},{"month":"Nov","label":"First steps"}]
+every 1s when recording onTick={seconds=seconds+1}
+App
+  Sidebar
+    Brand "Keepsake" icon="auto_stories"
+    NavItem "Pages" icon="collections" selected={tab=="pages"} onTap={tab="pages"}
+    NavItem "First times" icon="child_care" badge="{count(firsts,f=>!f.done)}" selected={tab=="firsts"} onTap={tab="firsts"}
+    NavItem "On this day" icon="history" selected={tab=="today"} onTap={tab="today"}
+    NavItem "Print book" icon="menu_book" onTap={go print-book}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Maya Reyes" size=32
+      Text.muted "Maya Reyes"
+  Main
+    Nav
+      if editingTitle
+        Input "Book title" bind=title w=320 onSubmit={editingTitle=false}
+      if !editingTitle
+        Heading "{title}" level=1 onTap={editingTitle=true}
+      Row gap=8
+        IconButton "edit" tooltip="Rename the book" onTap={editingTitle=true}
+        Button.outline "Add photo" icon="add_a_photo" onTap={emit addPhoto}
+        Button "Print" icon="print" onTap={go print-book}
+    Column pad=24 gap=16 scroll
+      if tab=="pages"
+        Row gap=16 top
+          Column grow gap=12
+            Row between
+              Text.strong "Spread {spread+1} of 12"
+              Row gap=8
+                IconButton "chevron_left" tooltip="Previous page" onTap={spread=max(0,spread-1)}
+                IconButton "chevron_right" tooltip="Next page" onTap={spread=min(11,spread+1)}
+            PageCurl bind=spread count=12 onSwipeLeft={spread=min(11,spread+1)} onSwipeRight={spread=max(0,spread-1)} h=460 drop=sticker onDrop={stickers=append(stickers,{"id":length(stickers)+1,"page":spread+1,"text":result.data,"x":result.x,"y":result.y})}
+              Stack fill=#FFFBF3EA radius=8
+                each p in filter(photos,q=>q.page==spread+1)
+                  Card gap=4 x={p.x} y={p.y} rotate={p.tilt} w=200 pad=8 fill=#FFFFFFFF drag=photo(p.id)
+                    Image "{p.url}" h=140 radius=2 onTap={open zoom}
+                    Input "Write a caption" bind=p.caption
+                each s in filter(stickers,q=>q.page==spread+1)
+                  Badge.warning "{s.text}" x={s.x} y={s.y} rotate=-6 drag=sticker(s.text)
+            Row gap=8
+              Text.muted "Stickers"
+              Chip "Mar 14" drag=sticker("Mar 14")
+              Chip "First snow" drag=sticker("First snow")
+              Chip "6 months" drag=sticker("6 months")
+              Chip "Grandma visits" drag=sticker("Grandma visits")
+              Button.ghost "Date sticker" icon="event" onTap={open stickerDate}
+          Column w=320 gap=12
+            Card gap=12
+              Heading "Voice note" level=3
+              if !recording
+                Button "Record" icon="mic" onTap={recording=true; seconds=0}
+              if recording
+                Row gap=8 middle
+                  Waveform live=true h=48 grow
+                  Text.mono "{duration(seconds)}"
+                Button.destructive "Stop and attach to page {spread+1}" icon="stop" onTap={recording=false; notes=append(notes,{"id":length(notes)+1,"page":spread+1,"label":"Voice note, " + formatDate(today(),"MMM d"),"length":seconds}); toast "Attached to page {spread+1}"}
+              each n in filter(notes,q=>q.page==spread+1)
+                Row gap=8 middle
+                  IconButton "play_arrow" tooltip="Play" onTap={emit play n.id}
+                  Waveform src="note-{n.id}" h=32 grow
+                  Text.caption "{duration(n.length)}"
+            Card gap=8
+              Heading "On this day" level=3
+              Image "https://images.keepsake.app/p/juniper-2024-park.jpg" h=120 radius=8
+              Text.muted "One year ago: a first splash at the pool."
+              Button.outline "See it" onTap={tab="today"}
+        Card gap=8
+          Heading "Juniper's year" level=3
+          Row scroll gap=0
+            each m in milestones
+              Column gap=4 center w=140
+                Text.caption "{m.month}"
+                Box w=12 h=12 radius=6 fill=#FFE07A5F
+                Text.small "{m.label}" center
+          Divider
+      if tab=="firsts"
+        Card gap=8
+          Heading "First times" level=3
+          each f in firsts
+            ListTile "{f.what}" subtitle="{f.done ? formatDate(f.date,"MMM d, yyyy") : "Not yet"}"
+              Checkbox bind=f.done onChange={firsts=updateWhere(firsts,x=>x.id==f.id,x=>with(x,"date",result ? formatDate(today(),"yyyy-MM-dd") : ""))}
+              DatePicker bind=f.date hide=phone
+          Button.outline "Add a first" icon="add" onTap={open newFirst}
+      if tab=="today"
+        Card gap=12
+          Heading "On this day, 2024" level=3
+          Image "https://images.keepsake.app/p/juniper-2024-park.jpg" h=260 radius=8
+          Text.strong "A first splash at the pool"
+          Text.muted "Mar 14, 2024. Juniper was five weeks old and loved the water."
+          Row gap=8
+            Button "Add to a page" onTap={emit pinMemory; toast "Added to page {spread+1}"}
+            Button.outline "Share" icon="share" onTap={emit share}
+  Dialog#stickerDate "Date sticker"
+    DatePicker "Pick a date" bind=stickerDay
+    Button "Place on page" onTap={stickers=append(stickers,{"id":length(stickers)+1,"page":spread+1,"text":formatDate(stickerDay,"MMM d"),"x":40,"y":40}); close}
+  Dialog#newFirst "A new first"
+    Input "What happened?" bind=newWhat
+    Button "Add" onTap={firsts=append(firsts,{"id":length(firsts)+1,"what":newWhat,"date":"","done":false}); newWhat=""; close}
+  Lightbox#zoom photos={map(photos,p=>p.url)} bind=at
+
+### Print book
+state pages=24
+state cover="hard"
+state copies=1
+state size="Square 8 in"
+Page
+  Nav
+    Brand "Keepsake" icon="auto_stories"
+    Link "Back to the book" onTap={go scrapbook}
+    Button.outline "Save for later" onTap={toast "Saved"}
+  Section
+    Row gap=48 top
+      Column grow gap=16
+        Heading "Print Juniper's First Year" level=1
+        Text.muted "A lay-flat photo book with every page, caption and sticker as you arranged it."
+        Card gap=12
+          Text.strong "Pages: {pages}"
+          Slider bind=pages min=20 max=80 step=2
+          Text.fieldLabel "Cover"
+          SegmentedButton bind=cover items=["soft","hard"]
+          Select "Size" bind=size items=["Square 6 in","Square 8 in","Landscape 11 in"]
+          Row gap=8 middle
+            Text "Copies"
+            Button.outline "-" onTap={copies=max(1,copies-1)}
+            Text.strong "{copies}"
+            Button.outline "+" onTap={copies=copies+1}
+      Column grow gap=16
+        Card gap=12
+          Image "https://images.keepsake.app/p/book-mock.jpg" h=240 radius=8
+          Row between
+            Text.muted "{pages} pages, {cover} cover"
+            Text.strong "{money((18 + pages*0.45 + (cover=="hard" ? 12 : 0)) * copies,"$",2)}"
+          Text.caption "Shipping calculated at checkout"
+          Button "Order {copies} {copies==1 ? "copy" : "copies"}" size=large onTap={open confirm}
+  Footer
+    Text.muted "Printed in 5 to 7 days"
+  Dialog#confirm "Order this book?" "{pages} pages, {cover} cover, {size}"
+    Text "Total {money((18 + pages*0.45 + (cover=="hard" ? 12 : 0)) * copies,"$",2)}"
+    Button "Place order" onTap={emit order; toast "Ordered"; close}

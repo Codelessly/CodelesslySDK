@@ -1,0 +1,3 @@
+App: Place Cards, a dinner seating game. A round table with name cards dragged to seats; each guest with a tiny list of likes and dislikes and a hint of a feud, with lines drawn between people who would be happy or upset coloured green and red; a score for the table that rises and falls as cards move; a target to beat; levels of rising size; a hint that swaps one pair; stars awarded at the end; a daily table challenge.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

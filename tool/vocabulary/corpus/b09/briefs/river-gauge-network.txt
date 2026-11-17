@@ -1,0 +1,3 @@
+App: Streamline, a river gauge network. A map of a river with gauge stations as dots coloured by level against flood thresholds; a station page with a level graph of the last week with a rising forecast as a dotted line and thresholds as bands; a flow in cubic metres; a flood warning banner with a countdown to peak; a downstream travel time from station to station drawn along the river; subscriptions to alerts by level; a photo from a bridge camera.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

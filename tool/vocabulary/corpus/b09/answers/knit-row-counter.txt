@@ -1,0 +1,159 @@
+### Counter
+state tab="counter"
+state row=42
+state total=118
+state running=true
+state secs=1394
+state stitches=96
+state note="Cast on 96, 4mm needles. Decrease row marked in red."
+state listening=false
+state repeats=[{"id":1,"label":"Decrease","every":6},{"id":2,"label":"Cable cross","every":8}]
+every 1s when running onTick={secs=secs+1}
+App
+  Sidebar
+    Brand "Purl Count" icon="checkroom"
+    NavItem "Counter" icon="exposure_plus_1" selected={tab=="counter"} onTap={go counter}
+    NavItem "Pattern" icon="grid_on" selected={tab=="pattern"} onTap={go pattern}
+    NavItem "Projects" icon="folder" badge="3" selected={tab=="projects"} onTap={go projects}
+    Spacer grow
+    Text.muted "Session {duration(secs)}"
+  Main
+    Nav
+      Heading "Autumn Cardigan" level=1
+      Row gap=8
+        Badge.info "Row {row} of {total}"
+        IconButton "mic" tooltip="Count by voice" onTap={listening=!listening}
+        IconButton "note_alt" tooltip="Stitch count and note" onTap={open notes}
+    Column pad=24 gap=16
+      Stack h=360 radius=16
+        Row h=360
+          Box grow fill=#FFFCE4EC center middle onTap={row=max(0,row-1)}
+            Icon "remove" size=48
+            Text.muted "Back one row"
+          Box grow fill=#FFE8F5E9 center middle onTap={row=row+1; any(repeats,r=>(row+1)%r.every==0) ? {sound chime; toast "Repeat reached: row {row+1}"} : {}}
+            Icon "add" size=48
+            Text.muted "Next row"
+        Column center middle
+          Text "{row}" size=120 weight=700 animate=pop
+          Text.muted "{total-row} rows to go"
+      if listening
+        Card gap=8
+          Row gap=8 middle
+            Icon "graphic_eq"
+            Text.strong "Listening... say next, back, or reset"
+          VoiceInput onResult={lower(result)=="next" ? row=row+1 : (lower(result)=="back" ? row=max(0,row-1) : (lower(result)=="reset" ? row=0 : toast "Did not catch that"))} onEnd={listening=false}
+      Progress {row/total}
+      Grid cols=2 gap=16
+        Card gap=8
+          Row between
+            Text.strong "Repeat counters"
+            IconButton "add" tooltip="Add repeat" onTap={open addRepeat}
+          each r in repeats
+            Row between middle
+              Column gap=2
+                Text.strong "{r.label} every {r.every} rows"
+                Text.muted "Next at row {(floor(row/r.every)+1)*r.every}"
+              if row%r.every==0 && row>0
+                Badge.warning "Now"
+              else
+                Text.muted "in {r.every-(row%r.every)}"
+        Card gap=8
+          Text.strong "Session timer"
+          Text.mono "{duration(secs)}" size=40
+          Row gap=8
+            Button.outline "{running ? 'Pause' : 'Resume'}" onTap={running=!running}
+            Button.ghost "Reset" onTap={secs=0}
+          Divider
+          Row between
+            Text.muted "Stitches on needle"
+            Text.strong "{stitches}"
+  Dialog#notes "Stitch count and note"
+    Row gap=8 middle
+      Button.outline "-" onTap={stitches=max(0,stitches-1)}
+      Input "Stitches" type=number bind=stitches
+      Button.outline "+" onTap={stitches=stitches+1}
+    Input "Note" "Anything to remember about this row" multiline bind=note
+    Button "Done" onTap={toast "Note saved"; close}
+  Dialog#addRepeat "New repeat" "A counter that chimes every N rows"
+    Input "Label" bind=newLabel
+    Input "Every how many rows" type=number bind=newEvery
+    Button "Add counter" onTap={repeats=append(repeats,{"id":length(repeats)+1,"label":newLabel,"every":newEvery}); close}
+
+### Pattern
+state tab="pattern"
+state row=42
+state total=118
+state lens=true
+state zoomAt=40
+state pattern=[[0,1,0,1,0,1,0,1,0,1,0,1],[1,0,1,0,1,0,1,0,1,0,1,0],[0,1,1,0,0,1,1,0,0,1,1,0],[1,1,0,0,1,1,0,0,1,1,0,0],[0,0,1,1,0,0,1,1,0,0,1,1],[1,0,0,1,1,0,0,1,1,0,0,1]]
+App
+  Sidebar
+    Brand "Purl Count" icon="checkroom"
+    NavItem "Counter" icon="exposure_plus_1" selected={tab=="counter"} onTap={go counter}
+    NavItem "Pattern" icon="grid_on" selected={tab=="pattern"} onTap={go pattern}
+    NavItem "Projects" icon="folder" badge="3" selected={tab=="projects"} onTap={go projects}
+  Main
+    Nav
+      Heading "Fair Isle yoke chart" level=1
+      Row gap=8
+        Toggle "Magnifier" bind=lens
+        Button "Row {row}" onTap={zoomAt=row}
+    Column pad=24 gap=16
+      Card gap=12
+        Row between
+          Text.strong "Chart, rows 1 to 118"
+          Row gap=12
+            Row gap=4 middle
+              Box w=16 h=16 fill=#FFC2185B radius=3
+              Text.caption "Colour A (berry)"
+            Row gap=4 middle
+              Box w=16 h=16 fill=#FFF5E6D3 radius=3
+              Text.caption "Colour B (cream)"
+        PatternChart grid={pattern} colors=["#FFF5E6D3","#FFC2185B"] cols=12 current={row} currentColor=#FFFFB300 doneColor=#FFBDBDBD onTapRow={row=result}
+        if lens
+          Magnifier source=pattern at={zoomAt} rows=3 h=96 bind=zoomAt
+      Row gap=8
+        Button.outline "Row up" onTap={row=min(total,row+1)}
+        Button.outline "Row down" onTap={row=max(1,row-1)}
+        Spacer grow
+        Text.muted "{round(row/total*100,0)}% of chart finished"
+      Progress {row/total}
+
+### Projects
+state tab="projects"
+state projects=[{"id":1,"name":"Autumn Cardigan","row":42,"rows":118,"yarn":310,"yarnStart":640},{"id":2,"name":"Harbor Socks","row":88,"rows":96,"yarn":22,"yarnStart":100},{"id":3,"name":"Baby Blanket","row":10,"rows":240,"yarn":820,"yarnStart":900}]
+state sel=1
+state q=""
+App
+  Sidebar
+    Brand "Purl Count" icon="checkroom"
+    NavItem "Counter" icon="exposure_plus_1" selected={tab=="counter"} onTap={go counter}
+    NavItem "Pattern" icon="grid_on" selected={tab=="pattern"} onTap={go pattern}
+    NavItem "Projects" icon="folder" badge="3" selected={tab=="projects"} onTap={go projects}
+  Main
+    Nav
+      Heading "Projects" level=1
+      Row gap=8
+        Input "Search" bind=q w=220
+        Button "New project" onTap={open newProject}
+    Column pad=24 gap=16
+      each p in filter(projects,x=>contains(lower(x.name),lower(q)))
+        Card gap=8 onTap={sel=p.id}
+          Row between middle
+            Text.heading "{p.name}"
+            IconButton "more_vert" tooltip="More" onTap={sel=p.id; open projMenu}
+          Progress {p.row/p.rows}
+          Row between
+            Text.muted "Row {p.row} of {p.rows}"
+            Text.muted "{p.yarn} g of yarn left"
+          if p.yarn<50
+            Badge.warning "Low on yarn"
+  Menu#projMenu end
+    MenuItem "Open in counter" icon="exposure_plus_1" onTap={go counter}
+    MenuItem "Mark yarn used" icon="remove_circle" onTap={projects=updateWhere(projects,x=>x.id==sel,x=>with(x,"yarn",max(0,x.yarn-10)))}
+    MenuItem "Delete" icon="delete" onTap={projects=removeWhere(projects,x=>x.id==sel)}
+  Dialog#newProject "New project" "Name it and weigh the yarn"
+    Input "Name" bind=pname
+    Input "Rows in pattern" type=number bind=prows
+    Input "Yarn in grams" type=number bind=pyarn
+    Button "Create" onTap={projects=append(projects,{"id":length(projects)+1,"name":pname,"row":0,"rows":prows,"yarn":pyarn,"yarnStart":pyarn}); close}

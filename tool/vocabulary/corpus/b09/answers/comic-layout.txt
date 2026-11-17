@@ -1,0 +1,168 @@
+### Editor
+state tool="draw"
+state pageIndex=0
+state sel=""
+state showBleed=true
+state showOrder=true
+state pages=[{"id":"p1","title":"Page 1","panels":[{"id":"a","x":0,"y":0,"w":1,"h":0.4,"order":1,"caption":"Dawn over the harbor.","bubbles":[]},{"id":"b","x":0,"y":0.4,"w":0.5,"h":0.6,"order":2,"caption":"","bubbles":[{"id":"b1","text":"You're late, Mara.","speaker":"Odd","tailX":0.3,"tailY":0.8}]},{"id":"c","x":0.5,"y":0.4,"w":0.5,"h":0.6,"order":3,"caption":"","bubbles":[]}]},{"id":"p2","title":"Page 2","panels":[]},{"id":"p3","title":"Page 3","panels":[]}]
+state draft=""
+state exportFormat="PDF"
+state exportScope="all"
+App
+  Sidebar w=160
+    Brand "Gutters" icon="grid_view"
+    Text.caption "Pages"
+    Column scroll gap=8
+      each p in pages
+        Card pad=6 gap=4 fill={pageIndex==index ? "#FFE8EEFF" : "#FFFFFFFF"} onTap={pageIndex=index; sel=""} drag=page(p.id) drop=page onDrop={pages=movePage(pages,result.data,index)}
+          PageThumb page={p} showOrder={showOrder} h=120
+          Row between
+            Text.small "{p.title}"
+            Text.caption "{length(p.panels)} panels"
+    Button.outline "Add page" icon="add" onTap={pages=append(pages,{"id":"p"+(length(pages)+1),"title":"Page "+(length(pages)+1),"panels":[]}); pageIndex=length(pages)}
+    Spacer grow
+    Button.ghost "Page turn preview" icon="auto_stories" onTap={go spread}
+  Main
+    Nav
+      Heading "Issue 1: Low Tide" level=3
+      Row gap=8
+        SegmentedButton bind=tool items=["Draw","Cut","Select"]
+        Toggle "Bleed and safe area" bind=showBleed
+        Toggle "Reading order" bind=showOrder
+        Button.outline "Spread" icon="auto_stories" onTap={go spread}
+        Button "Export" icon="ios_share" onTap={open export}
+    Row grow top
+      Column grow pad=24 center middle
+        PanelCanvas page={pages[pageIndex]} size="letter" tool={tool} showBleed={showBleed} showOrder={showOrder} selected={sel} gutter=12 onDrawPanel={pages=updateWhere(pages,p=>p.id==pages[pageIndex].id,p=>with(p,"panels",append(p.panels,result)))} onCut={pages=updateWhere(pages,p=>p.id==pages[pageIndex].id,p=>with(p,"panels",result))} onResizeEdge={pages=updateWhere(pages,p=>p.id==pages[pageIndex].id,p=>with(p,"panels",result))} onSelect={sel=result.id} onTailMove={pages=updateWhere(pages,p=>p.id==pages[pageIndex].id,p=>with(p,"panels",result))} onOrderChange={pages=updateWhere(pages,p=>p.id==pages[pageIndex].id,p=>with(p,"panels",result))}
+        Row gap=8 center
+          IconButton "undo" tooltip="Undo" onTap={emit undo}
+          IconButton "redo" tooltip="Redo" onTap={emit redo}
+          Text.caption "Drag on the page to draw a panel. Drag a gutter edge to resize its neighbours."
+      Pane w=300 pad=16 gap=12
+        if sel==""
+          Text.muted "Select a panel to add a sketch, a caption or a speech bubble."
+          Card gap=8
+            Text.strong "Reading order"
+            each p in sortBy(pages[pageIndex].panels,x=>x.order)
+              ListTile "Panel {p.order}" subtitle={p.caption==""?"No caption":p.caption} leading="drag_indicator" drag=order(p.id) drop=order onDrop={pages=updateWhere(pages,q=>q.id==pages[pageIndex].id,q=>with(q,"panels",reorderPanels(q.panels,result.data,p.order)))} onTap={sel=p.id}
+        if sel!=""
+          Row between
+            Text.strong "Panel {find(pages[pageIndex].panels,x=>x.id==sel).order}"
+            IconButton "close" tooltip="Deselect" onTap={sel=""}
+          Card gap=8
+            Text.fieldLabel "Sketch"
+            SketchPad h=140 panel={sel} onChange={emit sketch result}
+            Row gap=8
+              Button.outline "Upload" icon="upload" onTap={emit uploadSketch sel}
+              Button.outline "Clear" icon="delete" onTap={emit clearSketch sel}
+          Card gap=8
+            Text.fieldLabel "Caption box"
+            Input "Caption" "Narration text" multiline bind=draft
+            Button.outline "Set caption" onTap={pages=updateWhere(pages,p=>p.id==pages[pageIndex].id,p=>with(p,"panels",updateWhere(p.panels,x=>x.id==sel,x=>with(x,"caption",draft)))); draft=""}
+          Card gap=8
+            Row between
+              Text.fieldLabel "Speech bubbles"
+              Button.ghost "Add bubble" icon="chat_bubble" onTap={pages=updateWhere(pages,p=>p.id==pages[pageIndex].id,p=>with(p,"panels",updateWhere(p.panels,x=>x.id==sel,x=>with(x,"bubbles",append(x.bubbles,{"id":"b"+(length(x.bubbles)+1),"text":"New line","speaker":"","tailX":0.5,"tailY":0.9})))))}
+            each b in find(pages[pageIndex].panels,x=>x.id==sel).bubbles
+              Column gap=4
+                Input "Line" bind=b.text
+                Row gap=8
+                  Select bind=b.style items=["Speech","Thought","Shout","Whisper"]
+                  IconButton "delete" tooltip="Remove bubble" onTap={pages=updateWhere(pages,p=>p.id==pages[pageIndex].id,p=>with(p,"panels",updateWhere(p.panels,x=>x.id==sel,x=>with(x,"bubbles",removeWhere(x.bubbles,y=>y.id==b.id)))))}
+                Text.caption "Drag the tail on the page to the speaker."
+          Button.destructive "Delete panel" icon="delete" onTap={pages=updateWhere(pages,p=>p.id==pages[pageIndex].id,p=>with(p,"panels",removeWhere(p.panels,x=>x.id==sel))); sel=""}
+  Dialog#export "Export" "Choose what to send out"
+    Column gap=12
+      SegmentedButton bind=exportFormat items=["PDF","PNG","CBZ"]
+      Select "Pages" bind=exportScope items=["all","current","spreads"]
+      Toggle "Include bleed" bind=showBleed
+      Row end gap=8
+        Button.outline "Cancel" onTap={close}
+        Button "Export set" icon="download" onTap={emit export {"format":exportFormat,"scope":exportScope,"bleed":showBleed}; toast "Exporting {exportFormat}"; close}
+
+### Spread
+state left=0
+state zoom=1
+state pages=[{"id":"p1","title":"Page 1"},{"id":"p2","title":"Page 2"},{"id":"p3","title":"Page 3"},{"id":"p4","title":"Page 4"},{"id":"p5","title":"Page 5"},{"id":"p6","title":"Page 6"}]
+state coverAlone=true
+App
+  Main
+    Nav
+      Row gap=8
+        IconButton "arrow_back" tooltip="Back to editor" onTap={go editor}
+        Heading "Page turn preview" level=3
+      Row gap=8
+        Toggle "Cover stands alone" bind=coverAlone
+        Slider bind=zoom min=0.5 max=2 w=140
+        Button "Export spreads" icon="ios_share" onTap={open exportSpreads}
+    Column pad=24 gap=16 center
+      Row center middle gap=0
+        IconButton "chevron_left" tooltip="Previous spread" onTap={left=max(0,left-2)}
+        SpreadView pages={pages} left={left} zoom={zoom} coverAlone={coverAlone} showGutterShadow=true onPageTurn={left=result} onTapPage={go editor}
+        IconButton "chevron_right" tooltip="Next spread" onTap={left=min(length(pages)-1,left+2)}
+      Text.muted "Pages {left+1} and {left+2} of {length(pages)}"
+      Card gap=8
+        Text.strong "Reveals on the turn"
+        Text.muted "A panel on the right-hand page that ends on a cliffhanger should be the last thing the eye reaches before the turn."
+        Row gap=8
+          Chip "Page 2 ends on a splash" onTap={emit flag 2}
+          Chip "Page 3 opens on a reveal" onTap={emit flag 3}
+  Dialog#exportSpreads "Export spreads" "Each spread becomes one image"
+    Column gap=12
+      Select "Format" bind=fmt items=["PDF","PNG"]
+      Row end gap=8
+        Button.outline "Cancel" onTap={close}
+        Button "Export" onTap={emit exportSpreads fmt; toast "Spreads exported"; close}
+
+### Panel details
+state tab="bubbles"
+state sel=""
+state lettering=[{"id":"l1","page":1,"panel":2,"kind":"Speech","speaker":"Odd","text":"You're late, Mara."},{"id":"l2","page":1,"panel":1,"kind":"Caption","speaker":"","text":"Dawn over the harbor."},{"id":"l3","page":1,"panel":3,"kind":"Shout","speaker":"Mara","text":"The tide is turning!"}]
+Page
+  Nav sticky
+    Brand "Gutters" icon="grid_view"
+    Row gap=4
+      Link "Editor" onTap={go editor}
+      Link "Spread" onTap={go spread}
+      Link "Lettering" onTap={go panel_details}
+    Button "Export" onTap={open exportAll}
+  Section
+    Column gap=16
+      Heading "Lettering list" level=1
+      Text.muted "Every caption and bubble in reading order, ready for the letterer."
+      Row gap=8
+        ChoiceChip "Speech" selected={tab=="bubbles"} onTap={tab="bubbles"}
+        ChoiceChip "Captions" selected={tab=="captions"} onTap={tab="captions"}
+        ChoiceChip "All" selected={tab=="all"} onTap={tab="all"}
+      Card gap=8
+        Row gap=8
+          Text.strong "Pg" w=40
+          Text.strong "Pnl" w=40
+          Text.strong "Kind" w=90
+          Text.strong "Speaker" w=110
+          Text.strong "Text" grow
+          Text.strong "" w=40
+        Divider
+        each l in sortBy(lettering,x=>x.page*100+x.panel)
+          if tab=="all" || (tab=="bubbles" && l.kind!="Caption") || (tab=="captions" && l.kind=="Caption")
+            Row gap=8 middle
+              Text "{l.page}" w=40
+              Text "{l.panel}" w=40
+              Text.muted "{l.kind}" w=90
+              Text "{l.speaker}" w=110
+              Input "Text" bind=l.text grow
+              IconButton "more_vert" tooltip="More" w=40 onTap={sel=l.id; open lineMenu}
+  Footer
+    Row between
+      Text.strong "Gutters"
+      Text.muted "Low Tide, issue 1"
+  Menu#lineMenu end
+    MenuItem "Jump to panel" icon="my_location" onTap={emit jumpTo sel; go editor}
+    MenuItem "Copy text" icon="content_copy" onTap={copy find(lettering,x=>x.id==sel).text; toast "Copied"}
+    MenuItem "Delete" icon="delete" onTap={lettering=removeWhere(lettering,x=>x.id==sel)}
+  Dialog#exportAll "Export lettering" "A script for the letterer"
+    Column gap=12
+      SegmentedButton bind=fmt items=["CSV","TXT","PDF"]
+      Row end gap=8
+        Button.outline "Cancel" onTap={close}
+        Button "Export" onTap={emit exportLettering fmt; toast "Exported"; close}

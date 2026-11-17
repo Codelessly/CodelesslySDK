@@ -1,0 +1,175 @@
+### Table
+state elements=[{"n":1,"sym":"H","name":"Hydrogen","fam":"Nonmetal","mass":1.008,"melt":14.0,"boil":20.3,"en":2.20,"disc":"1766","by":"Henry Cavendish","shells":[1],"row":1,"col":1},{"n":2,"sym":"He","name":"Helium","fam":"Noble gas","mass":4.0026,"melt":0.95,"boil":4.2,"en":0,"disc":"1895","by":"William Ramsay","shells":[2],"row":1,"col":18},{"n":3,"sym":"Li","name":"Lithium","fam":"Alkali metal","mass":6.94,"melt":453.7,"boil":1603,"en":0.98,"disc":"1817","by":"Johan Arfwedson","shells":[2,1],"row":2,"col":1},{"n":4,"sym":"Be","name":"Beryllium","fam":"Alkaline earth","mass":9.0122,"melt":1560,"boil":2742,"en":1.57,"disc":"1798","by":"Louis Vauquelin","shells":[2,2],"row":2,"col":2},{"n":5,"sym":"B","name":"Boron","fam":"Metalloid","mass":10.81,"melt":2349,"boil":4200,"en":2.04,"disc":"1808","by":"Humphry Davy","shells":[2,3],"row":2,"col":13},{"n":6,"sym":"C","name":"Carbon","fam":"Nonmetal","mass":12.011,"melt":3800,"boil":4300,"en":2.55,"disc":"Ancient","by":"Unknown","shells":[2,4],"row":2,"col":14},{"n":7,"sym":"N","name":"Nitrogen","fam":"Nonmetal","mass":14.007,"melt":63.2,"boil":77.4,"en":3.04,"disc":"1772","by":"Daniel Rutherford","shells":[2,5],"row":2,"col":15},{"n":8,"sym":"O","name":"Oxygen","fam":"Nonmetal","mass":15.999,"melt":54.4,"boil":90.2,"en":3.44,"disc":"1774","by":"Joseph Priestley","shells":[2,6],"row":2,"col":16},{"n":9,"sym":"F","name":"Fluorine","fam":"Halogen","mass":18.998,"melt":53.5,"boil":85.0,"en":3.98,"disc":"1886","by":"Henri Moissan","shells":[2,7],"row":2,"col":17},{"n":10,"sym":"Ne","name":"Neon","fam":"Noble gas","mass":20.180,"melt":24.6,"boil":27.1,"en":0,"disc":"1898","by":"William Ramsay","shells":[2,8],"row":2,"col":18},{"n":11,"sym":"Na","name":"Sodium","fam":"Alkali metal","mass":22.990,"melt":370.9,"boil":1156,"en":0.93,"disc":"1807","by":"Humphry Davy","shells":[2,8,1],"row":3,"col":1},{"n":12,"sym":"Mg","name":"Magnesium","fam":"Alkaline earth","mass":24.305,"melt":923,"boil":1363,"en":1.31,"disc":"1755","by":"Joseph Black","shells":[2,8,2],"row":3,"col":2},{"n":13,"sym":"Al","name":"Aluminium","fam":"Post-transition metal","mass":26.982,"melt":933.5,"boil":2792,"en":1.61,"disc":"1825","by":"Hans Christian Orsted","shells":[2,8,3],"row":3,"col":13},{"n":14,"sym":"Si","name":"Silicon","fam":"Metalloid","mass":28.085,"melt":1687,"boil":3538,"en":1.90,"disc":"1824","by":"Jons Jacob Berzelius","shells":[2,8,4],"row":3,"col":14},{"n":15,"sym":"P","name":"Phosphorus","fam":"Nonmetal","mass":30.974,"melt":317.3,"boil":553.7,"en":2.19,"disc":"1669","by":"Hennig Brand","shells":[2,8,5],"row":3,"col":15},{"n":16,"sym":"S","name":"Sulfur","fam":"Nonmetal","mass":32.06,"melt":388.4,"boil":717.8,"en":2.58,"disc":"Ancient","by":"Unknown","shells":[2,8,6],"row":3,"col":16},{"n":17,"sym":"Cl","name":"Chlorine","fam":"Halogen","mass":35.45,"melt":171.6,"boil":239.1,"en":3.16,"disc":"1774","by":"Carl Wilhelm Scheele","shells":[2,8,7],"row":3,"col":17},{"n":18,"sym":"Ar","name":"Argon","fam":"Noble gas","mass":39.948,"melt":83.8,"boil":87.3,"en":0,"disc":"1894","by":"Lord Rayleigh","shells":[2,8,8],"row":3,"col":18},{"n":19,"sym":"K","name":"Potassium","fam":"Alkali metal","mass":39.098,"melt":336.5,"boil":1032,"en":0.82,"disc":"1807","by":"Humphry Davy","shells":[2,8,8,1],"row":4,"col":1},{"n":20,"sym":"Ca","name":"Calcium","fam":"Alkaline earth","mass":40.078,"melt":1115,"boil":1757,"en":1.00,"disc":"1808","by":"Humphry Davy","shells":[2,8,8,2],"row":4,"col":2},{"n":26,"sym":"Fe","name":"Iron","fam":"Transition metal","mass":55.845,"melt":1811,"boil":3134,"en":1.83,"disc":"Ancient","by":"Unknown","shells":[2,8,14,2],"row":4,"col":8},{"n":29,"sym":"Cu","name":"Copper","fam":"Transition metal","mass":63.546,"melt":1357.8,"boil":2835,"en":1.90,"disc":"Ancient","by":"Unknown","shells":[2,8,18,1],"row":4,"col":11},{"n":35,"sym":"Br","name":"Bromine","fam":"Halogen","mass":79.904,"melt":265.8,"boil":332,"en":2.96,"disc":"1826","by":"Antoine Balard","shells":[2,8,18,7],"row":4,"col":17},{"n":47,"sym":"Ag","name":"Silver","fam":"Transition metal","mass":107.87,"melt":1234.9,"boil":2435,"en":1.93,"disc":"Ancient","by":"Unknown","shells":[2,8,18,18,1],"row":5,"col":11},{"n":79,"sym":"Au","name":"Gold","fam":"Transition metal","mass":196.97,"melt":1337.3,"boil":3129,"en":2.54,"disc":"Ancient","by":"Unknown","shells":[2,8,18,32,18,1],"row":6,"col":11},{"n":80,"sym":"Hg","name":"Mercury","fam":"Transition metal","mass":200.59,"melt":234.3,"boil":629.9,"en":2.00,"disc":"Ancient","by":"Unknown","shells":[2,8,18,32,18,2],"row":6,"col":12},{"n":92,"sym":"U","name":"Uranium","fam":"Actinide","mass":238.03,"melt":1405.3,"boil":4404,"en":1.38,"disc":"1789","by":"Martin Klaproth","shells":[2,8,18,32,21,9,2],"row":7,"col":3}]
+state prop="Family"
+state temp=293
+state sel=null
+state query=""
+state famFilter="All"
+state a=null
+state b=null
+state tab="table"
+App
+  Sidebar
+    Brand "Elementary" icon="science"
+    NavItem "Table" icon="grid_view" selected={tab=="table"} onTap={tab="table"}
+    NavItem "Compare" icon="compare_arrows" selected={tab=="compare"} onTap={go compare}
+    NavItem "Quiz" icon="quiz" onTap={go quiz}
+    Spacer grow
+    Text.muted "118 elements"
+  Main
+    Nav
+      Heading "Periodic table"
+      Row gap=8
+        Input "Search symbol" "Fe" bind=query w=160
+        Select "Colour by" bind=prop items=["Family","Atomic mass","Melting point","Boiling point","Electronegativity","Discovery year"] w=200
+        Button.outline "Compare" icon="compare_arrows" onTap={go compare}
+        Button "Quiz me" icon="quiz" onTap={go quiz}
+    Column pad=24 gap=16
+      Card gap=12
+        Row between middle
+          Column gap=4
+            Text.strong "Temperature"
+            Text.muted "Cells show their state at {temp} K ({round(temp-273.15,0)} C)"
+          Text.heading "{temp} K"
+        Slider bind=temp min=0 max=6000
+        Row gap=16
+          Badge.info "Solid"
+          Badge.warning "Liquid"
+          Badge.error "Gas"
+          Spacer grow
+          Text.muted "Water freezes at 273 K and boils at 373 K"
+      Row gap=8 scroll
+        each f in ["All","Alkali metal","Alkaline earth","Transition metal","Post-transition metal","Metalloid","Nonmetal","Halogen","Noble gas","Actinide"]
+          FilterChip "{f}" selected={famFilter==f} onTap={famFilter=f}
+      Card gap=12
+        PeriodicTable elements={elements} colorBy={prop} temperature={temp} highlight={query} family={famFilter} selected={sel} onSelect={sel=result}
+        if prop!="Family"
+          Legend gradient=true from="Low" to="High" label="{prop}"
+        if prop=="Family"
+          Legend families=true
+  Dialog#element "{sel.name}" "{sel.fam}"
+    Row gap=24
+      Column gap=8
+        Box fill=#FF1F6FEB radius=12 pad=16 center
+          Text "{sel.n}" size=16 color=#FFFFFFFF
+          Text "{sel.sym}" size=56 weight=700 color=#FFFFFFFF
+          Text "{sel.name}" color=#FFFFFFFF
+      Column grow gap=8
+        ElectronShell shells={sel.shells} size=200
+        Text.muted "Shells: {join(sel.shells,\" - \")}"
+    Divider
+    Grid cols=2 gap=12
+      Column gap=2
+        Text.caption "Atomic mass"
+        Text.strong "{sel.mass} u"
+      Column gap=2
+        Text.caption "Melting point"
+        Text.strong "{sel.melt} K"
+      Column gap=2
+        Text.caption "Boiling point"
+        Text.strong "{sel.boil} K"
+      Column gap=2
+        Text.caption "Discovered"
+        Text.strong "{sel.disc}, {sel.by}"
+    Row gap=8
+      Button.outline "Set as A" onTap={a=sel; toast "{sel.name} is A"}
+      Button.outline "Set as B" onTap={b=sel; toast "{sel.name} is B"}
+      Button "Compare" onTap={a=coalesce(a,sel); close; go compare}
+
+### Compare
+state a=null
+state b=null
+state mode="Properties"
+App
+  Sidebar
+    Brand "Elementary" icon="science"
+    NavItem "Table" icon="grid_view" onTap={go table}
+    NavItem "Compare" icon="compare_arrows" selected={true}
+    NavItem "Quiz" icon="quiz" onTap={go quiz}
+  Main
+    Nav
+      Heading "Compare two elements"
+      Button.outline "Swap" icon="swap_horiz" onTap={a=b; b=a}
+    Column pad=24 gap=16
+      Grid cols=2 gap=16
+        Card gap=8
+          Text.fieldLabel "Element A"
+          Select "Choose" bind=a items={map(elements,e=>e.name)}
+        Card gap=8
+          Text.fieldLabel "Element B"
+          Select "Choose" bind=b items={map(elements,e=>e.name)}
+      SegmentedButton bind=mode items=["Properties","Atoms"]
+      if mode=="Properties"
+        Card gap=12
+          Row between
+            Text.muted "Property"
+            Row gap=48
+              Text.strong "{a.name}" w=120
+              Text.strong "{b.name}" w=120
+          Divider
+          Row between
+            Text "Atomic mass"
+            Row gap=48
+              Text "{a.mass}" w=120
+              Text "{b.mass}" w=120
+          Row between
+            Text "Melting point (K)"
+            Row gap=48
+              Text "{a.melt}" w=120
+              Text "{b.melt}" w=120
+          Row between
+            Text "Boiling point (K)"
+            Row gap=48
+              Text "{a.boil}" w=120
+              Text "{b.boil}" w=120
+          Row between
+            Text "Discovered"
+            Row gap=48
+              Text "{a.disc}" w=120
+              Text "{b.disc}" w=120
+        Card gap=8
+          Text.strong "Melting points"
+          BarChart values=[a.melt,b.melt] labels=[a.name,b.name] h=180
+      if mode=="Atoms"
+        Grid cols=2 gap=16
+          Card gap=8 center
+            ElectronShell shells={a.shells} size=220
+            Text.strong "{a.name}"
+          Card gap=8 center
+            ElectronShell shells={b.shells} size=220
+            Text.strong "{b.name}"
+      Text.muted "Heavier: {a.mass>b.mass ? a.name : b.name}, by {fixed(abs(a.mass-b.mass),3)} u"
+
+### Quiz
+state score=0
+state asked=0
+state current=null
+state answer=""
+state revealed=false
+state difficulty="Symbols"
+App
+  Sidebar
+    Brand "Elementary" icon="science"
+    NavItem "Table" icon="grid_view" onTap={go table}
+    NavItem "Compare" icon="compare_arrows" onTap={go compare}
+    NavItem "Quiz" icon="quiz" selected={true}
+  Main
+    Nav
+      Heading "Quiz"
+      Row gap=12 middle
+        Badge.success "Score {score} / {asked}"
+        Button.ghost "Restart" icon="restart_alt" onTap={score=0; asked=0; answer=""; revealed=false; current=elements[floor(random()*length(elements))]}
+    Column pad=24 gap=16
+      SegmentedButton bind=difficulty items=["Symbols","Families","Numbers"]
+      Card gap=12
+        Text.muted "Names are hidden. Tap a cell to answer."
+        PeriodicTable elements={elements} hideNames=true highlight={current.sym} onSelect={answer=result.name; revealed=true; asked=asked+1; score=result.name==current.name ? score+1 : score}
+      Card gap=12
+        Text.caption "Find the element"
+        Text.heading "{difficulty=="Numbers" ? "Number " + current.n : current.sym}"
+        Input "Or type its name" bind=answer
+        Row gap=8
+          Button "Check" onTap={revealed=true; asked=asked+1; lower(answer)==lower(current.name) ? score=score+1 : toast "It is {current.name}"}
+          Button.outline "Skip" onTap={answer=""; revealed=false; current=elements[floor(random()*length(elements))]}
+        if revealed
+          Text.success "{current.name}: {current.fam}, discovered {current.disc}"

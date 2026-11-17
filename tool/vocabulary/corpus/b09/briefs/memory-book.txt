@@ -1,0 +1,3 @@
+App: Keepsake, a memory book. A scrapbook page with photos placed freely and tilted, a caption written under each, dated stickers dragged on; a page turning with a curl as it is swiped; a timeline of a child's year in a ribbon at the foot; a voice note recorded and attached to a page with a waveform; a first-times list ticked with dates; a cover with a title edited in place; an on-this-day card from past years; a print as a book with page count and price.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

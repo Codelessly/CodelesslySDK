@@ -1,0 +1,3 @@
+App: Hookline, a crane lift planner. A side drawing of the crane with a boom whose angle and length are set by dragging its tip; the load radius and height read out live; a table of allowed weight at that reach with the current load shown as a bar that turns red past eighty percent; a load entry with rigging weight added; outrigger positions ticked; a lift plan sheet with a signature line and a print preview.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

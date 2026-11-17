@@ -1,0 +1,229 @@
+### Record
+state pet="biscuit"
+state pets=[{"id":"biscuit","name":"Biscuit","kind":"Dog, Border Collie","photo":"https://images.example.com/pets/biscuit.jpg","chip":"985 112 004 551 237","weight":18.4},{"id":"miso","name":"Miso","kind":"Cat, Tabby","photo":"https://images.example.com/pets/miso.jpg","chip":"941 000 028 774 019","weight":4.6},{"id":"pip","name":"Pip","kind":"Rabbit, Mini Lop","photo":"https://images.example.com/pets/pip.jpg","chip":"not chipped","weight":1.9}]
+state vaccines=[{"id":1,"name":"Rabies","given":"Mar 4, 2025","due":"Mar 4, 2028","days":472},{"id":2,"name":"DHPP booster","given":"Nov 20, 2025","due":"Dec 2, 2026","days":15},{"id":3,"name":"Leptospirosis","given":"Oct 2, 2025","due":"Oct 2, 2026","days":-46},{"id":4,"name":"Bordetella","given":"Jun 11, 2026","due":"Jun 11, 2027","days":206}]
+state remindDays=14
+state weights=[14.2,15.8,16.9,17.6,18.1,18.4]
+state weightLabels=["Jun","Jul","Aug","Sep","Oct","Nov"]
+state weightNew=""
+state sel=0
+App
+  Sidebar
+    Brand "Tailbook" icon="pets"
+    NavItem "Record" icon="vaccines" selected={true}
+    NavItem "Vet visits" icon="medical_services" onTap={go vet-visits}
+    NavItem "Travel" icon="flight" onTap={go travel}
+    NavItem "Share" icon="picture_as_pdf" onTap={go share}
+    Spacer grow
+    Text.muted "3 pets"
+  Main
+    Nav
+      Row gap=8
+        each p in pets
+          ChoiceChip "{p.name}" selected={pet==p.id} onTap={pet=p.id}
+      Row gap=8
+        Button.outline "Add pet" icon="add" onTap={open addPet}
+        Button "Share record" icon="share" onTap={go share}
+    Column pad=24 gap=16 scroll
+      each p in pets
+        if pet==p.id
+          Card gap=16
+            Row gap=20 top
+              Avatar src="{p.photo}" size=96
+              Column grow gap=4
+                Heading "{p.name}" level=1
+                Text.muted "{p.kind}"
+                Row gap=8
+                  Text.fieldLabel "Microchip"
+                  Text.mono "{p.chip}"
+                  IconButton "content_copy" tooltip="Copy chip number" onTap={copy p.chip; toast "Chip number copied"}
+              Column gap=2 end
+                Text.caption "Weight"
+                Text.strong "{p.weight} kg" size=28
+      Card gap=12
+        Row between
+          Heading "Vaccines" level=3
+          Button.outline "Log vaccine" icon="add" onTap={open addVaccine}
+        Row gap=8
+          Text.fieldLabel "Vaccine" grow
+          Text.fieldLabel "Given" w=120
+          Text.fieldLabel "Next due" w=120
+          Text.fieldLabel "Status" w=110
+          Text.fieldLabel "" w=40
+        Divider
+        each v in sortBy(vaccines, x=>x.days)
+          Row gap=8 middle
+            Text.strong "{v.name}" grow
+            Text "{v.given}" w=120
+            Text "{v.due}" w=120
+            if v.days < 0
+              Badge.error "Overdue {abs(v.days)} d" w=110
+            if v.days >= 0 && v.days <= 30
+              Badge.warning "Due in {v.days} d" w=110
+            if v.days > 30
+              Badge.success "Up to date" w=110
+            IconButton "more_vert" tooltip="More" onTap={sel=v.id; open vaccineMenu}
+      Row gap=16 top
+        Card grow gap=12
+          Heading "Reminder" level=3
+          Text.muted "Get a notification this many days before a vaccine is due."
+          Row gap=12 middle
+            Slider bind=remindDays min=1 max=60
+            Text.strong "{remindDays} days"
+          Toggle "Remind by email too" bind=remindEmail
+          Button "Save reminder" onTap={emit setReminder remindDays; toast "Reminder set for {remindDays} days before"}
+        Card grow gap=12
+          Row between
+            Heading "Weight" level=3
+            Text.muted "{last(weights)} kg now"
+          LineChart values={weights} labels={weightLabels} h=180
+          Row gap=8
+            Input "New weight (kg)" bind=weightNew type=number
+            Button.outline "Add" onTap={weightNew!="" ? {weights=append(weights,weightNew); weightLabels=append(weightLabels,"Now"); weightNew=""; toast "Weight logged"} : toast "Enter a weight"}
+  Dialog#addVaccine "Log a vaccine" "Add a dose to the record"
+    Select "Vaccine" bind=newName items=["Rabies","DHPP booster","Leptospirosis","Bordetella","Lyme"]
+    DatePicker "Date given" bind=newGiven
+    DatePicker "Next due" bind=newDue
+    Button "Save" onTap={newName!="" ? {vaccines=append(vaccines,{"id":length(vaccines)+1,"name":newName,"given":formatDate(newGiven,"MMM d, yyyy"),"due":formatDate(newDue,"MMM d, yyyy"),"days":365}); toast "Vaccine logged"; close} : toast "Choose a vaccine"}
+  Dialog#addPet "Add a pet"
+    Input "Name" bind=petName
+    Select "Species" bind=petKind items=["Dog","Cat","Rabbit","Other"]
+    Input "Microchip number" bind=petChip
+    Button "Add pet" onTap={emit addPet petName; close}
+  Menu#vaccineMenu
+    MenuItem "Mark as given today" icon="check" onTap={vaccines=updateWhere(vaccines,x=>x.id==sel,x=>with(with(x,"given",formatDate(today(),"MMM d, yyyy")),"days",365)); toast "Marked as given"}
+    MenuItem "Edit" icon="edit" onTap={open addVaccine}
+    MenuItem "Delete" icon="delete" onTap={vaccines=removeWhere(vaccines,x=>x.id==sel)}
+
+### Vet visits
+state visits=[{"id":1,"date":"Nov 20, 2025","vet":"Dr. Okafor, Elm Street Vets","reason":"DHPP booster and check-up","note":"Coat good, teeth need watching. Recheck in 6 months.","receipt":"https://images.example.com/receipts/elm-1120.jpg","cost":84},{"id":2,"date":"Jun 11, 2026","vet":"Dr. Okafor, Elm Street Vets","reason":"Bordetella and ear infection","note":"Left ear red. Drops twice a day for ten days.","receipt":"https://images.example.com/receipts/elm-0611.jpg","cost":132}]
+state photo=""
+state at=0
+state course={"name":"Ear drops, Otomax","total":20,"left":14,"perDay":2}
+state noteDraft=""
+App
+  Sidebar
+    Brand "Tailbook" icon="pets"
+    NavItem "Record" icon="vaccines" onTap={go record}
+    NavItem "Vet visits" icon="medical_services" selected={true}
+    NavItem "Travel" icon="flight" onTap={go travel}
+    NavItem "Share" icon="picture_as_pdf" onTap={go share}
+  Main
+    Nav
+      Heading "Vet visits" level=1
+      Button "Add visit" icon="add" onTap={open addVisit}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Column grow gap=12
+          each v in visits
+            Card gap=8
+              Row between
+                Text.strong "{v.date}"
+                Text.muted "{money(v.cost,"$",2)}"
+              Text.strong "{v.reason}"
+              Text.muted "{v.vet}"
+              Text "{v.note}"
+              Row gap=8 middle
+                Image "{v.receipt}" w=64 h=64 radius=8 onTap={photo=v.receipt; open zoom}
+                Text.muted "Receipt photo"
+                Spacer grow
+                Button.ghost "Delete" onTap={visits=removeWhere(visits,x=>x.id==v.id)}
+        Column w=320 gap=12
+          Card gap=12
+            Heading "Medicine course" level=3
+            Text.strong "{course.name}"
+            Row middle gap=16
+              Ring {(course.total-course.left)/course.total}
+              Column gap=2
+                Text.strong "{course.left} of {course.total} drops left" size=18
+                Text.muted "{course.perDay} a day, about {ceil(course.left/course.perDay)} days to go"
+            Progress {course.left/course.total}
+            Row gap=8
+              Button "Gave a dose" onTap={course.left>0 ? course=with(course,"left",course.left-1) : toast "Course finished"}
+              Button.outline "Undo" onTap={course=with(course,"left",min(course.total,course.left+1))}
+            if course.left<=3
+              Badge.warning "Nearly out: ask for a refill"
+  Dialog#addVisit "Add a vet visit"
+    DatePicker "Date" bind=visitDate
+    Input "Reason" bind=visitReason
+    Input "Notes" bind=noteDraft multiline
+    Input "Cost" bind=visitCost type=number
+    Button.outline "Attach receipt photo" icon="photo_camera" onTap={emit pickReceipt}
+    Button "Save visit" onTap={visitReason!="" ? {visits=append(visits,{"id":length(visits)+1,"date":formatDate(visitDate,"MMM d, yyyy"),"vet":"Elm Street Vets","reason":visitReason,"note":noteDraft,"receipt":"","cost":visitCost}); noteDraft=""; toast "Visit saved"; close} : toast "Add a reason"}
+  Lightbox#zoom "{photo}" "Receipt"
+
+### Travel
+state trip="Spain, 14 Jan 2027"
+state checklist=[{"id":1,"step":"Microchip implanted","done":true,"note":"Before the rabies vaccine"},{"id":2,"step":"Rabies vaccine given","done":true,"note":"Mar 4, 2025"},{"id":3,"step":"Wait 21 days after the vaccine","done":true,"note":"Passed Mar 25, 2025"},{"id":4,"step":"Book an official vet health certificate","done":false,"note":"Within 10 days of travel"},{"id":5,"step":"Tapeworm treatment (UK return)","done":false,"note":"1 to 5 days before return"}]
+state daysToValid=9
+App
+  Sidebar
+    Brand "Tailbook" icon="pets"
+    NavItem "Record" icon="vaccines" onTap={go record}
+    NavItem "Vet visits" icon="medical_services" onTap={go vet-visits}
+    NavItem "Travel" icon="flight" selected={true}
+    NavItem "Share" icon="picture_as_pdf" onTap={go share}
+  Main
+    Nav
+      Heading "Travel certificate" level=1
+      Select bind=trip items=["Spain, 14 Jan 2027","France, 3 Mar 2027"]
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Row between middle
+          Column gap=4
+            Heading "Biscuit to {trip}" level=3
+            Text.muted "Certificate becomes valid once every step is done"
+          Column gap=2 end
+            Text.strong "{daysToValid}" size=48
+            Text.caption "days until valid"
+        Progress {count(checklist,x=>x.done)/length(checklist)}
+        Text.muted "{count(checklist,x=>x.done)} of {length(checklist)} steps done"
+      Card gap=4
+        each c in checklist
+          Row gap=12 middle
+            Checkbox bind=c.done
+            Column grow gap=2
+              Text.strong "{c.step}" strike={c.done}
+              Text.muted "{c.note}"
+            if c.done
+              Badge.success "Done"
+            if !c.done
+              Badge.warning "To do"
+      Row gap=8
+        Button "Share with my vet" icon="send" onTap={emit sendChecklist; toast "Checklist sent"}
+        Button.outline "Open record" onTap={go record}
+
+### Share
+state sections=["Pet details","Vaccines","Vet visits","Weight"]
+state include=["Pet details","Vaccines"]
+Page
+  Nav
+    Brand "Tailbook" icon="pets"
+    Row gap=4
+      Link "Record" onTap={go record}
+      Link "Vet visits" onTap={go vet-visits}
+      Link "Travel" onTap={go travel}
+    Button "Download PDF" icon="download" onTap={emit exportPdf include; toast "PDF ready"}
+  Section narrow
+    Heading "Share Biscuit's record" level=1
+    Text.muted "Pick what the boarding kennel or new vet should see."
+    Card gap=12
+      each s in sections
+        Checkbox "{s}" checked={contains(include,s)} onChange={result ? include=append(include,s) : include=without(include,s)}
+      Divider
+      Row gap=8
+        Button "Download PDF" icon="picture_as_pdf" onTap={emit exportPdf include}
+        Button.outline "Copy link" icon="link" onTap={copy "https://tailbook.example.com/r/biscuit-7f3k"; toast "Link copied"}
+        Button.outline "Email" icon="mail" onTap={open emailShare}
+    Card gap=8
+      Heading "Preview" level=3
+      Text.strong "Biscuit, Border Collie, chip 985 112 004 551 237"
+      if contains(include,"Vaccines")
+        Text "Rabies 2025, DHPP 2025, Leptospirosis 2025 (overdue), Bordetella 2026"
+      if contains(include,"Vet visits")
+        Text "2 visits: Nov 20, 2025 and Jun 11, 2026"
+      if contains(include,"Weight")
+        LineChart values=[14.2,15.8,16.9,17.6,18.1,18.4] labels=["Jun","Jul","Aug","Sep","Oct","Nov"] h=120
+  Dialog#emailShare "Email the record"
+    Input "To" bind=shareTo type=email
+    Button "Send" onTap={shareTo!="" ? {emit emailRecord shareTo; toast "Sent"; close} : toast "Enter an address"}

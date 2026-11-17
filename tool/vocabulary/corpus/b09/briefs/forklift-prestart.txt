@@ -1,0 +1,3 @@
+App: Prestart, a forklift daily check. A walk-round with a diagram of the truck, with tappable spots (forks, tyres, mast chain, horn, lights, seatbelt, brakes), each marked ok or defect; a defect asks for a photo and tags the truck do-not-use with a red lockout screen; hours meter typed in; operator licence card scanned; a handbrake and lift test with a timer; a signed check kept in a list by date.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

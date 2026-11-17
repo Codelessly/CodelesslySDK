@@ -1,0 +1,224 @@
+### Live
+state tab="live"
+state running=true
+state elapsed=754
+state rate=24
+state targetLo=22
+state targetHi=24
+state splitSec=112
+state dist=3120
+state strokes=[{"n":1,"peak":820},{"n":2,"peak":840}]
+state curve=[0,120,340,610,820,700,420,180,40,0]
+state prev=[[0,110,330,600,810,690,410,170,30,0],[0,130,350,620,830,710,430,190,50,0],[0,115,335,605,815,695,415,175,35,0]]
+every 1s when running onTick={elapsed=elapsed+1; dist=dist+9}
+App
+  Sidebar
+    Brand "Catch & Drive" icon="rowing"
+    NavItem "Live" icon="speed" selected={tab=="live"} onTap={tab="live"}
+    NavItem "Boat" icon="groups" selected={tab=="boat"} onTap={go boat}
+    NavItem "Piece" icon="timer" onTap={go piece}
+    NavItem "Summary" icon="insights" onTap={go summary}
+    Spacer grow
+    Text.muted "Coach: Dana Whitfield"
+  Main
+    Nav
+      Heading "Live stroke" level=1
+      Row gap=8
+        Badge.success "Connected"
+        Button.outline "{running ? 'Pause' : 'Resume'}" onTap={running=!running}
+        Button.destructive "End session" onTap={open endSession}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=8
+          Text.caption "STROKE RATE (spm)"
+          Text "{rate}" size=96 weight=700 color={rate>=targetLo && rate<=targetHi ? "#FF2E7D32" : "#FFC62828"}
+          RangeBar value={rate} min=16 max=34 targetMin={targetLo} targetMax={targetHi}
+          Row between
+            Text.muted "Target {targetLo} to {targetHi}"
+            Text.muted "{rate<targetLo ? 'Too low' : rate>targetHi ? 'Too high' : 'In band'}"
+          Row gap=8
+            IconButton "remove" tooltip="Lower rate" onTap={rate=max(14,rate-1)}
+            IconButton "add" tooltip="Raise rate" onTap={rate=min(40,rate+1)}
+        Card gap=8
+          Text.caption "SPLIT / 500 m"
+          Text "{floor(splitSec/60)}:{splitSec%60<10 ? '0' : ''}{splitSec%60}" size=64 weight=700
+          Sparkline values=[114,113,113,112,112,111,112,112]
+          Text.muted "Average 1:52.4"
+        Card gap=8
+          Text.caption "DISTANCE / TIME"
+          Text "{dist} m" size=48 weight=700
+          Text.strong "{duration(elapsed)}"
+          Progress {dist/6000}
+          Text.muted "of 6000 m"
+      Card gap=12
+        Row between
+          Text.strong "Force curve"
+          Row gap=8
+            ChoiceChip "Last 10 overlaid" selected=true
+            Text.muted "Peak {max(curve[4],0)} N"
+        ForceCurve current={curve} previous={prev} fade=true h=220 xLabel="Drive" yLabel="Force (N)" peak={curve[4]}
+        Row gap=16
+          Text.muted "Drive 0.82 s"
+          Text.muted "Recovery 1.58 s"
+          Text.muted "Ratio 1:1.9"
+  Dialog#endSession "End this session?" "Your data so far is saved."
+    Row gap=8 end
+      Button.ghost "Keep rowing" onTap={close}
+      Button.destructive "End and review" onTap={emit endSession; close; go summary}
+
+### Boat
+state tab="boat"
+state seats=[{"seat":"Bow","name":"Priya","power":312},{"seat":"2","name":"Ken","power":340},{"seat":"3","name":"Omar","power":355},{"seat":"4","name":"Luca","power":348},{"seat":"5","name":"Tess","power":362},{"seat":"6","name":"Jonas","power":351},{"seat":"7","name":"Mina","power":344},{"seat":"Stroke","name":"Caleb","power":358}]
+state lagging="2"
+state selected=""
+state splitSec=112
+state elapsed=754
+state running=true
+every 1s when running onTick={elapsed=elapsed+1}
+App
+  Sidebar
+    Brand "Catch & Drive" icon="rowing"
+    NavItem "Live" icon="speed" onTap={go live}
+    NavItem "Boat" icon="groups" selected={tab=="boat"} onTap={tab="boat"}
+    NavItem "Piece" icon="timer" onTap={go piece}
+    NavItem "Summary" icon="insights" onTap={go summary}
+  Main
+    Nav
+      Heading "Boat view" level=1
+      Row gap=8
+        Badge.neutral "Eight, 8+"
+        Text.strong "Split {floor(splitSec/60)}:{splitSec%60}"
+        Text.muted "{duration(elapsed)}"
+    Column pad=24 gap=16
+      Card gap=12
+        Text.strong "Seats (bow to stroke)"
+        BoatView seats={seats} lagging={lagging} selected={selected} onSelect={selected=result}
+      Card gap=8
+        Row between
+          Text.strong "Power per seat (W)"
+          Text.muted "Boat average {round(sum(seats,s=>s.power)/length(seats),0)} W"
+        each s in seats
+          Row gap=12 middle
+            Text.strong "{s.seat}" w=60
+            Text s.name w=90
+            Progress {s.power/400} grow
+            Text "{s.power}" w=60
+            if s.seat==lagging
+              Badge.warning "Lagging"
+            if s.seat!=lagging
+              Spacer w=70
+          onTap={selected=s.seat; open seatSheet}
+      Row gap=8
+        Button.outline "Mark seat 3 as lagging" onTap={lagging="3"; toast "Seat 3 marked"}
+        Button.ghost "Clear mark" onTap={lagging=""}
+  Sheet#seatSheet "Seat {selected}"
+    Text.muted "Power {find(seats,s=>s.seat==selected).power} W against a boat average of 340 W."
+    Row gap=8
+      Button "Send cue to {find(seats,s=>s.seat==selected).name}" onTap={emit cue selected; toast "Cue sent"; close}
+      Button.ghost "Dismiss" onTap={close}
+
+### Piece
+state tab="piece"
+state running=false
+state clock=0
+state idx=0
+state boatM=0
+state ghostM=0
+state intervals=[{"label":"Work 1","kind":"work","sec":240,"rate":"22-24"},{"label":"Rest","kind":"rest","sec":90,"rate":""},{"label":"Work 2","kind":"work","sec":240,"rate":"24-26"},{"label":"Rest","kind":"rest","sec":90,"rate":""},{"label":"Work 3","kind":"work","sec":240,"rate":"26-28"},{"label":"Rest","kind":"rest","sec":90,"rate":""},{"label":"Work 4","kind":"work","sec":240,"rate":"28-30"}]
+state ghostPace=3.7
+state boatPace=3.9
+every 1s when running onTick={clock=clock+1; boatM=boatM+boatPace; ghostM=ghostM+ghostPace; running=clock<sum(intervals,i=>i.sec)}
+App
+  Sidebar
+    Brand "Catch & Drive" icon="rowing"
+    NavItem "Live" icon="speed" onTap={go live}
+    NavItem "Boat" icon="groups" onTap={go boat}
+    NavItem "Piece" icon="timer" selected={tab=="piece"} onTap={tab="piece"}
+    NavItem "Summary" icon="insights" onTap={go summary}
+  Main
+    Nav
+      Heading "Timed piece" level=1
+      Row gap=8
+        Button "{running ? 'Pause' : clock>0 ? 'Resume' : 'Start piece'}" onTap={running=!running}
+        Button.outline "Reset" onTap={running=false; clock=0; boatM=0; ghostM=0}
+        IconButton "tune" tooltip="Edit intervals" onTap={open editor}
+    Column pad=24 gap=16
+      Card gap=8
+        Row between
+          Text.strong "4 x 4 min, 90 s rest"
+          Text.strong "{duration(clock)} of {duration(sum(intervals,i=>i.sec))}"
+        Progress {clock/sum(intervals,i=>i.sec)}
+      Card gap=12
+        Row between
+          Text.strong "Pace boat"
+          Row gap=12
+            Badge.primary "You {round(boatM,0)} m"
+            Badge.neutral "Ghost {round(ghostM,0)} m"
+            Badge.{boatM>=ghostM ? "success" : "warning"} "{boatM>=ghostM ? 'Ahead' : 'Behind'} {abs(round(boatM-ghostM,0))} m"
+        RaceTrack boat={boatM} ghost={ghostM} length=3000 boatLabel="You" ghostLabel="Last Tuesday"
+      Card gap=8
+        Text.strong "Intervals"
+        each i in intervals
+          Row gap=12 middle
+            Text.strong "{i.label}" w=80
+            Progress {clamp((clock-sum(slice(intervals,0,index),x=>x.sec))/i.sec,0,1)} grow
+            Text.muted "{duration(i.sec)}" w=60
+            Text.muted "{i.kind=='work' ? i.rate + ' spm' : 'Rest'}" w=90
+  Dialog#editor "Edit intervals" "Change a length and the piece updates."
+    each i in intervals
+      Row gap=8 middle
+        Text i.label w=80
+        Input "Seconds" bind=i.sec type=number w=120
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button "Save" onTap={emit saveIntervals intervals; toast "Saved"; close}
+
+### Summary
+state tab="summary"
+state view="splits"
+state splits=[114,113,112,112,111,112,113,110]
+state rates=[22,23,24,24,25,24,26,28]
+state labels=["0","500","1000","1500","2000","2500","3000","3500"]
+state forces=[760,790,810,820,805,800,830,850]
+App
+  Sidebar
+    Brand "Catch & Drive" icon="rowing"
+    NavItem "Live" icon="speed" onTap={go live}
+    NavItem "Boat" icon="groups" onTap={go boat}
+    NavItem "Piece" icon="timer" onTap={go piece}
+    NavItem "Summary" icon="insights" selected={tab=="summary"} onTap={tab="summary"}
+  Main
+    Nav
+      Heading "Session summary" level=1
+      Row gap=8
+        Button.outline "Share" icon="share" onTap={open shareMenu}
+        Button "Save to log" onTap={emit saveSession; toast "Session saved"}
+    Column pad=24 gap=16
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.caption "Distance"
+          Text.strong "6,000 m"
+        Card gap=4
+          Text.caption "Average split"
+          Text.strong "1:52.2"
+        Card gap=4
+          Text.caption "Average rate"
+          Text.strong "{round(sum(rates,r=>r)/length(rates),1)} spm"
+        Card gap=4
+          Text.caption "Time in target band"
+          Text.strong "78%"
+      Card gap=12
+        SegmentedButton items=["Splits","Rate","Force"] onChange={view=lower(result)}
+        if view=="splits"
+          BarChart values={splits} labels={labels} h=240
+        if view=="rate"
+          LineChart values={rates} labels={labels} h=240
+        if view=="force"
+          AreaChart values={forces} labels={labels} h=240
+      Card gap=8
+        Text.strong "Coach notes"
+        Input "Add a note for the crew" bind=note multiline
+        Button.outline "Post note" onTap={emit note note; note=""; toast "Posted"}
+  Menu#shareMenu end
+    MenuItem "Copy link" icon="link" onTap={copy "https://catchdrive.app/s/6k-0412"; toast "Link copied"}
+    MenuItem "Export CSV" icon="download" onTap={emit exportCsv}

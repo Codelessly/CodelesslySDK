@@ -1,0 +1,184 @@
+### Deck Plan
+state deck="lower"
+state sel=""
+state plate=""
+state vlen=4.5
+state vtype="Car"
+state vweight=1.4
+state queue=[{"id":"q1","plate":"HX21 KLP","type":"Lorry","len":12.0,"weight":18.5,"dest":"Rosslare"},{"id":"q2","plate":"LN70 BDE","type":"Van","len":5.8,"weight":3.2,"dest":"Rosslare"},{"id":"q3","plate":"YR19 OWT","type":"Car","len":4.4,"weight":1.5,"dest":"Rosslare"},{"id":"q4","plate":"BK68 ZZA","type":"Motorbike","len":2.2,"weight":0.3,"dest":"Rosslare"},{"id":"q5","plate":"CF22 MNR","type":"Car","len":4.7,"weight":1.8,"dest":"Rosslare"}]
+state lanes=[{"id":"L1","name":"Lane 1 port","cap":42,"deck":"lower","vehicles":[]},{"id":"L2","name":"Lane 2","cap":42,"deck":"lower","vehicles":[]},{"id":"L3","name":"Lane 3","cap":42,"deck":"lower","vehicles":[]},{"id":"L4","name":"Lane 4 starboard","cap":42,"deck":"lower","vehicles":[]},{"id":"U1","name":"Lane 5 port","cap":42,"deck":"upper","vehicles":[]},{"id":"U2","name":"Lane 6 starboard","cap":42,"deck":"upper","vehicles":[]}]
+state seconds=2535
+state running=true
+every 1s when running onTick={seconds=max(0,seconds-1)}
+App
+  Sidebar
+    Brand "Roll On" icon="directions_boat"
+    NavItem "Deck plan" icon="map" selected={true}
+    NavItem "Load order" icon="format_list_numbered" badge="{length(queue)}" onTap={go load-order}
+    NavItem "Sailing" icon="schedule" onTap={go sailing}
+    Spacer grow
+    Text.muted "MV Aran Spirit"
+    Text.caption "Holyhead to Dublin"
+  Main
+    Nav
+      Heading "Deck plan" level=1
+      Row gap=12
+        Badge.info "Departs in {duration(seconds)}"
+        SegmentedButton items=["lower","upper"] bind=deck
+        Button "Add vehicle" onTap={open addVehicle}
+    Column pad=24 gap=16 scroll
+      if abs(sum(filter(lanes,l=>l.id=="L1"||l.id=="U1"),l=>sum(l.vehicles,v=>v.weight))-sum(filter(lanes,l=>l.id=="L4"||l.id=="U2"),l=>sum(l.vehicles,v=>v.weight)))>15
+        Card fill=#FFFDECEA gap=8
+          Row gap=12 middle
+            Icon "warning" color=#FFB3261E
+            Column grow
+              Text.strong "Trim warning: ship is listing"
+              Text.muted "Port and starboard differ by more than 15 t. Move a heavy vehicle to the lighter side."
+            Button.outline "Show balance" onTap={scroll balance}
+      if count(lanes,l=>l.deck=="upper"&&any(l.vehicles,v=>v.weight>10))>0
+        Card fill=#FFFFF4E0 gap=8
+          Row gap=12 middle
+            Icon "report" color=#FF8A5A00
+            Column grow
+              Text.strong "Heavy vehicle on the upper deck"
+              Text.muted "Lorries over 10 t must be on the lower deck."
+            Button.outline "Move to lower deck" onTap={lanes=map(lanes,l=>with(l,"vehicles",filter(l.vehicles,v=>!(l.deck=="upper"&&v.weight>10))));queue=concat(queue,[])}
+      Row gap=16 top
+        Column grow gap=12
+          Card gap=12
+            Row between
+              Text.strong "{upper(deck)} DECK, seen from above"
+              Text.muted "Bow at the top"
+            DeckPlan bind=deck
+              each lane in lanes
+                if lane.deck==deck
+                  Column gap=4
+                    Row between
+                      Text.caption "{lane.name}"
+                      Row gap=8
+                        Text.caption "{fixed(sum(lane.vehicles,v=>v.len),1)} of {lane.cap} m"
+                        if sum(lane.vehicles,v=>v.len)>=lane.cap-2
+                          Badge.error "Lane full"
+                        else
+                          Badge.success "{fixed(lane.cap-sum(lane.vehicles,v=>v.len),1)} m free"
+                    Lane#lane-{lane.id} drop=veh length={lane.cap} used={sum(lane.vehicles,v=>v.len)} onDrop={sum(lane.vehicles,v=>v.len)+result.data.len>lane.cap ? toast "Lane is full" : (deck=="upper"&&result.data.weight>10 ? toast "Heavy vehicles go on the lower deck" : lanes=updateWhere(lanes,l=>l.id==lane.id,l=>with(l,"vehicles",append(l.vehicles,result.data)));queue=removeWhere(queue,q=>q.id==result.data.id))}
+                      each v in lane.vehicles
+                        VehicleBlock "{v.plate}" type={v.type} length={v.len} weight={v.weight} scale=1 onTap={sel=v.id;open vehicleMenu} menu=vehicleMenu
+        Column w=300 gap=12
+          Card gap=12
+            Text.strong "Waiting to load"
+            if isEmpty(queue)
+              Text.muted "Everything is on board."
+            each q in queue
+              Card drag=veh(q) gap=4
+                Row between
+                  Text.strong "{q.plate}"
+                  Badge.neutral "{q.type}"
+                Text.caption "{q.len} m, {q.weight} t, to {q.dest}"
+      Card#balance gap=16
+        Text.strong "Weight and balance"
+        Row gap=24 top
+          Column grow gap=8
+            Text.caption "Port to starboard"
+            TrimNeedle value={sum(filter(lanes,l=>l.id=="L4"||l.id=="U2"),l=>sum(l.vehicles,v=>v.weight))-sum(filter(lanes,l=>l.id=="L1"||l.id=="U1"),l=>sum(l.vehicles,v=>v.weight))} min=-40 max=40 limit=15 leftLabel="Port" rightLabel="Starboard" unit="t"
+          Column grow gap=8
+            Text.caption "Bow to stern"
+            TrimBar value={sum(lanes,l=>sum(l.vehicles,v=>v.weight))} orientation=vertical labels=["Bow","Stern"] limit=20
+        Row gap=24
+          Text.muted "Total on board: {fixed(sum(lanes,l=>sum(l.vehicles,v=>v.weight)),1)} t"
+          Text.muted "Vehicles: {sum(lanes,l=>length(l.vehicles))}"
+  Dialog#addVehicle "Add a vehicle" "Type the plate and the length as the driver gives them"
+    Input "Plate" "HX21 KLP" bind=plate
+    Select "Type" items=["Car","Van","Lorry","Motorbike","Coach"] bind=vtype
+    Row gap=12
+      Input "Length (m)" type=number bind=vlen grow
+      Input "Weight (t)" type=number bind=vweight grow
+    Button "Add to queue" onTap={trim(plate)=="" ? toast "Enter a plate" : queue=append(queue,{"id":concat([],[plate])[0],"plate":upper(plate),"type":vtype,"len":vlen,"weight":vweight,"dest":"Dublin"});plate="";close}
+  Menu#vehicleMenu
+    MenuItem "Send back to queue" icon="undo" onTap={queue=append(queue,first(filter(concat([],flatten(lanes)),v=>v.id==sel)));lanes=map(lanes,l=>with(l,"vehicles",removeWhere(l.vehicles,v=>v.id==sel)))}
+    MenuItem "Copy plate" icon="content_copy" onTap={copy sel;toast "Copied"}
+
+### Load Order
+App
+  Sidebar
+    Brand "Roll On" icon="directions_boat"
+    NavItem "Deck plan" icon="map" onTap={go deck-plan}
+    NavItem "Load order" icon="format_list_numbered" badge="{length(queue)}" selected={true}
+    NavItem "Sailing" icon="schedule" onTap={go sailing}
+    Spacer grow
+    Text.muted "MV Aran Spirit"
+  Main
+    Nav
+      Heading "Load order" level=1
+      Row gap=8
+        Badge.info "Departs in {duration(seconds)}"
+        Button.outline "Print for the deck crew" icon="print" onTap={emit printOrder}
+    Column pad=24 gap=16 scroll
+      Text.muted "The list follows the plan. Lanes load front to back, lower deck first, heaviest vehicles first within a lane."
+      each lane in sortBy(filter(lanes,l=>!isEmpty(l.vehicles)),l=>l.deck=="lower"?0:1)
+        Card gap=8
+          Row between
+            Column
+              Text.strong "{lane.name}"
+              Text.caption "{upper(lane.deck)} DECK"
+            Row gap=8
+              if sum(lane.vehicles,v=>v.len)>=lane.cap-2
+                Badge.error "Full"
+              Badge.neutral "{length(lane.vehicles)} vehicles"
+          Divider
+          each v in sortByDesc(lane.vehicles,v=>v.weight)
+            ListTile "{index+1}. {v.plate}" subtitle="{v.type}, {v.len} m, {v.weight} t" leading="directions_car"
+              Row gap=8
+                IconButton "map" tooltip="Show on plan" onTap={deck=lane.deck;go deck-plan}
+                IconButton "undo" tooltip="Back to queue" onTap={sel=v.id;queue=append(queue,v);lanes=map(lanes,l=>with(l,"vehicles",removeWhere(l.vehicles,x=>x.id==sel)))}
+      if sum(lanes,l=>length(l.vehicles))==0
+        Card gap=8
+          Text.strong "Nothing placed yet"
+          Text.muted "Drag vehicles from the waiting list onto a lane."
+          Button "Go to the deck plan" onTap={go deck-plan}
+      Card gap=8
+        Text.strong "Still waiting ({length(queue)})"
+        each q in queue
+          Row between
+            Text "{q.plate} {q.type}"
+            Text.muted "{q.len} m, {q.weight} t"
+
+### Sailing
+state checks={"lights":false,"chocks":false,"lashings":false,"ramp":false}
+App
+  Sidebar
+    Brand "Roll On" icon="directions_boat"
+    NavItem "Deck plan" icon="map" onTap={go deck-plan}
+    NavItem "Load order" icon="format_list_numbered" badge="{length(queue)}" onTap={go load-order}
+    NavItem "Sailing" icon="schedule" selected={true}
+    Spacer grow
+    Text.muted "MV Aran Spirit"
+  Main
+    Nav
+      Heading "Sailing 18:30 to Dublin" level=1
+      Button "Close deck" disabled={!(checks.lights&&checks.chocks&&checks.lashings&&checks.ramp)||length(queue)>0} onTap={running=false;toast "Deck closed";emit deckClosed}
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.caption "Departs in"
+          Text "{duration(seconds)}" size=40 weight=700
+          Progress {1-seconds/2535}
+        Card gap=4
+          Text.caption "Loaded"
+          Text "{sum(lanes,l=>length(l.vehicles))} of {sum(lanes,l=>length(l.vehicles))+length(queue)}" size=40 weight=700
+          Text.muted "{length(queue)} still waiting"
+        Card gap=4
+          Text.caption "Lane use"
+          Text "{round(100*sum(lanes,l=>sum(l.vehicles,v=>v.len))/sum(lanes,l=>l.cap),0)}%" size=40 weight=700
+          Text.muted "{count(lanes,l=>sum(l.vehicles,v=>v.len)>=l.cap-2)} lanes full"
+      Card gap=12
+        Text.strong "Weight by lane"
+        BarChart values={map(lanes,l=>sum(l.vehicles,v=>v.weight))} labels={map(lanes,l=>l.name)} h=200
+      Card gap=8
+        Text.strong "Before the deck closes"
+        Checkbox "Lights off and handbrakes on" bind=checks.lights
+        Checkbox "Wheel chocks under lorries" bind=checks.chocks
+        Checkbox "Lashings checked on the upper deck" bind=checks.lashings
+        Checkbox "Bow ramp raised" bind=checks.ramp
+        if length(queue)>0
+          Text.danger "{length(queue)} vehicles are not yet on a lane."

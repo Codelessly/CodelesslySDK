@@ -1,0 +1,3 @@
+App: Buzz In, a door entry intercom. An outdoor panel with a list of flats by name scrolled by two arrows and a call key; a number typed for a code; a calling state with a ringing animation and a timeout; the resident's indoor screen with a camera image of the visitor, an answer, an open-door key that beeps and a hang up; a missed visitor log with photos and times; a delivery code for a day; a trades button on a timer; a night mode.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

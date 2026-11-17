@@ -1,0 +1,124 @@
+### Radio
+state ch=7
+state chName="Site Ops"
+state tx=false
+state txSecs=0
+state scanning=false
+state activity=false
+state locked=false
+state volume=60
+state squelch=3
+state battery=18
+state signal=4
+state groupCall=false
+state privateCode="38"
+state channels=[{"n":1,"name":"Dispatch"},{"n":2,"name":"Yard North"},{"n":3,"name":"Yard South"},{"n":4,"name":"Maintenance"},{"n":5,"name":"Security"},{"n":6,"name":"Loading Dock"},{"n":7,"name":"Site Ops"},{"n":8,"name":"Emergency"}]
+every 1s when tx onTick={txSecs=txSecs+1}
+every 700 when scanning && !activity onTick={ch=ch%8+1; chName=find(channels,c=>c.n==ch).name}
+App
+  Main
+    Nav
+      Brand "Pushtalk" icon="settings_input_antenna"
+      Row gap=8
+        IconButton "lock" tooltip="Lock keys" onTap={locked=!locked; toast locked ? "Keys unlocked" : "Keys locked"}
+        IconButton "list" tooltip="Saved channels" onTap={go channels}
+        IconButton "tune" tooltip="Settings" onTap={go settings}
+    Column pad=24 gap=16 maxw=420 center
+      Box fill=#FF10160F radius=16 pad=20 gap=12 animate={activity ? "pulse" : "none"}
+        Row between
+          SignalBar value={signal} max=5
+          Text "{scanning ? 'SCAN' : (groupCall ? 'GROUP' : 'CH')}" color=#FF7CFC7C size=14
+          BatteryIndicator value={battery} low=20 onLow={emit lowBattery}
+        Column center gap=0
+          Text "{fixed(ch,0)}" size=96 weight=700 color=#FF7CFC7C center
+          Text "{chName}" size=18 color=#FF7CFC7C center
+        if tx
+          Row center gap=8
+            Icon "fiber_manual_record" color=#FFFF3B30
+            Text "TX {duration(txSecs)}" color=#FFFF3B30 weight=700
+        if activity
+          Text "ACTIVITY ON CH {ch}" color=#FFFFD60A center animate=pulse
+        if locked
+          Row center gap=4
+            Icon "lock" color=#FF7CFC7C
+            Text "LOCKED" color=#FF7CFC7C size=12
+        if battery <= 20
+          Text "LOW BATTERY" color=#FFFF9F0A size=12 center animate=pulse
+      Row gap=12 center
+        Knob "Volume" bind=volume min=0 max=100 disabled={locked} onChange={emit volume result}
+        Knob "Squelch" bind=squelch min=0 max=9 disabled={locked} onChange={emit squelch result}
+      Row gap=8 center
+        IconButton "arrow_downward" tooltip="Channel down" disabled={locked || scanning} onTap={ch=ch==1?8:ch-1; chName=find(channels,c=>c.n==ch).name}
+        IconButton "arrow_upward" tooltip="Channel up" disabled={locked || scanning} onTap={ch=ch%8+1; chName=find(channels,c=>c.n==ch).name}
+        ChoiceChip "Scan" selected={scanning} disabled={locked} onTap={scanning=!scanning; activity=false}
+        ChoiceChip "Group" selected={groupCall} disabled={locked} onTap={groupCall=!groupCall}
+        Button.outline "Code {privateCode}" disabled={locked} onTap={open code}
+      if scanning && !activity
+        Button.tertiary "Simulate activity" onTap={activity=true; emit scanStopped ch}
+      if activity
+        Button.outline "Resume scan" onTap={activity=false}
+    Footer
+      Row center gap=12 pad=12
+        Button.outline "Call tone" icon="notifications_active" disabled={locked} onTap={emit callTone ch; toast "Call tone sent"}
+        PushToTalk "Hold to talk" disabled={locked} onPress={tx=true; txSecs=0; scanning=false; emit tx ch} onRelease={tx=false; emit txEnd txSecs}
+  Dialog#code "Private code" "Only radios with the same code hear you"
+    Input "Code (0 to 99)" bind=privateCode type=number
+    Row gap=8 end
+      Button.outline "Off" onTap={privateCode="0"; close}
+      Button "Save" onTap={clamp(privateCode,0,99) == privateCode ? close : toast "Enter 0 to 99"}
+
+### Channels
+state channels=[{"n":1,"name":"Dispatch"},{"n":2,"name":"Yard North"},{"n":3,"name":"Yard South"},{"n":4,"name":"Maintenance"},{"n":5,"name":"Security"},{"n":6,"name":"Loading Dock"},{"n":7,"name":"Site Ops"},{"n":8,"name":"Emergency"}]
+state ch=7
+state sel=0
+state newName=""
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go radio}
+      Heading "Saved channels" level=1
+      Badge.neutral "{length(channels)} of 8"
+    Column pad=24 gap=12 maxw=480
+      each c in channels
+        ListTile "{c.n}. {c.name}" subtitle={c.n==ch ? "Current channel" : ""} onTap={ch=c.n; go radio}
+          IconButton "more_vert" tooltip="Options" onTap={sel=c.n; open chMenu}
+  Menu#chMenu end
+    MenuItem "Tune to channel" icon="radio" onTap={ch=sel; go radio}
+    MenuItem "Rename" icon="edit" onTap={newName=find(channels,c=>c.n==sel).name; open rename}
+  Dialog#rename "Rename channel {sel}"
+    Input "Name" bind=newName
+    Button "Save" onTap={trim(newName)=="" ? toast "Name required" : {channels=updateWhere(channels,c=>c.n==sel,c=>with(c,"name",trim(newName))); close}}
+
+### Settings
+state volume=60
+state squelch=3
+state beepOnLow=true
+state lockTimeout="30 s"
+state toneType="Standard"
+state battery=18
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go radio}
+      Heading "Settings" level=1
+    Column pad=24 gap=16 maxw=480
+      Card gap=12
+        Heading "Audio" level=3
+        Slider "Volume" bind=volume min=0 max=100
+        Slider "Squelch" bind=squelch min=0 max=9
+        Select "Call tone" bind=toneType items=["Standard","Double chirp","Long"]
+        Button.outline "Test tone" icon="volume_up" onTap={emit callTone 0; toast "Tone played"}
+      Card gap=12
+        Heading "Battery" level=3
+        Row between
+          Text "Charge"
+          Text.strong "{battery}%"
+        Progress {battery/100}
+        Toggle "Beep when low" bind=beepOnLow
+        if battery <= 20 && beepOnLow
+          Text.danger "Low battery: beeping every 30 s"
+      Card gap=12
+        Heading "Keys" level=3
+        SegmentedButton bind=lockTimeout items=["Off","30 s","2 min"]
+        Text.muted "Keys lock automatically after {lockTimeout}."
+      Button "Done" onTap={emit saveSettings; go radio}

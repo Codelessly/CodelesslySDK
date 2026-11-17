@@ -1,0 +1,137 @@
+### Display
+state room=68
+state target=70
+state mode="HEAT"
+state heating=true
+state locked=false
+state editing=false
+state page=-1
+state message="Filter due in 12 days. Replace filter soon."
+state showMsg=false
+state cursorOn=true
+state units="F"
+every 500 onTick={cursorOn=!cursorOn}
+every 1s when heating onTick={room=min(target,room+0.1)}
+every 30s onTick={showMsg=!showMsg}
+App
+  Main
+    Column center middle gap=24 pad=24
+      Box fill=#FF1B2A1F radius=12 pad=20 gap=4 w=320
+        if locked
+          Row center middle h=64
+            Icon "lock" size=40 color=#FFB7F5A8
+        if !locked && page < 0
+          Row between
+            Text.mono "{fixed(room,0)}° {mode}" color=#FFB7F5A8 size=22
+            if heating
+              Icon "local_fire_department" color=#FFFF9A3C animate=pulse duration=1200
+          if showMsg
+            Marquee "{message}" speed=40 w=16ch color=#FFB7F5A8 size=22
+          if !showMsg
+            Row gap=2
+              Text.mono "Set {target}° ▲" color=#FFB7F5A8 size=22
+              if editing
+                Text.mono "_" color=#FFB7F5A8 size=22 visible={cursorOn}
+        if !locked && page >= 0
+          Text.mono "{page == 0 ? 'SCHEDULE' : page == 1 ? 'HOLD' : page == 2 ? 'UNITS' : 'LOCK'}" color=#FFB7F5A8 size=22
+          Text.mono "{page == 0 ? '6:00a 70° Mon-Fri' : page == 1 ? 'Hold 2h?  +/-' : page == 2 ? 'Show in ° ' + units : 'Hold menu 3s'}" color=#FFB7F5A8 size=22
+      Row gap=16
+        Button.outline "−" disabled={locked} onTap={target=target-1; editing=true}
+        Button.outline "+" disabled={locked} onTap={target=target+1; editing=true}
+        Button.secondary "MENU" onTap={locked ? toast "Locked" : editing ? editing=false : page=-1} onLongPress={page=(page+1)%4}
+      Row gap=8
+        Button.ghost "Schedule" onTap={go schedule}
+        Button.ghost "Hold" onTap={go hold}
+        Button.ghost "Lock" onTap={open lockConfirm}
+  Dialog#lockConfirm "Lock the keys?" "Only a key symbol will show."
+    Row end gap=8
+      Button.outline "Cancel" onTap={close}
+      Button "Lock" onTap={locked=true; page=-1; close}
+  Dialog#unlock "Unlock"
+    Text.muted "Hold MENU for three seconds to unlock."
+    Button "Unlock" onTap={locked=false; close}
+
+### Schedule
+state slots=[{"id":1,"time":"6:00a","temp":70,"days":"Mon-Fri"},{"id":2,"time":"9:00a","temp":62,"days":"Mon-Fri"},{"id":3,"time":"5:30p","temp":71,"days":"Mon-Fri"},{"id":4,"time":"10:30p","temp":64,"days":"Daily"}]
+state editId=0
+state editTemp=68
+App
+  Main
+    Nav
+      Heading "Schedule" level=1
+      Button.ghost "Back" onTap={go display}
+    Column pad=24 gap=12
+      Text.muted "Two lines on the display: time and days above, target below."
+      each s in slots
+        Card gap=8
+          Row between
+            Text.mono "{s.time} {s.days}"
+            Text.mono "{s.temp}° ▲"
+            Row gap=4
+              IconButton "remove" tooltip="Lower" onTap={slots=updateWhere(slots,x=>x.id==s.id,x=>with(x,"temp",x.temp-1))}
+              IconButton "add" tooltip="Raise" onTap={slots=updateWhere(slots,x=>x.id==s.id,x=>with(x,"temp",x.temp+1))}
+              IconButton "more_vert" tooltip="More" onTap={editId=s.id; open slotMenu}
+      Button.outline "Add a time" onTap={slots=append(slots,{"id":length(slots)+1,"time":"12:00p","temp":68,"days":"Daily"}); toast "Added"}
+  Menu#slotMenu
+    MenuItem "Copy to weekend" icon="content_copy" onTap={toast "Copied"}
+    MenuItem "Delete" icon="delete" onTap={slots=removeWhere(slots,x=>x.id==editId); toast "Removed"}
+
+### Hold
+state holdHours=2
+state holdTemp=72
+state holdOn=false
+state remaining=0
+every 1s when holdOn onTick={remaining=max(0,remaining-1); remaining==0 ? holdOn=false : toast ""}
+App
+  Main
+    Nav
+      Heading "Hold" level=1
+      Button.ghost "Back" onTap={go display}
+    Column pad=24 gap=16
+      Card gap=12
+        Text.strong "Hold the temperature"
+        Row between
+          Text.muted "Target"
+          Row gap=8
+            IconButton "remove" tooltip="Lower" onTap={holdTemp=holdTemp-1}
+            Text.mono "{holdTemp}°"
+            IconButton "add" tooltip="Raise" onTap={holdTemp=holdTemp+1}
+        Row between
+          Text.muted "For"
+          Row gap=8
+            IconButton "remove" tooltip="Shorter" onTap={holdHours=max(1,holdHours-1)}
+            Text.mono "{holdHours}h"
+            IconButton "add" tooltip="Longer" onTap={holdHours=min(12,holdHours+1)}
+        Button "Start hold" onTap={holdOn=true; remaining=holdHours*3600; toast "Holding {holdTemp}°"}
+      if holdOn
+        Card gap=8
+          Text.mono "HOLD {holdTemp}° {duration(remaining)}"
+          Progress {remaining/(holdHours*3600)}
+          Button.destructive "Cancel hold" onTap={holdOn=false; remaining=0}
+
+### Units
+state units="F"
+state autoLock=true
+state lockAfter=30
+App
+  Main
+    Nav
+      Heading "Units and lock" level=1
+      Button.ghost "Back" onTap={go display}
+    Column pad=24 gap=16
+      Card gap=12
+        Text.strong "Units"
+        SegmentedButton bind=units items=["F","C"]
+        Text.mono "Display: 70° {units}"
+      Card gap=12
+        Text.strong "Lock"
+        Toggle "Lock keys automatically" bind=autoLock
+        if autoLock
+          Row between
+            Text.muted "After {lockAfter} seconds"
+            Slider bind=lockAfter min=10 max=120 w=200
+        Button.outline "Lock now" onTap={open lockNow}
+  Dialog#lockNow "Lock now?" "The display shows a key symbol until MENU is held."
+    Row end gap=8
+      Button.outline "Cancel" onTap={close}
+      Button "Lock" onTap={emit lock; go display; close}

@@ -1,0 +1,164 @@
+### Run
+state tab="run"
+state pos=41.2
+state running=true
+state eta=5025
+state speed=1.8
+state sel=""
+state findings=[{"id":"F-101","km":3.4,"type":"Corrosion","depth":2.1,"wall":9.5,"sev":"low"},{"id":"F-102","km":12.8,"type":"Weld","depth":0.9,"wall":9.5,"sev":"low"},{"id":"F-103","km":18.6,"type":"Dent","depth":4.2,"wall":9.5,"sev":"medium"},{"id":"F-104","km":27.1,"type":"Corrosion","depth":5.8,"wall":9.5,"sev":"high"},{"id":"F-105","km":33.9,"type":"Weld","depth":1.4,"wall":9.5,"sev":"low"},{"id":"F-106","km":38.5,"type":"Corrosion","depth":7.3,"wall":9.5,"sev":"critical"}]
+state valves=[{"name":"MLV-1","km":0,"open":true},{"name":"MLV-2","km":22.5,"open":true},{"name":"MLV-3","km":45,"open":true},{"name":"Receiver","km":60,"open":false}]
+every 1s when running onTick={pos=min(60,pos+speed/3600); eta=max(0,eta-1)}
+App
+  Sidebar
+    Brand "Pigtrack" icon="route"
+    NavItem "Live run" icon="radar" selected={tab=="run"} onTap={tab="run"}
+    NavItem "Findings" icon="report_problem" badge="6" selected={tab=="findings"} onTap={go findings}
+    NavItem "Report" icon="description" selected={tab=="report"} onTap={go report}
+    Spacer grow
+    Text.muted "Line 7, Kilburn to Harrow"
+  Main
+    Nav
+      Heading "Run 2026-114" level=1
+      Row gap=8
+        Badge.success "Tool in line" visible={running}
+        Badge.warning "Paused" visible={!running}
+        Button.outline "{running ? 'Pause' : 'Resume'}" onTap={running=!running; toast running ? "Run paused" : "Run resumed"}
+        Button.destructive "Abort run" onTap={open abort}
+    Column pad=24 gap=16 scroll
+      Row gap=16
+        Card grow gap=4
+          Text.caption "Tool position"
+          Text "{fixed(pos,1)} km" size=36 weight=700
+        Card grow gap=4
+          Text.caption "Speed"
+          Text "{fixed(speed,1)} m/s" size=36 weight=700
+        Card grow gap=4
+          Text.caption "Receiver arrival in"
+          Countdown seconds={eta} size=36
+        Card grow gap=4
+          Text.caption "Findings so far"
+          Text "{count(findings,f=>f.km<=pos)} of {length(findings)}" size=36 weight=700
+      Card gap=12
+        Row between
+          Text.strong "Pipeline, km 0 to 60"
+          Text.muted "{fixed(60-pos,1)} km to go"
+        Row scroll
+          PipeLine min=0 max=60 position={pos} markers={map(findings,f=>{"km":f.km,"label":f.id,"severity":f.sev})} valves={valves} onSelect={sel=result; go findings} h=120
+        Progress {pos/60}
+      Card gap=8
+        Text.strong "Valves along the line"
+        each v in valves
+          ListTile "{v.name}" subtitle="km {v.km}" icon="valve"
+            Toggle bind=v.open onChange={toast result ? "{v.name} open" : "{v.name} closed"}
+      Card gap=8
+        Row between
+          Text.strong "Latest findings"
+          Link "All findings" onTap={go findings}
+        each f in reverse(filter(findings,f=>f.km<=pos))
+          ListTile "{f.type} at km {f.km}" subtitle="{f.depth} mm loss" onTap={sel=f.id; go findings}
+            Badge.error "{f.sev}" visible={f.sev=="critical" || f.sev=="high"}
+            Badge.warning "{f.sev}" visible={f.sev=="medium"}
+            Badge.success "{f.sev}" visible={f.sev=="low"}
+  Dialog#abort "Abort the run?" "The tool stays in the line until it is recovered."
+    Text.muted "Position {fixed(pos,1)} km will be logged as the stop point."
+    Row gap=8 end
+      Button.ghost "Keep running" onTap={close}
+      Button.destructive "Abort" onTap={running=false; emit abortRun pos; toast "Run aborted"; close}
+
+### Findings
+state sel="F-104"
+state sort="km"
+state findings=[{"id":"F-101","km":3.4,"type":"Corrosion","depth":2.1,"wall":9.5,"sev":"low"},{"id":"F-102","km":12.8,"type":"Weld","depth":0.9,"wall":9.5,"sev":"low"},{"id":"F-103","km":18.6,"type":"Dent","depth":4.2,"wall":9.5,"sev":"medium"},{"id":"F-104","km":27.1,"type":"Corrosion","depth":5.8,"wall":9.5,"sev":"high"},{"id":"F-105","km":33.9,"type":"Weld","depth":1.4,"wall":9.5,"sev":"low"},{"id":"F-106","km":38.5,"type":"Corrosion","depth":7.3,"wall":9.5,"sev":"critical"}]
+state typeFilter="All"
+App
+  Sidebar
+    Brand "Pigtrack" icon="route"
+    NavItem "Live run" icon="radar" onTap={go run}
+    NavItem "Findings" icon="report_problem" badge="6" selected={true}
+    NavItem "Report" icon="description" onTap={go report}
+  Main
+    Nav
+      Heading "Findings" level=1
+      Row gap=8
+        SegmentedButton bind=sort items=["km","depth"]
+        Select bind=typeFilter items=["All","Dent","Corrosion","Weld"] w=160
+    Column pad=24 gap=16 scroll
+      Card gap=4
+        Row gap=8
+          Text.strong w=70 "Position"
+          Text.strong w=100 "Type"
+          Text.strong w=90 "Depth"
+          Text.strong grow "Wall loss"
+          Text.strong w=90 "Severity"
+        Divider
+        each f in (sort=="km" ? sortBy(filter(findings,x=>typeFilter=="All" || x.type==typeFilter),x=>x.km) : sortByDesc(filter(findings,x=>typeFilter=="All" || x.type==typeFilter),x=>x.depth))
+          Row gap=8 middle pad=[0,6,0,6] fill={sel==f.id ? "#1F2F80ED" : "#00000000"} onTap={sel=f.id}
+            Text w=70 "km {f.km}"
+            Text w=100 "{f.type}"
+            Text w=90 "{f.depth} mm"
+            Progress {f.depth/f.wall} grow
+            Badge.error "Critical" w=90 visible={f.sev=="critical"}
+            Badge.danger "High" w=90 visible={f.sev=="high"}
+            Badge.warning "Medium" w=90 visible={f.sev=="medium"}
+            Badge.success "Low" w=90 visible={f.sev=="low"}
+    Footer
+      Row between pad=12
+        Text.muted "Selected {sel}"
+        Button "Cross-section" icon="layers" onTap={open wall}
+  Pane w=360 pad=16 gap=12
+    Heading "{find(findings,f=>f.id==sel).type} at km {find(findings,f=>f.id==sel).km}" level=3
+    CrossSection wall={find(findings,f=>f.id==sel).wall} loss={find(findings,f=>f.id==sel).depth} unit="mm" h=220
+    Row between
+      Text.muted "Remaining wall"
+      Text.strong "{fixed(find(findings,f=>f.id==sel).wall-find(findings,f=>f.id==sel).depth,1)} mm"
+    Row between
+      Text.muted "Loss"
+      Text.strong "{round(find(findings,f=>f.id==sel).depth/find(findings,f=>f.id==sel).wall*100,0)} %"
+    Button.outline "Flag for dig" icon="flag" onTap={emit flag sel; toast "Flagged {sel}"}
+  Sheet#wall "Wall section"
+    CrossSection wall={find(findings,f=>f.id==sel).wall} loss={find(findings,f=>f.id==sel).depth} unit="mm" h=240
+    Button "Close" onTap={close}
+
+### Report
+state findings=[{"id":"F-101","km":3.4,"type":"Corrosion","depth":2.1,"wall":9.5,"sev":"low"},{"id":"F-102","km":12.8,"type":"Weld","depth":0.9,"wall":9.5,"sev":"low"},{"id":"F-103","km":18.6,"type":"Dent","depth":4.2,"wall":9.5,"sev":"medium"},{"id":"F-104","km":27.1,"type":"Corrosion","depth":5.8,"wall":9.5,"sev":"high"},{"id":"F-105","km":33.9,"type":"Weld","depth":1.4,"wall":9.5,"sev":"low"},{"id":"F-106","km":38.5,"type":"Corrosion","depth":7.3,"wall":9.5,"sev":"critical"}]
+state includeLow=true
+App
+  Sidebar
+    Brand "Pigtrack" icon="route"
+    NavItem "Live run" icon="radar" onTap={go run}
+    NavItem "Findings" icon="report_problem" badge="6" onTap={go findings}
+    NavItem "Report" icon="description" selected={true}
+  Main
+    Nav
+      Heading "Run report" level=1
+      Row gap=8
+        Toggle "Include low severity" bind=includeLow
+        Button.outline "Copy summary" icon="content_copy" onTap={copy "Run 2026-114: {length(findings)} findings, worst {first(sortByDesc(findings,f=>f.depth)).depth} mm at km {first(sortByDesc(findings,f=>f.depth)).km}"; toast "Copied"}
+        Button "Export PDF" icon="picture_as_pdf" onTap={emit exportReport "pdf"; toast "Report queued"}
+    Column pad=24 gap=16 scroll maxw=900
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.caption "Findings"
+          Text "{length(findings)}" size=36 weight=700
+        Card gap=4
+          Text.caption "Deepest loss"
+          Text "{first(sortByDesc(findings,f=>f.depth)).depth} mm" size=36 weight=700
+        Card gap=4
+          Text.caption "Need action"
+          Text "{count(findings,f=>f.sev=="critical" || f.sev=="high")}" size=36 weight=700 color=#FFC62828
+      Card gap=12
+        Text.strong "Worst first"
+        each f in sortByDesc(filter(findings,x=>includeLow || x.sev!="low"),x=>x.depth)
+          Row gap=12 middle
+            Text.muted "{index+1}" w=24
+            Column grow gap=2
+              Text.strong "{f.type}, km {f.km}"
+              Text.muted "{f.id}, {f.depth} of {f.wall} mm wall"
+            Badge.error "Critical" visible={f.sev=="critical"}
+            Badge.danger "High" visible={f.sev=="high"}
+            Badge.warning "Medium" visible={f.sev=="medium"}
+            Badge.success "Low" visible={f.sev=="low"}
+            IconButton "chevron_right" tooltip="Open finding" onTap={go findings}
+      Card gap=8
+        Text.strong "Loss by position"
+        BarChart values={map(findings,f=>f.depth)} labels={map(findings,f=>"km {f.km}")} h=180

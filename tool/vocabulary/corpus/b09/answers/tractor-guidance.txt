@@ -1,0 +1,152 @@
+### Guidance
+project night=false saved
+project width=12
+project overlap=0.1
+state pass=14
+state offset=-0.4
+state heading=87
+state speed=7.8
+state covered=0.42
+state running=true
+every 1s when running onTick={offset=clamp(offset+0.05,-3,3)}
+App theme={night ? "dark" : "light"}
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Fields" onTap={go fields}
+        Column gap=0
+          Text.strong "North Meadow"
+          Text.caption "Pass {pass} of 31, {fixed(covered*100,0)}% covered"
+      Row gap=8
+        IconButton "dark_mode" tooltip="Day or night" onTap={night=!night}
+        IconButton "tune" tooltip="Implement" onTap={go implement}
+        IconButton "more_vert" tooltip="More" onTap={open more}
+    Column gap=8 pad=12 grow
+      OffLineBar value={offset} range=3 unit="m" onTap={emit recenter}
+      Row between middle
+        Text "{abs(offset)} m {offset<0 ? 'left' : 'right'} of pass {pass}" size=28 weight=700
+        Badge.success "On line" visible={abs(offset)<0.3}
+        Badge.warning "Steer {offset<0 ? 'right' : 'left'}" visible={abs(offset)>=0.3}
+      Card grow pad=0
+        FieldMap boundary="north_meadow" passes=31 spacing={width-overlap*width} heading={heading} selected={pass} covered={covered} trail=#FF2E9E4F tractor="arrow" follow onTapPass={pass=result}
+      if running && speed>0
+        Row gap=8 middle
+          Icon "warning"
+          Text.strong "Headland in 120 m, lift the implement" visible={covered>0.4}
+          Spacer grow
+          Button.outline "Dismiss" onTap={toast "Warning dismissed"}
+      Row between middle
+        Row gap=16
+          Gauge bind=speed min=0 max=15 unit="km/h" w=120 h=120
+          Column gap=2
+            Text.caption "Heading"
+            Text.strong "{heading} deg"
+            Text.caption "Width"
+            Text.strong "{width} m"
+    Footer
+      Row gap=12 middle
+        Button.outline "Prev pass" size=large onTap={pass=max(1,pass-1); offset=0}
+        Column grow center gap=0
+          Text "Pass {pass}" size=32 weight=700 center
+          Text.caption "next: {pass+1}" center
+        Button "Next pass" size=large onTap={pass=min(31,pass+1); offset=0; covered=clamp(covered+0.03,0,1)}
+        Button.destructive running ? "Pause" : "Resume" onTap={running=!running}
+  Menu#more end
+    MenuItem "Record boundary" icon="route" onTap={go boundary}
+    MenuItem "Implement and overlap" icon="agriculture" onTap={go implement}
+    MenuItem "Reset coverage" icon="restart_alt" onTap={open reset}
+    MenuItem "Export coverage" icon="ios_share" onTap={emit exportCoverage; toast "Coverage exported"}
+  Dialog#reset "Reset coverage?" "The green trail for North Meadow will be cleared."
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Reset" onTap={covered=0; pass=1; emit resetCoverage; toast "Coverage cleared"; close}
+
+### Record boundary
+state recording=false
+state points=[]
+state seconds=0
+state fieldName="East Paddock"
+state distance=0
+every 1s when recording onTick={seconds=seconds+1; distance=distance+8; points=append(points,{"id":seconds})}
+App theme={night ? "dark" : "light"}
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "close" tooltip="Cancel" onTap={recording=false; go guidance}
+        Heading "Record boundary" level=3
+      Badge.error "REC {duration(seconds)}" visible={recording}
+    Column gap=12 pad=16 grow
+      Input "Field name" bind=fieldName
+      Card grow pad=0
+        FieldMap recording={recording} points={points} tractor="arrow" showBoundary closeLoop
+      Grid cols=3 gap=12
+        Card gap=2
+          Text.caption "Distance"
+          Text.strong "{distance} m"
+        Card gap=2
+          Text.caption "Points"
+          Text.strong "{length(points)}"
+        Card gap=2
+          Text.caption "Area so far"
+          Text.strong "{fixed(distance*0.0012,2)} ha"
+      Text.muted "Drive once round the edge of the field with the implement raised. Tap Finish near the start point to close the loop."
+    Footer
+      Row gap=12
+        Button size=large grow visible={!recording && length(points)==0} onTap={recording=true; seconds=0} "Start recording"
+        if recording
+          Button.outline "Mark gate" size=large grow onTap={toast "Gate marked"}
+          Button.destructive "Finish" size=large grow onTap={recording=false; open saveField}
+        if !recording && length(points)>0
+          Button.outline "Discard" size=large grow onTap={points=[]; seconds=0; distance=0}
+          Button "Save field" size=large grow onTap={open saveField}
+  Dialog#saveField "Save {fieldName}?" "{length(points)} points, {fixed(distance*0.0012,2)} ha"
+    Toggle "Generate passes" bind=makePasses
+    Row gap=8 end
+      Button.ghost "Keep driving" onTap={recording=true; close}
+      Button "Save" onTap={emit saveField fieldName; toast "Field saved"; close; go guidance}
+
+### Implement
+project night=false saved
+project width=12
+project overlap=0.1
+state turn="Keep-left"
+state headland=2
+state lift=true
+App theme={night ? "dark" : "light"}
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Back" onTap={go guidance}
+        Heading "Implement and display" level=3
+      Button "Done" onTap={emit saveSettings; go guidance}
+    Column scroll pad=16 gap=16
+      Card gap=12
+        Text.strong "Working width"
+        Row between middle
+          Text "{width} m" size=40 weight=700
+          Row gap=8
+            IconButton "remove" tooltip="Narrower" onTap={width=max(1,round(width-0.5,1))}
+            IconButton "add" tooltip="Wider" onTap={width=min(40,round(width+0.5,1))}
+        Slider bind=width min=1 max=40
+        Input "Exact width (m)" type=number bind=width
+      Card gap=12
+        Text.strong "Overlap"
+        Row between
+          Text "{round(overlap*100,0)}% of width"
+          Text.muted "Pass spacing {fixed(width*(1-overlap),2)} m"
+        Slider bind=overlap min=0 max=0.5
+        PassPreview width={width} overlap={overlap} passes=3 h=120
+      Card gap=12
+        Text.strong "Headland and turns"
+        Select "Turn pattern" items=["Keep-left","Skip one","Skip two","U-turn"] bind=turn
+        Row between middle
+          Text "Headland passes"
+          Row gap=8 middle
+            IconButton "remove" tooltip="Fewer" onTap={headland=max(0,headland-1)}
+            Text.strong "{headland}"
+            IconButton "add" tooltip="More" onTap={headland=min(6,headland+1)}
+        Toggle "Warn before headland (150 m)" bind=lift
+      Card gap=12
+        Text.strong "Display"
+        SegmentedButton items=["Day","Night"] selected={night ? "Night" : "Day"} onChange={night=(result=="Night")}
+        Text.muted "Night mode dims the map and uses amber for the line bar."

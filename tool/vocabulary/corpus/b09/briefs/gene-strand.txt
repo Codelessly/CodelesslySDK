@@ -1,0 +1,3 @@
+App: Helixline, a gene sequence viewer. A long strip of coloured letters (four colours) that scrolls sideways, with genes drawn as arrows above it and exons as thick blocks; a ruler with position numbers; a search for a short sequence that highlights every match and counts them; a translated protein row beneath showing three-letter codes; a variant dropped as a flag with a note; a minimap of the whole chromosome with a window you drag.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

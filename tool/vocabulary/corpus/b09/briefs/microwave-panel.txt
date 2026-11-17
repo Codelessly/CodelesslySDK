@@ -1,0 +1,3 @@
+App: Quickwave, a microwave panel. A small display with the time and a row of keys: the number pad to type minutes and seconds, power level pressed repeatedly to step from ten to one hundred, a start and stop, and quick keys for popcorn, defrost and a reheat; a defrost by weight asking grams; a countdown with a rotating plate icon; a door open message; a beep at the end that repeats until the door opens; a child lock held for three seconds.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

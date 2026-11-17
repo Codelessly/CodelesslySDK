@@ -1,0 +1,3 @@
+App: Tight Lines, a fishing catch log. A catch form with species chosen from pictures, length and weight with a stepper, a photo with a ruler overlay, bait and depth, release or keep; a spot saved on a map as a pin with the water temperature at the time; a tide and moon strip that predicts bite times; a personal best list; a licence card with expiry; a season total chart by month; a rules sheet for the size limit.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

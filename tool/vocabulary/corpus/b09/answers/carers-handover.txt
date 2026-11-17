@@ -1,0 +1,234 @@
+### Shift note
+state tab="note"
+state mood=""
+state pain=2
+state note=""
+state flagged=false
+state savedNotes=[{"by":"Joy Okafor","time":"07:40","text":"Slept well. Asked for tea at 6.","flagged":false}]
+state tasks=[{"id":1,"name":"Breakfast","time":"08:00","done":true,"by":"Joy Okafor"},{"id":2,"name":"Morning medicine","time":"09:00","done":false,"by":""},{"id":3,"name":"Walk in the garden","time":"11:00","done":false,"by":""},{"id":4,"name":"Lunch","time":"12:30","done":false,"by":""}]
+state me="Joy Okafor"
+App
+  Sidebar
+    Brand "Passing On" icon="volunteer_activism"
+    NavItem "Shift note" icon="assignment" selected={tab=="note"} onTap={tab="note"}
+    NavItem "Medicines" icon="medication" badge="2" selected={tab=="meds"} onTap={go medicines}
+    NavItem "Visit log" icon="schedule" selected={tab=="visits"} onTap={go visit-log}
+    NavItem "Fall alert" icon="emergency" selected={tab=="alert"} onTap={go fall-alert}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Joy Okafor" size=32
+      Text.muted "Joy Okafor"
+  Main
+    Nav
+      Heading "Shift note" level=1
+      Row gap=8
+        Badge.info "Morning shift"
+        Button.destructive "Fall alert" onTap={go fall-alert}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Row gap=16 middle
+          Avatar src="https://images.example.com/residents/margaret-ellis.jpg" size=72
+          Column grow gap=4
+            Heading "Margaret Ellis" level=3
+            Text.muted "Age 84, Room 12, Rosewood House"
+            Row gap=8
+              Badge.warning "Falls risk"
+              Badge.neutral "Diabetic"
+        Divider
+        Text.strong "Care plan"
+        Text "Needs a hand to stand from her chair."
+        Text "Walking frame at all times, even indoors."
+        Text "Insulin with breakfast, checked by a senior carer."
+        Text "Soft foods only, thickened drinks."
+      Card gap=8
+        Row between
+          Text.strong "Tasks for this shift"
+          Text.muted "{count(tasks,t=>t.done)} of {length(tasks)} done"
+        Progress {count(tasks,t=>t.done)/length(tasks)}
+        each t in tasks
+          Row gap=12 middle
+            Checkbox "{t.name}" bind=t.done onChange={tasks=updateWhere(tasks,x=>x.id==t.id,x=>with(with(x,"done",result),"by",result ? me : ""))}
+            Spacer grow
+            Text.muted "{t.time}"
+            if t.done
+              Badge.success "{t.by}"
+            if !t.done
+              Badge.neutral "Waiting"
+      Grid cols=2 gap=16
+        Card gap=12
+          Text.strong "Mood this shift"
+          Row gap=8
+            IconButton "sentiment_very_satisfied" tooltip="Happy" selected={mood=="happy"} onTap={mood="happy"}
+            IconButton "sentiment_satisfied" tooltip="Content" selected={mood=="content"} onTap={mood="content"}
+            IconButton "sentiment_neutral" tooltip="Flat" selected={mood=="flat"} onTap={mood="flat"}
+            IconButton "sentiment_dissatisfied" tooltip="Low" selected={mood=="low"} onTap={mood="low"}
+            IconButton "sentiment_very_dissatisfied" tooltip="Distressed" selected={mood=="distressed"} onTap={mood="distressed"}
+          if mood!=""
+            Text.muted "Mood: {mood}"
+        Card gap=12
+          Row between
+            Text.strong "Pain"
+            Text.strong "{pain} / 10"
+          Slider bind=pain min=0 max=10 step=1
+          Row between
+            Text.caption "No pain"
+            Text.caption "Worst pain"
+          if pain>=7
+            Text.danger "High pain: tell the nurse in charge."
+      Card gap=12
+        Text.strong "Note for the next carer"
+        Input "Note" "What should the next carer know?" bind=note multiline
+        Row between middle
+          Toggle "Mark for next carer" bind=flagged
+          Button "Save note" onTap={note=="" ? toast "Write a note first" : {savedNotes=append(savedNotes,{"by":me,"time":"10:15","text":note,"flagged":flagged}); note=""; flagged=false; toast "Note saved"}}
+        Divider
+        each n in reverse(savedNotes)
+          Row gap=12 top
+            Text.muted "{n.time}" w=50
+            Column grow gap=2
+              Text "{n.text}"
+              Text.caption "{n.by}"
+            if n.flagged
+              Badge.warning "For next carer"
+
+### Medicines
+state meds=[{"id":1,"name":"Metformin 500 mg","dose":"1 tablet","due":"08:00","given":"08:05","by":"Joy Okafor"},{"id":2,"name":"Insulin glargine","dose":"14 units","due":"09:00","given":"","by":""},{"id":3,"name":"Amlodipine 5 mg","dose":"1 tablet","due":"09:00","given":"","by":""},{"id":4,"name":"Paracetamol 500 mg","dose":"2 tablets","due":"13:00","given":"","by":""}]
+state pick=0
+state me="Joy Okafor"
+App
+  Sidebar
+    Brand "Passing On" icon="volunteer_activism"
+    NavItem "Shift note" icon="assignment" onTap={go shift-note}
+    NavItem "Medicines" icon="medication" badge="{count(meds,m=>m.given==\"\")}" selected={true}
+    NavItem "Visit log" icon="schedule" onTap={go visit-log}
+    NavItem "Fall alert" icon="emergency" onTap={go fall-alert}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Joy Okafor" size=32
+      Text.muted "Joy Okafor"
+  Main
+    Nav
+      Heading "Medicines" level=1
+      Text.muted "Margaret Ellis, Room 12"
+    Column pad=24 gap=16 scroll
+      Card gap=4
+        Text.strong "Allergies"
+        Text.danger "Penicillin: rash"
+      each m in meds
+        Card gap=8
+          Row gap=12 middle
+            IconTile "medication"
+            Column grow gap=2
+              Text.strong "{m.name}"
+              Text.muted "{m.dose}, due {m.due}"
+            if m.given!=""
+              Column gap=2 end
+                Badge.success "Given {m.given}"
+                Text.caption "{m.by}"
+            if m.given==""
+              Button.outline "Hold to confirm" icon="fingerprint" onLongPress={meds=updateWhere(meds,x=>x.id==m.id,x=>with(with(x,"given","09:12"),"by",me)); toast "{m.name} logged"}
+              IconButton "more_vert" tooltip="Not given" onTap={pick=m.id; open skip}
+      Text.caption "Press and hold the button for one second to confirm a dose."
+  Dialog#skip "Dose not given" "Say why, so the next carer and the nurse know."
+    Select "Reason" items=["Refused","Asleep","Nil by mouth","Out of stock","Other"] bind=reason
+    Input "Details" bind=reasonNote multiline
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Save reason" onTap={meds=updateWhere(meds,x=>x.id==pick,x=>with(with(x,"given","not given"),"by",me)); toast "Reason saved"; close}
+
+### Fall alert
+state called=[]
+state seen=false
+state noteFall=""
+state me="Joy Okafor"
+state contacts=[{"id":1,"name":"Nurse in charge, Ana Silva","role":"On site","phone":"555-0141"},{"id":2,"name":"GP surgery, Dr Haddad","role":"Urgent line","phone":"555-0178"},{"id":3,"name":"Daughter, Claire Ellis","role":"Next of kin","phone":"555-0123"},{"id":4,"name":"Ambulance","role":"Emergency","phone":"999"}]
+App
+  Sidebar
+    Brand "Passing On" icon="volunteer_activism"
+    NavItem "Shift note" icon="assignment" onTap={go shift-note}
+    NavItem "Medicines" icon="medication" onTap={go medicines}
+    NavItem "Visit log" icon="schedule" onTap={go visit-log}
+    NavItem "Fall alert" icon="emergency" selected={true}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Joy Okafor" size=32
+      Text.muted "Joy Okafor"
+  Main
+    Nav
+      Heading "Fall alert" level=1
+      Badge.error "Margaret Ellis, Room 12"
+    Column pad=24 gap=16 scroll
+      Card gap=8 fill=#FFB3261E
+        Row gap=12 middle
+          Icon "emergency" color=#FFFFFFFF size=32
+          Column grow gap=2
+            Text.strong "Fall reported at 10:42" color=#FFFFFFFF
+            Text "Do not move her. Stay with her and call for help." color=#FFFFFFFF
+      Card gap=8
+        Text.strong "First checks"
+        Checkbox "She is awake and answering"
+        Checkbox "No bleeding"
+        Checkbox "No sign of a head injury"
+        Checkbox "Can move arms and legs without pain"
+      Card gap=8
+        Text.strong "Call list"
+        each c in contacts
+          Row gap=12 middle
+            Avatar "{c.name}" size=40
+            Column grow gap=2
+              Text.strong "{c.name}"
+              Text.muted "{c.role}, {c.phone}"
+            if contains(called,c.id)
+              Badge.success "Called"
+            Button.outline "Call" icon="call" onTap={emit call c.phone; called=append(called,c.id); toast "Calling {c.name}"}
+      Card gap=12
+        Text.strong "What happened"
+        Input "Describe the fall" bind=noteFall multiline
+        Row between middle
+          Toggle "Doctor has seen her" bind=seen
+          Button "Log incident" onTap={noteFall=="" ? toast "Describe the fall first" : {emit logFall noteFall; toast "Incident logged"; go shift-note}}
+
+### Visit log
+state visits=[{"id":1,"who":"Joy Okafor","role":"Carer","in":"07:30","out":"15:30"},{"id":2,"who":"Dr Haddad","role":"GP","in":"10:55","out":"11:20"},{"id":3,"who":"Claire Ellis","role":"Family","in":"13:00","out":""}]
+state who="Joy Okafor"
+App
+  Sidebar
+    Brand "Passing On" icon="volunteer_activism"
+    NavItem "Shift note" icon="assignment" onTap={go shift-note}
+    NavItem "Medicines" icon="medication" onTap={go medicines}
+    NavItem "Visit log" icon="schedule" selected={true}
+    NavItem "Fall alert" icon="emergency" onTap={go fall-alert}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Joy Okafor" size=32
+      Text.muted "Joy Okafor"
+  Main
+    Nav
+      Heading "Visit log" level=1
+      Button "Log arrival" icon="login" onTap={open arrive}
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Text.strong "Today, {formatDate(today(),\"MMM d\")}"
+        Row gap=8
+          Text.strong "Who" w=160
+          Text.strong "Arrived" w=80
+          Text.strong "Left" w=80
+          Spacer grow
+        Divider
+        each v in visits
+          Row gap=8 middle
+            Column w=160
+              Text.strong "{v.who}"
+              Text.caption "{v.role}"
+            Text "{v.in}" w=80
+            Text "{v.out==\"\" ? \"On site\" : v.out}" w=80
+            Spacer grow
+            if v.out==""
+              Button.outline "Log leave" onTap={visits=updateWhere(visits,x=>x.id==v.id,x=>with(x,"out","14:05")); toast "{v.who} left at 14:05"}
+  Dialog#arrive "Log arrival" "Who is arriving?"
+    Input "Name" bind=who
+    Select "Role" items=["Carer","GP","Nurse","Family","Other"] bind=role
+    TimePicker "Arrived at" bind=arrivedAt
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Save" onTap={visits=append(visits,{"id":length(visits)+1,"who":who,"role":role,"in":arrivedAt,"out":""}); toast "Arrival logged"; close}

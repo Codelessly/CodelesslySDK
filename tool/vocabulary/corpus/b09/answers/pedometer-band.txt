@@ -1,0 +1,96 @@
+### Band Pages
+state page=0
+state steps=7432
+state goal=10000
+state bpm=72
+state beat=false
+state goalShown=false
+state running=false
+state elapsed=0
+state laps=[]
+state ah=6
+state am=30
+state alarmOn=true
+state dim=false
+state idle=0
+state notice="Mia: Lunch at 12:30? Meet at the east gate"
+every 1s when running onTick={elapsed=elapsed+1}
+every 1s onTick={bpm=clamp(bpm+(elapsed%3==0 ? 1 : -1),64,84); beat=!beat; idle=idle+1; dim=idle>8}
+every 2s when steps<goal onTick={steps=steps+round(8,0); goalShown=steps>=goal; steps>=goal ? vibrate 400 : toast ""}
+App
+  Main onWake={dim=false; idle=0} onTap={dim=false; idle=0}
+    Stack center middle w=320 h=320 radius=160 fill=#FF000000
+      Column center middle gap=6 pad=24 hidden={dim}
+        Marquee "{notice}" speed=40 h=20 color=#FFB0B0B0 size=12 onTap={notice=""}
+        Pages bind=page h=240 w=260
+          Stack center middle
+            Ring {steps/goal} size=200 stroke=14 color=#FF30D158
+            Column center middle gap=2
+              Icon "directions_walk" color=#FF30D158
+              Text "{steps}" size=44 weight=700 color=#FFFFFFFF
+              Text "of {goal} steps" size=12 color=#FFB0B0B0
+              if steps>=goal
+                Icon "star" color=#FFFFD60A size=20 animate=pop
+          Column center middle gap=4
+            Icon "place" color=#FF0A84FF
+            Text "{fixed(steps*0.00078,2)}" size=52 weight=700 color=#FFFFFFFF
+            Text "km today" size=14 color=#FFB0B0B0
+          Column center middle gap=4
+            Icon "local_fire_department" color=#FFFF9F0A
+            Text "{round(steps*0.04,0)}" size=52 weight=700 color=#FFFFFFFF
+            Text "kcal burned" size=14 color=#FFB0B0B0
+          Column center middle gap=4
+            Icon "favorite" color=#FFFF453A size=48 animate=pulse duration=800
+            Text "{bpm}" size=52 weight=700 color=#FFFFFFFF
+            Text "bpm" size=14 color=#FFB0B0B0
+          Column center middle gap=8
+            Text "{formatDuration(elapsed)}" size=40 weight=700 color=#FFFFFFFF
+            Row gap=8 center
+              Button.secondary "Start" hidden={running} onTap={running=true}
+              Button.destructive "Stop" hidden={!running} onTap={running=false}
+              Button.outline "Lap" onTap={laps=append(laps,elapsed)}
+            Text.muted "Laps: {length(laps)}  Last {isEmpty(laps) ? "--" : duration(last(laps))}" size=12
+          Column center middle gap=4
+            Icon "bedtime" color=#FF5E5CE6
+            Text "7h 24m" size=44 weight=700 color=#FFFFFFFF
+            Text "slept last night" size=14 color=#FFB0B0B0
+            Progress 0.92 w=140
+          Column center middle gap=6
+            Text.muted "Alarm" size=12
+            Row center middle gap=6
+              DigitWheel bind=ah min=0 max=23 pad=2
+              Text ":" size=36 color=#FFFFFFFF
+              DigitWheel bind=am min=0 max=59 pad=2
+            Toggle "On" bind=alarmOn
+        Dots bind=page count=7
+      Column center middle gap=4 show=phone hidden={!dim}
+        Text "{formatDate(today(),"EEE d")}" size=14 color=#FF606060
+        Text "{steps}" size=32 color=#FF606060
+
+### Goal Reached
+state steps=10000
+App
+  Main
+    Stack center middle w=320 h=320 radius=160 fill=#FF000000
+      Column center middle gap=8
+        Icon "star" size=64 color=#FFFFD60A animate=pop
+        Text "Goal reached!" size=22 weight=700 color=#FFFFFFFF animate=fade
+        Text "{steps} steps" size=14 color=#FFB0B0B0
+        Button.outline "Dismiss" onTap={emit goalAck; go band-pages}
+
+### Charging
+state charge=0.64
+every 2s when charge<1 onTick={charge=min(1,charge+0.02)}
+App
+  Main
+    Stack center middle w=320 h=320 radius=160 fill=#FF000000
+      Column center middle gap=10
+        Row center middle gap=0
+          Box w=96 h=48 radius=8 border=#FFFFFFFF pad=4 left
+            Box w={round(88*charge,0)} h=40 radius=5 fill=#FF30D158 animate=pulse
+          Box w=6 h=20 radius=2 fill=#FFFFFFFF
+        Text "{round(charge*100,0)}%" size=40 weight=700 color=#FFFFFFFF
+        Row gap=4 center
+          Icon "bolt" color=#FFFFD60A size=16
+          Text "Charging" size=14 color=#FFB0B0B0
+        Text.muted "{charge>=1 ? "Full" : duration(round((1-charge)*5400,0))+" to full"}" size=12

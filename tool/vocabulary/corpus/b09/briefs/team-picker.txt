@@ -1,0 +1,3 @@
+App: Draftroom, a team picker. A list of players with a skill rating set by stars or a number; a sort of the pool into two or more teams that spin like a shuffle then land; teams balanced with a total beside each and a difference shown; dragging a player across to swap with the totals updating; lock a pair together or apart; captains choosing in turn by a pick order wheel; a coin toss with a flip animation; a save of teams for a match; a share image.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

@@ -1,0 +1,196 @@
+### Levels
+state level=3
+state stars={"1":3,"2":2,"3":0,"4":0,"5":0}
+state streak=4
+Page
+  Nav
+    Brand "Place Cards" icon="table_restaurant"
+    Row gap=4
+      Link "Levels"
+      Link "Daily table" onTap={go daily-table}
+      Link "How to play" onTap={open howto}
+    Row gap=8
+      Badge.warning "{streak} day streak"
+      Avatar "Maya Reyes" size=36
+  Section center
+    Column gap=12 center
+      Heading "Who sits next to whom?" level=1
+      Text.muted "Seat every guest so the table is happy. Beat the target to earn stars."
+      Row gap=12
+        Button "Continue level {level}" size=large onTap={go table}
+        Button.outline "Today's daily table" size=large onTap={go daily-table}
+  Section tint
+    Column gap=16
+      Heading "Levels"
+      Grid cols=5 gap=16
+        each n in [1,2,3,4,5]
+          Card gap=8 animate=fade stagger=80
+            Row between
+              Text.strong "Level {n}"
+              if n > level
+                Icon "lock"
+            Text.muted "{n+3} guests, {n+2} feuds"
+            Text.caption "Target {n*10+20}"
+            Row gap=4
+              each s in [1,2,3]
+                Icon "star" color={s <= stars[n] ? "#FFF5B301" : "#FFBDBDBD"}
+            Button.outline "Play" disabled={n > level} onTap={level=n; go table}
+  Section
+    Column gap=12
+      Heading "Best tables this week" level=3
+      Row gap=12 scroll
+        each p in [{"name":"Ines Okafor","score":88},{"name":"Tomas Berg","score":84},{"name":"Priya Nair","score":79}]
+          Card gap=8
+            Row gap=12 middle
+              Avatar "{p.name}" size=40
+              Column
+                Text.strong "{p.name}"
+                Text.muted "Level 5, score {p.score}"
+  Footer
+    Row between
+      Text.strong "Place Cards"
+      Text.muted "A seating game for round tables"
+  Dialog#howto "How to play" "Three minutes, one table"
+    Column gap=8
+      Text "Drag a name card to any seat. Green lines join neighbours who will be happy, red lines join those who will not."
+      Text "Likes and dislikes are shown on each card. A feud costs the most."
+      Text "Reach the target score to pass. Fewer moves and hints earn more stars."
+      Button "Got it" onTap={close}
+
+### Table
+state level=3
+state target=60
+state score=24
+state moves=0
+state hints=2
+state selected="g1"
+state guests=[{"id":"g1","name":"Ada Lindqvist","likes":["jazz","sailing"],"dislikes":["gossip"],"feud":"g4"},{"id":"g2","name":"Bram Coetzee","likes":["chess","wine"],"dislikes":["loud music"],"feud":""},{"id":"g3","name":"Chloe Marchetti","likes":["opera","travel"],"dislikes":["chess"],"feud":""},{"id":"g4","name":"Dev Raman","likes":["gossip","sailing"],"dislikes":["opera"],"feud":"g1"},{"id":"g5","name":"Elin Haugen","likes":["wine","jazz"],"dislikes":["travel"],"feud":""},{"id":"g6","name":"Farid Nasser","likes":["travel","chess"],"dislikes":["gossip"],"feud":""}]
+state seats=["g1","g4","g2","","g5","g6"]
+state ties=[{"a":"g1","b":"g4","w":-12},{"a":"g1","b":"g5","w":8},{"a":"g2","b":"g6","w":6},{"a":"g3","b":"g6","w":7},{"a":"g3","b":"g4","w":-5}]
+state log=[]
+state finished=false
+state showTies=true
+every 1s when !finished onTick={elapsed=elapsed+1}
+state elapsed=0
+App
+  Sidebar
+    Brand "Place Cards" icon="table_restaurant"
+    NavItem "Levels" icon="grid_view" onTap={go levels}
+    NavItem "Table" icon="restaurant" selected={true}
+    NavItem "Daily table" icon="today" onTap={go daily-table}
+    Spacer grow
+    Text.muted "Level {level}"
+    Text.caption "Time {duration(elapsed)}"
+  Main
+    Nav
+      Heading "Level {level}: the Okafor dinner"
+      Row gap=8
+        Toggle "Show lines" bind=showTies
+        Button.outline "Undo" disabled={isEmpty(log)} onTap={seats=last(log); log=removeAt(log,length(log)-1); moves=moves+1}
+        Button.outline "Hint ({hints})" disabled={hints==0} onTap={hints=hints-1; emit hint seats; toast "Swapped one pair"}
+        Button "Done" disabled={score < target} onTap={finished=true; open result}
+    Column pad=24 gap=16
+      Card gap=8
+        Row between
+          Text.strong "Table score"
+          Text.strong "{score} / {target}" color={score >= target ? "#FF2E7D32" : "#FFC62828"}
+        Progress {clamp(score/target,0,1)} animate=fade
+        Row gap=16
+          Badge.success "Happy pairs {count(ties, t=>t.w>0)}"
+          Badge.error "Upsets {count(ties, t=>t.w<0)}"
+          Badge.neutral "Moves {moves}"
+      Row gap=16 top
+        Card grow gap=12
+          Text.strong "The table"
+          SeatMap.round seats={seats} guests={guests} ties={ties} showTies={showTies} positive=#FF2E7D32 negative=#FFC62828 drop=card onDrop={log=append(log,seats); seats=result.seats; score=result.score; moves=moves+1} onSeatTap={selected=result.guest} h=420
+          Text.caption "Drag a card onto a seat. Dropping on a taken seat swaps the two guests."
+        Column w=300 gap=12
+          Text.strong "Cards to seat"
+          each g in guests
+            if !contains(seats,g.id)
+              Card gap=4 drag=card(g.id) onTap={selected=g.id}
+                Text.strong "{g.name}"
+                Text.caption "Likes {join(g.likes,', ')}"
+                Text.caption "Dislikes {join(g.dislikes,', ')}"
+          if all(guests,g=>contains(seats,g.id))
+            Text.muted "Every guest is seated."
+  Pane w=320
+    Heading "Guest" level=3
+    each g in filter(guests,x=>x.id==selected)
+      Column gap=12
+        Row gap=12 middle
+          Avatar "{g.name}" size=48
+          Text.strong "{g.name}"
+        Text.fieldLabel "Likes"
+        Row gap=8
+          each l in g.likes
+            Chip "{l}"
+        Text.fieldLabel "Dislikes"
+        Row gap=8
+          each d in g.dislikes
+            Chip "{d}"
+        if g.feud != ""
+          Card gap=4
+            Row gap=8
+              Icon "warning" color=#FFC62828
+              Text.danger "A feud with {find(guests,x=>x.id==g.feud).name}"
+            Text.caption "Keep them out of neighbouring seats."
+    Divider
+    Text.fieldLabel "Ties on the table"
+    each t in ties
+      ListTile "{find(guests,x=>x.id==t.a).name} and {find(guests,x=>x.id==t.b).name}" subtitle="{t.w > 0 ? 'Happy' : 'Upset'}" trailing="{t.w}"
+  Dialog#result "Dinner is served" "Your table scored {score}"
+    Column gap=12 center
+      Row gap=8
+        each s in [1,2,3]
+          Icon "star" size=48 animate=pop delay={s*300} color={s <= (score >= target+20 ? 3 : score >= target+8 ? 2 : 1) ? "#FFF5B301" : "#FFBDBDBD"}
+      Text.muted "Target {target}, {moves} moves, {2-hints} hints used"
+      Row gap=8
+        Button.outline "Replay" onTap={close; seats=["g1","g4","g2","","g5","g6"]; moves=0; hints=2; finished=false; elapsed=0}
+        Button "Next level" onTap={close; level=level+1; emit nextLevel level; go levels}
+
+### Daily Table
+state entered=false
+state picks=["","","","",""]
+state daily={"date":"today","guests":5,"target":52}
+state shared=false
+state best=61
+Page
+  Nav
+    Brand "Place Cards" icon="table_restaurant"
+    Row gap=4
+      Link "Levels" onTap={go levels}
+      Link "Daily table"
+    Button.outline "Share result" disabled={!entered} onTap={emit share best; shared=true; toast "Result copied"}
+  Section narrow
+    Column gap=16
+      Badge.info "Daily table, {formatDate(today(),'MMM d')}"
+      Heading "Everyone gets the same table today" level=1
+      Text.muted "Five guests, one feud, target {daily.target}. One attempt counts for the board."
+      Row gap=12
+        Button "Play today's table" size=large onTap={entered=true; go table}
+        Button.outline "Practice" size=large onTap={go table}
+  Section tint
+    Column gap=16
+      Heading "Today's board"
+      Card gap=8
+        each r in [{"rank":1,"name":"Ines Okafor","score":74,"moves":6},{"rank":2,"name":"Tomas Berg","score":71,"moves":9},{"rank":3,"name":"Priya Nair","score":66,"moves":8},{"rank":4,"name":"Maya Reyes","score":61,"moves":12}]
+          Row gap=12 middle animate=fade stagger=80
+            Text.strong "{r.rank}" w=24
+            Avatar "{r.name}" size=32
+            Text grow "{r.name}"
+            Text.muted "{r.moves} moves" w=90
+            Text.strong "{r.score}" w=48
+      Row gap=24
+        Card grow gap=8
+          Text.strong "Your streak"
+          Text "4 days" size=32 weight=700
+          Sparkline values=[52,58,61,55,63,61,66]
+        Card grow gap=8
+          Text.strong "Your best today"
+          Text "{best}" size=32 weight=700
+          Progress {clamp(best/daily.target/1.5,0,1)}
+  Footer
+    Row between
+      Text.strong "Place Cards"
+      Text.muted "New table every midnight"

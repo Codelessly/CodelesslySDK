@@ -1,0 +1,196 @@
+### Walk-round
+state spots=[{"id":"forks","name":"Forks","status":"unchecked","photo":""},{"id":"tyres","name":"Tyres","status":"unchecked","photo":""},{"id":"chain","name":"Mast chain","status":"unchecked","photo":""},{"id":"horn","name":"Horn","status":"unchecked","photo":""},{"id":"lights","name":"Lights","status":"unchecked","photo":""},{"id":"belt","name":"Seatbelt","status":"unchecked","photo":""},{"id":"brakes","name":"Brakes","status":"unchecked","photo":""}]
+state sel="forks"
+state locked=false
+state hours=""
+state truck="FLT-07"
+state tab="walk"
+App
+  Sidebar
+    Brand "Prestart" icon="forklift"
+    NavItem "Walk-round" icon="fact_check" badge="{count(spots,s=>s.status!='unchecked')}/7" selected={tab=="walk"} onTap={tab="walk"}
+    NavItem "Hours and licence" icon="badge" selected={tab=="licence"} onTap={go hours-licence}
+    NavItem "Handbrake and lift test" icon="timer" selected={tab=="test"} onTap={go tests}
+    NavItem "Signed checks" icon="history" selected={tab=="log"} onTap={go signed-checks}
+    Spacer grow
+    Text.muted "Operator: Dale Whitcombe"
+    Text.caption "Warehouse 2, bay 4"
+  Main
+    Nav
+      Heading "Daily check, {truck}" level=1
+      Row gap=8
+        Badge.warning "{count(spots,s=>s.status=='unchecked')} left" hidden={count(spots,s=>s.status=='unchecked')==0}
+        Badge.danger "Do not use" hidden={!locked}
+        Button "Finish check" onTap={count(spots,s=>s.status=='unchecked')>0 ? toast "Check every spot first" : (count(spots,s=>s.status=='defect')>0 ? {locked=true; go lockout} : go hours-licence)}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Card grow gap=12
+          Text.strong "Tap a spot on the truck"
+          TruckDiagram truck="counterbalance" spots={spots} selected={sel} onSelect={sel=result}
+          Row gap=16
+            Row gap=4
+              Icon "check_circle" color=#FF2E7D32
+              Text.caption "Ok"
+            Row gap=4
+              Icon "error" color=#FFC62828
+              Text.caption "Defect"
+            Row gap=4
+              Icon "radio_button_unchecked"
+              Text.caption "Not checked"
+        Column w=320 gap=12
+          Card gap=12
+            Text.strong "{find(spots,s=>s.id==sel).name}"
+            Text.muted "Look for cracks, bends, wear, leaks and anything loose."
+            Row gap=8
+              Button.outline "Ok" icon="check" grow onTap={spots=updateWhere(spots,s=>s.id==sel,s=>with(s,"status","ok"))}
+              Button.destructive "Defect" icon="report" grow onTap={spots=updateWhere(spots,s=>s.id==sel,s=>with(s,"status","defect")); open defect}
+            Badge.success "Marked ok" hidden={find(spots,s=>s.id==sel).status!="ok"}
+            Badge.error "Defect logged" hidden={find(spots,s=>s.id==sel).status!="defect"}
+          Card gap=4
+            Text.strong "All spots"
+            each s in spots
+              ListTile "{s.name}" icon={s.status=="ok" ? "check_circle" : (s.status=="defect" ? "error" : "radio_button_unchecked")} onTap={sel=s.id}
+  Sheet#defect "Report a defect"
+    Text.strong "{find(spots,s=>s.id==sel).name}"
+    Select "What is wrong" items=["Damaged","Leaking","Worn","Not working","Missing"] bind=fault
+    Input "Notes" "e.g. left fork tip bent about 2 cm" multiline bind=faultNote
+    Text.fieldLabel "Photo of the defect (required)"
+    PhotoPicker "Take photo" bind=defectPhoto source="camera"
+    Row gap=8
+      Button.ghost "Cancel" onTap={spots=updateWhere(spots,s=>s.id==sel,s=>with(s,"status","unchecked")); close}
+      Spacer grow
+      Button.destructive "Tag truck do not use" onTap={isEmpty(defectPhoto) ? toast "A photo is needed" : {spots=updateWhere(spots,s=>s.id==sel,s=>with(s,"photo",defectPhoto)); locked=true; emit defect sel; close; go lockout}}
+
+### Lockout
+state truck="FLT-07"
+state sel="forks"
+state spots=[]
+Page
+  Section center
+    Box fill=#FFB71C1C radius=16 pad=48 gap=20 center animate=pulse duration=1600
+      Icon "block" size=96 color=#FFFFFFFF
+      Text "DO NOT USE" size=56 weight=800 color=#FFFFFFFF center
+      Text "{truck} is tagged out of service" size=22 color=#FFFFFFFF center
+      Text "Defect found: {find(spots,s=>s.status=='defect').name}" size=18 color=#FFFFFFFF center
+      Text "Park it in the red bay, remove the key and tell your supervisor. Do not drive this truck until maintenance clears the tag." size=16 color=#FFFFFFFF center maxw=560
+      Row gap=12 center
+        Button.elevated "Call supervisor" icon="call" onTap={link tel:+441215550142}
+        Button.outline "Message maintenance" icon="chat" onTap={emit notifyMaintenance truck}
+      Button.ghost "Back to walk-round" onTap={go walk-round}
+    Text.muted "Tagged {formatDate(today(),'MMM d')} by Dale Whitcombe"
+
+### Hours and licence
+state hours=""
+state licenceOk=false
+state licence={"name":"","number":"","expires":""}
+state tab="licence"
+App
+  Sidebar
+    Brand "Prestart" icon="forklift"
+    NavItem "Walk-round" icon="fact_check" onTap={go walk-round}
+    NavItem "Hours and licence" icon="badge" selected={tab=="licence"} onTap={tab="licence"}
+    NavItem "Handbrake and lift test" icon="timer" onTap={go tests}
+    NavItem "Signed checks" icon="history" onTap={go signed-checks}
+  Main
+    Nav
+      Heading "Hours and operator licence" level=1
+    Column pad=24 gap=16
+      Grid cols=2 gap=24
+        Card gap=12
+          Text.strong "Hours meter"
+          Text.muted "Read the meter on the dash and type it in."
+          Input "Hours" "e.g. 4821.5" type=number bind=hours
+          Text.danger "Hours must be more than the last reading of 4,812.0" hidden={isEmpty(hours) || hours>4812}
+        Card gap=12
+          Text.strong "Operator licence"
+          Text.muted "Hold the card flat in front of the camera."
+          CardScanner "Scan licence" kind="licence" bind=licence onScan={licenceOk=true; toast "Licence read"}
+          if licenceOk
+            ListTile "{licence.name}" subtitle="No. {licence.number}, expires {licence.expires}" icon="verified"
+            Badge.success "Valid"
+      Row gap=8
+        Spacer grow
+        Button "Continue to tests" onTap={isEmpty(hours) || !licenceOk ? toast "Add the hours and scan the licence" : go tests}
+
+### Handbrake and lift test
+state secs=0
+state running=false
+state handbrake=""
+state lift=""
+state tab="test"
+every 1s when running onTick={secs=secs+1; secs>=30 ? running=false : }
+App
+  Sidebar
+    Brand "Prestart" icon="forklift"
+    NavItem "Walk-round" icon="fact_check" onTap={go walk-round}
+    NavItem "Hours and licence" icon="badge" onTap={go hours-licence}
+    NavItem "Handbrake and lift test" icon="timer" selected={tab=="test"} onTap={tab="test"}
+    NavItem "Signed checks" icon="history" onTap={go signed-checks}
+  Main
+    Nav
+      Heading "Handbrake and lift test" level=1
+    Column pad=24 gap=16
+      Grid cols=2 gap=24
+        Card gap=12 center
+          Text.strong "Hold test, 30 seconds"
+          Text.muted "Raise the forks 1 m with a load. Start the timer and watch for any drop or creep."
+          Ring {secs/30} size=160
+          Text "{duration(secs)}" size=40 weight=700
+          Row gap=8
+            Button "{running ? 'Pause' : 'Start timer'}" onTap={running=!running}
+            Button.outline "Reset" onTap={running=false; secs=0}
+        Card gap=16
+          Text.strong "Results"
+          SegmentedButton "Handbrake holds on the ramp" items=["Pass","Fail"] bind=handbrake
+          SegmentedButton "Forks hold with no drift" items=["Pass","Fail"] bind=lift
+          Text.success "Both tests passed" hidden={handbrake!="Pass" || lift!="Pass"}
+          Text.danger "A failed test tags the truck do not use" hidden={handbrake!="Fail" && lift!="Fail"}
+      Row gap=8
+        Spacer grow
+        Button "Sign and save check" onTap={isEmpty(handbrake) || isEmpty(lift) ? toast "Record both results" : (handbrake=="Fail" || lift=="Fail" ? go lockout : open sign)}
+  Dialog#sign "Sign this check" "Operator Dale Whitcombe, FLT-07"
+    SignaturePad "Sign here" bind=signature
+    Row gap=8
+      Button.ghost "Cancel" onTap={close}
+      Spacer grow
+      Button "Save" onTap={isEmpty(signature) ? toast "Please sign" : {emit saveCheck signature; toast "Check signed and saved"; close; go signed-checks}}
+
+### Signed checks
+state tab="log"
+state q=""
+state checks=[{"id":1,"date":"2026-11-16","truck":"FLT-07","hours":4812.0,"result":"Pass","operator":"Dale Whitcombe"},{"id":2,"date":"2026-11-15","truck":"FLT-07","hours":4804.5,"result":"Pass","operator":"Priya Nair"},{"id":3,"date":"2026-11-14","truck":"FLT-03","hours":6120.0,"result":"Defect: mast chain","operator":"Tom Haskett"},{"id":4,"date":"2026-11-13","truck":"FLT-07","hours":4796.0,"result":"Pass","operator":"Dale Whitcombe"}]
+App
+  Sidebar
+    Brand "Prestart" icon="forklift"
+    NavItem "Walk-round" icon="fact_check" onTap={go walk-round}
+    NavItem "Hours and licence" icon="badge" onTap={go hours-licence}
+    NavItem "Handbrake and lift test" icon="timer" onTap={go tests}
+    NavItem "Signed checks" icon="history" selected={tab=="log"} onTap={tab="log"}
+  Main
+    Nav
+      Heading "Signed checks" level=1
+      Row gap=8
+        Input "Search truck or operator" bind=q w=240
+        IconButton "download" tooltip="Export list" onTap={emit exportChecks}
+    Column pad=24 gap=16
+      Card gap=8
+        Row gap=8
+          Text.strong "Date" w=110
+          Text.strong "Truck" w=80
+          Text.strong "Hours" w=90
+          Text.strong "Operator" grow
+          Text.strong "Result" w=160
+        Divider
+        each c in sortByDesc(filter(checks,x=>contains(lower(x.truck+x.operator),lower(q))),x=>x.date)
+          Row gap=8 onTap={sel=c.id; open detail}
+            Text "{formatDate(c.date,'MMM d')}" w=110
+            Text "{c.truck}" w=80
+            Text "{fixed(c.hours,1)}" w=90
+            Text "{c.operator}" grow
+            Badge.success "Pass" w=160 hidden={c.result!="Pass"}
+            Badge.error "{c.result}" w=160 hidden={c.result=="Pass"}
+  Dialog#detail "Check detail"
+    Text.strong "{find(checks,c=>c.id==sel).truck}, {formatDate(find(checks,c=>c.id==sel).date,'MMM d')}"
+    Text.muted "Signed by {find(checks,c=>c.id==sel).operator}"
+    Text "Hours meter {fixed(find(checks,c=>c.id==sel).hours,1)}"
+    Button "Close" onTap={close}

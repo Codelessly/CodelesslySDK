@@ -1,0 +1,194 @@
+### Section Map
+state tab="map"
+state level="L450"
+state sel="n3"
+state acked=[]
+state notes=[{"id":"n1","level":"L450","face":"East Drive 12","tag":"blast done","color":"#FFE65100","text":"Blast fired 05:40, 38 holes, one misfire reported. Re-entry after 30 min vent.","by":"Tomas Eriksen"},{"id":"n2","level":"L450","face":"Crosscut 7","tag":"water","color":"#FF1565C0","text":"Seepage at back, sump pump running. Check discharge hose each hour.","by":"Tomas Eriksen"},{"id":"n3","level":"L450","face":"West Drive 4","tag":"loose ground","color":"#FFC62828","text":"Loose ground in the left wall, 2 m from face. Scaled once, rebar bolts needed.","by":"Amara Okafor"},{"id":"n4","level":"L520","face":"Stope 3N","tag":"blast done","color":"#FFE65100","text":"Production blast done, muck pile approx 420 t. Barricade up at entry.","by":"Amara Okafor"},{"id":"n5","level":"L520","face":"Ramp 2","tag":"water","color":"#FF1565C0","text":"Standing water 30 cm at the ramp bend, grader slowed.","by":"Jonas Lindqvist"}]
+every 1s onTick={clock=clock+1}
+state clock=0
+App
+  Sidebar
+    Brand "Changeover" icon="engineering"
+    NavItem "Map and notes" icon="map" badge="{length(notes)-length(acked)}" selected={tab=="map"} onTap={tab="map"}
+    NavItem "Equipment" icon="precision_manufacturing" selected={tab=="equip"} onTap={go equipment}
+    NavItem "Crew" icon="groups" selected={tab=="crew"} onTap={go crew}
+    Spacer grow
+    Text.muted "Incoming: Priya Nair"
+    Text.caption "Day shift, 06:00"
+  Main
+    Nav
+      Heading "Shift handover" level=1
+      Row gap=8
+        Badge.warning "{length(notes)-length(acked)} unread"
+        Text.mono "Review window {duration(1800-clock)}"
+        Button "Sign handover" onTap={go signoff}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Column grow gap=12
+          SegmentedButton bind=level items=["L450","L520","L600"]
+          Card gap=8
+            Row between
+              Text.strong "Cross-section, {level}"
+              Text.muted "Tap a marker to read its note"
+            TunnelMap levels=["L450","L520","L600"] bind=level h=320 onSelect={sel=result.id}
+              each n in notes
+                Marker "{n.tag}" at="{n.face}" level={n.level} color={n.color} id={n.id} selected={sel==n.id} onTap={sel=n.id}
+          Card gap=8
+            Text.strong "Face photo, West Drive 4"
+            PhotoMarkup src="https://example.com/photos/west-drive-4.jpg" h=220 bind=marks onChange={emit marks result} tools=["pen","arrow","circle"]
+            Row gap=8
+              Button.outline "Undo mark" onTap={marks=removeAt(marks,length(marks)-1)}
+              Button.outline "Clear" onTap={marks=[]}
+        Column w=380 gap=12
+          Text.strong "Notes from outgoing crew"
+          Text.caption "Swipe left to acknowledge"
+          each n in filter(notes, x=>x.level==level)
+            Card gap=8 animate=slide-up stagger=60 onSwipeLeft={acked=contains(acked,n.id) ? acked : append(acked,n.id); toast "Acknowledged: {n.face}"} onTap={sel=n.id}
+              Row between
+                Badge.neutral "{n.tag}"
+                if contains(acked,n.id)
+                  Icon "check_circle"
+                if !contains(acked,n.id)
+                  Badge.warning "unread"
+              Text.strong "{n.face}"
+              Text.body "{n.text}"
+              Text.caption "{n.by}"
+          if length(filter(notes, x=>x.level==level))==0
+            Text.muted "No notes on this level."
+          Progress "{length(acked)} of {length(notes)}" bind=ackShare
+          Text.caption "{length(acked)} of {length(notes)} acknowledged"
+state ackShare=0
+
+### Equipment
+state filter="all"
+state eq=[{"id":"e1","name":"Jumbo drill DD-07","state":"fit","note":"Serviced 3 days ago","where":"L450 East Drive"},{"id":"e2","name":"LHD loader ST-14","state":"faulty","note":"Hydraulic leak at boom cylinder","where":"L520 Ramp 2"},{"id":"e3","name":"Scaler SC-02","state":"fit","note":"Fuel 80%","where":"L450 West Drive"},{"id":"e4","name":"Haul truck MT-31","state":"parked","note":"Awaiting tyre change","where":"Surface workshop"},{"id":"e5","name":"Bolter RB-05","state":"faulty","note":"Feed chain worn, tag out","where":"L450 West Drive"},{"id":"e6","name":"Sump pump P-12","state":"fit","note":"Running continuously","where":"L450 Crosscut 7"}]
+state selEq=""
+App
+  Sidebar
+    Brand "Changeover" icon="engineering"
+    NavItem "Map and notes" icon="map" onTap={go map}
+    NavItem "Equipment" icon="precision_manufacturing" selected={true}
+    NavItem "Crew" icon="groups" onTap={go crew}
+    Spacer grow
+    Text.muted "Incoming: Priya Nair"
+  Main
+    Nav
+      Heading "Equipment" level=1
+      Row gap=8
+        Input "Search equipment" bind=q w=220
+        Button "Sign handover" onTap={go signoff}
+    Column pad=24 gap=16
+      Row gap=8
+        ChoiceChip "All {length(eq)}" selected={filter=="all"} onTap={filter="all"}
+        ChoiceChip "Fit {count(eq,e=>e.state=="fit")}" selected={filter=="fit"} onTap={filter="fit"}
+        ChoiceChip "Faulty {count(eq,e=>e.state=="faulty")}" selected={filter=="faulty"} onTap={filter="faulty"}
+        ChoiceChip "Parked {count(eq,e=>e.state=="parked")}" selected={filter=="parked"} onTap={filter="parked"}
+      Card gap=0
+        Row pad=12 border-bottom=#FFE0E0E0
+          Text.caption "Unit" grow
+          Text.caption "Status" w=100
+          Text.caption "Location" w=160 hide=phone
+          Text.caption "" w=40
+        each e in filter(eq, x=>(filter=="all" || x.state==filter) && contains(lower(x.name), lower(coalesce(q,""))))
+          Row pad=12 middle border-bottom=#FFEEEEEE menu=eqMenu onTap={selEq=e.id; open eqDetail}
+            Column grow gap=2
+              Text.strong "{e.name}"
+              Text.muted "{e.note}"
+            Badge.success "fit" w=100 hidden={e.state!="fit"}
+            Badge.error "faulty" w=100 hidden={e.state!="faulty"}
+            Badge.neutral "parked" w=100 hidden={e.state!="parked"}
+            Text.muted "{e.where}" w=160 hide=phone
+            IconButton "more_vert" tooltip="Change status" onTap={selEq=e.id; open eqMenu}
+  Menu#eqMenu end
+    MenuItem "Mark fit" icon="check_circle" onTap={eq=updateWhere(eq,x=>x.id==selEq,x=>with(x,"state","fit"))}
+    MenuItem "Mark faulty" icon="report" onTap={eq=updateWhere(eq,x=>x.id==selEq,x=>with(x,"state","faulty")); toast "Tagged out"}
+    MenuItem "Mark parked" icon="local_parking" onTap={eq=updateWhere(eq,x=>x.id==selEq,x=>with(x,"state","parked"))}
+  Dialog#eqDetail "Equipment detail" "Change the status before handover"
+    Text.strong "{find(eq,x=>x.id==selEq).name}"
+    Text.muted "{find(eq,x=>x.id==selEq).where}"
+    Input "Note for incoming crew" multiline bind=eqNote
+    Row gap=8 end
+      Button.outline "Close" onTap={close}
+      Button "Save note" onTap={eq=updateWhere(eq,x=>x.id==selEq,x=>with(x,"note",eqNote)); toast "Saved"; close}
+state eqNote=""
+
+### Crew
+state crewIn=[{"name":"Priya Nair","role":"Shift supervisor"},{"name":"Luis Herrera","role":"Drill operator"},{"name":"Mei Tanaka","role":"LHD operator"},{"name":"Kofi Mensah","role":"Bolter"},{"name":"Elena Petrova","role":"Blaster"}]
+state crewOut=[{"name":"Tomas Eriksen","role":"Shift supervisor"},{"name":"Amara Okafor","role":"Blaster"},{"name":"Jonas Lindqvist","role":"LHD operator"},{"name":"Sofia Alvarez","role":"Drill operator"}]
+state arrived=["Priya Nair","Luis Herrera"]
+state left=[]
+App
+  Sidebar
+    Brand "Changeover" icon="engineering"
+    NavItem "Map and notes" icon="map" onTap={go map}
+    NavItem "Equipment" icon="precision_manufacturing" onTap={go equipment}
+    NavItem "Crew" icon="groups" selected={true}
+    Spacer grow
+    Text.muted "Incoming: Priya Nair"
+  Main
+    Nav
+      Heading "Headcount" level=1
+      Row gap=8
+        Badge.info "In {length(arrived)} of {length(crewIn)}"
+        Badge.neutral "Out {length(left)} of {length(crewOut)}"
+        Button "Sign handover" onTap={go signoff}
+    Column pad=24 gap=16
+      Grid cols=2 gap=24
+        Card gap=8
+          Row between
+            Text.strong "Coming on"
+            Text.muted "{length(arrived)} / {length(crewIn)}"
+          each c in crewIn
+            ListTile "{c.name}" "{c.role}"
+              Avatar "{c.name}" size=32
+              Checkbox "On site" selected={contains(arrived,c.name)} onChange={result ? arrived=append(arrived,c.name) : arrived=without(arrived,c.name)}
+        Card gap=8
+          Row between
+            Text.strong "Going off"
+            Text.muted "{length(left)} / {length(crewOut)}"
+          each c in crewOut
+            ListTile "{c.name}" "{c.role}"
+              Avatar "{c.name}" size=32
+              Checkbox "Out of the mine" selected={contains(left,c.name)} onChange={result ? left=append(left,c.name) : left=without(left,c.name)}
+      if length(left)<length(crewOut)
+        Text.danger "Still underground: {join(filter(map(crewOut,c=>c.name),n=>!contains(left,n)),", ")}"
+      if length(left)==length(crewOut)
+        Text.success "Everyone from the outgoing shift is out."
+
+### Sign-off
+state signed=false
+state signName=""
+App
+  Sidebar
+    Brand "Changeover" icon="engineering"
+    NavItem "Map and notes" icon="map" onTap={go map}
+    NavItem "Equipment" icon="precision_manufacturing" onTap={go equipment}
+    NavItem "Crew" icon="groups" onTap={go crew}
+    NavItem "Sign-off" icon="draw" selected={true}
+  Main
+    Nav
+      Heading "Acknowledge and sign" level=1
+      Badge.warning "{length(notes)-length(acked)} unread"
+    Column pad=24 gap=16 maxw=720
+      Card gap=8
+        Text.strong "Notes still to acknowledge"
+        each n in filter(notes, x=>!contains(acked,x.id))
+          ListTile "{n.face}: {n.tag}" "{n.text}" onSwipeLeft={acked=append(acked,n.id); toast "Acknowledged"} onSwipeRight={acked=append(acked,n.id); toast "Acknowledged"}
+            Icon "swipe_left"
+        if length(acked)==length(notes)
+          Text.success "All notes acknowledged."
+      Card gap=8
+        Text.strong "Open equipment faults"
+        Text.body "{count(eq,e=>e.state=="faulty")} units tagged out: {join(map(filter(eq,e=>e.state=="faulty"),e=>e.name),", ")}"
+        Text.body "Underground not yet out: {length(crewOut)-length(left)}"
+      Card gap=12
+        Text.strong "Incoming supervisor signature"
+        Input "Full name" bind=signName
+        SignaturePad bind=signature h=140
+        Row gap=8
+          Button.outline "Clear" onTap={signature=""}
+          Button "Sign handover" onTap={length(acked)==length(notes) && trim(signName)!="" && signature!="" ? signed=true; open done : toast "Acknowledge every note, then name and sign"}
+  Dialog#done "Handover signed" "Changeover is complete"
+    Text.body "Signed by {signName} at {formatDate(today(),"MMM d")}."
+    Button "Finish" onTap={emit handoverSigned; close; go map}
+state signature=""

@@ -1,0 +1,3 @@
+App: Calendar Call, a court docket. Today's hearings as a list by courtroom and time with case number, parties and a status (called, in progress, continued, done); a judge's view with the next case on top and notes typed; a lawyer's check-in marking present; a case page with filings in order and documents opened; a continuance with a new date picked from a month grid; an interpreter needed badge; a courtroom screen outside showing the running list.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

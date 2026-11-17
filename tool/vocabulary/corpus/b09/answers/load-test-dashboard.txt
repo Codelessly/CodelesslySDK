@@ -1,0 +1,288 @@
+### Scenario
+state tab="scenario"
+state name="Checkout peak"
+state target="https://staging.shop.example.com"
+state points=[{"t":0,"vus":0},{"t":60,"vus":200},{"t":180,"vus":800},{"t":420,"vus":800},{"t":480,"vus":150},{"t":540,"vus":0}]
+state sel=-1
+state thresholdMs=800
+state maxErr=2
+state count=10
+state running=false
+App
+  Sidebar
+    Brand "Hammer" icon="hardware"
+    NavItem "Scenario" icon="tune" selected={tab=="scenario"} onTap={tab="scenario"; go scenario}
+    NavItem "Live run" icon="monitoring" badge="live" selected={tab=="live"} onTap={tab="live"; go live-run}
+    NavItem "Compare" icon="compare_arrows" selected={tab=="compare"} onTap={tab="compare"; go compare}
+    NavItem "Report" icon="fact_check" selected={tab=="report"} onTap={tab="report"; go report}
+    Spacer grow
+    Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "Scenario" level=1
+      Row gap=8
+        Button.outline "Save" icon="save" onTap={emit saveScenario points; toast "Scenario saved"}
+        Button "Start run" icon="play_arrow" onTap={open countdown}
+    Column pad=24 gap=16
+      Grid cols=2 gap=16
+        Input "Scenario name" bind=name
+        Input "Target" "https://" bind=target
+      Card gap=12
+        Row between
+          Column gap=4
+            Text.strong "Virtual users over time"
+            Text.muted "Drag a point to reshape the ramp. Tap the line to add a point."
+          Row gap=8
+            Button.outline "Add point" icon="add" onTap={points=append(points,{"t":max(points)+30,"vus":100})}
+            Button.ghost "Remove point" icon="remove" onTap={sel>=0 ? {points=removeAt(points,sel); sel=-1} : toast "Select a point first"}
+        RampEditor bind=points selected=sel xLabel="seconds" yLabel="virtual users" max=1000 h=260 snap=10 onSelect={sel=result} onChange={points=result}
+        Row gap=24
+          Text.caption "Peak {max(map(points,p=>p.vus),0)} users"
+          Text.caption "Length {last(points).t} s"
+      Grid cols=3 gap=16
+        Card gap=8
+          Text.fieldLabel "Fail the run if p95 latency crosses"
+          Slider bind=thresholdMs min=100 max=3000
+          Text.strong "{thresholdMs} ms"
+        Card gap=8
+          Text.fieldLabel "Fail the run if errors exceed"
+          Slider bind=maxErr min=0 max=20
+          Text.strong "{maxErr}%"
+        Card gap=8
+          Text.fieldLabel "Countdown before start"
+          SegmentedButton bind=count items=["5","10","30"]
+          Text.muted "seconds"
+  Dialog#countdown "Starting {name}" "Virtual users begin ramping when the count reaches zero."
+    Column center gap=12
+      Text "{count}" size=72 weight=700 center
+      Progress {1 - count/10}
+    Row gap=8 end
+      Button.outline "Cancel" onTap={running=false; close}
+      Button "Start now" onTap={emit startRun {"name":name,"points":points,"thresholdMs":thresholdMs,"maxErr":maxErr}; close; go live-run}
+every 1s when running onTick={count=count-1}
+
+### Live run
+state tab="live"
+state sort="p95"
+state running=true
+state elapsed=212
+state rps=[820,910,1040,1130,1210,1180,1260]
+state p50=[92,95,101,108,112,110,118]
+state p95=[240,262,301,355,410,398,452]
+state p99=[510,570,690,820,930,905,1040]
+state errs=[0.1,0.2,0.2,0.4,0.9,1.4,2.3]
+state thresholdMs=800
+state maxErr=2
+state endpoints=[{"path":"POST /api/checkout","rps":210,"p95":980,"err":3.1},{"path":"GET /api/cart","rps":340,"p95":420,"err":0.8},{"path":"GET /api/products","rps":520,"p95":210,"err":0.1},{"path":"POST /api/login","rps":90,"p95":340,"err":0.4},{"path":"GET /api/search","rps":100,"p95":280,"err":0.2}]
+every 1s when running onTick={elapsed=elapsed+1}
+App
+  Sidebar
+    Brand "Hammer" icon="hardware"
+    NavItem "Scenario" icon="tune" selected={tab=="scenario"} onTap={tab="scenario"; go scenario}
+    NavItem "Live run" icon="monitoring" badge="live" selected={tab=="live"} onTap={tab="live"}
+    NavItem "Compare" icon="compare_arrows" selected={tab=="compare"} onTap={go compare}
+    NavItem "Report" icon="fact_check" selected={tab=="report"} onTap={go report}
+    Spacer grow
+    Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Row gap=12
+        Heading "Checkout peak" level=1
+        Badge.success "Running" hide=phone
+        Text.mono "{duration(elapsed)}"
+      Row gap=8
+        Button.destructive "Stop" icon="stop" onTap={open confirmStop}
+    Column pad=24 gap=16
+      if last(p95) > thresholdMs || last(errs) > maxErr
+        Card gap=4 fill=#FFFDECEA
+          Row gap=8
+            Icon "warning" color=#FFB3261E
+            Text.strong "Threshold crossed. The run will fail." color=#FFB3261E
+          Text.muted "p95 is {last(p95)} ms against a limit of {thresholdMs} ms. Errors are {last(errs)}% against {maxErr}%."
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.caption "Requests per second"
+          Text "{last(rps)}" size=36 weight=700
+          Sparkline values={rps}
+        Card gap=4
+          Text.caption "p95 latency"
+          Text "{last(p95)} ms" size=36 weight=700
+          Sparkline values={p95}
+        Card gap=4
+          Text.caption "Error rate"
+          Text "{last(errs)}%" size=36 weight=700 color=#FFC62828
+          Sparkline values={errs} color=#FFC62828
+        Card gap=4
+          Text.caption "Virtual users"
+          Text "{min(800, elapsed*4)}" size=36 weight=700
+          Progress {min(1, elapsed/540)}
+      Grid cols=2 gap=16
+        Card gap=8
+          Text.strong "Requests per second"
+          AreaChart values={rps} labels=["-60s","-50s","-40s","-30s","-20s","-10s","now"] h=220
+        Card gap=8
+          Text.strong "Latency percentiles"
+          LineChart labels=["-60s","-50s","-40s","-30s","-20s","-10s","now"] series=[{"name":"p50","values":{p50}},{"name":"p95","values":{p95}},{"name":"p99","values":{p99}}] threshold={thresholdMs} thresholdLabel="Fail line" unit="ms" h=220
+      Card gap=8
+        Text.strong "Error rate"
+        LineChart labels=["-60s","-50s","-40s","-30s","-20s","-10s","now"] series=[{"name":"Errors","values":{errs}}] color=#FFC62828 threshold={maxErr} unit="%" h=140
+      Card gap=8
+        Row between
+          Text.strong "Endpoints, slowest first"
+          SegmentedButton bind=sort items=["p95","rps","err"]
+        Row gap=8
+          Text.fieldLabel "Endpoint" grow
+          Text.fieldLabel "Req/s" w=80
+          Text.fieldLabel "p95" w=90
+          Text.fieldLabel "Errors" w=80
+        Divider
+        each e in sortByDesc(endpoints, x => x[sort])
+          Row gap=8 middle
+            Text.mono "{e.path}" grow
+            Text "{e.rps}" w=80
+            Text "{e.p95} ms" w=90 color={e.p95 > thresholdMs ? "#FFC62828" : "#FF1B1B1B"}
+            Badge.danger "{e.err}%" w=80 visible={e.err > maxErr}
+            Text "{e.err}%" w=80 hidden={e.err > maxErr}
+  Dialog#confirmStop "Stop this run?" "Results so far are kept and marked as stopped."
+    Row gap=8 end
+      Button.outline "Keep running" onTap={close}
+      Button.destructive "Stop run" onTap={running=false; emit stopRun; close; go report}
+
+### Compare
+state tab="compare"
+state runA="Run 41"
+state runB="Run 42"
+state metric="p95"
+state runs=["Run 39","Run 40","Run 41","Run 42"]
+App
+  Sidebar
+    Brand "Hammer" icon="hardware"
+    NavItem "Scenario" icon="tune" selected={tab=="scenario"} onTap={go scenario}
+    NavItem "Live run" icon="monitoring" selected={tab=="live"} onTap={go live-run}
+    NavItem "Compare" icon="compare_arrows" selected={tab=="compare"} onTap={tab="compare"}
+    NavItem "Report" icon="fact_check" selected={tab=="report"} onTap={go report}
+    Spacer grow
+    Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "Compare runs" level=1
+      Button.outline "Swap" icon="swap_horiz" onTap={runA=runB; runB=runA}
+    Column pad=24 gap=16
+      Row gap=12 wrap
+        Select "Baseline" bind=runA items={runs}
+        Select "Candidate" bind=runB items={runs}
+        SegmentedButton bind=metric items=["p50","p95","p99","rps","errors"]
+      Card gap=8
+        Row between
+          Text.strong "{metric} over the run"
+          Row gap=12
+            Row gap=4
+              Icon "circle" color=#FF5B6B7A size=12
+              Text.caption "{runA}"
+            Row gap=4
+              Icon "circle" color=#FF2F6FED size=12
+              Text.caption "{runB}"
+        LineChart labels=["0:00","1:00","2:00","3:00","4:00","5:00","6:00","7:00","8:00"] series=[{"name":"Run 41","values":[90,120,210,260,300,310,280,170,100]},{"name":"Run 42","values":[88,118,230,340,410,452,390,210,110]}] threshold=800 thresholdLabel="Fail line" unit="ms" h=300
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.caption "Peak p95"
+          Text "452 ms" size=28 weight=700
+          Badge.error "+142 ms"
+        Card gap=4
+          Text.caption "Peak requests per second"
+          Text "1,260" size=28 weight=700
+          Badge.success "+90"
+        Card gap=4
+          Text.caption "Error rate"
+          Text "2.3%" size=28 weight=700
+          Badge.error "+1.8 points"
+        Card gap=4
+          Text.caption "Verdict"
+          Text "{runB} is slower" size=20 weight=700
+          Text.muted "p95 grew in 4 of 5 endpoints"
+      Card gap=8
+        Text.strong "Endpoints"
+        Row gap=8
+          Text.fieldLabel "Endpoint" grow
+          Text.fieldLabel "{runA} p95" w=110
+          Text.fieldLabel "{runB} p95" w=110
+          Text.fieldLabel "Change" w=90
+        Divider
+        Row gap=8
+          Text.mono "POST /api/checkout" grow
+          Text "610 ms" w=110
+          Text "980 ms" w=110
+          Badge.error "+61%" w=90
+        Row gap=8
+          Text.mono "GET /api/cart" grow
+          Text "400 ms" w=110
+          Text "420 ms" w=110
+          Badge.neutral "+5%" w=90
+        Row gap=8
+          Text.mono "GET /api/products" grow
+          Text "230 ms" w=110
+          Text "210 ms" w=110
+          Badge.success "-9%" w=90
+
+### Report
+state tab="report"
+state verdict="fail"
+App
+  Sidebar
+    Brand "Hammer" icon="hardware"
+    NavItem "Scenario" icon="tune" selected={tab=="scenario"} onTap={go scenario}
+    NavItem "Live run" icon="monitoring" selected={tab=="live"} onTap={go live-run}
+    NavItem "Compare" icon="compare_arrows" selected={tab=="compare"} onTap={go compare}
+    NavItem "Report" icon="fact_check" selected={tab=="report"} onTap={tab="report"}
+    Spacer grow
+    Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "Report: Checkout peak" level=1
+      Row gap=8
+        Button.outline "Copy link" icon="link" onTap={copy "https://hammer.example.com/reports/42"; toast "Link copied"}
+        Button "Export PDF" icon="picture_as_pdf" onTap={emit exportReport pdf}
+    Column pad=24 gap=16
+      Card gap=16
+        Row gap=24 middle
+          Seal {verdict=="pass" ? "PASS" : "FAIL"} tone={verdict=="pass" ? "success" : "danger"} size=120
+          Column grow gap=4
+            Heading "The run failed its thresholds" level=3
+            Text.muted "p95 latency crossed 800 ms for 41 seconds, and errors reached 2.3% against a limit of 2%."
+            Text.caption "Run 42, 9 minutes, peak 800 virtual users, 17 Nov 2026"
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.caption "Total requests"
+          Text "612,408" size=28 weight=700
+        Card gap=4
+          Text.caption "Peak requests per second"
+          Text "1,260" size=28 weight=700
+        Card gap=4
+          Text.caption "p99 latency"
+          Text "1,040 ms" size=28 weight=700
+        Card gap=4
+          Text.caption "Error rate"
+          Text "2.3%" size=28 weight=700 color=#FFC62828
+      Card gap=8
+        Text.strong "Thresholds"
+        Row between
+          Row gap=8
+            Icon "cancel" color=#FFC62828
+            Text "p95 latency under 800 ms"
+          Badge.error "Failed at 4:12"
+        Row between
+          Row gap=8
+            Icon "cancel" color=#FFC62828
+            Text "Error rate under 2%"
+          Badge.error "Failed at 5:03"
+        Row between
+          Row gap=8
+            Icon "check_circle" color=#FF2E7D32
+            Text "Throughput above 500 requests per second"
+          Badge.success "Passed"
+      Card gap=8
+        Text.strong "Latency percentiles"
+        LineChart labels=["0:00","1:00","2:00","3:00","4:00","5:00","6:00","7:00","8:00"] series=[{"name":"p50","values":[80,95,110,118,120,118,112,95,82]},{"name":"p95","values":[88,118,230,340,410,452,390,210,110]},{"name":"p99","values":[140,210,480,720,930,1040,880,420,180]}] threshold=800 thresholdLabel="Fail line" unit="ms" h=240
+      Row gap=8 end
+        Button.outline "Compare with another run" icon="compare_arrows" onTap={go compare}
+        Button "Run again" icon="replay" onTap={go scenario}

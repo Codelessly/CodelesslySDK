@@ -1,0 +1,3 @@
+App: Dispenser, a vending machine front. A grid of numbered slots with product pictures and prices, sold out marked with a cross; a keypad for a code; a price shown with the credit inserted; a change return with a progress animation; a card reader state; a drop animation and a pick up message; low stock hidden items; a combo offer suggested when two items are chosen; a hot drink chute with a cup sensed; a service mode behind a key with counts.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

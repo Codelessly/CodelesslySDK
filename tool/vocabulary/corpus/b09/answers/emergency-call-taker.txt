@@ -1,0 +1,194 @@
+### Call
+state tab="call"
+state elapsed=0
+state onHold=false
+state holdSecs=0
+state address="2214 Alder Street, Apt 3B"
+state accuracy=35
+state q="q1"
+state ansType=""
+state ansBreathing=""
+state ansConscious=""
+state ansWeapon=""
+state priority=3
+state incType=""
+state notes=""
+state timeline=[{"t":0,"who":"Caller","text":"Call connected from 555-0142"},{"t":6,"who":"Call taker","text":"911, what is the address of your emergency?"},{"t":11,"who":"Caller","text":"2214 Alder Street, there is a man on the floor"}]
+state units=[{"id":"M12","name":"Medic 12","kind":"Ambulance","status":"Available","km":1.2,"assigned":false},{"id":"E4","name":"Engine 4","kind":"Fire","status":"Available","km":0.8,"assigned":false},{"id":"P31","name":"Patrol 31","kind":"Police","status":"En route elsewhere","km":2.6,"assigned":false},{"id":"M7","name":"Medic 7","kind":"Ambulance","status":"Busy","km":4.1,"assigned":false}]
+every 1s onTick={elapsed=elapsed+1}
+every 1s when onHold onTick={holdSecs=holdSecs+1}
+App
+  Sidebar
+    Brand "Dispatch One" icon="emergency"
+    NavItem "Active call" icon="call" badge="1" selected={tab=="call"} onTap={tab="call"}
+    NavItem "Units" icon="local_shipping" selected={tab=="units"} onTap={go units}
+    NavItem "Call log" icon="history" onTap={go call-log}
+    Spacer grow
+    Text.muted "Call taker: J. Okafor"
+    Text.caption "Console 6"
+  Main
+    Nav
+      Row gap=12 middle
+        Heading "Call 24-118803" level=1
+        Badge.error "{duration(elapsed)}"
+        Badge.warning hidden={!onHold} "On hold {duration(holdSecs)}"
+      Row gap=8
+        Button.outline "Hold" icon="pause" hidden={onHold} onTap={onHold=true; holdSecs=0; timeline=append(timeline,{"t":elapsed,"who":"System","text":"Caller placed on hold"})}
+        Button "Resume" icon="play_arrow" hidden={!onHold} onTap={onHold=false; timeline=append(timeline,{"t":elapsed,"who":"System","text":"Caller resumed after {duration(holdSecs)}"})}
+        Button.destructive "End call" onTap={open endCall}
+    Row grow top gap=0
+      Column grow gap=16 pad=24 scroll
+        Card gap=12
+          Row between
+            Text.panelTitle "Caller location"
+            Badge.info "Accuracy {accuracy} m"
+          Map lat=40.7291 lng=-73.9965 zoom=17 h=240 accuracy={accuracy} marker="Caller"
+          Row gap=8
+            Input "Address" bind=address grow
+            Button.outline "Verify" icon="pin_drop" onTap={toast "Address verified"; timeline=append(timeline,{"t":elapsed,"who":"Call taker","text":"Address verified: {address}"})}
+        Card gap=12
+          Row between
+            Text.panelTitle "Script"
+            Text.caption "Step {q=="q1" ? 1 : q=="q2" ? 2 : q=="q3" ? 3 : 4} of 4"
+          Progress {q=="q1" ? 0.25 : q=="q2" ? 0.5 : q=="q3" ? 0.75 : 1}
+          if q=="q1"
+            Text.heading3 "What is the emergency? Is anyone hurt?"
+            Row gap=8
+              Button.outline "Medical" onTap={ansType="Medical"; incType="Medical"; priority=2; q="q2"; timeline=append(timeline,{"t":elapsed,"who":"Caller","text":"Medical: man on the floor"})}
+              Button.outline "Fire" onTap={ansType="Fire"; incType="Fire"; priority=2; q="q3"; timeline=append(timeline,{"t":elapsed,"who":"Caller","text":"Reports smoke"})}
+              Button.outline "Police" onTap={ansType="Police"; incType="Police"; priority=3; q="q4"; timeline=append(timeline,{"t":elapsed,"who":"Caller","text":"Reports a disturbance"})}
+          if q=="q2"
+            Text.heading3 "Is he breathing?"
+            Row gap=8
+              Button.outline "Yes, normally" onTap={ansBreathing="Yes"; priority=2; q="q3"; timeline=append(timeline,{"t":elapsed,"who":"Caller","text":"He is breathing normally"})}
+              Button.outline "Not breathing" onTap={ansBreathing="No"; priority=1; q="q3"; timeline=append(timeline,{"t":elapsed,"who":"Caller","text":"He is not breathing"}); toast "Start CPR instructions"}
+              Button.outline "Gasping" onTap={ansBreathing="Agonal"; priority=1; q="q3"; timeline=append(timeline,{"t":elapsed,"who":"Caller","text":"He is gasping"})}
+          if q=="q3"
+            Text.heading3 "{ansBreathing=="No" ? "Tell me when you are ready to start chest compressions. Is he awake?" : "Is he awake and answering you?"}"
+            Row gap=8
+              Button.outline "Awake" onTap={ansConscious="Yes"; q="q4"; timeline=append(timeline,{"t":elapsed,"who":"Caller","text":"He is awake"})}
+              Button.outline "Unresponsive" onTap={ansConscious="No"; priority=1; q="q4"; timeline=append(timeline,{"t":elapsed,"who":"Caller","text":"He is unresponsive"})}
+          if q=="q4"
+            Text.heading3 "Is there any weapon or danger at the scene?"
+            Row gap=8
+              Button.outline "No danger" onTap={ansWeapon="No"; q="done"; timeline=append(timeline,{"t":elapsed,"who":"Caller","text":"No danger at the scene"})}
+              Button.outline "Weapon present" onTap={ansWeapon="Yes"; priority=1; q="done"; timeline=append(timeline,{"t":elapsed,"who":"Caller","text":"A weapon is present"}); toast "Police needed"}
+          if q=="done"
+            Text.success "Script complete. Assign units."
+          Row gap=8
+            Button.ghost "Restart script" onTap={q="q1"; ansType=""; ansBreathing=""; ansConscious=""; ansWeapon=""; priority=3}
+        Card gap=12
+          Text.panelTitle "Incident type"
+          Grid cols=4 gap=12
+            Button.outline "Medical" icon="medical_services" h=72 selected={incType=="Medical"} onTap={incType="Medical"}
+            Button.outline "Fire" icon="local_fire_department" h=72 selected={incType=="Fire"} onTap={incType="Fire"}
+            Button.outline "Police" icon="local_police" h=72 selected={incType=="Police"} onTap={incType="Police"}
+            Button.outline "Traffic" icon="car_crash" h=72 selected={incType=="Traffic"} onTap={incType="Traffic"}
+        Card gap=8
+          Text.panelTitle "Notes"
+          Input "Notes" "Add details for responders" bind=notes multiline
+          Row end
+            Button.secondary "Add to timeline" onTap={notes!="" ? {timeline=append(timeline,{"t":elapsed,"who":"Note","text":notes}); notes=""} : toast "Write a note first"}
+      Pane w=340 pad=16 gap=12
+        Box radius=12 pad=16 gap=4 fill={priority==1 ? "#FFC62828" : priority==2 ? "#FFEF6C00" : "#FF2E7D32"}
+          Text "PRIORITY" color=#FFFFFFFF size=12 weight=700
+          Text "P{priority}" color=#FFFFFFFF size=48 weight=700 animate={priority==1 ? "pulse" : "fade"}
+          Text "{priority==1 ? "Life threatening" : priority==2 ? "Urgent" : "Routine"}" color=#FFFFFFFF
+        Text.panelTitle "Timeline"
+        Timeline items={timeline} timeKey="t" titleKey="who" textKey="text" h=220 scroll
+        Divider
+        Row between
+          Text.panelTitle "Units"
+          Link "All units" onTap={go units}
+        each u in sortBy(units, x=>x.km)
+          ListTile "{u.name}" subtitle="{u.kind}, {u.status}, {u.km} km"
+            Button.outline "Assign" hidden={u.assigned || u.status=="Busy"} onTap={units=updateWhere(units,x=>x.id==u.id,x=>with(x,"assigned",true)); timeline=append(timeline,{"t":elapsed,"who":"Dispatch","text":"{u.name} assigned"}); toast "{u.name} assigned"}
+            Badge.success "Sent" hidden={!u.assigned}
+Dialog#endCall "End this call?" "The timeline is saved to the call log."
+  Text.muted "{length(filter(units,u=>u.assigned))} unit(s) assigned. Priority P{priority}."
+  Row end gap=8
+    Button.ghost "Keep going" onTap={close}
+    Button.destructive "End call" onTap={emit endCall; toast "Call ended"; close; go call-log}
+
+### Units
+state filterKind="All"
+state sel=""
+state units=[{"id":"M12","name":"Medic 12","kind":"Ambulance","status":"Available","km":1.2,"assigned":false},{"id":"E4","name":"Engine 4","kind":"Fire","status":"Available","km":0.8,"assigned":false},{"id":"P31","name":"Patrol 31","kind":"Police","status":"En route elsewhere","km":2.6,"assigned":false},{"id":"M7","name":"Medic 7","kind":"Ambulance","status":"Busy","km":4.1,"assigned":false},{"id":"P18","name":"Patrol 18","kind":"Police","status":"Available","km":3.3,"assigned":false}]
+App
+  Sidebar
+    Brand "Dispatch One" icon="emergency"
+    NavItem "Active call" icon="call" badge="1" onTap={go call}
+    NavItem "Units" icon="local_shipping" selected onTap={go units}
+    NavItem "Call log" icon="history" onTap={go call-log}
+    Spacer grow
+    Text.muted "Call taker: J. Okafor"
+  Main
+    Nav
+      Heading "Units near 2214 Alder Street" level=1
+      Row gap=8
+        Select bind=filterKind items=["All","Ambulance","Fire","Police"]
+    Column pad=24 gap=16
+      Map lat=40.7291 lng=-73.9965 zoom=14 h=260 accuracy=35 marker="Caller" markers={map(units,u=>{"label":u.name,"status":u.status})}
+      Card gap=0
+        Row pad=8 gap=8
+          Text.strong "Unit" w=120
+          Text.strong "Type" w=100
+          Text.strong "Status" w=160
+          Text.strong "Distance" w=90
+          Spacer grow
+        each u in sortBy(filter(units,x=>filterKind=="All" || x.kind==filterKind), x=>x.km)
+          Row pad=8 gap=8 middle border-top=#FFE0E0E0
+            Text.strong "{u.name}" w=120
+            Text "{u.kind}" w=100
+            Badge.success "{u.status}" w=160 hidden={u.status!="Available"}
+            Badge.warning "{u.status}" w=160 hidden={u.status=="Available" || u.status=="Busy"}
+            Badge.danger "{u.status}" w=160 hidden={u.status!="Busy"}
+            Text "{u.km} km" w=90
+            Spacer grow
+            Button.outline "Assign" hidden={u.assigned || u.status=="Busy"} onTap={units=updateWhere(units,x=>x.id==u.id,x=>with(x,"assigned",true)); toast "{u.name} assigned"}
+            Button.ghost "Recall" hidden={!u.assigned} onTap={units=updateWhere(units,x=>x.id==u.id,x=>with(x,"assigned",false)); toast "{u.name} recalled"}
+            IconButton "more_vert" tooltip="More" onTap={sel=u.id; open unitMenu}
+Menu#unitMenu end
+  MenuItem "Call unit by radio" icon="settings_voice" onTap={toast "Radio open to {sel}"}
+  MenuItem "Mark out of service" icon="block" onTap={units=updateWhere(units,x=>x.id==sel,x=>with(x,"status","Busy")); toast "Marked busy"}
+
+### Call log
+state query=""
+state selected=""
+state calls=[{"id":"24-118803","time":"14:02","type":"Medical","addr":"2214 Alder Street","priority":1,"length":412},{"id":"24-118797","time":"13:41","type":"Fire","addr":"88 Dock Road","priority":2,"length":233},{"id":"24-118790","time":"13:12","type":"Police","addr":"410 Mercer Avenue","priority":3,"length":150},{"id":"24-118784","time":"12:55","type":"Traffic","addr":"I-95 northbound, mile 14","priority":2,"length":301}]
+App
+  Sidebar
+    Brand "Dispatch One" icon="emergency"
+    NavItem "Active call" icon="call" onTap={go call}
+    NavItem "Units" icon="local_shipping" onTap={go units}
+    NavItem "Call log" icon="history" selected onTap={go call-log}
+    Spacer grow
+    Text.muted "Call taker: J. Okafor"
+  Main
+    Nav
+      Heading "Call log" level=1
+      Input "Search calls" bind=query w=240
+    Column pad=24 gap=12
+      Card gap=0
+        Row pad=8 gap=8
+          Text.strong "Call" w=110
+          Text.strong "Time" w=70
+          Text.strong "Type" w=90
+          Text.strong "Address" grow
+          Text.strong "Priority" w=80
+          Text.strong "Length" w=80
+        each c in filter(calls,x=>contains(lower(x.addr),lower(query)) || contains(lower(x.type),lower(query)))
+          Row pad=8 gap=8 middle border-top=#FFE0E0E0 onTap={selected=c.id; open callDetail}
+            Text.mono "{c.id}" w=110
+            Text "{c.time}" w=70
+            Text "{c.type}" w=90
+            Text "{c.addr}" grow
+            Badge.error "P{c.priority}" w=80 hidden={c.priority!=1}
+            Badge.warning "P{c.priority}" w=80 hidden={c.priority!=2}
+            Badge.success "P{c.priority}" w=80 hidden={c.priority!=3}
+            Text "{duration(c.length)}" w=80
+Drawer#callDetail "Call {selected}" right
+  Text.muted "{find(calls,c=>c.id==selected).type} at {find(calls,c=>c.id==selected).addr}"
+  Button.outline "Play recording" icon="play_arrow" onTap={toast "Playing recording"}
+  Button.outline "Export report" icon="download" onTap={emit exportCall selected; toast "Report exported"}
+  Button.ghost "Close" onTap={close}

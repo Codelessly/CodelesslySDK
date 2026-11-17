@@ -1,0 +1,244 @@
+### Workspace
+state session="api-dev"
+state win=0
+state windows=[{"name":"editor","flags":"*"},{"name":"server","flags":""},{"name":"logs","flags":"-"},{"name":"db","flags":""}]
+state panes=[{"id":1,"title":"nvim router.dart","lines":["import 'package:shelf/shelf.dart';","","Handler buildRouter(Db db) {","  final r = Router();","  r.get('/users/<id>', (req, id) => users(db, id));","  r.post('/orders', (req) => createOrder(db, req));","  return r.call;","}"]},{"id":2,"title":"dart run bin/server.dart","lines":["[12:01:44] listening on :8080","[12:01:52] GET /users/42 200 8ms","[12:01:53] GET /users/43 200 6ms","[12:02:07] POST /orders 201 31ms","[12:02:09] GET /users/7 404 3ms","[12:02:15] POST /orders 500 12ms"]},{"id":3,"title":"tail -f logs/app.log","lines":["INFO  db pool ready size=10","WARN  slow query 212ms orders.byUser","ERROR null check failed in createOrder","INFO  retry 1 of 3","INFO  order 9918 saved"]}]
+state focus=1
+state layout="v"
+state zoomed=0
+state prefix=false
+state cmd=""
+state cmdOpen=false
+state clock="12:02"
+state msg=""
+state copyMode=false
+state cursor=0
+state anchor=-1
+every 1s onTick={clock=clock}
+every 4s onTick={panes=updateWhere(panes,p=>p.id==2,p=>with(p,"lines",append(slice(p.lines,max(0,length(p.lines)-7),length(p.lines)),"[tick] GET /health 200 1ms")))}
+App
+  Main
+    Nav
+      Row gap=8 middle
+        Icon "terminal"
+        Text.strong "Splitscreen"
+        Text.muted "session {session}"
+      Row gap=8
+        IconButton "vertical_split" tooltip="Split side by side" onTap={panes=append(panes,{"id":length(panes)+1,"title":"zsh","lines":["$ "]}); layout="v"; focus=length(panes)+1}
+        IconButton "horizontal_split" tooltip="Split stacked" onTap={panes=append(panes,{"id":length(panes)+1,"title":"zsh","lines":["$ "]}); layout="h"; focus=length(panes)+1}
+        IconButton "fullscreen" tooltip="Zoom pane (prefix z)" onTap={zoomed=zoomed==0 ? focus : 0}
+        IconButton "view_list" tooltip="Sessions (prefix s)" onTap={open sessions}
+        Button.outline "Prefix  Ctrl-b" onTap={prefix=true; msg="prefix pressed, type a command"}
+    Column pad=12 gap=8 grow
+      if zoomed==0
+        if layout=="v"
+          Row gap=8 grow stretch
+            each p in panes
+              Box grow gap=0 radius=4 border-top=#FF3A3F4B onTap={focus=p.id}
+                Row between pad=[8,4,8,4] fill={focus==p.id ? "#FF2F6FEB" : "#FF2A2E37"}
+                  Text.small "{p.id}: {p.title}" color=#FFFFFFFF
+                  Row gap=4
+                    IconButton "fullscreen" tooltip="Zoom" onTap={focus=p.id; zoomed=p.id}
+                    IconButton "close" tooltip="Kill pane" onTap={panes=removeWhere(panes,q=>q.id==p.id); focus=coalesce(first(panes).id,0)}
+                Column scroll pad=8 gap=0 fill=#FF14161B grow
+                  each line in p.lines
+                    Text.mono "{line}" color=#FFD6DAE0
+        if layout=="h"
+          Column gap=8 grow
+            each p in panes
+              Box grow gap=0 radius=4 onTap={focus=p.id}
+                Row between pad=[8,4,8,4] fill={focus==p.id ? "#FF2F6FEB" : "#FF2A2E37"}
+                  Text.small "{p.id}: {p.title}" color=#FFFFFFFF
+                  IconButton "fullscreen" tooltip="Zoom" onTap={focus=p.id; zoomed=p.id}
+                Column scroll pad=8 gap=0 fill=#FF14161B grow
+                  each line in p.lines
+                    Text.mono "{line}" color=#FFD6DAE0
+      if zoomed!=0
+        Box grow gap=0 radius=4
+          Row between pad=[8,4,8,4] fill=#FF2F6FEB
+            Text.small "{zoomed}: {find(panes,p=>p.id==zoomed).title}  [zoomed]" color=#FFFFFFFF
+            Button.ghost "Unzoom" icon="fullscreen_exit" onTap={zoomed=0}
+          Column scroll pad=8 gap=0 fill=#FF14161B grow
+            each line in find(panes,p=>p.id==zoomed).lines
+              Text.mono "{line}" color=#FFD6DAE0
+      if prefix
+        Card gap=8
+          Row gap=8 middle
+            Badge.warning "PREFIX"
+            Text.muted "Pick a key or type a command"
+          Row gap=8
+            Chip "%  split side by side" onTap={panes=append(panes,{"id":length(panes)+1,"title":"zsh","lines":["$ "]}); layout="v"; prefix=false}
+            Chip "\"  split stacked" onTap={panes=append(panes,{"id":length(panes)+1,"title":"zsh","lines":["$ "]}); layout="h"; prefix=false}
+            Chip "o  next pane" onTap={focus=focus==length(panes) ? 1 : focus+1; prefix=false}
+            Chip "z  zoom" onTap={zoomed=zoomed==0 ? focus : 0; prefix=false}
+            Chip "{  swap with previous" onTap={panes=swapPrev; prefix=false}
+            Chip "[  copy mode" onTap={copyMode=true; cursor=0; anchor=-1; prefix=false; open copy}
+            Chip ":  command" onTap={cmdOpen=true; prefix=false}
+            Chip "s  sessions" onTap={prefix=false; open sessions}
+          Row gap=8
+            Input ":" "resize-pane -R 10" bind=cmd onSubmit={msg=cmd; cmd=""; prefix=false}
+            Button "Run" onTap={msg="ran: {cmd}"; cmd=""; prefix=false}
+            Button.ghost "Cancel" onTap={prefix=false; cmd=""}
+      if cmdOpen
+        Card gap=8
+          Row gap=8 middle
+            Badge.info "COMMAND"
+            Input ":" "swap-pane -s 1 -t 2" bind=cmd grow onSubmit={msg="ran: {cmd}"; cmd=""; cmdOpen=false}
+          Row gap=8
+            Button.outline "resize-pane -L 5" onTap={cmd="resize-pane -L 5"}
+            Button.outline "resize-pane -R 5" onTap={cmd="resize-pane -R 5"}
+            Button.outline "resize-pane -D 3" onTap={cmd="resize-pane -D 3"}
+            Button.outline "swap-pane -s 1 -t 2" onTap={cmd="swap-pane -s 1 -t 2"; panes=[panes[1],panes[0],panes[2]]; msg="swapped panes 1 and 2"; cmdOpen=false}
+    Footer
+      Row between pad=[12,6,12,6] fill=#FF1B5E20
+        Row gap=0
+          Text.small "[{session}] " color=#FFFFFFFF weight=700
+          each w in windows
+            Box fill={win==index ? "#FFFFFFFF" : "#00000000"} pad=[8,2,8,2] onTap={win=index}
+              Text.small "{index}:{w.name}{w.flags}" color={win==index ? "#FF1B5E20" : "#FFFFFFFF"}
+        Row gap=12
+          Text.small "{msg}" color=#FFFFFFFF
+          Text.small "{clock}" color=#FFFFFFFF weight=700
+  Sheet#copy "Copy mode"
+    Row gap=8 middle
+      Badge.warning "[copy]"
+      Text.muted "j/k move, v select, y copy, q quit"
+    Column gap=0 pad=8 fill=#FF14161B
+      each line in find(panes,p=>p.id==focus).lines
+        Box fill={(anchor==-1 ? cursor==index : (index>=min(anchor,cursor) && index<=max(anchor,cursor))) ? "#FFD6DAE0" : "#00000000"} onTap={cursor=index}
+          Text.mono "{line}" color={(anchor==-1 ? cursor==index : (index>=min(anchor,cursor) && index<=max(anchor,cursor))) ? "#FF14161B" : "#FFD6DAE0"}
+    Row gap=8
+      IconButton "keyboard_arrow_up" tooltip="Up (k)" onTap={cursor=max(0,cursor-1)}
+      IconButton "keyboard_arrow_down" tooltip="Down (j)" onTap={cursor=min(length(find(panes,p=>p.id==focus).lines)-1,cursor+1)}
+      Button.outline "Select (v)" onTap={anchor=anchor==-1 ? cursor : -1}
+      Spacer grow
+      Button "Copy and quit (y)" onTap={copy join(slice(find(panes,p=>p.id==focus).lines,min(anchor==-1 ? cursor : anchor,cursor),max(anchor==-1 ? cursor : anchor,cursor)+1),"\n"); toast "Copied lines"; anchor=-1; copyMode=false; close}
+  Dialog#sessions "Sessions" "Switch to another session"
+    each s in [{"name":"api-dev","windows":4,"attached":true},{"name":"mobile","windows":2,"attached":false},{"name":"infra","windows":3,"attached":false},{"name":"scratch","windows":1,"attached":false}]
+      ListTile "{s.name}" subtitle="{s.windows} windows" selected={session==s.name} onTap={session=s.name; msg="switched to {s.name}"; close}
+        Badge.success "attached" visible={session==s.name}
+    Row gap=8
+      Input "New session" "name" bind=newName grow
+      Button "Create" onTap={session=newName; msg="new session {newName}"; close}
+
+### Zoomed pane
+state zoomed=true
+state fontSize=14
+state lines=["$ flutter test --coverage","00:01 +12: widgets/login_test.dart: shows error on bad password","00:02 +24: widgets/cart_test.dart: adds an item","00:03 +31: widgets/cart_test.dart: removes an item","00:04 +40: services/api_test.dart: retries on 503","00:05 +52: services/api_test.dart: times out after 10s","00:06 +60: All tests passed!","$ lcov --summary coverage/lcov.info","  lines......: 84.2% (1203 of 1429 lines)","  functions..: 79.8% (212 of 266 functions)","$ "]
+state clock="12:07"
+every 1s onTick={clock=clock}
+App
+  Main
+    Nav
+      Row gap=8 middle
+        Badge.warning "ZOOMED"
+        Text.strong "2: flutter test --coverage"
+      Row gap=8
+        IconButton "text_decrease" tooltip="Smaller text" onTap={fontSize=max(10,fontSize-1)}
+        IconButton "text_increase" tooltip="Larger text" onTap={fontSize=min(24,fontSize+1)}
+        Button "Unzoom  (prefix z)" icon="fullscreen_exit" onTap={go workspace}
+    Column pad=12 grow
+      Box grow radius=4 fill=#FF14161B pad=12 border-left=#FF2F6FEB
+        Column scroll gap=2
+          each line in lines
+            Text.mono "{line}" size={fontSize} color={contains(line,"passed") ? "#FF7EE787" : "#FFD6DAE0"}
+    Footer
+      Row between pad=[12,6,12,6] fill=#FF1B5E20
+        Row gap=0
+          Text.small "[api-dev] " color=#FFFFFFFF weight=700
+          Text.small "0:editor " color=#FFFFFFFF
+          Text.small "1:server " color=#FFFFFFFF
+          Box fill=#FFFFFFFF pad=[8,2,8,2]
+            Text.small "2:test*Z" color=#FF1B5E20
+          Text.small "3:db" color=#FFFFFFFF
+        Text.small "{clock}" color=#FFFFFFFF weight=700
+
+### Sessions
+state sessions=[{"name":"api-dev","windows":4,"created":"Mon 09:12","attached":true,"panes":3},{"name":"mobile","windows":2,"created":"Mon 10:40","attached":false,"panes":2},{"name":"infra","windows":3,"created":"Tue 08:05","attached":false,"panes":5},{"name":"scratch","windows":1,"created":"Today 11:58","attached":false,"panes":1}]
+state current="api-dev"
+state q=""
+state sel=""
+state renaming=""
+state newName=""
+App
+  Sidebar
+    Brand "Splitscreen" icon="terminal"
+    NavItem "Workspace" icon="view_quilt" onTap={go workspace}
+    NavItem "Sessions" icon="view_list" badge="{length(sessions)}" selected={true}
+    NavItem "Copy mode" icon="content_copy" onTap={go copy-mode}
+    Spacer grow
+    Text.muted "Prefix: Ctrl-b"
+  Main
+    Nav
+      Heading "Sessions" level=1
+      Row gap=8
+        Input "Filter" bind=q w=220
+        Button "New session" icon="add" onTap={open newSession}
+    Column pad=24 gap=12
+      each s in filter(sessions,x=>contains(lower(x.name),lower(q)))
+        Card
+          Row between middle
+            Row gap=12 middle
+              IconTile "terminal"
+              Column gap=2
+                Row gap=8 middle
+                  Text.strong "{s.name}"
+                  Badge.success "attached" visible={current==s.name}
+                Text.muted "{s.windows} windows, {s.panes} panes, created {s.created}"
+            Row gap=8
+              Button "Switch" onTap={current=s.name; toast "Attached to {s.name}"; go workspace} hidden={current==s.name}
+              IconButton "more_vert" tooltip="More" onTap={sel=s.name; open rowMenu}
+      if length(filter(sessions,x=>contains(lower(x.name),lower(q))))==0
+        Text.muted "No session matches \"{q}\""
+  Menu#rowMenu end
+    MenuItem "Rename" icon="edit" onTap={renaming=sel; open rename}
+    MenuItem "Detach others" icon="link_off" onTap={toast "Detached other clients from {sel}"}
+    MenuItem "Kill session" icon="delete" onTap={sessions=removeWhere(sessions,x=>x.name==sel); toast "Killed {sel}"}
+  Dialog#newSession "New session" "Starts with one window and one pane"
+    Input "Name" "build" bind=newName
+    Button "Create" onTap={newName!="" ? {sessions=append(sessions,{"name":newName,"windows":1,"created":"Now","attached":false,"panes":1}); current=newName; newName=""; close} : toast "Name the session"}
+  Dialog#rename "Rename session"
+    Input "Name" bind=renaming
+    Button "Save" onTap={sessions=updateWhere(sessions,x=>x.name==sel,x=>with(x,"name",renaming)); close}
+
+### Copy mode
+state lines=["$ git log --oneline -6","a41c9e2 router: add orders endpoint","7be03d1 db: pool size from env","c9d2f40 fix null check in createOrder","19a8b3e logs: rotate daily","e02f6aa deps: bump shelf to 1.4.1","5d7710c init","$ git status","On branch main","nothing to commit, working tree clean"]
+state cursor=0
+state anchor=-1
+state yanked=""
+state search=""
+App
+  Main
+    Nav
+      Row gap=8 middle
+        Badge.warning "[copy]"
+        Text.strong "pane 2: zsh"
+        Text.muted "line {cursor+1} of {length(lines)}"
+      Row gap=8
+        Input "Search" "/pattern" bind=search w=200 onSubmit={cursor=coalesce(indexOf(lines,find(lines,l=>contains(l,search))),cursor)}
+        Button.outline "Quit (q)" onTap={go workspace}
+    Column pad=12 gap=8 grow
+      Box grow fill=#FF14161B radius=4 pad=8
+        Column scroll gap=0
+          each line in lines
+            Box fill={(anchor==-1 ? cursor==index : (index>=min(anchor,cursor) && index<=max(anchor,cursor))) ? "#FFD6DAE0" : "#00000000"} onTap={cursor=index}
+              Text.mono "{line}" color={(anchor==-1 ? cursor==index : (index>=min(anchor,cursor) && index<=max(anchor,cursor))) ? "#FF14161B" : "#FFD6DAE0"}
+      Row gap=8 middle
+        IconButton "keyboard_arrow_up" tooltip="Up (k)" onTap={cursor=max(0,cursor-1)}
+        IconButton "keyboard_arrow_down" tooltip="Down (j)" onTap={cursor=min(length(lines)-1,cursor+1)}
+        IconButton "first_page" tooltip="Top (g)" onTap={cursor=0}
+        IconButton "last_page" tooltip="Bottom (G)" onTap={cursor=length(lines)-1}
+        Button.outline "{anchor==-1 ? \"Start selection (v)\" : \"Clear selection (v)\"}" onTap={anchor=anchor==-1 ? cursor : -1}
+        Spacer grow
+        Button "Copy selection (y)" onTap={yanked=join(slice(lines,min(anchor==-1 ? cursor : anchor,cursor),max(anchor==-1 ? cursor : anchor,cursor)+1),"\n"); copy yanked; toast "Copied {abs(cursor-(anchor==-1 ? cursor : anchor))+1} lines"; anchor=-1}
+      if yanked!=""
+        Card gap=4
+          Text.caption "Paste buffer"
+          Text.mono "{yanked}"
+          Row gap=8
+            Button.outline "Paste into pane (prefix ])" onTap={toast "Pasted"; go workspace}
+            Button.ghost "Clear" onTap={yanked=""}
+    Footer
+      Row between pad=[12,6,12,6] fill=#FF1B5E20
+        Text.small "[api-dev] 0:editor 1:server 2:zsh*" color=#FFFFFFFF
+        Text.small "[copy] {cursor+1}/{length(lines)}" color=#FFFFFFFF weight=700

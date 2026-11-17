@@ -1,0 +1,157 @@
+### Ballot
+state step=0
+state mayor=[]
+state council=[]
+state ranked=["","",""]
+state measure=""
+state contests=[{"title":"Mayor","hint":"Vote for one","max":1},{"title":"City Council","hint":"Vote for up to three","max":3},{"title":"Park Commissioner, ranked","hint":"Drag your choices into order","max":3},{"title":"Measure B: Library Bond","hint":"Vote yes or no","max":1}]
+state mayors=[{"id":"m1","name":"Elena Ortiz","party":"Harbor Party","color":"#FF1E5AA8"},{"id":"m2","name":"Thomas Whitfield","party":"Civic Union","color":"#FFC0392B"},{"id":"m3","name":"Priya Nair","party":"Green Alliance","color":"#FF2E8B57"},{"id":"m4","name":"Daniel Brooks","party":"Independent","color":"#FF6C5B7B"}]
+state councilors=[{"id":"c1","name":"Marcus Lee","party":"Harbor Party","color":"#FF1E5AA8"},{"id":"c2","name":"Ruth Abelman","party":"Civic Union","color":"#FFC0392B"},{"id":"c3","name":"Sofia Delgado","party":"Green Alliance","color":"#FF2E8B57"},{"id":"c4","name":"Ibrahim Khan","party":"Harbor Party","color":"#FF1E5AA8"},{"id":"c5","name":"Grace Tanaka","party":"Independent","color":"#FF6C5B7B"}]
+state parks=[{"id":"p1","name":"Lena Fischer","party":"Civic Union","color":"#FFC0392B"},{"id":"p2","name":"Omar Haddad","party":"Harbor Party","color":"#FF1E5AA8"},{"id":"p3","name":"June Park","party":"Green Alliance","color":"#FF2E8B57"},{"id":"p4","name":"Victor Alves","party":"Independent","color":"#FF6C5B7B"}]
+App
+  Main
+    Nav
+      Brand "Cast" icon="how_to_vote"
+      Row gap=12
+        Text.muted "Contest {step+1} of {length(contests)}"
+        Button.ghost "Start over" onTap={open startover}
+    Column pad=24 gap=16
+      Progress {(step+1)/length(contests)}
+      Heading "{contests[step].title}" level=1
+      Text.muted "{contests[step].hint}"
+      if step==0
+        Grid cols=2 gap=16
+          each c in mayors
+            Card gap=8 fill={contains(mayor,c.id) ? "#FFEAF2FF" : "#FFFFFFFF"} onTap={mayor=[c.id]}
+              Row between
+                Box fill={c.color} radius=8 pad=[12,6,12,6]
+                  Text.small "{c.party}" color=#FFFFFFFF
+                if contains(mayor,c.id)
+                  Icon "check_circle"
+              Text.title "{c.name}"
+      if step==1
+        if length(council)>3
+          Card fill=#FFFFF3CD gap=4
+            Row gap=8
+              Icon "warning"
+              Text.strong "You picked {length(council)} candidates."
+            Text "This contest allows up to three. Tap a candidate to remove them, or your votes here will not be counted."
+        Grid cols=3 gap=16
+          each c in councilors
+            Card gap=8 fill={contains(council,c.id) ? "#FFEAF2FF" : "#FFFFFFFF"} onTap={council=contains(council,c.id) ? without(council,c.id) : append(council,c.id)}
+              Row between
+                Box fill={c.color} radius=8 pad=[12,6,12,6]
+                  Text.small "{c.party}" color=#FFFFFFFF
+                Checkbox bind=council
+              Text.title "{c.name}"
+        Text.caption "{length(council)} of 3 chosen"
+      if step==2
+        Row gap=24 top
+          Column grow gap=8
+            Text.strong "Candidates"
+            each c in parks
+              if !contains(ranked,c.id)
+                Card drag=rank(c.id)
+                  Row between
+                    Text.title "{c.name}"
+                    Text.small "{c.party}" color={c.color}
+          Column grow gap=8
+            Text.strong "Your ranking"
+            each slot in ranked
+              Box drop=rank onDrop={ranked=setAt(ranked,index,result.data)} pad=16 radius=8 fill=#FFF2F2F2
+                Row gap=12
+                  Text.heading "{index+1}"
+                  if slot==""
+                    Text.muted "Drop a candidate here"
+                  if slot!=""
+                    Text.title "{find(parks,p=>p.id==slot).name}"
+                    Spacer grow
+                    IconButton "close" tooltip="Remove" onTap={ranked=setAt(ranked,index,"")}
+      if step==3
+        Card gap=12
+          Text.strong "Shall the City issue $42 million in bonds to renovate and expand the public libraries?"
+          Column scroll h=220 gap=8
+            Text "Measure B would authorize the City to issue general obligation bonds not to exceed $42,000,000 to repair the roofs and heating systems of all eleven branch libraries, add accessibility improvements, expand the central children's wing, and extend weekend hours."
+            Text "The bonds would be repaid through a property tax of approximately $19 per $100,000 of assessed value, for no more than 25 years. An independent citizens' committee would review spending each year and publish a report."
+            Text "A yes vote authorizes the bonds. A no vote leaves current funding in place."
+        Row gap=16
+          Button.outline "Yes" size=large grow onTap={measure="yes"} selected={measure=="yes"}
+          Button.outline "No" size=large grow onTap={measure="no"} selected={measure=="no"}
+      Row between
+        Button.outline "Back" disabled={step==0} onTap={step=step-1}
+        Row gap=8
+          Button.ghost "Skip contest" onTap={step==3 ? go review : step=step+1}
+          Button "Next" onTap={step==1 && length(council)>3 ? toast "Remove a candidate first" : (step==3 ? go review : step=step+1)}
+  Dialog#startover "Start over?" "Your choices so far will be cleared."
+    Row gap=8 end
+      Button.outline "Keep voting" onTap={close}
+      Button.destructive "Clear and restart" onTap={mayor=[]; council=[]; ranked=["","",""]; measure=""; step=0; close}
+
+### Review
+App
+  Main
+    Nav
+      Brand "Cast" icon="how_to_vote"
+      Text.muted "Review your ballot"
+    Column pad=24 gap=16 maxw=720
+      Heading "Check your choices" level=1
+      Text.muted "Nothing is cast until you confirm."
+      Card gap=12
+        Row between
+          Column gap=2
+            Text.caption "Mayor"
+            Text.strong "{isEmpty(mayor) ? 'No selection' : find(mayors,c=>c.id==mayor[0]).name}"
+          Link "Change" onTap={step=0; go ballot}
+        Divider
+        Row between
+          Column gap=2
+            Text.caption "City Council"
+            Text.strong "{isEmpty(council) ? 'No selection' : join(map(filter(councilors,c=>contains(council,c.id)),c=>c.name),', ')}"
+            if length(council)>3
+              Text.danger "Too many selected: this contest will not count."
+          Link "Change" onTap={step=1; go ballot}
+        Divider
+        Row between
+          Column gap=2
+            Text.caption "Park Commissioner, ranked"
+            each slot in ranked
+              Text "{index+1}. {slot=='' ? 'Not ranked' : find(parks,p=>p.id==slot).name}"
+          Link "Change" onTap={step=2; go ballot}
+        Divider
+        Row between
+          Column gap=2
+            Text.caption "Measure B: Library Bond"
+            Text.strong "{measure=='' ? 'No selection' : upper(measure)}"
+          Link "Change" onTap={step=3; go ballot}
+      Row between
+        Button.outline "Back to ballot" onTap={step=0; go ballot}
+        Button "Cast my ballot" size=large onTap={open confirm}
+  Dialog#confirm "Cast your ballot?" "You cannot change it after it is printed."
+    if isEmpty(mayor) || measure=="" || length(council)>3
+      Text.danger "Some contests are blank or over-voted. They will not be counted."
+    Row gap=8 end
+      Button.outline "Go back" onTap={close}
+      Button "Yes, print my ballot" onTap={close; go printing}
+
+### Printing
+state pct=0
+state done=false
+state left=15
+every 200 when !done onTick={pct=min(1,pct+0.04); done=pct>=1}
+every 1s when done onTick={left=left-1; left<=0 ? (mayor=[]; council=[]; ranked=["","",""]; measure=""; step=0; go ballot) : toast ""}
+Page
+  Section center
+    if !done
+      Column center gap=16 animate=fade
+        Icon "print" size=64
+        Heading "Printing your ballot" level=1
+        Text.muted "Please wait. Do not leave the booth."
+        Progress bind=pct
+        Text.caption "{round(pct*100,0)}%"
+    if done
+      Column center gap=16 animate=pop
+        Icon "check_circle" size=72 color=#FF2E8B57
+        Heading "Thank you for voting" level=1
+        Text.muted "Take your printed ballot to the scanner by the exit."
+        Button.outline "Finish now" onTap={mayor=[]; council=[]; ranked=["","",""]; measure=""; step=0; go ballot}
+        Text.caption "This screen resets in {left} seconds."

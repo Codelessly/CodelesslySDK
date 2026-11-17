@@ -1,0 +1,3 @@
+App: Callout, a bingo caller. A number machine drawing a ball with a spinning drum and rolling sound, the ball displayed large with its call phrase; a board of ninety numbers lighting as called; the last five calls in a row; a pattern shown for the game (line, corners, full house); a player's card checked by typing numbers with a valid or false claim result; a pause between calls timer; a speed setting; a prize list; a new game reset with a confirm.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

@@ -1,0 +1,118 @@
+### Panel
+state entry=0
+state left=0
+state running=false
+state power=100
+state door=false
+state beeping=false
+state locked=false
+every 1s when running onTick={left=left-1; left<=0 ? {running=false; beeping=true; left=0} : }
+every 1s when beeping onTick={beep}
+App
+  Main
+    Nav
+      Brand "Quickwave" icon="microwave"
+      Row gap=8
+        if locked
+          Badge.warning "Locked"
+        Badge.neutral "{power}% power"
+        IconButton "tune" tooltip="Settings" onTap={go settings}
+    Column pad=24 gap=16 maxw=560 center
+      Card gap=12
+        Box fill=#FF101418 radius=12 pad=20
+          Column center gap=8
+            if door
+              Text "Door open" size=28 weight=700 color=#FFFFB4AB
+              Text "Close the door to start" color=#FFB0B8C0
+            if !door
+              Row center middle gap=16
+                if running
+                  Icon "autorenew" animate=spin duration=3000 color=#FF7FD6FF size=40
+                Text "{running ? floor(left/60) : floor(entry/100)}:{(running ? left%60 : entry%100) < 10 ? "0" : ""}{running ? left%60 : entry%100}" size=64 weight=700 color=#FFFFFFFF
+              if beeping
+                Text "Done. Open the door." color=#FFFFD27F animate=pulse
+              if running
+                Progress {left / max(1, floor(entry/100)*60 + entry%100)}
+        Row between
+          Text.muted "Power {power}%"
+          Toggle "Door open" bind=door onChange={result ? {running=false; beeping=false; toast "Door open, paused"} : }
+      Grid cols=3 gap=8
+        Button.outline "1" onTap={locked ? toast "Child lock on" : {entry = entry < 1000 ? entry*10+1 : entry}}
+        Button.outline "2" onTap={locked ? toast "Child lock on" : {entry = entry < 1000 ? entry*10+2 : entry}}
+        Button.outline "3" onTap={locked ? toast "Child lock on" : {entry = entry < 1000 ? entry*10+3 : entry}}
+        Button.outline "4" onTap={locked ? toast "Child lock on" : {entry = entry < 1000 ? entry*10+4 : entry}}
+        Button.outline "5" onTap={locked ? toast "Child lock on" : {entry = entry < 1000 ? entry*10+5 : entry}}
+        Button.outline "6" onTap={locked ? toast "Child lock on" : {entry = entry < 1000 ? entry*10+6 : entry}}
+        Button.outline "7" onTap={locked ? toast "Child lock on" : {entry = entry < 1000 ? entry*10+7 : entry}}
+        Button.outline "8" onTap={locked ? toast "Child lock on" : {entry = entry < 1000 ? entry*10+8 : entry}}
+        Button.outline "9" onTap={locked ? toast "Child lock on" : {entry = entry < 1000 ? entry*10+9 : entry}}
+        Button.ghost "Clear" onTap={locked ? toast "Child lock on" : {entry=0; running=false; left=0}}
+        Button.outline "0" onTap={locked ? toast "Child lock on" : {entry = entry < 1000 ? entry*10 : entry}}
+        Button.outline "Power" icon="bolt" onTap={locked ? toast "Child lock on" : {power = power >= 100 ? 10 : power + 10}}
+      Row gap=8
+        Button grow "Start" icon="play_arrow" onTap={locked ? toast "Child lock on" : door ? toast "Close the door first" : entry == 0 ? toast "Enter a time" : {left=floor(entry/100)*60+entry%100; running=true; beeping=false}}
+        Button.destructive grow "Stop" icon="stop" onTap={running ? {running=false} : {entry=0; left=0; beeping=false}}
+      Text.fieldLabel "Quick keys"
+      Row gap=8
+        Button.tertiary grow "Popcorn" icon="local_movies" onTap={locked ? toast "Child lock on" : {entry=230; power=100; toast "Popcorn 2:30"}}
+        Button.tertiary grow "Defrost" icon="ac_unit" onTap={locked ? toast "Child lock on" : open defrost}
+        Button.tertiary grow "Reheat" icon="whatshot" onTap={locked ? toast "Child lock on" : {entry=100; power=70; toast "Reheat 1:00 at 70%"}}
+      Button.outline "{locked ? "Hold 3 s to unlock" : "Hold 3 s to lock"}" icon="{locked ? "lock" : "lock_open"}" holdMs=3000 onLongPress={locked=!locked; toast locked ? "Child lock off" : "Child lock on"}
+  Sheet#defrost "Defrost by weight" "Enter the food weight in grams"
+    state grams=500
+    Input "Weight (g)" type=number bind=grams
+    Slider bind=grams min=100 max=2000
+    Text.muted "About {ceil(grams / 100 * 1.5)} minutes at 30% power"
+    Row gap=8
+      Button.outline grow "Cancel" onTap={close}
+      Button grow "Set time" onTap={grams < 100 ? toast "Minimum 100 g" : {entry=floor(ceil(grams / 100 * 1.5))*100; power=30; close}}
+
+### Settings
+state beepOn=true
+state beepVolume=60
+state lockSeconds=3
+state door=false
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go panel}
+      Heading "Settings" level=1
+    Column pad=24 gap=16 maxw=560 center
+      Card gap=12
+        Heading "Sound" level=3
+        Toggle "End beep" bind=beepOn
+        Row gap=12
+          Icon "volume_up"
+          Slider grow bind=beepVolume min=0 max=100
+          Text.strong "{beepVolume}"
+        Text.muted "The beep repeats every second until the door opens."
+      Card gap=12
+        Heading "Child lock" level=3
+        SegmentedButton bind=lockSeconds items=["3 s","5 s"]
+        Text.muted "Hold the lock key for {lockSeconds} seconds to lock or unlock the keys."
+      Card gap=8
+        Heading "About" level=3
+        Row between
+          Text "Model"
+          Text.muted "Quickwave QW-900"
+        Row between
+          Text "Power"
+          Text.muted "900 W"
+      Button.outline "Test beep" icon="notifications" onTap={beep}
+
+### Door open
+state door=true
+state beeping=true
+every 1s when beeping onTick={beep}
+Page
+  Nav
+    Brand "Quickwave" icon="microwave"
+  Section center
+    Column center gap=16
+      Icon "door_front" size=64 animate=shake
+      Heading "Door open" level=1
+      Text.muted "Cooking is paused. Close the door and press Start to continue."
+      if beeping
+        Badge.warning "Beeping until the door opens"
+      Toggle "Door open" bind=door onChange={result ? beeping=false : }
+      Button "Back to panel" onTap={door ? toast "Close the door first" : go panel}

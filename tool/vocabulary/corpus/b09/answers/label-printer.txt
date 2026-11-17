@@ -1,0 +1,166 @@
+### Compose
+state text=""
+state shift=false
+state size="Medium"
+state frame="None"
+state bold=false
+state battery=18
+state tape=12
+state start=1
+state step=1
+state copies=3
+state tab="compose"
+state symbols=["home","star","favorite","bolt","warning","info","check_circle","cancel","lock","key","wifi","bluetooth","battery_full","power","settings","build","handyman","science","pets","eco","park","water_drop","local_fire_department","ac_unit","wb_sunny","nightlight","cloud","umbrella","flight","directions_car","directions_bike","train","sailing","local_shipping","luggage","map","place","public","language","phone","mail","chat","call","notifications","alarm","schedule","event","today","cake","celebration","music_note","headphones","mic","videocam","photo_camera","movie","sports_esports","sports_soccer","fitness_center","restaurant","local_cafe","local_bar","icecream","fastfood","shopping_cart","shopping_bag","sell","payments","savings","receipt","inventory","archive","folder","description","attach_file","edit","delete","content_cut","content_copy","print","scanner","computer","keyboard","mouse","memory","usb","cable","qr_code","fingerprint","visibility","thumb_up","emoji_emotions","school","work","medical_services","vaccines","child_care","accessible","recycling","flag"]
+App
+  Main
+    Nav
+      Heading "Tagline"
+      Row gap=8
+        Row gap=4 visible={tape>0}
+          Icon "straighten"
+          Text.muted "{tape} mm"
+        if battery<20
+          Icon "battery_alert" color=#FFD32F2F
+        else
+          Icon "battery_full"
+    Column pad=16 gap=16 scroll
+      Row gap=8
+        Icon "tape" visible=false
+        Badge.success "Tape detected: {tape} mm white" visible={tape>0}
+        Badge.error "No tape loaded" visible={tape==0}
+      Box fill=#FFFFFFFF radius=6 pad=16 h=96
+        Stack center middle
+          Box pad=[12,6,12,6] radius={frame=="Rounded" ? 16 : 2} border={frame=="None" ? 0 : 2}
+            Text "{shift ? upper(text) : text}" size={size=="Small" ? 20 : size=="Medium" ? 30 : 44} weight={bold ? 800 : 400} color=#FF111111
+      Row gap=8
+        Text.muted "{length(text)} characters"
+        Spacer grow
+        Button.ghost "Clear" onTap={text=""}
+      Column gap=6
+        Row gap=4 center
+          each k in ["Q","W","E","R","T","Y","U","I","O","P"]
+            Button.outline "{shift ? k : lower(k)}" grow onTap={text=text+(shift ? k : lower(k))}
+        Row gap=4 center
+          each k in ["A","S","D","F","G","H","J","K","L"]
+            Button.outline "{shift ? k : lower(k)}" grow onTap={text=text+(shift ? k : lower(k))}
+        Row gap=4 center
+          IconButton "arrow_upward" tooltip="Shift" selected={shift} onTap={shift=!shift}
+          each k in ["Z","X","C","V","B","N","M"]
+            Button.outline "{shift ? k : lower(k)}" grow onTap={text=text+(shift ? k : lower(k))}
+          IconButton "backspace" tooltip="Delete" onTap={text=slice(text,0,length(text)-1)}
+        Row gap=4
+          Button.outline "123" onTap={text=text+"1"}
+          Button.outline "Symbols" onTap={go symbols}
+          Button.outline "space" grow onTap={text=text+" "}
+          Button.outline "." onTap={text=text+"."}
+          Button.outline "-" onTap={text=text+"-"}
+      Card gap=12
+        Text.fieldLabel "Size"
+        SegmentedButton bind=size items=["Small","Medium","Large"]
+        Text.fieldLabel "Frame"
+        Row gap=8
+          ChoiceChip "None" selected={frame=="None"} onTap={frame="None"}
+          ChoiceChip "Boxed" selected={frame=="Boxed"} onTap={frame="Boxed"}
+          ChoiceChip "Rounded" selected={frame=="Rounded"} onTap={frame="Rounded"}
+        Toggle "Bold" bind=bold
+      Card gap=12
+        Text.fieldLabel "Numbering"
+        Row gap=12
+          Input "Start at" type=number bind=start grow
+          Input "Step" type=number bind=step grow
+          Input "Copies" type=number bind=copies grow
+        Text.muted "Labels read {text} {start}, {text} {start+step}, {text} {start+2*step}"
+    Footer
+      Row gap=8
+        Button.outline "Save" icon="bookmark" onTap={go saved}
+        Button "Preview and print" grow icon="print" onTap={go print}
+
+### Symbols
+state picked=""
+App
+  Main
+    Nav
+      Row gap=8
+        IconButton "arrow_back" tooltip="Back" onTap={go compose}
+        Heading "Symbols"
+      Text.muted "{length(symbols)} icons"
+    Column pad=16 gap=12
+      Input "Search symbols" bind=q
+      GridView cols=6 gap=8
+        each s in filter(symbols, x=>contains(x, lower(coalesce(q,""))))
+          Box radius=8 pad=8 fill={picked==s ? #FFE3F2FD : #FFF5F5F5} onTap={picked=s}
+            Column center gap=4
+              Icon "{s}"
+      if picked!=""
+        Card gap=8
+          Row gap=12 middle
+            Icon "{picked}" size=32
+            Text.strong "{picked}"
+            Spacer grow
+            Button "Add to label" onTap={text=text+"["+picked+"]"; toast "Symbol added"; go compose}
+
+### Print
+state printing=false
+state feed=0
+state cut="Full cut"
+state printed=false
+every 100 when printing onTick={feed=min(1,feed+0.04); feed>=1 ? {printing=false; printed=true; toast "Printed"} : }
+Page
+  Nav
+    Row gap=8
+      IconButton "arrow_back" tooltip="Back" onTap={go compose}
+      Heading "Preview"
+    Row gap=4
+      if battery<20
+        Icon "battery_alert" color=#FFD32F2F
+        Text.danger "{battery}%"
+  Section
+    Column gap=16
+      Text.fieldLabel "Preview strip"
+      Row scroll gap=12
+        each n in range(copies)
+          Box fill=#FFFFFFFF radius=4 pad=[16,12,16,12] border=1
+            Text "{text} {start+n*step}" size=28 weight={bold ? 800 : 400} color=#FF111111
+      Card gap=12
+        Text.fieldLabel "After printing"
+        Select "Cut" bind=cut items=["Full cut","Half cut","No cut (feed only)"]
+        Row between
+          Text "Tape"
+          Text.strong "{tape} mm"
+        Row between
+          Text "Labels"
+          Text.strong "{copies}"
+      if printing
+        Column gap=6
+          Text.muted "Feeding tape, label {min(copies,ceil(feed*copies))} of {copies}"
+          Progress bind=feed
+      if printed
+        Badge.success "Done, {cut=="No cut (feed only)" ? "tear off by hand" : "cut after the last label"}"
+      Row gap=8
+        Button.outline "Cancel" disabled={!printing} onTap={printing=false; feed=0; toast "Stopped"}
+        Button "Print {copies} labels" grow icon="print" disabled={printing || battery<5 || tape==0} onTap={feed=0; printed=false; printing=true}
+        Button.outline "Save" icon="bookmark" onTap={open slot}
+  Sheet#slot "Save to memory"
+    Text.muted "Choose one of ten slots"
+    Grid cols=5 gap=8
+      each i in range(10)
+        Button.outline "{i+1}" onTap={slots=setAt(slots,i,{"text":text,"size":size,"frame":frame,"bold":bold}); toast "Saved in slot {i+1}"; close}
+
+### Saved labels
+state slots=[{"text":"Pantry: Flour","size":"Medium","frame":"Boxed","bold":true},{"text":"Cable 01","size":"Small","frame":"None","bold":false},{"text":"Fragile","size":"Large","frame":"Rounded","bold":true},{},{"text":"Mia's lunch","size":"Medium","frame":"None","bold":false},{},{},{"text":"Wifi: Harbor-5G","size":"Small","frame":"Boxed","bold":false},{},{}]
+state sel=0
+App
+  Main
+    Nav
+      Row gap=8
+        IconButton "arrow_back" tooltip="Back" onTap={go compose}
+        Heading "Saved labels"
+      Text.muted "{count(slots,s=>!isEmpty(s.text))} of 10 used"
+    Column pad=16 gap=8 scroll
+      each s in slots
+        ListTile "{isEmpty(s.text) ? "Empty slot" : s.text}" "Slot {index+1}{isEmpty(s.text) ? "" : " - " + s.size + ", " + s.frame}" onTap={sel=index; isEmpty(s.text) ? toast "Nothing saved here" : open slotMenu}
+          IconButton "more_vert" tooltip="Options" hidden={isEmpty(s.text)} onTap={sel=index; open slotMenu}
+  Menu#slotMenu
+    MenuItem "Load into editor" icon="edit" onTap={text=slots[sel].text; size=slots[sel].size; frame=slots[sel].frame; bold=slots[sel].bold; go compose}
+    MenuItem "Print now" icon="print" onTap={text=slots[sel].text; size=slots[sel].size; frame=slots[sel].frame; bold=slots[sel].bold; go print}
+    MenuItem "Clear slot" icon="delete" onTap={slots=setAt(slots,sel,{}); toast "Slot cleared"}

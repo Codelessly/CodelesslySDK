@@ -1,0 +1,169 @@
+### Start
+state step=0
+state answers={}
+state questions=[{"id":"work","q":"What is your work situation?","options":[{"label":"Lost my job","icon":"work_off"},{"label":"Hours cut","icon":"schedule"},{"label":"Unable to work","icon":"healing"},{"label":"Retired","icon":"beach_access"}]},{"id":"home","q":"Who lives with you?","options":[{"label":"Just me","icon":"person"},{"label":"Partner","icon":"people"},{"label":"Children","icon":"child_care"},{"label":"Other adults","icon":"groups"}]},{"id":"rent","q":"How do you pay for housing?","options":[{"label":"Rent","icon":"apartment"},{"label":"Mortgage","icon":"home"},{"label":"Live with family","icon":"family_restroom"},{"label":"No fixed home","icon":"night_shelter"}]}]
+Page
+  Nav
+    Brand "Claimline" icon="volunteer_activism"
+    Row gap=8
+      Link "Help" onTap={open help}
+      Button.outline "Sign in" onTap={go sign-in}
+  Section narrow
+    Column gap=24
+      Text.caption "Step {step+1} of {length(questions)}"
+      Progress {(step)/length(questions)}
+      each q in questions
+        if index==step
+          Column gap=16 animate=slide-left
+            Heading "{q.q}" level=1
+            Grid cols=2 gap=12
+              each o in q.options
+                Card gap=8 onTap={answers=with(answers,q.id,o.label); step=step+1}
+                  IconTile "{o.icon}"
+                  Text.strong "{o.label}"
+      if step>=length(questions)
+        Card gap=12 animate=pop
+          Row gap=12
+            IconTile "check_circle"
+            Column grow
+              Heading "You may be able to claim" level=3
+              Text.muted "Based on: {answers.work}, {answers.home}, {answers.rent}."
+          Badge.success "3 benefits match"
+          Button "Start my claim" size=large onTap={go claim-form}
+          Button.ghost "Change my answers" onTap={step=0; answers={}}
+  Footer
+    Text.muted "Your answers are not saved until you start a claim."
+  Dialog#help "Need help?" "A caseworker answers weekdays 8 to 6"
+    Button "Call 0800 555 0142" onTap={link tel:08005550142}
+    Button.outline "Close" onTap={close}
+
+### Claim form
+state section="personal"
+state fullName="" saved
+state dob=""
+state address=""
+state phone=""
+state docs=[{"id":"id","name":"Photo ID","status":"missing"},{"id":"rent","name":"Tenancy agreement","status":"missing"},{"id":"bank","name":"Bank statement","status":"missing"},{"id":"pay","name":"Last payslip","status":"missing"}]
+state months=[{"month":"Aug","amount":1850},{"month":"Sep","amount":1620},{"month":"Oct","amount":1480}]
+state newAmount=0
+state doneSections=[]
+state docId=""
+App
+  Sidebar
+    Brand "Claimline" icon="volunteer_activism"
+    Text.caption "{length(doneSections)} of 4 sections saved"
+    Progress {length(doneSections)/4}
+    NavItem "Personal details" icon="person" selected={section=="personal"} onTap={section="personal"}
+    NavItem "Documents" icon="upload_file" badge="{count(docs,d=>d.status=='missing')}" selected={section=="documents"} onTap={section="documents"}
+    NavItem "Income" icon="payments" selected={section=="income"} onTap={section="income"}
+    NavItem "Review" icon="fact_check" selected={section=="review"} onTap={section="review"}
+    Spacer grow
+    Text.muted "Draft saved automatically"
+  Main
+    Nav
+      Heading "Your claim" level=1
+      Row gap=8
+        Button.outline "Save and exit" onTap={toast "Draft saved"; go start}
+        Button "Book interview" onTap={go interview}
+    Column pad=24 gap=16 scroll
+      if section=="personal"
+        Card gap=12
+          Heading "Personal details" level=3
+          Input "Full name" bind=fullName
+          DatePicker "Date of birth" bind=dob
+          Input "Address" multiline bind=address
+          Input "Phone" type=phone bind=phone
+          Row end
+            Button "Save section" onTap={fullName!="" ? {doneSections=unique(append(doneSections,"personal")); section="documents"; toast "Personal details saved"} : toast "Enter your name"}
+      if section=="documents"
+        Card gap=12
+          Heading "Documents" level=3
+          Text.muted "Upload a file or scan the page with your camera."
+          each d in docs
+            ListTile "{d.name}"
+              Row gap=8
+                Badge.success "Uploaded" hidden={d.status!="done"}
+                Badge.warning "Missing" hidden={d.status!="missing"}
+                Button.outline "Upload" onTap={docId=d.id; emit pickFile d.id}
+                Button.secondary "Scan" icon="photo_camera" onTap={docId=d.id; open scan}
+          Row end
+            Button "Save section" onTap={doneSections=unique(append(doneSections,"documents")); section="income"; toast "Documents saved"}
+      if section=="income"
+        Card gap=12
+          Heading "Income by month" level=3
+          each m in months
+            Row gap=12 middle
+              Text.strong "{m.month}" w=60
+              Input "Amount" type=number bind=m.amount grow
+              IconButton "delete" tooltip="Remove month" onTap={months=removeWhere(months,x=>x.month==m.month)}
+          Row gap=8
+            Input "Add amount" type=number bind=newAmount grow
+            Button.outline "Add month" onTap={months=append(months,{"month":"M"+(length(months)+1),"amount":newAmount}); newAmount=0}
+          Divider
+          Row between
+            Text.muted "Running average"
+            Text.strong size=24 "{money(length(months)==0?0:sum(months,m=>m.amount)/length(months),'$',2)}"
+          Sparkline values={map(months,m=>m.amount)}
+          Row end
+            Button "Save section" onTap={doneSections=unique(append(doneSections,"income")); section="review"; toast "Income saved"}
+      if section=="review"
+        Card gap=12
+          Heading "Review" level=3
+          Text "Name: {fullName}"
+          Text "Documents uploaded: {count(docs,d=>d.status=='done')} of {length(docs)}"
+          Text "Average income: {money(length(months)==0?0:sum(months,m=>m.amount)/length(months),'$',2)}"
+          Button "Submit claim" disabled={length(doneSections)<3} onTap={emit submitClaim; go status}
+  Dialog#scan "Scan document" "Hold the page flat inside the frame"
+    CameraScan autoStraighten=true onCapture={docs=updateWhere(docs,d=>d.id==docId,d=>with(d,"status","done")); close; toast "Page scanned and straightened"}
+    Button.outline "Cancel" onTap={close}
+
+### Interview
+state day=""
+state slot=""
+state booked=false
+state slots=["9:00","10:30","13:00","14:30","16:00"]
+Page
+  Nav
+    Brand "Claimline" icon="volunteer_activism"
+    Button.ghost "Back to claim" onTap={go claim-form}
+  Section narrow
+    Column gap=20
+      Heading "Book your interview" level=1
+      Text.muted "A 30 minute phone call with a caseworker."
+      Calendar bind=day min={today()} disabledDays=["Sat","Sun"]
+      if day!=""
+        Column gap=8 animate=fade
+          Text.strong "Times on {formatDate(day,'MMM d')}"
+          Row gap=8
+            each s in slots
+              ChoiceChip "{s}" selected={slot==s} onTap={slot=s}
+      Button "Confirm booking" disabled={day==""||slot==""} onTap={booked=true; emit book day; open done}
+  Dialog#done "Interview booked" "We sent a reminder to your phone"
+    Text "{formatDate(day,'MMM d')} at {slot}"
+    Button "View status" onTap={close; go status}
+
+### Status
+state steps=[{"title":"Claim submitted","note":"Received 3 Nov","state":"done"},{"title":"Documents checked","note":"Completed 5 Nov","state":"done"},{"title":"Interview","note":"Waiting for your call","state":"current"},{"title":"Decision","note":"Within 10 working days","state":"todo"},{"title":"First payment","note":"After decision","state":"todo"}]
+state reply=""
+state thread=[{"from":"Priya Nair, Caseworker","text":"Hello, I have your documents. Please keep your phone free for the interview call.","time":"Mon 9:12"}]
+Page
+  Nav
+    Brand "Claimline" icon="volunteer_activism"
+    Row gap=8
+      Button.outline "Edit claim" onTap={go claim-form}
+      Avatar "Sam Patel" size=32
+  Section
+    Row gap=32 top
+      Column grow gap=16
+        Heading "Claim status" level=1
+        Card gap=12
+          Timeline orientation=vertical
+            each s in steps
+              TimelineStep "{s.title}" "{s.note}" state={s.state} animate={s.state=="current"?"pulse":""}
+      Column w=360 gap=12
+        Card gap=12
+          Heading "Message from your caseworker" level=3
+          each m in thread
+            ChatBubble "{m.text}" sender="{m.from}" time="{m.time}"
+          Input "Reply" bind=reply multiline
+          Button "Send" onTap={reply!="" ? {thread=append(thread,{"from":"You","text":reply,"time":"Now"}); reply=""; toast "Sent"} : toast "Write a message first"}

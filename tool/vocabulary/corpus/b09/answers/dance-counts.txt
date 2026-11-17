@@ -1,0 +1,178 @@
+### Music and counts
+state screen="music"
+state playing=false
+state pos=0
+state speed=1
+state loopOn=false
+state loopFrom=2
+state loopTo=4
+state marks=[1,5,9,13,17,21,25,29]
+state block=1
+state bpm=112
+every 100 when playing onTick={pos=pos+0.1*speed}
+App
+  Sidebar
+    Brand "Eightcount" icon="graphic_eq"
+    NavItem "Music and counts" icon="music_note" selected={screen=="music"} onTap={go music-and-counts}
+    NavItem "Stage" icon="grid_view" selected={screen=="stage"} onTap={go stage}
+    NavItem "Moves" icon="directions_run" selected={screen=="moves"} onTap={go moves}
+    Spacer grow
+    Text.muted "Saturday showcase, 2:40"
+    Text.muted "112 bpm, 4/4"
+  Main
+    Nav
+      Heading "Midnight Sun, full cut" level=1
+      Row gap=8
+        Button.outline "Tap beat" icon="touch_app" onTap={marks=append(marks,round(pos*4,0))}
+        Button.outline "Clear marks" onTap={marks=[]}
+        Button "Share sheet" onTap={emit share}
+    Column pad=24 gap=16
+      Card gap=12
+        Row between
+          Text.strong "Waveform"
+          Row gap=8
+            SegmentedButton bind=speed items=["0.5x","1x"]
+            Toggle "Loop section" bind=loopOn
+        Waveform src="midnight-sun.mp3" bind=pos markers={marks} loop={loopOn ? [loopFrom,loopTo] : []} h=140 onSeek={pos=result} onTapMark={marks=append(marks,result)}
+        CountRuler eights=8 bpm={bpm} bind=pos marks={marks} loopFrom={loopFrom} loopTo={loopTo} onSelectRange={loopFrom=result[0]; loopTo=result[1]; loopOn=true}
+        Row between
+          Row gap=8
+            IconButton "skip_previous" tooltip="Back to the start" onTap={pos=0}
+            IconButton "play_arrow" tooltip="Play" hide={playing} onTap={playing=true}
+            IconButton "pause" tooltip="Pause" show={playing} onTap={playing=false}
+            IconButton "replay_10" tooltip="Back one eight" onTap={pos=max(0,pos-8)}
+          Text.mono "Eight {floor(pos/8)+1}, count {floor(pos%8)+1}"
+      Grid cols=3 gap=16
+        Card gap=8
+          Text.muted "Eights marked"
+          Text "{length(marks)} of 8" size=32 weight=700
+        Card gap=8
+          Text.muted "Loop"
+          Text "{loopOn ? 'Eights ' + loopFrom + ' to ' + loopTo + ' at ' + speed + 'x' : 'Off'}"
+        Card gap=8
+          Text.muted "Tempo"
+          Row gap=8 middle
+            Input type=number bind=bpm w=80
+            Text.muted "bpm"
+      Card gap=8
+        Text.strong "Count blocks"
+        each b in [1,2,3,4]
+          ListTile "Block {b}: eights {(b-1)*2+1} to {b*2}" selected={block==b} onTap={block=b; pos=(b-1)*16}
+            Badge.info "formation saved"
+
+### Stage
+state block=1
+state sel=""
+state playing=false
+state pos=0
+state dancers=[{"id":"A","name":"Maya","x":20,"y":30},{"id":"B","name":"Jonas","x":40,"y":30},{"id":"C","name":"Priya","x":60,"y":30},{"id":"D","name":"Theo","x":80,"y":30},{"id":"E","name":"Lena","x":30,"y":70},{"id":"F","name":"Omar","x":70,"y":70}]
+state formations=[{"block":1,"dots":[]},{"block":2,"dots":[]},{"block":3,"dots":[]},{"block":4,"dots":[]}]
+App
+  Sidebar
+    Brand "Eightcount" icon="graphic_eq"
+    NavItem "Music and counts" icon="music_note" onTap={go music-and-counts}
+    NavItem "Stage" icon="grid_view" selected onTap={go stage}
+    NavItem "Moves" icon="directions_run" onTap={go moves}
+    Spacer grow
+    Text.muted "6 dancers"
+  Main
+    Nav
+      Heading "Stage" level=1
+      Row gap=8
+        Button.outline "Save formation" icon="save" onTap={formations=updateWhere(formations,f=>f.block==block,f=>with(f,"dots",dancers)); toast "Formation saved at block {block}"}
+        Button.outline "Reset to saved" onTap={dancers=coalesce(find(formations,f=>f.block==block).dots,dancers)}
+        Button icon="play_arrow" "Play formations" onTap={playing=true; emit playFormations}
+    Row pad=24 gap=16 top
+      Column grow gap=12
+        Row gap=8
+          each b in [1,2,3,4]
+            ChoiceChip "Block {b}" selected={block==b} onTap={block=b; playing=false}
+        Card gap=8
+          Stage view="top" grid=10 w=fill h=360 dancers={dancers} bind=pos playing={playing} blocks={formations} glide=900 onDragDancer={dancers=updateWhere(dancers,d=>d.id==result.id,d=>with(with(d,"x",result.x),"y",result.y))} onSelect={sel=result.id} onGlideEnd={playing=false}
+            Text.caption "Audience"
+        Row between
+          Text.muted "Block {block} of 4, eights {(block-1)*2+1} to {block*2}"
+          Row gap=8
+            Text.muted "Speed"
+            SegmentedButton bind=speed items=["0.5x","1x"]
+      Pane w=320 pad=16 gap=12
+        Text.panelTitle "Dancers"
+        each d in dancers
+          ListTile "{d.name}" selected={sel==d.id} onTap={sel=d.id}
+            Avatar "{d.name}" size=32
+            Text.mono "{round(d.x,0)}, {round(d.y,0)}"
+        Divider
+        if sel!=""
+          Text.strong "{find(dancers,d=>d.id==sel).name}"
+          Row gap=8
+            Input "Across" type=number bind=px
+            Input "Depth" type=number bind=py
+          Button.outline "Nudge to grid" onTap={dancers=updateWhere(dancers,d=>d.id==sel,d=>with(with(d,"x",round(d.x/10,0)*10),"y",round(d.y/10,0)*10))}
+        if sel==""
+          Text.muted "Tap a dot on the stage to select a dancer, drag it to move."
+
+### Moves and notes
+state lane=["A","B","C"]
+state moves=[{"id":1,"who":"A","name":"Hip roll","from":1,"to":4},{"id":2,"who":"A","name":"Spin","from":5,"to":6},{"id":3,"who":"B","name":"Slide left","from":1,"to":3},{"id":4,"who":"B","name":"Pop","from":4,"to":5},{"id":5,"who":"C","name":"Wave","from":2,"to":6}]
+state picked=0
+state count=1
+state notes=[{"count":1,"text":"Heads down, hold for the drop","sticker":"star"},{"count":5,"text":"Maya cues the spin","sticker":"bolt"}]
+state draft=""
+state sticker="star"
+App
+  Sidebar
+    Brand "Eightcount" icon="graphic_eq"
+    NavItem "Music and counts" icon="music_note" onTap={go music-and-counts}
+    NavItem "Stage" icon="grid_view" onTap={go stage}
+    NavItem "Moves" icon="directions_run" selected onTap={go moves}
+    Spacer grow
+    Text.muted "{length(moves)} moves written"
+  Main
+    Nav
+      Heading "Moves and notes" level=1
+      Row gap=8
+        Button.outline "Add move" icon="add" onTap={open addMove}
+        Button.outline "Half speed loop" icon="loop" onTap={emit loopSection; toast "Looping counts 1 to 8 at 0.5x"}
+    Row pad=24 gap=16 top
+      Column grow gap=12
+        Card gap=8
+          Text.strong "Lanes"
+          Row scroll gap=0
+            Column gap=8
+              Row gap=0
+                Text.caption "" w=90
+                each c in range(8)
+                  Text.mono "{c+1}" w=64 center
+              each who in lane
+                Row gap=0 middle
+                  Text.strong "{find([{'id':'A','n':'Maya'},{'id':'B','n':'Jonas'},{'id':'C','n':'Priya'}],x=>x.id==who).n}" w=90
+                  Lane who={who} counts=8 cell=64 moves={filter(moves,m=>m.who==who)} drop=move onDrop={moves=updateWhere(moves,m=>m.id==result.data,m=>with(with(m,"who",who),"from",result.count))}
+                    each m in filter(moves,m=>m.who==who)
+                      Box.move "{m.name}" from={m.from} to={m.to} fill=#FF3B6FD4 radius=6 pad=6 drag=move(m.id) onTap={picked=m.id; open moveMenu} menu=moveMenu
+                        Text.small "{m.name}" color=#FFFFFFFF
+        Text.muted "Drag a box to another lane or count to move it."
+      Pane w=320 pad=16 gap=12
+        Text.panelTitle "Notes by count"
+        Row gap=8
+          Select "Count" bind=count items=[1,2,3,4,5,6,7,8]
+          Select "Sticker" bind=sticker items=["star","bolt","favorite","warning"]
+        Input "Note" "What happens on this count" bind=draft multiline
+        Button "Add note" onTap={draft=="" ? toast "Write a note first" : {notes=append(notes,{"count":count,"text":draft,"sticker":sticker}); draft=""}}
+        Divider
+        each n in sortBy(notes,n=>n.count)
+          ListTile "Count {n.count}"
+            Icon "{n.sticker}"
+            Text.muted "{n.text}"
+            IconButton "delete" tooltip="Remove note" onTap={notes=without(notes,n)}
+  Menu#moveMenu
+    MenuItem "Rename" icon="edit" onTap={open renameMove}
+    MenuItem "Duplicate" icon="content_copy" onTap={moves=append(moves,with(find(moves,m=>m.id==picked),"id",length(moves)+1))}
+    MenuItem "Delete" icon="delete" onTap={moves=removeWhere(moves,m=>m.id==picked)}
+  Dialog#renameMove "Rename move"
+    Input "Name" bind=newName
+    Button "Save" onTap={moves=updateWhere(moves,m=>m.id==picked,m=>with(m,"name",newName)); close}
+  Dialog#addMove "Add a move" "It lands in the first lane at the chosen count"
+    Input "Move name" "Body roll" bind=newName
+    Select "Dancer" bind=newWho items=["A","B","C"]
+    Select "From count" bind=newFrom items=[1,2,3,4,5,6,7,8]
+    Button "Add" onTap={moves=append(moves,{"id":length(moves)+1,"who":newWho,"name":newName,"from":newFrom,"to":newFrom+1}); close}

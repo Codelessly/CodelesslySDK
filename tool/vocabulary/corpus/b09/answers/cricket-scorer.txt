@@ -1,0 +1,181 @@
+### Scoring
+state tab="score"
+state log=[{"r":1,"k":"run"},{"r":4,"k":"four"},{"r":0,"k":"run"},{"r":"W","k":"wicket"},{"r":2,"k":"run"}]
+state over=[{"r":1,"k":"run"},{"r":4,"k":"four"},{"r":0,"k":"run"},{"r":"W","k":"wicket"},{"r":2,"k":"run"}]
+state runs=148
+state wickets=3
+state overNo=17
+state extra="none"
+state howOut="Bowled"
+state who="Priya Nair"
+state newBatter="Meera Joshi"
+state target=186
+state batters=[{"name":"Priya Nair","runs":52,"balls":38,"fours":6,"sixes":1,"on":true},{"name":"Asha Verma","runs":31,"balls":27,"fours":3,"sixes":0,"on":false}]
+state bowler={"name":"R. Kulkarni","overs":"3.5","maidens":0,"runs":29,"wkts":1}
+App
+  Sidebar
+    Brand "Over by Over" icon="sports_cricket"
+    NavItem "Scoring" icon="scoreboard" selected={tab=="score"} onTap={tab="score"; go scoring}
+    NavItem "Summary" icon="insights" selected={tab=="sum"} onTap={tab="sum"; go innings-summary}
+    NavItem "Scorecard" icon="receipt_long" selected={tab=="card"} onTap={tab="card"; go scorecard}
+    Spacer grow
+    Text.muted "Riverside CC v Harbour XI"
+  Main
+    Nav
+      Column
+        Heading "Riverside CC 148/{wickets}" level=1
+        Text.muted "Over {overNo}, 2nd innings, target {target}"
+      Row gap=8
+        Button.outline "Undo last ball" icon="undo" onTap={length(log)>0 ? {log=removeAt(log,length(log)-1); over=removeAt(over,length(over)-1); toast "Last ball removed"} : toast "Nothing to undo"}
+        Button.secondary "Scorecard" icon="ios_share" onTap={open share}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Row between
+          Text.sectionTitle "This over"
+          Text.muted "{length(over)} of 6 balls"
+        Row gap=12 center
+          each i in range(6)
+            Stack center middle w=48 h=48 radius=24 fill=#FFEEF1F4
+              if length(over)>i
+                Box w=48 h=48 radius=24 fill={over[i].k=="wicket" ? "#FFC62828" : over[i].k=="four" || over[i].k=="six" ? "#FF2E7D32" : "#FF1565C0"} animate=pop
+              Text "{length(over)>i ? over[i].r : ''}" weight=700 color=#FFFFFFFF
+      Card gap=12
+        Text.sectionTitle "Runs off the bat"
+        Grid cols=7 gap=8
+          Button.outline "0" onTap={log=append(log,{"r":0,"k":"run"}); over=append(over,{"r":0,"k":"run"})}
+          Button.outline "1" onTap={runs=runs+1; log=append(log,{"r":1,"k":"run"}); over=append(over,{"r":1,"k":"run"})}
+          Button.outline "2" onTap={runs=runs+2; log=append(log,{"r":2,"k":"run"}); over=append(over,{"r":2,"k":"run"})}
+          Button.outline "3" onTap={runs=runs+3; log=append(log,{"r":3,"k":"run"}); over=append(over,{"r":3,"k":"run"})}
+          Button "4" icon="flag" onTap={runs=runs+4; log=append(log,{"r":4,"k":"four"}); over=append(over,{"r":4,"k":"four"}); toast "Boundary"}
+          Button "5" onTap={runs=runs+5; log=append(log,{"r":5,"k":"run"}); over=append(over,{"r":5,"k":"run"})}
+          Button "6" icon="flag" onTap={runs=runs+6; log=append(log,{"r":6,"k":"six"}); over=append(over,{"r":6,"k":"six"}); toast "Six"}
+        Row gap=8
+          Button.secondary "Wide" grow onTap={runs=runs+1; log=append(log,{"r":"Wd","k":"wide"}); toast "Wide, 1 run"}
+          Button.secondary "No ball" grow onTap={runs=runs+1; log=append(log,{"r":"Nb","k":"noball"}); toast "No ball, 1 run"}
+          Button.secondary "Bye" grow onTap={runs=runs+1; log=append(log,{"r":"B","k":"bye"}); over=append(over,{"r":"B","k":"bye"})}
+          Button.secondary "Leg bye" grow onTap={runs=runs+1; log=append(log,{"r":"Lb","k":"legbye"}); over=append(over,{"r":"Lb","k":"legbye"})}
+          Button.destructive "Wicket" icon="person_off" grow onTap={open wicket}
+      Row gap=16 top
+        Card grow gap=8
+          Text.sectionTitle "Batters"
+          each b in batters
+            ListTile "{b.name}{b.on ? ' *' : ''}" subtitle="{b.runs} ({b.balls}) · {b.fours} fours · {b.sixes} sixes"
+              Text.strong "SR {fixed(b.runs*100/b.balls,1)}"
+        Card grow gap=8
+          Text.sectionTitle "Bowler"
+          ListTile "{bowler.name}" subtitle="{bowler.overs} ov · {bowler.maidens} maidens"
+            Text.strong "{bowler.wkts}/{bowler.runs}"
+          Text.muted "Economy {fixed(bowler.runs/3.83,2)}"
+      Card gap=8
+        Row between
+          Text.sectionTitle "Run rate"
+          Text.muted "Current {fixed(runs/(overNo-0.17),2)} · Required {fixed((target-runs)/(20-overNo+0.17),2)}"
+        LineChart labels=["10","11","12","13","14","15","16","17"] series=[{"name":"Current","values":[6.1,6.4,7.0,7.3,7.6,8.1,8.4,8.7]},{"name":"Required","values":[9.2,9.0,8.9,8.8,8.9,9.3,9.7,10.1]}] h=180
+      Card gap=8
+        Row between
+          Text.sectionTitle "Partnership"
+          Text.strong "63 runs, 41 balls"
+        Row gap=0
+          Box grow=32 h=14 fill=#FF1565C0 radius=7
+          Box grow=31 h=14 fill=#FF90CAF9 radius=7
+        Row between
+          Text.caption "Priya Nair 32"
+          Text.caption "Asha Verma 31"
+  Dialog#wicket "Wicket" "How was the batter out?"
+    Select "How out" bind=howOut items=["Bowled","Caught","LBW","Run out","Stumped","Hit wicket"]
+    Text.fieldLabel "Who is out"
+    Row gap=8
+      ChoiceChip "Priya Nair" selected={who=="Priya Nair"} onTap={who="Priya Nair"}
+      ChoiceChip "Asha Verma" selected={who=="Asha Verma"} onTap={who="Asha Verma"}
+    if howOut=="Caught" || howOut=="Run out" || howOut=="Stumped"
+      Select "Fielder" bind=fielder items=["Dev Rao","Kiran Shah","Sana Iqbal","Tara Menon"]
+    Select "Next batter" bind=newBatter items=["Meera Joshi","Lata Kulkarni","Zoya Khan"]
+    Button.destructive "Confirm wicket" onTap={wickets=wickets+1; log=append(log,{"r":"W","k":"wicket"}); over=append(over,{"r":"W","k":"wicket"}); toast "{who} {lower(howOut)}, {newBatter} in"; close}
+  Dialog#share "Share scorecard" "Sent as a picture"
+    Card gap=4
+      Text.heading "Riverside CC {runs}/{wickets}"
+      Text.muted "Over {overNo}, chasing {target}"
+    Button "Share as picture" icon="image" onTap={emit shareScorecard; toast "Picture ready"; close}
+
+### Innings summary
+App
+  Sidebar
+    Brand "Over by Over" icon="sports_cricket"
+    NavItem "Scoring" icon="scoreboard" onTap={go scoring}
+    NavItem "Summary" icon="insights" selected={true}
+    NavItem "Scorecard" icon="receipt_long" onTap={go scorecard}
+  Main
+    Nav
+      Heading "Innings summary" level=1
+      Button.outline "Share" icon="ios_share" onTap={open sumshare}
+    Column pad=24 gap=16 scroll
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.caption "Total"
+          Text "{runs}/{wickets}" size=32 weight=700
+        Card gap=4
+          Text.caption "Overs"
+          Text "17.2" size=32 weight=700
+        Card gap=4
+          Text.caption "Run rate"
+          Text "{fixed(runs/17.33,2)}" size=32 weight=700
+        Card gap=4
+          Text.caption "Extras"
+          Text "11" size=32 weight=700
+      Card gap=8
+        Text.sectionTitle "Runs by over"
+        BarChart values=[5,9,7,11,6,8,12,4,10,7,9,13,6,8,14,9,10] labels=["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17"] h=200
+      Grid cols=2 gap=16
+        Card gap=8
+          Text.sectionTitle "How the runs came"
+          Donut values=[62,48,24,14] labels=["Singles and twos","Fours","Sixes","Extras"]
+        Card gap=8
+          Text.sectionTitle "Fall of wickets"
+          ListTile "1-22" subtitle="O. Desai, 3.1 ov"
+          ListTile "2-71" subtitle="K. Rao, 9.4 ov"
+          ListTile "3-148" subtitle="Priya Nair, 17.2 ov"
+  Dialog#sumshare "Share summary"
+    Button "Share as picture" icon="image" onTap={emit shareSummary; close}
+
+### Scorecard
+App
+  Sidebar
+    Brand "Over by Over" icon="sports_cricket"
+    NavItem "Scoring" icon="scoreboard" onTap={go scoring}
+    NavItem "Summary" icon="insights" onTap={go innings-summary}
+    NavItem "Scorecard" icon="receipt_long" selected={true}
+  Main
+    Nav
+      Heading "Scorecard" level=1
+      Button "Share as picture" icon="image" onTap={emit shareScorecard; toast "Picture ready"}
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Text.sectionTitle "Riverside CC, {runs}/{wickets}"
+        Row gap=8
+          Text.fieldLabel "Batter" grow
+          Text.fieldLabel "How out" w=140
+          Text.fieldLabel "R" w=48
+          Text.fieldLabel "B" w=48
+          Text.fieldLabel "4s" w=40
+          Text.fieldLabel "6s" w=40
+        Divider
+        each b in batters
+          Row gap=8
+            Text.strong "{b.name}" grow
+            Text.muted "not out" w=140
+            Text "{b.runs}" w=48
+            Text "{b.balls}" w=48
+            Text "{b.fours}" w=40
+            Text "{b.sixes}" w=40
+      Card gap=8
+        Text.sectionTitle "Bowling, Harbour XI"
+        Row gap=8
+          Text.fieldLabel "Bowler" grow
+          Text.fieldLabel "O" w=48
+          Text.fieldLabel "R" w=48
+          Text.fieldLabel "W" w=48
+        Row gap=8
+          Text.strong "{bowler.name}" grow
+          Text "{bowler.overs}" w=48
+          Text "{bowler.runs}" w=48
+          Text "{bowler.wkts}" w=48

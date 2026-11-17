@@ -1,0 +1,185 @@
+### Planner
+state tab="planner"
+state angle=62
+state length=38
+state radius=17.9
+state height=33.6
+state load=6200
+state rigging=450
+state rigName="4-leg chain sling"
+state outriggers={"fl":true,"fr":true,"rl":true,"rr":false}
+state chart=[{"radius":10,"cap":24000},{"radius":14,"cap":16500},{"radius":18,"cap":11800},{"radius":22,"cap":8600},{"radius":26,"cap":6400},{"radius":30,"cap":4900},{"radius":34,"cap":3700}]
+state sel=0
+App
+  Sidebar
+    Brand "Hookline" icon="construction"
+    NavItem "Planner" icon="architecture" selected={tab=="planner"} onTap={tab="planner"}
+    NavItem "Lift plan" icon="assignment" selected={tab=="plan"} onTap={go lift-plan}
+    NavItem "Load charts" icon="table_chart" selected={tab=="charts"} onTap={tab="charts"}
+    NavItem "Site log" icon="history" badge="3" selected={tab=="log"} onTap={tab="log"}
+    Spacer grow
+    Text.muted "Site 14, Dock Road"
+    Text.muted "Crane LTM 1160"
+  Main
+    Nav
+      Heading "Lift planner" level=1
+      Row gap=8
+        Badge.success "Chart: 360 deg, 12 t counterweight"
+        Button.outline "Reset boom" onTap={angle=62; length=38}
+        Button "Create lift plan" onTap={go lift-plan}
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Load radius"
+          Text "{fixed(radius,1)} m" size=32 weight=700
+        Card gap=4
+          Text.muted "Tip height"
+          Text "{fixed(height,1)} m" size=32 weight=700
+        Card gap=4
+          Text.muted "Boom"
+          Text "{fixed(length,1)} m at {round(angle,0)} deg" size=32 weight=700
+      Row gap=16 top
+        Card grow gap=12
+          Row between
+            Heading "Side view" level=3
+            Text.muted "Drag the boom tip to set angle and length"
+          CraneDiagram boom_angle={angle} boom_length={length} load={load + rigging} outriggers={outriggers} h=360 onChange={angle=result.angle; length=result.length; radius=result.radius; height=result.height}
+          Row gap=12
+            Slider bind=angle min=20 max=82 w=220
+            Text.muted "Angle {round(angle,0)} deg"
+            Slider bind=length min=14 max=52 w=220
+            Text.muted "Length {round(length,0)} m"
+        Column w=320 gap=16
+          Card gap=12
+            Heading "Load" level=3
+            Input "Load weight (kg)" type=number bind=load
+            Select "Rigging" items=["4-leg chain sling","2-leg wire sling","Spreader beam","Soft sling pair"] bind=rigName
+            Input "Rigging weight (kg)" type=number bind=rigging
+            Divider
+            Row between
+              Text.muted "Total on hook"
+              Text.strong "{load + rigging} kg"
+          Card gap=8
+            Heading "Outriggers" level=3
+            Checkbox "Front left, 7.2 m" bind=outriggers.fl
+            Checkbox "Front right, 7.2 m" bind=outriggers.fr
+            Checkbox "Rear left, 7.2 m" bind=outriggers.rl
+            Checkbox "Rear right, 7.2 m" bind=outriggers.rr
+            if !(outriggers.fl && outriggers.fr && outriggers.rl && outriggers.rr)
+              Badge.warning "Not fully extended: capacity reduced"
+      Card gap=12
+        Row between
+          Heading "Allowed weight at this reach" level=3
+          Row gap=8
+            Text.muted "Allowed at {fixed(radius,1)} m"
+            Text.strong "{coalesce(find(chart, r=>r.radius>=radius).cap, 0)} kg"
+        Row gap=12
+          Text.muted "Radius" w=90
+          Text.muted "Allowed" w=110
+          Text.muted "Load used" grow
+          Text.muted "Status" w=100
+        each row in chart
+          Row gap=12 middle
+            Text.strong "{row.radius} m" w=90
+            Text "{row.cap} kg" w=110
+            Column grow gap=2
+              Progress {min(1, (load + rigging) / row.cap)}
+              Text.caption "{round(100 * (load + rigging) / row.cap, 0)} percent"
+            if (load + rigging) / row.cap > 1
+              Badge.error "Over" w=100
+            if (load + rigging) / row.cap > 0.8 && (load + rigging) / row.cap <= 1
+              Badge.danger "Past 80%" w=100
+            if (load + rigging) / row.cap <= 0.8
+              Badge.success "OK" w=100
+        if (load + rigging) / coalesce(find(chart, r=>r.radius>=radius).cap, 1) > 0.8
+          Card fill=#FFFDECEA gap=4
+            Text.danger "The load is past 80 percent of the allowed weight at {fixed(radius,1)} m. Shorten the radius or reduce the load."
+        Row gap=8 end
+          Button.outline "Print chart" onTap={print chart}
+          Button "Add to lift plan" onTap={emit addToPlan {"load": load + rigging, "radius": radius}; toast "Added to lift plan"}
+
+### Lift plan
+state name="Warehouse B roof unit R-4"
+state planner="Dana Whitfield"
+state signed=false
+state signature=""
+state date=today()
+state checks={"ground":true,"wind":false,"exclusion":true,"signals":false}
+Page
+  Nav sticky
+    Brand "Hookline" icon="construction"
+    Row gap=4
+      Link "Planner" onTap={go planner}
+      Link "Lift plan"
+    Row gap=8
+      Button.outline "Print preview" icon="print" onTap={open preview}
+      Button "Sign off" onTap={open sign}
+  Section narrow
+    Column gap=16
+      Heading "Lift plan" level=1
+      Text.muted "Lift 22-0417, prepared for the site manager and the appointed person."
+      Card gap=12
+        Heading "Lift details" level=3
+        Input "Lift name" bind=name
+        Input "Planner" bind=planner
+        DatePicker "Lift date" bind=date
+        Grid cols=2 gap=12
+          Column gap=2
+            Text.muted "Load on hook"
+            Text.strong "6,650 kg"
+          Column gap=2
+            Text.muted "Radius"
+            Text.strong "17.9 m"
+          Column gap=2
+            Text.muted "Allowed at radius"
+            Text.strong "11,800 kg"
+          Column gap=2
+            Text.muted "Used"
+            Text.strong "56 percent"
+      Card gap=8
+        Heading "Pre-lift checks" level=3
+        Checkbox "Ground bearing confirmed" bind=checks.ground
+        Checkbox "Wind under 9 m/s at boom tip" bind=checks.wind
+        Checkbox "Exclusion zone fenced" bind=checks.exclusion
+        Checkbox "Signaller briefed, radio checked" bind=checks.signals
+      Card gap=12
+        Heading "Signature" level=3
+        if signed
+          Row between
+            Column gap=2
+              Text.strong "{signature}"
+              Text.muted "Signed {formatDate(date,"MMM d, yyyy")}"
+            Button.ghost "Clear" onTap={signed=false; signature=""}
+        if !signed
+          SignaturePad bind=signature h=120
+          Row between
+            Text.muted "Appointed person"
+            Button "Accept signature" onTap={signature != "" ? signed=true : toast "Sign in the box first"}
+  Footer
+    Row between
+      Text.muted "Hookline lift plan, draft 3"
+      Text.muted "Page 1 of 1"
+  Dialog#preview "Print preview" "As it will print on A4"
+    Card gap=8
+      Heading "Lift plan: {name}" level=3
+      Text.muted "Planner {planner}, {formatDate(date,"MMM d, yyyy")}"
+      Divider
+      Row between
+        Text "Load on hook"
+        Text.strong "6,650 kg"
+      Row between
+        Text "Radius / allowed"
+        Text.strong "17.9 m / 11,800 kg"
+      Row between
+        Text "Checks complete"
+        Text.strong "{count([checks.ground,checks.wind,checks.exclusion,checks.signals], c=>c)} of 4"
+      Divider
+      Row between
+        Text.muted "Signed"
+        Text.strong "{signed ? signature : "Unsigned"}"
+    Row gap=8 end
+      Button.outline "Close" onTap={close}
+      Button "Print" onTap={print; close}
+  Dialog#sign "Sign off this lift" "All four checks must be ticked"
+    Text.muted "{count([checks.ground,checks.wind,checks.exclusion,checks.signals], c=>c)} of 4 checks ticked."
+    Button "Go to signature" onTap={checks.ground && checks.wind && checks.exclusion && checks.signals ? scroll signature; close : toast "Finish the checks first"}

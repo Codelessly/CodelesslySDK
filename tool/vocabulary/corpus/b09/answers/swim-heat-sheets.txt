@@ -1,0 +1,237 @@
+### Events
+state q=""
+state day="Saturday"
+state secs=1260
+state myEvent="Girls 100m Freestyle"
+state events=[{"id":"e12","name":"Girls 100m Freestyle","heats":6,"entries":43,"time":"10:05","status":"Next"},{"id":"e13","name":"Boys 100m Freestyle","heats":7,"entries":51,"time":"10:40","status":"Seeded"},{"id":"e14","name":"Girls 200m Individual Medley","heats":4,"entries":29,"time":"11:15","status":"Seeded"},{"id":"e15","name":"Boys 200m Individual Medley","heats":4,"entries":31,"time":"11:45","status":"Seeded"},{"id":"e16","name":"Girls 50m Butterfly","heats":5,"entries":37,"time":"12:20","status":"Seeded"},{"id":"e17","name":"Boys 50m Butterfly","heats":5,"entries":38,"time":"12:50","status":"Seeded"}]
+every 1s when secs>0 onTick={secs=secs-1}
+App
+  Sidebar
+    Brand "Lane Line" icon="pool"
+    NavItem "Events" icon="list_alt" selected={true} onTap={go events}
+    NavItem "Heat sheet" icon="grid_view" onTap={go heat-sheet}
+    NavItem "Results entry" icon="timer" onTap={go results-entry}
+    NavItem "Medal table" icon="emoji_events" onTap={go medal-table}
+    Spacer grow
+    Text.muted "Harbour Open, Day 1"
+  Main
+    Nav
+      Heading "Events" level=1
+      Row gap=8
+        SegmentedButton bind=day items=["Saturday","Sunday"]
+        Input "Search events" bind=q w=220
+    Column pad=24 gap=16
+      Card gap=8 fill=#FFFFF4E5
+        Row between middle
+          Column gap=4
+            Text.strong "Your heat: Girls 100m Freestyle, heat 4, lane 5"
+            Text.muted "Starts in {duration(secs)}"
+          Button "Open heat" onTap={go heat-sheet}
+        if secs<=600
+          Row gap=8 middle
+            Icon "warning" color=#FFB45309
+            Text.strong "Report to marshalling now: 10 minutes or less before your heat." color=#FFB45309
+      Card gap=0
+        Row pad=8 border-bottom=#FFE0E0E0
+          Text.muted "Event" grow
+          Text.muted "Heats" w=70
+          Text.muted "Entries" w=70
+          Text.muted "Start" w=70
+          Text.muted "Status" w=90
+        each ev in filter(events,e=>contains(lower(e.name),lower(q)))
+          ListTile onTap={myEvent=ev.name; go heat-sheet}
+            Row pad=8 middle
+              Column grow gap=2
+                Text.strong "{ev.name}"
+                Text.muted "Event {ev.id}"
+              Text "{ev.heats}" w=70
+              Text "{ev.entries}" w=70
+              Text "{ev.time}" w=70
+              Badge.info "{ev.status}" w=90
+      if length(filter(events,e=>contains(lower(e.name),lower(q))))==0
+        Text.muted "No events match \"{q}\"."
+
+### Heat sheet
+state heat=4
+state mine=5
+state pbOnly=false
+state lanes=[{"lane":1,"name":"Sofia Marin","club":"Harbour SC","seed":"1:03.42","pb":false},{"lane":2,"name":"Tess Okafor","club":"Northgate","seed":"1:02.87","pb":true},{"lane":3,"name":"Hannah Lindqvist","club":"Riverside","seed":"1:01.95","pb":false},{"lane":4,"name":"Ava Whitcombe","club":"Harbour SC","seed":"1:01.20","pb":true},{"lane":5,"name":"Maya Reyes","club":"Coastal Dolphins","seed":"1:01.58","pb":true},{"lane":6,"name":"Priya Nair","club":"Northgate","seed":"1:02.10","pb":false},{"lane":7,"name":"Chloe Bannerman","club":"Riverside","seed":"1:03.01","pb":false},{"lane":8,"name":"Isla Duarte","club":"Coastal Dolphins","seed":"1:04.26","pb":false}]
+state secs=1260
+every 1s when secs>0 onTick={secs=secs-1}
+App
+  Sidebar
+    Brand "Lane Line" icon="pool"
+    NavItem "Events" icon="list_alt" onTap={go events}
+    NavItem "Heat sheet" icon="grid_view" selected={true} onTap={go heat-sheet}
+    NavItem "Results entry" icon="timer" onTap={go results-entry}
+    NavItem "Medal table" icon="emoji_events" onTap={go medal-table}
+    Spacer grow
+    Text.muted "Maya Reyes, Coastal Dolphins"
+  Main
+    Nav
+      Column gap=2
+        Heading "Girls 100m Freestyle" level=1
+        Text.muted "Event 12, heat {heat} of 6"
+      Row gap=8
+        IconButton "chevron_left" tooltip="Previous heat" onTap={heat=max(1,heat-1)}
+        IconButton "chevron_right" tooltip="Next heat" onTap={heat=min(6,heat+1)}
+        Button "Enter results" onTap={go results-entry}
+    Column pad=24 gap=16
+      Card gap=8
+        Row between middle
+          Column gap=4
+            Text.strong "Your heat starts in {duration(secs)}"
+            Text.muted "Heat 4, lane 5, seed 1:01.58"
+          Badge.warning "Marshalling closes at 10:00" hide=phone
+        if secs<=600
+          Row gap=8 middle
+            Icon "warning" color=#FFB45309
+            Text.strong "Marshalling warning: go to the clerk of course now." color=#FFB45309
+        Progress {1-secs/1260}
+      Row between middle
+        Text.strong "Lanes"
+        FilterChip "Personal bests only" selected={pbOnly} onTap={pbOnly=!pbOnly}
+      Card gap=0
+        Row pad=8 border-bottom=#FFE0E0E0
+          Text.muted "Lane" w=50
+          Text.muted "Swimmer" grow
+          Text.muted "Club" w=150 hide=phone
+          Text.muted "Seed" w=80
+        each l in filter(lanes,x=>!pbOnly || x.pb)
+          Row pad=8 middle fill={l.lane==mine ? "#FFE3F2FD" : "#00FFFFFF"} onTap={mine=l.lane}
+            Text.strong "{l.lane}" w=50
+            Row grow gap=6 middle
+              Text "{l.name}"
+              if l.pb
+                Icon "star" color=#FFF59E0B tooltip="Personal best"
+              if l.lane==5
+                Badge.primary "You"
+            Text.muted "{l.club}" w=150 hide=phone
+            Text.mono "{l.seed}" w=80
+      Text.muted "Star marks a swimmer whose seed time is a personal best."
+
+### Results entry
+state heat=4
+state entered=[]
+state placing=[]
+state times={}
+state dq=[]
+state sel=0
+state tenths=""
+state reason=""
+state lanes=[{"lane":1,"name":"Sofia Marin","club":"Harbour SC"},{"lane":2,"name":"Tess Okafor","club":"Northgate"},{"lane":3,"name":"Hannah Lindqvist","club":"Riverside"},{"lane":4,"name":"Ava Whitcombe","club":"Harbour SC"},{"lane":5,"name":"Maya Reyes","club":"Coastal Dolphins"},{"lane":6,"name":"Priya Nair","club":"Northgate"},{"lane":7,"name":"Chloe Bannerman","club":"Riverside"},{"lane":8,"name":"Isla Duarte","club":"Coastal Dolphins"}]
+App
+  Sidebar
+    Brand "Lane Line" icon="pool"
+    NavItem "Events" icon="list_alt" onTap={go events}
+    NavItem "Heat sheet" icon="grid_view" onTap={go heat-sheet}
+    NavItem "Results entry" icon="timer" selected={true} onTap={go results-entry}
+    NavItem "Medal table" icon="emoji_events" onTap={go medal-table}
+  Main
+    Nav
+      Column gap=2
+        Heading "Results: Girls 100m Freestyle" level=1
+        Text.muted "Heat {heat}. Tap lanes in the order they finish."
+      Row gap=8
+        Button.outline "Clear places" onTap={placing=[]; times={}}
+        Button "Submit heat" onTap={length(placing)+length(dq)>=8 ? {emit submitHeat placing; toast "Heat {heat} submitted"; placing=[]; times={}; dq=[]} : toast "Place every lane or flag it first"}
+    Column pad=24 gap=16
+      Grid cols=4 gap=12
+        each l in lanes
+          Card gap=6 onTap={contains(dq,l.lane) ? toast "Lane {l.lane} is disqualified" : (contains(placing,l.lane) ? {sel=l.lane; tenths=""; open keypad} : placing=append(placing,l.lane))} menu=laneMenu
+            Row between middle
+              Text.strong "Lane {l.lane}"
+              if contains(dq,l.lane)
+                Badge.error "DQ"
+              if indexOf(placing,l.lane)>=0
+                Badge.success "{indexOf(placing,l.lane)+1}"
+            Text "{l.name}"
+            Text.muted "{l.club}"
+            if indexOf(placing,l.lane)>=0
+              Text.mono "{coalesce(times[l.lane],"tap to add time")}"
+            IconButton "more_vert" tooltip="More" onTap={sel=l.lane; open laneMenu}
+      Card gap=8
+        Text.strong "Finishing order"
+        if length(placing)==0
+          Text.muted "No places recorded yet."
+        each p in placing
+          Row gap=12 middle
+            Text.strong "{indexOf(placing,p)+1}" w=30
+            Text "{find(lanes,x=>x.lane==p).name}" grow
+            Text.mono "{coalesce(times[p],"--")}"
+            IconButton "close" tooltip="Remove place" onTap={placing=without(placing,p)}
+  Sheet#keypad "Time for lane {sel}"
+    Text.mono "{tenths==""?"0:00.0":slice(concat(["0","0","0","0"],map(range(length(tenths)),i=>slice(tenths,i,i+1))),0,0)}" size=32 center
+    Text.heading2 "{tenths==""?"0:00.0":tenths}" center
+    Grid cols=3 gap=8
+      each d in ["1","2","3","4","5","6","7","8","9","","0","back"]
+        Button.outline "{d}" hidden={d==""} onTap={d=="back" ? tenths=slice(tenths,0,length(tenths)-1) : (length(tenths)<5 ? tenths=tenths+d : toast "Time is full")}
+    Row gap=8
+      Button.outline "Cancel" grow onTap={close}
+      Button "Save time" grow onTap={length(tenths)>=2 ? {times=with(times,sel,tenths); toast "Time saved"; close} : toast "Type at least seconds and a tenth"}
+  Menu#laneMenu
+    MenuItem "Enter time" icon="dialpad" onTap={tenths=""; open keypad}
+    MenuItem "Disqualify" icon="block" onTap={reason=""; open dqDialog}
+    MenuItem "Clear lane" icon="backspace" onTap={placing=without(placing,sel); dq=without(dq,sel)}
+  Dialog#dqDialog "Disqualify lane {sel}" "Choose the infraction and report it to the referee."
+    Select "Reason" bind=reason items=["False start","Early take-off, relay","Stroke infringement","Incomplete turn","One-hand touch","Did not finish","Other"]
+    Input "Notes" "Lane judge and what was seen" multiline
+    Row gap=8
+      Button.outline "Cancel" grow onTap={close}
+      Button.destructive "Flag DQ" grow onTap={reason=="" ? toast "Pick a reason" : {dq=append(dq,sel); placing=without(placing,sel); emit dq {"lane":sel,"reason":reason}; toast "Lane {sel} flagged: {reason}"; close}}
+
+### Medal table
+state view="Club"
+state sortKey="gold"
+state clubs=[{"club":"Coastal Dolphins","gold":9,"silver":6,"bronze":4},{"club":"Harbour SC","gold":7,"silver":8,"bronze":5},{"club":"Northgate","gold":5,"silver":4,"bronze":9},{"club":"Riverside","gold":3,"silver":5,"bronze":6},{"club":"Lakeside Otters","gold":1,"silver":2,"bronze":3}]
+state recent=[{"event":"Boys 50m Backstroke","gold":"Leo Park, Harbour SC","silver":"Dan Mercer, Northgate","bronze":"Sam Idowu, Riverside","pb":true},{"event":"Girls 200m Freestyle","gold":"Maya Reyes, Coastal Dolphins","silver":"Ava Whitcombe, Harbour SC","bronze":"Tess Okafor, Northgate","pb":true}]
+App
+  Sidebar
+    Brand "Lane Line" icon="pool"
+    NavItem "Events" icon="list_alt" onTap={go events}
+    NavItem "Heat sheet" icon="grid_view" onTap={go heat-sheet}
+    NavItem "Results entry" icon="timer" onTap={go results-entry}
+    NavItem "Medal table" icon="emoji_events" selected={true} onTap={go medal-table}
+  Main
+    Nav
+      Heading "Medal count" level=1
+      SegmentedButton bind=view items=["Club","Recent"]
+    Column pad=24 gap=16
+      if view=="Club"
+        Card gap=12
+          Text.strong "Medals by club"
+          BarChart values={map(sortByDesc(clubs,c=>c.gold*100+c.silver*10+c.bronze),c=>c.gold+c.silver+c.bronze)} labels={map(sortByDesc(clubs,c=>c.gold*100+c.silver*10+c.bronze),c=>c.club)} h=200
+        Card gap=0
+          Row pad=8 border-bottom=#FFE0E0E0
+            Text.muted "#" w=30
+            Text.muted "Club" grow
+            Text.muted "Gold" w=60 onTap={sortKey="gold"}
+            Text.muted "Silver" w=60 onTap={sortKey="silver"}
+            Text.muted "Bronze" w=60 onTap={sortKey="bronze"}
+            Text.muted "Total" w=60
+          each c in sortByDesc(clubs,x=>x[sortKey]*100+x.gold*10+x.silver)
+            Row pad=8 middle
+              Text.strong "{indexOf(sortByDesc(clubs,x=>x[sortKey]*100+x.gold*10+x.silver),c)+1}" w=30
+              Text "{c.club}" grow
+              Text.strong "{c.gold}" w=60 color=#FFB8860B
+              Text "{c.silver}" w=60 color=#FF757575
+              Text "{c.bronze}" w=60 color=#FFA0522D
+              Text.strong "{c.gold+c.silver+c.bronze}" w=60
+      if view=="Recent"
+        each r in recent
+          Card gap=8
+            Row between middle
+              Text.strong "{r.event}"
+              if r.pb
+                Row gap=4 middle
+                  Icon "star" color=#FFF59E0B
+                  Text.muted "Personal best"
+            Row gap=8 middle
+              Icon "emoji_events" color=#FFB8860B
+              Text "{r.gold}"
+            Row gap=8 middle
+              Icon "emoji_events" color=#FF757575
+              Text "{r.silver}"
+            Row gap=8 middle
+              Icon "emoji_events" color=#FFA0522D
+              Text "{r.bronze}"

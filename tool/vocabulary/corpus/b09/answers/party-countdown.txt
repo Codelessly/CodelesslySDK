@@ -1,0 +1,120 @@
+### Countdown
+state left=2843
+state running=true
+state look="Fireworks"
+state muted=false
+state message="Happy New Year, everyone. Find someone to kiss at midnight."
+state greetings=[{"id":1,"name":"Maya","text":"Happy 2027!","lane":12},{"id":2,"name":"Tomas","text":"Cheers from Lisbon","lane":40},{"id":3,"name":"Priya","text":"Ten more minutes, dance!","lane":68}]
+state schedule=[{"id":1,"time":"20:00","title":"Doors open","done":true},{"id":2,"time":"21:30","title":"Dinner is served","done":true},{"id":3,"time":"23:00","title":"Toast with the sparkling wine","done":false},{"id":4,"time":"23:59","title":"Final countdown","done":false}]
+state target="23:59:59"
+state burst=false
+every 1s when running && left>0 onTick={left=left-1}
+every 1s when left==0 && !burst onTick={burst=true; play fanfare}
+every 1s when left>0 && left<=10 && !muted onTick={play tick}
+Shortcut key="m" onPress={muted=!muted; toast muted ? "Sound on" : "Sound off"}
+Shortcut key="space" onPress={running=!running}
+App
+  Sidebar
+    Brand "Midnight" icon="nightlife"
+    NavItem "Countdown" icon="timer" selected={true}
+    NavItem "Schedule" icon="event_note" onTap={go schedule}
+    NavItem "Guest wall" icon="forum" badge="{length(greetings)}" onTap={go guests}
+    Spacer grow
+    Text.muted "Counting to {target}"
+  Main
+    Nav
+      Heading "New Year's Eve at Ines's place"
+      Row gap=8
+        IconButton "{muted ? 'volume_off' : 'volume_up'}" tooltip="Mute (M)" onTap={muted=!muted}
+        IconButton "edit_calendar" tooltip="Set the moment" onTap={open setmoment}
+        Button.outline "Send a greeting" icon="send" onTap={open greet}
+    Column pad=24 gap=16 scroll
+      SegmentedButton bind=look items=["Fireworks","Retro flip","Rocket"]
+      Box fill={left>10 && left<=60 ? "#FF7A1F3D" : "#FF0B1026"} radius=24 pad=32 gap=16 animate=fade
+        Column center middle gap=12
+          if left>60
+            Text "Time to midnight" color=#FFB8C0E8 center
+            Row center gap=16
+              FlipClock value={left} format="hh:mm:ss" look={look} color=#FFFFFFFF
+          if left>10 && left<=60
+            Badge.warning "Last minute"
+            Row center gap=16
+              FlipClock value={left} format="mm:ss" look={look} color=#FFFFD27A animate=pulse
+          if left>0 && left<=10
+            Text "{left}" size=220 weight=800 color=#FFFF4D6D center animate=pop
+          if left==0
+            Text "Happy New Year" size=72 weight=800 color=#FFFFFFFF center animate=scale
+          Progress {1-left/3600}
+        Marquee "{message}" speed=60 color=#FFE6E9FF
+        FloatingMessages items={greetings} direction="left" duration=9000
+      if look=="Fireworks"
+        Fireworks active={left<=60}
+      if look=="Rocket"
+        Rocket progress={1-left/3600}
+      if burst
+        Confetti count=200 duration=6000
+      Row gap=12
+        Button.outline "{running ? 'Pause' : 'Resume'}" icon="{running ? 'pause' : 'play_arrow'}" onTap={running=!running}
+        Button.outline "Reset to 47:23" icon="restart_alt" onTap={left=2843; burst=false; running=true}
+        Button.ghost "Skip to 12 seconds" onTap={left=12}
+  Dialog#setmoment "Set the moment" "Pick when the party clock hits zero"
+    DatePicker "Date" bind=day
+    TimePicker "Time" bind=time
+    Button "Start countdown" onTap={target=time; left=secondsUntil(day,time); burst=false; close}
+  Dialog#greet "Send a greeting" "It floats across the screen with your name"
+    Input "Your name" "Maya" bind=gname
+    Input "Greeting" "Happy 2027!" bind=gtext multiline
+    Button "Send" onTap={trim(gname)!="" && trim(gtext)!="" ? {greetings=append(greetings,{"id":length(greetings)+1,"name":gname,"text":gtext,"lane":random(10,80)}); gtext=""; toast "Sent to the big screen"; close} : toast "Add your name and a greeting"}
+
+### Schedule
+state schedule=[{"id":1,"time":"20:00","title":"Doors open","done":true},{"id":2,"time":"21:30","title":"Dinner is served","done":true},{"id":3,"time":"23:00","title":"Toast with the sparkling wine","done":false},{"id":4,"time":"23:59","title":"Final countdown","done":false}]
+state ntime="22:15"
+state ntitle=""
+App
+  Sidebar
+    Brand "Midnight" icon="nightlife"
+    NavItem "Countdown" icon="timer" onTap={go countdown}
+    NavItem "Schedule" icon="event_note" selected={true}
+    NavItem "Guest wall" icon="forum" onTap={go guests}
+  Main
+    Nav
+      Heading "Earlier moments"
+      Button "Add a moment" icon="add" onTap={open addmoment}
+    Column pad=24 gap=16 scroll maxw=720
+      Text.muted "{count(schedule,s=>s.done)} of {length(schedule)} done"
+      Progress {count(schedule,s=>s.done)/length(schedule)}
+      each s in schedule
+        Card
+          Row between gap=12
+            Checkbox "{s.time}  {s.title}" bind=s.done
+            if s.done
+              Icon "check_circle" color=#FF2E9E5B
+            if !s.done
+              IconButton "delete" tooltip="Remove" onTap={schedule=removeWhere(schedule,x=>x.id==s.id)}
+  Sheet#addmoment "Add a moment"
+    TimePicker "Time" bind=ntime
+    Input "What happens" "Cake and candles" bind=ntitle
+    Button "Add" onTap={trim(ntitle)!="" ? {schedule=sortBy(append(schedule,{"id":length(schedule)+1,"time":ntime,"title":ntitle,"done":false}),x=>x.time); ntitle=""; close} : toast "Give the moment a name"}
+
+### Guest greeting
+state gname=""
+state gtext=""
+state sent=false
+state muted=false
+Page
+  Nav
+    Brand "Midnight" icon="nightlife"
+    Text.muted "Ines's party"
+  Section narrow
+    Column gap=16
+      Heading "Send a greeting to the big screen" level=1
+      Text.muted "It floats across the screen with your name. 47 minutes to midnight."
+      Input "Your name" "Maya" bind=gname
+      Input "Greeting" "Happy 2027!" bind=gtext multiline
+      Row gap=8
+        Chip "Cheers" onTap={gtext="Cheers, everyone"}
+        Chip "Happy New Year" onTap={gtext="Happy New Year"}
+        Chip "Dance more" onTap={gtext="Louder, please"}
+      Button "Send it" size=large onTap={trim(gname)!="" && trim(gtext)!="" ? {emit sendGreeting {"name":gname,"text":gtext}; sent=true; gtext=""} : toast "Add your name and a greeting"}
+      if sent
+        Badge.success "On the screen now"

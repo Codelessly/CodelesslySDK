@@ -1,0 +1,175 @@
+### Map
+state tab="map"
+state measure="Median age"
+state year=2020
+state place="Multnomah County, OR"
+state q=""
+state breaks=[30,35,40,45]
+state notable="Multnomah County is younger than Oregon overall: its median age is 37.4 against 40.2, and its households are smaller."
+App
+  Sidebar
+    Brand "Headcount" icon="groups"
+    NavItem "Map" icon="map" selected={tab=="map"} onTap={go map}
+    NavItem "Place profile" icon="bar_chart" selected={tab=="profile"} onTap={go profile}
+    NavItem "Compare and table" icon="table_chart" selected={tab=="compare"} onTap={go compare}
+    Spacer grow
+    Text.muted "Source: decennial census, 1970 to 2020"
+  Main
+    Nav
+      Heading "Map" level=1
+      Row gap=8
+        Input "Search places" "County, city or ZIP" bind=q w=260 onChange={emit searchPlace result}
+        Button.outline "Download table" icon="download" onTap={emit download "map-table.csv"; toast "Table downloaded"}
+    Column pad=24 gap=16
+      Row gap=12 wrap
+        SegmentedButton bind=measure items=["Median age","Household size","Spanish at home"]
+        Select "Language" bind=language items=["Spanish","Vietnamese","Chinese","Russian"] visible={measure=="Spanish at home"}
+      Row gap=16 top
+        Card grow gap=12
+          ChoroplethMap measure={measure} year={year} breaks={breaks} selected={place} h=420 onSelect={place=result; emit selectPlace result} onHover={emit hoverPlace result}
+          Legend for=map bind=breaks draggable min=20 max=60 unit={measure=="Median age" ? "yrs" : measure=="Household size" ? "people" : "%"} onChange={breaks=result; emit breaksChanged result}
+          Row gap=12 middle
+            Text.muted "{year - 30}"
+            Slider bind=year min=1970 max=2020 step=10 grow onChange={emit yearChanged result}
+            Text.muted "2020"
+            Text.strong "{year}"
+        Column w=320 gap=12
+          Card gap=8
+            Text.caption "SELECTED PLACE"
+            Heading "{place}" level=3
+            Row gap=24
+              Column
+                Text "{measure=="Median age" ? "37.4" : measure=="Household size" ? "2.31" : "9.8%"}" size=32 weight=700
+                Text.muted "{measure}, {year}"
+              Column
+                Text "815,428" size=32 weight=700
+                Text.muted "Residents"
+            Button "Open profile" icon="arrow_forward" onTap={go profile}
+          Card gap=8
+            Text.strong "What is notable"
+            Text.body "{notable}"
+            Button.tertiary "Copy sentence" icon="content_copy" onTap={copy notable; toast "Copied"}
+          Card gap=8
+            Text.strong "Matching places"
+            each p in filter(["Multnomah County, OR","Washington County, OR","Clackamas County, OR","Lane County, OR","Deschutes County, OR"], x=>contains(lower(x), lower(q)))
+              ListTile "{p}" icon="place" onTap={place=p; emit selectPlace p}
+
+### Place profile
+state tab="profile"
+state place="Multnomah County, OR"
+state sortCol="age"
+state sortDir="asc"
+state ages=[{"age":"0-9","m":46210,"f":44080},{"age":"10-19","m":42800,"f":41020},{"age":"20-29","m":62300,"f":61150},{"age":"30-39","m":71400,"f":70220},{"age":"40-49","m":55900,"f":56800},{"age":"50-59","m":48700,"f":51200},{"age":"60-69","m":41300,"f":46700},{"age":"70-79","m":24100,"f":30200},{"age":"80+","m":10200,"f":18400}]
+state year=2020
+App
+  Sidebar
+    Brand "Headcount" icon="groups"
+    NavItem "Map" icon="map" selected={tab=="map"} onTap={go map}
+    NavItem "Place profile" icon="bar_chart" selected={tab=="profile"} onTap={go profile}
+    NavItem "Compare and table" icon="table_chart" selected={tab=="compare"} onTap={go compare}
+    Spacer grow
+    Text.muted "Source: decennial census, 1970 to 2020"
+  Main
+    Nav
+      Heading "{place}" level=1
+      Row gap=8
+        Select "Year" bind=year items=[1970,1980,1990,2000,2010,2020]
+        Button.outline "Compare with another place" icon="compare_arrows" onTap={open pickSecond}
+        Button.outline "Download table" icon="download" onTap={emit download "profile-table.csv"; toast "Table downloaded"}
+    Column pad=24 gap=16
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.caption "POPULATION"
+          Text "815,428" size=32 weight=700
+          Sparkline values=[660,684,712,735,766,815]
+        Card gap=4
+          Text.caption "MEDIAN AGE"
+          Text "37.4" size=32 weight=700
+          Text.muted "Oregon 40.2"
+        Card gap=4
+          Text.caption "HOUSEHOLD SIZE"
+          Text "2.31" size=32 weight=700
+          Text.muted "Oregon 2.46"
+        Card gap=4
+          Text.caption "SPEAK ANOTHER LANGUAGE"
+          Text "22.6%" size=32 weight=700
+          Text.muted "Oregon 15.4%"
+      Row gap=16 top
+        Card grow gap=12
+          Row between
+            Text.strong "Population pyramid, {year}"
+            Row gap=12
+              Badge.info "Men"
+              Badge.primary "Women"
+          PopulationPyramid data={ages} ageKey="age" leftKey="m" rightKey="f" leftLabel="Men" rightLabel="Women" h=360 onSelect={emit pickAge result}
+        Card grow gap=12
+          Text.strong "Population by decade"
+          AreaChart labels=["1970","1980","1990","2000","2010","2020"] values=[556667,562647,583887,660486,735334,815428] h=360
+      Card gap=8
+        Text.strong "What is notable"
+        Text.body "More than a third of residents are between 20 and 39, and women outnumber men in every band from 50 up."
+      Card gap=8
+        Row between
+          Text.strong "Numbers by age"
+          Button.tertiary "Download table" icon="download" onTap={emit download "age-table.csv"}
+        Table rows={sortDir=="asc" ? sortBy(ages, r=>r[sortCol]) : sortByDesc(ages, r=>r[sortCol])} sort={sortCol} dir={sortDir} onSort={sortCol=result.column; sortDir=result.dir}
+          Column "age" "Age" w=90
+          Column "m" "Men" w=120 align=right
+          Column "f" "Women" w=120 align=right
+          Column "total" "Total" grow align=right
+  Dialog#pickSecond "Compare with" "Choose a second place"
+    Input "Search places" bind=second
+    each p in filter(["Washington County, OR","Clackamas County, OR","Lane County, OR","King County, WA","Cook County, IL"], x=>contains(lower(x), lower(second)))
+      ListTile "{p}" icon="place" onTap={other=p; close; go compare}
+
+### Compare and table
+state tab="compare"
+state placeA="Multnomah County, OR"
+state placeB="Washington County, OR"
+state measure="Median age"
+state sortCol="pop"
+state sortDir="desc"
+state rows=[{"name":"Multnomah County, OR","pop":815428,"age":37.4,"hh":2.31,"lang":22.6},{"name":"Washington County, OR","pop":600372,"age":37.1,"hh":2.62,"lang":27.9},{"name":"Clackamas County, OR","pop":421401,"age":42.0,"hh":2.55,"lang":13.8},{"name":"Lane County, OR","pop":382971,"age":39.5,"hh":2.38,"lang":12.1},{"name":"Deschutes County, OR","pop":198253,"age":42.9,"hh":2.47,"lang":9.7}]
+App
+  Sidebar
+    Brand "Headcount" icon="groups"
+    NavItem "Map" icon="map" selected={tab=="map"} onTap={go map}
+    NavItem "Place profile" icon="bar_chart" selected={tab=="profile"} onTap={go profile}
+    NavItem "Compare and table" icon="table_chart" selected={tab=="compare"} onTap={go compare}
+    Spacer grow
+    Text.muted "Source: decennial census, 1970 to 2020"
+  Main
+    Nav
+      Heading "Compare and table" level=1
+      Button.outline "Download table" icon="download" onTap={open exportOptions}
+    Column pad=24 gap=16
+      Card gap=12
+        Row gap=12 wrap middle
+          Select "Place A" bind=placeA items=["Multnomah County, OR","Washington County, OR","Clackamas County, OR","Lane County, OR","Deschutes County, OR"]
+          IconButton "swap_horiz" tooltip="Swap places" onTap={placeA=placeB; placeB=placeA}
+          Select "Place B" bind=placeB items=["Multnomah County, OR","Washington County, OR","Clackamas County, OR","Lane County, OR","Deschutes County, OR"]
+          SegmentedButton bind=measure items=["Median age","Household size","Other language"]
+        BarChart labels=["Under 18","18 to 34","35 to 54","55 to 74","75 and over"] series=[{"name":"{placeA}","values":[17,29,26,21,7]},{"name":"{placeB}","values":[22,27,27,18,6]}] h=260
+        Text.body "{placeA} is {measure=="Median age" ? "slightly older" : "more urban"} than {placeB}, with fewer children and more people in their late twenties and thirties."
+      Card gap=8
+        Row between
+          Text.strong "All places"
+          Text.muted "Sorted by {sortCol}, {sortDir=="asc" ? "lowest first" : "highest first"}"
+        Row gap=8 border-bottom=#FFE0E0E0 pad=[0,0,0,8]
+          Text.strong "Place" grow onTap={sortCol="name"; sortDir=(sortCol=="name" && sortDir=="asc") ? "desc" : "asc"}
+          Text.strong "Population" w=110 onTap={sortCol="pop"; sortDir=(sortCol=="pop" && sortDir=="asc") ? "desc" : "asc"}
+          Text.strong "Median age" w=100 onTap={sortCol="age"; sortDir=(sortCol=="age" && sortDir=="asc") ? "desc" : "asc"}
+          Text.strong "Household" w=100 onTap={sortCol="hh"; sortDir=(sortCol=="hh" && sortDir=="asc") ? "desc" : "asc"}
+          Text.strong "Other language" w=120 onTap={sortCol="lang"; sortDir=(sortCol=="lang" && sortDir=="asc") ? "desc" : "asc"}
+        each r in (sortDir=="asc" ? sortBy(rows, x=>x[sortCol]) : sortByDesc(rows, x=>x[sortCol]))
+          Row gap=8 middle
+            Text r.name grow
+            Text "{r.pop}" w=110
+            Text "{r.age}" w=100
+            Text "{r.hh}" w=100
+            Text "{r.lang}%" w=120
+  Dialog#exportOptions "Download table" "Choose a format"
+    Select "Format" bind=format items=["CSV","Excel","JSON"]
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button "Download" onTap={emit download format; toast "Table downloaded"; close}

@@ -1,0 +1,144 @@
+### Spin
+state tab="spin"
+state people=[{"id":"maya","name":"Maya Reyes","points":42,"streak":6},{"id":"leo","name":"Leo Reyes","points":35,"streak":2},{"id":"ines","name":"Ines Reyes","points":51,"streak":9}]
+state spinner="maya"
+state chores=[{"id":"dishes","name":"Dishes","points":5,"color":"#FFEF5350","minutes":15},{"id":"trash","name":"Take out trash","points":3,"color":"#FF42A5F5","minutes":5},{"id":"laundry","name":"Fold laundry","points":6,"color":"#FF66BB6A","minutes":20},{"id":"vacuum","name":"Vacuum living room","points":8,"color":"#FFFFCA28","minutes":25},{"id":"pets","name":"Feed the dog","points":2,"color":"#FFAB47BC","minutes":5},{"id":"bathroom","name":"Wipe bathroom","points":7,"color":"#FFFF7043","minutes":15}]
+state current=null
+state running=false
+state left=0
+state spinning=false
+every 1s when running onTick={left=max(0,left-1)}
+App
+  Sidebar
+    Brand "Spinning Jobs" icon="casino"
+    NavItem "Spin" icon="autorenew" selected={tab=="spin"} onTap={go spin}
+    NavItem "Week board" icon="calendar_view_week" selected={tab=="board"} onTap={go week-board}
+    NavItem "Rewards" icon="emoji_events" selected={tab=="rewards"} onTap={go rewards}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Maya Reyes" size=32
+      Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Who spins next?" level=1
+      Row gap=8
+        Badge.warning "6 day streak"
+        IconButton "notifications" tooltip="Send a reminder" onTap={open nag}
+    Column pad=24 gap=16
+      Row gap=12
+        each p in people
+          ChoiceChip "{p.name}" selected={spinner==p.id} onTap={spinner=p.id}
+      Row gap=24 top
+        Column grow gap=16 center
+          Wheel items={chores} labelKey="name" colorKey="color" size=360 sound="click" onSpin={spinning=true; current=null} onLand={spinning=false; current=result; left=result.minutes*60; running=false; toast "{result.name}!"}
+          Button "Spin the wheel" size=large icon="autorenew" onTap={spin}
+          Text.muted "Or flick the wheel. It clicks past every chore."
+        Column w=320 gap=12
+          if current==null
+            Card gap=8 center
+              Icon "touch_app"
+              Text.strong "No chore yet"
+              Text.muted "{find(people,x=>x.id==spinner).name} is up next."
+          if current!=null
+            Card gap=12 animate=pop
+              Row between
+                Heading "{current.name}" level=3
+                Badge.primary "{current.points} pts"
+              Text.mono size=40 "{duration(left)}"
+              Progress {1-left/(current.minutes*60)}
+              Row gap=8
+                Button "Start timer" icon="timer" onTap={running=true} hidden={running}
+                Button.outline "Pause" onTap={running=false} hidden={!running}
+                Button "Done" icon="check" onTap={people=updateWhere(people,x=>x.id==spinner,x=>with(x,"points",x.points+current.points)); toast "{current.points} points for {find(people,x=>x.id==spinner).name}"; current=null; running=false}
+              Button.ghost "Swap with a sibling" icon="swap_horiz" onTap={open swap}
+  Dialog#nag "Send a reminder" "A kind nudge, not a nag"
+    Select "To" bind=nagTo items=["Maya","Leo","Ines"]
+    Select "Tone" bind=nagTone items=["Friendly","Funny","Gentle"]
+    Input "Message" "Hey, the dishes are waiting when you have a minute" bind=nagText multiline
+    Button "Send" icon="send" onTap={emit nag {to: nagTo, text: nagText}; toast "Reminder sent kindly"; close}
+  Dialog#swap "Ask for a trade" "Offer this chore to a sibling"
+    Select "Trade with" bind=swapWith items=["Leo","Ines"]
+    Text.muted "They get the points if they accept."
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button "Send request" onTap={emit swapRequest {to: swapWith, chore: current.id}; toast "Request sent to {swapWith}"; close}
+
+### Week board
+state tab="board"
+state days=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+state log=[{"day":"Mon","who":"Maya Reyes","chore":"Dishes","points":5},{"day":"Mon","who":"Leo Reyes","chore":"Feed the dog","points":2},{"day":"Tue","who":"Ines Reyes","chore":"Fold laundry","points":6},{"day":"Wed","who":"Maya Reyes","chore":"Vacuum living room","points":8},{"day":"Thu","who":"Leo Reyes","chore":"Take out trash","points":3},{"day":"Thu","who":"Ines Reyes","chore":"Wipe bathroom","points":7}]
+state trade={"from":"Leo Reyes","to":"Maya Reyes","chore":"Vacuum living room","status":"pending"}
+App
+  Sidebar
+    Brand "Spinning Jobs" icon="casino"
+    NavItem "Spin" icon="autorenew" selected={tab=="spin"} onTap={go spin}
+    NavItem "Week board" icon="calendar_view_week" selected={tab=="board"} onTap={go week-board}
+    NavItem "Rewards" icon="emoji_events" selected={tab=="rewards"} onTap={go rewards}
+  Main
+    Nav
+      Heading "This week" level=1
+      Badge.info "{length(log)} chores done"
+    Column pad=24 gap=16
+      if trade.status=="pending"
+        Card gap=8
+          Row between middle
+            Row gap=12 middle
+              Avatar "{trade.from}" size=40
+              Column
+                Text.strong "{trade.from} asks you to take {trade.chore}"
+                Text.muted "Trade offered today"
+            Row gap=8
+              Button.outline "Decline" onTap={trade=with(trade,"status","declined"); toast "Declined"}
+              Button "Accept" icon="check" onTap={trade=with(trade,"status","accepted"); emit tradeAccepted trade; toast "Trade accepted"}
+      Card gap=12
+        Row scroll gap=12
+          each d in days
+            Column w=130 gap=8
+              Text.strong "{d}"
+              Divider
+              each e in filter(log,x=>x.day==d)
+                Box fill=#FFF3F0FA radius=12 pad=8 gap=4
+                  Row gap=8 middle
+                    Avatar "{e.who}" size=24
+                    Text.small "{e.chore}"
+                  Text.caption "+{e.points} pts"
+              if count(log,x=>x.day==d)==0
+                Text.muted "Nothing yet"
+
+### Rewards
+state tab="rewards"
+state total=128
+state goal=150
+state rewards=[{"name":"Movie night pick","cost":50,"icon":"movie"},{"name":"Extra screen time","cost":90,"icon":"tv"},{"name":"Pizza dinner","cost":150,"icon":"local_pizza"},{"name":"Trip to the arcade","cost":220,"icon":"sports_esports"}]
+state weekPoints=[18,22,15,30,25,10,8]
+App
+  Sidebar
+    Brand "Spinning Jobs" icon="casino"
+    NavItem "Spin" icon="autorenew" selected={tab=="spin"} onTap={go spin}
+    NavItem "Week board" icon="calendar_view_week" selected={tab=="board"} onTap={go week-board}
+    NavItem "Rewards" icon="emoji_events" selected={tab=="rewards"} onTap={go rewards}
+  Main
+    Nav
+      Heading "Rewards" level=1
+      Row gap=8 middle
+        Icon "local_fire_department" color=#FFFF7043
+        Text.strong "9 day streak"
+    Column pad=24 gap=16
+      Card gap=12
+        Row between
+          Text.strong "Family stars"
+          Text.strong "{total} / {goal}"
+        Progress {total/goal} animate=shimmer
+        Text.muted "{goal-total} more points to pizza dinner"
+      Grid cols=2 gap=16
+        Card gap=8
+          Text.strong "Points this week"
+          BarChart values={weekPoints} labels=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] h=160
+        Card gap=8
+          Text.strong "Who earned them"
+          Donut values=[42,35,51] labels=["Maya","Leo","Ines"]
+      Card gap=4
+        Text.strong "Reward list"
+        each r in rewards
+          ListTile "{r.name}" icon="{r.icon}" subtitle="{r.cost} points"
+            Button "Claim" disabled={total<r.cost} onTap={total=total-r.cost; toast "Enjoy your {lower(r.name)}!"}

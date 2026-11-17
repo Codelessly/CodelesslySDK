@@ -1,0 +1,192 @@
+### Fleet
+state units=[{"id":"u1","name":"Walk-in Fridge 2","kind":"fridge","temp":3.8,"lo":2,"hi":8,"battery":86,"signal":4,"out":0,"alarm":false,"trace":[3.5,3.6,3.9,3.8,3.7,3.8]},{"id":"u2","name":"Truck 14 Reefer","kind":"truck","temp":9.6,"lo":2,"hi":8,"battery":41,"signal":3,"out":37,"alarm":true,"trace":[5.1,6.0,7.2,8.4,9.3,9.6]},{"id":"u3","name":"Dairy Chiller","kind":"fridge","temp":4.4,"lo":2,"hi":8,"battery":12,"signal":2,"out":0,"alarm":false,"trace":[4.0,4.2,4.5,4.3,4.4,4.4]},{"id":"u4","name":"Truck 09 Reefer","kind":"truck","temp":-18.2,"lo":-22,"hi":-15,"battery":73,"signal":5,"out":0,"alarm":false,"trace":[-18.0,-18.4,-18.1,-18.3,-18.2,-18.2]}]
+state sel="u2"
+state filter="all"
+state q=""
+state reason=""
+state note=""
+state acked=[]
+App
+  Sidebar
+    Brand "Frostwatch" icon="ac_unit"
+    NavItem "Units" icon="device_thermostat" badge="{count(units,u=>u.alarm)}" selected={true}
+    NavItem "Handovers" icon="local_shipping" onTap={go handover}
+    NavItem "Certificates" icon="verified" onTap={go certificate}
+    Spacer grow
+    Text.muted "Depot North, shift B"
+  Main
+    Nav
+      Heading "Units" level=1
+      Row gap=8
+        Input "Search units" bind=q w=220
+        SegmentedButton bind=filter items=["all","fridge","truck"]
+    Column pad=24 gap=16
+      if count(units,u=>u.alarm && !contains(acked,u.id))>0
+        Card gap=8 fill=#FFFDECEA
+          Row between middle
+            Row gap=8 middle
+              Icon "warning" color=#FFC62828
+              Text.strong "Truck 14 Reefer is out of range: 37 min above 8 °C" color=#FFC62828
+            Button.destructive "Acknowledge" onTap={sel="u2"; open ack}
+      each u in filter=="all" ? filter(units,x=>contains(lower(x.name),lower(q))) : filter(units,x=>x.kind==filter && contains(lower(x.name),lower(q)))
+        Card gap=12 onTap={sel=u.id; go unit}
+          Row between middle
+            Row gap=12 middle
+              IconTile "{u.kind=='truck' ? 'local_shipping' : 'kitchen'}"
+              Column gap=2
+                Text.strong "{u.name}"
+                Text.caption "Safe band {u.lo} to {u.hi} °C"
+            Row gap=12 middle
+              Icon "{u.battery<20 ? 'battery_alert' : 'battery_full'}"
+              Text.small "{u.battery}%"
+              Icon "{u.signal>=4 ? 'signal_cellular_4_bar' : u.signal>=2 ? 'signal_cellular_alt_2_bar' : 'signal_cellular_0_bar'}"
+              Text.heading "{fixed(u.temp,1)} °C" color={u.out>0 ? "#FFC62828" : "#FF2E7D32"}
+          Row gap=16 middle
+            Sparkline values={u.trace} band=[u.lo,u.hi] color={u.out>0 ? "#FFC62828" : "#FF1565C0"} h=48 grow
+            if u.out>0
+              Badge.error "{u.out} min out"
+            if u.out==0
+              Badge.success "In range"
+  Dialog#ack "Acknowledge alarm" "Choose why the reading went out of range"
+    Select "Reason" bind=reason items=["Door left open","Loading in progress","Defrost cycle","Compressor fault","Sensor error","Power loss"]
+    Input "Note" "Optional detail for the audit log" bind=note multiline
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Acknowledge" onTap={reason=="" ? toast "Pick a reason first" : {acked=append(acked,sel); toast "Alarm acknowledged: {reason}"; emit acknowledge sel; close}}
+
+### Unit
+state tab="timeline"
+state units=[{"id":"u2","name":"Truck 14 Reefer","temp":9.6,"lo":2,"hi":8,"out":37}]
+Page
+  Nav
+    Brand "Frostwatch" icon="ac_unit"
+    Row gap=4
+      Link "Units" onTap={go fleet}
+      Link "Handovers" onTap={go handover}
+      Link "Certificates" onTap={go certificate}
+  Section
+    Column gap=16
+      Row between middle
+        Column gap=4
+          Heading "Truck 14 Reefer" level=1
+          Text.muted "Probe P-2291, last reading 1 min ago"
+        Row gap=8
+          Badge.error "37 min out of range"
+          Button.outline "Back to units" onTap={go fleet}
+      Card gap=12
+        Row between middle
+          Text.strong "Last 24 hours"
+          Row gap=16
+            Column gap=0
+              Text.caption "Spoilage clock"
+              Text.heading "00:37:12" color=#FFC62828
+            Column gap=0
+              Text.caption "Peak"
+              Text.heading "9.6 °C"
+        LineChart values=[4.2,4.5,4.1,4.8,5.6,6.4,7.0,7.9,8.6,9.2,9.6] labels=["00h","02h","04h","06h","08h","10h","12h","14h","16h","18h","20h"] band=[2,8] breach=8 h=220
+        Text.caption "Shaded band is the safe range, 2 to 8 °C. The line turns red above it."
+  Section tint
+    Column gap=12
+      Heading "Door timeline" level=3
+      Timeline
+        TimelineItem "06:12" "Door opened" "Driver, depot dock" icon="door_open"
+        TimelineItem "06:19" "Door closed" "7 min open" icon="door_front"
+        TimelineItem "11:48" "Door opened" "Delivery stop 2" icon="door_open"
+        TimelineItem "12:26" "Door still open" "38 min and counting, temperature rising" icon="warning" color=#FFC62828
+      Row gap=8
+        Button "Acknowledge alarm" onTap={open ack}
+        Button.outline "Start handover" onTap={go handover}
+  Dialog#ack "Acknowledge alarm" "Choose why the reading went out of range"
+    Select "Reason" bind=reason items=["Door left open","Loading in progress","Defrost cycle","Compressor fault","Sensor error","Power loss"]
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Acknowledge" onTap={reason=="" ? toast "Pick a reason first" : {emit acknowledge "u2"; toast "Alarm acknowledged: {reason}"; close}}
+
+### Handover
+state first=2.9
+state last=9.4
+state accepted=false
+state signedBy=""
+Page
+  Nav
+    Brand "Frostwatch" icon="ac_unit"
+    Row gap=4
+      Link "Units" onTap={go fleet}
+      Link "Handovers"
+      Link "Certificates" onTap={go certificate}
+  Section narrow
+    Column gap=16
+      Heading "Delivery handover" level=1
+      Text.muted "Truck 14 Reefer to Greenleaf Market, Dock 3"
+      Grid cols=2 gap=16
+        Card gap=4
+          Text.caption "First reading, loaded 05:58"
+          Text.heading "{first} °C" color=#FF2E7D32
+        Card gap=4
+          Text.caption "Last reading, arrived 12:40"
+          Text.heading "{last} °C" color=#FFC62828
+      Card gap=8
+        Row between
+          Text.strong "Change over the trip"
+          Text.strong "{fixed(last-first,1)} °C" color={last>8 ? "#FFC62828" : "#FF2E7D32"}
+        Progress {clamp((last-first)/10,0,1)}
+        if last>8
+          Badge.error "Last reading is outside the 2 to 8 °C band"
+        if last<=8
+          Badge.success "Delivered within the safe band"
+      Input "Received by" bind=signedBy
+      Checkbox "I accept this delivery with the readings shown" bind=accepted
+      Row gap=8
+        Button.outline "Reject load" onTap={open reject}
+        Button "Confirm handover" onTap={accepted && signedBy!="" ? {emit handover signedBy; toast "Handover recorded"; go certificate} : toast "Enter a name and accept first"}
+  Dialog#reject "Reject this load?" "The reading will be logged as out of range."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Reject" onTap={emit reject; toast "Load rejected"; close}
+
+### Certificate
+state signedBy="M. Okafor"
+Page
+  Nav
+    Brand "Frostwatch" icon="ac_unit"
+    Row gap=4
+      Link "Units" onTap={go fleet}
+      Link "Handovers" onTap={go handover}
+      Link "Certificates"
+  Section
+    Row gap=32 top
+      Column grow gap=12
+        Heading "Temperature certificate" level=1
+        Text.muted "Proof that the load stayed cold, ready to send with the invoice."
+        Select "Unit" bind=unitPick items=["Truck 14 Reefer","Truck 09 Reefer","Walk-in Fridge 2"]
+        DatePicker "Delivery date" bind=when
+        Row gap=8
+          Button "Download PDF" onTap={emit downloadCertificate; toast "Certificate downloaded"}
+          Button.outline "Email to customer" onTap={open send}
+      Card grow gap=12
+        Row between middle
+          Brand "Frostwatch" icon="ac_unit"
+          Badge.warning "Excursion noted"
+        Heading "Certificate of temperature record" level=3
+        Text.caption "Truck 14 Reefer, probe P-2291"
+        Divider
+        Row between
+          Text.muted "Safe band"
+          Text.strong "2 to 8 °C"
+        Row between
+          Text.muted "First reading"
+          Text.strong "2.9 °C"
+        Row between
+          Text.muted "Last reading"
+          Text.strong "9.4 °C"
+        Row between
+          Text.muted "Time out of range"
+          Text.strong "37 min"
+        LineChart values=[2.9,3.4,4.1,5.2,6.8,8.4,9.4] labels=["06h","08h","10h","12h","14h","16h","18h"] band=[2,8] h=120
+        Divider
+        Text.caption "Received by {signedBy}"
+  Dialog#send "Email certificate" "Send a copy to the receiving customer"
+    Input "Recipient" "buyer@greenleaf.example" bind=recipient type=email
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Send" onTap={emit sendCertificate recipient; toast "Certificate sent"; close}

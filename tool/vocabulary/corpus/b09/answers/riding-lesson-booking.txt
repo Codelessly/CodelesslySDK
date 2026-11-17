@@ -1,0 +1,274 @@
+### Week
+state tab="week"
+state arena="All"
+state level="All"
+state sel=""
+state lessons=[{"id":"l1","day":"Mon","time":"17:00","arena":"Indoor","title":"Flatwork basics","level":"Beginner","coach":"Hannah Doyle","left":2,"fee":25,"waiting":false},{"id":"l2","day":"Tue","time":"09:30","arena":"Outdoor","title":"Poles and grids","level":"Intermediate","coach":"Marcus Webb","left":0,"fee":30,"waiting":false},{"id":"l3","day":"Wed","time":"18:00","arena":"Indoor","title":"Jumping technique","level":"Intermediate","coach":"Hannah Doyle","left":3,"fee":30,"waiting":false},{"id":"l4","day":"Thu","time":"16:00","arena":"Paddock","title":"First steps in the saddle","level":"Beginner","coach":"Ines Carvalho","left":4,"fee":20,"waiting":false},{"id":"l5","day":"Sat","time":"10:00","arena":"Outdoor","title":"Dressage test practice","level":"Advanced","coach":"Marcus Webb","left":0,"fee":40,"waiting":false}]
+state booked=["l1"]
+state alerts=true
+state waitlist=[]
+App
+  Sidebar
+    Brand "Stirrup" icon="pets"
+    NavItem "Week" icon="calendar_month" selected={tab=="week"} onTap={tab="week"}
+    NavItem "Horses" icon="cruelty_free" onTap={go horses}
+    NavItem "My package" icon="confirmation_number" badge="{10-used}" onTap={go package}
+    NavItem "Yard map" icon="map" onTap={go package}
+    NavItem "Rider profile" icon="person" onTap={go package}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Maya Reyes" size=32
+      Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Lessons this week" level=1
+      Row gap=8
+        DatePicker bind=weekOf w=160
+        Button.outline "Alerts" icon="notifications" onTap={open alertsPopover}
+    Column pad=24 gap=16
+      Row gap=12 wrap
+        Select "Arena" bind=arena items=["All","Indoor","Outdoor","Paddock"] w=160
+        Select "Level" bind=level items=["All","Beginner","Intermediate","Advanced"] w=180
+        Spacer grow
+        Text.muted "{count(lessons,l=>(arena=="All"||l.arena==arena)&&(level=="All"||l.level==level))} lessons"
+      Card gap=0
+        each l in filter(lessons,x=>(arena=="All"||x.arena==arena)&&(level=="All"||x.level==level))
+          Row gap=12 middle pad=12 border-bottom=#FFE5E5E5
+            Column w=70
+              Text.strong "{l.day}"
+              Text.muted "{l.time}"
+            Column grow gap=2
+              Text.strong "{l.title}"
+              Text.muted "{l.arena} arena with {l.coach}"
+            Badge.info "{l.level}"
+            if l.left>0
+              Badge.success "{l.left} spots left"
+            if l.left==0
+              Badge.warning "Full"
+            if contains(booked,l.id)
+              Button.outline "Booked" icon="check" onTap={sel=l.id; open cancelFee}
+            if !contains(booked,l.id) && l.left>0
+              Button "Book" onTap={booked=append(booked,l.id); lessons=updateWhere(lessons,x=>x.id==l.id,x=>with(x,"left",x.left-1)); toast "Booked {l.title}"}
+            if !contains(booked,l.id) && l.left==0
+              Button.secondary "Join waiting list" onTap={sel=l.id; open joinWait}
+            IconButton "chevron_right" tooltip="Lesson details" onTap={go lesson}
+      if length(waitlist)>0
+        Card gap=8
+          Text.strong "On your waiting lists"
+          each w in waitlist
+            Row between middle
+              Text "{w}"
+              Button.ghost "Leave" onTap={waitlist=without(waitlist,w); toast "Removed from waiting list"}
+  Dialog#joinWait "Join the waiting list" "We will tell you the moment a spot opens."
+    Toggle "Alert me when a spot opens" bind=alerts
+    Select "Alert by" bind=alertBy items=["Push notification","Email","SMS"]
+    Row end gap=8
+      Button.ghost "Not now" onTap={close}
+      Button "Join" onTap={waitlist=append(waitlist,find(lessons,x=>x.id==sel).title); close; toast "You are on the waiting list"}
+  Dialog#cancelFee "Cancel this lesson?" "Lessons cancelled with under 24 hours notice are charged."
+    Card gap=8
+      Row between
+        Text "Cancellation fee"
+        Text.strong "{money(find(lessons,x=>x.id==sel).fee,"$",2)}"
+      Text.muted "Free to cancel until 24 hours before the lesson starts."
+    Row end gap=8
+      Button.ghost "Keep lesson" onTap={close}
+      Button.destructive "Cancel lesson" onTap={booked=without(booked,sel); lessons=updateWhere(lessons,x=>x.id==sel,x=>with(x,"left",x.left+1)); close; toast "Lesson cancelled"}
+  Popover#alertsPopover
+    Column gap=8 pad=8
+      Text.strong "Spot alerts"
+      Toggle "Alert me when a spot opens" bind=alerts
+      Text.muted "Applies to every lesson on your waiting lists."
+
+### Horses
+state sel="h1"
+state riderWeight=68
+state filterCalm=false
+state horses=[{"id":"h1","name":"Biscuit","photo":"https://images.stirrup.app/horses/biscuit.jpg","hands":13.2,"calm":5,"limit":60,"breed":"Welsh Pony"},{"id":"h2","name":"Orion","photo":"https://images.stirrup.app/horses/orion.jpg","hands":16.1,"calm":3,"limit":95,"breed":"Irish Sport Horse"},{"id":"h3","name":"Juniper","photo":"https://images.stirrup.app/horses/juniper.jpg","hands":15.0,"calm":4,"limit":80,"breed":"Cob"},{"id":"h4","name":"Tempest","photo":"https://images.stirrup.app/horses/tempest.jpg","hands":16.3,"calm":2,"limit":90,"breed":"Thoroughbred"}]
+state pick=""
+App
+  Sidebar
+    Brand "Stirrup" icon="pets"
+    NavItem "Week" icon="calendar_month" onTap={go week}
+    NavItem "Horses" icon="cruelty_free" selected={true}
+    NavItem "My package" icon="confirmation_number" onTap={go package}
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Choose a horse" level=1
+      Row gap=8
+        Input "Search" bind=q w=200
+        FilterChip "Calm only" selected={filterCalm} onTap={filterCalm=!filterCalm}
+    Column pad=24 gap=16
+      Row gap=12 middle
+        Text.muted "Your weight with tack"
+        Slider bind=riderWeight min=40 max=110 w=240
+        Text.strong "{riderWeight} kg"
+      Card gap=0
+        each h in filter(horses,x=>(!filterCalm||x.calm>=4)&&(isEmpty(q)||contains(lower(x.name),lower(q))))
+          ListTile selected={sel==h.id} onTap={sel=h.id}
+            Row gap=12 middle pad=8
+              Image "{h.photo}" w=72 h=72 radius=8 onTap={photo=h.photo; open zoom}
+              Column grow gap=2
+                Text.strong "{h.name}"
+                Text.muted "{h.breed}, {h.hands} hands"
+                Row gap=6 middle
+                  Text.caption "Calm"
+                  Rating value={h.calm} max=5 icon="circle" readonly
+              Column gap=4 end
+                Text.small "Max {h.limit} kg"
+                if riderWeight>h.limit
+                  Badge.warning "Over weight limit"
+                if riderWeight<=h.limit
+                  Badge.success "Suits you"
+      if sel!=""
+        Card gap=8
+          Heading "{find(horses,x=>x.id==sel).name}" level=3
+          if riderWeight>find(horses,x=>x.id==sel).limit
+            Row gap=8 middle
+              Icon "warning" color=#FFB45309
+              Text.danger "This horse carries up to {find(horses,x=>x.id==sel).limit} kg. At {riderWeight} kg we would suggest a bigger horse."
+          Row gap=8
+            Button "Request {find(horses,x=>x.id==sel).name}" onTap={riderWeight>find(horses,x=>x.id==sel).limit ? toast "Over the weight limit, pick another horse" : {pick=sel; emit pickHorse sel; toast "Horse requested"}}
+            Button.outline "See on yard map" onTap={go package}
+  Lightbox#zoom "{photo}" "Photo from the yard"
+
+### Lesson
+state fav=false
+state rating=0
+state note=""
+state fee=30
+Page
+  Nav sticky
+    Brand "Stirrup" icon="pets"
+    Row gap=4
+      Link "Week" onTap={go week}
+      Link "Horses" onTap={go horses}
+      Link "My package" onTap={go package}
+    Button.outline "Add to calendar" icon="event" onTap={emit addToCalendar}
+  Section narrow
+    Column gap=16
+      Row gap=8
+        Badge.info "Intermediate"
+        Badge.neutral "Indoor arena"
+      Heading "Jumping technique" level=1
+      Text.muted "Wednesday 18:00 to 19:00 with Hannah Doyle"
+      Row gap=12 middle
+        Avatar "Hannah Doyle" size=48
+        Column gap=2
+          Text.strong "Hannah Doyle"
+          Text.muted "BHS Stage 3 coach, nine years at the yard"
+      Card gap=8
+        Row between
+          Text "Horse"
+          Text.strong "Juniper, 15.0 hands"
+        Row between
+          Text "Spots left"
+          Text.strong "3 of 8"
+        Row between
+          Text "Counts against"
+          Text.strong "Package of ten"
+      Row gap=8
+        Button "Book this lesson" onTap={emit book; toast "Booked"}
+        Button.outline "Cancel" onTap={open cancelFee}
+        Button.ghost "Notify me if a spot opens" icon="notifications_active" onTap={open waitlist}
+  Section tint narrow
+    Column gap=12
+      Heading "Coach feedback" level=2
+      Card gap=8
+        Row gap=8 middle
+          Avatar "Hannah Doyle" size=32
+          Text.strong "From Hannah, after last week's lesson"
+          Spacer grow
+          Text.caption "Wed 11 Nov"
+        Text "Maya kept her heels down through the whole grid and her rhythm into the last fence was lovely. Next week we work on looking up earlier after landing, and on a steadier contact over the poles."
+        Row gap=6
+          Chip "Rhythm"
+          Chip "Heels down"
+          Chip "Look up"
+      Heading "How did it go for you?" level=3
+      Rating bind=rating max=5
+      Input "Your note for Hannah" multiline bind=note
+      Button "Send note" onTap={note=="" ? toast "Write a short note first" : {emit sendNote note; note=""; toast "Note sent to Hannah"}}
+  Footer
+    Row between
+      Text.strong "Stirrup"
+      Text.muted "Yard open 7:00 to 20:00"
+  Dialog#cancelFee "Cancel this lesson?" "Under 24 hours notice, the fee applies."
+    Card gap=8
+      Row between
+        Text "Cancellation fee"
+        Text.strong "{money(fee,"$",2)}"
+      Text.muted "This lesson starts in 31 hours, so cancelling now is free."
+    Row end gap=8
+      Button.ghost "Keep it" onTap={close}
+      Button.destructive "Cancel lesson" onTap={emit cancel; close; toast "Lesson cancelled"}
+  Sheet#waitlist "Waiting list"
+    Toggle "Alert me when a spot opens" bind=alerts
+    Select "Alert by" bind=alertBy items=["Push notification","Email","SMS"]
+    Button "Join waiting list" onTap={emit joinWaitlist; close; toast "You are on the list"}
+
+### Package
+state used=6
+state tab="package"
+state zone=""
+state level="Intermediate"
+state notes="Nervous over water. Prefers a calm horse for first rides of the term."
+state height=165
+state riderWeight=68
+App
+  Sidebar
+    Brand "Stirrup" icon="pets"
+    NavItem "Week" icon="calendar_month" onTap={go week}
+    NavItem "Horses" icon="cruelty_free" onTap={go horses}
+    NavItem "My package" icon="confirmation_number" selected={tab=="package"} onTap={tab="package"}
+    NavItem "Yard map" icon="map" selected={tab=="map"} onTap={tab="map"}
+    NavItem "Rider profile" icon="person" selected={tab=="profile"} onTap={tab="profile"}
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Package, yard and profile" level=1
+      Button "Buy ten lessons" onTap={emit buyPackage}
+    Column pad=24 gap=16
+      if tab=="package"
+        Card gap=12
+          Row between middle
+            Column gap=2
+              Text.strong "Package of ten lessons"
+              Text.muted "Valid until 31 January 2027"
+            Badge.warning "Expires soon"
+          Row gap=24 middle
+            Ring {used/10}
+            Column gap=4
+              Text "{10-used} lessons left" size=28 weight=700
+              Progress {used/10}
+              Countdown to="2027-01-31" label="until it expires"
+          Row gap=8
+            Button "Book a lesson" onTap={go week}
+            Button.outline "Extend by a month" onTap={emit extendPackage}
+        Card gap=8
+          Text.strong "Cancellation reminder"
+          Text.muted "Cancel under 24 hours before a lesson and the lesson fee is charged, or a lesson is taken from your package."
+      if tab=="map"
+        Card gap=12
+          Text.strong "Yard map"
+          YardMap zones=["Indoor arena","Outdoor arena","Paddock","Stables","Tack room","Car park"] bind=zone onSelect={zone=result}
+          if zone!=""
+            Row between middle
+              Text "{zone}"
+              Button.outline "Show lessons here" onTap={go week}
+      if tab=="profile"
+        Card gap=12
+          Row gap=12 middle
+            Avatar "Maya Reyes" size=56
+            Column gap=2
+              Text.strong "Maya Reyes"
+              Text.muted "Riding with us since March 2025"
+          Select "Level" bind=level items=["Beginner","Intermediate","Advanced"]
+          Row gap=12
+            Input "Height (cm)" type=number bind=height grow
+            Input "Weight with tack (kg)" type=number bind=riderWeight grow
+          Input "Notes for coaches" multiline bind=notes
+          Button "Save profile" onTap={emit saveProfile; toast "Profile saved"}

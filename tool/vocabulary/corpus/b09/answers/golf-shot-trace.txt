@@ -1,0 +1,155 @@
+### Hole
+state hole=7
+state club="Driver"
+state shots=[]
+state putts=0
+state tab="hole"
+state scores=[4,5,3,4,4,6,0,0,0,0,0,0,0,0,0,0,0,0]
+App
+  Sidebar
+    Brand "Fairway" icon="golf_course"
+    NavItem "Hole" icon="flag" selected={tab=="hole"} onTap={tab="hole"}
+    NavItem "Scorecard" icon="grid_on" selected={tab=="card"} onTap={go scorecard}
+    NavItem "Stats" icon="insights" selected={tab=="stats"} onTap={go stats}
+    Spacer grow
+    Text.muted "Ray Li, hcp 12"
+  Main
+    Nav
+      Heading "Hole {hole}: Par 4, 412 yd" level=1
+      Row gap=8
+        IconButton "chevron_left" tooltip="Previous hole" onTap={hole=max(1,hole-1); shots=[]; putts=0}
+        IconButton "chevron_right" tooltip="Next hole" onTap={hole=min(18,hole+1); shots=[]; putts=0}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Card grow gap=12
+          HoleMap#map par=4 length=412 unit="yd" tee={[0.5,0.94]} green={[0.55,0.08]} bunkers=[{"x":0.38,"y":0.3,"r":0.05},{"x":0.64,"y":0.12,"r":0.04}] water=[{"x":0.75,"y":0.55,"r":0.08}] shots={shots} showDistances h=420 onTapAt={shots=append(shots,{"x":result.x,"y":result.y,"club":club})}
+          Text.caption "Tap the map where each shot landed."
+        Column w=300 gap=12
+          Card gap=8
+            Text.strong "Club"
+            Row scroll gap=8
+              ChoiceChip "Driver" selected={club=="Driver"} onTap={club="Driver"}
+              ChoiceChip "3W" selected={club=="3W"} onTap={club="3W"}
+              ChoiceChip "5i" selected={club=="5i"} onTap={club="5i"}
+              ChoiceChip "7i" selected={club=="7i"} onTap={club="7i"}
+              ChoiceChip "9i" selected={club=="9i"} onTap={club="9i"}
+              ChoiceChip "PW" selected={club=="PW"} onTap={club="PW"}
+              ChoiceChip "SW" selected={club=="SW"} onTap={club="SW"}
+              ChoiceChip "Putter" selected={club=="Putter"} onTap={club="Putter"}
+          Card gap=8
+            Text.strong "Shots"
+            if isEmpty(shots)
+              Text.muted "No shots traced yet."
+            each s in shots
+              ListTile "{index+1}. {s.club}" subtitle="{s.distance} yd" icon="sports_golf"
+                IconButton "close" tooltip="Remove shot" onTap={shots=removeAt(shots,index)}
+            Row gap=8 end
+              Button.outline "Undo" onTap={shots=slice(shots,0,max(0,length(shots)-1))}
+              Button.ghost "Clear" onTap={shots=[]; putts=0}
+          Card gap=8
+            Text.strong "Putts"
+            Row gap=12 middle
+              Button.outline "-" onTap={putts=max(0,putts-1)}
+              Text "{putts}" size=32 weight=700
+              Button.outline "+" onTap={putts=putts+1}
+          Card gap=8
+            Row between
+              Text.strong "Score"
+              Badge.primary "{length(shots)+putts} strokes"
+            Text.muted "{length(shots)} to the green, {putts} putts. Par 4: {length(shots)+putts-4==0 ? "level" : (length(shots)+putts-4>0 ? "+" : "") + (length(shots)+putts-4)}"
+            Button "Save hole" onTap={scores=setAt(scores,hole-1,length(shots)+putts); emit saveHole {"hole":hole,"strokes":length(shots)+putts}; toast "Hole {hole} saved"; hole=min(18,hole+1); shots=[]; putts=0}
+
+### Scorecard
+state view="mine"
+state sel=0
+App
+  Sidebar
+    Brand "Fairway" icon="golf_course"
+    NavItem "Hole" icon="flag" onTap={go hole}
+    NavItem "Scorecard" icon="grid_on" selected={true}
+    NavItem "Stats" icon="insights" onTap={go stats}
+    Spacer grow
+    Text.muted "Ray Li, hcp 12"
+  Main
+    Nav
+      Heading "Scorecard" level=1
+      SegmentedButton items=["Mine","Side by side"] bind=view
+    Column pad=24 gap=16
+      Row gap=24
+        Column gap=2
+          Text.caption "Total"
+          Text "{sum(scores,x=>x)}" size=40 weight=700
+        Column gap=2
+          Text.caption "To par"
+          Text "+{sum(scores,x=>x)-24}" size=40 weight=700 color=#FFC62828
+        Column gap=2
+          Text.caption "Putts"
+          Text "11" size=40 weight=700
+      Row gap=12 middle
+        Badge.success "Birdie or better"
+        Badge.neutral "Par"
+        Badge.warning "Bogey"
+        Badge.error "Double or worse"
+      Grid cols=9 gap=8
+        each s in scores
+          ScoreCell "{index+1}" score={s} par={[4,5,3,4,4,5,4,3,4,4,4,3,5,4,4,5,3,4][index]} onTap={sel=index; open holeSheet}
+      if view=="Side by side"
+        Card gap=8
+          Text.strong "Ray vs Dana"
+          Table columns=["Hole","Par","Ray","Dana"] rows={map(range(9),i=>[i+1,[4,5,3,4,4,5,4,3,4][i],scores[i],[5,5,3,4,3,6,4,4,4][i]])} highlight="lower"
+          Row between
+            Text.strong "Ray {sum(take(scores,9),x=>x)}"
+            Text.strong "Dana 38"
+  Sheet#holeSheet "Hole {sel+1}"
+    Text.muted "Strokes: {scores[sel]}"
+    Row gap=8
+      Button.outline "-" onTap={scores=setAt(scores,sel,max(0,scores[sel]-1))}
+      Text.strong "{scores[sel]}"
+      Button.outline "+" onTap={scores=setAt(scores,sel,scores[sel]+1)}
+    Button "Done" onTap={close}
+
+### Stats
+state range="round"
+App
+  Sidebar
+    Brand "Fairway" icon="golf_course"
+    NavItem "Hole" icon="flag" onTap={go hole}
+    NavItem "Scorecard" icon="grid_on" onTap={go scorecard}
+    NavItem "Stats" icon="insights" selected={true}
+    Spacer grow
+    Text.muted "Ray Li, hcp 12"
+  Main
+    Nav
+      Heading "Stats" level=1
+      SegmentedButton items=["Round","Season"] bind=range
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=8 center
+          Text.strong "Fairways hit"
+          Ring 0.64
+          Text.muted "9 of 14"
+        Card gap=8 center
+          Text.strong "Greens in regulation"
+          Ring 0.39
+          Text.muted "7 of 18"
+        Card gap=8 center
+          Text.strong "Putts per hole"
+          Text "1.8" size=48 weight=700
+          Sparkline values=[2,2,1,2,3,2,2,1,2]
+      Card gap=8
+        Text.strong "Strokes by hole"
+        BarChart values=[4,5,3,4,4,6,4,3,5] labels=["1","2","3","4","5","6","7","8","9"] h=200
+      Card gap=8
+        Text.strong "Average drive by club"
+        Donut values=[42,31,27] labels=["Fairway","Rough","Bunker"]
+      Card gap=8
+        Row between
+          Text.strong "Dana's round"
+          Badge.info "Friend"
+        Row gap=16
+          Column grow gap=2
+            Text.caption "Fairways"
+            Progress 0.57
+          Column grow gap=2
+            Text.caption "Greens"
+            Progress 0.44
