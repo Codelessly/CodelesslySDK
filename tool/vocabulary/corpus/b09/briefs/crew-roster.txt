@@ -1,0 +1,3 @@
+App: Rotation, an airline crew roster. A month as a calendar with duty pairings as bars across days and layover cities labelled; tap a pairing to see its legs with flight numbers and times; a duty clock showing hours left before the legal limit as a draining ring; swap requests offered and accepted with a status chip; a rest-gap warning in red; a bid list reordered by preference; pay hours totalled; a delay change notice replacing a leg.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

@@ -1,0 +1,13 @@
+// A question answered by typing: a field and a Check button; the typed text is compared, ignoring case and spaces at the ends, with answer (onResult: result.correct, result.typed); a wrong answer shows the right one.
+TypedAnswer "label" bind=typed answer autofocus onResult
+  state typed=""
+  state checked=false
+  state right=false
+  Column w=fill gap=8
+    Input "{label}" bind=typed autofocus={autofocus} onChange={checked=false} onSubmit={right=(lower(trim(typed)) == lower(trim(answer))); checked=true; onResult({"correct": right, "typed": typed})}
+    Row w=fill gap=8 middle
+      Button "Check" onTap={right=(lower(trim(typed)) == lower(trim(answer))); checked=true; onResult({"correct": right, "typed": typed})}
+      if checked && right
+        Text.success "Correct"
+      if checked && !right
+        Text.danger "Not quite: {answer}"

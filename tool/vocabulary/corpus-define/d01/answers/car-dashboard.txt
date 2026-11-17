@@ -1,0 +1,252 @@
+### Drive
+state mode="normal"
+state night=false
+state speed=62
+state accel=3
+state range=412
+state fuel=0.68
+state lowFuel=false
+state belt=false
+state engine=false
+state doors=false
+state lights=true
+state modes=["eco","normal","sport"]
+every 1s onTick={speed=clamp(speed+accel,0,140); accel=speed>=95 ? -4 : (speed<=40 ? 3 : accel); range=max(0,range-1); lowFuel=range<60; fuel=clamp(range/600,0,1)}
+App
+  Sidebar
+    Brand "Roadwise" icon="directions_car"
+    NavItem "Drive" icon="speed" selected={true} onTap={go drive}
+    NavItem "Navigation" icon="navigation" onTap={go navigation}
+    NavItem "Media" icon="music_note" onTap={go media}
+    NavItem "Camera" icon="videocam" onTap={go camera}
+    Spacer grow
+    Toggle "Night mode" bind=night
+    Text.muted "Mode: {upper(mode)}"
+  Main
+    Nav
+      Heading "Drive" level=1
+      Row gap=8
+        Text.muted "{formatDate(today(),"MMM d")}"
+        IconButton "tonality" tooltip="Night mode" onTap={night=!night}
+        IconButton "radio_button_checked" tooltip="Driving mode: {mode}" onTap={mode=modes[(indexOf(modes,mode)+1)%3]; toast "Mode: {upper(mode)}"}
+    Column pad=24 gap=16
+      Box gap=16 pad=20 radius=16 fill={night ? "#FF05070A" : (mode=="eco" ? "#FF064E3B" : (mode=="sport" ? "#FF7F1D1D" : "#FF111827"))}
+        Row between middle
+          Row gap=12
+            WarningLight "local_gas_station" lit={lowFuel} flash={lowFuel} color=#FFF59E0B dim={night}
+            WarningLight "airline_seat_flat" lit={belt} flash={belt} color=#FFDC2626 dim={night}
+            WarningLight "engine" lit={engine} flash=false color=#FFF59E0B dim={night}
+            WarningLight "door_front" lit={doors} flash={doors} color=#FFDC2626 dim={night}
+            WarningLight "highlight" lit={lights} flash=false color=#FF22C55E dim={night}
+          Badge.neutral "{upper(mode)}"
+        Row gap=24 middle center
+          Column grow center gap=4
+            Text "{round(speed,0)}" size=96 weight=700 color={night ? "#FF9CA3AF" : "#FFFFFFFF"}
+            Text "km/h" color={night ? "#FF6B7280" : "#FFD1D5DB"}
+          Gauge bind=speed min=0 max=180 limit=120 unit="km/h"
+          Column grow center gap=4
+            Text "{speed==0 ? "P" : (speed<20 ? "1" : (speed<45 ? "2" : (speed<75 ? "3" : "4")))}" size=72 weight=700 color={night ? "#FF9CA3AF" : "#FFFFFFFF"}
+            Text "Gear" color={night ? "#FF6B7280" : "#FFD1D5DB"}
+        Row gap=24 middle
+          Column grow gap=4
+            Row between
+              Text "Range" color={night ? "#FF9CA3AF" : "#FFFFFFFF"}
+              Text.strong "{range} km" color={night ? "#FF9CA3AF" : "#FFFFFFFF"}
+            Progress bind=fuel
+          Button.outline "Warnings test" onTap={belt=!belt; engine=!engine; doors=!doors}
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Trip"
+          Text.heading "38.4 km"
+        Card gap=4
+          Text.muted "Average"
+          Text.heading "6.1 L/100"
+        Card gap=4
+          Text.muted "Outside"
+          Text.heading "14 °C"
+      Row gap=12
+        Button "Navigation" onTap={go navigation}
+        Button.secondary "Media" onTap={go media}
+        Button.outline "Reverse camera" onTap={go camera}
+
+### Navigation
+state mode="normal"
+state night=false
+state distance=450
+state step=0
+state steps=[{"icon":"turn_right","street":"Harbour Road","dist":450},{"icon":"turn_left","street":"King Street","dist":1200},{"icon":"roundabout_left","street":"Ring Road, 2nd exit","dist":3100},{"icon":"flag","street":"Arrive at Pier 9","dist":0}]
+state speed=62
+every 1s onTick={distance=max(0,distance-17)}
+every 1s when distance==0 onTick={step=min(length(steps)-1,step+1); distance=steps[min(length(steps)-1,step+1)].dist}
+App
+  Sidebar
+    Brand "Roadwise" icon="directions_car"
+    NavItem "Drive" icon="speed" onTap={go drive}
+    NavItem "Navigation" icon="navigation" selected={true} onTap={go navigation}
+    NavItem "Media" icon="music_note" onTap={go media}
+    NavItem "Camera" icon="videocam" onTap={go camera}
+    Spacer grow
+    Toggle "Night mode" bind=night
+  Main
+    Nav
+      Heading "Navigation" level=1
+      Row gap=8
+        IconButton "tonality" tooltip="Night mode" onTap={night=!night}
+        Button.outline "Cancel route" onTap={step=0; distance=450; toast "Route cancelled"}
+    Column pad=24 gap=16
+      Box gap=12 pad=16 radius=16 fill={night ? "#FF05070A" : (mode=="eco" ? "#FF064E3B" : (mode=="sport" ? "#FF7F1D1D" : "#FF111827"))}
+        Row gap=16 middle
+          TurnArrow icon={steps[step].icon} size=72 color={night ? "#FF9CA3AF" : "#FFFFFFFF"}
+          Column grow gap=2
+            Text "{distance} m" size=40 weight=700 color={night ? "#FF9CA3AF" : "#FFFFFFFF"}
+            Text "{steps[step].street}" color={night ? "#FF6B7280" : "#FFD1D5DB"}
+          Column center gap=2
+            Text "{round(speed,0)}" size=40 weight=700 color={night ? "#FF9CA3AF" : "#FFFFFFFF"}
+            Text "km/h" color={night ? "#FF6B7280" : "#FFD1D5DB"}
+        Map h=320 center="52.3702,4.8952" zoom=15 route=steps dim={night}
+      Row gap=16
+        Card grow gap=4
+          Text.muted "ETA"
+          Text.heading "17:42"
+        Card grow gap=4
+          Text.muted "Remaining"
+          Text.heading "12.8 km"
+        Card grow gap=4
+          Text.muted "Time left"
+          Text.heading "{duration(1140)}"
+      Card gap=8
+        Text.strong "Next steps"
+        each s in steps
+          ListTile "{s.street}" icon={s.icon} subtitle={s.dist>0 ? "{s.dist} m" : "Destination"}
+
+### Media
+state mode="normal"
+state night=false
+state playing=true
+state pos=84
+state vol=40
+state at=1
+state tracks=[{"title":"Midnight City","artist":"M83","len":243},{"title":"Nightcall","artist":"Kavinsky","len":258},{"title":"Resonance","artist":"HOME","len":212},{"title":"Instant Crush","artist":"Daft Punk","len":337}]
+every 1s when playing onTick={pos=pos>=tracks[at].len ? 0 : pos+1; at=pos>=tracks[at].len ? (at+1)%length(tracks) : at}
+App
+  Sidebar
+    Brand "Roadwise" icon="directions_car"
+    NavItem "Drive" icon="speed" onTap={go drive}
+    NavItem "Navigation" icon="navigation" onTap={go navigation}
+    NavItem "Media" icon="music_note" selected={true} onTap={go media}
+    NavItem "Camera" icon="videocam" onTap={go camera}
+    Spacer grow
+    Toggle "Night mode" bind=night
+  Main
+    Nav
+      Heading "Media" level=1
+      Row gap=8
+        IconButton "tonality" tooltip="Night mode" onTap={night=!night}
+        IconButton "queue_music" tooltip="Queue" onTap={open queue}
+    Column pad=24 gap=16
+      Box gap=16 pad=20 radius=16 fill={night ? "#FF05070A" : (mode=="eco" ? "#FF064E3B" : (mode=="sport" ? "#FF7F1D1D" : "#FF111827"))}
+        Row gap=16 middle
+          Box w=96 h=96 radius=12 fill=#FF374151 center middle
+            Icon "album"
+          Column grow gap=2
+            Text "{tracks[at].title}" size=32 weight=700 color={night ? "#FF9CA3AF" : "#FFFFFFFF"}
+            Text "{tracks[at].artist}" color={night ? "#FF6B7280" : "#FFD1D5DB"}
+        Slider bind=pos min=0 max={tracks[at].len}
+        Row between
+          Text.muted "{duration(pos)}"
+          Text.muted "{duration(tracks[at].len)}"
+        Row gap=12 stretch
+          Box grow h=120 radius=12 fill=#FF1F2937 center middle onTap={at=(at+length(tracks)-1)%length(tracks); pos=0}
+            Icon "skip_previous"
+          Box grow h=120 radius=12 fill=#FF2563EB center middle onTap={playing=!playing}
+            Icon {playing ? "pause" : "play_arrow"}
+          Box grow h=120 radius=12 fill=#FF1F2937 center middle onTap={at=(at+1)%length(tracks); pos=0}
+            Icon "skip_next"
+      Card gap=8
+        Row gap=12 middle
+          Icon "volume_up"
+          Slider bind=vol min=0 max=100
+          Text.strong "{vol}"
+  Drawer#queue "Up next" right
+    each t in tracks
+      ListTile "{t.title}" subtitle="{t.artist}" icon={indexOf(tracks,t)==at ? "equalizer" : "music_note"} onTap={at=indexOf(tracks,t); pos=0; close}
+
+### Reversing Camera
+state mode="normal"
+state night=false
+state gear="R"
+state dist=1.6
+state guides=true
+state steer=0
+every 1s onTick={dist=max(0.2,dist-0.1)}
+App
+  Sidebar
+    Brand "Roadwise" icon="directions_car"
+    NavItem "Drive" icon="speed" onTap={go drive}
+    NavItem "Navigation" icon="navigation" onTap={go navigation}
+    NavItem "Media" icon="music_note" onTap={go media}
+    NavItem "Camera" icon="videocam" selected={true} onTap={go camera}
+    Spacer grow
+    Toggle "Night mode" bind=night
+  Main
+    Nav
+      Heading "Reversing camera" level=1
+      Row gap=8
+        Badge.warning "Gear {gear}"
+        Button.outline "Back to drive" onTap={gear="D"; go drive}
+    Column pad=24 gap=16
+      Box gap=12 pad=12 radius=16 fill={night ? "#FF05070A" : "#FF111827"}
+        CameraView h=360 source="rear" dim={night}
+          GuideLines visible={guides} steer={steer} zones=[{"to":0.5,"color":"#FFDC2626"},{"to":1.0,"color":"#FFF59E0B"},{"to":2.0,"color":"#FF22C55E"}]
+        Row between middle
+          Text.strong "Obstacle {fixed(dist,1)} m" color={dist<0.6 ? "#FFFCA5A5" : "#FFFFFFFF"}
+          if dist<0.6
+            Badge.error "Stop" animate=pulse
+      Card gap=8
+        Row between
+          Text.strong "Steering guide"
+          Toggle "Guide lines" bind=guides
+        Slider bind=steer min=-30 max=30
+        Row gap=8
+          Button.outline "Reset" onTap={steer=0; dist=1.6}
+          Button.outline "Night view" onTap={night=!night}
+
+// Placeholder: there is no real map, camera or fuel sensor, so these are labelled boxes.
+define WarningLight "icon" lit=false flash=false color=#FFF59E0B dim=false
+  Box w=44 h=44 radius=22 center middle fill={lit ? "#33FFFFFF" : "#11FFFFFF"}
+    if lit && flash
+      Icon "{icon}" color={color} animate=pulse duration=600
+    if lit && !flash
+      Icon "{icon}" color={color}
+    if !lit
+      Icon "{icon}" color={dim ? "#FF1F2937" : "#FF4B5563"}
+
+// Draws a big turn icon only; a real lane graphic is not available.
+define TurnArrow icon="turn_right" size=64 color=#FFFFFFFF
+  Box w={size+16} h={size+16} radius={(size+16)/2} fill=#22FFFFFF center middle
+    Icon "{icon}" size={size} color={color}
+
+// A labelled box stands in for a real map: shows the centre and zoom, and dims at night.
+define Map center="0,0" zoom=14 route=[] dim=false h=300
+  Box h={h} radius=12 fill={dim ? "#FF0B1220" : "#FF1E3A5F"} center middle gap=6
+    Icon "map" size=48 color=#FF93C5FD
+    Text "Map {center} zoom {zoom}" color=#FF93C5FD
+    Text.small "{length(route)} route steps" color=#FF93C5FD
+
+// A labelled box stands in for a live camera feed; the children are drawn over it.
+define CameraView h=360 source="rear" dim=false
+  Stack h={h} radius=12 fill={dim ? "#FF0B0F14" : "#FF374151"} center middle
+    Column center middle gap=6
+      Icon "videocam" size=48 color=#FF9CA3AF
+      Text "Camera: {source}" color=#FF9CA3AF
+    ...
+
+// Three coloured distance bands and two guide lines drawn as boxes; the steering offset narrows one side.
+define GuideLines visible=true steer=0 zones=[]
+  if visible
+    Column bottom center gap=4
+      each z in zones
+        Box w={220-indexOf(zones,z)*40+abs(steer)} h=14 radius=4 fill={z.color}
+      Row gap={120-abs(steer)}
+        Box w=6 h=80 fill=#FFFFFFFF
+        Box w=6 h=80 fill=#FFFFFFFF

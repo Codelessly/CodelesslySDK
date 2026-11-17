@@ -1,0 +1,3 @@
+App: Hearth, a thermostat's two-line display. A tiny screen of two text lines of sixteen characters: the top line showing the room temperature and mode, the bottom line the target with an arrow; two plus and minus keys and a menu key; holding menu steps through text pages (schedule, hold, units, lock) in turn; a blinking cursor in an edit; a heating on flame mark; a message that scrolls sideways when long; a locked state that shows only a key symbol.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

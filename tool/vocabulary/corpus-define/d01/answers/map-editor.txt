@@ -1,0 +1,190 @@
+### Map editor
+state tool="select"
+state snap=true
+state selected="f2"
+state cursor="47.6062 N, 122.3321 W"
+state measureOn=false
+state measured=0
+state stroke="#FF2563EB"
+state fillc="#FF93C5FD"
+state icon="place"
+state layers=[{"id":"l1","name":"Parks","visible":true,"count":14},{"id":"l2","name":"Trails","visible":true,"count":9},{"id":"l3","name":"Parking","visible":false,"count":6},{"id":"l4","name":"Survey notes","visible":true,"count":21}]
+state features=[{"id":"f1","name":"Trailhead North","kind":"marker","layer":"l2","icon":"place","stroke":"#FFDC2626","fill":"#FFFECACA","notes":"Gate code changes monthly."},{"id":"f2","name":"Ridge Loop","kind":"line","layer":"l2","icon":"timeline","stroke":"#FF2563EB","fill":"#FF93C5FD","notes":"Steep after the second switchback."},{"id":"f3","name":"Alder Meadow","kind":"area","layer":"l1","icon":"park","stroke":"#FF16A34A","fill":"#FFBBF7D0","notes":"Seasonal wetland, closed March to May."}]
+App
+  Sidebar
+    Brand "Cartograph" icon="map"
+    Text.caption "LAYERS"
+    each layer in layers
+      Row between middle
+        Toggle "{layer.name}" bind=layer.visible
+        Badge.neutral "{layer.count}"
+    Divider
+    Button.outline "Add layer" icon="add" onTap={layers=append(layers,{"id":"l{length(layers)+1}","name":"New layer","visible":true,"count":0}); toast "Layer added"}
+    Spacer grow
+    Button.secondary "Import file" icon="upload_file" onTap={go import}
+    Text.muted "Pine Ridge survey, 2 editors online"
+  Main
+    Nav
+      Heading "Pine Ridge trail survey" level=1
+      Row gap=8 middle
+        SegmentedButton items=["Select","Marker","Line","Area"] bind=tool
+        Button.outline "Measure" icon="straighten" selected={measureOn} onTap={measureOn=!measureOn; measured=0}
+        Toggle "Snap" bind=snap
+        IconButton "undo" tooltip="Undo"
+        IconButton "redo" tooltip="Redo"
+        Button "Export" onTap={open exportMenu}
+    Column gap=0 grow
+      MapCanvas features={features} layers={layers} tool={tool} snap={snap} bind=selected onMove={cursor=result} onMeasure={measured=result} onVertexDrag={toast "Vertex moved"} onAdd={features=append(features,result); selected=result.id}
+      Footer
+        Row between middle pad=[16,8,16,8]
+          CoordinateReadout "{cursor}" zoom=14
+          if measureOn
+            Row gap=8 middle
+              Icon "straighten"
+              Text.strong "Distance: {fixed(measured,2)} km"
+              Button.ghost "Clear" onTap={measured=0}
+          Text.muted "Snap {snap ? 'on' : 'off'}"
+  Pane w=320 pad=16 gap=12
+    Heading "Feature properties" level=3
+    if selected==""
+      Text.muted "Select a feature on the map to edit it."
+    each f in features
+      if f.id==selected
+        Column gap=12
+          Row gap=8 middle
+            Icon "{f.icon}"
+            Badge.info "{f.kind}"
+          Input "Name" bind=f.name
+          Select "Layer" items=["Parks","Trails","Parking","Survey notes"]
+          Input "Notes" multiline bind=f.notes
+          Text.fieldLabel "Stroke"
+          ColorPicker bind=stroke swatches=["#FF111827","#FFDC2626","#FF2563EB","#FF16A34A","#FFF59E0B"] onPick={features=updateWhere(features,x=>x.id==f.id,x=>with(x,"stroke",result))}
+          Text.fieldLabel "Fill"
+          ColorPicker bind=fillc swatches=["#FFFECACA","#FF93C5FD","#FFBBF7D0","#FFFDE68A","#FFE5E7EB"] onPick={features=updateWhere(features,x=>x.id==f.id,x=>with(x,"fill",result))}
+          Text.fieldLabel "Icon"
+          IconPicker bind=icon icons=["place","park","flag","warning","local_parking","water_drop"] onPick={features=updateWhere(features,x=>x.id==f.id,x=>with(x,"icon",result))}
+          Row gap=8
+            Button "Apply" grow onTap={toast "Saved {f.name}"}
+            Button.destructive "Delete" onTap={open confirmDelete}
+    Divider
+    Text.caption "FEATURES"
+    each f in features
+      ListTile "{f.name}" subtitle="{f.kind}" icon="{f.icon}" selected={f.id==selected} onTap={selected=f.id}
+  Menu#exportMenu end
+    MenuItem "GeoJSON" icon="data_object" onTap={toast "Exported GeoJSON"}
+    MenuItem "KML" icon="public" onTap={toast "Exported KML"}
+    MenuItem "PNG snapshot" icon="image" onTap={toast "Snapshot saved"}
+  Dialog#confirmDelete "Delete this feature?" "It will be removed from its layer."
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button.destructive "Delete" onTap={features=removeWhere(features,x=>x.id==selected); selected=""; close; toast "Deleted"}
+
+### Import file
+state step=0
+state fileName="trail_survey_2026.csv"
+state delimiter="Comma"
+state hasHeader=true
+state latCol="latitude"
+state lonCol="longitude"
+state nameCol="trail_name"
+state targetLayer="Trails"
+state sample=[{"trail_name":"Ridge Loop","latitude":"47.6101","longitude":"-122.3412","surface":"gravel"},{"trail_name":"Alder Spur","latitude":"47.6133","longitude":"-122.3378","surface":"dirt"},{"trail_name":"Creek Path","latitude":"47.6088","longitude":"-122.3455","surface":"boardwalk"}]
+Page
+  Nav
+    Brand "Cartograph" icon="map"
+    Row gap=4
+      Link "Editor" onTap={go map_editor}
+      Link "Import" onTap={go import}
+    Button.outline "Cancel" onTap={go map_editor}
+  Section narrow
+    Column gap=16
+      Heading "Import features" level=1
+      Text.muted "Bring a file into a layer in three steps."
+      Row gap=8 middle
+        Badge.primary "1 File"
+        Icon "chevron_right"
+        Badge.neutral "2 Map columns"
+        Icon "chevron_right"
+        Badge.neutral "3 Review"
+      Progress {(step+1)/3}
+      if step==0
+        Card gap=12
+          Text.strong "Choose a file"
+          FileDrop "Drop a CSV, GeoJSON or KML file" accept=[".csv",".geojson",".kml"] bind=fileName onPick={toast "Loaded {result}"}
+          Row gap=12
+            Select "Delimiter" items=["Comma","Semicolon","Tab"] bind=delimiter
+            Toggle "First row is a header" bind=hasHeader
+          Row end
+            Button "Continue" onTap={step=1}
+      if step==1
+        Card gap=12
+          Text.strong "Match columns in {fileName}"
+          Grid cols=3 gap=12
+            Select "Latitude" items=["latitude","longitude","trail_name","surface"] bind=latCol
+            Select "Longitude" items=["latitude","longitude","trail_name","surface"] bind=lonCol
+            Select "Feature name" items=["latitude","longitude","trail_name","surface"] bind=nameCol
+          Text.caption "PREVIEW"
+          Row scroll
+            Table columns=["trail_name","latitude","longitude","surface"] rows={sample}
+          if latCol==lonCol
+            Text.danger "Latitude and longitude need different columns."
+          Row between
+            Button.outline "Back" onTap={step=0}
+            Button "Continue" onTap={latCol==lonCol ? toast "Pick two different columns" : step=2}
+      if step==2
+        Card gap=12
+          Text.strong "Review"
+          Text "{length(sample)} features will be added as markers."
+          Select "Target layer" items=["Parks","Trails","Parking","Survey notes"] bind=targetLayer
+          Row gap=8 middle
+            Icon "check_circle"
+            Text.success "Coordinates look valid"
+          Row between
+            Button.outline "Back" onTap={step=1}
+            Button "Import {length(sample)} features" onTap={emit importDone {"layer":targetLayer,"rows":sample}; toast "Imported"; go map_editor}
+
+// A map surface cannot be drawn with the words taught: shown as a labelled box listing what it holds.
+define MapCanvas features=[] layers=[] tool="select" snap=false bind=selected onMove onMeasure onVertexDrag onAdd
+  Box grow fill=#FFE8F0E4 pad=16 gap=8 drop=feature onDrop={onAdd(result.data)}
+    Text.caption "Map preview (placeholder) - tool: {tool}, snap: {snap ? 'on' : 'off'}"
+    each f in features
+      Chip "{f.name}" selected={f.id==selected} onTap={selected=f.id}
+    Spacer grow
+    Row gap=8
+      Text.muted "{length(features)} features on {count(layers,l=>l.visible)} visible layers"
+
+// Shows a coordinate pair as text; the live cursor position is supplied by the map.
+define CoordinateReadout "text" zoom=12
+  Row gap=8 middle
+    Icon "my_location"
+    Text.mono "{text}"
+    Text.muted "z{zoom}"
+
+define ColorPicker bind=color swatches=["#FF111827","#FFDC2626","#FF2563EB"] size=28 onPick
+  state color=""
+  Row gap=8 middle
+    each swatch in swatches
+      Box w={size} h={size} radius={size/2} fill={swatch} border={swatch == color ? "#FF111827" : "#00000000"} onTap={color=swatch; onPick(swatch)}
+
+define IconPicker bind=icon icons=["place"] onPick
+  state icon=""
+  Row gap=8 middle
+    each name in icons
+      IconButton "{name}" selected={name==icon} onTap={icon=name; onPick(name)}
+
+// A file chooser cannot read files here: drawn as a dashed drop zone box.
+define FileDrop "label" accept=[] bind=fileName onPick
+  Box pad=24 gap=8 center radius=8 border=#FF9CA3AF onTap={onPick(fileName)}
+    Icon "upload_file"
+    Text "{label}"
+    Text.caption "{fileName}"
+
+define Table columns=[] rows=[]
+  Column gap=0
+    Row gap=8 pad=8 border-bottom=#FFD1D5DB
+      each c in columns
+        Text.strong "{c}" w=110
+    each r in rows
+      Row gap=8 pad=8
+        each c in columns
+          Text "{r[c]}" w=110

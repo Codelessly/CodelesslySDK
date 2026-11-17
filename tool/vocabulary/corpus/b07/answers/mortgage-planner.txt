@@ -1,0 +1,213 @@
+### Planner
+state tab="planner"
+state price=385000
+state deposit=57750
+state term=25
+state rate=4.6
+state rateType="Fixed"
+state extra=150
+state readYear=10
+state scenarios=[{"id":1,"name":"Baseline","price":385000,"deposit":57750,"term":25,"rate":4.6,"extra":0,"payment":1819,"interest":218700,"years":25},{"id":2,"name":"Bigger deposit","price":385000,"deposit":90000,"term":25,"rate":4.4,"extra":0,"payment":1620,"interest":191000,"years":25}]
+App
+  Sidebar
+    Brand "Hearthloan" icon="home"
+    NavItem "Planner" icon="calculate" selected={tab=="planner"} onTap={go planner}
+    NavItem "Repayment table" icon="table_chart" selected={tab=="table"} onTap={go repayment-table}
+    NavItem "Scenarios" icon="compare" badge="{length(scenarios)}" selected={tab=="scenarios"} onTap={go scenarios}
+    Spacer grow
+    Text.muted "Estimates only. Not a mortgage offer."
+  Main
+    Nav
+      Heading "Mortgage planner" level=1
+      Row gap=8
+        SegmentedButton items=["Fixed","Variable"] bind=rateType
+        Button.outline "Save scenario" icon="bookmark_add" onTap={open saveScenario}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=16
+          Heading "Your loan" level=3
+          Column gap=4
+            Row between
+              Text.fieldLabel "Property price"
+              Input type=number bind=price w=140
+            Slider bind=price min=50000 max=1500000 step=5000
+          Column gap=4
+            Row between
+              Text.fieldLabel "Deposit ({round(deposit/price*100,1)}%)"
+              Input type=number bind=deposit w=140
+            Slider bind=deposit min=0 max={price} step=1000
+          Column gap=4
+            Row between
+              Text.fieldLabel "Term (years)"
+              Input type=number bind=term w=140
+            Slider bind=term min=5 max=40 step=1
+          Column gap=4
+            Row between
+              Text.fieldLabel "Interest rate (%)"
+              Input type=number bind=rate w=140
+            Slider bind=rate min=0.5 max=12 step=0.05
+        Column grow gap=16
+          Card gap=8 fill=#FF16324F
+            Text "Monthly payment" color=#FFB8CCE0
+            Text "{money(pmt(price-deposit,rate,term),'$',0)}" size=56 weight=700 color=#FFFFFFFF animate=fade
+            Text "{rateType} at {rate}% over {term} years, borrowing {money(price-deposit,'$',0)}" color=#FFB8CCE0
+            Divider
+            Row between
+              Text "Total interest" color=#FFB8CCE0
+              Text.strong "{money(pmt(price-deposit,rate,term)*term*12-(price-deposit),'$',0)}" color=#FFFFFFFF
+            Row between
+              Text "Total repaid" color=#FFB8CCE0
+              Text.strong "{money(pmt(price-deposit,rate,term)*term*12,'$',0)}" color=#FFFFFFFF
+          Card gap=12
+            Row between
+              Heading "Overpay each month" level=3
+              Text.strong "{money(extra,'$',0)}"
+            Slider bind=extra min=0 max=1000 step=25
+            Row gap=12
+              Card grow gap=4
+                Text.caption "Time saved"
+                Text.success "{term-amortYears(price-deposit,rate,term,extra)} yrs"
+              Card grow gap=4
+                Text.caption "Interest saved"
+                Text.success "{money(amortInterest(price-deposit,rate,term,0)-amortInterest(price-deposit,rate,term,extra),'$',0)}"
+      Card gap=12
+        Row between
+          Heading "Interest and principal by year" level=3
+          Text.muted "Drag the slider to read the balance at a year"
+        BarChart stacked labels={map(range(term),i=>"Y{i+1}")} series=[{"name":"Interest","values":{map(amortize(price-deposit,rate,term,extra),r=>r.interest)}},{"name":"Principal","values":{map(amortize(price-deposit,rate,term,extra),r=>r.principal)}}] h=220
+        Slider bind=readYear min=1 max={term} step=1
+        Row between
+          Text.strong "Year {readYear}"
+          Text "Balance remaining: {money(amortize(price-deposit,rate,term,extra)[readYear-1].balance,'$',0)}"
+          Text.muted "Paid off: {round((1-amortize(price-deposit,rate,term,extra)[readYear-1].balance/(price-deposit))*100,0)}%"
+      Card gap=12
+        Row between
+          Heading "Rate stress test" level=3
+          Badge.warning "+2.0%"
+        Grid cols=3 gap=12
+          Card gap=4
+            Text.caption "Now at {rate}%"
+            Text.heading "{money(pmt(price-deposit,rate,term),'$',0)}"
+          Card gap=4
+            Text.caption "Stressed at {round(rate+2,2)}%"
+            Text.heading "{money(pmt(price-deposit,rate+2,term),'$',0)}"
+          Card gap=4
+            Text.caption "Difference per month"
+            Text.danger "+{money(pmt(price-deposit,rate+2,term)-pmt(price-deposit,rate,term),'$',0)}"
+        if rateType=="Variable"
+          Text.muted "A variable rate can move at any time. Plan for the stressed payment."
+        if rateType=="Fixed"
+          Text.muted "Your rate is fixed for the term, so the stress test applies when you remortgage."
+  Dialog#saveScenario "Save this scenario" "It will appear in your comparison"
+    Input "Name" "e.g. Smaller house" bind=scenarioName
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Save" onTap={scenarioName=="" ? toast "Give it a name" : {scenarios=append(scenarios,{"id":length(scenarios)+1,"name":scenarioName,"price":price,"deposit":deposit,"term":term,"rate":rate,"extra":extra,"payment":pmt(price-deposit,rate,term),"interest":amortInterest(price-deposit,rate,term,extra),"years":amortYears(price-deposit,rate,term,extra)}; scenarioName=""; toast "Scenario saved"; close}}
+
+### Repayment table
+state tab="table"
+state price=385000
+state deposit=57750
+state term=25
+state rate=4.6
+state extra=150
+state showExtra=true
+App
+  Sidebar
+    Brand "Hearthloan" icon="home"
+    NavItem "Planner" icon="calculate" selected={tab=="planner"} onTap={go planner}
+    NavItem "Repayment table" icon="table_chart" selected={tab=="table"} onTap={go repayment-table}
+    NavItem "Scenarios" icon="compare" selected={tab=="scenarios"} onTap={go scenarios}
+    Spacer grow
+    Text.muted "Estimates only. Not a mortgage offer."
+  Main
+    Nav
+      Heading "Repayment table" level=1
+      Row gap=8
+        Toggle "Include overpayment" bind=showExtra
+        Button.outline "Export CSV" icon="download" onTap={copy table; toast "Table copied"}
+    Column pad=24 gap=16 scroll
+      Card gap=4
+        Text.muted "First ten years of {money(price-deposit,'$',0)} at {rate}% over {term} years{showExtra ? ", overpaying " + money(extra,'$',0) + " a month" : ""}."
+      Card gap=0
+        Row pad=12 border-bottom=#FFD0D5DB
+          Text.fieldLabel "Year" w=60
+          Text.fieldLabel "Payments" w=110
+          Text.fieldLabel "Interest" w=110
+          Text.fieldLabel "Principal" w=110
+          Text.fieldLabel "Balance" grow
+          Text.fieldLabel "Paid off" w=90
+        each r in take(amortize(price-deposit,rate,term,showExtra?extra:0),10)
+          Row pad=12 border-bottom=#FFE8EBEF
+            Text "{r.year}" w=60
+            Text "{money(r.interest+r.principal,'$',0)}" w=110
+            Text "{money(r.interest,'$',0)}" w=110
+            Text "{money(r.principal,'$',0)}" w=110
+            Text "{money(r.balance,'$',0)}" grow
+            Text.muted "{round((1-r.balance/(price-deposit))*100,0)}%" w=90
+      Row gap=16
+        Card grow gap=4
+          Text.caption "Interest in year 1"
+          Text.heading "{money(first(amortize(price-deposit,rate,term,showExtra?extra:0)).interest,'$',0)}"
+        Card grow gap=4
+          Text.caption "Balance after year 10"
+          Text.heading "{money(amortize(price-deposit,rate,term,showExtra?extra:0)[9].balance,'$',0)}"
+
+### Scenarios
+state tab="scenarios"
+state scenarios=[{"id":1,"name":"Baseline","price":385000,"deposit":57750,"term":25,"rate":4.6,"extra":0,"payment":1819,"interest":218700,"years":25},{"id":2,"name":"Bigger deposit","price":385000,"deposit":90000,"term":25,"rate":4.4,"extra":0,"payment":1620,"interest":191000,"years":25},{"id":3,"name":"Overpay 300","price":385000,"deposit":57750,"term":25,"rate":4.6,"extra":300,"payment":1819,"interest":161300,"years":21}]
+state picked=[1,2]
+state sel=0
+App
+  Sidebar
+    Brand "Hearthloan" icon="home"
+    NavItem "Planner" icon="calculate" selected={tab=="planner"} onTap={go planner}
+    NavItem "Repayment table" icon="table_chart" selected={tab=="table"} onTap={go repayment-table}
+    NavItem "Scenarios" icon="compare" badge="{length(scenarios)}" selected={tab=="scenarios"} onTap={go scenarios}
+    Spacer grow
+    Text.muted "Estimates only. Not a mortgage offer."
+  Main
+    Nav
+      Heading "Saved scenarios" level=1
+      Button "New scenario" icon="add" onTap={go planner}
+    Column pad=24 gap=16 scroll
+      Text.muted "Tick two or more to compare them side by side."
+      Row gap=8
+        each s in scenarios
+          FilterChip "{s.name}" selected={contains(picked,s.id)} onTap={picked=contains(picked,s.id)?without(picked,s.id):append(picked,s.id)}
+      Row gap=16 top scroll
+        each s in filter(scenarios,x=>contains(picked,x.id))
+          Card w=300 gap=12
+            Row between
+              Heading "{s.name}" level=3
+              IconButton "more_vert" tooltip="Options" onTap={sel=s.id; open scenarioMenu}
+            Text "{money(s.payment,'$',0)}" size=40 weight=700
+            Text.caption "per month"
+            Divider
+            Row between
+              Text.muted "Price"
+              Text.strong "{money(s.price,'$',0)}"
+            Row between
+              Text.muted "Deposit"
+              Text.strong "{money(s.deposit,'$',0)}"
+            Row between
+              Text.muted "Rate and term"
+              Text.strong "{s.rate}% / {s.term} yrs"
+            Row between
+              Text.muted "Overpayment"
+              Text.strong "{money(s.extra,'$',0)}"
+            Row between
+              Text.muted "Total interest"
+              Text.strong "{money(s.interest,'$',0)}"
+            Row between
+              Text.muted "Mortgage-free in"
+              Text.strong "{s.years} yrs"
+            if s.interest==min(s.interest,min(first(scenarios).interest,last(scenarios).interest))
+              Badge.success "Lowest interest"
+      if length(picked)>=2
+        Card gap=12
+          Heading "Interest compared" level=3
+          BarChart values={map(filter(scenarios,x=>contains(picked,x.id)),x=>x.interest)} labels={map(filter(scenarios,x=>contains(picked,x.id)),x=>x.name)} h=180
+  Menu#scenarioMenu
+    MenuItem "Load into planner" icon="open_in_new" onTap={emit loadScenario sel; go planner}
+    MenuItem "Delete" icon="delete" onTap={scenarios=removeWhere(scenarios,x=>x.id==sel); picked=without(picked,sel); toast "Scenario deleted"}

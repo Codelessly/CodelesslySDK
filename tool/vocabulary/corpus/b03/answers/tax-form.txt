@@ -1,0 +1,256 @@
+### Interview
+state section=1
+state qIndex=0
+state hasJob=""
+state dependents=""
+state wages=48500
+state withheld=5200
+state interest=120
+state filing="Single"
+state deduction=13850
+state taxable=0
+state tax=0
+state balance=0
+state done=[true,false,false,false,false]
+state sections=["About you","Income","Deductions","Documents","Review and sign"]
+Section
+App
+  Sidebar
+    Brand "Returnly" icon="receipt_long"
+    Text.caption "TAX YEAR 2025"
+    each s in sections
+      NavItem "{s}" icon="{done[index] ? 'check_circle' : 'radio_button_unchecked'}" selected={section==index+1} onTap={section=index+1; qIndex=0}
+    Spacer grow
+    Card gap=4
+      Text.caption "{balance >= 0 ? 'Estimated refund' : 'Estimated owed'}"
+      Text.heading1 "{money(abs(round(withheld - max(0,(wages+interest-deduction))*0.12,0)),'$',0)}" color=#FF1B7F4B animate=pulse
+      Text.muted "Updates as you answer"
+  Main
+    Nav
+      Heading "{sections[section-1]}" level=1
+      Row gap=8
+        Progress {(section-1)/5} w=160
+        Button.ghost "Save and exit" onTap={emit saveDraft; toast "Draft saved"}
+    Column pad=24 gap=16 maxw=720 scroll
+      Row gap=8
+        each s in sections
+          Chip "{index+1}. {s}" selected={section==index+1}
+      if section==1
+        if qIndex==0
+          Text.title "Did you have a job in 2025?"
+          Text.muted "Include part-time and seasonal work."
+          Row gap=16
+            Card grow gap=8 animate=scale onTap={hasJob="yes"}
+              Icon "work"
+              Text.strong "Yes"
+              Text.muted "I received a W-2"
+              Radio "Yes" bind=hasJob value="yes"
+            Card grow gap=8 animate=scale onTap={hasJob="no"}
+              Icon "block"
+              Text.strong "No"
+              Text.muted "No wages this year"
+              Radio "No" bind=hasJob value="no"
+          Accordion "Why do we ask this?"
+            Text.muted "Wages are the biggest part of most returns. If you had a job, your employer sent you a W-2 form by the end of January."
+        if qIndex==1
+          Text.title "Do you have dependents?"
+          Row gap=16
+            Card grow gap=8 onTap={dependents="yes"}
+              Icon "family_restroom"
+              Text.strong "Yes"
+              Radio "Yes" bind=dependents value="yes"
+            Card grow gap=8 onTap={dependents="no"}
+              Icon "person"
+              Text.strong "No"
+              Radio "No" bind=dependents value="no"
+          Accordion "Who counts as a dependent?"
+            Text.muted "A child or relative who lived with you more than half the year and whose support you mostly provided."
+          Select "Filing status" bind=filing items=["Single","Married filing jointly","Head of household"]
+        Row between
+          Button.ghost "Back" onTap={qIndex=max(0,qIndex-1)}
+          Button "Continue" onTap={hasJob=="" ? toast "Pick yes or no" : (qIndex==0 ? qIndex=1 : (done=setAt(done,0,true); section=2; qIndex=0))}
+      if section==2
+        Text.title "What did you earn?"
+        Input "Wages from your W-2" bind=wages type=number prefix="$"
+        Accordion "Where do I find this?"
+          Text.muted "Box 1 of your W-2. It already leaves out your pre-tax retirement contributions."
+        Input "Federal tax withheld" bind=withheld type=number prefix="$"
+        Accordion "What is withholding?"
+          Text.muted "Tax your employer sent to the IRS for you during the year. It is Box 2 of your W-2."
+        Input "Bank interest" bind=interest type=number prefix="$" hint="From any 1099-INT"
+        Card gap=4
+          Text.caption "Total income"
+          Text.heading2 "{money(wages+interest,'$',2)}"
+        Row between
+          Button.ghost "Back" onTap={section=1; qIndex=1}
+          Button "Continue" onTap={done=setAt(done,1,true); section=3}
+      if section==3
+        Text.title "Standard or itemized deduction?"
+        Row gap=16
+          Card grow gap=8 onTap={deduction=13850}
+            Text.strong "Standard"
+            Text.heading2 "$13,850"
+            Radio "Standard" bind=deduction value=13850
+          Card grow gap=8 onTap={deduction=0}
+            Text.strong "Itemized"
+            Text.muted "Enter your own list"
+            Radio "Itemized" bind=deduction value=0
+        if deduction==0
+          Input "Total itemized deductions" bind=deduction type=number prefix="$"
+        Accordion "Which one should I choose?"
+          Text.muted "Most people with simple returns do better with the standard deduction."
+        Row between
+          Button.ghost "Back" onTap={section=2}
+          Button "Continue" onTap={done=setAt(done,2,true); go documents}
+Dialog#leave "Leave this section?" "Your answers are saved."
+  Button "Stay" onTap={close}
+
+### Documents
+state docs=[{"id":1,"name":"W-2_Acme.pdf","kind":"W-2","field":"Wages","amount":48500,"matched":true},{"id":2,"name":"1099-INT_Bank.pdf","kind":"1099-INT","field":"Bank interest","amount":120,"matched":true},{"id":3,"name":"scan0042.jpg","kind":"Unknown","field":"","amount":0,"matched":false}]
+state sel=0
+state wages=48500
+state interest=120
+App
+  Sidebar
+    Brand "Returnly" icon="receipt_long"
+    NavItem "About you" icon="check_circle" onTap={go interview}
+    NavItem "Income" icon="check_circle" onTap={go interview}
+    NavItem "Deductions" icon="check_circle" onTap={go interview}
+    NavItem "Documents" icon="upload_file" selected badge="{count(docs,d=>!d.matched)}"
+    NavItem "Review and sign" icon="draw" onTap={go review}
+  Main
+    Nav
+      Heading "Documents" level=1
+      Button "Continue to review" onTap={count(docs,d=>!d.matched)==0 ? go review : toast "Match every document first"}
+    Column pad=24 gap=16
+      FileDrop "Drop your tax forms here" accept="pdf,jpg,png" multiple onUpload={docs=append(docs,{"id":length(docs)+1,"name":result.name,"kind":"Unknown","field":"","amount":0,"matched":false}); toast "Uploaded {result.name}"}
+      Text.sectionTitle "Uploaded ({length(docs)})"
+      each d in docs
+        Card gap=8
+          Row between middle
+            Row gap=12 middle
+              IconTile "{d.matched ? 'description' : 'help'}"
+              Column
+                Text.strong "{d.name}"
+                Text.muted "{d.kind}"
+            Row gap=8 middle
+              if d.matched
+                Badge.success "Matched to {d.field}"
+                Text.strong "{money(d.amount,'$',2)}"
+              if !d.matched
+                Badge.warning "Needs a field"
+                Button.outline "Match" onTap={sel=d.id; open match}
+              IconButton "delete" tooltip="Remove" onTap={docs=removeWhere(docs,x=>x.id==d.id)}
+      Card gap=4
+        Text.caption "Fields filled from documents"
+        Text.body "Wages {money(wages,'$',2)}, bank interest {money(interest,'$',2)}"
+Dialog#match "Match this document" "Choose where it belongs"
+  Select "Form type" bind=kind items=["W-2","1099-INT","1099-NEC","1098"]
+  Select "Field" bind=field items=["Wages","Bank interest","Self-employment income","Mortgage interest"]
+  Input "Amount" bind=amount type=number prefix="$"
+  Button "Save match" onTap={docs=updateWhere(docs,x=>x.id==sel,x=>with(with(with(with(x,"kind",kind),"field",field),"amount",amount),"matched",true)); close; toast "Matched"}
+
+### Review
+state wages=48500
+state withheld=5200
+state interest=120
+state deduction=13850
+state filing="Single"
+state editing=""
+state draftVal=0
+state agree=false
+App
+  Sidebar
+    Brand "Returnly" icon="receipt_long"
+    NavItem "About you" icon="check_circle" onTap={go interview}
+    NavItem "Income" icon="check_circle" onTap={go interview}
+    NavItem "Deductions" icon="check_circle" onTap={go interview}
+    NavItem "Documents" icon="check_circle" onTap={go documents}
+    NavItem "Review and sign" icon="draw" selected
+  Main
+    Nav
+      Heading "Review your return" level=1
+      Button "Sign and file" onTap={agree ? go sign : toast "Confirm the statement first"}
+    Column pad=24 gap=16 maxw=720
+      Card gap=4
+        Text.caption "{round(withheld - max(0,wages+interest-deduction)*0.12,0) >= 0 ? 'Your refund' : 'You owe'}"
+        Text.heading1 "{money(abs(round(withheld - max(0,wages+interest-deduction)*0.12,0)),'$',0)}" color=#FF1B7F4B
+      Text.sectionTitle "Your answers"
+      Card gap=0
+        Row between middle pad=8 border-bottom=#FFE0E0E0
+          Text.muted "Filing status"
+          Row gap=8 middle
+            Text.strong "{filing}"
+            IconButton "edit" tooltip="Edit filing status" onTap={go interview}
+        Row between middle pad=8 border-bottom=#FFE0E0E0
+          Text.muted "Wages"
+          Row gap=8 middle
+            if editing=="wages"
+              Input "Wages" bind=wages type=number prefix="$" w=140
+              IconButton "check" tooltip="Done" onTap={editing=""}
+            if editing!="wages"
+              Text.strong "{money(wages,'$',2)}"
+              IconButton "edit" tooltip="Edit wages" onTap={editing="wages"}
+        Row between middle pad=8 border-bottom=#FFE0E0E0
+          Text.muted "Tax withheld"
+          Row gap=8 middle
+            if editing=="withheld"
+              Input "Withheld" bind=withheld type=number prefix="$" w=140
+              IconButton "check" tooltip="Done" onTap={editing=""}
+            if editing!="withheld"
+              Text.strong "{money(withheld,'$',2)}"
+              IconButton "edit" tooltip="Edit withheld" onTap={editing="withheld"}
+        Row between middle pad=8 border-bottom=#FFE0E0E0
+          Text.muted "Bank interest"
+          Row gap=8 middle
+            if editing=="interest"
+              Input "Interest" bind=interest type=number prefix="$" w=140
+              IconButton "check" tooltip="Done" onTap={editing=""}
+            if editing!="interest"
+              Text.strong "{money(interest,'$',2)}"
+              IconButton "edit" tooltip="Edit interest" onTap={editing="interest"}
+        Row between middle pad=8
+          Text.muted "Deduction"
+          Row gap=8 middle
+            if editing=="deduction"
+              Input "Deduction" bind=deduction type=number prefix="$" w=140
+              IconButton "check" tooltip="Done" onTap={editing=""}
+            if editing!="deduction"
+              Text.strong "{money(deduction,'$',2)}"
+              IconButton "edit" tooltip="Edit deduction" onTap={editing="deduction"}
+      Checkbox "I confirm these answers are true and complete" bind=agree
+
+### Sign
+state sig=""
+state signed=false
+state agree=false
+state withheld=5200
+state wages=48500
+state interest=120
+state deduction=13850
+App
+  Sidebar
+    Brand "Returnly" icon="receipt_long"
+    NavItem "Documents" icon="check_circle" onTap={go documents}
+    NavItem "Review" icon="check_circle" onTap={go review}
+    NavItem "Sign and file" icon="draw" selected
+  Main
+    Nav
+      Heading "Sign your return" level=1
+    Column pad=24 gap=16 maxw=640
+      Card gap=8
+        Text.title "Under penalties of perjury"
+        Text.muted "I declare that I have examined this return and, to the best of my knowledge, it is true, correct and complete."
+        Text.strong "Refund: {money(abs(round(withheld - max(0,wages+interest-deduction)*0.12,0)),'$',0)}"
+      Text.fieldLabel "Draw your signature"
+      SignaturePad bind=sig h=160 onChange={signed=sig!=""}
+      Row between
+        Button.ghost "Clear" onTap={sig=""; signed=false}
+        Text.muted "{formatDate(today(),'MMM d, yyyy')}"
+      Row gap=12
+        Button.outline "Back to review" onTap={go review}
+        Button "File my return" onTap={signed ? open filed : toast "Draw your signature first"}
+Dialog#filed "Return filed" "Confirmation 2025-48213"
+  Icon "check_circle" color=#FF1B7F4B size=48
+  Text.body "Your refund should arrive within 21 days."
+  Button "Done" onTap={emit filed; close}

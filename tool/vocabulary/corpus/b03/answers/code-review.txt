@@ -1,0 +1,190 @@
+### Files changed
+state tab="files"
+state current="lib/retry/backoff.dart"
+state viewed=["lib/retry/policy.dart"]
+state files=[{"path":"lib/retry/backoff.dart","add":24,"del":6},{"path":"lib/retry/policy.dart","add":9,"del":2},{"path":"lib/http/client.dart","add":15,"del":11},{"path":"test/retry/backoff_test.dart","add":48,"del":0}]
+state checks=[{"id":1,"name":"lint","status":"passed","time":"41s"},{"id":2,"name":"unit-tests (linux)","status":"running","time":"2m"},{"id":3,"name":"unit-tests (windows)","status":"running","time":"3m"},{"id":4,"name":"coverage","status":"queued","time":""}]
+state reviewers=[{"name":"Priya Nair","state":"approved"},{"name":"Tomas Berg","state":"changes requested"},{"name":"Mei Chen","state":"pending"}]
+state diff=[{"n":12,"kind":"ctx","code":"  Duration delayFor(int attempt) {","thread":""},{"n":13,"kind":"del","code":"    return Duration(seconds: attempt * 2);","thread":""},{"n":13,"kind":"add","code":"    final ms = base.inMilliseconds * pow(2, attempt);","thread":"t1"},{"n":14,"kind":"add","code":"    return Duration(milliseconds: ms.toInt());","thread":""},{"n":15,"kind":"ctx","code":"  }","thread":""},{"n":16,"kind":"ctx","code":"","thread":""},{"n":17,"kind":"add","code":"  bool shouldRetry(int status) => status >= 500;","thread":"t2"}]
+state threads=[{"id":"t1","author":"Tomas Berg","body":"This grows without limit. Cap it so attempt 20 does not wait for days.","suggest":"    final ms = min(maxDelay.inMilliseconds, base.inMilliseconds * pow(2, attempt));","resolved":false,"draft":"","replies":[{"author":"Ana Souza","body":"Good catch, will add a cap."}]},{"id":"t2","author":"Priya Nair","body":"Should 429 be retried too?","suggest":"","resolved":false,"draft":"","replies":[]}]
+state showResolved=false
+every 3s when count(checks,c=>c.status=="running")>0 onTick={checks=updateWhere(checks,c=>c.status=="running",c=>with(c,"status","passed"))}
+App
+  Sidebar
+    Brand "Lint Roller" icon="rule"
+    Text.caption "FILES  {count(files,f=>contains(viewed,f.path))} of {length(files)} viewed"
+    Progress {count(files,f=>contains(viewed,f.path))/length(files)}
+    each f in files
+      Row gap=8 middle
+        Checkbox bind=f.done selected={contains(viewed,f.path)} onChange={result ? viewed=append(viewed,f.path) : viewed=without(viewed,f.path)}
+        NavItem "{f.path}" selected={current==f.path} onTap={current=f.path}
+        Badge.success "+{f.add}"
+        Badge.error "-{f.del}"
+    Spacer grow
+    Text.muted "Signed in as Ana Souza"
+  Main
+    Nav
+      Column
+        Heading "Cap exponential backoff at maxDelay" level=1
+        Row gap=8 middle
+          Badge.primary "Open"
+          Text.muted "#482 · ana/backoff-cap into main"
+      Row gap=8
+        Button.outline "Review changes" onTap={open review}
+        IconButton "more_vert" tooltip="More" onTap={open prMenu}
+    Column pad=24 gap=16
+      Tabs bind=tab items=["Conversation","Files changed","Checks"] onChange={tab=="Conversation" ? go conversation : toast "Showing files"}
+      Row gap=16 top
+        Column grow gap=12
+          Row between
+            Text.mono "{current}"
+            Toggle "Show resolved threads" bind=showResolved
+          Card gap=0
+            each l in diff
+              Row gap=12 fill={l.kind=="add" ? #1A2EA043 : l.kind=="del" ? #1AF85149 : #00000000}
+                Text.mono "{l.n}" w=40
+                Text.mono "{l.kind=="add" ? "+" : l.kind=="del" ? "-" : " "} {l.code}"
+                Spacer grow
+                IconButton "add_comment" tooltip="Comment on line {l.n}" onTap={open newComment}
+              if l.thread != ""
+                each t in filter(threads,x=>x.id==l.thread && (showResolved || !x.resolved))
+                  Card gap=8
+                    Row between
+                      Row gap=8 middle
+                        Avatar "{t.author}" size=28
+                        Text.strong "{t.author}"
+                      if t.resolved
+                        Badge.neutral "Resolved"
+                    Text "{t.body}"
+                    if t.suggest != ""
+                      Card gap=8
+                        Text.caption "Suggested change"
+                        Text.mono "{t.suggest}"
+                        Button "Apply suggestion" onTap={diff=updateWhere(diff,d=>d.thread==t.id,d=>with(d,"code",t.suggest)); threads=updateWhere(threads,x=>x.id==t.id,x=>with(x,"resolved",true)); toast "Suggestion applied in a commit"}
+                    each r in t.replies
+                      Row gap=8 top
+                        Avatar "{r.author}" size=24
+                        Column grow
+                          Text.strong "{r.author}"
+                          Text "{r.body}"
+                    Input "Reply" bind=t.draft
+                    Row gap=8
+                      Button "Reply" onTap={t.draft != "" ? threads=updateWhere(threads,x=>x.id==t.id,x=>with(with(x,"replies",append(x.replies,{"author":"Ana Souza","body":x.draft})),"draft","")) : toast "Write a reply first"}
+                      Button.ghost "{t.resolved ? "Unresolve" : "Resolve conversation"}" onTap={threads=updateWhere(threads,x=>x.id==t.id,x=>with(x,"resolved",!x.resolved))}
+        Pane w=320 pad=16 gap=12
+          Heading "Checks" level=3
+          each c in checks
+            Row between middle
+              Row gap=8 middle
+                if c.status=="passed"
+                  Icon "check_circle" color=#FF2EA043
+                if c.status=="running"
+                  Progress animate=spin
+                if c.status=="queued"
+                  Icon "schedule"
+                Text "{c.name}"
+              Text.muted "{c.time}"
+          Divider
+          Heading "Reviewers" level=3
+          each r in reviewers
+            Row between middle
+              Row gap=8 middle
+                Avatar "{r.name}" size=28
+                Text "{r.name}"
+              Badge.{r.state=="approved" ? "success" : r.state=="pending" ? "neutral" : "warning"} "{r.state}"
+          Divider
+          Card gap=8
+            Heading "Review summary" level=3
+            Text.muted "{count(reviewers,r=>r.state=="approved")} approved, {count(reviewers,r=>r.state=="changes requested")} requesting changes"
+            Button "Finish your review" onTap={open review}
+  Dialog#review "Finish your review" "Your comments are posted with it"
+    state verdict="comment"
+    state summary=""
+    Input "Summary" multiline bind=summary
+    Radio "Comment" bind=verdict value="comment"
+    Radio "Approve" bind=verdict value="approve"
+    Radio "Request changes" bind=verdict value="changes"
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Submit review" onTap={emit submitReview {"verdict":verdict,"summary":summary}; toast "Review submitted"; close}
+  Dialog#newComment "Add a comment"
+    state draftBody=""
+    Input "Comment" multiline bind=draftBody
+    Toggle "Suggest a change" bind=asSuggestion
+    Button "Start thread" onTap={draftBody != "" ? emit newThread draftBody; close : toast "Write a comment first"}
+  Menu#prMenu end
+    MenuItem "Copy link" icon="link" onTap={copy "https://github.com/lintroller/app/pull/482"; toast "Copied"}
+    MenuItem "Convert to draft" icon="edit_note" onTap={emit draft}
+    MenuItem "Close pull request" icon="close" onTap={emit closePr}
+
+### Conversation
+state tab="Conversation"
+state comment=""
+state merged=false
+state events=[{"id":1,"kind":"comment","who":"Ana Souza","text":"Delay was linear and unbounded. This switches to exponential with a cap.","when":"Tue 9:12"},{"id":2,"kind":"commit","who":"Ana Souza","text":"Cap exponential backoff at maxDelay","when":"Tue 9:14"},{"id":3,"kind":"review","who":"Priya Nair","text":"Approved these changes","when":"Tue 11:40"},{"id":4,"kind":"review","who":"Tomas Berg","text":"Requested changes: the delay needs an upper bound.","when":"Tue 13:05"},{"id":5,"kind":"commit","who":"Ana Souza","text":"Add maxDelay parameter and test","when":"Tue 15:22"}]
+state checks=[{"id":1,"name":"lint","status":"passed"},{"id":2,"name":"unit-tests (linux)","status":"passed"},{"id":3,"name":"unit-tests (windows)","status":"running"}]
+every 4s when count(checks,c=>c.status=="running")>0 onTick={checks=updateWhere(checks,c=>c.status=="running",c=>with(c,"status","passed"))}
+App
+  Sidebar
+    Brand "Lint Roller" icon="rule"
+    NavItem "Pull requests" icon="call_merge" badge="7" selected={true}
+    NavItem "Reviews requested" icon="rate_review" badge="3"
+    NavItem "Repositories" icon="folder"
+    Spacer grow
+    Text.muted "Signed in as Ana Souza"
+  Main
+    Nav
+      Column
+        Heading "Cap exponential backoff at maxDelay" level=1
+        Row gap=8 middle
+          Badge.primary "Open"
+          Text.muted "#482 · ana/backoff-cap into main"
+      Button.outline "Back to files" onTap={go files-changed}
+    Column pad=24 gap=16 scroll
+      Tabs bind=tab items=["Conversation","Files changed","Checks"] onChange={tab=="Files changed" ? go files-changed : toast "Already here"}
+      Row gap=16 top
+        Column grow gap=16
+          Timeline
+            each e in events
+              TimelineItem icon="{e.kind=="commit" ? "commit" : e.kind=="review" ? "rate_review" : "chat"}" title="{e.who}" time="{e.when}"
+                Text "{e.text}"
+          Card gap=8
+            Heading "Add a comment" level=3
+            Input "Leave a comment" multiline bind=comment
+            Row end gap=8
+              Button.outline "Close with comment" onTap={emit closePr}
+              Button "Comment" onTap={comment != "" ? events=append(events,{"id":length(events)+1,"kind":"comment","who":"Ana Souza","text":comment,"when":"Now"}); comment="" : toast "Write a comment first"}
+        Pane w=320 pad=16 gap=12
+          Heading "Checks" level=3
+          each c in checks
+            Row between middle
+              Text "{c.name}"
+              Badge.{c.status=="passed" ? "success" : "info"} "{c.status}"
+          Divider
+          Heading "Reviewers" level=3
+          Row between
+            Text "Priya Nair"
+            Badge.success "approved"
+          Row between
+            Text "Tomas Berg"
+            Badge.warning "changes requested"
+          Row between
+            Text "Mei Chen"
+            Badge.neutral "pending"
+          Divider
+          Card gap=8
+            Heading "Ready to merge?" level=3
+            Text.muted "{count(checks,c=>c.status=="passed")} of {length(checks)} checks passed. One reviewer is requesting changes."
+            Button "Squash and merge" onTap={merged=true; open mergeDone}
+            Button.outline "Request changes" onTap={open review}
+  Dialog#review "Finish your review"
+    state verdict="comment"
+    state summary=""
+    Input "Summary" multiline bind=summary
+    SegmentedButton bind=verdict items=["Comment","Approve","Request changes"]
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Submit review" onTap={emit submitReview {"verdict":verdict,"summary":summary}; events=append(events,{"id":length(events)+1,"kind":"review","who":"Ana Souza","text":"{verdict}: {summary}","when":"Now"}); close}
+  Dialog#mergeDone "Merged" "Branch ana/backoff-cap was merged into main"
+    Button "Delete branch" onTap={emit deleteBranch; toast "Branch deleted"; close}
+    Button.ghost "Keep branch" onTap={close}

@@ -1,0 +1,134 @@
+### Board
+state items=[{"id":"n1","kind":"note","x":120,"y":100,"w":180,"h":140,"text":"Launch checklist","color":"#FFFDE68A","group":""},{"id":"n2","kind":"note","x":340,"y":120,"w":180,"h":140,"text":"Pricing page copy","color":"#FFBFDBFE","group":""},{"id":"n3","kind":"note","x":580,"y":100,"w":180,"h":140,"text":"Ask legal about terms","color":"#FFBBF7D0","group":""},{"id":"s1","kind":"rect","x":160,"y":340,"w":220,"h":120,"text":"Onboarding flow","color":"#FFFECACA","group":""},{"id":"s2","kind":"ellipse","x":520,"y":340,"w":200,"h":120,"text":"Beta users","color":"#FFE9D5FF","group":""},{"id":"a1","kind":"arrow","x":380,"y":400,"w":140,"h":0,"text":"","color":"#FF111827","group":""}]
+state selected=[]
+state tool="select"
+state zoom=1
+state panX=0
+state panY=0
+state editing=""
+state history=[]
+state future=[]
+state color="#FFFDE68A"
+state peers=[{"name":"Maya Reyes","color":"#FFDC2626","x":300,"y":180},{"name":"Dev Patel","color":"#FF2563EB","x":640,"y":300},{"name":"Lena Fischer","color":"#FF16A34A","x":200,"y":420}]
+state boardName="Q3 roadmap workshop"
+App
+  Main
+    Nav
+      Row gap=12
+        IconButton "arrow_back" tooltip="All boards" onTap={go boards}
+        Heading "{boardName}" level=3
+        Badge.success "Live"
+      Row gap=8
+        Row gap=-8
+          each p in peers
+            Avatar "{p.name}" size=32
+        Button.outline "Share" icon="person_add" onTap={open share}
+    Stack grow
+      Canvas zoom={zoom} panX={panX} panY={panY} grid onPan={panX=panX+result.dx; panY=panY+result.dy} onZoom={zoom=clamp(result,0.25,4)} onBoxSelect={selected=map(filter(items,i=>i.x>=result.x && i.y>=result.y && i.x+i.w<=result.x+result.w && i.y+i.h<=result.y+result.h),i=>i.id)} onTap={selected=[]; editing=""} onPlace={tool=="select" ? toast "" : history=append(history,items); items=append(items,{"id":concat("i",length(items)+1),"kind":tool,"x":result.x,"y":result.y,"w":tool=="note" ? 180 : 160,"h":tool=="note" ? 140 : 100,"text":tool=="note" ? "New note" : "","color":color,"group":""}); selected=[concat("i",length(items))]; tool="select"} menu=canvasMenu
+        each it in items
+          Item#item x={it.x} y={it.y} w={it.w} h={it.h} kind={it.kind} fill={it.color} text={it.text} selected={contains(selected,it.id)} editing={editing==it.id} drag=item(it.id) onTap={selected=contains(selected,it.id) ? selected : [it.id]} onDoubleTap={editing=it.id} onEdit={history=append(history,items); items=updateWhere(items,i=>i.id==it.id,i=>with(i,"text",result)); editing=""} onMove={items=updateWhere(items,i=>contains(selected,i.id),i=>with(with(i,"x",i.x+result.dx),"y",i.y+result.dy))} onMoveStart={history=append(history,items); future=[]} onResize={items=updateWhere(items,i=>i.id==it.id,i=>with(with(i,"w",max(60,i.w+result.dw)),"h",max(40,i.h+result.dh)))}
+        each p in peers
+          Cursor "{p.name}" color={p.color} x={p.x} y={p.y}
+      Column left bottom pad=16 gap=8
+        Minimap items={items} zoom={zoom} panX={panX} panY={panY} w=180 h=120 onNavigate={panX=result.x; panY=result.y}
+      Column center top pad=12
+        Card pad=6
+          Row gap=4 middle
+            IconButton "near_me" tooltip="Select" selected={tool=="select"} onTap={tool="select"}
+            IconButton "sticky_note_2" tooltip="Sticky note" selected={tool=="note"} onTap={tool="note"}
+            IconButton "rectangle" tooltip="Rectangle" selected={tool=="rect"} onTap={tool="rect"}
+            IconButton "circle" tooltip="Ellipse" selected={tool=="ellipse"} onTap={tool="ellipse"}
+            IconButton "arrow_right_alt" tooltip="Arrow" selected={tool=="arrow"} onTap={tool="arrow"}
+            IconButton "title" tooltip="Text" selected={tool=="text"} onTap={tool="text"}
+            Divider
+            IconButton "undo" tooltip="Undo" disabled={isEmpty(history)} onTap={future=append(future,items); items=last(history); history=removeAt(history,length(history)-1)}
+            IconButton "redo" tooltip="Redo" disabled={isEmpty(future)} onTap={history=append(history,items); items=last(future); future=removeAt(future,length(future)-1)}
+      if length(selected) > 0
+        Column center bottom pad=16
+          Card pad=8
+            Row gap=8 middle
+              Text.muted "{length(selected)} selected"
+              each c in ["#FFFDE68A","#FFBFDBFE","#FFBBF7D0","#FFFECACA","#FFE9D5FF"]
+                Box w=24 h=24 radius=12 fill={c} border={c == color ? "#FF111827" : "#00000000"} onTap={color=c; history=append(history,items); items=updateWhere(items,i=>contains(selected,i.id),i=>with(i,"color",c))}
+              Divider
+              IconButton "group_work" tooltip="Group" disabled={length(selected) < 2} onTap={history=append(history,items); items=updateWhere(items,i=>contains(selected,i.id),i=>with(i,"group",concat("g",length(items))))}
+              IconButton "layers_clear" tooltip="Ungroup" onTap={history=append(history,items); items=updateWhere(items,i=>contains(selected,i.id),i=>with(i,"group",""))}
+              IconButton "content_copy" tooltip="Duplicate" onTap={history=append(history,items); items=concat(items,map(filter(items,i=>contains(selected,i.id)),i=>with(with(with(i,"id",concat(i.id,"c")),"x",i.x+24),"y",i.y+24)))}
+              IconButton "delete" tooltip="Delete" onTap={history=append(history,items); items=filter(items,i=>!contains(selected,i.id)); selected=[]}
+      Column right bottom pad=16
+        Card pad=6
+          Row gap=4 middle
+            IconButton "remove" tooltip="Zoom out" onTap={zoom=clamp(zoom-0.25,0.25,4)}
+            Button.ghost "{round(zoom*100,0)}%" onTap={open zoomMenu}
+            IconButton "add" tooltip="Zoom in" onTap={zoom=clamp(zoom+0.25,0.25,4)}
+            IconButton "fit_screen" tooltip="Fit to screen" onTap={zoom=0.75; panX=0; panY=0}
+  Menu#zoomMenu above end
+    MenuItem "50%" onTap={zoom=0.5}
+    MenuItem "100%" onTap={zoom=1}
+    MenuItem "200%" onTap={zoom=2}
+    MenuItem "Fit to screen" icon="fit_screen" onTap={zoom=0.75; panX=0; panY=0}
+  Menu#canvasMenu
+    MenuItem "Add sticky note" icon="sticky_note_2" onTap={tool="note"}
+    MenuItem "Select all" icon="select_all" onTap={selected=map(items,i=>i.id)}
+    MenuItem "Reset view" icon="center_focus_strong" onTap={zoom=1; panX=0; panY=0}
+  Dialog#share "Share this board" "Anyone with the link can view; invited people can edit"
+    Input "Invite by email" "name@company.com" bind=inviteEmail
+    Row gap=8
+      Button "Send invite" onTap={emit invite inviteEmail; toast "Invite sent"; close}
+      Button.outline "Copy link" onTap={copy "https://chalk.app/b/q3-roadmap"; toast "Link copied"}
+
+### Boards
+state q=""
+state boards=[{"id":"b1","name":"Q3 roadmap workshop","edited":"2 minutes ago","people":3},{"id":"b2","name":"Retro: sprint 42","edited":"Yesterday","people":5},{"id":"b3","name":"Onboarding flow map","edited":"Mon","people":2},{"id":"b4","name":"Brand ideas","edited":"Last week","people":1}]
+App
+  Sidebar
+    Brand "Chalk" icon="draw"
+    NavItem "All boards" icon="dashboard" selected={true}
+    NavItem "Shared with me" icon="group"
+    NavItem "Starred" icon="star"
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "All boards" level=1
+      Row gap=8
+        Input "Search boards" bind=q w=220
+        Button "New board" icon="add" onTap={go board}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        each b in filter(boards,x=>contains(lower(x.name),lower(q)))
+          Card gap=8 onTap={go board}
+            Box h=120 radius=8 fill=#FFF3F4F6
+              Text.muted "Preview"
+            Text.strong "{b.name}"
+            Row between
+              Text.caption "Edited {b.edited}"
+              Badge.neutral "{b.people} people"
+
+// The canvas: draws a pannable, zoomable surface with an optional dot grid. Panning, zooming and box selection are modelled by its events; the real gestures are not drawn.
+define Canvas zoom=1 panX=0 panY=0 grid onPan onZoom onBoxSelect onTap onPlace
+  Stack fill=#FFFAFAFA h=fill onTap={onTap}
+    ...
+
+// A board object: draws a sticky note, rectangle, ellipse, arrow or text, with selection outline, corner handles and in-place text editing.
+define Item x=0 y=0 w=180 h=140 kind="note" fill=#FFFDE68A text="" selected=false editing=false onTap onDoubleTap onEdit onMove onMoveStart onResize
+  Column w={w} h={h} pad=12 fill={fill} radius={kind=="ellipse" ? h/2 : 4} border={selected ? "#FF2563EB" : "#00000000"} onTap={onTap} onDoubleTap={onDoubleTap}
+    if editing
+      Input "" bind=text multiline onChange={onEdit(result)}
+    if !editing
+      Text "{text}"
+    if selected
+      Row end
+        Box w=10 h=10 fill=#FF2563EB drag=handle(text) onDrop={onResize}
+
+// Another person's pointer on the canvas, with their name in a small coloured label.
+define Cursor "name" color=#FF2563EB x=0 y=0
+  Row gap=2 middle
+    Icon "navigation" color={color}
+    Box pad=[6,2,6,2] radius=4 fill={color}
+      Text.caption "{name}" color=#FFFFFFFF
+
+// A small overview of the whole board with the visible area marked; shown as a labelled box, the items are not redrawn.
+define Minimap items=[] zoom=1 panX=0 panY=0 w=180 h=120 onNavigate
+  Box w={w} h={h} fill=#FFFFFFFF border=#FFD1D5DB radius=6 center middle onTap={onNavigate}
+    Text.caption "Minimap, {length(items)} objects"

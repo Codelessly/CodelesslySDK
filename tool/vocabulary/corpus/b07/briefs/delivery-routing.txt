@@ -1,0 +1,3 @@
+App: Dropoff, a courier's route app. A list of stops in order with time windows and parcel counts; a map with the route line and numbered pins, dragged in the list to reorder and the route redrawing; a next stop card with navigate, call and a proof screen asking for a photo, a signature drawn on screen or a code; failed delivery reasons; an estimate of finish time that updates; a day summary.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

@@ -1,0 +1,192 @@
+### Home
+state month="November 2026"
+state selected=17
+state address="14 Alder Lane, Bristol"
+state days=[{"d":2,"bins":["general"]},{"d":3,"bins":["recycling"]},{"d":9,"bins":["general"]},{"d":10,"bins":["recycling","garden"]},{"d":16,"bins":["general"]},{"d":17,"bins":["recycling","glass"]},{"d":23,"bins":["general"]},{"d":24,"bins":["recycling","garden"]},{"d":30,"bins":["general"]}]
+state holidays=[{"d":25,"note":"Thanksgiving week shift: moved to Fri 27"}]
+state binColors={"general":"#FF4A4A4A","recycling":"#FF2E7D32","garden":"#FF8D6E63","glass":"#FF1E88E5"}
+App
+  Sidebar
+    Brand "Binday" icon="delete"
+    NavItem "Calendar" icon="calendar_month" selected={true} onTap={go home}
+    NavItem "What goes where" icon="recycling" onTap={go guide}
+    NavItem "Report a missed bin" icon="report" onTap={go report}
+    NavItem "Settings" icon="settings" onTap={go settings}
+    Spacer grow
+    Text.muted "{address}"
+  Main
+    Nav
+      Heading "Calendar" level=1
+      Row gap=8
+        Input "Search address" "Postcode or street" bind=addressQuery w=240 onChange={emit findRound result}
+        Button.outline "Change address" onTap={open address}
+    Column pad=24 gap=16 scroll
+      Card gap=16
+        Row gap=24 middle
+          Image "https://binday.example/img/bin-recycling-blue.png" w=120 h=120 radius=12
+          Column grow gap=4
+            Text.caption "NEXT COLLECTION"
+            Text "Tomorrow" size=48 weight=700
+            Text.muted "Wednesday 18 November: recycling and glass"
+            Row gap=8
+              Badge.success "Recycling"
+              Badge.info "Glass"
+          Column gap=8
+            Button "Remind me tonight" onTap={toast "Reminder set for 7:00 pm"; emit remind}
+            Button.outline "Report a missed bin" onTap={go report}
+      Card gap=12
+        Row between middle
+          IconButton "chevron_left" tooltip="Previous month" onTap={emit prevMonth}
+          Text.heading "{month}"
+          IconButton "chevron_right" tooltip="Next month" onTap={emit nextMonth}
+        Grid cols=7 gap=4
+          each wd in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+            Text.caption "{wd}" center
+        Grid cols=7 gap=4
+          each day in range(30)
+            Box pad=6 gap=4 radius=8 fill={selected==day+1 ? "#FFE3F2FD" : "#00000000"} onTap={selected=day+1}
+              Text.strong "{day+1}"
+              Row gap=3
+                each entry in filter(days, x=>x.d==day+1)
+                  each b in entry.bins
+                    Box w=8 h=8 radius=4 fill={binColors[b]}
+              if any(holidays, h=>h.d==day+1)
+                Icon "event_busy" color=#FFD84315 size=14
+        Row gap=16
+          Row gap=4
+            Box w=8 h=8 radius=4 fill=#FF4A4A4A
+            Text.caption "General"
+          Row gap=4
+            Box w=8 h=8 radius=4 fill=#FF2E7D32
+            Text.caption "Recycling"
+          Row gap=4
+            Box w=8 h=8 radius=4 fill=#FF8D6E63
+            Text.caption "Garden"
+          Row gap=4
+            Box w=8 h=8 radius=4 fill=#FF1E88E5
+            Text.caption "Glass"
+          Row gap=4
+            Icon "event_busy" color=#FFD84315 size=14
+            Text.caption "Holiday change"
+      if any(holidays, h=>h.d==selected)
+        Card gap=4 fill=#FFFFF3E0
+          Text.strong "Holiday change"
+          Text.muted "{find(holidays, h=>h.d==selected).note}"
+      if isEmpty(filter(days, x=>x.d==selected))
+        Text.muted "No collection on {selected} November."
+  Dialog#address "Find your round" "We match your address to a collection round."
+    Input "Postcode" "BS1 4DJ" bind=postcode
+    Button "Find round" onTap={emit findRound postcode; address=postcode; toast "Round 3, Wednesday"; close}
+
+### What goes where
+state q=""
+state items=[{"name":"Pizza box","bin":"general","ok":false,"tip":"Greasy cardboard cannot be recycled."},{"name":"Cardboard box","bin":"recycling","ok":true,"tip":"Flatten it first."},{"name":"Glass jar","bin":"glass","ok":true,"tip":"Rinse and remove the lid."},{"name":"Lawn clippings","bin":"garden","ok":true,"tip":"No soil or stones."},{"name":"Crisp packet","bin":"general","ok":false,"tip":"Not recyclable at the kerb."},{"name":"Plastic bottle","bin":"recycling","ok":true,"tip":"Squash and put the cap back on."},{"name":"Tin can","bin":"recycling","ok":true,"tip":"Rinse it out."}]
+App
+  Sidebar
+    Brand "Binday" icon="delete"
+    NavItem "Calendar" icon="calendar_month" onTap={go home}
+    NavItem "What goes where" icon="recycling" selected={true} onTap={go guide}
+    NavItem "Report a missed bin" icon="report" onTap={go report}
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main
+    Nav
+      Heading "What goes where" level=1
+      Input "Search an item" "e.g. pizza box" bind=q w=260
+    Column pad=24 gap=16 scroll
+      if q!=""
+        each it in filter(items, x=>contains(lower(x.name), lower(q)))
+          Card gap=8
+            Row between middle
+              Text.heading "{it.name}"
+              Badge.success "Yes, recyclable" visible={it.ok}
+              Badge.danger "No, general waste" visible={!it.ok}
+            Text.muted "Goes in the {it.bin} bin. {it.tip}"
+        if isEmpty(filter(items, x=>contains(lower(x.name), lower(q))))
+          Text.muted "Nothing found for {q}. Check the council list."
+      Grid cols=2 gap=16
+        Card gap=8
+          Row gap=8 middle
+            Box w=12 h=12 radius=6 fill=#FF4A4A4A
+            Text.heading "General"
+          Text.muted "Nappies, crisp packets, greasy card, broken crockery, cat litter."
+        Card gap=8
+          Row gap=8 middle
+            Box w=12 h=12 radius=6 fill=#FF2E7D32
+            Text.heading "Recycling"
+          Text.muted "Paper, card, tins, cans, plastic bottles, tubs and trays."
+        Card gap=8
+          Row gap=8 middle
+            Box w=12 h=12 radius=6 fill=#FF8D6E63
+            Text.heading "Garden"
+          Text.muted "Grass, hedge trimmings, leaves, small branches."
+        Card gap=8
+          Row gap=8 middle
+            Box w=12 h=12 radius=6 fill=#FF1E88E5
+            Text.heading "Glass"
+          Text.muted "Bottles and jars of any colour, lids removed."
+
+### Report a missed bin
+state binType="Recycling"
+state when=""
+state note=""
+state photo=""
+state sent=false
+App
+  Sidebar
+    Brand "Binday" icon="delete"
+    NavItem "Calendar" icon="calendar_month" onTap={go home}
+    NavItem "What goes where" icon="recycling" onTap={go guide}
+    NavItem "Report a missed bin" icon="report" selected={true} onTap={go report}
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main
+    Nav
+      Heading "Report a missed bin" level=1
+    Column pad=24 gap=16 maxw=640 scroll
+      if sent
+        Card gap=8
+          Icon "check_circle" color=#FF2E7D32 size=40
+          Text.heading "Report sent"
+          Text.muted "Reference BD-20418. The crew returns within two working days."
+          Button.outline "Back to calendar" onTap={go home}
+      if !sent
+        Card gap=12
+          Text.fieldLabel "Which bin?"
+          Row gap=8
+            ChoiceChip "General" selected={binType=="General"} onTap={binType="General"}
+            ChoiceChip "Recycling" selected={binType=="Recycling"} onTap={binType="Recycling"}
+            ChoiceChip "Garden" selected={binType=="Garden"} onTap={binType="Garden"}
+            ChoiceChip "Glass" selected={binType=="Glass"} onTap={binType="Glass"}
+          DatePicker "Collection day" bind=when
+          Input "What happened?" "Bin left out by 7 am, not emptied" bind=note multiline
+          Row gap=12 middle
+            Button.outline "Add a photo" icon="photo_camera" onTap={emit pickPhoto}
+            if photo!=""
+              Image "{photo}" w=64 h=64 radius=8
+          Button "Send report" onTap={when!="" ? {emit report binType; sent=true; toast "Report sent"} : toast "Choose the collection day"}
+
+### Settings
+state reminderOn=true
+state reminderTime="19:00"
+state address="14 Alder Lane, Bristol"
+App
+  Sidebar
+    Brand "Binday" icon="delete"
+    NavItem "Calendar" icon="calendar_month" onTap={go home}
+    NavItem "What goes where" icon="recycling" onTap={go guide}
+    NavItem "Report a missed bin" icon="report" onTap={go report}
+    NavItem "Settings" icon="settings" selected={true} onTap={go settings}
+  Main
+    Nav
+      Heading "Settings" level=1
+    Column pad=24 gap=16 maxw=640 scroll
+      Card gap=12
+        Text.strong "Your address"
+        Input "Address" bind=address
+        Button.outline "Find my round" onTap={emit findRound address; toast "Round 3, Wednesday"}
+      Card gap=12
+        Text.strong "Night-before reminder"
+        Toggle "Remind me the evening before" bind=reminderOn
+        if reminderOn
+          TimePicker "Reminder time" bind=reminderTime
+          Text.muted "You will be reminded at {reminderTime} the night before each collection."
+        Button "Save" onTap={emit saveReminder reminderTime; toast "Saved"}

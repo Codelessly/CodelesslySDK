@@ -1,0 +1,162 @@
+### Battlefield
+state gold=150
+state lives=20
+state wave=1
+state speed=1
+state running=false
+state paused=false
+state left=0
+state nextId=1
+state enemies=[]
+state towers=[]
+state path=[8,9,10,11,12,13,14,15,23,31,30,29,28,27,26,25,24]
+state plots=[1,4,6,17,18,20,21,33,36,38]
+state sel=-1
+state cur={}
+state plot=-1
+state kinds=[{"id":"archer","name":"Archer","icon":"gps_fixed","cost":50,"dmg":6,"range":2},{"id":"cannon","name":"Cannon","icon":"local_fire_department","cost":90,"dmg":14,"range":2},{"id":"frost","name":"Frost","icon":"ac_unit","cost":70,"dmg":3,"range":3},{"id":"mage","name":"Mage","icon":"auto_fix_high","cost":120,"dmg":20,"range":2}]
+every 600 when running && !paused onTick={hit=map(enemies,e=>with(e,"hp",e.hp-sum(towers,t=>(max(abs(floor(t.tile/8)-floor(path[min(floor(e.at),16)]/8)),abs(t.tile%8-path[min(floor(e.at),16)]%8))<=t.range ? t.dmg : 0)))); gold=gold+sum(filter(hit,e=>e.hp<=0),e=>e.bounty); moved=map(filter(hit,e=>e.hp>0),e=>with(e,"at",e.at+0.5*speed)); lives=max(0,lives-count(moved,e=>e.at>=17)); enemies=filter(moved,e=>e.at<17); left>0 ? {enemies=append(enemies,{"id":nextId,"at":0,"hp":14+wave*8,"bounty":6+wave}); nextId=nextId+1; left=left-1} : ; lives<=0 ? {running=false; open defeat} : (left==0 && isEmpty(enemies) ? {running=false; gold=gold+20+wave*5; wave=wave+1; wave>10 ? open victory : toast "Wave cleared, +bonus gold"} : )}
+App
+  Main
+    Nav
+      Brand "Bastion Line" icon="castle"
+      Row gap=16 middle
+        Row gap=6 middle
+          Icon "paid" color=#FFF59E0B
+          Text.strong "{gold}"
+        Row gap=6 middle
+          Icon "favorite" color=#FFDC2626
+          Text.strong "{lives}"
+        Row gap=6 middle
+          Icon "flag"
+          Text.strong "Wave {min(wave,10)} of 10"
+      Row gap=8
+        Button.outline "{speed}x" onTap={speed=speed==3?1:speed+1}
+        IconButton "pause" tooltip="Pause" onTap={paused=true; open pause}
+    Column pad=24 gap=12 center
+      Progress {1-length(enemies)/(8+wave*2)} hide=phone
+      Grid cols=8 gap=2 maxw=720
+        each i in range(40)
+          Box h=72 radius=6 fill={contains(path,i) ? "#FFC8A96E" : (contains(plots,i) ? "#FF86B36B" : "#FF4F7F4A")} border={sel>=0 && max(abs(floor(cur.tile/8)-floor(i/8)),abs(cur.tile%8-i%8))<=cur.range ? "#FF2563EB" : "#00000000"} center middle onTap={contains(plots,i) ? (find(towers,t=>t.tile==i) != null ? {sel=i; cur=find(towers,t=>t.tile==i)} : {sel=-1; plot=i; open build}) : {sel=-1}}
+            if count(enemies,e=>path[min(floor(e.at),16)]==i) > 0
+              Badge.error "{count(enemies,e=>path[min(floor(e.at),16)]==i)}"
+            if find(towers,t=>t.tile==i) != null
+              Icon "{find(towers,t=>t.tile==i).icon}" color=#FF111827
+            if contains(plots,i) && find(towers,t=>t.tile==i) == null
+              Icon "add" color=#FFFFFFFF
+            if i==8
+              Text.caption "IN"
+            if i==24
+              Text.caption "KEEP"
+      Text.muted "Tap a green plot to build. Tap a tower to see its range."
+    Footer
+      Row between middle
+        Text.muted "{running ? 'Enemies left: ' + (length(enemies)+left) : 'Next wave: ' + (6+wave*2) + ' raiders'}"
+        Row gap=8
+          if !running
+            Button "Start wave {wave}" onTap={left=6+wave*2; running=true}
+          if running
+            Button.outline "Call next wave early +25g" onTap={gold=gold+25; left=left+6+(wave+1)*2; wave=wave+1}
+  Pane w=320 pad=16 gap=12
+    if sel<0
+      Heading "Defences" level=3
+      Text.muted "No tower selected."
+      each k in kinds
+        ListTile "{k.name}" icon="{k.icon}" subtitle="Damage {k.dmg}, range {k.range}, {k.cost}g"
+    if sel>=0
+      Heading "{cur.name} level {cur.level}" level=3
+      Row gap=12 middle
+        Ring {cur.range/3}
+        Column gap=2
+          Text.strong "Damage {cur.dmg}"
+          Text.muted "Range {cur.range} tiles (shown in blue on the map)"
+      Button "Upgrade for {60*cur.level}g" disabled={gold<60*cur.level || cur.level>=3} onTap={gold=gold-60*cur.level; towers=updateWhere(towers,t=>t.tile==sel,t=>with(with(with(t,"level",t.level+1),"dmg",round(t.dmg*1.5,0)),"spent",t.spent+60*t.level)); cur=with(with(with(cur,"level",cur.level+1),"dmg",round(cur.dmg*1.5,0)),"spent",cur.spent+60*cur.level); toast "Upgraded"}
+      Button.destructive "Sell for {floor(cur.spent*0.7)}g" onTap={gold=gold+floor(cur.spent*0.7); towers=removeWhere(towers,t=>t.tile==sel); sel=-1; cur={}}
+      Button.ghost "Deselect" onTap={sel=-1; cur={}}
+Popover#build
+  Text.strong "Build a tower"
+  Row gap=8
+    each k in kinds
+      Column gap=4 center pad=6 onTap={gold>=k.cost ? {gold=gold-k.cost; towers=append(towers,{"tile":plot,"kind":k.id,"name":k.name,"icon":k.icon,"level":1,"dmg":k.dmg,"range":k.range,"spent":k.cost}); sel=plot; cur=find(towers,t=>t.tile==plot); close} : toast "Not enough gold"}
+        IconButton "{k.icon}" tooltip="{k.name}"
+        Text.small "{k.name}"
+        Text.caption color={gold>=k.cost ? "#FF15803D" : "#FFDC2626"} "{k.cost}g"
+Dialog#pause "Paused" "The wave is held where it is."
+  Button "Resume" onTap={paused=false; close}
+  Button.outline "Restart level" onTap={gold=150; lives=20; wave=1; speed=1; running=false; paused=false; left=0; enemies=[]; towers=[]; sel=-1; cur={}; close}
+  Button.ghost "Quit to levels" onTap={paused=false; close; go levels}
+Dialog#victory "Victory" "All ten waves are broken. The keep stands."
+  Row gap=4 center
+    Icon "star" color=#FFF59E0B
+    Icon "star" color=#FFF59E0B
+    Icon "{lives>=15 ? 'star' : 'star_border'}" color=#FFF59E0B
+  Text.strong "{lives} lives left, {gold} gold unspent"
+  Button "Next level" onTap={close; go levels}
+  Button.outline "Replay" onTap={gold=150; lives=20; wave=1; running=false; left=0; enemies=[]; towers=[]; sel=-1; cur={}; close}
+Dialog#defeat "Defeat" "The line has fallen on wave {wave}."
+  Text.muted "Try a Frost tower near the entrance and upgrade the Cannons."
+  Button "Try again" onTap={gold=150; lives=20; wave=1; speed=1; running=false; left=0; enemies=[]; towers=[]; sel=-1; cur={}; close}
+  Button.ghost "Quit to levels" onTap={close; go levels}
+
+### Levels
+state picked="Green Valley"
+state levels=[{"name":"Green Valley","waves":10,"stars":2,"note":"One winding road. A gentle start."},{"name":"Ember Pass","waves":14,"stars":0,"note":"Fast raiders and few plots."},{"name":"Frostmere","waves":16,"stars":0,"note":"Two lanes merge before the keep."}]
+Page
+  Nav
+    Brand "Bastion Line" icon="castle"
+    Row gap=4
+      Link "Levels" onTap={go levels}
+      Link "Towers" onTap={go towers}
+    Button "Resume game" onTap={go battlefield}
+  Section
+    Column gap=8
+      Heading "Choose a front" level=1
+      Text.muted "Earn stars by keeping lives. Three stars needs 15 of 20."
+    Grid cols=3 gap=24
+      each lv in levels
+        Card gap=8 border={picked==lv.name ? "#FF2563EB" : "#FFE5E7EB"} onTap={picked=lv.name}
+          Heading "{lv.name}" level=3
+          Text.muted "{lv.note}"
+          Row gap=4
+            each s in range(3)
+              Icon "{s<lv.stars ? 'star' : 'star_border'}" color=#FFF59E0B
+          Text.caption "{lv.waves} waves"
+          Button "Play" disabled={lv.stars==0 && lv.name!="Green Valley" && lv.name!="Ember Pass"} onTap={picked=lv.name; go battlefield}
+  Footer
+    Text.muted "Selected: {picked}"
+
+### Towers
+state shown="archer"
+state kinds=[{"id":"archer","name":"Archer","icon":"gps_fixed","cost":50,"dmg":6,"range":2,"text":"Cheap and quick. Good early and on the first bend."},{"id":"cannon","name":"Cannon","icon":"local_fire_department","cost":90,"dmg":14,"range":2,"text":"Heavy shots against armoured raiders."},{"id":"frost","name":"Frost","icon":"ac_unit","cost":70,"dmg":3,"range":3,"text":"Chills the road. Longest reach, light damage."},{"id":"mage","name":"Mage","icon":"auto_fix_high","cost":120,"dmg":20,"range":2,"text":"The strongest hit. Save for the keep's last stretch."}]
+Page
+  Nav
+    Brand "Bastion Line" icon="castle"
+    Row gap=4
+      Link "Levels" onTap={go levels}
+      Link "Towers" onTap={go towers}
+    Button "Back to battle" onTap={go battlefield}
+  Section
+    Heading "Towers" level=1
+    Row gap=8
+      each k in kinds
+        ChoiceChip "{k.name}" selected={shown==k.id} onTap={shown=k.id}
+    Card gap=12
+      each k in filter(kinds,x=>x.id==shown)
+        Row gap=16 middle
+          IconTile "{k.icon}"
+          Column grow gap=4
+            Heading "{k.name}" level=3
+            Text.muted "{k.text}"
+        Grid cols=3 gap=12
+          Column gap=2
+            Text.caption "Cost"
+            Text.strong "{k.cost}g"
+          Column gap=2
+            Text.caption "Damage"
+            Text.strong "{k.dmg}"
+          Column gap=2
+            Text.caption "Range"
+            Text.strong "{k.range} tiles"
+        BarChart values={map(range(3),n=>round(k.dmg*(1+n*0.5),0))} labels=["Level 1","Level 2","Level 3"] h=160
+  Footer
+    Text.muted "Upgrades cost 60g times the level. Selling returns 70 percent of what you spent."

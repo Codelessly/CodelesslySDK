@@ -1,0 +1,3 @@
+App: Chalk, a shared whiteboard. A canvas that pans and zooms with sticky notes, shapes and arrows placed by drag from a toolbar; select, multi-select by a box, move, resize by handles, recolour, group; text edited in place; a minimap; cursors of three other people with names; undo and redo; a zoom control and fit to screen.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

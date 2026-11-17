@@ -1,0 +1,194 @@
+### Week
+state tab="week"
+state days=["Mon","Tue","Wed","Thu","Fri"]
+state slots=["Morning","Afternoon"]
+state adults=[{"name":"Priya N.","color":"#FF4F8EF7"},{"name":"Tom Hale","color":"#FF2FA36B"},{"name":"Grace Okafor","color":"#FFE08A1E"},{"name":"Luis M.","color":"#FF8E5CD9"}]
+state cells=[{"id":"mon-m","day":"Mon","slot":"Morning","adult":"Priya N.","kids":"Ava, Leo","color":"#FF4F8EF7"},{"id":"mon-a","day":"Mon","slot":"Afternoon","adult":"Tom Hale","kids":"Ava, Leo","color":"#FF2FA36B"},{"id":"tue-m","day":"Tue","slot":"Morning","adult":"Grace Okafor","kids":"Noor","color":"#FFE08A1E"},{"id":"tue-a","day":"Tue","slot":"Afternoon","adult":"","kids":"Noor","color":""},{"id":"wed-m","day":"Wed","slot":"Morning","adult":"Priya N.","kids":"Ava, Leo","color":"#FF4F8EF7"},{"id":"wed-a","day":"Wed","slot":"Afternoon","adult":"Luis M.","kids":"Ava (Chess Club to 4:30)","color":"#FF8E5CD9"},{"id":"thu-m","day":"Thu","slot":"Morning","adult":"Tom Hale","kids":"Leo","color":"#FF2FA36B"},{"id":"thu-a","day":"Thu","slot":"Afternoon","adult":"Grace Okafor","kids":"Noor, Leo","color":"#FFE08A1E"},{"id":"fri-m","day":"Fri","slot":"Morning","adult":"Luis M.","kids":"Ava","color":"#FF8E5CD9"},{"id":"fri-a","day":"Fri","slot":"Afternoon","adult":"","kids":"Ava, Noor","color":""}]
+state sel=""
+state to="Tom Hale"
+state note=""
+state late="Running 10 minutes late, please keep the children inside."
+state gaps=0
+state gaps=count(cells,c=>c.adult=="")
+App
+  Sidebar
+    Brand "Gate Duty" icon="school"
+    NavItem "Week" icon="calendar_view_week" selected={tab=="week"} onTap={tab="week"}
+    NavItem "Month" icon="calendar_month" selected={tab=="month"} onTap={go month}
+    NavItem "Requests" icon="swap_horiz" badge="2" onTap={go requests}
+    NavItem "My code" icon="qr_code_2" onTap={go code}
+    Spacer grow
+    Text.caption "Drag a name onto a cell to cover it."
+    Text.muted "Class 3B, Elmfield Primary"
+  Main
+    Nav
+      Heading "Week of 17 Nov" level=1
+      Row gap=8
+        IconButton "chevron_left" tooltip="Previous week"
+        IconButton "chevron_right" tooltip="Next week"
+        Button.outline "Gate map" icon="map" onTap={open gatemap}
+    Column pad=24 gap=16
+      if count(cells,c=>c.adult=="")>0
+        Card fill=#FFFDECEC border-left=#FFD93025
+          Row gap=12 middle
+            Icon "warning" color=#FFD93025
+            Text.strong "{count(cells,c=>c.adult==\"\")} pickups have nobody yet" color=#FFD93025
+            Spacer grow
+            Text.muted "Drag a name into the red cells."
+      Row gap=8 scroll
+        each a in adults
+          Chip "{a.name}" fill={a.color} color=#FFFFFFFF drag=adult(a.name)
+      Row gap=8
+        Text.caption "" w=90
+        each d in days
+          Text.strong "{d}" grow center
+      each s in slots
+        Row gap=8 top
+          Text.muted "{s}" w=90
+          each c in cells
+            if c.slot==s
+              Box grow gap=4 pad=10 radius=10 fill={c.adult=="" ? "#FFFDECEC" : c.color} drop=adult onDrop={cells=updateWhere(cells,x=>x.id==c.id,x=>with(with(x,"adult",result.data),"color",find(adults,y=>y.name==result.data).color)); toast "{result.data} now covers {c.day} {s}"} onTap={sel=c.id; open cell}
+                if c.adult==""
+                  Text.strong "Nobody yet" color=#FFD93025
+                  Text.caption "{c.kids}" color=#FFD93025
+                if c.adult!=""
+                  Text.strong "{c.adult}" color=#FFFFFFFF
+                  Text.caption "{c.kids}" color=#FFFFFFFF
+      Card gap=8
+        Text.strong "After-school clubs"
+        Row gap=8
+          Badge.info "Ava, Wed Chess Club until 4:30"
+          Badge.info "Noor, Thu Choir until 4:15"
+          Badge.neutral "Leo, no regular club"
+  Dialog#cell "Pickup details" "Cover, swap or ask the school"
+    Text.strong "{find(cells,c=>c.id==sel).day} {find(cells,c=>c.id==sel).slot}"
+    Text.muted "Children: {find(cells,c=>c.id==sel).kids}"
+    Select "Ask to swap with" bind=to items=["Tom Hale","Priya N.","Grace Okafor","Luis M."]
+    Input "Message" "Can you take this one?" bind=note multiline
+    Row gap=8
+      Button "Send swap request" onTap={emit swapRequest {"cell":sel,"to":to,"note":note}; toast "Request sent to {to}"; close}
+      Button.outline "Late note" onTap={close; open latenote}
+  Dialog#latenote "Late note" "Goes to the school office"
+    Input "Message to the school" bind=late multiline
+    Button "Send to school" icon="send" onTap={emit lateNote late; toast "School office notified"; close}
+  Dialog#gatemap "School gate map" "Gate B is for Years 3 to 4"
+    Image "https://example.com/elmfield-gate-map.png" h=220
+    Text.muted "Park on Mill Lane. Walk to Gate B by the bike shed."
+  Dialog#chime "Pickup in 30 minutes" "Today, Afternoon, Gate B"
+    Text.strong "Grace Okafor collects Noor and Leo at 3:15"
+    Image "https://example.com/elmfield-gate-map.png" h=160
+    Row gap=8
+      Button.outline "Late note" icon="edit_note" onTap={close; open latenote}
+      Button "On my way" onTap={toast "Teacher told you are coming"; close}
+
+### Month
+state month="Nov"
+state view="month"
+state weeks=[["3","4","5","6","7"],["10","11","12","13","14"],["17","18","19","20","21"],["24","25","26","27","28"]]
+state covered=[{"d":"3","n":2},{"d":"4","n":2},{"d":"5","n":2},{"d":"6","n":2},{"d":"7","n":2},{"d":"10","n":2},{"d":"11","n":2},{"d":"12","n":1},{"d":"13","n":2},{"d":"14","n":2},{"d":"17","n":2},{"d":"18","n":1},{"d":"19","n":2},{"d":"20","n":2},{"d":"21","n":1},{"d":"24","n":2},{"d":"25","n":2},{"d":"26","n":0},{"d":"27","n":2},{"d":"28","n":2}]
+state picked="18"
+App
+  Sidebar
+    Brand "Gate Duty" icon="school"
+    NavItem "Week" icon="calendar_view_week" onTap={go week}
+    NavItem "Month" icon="calendar_month" selected={view=="month"} onTap={view="month"}
+    NavItem "Requests" icon="swap_horiz" badge="2" onTap={go requests}
+    NavItem "My code" icon="qr_code_2" onTap={go code}
+  Main
+    Nav
+      Heading "{month} 2026" level=1
+      Row gap=8
+        SegmentedButton bind=month items=["Oct","Nov","Dec"]
+        IconButton "download" tooltip="Export rota"
+    Column pad=24 gap=16
+      if count(covered,c=>c.n<2)>0
+        Card fill=#FFFDECEC
+          Row gap=8 middle
+            Icon "warning" color=#FFD93025
+            Text.strong "{count(covered,c=>c.n<2)} days have a gap" color=#FFD93025
+      Row gap=8
+        each d in ["Mon","Tue","Wed","Thu","Fri"]
+          Text.muted "{d}" grow center
+      each w in weeks
+        Row gap=8
+          each day in w
+            Card grow gap=4 fill={find(covered,c=>c.d==day).n==2 ? "#FFE8F5EC" : (find(covered,c=>c.d==day).n==1 ? "#FFFFF3D6" : "#FFFDECEC")} onTap={picked=day}
+              Text.strong "{day}"
+              Row gap=4
+                each i in range(find(covered,c=>c.d==day).n)
+                  Icon "person" size=14
+                if find(covered,c=>c.d==day).n<2
+                  Icon "warning" size=14 color=#FFD93025
+      Card gap=8
+        Text.strong "{picked} {month}"
+        Text.muted "{find(covered,c=>c.d==picked).n} of 2 pickups covered"
+        Button.outline "Open this week" onTap={go week}
+
+### Requests
+state tab="incoming"
+state incoming=[{"id":1,"from":"Priya N.","day":"Tue","slot":"Afternoon","note":"Dentist appointment, can you take Noor?","status":"open"},{"id":2,"from":"Luis M.","day":"Fri","slot":"Morning","note":"Early shift, could we trade for Mon?","status":"open"}]
+state sent=[{"id":3,"to":"Tom Hale","day":"Thu","slot":"Morning","note":"Can you cover Leo?","status":"waiting"}]
+state sel=0
+App
+  Sidebar
+    Brand "Gate Duty" icon="school"
+    NavItem "Week" icon="calendar_view_week" onTap={go week}
+    NavItem "Month" icon="calendar_month" onTap={go month}
+    NavItem "Requests" icon="swap_horiz" badge={count(incoming,r=>r.status=="open")} selected={true}
+    NavItem "My code" icon="qr_code_2" onTap={go code}
+  Main
+    Nav
+      Heading "Swap requests" level=1
+      SegmentedButton bind=tab items=["incoming","sent"]
+    Column pad=24 gap=12 scroll
+      if tab=="incoming"
+        each r in incoming
+          Card gap=8
+            Row between
+              Text.strong "{r.from} asks you to cover {r.day} {r.slot}"
+              Badge.warning "{r.status}" visible={r.status=="open"}
+              Badge.success "{r.status}" visible={r.status=="accepted"}
+              Badge.neutral "{r.status}" visible={r.status=="declined"}
+            Text.muted "{r.note}"
+            if r.status=="open"
+              Row gap=8
+                Button "Accept" onTap={incoming=updateWhere(incoming,x=>x.id==r.id,x=>with(x,"status","accepted")); emit swapAnswer {"id":r.id,"answer":"accepted"}; toast "Accepted, the rota is updated"}
+                Button.outline "Decline" onTap={sel=r.id; open decline}
+      if tab=="sent"
+        each r in sent
+          Card gap=8
+            Row between
+              Text.strong "To {r.to}: {r.day} {r.slot}"
+              Badge.info "{r.status}"
+            Text.muted "{r.note}"
+            Button.ghost "Withdraw" onTap={sent=removeWhere(sent,x=>x.id==r.id); emit swapWithdraw r.id; toast "Request withdrawn"}
+  Dialog#decline "Decline this request?" "Say why, if you like"
+    Input "Reply" "Sorry, I am at work then" bind=reply
+    Button.destructive "Decline" onTap={incoming=updateWhere(incoming,x=>x.id==sel,x=>with(x,"status","declined")); emit swapAnswer {"id":sel,"answer":"declined","reply":reply}; toast "Declined"; close}
+
+### My code
+state code="48K-27R"
+state name="Grace Okafor"
+state shown=true
+Page
+  Nav
+    Brand "Gate Duty" icon="school"
+    Row gap=4
+      Link "Week" onTap={go week}
+      Link "Month" onTap={go month}
+      Link "Requests" onTap={go requests}
+  Section narrow center
+    Column gap=16 center
+      Heading "Today's pickup code" level=1
+      Text.muted "Show this to the teacher at Gate B. It works today only."
+      Card gap=12 center
+        Text.caption "{name}, Wed afternoon"
+        QRCode "{code}" size=200
+        Text "{code}" size=48 weight=700
+        Text.muted "Collecting Ava (Chess Club ends 4:30)"
+      Row gap=8
+        Button.outline "Copy code" icon="content_copy" onTap={copy code; toast "Code copied"}
+        Button "Send late note" icon="edit_note" onTap={open latenote}
+  Dialog#latenote "Late note" "Goes to the school office"
+    Input "Message to the school" bind=late multiline
+    Button "Send to school" icon="send" onTap={emit lateNote late; toast "School office notified"; close}

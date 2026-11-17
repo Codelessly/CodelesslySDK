@@ -1,0 +1,150 @@
+### Live rooms
+state tab="live"
+state q=""
+state rooms=[{"id":"r1","title":"Shipping a Flutter app solo","host":"Maya Reyes","listeners":312,"speakers":["Maya Reyes","Dev Patel","Lena Fischer","Tomas Ruiz"],"topic":"Engineering"},{"id":"r2","title":"Late night lo-fi producers hangout","host":"Kai Nakamura","listeners":148,"speakers":["Kai Nakamura","Sofia Alvarez"],"topic":"Music"},{"id":"r3","title":"Ask a recruiter anything","host":"Priya Shah","listeners":89,"speakers":["Priya Shah","Omar Haddad","Jess Wu"],"topic":"Career"}]
+state topic="All"
+App
+  Sidebar
+    Brand "Murmur" icon="graphic_eq"
+    NavItem "Live now" icon="sensors" badge="3" selected={tab=="live"} onTap={tab="live"}
+    NavItem "Schedule" icon="event" selected={tab=="schedule"} onTap={go schedule}
+    NavItem "Following" icon="group" selected={tab=="following"} onTap={tab="following"}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Alex Morgan" size=32
+      Text.muted "Alex Morgan"
+  Main
+    Nav
+      Heading "Live rooms" level=1
+      Row gap=8
+        Input "Search rooms" bind=q w=220
+        Button "Start a room" icon="mic" onTap={open newRoom}
+    Column pad=24 gap=16
+      Row scroll gap=8
+        ChoiceChip "All" selected={topic=="All"} onTap={topic="All"}
+        ChoiceChip "Engineering" selected={topic=="Engineering"} onTap={topic="Engineering"}
+        ChoiceChip "Music" selected={topic=="Music"} onTap={topic="Music"}
+        ChoiceChip "Career" selected={topic=="Career"} onTap={topic="Career"}
+      each r in filter(rooms, x => (topic=="All" || x.topic==topic) && contains(lower(x.title), lower(q)))
+        Card gap=12 onTap={go room}
+          Row between
+            Badge.error "LIVE"
+            Text.muted "{r.listeners} listening"
+          Text.heading "{r.title}"
+          Row gap=12 middle
+            AvatarStack names={r.speakers} size=36 max=4
+            Text.muted "{join(r.speakers, ', ')}"
+          Row between
+            Badge.neutral "{r.topic}"
+            Button "Join quietly" icon="headphones" onTap={emit join r.id; go room}
+      if length(filter(rooms, x => (topic=="All" || x.topic==topic) && contains(lower(x.title), lower(q))))==0
+        Text.muted "No live rooms match. Start one?"
+  Dialog#newRoom "Start a room" "Pick a title people will want to join"
+    Input "Room title" bind=newTitle
+    Select "Topic" items=["Engineering","Music","Career"] bind=newTopic
+    Toggle "Record this room" bind=newRecord
+    Button "Go live" onTap={rooms=append(rooms, {"id":"r4","title":newTitle,"host":"Alex Morgan","listeners":0,"speakers":["Alex Morgan"],"topic":newTopic}); emit startRoom newTitle; close; go room}
+
+### Room
+state muted=true
+state handRaised=false
+state active="Dev Patel"
+state speakers=[{"name":"Maya Reyes","host":true},{"name":"Dev Patel","host":false},{"name":"Lena Fischer","host":false},{"name":"Tomas Ruiz","host":false}]
+state listeners=[{"name":"Alex Morgan"},{"name":"Ines Costa"},{"name":"Ben Okafor"},{"name":"Yuki Tanaka"},{"name":"Rosa Mendes"},{"name":"Sam Lee"},{"name":"Noah Kim"},{"name":"Amara Diallo"}]
+state queue=[{"name":"Ines Costa"},{"name":"Ben Okafor"}]
+state reactions=[]
+state isHost=true
+every 3s onTick={active=speakers[(indexOf(map(speakers,s=>s.name),active)+1)%length(speakers)].name}
+App
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Leave quietly" onTap={emit leaveQuietly; go rooms}
+        Column gap=2
+          Heading "Shipping a Flutter app solo" level=3
+          Text.muted "{length(listeners)+length(speakers)} in the room"
+      Row gap=8
+        if isHost
+          Button.outline "Host panel" icon="admin_panel_settings" badge="{length(queue)}" onTap={open host}
+        Button.ghost "Leave quietly" icon="logout" onTap={emit leaveQuietly; go rooms}
+    Column pad=24 gap=24 scroll
+      Text.sectionTitle "Speakers"
+      SpeakerCircle items={speakers} active={active}
+        each s in speakers
+          Column center gap=4
+            Avatar "{s.name}" size=72 animate={active==s.name ? "pulse" : ""}
+            Row gap=4 middle
+              Text.strong "{s.name}"
+              if s.host
+                Badge.primary "Host"
+            if active==s.name
+              Waveform active size=20
+      Divider
+      Text.sectionTitle "Listeners"
+      Grid cols=4 gap=16
+        each l in listeners
+          Column center gap=4
+            Avatar "{l.name}" size=48
+            Text.caption "{l.name}"
+            if any(queue, q=>q.name==l.name)
+              Icon "front_hand" color=#FFF5A623
+      FloatingReactions items={reactions} onDone={reactions=[]}
+    Footer
+      Row between middle pad=12
+        Row gap=8
+          IconButton "{muted ? 'mic_off' : 'mic'}" tooltip={muted ? "Unmute" : "Mute"} selected={!muted} onTap={muted=!muted; toast muted ? "Muted" : "You are live"}
+          Button.outline "{handRaised ? 'Lower hand' : 'Raise hand'}" icon="front_hand" onTap={handRaised ? {handRaised=false; queue=removeWhere(queue,q=>q.name=="Alex Morgan"); emit lowerHand} : {handRaised=true; queue=append(queue,{"name":"Alex Morgan"}); emit raiseHand; toast "The host can see you in the queue"}}
+        Row gap=4
+          IconButton "favorite" tooltip="Love" onTap={reactions=append(reactions,{"emoji":"❤️"}); emit react "heart"}
+          IconButton "celebration" tooltip="Cheer" onTap={reactions=append(reactions,{"emoji":"🎉"}); emit react "cheer"}
+          IconButton "sentiment_very_satisfied" tooltip="Laugh" onTap={reactions=append(reactions,{"emoji":"😂"}); emit react "laugh"}
+          IconButton "thumb_up" tooltip="Agree" onTap={reactions=append(reactions,{"emoji":"👍"}); emit react "agree"}
+  Drawer#host "Host panel" right
+    Text.sectionTitle "Hand-raise queue ({length(queue)})"
+    if length(queue)==0
+      Text.muted "Nobody has a hand up."
+    each q in queue
+      ListTile "{q.name}" subtitle="Wants to speak" leading={Avatar "{q.name}" size=36}
+        Row gap=4
+          Button "Bring up" size=small onTap={speakers=append(speakers,{"name":q.name,"host":false}); listeners=removeWhere(listeners,l=>l.name==q.name); queue=removeWhere(queue,x=>x.name==q.name); emit moveUp q.name; toast "{q.name} is a speaker"}
+          IconButton "close" tooltip="Dismiss" onTap={queue=removeWhere(queue,x=>x.name==q.name)}
+    Divider
+    Text.sectionTitle "On stage"
+    each s in speakers
+      ListTile "{s.name}" subtitle={s.host ? "Host" : "Speaker"} leading={Avatar "{s.name}" size=36}
+        if !s.host
+          Button.outline "Move down" size=small onTap={listeners=append(listeners,{"name":s.name}); speakers=removeWhere(speakers,x=>x.name==s.name); emit moveDown s.name}
+    Divider
+    Button.outline "Invite someone" icon="person_add" onTap={open invite}
+  Dialog#invite "Invite to speak" "Send an invite to someone in the room"
+    Select "Person" items={map(listeners,l=>l.name)} bind=inviteWho
+    Button "Send invite" onTap={emit invite inviteWho; toast "Invite sent to {inviteWho}"; close}
+
+### Schedule
+state reminders=[]
+state day="Today"
+state upcoming=[{"id":"s1","title":"Founders open mic","host":"Priya Shah","when":"Today, 6:00 PM","day":"Today","going":214},{"id":"s2","title":"Jazz listening party","host":"Kai Nakamura","when":"Today, 9:30 PM","day":"Today","going":96},{"id":"s3","title":"Rust for Flutter devs","host":"Dev Patel","when":"Tomorrow, 12:00 PM","day":"Tomorrow","going":167},{"id":"s4","title":"Morning mindfulness","host":"Lena Fischer","when":"Tomorrow, 7:30 AM","day":"Tomorrow","going":58}]
+App
+  Sidebar
+    Brand "Murmur" icon="graphic_eq"
+    NavItem "Live now" icon="sensors" onTap={go rooms}
+    NavItem "Schedule" icon="event" selected onTap={go schedule}
+    NavItem "Following" icon="group" onTap={go following}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Alex Morgan" size=32
+      Text.muted "Alex Morgan"
+  Main
+    Nav
+      Heading "Schedule" level=1
+      Badge.info "{length(reminders)} reminders set"
+    Column pad=24 gap=16
+      SegmentedButton items=["Today","Tomorrow"] bind=day
+      each e in filter(upcoming, x=>x.day==day)
+        Card gap=8
+          Row between middle
+            Column gap=4
+              Text.heading "{e.title}"
+              Text.muted "{e.when} with {e.host}"
+              Text.caption "{e.going} going"
+            Button.outline "{contains(reminders,e.id) ? 'Reminder set' : 'Remind me'}" icon={contains(reminders,e.id) ? "notifications_active" : "notifications"} onTap={contains(reminders,e.id) ? {reminders=without(reminders,e.id); toast "Reminder removed"} : {reminders=append(reminders,e.id); emit remind e.id; toast "We will remind you 10 minutes before"}}

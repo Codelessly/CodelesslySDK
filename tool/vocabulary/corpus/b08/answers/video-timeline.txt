@@ -1,0 +1,175 @@
+### Editor
+state playing=false
+state frame=0
+state total=1800
+state zoom=40
+state sel=""
+state tab="edit"
+state clips=[{"id":"c1","track":"V1","name":"Harbor sunrise","start":0,"len":240,"color":"#FF3B6EA5"},{"id":"c2","track":"V1","name":"Market walk","start":240,"len":360,"color":"#FF3B6EA5"},{"id":"c3","track":"V1","name":"Ferry crossing","start":600,"len":420,"color":"#FF3B6EA5"},{"id":"c4","track":"V2","name":"Title card","start":30,"len":150,"color":"#FF8A4FBF"},{"id":"c5","track":"A1","name":"Ambient sea","start":0,"len":600,"color":"#FF2E8B6B","vol":0.8},{"id":"c6","track":"A1","name":"Interview Maya","start":600,"len":420,"color":"#FF2E8B6B","vol":1}]
+state transitions=[{"id":"t1","at":240,"kind":"Cross dissolve"}]
+state tracks=["V2","V1","A1"]
+state mute=[]
+every 1s when playing onTick={frame=frame+30>total ? total : frame+30; playing=frame+30<total}
+App
+  Sidebar
+    Brand "Cutroom" icon="movie_edit"
+    NavItem "Edit" icon="content_cut" selected={tab=="edit"} onTap={tab="edit"}
+    NavItem "Media" icon="video_library" badge="{length(clips)}" onTap={go media}
+    NavItem "Export" icon="ios_share" onTap={go export}
+    Spacer grow
+    Text.muted "Project: Harbor Days v3"
+    Text.caption "Autosaved 2 min ago"
+  Main
+    Nav
+      Heading "Harbor Days"
+      Row gap=8
+        Button.outline "Split" onTap={sel==""?toast "Select a clip":clips=append(updateWhere(clips,c=>c.id==sel&&frame>c.start&&frame<c.start+c.len,c=>with(c,"len",frame-c.start)),with(with(with(find(clips,c=>c.id==sel),"id","n{frame}"),"start",frame),"len",find(clips,c=>c.id==sel).start+find(clips,c=>c.id==sel).len-frame))}
+        Button.outline "Ripple delete" icon="auto_delete" onTap={sel==""?toast "Select a clip":{clips=updateWhere(removeWhere(clips,c=>c.id==sel),c=>c.track==find(clips,x=>x.id==sel).track&&c.start>find(clips,x=>x.id==sel).start,c=>with(c,"start",c.start-find(clips,x=>x.id==sel).len));sel=""}}
+        Button "Render" icon="movie" onTap={open render}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=12
+          VideoPlayer src="harbor_days_v3.mp4" frame={frame} fps=30 h=300
+          Row between middle
+            Text.mono "{formatTimecode(frame,30)} / {formatTimecode(total,30)}"
+            Row gap=8 middle
+              IconButton "skip_previous" tooltip="Back to start" onTap={frame=0}
+              IconButton "{playing ? 'pause' : 'play_arrow'}" tooltip="Play" onTap={playing=!playing}
+              IconButton "skip_next" tooltip="Next clip edge" onTap={frame=min(total,frame+30)}
+            Text.muted "Frame {frame}"
+        Card w=320 gap=12
+          Text.strong "Inspector"
+          if sel==""
+            Text.muted "Select a clip on the timeline to adjust it."
+          if sel!=""
+            Text.heading3 "{find(clips,c=>c.id==sel).name}"
+            Text.caption "Track {find(clips,c=>c.id==sel).track}, starts at frame {find(clips,c=>c.id==sel).start}, {find(clips,c=>c.id==sel).len} frames"
+            if find(clips,c=>c.id==sel).track=="A1"
+              Slider "Volume" min=0 max=1.5 bind=clipVol onChange={clips=updateWhere(clips,c=>c.id==sel,c=>with(c,"vol",result))}
+            Button.destructive "Delete clip" onTap={clips=removeWhere(clips,c=>c.id==sel);sel=""}
+      Card gap=12
+        Row between middle
+          Text.strong "Timeline"
+          Row gap=8 middle
+            Icon "zoom_out"
+            Slider bind=zoom min=10 max=120 w=160
+            Icon "zoom_in"
+            Text.caption "{zoom}px/s"
+        Timeline zoom={zoom} playhead={frame} total={total} onSeek={frame=result} h=300
+          each tr in tracks
+            Track "{tr}" kind="{startsWith(tr,'A') ? 'audio' : 'video'}" muted={contains(mute,tr)}
+              each c in filter(clips,x=>x.track==tr)
+                Clip "{c.name}" start={c.start} len={c.len} fill={c.color} selected={sel==c.id} drag=clip(c.id) onTap={sel=c.id} onMove={clips=updateWhere(clips,x=>x.id==c.id,x=>with(x,"start",result))} onTrim={clips=updateWhere(clips,x=>x.id==c.id,x=>with(with(x,"start",result.start),"len",result.len))}
+                  if startsWith(tr,"A")
+                    Waveform src="{c.name}.wav" volume={c.vol} onVolumeChange={clips=updateWhere(clips,x=>x.id==c.id,x=>with(x,"vol",result))}
+              each t in filter(transitions,x=>x.id!="")
+                if tr=="V1"
+                  TransitionMarker "{t.kind}" at={t.at} drop=transition onDrop={transitions=append(transitions,{"id":"t{frame}","at":t.at,"kind":result.data})}
+        Row gap=8 middle
+          Text.caption "Transitions"
+          Row scroll gap=8
+            Chip "Cross dissolve" drag=transition("Cross dissolve")
+            Chip "Fade to black" drag=transition("Fade to black")
+            Chip "Wipe left" drag=transition("Wipe left")
+            Chip "Slide push" drag=transition("Slide push")
+            Chip "Zoom blur" drag=transition("Zoom blur")
+  Dialog#render "Render movie" "Export Harbor Days v3"
+    state progress=0
+    state rendering=false
+    every 1s when rendering onTick={progress=min(1,progress+0.05);rendering=progress<1}
+    Select "Preset" items=["YouTube 1080p","Instagram 1080x1350","ProRes 422","H.265 4K"] bind=preset
+    Input "File name" bind=outName
+    Progress bind=progress
+    Row between
+      Text.muted "{round(progress*100,0)}% done"
+      Text.muted "About {duration(round((1-progress)*95,0))} left"
+    Row end gap=8
+      Button.ghost "Cancel" onTap={rendering=false;close}
+      Button "Start render" onTap={progress=0;rendering=true;emit render preset}
+
+### Media
+state tab="media"
+state filter="All"
+state selected=""
+state media=[{"id":"m1","name":"Harbor sunrise.mp4","kind":"Video","dur":8,"size":"412 MB","thumb":"https://picsum.photos/seed/harbor/320/180"},{"id":"m2","name":"Market walk.mp4","kind":"Video","dur":12,"size":"640 MB","thumb":"https://picsum.photos/seed/market/320/180"},{"id":"m3","name":"Ferry crossing.mp4","kind":"Video","dur":14,"size":"705 MB","thumb":"https://picsum.photos/seed/ferry/320/180"},{"id":"m4","name":"Ambient sea.wav","kind":"Audio","dur":20,"size":"34 MB","thumb":""},{"id":"m5","name":"Interview Maya.wav","kind":"Audio","dur":14,"size":"24 MB","thumb":""},{"id":"m6","name":"Logo sting.png","kind":"Image","dur":5,"size":"1 MB","thumb":"https://picsum.photos/seed/logo/320/180"}]
+App
+  Sidebar
+    Brand "Cutroom" icon="movie_edit"
+    NavItem "Edit" icon="content_cut" onTap={go editor}
+    NavItem "Media" icon="video_library" badge="{length(media)}" selected={tab=="media"} onTap={tab="media"}
+    NavItem "Export" icon="ios_share" onTap={go export}
+  Main
+    Nav
+      Heading "Media bin"
+      Row gap=8
+        Input "Search" bind=q w=220
+        Button "Import" icon="upload" onTap={emit importMedia}
+    Column pad=24 gap=16 scroll
+      Row gap=8 scroll
+        ChoiceChip "All" selected={filter=="All"} onTap={filter="All"}
+        ChoiceChip "Video" selected={filter=="Video"} onTap={filter="Video"}
+        ChoiceChip "Audio" selected={filter=="Audio"} onTap={filter="Audio"}
+        ChoiceChip "Image" selected={filter=="Image"} onTap={filter="Image"}
+      Grid cols=3 gap=16
+        each m in filter(media,x=>(filter=="All"||x.kind==filter)&&contains(lower(x.name),lower(coalesce(q,""))))
+          Card gap=8 drag=clip(m.id) onTap={selected=m.id} menu=mediaMenu
+            if m.thumb!=""
+              Image "{m.thumb}" h=120 radius=6
+            if m.thumb==""
+              Waveform src="{m.name}" h=120
+            Text.strong "{m.name}"
+            Row between
+              Text.caption "{m.kind}, {duration(m.dur)}"
+              Text.caption "{m.size}"
+  Menu#mediaMenu
+    MenuItem "Add to timeline" icon="playlist_add" onTap={emit addToTimeline selected;toast "Added to V1"}
+    MenuItem "Rename" icon="edit" onTap={emit rename selected}
+    MenuItem "Remove from project" icon="delete" onTap={media=removeWhere(media,m=>m.id==selected);toast "Removed"}
+
+### Export
+state tab="export"
+state preset="YouTube 1080p"
+state progress=0.42
+state rendering=true
+state queue=[{"name":"Harbor Days v3","preset":"YouTube 1080p","status":"Rendering","progress":0.42},{"name":"Harbor Days v2","preset":"H.265 4K","status":"Done","progress":1},{"name":"Teaser cut","preset":"Instagram 1080x1350","status":"Done","progress":1}]
+every 1s when rendering onTick={progress=min(1,progress+0.03);rendering=progress<1}
+App
+  Sidebar
+    Brand "Cutroom" icon="movie_edit"
+    NavItem "Edit" icon="content_cut" onTap={go editor}
+    NavItem "Media" icon="video_library" onTap={go media}
+    NavItem "Export" icon="ios_share" selected={tab=="export"} onTap={tab="export"}
+  Main
+    Nav
+      Heading "Export"
+      Button "New render" icon="add" onTap={open settings}
+    Column pad=24 gap=16
+      Card gap=12
+        Row between middle
+          Text.heading3 "Harbor Days v3"
+          Badge.info "{rendering ? 'Rendering' : 'Finished'}"
+        Progress bind=progress
+        Row between
+          Text.muted "{round(progress*100,0)}% of 1,800 frames"
+          Text.muted "Estimated time left: {duration(round((1-progress)*110,0))}"
+        Row gap=8
+          Button.outline "Pause" onTap={rendering=!rendering}
+          Button.destructive "Cancel" onTap={rendering=false;progress=0;toast "Render cancelled"}
+      Card gap=8
+        Text.strong "Queue"
+        each q in queue
+          Row between middle
+            Column gap=2
+              Text.strong "{q.name}"
+              Text.caption "{q.preset}"
+            Row gap=12 middle
+              Progress 0.5 bind=q.progress w=140
+              Badge.success "{q.status}"
+  Dialog#settings "Render settings" "Choose how the movie is encoded"
+    Select "Preset" items=["YouTube 1080p","Instagram 1080x1350","ProRes 422","H.265 4K"] bind=preset
+    Select "Frame rate" items=["24","30","60"] bind=fps
+    Slider "Quality" bind=quality min=1 max=100
+    Toggle "Include audio" bind=withAudio
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Add to queue" onTap={queue=append(queue,{"name":"Harbor Days v3","preset":preset,"status":"Queued","progress":0});close;toast "Queued"}

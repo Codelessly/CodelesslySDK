@@ -1,0 +1,155 @@
+### Scope
+state running=true
+state armed=false
+state mode="auto"
+state v1=1
+state v2=0.5
+state tdiv=1
+state trig=0.8
+state trigSrc="CH1"
+state curA=2
+state curB=6
+state cursorsOn=true
+state ch1on=true
+state ch2on=true
+state captured=false
+every 1s when running onTick={captured=captured}
+App
+  Sidebar
+    Brand "Wavepost" icon="graphic_eq"
+    NavItem "Scope" icon="monitor_heart" selected={true}
+    NavItem "Measure" icon="straighten" onTap={go measure}
+    NavItem "Saved traces" icon="photo_library" badge="3" onTap={go saved}
+    Spacer grow
+    Text.muted "Model WP-2024, 100 MHz"
+  Main
+    Nav
+      Heading "Scope" level=1
+      Row gap=8
+        Badge.success "RUN" visible={running && !armed}
+        Badge.danger "STOP" visible={!running}
+        Badge.warning "ARMED" visible={armed}
+        Select bind=mode items=["auto","normal","single"] onChange={armed=(result=="single"); running=(result!="single")}
+        Button.secondary "Run" visible={!running} onTap={running=true; armed=false}
+        Button.destructive "Stop" visible={running} onTap={running=false; armed=false}
+        Button.outline "Single" icon="filter_1" onTap={mode="single"; armed=true; running=false}
+        Button "Save picture" icon="image" onTap={open savePic}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Column grow gap=12
+          Card gap=8
+            Scope#screen h=360 divisions=[10,8] frozen={!running} timePerDiv={tdiv} onCursorMove={curA=result.a; curB=result.b}
+              Trace "CH1" channel=1 color=#FFFFD600 volts={v1} visible={ch1on} source="sine" freq=1200 amp=3.2
+              Trace "CH2" channel=2 color=#FF00E5FF volts={v2} visible={ch2on} source="square" freq=600 amp=1.5
+              TriggerMarker bind=trig edge="left" label="T" color=#FFFF6D00
+              Cursor#cursorA bind=curA axis="x" label="A" visible={cursorsOn}
+              Cursor#cursorB bind=curB axis="x" label="B" visible={cursorsOn}
+            Row between
+              Text.caption "CH1 {v1} V/div"
+              Text.caption "CH2 {v2} V/div"
+              Text.caption "{tdiv} ms/div"
+              Text.caption "Trig {trigSrc} {fixed(trig,2)} V"
+          Row gap=12
+            Knob "Time/div" bind=tdiv items=[0.1,0.2,0.5,1,2,5,10] unit="ms" detents
+            Knob "CH1 V/div" bind=v1 items=[0.1,0.2,0.5,1,2,5] unit="V" detents
+            Knob "CH2 V/div" bind=v2 items=[0.1,0.2,0.5,1,2,5] unit="V" detents
+            Knob "Trig level" bind=trig min=-4 max=4 step=0.05 unit="V"
+        Pane w=240 pad=0 gap=12
+          Card gap=12
+            Text.panelTitle "Automatic readings"
+            Row between
+              Text.muted "Frequency"
+              Text.mono "{fixed(1200,0)} Hz"
+            Row between
+              Text.muted "Peak to peak"
+              Text.mono "{fixed(v1*6.4,2)} V"
+            Row between
+              Text.muted "Period"
+              Text.mono "{fixed(1000/1200,3)} ms"
+            Row between
+              Text.muted "RMS"
+              Text.mono "{fixed(v1*2.26,2)} V"
+            Row between
+              Text.muted "Duty"
+              Text.mono "50 %"
+          Card gap=8
+            Text.panelTitle "Channels"
+            Toggle "CH1" bind=ch1on
+            Toggle "CH2" bind=ch2on
+            Select "Trigger source" bind=trigSrc items=["CH1","CH2","EXT"]
+            Toggle "Cursors" bind=cursorsOn
+  Dialog#savePic "Save trace as picture"
+    Select "Format" bind=fmt items=["PNG","SVG","JPEG"]
+    Toggle "Include readings" bind=withReadings
+    Row end gap=8
+      Button.outline "Cancel" onTap={close}
+      Button "Save" onTap={download "wavepost-trace.png" from=screen; toast "Trace saved"; captured=true; close}
+
+### Measure
+state curA=2
+state curB=6
+state tdiv=1
+state v1=1
+state yA=1.6
+state yB=-0.8
+Page
+  Nav
+    Brand "Wavepost" icon="graphic_eq"
+    Row gap=4
+      Link "Scope" onTap={go scope}
+      Link "Measure"
+      Link "Saved traces" onTap={go saved}
+    Button "Back to scope" onTap={go scope}
+  Section
+    Column gap=16
+      Heading "Cursor measurements" level=1
+      Text.muted "Drag cursors A and B across the frozen trace to read the time and voltage between them."
+      Card gap=8
+        Scope#measureScreen h=320 divisions=[10,8] frozen timePerDiv={tdiv}
+          Trace "CH1" channel=1 color=#FFFFD600 volts={v1} source="sine" freq=1200 amp=3.2
+          Cursor#cursorA bind=curA axis="x" label="A"
+          Cursor#cursorB bind=curB axis="x" label="B"
+          Cursor#levelA bind=yA axis="y" label="1"
+          Cursor#levelB bind=yB axis="y" label="2"
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.caption "A to B (time)"
+          Text.strong "{fixed(abs(curB-curA)*tdiv,2)} ms" size=28
+        Card gap=4
+          Text.caption "Frequency from period"
+          Text.strong "{fixed(1000/max(0.001,abs(curB-curA)*tdiv),1)} Hz" size=28
+        Card gap=4
+          Text.caption "Delta voltage"
+          Text.strong "{fixed(abs(yA-yB)*v1,2)} V" size=28
+        Card gap=4
+          Text.caption "Cursor positions"
+          Text.mono "A {fixed(curA,2)} div, B {fixed(curB,2)} div"
+      Row gap=8
+        Button.outline "Reset cursors" onTap={curA=2; curB=6; yA=1.6; yB=-0.8}
+        Button.secondary "Snap to peaks" onTap={curA=1.25; curB=5.0}
+        Button "Copy readings" icon="content_copy" onTap={copy "dt={fixed(abs(curB-curA)*tdiv,2)} ms, dV={fixed(abs(yA-yB)*v1,2)} V"; toast "Copied"}
+
+### Saved traces
+state sel=0
+state traces=[{"name":"Sine 1.2 kHz","when":"Today 09:41","pp":"6.4 V","url":"https://example.com/t1.png"},{"name":"Square 600 Hz","when":"Today 09:12","pp":"3.0 V","url":"https://example.com/t2.png"},{"name":"Power-on glitch","when":"Yesterday","pp":"5.1 V","url":"https://example.com/t3.png"}]
+App
+  Sidebar
+    Brand "Wavepost" icon="graphic_eq"
+    NavItem "Scope" icon="monitor_heart" onTap={go scope}
+    NavItem "Measure" icon="straighten" onTap={go measure}
+    NavItem "Saved traces" icon="photo_library" badge="3" selected={true}
+  Main
+    Nav
+      Heading "Saved traces" level=1
+      Button.outline "Open scope" onTap={go scope}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        each t in traces
+          Card gap=8
+            Image "{t.url}" h=140 onTap={sel=index; open zoom}
+            Text.strong "{t.name}"
+            Text.muted "{t.when} - {t.pp} pk-pk"
+            Row gap=8
+              IconButton "download" tooltip="Download" onTap={download t.url}
+              IconButton "delete" tooltip="Delete" onTap={traces=removeAt(traces,index); toast "Deleted"}
+  Lightbox#zoom photos={map(traces,t=>t.url)} bind=sel

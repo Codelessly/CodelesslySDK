@@ -1,0 +1,174 @@
+### Design
+state side="front"
+state skin="medium"
+state fade=0
+state stencil=false
+state scale=1.0
+state angle=0
+state px=0.5
+state py=0.4
+state baseCm=12
+state design={"name":"Koi and waves","url":"https://cdn.inkplace.app/designs/koi-waves.png"}
+state placements=[{"id":1,"name":"Left forearm, koi","side":"front","px":0.28,"py":0.46,"scale":0.9,"angle":-20,"cm":10.8},{"id":2,"name":"Right shoulder blade","side":"back","px":0.68,"py":0.2,"scale":1.4,"angle":15,"cm":16.8}]
+App
+  Sidebar
+    Brand "Inkplace" icon="draw"
+    NavItem "Design" icon="brush" selected={true}
+    NavItem "Placements" icon="bookmarks" badge="{length(placements)}" onTap={go placements}
+    NavItem "Book a session" icon="event" onTap={go booking}
+    Spacer grow
+    Text.muted "Mara Ellison"
+  Main
+    Nav
+      Heading "Place your design" level=1
+      Row gap=8
+        SegmentedButton bind=side items=["front","back"]
+        Button.outline "Save placement" icon="bookmark_add" onTap={open savePlacement}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Card grow gap=12
+          BodyOutline#body view={side} skin={skin} stencil={stencil} h=520
+            DesignOverlay src={design.url} x={px} y={py} scale={scale} angle={angle} fade={fade} stencil={stencil} onMove={px=result.x; py=result.y} onPinch={scale=clamp(result.scale,0.3,3)} onRotate={angle=result.angle}
+          Row between
+            Text.strong "{fixed(baseCm*scale,1)} cm wide"
+            Text.muted "Rotated {round(angle,0)} degrees"
+          Row gap=8
+            IconButton "zoom_out" tooltip="Smaller" onTap={scale=max(0.3,scale-0.1)}
+            IconButton "zoom_in" tooltip="Larger" onTap={scale=min(3,scale+0.1)}
+            IconButton "restart_alt" tooltip="Reset" onTap={scale=1; angle=0; px=0.5; py=0.4}
+        Column w=320 gap=16
+          Card gap=12
+            Text.strong "Skin tone"
+            Row gap=8
+              ChoiceChip "Fair" selected={skin=="fair"} onTap={skin="fair"}
+              ChoiceChip "Light" selected={skin=="light"} onTap={skin="light"}
+              ChoiceChip "Medium" selected={skin=="medium"} onTap={skin="medium"}
+              ChoiceChip "Tan" selected={skin=="tan"} onTap={skin="tan"}
+              ChoiceChip "Deep" selected={skin=="deep"} onTap={skin="deep"}
+          Card gap=12
+            Text.strong "Fade in ten years"
+            Slider bind=fade min=0 max=100
+            Text.muted "Lines at {100-fade}% of today's contrast"
+          Card gap=12
+            Toggle "Stencil mode" bind=stencil
+            Text.muted "Shows the black outline only, as the artist transfers it."
+          Card gap=8
+            Text.strong "Design"
+            Row gap=12
+              Image "{design.url}" w=64 h=64 radius=8
+              Column grow
+                Text "{design.name}"
+                Button.ghost "Change" onTap={open pickDesign}
+  Sheet#savePlacement "Save this placement"
+    Input "Name" "Left calf, koi" bind=newName
+    Text.muted "{side}, {fixed(baseCm*scale,1)} cm wide"
+    Button "Save" onTap={placements=append(placements,{"id":length(placements)+1,"name":coalesce(newName,"Untitled placement"),"side":side,"px":px,"py":py,"scale":scale,"angle":angle,"cm":round(baseCm*scale,1)}); newName=""; toast "Placement saved"; close}
+  Dialog#pickDesign "Choose a design"
+    Grid cols=3 gap=12
+      Image "https://cdn.inkplace.app/designs/koi-waves.png" onTap={design={"name":"Koi and waves","url":"https://cdn.inkplace.app/designs/koi-waves.png"}; close}
+      Image "https://cdn.inkplace.app/designs/peony.png" onTap={design={"name":"Peony","url":"https://cdn.inkplace.app/designs/peony.png"}; close}
+      Image "https://cdn.inkplace.app/designs/compass.png" onTap={design={"name":"Compass rose","url":"https://cdn.inkplace.app/designs/compass.png"}; close}
+
+### Placements
+state side="front"
+state selected=0
+state placements=[{"id":1,"name":"Left forearm, koi","side":"front","px":0.28,"py":0.46,"scale":0.9,"angle":-20,"cm":10.8},{"id":2,"name":"Right shoulder blade","side":"back","px":0.68,"py":0.2,"scale":1.4,"angle":15,"cm":16.8},{"id":3,"name":"Left calf, koi","side":"back","px":0.3,"py":0.78,"scale":1.0,"angle":0,"cm":12}]
+App
+  Sidebar
+    Brand "Inkplace" icon="draw"
+    NavItem "Design" icon="brush" onTap={go design}
+    NavItem "Placements" icon="bookmarks" badge="{length(placements)}" selected={true}
+    NavItem "Book a session" icon="event" onTap={go booking}
+    Spacer grow
+    Text.muted "Mara Ellison"
+  Main
+    Nav
+      Heading "Saved placements" level=1
+      Button "Book with a placement" icon="event" onTap={go booking}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Column grow gap=12
+          if isEmpty(placements)
+            Card gap=8
+              Text.strong "Nothing saved yet"
+              Text.muted "Drag the design onto the outline and save it to compare options."
+          each p in placements
+            Card gap=8 onTap={selected=p.id}
+              Row between
+                Column gap=4
+                  Text.strong "{p.name}"
+                  Text.muted "{upper(p.side)} side, {p.cm} cm wide, turned {p.angle} degrees"
+                Row gap=4
+                  IconButton "open_in_new" tooltip="Open in editor" onTap={go design}
+                  IconButton "content_copy" tooltip="Duplicate" onTap={placements=append(placements,with(with(p,"id",length(placements)+1),"name",concat(p.name," copy")))}
+                  IconButton "delete" tooltip="Delete" onTap={placements=removeWhere(placements,x=>x.id==p.id); toast "Removed"}
+        Column w=320 gap=12
+          Card gap=8
+            Text.strong "Preview"
+            if selected!=0
+              BodyOutline view={find(placements,x=>x.id==selected).side} h=320
+                DesignOverlay src="https://cdn.inkplace.app/designs/koi-waves.png" x={find(placements,x=>x.id==selected).px} y={find(placements,x=>x.id==selected).py} scale={find(placements,x=>x.id==selected).scale} angle={find(placements,x=>x.id==selected).angle} readonly
+            if selected==0
+              Text.muted "Select a placement to preview it."
+
+### Booking
+state step=0
+state artist="Jonah Reyes"
+state sessionHours=3
+state sessionDate=""
+state deposit=true
+state notes=""
+state artists=[{"name":"Jonah Reyes","style":"Fine line, 9 years","rate":180},{"name":"Priya Nair","style":"Japanese, 12 years","rate":220},{"name":"Theo Marsh","style":"Blackwork, 6 years","rate":160}]
+App
+  Sidebar
+    Brand "Inkplace" icon="draw"
+    NavItem "Design" icon="brush" onTap={go design}
+    NavItem "Placements" icon="bookmarks" onTap={go placements}
+    NavItem "Book a session" icon="event" selected={true}
+    Spacer grow
+    Text.muted "Mara Ellison"
+  Main
+    Nav
+      Heading "Book your session" level=1
+      Text.muted "Step {step+1} of 3"
+    Column pad=24 gap=16 maxw=720
+      Progress {(step+1)/3}
+      if step==0
+        Card gap=12
+          Text.strong "Choose your artist"
+          each a in artists
+            ListTile "{a.name}" "{a.style}, ${a.rate} per hour" selected={artist==a.name} onTap={artist=a.name}
+          Button "Next" onTap={step=1}
+      if step==1
+        Card gap=12
+          Text.strong "Session length"
+          Slider bind=sessionHours min=1 max=8
+          Text "{sessionHours} hours with {artist}"
+          DatePicker "Preferred date" bind=sessionDate
+          Input "Notes for the artist" bind=notes multiline
+          Row gap=8
+            Button.outline "Back" onTap={step=0}
+            Button "Next" onTap={sessionDate=="" ? toast "Pick a date" : step=2}
+      if step==2
+        Card gap=12
+          Text.strong "Summary"
+          Row between
+            Text "Artist"
+            Text.strong "{artist}"
+          Row between
+            Text "Length"
+            Text.strong "{sessionHours} hours"
+          Row between
+            Text "Estimate"
+            Text.strong "{money(sessionHours*find(artists,a=>a.name==artist).rate,"$",2)}"
+          Row between
+            Text "Deposit due now"
+            Text.strong "{money(sessionHours*find(artists,a=>a.name==artist).rate*0.2,"$",2)}"
+          Text.muted "The deposit is 20% of the estimate. It is taken off your final bill and is non-refundable within 48 hours of the session."
+          Checkbox "I understand the deposit terms" bind=deposit
+          Row gap=8
+            Button.outline "Back" onTap={step=1}
+            Button "Confirm booking" onTap={deposit ? open booked : toast "Accept the deposit terms first"}
+  Dialog#booked "Booking requested" "{artist} will confirm within a day"
+    Text "Session on {sessionDate}, {sessionHours} hours."
+    Button "Done" onTap={emit booked; step=0; close; go design}

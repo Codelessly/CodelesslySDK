@@ -1,0 +1,151 @@
+### Lift panel
+state floors=[{"n":9,"label":"Roof bar","card":true},{"n":8,"label":"Offices","card":true},{"n":7,"label":"Offices","card":false},{"n":6,"label":"Offices","card":false},{"n":5,"label":"Gym","card":false},{"n":4,"label":"Clinic","card":false},{"n":3,"label":"Cafe","card":false},{"n":2,"label":"Shops","card":false},{"n":1,"label":"Lobby (exit)","card":false},{"n":0,"label":"Garage","card":true}]
+state current=1
+state dir=0
+state queue=[]
+state doorOpen=false
+state load=320
+state maxLoad=630
+state fire=false
+state cardOk=false
+state pendingFloor=-1
+state alarm=false
+state voice=true
+state idle=0
+state exitFloor=1
+state msg=""
+
+every 1s when length(queue)>0 && !fire && load<=maxLoad && !doorOpen onTick={dir=first(queue)>current ? 1 : -1; current=current+(first(queue)>current ? 1 : -1); idle=0; current==first(queue) ? {queue=removeAt(queue,0); doorOpen=true; emit chime; voice ? emit speak "Floor {current}" : {}} : {}}
+every 1s when fire && current!=exitFloor onTick={dir=exitFloor>current ? 1 : -1; current=current+(exitFloor>current ? 1 : -1); current==exitFloor ? {doorOpen=true; emit speak "Fire. Exit via the lobby"} : {}}
+every 1s when length(queue)==0 && !doorOpen && !fire onTick={idle=idle+1; idle>=20 ? go ads : {}}
+every 4s when doorOpen && load<=maxLoad && !fire onTick={doorOpen=false}
+every 1s when load>maxLoad onTick={emit beep}
+
+App
+  Main
+    Nav
+      Heading "Floors" level=3
+      Row gap=8
+        Badge.success "{voice ? 'Voice on' : 'Voice off'}"
+        IconButton "volume_up" tooltip="Voice" onTap={voice=!voice}
+    Column pad=24 gap=16 center
+      if fire
+        Box fill=#FFB71C1C radius=12 pad=16 w=fill
+          Row gap=12 middle
+            Icon "local_fire_department" color=#FFFFFFFF
+            Column gap=4
+              Text.strong "FIRE: do not use this lift" color=#FFFFFFFF
+              Text "Only the exit floor ({exitFloor}) is available. Leave the building by the stairs after exiting." color=#FFFFFFFF
+      if load>maxLoad
+        Box fill=#FFF9A825 radius=12 pad=16 w=fill animate=pulse
+          Row gap=12 middle
+            Icon "warning"
+            Column gap=4
+              Text.strong "Overload: {load} kg of {maxLoad} kg"
+              Text "Please step out until the beeping stops."
+      Card gap=8 w=240 center
+        Row between middle
+          Icon "{dir>0 ? 'arrow_upward' : (dir<0 ? 'arrow_downward' : 'remove')}" size=32
+          Text "{current}" size=64 weight=700
+          Icon "{doorOpen ? 'meeting_room' : 'sensor_door'}" size=32
+        Text.muted "{doorOpen ? 'Doors open' : (length(queue)>0 ? 'Going to ' + first(queue) : 'Ready')}"
+      Row gap=8 center
+        Text.caption "Queue:"
+        if length(queue)==0
+          Text.muted "empty"
+        each q in queue
+          Chip "{q}"
+      Grid cols=2 gap=16
+        each f in floors
+          Column center gap=4
+            Button "{f.n}" radius=32 w=64 h=64 fill={contains(queue,f.n) ? "#FFFFC107" : "#FFEEEEEE"} disabled={fire && f.n!=exitFloor} onTap={fire ? (f.n==exitFloor ? queue=[exitFloor] : toast "Fire mode: exit floor only") : (f.card && !cardOk ? {pendingFloor=f.n; open card} : (contains(queue,f.n) || f.n==current ? {} : {queue=append(queue,f.n); idle=0; emit press f.n}))}
+            Row gap=2 middle
+              if f.card
+                Icon "vpn_key" size=12
+              Text.caption "{f.label}"
+      Row gap=16 center
+        Button.outline "Open" icon="keyboard_double_arrow_left" onTap={load>maxLoad || fire && current!=exitFloor ? toast "Not now" : {doorOpen=true; emit chime}}
+        Button.outline "Close" icon="keyboard_double_arrow_right" onTap={doorOpen=false}
+        Button.destructive "Alarm" icon="notifications_active" onTap={alarm=true; emit alarm; open alarmSheet}
+      Row gap=12 center
+        Text.caption "Load"
+        Slider bind=load min=0 max=900 w=200
+        Text.small "{load} kg"
+      Row gap=8 center
+        Toggle "Fire mode (test)" bind=fire onChange={result ? {queue=[]; emit speak "Fire. Please exit"} : {}}
+        Toggle "Key card inserted" bind=cardOk
+  Dialog#card "Key card needed" "Floor {pendingFloor} is restricted"
+    Row gap=12 middle
+      IconTile "vpn_key"
+      Text "Hold your key card to the reader."
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button "I have scanned it" onTap={cardOk=true; queue=append(queue,pendingFloor); pendingFloor=-1; close}
+  Sheet#alarmSheet "Alarm sounding"
+    Text "The control room has been called. Stay calm, help is on the way."
+    Row gap=8
+      Button.destructive "Silence" onTap={alarm=false; close}
+      Button.outline "Speak to operator" icon="call" onTap={emit callOperator}
+
+### Idle ads screen
+state slide=0
+state ads=[{"title":"Cafe Rivet, level 3","body":"Flat white and a pastry, 6.50 before 10 am.","color":"#FF4E342E","icon":"local_cafe"},{"title":"Pulse Gym, level 5","body":"First month free for people in this building.","color":"#FF1B5E20","icon":"fitness_center"},{"title":"Roof bar opens at 5","body":"Level 9. Key card required.","color":"#FF283593","icon":"nightlife"}]
+every 5s onTick={slide=(slide+1)%length(ads)}
+App
+  Main
+    Nav
+      Heading "Floors" level=3
+      Text.muted "Now at floor {current}"
+    Column pad=24 gap=16
+      Pages bind=slide h=360
+        each a in ads
+          Box fill={a.color} radius=16 pad=32 gap=16 center middle animate=fade
+            Icon "{a.icon}" size=64 color=#FFFFFFFF
+            Text "{a.title}" size=28 weight=700 color=#FFFFFFFF center
+            Text "{a.body}" color=#FFFFFFFF center
+      Dots bind=slide count=3
+      Row between middle
+        Text.muted "{formatDate(today(),'MMM d')}"
+        Button "Touch to use the lift" icon="touch_app" onTap={idle=0; go panel}
+
+### Service
+state tab="floors"
+state serviceCode=""
+state unlocked=false
+App
+  Sidebar
+    Brand "Floors" icon="elevator"
+    NavItem "Floors and access" icon="vpn_key" selected={tab=="floors"} onTap={tab="floors"}
+    NavItem "Ads" icon="ad_units" selected={tab=="ads"} onTap={tab="ads"}
+    NavItem "Load limit" icon="scale" selected={tab=="load"} onTap={tab="load"}
+    Spacer grow
+    Text.muted "Service mode"
+  Main
+    Nav
+      Heading "Service" level=1
+      Button.outline "Lock" onTap={unlocked=false}
+    Column pad=24 gap=16
+      if !unlocked
+        Card gap=12
+          Text.strong "Enter the service code"
+          Input "Code" bind=serviceCode type=number password
+          Button "Unlock" onTap={serviceCode=="4821" ? {unlocked=true; serviceCode=""} : toast "Wrong code"}
+      if unlocked
+        if tab=="floors"
+          Card gap=8
+            each f in floors
+              Row between middle
+                Text.strong "{f.n}  {f.label}"
+                Toggle "Key card" bind=f.card
+        if tab=="ads"
+          Card gap=8
+            each a in ads
+              Input "Title" bind=a.title
+              Input "Text" bind=a.body multiline
+        if tab=="load"
+          Card gap=12
+            Text.strong "Maximum load"
+            Slider bind=maxLoad min=300 max=1000
+            Text.muted "{maxLoad} kg, about {floor(maxLoad/75)} people"
+            Input "Exit floor in fire mode" bind=exitFloor type=number
+            Button "Save" onTap={emit saveService; toast "Saved"}

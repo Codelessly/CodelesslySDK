@@ -1,0 +1,102 @@
+### Sky
+state tab="sky"
+state night=false
+state showGrid=true
+state showNames=true
+state showDeep=false
+state showLines=true
+state when="2026-11-17T21:30"
+state hour=21
+state dayOfYear=321
+state q=""
+state target=null
+state sel=null
+state heading=0
+state altitude=45
+state tilt=true
+state objects=[{"id":"sirius","name":"Sirius","kind":"star","mag":-1.46,"rise":"17:42","set":"07:05","x":0.62,"y":0.71},{"id":"betelgeuse","name":"Betelgeuse","kind":"star","mag":0.42,"rise":"16:58","set":"06:21","x":0.48,"y":0.55},{"id":"rigel","name":"Rigel","kind":"star","mag":0.13,"rise":"17:10","set":"06:33","x":0.55,"y":0.66},{"id":"jupiter","name":"Jupiter","kind":"planet","mag":-2.7,"rise":"15:12","set":"05:48","x":0.35,"y":0.4},{"id":"saturn","name":"Saturn","kind":"planet","mag":0.9,"rise":"13:30","set":"01:52","x":0.8,"y":0.3},{"id":"m42","name":"Orion Nebula (M42)","kind":"deep sky","mag":4.0,"rise":"17:20","set":"06:40","x":0.52,"y":0.6}]
+App
+  Main
+    Nav
+      Brand "Nightfall" icon="nightlight"
+      Row gap=8
+        Input "Find a planet or star" bind=q w=200
+        IconButton "gps_fixed" tooltip="Point me to it" onTap={target=find(objects,o=>contains(lower(o.name),lower(q))); target==null ? toast "Nothing by that name" : toast "Arrow points to {target.name}"}
+        IconButton "layers" tooltip="Layers" onTap={open layers}
+        IconButton "satellite_alt" tooltip="Satellite passes" onTap={go passes}
+        IconButton "dark_mode" tooltip="Red night mode" onTap={night=!night}
+    Column pad=16 gap=12
+      Stack center middle
+        SkyDisc stars={objects} lines={showLines} grid={showGrid} names={showNames} deepSky={showDeep} night={night} heading={heading} altitude={altitude} time={when} target={target} h=380 draggable onDrag={heading=result.heading; altitude=result.altitude} onTapObject={sel=find(objects,o=>o.id==result.id); open objectCard}
+        if target!=null
+          Arrow toward={target.id} label="{target.name}" color={night ? #FFFF3B30 : #FFFFD54F}
+      Row between
+        Toggle "Turn phone to look around" bind=tilt
+        Text.muted "Facing {heading} deg, {altitude} deg up"
+      Card gap=8
+        Row between
+          Text.strong "Time"
+          Text.muted "{formatDate(when,"MMM d, HH:mm")}"
+        Slider bind=hour min=0 max=24 onChange={when=with({"v":when},"v",concat("2026-11-17T",hour)).v}
+        Slider bind=dayOfYear min=1 max=365
+        Row gap=8
+          Button.outline "Now" onTap={hour=21; dayOfYear=321}
+          Button.outline "Tonight 23:00" onTap={hour=23}
+          Button.outline "+1 month" onTap={dayOfYear=min(365,dayOfYear+30)}
+  Sheet#objectCard "{sel.name}"
+    Column gap=12
+      Row gap=8
+        Badge.info "{sel.kind}"
+        Badge.neutral "Magnitude {sel.mag}"
+      Row gap=24
+        Column gap=4
+          Text.muted "Rises"
+          Text.strong "{sel.rise}"
+        Column gap=4
+          Text.muted "Sets"
+          Text.strong "{sel.set}"
+      Row gap=8
+        Button "Point me to it" onTap={target=sel; close}
+        Button.outline "Close" onTap={close}
+  Sheet#layers "Layers"
+    Column gap=8
+      Toggle "Coordinate grid" bind=showGrid
+      Toggle "Constellation lines" bind=showLines
+      Toggle "Names" bind=showNames
+      Toggle "Deep sky objects" bind=showDeep
+      Toggle "Red night mode" bind=night
+      Button "Done" onTap={close}
+
+### Satellite passes
+state night=false
+state passes=[{"id":"iss","name":"ISS (Zarya)","start":"18:42","peak":"18:46","maxAlt":72,"dir":"WSW to NE","mag":-3.4},{"id":"tiangong","name":"Tiangong","start":"20:15","peak":"20:18","maxAlt":38,"dir":"NW to E","mag":-1.2},{"id":"hst","name":"Hubble","start":"21:03","peak":"21:07","maxAlt":54,"dir":"SW to SE","mag":1.8},{"id":"starlink","name":"Starlink train","start":"22:31","peak":"22:34","maxAlt":61,"dir":"W to NE","mag":2.6}]
+state pick=null
+state remind=[]
+Page
+  Nav
+    Brand "Nightfall" icon="nightlight"
+    Row gap=4
+      Link "Sky" onTap={go sky}
+      Link "Satellite passes"
+    IconButton "dark_mode" tooltip="Red night mode" onTap={night=!night}
+  Section
+    Column gap=16
+      Heading "Passes tonight" level=1
+      Text.muted "Visible from your location, sorted by start time."
+      each p in passes
+        Card gap=8 onTap={pick=p; open passCard}
+          Row between
+            Text.strong "{p.name}"
+            Badge.primary "mag {p.mag}"
+          Row gap=24
+            Text "Starts {p.start}"
+            Text "Peaks {p.peak} at {p.maxAlt} deg"
+            Text.muted "{p.dir}"
+          Row gap=8
+            Button.outline "Show on sky" onTap={go sky}
+            Button.ghost "Remind me" onTap={remind=append(remind,p.id); toast "Reminder set for {p.start}"}
+  Footer
+    Text.muted "Times are local. Brightness is estimated."
+  Dialog#passCard "{pick.name}" "Pass details"
+    Text "Rises {pick.start}, peaks {pick.peak} at {pick.maxAlt} degrees, moving {pick.dir}."
+    Button "Show on sky" onTap={go sky; close}

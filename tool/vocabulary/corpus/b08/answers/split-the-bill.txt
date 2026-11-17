@@ -1,0 +1,141 @@
+### Receipt
+state people=[{"id":1,"name":"Maya Reyes"},{"id":2,"name":"Jon Park"},{"id":3,"name":"Priya Nair"}]
+state items=[{"id":1,"name":"Margherita pizza","price":18.5,"who":[]},{"id":2,"name":"Truffle fries","price":9,"who":[]},{"id":3,"name":"Burrata salad","price":13,"who":[]},{"id":4,"name":"Aperol spritz","price":12,"who":[]},{"id":5,"name":"Tiramisu","price":8.5,"who":[]}]
+state sel=0
+state newName=""
+state tax=5.4
+state scanned=true
+App
+  Sidebar
+    Brand "Halves" icon="call_split"
+    NavItem "Receipt" icon="receipt_long" selected={true}
+    NavItem "Tip and tax" icon="percent" onTap={go tip-and-tax}
+    NavItem "Totals" icon="groups" onTap={go totals}
+    Spacer grow
+    Text.muted "Dinner at Lupa, Fri"
+  Main
+    Nav
+      Heading "Split the bill"
+      Row gap=8
+        Button.outline "Scan receipt" icon="photo_camera" onTap={emit scanReceipt; scanned=true; toast "Receipt read: 5 items"}
+        Button "Next: tip and tax" onTap={go tip-and-tax}
+    Column pad=24 gap=16
+      Card gap=12
+        Row between
+          Text.strong "Who is eating"
+          Button.ghost "Add person" icon="person_add" onTap={open addPerson}
+        Row gap=16 scroll
+          each p in people
+            Column center gap=4 w=96 drop=item onDrop={items=updateWhere(items,i=>i.id==result.data,i=>with(i,"who",contains(i.who,p.id) ? i.who : append(i.who,p.id)))} onTap={sel>0 ? items=updateWhere(items,i=>i.id==sel,i=>with(i,"who",contains(i.who,p.id) ? without(i.who,p.id) : append(i.who,p.id))) : toast "Pick an item first"}
+              Avatar "{p.name}" size=56
+              Text.small "{p.name}"
+              Text.caption "{count(items,i=>contains(i.who,p.id))} items"
+        Text.muted "Drag an item onto one or more people, or select an item and tap people. Shared items split evenly."
+      Card gap=8
+        Row between
+          Text.strong "Items"
+          Text.muted "{count(items,i=>length(i.who)==0)} unassigned"
+        each row in items
+          ListTile "{row.name}" selected={sel==row.id} drag=item(row.id) onTap={sel=row.id}
+            Row gap=8 between
+              Row gap=4
+                each w in row.who
+                  Avatar "{find(people,p=>p.id==w).name}" size=24
+              Input type=number bind=row.price w=90
+              IconButton "delete" tooltip="Remove item" onTap={items=removeWhere(items,i=>i.id==row.id)}
+        Row gap=8
+          Input "Add an item" bind=newName grow
+          Button.outline "Add" onTap={newName!="" ? items=append(items,{"id":length(items)+10,"name":newName,"price":0,"who":[]}); newName="" : toast "Name the item"}
+      Row between
+        Text.muted "Subtotal"
+        Text.strong "{money(sum(items,i=>i.price),"$",2)}"
+  Dialog#addPerson "Add a person" "They will appear at the top"
+    Input "Name" bind=newName
+    Button "Add" onTap={newName!="" ? people=append(people,{"id":length(people)+1,"name":newName}); newName=""; close : toast "Enter a name"}
+
+### Tip and tax
+state tipPct=18
+state customTip=""
+state tax=5.4
+state items=[{"id":1,"name":"Margherita pizza","price":18.5,"who":[1,2]},{"id":2,"name":"Truffle fries","price":9,"who":[1,2,3]},{"id":3,"name":"Burrata salad","price":13,"who":[3]},{"id":4,"name":"Aperol spritz","price":12,"who":[2]},{"id":5,"name":"Tiramisu","price":8.5,"who":[1,3]}]
+Page
+  Nav
+    Brand "Halves" icon="call_split"
+    Row gap=4
+      Link "Receipt" onTap={go receipt}
+      Link "Tip and tax"
+      Link "Totals" onTap={go totals}
+  Section narrow
+    Column gap=20
+      Heading "Tip and tax" level=1
+      Card gap=12
+        Text.strong "Tip"
+        Row gap=8
+          ChoiceChip "15%" selected={tipPct==15 && customTip==""} onTap={tipPct=15; customTip=""}
+          ChoiceChip "18%" selected={tipPct==18 && customTip==""} onTap={tipPct=18; customTip=""}
+          ChoiceChip "20%" selected={tipPct==20 && customTip==""} onTap={tipPct=20; customTip=""}
+          ChoiceChip "25%" selected={tipPct==25 && customTip==""} onTap={tipPct=25; customTip=""}
+        Input "Custom tip %" "e.g. 22" type=number bind=customTip onChange={customTip!="" ? tipPct=customTip : tipPct=tipPct}
+        Slider bind=tipPct min=0 max=40
+      Card gap=12
+        Text.strong "Tax"
+        Input "Tax on the receipt" type=number bind=tax
+        Text.muted "Tax is shared in proportion to what each person ordered."
+      Card gap=8
+        Row between
+          Text "Subtotal"
+          Text "{money(sum(items,i=>i.price),"$",2)}"
+        Row between
+          Text "Tax"
+          Text "{money(tax,"$",2)}"
+        Row between
+          Text "Tip ({tipPct}%)"
+          Text "{money(sum(items,i=>i.price)*tipPct/100,"$",2)}"
+        Divider
+        Row between
+          Text.strong "Bill total"
+          Text.strong "{money(sum(items,i=>i.price)*(1+tipPct/100)+tax,"$",2)}"
+      Button "See totals" size=large onTap={go totals}
+
+### Totals
+state people=[{"id":1,"name":"Maya Reyes"},{"id":2,"name":"Jon Park"},{"id":3,"name":"Priya Nair"}]
+state items=[{"id":1,"name":"Margherita pizza","price":18.5,"who":[1,2]},{"id":2,"name":"Truffle fries","price":9,"who":[1,2,3]},{"id":3,"name":"Burrata salad","price":13,"who":[3]},{"id":4,"name":"Aperol spritz","price":12,"who":[2]},{"id":5,"name":"Tiramisu","price":8.5,"who":[1,3]}]
+state tipPct=18
+state tax=5.4
+state who=1
+state settled=false
+App
+  Sidebar
+    Brand "Halves" icon="call_split"
+    NavItem "Receipt" icon="receipt_long" onTap={go receipt}
+    NavItem "Tip and tax" icon="percent" onTap={go tip-and-tax}
+    NavItem "Totals" icon="groups" selected={true}
+    Spacer grow
+    Text.muted "Dinner at Lupa, Fri"
+  Main
+    Nav
+      Heading "Who owes what"
+      Button "Send pay request" icon="send" onTap={open request}
+    Column pad=24 gap=16
+      if settled
+        Badge.success "SETTLED" animate=pop size=large
+      Grid cols=3 gap=16
+        each p in people
+          Card gap=8 center
+            Avatar "{p.name}" size=56
+            Text.strong "{p.name}"
+            Text "{money(sum(items,i=>contains(i.who,p.id) ? i.price/length(i.who) : 0)*(1+(tax+sum(items,i=>i.price)*tipPct/100)/sum(items,i=>i.price)),"$",2)}" size=28 weight=700
+            Text.caption "items {money(sum(items,i=>contains(i.who,p.id) ? i.price/length(i.who) : 0),"$",2)} + tax and tip"
+            Button.outline "Request" onTap={who=p.id; open request}
+      Card gap=8
+        Text.strong "Share of the bill"
+        Donut values={map(people,p=>sum(items,i=>contains(i.who,p.id) ? i.price/length(i.who) : 0))} labels={map(people,p=>p.name)}
+      Row gap=8
+        Button.outline "Reset" onTap={settled=false}
+        Button "Mark all settled" onTap={settled=true; toast "All settled up"}
+  Dialog#request "Pay request" "Edit it before you send"
+    Input "Message" multiline bind=message
+    Text.muted "Hi {find(people,p=>p.id==who).name}, your share of dinner at Lupa is {money(sum(items,i=>contains(i.who,who) ? i.price/length(i.who) : 0)*(1+(tax+sum(items,i=>i.price)*tipPct/100)/sum(items,i=>i.price)),"$",2)} including tax and a {tipPct}% tip. Thanks!"
+    Row gap=8
+      Button.outline "Copy" icon="content_copy" onTap={copy message; toast "Copied"}
+      Button "Share" icon="share" onTap={emit sharePayRequest who; close}

@@ -1,0 +1,3 @@
+App: Spectra Bench, a lab spectrometer panel. A live graph of intensity across wavelengths with peaks labelled and a cursor reading values; settings for integration time, averaging and range typed or stepped; a sample table of wells in a grid coloured by reading, selected wells combined into a curve; calibrate with steps and a pass mark; a run with a progress bar and a stop; export a data file; an error banner for a lamp warming up.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

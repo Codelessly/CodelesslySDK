@@ -1,0 +1,230 @@
+### Roster
+state tab="roster"
+state month="2026-12"
+state sel=null
+state dutySeconds=34200
+state dutyLimit=50400
+state pairings=[{"id":"P7K21","start":"2026-12-03","end":"2026-12-06","route":"SEA-JFK-LHR-JFK-SEA","layover":"LHR","hours":22.4,"legs":[{"no":"AS 18","from":"SEA","to":"JFK","dep":"07:10","arr":"15:32"},{"no":"AS 112","from":"JFK","to":"LHR","dep":"19:05","arr":"06:55"},{"no":"AS 113","from":"LHR","to":"JFK","dep":"12:40","arr":"15:30"},{"no":"AS 19","from":"JFK","to":"SEA","dep":"18:15","arr":"21:50"}]},{"id":"P3M08","start":"2026-12-09","end":"2026-12-11","route":"SEA-ORD-MSY-SEA","layover":"MSY","hours":14.1,"legs":[{"no":"AS 340","from":"SEA","to":"ORD","dep":"06:30","arr":"12:20"},{"no":"AS 771","from":"ORD","to":"MSY","dep":"14:00","arr":"16:25"},{"no":"AS 772","from":"MSY","to":"SEA","dep":"09:10","arr":"12:05"}]},{"id":"P9D44","start":"2026-12-12","end":"2026-12-14","route":"SEA-DEN-PHX-SEA","layover":"PHX","hours":12.8,"legs":[{"no":"AS 502","from":"SEA","to":"DEN","dep":"08:20","arr":"11:55"},{"no":"AS 615","from":"DEN","to":"PHX","dep":"13:30","arr":"15:05"},{"no":"AS 616","from":"PHX","to":"SEA","dep":"10:45","arr":"13:20"}]},{"id":"P5B16","start":"2026-12-19","end":"2026-12-22","route":"SEA-SFO-HNL-SFO-SEA","layover":"HNL","hours":19.6,"legs":[{"no":"AS 1","from":"SEA","to":"SFO","dep":"06:00","arr":"08:05"},{"no":"AS 827","from":"SFO","to":"HNL","dep":"10:15","arr":"13:20"},{"no":"AS 828","from":"HNL","to":"SFO","dep":"16:30","arr":"00:40"},{"no":"AS 2","from":"SFO","to":"SEA","dep":"09:00","arr":"11:10"}]}]
+state delay={"pairing":"P3M08","leg":"AS 771","oldDep":"14:00","newDep":"15:20","reason":"Late inbound aircraft"}
+state delayAck=false
+state restGap=9.5
+App
+  Sidebar
+    Brand "Rotation" icon="flight_takeoff"
+    NavItem "Roster" icon="calendar_month" selected={tab=="roster"} onTap={tab="roster"}
+    NavItem "Swaps" icon="swap_horiz" badge="2" selected={tab=="swaps"} onTap={tab="swaps"}
+    NavItem "Bids" icon="format_list_numbered" selected={tab=="bids"} onTap={tab="bids"}
+    NavItem "Pay" icon="payments" selected={tab=="pay"} onTap={tab="pay"}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Okafor" size=36
+      Column
+        Text.strong "Dana Okafor"
+        Text.caption "First Officer, B737 SEA"
+  Main
+    Nav
+      Heading "December 2026" level=1
+      Row gap=8
+        IconButton "chevron_left" tooltip="Previous month" onTap={month="2026-11"}
+        IconButton "chevron_right" tooltip="Next month" onTap={month="2027-01"}
+        Button.outline "Request swap" icon="swap_horiz" onTap={open swapRequest}
+    Column pad=24 gap=16 scroll
+      if !delayAck
+        Card gap=8 fill=#FFFFF4E5
+          Row between middle
+            Row gap=8 middle
+              Icon "schedule"
+              Text.strong "Schedule change on {delay.pairing}"
+            Badge.warning "Delay"
+          Row gap=12 middle
+            Text.strong "{delay.leg}"
+            Text.strong strike color=#FF8A6D3B "dep {delay.oldDep}"
+            Icon "arrow_forward"
+            Text.strong "dep {delay.newDep}"
+          Text.muted "{delay.reason}. This leg replaces the 14:00 departure on your pairing."
+          Row gap=8
+            Button "Acknowledge" onTap={delayAck=true; toast "Change acknowledged"}
+            Button.outline "View pairing" onTap={sel=find(pairings,p=>p.id==delay.pairing); open pairingSheet}
+      if restGap < 10
+        Card gap=8 fill=#FFFDECEA border-left=#FFC62828
+          Row gap=8 middle
+            Icon "warning" color=#FFC62828
+            Text.strong color=#FFC62828 "Rest gap below minimum"
+          Text "Only {restGap} hours between P3M08 arriving 12:05 on Dec 11 and P9D44 signing in 08:20 on Dec 12 is under the 10 hour legal minimum."
+          Button.outline "Ask scheduling to fix" onTap={emit restGapReport restGap; toast "Sent to crew scheduling"}
+      Row gap=16 top
+        Card grow gap=12
+          Row between middle
+            Text.strong "Month at a glance"
+            Row gap=8
+              Chip "Duty"
+              Chip "Layover"
+          Calendar month={month} events={pairings} startKey=start endKey=end label=layover onEventTap={sel=result; open pairingSheet}
+        Column w=300 gap=16
+          Card gap=12 center
+            Text.strong "Duty clock"
+            Stack center middle
+              Ring {(dutyLimit-dutySeconds)/dutyLimit} size=140
+              Column center
+                Text "{duration(dutyLimit-dutySeconds)}" size=24 weight=700
+                Text.caption "until legal limit"
+            Text.muted "{duration(dutySeconds)} flown of {duration(dutyLimit)} in 7 days"
+            if dutyLimit-dutySeconds < 7200
+              Badge.error "Under 2 hours left"
+          Card gap=8
+            Text.strong "Pay hours this month"
+            Text "{sum(pairings,p=>p.hours)} h" size=32 weight=700
+            Text.muted "{length(pairings)} pairings scheduled"
+every 1s onTick={dutySeconds=min(dutyLimit,dutySeconds+1)}
+  Sheet#pairingSheet "Pairing {sel.id}"
+    Column gap=12
+      Row between
+        Text.muted "{formatDate(sel.start,"MMM d")} to {formatDate(sel.end,"MMM d")}"
+        Badge.info "Layover {sel.layover}"
+      Text.strong "{sel.route}"
+      each leg in sel.legs
+        ListTile "{leg.no}  {leg.from} to {leg.to}" subtitle="Departs {leg.dep}, arrives {leg.arr}" icon="flight"
+      Divider
+      Row between
+        Text.muted "Credit hours"
+        Text.strong "{sel.hours} h"
+      Row gap=8
+        Button "Offer for swap" onTap={emit offerSwap sel.id; close; tab="swaps"}
+        Button.outline "Close" onTap={close}
+  Dialog#swapRequest "Request a swap" "Offer a pairing to other crew"
+    Select "Pairing" bind=swapPairing items=["P7K21","P3M08","P9D44","P5B16"]
+    Input "Note to crew" multiline bind=swapNote
+    Button "Post request" onTap={emit swapPosted swapPairing; toast "Swap posted"; close}
+
+### Swaps
+state tab="swaps"
+state filter="all"
+state swaps=[{"id":1,"pairing":"P9D44","dates":"Dec 12 to 14","route":"SEA-DEN-PHX-SEA","with":"Marcus Webb","status":"offered"},{"id":2,"pairing":"P5B16","dates":"Dec 19 to 22","route":"SEA-SFO-HNL-SFO-SEA","with":"Priya Nair","status":"accepted"},{"id":3,"pairing":"P3M08","dates":"Dec 9 to 11","route":"SEA-ORD-MSY-SEA","with":"Lena Fischer","status":"declined"},{"id":4,"pairing":"P2A90","dates":"Dec 26 to 28","route":"SEA-LAX-SEA","with":"Tom Abara","status":"offered"}]
+App
+  Sidebar
+    Brand "Rotation" icon="flight_takeoff"
+    NavItem "Roster" icon="calendar_month" onTap={go roster}
+    NavItem "Swaps" icon="swap_horiz" badge="2" selected={tab=="swaps"} onTap={tab="swaps"}
+    NavItem "Bids" icon="format_list_numbered" onTap={go bids}
+    NavItem "Pay" icon="payments" onTap={go pay}
+  Main
+    Nav
+      Heading "Swap requests" level=1
+      Button "New request" icon="add" onTap={open newSwap}
+    Column pad=24 gap=16 scroll
+      Row gap=8
+        FilterChip "All" selected={filter=="all"} onTap={filter="all"}
+        FilterChip "Offered" selected={filter=="offered"} onTap={filter="offered"}
+        FilterChip "Accepted" selected={filter=="accepted"} onTap={filter="accepted"}
+        FilterChip "Declined" selected={filter=="declined"} onTap={filter="declined"}
+      each s in filter=="all" ? swaps : filter(swaps,x=>x.status==filter)
+        Card gap=8
+          Row between middle
+            Row gap=12 middle
+              Avatar "{s.with}" size=40
+              Column
+                Text.strong "{s.pairing}  {s.route}"
+                Text.muted "{s.dates} with {s.with}"
+            if s.status=="offered"
+              Badge.warning "Offered"
+            if s.status=="accepted"
+              Badge.success "Accepted"
+            if s.status=="declined"
+              Badge.error "Declined"
+          if s.status=="offered"
+            Row gap=8
+              Button "Accept" onTap={swaps=updateWhere(swaps,x=>x.id==s.id,x=>with(x,"status","accepted")); emit swapAccepted s.id; toast "Swap accepted"}
+              Button.outline "Decline" onTap={swaps=updateWhere(swaps,x=>x.id==s.id,x=>with(x,"status","declined"))}
+              Button.ghost "Withdraw" onTap={swaps=removeWhere(swaps,x=>x.id==s.id)}
+          if s.status=="accepted"
+            Text.success "Awaiting scheduling approval"
+  Dialog#newSwap "New swap request"
+    Select "Pairing" bind=np items=["P7K21","P3M08","P9D44","P5B16"]
+    DatePicker "Trade for dates on or after" bind=nd
+    Button "Offer" onTap={swaps=append(swaps,{"id":length(swaps)+1,"pairing":np,"dates":formatDate(nd,"MMM d"),"route":"","with":"Open to all","status":"offered"}); close; toast "Offered"}
+
+### Bids
+state tab="bids"
+state bids=[{"id":"B1","name":"Hawaii layover trips","note":"HNL, 4 day pairings","rank":1},{"id":"B2","name":"Weekends off","note":"Fri night to Mon morning clear","rank":2},{"id":"B3","name":"Early reports before 07:00","note":"SEA base only","rank":3},{"id":"B4","name":"Short two day turns","note":"Max 2 legs per day","rank":4},{"id":"B5","name":"Red-eye avoidance","note":"No sign-in after 22:00","rank":5}]
+state submitted=false
+App
+  Sidebar
+    Brand "Rotation" icon="flight_takeoff"
+    NavItem "Roster" icon="calendar_month" onTap={go roster}
+    NavItem "Swaps" icon="swap_horiz" onTap={go swaps}
+    NavItem "Bids" icon="format_list_numbered" selected={tab=="bids"} onTap={tab="bids"}
+    NavItem "Pay" icon="payments" onTap={go pay}
+  Main
+    Nav
+      Heading "January bid" level=1
+      Row gap=8
+        Badge.info "Closes Dec 15"
+        Button "Submit bid" onTap={submitted=true; emit bidSubmit bids; toast "Bid submitted"}
+    Column pad=24 gap=12 scroll
+      Text.muted "Drag to reorder. Your top choice is awarded first by seniority."
+      ReorderableList bind=bids
+        each b in sortBy(bids,x=>x.rank)
+          Card drag=bid(b.id) drop=bid onDrop={bids=moveItem(bids,result.data,b.id)}
+            Row between middle
+              Row gap=12 middle
+                Icon "drag_indicator"
+                Text.strong "{b.rank}"
+                Column
+                  Text.strong "{b.name}"
+                  Text.muted "{b.note}"
+              Row gap=4
+                IconButton "arrow_upward" tooltip="Move up" onTap={bids=map(bids,x=>x.id==b.id ? with(x,"rank",max(1,x.rank-1)) : (x.rank==b.rank-1 ? with(x,"rank",x.rank+1) : x))}
+                IconButton "arrow_downward" tooltip="Move down" onTap={bids=map(bids,x=>x.id==b.id ? with(x,"rank",min(length(bids),x.rank+1)) : (x.rank==b.rank+1 ? with(x,"rank",x.rank-1) : x))}
+      if submitted
+        Text.success "Bid submitted. You can change it until the window closes."
+
+### Pay
+state tab="pay"
+state period="2026-12"
+state lines=[{"id":"P7K21","label":"P7K21 SEA-JFK-LHR-JFK-SEA","hours":22.4,"kind":"Flying"},{"id":"P3M08","label":"P3M08 SEA-ORD-MSY-SEA","hours":14.1,"kind":"Flying"},{"id":"P9D44","label":"P9D44 SEA-DEN-PHX-SEA","hours":12.8,"kind":"Flying"},{"id":"P5B16","label":"P5B16 SEA-SFO-HNL-SFO-SEA","hours":19.6,"kind":"Flying"},{"id":"DH1","label":"Deadhead SEA to SFO","hours":2.1,"kind":"Deadhead"},{"id":"INTL","label":"International override","hours":4.0,"kind":"Premium"}]
+state rate=62.5
+Page
+  Nav sticky
+    Brand "Rotation" icon="flight_takeoff"
+    Row gap=4
+      Link "Roster" onTap={go roster}
+      Link "Swaps" onTap={go swaps}
+      Link "Bids" onTap={go bids}
+      Link "Pay" onTap={tab="pay"}
+    Avatar "Dana Okafor" size=32
+  Section
+    Column gap=16
+      Heading "Pay hours" level=1
+      Row gap=24 top
+        Card grow gap=4
+          Text.muted "Total credit hours"
+          Text "{sum(lines,l=>l.hours)} h" size=40 weight=700
+        Card grow gap=4
+          Text.muted "Estimated gross"
+          Text "{money(sum(lines,l=>l.hours)*rate,"$",2)}" size=40 weight=700
+        Card grow gap=4
+          Text.muted "Rate per hour"
+          Input "Rate" type=number bind=rate
+  Section tint
+    Column gap=12
+      Heading "Breakdown" level=2
+      Row
+        Text.strong "Pairing" grow
+        Text.strong "Type" w=100
+        Text.strong "Hours" w=80
+      each l in lines
+        Row middle
+          Text "{l.label}" grow
+          Text.muted "{l.kind}" w=100
+          Text.strong "{fixed(l.hours,1)}" w=80
+      Divider
+      Row
+        Text.strong "Total" grow
+        Text.strong "{fixed(sum(lines,l=>l.hours),1)}" w=180
+      Row gap=8
+        Button.outline "Export PDF" icon="download" onTap={emit exportPay period}
+        Button.ghost "Dispute a line" onTap={open dispute}
+  Dialog#dispute "Dispute pay hours"
+    Select "Line" bind=dline items=["P7K21","P3M08","P9D44","P5B16","DH1","INTL"]
+    Input "What is wrong" multiline bind=dnote
+    Button "Send to crew pay" onTap={emit payDispute dline; close; toast "Dispute sent"}

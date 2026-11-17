@@ -1,0 +1,171 @@
+### Breathe
+state tab="breathe"
+state running=false
+state elapsed=0
+state total=300
+state c=0
+state scale=0
+state pattern="Box"
+state inhale=4
+state hold1=4
+state exhale=4
+state hold2=4
+state bg=#FF1F3A4D
+state streak=6
+state lastDay="2026-11-16"
+state hrBefore=0
+state hrAfter=0
+state hrStage="before"
+every 1s when running onTick={elapsed+1>=total ? {running=false; elapsed=total; streak=streak+1; lastDay=today(); emit bell; open done} : {elapsed=elapsed+1; c=(elapsed+1)%(inhale+hold1+exhale+hold2); scale=(c<inhale) ? c/inhale : (c<inhale+hold1) ? 1 : (c<inhale+hold1+exhale) ? 1-(c-inhale-hold1)/exhale : 0; bg=(c<inhale+hold1) ? #FF1F4D5C : #FF2B3358}}
+App
+  Sidebar
+    Brand "Tidal" icon="waves"
+    NavItem "Breathe" icon="air" selected={tab=="breathe"} onTap={tab="breathe"}
+    NavItem "Patterns" icon="tune" selected={tab=="patterns"} onTap={go patterns}
+    NavItem "Progress" icon="local_fire_department" badge="{streak}" selected={tab=="progress"} onTap={go progress}
+    Spacer grow
+    Text.muted "{streak} day streak"
+  Main
+    Nav
+      Heading "Breathe" level=1
+      Row gap=8
+        Chip "{pattern}" onTap={go patterns}
+        Button.outline "{round(total/60,0)} min" icon="timer" onTap={open length}
+    Box grow fill={bg} pad=24 gap=20 center
+      Text "{running ? 'Session in progress' : 'Ready when you are'}" color=#FFCFE8F0
+      Stack center middle h=320
+        Ring {1-elapsed/total} w=300 h=300
+        Box w={120+120*scale} h={120+120*scale} radius=999 fill=#FF7FD1C7 animate=pulse
+        Column center middle gap=4
+          Text "{c<inhale ? 'Breathe in' : c<inhale+hold1 ? 'Hold' : c<inhale+hold1+exhale ? 'Breathe out' : 'Hold'}" size=24 weight=600 color=#FF0B2530
+          Text "{c<inhale ? inhale-c : c<inhale+hold1 ? inhale+hold1-c : c<inhale+hold1+exhale ? inhale+hold1+exhale-c : inhale+hold1+exhale+hold2-c}" size=48 weight=700 color=#FF0B2530
+      Text "{duration(total-elapsed)} left" color=#FFCFE8F0
+      Row gap=12 center
+        Button "Start" icon="play_arrow" hidden={running} onTap={elapsed=0; c=0; scale=0; running=true}
+        Button.secondary "Pause" icon="pause" hidden={!running} onTap={running=false}
+        Button.outline "Reset" icon="replay" onTap={running=false; elapsed=0; c=0; scale=0}
+        Button.ghost "Heart rate" icon="favorite" onTap={hrStage="before"; open hr}
+      Row gap=8 center
+        Text.caption "Before: {hrBefore==0 ? '--' : hrBefore} bpm" color=#FFCFE8F0
+        Text.caption "After: {hrAfter==0 ? '--' : hrAfter} bpm" color=#FFCFE8F0
+  Sheet#length "Session length"
+    Column gap=12
+      Text.muted "How long would you like to breathe?"
+      Row gap=8
+        ChoiceChip "2 min" selected={total==120} onTap={total=120; elapsed=0; close}
+        ChoiceChip "5 min" selected={total==300} onTap={total=300; elapsed=0; close}
+        ChoiceChip "10 min" selected={total==600} onTap={total=600; elapsed=0; close}
+        ChoiceChip "20 min" selected={total==1200} onTap={total=1200; elapsed=0; close}
+      Row gap=8
+        Text.strong "Custom"
+        Input "Minutes" type=number w=100 onChange={total=clamp(result,1,60)*60; elapsed=0}
+        Button "Done" onTap={close}
+  Dialog#hr "Heart rate" "Check your pulse for 15 seconds and multiply by four"
+    Column gap=12
+      Text.strong "{hrStage=='before' ? 'Before your session' : 'After your session'}"
+      Input "Beats per minute" type=number bind=hrNow
+      Row end gap=8
+        Button.ghost "Cancel" onTap={close}
+        Button "Save" onTap={hrStage=='before' ? {hrBefore=hrNow; toast "Saved your starting rate"; close} : {hrAfter=hrNow; toast "Saved your ending rate"; close}}
+  Dialog#done "Session complete" "A bell rings softly"
+    Column gap=12 center
+      Icon "notifications_active"
+      Text "Well done. That is {streak} days in a row."
+      Text.muted "Take your pulse again to see how you feel."
+      Row gap=8
+        Button.outline "Close" onTap={close}
+        Button "Record heart rate" onTap={hrStage="after"; close; open hr}
+
+### Patterns
+state pattern="Box"
+state inhale=4
+state hold1=4
+state exhale=4
+state hold2=4
+App
+  Sidebar
+    Brand "Tidal" icon="waves"
+    NavItem "Breathe" icon="air" onTap={go breathe}
+    NavItem "Patterns" icon="tune" selected={true}
+    NavItem "Progress" icon="local_fire_department" onTap={go progress}
+  Main
+    Nav
+      Heading "Patterns" level=1
+      Button "Use {pattern}" onTap={emit usePattern pattern; go breathe}
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=8 onTap={pattern="Box"; inhale=4; hold1=4; exhale=4; hold2=4}
+          Heading "Box" level=3
+          Text.muted "Even four counts, in, hold, out, hold. Steady and focusing."
+          Badge.primary "4-4-4-4" hidden={pattern!="Box"}
+        Card gap=8 onTap={pattern="4-7-8"; inhale=4; hold1=7; exhale=8; hold2=0}
+          Heading "Four seven eight" level=3
+          Text.muted "A long exhale to settle you before sleep."
+          Badge.primary "4-7-8" hidden={pattern!="4-7-8"}
+        Card gap=8 onTap={pattern="Calm"; inhale=5; hold1=0; exhale=6; hold2=0}
+          Heading "Calm" level=3
+          Text.muted "Slow in, slower out. A gentle reset in the middle of the day."
+          Badge.primary "5-6" hidden={pattern!="Calm"}
+      Card gap=12
+        Heading "Timings for {pattern}" level=3
+        Row between
+          Text "Breathe in"
+          Row gap=8
+            IconButton "remove" tooltip="Shorter" onTap={inhale=max(1,inhale-1)}
+            Text.strong "{inhale}s" w=40 center
+            IconButton "add" tooltip="Longer" onTap={inhale=min(12,inhale+1)}
+        Row between
+          Text "Hold"
+          Row gap=8
+            IconButton "remove" tooltip="Shorter" onTap={hold1=max(0,hold1-1)}
+            Text.strong "{hold1}s" w=40 center
+            IconButton "add" tooltip="Longer" onTap={hold1=min(12,hold1+1)}
+        Row between
+          Text "Breathe out"
+          Row gap=8
+            IconButton "remove" tooltip="Shorter" onTap={exhale=max(1,exhale-1)}
+            Text.strong "{exhale}s" w=40 center
+            IconButton "add" tooltip="Longer" onTap={exhale=min(12,exhale+1)}
+        Row between
+          Text "Hold after"
+          Row gap=8
+            IconButton "remove" tooltip="Shorter" onTap={hold2=max(0,hold2-1)}
+            Text.strong "{hold2}s" w=40 center
+            IconButton "add" tooltip="Longer" onTap={hold2=min(12,hold2+1)}
+        Text.muted "One breath takes {inhale+hold1+exhale+hold2} seconds."
+
+### Progress
+state streak=6
+state days=[{"d":"Mon","min":5},{"d":"Tue","min":10},{"d":"Wed","min":5},{"d":"Thu","min":0},{"d":"Fri","min":10},{"d":"Sat","min":5},{"d":"Sun","min":5}]
+state sessions=[{"date":"Nov 16","pattern":"Calm","min":5,"before":78,"after":68},{"date":"Nov 15","pattern":"Box","min":10,"before":82,"after":70},{"date":"Nov 14","pattern":"4-7-8","min":5,"before":74,"after":66},{"date":"Nov 12","pattern":"Box","min":10,"before":80,"after":71}]
+App
+  Sidebar
+    Brand "Tidal" icon="waves"
+    NavItem "Breathe" icon="air" onTap={go breathe}
+    NavItem "Patterns" icon="tune" onTap={go patterns}
+    NavItem "Progress" icon="local_fire_department" selected={true}
+  Main
+    Nav
+      Heading "Progress" level=1
+      Badge.success "{streak} day streak"
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Current streak"
+          Text "{streak} days" size=32 weight=700
+        Card gap=4
+          Text.muted "Minutes this week"
+          Text "{sum(days,d=>d.min)}" size=32 weight=700
+        Card gap=4
+          Text.muted "Average heart rate drop"
+          Text "{round(sum(sessions,s=>s.before-s.after)/length(sessions),0)} bpm" size=32 weight=700
+      Card gap=12
+        Heading "Minutes each day" level=3
+        BarChart values={map(days,d=>d.min)} labels={map(days,d=>d.d)} h=200
+      Card gap=12
+        Heading "Heart rate before and after" level=3
+        LineChart labels={map(reverse(sessions),s=>s.date)} series=[{"name":"Before","values":[80,74,82,78]},{"name":"After","values":[71,66,70,68]}] h=200
+      Card gap=8
+        Heading "Recent sessions" level=3
+        each s in sessions
+          ListTile "{s.pattern}, {s.min} min" subtitle="{s.date}: {s.before} to {s.after} bpm" icon="self_improvement"

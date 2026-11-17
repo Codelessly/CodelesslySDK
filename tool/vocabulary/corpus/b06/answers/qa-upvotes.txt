@@ -1,0 +1,139 @@
+### Audience
+project questions=[{"id":1,"text":"Will the recordings be shared after the session?","author":"Priya","votes":41,"answered":false,"pinned":false,"hidden":false,"mergeInto":0,"merged":2},{"id":2,"text":"What is the roadmap for offline support?","author":"Anonymous","votes":28,"answered":false,"pinned":false,"hidden":false,"mergeInto":0,"merged":0},{"id":3,"text":"How do you decide what to cut from a release?","author":"Tomas","votes":19,"answered":false,"pinned":true,"hidden":false,"mergeInto":0,"merged":1},{"id":4,"text":"Are the recordings going to be public?","author":"Anonymous","votes":6,"answered":false,"pinned":false,"hidden":false,"mergeInto":1,"merged":0},{"id":5,"text":"Can we get the slides today?","author":"Lena","votes":12,"answered":true,"pinned":false,"hidden":false,"mergeInto":0,"merged":0}]
+project banned=["idiot","stupid","spam"]
+state sort="top"
+state draft=""
+state name=""
+state voted=[]
+state left=600
+state running=true
+every 1s when running onTick={left=max(0,left-1)}
+Page
+  Nav sticky
+    Brand "Ask Away" icon="forum"
+    Row gap=12
+      Badge.info "Round ends in {duration(left)}"
+      Button.outline "Host view" onTap={go host}
+  Section
+    Column gap=16
+      Heading "Product Q&A: Spring Launch" level=1
+      Text.muted "{count(questions,q=>!q.hidden)} questions, {sum(questions,q=>q.votes)} upvotes. Ask anything, upvote what you want answered."
+      Card gap=12
+        Heading "Ask a question" level=3
+        Input "Your question" "Type your question" bind=draft multiline maxlength=200
+        Row between
+          Text.caption "{length(draft)}/200"
+          if any(banned,w=>contains(lower(draft),w))
+            Row gap=4
+              Icon "warning" color=#FFB26A00
+              Text.danger "Please remove the flagged word before sending."
+        if length(draft)>12
+          Column gap=6
+            Text.strong "Similar questions already asked"
+            each s in filter(questions,q=>!q.hidden && length(draft)>12 && contains(lower(q.text),lower(slice(draft,0,12))))
+              ListTile "{s.text}" subtitle="{s.votes} upvotes"
+                Button.outline "Upvote instead" onTap={questions=updateWhere(questions,x=>x.id==s.id,x=>with(x,"votes",x.votes+1)); draft=""; toast "Upvoted the existing question"}
+        Input "Name (optional)" bind=name
+        Row end
+          Button "Send question" onTap={any(banned,w=>contains(lower(draft),w)) ? toast "Your question contains a banned word" : (length(trim(draft))<5 ? toast "Write at least 5 characters" : {questions=append(questions,{"id":length(questions)+10,"text":trim(draft),"author":coalesce(trim(name),"Anonymous"),"votes":1,"answered":false,"pinned":false,"hidden":false,"mergeInto":0,"merged":0}); draft=""; name=""; toast "Question sent"})}
+      Row between
+        SegmentedButton bind=sort items=["top","newest"]
+        Text.muted "Sorted by {sort}"
+      Column gap=8
+        each q in (sort=="top" ? sortByDesc(filter(questions,x=>!x.hidden),x=>x.votes) : sortByDesc(filter(questions,x=>!x.hidden),x=>x.id))
+          Card animate=slide-up stagger=60
+            Row gap=16
+              Column center gap=2
+                IconButton "arrow_upward" tooltip="Upvote" onTap={contains(voted,q.id) ? toast "You already upvoted" : {voted=append(voted,q.id); questions=updateWhere(questions,x=>x.id==q.id,x=>with(x,"votes",x.votes+1))}}
+                Text.strong "{q.votes}"
+                IconButton "arrow_downward" tooltip="Remove upvote" onTap={contains(voted,q.id) ? {voted=without(voted,q.id); questions=updateWhere(questions,x=>x.id==q.id,x=>with(x,"votes",x.votes-1))} : toast "Upvote it first"}
+              Column grow gap=4
+                Text "{q.text}"
+                Row gap=8
+                  Text.caption "{q.author}"
+                  if q.merged>0
+                    Badge.neutral "{q.merged} similar merged"
+                  if q.pinned
+                    Badge.primary "Pinned"
+                  if q.answered
+                    Badge.success "Answered"
+
+### Host
+state tab="live"
+state sel=0
+state running=true
+state left=600
+every 1s when running onTick={left=max(0,left-1)}
+App
+  Sidebar
+    Brand "Ask Away" icon="forum"
+    NavItem "Live questions" icon="question_answer" badge="{count(questions,q=>!q.answered && !q.hidden)}" selected={tab=="live"} onTap={tab="live"}
+    NavItem "Answered" icon="task_alt" selected={tab=="answered"} onTap={tab="answered"}
+    NavItem "Hidden" icon="visibility_off" selected={tab=="hidden"} onTap={tab="hidden"}
+    NavItem "Projector view" icon="cast" onTap={go projector}
+    Spacer grow
+    Text.muted "Host: Dana Whitfield"
+  Main
+    Nav
+      Heading "Spring Launch Q&A" level=1
+      Row gap=8
+        Badge.warning "Round {duration(left)}"
+        Button.outline "{running ? 'Pause' : 'Resume'}" onTap={running=!running}
+        Button.outline "Reset 10:00" onTap={left=600; running=true}
+        Button.outline "5 min" onTap={left=300}
+        Button "Open projector" onTap={go projector}
+    Column pad=24 gap=16 scroll
+      if tab=="live"
+        each q in sortByDesc(filter(questions,x=>!x.answered && !x.hidden),x=>(x.pinned ? 1000 : 0)+x.votes)
+          Card gap=8 animate=fade
+            Row gap=16
+              Column center gap=2
+                Icon "arrow_upward"
+                Text.strong "{q.votes}"
+              Column grow gap=4
+                Text "{q.text}"
+                Text.caption "{q.author}"
+                if q.mergeInto>0
+                  Badge.info "Looks similar to question {q.mergeInto}"
+            Row gap=8 end
+              if q.mergeInto>0
+                Button.outline "Merge" icon="call_merge" onTap={questions=removeWhere(updateWhere(questions,x=>x.id==q.mergeInto,x=>with(with(x,"votes",x.votes+q.votes),"merged",x.merged+1)),x=>x.id==q.id); toast "Merged into question {q.mergeInto}"}
+              Button.outline "{q.pinned ? 'Unpin' : 'Pin'}" icon="push_pin" onTap={questions=map(questions,x=>with(x,"pinned",x.id==q.id ? !q.pinned : false))}
+              Button "Answered" icon="check" onTap={questions=updateWhere(questions,x=>x.id==q.id,x=>with(with(x,"answered",true),"pinned",false))}
+              Button.destructive "Hide" icon="visibility_off" onTap={sel=q.id; open confirmHide}
+      if tab=="answered"
+        each q in filter(questions,x=>x.answered)
+          Card
+            Row between
+              Column gap=2
+                Text "{q.text}"
+                Text.caption "{q.author} · {q.votes} upvotes"
+              Button.outline "Reopen" onTap={questions=updateWhere(questions,x=>x.id==q.id,x=>with(x,"answered",false))}
+      if tab=="hidden"
+        if isEmpty(filter(questions,x=>x.hidden))
+          Text.muted "Nothing hidden."
+        each q in filter(questions,x=>x.hidden)
+          Card
+            Row between
+              Text "{q.text}"
+              Button.outline "Restore" onTap={questions=updateWhere(questions,x=>x.id==q.id,x=>with(x,"hidden",false))}
+Dialog#confirmHide "Hide this question?" "It disappears from the audience list and the projector."
+  Row gap=8 end
+    Button.outline "Cancel" onTap={close}
+    Button.destructive "Hide" onTap={questions=updateWhere(questions,x=>x.id==sel,x=>with(with(x,"hidden",true),"pinned",false)); close; toast "Question hidden"}
+
+### Projector
+Page
+  Nav
+    Brand "Ask Away" icon="forum"
+    Row gap=8
+      Badge.warning "{duration(left)} left"
+      Button.ghost "Back to host" onTap={go host}
+  Section center
+    Column center middle gap=24 pad=48
+      if isEmpty(filter(questions,q=>q.pinned && !q.hidden))
+        Text "No question pinned" size=48 weight=700 center
+        Text.muted "Pin a question from the host view to show it here." center
+      each q in filter(questions,x=>x.pinned && !x.hidden)
+        Text.caption "{q.votes} upvotes · asked by {q.author}" center animate=fade
+        Text "{q.text}" size=72 weight=800 center animate=scale

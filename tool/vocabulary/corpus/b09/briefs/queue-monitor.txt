@@ -1,0 +1,3 @@
+App: Backlog, a message queue monitor. A list of queues with depth as a number and a sparkline, rate in and out per second and age of the oldest message; a queue page with a chart where depth and rate overlay; consumers listed with a last seen time and a lag bar; a dead letter queue with messages whose body opens as a tree and can be replayed or purged with a confirm; an alert threshold line drawn on the chart and dragged.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

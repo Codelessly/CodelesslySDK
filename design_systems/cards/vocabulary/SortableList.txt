@@ -1,0 +1,4 @@
+// A list whose rows can be dragged in or out (the rows carry drag=group(value), the list drop=group and onDrop): the lines under it, in a bordered column. Putting its own rows in order is ReorderList's.
+SortableList
+  Column w=fill gap=4 pad=6 radius=10 border=line
+    ...

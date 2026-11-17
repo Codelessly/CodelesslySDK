@@ -1,0 +1,3 @@
+App: Blueprint DB, a schema designer. A canvas of tables as boxes listing columns with type and a key mark, dragged freely and linked by lines drawn from a column to another table's key with crow's foot ends; a column added inline by typing a name and choosing a type; reorder columns by drag; a relationship type toggled between one and many; an index list; generated create statements in a side pane that update live; a validation list of warnings.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

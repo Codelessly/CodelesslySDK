@@ -1,0 +1,181 @@
+### Crag
+state tab="crag"
+state routes=[{"id":"r1","name":"Slab Happy","grade":"5b","len":18,"color":"#FF2E7D32","pts":[[0.18,0.92],[0.22,0.6],[0.2,0.2]]},{"id":"r2","name":"Crimp Chimney","grade":"6a","len":22,"color":"#FFF9A825","pts":[[0.42,0.95],[0.46,0.55],[0.5,0.15]]},{"id":"r3","name":"The Rattler","grade":"6c","len":25,"color":"#FFD32F2F","pts":[[0.66,0.93],[0.7,0.5],[0.64,0.12]]},{"id":"r4","name":"Blue Moon","grade":"7a","len":27,"color":"#FF1565C0","pts":[[0.86,0.9],[0.82,0.45],[0.88,0.1]]}]
+state grades=["5a","5b","5c","6a","6b","6c","7a","7b"]
+state lo="5a"
+state hi="7b"
+state selId="r3"
+state ascents=[{"id":"a1","route":"Slab Happy","grade":"5b","style":"Flash","tries":1,"stars":3,"date":"2026-11-08"},{"id":"a2","route":"Crimp Chimney","grade":"6a","style":"Redpoint","tries":3,"stars":4,"date":"2026-11-08"},{"id":"a3","route":"Pocket Rocket","grade":"6b","style":"Redpoint","tries":5,"stars":5,"date":"2026-11-01"}]
+state style="Redpoint"
+state tries=1
+state stars=3
+state logRoute="The Rattler"
+App
+  Sidebar
+    Brand "Crux" icon="terrain"
+    NavItem "Crag" icon="landscape" selected={tab=="crag"} onTap={go crag}
+    NavItem "Progress" icon="insights" selected={tab=="progress"} onTap={go progress}
+    NavItem "Projects" icon="flag" badge="3" selected={tab=="projects"} onTap={go projects}
+    Spacer grow
+    Text.muted "Ray L. - Gorge du Loup"
+  Main
+    Nav
+      Heading "Gorge du Loup, Sector B" level=1
+      Row gap=8
+        Button.outline "Grade range" icon="tune" onTap={open filters}
+        Button "Log a climb" icon="add" onTap={logRoute=find(routes,r=>r.id==selId).name; style="Redpoint"; tries=1; stars=3; open logClimb}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Card grow gap=8
+          Row between
+            Text.strong "Wall photo"
+            Text.muted "{count(routes,r=>indexOf(grades,r.grade)>=indexOf(grades,lo) && indexOf(grades,r.grade)<=indexOf(grades,hi))} routes shown"
+          RouteTopo src="https://images.example.com/crags/gorge-du-loup-b.jpg" routes={filter(routes,r=>indexOf(grades,r.grade)>=indexOf(grades,lo) && indexOf(grades,r.grade)<=indexOf(grades,hi))} bind=selId h=420 onSelect={selId=result}
+        Pane w=320 pad=16 gap=12
+          each r in filter(routes,x=>x.id==selId)
+            Row between
+              Heading "{r.name}" level=3
+              Badge.primary "{r.grade}"
+            Row gap=16
+              Column gap=2
+                Text.caption "LENGTH"
+                Text.strong "{r.len} m"
+              Column gap=2
+                Text.caption "GRADE"
+                Text.strong "{r.grade}"
+            Button "Log this route" icon="check" onTap={logRoute=r.name; open logClimb}
+            Button.outline "Add to projects" icon="flag" onTap={emit project r.id; toast "Added to projects"}
+            Button.ghost "Beta note" icon="edit_note" onTap={go beta}
+  Sheet#filters "Grade range"
+    Row gap=12
+      Select "From" bind=lo items=["5a","5b","5c","6a","6b","6c","7a","7b"]
+      Select "To" bind=hi items=["5a","5b","5c","6a","6b","6c","7a","7b"]
+    Row gap=8
+      Button.outline "Reset" onTap={lo="5a"; hi="7b"}
+      Button "Apply" onTap={indexOf(grades,lo)<=indexOf(grades,hi) ? close : toast "Start grade is above end grade"}
+  Dialog#logClimb "Log a climb" "{logRoute}"
+    Column gap=16
+      Text.fieldLabel "Style"
+      SegmentedButton bind=style items=["Flash","Redpoint","Fell"]
+      Text.fieldLabel "Attempts"
+      Row gap=12 middle
+        IconButton "remove" tooltip="Fewer attempts" onTap={tries=max(1,tries-1)}
+        Text.strong "{tries}" size=24
+        IconButton "add" tooltip="More attempts" onTap={tries=tries+1}
+      Text.fieldLabel "Rating"
+      Rating bind=stars max=5
+      Input "Note" "Cruxy move at the third bolt" multiline bind=note
+      Row end gap=8
+        Button.ghost "Cancel" onTap={close}
+        Button "Save climb" onTap={ascents=append(ascents,{"id":"a{length(ascents)+1}","route":logRoute,"grade":find(routes,r=>r.name==logRoute).grade,"style":style,"tries":tries,"stars":stars,"date":today()}); emit logged logRoute; toast "Climb logged"; close}
+
+### Progress
+state tab="progress"
+state grades=["5a","5b","5c","6a","6b","6c","7a"]
+state ascents=[{"id":"a1","route":"Slab Happy","grade":"5b","style":"Flash","tries":1,"stars":3,"date":"2026-11-08"},{"id":"a2","route":"Crimp Chimney","grade":"6a","style":"Redpoint","tries":3,"stars":4,"date":"2026-11-08"},{"id":"a3","route":"Pocket Rocket","grade":"6b","style":"Redpoint","tries":5,"stars":5,"date":"2026-11-01"},{"id":"a4","route":"Easy Does It","grade":"5a","style":"Flash","tries":1,"stars":2,"date":"2026-11-01"},{"id":"a5","route":"Overhung","grade":"6a","style":"Fell","tries":2,"stars":3,"date":"2026-10-25"}]
+state range="Month"
+App
+  Sidebar
+    Brand "Crux" icon="terrain"
+    NavItem "Crag" icon="landscape" selected={tab=="crag"} onTap={go crag}
+    NavItem "Progress" icon="insights" selected={tab=="progress"} onTap={go progress}
+    NavItem "Projects" icon="flag" badge="3" selected={tab=="projects"} onTap={go projects}
+    Spacer grow
+    Text.muted "Ray L. - Gorge du Loup"
+  Main
+    Nav
+      Heading "Progress" level=1
+      SegmentedButton bind=range items=["Month","Year","All"]
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.caption "CLIMBS"
+          Text.strong "{length(ascents)}" size=32
+        Card gap=4
+          Text.caption "FLASH RATE"
+          Text.strong "{round(100*count(ascents,a=>a.style=="Flash")/length(ascents),0)}%" size=32
+        Card gap=4
+          Text.caption "AVG ATTEMPTS"
+          Text.strong "{fixed(sum(ascents,a=>a.tries)/length(ascents),1)}" size=32
+      Card gap=12
+        Row between
+          Text.strong "Grade pyramid"
+          Text.muted "Each bar is the ascents at that grade"
+        GradePyramid grades={grades} counts={map(grades,g=>count(ascents,a=>a.grade==g))} h=260
+      Card gap=8
+        Text.strong "Sessions"
+        each d in unique(map(sortByDesc(ascents,a=>a.date),a=>a.date))
+          Accordion "{formatDate(d,"EEE, MMM d")}" subtitle="{count(ascents,a=>a.date==d)} climbs"
+            each a in filter(ascents,x=>x.date==d)
+              ListTile "{a.route}" subtitle="{a.style} - {a.tries} tries" trailing="{a.grade}" icon="check_circle"
+
+### Projects
+state tab="projects"
+state projects=[{"id":"p1","route":"The Rattler","grade":"6c","tries":4,"next":"Rest at the big jug, then clip the fourth bolt early."},{"id":"p2","route":"Blue Moon","grade":"7a","tries":2,"next":"Work the sloper sequence on top rope first."},{"id":"p3","route":"Pocket Rocket","grade":"6b+","tries":6,"next":"Left foot high on the two-finger pocket."}]
+state editId=""
+state draft=""
+App
+  Sidebar
+    Brand "Crux" icon="terrain"
+    NavItem "Crag" icon="landscape" selected={tab=="crag"} onTap={go crag}
+    NavItem "Progress" icon="insights" selected={tab=="progress"} onTap={go progress}
+    NavItem "Projects" icon="flag" badge="{length(projects)}" selected={tab=="projects"} onTap={go projects}
+    Spacer grow
+    Text.muted "Ray L. - Gorge du Loup"
+  Main
+    Nav
+      Heading "Projects" level=1
+      Button "Open beta note" icon="edit_note" onTap={go beta}
+    Column pad=24 gap=12
+      each p in projects
+        Card gap=8
+          Row between
+            Row gap=8 middle
+              Heading "{p.route}" level=3
+              Badge.warning "{p.grade}"
+            Text.muted "{p.tries} tries"
+          Text.caption "NEXT TRY"
+          Text "{p.next}"
+          Row gap=8
+            Button.outline "Edit note" icon="edit" onTap={editId=p.id; draft=p.next; open editNote}
+            Button "Send it" icon="check" onTap={ascents=append(ascents,{"id":"p{p.id}","route":p.route,"grade":p.grade,"style":"Redpoint","tries":p.tries+1,"stars":4,"date":today()}); projects=removeWhere(projects,x=>x.id==p.id); toast "Project sent"}
+            Button.ghost "Drop" icon="delete" onTap={projects=removeWhere(projects,x=>x.id==p.id); toast "Removed from projects"}
+  Dialog#editNote "Next-try note"
+    Input "Note" bind=draft multiline
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Save" onTap={projects=updateWhere(projects,x=>x.id==editId,x=>with(x,"next",draft)); toast "Note saved"; close}
+
+### Beta
+state tab="projects"
+state hold=1
+state holds=[{"n":1,"x":0.3,"y":0.88,"note":"Start: left hand sidepull, right foot smear."},{"n":2,"x":0.38,"y":0.7,"note":"Crimp, pull through with the right."},{"n":3,"x":0.52,"y":0.55,"note":"Big jug. Rest and shake out here."},{"n":4,"x":0.6,"y":0.38,"note":"Flag left foot, reach the sloper."},{"n":5,"x":0.55,"y":0.15,"note":"Mantle onto the ledge, clip the chains."}]
+App
+  Sidebar
+    Brand "Crux" icon="terrain"
+    NavItem "Crag" icon="landscape" selected={tab=="crag"} onTap={go crag}
+    NavItem "Progress" icon="insights" selected={tab=="progress"} onTap={go progress}
+    NavItem "Projects" icon="flag" badge="3" selected={tab=="projects"} onTap={go projects}
+    Spacer grow
+    Text.muted "Ray L. - Gorge du Loup"
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Back to projects" onTap={go projects}
+        Heading "Beta: The Rattler (6c)" level=1
+      Button "Save beta" icon="save" onTap={emit saveBeta holds; toast "Beta saved"}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Card grow
+          NumberedPhoto src="https://images.example.com/crags/the-rattler.jpg" pins={holds} bind=hold h=480 onPlace={holds=append(holds,{"n":length(holds)+1,"x":result.x,"y":result.y,"note":""}); hold=length(holds)} onSelect={hold=result}
+        Pane w=320 pad=16 gap=12
+          Heading "Hold {hold}" level=3
+          each h in filter(holds,x=>x.n==hold)
+            Input "Beta for this hold" bind=h.note multiline
+          Row gap=8
+            Button.outline "Previous" icon="chevron_left" onTap={hold=max(1,hold-1)}
+            Button.outline "Next" icon="chevron_right" onTap={hold=min(length(holds),hold+1)}
+          Divider
+          Text.caption "ALL HOLDS"
+          each h in holds
+            ListTile "{h.n}. {h.note}" selected={hold==h.n} onTap={hold=h.n}

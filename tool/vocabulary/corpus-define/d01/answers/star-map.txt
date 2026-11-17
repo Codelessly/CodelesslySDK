@@ -1,0 +1,196 @@
+### Sky
+state stars=[{"id":"sirius","name":"Sirius","mag":-1.46,"con":"Canis Major","rise":"17:42","set":"05:31","alt":24,"az":161},{"id":"betelgeuse","name":"Betelgeuse","mag":0.42,"con":"Orion","rise":"15:58","set":"04:12","alt":41,"az":139},{"id":"rigel","name":"Rigel","mag":0.13,"con":"Orion","rise":"16:20","set":"04:02","alt":33,"az":147},{"id":"capella","name":"Capella","mag":0.08,"con":"Auriga","rise":"always up","set":"always up","alt":62,"az":58},{"id":"jupiter","name":"Jupiter","mag":-2.6,"con":"Taurus","rise":"16:05","set":"06:48","alt":55,"az":96}]
+state lines=[["betelgeuse","rigel"],["betelgeuse","capella"],["rigel","sirius"]]
+state centerAz=140
+state centerAlt=35
+state offsetMin=0
+state showGrid=true
+state showNames=true
+state showDeep=false
+state night=false
+state compass=false
+state query=""
+state target=""
+state picked=""
+state dayShift=0
+App
+  Sidebar
+    Brand "Nightfall" icon="nights_stay"
+    NavItem "Sky" icon="public" selected={true}
+    NavItem "Satellite passes" icon="satellite_alt" badge="4" onTap={go passes}
+    NavItem "Tonight" icon="event_note" onTap={go tonight}
+    Spacer grow
+    Toggle "Red night mode" bind=night
+    Text.muted "Berlin, 52.52 N 13.40 E"
+  Main
+    Nav
+      Heading "Sky tonight"
+      Row gap=8
+        Input "Find a planet or star" "Sirius, Jupiter..." bind=query w=240 onChange={target=""}
+        Button "Point" icon="near_me" onTap={find(stars,s=>lower(s.name)==lower(trim(query))) != null ? target=find(stars,s=>lower(s.name)==lower(trim(query))).id : toast "No object called {query}"}
+        IconButton "layers" tooltip="Layers" onTap={open layers}
+        IconButton "explore" tooltip="Follow the phone's compass" onTap={compass=!compass; toast compass ? "Turn the phone to move the sky" : "Compass off"}
+    Column pad=24 gap=16
+      if target != ""
+        Card gap=4
+          Row between middle
+            Text.strong "Arrow points to {find(stars,s=>s.id==target).name}"
+            Button.ghost "Clear" onTap={target=""; query=""}
+          Text.muted "Turn right {abs(find(stars,s=>s.id==target).az-centerAz)} degrees and look up {find(stars,s=>s.id==target).alt} degrees"
+      SkyDisc stars={stars} lines={lines} azimuth={centerAz} altitude={centerAlt} grid={showGrid} names={showNames} deep={showDeep} night={night} pointTo={target} compass={compass} onDrag={centerAz=result.az; centerAlt=result.alt} onPick={picked=result; open objcard}
+      Card gap=8
+        Row between middle
+          Text.strong "Time"
+          Text.muted "{offsetMin >= 0 ? '+' : ''}{round(offsetMin/60,1)} h, {formatDate(today(),'MMM d')} {dayShift != 0 ? '(' + dayShift + ' d)' : ''}"
+        TimeScrubber bind=offsetMin min=-720 max=720 step=10 label="Hours from now"
+        Row gap=8
+          Button.outline "Now" onTap={offsetMin=0; dayShift=0}
+          Button.outline "-1 day" onTap={dayShift=dayShift-1}
+          Button.outline "+1 day" onTap={dayShift=dayShift+1}
+          Button.outline "+1 month" onTap={dayShift=dayShift+30}
+          Button.outline "+1 year" onTap={dayShift=dayShift+365}
+  Pane w=320 pad=16 gap=12
+    Text.strong "Visible now"
+    each s in sortBy(stars,x=>x.mag)
+      ListTile "{s.name}" "{s.con}, mag {s.mag}" onTap={picked=s.id; open objcard}
+        Badge.neutral "{s.alt} deg"
+Sheet#layers "Layers"
+  Toggle "Coordinate grid" bind=showGrid
+  Toggle "Object names" bind=showNames
+  Toggle "Deep sky (clusters, nebulae, galaxies)" bind=showDeep
+  Toggle "Red night mode" bind=night
+  Button "Done" onTap={close}
+Sheet#objcard "{find(stars,s=>s.id==picked).name}"
+  Column gap=12
+    Text.muted "{find(stars,s=>s.id==picked).con}"
+    Grid cols=3 gap=12
+      Card gap=2
+        Text.caption "Magnitude"
+        Text.strong "{find(stars,s=>s.id==picked).mag}"
+      Card gap=2
+        Text.caption "Rises"
+        Text.strong "{find(stars,s=>s.id==picked).rise}"
+      Card gap=2
+        Text.caption "Sets"
+        Text.strong "{find(stars,s=>s.id==picked).set}"
+    Text.muted "Now {find(stars,s=>s.id==picked).alt} degrees above the horizon, bearing {find(stars,s=>s.id==picked).az}."
+    Row gap=8
+      Button "Point me to it" icon="near_me" onTap={target=picked; query=find(stars,s=>s.id==picked).name; close}
+      Button.outline "Close" onTap={close}
+
+### Satellite passes
+state night=false
+state minAlt=20
+state kind="all"
+state passes=[{"id":"iss1","name":"ISS","kind":"station","start":"19:12","peak":"19:15","end":"19:18","maxAlt":68,"mag":-3.4,"from":"WSW","to":"NE","watch":true},{"id":"tg1","name":"Tiangong","kind":"station","start":"20:41","peak":"20:44","end":"20:47","maxAlt":34,"mag":-1.2,"from":"W","to":"N","watch":false},{"id":"hst1","name":"Hubble","kind":"telescope","start":"21:03","peak":"21:06","end":"21:09","maxAlt":27,"mag":1.8,"from":"SW","to":"SE","watch":false},{"id":"iss2","name":"ISS","kind":"station","start":"22:49","peak":"22:51","end":"22:53","maxAlt":12,"mag":-0.6,"from":"WNW","to":"NNW","watch":false}]
+state sel=""
+App
+  Sidebar
+    Brand "Nightfall" icon="nights_stay"
+    NavItem "Sky" icon="public" onTap={go sky}
+    NavItem "Satellite passes" icon="satellite_alt" badge="{count(passes,p=>p.maxAlt>=minAlt)}" selected={true}
+    NavItem "Tonight" icon="event_note" onTap={go tonight}
+    Spacer grow
+    Toggle "Red night mode" bind=night
+  Main
+    Nav
+      Heading "Satellite passes"
+      Row gap=8
+        SegmentedButton bind=kind items=["all","station","telescope"]
+        IconButton "notifications" tooltip="Alert me before each watched pass" onTap={toast "Alerts set for {count(passes,p=>p.watch)} passes"}
+    Column pad=24 gap=16
+      Card gap=8
+        Row between middle
+          Text.strong "Minimum height"
+          Text.muted "{minAlt} degrees"
+        Slider bind=minAlt min=0 max=80
+      each p in filter(passes,x=>x.maxAlt>=minAlt && (kind=="all" || x.kind==kind))
+        Card gap=8 onTap={sel=p.id; open pass}
+          Row between middle
+            Row gap=12 middle
+              IconTile "satellite_alt"
+              Column gap=2
+                Text.strong "{p.name}"
+                Text.muted "{p.start} to {p.end}, {p.from} to {p.to}"
+            Column gap=2 right
+              Badge.info "max {p.maxAlt} deg"
+              Text.caption "mag {p.mag}"
+          Row between middle
+            Sparkline values=[0,p.maxAlt/2,p.maxAlt,p.maxAlt/2,0] h=32 w=120
+            Toggle "Watch" bind=p.watch
+      if count(passes,p=>p.maxAlt>=minAlt && (kind=="all" || p.kind==kind)) == 0
+        Card gap=4
+          Text.strong "No passes match"
+          Text.muted "Lower the minimum height or change the filter."
+          Button.outline "Reset" onTap={minAlt=0; kind="all"}
+Dialog#pass "Pass details" "{find(passes,p=>p.id==sel).name}"
+  Column gap=12
+    Row between
+      Text.muted "Rises"
+      Text.strong "{find(passes,p=>p.id==sel).start} from {find(passes,p=>p.id==sel).from}"
+    Row between
+      Text.muted "Peaks"
+      Text.strong "{find(passes,p=>p.id==sel).peak} at {find(passes,p=>p.id==sel).maxAlt} degrees"
+    Row between
+      Text.muted "Sets"
+      Text.strong "{find(passes,p=>p.id==sel).end} toward {find(passes,p=>p.id==sel).to}"
+    Button "Show path on the sky" icon="public" onTap={emit showPass sel; go sky; close}
+
+### Tonight
+state night=false
+state events=[{"time":"18:05","what":"Sunset","note":"Civil twilight ends 18:44"},{"time":"20:30","what":"Jupiter above 40 degrees","note":"Best in the east"},{"time":"22:10","what":"Orion clears the rooftops","note":"Betelgeuse and Rigel"},{"time":"03:20","what":"Moon sets","note":"Dark sky until dawn"}]
+state bortle=5
+App
+  Sidebar
+    Brand "Nightfall" icon="nights_stay"
+    NavItem "Sky" icon="public" onTap={go sky}
+    NavItem "Satellite passes" icon="satellite_alt" onTap={go passes}
+    NavItem "Tonight" icon="event_note" selected={true}
+    Spacer grow
+    Toggle "Red night mode" bind=night
+  Main
+    Nav
+      Heading "Tonight in Berlin"
+      Button.outline "Open the sky" icon="public" onTap={go sky}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.caption "Moon"
+          Text.strong "Waning, 34 percent"
+          Progress 0.34
+        Card gap=4
+          Text.caption "Darkness"
+          Gauge bind=bortle min=1 max=9 limit=6 unit="Bortle"
+        Card gap=4
+          Text.caption "Clouds by hour"
+          BarChart values=[10,20,45,60,30,15] labels=["20","22","00","02","04","06"] h=100
+      Card gap=8
+        Text.strong "What is up"
+        each e in events
+          ListTile "{e.what}" "{e.time}, {e.note}"
+
+// Placeholder: a real sky disc (projected stars, drag, phone orientation) cannot be drawn with these words. It shows the disc as a labelled box with its layers and a tappable list of dots for the objects.
+define SkyDisc stars=[] lines=[] azimuth=0 altitude=0 grid=true names=true deep=false night=false pointTo="" compass=false onDrag onPick
+  Card gap=8 fill={night ? "#FF1A0000" : "#FF0B1026"} radius=16 drag=sky(azimuth) onDrop={onDrag(result.data)}
+    Row between
+      Text.small "Sky disc, facing {azimuth} deg, up {altitude} deg" color={night ? "#FFFF4D4D" : "#FFCBD5E1"}
+      Text.small "{compass ? 'Compass on' : 'Drag to move'}" color={night ? "#FFFF4D4D" : "#FFCBD5E1"}
+    Row gap=16 center middle h=240 wrap
+      each s in stars
+        Column center gap=2 onTap={onPick(s.id)}
+          Box w={max(6,14-s.mag*3)} h={max(6,14-s.mag*3)} radius={14} fill={night ? "#FFFF4D4D" : (s.id==pointTo ? "#FFFACC15" : "#FFFFFFFF")}
+          if names
+            Text.caption "{s.name}" color={night ? "#FFFF4D4D" : "#FFCBD5E1"}
+          if s.id==pointTo
+            Icon "arrow_upward" color="#FFFACC15"
+    Row gap=12
+      if grid
+        Text.caption "Grid on" color={night ? "#FFFF4D4D" : "#FFCBD5E1"}
+      if deep
+        Text.caption "Deep sky on" color={night ? "#FFFF4D4D" : "#FFCBD5E1"}
+      Text.caption "{length(lines)} constellation lines" color={night ? "#FFFF4D4D" : "#FFCBD5E1"}
+
+define TimeScrubber bind=value min=-720 max=720 step=10 label="" onChange
+  Column gap=4
+    Text.caption "{label}"
+    Slider bind=value min={min} max={max} step={step} onChange={onChange}

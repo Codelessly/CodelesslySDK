@@ -1,0 +1,3 @@
+App: Platform 9, rail tickets. Search stations with a swap button, date and time, railcards; results as journeys with changes, duration, price and cheapest marked, earlier and later buttons; seat reservation with a carriage diagram; a ticket with a moving barcode and an activate countdown; live journey with platform and delays; refund flow.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

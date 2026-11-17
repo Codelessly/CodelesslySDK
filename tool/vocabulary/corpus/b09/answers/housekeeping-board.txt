@@ -1,0 +1,173 @@
+### Floor board
+state tab="board"
+state floor=3
+state sel=""
+state rooms=[{"id":"301","status":"dirty","at":"","early":true,"staff":"","dnd":false},{"id":"302","status":"progress","at":"9:12 AM","early":false,"staff":"Marta","dnd":false},{"id":"303","status":"clean","at":"9:40 AM","early":false,"staff":"Marta","dnd":false},{"id":"304","status":"inspected","at":"10:05 AM","early":false,"staff":"Joel","dnd":false},{"id":"305","status":"dirty","at":"","early":false,"staff":"","dnd":true},{"id":"306","status":"dirty","at":"","early":true,"staff":"","dnd":false},{"id":"307","status":"progress","at":"9:50 AM","early":false,"staff":"Joel","dnd":false},{"id":"308","status":"clean","at":"10:20 AM","early":false,"staff":"Priya","dnd":false},{"id":"309","status":"dirty","at":"","early":false,"staff":"","dnd":false},{"id":"310","status":"dirty","at":"","early":false,"staff":"","dnd":false},{"id":"311","status":"inspected","at":"8:55 AM","early":false,"staff":"Priya","dnd":false},{"id":"312","status":"dirty","at":"","early":true,"staff":"","dnd":false}]
+state staff=[{"name":"Marta Silva","key":"Marta","cap":5},{"name":"Joel Okafor","key":"Joel","cap":4},{"name":"Priya Nair","key":"Priya","cap":5}]
+App
+  Sidebar
+    Brand "Turndown" icon="bed"
+    NavItem "Floor board" icon="grid_view" selected={tab=="board"} onTap={tab="board"}
+    NavItem "Arrivals" icon="luggage" badge="7" onTap={open arrivals}
+    NavItem "Inspections" icon="fact_check" onTap={go inspections}
+    NavItem "Minibar" icon="local_bar" onTap={open minibar}
+    NavItem "Lost property" icon="inventory_2" onTap={open lost}
+    Spacer grow
+    Text.muted "Duty manager: Dana Whitfield"
+  Main
+    Nav
+      Heading "Floor {floor}" level=1
+      Row gap=8
+        SegmentedButton bind=floor items=[2,3,4]
+        Button "Today's arrivals" onTap={open arrivals}
+    Column pad=24 gap=16 scroll
+      Row gap=16
+        Card grow gap=4
+          Text.muted "Rooms left"
+          Text "{count(rooms,r=>r.status!='clean' && r.status!='inspected')}" size=40 weight=700
+        Card grow gap=4
+          Text.muted "Dirty"
+          Text "{count(rooms,r=>r.status=='dirty')}" size=40 weight=700 color=#FFC62828
+        Card grow gap=4
+          Text.muted "In progress"
+          Text "{count(rooms,r=>r.status=='progress')}" size=40 weight=700 color=#FFEF6C00
+        Card grow gap=4
+          Text.muted "Early check-in"
+          Text "{count(rooms,r=>r.early && r.status!='inspected')}" size=40 weight=700
+      Row gap=8
+        Badge.error "Dirty"
+        Badge.warning "In progress"
+        Badge.success "Clean"
+        Badge.info "Inspected"
+        Badge.neutral "Do not disturb"
+        Text.muted "Tap a room to move it on. Drag a room onto a name."
+      Grid cols=4 gap=12
+        each r in rooms
+          Box gap=4 pad=12 radius=12 drag=room(r.id) menu=roomMenu onTap={r.dnd ? toast "Room {r.id} is do not disturb" : rooms=updateWhere(rooms,x=>x.id==r.id,x=>with(with(x,"status",x.status=="dirty" ? "progress" : (x.status=="progress" ? "clean" : (x.status=="clean" ? "inspected" : "dirty"))),"at",formatDate(today(),"h:mm a")))} fill={r.dnd ? "#FFCFD8DC" : (r.status=="dirty" ? "#FFFFCDD2" : (r.status=="progress" ? "#FFFFE0B2" : (r.status=="clean" ? "#FFC8E6C9" : "#FFBBDEFB")))}
+            Row between
+              Text.strong "{r.id}"
+              Icon "bolt" visible={r.early} color=#FFE65100
+              Icon "do_not_disturb_on" visible={r.dnd}
+            Text.small "{r.dnd ? 'Do not disturb' : r.status}"
+            Text.caption "{r.at != '' ? 'Since ' + r.at : 'Not started'}"
+            Text.caption "{r.staff != '' ? r.staff : 'Unassigned'}"
+      Row between
+        Text.strong "Staff load"
+        Button.outline "Open staff list" onTap={go staff}
+      Grid cols=3 gap=12
+        each s in staff
+          Card gap=8 drop=room onDrop={rooms=updateWhere(rooms,x=>x.id==result.data,x=>with(x,"staff",s.key))}
+            Row between
+              Row gap=8
+                Avatar "{s.name}" size=32
+                Text.strong "{s.name}"
+              Text.muted "{count(rooms,x=>x.staff==s.key)} of {s.cap}"
+            Progress {clamp(count(rooms,x=>x.staff==s.key)/s.cap,0,1)}
+  Menu#roomMenu
+    MenuItem "Toggle early check-in" icon="bolt" onTap={rooms=updateWhere(rooms,x=>x.id==sel,x=>with(x,"early",!x.early))}
+    MenuItem "Toggle do not disturb" icon="do_not_disturb_on" onTap={rooms=updateWhere(rooms,x=>x.id==sel,x=>with(x,"dnd",!x.dnd))}
+    MenuItem "Add minibar charge" icon="local_bar" onTap={open minibar}
+  Sheet#arrivals "Today's arrivals"
+    Column gap=8
+      each a in arrivalsList
+        ListTile "{a.guest}" subtitle="Room {a.room}, {a.time}" icon="luggage"
+          Badge.warning "Early" visible={a.early}
+      Button "Close" onTap={close}
+  Dialog#minibar "Minibar" "Record what was used"
+    Select "Room" bind=mbRoom items=["301","302","303","304","305","306","307","308","309","310","311","312"]
+    Select "Item" bind=mbItem items=["Water","Cola","Mixed nuts","Prosecco","Beer"]
+    Input "Quantity" bind=mbQty type=number
+    Button "Post charge" onTap={emit minibar {room: mbRoom, item: mbItem, qty: mbQty}; toast "Charge posted to room {mbRoom}"; close}
+  Dialog#lost "Lost property" "Log an item found in a room"
+    Input "Room" bind=lpRoom
+    Input "Item" "Black umbrella" bind=lpItem
+    Input "Notes" multiline bind=lpNotes
+    Button "Log item" onTap={emit lostProperty {room: lpRoom, item: lpItem, notes: lpNotes}; toast "Logged"; close}
+
+state arrivalsList=[{"guest":"Hannah Brooks","room":"301","time":"11:00 AM","early":true},{"guest":"Luis Ortega","room":"306","time":"11:30 AM","early":true},{"guest":"Mei Tanaka","room":"312","time":"12:00 PM","early":true},{"guest":"Oliver Grant","room":"309","time":"2:00 PM","early":false},{"guest":"Sofia Petrov","room":"310","time":"3:30 PM","early":false}]
+state mbRoom="301"
+state mbItem="Water"
+state mbQty=1
+state lpRoom=""
+state lpItem=""
+state lpNotes=""
+
+### Staff
+state staff=[{"name":"Marta Silva","key":"Marta","cap":5,"shift":"7:00 to 15:00"},{"name":"Joel Okafor","key":"Joel","cap":4,"shift":"7:00 to 15:00"},{"name":"Priya Nair","key":"Priya","cap":5,"shift":"9:00 to 17:00"}]
+state rooms=[{"id":"301","status":"dirty","staff":"","early":true},{"id":"302","status":"progress","staff":"Marta","early":false},{"id":"303","status":"clean","staff":"Marta","early":false},{"id":"304","status":"inspected","staff":"Joel","early":false},{"id":"306","status":"dirty","staff":"","early":true},{"id":"307","status":"progress","staff":"Joel","early":false},{"id":"308","status":"clean","staff":"Priya","early":false},{"id":"312","status":"dirty","staff":"","early":true}]
+App
+  Sidebar
+    Brand "Turndown" icon="bed"
+    NavItem "Floor board" icon="grid_view" onTap={go floor-board}
+    NavItem "Staff" icon="groups" selected={true}
+    Spacer grow
+    Text.muted "Duty manager: Dana Whitfield"
+  Main
+    Nav
+      Heading "Staff and assignments" level=1
+      Button "Auto-assign" icon="auto_fix_high" onTap={emit autoAssign; toast "Rooms assigned by load"}
+    Row gap=16 top pad=24
+      Column grow gap=12
+        Text.strong "Unassigned rooms"
+        Card gap=8 drop=room onDrop={rooms=updateWhere(rooms,x=>x.id==result.data,x=>with(x,"staff",""))}
+          each r in filter(rooms,x=>x.staff=="")
+            Row between drag=room(r.id)
+              Text.strong "Room {r.id}"
+              Badge.warning "Early check-in" visible={r.early}
+          if count(rooms,x=>x.staff=="")==0
+            Text.muted "Everyone has rooms."
+      Column grow gap=12
+        Text.strong "On shift"
+        each s in staff
+          Card gap=8 drop=room onDrop={rooms=updateWhere(rooms,x=>x.id==result.data,x=>with(x,"staff",s.key))}
+            Row between
+              Row gap=8
+                Avatar "{s.name}" size=40
+                Column
+                  Text.strong "{s.name}"
+                  Text.caption "{s.shift}"
+              Badge.neutral "{count(rooms,x=>x.staff==s.key)} of {s.cap}"
+            Progress {clamp(count(rooms,x=>x.staff==s.key)/s.cap,0,1)}
+            Row gap=8
+              each r in filter(rooms,x=>x.staff==s.key)
+                Chip "{r.id}" drag=room(r.id)
+
+### Inspections
+state checks=[{"id":"bed","label":"Bed made, linen crisp","ok":false},{"id":"bath","label":"Bathroom spotless, towels folded","ok":false},{"id":"floor","label":"Floor vacuumed","ok":false},{"id":"minibar","label":"Minibar restocked","ok":false},{"id":"amen","label":"Amenities and kettle supplies in place","ok":false},{"id":"air","label":"Air fresh, windows closed","ok":false}]
+state inspRoom="303"
+state failNote=""
+state result=""
+state log=[]
+App
+  Sidebar
+    Brand "Turndown" icon="bed"
+    NavItem "Floor board" icon="grid_view" onTap={go floor-board}
+    NavItem "Inspections" icon="fact_check" selected={true}
+    Spacer grow
+    Text.muted "Inspector: Dana Whitfield"
+  Main
+    Nav
+      Heading "Inspect room {inspRoom}" level=1
+      Select bind=inspRoom items=["303","308","311"] w=140
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Row between
+          Text.strong "Checklist"
+          Text.muted "{count(checks,c=>c.ok)} of {length(checks)} ticked"
+        Progress {count(checks,c=>c.ok)/length(checks)}
+        each c in checks
+          Checkbox "{c.label}" bind=c.ok
+      Card gap=8
+        Text.strong "If it fails"
+        Input "What needs doing" multiline bind=failNote
+      Row gap=12
+        Button "Pass" icon="check_circle" onTap={all(checks,c=>c.ok) ? (log=append(log,{"room":inspRoom,"result":"pass"}); emit inspect {room: inspRoom, result: "pass"}; toast "Room {inspRoom} inspected"; checks=map(checks,c=>with(c,"ok",false))) : toast "Tick every item before passing"}
+        Button.destructive "Fail" icon="cancel" onTap={trim(failNote)=="" ? toast "Say what needs doing" : (log=append(log,{"room":inspRoom,"result":"fail","note":failNote}); emit inspect {room: inspRoom, result: "fail", note: failNote}; toast "Room {inspRoom} sent back to dirty"; failNote="")}
+      Card gap=8
+        Text.strong "Today's results"
+        each l in log
+          ListTile "Room {l.room}" subtitle="{l.note}" icon="{l.result=='pass' ? 'check_circle' : 'cancel'}"
+            Badge.success "Pass" visible={l.result=="pass"}
+            Badge.error "Fail" visible={l.result=="fail"}
+        if length(log)==0
+          Text.muted "Nothing inspected yet."

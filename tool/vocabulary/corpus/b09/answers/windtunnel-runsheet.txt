@@ -1,0 +1,150 @@
+### Run sheet
+state tab="runs"
+state cur=2
+state paused=false
+state angle=6
+state speed=40
+state notes={"1":"Clean attached flow, no buffet.","2":"Slight tuft lift at the trailing edge."}
+state noteDraft=""
+state runs=[{"id":1,"speed":30,"angle":0,"flap":"0°","done":true},{"id":2,"speed":30,"angle":4,"flap":"0°","done":false},{"id":3,"speed":30,"angle":8,"flap":"0°","done":false},{"id":4,"speed":40,"angle":0,"flap":"10°","done":false},{"id":5,"speed":40,"angle":4,"flap":"10°","done":false},{"id":6,"speed":40,"angle":8,"flap":"10°","done":false},{"id":7,"speed":50,"angle":4,"flap":"20°","done":false}]
+state points=[{"cd":0.021,"cl":0.02},{"cd":0.024,"cl":0.41}]
+state lift=3.2
+state drag=0.4
+state side=0.1
+state ramp=[0,8,15,22,28,30,30]
+App
+  Sidebar
+    Brand "Gustbook" icon="air"
+    NavItem "Run sheet" icon="table_rows" badge="{count(runs,r=>!r.done)}" selected={tab=="runs"} onTap={tab="runs"}
+    NavItem "Live forces" icon="speed" selected={tab=="live"} onTap={tab="live"}
+    NavItem "Speed ramp" icon="show_chart" selected={tab=="ramp"} onTap={tab="ramp"}
+    Spacer grow
+    Text.muted "Tunnel B, 0.6 m section"
+  Main
+    Nav
+      Heading "Run sheet" level=1
+      Row gap=8
+        Badge.info "Run {cur} of {length(runs)}"
+        Button.outline "Smoke test" icon="cloud" onTap={paused=true; open smoke}
+        Button "Complete run" onTap={runs=updateWhere(runs,r=>r.id==cur,r=>with(r,"done",true)); cur=min(cur+1,length(runs)); toast "Run logged"}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Card grow gap=8
+          Row between
+            Text.strong "Planned runs"
+            Text.muted "{count(runs,r=>r.done)} done"
+          Row gap=8 pad=[8,4,8,4] border-bottom=#FFCCCCCC
+            Text.fieldLabel "Done" w=50
+            Text.fieldLabel "Run" w=50
+            Text.fieldLabel "Speed" w=90
+            Text.fieldLabel "Angle" w=90
+            Text.fieldLabel "Flap" grow
+            Text.fieldLabel "Status" w=90
+          each r in runs
+            Row gap=8 pad=[8,8,8,8] middle fill={r.id==cur ? "#FFE3F0FF" : "#00000000"} radius=6
+              Checkbox bind=r.done w=50
+              Text.strong "{r.id}" w=50
+              Text "{r.speed} m/s" w=90
+              Text "{r.angle}°" w=90
+              Text "{r.flap}" grow
+              if r.id==cur
+                Badge.primary "Current" w=90
+              if r.id==cur+1
+                Badge.neutral "Next" w=90
+              if r.done
+                Badge.success "Done" w=90
+        Pane w=320 gap=12
+          Card gap=12
+            Text.strong "Model angle"
+            Row between middle
+              Stepper bind=angle min=-4 max=16 step=2 unit="°"
+              Text.heading "{angle}°"
+            if any(runs,r=>r.angle==angle && r.speed==speed && r.done)
+              Row gap=8 middle
+                Icon "warning" color=#FFB26A00
+                Text.small "Repeat run: {angle}° at {speed} m/s is already done"
+            Select "Tunnel speed" items=["30","40","50"] bind=speed
+            Button "Add run" onTap={runs=append(runs,{"id":length(runs)+1,"speed":speed,"angle":angle,"flap":"0°","done":false}); toast "Run added"}
+          Card gap=8
+            Text.strong "Notes for run {cur}"
+            Input "Note" "What did you see?" multiline bind=noteDraft
+            Button.outline "Save note" onTap={notes=with(notes,cur,noteDraft); noteDraft=""; toast "Note saved"}
+            if notes[cur]
+              Text.muted "{notes[cur]}"
+  Dialog#smoke "Smoke test" "Tunnel paused while the filament runs"
+    Image "https://example.com/stills/smoke-run2.jpg" h=200 radius=8
+    Text.caption "Camera still, run {cur}, 30 m/s, 4°"
+    Text.muted "Separation shows near 70 percent chord."
+    Row gap=8 end
+      Button.outline "Retake still" icon="photo_camera" onTap={emit retakeStill}
+      Button "Resume tunnel" onTap={paused=false; close}
+
+### Live forces
+every 1s when !paused onTick={lift=round(lift+0.1,2); drag=round(drag+0.01,2); side=round(side+0.01,2); points=length(points)<8 ? points : points}
+App
+  Sidebar
+    Brand "Gustbook" icon="air"
+    NavItem "Run sheet" icon="table_rows" selected={tab=="runs"} onTap={tab="runs"}
+    NavItem "Live forces" icon="speed" selected={tab=="live"} onTap={tab="live"}
+    NavItem "Speed ramp" icon="show_chart" selected={tab=="ramp"} onTap={tab="ramp"}
+    Spacer grow
+    Text.muted "Tunnel B, 0.6 m section"
+  Main
+    Nav
+      Heading "Live forces, run {cur}" level=1
+      Row gap=8
+        Badge.success "Balance zeroed"
+        Button.outline "Smoke test" icon="cloud" onTap={paused=true; open smoke}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=8 center
+          Text.strong "Lift"
+          Gauge bind=lift min=0 max=10 limit=8 unit="N"
+        Card gap=8 center
+          Text.strong "Drag"
+          Gauge bind=drag min=0 max=2 limit=1.5 unit="N"
+        Card gap=8 center
+          Text.strong "Side force"
+          Gauge bind=side min=-1 max=1 limit=0.8 unit="N"
+      Card gap=8
+        Row between
+          Text.strong "Drag polar"
+          Text.muted "{length(points)} runs plotted"
+        Polar points=points x="cd" y="cl" xLabel="CD" yLabel="CL" h=260
+      Row gap=8 end
+        Button.outline "Undo last point" onTap={points=take(points,length(points)-1)}
+        Button "Log point" onTap={points=append(points,{"cd":drag/10,"cl":lift/8}); toast "Point added"}
+  Dialog#smoke "Smoke test" "Tunnel paused while the filament runs"
+    Image "https://example.com/stills/smoke-run2.jpg" h=200 radius=8
+    Text.caption "Camera still, run {cur}, 30 m/s, 4°"
+    Button "Resume tunnel" onTap={paused=false; close}
+
+### Speed ramp
+App
+  Sidebar
+    Brand "Gustbook" icon="air"
+    NavItem "Run sheet" icon="table_rows" selected={tab=="runs"} onTap={tab="runs"}
+    NavItem "Live forces" icon="speed" selected={tab=="live"} onTap={tab="live"}
+    NavItem "Speed ramp" icon="show_chart" selected={tab=="ramp"} onTap={tab="ramp"}
+    Spacer grow
+    Text.muted "Tunnel B, 0.6 m section"
+  Main
+    Nav
+      Heading "Tunnel speed ramp" level=1
+      Button "Start ramp" icon="play_arrow" onTap={ramp=append(ramp,min(50,last(ramp)+5)); emit rampStart}
+    Column pad=24 gap=16
+      Card gap=12
+        Row between
+          Text.strong "Speed over time (m/s)"
+          Text.heading "{last(ramp)} m/s"
+        AreaChart values={ramp} labels=["0s","10s","20s","30s","40s","50s","60s"] h=240
+        Slider "Target speed" bind=speed min=0 max=50
+        Row gap=8
+          Button.outline "Hold" onTap={emit rampHold}
+          Button.destructive "Stop tunnel" icon="stop" onTap={emit tunnelStop; toast "Tunnel stopping"}
+      Card gap=8
+        Text.strong "Ramp steps"
+        each s in ramp
+          Row between
+            Text "Step {index+1}"
+            Text.muted "{s} m/s"

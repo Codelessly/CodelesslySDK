@@ -1,0 +1,114 @@
+### Home
+state level="Medium"
+Page
+  Nav
+    Brand "Nine Lines" icon="grid_on"
+    Row gap=4
+      Link "How to play" onTap={open howto}
+      Link "Best times" onTap={open best}
+  Section center
+    Column gap=20 center
+      Heading "Nine Lines" level=1
+      Text.muted "A quiet number puzzle. Every row, column and box holds 1 to 9 once."
+      SegmentedButton bind=level items=["Easy","Medium","Hard"]
+      Row gap=12 center
+        Button "New game" size=large onTap={go game}
+        Button.outline "Daily puzzle" size=large onTap={go game}
+      Text.caption "Last game: 14:32, 1 mistake"
+Sheet#howto "How to play"
+  Text "Tap a square, then a digit under the grid."
+  Text "Switch on Pencil to jot candidates in a 3 by 3 layout inside the square."
+  Text "Same digits light up; a digit that clashes in its row, column or box turns red."
+  Button "Got it" onTap={close}
+Dialog#best "Best times" "Medium puzzles"
+  ListTile "Today" "09:12"
+  ListTile "Last week" "11:48"
+  ListTile "Last month" "14:32"
+  Button.outline "Close" onTap={close}
+
+### Game
+project secs=0
+project mistakes=0
+project done=false
+state givens=[5,3,0,0,7,0,0,0,0,6,0,0,1,9,5,0,0,0,0,9,8,0,0,0,0,6,0,8,0,0,0,6,0,0,0,3,4,0,0,8,0,3,0,0,1,7,0,0,0,2,0,0,0,6,0,6,0,0,0,0,2,8,0,0,0,0,4,1,9,0,0,5,0,0,0,0,8,0,0,7,9]
+state sol=[5,3,4,6,7,8,9,1,2,6,7,2,1,9,5,3,4,8,1,9,8,3,4,2,5,6,7,8,5,9,7,6,1,4,2,3,4,2,6,8,5,3,7,9,1,7,1,3,9,2,4,8,5,6,9,6,1,5,3,7,2,8,4,2,8,7,4,1,9,6,3,5,3,4,5,2,8,6,1,7,9]
+state vals=[5,3,0,0,7,0,0,0,0,6,0,0,1,9,5,0,0,0,0,9,8,0,0,0,0,6,0,8,0,0,0,6,0,0,0,3,4,0,0,8,0,3,0,0,1,7,0,0,0,2,0,0,0,6,0,6,0,0,0,0,2,8,0,0,0,0,4,1,9,0,0,5,0,0,0,0,8,0,0,7,9]
+state notes=[]
+state sel=-1
+state hl=0
+state pencil=false
+state paused=false
+state hint=""
+state hintCell=-1
+state hints=0
+every 1s when !paused && !done onTick={secs=secs+1}
+App
+  Main
+    Nav
+      Heading "Nine Lines" level=3
+      Row gap=12
+        Text.strong "{duration(secs)}"
+        Badge.error "Mistakes {mistakes}/3"
+        IconButton "pause" tooltip="Pause" onTap={paused=true}
+    Column pad=16 gap=12 center maxw=520
+      if paused
+        Card gap=12 center
+          Icon "pause_circle"
+          Text.title "Paused"
+          Text.muted "The grid is hidden while the clock is stopped."
+          Button "Resume" onTap={paused=false}
+          Button.ghost "Quit to home" onTap={go home}
+      if !paused
+        Grid cols=9 gap=0
+          each i in range(81)
+            Box center middle h=44 fill={i==sel ? "#FFBBDEFB" : (hl!=0 && vals[i]==hl ? "#FFFFE08A" : ((floor(i/27)+floor((i%9)/3))%2==0 ? "#FFF1F3F6" : "#FFFFFFFF"))} border-right={i%3==2 ? "#FF667085" : "#FFD0D5DD"} border-bottom={floor(i/9)%3==2 ? "#FF667085" : "#FFD0D5DD"} onTap={sel=i; hl=vals[i]}
+              if vals[i]!=0
+                Text "{vals[i]}" size=24 weight={givens[i]!=0 ? 800 : 400} color={any(range(81),j=>j!=i&&vals[j]==vals[i]&&(floor(j/9)==floor(i/9)||j%9==i%9||(floor(j/27)==floor(i/27)&&floor((j%9)/3)==floor((i%9)/3)))) ? "#FFD32F2F" : (givens[i]!=0 ? "#FF111111" : "#FF1565C0")}
+              if vals[i]==0
+                Grid cols=3 gap=0
+                  each d in range(9)
+                    Text.caption "{any(notes,n=>n.c==i&&n.d==d+1) ? d+1 : ''}" size=9 center color=#FF667085
+        if hint!=""
+          Card gap=4
+            Row gap=8
+              Icon "lightbulb"
+              Text.strong "Hint"
+            Text "{hint}"
+        Row between
+          Toggle "Pencil" bind=pencil
+          Row gap=8
+            Button.outline "Erase" onTap={sel>=0 && givens[sel]==0 ? {vals=setAt(vals,sel,0); notes=removeWhere(notes,n=>n.c==sel); hl=0} : {}}
+            Button.outline "Hint" onTap={hintCell=first(filter(range(81),j=>vals[j]!=sol[j])); sel=hintCell; hl=0; hints=hints+1; hint="Row {floor(hintCell/9)+1}, column {hintCell%9+1} must be {sol[hintCell]}: every other digit already appears in its row, its column or its box."}
+        Row gap=4
+          each d in range(9)
+            Button.outline "{d+1}" grow disabled={count(vals,x=>x==d+1)==9} onTap={sel<0 || givens[sel]!=0 ? toast "Tap an empty square first" : (pencil ? {notes=any(notes,n=>n.c==sel&&n.d==d+1) ? removeWhere(notes,n=>n.c==sel&&n.d==d+1) : append(notes,{"c":sel,"d":d+1})} : {vals=setAt(vals,sel,d+1); notes=removeWhere(notes,n=>n.c==sel); hl=d+1; hint=""; mistakes=mistakes+(sol[sel]!=d+1 ? 1 : 0); done=all(range(81),j=>j==sel ? d+1==sol[j] : vals[j]==sol[j]); done ? {open finished} : {}})}
+Dialog#finished "Puzzle solved" "Every line holds one to nine."
+  Text.title "{duration(secs)}"
+  Text.muted "{mistakes} mistakes, {hints} hints"
+  Row gap=8
+    Button "See results" onTap={close; go results}
+    Button.outline "New game" onTap={close; go home}
+
+### Results
+Page
+  Nav
+    Brand "Nine Lines" icon="grid_on"
+    Button.ghost "Home" onTap={go home}
+  Section narrow center
+    Column gap=16 center
+      Icon "emoji_events"
+      Heading "Solved" level=1
+      Text "{duration(secs)}" size=48 weight=700
+      Grid cols=3 gap=12
+        Card center
+          Text.muted "Mistakes"
+          Text.strong "{mistakes}"
+        Card center
+          Text.muted "Time"
+          Text.strong "{duration(secs)}"
+        Card center
+          Text.muted "Best (Medium)"
+          Text.strong "09:12"
+      Row gap=12 center
+        Button "Play again" onTap={go game}
+        Button.outline "Share" onTap={emit share secs}

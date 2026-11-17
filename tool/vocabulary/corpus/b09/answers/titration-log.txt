@@ -1,0 +1,166 @@
+### Trials
+state tab="trials"
+state startV=0.00
+state endV=0.00
+state indicator="Phenolphthalein"
+state endpointColor=#FFE91E8C
+state limit=0.10
+state acidConc=0.1000
+state acidVol=25.00
+state trials=[{"id":1,"start":0.40,"end":24.85},{"id":2,"start":0.10,"end":24.60},{"id":3,"start":0.30,"end":24.95}]
+state nextId=4
+App
+  Sidebar
+    Brand "Dropwise" icon="science"
+    NavItem "Trials" icon="table_rows" badge="{length(trials)}" selected={tab=="trials"} onTap={tab="trials"; go trials}
+    NavItem "Curve" icon="show_chart" selected={tab=="curve"} onTap={tab="curve"; go curve}
+    NavItem "Result" icon="calculate" selected={tab=="result"} onTap={tab="result"; go result}
+    Spacer grow
+    Text.muted "NaOH vs. HCl, 25.00 mL aliquots"
+  Main
+    Nav
+      Heading "Trials" level=1
+      Row gap=8
+        Button.outline "Clear all" onTap={open confirmClear}
+        Button "Add trial" onTap={open addTrial}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card w=220 gap=12
+          Text.panelTitle "Burette"
+          Burette min=0 max=50 value={endV} h=320 unit="mL" label="{fixed(endV,2)} mL"
+          Text.caption "Level at end reading"
+        Column grow gap=16
+          Card gap=12
+            Text.panelTitle "New reading"
+            Row gap=12
+              Input "Start volume (mL)" bind=startV type=number grow
+              Input "End volume (mL)" bind=endV type=number grow
+            Row gap=8 middle
+              Text.fieldLabel "Used volume"
+              Text.heading "{fixed(max(0,endV-startV),2)} mL"
+              Spacer grow
+              Button "Log trial" onTap={endV>startV ? {trials=append(trials,{"id":nextId,"start":startV,"end":endV}); nextId=nextId+1; startV=endV; toast "Trial logged"} : toast "End volume must exceed start"}
+          Card gap=12
+            Text.panelTitle "Indicator"
+            Row gap=8
+              ChoiceChip "Phenolphthalein" selected={indicator=="Phenolphthalein"} onTap={indicator="Phenolphthalein"; endpointColor=#FFE91E8C}
+              ChoiceChip "Methyl orange" selected={indicator=="Methyl orange"} onTap={indicator="Methyl orange"; endpointColor=#FFFF8F00}
+              ChoiceChip "Bromothymol blue" selected={indicator=="Bromothymol blue"} onTap={indicator="Bromothymol blue"; endpointColor=#FF1E88E5}
+            Row gap=12 middle
+              Swatch color={endpointColor} size=40 radius=20
+              Text.body "Endpoint colour of {indicator}"
+      Card gap=12
+        Row between middle
+          Text.panelTitle "Repeated trials"
+          Row gap=8 middle
+            Text.fieldLabel "Spread limit (mL)"
+            Input "Limit" bind=limit type=number w=90
+        Row gap=8 border-bottom=#FFCCCCCC
+          Text.fieldLabel "#" w=40
+          Text.fieldLabel "Start" w=80
+          Text.fieldLabel "End" w=80
+          Text.fieldLabel "Used" grow
+          Text.fieldLabel "" w=48
+        each t in trials
+          Row gap=8 middle
+            Text "{t.id}" w=40
+            Text "{fixed(t.start,2)}" w=80
+            Text "{fixed(t.end,2)}" w=80
+            Text.strong "{fixed(t.end-t.start,2)} mL" grow
+            IconButton "delete" tooltip="Remove trial" onTap={trials=removeWhere(trials,x=>x.id==t.id)}
+        Divider
+        Row between middle
+          Text.body "Spread (highest minus lowest)"
+          Row gap=8 middle
+            Text.strong "{fixed(last(sortBy(map(trials,t=>t.end-t.start),v=>v))-first(sortBy(map(trials,t=>t.end-t.start),v=>v)),2)} mL"
+            if last(sortBy(map(trials,t=>t.end-t.start),v=>v))-first(sortBy(map(trials,t=>t.end-t.start),v=>v))>limit
+              Badge.error "Outside limit: repeat a run"
+            if last(sortBy(map(trials,t=>t.end-t.start),v=>v))-first(sortBy(map(trials,t=>t.end-t.start),v=>v))<=limit
+              Badge.success "Within limit"
+  Dialog#addTrial "Add trial" "Enter the burette readings"
+    Input "Start volume (mL)" bind=startV type=number
+    Input "End volume (mL)" bind=endV type=number
+    Text.muted "Used: {fixed(max(0,endV-startV),2)} mL"
+    Button "Add" onTap={endV>startV ? {trials=append(trials,{"id":nextId,"start":startV,"end":endV}); nextId=nextId+1; close} : toast "End volume must exceed start"}
+  Dialog#confirmClear "Clear all trials?" "This removes every logged run."
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Clear" onTap={trials=[]; close}
+
+### Curve
+state tab="curve"
+state phPoints=[{"v":0,"ph":1.0},{"v":10,"ph":1.37},{"v":20,"ph":2.05},{"v":24,"ph":2.69},{"v":24.9,"ph":3.7},{"v":25.1,"ph":10.3},{"v":26,"ph":11.3},{"v":30,"ph":11.96}]
+state newV=0
+state newPh=7.0
+state steepest=24.9
+App
+  Sidebar
+    Brand "Dropwise" icon="science"
+    NavItem "Trials" icon="table_rows" selected={tab=="trials"} onTap={tab="trials"; go trials}
+    NavItem "Curve" icon="show_chart" selected={tab=="curve"} onTap={tab="curve"; go curve}
+    NavItem "Result" icon="calculate" selected={tab=="result"} onTap={tab="result"; go result}
+    Spacer grow
+    Text.muted "{length(phPoints)} points plotted"
+  Main
+    Nav
+      Heading "pH curve" level=1
+      Row gap=8
+        Button.outline "Undo last point" onTap={phPoints=removeAt(phPoints,length(phPoints)-1)}
+        Button.outline "Reset" onTap={phPoints=[]}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=12
+          Text.panelTitle "pH against volume of NaOH"
+          TitrationCurve points={phPoints} x="v" y="ph" xLabel="Volume (mL)" yLabel="pH" markSteepest h=360
+          Row gap=8 middle
+            Badge.info "Steepest part"
+            Text.body "Equivalence near {fixed(steepest,2)} mL"
+        Column w=300 gap=16
+          Card gap=12
+            Text.panelTitle "Add a point"
+            Input "Volume (mL)" bind=newV type=number
+            Input "pH" bind=newPh type=number
+            Button "Plot point" onTap={phPoints=sortBy(append(phPoints,{"v":newV,"ph":newPh}),p=>p.v); toast "Point plotted"}
+          Card gap=8
+            Text.panelTitle "Readings"
+            each p in phPoints
+              Row between
+                Text "{fixed(p.v,2)} mL"
+                Text.strong "{fixed(p.ph,2)}"
+
+### Result
+state tab="result"
+state acidConc=0.1000
+state acidVol=25.00
+state trials=[{"id":1,"start":0.40,"end":24.85},{"id":2,"start":0.10,"end":24.60},{"id":3,"start":0.30,"end":24.95}]
+state showWorking=false
+App
+  Sidebar
+    Brand "Dropwise" icon="science"
+    NavItem "Trials" icon="table_rows" selected={tab=="trials"} onTap={tab="trials"; go trials}
+    NavItem "Curve" icon="show_chart" selected={tab=="curve"} onTap={tab="curve"; go curve}
+    NavItem "Result" icon="calculate" selected={tab=="result"} onTap={tab="result"; go result}
+    Spacer grow
+    Text.muted "Dropwise 1.0"
+  Main
+    Nav
+      Heading "Concentration" level=1
+      Row gap=8
+        Button.outline "Copy result" onTap={copy "NaOH {fixed(acidConc*acidVol/(sum(trials,t=>t.end-t.start)/length(trials)),4)} mol/L"; toast "Copied"}
+        Button "Export log" onTap={emit exportLog}
+    Column pad=24 gap=16 scroll maxw=720
+      Card gap=12
+        Text.panelTitle "Analyte"
+        Row gap=12
+          Input "Acid concentration (mol/L)" bind=acidConc type=number grow
+          Input "Aliquot volume (mL)" bind=acidVol type=number grow
+      Card gap=8 center
+        Text.fieldLabel "NaOH concentration"
+        Row gap=8 middle center
+          Text "{fixed(acidConc*acidVol/(sum(trials,t=>t.end-t.start)/length(trials)),4)}" size=56 weight=700
+          Text.muted "mol/L"
+        Text.caption "Mean titre {fixed(sum(trials,t=>t.end-t.start)/length(trials),2)} mL over {length(trials)} trials"
+      Accordion "Working"
+        Column gap=8
+          Text.mono "c(NaOH) = c(HCl) x V(HCl) / V(NaOH)"
+          Text.mono "= {acidConc} x {acidVol} / {fixed(sum(trials,t=>t.end-t.start)/length(trials),2)}"

@@ -1,0 +1,4 @@
+// A search field over a list: it keeps what is typed in bind and tells which of items match, best first (onResults: result is that list); keys names the fields of an item that are searched.
+FuzzySearch "label" bind=q items=[] keys=["name"] onResults
+  state q=""
+  Input "{label}" icon="search" bind=q onChange={onResults(fuzzy(items, result, x => join(map(keys, k => x[k]), " ")))}

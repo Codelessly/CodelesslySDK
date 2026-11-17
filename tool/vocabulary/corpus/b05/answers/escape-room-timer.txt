@@ -1,0 +1,160 @@
+### Game master
+project seconds=3600
+project running=false
+project status="playing"
+project roomHint=""
+project hintQueue=[{"id":1,"team":"Team Ravens","text":"We found the key but not the lock. Any ideas?","at":"41:12"},{"id":2,"team":"Team Ravens","text":"What do the numbers on the globe mean?","at":"38:50"}]
+project puzzles=[{"id":1,"name":"Library cipher","sensor":"Bookshelf reed switch","done":true},{"id":2,"name":"Globe coordinates","sensor":"Globe tilt sensor","done":true},{"id":3,"name":"Pressure plate floor","sensor":"Floor mat 4 of 4","done":false},{"id":4,"name":"Radio frequency","sensor":"Radio dial encoder","done":false},{"id":5,"name":"Vault dial","sensor":"Vault door latch","done":false}]
+project cams=[{"id":1,"name":"Library","live":true},{"id":2,"name":"Study","live":true},{"id":3,"name":"Cellar","live":true},{"id":4,"name":"Corridor","live":false}]
+project presets=["Look closely at the bookshelf","Try the globe again","Count the tiles on the floor","Not everything is a number"]
+state typed=""
+state sel=0
+every 1s when running && seconds>0 onTick={seconds=seconds-1}
+every 1s when running && seconds==0 onTick={running=false; status="failed"}
+if count(puzzles,p=>p.done)==length(puzzles)
+  every 1s onTick={running=false; status="won"}
+App
+  Sidebar
+    Brand "Lockbox" icon="lock"
+    NavItem "Control" icon="timer" selected={true}
+    NavItem "Room screen" icon="tv" onTap={go room-screen}
+    NavItem "Leaderboard" icon="emoji_events" onTap={go leaderboard}
+    Spacer grow
+    Text.muted "Room 2: The Archivist"
+    Text.muted "Game master: Dana"
+  Main
+    Nav
+      Heading "Room 2: The Archivist" level=1
+      Row gap=8
+        Badge.success "Team Ravens" hidden={status!="playing"}
+        Badge.success "Escaped" hidden={status!="won"}
+        Badge.error "Time up" hidden={status!="failed"}
+        Button.outline "Reset room" onTap={open resetConfirm}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=12
+          Text.caption "TIME REMAINING"
+          Text "{duration(seconds)}" size=96 weight=700 color={seconds<300 ? "#FFD32F2F" : "#FF1B1B1B"}
+          Progress {seconds/3600}
+          Row gap=8
+            Button "Start" icon="play_arrow" hidden={running} onTap={running=true; status="playing"}
+            Button.secondary "Pause" icon="pause" hidden={!running} onTap={running=false}
+            Button.outline "+1 min" onTap={seconds=seconds+60}
+            Button.outline "+5 min" onTap={seconds=seconds+300}
+            Button.outline "-1 min" onTap={seconds=max(0,seconds-60)}
+        Card w=360 gap=8
+          Text.strong "Puzzles"
+          Progress {count(puzzles,p=>p.done)/length(puzzles)}
+          Text.muted "{count(puzzles,p=>p.done)} of {length(puzzles)} solved"
+          each p in puzzles
+            ListTile "{p.name}" subtitle="{p.sensor}"
+              Checkbox bind=p.done
+              Badge.success "Fired" hidden={!p.done}
+      Row gap=16 top
+        Card grow gap=12
+          Row between
+            Text.strong "Hint queue"
+            Badge.warning "{length(hintQueue)} waiting" hidden={isEmpty(hintQueue)}
+          if isEmpty(hintQueue)
+            Text.muted "No requests from the room."
+          each h in hintQueue
+            ListTile "{h.team}, {h.at}" subtitle="{h.text}"
+              Button.outline "Answer" onTap={sel=h.id; open answer}
+              IconButton "close" tooltip="Dismiss" onTap={hintQueue=removeWhere(hintQueue,x=>x.id==h.id)}
+          Divider
+          Text.caption "Send a preset"
+          Row gap=8
+            each pr in presets
+              Chip "{pr}" onTap={roomHint=pr; toast "Hint sent to the room screen"}
+          Input "Type a hint" "Shown on the room screen" bind=typed multiline
+          Row between
+            Text.muted "{length(typed)} characters"
+            Button "Send to room" icon="send" onTap={roomHint=typed; typed=""; toast "Hint sent to the room screen"}
+        Card grow gap=12
+          Text.strong "Cameras"
+          Grid cols=2 gap=8
+            each c in cams
+              Stack
+                CameraFeed "{c.name}" live={c.live} h=130
+                Badge.error "LIVE" hidden={!c.live}
+                Badge.neutral "Offline" hidden={c.live}
+  Dialog#answer "Answer hint request" "Choose what the room sees"
+    Input "Your hint" bind=typed multiline
+    Button "Send" onTap={roomHint=typed; hintQueue=removeWhere(hintQueue,x=>x.id==sel); typed=""; close}
+  Dialog#resetConfirm "Reset the room?" "The clock goes back to 60:00 and every puzzle unticks."
+    Row end gap=8
+      Button.outline "Cancel" onTap={close}
+      Button.destructive "Reset" onTap={seconds=3600; running=false; status="playing"; roomHint=""; puzzles=map(puzzles,p=>with(p,"done",false)); close}
+
+### Room screen
+project seconds=3600
+project status="playing"
+project roomHint=""
+project puzzles=[]
+Page
+  Section center
+    Box fill=#FF0D0F14 radius=0 pad=48 gap=32 center middle
+      Text "THE ARCHIVIST" color=#FF9AA3B5 size=20 weight=600 center
+      if status=="playing"
+        Text "{duration(seconds)}" size=180 weight=700 color={seconds<300 ? "#FFFF5252" : "#FFFFFFFF"} center animate={seconds<60 ? "pulse" : "fade"}
+        Progress {seconds/3600}
+        Box fill=#FF1B2030 radius=12 pad=24 w=fill hidden={roomHint==""}
+          Text.caption "MESSAGE FROM THE GAME MASTER" color=#FF9AA3B5
+          TypeText "{roomHint}" speed=40 size=32 color=#FFFFFFFF
+      if status=="won"
+        Icon "lock_open" size=96 color=#FF66BB6A animate=pop
+        Text "YOU ESCAPED" size=96 weight=700 color=#FF66BB6A center animate=scale
+        Text "Time left: {duration(seconds)}" size=32 color=#FFFFFFFF center
+        Button "See the leaderboard" size=large onTap={go leaderboard}
+      if status=="failed"
+        Icon "lock" size=96 color=#FFFF5252 animate=shake
+        Text "TIME IS UP" size=96 weight=700 color=#FFFF5252 center animate=shake
+        Text "The Archivist keeps its secrets." size=28 color=#FFFFFFFF center
+      Text "{count(puzzles,p=>p.done)} of {length(puzzles)} puzzles solved" color=#FF9AA3B5 center
+
+### Leaderboard
+project seconds=3600
+project status="playing"
+state filter="All time"
+state teams=[{"id":1,"name":"Cipher Squad","size":4,"secs":2412,"room":"The Archivist"},{"id":2,"name":"Night Owls","size":5,"secs":2688,"room":"The Archivist"},{"id":3,"name":"Team Ravens","size":3,"secs":2951,"room":"The Archivist"},{"id":4,"name":"Birthday Crew","size":6,"secs":3187,"room":"The Archivist"},{"id":5,"name":"Locksmiths","size":2,"secs":3402,"room":"The Archivist"}]
+App
+  Sidebar
+    Brand "Lockbox" icon="lock"
+    NavItem "Control" icon="timer" onTap={go game-master}
+    NavItem "Room screen" icon="tv" onTap={go room-screen}
+    NavItem "Leaderboard" icon="emoji_events" selected={true}
+    Spacer grow
+    Text.muted "Game master: Dana"
+  Main
+    Nav
+      Heading "Leaderboard" level=1
+      SegmentedButton bind=filter items=["Today","Week","All time"]
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=8
+          Text.caption "FASTEST ESCAPE"
+          Text "{duration(first(sortBy(teams,t=>t.secs)).secs)}" size=48 weight=700
+          Text.muted "{first(sortBy(teams,t=>t.secs)).name}"
+        Card grow gap=8
+          Text.caption "ESCAPE RATE"
+          Text "68%" size=48 weight=700
+          Sparkline values=[55,61,64,60,68,70,68]
+        Card grow gap=8
+          Text.caption "TEAMS THIS WEEK"
+          BarChart values=[3,5,4,6,8,9,7] labels=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] h=90
+      Card gap=8
+        Row gap=8
+          Text.caption "#" w=40
+          Text.caption "Team" grow
+          Text.caption "Players" w=80
+          Text.caption "Time" w=100
+        Divider
+        each t in sortBy(teams,x=>x.secs)
+          Row gap=8 middle
+            Text.strong "{index+1}" w=40
+            Row grow gap=8 middle
+              Avatar "{t.name}" size=32
+              Text.strong "{t.name}"
+            Text "{t.size}" w=80
+            Text.mono "{duration(t.secs)}" w=100
+            Badge.success "Record" hidden={index!=0}

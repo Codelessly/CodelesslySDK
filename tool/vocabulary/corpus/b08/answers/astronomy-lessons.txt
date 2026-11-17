@@ -1,0 +1,181 @@
+### Solar System
+state days=0
+state scale="picture"
+state picked=""
+state planets=[{"id":"mercury","name":"Mercury","au":0.39,"diameter":4879,"moons":0,"day":"59 Earth days","year":"88 days","fact":"The smallest planet, and it has almost no atmosphere."},{"id":"venus","name":"Venus","au":0.72,"diameter":12104,"moons":0,"day":"243 Earth days","year":"225 days","fact":"Hotter than Mercury, with clouds of sulfuric acid."},{"id":"earth","name":"Earth","au":1.0,"diameter":12742,"moons":1,"day":"24 hours","year":"365 days","fact":"The only world we know that has liquid oceans on its surface."},{"id":"mars","name":"Mars","au":1.52,"diameter":6779,"moons":2,"day":"24.6 hours","year":"687 days","fact":"Home to Olympus Mons, the tallest volcano in the solar system."},{"id":"jupiter","name":"Jupiter","au":5.2,"diameter":139820,"moons":95,"day":"9.9 hours","year":"11.9 years","fact":"The Great Red Spot is a storm wider than Earth."},{"id":"saturn","name":"Saturn","au":9.58,"diameter":116460,"moons":146,"day":"10.7 hours","year":"29.4 years","fact":"Its rings are mostly water ice, and the planet is less dense than water."},{"id":"uranus","name":"Uranus","au":19.2,"diameter":50724,"moons":28,"day":"17.2 hours","year":"84 years","fact":"It rolls around the Sun tilted on its side."},{"id":"neptune","name":"Neptune","au":30.05,"diameter":49244,"moons":16,"day":"16.1 hours","year":"165 years","fact":"Winds here reach over 2,000 km/h, the fastest measured."}]
+every 100 when days>0 onTick={days=days+1}
+App
+  Sidebar
+    Brand "Orbit School" icon="public"
+    NavItem "Solar system" icon="brightness_5" selected={true}
+    NavItem "Compare" icon="compare" onTap={go compare-and-quiz}
+    NavItem "Night sky" icon="nightlight" onTap={go night-sky}
+    NavItem "Glossary" icon="menu_book" onTap={go glossary}
+    Spacer grow
+    Text.muted "Lesson 3 of 12"
+    Progress 0.25
+  Main
+    Nav
+      Heading "The Solar System" level=1
+      Row gap=12
+        Text.muted "Day {days}"
+        Toggle "True distances" bind=trueScale onChange={scale=result ? "true" : "picture"}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        SolarSystem planets={planets} day={days} scale={scale} selected={picked} h=360 onSelect={picked=result}
+        Row gap=12
+          Icon "schedule"
+          Slider bind=days min=0 max=3650 grow
+          Text.strong "{round(days/365,1)} yr"
+        Row gap=8
+          Button.outline "Play" icon="play_arrow" onTap={days=days+1}
+          Button.ghost "Reset" onTap={days=0}
+      if scale=="true"
+        Card gap=8
+          Text.strong "True distances"
+          Text.muted "At true scale Neptune is 30 times farther from the Sun than Earth, and the planets shrink to specks. Zoom in to find them."
+      Heading "Tap a planet" level=3
+      Grid cols=4 gap=12
+        each p in planets
+          Card gap=8 onTap={picked=p.id; open facts}
+            Avatar "{p.name}" size=40
+            Text.strong "{p.name}"
+            Text.muted "{p.au} AU from the Sun"
+  Footer
+    Row between
+      Text.muted "{picked=="" ? "No planet selected" : "Selected: " + picked}"
+      Button.ghost "Clear" onTap={picked=""}
+Sheet#facts "{find(planets,p=>p.id==picked).name}"
+  Column gap=12
+    Text "{find(planets,p=>p.id==picked).fact}"
+    Row gap=24
+      Column
+        Text.caption "Diameter"
+        Text.strong "{find(planets,p=>p.id==picked).diameter} km"
+      Column
+        Text.caption "Day"
+        Text.strong "{find(planets,p=>p.id==picked).day}"
+      Column
+        Text.caption "Year"
+        Text.strong "{find(planets,p=>p.id==picked).year}"
+      Column
+        Text.caption "Moons"
+        Text.strong "{find(planets,p=>p.id==picked).moons}"
+    Row gap=8
+      Button "Compare with Earth" onTap={go compare-and-quiz; close}
+      Button.outline "Close" onTap={close}
+
+### Compare and Quiz
+state tab="compare"
+state a="earth"
+state b="jupiter"
+state planets=[{"id":"mercury","name":"Mercury","diameter":4879},{"id":"venus","name":"Venus","diameter":12104},{"id":"earth","name":"Earth","diameter":12742},{"id":"mars","name":"Mars","diameter":6779},{"id":"jupiter","name":"Jupiter","diameter":139820},{"id":"saturn","name":"Saturn","diameter":116460},{"id":"uranus","name":"Uranus","diameter":50724},{"id":"neptune","name":"Neptune","diameter":49244}]
+state questions=[{"q":"How many moons does Mars have?","options":["0","2","14","79"],"answer":1},{"q":"Which planet has the most known moons?","options":["Jupiter","Neptune","Saturn","Earth"],"answer":2},{"q":"Which planet has no moons at all, along with Mercury?","options":["Mars","Venus","Uranus","Earth"],"answer":1},{"q":"What is the name of Earth's only natural satellite?","options":["Luna, the Moon","Phobos","Titan","Europa"],"answer":0}]
+state step=0
+state score=0
+state picked=-1
+state done=false
+App
+  Sidebar
+    Brand "Orbit School" icon="public"
+    NavItem "Solar system" icon="brightness_5" onTap={go solar-system}
+    NavItem "Compare" icon="compare" selected={tab=="compare"} onTap={tab="compare"}
+    NavItem "Moon quiz" icon="quiz" selected={tab=="quiz"} onTap={tab="quiz"}
+    NavItem "Night sky" icon="nightlight" onTap={go night-sky}
+    NavItem "Glossary" icon="menu_book" onTap={go glossary}
+  Main
+    Nav
+      Heading "{tab=="compare" ? "Compare two planets" : "Moon quiz"}" level=1
+    Column pad=24 gap=16 scroll
+      if tab=="compare"
+        Row gap=16
+          Select "First planet" bind=a items=["mercury","venus","earth","mars","jupiter","saturn","uranus","neptune"] grow
+          Select "Second planet" bind=b items=["mercury","venus","earth","mars","jupiter","saturn","uranus","neptune"] grow
+        Card gap=16
+          Text.strong "Drawn to the same scale"
+          Row center bottom gap=48
+            Column center gap=8
+              Box w={clamp(find(planets,p=>p.id==a).diameter/700,6,200)} h={clamp(find(planets,p=>p.id==a).diameter/700,6,200)} radius=999 fill=#FF4F8FD9
+              Text.strong "{upper(a)}"
+              Text.muted "{find(planets,p=>p.id==a).diameter} km"
+            Column center gap=8
+              Box w={clamp(find(planets,p=>p.id==b).diameter/700,6,200)} h={clamp(find(planets,p=>p.id==b).diameter/700,6,200)} radius=999 fill=#FFD98A4F
+              Text.strong "{upper(b)}"
+              Text.muted "{find(planets,p=>p.id==b).diameter} km"
+        Card gap=4
+          Text "{upper(b)} is {fixed(find(planets,p=>p.id==b).diameter/find(planets,p=>p.id==a).diameter,2)} times the width of {upper(a)}."
+          Text.muted "About {round(pow3,0)} of one would fit inside the other by volume."
+      if tab=="quiz"
+        if done
+          Card gap=12 center
+            Text "{score} of {length(questions)}" size=48 weight=700
+            Text.muted "{score==length(questions) ? "Perfect, a real astronomer." : "Good start. Try again to beat it."}"
+            Button "Try again" onTap={step=0; score=0; picked=-1; done=false}
+        if !done
+          Card gap=12
+            Progress {(step)/length(questions)}
+            Text.caption "Question {step+1} of {length(questions)}"
+            Text.heading "{questions[step].q}"
+            Column gap=8
+              each o in questions[step].options
+                ChoiceChip "{o}" selected={picked==index} onTap={picked=index}
+            Button "{step+1==length(questions) ? "Finish" : "Next"}" onTap={picked<0 ? toast "Pick an answer" : {score=score+(picked==questions[step].answer ? 1 : 0); picked=-1; step+1==length(questions) ? done=true : step=step+1}}
+
+### Night Sky
+state when="tonight"
+state filter="all"
+state sky=[{"name":"Venus","kind":"planet","rise":"17:42","best":"18:30","dir":"SW","mag":-4.1,"note":"The brightest point in the evening sky."},{"name":"Jupiter","kind":"planet","rise":"19:05","best":"23:10","dir":"E to S","mag":-2.6,"note":"Look for four tiny dots beside it: the Galilean moons."},{"name":"Saturn","kind":"planet","rise":"16:20","best":"20:00","dir":"S","mag":0.9,"note":"Rings are tilted nearly edge-on this year."},{"name":"Orion Nebula","kind":"deep sky","rise":"21:30","best":"01:00","dir":"S","mag":4.0,"note":"A faint smudge below Orion's belt."},{"name":"Pleiades","kind":"deep sky","rise":"18:10","best":"22:00","dir":"E","mag":1.6,"note":"Six or seven stars in a tight blue cluster."},{"name":"Waxing gibbous Moon","kind":"moon","rise":"14:50","best":"19:30","dir":"SE","mag":-12.0,"note":"Look along the terminator for crater shadows."}]
+App
+  Sidebar
+    Brand "Orbit School" icon="public"
+    NavItem "Solar system" icon="brightness_5" onTap={go solar-system}
+    NavItem "Compare" icon="compare" onTap={go compare-and-quiz}
+    NavItem "Night sky" icon="nightlight" selected={true}
+    NavItem "Glossary" icon="menu_book" onTap={go glossary}
+  Main
+    Nav
+      Heading "Tonight's sky" level=1
+      Row gap=8
+        SegmentedButton bind=when items=["tonight","tomorrow","weekend"]
+        IconButton "my_location" tooltip="Use my location" onTap={toast "Location set to Portland, OR"}
+    Column pad=24 gap=16 scroll
+      Row gap=8
+        FilterChip "All" selected={filter=="all"} onTap={filter="all"}
+        FilterChip "Planets" selected={filter=="planet"} onTap={filter="planet"}
+        FilterChip "Deep sky" selected={filter=="deep sky"} onTap={filter="deep sky"}
+        FilterChip "Moon" selected={filter=="moon"} onTap={filter="moon"}
+      Card gap=8
+        Text.strong "Sky chart, 9 pm"
+        StarMap objects={sky} h=240
+      each s in sky
+        if filter=="all" || filter==s.kind
+          ListTile "{s.name}" subtitle="{s.note}"
+            Row gap=12
+              Badge.info "{s.dir}"
+              Text.muted "Best {s.best}"
+              Text.caption "mag {s.mag}"
+
+### Glossary
+state q=""
+state term=""
+state words=[{"word":"Orbit","pic":"https://images.orbitschool.example/glossary/orbit.jpg","def":"The curved path an object takes around a star or planet, held by gravity."},{"word":"Astronomical unit","pic":"https://images.orbitschool.example/glossary/au.jpg","def":"The average distance from Earth to the Sun, about 150 million km."},{"word":"Eclipse","pic":"https://images.orbitschool.example/glossary/eclipse.jpg","def":"When one body passes into the shadow of another."},{"word":"Asteroid belt","pic":"https://images.orbitschool.example/glossary/belt.jpg","def":"The ring of rocky bodies between Mars and Jupiter."},{"word":"Exoplanet","pic":"https://images.orbitschool.example/glossary/exoplanet.jpg","def":"A planet that orbits a star other than our Sun."},{"word":"Moon","pic":"https://images.orbitschool.example/glossary/moon.jpg","def":"A natural satellite that orbits a planet."}]
+App
+  Sidebar
+    Brand "Orbit School" icon="public"
+    NavItem "Solar system" icon="brightness_5" onTap={go solar-system}
+    NavItem "Compare" icon="compare" onTap={go compare-and-quiz}
+    NavItem "Night sky" icon="nightlight" onTap={go night-sky}
+    NavItem "Glossary" icon="menu_book" selected={true}
+  Main
+    Nav
+      Heading "Glossary" level=1
+      Input "Search terms" bind=q w=220
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        each w in words
+          if q=="" || contains(lower(w.word),lower(q))
+            Card gap=8 onTap={term=w.word; open zoom}
+              Image "{w.pic}" h=140 radius=8
+              Text.heading3 "{w.word}"
+              Text.muted "{w.def}"
+Lightbox#zoom "{find(words,w=>w.word==term).pic}" "{term}"

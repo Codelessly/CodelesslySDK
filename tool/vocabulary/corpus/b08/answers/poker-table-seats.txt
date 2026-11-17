@@ -1,0 +1,139 @@
+### Table
+state seats=[{"id":"s1","name":"You","stack":1840,"bet":0,"folded":false},{"id":"s2","name":"Maya Reyes","stack":2310,"bet":40,"folded":false},{"id":"s3","name":"Dev Patel","stack":960,"bet":40,"folded":false},{"id":"s4","name":"Lena Ortiz","stack":1500,"bet":0,"folded":true},{"id":"s5","name":"Sam Okafor","stack":3200,"bet":40,"folded":false}]
+state hole=["As","Kd"]
+state board=["7h","Jc","2s","Qd","9h"]
+state stage="flop"
+state peek=false
+state turn="s1"
+state pot=160
+state toCall=40
+state bet=120
+state winner=""
+state hands=[{"n":41,"winner":"Maya Reyes","pot":420,"hand":"Two pair"},{"n":40,"winner":"You","pot":260,"hand":"Flush"},{"n":39,"winner":"Sam Okafor","pot":90,"hand":"Pair of tens"}]
+state rebuyAmount=1000
+state showWin=false
+every 1s when turn=="s1" onTick={emit clock}
+App
+  Sidebar
+    Brand "River Room" icon="casino"
+    NavItem "Table" icon="table_restaurant" selected={true}
+    NavItem "Hand history" icon="history" onTap={go history}
+    NavItem "Rebuy" icon="savings" onTap={open rebuy}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "You" size=32
+      Column
+        Text.strong "You"
+        Text.muted "{money(seats[0].stack,'$',0)}"
+  Main
+    Nav
+      Heading "Friday game" level=1
+      Row gap=8
+        Badge.info "Blinds 20 / 40"
+        Badge.neutral "Hand #42"
+        IconButton "history" tooltip="Hand history" onTap={go history}
+    Column pad=24 gap=16
+      PokerTable seats={seats} max=6 turn={turn} you="s1"
+        each s in seats
+          Seat#seat-{s.id} player={s} bet={s.bet} folded={s.folded} acting={turn==s.id} turnRing={turn==s.id} timer=20 dealer={s.id=="s5"}
+            Avatar "{s.name}" size=48
+            Text.strong "{s.name}"
+            Text.muted "{money(s.stack,'$',0)}"
+            if s.bet>0
+              ChipStack amount={s.bet}
+        Stack center middle
+          Column center gap=8
+            Row gap=8 center
+              each c in board
+                PlayingCard "{c}" faceUp={stage=="flop" ? index<3 : stage=="turn" ? index<4 : stage=="river"} animate=pop delay={index*150} onTap={emit flip c}
+            Row gap=8 center middle
+              ChipStack#potStack amount={pot} moveTo={winner} duration=800
+              Text.strong "Pot {money(pot,'$',0)}" size=20
+            if winner!=""
+              Badge.success "{winner} wins {money(pot,'$',0)}"
+      Row gap=8 center
+        PlayingCard "{hole[0]}" faceUp={peek} onLongPressStart={peek=true} onLongPressEnd={peek=false}
+        PlayingCard "{hole[1]}" faceUp={peek} onLongPressStart={peek=true} onLongPressEnd={peek=false}
+        Text.muted "Hold your cards to look"
+      Row gap=8 center
+        Button.outline "Deal flop" hidden={stage!="preflop"} onTap={stage="flop"}
+        Button.outline "Deal turn" hidden={stage!="flop"} onTap={stage="turn"}
+        Button.outline "Deal river" hidden={stage!="turn"} onTap={stage="river"}
+        Button.ghost "Show winner" onTap={winner="Maya Reyes"; seats=updateWhere(seats,s=>s.name=="Maya Reyes",s=>with(s,"stack",s.stack+pot)); pot=0; emit settle}
+    Footer
+      Column gap=8 pad=12
+        Row gap=12 middle
+          Text.strong "Raise to {money(bet,'$',0)}"
+          Slider bind=bet min=80 max={seats[0].stack} step=20 grow
+          Button.destructive "All in" onTap={bet=seats[0].stack; emit allin bet}
+        Row gap=8
+          Button.outline "1/2 pot" onTap={bet=round(pot/2,0)}
+          Button.outline "2/3 pot" onTap={bet=round(pot*2/3,0)}
+          Button.outline "Pot" onTap={bet=pot}
+        Row gap=8 center
+          Button.destructive "Fold" grow disabled={turn!="s1"} onTap={seats=updateWhere(seats,s=>s.id=="s1",s=>with(s,"folded",true)); turn="s2"; emit fold}
+          Button.secondary grow disabled={turn!="s1"} onTap={toCall>0 ? emit call toCall : emit check; turn="s2"}
+            Text "{toCall>0 ? 'Call ' + money(toCall,'$',0) : 'Check'}"
+          Button "Raise {money(bet,'$',0)}" grow disabled={turn!="s1"} onTap={pot=pot+bet; emit raise bet; turn="s2"}
+Dialog#rebuy "Rebuy" "Top up your stack to keep playing"
+  Select "Amount" bind=rebuyAmount items=[500,1000,2000]
+  Text.muted "Your stack: {money(seats[0].stack,'$',0)}"
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button "Rebuy {money(rebuyAmount,'$',0)}" onTap={seats=updateWhere(seats,s=>s.id=="s1",s=>with(s,"stack",s.stack+rebuyAmount)); emit rebuy rebuyAmount; toast "Stack topped up"; close}
+
+### Hand history
+state hands=[{"n":41,"winner":"Maya Reyes","pot":420,"hand":"Two pair","board":["Ts","Td","4c","8h","Ah"],"log":["Dev posts small blind 20","Maya posts big blind 40","You fold","Sam calls 40","Maya raises to 120","Sam folds","Dev calls 120","Flop Ts Td 4c","Maya bets 100","Dev calls","Turn 8h","Both check","River Ah","Maya bets 160, Dev folds"]},{"n":40,"winner":"You","pot":260,"hand":"Flush","board":["2h","9h","Kh","3c","6h"],"log":["You raise to 80","Lena calls","Flop 2h 9h Kh","Check, check","Turn 3c","You bet 60","River 6h","You win 260"]},{"n":39,"winner":"Sam Okafor","pot":90,"hand":"Pair of tens","board":["Td","5s","Jc","2d","7s"],"log":["Sam raises to 40","All fold","Sam wins 90"]}]
+state sel=41
+state step=0
+state playing=false
+every 1s when playing onTick={step=step+1; step>=length(find(hands,h=>h.n==sel).log) ? playing=false : emit tick}
+App
+  Sidebar
+    Brand "River Room" icon="casino"
+    NavItem "Table" icon="table_restaurant" onTap={go table}
+    NavItem "Hand history" icon="history" selected={true}
+    Spacer grow
+    Text.muted "Friday game"
+  Main
+    Nav
+      Heading "Hand history" level=1
+      Row gap=8
+        Select "Table" bind=tableFilter items=["All hands","Won by me","Showdowns"]
+        Button.outline "Rebuy" icon="savings" onTap={open rebuy}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Column w=320 gap=8
+          Text.fieldLabel "Recent hands"
+          each h in hands
+            ListTile "Hand #{h.n}" selected={sel==h.n} onTap={sel=h.n; step=0; playing=false}
+              Text.muted "{h.winner} won {money(h.pot,'$',0)} with {h.hand}"
+        Column grow gap=12
+          each h in hands
+            if h.n==sel
+              Card gap=12
+                Row between
+                  Heading "Hand #{h.n}" level=3
+                  Badge.success "{h.winner} +{money(h.pot,'$',0)}"
+                Row gap=8
+                  each c in h.board
+                    PlayingCard "{c}" faceUp={true} size=small
+                Progress {step/length(h.log)}
+                Row gap=8 middle
+                  IconButton "skip_previous" tooltip="Start" onTap={step=0}
+                  IconButton "{playing ? 'pause' : 'play_arrow'}" tooltip="Replay" onTap={playing=!playing}
+                  IconButton "navigate_next" tooltip="Next action" onTap={step=min(step+1,length(h.log))}
+                  Slider bind=step min=0 max={length(h.log)} grow
+                  Text.muted "{step} / {length(h.log)}"
+                Divider
+                each line in take(h.log,step)
+                  Row gap=8 animate=slide-up
+                    Text.mono "{index+1}"
+                    Text "{line}"
+                if step==0
+                  Text.muted "Press play to replay this hand action by action."
+Dialog#rebuy "Rebuy" "Top up your stack to keep playing"
+  Select "Amount" bind=rebuyAmount items=[500,1000,2000]
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button "Rebuy {money(rebuyAmount,'$',0)}" onTap={emit rebuy rebuyAmount; toast "Stack topped up"; close}

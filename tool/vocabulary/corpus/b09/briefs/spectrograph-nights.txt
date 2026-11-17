@@ -1,0 +1,3 @@
+App: Stellarline, a telescope spectrograph session. A graph of brightness against wavelength with dark dips marked by name when a line is matched; zoom into a range by dragging a box; a lamp calibration step where two peaks are tapped and given known values; exposure time and a progress ring that counts down; a stack of previous exposures averaged with the noise line falling; a target list ordered by height in the sky tonight.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

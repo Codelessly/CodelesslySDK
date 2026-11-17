@@ -1,0 +1,3 @@
+App: Tablescope, a database browser. A tree of schemas and tables, a table opened as a grid of rows with column headers sorted and resized by dragging, cells edited in place with changed ones marked and a commit bar counting changes; a filter builder of column, operator and value rows; a query editor with results below and an execution time; a relationships diagram of boxes joined by lines; export.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

@@ -1,0 +1,3 @@
+App: Afterglow, sprint retrospectives. Three columns (went well, to improve, actions) with cards added anonymously, hidden until reveal; group similar cards by dragging one onto another; dot-voting with five votes each and counts; a timer per phase; action items with owner and due date; an energy check as an emoji scale.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

@@ -1,0 +1,177 @@
+### Wallet
+state page=0
+state cards=[{"id":"c1","shop":"Daybreak Coffee","icon":"local_cafe","stamps":7,"goal":10,"reward":"Free large drink","color":"#FF6F4E37","expires":"2026-12-02"},{"id":"c2","shop":"Pagewell Books","icon":"menu_book","stamps":3,"goal":8,"reward":"$5 off any paperback","color":"#FF2F5D62","expires":"2027-03-14"},{"id":"c3","shop":"Sunny Side Bakery","icon":"bakery_dining","stamps":10,"goal":10,"reward":"Half-dozen pastries","color":"#FFB5651D","expires":"2026-11-30"}]
+state doubleDay=true
+state scanning=false
+state justStamped=false
+state history=[{"shop":"Daybreak Coffee","date":"2026-11-15","stamps":2},{"shop":"Sunny Side Bakery","date":"2026-11-12","stamps":1},{"shop":"Pagewell Books","date":"2026-11-08","stamps":1}]
+App
+  Sidebar
+    Brand "Stampbook" icon="loyalty"
+    NavItem "Wallet" icon="wallet" selected={true} onTap={go wallet}
+    NavItem "Find shops" icon="map" onTap={go shop-finder}
+    NavItem "History" icon="history" badge="{length(history)}" onTap={go history}
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "My cards" level=1
+      Row gap=8
+        IconButton "notifications" tooltip="Expiry alerts" onTap={open alerts}
+        Button "Scan stamp" icon="qr_code_scanner" onTap={scanning=true; open scan}
+    Column pad=24 gap=16
+      if doubleDay
+        Card gap=8 fill=#FFFFF3CD
+          Row between middle
+            Row gap=12 middle
+              IconTile "bolt"
+              Column gap=2
+                Text.strong "Double stamp day"
+                Text.muted "Every scan today earns 2 stamps at all participating shops."
+            IconButton "close" tooltip="Dismiss" onTap={doubleDay=false}
+      each c in cards
+        if c.expires < formatDate(today(),"yyyy-MM-dd") + "~"
+          if c.stamps < c.goal && c.expires <= "2026-12-05"
+            Card gap=4 fill=#FFFDECEA
+              Row gap=8 middle
+                Icon "warning"
+                Text.strong "{c.shop}: {c.goal - c.stamps} stamps left, expires {formatDate(c.expires,"MMM d")}"
+      Pages bind=page h=380 peek=0.86
+        each c in cards
+          Card gap=12 fill={c.color}
+            Row between middle
+              Row gap=8 middle
+                Icon "{c.icon}" color=#FFFFFFFF
+                Text.heading "{c.shop}" color=#FFFFFFFF
+              Badge.neutral "{c.stamps}/{c.goal}"
+            Grid cols=5 gap=8
+              each i in range(c.goal)
+                if i < c.stamps
+                  Box w=48 h=48 radius=24 fill=#FFFFFFFF center middle animate=pop delay={i*40}
+                    Icon "star" color={c.color}
+                if i == c.stamps
+                  Box w=48 h=48 radius=24 fill=#33FFFFFF center middle animate=pulse
+                    Icon "add" color=#FFFFFFFF
+                if i > c.stamps
+                  Box w=48 h=48 radius=24 fill=#22FFFFFF
+            Text "Reward: {c.reward}" color=#FFFFFFFF
+            Progress {c.stamps / c.goal}
+            if c.stamps >= c.goal
+              Button "Redeem reward" icon="redeem" onTap={go redeem}
+            if c.stamps < c.goal
+              Text.caption "Expires {formatDate(c.expires,"MMM d, yyyy")}" color=#FFFFFFFF
+      Row center
+        Dots bind=page count={length(cards)}
+  Dialog#scan "Scan the code at the till" "Hold your phone steady over the QR code"
+    Column center gap=16
+      Camera "Point at the shop's code" h=220 onScan={cards=updateWhere(cards,c=>c.id==cards[page].id,c=>with(c,"stamps",min(c.goal,c.stamps+(doubleDay?2:1)))); history=concat([{"shop":cards[page].shop,"date":formatDate(today(),"yyyy-MM-dd"),"stamps":doubleDay?2:1}],history); justStamped=true; scanning=false; toast "Stamp added to {cards[page].shop}"; close}
+      Text.muted "Scanning for {cards[page].shop}"
+      Button.outline "Simulate scan" onTap={cards=updateWhere(cards,c=>c.id==cards[page].id,c=>with(c,"stamps",min(c.goal,c.stamps+(doubleDay?2:1)))); history=concat([{"shop":cards[page].shop,"date":formatDate(today(),"yyyy-MM-dd"),"stamps":doubleDay?2:1}],history); justStamped=true; toast "Stamp added"; close}
+  Dialog#alerts "Expiring soon" "Use these before they lapse"
+    each c in cards
+      ListTile "{c.shop}" subtitle="Expires {formatDate(c.expires,"MMM d")}" icon="schedule" onTap={go redeem; close}
+
+### Redeem
+state sec=60
+state redeemed=false
+state slid=0
+every 1s when !redeemed && sec>0 onTick={sec=sec-1}
+App
+  Sidebar
+    Brand "Stampbook" icon="loyalty"
+    NavItem "Wallet" icon="wallet" onTap={go wallet}
+    NavItem "Find shops" icon="map" onTap={go shop-finder}
+    NavItem "History" icon="history" onTap={go history}
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go wallet}
+      Heading "Redeem reward" level=1
+    Column pad=24 gap=16 center maxw=480
+      Card gap=12 center
+        IconTile "local_cafe"
+        Heading "Daybreak Coffee" level=3
+        Text.strong "Free large drink"
+        Text.muted "10 of 10 stamps collected"
+      if !redeemed
+        Text.muted "Slide to show your barcode to the cashier. It stays valid for one minute."
+        Slider bind=slid min=0 max=100 onChange={result>=100 ? sec=60 : slid=0}
+        Text.caption center "Slide all the way to the right to reveal"
+        if slid>=100
+          Card gap=12 center animate=scale
+            Barcode "DBC-4821-7730-1956" type=code128 h=120
+            Row gap=8 center middle
+              Icon "timer"
+              Text.strong "Expires in {duration(sec)}"
+            Progress {sec/60}
+            if sec==0
+              Text.danger "Code expired"
+              Button.outline "Get a new code" onTap={sec=60}
+            Button "Cashier scanned it" onTap={redeemed=true; toast "Reward redeemed"}
+      if redeemed
+        Card gap=12 center animate=pop
+          Icon "check_circle" size=64
+          Heading "Enjoy your drink" level=3
+          Text.muted "Your card starts fresh at 0 of 10."
+          Button "Back to wallet" onTap={go wallet}
+
+### Shop finder
+state q=""
+state sel=""
+state shops=[{"id":"s1","name":"Daybreak Coffee","kind":"Cafe","dist":0.2,"lat":40.7421,"lng":-73.9911,"joined":true,"bonus":true},{"id":"s2","name":"Pagewell Books","kind":"Books","dist":0.5,"lat":40.7436,"lng":-73.9890,"joined":true,"bonus":false},{"id":"s3","name":"Sunny Side Bakery","kind":"Bakery","dist":0.8,"lat":40.7399,"lng":-73.9934,"joined":true,"bonus":true},{"id":"s4","name":"Fernhill Plants","kind":"Garden","dist":1.1,"lat":40.7450,"lng":-73.9955,"joined":false,"bonus":false},{"id":"s5","name":"Corner Pizza Co.","kind":"Restaurant","dist":1.4,"lat":40.7388,"lng":-73.9872,"joined":false,"bonus":true}]
+App
+  Sidebar
+    Brand "Stampbook" icon="loyalty"
+    NavItem "Wallet" icon="wallet" onTap={go wallet}
+    NavItem "Find shops" icon="map" selected={true} onTap={go shop-finder}
+    NavItem "History" icon="history" onTap={go history}
+  Main
+    Nav
+      Heading "Find shops" level=1
+      Input "Search shops" bind=q w=220
+    Column pad=24 gap=16
+      Map h=320 center={[40.7420,-73.9910]} zoom=15 markers={map(filter(shops,s=>contains(lower(s.name),lower(q))),s=>{"id":s.id,"lat":s.lat,"lng":s.lng,"label":s.name})} onMarkerTap={sel=result.id; open shop}
+      Text.sectionTitle "Nearby"
+      each s in filter(shops,s=>contains(lower(s.name),lower(q)))
+        ListTile "{s.name}" subtitle="{s.kind} - {s.dist} mi" icon="storefront" onTap={sel=s.id; open shop}
+          if s.bonus
+            Badge.warning "2x today"
+          if s.joined
+            Badge.success "On your wallet"
+  Sheet#shop "{find(shops,s=>s.id==sel).name}"
+    Column gap=12
+      Text.muted "{find(shops,s=>s.id==sel).kind}, {find(shops,s=>s.id==sel).dist} mi away"
+      if find(shops,s=>s.id==sel).bonus
+        Badge.warning "Double stamp day"
+      Button "Get directions" icon="directions" onTap={link "https://maps.example.com"}
+      if !find(shops,s=>s.id==sel).joined
+        Button.outline "Add card to wallet" onTap={shops=updateWhere(shops,s=>s.id==sel,s=>with(s,"joined",true)); toast "Card added"; close}
+
+### History
+state filter="all"
+state history=[{"shop":"Daybreak Coffee","date":"2026-11-15","stamps":2,"kind":"stamp"},{"shop":"Sunny Side Bakery","date":"2026-11-12","stamps":1,"kind":"stamp"},{"shop":"Pagewell Books","date":"2026-11-08","stamps":1,"kind":"stamp"},{"shop":"Daybreak Coffee","date":"2026-11-02","stamps":0,"kind":"reward"},{"shop":"Daybreak Coffee","date":"2026-10-28","stamps":1,"kind":"stamp"}]
+App
+  Sidebar
+    Brand "Stampbook" icon="loyalty"
+    NavItem "Wallet" icon="wallet" onTap={go wallet}
+    NavItem "Find shops" icon="map" onTap={go shop-finder}
+    NavItem "History" icon="history" selected={true} onTap={go history}
+  Main
+    Nav
+      Heading "Visits" level=1
+      SegmentedButton bind=filter items=["all","stamp","reward"]
+    Column pad=24 gap=16
+      Card gap=8
+        Text.strong "This month"
+        Row gap=24
+          Column
+            Text "{sum(history,h=>h.stamps)}" size=32 weight=700
+            Text.muted "stamps earned"
+          Column
+            Text "{count(history,h=>h.kind==\"reward\")}" size=32 weight=700
+            Text.muted "rewards used"
+      each h in filter(history,h=>filter=="all"||h.kind==filter)
+        ListTile "{h.shop}" subtitle="{formatDate(h.date,\"MMM d\")}" icon={h.kind=="reward"?"redeem":"star"}
+          if h.kind=="stamp"
+            Badge.primary "+{h.stamps}"
+          if h.kind=="reward"
+            Badge.success "Redeemed"

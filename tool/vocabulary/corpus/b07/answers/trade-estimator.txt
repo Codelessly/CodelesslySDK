@@ -1,0 +1,227 @@
+### Estimate
+state screen="estimate"
+state open1=true
+state open2=true
+state pasted=""
+state sel=""
+state rate=85
+state ohead=12
+state materials=[{"id":1,"sec":"Rough-in","code":"NM-122","desc":"Romex 12/2 NM-B, 250 ft","qty":4,"cost":148.5,"known":true},{"id":2,"sec":"Rough-in","code":"BX-142","desc":"Old-work box, 1-gang","qty":40,"cost":1.85,"known":true},{"id":3,"sec":"Rough-in","code":"CN-34","desc":"EMT conduit 3/4 in, 10 ft","qty":22,"cost":6.2,"known":true},{"id":4,"sec":"Finish","code":"SW-15W","desc":"Decora switch 15A, white","qty":28,"cost":2.4,"known":true},{"id":5,"sec":"Finish","code":"RC-20GF","desc":"GFCI receptacle 20A","qty":6,"cost":19.75,"known":true},{"id":6,"sec":"Finish","code":"","desc":"Dimmer, smart, 3-way","qty":4,"cost":0,"known":false}]
+state labour=[{"id":1,"task":"Rough-in wiring","hours":24},{"id":2,"task":"Panel swap","hours":10},{"id":3,"task":"Device trim-out","hours":14},{"id":4,"task":"Testing and permit","hours":4}]
+state markup={"Rough-in":18,"Finish":25}
+state matSub=0
+App
+  Sidebar
+    Brand "Joist" icon="bolt"
+    NavItem "Estimate" icon="calculate" selected={screen=="estimate"} onTap={screen="estimate"}
+    NavItem "Client quote" icon="description" onTap={go client-quote}
+    NavItem "Compare versions" icon="compare_arrows" onTap={go compare-versions}
+    Spacer grow
+    Text.muted "Dana Ruiz, Ruiz Electric"
+  Main
+    Nav
+      Column gap=0
+        Heading "Kessler kitchen remodel" level=1
+        Text.muted "Version 3, edited today"
+      Row gap=8
+        Button.outline "Paste items" icon="content_paste" onTap={open paste}
+        Button.outline "Compare" onTap={go compare-versions}
+        Button "Preview quote" onTap={go client-quote}
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Row between
+          Row gap=8
+            IconButton "{open1 ? 'expand_more' : 'chevron_right'}" tooltip="Fold group" onTap={open1=!open1}
+            Heading "Rough-in" level=3
+          Row gap=16
+            Row gap=4
+              Text.muted "Markup"
+              Input type=number bind=markup.Rough-in w=70
+              Text.muted "%"
+            Text.strong "Subtotal {money(sum(filter(materials,m=>m.sec=='Rough-in'),m=>m.qty*m.cost)*(1+markup.Rough-in/100),'$',2)}"
+        if open1
+          Row
+            Text.caption "Code" w=90
+            Text.caption "Description" grow
+            Text.caption "Qty" w=70
+            Text.caption "Unit cost" w=100
+            Text.caption "Line total" w=100
+          each row in materials
+            if row.sec=="Rough-in"
+              Row gap=8 fill={row.known ? "#00000000" : "#FFFFF0C2"}
+                Input bind=row.code w=90
+                Input bind=row.desc grow
+                Input type=number bind=row.qty w=70
+                Input type=number bind=row.cost w=100
+                Text.strong "{money(row.qty*row.cost,'$',2)}" w=100
+                IconButton "delete" tooltip="Remove line" onTap={materials=removeWhere(materials,r=>r.id==row.id)}
+      Card gap=8
+        Row between
+          Row gap=8
+            IconButton "{open2 ? 'expand_more' : 'chevron_right'}" tooltip="Fold group" onTap={open2=!open2}
+            Heading "Finish" level=3
+          Row gap=16
+            Row gap=4
+              Text.muted "Markup"
+              Input type=number bind=markup.Finish w=70
+              Text.muted "%"
+            Text.strong "Subtotal {money(sum(filter(materials,m=>m.sec=='Finish'),m=>m.qty*m.cost)*(1+markup.Finish/100),'$',2)}"
+        if open2
+          each row in materials
+            if row.sec=="Finish"
+              Row gap=8 fill={row.known ? "#00000000" : "#FFFFE0A3"}
+                Input bind=row.code w=90 hint="no code"
+                Input bind=row.desc grow
+                Input type=number bind=row.qty w=70
+                Input type=number bind=row.cost w=100
+                Text.strong "{money(row.qty*row.cost,'$',2)}" w=100
+                if !row.known
+                  Badge.warning "Unmatched"
+                IconButton "delete" tooltip="Remove line" onTap={materials=removeWhere(materials,r=>r.id==row.id)}
+      Card gap=8
+        Row between
+          Heading "Labour" level=3
+          Row gap=4
+            Text.muted "Rate $/h"
+            Input type=number bind=rate w=80
+        Row
+          Text.caption "Task" grow
+          Text.caption "Hours" w=90
+          Text.caption "Cost" w=110
+        each row in labour
+          Row gap=8
+            Input bind=row.task grow
+            Input type=number bind=row.hours w=90
+            Text.strong "{money(row.hours*rate,'$',2)}" w=110
+        Button.ghost "Add task" icon="add" onTap={labour=append(labour,{"id":length(labour)+1,"task":"","hours":0})}
+      Card gap=8
+        Heading "Totals" level=3
+        Row between
+          Text.muted "Materials with markup"
+          Text "{money(sum(materials,m=>m.qty*m.cost*(1+markup[m.sec]/100)),'$',2)}"
+        Row between
+          Text.muted "Labour ({sum(labour,l=>l.hours)} h)"
+          Text "{money(sum(labour,l=>l.hours)*rate,'$',2)}"
+        Row between
+          Text.muted "Overhead {ohead}%"
+          Text "{money((sum(materials,m=>m.qty*m.cost*(1+markup[m.sec]/100))+sum(labour,l=>l.hours)*rate)*ohead/100,'$',2)}"
+        Divider
+        Row between
+          Text.strong "Quote total"
+          Text.strong size=24 "{money((sum(materials,m=>m.qty*m.cost*(1+markup[m.sec]/100))+sum(labour,l=>l.hours)*rate)*(1+ohead/100),'$',2)}"
+        Row between
+          Text.muted "Margin on cost"
+          Text.success "{fixed((1-(sum(materials,m=>m.qty*m.cost)+sum(labour,l=>l.hours)*rate*0.6)/((sum(materials,m=>m.qty*m.cost*(1+markup[m.sec]/100))+sum(labour,l=>l.hours)*rate)*(1+ohead/100)))*100,1)}%"
+  Dialog#paste "Paste a list of items" "One item per line: quantity, then description"
+    Input "Items" bind=pasted multiline h=160
+    Text.muted "Lines that match nothing in your catalogue turn amber."
+    Row end gap=8
+      Button.outline "Cancel" onTap={close}
+      Button "Add to estimate" onTap={pasted=="" ? toast "Paste something first" : {materials=concat(materials,matchLines(pasted,catalog)); pasted=""; toast "Items added, check the amber ones"; close}}
+
+### Client quote
+state showLabour=true
+Page
+  Nav
+    Brand "Ruiz Electric" icon="bolt"
+    Row gap=8
+      Button.outline "Back to estimate" onTap={go estimate}
+      Button.outline "Download PDF" icon="download" onTap={emit exportPdf}
+      Button "Send to client" onTap={open send}
+  Section narrow
+    Column gap=16
+      Row between
+        Column gap=4
+          Heading "Quote 2041" level=1
+          Text.muted "Prepared for Mark Kessler, 18 Alder Lane"
+        Text.muted "Valid until {formatDate(today(),'MMM d')} plus 30 days"
+      Toggle "Show labour hours" bind=showLabour
+      Card gap=8
+        Heading "Rough-in" level=3
+        each row in materials
+          if row.sec=="Rough-in"
+            Row between
+              Text "{row.qty} x {row.desc}"
+              Text "{money(row.qty*row.cost*(1+markup.Rough-in/100),'$',2)}"
+      Card gap=8
+        Heading "Finish" level=3
+        each row in materials
+          if row.sec=="Finish"
+            Row between
+              Text "{row.qty} x {row.desc}"
+              Text "{money(row.qty*row.cost*(1+markup.Finish/100),'$',2)}"
+      if showLabour
+        Card gap=8
+          Heading "Labour" level=3
+          each row in labour
+            Row between
+              Text "{row.task}, {row.hours} h"
+              Text "{money(row.hours*rate,'$',2)}"
+      Card gap=8
+        Row between
+          Text.strong "Total"
+          Text.strong size=24 "{money((sum(materials,m=>m.qty*m.cost*(1+markup[m.sec]/100))+sum(labour,l=>l.hours)*rate)*(1+ohead/100),'$',2)}"
+        Text.muted "50% deposit on acceptance, balance on completion."
+  Footer
+    Text.muted "Ruiz Electric, licence E-48213"
+  Dialog#send "Send quote" "Mark will get a link to this page"
+    Input "Email" "mark@kessler.com" bind=clientEmail type=email
+    Button "Send" onTap={clientEmail=="" ? toast "Add an email" : {emit sendQuote clientEmail; toast "Quote sent"; close}}
+
+### Compare versions
+state vA="Version 2"
+state vB="Version 3"
+state changedOnly=false
+state versions=[{"code":"NM-122","desc":"Romex 12/2 NM-B, 250 ft","a":{"qty":3,"cost":148.5},"b":{"qty":4,"cost":148.5}},{"code":"BX-142","desc":"Old-work box, 1-gang","a":{"qty":40,"cost":1.85},"b":{"qty":40,"cost":1.85}},{"code":"CN-34","desc":"EMT conduit 3/4 in, 10 ft","a":{"qty":22,"cost":5.9},"b":{"qty":22,"cost":6.2}},{"code":"SW-15W","desc":"Decora switch 15A, white","a":{"qty":24,"cost":2.4},"b":{"qty":28,"cost":2.4}},{"code":"RC-20GF","desc":"GFCI receptacle 20A","a":{"qty":6,"cost":19.75},"b":{"qty":6,"cost":19.75}}]
+App
+  Sidebar
+    Brand "Joist" icon="bolt"
+    NavItem "Estimate" icon="calculate" onTap={go estimate}
+    NavItem "Client quote" icon="description" onTap={go client-quote}
+    NavItem "Compare versions" icon="compare_arrows" selected
+    Spacer grow
+    Text.muted "Dana Ruiz, Ruiz Electric"
+  Main
+    Nav
+      Heading "Compare versions" level=1
+      Row gap=8
+        Select bind=vA items=["Version 1","Version 2","Version 3"] w=140
+        Icon "arrow_forward"
+        Select bind=vB items=["Version 2","Version 3","Version 4"] w=140
+        Toggle "Changed only" bind=changedOnly
+    Column pad=24 gap=16 scroll
+      Row gap=12
+        Card grow gap=4
+          Text.muted "Total, {vA}"
+          Text.strong size=24 "$9,812.40"
+        Card grow gap=4
+          Text.muted "Total, {vB}"
+          Text.strong size=24 "$10,246.15"
+        Card grow gap=4
+          Text.muted "Change"
+          Text.danger size=24 "+$433.75"
+      Card gap=4
+        Row
+          Text.caption "Code" w=90
+          Text.caption "Description" grow
+          Text.caption "{vA} qty" w=90
+          Text.caption "{vB} qty" w=90
+          Text.caption "{vA} cost" w=90
+          Text.caption "{vB} cost" w=90
+        each row in versions
+          if !changedOnly || row.a.qty!=row.b.qty || row.a.cost!=row.b.cost
+            Row gap=8 middle
+              Text.mono "{row.code}" w=90
+              Text "{row.desc}" grow
+              Text "{row.a.qty}" w=90
+              Text "{row.b.qty}" w=90 fill={row.a.qty!=row.b.qty ? "#FFFFD9A0" : "#00000000"}
+              Text "{money(row.a.cost,'$',2)}" w=90
+              Text "{money(row.b.cost,'$',2)}" w=90 fill={row.a.cost!=row.b.cost ? "#FFFFD9A0" : "#00000000"}
+      Row gap=8
+        Badge.warning "Changed cell"
+        Spacer grow
+        Button.outline "Restore {vA}" onTap={open restore}
+  Dialog#restore "Restore this version?" "Your current edits become a new version first."
+    Row end gap=8
+      Button.outline "Cancel" onTap={close}
+      Button "Restore" onTap={emit restoreVersion vA; toast "Restored {vA}"; close; go estimate}

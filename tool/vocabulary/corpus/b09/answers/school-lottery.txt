@@ -1,0 +1,211 @@
+### Rank schools
+state tab="rank"
+state ranked=[{"id":"s1","name":"Lincoln Elementary","seats":24,"total":60,"sibling":true},{"id":"s2","name":"Maple Grove Academy","seats":9,"total":45,"sibling":false},{"id":"s3","name":"Riverside Montessori","seats":31,"total":40,"sibling":true},{"id":"s4","name":"Oak Hill STEM School","seats":4,"total":50,"sibling":false}]
+state available=[{"id":"s5","name":"Cedar Park Elementary","seats":18,"total":55,"sibling":false},{"id":"s6","name":"Harbor Language School","seats":12,"total":36,"sibling":true},{"id":"s7","name":"Westfield Arts Magnet","seats":6,"total":30,"sibling":false}]
+state remaining=0
+state deadline=432000
+every 1s onTick={deadline=max(0,deadline-1)}
+App
+  Sidebar
+    Brand "Seatdraw" icon="casino"
+    NavItem "My rankings" icon="format_list_numbered" badge="{length(ranked)}" selected={tab=="rank"} onTap={tab="rank"}
+    NavItem "Draw day" icon="autorenew" selected={tab=="draw"} onTap={go draw-day}
+    NavItem "Offer" icon="mark_email_unread" badge="1" selected={tab=="offer"} onTap={go offer}
+    NavItem "Home map" icon="map" selected={tab=="map"} onTap={go home-map}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Priya Nair" size=36
+      Column
+        Text.strong "Priya Nair"
+        Text.caption "Family #4821"
+  Main
+    Nav
+      Heading "Rank your schools" level=1
+      Row gap=12 middle
+        Badge.warning "Deadline in {duration(deadline)}"
+        Button "Submit ranking" onTap={length(ranked)==0 ? toast "Rank at least one school" : open confirm}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Column grow gap=12
+          Text.muted "Drag to reorder. Your first choice is tried first. You can rank up to six schools."
+          ReorderableList bind=ranked onReorder={emit reorder result}
+            each s in ranked
+              Card gap=8 drag=rank(s.id) drop=rank onDrop={ranked=moveTo(ranked,result.data,index)}
+                Row between middle
+                  Row gap=12 middle
+                    Icon "drag_indicator"
+                    Badge.primary "{index+1}"
+                    Column
+                      Text.strong "{s.name}"
+                      Text.caption "{s.seats} of {s.total} seats open"
+                  Row gap=8 middle
+                    if s.sibling
+                      Badge.success "Sibling priority"
+                    IconButton "close" tooltip="Remove" onTap={ranked=without(ranked,s); available=append(available,s)}
+                Progress {s.seats / s.total}
+          if length(ranked)>=6
+            Text.danger "You have ranked six schools, the most allowed."
+        Column w=320 gap=12
+          Text.panelTitle "Add a school"
+          each a in available
+            Card gap=8
+              Row between middle
+                Column
+                  Text.strong "{a.name}"
+                  Text.caption "{a.seats} seats of {a.total}"
+                IconButton "add" tooltip="Add to ranking" onTap={length(ranked)<6 ? ranked=append(ranked,a); available=without(available,a) : toast "Six schools is the limit"}
+              Progress {a.seats / a.total}
+              if a.sibling
+                Badge.success "Sibling priority"
+  Dialog#confirm "Submit your ranking?" "You can change it until the deadline."
+    each s in ranked
+      Text "{index+1}. {s.name}"
+    Row end gap=8
+      Button.ghost "Keep editing" onTap={close}
+      Button "Submit" onTap={emit submitRanking ranked; toast "Ranking submitted"; close}
+
+### Draw day
+state calling=true
+state called=[]
+state pool=[4821,1307,2290,3774,5012,1688,2951,4106,3345,720]
+state mine=4821
+state step=0
+every 2s when calling onTick={step<length(pool) ? called=append(called,pool[step]); step=step+1 : calling=false}
+App
+  Sidebar
+    Brand "Seatdraw" icon="casino"
+    NavItem "My rankings" icon="format_list_numbered" onTap={go rank-schools}
+    NavItem "Draw day" icon="autorenew" selected={true}
+    NavItem "Offer" icon="mark_email_unread" badge="1" onTap={go offer}
+    NavItem "Home map" icon="map" onTap={go home-map}
+    Spacer grow
+    Text.muted "Family #4821"
+  Main
+    Nav
+      Heading "Draw day" level=1
+      Row gap=8 middle
+        Badge.error "Live"
+        Text.muted "March 14, 10:00 AM"
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=16 center
+          Text.panelTitle "The drum"
+          Stack center middle h=220
+            Drum spinning={calling} animate=spin duration=2000
+            Text "{step>0 ? called[step-1] : '...'}" size=56 weight=700
+          Text.muted "{calling ? 'Drawing number ' + (step+1) + ' of ' + length(pool) : 'The draw is complete'}"
+          Progress {step / length(pool)}
+          Row gap=8
+            Button.outline "Pause" onTap={calling=false}
+            Button.outline "Resume" onTap={calling=true}
+        Column w=320 gap=12
+          Text.panelTitle "Numbers called"
+          Card gap=8
+            each n in called
+              Row between middle animate=slide-up
+                Text "{index+1}"
+                Text.strong "#{n}" color={n==mine ? "#FF1B7F4B" : "#FF333333"}
+                if n==mine
+                  Badge.success "That is you"
+            if isEmpty(called)
+              Text.muted "Waiting for the first number."
+      if contains(called,mine)
+        Card gap=8 fill=#FFE6F4EA animate=pop
+          Text.title "Your number was called"
+          Text.body "Family #4821 was called in position {indexOf(called,mine)+1}. Offers go out within the hour."
+          Button "See my offer" onTap={go offer}
+
+### Offer
+state offerLeft=3540
+state answer=""
+state position=14
+state waitlist=[{"school":"Riverside Montessori","pos":14},{"school":"Oak Hill STEM School","pos":9}]
+every 1s when answer=="" onTick={offerLeft=max(0,offerLeft-1)}
+every 10s onTick={waitlist=map(waitlist,w=>with(w,"pos",max(1,w.pos-1)))}
+App
+  Sidebar
+    Brand "Seatdraw" icon="casino"
+    NavItem "My rankings" icon="format_list_numbered" onTap={go rank-schools}
+    NavItem "Draw day" icon="autorenew" onTap={go draw-day}
+    NavItem "Offer" icon="mark_email_unread" badge="1" selected={true}
+    NavItem "Home map" icon="map" onTap={go home-map}
+    Spacer grow
+    Text.muted "Family #4821"
+  Main
+    Nav
+      Heading "Your offer" level=1
+      Badge.warning "Expires in {duration(offerLeft)}"
+    Column pad=24 gap=16 scroll
+      Card gap=16 animate=fade
+        Row between middle
+          Column
+            Text.caption "Offer for Maya Nair, Grade 2"
+            Heading "Lincoln Elementary" level=3
+          Badge.primary "Choice 1"
+        Text.muted "Seat reserved for the fall. Accept or decline before the timer ends or the seat passes to the next family."
+        Row gap=16 middle
+          Ring {offerLeft / 3600}
+          Column
+            Text.strong "{duration(offerLeft)} left"
+            Text.caption "Offers expire one hour after they are sent"
+        if answer==""
+          Row gap=12
+            Button "Accept seat" size=large onTap={open acceptDlg}
+            Button.destructive "Decline" size=large onTap={open declineDlg}
+        if answer=="accepted"
+          Badge.success "Accepted. Registration packet sent to your email."
+        if answer=="declined"
+          Badge.neutral "Declined. Your waitlist spots remain."
+      Text.panelTitle "Waitlist positions"
+      Grid cols=2 gap=16
+        each w in waitlist
+          Card gap=8
+            Text.strong "{w.school}"
+            Row between middle
+              Text.heading "#{w.pos}" size=40 weight=700 animate=pulse
+              Sparkline values=[22,19,17,16,{w.pos}]
+            Text.caption "Moves up as families decline"
+  Dialog#acceptDlg "Accept this seat?" "You will be removed from higher waitlists you chose to keep."
+    Row end gap=8
+      Button.ghost "Not yet" onTap={close}
+      Button "Accept" onTap={answer="accepted"; emit acceptOffer; toast "Seat accepted"; close}
+  Dialog#declineDlg "Decline this seat?" "This cannot be undone."
+    Row end gap=8
+      Button.ghost "Go back" onTap={close}
+      Button.destructive "Decline" onTap={answer="declined"; emit declineOffer; close}
+
+### Home map
+state zone="all"
+state selected="s1"
+state schools=[{"id":"s1","name":"Lincoln Elementary","lat":40.7,"lng":-74.0,"radius":1.2},{"id":"s2","name":"Maple Grove Academy","lat":40.72,"lng":-73.97,"radius":1.5},{"id":"s3","name":"Riverside Montessori","lat":40.69,"lng":-74.02,"radius":2.0}]
+state homes=[{"id":"h1","name":"Your home","lat":40.705,"lng":-73.99,"mine":true},{"id":"h2","name":"Family #1307","lat":40.715,"lng":-73.98,"mine":false}]
+Page
+  Nav sticky
+    Brand "Seatdraw" icon="casino"
+    Row gap=4
+      Link "Rankings" onTap={go rank-schools}
+      Link "Draw day" onTap={go draw-day}
+      Link "Offer" onTap={go offer}
+      Link "Map" onTap={go home-map}
+    Avatar "Priya Nair" size=36
+  Section bleed
+    Map h=480 center={[40.705,-73.99]} zoom=12
+      each s in schools
+        ZoneCircle center={[s.lat,s.lng]} radiusKm={s.radius} selected={selected==s.id} onTap={selected=s.id}
+        Marker "{s.name}" at={[s.lat,s.lng]} icon="school" onTap={selected=s.id}
+      each h in homes
+        Marker "{h.name}" at={[h.lat,h.lng]} icon={h.mine ? "home" : "circle"}
+  Section
+    Row gap=32 top
+      Column grow gap=12
+        Heading "Zones and your home" level=3
+        Text.muted "Your home is inside {count(schools,s=>distance(s,homes[0])<=s.radius)} of {length(schools)} school zones."
+        Row gap=8
+          ChoiceChip "All schools" selected={zone=="all"} onTap={zone="all"}
+          ChoiceChip "My zones" selected={zone=="mine"} onTap={zone="mine"}
+      Column w=320 gap=8
+        each s in schools
+          ListTile "{s.name}" subtitle="Zone radius {s.radius} km" selected={selected==s.id} onTap={selected=s.id}
+            Badge.success "Inside zone" hidden={distance(s,homes[0])>s.radius}
+  Footer
+    Text.muted "Zone boundaries from the district, updated Jan 2026"

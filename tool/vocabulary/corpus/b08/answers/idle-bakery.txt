@@ -1,0 +1,145 @@
+### Bakery
+project dough=0 saved
+project total=0 saved
+project stars=0 saved
+project items=[{"id":"cook","name":"Apprentice Baker","icon":"person","base":15,"cps":0.5,"owned":0},{"id":"oven","name":"Brick Oven","icon":"local_fire_department","base":120,"cps":4,"owned":0},{"id":"mill","name":"Windmill","icon":"air","base":900,"cps":22,"owned":0},{"id":"fact","name":"Bread Factory","icon":"factory","base":8000,"cps":150,"owned":0},{"id":"lab","name":"Yeast Lab","icon":"science","base":65000,"cps":900,"owned":0}] saved
+project qty=1
+state pops=[]
+state clock=0
+state crumb=0
+state crumbX=0
+state perTap=1
+state away=true
+state awayGain=18400
+every 1s onTick={dough=dough+sum(items,i=>i.cps*i.owned)*(1+stars*0.1); total=total+sum(items,i=>i.cps*i.owned)*(1+stars*0.1); clock=clock+1; crumb=crumb>0?crumb-1:(clock%25==0?6:0); pops=take(pops,3)}
+every 500 when crumb>0 onTick={crumbX=crumbX+6}
+App
+  Sidebar
+    Brand "Dough Empire" icon="bakery_dining"
+    NavItem "Bakery" icon="cookie" selected={true}
+    NavItem "Shop" icon="storefront" onTap={go shop}
+    NavItem "Ascend" icon="auto_awesome" badge={floor(total/1000000)>0?"new":""} onTap={go ascend}
+    Spacer grow
+    Text.muted "Lifetime {total>=1000000?fixed(total/1000000,2)+'M':(total>=1000?fixed(total/1000,1)+'K':fixed(total,0))}"
+  Main
+    Nav
+      Heading "Bakery" level=1
+      Row gap=8
+        Badge.warning "{stars} golden stars"
+        Button.outline "Shop" icon="storefront" onTap={go shop}
+    Column pad=24 gap=16 center
+      Card gap=4 center
+        Text.muted "Loaves baked"
+        Text "{dough>=1000000?fixed(dough/1000000,2)+'M':(dough>=1000?fixed(dough/1000,1)+'K':fixed(dough,0))}" size=64 weight=700
+        Text.muted "{fixed(sum(items,i=>i.cps*i.owned)*(1+stars*0.1),1)} per second, +{perTap*(1+stars*0.1)} per tap"
+      if crumb>0
+        Row
+          Spacer w={crumbX}
+          IconButton "stars" tooltip="Golden crumb" animate=pulse onTap={dough=dough+max(100,dough*0.15); total=total+max(100,dough*0.15); crumb=0; crumbX=0; toast "Golden crumb! +15%"}
+          Text.caption "{crumb}s"
+      Stack center middle
+        Box fill=#FFE8B86B radius=140 w=240 h=240 animate=scale onTap={dough=dough+perTap*(1+stars*0.1); total=total+perTap*(1+stars*0.1); pops=append(pops,perTap*(1+stars*0.1))}
+          Icon "bakery_dining" size=120
+        each p in pops
+          Text "+{p}" size=24 weight=700 color=#FFB8860B animate=slide-up duration=600
+      Text.muted "Tap the loaf"
+      Card gap=8
+        Row between
+          Text.strong "Golden crumb"
+          Text.muted "appears every 25s, fades in 6s"
+        Progress {crumb/6}
+      Card gap=8
+        Text.strong "Your helpers"
+        each it in items
+          if it.owned>0
+            Row between
+              Row gap=8
+                Icon "{it.icon}"
+                Text "{it.name}"
+              Text.strong "x{it.owned}"
+  Dialog#welcome "Welcome back" "Your bakers kept working while you were away"
+    Column gap=12 center
+      Icon "schedule" size=48
+      Text "You were away 3h 12m"
+      Text "+{awayGain} loaves" size=40 weight=700 color=#FFB8860B
+      Button "Collect" onTap={dough=dough+awayGain; total=total+awayGain; away=false; close}
+every 1s when away onTick={away=false; open welcome}
+
+### Shop
+project dough=0 saved
+project total=0 saved
+project stars=0 saved
+project items=[{"id":"cook","name":"Apprentice Baker","icon":"person","base":15,"cps":0.5,"owned":0},{"id":"oven","name":"Brick Oven","icon":"local_fire_department","base":120,"cps":4,"owned":0},{"id":"mill","name":"Windmill","icon":"air","base":900,"cps":22,"owned":0},{"id":"fact","name":"Bread Factory","icon":"factory","base":8000,"cps":150,"owned":0},{"id":"lab","name":"Yeast Lab","icon":"science","base":65000,"cps":900,"owned":0}] saved
+project qty=1
+every 1s onTick={dough=dough+sum(items,i=>i.cps*i.owned)*(1+stars*0.1); total=total+sum(items,i=>i.cps*i.owned)*(1+stars*0.1)}
+App
+  Sidebar
+    Brand "Dough Empire" icon="bakery_dining"
+    NavItem "Bakery" icon="cookie" onTap={go bakery}
+    NavItem "Shop" icon="storefront" selected={true}
+    NavItem "Ascend" icon="auto_awesome" onTap={go ascend}
+    Spacer grow
+    Text.muted "{fixed(sum(items,i=>i.cps*i.owned)*(1+stars*0.1),1)} loaves per second"
+  Main
+    Nav
+      Heading "Shop" level=1
+      Text.strong "{dough>=1000000?fixed(dough/1000000,2)+'M':(dough>=1000?fixed(dough/1000,1)+'K':fixed(dough,0))} loaves"
+    Column pad=24 gap=16
+      Row gap=8
+        Text.muted "Buy"
+        ChoiceChip "x1" selected={qty==1} onTap={qty=1}
+        ChoiceChip "x10" selected={qty==10} onTap={qty=10}
+        ChoiceChip "Max" selected={qty==0} onTap={qty=0}
+      each it in items
+        Card gap=8
+          Row between
+            Row gap=12
+              IconTile "{it.icon}"
+              Column gap=2
+                Text.strong "{it.name}"
+                Text.muted "+{it.cps} per second each, {it.owned} owned"
+            Row gap=12
+              Text.strong "{(qty==0?max(1,count(range(100),k=>it.base*(k+1)*(1+(it.owned+k/2)*0.2)<=dough)):qty)*it.base*(1+(it.owned+((qty==0?max(1,count(range(100),k=>it.base*(k+1)*(1+(it.owned+k/2)*0.2)<=dough)):qty)-1)/2)*0.2)>=1000?fixed((qty==0?max(1,count(range(100),k=>it.base*(k+1)*(1+(it.owned+k/2)*0.2)<=dough)):qty)*it.base*(1+(it.owned+((qty==0?max(1,count(range(100),k=>it.base*(k+1)*(1+(it.owned+k/2)*0.2)<=dough)):qty)-1)/2)*0.2)/1000,1)+'K':fixed((qty==0?max(1,count(range(100),k=>it.base*(k+1)*(1+(it.owned+k/2)*0.2)<=dough)):qty)*it.base*(1+(it.owned+((qty==0?max(1,count(range(100),k=>it.base*(k+1)*(1+(it.owned+k/2)*0.2)<=dough)):qty)-1)/2)*0.2),0)}" color={dough>=it.base*(1+it.owned*0.2)?#FFB8860B:#FF9E9E9E}
+              Button "Buy" disabled={dough<it.base*(1+it.owned*0.2)} onTap={items=updateWhere(items,x=>x.id==it.id,x=>with(x,"owned",x.owned+(qty==0?max(1,count(range(100),k=>it.base*(k+1)*(1+(it.owned+k/2)*0.2)<=dough)):qty))); dough=dough-(qty==0?max(1,count(range(100),k=>it.base*(k+1)*(1+(it.owned+k/2)*0.2)<=dough)):qty)*it.base*(1+(it.owned+((qty==0?max(1,count(range(100),k=>it.base*(k+1)*(1+(it.owned+k/2)*0.2)<=dough)):qty)-1)/2)*0.2); toast "Bought {it.name}"}
+          Progress {min(1,dough/(it.base*(1+it.owned*0.2)))}
+
+### Ascend
+project dough=0 saved
+project total=0 saved
+project stars=0 saved
+project items=[{"id":"cook","name":"Apprentice Baker","icon":"person","base":15,"cps":0.5,"owned":0},{"id":"oven","name":"Brick Oven","icon":"local_fire_department","base":120,"cps":4,"owned":0},{"id":"mill","name":"Windmill","icon":"air","base":900,"cps":22,"owned":0},{"id":"fact","name":"Bread Factory","icon":"factory","base":8000,"cps":150,"owned":0},{"id":"lab","name":"Yeast Lab","icon":"science","base":65000,"cps":900,"owned":0}] saved
+every 1s onTick={dough=dough+sum(items,i=>i.cps*i.owned)*(1+stars*0.1); total=total+sum(items,i=>i.cps*i.owned)*(1+stars*0.1)}
+App
+  Sidebar
+    Brand "Dough Empire" icon="bakery_dining"
+    NavItem "Bakery" icon="cookie" onTap={go bakery}
+    NavItem "Shop" icon="storefront" onTap={go shop}
+    NavItem "Ascend" icon="auto_awesome" selected={true}
+  Main
+    Nav
+      Heading "Ascend" level=1
+      Badge.warning "{stars} golden stars"
+    Column pad=24 gap=16 center maxw=720
+      Card gap=12 center
+        Icon "auto_awesome" size=56 color=#FFB8860B
+        Text.heading "Start over with a golden touch"
+        Text.muted "Resetting sells every helper and empties the bakery. Each golden star adds 10% to all production, forever."
+        Row gap=32 center
+          Column gap=2 center
+            Text.muted "Lifetime loaves"
+            Text.strong "{total>=1000000?fixed(total/1000000,2)+'M':(total>=1000?fixed(total/1000,1)+'K':fixed(total,0))}"
+          Column gap=2 center
+            Text.muted "Stars you would gain"
+            Text "+{floor(total/1000000)}" size=40 weight=700 color=#FFB8860B
+          Column gap=2 center
+            Text.muted "Production after"
+            Text.strong "+{(stars+floor(total/1000000))*10}%"
+        Progress {min(1,(total%1000000)/1000000)}
+        Text.caption "Next star at {fixed(1000000-(total%1000000),0)} more loaves"
+        Button "Ascend now" icon="auto_awesome" disabled={floor(total/1000000)<1} onTap={open confirm}
+  Dialog#confirm "Ascend?" "This cannot be undone"
+    Column gap=12
+      Text "You will gain {floor(total/1000000)} golden stars and lose all loaves and helpers."
+      Row gap=8 end
+        Button.ghost "Not yet" onTap={close}
+        Button "Ascend" onTap={stars=stars+floor(total/1000000); dough=0; total=0; items=map(items,x=>with(x,"owned",0)); close; toast "Ascended"; go bakery}

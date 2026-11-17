@@ -1,0 +1,228 @@
+### Calendar
+state tab="calendar"
+state sel=12
+state pattern="Week on, week off"
+state base=["M","M","M","M","M","M","M","D","D","D","D","D","D","D","M","M","M","M","M","M","M","D","D","D","D","D","D","D","M","M"]
+state holidays=[{"name":"Thanksgiving break","start":26,"end":29,"parent":"D"}]
+state term=true
+state handovers=[{"day":8,"place":"Maple Street School, front office","time":"3:30 PM"},{"day":15,"place":"Maple Street School, front office","time":"3:30 PM"},{"day":22,"place":"Corner Cafe on Ellis","time":"6:00 PM"}]
+state events=[{"day":5,"title":"Soccer practice","time":"4:00 PM"},{"day":12,"title":"Dentist, Dr. Okafor","time":"9:15 AM"},{"day":12,"title":"Piano lesson","time":"5:00 PM"},{"day":19,"title":"School concert","time":"6:30 PM"}]
+state requests=[{"id":1,"day":21,"title":"Swap Fri Nov 21 for Sat Nov 22","reason":"Work trip to Denver on Friday","from":"Dana","status":"pending"}]
+state hDay=0
+state hPlace=""
+state hTime="3:30 PM"
+App
+  Sidebar
+    Brand "Handoff" icon="swap_horiz"
+    NavItem "Calendar" icon="calendar_month" selected={tab=="calendar"} onTap={tab="calendar"}
+    NavItem "Requests" icon="mark_email_unread" badge="{count(requests,r=>r.status=="pending")}" onTap={go requests}
+    NavItem "Expenses" icon="receipt_long" onTap={go expenses}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Maya Reyes" size=32
+      Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "November 2026" level=1
+      Row gap=8
+        IconButton "chevron_left" tooltip="Previous month"
+        IconButton "chevron_right" tooltip="Next month"
+        Button.outline "Choose pattern" icon="tune" onTap={open patterns}
+        Button "Request a change" icon="send" onTap={open change}
+    Column pad=24 gap=16 scroll
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.caption "Nights with Maya"
+          Text.strong "{count(base,b=>b=="M")}" size=32
+        Card gap=4
+          Text.caption "Nights with Daniel"
+          Text.strong "{count(base,b=>b=="D")}" size=32
+        Card gap=4
+          Text.caption "Swap days"
+          Text.strong "{count(range(29),i=>base[i]!=base[i+1])}" size=32
+        Card gap=4
+          Text.caption "Pattern"
+          Text.strong "{pattern}"
+      Row gap=16 top
+        Card grow gap=12
+          Row between middle
+            Row gap=12 middle
+              Badge.primary "Maya"
+              Badge.warning "Daniel"
+              Row gap=4 middle
+                Icon "arrow_forward"
+                Text.caption "Swap day"
+            Toggle "School term" bind=term
+          Grid cols=7 gap=4
+            Text.caption "Sun" center
+            Text.caption "Mon" center
+            Text.caption "Tue" center
+            Text.caption "Wed" center
+            Text.caption "Thu" center
+            Text.caption "Fri" center
+            Text.caption "Sat" center
+          Grid cols=7 gap=4
+            each d in range(30)
+              Box pad=6 radius=8 gap=2 fill={find(holidays,h=>d+1>=h.start&&d+1<=h.end) ? "#FFFFE0B2" : (base[d]=="M" ? "#FFD6E4FF" : "#FFFFF3CD")} onTap={sel=d+1} menu=dayMenu
+                Row between
+                  Text.strong "{d+1}" weight={sel==d+1 ? 800 : 500}
+                  if d<29&&base[d]!=base[d+1]
+                    Icon "arrow_forward" size=14
+                if find(holidays,h=>d+1>=h.start&&d+1<=h.end)
+                  Text.caption "{find(holidays,h=>d+1>=h.start&&d+1<=h.end).name}"
+                if find(handovers,x=>x.day==d+1)
+                  Row gap=2 middle
+                    Icon "place" size=12
+                    Text.caption "{find(handovers,x=>x.day==d+1).time}"
+                if term&&d+1<=26
+                  Box h=3 radius=2 fill=#FF4CAF50
+        Pane w=320 pad=16 gap=12
+          Heading "Wed, Nov {sel}" level=3
+          Row gap=8 middle
+            Badge.primary "{base[sel-1]=="M" ? "With Maya" : "With Daniel"}"
+            if find(holidays,h=>sel>=h.start&&sel<=h.end)
+              Badge.warning "Holiday"
+          Divider
+          Text.strong "Handover"
+          if find(handovers,x=>x.day==sel)
+            ListTile "{find(handovers,x=>x.day==sel).place}" "{find(handovers,x=>x.day==sel).time}" icon="place"
+            Button.ghost "Remove" onTap={handovers=removeWhere(handovers,x=>x.day==sel); toast "Handover removed"}
+          if !find(handovers,x=>x.day==sel)
+            Text.muted "No handover set for this day."
+            Button.outline "Set place and time" icon="add_location" onTap={hDay=sel; open handover}
+          Divider
+          Text.strong "Events"
+          if count(events,e=>e.day==sel)==0
+            Text.muted "Nothing planned."
+          each e in filter(events,x=>x.day==sel)
+            ListTile "{e.title}" "{e.time}" icon="event"
+          Button.ghost "Add event" icon="add" onTap={open newEvent}
+      Card gap=8
+        Row between
+          Text.strong "Coming up for Ava"
+          Text.caption "{length(events)} events"
+        each e in sortBy(events,x=>x.day)
+          Row between middle
+            Row gap=12 middle
+              IconTile "event"
+              Column
+                Text.strong "{e.title}"
+                Text.caption "Nov {e.day}, {e.time}"
+            Badge.neutral "{base[e.day-1]=="M" ? "Maya" : "Daniel"}"
+  Menu#dayMenu
+    MenuItem "Set handover" icon="place" onTap={hDay=sel; open handover}
+    MenuItem "Add event" icon="event" onTap={open newEvent}
+    MenuItem "Request swap for this day" icon="swap_horiz" onTap={open change}
+Dialog#patterns "Choose a pattern" "Fills the calendar from the first of the month"
+  Column gap=12
+    Card gap=4 onTap={pattern="Week on, week off"; base=map(range(30),i=>floor(i/7)%2==0?"M":"D"); toast "Pattern applied"; close}
+      Text.strong "Week on, week off"
+      Text.muted "Seven nights each, alternating."
+    Card gap=4 onTap={pattern="Two two three"; base=map(range(30),i=>(i%7<2)?"M":((i%7<4)?"D":(floor(i/7)%2==0?"M":"D"))); toast "Pattern applied"; close}
+      Text.strong "Two two three"
+      Text.muted "Two nights, two nights, then a three-night stretch that alternates."
+    Card gap=4 onTap={pattern="Alternating days"; base=map(range(30),i=>i%2==0?"M":"D"); toast "Pattern applied"; close}
+      Text.strong "Alternating days"
+      Text.muted "A swap every day."
+Dialog#handover "Handover place and time" "Day {hDay}"
+  Input "Place" "Maple Street School, front office" bind=hPlace
+  TimePicker "Time" bind=hTime
+  Button "Save handover" onTap={hPlace=="" ? toast "Add a place" : {handovers=append(handovers,{"day":hDay,"place":hPlace,"time":hTime}); hPlace=""; toast "Handover saved"; close}}
+Dialog#newEvent "Add an event" "For Ava on day {sel}"
+  Input "Title" bind=evTitle
+  TimePicker "Time" bind=evTime
+  Button "Add" onTap={events=append(events,{"day":sel,"title":evTitle,"time":evTime}); evTitle=""; close}
+Dialog#change "Request a change" "Sent to Daniel for approval"
+  DatePicker "Day to swap" bind=chDay
+  Select "Swap with" items=["Fri Nov 21","Sat Nov 22","Sun Nov 23"] bind=chWith
+  Input "Reason" "Why do you need this swap?" bind=chReason multiline
+  Button "Send request" onTap={chReason=="" ? toast "Add a reason" : {requests=append(requests,{"id":length(requests)+1,"day":21,"title":"Swap {chDay} for {chWith}","reason":chReason,"from":"Maya","status":"pending"}); chReason=""; emit changeRequested; toast "Request sent to Daniel"; close}}
+
+### Requests
+state requests=[{"id":1,"day":21,"title":"Swap Fri Nov 21 for Sat Nov 22","reason":"Work trip to Denver on Friday","from":"Dana","status":"pending"},{"id":2,"day":28,"title":"Extra night on Nov 28","reason":"Ava's grandmother is visiting","from":"Maya","status":"approved"},{"id":3,"day":9,"title":"Move handover to 5 PM","reason":"Late practice","from":"Daniel","status":"declined"}]
+state filter="all"
+state sel=0
+state note=""
+App
+  Sidebar
+    Brand "Handoff" icon="swap_horiz"
+    NavItem "Calendar" icon="calendar_month" onTap={go calendar}
+    NavItem "Requests" icon="mark_email_unread" selected badge="{count(requests,r=>r.status=="pending")}"
+    NavItem "Expenses" icon="receipt_long" onTap={go expenses}
+  Main
+    Nav
+      Heading "Change requests" level=1
+      SegmentedButton items=["all","pending","approved","declined"] bind=filter
+    Column pad=24 gap=12 scroll maxw=720
+      each r in filter=="all" ? requests : filter(requests,x=>x.status==filter)
+        Card gap=8
+          Row between middle
+            Text.strong "{r.title}"
+            Badge.warning "Pending" visible={r.status=="pending"}
+            Badge.success "Approved" visible={r.status=="approved"}
+            Badge.error "Declined" visible={r.status=="declined"}
+          Text.muted "From {r.from}"
+          Text "Reason: {r.reason}"
+          if r.status=="pending"&&r.from!="Maya"
+            Row gap=8
+              Button "Approve" icon="check" onTap={requests=updateWhere(requests,x=>x.id==r.id,x=>with(x,"status","approved")); emit approve r.id; toast "Approved"}
+              Button.outline "Decline" icon="close" onTap={sel=r.id; open decline}
+      if length(requests)==0
+        Text.muted "No requests yet."
+Dialog#decline "Decline this request" "Daniel will see your note"
+  Input "Note" "Optional" bind=note multiline
+  Button.destructive "Decline" onTap={requests=updateWhere(requests,x=>x.id==sel,x=>with(x,"status","declined")); emit decline sel; note=""; toast "Declined"; close}
+
+### Expenses
+state expenses=[{"id":1,"what":"Soccer registration","amount":180,"paidBy":"Maya","split":50,"settled":false},{"id":2,"what":"Dentist copay","amount":45,"paidBy":"Daniel","split":50,"settled":false},{"id":3,"what":"School trip fee","amount":60,"paidBy":"Maya","split":50,"settled":true},{"id":4,"what":"Winter coat","amount":120,"paidBy":"Daniel","split":60,"settled":false}]
+state what=""
+state amount=""
+state paidBy="Maya"
+state split=50
+App
+  Sidebar
+    Brand "Handoff" icon="swap_horiz"
+    NavItem "Calendar" icon="calendar_month" onTap={go calendar}
+    NavItem "Requests" icon="mark_email_unread" onTap={go requests}
+    NavItem "Expenses" icon="receipt_long" selected
+  Main
+    Nav
+      Heading "Shared expenses" level=1
+      Button "Add expense" icon="add" onTap={open addExpense}
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.caption "Total shared"
+          Text.strong "{money(sum(expenses,e=>e.amount),"$",2)}" size=32
+        Card gap=4
+          Text.caption "Daniel owes Maya"
+          Text.strong "{money(sum(filter(expenses,e=>e.paidBy=="Maya"&&!e.settled),e=>e.amount*(100-e.split)/100),"$",2)}" size=32
+        Card gap=4
+          Text.caption "Maya owes Daniel"
+          Text.strong "{money(sum(filter(expenses,e=>e.paidBy=="Daniel"&&!e.settled),e=>e.amount*e.split/100),"$",2)}" size=32
+      Card gap=12
+        Text.strong "By parent"
+        Donut values=[sum(filter(expenses,e=>e.paidBy=="Maya"),e=>e.amount),sum(filter(expenses,e=>e.paidBy=="Daniel"),e=>e.amount)] labels=["Maya","Daniel"]
+      Card gap=8
+        Row
+          Text.caption "Expense" grow
+          Text.caption "Paid by" w=90
+          Text.caption "Amount" w=90
+          Text.caption "Split" w=70
+          Text.caption "" w=110
+        Divider
+        each e in expenses
+          Row middle
+            Text "{e.what}" grow strike={e.settled}
+            Text.muted "{e.paidBy}" w=90
+            Text "{money(e.amount,"$",2)}" w=90
+            Text.muted "{e.split}/{100-e.split}" w=70
+            Button.outline "Settle" w=110 hidden={e.settled} onTap={expenses=updateWhere(expenses,x=>x.id==e.id,x=>with(x,"settled",true)); emit settle e.id; toast "Marked settled"}
+            Badge.success "Settled" hidden={!e.settled}
+Dialog#addExpense "Add an expense" "Split between both parents"
+  Input "What was it for" bind=what
+  Input "Amount" type=number bind=amount
+  Select "Paid by" items=["Maya","Daniel"] bind=paidBy
+  Slider "Maya's share (%)" bind=split min=0 max=100
+  Text.caption "Maya {split}% and Daniel {100-split}%"
+  Button "Add expense" onTap={what=="" ? toast "Say what it was for" : {expenses=append(expenses,{"id":length(expenses)+1,"what":what,"amount":amount,"paidBy":paidBy,"split":split,"settled":false}); what=""; amount=""; toast "Expense added"; close}}

@@ -1,0 +1,175 @@
+### Lock screen
+state pass=""
+state wrong=false
+state locked=true
+Page
+  Section center
+    Column center gap=20 maxw=420
+      IconTile "lock"
+      Heading "Strongbox is locked" level=1
+      Text.muted "Type your passphrase code to open the vault." center
+      PinInput bind=pass count=6 password onComplete={pass=="482913" ? {locked=false; wrong=false; go vault} : {wrong=true; pass=""; animate=shake}}
+      if wrong
+        Text.danger "That code does not match. Try again."
+      Button "Unlock" w=fill onTap={pass=="482913" ? {locked=false; wrong=false; go vault} : {wrong=true; pass=""}}
+      Link "Forgot passphrase? Use recovery key" onTap={open recovery}
+      Text.caption "Auto-locks after 5 minutes of inactivity" center
+  Dialog#recovery "Use recovery key" "Enter the 24-word key you saved when you created this vault."
+    Input "Recovery key" bind=recoveryKey multiline
+    Button "Recover vault" onTap={recoveryKey==""? toast "Enter your recovery key" : {close; go vault}}
+
+### Vault
+state tab="all"
+state q=""
+state tagFilter="all"
+state sel=""
+state revealId=""
+state revealLeft=0
+state secrets=[{"id":"s1","name":"STRIPE_LIVE_KEY","tag":"payments","value":"sk_live_51Nq8vRtYx3","expiresIn":42,"updated":"Oct 28"},{"id":"s2","name":"SENDGRID_API_KEY","tag":"email","value":"SG.k3Jd8sLq0pXz","expiresIn":9,"updated":"Sep 30"},{"id":"s3","name":"AWS_SECRET_ACCESS_KEY","tag":"infra","value":"wJalrXUtnFEMI/K7MDENG","expiresIn":3,"updated":"Aug 12"},{"id":"s4","name":"GITHUB_DEPLOY_TOKEN","tag":"infra","value":"ghp_1a2B3c4D5e6F7g8H","expiresIn":-2,"updated":"Jul 02"},{"id":"s5","name":"OPENAI_API_KEY","tag":"ai","value":"sk-proj-7Hq2mZ9vB1","expiresIn":120,"updated":"Nov 09"}]
+every 1s when revealLeft>0 onTick={revealLeft=revealLeft-1; revealLeft==0 ? revealId="" : }
+App
+  Sidebar
+    Brand "Strongbox" icon="vpn_key"
+    NavItem "All secrets" icon="key" badge="{length(secrets)}" selected={tab=="all"} onTap={tab="all"}
+    NavItem "Expiring soon" icon="schedule" badge="{count(secrets,s=>s.expiresIn<=14)}" selected={tab=="expiring"} onTap={tab="expiring"}
+    NavItem "Access log" icon="history" selected={tab=="log"} onTap={tab="log"}
+    Spacer grow
+    Button.outline "Lock now" icon="lock" onTap={go lock-screen}
+  Main
+    Nav
+      Heading "Secrets" level=1
+      Row gap=8
+        Input "Search" bind=q w=220
+        Button "New secret" icon="add" onTap={open newSecret}
+    Column pad=24 gap=16
+      Row gap=8
+        ChoiceChip "All" selected={tagFilter=="all"} onTap={tagFilter="all"}
+        ChoiceChip "payments" selected={tagFilter=="payments"} onTap={tagFilter="payments"}
+        ChoiceChip "email" selected={tagFilter=="email"} onTap={tagFilter="email"}
+        ChoiceChip "infra" selected={tagFilter=="infra"} onTap={tagFilter="infra"}
+        ChoiceChip "ai" selected={tagFilter=="ai"} onTap={tagFilter="ai"}
+      each s in filter(secrets, x=>(tagFilter=="all" || x.tag==tagFilter) && contains(lower(x.name), lower(q)) && (tab!="expiring" || x.expiresIn<=14))
+        Card gap=8
+          Row between middle
+            Column grow gap=4
+              Text.strong "{s.name}"
+              Row gap=8
+                Badge.neutral "{s.tag}"
+                Text.caption "Updated {s.updated}"
+            Row gap=8 middle
+              if s.expiresIn<0
+                Badge.error "Expired {abs(s.expiresIn)}d ago"
+              if s.expiresIn>=0 && s.expiresIn<=7
+                Badge.error "Expires in {s.expiresIn}d"
+              if s.expiresIn>7 && s.expiresIn<=30
+                Badge.warning "Expires in {s.expiresIn}d"
+              if s.expiresIn>30
+                Badge.success "Expires in {s.expiresIn}d"
+              IconButton "more_vert" tooltip="More" onTap={sel=s.id; open rowMenu}
+          Row between middle
+            if revealId==s.id
+              Text.mono "{s.value}"
+            if revealId!=s.id
+              Text.mono "••••••••••••••••"
+            Row gap=8
+              Button.outline "Hold to reveal" icon="visibility" onPressStart={revealId=s.id; revealLeft=10} onPressEnd={revealId=""; revealLeft=0}
+              Button.outline "Copy" icon="content_copy" onTap={copy s.value; toast "Copied. Clipboard clears in 30 seconds"; clearClipboard 30s}
+              Button.ghost "Open" onTap={sel=s.id; go secret}
+          if revealId==s.id
+            Row gap=8 middle
+              Progress {revealLeft/10}
+              Text.caption "Hides in {revealLeft}s"
+  Menu#rowMenu end
+    MenuItem "Open" icon="open_in_new" onTap={go secret}
+    MenuItem "Rotate" icon="autorenew" onTap={open rotate}
+    MenuItem "Copy name" icon="content_copy" onTap={copy find(secrets,x=>x.id==sel).name; toast "Name copied"}
+    MenuItem "Delete" icon="delete" onTap={secrets=removeWhere(secrets,x=>x.id==sel); toast "Secret deleted"}
+  Dialog#newSecret "New secret" "Stored encrypted. The value is shown only when you hold to reveal."
+    Input "Name" "STRIPE_LIVE_KEY" bind=newName
+    Input "Value" password bind=newValue
+    Select "Tag" items=["payments","email","infra","ai"] bind=newTag
+    DatePicker "Expires on" bind=newExpiry
+    Button "Save secret" onTap={secrets=append(secrets,{"id":"n{length(secrets)+1}","name":newName,"tag":newTag,"value":newValue,"expiresIn":90,"updated":formatDate(today(),"MMM d")}); close; toast "Secret saved"}
+
+### Secret
+state sel="s3"
+state revealLeft=0
+state revealed=false
+state newValue=""
+state versions=[{"v":4,"when":"Aug 12, 09:14","by":"Dana Ortiz","note":"Scheduled rotation"},{"v":3,"when":"May 02, 16:40","by":"Priya Nair","note":"Rotated after offboarding"},{"v":2,"when":"Jan 19, 11:05","by":"Dana Ortiz","note":"Scheduled rotation"},{"v":1,"when":"Oct 03, 08:30","by":"Marcus Lee","note":"Created"}]
+state reads=[{"who":"Dana Ortiz","at":"Today, 10:42","how":"Revealed"},{"who":"ci-deploy-bot","at":"Today, 08:00","how":"API read"},{"who":"Priya Nair","at":"Yesterday, 17:25","how":"Copied"},{"who":"ci-deploy-bot","at":"Yesterday, 08:00","how":"API read"},{"who":"Marcus Lee","at":"Nov 14, 13:12","how":"Revealed"}]
+every 1s when revealLeft>0 onTick={revealLeft=revealLeft-1; revealLeft==0 ? revealed=false : }
+App
+  Sidebar
+    Brand "Strongbox" icon="vpn_key"
+    NavItem "All secrets" icon="key" onTap={go vault}
+    NavItem "Expiring soon" icon="schedule" onTap={go vault}
+    NavItem "Access log" icon="history"
+    Spacer grow
+    Button.outline "Lock now" icon="lock" onTap={go lock-screen}
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Back" onTap={go vault}
+        Heading "AWS_SECRET_ACCESS_KEY" level=1
+        Badge.error "Expires in 3d"
+      Row gap=8
+        Button.outline "Rotate" icon="autorenew" onTap={open rotate}
+        IconButton "more_vert" tooltip="More" onTap={open secretMenu}
+    Column pad=24 gap=16
+      Card gap=12
+        Text.strong "Current value"
+        if revealed
+          Text.mono "wJalrXUtnFEMI/K7MDENG"
+        if !revealed
+          Text.mono "••••••••••••••••••••"
+        if revealed
+          Row gap=8 middle
+            Progress {revealLeft/10}
+            Text.caption "Hides in {revealLeft}s"
+        Row gap=8
+          Button.outline "Hold to reveal" icon="visibility" onPressStart={revealed=true; revealLeft=10} onPressEnd={revealed=false; revealLeft=0}
+          Button.outline "Copy" icon="content_copy" onTap={copy "wJalrXUtnFEMI/K7MDENG"; toast "Copied. Clipboard clears in 30 seconds"; clearClipboard 30s}
+        Row gap=8
+          Badge.neutral "infra"
+          Text.caption "Version 4, rotated Aug 12"
+      Row gap=16 top
+        Card grow gap=12
+          Text.strong "Version history"
+          Timeline
+            each v in versions
+              TimelineItem "Version {v.v}" caption="{v.when} by {v.by}" note="{v.note}"
+        Card grow gap=12
+          Text.strong "Who has read it"
+          Table
+            Row
+              Text.caption "Who" grow
+              Text.caption "Action" w=90
+              Text.caption "When" w=130
+            each r in reads
+              Row middle
+                Row gap=8 grow middle
+                  Avatar "{r.who}" size=28
+                  Text "{r.who}"
+                Text.muted "{r.how}" w=90
+                Text.muted "{r.at}" w=130
+  Menu#secretMenu end
+    MenuItem "Set expiry" icon="event" onTap={open expiry}
+    MenuItem "Copy name" icon="content_copy" onTap={copy "AWS_SECRET_ACCESS_KEY"; toast "Name copied"}
+    MenuItem "Delete" icon="delete" onTap={toast "Secret deleted"; go vault}
+  Dialog#rotate "Rotate secret" "A new version is saved. The old value stays in history for 30 days."
+    SegmentedButton items=["Enter a value","Generate"] bind=rotateMode
+    if rotateMode=="Enter a value"
+      Input "New value" password bind=newValue
+    if rotateMode=="Generate"
+      Row gap=8 middle
+        Text.mono "{generated}"
+        IconButton "refresh" tooltip="Generate again" onTap={generated=randomString(32)}
+      Slider bind=genLength min=16 max=64
+      Text.caption "{genLength} characters"
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Rotate now" onTap={versions=concat([{"v":length(versions)+1,"when":"Today","by":"You","note":"Rotated manually"}],versions); newValue=""; close; toast "Rotated to version {length(versions)}"}
+  Dialog#expiry "Set expiry"
+    DatePicker "Expires on" bind=expiryDate
+    Button "Save" onTap={close; toast "Expiry updated"}

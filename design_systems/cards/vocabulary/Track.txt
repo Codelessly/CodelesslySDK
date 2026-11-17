@@ -1,0 +1,4 @@
+// One lane of an editor's timeline: its Head and the lines under it laid out side by side, ruled below.
+Track h=96
+  Row w=fill h={h} gap=0 border-bottom=line
+    ...

@@ -1,0 +1,218 @@
+### Recipe
+state screen="recipe"
+state servings=4
+state sel=0
+state orig=[{"id":1,"name":"Chicken breast","g":120,"kcal":165,"fat":3.6,"carb":0,"pro":31,"group":"protein"},{"id":2,"name":"Brown rice","g":70,"kcal":112,"fat":0.9,"carb":23,"pro":2.6,"group":"grain"},{"id":3,"name":"Broccoli","g":90,"kcal":34,"fat":0.4,"carb":7,"pro":2.8,"group":"vegetable"},{"id":4,"name":"Olive oil","g":10,"kcal":884,"fat":100,"carb":0,"pro":0,"group":"fat"},{"id":5,"name":"Greek yogurt","g":40,"kcal":59,"fat":0.4,"carb":3.6,"pro":10,"group":"dairy"}]
+state ings=[{"id":1,"name":"Chicken breast","g":120,"kcal":165,"fat":3.6,"carb":0,"pro":31,"group":"protein"},{"id":2,"name":"Brown rice","g":70,"kcal":112,"fat":0.9,"carb":23,"pro":2.6,"group":"grain"},{"id":3,"name":"Broccoli","g":90,"kcal":34,"fat":0.4,"carb":7,"pro":2.8,"group":"vegetable"},{"id":4,"name":"Olive oil","g":10,"kcal":884,"fat":100,"carb":0,"pro":0,"group":"fat"},{"id":5,"name":"Greek yogurt","g":40,"kcal":59,"fat":0.4,"carb":3.6,"pro":10,"group":"dairy"}]
+state swaps=[{"name":"Tofu, firm","kcal":144,"fat":8.7,"carb":2.8,"pro":17,"group":"protein"},{"name":"Salmon","kcal":208,"fat":13,"carb":0,"pro":20,"group":"protein"},{"name":"Quinoa","kcal":120,"fat":1.9,"carb":21,"pro":4.4,"group":"grain"},{"name":"Cauliflower rice","kcal":25,"fat":0.3,"carb":5,"pro":2,"group":"vegetable"}]
+state kcalT=700
+state fatT=25
+state carbT=90
+state proT=45
+App
+  Sidebar
+    Brand "Plateful" icon="restaurant"
+    NavItem "Recipe" icon="menu_book" selected={screen=="recipe"} onTap={screen="recipe"}
+    NavItem "Compare" icon="compare_arrows" selected={screen=="compare"} onTap={go compare}
+    NavItem "Plate" icon="donut_large" selected={screen=="plate"} onTap={go plate}
+    NavItem "Diet filter" icon="tune" onTap={open diet}
+    Spacer grow
+    Text.muted "Daily target 2,100 kcal"
+  Main
+    Nav
+      Heading "Lemon chicken power bowl" level=1
+      Row gap=8
+        IconButton "tune" tooltip="Dietary filter" onTap={open diet}
+        Button.outline "Reset swaps" onTap={ings=orig; toast "Original ingredients restored"}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Column grow gap=16
+          Card gap=12
+            Row between middle
+              Text.strong "Servings"
+              Row gap=8 middle
+                IconButton "remove" tooltip="Fewer servings" onTap={servings=max(1,servings-1)}
+                Text.strong "{servings}" size=20
+                IconButton "add" tooltip="More servings" onTap={servings=min(24,servings+1)}
+            Divider
+            Text.caption "Ingredients, scaled for {servings} servings"
+            each ing in ings
+              Row between middle gap=12
+                Row gap=12 middle grow
+                  Avatar "{ing.name}" size=32
+                  Column gap=2
+                    Text.strong "{ing.name}"
+                    Text.caption "{ing.group}"
+                Text.strong "{round(ing.g*servings,0)} g" w=80
+                Button.ghost "Swap" onTap={sel=ing.id; open swap}
+          Card gap=8
+            Text.strong "Method"
+            Text.muted "Grill the chicken with lemon and oil for 6 minutes a side. Steam the broccoli, fold in the rice and finish with yogurt."
+        Pane w=360 pad=16 gap=12
+          Text.panelTitle "Nutrition per serving"
+          Stack center middle h=180
+            Ring {min(1,sum(ings,i=>i.g*i.kcal/100)/kcalT)} h=180
+            Column center gap=0
+              Text "{round(sum(ings,i=>i.g*i.kcal/100),0)}" size=36 weight=700
+              Text.caption "kcal of {kcalT}"
+          Row gap=6 middle
+            if sum(ings,i=>i.g*i.kcal/100)-sum(orig,i=>i.g*i.kcal/100)!=0
+              Icon "{sum(ings,i=>i.g*i.kcal/100)>sum(orig,i=>i.g*i.kcal/100) ? 'arrow_upward' : 'arrow_downward'}"
+              Text.small "{abs(round(sum(ings,i=>i.g*i.kcal/100)-sum(orig,i=>i.g*i.kcal/100),0))} kcal vs original"
+          Column gap=4
+            Row between
+              Text "Fat"
+              Row gap=4 middle
+                if sum(ings,i=>i.g*i.fat/100)-sum(orig,i=>i.g*i.fat/100)!=0
+                  Icon "{sum(ings,i=>i.g*i.fat/100)>sum(orig,i=>i.g*i.fat/100) ? 'arrow_upward' : 'arrow_downward'}" size=16
+                Text.strong "{fixed(sum(ings,i=>i.g*i.fat/100),1)} g / {fatT} g"
+            Progress {min(1,sum(ings,i=>i.g*i.fat/100)/fatT)}
+          Column gap=4
+            Row between
+              Text "Carbs"
+              Row gap=4 middle
+                if sum(ings,i=>i.g*i.carb/100)-sum(orig,i=>i.g*i.carb/100)!=0
+                  Icon "{sum(ings,i=>i.g*i.carb/100)>sum(orig,i=>i.g*i.carb/100) ? 'arrow_upward' : 'arrow_downward'}" size=16
+                Text.strong "{fixed(sum(ings,i=>i.g*i.carb/100),1)} g / {carbT} g"
+            Progress {min(1,sum(ings,i=>i.g*i.carb/100)/carbT)}
+          Column gap=4
+            Row between
+              Text "Protein"
+              Row gap=4 middle
+                if sum(ings,i=>i.g*i.pro/100)-sum(orig,i=>i.g*i.pro/100)!=0
+                  Icon "{sum(ings,i=>i.g*i.pro/100)>sum(orig,i=>i.g*i.pro/100) ? 'arrow_upward' : 'arrow_downward'}" size=16
+                Text.strong "{fixed(sum(ings,i=>i.g*i.pro/100),1)} g / {proT} g"
+            Progress {min(1,sum(ings,i=>i.g*i.pro/100)/proT)}
+          Divider
+          BarChart values=[round(sum(ings,i=>i.g*i.kcal/100)/kcalT*100,0),round(sum(ings,i=>i.g*i.fat/100)/fatT*100,0),round(sum(ings,i=>i.g*i.carb/100)/carbT*100,0),round(sum(ings,i=>i.g*i.pro/100)/proT*100,0)] labels=["Calories","Fat","Carbs","Protein"] h=140
+          Text.caption "Share of the daily target, per serving"
+  Sheet#swap "Swap an ingredient"
+    Text.muted "Pick a replacement; the nutrition panel updates at once."
+    each s in swaps
+      ListTile "{s.name}" subtitle="{s.kcal} kcal, {s.pro} g protein per 100 g" onTap={ings=updateWhere(ings,x=>x.id==sel,x=>with(with(with(with(with(with(x,"name",s.name),"kcal",s.kcal),"fat",s.fat),"carb",s.carb),"pro",s.pro),"group",s.group)); close; toast "Swapped to {s.name}"}
+    Button.outline "Cancel" onTap={close}
+  Sheet#diet "Dietary filter"
+    Text.muted "Recipes with a marked allergen grey out."
+    Row gap=8
+      FilterChip "Peanuts" selected={contains(allergies,"peanut")} onTap={allergies=contains(allergies,"peanut") ? without(allergies,"peanut") : append(allergies,"peanut")}
+      FilterChip "Dairy" selected={contains(allergies,"dairy")} onTap={allergies=contains(allergies,"dairy") ? without(allergies,"dairy") : append(allergies,"dairy")}
+      FilterChip "Gluten" selected={contains(allergies,"gluten")} onTap={allergies=contains(allergies,"gluten") ? without(allergies,"gluten") : append(allergies,"gluten")}
+      FilterChip "Shellfish" selected={contains(allergies,"shellfish")} onTap={allergies=contains(allergies,"shellfish") ? without(allergies,"shellfish") : append(allergies,"shellfish")}
+    Divider
+    each r in recipes
+      ListTile "{r.name}" subtitle="{r.kcal} kcal, contains {join(r.allergens,', ')}" hidden={false} opacity={any(r.allergens,a=>contains(allergies,a)) ? 0.35 : 1}
+        if any(r.allergens,a=>contains(allergies,a))
+          Badge.warning "Avoid"
+    Row end
+      Button "Done" onTap={close}
+
+### Compare
+state allergies=[]
+state recipes=[{"id":"a","name":"Lemon chicken power bowl","kcal":512,"fat":16,"carb":58,"pro":38,"fib":7,"allergens":["dairy"]},{"id":"b","name":"Peanut noodle salad","kcal":640,"fat":28,"carb":74,"pro":21,"fib":6,"allergens":["peanut","gluten"]},{"id":"c","name":"Prawn and avocado wrap","kcal":470,"fat":19,"carb":45,"pro":27,"fib":5,"allergens":["shellfish","gluten"]},{"id":"d","name":"Roast veg quinoa","kcal":420,"fat":12,"carb":56,"pro":15,"fib":9,"allergens":[]}]
+state leftId="a"
+state rightId="b"
+App
+  Sidebar
+    Brand "Plateful" icon="restaurant"
+    NavItem "Recipe" icon="menu_book" onTap={go recipe}
+    NavItem "Compare" icon="compare_arrows" selected={true}
+    NavItem "Plate" icon="donut_large" onTap={go plate}
+    Spacer grow
+    Text.muted "Daily target 2,100 kcal"
+  Main
+    Nav
+      Heading "Compare recipes" level=1
+      Row gap=8
+        IconButton "tune" tooltip="Dietary filter" onTap={open diet}
+    Column pad=24 gap=16
+      Row gap=8
+        Text.caption "Avoiding"
+        each a in allergies
+          Chip "{a}" onTap={allergies=without(allergies,a)}
+        if isEmpty(allergies)
+          Text.muted "Nothing marked"
+      Row gap=16
+        Column grow gap=8
+          Select "Recipe one" bind=leftId items=["a","b","c","d"]
+        Column grow gap=8
+          Select "Recipe two" bind=rightId items=["a","b","c","d"]
+      Grid cols=2 gap=16
+        Card gap=12 opacity={any(find(recipes,r=>r.id==leftId).allergens,a=>contains(allergies,a)) ? 0.4 : 1}
+          Heading "{find(recipes,r=>r.id==leftId).name}" level=3
+          if any(find(recipes,r=>r.id==leftId).allergens,a=>contains(allergies,a))
+            Badge.warning "Contains an allergen you avoid"
+          Text.strong "{find(recipes,r=>r.id==leftId).kcal} kcal"
+          Progress {find(recipes,r=>r.id==leftId).kcal/800}
+          Text "Fat {find(recipes,r=>r.id==leftId).fat} g"
+          Text "Carbs {find(recipes,r=>r.id==leftId).carb} g"
+          Text "Protein {find(recipes,r=>r.id==leftId).pro} g"
+          Text "Fibre {find(recipes,r=>r.id==leftId).fib} g"
+        Card gap=12 opacity={any(find(recipes,r=>r.id==rightId).allergens,a=>contains(allergies,a)) ? 0.4 : 1}
+          Heading "{find(recipes,r=>r.id==rightId).name}" level=3
+          if any(find(recipes,r=>r.id==rightId).allergens,a=>contains(allergies,a))
+            Badge.warning "Contains an allergen you avoid"
+          Text.strong "{find(recipes,r=>r.id==rightId).kcal} kcal"
+          Progress {find(recipes,r=>r.id==rightId).kcal/800}
+          Text "Fat {find(recipes,r=>r.id==rightId).fat} g"
+          Text "Carbs {find(recipes,r=>r.id==rightId).carb} g"
+          Text "Protein {find(recipes,r=>r.id==rightId).pro} g"
+          Text "Fibre {find(recipes,r=>r.id==rightId).fib} g"
+      Card gap=12
+        Text.strong "Difference (recipe two minus recipe one)"
+        Row between middle
+          Text "Calories"
+          Row gap=4 middle
+            Icon "{find(recipes,r=>r.id==rightId).kcal>=find(recipes,r=>r.id==leftId).kcal ? 'arrow_upward' : 'arrow_downward'}"
+            Text.strong "{abs(find(recipes,r=>r.id==rightId).kcal-find(recipes,r=>r.id==leftId).kcal)} kcal"
+        Row between middle
+          Text "Protein"
+          Row gap=4 middle
+            Icon "{find(recipes,r=>r.id==rightId).pro>=find(recipes,r=>r.id==leftId).pro ? 'arrow_upward' : 'arrow_downward'}"
+            Text.strong "{abs(find(recipes,r=>r.id==rightId).pro-find(recipes,r=>r.id==leftId).pro)} g"
+        BarChart series=[{"name":"One","values":[find(recipes,r=>r.id==leftId).fat,find(recipes,r=>r.id==leftId).carb,find(recipes,r=>r.id==leftId).pro]},{"name":"Two","values":[find(recipes,r=>r.id==rightId).fat,find(recipes,r=>r.id==rightId).carb,find(recipes,r=>r.id==rightId).pro]}] labels=["Fat","Carbs","Protein"] h=200
+  Sheet#diet "Dietary filter"
+    Row gap=8
+      FilterChip "Peanuts" selected={contains(allergies,"peanut")} onTap={allergies=contains(allergies,"peanut") ? without(allergies,"peanut") : append(allergies,"peanut")}
+      FilterChip "Dairy" selected={contains(allergies,"dairy")} onTap={allergies=contains(allergies,"dairy") ? without(allergies,"dairy") : append(allergies,"dairy")}
+      FilterChip "Gluten" selected={contains(allergies,"gluten")} onTap={allergies=contains(allergies,"gluten") ? without(allergies,"gluten") : append(allergies,"gluten")}
+      FilterChip "Shellfish" selected={contains(allergies,"shellfish")} onTap={allergies=contains(allergies,"shellfish") ? without(allergies,"shellfish") : append(allergies,"shellfish")}
+    Row end
+      Button "Done" onTap={close}
+
+### Plate
+state groupSel="all"
+state servings=1
+state foods=[{"name":"Chicken breast","group":"protein","g":120},{"name":"Brown rice","group":"grain","g":70},{"name":"Broccoli","group":"vegetable","g":90},{"name":"Olive oil","group":"fat","g":10},{"name":"Greek yogurt","group":"dairy","g":40}]
+App
+  Sidebar
+    Brand "Plateful" icon="restaurant"
+    NavItem "Recipe" icon="menu_book" onTap={go recipe}
+    NavItem "Compare" icon="compare_arrows" onTap={go compare}
+    NavItem "Plate" icon="donut_large" selected={true}
+    Spacer grow
+    Text.muted "Daily target 2,100 kcal"
+  Main
+    Nav
+      Heading "Your plate" level=1
+      Row gap=8
+        SegmentedButton bind=servings items=["1","2","3"]
+    Column pad=24 gap=16
+      Row gap=8
+        ChoiceChip "All" selected={groupSel=="all"} onTap={groupSel="all"}
+        ChoiceChip "Protein" selected={groupSel=="protein"} onTap={groupSel="protein"}
+        ChoiceChip "Grain" selected={groupSel=="grain"} onTap={groupSel="grain"}
+        ChoiceChip "Vegetable" selected={groupSel=="vegetable"} onTap={groupSel="vegetable"}
+        ChoiceChip "Dairy" selected={groupSel=="dairy"} onTap={groupSel="dairy"}
+        ChoiceChip "Fat" selected={groupSel=="fat"} onTap={groupSel="fat"}
+      Row gap=24 top
+        Card grow gap=12
+          Text.strong "Plate by food group"
+          Donut values=[sum(filter(foods,f=>f.group=="protein"),f=>f.g),sum(filter(foods,f=>f.group=="grain"),f=>f.g),sum(filter(foods,f=>f.group=="vegetable"),f=>f.g),sum(filter(foods,f=>f.group=="dairy"),f=>f.g),sum(filter(foods,f=>f.group=="fat"),f=>f.g)] labels=["Protein","Grain","Vegetable","Dairy","Fat"] h=260
+          Text.caption "Grams per group, for {servings} serving"
+        Column w=320 gap=12
+          each f in filter(foods,x=>groupSel=="all" || x.group==groupSel)
+            Card gap=4
+              Row between middle
+                Text.strong "{f.name}"
+                Badge.info "{f.group}"
+              Text.muted "{f.g*servings} g"

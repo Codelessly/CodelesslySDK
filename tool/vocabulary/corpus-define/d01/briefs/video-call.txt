@@ -1,0 +1,3 @@
+App: Roundtable, video calls. A grid of participant tiles that reflows as people join, the speaker outlined, names and mute icons; a toolbar that hides when idle with mic, camera, share, raise hand, reactions that float up, leave; a side panel of chat and people; screen share takes the stage with tiles in a strip; a pre-join screen with device pickers and a mic test meter.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

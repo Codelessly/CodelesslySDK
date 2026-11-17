@@ -1,0 +1,261 @@
+### Weigh desk
+state tab="desk"
+state t=0
+state locked=false
+state target=41280
+state plate=""
+state product="Crushed granite 20mm"
+state products=[{"name":"Crushed granite 20mm","price":18.5},{"name":"Washed sand","price":14},{"name":"Road base","price":11.75},{"name":"Cement, bulk","price":96}]
+state queue=[{"id":"q1","plate":"KX 4821","driver":"Ola Brandt","firm":"Brandt Haulage","state":"waiting"},{"id":"q2","plate":"LM 3307","driver":"Priya Nair","firm":"Nair Aggregates","state":"waiting"},{"id":"q3","plate":"TR 9952","driver":"Jon Weiss","firm":"Weiss & Sons","state":"waiting"}]
+state current=null
+state firstWeigh=0
+state secondWeigh=0
+state axles=[{"name":"Steer","kg":6800,"limit":7500},{"name":"Drive","kg":11900,"limit":11500},{"name":"Trailer tri","kg":22580,"limit":24000}]
+state gvmLimit=40000
+state tickets=[]
+state lastTicket=null
+every 150 when !locked onTick={t=t+1; locked=t>=12}
+App
+  Sidebar
+    Brand "Scalehouse" icon="scale"
+    NavItem "Weigh desk" icon="monitor_weight" selected={tab=="desk"} onTap={tab="desk"}
+    NavItem "Queue" icon="local_shipping" badge="{length(queue)}" onTap={go queue}
+    NavItem "Tickets" icon="receipt_long" onTap={go tickets}
+    Spacer grow
+    Text.muted "Platform 1 online"
+    Text.muted "Operator: Dana Whitlock"
+  Main
+    Nav
+      Heading "Weigh desk" level=1
+      Row gap=8
+        Badge.success "Scale connected" hide=phone
+        Button.outline "Zero platform" onTap={t=0; locked=false; toast "Platform zeroed"}
+    Column pad=24 gap=16 scroll
+      Row gap=16
+        Card grow gap=12
+          Row between
+            Text.panelTitle "Live platform weight"
+            if locked
+              Badge.success "LOCKED"
+            if !locked
+              Badge.warning "SETTLING"
+          Stack center middle h=140
+            Text "{locked ? target : target + ((t*37)%120) - 60} kg" size=64 weight=700 animate={locked ? "pulse" : "shimmer"}
+          Row gap=8 center
+            Button "Lock and record" onTap={locked ? (current==null ? toast "Pick a truck first" : (firstWeigh==0 ? firstWeigh=target : secondWeigh=target)) : toast "Wait for a steady reading"}
+            Button.outline "Re-weigh" onTap={t=0; locked=false}
+        Card grow gap=12
+          Text.panelTitle "Truck"
+          Row gap=8
+            Input "Plate" "e.g. KX 4821" bind=plate grow
+            IconButton "photo_camera" tooltip="Capture plate" onTap={open plateCam}
+          Select "Product" bind=product items={map(products,p=>p.name)}
+          Text.muted "Price per tonne: {money(find(products,p=>p.name==product).price,"$",2)}"
+          Button "Start ticket" onTap={plate=="" ? toast "Enter a plate" : (current=plate; firstWeigh=0; secondWeigh=0; t=0; locked=false; toast "Ticket opened for {plate}")}
+      Row gap=16
+        Card grow gap=8
+          Text.panelTitle "First weigh (in)"
+          Text "{firstWeigh==0 ? "-" : firstWeigh + " kg"}" size=32 weight=700
+          Text.muted "Loaded truck on arrival"
+        Card grow gap=8
+          Text.panelTitle "Second weigh (out)"
+          Text "{secondWeigh==0 ? "-" : secondWeigh + " kg"}" size=32 weight=700
+          Text.muted "Empty truck on departure"
+        Card grow gap=8 fill=#FF14213D
+          Text.panelTitle "Net" color=#FFFFFFFF
+          Text "{firstWeigh>0 && secondWeigh>0 ? fixed(abs(firstWeigh-secondWeigh)/1000,2) + " t" : "-"}" size=48 weight=700 color=#FFFFFFFF
+          Text "{firstWeigh>0 && secondWeigh>0 ? money(abs(firstWeigh-secondWeigh)/1000*find(products,p=>p.name==product).price,"$",2) : "Awaiting both weights"}" color=#FFE5E5E5
+      if firstWeigh>gvmLimit
+        Card gap=12 fill=#FFFDECEA animate=shake
+          Row gap=8
+            Icon "warning" color=#FFB3261E
+            Text.strong "Overweight: {firstWeigh-gvmLimit} kg over the {gvmLimit} kg gross limit" color=#FFB3261E
+          each a in axles
+            Row gap=12
+              Text a.name w=110
+              Progress {min(1,a.kg/a.limit)} grow
+              Text.strong "{a.kg} / {a.limit} kg" w=150
+              if a.kg>a.limit
+                Badge.error "Over by {a.kg-a.limit}"
+              if a.kg<=a.limit
+                Badge.success "OK"
+          Row gap=8
+            Button.destructive "Reject load" onTap={emit rejectLoad current; toast "Load rejected"; current=null}
+            Button.outline "Allow with permit" onTap={open permit}
+      Row end gap=8
+        Button.outline "Cancel" onTap={current=null; firstWeigh=0; secondWeigh=0}
+        Button "Print ticket" onTap={firstWeigh==0 || secondWeigh==0 ? toast "Record both weights" : (lastTicket={"code":"WB-" + (1040+length(tickets)),"plate":current,"product":product,"net":abs(firstWeigh-secondWeigh),"amount":abs(firstWeigh-secondWeigh)/1000*find(products,p=>p.name==product).price}; tickets=append(tickets,lastTicket); queue=removeWhere(queue,q=>q.plate==current); emit printTicket lastTicket; go ticket)}
+    Pane w=320 pad=16 gap=12
+      Text.panelTitle "Trucks waiting ({length(queue)})"
+      each q in queue
+        ListTile "{q.plate}" subtitle="{q.driver}, {q.firm}" onTap={plate=q.plate; toast "Loaded {q.plate}"}
+  Dialog#plateCam "Capture plate" "Hold the plate inside the frame"
+    Camera facing=back onCapture={plate=result.text; close; toast "Read {result.text}"}
+    Button.outline "Cancel" onTap={close}
+  Dialog#permit "Overweight permit" "Record the permit that allows this load"
+    Input "Permit number" bind=permitNo
+    Input "Issued by" bind=permitBy
+    Button "Allow load" onTap={permitNo=="" ? toast "Permit number required" : (toast "Permit {permitNo} recorded"; close)}
+
+### Queue
+state qfilter="all"
+state qsearch=""
+state sel=""
+state queue=[{"id":"q1","plate":"KX 4821","driver":"Ola Brandt","firm":"Brandt Haulage","product":"Crushed granite 20mm","state":"waiting","eta":4},{"id":"q2","plate":"LM 3307","driver":"Priya Nair","firm":"Nair Aggregates","product":"Washed sand","state":"waiting","eta":9},{"id":"q3","plate":"TR 9952","driver":"Jon Weiss","firm":"Weiss & Sons","product":"Road base","state":"waiting","eta":15},{"id":"q4","plate":"HB 1180","driver":"Mina Okafor","firm":"Okafor Bulk","product":"Cement, bulk","state":"on scale","eta":0}]
+App
+  Sidebar
+    Brand "Scalehouse" icon="scale"
+    NavItem "Weigh desk" icon="monitor_weight" onTap={go weigh-desk}
+    NavItem "Queue" icon="local_shipping" badge="{length(queue)}" selected={true}
+    NavItem "Tickets" icon="receipt_long" onTap={go tickets}
+    Spacer grow
+    Text.muted "Operator: Dana Whitlock"
+  Main
+    Nav
+      Heading "Queue" level=1
+      Row gap=8
+        Input "Search plate or driver" bind=qsearch w=220
+        Button "Add truck" onTap={open addTruck}
+    Column pad=24 gap=16 scroll
+      Row gap=8
+        ChoiceChip "All" selected={qfilter=="all"} onTap={qfilter="all"}
+        ChoiceChip "Waiting" selected={qfilter=="waiting"} onTap={qfilter="waiting"}
+        ChoiceChip "On scale" selected={qfilter=="on scale"} onTap={qfilter="on scale"}
+      Card gap=0
+        Row pad=12 gap=12 border-bottom=#FFE0E0E0
+          Text.strong "Plate" w=100
+          Text.strong "Driver" grow
+          Text.strong "Product" w=170 hide=phone
+          Text.strong "Status" w=100
+          Text.strong "Wait" w=70 hide=tablet
+          Spacer w=40
+        each q in filter(queue,x=>(qfilter=="all" || x.state==qfilter) && (contains(lower(x.plate),lower(qsearch)) || contains(lower(x.driver),lower(qsearch))))
+          Row pad=12 gap=12 border-bottom=#FFF0F0F0 menu=rowMenu onTap={sel=q.id}
+            Text.mono q.plate w=100
+            Column grow
+              Text.strong "{q.driver}"
+              Text.muted "{q.firm}"
+            Text "{q.product}" w=170 hide=phone
+            Badge.primary "{q.state}" w=100
+            Text.muted "{q.eta} min" w=70 hide=tablet
+            IconButton "more_vert" tooltip="Actions" onTap={sel=q.id; open rowMenu}
+  Menu#rowMenu end
+    MenuItem "Call to scale" icon="scale" onTap={queue=updateWhere(queue,x=>x.id==sel,x=>with(x,"state","on scale")); toast "Called to scale"}
+    MenuItem "Move to front" icon="arrow_upward" onTap={queue=concat(filter(queue,x=>x.id==sel),filter(queue,x=>x.id!=sel))}
+    MenuItem "Remove" icon="delete" onTap={queue=removeWhere(queue,x=>x.id==sel); toast "Removed from queue"}
+  Dialog#addTruck "Add truck" "Put a truck in the queue"
+    Input "Plate" bind=newPlate
+    Input "Driver" bind=newDriver
+    Input "Firm" bind=newFirm
+    Select "Product" bind=newProduct items=["Crushed granite 20mm","Washed sand","Road base","Cement, bulk"]
+    Button "Add to queue" onTap={newPlate=="" ? toast "Plate required" : (queue=append(queue,{"id":"n" + length(queue),"plate":newPlate,"driver":newDriver,"firm":newFirm,"product":newProduct,"state":"waiting","eta":20}); newPlate=""; newDriver=""; newFirm=""; close)}
+
+### Ticket
+state lastTicket={"code":"WB-1042","plate":"KX 4821","driver":"Ola Brandt","product":"Crushed granite 20mm","first":41280,"second":14960,"net":26320,"price":18.5,"amount":486.92,"time":"14:32"}
+state copies=1
+Page
+  Nav
+    Brand "Scalehouse" icon="scale"
+    Row gap=4
+      Link "Weigh desk" onTap={go weigh-desk}
+      Link "Queue" onTap={go queue}
+      Link "Tickets" onTap={go tickets}
+  Section narrow
+    Card gap=16
+      Row between
+        Column
+          Text.panelTitle "Weighbridge ticket"
+          Text.muted "Scalehouse, Quarry Road 14"
+        Badge.success "Complete"
+      Divider
+      Row between
+        Text.muted "Ticket code"
+        Text.mono "{lastTicket.code}" size=24 weight=700
+      Stack center
+        QRCode "{lastTicket.code}" size=140
+      Grid cols=2 gap=12
+        Column
+          Text.caption "Plate"
+          Text.strong "{lastTicket.plate}"
+        Column
+          Text.caption "Driver"
+          Text.strong "{lastTicket.driver}"
+        Column
+          Text.caption "Product"
+          Text.strong "{lastTicket.product}"
+        Column
+          Text.caption "Date and time"
+          Text.strong "{formatDate(today(),"MMM d")} {lastTicket.time}"
+      Divider
+      Row between
+        Text "First weigh (in)"
+        Text.mono "{lastTicket.first} kg"
+      Row between
+        Text "Second weigh (out)"
+        Text.mono "{lastTicket.second} kg"
+      Row between
+        Text.strong "Net"
+        Text "{fixed(lastTicket.net/1000,2)} t" size=32 weight=700
+      Row between
+        Text.muted "At {money(lastTicket.price,"$",2)} per tonne"
+        Text.strong "{money(lastTicket.amount,"$",2)}"
+      Row gap=8 end
+        Stepper "Copies" bind=copies min=1 max=4
+        Button.outline "Copy code" icon="content_copy" onTap={copy lastTicket.code; toast "Code copied"}
+        Button "Print" icon="print" onTap={emit print lastTicket; toast "Printing {copies} copies"}
+        Button.ghost "Next truck" onTap={go weigh-desk}
+
+### Tickets
+state tickets=[{"code":"WB-1038","plate":"MD 7741","product":"Washed sand","net":24100,"amount":337.4,"hour":8},{"code":"WB-1039","plate":"PC 2290","product":"Road base","net":27650,"amount":324.89,"hour":9},{"code":"WB-1040","plate":"JT 5518","product":"Cement, bulk","net":18400,"amount":1766.4,"hour":10},{"code":"WB-1041","plate":"LM 3307","product":"Washed sand","net":23800,"amount":333.2,"hour":11},{"code":"WB-1042","plate":"KX 4821","product":"Crushed granite 20mm","net":26320,"amount":486.92,"hour":14}]
+state q=""
+App
+  Sidebar
+    Brand "Scalehouse" icon="scale"
+    NavItem "Weigh desk" icon="monitor_weight" onTap={go weigh-desk}
+    NavItem "Queue" icon="local_shipping" onTap={go queue}
+    NavItem "Tickets" icon="receipt_long" selected={true}
+    Spacer grow
+    Text.muted "Operator: Dana Whitlock"
+  Main
+    Nav
+      Heading "Day's tickets" level=1
+      Row gap=8
+        DatePicker "Day" bind=day w=160
+        Button.outline "Export CSV" icon="download" onTap={emit exportDay}
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.caption "Trucks weighed"
+          Text "{length(tickets)}" size=40 weight=700
+        Card gap=4
+          Text.caption "Total net"
+          Text "{fixed(sum(tickets,t=>t.net)/1000,2)} t" size=40 weight=700
+        Card gap=4
+          Text.caption "Day's total"
+          Text "{money(sum(tickets,t=>t.amount),"$",2)}" size=40 weight=700
+      Card gap=8
+        Text.panelTitle "Net tonnes by hour"
+        BarChart values={map(tickets,t=>t.net/1000)} labels={map(tickets,t=>t.hour + ":00")} h=180
+      Input "Search plate or code" bind=q
+      Card gap=0
+        Row pad=12 gap=12 border-bottom=#FFE0E0E0
+          Text.strong "Code" w=90
+          Text.strong "Plate" w=100
+          Text.strong "Product" grow
+          Text.strong "Net" w=90
+          Text.strong "Amount" w=100 hide=phone
+        each t in filter(tickets,x=>contains(lower(x.plate),lower(q)) || contains(lower(x.code),lower(q)))
+          Row pad=12 gap=12 border-bottom=#FFF0F0F0 onTap={lastTicket=t; go ticket}
+            Text.mono "{t.code}" w=90
+            Text.mono "{t.plate}" w=100
+            Text "{t.product}" grow
+            Text "{fixed(t.net/1000,2)} t" w=90
+            Text.strong "{money(t.amount,"$",2)}" w=100 hide=phone
+      Row between
+        Text.muted "Close the day when the last truck has left."
+        Button "Close day and print total" onTap={open closeDay}
+  Dialog#closeDay "Close the day" "Prints the day's total sheet"
+    Text "{length(tickets)} tickets, {fixed(sum(tickets,t=>t.net)/1000,2)} t, {money(sum(tickets,t=>t.amount),"$",2)}"
+    Row gap=8 end
+      Button.outline "Not yet" onTap={close}
+      Button "Print total" onTap={emit printDay; toast "Day total printed"; close}

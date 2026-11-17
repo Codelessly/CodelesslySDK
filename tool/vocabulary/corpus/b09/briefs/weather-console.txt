@@ -1,0 +1,3 @@
+App: Rooftop, a home weather station console. Big dial readouts for temperature, humidity and pressure with a small trend arrow each; a wind rose showing direction history as petals; a rain gauge as a filling tube with the day total; a graph with switchable day, week and year; record highs and lows in a table with dates; a sensor battery list; alert lines to set for frost and gusts; a night dimming mode.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

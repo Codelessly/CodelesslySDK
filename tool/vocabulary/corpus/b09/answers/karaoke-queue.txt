@@ -1,0 +1,151 @@
+### Queue
+state tab="queue"
+state queue=[{"id":1,"title":"Dancing Queen","artist":"ABBA","singer":"Maya"},{"id":2,"title":"Mr. Brightside","artist":"The Killers","singer":"Dev"},{"id":3,"title":"Valerie","artist":"Amy Winehouse","singer":"Lena"},{"id":4,"title":"Shallow","artist":"Lady Gaga & Bradley Cooper","singer":"Sam & Priya"}]
+state q=""
+state keyShift=0
+state newName=""
+state pick=null
+App
+  Sidebar
+    Brand "Singalong" icon="mic"
+    NavItem "Queue" icon="queue_music" badge="{length(queue)}" selected={tab=="queue"} onTap={tab="queue"}
+    NavItem "Songbook" icon="library_music" selected={tab=="book"} onTap={go songbook}
+    NavItem "Now singing" icon="graphic_eq" onTap={go now-singing}
+    Spacer grow
+    Text.muted "Room 4, Friday night"
+  Main
+    Nav
+      Heading "Up next" level=1
+      Row gap=8
+        Button.outline "Add yourself" icon="person_add" onTap={open addme}
+        Button "Start singing" icon="play_arrow" onTap={go now-singing}
+    Column pad=24 gap=16
+      Text.muted "Drag a song to move it up or down the queue."
+      Column gap=8 drop=song onDrop={queue=append(without(queue,find(queue,s=>s.id==result.data)),find(queue,s=>s.id==result.data))}
+        each s in queue
+          Card drag=song(s.id) animate=fade stagger=60
+            Row gap=12 middle
+              Icon "drag_indicator"
+              Text.strong "{index+1}"
+              Column grow gap=2
+                Text.strong "{s.title}"
+                Text.muted "{s.artist}"
+              Avatar "{s.singer}" size=32
+              Text "{s.singer}"
+              IconButton "more_vert" tooltip="Options" onTap={pick=s.id; open rowMenu}
+  Menu#rowMenu end
+    MenuItem "Move to top" icon="vertical_align_top" onTap={queue=concat([find(queue,s=>s.id==pick)],without(queue,find(queue,s=>s.id==pick)))}
+    MenuItem "Remove" icon="delete" onTap={queue=removeWhere(queue,s=>s.id==pick); toast "Removed from queue"}
+  Dialog#addme "Add yourself" "Type your name and pick a song from the songbook"
+    Input "Your name" bind=newName
+    Button "Join the queue" onTap={newName!="" ? {queue=append(queue,{"id":length(queue)+10,"title":"Pick a song","artist":"","singer":newName}); newName=""; toast "You are in the queue"; close} : toast "Type your name first"}
+
+### Songbook
+state q=""
+state keyShift=0
+state selected={"title":"Mr. Brightside","artist":"The Killers","key":"Em"}
+state songs=[{"title":"Mr. Brightside","artist":"The Killers","key":"Em"},{"title":"Dancing Queen","artist":"ABBA","key":"A"},{"title":"Valerie","artist":"Amy Winehouse","key":"Gm"},{"title":"Shallow","artist":"Lady Gaga & Bradley Cooper","key":"G"},{"title":"Don't Stop Believin'","artist":"Journey","key":"E"},{"title":"Respect","artist":"Aretha Franklin","key":"C"},{"title":"Rolling in the Deep","artist":"Adele","key":"Cm"}]
+App
+  Sidebar
+    Brand "Singalong" icon="mic"
+    NavItem "Queue" icon="queue_music" onTap={go queue}
+    NavItem "Songbook" icon="library_music" selected={true}
+    NavItem "Now singing" icon="graphic_eq" onTap={go now-singing}
+  Main
+    Nav
+      Heading "Songbook" level=1
+      Input "Search title or artist" bind=q w=260
+    Row gap=0 top
+      Column grow pad=24 gap=8
+        each s in filter(songs,x=>contains(lower(x.title),lower(q))||contains(lower(x.artist),lower(q)))
+          ListTile "{s.title}" subtitle="{s.artist}" onTap={selected=s; keyShift=0}
+            Badge.neutral "{s.key}"
+        if isEmpty(filter(songs,x=>contains(lower(x.title),lower(q))||contains(lower(x.artist),lower(q))))
+          Text.muted "Nothing matches \"{q}\"."
+      Pane w=320 pad=16 gap=12
+        Text.panelTitle "{selected.title}"
+        Text.muted "{selected.artist}"
+        Text.fieldLabel "Key shift preview"
+        Row gap=12 middle
+          IconButton "remove" tooltip="Down a semitone" onTap={keyShift=clamp(keyShift-1,-6,6)}
+          Text.strong "{keyShift>0 ? '+' : ''}{keyShift}"
+          IconButton "add" tooltip="Up a semitone" onTap={keyShift=clamp(keyShift+1,-6,6)}
+        Slider bind=keyShift min=-6 max=6
+        Button.outline "Preview in new key" icon="volume_up" onTap={emit previewKey keyShift}
+        Button "Add to queue" icon="playlist_add" onTap={emit queueSong selected.title; toast "Added to the queue"; go queue}
+
+### Now singing
+state playing=true
+state t=0
+state score=0
+state done=false
+state votes=1
+state needed=4
+state duet=false
+state words=["Is","this","the","real","life?","Is","this","just","fantasy?","Caught","in","a","landslide,","no","escape","from","reality"]
+state target=[60,62,64,64,62,60,59,60,62,64,65,64,62,60,59,57,55]
+state sung=[60,62,63,64,62,61,59,60,63,64,65,63,62,60,58,57,55]
+every 500 when playing && !done onTick={t=t+1; t>=length(words) ? {playing=false; done=true; score=88; open finish} : }
+Page
+  Nav sticky
+    Brand "Singalong" icon="mic"
+    Row gap=4
+      Link "Queue" onTap={go queue}
+      Link "Songbook" onTap={go songbook}
+    Row gap=8
+      Toggle "Duet" bind=duet
+      Button.outline "Skip" icon="skip_next" onTap={votes=votes+1; votes>=needed ? {toast "Skipped"; go queue} : toast "Skip vote {votes} of {needed}"}
+  Section center
+    Column gap=4 center
+      Text.muted "Now singing"
+      Heading "Don't Stop Me Now" level=1
+      Text.muted "Queen, sung by Maya"
+  Section
+    Card gap=16 center animate=fade
+      Stack center
+        Row gap=8 wrap center
+          each w in words
+            Text "{w}" size=32 weight=700 color={index<t ? "#FFE91E63" : "#FF9E9E9E"}
+        Icon "circle" color=#FFE91E63 animate=pulse duration=500
+      Progress {t/length(words)}
+      Row gap=12 center
+        IconButton "replay" tooltip="Restart" onTap={t=0; done=false; playing=true}
+        IconButton "pause" tooltip="Pause" hidden={!playing} onTap={playing=false}
+        IconButton "play_arrow" tooltip="Play" hidden={playing} onTap={playing=true}
+  Section tint
+    Grid cols=2 gap=24
+      Card gap=8
+        Heading "Pitch" level=3
+        Text.muted "Your note against the target"
+        PitchLine target={target} sung={sung} position={t} h=160
+      Card gap=8
+        Heading "Skip vote" level=3
+        Text.strong "{votes} of {needed} votes"
+        Progress {votes/needed}
+        Button.outline "Vote to skip" onTap={votes=votes+1; votes>=needed ? {toast "Skipped"; go queue} : toast "Vote counted"}
+  if duet
+    Section
+      Heading "Duet" level=2
+      Grid cols=2 gap=24
+        Card gap=8
+          Row gap=8 middle
+            Avatar "Maya Reyes" size=40
+            Text.strong "Maya"
+          Text "Is this the real life?"
+          Badge.primary "Singer 1"
+        Card gap=8
+          Row gap=8 middle
+            Avatar "Dev Rao" size=40
+            Text.strong "Dev"
+          Text "Is this just fantasy?"
+          Badge.info "Singer 2"
+  Dialog#finish "Great singing" "Your score"
+    Column center gap=12
+      Stack center middle
+        Ring {score/100}
+        Text.strong "{score}" size=32
+      Text.strong "Encore!"
+      Confetti animate=pop
+      Row gap=8
+        Button.outline "Sing again" onTap={t=0; done=false; playing=true; close}
+        Button "Back to queue" onTap={close; go queue}

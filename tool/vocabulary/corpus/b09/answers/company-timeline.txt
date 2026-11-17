@@ -1,0 +1,128 @@
+### Timeline
+state zoom="decade"
+state layers=["product","people","money"]
+state year=""
+state sel="e2014"
+state playing=false
+state step=0
+state events=[{"id":"e2009","year":2009,"title":"Founded in a garage","kind":"people","photo":"https://images.chronicle.example/garage.jpg","text":"Two engineers, one borrowed workbench and a first prototype of the Brightline sensor.","related":["e2011","e2014"]},{"id":"e2011","year":2011,"title":"First product ships","kind":"product","photo":"https://images.chronicle.example/brightline.jpg","text":"Brightline 1.0 reaches its first two hundred customers.","related":["e2009","e2014"]},{"id":"e2014","year":2014,"title":"Series A, $12M","kind":"money","photo":"https://images.chronicle.example/seriesa.jpg","text":"Led by Northgate Capital, the round funds the first real factory line.","related":["e2011","e2018"]},{"id":"e2018","year":2018,"title":"Berlin office opens","kind":"people","photo":"https://images.chronicle.example/berlin.jpg","text":"Thirty engineers and support staff join in the first year.","related":["e2014","e2022"]},{"id":"e2022","year":2022,"title":"Platform launch","kind":"product","photo":"https://images.chronicle.example/platform.jpg","text":"Brightline Cloud opens the data to partners through a public API.","related":["e2018"]}]
+state headcount=[2,9,24,40,75,120,180,260]
+state gapFrom=2015
+state gapTo=2017
+every 2s when playing onTick={step=(step+1)%length(events); sel=events[step].id}
+App
+  Sidebar
+    Brand "Chronicle" icon="timeline"
+    NavItem "Timeline" icon="timeline" selected={true}
+    NavItem "Play mode" icon="play_circle" onTap={go play}
+    NavItem "Headcount" icon="groups" onTap={scroll headcount}
+    Spacer grow
+    Text.caption "Brightline Inc., 2009 to today"
+  Main
+    Nav
+      Heading "Company timeline" level=1
+      Row gap=8
+        Input "Go to year" "1999 to 2025" type=number bind=year w=140
+        Button.outline "Go" onTap={scroll year}
+        SegmentedButton bind=zoom items=["decade","5 years","year"]
+        Button "Play" icon="play_arrow" onTap={playing=true; go play}
+    Column pad=24 gap=16
+      Row gap=8 wrap
+        Text.fieldLabel "Colour layers"
+        FilterChip "Products" selected={contains(layers,"product")} onTap={layers=contains(layers,"product") ? without(layers,"product") : append(layers,"product")}
+        FilterChip "People" selected={contains(layers,"people")} onTap={layers=contains(layers,"people") ? without(layers,"people") : append(layers,"people")}
+        FilterChip "Money" selected={contains(layers,"money")} onTap={layers=contains(layers,"money") ? without(layers,"money") : append(layers,"money")}
+      Card gap=0
+        Timeline#line from=2009 to=2025 zoom={zoom} draggable center={year != "" ? year : 2014} onZoom={zoom=result}
+          TimelineGap from={gapFrom} to={gapTo} label="Hidden period, 2015 to 2017" onTap={open gap}
+          each e in events
+            if contains(layers,e.kind)
+              TimelineEvent year={e.year} side={index % 2 == 0 ? "above" : "below"} color={e.kind == "product" ? #FF3B82F6 : e.kind == "people" ? #FF16A34A : #FFF59E0B} selected={sel == e.id} onTap={sel=e.id; open detail}
+                Image "{e.photo}" h=80
+                Text.strong "{e.title}"
+                Text.caption "{e.year}"
+        AreaChart#headcount values={headcount} labels=["2009","2011","2013","2015","2017","2019","2021","2023"] h=120 alignTo=line
+        Row between
+          Text.caption "Headcount under the line, aligned to the years"
+          Text.caption "{last(headcount)} people today"
+  Sheet#detail "Event"
+    each e in filter(events,x=>x.id==sel)
+      Image "{e.photo}" h=180
+      Row between
+        Text.heading "{e.title}"
+        Badge.info "{e.year}"
+      Text.body "{e.text}"
+      Text.fieldLabel "Related events"
+      Row gap=8 wrap
+        each r in e.related
+          Chip "{find(events,x=>x.id==r).title}" onTap={sel=r; scroll {r}}
+      Row gap=8
+        Button.outline "Open full story" onTap={go event-story}
+        Button.ghost "Close" onTap={close}
+  Dialog#gap "Hidden period" "2015 to 2017"
+    Text.body "These years are hidden from the line. Show them to see the events in between."
+    Row gap=8
+      Button "Show period" onTap={gapFrom=0; gapTo=0; close}
+      Button.outline "Keep hidden" onTap={close}
+
+### Play mode
+state step=0
+state playing=true
+state events=[{"id":"e2009","year":2009,"title":"Founded in a garage","text":"Two engineers and a borrowed workbench."},{"id":"e2011","year":2011,"title":"First product ships","text":"Brightline 1.0 reaches its first two hundred customers."},{"id":"e2014","year":2014,"title":"Series A, $12M","text":"Northgate Capital funds the first factory line."},{"id":"e2018","year":2018,"title":"Berlin office opens","text":"Thirty people join in the first year."},{"id":"e2022","year":2022,"title":"Platform launch","text":"Brightline Cloud opens an API to partners."}]
+every 3s when playing onTick={step=(step+1)%length(events)}
+App
+  Main
+    Nav
+      Heading "Play mode" level=1
+      Row gap=8
+        IconButton "skip_previous" tooltip="Previous milestone" onTap={step=max(0,step-1)}
+        IconButton "pause" tooltip="Pause" hidden={!playing} onTap={playing=false}
+        IconButton "play_arrow" tooltip="Play" hidden={playing} onTap={playing=true}
+        IconButton "skip_next" tooltip="Next milestone" onTap={step=min(length(events)-1,step+1)}
+        Button.outline "Back to timeline" onTap={go timeline}
+    Column pad=24 gap=24 center
+      Progress {(step+1)/length(events)}
+      Text "Milestone {step+1} of {length(events)}" center
+      Text.pageTitle "{events[step].year}" size=96 animate=scale duration=600
+      Text.heading "{events[step].title}" animate=slide-up duration=500
+      Text.body "{events[step].text}" center maxw=560 animate=fade duration=700 delay=200
+      Timeline from=2009 to=2025 center={events[step].year}
+        each e in events
+          TimelineEvent year={e.year} selected={index == step} onTap={step=index; playing=false}
+      Dots bind=step count={length(events)}
+    Footer
+      Row between
+        Text.muted "Stepping every 3 seconds"
+        Button.ghost "Exit" onTap={go timeline}
+
+### Event story
+App
+  Sidebar
+    Brand "Chronicle" icon="timeline"
+    NavItem "Timeline" icon="timeline" onTap={go timeline}
+    NavItem "Play mode" icon="play_circle" onTap={go play-mode}
+    Spacer grow
+  Main
+    Nav
+      Row gap=8
+        IconButton "arrow_back" tooltip="Back to the timeline" onTap={go timeline}
+        Heading "Series A, $12M" level=1
+      Row gap=8
+        Badge.warning "Money"
+        Badge.neutral "2014"
+    Column pad=24 gap=16 scroll
+      Image "https://images.chronicle.example/seriesa.jpg" h=240 onTap={open zoom}
+      Row gap=24 top
+        Column grow gap=12
+          Text.caption "March 4, 2014"
+          Text.body "Led by Northgate Capital, the round funds the first real factory line. Headcount grew from 24 to 40 within the year, and the team moved out of the garage for good."
+          Text.fieldLabel "Related events"
+          Row gap=8 wrap
+            Chip "First product ships, 2011" onTap={go timeline}
+            Chip "Berlin office opens, 2018" onTap={go timeline}
+          Link "Read the announcement" href="https://chronicle.example/news/series-a"
+        Card w=300 gap=8
+          Text.strong "Headcount that year"
+          Sparkline values=[9,24,40,75]
+          Text.caption "24 to 40 people"
+  Lightbox#zoom "https://images.chronicle.example/seriesa.jpg" "The Series A signing, March 2014"

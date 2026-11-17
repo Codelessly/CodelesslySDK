@@ -1,0 +1,192 @@
+### Plan Editor
+state tool="wall"
+state units="m"
+state snap=true
+state layers=[{"id":"walls","name":"Walls","visible":true,"locked":false},{"id":"electrics","name":"Electrics","visible":true,"locked":false},{"id":"plumbing","name":"Plumbing","visible":false,"locked":false},{"id":"furniture","name":"Furniture","visible":true,"locked":false}]
+state activeLayer="walls"
+state walls=[{"id":"w1","x1":0,"y1":0,"x2":6.4,"y2":0},{"id":"w2","x1":6.4,"y1":0,"x2":6.4,"y2":4.8},{"id":"w3","x1":6.4,"y1":4.8,"x2":0,"y2":4.8},{"id":"w4","x1":0,"y1":4.8,"x2":0,"y2":0}]
+state openings=[{"id":"o1","kind":"door","wall":"w3","at":0.3,"width":0.9},{"id":"o2","kind":"window","wall":"w1","at":0.5,"width":1.4}]
+state rooms=[{"id":"r1","name":"Living room","area":30.7}]
+state furniture=[{"id":"f1","type":"Sofa 3-seat","x":1.2,"y":3.4,"angle":0},{"id":"f2","type":"Dining table","x":4.2,"y":2.2,"angle":90}]
+state dims=[]
+state selected=""
+state typedLength=""
+state zoom=100
+state library=["Sofa 3-seat","Armchair","Dining table","Bed double","Wardrobe","Desk","Bathtub","Toilet","Basin","Kitchen unit"]
+state q=""
+App
+  Sidebar
+    Brand "Plan View" icon="architecture"
+    NavItem "Select" icon="near_me" selected={tool=="select"} onTap={tool="select"}
+    NavItem "Wall" icon="polyline" selected={tool=="wall"} onTap={tool="wall"}
+    NavItem "Room" icon="crop_square" selected={tool=="room"} onTap={tool="room"}
+    NavItem "Dimension" icon="straighten" selected={tool=="dimension"} onTap={tool="dimension"}
+    Divider
+    Text.caption "Doors and windows"
+    Row gap=8
+      Card drag=door(1) gap=4 grow
+        Icon "door_front"
+        Text.small "Door"
+      Card drag=window(1) gap=4 grow
+        Icon "window"
+        Text.small "Window"
+    Divider
+    Text.caption "Furniture"
+    Input "Search furniture" bind=q
+    Column scroll gap=4
+      each item in library
+        if q=="" || contains(lower(item),lower(q))
+          ListTile "{item}" icon="chair" drag=furniture(item)
+    Spacer grow
+    NavItem "Rooms" icon="meeting_room" onTap={go rooms}
+    NavItem "Layers" icon="layers" onTap={open layers}
+  Main
+    Nav
+      Heading "Ground floor, 14 Alder Lane" level=3
+      Row gap=8
+        SegmentedButton items=["m","ft"] bind=units
+        Toggle "Snap" bind=snap
+        IconButton "zoom_out" tooltip="Zoom out" onTap={zoom=max(25,zoom-25)}
+        Text.strong "{zoom}%"
+        IconButton "zoom_in" tooltip="Zoom in" onTap={zoom=min(400,zoom+25)}
+        Button "Export PDF" icon="picture_as_pdf" onTap={open export}
+    Column pad=0 gap=0
+      FloorCanvas#canvas tool={tool} units={units} grid=0.5 snap={snap} zoom={zoom} walls={walls} openings={openings} rooms={rooms} furniture={furniture} dimensions={dims} layers={layers} drop=door,window,furniture bind=selected showLengths=true rotateHandle=true onWallAdd={walls=append(walls,result)} onWallLength={selected=result.id; typedLength=fixed(result.length,2); open wallLength} onOpeningDrop={openings=append(openings,result)} onFurnitureDrop={furniture=append(furniture,result)} onRotate={furniture=updateWhere(furniture,f=>f.id==result.id,f=>with(f,"angle",result.angle))} onDimension={dims=append(dims,result)} onRoomFill={rooms=append(rooms,result); selected=result.id} onSelect={selected=result.id} onDrop={toast "Dropped {result.data}"}
+      Row between pad=12
+        Row gap=8
+          Box w=120 h=4 fill=#FF263238
+          Text.caption "{units=="m" ? "0 to 2 m" : "0 to 6 ft"}"
+        Text.caption "Click to place points. Type a number to set the length, Enter to confirm."
+    Pane w=320 pad=16 gap=12
+      Heading "Properties" level=3
+      if selected==""
+        Text.muted "Select a wall, door, room or item to edit it."
+      if selected!=""
+        Card gap=8
+          Text.strong "{selected}"
+          Input "Length ({units})" type=number bind=typedLength
+          Button "Apply" onTap={walls=updateWhere(walls,w=>w.id==selected,w=>with(w,"length",typedLength)); toast "Length set"}
+          Button.destructive "Delete" onTap={walls=removeWhere(walls,w=>w.id==selected); selected=""}
+      Heading "Rooms" level=3
+      each r in rooms
+        Card gap=8
+          Input "Name" bind=r.name
+          Row between
+            Text.muted "Area"
+            Text.strong "{units=="m" ? fixed(r.area,1) + " m²" : fixed(r.area*10.764,0) + " ft²"}"
+      Heading "Layers" level=3
+      each l in layers
+        Row between
+          Toggle "{l.name}" bind=l.visible
+          IconButton "{l.locked ? "lock" : "lock_open"}" tooltip="Lock" onTap={layers=updateWhere(layers,x=>x.id==l.id,x=>with(x,"locked",!x.locked))}
+  Dialog#wallLength "Set wall length" "Type the exact length"
+    Input "Length ({units})" type=number bind=typedLength
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Set" onTap={walls=updateWhere(walls,w=>w.id==selected,w=>with(w,"length",typedLength)); close}
+  Dialog#layers "Layers" "Show, hide or lock what you draw on"
+    each l in layers
+      Row between
+        Row gap=8
+          Radio "{l.name}" onTap={activeLayer=l.id} selected={activeLayer==l.id}
+        Row gap=8
+          Toggle "Visible" bind=l.visible
+          Toggle "Locked" bind=l.locked
+    Button "Done" onTap={close}
+  Dialog#export "Export as PDF" "Print-ready drawing with scale bar"
+    Select "Paper" items=["A4","A3","A2"] bind=paper
+    Select "Scale" items=["1:50","1:100","1:200"] bind=scale
+    Toggle "Include dimensions" bind=withDims
+    Toggle "Include furniture" bind=withFurniture
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Export" icon="download" onTap={emit exportPdf {"paper":paper,"scale":scale}; toast "PDF exported"; close}
+
+### Rooms
+state units="m"
+state rooms=[{"id":"r1","name":"Living room","area":30.7,"floor":"Oak"},{"id":"r2","name":"Kitchen","area":12.4,"floor":"Tile"},{"id":"r3","name":"Bedroom","area":14.2,"floor":"Carpet"},{"id":"r4","name":"Bathroom","area":5.1,"floor":"Tile"}]
+state sel=""
+App
+  Sidebar
+    Brand "Plan View" icon="architecture"
+    NavItem "Editor" icon="edit" onTap={go plan_editor}
+    NavItem "Rooms" icon="meeting_room" selected={true}
+    NavItem "Electrics" icon="bolt" onTap={go electrics}
+    NavItem "Plumbing" icon="water_drop" onTap={go electrics}
+  Main
+    Nav
+      Heading "Rooms" level=1
+      Row gap=8
+        SegmentedButton items=["m","ft"] bind=units
+        Button "Export PDF" onTap={open exportRooms}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Total area"
+          Text "{units=="m" ? fixed(sum(rooms,r=>r.area),1) + " m²" : fixed(sum(rooms,r=>r.area)*10.764,0) + " ft²"}" size=32 weight=700
+        Card gap=4
+          Text.muted "Rooms"
+          Text "{length(rooms)}" size=32 weight=700
+        Card gap=4
+          Text.muted "Largest"
+          Text "{first(sortByDesc(rooms,r=>r.area)).name}" size=32 weight=700
+      Card gap=8
+        Row pad=8 border-bottom=#FFE0E0E0
+          Text.caption "Name" grow
+          Text.caption "Floor" w=100
+          Text.caption "Area" w=100
+          Text.caption "" w=40
+        each r in rooms
+          Row middle pad=8
+            Input "Name" bind=r.name grow
+            Text.muted "{r.floor}" w=100
+            Text.strong "{units=="m" ? fixed(r.area,1) + " m²" : fixed(r.area*10.764,0) + " ft²"}" w=100
+            IconButton "more_vert" tooltip="More" onTap={sel=r.id; open roomMenu}
+      Row gap=8
+        Button.outline "Add room" icon="add" onTap={rooms=append(rooms,{"id":"r{length(rooms)+1}","name":"New room","area":0,"floor":"Oak"})}
+  Menu#roomMenu end
+    MenuItem "Show in plan" icon="visibility" onTap={emit focusRoom sel; go plan_editor}
+    MenuItem "Duplicate" icon="content_copy" onTap={rooms=append(rooms,with(find(rooms,r=>r.id==sel),"id","r{length(rooms)+1}"))}
+    MenuItem "Delete" icon="delete" onTap={rooms=removeWhere(rooms,r=>r.id==sel)}
+  Dialog#exportRooms "Export room schedule" "A PDF listing every room and its area"
+    Button "Export" onTap={emit exportPdf {"what":"rooms"}; toast "PDF exported"; close}
+
+### Electrics and Plumbing
+state units="m"
+state layer="electrics"
+state symbols=[{"id":"s1","kind":"socket","x":0.6,"y":4.6,"layer":"electrics"},{"id":"s2","kind":"switch","x":1.1,"y":4.8,"layer":"electrics"},{"id":"s3","kind":"light","x":3.2,"y":2.4,"layer":"electrics"},{"id":"s4","kind":"tap","x":5.9,"y":0.4,"layer":"plumbing"},{"id":"s5","kind":"drain","x":5.9,"y":1.2,"layer":"plumbing"}]
+state selected=""
+App
+  Sidebar
+    Brand "Plan View" icon="architecture"
+    NavItem "Editor" icon="edit" onTap={go plan_editor}
+    NavItem "Rooms" icon="meeting_room" onTap={go rooms}
+    NavItem "Electrics" icon="bolt" selected={layer=="electrics"} onTap={layer="electrics"}
+    NavItem "Plumbing" icon="water_drop" selected={layer=="plumbing"} onTap={layer="plumbing"}
+    Divider
+    Text.caption "Symbols"
+    if layer=="electrics"
+      ListTile "Socket" icon="power" drag=symbol(socket)
+      ListTile "Switch" icon="toggle_on" drag=symbol(switch)
+      ListTile "Light" icon="lightbulb" drag=symbol(light)
+      ListTile "Consumer unit" icon="electrical_services" drag=symbol(board)
+    if layer=="plumbing"
+      ListTile "Tap" icon="faucet" drag=symbol(tap)
+      ListTile "Drain" icon="water" drag=symbol(drain)
+      ListTile "Radiator" icon="heat_pump" drag=symbol(radiator)
+  Main
+    Nav
+      Heading "{layer=="electrics" ? "Electrics" : "Plumbing"}" level=1
+      Row gap=8
+        SegmentedButton items=["m","ft"] bind=units
+        Button.outline "Clear layer" onTap={symbols=removeWhere(symbols,s=>s.layer==layer)}
+    Column pad=24 gap=16
+      FloorCanvas tool="symbol" units={units} grid=0.5 dimmed={true} activeLayer={layer} symbols={symbols} drop=symbol bind=selected onSymbolDrop={symbols=append(symbols,with(result,"layer",layer))} onSelect={selected=result.id} onContextMenu={selected=result.id; open symMenu} menu=symMenu
+      Row between
+        Text.caption "{count(symbols,s=>s.layer==layer)} symbols on this layer"
+        Row gap=8
+          Box w=96 h=4 fill=#FF263238
+          Text.caption "{units=="m" ? "2 m" : "6 ft"}"
+  Menu#symMenu
+    MenuItem "Rotate 90 degrees" icon="rotate_right" onTap={symbols=updateWhere(symbols,s=>s.id==selected,s=>with(s,"angle",coalesce(s.angle,0)+90))}
+    MenuItem "Delete" icon="delete" onTap={symbols=removeWhere(symbols,s=>s.id==selected); selected=""}

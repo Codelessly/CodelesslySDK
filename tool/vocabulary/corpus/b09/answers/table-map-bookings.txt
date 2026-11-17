@@ -1,0 +1,163 @@
+### Floor
+state tab="floor"
+state t=19
+state sel=""
+state tables=[{"id":"T1","shape":"round","seats":2,"state":"seated","since":18.5,"guest":"Okafor"},{"id":"T2","shape":"round","seats":2,"state":"free","since":0,"guest":""},{"id":"T3","shape":"square","seats":4,"state":"ordered","since":19,"guest":"Lindqvist"},{"id":"T4","shape":"square","seats":4,"state":"free","since":0,"guest":""},{"id":"T5","shape":"rect","seats":6,"state":"dessert","since":17.5,"guest":"Moreau"},{"id":"T6","shape":"rect","seats":6,"state":"paying","since":17.25,"guest":"Tanaka"},{"id":"T7","shape":"round","seats":8,"state":"seated","since":19.25,"guest":"Alvarez"}]
+state bookings=[{"id":"b1","name":"Patel","party":4,"time":19.5,"phone":"555-0142","placed":false},{"id":"b2","name":"Nguyen","party":6,"time":20,"phone":"555-0177","placed":false},{"id":"b3","name":"Brooks","party":2,"time":20.5,"phone":"555-0119","placed":false},{"id":"b4","name":"Rossi","party":8,"time":21,"phone":"555-0103","placed":false}]
+state waitlist=[{"id":"w1","name":"Kim","party":2,"wait":600,"texted":false},{"id":"w2","name":"Dubois","party":3,"wait":1200,"texted":false}]
+state walkName=""
+state walkParty=2
+state walkWait=15
+state turnMin=75
+every 1s onTick={waitlist=map(waitlist,w=>with(w,"wait",max(0,w.wait-1)))}
+App
+  Sidebar
+    Brand "Covers" icon="restaurant"
+    NavItem "Floor" icon="table_restaurant" selected={tab=="floor"} onTap={tab="floor"}
+    NavItem "Reservations" icon="event_seat" badge="{count(bookings,b=>!b.placed)}" selected={tab=="res"} onTap={go reservations}
+    NavItem "Waitlist" icon="hourglass_top" badge="{length(waitlist)}" onTap={go waitlist}
+    Spacer grow
+    Text.muted "Friday service"
+    Text.strong "Covers tonight: {sum(tables,x=>x.state!="free" ? x.seats : 0) + sum(bookings,b=>b.party)}"
+  Main
+    Nav
+      Heading "Floor plan"
+      Row gap=8
+        Button.outline "Add walk-in" icon="person_add" onTap={open walkin}
+        Button "Tonight's covers" icon="groups" onTap={open covers}
+    Column pad=24 gap=16
+      Card gap=12
+        Row between
+          Text.strong "Time of evening"
+          Text.heading "{t}:00"
+        Slider bind=t min=17 max=23 step=1
+        Row gap=16
+          Badge.neutral "Seated"
+          Badge.info "Ordered"
+          Badge.warning "Dessert"
+          Badge.primary "Paying"
+          Badge.success "Free"
+      Row gap=16 top
+        FloorPlan grow h=420
+          each tb in tables
+            Table#{tb.id} "{tb.id}" shape={tb.shape} seats={tb.seats} state={tb.state} guest={tb.guest} taken={tb.state!="free" && t < tb.since + turnMin/60} drop=booking onDrop={result.data.party > tb.seats ? toast "Party of {result.data.party} does not fit {tb.id} ({tb.seats} seats)" : {tables=updateWhere(tables,x=>x.id==tb.id,x=>with(with(x,"state","seated"),"guest",result.data.name)); bookings=updateWhere(bookings,b=>b.id==result.data.id,b=>with(b,"placed",true)); toast "{result.data.name} seated at {tb.id}"}} onTap={sel=tb.id; open tableMenu}
+        Column w=300 gap=12
+          Card gap=8
+            Text.strong "Bookings, drag onto a table"
+            each b in bookings
+              if !b.placed
+                Card drag=booking(b) gap=4
+                  Row between
+                    Text.strong "{b.name}"
+                    Badge.neutral "{b.party} guests"
+                  Text.muted "{b.time}:00 / {b.phone}"
+                  if b.party > 6
+                    Text.danger "Needs the big round, T7"
+          Card gap=8
+            Text.strong "Turn time"
+            Row gap=8
+              Slider bind=turnMin min=45 max=120 step=5 grow
+              Text.mono "{turnMin} min"
+            Text.muted "Estimated next free table: {first(sortBy(filter(tables,x=>x.state!="free"),x=>x.since)).id}"
+  Menu#tableMenu
+    MenuItem "Seated" icon="chair" onTap={tables=updateWhere(tables,x=>x.id==sel,x=>with(x,"state","seated"))}
+    MenuItem "Ordered" icon="restaurant_menu" onTap={tables=updateWhere(tables,x=>x.id==sel,x=>with(x,"state","ordered"))}
+    MenuItem "Dessert" icon="cake" onTap={tables=updateWhere(tables,x=>x.id==sel,x=>with(x,"state","dessert"))}
+    MenuItem "Paying" icon="receipt" onTap={tables=updateWhere(tables,x=>x.id==sel,x=>with(x,"state","paying"))}
+    MenuItem "Free the table" icon="check_circle" onTap={tables=updateWhere(tables,x=>x.id==sel,x=>with(with(x,"state","free"),"guest","")); toast "{sel} is free"}
+  Dialog#walkin "Add a walk-in" "Name, party and how long they wait"
+    Input "Name" bind=walkName
+    Input "Party size" bind=walkParty type=number
+    Select "Quoted wait" bind=walkWait items=[10,15,20,30,45]
+    if count(tables,x=>x.state=="free" && x.seats>=walkParty)==0
+      Text.danger "No free table seats {walkParty}. They will wait."
+    Button "Add to waitlist" onTap={walkName=="" ? toast "Enter a name" : {waitlist=append(waitlist,{"id":"w{length(waitlist)+1}","name":walkName,"party":walkParty,"wait":walkWait*60,"texted":false}); walkName=""; close; toast "Added, quoted {walkWait} min"}}
+  Dialog#covers "Covers tonight" "Seated plus booked"
+    Row gap=24
+      Column grow
+        Text.muted "Seated now"
+        Text "{sum(tables,x=>x.state!="free" ? x.seats : 0)}" size=48 weight=700
+      Column grow
+        Text.muted "Still to come"
+        Text "{sum(bookings,b=>b.party) + sum(waitlist,w=>w.party)}" size=48 weight=700
+    BarChart values=[24,38,52,61,44,30] labels=["17","18","19","20","21","22"] h=160
+    Button.outline "Close" onTap={close}
+
+### Reservations
+state q=""
+state when="all"
+state bookings=[{"id":"b1","name":"Patel","party":4,"time":19.5,"phone":"555-0142","placed":false},{"id":"b2","name":"Nguyen","party":6,"time":20,"phone":"555-0177","placed":false},{"id":"b3","name":"Brooks","party":2,"time":20.5,"phone":"555-0119","placed":false},{"id":"b4","name":"Rossi","party":8,"time":21,"phone":"555-0103","placed":false}]
+state sel=""
+state newName=""
+state newParty=2
+state newTime="19:30"
+App
+  Sidebar
+    Brand "Covers" icon="restaurant"
+    NavItem "Floor" icon="table_restaurant" onTap={go floor}
+    NavItem "Reservations" icon="event_seat" selected={true}
+    NavItem "Waitlist" icon="hourglass_top" onTap={go waitlist}
+  Main
+    Nav
+      Heading "Reservations"
+      Row gap=8
+        Input "Search guests" bind=q w=220
+        Button "New booking" icon="add" onTap={open newbooking}
+    Column pad=24 gap=16
+      Row gap=8
+        FilterChip "All" selected={when=="all"} onTap={when="all"}
+        FilterChip "Early" selected={when=="early"} onTap={when="early"}
+        FilterChip "Late" selected={when=="late"} onTap={when="late"}
+      Card gap=0
+        Row gap=8 pad=8 border-bottom=#FFDDDDDD
+          Text.muted "Guest" w=140
+          Text.muted "Party" w=70
+          Text.muted "Time" w=80
+          Text.muted "Phone" grow
+          Text.muted "Status" w=100
+        each b in filter(bookings,x=>contains(lower(x.name),lower(q)) && (when=="all" || (when=="early" ? x.time<20.5 : x.time>=20.5)))
+          Row gap=8 pad=8 middle
+            Text.strong "{b.name}" w=140
+            Text "{b.party}" w=70
+            Text "{b.time}:00" w=80
+            Text.muted "{b.phone}" grow
+            Badge.success "Seated" w=100 visible={b.placed}
+            Badge.neutral "Booked" w=100 visible={!b.placed}
+            IconButton "more_vert" tooltip="Actions" onTap={sel=b.id; open rowMenu}
+  Menu#rowMenu end
+    MenuItem "Text the guest" icon="sms" onTap={toast "Text sent to {find(bookings,b=>b.id==sel).name}: your table is ready"}
+    MenuItem "Cancel booking" icon="delete" onTap={bookings=removeWhere(bookings,b=>b.id==sel); toast "Cancelled"}
+  Dialog#newbooking "New booking"
+    Input "Guest name" bind=newName
+    Input "Party size" bind=newParty type=number
+    TimePicker "Time" bind=newTime
+    Button "Save booking" onTap={newName=="" ? toast "Enter a name" : {bookings=append(bookings,{"id":"b{length(bookings)+1}","name":newName,"party":newParty,"time":19,"phone":"","placed":false}); newName=""; close; toast "Booked"}}
+
+### Waitlist
+state waitlist=[{"id":"w1","name":"Kim","party":2,"wait":600,"texted":false},{"id":"w2","name":"Dubois","party":3,"wait":1200,"texted":false},{"id":"w3","name":"Haddad","party":5,"wait":1800,"texted":true}]
+every 1s onTick={waitlist=map(waitlist,w=>with(w,"wait",max(0,w.wait-1)))}
+App
+  Sidebar
+    Brand "Covers" icon="restaurant"
+    NavItem "Floor" icon="table_restaurant" onTap={go floor}
+    NavItem "Reservations" icon="event_seat" onTap={go reservations}
+    NavItem "Waitlist" icon="hourglass_top" badge="{length(waitlist)}" selected={true}
+  Main
+    Nav
+      Heading "Waitlist"
+      Text.muted "{sum(waitlist,w=>w.party)} guests waiting"
+    Column pad=24 gap=12
+      if isEmpty(waitlist)
+        Card
+          Text.muted "Nobody is waiting."
+      each w in waitlist
+        Card
+          Row between middle
+            Column gap=4
+              Text.strong "{w.name}, party of {w.party}"
+              Text.muted "Quoted wait left: {duration(w.wait)}"
+              Progress {1 - w.wait/1800}
+            Row gap=8
+              Button.outline "Text a guest" icon="sms" disabled={w.texted} onTap={waitlist=updateWhere(waitlist,x=>x.id==w.id,x=>with(x,"texted",true)); toast "Texted {w.name}: your table is almost ready"}
+              Button "Seat now" icon="chair" onTap={waitlist=removeWhere(waitlist,x=>x.id==w.id); emit seat w.id; toast "{w.name} seated"}
+              IconButton "close" tooltip="Remove" onTap={waitlist=removeWhere(waitlist,x=>x.id==w.id)}

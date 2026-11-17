@@ -1,0 +1,254 @@
+### Log a catch
+state tab="log"
+state species="Largemouth bass"
+state length=16.5
+state weight=2.8
+state bait="Green pumpkin worm"
+state depth=8
+state released=true
+state photo=""
+state spot="Birch Hollow Cove"
+state waterTemp=61
+state notes=""
+state catches=[{"id":1,"species":"Largemouth bass","length":16.5,"weight":2.8,"spot":"Birch Hollow Cove","date":"2026-10-04","released":true},{"id":2,"species":"Rainbow trout","length":14,"weight":1.4,"spot":"Silver Creek","date":"2026-09-27","released":false}]
+state speciesList=[{"name":"Largemouth bass","url":"https://images.example.com/fish/largemouth-bass.jpg","min":14},{"name":"Rainbow trout","url":"https://images.example.com/fish/rainbow-trout.jpg","min":9},{"name":"Bluegill","url":"https://images.example.com/fish/bluegill.jpg","min":6},{"name":"Walleye","url":"https://images.example.com/fish/walleye.jpg","min":15},{"name":"Channel catfish","url":"https://images.example.com/fish/channel-catfish.jpg","min":12},{"name":"Northern pike","url":"https://images.example.com/fish/northern-pike.jpg","min":24}]
+App
+  Sidebar
+    Brand "Tight Lines" icon="phishing"
+    NavItem "Log a catch" icon="add_circle" selected={tab=="log"} onTap={go log-a-catch}
+    NavItem "Spots and bite times" icon="map" selected={tab=="spots"} onTap={go spots-and-bite-times}
+    NavItem "Records and licence" icon="emoji_events" selected={tab=="records"} onTap={go records-and-licence}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Whitfield" size=36
+      Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "Log a catch" level=1
+      Row gap=8
+        Button.outline "Size limits" icon="gavel" onTap={open rules}
+        Button "Save catch" onTap={catches=append(catches,{"id":length(catches)+1,"species":species,"length":length,"weight":weight,"spot":spot,"date":formatDate(today(),"yyyy-MM-dd"),"released":released}); toast "Catch saved: {species}, {length} in"; emit catchSaved}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Text.panelTitle "What did you catch?"
+        Grid cols=3 gap=12
+          each s in speciesList
+            Card gap=8 selected={species==s.name} onTap={species=s.name} animate=fade stagger=60
+              Image "{s.url}" h=96 radius=8
+              Row between
+                Text.strong "{s.name}"
+                if species==s.name
+                  Icon "check_circle"
+              Text.caption "Min {s.min} in"
+      Row gap=16 top
+        Card grow gap=12
+          Text.panelTitle "Size"
+          Stepper "Length (in)" bind=length min=0 max=60 step=0.5
+          Stepper "Weight (lb)" bind=weight min=0 max=40 step=0.1
+          if length < find(speciesList, x=>x.name==species).min
+            Badge.warning "Under the {find(speciesList, x=>x.name==species).min} in limit: release it"
+          Text.muted "Longest keeper in your log: {fixed(max(length, 0),1)} in"
+        Card grow gap=12
+          Text.panelTitle "Photo"
+          Stack
+            Image "{photo}" h=200 radius=8 fill=#FFE6EEF2
+            RulerOverlay bind=length unit="in" h=200
+          Row gap=8
+            Button.outline "Take photo" icon="photo_camera" onTap={photo=capture camera}
+            Button.ghost "Choose from library" icon="photo_library" onTap={photo=pick image}
+      Card gap=12
+        Text.panelTitle "How you got it"
+        Row gap=16 top
+          Select "Bait or lure" bind=bait items=["Green pumpkin worm","Nightcrawler","Rapala minnow","Spinnerbait","PowerBait","Live shiner"] grow
+          Column grow gap=4
+            Text.fieldLabel "Depth: {depth} ft"
+            Slider bind=depth min=1 max=40
+        SegmentedButton bind=released items=["Release","Keep"] onChange={released=(result=="Release")}
+        Input "Notes" "Cloud cover, retrieve speed, structure" bind=notes multiline
+      Card gap=12
+        Row between
+          Text.panelTitle "Spot"
+          Button.tertiary "Change on map" icon="place" onTap={go spots-and-bite-times}
+        Row gap=16 middle
+          IconTile "place"
+          Column grow gap=2
+            Text.strong "{spot}"
+            Text.muted "Water temperature at the time: {waterTemp} F"
+          Badge.info "Pin saved"
+      Card gap=8
+        Text.panelTitle "Recent catches"
+        each c in reverse(catches)
+          ListTile "{c.species}, {c.length} in" subtitle="{c.spot} on {formatDate(c.date,"MMM d")}" leading="set_meal" trailing={c.released ? "Released" : "Kept"} onTap={emit openCatch c.id}
+  Dialog#rules "Size and bag limits" "Silver Creek and Birch Hollow, 2026 season"
+    Column gap=8
+      each s in speciesList
+        Row between
+          Text.strong "{s.name}"
+          Text "Minimum {s.min} in"
+      Text.caption "Fish under the limit must go back at once."
+    Button "Got it" onTap={close}
+
+### Spots and bite times
+state tab="spots"
+state selected="Birch Hollow Cove"
+state naming=""
+state pinTemp=61
+state spots=[{"name":"Birch Hollow Cove","lat":44.3187,"lng":-85.6021,"temp":61,"catches":7},{"name":"Silver Creek Bridge","lat":44.2954,"lng":-85.5733,"temp":54,"catches":3},{"name":"North Dock","lat":44.3342,"lng":-85.6310,"temp":63,"catches":11}]
+state newPin={"lat":0,"lng":0}
+state tides=[{"time":"05:42","type":"High","ft":4.1},{"time":"11:58","type":"Low","ft":0.6},{"time":"18:07","type":"High","ft":3.8}]
+state bites=[{"start":"05:15","end":"06:45","score":0.9,"why":"Dawn with a rising tide"},{"start":"11:30","end":"12:30","score":0.55,"why":"Moon overhead"},{"start":"17:40","end":"19:10","score":0.8,"why":"Dusk at the top of the tide"}]
+App
+  Sidebar
+    Brand "Tight Lines" icon="phishing"
+    NavItem "Log a catch" icon="add_circle" selected={tab=="log"} onTap={go log-a-catch}
+    NavItem "Spots and bite times" icon="map" selected={tab=="spots"} onTap={go spots-and-bite-times}
+    NavItem "Records and licence" icon="emoji_events" selected={tab=="records"} onTap={go records-and-licence}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Whitfield" size=36
+      Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "Spots and bite times" level=1
+      Row gap=8
+        Button.outline "Drop a pin" icon="add_location" onTap={naming=""; open newSpot}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=12
+          Text.panelTitle "Your spots"
+          MapView h=360 center=[44.3187,-85.6021] zoom=12 onTap={newPin=result; pinTemp=62; open newSpot}
+            each sp in spots
+              Pin lat={sp.lat} lng={sp.lng} label="{sp.name}" selected={selected==sp.name} onTap={selected=sp.name}
+        Column w=320 gap=12
+          Card gap=8
+            Text.panelTitle "{selected}"
+            Text.muted "Water temperature when pinned: {find(spots, x=>x.name==selected).temp} F"
+            Text.muted "{find(spots, x=>x.name==selected).catches} catches logged here"
+            Button "Log a catch here" icon="add" onTap={go log-a-catch}
+          Card gap=8
+            Text.panelTitle "Conditions today"
+            Row gap=12 middle
+              MoonPhase date={today()} size=48
+              Column gap=2
+                Text.strong "Waxing gibbous"
+                Text.caption "82 percent lit, moonrise 15:24"
+            Row between
+              Text.muted "Air"
+              Text.strong "58 F"
+            Row between
+              Text.muted "Pressure"
+              Text.strong "30.12 inHg, falling"
+      Card gap=12
+        Row between
+          Text.panelTitle "Tide and moon"
+          Text.caption "Tides for Birch Hollow Cove"
+        TideChart values=[1.2,2.4,3.6,4.1,3.2,1.8,0.6,1.4,2.7,3.5,3.8,2.9,1.7] labels=["03","05","07","09","11","13","15","17","19","21","23","01","03"] h=160 now={formatDate(today(),"HH:mm")}
+        Row gap=12 scroll
+          each t in tides
+            Card gap=2
+              Text.caption "{t.type} tide"
+              Text.strong "{t.time}"
+              Text.muted "{t.ft} ft"
+      Card gap=12
+        Text.panelTitle "Predicted bite times"
+        each b in bites
+          Row gap=12 middle
+            Column w=120
+              Text.strong "{b.start} to {b.end}"
+            Progress {b.score} grow
+            Text.muted "{b.why}" w=200 hide=phone
+            IconButton "notifications" tooltip="Remind me at {b.start}" onTap={toast "Reminder set for {b.start}"}
+  Dialog#newSpot "Save this spot" "A pin with today's water temperature"
+    Input "Spot name" bind=naming
+    Row gap=8 middle
+      Icon "thermostat"
+      Text "Water temperature"
+      Spacer grow
+      Stepper bind=pinTemp min=32 max=90 unit="F"
+    Row gap=8
+      Button.outline "Cancel" onTap={close}
+      Button "Save pin" onTap={naming!="" ? {spots=append(spots,{"name":naming,"lat":newPin.lat,"lng":newPin.lng,"temp":pinTemp,"catches":0}); selected=naming; toast "Pinned {naming}"; close} : toast "Give the spot a name"}
+
+### Records and licence
+state tab="records"
+state range="Season 2026"
+state records=[{"species":"Largemouth bass","length":21.5,"weight":5.9,"spot":"North Dock","date":"2026-06-14"},{"species":"Rainbow trout","length":18,"weight":2.7,"spot":"Silver Creek Bridge","date":"2026-05-03"},{"species":"Walleye","length":24,"weight":4.8,"spot":"Birch Hollow Cove","date":"2026-09-12"},{"species":"Bluegill","length":9.5,"weight":0.9,"spot":"North Dock","date":"2026-07-21"}]
+state monthly=[0,2,6,11,18,24,20,15,9,4,0,0]
+state licence={"holder":"Dana Whitfield","number":"FW-2026-884217","type":"Annual freshwater","expires":"2026-12-31","daysLeft":44}
+Page
+  Nav sticky
+    Brand "Tight Lines" icon="phishing"
+    Row gap=4
+      Link "Log a catch" onTap={go log-a-catch}
+      Link "Spots and bite times" onTap={go spots-and-bite-times}
+      Link "Records and licence" onTap={go records-and-licence}
+    Button.outline "Size limits" icon="gavel" onTap={open limits}
+  Section
+    Column gap=16
+      Heading "Records and licence" level=1
+      Text.muted "Your best fish, your season so far and the paper you need to keep fishing."
+  Section tint
+    Row gap=24 top
+      Column grow gap=12
+        Heading "Personal bests" level=3
+        each r in sortByDesc(records, x=>x.weight)
+          Card gap=8 animate=fade stagger=80
+            Row between middle
+              Row gap=12 middle
+                IconTile "emoji_events"
+                Column gap=2
+                  Text.strong "{r.species}"
+                  Text.muted "{r.spot}, {formatDate(r.date,"MMM d")}"
+              Column gap=2 end
+                Text.strong "{r.weight} lb"
+                Text.caption "{r.length} in"
+      Card w=320 gap=12 sticky
+        Row between middle
+          Heading "Fishing licence" level=3
+          Badge.success "{licence.daysLeft} days left"
+        Text.muted "{licence.type}"
+        Text.strong "{licence.holder}"
+        Text.mono "{licence.number}"
+        Row between
+          Text.muted "Expires"
+          Text.strong "{formatDate(licence.expires,"MMM d, yyyy")}"
+        Progress {licence.daysLeft/365}
+        Button "Renew licence" icon="autorenew" onTap={link https://www.example.gov/wildlife/licences/renew}
+        Button.outline "Add to wallet" icon="wallet" onTap={emit addLicenceToWallet; toast "Licence added"}
+  Section
+    Column gap=16
+      Row between middle
+        Heading "Season total" level=3
+        SegmentedButton bind=range items=["Season 2026","Season 2025"]
+      BarChart values={monthly} labels=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"] h=240
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.caption "Fish landed"
+          Text.strong "{sum(monthly, m=>m)}" size=32
+        Card gap=4
+          Text.caption "Best month"
+          Text.strong "Jun" size=32
+        Card gap=4
+          Text.caption "Released"
+          Text.strong "81 percent" size=32
+  Footer
+    Row between
+      Text.strong "Tight Lines"
+      Text.muted "Tight lines and calm water"
+  Sheet#limits "Size limit rules"
+    Column gap=12
+      Text.muted "Statewide limits, effective April 1, 2026."
+      Row between
+        Text.strong "Largemouth bass"
+        Text "14 in minimum, 5 a day"
+      Row between
+        Text.strong "Rainbow trout"
+        Text "9 in minimum, 5 a day"
+      Row between
+        Text.strong "Walleye"
+        Text "15 in minimum, 4 a day"
+      Row between
+        Text.strong "Northern pike"
+        Text "24 in minimum, 2 a day"
+      Button.outline "Read the full regulations" onTap={link https://www.example.gov/wildlife/regulations}
+      Button "Close" onTap={close}

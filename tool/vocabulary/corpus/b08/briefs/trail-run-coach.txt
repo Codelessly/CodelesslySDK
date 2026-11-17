@@ -1,0 +1,3 @@
+App: Fartlek, a running coach. A plan for twelve weeks as a calendar with workouts as coloured blocks and a long run marked, a block moved to another day by dragging; a workout detail drawn as a profile of bars for warm-up, intervals and cool-down with target paces; a live screen with audio cues shown as banners and a lap button; weekly load as a stacked bar chart; a readiness score from sleep and rest; a race countdown.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

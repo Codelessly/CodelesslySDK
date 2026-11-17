@@ -1,0 +1,217 @@
+### Claim form
+state screen="claim"
+state tag="BA 482913"
+state shape="roller"
+state shapes=[{"id":"hardshell","name":"Hard shell"},{"id":"soft","name":"Soft case"},{"id":"roller","name":"Roller"},{"id":"duffel","name":"Duffel"},{"id":"backpack","name":"Backpack"},{"id":"garment","name":"Garment bag"}]
+state colors=["#FF1F2937","#FFB91C1C","#FF1D4ED8","#FF15803D","#FF9CA3AF","#FFF59E0B"]
+state colorNames=["Black","Red","Blue","Green","Grey","Amber"]
+state color=0
+state size="Medium"
+state marks=["Luggage strap","Yellow ribbon"]
+state newMark=""
+state items=[{"name":"Rain jacket","price":120,"age":1},{"name":"Laptop charger","price":45,"age":3}]
+state flight="BA 284"
+App
+  Sidebar
+    Brand "Baggage Trail" icon="luggage"
+    NavItem "Claim form" icon="assignment" selected={screen=="claim"} onTap={go claim-form}
+    NavItem "Trace" icon="route" badge="1" selected={screen=="trace"} onTap={go trace}
+    NavItem "Delivery" icon="local_shipping" onTap={go delivery}
+    NavItem "Messages" icon="chat" badge="2" onTap={go messages}
+    Spacer grow
+    Text.muted "Claim LHR-77421"
+  Main
+    Nav
+      Heading "Report a delayed bag" level=1
+      Row gap=8
+        Button.outline "Save draft" onTap={toast "Draft saved"}
+        Button "Submit claim" onTap={tag=="" ? toast "Enter the tag number" : {emit submitClaim {"tag":tag,"shape":shape,"color":color,"size":size,"marks":marks}; toast "Claim submitted"; go trace}}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Text.sectionTitle "Bag tag"
+        Row gap=8
+          Input "Tag number" "10 digits on your baggage receipt" bind=tag grow
+          Button.outline "Scan tag" onTap={emit scanTag}
+        Text.caption "Flight {flight}, London Heathrow to Denver"
+      Card gap=12
+        Text.sectionTitle "Bag shape"
+        Grid cols=6 gap=8
+          each s in shapes
+            Card gap=4 center selected={shape==s.id} onTap={shape=s.id}
+              Image "https://baggagetrail.example/shapes/{s.id}.svg" h=64
+              Text.caption "{s.name}"
+      Card gap=12
+        Text.sectionTitle "Colour"
+        Row gap=12
+          each c in colors
+            ColorSwatch "{c}" selected={color==index} onTap={color=index}
+        Text.muted "{colorNames[color]}"
+        Text.sectionTitle "Size"
+        SegmentedButton bind=size items=["Small","Medium","Large"]
+      Card gap=12
+        Text.sectionTitle "Distinguishing marks"
+        Row gap=8
+          each m in marks
+            Chip "{m}" onDelete={marks=without(marks,m)}
+        Row gap=8
+          Input "Add a mark" "scratch, sticker, name tag" bind=newMark grow
+          Button.outline "Add" onTap={newMark!="" ? {marks=append(marks,trim(newMark)); newMark=""} : toast "Type a mark first"}
+      Card gap=12
+        Text.sectionTitle "Items bought because of the delay"
+        each it in items
+          Row gap=8
+            Input "Item" bind=it.name grow
+            Input "Price" bind=it.price type=number w=100
+            IconButton "delete" tooltip="Remove item" onTap={items=removeWhere(items,x=>x.name==it.name)}
+        Button.ghost "Add item" icon="add" onTap={items=append(items,{"name":"","price":0,"age":0})}
+        Row between
+          Text.muted "Estimated compensation"
+          Text.strong "{money(sum(items,x=>x.price),"$",2)}"
+  Dialog#scan "Scan your tag"
+    Camera mode="barcode" h=240 onScan={tag=result; close}
+    Button.outline "Cancel" onTap={close}
+
+### Trace
+state tag="BA 482913"
+state status="in transit"
+state scans=[{"airport":"LHR","city":"London","at":"2026-11-14 09:12","note":"Checked in","done":true},{"airport":"LHR","city":"London","at":"2026-11-14 10:40","note":"Missed connection, held at transfer","done":true},{"airport":"FRA","city":"Frankfurt","at":"2026-11-15 06:05","note":"Rerouted","done":true},{"airport":"ORD","city":"Chicago","at":"2026-11-16 14:30","note":"Customs hold released","done":true},{"airport":"DEN","city":"Denver","at":"2026-11-17 08:00","note":"Expected","done":false}]
+state filter="all"
+App
+  Sidebar
+    Brand "Baggage Trail" icon="luggage"
+    NavItem "Claim form" icon="assignment" onTap={go claim-form}
+    NavItem "Trace" icon="route" badge="1" selected={true} onTap={go trace}
+    NavItem "Delivery" icon="local_shipping" onTap={go delivery}
+    NavItem "Messages" icon="chat" badge="2" onTap={go messages}
+    Spacer grow
+    Text.muted "Claim LHR-77421"
+  Main
+    Nav
+      Heading "Where is my bag" level=1
+      Row gap=8
+        Button.outline "Refresh" icon="refresh" onTap={emit refreshScans; toast "Checking scanners"}
+        Button.outline "Contact agent" onTap={go messages}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Row between
+          Column gap=4
+            Text.caption "Tag {tag}"
+            Text.heading "Last scanned at Chicago O'Hare"
+          Badge.info "{upper(status)}"
+        StatusStepper steps=["Reported","Located","In transit","Ready to deliver","Delivered"] current={status=="in transit" ? 2 : 3}
+        Progress 0.7
+        Text.muted "Estimated arrival in Denver: Tue 17 Nov, 08:00"
+      Card gap=12
+        Row between
+          Text.sectionTitle "Route"
+          SegmentedButton bind=filter items=["all","done","upcoming"]
+        RouteMap stops={map(scans,s=>s.airport)} current=3 h=160
+      Card gap=8
+        Text.sectionTitle "Scan history"
+        Timeline
+          each s in scans
+            TimelineItem "{s.airport}, {s.city}" "{s.note}" time="{s.at}" done={s.done} hidden={(filter=="done" && !s.done) || (filter=="upcoming" && s.done)}
+      Card gap=8
+        Text.sectionTitle "What happens next"
+        Text.muted "When the bag is scanned at Denver it is marked ready to deliver and you can pick a delivery window."
+        Button "Arrange delivery" onTap={go delivery}
+
+### Delivery and compensation
+state addr="2210 Larimer St, Apt 5B"
+state city="Denver"
+state zip="80205"
+state notes=""
+state day="Tue 17 Nov"
+state slot="12:00 to 14:00"
+state slots=["08:00 to 10:00","10:00 to 12:00","12:00 to 14:00","14:00 to 16:00","16:00 to 18:00"]
+state days=["Tue 17 Nov","Wed 18 Nov","Thu 19 Nov"]
+state items=[{"name":"Rain jacket","price":120,"age":1,"cat":"Clothing"},{"name":"Laptop charger","price":45,"age":3,"cat":"Electronics"}]
+state receipts=0
+state ack=false
+App
+  Sidebar
+    Brand "Baggage Trail" icon="luggage"
+    NavItem "Claim form" icon="assignment" onTap={go claim-form}
+    NavItem "Trace" icon="route" onTap={go trace}
+    NavItem "Delivery" icon="local_shipping" selected={true} onTap={go delivery}
+    NavItem "Messages" icon="chat" badge="2" onTap={go messages}
+    Spacer grow
+    Text.muted "Claim LHR-77421"
+  Main
+    Nav
+      Heading "Delivery and compensation" level=1
+      Button.ghost "Help" icon="help" onTap={open help}
+    Column pad=24 gap=16 scroll
+      Grid cols=2 gap=16
+        Card gap=12
+          Text.sectionTitle "Delivery address"
+          Input "Street" bind=addr
+          Row gap=8
+            Input "City" bind=city grow
+            Input "ZIP" bind=zip w=100
+          Input "Notes for the courier" "gate code, concierge" bind=notes multiline
+        Card gap=12
+          Text.sectionTitle "Delivery window"
+          DatePicker "Date" bind=day items={days}
+          Wrap gap=8
+            each t in slots
+              ChoiceChip "{t}" selected={slot==t} onTap={slot=t}
+          Text.muted "Courier arrives {day}, {slot}"
+          Toggle "Text me 30 minutes before" bind=sms
+      Card gap=12
+        Text.sectionTitle "Compensation estimate"
+        each it in items
+          ListTile "{it.name}" subtitle="{it.cat}, bought {it.age} days into the delay" trailing="{money(it.price,"$",2)}"
+        Divider
+        Row between
+          Text.muted "Items total"
+          Text "{money(sum(items,x=>x.price),"$",2)}"
+        Row between
+          Text.muted "Covered, up to daily limit of $100 for 5 days"
+          Text.strong "{money(min(sum(items,x=>x.price),500),"$",2)}"
+        Row gap=8
+          Button.outline "Attach receipts" icon="upload_file" onTap={receipts=receipts+1; toast "Receipt added"}
+          Text.muted "{receipts} attached"
+      Card gap=12
+        Checkbox "My address is correct and someone will sign for the bag" bind=ack
+        Button "Confirm delivery" onTap={ack ? {emit confirmDelivery {"addr":addr,"day":day,"slot":slot}; toast "Delivery booked"; open booked} : toast "Please confirm the address"}
+  Dialog#booked "Delivery booked" "Your bag will be at {addr} on {day}, {slot}"
+    Button "Track my bag" onTap={close; go trace}
+  Sheet#help "Compensation rules"
+    Text.muted "Essentials bought after 24 hours are covered with receipts. Keep every receipt."
+    Button.outline "Close" onTap={close}
+
+### Messages
+state msg=""
+state log=[{"from":"agent","name":"Priya N.","text":"Hi, I have your bag located in Chicago. It clears customs this afternoon.","at":"09:41"},{"from":"me","name":"You","text":"Great, can it be delivered tomorrow morning?","at":"09:43"},{"from":"agent","name":"Priya N.","text":"Yes, pick a window under Delivery and I will confirm it.","at":"09:44"}]
+App
+  Sidebar
+    Brand "Baggage Trail" icon="luggage"
+    NavItem "Claim form" icon="assignment" onTap={go claim-form}
+    NavItem "Trace" icon="route" onTap={go trace}
+    NavItem "Delivery" icon="local_shipping" onTap={go delivery}
+    NavItem "Messages" icon="chat" badge="2" selected={true} onTap={go messages}
+    Spacer grow
+    Text.muted "Claim LHR-77421"
+  Main
+    Nav
+      Row gap=12
+        Avatar "Priya N." size=40
+        Column gap=2
+          Text.strong "Priya N., baggage agent"
+          Text.caption "Heathrow baggage services, online"
+      IconButton "more_vert" tooltip="More" onTap={open more}
+    Column pad=24 gap=12 scroll
+      ChatLog
+        each m in log
+          ChatBubble "{m.text}" from={m.from} name="{m.name}" time="{m.at}"
+      TypingIndicator hidden={msg==""}
+    Footer
+      Row gap=8 pad=12
+        IconButton "attach_file" tooltip="Attach photo" onTap={emit attach}
+        Input "Message" "Write to your agent" bind=msg grow onSubmit={msg!="" ? {log=append(log,{"from":"me","name":"You","text":msg,"at":formatDate(today(),"HH:mm")}); emit sendMessage msg; msg=""} : toast "Type a message"}
+        Button "Send" icon="send" onTap={msg!="" ? {log=append(log,{"from":"me","name":"You","text":msg,"at":formatDate(today(),"HH:mm")}); emit sendMessage msg; msg=""} : toast "Type a message"}
+  Menu#more end
+    MenuItem "Email transcript" icon="mail" onTap={emit emailTranscript; toast "Transcript sent"}
+    MenuItem "Call the agent" icon="call" onTap={link tel:+442070000000}
+    MenuItem "Clear chat" icon="delete" onTap={log=[]}

@@ -1,0 +1,208 @@
+### Outdoor panel
+state mode="idle"
+state night=false
+state flats=[{"no":"1A","name":"Okafor"},{"no":"1B","name":"Lindqvist"},{"no":"2A","name":"Haddad"},{"no":"2B","name":"Moreau"},{"no":"3A","name":"Tanaka"},{"no":"3B","name":"Whitcombe"},{"no":"4A","name":"Petrov"},{"no":"4B","name":"Alvarez"}]
+state at=0
+state code=""
+state ringLeft=30
+state trades=false
+state tradesLeft=0
+state codeError=""
+every 1s when mode=="calling"
+  onTick={ringLeft=ringLeft-1; ringLeft<=0 ? {mode="noanswer"; emit callTimeout} : }
+every 1s when trades
+  onTick={tradesLeft=tradesLeft-1; tradesLeft<=0 ? {trades=false; toast "Trades button closed"} : }
+App
+  Main
+    Nav
+      Brand "Buzz In" icon="doorbell"
+      Row gap=8
+        if trades
+          Badge.warning "Trades open {duration(tradesLeft)}"
+        Badge.neutral "{night ? 'Night mode' : 'Day mode'}"
+        IconButton "dark_mode" tooltip="Night mode" onTap={night=!night; emit nightMode night}
+    Column pad=24 gap=16 center maxw=520
+      if mode=="idle"
+        Text.heading1 "Harlow Court" center
+        Text.muted "Choose a flat, then press Call" center
+        Card gap=12
+          Row between middle
+            IconButton "keyboard_arrow_up" tooltip="Previous flat" onTap={at=max(0,at-1)}
+            Column center gap=4 grow
+              Text.caption "Flat {flats[at].no}"
+              Text.heading1 "{flats[at].name}" animate=fade
+            IconButton "keyboard_arrow_down" tooltip="Next flat" onTap={at=min(length(flats)-1,at+1)}
+          Text.caption "{at+1} of {length(flats)}" center
+          Button "Call" icon="call" size=large onTap={mode="calling"; ringLeft=30; emit call flats[at].no}
+        Divider
+        Text.strong "Have a code?" center
+        Input "Door code" "Digits only" bind=code type=number
+        if codeError!=""
+          Text.danger "{codeError}"
+        Row gap=8 center
+          Button.outline "Enter code" onTap={code==todayCode || code=="4821" ? {mode="open"; code=""; codeError=""; emit unlock} : {codeError="That code is not valid today"; code=""}}
+          Button.secondary "Trades" icon="construction" onTap={trades=true; tradesLeft=3600; toast "Trades button open for 1 hour"}
+      if mode=="calling"
+        Card gap=16
+          Column center gap=12
+            Stack center middle h=140
+              Icon "notifications_active" size=56 animate=pulse
+            Text.heading1 "Calling {flats[at].name}" center animate=pulse
+            Text.muted "Flat {flats[at].no} - ringing" center
+            Progress {ringLeft/30}
+            Text.caption "Gives up in {ringLeft} s" center
+            Button.destructive "Cancel" onTap={mode="idle"; emit cancel}
+      if mode=="noanswer"
+        Card gap=12
+          Column center gap=12
+            Icon "phone_missed" size=48
+            Text.heading2 "No answer from {flats[at].name}" center
+            Text.muted "A photo of you has been left for the resident." center
+            Button "Try again" onTap={mode="calling"; ringLeft=30; emit call flats[at].no}
+            Button.ghost "Back" onTap={mode="idle"}
+      if mode=="open"
+        Card gap=12
+          Column center gap=12
+            Icon "lock_open" size=56 animate=scale
+            Text.heading1 "Door open" center
+            Text.muted "Please come in" center
+            Button.outline "Done" onTap={mode="idle"}
+
+### Resident screen
+state visitor={"who":"Visitor at the main door","time":"14:32","photo":"https://images.buzzin.example/visits/now.jpg"}
+state talking=false
+state mic=true
+state seconds=0
+state doorOpen=false
+state camera=0
+state mode="ringing"
+every 1s when talking
+  onTick={seconds=seconds+1}
+App
+  Sidebar
+    Brand "Buzz In" icon="doorbell"
+    NavItem "Door screen" icon="videocam" selected={true}
+    NavItem "Missed visitors" icon="history" badge="3" onTap={go missed-visitors}
+    NavItem "Settings" icon="settings" onTap={go door-settings}
+    Spacer grow
+    Text.muted "Flat 2A - Haddad"
+  Main
+    Nav
+      Heading "Front door" level=1
+      Row gap=8
+        Badge.success "Online"
+        IconButton "dark_mode" tooltip="Night mode" onTap={go door-settings}
+    Column pad=24 gap=16
+      Card gap=12
+        Stack
+          Image "{visitor.photo}" h=280
+          Badge.error "Live" animate=pulse
+        Row between
+          Column gap=2
+            Text.strong "{visitor.who}"
+            Text.muted "{visitor.time}"
+          if talking
+            Text.mono "{duration(seconds)}"
+        Row gap=8 center
+          if !talking
+            Button "Answer" icon="call" onTap={talking=true; seconds=0; emit answer}
+          if talking
+            Toggle "Mic" bind=mic
+          Button.secondary "Open door" icon="lock_open" onTap={doorOpen=true; emit openDoor; beep; toast "Door unlocked for 5 s"}
+          Button.destructive "Hang up" icon="call_end" onTap={talking=false; seconds=0; emit hangUp; toast "Call ended"}
+        if doorOpen
+          Text.success "Door unlocked" animate=fade
+        Text.caption "Camera {camera+1} of 2"
+        SegmentedButton bind=camera items=["Entrance","Courtyard"]
+
+### Missed visitors
+state log=[{"id":1,"time":"09:12","day":"Today","photo":"https://images.buzzin.example/visits/1.jpg","note":"Courier, left a card"},{"id":2,"time":"11:47","day":"Today","photo":"https://images.buzzin.example/visits/2.jpg","note":"Unknown visitor"},{"id":3,"time":"18:05","day":"Yesterday","photo":"https://images.buzzin.example/visits/3.jpg","note":"Neighbour, Flat 4B"}]
+state sel=0
+state photo=""
+App
+  Sidebar
+    Brand "Buzz In" icon="doorbell"
+    NavItem "Door screen" icon="videocam" onTap={go resident-screen}
+    NavItem "Missed visitors" icon="history" badge="{length(log)}" selected={true}
+    NavItem "Settings" icon="settings" onTap={go door-settings}
+  Main
+    Nav
+      Heading "Missed visitors" level=1
+      Button.outline "Clear all" onTap={open confirmClear}
+    Column pad=24 gap=12
+      if isEmpty(log)
+        Text.muted "Nobody has rung while you were out."
+      Grid cols=3 gap=16
+        each v in log
+          Card gap=8
+            Image "{v.photo}" h=140 onTap={photo=v.photo; open zoom}
+            Row between
+              Text.strong "{v.day}"
+              Text.mono "{v.time}"
+            Text.muted "{v.note}"
+            Row gap=8
+              Button.outline "Call back" icon="call" onTap={emit callBack v.id}
+              IconButton "delete" tooltip="Delete" onTap={log=removeWhere(log,x=>x.id==v.id)}
+  Lightbox#zoom "{photo}" "Visitor photo"
+  Dialog#confirmClear "Clear the log?" "All photos will be deleted."
+    Row gap=8 end
+      Button.ghost "Keep them" onTap={close}
+      Button.destructive "Clear" onTap={log=[]; close; toast "Log cleared"}
+
+### Door settings
+state night=false
+state nightFrom="22:00"
+state nightTo="06:00"
+state todayCode="7305"
+state codeDay="Today"
+state codeUses=1
+state trades=false
+state tradesFor="1 hour"
+state tradesLeft=0
+every 1s when trades
+  onTick={tradesLeft=tradesLeft-1; tradesLeft<=0 ? {trades=false; emit tradesClosed} : }
+App
+  Sidebar
+    Brand "Buzz In" icon="doorbell"
+    NavItem "Door screen" icon="videocam" onTap={go resident-screen}
+    NavItem "Missed visitors" icon="history" onTap={go missed-visitors}
+    NavItem "Settings" icon="settings" selected={true}
+  Main
+    Nav
+      Heading "Door settings" level=1
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Heading "Delivery code" level=3
+        Text.muted "A one-day code for couriers. It stops working at midnight."
+        Row between middle
+          Text.heading1 "{todayCode}" size=40
+          Row gap=8
+            IconButton "content_copy" tooltip="Copy code" onTap={copy todayCode; toast "Copied"}
+            Button.outline "New code" icon="refresh" onTap={todayCode=fixed(1000+floor(random()*9000),0); codeUses=1; emit newCode todayCode}
+        Row gap=8 middle
+          Text "Valid for"
+          SegmentedButton bind=codeDay items=["Today","Tomorrow"]
+        Row gap=8 middle
+          Text "Uses"
+          Select bind=codeUses items=[1,2,3,5]
+      Card gap=12
+        Heading "Trades button" level=3
+        Text.muted "Leaves the door on release for a set time."
+        Row gap=8 middle
+          Select bind=tradesFor items=["30 minutes","1 hour","2 hours"]
+          if !trades
+            Button "Start" onTap={trades=true; tradesLeft=tradesFor=="30 minutes" ? 1800 : tradesFor=="1 hour" ? 3600 : 7200; emit tradesOpen}
+          if trades
+            Button.destructive "Stop" onTap={trades=false; tradesLeft=0; emit tradesClosed}
+        if trades
+          Row between middle
+            Text.strong "Open for {duration(tradesLeft)}"
+            Ring {tradesLeft/3600}
+      Card gap=12
+        Heading "Night mode" level=3
+        Toggle "Night mode" bind=night
+        if night
+          Row gap=12
+            TimePicker "From" bind=nightFrom
+            TimePicker "To" bind=nightTo
+          Text.muted "From {nightFrom} to {nightTo} the panel dims and rings quietly."

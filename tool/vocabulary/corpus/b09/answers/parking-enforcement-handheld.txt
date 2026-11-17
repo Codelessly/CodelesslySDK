@@ -1,0 +1,205 @@
+### Check plate
+state plate=""
+state result="none"
+state scanning=false
+state firstSeen=0
+state graceMin=15
+state elapsed=0
+state running=false
+state permits=[{"plate":"7KLM402","holder":"Dana Whitfield","zone":"B2","until":"2026-11-30"},{"plate":"4TRX918","holder":"Omar Haddad","zone":"B2","until":"2027-01-15"},{"plate":"8CVB115","holder":"Priya Nair","zone":"A1","until":"2026-10-31"}]
+state zone="B2"
+state tallyChecked=41
+state tallyCited=9
+every 1s when running onTick={elapsed=elapsed+1}
+App
+  Main
+    Nav
+      Brand "Chalkmark" icon="local_parking"
+      Row gap=8
+        Badge.info "Zone {zone}"
+        IconButton "history" tooltip="Day's tally" onTap={go tally}
+    Column pad=16 gap=16 scroll
+      Card gap=12
+        Row between
+          Text.sectionTitle "Plate"
+          Button.ghost "Scan" icon="photo_camera" onTap={scanning=true; open scan}
+        Input "Plate number" "e.g. 7KLM402" bind=plate type=text
+        Row gap=8
+          Button "Check permit" grow onTap={result=any(permits,p=>p.plate==upper(replace(plate," ",""))&&p.zone==zone&&p.until>=formatDate(today(),"yyyy-MM-dd")) ? "valid" : "invalid"; tallyChecked=tallyChecked+1; firstSeen=elapsed; running=true; elapsed=0}
+          Button.outline "Clear" onTap={plate=""; result="none"; running=false; elapsed=0}
+      if result=="valid"
+        Box fill=#FF1B8A3E radius=12 pad=16 gap=4 animate=pop
+          Row gap=12 middle
+            Icon "check_circle" color=#FFFFFFFF size=40
+            Column gap=2
+              Text "PERMIT VALID" color=#FFFFFFFF size=24 weight=700
+              Text "{find(permits,p=>p.plate==upper(replace(plate,' ','')))?.holder} - zone {zone}" color=#FFFFFFFF
+      if result=="invalid"
+        Box fill=#FFC62828 radius=12 pad=16 gap=4 animate=shake
+          Row gap=12 middle
+            Icon "cancel" color=#FFFFFFFF size=40
+            Column gap=2
+              Text "NO VALID PERMIT" color=#FFFFFFFF size=24 weight=700
+              Text "{upper(plate)} not on the zone {zone} list" color=#FFFFFFFF
+      if result=="invalid"
+        Card gap=12
+          Row between
+            Text.sectionTitle "Grace period"
+            Badge.warning "{graceMin} min"
+          Progress {clamp(elapsed/(graceMin*60),0,1)}
+          Row between
+            Text.mono "{duration(elapsed)} since first seen"
+            Text.muted "{elapsed >= graceMin*60 ? 'Grace over' : 'Left: ' + duration(graceMin*60-elapsed)}"
+          Row gap=8
+            Button.outline "Pause" grow onTap={running=false}
+            Button.outline "Resume" grow onTap={running=true}
+          Button "Write notice" disabled={elapsed < graceMin*60} onTap={go evidence}
+          if elapsed < graceMin*60
+            Text.caption "A notice can be written once the grace time has run out."
+      Card gap=8
+        Row between
+          Text.sectionTitle "Zone map"
+          Button.ghost "Open" icon="map" onTap={go zone}
+        MapView h=140 center={[47.6062,-122.3321]} zoom=17 pin={[47.6062,-122.3321]} pinLabel="You are here"
+        Text.caption "Pinned at 1420 Alder St, zone {zone}"
+  Footer
+    Row between pad=8
+      NavItem "Check" icon="search" selected onTap={go check-plate}
+      NavItem "Zone" icon="map" onTap={go zone}
+      NavItem "Evidence" icon="photo_camera" onTap={go evidence}
+      NavItem "Tally" icon="bar_chart" onTap={go tally}
+  Dialog#scan "Scan plate" "Hold the camera steady on the plate"
+    CameraView h=220 overlay="plate" onCapture={plate=result.text; scanning=false; close; toast "Read {result.text}"}
+    Row gap=8
+      Button.outline "Cancel" grow onTap={scanning=false; close}
+      Button "Capture frame" grow onTap={emit captureFrame}
+
+### Zone map
+state zone="B2"
+state sel=""
+state zones=[{"id":"A1","name":"Harbor Row","hours":"Mon-Sat 8:00-18:00","limit":"2 hr","permit":"Permit A only"},{"id":"B2","name":"Alder Street","hours":"Mon-Fri 7:00-19:00","limit":"4 hr","permit":"Permit B, visitors 2 hr"},{"id":"C3","name":"Market Square","hours":"Daily 6:00-22:00","limit":"1 hr","permit":"No permit parking"}]
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go check-plate}
+      Heading "Zone map" level=1
+      IconButton "my_location" tooltip="Recenter" onTap={emit recenter}
+    Column gap=0 grow
+      MapView grow center={[47.6062,-122.3321]} zoom=16 pin={[47.6062,-122.3321]} pinLabel="You are here" polygons={map(zones,z=>z.id)} onPolygonTap={zone=result.id; open zoneInfo}
+    Column pad=16 gap=12
+      Card gap=8
+        Row between
+          Text.sectionTitle "Zone {zone}"
+          Badge.primary "{find(zones,z=>z.id==zone).limit}"
+        Row gap=8
+          Icon "schedule"
+          Text "{find(zones,z=>z.id==zone).hours}"
+        Row gap=8
+          Icon "badge"
+          Text "{find(zones,z=>z.id==zone).permit}"
+        Button.outline "Zone signs" icon="signpost" onTap={open zoneInfo}
+  Footer
+    Row between pad=8
+      NavItem "Check" icon="search" onTap={go check-plate}
+      NavItem "Zone" icon="map" selected onTap={go zone}
+      NavItem "Evidence" icon="photo_camera" onTap={go evidence}
+      NavItem "Tally" icon="bar_chart" onTap={go tally}
+  Sheet#zoneInfo "Signed hours"
+    each z in zones
+      ListTile "{z.id} - {z.name}" subtitle="{z.hours}, {z.limit}" icon="local_parking" selected={zone==z.id} onTap={zone=z.id; close}
+
+### Evidence and fine
+state plate="7KLM402"
+state shots=[]
+state wheelOn=false
+state signOn=false
+state fine=""
+state fines=[{"code":"EXP","name":"Expired meter","amount":45},{"code":"NOP","name":"No valid permit","amount":75},{"code":"HYD","name":"Within 15 ft of hydrant","amount":125},{"code":"LOD","name":"Loading zone violation","amount":90},{"code":"DBL","name":"Double parked","amount":110}]
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go check-plate}
+      Heading "Evidence" level=1
+      Badge.neutral "{length(shots)} of 4"
+    Column pad=16 gap=16 scroll
+      Card gap=12
+        Text.sectionTitle "Photos"
+        Grid cols=4 gap=8
+          each i in range(4)
+            Box h=72 radius=8 fill=#FFE0E0E0 onTap={emit takePhoto}
+              if i < length(shots)
+                Image "{shots[i].url}"
+              if i >= length(shots)
+                Icon "add_a_photo"
+        Row gap=8
+          Button "Take photo" icon="photo_camera" grow disabled={length(shots) >= 4} onTap={shots=append(shots,{"url":"https://img.chalkmark.app/e/" + plate + "-" + (length(shots)+1) + ".jpg"}); toast "Photo saved"}
+          Button.outline "Retake last" onTap={shots=removeAt(shots,length(shots)-1)}
+        Toggle "Wheel chalk visible" bind=wheelOn
+        Toggle "Sign in frame" bind=signOn
+        if wheelOn && signOn && length(shots) >= 2
+          Text.success "Evidence complete"
+      Card gap=8
+        Text.sectionTitle "Fine type"
+        Select "Violation" bind=fine items={map(fines,f=>f.name)}
+        if fine != ""
+          Row between
+            Text.muted "Fine amount"
+            Text.strong "{money(find(fines,f=>f.name==fine).amount,'$',2)}"
+        Button "Preview notice" disabled={fine==""||length(shots)<4} onTap={open notice}
+        if length(shots) < 4
+          Text.caption "Four photos are needed before a notice."
+  Footer
+    Row between pad=8
+      NavItem "Check" icon="search" onTap={go check-plate}
+      NavItem "Zone" icon="map" onTap={go zone}
+      NavItem "Evidence" icon="photo_camera" selected onTap={go evidence}
+      NavItem "Tally" icon="bar_chart" onTap={go tally}
+  Sheet#notice "Notice preview"
+    Card gap=8
+      Text.strong "CITY PARKING NOTICE"
+      Divider
+      Text.mono "Plate: {upper(plate)}"
+      Text.mono "Violation: {fine}"
+      Text.mono "Fine: {fine==\"\" ? \"\" : money(find(fines,f=>f.name==fine).amount,'$',2)}"
+      Text.mono "Issued: {formatDate(today(),'MMM d, yyyy')}"
+      Text.mono "Zone: B2, 1420 Alder St"
+      Text.caption "Pay within 21 days or appeal at chalkmark.city/appeal"
+    Row gap=8
+      Button.outline "Edit" grow onTap={close}
+      Button "Print notice" grow icon="print" onTap={emit printNotice; tallyCited=tallyCited+1; toast "Printing"; close; go tally}
+
+### Day tally
+state tallyChecked=41
+state tallyCited=9
+state hourly=[3,6,8,5,7,4,8]
+state byType=[{"name":"Expired meter","n":4},{"name":"No permit","n":3},{"name":"Hydrant","n":1},{"name":"Loading zone","n":1}]
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go check-plate}
+      Heading "Today" level=1
+      Text.muted "{formatDate(today(),'EEE MMM d')}"
+    Column pad=16 gap=16 scroll
+      Grid cols=3 gap=8
+        Card gap=2
+          Text.caption "Checked"
+          Text.strong "{tallyChecked}" size=28
+        Card gap=2
+          Text.caption "Cited"
+          Text.strong "{tallyCited}" size=28
+        Card gap=2
+          Text.caption "Rate"
+          Text.strong "{round(tallyCited/max(1,tallyChecked)*100,0)}%" size=28
+      Card gap=8
+        Text.sectionTitle "Plates checked by hour"
+        BarChart values={hourly} labels=["8","9","10","11","12","13","14"] h=160
+      Card gap=8
+        Text.sectionTitle "Notices by type"
+        Donut values={map(byType,t=>t.n)} labels={map(byType,t=>t.name)}
+      Button.outline "End shift and sync" icon="cloud_upload" onTap={emit syncShift; toast "Shift synced"}
+  Footer
+    Row between pad=8
+      NavItem "Check" icon="search" onTap={go check-plate}
+      NavItem "Zone" icon="map" onTap={go zone}
+      NavItem "Evidence" icon="photo_camera" onTap={go evidence}
+      NavItem "Tally" icon="bar_chart" selected onTap={go tally}

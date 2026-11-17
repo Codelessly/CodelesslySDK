@@ -1,0 +1,173 @@
+### Cue Stack
+state tab="cues"
+state cues=[{"id":1,"num":"1","name":"House to half","fade":3,"wait":0},{"id":2,"num":"2","name":"Preset wash blue","fade":4,"wait":0},{"id":3,"num":"3","name":"Band intro","fade":2,"wait":1.5},{"id":4,"num":"3.5","name":"Singer special","fade":2.5,"wait":0},{"id":5,"num":"4","name":"Full stage warm","fade":5,"wait":0},{"id":6,"num":"5","name":"Slow fade to dusk","fade":8,"wait":2},{"id":7,"num":"6","name":"Finale burst","fade":1,"wait":0}]
+state live=3
+state nextId=4
+state prevId=2
+state fade=1
+state fading=false
+state blackout=false
+state sel=0
+state newName=""
+state newNum=""
+state afterId=4
+every 100 when fading onTick={fade>=1 ? fading=false : fade=round(fade+0.04,2)}
+App
+  Sidebar
+    Brand "Followspot" icon="highlight"
+    NavItem "Cue stack" icon="list" badge="{length(cues)}" selected={tab=="cues"} onTap={tab="cues"}
+    NavItem "Channels" icon="tune" selected={tab=="channels"} onTap={go channels}
+    NavItem "Stage plan" icon="grid_view" selected={tab=="plan"} onTap={go stage-plan}
+    NavItem "Colour" icon="palette" selected={tab=="colour"} onTap={go colour}
+    Spacer grow
+    Text.caption "Show: Tidewater Revue"
+    Text.muted "Desk online"
+  Main
+    Nav
+      Heading "Cue stack" level=1
+      Row gap=8
+        Badge.success "LIVE {find(cues,c=>c.id==live).num}"
+        Badge.info "NEXT {find(cues,c=>c.id==nextId).num}"
+        Button.outline "Record cue" icon="fiber_manual_record" onTap={open record}
+        Button.destructive "Blackout" animate={blackout ? "pulse" : "none"} onTap={blackout=!blackout; toast blackout ? "Blackout off" : "Blackout on"}
+    Column pad=24 gap=16
+      if blackout
+        Card gap=4 fill=#FF3B0A0A animate=pulse duration=900
+          Text.strong "BLACKOUT" color=#FFFFFFFF
+          Text.caption "All outputs held at zero. Press Blackout again to restore." color=#FFFFFFFF
+      Card gap=12
+        Row between
+          Column gap=2
+            Text.caption "NOW FADING"
+            Text.heading "{find(cues,c=>c.id==prevId).name}  to  {find(cues,c=>c.id==live).name}"
+          Text.mono "{fixed(fade*find(cues,c=>c.id==live).fade,1)}s / {find(cues,c=>c.id==live).fade}s"
+        Progress bind=fade
+        Row gap=12 middle
+          Button "GO" size=large icon="play_arrow" onTap={prevId=live; live=nextId; nextId=min(7,nextId+1); fade=0; fading=true}
+          Button.outline "Back" icon="skip_previous" onTap={nextId=live; live=prevId; prevId=max(1,prevId-1); fade=0; fading=true}
+          Button.ghost "Snap to live" onTap={fade=1; fading=false}
+          Spacer grow
+          Text.muted "Fade {fading ? 'running' : 'complete'}"
+      Card gap=0
+        Row gap=8 pad=[8,8,8,8] border-bottom=#FF444444
+          Text.caption "Q" w=56
+          Text.caption "Name" grow
+          Text.caption "Fade" w=70
+          Text.caption "Wait" w=70
+          Text.caption "" w=36
+        each c in cues
+          Row gap=8 middle pad=[8,10,8,10] fill={c.id==live ? "#FF14532D" : (c.id==nextId ? "#FF3F3F0A" : "#00000000")} onTap={sel=c.id} menu=cueMenu
+            Text.mono "{c.num}" w=56
+            Row grow gap=8 middle
+              Text.strong "{c.name}"
+              if c.id==live
+                Badge.success "LIVE"
+              if c.id==nextId
+                Badge.warning "NEXT"
+            Text.mono "{c.fade}s" w=70
+            Text.mono "{c.wait}s" w=70
+            IconButton "more_vert" tooltip="Cue options" onTap={sel=c.id; open cueMenu}
+  Menu#cueMenu end
+    MenuItem "Set as next" icon="skip_next" onTap={nextId=sel}
+    MenuItem "Fire now" icon="play_arrow" onTap={prevId=live; live=sel; fade=0; fading=true}
+    MenuItem "Delete cue" icon="delete" onTap={cues=removeWhere(cues,c=>c.id==sel)}
+  Dialog#record "Record current look" "Stores the stage as a new cue"
+    Input "Cue number" "3.7" bind=newNum
+    Input "Name" "Singer special 2" bind=newName
+    Select "Insert after" items=["3 Band intro","3.5 Singer special","4 Full stage warm"] bind=afterId
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button "Record" onTap={newName=="" ? toast "Name the cue" : {cues=append(cues,{"id":length(cues)+1,"num":newNum,"name":newName,"fade":3,"wait":0}); toast "Cue {newNum} recorded"; newName=""; newNum=""; close}}
+
+### Channels
+state levels=[{"ch":1,"name":"Front wash L","v":80},{"ch":2,"name":"Front wash R","v":80},{"ch":3,"name":"Backlight","v":45},{"ch":4,"name":"Cyc blue","v":60},{"ch":5,"name":"Special DS","v":0},{"ch":6,"name":"Gobo break","v":25},{"ch":7,"name":"Haze fan","v":10},{"ch":8,"name":"House","v":50}]
+state blackout=false
+App
+  Sidebar
+    Brand "Followspot" icon="highlight"
+    NavItem "Cue stack" icon="list" onTap={go cue-stack}
+    NavItem "Channels" icon="tune" selected={true}
+    NavItem "Stage plan" icon="grid_view" onTap={go stage-plan}
+    NavItem "Colour" icon="palette" onTap={go colour}
+    Spacer grow
+    Text.muted "Desk online"
+  Main
+    Nav
+      Heading "Channels" level=1
+      Row gap=8
+        Button.outline "Clear all" onTap={levels=map(levels,l=>with(l,"v",0))}
+        Button.outline "Full" onTap={levels=map(levels,l=>with(l,"v",100))}
+        Button.destructive "Blackout" animate={blackout ? "pulse" : "none"} onTap={blackout=!blackout}
+    Column pad=24 gap=16
+      Text.muted "Drag a fader or type a level from 0 to 100."
+      Row scroll gap=12
+        each l in levels
+          Card gap=8 center w=120
+            Text.mono "{l.ch}"
+            Slider bind=l.v min=0 max=100 vertical h=220
+            Input "Level" type=number bind=l.v w=80
+            Text.caption "{l.name}" center
+            Progress {blackout ? 0 : l.v/100}
+      Card gap=8
+        Text.strong "Output"
+        BarChart values={map(levels,l=>blackout ? 0 : l.v)} labels={map(levels,l=>"{l.ch}")} h=140
+        Text.caption "{count(levels,l=>l.v>0)} channels active"
+
+### Stage Plan and Colour
+state lamps=[{"id":1,"name":"FOH 1","x":1,"y":0},{"id":2,"name":"FOH 2","x":2,"y":0},{"id":3,"name":"FOH 3","x":3,"y":0},{"id":4,"name":"Mid L","x":0,"y":1},{"id":5,"name":"Mid C","x":2,"y":1},{"id":6,"name":"Mid R","x":4,"y":1},{"id":7,"name":"Back 1","x":1,"y":2},{"id":8,"name":"Back 2","x":3,"y":2}]
+state picked=[]
+state r=255
+state g=140
+state b=40
+state colourSet={}
+state blackout=false
+App
+  Sidebar
+    Brand "Followspot" icon="highlight"
+    NavItem "Cue stack" icon="list" onTap={go cue-stack}
+    NavItem "Channels" icon="tune" onTap={go channels}
+    NavItem "Stage plan" icon="grid_view" selected={true}
+    Spacer grow
+    Text.muted "{length(picked)} lamps selected"
+  Main
+    Nav
+      Heading "Stage plan" level=1
+      Row gap=8
+        Button.ghost "Select none" onTap={picked=[]}
+        Button.outline "Select all" onTap={picked=map(lamps,l=>l.id)}
+        Button.destructive "Blackout" animate={blackout ? "pulse" : "none"} onTap={blackout=!blackout}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Card grow gap=12
+          Text.strong "Plan, audience at the top"
+          Grid cols=5 gap=8
+            each l in lamps
+              Box gap=4 pad=12 radius=8 center fill={contains(picked,l.id) ? "#FF1D4ED8" : "#FF2A2A2A"} onTap={picked=contains(picked,l.id) ? without(picked,l.id) : append(picked,l.id)}
+                Icon "lightbulb"
+                Text.caption "{l.name}" color=#FFFFFFFF
+          Text.caption "Tap a lamp to add or remove it from the group."
+        Column w=320 gap=12
+          Card gap=12
+            Text.strong "Colour mix"
+            Box h=80 radius=8 fill={blackout ? "#FF000000" : "#FF" + "RGB"}
+              Text.mono "R{r} G{g} B{b}" color=#FFFFFFFF center
+            Row gap=8 middle
+              Text.caption "R" w=16
+              Slider bind=r min=0 max=255 grow
+              Text.mono "{r}" w=36
+            Row gap=8 middle
+              Text.caption "G" w=16
+              Slider bind=g min=0 max=255 grow
+              Text.mono "{g}" w=36
+            Row gap=8 middle
+              Text.caption "B" w=16
+              Slider bind=b min=0 max=255 grow
+              Text.mono "{b}" w=36
+            Button "Apply to {length(picked)} lamps" onTap={isEmpty(picked) ? toast "Pick lamps first" : toast "Colour applied"}
+          Card gap=8
+            Text.strong "Presets"
+            Row gap=8
+              Chip "Warm" onTap={r=255; g=170; b=90}
+              Chip "Cool" onTap={r=120; g=170; b=255}
+              Chip "Amber" onTap={r=255; g=120; b=0}
+              Chip "Red" onTap={r=255; g=20; b=20}

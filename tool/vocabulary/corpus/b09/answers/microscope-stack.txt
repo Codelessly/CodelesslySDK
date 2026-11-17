@@ -1,0 +1,150 @@
+### Viewer
+state z=14
+state zoom=1
+state merged=false
+state tool="view"
+state channels=[{"id":"dapi","name":"DAPI","color":"#FF4C6FFF","on":true,"level":0.8},{"id":"gfp","name":"GFP","color":"#FF2EC27E","on":true,"level":0.65},{"id":"tritc","name":"TRITC","color":"#FFE5484D","on":false,"level":0.5}]
+state layers=range(30)
+App
+  Sidebar
+    Brand "Focusplane" icon="biotech"
+    NavItem "Viewer" icon="visibility" selected={tool=="view"} onTap={tool="view"}
+    NavItem "Count cells" icon="pin_drop" selected={tool=="count"} onTap={go count}
+    NavItem "Measure region" icon="gesture" selected={tool=="region"} onTap={go region}
+    Spacer grow
+    Text.muted "HeLa_0412_stack.czi"
+    Text.caption "30 layers, 0.5 um step"
+  Main
+    Nav
+      Heading "HeLa_0412_stack" level=1
+      Row gap=8
+        Toggle "Merged sharpest" bind=merged
+        IconButton "zoom_out" tooltip="Zoom out" onTap={zoom=max(0.5,zoom-0.5)}
+        Text.strong "{zoom}x"
+        IconButton "zoom_in" tooltip="Zoom in" onTap={zoom=min(8,zoom+0.5)}
+        IconButton "restart_alt" tooltip="Reset view" onTap={zoom=1; z=14}
+    Row gap=16 pad=24 top
+      Column grow gap=12
+        Card gap=12
+          ImageStack src="https://img.focusplane.app/hela_0412" layer={z} merged={merged} zoom={zoom} channels={channels} h=420
+          ScaleBar zoom={zoom} pixelSize=0.325 unit="um" units=[10,20,50,100]
+        Card gap=8
+          Row between
+            Text.strong "Focus depth"
+            Text.muted "Layer {z+1} of 30, z = {fixed(z*0.5,1)} um"
+          Row gap=8
+            IconButton "chevron_left" tooltip="Previous layer" onTap={z=max(0,z-1)}
+            Slider bind=z min=0 max=29 step=1 grow
+            IconButton "chevron_right" tooltip="Next layer" onTap={z=min(29,z+1)}
+      Column w=320 gap=16
+        Card gap=8
+          Text.strong "Side view"
+          SideView layers=30 current={z} src="https://img.focusplane.app/hela_0412" h=140 onSelect={z=result}
+          Text.caption "Tap the side view to jump to a layer"
+        Card gap=8
+          Text.strong "Merged preview"
+          Image "https://img.focusplane.app/hela_0412/merged_thumb.jpg" h=120 onTap={merged=true}
+          Text.caption "Sharpest layer at every pixel"
+        Card gap=12
+          Text.strong "Channels"
+          each c in channels
+            Column gap=4
+              Row between
+                Row gap=8
+                  Box w=12 h=12 radius=6 fill={c.color}
+                  Text "{c.name}"
+                Toggle bind=c.on
+              Slider bind=c.level min=0 max=1 step=0.05 disabled={!c.on}
+
+### Count cells
+state z=14
+state zoom=1
+state dots=[]
+state mode="add"
+App
+  Sidebar
+    Brand "Focusplane" icon="biotech"
+    NavItem "Viewer" icon="visibility" onTap={go viewer}
+    NavItem "Count cells" icon="pin_drop" selected={true}
+    NavItem "Measure region" icon="gesture" onTap={go region}
+    Spacer grow
+    Text.muted "HeLa_0412_stack.czi"
+  Main
+    Nav
+      Heading "Count cells" level=1
+      Row gap=8
+        SegmentedButton bind=mode items=["add","remove"]
+        Button.outline "Undo" onTap={dots=removeAt(dots,length(dots)-1)}
+        Button.destructive "Clear all" onTap={open confirmClear}
+    Row gap=16 pad=24 top
+      Column grow gap=12
+        Card gap=12
+          ImageStack src="https://img.focusplane.app/hela_0412" layer={z} zoom={zoom} h=420 markers={dots} onTapAt={mode=="add" ? dots=append(dots,{"id":length(dots)+1,"x":result.x,"y":result.y,"z":z}) : dots=removeWhere(dots,d=>abs(d.x-result.x)<12 && abs(d.y-result.y)<12 && d.z==z)}
+          ScaleBar zoom={zoom} pixelSize=0.325 unit="um"
+        Row gap=8
+          IconButton "zoom_out" tooltip="Zoom out" onTap={zoom=max(0.5,zoom-0.5)}
+          Slider bind=z min=0 max=29 step=1 grow
+          IconButton "zoom_in" tooltip="Zoom in" onTap={zoom=min(8,zoom+0.5)}
+      Column w=320 gap=16
+        Card gap=8
+          Text.caption "Total counted"
+          Text "{length(dots)}" size=64 weight=700
+          Text.muted "{count(dots,d=>d.z==z)} on this layer"
+        Card gap=8
+          Text.strong "Dots"
+          if isEmpty(dots)
+            Text.muted "Tap the image to drop a numbered dot."
+          ListView h=260
+            each d in dots
+              ListTile "#{d.id}" subtitle="layer {d.z+1}, x {round(d.x,0)}, y {round(d.y,0)}"
+                IconButton "close" tooltip="Remove" onTap={dots=removeWhere(dots,x=>x.id==d.id)}
+        Button "Export counts" icon="download" onTap={emit exportCounts dots; toast "Counts exported"}
+  Dialog#confirmClear "Clear all dots?" "This removes {length(dots)} dots."
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Clear" onTap={dots=[]; close; toast "Cleared"}
+
+### Measure region
+state z=14
+state zoom=1
+state outline=[]
+state drawing=false
+state regions=[{"name":"Region 1","area":1842.6}]
+state draft=0
+App
+  Sidebar
+    Brand "Focusplane" icon="biotech"
+    NavItem "Viewer" icon="visibility" onTap={go viewer}
+    NavItem "Count cells" icon="pin_drop" onTap={go count}
+    NavItem "Measure region" icon="gesture" selected={true}
+    Spacer grow
+    Text.muted "HeLa_0412_stack.czi"
+  Main
+    Nav
+      Heading "Measure region" level=1
+      Row gap=8
+        Button.outline "Redraw" onTap={outline=[]; draft=0}
+        Button "Save region" disabled={isEmpty(outline)} onTap={regions=append(regions,{"name":"Region {length(regions)+1}","area":draft}); outline=[]; draft=0; toast "Region saved"}
+    Row gap=16 pad=24 top
+      Column grow gap=12
+        Card gap=12
+          ImageStack src="https://img.focusplane.app/hela_0412" layer={z} zoom={zoom} h=420 drawPath={outline} onDraw={outline=result.points; draft=result.area} pixelSize=0.325
+          ScaleBar zoom={zoom} pixelSize=0.325 unit="um"
+        Row gap=8
+          IconButton "zoom_out" tooltip="Zoom out" onTap={zoom=max(0.5,zoom-0.5)}
+          Slider bind=z min=0 max=29 step=1 grow
+          IconButton "zoom_in" tooltip="Zoom in" onTap={zoom=min(8,zoom+0.5)}
+      Column w=320 gap=16
+        Card gap=8
+          Text.caption "Current outline area"
+          Text "{fixed(draft,1)} um2" size=40 weight=700
+          Text.muted "Draw round a region on the image to trace it."
+        Card gap=8
+          Text.strong "Saved regions"
+          each r in regions
+            ListTile "{r.name}" subtitle="{fixed(r.area,1)} um2"
+              IconButton "delete" tooltip="Delete" onTap={regions=removeWhere(regions,x=>x.name==r.name)}
+          Divider
+          Row between
+            Text.strong "Total"
+            Text.strong "{fixed(sum(regions,r=>r.area),1)} um2"

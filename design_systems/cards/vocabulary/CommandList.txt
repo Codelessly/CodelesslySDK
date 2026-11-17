@@ -1,0 +1,4 @@
+// The list under a palette's search: the Group and CommandItem lines written under it, in a panel that scrolls.
+CommandList
+  Column w=fill gap=4 pad=[8,8,8,8] scroll
+    ...

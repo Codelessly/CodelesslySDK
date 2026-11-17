@@ -1,0 +1,150 @@
+### Plot
+state tab="plot"
+state round="18 m"
+state endNo=3
+state arrows=[{"x":0.04,"y":-0.12,"score":10},{"x":-0.21,"y":0.08,"score":9},{"x":0.33,"y":0.27,"score":8}]
+state ends=[{"n":1,"shots":[10,9,9,8,8,7],"total":51},{"n":2,"shots":[10,10,9,9,8,6],"total":52}]
+state lastEnd=[{"x":0.1,"y":-0.05},{"x":0.18,"y":0.12},{"x":-0.06,"y":0.2},{"x":0.22,"y":-0.15},{"x":0.02,"y":0.09},{"x":0.14,"y":0.02}]
+App
+  Sidebar
+    Brand "Gold Ring" icon="adjust"
+    NavItem "Plot" icon="gps_fixed" selected={tab=="plot"} onTap={go plot}
+    NavItem "Score sheet" icon="table_rows" badge="{length(ends)}" selected={tab=="sheet"} onTap={go score-sheet}
+    NavItem "Records" icon="emoji_events" selected={tab=="records"} onTap={go records}
+    Spacer grow
+    Text.muted "Round: {round}"
+  Main
+    Nav
+      Heading "End {endNo}" level=1
+      Row gap=8
+        Button.outline "{round}" icon="straighten" onTap={open roundPick}
+        Button.ghost "Undo" icon="undo" onTap={arrows=slice(arrows,0,length(arrows)-1)}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Column grow gap=12
+          TargetFace#face rings=10 arrows={arrows} loupe=true maxArrows=6 onPlace={length(arrows)<6 ? arrows=append(arrows,result) : toast "End is full, score it"}
+          Row center gap=8
+            Text.caption "Arrow {min(length(arrows)+1,6)} of 6"
+            Progress {length(arrows)/6}
+        Column w=320 gap=12
+          Card gap=8
+            Text.muted "Arrows this end"
+            Grid cols=3 gap=8
+              each a in arrows
+                Badge.primary "{a.score}" animate=pop
+            Divider
+            Row between
+              Text.strong "End total"
+              Text.strong "{sum(arrows,a=>a.score)}" size=28
+          Card gap=8
+            Text.muted "Last end spread"
+            SpreadPlot points={lastEnd} showCenter=true showSightArrow=true h=180
+            Text.caption "Centre is 0.11 right, 0.04 low. Move the sight left and up."
+          Button "Score end" icon="check" onTap={length(arrows)==6 ? ends=append(ends,{"n":endNo,"shots":map(arrows,a=>a.score),"total":sum(arrows,a=>a.score)}); lastEnd=map(arrows,a=>{"x":a.x,"y":a.y}); arrows=[]; endNo=endNo+1; toast "End scored" : toast "Plot all six arrows first"}
+  Sheet#roundPick "Choose a round"
+    Column gap=8
+      Radio "18 m indoor, 60 arrows" bind=round
+      Radio "30 m, 72 arrows" bind=round
+      Radio "50 m, 72 arrows" bind=round
+      Radio "70 m, 72 arrows" bind=round
+      Button "Done" onTap={close}
+
+### Score sheet
+state tab="sheet"
+state round="18 m"
+state ends=[{"n":1,"shots":[10,9,9,8,8,7],"total":51},{"n":2,"shots":[10,10,9,9,8,6],"total":52},{"n":3,"shots":[9,9,9,8,7,7],"total":49}]
+state sel=0
+App
+  Sidebar
+    Brand "Gold Ring" icon="adjust"
+    NavItem "Plot" icon="gps_fixed" selected={tab=="plot"} onTap={go plot}
+    NavItem "Score sheet" icon="table_rows" selected={tab=="sheet"} onTap={go score-sheet}
+    NavItem "Records" icon="emoji_events" selected={tab=="records"} onTap={go records}
+    Spacer grow
+    Text.muted "Round: {round}"
+  Main
+    Nav
+      Heading "Score sheet" level=1
+      Row gap=8
+        Button.outline "Export" icon="download" onTap={emit exportSheet}
+        Button "Share" icon="share" onTap={emit shareSheet}
+    Column pad=24 gap=16
+      Row gap=16
+        Card grow gap=4
+          Text.muted "Running total"
+          Text.strong "{sum(ends,e=>e.total)}" size=40
+        Card grow gap=4
+          Text.muted "Average per arrow"
+          Text.strong "{fixed(sum(ends,e=>e.total)/(length(ends)*6),2)}" size=40
+        Card grow gap=4
+          Text.muted "Tens"
+          Text.strong "{sum(ends,e=>count(e.shots,s=>s==10))}" size=40
+      Card gap=8
+        Row gap=8
+          Text.fieldLabel "End" w=50
+          Text.fieldLabel "Arrows" grow
+          Text.fieldLabel "Total" w=70
+          Text.fieldLabel "Running" w=80 hide=phone
+        Divider
+        each e in ends
+          Row gap=8 middle onTap={sel=index; open endDetail}
+            Text.strong "{e.n}" w=50
+            Row grow gap=4
+              each s in e.shots
+                Badge.neutral "{s}"
+            Text.strong "{e.total}" w=70
+            Text "{sum(slice(ends,0,index+1),x=>x.total)}" w=80 hide=phone
+      Card gap=8
+        Text.muted "Score by end"
+        BarChart values={map(ends,e=>e.total)} labels={map(ends,e=>"E{e.n}")} h=160
+  Dialog#endDetail "End details" "Arrows in the order they were shot"
+    Column gap=12
+      Row gap=8
+        each s in ends[sel].shots
+          Badge.primary "{s}"
+      Row between
+        Text.muted "Total"
+        Text.strong "{ends[sel].total}"
+      SpreadPlot points={[]} showCenter=true h=140
+      Row gap=8
+        Button.outline "Edit arrows" onTap={emit editEnd ends[sel].n; close}
+        Button.destructive "Delete end" onTap={ends=removeAt(ends,sel); close; toast "End deleted"}
+
+### Records
+state tab="records"
+state round="18 m"
+state filter="All"
+state records=[{"round":"18 m","best":562,"date":"2026-03-14","max":600},{"round":"30 m","best":641,"date":"2026-05-02","max":720},{"round":"50 m","best":618,"date":"2026-07-19","max":720},{"round":"70 m","best":587,"date":"2026-09-06","max":720}]
+state sessions=[{"date":"Nov 12","round":"18 m","score":548},{"date":"Nov 5","round":"18 m","score":553},{"date":"Oct 29","round":"18 m","score":541},{"date":"Oct 22","round":"18 m","score":562}]
+App
+  Sidebar
+    Brand "Gold Ring" icon="adjust"
+    NavItem "Plot" icon="gps_fixed" selected={tab=="plot"} onTap={go plot}
+    NavItem "Score sheet" icon="table_rows" selected={tab=="sheet"} onTap={go score-sheet}
+    NavItem "Records" icon="emoji_events" selected={tab=="records"} onTap={go records}
+    Spacer grow
+    Avatar "Maya Reyes" size=36
+  Main
+    Nav
+      Heading "Personal records" level=1
+      SegmentedButton bind=filter items=["All","Indoor","Outdoor"]
+    Column pad=24 gap=16
+      Grid cols=2 gap=16
+        each r in records
+          Card gap=8 animate=slide-up stagger=80
+            Row between
+              Text.strong "{r.round}"
+              Badge.success "PB"
+            Text.strong "{r.best}" size=36
+            Progress {r.best/r.max}
+            Text.caption "{r.best} of {r.max}, set {formatDate(r.date,"MMM d, yyyy")}"
+      Card gap=8
+        Row between
+          Text.strong "18 m progress"
+          Select bind=round items=["18 m","30 m","50 m","70 m"] w=120
+        LineChart values={map(reverse(sessions),s=>s.score)} labels={map(reverse(sessions),s=>s.date)} h=180
+      Card gap=8
+        Text.strong "Recent sessions"
+        each s in sessions
+          ListTile "{s.round}, {s.score}" subtitle="{s.date}" icon="gps_fixed"
+            Badge.info "{fixed(s.score/6,1)} avg"

@@ -1,0 +1,220 @@
+### Performance
+project trackA={"title":"Midnight Drive","artist":"Kaito Rae","bpm":124,"key":"8A","length":372}
+project trackB={"title":"Salt Flats","artist":"Mira Voss","bpm":126,"key":"9A","length":341}
+state playA=false
+state playB=false
+state tempoA=0
+state tempoB=0
+state bendA=0
+state bendB=0
+state loopA=0
+state loopB=0
+state cuesA=[12.4,48.0,96.5,0]
+state cuesB=[8.0,64.2,0,0]
+state posA=0
+state posB=0
+state volA=0.8
+state volB=0.8
+state hiA=0
+state midA=0
+state loA=0
+state hiB=0
+state midB=0
+state loB=0
+state xf=0
+state master=0.85
+every 100 when playA onTick={posA=posA+0.1*(1+tempoA/100+bendA)}
+every 100 when playB onTick={posB=posB+0.1*(1+tempoB/100+bendB)}
+App
+  Sidebar
+    Brand "Crossfade" icon="album"
+    NavItem "Decks" icon="graphic_eq" selected={true}
+    NavItem "Library" icon="library_music" badge="1,284" onTap={go library}
+    NavItem "Sets" icon="queue_music" onTap={go sets}
+    Spacer grow
+    Text.muted "Master {round(master*100,0)}%"
+    Slider bind=master min=0 max=1
+  Main
+    Nav
+      Heading "Decks"
+      Row gap=8
+        Badge.success "REC ready"
+        Button.outline "Sync A to B" onTap={tempoA=tempoB; toast "Synced to {trackB.bpm} BPM"}
+        Button.destructive "Record" onTap={open rec}
+    Column pad=24 gap=16 scroll
+      Grid cols=2 gap=16
+        Card gap=12
+          Row between
+            Column gap=2
+              Text.strong "A  {trackA.title}"
+              Text.muted "{trackA.artist}"
+            Column gap=2 end
+              Text.strong "{round(trackA.bpm*(1+tempoA/100),1)} BPM"
+              Text.muted "Key {trackA.key}"
+          Row gap=16 middle
+            Platter bind=playA rpm=33 size=160 animate=spin
+            Column grow gap=8
+              Waveform bind=posA values=trackA beats=true cues={cuesA} loop={loopA} h=100
+              Row between
+                Text.mono "{duration(posA)}"
+                Text.mono "-{duration(trackA.length-posA)}"
+          Row gap=8 middle
+            Button.secondary "Cue" onTap={posA=cuesA[0]; playA=false}
+            Button {playA ? "Pause" : "Play"} onTap={playA=!playA}
+            Spacer grow
+            IconButton "fast_rewind" tooltip="Pitch bend down" onTap={bendA=-0.04}
+            IconButton "fast_forward" tooltip="Pitch bend up" onTap={bendA=0.04}
+            IconButton "sync" tooltip="Reset bend" onTap={bendA=0}
+          Row gap=8
+            Text.caption "Loop"
+            ChoiceChip "1/4" selected={loopA==0.25} onTap={loopA=loopA==0.25?0:0.25}
+            ChoiceChip "1/2" selected={loopA==0.5} onTap={loopA=loopA==0.5?0:0.5}
+            ChoiceChip "1" selected={loopA==1} onTap={loopA=loopA==1?0:1}
+            ChoiceChip "4" selected={loopA==4} onTap={loopA=loopA==4?0:4}
+            ChoiceChip "8" selected={loopA==8} onTap={loopA=loopA==8?0:8}
+          Grid cols=4 gap=8
+            each c in cuesA
+              Button.outline "Cue {index+1}" onTap={c>0 ? posA=c : cuesA=setAt(cuesA,index,posA)}
+          Row gap=8 middle
+            Text.caption "Tempo {tempoA}%"
+            Slider bind=tempoA min=-8 max=8 grow
+        Card gap=12
+          Row between
+            Column gap=2
+              Text.strong "B  {trackB.title}"
+              Text.muted "{trackB.artist}"
+            Column gap=2 end
+              Text.strong "{round(trackB.bpm*(1+tempoB/100),1)} BPM"
+              Text.muted "Key {trackB.key}"
+          Row gap=16 middle
+            Platter bind=playB rpm=33 size=160 animate=spin
+            Column grow gap=8
+              Waveform bind=posB values=trackB beats=true cues={cuesB} loop={loopB} h=100
+              Row between
+                Text.mono "{duration(posB)}"
+                Text.mono "-{duration(trackB.length-posB)}"
+          Row gap=8 middle
+            Button.secondary "Cue" onTap={posB=cuesB[0]; playB=false}
+            Button {playB ? "Pause" : "Play"} onTap={playB=!playB}
+            Spacer grow
+            IconButton "fast_rewind" tooltip="Pitch bend down" onTap={bendB=-0.04}
+            IconButton "fast_forward" tooltip="Pitch bend up" onTap={bendB=0.04}
+            IconButton "sync" tooltip="Reset bend" onTap={bendB=0}
+          Row gap=8
+            Text.caption "Loop"
+            ChoiceChip "1/4" selected={loopB==0.25} onTap={loopB=loopB==0.25?0:0.25}
+            ChoiceChip "1/2" selected={loopB==0.5} onTap={loopB=loopB==0.5?0:0.5}
+            ChoiceChip "1" selected={loopB==1} onTap={loopB=loopB==1?0:1}
+            ChoiceChip "4" selected={loopB==4} onTap={loopB=loopB==4?0:4}
+            ChoiceChip "8" selected={loopB==8} onTap={loopB=loopB==8?0:8}
+          Grid cols=4 gap=8
+            each c in cuesB
+              Button.outline "Cue {index+1}" onTap={c>0 ? posB=c : cuesB=setAt(cuesB,index,posB)}
+          Row gap=8 middle
+            Text.caption "Tempo {tempoB}%"
+            Slider bind=tempoB min=-8 max=8 grow
+      Card gap=12
+        Text.strong "Mixer"
+        Row gap=32 center top
+          Column gap=8 center
+            Text.caption "A"
+            Row gap=8
+              Knob "Hi" bind=hiA min=-12 max=12
+              Knob "Mid" bind=midA min=-12 max=12
+              Knob "Lo" bind=loA min=-12 max=12
+            Fader bind=volA min=0 max=1 vertical h=120
+          Column gap=8 center grow
+            Text.caption "Crossfader"
+            Crossfader bind=xf min=-1 max=1
+            Row between
+              Text.caption "A"
+              Button.ghost "Center" onTap={xf=0}
+              Text.caption "B"
+          Column gap=8 center
+            Text.caption "B"
+            Row gap=8
+              Knob "Hi" bind=hiB min=-12 max=12
+              Knob "Mid" bind=midB min=-12 max=12
+              Knob "Lo" bind=loB min=-12 max=12
+            Fader bind=volB min=0 max=1 vertical h=120
+  Dialog#rec "Record the set" "Saved as WAV to Music/Crossfade"
+    Input "File name" bind=recName
+    Select "Format" items=["WAV 24-bit","WAV 16-bit","MP3 320"] bind=recFormat
+    Button "Start recording" onTap={emit record recName; toast "Recording"; close}
+
+### Library
+project trackA={"title":"Midnight Drive","artist":"Kaito Rae","bpm":124,"key":"8A","length":372}
+project trackB={"title":"Salt Flats","artist":"Mira Voss","bpm":126,"key":"9A","length":341}
+state q=""
+state sort="title"
+state selId=0
+state tracks=[{"id":1,"title":"Midnight Drive","artist":"Kaito Rae","bpm":124,"key":"8A","length":372,"genre":"House"},{"id":2,"title":"Salt Flats","artist":"Mira Voss","bpm":126,"key":"9A","length":341,"genre":"Techno"},{"id":3,"title":"Glass Harbor","artist":"Dune Hours","bpm":122,"key":"5A","length":398,"genre":"Deep House"},{"id":4,"title":"Low Tide","artist":"Ana Okafor","bpm":128,"key":"10A","length":415,"genre":"Techno"},{"id":5,"title":"Neon Orchard","artist":"Kaito Rae","bpm":120,"key":"8B","length":356,"genre":"Disco"},{"id":6,"title":"Copper Wire","artist":"Sable","bpm":132,"key":"2A","length":387,"genre":"Trance"}]
+App
+  Sidebar
+    Brand "Crossfade" icon="album"
+    NavItem "Decks" icon="graphic_eq" onTap={go performance}
+    NavItem "Library" icon="library_music" badge="1,284" selected={true}
+    NavItem "Sets" icon="queue_music" onTap={go sets}
+    Spacer grow
+    Text.caption "Deck A: {trackA.title}"
+    Text.caption "Deck B: {trackB.title}"
+  Main
+    Nav
+      Heading "Library"
+      Row gap=8
+        Input "Search tracks" bind=q w=240
+        Select "Sort" items=["title","artist","bpm","key"] bind=sort
+    Column pad=24 gap=16
+      Card gap=0
+        Row pad=8 border-bottom=#FF444444
+          Text.caption "Title" grow
+          Text.caption "Artist" w=140
+          Text.caption "BPM" w=60
+          Text.caption "Key" w=50
+          Text.caption "Load" w=130
+        each t in sortBy(filter(tracks,x=>contains(lower(x.title+x.artist),lower(q))),x=>x[sort])
+          Row pad=8 middle onTap={selId=t.id} menu=rowMenu
+            Text.strong "{t.title}" grow
+            Text.muted "{t.artist}" w=140
+            Text.mono "{t.bpm}" w=60
+            Badge.info "{t.key}" w=50
+            Row gap=4 w=130
+              Button.outline "A" onTap={trackA=t; toast "Loaded to deck A"}
+              Button.outline "B" onTap={trackB=t; toast "Loaded to deck B"}
+      if selId!=0
+        Card gap=8
+          Text.strong "{find(tracks,x=>x.id==selId).title}"
+          Waveform values={find(tracks,x=>x.id==selId)} beats=true h=60
+          Text.muted "BPM match: A {abs(find(tracks,x=>x.id==selId).bpm-trackA.bpm)} off, B {abs(find(tracks,x=>x.id==selId).bpm-trackB.bpm)} off"
+  Menu#rowMenu
+    MenuItem "Load to deck A" icon="looks_one" onTap={trackA=find(tracks,x=>x.id==selId); toast "Loaded to deck A"}
+    MenuItem "Load to deck B" icon="looks_two" onTap={trackB=find(tracks,x=>x.id==selId); toast "Loaded to deck B"}
+    MenuItem "Remove from library" icon="delete" onTap={tracks=removeWhere(tracks,x=>x.id==selId); selId=0}
+
+### Sets
+state sets=[{"name":"Friday Warehouse","tracks":18,"mins":92},{"name":"Rooftop Sunset","tracks":12,"mins":64},{"name":"Late Night Deep","tracks":22,"mins":118}]
+App
+  Sidebar
+    Brand "Crossfade" icon="album"
+    NavItem "Decks" icon="graphic_eq" onTap={go performance}
+    NavItem "Library" icon="library_music" onTap={go library}
+    NavItem "Sets" icon="queue_music" selected={true}
+    Spacer grow
+  Main
+    Nav
+      Heading "Sets"
+      Button "New set" onTap={open newset}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        each s in sets
+          Card gap=8
+            Text.strong "{s.name}"
+            Text.muted "{s.tracks} tracks, {s.mins} min"
+            Sparkline values=[122,124,126,128,126,124,130]
+            Row gap=8
+              Button.outline "Open" onTap={toast "Opening {s.name}"}
+              Button.ghost "Delete" onTap={sets=removeWhere(sets,x=>x.name==s.name)}
+  Dialog#newset "New set" "Name it and pick a target BPM range"
+    Input "Set name" bind=setName
+    Slider bind=setBpm min=100 max=150
+    Button "Create" onTap={sets=append(sets,{"name":setName,"tracks":0,"mins":0}); close}

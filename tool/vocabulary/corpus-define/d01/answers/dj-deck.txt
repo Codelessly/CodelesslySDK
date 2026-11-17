@@ -1,0 +1,238 @@
+### Decks and Mixer
+state titleA="Midnight Drive"
+state bpmA=124
+state keyA="8A"
+state titleB="Glass Harbor"
+state bpmB=126
+state keyB="9A"
+state vol1=80
+state vol2=75
+state vol3=70
+state vol4=85
+state xfade=50
+state hiA=0
+state midA=0
+state loA=0
+state hiB=0
+state midB=0
+state loB=0
+state master=78
+App
+  Sidebar
+    Brand "Crossfade" icon="album"
+    NavItem "Decks" icon="graphic_eq" selected={true} onTap={go decks_and_mixer}
+    NavItem "Library" icon="library_music" badge="8" onTap={go library}
+    NavItem "Recordings" icon="fiber_manual_record" onTap={go recordings}
+    Spacer grow
+    Text.muted "Master {master}%"
+    Slider bind=master min=0 max=100
+  Main
+    Nav
+      Heading "Live set" level=1
+      Row gap=8
+        Badge.success "Synced"
+        Button.outline "Record" onTap={go recordings}
+        IconButton "settings" tooltip="Audio settings" onTap={open audio}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Column grow gap=12
+          Deck "A" title={titleA} bpm={bpmA} key={keyA} accent=#FF22D3EE
+        Column grow gap=12
+          Deck "B" title={titleB} bpm={bpmB} key={keyB} accent=#FFF472B6
+      Card gap=16
+        Text.panelTitle "Mixer"
+        Row gap=24 middle center
+          Column gap=8 center
+            Text.caption "DECK A EQ"
+            Row gap=12
+              Knob "HI" bind=hiA
+              Knob "MID" bind=midA
+              Knob "LO" bind=loA
+          Row gap=12 bottom
+            Fader "1" bind=vol1
+            Fader "2" bind=vol2
+          Column gap=8 center
+            Text.caption "CROSSFADER"
+            Slider bind=xfade min=0 max=100 w=240
+            Row between w=240
+              Text.small "A"
+              Button.ghost "Center" onTap={xfade=50}
+              Text.small "B"
+          Row gap=12 bottom
+            Fader "3" bind=vol3
+            Fader "4" bind=vol4
+          Column gap=8 center
+            Text.caption "DECK B EQ"
+            Row gap=12
+              Knob "HI" bind=hiB
+              Knob "MID" bind=midB
+              Knob "LO" bind=loB
+      Card gap=8
+        Row between
+          Text.panelTitle "Up next"
+          Button.tertiary "Open library" onTap={go library}
+        Row gap=12 middle
+          Icon "queue_music"
+          Text.strong "Neon Tides"
+          Text.muted "128 BPM, 8B"
+          Spacer grow
+          Button.outline "Load to A" onTap={titleA="Neon Tides"; bpmA=128; keyA="8B"; toast "Loaded to deck A"}
+          Button.outline "Load to B" onTap={titleB="Neon Tides"; bpmB=128; keyB="8B"; toast "Loaded to deck B"}
+  Dialog#audio "Audio settings" "Output and latency"
+    Select "Output device" items=["Built-in output","USB interface","Bluetooth speaker"] bind=device
+    Select "Buffer size" items=["128 samples","256 samples","512 samples"] bind=buffer
+    Toggle "Headphone cue mix" bind=cuemix
+    Button "Done" onTap={close}
+
+### Library
+state q=""
+state sortKey="title"
+state tracks=[{"id":1,"title":"Midnight Drive","artist":"Lena Voss","bpm":124,"key":"8A","time":"6:12"},{"id":2,"title":"Glass Harbor","artist":"Orin Pike","bpm":126,"key":"9A","time":"5:48"},{"id":3,"title":"Neon Tides","artist":"Kito","bpm":128,"key":"8B","time":"7:03"},{"id":4,"title":"Slow Orbit","artist":"Maya Sun","bpm":118,"key":"5A","time":"6:40"},{"id":5,"title":"Copper Rain","artist":"Lena Voss","bpm":122,"key":"4A","time":"5:21"},{"id":6,"title":"Afterglow Room","artist":"Dub Atlas","bpm":130,"key":"10B","time":"6:55"},{"id":7,"title":"Static Bloom","artist":"Orin Pike","bpm":132,"key":"11A","time":"4:59"},{"id":8,"title":"Paper Moons","artist":"Kito","bpm":120,"key":"7A","time":"6:08"}]
+state loadedA=""
+state loadedB=""
+state sel=0
+App
+  Sidebar
+    Brand "Crossfade" icon="album"
+    NavItem "Decks" icon="graphic_eq" onTap={go decks_and_mixer}
+    NavItem "Library" icon="library_music" badge="8" selected={true} onTap={go library}
+    NavItem "Recordings" icon="fiber_manual_record" onTap={go recordings}
+    Spacer grow
+    Text.muted "Deck A: {loadedA}"
+    Text.muted "Deck B: {loadedB}"
+  Main
+    Nav
+      Heading "Track browser" level=1
+      Row gap=8
+        Input "Search tracks" bind=q w=240
+        Button.outline "Sort by BPM" onTap={sortKey="bpm"}
+        Button.outline "Sort by key" onTap={sortKey="key"}
+    Column pad=24 gap=12
+      Card gap=4
+        Row gap=12
+          Text.caption "Title" grow
+          Text.caption "Artist" w=140
+          Text.caption "BPM" w=60
+          Text.caption "Key" w=60
+          Text.caption "Time" w=60
+          Text.caption "Load" w=180
+        Divider
+        each t in sortBy(filter(tracks, x => contains(lower(x.title), lower(q)) || contains(lower(x.artist), lower(q))), x => x[sortKey])
+          Row gap=12 middle menu=trackMenu onTap={sel=t.id}
+            Text.strong "{t.title}" grow
+            Text.muted "{t.artist}" w=140
+            Text "{t.bpm}" w=60
+            Badge.info "{t.key}"
+            Text.muted "{t.time}" w=60
+            Row gap=8 w=180
+              Button.outline "A" onTap={loadedA=t.title; toast "{t.title} loaded to deck A"}
+              Button.outline "B" onTap={loadedB=t.title; toast "{t.title} loaded to deck B"}
+              IconButton "more_vert" tooltip="More" onTap={sel=t.id; open trackMenu}
+      if isEmpty(filter(tracks, x => contains(lower(x.title), lower(q)) || contains(lower(x.artist), lower(q))))
+        Text.muted "No tracks match {q}"
+  Menu#trackMenu end
+    MenuItem "Load to deck A" icon="looks_one" onTap={loadedA=find(tracks, x => x.id==sel).title; toast "Loaded to deck A"}
+    MenuItem "Load to deck B" icon="looks_two" onTap={loadedB=find(tracks, x => x.id==sel).title; toast "Loaded to deck B"}
+    MenuItem "Remove from crate" icon="delete" onTap={tracks=removeWhere(tracks, x => x.id==sel)}
+
+### Recordings
+state recording=false
+state secs=0
+state takes=[{"name":"Friday warm-up","len":"1:12:30","date":"Nov 14"},{"name":"Rooftop set","len":"58:04","date":"Nov 8"}]
+every 1s when recording onTick={secs=secs+1}
+App
+  Sidebar
+    Brand "Crossfade" icon="album"
+    NavItem "Decks" icon="graphic_eq" onTap={go decks_and_mixer}
+    NavItem "Library" icon="library_music" onTap={go library}
+    NavItem "Recordings" icon="fiber_manual_record" selected={true} onTap={go recordings}
+  Main
+    Nav
+      Heading "Recordings" level=1
+      Button "{recording ? 'Stop' : 'Start recording'}" onTap={recording ? {recording=false; takes=append(takes,{"name":"Untitled take","len":duration(secs),"date":"Today"}); secs=0; toast "Take saved"} : {recording=true}}
+    Column pad=24 gap=16
+      if recording
+        Card gap=8
+          Row gap=12 middle
+            Icon "fiber_manual_record"
+            Text.strong "Recording {duration(secs)}"
+          Waveform values=[3,5,4,7,6,8,5,4,6,9,7,5] position=0
+      each tk in takes
+        Card
+          Row gap=12 middle
+            IconTile "mic"
+            Column grow
+              Text.strong "{tk.name}"
+              Text.muted "{tk.date}, {tk.len}"
+            IconButton "download" tooltip="Download" onTap={toast "Exporting {tk.name}"}
+            IconButton "delete" tooltip="Delete" onTap={takes=removeWhere(takes, x => x.name==tk.name)}
+
+// Platter drawn as a ring with a record icon; it spins only while playing. No real audio.
+define Platter spinning=false accent=#FF22D3EE size=120
+  Stack center middle
+    Ring 1 w={size} h={size}
+    if spinning
+      Icon "album" size={size/2} color={accent} animate=spin duration=2000
+    if !spinning
+      Icon "album" size={size/2} color={accent}
+
+// Waveform is a bar chart stand-in with a position readout; real scrolling audio is not drawn.
+define Waveform values=[4,6,5,8,7,9,6,5] position=0 cues=[] color=#FF22D3EE
+  Column gap=4
+    BarChart values={values} h=64
+    Row between
+      Text.caption "{duration(position)}"
+      Text.caption "Cues: {length(cues)}"
+
+define Knob "label" bind=value min=-12 max=12
+  state value=0
+  Column gap=4 center
+    Stack center middle
+      Ring {(value-min)/(max-min)} w=56 h=56
+      Text.small "{value}"
+    Slider bind=value min={min} max={max} w=64
+    Text.caption "{label}"
+
+// Vertical fader shown as a labelled level column with a horizontal slider; no vertical slider is drawn.
+define Fader "label" bind=level
+  state level=75
+  Column gap=4 center
+    Progress {level/100} w=48
+    Slider bind=level min=0 max=100 w=80
+    Text.caption "CH {label}"
+
+define Deck "name" title="" bpm=120 key="" accent=#FF22D3EE
+  state playing=false
+  state tempo=0
+  state pos=0
+  state loop=0
+  state cues=[]
+  every 1s when playing onTick={pos=pos+1}
+  Card gap=12
+    Row between
+      Row gap=8 middle
+        Badge.primary "DECK {name}"
+        Column
+          Text.strong "{title}"
+          Text.muted "{bpm + round(bpm*tempo/100,1)} BPM, key {key}"
+      Text.mono "{duration(pos)}"
+    Row gap=16 middle
+      Platter spinning={playing} accent={accent}
+      Column grow gap=8
+        Waveform values=[3,5,4,7,6,8,5,4,6,9,7,5,4,6] position={pos} cues={cues} color={accent}
+        Row gap=8
+          Button.outline "Bend -" onTap={tempo=clamp(tempo-1,-8,8)}
+          Button.outline "Bend +" onTap={tempo=clamp(tempo+1,-8,8)}
+          Text.small "Tempo {tempo}%"
+    Slider bind=tempo min=-8 max=8
+    Row gap=8
+      Button "{playing ? 'Pause' : 'Play'}" onTap={playing=!playing}
+      Button.secondary "Cue" onTap={pos=0; playing=false}
+      Spacer grow
+      ChoiceChip "1/4" selected={loop==0.25} onTap={loop=loop==0.25 ? 0 : 0.25}
+      ChoiceChip "1/2" selected={loop==0.5} onTap={loop=loop==0.5 ? 0 : 0.5}
+      ChoiceChip "1" selected={loop==1} onTap={loop=loop==1 ? 0 : 1}
+      ChoiceChip "4" selected={loop==4} onTap={loop=loop==4 ? 0 : 4}
+    Grid cols=4 gap=8
+      each i in range(4)
+        Button.outline "Cue {i+1}" selected={contains(cues,i)} onTap={contains(cues,i) ? {pos=i*30} : {cues=append(cues,i); toast "Cue {i+1} set"}}

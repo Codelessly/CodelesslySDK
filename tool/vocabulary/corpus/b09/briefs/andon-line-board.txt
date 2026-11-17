@@ -1,0 +1,3 @@
+App: Lampwall, a factory line status board. A wall screen of twelve stations as big coloured tiles (green running, yellow call for help, red stopped, blue waiting for parts) with a count of parts made against target; a stopped tile pulses and shows minutes down; tapping a tile opens its call history and who answered; a shift clock with a takt bar filling; a side column of the three worst stations by lost minutes.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

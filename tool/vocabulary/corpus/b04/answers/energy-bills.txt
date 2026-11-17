@@ -1,0 +1,206 @@
+### Usage
+state day=""
+state range="Last 14 days"
+state half=[]
+state days=[{"d":"Mon 3","kwh":11.2},{"d":"Tue 4","kwh":9.8},{"d":"Wed 5","kwh":12.4},{"d":"Thu 6","kwh":10.1},{"d":"Fri 7","kwh":13.6},{"d":"Sat 8","kwh":15.2},{"d":"Sun 9","kwh":14.1}]
+App
+  Sidebar
+    Brand "Kilowatt" icon="bolt"
+    NavItem "Usage" icon="insights" selected={true} onTap={go usage}
+    NavItem "Tariffs" icon="compare_arrows" onTap={go tariffs}
+    NavItem "Meter reading" icon="speed" onTap={go meter_reading}
+    NavItem "Payments" icon="payments" onTap={go payments}
+    Spacer grow
+    Text.muted "Account 40-118-7732"
+  Main
+    Nav
+      Heading "Usage" level=1
+      Row gap=8
+        SegmentedButton bind=range items=["Last 7 days","Last 14 days","Last 30 days"]
+        Button "Submit a reading" onTap={go meter_reading}
+    Column pad=24 gap=16 scroll
+      Grid cols=2 gap=16
+        Card gap=12
+          Text.panelTitle "This month against last"
+          BarChart values=[312,284] labels=["October","November so far"] h=180
+          Row between
+            Text.muted "October total"
+            Text.strong "312 kWh"
+          Row between
+            Text.muted "November so far (17 days)"
+            Text.strong "284 kWh"
+        Card gap=8
+          Text.panelTitle "Forecast bill"
+          Text "{money(148.60,'£',2)}" size=48 weight=700
+          Text.muted "Based on 17 days of use and your Everyday Fixed tariff. Last month: £131.20."
+          Badge.warning "13% above October"
+          Progress 0.57
+          Text.caption "17 of 30 days billed"
+      Card gap=12
+        Row between
+          Text.panelTitle "Daily use"
+          Text.muted "Tap a day for half-hour detail"
+        BarChart values={map(days,x=>x.kwh)} labels={map(days,x=>x.d)} h=220 onSelect={day=result.label; half=[0.2,0.2,0.1,0.1,0.1,0.1,0.2,0.4,0.6,0.5,0.3,0.2,0.2,0.2,0.3,0.3,0.4,0.5,0.7,0.9,1.1,1.0,0.8,0.6]; open halfhour}
+        Row gap=8 scroll
+          each d in days
+            Chip "{d.d}: {d.kwh} kWh" onTap={day=d.d; half=[0.2,0.2,0.1,0.1,0.1,0.1,0.2,0.4,0.6,0.5,0.3,0.2,0.2,0.2,0.3,0.3,0.4,0.5,0.7,0.9,1.1,1.0,0.8,0.6]; open halfhour}
+      Card gap=12
+        Text.panelTitle "Where it goes"
+        Donut values=[38,24,18,12,8] labels=["Heating","Water heater","Fridge and freezer","Washing and drying","Lighting and other"]
+  Sheet#halfhour "{day}: every half hour"
+    Text.muted "Use in kWh, 00:00 to 24:00"
+    BarChart values={half} labels=["00:00","","","","02:00","","","","04:00","","","","06:00","","","","08:00","","","","10:00","","",""] h=200
+    Row between
+      Text.muted "Total"
+      Text.strong "{fixed(sum(half,x=>x),1)} kWh"
+    Button.outline "Close" onTap={close}
+
+### Tariffs
+state sort="Yearly cost"
+state pick=""
+state tariffs=[{"id":"t1","name":"Everyday Fixed 12","type":"Fixed","unit":28.4,"standing":46.0,"yearly":1412,"current":true},{"id":"t2","name":"Green Saver","type":"Variable","unit":26.9,"standing":44.5,"yearly":1338,"current":false},{"id":"t3","name":"Night Owl","type":"Time of use","unit":24.1,"standing":52.0,"yearly":1297,"current":false},{"id":"t4","name":"Fixed Two Year","type":"Fixed","unit":27.2,"standing":47.5,"yearly":1361,"current":false}]
+App
+  Sidebar
+    Brand "Kilowatt" icon="bolt"
+    NavItem "Usage" icon="insights" onTap={go usage}
+    NavItem "Tariffs" icon="compare_arrows" selected={true} onTap={go tariffs}
+    NavItem "Meter reading" icon="speed" onTap={go meter_reading}
+    NavItem "Payments" icon="payments" onTap={go payments}
+    Spacer grow
+    Text.muted "Account 40-118-7732"
+  Main
+    Nav
+      Heading "Compare tariffs" level=1
+      Select bind=sort items=["Yearly cost","Unit rate","Name"] w=180
+    Column pad=24 gap=16 scroll
+      Text.muted "Yearly cost is worked out from the 4,120 kWh you used over the last 12 months."
+      Card gap=0
+        Row gap=12 border-bottom=#FFE0E0E0 pad=[12,12,12,12]
+          Text.strong "Tariff" grow
+          Text.strong "Type" w=110 hide=phone
+          Text.strong "Unit rate" w=90 hide=phone
+          Text.strong "Standing" w=90 hide=tablet
+          Text.strong "Per year" w=90
+          Text.strong "" w=110
+        each t in sortBy(tariffs, x => sort=="Yearly cost" ? x.yearly : (sort=="Unit rate" ? x.unit : x.name))
+          Row gap=12 middle pad=[12,12,12,12] border-bottom=#FFEEEEEE
+            Row grow gap=8 middle
+              Text.strong "{t.name}"
+              if t.current
+                Badge.info "Your tariff"
+            Text "{t.type}" w=110 hide=phone
+            Text "{t.unit}p" w=90 hide=phone
+            Text "{t.standing}p/day" w=90 hide=tablet
+            Text.strong "{money(t.yearly,'£',0)}" w=90
+            if t.current
+              Text.muted "Current" w=110
+            if !t.current
+              Button "Switch" w=110 onTap={pick=t.id; open confirmswitch}
+  Dialog#confirmswitch "Switch tariff?" "Your new tariff starts after a 14 day cooling-off period."
+    if pick != ""
+      Column gap=8
+        Text.strong "{find(tariffs,x=>x.id==pick).name}"
+        Row between
+          Text.muted "Yearly cost"
+          Text.strong "{money(find(tariffs,x=>x.id==pick).yearly,'£',0)}"
+        Row between
+          Text.muted "You would save"
+          Text.success "{money(1412-find(tariffs,x=>x.id==pick).yearly,'£',0)} a year"
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Confirm switch" onTap={emit switchTariff pick; toast "Switch requested"; close}
+
+### Meter reading
+state digits=["","","","",""]
+state photo=""
+state sent=false
+App
+  Sidebar
+    Brand "Kilowatt" icon="bolt"
+    NavItem "Usage" icon="insights" onTap={go usage}
+    NavItem "Tariffs" icon="compare_arrows" onTap={go tariffs}
+    NavItem "Meter reading" icon="speed" selected={true} onTap={go meter_reading}
+    NavItem "Payments" icon="payments" onTap={go payments}
+    Spacer grow
+    Text.muted "Account 40-118-7732"
+  Main
+    Nav
+      Heading "Submit a meter reading" level=1
+    Column pad=24 gap=16 scroll maxw=640
+      Card gap=12
+        Text.panelTitle "Electricity meter, serial E10 4471 9"
+        Text.muted "Last reading: 48,213 kWh on 1 November"
+        Text.fieldLabel "Enter the five black digits"
+        DigitInput bind=digits count=5 type=number
+        Text.caption "Ignore any red digit after the decimal point."
+      Card gap=12
+        Text.panelTitle "Add a photo (optional)"
+        if photo == ""
+          Button.outline "Take or upload a photo" icon="photo_camera" onTap={photo=pickImage()}
+        ImagePicker bind=photo accept="image/*" label="Photo of your meter"
+        if photo != ""
+          Image "{photo}" h=160
+          Button.ghost "Remove photo" onTap={photo=""}
+      Row end gap=8
+        Button.ghost "Clear" onTap={digits=["","","","",""]; photo=""}
+        Button "Submit reading" onTap={all(digits,d=>d!="") ? {sent=true; emit submitReading; toast "Reading sent"} : toast "Enter all five digits"}
+      if sent
+        Card gap=8
+          Badge.success "Received"
+          Text "Thank you. Your next bill will use this reading."
+
+### Payments
+state method="Direct debit"
+state day="1st"
+state sortcode=""
+state account=""
+state holder=""
+state agree=false
+state payments=[{"d":"1 Nov","amt":131.2,"how":"Direct debit","ok":true},{"d":"1 Oct","amt":118.45,"how":"Direct debit","ok":true},{"d":"3 Sep","amt":96.8,"how":"Card","ok":true},{"d":"1 Aug","amt":88.1,"how":"Card","ok":true}]
+App
+  Sidebar
+    Brand "Kilowatt" icon="bolt"
+    NavItem "Usage" icon="insights" onTap={go usage}
+    NavItem "Tariffs" icon="compare_arrows" onTap={go tariffs}
+    NavItem "Meter reading" icon="speed" onTap={go meter_reading}
+    NavItem "Payments" icon="payments" selected={true} onTap={go payments}
+    Spacer grow
+    Text.muted "Account 40-118-7732"
+  Main
+    Nav
+      Heading "Payments" level=1
+      Button "Set up direct debit" icon="account_balance" onTap={open ddsetup}
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Balance"
+          Text "£0.00 in credit" size=24 weight=700
+        Card gap=4
+          Text.muted "Next bill (forecast)"
+          Text "£148.60" size=24 weight=700
+        Card gap=4
+          Text.muted "Direct debit"
+          Badge.warning "Not set up"
+      Card gap=0
+        Text.panelTitle "Payment history"
+        Row gap=12 pad=[0,12,0,12]
+          Text.strong "Date" w=90
+          Text.strong "Method" grow
+          Text.strong "Amount" w=90
+          Text.strong "Status" w=90
+        each p in payments
+          Row gap=12 middle pad=[12,12,12,12] border-top=#FFEEEEEE
+            Text "{p.d}" w=90
+            Text "{p.how}" grow
+            Text.strong "{money(p.amt,'£',2)}" w=90
+            Badge.success "Paid" w=90 visible={p.ok}
+  Dialog#ddsetup "Set up direct debit" "We take your bill once a month."
+    Input "Name on the account" bind=holder
+    Row gap=8
+      Input "Sort code" "00-00-00" bind=sortcode type=number grow
+      Input "Account number" "8 digits" bind=account type=number grow
+    Select bind=day items=["1st","8th","15th","22nd"] label="Collection day"
+    Checkbox "I am the only person needed to authorise debits" bind=agree
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Confirm" onTap={(agree && holder != "" && length(account)==8) ? {emit setupDirectDebit; toast "Direct debit set up"; close} : toast "Fill in every field"}

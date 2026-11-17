@@ -1,0 +1,171 @@
+### Results
+state tab="results"
+state party="all"
+state sel="d14"
+state projector=false
+state reporting=64
+state districts=[{"id":"d1","name":"Ashford North","lead":"LAB","margin":12,"called":true,"in":100},{"id":"d2","name":"Ashford South","lead":"CON","margin":3,"called":false,"in":88},{"id":"d14","name":"Brindle Vale","lead":"LAB","margin":2,"called":false,"in":71},{"id":"d15","name":"Corran Heath","lead":"CON","margin":18,"called":true,"in":100},{"id":"d16","name":"Dunmere","lead":"LD","margin":5,"called":false,"in":55},{"id":"d17","name":"Eastgate","lead":"GRN","margin":9,"called":true,"in":100},{"id":"d18","name":"Fenwick","lead":"CON","margin":1,"called":false,"in":42}]
+state seats=[{"party":"LAB","n":148,"color":"#FFD32F2F"},{"party":"CON","n":131,"color":"#FF1565C0"},{"party":"LD","n":34,"color":"#FFF9A825"},{"party":"GRN","n":9,"color":"#FF2E7D32"}]
+every 5s when reporting<100 onTick={reporting=min(100,reporting+1)}
+App
+  Sidebar
+    Brand "Tallyroom" icon="how_to_vote"
+    NavItem "Results" icon="map" selected={tab=="results"} onTap={tab="results"}
+    NavItem "Races" icon="list_alt" badge="{count(districts,d=>!d.called)}" selected={tab=="races"} onTap={go races}
+    NavItem "Calls timeline" icon="timeline" onTap={go calls}
+    Spacer grow
+    Button.outline "Projector mode" icon="cast" onTap={projector=true; open projector}
+    Text.muted "Election night, 6 Nov"
+  Main
+    Nav
+      Heading "General election results" level=1
+      Row gap=12
+        Text.muted "Reporting"
+        Text.strong "{reporting}%"
+        Progress {reporting/100} w=160
+        Select bind=party items=["all","LAB","CON","LD","GRN"]
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Row between
+          Text.strong "Seats won, 326 for a majority"
+          Text.muted "{sum(seats,s=>s.n)} of 650 called"
+        SeatsBar seats={seats} total=650 majority=326 h=48
+      Row gap=16 top
+        Card grow gap=12
+          Row between
+            Text.strong "District map"
+            Row gap=8
+              Text.caption "Pale: narrow lead"
+              Text.caption "Deep: wide lead"
+          ElectionMap districts={districts} filter={party} shade=margin h=380 bind=sel onSelect={sel=result}
+        Column w=320 gap=16
+          Card gap=8 center
+            Text.muted "Percent reporting"
+            Counter {reporting} suffix="%" size=64 animate=pulse
+            Text.caption "{count(districts,d=>d.in==100)} of {length(districts)} districts fully in"
+          Card gap=8
+            Text.strong "Swing since 2021"
+            Row gap=12 middle
+              SwingArrow value=4.2 from="CON" to="LAB" size=56
+              Column gap=2
+                Text.strong "+4.2 points to LAB"
+                Text.caption "Nationally, compared with last time"
+      Card gap=8
+        Text.strong "Latest calls"
+        each d in take(filter(districts,d=>d.called),3)
+          ListTile "{d.name}" subtitle="{d.lead} hold, majority {d.margin} points" onTap={sel=d.id; go candidate}
+
+### Races
+state filter="all"
+state q=""
+state districts=[{"id":"d1","name":"Ashford North","lead":"LAB","margin":12,"called":true,"in":100},{"id":"d2","name":"Ashford South","lead":"CON","margin":3,"called":false,"in":88},{"id":"d14","name":"Brindle Vale","lead":"LAB","margin":2,"called":false,"in":71},{"id":"d15","name":"Corran Heath","lead":"CON","margin":18,"called":true,"in":100},{"id":"d16","name":"Dunmere","lead":"LD","margin":5,"called":false,"in":55},{"id":"d17","name":"Eastgate","lead":"GRN","margin":9,"called":true,"in":100},{"id":"d18","name":"Fenwick","lead":"CON","margin":1,"called":false,"in":42}]
+App
+  Sidebar
+    Brand "Tallyroom" icon="how_to_vote"
+    NavItem "Results" icon="map" onTap={go results}
+    NavItem "Races" icon="list_alt" selected={true}
+    NavItem "Calls timeline" icon="timeline" onTap={go calls}
+  Main
+    Nav
+      Heading "Races" level=1
+      Row gap=8
+        Input "Search districts" bind=q w=220
+        IconButton "cast" tooltip="Projector mode" onTap={open projector}
+    Column pad=24 gap=16 scroll
+      Row gap=8
+        ChoiceChip "All" selected={filter=="all"} onTap={filter="all"}
+        ChoiceChip "Called" selected={filter=="called"} onTap={filter="called"}
+        ChoiceChip "Too close to call" selected={filter=="close"} onTap={filter="close"}
+      Card gap=0
+        Row gap=12 pad=[12,8,12,8] border-bottom=#FFE0E0E0
+          Text.caption "District" grow
+          Text.caption "Leading" w=80
+          Text.caption "Margin" w=80
+          Text.caption "Counted" w=100
+          Text.caption "Status" w=140
+        each d in sortBy(filter(districts,d=>(filter=="all" || (filter=="called" && d.called) || (filter=="close" && !d.called)) && contains(lower(d.name),lower(q))),d=>d.margin)
+          Row gap=12 pad=[12,10,12,10] middle border-bottom=#FFEEEEEE onTap={sel=d.id; go candidate}
+            Text.strong "{d.name}" grow
+            Badge.primary "{d.lead}" w=80
+            Text "{d.margin} pts" w=80
+            Progress {d.in/100} w=100
+            if d.called
+              Badge.success "Called" w=140
+            if !d.called
+              Badge.warning "Too close to call" w=140
+  Menu#raceMenu
+    MenuItem "Open candidate page" icon="person" onTap={go candidate}
+    MenuItem "Copy result link" icon="link" onTap={copy "tallyroom.app/race/{sel}"; toast "Link copied"}
+
+### Candidate
+state sel="d14"
+state at=0
+state candidates=[{"name":"Mara Okonkwo","party":"LAB","votes":18420,"pct":44.1},{"name":"Julian Pryce","party":"CON","votes":17690,"pct":42.4},{"name":"Elin Hart","party":"LD","votes":4210,"pct":10.1},{"name":"Tom Rae","party":"GRN","votes":1430,"pct":3.4}]
+App
+  Sidebar
+    Brand "Tallyroom" icon="how_to_vote"
+    NavItem "Results" icon="map" onTap={go results}
+    NavItem "Races" icon="list_alt" onTap={go races}
+    NavItem "Calls timeline" icon="timeline" onTap={go calls}
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Back to races" onTap={go races}
+        Heading "Brindle Vale" level=1
+      Row gap=8
+        Badge.warning "Too close to call"
+        Button.outline "Follow race" icon="notifications" onTap={toast "Following Brindle Vale"}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=12
+          Text.strong "Votes counted so far"
+          BarChart values={map(candidates,c=>c.votes)} labels={map(candidates,c=>c.party)} h=240
+          Text.caption "71% of polling stations declared"
+        Column w=320 gap=16
+          Card gap=8
+            Text.strong "Lead"
+            Text "{candidates[0].name} ahead by {candidates[0].votes-candidates[1].votes} votes" size=20 weight=700
+            Text.muted "{fixed(candidates[0].pct-candidates[1].pct,1)} points, with 29% still to count"
+          Card gap=8
+            Text.strong "Swing since 2021"
+            SwingArrow value=2.6 from="CON" to="LAB" size=48
+            Text.caption "2.6 points to LAB"
+      Card gap=0
+        each c in candidates
+          ListTile "{c.name}" subtitle="{c.party}" onTap={at=index}
+            Row gap=12 middle
+              Text.strong "{money(c.votes,"",0)}"
+              Text.muted "{c.pct}%"
+
+### Calls
+state tab="calls"
+state calls=[{"t":"22:04","district":"Ashford North","party":"LAB","kind":"hold"},{"t":"22:31","district":"Corran Heath","party":"CON","kind":"hold"},{"t":"23:12","district":"Eastgate","party":"GRN","kind":"gain"},{"t":"23:47","district":"Dunmere","party":"LD","kind":"gain"},{"t":"00:20","district":"Ashford South","party":"CON","kind":"hold"}]
+Page
+  Nav sticky
+    Brand "Tallyroom" icon="how_to_vote"
+    Row gap=4
+      Link "Results" onTap={go results}
+      Link "Races" onTap={go races}
+      Link "Calls timeline" onTap={go calls}
+    Button "Projector mode" icon="cast" onTap={open projector}
+  Section narrow
+    Heading "Calls by time" level=1
+    Text.muted "Every race called tonight, in the order the calls came in."
+    Timeline items={calls} time="t" title="district" subtitle="party" gap=16
+  Section tint
+    Row gap=24
+      Card grow gap=8
+        Text.strong "Gains tonight"
+        Text "{count(calls,c=>c.kind==\"gain\")}" size=48 weight=700
+      Card grow gap=8
+        Text.strong "Holds tonight"
+        Text "{count(calls,c=>c.kind==\"hold\")}" size=48 weight=700
+  Footer
+    Row between
+      Text.strong "Tallyroom"
+      Text.muted "Results from returning officers, updated every minute"
+  Dialog#projector "Projector mode" "Big type, high contrast, no controls"
+    Select "Show" bind=view items=["Seats bar","Map","Percent reporting"]
+    Toggle "Rotate every 20 seconds" bind=rotate
+    Toggle "Hide cursor" bind=hideCursor
+    Button "Start" icon="cast" onTap={projector=true; fullscreen; close}

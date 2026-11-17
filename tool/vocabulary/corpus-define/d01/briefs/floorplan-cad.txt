@@ -1,0 +1,3 @@
+App: Plan View, a floor planning tool. A grid with walls drawn by clicking points with a length shown on each segment and typing to set it exactly; doors and windows dragged onto walls and snapping to them; rooms that fill with a name and an area figure; a furniture library with items rotated by a handle; a dimension tool; layers for electrics and plumbing; scale bar; units switch between metres and feet; export as a PDF.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

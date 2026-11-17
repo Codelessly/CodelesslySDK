@@ -1,0 +1,221 @@
+### Docket
+state tab="docket"
+state room="All"
+state q=""
+state sel=""
+state checkName=""
+state checkRole="Counsel"
+state hearings=[{"id":"h1","room":"3A","time":"09:00","case":"24-CV-01873","parties":"Alvarez v. Northgate Property Group","status":"done","interpreter":false,"present":["Dana Whitt","R. Okafor"]},{"id":"h2","room":"3A","time":"09:45","case":"24-CR-00412","parties":"State v. Marcus Delaney","status":"in progress","interpreter":false,"present":["A. Brandt"]},{"id":"h3","room":"3A","time":"10:30","case":"23-FA-02210","parties":"In re Marriage of Petrov","status":"called","interpreter":true,"present":[]},{"id":"h4","room":"3A","time":"11:15","case":"24-CV-02044","parties":"Hollis Credit v. Tran","status":"continued","interpreter":true,"present":[]},{"id":"h5","room":"4B","time":"09:30","case":"24-SC-00931","parties":"Kimura v. Eastside Auto","status":"done","interpreter":false,"present":["H. Kimura"]},{"id":"h6","room":"4B","time":"10:15","case":"24-PR-00155","parties":"Estate of Lorraine Baptiste","status":"called","interpreter":false,"present":["J. Baptiste"]}]
+App
+  Sidebar
+    Brand "Calendar Call" icon="gavel"
+    NavItem "Docket" icon="list_alt" badge="6" selected={tab=="docket"} onTap={tab="docket"}
+    NavItem "Judge's bench" icon="balance" onTap={go judges-bench}
+    NavItem "Courtroom screen" icon="tv" onTap={go courtroom-screen}
+    Spacer grow
+    Text.muted "Clerk: M. Reyes"
+  Main
+    Nav
+      Heading "Today's docket" level=1
+      Row gap=8
+        Input "Search case or party" bind=q w=240
+        Button.outline "Lawyer check-in" icon="how_to_reg" onTap={open checkin}
+    Column pad=24 gap=16
+      Row gap=8
+        ChoiceChip "All" selected={room=="All"} onTap={room="All"}
+        ChoiceChip "Courtroom 3A" selected={room=="3A"} onTap={room="3A"}
+        ChoiceChip "Courtroom 4B" selected={room=="4B"} onTap={room="4B"}
+        Spacer grow
+        Text.muted "{count(hearings, h=>h.status!='done')} hearings remaining"
+      Card gap=0
+        Row gap=12 pad=8 border-bottom=#FFDDDDDD
+          Text.caption "Time" w=70
+          Text.caption "Room" w=50
+          Text.caption "Case no." w=120
+          Text.caption "Parties" grow
+          Text.caption "Present" w=70 hide=phone
+          Text.caption "Status" w=110
+          Spacer w=40
+        each h in sortBy(filter(hearings, x=>(room=="All" || x.room==room) && (q=="" || contains(lower(x.parties), lower(q)) || contains(x.case, q))), x=>x.time)
+          Row gap=12 pad=8 middle border-bottom=#FFEEEEEE onTap={go case-page}
+            Text.strong "{h.time}" w=70
+            Text "{h.room}" w=50
+            Text.mono "{h.case}" w=120
+            Column grow gap=4
+              Text "{h.parties}"
+              if h.interpreter
+                Badge.warning "Interpreter needed" icon="translate"
+            Text.muted "{length(h.present)}" w=70 hide=phone
+            Badge.neutral "{h.status}" w=110 visible={h.status=="called"}
+            Badge.info "{h.status}" w=110 visible={h.status=="in progress"}
+            Badge.warning "{h.status}" w=110 visible={h.status=="continued"}
+            Badge.success "{h.status}" w=110 visible={h.status=="done"}
+            IconButton "more_vert" tooltip="Actions" onTap={sel=h.id; open rowMenu}
+  Menu#rowMenu end
+    MenuItem "Call case" icon="campaign" onTap={hearings=updateWhere(hearings,x=>x.id==sel,x=>with(x,"status","called")); toast "Case called"}
+    MenuItem "Start hearing" icon="play_arrow" onTap={hearings=updateWhere(hearings,x=>x.id==sel,x=>with(x,"status","in progress"))}
+    MenuItem "Mark done" icon="check" onTap={hearings=updateWhere(hearings,x=>x.id==sel,x=>with(x,"status","done"))}
+    MenuItem "Open case" icon="folder_open" onTap={go case-page}
+    MenuItem "Continue..." icon="event_repeat" onTap={go case-page}
+  Dialog#checkin "Lawyer check-in" "Mark yourself present for your hearing"
+    Input "Full name" bind=checkName
+    Select "Role" items=["Counsel","Co-counsel","Self-represented","Guardian ad litem"] bind=checkRole
+    Select "Hearing" items={map(filter(hearings, x=>x.status!="done"), x=>x.case + "  " + x.parties)} bind=checkHearing
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "I am present" icon="check_circle" onTap={checkName=="" ? toast "Enter your name" : {hearings=updateWhere(hearings,x=>contains(checkHearing,x.case),x=>with(x,"present",append(x.present,checkName))); toast "Checked in: {checkName}"; checkName=""; close}}
+
+### Judge's bench
+state notes=""
+state saved=[]
+state queue=[{"id":"h2","time":"09:45","case":"24-CR-00412","parties":"State v. Marcus Delaney","matter":"Motion to suppress","status":"in progress","present":["A. Brandt","D. Cho"],"interpreter":false},{"id":"h3","time":"10:30","case":"23-FA-02210","parties":"In re Marriage of Petrov","matter":"Custody review","status":"called","present":[],"interpreter":true},{"id":"h6","time":"10:15","case":"24-PR-00155","parties":"Estate of Lorraine Baptiste","matter":"Petition to approve accounting","status":"called","present":["J. Baptiste"],"interpreter":false}]
+state ruling="Under advisement"
+App
+  Sidebar
+    Brand "Calendar Call" icon="gavel"
+    NavItem "Docket" icon="list_alt" onTap={go docket}
+    NavItem "Judge's bench" icon="balance" selected={true}
+    NavItem "Courtroom screen" icon="tv" onTap={go courtroom-screen}
+    Spacer grow
+    Text.muted "Hon. E. Marlowe"
+  Main
+    Nav
+      Heading "Courtroom 3A" level=1
+      Row gap=8
+        Text.muted "{length(queue)} cases waiting"
+        Button.outline "Next case" icon="skip_next" onTap={queue=removeAt(queue,0); notes=""; ruling="Under advisement"}
+    Row gap=16 pad=24 top
+      Column grow gap=16
+        Card gap=12
+          Row between
+            Badge.info "Now hearing"
+            Text.mono "{first(queue).case}"
+          Heading "{first(queue).parties}" level=1
+          Text.muted "{first(queue).matter} at {first(queue).time}"
+          if first(queue).interpreter
+            Badge.warning "Interpreter needed" icon="translate"
+          Divider
+          Text.strong "In the courtroom"
+          Row gap=8
+            each p in first(queue).present
+              Chip "{p}" icon="person"
+            if isEmpty(first(queue).present)
+              Text.muted "No one has checked in yet."
+          Button.outline "Open case file" icon="folder_open" onTap={go case-page}
+        Card gap=12
+          Text.strong "Notes for this hearing"
+          Input "Type notes" "Arguments, findings, orders to enter" bind=notes multiline h=160
+          Row between
+            SegmentedButton items=["Granted","Denied","Under advisement"] bind=ruling
+            Row gap=8
+              Button.ghost "Clear" onTap={notes=""}
+              Button "Save notes" icon="save" onTap={saved=append(saved,{"case":first(queue).case,"note":notes,"ruling":ruling}); toast "Notes saved to {first(queue).case}"}
+      Pane w=320 pad=16 gap=12
+        Text.strong "Up next"
+        each c in slice(queue,1,length(queue))
+          ListTile "{c.parties}" subtitle="{c.time} - {c.case}" trailing="{c.status}"
+        Divider
+        Text.strong "Saved this session"
+        if isEmpty(saved)
+          Text.muted "Nothing saved yet."
+        each s in saved
+          Card gap=4
+            Text.mono "{s.case}"
+            Badge.primary "{s.ruling}"
+            Text.muted "{s.note}"
+
+### Case page
+state tab="filings"
+state doc=""
+state newDate=""
+state reason="Counsel unavailable"
+state continued=false
+state filings=[{"no":1,"date":"2024-03-04","title":"Complaint","by":"Plaintiff","pages":14,"url":"https://court.example/docs/1.pdf"},{"no":2,"date":"2024-03-26","title":"Summons returned executed","by":"Clerk","pages":2,"url":"https://court.example/docs/2.pdf"},{"no":3,"date":"2024-04-18","title":"Answer and affirmative defenses","by":"Defendant","pages":9,"url":"https://court.example/docs/3.pdf"},{"no":4,"date":"2024-06-02","title":"Motion for summary judgment","by":"Plaintiff","pages":23,"url":"https://court.example/docs/4.pdf"},{"no":5,"date":"2024-06-30","title":"Opposition to motion","by":"Defendant","pages":17,"url":"https://court.example/docs/5.pdf"}]
+Page
+  Nav sticky
+    Brand "Calendar Call" icon="gavel"
+    Row gap=4
+      Link "Docket" onTap={go docket}
+      Link "Judge's bench" onTap={go judges-bench}
+    Button "Continue hearing" icon="event_repeat" onTap={open continuance}
+  Section
+    Column gap=12
+      Row gap=8
+        Text.mono "24-CV-02044"
+        Badge.warning "Continued" visible={continued}
+        Badge.neutral "Called" visible={!continued}
+        Badge.warning "Interpreter needed" icon="translate"
+      Heading "Hollis Credit v. Tran" level=1
+      Text.muted "Courtroom 3A - Hon. E. Marlowe - Hearing {continued ? formatDate(newDate,'MMM d, yyyy') : 'today 11:15'}"
+      if continued
+        Text.success "Continued to {formatDate(newDate,'MMM d, yyyy')}: {reason}"
+  Section tint
+    Row gap=32 top
+      Column grow gap=12
+        Row gap=8
+          ChoiceChip "Filings" selected={tab=="filings"} onTap={tab="filings"}
+          ChoiceChip "Parties" selected={tab=="parties"} onTap={tab="parties"}
+        if tab=="filings"
+          Card gap=0
+            each f in sortBy(filings, x=>x.no)
+              Row gap=12 pad=8 middle border-bottom=#FFEEEEEE
+                Text.strong "{f.no}" w=30
+                Text.muted "{f.date}" w=90
+                Column grow
+                  Text "{f.title}"
+                  Text.caption "Filed by {f.by} - {f.pages} pages"
+                IconButton "visibility" tooltip="Open document" onTap={doc=f.title; open viewer}
+        if tab=="parties"
+          Card gap=8
+            Text.strong "Plaintiff: Hollis Credit Services"
+            Text.muted "Counsel: R. Okafor, Okafor & Lund LLP"
+            Divider
+            Text.strong "Defendant: Linh Tran"
+            Text.muted "Self-represented. Vietnamese interpreter requested."
+      Column w=320 gap=12
+        Card gap=8
+          Text.strong "Next hearing"
+          Text "{continued ? formatDate(newDate,'EEEE, MMM d') : 'Today, 11:15'}"
+          Button.outline "Continue hearing" icon="event_repeat" onTap={open continuance}
+        Card gap=8
+          Text.strong "Interpreter"
+          Badge.warning "Needed"
+          Text.muted "Vietnamese, in person."
+          Button.outline "Request interpreter" onTap={emit requestInterpreter; toast "Request sent"}
+  Footer
+    Text.muted "Calendar Call - Clerk's office"
+  Dialog#continuance "Continue this hearing" "Pick a new date from the calendar"
+    Calendar bind=newDate min={today()} disableWeekends=true
+    Select "Reason" items=["Counsel unavailable","Interpreter unavailable","Party not served","Joint request","Court's own motion"] bind=reason
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Confirm continuance" icon="event_available" onTap={newDate=="" ? toast "Pick a new date" : {continued=true; emit continued newDate; toast "Continued to {formatDate(newDate,'MMM d')}"; close}}
+  Lightbox#viewer "{doc}" "Filed document"
+    DocumentViewer src="https://court.example/docs/1.pdf"
+
+### Courtroom screen
+state clock="9:41"
+state rows=[{"time":"09:45","case":"24-CR-00412","parties":"State v. Delaney","status":"in progress"},{"time":"10:15","case":"24-PR-00155","parties":"Estate of Baptiste","status":"called"},{"time":"10:30","case":"23-FA-02210","parties":"Petrov","status":"called"},{"time":"11:15","case":"24-CV-02044","parties":"Hollis Credit v. Tran","status":"continued"},{"time":"13:30","case":"24-CV-02390","parties":"Marsh v. Lakeview HOA","status":"called"}]
+every 1s onTick={clock=formatDate(now(),"h:mm:ss")}
+Page
+  Section bleed
+    Box fill=#FF0B1F3A pad=32 gap=24
+      Row between middle
+        Column gap=4
+          Text "COURTROOM 3A" color=#FFFFFFFF size=44 weight=700
+          Text "Hon. E. Marlowe" color=#FFB8C4D9 size=24
+        Text "{clock}" color=#FFFFFFFF size=56 weight=700
+      Row gap=16 pad=12 border-bottom=#FF3A4E73
+        Text "Time" color=#FFB8C4D9 size=22 w=120
+        Text "Case" color=#FFB8C4D9 size=22 w=220
+        Text "Parties" color=#FFB8C4D9 size=22 grow
+        Text "Status" color=#FFB8C4D9 size=22 w=200
+      each r in rows
+        Row gap=16 pad=12 middle animate=fade stagger=80
+          Text "{r.time}" color=#FFFFFFFF size=32 weight=700 w=120
+          Text "{r.case}" color=#FFFFFFFF size=28 w=220
+          Text "{r.parties}" color=#FFFFFFFF size=32 grow
+          Badge.info "IN PROGRESS" w=200 visible={r.status=="in progress"} animate=pulse
+          Badge.neutral "CALLED" w=200 visible={r.status=="called"}
+          Badge.warning "CONTINUED" w=200 visible={r.status=="continued"}
+      Text "Please silence phones. Check in with the clerk when your case is called." color=#FFB8C4D9 size=22

@@ -1,0 +1,130 @@
+### Queues
+state q=""
+state sort="depth"
+state queues=[{"id":"orders-incoming","name":"orders.incoming","depth":1284,"trend":[900,1020,1100,1190,1284],"in":142.5,"out":131.0,"oldest":"2m 14s"},{"id":"payments-settle","name":"payments.settle","depth":37,"trend":[60,48,52,40,37],"in":18.2,"out":19.0,"oldest":"4s"},{"id":"emails-outbound","name":"emails.outbound","depth":15920,"trend":[4000,7200,10100,13000,15920],"in":420.0,"out":210.4,"oldest":"41m 08s"},{"id":"inventory-sync","name":"inventory.sync","depth":212,"trend":[190,230,205,220,212],"in":55.0,"out":54.1,"oldest":"11s"},{"id":"webhooks-retry","name":"webhooks.retry","depth":3046,"trend":[2800,2900,3010,3000,3046],"in":9.3,"out":8.8,"oldest":"1h 02m"}]
+App
+  Sidebar
+    Brand "Backlog" icon="stacked_bar_chart"
+    NavItem "Queues" icon="queue" badge="5" selected={true}
+    NavItem "Dead letters" icon="report" badge="23" onTap={go dead-letters}
+    NavItem "Alerts" icon="notifications_active"
+    Spacer grow
+    Text.muted "broker-eu-west-1"
+  Main
+    Nav
+      Heading "Queues" level=1
+      Row gap=8
+        Input "Filter queues" bind=q w=220
+        Select bind=sort items=["depth","rate in","oldest"]
+        IconButton "refresh" tooltip="Refresh now" onTap={toast "Refreshed"}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Total depth"
+          Text "{sum(queues,x=>x.depth)}" size=32 weight=700
+        Card gap=4
+          Text.muted "Rate in / s"
+          Text "{fixed(sum(queues,x=>x.in),1)}" size=32 weight=700
+        Card gap=4
+          Text.muted "Rate out / s"
+          Text "{fixed(sum(queues,x=>x.out),1)}" size=32 weight=700
+      Card gap=8
+        Row gap=12
+          Text.fieldLabel "Queue" grow
+          Text.fieldLabel "Depth" w=80
+          Text.fieldLabel "Trend" w=120
+          Text.fieldLabel "In / s" w=70
+          Text.fieldLabel "Out / s" w=70
+          Text.fieldLabel "Oldest" w=80
+        Divider
+        each qu in sortByDesc(filter(queues,x=>contains(lower(x.name),lower(q))),x=>sort=="depth" ? x.depth : x.in)
+          Row gap=12 middle onTap={go queue-detail}
+            Text.strong "{qu.name}" grow
+            Text "{qu.depth}" w=80
+            Sparkline values={qu.trend} w=120 h=28
+            Text "{qu.in}" w=70
+            Text "{qu.out}" w=70
+            Badge.warning "{qu.oldest}" w=80
+          Divider
+
+### Queue detail
+state limit=2000
+state range="1h"
+state depthSeries=[820,900,1020,1100,1190,1284,1350,1500,1720,1890,2100,2240]
+state inSeries=[120,126,131,135,138,142,150,161,170,176,181,188]
+state outSeries=[118,119,121,120,124,131,130,132,131,133,132,134]
+state consumers=[{"name":"worker-a1","seen":"2s ago","lag":0.12},{"name":"worker-a2","seen":"3s ago","lag":0.18},{"name":"worker-b1","seen":"41s ago","lag":0.74},{"name":"worker-c1","seen":"6m ago","lag":0.96}]
+App
+  Sidebar
+    Brand "Backlog" icon="stacked_bar_chart"
+    NavItem "Queues" icon="queue" selected={true} onTap={go queues}
+    NavItem "Dead letters" icon="report" badge="23" onTap={go dead-letters}
+    NavItem "Alerts" icon="notifications_active"
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="All queues" onTap={go queues}
+        Heading "orders.incoming" level=1
+        Badge.warning "Over threshold" visible={last(depthSeries) > limit}
+      Row gap=8
+        SegmentedButton bind=range items=["1h","6h","24h"]
+        Button.outline "Pause consumers" onTap={open pause}
+    Column pad=24 gap=16
+      Card gap=12
+        Row between
+          Heading "Depth and rate" level=3
+          Text.muted "Alert at {limit} messages (drag the line)"
+        LineChart labels=["10:00","10:05","10:10","10:15","10:20","10:25","10:30","10:35","10:40","10:45","10:50","10:55"] series=[{"name":"Depth","values":depthSeries},{"name":"In / s","values":inSeries,"axis":"right"},{"name":"Out / s","values":outSeries,"axis":"right"}] threshold={limit} thresholdLabel="Alert" draggable onThresholdDrag={limit=round(result,0)} onThresholdChange={emit setThreshold limit; toast "Alert threshold set to {limit}"} h=280
+      Card gap=8
+        Heading "Consumers" level=3
+        Row gap=12
+          Text.fieldLabel "Consumer" grow
+          Text.fieldLabel "Last seen" w=100
+          Text.fieldLabel "Lag" w=160
+        Divider
+        each c in consumers
+          Row gap=12 middle
+            Text.strong "{c.name}" grow
+            Text.muted "{c.seen}" w=100
+            Progress {c.lag} w=160
+  Dialog#pause "Pause consumers?" "Messages will keep arriving and pile up."
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Pause" onTap={emit pauseConsumers; toast "Consumers paused"; close}
+
+### Dead letters
+state sel=""
+state messages=[{"id":"m-7f31","queue":"orders.incoming","reason":"Schema validation failed","at":"10:42:07","body":{"orderId":"A-90412","customer":{"id":"c-221","email":"ines@example.com"},"items":[{"sku":"TEA-200","qty":2},{"sku":"MUG-01","qty":null}],"total":48.5}},{"id":"m-7f35","queue":"payments.settle","reason":"Handler timed out after 30s","at":"10:44:51","body":{"paymentId":"p-5521","amount":129.0,"currency":"EUR","attempts":5}},{"id":"m-7f40","queue":"webhooks.retry","reason":"HTTP 410 from endpoint","at":"10:51:19","body":{"url":"https://hooks.shop.example/in","event":"order.paid","payload":{"orderId":"A-90377"}}}]
+App
+  Sidebar
+    Brand "Backlog" icon="stacked_bar_chart"
+    NavItem "Queues" icon="queue" onTap={go queues}
+    NavItem "Dead letters" icon="report" badge="{length(messages)}" selected={true}
+    NavItem "Alerts" icon="notifications_active"
+  Main
+    Nav
+      Heading "Dead letter queue" level=1
+      Row gap=8
+        Button.outline "Replay all" icon="replay" onTap={emit replayAll; messages=[]; toast "Replaying all messages"}
+        Button.destructive "Purge all" icon="delete_forever" onTap={sel="all"; open purge}
+    Column pad=24 gap=16
+      if isEmpty(messages)
+        Card gap=8 center
+          Icon "check_circle"
+          Text.heading "No dead letters"
+          Text.muted "Everything was delivered."
+      each m in messages
+        Card gap=8
+          Row between
+            Column gap=2
+              Text.strong "{m.id} from {m.queue}"
+              Text.muted "{m.reason} at {m.at}"
+            Row gap=8
+              Button.outline "Replay" icon="replay" onTap={emit replay m.id; messages=removeWhere(messages,x=>x.id==m.id); toast "Replayed {m.id}"}
+              Button.destructive "Purge" icon="delete" onTap={sel=m.id; open purge}
+          Accordion "Message body"
+            Tree data={m.body} expand=1 copy
+  Dialog#purge "Purge from dead letters?" "This removes the message for good. It cannot be undone."
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Purge" onTap={emit purge sel; messages=sel=="all" ? [] : removeWhere(messages,x=>x.id==sel); toast "Purged"; close}

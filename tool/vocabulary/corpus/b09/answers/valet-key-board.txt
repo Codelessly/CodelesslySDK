@@ -1,0 +1,154 @@
+### Key board
+state sel=0
+state q=""
+state filter="all"
+state hooks=[{"n":1,"plate":"7KLM214","car":"Silver Audi Q5","bay":"B12","runner":""},{"n":2,"plate":"","car":"","bay":"","runner":""},{"n":3,"plate":"9TRE552","car":"Black Tesla Model 3","bay":"A04","runner":"Dario"},{"n":4,"plate":"","car":"","bay":"","runner":""},{"n":5,"plate":"8WQP031","car":"White Range Rover","bay":"C07","runner":""},{"n":6,"plate":"6HJD870","car":"Red Mazda CX-5","bay":"B03","runner":""},{"n":7,"plate":"","car":"","bay":"","runner":""},{"n":8,"plate":"5BNV346","car":"Blue Honda Civic","bay":"A11","runner":"Mei"}]
+state tab="board"
+App
+  Sidebar
+    Brand "Keyhook" icon="key"
+    NavItem "Key board" icon="grid_view" selected={tab=="board"} onTap={tab="board"}
+    NavItem "New ticket" icon="add_circle" onTap={go new-ticket}
+    NavItem "Retrievals" icon="directions_car" badge="2" onTap={go retrieve}
+    NavItem "Garage plan" icon="map" onTap={go retrieve}
+    Spacer grow
+    Text.muted "Evening shift, Marta O."
+  Main
+    Nav
+      Heading "Key board" level=1
+      Row gap=8
+        Input "Search plate or hook" bind=q w=220
+        Button "New ticket" icon="add" onTap={go new-ticket}
+    Column pad=24 gap=16
+      Row gap=8
+        ChoiceChip "All" selected={filter=="all"} onTap={filter="all"}
+        ChoiceChip "Hung" selected={filter=="hung"} onTap={filter="hung"}
+        ChoiceChip "Empty" selected={filter=="empty"} onTap={filter="empty"}
+        Spacer grow
+        Text.muted "{count(hooks,h=>h.plate!="")} of {length(hooks)} hooks in use"
+      Grid cols=4 gap=12
+        each h in hooks
+          Card gap=6 onTap={sel=h.n; open hook}
+            Row between
+              Text.strong "{h.n}"
+              Icon "key" hidden={h.plate==""}
+            Text.small "{h.plate==""? "Empty" : h.plate}"
+            Text.muted "{h.car}"
+            Badge.success "{h.bay}" visible={h.plate!=""}
+            Badge.warning "Runner {h.runner}" visible={h.runner!=""}
+  Dialog#hook "Hook {sel}" "Key details"
+    Column gap=12
+      Text.strong "{find(hooks,h=>h.n==sel).car}"
+      Text.muted "Plate {find(hooks,h=>h.n==sel).plate}, bay {find(hooks,h=>h.n==sel).bay}"
+      Row gap=8
+        Button "Retrieve" onTap={emit retrieve sel; close; go retrieve}
+        Button.outline "Release key" onTap={hooks=updateWhere(hooks,h=>h.n==sel,h=>with(with(with(h,"plate",""),"car",""),"bay","")); toast "Hook freed"; close}
+
+### New ticket
+state plate=""
+state colour="Silver"
+state make=""
+state photos=[]
+state damage=[]
+state stub=false
+state ticketNo=48213
+Page
+  Nav
+    Brand "Keyhook" icon="key"
+    Row gap=4
+      Link "Key board" onTap={go key-board}
+      Link "Retrievals" onTap={go retrieve}
+    Button.outline "Cancel" onTap={go key-board}
+  Section
+    Row gap=32 top
+      Column grow gap=16
+        Heading "New car ticket" level=1
+        Input "Plate" "7ABC123" bind=plate
+        Row gap=12
+          Select "Colour" bind=colour items=["Silver","Black","White","Red","Blue","Grey","Green"] grow
+          Input "Make and model" bind=make grow
+        Text.strong "Photos ({length(photos)} of 4)"
+        Grid cols=4 gap=8
+          CameraCapture "Front" onCapture={photos=append(photos,result)}
+          CameraCapture "Left" onCapture={photos=append(photos,result)}
+          CameraCapture "Rear" onCapture={photos=append(photos,result)}
+          CameraCapture "Right" onCapture={photos=append(photos,result)}
+        Text.strong "Mark damage"
+        Text.muted "Tap the outline where the car is already marked."
+        CarOutline bind=damage h=220 onTap={damage=append(damage,result)}
+        Row gap=8
+          Text.muted "{length(damage)} marks"
+          Spacer grow
+          Button.ghost "Clear marks" onTap={damage=[]}
+      Card w=320 sticky gap=12
+        Heading "Ticket summary" level=3
+        Text.muted "{plate==""? "No plate yet" : plate} / {colour} {make}"
+        Text.muted "{length(photos)} photos, {length(damage)} damage marks"
+        Button "Issue ticket" disabled={plate=="" || length(photos)<4} onTap={stub=true; open stubDlg}
+  Dialog#stubDlg "Ticket {ticketNo}" "Give the stub to the guest"
+    Column center gap=12
+      QRCode "keyhook:{ticketNo}:{plate}" size=160
+      Text.heading "Hook 9"
+      Text.muted "{plate} / {colour} {make}"
+      Row gap=8
+        Button.outline "Print stub" onTap={emit printStub ticketNo; toast "Printing"}
+        Button "Done" onTap={ticketNo=ticketNo+1; plate=""; photos=[]; damage=[]; close; go key-board}
+
+### Retrieve
+state eta=420
+state running=true
+state tip=0
+state otherTip=""
+state arrived=false
+state floor="B"
+state minutesOver=0
+App
+  Sidebar
+    Brand "Keyhook" icon="key"
+    NavItem "Key board" icon="grid_view" onTap={go key-board}
+    NavItem "Retrievals" icon="directions_car" selected={true}
+    Spacer grow
+    Text.muted "Evening shift, Marta O."
+  Main
+    Nav
+      Heading "Retrieve: ticket 48190" level=1
+      Row gap=8
+        Button.outline "Cancel request" onTap={running=false; toast "Request cancelled"; go key-board}
+    Column pad=24 gap=16
+      every 1s when running onTick={eta=max(0,eta-1); arrived=eta==0; running=eta>0}
+      every 60s onTick={minutesOver=minutesOver+1}
+      Row gap=16 top
+        Card grow gap=8
+          Text.muted "Guest wants the car in"
+          Text "{duration(eta)}" size=48 weight=700
+          Progress {1-eta/420}
+          Row gap=8
+            Avatar "Dario Costa" size=40
+            Column
+              Text.strong "Runner Dario Costa"
+              Text.muted "On the way to bay C07"
+            Spacer grow
+            IconButton "call" tooltip="Call runner" onTap={emit callRunner}
+        Card grow gap=8
+          Text.muted "Late fee"
+          Text "{money(max(0,minutesOver-15)*2,"$",2)}" size=48 weight=700
+          Text.muted "Free for 15 minutes, then $2 a minute"
+          Badge.warning "Clock running" visible={minutesOver>15}
+      Card gap=8
+        Row between
+          Heading "Where the car is" level=3
+          SegmentedButton bind=floor items=["A","B","C"]
+        GaragePlan bind=floor highlight="C07" h=240 onTap={emit pickBay result}
+        Text.muted "Bay C07, level {floor}, 40 m from the lobby"
+      Card gap=8
+        Heading "Tip for the runner" level=3
+        Row gap=8
+          ChoiceChip "$5" selected={tip==5} onTap={tip=5}
+          ChoiceChip "$10" selected={tip==10} onTap={tip=10}
+          ChoiceChip "$20" selected={tip==20} onTap={tip=20}
+          Input "Other" type=number bind=otherTip w=100 onChange={tip=coalesce(result,0)}
+        Button "Add {money(tip,"$",2)} tip" disabled={tip==0} onTap={emit tip tip; toast "Tip added to the room bill"; tip=0}
+      if arrived
+        Card gap=8 fill=#FFE7F5EC
+          Text.strong "Car is at the door"
+          Button "Hand over key" onTap={emit handover; toast "Key handed over"; go key-board}

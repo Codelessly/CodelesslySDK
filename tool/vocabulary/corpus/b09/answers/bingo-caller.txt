@@ -1,0 +1,161 @@
+### Caller
+state pool=range(90)
+state called=[]
+state ball=0
+state spin=0
+state auto=false
+state speed="Normal"
+state gap=8
+state left=8
+state pattern="Line"
+state phrases=[{"n":1,"p":"Kelly's eye"},{"n":2,"p":"One little duck"},{"n":7,"p":"Lucky seven"},{"n":11,"p":"Legs eleven"},{"n":13,"p":"Unlucky for some"},{"n":22,"p":"Two little ducks"},{"n":30,"p":"Dirty Gertie"},{"n":44,"p":"Droopy drawers"},{"n":58,"p":"Make them wait"},{"n":66,"p":"Clickety click"},{"n":77,"p":"Sunset strip"},{"n":88,"p":"Two fat ladies"},{"n":90,"p":"Top of the shop"}]
+every 1s when spin>0 onTick={spin=spin-1}
+every 1s when auto && spin==0 && length(called)<90 onTick={left<=1 ? {ball=random(pool)+1; called=append(called,ball); pool=without(pool,ball-1); spin=2; left=gap; play drum_roll} : {left=left-1}}
+App
+  Sidebar
+    Brand "Callout" icon="casino"
+    NavItem "Caller" icon="sports_score" selected={true}
+    NavItem "Check a card" icon="fact_check" onTap={go check-card}
+    NavItem "Prizes" icon="emoji_events" onTap={go prizes}
+    Spacer grow
+    Button.outline "New game" icon="restart_alt" onTap={open reset}
+  Main
+    Nav
+      Heading "Game 14, Friday night" level=1
+      Row gap=8
+        Badge.primary "{length(called)} of 90 called"
+        Badge.info "Pattern: {pattern}"
+        IconButton "volume_up" tooltip="Sound on"
+    Column pad=24 gap=16 scroll
+      Row gap=24 top
+        Card grow gap=16 center
+          Stack center middle h=220
+            Box animate={spin>0 ? "spin" : "fade"} duration=600 w=200 h=200 radius=100 fill=#FFE8EAF6
+              Icon "blur_circular" size=120
+            if spin==0 && ball>0
+              Box center middle w=140 h=140 radius=70 fill=#FFC62828 animate=pop
+                Text "{ball}" size=72 weight=800 color=#FFFFFFFF
+          if ball>0 && spin==0
+            Text.heading "{coalesce(find(phrases,p=>p.n==ball).p,'Number ' + ball)}" center animate=slide-up
+          if ball==0
+            Text.muted "Press Call to draw the first ball" center
+          if spin>0
+            Text.muted "Drawing..." center
+          Row gap=12 center
+            Button "Call next ball" icon="play_arrow" size=large onTap={length(called)<90 ? {ball=random(pool)+1; called=append(called,ball); pool=without(pool,ball-1); spin=2; left=gap; play drum_roll} : {toast "All ninety are called"}}
+            Button.outline "{auto ? 'Pause' : 'Auto call'}" icon="{auto ? 'pause' : 'timer'}" onTap={auto=!auto}
+        Column grow gap=16
+          Card gap=12
+            Text.strong "Between calls"
+            Row between
+              Text.muted "Next ball in"
+              Text.heading "{auto ? left : gap}s"
+            Progress {auto ? 1-(left/gap) : 0}
+            Text.fieldLabel "Speed"
+            SegmentedButton bind=speed items=["Slow","Normal","Fast"] onChange={speed=result; gap=(result=="Slow" ? 12 : result=="Fast" ? 4 : 8); left=gap}
+          Card gap=12
+            Text.strong "Pattern for this game"
+            SegmentedButton bind=pattern items=["Line","Corners","Full house"]
+            Grid cols=5 gap=4 w=200
+              each i in range(25)
+                Box h=32 radius=4 fill={pattern=="Full house" || (pattern=="Line" && floor(i/5)==2) || (pattern=="Corners" && (i==0 || i==4 || i==20 || i==24)) ? "#FF2E7D32" : "#FFEEEEEE"}
+      Card gap=8
+        Text.strong "Last five calls"
+        Row gap=12
+          each b in reverse(take(reverse(called),5))
+            Box center middle w=56 h=56 radius=28 fill=#FF1A237E animate=pop
+              Text "{b}" size=22 weight=700 color=#FFFFFFFF
+          if isEmpty(called)
+            Text.muted "No calls yet"
+      Card gap=12
+        Row between
+          Text.strong "Board"
+          Text.muted "Lit numbers have been called"
+        Grid cols=10 gap=6 keep
+          each n in range(90)
+            Box center middle h=40 radius=6 fill={contains(called,n+1) ? "#FFC62828" : "#FFF3F3F3"}
+              Text "{n+1}" weight=700 color={contains(called,n+1) ? "#FFFFFFFF" : "#FF555555"}
+  Dialog#reset "Start a new game?" "All called numbers will be cleared."
+    Text.muted "{length(called)} numbers have been called so far. This cannot be undone."
+    Row gap=8 end
+      Button.outline "Keep playing" onTap={close}
+      Button.destructive "New game" onTap={called=[]; pool=range(90); ball=0; spin=0; auto=false; left=gap; toast "New game ready"; close}
+
+### Check a card
+state called=[1,7,11,22,30,44,58,66,77,88]
+state pattern="Line"
+state typed=""
+state claim=""
+state card=[]
+App
+  Sidebar
+    Brand "Callout" icon="casino"
+    NavItem "Caller" icon="sports_score" onTap={go caller}
+    NavItem "Check a card" icon="fact_check" selected={true}
+    NavItem "Prizes" icon="emoji_events" onTap={go prizes}
+  Main
+    Nav
+      Heading "Check a card" level=1
+      Badge.info "Pattern: {pattern}"
+    Column pad=24 gap=16 maxw=720
+      Card gap=12
+        Text.strong "Type the numbers on the player's card"
+        Input "Numbers" "e.g. 7, 22, 44, 58, 77" bind=typed
+        Row gap=8
+          Button "Check claim" icon="rule" onTap={card=map(filter(map(split(typed,","),t=>trim(t)),t=>t!=""),t=>t+0); claim=(all(card,x=>contains(called,x)) && length(card)>=5 ? "valid" : "false")}
+          Button.outline "Clear" onTap={typed=""; card=[]; claim=""}
+      if claim=="valid"
+        Card gap=8 fill=#FFE8F5E9 animate=pop
+          Row gap=8 middle
+            Icon "check_circle" color=#FF2E7D32
+            Text.heading "Valid claim"
+          Text.muted "All {length(card)} numbers were called."
+          Button "Award prize" icon="emoji_events" onTap={emit awardPrize pattern; toast "Prize awarded"}
+      if claim=="false"
+        Card gap=8 fill=#FFFFEBEE animate=shake
+          Row gap=8 middle
+            Icon "cancel" color=#FFC62828
+            Text.heading "False claim"
+          Text.muted "Not called: {join(filter(card,x=>!contains(called,x)),', ')}"
+          if length(card)<5
+            Text.muted "A card needs at least five numbers."
+      if !isEmpty(card)
+        Card gap=8
+          Text.strong "Numbers on the card"
+          Row gap=8 scroll
+            each x in card
+              Box center middle w=48 h=48 radius=24 fill={contains(called,x) ? "#FF2E7D32" : "#FFC62828"}
+                Text "{x}" weight=700 color=#FFFFFFFF
+
+### Prizes
+state prizes=[{"id":1,"pattern":"Line","prize":"Bottle of wine","won":true,"winner":"Table 4"},{"id":2,"pattern":"Corners","prize":"Chocolate hamper","won":false,"winner":""},{"id":3,"pattern":"Full house","prize":"$100 voucher","won":false,"winner":""}]
+state sel=0
+state newPrize=""
+state newPattern="Line"
+App
+  Sidebar
+    Brand "Callout" icon="casino"
+    NavItem "Caller" icon="sports_score" onTap={go caller}
+    NavItem "Check a card" icon="fact_check" onTap={go check-card}
+    NavItem "Prizes" icon="emoji_events" selected={true}
+  Main
+    Nav
+      Heading "Prize list" level=1
+      Button "Add prize" icon="add" onTap={open addPrize}
+    Column pad=24 gap=16 maxw=720
+      each p in prizes
+        ListTile "{p.pattern}" subtitle="{p.prize}" leading="emoji_events"
+          Row gap=8 middle
+            if p.won
+              Badge.success "Won by {p.winner}"
+            if !p.won
+              Badge.neutral "Open"
+            IconButton "more_vert" tooltip="More" onTap={sel=p.id; open prizeMenu}
+  Menu#prizeMenu end
+    MenuItem "Mark as won" icon="check" onTap={prizes=updateWhere(prizes,r=>r.id==sel,r=>with(with(r,"won",true),"winner","Player"))}
+    MenuItem "Reopen" icon="undo" onTap={prizes=updateWhere(prizes,r=>r.id==sel,r=>with(r,"won",false))}
+    MenuItem "Remove" icon="delete" onTap={prizes=removeWhere(prizes,r=>r.id==sel)}
+  Dialog#addPrize "Add a prize"
+    Select "Pattern" bind=newPattern items=["Line","Corners","Full house"]
+    Input "Prize" "e.g. Gift basket" bind=newPrize
+    Button "Add" onTap={newPrize!="" ? {prizes=append(prizes,{"id":length(prizes)+10,"pattern":newPattern,"prize":newPrize,"won":false,"winner":""}); newPrize=""; close} : toast "Name the prize"}

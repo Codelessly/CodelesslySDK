@@ -1,0 +1,185 @@
+### Live
+state tab="live"
+state night=false
+state temp=14.2
+state humidity=68
+state pressure=1012
+state tempTrend="up"
+state humTrend="down"
+state presTrend="flat"
+state windHistory=[{"dir":"N","count":4},{"dir":"NE","count":7},{"dir":"E","count":3},{"dir":"SE","count":2},{"dir":"S","count":5},{"dir":"SW","count":12},{"dir":"W","count":9},{"dir":"NW","count":6}]
+state rainToday=7.4
+state rainCapacity=25
+every 30s onTick={emit refresh}
+App
+  Sidebar
+    Brand "Rooftop" icon="cloud"
+    NavItem "Live" icon="speed" selected={tab=="live"} onTap={tab="live"}
+    NavItem "History" icon="show_chart" onTap={go history}
+    NavItem "Sensors" icon="sensors" badge="1" onTap={go sensors}
+    NavItem "Alerts" icon="notifications" onTap={go alerts}
+    Spacer grow
+    Toggle "Night mode" bind=night onChange={emit nightMode result}
+    Text.muted "Station RT-01, Leeds"
+  Main
+    Nav
+      Heading "Live conditions" level=1
+      Row gap=8
+        Text.muted "Updated {formatDate(today(),"MMM d")}"
+        IconButton "refresh" tooltip="Refresh now" onTap={emit refresh; toast "Refreshed"}
+        IconButton "dark_mode" tooltip="Night mode" onTap={night=!night}
+    Column pad=24 gap=16 scroll fill={night ? "#FF120606" : "#FFFFFFFF"}
+      Grid cols=3 gap=16
+        Card gap=8
+          Text.fieldLabel "Temperature"
+          Dial {temp} min=-20 max=45 unit="°C" color={night ? "#FFB04A3A" : "#FFE5733B"}
+          Row center gap=4
+            Icon {tempTrend=="up" ? "trending_up" : tempTrend=="down" ? "trending_down" : "trending_flat"}
+            Text.muted "{tempTrend=="up" ? "+0.6" : "-0.3"} °C in the last hour"
+        Card gap=8
+          Text.fieldLabel "Humidity"
+          Dial {humidity} min=0 max=100 unit="%"
+          Row center gap=4
+            Icon {humTrend=="up" ? "trending_up" : humTrend=="down" ? "trending_down" : "trending_flat"}
+            Text.muted "falling 3 % an hour"
+        Card gap=8
+          Text.fieldLabel "Pressure"
+          Dial {pressure} min=960 max=1060 unit="hPa"
+          Row center gap=4
+            Icon {presTrend=="up" ? "trending_up" : presTrend=="down" ? "trending_down" : "trending_flat"}
+            Text.muted "steady"
+      Row gap=16 top
+        Card grow gap=12
+          Row between
+            Text.strong "Wind rose, last 24 hours"
+            Badge.info "SW prevailing"
+          WindRose items={windHistory} dir="dir" value="count" h=260
+          Text.muted "Each petal is how long the wind blew from that bearing."
+        Card w=280 gap=12
+          Text.strong "Rain today"
+          RainGauge value={rainToday} max={rainCapacity} unit="mm" h=240
+          Row between
+            Text.muted "Day total"
+            Text.strong "{rainToday} mm"
+          Progress {rainToday/rainCapacity}
+          Button.outline "Reset gauge" onTap={open resetRain}
+  Dialog#resetRain "Reset the rain gauge?" "Today's total will be stored and the tube emptied."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Reset" onTap={rainToday=0; emit resetRain; toast "Gauge emptied"; close}
+
+### History
+state range="day"
+state night=false
+state series={"day":[12,11,10,10,13,16,18,19,17,14],"week":[11,13,15,12,9,14,16],"year":[4,5,8,11,15,18,21,20,16,11,7,5]}
+state labels={"day":["00","03","06","09","12","15","18","21","24","27"],"week":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"year":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]}
+state records=[{"kind":"Highest temperature","value":"34.1 °C","date":"2025-07-19"},{"kind":"Lowest temperature","value":"-9.3 °C","date":"2026-01-08"},{"kind":"Highest gust","value":"71 km/h","date":"2025-12-04"},{"kind":"Lowest pressure","value":"968 hPa","date":"2025-12-04"},{"kind":"Highest pressure","value":"1046 hPa","date":"2026-02-11"},{"kind":"Wettest day","value":"38.2 mm","date":"2025-10-23"}]
+App
+  Sidebar
+    Brand "Rooftop" icon="cloud"
+    NavItem "Live" icon="speed" onTap={go live}
+    NavItem "History" icon="show_chart" selected={true}
+    NavItem "Sensors" icon="sensors" badge="1" onTap={go sensors}
+    NavItem "Alerts" icon="notifications" onTap={go alerts}
+    Spacer grow
+    Toggle "Night mode" bind=night
+  Main
+    Nav
+      Heading "History" level=1
+      Row gap=8
+        Button.outline "Export CSV" onTap={emit exportCsv range; toast "Export started"}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Row between
+          Text.strong "Temperature"
+          SegmentedButton bind=range items=["day","week","year"]
+        LineChart values={series[range]} labels={labels[range]} h=260
+        Row gap=24
+          Text.muted "Mean {fixed(sum(series[range],v=>v)/length(series[range]),1)} °C"
+          Text.muted "Max {max(first(series[range]),max(last(series[range]),first(series[range])))} °C"
+      Card gap=8
+        Text.strong "Records"
+        Table items={records} sortable
+          Column "Record" field="kind" grow
+          Column "Value" field="value" w=110
+          Column "Date" field="date" w=120
+
+### Sensors
+state night=false
+state sensors=[{"id":"t1","name":"Outdoor temperature","battery":0.86,"signal":"strong"},{"id":"w1","name":"Anemometer","battery":0.54,"signal":"strong"},{"id":"r1","name":"Rain tipping bucket","battery":0.21,"signal":"fair"},{"id":"p1","name":"Barometer (indoor)","battery":0.97,"signal":"strong"},{"id":"h1","name":"Hygrometer","battery":0.67,"signal":"weak"}]
+App
+  Sidebar
+    Brand "Rooftop" icon="cloud"
+    NavItem "Live" icon="speed" onTap={go live}
+    NavItem "History" icon="show_chart" onTap={go history}
+    NavItem "Sensors" icon="sensors" badge="1" selected={true}
+    NavItem "Alerts" icon="notifications" onTap={go alerts}
+    Spacer grow
+    Toggle "Night mode" bind=night
+  Main
+    Nav
+      Heading "Sensor batteries" level=1
+      Badge.warning "{count(sensors,s=>s.battery<0.25)} low"
+    Column pad=24 gap=12 scroll
+      each s in sortBy(sensors,x=>x.battery)
+        Card
+          Row gap=16 middle
+            IconTile {s.battery<0.25 ? "battery_alert" : "battery_full"}
+            Column grow gap=4
+              Text.strong "{s.name}"
+              Progress {s.battery}
+            Text.strong w=60 "{round(s.battery*100,0)}%"
+            Badge.neutral "{s.signal}"
+            IconButton "more_vert" tooltip="Sensor options" onTap={sel=s.id; open sensorMenu}
+  Menu#sensorMenu end
+    MenuItem "Rename" icon="edit" onTap={emit renameSensor sel}
+    MenuItem "Mark battery replaced" icon="battery_charging_full" onTap={sensors=updateWhere(sensors,x=>x.id==sel,x=>with(x,"battery",1)); toast "Battery logged"}
+
+### Alerts
+state night=false
+state frostOn=true
+state frostBelow=2
+state gustOn=true
+state gustAbove=60
+state notifyBy="push"
+App
+  Sidebar
+    Brand "Rooftop" icon="cloud"
+    NavItem "Live" icon="speed" onTap={go live}
+    NavItem "History" icon="show_chart" onTap={go history}
+    NavItem "Sensors" icon="sensors" badge="1" onTap={go sensors}
+    NavItem "Alerts" icon="notifications" selected={true}
+    Spacer grow
+    Toggle "Night mode" bind=night
+  Main
+    Nav
+      Heading "Alerts and display" level=1
+      Button "Save" onTap={emit saveAlerts; toast "Alerts saved"}
+    Column pad=24 gap=16 maxw=720
+      Card gap=12
+        Row between
+          Text.strong "Frost alert"
+          Toggle bind=frostOn
+        if frostOn
+          Text.muted "Warn me when the temperature falls below {frostBelow} °C"
+          Slider bind=frostBelow min=-5 max=6
+      Card gap=12
+        Row between
+          Text.strong "Gust alert"
+          Toggle bind=gustOn
+        if gustOn
+          Text.muted "Warn me when a gust passes {gustAbove} km/h"
+          Slider bind=gustAbove min=20 max=120
+      Card gap=12
+        Text.strong "Send alerts by"
+        SegmentedButton bind=notifyBy items=["push","email","off"]
+        if notifyBy=="email"
+          Input "Email" "you@example.com" type=email bind=alertEmail
+      Card gap=12
+        Row between
+          Column gap=4
+            Text.strong "Night dimming"
+            Text.muted "Dims the console and turns the readouts red."
+          Toggle bind=night onChange={emit nightMode result}
+        if night
+          Slider "Brightness" bind=dim min=5 max=60

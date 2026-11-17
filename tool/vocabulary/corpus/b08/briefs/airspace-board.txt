@@ -1,0 +1,3 @@
+App: Skyline Ops, an airport arrivals and departures board. A tall table of rows that update in place, each with a flight, a gate, a scheduled and an estimated time, a status word coloured by state; changed cells flash for a few seconds; rows re-sort when times change with a slide; filters by terminal; a runway strip showing next ten movements as blocks in time order; a weather and wind panel; a clock in two zones.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

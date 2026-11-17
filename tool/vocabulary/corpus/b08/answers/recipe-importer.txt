@@ -1,0 +1,227 @@
+### Import
+state tab="import"
+state url=""
+state busy=false
+state done=false
+state recent=[{"title":"Brown Butter Gnocchi","site":"seriouseats.com","time":"35 min"},{"title":"Miso Roasted Carrots","site":"bonappetit.com","time":"40 min"},{"title":"Lemon Ricotta Pancakes","site":"smittenkitchen.com","time":"25 min"}]
+every 1200 when busy onTick={busy=false; done=true}
+App
+  Sidebar
+    Brand "Clip a Dish" icon="restaurant_menu"
+    NavItem "Import" icon="link" selected={tab=="import"} onTap={tab="import"}
+    NavItem "Recipe" icon="menu_book" selected={tab=="recipe"} onTap={go recipe}
+    NavItem "Collection" icon="collections_bookmark" badge="24" selected={tab=="collection"} onTap={go collection}
+    NavItem "Grocery list" icon="shopping_basket" badge="6" onTap={go collection}
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Import a recipe" level=1
+      Button.outline "Paste from clipboard" icon="content_paste" onTap={paste url}
+    Column pad=24 gap=16 maxw=720
+      Card gap=12
+        Text.strong "Paste a web address"
+        Row gap=8
+          Input "Recipe link" "https://" bind=url grow type=url
+          Button "Clip it" icon="auto_fix_high" onTap={url=="" ? toast "Paste a link first" : busy=true; done=false}
+        if busy
+          Row gap=8 middle
+            Progress grow animate=pulse
+            Text.muted "Reading the page..."
+      if done
+        Card gap=12 animate=slide-up
+          Row gap=16
+            Image "https://images.example.com/gnocchi.jpg" w=160 h=110 radius=8
+            Column grow gap=4
+              Heading "Brown Butter Gnocchi with Sage" level=3
+              Row gap=8
+                Badge.neutral "35 min"
+                Badge.neutral "Serves 4"
+                Badge.warning "3 guessed"
+              Text.muted "seriouseats.com"
+          Divider
+          Text.strong "Ingredients"
+          Column gap=4
+            Row gap=8 middle
+              Text.strong "1 lb" w=70
+              Text "potato gnocchi" grow
+            Row gap=8 middle
+              Text.strong "4 tbsp" w=70
+              Text "unsalted butter" grow
+            Row gap=8 middle
+              Icon "help_outline" size=16
+              Text.strong "1/4 cup" w=54
+              Text "sage leaves" grow
+              Badge.warning "guessed"
+              Button.ghost "Fix" onTap={open fixLine}
+          Row gap=8 end
+            Button.outline "Discard" onTap={done=false; url=""}
+            Button "Save to collection" onTap={toast "Saved to Weeknight Pasta"; go recipe}
+      Text.sectionTitle "Recently clipped"
+      each r in recent
+        ListTile "{r.title}" subtitle="{r.site} - {r.time}" icon="receipt_long" onTap={go recipe}
+  Sheet#fixLine "Fix this line" "We were not sure about this one"
+    Input "Amount" bind=fixAmount "1/4 cup"
+    Input "Ingredient" bind=fixName "sage leaves"
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button "Looks right" onTap={toast "Line fixed"; close}
+
+### Recipe
+state servings=4
+state base=4
+state metric=false
+state step=0
+state picked=[]
+state ings=[{"id":1,"qty":1,"unit":"lb","grams":454,"name":"potato gnocchi","guess":false},{"id":2,"qty":4,"unit":"tbsp","grams":57,"name":"unsalted butter","guess":false},{"id":3,"qty":0.25,"unit":"cup","grams":6,"name":"sage leaves","guess":true},{"id":4,"qty":0.5,"unit":"cup","grams":50,"name":"grated Parmesan","guess":true},{"id":5,"qty":1,"unit":"tsp","grams":6,"name":"kosher salt","guess":false}]
+state steps=["Bring a large pot of salted water to a boil.","Melt the butter in a wide skillet over medium heat until it foams and smells nutty, about 4 minutes.","Add the sage and fry until crisp, about 1 minute.","Boil the gnocchi until they float, then lift them into the skillet.","Toss with Parmesan and serve at once."]
+state fixId=0
+App
+  Sidebar
+    Brand "Clip a Dish" icon="restaurant_menu"
+    NavItem "Import" icon="link" onTap={go import}
+    NavItem "Recipe" icon="menu_book" selected={true}
+    NavItem "Collection" icon="collections_bookmark" badge="24" onTap={go collection}
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Brown Butter Gnocchi with Sage" level=1
+      Row gap=8
+        IconButton "bookmark_border" tooltip="Save to collection" onTap={open tagMenu}
+        Button "Start cooking" icon="play_arrow" onTap={go cook-mode}
+    Column pad=24 gap=16 scroll
+      Row gap=24 top
+        Image "https://images.example.com/gnocchi.jpg" w=280 h=190 radius=12
+        Column grow gap=8
+          Row gap=8
+            Badge.neutral "Prep 10 min"
+            Badge.neutral "Cook 25 min"
+            Chip "weeknight"
+            Chip "pasta"
+          Text.muted "From seriouseats.com"
+          Row gap=12 middle
+            Text.strong "Servings"
+            IconButton "remove" tooltip="Fewer" onTap={servings=max(1,servings-1)}
+            Text.strong "{servings}"
+            IconButton "add" tooltip="More" onTap={servings=servings+1}
+          Row gap=8 middle
+            Text.strong "Units"
+            SegmentedButton items=["Cups","Metric"] bind=unitMode onChange={metric=(result=="Metric")}
+      Card gap=8
+        Row between
+          Heading "Ingredients" level=3
+          Button.outline "Add all to grocery list" icon="add_shopping_cart" onTap={picked=map(ings,i=>i.id); emit groceryAdd; toast "6 items added to grocery list"}
+        each i in ings
+          Row gap=8 middle
+            Checkbox bind=i.have
+            Text.strong "{metric ? fixed(i.grams * servings / base, 0) + ' g' : fraction(i.qty * servings / base) + ' ' + i.unit}" w=90
+            Text "{i.name}" grow
+            if i.guess
+              Badge.warning "guessed" onTap={fixId=i.id; open fixLine}
+            IconButton "add_shopping_cart" tooltip="Add to grocery list" onTap={picked=append(picked,i.id); emit groceryAdd i.id; toast "Added {i.name}"}
+      Card gap=8
+        Heading "Steps" level=3
+        each s in steps
+          Row gap=12 top
+            Text.strong "{index+1}." w=28
+            Text "{s}" grow
+  Sheet#fixLine "Fix this line" "Tap-to-correct a guessed part"
+    Input "Amount" bind=fixAmount
+    Input "Ingredient" bind=fixName
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button "Save fix" onTap={ings=updateWhere(ings,x=>x.id==fixId,x=>with(x,"guess",false)); toast "Fixed"; close}
+  Menu#tagMenu
+    MenuItem "Add to Weeknight Pasta" icon="folder" onTap={toast "Added to Weeknight Pasta"}
+    MenuItem "Add to Date Night" icon="favorite" onTap={toast "Added to Date Night"}
+    MenuItem "New collection" icon="create_new_folder" onTap={go collection}
+
+### Cook Mode
+state step=0
+state steps=["Bring a large pot of salted water to a boil.","Melt the butter in a wide skillet over medium heat until it foams and smells nutty, about 4 minutes.","Add the sage and fry until crisp, about 1 minute.","Boil the gnocchi until they float, then lift them into the skillet.","Toss with Parmesan and serve at once."]
+state timer=0
+state running=false
+every 1s when running onTick={timer=max(0,timer-1); timer==0 ? running=false : toast ""}
+Page
+  Nav
+    IconButton "close" tooltip="Leave cook mode" onTap={go recipe}
+    Text.strong "Brown Butter Gnocchi"
+    Text.muted "Step {step+1} of {length(steps)}"
+  Section center
+    Column gap=24 center
+      Progress "{(step+1)/length(steps)}"
+      Pages bind=step h=260
+        each s in steps
+          Text "{s}" size=40 weight=700 center
+      Dots bind=step count=5
+      if timer>0
+        Text "{duration(timer)}" size=64 weight=700
+      Row gap=8 center
+        Button.outline "1 min" icon="timer" onTap={timer=60; running=true}
+        Button.outline "4 min" icon="timer" onTap={timer=240; running=true}
+        Button.ghost "Stop" onTap={running=false; timer=0}
+      Row gap=16 center
+        Button.outline "Back" size=large icon="arrow_back" onTap={step=max(0,step-1)}
+        Button "Next" size=large icon="arrow_forward" onTap={step<length(steps)-1 ? step=step+1 : toast "All done, enjoy"}
+      Button.ghost "Show ingredients" icon="list" onTap={open ingredients}
+  Sheet#ingredients "Ingredients"
+    ListTile "1 lb potato gnocchi"
+    ListTile "4 tbsp unsalted butter"
+    ListTile "1/4 cup sage leaves"
+    ListTile "1/2 cup grated Parmesan"
+    ListTile "1 tsp kosher salt"
+
+### Collection
+state tag="all"
+state q=""
+state recipes=[{"id":1,"title":"Brown Butter Gnocchi","time":"35 min","tags":["pasta","weeknight"]},{"id":2,"title":"Miso Roasted Carrots","time":"40 min","tags":["vegetarian","side"]},{"id":3,"title":"Lemon Ricotta Pancakes","time":"25 min","tags":["breakfast"]},{"id":4,"title":"Sheet Pan Chicken Thighs","time":"50 min","tags":["weeknight","dinner"]},{"id":5,"title":"Cacio e Pepe","time":"20 min","tags":["pasta","weeknight"]}]
+state tags=["all","pasta","weeknight","vegetarian","breakfast","dinner","side"]
+state sel=0
+state grocery=[{"name":"potato gnocchi","amount":"1 lb","got":false},{"name":"unsalted butter","amount":"4 tbsp","got":false},{"name":"sage leaves","amount":"1/4 cup","got":true}]
+App
+  Sidebar
+    Brand "Clip a Dish" icon="restaurant_menu"
+    NavItem "Import" icon="link" onTap={go import}
+    NavItem "Collection" icon="collections_bookmark" badge="{length(recipes)}" selected={true}
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Collection" level=1
+      Row gap=8
+        Input "Search recipes" bind=q w=220
+        Button "Import" icon="add" onTap={go import}
+    Column pad=24 gap=16
+      Row gap=8 scroll
+        each t in tags
+          FilterChip "{t}" selected={tag==t} onTap={tag=t}
+      Grid cols=3 gap=16
+        each r in filter(recipes, x=>(tag=="all" || contains(x.tags,tag)) && contains(lower(x.title),lower(q)))
+          Card gap=8 menu=rowMenu onTap={go recipe}
+            Image "https://images.example.com/recipe-{r.id}.jpg" h=120 radius=8
+            Row between
+              Text.strong "{r.title}"
+              IconButton "more_vert" tooltip="More" onTap={sel=r.id; open rowMenu}
+            Row gap=4
+              Badge.neutral "{r.time}"
+              each t in r.tags
+                Chip "{t}"
+    Footer
+      Row between middle
+        Text.strong "Grocery list ({count(grocery,g=>!g.got)} to get)"
+        Button.outline "Open" icon="shopping_basket" onTap={open groceryList}
+  Menu#rowMenu
+    MenuItem "Open" icon="open_in_new" onTap={go recipe}
+    MenuItem "Add tag" icon="label" onTap={open tagDialog}
+    MenuItem "Add to grocery list" icon="add_shopping_cart" onTap={emit groceryAdd sel; toast "Added to grocery list"}
+    MenuItem "Delete" icon="delete" onTap={recipes=removeWhere(recipes,x=>x.id==sel); toast "Recipe removed"}
+  Dialog#tagDialog "Add a tag" "Tags help you find it later"
+    Input "Tag" bind=newTag
+    Button "Add" onTap={newTag=="" ? toast "Type a tag" : {recipes=updateWhere(recipes,x=>x.id==sel,x=>with(x,"tags",append(x.tags,newTag))); tags=unique(append(tags,newTag)); newTag=""; close}}
+  Drawer#groceryList "Grocery list" right
+    each g in grocery
+      Row gap=8 middle
+        Checkbox bind=g.got
+        Text "{g.amount} {g.name}" grow strike={g.got}
+    Button.outline "Clear checked" onTap={grocery=removeWhere(grocery,g=>g.got)}

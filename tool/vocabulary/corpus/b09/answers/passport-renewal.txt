@@ -1,0 +1,257 @@
+### Photo
+state photoDone=false
+state photoUrl=""
+state faceRatio=0.0
+state glasses=false
+state checked=false
+state photoOk={checked && faceRatio>=0.5 && !glasses}
+App
+  Sidebar
+    Brand "Renewal Desk" icon="badge"
+    NavItem "1. Photo" icon={photoOk ? "check_circle" : "photo_camera"} selected=true onTap={go photo}
+    NavItem "2. Your details" icon="check_circle_outline" onTap={go details}
+    NavItem "3. Address history" icon="home" onTap={go details}
+    NavItem "4. Speed and fee" icon="bolt" onTap={go fee}
+    NavItem "5. Declaration" icon="gavel" onTap={go fee}
+    NavItem "6. Payment" icon="credit_card" onTap={go fee}
+    NavItem "7. Track" icon="local_shipping" onTap={go tracker}
+    Spacer grow
+    Text.muted "Application RD-48213"
+    Text.muted "Saved 2 minutes ago"
+  Main
+    Nav
+      Heading "Your photo" level=1
+      Row gap=8
+        Button.ghost "Save and exit" onTap={emit saveDraft; toast "Draft saved"}
+        Button "Continue" onTap={photoOk ? go details : toast "Upload a photo that passes the checks"}
+    Column pad=24 gap=16 scroll
+      Progress 0.14
+      Row gap=24 top
+        Card grow gap=12
+          Text.strong "Upload a recent photo"
+          Text.muted "Plain light background, face centred, taken in the last month."
+          Stack h=320
+            if photoUrl==""
+              FileDrop "Drop a photo here or browse" accept="image/*" onChange={photoUrl=result; checked=false}
+            if photoUrl!=""
+              Image "{photoUrl}" h=320
+              HeadOutline guide=true
+          Row gap=8
+            Button.outline "Take with camera" icon="photo_camera" onTap={open camera}
+            Button.ghost "Remove" hidden={photoUrl==""} onTap={photoUrl=""; checked=false; faceRatio=0.0; glasses=false}
+            Spacer grow
+            Button "Check photo" onTap={emit checkPhoto photoUrl; checked=true; faceRatio=0.42}
+        Card grow gap=12
+          Text.strong "What we check"
+          Row gap=8
+            Icon {checked && faceRatio>=0.5 ? "check_circle" : "radio_button_unchecked"}
+            Text "Face fills the oval"
+          if checked && faceRatio<0.5
+            Badge.warning "Your face is too small. Move closer and retake."
+          Row gap=8
+            Icon {checked && !glasses ? "check_circle" : "radio_button_unchecked"}
+            Text "No glasses"
+          if glasses
+            Badge.error "Glasses seen. Take them off and retake."
+          Row gap=8
+            Icon "radio_button_unchecked"
+            Text "Plain background, no shadows"
+          Divider
+          Toggle "Simulate: wearing glasses" bind=glasses
+  Dialog#camera "Take your photo" "Line your face up with the outline"
+    CameraView facing="front" overlay="head-outline" onCapture={photoUrl=result; checked=false; close}
+    Button.outline "Cancel" onTap={close}
+
+### Details
+state tab="details"
+state surname="HOLLOWAY"
+state given="Imogen Claire"
+state dob="1988-03-14"
+state passportNo="533 218 940"
+state expiry="2026-12-02"
+state scanned=false
+state addresses=[{"id":1,"street":"14 Mill Lane, Bath BA1 2PQ","from":"2019-06-01","to":"2026-11-01"},{"id":2,"street":"Flat 3, 22 Orchard Road, Bristol BS6 5TH","from":"2014-09-01","to":"2019-05-31"}]
+state gaps={count(addresses,a=>a.to=="")}
+App
+  Sidebar
+    Brand "Renewal Desk" icon="badge"
+    NavItem "1. Photo" icon="check_circle" onTap={go photo}
+    NavItem "2. Your details" icon={scanned ? "check_circle" : "person"} selected=true onTap={go details}
+    NavItem "3. Address history" icon={length(addresses)>=2 ? "check_circle" : "home"} selected=true onTap={go details}
+    NavItem "4. Speed and fee" icon="bolt" onTap={go fee}
+    NavItem "5. Declaration" icon="gavel" onTap={go fee}
+    NavItem "6. Payment" icon="credit_card" onTap={go fee}
+    NavItem "7. Track" icon="local_shipping" onTap={go tracker}
+    Spacer grow
+    Text.muted "Application RD-48213"
+  Main
+    Nav
+      Heading "Your details" level=1
+      Row gap=8
+        Button.ghost "Back" onTap={go photo}
+        Button "Continue" onTap={scanned && length(addresses)>0 ? go fee : toast "Scan your old passport and add an address first"}
+    Column pad=24 gap=16 scroll
+      Progress 0.4
+      Card gap=12
+        Row between
+          Column gap=4
+            Text.strong "Copy from your old passport"
+            Text.muted "Hold the photo page flat. We read the two lines of code at the bottom."
+          Button "Scan code strip" icon="document_scanner" onTap={open scan}
+        if scanned
+          Badge.success "Read from the code strip. Check each field below."
+      Card gap=12
+        Text.strong "Personal details"
+        Grid cols=2 gap=12
+          Input "Surname" bind=surname
+          Input "Given names" bind=given
+          DatePicker "Date of birth" bind=dob
+          Input "Passport number" bind=passportNo
+          DatePicker "Expiry date" bind=expiry
+          Select "Place of birth" items=["Bath","Bristol","London","Leeds","Other"] bind=birthplace
+      Card gap=12
+        Row between
+          Text.strong "Address history, last 5 years"
+          Button.outline "Add address" icon="add" onTap={open addAddress}
+        each a in addresses
+          Row gap=12 middle
+            Icon "home"
+            Column grow gap=2
+              Text.strong "{a.street}"
+              Text.muted "{formatDate(a.from,"MMM yyyy")} to {a.to=="" ? "present" : formatDate(a.to,"MMM yyyy")}"
+            IconButton "delete" tooltip="Remove address" onTap={addresses=removeWhere(addresses,x=>x.id==a.id)}
+          Divider
+        if isEmpty(addresses)
+          Text.muted "No addresses yet. Add where you have lived since 2021."
+  Dialog#scan "Scan the code strip" "Fit the two lines of code inside the frame"
+    CameraView facing="back" overlay="mrz-strip" onCapture={emit readCodeStrip result}
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button "Use scan" onTap={scanned=true; surname="HOLLOWAY"; given="Imogen Claire"; passportNo="533 218 940"; close; toast "Details copied from your passport"}
+  Dialog#addAddress "Add an address"
+    Input "Street and town" bind=newStreet
+    DateRange "Lived here" bind=newRange
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button "Add" onTap={newStreet!="" ? {addresses=append(addresses,{"id":length(addresses)+10,"street":newStreet,"from":newRange.start,"to":newRange.end}); newStreet=""; close} : toast "Enter the address"}
+
+### Speed, declaration and payment
+state speed="standard"
+state declared=false
+state witness=""
+state agree=false
+state fee={speed=="fast" ? 142 : 88.5}
+state delivery={speed=="fast" ? "Thu 26 Nov" : "Tue 15 Dec"}
+state postage=true
+state total={fee + (postage ? 6.5 : 0)}
+state cardName=""
+state paid=false
+App
+  Sidebar
+    Brand "Renewal Desk" icon="badge"
+    NavItem "1. Photo" icon="check_circle" onTap={go photo}
+    NavItem "2. Your details" icon="check_circle" onTap={go details}
+    NavItem "3. Address history" icon="check_circle" onTap={go details}
+    NavItem "4. Speed and fee" icon="bolt" selected=true onTap={scroll speed}
+    NavItem "5. Declaration" icon={declared ? "check_circle" : "gavel"} selected=true onTap={scroll declaration}
+    NavItem "6. Payment" icon={paid ? "check_circle" : "credit_card"} selected=true onTap={scroll payment}
+    NavItem "7. Track" icon="local_shipping" onTap={go tracker}
+    Spacer grow
+    Text.muted "Application RD-48213"
+  Main
+    Nav
+      Heading "Fee, declaration and payment" level=1
+      Button.ghost "Back" onTap={go details}
+    Column pad=24 gap=16 scroll
+      Progress 0.8
+      Card#speed gap=12
+        Text.strong "How fast do you need it?"
+        Grid cols=2 gap=12
+          Card gap=8 selected={speed=="standard"} onTap={speed="standard"}
+            Row between
+              Text.strong "Standard"
+              Text.strong "{money(88.5,"£",2)}"
+            Text.muted "Arrives by"
+            Text.heading "Tue 15 Dec"
+            Text.muted "About 3 weeks"
+          Card gap=8 selected={speed=="fast"} onTap={speed="fast"}
+            Row between
+              Text.strong "Fast track"
+              Text.strong "{money(142,"£",2)}"
+            Text.muted "Arrives by"
+            Text.heading "Thu 26 Nov"
+            Text.muted "One week, appointment in Newport"
+        Toggle "Special delivery to my address (+£6.50)" bind=postage
+        Text.caption "Your current passport expires on 2 Dec 2026. Fast track arrives before it does."
+      Card#declaration gap=12
+        Text.strong "Declaration"
+        Text.muted "I confirm the details above are true, the photo is a true likeness of me, and I have not held another passport under a different name."
+        Input "Countersignatory name" "Someone who has known you two years" bind=witness
+        Checkbox "I declare this is true" bind=agree
+        Button "Sign declaration" disabled={!agree || witness==""} onTap={declared=true; toast "Declaration signed"}
+        if declared
+          Badge.success "Signed today, {formatDate(today(),"d MMM yyyy")}"
+      Card#payment gap=12
+        Text.strong "Payment summary"
+        Row between
+          Text "Passport renewal, {speed=="fast" ? "fast track" : "standard"}"
+          Text "{money(fee,"£",2)}"
+        if postage
+          Row between
+            Text "Special delivery"
+            Text "{money(6.5,"£",2)}"
+        Divider
+        Row between
+          Text.strong "Total"
+          Text.heading "{money(total,"£",2)}"
+        Text.muted "Estimated delivery {delivery}"
+        Input "Name on card" bind=cardName
+        CardField "Card details" onChange={cardReady=result.valid}
+        Button "Pay {money(total,"£",2)}" size=large disabled={!declared || cardName==""} onTap={emit pay total; paid=true; go tracker}
+
+### Tracker
+state step=2
+state steps=["Application received","Photo and details checked","Printing","Posted","Delivered"]
+App
+  Sidebar
+    Brand "Renewal Desk" icon="badge"
+    NavItem "1. Photo" icon="check_circle" onTap={go photo}
+    NavItem "2. Your details" icon="check_circle" onTap={go details}
+    NavItem "3. Address history" icon="check_circle" onTap={go details}
+    NavItem "4. Speed and fee" icon="check_circle" onTap={go fee}
+    NavItem "5. Declaration" icon="check_circle" onTap={go fee}
+    NavItem "6. Payment" icon="check_circle" onTap={go fee}
+    NavItem "7. Track" icon="local_shipping" selected=true onTap={go tracker}
+    Spacer grow
+    Text.muted "Application RD-48213"
+  Main
+    Nav
+      Heading "Track your passport" level=1
+      Row gap=8
+        IconButton "refresh" tooltip="Refresh" onTap={emit refreshTracking; toast "Updated just now"}
+        Button.outline "Contact support" icon="chat" onTap={open help}
+    Column pad=24 gap=16 scroll
+      Row gap=24 top
+        Card grow gap=12
+          Row between
+            Text.strong "Estimated delivery"
+            Badge.info "Fast track"
+          Text "Thu 26 Nov" size=40 weight=700
+          Text.muted "Special delivery to 14 Mill Lane, Bath"
+          Timeline items={steps} current={step}
+        Card grow gap=12
+          Text.strong "Where it is"
+          Map h=300 markers=[{"lat":51.5879,"lng":-3.0089,"label":"Newport passport office"},{"lat":51.3811,"lng":-2.3590,"label":"Your address"}] route=true
+          Row between
+            Text.muted "Newport passport office"
+            Text.muted "Bath, 62 miles"
+      Card gap=8
+        Text.strong "Tracking number"
+        Row between
+          Text.mono "RM 4821 9930 7GB"
+          Button.ghost "Copy" icon="content_copy" onTap={copy "RM 4821 9930 7GB"; toast "Copied"}
+  Dialog#help "Contact support" "We reply within a working day"
+    Input "Your message" multiline bind=msg
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button "Send" onTap={emit support msg; msg=""; close; toast "Message sent"}

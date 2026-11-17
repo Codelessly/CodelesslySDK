@@ -1,0 +1,216 @@
+### Live captions
+state listening=true
+state paused=false
+state silence=0
+state spoken="English"
+state shown="English"
+state fontSize=44
+state fontFamily="Sans"
+state theme="Dark"
+state keyword="invoice"
+state lines=[{"id":1,"speaker":"Maya","color":"#FF4FC3F7","text":"Thanks everyone for joining, let's start with the invoice from last week.","tentative":""},{"id":2,"speaker":"Daniel","color":"#FFFFB74D","text":"I checked it this morning and the totals match the purchase order","tentative":" except for the shipping"},{"id":3,"speaker":"Maya","color":"#FF4FC3F7","text":"Good, can you send the corrected invoice before","tentative":" noon today"}]
+state liveCount=3
+every 1s when listening onTick={silence=silence+1}
+App
+  Sidebar
+    Brand "Subtitler" icon="closed_caption"
+    NavItem "Live" icon="subtitles" selected={true}
+    NavItem "History" icon="history" onTap={go history}
+    NavItem "Appearance" icon="text_fields" onTap={go appearance}
+    NavItem "Languages" icon="translate" onTap={go languages}
+    Spacer grow
+    Text.muted "Room: Studio B"
+  Main
+    Nav
+      Heading "Live captions" level=1
+      Row gap=8
+        Badge.success "Listening" visible={listening && silence<10}
+        Badge.warning "Paused" visible={paused}
+        Button.outline "Save transcript" icon="download" onTap={emit saveTranscript lines; toast "Transcript saved"}
+        Button.outline "Pause" onTap={paused=!paused; toast paused ? "Resumed" : "Paused for reading"}
+        Button.destructive "Stop" onTap={listening=false; silence=0}
+    Column pad=24 gap=16
+      if silence>=10 && listening
+        Card fill=#FFFFF3CD gap=8
+          Row gap=8 middle
+            Icon "volume_off" color=#FF8A6D00
+            Text.strong "The room is very quiet" color=#FF5C4600
+          Text "No speech for {silence} seconds. Move the microphone closer or check that it is not muted." color=#FF5C4600
+          Row gap=8
+            Button.outline "Check microphone" onTap={open micCheck}
+            Button.ghost "Dismiss" onTap={silence=0}
+      Row gap=12 middle
+        Input "Highlight words" "invoice, deadline" bind=keyword w=240
+        Select bind=spoken items=["English","Spanish","French","German","Japanese"] label="Spoken"
+        Icon "arrow_forward"
+        Select bind=shown items=["English","Spanish","French","German","Japanese"] label="Shown"
+        Spacer grow
+        Waveform active={listening && !paused} onVoice={silence=0}
+      Box fill={theme=="Dark" ? "#FF111418" : theme=="Light" ? "#FFFFFFFF" : "#FF000000"} radius=16 pad=24 gap=20 h=420
+        Column scroll gap=20 autoscroll={!paused}
+          each line in lines
+            Column gap=4 animate=fade
+              Text.caption "{line.speaker}" color={line.color} weight=700
+              Text "{line.text}{line.tentative}" size={fontSize} font={fontFamily} color={theme=="Light" ? "#FF111418" : "#FFFFFFFF"} highlight={keyword} highlightColor=#FFFFD54F
+                Span "{line.tentative}" opacity=0.5
+      Row between middle
+        Text.muted "{length(lines)} segments, {sum(lines,l=>length(l.text))} characters"
+        Row gap=8
+          Button.outline "Add test speech" onTap={lines=append(lines,{"id":length(lines)+1,"speaker":"Daniel","color":"#FFFFB74D","text":"This is a sample line of speech.","tentative":" still arriving"}); silence=0}
+          Button.ghost "Clear" onTap={lines=[]}
+  Dialog#micCheck "Microphone check" "Speak normally for a few seconds."
+    Waveform active={true}
+    Progress bind=micLevel
+    Text.muted "Input level: {round(micLevel*100,0)}%"
+    Button "Done" onTap={silence=0; close}
+
+### Appearance
+state fontSize=44
+state fontFamily="Sans"
+state theme="Dark"
+state weight=500
+state lineSpacing=1.3
+state showSpeakers=true
+state tab="appearance"
+App
+  Sidebar
+    Brand "Subtitler" icon="closed_caption"
+    NavItem "Live" icon="subtitles" onTap={go live-captions}
+    NavItem "History" icon="history" onTap={go history}
+    NavItem "Appearance" icon="text_fields" selected={true}
+    NavItem "Languages" icon="translate" onTap={go languages}
+  Main
+    Nav
+      Heading "Appearance" level=1
+      Button.ghost "Reset" onTap={fontSize=44; fontFamily="Sans"; theme="Dark"; weight=500; lineSpacing=1.3; toast "Defaults restored"}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Card grow gap=16
+          Heading "Text" level=3
+          Column gap=4
+            Text.fieldLabel "Size: {fontSize} px"
+            Slider bind=fontSize min=20 max=96
+          Column gap=4
+            Text.fieldLabel "Weight"
+            Slider bind=weight min=300 max=800 step=100
+          Column gap=4
+            Text.fieldLabel "Line spacing"
+            Slider bind=lineSpacing min=1 max=2 step=0.1
+          Column gap=8
+            Text.fieldLabel "Font"
+            Row gap=8
+              ChoiceChip "Sans" selected={fontFamily=="Sans"} onTap={fontFamily="Sans"}
+              ChoiceChip "Serif" selected={fontFamily=="Serif"} onTap={fontFamily="Serif"}
+              ChoiceChip "Mono" selected={fontFamily=="Mono"} onTap={fontFamily="Mono"}
+              ChoiceChip "Dyslexia friendly" selected={fontFamily=="Dyslexic"} onTap={fontFamily="Dyslexic"}
+          Column gap=8
+            Text.fieldLabel "Background"
+            Row gap=8
+              ChoiceChip "Dark" selected={theme=="Dark"} onTap={theme="Dark"}
+              ChoiceChip "Light" selected={theme=="Light"} onTap={theme="Light"}
+              ChoiceChip "High contrast" selected={theme=="High"} onTap={theme="High"}
+          Toggle "Show speaker names" bind=showSpeakers
+        Card grow gap=12
+          Heading "Sample" level=3
+          Box fill={theme=="Dark" ? "#FF111418" : theme=="Light" ? "#FFFFFFFF" : "#FF000000"} radius=12 pad=20 gap=12
+            if showSpeakers
+              Text.caption "Maya" color=#FF4FC3F7 weight=700
+            Text "Thanks everyone for joining, let's start with the" size={fontSize} font={fontFamily} weight={weight} lineHeight={lineSpacing} color={theme=="Light" ? "#FF111418" : "#FFFFFFFF"}
+              Span " invoice from last" opacity=0.5
+            if showSpeakers
+              Text.caption "Daniel" color=#FFFFB74D weight=700
+            Text "Totals match." size={fontSize} font={fontFamily} weight={weight} lineHeight={lineSpacing} color={theme=="Light" ? "#FF111418" : "#FFFFFFFF"}
+          Text.muted "The lighter words are still being recognised and settle once confirmed."
+      Row end gap=8
+        Button.outline "Cancel" onTap={go live-captions}
+        Button "Apply" onTap={emit saveAppearance {"size":fontSize,"font":fontFamily,"theme":theme}; toast "Appearance saved"; go live-captions}
+
+### History
+state paused=true
+state query=""
+state keyword="invoice"
+state speakerFilter="All"
+state history=[{"id":1,"time":"10:02","speaker":"Maya","color":"#FF4FC3F7","text":"Thanks everyone for joining, let's start with the invoice from last week."},{"id":2,"time":"10:03","speaker":"Daniel","color":"#FFFFB74D","text":"I checked it this morning and the totals match the purchase order except for the shipping."},{"id":3,"time":"10:04","speaker":"Maya","color":"#FF4FC3F7","text":"Good, can you send the corrected invoice before noon today?"},{"id":4,"time":"10:06","speaker":"Priya","color":"#FF81C784","text":"The deadline for the audit is Friday, so we should file everything by Thursday."},{"id":5,"time":"10:08","speaker":"Daniel","color":"#FFFFB74D","text":"Understood, I will attach the signed invoice to the audit folder."}]
+App
+  Sidebar
+    Brand "Subtitler" icon="closed_caption"
+    NavItem "Live" icon="subtitles" onTap={go live-captions}
+    NavItem "History" icon="history" selected={true}
+    NavItem "Appearance" icon="text_fields" onTap={go appearance}
+    NavItem "Languages" icon="translate" onTap={go languages}
+  Main
+    Nav
+      Heading "History" level=1
+      Row gap=8
+        Badge.warning "Paused, reading back" visible={paused}
+        Button.outline "Resume live" visible={paused} onTap={paused=false; go live-captions}
+        Button "Save transcript" icon="download" onTap={open saveFormat}
+    Column pad=24 gap=16
+      Row gap=12 middle
+        Input "Search transcript" bind=query w=260
+        Input "Highlight" bind=keyword w=180
+        SegmentedButton bind=speakerFilter items=["All","Maya","Daniel","Priya"]
+        Spacer grow
+        Text.muted "{count(history,h=>speakerFilter=="All" || h.speaker==speakerFilter)} segments"
+      Card gap=0
+        Column scroll h=460 gap=16
+          each h in history
+            if (speakerFilter=="All" || h.speaker==speakerFilter) && contains(lower(h.text),lower(query))
+              Row gap=12 top
+                Text.muted "{h.time}" w=56
+                Avatar "{h.speaker}" size=32
+                Column grow gap=4
+                  Text.strong "{h.speaker}" color={h.color}
+                  Text "{h.text}" highlight={keyword} highlightColor=#FFFFD54F
+                IconButton "content_copy" tooltip="Copy line" onTap={copy h.text; toast "Copied"}
+      Row between middle
+        Text.muted "Scrolling back pauses the live captions."
+        Button.ghost "Jump to latest" icon="arrow_downward" onTap={scroll latest}
+  Dialog#saveFormat "Save transcript" "Choose how to export the conversation."
+    Select "Format" bind=format items=["Plain text (.txt)","Subtitles (.srt)","Document (.docx)"]
+    Toggle "Include timestamps" bind=stamps
+    Toggle "Include speaker names" bind=names
+    Row end gap=8
+      Button.outline "Cancel" onTap={close}
+      Button "Save" onTap={emit saveTranscript {"format":format,"timestamps":stamps,"names":names}; toast "Transcript saved"; close}
+
+### Languages
+state spoken="English"
+state shown="Spanish"
+state translate=true
+state autoDetect=false
+state langs=["English","Spanish","French","German","Japanese","Portuguese"]
+App
+  Sidebar
+    Brand "Subtitler" icon="closed_caption"
+    NavItem "Live" icon="subtitles" onTap={go live-captions}
+    NavItem "History" icon="history" onTap={go history}
+    NavItem "Appearance" icon="text_fields" onTap={go appearance}
+    NavItem "Languages" icon="translate" selected={true}
+  Main
+    Nav
+      Heading "Languages" level=1
+      Button.outline "Swap" icon="swap_horiz" onTap={spoken=shown; shown=spoken}
+    Column pad=24 gap=16
+      Grid cols=2 gap=24
+        Card gap=12
+          Heading "Spoken language" level=3
+          Text.muted "What people in the room are speaking."
+          Select bind=spoken items={langs}
+          Toggle "Detect the language automatically" bind=autoDetect
+        Card gap=12
+          Heading "Shown language" level=3
+          Text.muted "What appears on the caption stripe."
+          Select bind=shown items={langs}
+          Toggle "Translate the captions" bind=translate
+      Card gap=8
+        Text.strong "Preview"
+        Row gap=8 middle
+          Badge.info "{spoken}"
+          Icon "arrow_forward"
+          Badge.primary "{translate ? shown : spoken}"
+        Text.muted "Hello everyone, shall we begin?"
+        Text size=28 "{translate && shown=="Spanish" ? "Hola a todos, ¿empezamos?" : translate && shown=="French" ? "Bonjour à tous, on commence ?" : "Hello everyone, shall we begin?"}"
+      Row end gap=8
+        Button.outline "Cancel" onTap={go live-captions}
+        Button "Apply" onTap={emit setLanguages {"spoken":spoken,"shown":shown,"translate":translate}; toast "Languages updated"; go live-captions}

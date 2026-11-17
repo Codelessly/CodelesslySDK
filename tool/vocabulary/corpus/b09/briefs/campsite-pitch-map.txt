@@ -1,0 +1,3 @@
+App: Pitchup, a campsite pitch map. A drawn site with pitches as numbered shapes in colours for free, booked, arriving and blocked; filters for hookup, shade, size and near the toilets; tap a pitch to see its dimensions, photo and nightly price; a stay from a date range on a calendar with the minimum nights; a van length field that hides pitches too small; a check-in code; a late arrival note; a map walk to the pitch.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

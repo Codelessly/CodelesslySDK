@@ -1,0 +1,161 @@
+### Board
+state dir="Departures"
+state term="All"
+state sel=""
+state step=0
+state live=true
+state flights=[{"id":"SK214","dir":"Departures","airline":"Skyline","city":"London Heathrow","term":"T1","gate":"A12","sched":"14:05","est":"14:05","status":"On time","age":0,"rwy":"27L"},{"id":"DL88","dir":"Departures","airline":"Delta","city":"Atlanta","term":"T2","gate":"B07","sched":"14:10","est":"14:25","status":"Delayed","age":0,"rwy":"27R"},{"id":"AF1481","dir":"Departures","airline":"Air France","city":"Paris CDG","term":"T1","gate":"A03","sched":"14:15","est":"14:15","status":"Boarding","age":0,"rwy":"27L"},{"id":"LH401","dir":"Departures","airline":"Lufthansa","city":"Frankfurt","term":"T1","gate":"A09","sched":"14:20","est":"14:20","status":"On time","age":0,"rwy":"27L"},{"id":"UA932","dir":"Departures","airline":"United","city":"San Francisco","term":"T2","gate":"B15","sched":"14:30","est":"14:30","status":"On time","age":0,"rwy":"27R"},{"id":"EK202","dir":"Departures","airline":"Emirates","city":"Dubai","term":"T3","gate":"C21","sched":"14:40","est":"14:40","status":"Gate closed","age":0,"rwy":"27L"},{"id":"BA177","dir":"Departures","airline":"British Airways","city":"Madrid","term":"T3","gate":"C04","sched":"14:45","est":"14:55","status":"Delayed","age":0,"rwy":"27R"},{"id":"QF12","dir":"Departures","airline":"Qantas","city":"Sydney","term":"T3","gate":"C18","sched":"15:00","est":"15:00","status":"On time","age":0,"rwy":"27L"},{"id":"KL642","dir":"Arrivals","airline":"KLM","city":"Amsterdam","term":"T1","gate":"A05","sched":"14:00","est":"14:02","status":"Landed","age":0,"rwy":"09L"},{"id":"AA101","dir":"Arrivals","airline":"American","city":"New York JFK","term":"T2","gate":"B11","sched":"14:12","est":"14:12","status":"Approach","age":0,"rwy":"09R"},{"id":"SQ318","dir":"Arrivals","airline":"Singapore","city":"Singapore","term":"T3","gate":"C09","sched":"14:22","est":"14:41","status":"Delayed","age":0,"rwy":"09L"},{"id":"IB3166","dir":"Arrivals","airline":"Iberia","city":"Barcelona","term":"T1","gate":"A14","sched":"14:35","est":"14:35","status":"On time","age":0,"rwy":"09R"},{"id":"AC856","dir":"Arrivals","airline":"Air Canada","city":"Toronto","term":"T2","gate":"B02","sched":"14:50","est":"14:50","status":"On time","age":0,"rwy":"09L"},{"id":"TK1983","dir":"Arrivals","airline":"Turkish","city":"Istanbul","term":"T3","gate":"C12","sched":"14:55","est":"14:48","status":"Early","age":0,"rwy":"09R"}]
+state script=[{"id":"SK214","est":"14:18","status":"Delayed"},{"id":"AA101","est":"14:09","status":"Landed"},{"id":"UA932","est":"14:38","status":"Delayed"},{"id":"DL88","est":"14:25","status":"Boarding"},{"id":"IB3166","est":"14:31","status":"Early"},{"id":"QF12","est":"15:00","status":"Cancelled"}]
+every 6s when live onTick={flights=updateWhere(flights,f=>f.id==script[step%length(script)].id,f=>with(with(with(f,"est",script[step%length(script)].est),"status",script[step%length(script)].status),"age",4)); step=step+1}
+every 1s onTick={flights=map(flights,f=>f.age>0 ? with(f,"age",f.age-1) : f)}
+App
+  Sidebar
+    Brand "Skyline Ops" icon="flight"
+    NavItem "Board" icon="departure_board" selected={true}
+    NavItem "Runway" icon="airplanemode_active" onTap={go runway}
+    NavItem "Weather" icon="air" onTap={go weather}
+    Spacer grow
+    Text.caption "Zones"
+    Clock "Local" zone="Europe/London" format="HH:mm:ss"
+    Clock "UTC" zone="UTC" format="HH:mm:ss"
+  Main
+    Nav
+      Heading "Arrivals and departures" level=1
+      Row gap=8
+        Badge.success "{count(flights,f=>f.status==\"On time\")} on time"
+        Badge.warning "{count(flights,f=>f.status==\"Delayed\")} delayed"
+        Toggle "Live" bind=live
+        IconButton "refresh" tooltip="Refresh now" onTap={step=step+1; toast "Board refreshed"}
+    Column pad=24 gap=16
+      Row between
+        SegmentedButton bind=dir items=["Departures","Arrivals"]
+        Row gap=8
+          ChoiceChip "All terminals" selected={term=="All"} onTap={term="All"}
+          ChoiceChip "T1" selected={term=="T1"} onTap={term="T1"}
+          ChoiceChip "T2" selected={term=="T2"} onTap={term="T2"}
+          ChoiceChip "T3" selected={term=="T3"} onTap={term="T3"}
+      Card gap=4
+        Row gap=12
+          Text.caption "Flight" w=90
+          Text.caption "{dir==\"Departures\" ? \"To\" : \"From\"}" grow
+          Text.caption "Term" w=50
+          Text.caption "Gate" w=60
+          Text.caption "Sched" w=70
+          Text.caption "Est" w=70
+          Text.caption "Status" w=110
+        Divider
+        each f in sortBy(filter(flights,x=>x.dir==dir && (term=="All" || x.term==term)),x=>x.est)
+          Row gap=12 middle animate=slide-up duration=300 onTap={sel=f.id; open detail}
+            Text.strong "{f.id}" w=90
+            Column grow
+              Text "{f.city}"
+              Text.caption "{f.airline}"
+            Text "{f.term}" w=50
+            Text "{f.gate}" w=60 animate={f.age>0 ? "pulse" : "none"}
+            Text "{f.sched}" w=70
+            Text.strong "{f.est}" w=70 fill={f.age>0 ? "#FFFFF3B0" : "#00000000"}
+            Badge "{f.status}" w=110 animate={f.age>0 ? "pulse" : "none"} variant={f.status=="On time" || f.status=="Landed" || f.status=="Early" ? "success" : (f.status=="Delayed" ? "warning" : (f.status=="Cancelled" ? "error" : "info"))}
+          Divider
+        if isEmpty(filter(flights,x=>x.dir==dir && (term=="All" || x.term==term)))
+          Text.muted "No flights for this terminal."
+    Footer
+      Row between
+        Text.muted "Next ten movements"
+        Row gap=4 scroll
+          each m in take(sortBy(flights,x=>x.est),10)
+            Box pad=8 radius=6 fill={m.dir=="Departures" ? "#FF1E66F5" : "#FF2E9E5B"} onTap={sel=m.id; open detail}
+              Text "{m.id} {m.est}" color=#FFFFFFFF size=12
+  Dialog#detail "Flight {sel}" "{find(flights,x=>x.id==sel).city}"
+    Row between
+      Text.muted "Status"
+      Badge "{find(flights,x=>x.id==sel).status}"
+    Row between
+      Text.muted "Gate"
+      Text.strong "{find(flights,x=>x.id==sel).gate}"
+    Row between
+      Text.muted "Scheduled"
+      Text "{find(flights,x=>x.id==sel).sched}"
+    Row between
+      Text.muted "Estimated"
+      Text.strong "{find(flights,x=>x.id==sel).est}"
+    Row between
+      Text.muted "Runway"
+      Text "{find(flights,x=>x.id==sel).rwy}"
+    Button "Track on runway strip" onTap={close; go runway}
+
+### Runway
+state sel=""
+state window=30
+App
+  Sidebar
+    Brand "Skyline Ops" icon="flight"
+    NavItem "Board" icon="departure_board" onTap={go board}
+    NavItem "Runway" icon="airplanemode_active" selected={true}
+    NavItem "Weather" icon="air" onTap={go weather}
+    Spacer grow
+    Clock "Local" zone="Europe/London" format="HH:mm:ss"
+    Clock "UTC" zone="UTC" format="HH:mm:ss"
+  Main
+    Nav
+      Heading "Runway strip" level=1
+      SegmentedButton bind=window items=["30","60","90"]
+    Column pad=24 gap=16
+      Card gap=12
+        Text.strong "Next ten movements, in time order"
+        Row gap=6 scroll
+          each m in take(sortBy(flights,x=>x.est),10)
+            Box pad=12 radius=8 gap=4 w=120 fill={m.dir=="Departures" ? "#FF1E66F5" : "#FF2E9E5B"} animate=slide-left stagger=80 onTap={sel=m.id; open mv}
+              Text.strong "{m.est}" color=#FFFFFFFF
+              Text "{m.id}" color=#FFFFFFFF
+              Text.caption "{m.rwy}" color=#FFFFFFFF
+      Grid cols=2 gap=16
+        Card gap=8
+          Text.strong "Runway 27L / 09R"
+          Timeline items={filter(flights,x=>x.rwy=="27L" || x.rwy=="09R")} time="est" label="id"
+        Card gap=8
+          Text.strong "Runway 27R / 09L"
+          Timeline items={filter(flights,x=>x.rwy=="27R" || x.rwy=="09L")} time="est" label="id"
+  Sheet#mv "Movement {sel}"
+    Text "{find(flights,x=>x.id==sel).city}, runway {find(flights,x=>x.id==sel).rwy}"
+    Row gap=8
+      Button "Hold" onTap={toast "Hold issued for {sel}"; close}
+      Button.outline "Close" onTap={close}
+
+### Weather
+state unit="kt"
+App
+  Sidebar
+    Brand "Skyline Ops" icon="flight"
+    NavItem "Board" icon="departure_board" onTap={go board}
+    NavItem "Runway" icon="airplanemode_active" onTap={go runway}
+    NavItem "Weather" icon="air" selected={true}
+    Spacer grow
+    Clock "Local" zone="Europe/London" format="HH:mm:ss"
+    Clock "UTC" zone="UTC" format="HH:mm:ss"
+  Main
+    Nav
+      Heading "Weather and wind" level=1
+      SegmentedButton bind=unit items=["kt","km/h"]
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=8
+          Text.caption "Wind"
+          Gauge 14 min=0 max=40 limit=25 unit="kt"
+          Text.muted "From 270 degrees, gusting 22"
+        Card gap=8
+          Text.caption "Visibility"
+          Text "9 km" size=40 weight=700
+          Badge.success "VFR"
+        Card gap=8
+          Text.caption "Conditions"
+          Row gap=8 middle
+            Icon "cloud"
+            Text.strong "Scattered clouds, 14 C"
+          Text.muted "QNH 1016 hPa"
+      Card gap=8
+        Text.strong "Wind next 12 hours"
+        LineChart labels=["13","14","15","16","17","18","19","20"] series=[{"name":"Wind","values":[12,14,16,19,22,20,15,11]},{"name":"Gust","values":[18,22,25,28,30,26,21,16]}] h=220
+      Card gap=8
+        Text.strong "Runway crosswind"
+        Compass heading=270 wind=270 speed=14 size=160
+        Text.muted "Runway 27L is aligned with the wind."

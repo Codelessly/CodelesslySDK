@@ -1,0 +1,178 @@
+### League
+state tab="league"
+state season="2025/26"
+state wk=8
+state playing=false
+state teams=[{"id":"hc","name":"Harbour City","form":"WWDWW","weekly":[3,3,1,3,3,0,3,3],"gf":19,"ga":7},{"id":"nu","name":"Northgate United","form":"WLWWD","weekly":[3,0,3,3,1,3,1,3],"gf":16,"ga":9},{"id":"rr","name":"Redfield Rovers","form":"DWLWW","weekly":[1,3,0,3,3,1,3,0],"gf":14,"ga":10},{"id":"aa","name":"Ashford Athletic","form":"LDWDL","weekly":[0,1,3,0,1,3,0,3],"gf":11,"ga":12},{"id":"kb","name":"Kingsbridge","form":"LLDWL","weekly":[1,0,0,3,0,1,3,0],"gf":9,"ga":15},{"id":"lt","name":"Lowmoor Town","form":"DLLLL","weekly":[0,1,0,0,3,0,0,1],"gf":6,"ga":17}]
+every 1s when playing onTick={wk<8 ? wk=wk+1 : playing=false}
+App
+  Sidebar
+    Brand "Yearbook" icon="sports_soccer"
+    NavItem "League" icon="leaderboard" selected={tab=="league"} onTap={go league}
+    NavItem "Team" icon="groups" selected={tab=="team"} onTap={go team}
+    NavItem "Records" icon="emoji_events" selected={tab=="records"} onTap={go records}
+    NavItem "Fixtures" icon="calendar_month" selected={tab=="fixtures"} onTap={go fixtures}
+    Spacer grow
+    Text.muted "Season {season}"
+  Main
+    Nav
+      Heading "League table" level=1
+      Row gap=8
+        Select bind=season items=["2025/26","2024/25","2023/24","2022/23"] w=140
+        Button.outline "Season replay" icon="replay" onTap={open replay}
+    Column pad=24 gap=16 scroll
+      Row gap=12
+        Text.muted "After week {wk} of 8"
+        Spacer grow
+        Button.ghost "Reset" onTap={wk=8; playing=false}
+      Card gap=4
+        Row gap=8 pad=[0,8,0,8]
+          Text.caption "#" w=30
+          Text.caption "Team"
+          Spacer grow
+          Text.caption "Form" w=120 hide=phone
+          Text.caption "GD" w=50
+          Text.caption "Pts" w=50
+        Divider
+        each t in sortByDesc(map(teams,x=>with(x,"pts",sum(take(x.weekly,wk),y=>y))),r=>r.pts)
+          Row gap=8 pad=8 middle onTap={go team}
+            Text.strong "{index+1}" w=30
+            Avatar "{t.name}" size=28
+            Text.strong "{t.name}"
+            Spacer grow
+            FormDots form={t.form} w=120 hide=phone
+            Text "{t.gf-t.ga}" w=50
+            Text.strong "{t.pts}" w=50
+          Divider
+      Card gap=8
+        Text.strong "Points after week {wk}"
+        BarChart values={map(sortByDesc(map(teams,x=>with(x,"pts",sum(take(x.weekly,wk),y=>y))),r=>r.pts),r=>r.pts)} labels={map(sortByDesc(map(teams,x=>with(x,"pts",sum(take(x.weekly,wk),y=>y))),r=>r.pts),r=>r.name)} h=180
+  Dialog#replay "Season replay" "Watch the table change week by week"
+    Text.muted "Week {wk} of 8"
+    Slider bind=wk min=1 max=8 step=1
+    Row gap=8
+      Button "Play" icon="play_arrow" onTap={wk=1; playing=true}
+      Button.outline "Pause" icon="pause" onTap={playing=false}
+      Button.ghost "Close" onTap={playing=false; close}
+
+### Team
+state tab="team"
+state teamId="hc"
+state rival="nu"
+state results=[{"wk":8,"opp":"Lowmoor Town","score":"3-0","res":"W","home":true},{"wk":7,"opp":"Ashford Athletic","score":"2-1","res":"W","home":false},{"wk":6,"opp":"Northgate United","score":"0-2","res":"L","home":true},{"wk":5,"opp":"Kingsbridge","score":"4-1","res":"W","home":true},{"wk":4,"opp":"Redfield Rovers","score":"2-0","res":"W","home":false}]
+state scorers=[{"name":"Tomas Aldana","goals":9},{"name":"Reece Whitlock","goals":6},{"name":"Ivo Brandt","goals":4},{"name":"Sami Okafor","goals":3}]
+state h2h={"hc":{"wins":4,"goals":19},"nu":{"wins":3,"goals":16},"draws":1}
+App
+  Sidebar
+    Brand "Yearbook" icon="sports_soccer"
+    NavItem "League" icon="leaderboard" onTap={go league}
+    NavItem "Team" icon="groups" selected={tab=="team"} onTap={go team}
+    NavItem "Records" icon="emoji_events" onTap={go records}
+    NavItem "Fixtures" icon="calendar_month" onTap={go fixtures}
+  Main
+    Nav
+      Row gap=12 middle
+        Avatar "Harbour City" size=36
+        Heading "Harbour City" level=1
+      Row gap=8
+        FormDots form="WWDWW"
+        Button.outline "Compare" icon="compare_arrows" onTap={open compare}
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Position"
+          Text "1st" size=32 weight=700
+        Card gap=4
+          Text.muted "Points"
+          Text "19" size=32 weight=700
+        Card gap=4
+          Text.muted "Goal difference"
+          Text "+12" size=32 weight=700
+      Row gap=16 top
+        Card grow gap=8
+          Text.strong "Points by week"
+          LineChart values=[3,6,7,10,13,13,16,19] labels=["1","2","3","4","5","6","7","8"] h=200
+        Card grow gap=8
+          Text.strong "Top scorers"
+          BarChart values={map(scorers,s=>s.goals)} labels={map(scorers,s=>s.name)} h=200
+      Card gap=4
+        Text.strong "Results"
+        each r in results
+          ListTile "{r.res == 'W' ? 'Won' : r.res == 'L' ? 'Lost' : 'Drew'} {r.score} {r.home ? 'vs' : 'at'} {r.opp}" "Week {r.wk}" onTap={toast "Match report for week {r.wk}"}
+            Badge.success "W" hidden={r.res!="W"}
+            Badge.error "L" hidden={r.res!="L"}
+            Badge.neutral "D" hidden={r.res!="D"}
+  Sheet#compare "Head to head"
+    Select bind=rival items=["Northgate United","Redfield Rovers","Ashford Athletic","Kingsbridge","Lowmoor Town"]
+    Row gap=0 middle
+      Column grow center gap=4
+        Text.strong "Harbour City"
+        Text "{h2h.hc.wins}" size=48 weight=700
+        Text.muted "wins"
+      Text.muted "{h2h.draws} drawn"
+      Column grow center gap=4
+        Text.strong "{rival}"
+        Text "{h2h.nu.wins}" size=48 weight=700
+        Text.muted "wins"
+    SplitBar left={h2h.hc.wins} right={h2h.nu.wins} h=12
+    Text.caption "Goals" center
+    SplitBar left={h2h.hc.goals} right={h2h.nu.goals} leftLabel="{h2h.hc.goals}" rightLabel="{h2h.nu.goals}" h=12
+    Button "Done" onTap={close}
+
+### Records
+state tab="records"
+state q=""
+state kind="Titles"
+state records=[{"kind":"Titles","name":"Harbour City","value":14},{"kind":"Titles","name":"Northgate United","value":11},{"kind":"Titles","name":"Redfield Rovers","value":6},{"kind":"Goals","name":"Tomas Aldana","value":212},{"kind":"Goals","name":"Gareth Pym","value":198},{"kind":"Goals","name":"Reece Whitlock","value":176},{"kind":"Appearances","name":"Gareth Pym","value":571},{"kind":"Appearances","name":"Dennis Lowe","value":548},{"kind":"Appearances","name":"Ivo Brandt","value":502}]
+App
+  Sidebar
+    Brand "Yearbook" icon="sports_soccer"
+    NavItem "League" icon="leaderboard" onTap={go league}
+    NavItem "Team" icon="groups" onTap={go team}
+    NavItem "Records" icon="emoji_events" selected={tab=="records"} onTap={go records}
+    NavItem "Fixtures" icon="calendar_month" onTap={go fixtures}
+  Main
+    Nav
+      Heading "All-time records" level=1
+      Input "Search by name" bind=q w=240 icon="search"
+    Column pad=24 gap=16 scroll
+      SegmentedButton bind=kind items=["Titles","Goals","Appearances"]
+      Card gap=4
+        Text.strong "{kind}"
+        each r in sortByDesc(filter(records,x=>x.kind==kind && contains(lower(x.name),lower(q))),x=>x.value)
+          ListTile "{r.name}" onTap={toast "{r.name}: {r.value} {lower(kind)}"}
+            Text.strong "{r.value}"
+        if isEmpty(filter(records,x=>x.kind==kind && contains(lower(x.name),lower(q))))
+          Text.muted "No one called \"{q}\" in this list."
+      Card gap=8
+        Text.strong "Top three"
+        BarChart values={map(take(sortByDesc(filter(records,x=>x.kind==kind),x=>x.value),3),x=>x.value)} labels={map(take(sortByDesc(filter(records,x=>x.kind==kind),x=>x.value),3),x=>x.name)} h=180
+
+### Fixtures
+state tab="fixtures"
+state day="2026-03-14"
+state fixtures=[{"date":"2026-03-14","home":"Harbour City","away":"Kingsbridge","time":"15:00"},{"date":"2026-03-14","home":"Redfield Rovers","away":"Northgate United","time":"17:30"},{"date":"2026-03-21","home":"Ashford Athletic","away":"Harbour City","time":"12:30"},{"date":"2026-03-21","home":"Lowmoor Town","away":"Redfield Rovers","time":"15:00"},{"date":"2026-04-04","home":"Northgate United","away":"Ashford Athletic","time":"15:00"}]
+App
+  Sidebar
+    Brand "Yearbook" icon="sports_soccer"
+    NavItem "League" icon="leaderboard" onTap={go league}
+    NavItem "Team" icon="groups" onTap={go team}
+    NavItem "Records" icon="emoji_events" onTap={go records}
+    NavItem "Fixtures" icon="calendar_month" selected={tab=="fixtures"} onTap={go fixtures}
+  Main
+    Nav
+      Heading "Fixtures" level=1
+      Button.outline "Today" onTap={day=today()}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=8
+          Calendar bind=day marks={unique(map(fixtures,f=>f.date))}
+        Card grow gap=8
+          Text.strong "{formatDate(day,'MMM d')}"
+          each f in filter(fixtures,x=>x.date==day)
+            ListTile "{f.home} v {f.away}" "{f.time}" onTap={open fixture}
+          if isEmpty(filter(fixtures,x=>x.date==day))
+            Text.muted "No fixtures on this day."
+  Dialog#fixture "Fixture" "Kick-off details"
+    Text.muted "Pick a day with a mark to see its matches."
+    Button "Add to my calendar" onTap={toast "Added"; close}

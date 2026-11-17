@@ -1,0 +1,184 @@
+### Floor plan
+state tab="plan"
+state floor="Ground"
+state filters=[]
+state code=""
+state stops=[{"n":12,"title":"Winged Victory cast","room":"Hall of Casts"},{"n":14,"title":"The Amber Room panel","room":"Baltic Gallery"},{"n":21,"title":"Sunflower fragments","room":"Garden Room"},{"n":27,"title":"Tide clock","room":"Maritime Wing"}]
+App
+  Sidebar
+    Brand "Wanderlust Wing" icon="headphones"
+    NavItem "Plan" icon="map" selected={tab=="plan"} onTap={tab="plan"}
+    NavItem "Tour" icon="route" onTap={go tour}
+    NavItem "Favourites" icon="favorite" badge="{length(favs)}" onTap={go favourites}
+    Spacer grow
+    Button.outline "{lang}" icon="language" onTap={open language}
+  Main
+    Nav
+      Heading "Floor plan" level=1
+      Row gap=8
+        SegmentedButton bind=floor items=["Ground","First","Second"]
+        IconButton "qr_code_scanner" tooltip="Scan a label" onTap={open scan}
+    Column pad=24 gap=16 scroll
+      Row gap=12
+        Input "Stop number" "e.g. 14" bind=code type=number grow
+        Button "Play" onTap={isEmpty(find(stops,s=>s.n==code)) ? toast "No stop with that number" : {stop=code; go stop}}
+      Row gap=8
+        FilterChip "Cafe" icon="local_cafe" selected={contains(filters,"cafe")} onTap={filters=contains(filters,"cafe") ? without(filters,"cafe") : append(filters,"cafe")}
+        FilterChip "Toilets" icon="wc" selected={contains(filters,"toilets")} onTap={filters=contains(filters,"toilets") ? without(filters,"toilets") : append(filters,"toilets")}
+        FilterChip "Lift" icon="elevator" selected={contains(filters,"lift")} onTap={filters=contains(filters,"lift") ? without(filters,"lift") : append(filters,"lift")}
+      Card gap=12
+        FloorPlan h=420 floor={floor}
+          Room "Hall of Casts" x=0 y=0 w=4 h=3
+          Room "Baltic Gallery" x=4 y=0 w=3 h=3
+          Room "Garden Room" x=0 y=3 w=3 h=3
+          Room "Maritime Wing" x=3 y=3 w=4 h=3
+          Marker.you x=1.5 y=2.2 label="You are here"
+          each s in stops
+            Marker.stop "{s.n}" x={s.x} y={s.y} selected={s.n==stop} onTap={stop=s.n; open stopPeek}
+          if contains(filters,"cafe")
+            Marker.amenity "local_cafe" x=5.5 y=4.5 label="Cafe"
+          if contains(filters,"toilets")
+            Marker.amenity "wc" x=2.8 y=1.2 label="Toilets"
+            Marker.amenity "wc" x=6.2 y=5.2 label="Toilets"
+          if contains(filters,"lift")
+            Marker.amenity "elevator" x=3.5 y=2.9 label="Lift"
+        Row between
+          Text.caption "Blue dot: you. Numbers: audio stops."
+          Text.caption "{length(stops)} stops on this floor"
+  Sheet#stopPeek "Stop {stop}"
+    Text.heading "{find(stops,s=>s.n==stop).title}"
+    Text.muted "{find(stops,s=>s.n==stop).room}"
+    Row gap=8
+      Button "Play" icon="play_arrow" onTap={close; go stop}
+      Button.outline "Save" icon="favorite_border" onTap={favs=contains(favs,stop) ? favs : append(favs,stop); toast "Added to favourites"}
+  Dialog#scan "Scan a label" "Hold the camera over the code beside the object"
+    Scanner onScan={stop=result; close; go stop}
+    Button.ghost "Type the number instead" onTap={close}
+  Dialog#language "Language"
+    Radio bind=lang items=["English","Francais","Deutsch","Espanol","Italiano","Japanese"]
+    Button "Done" onTap={close}
+
+### Now playing
+state playing=true
+state pos=42
+state speed="1x"
+state detail=""
+state transcript=[{"t":0,"line":"Welcome to the Garden Room."},{"t":12,"line":"These fragments come from a canvas of nine sunflowers painted in the winter of 1888."},{"t":31,"line":"Look at the lower left, where the petals are thickest with paint."},{"t":55,"line":"The artist wrote that he wanted the colour to feel like a chord."},{"t":78,"line":"Move to the window to see how daylight changes the yellow."}]
+every 1s when playing onTick={pos=min(240,pos+(speed=="1.5x" ? 1.5 : speed=="2x" ? 2 : speed=="0.75x" ? 0.75 : 1))}
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back to plan" onTap={go floor_plan}
+      Column
+        Text.strong "Stop 21: Sunflower fragments"
+        Text.caption "Garden Room, Ground floor"
+      Row gap=8
+        IconButton "favorite" tooltip="Add to favourites" onTap={favs=contains(favs,21) ? without(favs,21) : append(favs,21); toast contains(favs,21) ? "Removed" : "Saved to favourites"}
+        IconButton "more_vert" tooltip="More" onTap={open more}
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        ImageMap src="https://images.wanderlustwing.example/stops/21/sunflowers.jpg" h=260 onSelect={detail=result}
+          Hotspot "petals" x=0.28 y=0.72 label="Thick impasto petals"
+          Hotspot "signature" x=0.64 y=0.18 label="Painted signature"
+          Hotspot "vase" x=0.5 y=0.88 label="The vase"
+        Text.caption "Tap a numbered point to hear about that detail."
+      if detail!=""
+        Card gap=4 animate=fade
+          Text.strong "{detail}"
+          Text.muted "Tap Play to hear this detail in the guide's voice."
+      Card gap=8
+        Row between
+          Text.panelTitle "Transcript"
+          Badge.neutral "{speed}"
+        Transcript lines={transcript} position={pos} onSeek={pos=result}
+      Row gap=12 middle
+        Text.fieldLabel "Speed"
+        SegmentedButton bind=speed items=["0.75x","1x","1.5x","2x"]
+    Footer
+      Column gap=4 pad=12
+        Slider bind=pos min=0 max=240
+        Row between middle
+          Text.caption "{duration(pos)}"
+          Row gap=8 middle
+            IconButton "replay_10" tooltip="Back 10 seconds" onTap={pos=max(0,pos-10)}
+            IconButton "{playing ? 'pause_circle' : 'play_circle'}" tooltip="Play or pause" size=48 onTap={playing=!playing}
+            IconButton "forward_10" tooltip="Forward 10 seconds" onTap={pos=min(240,pos+10)}
+          Text.caption "{duration(240)}"
+  Menu#more end
+    MenuItem "Report a mistake" icon="flag" onTap={emit report 21}
+    MenuItem "Share this stop" icon="share" onTap={copy "https://wanderlustwing.example/stop/21"; toast "Link copied"}
+    MenuItem "Next stop in tour" icon="skip_next" onTap={go tour}
+
+### Tour
+state theme="Light and Colour"
+state done=[{"theme":"Light and Colour","seen":4,"total":6},{"theme":"Seas and Ships","seen":1,"total":5},{"theme":"Gardens in Art","seen":0,"total":4}]
+App
+  Sidebar
+    Brand "Wanderlust Wing" icon="headphones"
+    NavItem "Plan" icon="map" onTap={go floor_plan}
+    NavItem "Tour" icon="route" selected={true}
+    NavItem "Favourites" icon="favorite" badge="{length(favs)}" onTap={go favourites}
+  Main
+    Nav
+      Heading "Your tour" level=1
+      Text.muted "{sum(done,d=>d.seen)} of {sum(done,d=>d.total)} stops heard"
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Row between
+          Text.strong "Overall progress"
+          Text.strong "{round(100*sum(done,d=>d.seen)/sum(done,d=>d.total),0)}%"
+        Progress {sum(done,d=>d.seen)/sum(done,d=>d.total)}
+      Grid cols=3 gap=16
+        each d in done
+          Card gap=12 onTap={theme=d.theme}
+            Row between
+              IconTile "{d.theme=='Light and Colour' ? 'wb_sunny' : d.theme=='Seas and Ships' ? 'sailing' : 'local_florist'}"
+              if d.seen==d.total
+                Badge.success "Complete"
+              if d.seen<d.total
+                Badge.info "{d.seen}/{d.total}"
+            Heading "{d.theme}" level=3
+            Progress {d.seen/d.total}
+            Text.caption "About {(d.total-d.seen)*4} minutes left"
+            Button.outline "{d.seen==0 ? 'Begin' : 'Continue'}" onTap={theme=d.theme; stop=d.seen==0 ? 1 : d.seen+1; go stop}
+      Card gap=8
+        Text.panelTitle "Up next in {theme}"
+        Timeline
+          TimelineItem "Stop 18: Cobalt and ultramarine" caption="Room 2, 4 min" done={true}
+          TimelineItem "Stop 21: Sunflower fragments" caption="Garden Room, 4 min" current={true}
+          TimelineItem "Stop 23: The glass studio" caption="Room 5, 3 min"
+        Button "Play next stop" icon="play_arrow" onTap={stop=21; go stop}
+
+### Favourites
+state email=""
+state note=""
+state sent=false
+App
+  Sidebar
+    Brand "Wanderlust Wing" icon="headphones"
+    NavItem "Plan" icon="map" onTap={go floor_plan}
+    NavItem "Tour" icon="route" onTap={go tour}
+    NavItem "Favourites" icon="favorite" badge="{length(favs)}" selected={true}
+  Main
+    Nav
+      Heading "Favourites bag" level=1
+      Button "Email me my bag" icon="mail" onTap={open email}
+    Column pad=24 gap=12 scroll
+      if length(favs)==0
+        Card center gap=8
+          Icon "favorite_border"
+          Text.strong "Nothing saved yet"
+          Text.muted "Tap the heart on any stop and it will wait here."
+          Button.outline "Back to the plan" onTap={go floor_plan}
+      each f in favs
+        ListTile "Stop {f}" icon="headphones" subtitle="Saved today"
+          Row gap=8
+            IconButton "play_arrow" tooltip="Play" onTap={stop=f; go stop}
+            IconButton "delete" tooltip="Remove" onTap={favs=without(favs,f)}
+      if sent
+        Text.success "Sent to {email}. Enjoy the rest of your visit."
+  Dialog#email "Email my favourites" "We send one email and keep no list"
+    Input "Your email" "you@example.com" bind=email type=email
+    Input "Add a note" bind=note multiline
+    Checkbox "Include transcripts" bind=withText
+    Button "Send" onTap={contains(email,"@") ? {emit sendBag {"email":email,"note":note,"stops":favs}; sent=true; close; toast "Bag on its way"} : toast "Enter a valid email"}

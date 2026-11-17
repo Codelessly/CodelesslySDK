@@ -1,0 +1,198 @@
+### Lobby
+state rooms=[{"id":"r1","name":"Friday Pub Legends","players":7,"max":8,"private":false,"topic":"General knowledge"},{"id":"r2","name":"Movie Buffs","players":4,"max":8,"private":false,"topic":"Film"},{"id":"r3","name":"The Brainiacs","players":3,"max":6,"private":true,"topic":"Science"},{"id":"r4","name":"Sports Bar Showdown","players":8,"max":8,"private":false,"topic":"Sport"},{"id":"r5","name":"Office Team Night","players":5,"max":10,"private":true,"topic":"Mixed"}]
+state q=""
+state sel=""
+state code=""
+state nick="Maya"
+App
+  Sidebar
+    Brand "Quizzo Night" icon="quiz"
+    NavItem "Lobby" icon="meeting_room" selected={true}
+    NavItem "My stats" icon="insights" onTap={go stats}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "{nick}" size=32
+      Text.muted "{nick}"
+  Main
+    Nav
+      Heading "Open rooms" level=1
+      Row gap=8
+        Input "Search rooms" bind=q w=220
+        Button "Create room" icon="add" onTap={open create}
+    Column pad=24 gap=16 scroll
+      Grid cols=2 gap=16
+        each r in filter(rooms, x=>contains(lower(x.name), lower(q)))
+          Card gap=8 animate=fade stagger=60
+            Row between middle
+              Text.strong "{r.name}"
+              if r.private
+                Icon "lock"
+            Text.muted "{r.topic}"
+            Row between middle
+              Row gap=4 middle
+                Icon "group"
+                Text "{r.players}/{r.max}"
+              Progress {r.players / r.max} w=120
+            if r.players >= r.max
+              Button.outline "Room full" disabled
+            if r.players < r.max && !r.private
+              Button "Join" onTap={sel=r.id; go room}
+            if r.players < r.max && r.private
+              Button.secondary "Enter code" icon="lock" onTap={sel=r.id; open code}
+  Dialog#code "Private room" "Ask the host for the code"
+    Input "Room code" bind=code
+    Button "Join room" onTap={code=="" ? toast "Enter the code" : {go room; close}}
+  Dialog#create "Create a room" "Pick a name and a topic"
+    Input "Room name" bind=newName
+    Select "Topic" bind=newTopic items=["General knowledge","Film","Science","Sport","Music"]
+    Toggle "Private room" bind=newPrivate
+    Button "Create" onTap={rooms=append(rooms,{"id":"n","name":newName,"players":1,"max":8,"private":newPrivate,"topic":newTopic}); close}
+
+### Room
+state players=[{"name":"Maya Reyes"},{"name":"Tom Becker"},{"name":"Priya Nair"},{"name":"Luca Rossi"}]
+state isHost=true
+state joined=false
+state names=["Sofia Alvarez","Ben Okafor","Hana Kim"]
+state n=0
+every 2s when n < 3 onTick={players=append(players,{"name":names[n]}); n=n+1}
+App
+  Sidebar
+    Brand "Quizzo Night" icon="quiz"
+    NavItem "Lobby" icon="meeting_room" onTap={go lobby}
+    NavItem "Room" icon="groups" selected={true}
+  Main
+    Nav
+      Heading "Friday Pub Legends" level=1
+      Row gap=8
+        Badge.info "{length(players)} / 8 players"
+        Button.outline "Leave" onTap={go lobby}
+    Column pad=24 gap=16
+      Text.muted "Waiting for the host to start. General knowledge, 10 questions."
+      Grid cols=4 gap=16
+        each p in players
+          Column center gap=8 animate=pop
+            Avatar "{p.name}" size=64
+            Text.small "{p.name}"
+      if isHost
+        Button "Start game" size=large icon="play_arrow" disabled={length(players) < 2} onTap={go question}
+      if !isHost
+        Text.muted "Only the host can start the game"
+      Row gap=8
+        Button.outline "Invite friends" icon="share" onTap={copy "quizzo.app/join/FPL7"; toast "Link copied"}
+        Button.ghost "Room settings" icon="settings" onTap={open settings}
+  Sheet#settings "Room settings"
+    Toggle "Private room" bind=priv
+    Slider bind=perQuestion min=10 max=30
+    Text.muted "Seconds per question: {perQuestion}"
+    Button "Done" onTap={close}
+
+### Question
+state t=15
+state picked=-1
+state score=0
+state done=false
+state options=[{"label":"Canberra","color":"#FFE53935"},{"label":"Sydney","color":"#FF1E88E5"},{"label":"Melbourne","color":"#FFFDD835"},{"label":"Perth","color":"#FF43A047"}]
+state correct=0
+every 1s when !done onTick={t=max(0,t-1); t==0 ? {done=true; go reveal} : {}}
+App
+  Main
+    Nav
+      Text.strong "Question 4 of 10"
+      Row gap=8
+        Icon "timer"
+        Text.strong "{t}s"
+        Badge.primary "{score} pts"
+    Column pad=24 gap=20 maxw=720
+      Progress {t/15}
+      Text.heading1 "What is the capital city of Australia?" center
+      Grid cols=2 gap=16
+        each o in options
+          Box fill={o.color} radius=12 pad=24 animate=scale onTap={picked==-1 ? {picked=index; score=score+round(100+t*10,0); done=true; go reveal} : {}}
+            Row between middle
+              Text.strong "{o.label}" color=#FFFFFFFF size=22
+              if picked==index
+                Icon "check_circle" color=#FFFFFFFF
+      Text.muted "Faster correct answers score more: up to 250 points"
+
+### Reveal
+state counts=[2,5,1,0]
+state labels=["Canberra","Sydney","Melbourne","Perth"]
+state correct=0
+App
+  Main
+    Nav
+      Heading "Answer" level=1
+      Button "Scoreboard" onTap={go scoreboard}
+    Column pad=24 gap=16 maxw=720
+      Card gap=8
+        Row gap=8 middle
+          Icon "check_circle" color=#FF43A047
+          Text.heading2 "Canberra"
+        Text.muted "Canberra has been the capital since 1913. 2 of 8 got it right."
+      Card gap=12
+        Text.strong "How everyone answered"
+        each c in counts
+          Column gap=4
+            Row between
+              Text "{labels[index]}"
+              Text.strong "{c}"
+            Progress {c / sum(counts, x=>x)}
+      Text.success "You scored +180 points"
+
+### Scoreboard
+state board=[{"name":"Priya Nair","pts":820,"move":1},{"name":"Maya Reyes","pts":790,"move":-1},{"name":"Tom Becker","pts":640,"move":0},{"name":"Luca Rossi","pts":590,"move":2},{"name":"Sofia Alvarez","pts":410,"move":-1}]
+state round=4
+App
+  Main
+    Nav
+      Heading "Scoreboard" level=1
+      Row gap=8
+        Badge.neutral "After question {round}"
+        Button "Next question" onTap={go question}
+        Button.outline "Final results" onTap={go podium}
+    Column pad=24 gap=8 maxw=720
+      each p in sortByDesc(board, x=>x.pts)
+        Card animate=slide-up stagger=60
+          Row gap=12 middle
+            Text.heading3 "{index+1}" w=32
+            Avatar "{p.name}" size=40
+            Text.strong "{p.name}" grow
+            if p.move > 0
+              Icon "arrow_upward" color=#FF43A047
+            if p.move < 0
+              Icon "arrow_downward" color=#FFE53935
+            if p.move == 0
+              Icon "remove"
+            Text.strong "{p.pts}"
+
+### Podium
+state top=[{"name":"Priya Nair","pts":1480},{"name":"Maya Reyes","pts":1390},{"name":"Tom Becker","pts":1210}]
+Page
+  Section center
+    Heading "Winners" level=1
+    Row gap=24 bottom center
+      Column center gap=8 animate=slide-up delay=300
+        Avatar "{top[1].name}" size=64
+        Text.strong "{top[1].name}"
+        Box fill=#FFB0BEC5 radius=8 w=140 h=120
+          Column center middle grow
+            Text.heading1 "2"
+        Text.muted "{top[1].pts} pts"
+      Column center gap=8 animate=slide-up
+        Icon "emoji_events" color=#FFFFC107 size=48
+        Avatar "{top[0].name}" size=80
+        Text.strong "{top[0].name}"
+        Box fill=#FFFFC107 radius=8 w=140 h=170
+          Column center middle grow
+            Text.heading1 "1"
+        Text.muted "{top[0].pts} pts"
+      Column center gap=8 animate=slide-up delay=500
+        Avatar "{top[2].name}" size=64
+        Text.strong "{top[2].name}"
+        Box fill=#FFBCAAA4 radius=8 w=140 h=90
+          Column center middle grow
+            Text.heading1 "3"
+        Text.muted "{top[2].pts} pts"
+    Row gap=12 center
+      Button "Play again" onTap={go room}
+      Button.outline "Back to lobby" onTap={go lobby}

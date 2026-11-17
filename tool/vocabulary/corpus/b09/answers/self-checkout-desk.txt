@@ -1,0 +1,117 @@
+### Scan
+state lang="English"
+state large=false
+state card=""
+state loans=[{"id":"b1","title":"The Overstory","due":"Dec 8","hold":false},{"id":"b2","title":"Piranesi","due":"Dec 8","hold":true},{"id":"b3","title":"Braiding Sweetgrass","due":"Dec 8","hold":false}]
+state code=""
+state left=45
+every 1s onTick={left=left-1; left==10 ? open timeout : ; left==0 ? go scan : }
+App
+  Sidebar
+    Brand "Handover" icon="local_library"
+    NavItem "Check out" icon="qr_code_scanner" selected={true} onTap={go scan}
+    NavItem "Fines" icon="payments" badge="1" onTap={go fines}
+    Spacer grow
+    Select "Language" items=["English","Español","Français"] bind=lang
+    Toggle "Large mode" bind=large
+  Main
+    Nav
+      Heading "{lang=="English" ? "Check out your books" : lang=="Español" ? "Retire sus libros" : "Empruntez vos livres"}" level=1
+      Badge.primary "{length(loans)} items"
+    Column pad=24 gap=16
+      Card gap=12
+        Row gap=12
+          Icon "contactless" size={large ? 48 : 28}
+          Text.strong "{lang=="English" ? "Put your library card on the pad, then a book on the shelf plate." : lang=="Español" ? "Ponga su tarjeta en la almohadilla y un libro en la placa." : "Posez votre carte sur le lecteur, puis un livre sur la plaque."}" size={large ? 28 : 16}
+        Input "Scan or type a barcode" bind=code onSubmit={loans=append(loans,{"id":code,"title":"Item "+code,"due":"Dec 8","hold":false}); code=""; left=45}
+        Button.outline "Read item" onTap={loans=append(loans,{"id":code,"title":"Item "+code,"due":"Dec 8","hold":false}); code=""; left=45}
+      Card gap=8
+        Row between
+          Text.panelTitle "Items read"
+          Text.strong "{length(loans)}" size={large ? 32 : 18}
+        each b in loans
+          Row between animate=slide-up
+            Column gap=2
+              Text.strong "{b.title}" size={large ? 26 : 16} color={b.hold ? "#FFC62828" : "#FF1B1B1B"}
+              if b.hold
+                Text "On hold for another patron. See the desk." color=#FFC62828 size={large ? 22 : 13}
+            Row gap=8
+              Text.muted "Due {b.due}" size={large ? 22 : 14}
+              IconButton "close" tooltip="Remove" onTap={loans=removeWhere(loans,x=>x.id==b.id); left=45}
+      if any(loans,x=>x.hold)
+        Box fill=#FFFDECEA radius=8 pad=12
+          Text "One item is on hold and cannot be borrowed. Remove it to continue." color=#FFC62828
+    Footer
+      Row between
+        Text.muted "Session ends in {left} s"
+        Button "Finish" size={large ? "large" : "medium"} onTap={go finish}
+  Dialog#timeout "Still there?" "Your session ends soon."
+    Progress {left/10}
+    Text.strong "{left} seconds left"
+    Row gap=8
+      Button "Keep going" onTap={left=45; close}
+      Button.outline "End now" onTap={close; go scan}
+
+### Finish
+state receipt="print"
+state email=""
+state large=false
+state loans=[{"id":"b1","title":"The Overstory","due":"Dec 8","hold":false},{"id":"b3","title":"Braiding Sweetgrass","due":"Dec 8","hold":false}]
+App
+  Sidebar
+    Brand "Handover" icon="local_library"
+    NavItem "Check out" icon="qr_code_scanner" onTap={go scan}
+    NavItem "Finish" icon="task_alt" selected={true}
+    NavItem "Fines" icon="payments" onTap={go fines}
+  Main
+    Nav
+      Heading "Finish" level=1
+    Column pad=24 gap=16
+      Card gap=8
+        Text.panelTitle "Borrowed today: {count(loans,x=>!x.hold)}"
+        each b in loans
+          Row between
+            Text "{b.title}" size={large ? 26 : 16}
+            Text.muted "Due {b.due}"
+      Card gap=12
+        Text.panelTitle "Receipt"
+        SegmentedButton items=["Print","Email"] bind=receipt
+        if receipt=="Email"
+          Input "Email" "you@example.com" type=email bind=email
+      Row gap=8
+        Button "Done" size=large onTap={receipt=="Email" && email=="" ? toast "Enter an email address" : emit finish receipt; toast "Thank you. Enjoy your books."; go scan}
+        Button.outline "Back" size=large onTap={go scan}
+
+### Fines
+state fines=[{"id":"f1","title":"Late: Sapiens","amount":2.5}]
+state method="Card"
+state paid=false
+state large=false
+App
+  Sidebar
+    Brand "Handover" icon="local_library"
+    NavItem "Check out" icon="qr_code_scanner" onTap={go scan}
+    NavItem "Fines" icon="payments" badge="1" selected={true}
+  Main
+    Nav
+      Heading "Fines" level=1
+      Toggle "Large mode" bind=large
+    Column pad=24 gap=16
+      Card gap=8
+        each f in fines
+          Row between
+            Text "{f.title}" size={large ? 26 : 16}
+            Text.strong "{money(f.amount,"$",2)}"
+        Divider
+        Row between
+          Text.strong "Total"
+          Text.strong "{money(sum(fines,f=>f.amount),"$",2)}" size={large ? 32 : 20}
+      if paid
+        Text.success "Paid. Receipt sent to the printer."
+      Button "Pay by card" size=large hidden={paid} onTap={open pay}
+  Dialog#pay "Pay by card" "Insert or tap your card on the reader"
+    Icon "credit_card" size=48
+    Text.muted "Total {money(sum(fines,f=>f.amount),"$",2)}"
+    Row gap=8
+      Button "Confirm payment" onTap={emit pay sum(fines,f=>f.amount); fines=[]; paid=true; close}
+      Button.outline "Cancel" onTap={close}

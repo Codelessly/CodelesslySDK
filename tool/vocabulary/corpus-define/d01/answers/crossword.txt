@@ -1,0 +1,150 @@
+### Play
+state sol="CRANE#BASIL#SAGAOPERA#ONE#RIDGEANTLER#TEAMSTONEMISERY#RENO#SONICPEARS#TIDE#LAMBSEASON#ARC#TEARSDIVERT#EYES#IRATENSTEP#TAP#SPEARKNEELER#SEA#ALTO"
+state clues=[{"n":1,"dir":"a","s":0,"len":5,"t":"Tall wading bird"},{"n":2,"dir":"a","s":6,"len":5,"t":"Pesto herb"},{"n":3,"dir":"a","s":13,"len":5,"t":"Sag, as a sail"},{"n":4,"dir":"a","s":19,"len":5,"t":"Night at the ___"},{"n":5,"dir":"a","s":26,"len":5,"t":"Mountain crest"},{"n":6,"dir":"a","s":32,"len":6,"t":"Deer's headgear"},{"n":1,"dir":"d","s":0,"len":6,"t":"Spin around"},{"n":2,"dir":"d","s":1,"len":5,"t":"Cut, as a lawn"},{"n":3,"dir":"d","s":2,"len":7,"t":"Seaside tower"},{"n":4,"dir":"d","s":3,"len":5,"t":"Single digit"},{"n":5,"dir":"d","s":4,"len":6,"t":"Pass the time"}]
+state vals=map(range(169),i=>"")
+state pen=map(range(169),i=>false)
+state bad=map(range(169),i=>false)
+state cur=0
+state dir="a"
+state pencil=false
+state secs=0
+state running=true
+state solved=false
+state hints=0
+every 1s when running onTick={secs=secs+1}
+App
+  Sidebar
+    Brand "Gridword" icon="grid_on"
+    NavItem "Today's puzzle" icon="extension" selected onTap={go play}
+    NavItem "Archive" icon="calendar_month" onTap={go archive}
+    NavItem "Stats" icon="insights" onTap={go stats}
+    Spacer grow
+    Text.muted "Streak: 12 days"
+  Main
+    Nav
+      Column
+        Heading "Saturday Standard" level=1
+        Text.caption "By Mara Ellison, edited by J. Okafor"
+      Row gap=8 middle
+        Text.mono "{duration(secs)}"
+        IconButton "{running ? 'pause' : 'play_arrow'}" tooltip="Pause or resume" onTap={running=!running}
+        Toggle "Pencil" bind=pencil
+        Button.outline "Check" icon="spellcheck" onTap={open checkMenu}
+        Button.outline "Reveal" icon="visibility" onTap={open revealMenu}
+    Row gap=16 pad=24 top
+      Column grow gap=12
+        Card gap=8
+          Row between
+            Text.strong "{dir == 'a' ? cur_clue_a : cur_clue_d}"
+            Row gap=4
+              IconButton "chevron_left" tooltip="Previous clue" onTap={cur=prevStart(cur)}
+              IconButton "chevron_right" tooltip="Next clue" onTap={cur=nextStart(cur)}
+          Text.muted "{find(clues,k=>k.dir==dir && (dir=='a' ? (cur>=k.s && cur<k.s+k.len) : (cur>=k.s && (cur-k.s)%13==0 && cur<=k.s+13*(k.len-1)))).n}{upper(dir)}  {find(clues,k=>k.dir==dir && (dir=='a' ? (cur>=k.s && cur<k.s+k.len) : (cur>=k.s && (cur-k.s)%13==0 && cur<=k.s+13*(k.len-1)))).t}"
+        CrosswordGrid
+      Pane w=320 gap=12
+        Text.sectionTitle "Across"
+        ClueList which="a"
+        Divider
+        Text.sectionTitle "Down"
+        ClueList which="d"
+    Footer
+      Row between pad=12
+        Row gap=12 middle
+          Progress "{count(vals,v=>v!='') / 144}" w=160
+          Text.caption "{count(vals,v=>v!='')} of 144 filled"
+        Row gap=8
+          Button.ghost "Clear grid" icon="delete_sweep" onTap={open clearConfirm}
+          Button "Submit" icon="check_circle" onTap={vals == map(range(169),i=>substr(sol,i)) ? {solved=true; running=false; open done} : toast "Not quite yet. Keep going."}
+Menu#checkMenu
+  MenuItem "Check letter" icon="spellcheck" onTap={bad=setAt(bad,cur,vals[cur]!='' && vals[cur]!=slice(sol,cur,cur+1))}
+  MenuItem "Check word" icon="spellcheck" onTap={bad=markWord(bad)}
+  MenuItem "Check grid" icon="grid_on" onTap={bad=map(range(169),i=>vals[i]!='' && vals[i]!=slice(sol,i,i+1))}
+Menu#revealMenu
+  MenuItem "Reveal letter" icon="visibility" onTap={vals=setAt(vals,cur,slice(sol,cur,cur+1)); hints=hints+1}
+  MenuItem "Reveal word" icon="visibility" onTap={vals=revealWord(vals); hints=hints+3}
+  MenuItem "Reveal grid" icon="visibility" onTap={open revealAll}
+Dialog#revealAll "Reveal the whole grid?" "Your time will not count toward your streak."
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button.destructive "Reveal" onTap={vals=map(range(169),i=>slice(sol,i,i+1)); running=false; close}
+Dialog#clearConfirm "Clear every letter?" "Your timer keeps running."
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button.destructive "Clear" onTap={vals=map(range(169),i=>""); bad=map(range(169),i=>false); close}
+Dialog#done "Solved!" "Every square is right."
+  Column center gap=12
+    Icon "emoji_events" size=48
+    Text.heading "{duration(secs)}"
+    Text.muted "{hints} hints used. Your streak is now 13 days."
+    Row gap=8
+      Button.outline "Share result" icon="share" onTap={copy "Gridword Saturday Standard {duration(secs)}"; toast "Copied"}
+      Button "Next puzzle" onTap={go archive; close}
+
+// A 13 by 13 board of cells. Keys are read on the grid; typing fills the cell and steps along the word.
+define CrosswordGrid
+  Grid cols=13 gap=1 w=520 fill=#FF111827 onKey={result=="Backspace" ? {vals=setAt(vals,cur,""); cur=max(0,cur-(dir=="a"?1:13))} : result=="ArrowRight" ? {cur=min(168,cur+1)} : result=="ArrowLeft" ? {cur=max(0,cur-1)} : result=="ArrowDown" ? {cur=min(168,cur+13)} : result=="ArrowUp" ? {cur=max(0,cur-13)} : result=="Tab" ? {cur=nextStart(cur)} : result==" " ? {dir=(dir=="a"?"d":"a")} : {vals=setAt(vals,cur,upper(result)); pen=setAt(pen,cur,pencil); bad=setAt(bad,cur,false); cur=min(168,cur+(dir=="a"?1:13))}}
+    each i in range(169)
+      Cell i={i}
+
+define Cell i=0
+  Stack h=40 fill={slice(sol,i,i+1)=="#" ? "#FF111827" : i==cur ? "#FFFDE047" : (dir=="a" ? (floor(i/13)==floor(cur/13)) : (i%13==cur%13)) ? "#FFBFDBFE" : "#FFFFFFFF"} onTap={slice(sol,i,i+1)=="#" ? {} : i==cur ? {dir=(dir=="a"?"d":"a")} : {cur=i}}
+    if find(clues,k=>k.s==i)
+      Text "{find(clues,k=>k.s==i).n}" size=9 left top
+    Text "{vals[i]}" center middle size=22 weight=600 color={bad[i] ? "#FFDC2626" : pen[i] ? "#FF6B7280" : "#FF111827"}
+    if bad[i]
+      Icon "close" size=12 right bottom color=#FFDC2626
+
+define ClueList which="a"
+  Column gap=2 scroll h=240
+    each k in filter(clues,x=>x.dir==which)
+      Row gap=8 pad=6 radius=4 fill={k.dir==dir && k.s==cur ? "#FFBFDBFE" : "#00000000"} onTap={cur=k.s; dir=which}
+        Text.strong "{k.n}" w=24
+        Text.body "{k.t}" grow
+
+### Archive
+state filter_level="All"
+App
+  Sidebar
+    Brand "Gridword" icon="grid_on"
+    NavItem "Today's puzzle" icon="extension" onTap={go play}
+    NavItem "Archive" icon="calendar_month" selected onTap={go archive}
+    NavItem "Stats" icon="insights" onTap={go stats}
+  Main
+    Nav
+      Heading "Archive" level=1
+      SegmentedButton items=["All","Easy","Medium","Hard"] bind=filter_level
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        each p in [{"d":"Mon","t":"Easy Street","lvl":"Easy","best":"04:12"},{"d":"Wed","t":"Mid-week Mix","lvl":"Medium","best":"09:48"},{"d":"Fri","t":"Barbed Wire","lvl":"Hard","best":""}]
+          if filter_level=="All" || filter_level==p.lvl
+            Card gap=8 onTap={go play}
+              Row between
+                Text.strong "{p.t}"
+                Badge "{p.lvl}"
+              Text.muted "{p.d}, 13 by 13"
+              Text.caption "{p.best == '' ? 'Not started' : 'Best ' + p.best}"
+
+### Stats
+App
+  Sidebar
+    Brand "Gridword" icon="grid_on"
+    NavItem "Today's puzzle" icon="extension" onTap={go play}
+    NavItem "Archive" icon="calendar_month" onTap={go archive}
+    NavItem "Stats" icon="insights" selected onTap={go stats}
+  Main
+    Nav
+      Heading "Your stats" level=1
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card
+          Text.muted "Solved"
+          Text "87" size=40 weight=700
+        Card
+          Text.muted "Average time"
+          Text "11:20" size=40 weight=700
+        Card
+          Text.muted "Streak"
+          Text "12 days" size=40 weight=700
+      Card gap=8
+        Text.strong "Solve time by day"
+        BarChart values=[14,12,11,9,13,16,10] labels=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] h=200

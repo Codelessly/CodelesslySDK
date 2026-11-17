@@ -1,0 +1,146 @@
+### Pre-join
+state name="Priya Nair"
+state mic=true
+state cam=true
+state micDevice="MacBook Pro Microphone"
+state camDevice="FaceTime HD Camera"
+state speakerDevice="MacBook Pro Speakers"
+state level=0.0
+state testing=false
+every 150 when testing onTick={level=clamp(level+0.37,0,1)%1}
+Page
+  Nav
+    Brand "Roundtable" icon="videocam"
+    Row gap=8
+      Link "Help" href="https://roundtable.example/help"
+      Avatar "Priya Nair" size=32
+  Section
+    Row gap=48 top
+      Column grow gap=12
+        Box radius=16 fill=#FF111827 h=340
+          Stack center middle
+            if cam
+              VideoPreview device={camDevice} mirror
+            if !cam
+              Avatar "Priya Nair" size=96
+          Row center gap=12 pad=12 bottom
+            IconButton {mic ? "mic" : "mic_off"} tooltip="Toggle microphone" onTap={mic=!mic}
+            IconButton {cam ? "videocam" : "videocam_off"} tooltip="Toggle camera" onTap={cam=!cam}
+            IconButton "auto_awesome" tooltip="Background effects" onTap={open effects}
+        Text.muted "Your camera looks good. Nobody has joined yet."
+      Column grow gap=16
+        Heading "Weekly design review" level=1
+        Text.muted "Today 10:30 AM, hosted by Daniel Okafor, 5 invited"
+        Input "Your name" bind=name
+        Select "Microphone" bind=micDevice items=["MacBook Pro Microphone","AirPods Pro","Jabra Speak 510"]
+        Select "Camera" bind=camDevice items=["FaceTime HD Camera","Logitech C920"]
+        Select "Speakers" bind=speakerDevice items=["MacBook Pro Speakers","AirPods Pro","Jabra Speak 510"]
+        Card gap=8
+          Row between
+            Text.strong "Test your microphone"
+            Button.outline {testing ? "Stop" : "Start test"} onTap={testing=!testing; level=0}
+          LevelMeter bind=level segments=20
+          Text.caption "Say something. The bars should move as you speak."
+        Row gap=12
+          Button "Join now" size=large onTap={go call}
+          Button.outline "Join with audio only" size=large onTap={cam=false; go call}
+  Dialog#effects "Background effects" "Applies to your camera only"
+    Row gap=8
+      ChoiceChip "None"
+      ChoiceChip "Blur"
+      ChoiceChip "Office"
+      ChoiceChip "Beach"
+    Button "Done" onTap={close}
+
+### Call
+state name="Priya Nair"
+state mic=true
+state cam=true
+state sharing=false
+state handUp=false
+state panel="chat"
+state speaker=2
+state idle=0
+state draft=""
+state reactions=[]
+state participants=[{"id":1,"name":"Priya Nair","muted":false,"hand":false,"you":true},{"id":2,"name":"Daniel Okafor","muted":false,"hand":false,"you":false},{"id":3,"name":"Mei Lin","muted":true,"hand":false,"you":false},{"id":4,"name":"Tomas Berg","muted":false,"hand":true,"you":false},{"id":5,"name":"Aisha Rahman","muted":true,"hand":false,"you":false}]
+state messages=[{"from":"Daniel Okafor","text":"Sharing the new onboarding flow in a sec","time":"10:32"},{"from":"Mei Lin","text":"Can you zoom in on step three?","time":"10:34"},{"from":"Tomas Berg","text":"Link to the Figma file: roundtable.example/f/ob3","time":"10:35"}]
+every 1s onTick={idle=idle+1}
+every 1s onTick={reactions=filter(reactions,r=>r.age<3)}
+App
+  Main
+    Nav
+      Row gap=8
+        Heading "Weekly design review" level=3
+        Badge.error "Recording"
+      Row gap=8
+        Text.muted "{duration(1245)}"
+        IconButton "chat" tooltip="Chat" onTap={panel="chat"}
+        IconButton "group" tooltip="People" onTap={panel="people"}
+    Column pad=16 gap=12 grow onPointerMove={idle=0}
+      if !sharing
+        Grid cols={length(participants)<=1 ? 1 : length(participants)<=4 ? 2 : 3} gap=12 grow
+          each p in participants
+            ParticipantTile name={p.name} muted={p.muted} hand={p.hand} speaking={p.id==speaker} video={p.id!=3} onTap={speaker=p.id} menu=tileMenu
+      if sharing
+        ScreenShare "Onboarding flow v3.fig" presenter="Daniel Okafor" grow
+        Row scroll gap=8 h=110
+          each p in participants
+            ParticipantTile name={p.name} muted={p.muted} hand={p.hand} speaking={p.id==speaker} video={p.id!=3} w=160
+      Stack
+        each r in reactions
+          Text "{r.emoji}" size=40 animate=slide-up duration=2500 right={r.x}
+    Footer visible={idle<5}
+      Row center middle gap=12 pad=12
+        IconButton {mic ? "mic" : "mic_off"} tooltip={mic ? "Mute" : "Unmute"} selected={!mic} onTap={mic=!mic; participants=updateWhere(participants,p=>p.you,p=>with(p,"muted",mic))}
+        IconButton {cam ? "videocam" : "videocam_off"} tooltip={cam ? "Stop video" : "Start video"} selected={!cam} onTap={cam=!cam}
+        IconButton "present_to_all" tooltip={sharing ? "Stop sharing" : "Share screen"} selected={sharing} onTap={sharing=!sharing; sharing ? toast "You are sharing your screen" : toast "Sharing stopped"}
+        IconButton "front_hand" tooltip={handUp ? "Lower hand" : "Raise hand"} selected={handUp} onTap={handUp=!handUp; participants=updateWhere(participants,p=>p.you,p=>with(p,"hand",handUp))}
+        IconButton "add_reaction" tooltip="Reactions" onTap={open reactionPicker}
+        IconButton "more_vert" tooltip="More" onTap={open moreMenu}
+        Button.destructive "Leave" icon="call_end" onTap={open leave}
+  Pane w=320 pad=16 gap=12
+    SegmentedButton bind=panel items=["chat","people"]
+    if panel=="chat"
+      Column grow gap=8 scroll
+        each m in messages
+          ChatBubble from={m.from} text={m.text} time={m.time} own={m.from==name}
+      Row gap=8
+        Input "Message" bind=draft grow
+        IconButton "send" tooltip="Send" onTap={draft!="" ? {messages=append(messages,{"from":name,"text":draft,"time":"10:41"}); draft=""} : toast "Type a message first"}
+    if panel=="people"
+      Text.caption "{length(participants)} in this call"
+      Column grow gap=4 scroll
+        each p in participants
+          ListTile "{p.name}{p.you ? ' (you)' : ''}" subtitle={p.hand ? "Hand raised" : ""}
+            Avatar "{p.name}" size=32
+            Icon {p.muted ? "mic_off" : "mic"}
+      Button.outline "Invite people" icon="person_add" onTap={open invite}
+  Popover#reactionPicker
+    Row gap=8
+      Button.ghost "👍" onTap={reactions=append(reactions,{"emoji":"👍","x":random(200),"age":0}); close}
+      Button.ghost "👏" onTap={reactions=append(reactions,{"emoji":"👏","x":random(200),"age":0}); close}
+      Button.ghost "❤️" onTap={reactions=append(reactions,{"emoji":"❤️","x":random(200),"age":0}); close}
+      Button.ghost "😂" onTap={reactions=append(reactions,{"emoji":"😂","x":random(200),"age":0}); close}
+      Button.ghost "🎉" onTap={reactions=append(reactions,{"emoji":"🎉","x":random(200),"age":0}); close}
+  Menu#moreMenu above
+    MenuItem "Copy meeting link" icon="link" onTap={copy "https://roundtable.example/j/wdr-4821"; toast "Link copied"}
+    MenuItem "Start recording" icon="fiber_manual_record" onTap={toast "Recording started"}
+    MenuItem "Settings" icon="settings" onTap={open settings}
+  Menu#tileMenu
+    MenuItem "Pin" icon="push_pin" onTap={speaker=speaker}
+    MenuItem "Mute for everyone" icon="mic_off" onTap={emit muteParticipant}
+  Dialog#settings "Audio and video"
+    Select "Microphone" bind=micDevice items=["MacBook Pro Microphone","AirPods Pro"]
+    Select "Camera" bind=camDevice items=["FaceTime HD Camera","Logitech C920"]
+    Toggle "Noise suppression" bind=noise
+    Button "Done" onTap={close}
+  Dialog#invite "Invite people"
+    Input "Email addresses" "name@company.com" bind=inviteEmail
+    Row gap=8
+      Button.outline "Copy link" onTap={copy "https://roundtable.example/j/wdr-4821"; toast "Link copied"}
+      Button "Send invite" onTap={emit invite inviteEmail; toast "Invite sent"; close}
+  Dialog#leave "Leave the call?" "The others will stay in the call."
+    Row gap=8 end
+      Button.outline "Stay" onTap={close}
+      Button.destructive "Leave" onTap={emit leave; go prejoin}

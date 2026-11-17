@@ -1,0 +1,216 @@
+### Dispenser
+state slots=[{"id":"A1","name":"Sea Salt Chips","price":1.75,"stock":8,"img":"https://images.example.com/vend/chips.jpg","hot":false,"hidden":false},{"id":"A2","name":"Peanut Butter Crackers","price":1.5,"stock":2,"img":"https://images.example.com/vend/crackers.jpg","hot":false,"hidden":false},{"id":"A3","name":"Dark Chocolate Bar","price":2.25,"stock":0,"img":"https://images.example.com/vend/chocolate.jpg","hot":false,"hidden":false},{"id":"B1","name":"Sparkling Water","price":1.9,"stock":11,"img":"https://images.example.com/vend/water.jpg","hot":false,"hidden":false},{"id":"B2","name":"Cola","price":2,"stock":6,"img":"https://images.example.com/vend/cola.jpg","hot":false,"hidden":false},{"id":"B3","name":"Orange Juice","price":2.5,"stock":1,"img":"https://images.example.com/vend/juice.jpg","hot":false,"hidden":false},{"id":"C1","name":"Trail Mix","price":2.75,"stock":5,"img":"https://images.example.com/vend/trailmix.jpg","hot":false,"hidden":false},{"id":"C2","name":"Granola Bar","price":1.6,"stock":0,"img":"https://images.example.com/vend/granola.jpg","hot":false,"hidden":true},{"id":"C3","name":"Gummy Bears","price":1.8,"stock":9,"img":"https://images.example.com/vend/gummy.jpg","hot":false,"hidden":false},{"id":"H1","name":"Hot Coffee","price":2.2,"stock":40,"img":"https://images.example.com/vend/coffee.jpg","hot":true,"hidden":false},{"id":"H2","name":"Hot Chocolate","price":2.4,"stock":30,"img":"https://images.example.com/vend/cocoa.jpg","hot":true,"hidden":false}]
+state code=""
+state credit=0
+state picked=[]
+state payMode="cash"
+state cardState="idle"
+state cupSensed=true
+state dispensing=false
+state dropProgress=0
+state delivered=""
+state changeDue=0
+state returning=false
+state returnProgress=0
+state serviceKey=""
+state serviceOn=false
+every 100 when dispensing onTick={dropProgress=min(1,dropProgress+0.1); dropProgress>=1 ? {dispensing=false; delivered="Take your item from the tray"} : }
+every 100 when returning onTick={returnProgress=min(1,returnProgress+0.05); returnProgress>=1 ? {returning=false; changeDue=0; toast "Change returned"} : }
+App
+  Sidebar
+    Brand "Dispenser" icon="local_cafe"
+    NavItem "Choose" icon="grid_view" selected={true}
+    NavItem "Service" icon="key" onTap={open keyEntry}
+    Spacer grow
+    Card gap=8
+      Text.muted "Card reader"
+      Row gap=8 middle
+        Icon "contactless"
+        Badge.neutral "Ready" visible={cardState=="idle"}
+        Badge.info "Reading card" visible={cardState=="reading"}
+        Badge.success "Approved" visible={cardState=="approved"}
+        Badge.error "Declined" visible={cardState=="declined"}
+      Button.outline "Tap card" onTap={payMode="card"; cardState="reading"; credit=credit+5; cardState="approved"}
+    Text.muted "Unit 0417, Lobby level 2"
+  Main
+    Nav
+      Heading "Choose your snack" level=1
+      Row gap=8 middle
+        Text.muted "Credit"
+        Text.strong "{money(credit,"$",2)}" size=24
+    Column pad=24 gap=16 scroll
+      if length(picked)==2 && !any(picked,s=>s.hot)
+        Card gap=8 fill=#FFFFF4D6 animate=slide-up
+          Row between middle
+            Column gap=4
+              Text.strong "Combo offer"
+              Text.muted "{picked[0].name} and {picked[1].name} together for {money(picked[0].price+picked[1].price-0.5,"$",2)}"
+            Button "Take the combo" onTap={credit>=picked[0].price+picked[1].price-0.5 ? {credit=credit-(picked[0].price+picked[1].price-0.5); slots=map(slots,s=>contains(map(picked,p=>p.id),s.id)?with(s,"stock",s.stock-1):s); picked=[]; dispensing=true; dropProgress=0; delivered=""; emit combo} : toast "Insert {money(picked[0].price+picked[1].price-0.5-credit,"$",2)} more"}
+      Grid cols=3 gap=16
+        each s in filter(slots,x=>!x.hidden && !x.hot)
+          Card gap=8 onTap={s.stock>0 ? code=s.id : toast "{s.name} is sold out"}
+            Stack
+              Image "{s.img}" h=110
+              if s.stock==0
+                Stack center middle
+                  Icon "close" size=72 color=#FFD32F2F
+            Row between middle
+              Badge.primary "{s.id}"
+              Text.strong "{money(s.price,"$",2)}"
+            Text "{s.name}"
+            if s.stock>0 && s.stock<=2
+              Badge.warning "Only {s.stock} left"
+            if s.stock==0
+              Badge.error "Sold out"
+            Row gap=8
+              Button.outline "Add" visible={s.stock>0} onTap={picked=length(picked)<2 ? append(picked,s) : picked; toast "{s.name} chosen"}
+      Card gap=12
+        Row between middle
+          Text.heading "Hot drinks"
+          Row gap=8 middle
+            Icon "sensors"
+            Badge.success "Cup sensed" visible={cupSensed}
+            Badge.warning "Place a cup" visible={!cupSensed}
+        Row gap=12
+          each h in filter(slots,x=>x.hot)
+            Card grow gap=8
+              Row gap=12 middle
+                Image "{h.img}" w=64 h=64 radius=8
+                Column grow gap=4
+                  Text.strong "{h.id} {h.name}"
+                  Text.muted "{money(h.price,"$",2)}"
+              Button "Brew" onTap={!cupSensed ? toast "Place a cup in the chute" : credit<h.price ? toast "Insert {money(h.price-credit,"$",2)} more" : {credit=credit-h.price; dispensing=true; dropProgress=0; delivered=""; emit brew h.id}}
+        Row gap=8 middle
+          Toggle "Cup in chute" bind=cupSensed
+      if dispensing
+        Card gap=8 animate=pulse
+          Row gap=8 middle
+            Icon "south" animate=slide-up
+            Text.strong "Dispensing..."
+          Progress bind=dropProgress
+      if delivered!=""
+        Card gap=8 fill=#FFE3F5E6 animate=pop
+          Row between middle
+            Row gap=8 middle
+              Icon "check_circle"
+              Text.strong "{delivered}"
+            Button.ghost "Got it" onTap={delivered=""}
+    Footer
+      Row between middle pad=12
+        Row gap=8 middle
+          Text.muted "Selected"
+          Text.strong "{code==""?"none":code}"
+        Row gap=8
+          Button.outline "Insert $1" onTap={credit=credit+1}
+          Button.outline "Insert $5" onTap={credit=credit+5}
+          Button "Open keypad" onTap={open keypad}
+  Pane w=320 pad=16 gap=12
+    Card gap=8
+      Text.muted "Price"
+      Text "{code==""?"--":money(coalesce(find(slots,s=>s.id==code).price,0),"$",2)}" size=40 weight=700
+      Text.muted "Credit inserted {money(credit,"$",2)}"
+      Progress "{credit}" value={min(1,credit/max(0.01,coalesce(find(slots,s=>s.id==code).price,2)))}
+    Card gap=8
+      Text.strong "Code"
+      Text.mono "{code==""?"_ _":code}" size=32
+      Grid cols=3 gap=8
+        each k in ["1","2","3","A","B","C","4","5","6","H","D","E"]
+          Button.outline "{k}" onTap={length(code)<2 ? code=code+k : toast "Code is two characters"}
+        Button.ghost "Clear" onTap={code=""}
+        Button.outline "0" onTap={length(code)<2 ? code=code+"0" : toast "Code is two characters"}
+        Button "Go" onTap={vend}
+    Card gap=8
+      Row between middle
+        Text.strong "Change return"
+        Text "{money(changeDue,"$",2)}"
+      if returning
+        Progress bind=returnProgress
+      Button.outline "Return credit" onTap={credit>0 ? {changeDue=credit; credit=0; returnProgress=0; returning=true} : toast "No credit to return"}
+  Dialog#keypad "Enter a code" "Two characters, a letter then a number"
+    Input "Code" bind=code
+    Row gap=8
+      Button.outline "Cancel" onTap={code=""; close}
+      Button "Vend" onTap={find(slots,s=>s.id==code)==null ? toast "No such slot" : find(slots,s=>s.id==code).stock==0 ? toast "Sold out" : credit<find(slots,s=>s.id==code).price ? toast "Insert {money(find(slots,s=>s.id==code).price-credit,"$",2)} more" : {credit=credit-find(slots,s=>s.id==code).price; slots=updateWhere(slots,s=>s.id==code,s=>with(s,"stock",s.stock-1)); code=""; dispensing=true; dropProgress=0; delivered=""; emit vend; close}}
+  Dialog#keyEntry "Service mode" "Turn the key to continue"
+    Input "Service key" bind=serviceKey password
+    Button "Unlock" onTap={serviceKey=="4417" ? {serviceOn=true; serviceKey=""; close; go service} : toast "Wrong key"}
+
+### Service
+state slots=[]
+state counts={"coins":142,"bills":38,"cashbox":218.5}
+state restock=""
+state restockQty=1
+state tab="stock"
+App
+  Sidebar
+    Brand "Service" icon="build"
+    NavItem "Stock counts" icon="inventory_2" selected={tab=="stock"} onTap={tab="stock"}
+    NavItem "Cash" icon="payments" selected={tab=="cash"} onTap={tab="cash"}
+    NavItem "Diagnostics" icon="monitor_heart" selected={tab=="diag"} onTap={tab="diag"}
+    Spacer grow
+    Button.outline "Leave service mode" onTap={serviceOn=false; go dispenser}
+  Main
+    Nav
+      Heading "Service mode" level=1
+      Row gap=8
+        Badge.warning "Key turned"
+        Button "Restock" onTap={open restockDlg}
+    Column pad=24 gap=16 scroll
+      if tab=="stock"
+        Grid cols=3 gap=16
+          Card gap=4
+            Text.muted "Slots sold out"
+            Text "{count(slots,s=>s.stock==0)}" size=40 weight=700
+          Card gap=4
+            Text.muted "Low stock"
+            Text "{count(slots,s=>s.stock>0 && s.stock<=2)}" size=40 weight=700
+          Card gap=4
+            Text.muted "Items in machine"
+            Text "{sum(slots,s=>s.stock)}" size=40 weight=700
+        Card gap=8
+          Row
+            Text.strong "Slot" w=60
+            Text.strong "Item" grow
+            Text.strong "Count" w=80
+            Text.strong "Status" w=110
+          Divider
+          each s in sortBy(slots,x=>x.id)
+            Row middle
+              Text "{s.id}" w=60
+              Text "{s.name}" grow
+              Text "{s.stock}" w=80
+              Badge.error "Sold out" w=110 visible={s.stock==0}
+              Badge.warning "Low" w=110 visible={s.stock>0 && s.stock<=2}
+              Badge.success "Ok" w=110 visible={s.stock>2}
+      if tab=="cash"
+        Card gap=8
+          Row between
+            Text "Coins in tube"
+            Text.strong "{counts.coins}"
+          Row between
+            Text "Bills in stacker"
+            Text.strong "{counts.bills}"
+          Row between
+            Text "Cashbox total"
+            Text.strong "{money(counts.cashbox,"$",2)}"
+          Button.destructive "Empty cashbox" onTap={counts=with(counts,"cashbox",0); toast "Cashbox emptied"}
+      if tab=="diag"
+        Card gap=12
+          Row between middle
+            Text "Card reader"
+            Badge.success "Online"
+          Row between middle
+            Text "Hot chute heater"
+            Badge.success "185 F"
+          Row between middle
+            Text "Cup sensor"
+            Badge.info "Cup present"
+          Row between middle
+            Text "Door"
+            Badge.neutral "Closed"
+  Dialog#restockDlg "Restock a slot" "Set the new count"
+    Input "Slot code" bind=restock
+    Input "Quantity" type=number bind=restockQty
+    Row gap=8
+      Button.outline "Cancel" onTap={close}
+      Button "Save" onTap={slots=updateWhere(slots,s=>s.id==restock,s=>with(s,"stock",restockQty)); toast "Slot {restock} now {restockQty}"; close}

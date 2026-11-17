@@ -1,0 +1,3 @@
+App: Control Point, orienteering splits. A course map with numbered controls joined in order, a runner's route drawn over it as a path; split times per control in a table with the best time per leg coloured and a rank; time lost shown as a bar chart per leg; a live finish board ranking runners as they punch the finish; a start list with countdown to each start; a comparison of two runners' routes; a download of the card readout.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

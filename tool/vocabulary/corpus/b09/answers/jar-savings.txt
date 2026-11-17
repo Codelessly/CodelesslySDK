@@ -1,0 +1,203 @@
+### Jars
+state tab="jars"
+state locked=true
+state spend=12.50
+state save=48.00
+state give=6.25
+state split=[50,40]
+state allowanceDay="Saturday"
+state allowance=10
+state goalName="Red scooter"
+state goalCost=80
+state wishes=[{"id":1,"name":"LEGO space shuttle","price":34.99,"emoji":"rocket"},{"id":2,"name":"Soccer cleats","price":29.00,"emoji":"sports_soccer"},{"id":3,"name":"Sticker book","price":6.50,"emoji":"menu_book"}]
+state chores=[{"id":1,"name":"Feed the cat","pay":1.00,"done":true,"approved":false},{"id":2,"name":"Take out recycling","pay":1.50,"done":true,"approved":true},{"id":3,"name":"Wash dishes","pay":2.00,"done":false,"approved":false}]
+state log=[{"id":1,"date":"Nov 15","what":"Allowance","amount":10.00},{"id":2,"what":"Recycling chore","date":"Nov 14","amount":1.50},{"id":3,"what":"Comic book","date":"Nov 12","amount":-5.25}]
+state addAmount=0
+state target="save"
+App
+  Sidebar
+    Brand "Three Jars" icon="savings"
+    NavItem "My jars" icon="local_drink" selected={tab=="jars"} onTap={tab="jars"}
+    NavItem "Chores" icon="checklist" badge="{count(chores,c=>c.done && !c.approved)}" onTap={go chores}
+    NavItem "Wish list" icon="favorite" onTap={go wishes}
+    NavItem "Bank log" icon="receipt_long" onTap={go bank}
+    NavItem "Coin game" icon="paid" onTap={go coins}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Maya Reyes" size=36
+      Text.muted "Maya"
+    Button.outline "Parent mode" icon="lock" onTap={open pin}
+  Main
+    Nav
+      Heading "My jars" level=1
+      Row gap=8
+        Text.muted "Total {money(spend+save+give,"$",2)}"
+        Button "Add money" icon="add" onTap={open addMoney}
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=8 center
+          Jar "Spend" amount={spend} max=50 color=#FF2196F3 coins={floor(spend)} animate=plop
+          Text.heading "{money(spend,"$",2)}"
+          Text.muted "Spend"
+        Card gap=8 center
+          Jar "Save" amount={save} max=100 color=#FF4CAF50 coins={floor(save)} animate=plop
+          Text.heading "{money(save,"$",2)}"
+          Text.muted "Save"
+        Card gap=8 center
+          Jar "Give" amount={give} max=25 color=#FFE91E63 coins={floor(give)} animate=plop
+          Text.heading "{money(give,"$",2)}"
+          Text.muted "Give"
+      Row gap=16
+        Card grow gap=12
+          Heading "Allowance day" level=3
+          Text.muted "{money(allowance,"$",2)} arrives every {allowanceDay}. Drag the handles to split it."
+          Select "Day" bind=allowanceDay items=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
+          RangeSlider bind=split min=0 max=100 handles=2 labels=["Spend","Save","Give"] colors=[#FF2196F3,#FF4CAF50,#FFE91E63]
+          Row between
+            Text "Spend {round(allowance*split[0]/100,2)}"
+            Text "Save {round(allowance*(split[1]-split[0])/100,2)}"
+            Text "Give {round(allowance*(100-split[1])/100,2)}"
+          Button "Save split" onTap={emit saveSplit split; toast "Split saved"}
+        Card grow gap=12
+          Heading "Saving goal" level=3
+          Row gap=16 middle
+            Image "https://images.example.com/scooter.jpg" w=96 h=96 radius=12
+            Column grow gap=4
+              Text.strong "{goalName}"
+              Text.muted "{money(save,"$",2)} of {money(goalCost,"$",2)}"
+            Stack center middle
+              Ring {clamp(save/goalCost,0,1)}
+              Text.strong "{round(clamp(save/goalCost,0,1)*100,0)}%"
+          if save >= goalCost
+            Badge.success "Goal reached!"
+  Dialog#addMoney "Add money" "Choose a jar"
+    SegmentedButton bind=target items=["spend","save","give"]
+    Input "Amount" bind=addAmount type=number
+    Button "Drop it in" onTap={target=="spend" ? spend=spend+addAmount : target=="save" ? save=save+addAmount : give=give+addAmount; log=concat([{"id":length(log)+1,"date":formatDate(today(),"MMM d"),"what":"Added to {target}","amount":addAmount}],log); addAmount=0; close}
+  Dialog#pin "Parent lock" "Enter your PIN"
+    PinInput bind=pinEntry length=4
+    Button "Unlock" onTap={pinEntry=="2468" ? locked=false; close; go chores : toast "Wrong PIN"}
+
+### Chores and wishes
+state pinEntry=""
+state locked=true
+state save=48.00
+state spend=12.50
+state chores=[{"id":1,"name":"Feed the cat","pay":1.00,"done":true,"approved":false},{"id":2,"name":"Take out recycling","pay":1.50,"done":true,"approved":true},{"id":3,"name":"Wash dishes","pay":2.00,"done":false,"approved":false},{"id":4,"name":"Tidy bedroom","pay":2.50,"done":true,"approved":false}]
+state wishes=[{"id":1,"name":"LEGO space shuttle","price":34.99,"icon":"rocket"},{"id":2,"name":"Soccer cleats","price":29.00,"icon":"sports_soccer"},{"id":3,"name":"Sticker book","price":6.50,"icon":"menu_book"}]
+state picked=0
+App
+  Sidebar
+    Brand "Three Jars" icon="savings"
+    NavItem "My jars" icon="local_drink" onTap={go jars}
+    NavItem "Chores" icon="checklist" selected={true}
+    NavItem "Wish list" icon="favorite" onTap={go wishes}
+    NavItem "Bank log" icon="receipt_long" onTap={go bank}
+    Spacer grow
+    if locked
+      Button.outline "Parent mode" icon="lock" onTap={open pin}
+    if !locked
+      Button.outline "Lock again" icon="lock_open" onTap={locked=true; toast "Locked"}
+  Main
+    Nav
+      Heading "Chores and wishes" level=1
+      Badge.warning "{count(chores,c=>c.done && !c.approved)} waiting for a parent"
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=8
+          Heading "This week's chores" level=3
+          each c in chores
+            ListTile "{c.name}" subtitle="{money(c.pay,"$",2)}" leading="task_alt"
+              Row gap=8 middle
+                Toggle bind=c.done
+                if c.approved
+                  Badge.success "Approved"
+                if !c.approved && c.done
+                  Button "Approve" size=small onTap={locked ? open pin : chores=updateWhere(chores,x=>x.id==c.id,x=>with(x,"approved",true)); save=save+c.pay; toast "Approved {money(c.pay,"$",2)}"}
+          Divider
+          Row between
+            Text.strong "Earned so far"
+            Text.strong "{money(sum(filter(chores,c=>c.approved),c=>c.pay),"$",2)}"
+        Card grow gap=8
+          Heading "Wish list" level=3
+          each w in wishes
+            Column gap=4
+              Row gap=8 middle
+                IconTile "{w.icon}"
+                Column grow
+                  Text.strong "{w.name}"
+                  Text.muted "{money(w.price,"$",2)}"
+                IconButton "delete" tooltip="Remove" onTap={wishes=removeWhere(wishes,x=>x.id==w.id)}
+              Progress {clamp(save/w.price,0,1)}
+              if save >= w.price
+                Badge.success "You can afford it"
+              if save < w.price
+                Text.muted "{money(w.price-save,"$",2)} more to go"
+          Button.outline "Add a wish" icon="add" onTap={open newWish}
+  Dialog#pin "Parent lock" "Enter your PIN"
+    PinInput bind=pinEntry length=4
+    Button "Unlock" onTap={pinEntry=="2468" ? locked=false; pinEntry=""; close : toast "Wrong PIN"}
+  Dialog#newWish "New wish"
+    Input "What do you want?" bind=wishName
+    Input "Price" bind=wishPrice type=number
+    Button "Add" onTap={wishes=append(wishes,{"id":length(wishes)+10,"name":wishName,"price":wishPrice,"icon":"star"}); close}
+
+### Bank log
+state log=[{"id":1,"date":"Nov 15","what":"Allowance","amount":10.00},{"id":2,"date":"Nov 14","what":"Recycling chore","amount":1.50},{"id":3,"date":"Nov 12","what":"Comic book","amount":-5.25},{"id":4,"date":"Nov 8","what":"Allowance","amount":10.00},{"id":5,"date":"Nov 5","what":"Gift to school fundraiser","amount":-2.00}]
+state filter="all"
+App
+  Sidebar
+    Brand "Three Jars" icon="savings"
+    NavItem "My jars" icon="local_drink" onTap={go jars}
+    NavItem "Chores" icon="checklist" onTap={go chores}
+    NavItem "Bank log" icon="receipt_long" selected={true}
+    NavItem "Coin game" icon="paid" onTap={go coins}
+  Main
+    Nav
+      Heading "Bank log" level=1
+      SegmentedButton bind=filter items=["all","in","out"]
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Row gap=8
+          Text.muted "Date" w=80
+          Text.muted "What" grow
+          Text.muted "Amount" w=90
+        Divider
+        each e in sortByDesc(filter=="all" ? log : filter=="in" ? filter(log,x=>x.amount>0) : filter(log,x=>x.amount<0),x=>x.id)
+          Row gap=8 middle
+            Text "{e.date}" w=80
+            Text.strong "{e.what}" grow
+            Text "{money(e.amount,"$",2)}" w=90 color={e.amount<0 ? #FFD32F2F : #FF2E7D32}
+      Card gap=8
+        Heading "Where it went this month" level=3
+        Donut values=[12.5,48,6.25] labels=["Spend","Save","Give"]
+
+### Coin game
+state coins=[1,5,10,25,5,10,1]
+state guess=""
+state score=0
+state round=1
+state msg=""
+Page
+  Nav
+    Brand "Three Jars" icon="savings"
+    Row gap=4
+      Link "My jars" onTap={go jars}
+      Link "Bank log" onTap={go bank}
+    Button.outline "Back" onTap={go jars}
+  Section center
+    Column gap=16 center
+      Heading "Count the coins" level=1
+      Text.muted "Round {round}: how many cents is this pile worth?"
+      Row gap=8 center
+        each c in coins
+          Coin value={c} animate=pop stagger=80
+      Input "Your answer in cents" bind=guess type=number w=240
+      Row gap=8
+        Button "Check" onTap={guess==sum(coins,c=>c) ? score=score+1; msg="Right! {sum(coins,c=>c)} cents"; round=round+1; coins=map(range(6),i=>[1,5,10,25][i%4]) : msg="Not quite, try again"; animate=shake}
+        Button.outline "Hint" onTap={toast "Count the quarters first"}
+      if msg!=""
+        Text.strong "{msg}"
+      Row gap=8 middle
+        Icon "star"
+        Text.strong "Score {score}"

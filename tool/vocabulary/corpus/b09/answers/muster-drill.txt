@@ -1,0 +1,192 @@
+### Muster Control
+state tab="control"
+state running=true
+state elapsed=372
+state lang="English"
+state station="all"
+state sent=false
+state missing=[{"id":1,"name":"Harold Pemberton","cabin":"7114","deck":"Deck 7","station":"B"},{"id":2,"name":"Lucia Fontaine","cabin":"7120","deck":"Deck 7","station":"B"},{"id":3,"name":"Tomasz Wrobel","cabin":"5032","deck":"Deck 5","station":"A"},{"id":4,"name":"Priya Raman","cabin":"9201","deck":"Deck 9","station":"C"},{"id":5,"name":"Gene Okafor","cabin":"5047","deck":"Deck 5","station":"A"},{"id":6,"name":"Mei-Ling Tran","cabin":"9215","deck":"Deck 9","station":"C"}]
+state decks=[{"name":"Deck 5","total":412,"present":398},{"name":"Deck 6","total":388,"present":388},{"name":"Deck 7","total":436,"present":431},{"name":"Deck 8","total":402,"present":402},{"name":"Deck 9","total":290,"present":286}]
+every 1s when running onTick={elapsed=elapsed+1}
+App
+  Sidebar
+    Brand "Allhands" icon="anchor"
+    NavItem "Muster control" icon="map" selected={tab=="control"} onTap={tab="control"}
+    NavItem "Call list" icon="phone_in_talk" badge="{length(missing)}" onTap={go call-list}
+    NavItem "Passenger card" icon="badge" onTap={go passenger-card}
+    Spacer grow
+    Text.muted "MV Aurelia, drill 14"
+    Text.muted "Officer D. Alvarez"
+  Main
+    Nav
+      Heading "Muster drill" level=1
+      Row gap=12
+        Badge.warning "{length(missing)} unaccounted"
+        Text.mono "{duration(elapsed)}"
+        IconButton "{running ? 'pause' : 'play_arrow'}" tooltip="Pause or resume timer" onTap={running=!running}
+        Button.outline "Language: {lang}" icon="translate" onTap={open lang}
+    Column pad=24 gap=16 scroll
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.muted "Present"
+          Text.strong "{sum(decks,d=>d.present)}" size=32
+        Card gap=4
+          Text.muted "Aboard"
+          Text.strong "{sum(decks,d=>d.total)}" size=32
+        Card gap=4
+          Text.muted "Missing"
+          Text.danger "{sum(decks,d=>d.total-d.present)}" size=32
+        Card gap=4
+          Text.muted "Elapsed"
+          Text.strong "{duration(elapsed)}" size=32
+      Row gap=16 top
+        Card grow gap=12
+          Row between
+            Heading "Deck plan" level=3
+            SegmentedButton bind=station items=["all","A","B","C"]
+          DeckPlan deck="Deck 7" station={station} stations=[{"id":"A","color":"#FFE53935","name":"Station A, Promenade"},{"id":"B","color":"#FF1E88E5","name":"Station B, Atrium"},{"id":"C","color":"#FF43A047","name":"Station C, Sun deck"}] h=260
+          Row gap=16
+            Row gap=6
+              Box w=12 h=12 radius=6 fill=#FFE53935
+              Text.caption "A Promenade"
+            Row gap=6
+              Box w=12 h=12 radius=6 fill=#FF1E88E5
+              Text.caption "B Atrium"
+            Row gap=6
+              Box w=12 h=12 radius=6 fill=#FF43A047
+              Text.caption "C Sun deck"
+        Card w=320 gap=12
+          Heading "Missing by deck" level=3
+          each d in decks
+            Column gap=4
+              Row between
+                Text.small "{d.name}"
+                Text.strong "{d.total-d.present}"
+              Progress {(d.total-d.present)/d.total*20}
+      Card gap=12
+        Row between
+          Heading "Still to scan" level=3
+          Button.ghost "Open call list" onTap={go call-list}
+        each m in missing
+          ListTile "{m.name}" "Cabin {m.cabin}, {m.deck}, Station {m.station}"
+            Button.outline "Mark present" onTap={missing=removeWhere(missing,x=>x.id==m.id); toast "{m.name} accounted for"}
+    Footer
+      Row between
+        Column gap=2
+          Text.strong "{sent ? 'All-clear sent' : 'All-clear not sent'}"
+          Text.muted "{length(missing)} still unaccounted"
+        Button.destructive "Send all-clear" icon="campaign" onTap={open allclear}
+  Dialog#allclear "Send all-clear?" "Announces end of drill in {lang} on every deck"
+    Text "{length(missing)} passengers are still unaccounted. Hold the button to confirm."
+    HoldButton "Hold to send all-clear" duration=2000 onConfirm={sent=true; running=false; emit allClear lang; toast "All-clear sent"; close}
+    Button.ghost "Cancel" onTap={close}
+  Sheet#lang "Announcement language"
+    each l in ["English","Español","Deutsch","Français","Italiano","中文","日本語"]
+      ListTile "{l}" onTap={lang=l; toast "Announcements in {l}"; close}
+        if lang==l
+          Icon "check"
+
+### Call List
+state q=""
+state deckFilter="All"
+state called=[]
+state missing=[{"id":1,"name":"Harold Pemberton","cabin":"7114","deck":"Deck 7","station":"B","phone":"x7114"},{"id":2,"name":"Lucia Fontaine","cabin":"7120","deck":"Deck 7","station":"B","phone":"x7120"},{"id":3,"name":"Tomasz Wrobel","cabin":"5032","deck":"Deck 5","station":"A","phone":"x5032"},{"id":4,"name":"Priya Raman","cabin":"9201","deck":"Deck 9","station":"C","phone":"x9201"},{"id":5,"name":"Gene Okafor","cabin":"5047","deck":"Deck 5","station":"A","phone":"x5047"},{"id":6,"name":"Mei-Ling Tran","cabin":"9215","deck":"Deck 9","station":"C","phone":"x9215"}]
+state sel=0
+App
+  Sidebar
+    Brand "Allhands" icon="anchor"
+    NavItem "Muster control" icon="map" onTap={go muster-control}
+    NavItem "Call list" icon="phone_in_talk" badge="{length(missing)}" selected={true}
+    NavItem "Passenger card" icon="badge" onTap={go passenger-card}
+    Spacer grow
+    Text.muted "MV Aurelia, drill 14"
+  Main
+    Nav
+      Heading "Call list" level=1
+      Row gap=8
+        Input "Search name or cabin" bind=q w=240
+        Select bind=deckFilter items=["All","Deck 5","Deck 6","Deck 7","Deck 8","Deck 9"]
+    Column pad=24 gap=12 scroll
+      Text.muted "Unaccounted passengers, called from the bridge. Tap a name for cabin steward details."
+      Row gap=12
+        Text.caption "Name" grow
+        Text.caption "Cabin" w=80
+        Text.caption "Deck" w=80
+        Text.caption "Stn" w=50
+        Text.caption "" w=120
+      Divider
+      each m in filter(missing,x=>(deckFilter=="All"||x.deck==deckFilter)&&(q==""||contains(lower(x.name),lower(q))||contains(x.cabin,q)))
+        Row gap=12 middle
+          Row grow gap=8 middle
+            Icon "{contains(called,m.id) ? 'phone_callback' : 'person_off'}"
+            Text.strong "{m.name}"
+            if contains(called,m.id)
+              Badge.info "called"
+          Text.mono "{m.cabin}" w=80
+          Text "{m.deck}" w=80
+          Badge.neutral "{m.station}" w=50
+          Row gap=4 w=120
+            IconButton "call" tooltip="Call cabin" onTap={called=append(called,m.id); toast "Calling {m.phone}"}
+            IconButton "more_vert" tooltip="More" onTap={sel=m.id; open rowMenu}
+      if isEmpty(missing)
+        Card gap=8 center
+          Icon "check_circle"
+          Text.success "Everyone is accounted for"
+  Menu#rowMenu end
+    MenuItem "Mark present" icon="check" onTap={missing=removeWhere(missing,x=>x.id==sel); toast "Marked present"}
+    MenuItem "Send stewards to cabin" icon="directions_walk" onTap={emit sendSteward sel; toast "Steward sent"}
+    MenuItem "Copy cabin number" icon="content_copy" onTap={copy find(missing,x=>x.id==sel).cabin}
+
+### Passenger Card
+state scanned=false
+state lang="English"
+state elapsed=372
+every 1s when !scanned onTick={elapsed=elapsed+1}
+Page
+  Nav
+    Brand "Allhands" icon="anchor"
+    Row gap=4
+      Link "Muster control" onTap={go muster-control}
+      Link "Call list" onTap={go call-list}
+      Link "Passenger card"
+    Button.outline "Language: {lang}" icon="translate" onTap={open langPick}
+  Section narrow
+    Column gap=16 center
+      Heading "Your muster station" level=1
+      Text.muted "Show this card to the crew at your station. Do not leave until the all-clear."
+      Card gap=16 w=320
+        Row between
+          Column gap=2
+            Text.strong "Margaret Ellison" size=20
+            Text.muted "Cabin 7114, Deck 7"
+          Avatar "Margaret Ellison" size=48
+        Box fill=#FF1E88E5 radius=12 pad=16 gap=4
+          Text "Station B" size=32 weight=700 color=#FFFFFFFF
+          Text "Atrium, Deck 5 (forward lifts)" color=#FFFFFFFF
+        Stack center middle
+          QRCode "ALLHANDS-AUR14-7114-ELLISON" size=200 animate=fade
+          if scanned
+            Icon "check_circle" size=96 color=#FF43A047 animate=pop
+        Row gap=8 middle
+          Icon "health_and_safety"
+          Column gap=2
+            Text.strong "Lifejacket"
+            Text.muted "Under your bed, bottom drawer. Spare in the corridor locker 7C."
+        if scanned
+          Badge.success "Present, checked in at Station B"
+        else
+          Badge.warning "Not yet scanned"
+      Row gap=12
+        Text.mono "{duration(elapsed)}"
+        Text.muted "since the alarm"
+      Button.outline "Simulate station scan" icon="qr_code_scanner" onTap={scanned=true; emit scanned 7114; toast "Scan accepted"}
+      Button.ghost "Play announcement in {lang}" icon="volume_up" onTap={emit playAnnouncement lang}
+  Footer
+    Row between
+      Text.strong "Allhands"
+      Text.muted "MV Aurelia muster drill 14"
+  Sheet#langPick "Announcement language"
+    each l in ["English","Español","Deutsch","Français","Italiano","中文","日本語"]
+      ListTile "{l}" onTap={lang=l; close}
+        if lang==l
+          Icon "check"

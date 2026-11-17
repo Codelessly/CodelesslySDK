@@ -1,0 +1,3 @@
+App: Shelf, a file manager. Folders tree, breadcrumb, list and grid views with sort by column; select with click, shift and ctrl, a selection box; drag files onto a folder; rename in place; a preview pane; context menu with cut, copy, paste, share, delete to trash with undo; upload with a progress tray; storage used bar; search with type and date filters.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

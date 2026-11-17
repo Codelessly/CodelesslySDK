@@ -1,0 +1,205 @@
+### History
+state sel="a41f9c2"
+state pulling=false
+state pushing=false
+state progress=0
+state ahead=3
+state commits=[{"hash":"e7b02d1","subject":"Add retry to fetch queue","author":"Maya Reyes","when":"2h ago","lane":0,"lanes":3,"refs":"main"},{"hash":"a41f9c2","subject":"Merge branch 'feature/diff-view'","author":"Jon Park","when":"5h ago","lane":0,"lanes":3,"refs":""},{"hash":"c93d5aa","subject":"Render hunks with line numbers","author":"Priya Nair","when":"yesterday","lane":1,"lanes":3,"refs":"feature/diff-view"},{"hash":"5be8810","subject":"Fix lane colour reuse in graph","author":"Maya Reyes","when":"yesterday","lane":0,"lanes":3,"refs":""},{"hash":"0d7c3f6","subject":"Spike: inline word diff","author":"Tom Albright","when":"2 days ago","lane":2,"lanes":3,"refs":"spike/word-diff"},{"hash":"b2210ee","subject":"Bump libgit2 to 1.8","author":"Jon Park","when":"3 days ago","lane":0,"lanes":3,"refs":"v0.9.0"}]
+state files=[{"name":"lib/graph/lane_painter.dart","status":"M","add":42,"del":11},{"name":"lib/graph/commit_row.dart","status":"M","add":18,"del":3},{"name":"test/graph/lane_test.dart","status":"A","add":96,"del":0},{"name":"lib/legacy/old_graph.dart","status":"D","add":0,"del":210}]
+every 250 when pushing onTick={progress>=1 ? {pushing=false; ahead=0; close; toast "Pushed 3 commits to origin/main"} : progress=progress+0.1}
+App
+  TwigSidebar active="history"
+  Main
+    Nav
+      Column
+        Heading "main" level=1
+        Text.muted "origin/main  3 ahead, 0 behind"
+      Row gap=8
+        Button.outline "Pull" icon="arrow_downward" onTap={pulling=true; toast "Already up to date"; pulling=false}
+        Button "Push {ahead}" icon="arrow_upward" disabled={ahead==0} onTap={progress=0; pushing=true; open pushing}
+    Row top
+      Column grow gap=0
+        Row pad=[16,10,16,10] border-bottom=#FFE5E7EB
+          Text.caption "GRAPH" w=72
+          Text.caption "MESSAGE" grow
+          Text.caption "AUTHOR" w=140 hide=phone
+          Text.caption "DATE" w=90 hide=tablet
+        each c in commits
+          CommitRow "{c.subject}" author={c.author} hash={c.hash} lane={c.lane} lanes={c.lanes} refs={c.refs} when={c.when} selected={sel==c.hash} onTap={sel=c.hash}
+      Pane w=340 pad=16 gap=12
+        Text.caption "COMMIT {sel}"
+        Heading "Merge branch 'feature/diff-view'" level=3
+        Row gap=8 middle
+          Avatar "Jon Park" size=28
+          Text.muted "Jon Park committed 5 hours ago"
+        Divider
+        Row between
+          Text.strong "{length(files)} files changed"
+          Row gap=6
+            Text.success "+{sum(files,f=>f.add)}"
+            Text.danger "-{sum(files,f=>f.del)}"
+        each f in files
+          FileRow "{f.name}" status={f.status} add={f.add} del={f.del} onTap={go changes}
+Dialog#pushing "Pushing to origin/main" "3 commits, 14 objects"
+  Progress bind=progress
+  Text.muted "{round(progress*100,0)}% - compressing and writing objects"
+  Button.outline "Cancel" onTap={pushing=false; close}
+
+### Changes
+state tab="unstaged"
+state mode="split"
+state summary="Fix lane colour reuse when branches merge"
+state body=""
+state hunks=[{"id":1,"header":"@@ -38,9 +38,14 @@ class LanePainter","staged":false,"lines":[{"k":"ctx","o":38,"n":38,"t":"  Color colorFor(int lane) {"},{"k":"del","o":39,"n":0,"t":"    return palette[lane];"},{"k":"add","o":0,"n":39,"t":"    // wrap so long histories never run out of colours"},{"k":"add","o":0,"n":40,"t":"    return palette[lane % palette.length];"},{"k":"ctx","o":40,"n":41,"t":"  }"}]},{"id":2,"header":"@@ -71,6 +76,8 @@ void paint(Canvas c)","staged":false,"lines":[{"k":"ctx","o":71,"n":76,"t":"    for (final edge in edges) {"},{"k":"add","o":0,"n":77,"t":"      if (edge.hidden) continue;"},{"k":"add","o":0,"n":78,"t":"      final lane = edge.lane;"},{"k":"del","o":72,"n":0,"t":"      drawEdge(c, edge);"},{"k":"add","o":0,"n":79,"t":"      drawEdge(c, edge, colorFor(lane));"},{"k":"ctx","o":73,"n":80,"t":"    }"}]}]
+state unstaged=[{"name":"lib/graph/lane_painter.dart","status":"M","add":8,"del":2},{"name":"lib/graph/commit_row.dart","status":"M","add":3,"del":1},{"name":"README.md","status":"M","add":2,"del":0}]
+state staged=[{"name":"test/graph/lane_test.dart","status":"A","add":96,"del":0}]
+App
+  TwigSidebar active="changes"
+  Main
+    Nav
+      Column
+        Heading "Changes" level=1
+        Text.muted "{length(unstaged)} unstaged, {length(staged)} staged"
+      SegmentedButton bind=mode items=["split","inline"]
+    Row top
+      Pane w=300 pad=12 gap=8
+        Row between
+          Text.strong "Unstaged"
+          Button.ghost "Stage all" onTap={staged=concat(staged,unstaged); unstaged=[]}
+        each f in unstaged
+          FileRow "{f.name}" status={f.status} add={f.add} del={f.del} onTap={toast "Opened {f.name}"}
+        Divider
+        Row between
+          Text.strong "Staged"
+          Button.ghost "Unstage all" onTap={unstaged=concat(unstaged,staged); staged=[]}
+        each f in staged
+          FileRow "{f.name}" status={f.status} add={f.add} del={f.del} onTap={toast "Opened {f.name}"}
+      Column grow gap=12 pad=16 scroll
+        Text.mono "lib/graph/lane_painter.dart"
+        each h in hunks
+          Card gap=0 pad=0
+            Row between middle pad=[12,8,12,8] fill=#FFF3F4F6
+              Text.mono "{h.header}"
+              Button.outline "{h.staged ? 'Unstage hunk' : 'Stage hunk'}" size=small onTap={hunks=updateWhere(hunks,x=>x.id==h.id,x=>with(x,"staged",!x.staged)); toast h.staged ? "Hunk unstaged" : "Hunk staged"}
+            each l in h.lines
+              if mode=="inline"
+                DiffRow kind={l.k} old={l.o} new={l.n} "{l.t}"
+              if mode=="split"
+                Row gap=0
+                  Column grow
+                    DiffRow kind={l.k=="add" ? "empty" : l.k} old={l.o} new={0} "{l.k=="add" ? '' : l.t}"
+                  Column grow
+                    DiffRow kind={l.k=="del" ? "empty" : l.k} old={0} new={l.n} "{l.k=="del" ? '' : l.t}"
+    Footer
+      Column gap=8 pad=16 border-top=#FFE5E7EB
+        Row between middle
+          Text.strong "Commit to main"
+          Text.caption color={length(summary)>72 ? "#FFDC2626" : "#FF6B7280"} "{length(summary)}/72"
+        Input "Summary" bind=summary
+        Input "Description" bind=body multiline
+        Row between middle
+          Text.muted "{length(staged)} staged files"
+          Button "Commit" disabled={length(summary)==0 || length(summary)>72 || length(staged)==0} onTap={toast "Committed {summary}"; summary=""; body=""; staged=[]}
+
+### Conflicts
+state blocks=[{"id":1,"file":"lib/graph/lane_painter.dart","ours":["final gap = 6.0;","final radius = 5.0;"],"theirs":["final gap = 8.0;","final radius = 4.0;","final stroke = 2.0;"],"pick":""},{"id":2,"file":"lib/graph/lane_painter.dart","ours":["Color colorFor(int lane) => palette[lane % 8];"],"theirs":["Color colorFor(int lane) => palette[lane % palette.length];"],"pick":""},{"id":3,"file":"lib/graph/commit_row.dart","ours":["height: 40,"],"theirs":["height: 44,"],"pick":""}]
+state resolved=false
+App
+  TwigSidebar active="conflicts"
+  Main
+    Nav
+      Column
+        Heading "Merge conflicts" level=1
+        Text.muted "Merging feature/diff-view into main"
+      Row gap=8 middle
+        Badge.warning "{count(blocks,b=>b.pick==\"\")} unresolved"
+        Button.outline "Abort merge" onTap={emit abortMerge; toast "Merge aborted"}
+        Button "Mark resolved" disabled={count(blocks,b=>b.pick=="")>0} onTap={resolved=true; emit completeMerge; toast "Conflicts resolved, ready to commit"}
+    Column pad=24 gap=16 scroll
+      if resolved
+        Card gap=8
+          Text.success "All conflicts resolved. Commit the merge from Changes."
+          Button "Go to Changes" onTap={go changes}
+      each b in blocks
+        Card gap=12
+          Row between middle
+            Row gap=8 middle
+              Text.mono "{b.file}"
+              Badge.neutral "Block {b.id}"
+            if b.pick!=""
+              Badge.success "Took {b.pick}"
+          Row gap=12 top
+            Column grow gap=6
+              Row between middle
+                Text.strong "Ours (main)"
+                Button.outline "Take left" size=small onTap={blocks=updateWhere(blocks,x=>x.id==b.id,x=>with(x,"pick","left"))}
+              Box pad=10 radius=6 fill={b.pick=="left" ? "#FFDCFCE7" : "#FFF3F4F6"}
+                each ln in b.ours
+                  Text.mono "{ln}"
+            Column grow gap=6
+              Row between middle
+                Text.strong "Theirs (feature/diff-view)"
+                Button.outline "Take right" size=small onTap={blocks=updateWhere(blocks,x=>x.id==b.id,x=>with(x,"pick","right"))}
+              Box pad=10 radius=6 fill={b.pick=="right" ? "#FFDCFCE7" : "#FFF3F4F6"}
+                each ln in b.theirs
+                  Text.mono "{ln}"
+          Row gap=8
+            Button.ghost "Take both" size=small onTap={blocks=updateWhere(blocks,x=>x.id==b.id,x=>with(x,"pick","both"))}
+            Button.ghost "Reset" size=small onTap={blocks=updateWhere(blocks,x=>x.id==b.id,x=>with(x,"pick",""))}
+
+define TwigSidebar active="history"
+  state branches=[{"name":"main","ahead":3,"behind":0},{"name":"feature/diff-view","ahead":0,"behind":2},{"name":"spike/word-diff","ahead":5,"behind":12},{"name":"release/0.9","ahead":0,"behind":0}]
+  state current="main"
+  Sidebar
+    Brand "Twig" icon="account_tree"
+    NavItem "History" icon="history" selected={active=="history"} onTap={go history}
+    NavItem "Changes" icon="edit_note" badge="4" selected={active=="changes"} onTap={go changes}
+    NavItem "Conflicts" icon="warning" badge="3" selected={active=="conflicts"} onTap={go conflicts}
+    Divider
+    Text.caption "BRANCHES"
+    each br in branches
+      BranchRow "{br.name}" ahead={br.ahead} behind={br.behind} current={current==br.name} onTap={current=br.name; toast "Checked out {br.name}"}
+    Spacer grow
+    Text.muted "~/code/twig"
+
+define BranchRow "name" ahead=0 behind=0 current=false onTap
+  Row between middle pad=[8,6,8,6] radius=6 fill={current ? "#FFEFF6FF" : "#00000000"} onTap={onTap}
+    Row gap=6 middle
+      Icon "{current ? 'check' : 'call_split'}"
+      Text.strong "{name}"
+    Row gap=6
+      if ahead>0
+        Text.caption color=#FF16A34A "{ahead} up"
+      if behind>0
+        Text.caption color=#FFDC2626 "{behind} down"
+
+define CommitRow "subject" author="" hash="" lane=0 lanes=3 refs="" when="" selected=false onTap palette=["#FF2563EB","#FF16A34A","#FFDC2626","#FF9333EA"]
+  Row gap=0 middle h=48 pad=[16,0,16,0] fill={selected ? "#FFEFF6FF" : "#00000000"} border-bottom=#FFF3F4F6 onTap={onTap}
+    Row gap=0 w=72
+      each i in range(lanes)
+        Stack w=24 h=48 center middle
+          Box w=2 h=48 fill={palette[i%4]}
+          if i==lane
+            Avatar "{author}" size=20
+    Row grow gap=8 middle
+      if refs!=""
+        Badge.info "{refs}"
+      Text "{subject}"
+      Text.caption "{hash}"
+    Text.muted "{author}" w=140 hide=phone
+    Text.muted "{when}" w=90 hide=tablet
+
+define FileRow "name" status="M" add=0 del=0 onTap
+  Row between middle pad=[6,6,6,6] radius=4 onTap={onTap}
+    Row gap=8 middle grow
+      Badge.neutral "{status}"
+      Text.small "{name}"
+    Row gap=6
+      Text.caption color=#FF16A34A "+{add}"
+      Text.caption color=#FFDC2626 "-{del}"
+
+define DiffRow "text" kind="ctx" old=0 new=0
+  Row gap=0 fill={kind=="add" ? "#FFDCFCE7" : kind=="del" ? "#FFFEE2E2" : kind=="empty" ? "#FFF9FAFB" : "#00000000"}
+    Text.caption "{old>0 ? old : ''}" w=40 right color=#FF9CA3AF
+    Text.caption "{new>0 ? new : ''}" w=40 right color=#FF9CA3AF
+    Text.mono "{kind=="add" ? '+ ' : kind=="del" ? '- ' : '  '}{text}"

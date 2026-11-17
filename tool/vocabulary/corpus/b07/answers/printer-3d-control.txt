@@ -1,0 +1,219 @@
+### Dashboard
+state screen="dashboard"
+state nozzle=214
+state nozzleTarget=215
+state bed=59
+state bedTarget=60
+state layer=84
+state totalLayers=240
+state running=true
+state paused=false
+state remaining=5880
+state progress=0.35
+state filament=62
+state step="1"
+state clog=true
+state jobName="benchy_0.2mm_PLA.gcode"
+state xPos=120.0
+state yPos=110.0
+state zPos=16.8
+state history=[{"t":"0m","nozzle":24,"bed":22},{"t":"2m","nozzle":120,"bed":38},{"t":"4m","nozzle":190,"bed":52},{"t":"6m","nozzle":212,"bed":59},{"t":"8m","nozzle":215,"bed":60}]
+every 1s when running && !paused onTick={remaining=max(0,remaining-1); progress=clamp(progress+0.0001,0,1); layer=clamp(floor(progress*totalLayers),0,totalLayers)}
+App
+  Sidebar
+    Brand "Extruder" icon="precision_manufacturing"
+    NavItem "Dashboard" icon="dashboard" selected={screen=="dashboard"} onTap={screen="dashboard"}
+    NavItem "Motion" icon="open_with" selected={screen=="motion"} onTap={go motion}
+    NavItem "Files" icon="folder" badge="6" onTap={go files}
+    Spacer grow
+    Text.muted "Voron 2.4 - 350mm"
+  Main
+    Nav
+      Heading "{jobName}" level=1
+      Row gap=8
+        Badge.success "Printing" visible={running && !paused}
+        Badge.warning "Paused" visible={paused}
+        Button.outline "Pause" icon="pause" visible={!paused} onTap={paused=true; toast "Print paused"}
+        Button.outline "Resume" icon="play_arrow" visible={paused} onTap={paused=false; toast "Resuming"}
+        Button.destructive "Cancel" icon="stop" onTap={open cancelJob}
+    Column pad=24 gap=16 scroll
+      if clog
+        Card gap=8 fill=#FFFFF3CD
+          Row between middle
+            Row gap=12 middle
+              Icon "warning" color=#FF9A6700
+              Column gap=2
+                Text.strong "Possible nozzle clog" color=#FF664D03
+                Text.small "Flow dropped 38% over the last 40 layers while the extruder kept pushing." color=#FF664D03
+            Row gap=8
+              Button.outline "Purge nozzle" onTap={emit purgeNozzle; toast "Purging 20 mm"}
+              Button.ghost "Dismiss" onTap={clog=false}
+      Row gap=16 top
+        Card grow gap=8
+          Row between
+            Text.strong "Nozzle"
+            Badge.info "Heating" visible={nozzle<nozzleTarget-2}
+          Row center
+            Gauge bind=nozzle min=0 max=300 limit={nozzleTarget} unit="C"
+          Row between middle
+            Text.muted "Target"
+            Row gap=8 middle
+              IconButton "remove" tooltip="Lower target" onTap={nozzleTarget=max(0,nozzleTarget-5)}
+              Text.strong "{nozzleTarget} C"
+              IconButton "add" tooltip="Raise target" onTap={nozzleTarget=min(300,nozzleTarget+5)}
+        Card grow gap=8
+          Row between
+            Text.strong "Bed"
+            Badge.success "At target" visible={abs(bed-bedTarget)<=2}
+          Row center
+            Gauge bind=bed min=0 max=120 limit={bedTarget} unit="C"
+          Row between middle
+            Text.muted "Target"
+            Row gap=8 middle
+              IconButton "remove" tooltip="Lower target" onTap={bedTarget=max(0,bedTarget-5)}
+              Text.strong "{bedTarget} C"
+              IconButton "add" tooltip="Raise target" onTap={bedTarget=min(120,bedTarget+5)}
+        Card grow gap=8
+          Text.strong "Heating curve"
+          LineChart labels=["0m","2m","4m","6m","8m"] series=[{"name":"Nozzle","values":[24,120,190,212,215]},{"name":"Bed","values":[22,38,52,59,60]}] h=200
+      Row gap=16 top
+        Card grow gap=12
+          Row between
+            Text.strong "Model preview"
+            Text.muted "Layer {layer} of {totalLayers}"
+          ModelPreview src="benchy.gcode" layers={layer} total={totalLayers} h=260
+          Row gap=12 middle
+            Icon "layers"
+            Slider bind=layer min=1 max={totalLayers} onChange={paused=true}
+            Button.outline "Live" onTap={layer=floor(progress*totalLayers); paused=false}
+        Column w=320 gap=16
+          Card gap=8
+            Text.strong "Camera"
+            Camera src="rtsp://extruder.local/stream" h=170 live
+            Row between
+              Text.caption "Chamber cam"
+              IconButton "fullscreen" tooltip="Fullscreen" onTap={emit camFullscreen}
+          Card gap=8
+            Row between
+              Text.strong "Filament"
+              Text.muted "{filament}% left"
+            Gauge bind=filament min=0 max=100 limit=15 unit="%"
+            Text.caption "Polymaker PLA, grey, about 620 g"
+      Card gap=8
+        Row between middle
+          Text.strong "Job progress"
+          Text.strong "{round(progress*100,0)}%"
+        Progress bind=progress
+        Row between
+          Text.muted "Time left {duration(remaining)}"
+          Text.muted "Done at {formatDate(today(),'MMM d')}, 4:12 PM"
+  Dialog#cancelJob "Cancel this print?" "The job stops and the heaters cool. This cannot be resumed."
+    Row end gap=8
+      Button.ghost "Keep printing" onTap={close}
+      Button.destructive "Cancel print" onTap={running=false; paused=false; progress=0; layer=0; emit cancelPrint; close; toast "Print cancelled"}
+
+### Motion
+state step="1"
+state xPos=120.0
+state yPos=110.0
+state zPos=16.8
+state homed=true
+App
+  Sidebar
+    Brand "Extruder" icon="precision_manufacturing"
+    NavItem "Dashboard" icon="dashboard" onTap={go dashboard}
+    NavItem "Motion" icon="open_with" selected={true}
+    NavItem "Files" icon="folder" badge="6" onTap={go files}
+    Spacer grow
+    Text.muted "Voron 2.4 - 350mm"
+  Main
+    Nav
+      Heading "Motion" level=1
+      Row gap=8
+        Button.outline "Home all" icon="home" onTap={xPos=0.0; yPos=0.0; zPos=0.0; homed=true; emit homeAll}
+        Button.outline "Disable motors" onTap={emit motorsOff; toast "Motors disabled"}
+    Column pad=24 gap=16
+      Card gap=12
+        Text.strong "Step size"
+        SegmentedButton bind=step items=["0.1","1","10","50"]
+        Text.caption "mm per tap"
+      Row gap=16 top
+        Card grow gap=12
+          Text.strong "X / Y"
+          Grid cols=3 gap=8 w=240
+            Spacer
+            IconButton "keyboard_arrow_up" tooltip="Y plus" onTap={yPos=round(min(350,yPos+step*1),1); emit jog {"axis":"Y","dist":step}}
+            Spacer
+            IconButton "keyboard_arrow_left" tooltip="X minus" onTap={xPos=round(max(0,xPos-step*1),1); emit jog {"axis":"X","dist":0-step}}
+            IconButton "home" tooltip="Home XY" onTap={xPos=0.0; yPos=0.0; emit homeXY}
+            IconButton "keyboard_arrow_right" tooltip="X plus" onTap={xPos=round(min(350,xPos+step*1),1); emit jog {"axis":"X","dist":step}}
+            Spacer
+            IconButton "keyboard_arrow_down" tooltip="Y minus" onTap={yPos=round(max(0,yPos-step*1),1); emit jog {"axis":"Y","dist":0-step}}
+            Spacer
+        Card grow gap=12
+          Text.strong "Z"
+          Column gap=8 w=80
+            IconButton "keyboard_double_arrow_up" tooltip="Z up" onTap={zPos=round(min(340,zPos+step*1),1); emit jog {"axis":"Z","dist":step}}
+            IconButton "home" tooltip="Home Z" onTap={zPos=0.0; emit homeZ}
+            IconButton "keyboard_double_arrow_down" tooltip="Z down" onTap={zPos=round(max(0,zPos-step*1),1); emit jog {"axis":"Z","dist":0-step}}
+        Card grow gap=8
+          Text.strong "Position"
+          Row between
+            Text.muted "X"
+            Text.mono "{fixed(xPos,1)}"
+          Row between
+            Text.muted "Y"
+            Text.mono "{fixed(yPos,1)}"
+          Row between
+            Text.muted "Z"
+            Text.mono "{fixed(zPos,1)}"
+      Card gap=8
+        Text.strong "Extruder"
+        Row gap=8
+          Button.outline "Retract 5 mm" onTap={emit extrude -5}
+          Button.outline "Extrude 5 mm" onTap={emit extrude 5}
+          Button.outline "Extrude 50 mm" onTap={emit extrude 50}
+
+### Files
+state q=""
+state sortKey="name"
+state sel=""
+state files=[{"id":"f1","name":"benchy_0.2mm_PLA.gcode","mins":98,"grams":14,"layers":240},{"id":"f2","name":"phone_stand_v3.gcode","mins":142,"grams":31,"layers":310},{"id":"f3","name":"gridfinity_bin_4x2.gcode","mins":205,"grams":46,"layers":180},{"id":"f4","name":"calibration_cube.gcode","mins":24,"grams":4,"layers":100},{"id":"f5","name":"cable_clip_x10.gcode","mins":67,"grams":9,"layers":60},{"id":"f6","name":"vase_spiral_petg.gcode","mins":312,"grams":88,"layers":820}]
+App
+  Sidebar
+    Brand "Extruder" icon="precision_manufacturing"
+    NavItem "Dashboard" icon="dashboard" onTap={go dashboard}
+    NavItem "Motion" icon="open_with" onTap={go motion}
+    NavItem "Files" icon="folder" badge="6" selected={true}
+    Spacer grow
+    Text.muted "Voron 2.4 - 350mm"
+  Main
+    Nav
+      Heading "Files" level=1
+      Row gap=8
+        Input "Search files" bind=q w=220
+        Select bind=sortKey items=["name","mins","grams"]
+        Button "Upload" icon="upload" onTap={emit upload}
+    Column pad=24 gap=16
+      Card gap=8
+        Row gap=8
+          Text.muted "File" grow
+          Text.muted "Layers" w=70
+          Text.muted "Filament" w=80
+          Text.muted "Est. time" w=90
+          Text.muted "" w=80
+        Divider
+        each f in sortBy(filter(files,x=>contains(lower(x.name),lower(q))),x=>x[sortKey])
+          Row gap=8 middle
+            Row grow gap=8 middle
+              Icon "description"
+              Text.strong "{f.name}"
+            Text "{f.layers}" w=70
+            Text "{f.grams} g" w=80
+            Text "{duration(f.mins*60)}" w=90
+            IconButton "more_vert" tooltip="Options" onTap={sel=f.id; open fileMenu}
+          Divider
+  Menu#fileMenu end
+    MenuItem "Print" icon="play_arrow" onTap={emit startPrint sel; toast "Starting print"; go dashboard}
+    MenuItem "Preview" icon="visibility" onTap={emit previewFile sel}
+    MenuItem "Delete" icon="delete" onTap={files=removeWhere(files,x=>x.id==sel); toast "File deleted"}

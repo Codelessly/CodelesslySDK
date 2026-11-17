@@ -1,0 +1,151 @@
+### Start
+state code=""
+state codeError=false
+Page
+  Nav
+    Brand "Headcount" icon="groups"
+    Row gap=4
+      Link "Help" onTap={open help}
+      Link "Privacy" onTap={open privacy}
+  Section narrow center
+    Column gap=20 center
+      IconTile "mail"
+      Heading "Start your census form" level=1
+      Text.muted "Enter the 8-character code printed on the letter we mailed to your address." center
+      CodeInput length=8 bind=code onComplete={codeError=false}
+      if codeError
+        Text.danger "That code was not recognised. Check the letter and try again."
+      Button "Continue" size=large onTap={length(code)==8 ? go household : codeError=true}
+      Text.muted "No letter? Ask for a new code" onTap={open help}
+  Footer
+    Row between
+      Text.muted "Headcount 2026 Census"
+      Text.muted "Your answers are protected by law"
+  Dialog#help "Need a new code?" "We can send another letter within five days."
+    Input "Postcode" bind=postcode
+    Button "Request a letter" onTap={emit requestLetter postcode; toast "Letter requested"; close}
+  Dialog#privacy "How we use your answers"
+    Text "Answers are used for statistics only and are never shared with other agencies."
+    Button.outline "Close" onTap={close}
+
+### Household
+state people=[{"id":1,"name":"Maria Alvarez","answered":12,"total":12},{"id":2,"name":"Tomas Alvarez","answered":7,"total":12}]
+state newName=""
+state sel=0
+Page
+  Nav
+    Brand "Headcount" icon="groups"
+    Text.muted "Code {code}"
+  Section
+    Column gap=20
+      Heading "Who lives at this address?" level=1
+      Text.muted "Add everyone who usually lives here, including children and lodgers."
+      Grid cols=3 gap=16
+        each p in people
+          Card gap=12 center
+            Stack center middle
+              Ring {p.answered / p.total} w=96 h=96
+              Text.strong "{round(p.answered / p.total * 100, 0)}%"
+            Text.heading "{p.name}"
+            Text.muted "{p.answered} of {p.total} questions answered"
+            Row gap=8
+              Button "{p.answered == p.total ? 'Review' : 'Continue'}" onTap={sel=p.id; go question}
+              IconButton "more_vert" tooltip="More" onTap={sel=p.id; open personMenu}
+        Card gap=8 center middle onTap={open addPerson}
+          Icon "person_add"
+          Text.strong "Add a person"
+      Row between
+        Button.outline "Back" onTap={go start}
+        Button "Review answers" disabled={count(people, x=>x.answered<x.total)>0} onTap={go review}
+  Dialog#addPerson "Add a person" "Their name as it should appear on the form"
+    Input "Full name" bind=newName
+    Button "Add" onTap={trim(newName)=="" ? toast "Enter a name" : {people=append(people, with(with(with({}, "id", length(people)+1), "name", newName), "answered", 0)); newName=""; close}}
+  Menu#personMenu
+    MenuItem "Answer questions" icon="edit" onTap={go question}
+    MenuItem "Remove from household" icon="delete" onTap={people=removeWhere(people, x=>x.id==sel)}
+
+### Question
+state dobDay=""
+state dobMonth=""
+state dobYear=""
+state employment=""
+state employmentOther=""
+state skipReason=""
+state skipped=false
+state sel=1
+Page
+  Nav
+    Brand "Headcount" icon="groups"
+    Row gap=12
+      Text.muted "Question 3 of 12"
+      Progress 0.25 w=120
+  Section narrow
+    Column gap=24
+      Link "Back to household" onTap={go household}
+      Heading "About Maria Alvarez" level=1
+      Card gap=12
+        Text.strong "What is your date of birth?"
+        Row gap=12
+          Input "Day" "DD" type=number bind=dobDay w=80
+          Input "Month" "MM" type=number bind=dobMonth w=80
+          Input "Year" "YYYY" type=number bind=dobYear w=120
+        if dobYear!="" && 2026 - dobYear < 16
+          Badge.info "Under 16: work questions are skipped"
+      if dobYear=="" || 2026 - dobYear >= 16
+        Card gap=12
+          Text.strong "Which best describes your main activity last week?"
+          Radio bind=employment items=["Working for an employer","Self-employed","Looking for work","Retired","Student","Looking after home or family","Other"]
+          if employment=="Other"
+            Input "Please describe" multiline bind=employmentOther
+      if skipped
+        Badge.warning "Skipped: {skipReason}"
+      Row between
+        Button.ghost "Skip this question" onTap={open skip}
+        Row gap=8
+          Button.outline "Previous" onTap={go household}
+          Button "Save and continue" disabled={dobDay=="" || dobMonth=="" || dobYear=="" || (employment=="" && !skipped && (dobYear=="" || 2026 - dobYear >= 16))} onTap={toast "Saved"; go review}
+  Dialog#skip "Skip this question" "Tell us why you would rather not answer."
+    Select "Reason" bind=skipReason items=["I do not know the answer","I prefer not to say","It does not apply to me"]
+    Row end gap=8
+      Button.outline "Cancel" onTap={close}
+      Button "Skip" onTap={skipReason=="" ? toast "Choose a reason" : {skipped=true; close}}
+
+### Review and Submit
+state people=[{"id":1,"name":"Maria Alvarez","dob":"14 Mar 1984","activity":"Working for an employer"},{"id":2,"name":"Tomas Alvarez","dob":"02 Aug 2012","activity":"Student"}]
+state submitted=false
+state ref=""
+state confirmed=false
+Page
+  Nav
+    Brand "Headcount" icon="groups"
+    Text.muted "Code {code}"
+  Section
+    Column gap=20
+      if !submitted
+        Heading "Review your answers" level=1
+        Text.muted "Check each person before you submit. You cannot change answers afterwards."
+        Card gap=0
+          Row pad=12 border-bottom=#FFE0E0E0
+            Text.strong "Name" grow
+            Text.strong "Date of birth" w=140 hide=phone
+            Text.strong "Main activity" w=220 hide=tablet
+            Text.strong "" w=60
+          each p in people
+            Row pad=12 border-bottom=#FFE0E0E0
+              Text "{p.name}" grow
+              Text "{p.dob}" w=140 hide=phone
+              Text "{p.activity}" w=220 hide=tablet
+              Link "Edit" w=60 onTap={sel=p.id; go question}
+        Checkbox "I confirm these answers are correct to the best of my knowledge" bind=confirmed
+        Row between
+          Button.outline "Back" onTap={go household}
+          Button "Submit census" size=large disabled={!confirmed} onTap={ref="HC-" + upper(replace(code,"-","")) + "-" + length(people); submitted=true; emit submit ref}
+      if submitted
+        Column gap=16 center animate=pop
+          IconTile "check_circle"
+          Heading "Thank you, your census is submitted" level=1
+          Text.muted "Your reference number is"
+          Text.mono "{ref}" size=28 weight=700
+          Row gap=8
+            Button.outline "Copy reference" onTap={copy ref; toast "Copied"}
+            Button "Done" onTap={go start}

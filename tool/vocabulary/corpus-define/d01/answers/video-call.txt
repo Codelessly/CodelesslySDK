@@ -1,0 +1,167 @@
+### Pre-join
+state camOn=true
+state micOn=true
+state mic="MacBook Pro Microphone"
+state cam="FaceTime HD Camera"
+state speaker="MacBook Pro Speakers"
+state level=0
+state testing=false
+state name="Priya Raman"
+every 200 when testing onTick={level=(level*7+13)%100}
+Page
+  Nav
+    Brand "Roundtable" icon="videocam"
+    Row gap=8
+      Link "Help"
+      Link "Settings" onTap={open prejoinSettings}
+  Section
+    Row gap=40 top
+      Column grow gap=12
+        VideoTile "{name}" cam={camOn} muted={!micOn} h=320
+        Row center gap=12
+          IconButton "mic" tooltip="Microphone" onTap={micOn=!micOn}
+          IconButton "videocam" tooltip="Camera" onTap={camOn=!camOn}
+          IconButton "blur_on" tooltip="Background effects" onTap={toast "Blur on"}
+      Column w=320 gap=14
+        Heading "Weekly design sync" level=2
+        Text.muted "Started by Marcus Bell. 4 people are in the call."
+        Input "Your name" bind=name
+        Select "Microphone" bind=mic items=["MacBook Pro Microphone","AirPods Pro","Jabra Speak 510"]
+        Select "Camera" bind=cam items=["FaceTime HD Camera","Logitech C920"]
+        Select "Speaker" bind=speaker items=["MacBook Pro Speakers","AirPods Pro","Jabra Speak 510"]
+        Card gap=8
+          Row between
+            Text.strong "Test your microphone"
+            Button.outline "{testing ? 'Stop' : 'Test'}" onTap={testing=!testing; level=0}
+          MicMeter bind=level
+          Text.caption "Say something. The bar should move."
+        Button "Join now" size=large onTap={go call}
+        Button.outline "Join with camera off" onTap={camOn=false; go call}
+  Dialog#prejoinSettings "Settings"
+    Toggle "Mirror my video" bind=mirror
+    Toggle "Noise suppression" bind=noise
+    Button "Done" onTap={close}
+
+### Call
+state people=[{"id":1,"name":"Marcus Bell","muted":false,"cam":true},{"id":2,"name":"Aiko Tanaka","muted":true,"cam":true},{"id":3,"name":"Dmitri Volkov","muted":false,"cam":false},{"id":4,"name":"Priya Raman","muted":false,"cam":true}]
+state speaker=1
+state micOn=true
+state camOn=true
+state hand=false
+state panel="chat"
+state showPanel=true
+state idleFor=0
+state floats=[]
+state draft=""
+state msgs=[{"id":1,"who":"Marcus Bell","text":"Morning all, sharing the mockups in a minute.","time":"10:02"},{"id":2,"who":"Aiko Tanaka","text":"Can everyone see the new nav?","time":"10:04"},{"id":3,"who":"Dmitri Volkov","text":"Yes, looks good. Audio is a bit quiet on my side.","time":"10:05"}]
+every 1s onTick={idleFor=idleFor+1}
+every 2s onTick={speaker=speaker%length(people)+1}
+App
+  Main
+    Nav
+      Column
+        Text.strong "Weekly design sync"
+        Text.caption "{length(people)} in call"
+      Row gap=8
+        IconButton "forum" tooltip="Chat" onTap={panel="chat"; showPanel=true}
+        IconButton "group" tooltip="People" onTap={panel="people"; showPanel=true}
+    Stack grow onTap={idleFor=0}
+      Grid cols={length(people)<=1 ? 1 : length(people)<=4 ? 2 : 3} gap=8 pad=12
+        each p in people
+          VideoTile "{p.name}" speaking={speaker==p.id} muted={p.muted} cam={p.cam}
+      Column end right pad=24
+        each f in floats
+          Text "{f}" size=32 animate=slide-up duration=1500
+    if idleFor<5
+      Footer
+        Row center middle gap=12 pad=12
+          IconButton "{micOn ? 'mic' : 'mic_off'}" tooltip="Mute" onTap={micOn=!micOn}
+          IconButton "{camOn ? 'videocam' : 'videocam_off'}" tooltip="Camera" onTap={camOn=!camOn}
+          IconButton "present_to_all" tooltip="Share screen" onTap={go screen-share}
+          IconButton "pan_tool" tooltip="Raise hand" onTap={hand=!hand; toast hand ? "Hand lowered" : "Hand raised"}
+          IconButton "add_reaction" tooltip="Reactions" onTap={open reactions}
+          Button.destructive "Leave" icon="call_end" onTap={open leave}
+  if showPanel
+    Pane w=320 pad=16 gap=12
+      Row between
+        SegmentedButton bind=panel items=["chat","people"]
+        IconButton "close" tooltip="Close panel" onTap={showPanel=false}
+      if panel=="chat"
+        Column grow scroll gap=10
+          each m in msgs
+            ChatBubble "{m.text}" sender="{m.who}" time="{m.time}" mine={m.who=="Priya Raman"}
+        Row gap=8
+          Input "Message" bind=draft grow
+          IconButton "send" tooltip="Send" onTap={draft=="" ? : {msgs=append(msgs,{"id":length(msgs)+1,"who":"Priya Raman","text":draft,"time":"10:07"}); draft=""}}
+      if panel=="people"
+        Column grow scroll gap=4
+          each p in people
+            ListTile "{p.name}" subtitle="{p.muted ? 'Muted' : 'Speaking allowed'}" leading="avatar"
+              Icon "{p.muted ? 'mic_off' : 'mic'}"
+  Menu#reactions above
+    MenuItem "Clap" icon="celebration" onTap={floats=append(floats,"👏")}
+    MenuItem "Heart" icon="favorite" onTap={floats=append(floats,"❤️")}
+    MenuItem "Laugh" icon="mood" onTap={floats=append(floats,"😂")}
+    MenuItem "Thumbs up" icon="thumb_up" onTap={floats=append(floats,"👍")}
+  Dialog#leave "Leave the call?" "You can rejoin while it is running."
+    Row end gap=8
+      Button.outline "Stay" onTap={close}
+      Button.destructive "Leave" onTap={close; go pre-join}
+
+### Screen share
+state people=[{"id":1,"name":"Marcus Bell","muted":false,"cam":true},{"id":2,"name":"Aiko Tanaka","muted":true,"cam":true},{"id":3,"name":"Dmitri Volkov","muted":false,"cam":false},{"id":4,"name":"Priya Raman","muted":false,"cam":true}]
+state micOn=true
+state idleFor=0
+every 1s onTick={idleFor=idleFor+1}
+App
+  Main
+    Nav
+      Row gap=8 middle
+        Badge.danger "Presenting"
+        Text.strong "Marcus Bell is sharing: Roundtable-mockups.fig"
+      Button.outline "View options" onTap={open viewMenu}
+    Column grow gap=8 pad=12 onTap={idleFor=0}
+      Box grow fill=#FF111827 radius=12 center middle
+        Icon "desktop_windows" size=64 color=#FF9CA3AF
+        Text "Shared screen" color=#FFF9FAFB
+        Text.caption "A live view of the shared window appears here" color=#FF9CA3AF
+      Row scroll gap=8
+        each p in people
+          VideoTile "{p.name}" w=180 h=110 speaking={p.id==1} muted={p.muted} cam={p.cam}
+    if idleFor<5
+      Footer
+        Row center middle gap=12 pad=12
+          IconButton "{micOn ? 'mic' : 'mic_off'}" tooltip="Mute" onTap={micOn=!micOn}
+          IconButton "videocam" tooltip="Camera"
+          Button.outline "Stop viewing" onTap={go call}
+          Button.destructive "Leave" icon="call_end" onTap={go pre-join}
+  Menu#viewMenu end
+    MenuItem "Fit to window" icon="fit_screen" onTap={toast "Fit to window"}
+    MenuItem "Actual size" icon="zoom_in" onTap={toast "Actual size"}
+    MenuItem "Hide participant strip" icon="visibility_off" onTap={toast "Strip hidden"}
+
+// A video feed cannot be drawn, so a tile shows an avatar or a camera-off icon on a dark fill; the speaker is outlined in green.
+define VideoTile "name" speaking=false muted=false cam=true h=160 w=fill onTap
+  Stack h={h} w={w} radius=12 fill=#FF1F2937 border={speaking ? "#FF22C55E" : "#00000000"} onTap={onTap}
+    Column center middle
+      if cam
+        Avatar "{name}" size=56
+      if !cam
+        Icon "videocam_off" color=#FF9CA3AF
+    Column bottom left pad=8
+      Row gap=6 middle
+        Text.small "{name}" color=#FFF9FAFB
+        if muted
+          Icon "mic_off" size=16 color=#FFF87171
+
+// A level meter: a bar filling with the level from 0 to 100.
+define MicMeter bind=level
+  state level=0
+  Progress {level/100}
+
+// A chat message bubble, right-aligned and tinted when it is mine.
+define ChatBubble "text" sender="" time="" mine=false
+  Column gap=2 right={mine}
+    Text.caption "{sender}  {time}"
+    Box pad=10 radius=12 fill={mine ? "#FFDBEAFE" : "#FFF3F4F6"}
+      Text "{text}"

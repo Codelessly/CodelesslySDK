@@ -1,0 +1,197 @@
+### Sign-up sheet
+state tab="sheet"
+state shifts=[{"id":"s1","day":"Fri 14","time":"9:00-12:00","role":"Food sorting","need":4,"names":["Ada","Ben","Cleo","Dev"],"wait":["Fay"]},{"id":"s2","day":"Fri 14","time":"13:00-16:00","role":"Front desk","need":3,"names":["Gus"],"wait":[]},{"id":"s3","day":"Sat 15","time":"9:00-12:00","role":"Food sorting","need":5,"names":["Ivy","Jon"],"wait":[]},{"id":"s4","day":"Sat 15","time":"13:00-16:00","role":"Deliveries","need":2,"names":["Kim","Lou"],"wait":[]},{"id":"s5","day":"Sun 16","time":"10:00-14:00","role":"Pop-up kitchen","need":6,"names":["Mia"],"wait":[]},{"id":"s6","day":"Sun 16","time":"14:00-17:00","role":"Clean-up","need":3,"names":[],"wait":[]}]
+state mine=[{"id":"s3","day":"Sat 15","time":"9:00-12:00","role":"Food sorting","note":"Can lift boxes"}]
+state me="Sam Patel"
+state pick=""
+state note=""
+state remind="1 hour before"
+state swapFrom=""
+state swapTo=""
+App
+  Sidebar
+    Brand "Slots" icon="event_available"
+    NavItem "Sign-up sheet" icon="grid_view" selected={tab=="sheet"} onTap={tab="sheet"}
+    NavItem "My shifts" icon="checklist" badge="{length(mine)}" selected={tab=="mine"} onTap={tab="mine"}
+    NavItem "Organiser" icon="admin_panel_settings" onTap={go organiser}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Sam Patel" size=32
+      Text.muted "{me}"
+  Main
+    Nav
+      Heading "Weekend sign-up sheet" level=1
+      Row gap=8
+        Select bind=remind items=["None","1 hour before","1 day before","Both"] tooltip="Reminder before a shift"
+        Button.outline "My shifts" icon="checklist" onTap={tab="mine"}
+    Column pad=24 gap=16
+      Row gap=16 middle
+        Row gap=6 middle
+          SlotDots need=1 filled=1
+          Text.muted "Filled"
+        Row gap=6 middle
+          SlotDots need=1 filled=0
+          Text.muted "Still needed"
+        Row gap=6 middle
+          Badge.neutral "Full"
+          Text.muted "Tap a full shift to join its waitlist"
+      Grid cols=3 gap=16
+        each s in shifts
+          Card gap=8 fill={length(s.names)>=s.need ? "#FFEEEEEE" : "#FFFFFFFF"} onTap={pick=s.id; note=""; length(s.names)>=s.need ? open waitlist : open join}
+            Row between
+              Text.strong "{s.day}"
+              Text.muted "{s.time}"
+            Heading "{s.role}" level=3
+            SlotDots need={s.need} filled={length(s.names)}
+            Row between
+              Text.muted "{length(s.names)} of {s.need} filled"
+              if length(s.names)>=s.need
+                Badge.neutral "Full, {length(s.wait)} waiting"
+              if length(s.names)<s.need
+                Badge.success "{s.need-length(s.names)} open"
+  Dialog#join "Add your name" "Tell the organiser anything useful"
+    Text.strong "{find(shifts,x=>x.id==pick).role}, {find(shifts,x=>x.id==pick).day}"
+    Input "Your name" bind=me
+    Input "Note" "Allergies, can drive, bringing a friend" bind=note multiline
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Sign me up" onTap={isEmpty(trim(me)) ? toast "Add your name" : {shifts=updateWhere(shifts,x=>x.id==pick,x=>with(x,"names",append(x.names,me))); mine=append(mine,{"id":pick,"day":find(shifts,x=>x.id==pick).day,"time":find(shifts,x=>x.id==pick).time,"role":find(shifts,x=>x.id==pick).role,"note":note}); toast "You are in. Reminder: {remind}"; close}}
+  Dialog#waitlist "This shift is full" "Join the waitlist and we will tell you if a spot opens"
+    Text.strong "{find(shifts,x=>x.id==pick).role}, {find(shifts,x=>x.id==pick).day}"
+    Text.muted "{length(find(shifts,x=>x.id==pick).wait)} people ahead of you"
+    Row end gap=8
+      Button.ghost "No thanks" onTap={close}
+      Button "Join waitlist" onTap={shifts=updateWhere(shifts,x=>x.id==pick,x=>with(x,"wait",append(x.wait,me))); toast "On the waitlist"; close}
+
+### My shifts
+state mine=[{"id":"s3","day":"Sat 15","time":"9:00-12:00","role":"Food sorting","note":"Can lift boxes"},{"id":"s5","day":"Sun 16","time":"10:00-14:00","role":"Pop-up kitchen","note":""}]
+state shifts=[{"id":"s1","day":"Fri 14","time":"9:00-12:00","role":"Food sorting","need":4,"names":["Ada","Ben","Cleo","Dev"],"wait":["Fay"]},{"id":"s2","day":"Fri 14","time":"13:00-16:00","role":"Front desk","need":3,"names":["Gus"],"wait":[]},{"id":"s4","day":"Sat 15","time":"13:00-16:00","role":"Deliveries","need":2,"names":["Kim"],"wait":[]},{"id":"s6","day":"Sun 16","time":"14:00-17:00","role":"Clean-up","need":3,"names":[],"wait":[]}]
+state me="Sam Patel"
+state sel=""
+state swapTo=""
+state remind="1 hour before"
+state remindOn=true
+Page
+  Nav
+    Brand "Slots" icon="event_available"
+    Row gap=4
+      Link "Sign-up sheet" onTap={go sign-up-sheet}
+      Link "My shifts"
+    Button.outline "Organiser" onTap={go organiser}
+  Section narrow
+    Column gap=16
+      Heading "My shifts" level=1
+      Text.muted "You have {length(mine)} shifts coming up."
+      Card gap=8
+        Row between middle
+          Column gap=2
+            Text.strong "Reminder before each shift"
+            Text.muted "We message you {remind}"
+          Toggle bind=remindOn
+        if remindOn
+          Select "Remind me" bind=remind items=["1 hour before","3 hours before","1 day before"]
+      if isEmpty(mine)
+        EmptyState "No shifts yet" "Pick one on the sign-up sheet" icon="event_busy"
+      each m in mine
+        Card gap=8
+          Row between middle
+            Column gap=2
+              Text.strong "{m.role}"
+              Text.muted "{m.day}, {m.time}"
+            Row gap=8
+              Button.outline "Swap" icon="swap_horiz" onTap={sel=m.id; swapTo=""; open swap}
+              Button.destructive "Cancel" onTap={sel=m.id; open cancel}
+          if m.note != ""
+            Text.small "Note: {m.note}"
+  Dialog#cancel "Cancel this shift?" "We will offer your spot to the waitlist"
+    Text "{find(mine,x=>x.id==sel).role}, {find(mine,x=>x.id==sel).day}"
+    Row end gap=8
+      Button.ghost "Keep it" onTap={close}
+      Button.destructive "Cancel shift" onTap={shifts=updateWhere(shifts,x=>x.id==sel,x=>with(x,"names",without(x.names,me))); mine=removeWhere(mine,x=>x.id==sel); toast "Shift cancelled"; close}
+  Dialog#swap "Swap to another shift" "Choose an open shift"
+    each s in filter(shifts,x=>length(x.names)<x.need)
+      ListTile "{s.role}" "{s.day}, {s.time}, {s.need-length(s.names)} open" selected={swapTo==s.id} onTap={swapTo=s.id}
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Swap" onTap={swapTo=="" ? toast "Choose a shift" : {mine=map(mine,x=>x.id==sel ? {"id":swapTo,"day":find(shifts,y=>y.id==swapTo).day,"time":find(shifts,y=>y.id==swapTo).time,"role":find(shifts,y=>y.id==swapTo).role,"note":x.note} : x); shifts=updateWhere(shifts,x=>x.id==swapTo,x=>with(x,"names",append(x.names,me))); shifts=updateWhere(shifts,x=>x.id==sel,x=>with(x,"names",without(x.names,me))); toast "Swapped"; close}}
+
+### Organiser
+state shifts=[{"id":"s1","day":"Fri 14","time":"9:00-12:00","role":"Food sorting","need":4,"names":["Ada","Ben","Cleo","Dev"],"wait":["Fay"]},{"id":"s2","day":"Fri 14","time":"13:00-16:00","role":"Front desk","need":3,"names":["Gus"],"wait":[]},{"id":"s3","day":"Sat 15","time":"9:00-12:00","role":"Food sorting","need":5,"names":["Ivy","Jon"],"wait":[]},{"id":"s4","day":"Sat 15","time":"13:00-16:00","role":"Deliveries","need":2,"names":["Kim","Lou"],"wait":[]}]
+state copyDay="Sat 15"
+state newDay="Sat 22"
+state newCount=5
+state newRole="Food sorting"
+state newTime="9:00-12:00"
+state subject=""
+state body=""
+state template="Custom"
+App
+  Sidebar
+    Brand "Slots" icon="event_available"
+    NavItem "Sign-up sheet" icon="grid_view" onTap={go sign-up-sheet}
+    NavItem "My shifts" icon="checklist" onTap={go my-shifts}
+    NavItem "Organiser" icon="admin_panel_settings" selected
+    Spacer grow
+    Text.muted "Organiser: Sam Patel"
+  Main
+    Nav
+      Heading "Organiser" level=1
+      Row gap=8
+        Button.outline "Message all" icon="campaign" onTap={open message}
+        Button "Add shifts" icon="add" onTap={open addshifts}
+    Column pad=24 gap=16
+      Row gap=16
+        Card grow gap=4
+          Text.muted "Volunteers needed"
+          Text "{sum(shifts,x=>x.need)}" size=32 weight=700
+        Card grow gap=4
+          Text.muted "Signed up"
+          Text "{sum(shifts,x=>length(x.names))}" size=32 weight=700
+        Card grow gap=4
+          Text.muted "Still missing"
+          Text "{sum(shifts,x=>max(0,x.need-length(x.names)))}" size=32 weight=700 color=#FFC62828
+      Card gap=8
+        Text.strong "Shifts"
+        Row gap=8
+          Text.muted "Shift" grow
+          Text.muted "Filled" w=140
+          Text.muted "Missing" w=80
+          Text.muted "Waitlist" w=80
+          Text.muted "" w=40
+        Divider
+        each s in sortBy(shifts,x=>x.day)
+          Row gap=8 middle
+            Column grow gap=2
+              Text.strong "{s.role}"
+              Text.muted "{s.day}, {s.time}"
+            Row w=140
+              SlotDots need={s.need} filled={length(s.names)}
+            Badge.warning "{max(0,s.need-length(s.names))}" w=80 hidden={length(s.names)>=s.need}
+            Badge.success "0" w=80 hidden={length(s.names)<s.need}
+            Text "{length(s.wait)}" w=80
+            IconButton "more_vert" tooltip="More" onTap={sel=s.id; open rowMenu}
+  Menu#rowMenu end
+    MenuItem "Add one more slot" icon="person_add" onTap={shifts=updateWhere(shifts,x=>x.id==sel,x=>with(x,"need",x.need+1))}
+    MenuItem "Copy to another day" icon="content_copy" onTap={copyDay=find(shifts,x=>x.id==sel).day; open addshifts}
+    MenuItem "Message this shift" icon="mail" onTap={open message}
+    MenuItem "Delete shift" icon="delete" onTap={shifts=removeWhere(shifts,x=>x.id==sel); toast "Shift deleted"}
+  Dialog#addshifts "Add shifts" "Copy a whole day, or add a single shift"
+    Select "Copy shifts from" bind=copyDay items=["Fri 14","Sat 15","Sun 16"]
+    Input "New day" bind=newDay
+    Text.muted "{count(shifts,x=>x.day==copyDay)} shifts will be copied to {newDay}"
+    Divider
+    Input "Role" bind=newRole
+    Input "Time" bind=newTime
+    Input "Volunteers needed" bind=newCount type=number
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.outline "Copy day" onTap={shifts=concat(shifts,map(filter(shifts,x=>x.day==copyDay),x=>with(with(with(x,"id",concat(x.id,newDay)),"day",newDay),"names",[]))); toast "Day copied"; close}
+      Button "Add shift" onTap={shifts=append(shifts,{"id":concat("n",newDay),"day":newDay,"time":newTime,"role":newRole,"need":newCount,"names":[],"wait":[]}); toast "Shift added"; close}
+  Dialog#message "Message all volunteers" "Goes to everyone signed up"
+    Select "Template" bind=template items=["Custom","Reminder","Thank you","We need more people"] onChange={template=="Reminder" ? {subject="See you this weekend"; body="Hi all, a reminder that your shift starts soon. Please arrive ten minutes early."} : template=="Thank you" ? {subject="Thank you"; body="Thank you for giving your time. It made a real difference."} : template=="We need more people" ? {subject="Can you bring a friend?"; body="We still have {sum(shifts,x=>max(0,x.need-length(x.names)))} open spots. Please share the sheet."} : {subject=""; body=""}}
+    Input "Subject" bind=subject
+    Input "Message" bind=body multiline
+    Text.muted "To: {sum(shifts,x=>length(x.names))} volunteers"
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Send" icon="send" onTap={isEmpty(trim(body)) ? toast "Write a message" : {emit sendAll body; toast "Message sent"; close}}

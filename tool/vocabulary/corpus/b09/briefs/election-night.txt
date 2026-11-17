@@ -1,0 +1,3 @@
+App: Tallyroom, an election results night. A map of districts coloured by the leading party with shades for the margin, districts filling in as results arrive; a seats bar across the top with a line at the majority mark; a counter of percent reporting; a race list with called and too close to call; a swing arrow compared with last time; a candidate page with a bar of votes; a timeline of calls by time; a projector mode.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

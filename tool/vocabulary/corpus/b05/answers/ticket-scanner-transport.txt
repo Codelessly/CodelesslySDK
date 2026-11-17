@@ -1,0 +1,254 @@
+### Search
+state from="London Paddington"
+state to="Bristol Temple Meads"
+state date="2026-11-20"
+state time="08:30"
+state railcard="None"
+state adults=1
+state sort="best"
+state sel=-1
+state journeys=[{"id":1,"dep":"08:45","arr":"10:07","dur":"1h 22m","changes":0,"price":58.5,"from":"Paddington","to":"Temple Meads","platform":"3","operator":"GWR"},{"id":2,"dep":"09:15","arr":"11:02","dur":"1h 47m","changes":1,"price":34.2,"from":"Paddington","to":"Temple Meads","platform":"7","operator":"GWR via Reading"},{"id":3,"dep":"09:45","arr":"11:08","dur":"1h 23m","changes":0,"price":61,"from":"Paddington","to":"Temple Meads","platform":"4","operator":"GWR"},{"id":4,"dep":"10:30","arr":"12:25","dur":"1h 55m","changes":2,"price":27.9,"from":"Paddington","to":"Temple Meads","platform":"9","operator":"GWR via Reading, Didcot"}]
+App
+  Sidebar
+    Brand "Platform 9" icon="train"
+    NavItem "Search" icon="search" selected={true}
+    NavItem "My tickets" icon="confirmation_number" badge="1" onTap={go ticket}
+    NavItem "Live journey" icon="my_location" onTap={go live}
+    NavItem "Refunds" icon="undo" onTap={go refund}
+    Spacer grow
+    Text.muted "Ray Li"
+  Main
+    Nav
+      Heading "Plan a journey"
+      Row gap=8
+        Button.outline "Railcards" icon="badge" onTap={open railcards}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Row gap=12 bottom
+          Input "From" bind=from grow
+          IconButton "swap_horiz" tooltip="Swap stations" onTap={from=to; to=from}
+          Input "To" bind=to grow
+        Row gap=12 bottom
+          DatePicker "Date" bind=date grow
+          TimePicker "Leave after" bind=time grow
+          Select "Railcard" bind=railcard items=["None","16-25 Railcard","Senior Railcard","Two Together","Family & Friends"] grow
+        Row between
+          Row gap=8
+            IconButton "remove" tooltip="Fewer adults" onTap={adults=max(1,adults-1)}
+            Text.strong "{adults} adult{adults>1 ? 's' : ''}"
+            IconButton "add" tooltip="More adults" onTap={adults=min(9,adults+1)}
+          Button "Search trains" icon="search" onTap={sel=-1; toast "Showing trains for {date}"}
+      Row between
+        Text.heading "{from} to {to}"
+        SegmentedButton bind=sort items=["best","cheapest","fastest"]
+      Row gap=8
+        Button.outline "Earlier" icon="keyboard_arrow_up" onTap={time="07:30"; toast "Showing earlier trains"}
+      each j in sortBy(journeys, x => sort=="cheapest" ? x.price : (sort=="fastest" ? x.dur : x.dep))
+        Card gap=8 onTap={sel=j.id}
+          Row between
+            Row gap=16
+              Column
+                Text.strong "{j.dep}"
+                Text.caption "{j.from}"
+              Icon "arrow_forward"
+              Column
+                Text.strong "{j.arr}"
+                Text.caption "{j.to}"
+            Column end
+              Text.heading "{money(j.price * adults, '£', 2)}"
+              if j.price == min(34.2, min(27.9, min(58.5, 61)))
+                Badge.success "Cheapest"
+          Row gap=12
+            Text.muted "{j.dur}"
+            Badge.neutral "{j.changes == 0 ? 'Direct' : j.changes + ' change' + (j.changes>1 ? 's' : '')}"
+            Text.muted "{j.operator}"
+            Spacer grow
+            Button.outline "Reserve seat" onTap={sel=j.id; go seats}
+            Button "Buy" onTap={sel=j.id; open buy}
+      Row
+        Button.outline "Later" icon="keyboard_arrow_down" onTap={time="11:30"; toast "Showing later trains"}
+  Sheet#railcards "Railcards"
+    Text.muted "A railcard takes a third off most fares."
+    Radio "None" bind=railcard
+    Radio "16-25 Railcard" bind=railcard
+    Radio "Senior Railcard" bind=railcard
+    Radio "Two Together" bind=railcard
+    Radio "Family & Friends" bind=railcard
+    Button "Apply" onTap={close}
+  Dialog#buy "Confirm purchase" "Anytime Single, 1 adult"
+    Text.strong "{from} to {to}"
+    Text.muted "{date}"
+    Text.muted "Railcard: {railcard}"
+    Row gap=8
+      Button.outline "Cancel" onTap={close}
+      Button "Pay and get ticket" onTap={close; emit purchase sel; go ticket}
+
+### Seats
+state coach=0
+state seat=""
+state taken=["A1","A2","B3","C1","C4","D2","D3","E1","F4","G2"]
+state prefs=["Window","Quiet coach"]
+state coaches=["A","B","C","D","E"]
+App
+  Sidebar
+    Brand "Platform 9" icon="train"
+    NavItem "Search" icon="search" onTap={go search}
+    NavItem "My tickets" icon="confirmation_number" onTap={go ticket}
+    NavItem "Live journey" icon="my_location" onTap={go live}
+    NavItem "Refunds" icon="undo" onTap={go refund}
+  Main
+    Nav
+      Heading "Reserve a seat"
+      Text.muted "08:45 Paddington to Temple Meads"
+    Column pad=24 gap=16 scroll
+      Row gap=8
+        each c in coaches
+          ChoiceChip "Coach {c}" selected={coach==index} onTap={coach=index}
+      Row gap=8
+        FilterChip "Window" selected={contains(prefs,"Window")} onTap={prefs=contains(prefs,"Window") ? without(prefs,"Window") : append(prefs,"Window")}
+        FilterChip "Table" selected={contains(prefs,"Table")} onTap={prefs=contains(prefs,"Table") ? without(prefs,"Table") : append(prefs,"Table")}
+        FilterChip "Quiet coach" selected={contains(prefs,"Quiet coach")} onTap={prefs=contains(prefs,"Quiet coach") ? without(prefs,"Quiet coach") : append(prefs,"Quiet coach")}
+      Card gap=12
+        Text.strong "Coach {coaches[coach]}"
+        SeatMap cols=4 rows=8 aisle=2 taken={taken} bind=seat
+        Row gap=16
+          Row gap=4
+            Icon "event_seat"
+            Text.caption "Free"
+          Row gap=4
+            Icon "event_seat" color=#FF9E9E9E
+            Text.caption "Taken"
+          Row gap=4
+            Icon "event_seat" color=#FF1E88E5
+            Text.caption "Yours"
+    Footer
+      Row between pad=16
+        Column
+          Text.strong "{seat == '' ? 'No seat chosen' : 'Seat ' + seat}"
+          Text.muted "Reservation £0.00, free with this ticket"
+        Button "Confirm seat" disabled={seat==""} onTap={emit reserve seat; toast "Seat {seat} reserved"; go ticket}
+
+### Ticket
+state secs=1200
+state active=false
+state frame=0
+state tickets=[{"id":"PL9-4471-RX","route":"London Paddington to Bristol Temple Meads","when":"Fri 20 Nov, 08:45","type":"Anytime Single","seat":"B, 14"}]
+every 1s when !active && secs>0 onTick={secs=secs-1}
+every 1s when secs==0 && !active onTick={active=true}
+every 400 when active onTick={frame=frame+1}
+App
+  Sidebar
+    Brand "Platform 9" icon="train"
+    NavItem "Search" icon="search" onTap={go search}
+    NavItem "My tickets" icon="confirmation_number" selected={true}
+    NavItem "Live journey" icon="my_location" onTap={go live}
+    NavItem "Refunds" icon="undo" onTap={go refund}
+  Main
+    Nav
+      Heading "My ticket"
+      Row gap=8
+        IconButton "more_vert" tooltip="More" onTap={open ticketMenu}
+    Column pad=24 gap=16 center scroll maxw=480
+      each t in tickets
+        Card gap=12
+          Row between
+            Text.heading "{t.type}"
+            Badge.success "{active ? 'Active' : 'Not yet active'}"
+          Text.strong "{t.route}"
+          Text.muted "{t.when}, Coach {t.seat}"
+          Divider
+          if active
+            Column center gap=8
+              Barcode value="{t.id}" format=aztec size=200 animate=pulse
+              Text.mono "{t.id}"
+              Text.caption "Moving code, screenshots will not be accepted"
+          if !active
+            Column center gap=12
+              Stack center middle
+                Ring {1 - secs/1200}
+                Text.strong "{floor(secs/60)}:{secs%60 < 10 ? '0' : ''}{secs%60}"
+              Text.muted "Ticket activates 20 minutes before departure"
+              Button.outline "Activate now" onTap={active=true; toast "Ticket activated"}
+          Divider
+          Row gap=8
+            Button.outline "Add to wallet" icon="wallet" onTap={emit addToWallet t.id}
+            Button.outline "Refund" icon="undo" onTap={go refund}
+  Menu#ticketMenu end
+    MenuItem "Share ticket" icon="share" onTap={emit share}
+    MenuItem "Download PDF" icon="download" onTap={emit download}
+    MenuItem "Refund ticket" icon="undo" onTap={go refund}
+
+### Live and refund
+state step=0
+state reason="Train cancelled"
+state method="Original card"
+state delay=7
+state stops=[{"name":"London Paddington","time":"08:45","done":true},{"name":"Reading","time":"09:12","done":true},{"name":"Didcot Parkway","time":"09:30","done":false},{"name":"Swindon","time":"09:46","done":false},{"name":"Bristol Temple Meads","time":"10:07","done":false}]
+App
+  Sidebar
+    Brand "Platform 9" icon="train"
+    NavItem "Search" icon="search" onTap={go search}
+    NavItem "My tickets" icon="confirmation_number" onTap={go ticket}
+    NavItem "Live journey" icon="my_location" selected={step==0} onTap={step=0}
+    NavItem "Refunds" icon="undo" selected={step>0} onTap={step=1}
+  Main
+    Nav
+      Heading "{step==0 ? 'Live journey' : 'Refund'}"
+    Column pad=24 gap=16 scroll
+      if step==0
+        Card gap=12
+          Row between
+            Column
+              Text.heading "08:45 to Bristol Temple Meads"
+              Text.muted "Calling at Reading, Didcot Parkway, Swindon"
+            Column end
+              Text.caption "Platform"
+              Text.title "3" size=40 weight=700
+          Row gap=8
+            Badge.warning "Delayed {delay} min"
+            Text.muted "Now expected 10:14"
+          Timeline items={stops} current=2
+          each s in stops
+            Row between
+              Row gap=8
+                Icon "{s.done ? 'check_circle' : 'radio_button_unchecked'}"
+                Text "{s.name}"
+              Text.muted "{s.time}"
+        Row gap=8
+          Button.outline "Refresh" icon="refresh" onTap={delay=max(0,delay-1); toast "Updated"}
+          Button.destructive "Train cancelled? Refund" onTap={step=1}
+      if step==1
+        Card gap=12
+          Text.heading "Why are you claiming?"
+          Radio "Train cancelled" bind=reason
+          Radio "Delayed 30 minutes or more" bind=reason
+          Radio "Change of plans" bind=reason
+          Button "Continue" onTap={step=2}
+      if step==2
+        Card gap=12
+          Text.heading "Where should we send it?"
+          Radio "Original card" bind=method
+          Radio "Platform 9 credit" bind=method
+          Row between
+            Text.muted "Ticket price"
+            Text "£58.50"
+          Row between
+            Text.muted "Admin fee"
+            Text "{reason=='Change of plans' ? '£10.00' : '£0.00'}"
+          Divider
+          Row between
+            Text.strong "You get back"
+            Text.strong "{reason=='Change of plans' ? '£48.50' : '£58.50'}"
+          Row gap=8
+            Button.outline "Back" onTap={step=1}
+            Button "Request refund" onTap={open confirmRefund}
+      if step==3
+        Card gap=12 center
+          Icon "check_circle" color=#FF2E7D32 size=48
+          Text.heading "Refund requested"
+          Text.muted "Expect it on your {lower(method)} within 5 working days."
+          Button "Done" onTap={emit refund reason; go ticket}
+  Dialog#confirmRefund "Refund this ticket?" "The ticket will stop working straight away."
+    Row gap=8
+      Button.outline "Keep ticket" onTap={close}
+      Button.destructive "Refund" onTap={step=3; close}

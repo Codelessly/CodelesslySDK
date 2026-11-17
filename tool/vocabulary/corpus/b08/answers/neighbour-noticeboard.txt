@@ -1,0 +1,184 @@
+### Board
+project cat="all"
+project radius=2
+project sel=""
+project posts=[{"id":"p1","cat":"lost pet","title":"Lost: grey tabby, answers to Biscuit","body":"Slipped out near Alder Street on Sunday evening. Wearing a green collar with a bell.","who":"Maren K.","when":"2h ago","dist":0.4,"tilt":-2,"taken":false,"replies":3},{"id":"p2","cat":"for free","title":"Free: solid oak bookshelf","body":"Moving out. Needs a good home, you collect. Porch pickup after 5pm.","who":"Tomas B.","when":"5h ago","dist":0.9,"tilt":1.5,"taken":false,"replies":6},{"id":"p3","cat":"help wanted","title":"Help: carrying a sofa up two flights","body":"Two strong people for twenty minutes on Saturday morning. Coffee and pastries provided.","who":"Ines D.","when":"yesterday","dist":1.3,"tilt":-1,"taken":false,"replies":2},{"id":"p4","cat":"events","title":"Street cleanup and potluck","body":"Gloves and bags supplied. Meet at the corner of Alder and 4th, 10am Sunday.","who":"Alder St. Association","when":"2 days ago","dist":0.6,"tilt":2,"taken":false,"replies":11},{"id":"p5","cat":"for free","title":"Free: box of moving boxes, flattened","body":"About thirty, various sizes. Leave on the step, take what you need.","who":"Priya S.","when":"3 days ago","dist":2.8,"tilt":-1.5,"taken":true,"replies":4}]
+state q=""
+state view="board"
+Page
+  Nav sticky
+    Brand "Lamppost" icon="light"
+    Row gap=4
+      Link "Board" onTap={go board}
+      Link "My posts" onTap={toast "Showing your posts"}
+    Row gap=8
+      Input "Search the board" bind=q w=220
+      Button "Pin a notice" icon="push_pin" onTap={go new-post}
+  Section fill=#FFC8A064
+    Column gap=16
+      Heading "What is happening within {radius} km" level=1
+      Row gap=8 top
+        ChoiceChip "All" selected={cat=="all"} onTap={cat="all"}
+        ChoiceChip "Lost pet" selected={cat=="lost pet"} onTap={cat="lost pet"}
+        ChoiceChip "For free" selected={cat=="for free"} onTap={cat="for free"}
+        ChoiceChip "Help wanted" selected={cat=="help wanted"} onTap={cat="help wanted"}
+        ChoiceChip "Events" selected={cat=="events"} onTap={cat="events"}
+      Row gap=24 top
+        Column grow gap=16
+          Grid cols=2 gap=24
+            each p in filter(posts, x => (cat=="all" || x.cat==cat) && x.dist<=radius && (q=="" || contains(lower(x.title), lower(q))))
+              Card gap=8 fill=#FFFFF8E1 rotate={p.tilt} animate=pop stagger=60 onTap={sel=p.id; go post-detail}
+                Row between
+                  Badge.info "{p.cat}"
+                  Icon "push_pin"
+                if p.taken
+                  Badge.neutral "Taken"
+                Text.strong "{p.title}" strike={p.taken}
+                Text.muted "{p.body}"
+                Row between
+                  Text.caption "{p.who} · {p.when}"
+                  Text.caption "{p.dist} km · {p.replies} replies"
+                Row gap=8
+                  Button.outline "Open" onTap={sel=p.id; go post-detail}
+                  if p.cat=="for free" && !p.taken
+                    Button.secondary "Mark taken" onTap={posts=updateWhere(posts, x => x.id==p.id, x => with(x,"taken",true)); toast "Marked as taken"}
+                  IconButton "more_vert" tooltip="More" onTap={sel=p.id; open noticeMenu}
+          if count(posts, x => (cat=="all" || x.cat==cat) && x.dist<=radius)==0
+            Text.muted "Nothing pinned here yet. Try a wider radius."
+        Card w=300 gap=12 sticky
+          Heading "Nearby radius" level=3
+          Gauge bind=radius min=0 max=10 unit="km"
+          Slider bind=radius min=1 max=10
+          Text.caption "Only notices from within {radius} km of Alder Street are shown."
+          Divider
+          Heading "Your area" level=3
+          Map lat=51.5 lng=-0.12 zoom=14 h=160 radius={radius}
+          Text.caption "Alder Street, N7"
+  Footer
+    Row between
+      Text.strong "Lamppost"
+      Text.muted "Keep it kind. Meet in public."
+  Menu#noticeMenu end
+    MenuItem "Open" icon="open_in_new" onTap={go post-detail}
+    MenuItem "Reply" icon="reply" onTap={go post-detail}
+    MenuItem "Report" icon="flag" onTap={open report}
+  Dialog#report "Report this notice" "Tell the moderators what is wrong"
+    Select "Reason" bind=reason items=["Spam","Unsafe request","Wrong category","Offensive","Other"]
+    Input "Details" bind=detail multiline
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Send report" onTap={emit report {id: sel, reason: reason, detail: detail}; toast "Thanks, a moderator will look at it"; close}
+
+### Post detail
+state reply=""
+state thread=[{"who":"Dev R.","text":"Saw a grey cat by the bins on Alder 3 this morning, will check again at lunch.","when":"1h ago"},{"who":"Maren K.","text":"Thank you! Biscuit is shy, call softly.","when":"1h ago"},{"who":"Lucia P.","text":"Posted it on the school gate group too.","when":"40m ago"}]
+state at=0
+Page
+  Nav sticky
+    Brand "Lamppost" icon="light"
+    Row gap=4
+      Link "Board" onTap={go board}
+    Button.outline "Back to the board" icon="arrow_back" onTap={go board}
+  Section fill=#FFC8A064
+    Row gap=24 top
+      Column grow gap=16
+        Card gap=12 fill=#FFFFF8E1 rotate=-1
+          Row between
+            Badge.info "lost pet"
+            Text.caption "Posted 2h ago"
+          Heading "Lost: grey tabby, answers to Biscuit" level=1
+          Row gap=8
+            Avatar "Maren K." size=40
+            Column
+              Text.strong "Maren K."
+              Text.caption "Alder Street · 0.4 km away"
+          Text "Slipped out near Alder Street on Sunday evening. Wearing a green collar with a bell. Very friendly but nervous around dogs. Microchipped. Please message me rather than chase her."
+          Row gap=8 scroll
+            Image "https://images.example.com/biscuit-1.jpg" w=160 h=120 radius=8 onTap={at=0; open shots}
+            Image "https://images.example.com/biscuit-2.jpg" w=160 h=120 radius=8 onTap={at=1; open shots}
+            Image "https://images.example.com/biscuit-3.jpg" w=160 h=120 radius=8 onTap={at=2; open shots}
+          Row gap=8
+            Button "Call Maren" icon="call" onTap={link tel:+441632960123}
+            Button.outline "Share" icon="share" onTap={copy "https://lamppost.example/p/p1"; toast "Link copied"}
+            Button.ghost "Report" icon="flag" onTap={open report}
+        Card gap=12
+          Heading "Replies ({length(thread)})" level=3
+          each r in thread
+            Row gap=12 top
+              Avatar "{r.who}" size=32
+              Column grow
+                Row between
+                  Text.strong "{r.who}"
+                  Text.caption "{r.when}"
+                Text "{r.text}"
+          Divider
+          Row gap=8
+            Input "Write a reply" bind=reply grow
+            Button "Send" icon="send" onTap={reply!="" ? {thread=append(thread, {"who":"You","text":reply,"when":"now"}); reply=""; toast "Reply sent"} : toast "Write something first"}
+      Column w=320 gap=16 sticky
+        Card gap=8
+          Heading "Where" level=3
+          Map lat=51.5 lng=-0.12 zoom=15 h=180 pin="Last seen near Alder St"
+          Text.caption "Pin shows the area, not the exact address."
+        Card gap=8 fill=#FFE8F5E9
+          Row gap=8
+            IconTile "health_and_safety"
+            Heading "Safe meeting tip" level=3
+          Text.muted "Meet in a public, well lit spot such as the corner shop or the library steps. Bring a friend after dark, and never send money before you see the item."
+  Lightbox#shots photos=["https://images.example.com/biscuit-1.jpg","https://images.example.com/biscuit-2.jpg","https://images.example.com/biscuit-3.jpg"] bind=at
+  Dialog#report "Report this notice" "Tell the moderators what is wrong"
+    Select "Reason" bind=reason items=["Spam","Unsafe request","Wrong category","Offensive","Other"]
+    Input "Details" bind=detail multiline
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Send report" onTap={emit report {reason: reason, detail: detail}; toast "Thanks, a moderator will look at it"; close}
+
+### New post
+state title=""
+state body=""
+state kind="for free"
+state expiry="7 days"
+state area=2
+state photos=[]
+App
+  Sidebar
+    Brand "Lamppost" icon="light"
+    NavItem "Board" icon="dashboard" onTap={go board}
+    NavItem "Pin a notice" icon="push_pin" selected={true}
+    NavItem "My posts" icon="article" badge="2" onTap={toast "Showing your posts"}
+    Spacer grow
+    Text.muted "Maren K. · Alder Street"
+  Main
+    Nav
+      Heading "Pin a notice" level=1
+      Row gap=8
+        Button.ghost "Cancel" onTap={go board}
+        Button "Pin it" onTap={title!="" && body!="" ? {emit newPost {title: title, body: body, cat: kind, expiry: expiry, radius: area}; toast "Pinned to the board"; go board} : toast "Add a title and a few words"}
+    Column pad=24 gap=16 scroll maxw=720
+      Card gap=12
+        Text.fieldLabel "Category"
+        Row gap=8
+          ChoiceChip "Lost pet" selected={kind=="lost pet"} onTap={kind="lost pet"}
+          ChoiceChip "For free" selected={kind=="for free"} onTap={kind="for free"}
+          ChoiceChip "Help wanted" selected={kind=="help wanted"} onTap={kind="help wanted"}
+          ChoiceChip "Events" selected={kind=="events"} onTap={kind="events"}
+        Input "Title" "Short and clear" bind=title
+        Input "What do neighbours need to know?" bind=body multiline
+        if kind=="events"
+          Row gap=12
+            DatePicker "Date" bind=eventDate
+            TimePicker "Starts" bind=eventTime
+        Row gap=8
+          Button.outline "Add photos" icon="add_a_photo" onTap={emit pickPhotos}
+          Text.caption "{length(photos)} added"
+      Card gap=12
+        Text.fieldLabel "Show it to neighbours within"
+        Row gap=16
+          Gauge bind=area min=0 max=10 unit="km"
+          Slider bind=area min=1 max=10 grow
+        Select "Take it down after" bind=expiry items=["1 day","3 days","7 days","14 days","30 days"]
+        Toggle "Allow replies" bind=replies
+      Card gap=8 fill=#FFE8F5E9
+        Row gap=8
+          IconTile "health_and_safety"
+          Text.muted "Keep your address out of the post. Arrange a public meeting place in the replies."

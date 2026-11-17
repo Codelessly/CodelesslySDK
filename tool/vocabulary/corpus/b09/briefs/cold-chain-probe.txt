@@ -1,0 +1,3 @@
+App: Frostwatch, cold chain monitoring. A list of fridges and trucks with a current temperature and a trace line for the last day inside a shaded safe band; a breach marks the line in red with minutes out of range and a running spoilage clock; probe battery and signal icons; tap a unit for a door-open timeline; acknowledge an alarm with a reason chosen from a list; a delivery handover with a first and last reading compared; a certificate preview.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

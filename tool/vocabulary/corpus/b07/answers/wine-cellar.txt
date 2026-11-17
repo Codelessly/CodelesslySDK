@@ -1,0 +1,157 @@
+### Rack
+state tab="rack"
+state sel=0
+state bottles=[{"id":1,"slot":0,"name":"Chateau Margaux 2015","region":"Bordeaux","kind":"red","price":640,"from":2024,"to":2040,"peak":2032},{"id":2,"slot":1,"name":"Barolo Cannubi 2016","region":"Piedmont","kind":"red","price":120,"from":2024,"to":2036,"peak":2030},{"id":3,"slot":3,"name":"Chablis Grand Cru 2019","region":"Burgundy","kind":"white","price":85,"from":2023,"to":2027,"peak":2025},{"id":4,"slot":4,"name":"Sancerre Rose 2023","region":"Loire","kind":"rose","price":28,"from":2025,"to":2026,"peak":2026},{"id":5,"slot":7,"name":"Rioja Reserva 2017","region":"Rioja","kind":"red","price":42,"from":2022,"to":2026,"peak":2025},{"id":6,"slot":8,"name":"Riesling Spatlese 2020","region":"Mosel","kind":"white","price":36,"from":2023,"to":2035,"peak":2029},{"id":7,"slot":10,"name":"Cotes de Provence Rose 2023","region":"Provence","kind":"rose","price":22,"from":2025,"to":2026,"peak":2026},{"id":8,"slot":13,"name":"Brunello di Montalcino 2015","region":"Tuscany","kind":"red","price":95,"from":2023,"to":2038,"peak":2030}]
+state sortRegion=false
+state notes=[]
+state rating=0
+state noteText=""
+state guess=-1
+state moveFrom=-1
+App
+  Sidebar
+    Brand "Cask" icon="wine_bar"
+    NavItem "Rack" icon="grid_view" selected={tab=="rack"} onTap={tab="rack"}
+    NavItem "Drink soon" icon="schedule" badge="{count(bottles,b=>b.to<=2026)}" onTap={go drink-soon}
+    NavItem "By region" icon="public" onTap={go by-region}
+    Spacer grow
+    Text.muted "{length(bottles)} bottles in the cellar"
+  Main
+    Nav
+      Heading "Rack" level=1
+      Row gap=8
+        Text.strong "Cellar value {money(sum(bottles,b=>b.price),"$",0)}"
+        Button "Scan a label" icon="photo_camera" onTap={open scan}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Column grow gap=12
+          Row between
+            Text.sectionTitle "Rack A, 24 slots"
+            Row gap=12
+              Row gap=4
+                Icon "circle" color=#FF8B1E3F size=14
+                Text.small "Red"
+              Row gap=4
+                Icon "circle" color=#FFE8D77A size=14
+                Text.small "White"
+              Row gap=4
+                Icon "circle" color=#FFF2A6B5 size=14
+                Text.small "Rose"
+          Grid cols=6 gap=8
+            each s in range(24)
+              if any(bottles,b=>b.slot==s)
+                Box gap=4 pad=8 radius=8 fill=#FFF4F0EA center middle drag=bottle(find(bottles,b=>b.slot==s).id) drop=bottle onDrop={bottles=updateWhere(bottles,b=>b.id==result.data,b=>with(b,"slot",s))} onTap={sel=find(bottles,b=>b.slot==s).id; open bottle}
+                  Icon "wine_bar" color={find(bottles,b=>b.slot==s).kind=="red" ? "#FF8B1E3F" : (find(bottles,b=>b.slot==s).kind=="white" ? "#FFE8D77A" : "#FFF2A6B5")} size=28
+                  Text.caption "{find(bottles,b=>b.slot==s).name}" center
+              if !any(bottles,b=>b.slot==s)
+                Box pad=8 radius=8 center middle h=88 border=#FFBDB5A8 dashed drop=bottle onDrop={bottles=updateWhere(bottles,b=>b.id==result.data,b=>with(b,"slot",s))} onTap={open scan}
+                  Text.muted "{s+1}" center
+          Text.muted "Drag a bottle onto another slot to move it. Tap an empty slot to add a bottle."
+        Pane w=320 pad=16 gap=12
+          Text.panelTitle "Drinking windows"
+          each b in sortByDesc(bottles,b=>b.to)
+            Column gap=4
+              Row between
+                Text.strong "{b.name}"
+                Text.small "{b.from} to {b.to}"
+              Row gap=2
+                Progress {clamp((2026-b.from)/(b.to-b.from),0,1)}
+              Row between
+                Text.caption "now 2026"
+                Text.caption "{2026>b.peak ? "past peak" : "peak " + b.peak}"
+  Sheet#scan "Add by scanning a label"
+    Column gap=12
+      CameraScan "Point at the label" onScan={guess=0}
+      Text.muted "Best guesses from the label"
+      each g in [{"name":"Chateau Lafite Rothschild 2014","region":"Bordeaux","kind":"red","price":780},{"name":"Chateau Latour 2014","region":"Bordeaux","kind":"red","price":720},{"name":"Chateau Mouton Rothschild 2014","region":"Bordeaux","kind":"red","price":690}]
+        Card gap=4 onTap={guess=index}
+          Row between
+            Column gap=2
+              Text.strong "{g.name}"
+              Text.muted "{g.region} / {money(g.price,"$",0)}"
+            Radio selected={guess==index}
+      Button "Add to the first empty slot" onTap={guess>=0 ? {bottles=append(bottles,{"id":length(bottles)+10,"slot":first(filter(range(24),s=>!any(bottles,b=>b.slot==s))),"name":"Chateau Lafite Rothschild 2014","region":"Bordeaux","kind":"red","price":780,"from":2026,"to":2045,"peak":2035}); toast "Bottle added"; close} : toast "Pick a guess first"}
+  Dialog#bottle "{find(bottles,b=>b.id==sel).name}" "{find(bottles,b=>b.id==sel).region} / slot {find(bottles,b=>b.id==sel).slot+1}"
+    Column gap=12
+      Row between
+        Badge.neutral "{find(bottles,b=>b.id==sel).kind}"
+        Text.strong "{money(find(bottles,b=>b.id==sel).price,"$",0)}"
+      Text.caption "Drink between {find(bottles,b=>b.id==sel).from} and {find(bottles,b=>b.id==sel).to}, peak {find(bottles,b=>b.id==sel).peak}"
+      Button.outline "Add a tasting note" icon="edit_note" onTap={close; open note}
+      Button.destructive "Drink it" onTap={bottles=removeWhere(bottles,b=>b.id==sel); toast "Enjoy"; close}
+  Dialog#note "Tasting note"
+    Column gap=12
+      Rating bind=rating max=5
+      Input "Note" "Dark cherry, cedar, long finish" bind=noteText multiline
+      Button "Save note" onTap={notes=append(notes,{"id":sel,"stars":rating,"text":noteText}); rating=0; noteText=""; toast "Note saved"; close}
+
+### Drink soon
+state sel=0
+state bottles=[{"id":1,"slot":0,"name":"Chateau Margaux 2015","region":"Bordeaux","kind":"red","price":640,"from":2024,"to":2040,"peak":2032},{"id":3,"slot":3,"name":"Chablis Grand Cru 2019","region":"Burgundy","kind":"white","price":85,"from":2023,"to":2027,"peak":2025},{"id":4,"slot":4,"name":"Sancerre Rose 2023","region":"Loire","kind":"rose","price":28,"from":2025,"to":2026,"peak":2026},{"id":5,"slot":7,"name":"Rioja Reserva 2017","region":"Rioja","kind":"red","price":42,"from":2022,"to":2026,"peak":2025},{"id":7,"slot":10,"name":"Cotes de Provence Rose 2023","region":"Provence","kind":"rose","price":22,"from":2025,"to":2026,"peak":2026}]
+App
+  Sidebar
+    Brand "Cask" icon="wine_bar"
+    NavItem "Rack" icon="grid_view" onTap={go rack}
+    NavItem "Drink soon" icon="schedule" selected badge="{count(bottles,b=>b.to<=2027)}"
+    NavItem "By region" icon="public" onTap={go by-region}
+  Main
+    Nav
+      Heading "Drink soon" level=1
+      Text.muted "Windows closing by the end of 2027"
+    Column pad=24 gap=12
+      each b in sortBy(filter(bottles,b=>b.to<=2027),b=>b.to)
+        Card gap=8
+          Row between
+            Column gap=2
+              Text.strong "{b.name}"
+              Text.muted "{b.region} / slot {b.slot+1}"
+            Badge.warning "{b.to-2026 <= 0 ? "drink now" : "by " + b.to}"
+          Row gap=2
+            Progress {clamp((2026-b.from)/(b.to-b.from),0,1)}
+          Row gap=8
+            Button.outline "Show in rack" onTap={sel=b.id; go rack}
+            Button "Tasting note" icon="star" onTap={sel=b.id; open note}
+  Dialog#note "Tasting note"
+    Column gap=12
+      Rating bind=stars max=5
+      Input "Note" "How did it drink?" bind=text multiline
+      Button "Save" onTap={toast "Note saved"; close}
+
+### By region
+state sortRegion=true
+state bottles=[{"id":1,"name":"Chateau Margaux 2015","region":"Bordeaux","kind":"red","price":640},{"id":2,"name":"Barolo Cannubi 2016","region":"Piedmont","kind":"red","price":120},{"id":3,"name":"Chablis Grand Cru 2019","region":"Burgundy","kind":"white","price":85},{"id":4,"name":"Sancerre Rose 2023","region":"Loire","kind":"rose","price":28},{"id":5,"name":"Rioja Reserva 2017","region":"Rioja","kind":"red","price":42},{"id":6,"name":"Riesling Spatlese 2020","region":"Mosel","kind":"white","price":36},{"id":7,"name":"Cotes de Provence Rose 2023","region":"Provence","kind":"rose","price":22},{"id":8,"name":"Brunello di Montalcino 2015","region":"Tuscany","kind":"red","price":95}]
+state order="Region"
+App
+  Sidebar
+    Brand "Cask" icon="wine_bar"
+    NavItem "Rack" icon="grid_view" onTap={go rack}
+    NavItem "Drink soon" icon="schedule" onTap={go drink-soon}
+    NavItem "By region" icon="public" selected
+  Main
+    Nav
+      Heading "By region" level=1
+      SegmentedButton bind=order items=["Region","Price","Name"]
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Total value"
+          Text.heading "{money(sum(bottles,b=>b.price),"$",0)}"
+        Card gap=4
+          Text.muted "Bottles"
+          Text.heading "{length(bottles)}"
+        Card gap=4
+          Text.muted "Regions"
+          Text.heading "{length(unique(map(bottles,b=>b.region)))}"
+      Card gap=8
+        Text.panelTitle "Value by region"
+        Donut values=[640,120,85,28,42,36,22,95] labels=["Bordeaux","Piedmont","Burgundy","Loire","Rioja","Mosel","Provence","Tuscany"]
+      Card gap=4
+        each b in (order=="Region" ? sortBy(bottles,b=>b.region) : (order=="Price" ? sortByDesc(bottles,b=>b.price) : sortBy(bottles,b=>b.name)))
+          Row between
+            Row gap=8
+              Icon "circle" color={b.kind=="red" ? "#FF8B1E3F" : (b.kind=="white" ? "#FFE8D77A" : "#FFF2A6B5")} size=14
+              Column gap=2
+                Text.strong "{b.name}"
+                Text.caption "{b.region}"
+            Text.strong "{money(b.price,"$",0)}"
+          Divider

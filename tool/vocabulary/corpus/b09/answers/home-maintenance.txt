@@ -1,0 +1,208 @@
+### Year calendar
+project tasks=[{"id":1,"name":"Boiler service","month":9,"every":"12 months","last":"2025-10-04","due":"2026-10-04","days":-44,"who":"Harlow Heating","phone":"020 7946 0112","done":false},{"id":2,"name":"Clear gutters","month":10,"every":"6 months","last":"2026-04-18","due":"2026-10-18","days":-30,"who":"Dave Okafor","phone":"07700 900314","done":false},{"id":3,"name":"Smoke alarm batteries","month":5,"every":"12 months","last":"2025-12-01","due":"2026-12-01","days":14,"who":"Self","phone":"","done":false},{"id":4,"name":"Replace boiler filter","month":11,"every":"3 months","last":"2026-09-02","due":"2026-12-02","days":15,"who":"Self","phone":"","done":false},{"id":5,"name":"Bleed radiators","month":9,"every":"12 months","last":"2025-10-20","due":"2026-10-20","days":-28,"who":"Self","phone":"","done":false},{"id":6,"name":"Chimney sweep","month":0,"every":"12 months","last":"2026-01-12","due":"2027-01-12","days":56,"who":"Sootless Sweeps","phone":"020 7946 0777","done":false}] saved
+state sel=1
+state year=2026
+state view="year"
+App
+  Sidebar
+    Brand "Upkeep" icon="home_repair_service"
+    NavItem "Calendar" icon="calendar_month" selected={true}
+    NavItem "Autumn checklist" icon="checklist" badge="5" onTap={go autumn-checklist}
+    NavItem "Home plan" icon="floor_plan" onTap={go home-plan}
+    NavItem "Spend and warranties" icon="receipt_long" onTap={go spend-and-warranties}
+    NavItem "Trusted contacts" icon="contacts" onTap={go spend-and-warranties}
+    Spacer grow
+    Text.muted "12 Alder Road"
+  Main
+    Nav
+      Row gap=8
+        IconButton "chevron_left" tooltip="Previous year" onTap={year=year-1}
+        Heading "{year}" level=1
+        IconButton "chevron_right" tooltip="Next year" onTap={year=year+1}
+      Row gap=8
+        SegmentedButton bind=view items=["year","list"]
+        Button "Add task" icon="add" onTap={open newTask}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Column grow gap=16
+          if view=="year"
+            Grid cols=4 gap=12
+              each m in ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+                Card gap=8 onTap={open monthSheet}
+                  Text.strong "{m}"
+                  Row gap=4
+                    each t in filter(tasks,x=>x.month==index)
+                      Box w=10 h=10 radius=5 fill=#FF2E7D6B
+                  Text.caption "{count(tasks,x=>x.month==index)} tasks"
+          if view=="list"
+            Card gap=8
+              Text.strong "All tasks by due date"
+              each t in sortBy(tasks,x=>x.days)
+                ListTile "{t.name}" "Every {t.every}, last done {t.last}" onTap={sel=t.id}
+                  Badge.error "Overdue {abs(t.days)} d" visible={t.days<0}
+                  Badge.info "In {t.days} d" visible={t.days>=0}
+        Pane w=320 pad=16 gap=12
+          each t in filter(tasks,x=>x.id==sel)
+            Heading "{t.name}" level=3
+            Text.muted "Repeats every {t.every}"
+            Row between
+              Text "Last done"
+              Text.strong "{t.last}"
+            Row between
+              Text "Next due"
+              Text.strong "{t.due}"
+            if t.days<0
+              Badge.error "Overdue by {abs(t.days)} days"
+            if t.days>=0
+              Badge.success "Due in {t.days} days"
+            Divider
+            Text.fieldLabel "Who to call"
+            Text.strong "{t.who}"
+            Text.muted "{t.phone}"
+            Row gap=8
+              Button.outline "Call" icon="call" visible={t.phone!=""} onTap={link "tel:{t.phone}"}
+              Button "Mark done" icon="check" onTap={tasks=updateWhere(tasks,x=>x.id==t.id,x=>with(with(x,"last",today()),"days",365)); toast "Done. Next due in a year"}
+  Sheet#monthSheet "Tasks this month"
+    Text.muted "Tap a task to see its details"
+    each t in tasks
+      ListTile "{t.name}" "{t.who}" onTap={sel=t.id; close}
+  Dialog#newTask "New task" "Set how often it repeats"
+    Input "Task name" "Service the boiler" bind=draftName
+    Select "Repeats" items=["Monthly","Every 3 months","Every 6 months","Yearly"] bind=draftEvery
+    DatePicker "Last done" bind=draftLast
+    Input "Who to call" bind=draftWho
+    Button "Add task" onTap={tasks=append(tasks,{"id":length(tasks)+1,"name":draftName,"month":0,"every":draftEvery,"last":draftLast,"due":draftLast,"days":30,"who":draftWho,"phone":"","done":false}); toast "Task added"; close}
+
+### Autumn checklist
+state items=[{"id":1,"t":"Bleed the radiators","done":true,"area":"Heating"},{"id":2,"t":"Clear gutters and downpipes","done":false,"area":"Outside"},{"id":3,"t":"Book boiler service","done":false,"area":"Heating"},{"id":4,"t":"Test smoke and CO alarms","done":false,"area":"Safety"},{"id":5,"t":"Drain outdoor taps","done":false,"area":"Outside"},{"id":6,"t":"Check loft insulation","done":false,"area":"Roof"},{"id":7,"t":"Seal draughts around doors","done":false,"area":"Doors"}] saved
+state area="All"
+App
+  Sidebar
+    Brand "Upkeep" icon="home_repair_service"
+    NavItem "Calendar" icon="calendar_month" onTap={go year-calendar}
+    NavItem "Autumn checklist" icon="checklist" selected={true}
+    NavItem "Home plan" icon="floor_plan" onTap={go home-plan}
+    NavItem "Spend and warranties" icon="receipt_long" onTap={go spend-and-warranties}
+    Spacer grow
+    Text.muted "12 Alder Road"
+  Main
+    Nav
+      Heading "Autumn checklist" level=1
+      Button.outline "Reset for next year" onTap={items=map(items,x=>with(x,"done",false)); toast "Checklist reset"}
+    Column pad=24 gap=16 maxw=720
+      Card gap=8
+        Row between
+          Text.strong "{count(items,x=>x.done)} of {length(items)} done"
+          Text.muted "{round(count(items,x=>x.done)/length(items)*100,0)}%"
+        Progress {count(items,x=>x.done)/length(items)}
+      Row gap=8
+        ChoiceChip "All" selected={area=="All"} onTap={area="All"}
+        ChoiceChip "Heating" selected={area=="Heating"} onTap={area="Heating"}
+        ChoiceChip "Outside" selected={area=="Outside"} onTap={area="Outside"}
+        ChoiceChip "Safety" selected={area=="Safety"} onTap={area="Safety"}
+      Card gap=4
+        each it in items
+          if area=="All" || it.area==area
+            Row between
+              Checkbox "{it.t}" bind=it.done
+              Badge.neutral "{it.area}"
+      Button "Book boiler service" icon="phone" onTap={open callSheet}
+  Sheet#callSheet "Book a service"
+    Text.strong "Harlow Heating"
+    Text.muted "020 7946 0112, weekdays 8 to 5"
+    Button "Call now" icon="call" onTap={link "tel:02079460112"; close}
+    Button.outline "Remind me Monday" onTap={toast "Reminder set for Monday"; close}
+
+### Home plan
+state rooms=[{"id":"kitchen","name":"Kitchen","tasks":["Descale kettle and dishwasher","Replace filter in extractor"]},{"id":"bath","name":"Bathroom","tasks":["Re-seal around bath","Clean extractor fan"]},{"id":"hall","name":"Hallway","tasks":["Test smoke alarm","Check front door seals"]},{"id":"loft","name":"Loft","tasks":["Check insulation","Look for damp"]},{"id":"boiler","name":"Boiler cupboard","tasks":["Annual service","Check pressure gauge"]}]
+state room="kitchen"
+App
+  Sidebar
+    Brand "Upkeep" icon="home_repair_service"
+    NavItem "Calendar" icon="calendar_month" onTap={go year-calendar}
+    NavItem "Autumn checklist" icon="checklist" onTap={go autumn-checklist}
+    NavItem "Home plan" icon="floor_plan" selected={true}
+    NavItem "Spend and warranties" icon="receipt_long" onTap={go spend-and-warranties}
+    Spacer grow
+    Text.muted "12 Alder Road"
+  Main
+    Nav
+      Heading "Home plan" level=1
+      Button.outline "Edit rooms" icon="edit" onTap={toast "Drag a pin to move it"}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Card grow
+          FloorPlan rooms={rooms} bind=room h=360
+            each r in rooms
+              Pin "{length(r.tasks)}" room=r.id onTap={room=r.id}
+        Pane w=320 pad=16 gap=12
+          each r in filter(rooms,x=>x.id==room)
+            Heading "{r.name}" level=3
+            Text.muted "{length(r.tasks)} tasks"
+            each t in r.tasks
+              Row between
+                Text "{t}"
+                IconButton "check" tooltip="Mark done" onTap={rooms=updateWhere(rooms,x=>x.id==r.id,x=>with(x,"tasks",without(x.tasks,t))); toast "Done"}
+            Button.outline "Add task here" icon="add" onTap={open addHere}
+  Dialog#addHere "Add a task to this room"
+    Input "Task" bind=newTask
+    Button "Add" onTap={rooms=updateWhere(rooms,x=>x.id==room,x=>with(x,"tasks",append(x.tasks,newTask))); newTask=""; close}
+
+### Spend and warranties
+state tab="spend"
+state spend=[{"task":"Boiler service","amount":96,"date":"2025-10-04","receipt":"https://example.com/r/boiler.jpg"},{"task":"Gutter clearing","amount":60,"date":"2026-04-18","receipt":"https://example.com/r/gutters.jpg"},{"task":"Chimney sweep","amount":75,"date":"2026-01-12","receipt":"https://example.com/r/sweep.jpg"},{"task":"Smoke alarm batteries","amount":14.5,"date":"2025-12-01","receipt":""}]
+state warranties=[{"item":"Boiler","ends":"2028-03-15","days":850,"remind":true},{"item":"Dishwasher","ends":"2026-12-20","days":33,"remind":true},{"item":"Washing machine","ends":"2027-05-02","days":166,"remind":false}]
+state contacts=[{"name":"Harlow Heating","role":"Boiler engineer","phone":"020 7946 0112"},{"name":"Dave Okafor","role":"Gutters and roofing","phone":"07700 900314"},{"name":"Sootless Sweeps","role":"Chimney sweep","phone":"020 7946 0777"},{"name":"Priya Nair","role":"Electrician","phone":"07700 900552"}]
+state photo=""
+App
+  Sidebar
+    Brand "Upkeep" icon="home_repair_service"
+    NavItem "Calendar" icon="calendar_month" onTap={go year-calendar}
+    NavItem "Autumn checklist" icon="checklist" onTap={go autumn-checklist}
+    NavItem "Home plan" icon="floor_plan" onTap={go home-plan}
+    NavItem "Spend and warranties" icon="receipt_long" selected={true}
+    Spacer grow
+    Text.muted "12 Alder Road"
+  Main
+    Nav
+      Heading "Spend, warranties and contacts" level=1
+      Button "Add receipt" icon="photo_camera" onTap={open receipt}
+    Column pad=24 gap=16
+      SegmentedButton bind=tab items=["spend","warranties","contacts"]
+      if tab=="spend"
+        Row gap=16 top
+          Card grow gap=8
+            Text.strong "Spend by task"
+            Donut values={map(spend,s=>s.amount)} labels={map(spend,s=>s.task)}
+          Card grow gap=8
+            Text.strong "Total this year"
+            Text "{money(sum(spend,s=>s.amount),"£",2)}" size=40 weight=700
+            Divider
+            each s in spend
+              Row between
+                Text "{s.task}"
+                Row gap=8
+                  Text.muted "{money(s.amount,"£",2)}"
+                  IconButton "receipt" tooltip="View receipt" visible={s.receipt!=""} onTap={photo=s.receipt; open zoom}
+      if tab=="warranties"
+        Card gap=8
+          each w in sortBy(warranties,x=>x.days)
+            Row between
+              Column gap=2
+                Text.strong "{w.item}"
+                Text.muted "Ends {w.ends}"
+              Row gap=8
+                Badge.warning "{w.days} days left" visible={w.days<60}
+                FilterChip "Remind me" bind=w.remind
+      if tab=="contacts"
+        Card gap=8
+          each c in contacts
+            ListTile "{c.name}" "{c.role}, {c.phone}"
+              IconButton "call" tooltip="Call" onTap={link "tel:{c.phone}"}
+              IconButton "content_copy" tooltip="Copy number" onTap={copy c.phone; toast "Number copied"}
+  Dialog#receipt "Add a receipt"
+    Select "Task" items=["Boiler service","Gutter clearing","Chimney sweep","Other"] bind=rTask
+    Input "Amount" type=number bind=rAmount
+    ImagePicker "Photograph receipt" bind=rPhoto source="camera"
+    Button "Save" onTap={spend=append(spend,{"task":rTask,"amount":rAmount,"date":today(),"receipt":rPhoto}); toast "Receipt saved"; close}
+  Lightbox#zoom "{photo}" "Receipt"

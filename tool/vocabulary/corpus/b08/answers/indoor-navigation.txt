@@ -1,0 +1,100 @@
+### Map
+state floor="L1"
+state query=""
+state dest=""
+state routing=false
+state accessible=false
+state via="Lift"
+state step=0
+state offRoute=false
+state steps=[{"text":"Leave Main Entrance and walk straight along the central corridor","dist":"40 m"},{"text":"Turn left at the lifts","dist":"15 m"},{"text":"Take the lift to Level 2","dist":"1 min"},{"text":"Turn right out of the lift; Radiology is the second door on your left","dist":"25 m"}]
+state floors=["L3","L2","L1","B1"]
+every 4s when routing && step < 3 onTick={step=step+1}
+App
+  Sidebar
+    Brand "Wayfinder" icon="navigation"
+    NavItem "Map" icon="map" selected={true}
+    NavItem "Directory" icon="apartment" onTap={go directory}
+    NavItem "Saved places" icon="bookmark" onTap={go directory}
+    Spacer grow
+    Link "Share my location" onTap={open share}
+    Text.muted "St. Mary's Hospital"
+  Main
+    Nav
+      Heading "Floor {floor}" level=1
+      Row gap=8
+        Input "Search a department or a person" bind=query w=300
+        Button "Directions" onTap={dest=query; routing=true; step=0; offRoute=false}
+        IconButton "more_vert" tooltip="More" onTap={open more}
+    if offRoute
+      Card gap=8 fill=#FFFFF3CD
+        Row between
+          Row gap=8
+            Icon "wrong_location"
+            Text.strong "You have left the route"
+          Row gap=8
+            Button.outline "Reroute" onTap={offRoute=false; step=0; toast "New route found"}
+            Button.ghost "Dismiss" onTap={offRoute=false}
+    Row gap=16 top pad=24
+      Column w=72 gap=8
+        each f in floors
+          ChoiceChip "{f}" selected={floor==f} onTap={floor=f}
+      Card grow gap=8
+        FloorPlan floor={floor} h=420 location={"x":0.32,"y":0.7} route={routing ? "main-entrance>lifts>radiology" : ""} rooms=["Main Entrance","Reception","Lifts","Stairs","Radiology","Pharmacy","Cafe","Toilets"] accessible={accessible} onSelectRoom={dest=result; query=result; open place} onOffRoute={offRoute=true}
+        Row between
+          Row gap=8
+            Icon "my_location"
+            Text.muted "You are near Reception"
+          Button.outline "Simulate wrong turn" onTap={offRoute=true}
+      Pane w=320 gap=12
+        Text.strong "Route options"
+        SegmentedButton items=["Lift","Stairs"] bind=via
+        Toggle "Accessible route (no stairs)" bind=accessible onChange={via=result ? "Lift" : via}
+        if routing
+          Text.strong "To {dest} - 4 min, 80 m"
+          Progress {(step+1)/4}
+          each s in steps
+            Card gap=4 fill={index==step ? "#FFE3F2FD" : "#00000000"}
+              Row gap=8
+                Icon "{index==step ? 'turn_left' : 'radio_button_unchecked'}"
+                Column grow
+                  Text "{s.text}" weight={index==step ? 700 : 400}
+                  Text.muted "{s.dist}"
+          Row gap=8
+            Button.outline "Back" onTap={step=max(0,step-1)}
+            Button "Next step" onTap={step=min(3,step+1)}
+          Button.destructive "End route" onTap={routing=false; step=0}
+        if !routing
+          Text.muted "Search a department or a person to see a route."
+  Dialog#share "Share my location" "Colleagues see your dot on the map"
+    Select "Share with" items=["Anyone with the link","Dr. Okafor","Front desk"] bind=shareWith
+    Button "Copy link" onTap={copy "https://wayfinder.stmarys.example/loc/8f3k"; toast "Link copied"; close}
+  Menu#more end
+    MenuItem "Share my location" icon="share" onTap={open share}
+    MenuItem "Report a blocked corridor" icon="report" onTap={toast "Reported"}
+  Sheet#place "{dest}"
+    Text.muted "Level 2, East Wing"
+    Row gap=8
+      Button "Route here" onTap={routing=true; step=0; close}
+      Button.outline "Save" onTap={toast "Saved"; close}
+
+### Directory
+state q=""
+state kind="All"
+state people=[{"name":"Dr. Amara Okafor","role":"Cardiology","room":"Room 214, L2"},{"name":"Nurse Jon Bell","role":"Radiology","room":"Desk 3, L2"},{"name":"Dr. Lin Zhao","role":"Pediatrics","room":"Room 105, L1"},{"name":"Pharmacy","role":"Department","room":"Near Main Entrance, L1"},{"name":"Radiology","role":"Department","room":"East Wing, L2"}]
+App
+  Sidebar
+    Brand "Wayfinder" icon="navigation"
+    NavItem "Map" icon="map" onTap={go map}
+    NavItem "Directory" icon="apartment" selected={true}
+    Spacer grow
+    Link "Share my location" onTap={toast "Location sharing on"}
+  Main
+    Nav
+      Heading "Directory" level=1
+      Input "Search a department or a person" bind=q w=300
+    Column pad=24 gap=16
+      SegmentedButton items=["All","Departments","People"] bind=kind
+      each p in filter(people, x => contains(lower(x.name), lower(q)) || contains(lower(x.role), lower(q)))
+        ListTile "{p.name}" subtitle="{p.role} - {p.room}"
+          Button "Navigate" onTap={emit navigate p.name; go map}

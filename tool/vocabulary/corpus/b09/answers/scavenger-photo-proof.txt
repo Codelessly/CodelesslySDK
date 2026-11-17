@@ -1,0 +1,168 @@
+### Hunt
+state tab="hunt"
+state secs=5400
+state bonus=0
+state running=true
+state sel={}
+state items=[{"id":1,"name":"A red door","clue":"Where the baker hides from the rain","points":10,"status":"approved"},{"id":2,"name":"A street musician","clue":"Listen near the old fountain","points":20,"status":"pending"},{"id":3,"name":"A bicycle with a basket","clue":"Parked where the market begins","points":15,"status":"open"},{"id":4,"name":"A mural of a fish","clue":"Under the bridge, facing the river","points":25,"status":"open"},{"id":5,"name":"A brass plaque from 1890","clue":"Ask the clock tower","points":30,"status":"open"}]
+every 1s when running onTick={secs=max(0,secs-1)}
+App
+  Sidebar
+    Brand "Snaphunt" icon="photo_camera"
+    NavItem "Hunt" icon="checklist" badge="{count(items,i=>i.status!='approved')}" selected={tab=="hunt"} onTap={tab="hunt"}
+    NavItem "Map" icon="map" selected={tab=="map"} onTap={go map}
+    NavItem "Leaderboard" icon="leaderboard" selected={tab=="board"} onTap={go leaderboard}
+    NavItem "Judge" icon="gavel" onTap={go judge}
+    Spacer grow
+    Text.muted "Team Lantern Fish"
+  Main
+    Nav
+      Heading "Today's hunt" level=1
+      Row gap=12
+        Badge.info "{floor(secs/3600)}h {floor((secs%3600)/60)}m left"
+        Badge.success "+{bonus} bonus min"
+        Button.outline "Pause" onTap={running=!running}
+    Column pad=24 gap=16
+      Row between
+        Text.strong "{count(items,i=>i.status=='approved')} of {length(items)} found"
+        Text.strong "{sum(filter(items,i=>i.status=='approved'),i=>i.points)} points"
+      Progress {count(items,i=>i.status=="approved")/length(items)}
+      each item in items
+        Card gap=8 animate=fade stagger=80
+          Row between
+            Column grow gap=4
+              Text.heading "{item.name}"
+              if item.status=="open" && (index==0 || items[index-1].status=="approved")
+                Text.muted "Clue: {item.clue}"
+              if item.status!="open" || (index>0 && items[index-1].status!="approved")
+                Text.muted "Locked until the previous item is found"
+            Badge.neutral "{item.points} pts"
+          Row gap=8
+            if item.status=="approved"
+              Badge.success "Found"
+            if item.status=="pending"
+              Badge.warning "Waiting for a judge"
+            if item.status=="open" && index>0 && items[index-1].status!="approved"
+              Icon "lock"
+              Text.muted "Locked"
+            if item.status=="open" && (index==0 || items[index-1].status=="approved")
+              Button "Take photo" icon="photo_camera" onTap={sel=item; go camera}
+              Button.ghost "Use a bonus minute" onTap={bonus=bonus+1; secs=secs+60; toast "One minute added"}
+
+### Camera
+state shot=false
+state sent=false
+state sel={"id":3,"name":"A bicycle with a basket","points":15}
+Page
+  Nav
+    IconButton "arrow_back" tooltip="Back to the hunt" onTap={go hunt}
+    Heading "Take your photo"
+    Badge.info "{sel.points} pts"
+  Section narrow
+    Column gap=16
+      Stack h=420 radius=16 fill=#FF111111
+        if !shot
+          CameraView facing=back
+        if shot
+          Image "https://photos.snaphunt.app/preview/latest.jpg"
+        Column pad=16 top
+          Box fill=#99000000 radius=12 pad=12
+            Text.small "Find: {sel.name}" color=#FFFFFFFF
+            Text.small "Fit it all inside the frame" color=#FFDDDDDD
+      if sent
+        Card gap=8 animate=pop
+          Row gap=12 middle
+            Icon "hourglass_top"
+            Column grow
+              Text.strong "Submitted"
+              Text.muted "A judge is looking at it now. You can take on the next clue meanwhile."
+          Button "Back to the hunt" onTap={go hunt}
+      if !sent
+        Row center gap=16
+          if shot
+            Button.outline "Retake" icon="replay" onTap={shot=false}
+            Button "Submit" icon="send" onTap={sent=true; emit submit sel.id; toast "Sent to the judge"}
+          if !shot
+            Button "Snap" icon="photo_camera" size=large onTap={shot=true}
+            IconButton "flip_camera_android" tooltip="Flip camera" onTap={emit flipCamera}
+
+### Judge
+state shots=[{"id":11,"team":"Lantern Fish","item":"A street musician","url":"https://photos.snaphunt.app/p/11.jpg","status":"pending"},{"id":12,"team":"Night Owls","item":"A street musician","url":"https://photos.snaphunt.app/p/12.jpg","status":"pending"},{"id":13,"team":"Paper Boats","item":"A red door","url":"https://photos.snaphunt.app/p/13.jpg","status":"pending"},{"id":14,"team":"Night Owls","item":"A mural of a fish","url":"https://photos.snaphunt.app/p/14.jpg","status":"approved"}]
+state cur={}
+state comment=""
+App
+  Sidebar
+    Brand "Snaphunt" icon="photo_camera"
+    NavItem "Hunt" icon="checklist" onTap={go hunt}
+    NavItem "Judge" icon="gavel" selected={true} badge="{count(shots,s=>s.status=='pending')}"
+    NavItem "Leaderboard" icon="leaderboard" onTap={go leaderboard}
+  Main
+    Nav
+      Heading "Judge's desk" level=1
+      Text.muted "{count(shots,s=>s.status=='pending')} waiting"
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        each s in shots
+          Card gap=8
+            Image "{s.url}" h=160 radius=8 onTap={cur=s; open review}
+            Row between
+              Text.strong "{s.team}"
+              if s.status=="pending"
+                Badge.warning "Pending"
+              if s.status=="approved"
+                Badge.success "Approved"
+              if s.status=="rejected"
+                Badge.error "Rejected"
+            Text.muted "{s.item}"
+            if s.status=="pending"
+              Row gap=8
+                Button "Approve" icon="check" grow onTap={shots=updateWhere(shots,x=>x.id==s.id,x=>with(x,"status","approved")); emit approve s.id}
+                Button.destructive "Reject" icon="close" grow onTap={cur=s; open review}
+  Dialog#review "Review photo" "Say why when you reject"
+    Image "{cur.url}" h=240 radius=8
+    Text.strong "{cur.team}: {cur.item}"
+    Input "Comment" "Blurry, or the wrong door" bind=comment multiline
+    Row end gap=8
+      Button.outline "Cancel" onTap={close}
+      Button.destructive "Reject" onTap={comment=="" ? toast "Add a comment first" : {shots=updateWhere(shots,x=>x.id==cur.id,x=>with(x,"status","rejected")); emit reject {"id":cur.id,"comment":comment}; comment=""; close}}
+      Button "Approve" onTap={shots=updateWhere(shots,x=>x.id==cur.id,x=>with(x,"status","approved")); emit approve cur.id; comment=""; close}
+
+### Leaderboard
+state view="board"
+state spots=[{"name":"Old fountain","clue":"Listen for a violin","found":true},{"name":"Market gate","clue":"Where the bicycles rest","found":false},{"name":"River bridge","clue":"A fish looks back at you","found":false},{"name":"Clock tower","clue":"Ask for 1890","found":false}]
+state teams=[{"name":"Night Owls","photos":5,"points":105},{"name":"Lantern Fish","photos":4,"points":70},{"name":"Paper Boats","photos":3,"points":55},{"name":"Gull Squad","photos":1,"points":10}]
+Page
+  Nav
+    Brand "Snaphunt" icon="photo_camera"
+    Row gap=4
+      Link "Hunt" onTap={go hunt}
+      Link "Leaderboard" onTap={view="board"}
+      Link "Map" onTap={view="map"}
+    Badge.success "+{bonus} bonus min"
+  Section
+    Column gap=16
+      SegmentedButton bind=view items=["board","map"]
+      if view=="board"
+        Heading "Teams" level=1
+        each t in sortByDesc(teams,x=>x.points)
+          Card animate=slide-up stagger=60
+            Row between middle
+              Row gap=12 middle
+                Text.heading "{index+1}"
+                Avatar "{t.name}" size=40
+                Column
+                  Text.strong "{t.name}"
+                  Text.muted "{t.photos} photos"
+              Text.strong "{t.points} pts"
+      if view=="map"
+        Heading "Clue spots" level=1
+        Grid cols=2 gap=24
+          Card
+            MapView markers={map(spots,s=>s.name)} h=360
+          Column gap=8
+            each s in spots
+              ListTile "{s.name}" subtitle="{s.clue}" icon={s.found ? "check_circle" : "place"}
+  Footer
+    Row between
+      Text.muted "Game clock"
+      Text.strong "{floor(secs/60)} min left"

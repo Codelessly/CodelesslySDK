@@ -1,0 +1,160 @@
+### Practice
+state glyph="永"
+state glyphs=["永","山","水","人","大","心"]
+state ghost=true
+state guide="mi"
+state playing=false
+state step=0
+state paper="#FFF6E7"
+state ink="#FF1B1B1B"
+state brush="Medium"
+state scores=[]
+state strokesDone=0
+state strokeNames=["Dot","Horizontal hook","Rising","Left-falling","Right-falling"]
+every 700 when playing onTick={step=step+1; step>=5 ? playing=false : toast ""}
+App
+  Sidebar
+    Brand "Brushwork" icon="brush"
+    NavItem "Practice" icon="edit" selected={true}
+    NavItem "Practice sheet" icon="grid_on" onTap={go practice-sheet}
+    NavItem "Saved work" icon="collections_bookmark" badge="14" onTap={go saved-work}
+    Spacer grow
+    Text.muted "Day 12 streak"
+    Progress 0.6
+  Main
+    Nav
+      Heading "Practice: {glyph}" level=1
+      Row gap=8
+        Button.outline "Paper and ink" icon="palette" onTap={open look}
+        Button.outline "Clear" icon="refresh" onTap={scores=[]; strokesDone=0; step=0; emit clear}
+        Button "Save work" icon="save" onTap={emit saveWork glyph; toast "Saved to your page"}
+    Column pad=24 gap=16
+      Row gap=8 scroll
+        each g in glyphs
+          ChoiceChip "{g}" selected={glyph==g} onTap={glyph=g; scores=[]; strokesDone=0; step=0}
+      Row gap=24 top
+        Column grow gap=12
+          WritingSquare bind=strokesDone model={glyph} guide={guide} ghost={ghost} playStep={step} playing={playing} paper={paper} ink={ink} brush={brush} pressure=speed maxw=520 h=520 onStroke={strokesDone=result.index+1; scores=append(scores,result.score)} onComplete={emit practiceDone glyph; toast "Character finished"}
+          Row gap=8 center
+            Button "Play stroke order" icon="play_arrow" onTap={step=0; playing=true}
+            Toggle "Ghost model" bind=ghost
+            SegmentedButton bind=guide items=["mi","tian","none"]
+        Pane w=320 pad=16 gap=12
+          Text.panelTitle "Strokes"
+          each name in strokeNames
+            ListTile "{index+1}. {name}" selected={step==index} onTap={step=index; playing=false}
+              Text.small "{scores[index] != null ? scores[index].position : 0}% position"
+              Badge.success "{scores[index] != null ? scores[index].direction : 0}% direction" visible={scores[index] != null}
+          Divider
+          Text.muted "Average"
+          Text "{isEmpty(scores) ? 0 : round(sum(scores, s=>s.total) / length(scores), 0)}" size=48 weight=700
+          Progress {strokesDone / 5}
+          Text.caption "{strokesDone} of 5 strokes written"
+          Select "Brush" bind=brush items=["Fine","Medium","Broad"]
+  Sheet#look "Paper and ink"
+    Text.fieldLabel "Paper"
+    Row gap=12
+      Box w=48 h=48 radius=24 fill=#FFFFF6E7 onTap={paper="#FFF6E7"}
+      Box w=48 h=48 radius=24 fill=#FFF0E0C0 onTap={paper="#FFF0E0C0"}
+      Box w=48 h=48 radius=24 fill=#FFE8EDE4 onTap={paper="#FFE8EDE4"}
+      Box w=48 h=48 radius=24 fill=#FFFFFFFF onTap={paper="#FFFFFF"}
+      Box w=48 h=48 radius=24 fill=#FF2A2A2E onTap={paper="#FF2A2A2E"}
+    Text.fieldLabel "Ink"
+    Row gap=12
+      Box w=48 h=48 radius=24 fill=#FF1B1B1B onTap={ink="#FF1B1B1B"}
+      Box w=48 h=48 radius=24 fill=#FF2F3E5C onTap={ink="#FF2F3E5C"}
+      Box w=48 h=48 radius=24 fill=#FF8C1D18 onTap={ink="#FF8C1D18"}
+      Box w=48 h=48 radius=24 fill=#FFD9C7A0 onTap={ink="#FFD9C7A0"}
+    Button "Done" onTap={close}
+
+### Practice sheet
+state glyph="永"
+state cols=4
+state rows=5
+state ghost=true
+state paper="#FFF6E7"
+state ink="#FF1B1B1B"
+state filled=[]
+state cells=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+App
+  Sidebar
+    Brand "Brushwork" icon="brush"
+    NavItem "Practice" icon="edit" onTap={go practice}
+    NavItem "Practice sheet" icon="grid_on" selected={true}
+    NavItem "Saved work" icon="collections_bookmark" badge="14" onTap={go saved-work}
+  Main
+    Nav
+      Heading "Practice sheet" level=1
+      Row gap=8
+        Button.outline "Print" icon="print" onTap={emit print glyph}
+        Button "Save sheet" icon="save" onTap={emit saveSheet {"glyph": glyph, "cells": filled}; toast "Sheet saved"}
+    Column pad=24 gap=16
+      Row gap=16 wrap
+        Select "Character" bind=glyph items=["永","山","水","人","大","心"]
+        Select "Columns" bind=cols items=[3,4,5,6]
+        Toggle "Fade the model after the first row" bind=ghost
+        Button.outline "Clear sheet" onTap={filled=[]; emit clearSheet}
+      Text.muted "{length(filled)} of {length(cells)} squares written. Squares fade from a clear model to a faint one."
+      Progress {length(filled) / length(cells)}
+      Grid cols={cols} gap=8
+        each c in cells
+          WritingSquare model={glyph} guide="mi" ghost={ghost && c <= cols} ghostOpacity={clamp(1 - (c - 1) / 10, 0.15, 1)} paper={paper} ink={ink} pressure=speed onComplete={filled=append(filled,c)} h=140
+
+### Saved work
+state view="grid"
+state sort="Newest"
+state sel=0
+state works=[{"id":1,"glyph":"永","date":"Nov 14","score":86,"note":"Right-falling stroke still rushed"},{"id":2,"glyph":"山","date":"Nov 13","score":92,"note":"Even spacing"},{"id":3,"glyph":"水","date":"Nov 11","score":74,"note":"Hook too short"},{"id":4,"glyph":"人","date":"Nov 9","score":95,"note":"Good thick and thin"},{"id":5,"glyph":"大","date":"Nov 8","score":81,"note":"Horizontal sloped up"},{"id":6,"glyph":"心","date":"Nov 6","score":68,"note":"Dots too heavy"}]
+state selId=0
+App
+  Sidebar
+    Brand "Brushwork" icon="brush"
+    NavItem "Practice" icon="edit" onTap={go practice}
+    NavItem "Practice sheet" icon="grid_on" onTap={go practice-sheet}
+    NavItem "Saved work" icon="collections_bookmark" badge="{length(works)}" selected={true}
+  Main
+    Nav
+      Heading "Saved work" level=1
+      Row gap=8
+        Select bind=sort items=["Newest","Highest score","Character"]
+        SegmentedButton bind=view items=["grid","list"]
+    Column pad=24 gap=16
+      Row gap=16
+        Card grow gap=4
+          Text.muted "Average score"
+          Text "{round(sum(works, w=>w.score) / length(works), 0)}" size=48 weight=700
+        Card grow gap=4
+          Text.muted "Best character"
+          Text "{sortByDesc(works, w=>w.score)[0].glyph}" size=48 weight=700
+        Card grow gap=4
+          Text.muted "Score over the last six"
+          Sparkline values={map(reverse(works), w=>w.score)}
+      if view=="grid"
+        Grid cols=3 gap=16
+          each w in sort=="Highest score" ? sortByDesc(works, x=>x.score) : works
+            Card gap=8 onTap={selId=w.id; open detail} menu=workMenu
+              WritingSquare model={w.glyph} readonly h=180 replay=false
+              Row between
+                Text.strong "{w.glyph}  {w.date}"
+                Badge.success "{w.score}" visible={w.score >= 80}
+                Badge.warning "{w.score}" visible={w.score < 80}
+              Text.muted "{w.note}"
+              Row
+                Spacer grow
+                IconButton "more_vert" tooltip="More" onTap={selId=w.id; open workMenu}
+      if view=="list"
+        each w in works
+          ListTile "{w.glyph}  {w.date}" onTap={selId=w.id; open detail}
+            Text.muted "{w.note}"
+            Badge.neutral "{w.score}"
+  Menu#workMenu end
+    MenuItem "Replay strokes" icon="play_arrow" onTap={open detail}
+    MenuItem "Practise again" icon="edit" onTap={emit practiceAgain selId; go practice}
+    MenuItem "Share" icon="share" onTap={emit share selId}
+    MenuItem "Delete" icon="delete" onTap={works=removeWhere(works, w=>w.id==selId); toast "Removed"}
+  Dialog#detail "Saved attempt" "Replay your pen path with its thick and thin"
+    WritingSquare model={find(works, w=>w.id==selId).glyph} replayId={selId} readonly h=320
+    Row gap=8 center
+      Button "Replay" icon="replay" onTap={emit replay selId}
+      Button.outline "Export image" icon="image" onTap={emit export selId}
+    Button.ghost "Close" onTap={close}

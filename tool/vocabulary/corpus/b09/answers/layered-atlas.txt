@@ -1,0 +1,105 @@
+### Atlas
+state zoom=2
+state tab="map"
+state layers=[{"id":"borders","name":"Borders","on":true,"opacity":100},{"id":"rivers","name":"Rivers","on":false,"opacity":80},{"id":"rain","name":"Rainfall","on":false,"opacity":60},{"id":"pop","name":"Population","on":false,"opacity":60},{"id":"elev","name":"Elevation shading","on":true,"opacity":40}]
+state place={"name":"Portugal","flag":"PT","capital":"Lisbon","pop":10.3,"area":92212,"trend":[9.9,10.0,10.3,10.4,10.3]}
+state bookmarks=[{"id":"b1","name":"Lisbon","lat":38.72,"lng":-9.14,"zoom":9},{"id":"b2","name":"Lake Titicaca","lat":-15.84,"lng":-69.37,"zoom":8},{"id":"b3","name":"Kathmandu","lat":27.71,"lng":85.32,"zoom":10}]
+state measuring=false
+state points=[]
+state compare=false
+state compareA="elev"
+state compareB="rain"
+state split=50
+state q=""
+App
+  Sidebar
+    Brand "Gazetteer" icon="public"
+    NavItem "Map" icon="map" selected={tab=="map"} onTap={tab="map"}
+    NavItem "Bookmarks" icon="bookmark" badge="{length(bookmarks)}" selected={tab=="marks"} onTap={tab="marks"}
+    NavItem "Compare" icon="compare" selected={compare} onTap={compare=!compare}
+    Divider
+    Text.caption "LAYERS"
+    each l in layers
+      Column gap=4
+        Checkbox "{l.name}" bind=l.on
+        if l.on
+          Slider bind=l.opacity min=0 max=100
+    Spacer grow
+    Text.muted "Zoom {zoom}x"
+  Main
+    Nav
+      Heading "World" level=1
+      Row gap=8
+        Input "Search places" bind=q w=240
+        Button.outline "Measure" icon="straighten" onTap={measuring=!measuring; points=[]}
+        Button.outline "Bookmark" icon="bookmark_add" onTap={bookmarks=append(bookmarks,{"id":"b{length(bookmarks)+1}","name":place.name,"lat":0,"lng":0,"zoom":zoom}); toast "Bookmarked {place.name}"}
+        IconButton "zoom_in" tooltip="Zoom in" onTap={zoom=min(18,zoom+1)}
+        IconButton "zoom_out" tooltip="Zoom out" onTap={zoom=max(1,zoom-1)}
+    Row grow
+      Stack grow
+        if compare
+          MapCompare bind=split left={compareA} right={compareB} layers={layers} zoom={zoom} onZoom={zoom=result}
+        if !compare
+          MapView zoom={zoom} layers={layers} labelsBySize measuring={measuring} onZoom={zoom=result} onPlaceTap={place=result; open placeCard} onMeasure={points=result}
+        if measuring
+          Box fill=#CC000000 radius=8 pad=12
+            Text "Distance: {points.length < 2 ? 'tap two points' : fixed(distance(points[0],points[1]),0) + ' km'}" color=#FFFFFFFF
+        if compare
+          Box fill=#CC000000 radius=8 pad=8
+            Text "{compareA} | {compareB}" color=#FFFFFFFF
+      Pane w=280 pad=16 gap=12
+        Heading "Legend" level=3
+        each l in filter(layers,x=>x.on)
+          Column gap=4
+            Text.strong "{l.name}"
+            Legend layer=l.id opacity={l.opacity}
+        if isEmpty(filter(layers,x=>x.on))
+          Text.muted "No layers on."
+  Drawer#placeCard "{place.name}" right
+    Column gap=12 pad=16
+      Row gap=12
+        Flag code={place.flag} size=48
+        Column
+          Text.strong "{place.name}"
+          Text.muted "Capital: {place.capital}"
+      Row gap=24
+        Column
+          Text.caption "Population"
+          Text.strong "{place.pop} M"
+        Column
+          Text.caption "Area"
+          Text.strong "{place.area} km2"
+      Text.caption "Population, last five years (M)"
+      LineChart values={place.trend} labels=["2020","2021","2022","2023","2024"] h=120
+      Button "Bookmark" onTap={bookmarks=append(bookmarks,{"id":"b{length(bookmarks)+1}","name":place.name,"lat":0,"lng":0,"zoom":zoom}); toast "Saved"; close}
+
+### Bookmarks
+state tab="marks"
+state sel=""
+state bookmarks=[{"id":"b1","name":"Lisbon","lat":38.72,"lng":-9.14,"zoom":9},{"id":"b2","name":"Lake Titicaca","lat":-15.84,"lng":-69.37,"zoom":8},{"id":"b3","name":"Kathmandu","lat":27.71,"lng":85.32,"zoom":10}]
+App
+  Sidebar
+    Brand "Gazetteer" icon="public"
+    NavItem "Map" icon="map" selected={tab=="map"} onTap={go atlas}
+    NavItem "Bookmarks" icon="bookmark" badge="{length(bookmarks)}" selected={tab=="marks"} onTap={tab="marks"}
+  Main
+    Nav
+      Heading "Bookmarks" level=1
+      Button.outline "Clear all" onTap={open confirmClear}
+    Column pad=24 gap=12 scroll
+      if isEmpty(bookmarks)
+        Text.muted "Nothing saved yet. Tap Bookmark on the map."
+      each b in bookmarks
+        ListTile "{b.name}" subtitle="{b.lat}, {b.lng}  zoom {b.zoom}" icon="place" onTap={go atlas}
+          IconButton "more_vert" onTap={sel=b.id; open rowMenu}
+  Menu#rowMenu end
+    MenuItem "Open on map" icon="map" onTap={go atlas}
+    MenuItem "Rename" icon="edit" onTap={open rename}
+    MenuItem "Remove" icon="delete" onTap={bookmarks=removeWhere(bookmarks,x=>x.id==sel)}
+  Dialog#rename "Rename bookmark"
+    Input "Name" bind=newName
+    Button "Save" onTap={bookmarks=updateWhere(bookmarks,x=>x.id==sel,x=>with(x,"name",newName)); close}
+  Dialog#confirmClear "Remove all bookmarks?"
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button.destructive "Remove all" onTap={bookmarks=[]; close}

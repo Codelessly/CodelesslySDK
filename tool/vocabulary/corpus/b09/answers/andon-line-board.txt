@@ -1,0 +1,162 @@
+### Line board
+state tab="board"
+state selId=1
+state elapsed=11520
+state takt=28800
+state stations=[{"id":1,"name":"Press 1","status":"running","made":412,"target":450,"down":0,"lost":6,"calls":[{"time":"06:12","by":"Dana Ortiz","note":"Die lube topped up","mins":4}]},{"id":2,"name":"Press 2","status":"running","made":398,"target":450,"down":0,"lost":11,"calls":[]},{"id":3,"name":"Weld A","status":"help","made":301,"target":360,"down":0,"lost":18,"calls":[{"time":"09:02","by":"Luis Prada","note":"Tip dresser jam, cleared","mins":7}]},{"id":4,"name":"Weld B","status":"running","made":352,"target":360,"down":0,"lost":3,"calls":[]},{"id":5,"name":"Paint 1","status":"stopped","made":188,"target":300,"down":23,"lost":41,"calls":[{"time":"09:41","by":"Priya Nair","note":"Booth airflow fault, maintenance called","mins":23},{"time":"07:20","by":"Tom Keane","note":"Colour change delay","mins":9}]},{"id":6,"name":"Paint 2","status":"running","made":276,"target":300,"down":0,"lost":5,"calls":[]},{"id":7,"name":"Assembly 1","status":"waiting","made":210,"target":280,"down":0,"lost":27,"calls":[{"time":"08:55","by":"Mei Chen","note":"Waiting on wiring harness from stores","mins":14}]},{"id":8,"name":"Assembly 2","status":"running","made":265,"target":280,"down":0,"lost":4,"calls":[]},{"id":9,"name":"Test 1","status":"stopped","made":140,"target":240,"down":9,"lost":33,"calls":[{"time":"09:55","by":"Omar Faris","note":"Fixture sensor fault","mins":9}]},{"id":10,"name":"Test 2","status":"running","made":228,"target":240,"down":0,"lost":2,"calls":[]},{"id":11,"name":"Pack 1","status":"help","made":190,"target":220,"down":0,"lost":12,"calls":[{"time":"09:48","by":"Grace Lim","note":"Label printer low on ribbon","mins":3}]},{"id":12,"name":"Pack 2","status":"running","made":214,"target":220,"down":0,"lost":1,"calls":[]}]
+every 1s onTick={elapsed=min(takt,elapsed+1)}
+App
+  Sidebar
+    Brand "Lampwall" icon="factory"
+    NavItem "Line board" icon="grid_view" selected={tab=="board"} onTap={tab="board"}
+    NavItem "Call log" icon="support_agent" badge="{count(stations,s=>s.status!='running')}" onTap={go call-log}
+    NavItem "Shift setup" icon="tune" onTap={go shift-setup}
+    Spacer grow
+    Text.muted "Plant 2, Line 4"
+  Main
+    Nav
+      Heading "Line 4 status" level=1
+      Row gap=16
+        Column gap=2
+          Text.caption "Shift clock"
+          Text.strong "{duration(elapsed)} of {duration(takt)}"
+        Badge.error "{count(stations,s=>s.status=='stopped')} stopped"
+        Badge.warning "{count(stations,s=>s.status=='help')} calling"
+    Column pad=24 gap=16
+      Card gap=8
+        Row between
+          Text.strong "Takt"
+          Text.muted "{round(elapsed/takt*100,0)}% of shift"
+        Progress {elapsed/takt}
+        Row between
+          Text.caption "Made {sum(stations,s=>s.made)}"
+          Text.caption "Target {sum(stations,s=>s.target)}"
+      Row gap=16 top
+        Column grow gap=16
+          Row gap=16 scroll
+            Row gap=6
+              Box w=14 h=14 fill=#FF2E9E5B radius=4
+              Text.caption "Running"
+            Row gap=6
+              Box w=14 h=14 fill=#FFE8B923 radius=4
+              Text.caption "Call for help"
+            Row gap=6
+              Box w=14 h=14 fill=#FFD64545 radius=4
+              Text.caption "Stopped"
+            Row gap=6
+              Box w=14 h=14 fill=#FF3B7DD8 radius=4
+              Text.caption "Waiting for parts"
+          Grid cols=4 gap=12
+            each s in stations
+              if s.status=="stopped"
+                Box fill=#FFD64545 radius=12 pad=16 gap=8 animate=pulse duration=1200 onTap={selId=s.id; open history}
+                  Row between
+                    Text "{s.name}" color=#FFFFFFFF weight=700 size=20
+                    Icon "error" color=#FFFFFFFF
+                  Text "{s.made} / {s.target}" color=#FFFFFFFF size=32 weight=700
+                  Text "Down {s.down} min" color=#FFFFFFFF weight=600
+              if s.status!="stopped"
+                Box fill={s.status=="running" ? "#FF2E9E5B" : s.status=="help" ? "#FFE8B923" : "#FF3B7DD8"} radius=12 pad=16 gap=8 onTap={selId=s.id; open history}
+                  Row between
+                    Text "{s.name}" color=#FFFFFFFF weight=700 size=20
+                    Icon {s.status=="running" ? "check_circle" : s.status=="help" ? "front_hand" : "inventory_2"} color=#FFFFFFFF
+                  Text "{s.made} / {s.target}" color=#FFFFFFFF size=32 weight=700
+                  Text "{s.status=='running' ? 'Running' : s.status=='help' ? 'Calling for help' : 'Waiting for parts'}" color=#FFFFFFFF
+        Pane w=320 pad=16 gap=12
+          Heading "Worst three by lost minutes" level=3
+          each w in take(sortByDesc(stations,s=>s.lost),3)
+            Card gap=6 onTap={selId=w.id; open history}
+              Row between
+                Text.strong "{w.name}"
+                Badge.error "{w.lost} min"
+              Progress {w.lost/60}
+              Text.caption "{w.made} of {w.target} parts"
+  Sheet#history "Call history"
+    Heading "{find(stations,s=>s.id==selId).name}" level=3
+    Row gap=8
+      Badge.neutral "{find(stations,s=>s.id==selId).status}"
+      Text.muted "{find(stations,s=>s.id==selId).made} of {find(stations,s=>s.id==selId).target} parts"
+    if isEmpty(find(stations,s=>s.id==selId).calls)
+      Text.muted "No calls this shift."
+    each c in find(stations,s=>s.id==selId).calls
+      ListTile "{c.note}" "{c.time}, answered by {c.by}, {c.mins} min" icon="support_agent"
+    Row gap=8 end
+      Button.outline "Full log" onTap={close; go call-log}
+      Button "Close" onTap={close}
+
+### Call log
+state who="All"
+state calls=[{"time":"09:55","station":"Test 1","by":"Omar Faris","note":"Fixture sensor fault","mins":9,"open":true},{"time":"09:48","station":"Pack 1","by":"Grace Lim","note":"Label printer low on ribbon","mins":3,"open":true},{"time":"09:41","station":"Paint 1","by":"Priya Nair","note":"Booth airflow fault, maintenance called","mins":23,"open":true},{"time":"09:02","station":"Weld A","by":"Luis Prada","note":"Tip dresser jam, cleared","mins":7,"open":false},{"time":"08:55","station":"Assembly 1","by":"Mei Chen","note":"Waiting on wiring harness from stores","mins":14,"open":true},{"time":"07:20","station":"Paint 1","by":"Tom Keane","note":"Colour change delay","mins":9,"open":false},{"time":"06:12","station":"Press 1","by":"Dana Ortiz","note":"Die lube topped up","mins":4,"open":false}]
+App
+  Sidebar
+    Brand "Lampwall" icon="factory"
+    NavItem "Line board" icon="grid_view" onTap={go line-board}
+    NavItem "Call log" icon="support_agent" selected={true}
+    NavItem "Shift setup" icon="tune" onTap={go shift-setup}
+    Spacer grow
+    Text.muted "Plant 2, Line 4"
+  Main
+    Nav
+      Heading "Call log" level=1
+      Row gap=8
+        Select bind=who items=["All","Open","Closed"] w=140
+        Button.outline "Export" onTap={emit exportLog; toast "Log exported"}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.caption "Calls this shift"
+          Text "{length(calls)}" size=40 weight=700
+        Card gap=4
+          Text.caption "Still open"
+          Text "{count(calls,c=>c.open)}" size=40 weight=700
+        Card gap=4
+          Text.caption "Minutes answered"
+          Text "{sum(calls,c=>c.mins)}" size=40 weight=700
+      Card gap=8
+        Row gap=8
+          Text.caption "Time" w=70
+          Text.caption "Station" w=110
+          Text.caption "Answered by" w=130
+          Text.caption "Note" grow
+          Text.caption "Min" w=50
+        Divider
+        each c in filter(calls,c=>who=="All" || (who=="Open" && c.open) || (who=="Closed" && !c.open))
+          Row gap=8 onTap={toast "{c.station}: {c.note}"}
+            Text "{c.time}" w=70
+            Text.strong "{c.station}" w=110
+            Text "{c.by}" w=130
+            Text.muted "{c.note}" grow
+            Text "{c.mins}" w=50
+
+### Shift setup
+state shiftStart="06:00"
+state takt=28800
+state target=450
+state alertMins=10
+state sound=true
+App
+  Sidebar
+    Brand "Lampwall" icon="factory"
+    NavItem "Line board" icon="grid_view" onTap={go line-board}
+    NavItem "Call log" icon="support_agent" onTap={go call-log}
+    NavItem "Shift setup" icon="tune" selected={true}
+    Spacer grow
+    Text.muted "Plant 2, Line 4"
+  Main
+    Nav
+      Heading "Shift setup" level=1
+      Button "Save" onTap={emit saveShift; toast "Shift saved"}
+    Column pad=24 gap=16 maxw=720
+      Card gap=12
+        Heading "Shift clock" level=3
+        TimePicker "Shift start" bind=shiftStart
+        Text.fieldLabel "Shift length in hours: {takt/3600}"
+        Slider bind=takt min=21600 max=43200
+      Card gap=12
+        Heading "Targets" level=3
+        Input "Parts per station" bind=target type=number
+        Text.muted "Takt time per part: {fixed(takt/target,1)} seconds"
+      Card gap=12
+        Heading "Alerts" level=3
+        Toggle "Sound a horn when a station stops" bind=sound
+        Input "Escalate a stop after (minutes)" bind=alertMins type=number

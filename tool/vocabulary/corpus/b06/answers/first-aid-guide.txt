@@ -1,0 +1,125 @@
+### Home
+state situations=[{"id":"choking","name":"Choking","note":"Adult or child, can't cough or speak","icon":"air","img":"https://images.steady.app/choking.jpg"},{"id":"burns","name":"Burns","note":"Heat, scalds, chemical","icon":"local_fire_department","img":"https://images.steady.app/burns.jpg"},{"id":"bleeding","name":"Severe bleeding","note":"Cuts that will not stop","icon":"water_drop","img":"https://images.steady.app/bleeding.jpg"},{"id":"bites","name":"Bites and stings","note":"Animal, insect, snake","icon":"pest_control","img":"https://images.steady.app/bites.jpg"},{"id":"cpr","name":"Not breathing (CPR)","note":"Unresponsive adult","icon":"favorite","img":"https://images.steady.app/cpr.jpg"}]
+state q=""
+state place="51 Marlow Road, near Elm Street junction"
+state offline=true
+App
+  Main
+    Nav
+      Brand "Steady" icon="health_and_safety"
+      Row gap=8
+        if offline
+          Badge.success "Works offline"
+        IconButton "settings" tooltip="Settings" onTap={go settings}
+    Column pad=16 gap=16 scroll
+      Row gap=12
+        Button.destructive "Call emergency" icon="call" size=large grow onTap={link tel:911}
+        Button.outline "Read out my location" icon="my_location" size=large grow onTap={open location}
+      Card gap=8
+        Row gap=12
+          Icon "warning"
+          Column grow gap=4
+            Text.strong "Not sure it is an emergency?"
+            Text.muted "Answer a few questions and Steady tells you what to do."
+        Button.secondary "Start triage" onTap={go triage}
+      Input "Search situations" "choking, burn, bite" bind=q icon="search"
+      Text.sectionTitle "Situations"
+      Grid cols=2 gap=12
+        each s in filter(situations, x=>contains(lower(x.name), lower(q)))
+          Card gap=8 onTap={go steps}
+            Image "{s.img}" h=96
+            Row gap=8
+              Icon "{s.icon}"
+              Text.strong "{s.name}"
+            Text.caption "{s.note}"
+      if isEmpty(filter(situations, x=>contains(lower(x.name), lower(q))))
+        Text.muted center "Nothing matches. Try a single word, like burn."
+  Dialog#location "Your location" "Read this to the dispatcher"
+    Text size=22 weight=700 "{place}"
+    Text.muted "Latitude 51.5072, longitude -0.1276. Accuracy about 8 meters."
+    Row gap=8
+      Button.outline "Copy" icon="content_copy" onTap={copy place; toast "Copied"}
+      Button "Speak it aloud" icon="volume_up" onTap={speak place}
+    Button.tertiary "Close" onTap={close}
+
+### Step by step
+state step=0
+state steps=[{"title":"Check it is safe","text":"Look around. Move yourself and the person away from danger first.","img":"https://images.steady.app/cpr-1.jpg"},{"title":"Check for a response","text":"Tap the shoulders and shout. If there is no answer, shout for help.","img":"https://images.steady.app/cpr-2.jpg"},{"title":"Call 911","text":"Put your phone on speaker. Ask someone to find a defibrillator.","img":"https://images.steady.app/cpr-3.jpg"},{"title":"Push hard and fast","text":"Heel of your hand on the center of the chest. Push down 5 cm, about twice a second. Follow the beat.","img":"https://images.steady.app/cpr-4.jpg","timed":true}]
+state running=false
+state seconds=0
+state beat=false
+every 500 when running onTick={beat=!beat}
+every 1s when running onTick={seconds=seconds+1}
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go home}
+      Heading "Not breathing (CPR)"
+      Text.muted "{step+1} of {length(steps)}"
+    Column pad=16 gap=16 grow
+      Progress {(step+1)/length(steps)}
+      Pages bind=step h=260
+        each s in steps
+          Image "{s.img}" h=260 radius=16
+      Column gap=8 center
+        Text size=32 weight=700 center "{steps[step].title}"
+        Text size=22 center "{steps[step].text}"
+      if steps[step].timed
+        Card gap=12 center
+          Row gap=16 middle center
+            Box w=32 h=32 radius=16 fill=#FFD32F2F animate=pulse duration=500 hidden={!beat}
+            Box w=32 h=32 radius=16 fill=#FFFFCDD2 hidden={beat}
+            Text size=48 weight=700 "{duration(seconds)}"
+          Text.muted "110 beats a minute"
+          Row gap=8 center
+            Button "{running ? 'Pause' : 'Start compressions'}" icon="{running ? 'pause' : 'play_arrow'}" onTap={running=!running}
+            Button.outline "Reset" onTap={running=false; seconds=0}
+    Footer
+      Row gap=12 pad=12
+        Button.outline "Back" disabled={step==0} grow onTap={step=max(0,step-1)}
+        if step < length(steps)-1
+          Button "Next" size=large grow onTap={step=step+1}
+        if step == length(steps)-1
+          Button.success "Done" size=large grow onTap={running=false; seconds=0; step=0; go home}
+
+### Triage
+state tq=0
+state answers=[]
+state outcome=""
+state questions=[{"q":"Is the person awake and responding to you?","yes":1,"no":"call"},{"q":"Are they breathing normally?","yes":2,"no":"cpr"},{"q":"Is there heavy bleeding that will not stop?","yes":"bleeding","no":3},{"q":"Are they in severe pain, or confused?","yes":"call","no":"rest"}]
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go home}
+      Heading "Quick triage"
+    Column pad=16 gap=16 grow
+      if outcome==""
+        Progress {tq/length(questions)}
+        Text.caption "Question {tq+1}"
+        Text size=30 weight=700 "{questions[tq].q}"
+        Row gap=12
+          Button.outline "No" size=large grow onTap={answers=append(answers,"no"); questions[tq].no==3 ? tq=3 : outcome=questions[tq].no}
+          Button "Yes" size=large grow onTap={answers=append(answers,"yes"); questions[tq].yes==1 || questions[tq].yes==2 || questions[tq].yes==3 ? tq=questions[tq].yes : outcome=questions[tq].yes}
+        Button.ghost "Start over" onTap={tq=0; answers=[]}
+      if outcome=="call"
+        Card gap=12 fill=#FFFFEBEE
+          Icon "emergency" size=40
+          Text.heading "Call emergency services now"
+          Text.muted "Stay with the person. Do not move them unless they are in danger."
+          Button.destructive "Call 911" icon="call" size=large onTap={link tel:911}
+      if outcome=="cpr"
+        Card gap=12 fill=#FFFFEBEE
+          Text.heading "Start CPR and call 911"
+          Button.destructive "Call 911" icon="call" onTap={link tel:911}
+          Button "Show CPR steps" onTap={go steps}
+      if outcome=="bleeding"
+        Card gap=12 fill=#FFFFF3E0
+          Text.heading "Press firmly on the wound"
+          Text.muted "Use a clean cloth. Keep pressing. Call 911 if it soaks through."
+          Button "Show bleeding steps" onTap={go steps}
+      if outcome=="rest"
+        Card gap=12 fill=#FFE8F5E9
+          Text.heading "Keep them comfortable and watch"
+          Text.muted "Sit them down, stay close and check again in five minutes."
+      if outcome!=""
+        Button.outline "Ask again" onTap={outcome=""; tq=0; answers=[]}

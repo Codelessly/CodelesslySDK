@@ -1,0 +1,3 @@
+App: Crux, a climbing route logbook. A crag as a wall photo with routes drawn on it as coloured lines, tap a line to see its grade and length; a log entry with style (flash, redpoint, fell), attempts counted by a stepper and a star rating; a grade pyramid filling as climbs are added; a session list by date; a hold-by-hold beta note on a numbered photo; a project list with next-try notes; a filter by grade range.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

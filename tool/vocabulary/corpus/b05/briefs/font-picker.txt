@@ -1,0 +1,3 @@
+App: Specimen, a font browser. A grid of typefaces each rendering a sample sentence you can edit once for all, a size slider, weight and italic toggles, filters for serif, sans, mono, display and number of styles; a font page with a glyph grid, a waterfall of sizes, variable-axis sliders, pairings; a compare tray of up to four; collect into a project.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

@@ -1,0 +1,206 @@
+### Site map
+state pitches=[{"id":1,"no":"1","x":40,"y":40,"w":70,"h":50,"status":"free","hookup":true,"shade":true,"len":9,"wid":5,"toilets":false,"price":32,"photo":"https://images.pitchup.example/riverside/p1.jpg"},{"id":2,"no":"2","x":130,"y":40,"w":70,"h":50,"status":"booked","hookup":true,"shade":false,"len":9,"wid":5,"toilets":false,"price":32,"photo":"https://images.pitchup.example/riverside/p2.jpg"},{"id":3,"no":"3","x":220,"y":40,"w":80,"h":60,"status":"free","hookup":true,"shade":true,"len":11,"wid":6,"toilets":false,"price":38,"photo":"https://images.pitchup.example/riverside/p3.jpg"},{"id":4,"no":"4","x":40,"y":120,"w":70,"h":50,"status":"arriving","hookup":false,"shade":true,"len":8,"wid":5,"toilets":true,"price":24,"photo":"https://images.pitchup.example/riverside/p4.jpg"},{"id":5,"no":"5","x":130,"y":120,"w":90,"h":60,"status":"free","hookup":true,"shade":false,"len":12,"wid":7,"toilets":true,"price":42,"photo":"https://images.pitchup.example/riverside/p5.jpg"},{"id":6,"no":"6","x":240,"y":120,"w":60,"h":50,"status":"blocked","hookup":false,"shade":false,"len":7,"wid":4,"toilets":true,"price":20,"photo":"https://images.pitchup.example/riverside/p6.jpg"},{"id":7,"no":"7","x":40,"y":200,"w":100,"h":70,"status":"free","hookup":true,"shade":true,"len":14,"wid":8,"toilets":false,"price":48,"photo":"https://images.pitchup.example/riverside/p7.jpg"},{"id":8,"no":"8","x":160,"y":200,"w":70,"h":50,"status":"free","hookup":false,"shade":false,"len":8,"wid":5,"toilets":true,"price":22,"photo":"https://images.pitchup.example/riverside/p8.jpg"}]
+state fHookup=false
+state fShade=false
+state fToilets=false
+state fSize="Any"
+state vanLen=0
+state sel=0
+state checkIn="2026-08-14"
+state checkOut="2026-08-17"
+state minNights=2
+state code=""
+state lateNote=""
+state arrivalTime="18:00"
+state walking=false
+
+App
+  Sidebar
+    Brand "Pitchup" icon="camping"
+    NavItem "Site map" icon="map" selected={true}
+    NavItem "My stay" icon="event" onTap={go my-stay}
+    NavItem "Check-in" icon="key" onTap={go check-in}
+    Spacer grow
+    Text.muted "Riverside Meadow, 8 pitches"
+  Main
+    Nav
+      Heading "Choose your pitch" level=1
+      Row gap=8
+        Text.muted "{formatDate(checkIn,"MMM d")} to {formatDate(checkOut,"MMM d")}"
+        Button.outline "Change dates" icon="calendar_month" onTap={open dates}
+    Column pad=24 gap=16
+      Card gap=12
+        Row gap=16 wrap
+          FilterChip "Hookup" icon="bolt" bind=fHookup
+          FilterChip "Shade" icon="park" bind=fShade
+          FilterChip "Near toilets" icon="wc" bind=fToilets
+          Select "Size" items=["Any","Small","Medium","Large"] bind=fSize
+          Input "Van length (m)" type=number bind=vanLen w=140
+          Button.ghost "Clear" onTap={fHookup=false; fShade=false; fToilets=false; fSize="Any"; vanLen=0}
+        Row gap=16
+          Badge.success "Free"
+          Badge.info "Arriving"
+          Badge.neutral "Booked"
+          Badge.error "Blocked"
+          Text.muted "{count(pitches,p=>p.status=="free" && p.len>=vanLen && (!fHookup || p.hookup) && (!fShade || p.shade) && (!fToilets || p.toilets))} pitches fit"
+      Card
+        SiteMap h=340 background="https://images.pitchup.example/riverside/plan.svg"
+          each p in pitches
+            Pitch "{p.no}" x={p.x} y={p.y} w={p.w} h={p.h} shape=rect status={p.status} selected={sel==p.id} dimmed={p.len<vanLen || (fHookup && !p.hookup) || (fShade && !p.shade) || (fToilets && !p.toilets) || (fSize=="Small" && p.len>9) || (fSize=="Medium" && (p.len<10 || p.len>12)) || (fSize=="Large" && p.len<13)} onTap={p.status=="blocked" ? toast "Pitch {p.no} is closed" : {sel=p.id; open pitch}}
+          Marker "Toilets" icon="wc" x=320 y=150
+          Marker "Gate" icon="door_front" x=20 y=300
+      if vanLen>0
+        Text.muted "Pitches shorter than {vanLen} m are dimmed."
+
+  Sheet#pitch "Pitch {find(pitches,p=>p.id==sel).no}"
+    Image "{find(pitches,p=>p.id==sel).photo}" h=180 radius=12
+    Row between
+      Text.strong "{find(pitches,p=>p.id==sel).len} m by {find(pitches,p=>p.id==sel).wid} m"
+      Text.heading "{money(find(pitches,p=>p.id==sel).price,"$",2)} / night"
+    Row gap=8
+      if find(pitches,p=>p.id==sel).hookup
+        Badge.primary "Hookup"
+      if find(pitches,p=>p.id==sel).shade
+        Badge.primary "Shade"
+      if find(pitches,p=>p.id==sel).toilets
+        Badge.primary "Near toilets"
+    Text.muted "{formatDate(checkIn,"MMM d")} to {formatDate(checkOut,"MMM d")}: {money(find(pitches,p=>p.id==sel).price * 3,"$",2)} for 3 nights (minimum {minNights})"
+    Row gap=8
+      Button.outline "Walk me there" icon="directions_walk" onTap={walking=true; close; open walk}
+      Button "Book this pitch" grow onTap={emit book sel; close; go my-stay}
+
+  Dialog#dates "Your dates" "Minimum stay is {minNights} nights"
+    DateRangePicker bind=stay start=checkIn end=checkOut minNights={minNights} min={today()}
+    Text.muted "Unavailable days are crossed out."
+    Button "Apply" onTap={checkIn=stay.start; checkOut=stay.end; close}
+
+  Sheet#walk "Walk to pitch {find(pitches,p=>p.id==sel).no}"
+    MapRoute from="Gate" to="Pitch {find(pitches,p=>p.id==sel).no}" mode=walking h=240
+    Row gap=12
+      Icon "directions_walk"
+      Text "About 4 minutes from the gate, past the shower block"
+    Button.outline "Open in maps" onTap={link https://maps.example/walk}
+
+### My stay
+state sel=7
+state checkIn="2026-08-14"
+state checkOut="2026-08-17"
+state vanLen=0
+state lateNote=""
+state late=false
+state arrivalTime="18:00"
+state stayPitches=[{"id":7,"no":"7","len":14,"wid":8,"price":48}]
+
+Page
+  Nav
+    Brand "Pitchup" icon="camping"
+    Row gap=4
+      Link "Site map" onTap={go site-map}
+      Link "My stay"
+      Link "Check-in" onTap={go check-in}
+    Button.outline "Contact the site" icon="call" onTap={open contact}
+  Section narrow
+    Column gap=20
+      Heading "Your stay at Riverside Meadow" level=1
+      Card gap=12
+        Row between
+          Column gap=4
+            Text.strong "Pitch 7, with hookup and shade"
+            Text.muted "14 m by 8 m"
+          Text.heading "{money(48*3,"$",2)}"
+        Divider
+        Row gap=16
+          Column grow gap=4
+            Text.caption "Arrive"
+            Text.strong "{formatDate(checkIn,"EEE MMM d")}"
+          Column grow gap=4
+            Text.caption "Depart"
+            Text.strong "{formatDate(checkOut,"EEE MMM d")}"
+          Column grow gap=4
+            Text.caption "Nights"
+            Text.strong "3"
+        Button.outline "Change dates" onTap={open dates}
+      Card gap=12
+        Text.strong "Your van"
+        Input "Van length (m)" "e.g. 7.5" type=number bind=vanLen
+        if vanLen>14
+          Text.danger "Pitch 7 fits vans up to 14 m."
+        if vanLen>0 && vanLen<=14
+          Text.success "Fits with {fixed(14-vanLen,1)} m to spare."
+      Card gap=12
+        Text.strong "Arriving late?"
+        Toggle "I will arrive after 8 pm" bind=late
+        if late
+          TimePicker "Expected arrival" bind=arrivalTime
+          Input "Note for the warden" "Gate code needed, quiet arrival" multiline bind=lateNote
+          Button "Save note" onTap={emit lateNote lateNote; toast "The warden has your note"}
+      Card gap=12
+        Text.strong "Getting there"
+        MapRoute from="Gate" to="Pitch 7" mode=walking h=180
+        Button.outline "Walk me to my pitch" icon="directions_walk" onTap={open walk}
+      Row gap=12
+        Button.outline "Cancel booking" onTap={open cancel}
+        Button "Go to check-in" grow onTap={go check-in}
+  Footer
+    Text.muted "Pitchup, Riverside Meadow"
+
+  Dialog#dates "Change your dates" "Minimum stay is 2 nights"
+    DateRangePicker bind=stay start=checkIn end=checkOut minNights=2 min={today()}
+    Button "Apply" onTap={checkIn=stay.start; checkOut=stay.end; close}
+
+  Sheet#walk "Walk to pitch 7"
+    MapRoute from="Gate" to="Pitch 7" mode=walking h=240
+    Text "Straight on from the gate, left at the shower block, pitch 7 is the third on the right."
+    Button.outline "Close" onTap={close}
+
+  Dialog#cancel "Cancel this booking?" "Free until 48 hours before arrival"
+    Row gap=8 end
+      Button.ghost "Keep it" onTap={close}
+      Button.destructive "Cancel booking" onTap={emit cancel; toast "Booking cancelled"; close; go site-map}
+
+  Dialog#contact "Contact the site"
+    Text "Warden: 01234 567 890"
+    Button "Call now" onTap={link tel:01234567890}
+
+### Check-in
+state code=""
+state codeOk=false
+state tries=0
+state late=false
+state lateNote=""
+
+Page
+  Nav
+    Brand "Pitchup" icon="camping"
+    Row gap=4
+      Link "Site map" onTap={go site-map}
+      Link "My stay" onTap={go my-stay}
+      Link "Check-in"
+  Section narrow center
+    Column gap=20 center
+      Heading "Check in to pitch 7" level=1
+      Text.muted "Enter the six digit code from your confirmation email."
+      CodeInput bind=code length=6 onComplete={codeOk = code=="482915"; tries=tries+1}
+      if !codeOk && tries>0
+        Text.danger "That code does not match. {tries} tries so far."
+      if codeOk
+        Card gap=12
+          Row gap=8
+            Icon "check_circle"
+            Text.success "Checked in. Welcome to Riverside Meadow."
+          Text "Gate code for tonight: 7421"
+          Text.muted "Quiet hours begin at 10 pm."
+          Button "Walk me to pitch 7" icon="directions_walk" onTap={open walk}
+      Card gap=12
+        Text.strong "Running late?"
+        Toggle "I will arrive after 8 pm" bind=late
+        if late
+          Input "Note for the warden" multiline bind=lateNote
+          Button.outline "Send note" onTap={emit lateNote lateNote; toast "Note sent"}
+      Button.ghost "Back to the site map" onTap={go site-map}
+  Footer
+    Text.muted "Lost your code? Call the warden on 01234 567 890"
+
+  Sheet#walk "Walk to pitch 7"
+    MapRoute from="Gate" to="Pitch 7" mode=walking h=260
+    Text "About 4 minutes. Keep left at the shower block."

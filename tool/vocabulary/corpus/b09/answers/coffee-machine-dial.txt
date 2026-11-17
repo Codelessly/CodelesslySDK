@@ -1,0 +1,142 @@
+### Drink dial
+state drinks=[{"name":"Espresso","icon":"coffee","ml":40},{"name":"Lungo","icon":"local_cafe","ml":110},{"name":"Cappuccino","icon":"coffee_maker","ml":180},{"name":"Latte","icon":"icecream","ml":240},{"name":"Americano","icon":"water_drop","ml":150},{"name":"Hot water","icon":"hot_tub","ml":200}]
+state at=0
+state step="drink"
+state size=1
+state strength=2
+state milk="None"
+state sizes=["Small","Medium","Large"]
+state strengths=["Mild","Medium","Strong","Extra"]
+state milks=["None","Splash","Half","Full"]
+state brewing=false
+state progress=0
+state phase="Grinding"
+state cups=0
+state cupsLeft=38
+state total=1286
+every 200 when brewing onTick={progress=min(1,progress+0.02); phase=progress<0.4 ? "Grinding" : "Pouring"; progress>=1 ? {brewing=false; cups=cups+1; cupsLeft=cupsLeft-1; total=total+1; step="drink"; toast "Enjoy your drink"} : }
+App
+  Main
+    Column center middle pad=16 gap=12
+      Row between
+        Brand "Grind & Pour" icon="coffee"
+        Row gap=8
+          Badge.neutral "{cups} cups today"
+          IconButton "build" tooltip="Maintenance" onTap={go maintenance}
+      Stack center middle w=360 h=360
+        Box fill=#FF1B1410 radius=180 w=360 h=360
+        if !brewing
+          Dial bind=at count={length(drinks)} w=340 h=340 onTurn={step=="drink" ? at=(at+result+length(drinks))%length(drinks) : step=="size" ? size=clamp(size+result,0,2) : step=="strength" ? strength=clamp(strength+result,0,3) : milk=milks[clamp(indexOf(milks,milk)+result,0,3)]} onPress={step=="drink" ? step="size" : step=="size" ? step="strength" : step=="strength" ? step="milk" : {brewing=true; progress=0}}
+            each d in drinks
+              Icon "{d.icon}" selected={index==at}
+        Column center middle gap=4
+          if brewing
+            Ring bind=progress size=200
+            Text "{phase}" color=#FFF5E6D3 size=20
+            Text.caption "{round(progress*100,0)}%" color=#FFC9B79C
+          if !brewing && step=="drink"
+            Icon "{drinks[at].icon}" size=96 color=#FFF5E6D3
+            Text "{drinks[at].name}" size=28 weight=700 color=#FFF5E6D3
+            Text.caption "{drinks[at].ml} ml" color=#FFC9B79C
+          if !brewing && step=="size"
+            Text.caption "Size" color=#FFC9B79C
+            Text "{sizes[size]}" size=36 weight=700 color=#FFF5E6D3
+            Text.caption "{drinks[at].ml * (size+2) / 2} ml" color=#FFC9B79C
+          if !brewing && step=="strength"
+            Text.caption "Strength" color=#FFC9B79C
+            Text "{strengths[strength]}" size=36 weight=700 color=#FFF5E6D3
+            Row gap=4
+              each s in strengths
+                Icon "circle" size=12 color={index<=strength ? #FFE0A96D : #FF4A3B2E}
+          if !brewing && step=="milk"
+            Text.caption "Milk" color=#FFC9B79C
+            Text "{milk}" size=36 weight=700 color=#FFF5E6D3
+            Text.caption "Press to brew" color=#FFC9B79C
+      Row gap=8 center
+        each s in ["drink","size","strength","milk"]
+          Chip "{s}" selected={step==s}
+      Text.muted "Turn the dial to choose, press to confirm"
+      Row gap=12 center
+        Button.outline "Back" disabled={step=="drink" || brewing} onTap={step=step=="milk" ? "strength" : step=="strength" ? "size" : "drink"}
+        Button.destructive "Stop" visible={brewing} onTap={brewing=false; progress=0; step="drink"; toast "Cancelled"}
+      if cupsLeft<=10
+        Card gap=8 fill=#FFFFF3D6
+          Row between
+            Row gap=8
+              Icon "warning" color=#FFB26A00
+              Text.strong "Descale soon: {cupsLeft} cups left"
+            Button.outline "Details" onTap={go maintenance}
+
+### Maintenance
+state cupsLeft=38
+state limit=200
+state running=false
+state stepNo=0
+state remaining=0
+state cleanSteps=[{"name":"Empty the drip tray","secs":20},{"name":"Insert cleaning tablet","secs":15},{"name":"Rinsing the brew group","secs":90},{"name":"Flushing the milk system","secs":60},{"name":"Final rinse","secs":45}]
+every 1s when running onTick={remaining>1 ? remaining=remaining-1 : stepNo<length(cleanSteps)-1 ? {stepNo=stepNo+1; remaining=cleanSteps[stepNo+1].secs} : {running=false; stepNo=0; toast "Machine is clean"}}
+App
+  Main
+    Nav
+      Row gap=8
+        IconButton "arrow_back" tooltip="Back" onTap={go drink-dial}
+        Heading "Maintenance" level=1
+    Column pad=24 gap=16 maxw=640
+      Card gap=12
+        Row between
+          Heading "Descaling" level=3
+          Badge.warning "{cupsLeft} cups left"
+        Progress {cupsLeft/limit}
+        Text.muted "Hardness 14 dH. Descale at 200 cups or every 3 months."
+        Button.outline "Start descaling" onTap={open descale}
+      Card gap=12
+        Heading "Cleaning programme" level=3
+        if !running
+          Text.muted "Takes about 4 minutes. Leave a 1 litre jug under the spout."
+          Button "Start cleaning" onTap={running=true; stepNo=0; remaining=cleanSteps[0].secs}
+        if running
+          Text.strong "Step {stepNo+1} of {length(cleanSteps)}: {cleanSteps[stepNo].name}"
+          Progress {1-remaining/cleanSteps[stepNo].secs}
+          Text "{duration(remaining)} remaining" size=32 weight=700
+          each c in cleanSteps
+            ListTile "{c.name}" icon={index<stepNo ? "check_circle" : index==stepNo ? "autorenew" : "radio_button_unchecked"}
+          Button.destructive "Cancel" onTap={running=false; stepNo=0}
+      Card gap=8
+        Heading "Totals" level=3
+        Row between
+          Text.muted "Cups brewed"
+          Text.strong "1,286"
+        Row between
+          Text.muted "Last cleaned"
+          Text.strong "3 days ago"
+  Dialog#descale "Descale the machine" "Takes about 25 minutes"
+    Text "Fill the tank with descaler solution, place a 1.5 litre container under the spout and keep the machine plugged in."
+    Row end gap=8
+      Button.ghost "Not now" onTap={close}
+      Button "Begin" onTap={cupsLeft=limit; emit descale; toast "Descaling started"; close}
+
+### Water tank error
+state level=0.06
+state tankOpen=false
+Page
+  Nav
+    Brand "Grind & Pour" icon="coffee"
+    Badge.error "Error E-02"
+  Section center
+    Column center gap=16 maxw=480
+      Stack center middle w=200 h=260
+        Box w=160 h=220 radius=16 fill=#FFE8F1F8 border=#FF607D8B
+        Box w=160 h={220*level} radius=16 fill=#FF4FA3E0 animate=pulse
+        Icon "water_drop" size=48 color=#FFFFFFFF
+        Icon "close" size=32 color=#FFD32F2F
+      Heading "The water tank is empty" level=1
+      Text.muted "Fill the tank to the max mark, then press the button to continue. Your Latte is saved and will start where it stopped."
+      Progress {level}
+      Text.caption "{round(level*1400,0)} ml of 1400 ml"
+      Row gap=12
+        Button "I filled it" onTap={level=1; emit tankFilled; toast "Tank detected"; go drink-dial}
+        Button.outline "Cancel drink" onTap={emit cancel; go drink-dial}
+      Link "Tank not fitting?" onTap={open help}
+  Sheet#help "Fitting the tank"
+    Text "Slide the tank straight down until it clicks. Check that the float at the bottom moves freely."
+    Button "Got it" onTap={close}

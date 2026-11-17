@@ -1,0 +1,8 @@
+// The seven days of a week as a strip to pick one from: bind is the place of the chosen day (0 to 6), start the first day (yyyy-MM-dd).
+WeekStrip bind=day start
+  state day=0
+  Row w=fill gap=6
+    each i in range(7)
+      Column grow gap=2 pad=[4,8,4,8] radius=12 center border={i == day ? "accentLine" : "line"} fill={i == day ? "accentTint" : "card"} onTap={day=i}
+        Text.caption "{formatDate(addDays(start, i), "EEE")}"
+        Text.strong "{formatDate(addDays(start, i), "d")}" color={i == day ? "accent" : "ink"}

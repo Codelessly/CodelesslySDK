@@ -1,0 +1,281 @@
+### Console
+state speed=6.5
+state incline=2.0
+state keypad=""
+state field="speed"
+state hr="connecting"
+state bpm=0
+state clip=true
+every 2s when hr=="connecting" onTick={hr="connected"; bpm=112}
+App
+  Sidebar
+    Brand "Stride" icon="directions_run"
+    NavItem "Console" icon="speed" selected={true}
+    NavItem "Programs" icon="terrain" onTap={go programs}
+    NavItem "Workout" icon="timer" onTap={go workout}
+    NavItem "Summary" icon="emoji_events" onTap={go summary}
+    Spacer grow
+    Row gap=8 middle
+      Icon "favorite"
+      Text.muted "Heart-rate band"
+    Badge.warning "Connecting" hidden={hr=="connected"}
+    Badge.success "Connected" hidden={hr!="connected"}
+  Main
+    Nav
+      Heading "Manual run"
+      Row gap=8
+        Badge.error "Safety clip off" hidden={clip}
+        Button.outline "Pair band" icon="bluetooth" onTap={open band}
+        Button.destructive "Emergency stop" icon="stop_circle" onTap={open stop}
+    Column pad=24 gap=16
+      if !clip
+        Card gap=8 fill=#FFFDECEA
+          Row gap=8 middle
+            Icon "warning"
+            Text.strong "Emergency stop clip is not attached"
+          Text.muted "Clip it to your shirt before the belt starts."
+          Button "I attached it" onTap={clip=true}
+      Grid cols=2 gap=16
+        Card gap=8
+          Text.caption "SPEED"
+          Row gap=8 bottom
+            Text "{fixed(speed,1)}" size=72 weight=700
+            Text.muted "mph"
+          Row gap=8
+            IconButton "remove" tooltip="Slower" onTap={speed=max(0.5,round(speed-0.1,1))}
+            IconButton "add" tooltip="Faster" onTap={speed=min(12,round(speed+0.1,1))}
+            Button.outline "Edit" onTap={field="speed"; keypad=""}
+        Card gap=8
+          Text.caption "INCLINE"
+          Row gap=8 bottom
+            Text "{fixed(incline,1)}" size=72 weight=700
+            Text.muted "%"
+          Row gap=8
+            IconButton "remove" tooltip="Flatter" onTap={incline=max(0,round(incline-0.5,1))}
+            IconButton "add" tooltip="Steeper" onTap={incline=min(15,round(incline+0.5,1))}
+            Button.outline "Edit" onTap={field="incline"; keypad=""}
+      Grid cols=2 gap=16
+        Card gap=12
+          Text.strong "Set {field == 'speed' ? 'speed' : 'incline'}"
+          Text "{keypad == '' ? '-' : keypad}" size=40 weight=700
+          Grid cols=3 gap=8
+            Button.outline "1" onTap={keypad=keypad+"1"}
+            Button.outline "2" onTap={keypad=keypad+"2"}
+            Button.outline "3" onTap={keypad=keypad+"3"}
+            Button.outline "4" onTap={keypad=keypad+"4"}
+            Button.outline "5" onTap={keypad=keypad+"5"}
+            Button.outline "6" onTap={keypad=keypad+"6"}
+            Button.outline "7" onTap={keypad=keypad+"7"}
+            Button.outline "8" onTap={keypad=keypad+"8"}
+            Button.outline "9" onTap={keypad=keypad+"9"}
+            Button.outline "." onTap={contains(keypad,".") ? toast "One decimal point" : keypad=keypad+"."}
+            Button.outline "0" onTap={keypad=keypad+"0"}
+            Button.outline "back" icon="backspace" onTap={keypad=slice(keypad,0,length(keypad)-1)}
+          Row gap=8
+            Button.ghost "Clear" onTap={keypad=""}
+            Button grow "Set" onTap={keypad=="" ? toast "Enter a number first" : (field=="speed" ? (speed=clamp(keypad*1,0.5,12); keypad="") : (incline=clamp(keypad*1,0,15); keypad=""))}
+        Card gap=12
+          Row between
+            Text.strong "Heart rate"
+            Badge.warning "Connecting" hidden={hr=="connected"}
+            Badge.success "Connected" hidden={hr!="connected"}
+          if hr=="connected"
+            Row gap=8 bottom
+              Text "{bpm}" size=64 weight=700
+              Text.muted "bpm"
+            Progress {clamp((bpm-60)/120,0,1)}
+            Text.muted "Zone 2 of 5, fat burn"
+          if hr!="connected"
+            Text.muted "Looking for your Polar H10 band. Wet the strap and keep it on."
+            Progress 0.3 animate=pulse
+          Spacer grow
+          Button.outline "Forget band" onTap={hr="connecting"; bpm=0}
+      Row gap=12
+        Button grow size=large "Start belt" icon="play_arrow" onTap={clip ? go workout : open stop}
+        Button.outline "Choose a program" onTap={go programs}
+  Dialog#band "Pair heart-rate band" "Bluetooth is on"
+    ListTile "Polar H10 7A21F" "Strong signal" onTap={hr="connected"; bpm=112; close}
+    ListTile "Wahoo TICKR 04C9" "Weak signal" onTap={hr="connected"; bpm=108; close}
+    Button.ghost "Cancel" onTap={close}
+  Dialog#stop "Stop the belt?" "The belt slows to a stop over three seconds."
+    Row gap=8
+      Button.outline grow "Keep running" onTap={close}
+      Button.destructive grow "Stop now" onTap={speed=0; close; emit emergencyStop}
+
+### Programs
+state program="hills"
+state profile=[2,3,5,6,8,6,4,3,5,7,9,6,3,2]
+state selectedBar=0
+state mins=30
+App
+  Sidebar
+    Brand "Stride" icon="directions_run"
+    NavItem "Console" icon="speed" onTap={go console}
+    NavItem "Programs" icon="terrain" selected={true}
+    NavItem "Workout" icon="timer" onTap={go workout}
+    NavItem "Summary" icon="emoji_events" onTap={go summary}
+  Main
+    Nav
+      Heading "Programs"
+      Button "Start program" icon="play_arrow" onTap={emit startProgram program; go workout}
+    Column pad=24 gap=16
+      Grid cols=4 gap=12
+        Card gap=8 onTap={program="hills"; profile=[2,3,5,6,8,6,4,3,5,7,9,6,3,2]; mins=30}
+          IconTile "terrain"
+          Text.strong "Rolling hills"
+          Text.muted "30 min, up to 9%"
+          Badge.primary "Selected" hidden={program!="hills"}
+        Card gap=8 onTap={program="intervals"; profile=[1,1,6,6,1,1,6,6,1,1,6,6,1,1]; mins=24}
+          IconTile "bolt"
+          Text.strong "Intervals"
+          Text.muted "24 min, 2 min on, 2 off"
+          Badge.primary "Selected" hidden={program!="intervals"}
+        Card gap=8 onTap={program="climb"; profile=[1,2,3,4,5,6,7,8,9,10,11,12,12,12]; mins=40}
+          IconTile "trending_up"
+          Text.strong "Mountain climb"
+          Text.muted "40 min, steady rise"
+          Badge.primary "Selected" hidden={program!="climb"}
+        Card gap=8 onTap={program="custom"}
+          IconTile "edit"
+          Text.strong "Custom"
+          Text.muted "Draw your own"
+          Badge.primary "Selected" hidden={program!="custom"}
+      Card gap=12
+        Row between
+          Text.strong "Incline profile"
+          Text.muted "{mins} min, {length(profile)} segments"
+        BarChart values={profile} labels={map(range(length(profile)), i=>i+1)} h=200 onTap={selectedBar=index}
+        if program=="custom"
+          Text.caption "Segment {selectedBar+1}: {profile[selectedBar]}% incline"
+          Row gap=12 middle
+            IconButton "remove" tooltip="Lower segment" onTap={profile=setAt(profile,selectedBar,max(0,profile[selectedBar]-1))}
+            Slider min=0 max=15 bind=segLevel onChange={profile=setAt(profile,selectedBar,round(result,0))} grow
+            IconButton "add" tooltip="Raise segment" onTap={profile=setAt(profile,selectedBar,min(15,profile[selectedBar]+1))}
+          Row gap=8
+            Button.outline "Add segment" icon="add" onTap={profile=append(profile,profile[length(profile)-1])}
+            Button.outline "Remove last" icon="remove" onTap={length(profile)>2 ? profile=removeAt(profile,length(profile)-1) : toast "A program needs two segments"}
+            Button.ghost "Flatten" onTap={profile=map(profile,p=>0)}
+        if program!="custom"
+          Text.muted "Switch to Custom to change these bars."
+      Row gap=16
+        Column grow gap=8
+          Text.fieldLabel "Length"
+          Slider bind=mins min=10 max=60
+        Column grow gap=8
+          Text.fieldLabel "Warm-up"
+          SegmentedButton items=["None","3 min","5 min"] bind=warm
+
+### Workout
+state elapsed=0
+state total=1800
+state running=true
+state segment=0
+state segLen=120
+state speed=6.5
+state incline=3
+state bpm=128
+state profile=[2,3,5,6,8,6,4,3,5,7,9,6,3,2]
+state phase="run"
+every 1s when running onTick={elapsed=elapsed+1; segment=min(length(profile)-1,floor(elapsed/segLen)); incline=profile[segment]; phase=elapsed>=total-300 ? "cooldown" : "run"; elapsed>=total ? (running=false; go summary) : ""}
+App
+  Sidebar
+    Brand "Stride" icon="directions_run"
+    NavItem "Console" icon="speed" onTap={go console}
+    NavItem "Programs" icon="terrain" onTap={go programs}
+    NavItem "Workout" icon="timer" selected={true}
+    NavItem "Summary" icon="emoji_events" onTap={go summary}
+  Main
+    Nav
+      Row gap=8 middle
+        Heading "Rolling hills"
+        Badge.info "Cool-down" hidden={phase!="cooldown"}
+        Badge.success "Running" hidden={phase=="cooldown" || !running}
+        Badge.warning "Paused" hidden={running}
+      Button.destructive "Emergency stop" icon="stop_circle" onTap={open stop}
+    Column pad=24 gap=16
+      if phase=="cooldown"
+        Card gap=8 fill=#FFE8F1FB
+          Text.strong "Cool-down"
+          Text.muted "Speed eases to 3.0 mph. Keep walking until the belt stops."
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.caption "SPEED"
+          Text "{fixed(speed,1)}" size=56 weight=700
+          Text.muted "mph"
+        Card gap=4
+          Text.caption "INCLINE"
+          Text "{incline}" size=56 weight=700
+          Text.muted "%"
+        Card gap=4
+          Text.caption "HEART RATE"
+          Text "{bpm}" size=56 weight=700
+          Text.muted "bpm"
+        Card gap=4
+          Text.caption "NEXT CHANGE IN"
+          Text "{duration(segLen-(elapsed%segLen))}" size=56 weight=700
+          Text.muted "to {profile[min(length(profile)-1,segment+1)]}% incline"
+      Card gap=12
+        Row between
+          Text.strong "Course profile"
+          Text.muted "{duration(elapsed)} of {duration(total)}"
+        ProfileTrack values={profile} position={elapsed/total} h=200
+        Progress {elapsed/total}
+      Row gap=8
+        IconButton "remove" tooltip="Slower" onTap={speed=max(0.5,round(speed-0.1,1))}
+        IconButton "add" tooltip="Faster" onTap={speed=min(12,round(speed+0.1,1))}
+        Spacer grow
+        Button.outline "Skip segment" icon="skip_next" onTap={elapsed=min(total,(segment+1)*segLen)}
+        Button.outline "{running ? 'Pause' : 'Resume'}" icon={running ? "pause" : "play_arrow"} onTap={running=!running}
+        Button.secondary "Start cool-down" onTap={elapsed=total-300}
+  Dialog#stop "Stop the belt?" "The belt slows to a stop over three seconds."
+    Row gap=8
+      Button.outline grow "Keep running" onTap={close}
+      Button.destructive grow "Stop now" onTap={running=false; close; emit emergencyStop; go summary}
+
+### Summary
+state saved=false
+state felt="Good"
+Page
+  Nav
+    Brand "Stride" icon="directions_run"
+    Row gap=4
+      Link "Console" onTap={go console}
+      Link "Programs" onTap={go programs}
+    Button "New workout" onTap={go programs}
+  Section narrow center
+    Icon "emoji_events" size=48
+    Heading "Nice work, workout complete" level=1
+    Text.muted "Rolling hills, Tuesday morning"
+    Grid cols=3 gap=16
+      Card gap=4
+        Text.caption "DISTANCE"
+        Text "2.9 mi" size=36 weight=700
+      Card gap=4
+        Text.caption "TIME"
+        Text "30:00" size=36 weight=700
+      Card gap=4
+        Text.caption "CALORIES"
+        Text "318" size=36 weight=700
+    Card gap=12
+      Text.strong "Heart rate"
+      AreaChart values=[104,118,126,132,141,138,129,144,152,147,133,118] labels=["0","3","6","9","12","15","18","21","24","27","30","33"] h=180
+      Row between
+        Text.muted "Average 134 bpm"
+        Text.muted "Peak 152 bpm"
+    Card gap=12
+      Text.strong "Time in zones"
+      Donut values=[4,12,10,4] labels=["Warm-up","Fat burn","Cardio","Peak"]
+    Card gap=8
+      Text.strong "How did it feel?"
+      Row gap=8
+        ChoiceChip "Easy" selected={felt=="Easy"} onTap={felt="Easy"}
+        ChoiceChip "Good" selected={felt=="Good"} onTap={felt="Good"}
+        ChoiceChip "Hard" selected={felt=="Hard"} onTap={felt="Hard"}
+      Input "Note" "Left calf tight on the last hill" multiline
+    Row gap=12 center
+      Button "Save workout" onTap={saved=true; emit saveWorkout felt; toast "Workout saved"}
+      Button.outline "Share" icon="share" onTap={open share}
+    Text.success "Saved to your history" hidden={!saved}
+  Sheet#share "Share workout"
+    ListTile "Copy summary" icon="content_copy" onTap={copy "Rolling hills, 2.9 mi in 30:00"; toast "Copied"; close}
+    ListTile "Send to Health" icon="favorite" onTap={emit exportHealth; close}

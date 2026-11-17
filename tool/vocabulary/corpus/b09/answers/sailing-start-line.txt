@@ -1,0 +1,156 @@
+### Countdown
+state secs=300
+state running=false
+state speed=3.2
+state dist=142
+state tackOn=false
+state tackSecs=0
+state tackLog=[]
+every 1s when running onTick={secs=max(0,secs-1)}
+every 1s when tackOn onTick={tackSecs=tackSecs+1}
+App
+  Sidebar
+    Brand "Starting Gun" icon="sailing"
+    NavItem "Countdown" icon="timer" selected={true}
+    NavItem "Start line" icon="straighten" onTap={go start-line}
+    NavItem "Track" icon="route" onTap={go track}
+    Spacer grow
+    Text.muted "Race 4, Fleet Laser"
+  Main
+    Nav
+      Heading "Countdown" level=1
+      Row gap=8
+        Button.outline "Sync to minute" icon="sync" onTap={secs=round(secs/60,0)*60; toast "Synced to {formatDate(secs,"m")} min"}
+        IconButton "restart_alt" tooltip="Reset to 5:00" onTap={running=false; secs=300}
+    Column pad=24 gap=16 scroll
+      Card gap=16
+        Column center gap=4
+          Text "{floor(secs/60)}:{secs%60<10 ? "0" : ""}{secs%60}" size=96 weight=700 center
+          Text.muted "Time to the start gun" center
+        Progress {1-secs/300}
+        Row gap=12 center
+          Button "Start" size=large hide={running} onTap={running=true}
+          Button.secondary "Pause" size=large show={running} onTap={running=false}
+          Button.outline "Sync" size=large onTap={secs=round(secs/60,0)*60; emit syncStart}
+      Card gap=12
+        Text.strong "Flags"
+        Row gap=12
+          Flag "Class flag" code="Fleet" raised={secs<=300} at="5:00"
+          Flag "Preparatory" code="P" raised={secs<=240} at="4:00"
+          Flag "Preparatory down" code="P" lowered={secs<=60} at="1:00"
+          Flag "Start" code="Class" lowered={secs<=0} at="0:00"
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Distance to line"
+          Text "{dist} m" size=40 weight=700
+        Card gap=4
+          Text.muted "Time to burn"
+          Text "{duration(max(0,secs-dist/speed))}" size=40 weight=700 color={secs-dist/speed<0 ? "#FFD32F2F" : "#FF2E7D32"}
+          Text.caption "At {speed} m/s the line is {duration(dist/speed)} away"
+        Card gap=8
+          Text.muted "Tack timer"
+          Text "{duration(tackSecs)}" size=40 weight=700
+          Row gap=8
+            Button "Tack" onTap={tackLog=append(tackLog,tackSecs); tackSecs=0; tackOn=true}
+            Button.outline "Stop" onTap={tackOn=false}
+      if length(tackLog)>0
+        Card gap=8
+          Text.strong "Legs this race"
+          each t in tackLog
+            Row between
+              Text "Leg {index+1}"
+              Text.muted "{duration(t)}"
+
+### Start line
+state wind=215
+state lineBearing=125
+state boatPing={"lat":null,"lon":null,"at":""}
+state pinPing={"lat":null,"lon":null,"at":""}
+state boatLat=50.7612
+state boatLon=-1.2954
+state dist=142
+state secs=240
+state speed=3.2
+App
+  Sidebar
+    Brand "Starting Gun" icon="sailing"
+    NavItem "Countdown" icon="timer" onTap={go countdown}
+    NavItem "Start line" icon="straighten" selected={true}
+    NavItem "Track" icon="route" onTap={go track}
+    Spacer grow
+    Text.muted "Race 4, Fleet Laser"
+  Main
+    Nav
+      Heading "Start line" level=1
+      Row gap=8
+        Badge.success "GPS lock 3 m" icon="gps_fixed"
+        IconButton "tune" tooltip="Line settings" onTap={open settings}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=12
+          Text.strong "The line"
+          LineMap boat={[boatLat,boatLon]} committee={boatPing} pin={pinPing} wind={wind} h=320
+          Row gap=12
+            Button "Ping committee boat" icon="flag" grow onTap={emit pingBoat; toast "Committee boat pinged"}
+            Button "Ping pin" icon="sports_score" grow onTap={emit pingPin; toast "Pin pinged"}
+          Row gap=12
+            Text.muted "Committee: {boatPing.at==""?"not set":boatPing.at}"
+            Text.muted "Pin: {pinPing.at==""?"not set":pinPing.at}"
+        Column w=320 gap=16
+          Card gap=8
+            Text.muted "Distance to the line"
+            Text "{dist} m" size=56 weight=700
+            Text.caption "Updating once a second from your position"
+          Card gap=12
+            Text.strong "Favoured end"
+            Row gap=12 middle
+              Compass bind=wind arrow="favoured" size=96
+              Column gap=4
+                Text.strong "{wind - (lineBearing-90) > 0 ? "Pin end" : "Committee boat end"}"
+                Text.muted "Bias {abs(round(wind-(lineBearing-90),0))} degrees"
+            Slider "Wind direction" bind=wind min=0 max=359
+            Text.caption "Wind from {wind} degrees"
+          Card gap=8
+            Text.muted "Time to burn"
+            Text "{duration(max(0,secs-dist/speed))}" size=40 weight=700
+            Text.caption "Gun in {duration(secs)}"
+  Dialog#settings "Line settings" "Used for bias and distance"
+    Input "Line bearing, degrees" bind=lineBearing type=number
+    Input "Boat speed, m/s" bind=speed type=number
+    Button "Done" onTap={close}
+
+### Track
+state tab="track"
+state tackLog=[]
+state recording=true
+state recorded=[{"name":"Race 3","dur":2640,"dist":"5.8 km"},{"name":"Race 2","dur":2410,"dist":"5.4 km"}]
+state sel=0
+App
+  Sidebar
+    Brand "Starting Gun" icon="sailing"
+    NavItem "Countdown" icon="timer" onTap={go countdown}
+    NavItem "Start line" icon="straighten" onTap={go start-line}
+    NavItem "Track" icon="route" selected={true}
+    Spacer grow
+    Text.muted "Race 4, Fleet Laser"
+  Main
+    Nav
+      Heading "Track" level=1
+      Row gap=8
+        Toggle "Recording" bind=recording onChange={emit recording result}
+        Button.outline "Export GPX" icon="download" onTap={emit exportGpx recorded[sel].name}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=12
+          Text.strong "{recorded[sel].name}"
+          TrackMap track={recorded[sel]} showLine=true h=360
+        Column w=320 gap=12
+          Card gap=8
+            Text.strong "Recorded"
+            each r in recorded
+              ListTile "{r.name}" subtitle="{duration(r.dur)} / {r.dist}" selected={sel==index} onTap={sel=index}
+                IconButton "delete" tooltip="Delete track" onTap={recorded=removeAt(recorded,index); sel=0}
+          Card gap=8
+            Text.strong "Start summary"
+            Text.muted "Crossed the line 2 s after the gun, 11 m from the pin end."
+            LineChart values=[150,118,86,52,24,8,3] labels=["-60","-50","-40","-30","-20","-10","0"] h=120

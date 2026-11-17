@@ -1,0 +1,227 @@
+### Today
+state tab="today"
+state kind="pain"
+state spots=[{"area":"lower back","kind":"ache","sev":5},{"area":"left knee","kind":"pain","sev":3}]
+state picked=""
+state severity=4
+state triggers=["Stress","Poor sleep"]
+state foods=["Coffee","Dairy"]
+state mood="Okay"
+state sleepHours=6.5
+state sleepQuality="Restless"
+state saved=false
+App
+  Sidebar
+    Brand "Daybook Health" icon="healing"
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={tab="today"}
+    NavItem "Month" icon="calendar_month" selected={tab=="month"} onTap={go month}
+    NavItem "Patterns" icon="insights" selected={tab=="patterns"} onTap={go patterns}
+    NavItem "Doctor note" icon="description" selected={tab=="note"} onTap={go doctor-note}
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Today, {formatDate(today(),'EEEE MMM d')}" level=1
+      Row gap=8
+        Button.outline "Export" icon="ios_share" onTap={open export}
+        Button "Save entry" onTap={saved=true; toast "Entry saved"; emit saveEntry}
+    Column scroll pad=24 gap=16
+      Grid cols=2 gap=16
+        Card gap=12
+          Text.strong "Where does it hurt?"
+          SegmentedButton bind=kind items=["pain","itch","ache"]
+          Stack center middle
+            BodyMap view="front" bind=spots mode={kind} onTapSpot={picked=result.area; spots=append(spots,{"area":result.area,"kind":kind,"sev":severity})} h=360
+          Text.muted "Tap a spot on the outline to mark it as {kind}."
+          if picked!=""
+            Text.small "Last marked: {picked}"
+        Column gap=16
+          Card gap=12
+            Text.strong "Marked today"
+            if isEmpty(spots)
+              Text.muted "Nothing marked yet."
+            each s in spots
+              ListTile "{s.area}" subtitle="{s.kind}, {s.sev} of 10"
+                IconButton "close" tooltip="Remove" onTap={spots=removeWhere(spots,x=>x.area==s.area)}
+          Card gap=12
+            Row between
+              Text.strong "How bad is it?"
+              Text.strong "{severity} of 10"
+            Slider bind=severity min=0 max=10 step=1 faces
+            Row between
+              Icon "sentiment_very_satisfied"
+              Icon "sentiment_neutral"
+              Icon "sentiment_very_dissatisfied"
+          Card gap=12
+            Text.strong "Triggers"
+            Row gap=8 wrap
+              each t in ["Stress","Poor sleep","Weather","Exercise","Screen time","Alcohol","Skipped meal"]
+                FilterChip "{t}" selected={contains(triggers,t)} onTap={triggers=contains(triggers,t) ? without(triggers,t) : append(triggers,t)}
+            Text.strong "Food"
+            Row gap=8 wrap
+              each f in ["Coffee","Dairy","Gluten","Sugar","Spicy","Eggs","Nuts"]
+                FilterChip "{f}" selected={contains(foods,f)} onTap={foods=contains(foods,f) ? without(foods,f) : append(foods,f)}
+          Card gap=12
+            Row middle gap=12
+              Text.strong "Mood" w=60
+              Row gap=8 grow
+                ChoiceChip "Low" selected={mood=="Low"} onTap={mood="Low"}
+                ChoiceChip "Okay" selected={mood=="Okay"} onTap={mood="Okay"}
+                ChoiceChip "Good" selected={mood=="Good"} onTap={mood="Good"}
+            Row middle gap=12
+              Text.strong "Sleep" w=60
+              Input "Hours" type=number bind=sleepHours w=90
+              Select bind=sleepQuality items=["Deep","Okay","Restless","Barely slept"] grow
+          if saved
+            Text.success "Saved. Today is logged."
+
+  Dialog#export "Export your diary" "Choose what goes into the file"
+    SegmentedButton bind=exportRange items=["2 weeks","Month","All"]
+    Select "Format" bind=exportFormat items=["PDF","CSV","Plain text"]
+    Toggle "Include food and triggers" bind=exportExtras
+    Row end gap=8
+      Button.outline "Copy as text" onTap={copy summary; toast "Copied"}
+      Button "Download" onTap={emit export {"range":exportRange,"format":exportFormat,"extras":exportExtras}; toast "Preparing file"; close}
+
+### Month
+state tab="month"
+state days=[{"d":1,"sev":2,"t":["Weather"]},{"d":2,"sev":1,"t":[]},{"d":3,"sev":4,"t":["Stress"]},{"d":4,"sev":6,"t":["Stress","Alcohol"]},{"d":5,"sev":7,"t":["Poor sleep","Stress"]},{"d":6,"sev":3,"t":[]},{"d":7,"sev":2,"t":["Exercise"]},{"d":8,"sev":5,"t":["Skipped meal"]},{"d":9,"sev":8,"t":["Poor sleep","Alcohol"]},{"d":10,"sev":4,"t":["Weather"]},{"d":11,"sev":2,"t":[]},{"d":12,"sev":1,"t":[]},{"d":13,"sev":3,"t":["Screen time"]},{"d":14,"sev":6,"t":["Stress","Poor sleep"]}]
+state selDay=14
+App
+  Sidebar
+    Brand "Daybook Health" icon="healing"
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={go today}
+    NavItem "Month" icon="calendar_month" selected={tab=="month"} onTap={tab="month"}
+    NavItem "Patterns" icon="insights" selected={tab=="patterns"} onTap={go patterns}
+    NavItem "Doctor note" icon="description" selected={tab=="note"} onTap={go doctor-note}
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "November" level=1
+      Row gap=8
+        IconButton "chevron_left" tooltip="Previous month" onTap={emit prevMonth}
+        IconButton "chevron_right" tooltip="Next month" onTap={emit nextMonth}
+    Column scroll pad=24 gap=16
+      Card gap=12
+        Row between
+          Text.strong "Your month at a glance"
+          Row gap=12
+            Row gap=4 middle
+              Icon "circle" color=#FF4CAF50 size=12
+              Text.small "Mild"
+            Row gap=4 middle
+              Icon "circle" color=#FFFFB300 size=12
+              Text.small "Moderate"
+            Row gap=4 middle
+              Icon "circle" color=#FFE53935 size=12
+              Text.small "Severe"
+        Timeline view="month" days={days} dot={d=>d.sev>=6 ? "#FFE53935" : d.sev>=3 ? "#FFFFB300" : "#FF4CAF50"} selected={selDay} onSelect={selDay=result.d}
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Good days"
+          Text "{count(days,d=>d.sev<3)}" size=40 weight=700
+        Card gap=4
+          Text.muted "Bad days"
+          Text "{count(days,d=>d.sev>=6)}" size=40 weight=700 color=#FFE53935
+        Card gap=4
+          Text.muted "Average severity"
+          Text "{fixed(sum(days,d=>d.sev)/length(days),1)}" size=40 weight=700
+      Card gap=8
+        Row between
+          Text.strong "Day {selDay}"
+          Badge.warning "Severity {find(days,d=>d.d==selDay).sev}"
+        Row gap=8 wrap
+          each t in find(days,d=>d.d==selDay).t
+            Chip "{t}"
+        if isEmpty(find(days,d=>d.d==selDay).t)
+          Text.muted "No triggers logged."
+        Button.outline "Open this day" onTap={go today}
+
+### Patterns
+state tab="patterns"
+state range="30 days"
+state days=[{"sev":2,"t":["Weather"]},{"sev":4,"t":["Stress"]},{"sev":6,"t":["Stress","Alcohol"]},{"sev":7,"t":["Poor sleep","Stress"]},{"sev":8,"t":["Poor sleep","Alcohol"]},{"sev":3,"t":["Screen time"]},{"sev":6,"t":["Stress","Poor sleep"]},{"sev":1,"t":["Exercise"]}]
+state triggerNames=["Poor sleep","Stress","Alcohol","Weather","Screen time","Exercise"]
+App
+  Sidebar
+    Brand "Daybook Health" icon="healing"
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={go today}
+    NavItem "Month" icon="calendar_month" selected={tab=="month"} onTap={go month}
+    NavItem "Patterns" icon="insights" selected={tab=="patterns"} onTap={tab="patterns"}
+    NavItem "Doctor note" icon="description" selected={tab=="note"} onTap={go doctor-note}
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Patterns" level=1
+      SegmentedButton bind=range items=["14 days","30 days","90 days"]
+    Column scroll pad=24 gap=16
+      Card gap=12
+        Text.strong "Share of bad days with each trigger"
+        Text.muted "A bad day is severity 6 or higher. Bars show how many bad days included the trigger."
+        BarChart horizontal values={map(triggerNames,n=>count(filter(days,d=>d.sev>=6),d=>contains(d.t,n)))} labels={triggerNames} h=260
+      Grid cols=2 gap=16
+        Card gap=12
+          Text.strong "Average severity with the trigger"
+          each n in sortByDesc(triggerNames,n=>sum(filter(days,d=>contains(d.t,n)),d=>d.sev)/max(1,count(days,d=>contains(d.t,n))))
+            Row middle gap=12
+              Text n w=110
+              Progress {sum(filter(days,d=>contains(d.t,n)),d=>d.sev)/max(1,count(days,d=>contains(d.t,n)))/10} grow
+              Text.strong "{fixed(sum(filter(days,d=>contains(d.t,n)),d=>d.sev)/max(1,count(days,d=>contains(d.t,n))),1)}" w=40
+        Card gap=12
+          Text.strong "Severity over time"
+          LineChart values={map(days,d=>d.sev)} h=200
+          Text.muted "Poor sleep and stress show up together on your worst days."
+      Row gap=12
+        Button.outline "Write the doctor note" icon="description" onTap={go doctor-note}
+        Button.ghost "Export" icon="ios_share" onTap={emit exportPatterns}
+
+### Doctor note
+state tab="note"
+state days=[{"date":"Nov 4","sev":6,"areas":"lower back","t":["Stress","Alcohol"]},{"date":"Nov 5","sev":7,"areas":"lower back, left knee","t":["Poor sleep","Stress"]},{"date":"Nov 9","sev":8,"areas":"lower back","t":["Poor sleep","Alcohol"]},{"date":"Nov 14","sev":6,"areas":"left knee","t":["Stress","Poor sleep"]}]
+state includeFood=true
+state includeSleep=true
+state extra=""
+state sent=false
+App
+  Sidebar
+    Brand "Daybook Health" icon="healing"
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={go today}
+    NavItem "Month" icon="calendar_month" selected={tab=="month"} onTap={go month}
+    NavItem "Patterns" icon="insights" selected={tab=="patterns"} onTap={go patterns}
+    NavItem "Doctor note" icon="description" selected={tab=="note"} onTap={tab="note"}
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Note for your doctor" level=1
+      Row gap=8
+        Button.outline "Copy" icon="content_copy" onTap={copy note; toast "Copied"}
+        Button "Export" icon="ios_share" onTap={open share}
+    Column scroll pad=24 gap=16
+      Grid cols=2 gap=16
+        Card gap=12
+          Text.strong "Built from the last two weeks"
+          Toggle "Include food and triggers" bind=includeFood
+          Toggle "Include sleep and mood" bind=includeSleep
+          Input "Anything to add" "Questions, new medicines, what worries you" bind=extra multiline
+          Divider
+          Text.strong "Bad days"
+          each d in days
+            ListTile "{d.date}: severity {d.sev}" subtitle="{d.areas}"
+              Badge.danger "{d.sev}"
+        Card gap=12
+          Text.strong "Your note"
+          Input "Note" bind=note multiline h=360 value="Over the last 14 days I logged {length(days)} bad days (severity 6 or more), mostly in my lower back and left knee. Average severity on those days was {fixed(sum(days,d=>d.sev)/length(days),1)} of 10.{includeFood ? ' Stress and poor sleep came up most often, and alcohol twice.' : ''}{includeSleep ? ' I slept about 6.5 hours a night and my mood was mostly okay to low.' : ''} {extra}"
+          Row end gap=8
+            Button.outline "Edit later" onTap={toast "Draft kept"}
+            Button "Send to my doctor" onTap={sent=true; emit sendNote note; toast "Note sent"}
+          if sent
+            Text.success "Sent to Dr. Okafor."
+
+  Sheet#share "Export the note"
+    ListTile "PDF" subtitle="One page, ready to print" icon="picture_as_pdf" onTap={emit exportNote "pdf"; close}
+    ListTile "Email it" subtitle="To Dr. Okafor" icon="mail" onTap={emit emailNote; toast "Email drafted"; close}
+    ListTile "Copy as text" subtitle="Paste it anywhere" icon="content_copy" onTap={copy note; toast "Copied"; close}
+    Button.ghost "Cancel" onTap={close}

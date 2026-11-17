@@ -1,0 +1,135 @@
+### Phrase scan
+state tab="phrases"
+state mode="row"
+state rowIdx=0
+state tileIdx=0
+state running=true
+state speed=1.5
+state hold=0.3
+state cue=true
+state speech=""
+state history=[]
+state rows=[{"n":0,"label":"Needs","tiles":["I need help","I am thirsty","I am hungry","Bathroom please","I am in pain","I am cold"]},{"n":1,"label":"Feelings","tiles":["I am happy","I am tired","I am worried","I love you","Thank you","I am sorry"]},{"n":2,"label":"People","tiles":["Hello","Good morning","How are you?","Please come here","Goodbye","Call my nurse"]},{"n":3,"label":"Answers","tiles":["Yes","No","Maybe","Wait a moment","Not now","I don't know"]}]
+every speed*1000 when running && tab=="phrases" onTick={mode=="row" ? {rowIdx=(rowIdx+1)%(length(rows)+1); cue ? play tick : {}} : {tileIdx=(tileIdx+1)%(length(rows[rowIdx].tiles)+1); cue ? play tick : {}}}
+App
+  Sidebar
+    Brand "Single Switch" icon="touch_app"
+    NavItem "Phrases" icon="grid_view" selected={tab=="phrases"} onTap={tab="phrases"}
+    NavItem "Keyboard" icon="keyboard" selected={tab=="keyboard"} onTap={go keyboard}
+    NavItem "Settings" icon="tune" onTap={go settings}
+    Spacer grow
+    Text.muted "Scanning {running ? 'running' : 'paused'}"
+  Main
+    Nav
+      Heading "Phrases" level=1
+      Row gap=8
+        Badge.info "{mode=='row' ? 'Choose a row' : 'Choose a phrase'}"
+        Button.outline "{running ? 'Pause' : 'Resume'}" icon="{running ? 'pause' : 'play_arrow'}" onTap={running=!running}
+        IconButton "settings" tooltip="Scan settings" onTap={go settings}
+    Column pad=24 gap=16
+      Card gap=8
+        Row between
+          Text.strong "Speech bar"
+          Row gap=4
+            IconButton "volume_up" tooltip="Speak again" onTap={speak speech}
+            IconButton "backspace" tooltip="Clear" onTap={speech=""}
+        Text.heading1 "{speech == '' ? 'Choose a phrase to speak' : speech}"
+      Column gap=8
+        each row in rows
+          Card gap=8 fill={mode=="row" && rowIdx==row.n ? "#FFFFE08A" : "#00000000"}
+            Row between
+              Text.strong "{row.label}"
+              Badge.primary "Row {row.n+1}" visible={mode=="row" && rowIdx==row.n}
+            Grid cols=6 gap=8
+              each t in row.tiles
+                Box pad=12 radius=8 fill={mode=="tile" && rowIdx==row.n && tileIdx==index ? "#FFFFC107" : "#FFEEF1F5"}
+                  Text.strong "{t}" center
+        Card fill={mode=="row" && rowIdx==length(rows) ? "#FFFFE08A" : "#FFEEF1F5"}
+          Row gap=8 center
+            Icon "undo"
+            Text.strong "Back to the start of the pass"
+      Box fill="#FF1F2937" radius=12 pad=24
+        Button "SWITCH" size=large icon="touch_app" holdMs={hold*1000} onHold={mode=="row" ? {rowIdx==length(rows) ? {rowIdx=0} : {mode="tile"; tileIdx=0; cue ? play select : {}}} : {tileIdx==length(rows[rowIdx].tiles) ? {mode="row"; tileIdx=0; cue ? play back : {}} : {speech=rows[rowIdx].tiles[tileIdx]; history=take(append(history,rows[rowIdx].tiles[tileIdx]),20); speak speech; cue ? play chime : {}; mode="row"; rowIdx=0; tileIdx=0}}}
+        Text "Hold the button for {hold} s to select. Highlight moves every {speed} s." color="#FFFFFFFF" center
+  Sheet#history "Spoken today"
+    each h in history
+      ListTile "{h}" icon="record_voice_over" onTap={speech=h; speak h; close}
+    if isEmpty(history)
+      Text.muted "Nothing spoken yet."
+
+### Keyboard
+state letters=["E","T","A","O","I","N","S","R","H","L","D","C","U","M","F","P","G","W","Y","B","V","K","X","J","Q","Z"]
+state typed=""
+state kmode="letter"
+state kIdx=0
+state words={"E":["the","and","be"],"T":["the","to","that"]}
+every speed*1000 when running onTick={kIdx=(kIdx+1)%(length(letters)+4); cue ? play tick : {}}
+App
+  Sidebar
+    Brand "Single Switch" icon="touch_app"
+    NavItem "Phrases" icon="grid_view" onTap={go phrase-scan}
+    NavItem "Keyboard" icon="keyboard" selected={true}
+    NavItem "Settings" icon="tune" onTap={go settings}
+  Main
+    Nav
+      Heading "Keyboard" level=1
+      Row gap=8
+        Button.outline "{running ? 'Pause' : 'Resume'}" icon="{running ? 'pause' : 'play_arrow'}" onTap={running=!running}
+        Button "Speak" icon="volume_up" onTap={speech=typed; speak typed}
+    Column pad=24 gap=16
+      Card gap=8
+        Text.strong "Speech bar"
+        Text.heading1 "{typed == '' ? 'Start typing with the switch' : typed}"
+      Card gap=8
+        Text.strong "Word predictions"
+        Row gap=8
+          each w in coalesce(words[upper(last(typed))],["I","the","and","to"])
+            Button.outline "{w}" onTap={typed=concat(typed,w); typed=typed+" "}
+      Grid cols=9 gap=8
+        each l in letters
+          Box pad=12 radius=8 fill={kIdx==index ? "#FFFFC107" : "#FFEEF1F5"}
+            Text.heading3 "{l}" center
+        Box pad=12 radius=8 fill={kIdx==length(letters) ? "#FFFFC107" : "#FFEEF1F5"}
+          Text.strong "Space" center
+        Box pad=12 radius=8 fill={kIdx==length(letters)+1 ? "#FFFFC107" : "#FFEEF1F5"}
+          Text.strong "Delete" center
+        Box pad=12 radius=8 fill={kIdx==length(letters)+2 ? "#FFFFC107" : "#FFEEF1F5"}
+          Text.strong "Speak" center
+        Box pad=12 radius=8 fill={kIdx==length(letters)+3 ? "#FFFFC107" : "#FFEEF1F5"}
+          Text.strong "Back out" center
+      Text.muted "Letters follow their frequency in English, most common first."
+      Button "SWITCH" size=large icon="touch_app" holdMs={hold*1000} onHold={kIdx<length(letters) ? {typed=typed+letters[kIdx]; kIdx=0} : {kIdx==length(letters) ? {typed=typed+" "; kIdx=0} : {kIdx==length(letters)+1 ? {typed=slice(typed,0,length(typed)-1); kIdx=0} : {kIdx==length(letters)+2 ? {speech=typed; speak typed; kIdx=0} : {go phrase-scan}}}}}
+
+### Settings
+App
+  Sidebar
+    Brand "Single Switch" icon="touch_app"
+    NavItem "Phrases" icon="grid_view" onTap={go phrase-scan}
+    NavItem "Keyboard" icon="keyboard" onTap={go keyboard}
+    NavItem "Settings" icon="tune" selected={true}
+  Main
+    Nav
+      Heading "Scan settings" level=1
+      Button.outline "Reset" onTap={speed=1.5; hold=0.3; cue=true; toast "Defaults restored"}
+    Column pad=24 gap=16 maxw=640
+      Card gap=12
+        Heading "Scan speed" level=3
+        Text.muted "How long the highlight rests on each row or tile."
+        Slider bind=speed min=0.5 max=4 step=0.25
+        Text.strong "{fixed(speed,2)} seconds per step"
+      Card gap=12
+        Heading "Hold time" level=3
+        Text.muted "How long to hold the switch before it counts as a press. Longer holds ignore tremor."
+        Slider bind=hold min=0 max=2 step=0.1
+        Text.strong "{fixed(hold,1)} seconds"
+      Card gap=12
+        Heading "Sound cue" level=3
+        Toggle "Tick on every step" bind=cue
+        Select "Cue sound" items=["Soft tick","Click","Spoken row name"] bind=cueSound
+      Card gap=12
+        Heading "Back out" level=3
+        Toggle "Offer a back-out step at the end of each pass" bind=backout
+      Card gap=12
+        Heading "Pause" level=3
+        Toggle "Pause scanning" bind=paused onChange={running=!result}
+        Button.outline "Test the speed" onTap={go phrase-scan; running=true}

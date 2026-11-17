@@ -1,0 +1,186 @@
+### Calendar
+state tab="calendar"
+state sel=17
+state periodDays=[3,4,5,6,7]
+state predicted=[28,29,30,31,32]
+state fertile=[16,17,18,19,20,21]
+state logs=[{"day":3,"flow":"Heavy","symptoms":["Cramps"],"mood":"Tired"},{"day":4,"flow":"Medium","symptoms":["Cramps","Headache"],"mood":"Low"},{"day":5,"flow":"Medium","symptoms":[],"mood":"Calm"},{"day":6,"flow":"Light","symptoms":[],"mood":"Happy"},{"day":7,"flow":"Spotting","symptoms":[],"mood":"Happy"}]
+state flow=""
+state symptoms=[]
+state mood=""
+state cycleDay=15
+state phase="Fertile window"
+App
+  Sidebar
+    Brand "Moonmark" icon="brightness_3"
+    NavItem "Calendar" icon="calendar_month" selected={tab=="calendar"} onTap={tab="calendar"}
+    NavItem "Insights" icon="insights" selected={tab=="insights"} onTap={go insights}
+    NavItem "Settings" icon="settings" selected={tab=="settings"} onTap={go settings}
+    Spacer grow
+    Button.outline "Lock now" icon="lock" onTap={open lock}
+  Main
+    Nav
+      Heading "November 2026" level=1
+      Row gap=8
+        IconButton "chevron_left" tooltip="Previous month" onTap={toast "October 2026"}
+        IconButton "chevron_right" tooltip="Next month" onTap={toast "December 2026"}
+        Button "Share report" icon="medical_services" onTap={open report}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Card grow gap=12
+          Row gap=16
+            Row gap=6
+              Icon "circle" color=#FFD6336C size=14
+              Text.caption "Period"
+            Row gap=6
+              Icon "radio_button_unchecked" color=#FFD6336C size=14
+              Text.caption "Predicted"
+            Row gap=6
+              Icon "circle" color=#FFB9D8F2 size=14
+              Text.caption "Fertile window"
+          Grid cols=7 gap=4
+            Text.caption "Sun" center
+            Text.caption "Mon" center
+            Text.caption "Tue" center
+            Text.caption "Wed" center
+            Text.caption "Thu" center
+            Text.caption "Fri" center
+            Text.caption "Sat" center
+            each d in range(30)
+              Box center middle h=56 radius=12 fill={contains(periodDays,d+1) ? "#FFD6336C" : contains(fertile,d+1) ? "#FFD9ECFA" : "#00000000"} border={contains(predicted,d+1) ? "dotted" : "none"} onTap={sel=d+1; flow=coalesce(find(logs,l=>l.day==d+1).flow,""); symptoms=coalesce(find(logs,l=>l.day==d+1).symptoms,[]); mood=coalesce(find(logs,l=>l.day==d+1).mood,""); open logDay}
+                Text "{d+1}" color={contains(periodDays,d+1) ? "#FFFFFFFF" : "#FF222222"} weight={d+1==17 ? 700 : 400}
+        Card w=300 gap=12 center
+          Text.sectionTitle "Today"
+          Stack center middle
+            Ring {cycleDay/28} size=140
+            Column center gap=0
+              Text "{cycleDay}" size=40 weight=700
+              Text.caption "day of cycle"
+          Badge.info "{phase}"
+          Text.muted "Next period expected Nov 28, in 11 days." center
+          Button "Log today" icon="edit" onTap={sel=17; open logDay}
+      Card gap=8
+        Text.strong "Recent logs"
+        each l in sortByDesc(logs,x=>x.day)
+          ListTile "Nov {l.day}: {l.flow} flow" subtitle="{l.mood}{length(l.symptoms)>0 ? ' · ' + join(l.symptoms,', ') : ''}" onTap={sel=l.day; flow=l.flow; symptoms=l.symptoms; mood=l.mood; open logDay}
+  Sheet#logDay "Log for November {sel}"
+    Text.fieldLabel "Flow"
+    Row gap=8
+      ChoiceChip "Spotting" icon="water_drop" selected={flow=="Spotting"} onTap={flow="Spotting"}
+      ChoiceChip "Light" icon="water_drop" selected={flow=="Light"} onTap={flow="Light"}
+      ChoiceChip "Medium" icon="water_drop" selected={flow=="Medium"} onTap={flow="Medium"}
+      ChoiceChip "Heavy" icon="water_drop" selected={flow=="Heavy"} onTap={flow="Heavy"}
+    Text.fieldLabel "Symptoms"
+    Row gap=8
+      FilterChip "Cramps" icon="bolt" selected={contains(symptoms,"Cramps")} onTap={symptoms=contains(symptoms,"Cramps") ? without(symptoms,"Cramps") : append(symptoms,"Cramps")}
+      FilterChip "Headache" icon="psychology_alt" selected={contains(symptoms,"Headache")} onTap={symptoms=contains(symptoms,"Headache") ? without(symptoms,"Headache") : append(symptoms,"Headache")}
+      FilterChip "Bloating" icon="air" selected={contains(symptoms,"Bloating")} onTap={symptoms=contains(symptoms,"Bloating") ? without(symptoms,"Bloating") : append(symptoms,"Bloating")}
+      FilterChip "Backache" icon="accessibility_new" selected={contains(symptoms,"Backache")} onTap={symptoms=contains(symptoms,"Backache") ? without(symptoms,"Backache") : append(symptoms,"Backache")}
+      FilterChip "Nausea" icon="sick" selected={contains(symptoms,"Nausea")} onTap={symptoms=contains(symptoms,"Nausea") ? without(symptoms,"Nausea") : append(symptoms,"Nausea")}
+    Text.fieldLabel "Mood"
+    Row gap=8
+      ChoiceChip "Happy" icon="sentiment_very_satisfied" selected={mood=="Happy"} onTap={mood="Happy"}
+      ChoiceChip "Calm" icon="sentiment_satisfied" selected={mood=="Calm"} onTap={mood="Calm"}
+      ChoiceChip "Tired" icon="bedtime" selected={mood=="Tired"} onTap={mood="Tired"}
+      ChoiceChip "Low" icon="sentiment_dissatisfied" selected={mood=="Low"} onTap={mood="Low"}
+      ChoiceChip "Irritable" icon="sentiment_very_dissatisfied" selected={mood=="Irritable"} onTap={mood="Irritable"}
+    Input "Note" "Anything else" multiline bind=note
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Save" onTap={logs=append(removeWhere(logs,l=>l.day==sel),{"day":sel,"flow":flow,"symptoms":symptoms,"mood":mood}); periodDays=flow!="" && !contains(periodDays,sel) ? append(periodDays,sel) : periodDays; toast "Saved for Nov {sel}"; close}
+  Dialog#lock "Private lock" "Enter your 4-digit code to unlock"
+    Input "Code" password type=number bind=codeEntry
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Unlock" onTap={codeEntry==code ? close : toast "Wrong code"}
+  Dialog#report "Share with your doctor" "A summary of the last 12 months"
+    Text.body "Includes cycle lengths, average {avgLen} days, period length, logged symptoms and mood."
+    Toggle "Include symptoms" bind=incSymptoms
+    Toggle "Include mood" bind=incMood
+    Input "Doctor's email" bind=doctorEmail type=email
+    Row end gap=8
+      Button.outline "Download PDF" icon="download" onTap={emit downloadReport; close}
+      Button "Send" icon="send" onTap={doctorEmail!="" ? emit shareReport doctorEmail; toast "Report sent"; close : toast "Add an email"}
+
+### Insights
+state tab="insights"
+state lengths=[28,29,27,30,28,26,28,29,31,28,27,28]
+state avgLen=28
+App
+  Sidebar
+    Brand "Moonmark" icon="brightness_3"
+    NavItem "Calendar" icon="calendar_month" selected={tab=="calendar"} onTap={go calendar}
+    NavItem "Insights" icon="insights" selected={tab=="insights"} onTap={tab="insights"}
+    NavItem "Settings" icon="settings" selected={tab=="settings"} onTap={go settings}
+  Main
+    Nav
+      Heading "Insights" level=1
+      Button "Share report" icon="medical_services" onTap={open report}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.caption "Average cycle"
+          Text "{avgLen} days" size=32 weight=700
+        Card gap=4
+          Text.caption "Average period"
+          Text "5 days" size=32 weight=700
+        Card gap=4
+          Text.caption "Regularity"
+          Text "Regular" size=32 weight=700
+      Card gap=12
+        Text.strong "Cycle length, last 12 months"
+        BarChart values={lengths} labels=["Dec","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov"] h=240 average={avgLen}
+        Text.muted "The line shows your average of {avgLen} days."
+  Dialog#report "Share with your doctor" "A summary of the last 12 months"
+    Toggle "Include symptoms" bind=incSymptoms
+    Toggle "Include mood" bind=incMood
+    Input "Doctor's email" bind=doctorEmail type=email
+    Row end gap=8
+      Button.outline "Download PDF" icon="download" onTap={emit downloadReport; close}
+      Button "Send" icon="send" onTap={emit shareReport doctorEmail; toast "Report sent"; close}
+
+### Settings
+state tab="settings"
+state remind=true
+state remindDays=2
+state remindAt="09:00"
+state lockOn=true
+state code="2468"
+state newCode=""
+App
+  Sidebar
+    Brand "Moonmark" icon="brightness_3"
+    NavItem "Calendar" icon="calendar_month" selected={tab=="calendar"} onTap={go calendar}
+    NavItem "Insights" icon="insights" selected={tab=="insights"} onTap={go insights}
+    NavItem "Settings" icon="settings" selected={tab=="settings"} onTap={tab="settings"}
+  Main
+    Nav
+      Heading "Settings" level=1
+    Column pad=24 gap=16 maxw=640
+      Card gap=12
+        Text.strong "Reminder"
+        Toggle "Remind me before my period" bind=remind
+        if remind
+          Select "Days before" items=["1","2","3","5"] bind=remindDays
+          TimePicker "Time" bind=remindAt
+      Card gap=12
+        Text.strong "Private lock"
+        Toggle "Ask for a code when opening Moonmark" bind=lockOn
+        if lockOn
+          Button.outline "Change code" icon="pin" onTap={open setCode}
+      Card gap=12
+        Text.strong "Doctor report"
+        Text.muted "Share a summary of your cycles, symptoms and mood."
+        Button.outline "Prepare report" icon="medical_services" onTap={open report}
+  Dialog#setCode "New code" "Choose four digits"
+    Input "Code" password type=number bind=newCode
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Save" onTap={length(newCode)==4 ? code=newCode; toast "Code changed"; close : toast "Use four digits"}
+  Dialog#report "Share with your doctor" "A summary of the last 12 months"
+    Toggle "Include symptoms" bind=incSymptoms
+    Toggle "Include mood" bind=incMood
+    Input "Doctor's email" bind=doctorEmail type=email
+    Row end gap=8
+      Button.outline "Download PDF" icon="download" onTap={emit downloadReport; close}
+      Button "Send" icon="send" onTap={emit shareReport doctorEmail; toast "Report sent"; close}

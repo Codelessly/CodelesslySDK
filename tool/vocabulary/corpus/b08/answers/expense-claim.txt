@@ -1,0 +1,272 @@
+### New claim
+state tab="new"
+state cats=["Meals","Lodging","Transport","Supplies","Other"]
+state homeCur="USD"
+state cur="EUR"
+state rate=1.08
+state lines=[{"id":1,"merchant":"Brasserie Lipp","date":"2026-11-03","amount":84.5,"cat":"Meals","limit":75,"cur":"EUR","img":"https://img.claimant.app/r/1.jpg"},{"id":2,"merchant":"Hotel Le Marais","date":"2026-11-03","amount":212,"cat":"Lodging","limit":250,"cur":"EUR","img":"https://img.claimant.app/r/2.jpg"},{"id":3,"merchant":"SNCF","date":"2026-11-04","amount":46.8,"cat":"Transport","limit":100,"cur":"EUR","img":"https://img.claimant.app/r/3.jpg"}]
+state trips=[{"id":1,"from":"Office, 200 Mission St","to":"SFO Terminal 2","km":22.4}]
+state startPt="Office, 200 Mission St"
+state endPt="SFO Terminal 2"
+state km=22.4
+state purpose=""
+state sel=0
+state nextId=4
+App
+  Sidebar
+    Brand "Claimant" icon="receipt_long"
+    NavItem "New claim" icon="add_circle" selected={tab=="new"} onTap={tab="new"}
+    NavItem "My claims" icon="folder" badge="3" onTap={go my-claims}
+    NavItem "Approvals" icon="fact_check" badge="5" onTap={go approvals}
+    NavItem "Payments" icon="payments" onTap={go payments}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Whitfield" size=32
+      Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "Trip to Paris, Nov 3-5" level=1
+      Row gap=8
+        Button.outline "Save draft" onTap={toast "Draft saved"}
+        Button "Submit claim" onTap={count(lines,l=>l.amount>l.limit)>0 && purpose=="" ? toast "Add a business purpose" : open confirm}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Heading "Receipts" level=3
+        Dropzone "Drop receipts here or take photos" accept="image/*" multiple onUpload={lines=concat(lines,map(result,f=>{"id":nextId,"merchant":f.suggestedMerchant,"date":f.suggestedDate,"amount":f.suggestedAmount,"cat":f.suggestedCategory,"limit":100,"cur":cur,"img":f.url}); nextId=nextId+length(result); toast "{length(result)} receipts read"}
+        Text.muted "Each photo becomes a line below. Check the date, amount and category it read."
+      Card gap=12
+        Row between
+          Heading "Lines ({length(lines)})" level=3
+          Button.ghost "Add line by hand" icon="add" onTap={lines=append(lines,{"id":nextId,"merchant":"","date":today(),"amount":0,"cat":"Other","limit":50,"cur":cur,"img":""}); nextId=nextId+1}
+        each row in lines
+          Column gap=8
+            Row gap=12 middle
+              Image "{row.img}" w=56 h=56 radius=8 onTap={sel=row.id; open receipt}
+              Input "Merchant" bind=row.merchant grow
+              DatePicker "Date" bind=row.date w=150
+              Input "Amount" type=number bind=row.amount w=110
+              Select "Category" bind=row.cat items=cats w=140
+              IconButton "delete" tooltip="Remove line" onTap={lines=removeWhere(lines,l=>l.id==row.id)}
+            if row.amount > row.limit
+              Row gap=8 middle
+                Badge.warning "Over policy"
+                Text.danger "{row.cat} limit is {money(row.limit,"$",2)} per item; this line is {money(row.amount-row.limit,"$",2)} over. Add a note for your approver."
+                Input "Note" bind=row.note grow
+            Divider
+      Card gap=12
+        Row between
+          Heading "Mileage" level=3
+          Button.ghost "Add trip" icon="add_road" onTap={open trip}
+        Row gap=16 top
+          MiniMap from={startPt} to={endPt} h=180 grow
+          Column gap=8 w=280
+            Input "Start" bind=startPt
+            Input "End" bind=endPt
+            Input "Distance (km)" type=number bind=km
+            Text.muted "{fixed(km*0.7,2)} mi at $0.67 per mile = {money(km*0.7*0.67,"$",2)}"
+        each t in trips
+          Row between
+            Text "{t.from} to {t.to}"
+            Text.strong "{t.km} km"
+      Card gap=12
+        Heading "Currency" level=3
+        Row gap=12 middle
+          Select "Receipts are in" bind=cur items=["EUR","GBP","CAD","JPY"] w=140
+          Input "Rate to {homeCur}" type=number bind=rate w=140
+          Text.muted "1 {cur} = {rate} {homeCur}, rate of {formatDate(today(),"MMM d")}"
+          Button.ghost "Refresh rate" icon="sync" onTap={emit refreshRate cur}
+      Card gap=12
+        Input "Business purpose" bind=purpose multiline
+        Divider
+        Row between
+          Text.muted "Receipts ({cur})"
+          Text "{money(sum(lines,l=>l.amount),"",2)}"
+        Row between
+          Text.muted "Converted at {rate}"
+          Text "{money(sum(lines,l=>l.amount)*rate,"$",2)}"
+        Row between
+          Text.muted "Mileage"
+          Text "{money(km*0.7*0.67,"$",2)}"
+        Row between
+          Text.strong "Total to claim"
+          Text.heading "{money(sum(lines,l=>l.amount)*rate+km*0.7*0.67,"$",2)}" size=28
+        if count(lines,l=>l.amount>l.limit)>0
+          Row gap=8 middle
+            Icon "warning"
+            Text.danger "{count(lines,l=>l.amount>l.limit)} line over policy; it will be flagged for review."
+  Dialog#receipt "Receipt"
+    Lightbox#zoom "{find(lines,l=>l.id==sel).img}" "{find(lines,l=>l.id==sel).merchant}"
+    Text.muted "{find(lines,l=>l.id==sel).merchant}, {find(lines,l=>l.id==sel).date}"
+    Button.outline "Close" onTap={close}
+  Dialog#trip "Add a mileage trip" "Start and end are placed on the map"
+    Input "Start" bind=startPt
+    Input "End" bind=endPt
+    MiniMap from={startPt} to={endPt} h=160
+    Input "Distance (km)" type=number bind=km
+    Button "Add trip" onTap={trips=append(trips,{"id":length(trips)+1,"from":startPt,"to":endPt,"km":km}); close}
+  Dialog#confirm "Submit this claim?" "Your approver, Marcus Lee, is notified."
+    Text "Total {money(sum(lines,l=>l.amount)*rate+km*0.7*0.67,"$",2)} across {length(lines)} receipts and {length(trips)} trip."
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button "Submit" onTap={emit submitClaim; toast "Claim submitted"; close; go my-claims}
+
+### Approvals
+state tab="approvals"
+state sel=1
+state comment=""
+state filter="Pending"
+state claim={"id":"EX-2291","who":"Dana Whitfield","trip":"Trip to Paris, Nov 3-5","total":412.3,"lines":[{"id":1,"merchant":"Brasserie Lipp","date":"2026-11-03","amount":91.26,"cat":"Meals","limit":81,"status":"pending","img":"https://img.claimant.app/r/1.jpg"},{"id":2,"merchant":"Hotel Le Marais","date":"2026-11-03","amount":228.96,"cat":"Lodging","limit":270,"status":"pending","img":"https://img.claimant.app/r/2.jpg"},{"id":3,"merchant":"SNCF","date":"2026-11-04","amount":50.54,"cat":"Transport","limit":108,"status":"pending","img":"https://img.claimant.app/r/3.jpg"},{"id":4,"merchant":"Mileage, 22.4 km","date":"2026-11-05","amount":9.34,"cat":"Mileage","limit":100,"status":"pending","img":""}]}
+state queue=[{"id":"EX-2291","who":"Dana Whitfield","total":412.3,"age":"2 days"},{"id":"EX-2288","who":"Priya Nair","total":1280,"age":"3 days"},{"id":"EX-2284","who":"Tom Becker","total":96.4,"age":"5 days"}]
+App
+  Sidebar
+    Brand "Claimant" icon="receipt_long"
+    NavItem "New claim" icon="add_circle" onTap={go new-claim}
+    NavItem "My claims" icon="folder" onTap={go my-claims}
+    NavItem "Approvals" icon="fact_check" badge="5" selected={tab=="approvals"} onTap={tab="approvals"}
+    NavItem "Payments" icon="payments" onTap={go payments}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Marcus Lee" size=32
+      Text.muted "Marcus Lee"
+  Pane w=300 pad=16 gap=12
+    Heading "Waiting for you" level=3
+    SegmentedButton bind=filter items=["Pending","Queried","Done"]
+    each q in queue
+      Card gap=4 onTap={emit openClaim q.id}
+        Row between
+          Text.strong "{q.who}"
+          Text.strong "{money(q.total,"$",2)}"
+        Text.muted "{q.id}, waiting {q.age}"
+  Main
+    Nav
+      Column
+        Heading "{claim.trip}" level=1
+        Text.muted "{claim.who}, {claim.id}"
+      Row gap=8
+        Button.outline "Reject all" icon="close" onTap={claim=with(claim,"lines",map(claim.lines,l=>with(l,"status","rejected")))}
+        Button "Approve all" icon="done_all" onTap={claim=with(claim,"lines",map(claim.lines,l=>with(l,"status","approved"))); toast "All lines approved"}
+    Column pad=24 gap=16 scroll
+      Row gap=16
+        Card grow gap=4
+          Text.muted "Total claimed"
+          Text.heading "{money(sum(claim.lines,l=>l.amount),"$",2)}" size=28
+        Card grow gap=4
+          Text.muted "Approved"
+          Text.heading "{money(sum(filter(claim.lines,l=>l.status=="approved"),l=>l.amount),"$",2)}" size=28 color=#FF2E7D32
+        Card grow gap=4
+          Text.muted "Over policy"
+          Text.heading "{count(claim.lines,l=>l.amount>l.limit)} line" size=28 color=#FFB26A00
+      Card gap=12
+        Heading "Lines" level=3
+        Row gap=12
+          Text.muted "Receipt" w=56
+          Text.muted "Merchant" grow
+          Text.muted "Date" w=90
+          Text.muted "Amount" w=90
+          Text.muted "Status" w=90
+          Text.muted "Decision" w=220
+        Divider
+        each row in claim.lines
+          Column gap=6
+            Row gap=12 middle
+              Image "{row.img}" w=56 h=40 radius=6 onTap={sel=row.id; open receipt}
+              Column grow
+                Text.strong "{row.merchant}"
+                Text.muted "{row.cat}"
+              Text "{formatDate(row.date,"MMM d")}" w=90
+              Text.strong "{money(row.amount,"$",2)}" w=90
+              Badge.neutral "Pending" w=90 visible={row.status=="pending"}
+              Badge.success "Approved" w=90 visible={row.status=="approved"}
+              Badge.warning "Queried" w=90 visible={row.status=="queried"}
+              Badge.error "Rejected" w=90 visible={row.status=="rejected"}
+              Row gap=4 w=220
+                Button.outline "Approve" onTap={claim=with(claim,"lines",updateWhere(claim.lines,l=>l.id==row.id,l=>with(l,"status","approved")))}
+                Button.ghost "Query" onTap={sel=row.id; open query}
+                Button.ghost "Reject" onTap={claim=with(claim,"lines",updateWhere(claim.lines,l=>l.id==row.id,l=>with(l,"status","rejected")))}
+            if row.amount > row.limit
+              Row gap=8 middle
+                Badge.warning "Over policy"
+                Text.muted "{row.cat} limit {money(row.limit,"$",2)}; Dana's note: Client dinner, four guests."
+            Divider
+      Card gap=12
+        Heading "Comment for Dana" level=3
+        Input "Comment" "Anything she should know before this is paid" bind=comment multiline
+        Row end gap=8
+          Button.outline "Send comment" onTap={emit comment comment; comment=""; toast "Comment sent"}
+  Dialog#receipt "Receipt"
+    Lightbox#zoom "{find(claim.lines,l=>l.id==sel).img}" "{find(claim.lines,l=>l.id==sel).merchant}"
+    Button.outline "Close" onTap={close}
+  Dialog#query "Query this line" "Dana is asked to explain or replace the receipt."
+    Input "Your question" bind=comment multiline
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button "Send query" onTap={claim=with(claim,"lines",updateWhere(claim.lines,l=>l.id==sel,l=>with(l,"status","queried"))); emit query {"line":sel,"text":comment}; comment=""; toast "Query sent"; close}
+
+### Payment status
+state tab="payments"
+state sel="EX-2291"
+state claims=[{"id":"EX-2291","trip":"Trip to Paris, Nov 3-5","total":412.3,"state":"Approved","step":2},{"id":"EX-2270","trip":"Sales offsite, Oct 14","total":688.9,"state":"Paid","step":4},{"id":"EX-2259","trip":"Client visit, Oct 2","total":143.2,"state":"Queried","step":1}]
+state steps=[{"title":"Submitted","when":"Nov 6, 9:12 AM","note":"Sent by Dana Whitfield"},{"title":"Manager review","when":"Nov 7, 2:40 PM","note":"Marcus Lee queried the hotel receipt; replaced Nov 7"},{"title":"Approved","when":"Nov 8, 10:05 AM","note":"Four lines approved, $380.10 in total"},{"title":"Payment sent","when":"Expected Nov 12","note":"To account ending 4471"},{"title":"Paid","when":"","note":""}]
+App
+  Sidebar
+    Brand "Claimant" icon="receipt_long"
+    NavItem "New claim" icon="add_circle" onTap={go new-claim}
+    NavItem "My claims" icon="folder" onTap={go my-claims}
+    NavItem "Approvals" icon="fact_check" onTap={go approvals}
+    NavItem "Payments" icon="payments" selected={tab=="payments"} onTap={tab="payments"}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Whitfield" size=32
+      Text.muted "Dana Whitfield"
+  Pane w=320 pad=16 gap=12
+    Heading "Your claims" level=3
+    each c in claims
+      Card gap=4 onTap={sel=c.id}
+        Row between
+          Text.strong "{c.trip}"
+          Text.strong "{money(c.total,"$",2)}"
+        Row between
+          Text.muted "{c.id}"
+          Badge.success "Paid" visible={c.state=="Paid"}
+          Badge.info "Approved" visible={c.state=="Approved"}
+          Badge.warning "Queried" visible={c.state=="Queried"}
+  Main
+    Nav
+      Heading "{sel}" level=1
+      Row gap=8
+        Button.outline "Download PDF" icon="download" onTap={emit download sel}
+        Button.ghost "Contact finance" icon="support_agent" onTap={open help}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Row between
+          Column
+            Text.muted "Amount to be paid"
+            Text.heading "{money(find(claims,c=>c.id==sel).total,"$",2)}" size=32
+          Badge.info "Approved, payment on its way"
+        Progress {find(claims,c=>c.id==sel).step/4}
+      Card gap=12
+        Heading "Progress" level=3
+        Timeline current={find(claims,c=>c.id==sel).step}
+          each s in steps
+            TimelineItem "{s.title}" when="{s.when}" note="{s.note}"
+      Card gap=8
+        Heading "Payment details" level=3
+        Row between
+          Text.muted "Method"
+          Text "Bank transfer"
+        Row between
+          Text.muted "Account"
+          Text "Checking ending 4471"
+        Row between
+          Text.muted "Expected"
+          Text "Nov 12"
+        Row between
+          Text.muted "Reference"
+          Row gap=8 middle
+            Text.mono "CLM-{sel}-DW"
+            IconButton "content_copy" tooltip="Copy reference" onTap={copy "CLM-{sel}-DW"; toast "Copied"}
+  Dialog#help "Ask finance" "We reply within one working day."
+    Input "Your message" bind=msg multiline
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button "Send" onTap={emit askFinance {"claim":sel,"text":msg}; msg=""; toast "Sent"; close}

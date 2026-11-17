@@ -1,0 +1,7 @@
+// A drawn picture of a dish: a tile in the fill given (or a tint picked from its kind), with a plate icon and the kind under it.
+DishArt kind w=fill h=140 radius=16 fill
+  Row w={w} h={h} radius={radius} center middle fill={coalesce(fill, ["sandA","roseA","mintA","skyA","lilacA"][length(text(kind)) % 5])}
+    Column gap=4 center
+      Icon "restaurant" size={min(40, h * 0.4)} color=inkSoft
+      if h >= 90 && kind != null
+        Text.caption "{kind}"

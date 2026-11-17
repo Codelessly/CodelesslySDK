@@ -1,0 +1,176 @@
+### Canvas
+state tool="pen"
+state zoom=100
+state snap=true
+state showRulers=true
+state guides=[{"id":"g1","axis":"v","pos":240},{"id":"g2","axis":"h","pos":180}]
+state layers=[{"id":"l1","name":"Barn roof","kind":"path","hidden":false,"locked":false,"depth":1,"group":"g-barn"},{"id":"l2","name":"Barn wall","kind":"rect","hidden":false,"locked":false,"depth":1,"group":"g-barn"},{"id":"l3","name":"Door","kind":"path","hidden":false,"locked":true,"depth":1,"group":"g-barn"},{"id":"l4","name":"Hills","kind":"path","hidden":false,"locked":false,"depth":0,"group":""},{"id":"l5","name":"Sun","kind":"ellipse","hidden":true,"locked":false,"depth":0,"group":""}]
+state selected=["l1"]
+state points=[{"id":"p1","x":120,"y":300,"hx":150,"hy":260},{"id":"p2","x":260,"y":180,"hx":300,"hy":180},{"id":"p3","x":420,"y":300,"hx":0,"hy":0}]
+state activePoint="p2"
+state fillKind="linear"
+state stops=[{"id":"s1","pos":0,"color":"#FFB5362B"},{"id":"s2","pos":0.55,"color":"#FFE0703C"},{"id":"s3","pos":1,"color":"#FFF6C177"}]
+state activeStop="s2"
+state strokeW=2
+state strokeColor="#FF2B1B14"
+state opacity=100
+App
+  Sidebar
+    Brand "Bezier Barn" icon="draw"
+    Text.panelTitle "Tools"
+    Row gap=4
+      IconButton "near_me" tooltip="Select" selected={tool=="select"} onTap={tool="select"}
+      IconButton "edit" tooltip="Pen (P)" selected={tool=="pen"} onTap={tool="pen"}
+      IconButton "crop_square" tooltip="Rectangle" selected={tool=="rect"} onTap={tool="rect"}
+      IconButton "circle" tooltip="Ellipse" selected={tool=="ellipse"} onTap={tool="ellipse"}
+      IconButton "pan_tool" tooltip="Hand" selected={tool=="hand"} onTap={tool="hand"}
+    Divider
+    Row between
+      Text.panelTitle "Layers"
+      Row gap=2
+        IconButton "create_new_folder" tooltip="Group selected" onTap={layers=groupLayers(layers,selected); toast "Grouped"}
+        IconButton "folder_off" tooltip="Ungroup" onTap={layers=ungroupLayers(layers,selected)}
+    Column scroll grow gap=2
+      each layer in layers
+        ListTile "{layer.name}" selected={contains(selected,layer.id)} pad=[{layer.depth*16},0,0,0] onTap={selected=[layer.id]}
+          Icon "{layer.kind=='rect' ? 'crop_square' : layer.kind=='ellipse' ? 'circle' : 'timeline'}"
+          Row gap=0
+            IconButton "{layer.hidden ? 'visibility_off' : 'visibility'}" tooltip="Hide" onTap={layers=updateWhere(layers,l=>l.id==layer.id,l=>with(l,"hidden",!l.hidden))}
+            IconButton "{layer.locked ? 'lock' : 'lock_open'}" tooltip="Lock" onTap={layers=updateWhere(layers,l=>l.id==layer.id,l=>with(l,"locked",!l.locked))}
+    Text.muted "{length(layers)} layers, {length(selected)} selected"
+  Main
+    Nav
+      Row gap=8
+        Heading "barn-poster.bez" level=1
+        Badge.neutral "Saved"
+      Row gap=8
+        Toggle "Snap to points" bind=snap
+        Toggle "Rulers" bind=showRulers
+        IconButton "remove" tooltip="Zoom out" onTap={zoom=max(10,zoom-25)}
+        Select bind=zoom items=[25,50,100,150,200,400] w=100
+        IconButton "add" tooltip="Zoom in" onTap={zoom=min(800,zoom+25)}
+        Button.outline "Zoom to fit" onTap={zoom=fitZoom()}
+        Button "Export" onTap={go export}
+    Column grow
+      if showRulers
+        Row
+          Ruler axis="h" zoom={zoom} onGuide={guides=append(guides,{"id":"g"+(length(guides)+1),"axis":"v","pos":result.pos})}
+      Row grow
+        if showRulers
+          Ruler axis="v" zoom={zoom} onGuide={guides=append(guides,{"id":"g"+(length(guides)+1),"axis":"h","pos":result.pos})}
+        Canvas grow zoom={zoom} snap={snap} tool={tool} guides={guides} onZoom={zoom=result} menu=canvasMenu
+          Path#roof points={points} closed=true fill="#FFB5362B" stroke={strokeColor} strokeWidth={strokeW} selected={contains(selected,"l1")} onPointAdd={points=append(points,{"id":"p"+(length(points)+1),"x":result.x,"y":result.y,"hx":result.hx,"hy":result.hy})} onPointMove={points=updateWhere(points,p=>p.id==result.id,p=>with(with(p,"x",result.x),"y",result.y))} onHandleMove={points=updateWhere(points,p=>p.id==result.id,p=>with(with(p,"hx",result.hx),"hy",result.hy))} onPointSelect={activePoint=result.id}
+          Rect#wall x=140 y=300 w=260 h=160 fill="#FF8A5A3C" selected={contains(selected,"l2")}
+          Ellipse#sun cx=520 cy=90 r=40 fill="#FFF6C177" hidden={layers[4].hidden}
+          each g in guides
+            Guide axis="{g.axis}" pos={g.pos} onDrag={guides=updateWhere(guides,x=>x.id==g.id,x=>with(x,"pos",result))} onDelete={guides=removeWhere(guides,x=>x.id==g.id)}
+    Footer
+      Row between pad=8
+        Text.mono "x {round(points[0].x,1)}  y {round(points[0].y,1)}"
+        Text.muted "{zoom}%  |  {length(points)} points on Barn roof"
+        Row gap=8
+          Button.ghost "Close path" onTap={points=points}
+          Button.ghost "Delete point" onTap={points=removeWhere(points,p=>p.id==activePoint)}
+  Pane w=320 pad=16 gap=12
+    if length(selected)>1
+      Card gap=8
+        Text.panelTitle "Align"
+        Row gap=4
+          IconButton "align_horizontal_left" tooltip="Align left" onTap={emit align "left"}
+          IconButton "align_horizontal_center" tooltip="Align centers" onTap={emit align "center"}
+          IconButton "align_horizontal_right" tooltip="Align right" onTap={emit align "right"}
+          IconButton "align_vertical_top" tooltip="Align top" onTap={emit align "top"}
+          IconButton "align_vertical_center" tooltip="Align middles" onTap={emit align "middle"}
+          IconButton "align_vertical_bottom" tooltip="Align bottom" onTap={emit align "bottom"}
+        Row gap=8
+          Button.outline "Distribute horizontally" grow onTap={emit distribute "h"}
+          Button.outline "Distribute vertically" grow onTap={emit distribute "v"}
+    Card gap=12
+      Text.panelTitle "Fill"
+      SegmentedButton bind=fillKind items=["solid","linear","radial"]
+      if fillKind!="solid"
+        GradientBar stops={stops} selected={activeStop} onSelect={activeStop=result} onStopMove={stops=updateWhere(stops,s=>s.id==result.id,s=>with(s,"pos",clamp(result.pos,0,1)))} onStopAdd={stops=append(stops,{"id":"s"+(length(stops)+1),"pos":result.pos,"color":result.color})} onStopRemove={stops=removeWhere(stops,s=>s.id==result.id)}
+        Row gap=8
+          ColorPicker bind=stopColor value={find(stops,s=>s.id==activeStop).color} onChange={stops=updateWhere(stops,s=>s.id==activeStop,s=>with(s,"color",result))}
+          Input "Position" type=number value={round(find(stops,s=>s.id==activeStop).pos*100,0)} onChange={stops=updateWhere(stops,s=>s.id==activeStop,s=>with(s,"pos",clamp(result/100,0,1)))} w=90
+          Text.muted "%"
+        Button.ghost "Reverse stops" onTap={stops=map(stops,s=>with(s,"pos",1-s.pos))}
+      if fillKind=="solid"
+        ColorPicker bind=fillColor
+    Card gap=12
+      Text.panelTitle "Stroke"
+      Row gap=8
+        ColorPicker bind=strokeColor
+        Input "Width" type=number bind=strokeW w=90
+      Select "Cap" bind=cap items=["Butt","Round","Square"]
+      Select "Join" bind=join items=["Miter","Round","Bevel"]
+      Slider bind=opacity min=0 max=100
+      Text.muted "Opacity {opacity}%"
+    Card gap=8
+      Text.panelTitle "Point"
+      if activePoint!=""
+        Row gap=8
+          Input "X" type=number value={find(points,p=>p.id==activePoint).x} onChange={points=updateWhere(points,p=>p.id==activePoint,p=>with(p,"x",result))}
+          Input "Y" type=number value={find(points,p=>p.id==activePoint).y} onChange={points=updateWhere(points,p=>p.id==activePoint,p=>with(p,"y",result))}
+        Row gap=8
+          Button.outline "Smooth" grow onTap={emit pointType "smooth"}
+          Button.outline "Corner" grow onTap={emit pointType "corner"}
+  Menu#canvasMenu
+    MenuItem "Add horizontal guide" icon="horizontal_rule" onTap={guides=append(guides,{"id":"g"+(length(guides)+1),"axis":"h","pos":200})}
+    MenuItem "Clear all guides" icon="grid_off" onTap={guides=[]}
+    MenuItem "Select all" icon="select_all" onTap={selected=map(layers,l=>l.id)}
+
+### Export
+state format="SVG"
+state scale=1
+state onlySelection=false
+state name="barn-poster"
+Page
+  Nav
+    Brand "Bezier Barn" icon="draw"
+    Row gap=4
+      Link "Canvas" onTap={go canvas}
+      Link "Export"
+    Button.outline "Back to canvas" onTap={go canvas}
+  Section
+    Row gap=32
+      Column grow gap=16
+        Heading "Export artwork" level=1
+        Text.muted "Choose a format and size, then download your drawing."
+        Input "File name" bind=name
+        SegmentedButton bind=format items=["SVG","PNG","PDF"]
+        if format=="PNG"
+          Select "Scale" bind=scale items=[1,2,3,4]
+        Toggle "Only selected layers" bind=onlySelection
+        Row gap=12
+          Button "Download {name}.{lower(format)}" onTap={emit export {"format":format,"scale":scale,"selection":onlySelection}; toast "Exported"}
+          Button.outline "Copy as SVG" onTap={copy "svg"; toast "Copied"}
+      Card w=320 gap=8
+        Text.strong "Preview"
+        Image "https://example.com/preview/barn-poster.png" h=200
+        Text.muted "640 x 480 px, 5 layers"
+
+### Preferences
+state snapDistance=8
+state showGuides=true
+state guideColor="#FF00B7FF"
+state rulerUnit="px"
+App
+  Sidebar
+    Brand "Bezier Barn" icon="draw"
+    NavItem "Canvas" icon="brush" onTap={go canvas}
+    NavItem "Preferences" icon="settings" selected={true}
+  Main
+    Nav
+      Heading "Preferences" level=1
+      Button "Save" onTap={emit savePrefs; toast "Saved"}
+    Column pad=24 gap=16 maxw=720
+      Card gap=12
+        Text.panelTitle "Snapping"
+        Slider bind=snapDistance min=1 max=24
+        Text.muted "Snap within {snapDistance} px of a point or guide"
+        Toggle "Show guides" bind=showGuides
+      Card gap=12
+        Text.panelTitle "Rulers"
+        Select "Units" bind=rulerUnit items=["px","pt","mm","in"]
+        ColorPicker "Guide color" bind=guideColor

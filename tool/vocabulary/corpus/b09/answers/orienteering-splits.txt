@@ -1,0 +1,125 @@
+### Course and Splits
+state tab="splits"
+state runner="Elin Sjoberg"
+state controls=[{"n":1,"x":12,"y":70},{"n":2,"x":30,"y":45},{"n":3,"x":48,"y":60},{"n":4,"x":66,"y":28},{"n":5,"x":84,"y":50}]
+state splits=[{"n":1,"time":312,"best":298,"lost":14},{"n":2,"time":268,"best":268,"lost":0},{"n":3,"time":341,"best":305,"lost":36},{"n":4,"time":402,"best":389,"lost":13},{"n":5,"time":255,"best":249,"lost":6}]
+App
+  Sidebar
+    Brand "Control Point" icon="explore"
+    NavItem "Course and splits" icon="route" selected={tab=="splits"} onTap={tab="splits"}
+    NavItem "Time lost" icon="bar_chart" selected={tab=="lost"} onTap={tab="lost"}
+    NavItem "Finish board" icon="flag" onTap={go finish-board}
+    NavItem "Start list" icon="schedule" onTap={go start-list}
+    NavItem "Compare routes" icon="compare_arrows" onTap={go compare}
+    Spacer grow
+    Text.muted "Blue Course, Hallsberg Forest"
+  Main
+    Nav
+      Heading "Splits: {runner}" level=1
+      Row gap=8
+        Select bind=runner items=["Elin Sjoberg","Marta Koval","Jonas Berg","Aiko Tanaka"]
+        Button.outline "Download card readout" icon="download" onTap={emit downloadCard runner; toast "Card readout downloaded"}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Card grow gap=8
+          Text.strong "Course map"
+          CourseMap controls={controls} route={routes[runner]} h=320 onSelectControl={sel=result; open controlInfo}
+          Text.caption "Controls 1 to 5 joined in order; the line is {runner}'s route."
+        Card w=320 gap=8
+          Text.strong "Result"
+          Text "Total {duration(sum(splits,s=>s.time))}"
+          Text "Rank 3 of 42"
+          Text.muted "Time lost {duration(sum(splits,s=>s.lost))}"
+      Card gap=8
+        Text.strong "Split times"
+        Row gap=8 border-bottom=#FFDDDDDD
+          Text.caption "Control" w=70
+          Text.caption "Split" w=90
+          Text.caption "Best" w=90
+          Text.caption "Lost" w=70
+          Text.caption "Rank" grow
+        each s in splits
+          Row gap=8
+            Text "{s.n}" w=70
+            Text "{duration(s.time)}" w=90 color={s.lost==0 ? "#FF2E7D32" : "#FF000000"} weight={s.lost==0 ? 700 : 400}
+            Text "{duration(s.best)}" w=90
+            Text "+{s.lost}s" w=70
+            Badge.success "1st" show={s.lost==0}
+            Badge.neutral "{s.lost<15 ? 2 : 5}th" hidden={s.lost==0}
+  Dialog#controlInfo "Control {sel}" "Leg split detail"
+    Text "Split {duration(splits[sel-1].time)}"
+    Text.muted "Best {duration(splits[sel-1].best)}"
+    Button "Close" onTap={close}
+
+### Time Lost
+App
+  Sidebar
+    Brand "Control Point" icon="explore"
+    NavItem "Course and splits" icon="route" onTap={go course-and-splits}
+    NavItem "Time lost" icon="bar_chart" selected={true}
+    NavItem "Finish board" icon="flag" onTap={go finish-board}
+    NavItem "Start list" icon="schedule" onTap={go start-list}
+    NavItem "Compare routes" icon="compare_arrows" onTap={go compare}
+  Main
+    Nav
+      Heading "Time lost per leg" level=1
+      Select bind=runner items=["Elin Sjoberg","Marta Koval","Jonas Berg","Aiko Tanaka"]
+    Column pad=24 gap=16
+      Card gap=12
+        Text.strong "Seconds lost against the best split"
+        BarChart values=map(splits,s=>s.lost) labels=map(splits,s=>"{s.n}") h=260
+      Card gap=8
+        Text.muted "Biggest loss: leg {sortByDesc(splits,s=>s.lost)[0].n}, {sortByDesc(splits,s=>s.lost)[0].lost}s."
+
+### Finish Board
+state finished=[{"name":"Marta Koval","time":1512},{"name":"Elin Sjoberg","time":1578},{"name":"Jonas Berg","time":1633}]
+Page
+  Nav sticky
+    Brand "Control Point" icon="explore"
+    Row gap=4
+      Link "Splits" onTap={go course-and-splits}
+      Link "Start list" onTap={go start-list}
+    Badge.success "Live"
+  Section
+    Heading "Finish board" level=1
+    Text.muted "Runners are ranked as they punch the finish."
+    LiveFeed bind=finished source="finish" onPunch={finished=sortBy(append(finished,result),r=>r.time)}
+    Card gap=8
+      each r in finished
+        Row between animate=slide-up
+          Row gap=12
+            Text.strong "{index+1}"
+            Avatar "{r.name}" size=32
+            Text "{r.name}"
+          Text.mono "{duration(r.time)}"
+      if isEmpty(finished)
+        Text.muted "No finishers yet."
+
+### Start List and Compare
+state starts=[{"name":"Aiko Tanaka","in":95},{"name":"Jonas Berg","in":215},{"name":"Priya Nair","in":335}]
+state a="Elin Sjoberg"
+state b="Marta Koval"
+every 1s onTick={starts=map(starts,s=>with(s,"in",max(0,s.in-1)))}
+Page
+  Nav
+    Brand "Control Point" icon="explore"
+    Link "Splits" onTap={go course-and-splits}
+  Section
+    Heading "Start list" level=1
+    Card gap=8
+      each s in starts
+        Row between
+          Text "{s.name}"
+          if s.in>0
+            Badge.info "Starts in {duration(s.in)}"
+          if s.in==0
+            Badge.success "Started"
+  Section tint
+    Heading "Compare two runners" level=1
+    Row gap=12
+      Select bind=a items=["Elin Sjoberg","Marta Koval","Jonas Berg"]
+      Select bind=b items=["Elin Sjoberg","Marta Koval","Jonas Berg"]
+    Card
+      CourseMap controls={controls} routes=[routes[a],routes[b]] h=320
+    Card
+      LineChart labels=["1","2","3","4","5"] series=[{"name":"{a}","values":cumulative[a]},{"name":"{b}","values":cumulative[b]}] h=200

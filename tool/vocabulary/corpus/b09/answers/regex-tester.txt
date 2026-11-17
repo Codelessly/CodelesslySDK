@@ -1,0 +1,234 @@
+### Tester
+state tab="tester"
+state pattern="(\\d{4})-(\\d{2})-(\\d{2})"
+state flagG=true
+state flagI=false
+state flagM=false
+state flagS=false
+state flagU=false
+state flagY=false
+state sample="Invoice 1042 issued 2026-03-14, due 2026-04-13.\nPayment received 2026-04-02 from Orrin & Vale Ltd.\nCredit note 1051 dated 2026-04-20."
+state replacement="$3/$2/$1"
+state sel=0
+state hint=""
+state matches=[{"index":0,"start":16,"end":26,"text":"2026-03-14","groups":["2026","03","14"]},{"index":1,"start":32,"end":42,"text":"2026-04-13","groups":["2026","04","13"]},{"index":2,"start":65,"end":75,"text":"2026-04-02","groups":["2026","04","02"]},{"index":3,"start":125,"end":135,"text":"2026-04-20","groups":["2026","04","20"]}]
+state patternError=""
+state elapsed=0.4
+state runs=1
+App
+  Sidebar
+    Brand "Pattern Lab" icon="data_object"
+    NavItem "Tester" icon="manage_search" selected={tab=="tester"} onTap={tab="tester"}
+    NavItem "Saved patterns" icon="bookmarks" badge="6" selected={tab=="saved"} onTap={go saved-patterns}
+    NavItem "Performance" icon="speed" selected={tab=="perf"} onTap={go performance}
+    NavItem "Cheat sheet" icon="menu_book" onTap={open cheatsheet}
+    Spacer grow
+    Text.muted "Engine: ECMAScript"
+  Main
+    Nav
+      Heading "Tester"
+      Row gap=8
+        Button.outline "Cheat sheet" icon="menu_book" onTap={open cheatsheet}
+        Button.outline "Save pattern" icon="bookmark_add" onTap={open savePattern}
+        Button "Copy as code" icon="content_copy" onTap={copy pattern; toast "Pattern copied"}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Row gap=8 middle
+          Text.mono "/" size=20
+          PatternInput bind=pattern flags="{flagG ? 'g' : ''}{flagI ? 'i' : ''}{flagM ? 'm' : ''}{flagS ? 's' : ''}{flagU ? 'u' : ''}{flagY ? 'y' : ''}" grow onHoverPart={hint=result.explanation} onChange={emit compile result}
+          Text.mono "/" size=20
+          Text.mono "{flagG ? 'g' : ''}{flagI ? 'i' : ''}{flagM ? 'm' : ''}{flagS ? 's' : ''}{flagU ? 'u' : ''}{flagY ? 'y' : ''}"
+        Row gap=8 wrap
+          FilterChip "g global" selected={flagG} onTap={flagG=!flagG}
+          FilterChip "i ignore case" selected={flagI} onTap={flagI=!flagI}
+          FilterChip "m multiline" selected={flagM} onTap={flagM=!flagM}
+          FilterChip "s dotAll" selected={flagS} onTap={flagS=!flagS}
+          FilterChip "u unicode" selected={flagU} onTap={flagU=!flagU}
+          FilterChip "y sticky" selected={flagY} onTap={flagY=!flagY}
+        if patternError != ""
+          Row gap=8 middle
+            Icon "error" color=#FFC62828
+            Text.danger "{patternError}"
+        if patternError == "" && hint != ""
+          Row gap=8 middle
+            Icon "lightbulb"
+            Text.muted "{hint}"
+        if patternError == ""
+          Row gap=8 middle
+            Icon "timer"
+            Text.muted "{count(matches, m=>true)} matches in {elapsed} ms"
+            Badge.success "Fast" visible={elapsed < 50}
+            Badge.warning "Slow" visible={elapsed >= 50}
+      Row gap=16 top
+        Card grow gap=8
+          Heading "Test text" level=3
+          RegexHighlight bind=sample pattern={pattern} flags="{flagG ? 'g' : ''}{flagI ? 'i' : ''}{flagM ? 'm' : ''}{flagS ? 's' : ''}" matchColors=["#FFFFF3C4","#FFD6EBFF"] groupShades=["#FF8FB8DE","#FF5C9BD1","#FF2F7BBF"] groupUnderline editable h=200
+        Card grow gap=8
+          Row between middle
+            Heading "Replace" level=3
+            Button.ghost "Copy result" icon="content_copy" onTap={copy replace(sample, pattern, replacement); toast "Copied"}
+          Input "Replace with" bind=replacement
+          Text.fieldLabel "Result"
+          Text.mono "{replace(sample, pattern, replacement)}"
+      Card gap=12
+        Row between middle
+          Heading "Matches" level=3
+          Button.ghost "Copy as JSON" icon="data_array" onTap={copy matches; toast "Copied"}
+        Table items={matches} onRowTap={sel=result.index}
+          Column "#" key=index w=48
+          Column "Start" key=start w=72
+          Column "End" key=end w=72
+          Column "Match" key=text grow mono=true
+          Column "Group 1" key=groups[0] w=100
+          Column "Group 2" key=groups[1] w=100
+          Column "Group 3" key=groups[2] w=100
+        if isEmpty(matches)
+          Text.muted "No matches. Check the pattern or the flags."
+  Footer
+    Row between middle pad=8
+      Text.muted "Pattern Lab"
+      Row gap=8 middle
+        Text.muted "Last run {elapsed} ms"
+        Button.ghost "Test for catastrophic backtracking" icon="speed" onTap={go performance}
+Drawer#cheatsheet "Cheat sheet" right
+  Input "Filter tokens" "digit, group, lookahead" bind=cheatQ
+  Accordion "Character classes"
+    ListTile "\\d" "A digit" onTap={pattern=pattern+"\\d"; close}
+    ListTile "\\w" "A word character" onTap={pattern=pattern+"\\w"; close}
+    ListTile "\\s" "Whitespace" onTap={pattern=pattern+"\\s"; close}
+    ListTile "[^abc]" "Anything but a, b or c" onTap={pattern=pattern+"[^abc]"; close}
+  Accordion "Quantifiers"
+    ListTile "a*" "Zero or more" onTap={pattern=pattern+"*"; close}
+    ListTile "a+" "One or more" onTap={pattern=pattern+"+"; close}
+    ListTile "a{2,4}" "Two to four" onTap={pattern=pattern+"{2,4}"; close}
+    ListTile "a+?" "Lazy: as few as possible" onTap={pattern=pattern+"+?"; close}
+  Accordion "Groups and lookaround"
+    ListTile "(abc)" "Capturing group" onTap={pattern=pattern+"(abc)"; close}
+    ListTile "(?:abc)" "Non-capturing group" onTap={pattern=pattern+"(?:abc)"; close}
+    ListTile "(?<name>abc)" "Named group" onTap={pattern=pattern+"(?<name>abc)"; close}
+    ListTile "(?=abc)" "Lookahead" onTap={pattern=pattern+"(?=abc)"; close}
+    ListTile "(?<!abc)" "Negative lookbehind" onTap={pattern=pattern+"(?<!abc)"; close}
+  Accordion "Anchors"
+    ListTile "^" "Start of line" onTap={pattern="^"+pattern; close}
+    ListTile "$" "End of line" onTap={pattern=pattern+"$"; close}
+    ListTile "\\b" "Word boundary" onTap={pattern=pattern+"\\b"; close}
+Dialog#savePattern "Save pattern" "Keep it in your library"
+  Input "Name" "ISO date" bind=saveName
+  Input "Description" "Year, month and day in three groups" bind=saveDesc multiline
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button "Save" onTap={saveName != "" ? {emit savePattern {"name":saveName,"pattern":pattern}; toast "Pattern saved"; close} : toast "Give it a name"}
+
+### Saved patterns
+state tab="saved"
+state q=""
+state kind="All"
+state sel=0
+state saved=[{"id":1,"name":"ISO date","pattern":"(\\d{4})-(\\d{2})-(\\d{2})","kind":"Dates","used":"Today"},{"id":2,"name":"Email address","pattern":"[\\w.+-]+@[\\w-]+\\.[\\w.]+","kind":"Contact","used":"Yesterday"},{"id":3,"name":"Hex colour","pattern":"#(?:[0-9a-fA-F]{3}){1,2}\\b","kind":"Web","used":"3 days ago"},{"id":4,"name":"IPv4 address","pattern":"\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b","kind":"Network","used":"Last week"},{"id":5,"name":"Semantic version","pattern":"v?(\\d+)\\.(\\d+)\\.(\\d+)(?:-([\\w.]+))?","kind":"Dev","used":"Last week"},{"id":6,"name":"Trailing whitespace","pattern":"[ \\t]+$","kind":"Text","used":"Oct 29"}]
+App
+  Sidebar
+    Brand "Pattern Lab" icon="data_object"
+    NavItem "Tester" icon="manage_search" selected={tab=="tester"} onTap={go tester}
+    NavItem "Saved patterns" icon="bookmarks" badge="6" selected={tab=="saved"} onTap={tab="saved"}
+    NavItem "Performance" icon="speed" selected={tab=="perf"} onTap={go performance}
+    Spacer grow
+    Text.muted "Engine: ECMAScript"
+  Main
+    Nav
+      Heading "Saved patterns"
+      Row gap=8
+        Input "Search" bind=q w=220
+        Button "New pattern" icon="add" onTap={go tester}
+    Column pad=24 gap=16 scroll
+      Row gap=8 wrap
+        ChoiceChip "All" selected={kind=="All"} onTap={kind="All"}
+        ChoiceChip "Dates" selected={kind=="Dates"} onTap={kind="Dates"}
+        ChoiceChip "Contact" selected={kind=="Contact"} onTap={kind="Contact"}
+        ChoiceChip "Web" selected={kind=="Web"} onTap={kind="Web"}
+        ChoiceChip "Network" selected={kind=="Network"} onTap={kind="Network"}
+        ChoiceChip "Dev" selected={kind=="Dev"} onTap={kind="Dev"}
+      Grid cols=2 gap=16
+        each p in filter(saved, s=>(kind=="All" || s.kind==kind) && contains(lower(s.name), lower(q)))
+          Card gap=8
+            Row between middle
+              Heading "{p.name}" level=3
+              IconButton "more_vert" tooltip="More" onTap={sel=p.id; open patternMenu}
+            Text.mono "/{p.pattern}/g"
+            Row between middle
+              Badge.neutral "{p.kind}"
+              Text.caption "Used {p.used}"
+            Row gap=8
+              Button.outline "Open in tester" onTap={emit openPattern p.id; go tester}
+              Button.ghost "Copy" icon="content_copy" onTap={copy p.pattern; toast "Copied"}
+      if isEmpty(filter(saved, s=>(kind=="All" || s.kind==kind) && contains(lower(s.name), lower(q))))
+        Text.muted "No saved pattern matches that search."
+Menu#patternMenu end
+  MenuItem "Open in tester" icon="open_in_new" onTap={emit openPattern sel; go tester}
+  MenuItem "Rename" icon="edit" onTap={open renamePattern}
+  MenuItem "Duplicate" icon="content_copy" onTap={saved=append(saved, with(find(saved, s=>s.id==sel),"id",length(saved)+1)); toast "Duplicated"}
+  MenuItem "Delete" icon="delete" onTap={saved=removeWhere(saved, s=>s.id==sel); toast "Pattern deleted"}
+Dialog#renamePattern "Rename pattern"
+  Input "Name" bind=newName
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button "Rename" onTap={saved=updateWhere(saved, s=>s.id==sel, s=>with(s,"name",newName)); close}
+
+### Performance
+state tab="perf"
+state pattern="(a+)+$"
+state input="aaaaaaaaaaaaaaaaaaaaaaaa!"
+state length=24
+state running=false
+state timeout=2000
+state history=[{"n":16,"ms":2},{"n":20,"ms":31},{"n":22,"ms":118},{"n":24,"ms":476},{"n":26,"ms":1904}]
+state result="Not run yet"
+Page
+  Nav sticky
+    Brand "Pattern Lab" icon="data_object"
+    Row gap=4
+      Link "Tester" onTap={go tester}
+      Link "Saved patterns" onTap={go saved-patterns}
+      Link "Performance"
+    Button "Open tester" onTap={go tester}
+  Section narrow
+    Column gap=12
+      Heading "Catastrophic backtracking" level=1
+      Text.muted "Run a pattern against inputs of growing length and watch how the time grows. A pattern like (a+)+$ doubles its time for every extra character."
+  Section
+    Grid cols=2 gap=24
+      Card gap=12
+        Heading "Run a test" level=3
+        Input "Pattern" bind=pattern
+        Input "Input text" bind=input
+        Slider bind=length min=8 max=32 label="Length: {length} characters"
+        Select "Timeout" bind=timeout items=[500,1000,2000,5000]
+        Row gap=8
+          Button "Run timing" icon="play_arrow" onTap={running=true; emit timeRegex {"pattern":pattern,"input":input,"timeout":timeout}}
+          Button.outline "Stop" onTap={running=false; emit cancelRegex}
+        if running
+          Progress bind=progress
+          Text.muted "Running..."
+        if !running
+          Text.strong "{result}"
+        Badge.danger "Timed out after {timeout} ms" visible={result=="timeout"}
+      Card gap=12
+        Heading "Time by input length" level=3
+        LineChart labels=map(history, h=>h.n) values=map(history, h=>h.ms) h=220
+        Text.caption "Milliseconds per run. A straight line is fine; a curve that bends up is a warning."
+  Section tint
+    Column gap=12
+      Heading "Safer rewrites" level=2
+      Grid cols=2 gap=24
+        Card gap=8
+          Badge.error "Risky"
+          Text.mono "(a+)+$"
+          Text.muted "A group repeated inside a repeat can try every way to split the run."
+        Card gap=8
+          Badge.success "Safe"
+          Text.mono "a+$"
+          Text.muted "One repeat, one way to match."
+          Button.outline "Try this in the tester" onTap={pattern="a+$"; go tester}
+  Footer
+    Row between
+      Text.strong "Pattern Lab"
+      Text.muted "Timings come from this device"

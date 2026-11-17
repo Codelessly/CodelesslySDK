@@ -1,0 +1,232 @@
+### Stations
+project nowStation={"id":"s1","name":"KEXP 90.3","city":"Seattle","genre":"Indie","song":"Khruangbin - Time (You and I)","bitrate":128}
+project playing=true
+project saved=[]
+state country="All"
+state genre="All"
+state q=""
+state stations=[{"id":"s1","name":"KEXP 90.3","city":"Seattle","country":"USA","genre":"Indie","song":"Khruangbin - Time (You and I)","bitrate":128,"live":true},{"id":"s2","name":"FIP","city":"Paris","country":"France","genre":"Eclectic","song":"Nina Simone - Sinnerman","bitrate":192,"live":true},{"id":"s3","name":"Radio Paradise","city":"Paradise","country":"USA","genre":"Rock","song":"Fleet Foxes - Mykonos","bitrate":320,"live":true},{"id":"s4","name":"NTS 1","city":"London","country":"UK","genre":"Electronic","song":"Floating Points - Last Bloom","bitrate":128,"live":true},{"id":"s5","name":"Jazz24","city":"Seattle","country":"USA","genre":"Jazz","song":"Kamasi Washington - Truth","bitrate":128,"live":true},{"id":"s6","name":"Radio Swiss Classic","city":"Bern","country":"Switzerland","genre":"Classical","song":"Debussy - Clair de lune","bitrate":128,"live":true}]
+App
+  Sidebar
+    Brand "Longwave" icon="radio"
+    NavItem "Stations" icon="podcasts" selected={true}
+    NavItem "Now playing" icon="graphic_eq" onTap={go now-playing}
+    NavItem "Recently played" icon="history" badge="{length(saved)}" onTap={go recent}
+    NavItem "Alarm" icon="alarm" onTap={go alarm}
+    NavItem "Car mode" icon="directions_car" onTap={go car-mode}
+    Spacer grow
+    Text.muted "Signed in as Ines Moreau"
+  Main
+    Nav
+      Heading "Stations" level=1
+      Row gap=8
+        Input "Search stations" bind=q w=220
+        IconButton "tune" tooltip="Filters" onTap={open filters}
+    Column pad=24 gap=16 scroll
+      Row gap=8 scroll
+        FilterChip "All" selected={genre=="All"} onTap={genre="All"}
+        FilterChip "Indie" selected={genre=="Indie"} onTap={genre="Indie"}
+        FilterChip "Jazz" selected={genre=="Jazz"} onTap={genre="Jazz"}
+        FilterChip "Electronic" selected={genre=="Electronic"} onTap={genre="Electronic"}
+        FilterChip "Classical" selected={genre=="Classical"} onTap={genre="Classical"}
+        FilterChip "Rock" selected={genre=="Rock"} onTap={genre="Rock"}
+        FilterChip "Eclectic" selected={genre=="Eclectic"} onTap={genre="Eclectic"}
+      Row gap=12
+        Select bind=country items=["All","USA","UK","France","Switzerland"]
+        Text.muted "{count(stations, s=>(country=="All" || s.country==country) && (genre=="All" || s.genre==genre))} stations"
+      each s in filter(stations, s=>(country=="All" || s.country==country) && (genre=="All" || s.genre==genre) && contains(lower(s.name), lower(q)))
+        ListTile onTap={nowStation=s; playing=true; go now-playing} menu=stationMenu
+          Avatar "{s.name}" size=40
+          Column grow gap=2
+            Row gap=8
+              Text.strong "{s.name}"
+              Badge.error "LIVE" visible={s.live}
+            Text.muted "{s.city}, {s.country} - {s.genre}"
+            Text.small "Now: {s.song}"
+          Text.caption "{s.bitrate} kbps"
+          IconButton "more_vert" tooltip="More" onTap={sel=s.id; open stationMenu}
+    Footer
+      Row between pad=12 gap=12
+        Row gap=12
+          Avatar "{nowStation.name}" size=40
+          Column gap=2
+            Text.strong "{nowStation.name}"
+            Text.muted "{nowStation.song}"
+        Row gap=8
+          IconButton "{playing ? 'pause' : 'play_arrow'}" tooltip="Play or pause" onTap={playing=!playing}
+          IconButton "open_in_full" tooltip="Open player" onTap={go now-playing}
+Sheet#filters "Filters"
+  Text.fieldLabel "Minimum quality"
+  SegmentedButton bind=quality items=["Any","128","192","320"]
+  Toggle "Only stations that are live now" bind=liveOnly
+  Button "Apply" onTap={close}
+Menu#stationMenu
+  MenuItem "Play" icon="play_arrow" onTap={nowStation=find(stations, s=>s.id==sel); playing=true; go now-playing}
+  MenuItem "Add to favourites" icon="favorite" onTap={toast "Added to favourites"}
+  MenuItem "Copy station link" icon="link" onTap={copy "https://longwave.fm/s/{sel}"; toast "Link copied"}
+
+### Now playing
+state buffering=false
+state level=0.62
+state preset="Flat"
+state bands=[0,0,0,0,0,0,0,0,0,0]
+state sleepMinutes=0
+state sleepLeft=0
+state spectrum=[0.2,0.5,0.7,0.4,0.8,0.6,0.3,0.5,0.4,0.2,0.6,0.7]
+state volume=70
+every 150 when playing onTick={spectrum=map(spectrum, v=>clamp(v+0.3*(random()-0.5),0.05,1))}
+every 1s when sleepLeft>0 onTick={sleepLeft=sleepLeft-1; sleepLeft==0 ? {playing=false; toast "Sleep timer ended"} : {}}
+App
+  Sidebar
+    Brand "Longwave" icon="radio"
+    NavItem "Stations" icon="podcasts" onTap={go stations}
+    NavItem "Now playing" icon="graphic_eq" selected={true}
+    NavItem "Recently played" icon="history" onTap={go recent}
+    NavItem "Alarm" icon="alarm" onTap={go alarm}
+    NavItem "Car mode" icon="directions_car" onTap={go car-mode}
+  Main
+    Nav
+      Heading "Now playing" level=1
+      Row gap=8
+        IconButton "bedtime" tooltip="Sleep timer" onTap={open sleep}
+        IconButton "equalizer" tooltip="Equalizer" onTap={open eq}
+        IconButton "directions_car" tooltip="Car mode" onTap={go car-mode}
+    Column pad=24 gap=20 scroll maxw=720
+      Row gap=16
+        Avatar "{nowStation.name}" size=96
+        Column grow gap=6
+          Row gap=8
+            Text.heading "{nowStation.name}"
+            Badge.error "LIVE"
+            Badge.warning "Buffering" visible={buffering}
+          Text.muted "{nowStation.city} - {nowStation.genre} - {nowStation.bitrate} kbps"
+          Text.strong "{nowStation.song}"
+      if buffering
+        Column gap=4
+          Progress bind=level
+          Text.caption "Buffering, reconnecting to the stream"
+      Card gap=8
+        Spectrum values={spectrum} bars=12 h=96
+      Row center gap=16
+        IconButton "skip_previous" tooltip="Previous station" onTap={toast "Previous station"}
+        IconButton "{playing ? 'pause_circle' : 'play_circle'}" size=56 tooltip="Play or pause" onTap={playing=!playing; buffering=false}
+        IconButton "skip_next" tooltip="Next station" onTap={toast "Next station"}
+      Row gap=12 middle
+        Icon "volume_down"
+        Slider bind=volume min=0 max=100 grow
+        Icon "volume_up"
+      Row gap=8
+        Button.outline "Save this song" icon="favorite_border" onTap={saved=append(saved,{"title":nowStation.song,"station":nowStation.name,"at":"now"}); toast "Saved to your songs"}
+        Button.outline "Simulate drop" onTap={buffering=true}
+        Button.ghost "Reconnect" visible={buffering} onTap={buffering=false; toast "Back on air"}
+      Card gap=8 visible={sleepLeft>0}
+        Row between
+          Text.strong "Sleep timer"
+          Text.mono "{duration(sleepLeft)}"
+        Button.tertiary "Cancel timer" onTap={sleepLeft=0; sleepMinutes=0}
+Sheet#sleep "Sleep timer"
+  Wheel bind=sleepMinutes items=[0,5,10,15,30,45,60,90] unit="min" h=160
+  Row gap=8
+    Button.outline "Cancel" onTap={close}
+    Button "Start" onTap={sleepLeft=sleepMinutes*60; toast "Stopping in {sleepMinutes} min"; close}
+Dialog#eq "Equalizer" "Ten bands, 32 Hz to 16 kHz"
+  Row gap=8 scroll
+    ChoiceChip "Flat" selected={preset=="Flat"} onTap={preset="Flat"; bands=[0,0,0,0,0,0,0,0,0,0]}
+    ChoiceChip "Bass boost" selected={preset=="Bass boost"} onTap={preset="Bass boost"; bands=[6,5,4,2,0,0,0,0,0,0]}
+    ChoiceChip "Vocal" selected={preset=="Vocal"} onTap={preset="Vocal"; bands=[-2,-2,0,2,4,4,3,1,0,-1]}
+    ChoiceChip "Treble" selected={preset=="Treble"} onTap={preset="Treble"; bands=[0,0,0,0,0,1,3,5,6,6]}
+    ChoiceChip "Late night" selected={preset=="Late night"} onTap={preset="Late night"; bands=[3,2,0,-1,-1,0,1,2,2,1]}
+  Row gap=4 center
+    each b in bands
+      Column center gap=4
+        Slider bind=bands[index] min=-12 max=12 vertical h=140
+        Text.caption "{['32','64','125','250','500','1k','2k','4k','8k','16k'][index]}"
+  Row between
+    Button.ghost "Reset" onTap={preset="Flat"; bands=[0,0,0,0,0,0,0,0,0,0]}
+    Button "Done" onTap={close}
+
+### Recently played
+state recent=[{"id":"r1","title":"Khruangbin - Time (You and I)","station":"KEXP 90.3","when":"2 min ago","saved":false},{"id":"r2","title":"Nina Simone - Sinnerman","station":"FIP","when":"14 min ago","saved":true},{"id":"r3","title":"Floating Points - Last Bloom","station":"NTS 1","when":"31 min ago","saved":false},{"id":"r4","title":"Fleet Foxes - Mykonos","station":"Radio Paradise","when":"1 h ago","saved":false},{"id":"r5","title":"Debussy - Clair de lune","station":"Radio Swiss Classic","when":"2 h ago","saved":true}]
+state view="All"
+App
+  Sidebar
+    Brand "Longwave" icon="radio"
+    NavItem "Stations" icon="podcasts" onTap={go stations}
+    NavItem "Now playing" icon="graphic_eq" onTap={go now-playing}
+    NavItem "Recently played" icon="history" selected={true}
+    NavItem "Alarm" icon="alarm" onTap={go alarm}
+    NavItem "Car mode" icon="directions_car" onTap={go car-mode}
+  Main
+    Nav
+      Heading "Recently played" level=1
+      SegmentedButton bind=view items=["All","Saved"]
+    Column pad=24 gap=12 scroll
+      each r in filter(recent, r=>view=="All" || r.saved)
+        ListTile
+          IconTile "music_note"
+          Column grow gap=2
+            Text.strong "{r.title}"
+            Text.muted "{r.station} - {r.when}"
+          IconButton "{r.saved ? 'favorite' : 'favorite_border'}" tooltip="Save song" onTap={recent=updateWhere(recent, x=>x.id==r.id, x=>with(x,"saved",!x.saved)); toast r.saved ? "Removed" : "Saved"}
+          IconButton "more_vert" tooltip="More" onTap={sel=r.id; open songMenu}
+      if count(recent, r=>r.saved)==0 && view=="Saved"
+        Text.muted "Nothing saved yet. Tap the heart on a song."
+Menu#songMenu end
+  MenuItem "Copy title" icon="content_copy" onTap={copy find(recent, x=>x.id==sel).title; toast "Copied"}
+  MenuItem "Remove from history" icon="delete" onTap={recent=removeWhere(recent, x=>x.id==sel)}
+
+### Alarm
+state alarmOn=true
+state alarmTime="06:45"
+state days=["Mon","Tue","Wed","Thu","Fri"]
+state alarmStation="KEXP 90.3"
+state ramp=true
+state alarmVolume=40
+App
+  Sidebar
+    Brand "Longwave" icon="radio"
+    NavItem "Stations" icon="podcasts" onTap={go stations}
+    NavItem "Now playing" icon="graphic_eq" onTap={go now-playing}
+    NavItem "Recently played" icon="history" onTap={go recent}
+    NavItem "Alarm" icon="alarm" selected={true}
+    NavItem "Car mode" icon="directions_car" onTap={go car-mode}
+  Main
+    Nav
+      Heading "Alarm" level=1
+      Toggle "Alarm on" bind=alarmOn
+    Column pad=24 gap=16 maxw=560
+      Card gap=16
+        Text.fieldLabel "Wake at"
+        TimePicker bind=alarmTime
+        Text.fieldLabel "Repeat"
+        Row gap=8 scroll
+          each d in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+            FilterChip "{d}" selected={contains(days,d)} onTap={days=contains(days,d) ? without(days,d) : append(days,d)}
+        Text.fieldLabel "Wake to station"
+        Select bind=alarmStation items=["KEXP 90.3","FIP","Radio Paradise","NTS 1","Jazz24","Radio Swiss Classic"]
+        Toggle "Fade in slowly" bind=ramp
+        Row gap=12 middle
+          Icon "volume_up"
+          Slider bind=alarmVolume min=0 max=100 grow
+        Text.muted "Rings {join(days,', ')} at {alarmTime} to {alarmStation}, volume {alarmVolume}%."
+        Row gap=8
+          Button.outline "Test now" onTap={nowStation=find(stations, s=>s.name==alarmStation); playing=true; go now-playing}
+          Button "Save alarm" onTap={emit saveAlarm {"time":alarmTime,"days":days,"station":alarmStation}; toast "Alarm set for {alarmTime}"}
+
+### Car mode
+state carMuted=false
+App
+  Main
+    Column pad=24 gap=24 center
+      Row between
+        Column gap=2
+          Text "{nowStation.name}" size=40 weight=700
+          Text.muted "{nowStation.song}" size=24
+        Button.ghost "Exit" icon="close" size=large onTap={go now-playing}
+      Row center gap=32
+        Button.outline icon="skip_previous" size=huge w=200 h=200 onTap={toast "Previous station"}
+        Button icon="{playing ? 'pause' : 'play_arrow'}" size=huge w=260 h=260 onTap={playing=!playing}
+        Button.outline icon="skip_next" size=huge w=200 h=200 onTap={toast "Next station"}
+      Row center gap=32
+        Button.secondary "Save song" icon="favorite" size=huge onTap={saved=append(saved,{"title":nowStation.song,"station":nowStation.name,"at":"now"}); toast "Saved"}
+        Button.secondary "{carMuted ? 'Unmute' : 'Mute'}" icon="{carMuted ? 'volume_off' : 'volume_up'}" size=huge onTap={carMuted=!carMuted}

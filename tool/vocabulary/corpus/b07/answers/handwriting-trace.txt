@@ -1,0 +1,150 @@
+### Trace
+state tab="trace"
+state letter="a"
+state letters=["a","b","c","d","e","f","g"]
+state thickness=6
+state showGuide=true
+state playing=false
+state strokesDone=0
+state wrong=false
+state stars={"a":3,"b":2,"c":0,"d":1,"e":0,"f":0,"g":0}
+state word=""
+state words=[{"id":1,"text":"cat","stars":3},{"id":2,"text":"sun","stars":2},{"id":3,"text":"bee","stars":3}]
+state mode="letter"
+
+App
+  Sidebar
+    Brand "Penpal" icon="draw"
+    NavItem "Trace" icon="gesture" selected={tab=="trace"} onTap={tab="trace"}
+    NavItem "Lines" icon="format_line_spacing" selected={tab=="lines"} onTap={go lines}
+    NavItem "Gallery" icon="photo_library" badge="{length(words)}" onTap={go gallery}
+    Spacer grow
+    Text.caption "Pen thickness"
+    Slider bind=thickness min=2 max=16
+    Row gap=8 middle
+      Icon "edit"
+      Text.muted "{thickness} pt"
+  Main
+    Nav
+      Heading "Trace the letter" level=1
+      Row gap=8
+        SegmentedButton bind=mode items=["letter","word"]
+        Button.outline "Show me how" icon="play_arrow" onTap={playing=true; strokesDone=0}
+        Button.ghost "Clear" icon="refresh" onTap={strokesDone=0; wrong=false}
+    Column pad=24 gap=16
+      Row gap=8 scroll
+        each l in letters
+          ChoiceChip "{upper(l)}" selected={letter==l} onTap={letter=l; strokesDone=0; wrong=false; playing=false}
+      Row gap=24 top
+        Card grow gap=12
+          Row between
+            Text.strong "Letter {upper(letter)}"
+            Row gap=4
+              each i in range(3)
+                Icon "star" color={stars[letter] > i ? "#FFFFB300" : "#FFCCCCCC"}
+          TraceCanvas#canvas glyph={letter} h=360 thickness={thickness} guides={showGuide} dotted baseline midline startDot arrows tolerance=24 wobble animate={playing} onStroke={strokesDone=strokesDone+1; wrong=false} onWrong={wrong=true} onComplete={stars=with(stars,letter,result.score); toast "Lovely {upper(letter)}!"} onAnimationEnd={playing=false}
+          if wrong
+            Text.danger "Stay close to the dotted line" animate=shake
+          Row between
+            Progress {strokesDone/3}
+            Text.muted "Stroke {strokesDone} of 3"
+        Column w=280 gap=12
+          Card gap=8
+            Text.strong "Guides"
+            Toggle "Dotted guide" bind=showGuide
+            Toggle "Numbered start dot" bind=showGuide
+          Card gap=8
+            Text.strong "Stroke order"
+            Text.muted "Watch the pen move, then try it yourself."
+            Button.secondary "Play animation" icon="play_circle" onTap={playing=true; strokesDone=0}
+          Card gap=8
+            Text.strong "Stars so far"
+            each l in letters
+              Row between
+                Text "{upper(l)}"
+                Row gap=2
+                  each i in range(3)
+                    Icon "star" size=16 color={stars[l] > i ? "#FFFFB300" : "#FFCCCCCC"}
+
+### Lines
+state thickness=6
+state sentence="a cat sat"
+state strokesOk=0
+state score=0
+state penDown=false
+
+App
+  Sidebar
+    Brand "Penpal" icon="draw"
+    NavItem "Trace" icon="gesture" onTap={go trace}
+    NavItem "Lines" icon="format_line_spacing" selected={true}
+    NavItem "Gallery" icon="photo_library" onTap={go gallery}
+    Spacer grow
+    Text.caption "Pen thickness"
+    Slider bind=thickness min=2 max=16
+  Main
+    Nav
+      Heading "Practice lines" level=1
+      Row gap=8
+        Select bind=sentence items=["a cat sat","the sun","big bee","my dog"]
+        Button "Save word" icon="check" onTap={emit saveWord sentence; toast "Saved to your gallery"}
+    Column pad=24 gap=16
+      Card gap=12
+        Text.strong "Write it on the lines"
+        Text.muted "Keep the tall letters touching the top line and the small ones on the midline."
+        Stack
+          WritingLines h=140 baseline midline topline
+          TraceCanvas text={sentence} h=140 thickness={thickness} dotted tolerance=20 wobble onStroke={strokesOk=strokesOk+1} onComplete={score=result.score; toast "Nice writing!"}
+        Row gap=8 middle
+          Icon "straighten"
+          Text.muted "Baseline, midline and top line are drawn for you"
+      Card gap=8
+        Row between
+          Text.strong "Your score"
+          Row gap=4
+            each i in range(3)
+              Icon "star" color={score > i ? "#FFFFB300" : "#FFCCCCCC"}
+        Progress {min(1,strokesOk/10)}
+        Text.muted "{strokesOk} careful strokes"
+      Row gap=8
+        Button.outline "Clear lines" icon="refresh" onTap={strokesOk=0; score=0}
+        Button.ghost "Bigger pen" icon="add" onTap={thickness=min(16,thickness+2)}
+        Button.ghost "Smaller pen" icon="remove" onTap={thickness=max(2,thickness-2)}
+
+### Gallery
+state selected=0
+state words=[{"id":1,"text":"cat","stars":3,"img":"https://img.penpal.app/words/cat.png"},{"id":2,"text":"sun","stars":2,"img":"https://img.penpal.app/words/sun.png"},{"id":3,"text":"bee","stars":3,"img":"https://img.penpal.app/words/bee.png"},{"id":4,"text":"moon","stars":1,"img":"https://img.penpal.app/words/moon.png"}]
+state sel=0
+
+App
+  Sidebar
+    Brand "Penpal" icon="draw"
+    NavItem "Trace" icon="gesture" onTap={go trace}
+    NavItem "Lines" icon="format_line_spacing" onTap={go lines}
+    NavItem "Gallery" icon="photo_library" badge="{length(words)}" selected={true}
+  Main
+    Nav
+      Heading "My finished words" level=1
+      Text.muted "{sum(words,w=>w.stars)} stars collected"
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        each w in words
+          Card gap=8 menu=wordMenu onTap={selected=w.id; open zoom}
+            Image "{w.img}" h=140
+            Row between
+              Text.heading "{w.text}"
+              Row gap=2
+                each i in range(3)
+                  Icon "star" size=16 color={w.stars > i ? "#FFFFB300" : "#FFCCCCCC"}
+            Row between
+              Text.caption "Finished"
+              IconButton "more_vert" tooltip="More" onTap={sel=w.id; open wordMenu}
+      if isEmpty(words)
+        Column center gap=8
+          Icon "draw" size=48
+          Text.muted "No words yet. Finish a line to see it here."
+  Menu#wordMenu end
+    MenuItem "Trace again" icon="replay" onTap={go lines}
+    MenuItem "Share" icon="share" onTap={emit share sel}
+    MenuItem "Delete" icon="delete" onTap={words=removeWhere(words,w=>w.id==sel)}
+  Lightbox#zoom photos={map(words,w=>w.img)} bind=selected

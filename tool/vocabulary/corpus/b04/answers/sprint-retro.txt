@@ -1,0 +1,172 @@
+### Retro board
+state tab="board"
+state phase="Write"
+state revealed=false
+state running=false
+state secs=300
+state votesLeft=5
+state target="well"
+state draft=""
+state nextId=8
+state cards=[{"id":1,"col":"well","text":"Pairing on the checkout bug unblocked us in a day","votes":0,"group":0},{"id":2,"col":"well","text":"Design handoff notes were clear this sprint","votes":0,"group":0},{"id":3,"col":"well","text":"Deploys were boring, in a good way","votes":0,"group":0},{"id":4,"col":"improve","text":"Standups run past 20 minutes","votes":0,"group":0},{"id":5,"col":"improve","text":"Flaky integration tests slowed every PR","votes":0,"group":0},{"id":6,"col":"improve","text":"Scope for the export feature changed twice midweek","votes":0,"group":0},{"id":7,"col":"actions","text":"Timebox standups to 10 minutes","votes":0,"group":0}]
+state energy=0
+App
+  Sidebar
+    Brand "Afterglow" icon="wb_twilight"
+    NavItem "Board" icon="view_column" selected={tab=="board"} onTap={tab="board"}
+    NavItem "Action items" icon="task_alt" badge="4" onTap={go action-items}
+    NavItem "Energy check" icon="mood" onTap={open energy}
+    Spacer grow
+    Text.muted "Sprint 42, Apr 7 to Apr 18"
+    Text.muted "Facilitator: Priya Nair"
+  Main
+    Nav
+      Heading "Sprint 42 retrospective" level=1
+      Row gap=8
+        SegmentedButton bind=phase items=["Write","Group","Vote","Discuss"]
+        Text.strong "{duration(secs)}"
+        IconButton "play_arrow" tooltip="Start timer" hidden={running} onTap={running=true}
+        IconButton "pause" tooltip="Pause timer" hide={!running} onTap={running=false}
+        IconButton "restart_alt" tooltip="Reset timer" onTap={running=false; secs=300}
+        Button "Reveal cards" hidden={revealed} onTap={revealed=true; phase="Group"; toast "Cards revealed"}
+        Button.outline "Hide again" hide={!revealed} onTap={revealed=false}
+    every 1s when running onTick={secs=max(0,secs-1)}
+    Column pad=24 gap=16
+      Row between
+        Row gap=8
+          Badge.info "{length(cards)} cards"
+          Badge.neutral "Anonymous"
+          if revealed
+            Badge.success "Revealed"
+        Row gap=8
+          Text.muted "Votes left"
+          Badge.primary "{votesLeft} of 5"
+          Button.ghost "Reset my votes" onTap={cards=map(cards,c=>with(c,"votes",0)); votesLeft=5}
+      Row gap=16 top
+        Column grow gap=12 fill=#FFF3F8F4 radius=12 pad=12
+          Row between
+            Text.sectionTitle "Went well"
+            IconButton "add" tooltip="Add a card" onTap={target="well"; open add}
+          each card in filter(cards,c=>c.col=="well")
+            Card gap=8 drag=card(card.id) drop=card onDrop={cards=updateWhere(cards,c=>c.id==result.data && c.id!=card.id,c=>with(c,"group",card.id))}
+              if revealed
+                Text "{card.text}"
+              if !revealed
+                Text.muted "Hidden until reveal" animate=shimmer
+              Row between
+                if card.group!=0
+                  Chip "Grouped under #{card.group}"
+                Spacer grow
+                Button.outline "{card.votes}" icon="thumb_up" hidden={!revealed || phase!="Vote"} onTap={votesLeft>0 ? {cards=updateWhere(cards,c=>c.id==card.id,c=>with(c,"votes",c.votes+1)); votesLeft=votesLeft-1} : toast "You are out of votes"}
+                Badge.neutral "{card.votes} votes" hidden={phase=="Vote"}
+        Column grow gap=12 fill=#FFFFF6EC radius=12 pad=12
+          Row between
+            Text.sectionTitle "To improve"
+            IconButton "add" tooltip="Add a card" onTap={target="improve"; open add}
+          each card in filter(cards,c=>c.col=="improve")
+            Card gap=8 drag=card(card.id) drop=card onDrop={cards=updateWhere(cards,c=>c.id==result.data && c.id!=card.id,c=>with(c,"group",card.id))}
+              if revealed
+                Text "{card.text}"
+              if !revealed
+                Text.muted "Hidden until reveal" animate=shimmer
+              Row between
+                if card.group!=0
+                  Chip "Grouped under #{card.group}"
+                Spacer grow
+                Button.outline "{card.votes}" icon="thumb_up" hidden={!revealed || phase!="Vote"} onTap={votesLeft>0 ? {cards=updateWhere(cards,c=>c.id==card.id,c=>with(c,"votes",c.votes+1)); votesLeft=votesLeft-1} : toast "You are out of votes"}
+                Badge.neutral "{card.votes} votes" hidden={phase=="Vote"}
+        Column grow gap=12 fill=#FFF1F3FB radius=12 pad=12
+          Row between
+            Text.sectionTitle "Actions"
+            IconButton "add" tooltip="Add a card" onTap={target="actions"; open add}
+          each card in filter(cards,c=>c.col=="actions")
+            Card gap=8 drag=card(card.id) drop=card onDrop={cards=updateWhere(cards,c=>c.id==result.data && c.id!=card.id,c=>with(c,"group",card.id))}
+              if revealed
+                Text "{card.text}"
+              if !revealed
+                Text.muted "Hidden until reveal" animate=shimmer
+              Row between
+                if card.group!=0
+                  Chip "Grouped under #{card.group}"
+                Spacer grow
+                Button.outline "{card.votes}" icon="thumb_up" hidden={!revealed || phase!="Vote"} onTap={votesLeft>0 ? {cards=updateWhere(cards,c=>c.id==card.id,c=>with(c,"votes",c.votes+1)); votesLeft=votesLeft-1} : toast "You are out of votes"}
+                Badge.neutral "{card.votes} votes" hidden={phase=="Vote"}
+      Text.muted "Drag one card onto another to group similar ideas."
+    Footer
+      Row between
+        Text.muted "Phase: {phase}"
+        Button "Go to action items" onTap={go action-items}
+  Dialog#add "Add a card" "Cards are anonymous until the facilitator reveals them"
+    Select "Column" bind=target items=["well","improve","actions"]
+    Input "Your card" "What should the team hear?" bind=draft multiline
+    Button "Post anonymously" onTap={draft!="" ? {cards=append(cards,{"id":nextId,"col":target,"text":draft,"votes":0,"group":0}); nextId=nextId+1; draft=""; close; toast "Card added"} : toast "Write something first"}
+  Dialog#energy "Energy check" "How is your energy after this sprint?"
+    Row center gap=8
+      ChoiceChip "😫" selected={energy==1} onTap={energy=1}
+      ChoiceChip "😕" selected={energy==2} onTap={energy=2}
+      ChoiceChip "😐" selected={energy==3} onTap={energy=3}
+      ChoiceChip "🙂" selected={energy==4} onTap={energy=4}
+      ChoiceChip "🤩" selected={energy==5} onTap={energy=5}
+    Row between
+      Text.muted "Drained"
+      Text.muted "Fired up"
+    Button "Submit" onTap={energy>0 ? {emit energy energy; toast "Thanks for checking in"; close} : toast "Pick one"}
+
+### Action items
+state owner="Priya Nair"
+state title=""
+state due=""
+state filterOwner="All"
+state sel=0
+state actions=[{"id":1,"title":"Timebox standups to 10 minutes","owner":"Marcus Webb","due":"2026-04-25","done":false},{"id":2,"title":"Quarantine and fix the three flakiest integration tests","owner":"Lena Fischer","due":"2026-05-02","done":false},{"id":3,"title":"Write a one-page scope freeze rule for mid-sprint changes","owner":"Priya Nair","due":"2026-04-23","done":false},{"id":4,"title":"Share pairing schedule for next sprint","owner":"Jon Okafor","due":"2026-04-21","done":true}]
+App
+  Sidebar
+    Brand "Afterglow" icon="wb_twilight"
+    NavItem "Board" icon="view_column" onTap={go retro-board}
+    NavItem "Action items" icon="task_alt" selected badge="{count(actions,a=>!a.done)}"
+    NavItem "Energy check" icon="mood" onTap={go retro-board}
+    Spacer grow
+    Text.muted "Sprint 42"
+  Main
+    Nav
+      Heading "Action items" level=1
+      Row gap=8
+        Select "Owner" bind=filterOwner items=["All","Priya Nair","Marcus Webb","Lena Fischer","Jon Okafor"] w=180
+        Button "New action" onTap={open newAction}
+    Column pad=24 gap=16
+      Row gap=16
+        Card grow gap=4
+          Text.muted "Open"
+          Text "{count(actions,a=>!a.done)}" size=32 weight=700
+        Card grow gap=4
+          Text.muted "Done"
+          Text "{count(actions,a=>a.done)}" size=32 weight=700
+        Card grow gap=8
+          Text.muted "Progress"
+          Progress {count(actions,a=>a.done)/length(actions)}
+      Card gap=0
+        Row pad=8 border-bottom=#FFDDDDDD
+          Text.strong "" w=40
+          Text.strong "Action" grow
+          Text.strong "Owner" w=140 hide=phone
+          Text.strong "Due" w=110
+          Text.strong "" w=40
+        each a in filter(actions,x=>filterOwner=="All" || x.owner==filterOwner)
+          Row pad=8 middle border-bottom=#FFEEEEEE
+            Checkbox bind=a.done w=40
+            Text "{a.title}" grow strike={a.done}
+            Row gap=8 w=140 hide=phone
+              Avatar "{a.owner}" size=24
+              Text.small "{a.owner}"
+            Text.small "{formatDate(a.due,"MMM d")}" w=110
+            IconButton "more_vert" tooltip="More" onTap={sel=a.id; open rowMenu}
+      if isEmpty(filter(actions,x=>filterOwner=="All" || x.owner==filterOwner))
+        Text.muted "No actions for {filterOwner}." center
+  Dialog#newAction "New action item"
+    Input "What needs to happen?" bind=title
+    Select "Owner" bind=owner items=["Priya Nair","Marcus Webb","Lena Fischer","Jon Okafor"]
+    DatePicker "Due date" bind=due
+    Button "Add action" onTap={title!="" && due!="" ? {actions=append(actions,{"id":length(actions)+10,"title":title,"owner":owner,"due":due,"done":false}); title=""; due=""; close; toast "Action added"} : toast "Add a title and a due date"}
+  Menu#rowMenu end
+    MenuItem "Mark done" icon="check" onTap={actions=updateWhere(actions,a=>a.id==sel,a=>with(a,"done",true))}
+    MenuItem "Remove" icon="delete" onTap={actions=removeWhere(actions,a=>a.id==sel); toast "Removed"}

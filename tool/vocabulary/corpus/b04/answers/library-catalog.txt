@@ -1,0 +1,224 @@
+### Catalog
+state tab="catalog"
+state q=""
+state formats=[]
+state lang="Any"
+state onlyAvail=false
+state sel=""
+state holds=[{"id":"b2","title":"Piranesi","pos":3}]
+state books=[{"id":"b1","title":"The Overstory","author":"Richard Powers","format":"Print","lang":"English","avail":true,"cover":"https://covers.stacks.example/overstory.jpg"},{"id":"b2","title":"Piranesi","author":"Susanna Clarke","format":"E-book","lang":"English","avail":false,"cover":"https://covers.stacks.example/piranesi.jpg"},{"id":"b3","title":"La peste","author":"Albert Camus","format":"Print","lang":"French","avail":true,"cover":"https://covers.stacks.example/peste.jpg"},{"id":"b4","title":"Braiding Sweetgrass","author":"Robin Wall Kimmerer","format":"Audiobook","lang":"English","avail":true,"cover":"https://covers.stacks.example/sweetgrass.jpg"}]
+state readingList=[]
+App
+  Sidebar
+    Brand "Stacks" icon="local_library"
+    NavItem "Catalog" icon="search" selected={tab=="catalog"} onTap={tab="catalog"}
+    NavItem "My loans" icon="book" badge="3" onTap={go loans}
+    NavItem "Reading list" icon="bookmarks" badge="{length(readingList)}" onTap={go reading-list}
+    NavItem "Library card" icon="qr_code" onTap={open card}
+    NavItem "E-book reader" icon="chrome_reader_mode" onTap={go reader}
+    Spacer grow
+    Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "Catalog" level=1
+      Row gap=8
+        Input "Search title, author or ISBN" bind=q w=280
+        Button.outline "Filters" onTap={open filters}
+    Column pad=24 gap=16 scroll
+      Row gap=8
+        FilterChip "Print" selected={contains(formats,"Print")} onTap={formats=contains(formats,"Print") ? without(formats,"Print") : append(formats,"Print")}
+        FilterChip "E-book" selected={contains(formats,"E-book")} onTap={formats=contains(formats,"E-book") ? without(formats,"E-book") : append(formats,"E-book")}
+        FilterChip "Audiobook" selected={contains(formats,"Audiobook")} onTap={formats=contains(formats,"Audiobook") ? without(formats,"Audiobook") : append(formats,"Audiobook")}
+        Spacer grow
+        Toggle "Available now" bind=onlyAvail
+      Text.muted "{count(books,b=>(q==\"\" || contains(lower(b.title),lower(q)) || contains(lower(b.author),lower(q))) && (length(formats)==0 || contains(formats,b.format)) && (lang==\"Any\" || b.lang==lang) && (!onlyAvail || b.avail))} results"
+      Grid cols=2 gap=16
+        each b in books
+          if (q=="" || contains(lower(b.title),lower(q)) || contains(lower(b.author),lower(q))) && (length(formats)==0 || contains(formats,b.format)) && (lang=="Any" || b.lang==lang) && (!onlyAvail || b.avail)
+            Card gap=12 onTap={sel=b.id; go book}
+              Row gap=12
+                Image "{b.cover}" w=80 h=120 radius=6
+                Column grow gap=4
+                  Heading "{b.title}" level=3
+                  Text.muted "{b.author}"
+                  Row gap=8
+                    Badge.neutral "{b.format}"
+                    Badge.neutral "{b.lang}"
+                  if b.avail
+                    Badge.success "Available"
+                  if !b.avail
+                    Badge.warning "All copies out"
+              Row gap=8
+                Button.outline "Add to list" onTap={readingList=contains(readingList,b.id) ? readingList : append(readingList,b.id); toast "Added to reading list"}
+                Button "Details" onTap={sel=b.id; go book}
+  Sheet#filters "Filters"
+    Select "Language" items=["Any","English","French","Spanish"] bind=lang
+    SegmentedButton items=["Print","E-book","Audiobook"] onChange={formats=[result]}
+    Toggle "Available now" bind=onlyAvail
+    Row gap=8
+      Button.ghost "Clear" onTap={formats=[]; lang="Any"; onlyAvail=false}
+      Button "Show results" onTap={close}
+  Dialog#card "Library card" "Scan at any Stacks branch"
+    Column center gap=12
+      Barcode "2 9041 0057 3382" format="code128" h=96
+      Text.mono "2 9041 0057 3382"
+      Text.strong "Dana Whitfield"
+      Text.muted "Valid through Mar 2028"
+
+### Book
+state sel="b2"
+state pickup="Central"
+state placed=false
+state copies=[{"branch":"Central","n":0,"total":4},{"branch":"Riverside","n":0,"total":2},{"branch":"Eastgate","n":1,"total":1}]
+App
+  Sidebar
+    Brand "Stacks" icon="local_library"
+    NavItem "Catalog" icon="search" onTap={go catalog}
+    NavItem "My loans" icon="book" onTap={go loans}
+    NavItem "Reading list" icon="bookmarks" onTap={go reading-list}
+    Spacer grow
+    Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Row gap=8
+        IconButton "arrow_back" tooltip="Back to catalog" onTap={go catalog}
+        Heading "Piranesi" level=1
+      Row gap=8
+        IconButton "bookmark_add" tooltip="Add to reading list" onTap={emit addToList sel; toast "Added to reading list"}
+        IconButton "share" tooltip="Share" onTap={emit share sel}
+    Column pad=24 gap=16 scroll
+      Row gap=24 top
+        Image "https://covers.stacks.example/piranesi.jpg" w=200 h=300 radius=8
+        Column grow gap=12
+          Heading "Piranesi" level=1
+          Text.muted "Susanna Clarke, 2020"
+          Row gap=8
+            Badge.neutral "E-book"
+            Badge.neutral "Fantasy"
+            Badge.warning "All copies out"
+            Rating value=4.4 readonly
+          Text "A man lives in a house of endless halls and drowned staircases, keeping a journal of the tides and the statues. Then someone else arrives."
+          if placed
+            Card gap=4
+              Text.strong "Hold placed"
+              Text.muted "You are number 4 in the queue. We will email you when it is ready at {pickup}."
+          if !placed
+            Row gap=8
+              Button "Place a hold" onTap={open hold}
+              Button.outline "Read a sample" onTap={go reader}
+      Card gap=8
+        Text.strong "Copies by branch"
+        each c in copies
+          Row between
+            Text "{c.branch}"
+            Row gap=8
+              Text.muted "{c.n} of {c.total} on shelf"
+              if c.n>0
+                Badge.success "Available"
+              if c.n==0
+                Badge.neutral "Out"
+  Dialog#hold "Place a hold" "Pick where you want to collect it"
+    Select "Pickup branch" items=["Central","Riverside","Eastgate"] bind=pickup
+    Card gap=4
+      Text.muted "Queue position"
+      Text.strong "4 of 6 holds, about 3 weeks"
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Confirm hold" onTap={placed=true; emit hold {"book":sel,"branch":pickup}; toast "Hold placed"; close}
+
+### Loans
+state tab="loans"
+state sel=""
+state loans=[{"id":"l1","title":"The Overstory","due":"2026-11-24","days":7,"renewals":0,"fine":0},{"id":"l2","title":"La peste","due":"2026-11-09","days":-8,"renewals":1,"fine":1.6},{"id":"l3","title":"Braiding Sweetgrass","due":"2026-12-01","days":14,"renewals":0,"fine":0}]
+App
+  Sidebar
+    Brand "Stacks" icon="local_library"
+    NavItem "Catalog" icon="search" onTap={go catalog}
+    NavItem "My loans" icon="book" badge="{length(loans)}" selected={tab=="loans"} onTap={tab="loans"}
+    NavItem "Reading list" icon="bookmarks" onTap={go reading-list}
+    NavItem "Library card" icon="qr_code" onTap={open card}
+    Spacer grow
+    Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "My loans" level=1
+      Row gap=8
+        Button.outline "Renew all" onTap={loans=map(loans,l=>l.days<0 ? l : with(with(l,"days",l.days+14),"renewals",l.renewals+1)); toast "Renewed"}
+    Column pad=24 gap=16 scroll
+      if sum(loans,l=>l.fine)>0
+        Card gap=8 fill=#FFFDECEA
+          Row between
+            Column gap=2
+              Text.danger "Overdue fines: {money(sum(loans,l=>l.fine),\"$\",2)}"
+              Text.muted "Pay at any branch or online to keep borrowing."
+            Button "Pay fines" onTap={emit payFines}
+      Row gap=12
+        Text.strong w=220 "Title"
+        Text.strong w=120 "Due"
+        Text.strong w=100 "Status"
+        Text.strong grow "Actions"
+      Divider
+      each l in loans
+        Row gap=12 middle
+          Text w=220 "{l.title}"
+          Text w=120 "{formatDate(l.due,\"MMM d\")}"
+          if l.days<0
+            Badge.error w=100 "{abs(l.days)} days overdue"
+          if l.days>=0
+            Badge.success w=100 "{l.days} days left"
+          Row grow gap=8
+            Button.outline "Renew" onTap={l.renewals>=2 ? toast "Renewal limit reached" : loans=updateWhere(loans,x=>x.id==l.id,x=>with(with(x,"days",x.days+14),"renewals",x.renewals+1))}
+            IconButton "more_vert" tooltip="More" onTap={sel=l.id; open loanMenu}
+            if l.fine>0
+              Text.danger "{money(l.fine,\"$\",2)}"
+      Divider
+      Text.muted "Items can be renewed twice unless someone is waiting."
+  Menu#loanMenu end
+    MenuItem "Return by drop box" icon="move_to_inbox" onTap={loans=removeWhere(loans,x=>x.id==sel); toast "Marked for return"}
+    MenuItem "Open book" icon="open_in_new" onTap={go book}
+  Dialog#card "Library card" "Scan at any Stacks branch"
+    Column center gap=12
+      Barcode "2 9041 0057 3382" format="code128" h=96
+      Text.mono "2 9041 0057 3382"
+
+### Reader
+state fontSize=18
+state theme="Light"
+state page=0
+state pages=[{"text":"I am Piranesi. The Beloved Child of the House. The tides come in the Eastern Halls."},{"text":"On the Third Day of the month I walked the Sixth Vestibule and found the statue of the Faun."},{"text":"There is a person known as the Other, and he visits me twice a week."}]
+state bookmarks=[]
+App
+  Main
+    Nav
+      Row gap=8
+        IconButton "arrow_back" tooltip="Close reader" onTap={go catalog}
+        Heading "Piranesi" level=3
+      Row gap=8
+        IconButton "text_fields" tooltip="Text size" onTap={open textOpts}
+        IconButton "bookmark" tooltip="Bookmark this page" onTap={bookmarks=contains(bookmarks,page) ? without(bookmarks,page) : append(bookmarks,page); toast "Bookmark saved"}
+        IconButton "list" tooltip="Bookmarks" onTap={open marks}
+    Column pad=24 gap=16 center maxw=640
+      Pages bind=page h=360
+        each p in pages
+          Box pad=24 fill={theme=="Dark" ? "#FF1B1B1F" : theme=="Sepia" ? "#FFF4ECD8" : "#FFFFFFFF"} radius=8
+            Text "{p.text}" size={fontSize} color={theme=="Dark" ? "#FFE6E6E6" : "#FF222222"}
+      Dots bind=page count=3
+    Footer
+      Column gap=4 pad=12
+        Progress {(page+1)/length(pages)}
+        Row between
+          Text.muted "Page {page+1} of {length(pages)}"
+          Text.muted "{round((page+1)/length(pages)*100,0)}% read"
+  Popover#textOpts
+    Column gap=12 pad=8
+      Text.strong "Font size"
+      Row gap=8 middle
+        Text.small "A"
+        Slider bind=fontSize min=12 max=32 grow
+        Text "A" size=24
+      SegmentedButton items=["Light","Sepia","Dark"] bind=theme
+  Sheet#marks "Bookmarks"
+    if length(bookmarks)==0
+      Text.muted "No bookmarks yet."
+    each m in bookmarks
+      ListTile "Page {m+1}" subtitle="{slice(pages[m].text,0,40)}" onTap={page=m; close}

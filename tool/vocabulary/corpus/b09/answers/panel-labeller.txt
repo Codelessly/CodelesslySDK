@@ -1,0 +1,144 @@
+### Panel
+state tab="panel"
+state sel=1
+state view="drawing"
+state breakers=[{"id":1,"amps":20,"name":"Kitchen counters","room":"Kitchen","phase":"A","gauge":"12 AWG","spare":false},{"id":2,"amps":15,"name":"Living room lights","room":"Living room","phase":"B","gauge":"14 AWG","spare":false},{"id":3,"amps":30,"name":"Dryer","room":"Laundry","phase":"C","gauge":"10 AWG","spare":false},{"id":4,"amps":20,"name":"Bathroom outlets","room":"Bath","phase":"A","gauge":"14 AWG","spare":false},{"id":5,"amps":15,"name":"Bedroom 1","room":"Bedroom 1","phase":"B","gauge":"14 AWG","spare":false},{"id":6,"amps":40,"name":"Range","room":"Kitchen","phase":"C","gauge":"8 AWG","spare":false},{"id":7,"amps":20,"name":"Garage","room":"Garage","phase":"A","gauge":"12 AWG","spare":false},{"id":8,"amps":15,"name":"","room":"","phase":"B","gauge":"14 AWG","spare":true},{"id":9,"amps":50,"name":"EV charger","room":"Garage","phase":"C","gauge":"6 AWG","spare":false},{"id":10,"amps":15,"name":"Hallway","room":"Hall","phase":"A","gauge":"14 AWG","spare":false},{"id":11,"amps":20,"name":"Dishwasher","room":"Kitchen","phase":"B","gauge":"12 AWG","spare":false},{"id":12,"amps":15,"name":"","room":"","phase":"C","gauge":"14 AWG","spare":true}]
+state wireMax=[{"gauge":"14 AWG","max":15},{"gauge":"12 AWG","max":20},{"gauge":"10 AWG","max":30},{"gauge":"8 AWG","max":40},{"gauge":"6 AWG","max":55}]
+App
+  Sidebar
+    Brand "Breakerbook" icon="electrical_services"
+    NavItem "Panel" icon="developer_board" selected={tab=="panel"} onTap={tab="panel"}
+    NavItem "Circuit warnings" icon="warning" badge="{count(breakers,b=>b.amps>find(wireMax,w=>w.gauge==b.gauge).max)}" onTap={open warnings}
+    NavItem "Print directory" icon="print" onTap={go print-directory}
+    NavItem "Panel photo" icon="photo_camera" onTap={go panel-photo}
+    Spacer grow
+    Text.muted "Main panel, 200 A, 12 spaces"
+  Main
+    Nav
+      Heading "Main panel" level=1
+      Row gap=8
+        SegmentedButton bind=view items=["drawing","list"]
+        Button.outline "Spares only" onTap={view="spares"}
+        Button "Print directory" onTap={go print-directory}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=12
+          Text.strong "Distribution board"
+          PanelDiagram columns=2 count=12 bind=sel
+            Grid cols=2 gap=8
+              each b in breakers
+                Box fill=#FFF4F4F2 radius=8 pad=8 gap=4 onTap={sel=b.id} menu=breakerMenu
+                  Row between
+                    Badge.neutral "{b.id}"
+                    Badge.primary "{b.amps} A"
+                  Text.strong "{b.spare ? 'SPARE' : b.name}" strike={false}
+                  Text.muted "{b.room} / phase {b.phase}"
+                  if b.amps>find(wireMax,w=>w.gauge==b.gauge).max
+                    Row gap=4
+                      Icon "warning" color=#FFD32F2F
+                      Text.danger "Wire too small"
+        Card w=320 gap=8
+          Heading "Load per phase" level=3
+          Text.caption "Phase A  {sum(filter(breakers,b=>b.phase=='A'&&!b.spare),b=>b.amps)} A"
+          Progress {sum(filter(breakers,b=>b.phase=="A"&&!b.spare),b=>b.amps)/60}
+          Text.caption "Phase B  {sum(filter(breakers,b=>b.phase=='B'&&!b.spare),b=>b.amps)} A"
+          Progress {sum(filter(breakers,b=>b.phase=="B"&&!b.spare),b=>b.amps)/60}
+          Text.caption "Phase C  {sum(filter(breakers,b=>b.phase=='C'&&!b.spare),b=>b.amps)} A"
+          Progress {sum(filter(breakers,b=>b.phase=="C"&&!b.spare),b=>b.amps)/60}
+          Text.muted "Aim for the three bars within 10 A of each other."
+    Footer
+      Row between
+        Text.muted "Breaker {sel} selected"
+        Button "Edit breaker {sel}" onTap={open edit}
+  Pane w=320 pad=16 gap=12
+    Heading "Breaker {sel}" level=3
+    Text.muted "{find(breakers,b=>b.id==sel).spare ? 'Spare' : find(breakers,b=>b.id==sel).name}"
+    Image "https://example.com/panel/breaker-{sel}.jpg" h=120
+    Button.outline "Open photo of panel" onTap={go panel-photo}
+Menu#breakerMenu
+  MenuItem "Edit" icon="edit" onTap={open edit}
+  MenuItem "Mark as spare" icon="bookmark" onTap={breakers=updateWhere(breakers,b=>b.id==sel,b=>with(b,"spare",true))}
+  MenuItem "Clear label" icon="backspace" onTap={breakers=updateWhere(breakers,b=>b.id==sel,b=>with(with(b,"name",""),"room",""))}
+Dialog#edit "Edit breaker" "Set the rating, circuit name and room"
+  Select "Amperage" bind=editAmps items=[15,20,30,40,50]
+  Input "Circuit name" "e.g. Kitchen counters" bind=editName
+  Input "Room" bind=editRoom
+  Select "Wire gauge" bind=editGauge items=["14 AWG","12 AWG","10 AWG","8 AWG","6 AWG"]
+  Select "Phase" bind=editPhase items=["A","B","C"]
+  Toggle "Spare" bind=editSpare
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button "Save" onTap={breakers=updateWhere(breakers,b=>b.id==sel,b=>with(with(with(with(with(with(b,"amps",editAmps),"name",editName),"room",editRoom),"gauge",editGauge),"phase",editPhase),"spare",editSpare)); toast "Breaker saved"; close}
+Sheet#warnings "Circuit warnings"
+  each b in filter(breakers,b=>b.amps>find(wireMax,w=>w.gauge==b.gauge).max)
+    ListTile "Breaker {b.id}: {b.name}" icon="warning" onTap={sel=b.id; close}
+      Text.muted "{b.amps} A breaker on {b.gauge} wire. Use a breaker of {find(wireMax,w=>w.gauge==b.gauge).max} A or less, or a heavier wire."
+  if count(breakers,b=>b.amps>find(wireMax,w=>w.gauge==b.gauge).max)==0
+    Text.success "Every wire suits its breaker."
+
+### Print directory
+state cutLines=true
+state size="standard"
+state breakers=[{"id":1,"name":"Kitchen counters","room":"Kitchen","spare":false},{"id":2,"name":"Living room lights","room":"Living room","spare":false},{"id":3,"name":"Dryer","room":"Laundry","spare":false},{"id":4,"name":"Bathroom outlets","room":"Bath","spare":false},{"id":5,"name":"Bedroom 1","room":"Bedroom 1","spare":false},{"id":6,"name":"Range","room":"Kitchen","spare":false},{"id":7,"name":"Garage","room":"Garage","spare":false},{"id":8,"name":"","room":"","spare":true},{"id":9,"name":"EV charger","room":"Garage","spare":false},{"id":10,"name":"Hallway","room":"Hall","spare":false},{"id":11,"name":"Dishwasher","room":"Kitchen","spare":false},{"id":12,"name":"","room":"","spare":true}]
+Page
+  Nav sticky
+    Brand "Breakerbook" icon="electrical_services"
+    Row gap=4
+      Link "Panel" onTap={go panel}
+      Link "Print directory"
+      Link "Panel photo" onTap={go panel-photo}
+    Button "Print" icon="print" onTap={emit print; toast "Sent to the printer"}
+  Section
+    Row gap=32 top
+      Column w=320 gap=12 sticky
+        Heading "Directory card" level=1
+        Text.muted "Printed at true size, 100 percent. Cut along the dashed lines and slide the card into the panel door."
+        SegmentedButton bind=size items=["standard","wide"]
+        Toggle "Show cut lines" bind=cutLines
+        Select "Paper" items=["Letter","A4"] bind=paper
+        Button "Print at true size" onTap={emit print}
+        Button.outline "Download PDF" onTap={emit downloadPdf}
+      Column grow gap=12
+        PrintSheet paper="letter" scale=1 cutLines={cutLines}
+          DirectoryCard widthIn={size=="wide" ? 4.5 : 3.5} heightIn=5 cutLines={cutLines}
+            Text.strong "MAIN PANEL - 200 A" center
+            Grid cols=2 gap=0
+              each b in breakers
+                Row gap=6 border-bottom=#FFBDBDBD
+                  Text.mono "{b.id}" w=24
+                  Text "{b.spare ? 'SPARE' : b.name + ' (' + b.room + ')'}" grow strike={false}
+    Text.caption "Card size on paper: {size=='wide' ? '4.5 x 5 in' : '3.5 x 5 in'}. Check the scale box is 100 percent in the print dialog."
+
+### Panel photo
+state hotspot=1
+state zoom=1
+state breakers=[{"id":1,"name":"Kitchen counters"},{"id":2,"name":"Living room lights"},{"id":3,"name":"Dryer"},{"id":4,"name":"Bathroom outlets"},{"id":5,"name":"Bedroom 1"},{"id":6,"name":"Range"}]
+App
+  Sidebar
+    Brand "Breakerbook" icon="electrical_services"
+    NavItem "Panel" icon="developer_board" onTap={go panel}
+    NavItem "Print directory" icon="print" onTap={go print-directory}
+    NavItem "Panel photo" icon="photo_camera" selected={true}
+  Main
+    Nav
+      Heading "Panel photo" level=1
+      Row gap=8
+        Button.outline "Retake photo" icon="photo_camera" onTap={emit retakePhoto}
+        Button "Upload photo" icon="upload" onTap={emit uploadPhoto}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=8
+          Text.strong "Real panel"
+          PhotoAnnotator src="https://example.com/panel/real-panel.jpg" bind=hotspot zoom={zoom} h=420 onTap={open zoomPhoto}
+          Slider bind=zoom min=1 max=4
+        Card grow gap=8
+          Text.strong "Drawing"
+          PanelDiagram columns=2 count=12 bind=hotspot h=420
+          Text.muted "Tap a breaker on either side and the other side lights the same one."
+      Card gap=8
+        Heading "Breaker {hotspot}" level=3
+        Text.muted "{find(breakers,b=>b.id==hotspot).name}"
+        Row gap=8
+          Button.outline "Previous" onTap={hotspot=max(1,hotspot-1)}
+          Button.outline "Next" onTap={hotspot=min(12,hotspot+1)}
+Lightbox#zoomPhoto "https://example.com/panel/real-panel.jpg" "Real panel, door open"

@@ -1,0 +1,202 @@
+### Shelf
+state tab="shelf"
+state age="all"
+state mood="all"
+state maxMin=30
+state timer=15
+state favs=["b2","b5"]
+state voice="Luna"
+state tonight=null
+state books=[{"id":"b1","title":"The Sleepy Fox","author":"Mira Bell","age":"3-5","min":6,"mood":"calm","cover":"https://covers.example.com/sleepy-fox.jpg"},{"id":"b2","title":"Moon Over Marshmallow Hill","author":"Theo Park","age":"3-5","min":9,"mood":"calm","cover":"https://covers.example.com/marshmallow-hill.jpg"},{"id":"b3","title":"Captain Pip and the Giggling Whale","author":"Ana Ruiz","age":"6-8","min":12,"mood":"funny","cover":"https://covers.example.com/captain-pip.jpg"},{"id":"b4","title":"The Lantern Trail","author":"Jonas Weir","age":"6-8","min":18,"mood":"adventure","cover":"https://covers.example.com/lantern-trail.jpg"},{"id":"b5","title":"Penny the Pajama Dragon","author":"Sofia Lindqvist","age":"3-5","min":7,"mood":"funny","cover":"https://covers.example.com/pajama-dragon.jpg"},{"id":"b6","title":"Across the Starlight Sea","author":"Omar Haddad","age":"9-12","min":25,"mood":"adventure","cover":"https://covers.example.com/starlight-sea.jpg"}]
+App
+  Sidebar
+    Brand "Bedtime Shelf" icon="bedtime"
+    NavItem "Shelf" icon="auto_stories" selected={tab=="shelf"} onTap={tab="shelf"}
+    NavItem "Favourites" icon="favorite" badge="{length(favs)}" selected={tab=="favs"} onTap={go favourites}
+    NavItem "Recently read" icon="history" onTap={go recent}
+    Spacer grow
+    Button.outline "Sleep timer: {timer} min" onTap={open timerSheet}
+  Main
+    Nav
+      Heading "Tonight's shelf" level=1
+      Row gap=8
+        Button.secondary "Story of the night" icon="casino" onTap={tonight=books[floor(random()*length(books))]; open tonightDialog}
+        IconButton "tune" tooltip="Filters" onTap={open filters}
+    Column pad=24 gap=20 scroll
+      Row gap=8 scroll
+        FilterChip "All ages" selected={age=="all"} onTap={age="all"}
+        FilterChip "3-5" selected={age=="3-5"} onTap={age="3-5"}
+        FilterChip "6-8" selected={age=="6-8"} onTap={age="6-8"}
+        FilterChip "9-12" selected={age=="9-12"} onTap={age="9-12"}
+        FilterChip "Calm" icon="spa" selected={mood=="calm"} onTap={mood="calm"}
+        FilterChip "Funny" icon="sentiment_very_satisfied" selected={mood=="funny"} onTap={mood="funny"}
+        FilterChip "Adventure" icon="explore" selected={mood=="adventure"} onTap={mood="adventure"}
+      Text.sectionTitle "Up to {maxMin} minutes"
+      Row gap=16 scroll
+        each b in filter(books, x=>(age=="all" || x.age==age) && (mood=="all" || x.mood==mood) && x.min<=maxMin)
+          Card gap=8 w=180 menu=bookMenu onTap={sel=b.id; go player} animate=slide-up stagger=80
+            Image "{b.cover}" h=220 radius=12
+            Text.strong "{b.title}"
+            Text.caption "{b.author} · {b.min} min"
+            Row between
+              Badge.neutral "{b.mood}"
+              IconButton "{contains(favs,b.id) ? 'favorite' : 'favorite_border'}" tooltip="Favourite" onTap={favs=contains(favs,b.id) ? without(favs,b.id) : append(favs,b.id)}
+      Text.sectionTitle "Because you liked calm stories"
+      Pages bind=page h=240 peek=0.86
+        each b in filter(books, x=>x.mood=="calm")
+          Card gap=8
+            Row gap=16
+              Image "{b.cover}" w=140 h=200 radius=12
+              Column grow gap=8
+                Text.heading "{b.title}"
+                Text.muted "{b.author}"
+                Text.caption "{b.min} minutes · ages {b.age}"
+                Spacer grow
+                Button "Read tonight" icon="play_arrow" onTap={sel=b.id; go player}
+      Dots bind=page count=2
+  Sheet#filters "Filters"
+    Column gap=16
+      Text.sectionTitle "Age"
+      Grid cols=3 gap=12
+        Box gap=4 radius=16 pad=8 fill={age=="3-5" ? "#FF3B3F73" : "#FF1B1E3C"} onTap={age="3-5"}
+          Image "https://tiles.example.com/age-toddler.jpg" h=96 radius=12
+          Text.strong "3-5" color=#FFFFFFFF center
+        Box gap=4 radius=16 pad=8 fill={age=="6-8" ? "#FF3B3F73" : "#FF1B1E3C"} onTap={age="6-8"}
+          Image "https://tiles.example.com/age-kid.jpg" h=96 radius=12
+          Text.strong "6-8" color=#FFFFFFFF center
+        Box gap=4 radius=16 pad=8 fill={age=="9-12" ? "#FF3B3F73" : "#FF1B1E3C"} onTap={age="9-12"}
+          Image "https://tiles.example.com/age-older.jpg" h=96 radius=12
+          Text.strong "9-12" color=#FFFFFFFF center
+      Text.sectionTitle "Length: {maxMin} minutes"
+      Slider bind=maxMin min=5 max=30
+      Text.sectionTitle "Mood"
+      Grid cols=3 gap=12
+        Box gap=4 radius=16 pad=8 fill={mood=="calm" ? "#FF3B3F73" : "#FF1B1E3C"} onTap={mood="calm"}
+          Image "https://tiles.example.com/mood-calm.jpg" h=96 radius=12
+          Text.strong "Calm" color=#FFFFFFFF center
+        Box gap=4 radius=16 pad=8 fill={mood=="funny" ? "#FF3B3F73" : "#FF1B1E3C"} onTap={mood="funny"}
+          Image "https://tiles.example.com/mood-funny.jpg" h=96 radius=12
+          Text.strong "Funny" color=#FFFFFFFF center
+        Box gap=4 radius=16 pad=8 fill={mood=="adventure" ? "#FF3B3F73" : "#FF1B1E3C"} onTap={mood="adventure"}
+          Image "https://tiles.example.com/mood-adventure.jpg" h=96 radius=12
+          Text.strong "Adventure" color=#FFFFFFFF center
+      Row gap=8
+        Button.outline "Clear" onTap={age="all"; mood="all"; maxMin=30}
+        Button "Show stories" grow onTap={close}
+  Sheet#timerSheet "Sleep timer"
+    Column gap=16 center
+      Stack center middle
+        Ring {timer/60} w=140 h=140
+        Text.heading "{timer} min"
+      Row gap=8
+        ChoiceChip "5" selected={timer==5} onTap={timer=5}
+        ChoiceChip "10" selected={timer==10} onTap={timer=10}
+        ChoiceChip "15" selected={timer==15} onTap={timer=15}
+        ChoiceChip "30" selected={timer==30} onTap={timer=30}
+        ChoiceChip "45" selected={timer==45} onTap={timer=45}
+      Slider bind=timer min=5 max=60
+      Button "Set timer" onTap={emit setTimer timer; toast "Sleep timer set for {timer} minutes"; close}
+  Dialog#tonightDialog "Story of the night" "Picked at random, just for tonight"
+    Column gap=12 center
+      Image "{tonight.cover}" w=160 h=220 radius=12
+      Text.heading "{tonight.title}"
+      Text.muted "{tonight.author} · {tonight.min} min"
+      Row gap=8
+        Button.outline "Pick again" onTap={tonight=books[floor(random()*length(books))]}
+        Button "Read it" onTap={sel=tonight.id; close; go player}
+  Menu#bookMenu
+    MenuItem "Read now" icon="play_arrow" onTap={go player}
+    MenuItem "Add to favourites" icon="favorite" onTap={favs=append(favs,sel)}
+    MenuItem "Lullaby mode" icon="music_note" onTap={emit lullaby sel; go player}
+
+### Player
+state words=["Once","upon","a","time,","a","sleepy","fox","curled","up","beneath","the","silver","moon","and","listened","to","the","quiet","hills","hum","goodnight."]
+state cur=0
+state playing=true
+state lullaby=false
+state voice="Luna"
+state timerLeft=900
+state fav=false
+state dim=0
+every 450 when playing onTick={cur=min(cur+1,length(words)); dim=clamp(cur/length(words),0,1)}
+every 1s when playing onTick={timerLeft=max(0,timerLeft-1)}
+App
+  Main
+    Box fill=#FF0B1026 pad=16 gap=16 grow
+      Row between
+        IconButton "arrow_back" tooltip="Back to shelf" color=#FFFFFFFF onTap={go shelf}
+        Column center gap=4
+          MoonProgress value={cur/length(words)} dim={dim} size=72
+          Text.caption "{duration(timerLeft)} until sleep" color=#FFB0B8D0
+        IconButton "{fav ? 'favorite' : 'favorite_border'}" tooltip="Favourite" color=#FFFFFFFF onTap={fav=!fav; toast fav ? "Removed from favourites" : "Added to favourites"}
+      Text.title "The Sleepy Fox" color=#FFFFFFFF center
+      Text.caption "Mira Bell · read by {voice}" color=#FFB0B8D0 center
+      Row gap=10 center wrap pad=16
+        each w in words
+          Text "{w}" size=34 weight={index==cur ? 800 : 500} color={index==cur ? "#FFFFD54F" : (index<cur ? "#FF6E7699" : "#FFE8EAF6")} animate={index==cur ? "pulse" : "fade"}
+      Slider bind=cur min=0 max={length(words)}
+      Row between
+        Text.caption "{cur} of {length(words)} words" color=#FFB0B8D0
+        Text.caption "{round(cur/length(words)*100,0)}%" color=#FFB0B8D0
+      Row gap=16 center middle
+        IconButton "replay_10" tooltip="Back" color=#FFFFFFFF onTap={cur=max(0,cur-10)}
+        IconButton "{playing ? 'pause_circle' : 'play_circle'}" tooltip="Play or pause" size=72 color=#FFFFD54F onTap={playing=!playing}
+        IconButton "forward_10" tooltip="Forward" color=#FFFFFFFF onTap={cur=min(length(words),cur+10)}
+    Footer
+      Row between pad=8
+        Toggle "Lullaby mode" bind=lullaby onChange={emit lullaby result}
+        Button.outline "Voice: {voice}" icon="record_voice_over" onTap={open voiceMenu}
+        Button.outline "Timer" icon="timer" onTap={open timerPop}
+  Menu#voiceMenu above
+    MenuItem "Luna (soft)" icon="check" onTap={voice="Luna"; emit voice voice}
+    MenuItem "Orion (deep)" icon="check" onTap={voice="Orion"; emit voice voice}
+    MenuItem "Willow (whisper)" icon="check" onTap={voice="Willow"; emit voice voice}
+  Popover#timerPop
+    Column gap=8
+      Text.strong "Add time"
+      Row gap=8
+        Button.outline "+5 min" onTap={timerLeft=timerLeft+300}
+        Button.outline "+10 min" onTap={timerLeft=timerLeft+600}
+      Button.ghost "Stop timer" onTap={timerLeft=0; playing=false; close}
+
+### Favourites
+state favs=["b2","b5"]
+state books=[{"id":"b2","title":"Moon Over Marshmallow Hill","min":9,"cover":"https://covers.example.com/marshmallow-hill.jpg"},{"id":"b5","title":"Penny the Pajama Dragon","min":7,"cover":"https://covers.example.com/pajama-dragon.jpg"},{"id":"b1","title":"The Sleepy Fox","min":6,"cover":"https://covers.example.com/sleepy-fox.jpg"}]
+App
+  Sidebar
+    Brand "Bedtime Shelf" icon="bedtime"
+    NavItem "Shelf" icon="auto_stories" onTap={go shelf}
+    NavItem "Favourites" icon="favorite" badge="{length(favs)}" selected={true}
+    NavItem "Recently read" icon="history" onTap={go recent}
+  Main
+    Nav
+      Heading "Favourites" level=1
+      Button.outline "Play all" icon="play_arrow" onTap={emit playAll favs; go player}
+    Column pad=24 gap=16 scroll
+      if isEmpty(favs)
+        Text.muted "Tap the heart on a book to keep it here."
+      Grid cols=3 gap=16
+        each b in filter(books, x=>contains(favs,x.id))
+          Card gap=8
+            Image "{b.cover}" h=200 radius=12
+            Text.strong "{b.title}"
+            Row between
+              Text.caption "{b.min} min"
+              IconButton "favorite" tooltip="Remove from favourites" onTap={favs=without(favs,b.id)}
+
+### Recently read
+state history=[{"id":"b1","title":"The Sleepy Fox","when":"Last night","stars":4},{"id":"b3","title":"Captain Pip and the Giggling Whale","when":"Sunday","stars":5},{"id":"b4","title":"The Lantern Trail","when":"Friday","stars":3}]
+App
+  Sidebar
+    Brand "Bedtime Shelf" icon="bedtime"
+    NavItem "Shelf" icon="auto_stories" onTap={go shelf}
+    NavItem "Favourites" icon="favorite" onTap={go favourites}
+    NavItem "Recently read" icon="history" selected={true}
+  Main
+    Nav
+      Heading "Recently read" level=1
+    Column pad=24 gap=12 scroll
+      each h in history
+        ListTile "{h.title}" subtitle="{h.when}" leading="menu_book"
+          Rating bind=h.stars max=5
+          Button.ghost "Read again" onTap={sel=h.id; go player}

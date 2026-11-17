@@ -1,0 +1,214 @@
+### Convert
+state from="USD"
+state to="EUR"
+state rate=0.9234
+state active="from"
+state entry="250"
+state bankFee=3.2
+state updated="Today, 09:41"
+state offline=true
+state fav=["USD/EUR","GBP/USD","USD/JPY","EUR/CHF"]
+App
+  Sidebar
+    Brand "Rate Room" icon="currency_exchange"
+    NavItem "Convert" icon="swap_vert" selected={true} onTap={go convert}
+    NavItem "Rate history" icon="show_chart" onTap={go rate-history}
+    NavItem "Favourites" icon="star" badge="4" onTap={go favourites}
+    NavItem "Alerts" icon="notifications" onTap={go alerts}
+    Spacer grow
+    if offline
+      Badge.warning "Offline"
+    Text.muted "Updated {updated}"
+  Main
+    Nav
+      Heading "Convert"
+      Row gap=8
+        IconButton "refresh" tooltip="Refresh rates" onTap={updated="Just now"; offline=false; toast "Rates refreshed"}
+        IconButton "star_border" tooltip="Save this pair" onTap={fav=append(fav, from + "/" + to); toast "Pair saved"}
+    Column pad=24 gap=16 scroll
+      if offline
+        Card gap=4
+          Row gap=8 middle
+            Icon "cloud_off"
+            Text.strong "Offline stamp"
+          Text.muted "Rates last updated {updated}. They may differ from the live market."
+      Card gap=16
+        Row gap=12 middle onTap={active="from"}
+          Column grow gap=4
+            Text.caption "You send"
+            Text "{active=="from" ? entry : fixed(entry/rate,2)}" size=44 weight=700
+          Select bind=from items=["USD","EUR","GBP","JPY","CHF","CAD","AUD"] w=110
+        Row center
+          IconButton "swap_vert" tooltip="Swap currencies" onTap={from=to; to=from; rate=round(1/rate,4); active="from"}
+        Row gap=12 middle onTap={active="to"}
+          Column grow gap=4
+            Text.caption "They receive"
+            Text "{active=="to" ? entry : fixed(entry*rate,2)}" size=44 weight=700
+          Select bind=to items=["EUR","USD","GBP","JPY","CHF","CAD","AUD"] w=110
+        Text.muted "1 {from} = {rate} {to}"
+      Grid cols=3 gap=8
+        Button.outline "1" onTap={entry=entry=="0" ? "1" : entry+"1"}
+        Button.outline "2" onTap={entry=entry=="0" ? "2" : entry+"2"}
+        Button.outline "3" onTap={entry=entry=="0" ? "3" : entry+"3"}
+        Button.outline "4" onTap={entry=entry=="0" ? "4" : entry+"4"}
+        Button.outline "5" onTap={entry=entry=="0" ? "5" : entry+"5"}
+        Button.outline "6" onTap={entry=entry=="0" ? "6" : entry+"6"}
+        Button.outline "7" onTap={entry=entry=="0" ? "7" : entry+"7"}
+        Button.outline "8" onTap={entry=entry=="0" ? "8" : entry+"8"}
+        Button.outline "9" onTap={entry=entry=="0" ? "9" : entry+"9"}
+        Button.outline "." onTap={entry=contains(entry,".") ? entry : entry+"."}
+        Button.outline "0" onTap={entry=entry=="0" ? "0" : entry+"0"}
+        IconButton "backspace" tooltip="Delete" onTap={entry=length(entry)>1 ? slice(entry,0,length(entry)-1) : "0"}
+      Row gap=8
+        Button.ghost "Clear" onTap={entry="0"}
+        Spacer grow
+        Button.tertiary "See rate history" onTap={go rate-history}
+      Card gap=12
+        Heading "Mid-market rate vs your bank" level=3
+        Row between
+          Text "Mid-market"
+          Text.strong "{fixed(entry*rate,2)} {to}"
+        Row between
+          Text "Bank at {bankFee}% fee"
+          Text.strong "{fixed(entry*rate*(1-bankFee/100),2)} {to}"
+        Divider
+        Row between
+          Text.danger "You lose to the bank"
+          Text.danger "{fixed(entry*rate*bankFee/100,2)} {to}"
+        Slider bind=bankFee min=0 max=6
+        Text.caption "Drag to try your bank's fee."
+
+### Rate history
+state pair="USD/EUR"
+state range="1M"
+state point=null
+state series={"1W":[0.9181,0.9203,0.9195,0.9228,0.9210,0.9241,0.9234],"1M":[0.9012,0.9054,0.9101,0.9087,0.9150,0.9176,0.9203,0.9195,0.9228,0.9234],"3M":[0.8890,0.8932,0.9005,0.8976,0.9044,0.9101,0.9150,0.9203,0.9234],"1Y":[0.8620,0.8701,0.8840,0.8795,0.8932,0.9005,0.9101,0.9234]}
+state labels={"1W":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"1M":["Oct 18","Oct 21","Oct 24","Oct 27","Oct 30","Nov 2","Nov 5","Nov 8","Nov 11","Nov 14"],"3M":["Aug","","Sep","","Oct","","","","Nov"],"1Y":["Dec","Feb","Apr","Jun","Aug","Sep","Oct","Nov"]}
+state offline=true
+App
+  Sidebar
+    Brand "Rate Room" icon="currency_exchange"
+    NavItem "Convert" icon="swap_vert" onTap={go convert}
+    NavItem "Rate history" icon="show_chart" selected={true} onTap={go rate-history}
+    NavItem "Favourites" icon="star" badge="4" onTap={go favourites}
+    NavItem "Alerts" icon="notifications" onTap={go alerts}
+    Spacer grow
+    if offline
+      Badge.warning "Offline"
+    Text.muted "Updated Today, 09:41"
+  Main
+    Nav
+      Heading "{pair}"
+      Select bind=pair items=["USD/EUR","GBP/USD","USD/JPY","EUR/CHF"] w=140
+    Column pad=24 gap=16 scroll
+      Row between middle
+        Column gap=2
+          Text "{point==null ? last(series[range]) : point.value}" size=40 weight=700
+          Text.muted "{point==null ? "Latest" : point.label}"
+        Badge.success "+0.34% this {range}"
+      SegmentedButton bind=range items=["1W","1M","3M","1Y"]
+      Card gap=8
+        LineChart values={series[range]} labels={labels[range]} h=260 onScrub={point=result} onRelease={point=null}
+        Text.caption "Drag along the line to read the rate on a date."
+      Grid cols=3 gap=12
+        Card gap=4
+          Text.caption "High"
+          Text.strong "{max(0.9234, 0.9228)}"
+        Card gap=4
+          Text.caption "Low"
+          Text.strong "{min(series[range][0], 0.9012)}"
+        Card gap=4
+          Text.caption "Average"
+          Text.strong "{fixed(sum(series[range], v=>v)/length(series[range]),4)}"
+      Row gap=8
+        Button "Set an alert" onTap={go alerts}
+        Button.outline "Convert now" onTap={go convert}
+
+### Favourites
+state favs=[{"pair":"USD/EUR","rate":0.9234,"change":0.34},{"pair":"GBP/USD","rate":1.2671,"change":-0.12},{"pair":"USD/JPY","rate":151.82,"change":0.58},{"pair":"EUR/CHF","rate":0.9648,"change":-0.07}]
+state sel=""
+state offline=true
+App
+  Sidebar
+    Brand "Rate Room" icon="currency_exchange"
+    NavItem "Convert" icon="swap_vert" onTap={go convert}
+    NavItem "Rate history" icon="show_chart" onTap={go rate-history}
+    NavItem "Favourites" icon="star" badge="{length(favs)}" selected={true} onTap={go favourites}
+    NavItem "Alerts" icon="notifications" onTap={go alerts}
+    Spacer grow
+    if offline
+      Badge.warning "Offline"
+    Text.muted "Updated Today, 09:41"
+  Main
+    Nav
+      Heading "Favourite pairs"
+      Button.outline "Add pair" icon="add" onTap={open addPair}
+    Column pad=24 gap=12 scroll
+      if isEmpty(favs)
+        Card gap=8 center
+          Icon "star_border"
+          Text.muted "No favourite pairs yet."
+      each f in favs
+        Card
+          Row gap=12 middle onTap={go rate-history}
+            Column grow gap=2
+              Text.strong "{f.pair}"
+              Text.muted "{f.rate}"
+            Sparkline values=[3,4,3,5,4,6,f.change>0 ? 7 : 2] w=80 h=32
+            Icon "{f.change>0 ? "arrow_upward" : "arrow_downward"}" color={f.change>0 ? #FF2E7D32 : #FFC62828}
+            Text "{abs(f.change)}%" color={f.change>0 ? #FF2E7D32 : #FFC62828}
+            IconButton "more_vert" tooltip="More" onTap={sel=f.pair; open pairMenu}
+  Menu#pairMenu end
+    MenuItem "Convert" icon="swap_vert" onTap={go convert}
+    MenuItem "Rate history" icon="show_chart" onTap={go rate-history}
+    MenuItem "Set alert" icon="notifications" onTap={go alerts}
+    MenuItem "Remove" icon="delete" onTap={favs=removeWhere(favs,f=>f.pair==sel); toast "Removed {sel}"}
+  Dialog#addPair "Add a pair" "Pick two currencies to follow"
+    Row gap=8
+      Select "From" bind=newFrom items=["USD","EUR","GBP","JPY","CHF","CAD","AUD"] grow
+      Select "To" bind=newTo items=["EUR","USD","GBP","JPY","CHF","CAD","AUD"] grow
+    Button "Add" onTap={favs=append(favs,{"pair":newFrom + "/" + newTo,"rate":1.0,"change":0}); close; toast "Pair added"}
+
+### Alerts
+state pairA="USD/EUR"
+state target=0.9300
+state direction="rises above"
+state notify=true
+state email=false
+state alerts=[{"id":1,"pair":"GBP/USD","dir":"falls below","target":1.2500,"on":true},{"id":2,"pair":"USD/JPY","dir":"rises above","target":153.00,"on":true}]
+state offline=true
+App
+  Sidebar
+    Brand "Rate Room" icon="currency_exchange"
+    NavItem "Convert" icon="swap_vert" onTap={go convert}
+    NavItem "Rate history" icon="show_chart" onTap={go rate-history}
+    NavItem "Favourites" icon="star" badge="4" onTap={go favourites}
+    NavItem "Alerts" icon="notifications" badge="{count(alerts,a=>a.on)}" selected={true} onTap={go alerts}
+    Spacer grow
+    if offline
+      Badge.warning "Offline"
+    Text.muted "Updated Today, 09:41"
+  Main
+    Nav
+      Heading "Rate alerts"
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Heading "New alert" level=3
+        Select "Pair" bind=pairA items=["USD/EUR","GBP/USD","USD/JPY","EUR/CHF"]
+        SegmentedButton bind=direction items=["rises above","falls below"]
+        Input "Target rate" bind=target type=number
+        Text.muted "Now 0.9234. Your target is {fixed(abs(target-0.9234)/0.9234*100,2)}% away."
+        Toggle "Push notification" bind=notify
+        Toggle "Email me" bind=email
+        Button "Create alert" onTap={target>0 ? {alerts=append(alerts,{"id":length(alerts)+10,"pair":pairA,"dir":direction,"target":target,"on":true}); toast "Alert set for {pairA}"} : toast "Enter a target rate"}
+      Heading "Active alerts" level=3
+      if isEmpty(alerts)
+        Text.muted "No alerts yet."
+      each a in alerts
+        Card
+          Row gap=12 middle
+            Column grow gap=2
+              Text.strong "{a.pair}"
+              Text.muted "When it {a.dir} {a.target}"
+            Toggle bind=a.on
+            IconButton "delete" tooltip="Delete alert" onTap={alerts=removeWhere(alerts,x=>x.id==a.id); toast "Alert deleted"}

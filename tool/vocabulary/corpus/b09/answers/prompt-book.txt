@@ -1,0 +1,141 @@
+### Prompt Book
+state screen="book"
+state night=true
+state cur=0
+state holding=false
+state holdReason=""
+state holdLog=[]
+state elapsed=0
+state dept="All"
+state lines=[{"n":1,"act":1,"scene":1,"who":"HELENA","text":"How happy some o'er other some can be!","cue":""},{"n":2,"act":1,"scene":1,"who":"HELENA","text":"Through Athens I am thought as fair as she.","cue":"LX 14 Warning: slow fade to dusk"},{"n":3,"act":1,"scene":1,"who":"HELENA","text":"But what of that? Demetrius thinks not so.","cue":""},{"n":4,"act":1,"scene":1,"who":"HERMIA","text":"I frown upon him, yet he loves me still.","cue":"SQ 7 Standby: birdsong out"},{"n":5,"act":1,"scene":1,"who":"HELENA","text":"O that your frowns would teach my smiles such skill!","cue":"FLY 3 Go: garden drop in"},{"n":6,"act":1,"scene":2,"who":"QUINCE","text":"Is all our company here?","cue":"LX 15 Go: workshop state"}]
+state cues=[{"id":"c1","dept":"LX","name":"LX 14 slow fade to dusk","phase":"Warning","secs":95},{"id":"c2","dept":"SQ","name":"SQ 7 birdsong out","phase":"Standby","secs":42},{"id":"c3","dept":"FLY","name":"FLY 3 garden drop in","phase":"Go","secs":9},{"id":"c4","dept":"LX","name":"LX 15 workshop state","phase":"Warning","secs":210}]
+every 1s when !holding onTick={elapsed=elapsed+1; cues=map(cues,c=>with(c,"secs",max(0,c.secs-1)))}
+App
+  Sidebar
+    Brand "Cuesheet" icon="theater_comedy"
+    NavItem "Prompt book" icon="menu_book" selected={screen=="book"} onTap={screen="book"}
+    NavItem "Rehearsal report" icon="assignment" selected={screen=="report"} onTap={go rehearsal-report}
+    NavItem "Jump to page" icon="bookmark" onTap={open jump}
+    Spacer grow
+    Toggle "Night show" bind=night
+    Text.muted "A Midsummer Night's Dream"
+    Text.muted "Stage manager: Priya Nair"
+  Main
+    Nav
+      Column
+        Heading "Act {lines[cur].act}, Scene {lines[cur].scene}" level=1
+        Text.muted "Line {cur+1} of {length(lines)}  |  running {duration(elapsed)}"
+      Row gap=8
+        Select bind=dept items=["All","LX","SQ","FLY"]
+        Button.outline "Jump" icon="bookmark" onTap={open jump}
+        if holding
+          Button.destructive "Release hold" onTap={holding=false; holdLog=append(holdLog,{"reason":holdReason,"at":elapsed}); holdReason=""; toast "Hold released"}
+        else
+          Button.outline "Hold" onTap={open hold}
+    Row grow top
+      Column grow pad=24 gap=12 scroll fill={night ? "#FF0B0B10" : "#FFFFFFFF"}
+        if holding
+          Box fill="#FF7A1F1F" pad=12 radius=8
+            Text.strong "HOLD: {holdReason}" color="#FFFFFFFF"
+        Row gap=16 border-bottom="#FF444444"
+          Text.caption "SPOKEN" grow
+          Text.caption "CUE CALL" w=240
+        each l in lines
+          Row gap=16 top pad=8 fill={l.n==cur+1 ? (night ? "#FF2A2410" : "#FFFFF3C4") : "#00000000"} radius=6 onTap={cur=l.n-1}
+            Column grow gap=2
+              Text.caption "{l.who}"
+              Text "{l.text}" size=18 color={night ? "#FFB8B8C0" : "#FF111111"}
+            Column w=240
+              if l.cue != ""
+                Badge.warning "{l.cue}"
+              if l.n==cur+1
+                Badge.primary "NOW"
+      Pane w=300 pad=16 gap=12 fill={night ? "#FF121218" : "#FFF4F4F6"}
+        Heading "Live calls" level=3
+        each c in filter(cues,c=>dept=="All" || c.dept==dept)
+          Card gap=6 animate={c.secs<10 ? "pulse" : "fade"}
+            Row between
+              Badge.neutral "{c.dept}"
+              Badge.{c.phase=="Go" ? "success" : (c.phase=="Standby" ? "warning" : "info")} "{c.phase}"
+            Text.strong "{c.name}"
+            Row between
+              Text.heading "{c.secs}s" size=28
+              Button.outline "Called" onTap={cues=removeWhere(cues,x=>x.id==c.id); toast "{c.name} called"}
+            Progress {1-min(1,c.secs/210)}
+        Divider
+        Heading "Holds tonight" level=3
+        if isEmpty(holdLog)
+          Text.muted "No holds yet."
+        each h in holdLog
+          Text.muted "{duration(h.at)}  {h.reason}"
+    Footer
+      Row between pad=12 fill={night ? "#FF000000" : "#FFEDEDF0"}
+        Button.outline "Back" icon="chevron_left" onTap={cur=max(0,cur-1)}
+        Text.strong "Next: {lines[min(cur+1,length(lines)-1)].cue != "" ? lines[min(cur+1,length(lines)-1)].cue : "no cue"}"
+        Button "GO" icon="play_arrow" size=large disabled={holding} onTap={cur=min(length(lines)-1,cur+1); emit go cur}
+  Dialog#hold "Call a hold" "Say why so the log can be read back."
+    Input "Reason" "Actor missing from the wings" bind=holdReason multiline
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Hold" onTap={holdReason=="" ? toast "Type a reason" : {holding=true; emit hold holdReason; close}}
+  Sheet#jump "Jump to page"
+    state jumpAct=1
+    SegmentedButton bind=jumpAct items=["Act 1","Act 2","Act 3"]
+    Text.caption "Scenes"
+    Grid cols=3 gap=8
+      each l in filter(lines,l=>l.act==1 && l.who!="")
+        Button.outline "Sc {l.scene} line {l.n}" onTap={cur=l.n-1; close; toast "Page {l.n}"}
+
+### Rehearsal Report
+state tab="all"
+state who="Everyone"
+state noteText=""
+state noteTarget="Stage management"
+state notes=[{"id":1,"person":"Lighting","dept":"LX","text":"LX 14 late by two seconds on Act 1 Scene 1","done":false},{"id":2,"person":"Sound","dept":"SQ","text":"Birdsong cuts off the last word of Hermia's line","done":false},{"id":3,"person":"Marcus Bell (Demetrius)","dept":"Cast","text":"Take the pause before 'still' a beat longer","done":true},{"id":4,"person":"Flys","dept":"FLY","text":"Garden drop sticks at half; check the line","done":false},{"id":5,"person":"Wardrobe","dept":"Costume","text":"Helena's cloak catches on the door flat","done":false}]
+App
+  Sidebar
+    Brand "Cuesheet" icon="theater_comedy"
+    NavItem "Prompt book" icon="menu_book" onTap={go prompt-book}
+    NavItem "Rehearsal report" icon="assignment" selected onTap={go rehearsal-report}
+    Spacer grow
+    Text.muted "Rehearsal 12, Tues 18 Nov"
+  Main
+    Nav
+      Heading "Rehearsal report" level=1
+      Row gap=8
+        Button.outline "Copy" icon="content_copy" onTap={copy join(map(notes,n=>n.person+": "+n.text),"\n"); toast "Report copied"}
+        Button "Send to company" icon="send" onTap={emit sendReport notes; toast "Report sent"}
+    Column pad=24 gap=16 scroll
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.muted "Notes"
+          Text.heading "{length(notes)}" size=32
+        Card gap=4
+          Text.muted "Open"
+          Text.heading "{count(notes,n=>!n.done)}" size=32
+        Card gap=4
+          Text.muted "Done"
+          Text.heading "{count(notes,n=>n.done)}" size=32
+        Card gap=4
+          Text.muted "Holds"
+          Text.heading "2" size=32
+      Row gap=8
+        ChoiceChip "All" selected={tab=="all"} onTap={tab="all"}
+        ChoiceChip "Open" selected={tab=="open"} onTap={tab="open"}
+        ChoiceChip "Done" selected={tab=="done"} onTap={tab="done"}
+        Spacer grow
+        Select bind=who items=["Everyone","Lighting","Sound","Flys","Wardrobe","Marcus Bell (Demetrius)"]
+      Card gap=8
+        Heading "Notes by person" level=3
+        each n in filter(notes,n=>(tab=="all" || (tab=="open" && !n.done) || (tab=="done" && n.done)) && (who=="Everyone" || n.person==who))
+          ListTile "{n.person}" subtitle="{n.text}"
+            Checkbox bind=n.done
+            Badge.neutral "{n.dept}"
+        if count(notes,n=>(who=="Everyone" || n.person==who))==0
+          Text.muted "No notes for {who}."
+      Card gap=8
+        Heading "Add a note" level=3
+        Row gap=8
+          Select bind=noteTarget items=["Stage management","Lighting","Sound","Flys","Wardrobe"] w=220
+          Input "Note" "What needs fixing?" bind=noteText grow
+          Button "Add" onTap={noteText=="" ? toast "Write the note first" : {notes=append(notes,{"id":length(notes)+1,"person":noteTarget,"dept":"SM","text":noteText,"done":false}); noteText=""}}

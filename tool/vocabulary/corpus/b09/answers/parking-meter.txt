@@ -1,0 +1,160 @@
+### Meter
+state bay="Bay 14B"
+state rate=2.00
+state total=0
+state coins=[]
+state maxMinutes=120
+state contactless=false
+state freeHours=false
+state freeStart="18:00"
+state lastCoin=0
+state tab="meter"
+App
+  Main
+    Nav
+      Brand "Feeder" icon="local_parking"
+      Row gap=8
+        Chip "Contactless only" selected={contactless} onTap={contactless=!contactless; toast contactless ? "Coins accepted again" : "Contactless only"}
+        IconButton "volume_up" tooltip="Sound"
+    Column pad=24 gap=16 maxw=560 center
+      Box fill=#FF10261C radius=12 pad=20 gap=8
+        Row between
+          Text.heading "{bay}" color=#FFB8F5CF
+          Text "Pay and display" color=#FF7FB896
+        Text "{money(rate,"$",2)} per hour, max stay {maxMinutes / 60} h" color=#FFB8F5CF
+        Text "{floor(total / rate * 60)} min" size=64 weight=700 color=#FF5CFF9A center
+        Text "{formatDate(today(),"MMM d")}" color=#FF7FB896 center
+      if freeHours
+        Card gap=4
+          Row gap=8
+            IconTile "nightlight"
+            Column grow
+              Text.strong "Charge-free hours"
+              Text.muted "No charge from {freeStart} to 08:00. Park free, no ticket needed."
+      if floor(total / rate * 60) >= maxMinutes
+        Card gap=4 fill=#FFFFF4E5
+          Row gap=8
+            Icon "warning"
+            Column grow
+              Text.strong "Maximum stay reached"
+              Text.muted "This bay allows {maxMinutes / 60} hours. No more time can be added."
+      if floor(total / rate * 60) < maxMinutes && floor(total / rate * 60) >= maxMinutes - 30
+        Badge.warning "Close to the maximum stay of {maxMinutes} min"
+      Card gap=8
+        Row between
+          Text.strong "Coins"
+          Text.strong "{money(total,"$",2)}" animate=pulse
+        if contactless
+          Text.muted "This meter takes cards and phones only today."
+        if !contactless
+          Row gap=8
+            Button.outline "10c" onTap={floor(total / rate * 60) < maxMinutes ? {total=round(total+0.10,2); coins=append(coins,0.10); lastCoin=0.10; play tick} : toast "Maximum stay reached"}
+            Button.outline "25c" onTap={floor(total / rate * 60) < maxMinutes ? {total=round(total+0.25,2); coins=append(coins,0.25); lastCoin=0.25; play tick} : toast "Maximum stay reached"}
+            Button.outline "$1" onTap={floor(total / rate * 60) < maxMinutes ? {total=round(total+1,2); coins=append(coins,1); lastCoin=1; play tick} : toast "Maximum stay reached"}
+            Button.outline "$2" onTap={floor(total / rate * 60) < maxMinutes ? {total=round(total+2,2); coins=append(coins,2); lastCoin=2; play tick} : toast "Maximum stay reached"}
+        Row scroll gap=4
+          each c in coins
+            Badge.neutral "{money(c,"$",2)}" animate=slide-up duration=200
+        Row between
+          Text.muted "{length(coins)} coins inserted"
+          Button.ghost "Refund" onTap={total=0; coins=[]; toast "Coins returned"}
+      Row gap=12
+        Button.secondary "Last purchase" grow onTap={go remaining}
+        Button "Enter plate" grow onTap={go plate}
+
+### Plate
+state chars=["A","B","C","D","E","F","G","H","J","K","L","M","N","P","R","S","T","U","V","W","X","Y","Z","0","1","2","3","4","5","6","7","8","9"]
+state plateIdx=[1,5,13,24,25,26,10]
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go meter}
+      Heading "Your plate"
+      Text.muted "Bay 14B"
+    Column pad=24 gap=16 maxw=560 center
+      Text.muted "Use the arrows to set each character of your number plate."
+      Row gap=6 center
+        each v in plateIdx
+          Card gap=4 center
+            IconButton "keyboard_arrow_up" tooltip="Next" onTap={plateIdx=setAt(plateIdx,index,(plateIdx[index]+1)%length(chars)); play tick}
+            Text "{chars[v]}" size=40 weight=700 center
+            IconButton "keyboard_arrow_down" tooltip="Previous" onTap={plateIdx=setAt(plateIdx,index,(plateIdx[index]+length(chars)-1)%length(chars)); play tick}
+      Row between
+        Button.ghost "Clear" onTap={plateIdx=[0,0,0,0,0,0,0]}
+        Text.mono "{join(map(plateIdx,v=>chars[v]),"")}"
+      Button "Confirm plate" size=large onTap={emit plate join(map(plateIdx,v=>chars[v]),""); go pay}
+
+### Pay
+state stage="choose"
+state tapCount=5
+state paid=false
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go meter}
+      Heading "Payment"
+    Column pad=24 gap=16 maxw=560 center
+      if stage=="choose"
+        Card gap=12
+          Text.strong "Total due"
+          Text "{money(total,"$",2)}" size=48 weight=700
+          Text.muted "{floor(total / rate * 60)} min in Bay 14B"
+          Button "Pay by card or phone" size=large onTap={stage="tap"; tapCount=5}
+          Button.outline "Cancel" onTap={go meter}
+      if stage=="tap"
+        every 1s onTick={tapCount=tapCount-1; tapCount<=1 ? {stage="done"; paid=true; emit purchase total} : {}}
+        Card gap=12 center
+          Stack center middle
+            Ring 0.66 animate=pulse
+            Icon "contactless" size=48
+          Text.heading "Hold your card or phone to the reader"
+          Text.muted "Waiting for payment, {tapCount} s"
+          Button.ghost "Cancel" onTap={stage="choose"}
+      if stage=="done"
+        Card gap=12 center animate=pop
+          IconTile "check_circle"
+          Text.heading "Payment accepted"
+          Text.muted "{money(total,"$",2)} paid. Take your ticket."
+          Slip "Feeder" bay="14B" plate={join(map(plateIdx,v=>chars[v]),"")} minutes={floor(total / rate * 60)} animate=slide-up
+          Row gap=8
+            Button.outline "Show time left" grow onTap={go remaining}
+            Button "Done" grow onTap={stage="choose"; total=0; coins=[]; go meter}
+
+### Remaining
+state boughtSeconds=5400
+state elapsed=1260
+state running=true
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go meter}
+      Heading "Last purchase"
+    every 1s when running onTick={elapsed=min(boughtSeconds,elapsed+1)}
+    Column pad=24 gap=16 maxw=560 center
+      Box fill=#FF10261C radius=12 pad=20 gap=8
+        Text "Time remaining" color=#FF7FB896 center
+        Text "{duration(boughtSeconds-elapsed)}" size=64 weight=700 color=#FF5CFF9A center
+        Progress {(boughtSeconds-elapsed)/boughtSeconds}
+      if boughtSeconds-elapsed < 300
+        Badge.warning "Less than 5 minutes left"
+      if boughtSeconds-elapsed <= 0
+        Badge.error "Expired. Buy more time at the meter."
+      Card gap=8
+        Row between
+          Text.muted "Bay"
+          Text.strong "14B"
+        Row between
+          Text.muted "Plate"
+          Text.mono "{join(map(plateIdx,v=>chars[v]),"")}"
+        Row between
+          Text.muted "Paid"
+          Text.strong "$3.00"
+        Row between
+          Text.muted "Free period started"
+          Text.strong "{freeStart}"
+      Row gap=12
+        Button.outline "Print slip" grow onTap={open slip}
+        Button "Buy more time" grow onTap={go meter}
+  Dialog#slip "Ticket printed" "Keep it on your dashboard"
+    Slip "Feeder" bay="14B" plate={join(map(plateIdx,v=>chars[v]),"")} minutes=90 animate=slide-up
+    Button "Close" onTap={close}

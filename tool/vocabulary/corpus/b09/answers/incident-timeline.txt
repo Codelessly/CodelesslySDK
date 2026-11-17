@@ -1,0 +1,165 @@
+### Timeline
+state screen="timeline"
+state status="investigating"
+state elapsed=2535
+state filter="all"
+state note=""
+state kind="action"
+state events=[{"id":1,"t":"14:02","who":"PagerDuty","type":"alert","text":"Checkout error rate above 5% for 3 minutes"},{"id":2,"t":"14:06","who":"Dana Ortiz","type":"action","text":"Acknowledged page, opened incident channel"},{"id":3,"t":"14:15","who":"Priya Nair","type":"alert","text":"Payments DB primary shows connection pool at 100%"},{"id":4,"t":"14:24","who":"Marcus Webb","type":"decision","text":"Roll back release 2024.11.3 on checkout-api"},{"id":5,"t":"14:31","who":"Marcus Webb","type":"action","text":"Rollback started, 4 of 12 pods replaced"}]
+state paged=[{"name":"Dana Ortiz","acked":true},{"name":"Priya Nair","acked":true},{"name":"Marcus Webb","acked":true},{"name":"Lena Fischer","acked":false}]
+state tasks=[{"id":1,"text":"Add connection pool alert at 80%","owner":"Priya Nair","done":false},{"id":2,"text":"Load test release before canary","owner":"Marcus Webb","done":false},{"id":3,"text":"Write runbook for pool exhaustion","owner":"Dana Ortiz","done":true}]
+every 1s when status!="resolved" onTick={elapsed=elapsed+1}
+App
+  Sidebar
+    Brand "Postmortem" icon="local_fire_department"
+    NavItem "Timeline" icon="timeline" selected={screen=="timeline"} onTap={go timeline}
+    NavItem "Status update" icon="campaign" selected={screen=="update"} onTap={go update}
+    NavItem "Follow-ups" icon="checklist" badge="{count(tasks,t=>!t.done)}" selected={screen=="followups"} onTap={go followups}
+    Spacer grow
+    Text.muted "On call: Dana Ortiz"
+  Main
+    Nav
+      Row gap=12
+        Heading "INC-2291 Checkout failing" level=1
+        Badge.error "SEV 1"
+      Row gap=8
+        Text.mono "{duration(elapsed)}"
+        Button.outline "Page someone" icon="notifications_active" onTap={open page}
+        Button "Add event" icon="add" onTap={open addEvent}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Row between
+          Row gap=12
+            Avatar "Dana Ortiz" size=40
+            Column
+              Text.strong "Dana Ortiz"
+              Text.muted "Incident commander"
+          Badge.warning "{upper(status)}" visible={status!="resolved"}
+          Badge.success "RESOLVED" visible={status=="resolved"}
+        SegmentedButton bind=status items=["investigating","identified","mitigating","resolved"]
+        Row gap=8
+          Button.outline "Advance status" disabled={status=="resolved"} onTap={status=status=="investigating" ? "identified" : status=="identified" ? "mitigating" : "resolved"; toast "Status updated"}
+          Button.ghost "Reopen" visible={status=="resolved"} onTap={status="investigating"}
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Time to acknowledge"
+          Text.strong "4 min" size=24
+        Card gap=4
+          Text.muted "Time open"
+          Text.strong "{duration(elapsed)}" size=24
+        Card gap=4
+          Text.muted "Customers affected"
+          Text.strong "12,400" size=24
+      Card gap=8
+        Text.strong "Error rate"
+        LineChart values=[0.4,0.5,0.4,6.2,9.8,11.5,8.1,3.2,0.9,0.5] labels=["13:50","14:00","14:10","14:20","14:30","14:40","14:50","15:00","15:10","15:20"] h=200 shade={[3,7]} shadeLabel="Incident window"
+      Card gap=12
+        Row between
+          Text.strong "Timeline"
+          Row gap=8
+            ChoiceChip "All" selected={filter=="all"} onTap={filter="all"}
+            ChoiceChip "Alerts" selected={filter=="alert"} onTap={filter="alert"}
+            ChoiceChip "Actions" selected={filter=="action"} onTap={filter="action"}
+            ChoiceChip "Decisions" selected={filter=="decision"} onTap={filter="decision"}
+        Timeline
+          each e in sortBy(filter=="all" ? events : filter(events,x=>x.type==filter),x=>x.t)
+            TimelineItem time="{e.t}" icon={e.type=="alert" ? "warning" : e.type=="decision" ? "gavel" : "build"}
+              Row gap=8
+                Text.strong "{e.who}"
+                Badge.neutral "{e.type}"
+              Text "{e.text}"
+  Dialog#addEvent "Add event" "Appears on the timeline for everyone"
+    SegmentedButton bind=kind items=["alert","action","decision"]
+    Input "What happened" bind=note multiline
+    Button "Post to timeline" onTap={note!="" ? events=append(events,{"id":length(events)+1,"t":"14:40","who":"Dana Ortiz","type":kind,"text":note}); note=""; close : toast "Describe the event first"}
+  Sheet#page "Page someone"
+    Text.muted "Paged so far"
+    Row gap=8
+      each p in paged
+        Chip "{p.name}" icon={p.acked ? "check_circle" : "schedule"} onTap={paged=updateWhere(paged,x=>x.name==p.name,x=>with(x,"acked",true)); toast "{p.name} acknowledged"}
+    Button.outline "Page Sam Patel" onTap={paged=append(paged,{"name":"Sam Patel","acked":false}); toast "Paged Sam Patel"; close}
+
+### Status update
+state status="investigating"
+state elapsed=2535
+state draft="We are investigating elevated errors at checkout. A rollback is in progress and we will update in 30 minutes."
+state audience="Customers"
+state preview=false
+state posted=[{"t":"14:20","who":"Dana Ortiz","to":"Customers","text":"We are aware of failures at checkout and are investigating."}]
+every 1s when status!="resolved" onTick={elapsed=elapsed+1}
+App
+  Sidebar
+    Brand "Postmortem" icon="local_fire_department"
+    NavItem "Timeline" icon="timeline" onTap={go timeline}
+    NavItem "Status update" icon="campaign" selected={true}
+    NavItem "Follow-ups" icon="checklist" onTap={go followups}
+  Main
+    Nav
+      Heading "Status update" level=1
+      Text.mono "{duration(elapsed)} open"
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=12
+          Text.strong "Draft"
+          SegmentedButton bind=audience items=["Customers","Internal","Executives"]
+          Input "Message" bind=draft multiline
+          Text.caption "{length(draft)} of 280"
+          Row gap=8
+            Button.outline "Preview" onTap={preview=!preview}
+            Button "Post update" disabled={draft=="" || length(draft)>280} onTap={posted=append(posted,{"t":"14:40","who":"Dana Ortiz","to":audience,"text":draft}); draft=""; preview=false; toast "Update posted"}
+        if preview
+          Card grow gap=8
+            Text.muted "Preview for {lower(audience)}"
+            Row gap=8
+              Avatar "Dana Ortiz" size=32
+              Text.strong "Postmortem status"
+              Badge.warning "{status}"
+            Text "{draft}"
+      Card gap=12
+        Text.strong "Posted"
+        each p in reverse(posted)
+          ListTile "{p.text}" subtitle="{p.t} to {p.to}, by {p.who}" icon="campaign"
+
+### Follow-ups
+state tasks=[{"id":1,"text":"Add connection pool alert at 80%","owner":"Priya Nair","done":false},{"id":2,"text":"Load test release before canary","owner":"Marcus Webb","done":false},{"id":3,"text":"Write runbook for pool exhaustion","owner":"Dana Ortiz","done":true}]
+state newText=""
+state newOwner="Dana Ortiz"
+state status="investigating"
+state elapsed=2535
+every 1s when status!="resolved" onTick={elapsed=elapsed+1}
+App
+  Sidebar
+    Brand "Postmortem" icon="local_fire_department"
+    NavItem "Timeline" icon="timeline" onTap={go timeline}
+    NavItem "Status update" icon="campaign" onTap={go update}
+    NavItem "Follow-ups" icon="checklist" selected={true}
+  Main
+    Nav
+      Heading "Follow-ups" level=1
+      Text.muted "{count(tasks,t=>t.done)} of {length(tasks)} done"
+    Column pad=24 gap=16 scroll
+      Progress {count(tasks,t=>t.done)/max(1,length(tasks))}
+      Card gap=8
+        each t in tasks
+          Row between
+            Checkbox "{t.text}" bind=t.done
+            Row gap=8
+              Avatar "{t.owner}" size=28
+              Text.muted "{t.owner}"
+              IconButton "delete" tooltip="Remove" onTap={tasks=removeWhere(tasks,x=>x.id==t.id)}
+      Card gap=12
+        Text.strong "New follow-up"
+        Input "Task" bind=newText
+        Select "Owner" bind=newOwner items=["Dana Ortiz","Priya Nair","Marcus Webb","Lena Fischer"]
+        Button "Add" onTap={newText!="" ? tasks=append(tasks,{"id":length(tasks)+10,"text":newText,"owner":newOwner,"done":false}); newText="" : toast "Write the task first"}
+      Card gap=8
+        Text.strong "Summary"
+        Row between
+          Text.muted "Duration"
+          Text.strong "{duration(elapsed)}"
+        Row between
+          Text.muted "Time to acknowledge"
+          Text.strong "4 min"
+        Row between
+          Text.muted "Open follow-ups"
+          Text.strong "{count(tasks,t=>!t.done)}"

@@ -1,0 +1,156 @@
+### Study
+state side="front"
+state depth=0.5
+state part=""
+state weak=["Rotator cuff","Tibialis anterior","Scaphoid"]
+state tab="study"
+App
+  Sidebar
+    Brand "Bonefinder" icon="accessibility_new"
+    NavItem "Study" icon="school" selected={tab=="study"} onTap={tab="study"}
+    NavItem "Quiz" icon="quiz" onTap={go quiz}
+    NavItem "Parts" icon="search" onTap={go parts}
+    NavItem "Progress" icon="insights" onTap={go progress}
+    NavItem "Weak deck" icon="style" badge="{length(weak)}" onTap={go parts}
+    Spacer grow
+    Text.muted "Streak: 6 days"
+  Main
+    Nav
+      Heading "Study" level=1
+      Row gap=8
+        SegmentedButton bind=side items=["front","back"]
+        IconButton "360" tooltip="Rotate the body" onTap={side = side=="front" ? "back" : "front"}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Card grow gap=12
+          BodyModel view={side} depth={depth} bind=part h=480 onSelect={part=result; emit selectPart result}
+            Callout part={part} line=true
+          Row gap=12
+            Icon "layers"
+            Text.fieldLabel "Skin"
+            Slider bind=depth min=0 max=1 grow
+            Text.fieldLabel "Bone"
+          Text.caption "{depth < 0.33 ? 'Skin' : depth < 0.66 ? 'Muscle' : 'Bone'} layer, {side} view"
+        Column w=320 gap=12
+          if part==""
+            Card gap=8
+              Text.strong "Tap a part"
+              Text.muted "Tap any region of the body to name it. Slide the layers to peel back skin and muscle."
+          if part!=""
+            Card gap=12
+              Row between
+                Heading "{part}" level=3
+                IconButton "close" tooltip="Clear" onTap={part=""}
+              Row gap=8
+                Text.mono "{pronounce(part)}"
+                IconButton "volume_up" tooltip="Hear it" onTap={speak part}
+              Text.muted "{describe(part)}"
+              Row gap=8
+                Button "Add to weak deck" icon="bookmark_add" onTap={weak=append(weak,part); toast "Added to your weak deck"}
+                Button.outline "Quiz me" onTap={go quiz}
+
+### Quiz
+state mode="relaxed"
+state running=false
+state left=60
+state score=0
+state placed={}
+state labels=[{"id":"clavicle","name":"Clavicle"},{"id":"sternum","name":"Sternum"},{"id":"humerus","name":"Humerus"},{"id":"radius","name":"Radius"},{"id":"femur","name":"Femur"}]
+state dots=[{"id":"clavicle","x":0.42,"y":0.18},{"id":"sternum","x":0.5,"y":0.28},{"id":"humerus","x":0.3,"y":0.34},{"id":"radius","x":0.24,"y":0.5},{"id":"femur","x":0.42,"y":0.68}]
+every 1s when running onTick={left=left-1; left<=0 ? {running=false; open timeup} : {}}
+App
+  Sidebar
+    Brand "Bonefinder" icon="accessibility_new"
+    NavItem "Study" icon="school" onTap={go study}
+    NavItem "Quiz" icon="quiz" selected={true}
+    NavItem "Parts" icon="search" onTap={go parts}
+    NavItem "Progress" icon="insights" onTap={go progress}
+    Spacer grow
+  Main
+    Nav
+      Heading "Skeleton quiz" level=1
+      Row gap=12
+        SegmentedButton bind=mode items=["relaxed","timed"]
+        if mode=="timed"
+          Badge.warning "{duration(left)}"
+        Button "{running ? 'Pause' : 'Start'}" onTap={running=!running; left = left<=0 ? 60 : left}
+    Column pad=24 gap=16
+      Row gap=16
+        Text.strong "Score {score} of {length(dots)}"
+        Progress {score/length(dots)} grow
+      Row gap=24 top
+        Card grow
+          BodyModel view="front" layer="bone" h=460
+            each d in dots
+              Dot#d{d.id} x={d.x} y={d.y} filled={contains(keys(placed), d.id)} drop=label onDrop={result.data==d.id ? {placed=with(placed,d.id,result.data); score=score+1; toast "Correct"} : {toast "Not that one"; animate=shake}}
+        Column w=240 gap=8
+          Text.fieldLabel "Drag each label to its dot"
+          each l in labels
+            Chip "{l.name}" drag=label(l.id) hidden={contains(keys(placed), l.id)}
+          if score==length(dots)
+            Card gap=8
+              Text.success "All placed"
+              Button "Play again" onTap={placed={}; score=0; left=60; running=false}
+  Dialog#timeup "Time is up" "You placed {score} of {length(dots)}"
+    Button "Try again" onTap={placed={}; score=0; left=60; running=true; close}
+    Button.ghost "Add the missed to weak deck" onTap={emit saveMissed; close}
+
+### Parts
+state q=""
+state sel="Scaphoid"
+state flipped=false
+state parts=[{"name":"Scaphoid","region":"Wrist","say":"SKAF-oid","weak":true},{"name":"Rotator cuff","region":"Shoulder","say":"ROH-tay-ter kuf","weak":true},{"name":"Tibialis anterior","region":"Shin","say":"tib-ee-AY-lis an-TEER-ee-er","weak":true},{"name":"Humerus","region":"Arm","say":"HYOO-mer-us","weak":false},{"name":"Sternum","region":"Chest","say":"STUR-num","weak":false},{"name":"Gastrocnemius","region":"Calf","say":"gas-trok-NEE-mee-us","weak":false}]
+App
+  Sidebar
+    Brand "Bonefinder" icon="accessibility_new"
+    NavItem "Study" icon="school" onTap={go study}
+    NavItem "Quiz" icon="quiz" onTap={go quiz}
+    NavItem "Parts" icon="search" selected={true}
+    NavItem "Progress" icon="insights" onTap={go progress}
+    Spacer grow
+  Main
+    Nav
+      Heading "Parts" level=1
+      Input "Search parts" "Try humerus" bind=q w=240
+    Column pad=24 gap=12
+      Text.fieldLabel "Weak deck: {count(parts,p=>p.weak)} parts"
+      each p in filter(parts, x=>contains(lower(x.name), lower(q)))
+        ListTile "{p.name}" subtitle="{p.region}" selected={sel==p.name} onTap={sel=p.name; flipped=false}
+          Badge.warning "weak" visible={p.weak}
+  Pane w=360 pad=16 gap=12
+    Flashcard front="{sel}" back="{find(parts,p=>p.name==sel).say}" bind=flipped
+    Row gap=8
+      IconButton "volume_up" tooltip="Hear it" onTap={speak sel}
+      Button.outline "Still weak" onTap={parts=updateWhere(parts,p=>p.name==sel,p=>with(p,"weak",true)); toast "Kept in deck"}
+      Button "Got it" onTap={parts=updateWhere(parts,p=>p.name==sel,p=>with(p,"weak",false)); toast "Removed from deck"}
+
+### Progress
+state side="front"
+state regions=[{"name":"Head","score":0.9},{"name":"Shoulder","score":0.45},{"name":"Chest","score":0.8},{"name":"Arm","score":0.7},{"name":"Wrist","score":0.3},{"name":"Thigh","score":0.6},{"name":"Calf","score":0.5},{"name":"Foot","score":0.2}]
+App
+  Sidebar
+    Brand "Bonefinder" icon="accessibility_new"
+    NavItem "Study" icon="school" onTap={go study}
+    NavItem "Quiz" icon="quiz" onTap={go quiz}
+    NavItem "Parts" icon="search" onTap={go parts}
+    NavItem "Progress" icon="insights" selected={true}
+    Spacer grow
+  Main
+    Nav
+      Heading "Progress" level=1
+      SegmentedButton bind=side items=["front","back"]
+    Column pad=24 gap=16
+      Row gap=24 top
+        Card grow
+          BodyMap view={side} regions={regions} scale="heat" h=480 onSelect={emit openRegion result}
+        Column w=320 gap=12
+          Card gap=8
+            Text.fieldLabel "Overall"
+            Text "{round(sum(regions,r=>r.score)/length(regions)*100,0)}%" size=48 weight=700
+            Progress {sum(regions,r=>r.score)/length(regions)}
+          Card gap=8
+            Text.strong "Weakest regions"
+            each r in take(sortBy(regions,x=>x.score),3)
+              Row between
+                Text "{r.name}"
+                Badge.warning "{round(r.score*100,0)}%"

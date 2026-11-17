@@ -1,0 +1,3 @@
+App: Downbeat, a score follower for a musician. A page of sheet music with a bar highlighted and moving as the music is played, a tempo indicator; a tap on a bar sets a loop between two bars shown by brackets; a page turn that flips by itself a bar before the end or by a tap; a metronome with a flashing dot and accent pattern; annotations drawn with a pencil and an eraser; a list of pieces in a setlist reordered by dragging.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

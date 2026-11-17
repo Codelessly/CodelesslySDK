@@ -1,0 +1,212 @@
+### Desk
+state status="ready"
+state elapsed=0
+state incoming=true
+state queue=14
+state longest=372
+state handled=23
+state whisper=false
+every 1s onTick={elapsed=elapsed+1; longest=longest+1}
+App
+  Sidebar
+    Brand "Handset" icon="headset_mic"
+    NavItem "Desk" icon="dashboard" selected={true}
+    NavItem "Active call" icon="call" onTap={go active-call}
+    NavItem "Wrap-up" icon="fact_check" onTap={go wrap-up}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Whitfield" size=36
+      Column
+        Text.strong "Dana Whitfield"
+        Text.caption "Billing support, seat 42"
+  Main
+    Nav
+      Heading "Agent desk" level=1
+      Row gap=12 middle
+        Badge.success "Ready" visible={status=="ready"}
+        Badge.info "On a call" visible={status=="on a call"}
+        Badge.warning "Wrap-up" visible={status=="wrap-up"}
+        Badge.neutral "Break" visible={status=="break"}
+        Text.mono "{duration(elapsed)}"
+        Select bind=status items=["ready","on a call","wrap-up","break"] onChange={elapsed=0}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Card grow gap=12
+          Row between
+            Text.sectionTitle "Incoming call"
+            Badge.warning "Ringing" visible={incoming}
+          if incoming
+            Row gap=12 middle animate=pulse
+              Avatar "Marcus Adeyemi" size=56
+              Column grow
+                Text.heading2 "Marcus Adeyemi"
+                Text.muted "+1 (415) 555-0187, matched by phone"
+            Grid cols=2 gap=8
+              Text.caption "Account"
+              Text.strong "Premier, since 2019"
+              Text.caption "Open tickets"
+              Text.strong "2 (billing dispute, card update)"
+              Text.caption "Last contact"
+              Text.strong "Tue, via chat"
+              Text.caption "Sentiment"
+              Badge.warning "Frustrated"
+            Row gap=8
+              Button "Answer" icon="call" onTap={incoming=false; status="on a call"; elapsed=0; queue=max(0,queue-1); go active-call}
+              Button.destructive "Decline" icon="call_end" onTap={incoming=false; queue=max(0,queue-1); toast "Call declined and returned to the queue"}
+          if !incoming
+            Text.muted "No call ringing. Stay ready and the next caller will appear here."
+            Button.outline "Simulate next call" onTap={incoming=true; status="ready"}
+        Card w=320 gap=12
+          Text.sectionTitle "Queue"
+          Row between
+            Column
+              Text "{queue}" size=48 weight=700
+              Text.caption "callers waiting"
+            Column
+              Text "{duration(longest)}" size=32 weight=700 color=#FFD9480F
+              Text.caption "longest wait"
+          Progress {min(1,longest/600)}
+          Text.caption "Service target is a 10 minute longest wait"
+          Sparkline values=[9,11,10,13,12,15,14]
+      Card gap=12
+        Row between
+          Text.sectionTitle "Your day"
+          Text.caption "Since 8:00 AM"
+        Grid cols=4 gap=16
+          Column
+            Text.caption "Calls handled"
+            Text "{handled}" size=32 weight=700
+          Column
+            Text.caption "Average handle time"
+            Text "5:42" size=32 weight=700
+          Column
+            Text.caption "Satisfaction"
+            Row gap=4 middle
+              Text "4.7" size=32 weight=700
+              Icon "star"
+          Column
+            Text.caption "First call resolution"
+            Text "81%" size=32 weight=700
+
+### Active call
+state elapsed=0
+state hold=false
+state steps=[{"label":"Greet and confirm name","done":true},{"label":"Verify identity: postcode and last four of card","done":true},{"label":"Acknowledge the billing dispute","done":false},{"label":"Check the disputed charge in the ledger","done":false},{"label":"Offer refund or credit within policy","done":false},{"label":"Confirm resolution and close warmly","done":false}]
+state notes="" saved
+state whisper=true
+state query=""
+state target=""
+state directory=[{"name":"Priya Nair","team":"Billing escalations","presence":"available"},{"name":"Tom Brandt","team":"Payments risk","presence":"on a call"},{"name":"Lena Kowalski","team":"Retention","presence":"available"},{"name":"Front desk queue","team":"General","presence":"available"}]
+every 1s when !hold onTick={elapsed=elapsed+1}
+App
+  Sidebar
+    Brand "Handset" icon="headset_mic"
+    NavItem "Desk" icon="dashboard" onTap={go desk}
+    NavItem "Active call" icon="call" selected={true}
+    NavItem "Wrap-up" icon="fact_check" onTap={go wrap-up}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Whitfield" size=36
+      Text.strong "Dana Whitfield"
+  Main
+    Nav
+      Row gap=12 middle
+        Avatar "Marcus Adeyemi" size=32
+        Heading "Marcus Adeyemi" level=1
+        Badge.warning "On hold" visible={hold}
+        Badge.info "Live" visible={!hold}
+        Text.mono "{duration(elapsed)}"
+      Row gap=8 middle
+        Row gap=6 middle visible={whisper} animate=pulse
+          Icon "hearing"
+          Text.strong "Supervisor Ines is whispering"
+        IconButton "hearing_disabled" tooltip="Dismiss whisper notice" visible={whisper} onTap={whisper=false}
+        Button.outline "Hold" icon="pause" visible={!hold} onTap={hold=true; toast "Caller on hold"}
+        Button "Resume" icon="play_arrow" visible={hold} onTap={hold=false}
+        Button.outline "Transfer" icon="phone_forwarded" onTap={open transfer}
+        Button.destructive "End call" icon="call_end" onTap={go wrap-up}
+    Row grow top
+      Column grow pad=24 gap=16 scroll
+        Card gap=12
+          Row between
+            Text.sectionTitle "Call script: billing dispute"
+            Text.caption "{count(steps,s=>s.done)} of {length(steps)} steps"
+          Progress {count(steps,s=>s.done)/length(steps)}
+          each step in steps
+            Checkbox "{step.label}" bind=step.done
+        Card gap=8
+          Row between
+            Text.sectionTitle "Notes"
+            Text.caption "Saved on this device"
+          Input "Call notes" "What did the customer say, and what did you promise?" bind=notes multiline h=140
+          Row end gap=8
+            Button.outline "Insert template" onTap={notes=notes+"Issue: \nAction taken: \nFollow-up: "}
+            Button "Save note" onTap={emit saveNote notes; toast "Note saved"}
+      Pane w=340 pad=16 gap=12
+        Text.sectionTitle "Customer history"
+        Timeline
+          TimelineItem "Today, 9:41" "Called about a duplicate charge of $89.00" icon="call"
+          TimelineItem "Tue, 14:20" "Chat: asked for a receipt" icon="chat"
+          TimelineItem "Mar 3" "Card updated to ending 4417" icon="credit_card"
+          TimelineItem "Feb 11" "Refund of $24.00 issued" icon="undo"
+          TimelineItem "2019" "Joined on the Premier plan" icon="star"
+        Divider
+        Text.sectionTitle "Account"
+        Row between
+          Text.muted "Plan"
+          Text.strong "Premier"
+        Row between
+          Text.muted "Balance"
+          Text.strong "$0.00"
+  Sheet#transfer "Transfer call"
+    Input "Search the directory" bind=query
+    each person in filter(directory,p=>contains(lower(p.name),lower(query)) || contains(lower(p.team),lower(query)))
+      ListTile "{person.name}" subtitle="{person.team}" onTap={target=person.name}
+        Avatar "{person.name}" size=32
+        Badge.success "Available" visible={person.presence=="available"}
+        Badge.neutral "{person.presence}" visible={person.presence!="available"}
+    if target!=""
+      Text.muted "Transfer to {target}?"
+    Row end gap=8
+      Button.outline "Cancel" onTap={target=""; close}
+      Button "Warm transfer" onTap={target!="" ? {emit transfer target; toast "Transferring to {target}"; close; go wrap-up} : toast "Pick someone first"}
+
+### Wrap-up
+state codes=[{"name":"Resolved","on":false},{"name":"Refund issued","on":false},{"name":"Escalated","on":false},{"name":"Callback needed","on":false},{"name":"Billing dispute","on":false},{"name":"Card update","on":false},{"name":"Wrong department","on":false},{"name":"Technical issue","on":false}]
+state outcome=""
+state remaining=60
+state comment=""
+every 1s when remaining>0 onTick={remaining=remaining-1}
+App
+  Sidebar
+    Brand "Handset" icon="headset_mic"
+    NavItem "Desk" icon="dashboard" onTap={go desk}
+    NavItem "Active call" icon="call" onTap={go active-call}
+    NavItem "Wrap-up" icon="fact_check" selected={true}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Whitfield" size=36
+      Text.strong "Dana Whitfield"
+  Main
+    Nav
+      Heading "Wrap up the call" level=1
+      Row gap=8 middle
+        Icon "timer"
+        Text.mono "{duration(remaining)} left"
+    Column pad=24 gap=16 maxw=720
+      Card gap=8
+        Text.strong "Marcus Adeyemi, 14:08 call"
+        Text.muted "Duplicate charge of $89.00 refunded to the card ending 4417."
+      Card gap=12
+        Text.sectionTitle "Wrap-up codes"
+        Text.caption "Pick every code that applies"
+        Row gap=8
+          each c in codes
+            FilterChip "{c.name}" bind=c.on
+      Card gap=12
+        Text.sectionTitle "Outcome"
+        SegmentedButton bind=outcome items=["Resolved","Follow-up","Escalated"]
+        Input "Wrap-up comment" bind=comment multiline
+      Row end gap=8
+        Button.outline "Back to the call" onTap={go active-call}
+        Button "Finish and go ready" onTap={count(codes,c=>c.on)>0 && outcome!="" ? {emit wrapUp {"codes":filter(codes,c=>c.on),"outcome":outcome}; toast "Wrap-up saved"; go desk} : toast "Pick a code and an outcome"}

@@ -1,0 +1,3 @@
+App: Derrick Daily, an oil-rig safety round. A list of areas walked in order, each with checks answered pass, fail or not applicable by a three-way choice; a fail opens a photo, a note and a severity; gas readings typed into number boxes that go red above a limit; a map of the platform decks with a dot per area done; a muster headcount screen; a sign-off that is locked until every area is answered.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

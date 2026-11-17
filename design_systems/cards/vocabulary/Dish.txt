@@ -1,0 +1,7 @@
+// A picture of a dish where a photo would go: a tinted tile (its tint from the name given) with a plate icon and, on a large tile, the name.
+Dish "kind" w=fill h=120 radius=12
+  Row w={w} h={h} radius={radius} center middle fill={["sandA","roseA","mintA","skyA","lilacA"][length(text(kind)) % 5]}
+    Column gap=4 center
+      Icon "restaurant" size={min(36, h * 0.4)} color=inkSoft
+      if h >= 90 && kind != null
+        Text.caption "{kind}"

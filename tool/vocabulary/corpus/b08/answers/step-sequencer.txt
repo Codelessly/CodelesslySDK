@@ -1,0 +1,191 @@
+### Sequencer
+state tab="sequencer"
+state playing=false
+state step=0
+state tempo=118
+state swing=22
+state volume=80
+state level=0.5
+state bank=0
+state patterns=[{"name":"A1 Four on the floor","kick":[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],"snare":[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],"hats":[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],"bass":[]},{"name":"A2 Broken","kick":[1,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0],"snare":[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1],"hats":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],"bass":[]},{"name":"A3 Half time","kick":[1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0],"snare":[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],"hats":[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],"bass":[]},{"name":"A4 Empty","kick":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"snare":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"hats":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"bass":[]},{"name":"B1 Shuffle","kick":[1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],"snare":[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],"hats":[1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1],"bass":[]},{"name":"B2 Empty","kick":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"snare":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"hats":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"bass":[]},{"name":"B3 Empty","kick":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"snare":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"hats":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"bass":[]},{"name":"B4 Empty","kick":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"snare":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"hats":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"bass":[]}]
+state kick=[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0]
+state snare=[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0]
+state hats=[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0]
+state mutes=[]
+state solo=""
+state clip=null
+state saved=false
+every 1000 when playing onTick={step=(step+1)%16}
+App
+  Sidebar
+    Brand "Grid Drums" icon="graphic_eq"
+    NavItem "Sequencer" icon="grid_on" selected={tab=="sequencer"} onTap={go sequencer}
+    NavItem "Bassline" icon="piano" selected={tab=="bassline"} onTap={go bassline}
+    NavItem "Patterns" icon="library_music" selected={tab=="patterns"} onTap={go patterns}
+    Spacer grow
+    Text.caption "Master"
+    Slider bind=volume min=0 max=100
+    LevelMeter bind=level orientation=horizontal
+    Text.muted "Loop: {patterns[bank].name}"
+  Main
+    Nav
+      Heading "Sequencer" level=1
+      Row gap=8
+        Chip "{tempo} BPM"
+        Chip "Swing {swing}%"
+        IconButton "{playing ? 'pause' : 'play_arrow'}" tooltip="Play or pause" onTap={playing=!playing}
+        IconButton "stop" tooltip="Stop" onTap={playing=false; step=0}
+        Button.outline "Save loop" icon="save" onTap={open saveLoop}
+        Button "Export" icon="download" onTap={open exportLoop}
+    Column pad=24 gap=16 scroll
+      Row gap=24 top
+        Column gap=8 items-center
+          Knob bind=tempo min=60 max=200 label="Tempo" unit="BPM" drag=vertical
+          Text.caption "Drag up or down"
+        Column gap=8
+          Knob bind=swing min=0 max=75 label="Swing" unit="%" drag=vertical
+          Text.caption "Drag up or down"
+        Column grow gap=8
+          Text.strong "Pattern {patterns[bank].name}"
+          Row gap=8
+            Text.caption "Step"
+            Text.mono "{step+1} / 16"
+          Progress {step/15}
+      Card gap=12
+        Row gap=12
+          Text.strong "Kick" w=60
+          StepRow bind=kick steps=16 playhead={step} paint=true muted={contains(mutes,"kick") || (solo!="" && solo!="kick")} onChange={patterns=updateWhere(patterns,p=>p.name==patterns[bank].name,p=>with(p,"kick",result))}
+          IconButton "volume_off" tooltip="Mute kick" selected={contains(mutes,"kick")} onTap={mutes=contains(mutes,"kick") ? without(mutes,"kick") : append(mutes,"kick")}
+          IconButton "headphones" tooltip="Solo kick" selected={solo=="kick"} onTap={solo=solo=="kick" ? "" : "kick"}
+        Row gap=12
+          Text.strong "Snare" w=60
+          StepRow bind=snare steps=16 playhead={step} paint=true muted={contains(mutes,"snare") || (solo!="" && solo!="snare")} onChange={patterns=updateWhere(patterns,p=>p.name==patterns[bank].name,p=>with(p,"snare",result))}
+          IconButton "volume_off" tooltip="Mute snare" selected={contains(mutes,"snare")} onTap={mutes=contains(mutes,"snare") ? without(mutes,"snare") : append(mutes,"snare")}
+          IconButton "headphones" tooltip="Solo snare" selected={solo=="snare"} onTap={solo=solo=="snare" ? "" : "snare"}
+        Row gap=12
+          Text.strong "Hats" w=60
+          StepRow bind=hats steps=16 playhead={step} paint=true muted={contains(mutes,"hats") || (solo!="" && solo!="hats")} onChange={patterns=updateWhere(patterns,p=>p.name==patterns[bank].name,p=>with(p,"hats",result))}
+          IconButton "volume_off" tooltip="Mute hats" selected={contains(mutes,"hats")} onTap={mutes=contains(mutes,"hats") ? without(mutes,"hats") : append(mutes,"hats")}
+          IconButton "headphones" tooltip="Solo hats" selected={solo=="hats"} onTap={solo=solo=="hats" ? "" : "hats"}
+        Row gap=12
+          Text.strong "Bass" w=60
+          Row grow gap=2
+            each n in range(16)
+              Box grow h=32 radius=4 fill={step==n ? "#FFFFB300" : "#FF2A2F3A"}
+          IconButton "volume_off" tooltip="Mute bass" selected={contains(mutes,"bass")} onTap={mutes=contains(mutes,"bass") ? without(mutes,"bass") : append(mutes,"bass")}
+          IconButton "headphones" tooltip="Solo bass" selected={solo=="bass"} onTap={solo=solo=="bass" ? "" : "bass"}
+          Button.ghost "Edit roll" onTap={go bassline}
+      Row gap=16
+        Card grow gap=8
+          Text.strong "Pattern bank"
+          Grid cols=8 gap=8
+            each p in patterns
+              ChoiceChip "{index+1}" selected={bank==index} onTap={bank=index}
+          Row gap=8
+            Button.outline "Copy" icon="content_copy" onTap={clip=patterns[bank]; toast "Copied {patterns[bank].name}"}
+            Button.outline "Paste" icon="content_paste" onTap={clip==null ? toast "Nothing copied yet" : {patterns=setAt(patterns,bank,with(clip,"name",patterns[bank].name)); toast "Pasted"}}
+        Card grow gap=8
+          Text.strong "Level"
+          Row gap=8 middle
+            Gauge bind=level min=0 max=1 limit=0.9 h=96
+            Text.mono "{round(volume*0.8,0)} dB"
+
+### Bassline
+state tab="bassline"
+state notes=[{"id":1,"pitch":"C2","start":0,"len":2},{"id":2,"pitch":"C2","start":3,"len":1},{"id":3,"pitch":"Eb2","start":4,"len":2},{"id":4,"pitch":"G2","start":8,"len":3},{"id":5,"pitch":"F2","start":12,"len":2},{"id":6,"pitch":"Bb1","start":14,"len":2}]
+state selected=0
+state snap="1/16"
+state octave=2
+state playing=false
+state step=0
+every 1000 when playing onTick={step=(step+1)%16}
+App
+  Sidebar
+    Brand "Grid Drums" icon="graphic_eq"
+    NavItem "Sequencer" icon="grid_on" selected={tab=="sequencer"} onTap={go sequencer}
+    NavItem "Bassline" icon="piano" selected={tab=="bassline"} onTap={go bassline}
+    NavItem "Patterns" icon="library_music" selected={tab=="patterns"} onTap={go patterns}
+  Main
+    Nav
+      Heading "Bassline" level=1
+      Row gap=8
+        Select bind=snap items=["1/4","1/8","1/16"]
+        SegmentedButton bind=octave items=["1","2","3"]
+        IconButton "{playing ? 'pause' : 'play_arrow'}" tooltip="Play or pause" onTap={playing=!playing}
+        Button.outline "Clear" icon="delete" onTap={notes=[]; selected=0}
+    Column pad=24 gap=16
+      Card gap=8
+        PianoRoll bind=notes steps=16 rows=24 lowest="C1" snap={snap} playhead={step} draw=true resize=true selected={selected} onSelect={selected=result} onChange={notes=result}
+      Row gap=16
+        Card grow gap=8
+          Text.strong "Selected note"
+          if selected==0
+            Text.muted "Click a note to select it, or drag on the grid to draw one. Drag a note's right edge to stretch it."
+          if selected!=0
+            Row gap=8
+              Text.mono "{find(notes,n=>n.id==selected).pitch}"
+              Text.muted "start {find(notes,n=>n.id==selected).start + 1}, length {find(notes,n=>n.id==selected).len}"
+            Row gap=8
+              Button.outline "Shorter" onTap={notes=updateWhere(notes,n=>n.id==selected,n=>with(n,"len",max(1,n.len-1)))}
+              Button.outline "Longer" onTap={notes=updateWhere(notes,n=>n.id==selected,n=>with(n,"len",min(16-n.start,n.len+1)))}
+              Button.destructive "Delete" onTap={notes=removeWhere(notes,n=>n.id==selected); selected=0}
+        Card grow gap=8
+          Text.strong "Notes"
+          Text.heading "{length(notes)}"
+          Text.muted "{sum(notes,n=>n.len)} steps filled of 16"
+
+### Patterns
+state tab="patterns"
+state q=""
+state sel=0
+state names=["A1 Four on the floor","A2 Broken","A3 Half time","A4 Empty","B1 Shuffle","B2 Empty","B3 Empty","B4 Empty"]
+state loops=[{"id":1,"name":"Warehouse loop","bpm":124,"date":"2026-11-12","bars":4},{"id":2,"name":"Broken beat sketch","bpm":118,"date":"2026-11-14","bars":2},{"id":3,"name":"Half time groove","bpm":92,"date":"2026-11-16","bars":8}]
+state format="WAV"
+state bars=4
+App
+  Sidebar
+    Brand "Grid Drums" icon="graphic_eq"
+    NavItem "Sequencer" icon="grid_on" selected={tab=="sequencer"} onTap={go sequencer}
+    NavItem "Bassline" icon="piano" selected={tab=="bassline"} onTap={go bassline}
+    NavItem "Patterns" icon="library_music" selected={tab=="patterns"} onTap={go patterns}
+  Main
+    Nav
+      Heading "Patterns and loops" level=1
+      Row gap=8
+        Input "Search" bind=q w=220
+        Button "Export loop" icon="download" onTap={open exportLoop}
+    Column pad=24 gap=16
+      Card gap=12
+        Text.strong "Pattern bank"
+        Grid cols=4 gap=12
+          each n in names
+            Card gap=8 menu=patternMenu onTap={sel=index}
+              Row between
+                Text.strong "{n}"
+                IconButton "more_vert" tooltip="Pattern actions" onTap={sel=index; open patternMenu}
+              Text.caption "Slot {index+1}"
+      Card gap=8
+        Text.strong "Saved loops"
+        each l in filter(loops,x=>contains(lower(x.name),lower(q)))
+          ListTile "{l.name}" subtitle="{l.bpm} BPM, {l.bars} bars, saved {formatDate(l.date,'MMM d')}"
+            Row gap=8
+              IconButton "play_arrow" tooltip="Audition" onTap={emit audition l.id}
+              IconButton "download" tooltip="Export" onTap={open exportLoop}
+              IconButton "delete" tooltip="Delete" onTap={loops=removeWhere(loops,x=>x.id==l.id); toast "Deleted"}
+  Menu#patternMenu
+    MenuItem "Copy" icon="content_copy" onTap={emit copyPattern sel; toast "Copied"}
+    MenuItem "Paste" icon="content_paste" onTap={emit pastePattern sel; toast "Pasted"}
+    MenuItem "Rename" icon="edit" onTap={open renamePattern}
+    MenuItem "Clear" icon="backspace" onTap={emit clearPattern sel}
+  Dialog#renamePattern "Rename pattern"
+    Input "Name" bind=newName
+    Button "Save" onTap={names=setAt(names,sel,newName); close}
+  Dialog#exportLoop "Export loop" "Render the current pattern to a file"
+    Select "Format" bind=format items=["WAV","MP3","MIDI"]
+    SegmentedButton bind=bars items=[1,2,4]
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Export" onTap={emit exportLoop format; toast "Exported {format}"; close}
+  Dialog#saveLoop "Save loop"
+    Input "Loop name" "Untitled loop" bind=loopName
+    Button "Save" onTap={loops=append(loops,{"id":length(loops)+1,"name":loopName,"bpm":118,"date":today(),"bars":4}); toast "Loop saved"; close}

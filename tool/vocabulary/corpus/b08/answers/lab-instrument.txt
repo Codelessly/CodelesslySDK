@@ -1,0 +1,180 @@
+### Spectrum
+state tab="spectrum"
+state lampReady=false
+state running=false
+state progress=0
+state cursor=550
+state integration=100
+state averaging=8
+state rangeFrom=400
+state rangeTo=800
+state intensity=[120,180,260,520,810,640,430,380,590,940,720,410,260,190,150]
+state wavelengths=[400,425,450,475,500,525,550,575,600,625,650,675,700,750,800]
+state peaks=[{"nm":500,"label":"Peak A"},{"nm":625,"label":"Peak B"}]
+state exportFormat="CSV"
+every 500 when running onTick={progress=min(1,progress+0.05); progress>=1 ? running=false : }
+App
+  Sidebar
+    Brand "Spectra Bench" icon="graphic_eq"
+    NavItem "Spectrum" icon="show_chart" selected={tab=="spectrum"} onTap={go spectrum}
+    NavItem "Samples" icon="grid_view" selected={tab=="samples"} onTap={go samples}
+    NavItem "Calibrate" icon="tune" selected={tab=="calibrate"} onTap={go calibrate}
+    Spacer grow
+    Text.muted "Bench 2, Lamp D2"
+  Main
+    Nav
+      Heading "Spectrum" level=1
+      Row gap=8
+        Button.outline "Export" icon="download" onTap={open export}
+        Button "Run scan" icon="play_arrow" hidden={running} onTap={lampReady ? running=true; progress=0 : toast "Lamp still warming up"}
+        Button.destructive "Stop" icon="stop" visible={running} onTap={running=false; toast "Scan stopped"}
+    Column pad=24 gap=16 scroll
+      if !lampReady
+        Banner.warning "Lamp warming up" "The deuterium lamp needs about 90 seconds to stabilise. Readings may drift until it is ready." icon="warning"
+          Button.outline "Dismiss" onTap={lampReady=true}
+      if running
+        Card gap=8
+          Row between
+            Text.strong "Scanning {rangeFrom} to {rangeTo} nm"
+            Text.muted "{round(progress*100,0)}%"
+          Progress bind=progress
+      Row gap=16 top
+        Card grow gap=12
+          Row between
+            Heading "Intensity by wavelength" level=3
+            Text.muted "Cursor {cursor} nm"
+          LineChart values={intensity} labels={wavelengths} h=300 cursor={cursor} peaks={peaks} onCursor={cursor=result}
+          Slider bind=cursor min=400 max=800 step=1
+          Row gap=24
+            Column
+              Text.caption "Wavelength"
+              Text.strong "{cursor} nm"
+            Column
+              Text.caption "Intensity"
+              Text.strong "{fixed(intensity[floor((cursor-400)/27)],0)} counts"
+            Column
+              Text.caption "Peaks found"
+              Text.strong "{length(peaks)}"
+        Card w=300 gap=12
+          Heading "Settings" level=3
+          Input "Integration time (ms)" type=number bind=integration
+          Row gap=8
+            IconButton "remove" tooltip="Shorter" onTap={integration=max(10,integration-10)}
+            IconButton "add" tooltip="Longer" onTap={integration=min(5000,integration+10)}
+          Input "Averaging (scans)" type=number bind=averaging
+          Row gap=8
+            IconButton "remove" tooltip="Fewer scans" onTap={averaging=max(1,averaging-1)}
+            IconButton "add" tooltip="More scans" onTap={averaging=min(64,averaging+1)}
+          Text.fieldLabel "Range (nm)"
+          Row gap=8
+            Input "From" type=number bind=rangeFrom grow
+            Input "To" type=number bind=rangeTo grow
+          Button.tertiary "Reset to defaults" onTap={integration=100; averaging=8; rangeFrom=400; rangeTo=800; toast "Defaults restored"}
+  Dialog#export "Export data" "Save the current spectrum as a file"
+    Select "Format" items=["CSV","JSON","SPC"] bind=exportFormat
+    Text.muted "{length(wavelengths)} points, {rangeFrom} to {rangeTo} nm, integration {integration} ms"
+    Row end gap=8
+      Button.outline "Cancel" onTap={close}
+      Button "Save file" onTap={emit exportFile exportFormat; toast "Exported spectrum.{lower(exportFormat)}"; close}
+
+### Samples
+state tab="samples"
+state selected=[]
+state metric="Absorbance"
+state wells=[{"id":"A1","v":0.12},{"id":"A2","v":0.34},{"id":"A3","v":0.58},{"id":"A4","v":0.81},{"id":"B1","v":0.15},{"id":"B2","v":0.39},{"id":"B3","v":0.62},{"id":"B4","v":0.88},{"id":"C1","v":0.09},{"id":"C2","v":0.31},{"id":"C3","v":0.55},{"id":"C4","v":0.74}]
+state combined=false
+App
+  Sidebar
+    Brand "Spectra Bench" icon="graphic_eq"
+    NavItem "Spectrum" icon="show_chart" selected={tab=="spectrum"} onTap={go spectrum}
+    NavItem "Samples" icon="grid_view" selected={tab=="samples"} onTap={go samples}
+    NavItem "Calibrate" icon="tune" selected={tab=="calibrate"} onTap={go calibrate}
+    Spacer grow
+    Text.muted "Bench 2, Lamp D2"
+  Main
+    Nav
+      Heading "Sample plate" level=1
+      Row gap=8
+        SegmentedButton items=["Absorbance","Fluorescence"] bind=metric
+        Button "Combine selected" icon="merge" onTap={length(selected)>1 ? combined=true : toast "Select at least two wells"}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=12
+          Row between
+            Heading "Wells" level=3
+            Text.muted "{length(selected)} selected"
+          Grid cols=4 gap=8
+            each w in wells
+              Box pad=12 radius=8 fill={w.v>0.7 ? "#FFC62828" : w.v>0.45 ? "#FFEF6C00" : w.v>0.2 ? "#FF2E7D32" : "#FF1565C0"} onTap={selected=contains(selected,w.id) ? without(selected,w.id) : append(selected,w.id)} menu=wellMenu
+                Row between
+                  Text.strong "{w.id}" color=#FFFFFFFF
+                  Icon "check_circle" color=#FFFFFFFF visible={contains(selected,w.id)}
+                Text "{fixed(w.v,2)}" color=#FFFFFFFF size=20
+          Row gap=12
+            Badge.info "Low"
+            Badge.success "Mid"
+            Badge.warning "High"
+            Badge.error "Saturated"
+        Card w=360 gap=12
+          Heading "Combined curve" level=3
+          if combined
+            LineChart series={map(selected,id=>{"name":id,"values":[find(wells,x=>x.id==id).v*0.4,find(wells,x=>x.id==id).v*0.8,find(wells,x=>x.id==id).v]})} labels=["400","550","700"] h=220
+            Text.muted "Mean reading {fixed(sum(selected,id=>find(wells,x=>x.id==id).v)/length(selected),2)}"
+            Button.outline "Clear" onTap={combined=false; selected=[]}
+          if !combined
+            Text.muted "Pick wells on the left, then combine them into one curve."
+          Divider
+          Table items={wells} columns=["id","v"] headers=["Well","Reading"] h=200
+  Menu#wellMenu
+    MenuItem "Select row" icon="select_all" onTap={selected=map(filter(wells,x=>startsWith(x.id,"A")),x=>x.id)}
+    MenuItem "Clear selection" icon="deselect" onTap={selected=[]}
+
+### Calibrate
+state tab="calibrate"
+state step=0
+state score=0
+state passMark=95
+state steps=[{"name":"Dark reference","done":false},{"name":"White reference","done":false},{"name":"Wavelength check","done":false},{"name":"Intensity check","done":false}]
+state checking=false
+App
+  Sidebar
+    Brand "Spectra Bench" icon="graphic_eq"
+    NavItem "Spectrum" icon="show_chart" selected={tab=="spectrum"} onTap={go spectrum}
+    NavItem "Samples" icon="grid_view" selected={tab=="samples"} onTap={go samples}
+    NavItem "Calibrate" icon="tune" selected={tab=="calibrate"} onTap={go calibrate}
+    Spacer grow
+    Text.muted "Bench 2, Lamp D2"
+  Main
+    Nav
+      Heading "Calibration" level=1
+      Button.outline "Restart" icon="restart_alt" onTap={step=0; score=0; steps=map(steps,s=>with(s,"done",false))}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Row between
+          Text.strong "Step {min(step+1,length(steps))} of {length(steps)}"
+          Text.muted "{count(steps,s=>s.done)} complete"
+        Progress {count(steps,s=>s.done)/length(steps)}
+      Card gap=8
+        each s in steps
+          ListTile "{s.name}" icon={s.done ? "check_circle" : "radio_button_unchecked"} subtitle={s.done ? "Done" : "Waiting"}
+      Card gap=12
+        Heading "Pass mark" level=3
+        Row gap=16
+          Slider bind=passMark min=80 max=100 grow
+          Text.strong "{passMark}%"
+        Row gap=16 middle
+          Gauge bind=score min=0 max=100 limit={passMark} unit="%"
+          Column gap=4
+            Text.strong "Score {score}%"
+            if score>=passMark
+              Badge.success "Passed"
+            if score<passMark && step>=length(steps)
+              Badge.error "Below pass mark"
+        Row gap=8
+          Button "Run next step" disabled={step>=length(steps) || checking} onTap={steps=updateWhere(steps,s=>s.name==steps[step].name,s=>with(s,"done",true)); step=step+1; score=min(100,score+25)}
+          Button.outline "Finish" visible={step>=length(steps)} onTap={score>=passMark ? emit calibrated score; toast "Calibration saved" : open retry}
+  Dialog#retry "Calibration failed" "The score is under the pass mark."
+    Text "Score {score}% against a pass mark of {passMark}%. Clean the cuvette holder and try again."
+    Row end gap=8
+      Button.outline "Cancel" onTap={close}
+      Button "Restart" onTap={step=0; score=0; steps=map(steps,s=>with(s,"done",false)); close}

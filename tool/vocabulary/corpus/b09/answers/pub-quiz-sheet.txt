@@ -1,0 +1,122 @@
+### Scoresheet
+state screen="sheet"
+state teams=["Quizzy Rascals","Les Quizerables","Trivia Newton John","The Know-It-Ales"]
+state rounds=[{"id":1,"name":"1. General knowledge","joker":-1,"s":[7,6,8,5]},{"id":2,"name":"2. Geography","joker":2,"s":[5,7,6,6]},{"id":3,"name":"3. Music","joker":-1,"s":[8,6,7,9]},{"id":4,"name":"4. Science","joker":0,"s":[6,4,5,7]},{"id":5,"name":"5. Sport","joker":-1,"s":[4,8,6,5]}]
+state tab="Cider and 2 packets of crisps (Les Quizerables)\nPints x6 (Rascals)"
+state tabNote="Rascals owe 6 pints; Les Quizerables owe the crisps."
+state tiebreak=[{"team":"Quizzy Rascals","guess":1969},{"team":"Les Quizerables","guess":1971},{"team":"Trivia Newton John","guess":1966},{"team":"The Know-It-Ales","guess":1970}]
+state answer=1969
+App
+  Sidebar
+    Brand "Round Table" icon="sports_bar"
+    NavItem "Scoresheet" icon="grid_on" selected={screen=="sheet"} onTap={screen="sheet"}
+    NavItem "Question reader" icon="quiz" onTap={go reader}
+    NavItem "Leaderboard" icon="leaderboard" onTap={go leaderboard}
+    Spacer grow
+    NavItem "Bar tab" icon="receipt_long" onTap={open tabsheet}
+  Main
+    Nav
+      Heading "Thursday Quiz at The Anchor" level=1
+      Row gap=8
+        Button.outline "Tiebreaker" icon="timer" onTap={open tiebreak}
+        Button "Show on screen" icon="tv" onTap={go leaderboard}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Row gap=8
+          Text.strong "Round" w=200
+          each t in teams
+            Text.strong "{t}" grow center
+        Divider
+        each row in rounds
+          Row gap=8 middle
+            Text row.name w=200
+            each t in teams
+              Column grow center gap=4
+                Input "" type=number value={row.s[index]} center onChange={rounds=updateWhere(rounds,r=>r.id==row.id,r=>with(r,"s",setAt(r.s,index,result)))}
+                ChoiceChip "Joker x2" selected={row.joker==index} onTap={rounds=updateWhere(rounds,r=>r.id==row.id,r=>with(r,"joker",row.joker==index ? -1 : index))}
+        Divider
+        Row gap=8 middle
+          Text.strong "Total" w=200
+          each t in teams
+            Box grow center pad=8 radius=8 fill={sum(rounds,r=>r.s[index]*(r.joker==index ? 2 : 1))==max(sum(rounds,r=>r.s[0]*(r.joker==0 ? 2 : 1)),max(max(sum(rounds,r=>r.s[1]*(r.joker==1 ? 2 : 1)),sum(rounds,r=>r.s[2]*(r.joker==2 ? 2 : 1))),sum(rounds,r=>r.s[3]*(r.joker==3 ? 2 : 1)))) ? "#FFFFD54F" : "#00000000"}
+              Text "{sum(rounds,r=>r.s[index]*(r.joker==index ? 2 : 1))}" size=28 weight=700 center
+      Card gap=8
+        Text.strong "Bar tab note"
+        Input "Note" multiline bind=tabNote
+  Sheet#tabsheet "Bar tab"
+    Input "What is owed" multiline bind=tabNote
+    Button "Save" onTap={toast "Tab note saved"; close}
+  Dialog#tiebreak "Tiebreaker" "Closest number wins: what year did the first Moon landing happen?"
+    each g in tiebreak
+      Row gap=12 middle
+        Text g.team grow
+        Input "Guess" type=number value={g.guess} w=120 onChange={tiebreak=setAt(tiebreak,index,with(g,"guess",result))}
+    Text.muted "Closest: {first(sortBy(tiebreak,g=>abs(g.guess-answer))).team}"
+    Button "Done" onTap={close}
+
+### Question reader
+state q=0
+state shown=false
+state secs=0
+state playing=false
+state hidden=true
+state questions=[{"text":"Which element has the chemical symbol Fe?","answer":"Iron"},{"text":"What is the capital of Australia?","answer":"Canberra"},{"text":"Who painted The Night Watch?","answer":"Rembrandt"}]
+every 1s when secs>0 onTick={secs=secs-1; secs==1 ? shown=true : toast ""}
+App
+  Sidebar
+    Brand "Round Table" icon="sports_bar"
+    NavItem "Scoresheet" icon="grid_on" onTap={go scoresheet}
+    NavItem "Question reader" icon="quiz" selected={true}
+    NavItem "Leaderboard" icon="leaderboard" onTap={go leaderboard}
+  Main
+    Nav
+      Heading "Round 2: Geography" level=1
+      Text.muted "Question {q+1} of {length(questions)}"
+    Column pad=24 gap=24 center
+      Text "{questions[q].text}" size=44 weight=700 center
+      if secs>0
+        Text "{secs}" size=96 weight=700 center animate=pulse
+      if shown
+        Card gap=8 animate=scale
+          Text.muted "Answer" center
+          Text "{questions[q].answer}" size=40 weight=700 center
+      Row gap=12
+        Button.outline "Previous" disabled={q==0} onTap={q=q-1; shown=false; secs=0}
+        Button "Reveal in 5 seconds" icon="hourglass_top" onTap={shown=false; secs=5}
+        Button.outline "Next" disabled={q==length(questions)-1} onTap={q=q+1; shown=false; secs=0}
+      Divider
+      Card gap=12
+        Text.strong "Music round"
+        Row gap=12 middle
+          IconButton "play_arrow" tooltip="Play clip" hidden={playing} onTap={playing=true; emit playClip}
+          IconButton "pause" tooltip="Pause" hidden={!playing} onTap={playing=false; emit pauseClip}
+          Waveform playing={playing} grow h=48
+          Text.mono "{hidden ? '???' : 'Billie Jean - Michael Jackson'}"
+        Row gap=8
+          Button.outline "Reveal title" onTap={hidden=false}
+          Button.ghost "Hide title" onTap={hidden=true}
+
+### Leaderboard
+state teams=[{"name":"Quizzy Rascals","score":31},{"name":"Les Quizerables","score":27},{"name":"Trivia Newton John","score":38},{"name":"The Know-It-Ales","score":29}]
+state ticking=false
+every 3s when ticking onTick={teams=updateWhere(teams,t=>t.name=="Les Quizerables",t=>with(t,"score",t.score+2))}
+Page
+  Nav
+    Brand "Round Table" icon="sports_bar"
+    Row gap=4
+      Link "Scoresheet" onTap={go scoresheet}
+      Link "Question reader" onTap={go reader}
+    Button "{ticking ? 'Pause' : 'Go live'}" onTap={ticking=!ticking}
+  Section center
+    Heading "Leaderboard after round 4" level=1
+    Column gap=12 maxw=720
+      each t in sortByDesc(teams,x=>x.score)
+        Card animate=slide-up stagger=80
+          Row between middle
+            Row gap=16 middle
+              Text "{index+1}" size=40 weight=700
+              Text.heading "{t.name}"
+            Text "{t.score}" size=40 weight=700
+          Progress {t.score/45}
+  Footer
+    Text.muted "Tiebreaker: closest year wins. Tab is settled at the bar."

@@ -1,0 +1,254 @@
+### Tree
+state tab="tree"
+state sel="p4"
+state focus=false
+state zoom=1
+state people=[{"id":"p1","name":"Walter Hale","born":1921,"died":1994,"place":"Leeds, England","gen":0,"photo":"https://example.com/p/walter.jpg","notes":2},{"id":"p2","name":"Edith Hale","born":1924,"died":2003,"place":"York, England","gen":0,"photo":"https://example.com/p/edith.jpg","notes":0},{"id":"p3","name":"Harold Hale","born":1948,"died":0,"place":"Leeds, England","gen":1,"photo":"https://example.com/p/harold.jpg","notes":1},{"id":"p4","name":"Maria Santos","born":1951,"died":0,"place":"Porto, Portugal","gen":1,"photo":"https://example.com/p/maria.jpg","notes":3},{"id":"p5","name":"Clara Hale","born":1978,"died":0,"place":"Boston, USA","gen":2,"photo":"https://example.com/p/clara.jpg","notes":0},{"id":"p6","name":"Daniel Hale","born":1981,"died":0,"place":"Boston, USA","gen":2,"photo":"https://example.com/p/daniel.jpg","notes":1}]
+App
+  Sidebar
+    Brand "Rootwork" icon="park"
+    NavItem "Tree" icon="account_tree" selected={tab=="tree"} onTap={tab="tree"; go tree}
+    NavItem "Timeline" icon="timeline" selected={tab=="timeline"} onTap={tab="timeline"; go timeline}
+    NavItem "Map" icon="map" selected={tab=="map"} onTap={tab="map"; go map}
+    NavItem "Print chart" icon="print" selected={tab=="print"} onTap={tab="print"; go print-chart}
+    Spacer grow
+    Text.muted "Hale family, 6 people"
+  Main
+    Nav
+      Heading "Hale family tree" level=1
+      Row gap=8
+        Toggle "Direct ancestors only" bind=focus
+        IconButton "remove" tooltip="Zoom out" onTap={zoom=max(0.5,zoom-0.25)}
+        Text.strong "{round(zoom*100,0)}%"
+        IconButton "add" tooltip="Zoom in" onTap={zoom=min(2,zoom+0.25)}
+        IconButton "center_focus_strong" tooltip="Reset view" onTap={zoom=1}
+    Column pad=24 gap=16
+      Text.muted "Drag to pan, pinch to zoom. Tap the plus marks to add a relative."
+      FamilyTree bind=sel zoom={zoom} onZoom={zoom=result} focus={focus} focusOn={sel} people={people} h=520
+        Generation
+          Couple
+            PersonCard#p1 person=people[0] onTap={sel="p1"}
+              Image "{people[0].photo}" w=56 h=56 radius=28
+              Column grow gap=2
+                Text.strong "{people[0].name}"
+                Text.caption "{people[0].born} - {people[0].died}"
+              Icon "sticky_note_2" hidden={people[0].notes==0}
+              AddMark "parent" onTap={sel="p1"; open addRelative}
+              AddMark "partner" onTap={sel="p1"; open addRelative}
+              AddMark "child" onTap={sel="p1"; open addRelative}
+            PersonCard#p2 person=people[1] onTap={sel="p2"}
+              Image "{people[1].photo}" w=56 h=56 radius=28
+              Column grow gap=2
+                Text.strong "{people[1].name}"
+                Text.caption "{people[1].born} - {people[1].died}"
+              AddMark "parent" onTap={sel="p2"; open addRelative}
+              AddMark "child" onTap={sel="p2"; open addRelative}
+        Generation
+          Couple
+            PersonCard#p3 person=people[2] onTap={sel="p3"}
+              Image "{people[2].photo}" w=56 h=56 radius=28
+              Column grow gap=2
+                Text.strong "{people[2].name}"
+                Text.caption "b. {people[2].born}"
+              Icon "sticky_note_2"
+              AddMark "partner" onTap={sel="p3"; open addRelative}
+              AddMark "child" onTap={sel="p3"; open addRelative}
+            PersonCard#p4 person=people[3] onTap={sel="p4"}
+              Image "{people[3].photo}" w=56 h=56 radius=28
+              Column grow gap=2
+                Text.strong "{people[3].name}"
+                Text.caption "b. {people[3].born}"
+              Icon "sticky_note_2"
+              AddMark "parent" onTap={sel="p4"; open addRelative}
+              AddMark "child" onTap={sel="p4"; open addRelative}
+        Generation
+          PersonCard#p5 person=people[4] onTap={sel="p5"}
+            Image "{people[4].photo}" w=56 h=56 radius=28
+            Column grow gap=2
+              Text.strong "{people[4].name}"
+              Text.caption "b. {people[4].born}"
+            AddMark "partner" onTap={sel="p5"; open addRelative}
+            AddMark "child" onTap={sel="p5"; open addRelative}
+          PersonCard#p6 person=people[5] onTap={sel="p6"}
+            Image "{people[5].photo}" w=56 h=56 radius=28
+            Column grow gap=2
+              Text.strong "{people[5].name}"
+              Text.caption "b. {people[5].born}"
+            Icon "sticky_note_2"
+            AddMark "partner" onTap={sel="p6"; open addRelative}
+            AddMark "child" onTap={sel="p6"; open addRelative}
+    Footer
+      Row between
+        Text.muted "Selected: {find(people,p=>p.id==sel).name}"
+        Row gap=8
+          Button.outline "Open timeline" onTap={tab="timeline"; go timeline}
+          Button.outline "Notes" onTap={open notes}
+  Pane w=320 pad=16 gap=12
+    Avatar src="{find(people,p=>p.id==sel).photo}" size=96
+    Heading "{find(people,p=>p.id==sel).name}" level=3
+    Text.muted "Born {find(people,p=>p.id==sel).born} in {find(people,p=>p.id==sel).place}"
+    if find(people,p=>p.id==sel).died>0
+      Text.muted "Died {find(people,p=>p.id==sel).died}"
+    Badge.info "{find(people,p=>p.id==sel).notes} notes"
+    Divider
+    Row gap=8
+      Button "Add relative" icon="person_add" onTap={open addRelative}
+      Button.outline "Edit" onTap={open editPerson}
+    Button.ghost "Show only ancestors" icon="family_restroom" onTap={focus=true}
+  Dialog#addRelative "Add a relative" "They will join the tree next to {find(people,p=>p.id==sel).name}"
+    state relation="child"
+    state newName=""
+    state newBorn=""
+    SegmentedButton bind=relation items=["Parent","Partner","Child"]
+    Input "Full name" bind=newName
+    Input "Year of birth" type=number bind=newBorn
+    Input "Birthplace" bind=newPlace
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Add person" onTap={trim(newName)!="" ? {people=append(people,{"id":concat("p",length(people)+1),"name":newName,"born":newBorn,"died":0,"place":newPlace,"gen":2,"photo":"","notes":0}); toast "Added {newName}"; close} : toast "Enter a name"}
+  Dialog#editPerson "Edit person"
+    Input "Full name" bind=editName
+    Input "Birthplace" bind=editPlace
+    Button "Save" onTap={toast "Saved"; close}
+  Sheet#notes "Notes on {find(people,p=>p.id==sel).name}"
+    Input "Add a note" multiline bind=noteText
+    Button "Save note" onTap={emit saveNote noteText; toast "Note saved"; close}
+
+### Timeline
+state tab="timeline"
+state sel="p4"
+state events=[{"year":1951,"title":"Born in Porto","kind":"birth","text":"Daughter of a fishing family on the Douro."},{"year":1969,"title":"Finished school","kind":"school","text":"Left Colegio Sao Joao with honours in languages."},{"year":1972,"title":"Moved to Leeds","kind":"move","text":"Took a job as a translator at a shipping firm."},{"year":1975,"title":"Married Harold Hale","kind":"marriage","text":"Wed at Leeds Register Office."},{"year":1978,"title":"Clara born","kind":"birth","text":"First child, born in Boston after the family emigrated."},{"year":1981,"title":"Daniel born","kind":"birth","text":"Second child."}]
+state kindFilter="all"
+App
+  Sidebar
+    Brand "Rootwork" icon="park"
+    NavItem "Tree" icon="account_tree" selected={tab=="tree"} onTap={tab="tree"; go tree}
+    NavItem "Timeline" icon="timeline" selected={tab=="timeline"} onTap={tab="timeline"; go timeline}
+    NavItem "Map" icon="map" selected={tab=="map"} onTap={tab="map"; go map}
+    NavItem "Print chart" icon="print" selected={tab=="print"} onTap={tab="print"; go print-chart}
+  Main
+    Nav
+      Row gap=12
+        IconButton "arrow_back" tooltip="Back to tree" onTap={go tree}
+        Avatar "Maria Santos" size=40
+        Heading "Maria Santos, life timeline" level=1
+      Row gap=8
+        Select bind=kindFilter items=["all","birth","school","move","marriage"]
+        Button.outline "Add event" icon="add" onTap={open addEvent}
+    Column pad=24 gap=16 scroll
+      Card gap=4
+        Text.strong "1951 - present"
+        Text.muted "{length(events)} events, 74 years"
+      Timeline
+        each e in filter(events,x=>kindFilter=="all" || x.kind==kindFilter)
+          TimelineItem "{e.year}" icon={e.kind=="birth" ? "child_care" : e.kind=="marriage" ? "favorite" : e.kind=="move" ? "flight" : "school"} animate=slide-up stagger=80
+            Heading "{e.title}" level=3
+            Text.muted "{e.text}"
+            Row gap=8
+              Button.ghost "Edit" onTap={sel=e.year; open editEvent}
+              Button.ghost "Remove" onTap={events=removeWhere(events,x=>x.year==e.year); toast "Event removed"}
+  Dialog#addEvent "Add a life event"
+    Input "Year" type=number bind=evYear
+    Input "Title" bind=evTitle
+    Input "Details" multiline bind=evText
+    Select "Kind" bind=evKind items=["birth","school","move","marriage"]
+    Button "Add to timeline" onTap={evTitle!="" ? {events=sortBy(append(events,{"year":evYear,"title":evTitle,"kind":evKind,"text":evText}),x=>x.year); close} : toast "Give the event a title"}
+  Dialog#editEvent "Edit event"
+    Input "Title" bind=evTitle
+    Button "Save" onTap={toast "Saved"; close}
+
+### Birthplaces
+state tab="map"
+state genPick=0
+state sel="p4"
+state places=[{"name":"Leeds","gen":0,"lat":53.8,"lng":-1.55,"count":2},{"name":"York","gen":0,"lat":53.96,"lng":-1.08,"count":1},{"name":"Porto","gen":1,"lat":41.15,"lng":-8.61,"count":1},{"name":"Boston","gen":2,"lat":42.36,"lng":-71.06,"count":2}]
+App
+  Sidebar
+    Brand "Rootwork" icon="park"
+    NavItem "Tree" icon="account_tree" selected={tab=="tree"} onTap={tab="tree"; go tree}
+    NavItem "Timeline" icon="timeline" selected={tab=="timeline"} onTap={tab="timeline"; go timeline}
+    NavItem "Map" icon="map" selected={tab=="map"} onTap={tab="map"; go map}
+    NavItem "Print chart" icon="print" selected={tab=="print"} onTap={tab="print"; go print-chart}
+  Main
+    Nav
+      Heading "Where the family was born" level=1
+      SegmentedButton bind=genPick items=["All","Gen 1","Gen 2","Gen 3"]
+    Column pad=24 gap=16
+      MapView h=420 center=[48,-30] zoom=3
+        each p in filter(places,x=>genPick==0 || x.gen==genPick-1)
+          MapMarker lat={p.lat} lng={p.lng} label="{p.name}" color={p.gen==0 ? #FF8D6E63 : p.gen==1 ? #FF3F7CAC : #FF2E8B57} onTap={sel=p.name; open placeInfo}
+        MapLegend "Generation" items=["1","2","3"]
+      Text.strong "Birthplaces by generation"
+      Grid cols=3 gap=16
+        each g in range(3)
+          Card gap=8
+            Heading "Generation {g+1}" level=3
+            each p in filter(places,x=>x.gen==g)
+              Row between
+                Text "{p.name}"
+                Badge.neutral "{p.count}"
+  Popover#placeInfo
+    Text.strong "{sel}"
+    Button.ghost "Show people born here" onTap={go tree; close}
+
+### Print Chart
+state tab="print"
+state paper="A4"
+state orient="Landscape"
+state showPhotos=true
+state breaks=[1,2]
+Page
+  Nav sticky
+    Brand "Rootwork" icon="park"
+    Row gap=4
+      Link "Tree" onTap={go tree}
+      Link "Timeline" onTap={go timeline}
+      Link "Map" onTap={go map}
+    Button "Print" icon="print" onTap={emit print}
+  Section
+    Row gap=32 top
+      Column w=320 sticky gap=12
+        Heading "Print settings" level=3
+        Select "Paper" bind=paper items=["A4","Letter","A3"]
+        SegmentedButton bind=orient items=["Portrait","Landscape"]
+        Toggle "Include photos" bind=showPhotos
+        Toggle "Mark page breaks" bind=markBreaks
+        Slider "Scale" bind=printScale min=50 max=100
+        Button.outline "Add break after generation" onTap={breaks=append(breaks,length(breaks)+1); toast "Break added"}
+        Button.ghost "Clear breaks" onTap={breaks=[]}
+        Text.muted "{length(breaks)+1} pages on {paper}"
+      Column grow gap=16
+        PrintPreview paper={paper} orientation={orient} pages={length(breaks)+1}
+          PrintPage "Page 1"
+            Heading "Hale family: Walter and Edith" level=3
+            Row gap=12
+              Card grow
+                Text.strong "Walter Hale"
+                Text.caption "1921 - 1994"
+              Card grow
+                Text.strong "Edith Hale"
+                Text.caption "1924 - 2003"
+          PageBreak "Page break 1" onTap={breaks=removeAt(breaks,0)}
+          PrintPage "Page 2"
+            Heading "Harold and Maria" level=3
+            Row gap=12
+              Card grow
+                Text.strong "Harold Hale"
+                Text.caption "b. 1948"
+              Card grow
+                Text.strong "Maria Santos"
+                Text.caption "b. 1951"
+          PageBreak "Page break 2" onTap={breaks=removeAt(breaks,1)}
+          PrintPage "Page 3"
+            Heading "Clara and Daniel" level=3
+            Row gap=12
+              Card grow
+                Text.strong "Clara Hale"
+                Text.caption "b. 1978"
+              Card grow
+                Text.strong "Daniel Hale"
+                Text.caption "b. 1981"
+  Footer
+    Row between
+      Text.strong "Rootwork"
+      Text.muted "Printed charts keep the page breaks you marked"

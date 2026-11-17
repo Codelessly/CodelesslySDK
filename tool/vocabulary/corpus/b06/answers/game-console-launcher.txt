@@ -1,0 +1,126 @@
+### Home
+state focus=0
+state clock="8:42 PM"
+state muted=false
+state volume=60
+state games=[{"id":"g1","title":"Ember Reach","kind":"Action RPG","hours":42,"loop":"ember_reach.mp4","art":"https://cdn.hearthstone.example/art/ember.jpg","installed":true},{"id":"g2","title":"Tidal Rush","kind":"Racing","hours":18,"loop":"tidal_rush.mp4","art":"https://cdn.hearthstone.example/art/tidal.jpg","installed":true},{"id":"g3","title":"Moss & Lantern","kind":"Puzzle adventure","hours":7,"loop":"moss.mp4","art":"https://cdn.hearthstone.example/art/moss.jpg","installed":true},{"id":"g4","title":"Void Sparrow","kind":"Shooter","hours":0,"loop":"void_sparrow.mp4","art":"https://cdn.hearthstone.example/art/sparrow.jpg","installed":false},{"id":"g5","title":"Kingdom of Salt","kind":"Strategy","hours":63,"loop":"salt.mp4","art":"https://cdn.hearthstone.example/art/salt.jpg","installed":true},{"id":"g6","title":"Store","kind":"Browse and buy","hours":0,"loop":"store.mp4","art":"https://cdn.hearthstone.example/art/store.jpg","installed":true}]
+state friends=[{"name":"Maya Reyes","game":"Ember Reach","status":"playing"},{"name":"Jonas Weber","game":"Tidal Rush","status":"playing"},{"name":"Priya Nair","game":"Kingdom of Salt","status":"playing"},{"name":"Leo Santos","game":"","status":"online"},{"name":"Aiko Tanaka","game":"","status":"away"}]
+state downloads=[{"id":"d1","title":"Void Sparrow","size":"38.2 GB","done":0.64,"paused":false},{"id":"d2","title":"Ember Reach: Ashen Crown","size":"6.4 GB","done":0.12,"paused":false},{"id":"d3","title":"Tidal Rush update 1.4","size":"1.1 GB","done":0,"paused":true}]
+every 1m onTick={clock=formatDate(today(),"h:mm a")}
+App
+  Main
+    Nav
+      Brand "Hearthstone" icon="local_fire_department"
+      Text.muted "{clock}"
+      Row gap=8
+        Button.ghost "Friends ({count(friends,f=>f.status==\"playing\")} playing)" icon="group" onTap={open friends}
+        IconButton "download" tooltip="Downloads" onTap={go downloads}
+        IconButton "power_settings_new" tooltip="Quick menu" onTap={open quick}
+    Column grow pad=24 gap=24 onKeyRight={focus=min(length(games)-1,focus+1); play tick} onKeyLeft={focus=max(0,focus-1); play tick} onKeyA={emit launch games[focus].id} onKeyY={open friends} onKeyMenu={open quick}
+      Row scroll gap=16 middle
+        each g in games
+          Box fill=#FF1B1F2A radius=16 pad=0 w={index==focus ? 300 : 160} h=300 animate=scale duration=200 onTap={focus=index; play tick}
+            Image "{g.art}" h=fill
+            if index==focus
+              Video "{g.loop}" autoplay loop muted={muted} h=fill
+      Column gap=8
+        Text.pageTitle "{games[focus].title}"
+        Text.muted "{games[focus].kind}"
+        if games[focus].hours>0
+          Text.caption "{games[focus].hours} hours played"
+        Row gap=12
+          if games[focus].installed
+            Button "Play" icon="play_arrow" onTap={emit launch games[focus].id}
+          else
+            Button "Download" icon="download" onTap={downloads=append(downloads,{"id":games[focus].id,"title":games[focus].title,"size":"38.2 GB","done":0,"paused":false}); toast "Added to the download queue"}
+          Button.outline "Options" icon="tune" onTap={open options}
+    Footer
+      Row gap=24 center
+        Row gap=8
+          Badge.neutral "A"
+          Text.muted "{games[focus].installed ? \"Start\" : \"Download\"}"
+        Row gap=8
+          Badge.neutral "Y"
+          Text.muted "Friends"
+        Row gap=8
+          Badge.neutral "X"
+          Text.muted "Options"
+        Row gap=8
+          Badge.neutral "Menu"
+          Text.muted "Quick menu"
+        Row gap=8
+          Badge.neutral "◀ ▶"
+          Text.muted "Move"
+
+Drawer#friends "Friends" right
+  Text.muted "{count(friends,f=>f.status==\"playing\")} of {length(friends)} are playing"
+  each f in friends
+    ListTile "{f.name}" subtitle={f.game!="" ? "Playing " + f.game : (f.status=="online" ? "Online" : "Away")} leading="avatar" onTap={emit openProfile f.name}
+      Avatar "{f.name}" size=36
+      if f.status=="playing"
+        Badge.success "Playing"
+      else
+        Badge.neutral "{f.status}"
+  Button.outline "Invite a friend" icon="person_add" onTap={emit invite; close}
+
+Menu#quick end
+  Text.caption "Volume {muted ? 0 : volume}%"
+  Slider bind=volume min=0 max=100 onChange={muted=false; play tick}
+  MenuItem "{muted ? \"Unmute\" : \"Mute\"}" icon="volume_off" onTap={muted=!muted}
+  MenuItem "Downloads" icon="download" onTap={go downloads}
+  MenuItem "Controllers" icon="sports_esports" onTap={emit controllers}
+  Divider
+  MenuItem "Sleep" icon="bedtime" onTap={emit sleep}
+  MenuItem "Power off" icon="power_settings_new" onTap={open powerOff}
+
+Dialog#powerOff "Power off Hearthstone?" "Unsaved progress in a running game may be lost."
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button.destructive "Power off" onTap={emit powerOff; close}
+
+Sheet#options "Options"
+  ListTile "Manage game" icon="settings" onTap={emit manage games[focus].id; close}
+  ListTile "Check for updates" icon="system_update" onTap={emit checkUpdate games[focus].id; toast "Checking for updates"; close}
+  ListTile "Remove from Home" icon="visibility_off" onTap={games=removeAt(games,focus); focus=max(0,focus-1); close}
+
+### Downloads
+state downloads=[{"id":"d1","title":"Void Sparrow","size":"38.2 GB","done":0.64,"paused":false},{"id":"d2","title":"Ember Reach: Ashen Crown","size":"6.4 GB","done":0.12,"paused":false},{"id":"d3","title":"Tidal Rush update 1.4","size":"1.1 GB","done":0,"paused":true}]
+state allPaused=false
+state sel=0
+every 1s onTick={downloads=map(downloads,d=>d.paused ? d : with(d,"done",min(1,d.done+0.004)))}
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go home}
+      Heading "Downloads" level=1
+      Row gap=8
+        Button.outline "{allPaused ? \"Resume all\" : \"Pause all\"}" icon="{allPaused ? \"play_arrow\" : \"pause\"}" onTap={allPaused=!allPaused; downloads=map(downloads,d=>with(d,"paused",allPaused))}
+    Column grow pad=24 gap=16 onKeyDown={sel=min(length(downloads)-1,sel+1); play tick} onKeyUp={sel=max(0,sel-1); play tick} onKeyA={downloads=updateWhere(downloads,d=>d.id==downloads[sel].id,d=>with(d,"paused",!d.paused))} onKeyX={downloads=removeAt(downloads,sel)}
+      if isEmpty(downloads)
+        Column center middle gap=8
+          Icon "cloud_done"
+          Text.muted "Nothing in the queue"
+      each d in downloads
+        Card gap=8 border-left={index==sel ? #FFFF7A1A : #00000000} onTap={sel=index; play tick}
+          Row between
+            Column gap=2
+              Text.strong "{d.title}"
+              Text.caption "{d.size} · {d.paused ? \"Paused\" : (d.done>=1 ? \"Ready\" : round(d.done*100,0) + \"% · \" + duration(round((1-d.done)/0.004,0)) + \" left\")}"
+            Row gap=8
+              IconButton "{d.paused ? \"play_arrow\" : \"pause\"}" tooltip="{d.paused ? \"Resume\" : \"Pause\"}" onTap={downloads=updateWhere(downloads,x=>x.id==d.id,x=>with(x,"paused",!x.paused))}
+              IconButton "close" tooltip="Cancel download" onTap={downloads=removeWhere(downloads,x=>x.id==d.id); toast "Removed {d.title}"}
+          Progress {d.done}
+    Footer
+      Row gap=24 center
+        Row gap=8
+          Badge.neutral "A"
+          Text.muted "Pause or resume"
+        Row gap=8
+          Badge.neutral "X"
+          Text.muted "Cancel"
+        Row gap=8
+          Badge.neutral "▲ ▼"
+          Text.muted "Select"
+        Row gap=8
+          Badge.neutral "B"
+          Text.muted "Back"
