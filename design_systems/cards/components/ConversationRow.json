@@ -13,7 +13,8 @@
    {"key": "unread", "type": {"kind": "boolean", "flutter": "bool"}, "default": false, "doc": "Shows the blue dot and sets the name and subject heavier."},
    {"key": "selected", "type": {"kind": "boolean", "flutter": "bool"}, "default": false, "doc": "The open conversation: a tinted fill and an accent bar at the left."},
    {"key": "initials", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The letters in the round mark (empty: the name's first letter)."},
-   {"key": "tone", "type": {"kind": "string", "flutter": "String"}, "default": "sky", "doc": "The mark's color: sand, rose, mint, sky, lilac or slate."}
+   {"key": "tone", "type": {"kind": "string", "flutter": "String"}, "default": "sky", "doc": "The mark's color: sand, rose, mint, sky, lilac or slate."},
+   {"key": "mark", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "What to mark in the name, subject and preview (a search query: what fuzzy matched is drawn bold and underlined; empty: nothing)."}
   ],
   "events": [
    {"key": "onPressed", "doc": "The row was tapped (open this conversation)."}
@@ -84,7 +85,7 @@
    "type": "text",
    "props": {"text": "${props.name}", "style": {"from": "strongWide", "color": "ink"}, "maxLines": 1, "overflow": "ellipsis"},
    "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
-   "bind": {"props.style.fontWeight": "${= props.unread ? 700 : 600}"}
+   "bind": {"props.style.fontWeight": "${= props.unread ? 700 : 600}", "props.runs": "${= matchRuns(props.name, props.mark)}"}
   },
   "dot": {
    "type": "box",
@@ -105,14 +106,15 @@
    "bind": {
     "visible": "${= props.subject != ''}",
     "props.style.fontWeight": "${= props.unread ? 600 : 400}",
-    "props.style.color": "${= props.unread ? theme.colors.ink : theme.colors.inkSoft}"
+    "props.style.color": "${= props.unread ? theme.colors.ink : theme.colors.inkSoft}",
+    "props.runs": "${= matchRuns(props.subject, props.mark)}"
    }
   },
   "preview": {
    "type": "text",
    "props": {"text": "${props.preview}", "style": {"from": "smallWide", "color": "inkFaint"}, "maxLines": 1, "overflow": "ellipsis"},
    "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
-   "bind": {"visible": "${= props.preview != ''}"}
+   "bind": {"visible": "${= props.preview != ''}", "props.runs": "${= matchRuns(props.preview, props.mark)}"}
   },
   "rule": {
    "type": "box",

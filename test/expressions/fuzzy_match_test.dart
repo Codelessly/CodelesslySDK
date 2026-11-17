@@ -46,4 +46,45 @@ void main() {
     expect(eval('matchReason("The light keeper","ligth")'), 'Close spelling');
     expect(eval('matchRuns("The light keeper","")'), isEmpty);
   });
+
+  test('letters typed together match across words, and mark each word\x27s part', () {
+    final vars = {
+      'people': [
+        {'name': 'Grace Hopper'},
+        {'name': 'Ada Mensah'},
+      ],
+    };
+    expect((eval('fuzzy(people,"adamens",p=>p.name)', vars) as List).map((p) => (p as Map)['name']), ['Ada Mensah']);
+    expect(eval('matchRanges("Ada Mensah","adamens")'), [
+      [0, 3],
+      [4, 8],
+    ]);
+  });
+
+  test('a tolerance says how many letters a word may be off by; "keep" keeps the list\x27s order', () {
+    final vars = {
+      'items': [
+        {'title': 'Lighthouse keeper'},
+        {'title': 'Light on the island'},
+        {'title': 'Lantern'},
+      ],
+    };
+    List<Object?> titles(String expression) => [for (final x in eval(expression, vars) as List) (x as Map)['title']];
+    // "lentrin" is three letters off "lantern": out of reach of the default
+    // (2 for a word of 5 or more), in reach of 3.
+    expect(titles('fuzzy(items,"lentrin",x=>x.title)'), isEmpty);
+    expect(titles('fuzzy(items,"lentrin",x=>x.title,3)'), ['Lantern']);
+    // 0 takes no misspelling.
+    expect(titles('fuzzy(items,"ligth",x=>x.title)'), isNotEmpty);
+    expect(titles('fuzzy(items,"ligth",x=>x.title,0)'), isEmpty);
+    // Best first, unless kept in the list's order; the options in either order.
+    expect(titles('fuzzy(items,"light",x=>x.title)'), ['Light on the island', 'Lighthouse keeper']);
+    expect(titles('fuzzy(items,"light",x=>x.title,"keep")'), ['Lighthouse keeper', 'Light on the island']);
+    expect(titles('fuzzy(items,"lentrin",x=>x.title,"keep",3)'), ['Lantern']);
+    // The marks take the same tolerance.
+    expect(eval('matchRanges("Lantern","lentrin")'), isEmpty);
+    expect(eval('matchRanges("Lantern","lentrin",3)'), [
+      [0, 7],
+    ]);
+  });
 }
