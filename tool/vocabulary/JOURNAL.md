@@ -172,3 +172,82 @@ the rest, what is left for Dart is the primitives list in 4, and that list is th
 
 **To check at review 3.** Resolved share after D6 to D9 (expect well over 60%). Do Sonnet-written definitions
 pass the checks first time, and how do the pages look? Does the per-answer growth hold near 40 words?
+
+### Review 3 (after batches b03 to b09: the corpus passes 5,000 words)
+
+**Numbers.** 313 answers, 1,078 screens, 47,266 lines. **5,199 distinct words**: 602 types, 188 text
+positions, 2,900 parameters, 408 flags, 626 events, 56 variants, 312 verbs, 99 functions, 8 statements.
+Resolved 1,640 (31.5%): core 1,120, component 164, alias 27, definition 329. Unknown 3,559.
+By lines: 98.1% of lines start with a word we read (core 88.4%, component 8.7%, definition 0.6%, alias 0.3%);
+1.9% stand in. Grammar issues 766 (16.2 per 1,000 lines; the baseline was 39.5). Validation errors 458.
+
+Growth by batch (new words per answer): b03 12.5, b04 15.3, b05 11.2, b06 12.6 (first briefs from new
+families), b07 18.4, b08 13.0, b09 10.9. Batches b07 to b09 ran as one workflow each (34, 68 and 110 Sonnet
+writers; four minutes for 110).
+
+**Did review 2's decisions work?**
+- D10 (definitions written by Sonnet): yes. Thirty definitions in twenty minutes, all loading and validating,
+  most looking finished in a picture; resolved share on the 40-answer corpus 54.9% to 62.8%, unknown types 70
+  to 41. The definer also named nine things in the form and the renderer that got in its way, which is the
+  most precise bug list of the run.
+- D11 (new families): partly. Unfamiliar ground brought 13 to 18 new words an answer against 11 to 12, not a
+  step change. The vocabulary of *lines* is saturated; what grows is the tail.
+- D6 to D9 (universal words, Input, the count fix): still on their branch at the time of this review; the
+  resolved share above does not include them. So the 31.5% is a floor, and it fell (54.9% at 40 answers)
+  because the corpus grew six times faster than the fixes.
+
+**What 5,000 words say.**
+1. *Two different numbers, and both are true.* By lines we read 98%. By distinct words we read 32%. A model
+   asked for a whole app writes the core nineteen lines in twenty, and in the twentieth invents a word that
+   nobody else will ever write (`GlacierDrawing`, `WeighbridgeTicket`, `KnitRow`). 362 of the 425 unknown types
+   appear in exactly one answer. Only 28 appear in three or more, and those are the primitives list again:
+   `Map` (21 answers), `Waveform` (17), `Marker`/`Pin`/`MapMarker`, `SeatMap`, `QRCode`, `SignaturePad`,
+   `FileDrop`, `Camera`, `Ruler`, `Compass`, `Knob`, `Wheel`.
+2. *The unknown words hang off the unknown types.* 2,375 of the 3,134 unknown parameters, flags and events
+   are on a type we do not have. They are not separate problems: define the type and its words come with it.
+3. *The rest is the universal words of review 2, now unmistakable:* `size` on 38 types, `color` on 29,
+   `selected` on 28, `label` 23, `items` 22, `max` 19; `onSelect` on 33 types, `onChange` 22; and the
+   positioned surface: `x` and `y` on 24 types, `zoom` on 20, `snap` on 10, `onMove`, `onDrop`, `onDrag`.
+4. *A third of the grammar issues are one thing.* 256 of 766 are an `open` to an overlay the answer never
+   wrote: asked for two to four screens, a model writes the button that opens the dialog and leaves the dialog
+   out. That is incompleteness, not grammar, and a page should survive it.
+5. *More answers will not teach us more.* The curve is flat at about eleven words an answer and every one of
+   them is a tail word. The corpus is now a regression set, not a discovery tool.
+
+**Insight.** The tail cannot be closed from our side at all, by Dart or by a shipped folder of definitions:
+there is no finite list of one-answer words. It can only be closed from the writer's side. The writer that
+invents `KnitRow` knows exactly what it means by it, and a definition is written in the grammar it is already
+writing. So the open prompt should end the way a paper ends, with its own glossary: *any word you use that is
+not in the core, define at the end with `define`*. Then every answer is self-contained and renders whole; the
+long tail costs us nothing; and the definitions models write for the same word in different answers are the
+raw material for the shared vocabulary: when the same word is defined five times, the tool can show the five
+side by side and a fixer promotes one (or finds the universal word or primitive underneath). That turns the
+loop from "we chase the model's words" into "the model brings its words with their meaning, and we harvest
+what recurs". What stays ours is what a definition cannot express: the universal words and the primitives.
+
+**Decisions.**
+- D13. The corpus stops growing for its own sake. The 313 answers are the regression set: every fix is
+  measured by recounting them (resolved share, lines that stand in, grammar issues, validation errors) and by
+  rendering a fixed sample.
+- D14. Self-defining answers: a prompt variant (`--open --define`) that asks for a `define` block for every
+  invented word. Run it on 20 briefs already in the corpus, so each has a before. Measure: share of invented
+  types that came with a definition, share of definitions that load and validate first time, lines that stand
+  in, render errors, the extra lines it costs, and whether invented words fall (models may reach for the core
+  more when they have to pay for a new word). If it holds, it becomes the open prompt.
+- D15. Harvest: the vocabulary tool lists every word defined in more than one answer with its definitions
+  side by side (signature and body), ranked by answers. Promotion to a design system's `vocabulary/` is a
+  fixer's judgment, not automatic.
+- D16. The definer's nine findings go to an Opus fixer: `h=` on a Column is only a hint; `Row wrap` over an
+  `each` does not wrap; `Word#{expr}` does not match its definition; a path given to a plain parameter reads
+  as text; a choice between actions cannot take an event; `every` takes no expression; `reorder` over an
+  expression; a border's colour and width together; a font on an `Input`.
+- D17. An `open` to an overlay that was not written opens a labelled placeholder sheet in open mode and is
+  recorded as a wanted overlay, not an error.
+- D18. Primitives, in order of the answers waiting on each: (1) a map as a surface with markers, a route and
+  a position (21 + 9 + 4 + 3 answers); (2) the positioned surface with drag, resize, select, zoom and snap
+  (`x`/`y` on 24 types); (3) a drawn series as a shape: waveform, level meter, spark (17 + 3); (4) scroll
+  position as a value; (5) capture: signature, file drop, camera frame as honest placeholders with events.
+  Each starts by reading what the document model already has.
+
+**To check at review 4.** Does self-definition work first time, and does it lower invention? Resolved share
+with universal words merged. Whether the same word defined in several answers converges on one meaning.
