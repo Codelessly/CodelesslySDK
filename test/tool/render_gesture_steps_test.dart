@@ -38,6 +38,8 @@ final _doc = {
       {'name': 'pressed', 'type': 'text', 'value': 'none'},
       {'name': 'kept', 'type': 'integer', 'value': 0, 'persist': true},
       {'name': 'lost', 'type': 'integer', 'value': 0},
+      {'name': 'keys', 'type': 'text', 'value': ''},
+      {'name': 'typed', 'type': 'text', 'value': ''},
     ],
   },
   'nodes': {
@@ -50,10 +52,20 @@ final _doc = {
           {'color': '#FFFFFFFF'},
         ],
       },
+      // Shortcuts as the notation writes them (`key ? onPress={…}`).
+      'actions': [
+        for (final k in ['?', '/', 'F2', 'mod+k'])
+          {
+            'trigger': {'type': 'keyDown', 'key': k},
+            'actions': [
+              {'type': 'setVariable', 'variable': 'keys', 'value': '\${= keys + "[$k]"}'},
+            ],
+          },
+      ],
     },
     'col': {
       'type': 'column',
-      'children': ['label', 'swipe', 'context', 'count'],
+      'children': ['label', 'swipe', 'context', 'count', 'keysLabel', 'field'],
       'layout': {'width': {'fill': 390}, 'height': {'fill': 600}},
       'props': {'spacing': 8},
     },
@@ -80,6 +92,19 @@ final _doc = {
         ],
       },
     ]),
+    'keysLabel': {
+      'type': 'text',
+      'layout': {'width': {'fill': 390}, 'height': {'hug': 20}},
+      'props': {
+        'text': r'keys ${keys}, typed ${typed}',
+        'style': {'fontSize': 14, 'color': '#FF000000'},
+      },
+    },
+    'field': {
+      'type': 'textField',
+      'layout': {'width': 300, 'height': 48},
+      'bind': {'props.initialValue': r'${typed}'},
+    },
   },
 };
 
@@ -88,14 +113,29 @@ void main() {
   setUp(() => out = Directory.systemTemp.createTempSync('render_gesture_steps_test'));
   tearDown(() => out.deleteSync(recursive: true));
 
-  Future<String> label(WidgetTester tester, List<Step> steps) async {
+  late RenderReport last;
+  Future<String> label(WidgetTester tester, List<Step> steps, {String id = 'label', bool clean = true}) async {
     final file = File('${out.path}/page.json')..writeAsStringSync(jsonEncode(_doc));
-    final report = await runRender(
+    final report = last = await runRender(
         tester, RenderArgs(inputs: [file.path], out: '${out.path}/o', sizes: const [Size(390, 600)], steps: steps, dumpLayout: true));
-    expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
+    if (clean) expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
     final boxes = jsonDecode(File('${out.path}/o/page@390x600.layout.json').readAsStringSync()) as List;
-    return '${boxes.cast<Map>().firstWhere((b) => b['id'] == 'label')['text']}';
+    return '${boxes.cast<Map>().firstWhere((b) => b['id'] == id)['text']}';
   }
+
+  testWidgets('--key takes printable characters, F keys and mod, and types a character into a focused field', (tester) async {
+    expect(
+        await label(tester, const [Step('key', '?'), Step('key', '/'), Step('key', 'F2'), Step('key', 'mod+k')], id: 'keysLabel'),
+        'keys [?][/][F2][mod+k], typed ');
+    expect(await label(tester, const [Step('focus', 'field'), Step('key', 'o'), Step('key', 'shift+k'), Step('key', '?')], id: 'keysLabel'),
+        'keys , typed oK?');
+  });
+
+  testWidgets('--long-press on a node with no long press reaction says its tap ran', (tester) async {
+    expect(await label(tester, const [Step('long-press', 'count')], clean: false), endsWith('kept 1, lost 1'));
+    expect(last.diagnostics.single['code'], 'long_press_no_reaction');
+    expect(await label(tester, const [Step('long-press', 'context')]), contains('pressed long,'));
+  });
 
   testWidgets('the options parse', (tester) async {
     final a = parseArgs(['site', '--out', 'o', '--long-press', 'row#0', '--right-click', 'row#1', '--reload', '--drag', 'row=-140,0']);

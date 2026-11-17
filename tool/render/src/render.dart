@@ -14,6 +14,7 @@ import 'package:codelessly_api/validate.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/controls/focus.dart' show ControlFocusScope;
 import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabeledControl, firstTextUnder;
+import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide Page, Step; // ignore: deprecated_member_use
 import 'package:flutter/rendering.dart';
@@ -82,6 +83,7 @@ const runtimeCodes = <(String, String, String)>[
   ('interaction_failed', 'error', 'A --tap/--hover/--focus/--type/--scroll/--set/--navigate step could not be applied (no such node, not on screen, covered by another node: the message names it).'),
   ('step_skipped', 'warning', 'A step names a node not shown at this size (hidden by a media rule or a binding, or on another breakpoint\'s canvas): it is skipped at this size, the other steps run and the capture is made. One note per size.'),
   ('tap_no_reaction', 'warning', 'A --tap hit its node, but neither it nor anything around it reacts to a tap (no click reaction, no button or input): nothing happens.'),
+  ('long_press_no_reaction', 'warning', 'A --long-press held its node, but nothing there reacts to a long press: the hold ends as a tap does (its tap reactions run).'),
   ('missing_glyph', 'warning', 'A text has characters its font has no glyph for: they are drawn as empty boxes. Use another character, an icon, or a box with a path.'),
   ('icon_not_drawn', 'warning', 'An icon names no glyph the renderer can draw (an unknown Material icon name, or an object without a type or name).'),
   ('expression_not_evaluated', 'warning', 'A text shows "\${" on screen: an expression that did not evaluate (a formula error, or a binding that replaced the text).'),
@@ -2118,9 +2120,48 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     case 'long-press':
       // A finger (or a mouse button) held on the node past the long-press
       // time, then lifted: a `longPress` reaction, a context menu on touch.
-      final (at, problem) = await pointAt(step.target, 'long-press');
-      if (at == null) return problem;
-      await _unfocusFieldOutside(tester, _boxOf(binding, step.target));
+      final (point, problem) = await pointAt(step.target, 'long-press');
+      if (point == null) return problem;
+      var at = point;
+      final pressed = _boxOf(binding, step.target);
+      // A control inside the node that acts as a finger lands (a slider
+      // takes its value there) would act too: hold where none is.
+      bool controlUnder(ui.Offset p) {
+        for (final o in hitAt(p)) {
+          if (identical(o, pressed)) return false;
+          if (o is RenderControl && o.enabled && o.takesInput) return true;
+        }
+        return false;
+      }
+
+      if (pressed != null && controlUnder(at)) {
+        final r = _rectOf(pressed).intersect(viewRect());
+        search:
+        for (var j = 0; j < 5; j++) {
+          for (var i = 0; i < 5; i++) {
+            final p = ui.Offset(r.left + r.width * (i + 0.5) / 5, r.top + r.height * (j + 0.5) / 5);
+            if (hitAt(p).contains(pressed) && !controlUnder(p)) {
+              at = p;
+              break search;
+            }
+          }
+        }
+      }
+      // Nothing there reacts to a hold: the tap's reactions run instead, as
+      // on a device, and a capture cannot tell the two apart.
+      final path = hitAt(at);
+      final holds = path.any((o) =>
+          (o is RenderReactions && o.triggers.intersection(const {api.TriggerType.longPress, api.TriggerType.hold}).isNotEmpty) ||
+          (o is RenderSemanticsGestureHandler && o.onLongPress != null) ||
+          (o is RenderControl && o.enabled && o.takesInput) ||
+          o is RenderEditable);
+      if (!holds) {
+        warn('long_press_no_reaction',
+            '--long-press ${step.target}: nothing at the node reacts to a long press (no "longPress" reaction, onLongPress or menu=), so the hold ends as a tap does: '
+                '${reactsToTap(path) ? 'its tap reactions ran' : 'nothing happened'}.',
+            step.target.split('#').first);
+      }
+      await _unfocusFieldOutside(tester, pressed);
       final g = await tester.startGesture(at);
       await tester.pump(const Duration(milliseconds: 700));
       await g.up(timeStamp: const Duration(milliseconds: 700));
@@ -2289,12 +2330,20 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       await tester.pump();
       return null;
     case 'key':
-      final parts = step.target.split('+').map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
+      // `ctrl+k`, `?`, `+` and `ctrl++` (the key `+` after its modifiers).
+      final spec = step.target.trim();
+      final plus = spec == '+' || spec.endsWith('++');
+      final parts = [
+        ...(plus ? spec.substring(0, spec.length - 1) : spec).split('+').map((p) => p.trim()).where((p) => p.isNotEmpty),
+        if (plus) '+',
+      ];
       if (parts.isEmpty) return '--key: name a key (ArrowRight, Enter, Escape, Tab, shift+Tab...).';
-      final key = _keyNamed(parts.last);
-      if (key == null) {
-        return '--key ${step.target}: "${parts.last}" is not a key the command knows. Keys: ${_keyNames.keys.join(', ')}, a letter or a digit; modifiers: shift, ctrl, alt, meta.';
+      final named = _keyNamed(parts.last);
+      if (named == null) {
+        return '--key ${step.target}: "${parts.last}" is not a key the command knows. Keys: ${_keyNames.keys.join(', ')}, F1 to F24, '
+            'a letter, a digit or a printable character (/, ?, [...); modifiers: shift, ctrl, alt, meta, mod (ctrl, or meta on a Mac).';
       }
+      final key = named.key;
       final modifiers = <LogicalKeyboardKey>[];
       for (final m in parts.take(parts.length - 1)) {
         final k = switch (m.toLowerCase()) {
@@ -2302,11 +2351,23 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
           'ctrl' || 'control' => LogicalKeyboardKey.controlLeft,
           'alt' || 'option' => LogicalKeyboardKey.altLeft,
           'meta' || 'cmd' || 'command' => LogicalKeyboardKey.metaLeft,
+          // The notation's mod: Command on a Mac, Control elsewhere.
+          'mod' => defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS
+              ? LogicalKeyboardKey.metaLeft
+              : LogicalKeyboardKey.controlLeft,
           _ => null,
         };
-        if (k == null) return '--key ${step.target}: "$m" is not a modifier (shift, ctrl, alt, meta).';
-        modifiers.add(k);
+        if (k == null) return '--key ${step.target}: "$m" is not a modifier (shift, ctrl, alt, meta, mod).';
+        if (!modifiers.contains(k)) modifiers.add(k);
       }
+      // A character typed with Shift on a US keyboard (`?` is Shift+/).
+      if (named.shifted && !modifiers.contains(LogicalKeyboardKey.shiftLeft)) modifiers.insert(0, LogicalKeyboardKey.shiftLeft);
+      final shift = modifiers.contains(LogicalKeyboardKey.shiftLeft);
+      final character = named.character == null
+          ? null
+          : shift && !named.shifted
+              ? named.character!.toUpperCase()
+              : named.character;
       // Enter in a text field connected to the platform's text input is
       // the input's to act on (a field leaves it alone: an IME may be
       // composing): the platform sends the field its action key (Done, Go,
@@ -2331,10 +2392,26 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         await tester.pump();
         return null;
       }
+      // A character key in a focused text field types it, as the device's
+      // keyboard does through the platform's text input (which a key event
+      // alone does not reach in a test): `--key o` writes an o.
+      if (character != null &&
+          modifiers.every((m) => m == LogicalKeyboardKey.shiftLeft) &&
+          typing != null &&
+          typing.attached &&
+          typing.focusNode.hasFocus &&
+          typing.editor.hasConnection) {
+        final v = typing.editor.value;
+        final at = v.selection.isValid ? v.selection : TextSelection.collapsed(offset: v.text.length);
+        tester.testTextInput.updateEditingValue(
+            TextEditingValue(text: v.text.replaceRange(at.start, at.end, character), selection: TextSelection.collapsed(offset: at.start + character.length)));
+        await tester.pump();
+        return null;
+      }
       for (final m in modifiers) {
         await tester.sendKeyDownEvent(m);
       }
-      await tester.sendKeyEvent(key);
+      await tester.sendKeyEvent(key, character: character);
       for (final m in modifiers.reversed) {
         await tester.sendKeyUpEvent(m);
       }
@@ -2383,14 +2460,45 @@ const _keyNames = <String, LogicalKeyboardKey>{
   'PageDown': LogicalKeyboardKey.pageDown,
 };
 
+/// The printable characters of a US keyboard: the key that types each, and
+/// whether Shift is held for it (`?` is Shift+/).
+const _characterKeys = <String, (LogicalKeyboardKey, bool)>{
+  '/': (LogicalKeyboardKey.slash, false), '?': (LogicalKeyboardKey.slash, true),
+  '.': (LogicalKeyboardKey.period, false), '>': (LogicalKeyboardKey.period, true),
+  ',': (LogicalKeyboardKey.comma, false), '<': (LogicalKeyboardKey.comma, true),
+  ';': (LogicalKeyboardKey.semicolon, false), ':': (LogicalKeyboardKey.semicolon, true),
+  "'": (LogicalKeyboardKey.quote, false), '"': (LogicalKeyboardKey.quote, true),
+  '[': (LogicalKeyboardKey.bracketLeft, false), '{': (LogicalKeyboardKey.bracketLeft, true),
+  ']': (LogicalKeyboardKey.bracketRight, false), '}': (LogicalKeyboardKey.bracketRight, true),
+  '\\': (LogicalKeyboardKey.backslash, false), '|': (LogicalKeyboardKey.backslash, true),
+  '-': (LogicalKeyboardKey.minus, false), '_': (LogicalKeyboardKey.minus, true),
+  '=': (LogicalKeyboardKey.equal, false), '+': (LogicalKeyboardKey.equal, true),
+  '`': (LogicalKeyboardKey.backquote, false), '~': (LogicalKeyboardKey.backquote, true),
+  '!': (LogicalKeyboardKey.digit1, true), '@': (LogicalKeyboardKey.digit2, true), '#': (LogicalKeyboardKey.digit3, true),
+  r'$': (LogicalKeyboardKey.digit4, true), '%': (LogicalKeyboardKey.digit5, true), '^': (LogicalKeyboardKey.digit6, true),
+  '&': (LogicalKeyboardKey.digit7, true), '*': (LogicalKeyboardKey.digit8, true), '(': (LogicalKeyboardKey.digit9, true),
+  ')': (LogicalKeyboardKey.digit0, true),
+};
+
 /// The key named [name] (as the web's `KeyboardEvent.key`: `ArrowRight`,
-/// `Enter`; any case), a letter or a digit.
-LogicalKeyboardKey? _keyNamed(String name) {
+/// `Enter`, `F2`; any case), a letter, a digit or a printable character:
+/// the key, the character it types (null: none) and whether Shift types it.
+({LogicalKeyboardKey key, String? character, bool shifted})? _keyNamed(String name) {
   for (final e in _keyNames.entries) {
-    if (e.key.toLowerCase() == name.toLowerCase() || (name.toLowerCase() == 'esc' && e.key == 'Escape')) return e.value;
+    if (e.key.toLowerCase() == name.toLowerCase() || (name.toLowerCase() == 'esc' && e.key == 'Escape')) {
+      return (key: e.value, character: e.value == LogicalKeyboardKey.space ? ' ' : null, shifted: false);
+    }
   }
-  if (RegExp(r'^[A-Za-z]$').hasMatch(name)) return LogicalKeyboardKey(LogicalKeyboardKey.keyA.keyId + name.toLowerCase().codeUnitAt(0) - 0x61);
-  if (RegExp(r'^[0-9]$').hasMatch(name)) return LogicalKeyboardKey(LogicalKeyboardKey.digit0.keyId + name.codeUnitAt(0) - 0x30);
+  if (RegExp(r'^[A-Za-z]$').hasMatch(name)) {
+    final c = name.toLowerCase();
+    return (key: LogicalKeyboardKey(LogicalKeyboardKey.keyA.keyId + c.codeUnitAt(0) - 0x61), character: c, shifted: false);
+  }
+  if (RegExp(r'^[0-9]$').hasMatch(name)) {
+    return (key: LogicalKeyboardKey(LogicalKeyboardKey.digit0.keyId + name.codeUnitAt(0) - 0x30), character: name, shifted: false);
+  }
+  final f = RegExp(r'^[Ff]([1-9]|1[0-9]|2[0-4])$').firstMatch(name);
+  if (f != null) return (key: LogicalKeyboardKey(LogicalKeyboardKey.f1.keyId + int.parse(f[1]!) - 1), character: null, shifted: false);
+  if (_characterKeys[name] case (final key, final shifted)) return (key: key, character: name, shifted: shifted);
   return null;
 }
 
