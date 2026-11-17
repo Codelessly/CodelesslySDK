@@ -1,0 +1,246 @@
+### Devices
+state room="All"
+state q=""
+state sel=""
+state devices=[{"id":"d1","name":"core-sw-01","room":"Server room","kind":"switch","status":"up","ms":2},{"id":"d2","name":"edge-rtr-01","room":"Server room","kind":"router","status":"up","ms":9},{"id":"d3","name":"nas-archive","room":"Server room","kind":"storage","status":"warn","ms":48},{"id":"d4","name":"ap-lobby","room":"Lobby","kind":"wifi","status":"up","ms":6},{"id":"d5","name":"cam-entrance","room":"Lobby","kind":"camera","status":"down","ms":0},{"id":"d6","name":"ap-open-office","room":"Floor 2","kind":"wifi","status":"up","ms":11},{"id":"d7","name":"printer-2f","room":"Floor 2","kind":"print","status":"warn","ms":120},{"id":"d8","name":"sw-floor2","room":"Floor 2","kind":"switch","status":"up","ms":3}]
+App
+  Sidebar
+    Brand "Pingdom Hall" icon="monitor_heart"
+    NavItem "Devices" icon="devices" selected={true}
+    NavItem "Topology" icon="hub" onTap={go topology}
+    NavItem "Alerts" icon="notifications_active" badge="3" onTap={go alerts}
+    Spacer grow
+    Text.muted "Silenced: none"
+  Main
+    Nav
+      Heading "Devices" level=1
+      Row gap=8
+        Input "Search devices" bind=q w=220
+        Select bind=room items=["All","Server room","Lobby","Floor 2"]
+        Button.outline "Maintenance window" icon="event" onTap={open maint}
+    Column pad=24 gap=16
+      Row gap=16
+        Card grow gap=4
+          Text.muted "Up"
+          Text "{count(devices,d=>d.status==\"up\")}" size=32 weight=700
+        Card grow gap=4
+          Text.muted "Degraded"
+          Text "{count(devices,d=>d.status==\"warn\")}" size=32 weight=700 color=#FFB26A00
+        Card grow gap=4
+          Text.muted "Down"
+          Text "{count(devices,d=>d.status==\"down\")}" size=32 weight=700 color=#FFC62828
+        Card grow gap=4
+          Text.muted "Median latency"
+          Text "8 ms" size=32 weight=700
+      Grid cols=4 gap=16
+        each d in devices
+          if (room=="All" || d.room==room) && (q=="" || contains(lower(d.name),lower(q)))
+            Card gap=8 onTap={go device} menu=devMenu
+              Row between
+                Row gap=8 middle
+                  StatusDot status={d.status}
+                  Text.strong "{d.name}"
+                IconButton "more_vert" tooltip="More" onTap={sel=d.id; open devMenu}
+              Text.muted "{d.room} · {d.kind}"
+              Row between
+                Text.caption "Latency"
+                Text.mono "{d.status==\"down\" ? \"no reply\" : d.ms + \" ms\"}"
+              Sparkline values=[4,5,4,6,5,7,6,5] h=24
+  Menu#devMenu
+    MenuItem "Open device" icon="open_in_new" onTap={go device}
+    MenuItem "Silence for 1 hour" icon="notifications_off" onTap={toast "Silenced for 1 hour"; emit silence {"id":sel,"minutes":60}}
+    MenuItem "Acknowledge" icon="check" onTap={toast "Acknowledged"; emit acknowledge sel}
+    MenuItem "Copy IP address" icon="content_copy" onTap={copy "10.0.4.17"; toast "Copied"}
+  Dialog#maint "Maintenance window" "Alerts are paused for the devices you pick"
+    Calendar bind=maintDate
+    Row gap=8
+      TimePicker "From" bind=maintFrom
+      TimePicker "To" bind=maintTo
+    Select "Applies to" bind=maintRoom items=["Server room","Lobby","Floor 2","All devices"]
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Schedule" onTap={emit scheduleMaintenance {"date":maintDate,"from":maintFrom,"to":maintTo,"room":maintRoom}; toast "Maintenance scheduled"; close}
+
+### Topology
+state hovered=""
+state links=[{"a":"edge-rtr-01","b":"core-sw-01","mbps":940,"status":"up"},{"a":"core-sw-01","b":"sw-floor2","mbps":420,"status":"up"},{"a":"core-sw-01","b":"sw-lobby","mbps":180,"status":"up"},{"a":"core-sw-01","b":"nas-archive","mbps":610,"status":"warn"},{"a":"sw-lobby","b":"cam-entrance","mbps":0,"status":"down"},{"a":"sw-floor2","b":"ap-open-office","mbps":95,"status":"up"}]
+App
+  Sidebar
+    Brand "Pingdom Hall" icon="monitor_heart"
+    NavItem "Devices" icon="devices" onTap={go devices}
+    NavItem "Topology" icon="hub" selected={true}
+    NavItem "Alerts" icon="notifications_active" badge="3" onTap={go alerts}
+  Main
+    Nav
+      Heading "Topology" level=1
+      Row gap=8
+        SegmentedButton bind=metric items=["Traffic","Latency"]
+        Button.outline "Fit to screen" icon="fit_screen" onTap={emit fitTopology}
+    Column pad=24 gap=16
+      Card
+        Topology bind=hovered h=420
+          TopologyNode "edge-rtr-01" kind="router" x=50 y=8 status="up"
+          TopologyNode "core-sw-01" kind="switch" x=50 y=38 status="up"
+          TopologyNode "sw-floor2" kind="switch" x=22 y=68 status="up"
+          TopologyNode "sw-lobby" kind="switch" x=78 y=68 status="up"
+          TopologyNode "nas-archive" kind="storage" x=50 y=78 status="warn"
+          TopologyNode "ap-open-office" kind="wifi" x=10 y=94 status="up"
+          TopologyNode "cam-entrance" kind="camera" x=90 y=94 status="down"
+          each l in links
+            TopologyLink from={l.a} to={l.b} width={clamp(l.mbps/100,1,10)} color={l.status=="down" ? "#FFC62828" : l.status=="warn" ? "#FFB26A00" : "#FF2E7D32"} label="{l.mbps} Mbps" onTap={hovered=l.a+" - "+l.b}
+      if hovered!=""
+        Card gap=8
+          Row between
+            Text.strong "{hovered}"
+            IconButton "close" tooltip="Clear" onTap={hovered=""}
+          Row gap=24
+            Column
+              Text.caption "Throughput"
+              Text.strong "{find(links,l=>l.a+\" - \"+l.b==hovered).mbps} Mbps"
+            Column
+              Text.caption "State"
+              Text.strong "{find(links,l=>l.a+\" - \"+l.b==hovered).status}"
+          Row gap=8
+            Button.outline "Open device" onTap={go device}
+            Button.ghost "Silence for 1 hour" onTap={toast "Silenced for 1 hour"; emit silence {"link":hovered,"minutes":60}}
+
+### Device
+state range="5 min"
+state live=[8,9,8,10,9,12,11,9,8,10]
+state loss=0.4
+state running=true
+state tab="events"
+state events=[{"id":"e1","at":"14:02:11","level":"error","text":"No reply to 3 consecutive pings","ack":false},{"id":"e2","at":"13:58:40","level":"warn","text":"Latency above 40 ms for 2 min","ack":true},{"id":"e3","at":"13:41:07","level":"info","text":"Interface Gi0/2 link up","ack":true},{"id":"e4","at":"12:15:52","level":"info","text":"Firmware check passed (v17.9.4)","ack":true}]
+every 1s when running onTick={live=append(slice(live,1,length(live)),round(8+abs(sin(1))*6,0)); loss=clamp(loss+0.1-0.1,0,5)}
+App
+  Sidebar
+    Brand "Pingdom Hall" icon="monitor_heart"
+    NavItem "Devices" icon="devices" selected={true} onTap={go devices}
+    NavItem "Topology" icon="hub" onTap={go topology}
+    NavItem "Alerts" icon="notifications_active" badge="3" onTap={go alerts}
+  Main
+    Nav
+      Row gap=12 middle
+        IconButton "arrow_back" tooltip="Back" onTap={go devices}
+        Heading "edge-rtr-01" level=1
+        Badge.success "Up"
+      Row gap=8
+        Button.outline "Acknowledge" icon="check" onTap={events=updateWhere(events,e=>!e.ack,e=>with(e,"ack",true)); toast "Acknowledged"}
+        Button.outline "Silence 1 hour" icon="notifications_off" onTap={emit silence {"id":"d2","minutes":60}; toast "Silenced for 1 hour"}
+        IconButton "more_vert" tooltip="More" onTap={open devActions}
+    Column pad=24 gap=16
+      Row gap=16
+        Card grow gap=4
+          Text.muted "Latency"
+          Text "{last(live)} ms" size=32 weight=700
+        Card grow gap=4
+          Text.muted "Packet loss"
+          Text "{fixed(loss,1)} %" size=32 weight=700
+        Card grow gap=4
+          Text.muted "Uptime"
+          Text "41 d 6 h" size=32 weight=700
+        Card grow gap=4
+          Text.muted "Address"
+          Text.mono "10.0.0.1"
+      Card gap=12
+        Row between
+          Text.strong "Latency"
+          Row gap=8
+            SegmentedButton bind=range items=["5 min","1 h","24 h"]
+            IconButton "{running ? \"pause\" : \"play_arrow\"}" tooltip="Pause live view" onTap={running=!running}
+        LiveChart values={live} unit="ms" limit=40 h=220 scroll
+      Card gap=12
+        Row between
+          Text.strong "Event log"
+          Row gap=8
+            ChoiceChip "Events" selected={tab=="events"} onTap={tab="events"}
+            ChoiceChip "Packet loss" selected={tab=="loss"} onTap={tab="loss"}
+        if tab=="events"
+          each e in events
+            ListTile "{e.text}" subtitle="{e.at}" icon={e.level=="error" ? "error" : e.level=="warn" ? "warning" : "info"}
+              Row gap=8
+                if e.ack
+                  Badge.neutral "Acknowledged"
+                if !e.ack
+                  Button.outline "Acknowledge" onTap={events=updateWhere(events,x=>x.id==e.id,x=>with(x,"ack",true))}
+        if tab=="loss"
+          BarChart values=[0,0.2,0.4,0,0.8,0.4,0.1,0.4] labels=["13:00","13:10","13:20","13:30","13:40","13:50","14:00","14:10"] h=180
+  Menu#devActions end
+    MenuItem "Reboot device" icon="restart_alt" onTap={open confirmReboot}
+    MenuItem "Add alert rule" icon="add_alert" onTap={go alerts}
+    MenuItem "Copy IP address" icon="content_copy" onTap={copy "10.0.0.1"; toast "Copied"}
+  Dialog#confirmReboot "Reboot edge-rtr-01?" "The network will drop for about two minutes."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Reboot" onTap={emit reboot "d2"; toast "Reboot sent"; close}
+
+### Alerts
+state tab="rules"
+state rules=[{"id":"r1","name":"High latency","metric":"latency","op":">","threshold":40,"unit":"ms","notify":["Network team","On-call"],"on":true},{"id":"r2","name":"Packet loss","metric":"loss","op":">","threshold":2,"unit":"%","notify":["On-call"],"on":true},{"id":"r3","name":"Device down","metric":"status","op":"==","threshold":0,"unit":"","notify":["Network team","Facilities"],"on":true}]
+state incidents=[{"id":"i1","at":"14:02","title":"cam-entrance is down","sev":"error","ack":false,"by":""},{"id":"i2","at":"13:58","title":"nas-archive latency above 40 ms","sev":"warn","ack":true,"by":"Dana"},{"id":"i3","at":"11:20","title":"printer-2f packet loss 4%","sev":"warn","ack":true,"by":"Sam"},{"id":"i4","at":"09:05","title":"sw-lobby restarted","sev":"info","ack":true,"by":"Dana"}]
+state editing={"id":"","name":"","metric":"latency","op":">","threshold":40,"notify":[]}
+App
+  Sidebar
+    Brand "Pingdom Hall" icon="monitor_heart"
+    NavItem "Devices" icon="devices" onTap={go devices}
+    NavItem "Topology" icon="hub" onTap={go topology}
+    NavItem "Alerts" icon="notifications_active" badge="{count(incidents,i=>!i.ack)}" selected={true}
+  Main
+    Nav
+      Heading "Alerts" level=1
+      Row gap=8
+        Button.outline "Maintenance window" icon="event" onTap={open maint}
+        Button "New rule" icon="add" onTap={editing={"id":"","name":"","metric":"latency","op":">","threshold":40,"notify":[]}; open rule}
+    Column pad=24 gap=16
+      Row gap=8
+        ChoiceChip "Rules" selected={tab=="rules"} onTap={tab="rules"}
+        ChoiceChip "Incidents" selected={tab=="incidents"} onTap={tab="incidents"}
+      if tab=="rules"
+        Card gap=0
+          Row gap=12 pad=[12,8,12,8] border-bottom=#FFDDDDDD
+            Text.caption "Rule" grow
+            Text.caption "Condition" w=140
+            Text.caption "Who is told" w=180
+            Text.caption "On" w=60
+          each r in rules
+            Row gap=12 pad=[12,12,12,12] middle border-bottom=#FFEEEEEE
+              Text.strong "{r.name}" grow
+              Text.mono "{r.metric} {r.op} {r.threshold}{r.unit}" w=140
+              Text.muted "{join(r.notify,\", \")}" w=180
+              Toggle bind=r.on w=60
+              IconButton "edit" tooltip="Edit rule" onTap={editing=r; open rule}
+      if tab=="incidents"
+        Card gap=12
+          Text.strong "Today"
+          Timeline
+            each i in incidents
+              TimelineItem "{i.title}" time="{i.at}" icon={i.sev=="error" ? "error" : i.sev=="warn" ? "warning" : "info"} color={i.sev=="error" ? "#FFC62828" : i.sev=="warn" ? "#FFB26A00" : "#FF1565C0"}
+                if i.ack
+                  Text.muted "Acknowledged by {i.by}"
+                if !i.ack
+                  Row gap=8
+                    Button "Acknowledge" onTap={incidents=updateWhere(incidents,x=>x.id==i.id,x=>with(with(x,"ack",true),"by","You")); toast "Acknowledged"}
+                    Button.outline "Silence 1 hour" onTap={emit silence {"incident":i.id,"minutes":60}; toast "Silenced for 1 hour"}
+  Dialog#rule "Alert rule" "Choose a condition and who hears about it"
+    Input "Name" bind=editing.name
+    Row gap=8
+      Select "Metric" bind=editing.metric items=["latency","loss","status"] grow
+      Select "Is" bind=editing.op items=[">","<","=="] w=90
+      Input "Threshold" bind=editing.threshold type=number w=110
+    Text.fieldLabel "Notify"
+    Row gap=8
+      FilterChip "Network team" selected={contains(editing.notify,"Network team")} onTap={editing=with(editing,"notify",contains(editing.notify,"Network team") ? without(editing.notify,"Network team") : append(editing.notify,"Network team"))}
+      FilterChip "On-call" selected={contains(editing.notify,"On-call")} onTap={editing=with(editing,"notify",contains(editing.notify,"On-call") ? without(editing.notify,"On-call") : append(editing.notify,"On-call"))}
+      FilterChip "Facilities" selected={contains(editing.notify,"Facilities")} onTap={editing=with(editing,"notify",contains(editing.notify,"Facilities") ? without(editing.notify,"Facilities") : append(editing.notify,"Facilities"))}
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Save rule" onTap={editing.name=="" ? toast "Name the rule" : {rules=editing.id=="" ? append(rules,with(editing,"id","r"+(length(rules)+1))) : updateWhere(rules,r=>r.id==editing.id,r=>editing); toast "Rule saved"; close}}
+  Dialog#maint "Maintenance window" "Alerts are paused for the devices you pick"
+    Calendar bind=maintDate
+    Row gap=8
+      TimePicker "From" bind=maintFrom
+      TimePicker "To" bind=maintTo
+    Select "Applies to" bind=maintRoom items=["Server room","Lobby","Floor 2","All devices"]
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Schedule" onTap={emit scheduleMaintenance {"date":maintDate,"from":maintFrom,"to":maintTo,"room":maintRoom}; toast "Maintenance scheduled"; close}

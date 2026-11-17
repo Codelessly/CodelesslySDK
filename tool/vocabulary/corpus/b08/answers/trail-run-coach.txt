@@ -1,0 +1,234 @@
+### Plan
+state tab="plan"
+state week=7
+state sel=""
+state days=[{"i":0,"name":"Mon"},{"i":1,"name":"Tue"},{"i":2,"name":"Wed"},{"i":3,"name":"Thu"},{"i":4,"name":"Fri"},{"i":5,"name":"Sat"},{"i":6,"name":"Sun"}]
+state plan=[{"id":"w7a","week":7,"day":0,"kind":"rest","title":"Rest","km":0,"color":"#FF9E9E9E"},{"id":"w7b","week":7,"day":1,"kind":"intervals","title":"6 x 800 m","km":10,"color":"#FFE5484D"},{"id":"w7c","week":7,"day":2,"kind":"easy","title":"Easy run","km":8,"color":"#FF30A46C"},{"id":"w7d","week":7,"day":3,"kind":"tempo","title":"Tempo 25 min","km":11,"color":"#FFF5A524"},{"id":"w7e","week":7,"day":4,"kind":"easy","title":"Recovery jog","km":6,"color":"#FF30A46C"},{"id":"w7f","week":7,"day":5,"kind":"long","title":"Long run","km":26,"color":"#FF3E63DD"},{"id":"w7g","week":7,"day":6,"kind":"easy","title":"Shake-out","km":5,"color":"#FF30A46C"}]
+state raceDate="2027-02-14"
+App
+  Sidebar
+    Brand "Fartlek" icon="directions_run"
+    NavItem "Plan" icon="calendar_month" selected={tab=="plan"} onTap={go plan}
+    NavItem "Workout" icon="show_chart" selected={tab=="workout"} onTap={go workout}
+    NavItem "Live" icon="timer" selected={tab=="live"} onTap={go live}
+    NavItem "Load and readiness" icon="monitor_heart" selected={tab=="load"} onTap={go load}
+    Spacer grow
+    Card gap=4
+      Text.caption "Race day"
+      Text.strong "Valencia Marathon"
+      Text.muted "{formatDate(raceDate,'MMM d')}"
+  Main
+    Nav
+      Heading "12-week plan" level=1
+      Row gap=8
+        IconButton "chevron_left" tooltip="Previous week" onTap={week=max(1,week-1)}
+        Text.strong "Week {week} of 12"
+        IconButton "chevron_right" tooltip="Next week" onTap={week=min(12,week+1)}
+        Button.outline "Add workout" icon="add" onTap={open addWorkout}
+    Column pad=24 gap=16
+      Row gap=16
+        Card grow gap=4
+          Text.caption "This week"
+          Text.heading "{sum(filter(plan,p=>p.week==week),p=>p.km)} km"
+        Card grow gap=4
+          Text.caption "Long run"
+          Text.heading "{sum(filter(plan,p=>p.week==week&&p.kind=='long'),p=>p.km)} km"
+        Card grow gap=4
+          Text.caption "Workouts"
+          Text.heading "{count(filter(plan,p=>p.week==week),p=>p.kind!='rest')}"
+      Row gap=8
+        Badge.error "Intervals"
+        Badge.warning "Tempo"
+        Badge.success "Easy"
+        Badge.primary "Long run"
+        Text.muted "Drag a block to another day to move it."
+      Grid cols=7 gap=8
+        each d in days
+          Column#day gap=8 pad=8 radius=8 fill=#FFF6F7F9 drop=workout onDrop={plan=updateWhere(plan,p=>p.id==result.data,p=>with(with(p,"day",d.i),"week",week))}
+            Text.caption "{d.name}"
+            each w in filter(plan,p=>p.week==week&&p.day==d.i)
+              Box gap=4 pad=10 radius=8 fill={w.color} drag=workout(w.id) onTap={sel=w.id; open workoutDrawer}
+                Row between
+                  Text.strong "{w.title}" color=#FFFFFFFF
+                  if w.kind=="long"
+                    Icon "flag" color=#FFFFFFFF
+                if w.km>0
+                  Text.small "{w.km} km" color=#FFFFFFFF
+      Card gap=8
+        Text.strong "All twelve weeks"
+        BarChart values=[32,36,40,28,44,48,52,38,56,60,42,30] labels=["1","2","3","4","5","6","7","8","9","10","11","12"] h=140
+  Dialog#addWorkout "Add a workout" "Placed on the selected week"
+    Input "Title" bind=newTitle
+    Select "Type" bind=newKind items=["Easy","Tempo","Intervals","Long run"]
+    Input "Distance (km)" type=number bind=newKm
+    Select "Day" bind=newDay items=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+    Button "Add" onTap={plan=append(plan,{"id":"n{length(plan)}","week":week,"day":indexOf(["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],newDay),"kind":lower(newKind),"title":newTitle,"km":newKm,"color":"#FF3E63DD"}); toast "Workout added"; close}
+  Drawer#workoutDrawer "Workout" right
+    Text.heading "{find(plan,p=>p.id==sel).title}"
+    Text.muted "Week {find(plan,p=>p.id==sel).week} · {find(plan,p=>p.id==sel).km} km"
+    Button "Open detail" onTap={go workout}
+    Button.outline "Start now" onTap={go live}
+    Button.destructive "Remove from plan" onTap={plan=removeWhere(plan,p=>p.id==sel); close; toast "Removed"}
+
+### Workout
+state tab="workout"
+state step=-1
+state steps=[{"name":"Warm-up","min":15,"pace":"6:10/km","h":60,"color":"#FF30A46C"},{"name":"Rep 1","min":4,"pace":"4:15/km","h":140,"color":"#FFE5484D"},{"name":"Jog 1","min":2,"pace":"6:30/km","h":50,"color":"#FF9E9E9E"},{"name":"Rep 2","min":4,"pace":"4:15/km","h":140,"color":"#FFE5484D"},{"name":"Jog 2","min":2,"pace":"6:30/km","h":50,"color":"#FF9E9E9E"},{"name":"Rep 3","min":4,"pace":"4:15/km","h":140,"color":"#FFE5484D"},{"name":"Jog 3","min":2,"pace":"6:30/km","h":50,"color":"#FF9E9E9E"},{"name":"Rep 4","min":4,"pace":"4:10/km","h":150,"color":"#FFE5484D"},{"name":"Cool-down","min":10,"pace":"6:20/km","h":60,"color":"#FF3E63DD"}]
+App
+  Sidebar
+    Brand "Fartlek" icon="directions_run"
+    NavItem "Plan" icon="calendar_month" selected={tab=="plan"} onTap={go plan}
+    NavItem "Workout" icon="show_chart" selected={tab=="workout"} onTap={go workout}
+    NavItem "Live" icon="timer" selected={tab=="live"} onTap={go live}
+    NavItem "Load and readiness" icon="monitor_heart" selected={tab=="load"} onTap={go load}
+  Main
+    Nav
+      Heading "Tuesday: 4 x 4 min intervals" level=1
+      Row gap=8
+        Button.outline "Move to another day" icon="event" onTap={open moveMenu}
+        Button "Start workout" icon="play_arrow" onTap={go live}
+    Column pad=24 gap=16
+      Row gap=16
+        Card grow gap=4
+          Text.caption "Duration"
+          Text.heading "{sum(steps,s=>s.min)} min"
+        Card grow gap=4
+          Text.caption "Distance"
+          Text.heading "10.4 km"
+        Card grow gap=4
+          Text.caption "Effort"
+          Text.heading "Hard"
+      Card gap=12
+        Text.strong "Profile"
+        Row scroll gap=6 bottom
+          each s in steps
+            Column gap=4 center
+              Box w=44 h={s.h} fill={s.color} radius=6 onTap={step=index}
+              Text.caption "{s.min}'"
+        Row gap=16
+          Row gap=4
+            Icon "circle" color=#FF30A46C
+            Text.small "Warm-up"
+          Row gap=4
+            Icon "circle" color=#FFE5484D
+            Text.small "Interval"
+          Row gap=4
+            Icon "circle" color=#FF9E9E9E
+            Text.small "Recovery jog"
+          Row gap=4
+            Icon "circle" color=#FF3E63DD
+            Text.small "Cool-down"
+      Card gap=8
+        Text.strong "Target paces"
+        each s in steps
+          ListTile "{s.name}" subtitle="{s.min} min" selected={step==index} onTap={step=index}
+            Text.strong "{s.pace}"
+      Card gap=8
+        Text.strong "Audio cues"
+        Toggle "Pace alerts" bind=cuePace
+        Toggle "Interval countdown" bind=cueCount
+        Toggle "Heart-rate zone warnings" bind=cueHr
+  Menu#moveMenu
+    MenuItem "Wednesday" icon="event" onTap={toast "Moved to Wednesday"; emit moveWorkout "wed"}
+    MenuItem "Thursday" icon="event" onTap={toast "Moved to Thursday"; emit moveWorkout "thu"}
+    MenuItem "Friday" icon="event" onTap={toast "Moved to Friday"; emit moveWorkout "fri"}
+
+### Live
+state tab="live"
+state running=true
+state secs=0
+state lapStart=0
+state laps=[]
+state banner="Warm-up: keep it easy, 6:10 per km"
+state pace="6:08"
+state hr=142
+every 1s when running onTick={secs=secs+1; banner=secs==30?"Rep 1 in 10 seconds: get ready":banner}
+App
+  Main
+    Nav
+      Row gap=8
+        IconButton "close" tooltip="End workout" onTap={open endWorkout}
+        Heading "4 x 4 min intervals" level=1
+      Badge.success "GPS locked"
+    Column pad=24 gap=16 center
+      Card gap=4
+        Row gap=12
+          Icon "volume_up"
+          Column grow gap=2
+            Text.caption "Audio cue"
+            Text.strong "{banner}"
+          IconButton "close" tooltip="Dismiss" onTap={banner=""}
+      Text "{duration(secs)}" size=72 weight=700 center
+      Row gap=16
+        Card grow gap=4
+          Text.caption "Pace"
+          Text.heading "{pace}"
+        Card grow gap=4
+          Text.caption "Heart rate"
+          Text.heading "{hr}"
+        Card grow gap=4
+          Text.caption "Distance"
+          Text.heading "{fixed(secs/370,2)} km"
+      Progress {clamp(secs/1500,0,1)}
+      Row gap=12 center
+        Button.outline "{running ? 'Pause' : 'Resume'}" icon={running ? "pause" : "play_arrow"} onTap={running=!running}
+        Button "Lap" icon="flag" size=large onTap={laps=append(laps,{"n":length(laps)+1,"t":secs-lapStart}); lapStart=secs; toast "Lap {length(laps)+1}"}
+      if length(laps)>0
+        Card gap=8
+          Text.strong "Laps"
+          each l in reverse(laps)
+            Row between
+              Text "Lap {l.n}"
+              Text.strong "{duration(l.t)}"
+  Dialog#endWorkout "End this workout?" "Your run so far will be saved."
+    Button "Save and finish" onTap={emit finishRun secs; close; go load}
+    Button.destructive "Discard" onTap={emit discardRun; close; go plan}
+    Button.ghost "Keep running" onTap={close}
+
+### Load and readiness
+state tab="load"
+state sleep=7.2
+state rest=2
+state soreness=3
+state raceDate="2027-02-14"
+state daysToRace=89
+App
+  Sidebar
+    Brand "Fartlek" icon="directions_run"
+    NavItem "Plan" icon="calendar_month" selected={tab=="plan"} onTap={go plan}
+    NavItem "Workout" icon="show_chart" selected={tab=="workout"} onTap={go workout}
+    NavItem "Live" icon="timer" selected={tab=="live"} onTap={go live}
+    NavItem "Load and readiness" icon="monitor_heart" selected={tab=="load"} onTap={go load}
+  Main
+    Nav
+      Heading "Load and readiness" level=1
+      Button.outline "Log last night" icon="bedtime" onTap={open logSleep}
+    Column pad=24 gap=16
+      Grid cols=2 gap=16
+        Card gap=12
+          Text.strong "Readiness"
+          Stack center middle
+            Ring {clamp((sleep/8)*0.6+(rest/3)*0.3+((5-soreness)/5)*0.1,0,1)} h=140
+            Text "{round(clamp((sleep/8)*0.6+(rest/3)*0.3+((5-soreness)/5)*0.1,0,1)*100,0)}" size=40 weight=700
+          Text.muted "Sleep {sleep} h, {rest} rest days this week, soreness {soreness} of 5."
+        Card gap=12 fill=#FF1B2A4A
+          Text.caption "Race countdown" color=#FFC9D4EE
+          Text "{daysToRace} days" size=48 weight=700 color=#FFFFFFFF
+          Text.strong "Valencia Marathon, {formatDate(raceDate,'MMM d')}" color=#FFFFFFFF
+          Progress {clamp(1-daysToRace/168,0,1)}
+          Text.small "Week 7 of 12 in the build" color=#FFC9D4EE
+      Card gap=12
+        Row between
+          Text.strong "Weekly load (km)"
+          Row gap=8
+            ChoiceChip "Distance" selected={metric=="km"} onTap={metric="km"}
+            ChoiceChip "Time" selected={metric=="min"} onTap={metric="min"}
+        BarChart stacked labels=["W1","W2","W3","W4","W5","W6","W7","W8","W9","W10","W11","W12"] series=[{"name":"Easy","values":[18,20,22,16,24,26,28,20,30,32,22,16]},{"name":"Tempo and intervals","values":[8,10,10,6,12,12,14,10,14,16,10,6]},{"name":"Long run","values":[6,6,8,6,8,10,10,8,12,12,10,8]}] h=240
+      Card gap=8
+        Text.strong "Recovery notes"
+        ListTile "Sleep under 7 h two nights this week" subtitle="Keep Thursday's tempo easy if it happens again." icon="bedtime"
+        ListTile "Long run is up 8 percent" subtitle="Within the safe range." icon="trending_up"
+  Dialog#logSleep "Log last night" "Feeds your readiness score"
+    Slider "Hours slept" bind=sleep min=3 max=11
+    Slider "Soreness" bind=soreness min=0 max=5
+    Button "Save" onTap={emit logReadiness; toast "Readiness updated"; close}

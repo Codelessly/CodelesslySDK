@@ -1,0 +1,151 @@
+### Till
+state tab="till"
+state online=true
+state queue=[]
+state sales=[]
+state cart=[]
+state grams=0
+state weighItem="Heritage tomatoes"
+state tendered=0
+state reader="idle"
+state stock=[{"id":"apples","name":"Cox apples","price":3.2,"qty":24,"img":"https://images.example.com/stall/apples.jpg","unit":"kg"},{"id":"eggs","name":"Free-range eggs","price":4.5,"qty":9,"img":"https://images.example.com/stall/eggs.jpg","unit":"box"},{"id":"honey","name":"Wildflower honey","price":7,"qty":14,"img":"https://images.example.com/stall/honey.jpg","unit":"jar"},{"id":"bread","name":"Sourdough loaf","price":5.5,"qty":4,"img":"https://images.example.com/stall/bread.jpg","unit":"loaf"}]
+state perKilo=[{"name":"Heritage tomatoes","price":6.4},{"name":"New potatoes","price":2.8},{"name":"Runner beans","price":7.2}]
+state total=0
+every 1s when reader=="waiting" onTick={reader=reader}
+App
+  Sidebar
+    Brand "Barrowboy" icon="storefront"
+    NavItem "Till" icon="point_of_sale" selected={tab=="till"} onTap={tab="till"}
+    NavItem "Stock" icon="inventory_2" badge="{count(stock,s=>s.qty<=5)}" onTap={go stock}
+    NavItem "Takings" icon="show_chart" onTap={go takings}
+    Spacer grow
+    Row gap=8 middle
+      Icon "wifi" hidden={!online}
+      Icon "wifi_off" hidden={online}
+      Text.muted "{online ? 'Online' : 'Offline'}"
+    Toggle "Connected" bind=online
+    Badge.warning "{length(queue)} queued" visible={length(queue)>0}
+  Main
+    Nav
+      Heading "Saturday stall" level=1
+      Row gap=8
+        Badge.warning "Offline: sales queue" visible={!online}
+        Button.outline "Sync queue" icon="sync" visible={online && length(queue)>0} onTap={sales=concat(sales,queue); queue=[]; toast "Queue sent"}
+    Row gap=16 pad=24 top
+      Column grow gap=16
+        Text.sectionTitle "Tap to add, hold to remove"
+        Grid cols=2 gap=12
+          each item in stock
+            Card gap=8 onTap={item.qty>0 ? {cart=append(cart,item); stock=updateWhere(stock,s=>s.id==item.id,s=>with(s,"qty",s.qty-1))} : toast "Sold out"} onLongPress={contains(map(cart,c=>c.id),item.id) ? {cart=removeAt(cart,indexOf(map(cart,c=>c.id),item.id)); stock=updateWhere(stock,s=>s.id==item.id,s=>with(s,"qty",s.qty+1))} : toast "None in the basket"}
+              Image "{item.img}" h=140
+              Row between
+                Text.heading3 "{item.name}"
+                Badge.primary "{money(item.price,'$',2)}"
+              Row between
+                Text.muted "{item.qty} left per {item.unit}"
+                Badge.warning "Low" visible={item.qty<=5}
+        Card gap=12
+          Heading "Scale" level=3
+          Row gap=12 middle
+            Select bind=weighItem items=["Heritage tomatoes","New potatoes","Runner beans"] grow
+            Input "Grams from scale" type=number bind=grams w=160
+          Row between
+            Text.muted "{money(find(perKilo,p=>p.name==weighItem).price,'$',2)} per kilo"
+            Text.strong "{money(grams/1000*find(perKilo,p=>p.name==weighItem).price,'$',2)}"
+          Button.outline "Add weighed item" onTap={grams>0 ? {cart=append(cart,{"id":"w","name":weighItem+" "+grams+"g","price":round(grams/1000*find(perKilo,p=>p.name==weighItem).price,2)}); grams=0} : toast "Nothing on the scale"}
+      Pane w=340 pad=16 gap=12
+        Heading "Basket" level=3
+        if isEmpty(cart)
+          Text.muted "Nothing yet"
+        each line in cart
+          Row between
+            Text "{line.name}"
+            Text.strong "{money(line.price,'$',2)}"
+        Divider
+        Row between
+          Text.title "Total"
+          Text "{money(sum(cart,c=>c.price),'$',2)}" size=40 weight=700
+        Button "Cash {money(sum(cart,c=>c.price),'$',2)}" size=large onTap={open cash}
+        Button.secondary "Card" size=large onTap={reader="waiting"; open card}
+        Button.ghost "Clear basket" onTap={cart=[]}
+  Dialog#cash "Cash payment"
+    Text.muted "Due {money(sum(cart,c=>c.price),'$',2)}"
+    Input "Cash handed over" type=number bind=tendered
+    Row gap=8
+      Button.outline "$10" onTap={tendered=10}
+      Button.outline "$20" onTap={tendered=20}
+      Button.outline "$50" onTap={tendered=50}
+    Row between
+      Text.title "Change"
+      Text "{money(max(0,tendered-sum(cart,c=>c.price)),'$',2)}" size=40 weight=700 color=#FF2E7D32
+    Button "Complete sale" onTap={tendered>=sum(cart,c=>c.price) ? {online ? sales=append(sales,{"total":sum(cart,c=>c.price),"hour":hour()}) : queue=append(queue,{"total":sum(cart,c=>c.price),"hour":hour()}); cart=[]; tendered=0; close; toast "Sale recorded"} : toast "Not enough cash"}
+  Dialog#card "Card reader"
+    if reader=="waiting"
+      Column center gap=12
+        Icon "contactless" size=64 animate=pulse
+        Text.title "Waiting for card"
+        Text.muted "Hold the card to the reader"
+        Button.outline "Simulate approval" onTap={reader="done"}
+    if reader=="done"
+      Column center gap=12
+        Icon "check_circle" size=64 color=#FF2E7D32 animate=pop
+        Text.title "Payment approved"
+        Button "Finish" onTap={online ? sales=append(sales,{"total":sum(cart,c=>c.price),"hour":hour()}) : queue=append(queue,{"total":sum(cart,c=>c.price),"hour":hour()}); cart=[]; reader="idle"; close}
+
+### Stock
+App
+  Sidebar
+    Brand "Barrowboy" icon="storefront"
+    NavItem "Till" icon="point_of_sale" onTap={go till}
+    NavItem "Stock" icon="inventory_2" selected={true}
+    NavItem "Takings" icon="show_chart" onTap={go takings}
+  Main
+    Nav
+      Heading "Stock count" level=1
+      Button "Restock all low" icon="add_box" onTap={stock=map(stock,s=>s.qty<=5 ? with(s,"qty",s.qty+12) : s); toast "Low items topped up"}
+    Column pad=24 gap=16
+      Card gap=8 visible={count(stock,s=>s.qty<=5)>0}
+        Row gap=8 middle
+          Icon "warning" color=#FFB26A00
+          Text.strong "Low stock: {join(map(filter(stock,s=>s.qty<=5),s=>s.name),', ')}"
+      each item in stock
+        Card
+          Row between middle
+            Row gap=12 middle grow
+              Avatar src="{item.img}" size=48
+              Column gap=4 grow
+                Text.strong "{item.name}"
+                Progress {clamp(item.qty/30,0,1)}
+            Badge.error "Low" visible={item.qty<=5}
+            Text.strong "{item.qty}" w=48
+            IconButton "remove" tooltip="Remove one" onTap={stock=updateWhere(stock,s=>s.id==item.id,s=>with(s,"qty",max(0,s.qty-1)))}
+            IconButton "add" tooltip="Add one" onTap={stock=updateWhere(stock,s=>s.id==item.id,s=>with(s,"qty",s.qty+1))}
+
+### Takings
+App
+  Sidebar
+    Brand "Barrowboy" icon="storefront"
+    NavItem "Till" icon="point_of_sale" onTap={go till}
+    NavItem "Stock" icon="inventory_2" onTap={go stock}
+    NavItem "Takings" icon="show_chart" selected={true}
+  Main
+    Nav
+      Heading "Day's takings" level=1
+      Badge.warning "{length(queue)} sales waiting to sync" visible={length(queue)>0}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Taken today"
+          Text "{money(sum(sales,s=>s.total),'$',2)}" size=36 weight=700
+        Card gap=4
+          Text.muted "Sales"
+          Text "{length(sales)}" size=36 weight=700
+        Card gap=4
+          Text.muted "Queued offline"
+          Text "{money(sum(queue,s=>s.total),'$',2)}" size=36 weight=700
+      Card gap=12
+        Heading "Takings by hour" level=3
+        BarChart values=[42,88,130,96,61,74,52,30] labels=["7am","8am","9am","10am","11am","12pm","1pm","2pm"] h=240
+      Card gap=12
+        Heading "Running total" level=3
+        AreaChart values=[42,130,260,356,417,491,543,573] labels=["7am","8am","9am","10am","11am","12pm","1pm","2pm"] h=200

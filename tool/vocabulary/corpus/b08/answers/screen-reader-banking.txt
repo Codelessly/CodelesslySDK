@@ -1,0 +1,95 @@
+### Accounts
+state accounts=[{"id":"chk","name":"Everyday Checking","last4":"4821","balance":2480.55,"low":false},{"id":"sav","name":"Rainy Day Savings","last4":"9930","balance":12250.00,"low":false},{"id":"cc","name":"Travel Card","last4":"1177","balance":-640.20,"low":false},{"id":"bus","name":"Side Business Checking","last4":"3305","balance":38.40,"low":true}]
+App
+  Main
+    Nav
+      Heading "Accounts" level=1
+      Button.outline "Help line" icon="support_agent" onTap={go help}
+    Column pad=24 gap=16 maxw=720
+      Card gap=8 role=region label="Summary"
+        Heading "Summary" level=2
+        Text "You have {length(accounts)} accounts. Total balance {money(sum(accounts,a=>a.balance),"$",2)}. {count(accounts,a=>a.low)} account is low."
+      Heading "Your accounts" level=2
+      each a in accounts
+        ListTile "{a.name}, ending {a.last4}" label="{a.name}, ending {a.last4}, balance {money(a.balance,"$",2)}{a.low ? ", low balance" : ", balance is fine"}" subtitle="{money(a.balance,"$",2)}{a.low ? ", low" : ""}" onTap={sel=a.id; go account-detail}
+      Heading "Actions" level=2
+      Button "Transfer money" onTap={go transfer}
+      Button.outline "Recent activity" onTap={go activity}
+
+### Transfer
+state from="Everyday Checking"
+state to="Rainy Day Savings"
+state amount=""
+state note=""
+state error=""
+state accts=["Everyday Checking","Rainy Day Savings","Travel Card","Side Business Checking"]
+App
+  Main
+    Nav
+      Heading "Transfer money" level=1
+      Button.outline "Help line" icon="support_agent" onTap={go help}
+    Column pad=24 gap=16 maxw=720
+      Card gap=4 role=region label="Summary"
+        Heading "Summary" level=2
+        Text "Move money between your own accounts. Three fields, then a confirm step."
+      Heading "Details" level=2
+      Select "From account" bind=from items={accts} hint="The account the money leaves"
+      Select "To account" bind=to items={accts} hint="The account the money goes to"
+      Input "Amount in dollars" "For example 150.00" bind=amount type=number
+      Input "Note, optional" "A short reminder" bind=note
+      if error!=""
+        Text.danger "Error: {error}" live=assertive role=alert
+      Button "Review transfer" onTap={from==to ? error="Choose two different accounts." : (amount=="" || amount<=0 ? error="Enter an amount greater than zero." : (error=""; open confirm))}
+      Button.ghost "Cancel" onTap={go accounts}
+  Dialog#confirm "Confirm transfer" "Please check these details before you send."
+    Text "You are moving {money(amount,"$",2)} from {from} to {to}."
+    Text "Amount in words: {fixed(amount,2)} dollars."
+    if note!=""
+      Text "Note: {note}"
+    Row gap=8
+      Button "Confirm and send" onTap={emit transfer {"from":from,"to":to,"amount":amount}; toast "Transfer of {money(amount,"$",2)} sent"; amount=""; note=""; close; go accounts}
+      Button.outline "Go back and edit" onTap={close}
+
+### Activity
+state filter="all"
+state items=[{"id":1,"date":"Nov 15","what":"Grocery Market","amt":-84.12,"kind":"out"},{"id":2,"date":"Nov 14","what":"Paycheck deposit","amt":2150.00,"kind":"in"},{"id":3,"date":"Nov 12","what":"Electric company","amt":-96.40,"kind":"out"},{"id":4,"date":"Nov 10","what":"Transfer to Rainy Day Savings","amt":-300.00,"kind":"out"}]
+App
+  Main
+    Nav
+      Heading "Recent activity" level=1
+      Button.outline "Help line" icon="support_agent" onTap={go help}
+    Column pad=24 gap=16 maxw=720
+      Card gap=4 role=region label="Summary"
+        Heading "Summary" level=2
+        Text "{length(items)} transactions in the last 30 days. Money in {money(sum(filter(items,i=>i.amt>0),i=>i.amt),"$",2)}. Money out {money(abs(sum(filter(items,i=>i.amt<0),i=>i.amt)),"$",2)}."
+      Heading "Show" level=2
+      Row gap=8
+        ChoiceChip "All" selected={filter=="all"} onTap={filter="all"}
+        ChoiceChip "Money in" selected={filter=="in"} onTap={filter="in"}
+        ChoiceChip "Money out" selected={filter=="out"} onTap={filter="out"}
+      Heading "Transactions" level=2
+      each t in filter(items,i=>filter=="all" || i.kind==filter)
+        ListTile "{t.what}" label="{t.date}, {t.what}, {t.kind=="in" ? "money in" : "money out"} {money(abs(t.amt),"$",2)}" subtitle="{t.date}, {money(t.amt,"$",2)}"
+      Button.outline "Copy activity summary" onTap={copy "Recent activity"; toast "Copied"}
+
+### Help
+App
+  Main
+    Nav
+      Heading "Help line" level=1
+      Button.outline "Back to accounts" onTap={go accounts}
+    Column pad=24 gap=16 maxw=720
+      Card gap=8 role=region label="Summary"
+        Heading "Summary" level=2
+        Text "A person answers every day from 7 in the morning to 11 at night."
+      Heading "Reach us" level=2
+      Button "Call the help line" icon="call" onTap={link tel:+18005550142}
+      Button.outline "Send a secure message" icon="chat" onTap={open message}
+      Heading "Common questions" level=2
+      Accordion "How do I hear my balance?"
+        Text "Open Accounts. Each account reads its name, balance and whether it is low."
+      Accordion "How do I move money?"
+        Text "Open Transfer money, fill the three fields, then confirm. Amounts are restated in words."
+  Dialog#message "Secure message" "We reply within one business day."
+    Input "Your message" bind=msg multiline
+    Button "Send" onTap={emit helpMessage msg; msg=""; toast "Message sent"; close}

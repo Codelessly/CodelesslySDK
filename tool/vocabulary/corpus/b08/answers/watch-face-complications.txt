@@ -1,0 +1,105 @@
+### Watch face
+state hour=10
+state minute=9
+state second=30
+state steps=6420
+state goal=10000
+state battery=78
+state temp=14
+state awake=true
+state dim=false
+state showBattery=true
+state showEvent=true
+state showTemp=true
+state accent="#FF4FD1C5"
+every 1s onTick={second=(second+1)%60; second==0 ? {minute=(minute+1)%60} : {}; second==0 && minute==0 ? {hour=(hour+1)%12} : {}}
+App
+  Main
+    Column center middle pad=12 gap=8 onSwipeUp={go cards} onLongPress={go gallery} onRaise={dim=false; awake=true} onScrollCrown={go cards}
+      Stack center middle w=300 h=300 fill=#FF000000 radius=150 animate=fade
+        Ring {steps/goal} color={accent} size=300
+        Clock hour={hour} minute={minute} second={second} style="analogue" ticks=12 w=240 h=240
+        if showBattery
+          Gauge {battery} min=0 max=100 unit="%" size=56 top left onTap={open batteryTip}
+        if showEvent
+          Column center gap=2 bottom onTap={go cards}
+            Icon "event"
+            Text.caption "Stand-up 10:30" color=#FFFFFFFF
+        if showTemp
+          Column center gap=2 top right
+            Icon "thermostat"
+            Text.caption "{temp}°C" color=#FFFFFFFF
+        if dim
+          Box fill=#CC000000 w=300 h=300 radius=150 onTap={dim=false}
+      Text.caption "{formatDate(today(),"EEE MMM d")}  |  {steps} / {goal} steps"
+      Row gap=8 center
+        Button.ghost "Dim" onTap={dim=true}
+        Button.ghost "Wake" onTap={dim=false; awake=true; toast "Raised to wake"}
+        Button.ghost "Faces" onTap={go gallery}
+  Popover#batteryTip
+    Text.strong "Battery {battery}%"
+    Text.muted "About {round(battery*0.3,0)} hours left"
+
+### Cards
+state card=0
+state cards=[{"title":"Steps","value":"6,420","sub":"64% of goal","icon":"directions_walk"},{"title":"Next event","value":"Stand-up","sub":"10:30, Meeting room 2","icon":"event"},{"title":"Weather","value":"14°C","sub":"Light rain from noon","icon":"cloud"},{"title":"Heart rate","value":"68 bpm","sub":"Resting 59","icon":"favorite"},{"title":"Sleep","value":"7h 12m","sub":"Last night","icon":"bedtime"}]
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go watch-face}
+      Heading "Today"
+      Text.muted "{card+1}/{length(cards)}"
+    Column pad=16 gap=12 center onScrollCrown={card=clamp(card+result,0,length(cards)-1)} onSwipeUp={card=min(card+1,length(cards)-1)} onSwipeDown={card=max(card-1,0)}
+      Pages bind=card h=220 vertical items=cards
+        Card gap=8 center animate=slide-up
+          IconTile "{item.icon}"
+          Text.muted "{item.title}"
+          Text "{item.value}" size=36 weight=700
+          Text.caption "{item.sub}"
+      Dots bind=card count=5
+      Row gap=8
+        Button.outline "Prev" onTap={card=max(card-1,0)}
+        Button.outline "Next" onTap={card=min(card+1,length(cards)-1)}
+
+### Face gallery
+state face=0
+state faces=[{"name":"Tidewatch","style":"Analogue + ring"},{"name":"Minimal","style":"Hands only"},{"name":"Chronograph","style":"Three dials"},{"name":"Night","style":"Dim red"}]
+App
+  Main
+    Nav
+      IconButton "close" tooltip="Close" onTap={go watch-face}
+      Heading "Faces"
+      IconButton "tune" tooltip="Customise" onTap={go customise}
+    Column pad=16 gap=12 center
+      Pages bind=face h=260 peek=0.8 items=faces
+        Card gap=8 center
+          Clock hour={hour} minute={minute} second={second} style="analogue" w=160 h=160
+          Text.strong "{item.name}"
+          Text.caption "{item.style}"
+      Dots bind=face count=4
+      Row gap=8
+        Button.outline "Customise" onTap={go customise}
+        Button "Use this face" onTap={emit setFace face; toast "Face set"; go watch-face}
+
+### Customise
+state color="Teal"
+state palette=["Teal","Coral","Gold","Violet","White"]
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go gallery}
+      Heading "Customise"
+      Button.ghost "Done" onTap={emit saveFace {"color":color,"battery":showBattery,"event":showEvent,"temp":showTemp}; toast "Saved"; go watch-face}
+    Column pad=16 gap=16 scroll
+      Stack center middle h=180
+        Ring {steps/goal} size=160
+        Clock hour={hour} minute={minute} second={second} style="analogue" w=130 h=130
+      Text.sectionTitle "Colour"
+      Row gap=8 scroll
+        each c in palette
+          ChoiceChip "{c}" selected={color==c} onTap={color=c; accent=c=="Teal" ? "#FF4FD1C5" : c=="Coral" ? "#FFFF7F6B" : c=="Gold" ? "#FFFFC857" : c=="Violet" ? "#FF9B7BFF" : "#FFFFFFFF"}
+      Text.sectionTitle "Dials"
+      Toggle "Battery" bind=showBattery
+      Toggle "Next event" bind=showEvent
+      Toggle "Temperature" bind=showTemp
+      Toggle "Always-on dim" bind=dim

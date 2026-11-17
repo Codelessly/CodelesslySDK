@@ -1,0 +1,204 @@
+### Live Auction
+state tab="auction"
+state clock=28800
+state lots=[{"id":1,"name":"Crate of Bramley apples","photo":"https://images.example.com/lots/apples.jpg","qty":1,"unit":"crate","kg":12,"reserve":40,"reserveMet":false,"price":28,"bids":3,"seller":"Hollins Orchard"},{"id":2,"name":"Three Light Sussex hens","photo":"https://images.example.com/lots/hens.jpg","qty":3,"unit":"hens","kg":8.5,"reserve":60,"reserveMet":true,"price":65,"bids":7,"seller":"Dunmore Farm"},{"id":3,"name":"Sack of Maris Piper potatoes","photo":"https://images.example.com/lots/potatoes.jpg","qty":1,"unit":"sack","kg":25,"reserve":15,"reserveMet":true,"price":18,"bids":2,"seller":"Tilley and Sons"}]
+state at=0
+state window=30
+state running=false
+state count=0
+state sold=false
+state step=2
+state myBids=[]
+every 1s onTick={clock=clock+1}
+every 1s when running onTick={window=window-1; window<=0 ? {running=false; count=0; sold=true; toast "Sold"} : {}}
+every 1s when running && window<=3 onTick={count=count+1}
+App
+  Sidebar
+    Brand "Barrow Bids" icon="gavel"
+    NavItem "Live auction" icon="gavel" selected={tab=="auction"} onTap={go live-auction}
+    NavItem "Sell a lot" icon="add_a_photo" selected={tab=="sell"} onTap={go sell-a-lot}
+    NavItem "My wins" icon="emoji_events" badge="2" selected={tab=="wins"} onTap={go my-wins}
+    Spacer grow
+    Text.caption "Market day"
+    Text.strong "{formatDate(today(),"EEE d MMM")}"
+    Clock "{clock}" format="HH:mm:ss" start=28800
+  Main
+    Nav
+      Heading "Lot {at+1} of {length(lots)}" level=1
+      Row gap=8
+        Badge.info "Window {window}s"
+        IconButton "volume_up" tooltip="Bell on"
+        Button.outline "Next lot" onTap={at=(at+1)%length(lots); window=30; running=false; count=0; sold=false}
+    Column pad=24 gap=16 scroll
+      Row gap=24 top
+        Card grow gap=12
+          Image "{lots[at].photo}" h=280 radius=12
+          Row between
+            Text.heading "{lots[at].name}"
+            if lots[at].reserveMet
+              Badge.success "Reserve met"
+            if !lots[at].reserveMet
+              Badge.warning "Reserve not met"
+          Row gap=24
+            Column gap=2
+              Text.caption "Quantity"
+              Text.strong "{lots[at].qty} {lots[at].unit}"
+            Column gap=2
+              Text.caption "Weight"
+              Text.strong "{lots[at].kg} kg"
+            Column gap=2
+              Text.caption "Seller"
+              Text.strong "{lots[at].seller}"
+        Column w=320 gap=16
+          Card gap=12 center
+            Text.caption "Current bid"
+            Text "{money(lots[at].price,"£",2)}" size=48 weight=700
+            Text.muted "{lots[at].bids} bids"
+            Row gap=8 center
+              Icon "timer"
+              Text.heading "{window}s"
+            Progress {window/30}
+            if count>0 && !sold
+              Text "Going {count == 1 ? "once" : count == 2 ? "twice" : "gone"}..." size=28 weight=700 color=#FFB3261E animate=pulse
+            if sold
+              Row gap=8 center animate=pop
+                Icon "notifications_active"
+                Text.success "Sold to the room"
+          Card gap=12
+            SegmentedButton bind=step items=[1,2,5]
+            Button "Bid +£{step}" size=large disabled={sold} onTap={lots=updateWhere(lots,l=>l.id==lots[at].id,l=>with(with(with(l,"price",l.price+step),"bids",l.bids+1),"reserveMet",l.price+step>=l.reserve)); myBids=append(myBids,{"lot":lots[at].id,"amount":lots[at].price+step}); running=true; window=30; count=0}
+            Button.outline "Start the window" disabled={running} onTap={running=true; window=30; sold=false}
+            Button.tertiary "Ring the bell" icon="notifications" onTap={sold=true; running=false; toast "Bell rung, lot {at+1} sold"}
+      Card gap=8
+        Text.strong "Your bids this session"
+        if isEmpty(myBids)
+          Text.muted "No bids yet."
+        each b in myBids
+          Row between
+            Text "Lot {b.lot}"
+            Text.strong "{money(b.amount,"£",2)}"
+
+### Sell a Lot
+state tab="sell"
+state step=0
+state name=""
+state photo=""
+state qty=1
+state unit="crate"
+state kg=0
+state guess=0
+state reserve=0
+state entered=[{"id":11,"name":"Dozen duck eggs","qty":12,"unit":"eggs","kg":1,"guess":9,"reserve":6,"status":"Listed"},{"id":12,"name":"Basket of damsons","qty":1,"unit":"basket","kg":4,"guess":14,"reserve":10,"status":"In auction"},{"id":13,"name":"Raw honey, 6 jars","qty":6,"unit":"jars","kg":2.7,"guess":30,"reserve":24,"status":"Sold"}]
+App
+  Sidebar
+    Brand "Barrow Bids" icon="gavel"
+    NavItem "Live auction" icon="gavel" selected={tab=="auction"} onTap={go live-auction}
+    NavItem "Sell a lot" icon="add_a_photo" selected={tab=="sell"} onTap={go sell-a-lot}
+    NavItem "My wins" icon="emoji_events" badge="2" selected={tab=="wins"} onTap={go my-wins}
+    Spacer grow
+    Text.muted "Hollins Orchard"
+  Main
+    Nav
+      Heading "Your lots" level=1
+      Button "New lot" icon="add" onTap={open newLot}
+    Column pad=24 gap=16 scroll
+      Row gap=16
+        Card grow gap=2
+          Text.caption "Lots entered"
+          Text "{length(entered)}" size=32 weight=700
+        Card grow gap=2
+          Text.caption "Price guesses total"
+          Text "{money(sum(entered,l=>l.guess),"£",2)}" size=32 weight=700
+        Card grow gap=2
+          Text.caption "Sold"
+          Text "{count(entered,l=>l.status=="Sold")}" size=32 weight=700
+      Card gap=8
+        Row gap=12
+          Text.caption "Lot" grow
+          Text.caption "Qty" w=90
+          Text.caption "Weight" w=80
+          Text.caption "Guess" w=80
+          Text.caption "Reserve" w=80
+          Text.caption "Status" w=100
+          Text.caption "" w=40
+        Divider
+        each l in entered
+          Row gap=12 middle
+            Text.strong "{l.name}" grow
+            Text "{l.qty} {l.unit}" w=90
+            Text "{l.kg} kg" w=80
+            Text "{money(l.guess,"£",0)}" w=80
+            Text "{money(l.reserve,"£",0)}" w=80
+            Badge.neutral "{l.status}" w=100
+            IconButton "more_vert" tooltip="Lot options" onTap={sel=l.id; open lotMenu}
+  Dialog#newLot "Enter a lot" "Photograph it, weigh it, guess a price"
+    Column gap=12
+      Camera bind=photo facing=back onCapture={photo=result}
+      if photo!=""
+        Image "{photo}" h=160 radius=8
+      Input "Lot name" "Crate of Bramley apples" bind=name
+      Row gap=12
+        Input "Quantity" type=number bind=qty grow
+        Select "Unit" bind=unit items=["crate","sack","hens","jars","dozen","bunch"] grow
+      Input "Weight (kg)" type=number bind=kg
+      Input "Price guess (£)" type=number bind=guess
+      Input "Reserve (£)" type=number bind=reserve
+      Toggle "Hide the reserve from buyers" bind=hideReserve
+      Button "Enter lot" onTap={name=="" || photo=="" ? toast "Add a name and a photo" : {entered=append(entered,{"id":length(entered)+20,"name":name,"qty":qty,"unit":unit,"kg":kg,"guess":guess,"reserve":reserve,"status":"Listed"}); name=""; photo=""; toast "Lot entered"; close}}
+  Menu#lotMenu end
+    MenuItem "Edit price guess" icon="edit" onTap={open newLot}
+    MenuItem "Withdraw lot" icon="delete" onTap={entered=removeWhere(entered,l=>l.id==sel); toast "Lot withdrawn"}
+
+### My Wins
+state tab="wins"
+state wins=[{"id":1,"name":"Three Light Sussex hens","price":65,"slot":"","paid":false},{"id":2,"name":"Sack of Maris Piper potatoes","price":18,"slot":"11:30","paid":false},{"id":3,"name":"Crate of Bramley apples","price":41,"slot":"","paid":true}]
+state slots=["10:30","11:00","11:30","12:00","12:30"]
+state pick=0
+App
+  Sidebar
+    Brand "Barrow Bids" icon="gavel"
+    NavItem "Live auction" icon="gavel" selected={tab=="auction"} onTap={go live-auction}
+    NavItem "Sell a lot" icon="add_a_photo" selected={tab=="sell"} onTap={go sell-a-lot}
+    NavItem "My wins" icon="emoji_events" badge="{count(wins,w=>!w.paid)}" selected={tab=="wins"} onTap={go my-wins}
+    Spacer grow
+    Text.muted "Buyer 214"
+  Main
+    Nav
+      Heading "Won lots" level=1
+      Text.muted "Market closes at 13:00"
+    Column pad=24 gap=16 scroll
+      each w in wins
+        Card gap=8
+          Row between middle
+            Column gap=2
+              Text.heading "{w.name}"
+              Text.muted "Hammer price {money(w.price,"£",2)}"
+            if w.paid
+              Badge.success "Paid"
+            if !w.paid
+              Badge.warning "Payment due"
+          Row gap=12 middle
+            Icon "schedule"
+            if w.slot==""
+              Text.muted "No collect slot yet"
+              Spacer grow
+              Button.outline "Choose slot" onTap={pick=w.id; open slotSheet}
+            if w.slot!=""
+              Text.strong "Collect at {w.slot}, stall 6"
+              Spacer grow
+              Button.ghost "Change" onTap={pick=w.id; open slotSheet}
+      Footer
+        Row between middle
+          Column gap=2
+            Text.caption "To pay"
+            Text "{money(sum(filter(wins,w=>!w.paid),w=>w.price),"£",2)}" size=28 weight=700
+          Button "Pay now" size=large disabled={count(wins,w=>!w.paid)==0} onTap={open payDialog}
+  Sheet#slotSheet "Collect slot"
+    Grid cols=3 gap=8
+      each s in slots
+        ChoiceChip "{s}" onTap={wins=updateWhere(wins,w=>w.id==pick,w=>with(w,"slot",s)); toast "Slot booked for {s}"; close}
+  Dialog#payDialog "Pay for your lots" "Total {money(sum(filter(wins,w=>!w.paid),w=>w.price),"£",2)}"
+    Column gap=12
+      Text "Pay at the market office or by card."
+      Button "Pay by card" onTap={wins=map(wins,w=>with(w,"paid",true)); emit pay; toast "Paid, thank you"; close}
+      Button.outline "Pay at the office" onTap={emit payAtOffice; close}

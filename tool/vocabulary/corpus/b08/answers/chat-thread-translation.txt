@@ -1,0 +1,160 @@
+### Chat thread
+state tab="chats"
+state myLang="en"
+state showOriginal=[]
+state typing=[{"name":"Mariana","lang":"pt"},{"name":"Kenji","lang":"ja"}]
+state draft=""
+state replyTo=null
+state target=null
+state playing=""
+state messages=[{"id":1,"sender":"Mariana","lang":"pt","original":"Pessoal, a reunião de amanhã foi adiada para as 15h.","text":"Everyone, tomorrow's meeting has been moved to 3 pm.","time":"09:12","reactions":[{"emoji":"👍","count":2}],"kind":"text"},{"id":2,"sender":"Kenji","lang":"ja","original":"了解しました。資料は今夜送ります。","text":"Understood. I'll send the materials tonight.","time":"09:14","reactions":[],"kind":"text","replyId":1},{"id":3,"sender":"Lucía","lang":"es","original":"","text":"","time":"09:20","reactions":[],"kind":"voice","duration":38,"transcriptOriginal":"Hola a todos, quería contarles que el cliente de Lisboa confirmó el pedido de Bridgewater.","transcriptMine":"Hi everyone, I wanted to tell you the Lisbon client confirmed the Bridgewater order."},{"id":4,"sender":"You","lang":"en","original":"Great news, Lucía! Let's celebrate Friday.","text":"Great news, Lucía! Let's celebrate Friday.","time":"09:22","reactions":[{"emoji":"🎉","count":3}],"kind":"text","mine":true}]
+state glossary=["Bridgewater","Aiko","Sagrada"]
+App
+  Sidebar
+    Brand "Bridge" icon="translate"
+    NavItem "Chats" icon="chat" badge="3" selected={tab=="chats"} onTap={tab="chats"}
+    NavItem "Glossary" icon="menu_book" selected={tab=="glossary"} onTap={go glossary}
+    NavItem "Settings" icon="settings" selected={tab=="settings"} onTap={tab="settings"}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Sam Patel" size=32
+      Column
+        Text.strong "Sam Patel"
+        Text.caption "Reading in English"
+  Main
+    Nav
+      Column
+        Heading "Lisbon launch team" level=1
+        Row gap=6 middle
+          LanguageFlag "pt"
+          LanguageFlag "ja"
+          LanguageFlag "es"
+          LanguageFlag "en"
+          Text.caption "4 members"
+      Row gap=8
+        Select bind=myLang items=["en","pt","ja","es"]
+        IconButton "menu_book" tooltip="Glossary" onTap={go glossary}
+        IconButton "more_vert" tooltip="More" onTap={open threadMenu}
+    Column pad=24 gap=12 scroll
+      each m in messages
+        Column gap=4 menu=null
+          if m.replyId
+            Row gap=8 onTap={scroll {"msg" + m.replyId}}
+              Icon "reply" size=16
+              Text.caption "{find(messages,x=>x.id==m.replyId).sender}: {find(messages,x=>x.id==m.replyId).text}"
+              Text.caption "Jump"
+          if m.kind=="text"
+            ChatBubble#msg{m.id} sender="{m.sender}" lang="{m.lang}" time="{m.time}" mine={m.mine} reactions={m.reactions} onLongPress={target=m.id; open reactions} onTap={showOriginal=contains(showOriginal,m.id) ? without(showOriginal,m.id) : append(showOriginal,m.id)}
+              Text "{m.text}"
+              if contains(showOriginal,m.id) && m.lang!=myLang
+                Divider
+                Row gap=6
+                  LanguageFlag "{m.lang}"
+                  Text.muted "{m.original}"
+          if m.kind=="voice"
+            ChatBubble sender="{m.sender}" lang="{m.lang}" time="{m.time}" reactions={m.reactions} onLongPress={target=m.id; open reactions}
+              Row gap=12 middle
+                IconButton "{playing==m.id ? 'pause' : 'play_arrow'}" tooltip="Play" onTap={playing=playing==m.id ? "" : m.id}
+                Waveform seed={m.id} progress={playing==m.id ? 0.4 : 0} duration={m.duration} grow
+                Text.caption "{duration(m.duration)}"
+              Column gap=4
+                Row gap=6
+                  LanguageFlag "{m.lang}"
+                  Text.muted "{m.transcriptOriginal}"
+                Row gap=6
+                  LanguageFlag "{myLang}"
+                  Text "{m.transcriptMine}"
+          if m.reactions
+            ReactionBar reactions={m.reactions} onReact={target=m.id; messages=updateWhere(messages,x=>x.id==m.id,x=>with(x,"reactions",append(x.reactions,{"emoji":result,"count":1})))}
+      each p in typing
+        Row gap=8 middle
+          LanguageFlag "{p.lang}"
+          TypingIndicator "{p.name} is typing" lang="{p.lang}"
+    Footer
+      Column gap=8 pad=12 border-top=#FFE0E0E0
+        if replyTo
+          Row between middle
+            Row gap=8 middle
+              Icon "reply" size=16
+              Text.caption "Replying to {replyTo.sender}: {replyTo.text}"
+            IconButton "close" tooltip="Cancel reply" onTap={replyTo=null}
+        Row gap=8 middle
+          IconButton "mic" tooltip="Record a voice note" onTap={emit recordVoice}
+          Input "Message" "Write in English, they read it in their language" bind=draft grow
+          IconButton "translate" tooltip="Preview translation" onTap={open preview}
+          Button "Send" onTap={draft!="" ? {emit send draft; draft=""; replyTo=null} : toast "Write something first"}
+  Sheet#reactions "React"
+    Row gap=12 center
+      IconButton "👍" tooltip="Like" onTap={emit react {"id":target,"emoji":"👍"}; close}
+      IconButton "❤️" tooltip="Love" onTap={emit react {"id":target,"emoji":"❤️"}; close}
+      IconButton "😂" tooltip="Laugh" onTap={emit react {"id":target,"emoji":"😂"}; close}
+      IconButton "🎉" tooltip="Celebrate" onTap={emit react {"id":target,"emoji":"🎉"}; close}
+      IconButton "🙏" tooltip="Thanks" onTap={emit react {"id":target,"emoji":"🙏"}; close}
+    Divider
+    ListTile "Reply" icon="reply" onTap={replyTo=find(messages,x=>x.id==target); close}
+    ListTile "Copy original" icon="content_copy" onTap={copy find(messages,x=>x.id==target).original; toast "Copied"; close}
+    ListTile "Report a bad translation" icon="flag" onTap={emit reportTranslation target; toast "Thanks, we will review it"; close}
+  Dialog#preview "How it reads to others" "Each person sees your message in their language"
+    Column gap=12
+      Text.muted "Your message"
+      Text "{draft}"
+      Divider
+      TranslationPreview text={draft} from={myLang} to=["pt","ja","es"] glossary={glossary}
+      Text.caption "Names in your glossary stay as written."
+      Row end gap=8
+        Button.ghost "Edit" onTap={close}
+        Button "Send" onTap={draft!="" ? {emit send draft; draft=""; close} : toast "Write something first"}
+  Menu#threadMenu end
+    MenuItem "Mute thread" icon="notifications_off" onTap={emit mute}
+    MenuItem "Show all originals" icon="visibility" onTap={showOriginal=map(messages,x=>x.id)}
+    MenuItem "Hide all originals" icon="visibility_off" onTap={showOriginal=[]}
+    MenuItem "Leave thread" icon="logout" onTap={emit leave}
+
+### Glossary
+state glossary=[{"term":"Bridgewater","note":"Client name","langs":["pt","ja","es"]},{"term":"Aiko","note":"Person","langs":["pt","ja","es"]},{"term":"Sagrada","note":"Project codename","langs":["pt","es"]}]
+state newTerm=""
+state newNote=""
+state q=""
+state sel=null
+App
+  Sidebar
+    Brand "Bridge" icon="translate"
+    NavItem "Chats" icon="chat" onTap={go chat-thread}
+    NavItem "Glossary" icon="menu_book" selected={true}
+    NavItem "Settings" icon="settings" onTap={go settings}
+    Spacer grow
+    Text.muted "Sam Patel"
+  Main
+    Nav
+      Heading "Glossary" level=1
+      Row gap=8
+        Input "Search terms" bind=q w=220
+        Button "Add term" icon="add" onTap={open addTerm}
+    Column pad=24 gap=16
+      Text.muted "Names and words on this list are never translated. Everyone sees them exactly as written."
+      Card gap=0
+        Row pad=12 border-bottom=#FFE0E0E0
+          Text.strong "Term" grow
+          Text.strong "Note" w=160 hide=phone
+          Text.strong "Kept in" w=120
+          Spacer w=40
+        each g in filter(glossary,x=>contains(lower(x.term),lower(q)))
+          Row pad=12 middle border-bottom=#FFF0F0F0 menu=rowMenu onLongPress={sel=g.term; open rowMenu}
+            Text.strong "{g.term}" grow
+            Text.muted "{g.note}" w=160 hide=phone
+            Row gap=4 w=120
+              each l in g.langs
+                LanguageFlag "{l}"
+            IconButton "more_vert" tooltip="Options" onTap={sel=g.term; open rowMenu}
+        if isEmpty(filter(glossary,x=>contains(lower(x.term),lower(q))))
+          Column center pad=32
+            Text.muted "No terms match \"{q}\""
+  Dialog#addTerm "Add a term" "It will stay untranslated in every language"
+    Input "Term" bind=newTerm
+    Input "Note" "Client, person, product" bind=newNote
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Add" onTap={trim(newTerm)!="" ? {glossary=append(glossary,{"term":trim(newTerm),"note":newNote,"langs":["pt","ja","es"]}); newTerm=""; newNote=""; toast "Added to glossary"; close} : toast "Enter a term"}
+  Menu#rowMenu end
+    MenuItem "Copy term" icon="content_copy" onTap={copy sel; toast "Copied"}
+    MenuItem "Remove" icon="delete" onTap={glossary=removeWhere(glossary,x=>x.term==sel); toast "Removed"}

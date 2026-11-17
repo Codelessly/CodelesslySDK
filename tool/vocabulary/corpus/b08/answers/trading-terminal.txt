@@ -1,0 +1,204 @@
+### Terminal
+state symbol="NVDA"
+state tab="watch"
+state side="buy"
+state size=100
+state limitPrice=482.50
+state orderType="Limit"
+state indicators=["VWAP"]
+state interval="5m"
+state layout=["watch","chart","book","ticket","positions"]
+state dragging=""
+state sel=""
+state watchlist=[{"sym":"NVDA","name":"NVIDIA","last":482.50,"chg":1.84,"dir":"up"},{"sym":"AAPL","name":"Apple","last":231.14,"chg":-0.42,"dir":"down"},{"sym":"TSLA","name":"Tesla","last":318.77,"chg":3.12,"dir":"up"},{"sym":"MSFT","name":"Microsoft","last":441.05,"chg":0.18,"dir":"up"},{"sym":"AMZN","name":"Amazon","last":212.60,"chg":-1.07,"dir":"down"},{"sym":"META","name":"Meta","last":598.33,"chg":0.91,"dir":"up"}]
+state bids=[{"px":482.45,"qty":1200},{"px":482.40,"qty":2650},{"px":482.35,"qty":900},{"px":482.30,"qty":3100},{"px":482.25,"qty":1750},{"px":482.20,"qty":2200}]
+state asks=[{"px":482.55,"qty":800},{"px":482.60,"qty":1900},{"px":482.65,"qty":2400},{"px":482.70,"qty":1100},{"px":482.75,"qty":3300},{"px":482.80,"qty":1500}]
+state positions=[{"id":1,"sym":"NVDA","qty":300,"avg":451.20,"last":482.50},{"id":2,"sym":"AAPL","qty":-150,"avg":236.80,"last":231.14},{"id":3,"sym":"TSLA","qty":80,"avg":325.10,"last":318.77},{"id":4,"sym":"AMZN","qty":200,"avg":205.40,"last":212.60}]
+state headlines=["Fed holds rates, signals one cut in December","NVIDIA beats on data-center revenue, guides above consensus","Oil slips 1.8% as inventories build","Apple supplier flags weaker iPhone demand","Treasury 10-year yield at 4.21%","Tesla deliveries up 9% year on year"]
+state spread=0.10
+every 1s onTick={spread=round(0.05+abs(sin(spread*100))*0.1,2)}
+App
+  Sidebar
+    Brand "Floor Five" icon="candlestick_chart"
+    NavItem "Terminal" icon="dashboard" selected={true}
+    NavItem "Orders" icon="receipt_long" badge="3" onTap={go orders}
+    NavItem "Analytics" icon="query_stats" onTap={go analytics}
+    NavItem "Alerts" icon="notifications" badge="2"
+    Spacer grow
+    Text.muted "Desk 5, Ray L."
+  Main
+    Nav
+      Row gap=12
+        Heading "{symbol}" level=1
+        Text.success "482.50  +1.84%"
+      Row gap=8
+        SegmentedButton bind=interval items=["1m","5m","15m","1h"]
+        Button.outline "Add panel" icon="add" onTap={open addPanel}
+        Button.ghost "Reset layout" onTap={layout=["watch","chart","book","ticket","positions"]; toast "Layout reset"}
+        IconButton "settings" tooltip="Terminal settings" onTap={open settings}
+    Column pad=12 gap=12 fill=#FF0B0E14
+      PanelGrid cols=12 gap=12 bind=layout
+        Panel#watch "Watchlist" span=3 resizable drag=panel("watch") drop=panel onDrop={layout=move(layout,result.data,"watch")}
+          Row gap=8
+            Input "Search symbols" bind=q w=160
+            IconButton "add" tooltip="Add symbol" onTap={open addSymbol}
+          Row between
+            Text.caption "Symbol" w=70
+            Text.caption "Last" w=70 right
+            Text.caption "Chg" w=60 right
+          each w in watchlist
+            Row between onTap={symbol=w.sym} menu=rowMenu
+              Text.strong "{w.sym}" w=70
+              PriceTick "{fixed(w.last,2)}" dir={w.dir} flash w=70
+              Text.mono "{w.chg>0 ? '+' : ''}{fixed(w.chg,2)}%" color={w.chg>0 ? #FF26A69A : #FFEF5350} w=60
+        Panel#chart "{symbol} {interval}" span=6 resizable drag=panel("chart") drop=panel onDrop={layout=move(layout,result.data,"chart")}
+          Row between
+            Row gap=6
+              each ind in ["VWAP","EMA 20","EMA 50","Bollinger","RSI","Volume"]
+                FilterChip "{ind}" selected={contains(indicators,ind)} onTap={indicators=contains(indicators,ind) ? without(indicators,ind) : append(indicators,ind)}
+            Button.ghost "Indicators" icon="functions" onTap={open indicatorList}
+          CandleChart symbol={symbol} interval={interval} overlays={indicators} h=320 live onCrosshair={emit crosshair result}
+          Sparkline values=[3,4,3,6,5,7,6,8] h=24
+        Panel#book "Order book" span=3 resizable drag=panel("book") drop=panel onDrop={layout=move(layout,result.data,"book")}
+          Row between
+            Text.caption "Bid size"
+            Text.caption "Price"
+            Text.caption "Ask size"
+          Row gap=4
+            Column grow gap=2
+              each b in bids
+                DepthBar "{b.qty}" value={b.qty} max=3500 side="bid" animate=pulse onTap={limitPrice=b.px; side="sell"}
+            Column grow gap=2
+              each a in asks
+                DepthBar "{a.qty}" value={a.qty} max=3500 side="ask" animate=pulse onTap={limitPrice=a.px; side="buy"}
+          Row between
+            Text.muted "Spread"
+            Text.mono "{fixed(spread,2)}"
+        Panel#ticket "Order ticket" span=4 resizable drag=panel("ticket") drop=panel onDrop={layout=move(layout,result.data,"ticket")}
+          Row gap=8
+            Button "Buy" variant={side=="buy" ? "primary" : "outline"} grow onTap={side="buy"}
+            Button.destructive "Sell" grow onTap={side="sell"}
+          Select "Order type" bind=orderType items=["Market","Limit","Stop","Stop limit"]
+          Input "Size (shares)" bind=size type=number
+          Slider bind=size min=0 max=1000
+          if orderType!="Market"
+            Input "Limit price" bind=limitPrice type=number
+          Row between
+            Text.muted "Estimated value"
+            Text.strong "{money(size*limitPrice,'$',2)}"
+          Button "Review {side} order" onTap={size>0 ? open reviewOrder : toast "Enter a size"}
+        Panel#positions "Open positions" span=8 resizable drag=panel("positions") drop=panel onDrop={layout=move(layout,result.data,"positions")}
+          Row between
+            Text.caption "Symbol" w=80
+            Text.caption "Qty" w=70 right
+            Text.caption "Avg" w=80 right
+            Text.caption "Last" w=80 right
+            Text.caption "P&L" w=110 right
+            Text.caption "" w=40
+          each p in positions
+            Row between
+              Text.strong "{p.sym}" w=80
+              Text.mono "{p.qty}" w=70 right
+              Text.mono "{fixed(p.avg,2)}" w=80 right
+              Text.mono "{fixed(p.last,2)}" w=80 right
+              Text.mono "{money((p.last-p.avg)*p.qty,'$',2)}" color={(p.last-p.avg)*p.qty>=0 ? #FF26A69A : #FFEF5350} w=110 right
+              IconButton "more_vert" tooltip="Position actions" onTap={sel=p.id; open posMenu}
+          Row between
+            Text.muted "Total open P&L"
+            Text.strong "{money(sum(positions,p=>(p.last-p.avg)*p.qty),'$',2)}"
+    Footer
+      Ticker items={headlines} speed=40 pauseOnHover onTap={emit openNews result}
+  Dialog#reviewOrder "Review order" "Check the details before sending"
+    Column gap=8
+      Row between
+        Text.muted "Side"
+        Badge.success "{upper(side)}"
+      Row between
+        Text.muted "Symbol"
+        Text.strong "{symbol}"
+      Row between
+        Text.muted "Type"
+        Text.strong "{orderType}"
+      Row between
+        Text.muted "Size"
+        Text.strong "{size}"
+      Row between
+        Text.muted "Price"
+        Text.strong "{orderType=='Market' ? 'Market' : money(limitPrice,'$',2)}"
+      Divider
+      Row between
+        Text.strong "Estimated total"
+        Text.strong "{money(size*limitPrice,'$',2)}"
+      Row gap=8 end
+        Button.outline "Edit" onTap={close}
+        Button "Confirm {side}" onTap={emit placeOrder {"sym":symbol,"side":side,"qty":size,"px":limitPrice}; toast "Order sent: {upper(side)} {size} {symbol}"; close}
+  Dialog#addSymbol "Add symbol"
+    Input "Ticker" "e.g. GOOGL" bind=newSym
+    Button "Add to watchlist" onTap={watchlist=append(watchlist,{"sym":upper(newSym),"name":upper(newSym),"last":100.00,"chg":0,"dir":"up"}); newSym=""; close}
+  Dialog#indicatorList "Indicators" "Add an overlay to the chart"
+    ListView
+      each ind in ["VWAP","EMA 20","EMA 50","Bollinger","RSI","MACD","Volume","ATR"]
+        ListTile "{ind}" onTap={indicators=contains(indicators,ind) ? indicators : append(indicators,ind); close}
+          Icon "check" hidden={!contains(indicators,ind)}
+  Dialog#addPanel "Add panel"
+    Grid cols=2 gap=8
+      Button.outline "Time and sales" onTap={layout=append(layout,"tape"); close}
+      Button.outline "Level 2" onTap={layout=append(layout,"level2"); close}
+      Button.outline "Heatmap" onTap={layout=append(layout,"heatmap"); close}
+      Button.outline "Option chain" onTap={layout=append(layout,"chain"); close}
+  Sheet#settings "Terminal settings"
+    Toggle "Flash price ticks" bind=flash
+    Toggle "Sound on fill" bind=sound
+    Select "Theme" bind=theme items=["Dark","Midnight","High contrast"]
+    Button "Done" onTap={close}
+  Menu#rowMenu
+    MenuItem "Open chart" icon="show_chart" onTap={symbol=sel}
+    MenuItem "Buy" icon="add" onTap={symbol=sel; side="buy"}
+    MenuItem "Sell" icon="remove" onTap={symbol=sel; side="sell"}
+    MenuItem "Remove" icon="delete" onTap={watchlist=removeWhere(watchlist,w=>w.sym==sel)}
+  Menu#posMenu end
+    MenuItem "Close position" icon="close" onTap={positions=removeWhere(positions,p=>p.id==sel); toast "Position closed"}
+    MenuItem "Add to position" icon="add" onTap={side="buy"}
+    MenuItem "Set stop" icon="front_hand" onTap={orderType="Stop"}
+
+### Orders
+state filter="Open"
+state orders=[{"id":"A1042","sym":"NVDA","side":"buy","qty":100,"px":480.00,"status":"Open","time":"09:41:12"},{"id":"A1041","sym":"AAPL","side":"sell","qty":150,"px":236.80,"status":"Filled","time":"09:35:40"},{"id":"A1040","sym":"TSLA","side":"buy","qty":80,"px":325.10,"status":"Filled","time":"09:31:05"},{"id":"A1039","sym":"AMZN","side":"buy","qty":50,"px":205.00,"status":"Open","time":"09:30:18"},{"id":"A1038","sym":"META","side":"sell","qty":20,"px":601.00,"status":"Cancelled","time":"09:30:02"}]
+App
+  Sidebar
+    Brand "Floor Five" icon="candlestick_chart"
+    NavItem "Terminal" icon="dashboard" onTap={go terminal}
+    NavItem "Orders" icon="receipt_long" badge="3" selected={true}
+    NavItem "Analytics" icon="query_stats" onTap={go analytics}
+    Spacer grow
+    Text.muted "Desk 5, Ray L."
+  Main
+    Nav
+      Heading "Orders" level=1
+      Row gap=8
+        Input "Search orders" bind=q w=220
+        Button.outline "Export" icon="download" onTap={emit exportOrders}
+    Column pad=24 gap=16
+      Row gap=8
+        each f in ["Open","Filled","Cancelled","All"]
+          ChoiceChip "{f}" selected={filter==f} onTap={filter=f}
+      Card gap=8
+        Row between
+          Text.caption "Order" w=80
+          Text.caption "Symbol" w=80
+          Text.caption "Side" w=70
+          Text.caption "Size" w=70 right
+          Text.caption "Price" w=90 right
+          Text.caption "Status" w=100
+          Text.caption "Time" w=90
+          Text.caption "" w=40
+        each o in filter=="All" ? orders : filter_orders
+          Row between
+            Text.mono "{o.id}" w=80
+            Text.strong "{o.sym}" w=80
+            Badge.success "{upper(o.side)}" w=70
+            Text.mono "{o.qty}" w=70 right
+            Text.mono "{fixed(o.px,2)}" w=90 right
+            Badge.info "{o.status}" w=100
+            Text.muted "{o.time}" w=90
+            IconButton "cancel" tooltip="Cancel order" hidden={o.status!="Open"} onTap={orders=updateWhere(orders,r=>r.id==o.id,r=>with(r,"status","Cancelled")); toast "Cancelled {o.id}"}

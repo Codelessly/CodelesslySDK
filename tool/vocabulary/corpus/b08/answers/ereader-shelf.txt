@@ -1,0 +1,189 @@
+### Reader
+state page=0
+state ui=false
+state font="Georgia"
+state size=18
+state spacing=1.5
+state margin=24
+state hue="yellow"
+state highlights=[{"id":1,"page":0,"text":"the harbor lights went out one by one","color":"yellow","note":""}]
+state sel={"text":"","page":0}
+state note=""
+state word=""
+state chapters=[{"title":"1. The Ferry at Dusk","page":0},{"title":"2. Salt and Rope","page":3},{"title":"3. A Letter Unsent","page":6},{"title":"4. The Lamp Keeper","page":9}]
+state pages=["By the time the ferry reached Calder Point, the harbor lights went out one by one, as they always did when the wind turned north. Ines held the rail and counted them, a habit from childhood.","Her father had taught her to count lights the way other fathers taught their children prayers. Seven for the breakwater, four for the mill, and one, always, for the house that no longer had a name.","The deckhand coiled a rope with the slow patience of a man paid by the hour. He nodded at her bag, then at the water, and said nothing, which she took as kindness.","Salt had worked its way into everything: the bench, the buckles, the pages of the book she had not opened since Lisbon. She opened it now, and the spine cracked like a knuckle.","Chapter two began with a recipe for fish stew and ended with a confession. She read both twice.","Somewhere below, an engine changed its note. The ferry leaned toward the quay and the town came up out of the dark in pieces.","A letter lay folded in the book's back cover, addressed in a hand she knew and had hoped not to see again.","She did not open it. She set it on the bench beside her and watched the wind decide what to do.","By the time the porter arrived, the envelope was gone, and Ines found she did not mind as much as she had expected.","The lamp keeper's cottage stood at the end of the mole, its window the only square of yellow on that side of the bay.","He answered the door before she knocked, as though the knocking had been audible for years.","Come in, he said. The kettle has been waiting longer than I have."]
+state defs={"quay":{"pos":"noun","def":"A platform lying alongside or projecting into water for loading and unloading ships.","ipa":"kee"},"mole":{"pos":"noun","def":"A stone structure serving as a pier or breakwater.","ipa":"mohl"},"porter":{"pos":"noun","def":"A person employed to carry luggage.","ipa":"PAWR-ter"}}
+state hl=[]
+every 1s when ui==false onTick={}
+App
+  Main
+    Nav hide=phone
+      IconButton "arrow_back" tooltip="Library" onTap={go library}
+      Column gap=0
+        Text.strong "The Lamp Keeper's Year"
+        Text.caption "Nadia Okonkwo"
+      Row gap=4
+        IconButton "format_list_bulleted" tooltip="Contents" onTap={open contents}
+        IconButton "bookmark_border" tooltip="Bookmark this page" onTap={toast "Bookmarked page {page+1}"}
+        IconButton "search" tooltip="Search in book" onTap={open bookSearch}
+        IconButton "text_fields" tooltip="Display settings" onTap={ui=true; open settings}
+    Stack grow
+      Pages bind=page items=pages onSwipeLeft={page=min(page+1,length(pages)-1)} onSwipeRight={page=max(page-1,0)}
+        Column pad=[margin,32,margin,32]
+          SelectableText "{item}" font=font size=size lineHeight=spacing highlights={filter(highlights,h=>h.page==page)} colors={{"yellow":"#66FFEB3B","green":"#6666BB6A","blue":"#6642A5F5","pink":"#66F06292"}} onSelect={sel={"text":result.text,"page":page}; open highlightMenu} onLongPress={word=lower(result.word); open dictionary} onHighlightTap={note=result.note; sel=result; open noteEditor}
+      Row
+        Box w=96 h=fill onTap={page=max(page-1,0)}
+        Box grow h=fill onTap={ui=!ui; ui ? open settings : close}
+        Box w=96 h=fill onTap={page=min(page+1,length(pages)-1)}
+    Footer
+      Column gap=4 pad=[24,8,24,8]
+        Progress {(page+1)/length(pages)}
+        Row between
+          Text.caption "{last(filter(chapters,c=>c.page<=page)).title}"
+          Text.caption "{round((page+1)/length(pages)*100,0)}%  ·  page {page+1} of {length(pages)}"
+  Sheet#settings "Display"
+    Column gap=16
+      Card gap=4
+        Text "Her father had taught her to count lights the way other fathers taught their children prayers." font=font size=size lineHeight=spacing
+        Text.caption "Live sample"
+      Select "Typeface" bind=font items=["Georgia","Merriweather","Literata","Helvetica","OpenDyslexic"]
+      Row gap=12
+        Icon "text_decrease"
+        Slider bind=size min=12 max=32 step=1 grow
+        Icon "text_increase"
+        Text.strong "{size}"
+      Column gap=4
+        Text.fieldLabel "Line spacing"
+        SegmentedButton bind=spacing items=[1.2,1.5,1.8,2.1]
+      Column gap=4
+        Text.fieldLabel "Margins"
+        Slider bind=margin min=8 max=64 step=4
+      Row gap=8
+        ChoiceChip "Paper" onTap={emit theme "paper"}
+        ChoiceChip "Sepia" onTap={emit theme "sepia"}
+        ChoiceChip "Night" onTap={emit theme "night"}
+      Button "Done" onTap={ui=false; close}
+  Menu#highlightMenu
+    Row gap=8 pad=8
+      IconButton "circle" color=#FFFFEB3B tooltip="Yellow" onTap={highlights=append(highlights,{"id":length(highlights)+1,"page":sel.page,"text":sel.text,"color":"yellow","note":""}); close}
+      IconButton "circle" color=#FF66BB6A tooltip="Green" onTap={highlights=append(highlights,{"id":length(highlights)+1,"page":sel.page,"text":sel.text,"color":"green","note":""}); close}
+      IconButton "circle" color=#FF42A5F5 tooltip="Blue" onTap={highlights=append(highlights,{"id":length(highlights)+1,"page":sel.page,"text":sel.text,"color":"blue","note":""}); close}
+      IconButton "circle" color=#FFF06292 tooltip="Pink" onTap={highlights=append(highlights,{"id":length(highlights)+1,"page":sel.page,"text":sel.text,"color":"pink","note":""}); close}
+    MenuItem "Highlight and add note" icon="edit_note" onTap={highlights=append(highlights,{"id":length(highlights)+1,"page":sel.page,"text":sel.text,"color":"yellow","note":""}); note=""; open noteEditor}
+    MenuItem "Copy" icon="content_copy" onTap={copy sel.text; toast "Copied"}
+    MenuItem "Look up" icon="menu_book" onTap={word=lower(sel.text); open dictionary}
+  Dialog#noteEditor "Note" "On: {sel.text}"
+    Input "Your note" bind=note multiline
+    Row end gap=8
+      Button.ghost "Remove highlight" onTap={highlights=removeWhere(highlights,h=>h.text==sel.text); close}
+      Button "Save" onTap={highlights=updateWhere(highlights,h=>h.text==sel.text,h=>with(h,"note",note)); toast "Note saved"; close}
+  Popover#dictionary
+    Column gap=8 pad=16 w=300
+      Row between
+        Text.heading "{word}"
+        IconButton "volume_up" tooltip="Pronounce" onTap={emit speak word}
+      Text.caption "{coalesce(defs[word].pos,"")}  /{coalesce(defs[word].ipa,"")}/"
+      Text "{coalesce(defs[word].def,"No entry found offline.")}"
+      Row gap=8
+        Button.outline "Highlight" onTap={highlights=append(highlights,{"id":length(highlights)+1,"page":page,"text":word,"color":"yellow","note":""}); close}
+        Button.ghost "More" onTap={link "https://en.wiktionary.org/wiki/{word}"}
+  Sheet#contents "Contents"
+    ListView
+      each c in chapters
+        ListTile "{c.title}" subtitle="Page {c.page+1}" selected={c.page<=page && (isEmpty(filter(chapters,d=>d.page>c.page && d.page<=page)))} onTap={page=c.page; close}
+    Divider
+    Text.sectionTitle "Highlights"
+    ListView
+      each h in highlights
+        ListTile "{h.text}" subtitle={h.note==""?"Page {h.page+1}":h.note} onTap={page=h.page; close}
+  Dialog#bookSearch "Search in book"
+    Input "Search" bind=q
+    ListView
+      each p in pages
+        if contains(lower(p),lower(q)) && q!=""
+          ListTile "Page {index+1}" subtitle="{p}" onTap={page=index; close}
+
+### Library
+state shelf="all"
+state sort="recent"
+state q=""
+state books=[{"id":1,"title":"The Lamp Keeper's Year","author":"Nadia Okonkwo","read":0.34,"status":"reading","cover":"https://covers.example.com/lamp.jpg"},{"id":2,"title":"Atlas of Quiet Places","author":"Jun Takeda","read":1.0,"status":"finished","cover":"https://covers.example.com/atlas.jpg"},{"id":3,"title":"A Short History of Salt","author":"Marguerite Fell","read":0.72,"status":"reading","cover":"https://covers.example.com/salt.jpg"},{"id":4,"title":"Night Trains to Everywhere","author":"Oluwaseun Adeyemi","read":0.0,"status":"unread","cover":"https://covers.example.com/trains.jpg"},{"id":5,"title":"The Cartographer's Daughter","author":"Priya Raman","read":0.08,"status":"reading","cover":"https://covers.example.com/carto.jpg"},{"id":6,"title":"Small Gods of the Tide","author":"Elias Brandt","read":0.0,"status":"unread","cover":"https://covers.example.com/gods.jpg"}]
+state pick=0
+App
+  Sidebar
+    Brand "Marginalia" icon="auto_stories"
+    NavItem "All books" icon="library_books" badge="{length(books)}" selected={shelf=="all"} onTap={shelf="all"}
+    NavItem "Reading" icon="chrome_reader_mode" badge="{count(books,b=>b.status=="reading")}" selected={shelf=="reading"} onTap={shelf="reading"}
+    NavItem "Unread" icon="bookmark_border" selected={shelf=="unread"} onTap={shelf="unread"}
+    NavItem "Finished" icon="check_circle" selected={shelf=="finished"} onTap={shelf="finished"}
+    NavItem "Highlights" icon="border_color" onTap={go highlights}
+    Spacer grow
+    Text.muted "{count(books,b=>b.status=="finished")} finished this year"
+  Main
+    Nav
+      Heading "Library" level=1
+      Row gap=8
+        Input "Search title or author" bind=q w=220
+        Select "Sort" bind=sort items=["recent","title","author","progress"] w=140
+        Button "Add book" icon="add" onTap={emit importBook}
+    Column pad=24 gap=16 scroll
+      if shelf=="all" && q==""
+        Card gap=12
+          Text.sectionTitle "Continue reading"
+          Row gap=16
+            Image "https://covers.example.com/lamp.jpg" w=96 h=144 radius=6
+            Column grow gap=6
+              Text.heading "The Lamp Keeper's Year"
+              Text.muted "Nadia Okonkwo  ·  Chapter 1, The Ferry at Dusk"
+              Progress 0.34
+              Row between
+                Text.caption "34% read"
+                Text.caption "3 h 12 min left"
+              Button "Resume" onTap={go reader}
+      Grid cols=4 gap=20
+        each b in sortBy(filter(books,x=>(shelf=="all" || x.status==shelf) && (q=="" || contains(lower(x.title),lower(q)) || contains(lower(x.author),lower(q)))),x=>sort=="title"?x.title:sort=="author"?x.author:sort=="progress"?0-x.read:0)
+          Column gap=6 menu=bookMenu onTap={go reader} onLongPress={pick=b.id; open bookMenu}
+            Stack
+              Image "{b.cover}" h=200 radius=6
+              if b.status=="finished"
+                Badge.success "Finished"
+            Text.strong "{b.title}"
+            Text.caption "{b.author}"
+            Row gap=8
+              Progress {b.read} grow
+              Text.caption "{round(b.read*100,0)}%"
+  Menu#bookMenu
+    MenuItem "Open" icon="open_in_new" onTap={go reader}
+    MenuItem "Mark as finished" icon="done_all" onTap={books=updateWhere(books,b=>b.id==pick,b=>with(with(b,"read",1.0),"status","finished"))}
+    MenuItem "Mark as unread" icon="remove_done" onTap={books=updateWhere(books,b=>b.id==pick,b=>with(with(b,"read",0.0),"status","unread"))}
+    MenuItem "Remove from device" icon="delete" onTap={books=removeWhere(books,b=>b.id==pick); toast "Removed"}
+
+### Highlights
+state color="all"
+state items=[{"book":"The Lamp Keeper's Year","page":1,"text":"the harbor lights went out one by one","color":"yellow","note":"Opening image, mirrors the last chapter?"},{"book":"A Short History of Salt","page":88,"text":"Salt was money before money was salt","color":"blue","note":""},{"book":"Atlas of Quiet Places","page":214,"text":"Silence is a place you can only visit","color":"green","note":"Quote for the newsletter"},{"book":"A Short History of Salt","page":131,"text":"The brine remembers the sea","color":"pink","note":""}]
+Page
+  Nav
+    Brand "Marginalia" icon="auto_stories"
+    Row gap=4
+      Link "Library" onTap={go library}
+      Link "Highlights" onTap={go highlights}
+    Button.outline "Export notes" onTap={emit exportNotes}
+  Section narrow
+    Column gap=16
+      Heading "Highlights and notes" level=1
+      Row gap=8
+        ChoiceChip "All" selected={color=="all"} onTap={color="all"}
+        ChoiceChip "Yellow" selected={color=="yellow"} onTap={color="yellow"}
+        ChoiceChip "Green" selected={color=="green"} onTap={color="green"}
+        ChoiceChip "Blue" selected={color=="blue"} onTap={color="blue"}
+        ChoiceChip "Pink" selected={color=="pink"} onTap={color="pink"}
+      each h in filter(items,i=>color=="all" || i.color==color)
+        Card gap=8
+          Text "\"{h.text}\""
+          if h.note!=""
+            Text.muted "Note: {h.note}"
+          Row between
+            Text.caption "{h.book}, p. {h.page}"
+            IconButton "delete" tooltip="Delete" onTap={items=removeWhere(items,i=>i.text==h.text)}
+  Footer
+    Text.muted "© 2026 Marginalia"

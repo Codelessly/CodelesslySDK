@@ -1,0 +1,3 @@
+App: Halves, a bill splitter. A photo of a receipt turned into rows of items with prices; people as round avatars added at the top; drag an item onto one or more people or tap people to assign it, shared items splitting evenly; a tip as quick percentages and a custom number; tax shared in proportion; a total per person that updates; a pay request message built and shared; a settled stamp.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

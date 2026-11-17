@@ -1,0 +1,3 @@
+App: Barrow Bids, an auction for a farm market. Lots of produce (a crate of apples, three hens) with a photo, a quantity and a weight, a reserve marker; bidding in a short fixed window where the price steps up with a bid button and a bell when sold; a hammer count at three; a seller screen listing lots entered with a camera and a price guess; a buyer's won list with a collect slot and a payment total; a market day clock.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

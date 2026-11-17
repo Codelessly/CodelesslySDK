@@ -1,0 +1,3 @@
+App: Reefkeeper, an aquarium monitor. Probes as gauges for temperature, salinity and pH with a safe band and a needle, a line chart of the week; a tank diagram with lights on a day curve as a draggable sunrise and sunset; dosing pumps with a schedule and a manual dose; a feed button with a countdown that pauses the filter; a livestock list with photos; a test log with number fields; alarms by text.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

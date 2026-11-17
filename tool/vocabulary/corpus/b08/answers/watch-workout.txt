@@ -1,0 +1,144 @@
+### Sports
+state sport=""
+state query=""
+state sports=[{"id":"run","name":"Outdoor Run","icon":"directions_run","last":"5.2 km yesterday"},{"id":"walk","name":"Walk","icon":"directions_walk","last":"3.1 km Sun"},{"id":"bike","name":"Cycling","icon":"directions_bike","last":"22 km Sat"},{"id":"swim","name":"Pool Swim","icon":"pool","last":"1.0 km Thu"},{"id":"hiit","name":"HIIT","icon":"fitness_center","last":"24 min Tue"},{"id":"yoga","name":"Yoga","icon":"self_improvement","last":"40 min Mon"},{"id":"row","name":"Rowing","icon":"rowing","last":"6.0 km Fri"}]
+App
+  Main
+    Nav
+      Text.strong "Workout"
+      Text.muted "{formatDate(today(),"h:mm")}"
+    Column pad=12 gap=8 scroll center
+      Text.caption "Heart rate 62 bpm, resting"
+      each s in sports
+        ListTile "{s.name}" subtitle="{s.last}" icon="{s.icon}" onTap={sport=s.id; open start} animate=slide-up stagger=60
+      Button.ghost "More sports" onTap={toast "Opening full list"}
+  Sheet#start "Ready?"
+    Column center gap=12
+      Text.heading "{find(sports,x=>x.id==sport).name}"
+      Text.muted "GPS locked. Tap to begin."
+      Button "Start" onTap={emit start sport; close; go running}
+      Button.ghost "Cancel" onTap={close}
+
+### Running
+state elapsed=0
+state running=true
+state locked=false
+state hr=128
+state page=0
+state distance=0.0
+state lapCount=0
+state lapBanner=false
+state pulse=false
+state zones=[{"name":"Easy","max":120,"color":"#FF4FC3F7"},{"name":"Fat burn","max":140,"color":"#FF66BB6A"},{"name":"Aerobic","max":160,"color":"#FFFFCA28"},{"name":"Threshold","max":175,"color":"#FFFF7043"},{"name":"Max","max":220,"color":"#FFE53935"}]
+every 1s when running onTick={elapsed=elapsed+1; distance=distance+0.0031; hr=clamp(hr+(elapsed%7<4?1:-1),110,182); lapBanner=distance>=(lapCount+1)*1.0 ? true : lapBanner; pulse=distance>=(lapCount+1)*1.0 ? true : pulse}
+every 3s when lapBanner onTick={lapBanner=false; pulse=false; lapCount=floor(distance)}
+App
+  Main
+    Stack center middle
+      Pages bind=page h=fill
+        Column center middle gap=4
+          Text.caption "ELAPSED"
+          Text "{duration(elapsed)}" size=48 weight=700
+          Text.muted "Outdoor Run"
+        Column center middle gap=4
+          Stack center middle
+            Gauge bind=hr min=60 max=200 limit=175 unit="bpm"
+            Ring {clamp((hr-60)/140,0,1)}
+          Text.strong "{find(zones,z=>hr<=z.max).name}" color={find(zones,z=>hr<=z.max).color}
+          Text.caption "Zone {indexOf(zones,find(zones,z=>hr<=z.max))+1} of 5"
+        Column center middle gap=6
+          Row center gap=16
+            Column center
+              Text.caption "PACE"
+              Text "{fixed(distance>0 ? (elapsed/60)/distance : 0,2)}" size=32 weight=700
+              Text.caption "min/km"
+            Column center
+              Text.caption "DIST"
+              Text "{fixed(distance,2)}" size=32 weight=700
+              Text.caption "km"
+          Sparkline values=[5.8,5.6,5.5,5.7,5.4,5.3,5.4] h=32
+        Column center middle gap=8
+          Text.caption "LAPS"
+          Text "{lapCount}" size=48 weight=700
+          Text.muted "Last lap 5:41"
+      Dots bind=page count=4
+      if lapBanner
+        Box fill=#FF1B5E20 radius=16 pad=12 animate=slide-up
+          Column center gap=2
+            Row center gap=6
+              Icon "flag"
+              Text.strong "Lap {lapCount+1}" color=#FFFFFFFF
+            Text.small "{fixed(distance,2)} km, auto-lap" color=#FFFFFFFF
+      if pulse
+        Ring 1.0 animate=pulse duration=300
+        Text.caption "Buzz buzz" animate=fade
+      if locked
+        Box fill=#CC000000 radius=999 animate=fade
+          Column center middle gap=6
+            Icon "lock"
+            Text.strong "Water lock" color=#FFFFFFFF
+            Text.small "Hold crown to unlock" color=#FFFFFFFF
+    Footer
+      Row center gap=12
+        IconButton "pause" tooltip="Pause" onTap={running=false; go paused}
+        IconButton "water_drop" tooltip="Water lock" onTap={locked=true; toast "Touch locked"}
+        IconButton "lock_open" tooltip="Unlock" hidden={!locked} onTap={locked=false}
+
+### Paused
+state lapCount=2
+state elapsed=1874
+state distance=5.21
+state confirmEnd=false
+state laps=[{"n":1,"time":"5:41"},{"n":2,"time":"5:38"}]
+App
+  Main
+    Column center middle gap=10 pad=12
+      Text.caption "PAUSED"
+      Text "{duration(elapsed)}" size=40 weight=700 animate=pulse
+      Text.muted "{fixed(distance,2)} km, {lapCount} laps"
+      Row center gap=12
+        Button.outline "Lap" icon="flag" onTap={laps=append(laps,{"n":length(laps)+1,"time":"5:44"}); lapCount=lapCount+1; toast "Lap {lapCount} saved"}
+        Button.destructive "End" icon="stop" onTap={open endSheet}
+      Button "Resume" icon="play_arrow" onTap={emit resume; go running}
+  Dialog#endSheet "End workout?" "Your run will be saved."
+    Row gap=12 center
+      Button.ghost "Keep going" onTap={close}
+      Button.destructive "End and save" onTap={emit end; close; go summary}
+
+### Summary
+state tab="route"
+state splits=[5.7,5.6,5.5,5.4,5.3]
+state zoneShare=[4,18,42,28,8]
+App
+  Main
+    Nav
+      Text.strong "Outdoor Run"
+      Text.muted "Today 7:12"
+    Column pad=12 gap=12 scroll center
+      Grid cols=2 gap=8
+        Column center
+          Text.caption "TIME"
+          Text.heading "31:14"
+        Column center
+          Text.caption "DISTANCE"
+          Text.heading "5.21 km"
+        Column center
+          Text.caption "AVG PACE"
+          Text.heading "6:00"
+        Column center
+          Text.caption "AVG HR"
+          Text.heading "153"
+      SegmentedButton bind=tab items=["route","splits","zones"]
+      if tab=="route"
+        RouteMap points=[[0,0],[2,1],[4,1],[5,3],[7,4],[9,3],[10,5]] h=140
+      if tab=="splits"
+        BarChart values={splits} labels=["1","2","3","4","5"] h=140
+        Text.caption "Pace per km, min"
+      if tab=="zones"
+        Donut values={zoneShare} labels=["Easy","Fat burn","Aerobic","Threshold","Max"]
+      Button "Done" onTap={emit done; go sports}
+      Button.ghost "Discard" onTap={open discard}
+  Dialog#discard "Discard run?" "This cannot be undone."
+    Row gap=12
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Discard" onTap={emit discard; close; go sports}

@@ -1,0 +1,231 @@
+### Today
+state tab="today"
+state range="Day"
+state ctx="Before meal"
+state units="0"
+state entry=""
+state readings=[{"id":1,"time":"6:45 AM","mg":96,"ctx":"Fasting","units":0},{"id":2,"time":"8:10 AM","mg":142,"ctx":"After meal","units":4},{"id":3,"time":"11:30 AM","mg":118,"ctx":"Before meal","units":0},{"id":4,"time":"1:20 PM","mg":184,"ctx":"After meal","units":6},{"id":5,"time":"3:40 PM","mg":132,"ctx":"Random","units":0},{"id":6,"time":"6:15 PM","mg":68,"ctx":"Before meal","units":0}]
+App
+  Sidebar
+    Brand "Sugarcube" icon="water_drop"
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={go today}
+    NavItem "Insights" icon="insights" selected={tab=="insights"} onTap={go insights}
+    NavItem "Alerts" icon="notifications" badge="2" selected={tab=="alerts"} onTap={go alerts}
+    NavItem "Export" icon="ios_share" selected={tab=="export"} onTap={go export}
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Today" level=1
+      Row gap=8
+        Button.outline "Export" icon="ios_share" onTap={go export}
+        Button "Add reading" icon="add" onTap={open addReading}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=8
+          Text.caption "LATEST READING, 6:15 PM"
+          Row gap=12 middle
+            Text "{last(readings).mg}" size=72 weight=700 color={last(readings).mg < 70 ? "#FFC62828" : (last(readings).mg > 180 ? "#FFEF6C00" : "#FF2E7D32")}
+            Column gap=4
+              Text.muted "mg/dL"
+              Icon "south_east" size=32
+          Row gap=8
+            Badge.error "Low" visible={last(readings).mg < 70}
+            Badge.success "In range" visible={last(readings).mg >= 70 && last(readings).mg <= 180}
+            Badge.warning "High" visible={last(readings).mg > 180}
+            Text.muted "Falling 64 mg/dL in 3 hours"
+          Row gap=0
+            Box grow h=8 fill=#FFEF5350
+            Box grow h=8 fill=#FF66BB6A
+            Box grow h=8 fill=#FFFFB74D
+          Row between
+            Text.caption "Low under 70"
+            Text.caption "In range 70-180"
+            Text.caption "High over 180"
+        Card w=320 gap=8
+          Text.strong "Time in range, 7 days"
+          Donut values=[74,18,8] labels=["In range","High","Low"]
+          Text.muted "Goal is above 70%. You are 4 points over."
+      Card gap=12
+        Row between
+          Text.strong "Readings"
+          SegmentedButton bind=range items=["Day","Week"]
+        ScatterChart values=[96,142,118,184,132,68] labels=["6:45","8:10","11:30","1:20","3:40","6:15"] connect=true band=[70,180] bandColor=#3366BB6A min=40 max=240 unit="mg/dL" h=240
+        Row gap=16
+          Text.caption "Meals"
+          Icon "restaurant" size=16
+          Text.caption "8:10 AM Oatmeal and berries"
+          Icon "restaurant" size=16
+          Text.caption "1:20 PM Rice bowl"
+          Icon "restaurant" size=16
+          Text.caption "6:15 PM Pasta"
+      Card gap=8
+        Text.strong "Log"
+        each r in readings
+          ListTile "{r.mg} mg/dL" subtitle="{r.time}, {r.ctx}" icon="water_drop" trailing="{r.units} u" onTap={emit openReading r.id} menu=rowMenu
+  Menu#rowMenu
+    MenuItem "Edit reading" icon="edit" onTap={emit editReading}
+    MenuItem "Delete" icon="delete" onTap={emit deleteReading}
+  Sheet#addReading "Add reading"
+    Column gap=12
+      Text "{entry == "" ? "---" : entry}" size=56 weight=700 center
+      Text.muted "mg/dL" center
+      NumberPad bind=entry max=3 onSubmit={open addDetails}
+      Button "Next" onTap={entry != "" ? open addDetails : toast "Enter a number"}
+  Sheet#addDetails "Context"
+    Column gap=12
+      Text.fieldLabel "Meal context"
+      Row gap=8
+        ChoiceChip "Fasting" selected={ctx=="Fasting"} onTap={ctx="Fasting"}
+        ChoiceChip "Before meal" selected={ctx=="Before meal"} onTap={ctx="Before meal"}
+        ChoiceChip "After meal" selected={ctx=="After meal"} onTap={ctx="After meal"}
+        ChoiceChip "Bedtime" selected={ctx=="Bedtime"} onTap={ctx="Bedtime"}
+      Text.fieldLabel "Insulin units"
+      Row gap=12 middle
+        IconButton "remove" tooltip="Fewer units" onTap={units=max(0,units-1)}
+        Text.strong "{units} u" size=24
+        IconButton "add" tooltip="More units" onTap={units=units+1}
+      TimePicker "Time" bind=when
+      Button "Save reading" onTap={readings=append(readings,{"id":length(readings)+1,"time":formatDate(today(),"h:mm a"),"mg":entry,"ctx":ctx,"units":units}); entry=""; units=0; emit saveReading; toast "Reading saved"; close}
+
+### Insights
+state tab="insights"
+state hours=["6 AM","9 AM","12 PM","3 PM","6 PM","9 PM"]
+App
+  Sidebar
+    Brand "Sugarcube" icon="water_drop"
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={go today}
+    NavItem "Insights" icon="insights" selected={tab=="insights"} onTap={go insights}
+    NavItem "Alerts" icon="notifications" badge="2" selected={tab=="alerts"} onTap={go alerts}
+    NavItem "Export" icon="ios_share" selected={tab=="export"} onTap={go export}
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Insights" level=1
+      Button.outline "Export for clinic" icon="ios_share" onTap={go export}
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.caption "AVERAGE"
+          Text "128 mg/dL" size=28 weight=700
+          Text.muted "Down 6 from last week"
+        Card gap=4
+          Text.caption "TIME IN RANGE"
+          Text "74%" size=28 weight=700 color=#FF2E7D32
+          Text.muted "Goal over 70%"
+        Card gap=4
+          Text.caption "LOWS THIS WEEK"
+          Text "3" size=28 weight=700 color=#FFC62828
+          Text.muted "All before dinner"
+      Card gap=12
+        Text.strong "Week by hour"
+        Text.muted "Average reading in mg/dL. Cells are coloured low, in range or high."
+        Row scroll
+          Table#week columns=["Day","6 AM","9 AM","12 PM","3 PM","6 PM","9 PM"] rows=[["Mon",92,148,121,134,110,126],["Tue",98,155,117,129,72,131],["Wed",101,162,124,188,66,119],["Thu",94,139,130,141,118,123],["Fri",96,171,115,126,104,140],["Sat",110,190,138,152,121,133],["Sun",99,144,119,131,108,127]] low=70 high=180 colorCells=true
+      Row gap=16 top
+        Card grow gap=8
+          Text.strong "Time in range"
+          Donut values=[74,18,8] labels=["In range","High","Low"]
+        Card grow gap=8
+          Text.strong "Daily average"
+          LineChart values=[131,126,134,129,124,133,128] labels=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] h=200
+      Card gap=4
+        Text.strong "What stands out"
+        Text.muted "Readings after breakfast run highest, around 160 mg/dL. Three of the week's lows came before dinner, on days with 4 units or more at lunch."
+
+### Alerts
+state tab="alerts"
+state lowOn=true
+state highOn=true
+state low=70
+state high=180
+state urgentLow=54
+state quiet=false
+state recent=[{"id":1,"kind":"Low","mg":68,"time":"Today, 6:15 PM"},{"id":2,"kind":"High","mg":188,"time":"Wed, 3:10 PM"},{"id":3,"kind":"Low","mg":66,"time":"Wed, 5:55 PM"}]
+App
+  Sidebar
+    Brand "Sugarcube" icon="water_drop"
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={go today}
+    NavItem "Insights" icon="insights" selected={tab=="insights"} onTap={go insights}
+    NavItem "Alerts" icon="notifications" badge="2" selected={tab=="alerts"} onTap={go alerts}
+    NavItem "Export" icon="ios_share" selected={tab=="export"} onTap={go export}
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Alerts" level=1
+      Button "Save thresholds" onTap={emit saveAlerts; toast "Alerts saved"}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Toggle "Alert me when low" bind=lowOn
+        if lowOn
+          Row gap=12 middle
+            Text "Below" w=70
+            Slider bind=low min=50 max=90 grow
+            Text.strong "{low} mg/dL" w=100
+        Divider
+        Toggle "Alert me when high" bind=highOn
+        if highOn
+          Row gap=12 middle
+            Text "Above" w=70
+            Slider bind=high min=140 max=300 grow
+            Text.strong "{high} mg/dL" w=100
+        Divider
+        Row gap=12 middle
+          Text "Urgent low" w=100
+          Slider bind=urgentLow min=40 max=60 grow
+          Text.strong "{urgentLow} mg/dL" w=100
+        Toggle "Quiet hours, 10 PM to 6 AM" bind=quiet
+        if quiet
+          Row gap=12
+            TimePicker "From" bind=quietFrom
+            TimePicker "Until" bind=quietUntil
+      Card gap=8
+        Text.strong "Recent alerts"
+        each a in recent
+          ListTile "{a.kind}: {a.mg} mg/dL" subtitle="{a.time}" icon={a.kind=="Low" ? "arrow_downward" : "arrow_upward"}
+            Badge.error "Low" visible={a.kind=="Low"}
+            Badge.warning "High" visible={a.kind=="High"}
+
+### Export
+state tab="export"
+state period="Last 30 days"
+state format="PDF"
+state incMeals=true
+state incInsulin=true
+state clinic=""
+App
+  Sidebar
+    Brand "Sugarcube" icon="water_drop"
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={go today}
+    NavItem "Insights" icon="insights" selected={tab=="insights"} onTap={go insights}
+    NavItem "Alerts" icon="notifications" badge="2" selected={tab=="alerts"} onTap={go alerts}
+    NavItem "Export" icon="ios_share" selected={tab=="export"} onTap={go export}
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Export for the clinic" level=1
+    Column pad=24 gap=16 maxw=720
+      Card gap=12
+        Select "Period" bind=period items=["Last 7 days","Last 14 days","Last 30 days","Last 90 days","Custom"]
+        if period=="Custom"
+          Row gap=12
+            DatePicker "From" bind=from
+            DatePicker "To" bind=to
+        SegmentedButton bind=format items=["PDF","CSV"]
+        Checkbox "Include meal context" bind=incMeals
+        Checkbox "Include insulin units" bind=incInsulin
+        Input "Clinic email" "clinic@example.com" bind=clinic type=email
+      Card gap=4
+        Text.strong "Summary in this report"
+        Text.muted "Average 128 mg/dL, time in range 74%, 3 lows, 5 highs, 186 readings."
+      Row gap=12
+        Button.outline "Download" icon="download" onTap={emit downloadReport format; toast "Report ready"}
+        Button "Send to clinic" icon="send" onTap={clinic != "" ? open confirmSend : toast "Add the clinic's email"}
+  Dialog#confirmSend "Send report?" "This shares your readings for the period you chose."
+    Text "To {clinic}, {period}, as {format}."
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button "Send" onTap={emit sendReport; toast "Report sent"; close}

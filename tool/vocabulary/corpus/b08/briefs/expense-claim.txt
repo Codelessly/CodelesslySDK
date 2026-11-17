@@ -1,0 +1,3 @@
+App: Claimant, expense claims with receipts. A new claim with a stack of receipts photographed and each one turned into a line with a date, an amount and a category; a policy warning on a line that is over a limit; mileage with a start and an end on a mini map; a currency line with a rate; a total with a submit; an approver view with approve, query and reject beside each line and a comment; payment status timeline.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

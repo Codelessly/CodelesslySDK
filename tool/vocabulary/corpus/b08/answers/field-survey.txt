@@ -1,0 +1,153 @@
+### Map
+state tab="map"
+state gps=4
+state sel=""
+state plots=[{"id":"P-014","name":"Plot 14","status":"done","dist":0},{"id":"P-015","name":"Plot 15","status":"draft","dist":180},{"id":"P-016","name":"Plot 16","status":"todo","dist":340},{"id":"P-017","name":"Plot 17","status":"todo","dist":520}]
+state queue=[{"id":1,"label":"Plot 14 form","state":"failed"},{"id":2,"label":"Plot 14 photo N","state":"pending"},{"id":3,"label":"Plot 13 form","state":"pending"}]
+state nextId="P-016"
+App
+  Sidebar
+    Brand "Transect" icon="grass"
+    NavItem "Map" icon="map" selected={tab=="map"} onTap={tab="map"}
+    NavItem "Sync queue" icon="sync" badge="{length(queue)}" selected={tab=="sync"} onTap={go sync-queue}
+    NavItem "Export day" icon="ios_share" onTap={open export}
+    Spacer grow
+    Text.muted "Ines Duarte, crew B"
+  Main
+    Nav
+      Heading "Marsh transect 3" level=1
+      Row gap=8
+        if gps<=5
+          Badge.success "GPS ±{gps} m"
+        if gps>5 && gps<=15
+          Badge.warning "GPS ±{gps} m"
+        if gps>15
+          Badge.error "GPS ±{gps} m"
+        Button.outline "Next plot: {nextId}" icon="navigation" onTap={open route}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Card grow gap=12
+          PlotMap plots={plots} selected={sel} position="here" bind=sel onSelect={sel=result; open plot}
+          Row gap=12
+            Badge.success "Done"
+            Badge.warning "Partly saved"
+            Badge.neutral "To do"
+        Column w=320 gap=12
+          Card gap=8
+            Text.strong "Today"
+            Text.muted "{count(plots,p=>p.status==\"done\")} of {length(plots)} plots done"
+            Progress {count(plots,p=>p.status=="done")/length(plots)}
+          Card gap=8
+            Text.strong "Sync"
+            Text.muted "{length(queue)} waiting to upload"
+            Button.outline "Open queue" onTap={go sync-queue}
+  Sheet#plot "Plot {sel}"
+    Column gap=8
+      Text.muted "Last visit 12 May by Kofi Mensah"
+      Row gap=8
+        Button "Open form" onTap={close; go plot-form}
+        Button.outline "Route here" onTap={nextId=sel; close; open route}
+  Dialog#route "Route to {nextId}" "Walk 340 m north-east along the boardwalk"
+    Compass bearing=42 distance=340 unit="m" target={nextId}
+    Row gap=8
+      Button "Start navigation" onTap={emit navigate nextId; close}
+      Button.outline "Cancel" onTap={close}
+  Dialog#export "Export day" "Wednesday 17 November"
+    Select "Format" items=["CSV","GeoJSON","Excel"] bind=fmt
+    Toggle "Include photos" bind=withPhotos
+    Toggle "Only completed plots" bind=onlyDone
+    Button "Export" onTap={emit export fmt; toast "Export ready"; close}
+
+### Plot form
+state gps=4
+state quad="A"
+state cover=62
+state depth=18
+state soil="Peat"
+state notes=""
+state tide="Low"
+state photos=[{"url":"p14_n.jpg","dir":"N","deg":4},{"url":"p14_e.jpg","dir":"E","deg":91}]
+state species=[{"name":"Spartina alterniflora","n":14},{"name":"Salicornia","n":6},{"name":"Limonium","n":0}]
+state saved="none"
+App
+  Main
+    Nav
+      Row gap=8
+        IconButton "arrow_back" tooltip="Back to map" onTap={go map}
+        Heading "Plot 14" level=1
+      Row gap=8
+        if gps<=5
+          Badge.success "GPS ±{gps} m"
+        if gps>5 && gps<=15
+          Badge.warning "GPS ±{gps} m"
+        if gps>15
+          Badge.error "GPS ±{gps} m"
+        if saved=="partial"
+          Badge.warning "Saved partly"
+    Column pad=24 gap=16 scroll maxw=720
+      Card gap=12
+        Text.sectionTitle "Measurements"
+        Grid cols=2 gap=12
+          Input "Canopy cover (%)" type=number bind=cover
+          Input "Water depth (cm)" type=number bind=depth
+          Select "Soil" items=["Peat","Clay","Sand","Silt"] bind=soil
+          Select "Tide" items=["Low","Rising","High","Falling"] bind=tide
+        SegmentedButton items=["A","B","C","D"] bind=quad
+        Input "Notes" multiline bind=notes
+      Card gap=12
+        Text.sectionTitle "Species count"
+        each s in species
+          Row between middle
+            Text "{s.name}"
+            Row gap=8 middle
+              IconButton "remove" tooltip="Fewer" onTap={species=updateWhere(species,x=>x.name==s.name,x=>with(x,"n",max(0,x.n-1)))}
+              Text.strong "{s.n}" w=32 center
+              IconButton "add" tooltip="More" onTap={species=updateWhere(species,x=>x.name==s.name,x=>with(x,"n",x.n+1))}
+        Row gap=8
+          Text.muted "Total {sum(species,x=>x.n)}"
+        Button.ghost "Add species" icon="add" onTap={open addSpecies}
+      Card gap=12
+        Row between
+          Text.sectionTitle "Photos"
+          Button.outline "Take photo" icon="photo_camera" onTap={emit camera}
+        Row scroll gap=12
+          each p in photos
+            Stack
+              Image "{p.url}" w=160 h=120 radius=8 onTap={at=index; open shots}
+              CompassStamp "{p.dir} {p.deg}°" bearing={p.deg} bottom left
+      Row gap=8
+        Button.outline "Save partial" onTap={saved="partial"; toast "Saved, finish later"}
+        Button "Complete plot" onTap={cover>0 ? {saved="done"; emit complete; toast "Plot 14 complete"; go map} : toast "Enter the canopy cover first"}
+  Lightbox#shots photos={photos} bind=at
+  Dialog#addSpecies "Add species"
+    Input "Species name" bind=newSpecies
+    Button "Add" onTap={species=append(species,{"name":newSpecies,"n":0}); newSpecies=""; close}
+
+### Sync queue
+state queue=[{"id":1,"label":"Plot 14 form","size":"4 KB","state":"failed"},{"id":2,"label":"Plot 14 photo N","size":"2.1 MB","state":"pending"},{"id":3,"label":"Plot 14 photo E","size":"1.9 MB","state":"pending"},{"id":4,"label":"Plot 13 form","size":"3 KB","state":"pending"}]
+state online=true
+App
+  Main
+    Nav
+      Row gap=8
+        IconButton "arrow_back" tooltip="Back" onTap={go map}
+        Heading "Sync queue" level=1
+        Badge.info "{length(queue)}"
+      Row gap=8
+        Badge.success hidden={!online} "Online"
+        Badge.error hidden={online} "Offline"
+        Button "Retry all" icon="refresh" onTap={queue=map(queue,q=>with(q,"state","pending")); emit syncAll; toast "Retrying"}
+    Column pad=24 gap=16 maxw=720
+      if isEmpty(queue)
+        Card gap=8
+          Icon "cloud_done"
+          Text.strong "Everything is uploaded"
+      each q in queue
+        ListTile "{q.label}" subtitle="{q.size}" icon="description"
+          Row gap=8
+            if q.state=="failed"
+              Badge.error "Failed"
+              Button.outline "Retry" onTap={queue=updateWhere(queue,x=>x.id==q.id,x=>with(x,"state","pending")); emit retry q.id}
+            if q.state=="pending"
+              Badge.neutral "Waiting"
+            IconButton "close" tooltip="Remove" onTap={queue=removeWhere(queue,x=>x.id==q.id)}

@@ -1,0 +1,181 @@
+### Site map
+state tab="map"
+state filters=["stage","food","toilets","camping"]
+state selected=""
+state zones=[{"id":"main","name":"Main Stage","kind":"stage","icon":"music_note","wait":0},{"id":"barn","name":"The Barn","kind":"stage","icon":"music_note","wait":0},{"id":"noodle","name":"Noodle Yard","kind":"food","icon":"restaurant","wait":12},{"id":"wood","name":"Woodfire Pizza","kind":"food","icon":"restaurant","wait":25},{"id":"wc1","name":"Toilets North","kind":"toilets","icon":"wc","wait":4},{"id":"wc2","name":"Toilets Meadow","kind":"toilets","icon":"wc","wait":9},{"id":"camp","name":"Meadow Camping","kind":"camping","icon":"camping","wait":0}]
+state weather={"temp":14,"text":"Rain from 16:30, heavy by 17:15"}
+state showWeather=true
+App
+  Sidebar
+    Brand "Mudflap" icon="festival"
+    NavItem "Site map" icon="map" selected={tab=="map"} onTap={go site-map}
+    NavItem "Line-up" icon="queue_music" selected={tab=="lineup"} onTap={go line-up}
+    NavItem "My day" icon="schedule" badge="1" selected={tab=="day"} onTap={go my-day}
+    NavItem "Friends and queues" icon="group" selected={tab=="friends"} onTap={go friends}
+    Spacer grow
+    Button.outline "Lost and found" icon="search" onTap={open lost}
+  Main
+    Nav
+      Heading "Site map" level=1
+      Row gap=8
+        IconButton "my_location" tooltip="Centre on me" onTap={emit centreMap}
+        IconButton "zoom_in" tooltip="Zoom in" onTap={emit zoomIn}
+    Column pad=24 gap=16 scroll
+      if showWeather
+        Card fill=#FFFFF3CD gap=8
+          Row between
+            Row gap=8 middle
+              Icon "thunderstorm"
+              Text.strong "{weather.temp} degrees, {weather.text}"
+            IconButton "close" tooltip="Dismiss" onTap={showWeather=false}
+      Row gap=8
+        FilterChip "Stages" icon="music_note" selected={contains(filters,"stage")} onTap={filters=contains(filters,"stage") ? without(filters,"stage") : append(filters,"stage")}
+        FilterChip "Food" icon="restaurant" selected={contains(filters,"food")} onTap={filters=contains(filters,"food") ? without(filters,"food") : append(filters,"food")}
+        FilterChip "Toilets" icon="wc" selected={contains(filters,"toilets")} onTap={filters=contains(filters,"toilets") ? without(filters,"toilets") : append(filters,"toilets")}
+        FilterChip "Camping" icon="camping" selected={contains(filters,"camping")} onTap={filters=contains(filters,"camping") ? without(filters,"camping") : append(filters,"camping")}
+      Row gap=16 top
+        Card grow
+          SiteMap h=440 zones={filter(zones,z=>contains(filters,z.kind))} bind=selected onSelect={selected=result}
+        Column w=320 gap=12
+          Text.strong "Nearby"
+          each z in filter(zones,z=>contains(filters,z.kind))
+            ListTile "{z.name}" icon="{z.icon}" selected={selected==z.id} onTap={selected=z.id}
+              if z.wait > 0
+                Badge.warning "{z.wait} min queue"
+          if selected!=""
+            Card gap=8
+              Heading "{find(zones,z=>z.id==selected).name}" level=3
+              Button "Walk me there" icon="directions_walk" onTap={emit navigateTo selected}
+  Dialog#lost "Lost and found" "Tell us what you lost and where"
+    state item=""
+    state kind="Phone"
+    state place="Main Stage"
+    state when=""
+    state contact=""
+    Input "What did you lose?" "Black wallet with a red lanyard" bind=item
+    Select "Type" items=["Phone","Wallet","Keys","Bag","Other"] bind=kind
+    Select "Last seen near" items=["Main Stage","The Barn","Noodle Yard","Meadow Camping","Toilets North"] bind=place
+    TimePicker "About what time" bind=when
+    Input "Phone or email to reach you" type=phone bind=contact
+    Button "Send report" onTap={trim(item)!="" && trim(contact)!="" ? emit lostReport {item:item,kind:kind,place:place,when:when,contact:contact}; toast "Reported. Check the info tent at the south gate."; close : toast "Add what you lost and a contact"}
+
+### Line-up
+state tab="lineup"
+state day="Saturday"
+state starred=["s3"]
+state sets=[{"id":"s1","stage":"Main Stage","artist":"The Pale Hours","start":"14:00","end":"15:00","day":"Saturday"},{"id":"s2","stage":"The Barn","artist":"Nia Okafor","start":"14:30","end":"15:30","day":"Saturday"},{"id":"s3","stage":"Main Stage","artist":"Hollow Pines","start":"16:00","end":"17:15","day":"Saturday"},{"id":"s4","stage":"The Barn","artist":"Dust Choir","start":"16:30","end":"17:30","day":"Saturday"},{"id":"s5","stage":"Woodland","artist":"Marlo and the Moths","start":"17:00","end":"18:00","day":"Saturday"},{"id":"s6","stage":"Main Stage","artist":"Static Bloom","start":"21:00","end":"22:30","day":"Saturday"}]
+state overlapId=""
+App
+  Sidebar
+    Brand "Mudflap" icon="festival"
+    NavItem "Site map" icon="map" selected={tab=="map"} onTap={go site-map}
+    NavItem "Line-up" icon="queue_music" selected={tab=="lineup"} onTap={go line-up}
+    NavItem "My day" icon="schedule" badge="1" selected={tab=="day"} onTap={go my-day}
+    NavItem "Friends and queues" icon="group" selected={tab=="friends"} onTap={go friends}
+  Main
+    Nav
+      Heading "Line-up" level=1
+      SegmentedButton items=["Friday","Saturday","Sunday"] bind=day
+    Column pad=24 gap=16 scroll
+      Row between
+        Text.muted "{count(starred,i=>true)} sets starred"
+        Button.outline "Show my starred" icon="star" onTap={emit filterStarred}
+      Card
+        Timetable stages=["Main Stage","The Barn","Woodland"] from="12:00" to="23:00" sets={filter(sets,s=>s.day==day)} starred={starred} flagOverlaps=true onSelect={overlapId=result; open setSheet}
+      each s in filter(sets,s=>s.day==day)
+        ListTile "{s.artist}" icon="music_note" subtitle="{s.stage}, {s.start} to {s.end}"
+          Row gap=8
+            if any(starred,id=>id==s.id) && any(filter(sets,o=>o.id!=s.id && contains(starred,o.id) && o.start<s.end && o.end>s.start),o=>true)
+              Badge.warning "Clashes with a starred set"
+            IconButton "{contains(starred,s.id) ? 'star' : 'star_border'}" tooltip="Star this set" onTap={starred=contains(starred,s.id) ? without(starred,s.id) : append(starred,s.id); toast contains(starred,s.id) ? "Removed from your day" : "Added to your day"}
+  Sheet#setSheet "Set details"
+    Heading "{find(sets,s=>s.id==overlapId).artist}" level=3
+    Text.muted "{find(sets,s=>s.id==overlapId).stage}, {find(sets,s=>s.id==overlapId).start} to {find(sets,s=>s.id==overlapId).end}"
+    Button "Star it" icon="star" onTap={starred=contains(starred,overlapId) ? starred : append(starred,overlapId); close}
+    Button.ghost "Remind me 10 minutes before" icon="notifications" onTap={emit remind overlapId; toast "Reminder set"; close}
+
+### My day
+state tab="day"
+state now="16:20"
+state walkMin=11
+state plan=[{"id":"s3","artist":"Hollow Pines","stage":"Main Stage","start":"16:00","end":"17:15"},{"id":"s5","artist":"Marlo and the Moths","stage":"Woodland","start":"17:30","end":"18:30"},{"id":"s6","artist":"Static Bloom","stage":"Main Stage","start":"21:00","end":"22:30"}]
+state leaveAlert=true
+every 30s onTick={emit refreshClock}
+App
+  Sidebar
+    Brand "Mudflap" icon="festival"
+    NavItem "Site map" icon="map" selected={tab=="map"} onTap={go site-map}
+    NavItem "Line-up" icon="queue_music" selected={tab=="lineup"} onTap={go line-up}
+    NavItem "My day" icon="schedule" badge="1" selected={tab=="day"} onTap={go my-day}
+    NavItem "Friends and queues" icon="group" selected={tab=="friends"} onTap={go friends}
+  Main
+    Nav
+      Heading "My day" level=1
+      Toggle "Leave-now alerts" bind=leaveAlert
+    Column pad=24 gap=16 scroll
+      if leaveAlert
+        Card fill=#FFB3261E gap=8 animate=pulse
+          Row between middle
+            Column gap=4
+              Text.strong "Leave now for Woodland" color=#FFFFFFFF
+              Text "Marlo and the Moths start at 17:30. It is an {walkMin} minute walk in the rain." color=#FFFFFFFF
+            Button.secondary "Navigate" icon="directions_walk" onTap={emit navigateTo "woodland"}
+      Card gap=8
+        Timeline now={now}
+          each p in plan
+            TimelineItem "{p.artist}" time="{p.start}" subtitle="{p.stage}, until {p.end}" icon="music_note" onTap={emit openSet p.id}
+              if p.id=="s5"
+                WalkingTime from="Main Stage" to="Woodland" minutes={walkMin} leaveBy="17:19"
+              if p.id=="s6"
+                WalkingTime from="Woodland" to="Main Stage" minutes=9 leaveBy="20:50"
+      Row gap=8
+        Button.outline "Add a set" icon="add" onTap={go line-up}
+        Button.ghost "Share my day with friends" icon="share" onTap={emit shareDay; toast "Link copied"}
+
+### Friends and queues
+state tab="friends"
+state friends=[{"id":"f1","name":"Priya","x":0.32,"y":0.41,"where":"The Barn","seen":"2 min ago"},{"id":"f2","name":"Tom","x":0.61,"y":0.27,"where":"Noodle Yard","seen":"now"},{"id":"f3","name":"Jess","x":0.78,"y":0.66,"where":"Meadow Camping","seen":"9 min ago"}]
+state picked=""
+state queues=[{"name":"Noodle Yard","kind":"food","wait":12},{"name":"Woodfire Pizza","kind":"food","wait":25},{"name":"Toilets North","kind":"toilets","wait":4},{"name":"Toilets Meadow","kind":"toilets","wait":9}]
+state qFilter="food"
+state sharing=true
+App
+  Sidebar
+    Brand "Mudflap" icon="festival"
+    NavItem "Site map" icon="map" selected={tab=="map"} onTap={go site-map}
+    NavItem "Line-up" icon="queue_music" selected={tab=="lineup"} onTap={go line-up}
+    NavItem "My day" icon="schedule" badge="1" selected={tab=="day"} onTap={go my-day}
+    NavItem "Friends and queues" icon="group" selected={tab=="friends"} onTap={go friends}
+  Main
+    Nav
+      Heading "Friends and queues" level=1
+      Toggle "Share my location" bind=sharing
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=8
+          Text.strong "Friend finder"
+          FriendMap h=320 friends={friends} me={{"x":0.5,"y":0.5}} bind=picked onSelect={picked=result}
+        Column w=320 gap=8
+          each f in friends
+            ListTile "{f.name}" subtitle="{f.where}, {f.seen}" selected={picked==f.id} onTap={picked=f.id}
+              Avatar "{f.name}" size=40
+          if picked!=""
+            Button "Walk to {find(friends,f=>f.id==picked).name}" icon="directions_walk" onTap={emit navigateToFriend picked}
+            Button.outline "Send a ping" icon="notifications" onTap={emit ping picked; toast "Ping sent"}
+      Card gap=12
+        Row between
+          Text.strong "Queue times"
+          SegmentedButton items=["food","toilets"] bind=qFilter
+        each q in filter(queues,q=>q.kind==qFilter)
+          Row between middle
+            Text "{q.name}"
+            Row gap=8 middle
+              Progress {min(1,q.wait/30)} w=120
+              Badge.{q.wait>20 ? "error" : q.wait>10 ? "warning" : "success"} "{q.wait} min"
+        Button.outline "Report a queue" icon="edit" onTap={open reportQueue}
+  Sheet#reportQueue "How long is the queue?"
+    state qName="Noodle Yard"
+    state qMin=10
+    Select "Where" items=["Noodle Yard","Woodfire Pizza","Toilets North","Toilets Meadow"] bind=qName
+    Slider "Minutes" bind=qMin min=0 max=45
+    Button "Submit" onTap={queues=updateWhere(queues,q=>q.name==qName,q=>with(q,"wait",qMin)); toast "Thanks, updated"; close}

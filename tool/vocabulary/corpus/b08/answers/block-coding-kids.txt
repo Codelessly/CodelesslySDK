@@ -1,0 +1,141 @@
+### Level map
+state stars=7
+state unlocked=5
+state levels=[{"n":1,"name":"First Steps","stars":3},{"n":2,"name":"Turn Around","stars":3},{"n":3,"name":"Star Path","stars":2},{"n":4,"name":"Loop the Loop","stars":1},{"n":5,"name":"Square Dance","stars":0},{"n":6,"name":"Zig Zag","stars":0},{"n":7,"name":"Big Jump","stars":0},{"n":8,"name":"Robot Maze","stars":0}]
+state level=1
+App
+  Main
+    Nav
+      Brand "Lego-ish Logic" icon="smart_toy"
+      Row gap=12
+        Badge.warning "{stars} stars"
+        Avatar "Mia" size=36
+    Column pad=24 gap=16 scroll
+      Heading "Pick a level, Mia!" level=1
+      Text.muted "Finish a level to unlock the next one. Collect all three stars for the gold crown."
+      Progress {unlocked/8}
+      LevelMap
+        each lv in levels
+          LevelNode "{lv.n}" label="{lv.name}" stars={lv.stars} locked={lv.n > unlocked} current={lv.n == unlocked} onTap={lv.n > unlocked ? toast "Finish level {unlocked} first" : level=lv.n; go play}
+      Card gap=8
+        Row gap=12 middle
+          Avatar "Pip the Owl" size=48
+          Column grow gap=4
+            Text.strong "Pip says"
+            Text.muted "Tap the next glowing level to keep going. I will be right there if you get stuck."
+          Button.outline "Settings" onTap={open settings}
+  Dialog#settings "Settings"
+    Toggle "Sound effects" bind=sound
+    Toggle "Show hints automatically" bind=autohint
+    SegmentedButton bind=speed items=["Slow","Normal","Fast"]
+    Button "Done" onTap={close}
+
+### Play
+state level=5
+state script=[{"id":1,"cmd":"forward"},{"id":2,"cmd":"turn_right"},{"id":3,"cmd":"repeat","n":2,"body":[{"id":4,"cmd":"forward"}]}]
+state nextId=10
+state running=false
+state step=0
+state maxPieces=8
+state hintOpen=false
+state palette=[{"cmd":"forward","label":"Move forward","icon":"arrow_upward","color":"#FF2196F3"},{"cmd":"turn_left","label":"Turn left","icon":"turn_left","color":"#FFFF9800"},{"cmd":"turn_right","label":"Turn right","icon":"turn_right","color":"#FFFF9800"},{"cmd":"jump","label":"Jump","icon":"north_east","color":"#FF9C27B0"},{"cmd":"repeat","label":"Repeat","icon":"loop","color":"#FF4CAF50"}]
+state pieceCount=4
+every 700 when running onTick={step=step+1; step>=pieceCount ? running=false : toast ""}
+App
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Back to the map" onTap={go level_map}
+        Heading "Level {level}: Square Dance" level=3
+      Row gap=8
+        Badge.info "{pieceCount} / {maxPieces} pieces"
+        Button.outline "Hint" icon="lightbulb" onTap={open hint}
+    Row gap=16 pad=16 top
+      Column grow gap=12
+        Card gap=8
+          Row between middle
+            Text.strong "Goal"
+            Row gap=4
+              Icon "star"
+              Text.muted "Reach the star"
+          RobotStage grid=[6,6] robot={"x":0,"y":5,"facing":"up"} goal={"x":3,"y":2} walls=[{"x":1,"y":3},{"x":2,"y":3}] program={script} step={step} running={running} onReachGoal={running=false; open win} onCrash={running=false; toast "Bonk! Try another way."}
+        Row gap=8 center
+          Button "Play" icon="play_arrow" disabled={running || isEmpty(script)} onTap={step=0; running=true}
+          Button.outline "Step" icon="skip_next" onTap={step=step+1; running=false}
+          Button.outline "Reset" icon="replay" onTap={running=false; step=0}
+          Button.ghost "Clear" icon="delete" onTap={script=[]; pieceCount=0; step=0}
+      Column grow gap=12
+        Card gap=8
+          Text.strong "Your pieces"
+          Text.caption "Drag a piece into the script. Pieces snap under each other."
+          Row scroll gap=8
+            each p in palette
+              PuzzlePiece "{p.label}" icon="{p.icon}" color="{p.color}" drag=piece(p.cmd)
+        Card gap=8 grow
+          Row between middle
+            Text.strong "My script"
+            Text.muted "{pieceCount} / {maxPieces}"
+          Column gap=4 drop=piece onDrop={pieceCount >= maxPieces ? toast "That is too many pieces! Try a loop." : script=append(script,{"id":nextId,"cmd":result.data,"n":2,"body":[]}); nextId=nextId+1; pieceCount=pieceCount+1}
+            PuzzlePiece "Start" icon="flag" color="#FF607D8B" fixed
+            each s in script
+              PuzzlePiece "{s.cmd}" cmd={s.cmd} active={running && indexOf(script,s) == step} drag=piece(s.id) wraps={s.body} drop=piece onDrop={script=updateWhere(script,x=>x.id==s.id,x=>with(x,"body",append(x.body,{"id":nextId,"cmd":result.data})))} onTap={script=removeWhere(script,x=>x.id==s.id); pieceCount=max(0,pieceCount-1)}
+                if s.cmd == "repeat"
+                  Stepper bind=s.n min=2 max=9 label="times"
+            Text.muted "Drop here to add to the end" hidden={length(script) > 0}
+  Dialog#hint "Pip's hint"
+    Row gap=12 middle
+      Avatar "Pip the Owl" size=56
+      Text "Look at the path. You walk forward twice, then turn, then forward twice again. Can one Repeat piece do the same thing with fewer pieces?"
+    Row gap=8 end
+      Button.outline "Show me" onTap={emit showSolution; close}
+      Button "Got it" onTap={close}
+  Dialog#win "You did it!"
+    Column center gap=12
+      Row gap=8 center
+        Icon "star" color=#FFFFC107 size=48 animate=pop
+        Icon "star" color=#FFFFC107 size=48 animate=pop delay=200
+        Icon "star_border" size=48 animate=pop delay=400
+      Text.strong "Level {level} complete with {pieceCount} pieces"
+      Text.muted "Use only 5 pieces to earn the third star."
+      Row gap=8
+        Button.outline "Try again" onTap={step=0; close}
+        Button "Next level" onTap={level=level+1; script=[]; pieceCount=0; step=0; close; go level_map}
+
+### Parent corner
+state child="Mia"
+state minutes=20
+state history=[{"day":"Mon","min":15},{"day":"Tue","min":25},{"day":"Wed","min":10},{"day":"Thu","min":30},{"day":"Fri","min":20}]
+Page
+  Nav
+    Brand "Lego-ish Logic" icon="smart_toy"
+    Row gap=4
+      Link "Map" onTap={go level_map}
+      Link "Parent corner"
+  Section narrow
+    Heading "How {child} is doing" level=1
+    Text.muted "Levels finished, minutes played and the ideas {child} is learning, such as sequences and loops."
+  Section tint
+    Grid cols=3 gap=24
+      Card gap=8
+        IconTile "map"
+        Heading "Levels" level=3
+        Text.strong "4 of 8" size=32
+      Card gap=8
+        IconTile "star"
+        Heading "Stars" level=3
+        Text.strong "7 of 24" size=32
+      Card gap=8
+        IconTile "loop"
+        Heading "Loops used" level=3
+        Text.strong "6" size=32
+  Section
+    Card gap=12
+      Heading "Minutes this week" level=3
+      BarChart values=[15,25,10,30,20] labels=["Mon","Tue","Wed","Thu","Fri"] h=200
+    Card gap=12
+      Heading "Daily limit" level=3
+      Slider bind=minutes min=10 max=60
+      Text.muted "Play stops after {minutes} minutes a day."
+      Button "Save" onTap={emit saveLimit minutes; toast "Saved"}
+  Footer
+    Text.muted "Made for ages 5 to 9"

@@ -1,0 +1,3 @@
+App: Lamppost, a neighbourhood noticeboard. Posts as pinned paper cards of differing sizes and tilt on a corkboard style page, categories as coloured tabs (lost pet, for free, help wanted, events); a post with photos, a map pin for the area, a reply thread and a safe-meeting tip; a new post with a category choice and an expiry; a nearby radius dial; report; a for-free item marked taken.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

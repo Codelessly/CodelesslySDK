@@ -1,0 +1,3 @@
+App: Floor Five, a trading terminal. Several panels on a dark screen: a watchlist with flashing price ticks green and red, a candle chart with indicator overlays added from a list, an order book as two columns of bars that move, an order ticket with buy and sell tabs, size, limit price and a review step, open positions with profit and loss, a news ticker moving along the bottom; panels dragged and resized.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

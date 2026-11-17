@@ -1,0 +1,183 @@
+### Family Board
+state tab="board"
+state doorOpen=true
+state doorSecs=94
+state day="Wed"
+state note=""
+state pen="ink"
+every 1s when doorOpen onTick={doorSecs=doorSecs+1}
+App
+  Sidebar
+    Brand "Icebox" icon="kitchen"
+    NavItem "Family board" icon="dashboard" selected={tab=="board"} onTap={tab="board"}
+    NavItem "Shopping" icon="shopping_cart" badge="4" onTap={go shopping}
+    NavItem "Inside the fridge" icon="videocam" onTap={go inside-the-fridge}
+    NavItem "Recipe" icon="restaurant_menu" onTap={go recipe}
+    Spacer grow
+    Text.muted "Thursday 14 May, 6:42 pm"
+  Main
+    Nav
+      Heading "This week"
+      Row gap=8
+        SegmentedButton bind=day items=["Mon","Tue","Wed","Thu"]
+        Button.outline "Add event" icon="add" onTap={open newEvent}
+    if doorOpen
+      Banner.error "Fridge door open for {duration(doorSecs)}" icon="door_front" action="Dismiss" onAction={doorOpen=false; doorSecs=0}
+    Column pad=24 gap=16
+      WeekCalendar days=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] people=[{"name":"Maya","color":"#FFE57373"},{"name":"Leo","color":"#FF64B5F6"},{"name":"Dad","color":"#FF81C784"},{"name":"Mum","color":"#FFFFB74D"}] events=[{"day":"Mon","person":"Maya","title":"Swim club","start":"16:30","end":"17:30"},{"day":"Tue","person":"Leo","title":"Piano","start":"15:45","end":"16:30"},{"day":"Wed","person":"Dad","title":"Late shift","start":"14:00","end":"22:00"},{"day":"Wed","person":"Mum","title":"Parents evening","start":"18:00","end":"19:30"},{"day":"Thu","person":"Maya","title":"School trip","start":"08:00","end":"15:00"},{"day":"Sat","person":"Leo","title":"Football","start":"10:00","end":"11:30"}] h=320 onEventTap={open eventMenu}
+      Card gap=8
+        Row between
+          Text.strong "Family note"
+          Row gap=4
+            ChoiceChip "Ink" selected={pen=="ink"} onTap={pen="ink"}
+            ChoiceChip "Marker" selected={pen=="marker"} onTap={pen="marker"}
+            IconButton "undo" tooltip="Undo stroke" onTap={undo note}
+            IconButton "delete" tooltip="Clear note" onTap={note=""}
+        Sketchpad bind=note tool={pen} h=180 onChange={emit noteChanged}
+  Dialog#newEvent "New event" "Pick who it is for"
+    Input "Title" bind=evTitle
+    Select "Person" bind=evPerson items=["Maya","Leo","Dad","Mum"]
+    Row gap=8
+      TimePicker "From" bind=evStart
+      TimePicker "To" bind=evEnd
+    Button "Add" onTap={emit addEvent {"title":evTitle,"person":evPerson,"day":day}; toast "Event added"; close}
+  Menu#eventMenu
+    MenuItem "Edit" icon="edit" onTap={open newEvent}
+    MenuItem "Delete" icon="delete" onTap={emit deleteEvent result.id; toast "Removed"}
+
+### Shopping List
+state items=[{"id":1,"name":"Whole milk","qty":1,"low":true},{"id":2,"name":"Eggs","qty":6,"low":true},{"id":3,"name":"Butter","qty":1,"low":false},{"id":4,"name":"Spinach","qty":1,"low":true}]
+state listening=false
+state heard=""
+state draft=""
+App
+  Sidebar
+    Brand "Icebox" icon="kitchen"
+    NavItem "Family board" icon="dashboard" onTap={go family-board}
+    NavItem "Shopping" icon="shopping_cart" badge="{length(items)}" selected={true}
+    NavItem "Inside the fridge" icon="videocam" onTap={go inside-the-fridge}
+    NavItem "Recipe" icon="restaurant_menu" onTap={go recipe}
+  Main
+    Nav
+      Heading "Shopping list"
+      Row gap=8
+        Button.outline "Clear ticked" icon="done_all" onTap={items=removeWhere(items,i=>i.done)}
+        Button "Send to phone" icon="send" onTap={emit shareList items; toast "Sent to Mum's phone"}
+    Column pad=24 gap=16
+      Card gap=12
+        Row gap=12 middle
+          VoiceInput bind=heard listening={listening} onStart={listening=true} onResult={items=append(items,{"id":length(items)+10,"name":result.text,"qty":1,"low":false}); heard=""; listening=false; toast "Added {result.text}"} onError={listening=false; toast "Did not catch that"}
+          Column grow gap=2
+            Text.strong "{listening ? 'Listening...' : 'Tap the mic and say an item'}"
+            if heard!=""
+              Text.muted "Heard: {heard}"
+          Input "Or type" bind=draft w=220
+          IconButton "add" tooltip="Add item" onTap={draft!="" ? {items=append(items,{"id":length(items)+10,"name":draft,"qty":1,"low":false}); draft=""} : toast "Type an item first"}
+      Row gap=24 top
+        Card grow gap=8
+          Text.strong "To buy ({length(items)})"
+          each it in items
+            ListTile "{it.name}" subtitle="{it.low ? 'Nearly out' : 'Added by voice'}"
+              Checkbox bind=it.done
+              Row gap=4
+                IconButton "remove" tooltip="Less" onTap={items=updateWhere(items,x=>x.id==it.id,x=>with(x,"qty",max(1,x.qty-1)))}
+                Text.strong "{it.qty}"
+                IconButton "add" tooltip="More" onTap={items=updateWhere(items,x=>x.id==it.id,x=>with(x,"qty",x.qty+1))}
+                IconButton "close" tooltip="Remove" onTap={items=removeWhere(items,x=>x.id==it.id)}
+        Column w=300 gap=12
+          Card gap=8
+            Text.strong "Nearly out"
+            each it in filter(items,x=>x.low)
+              Row between middle
+                Text "{it.name}"
+                Badge.warning "low"
+            Progress 0.2
+            Text.caption "Milk is about 20% full by weight"
+
+### Inside the Fridge
+state zone="main"
+state tempMain=4
+state tempFreezer=-18
+state tempDrawer=2
+state doorOpen=true
+state doorSecs=94
+state picked={}
+every 1s when doorOpen onTick={doorSecs=doorSecs+1}
+App
+  Sidebar
+    Brand "Icebox" icon="kitchen"
+    NavItem "Family board" icon="dashboard" onTap={go family-board}
+    NavItem "Shopping" icon="shopping_cart" onTap={go shopping}
+    NavItem "Inside the fridge" icon="videocam" selected={true}
+    NavItem "Recipe" icon="restaurant_menu" onTap={go recipe}
+  Main
+    Nav
+      Heading "Inside the fridge"
+      SegmentedButton bind=zone items=["main","drawer","freezer"]
+    if doorOpen
+      Banner.error "Door open for {duration(doorSecs)}. Close it to protect the food." icon="door_front" action="Silence" onAction={doorOpen=false; doorSecs=0; toast "Alarm silenced"}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Card grow gap=8
+          Row between
+            Text.strong "Camera, {zone} shelf"
+            Badge.info "Updated 2 min ago"
+          CameraView src="fridge-cam-{zone}" h=320 onTagTap={picked=result; open itemInfo}
+            Tag "Chicken thighs" at=[0.18,0.42] expires="2026-05-15" tone="warning"
+            Tag "Greek yoghurt" at=[0.55,0.30] expires="2026-05-22" tone="success"
+            Tag "Leftover pasta" at=[0.72,0.62] expires="2026-05-13" tone="danger"
+        Column w=300 gap=12
+          Card gap=12
+            Text.strong "Main compartment"
+            Row between middle
+              IconButton "remove" tooltip="Colder" onTap={tempMain=max(1,tempMain-1)}
+              Text "{tempMain} °C" size=40 weight=700
+              IconButton "add" tooltip="Warmer" onTap={tempMain=min(8,tempMain+1)}
+            Slider bind=tempMain min=1 max=8
+          Card gap=12
+            Text.strong "Veg drawer"
+            Row between middle
+              IconButton "remove" tooltip="Colder" onTap={tempDrawer=max(0,tempDrawer-1)}
+              Text "{tempDrawer} °C" size=40 weight=700
+              IconButton "add" tooltip="Warmer" onTap={tempDrawer=min(6,tempDrawer+1)}
+          Card gap=12
+            Text.strong "Freezer"
+            Row between middle
+              IconButton "remove" tooltip="Colder" onTap={tempFreezer=max(-24,tempFreezer-1)}
+              Text "{tempFreezer} °C" size=40 weight=700
+              IconButton "add" tooltip="Warmer" onTap={tempFreezer=min(-14,tempFreezer+1)}
+  Sheet#itemInfo "{picked.title}"
+    Text.muted "Use by {formatDate(picked.expires,'MMM d')}"
+    Row gap=8
+      Button "Add to recipe ideas" onTap={emit suggestRecipe picked.title; close}
+      Button.outline "Used it up" onTap={emit removeItem picked.title; toast "Marked as used"; close}
+
+### Recipe Step
+state step=0
+state steps=[{"title":"Season the chicken","text":"Rub 4 chicken thighs with 2 tsp paprika, salt and a little oil.","timer":0},{"title":"Sear the skin","text":"Place skin side down in a cold pan. Heat to medium and cook for 8 minutes.","timer":480},{"title":"Flip and roast","text":"Turn the thighs, add the lemon halves and roast at 200 degrees for 20 minutes.","timer":1200},{"title":"Rest and serve","text":"Rest for 5 minutes, then spoon the pan juices over the top.","timer":300}]
+state left=0
+state running=false
+every 1s when running onTick={left=max(0,left-1); left==0 ? {running=false; toast "Timer done"} : }
+App
+  Sidebar
+    Brand "Icebox" icon="kitchen"
+    NavItem "Family board" icon="dashboard" onTap={go family-board}
+    NavItem "Shopping" icon="shopping_cart" onTap={go shopping}
+    NavItem "Inside the fridge" icon="videocam" onTap={go inside-the-fridge}
+    NavItem "Recipe" icon="restaurant_menu" selected={true}
+  Main
+    Nav
+      Heading "Lemon paprika chicken"
+      Text.muted "Step {step+1} of {length(steps)}"
+    Column pad=24 gap=24 center
+      Progress {(step+1)/length(steps)}
+      Text.pageTitle "{steps[step].title}" center size=48
+      Text "{steps[step].text}" center size=32
+      if steps[step].timer>0
+        Row gap=16 center middle
+          Text "{duration(left)}" size=64 weight=700
+          Button "Start timer" icon="timer" onTap={left=steps[step].timer; running=true}
+          Button.outline "Pause" onTap={running=false}
+      Row gap=16 center
+        Button.outline "Back" size=large icon="arrow_back" onTap={step=max(0,step-1); running=false; left=0}
+        Button "Next step" size=large icon="arrow_forward" onTap={step<length(steps)-1 ? {step=step+1; running=false; left=0} : toast "All done, enjoy"}

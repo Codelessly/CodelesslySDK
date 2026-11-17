@@ -1,0 +1,227 @@
+### Invitation
+state reply=""
+state guests=1
+state guestList=[{"name":"","meal":"Chicken"}]
+state seats=[]
+state sent=false
+Page
+  Nav
+    Brand "Placecard" icon="event_seat"
+    Row gap=4
+      Link "Details" href="#details"
+      Link "Reply" href="#reply"
+      Link "Seating" href="#seating"
+    Button.outline "Add to calendar" icon="event" onTap={open addcal}
+  Section bleed
+    Image "https://images.example.com/garden-terrace-evening.jpg" h=360
+  Section
+    Column gap=12
+      Badge.primary "Wedding celebration"
+      Heading "Inès and Tomas are getting married" level=1
+      Text.muted "Saturday, June 13, 2026 at 4:30 PM"
+      Row gap=8
+        Icon "place"
+        Text "The Orangery at Hollis Park, 14 Garden Lane, Asheville"
+      Text.muted "Ceremony on the terrace, dinner in the main hall, dancing until midnight. Please reply by May 15."
+  Section#details tint
+    Row gap=32
+      Column grow gap=12
+        Heading "Where to find us" level=3
+        Text.muted "Free parking is behind the hall. A shuttle leaves the Marlow Hotel at 3:45 PM and returns at 12:30 AM."
+        Row gap=8
+          Button.outline "Add to calendar" icon="event" onTap={open addcal}
+          Button.ghost "Get directions" icon="directions" onTap={link https://maps.example.com/orangery}
+      Map grow h=240 lat=35.5951 lng=-82.5515 zoom=15 marker="The Orangery"
+  Section#reply
+    Column gap=16
+      Heading "Will you join us?" level=1
+      SegmentedButton bind=reply items=["Yes","Maybe","No"]
+      if reply=="Yes"
+        Card gap=12
+          Heading "Your party" level=3
+          Row gap=12
+            Text.strong "Guests"
+            Stepper bind=guests min=1 max=6 onChange={guestList=map(range(result),i=>coalesce(guestList[i],{"name":"","meal":"Chicken"}))}
+          each g in guestList
+            Row gap=12 top
+              Input "Guest {index+1} name" bind=g.name grow
+              Select bind=g.meal items=["Chicken","Salmon","Vegetarian","Vegan"] w=180
+          Input "Allergies or notes" bind=notes multiline
+      if reply=="Maybe"
+        Card gap=8
+          Text "No problem. We will remind you a week before the deadline."
+          Input "Email for the reminder" type=email bind=remindEmail
+      if reply=="No"
+        Card gap=8
+          Text "We will miss you. Leave a note for the couple?"
+          Input "Message" bind=declineNote multiline
+      Row gap=12
+        Button "Send reply" disabled={reply==""} onTap={sent=true; emit rsvp reply; toast "Reply sent, thank you!"}
+        if reply=="Yes"
+          Button.outline "Choose seats" icon="event_seat" onTap={go seating}
+  Section#wait tint compact
+    Row between
+      Column gap=4
+        Text.strong "Table 9 is full"
+        Text.muted "Join the wait list and we will tell you if a seat opens."
+      Button.outline "Join wait list" onTap={open waitlist}
+  Footer
+    Row between
+      Text.strong "Placecard"
+      Text.muted "Hosted by Inès Moreau"
+  Dialog#addcal "Add to your calendar"
+    Column gap=8
+      Button.outline "Google Calendar" icon="event" onTap={calendar google; close}
+      Button.outline "Apple Calendar" icon="event" onTap={calendar ics; close}
+      Button.outline "Outlook" icon="event" onTap={calendar outlook; close}
+  Dialog#waitlist "Join the wait list" "We will email you if a seat opens"
+    Input "Name" bind=wlName
+    Input "Email" type=email bind=wlEmail
+    Stepper "Seats needed" bind=wlSeats min=1 max=4
+    Button "Join" onTap={emit waitlistJoin; toast "You are on the list"; close}
+
+### Seating
+state seats=[]
+state party=3
+state table="all"
+state taken=["A1","A2","B4","C3","C4","D2","E5","E6"]
+Page
+  Nav
+    Brand "Placecard" icon="event_seat"
+    Row gap=4
+      Link "Invitation" onTap={go invitation}
+      Link "Seating" onTap={go seating}
+    Button "Confirm seats" disabled={length(seats)!=party} onTap={open confirmSeats}
+  Section
+    Column gap=8
+      Heading "Choose your seats" level=1
+      Text.muted "Your party of {party} sits together. Tap a free seat and the rest of your group is held beside it."
+  Section tint
+    Row gap=32 top
+      Column grow gap=12
+        Row between
+          Row gap=8
+            ChoiceChip "All tables" selected={table=="all"} onTap={table="all"}
+            ChoiceChip "Family side" selected={table=="family"} onTap={table="family"}
+            ChoiceChip "Friends side" selected={table=="friends"} onTap={table="friends"}
+          Row gap=12
+            Row gap=4
+              Icon "circle" color=#FF9CA3AF
+              Text.caption "Free"
+            Row gap=4
+              Icon "circle" color=#FF2563EB
+              Text.caption "Yours"
+            Row gap=4
+              Icon "circle" color=#FF374151
+              Text.caption "Taken"
+        Card
+          SeatMap bind=seats taken={taken} hold={party} filter={table} rows=6 cols=8 tables=6 h=420 onSelect={toast "Seats held together"} onConflict={toast "Not enough free seats side by side"}
+      Column w=320 gap=12
+        Card gap=12
+          Heading "Your party" level=3
+          Row between
+            Text "Guests"
+            Stepper bind=party min=1 max=6 onChange={seats=[]}
+          Divider
+          if length(seats)==0
+            Text.muted "No seats held yet."
+          each s in seats
+            Row between
+              Row gap=8
+                Icon "event_seat"
+                Text.strong "{s}"
+              Text.muted "Table {slice(s,0,1)}"
+          Button "Confirm seats" disabled={length(seats)!=party} onTap={open confirmSeats}
+          Button.ghost "Clear" onTap={seats=[]}
+        Card gap=8
+          Text.strong "Table full?"
+          Text.muted "Join the wait list for a seat that opens."
+          Button.outline "Join wait list" onTap={open waitlist2}
+  Dialog#confirmSeats "Confirm your seats" "{join(seats,', ')} at Table {slice(first(seats),0,1)}"
+    Text "Seats stay reserved until May 15."
+    Row gap=8 end
+      Button.outline "Back" onTap={close}
+      Button "Confirm" onTap={emit seatsConfirmed seats; toast "Seats confirmed"; close}
+  Sheet#waitlist2 "Wait list"
+    Input "Name" bind=wlName
+    Input "Email" type=email bind=wlEmail
+    Button "Join" onTap={emit waitlistJoin; toast "You are on the list"; close}
+
+### Host dashboard
+state tab="replies"
+state filter="all"
+state sel=""
+state replies=[{"id":1,"name":"Priya Nair","answer":"Yes","guests":2,"table":"A"},{"id":2,"name":"Tomas Weber","answer":"Yes","guests":1,"table":"B"},{"id":3,"name":"Greta Olsen","answer":"Maybe","guests":2,"table":""},{"id":4,"name":"Diego Ramos","answer":"No","guests":0,"table":""},{"id":5,"name":"Aiko Tanaka","answer":"Yes","guests":3,"table":"C"},{"id":6,"name":"Leo Martin","answer":"","guests":0,"table":""}]
+state waitlist=[{"name":"Hana Sato","seats":2},{"name":"Omar Khalil","seats":1}]
+App
+  Sidebar
+    Brand "Placecard" icon="event_seat"
+    NavItem "Replies" icon="how_to_reg" badge="{count(replies,r=>r.answer==\"\")}" selected={tab=="replies"} onTap={tab="replies"}
+    NavItem "Seating" icon="event_seat" selected={tab=="seating"} onTap={tab="seating"}
+    NavItem "Wait list" icon="hourglass_empty" badge="{length(waitlist)}" selected={tab=="wait"} onTap={tab="wait"}
+    Spacer grow
+    Text.muted "Inès Moreau, host"
+  Main
+    Nav
+      Heading "Wedding of Inès and Tomas" level=1
+      Row gap=8
+        Button.outline "Add to calendar" icon="event" onTap={open addcal2}
+        Button "Send reminder" icon="send" onTap={open remind}
+    Column pad=24 gap=16
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.muted "Invited"
+          Text "{length(replies)}" size=32 weight=700
+        Card gap=4
+          Text.muted "Yes (guests)"
+          Text "{sum(filter(replies,r=>r.answer==\"Yes\"),r=>r.guests)}" size=32 weight=700
+        Card gap=4
+          Text.muted "Maybe"
+          Text "{count(replies,r=>r.answer==\"Maybe\")}" size=32 weight=700
+        Card gap=4
+          Text.muted "Waiting for a reply"
+          Text "{count(replies,r=>r.answer==\"\")}" size=32 weight=700
+      if tab=="replies"
+        Row gap=16 top
+          Card grow gap=12
+            Text.strong "Reply tally"
+            BarChart values=[{count(replies,r=>r.answer=="Yes")},{count(replies,r=>r.answer=="Maybe")},{count(replies,r=>r.answer=="No")},{count(replies,r=>r.answer=="")}] labels=["Yes","Maybe","No","No reply"] h=220
+          Card grow gap=8
+            Row between
+              Text.strong "Replies"
+              Row gap=8
+                FilterChip "All" selected={filter=="all"} onTap={filter="all"}
+                FilterChip "Yes" selected={filter=="Yes"} onTap={filter="Yes"}
+                FilterChip "Maybe" selected={filter=="Maybe"} onTap={filter="Maybe"}
+                FilterChip "No" selected={filter=="No"} onTap={filter="No"}
+            each r in filter(replies,x=>filter=="all"||x.answer==filter)
+              ListTile "{r.name}" subtitle="{r.guests} guests" menu=rowMenu onTap={sel=r.id}
+                Badge.neutral "{coalesce(r.answer,'Pending')}"
+                IconButton "more_vert" tooltip="Actions" onTap={sel=r.id; open rowMenu}
+      if tab=="seating"
+        Card gap=12
+          Row between
+            Text.strong "Hall plan"
+            Text.muted "{count(replies,r=>r.table!=\"\")} parties seated"
+          SeatMap readonly tables=6 rows=6 cols=8 taken={["A1","A2","B4","C3","C4","D2","E5","E6"]} h=380
+      if tab=="wait"
+        Card gap=8
+          Text.strong "Wait list"
+          each w in waitlist
+            ListTile "{w.name}" subtitle="{w.seats} seats"
+              Button.outline "Offer a seat" onTap={emit offerSeat w.name; waitlist=without(waitlist,w); toast "Offer sent to {w.name}"}
+              IconButton "close" tooltip="Remove" onTap={waitlist=without(waitlist,w)}
+  Menu#rowMenu
+    MenuItem "Send reminder" icon="send" onTap={emit remindOne sel; toast "Reminder sent"}
+    MenuItem "Mark as Yes" icon="check" onTap={replies=updateWhere(replies,r=>r.id==sel,r=>with(r,"answer","Yes"))}
+    MenuItem "Remove" icon="delete" onTap={replies=removeWhere(replies,r=>r.id==sel)}
+  Dialog#remind "Send a reminder" "To the {count(replies,r=>r.answer==\"\"||r.answer==\"Maybe\")} guests who have not decided"
+    Select "Send by" items=["Email","Text message"] bind=channel
+    Input "Message" bind=reminderText multiline
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button "Send" onTap={emit sendReminder channel reminderText; toast "Reminders sent"; close}
+  Dialog#addcal2 "Add to calendar"
+    Column gap=8
+      Button.outline "Google Calendar" icon="event" onTap={calendar google; close}
+      Button.outline "Apple Calendar" icon="event" onTap={calendar ics; close}

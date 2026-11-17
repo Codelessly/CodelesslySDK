@@ -1,0 +1,158 @@
+### Ride
+state screen="ride"
+state speed=31.4
+state running=true
+state autoPause=true
+state elapsed=3725
+state distance=48.2
+state cadence=88
+state power=214
+state hr=142
+state laps=[{"n":1,"time":1204,"km":14.8},{"n":2,"time":1311,"km":15.9}]
+state slots=["time","distance","cadence","power","hr"]
+every 1s when running onTick={elapsed=elapsed+1; distance=round(distance+speed/3600,2)}
+every 1s when autoPause && speed<2 onTick={running=false; toast "Auto paused"}
+App
+  Main
+    Nav
+      Brand "Cadence" icon="pedal_bike"
+      Row gap=8
+        Badge.success "GPS" hide=phone
+        Badge.info "{hr} bpm"
+        IconButton "tune" tooltip="Set up tiles" onTap={go setup}
+        IconButton "route" tooltip="Route" onTap={go route}
+    Column pad=16 gap=16 center
+      Gauge bind=speed min=0 max=60 limit=45 unit="km/h"
+      if !running
+        Badge.warning "Paused" animate=pulse
+      Grid cols=3 gap=12
+        each s in slots
+          Card gap=4
+            Text.caption "{upper(s)}"
+            Text.strong "{s=="time" ? duration(elapsed) : s=="distance" ? fixed(distance,1) + " km" : s=="cadence" ? cadence + " rpm" : s=="power" ? power + " W" : hr + " bpm"}" size=28
+      Row gap=12
+        Button "Lap" size=large grow onTap={laps=append(laps,{"n":length(laps)+1,"time":elapsed,"km":distance}); toast "Lap {length(laps)+1} marked"}
+        Button.outline "{running ? "Pause" : "Resume"}" size=large grow onTap={running=!running}
+        Button.destructive "Finish" size=large onTap={open finish}
+      Toggle "Auto pause below 2 km/h" bind=autoPause
+      Card gap=8
+        Text.panelTitle "Laps"
+        each l in laps
+          ListTile "Lap {l.n}" subtitle="{fixed(l.km,1)} km" trailing="{duration(l.time)}"
+  Dialog#finish "Finish this ride?" "{fixed(distance,1)} km in {duration(elapsed)}"
+    Row gap=8
+      Button.outline "Keep riding" onTap={close}
+      Button "Finish and save" onTap={running=false; close; go summary}
+
+### Setup
+state slots=["time","distance","cadence","power","hr"]
+state pool=["time","distance","cadence","power","hr","speed_avg","elevation","calories"]
+state sensors=[{"name":"Wahoo KICKR Core","kind":"Power","bars":4,"on":true},{"name":"Garmin HRM-Pro","kind":"Heart rate","bars":3,"on":true},{"name":"Cadence sensor 7B","kind":"Cadence","bars":1,"on":false}]
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go ride}
+      Heading "Set up" level=1
+      Button "Done" onTap={emit saveLayout slots; go ride}
+    Column pad=24 gap=16 scroll
+      Text.sectionTitle "Your tiles"
+      Text.muted "Drag a tile from the tray onto a slot to replace it."
+      Grid cols=3 gap=12
+        each s in slots
+          Box fill=#FFEEF1F5 radius=12 pad=16 drop=tile onDrop={slots=setAt(slots,index,result.data)}
+            Text.caption "Slot {index+1}"
+            Text.strong "{upper(s)}"
+      Text.sectionTitle "Tray"
+      Row scroll gap=8
+        each p in pool
+          Card drag=tile(p)
+            Row gap=8 middle
+              Icon "drag_indicator"
+              Text "{upper(p)}"
+      Divider
+      Text.sectionTitle "Sensors"
+      each s in sensors
+        ListTile "{s.name}" subtitle="{s.kind}"
+          Row gap=8 middle
+            SignalBars value={s.bars} max=4
+            Toggle bind=s.on
+
+### Route
+state dist=48.2
+state toTurn=320
+state turn="Left onto Mill Lane"
+state page=0
+state grade=7.4
+App
+  Main
+    Nav
+      IconButton "arrow_back" tooltip="Back" onTap={go ride}
+      Heading "Route" level=1
+      Text.muted "{fixed(dist,1)} of 92 km"
+    Column pad=16 gap=16
+      Pages bind=page h=420
+        Column gap=12
+          RouteMap route="Hartley Loop" progress={dist/92} h=340
+          Dots bind=page count=2
+        Column gap=12
+          Card gap=8
+            Row between
+              Text.panelTitle "Next climb: Hollow Hill"
+              Badge.warning "{grade}% avg"
+            ElevationProfile values=[112,118,131,152,181,214,236,241] labels=["0","0.5","1","1.5","2","2.5","3","3.4 km"] grade={grade} h=200
+            Row between
+              Text.muted "Gain 129 m"
+              Text.muted "Max 11.2%"
+          Dots bind=page count=2
+      if toTurn<400
+        Card fill=#FFFFF3CD gap=4 animate=shake
+          Row gap=12 middle
+            Icon "turn_left" size=40
+            Column grow
+              Text.strong "{turn}"
+              Text.muted "in {toTurn} m"
+            IconButton "volume_up" tooltip="Repeat" onTap={emit repeatTurn}
+
+### Summary
+state tab="map"
+state laps=[{"n":1,"time":1204,"km":14.8},{"n":2,"time":1311,"km":15.9},{"n":3,"time":1190,"km":14.6}]
+Page
+  Nav
+    Brand "Cadence" icon="pedal_bike"
+    Row gap=8
+      Button.outline "Share" onTap={emit share}
+      Button "Save ride" onTap={emit saveRide; toast "Ride saved"; go ride}
+  Section
+    Heading "Saturday morning loop" level=1
+    Text.muted "Hartley Loop, 92 km"
+    Grid cols=4 gap=16
+      Card
+        Text.caption "Distance"
+        Text.strong "92.4 km" size=28
+      Card
+        Text.caption "Moving time"
+        Text.strong "3:08:40" size=28
+      Card
+        Text.caption "Avg speed"
+        Text.strong "29.4 km/h" size=28
+      Card
+        Text.caption "Elevation"
+        Text.strong "812 m" size=28
+  Section tint
+    Row gap=8
+      ChoiceChip "Map" selected={tab=="map"} onTap={tab="map"}
+      ChoiceChip "Speed" selected={tab=="speed"} onTap={tab="speed"}
+      ChoiceChip "Power" selected={tab=="power"} onTap={tab="power"}
+      ChoiceChip "Heart rate" selected={tab=="hr"} onTap={tab="hr"}
+    if tab=="map"
+      RouteMap route="Hartley Loop" h=360 laps={laps}
+    if tab=="speed"
+      AreaChart values=[24,28,31,33,29,22,35,31,27] labels=["0","10","20","30","40","50","60","70","80"] h=300
+    if tab=="power"
+      LineChart values=[180,210,245,230,190,260,215,205,198] labels=["0","10","20","30","40","50","60","70","80"] h=300
+    if tab=="hr"
+      LineChart values=[121,135,148,152,149,158,151,146,139] labels=["0","10","20","30","40","50","60","70","80"] h=300
+  Section
+    Heading "Laps" level=3
+    each l in laps
+      ListTile "Lap {l.n}" subtitle="{fixed(l.km,1)} km" trailing="{duration(l.time)}"

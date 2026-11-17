@@ -1,0 +1,3 @@
+App: River Room, a card table for friends. An oval table with up to six seats and avatars, your two cards at the bottom turned over by holding, five shared cards dealt in stages with a flip; a pot in the middle with chip stacks that move to the winner; a bet slider with all-in and quick pot fractions; a fold, check or call row; a turn ring around the acting player; a hand history with a replay; a rebuy dialog.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

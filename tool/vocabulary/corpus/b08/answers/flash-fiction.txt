@@ -1,0 +1,117 @@
+### Write
+state title="The Lighthouse Keeper's Last Letter"
+state text="She wrote to the sea every night. The sea never answered, but the lamp did, turning slowly. By morning the paper was gone."
+state focus=false
+state words=21
+state sentences=[6,9,7]
+state left=8040
+state tab="write"
+state drafts=[{"id":1,"title":"The Lighthouse Keeper's Last Letter","words":21,"when":"Today, 9:12"},{"id":2,"title":"Salt","words":64,"when":"Yesterday"},{"id":3,"title":"Salt (first pass)","words":112,"when":"Mon"}]
+state streak=[true,true,true,false,true,true,true]
+state days=12
+every 1s onTick={left=max(0,left-1)}
+App
+  Sidebar
+    Brand "Hundred Words" icon="edit_note"
+    NavItem "Write" icon="edit" selected={tab=="write"} onTap={tab="write"}
+    NavItem "History" icon="history" badge="{length(drafts)}" selected={tab=="history"} onTap={open history}
+    NavItem "Contest" icon="emoji_events" onTap={go contest}
+    Spacer grow
+    Card gap=8
+      Row middle gap=8
+        Icon "local_fire_department" color=#FFE8A317
+        Text.strong "{days} day streak"
+      Row gap=6
+        each d in streak
+          Box w=16 h=16 radius=8 fill={d ? #FFE8A317 : #FFD9D9D9}
+  Main
+    Nav
+      Heading "Today's page" level=1
+      Row gap=8 middle
+        Toggle "Focus mode" bind=focus
+        Button.outline "Save draft" icon="save" onTap={drafts=append(drafts,{"id":length(drafts)+1,"title":title,"words":words,"when":"Just now"}); toast "Draft saved"}
+        Button "Submit" icon="send" onTap={open submit}
+    Column pad=24 gap=16 scroll
+      Card gap=4 fill=#FFFFF8E6
+        Row between middle
+          Column gap=4
+            Text.caption "PROMPT OF THE DAY"
+            Text.heading "Write about a letter that is never delivered."
+          Column end gap=2
+            Text.caption "Closes in"
+            Text.strong "{duration(left)}"
+      Row gap=24 top
+        Column grow gap=12
+          Input "Title" bind=title
+          TextEditor bind=text hint="Begin with the last thing that happened." dim={focus} h=320 onChange={words=trim(text)=="" ? 0 : length(text)-length(replace(text," ",""))+1; emit analyze text}
+        Column w=280 gap=16
+          Card gap=12 center
+            Text.fieldLabel "Word count"
+            Stack center middle
+              Ring {min(words/100,1)} size=140 color={words==100 ? #FFE8A317 : words>100 ? #FFD64545 : #FF4F6BED}
+              Text "{words}" size=40 weight=700 color={words==100 ? #FFE8A317 : words>100 ? #FFD64545 : #FF222222}
+            if words==100
+              Text.success "Exactly a hundred."
+            if words>100
+              Text.danger "{words-100} over. Cut {words-100}."
+            if words<100
+              Text.muted "{100-words} to go"
+          Card gap=8
+            Text.fieldLabel "Sentence rhythm"
+            BarChart values={sentences} labels={map(range(length(sentences)),i=>i+1)} h=140
+            Text.caption "Words per sentence. Vary the beat."
+  Sheet#history "Draft history"
+    each d in drafts
+      ListTile "{d.title}" subtitle="{d.words} words, {d.when}" onTap={title=d.title; words=d.words; toast "Restored {d.title}"; close}
+        IconButton "delete" tooltip="Delete draft" onTap={drafts=removeWhere(drafts,x=>x.id==d.id)}
+  Dialog#submit "Submit to the monthly contest" "November: Letters"
+    Text.fieldLabel "Reading preview"
+    Card gap=8
+      Heading "{title}" level=3
+      Text "{text}"
+      Text.caption "{words} words"
+    if words!=100
+      Text.danger "Entries must be exactly 100 words. Yours is {words}."
+    Row end gap=8
+      Button.ghost "Keep editing" onTap={close}
+      Button "Enter contest" onTap={words==100 ? emit submitEntry {"title":title,"text":text}; toast "Entered. Good luck."; close : toast "Make it exactly 100 words"}
+
+### Contest
+state entry=""
+state votes=0
+state sort="Newest"
+state entries=[{"id":1,"title":"Tides","author":"Maya Reyes","likes":42,"text":"The tide took the footprints first, then the names."},{"id":2,"title":"Postmark","author":"Jon Ito","likes":31,"text":"Forty years late, the letter arrived dry."}]
+Page
+  Nav
+    Brand "Hundred Words" icon="edit_note"
+    Row gap=4
+      Link "Write" onTap={go write}
+      Link "Contest"
+      Link "Rules" onTap={open rules}
+    Button "Submit entry" onTap={go write}
+  Section
+    Column gap=12
+      Heading "November: Letters" level=1
+      Text.muted "One hundred words, exactly. Winners are read aloud on the first of the month."
+      Row gap=12 middle
+        Badge.warning "Closes in {duration(8040)}"
+        Select bind=sort items=["Newest","Most liked"]
+  Section tint
+    Grid cols=2 gap=24
+      each e in sortBy(entries,x=>sort=="Newest" ? x.id : 0-x.likes)
+        Card gap=8
+          Heading "{e.title}" level=3
+          Text.muted "by {e.author}"
+          Text "{e.text}"
+          Row between middle
+            Button.ghost "{e.likes} likes" icon="favorite_border" onTap={entries=updateWhere(entries,x=>x.id==e.id,x=>with(x,"likes",x.likes+1))}
+            Button.outline "Read" onTap={entry=e.text; open reader}
+  Footer
+    Row between
+      Text.strong "Hundred Words"
+      Text.muted "Monthly contest"
+  Lightbox#reader "Reading preview"
+    Text "{entry}" size=22
+  Dialog#rules "Contest rules"
+    Text "Exactly 100 words, title not counted. One entry per writer per month. Original work only."
+    Button "Got it" onTap={close}
