@@ -81,6 +81,53 @@ void main() {
     });
   }
 
+  testWidgets('range slider: Tab goes from the lower thumb to the upper one, Shift+Tab back, each named and ringed', (tester) async {
+    final (tree, _) = await _show(tester, {
+      'price': _node({'value': 20, 'rangeEnd': 80, 'min': 0, 'max': 100, 'label': 'Price range'}),
+      'after': _node({'value': 5, 'min': 0, 'max': 10}),
+    });
+    final slider = _slider(tree, 'price');
+    final keys = Keyboard(tester);
+    await keys.tab();
+    expect(keys.focusedId, 'price');
+    expect(slider.highActive, isFalse);
+    expect(slider.focusNode.label!(), 'Price range, lower thumb');
+    await keys.tab();
+    expect(keys.focusedId, 'price');
+    expect(slider.highActive, isTrue);
+    expect(slider.focusNode.label!(), 'Price range, upper thumb');
+    expect(keys.ringShown, isTrue);
+    await keys.right();
+    expect(slider.rangeEnd, 81);
+    expect(slider.value, 20);
+    await keys.tab();
+    expect(keys.focusedId, 'after');
+    // Back from after it: onto the upper thumb, then the lower one.
+    await keys.shiftTab();
+    expect(keys.focusedId, 'price');
+    expect(slider.highActive, isTrue);
+    await keys.shiftTab();
+    expect(keys.focusedId, 'price');
+    expect(slider.highActive, isFalse);
+    await keys.left();
+    expect(slider.value, 19);
+  });
+
+  testWidgets('between whole-number ends an arrow moves by at least 1', (tester) async {
+    final (tree, _) = await _show(tester, {
+      'heat': _node({'value': 18, 'rangeEnd': 24, 'min': 16, 'max': 30}),
+      'level': _node({'value': 0.5, 'min': 0, 'max': 1}),
+    });
+    final keys = Keyboard(tester);
+    await keys.tab();
+    await keys.right();
+    expect(_slider(tree, 'heat').value, 19);
+    await keys.tab();
+    await keys.tab();
+    await keys.right();
+    expect(_slider(tree, 'level').value, closeTo(0.51, 1e-9));
+  });
+
   testWidgets('range slider mirrors its track and horizontal keys in right-to-left text', (tester) async {
     final (tree, _) = await _show(tester, {
       'price': {..._node({'value': 20, 'rangeEnd': 80, 'min': 0, 'max': 100}), 'textDirection': 'rtl'}

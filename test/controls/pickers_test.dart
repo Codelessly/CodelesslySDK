@@ -110,6 +110,17 @@ void main() {
       expect(rectOf(tree, 'pattern').width, greaterThan(rectOf(tree, 'date').width), reason: 'a hugging field is its content\'s width');
     });
 
+    testWidgets('a time picker reads a whole number as minutes since midnight', (tester) async {
+      final (tree, _) = await _show(tester, {
+        'time': hugging('timePicker', {'value': '1170'}),
+        'late': hugging('timePicker', {'value': '1440'}),
+      });
+      expect(_field(tree, 'time').shown, '19:30');
+      expect(_field(tree, 'late').shown, 'Select time', reason: 'past the day');
+      expect(parseClock('570'), 570);
+      expect(parseClock('9:30'), 570);
+    });
+
     testWidgets('dark mode takes SSUI\'s dark tokens; disabled is half opacity and does not open', (tester) async {
       final (tree, _) = await _show(tester, {
         'date': hugging('datePicker', {'value': '2026-11-13'}),

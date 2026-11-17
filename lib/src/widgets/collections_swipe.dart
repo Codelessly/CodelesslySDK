@@ -203,6 +203,9 @@ class _SwipeActionsBoxState extends State<SwipeActionsBox>
       children: [
         for (final action in shown)
           SizedBox(
+            // What a test or the render tool finds a revealed action by
+            // (`--tap delete`): its id and its label.
+            key: ValueKey(('Codelessly swipe action', action.id, action.label)),
             width: full
                 ? offset.abs()
                 : math.max(

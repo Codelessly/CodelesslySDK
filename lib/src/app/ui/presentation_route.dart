@@ -6,11 +6,13 @@ import 'dart:ui' as ui;
 
 import 'package:codelessly_api/core.dart' show Breakpoints, CanvasProps, ModalPresentation;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderProxyBox;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import '../../render/controls/focus.dart';
 import '../../render/controls/kit.dart' show firstTextUnder;
+import '../../render/layout/design_scroll.dart' show ScrollDragGate;
 import '../../render/node_view.dart';
 
 /// The width below which an adaptive modal with no breakpoint of its own is
@@ -208,6 +210,52 @@ class _BottomSheetState extends State<_BottomSheet> {
     setState(() { _stop = (_stop + delta).clamp(0, stops.length - 1); _dragHeight = null; });
   }
 
+  /// The height the sheet's stops are shares of (set as it builds).
+  double _available = 0;
+
+  /// A finger moved by [dy] (positive: down) on the sheet: moving up, the
+  /// sheet grows to its top stop before its content scrolls; moving down,
+  /// it shrinks to its lowest stop once the content is back at its start.
+  /// Returns what is left of [dy] for the content.
+  double _dragBy(double dy, {required bool contentAtStart}) {
+    final stops = _stops;
+    if (stops.isEmpty || dy == 0) return dy;
+    final top = _available * stops.last, bottom = _available * stops.first;
+    final h = _dragHeight ?? _available * stops[_stop.clamp(0, stops.length - 1)];
+    if (dy < 0) {
+      if (h >= top - 0.5) return dy;
+      final next = math.min(top, h - dy);
+      setState(() => _dragHeight = next);
+      return dy + (next - h);
+    }
+    if (!contentAtStart || h <= bottom + 0.5) return dy;
+    final next = math.max(bottom, h - dy);
+    setState(() => _dragHeight = next);
+    return dy - (h - next);
+  }
+
+  /// The finger lifted at [velocity] (positive: down): the sheet rests at the
+  /// stop nearest its height, or the next one the way it was flung.
+  bool _dragEnd(double velocity) {
+    final stops = _stops;
+    final dragged = _dragHeight;
+    if (stops.isEmpty || dragged == null) return false;
+    final heights = [for (final s in stops) _available * s];
+    var stop = [for (var i = 0; i < heights.length; i++) i].reduce((a, b) => (heights[a] - dragged).abs() <= (heights[b] - dragged).abs() ? a : b);
+    if (velocity < -400) {
+      stop = heights.indexWhere((h) => h > dragged + 1);
+      if (stop < 0) stop = heights.length - 1;
+    } else if (velocity > 400) {
+      stop = heights.lastIndexWhere((h) => h < dragged - 1);
+      if (stop < 0) stop = 0;
+    }
+    setState(() {
+      _stop = stop;
+      _dragHeight = null;
+    });
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
@@ -217,7 +265,7 @@ class _BottomSheetState extends State<_BottomSheet> {
     // Narrower than the screen: it floats [margin] above the bottom, every
     // corner rounded.
     final floating = widget.margin > 0 && sheetWidth < media.size.width;
-    final available = math.max(0.0, media.size.height - keyboard - (floating ? widget.margin : 0));
+    final available = _available = math.max(0.0, media.size.height - keyboard - (floating ? widget.margin : 0));
     final stops = _stops;
     final maxHeight = available * widget.maxHeightFactor.clamp(0, 1);
     final height = stops.isEmpty ? null : (_dragHeight ?? available * stops[_stop.clamp(0, stops.length - 1)]).clamp(0.0, maxHeight);
@@ -238,7 +286,24 @@ class _BottomSheetState extends State<_BottomSheet> {
                 removeBottom: true,
                 child: Stack(
                   children: [
-                    SizedBox(height: height, child: Builder(builder: widget.builder)),
+                    // With stops, a drag anywhere on the sheet moves it
+                    // between them: its scrolling content hands the drag to
+                    // the gate first; content that does not scroll leaves it
+                    // to the detector.
+                    if (stops.isEmpty)
+                      SizedBox(height: height, child: Builder(builder: widget.builder))
+                    else
+                      GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onVerticalDragUpdate: (d) => _dragBy(d.delta.dy, contentAtStart: true),
+                        onVerticalDragEnd: (d) => _dragEnd(d.velocity.pixelsPerSecond.dy),
+                        onVerticalDragCancel: () => _dragEnd(0),
+                        child: _SheetDragGate(
+                          onDrag: _dragBy,
+                          onDragEnd: _dragEnd,
+                          child: SizedBox(height: height, child: Builder(builder: widget.builder)),
+                        ),
+                      ),
                     if (widget.showDragHandle)
                       // The handle is drawn where it always was; the area
                       // that takes a finger runs from the sheet's top edge to
@@ -255,15 +320,13 @@ class _BottomSheetState extends State<_BottomSheet> {
                           onIncrease: stops.isEmpty ? null : () => _move(1),
                           onDecrease: stops.isEmpty ? null : () => _move(-1),
                           child: GestureDetector(
+                            key: const ValueKey('Codelessly sheet drag area'),
                             behavior: HitTestBehavior.opaque,
-                            onVerticalDragUpdate: stops.isEmpty ? null : (details) => setState(() {
-                              _dragHeight = ((_dragHeight ?? available * stops[_stop]) - details.delta.dy).clamp(available * stops.first, available * stops.last);
-                            }),
-                            onVerticalDragEnd: stops.isEmpty ? null : (_) => setState(() {
-                              final dragged = _dragHeight ?? available * stops[_stop];
-                              _stop = [for (var i = 0; i < stops.length; i++) i].reduce((a, b) => (available * stops[a] - dragged).abs() <= (available * stops[b] - dragged).abs() ? a : b);
-                              _dragHeight = null;
-                            }),
+                            onVerticalDragUpdate: stops.isEmpty ? null : (d) => _dragBy(d.delta.dy, contentAtStart: true),
+                            onVerticalDragEnd: stops.isEmpty ? null : (d) => _dragEnd(d.velocity.pixelsPerSecond.dy),
+                            // A tap on the handle steps to the next stop
+                            // (back to the first from the top one).
+                            onTap: stops.length < 2 ? null : () => _move(_stop >= stops.length - 1 ? -(stops.length - 1) : 1),
                             child: const Padding(
                               padding: EdgeInsets.fromLTRB(12, PresentationRoute.dragHandleTop, 12, 32),
                               child: _DragHandle(),
@@ -280,6 +343,36 @@ class _BottomSheetState extends State<_BottomSheet> {
       ),
     );
   }
+}
+
+/// Hands a drag of the sheet's scrolling content to the sheet first (a
+/// [ScrollDragGate] the content's scroll view finds above it).
+class _SheetDragGate extends SingleChildRenderObjectWidget {
+  const _SheetDragGate({required this.onDrag, required this.onDragEnd, super.child});
+
+  final double Function(double dy, {required bool contentAtStart}) onDrag;
+  final bool Function(double velocity) onDragEnd;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderSheetDragGate(onDrag, onDragEnd);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderSheetDragGate renderObject) => renderObject
+    ..onDrag = onDrag
+    ..onDragEnd = onDragEnd;
+}
+
+class _RenderSheetDragGate extends RenderProxyBox implements ScrollDragGate {
+  _RenderSheetDragGate(this.onDrag, this.onDragEnd);
+
+  double Function(double dy, {required bool contentAtStart}) onDrag;
+  bool Function(double velocity) onDragEnd;
+
+  @override
+  double dragBy(double dy, {required bool contentAtStart}) => onDrag(dy, contentAtStart: contentAtStart);
+
+  @override
+  bool dragEnd(double velocity) => onDragEnd(velocity);
 }
 
 class _DragHandle extends StatelessWidget {
