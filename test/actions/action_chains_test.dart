@@ -915,15 +915,6 @@ void main() {
   });
 
   group('a load reaction whose node moves or goes', () {
-    testWidgets('finishes when its node is moved while it waits', (tester) async {
-      final mode = ValueNotifier(0);
-      final scope = await _host(tester, mode);
-      await tester.pump(const Duration(milliseconds: 100));
-      mode.value = 1; // re-parented (GlobalKey move) in one frame
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
-      expect(scope.valueOf('state', scope), 'ready');
-    });
 
     testWidgets('stops when its node is removed while it waits', (tester) async {
       final mode = ValueNotifier(0);

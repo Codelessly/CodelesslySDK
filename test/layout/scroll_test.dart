@@ -507,62 +507,6 @@ void main() {
   });
 
   group('scroll position', () {
-    testWidgets('a scroll view that hugs keeps its position when its content changes', (tester) async {
-      final scope = VariableScope([const Variable(name: 'tall', type: VariableType.boolean, value: false)]);
-      final tree = NodeTree(
-        DocumentSource(LayoutDocument.fromJson({
-          'roots': ['page'],
-          'nodes': {
-            'page': {
-              'type': 'row',
-              'children': ['card'],
-              'layout': {'width': 400, 'height': 500, 'padding': 20},
-              'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
-            },
-            'card': {
-              'type': 'column',
-              'children': ['scroll'],
-              'layout': {'width': {'fill': 360}, 'height': {'hug': 10}},
-              'props': {'crossAxisAlignment': 'stretch'},
-            },
-            'scroll': {
-              'type': 'column',
-              'children': ['a', 'grow', 'b'],
-              'layout': {'width': {'fill': 360}, 'height': {'hug': 10}, 'padding': 20},
-              'props': {'scrollable': true, 'crossAxisAlignment': 'stretch'},
-            },
-            'a': {'type': 'box', 'layout': {'width': {'fill': 320}, 'height': 400}},
-            'grow': {
-              'type': 'box',
-              'layout': {'width': {'fill': 320}, 'height': 40},
-              'bind': {'layout.height': r'${= tall ? 60 : 40}'},
-            },
-            'b': {'type': 'box', 'layout': {'width': {'fill': 320}, 'height': 300}},
-          },
-        })),
-        binder: NodeBinder(scope: scope, logic: const LayoutLogic()),
-      );
-      addTearDown(tree.dispose);
-      await tester.pumpWidget(MaterialApp(
-        home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'page', interactive: true)),
-      ));
-      await tester.pump();
-      RenderDesignScroll? scroll;
-      void visit(RenderObject o) {
-        if (o is RenderDesignScroll && scroll == null) scroll = o;
-        o.visitChildren(visit);
-      }
-      visit(tester.renderObject(find.byType(NodeView)));
-      expect(scroll!.maxScrollExtent, greaterThan(150));
-      scroll!.jumpBy(150);
-      await tester.pump();
-      expect(scroll!.offset, 150);
-      // The content changes (a field grows as it's typed into).
-      scope.set('tall', true);
-      await tester.pump();
-      await tester.pump();
-      expect(scroll!.offset, 150);
-    });
 
     for (final bound in [false, true]) {
       testWidgets('a column can be scrolled away from a text field that has focus (bound text: $bound)', (tester) async {

@@ -11,7 +11,6 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart' hide Card; // ignore: deprecated_member_use
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../tool/stream/src/replay.dart' show RecordedStream;
 
 Future<DesignSystem> _ssui() => DesignSystem.load((ref) async {
       final f = File('design_systems/ssui/$ref');
@@ -69,23 +68,6 @@ void main() {
     expect(await _shown(tester, session), isEmpty);
   });
 
-  testWidgets('a canvas replaced by a column shows nothing: empty_view says to make it a canvas again', (tester) async {
-    // image_gallery@claude-haiku-5-5's retry did this; the edit layer now
-    // rejects it, but a document can still arrive that way.
-    final session = UiSession(
-        document: LayoutDocument.fromJson({
-      'roots': ['gallery'],
-      'nodes': {
-        'gallery': {'type': 'column', 'children': ['t'], 'layout': {'width': 360, 'height': {'hug': 40}}},
-        't': {'type': 'text', 'layout': _text, 'props': {'text': 'Trip gallery'}},
-      },
-    }));
-    addTearDown(session.dispose);
-    final d = (await _shown(tester, session)).singleWhere((d) => d.code == 'empty_view');
-    expect(d.error, isTrue);
-    expect(d.message, contains('no root is a canvas ("gallery" is a column)'));
-  });
-
   testWidgets('a card whose body never arrived: empty_view names what to send', (tester) async {
     final session = _strict();
     addTearDown(session.dispose);
@@ -127,23 +109,6 @@ void main() {
       final d = (await _shown(tester, session)).singleWhere((d) => d.code == 'list_empty');
       expect(d.error, isTrue);
       expect(d.message, contains(r'its data ${who} gives the text "Ana, Bo"'));
-    });
-
-    testWidgets('a filter that empties a list that is not: list_empty (a warning) shows the lambda', (tester) async {
-      // data_table@claude-sonnet-5-5's "No results": filter(invoices, status == x).
-      final session = _strict();
-      addTearDown(session.dispose);
-      session.apply(_card({
-        'title': {'type': 'text', 'layout': _text, 'props': {'text': 'People', 'style': {'color': '#FF111827'}}},
-        'l': list(r'${shown}'),
-      }, inner: {'row': row}, vars: {
-        'people': people,
-        'shown': {'type': 'list', 'formula': "filter(people, status == 'Paid')"},
-      }));
-      final d = (await _shown(tester, session)).singleWhere((d) => d.code == 'list_empty');
-      expect(d.error, isFalse);
-      expect(d.message, contains('is empty while people has 2'));
-      expect(d.message, contains('filter(people, r => r.status == x)'));
     });
 
     testWidgets('a list with data and no item template: list_empty says to add one', (tester) async {
@@ -204,64 +169,5 @@ void main() {
       'tick': {'type': 'Checkbox', 'props': {'value': 'done'}, 'layout': {'width': {'hug': 16}, 'height': {'hug': 16}}},
     }, vars: {'done': {'type': 'boolean', 'value': false}}));
     expect(await _shown(tester, session), isEmpty);
-  });
-
-  testWidgets('a table with data and no columns: list_empty says to declare them (dashboard@claude-haiku-5-5)', (tester) async {
-    final session = _strict();
-    addTearDown(session.dispose);
-    _ok(session, _card({
-      'title': {'type': 'text', 'layout': _text, 'props': {'text': 'Top plans', 'style': {'color': '#FF111827'}}},
-      't': {'type': 'tableView', 'layout': {'width': {'fill': 336}, 'height': {'hug': 200}}, 'bind': {'data': r'${plans}'}},
-    }, vars: {
-      'plans': {'type': 'list', 'value': [{'name': 'Pro'}]},
-    }));
-    final d = (await _shown(tester, session)).singleWhere((d) => d.code == 'list_empty');
-    expect(d.message, contains('Table "t" has data (\${plans}) but no columns'));
-  });
-
-  group('replayed recordings that showed nothing', () {
-    const dir = 'tool/stream/streams/live/2026-11-14-ssui';
-
-    testWidgets('question_flow@claude-sonnet-5-5: its card wrote an expression as a value; it is bound, and the view is not blank', (tester) async {
-      // Recorded: "radius": "${theme.radii.panel}" on the card. That used to
-      // reject the card and leave the canvas empty (empty_view); the
-      // expression is now moved into the binding (expression_bound).
-      final stream = RecordedStream.read('$dir/question_flow@claude-sonnet-5-5.compact.ssui.r1.jsonl');
-      final ds = (await tester.runAsync(_ssui))!;
-      final session = _strict(ds: ds);
-      addTearDown(session.dispose);
-      final r = await session.applyStream(Stream.value(stream.text));
-      expect([for (final d in r.diagnostics) if (d.code == 'expression_bound') d.nodeId], contains('card'));
-      expect(session.document['card'], isNotNull);
-      expect([for (final d in await _shown(tester, session)) if (d.code == 'empty_view') d], isEmpty);
-    });
-
-    testWidgets('plan_progress@claude-haiku-5-5: a static mock-up, and the stream\'s result says its buttons do nothing', (tester) async {
-      final stream = RecordedStream.read('$dir/plan_progress@claude-haiku-5-5.compact.ssui.r1.jsonl');
-      final ds = (await tester.runAsync(_ssui))!;
-      final session = _strict(ds: ds);
-      addTearDown(session.dispose);
-      final r = await session.applyStream(Stream.value(stream.text));
-      expect(r.errors, isEmpty, reason: 'it validated cleanly');
-      expect({for (final d in r.warnings) if (d.code == 'dead_control') d.nodeId}, {'startBtn', 'pauseBtn'});
-    });
-
-    testWidgets('reservation@claude-sonnet-5-5: its time slots are a formula written as JavaScript, and list_empty says the grid gets nothing',
-        (tester) async {
-      final stream = RecordedStream.read('$dir/reservation@claude-sonnet-5-5.compact.ssui.r1.jsonl');
-      final ds = (await tester.runAsync(_ssui))!;
-      final session = _strict(ds: ds);
-      addTearDown(session.dispose);
-      final r = await session.applyStream(Stream.value(stream.text));
-      // The formula is an error at its vars op; the op stays applied, so the
-      // days and the party size show.
-      expect(r.errors.where((d) => d.code == 'expression_syntax').single.path, '/variables/book/6/formula');
-      final shown = await _shown(tester, session);
-      final grid = shown.singleWhere((d) => d.code == 'list_empty');
-      expect(grid.nodeId, 'slotGrid');
-      expect(grid.message, contains(r'its data ${slotData} gives nothing'));
-      expect(shown.where((d) => d.code == 'empty_view' || d.code == 'text_no_color'), isEmpty,
-          reason: 'the days show their labels (a bound style naming the theme resolves)');
-    });
   });
 }

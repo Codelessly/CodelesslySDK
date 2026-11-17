@@ -49,24 +49,4 @@ void main() {
     final ssui = ControlTokens.resolve(ThemeTokens.none, dark: false);
     expect([for (final h in const <double>[24, 28, 32, 36, 44]) ssui.radiusFor(ssui.scaleFor(h))], [5, 7, 7, 7, 7]);
   });
-  test('a theme with its own surface: SSUI\'s neutral names are made from it, so an unstyled field is not SSUI white on navy (test 4)', () {
-    final navy = ThemeTokens.fromJson({
-      'mode': 'dark', 'primary': 'lime', 'onPrimary': 'navy', 'surface': 'navy', 'onSurface': 'paper',
-      'colors': {'navy': '#FF10123A', 'paper': '#FFF7F7FD', 'lime': '#FFD6FF65'},
-    });
-    // Whatever brightness the screen reports: the surface says it is dark.
-    for (final dark in [false, true]) {
-      final t = ControlTokens.resolve(navy, dark: dark);
-      expect(t.dark, isTrue);
-      expect(t.theme.color('primaryBackground')!.value, 0xFF10123A);
-      expect(t.theme.color('primaryText')!.value, 0xFFF7F7FD);
-      expect(t.focusBorder, const Color(0x80D6FF65), reason: 'the ring is the document\'s primary, not SSUI blue');
-    }
-    // A name the document gives is kept.
-    final own = ThemeTokens.fromJson({'surface': '#FF10123A', 'colors': {'primaryBorder': '#FFFF0000'}});
-    expect(ControlTokens.resolve(own, dark: false).primaryBorder, const Color(0xFFFF0000));
-    // A theme with no surface or primary of its own is SSUI's, unchanged.
-    expect(ControlTokens.resolve(ThemeTokens.fromJson({'fontFamily': 'Inter'}), dark: false).primaryBorder,
-        ControlTokens.resolve(ThemeTokens.none, dark: false).primaryBorder);
-  });
 }

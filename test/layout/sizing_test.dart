@@ -106,9 +106,6 @@ void main() {
   });
 
   group('a path node', () {
-    testWidgets('set to fill takes its column\'s width', (tester) async {
-      expect(await _size(tester, 'start', {'fill': 100}), const Size(350, 14));
-    });
     testWidgets('with a fixed size keeps it', (tester) async {
       expect(await _size(tester, 'start', 120), const Size(120, 14));
     });

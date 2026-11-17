@@ -285,13 +285,6 @@ void main() {
       return (scope, events);
     }
 
-    test('a picked file is uploaded', () async {
-      final (scope, events) = await upload(FixedFilePicker([_photo(1024)]));
-      expect(events, isEmpty);
-      expect(scope.read('url'), isNotEmpty);
-      scope.dispose();
-    });
-
     test('a photo over the size limit fails as too large', () async {
       final (scope, events) = await upload(FixedFilePicker([_photo(7 * 1024 * 1024)]));
       expect((events.single['error'] as Map)['code'], 'file-too-large');

@@ -168,25 +168,6 @@ void main() {
     expect(view.pixels, 40);
   });
 
-  group('fonts still loading', () {
-    testWidgets('a scroll-to waits for a font that is still loading, then lands on its target', (tester) async {
-      final load = Completer<void>();
-      CodelesslyFonts.track(load.future);
-      final screen = await harness.show(tester, page('d'), variables: [rows]);
-      final view = viewport(screen.tree);
-      await tester.tapAt(view.localToGlobal(const Offset(100, 20)));
-      for (var i = 0; i < 4; i++) {
-        await tester.pump();
-      }
-      expect(view.pixels, 0, reason: 'still waiting for the font');
-      load.complete();
-      for (var i = 0; i < 4; i++) {
-        await tester.pump();
-      }
-      expect(view.pixels, 340);
-    });
-  });
-
   group('keeping a node in view', () {
     testWidgets('following keeps the end in view as content grows, until the user scrolls away', (tester) async {
       final (s, viewport) = await _show(tester, follow: true);

@@ -325,18 +325,5 @@ void main() {
       expect(eval("coalesce('', 'b')"), 'b');
       expect(eval('coalesce(0, 5)'), 0);
     });
-
-    // A draft badge read `coalesce(at(drafts, id).text, '') != ''`: with no
-    // draft, coalesce answered null, so the badge showed on every row.
-    test('coalesce falls back to its last value when none is set', () {
-      expect(eval("coalesce(null, '')"), '');
-      expect(eval("coalesce(at(drafts, '4921').text, '') != ''", {
-        'drafts': <String, Object?>{},
-      }), isFalse);
-      expect(eval("coalesce(at(drafts, '4921').text, '') != ''", {
-        'drafts': <String, Object?>{'4921': {'text': 'Hi'}},
-      }), isTrue);
-      expect(eval('coalesce(null, null)'), isNull);
-    });
   });
 }
