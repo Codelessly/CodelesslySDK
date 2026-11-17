@@ -158,6 +158,10 @@
   dropdown showing the choice (its menu opens on a tap, Enter or Space; the arrows and Enter choose) and the arrow
   button that flips the direction beside it. A repair in `design_systems/cards/tool/repairs.py`, so a rebuild keeps
   it.
+- `NumberInput bind=amount step=0.01 showStepper=true` over `state amount=0` saved 26 for a typed 25.50, and
+  ArrowUp, ArrowDown and the stepper buttons did nothing: the notation declared the variable an integer, which
+  rounds what the field sets. codelessly_api's notation now declares it a decimal (the field and the block were
+  right); the value keeps the step's precision by typing, by the arrow keys and by the buttons.
 
 ## 32.0.0
 
