@@ -22,7 +22,7 @@
 
 ### Added
 
-- **Twenty behaviours, folded from the `dsl5/*` branches** (their notation in the 33.0.0 grammar; an example page
+- **Nineteen behaviours, folded from the `dsl5/*` branches** (their notation in the 33.0.0 grammar; an example page
   with all of them is `examples/showcase/desktop/behaviours/words.txt`):
   - **Confirm**: the built-in confirm opens with the focus on Cancel (`onTap={confirm "Remove it?" then {rows=[]}}`).
   - **A saved value** (`state draft="" saved`) that no longer has the shape or type of its declaration starts
@@ -43,8 +43,6 @@
     Enter collapses and restores.
   - **A rating**: a slider with `trackShape: stars` (and `readOnly`); Cards' `Rating` block (`Rating "Your rating"
     bind=score half`).
-  - **A selection** (`SelectionList bind=picked items=[…] columns=2`): range with Shift, add with Ctrl/Cmd, select
-    all; one stop of the page's Tab order.
   - **A tooltip** (`IconButton "close" tooltip="Close"`) shows on keyboard focus and a touch hold too, Escape hides
     it, and it names an icon-only button.
   - **A hover card** (`Link "About Mara" preview=bio`, `Popover#bio arrow`): opens on a rested pointer or a

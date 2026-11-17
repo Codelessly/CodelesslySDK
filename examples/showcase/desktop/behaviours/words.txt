@@ -1,6 +1,6 @@
-// The words of the twenty behaviours on one page: a shortcut, a search with what matched marked, a table worked by keys,
+// The words of the folded behaviours on one page: a shortcut, a search with what matched marked, a table worked by keys,
 // a list reordered by its handles, rows with swipe actions, a log that follows its end, a calendar with a range, a range
-// slider, a stepping number, a one-time code, a rating, a selection, a splitter, a hover card with an arrow, a guarded
+// slider, a stepping number, a one-time code, a rating, a splitter, a hover card with an arrow, a guarded
 // dialog, a sheet with stops, confirm, announce, a live text, a saved value and device.hover.
 // tool/notation/notation.sh expand words.txt --design-system design_systems/cards --named --id words --width 1280 --out <site>/words.json
 // tool/render/render.sh <site> --out <dir> --sizes 1440x900,834x1112,390x844 --full-page
@@ -20,7 +20,6 @@ state high=160
 state qty=2
 state code=""
 state stars=4
-state picked=["opening"]
 state paneW=200
 state name=""
 state preview="Chur"
@@ -95,8 +94,6 @@ Page
         Row gap=16 middle
           Rating "Your rating" bind=stars
           Rating "Guest score" score=4.5 readOnly
-        SelectionList#extras bind=picked label="Extras" items=[{"key":"opening","label":"Early check-in"},{"key":"breakfast","label":"Breakfast"},{"key":"bikes","label":"Bikes"},{"key":"late","label":"Late check-out"}] columns=2
-        Text.muted "{length(picked)} extras chosen"
     Row h=160
       Column#notesPane w={paneW} pad=12 fill=#FFF3F4F6
         Text.strong "Notes"

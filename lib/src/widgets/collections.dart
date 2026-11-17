@@ -26,12 +26,10 @@ import 'collections_layout.dart';
 import 'collections_pagination.dart';
 import 'collections_page_runtime.dart';
 import 'collections_reorder.dart';
-import 'collections_selection.dart';
 import 'collections_table.dart';
 
 /// Recipes for the collections group, by node type.
 final Map<String, WidgetRecipe> collectionsRecipes = {
-  'selectionList': selectionListRecipe,
   'listView': _listView,
   'gridView': _gridView,
   'pageView': _pageView,
