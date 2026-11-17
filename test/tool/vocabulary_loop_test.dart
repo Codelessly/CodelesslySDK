@@ -95,10 +95,11 @@ void main() {
     // Words Cards defines in the notation (its vocabulary/*.txt) are words we
     // have; what a use gives that its definition does not take is recorded.
     expect(of('definition'), ['Legend', 'Waveform', 'CommandItem']);
-    expect(of('parameter'), ['Legend.string1', 'Waveform.seed']);
+    // Legend "Premium" color=… is a key's entry (Legend#entry, review 7).
+    expect(of('parameter'), ['Waveform.seed']);
     // A universal word (codelessly_api docs/design/21) on a defined word goes on its root;
     // clearable is an Input's own now.
-    expect(of('universal'), contains('Legend.color'));
+    expect(of('universal'), contains('Waveform.color'));
     expect(of('flag'), isEmpty);
     expect(of('verb'), ['Button.haptic', 'ListTile.vibrate']);
     expect(of('variant'), ['Button.Button.danger']);
@@ -186,6 +187,15 @@ void main() {
     expect(screens[1].text, 'state n=1\nApp\n  Main');
     final one = screensOf('Column\n  Text "x"\n', 'card');
     expect([for (final s in one) (s.name, s.id)], [('card', 'card')]);
+  });
+
+  test('state and overlays before the first ### line are every screen\'s, not a screen; a page there is still one', () {
+    final screens = screensOf('state recipes=[]\nstate q="" saved\nstate total=sum(recipes,r=>r.n)\nDialog#about "About"\n  Text "x"\n\n### Recipes\nColumn\n  Text "a"\n### Saved\nColumn\n  Text "b"\n', 'file');
+    // `from` stays the file's line of each screen's own first line.
+    expect([for (final s in screens) (s.id, s.from + 3)], [('recipes', 8), ('saved', 11)]);
+    expect(screens[0].text, 'project recipes=[]\nproject q="" saved\nstate total=sum(recipes,r=>r.n)\nColumn\n  Text "a"\nDialog#about "About"\n  Text "x"');
+    final page = screensOf('Column\n  Text "home"\n### Other\nColumn\n', 'file');
+    expect([for (final s in page) s.id], ['file', 'other']);
   });
 
   test('the first corpus is there with the tool\'s output, which says how each word resolved', () {

@@ -81,7 +81,8 @@ state attach={"name":"plan.pdf","size":"2 MB","progress":0.5}
     'FileUploader accept=["pdf","jpg","png"] multiple': [],
     'ImageUpload bind=photo accept="image/*"': ['alias accept>hint'],
     'Donut values=[38,24,16] labels=["Heating","Water heater","Fridge"]': [],
-    'StatusBadge status="Open"': ['alias status>label'],
+    // status is its tone; a status no tone has, with no string, is what it says.
+    'StatusBadge status="Open"': [r'alias status>$text'],
     'StatusBadge "{filter}"': [],
     'Barcode "29034 00718 4421" w=260 h=90': [],
     'Rating 4.5 readonly': ['alias readonly>readOnly'],
@@ -104,6 +105,25 @@ state attach={"name":"plan.pdf","size":"2 MB","progress":0.5}
     'CameraView "Point at the meter" source="rear" h=240 onCapture={toast "Captured"}': ['definition CameraView'],
     'PhotoPicker "Meter photo" bind=photo onPick={photo="meter.jpg"}': ['definition PhotoPicker'],
     'Waveform peaks=[0.2,0.8,0.5,0.9] progress={progress} onSeek={toast "{result}"}': ['definition Waveform', 'alias peaks>values', 'alias progress>position'],
+    // The names the standalone runs converged on (review 7, D34).
+    'StatusBadge "LIVE" status="success"': ['alias status>tone'],
+    'StatusDot "Live" color="success"': ['alias color>status'],
+    'StatCard "Users" value="3" description="up 4%"': ['alias description>note'],
+    'StatCard "Users" value="3" detail="up 4%"': ['alias detail>note'],
+    'TimelineItem "Launch" note="On time"': ['definition TimelineItem', 'alias note>detail'],
+    'TimelineItem "Launch" description="On time"': ['definition TimelineItem', 'alias description>detail'],
+    'InputField "Email" hint="you@example.com" bind=sel': ['alias hint>placeholder'],
+    'ReorderableList "Order" items={pins}': ['alias items>bind'],
+    'Legend "Free" color=#FFE9F7EF': ['definition Legend#entry'],
+    'Counter "Guests" bind=step min=1 max=8': [],
+    'NumberInput "Exposure" bind=progress': [],
+    'ConnectionStatus "Server" status="connected"': [],
+    'SectionHeader "Files" count="3" action="View all" onAction={toast "all"}': [],
+    'ListRow "Milk" removable onRemove={toast "removed"}': [],
+    'ListRow "Milk" onDelete={toast "removed"}': ['alias onDelete>onRemove'],
+    'SearchBar "Find" bind=sel clearable': [],
+    'Banner "Syncing" "3 left" live': [],
+    'ChoiceChips bind=filter options=["18:00","18:30"] disabled={placing}': [],
   };
 
   for (final e in lines.entries) {
@@ -137,6 +157,52 @@ state attach={"name":"plan.pdf","size":"2 MB","progress":0.5}
     final page = prompt();
     expect(page, contains('${notationGlossaryLead()}\n${names.join(' ')}\n\n'));
     expect(page.length - prompt(glossary: false).length, lessThan(4000));
+  });
+
+  test('what those names become: a tone, an x in a ListRow\'s slot, a SectionHeader\'s action, a whole ChoiceChips off', () {
+    final r = read('''
+${state}Column
+  StatusBadge#badge "LIVE" status="success"
+  ListRow#row "Milk" onDelete={toast "removed"}
+  SectionHeader#head "Files" action="View all" onAction={toast "all"}
+  ChoiceChips#chips bind=filter options=["18:00","18:30"] disabled={placing}
+  ChoiceChips#some bind=filter options=["18:00","18:30"] disabled=["18:30"]
+''');
+    expect(r.issues, isEmpty);
+    Map<String, Object?> node(String id) => ((r.document['nodes']! as Map)[id] as Map).cast<String, Object?>();
+    expect(node('badge')['props'], {'label': 'LIVE', 'tone': 'success'});
+    final x = ((node(((node('row')['slots'] as Map)['trailing']) as String)['children'] as List).single) as String;
+    expect(jsonEncode(node(x)['actions']), contains('removed'));
+    final action = ((node(((node('head')['slots'] as Map)['actions']) as String)['children'] as List).single) as String;
+    expect(node(action)['props'], containsPair('label', 'View all'));
+    expect(jsonEncode(node(action)['actions']), contains('"message":"all"'));
+    expect(node('chips')['bind'], {'disabled': r'${= placing}'});
+    expect(node('some')['props'], containsPair('disabled', ['18:30']));
+    expect(invalid(r.document), isEmpty);
+  });
+
+  test('a selectable list of TableRows: the row\'s own tap chooses it', () {
+    final r = read('${state}Column selectable bind=picked\n  each p in pins\n    TableRow#trow cells={[p.id,p.label]}\n');
+    expect(r.issues, isEmpty);
+    final row = (r.document['nodes']! as Map)['trow'] as Map;
+    final pressed = (row['actions'] as List).single as Map;
+    expect(pressed['trigger'], {'type': 'event', 'event': 'onPressed'});
+    expect(((pressed['actions'] as List).first as Map)['variable'], 'picked');
+    expect(invalid(r.document), isEmpty);
+  });
+
+  test('Rating sizes its stars inside its root: no warning wherever it is used', () {
+    final r = read('${state}Column\n  Rating "Taste" bind=progress max=10\n');
+    expect(r.issues, isEmpty);
+    final warnings = api.Catalog.run(
+        catalog,
+        () => validateDocument(r.document,
+            options: ValidateOptions(
+              theme: api.ThemeTokens.fromJson(ds.manifest.theme.toJson()),
+              components: ds.components,
+              formulas: (f) => (error: FormulaEvaluator.errorOf(f), paths: FormulaEvaluator.referencedPaths(f)),
+            )));
+    expect([for (final d in warnings) if (d.severity != Severity.info) '${d.code.name} ${d.path}'], isEmpty);
   });
 
   test('the steps Stepper and the number control are one word with two meanings', () {
