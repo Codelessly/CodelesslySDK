@@ -8,9 +8,9 @@ Card gap=12
     Badge.warning "{mode}" visible={mode=="Heat"}
     Badge.info "{mode}" visible={mode=="Cool"}
   Row center
-    Gauge bind=temp min=16 max=28 unit="°C"
+    Gauge value={temp} min=16 max=28 unit="°C"
   Row center middle gap=16
     IconButton "remove" onTap={temp=max(16,temp-1)}
     Text.heading "{temp}°C"
     IconButton "add" onTap={temp=min(28,temp+1)}
-  SegmentedButton bind=mode items=["Heat","Cool"]
+  SegmentedButton @mode items=["Heat","Cool"]

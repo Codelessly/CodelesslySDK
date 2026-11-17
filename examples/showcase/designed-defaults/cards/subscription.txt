@@ -12,14 +12,14 @@ Card w=390 gap=12
     Row between
       Text.fieldLabel "Storage"
       Text.small "{storageUsed} of {storageTotal} GB"
-    Progress bind=storageShare
+    Progress value={storageShare}
   Column gap=4
     Row between
       Text.fieldLabel "Seats"
       Text.small "{seatsUsed} of {seatsTotal} seats"
-    Progress bind=seatShare
+    Progress value={seatShare}
   Divider
-  Toggle "Switch to annual billing" bind=annual
+  Toggle "Switch to annual billing" @annual
   if annual
     Box fill=#FFE8F5E9 radius=8 pad=10
       Text "You save {money(biller*2,'$',0)} a year (2 months free)" color=#FF1B5E20

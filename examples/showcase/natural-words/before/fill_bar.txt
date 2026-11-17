@@ -8,6 +8,6 @@ Card gap=12
       Text.caption "{pct<1 ? 'Uploading…' : 'Upload complete'}"
     Text.strong "{round(pct*100,0)}%" visible={pct<1}
     Icon "check_circle" color={#FF2E7D32} visible={pct>=1}
-  Progress bind=pct color={pct>=1?"#FF2E7D32":"#FF1976D2"}
+  Progress value={pct} color={pct>=1?"#FF2E7D32":"#FF1976D2"}
   Row end visible={pct>=1}
     Button.ghost "Upload again" onTap={pct=0}

@@ -8,18 +8,18 @@ Column center pad=16 maxw=420
   Card gap=12
     Text.heading1 "Create your account"
     Text.bodySecondary "Start capturing ideas with Lumen Notes."
-    Input "Full name" "Ada Lovelace" bind=name
+    Input "Full name" "Ada Lovelace" @name
     Column gap=4
-      Input "Email" "you@example.com" bind=email type={email}
+      Input "Email" "you@example.com" @email type={email}
       if submitted&&email==""
         Text.danger "Email is required."
     Column gap=4
-      Input "Password" bind=password password
+      Input "Password" @password password
       Progress value={((length(password)>=8?1:0)+(lower(password)!=password?1:0)+(length(password)>=12?1:0))/3}
       Text.small "Strength: {((length(password)>=8?1:0)+(lower(password)!=password?1:0)+(length(password)>=12?1:0))<=1?'Weak':((length(password)>=8?1:0)+(lower(password)!=password?1:0)+(length(password)>=12?1:0))==2?'Fair':'Strong'}" color={((length(password)>=8?1:0)+(lower(password)!=password?1:0)+(length(password)>=12?1:0))<=1?"#FFD32F2F":((length(password)>=8?1:0)+(lower(password)!=password?1:0)+(length(password)>=12?1:0))==2?"#FFF9A825":"#FF2E7D32"}
     Column gap=4
-      Input "Confirm password" bind=confirm password
+      Input "Confirm password" @confirm password
       if submitted&&password!=confirm
         Text.danger "Passwords do not match."
-    Checkbox "I accept the Terms of Service and Privacy Policy" bind=accepted
+    Checkbox "I accept the Terms of Service and Privacy Policy" @accepted
     Button "Create account" onTap={submitted=true; emit signup}

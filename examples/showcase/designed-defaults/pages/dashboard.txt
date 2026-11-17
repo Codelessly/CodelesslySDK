@@ -6,7 +6,7 @@ Column scroll gap=16 pad=16
       Text.title "Dashboard"
       Text.muted "Store overview"
     IconButton "notifications"
-  SegmentedButton bind=range items=["Day","Week","Month"]
+  SegmentedButton @range items=["Day","Week","Month"]
   Grid cols=2 gap=12
     Card gap=4
       Text.caption "Revenue"

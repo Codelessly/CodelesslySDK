@@ -4,6 +4,6 @@ Card gap=8
   Text.muted "Swipe a row left to delete"
   each row in todos
     Row middle pad=8 {"interaction": {"swipeLeft": "todos=removeWhere(todos,t=>t.id==row.id)"}}
-      Checkbox "{row.title}" bind=row.done grow
+      Checkbox "{row.title}" @row.done grow
   if isEmpty(todos)
     Text.muted "All done!"

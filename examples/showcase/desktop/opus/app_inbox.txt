@@ -79,7 +79,7 @@ App
             Text "9:10" color=#FFDBEAFE size=12
           Text "Usually 3 to 5 business days, depending on your bank. I'll keep this open until it lands." color=#FFFFFFFF
       Card gap=10
-        Input "Reply to Marco" "Write a reply…" bind=reply multiline
+        Input "Reply to Marco" "Write a reply…" @reply multiline
         Row gap=8 middle
           IconButton "attach_file" onTap={emit attach}
           Spacer grow

@@ -24,8 +24,8 @@ App
     Nav
       Heading "Overview"
       Row gap=12
-        Segments bind=range options=["7d","30d","90d"]
-        Input "Search" bind=q w=220
+        Segments @range options=["7d","30d","90d"]
+        Input "Search" @q w=220
         Button "New order" icon="add" onTap={emit newOrder}
     Column pad=24 gap=16
       Grid cols=4 gap=16

@@ -44,27 +44,27 @@ App
                 Button.outline "Change" onTap={emit changePicture; dirty=true}
                 Text.caption "JPG or PNG, up to 5 MB"
             Row gap=16
-              Input "Full name" bind=name grow onChange={dirty=true}
-              Input "Username" "yourname" bind=username grow onChange={dirty=true}
+              Input "Full name" @name grow onChange={dirty=true}
+              Input "Username" "yourname" @username grow onChange={dirty=true}
             Column gap=4
-              Input "Bio" "Tell readers a little about you" bind=bio multiline onChange={dirty=true}
+              Input "Bio" "Tell readers a little about you" @bio multiline onChange={dirty=true}
               Row end
                 Text.caption "{length(bio)}/160" color={length(bio)>160?"#FFDC2626":"#FF6B7280"}
-            Select "Time zone" bind=tz items=["Pacific/Honolulu (UTC-10)","America/Los_Angeles (UTC-8)","America/New_York (UTC-5)","Europe/Lisbon (UTC+0)","Europe/Berlin (UTC+1)","Asia/Kolkata (UTC+5:30)","Asia/Tokyo (UTC+9)"] onChange={dirty=true}
-            Toggle "Public profile" bind=public onChange={dirty=true}
+            Select "Time zone" @tz items=["Pacific/Honolulu (UTC-10)","America/Los_Angeles (UTC-8)","America/New_York (UTC-5)","Europe/Lisbon (UTC+0)","Europe/Berlin (UTC+1)","Asia/Kolkata (UTC+5:30)","Asia/Tokyo (UTC+9)"] onChange={dirty=true}
+            Toggle "Public profile" @public onChange={dirty=true}
             Text.caption "When on, anyone can find your profile and read your published pieces."
           Card gap=4
             Heading "Notifications" level=3
             Text.muted "Choose what Plume tells you about."
-            ToggleRow "Draft reminders" "A gentle nudge when a draft has sat untouched for a week." bind=nDrafts onChanged={dirty=true}
+            ToggleRow "Draft reminders" "A gentle nudge when a draft has sat untouched for a week." @nDrafts onChanged={dirty=true}
             Divider
-            ToggleRow "Comments and replies" "Someone responds to one of your pieces." bind=nComments onChanged={dirty=true}
+            ToggleRow "Comments and replies" "Someone responds to one of your pieces." @nComments onChanged={dirty=true}
             Divider
-            ToggleRow "Weekly digest" "A Sunday summary of your words written and readers reached." bind=nWeekly onChanged={dirty=true}
+            ToggleRow "Weekly digest" "A Sunday summary of your words written and readers reached." @nWeekly onChanged={dirty=true}
             Divider
-            ToggleRow "Writing goals" "Progress updates and streak reminders." bind=nGoals onChanged={dirty=true}
+            ToggleRow "Writing goals" "Progress updates and streak reminders." @nGoals onChanged={dirty=true}
             Divider
-            ToggleRow "Product news" "New features and occasional tips from the Plume team." bind=nProduct onChanged={dirty=true}
+            ToggleRow "Product news" "New features and occasional tips from the Plume team." @nProduct onChanged={dirty=true}
           Box gap=12 pad=20 radius=12 border=#FFFCA5A5 fill=#FFFEF2F2
             Heading "Danger zone" level=3
             Text.muted "Deleting your account removes all your drafts, published pieces and followers. This cannot be undone."

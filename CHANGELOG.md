@@ -1,3 +1,33 @@
+## 34.0.0
+
+Needs codelessly_api 34.0.0.
+
+### Breaking
+
+- **The compact notation binds a variable with `@`, and codelessly_api reads only that** (its
+  docs/design/13-compact-notation.md, section 3.1): `Slider @heat min=14 max=24` (bare, the control's value;
+  `value=@heat` the same), `Column selectable selected=@picked`, `SortMenu @sort direction=@dir` (a block's
+  further variable), `Slider @low @high` and `Calendar @arrival @departure` (a range), where 33 wrote `bind=heat`,
+  `bind=picked`, `direction=dir`, `bind=low bindEnd=high`. On what only shows a value, 33's `bind={done/total}` is
+  `value={done/total}`. A bound variable is declared: by a `state` line, a site's variable, a loop's item or a
+  definition's parameter. `bind=`, `bind={…}` and `bindEnd=` are not read: each line that writes them is one issue
+  that shows the line in the new form.
+  **To migrate: `tool/notation/notation.sh migrate <file or folder>...`** (`--design-system <folder>` for the
+  blocks the files call, else every design system here; `--site <site.json>` for a site's variables; `--check` to
+  list what is left; `--from 32` for a file written before 33.0.0). It rewrites notation files and the notation
+  in Markdown, Dart, Python, JSON and HTML, adds a `state` line at a screen's head for each variable it binds and
+  nothing declares, and prints each line it changed. It cannot rewrite `bind=` assembled in code (a Python
+  f-string, a Dart interpolation): `--check` names those lines, to rewrite by hand.
+- **A block's further variable written in braces is now bound both ways.** 33 read `TableHeader @sort desc={desc}`
+  as a value shown, so a second tap on a header did not flip `desc`; the migration writes `desc=@desc`, as the
+  block's own documentation always asked, and the showcase's sortable tables (`examples/showcase/cards/dashboard`,
+  `data_table`, `table_wide`, and the desktop pages with a `TableHeader`) flip it now.
+- Everything in this repository written in the notation is rewritten with it: the examples (the showcase's cards,
+  recorded answers and desktop pages, the playground's samples, the prompt app's screens and its bundle of Skip),
+  `tool/values`, the benchmark's generated notation, the README and the docs; the showcase's site
+  (`examples/showcase/site`) is expanded again. Changelog entries of earlier releases keep the form they were
+  written in.
+
 ## 33.1.1
 
 Needs codelessly_api 33.1.1.

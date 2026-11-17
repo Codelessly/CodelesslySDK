@@ -89,7 +89,7 @@ Row w=1280 h=800 fill="#FFFFFFFF"
             Text "Thanks, I'll wait for the refund confirmation then."
       Divider
       Column gap=10 pad=16
-        Input "Reply" "Write a reply to Daniel…" multiline bind=reply
+        Input "Reply" "Write a reply to Daniel…" multiline @reply
         Row gap=8 end
           Button.outline "Send and close" onTap={emit sendAndClose reply; reply=""; toast "Sent and closed"}
           Button "Send" onTap={emit send reply; reply=""; toast "Reply sent"}

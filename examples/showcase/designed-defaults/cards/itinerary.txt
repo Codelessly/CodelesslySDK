@@ -9,7 +9,7 @@ Card w=390 gap=12
   Row gap=8 middle
     Icon "event_available"
     Text.strong "{(d1a?0:1)+(d1b?0:1)+(d1c?0:1)+(d2a?0:1)+(d2b?0:1)+(d2c?0:1)} of 6 bookings left"
-  Progress bind={0}
+  Progress value={0}
   Divider
   Row between middle
     Text.heading "Day 1: Higashiyama"
@@ -40,9 +40,9 @@ Card w=390 gap=12
       Text "Hanamikoji Street at dusk, then kaiseki or izakaya dinner."
       Text.muted "Stay about 2.5 hours"
   Text.strong "Book ahead"
-  Checkbox "Dinner reservation in Gion" bind=d1a
-  Checkbox "Kiyomizu-dera evening illumination tickets" bind=d1b
-  Checkbox "Tea ceremony in Higashiyama" bind=d1c
+  Checkbox "Dinner reservation in Gion" @d1a
+  Checkbox "Kiyomizu-dera evening illumination tickets" @d1b
+  Checkbox "Tea ceremony in Higashiyama" @d1c
   Divider
   Row between middle
     Text.heading "Day 2: Arashiyama and north"
@@ -73,6 +73,6 @@ Card w=390 gap=12
       Text "Lantern-lit lane along the Kamo River with small restaurants."
       Text.muted "Stay about 2 hours"
   Text.strong "Book ahead"
-  Checkbox "Pontocho dinner table" bind=d2a
-  Checkbox "Tenryu-ji garden and temple entry" bind=d2b
-  Checkbox "Rickshaw ride in Arashiyama" bind=d2c
+  Checkbox "Pontocho dinner table" @d2a
+  Checkbox "Tenryu-ji garden and temple entry" @d2b
+  Checkbox "Rickshaw ride in Arashiyama" @d2c

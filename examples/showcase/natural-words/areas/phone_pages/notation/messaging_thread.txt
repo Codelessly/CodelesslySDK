@@ -41,5 +41,5 @@ Column h=fill
   state msg=""
   Row gap=8 pad=[12,8,12,12] center
     IconButton "add" onTap={emit attach}
-    Input "Message…" bind=msg grow
+    Input "Message…" @msg grow
     IconButton "send" onTap={emit send msg; msg=""}

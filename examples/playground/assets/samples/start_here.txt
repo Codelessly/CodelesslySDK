@@ -4,9 +4,9 @@ state name=""
 Card gap=12
   Text.sectionTitle "Start here"
   Text.bodySecondary "Edit any line on the left. This card redraws as you type."
-  Slider bind=volume min=0 max=100
-  Input "Your name" bind=name
-  Toggle "Notifications" bind=notify
+  Slider @volume min=0 max=100
+  Input "Your name" @name
+  Toggle "Notifications" @notify
   Row between
     Text.caption "{name==""?"No name yet":"Hello, "+name} · volume {round(volume)}"
     Button "Save" enabled={name!=""} onTap={toast "Saved"}

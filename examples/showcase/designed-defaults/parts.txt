@@ -79,13 +79,13 @@ Column gap=16 pad=16
       FilterChip "Off"
   Text.caption "FORM CONTROLS"
   Card gap=12
-    Input "Email" "you@example.com" bind=email
-    Select bind=size items=["S","M","L"]
-    SegmentedButton bind=plan items=["Free","Pro","Team"]
-    Toggle "Notifications" bind=notify
-    Checkbox "I agree to the terms" bind=agree
-    Radio "Option A" value="a" bind=tab
-    Slider bind=volume min=0 max=100
+    Input "Email" "you@example.com" @email
+    Select @size items=["S","M","L"]
+    SegmentedButton @plan items=["Free","Pro","Team"]
+    Toggle "Notifications" @notify
+    Checkbox "I agree to the terms" @agree
+    Radio "Option A" value="a" @tab
+    Slider @volume min=0 max=100
     Progress 0.62
     DatePicker
   Text.caption "LISTS AND DIVIDERS"

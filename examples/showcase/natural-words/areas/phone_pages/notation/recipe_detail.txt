@@ -38,7 +38,7 @@ Column h=fill
       Text.heading2 "Ingredients"
       Column gap=4
         each row in ingredients
-          Checkbox "{row.qty>0 ? round(row.qty*servings/4,1)+' ' : ''}{row.name}" bind=row.done
+          Checkbox "{row.qty>0 ? round(row.qty*servings/4,1)+' ' : ''}{row.name}" @row.done
       Divider
       Text.heading2 "Steps"
       Column gap=14

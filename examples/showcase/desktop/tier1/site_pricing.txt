@@ -16,7 +16,7 @@ Page
       Text.eyebrow "PRICING"
       Heading "Simple pricing for every stage" level=1 center
       Text.lead "Choose the plan that fits your books today. Change or cancel any time." center
-      Segments bind=billing options=["Monthly","Yearly"]
+      Segments @billing options=["Monthly","Yearly"]
       Text.muted "Yearly billing saves you 20%" visible={billing=="Yearly"}
   Section
     Grid cols=3 gap=24

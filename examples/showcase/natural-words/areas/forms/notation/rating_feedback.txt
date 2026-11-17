@@ -20,5 +20,5 @@ Card gap=16 pad=16 maxw=480
       FilterChip "Fresh produce" selected={contains(tags,"Fresh produce")} onTap={tags=contains(tags,"Fresh produce")?without(tags,"Fresh produce"):append(tags,"Fresh produce")}
       FilterChip "Friendly driver" selected={contains(tags,"Friendly driver")} onTap={tags=contains(tags,"Friendly driver")?without(tags,"Friendly driver"):append(tags,"Friendly driver")}
       FilterChip "Good packaging" selected={contains(tags,"Good packaging")} onTap={tags=contains(tags,"Good packaging")?without(tags,"Good packaging"):append(tags,"Good packaging")}
-  Input "Comment (optional)" "Tell us more about your delivery" multiline bind=comment
+  Input "Comment (optional)" "Tell us more about your delivery" multiline @comment
   Button "Send feedback" onTap={emit sendFeedback; toast "Thanks for your feedback!"}

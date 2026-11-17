@@ -16,7 +16,7 @@ App
           Avatar "Sam Patel" size=28
           Avatar "Ana Costa" size=28
       Row gap=12
-        Input "Filter tasks" bind=q w=220
+        Input "Filter tasks" @q w=220
         Button "New task" icon="add" onTap={emit newTask}
     Row grow top
       Row scroll grow gap=16 pad=24 top
@@ -52,7 +52,7 @@ App
             Details rows={[["Assignee",d.who],["Due",d.due],["Comments",d.comments],["Status",d.col]]}
             SectionLabel "Description"
             Paragraph "{d.desc}"
-            Checklist "Checklist" bind=done items=["Review requirements","Complete the work","Get a teammate's feedback","Update the project notes"]
+            Checklist "Checklist" @done items=["Review requirements","Complete the work","Get a teammate's feedback","Update the project notes"]
             SectionLabel "Activity" "{length(activity)} updates"
             each a in activity
               Row gap=10 top

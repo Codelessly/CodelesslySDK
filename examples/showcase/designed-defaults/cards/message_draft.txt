@@ -23,10 +23,10 @@ Card w=390 gap=12
     Row between middle
       Text.heading "Draft email"
       Badge.info "Draft"
-    Input "To" "name@example.com" bind=to
-    Input "Subject" bind=subject
-    SegmentedButton bind=tone items=["Polite","Firm"] onChange={body=(tone=="Polite" ? "Hi,\n\nI hope you're well. The heating in my apartment has stopped working. Could you please arrange for someone to take a look as soon as you're able? I'm happy to work around your schedule for access.\n\nThank you very much,\nAlex" : "Hello,\n\nThe heating in my apartment is broken and has not been working. This needs to be repaired promptly. Please confirm today when a technician will visit. If it is not fixed soon, I will have to look at my options under my tenancy agreement.\n\nRegards,\nAlex")}
-    Input "Message" bind=body lines=10
+    Input "To" "name@example.com" @to
+    Input "Subject" @subject
+    SegmentedButton @tone items=["Polite","Firm"] onChange={body=(tone=="Polite" ? "Hi,\n\nI hope you're well. The heating in my apartment has stopped working. Could you please arrange for someone to take a look as soon as you're able? I'm happy to work around your schedule for access.\n\nThank you very much,\nAlex" : "Hello,\n\nThe heating in my apartment is broken and has not been working. This needs to be repaired promptly. Please confirm today when a technician will visit. If it is not fixed soon, I will have to look at my options under my tenancy agreement.\n\nRegards,\nAlex")}
+    Input "Message" @body lines=10
     if trim(to)=="" || trim(subject)==""
       Text.danger "Add a recipient and a subject to send."
     Row gap=8 end

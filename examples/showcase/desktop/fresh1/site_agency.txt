@@ -1,3 +1,4 @@
+state email=""
 Page
   Nav
     Brand "Northlight" icon="north"
@@ -105,7 +106,7 @@ Page
       Heading "Have a project in mind?" level=2
       Text.lead "Tell us a little about it and we will reply within two working days." center
       Row gap=12 middle center
-        Input "Email" hint="you@example.com" bind=email w=320
+        Input "Email" hint="you@example.com" @email w=320
         Button "Start a project" size=large onTap={emit start email; toast "Thanks, we will be in touch"}
   Footer
     Row between top

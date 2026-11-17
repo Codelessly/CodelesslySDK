@@ -15,4 +15,4 @@ Card gap=12 pad=16
     Column gap=4 grow
       Text.strong "{round((100-level)*1.3,0)} min to full"
       Text.muted "Fully charged around 10:45"
-      Progress bind={level/100}
+      Progress value={level/100}

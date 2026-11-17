@@ -30,10 +30,10 @@ App
         Button "Add customer" onTap={emit addCustomer}
     Column pad=24 gap=16 scroll
       Row gap=12 middle
-        Input "Search customers" bind=q w=280
-        Select bind=status items=["All","Active","Trial","Churned"] w=140
+        Input "Search customers" @q w=280
+        Select @status items=["All","Active","Trial","Churned"] w=140
         Spacer grow
-        SegmentedButton bind=seg items=["All customers","Mine","Recently added"]
+        SegmentedButton @seg items=["All customers","Mine","Recently added"]
       if length(picked)>0
         Row gap=12 middle pad=[16,10,16,10] fill=#FF1E293B radius=8
           Text "{length(picked)} selected" color=#FFFFFFFF weight=600
@@ -42,7 +42,7 @@ App
           Button.destructive "Delete" onTap={rows=filter(rows,r=>!contains(picked,r.id)); picked=[]; all=false; emit deleteCustomers picked}
       Card gap=0 pad=0
         Row gap=12 middle pad=[16,10,16,10] border-bottom=#FFE2E8F0
-          Checkbox bind=all w=28 onChange={picked=all?map(rows,r=>r.id):[]}
+          Checkbox @all w=28 onChange={picked=all?map(rows,r=>r.id):[]}
           Button.ghost "Name" grow onTap={rows=(sort=="name"&&!desc)?sortByDesc(rows,x=>x.name):sortBy(rows,x=>x.name); desc=(sort=="name"&&!desc); sort="name"}
           Button.ghost "Company" w=170 onTap={rows=(sort=="company"&&!desc)?sortByDesc(rows,x=>x.company):sortBy(rows,x=>x.company); desc=(sort=="company"&&!desc); sort="company"}
           Button.ghost "Status" w=90 onTap={rows=(sort=="status"&&!desc)?sortByDesc(rows,x=>x.status):sortBy(rows,x=>x.status); desc=(sort=="status"&&!desc); sort="status"}

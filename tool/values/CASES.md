@@ -109,7 +109,7 @@ These are lines of the references (`tool/values/reference/`) where the notation 
    read the hour from the text). A `pad`/`formatTime`/`parseTime` would remove most of the formulas.
 3. **`Checklist` keeps what is ticked as the item's text**, so when the text changes the tick is lost while the count
    still says it is ticked: `recipe.txt`'s first version,
-   `Checklist#ings "Ingredients" bind=done items={map(ings,x=>x.a*servings/4+x.u+" "+x.n)}`, showed "1 of 6" with no row
+   `Checklist#ings "Ingredients" @done items={map(ings,x=>x.a*servings/4+x.u+" "+x.n)}`, showed "1 of 6" with no row
    ticked once the servings changed. The reference uses a `ListRow` per ingredient with
    `selected={x.done} onTap={ings=updateWhere(ings,y=>y.n==x.n,y=>with(y,"done",!y.done))}` instead, which is a row with a
    check icon, not the Checklist block.
@@ -141,7 +141,7 @@ These are lines of the references (`tool/values/reference/`) where the notation 
     ask "which time is selected". reservation and meeting_slot therefore ask for the Confirm line to say the day,
     size and time as one sentence, and the cases read that. (A `Counter`'s number and a `Checklist`'s "n of m" are
     texts and are read directly.)
-12. **A base `Checkbox` inside `each`** (`Checkbox#tick "{x.a*servings/4}{x.u} {x.n}" bind=x.done`) produced no label in the
+12. **A base `Checkbox` inside `each`** (`Checkbox#tick "{x.a*servings/4}{x.u} {x.n}" @x.done`) produced no label in the
     text dump at all, so it could not be checked; the `ListRow` version of item 3 is what the case drives.
 
 ## Audit against the baselines (2026-11-15)

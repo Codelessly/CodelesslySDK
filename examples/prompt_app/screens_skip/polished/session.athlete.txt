@@ -11,7 +11,7 @@ Screen
       Text.eyebrow "{upper(phase)}"
       Text.meta "Round {round}/{today.rounds}"
     Text.display "{left}s" size=120
-    Progress bind={0}
+    Progress value={0}
     Text.meta "Rounds left {today.rounds-round}"
   Row between middle
     Column

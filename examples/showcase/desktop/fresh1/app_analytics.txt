@@ -25,7 +25,7 @@ App
     Nav
       Heading "Explore" level=1
       Row gap=8 middle
-        Select bind=range items=["7 days","30 days","90 days","12 months"] w=150
+        Select @range items=["7 days","30 days","90 days","12 months"] w=150
         Button "Save chart" icon="bookmark_add" onTap={toast "Chart saved"}
     Column pad=24 gap=20
       Card gap=16
@@ -33,10 +33,10 @@ App
         Row gap=16 bottom
           Column gap=4 grow
             Text.fieldLabel "Event"
-            Select bind=event items=["Checkout completed","Signed up","Project created","Invite sent"]
+            Select @event items=["Checkout completed","Signed up","Project created","Invite sent"]
           Column gap=4 grow
             Text.fieldLabel "Grouped by"
-            Select bind=groupBy items=["Plan","Country","Platform"]
+            Select @groupBy items=["Plan","Country","Platform"]
         Row gap=8 middle
           Text.fieldLabel "Filters"
           each f in filters

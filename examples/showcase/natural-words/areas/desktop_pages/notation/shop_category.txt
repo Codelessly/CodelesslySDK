@@ -20,13 +20,13 @@ Column scroll maxw=1280
         Text.panelTitle "Filters"
         Divider
         Text.sectionTitle "Brand"
-        Checkbox "Nike" bind=nike
-        Checkbox "Adidas" bind=adidas
-        Checkbox "Hoka" bind=hoka
-        Checkbox "Asics" bind=asics
+        Checkbox "Nike" @nike
+        Checkbox "Adidas" @adidas
+        Checkbox "Hoka" @hoka
+        Checkbox "Asics" @asics
         Divider
         Text.sectionTitle "Price"
-        Slider bind=maxPrice min=50 max=250
+        Slider @maxPrice min=50 max=250
         Row between
           Text.caption "$50"
           Text.strong "Up to ${maxPrice}"
@@ -54,7 +54,7 @@ Column scroll maxw=1280
           Text.heading3 "128 results"
           Row gap=8 middle
             Text.bodySecondary "Sort by:"
-            Select bind=sort items=["Popular","Price: Low to High","Price: High to Low","Newest","Top Rated"]
+            Select @sort items=["Popular","Price: Low to High","Price: High to Low","Newest","Top Rated"]
         Grid cols=4 gap=16
           each p in products
             Card gap=8

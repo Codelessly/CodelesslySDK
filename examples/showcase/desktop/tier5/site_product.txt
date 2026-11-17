@@ -7,7 +7,7 @@ Page
       Link "Kitchen"
       Link "Office"
     Row gap=12 middle
-      SearchBar "Search products" bind=q w=260
+      SearchBar "Search products" @q w=260
       NotificationBadge count={cart}
         IconButton "shopping_cart" onTap={emit openCart}
   Section
@@ -41,10 +41,10 @@ Page
           Divider
           Column gap=8
             Text.strong "Finish: {finish}"
-            ChoiceChips bind=finish options=["Brass","Graphite","Sand"] columns=3
+            ChoiceChips @finish options=["Brass","Graphite","Sand"] columns=3
           Row gap=12 middle
             Text.strong "Quantity"
-            Stepper "Quantity" bind=qty min=1 max=10
+            Stepper "Quantity" @qty min=1 max=10
           Row gap=12
             Button "Add to cart" size=large grow onTap={cart=cart+qty; toast "Added to cart"}
             Button.outline "Buy now" size=large grow onTap={emit buyNow}
@@ -61,7 +61,7 @@ Page
                 Text.muted "Not the right fit? Send it back free of charge."
   Section tint
     Column gap=20
-      SegmentedButton bind=tab items=["Description","Specifications","Reviews"]
+      SegmentedButton @tab items=["Description","Specifications","Reviews"]
       if tab=="Description"
         Column gap=12 maxw=760
           Heading "Light that moves with you" level=3

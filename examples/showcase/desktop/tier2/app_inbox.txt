@@ -70,7 +70,7 @@ App
               Text "Thank you, Maya. I've approved a free replacement and it ships tomorrow. Is the same address still correct?"
           Avatar "Priya Natarajan" size=32
         Card gap=10
-          Input "Reply to Maya" "Write your reply" multiline bind=reply
+          Input "Reply to Maya" "Write your reply" multiline @reply
           Row between middle
             Row gap=8
               IconButton "attach_file"

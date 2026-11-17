@@ -69,7 +69,7 @@ App
           Text "The refund has been issued. Pending charges usually drop within 3 to 5 business days."
         Avatar "Priya Shah" size=32
     Column pad=16 gap=10 border-top=#FFE5E7EB
-      Input "Reply to Daniel" "Write your reply…" bind=reply multiline
+      Input "Reply to Daniel" "Write your reply…" @reply multiline
       Row gap=8 end
         Button "Send" onTap={emit send reply; reply=""; toast "Reply sent"}
         Button.outline "Send and close" onTap={emit sendAndClose reply; reply=""; toast "Sent and closed"}

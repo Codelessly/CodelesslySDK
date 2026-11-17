@@ -15,7 +15,7 @@ Column scroll gap=16 pad=16
   Card gap=8 center
     Text.heading2 "{phase=='Jump' ? 'JUMP!' : 'Rest. Breathe!'}"
     Text.heading1 "{remaining}"
-    Progress bind={0}
+    Progress value={0}
   if !started
     Button "Let's go!" onTap={started=true; remaining=today.work; phase="Jump"; round=1; count=0; emit start_session}
   if started

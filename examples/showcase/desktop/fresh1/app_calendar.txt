@@ -29,10 +29,10 @@ App
             Text.caption "{d+1}" center color={d+1==10?"#FFFFFFFF":"#FF111827"}
     Text.eyebrow "MY CALENDARS"
     Column gap=6
-      Checkbox "Work" bind=work color=#FF2563EB
-      Checkbox "Personal" bind=personal color=#FF16A34A
-      Checkbox "Team" bind=team color=#FF7C3AED
-      Checkbox "Holidays" bind=holidays color=#FFEA580C
+      Checkbox "Work" @work color=#FF2563EB
+      Checkbox "Personal" @personal color=#FF16A34A
+      Checkbox "Team" @team color=#FF7C3AED
+      Checkbox "Holidays" @holidays color=#FFEA580C
     Spacer grow
   Main
     Nav
@@ -41,7 +41,7 @@ App
         IconButton "chevron_left" onTap={emit prevWeek}
         IconButton "chevron_right" onTap={emit nextWeek}
         Button.outline "Today" onTap={emit today}
-      SegmentedButton bind=view items=["Day","Week","Month"]
+      SegmentedButton @view items=["Day","Week","Month"]
     Column pad=[16,12,16,16] gap=0 scroll
       Row gap=0 pad=[0,0,0,8]
         Box w=56

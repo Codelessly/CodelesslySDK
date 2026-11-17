@@ -16,5 +16,5 @@ Card w=390 gap=12
             if options[choice]==opt
               Badge.primary "Your vote"
           Text.muted "{round(100*votes[indexOf(options,opt)]/sum(votes,v=>v),0)}%"
-        Progress bind={votes[indexOf(options,opt)]/sum(votes,v=>v)}
+        Progress value={votes[indexOf(options,opt)]/sum(votes,v=>v)}
     Text.caption "{sum(votes,v=>v)} votes in total"

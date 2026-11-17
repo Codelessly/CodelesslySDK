@@ -214,3 +214,11 @@ rest is in codelessly_api's docs/design/18-notation-grammar-migration.md). Each 
 expanded to before. They are no longer, to the letter, what the models wrote: those texts are in the history, at
 the parent of the change that rewrote them. The answers written with no vocabulary (`natural-words/**/natural`)
 were not touched: they are the evidence of what a model writes by itself, and they no longer expand.
+
+## A variable bound with `@`, 34.0.0
+
+34.0.0 binds a variable with `@` (codelessly_api's docs/design/13-compact-notation.md, section 3.1): `bind=email`
+is `@email`, `bind={step/3}` on a Progress (which shows a value and keeps none) is `value={step/3}`, a block's
+further variable is `desc=@desc`, and a variable a screen binds is declared by a `state` line. The same
+`tool/notation/notation.sh migrate` rewrote the files here again, adding a `state` line where a screen bound a
+variable nothing declared.

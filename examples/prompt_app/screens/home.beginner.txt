@@ -18,7 +18,7 @@ Column scroll gap=16 pad=16
     Row between
       Text.sectionTitle "This week"
       Text.strong "{sessionsThisWeek} of {weeklyGoal}"
-    Progress bind=weekProgress
+    Progress value={weekProgress}
     Text.bodySecondary "{weeklyGoal-sessionsThisWeek} more short sessions to reach your goal."
   Row between middle
     Text.sectionTitle "Last session"

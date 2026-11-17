@@ -29,10 +29,10 @@ App
         Button "Add customer" onTap={emit addCustomer}
     Column pad=24 gap=16
       Row gap=12 middle
-        Input "Search customers" bind=q w=280
-        Select bind=status items=["All","Active","Trial","Churned"] w=160
+        Input "Search customers" @q w=280
+        Select @status items=["All","Active","Trial","Churned"] w=160
         Spacer grow
-        Segments bind=view options=["All","Mine","Starred"]
+        Segments @view options=["All","Mine","Starred"]
       if length(picked)>0
         Row between middle fill=#FF1E293B radius=8 pad=[16,8,16,8]
           Text "{length(picked)} selected" color=#FFFFFFFF weight=600

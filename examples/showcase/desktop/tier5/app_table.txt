@@ -27,10 +27,10 @@ App
         Button.outline "Import" onTap={toast "Import started"}
         Button "Add customer" onTap={emit addCustomer}
       Row gap=12 middle
-        Input "Search customers" bind=q w=280
-        Select bind=status items=["All","Active","Trial","Churned"] w=160
+        Input "Search customers" @q w=280
+        Select @status items=["All","Active","Trial","Churned"] w=160
         Spacer grow
-        Segments bind=view options=["All","Mine","Recent"]
+        Segments @view options=["All","Mine","Recent"]
       if length(picked)>0
         Row gap=12 middle pad=[16,10,16,10] fill=#FFEFF4FF radius=8
           Text.strong "{length(picked)} selected"

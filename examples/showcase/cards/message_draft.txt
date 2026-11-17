@@ -7,10 +7,10 @@ state body=polite
 state sent=false
 ChatCard "Email to your landlord" "Edit anything before it goes" icon="mail_rounded" status={sent?"Sent":"Draft"} tone={sent?"good":"accent"}
   if !sent
-    InputField#to "To" "name@example.com" bind=to keyboard="emailAddress" error={to==""?"Add a recipient to send":""}
-    InputField#subject "Subject" "What is it about?" bind=subject error={subject==""?"Add a subject to send":""}
-    Segments#tone bind=tone options=["Polite","Firm"] onChanged={body=result=="Firm"?firm:polite}
-    InputField#body "Message" bind=body lines=11
+    InputField#to "To" "name@example.com" @to keyboard="emailAddress" error={to==""?"Add a recipient to send":""}
+    InputField#subject "Subject" "What is it about?" @subject error={subject==""?"Add a subject to send":""}
+    Segments#tone @tone options=["Polite","Firm"] onChanged={body=result=="Firm"?firm:polite}
+    InputField#body "Message" @body lines=11
     Row gap=10
       ActionButton#discard "Discard" tone="quiet" grow onPressed={emit discard_draft}
       ActionButton#send "Send" icon="send_rounded" enabled={to!=""&&subject!=""} grow=2 onPressed={sent=true; emit send_email body}

@@ -14,5 +14,5 @@ Card gap=16
         Text "{temp}°" size=48 weight=700 color={mode=="Heat"?"#FFE65100":"#FF0277BD"}
         Text.caption "16° – 28°"
     Button.outline "+" onTap={temp=min(28,temp+1)}
-  Slider bind=temp min=16 max=28 step=1
-  SegmentedButton bind=mode items=["Heat","Cool"]
+  Slider @temp min=16 max=28 step=1
+  SegmentedButton @mode items=["Heat","Cool"]

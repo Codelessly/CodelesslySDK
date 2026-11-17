@@ -22,7 +22,7 @@ Column w=1280 h=fill fill=#FFF6F7F9
         Avatar "Leo Martin" size=32
         Avatar "Ana Ruiz" size=32
     Row gap=12 center
-      Input "Filter" "Filter tasks" bind=q w=240
+      Input "Filter" "Filter tasks" @q w=240
       Button "New task" onTap={emit newTask}
   Row grow gap=12 pad=16
     Row grow gap=12
@@ -67,10 +67,10 @@ Column w=1280 h=fill fill=#FFF6F7F9
         Text.strong "Description"
         Text.bodySecondary "Plan, build and review this piece of the relaunch. Align with the brand guidelines and share a draft with the team before the due date."
         Text.strong "Checklist"
-        Checkbox "Draft the first version" bind=c1
-        Checkbox "Share with the team" bind=c2
-        Checkbox "Apply feedback" bind=c3
-        Checkbox "Final sign-off" bind=c4
+        Checkbox "Draft the first version" @c1
+        Checkbox "Share with the team" @c2
+        Checkbox "Apply feedback" @c3
+        Checkbox "Final sign-off" @c4
         Divider
         Text.strong "Activity"
         Row gap=8

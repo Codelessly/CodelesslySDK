@@ -36,27 +36,27 @@ App
             Column gap=4
               Button.outline "Change" onTap={emit changePicture}
               Text.caption "JPG or PNG, up to 5 MB"
-          Input "Name" bind=name onChange={dirty=true}
-          Input "Username" bind=username onChange={dirty=true}
+          Input "Name" @name onChange={dirty=true}
+          Input "Username" @username onChange={dirty=true}
           Column gap=4
-            Input "Bio" "Tell readers a little about you" bind=bio multiline onChange={dirty=true}
+            Input "Bio" "Tell readers a little about you" @bio multiline onChange={dirty=true}
             Row end
               Text.caption "{length(bio)}/160" color={length(bio)>160?"#FFDC2626":"#FF6B7280"}
           Column gap=4
             Text.fieldLabel "Time zone"
-            Select bind=tz items=["(UTC-08:00) Pacific Time","(UTC-05:00) Eastern Time","(UTC+00:00) London","(UTC+01:00) Central European Time","(UTC+05:30) India","(UTC+09:00) Tokyo"] onChange={dirty=true}
-          ToggleRow "Public profile" "Anyone can read your profile and published pieces." bind=public onChanged={dirty=true}
+            Select @tz items=["(UTC-08:00) Pacific Time","(UTC-05:00) Eastern Time","(UTC+00:00) London","(UTC+01:00) Central European Time","(UTC+05:30) India","(UTC+09:00) Tokyo"] onChange={dirty=true}
+          ToggleRow "Public profile" "Anyone can read your profile and published pieces." @public onChanged={dirty=true}
         Card gap=4
           Heading "Notifications" level=3
-          ToggleRow "Mentions" "When someone mentions you in a draft or comment." bind=nMentions onChanged={dirty=true}
+          ToggleRow "Mentions" "When someone mentions you in a draft or comment." @nMentions onChanged={dirty=true}
           Divider
-          ToggleRow "Comments" "When a reader or editor comments on your writing." bind=nComments onChanged={dirty=true}
+          ToggleRow "Comments" "When a reader or editor comments on your writing." @nComments onChanged={dirty=true}
           Divider
-          ToggleRow "Weekly digest" "A summary of your writing streak and word count." bind=nDigest onChanged={dirty=true}
+          ToggleRow "Weekly digest" "A summary of your writing streak and word count." @nDigest onChanged={dirty=true}
           Divider
-          ToggleRow "Product updates" "News about new features in Plume." bind=nProduct onChanged={dirty=true}
+          ToggleRow "Product updates" "News about new features in Plume." @nProduct onChanged={dirty=true}
           Divider
-          ToggleRow "Security alerts" "Sign-ins from new devices and password changes." bind=nSecurity onChanged={dirty=true}
+          ToggleRow "Security alerts" "Sign-ins from new devices and password changes." @nSecurity onChanged={dirty=true}
         Box gap=12 pad=16 radius=12 fill=#FFFEF2F2 border=#FFFCA5A5
           Heading "Danger zone" level=3
           Text.muted "Deleting your account removes all your drafts, published pieces and settings. This cannot be undone."

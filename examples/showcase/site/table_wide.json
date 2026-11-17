@@ -71,6 +71,7 @@
    },
    "props": {
     "value": "sort",
+    "desc": "desc",
     "columns": [
      "Plan",
      "Subs",
@@ -98,9 +99,6 @@
      2,
      3
     ]
-   },
-   "bind": {
-    "props.desc": "${desc}"
    }
   },
   "listView1": {

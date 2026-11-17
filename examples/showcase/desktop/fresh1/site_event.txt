@@ -1,3 +1,4 @@
+state pin=0
 Page
   Nav
     Brand "Signal 2027" icon="graphic_eq"
@@ -129,7 +130,7 @@ Page
       Heading "Pavilhão do Conhecimento, Lisbon"
     Row gap=32 top
       Card grow
-        MapPanel bind=pin count=3
+        MapPanel @pin count=3
       Column grow gap=16
         Row gap=12
           IconTile "place"

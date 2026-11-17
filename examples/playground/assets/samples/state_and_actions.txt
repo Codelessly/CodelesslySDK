@@ -9,7 +9,7 @@ Card gap=12
     Button.outline "+" onTap={seats=seats+1}
     Spacer grow
     Button.ghost "Reset" enabled={seats>1} onTap={seats=1}
-  SegmentedButton bind=plan items=["Monthly","Yearly"]
+  SegmentedButton @plan items=["Monthly","Yearly"]
   if plan=="Yearly"
     Badge.success "Two months free"
   Divider

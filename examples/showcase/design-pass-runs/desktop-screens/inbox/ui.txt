@@ -64,7 +64,7 @@ Row w=1280 h=800 fill=#FFFFFFFF
     Spacer grow
     Divider
     Text.fieldLabel "Reply to {cur.from}"
-    TextArea "Write your reply…" bind=reply h=130
+    TextArea "Write your reply…" @reply h=130
     Row gap=10 end
       Button.outline "Close ticket" onTap={convos=updateWhere(convos,x=>x.id==cur.id,x=>with(x,"status","Resolved")); cur=with(cur,"status","Resolved"); toast "Ticket closed"}
       Button "Send" enabled={trim(reply)!=""} onTap={convos=updateWhere(convos,x=>x.id==cur.id,x=>with(x,"status","Waiting")); cur=with(cur,"status","Waiting"); reply=""; toast "Reply sent"}

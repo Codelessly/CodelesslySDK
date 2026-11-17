@@ -1,6 +1,7 @@
 state tab="overview"
 state range="30d"
 state orders=[{"id":"#10492","customer":"Maya Reyes","status":"Paid","total":"$84.20","date":"Mar 14"},{"id":"#10491","customer":"Jonas Weber","status":"Shipped","total":"$212.00","date":"Mar 14"},{"id":"#10490","customer":"Priya Nair","status":"Pending","total":"$46.50","date":"Mar 13"},{"id":"#10489","customer":"Liam O'Connor","status":"Paid","total":"$129.90","date":"Mar 13"},{"id":"#10488","customer":"Sofia Rossi","status":"Refunded","total":"$58.00","date":"Mar 12"},{"id":"#10487","customer":"Kenji Sato","status":"Shipped","total":"$301.75","date":"Mar 12"},{"id":"#10486","customer":"Amara Okafor","status":"Pending","total":"$73.40","date":"Mar 11"},{"id":"#10485","customer":"Lucas Meyer","status":"Paid","total":"$96.10","date":"Mar 11"}]
+state q=""
 App
   Sidebar
     Brand "Harbor" icon="anchor"
@@ -20,8 +21,8 @@ App
     Nav
       Heading "Overview" level=1
       Row gap=8 middle
-        SegmentedButton bind=range items=["7d","30d","90d"]
-        Input "Search" bind=q w=220
+        SegmentedButton @range items=["7d","30d","90d"]
+        Input "Search" @q w=220
         Button "New order" icon="add" onTap={emit newOrder}
     Column pad=24 gap=20
       Grid cols=4 gap=16

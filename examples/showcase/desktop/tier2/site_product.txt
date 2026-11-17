@@ -4,6 +4,7 @@ state qty=1
 state cart=2
 state tab="Description"
 state reviews=[{"name":"Elena M.","stars":5,"title":"Perfect reading light","text":"The arm moves smoothly and stays where I put it. The brass finish looks even better in person."},{"name":"Jonas K.","stars":5,"title":"Beautiful and sturdy","text":"Heavy base, no wobble. Warm light that is easy on the eyes in the evening."},{"name":"Priya S.","stars":4,"title":"Great lamp, short cable","text":"Love the design and the dimmer. I would have liked a slightly longer cable."}]
+state q=""
 Page
   Nav
     Text.heading "Nord & Co"
@@ -14,7 +15,7 @@ Page
       Link "Kitchen"
       Link "Sale"
     Row gap=12 middle
-      Input "Search" "Search products" bind=q w=240
+      Input "Search" "Search products" @q w=240
       Row gap=6 middle
         Icon "shopping_cart"
         Badge.primary "{cart}"
@@ -64,7 +65,7 @@ Page
             ChoiceChip "Graphite" selected={finish=="Graphite"} onTap={finish="Graphite"}
             ChoiceChip "Sand" selected={finish=="Sand"} onTap={finish="Sand"}
           Text.strong "Quantity"
-          Stepper "Quantity" bind=qty min=1 max=10
+          Stepper "Quantity" @qty min=1 max=10
           Row gap=12
             Button "Add to cart" size=large grow onTap={cart=cart+qty; toast "Added to cart"}
             Button.outline "Buy now" size=large grow onTap={emit buyNow}
@@ -86,7 +87,7 @@ Page
                 Text.muted "Covers the LED and the dimmer"
   Section tint
     Column gap=20
-      TabToggle bind=tab options=["Description","Specifications","Reviews"]
+      TabToggle @tab options=["Description","Specifications","Reviews"]
       if tab=="Description"
         Column gap=12
           Heading "Light that moves with you" level=3
