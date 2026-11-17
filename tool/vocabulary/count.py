@@ -6,7 +6,10 @@ counted once per kind and, for a text, parameter, flag, event or variant, once p
 (`size` on IconButton and `size` on Chip are two entries: each is mapped or built on its own). Each resolves as
 core, component, alias, definition (a word defined in the notation), universal (a word every line understands,
 read where the type has no word of that name or honoured by the stand-in of a type we do not have: codelessly_api
-docs/design/21-universal-words.md) or unknown; the resolved share is all but unknown.
+docs/design/21-universal-words.md), primitive (a word an answer declared with `primitive`, for what no line can
+express, and what its uses were given: it stands in), unread (a word a definition names and its lines never read or
+fire: codelessly_api docs/design/20 section 12) or unknown. Resolved is the first five; the last line gives the
+others apart, and the unknown types apart from the unknown words of every other kind.
 
 With an earlier file, also lists the words that are new since it, and those that resolve otherwise. An earlier
 file written before every word was recorded (it has no `words`) is read as it was counted then: every type, and
@@ -16,7 +19,8 @@ import json
 import sys
 
 KINDS = ['type', 'text', 'parameter', 'flag', 'event', 'variant', 'verb', 'function', 'statement']
-RESOLUTIONS = ['core', 'component', 'alias', 'definition', 'universal', 'unknown']
+RESOLUTIONS = ['core', 'component', 'alias', 'definition', 'universal', 'primitive', 'unread', 'unknown']
+UNRESOLVED = {'primitive', 'unread', 'unknown'}
 OLD = {'types': 'type', 'parameters': 'parameter', 'flags': 'flag', 'events': 'event', 'verbs': 'verb',
        'functions': 'function', 'variants': 'variant', 'aliases': 'alias'}
 
@@ -54,8 +58,11 @@ for kind in order:
     print(f"  {kind:10} {sum(row.values()):5}  " + ', '.join(f'{r} {row[r]}' for r in RESOLUTIONS + sorted(set(row) - set(RESOLUTIONS)) if r in row))
 total = {r: sum(k.get(r, 0) for k in by.values()) for r in RESOLUTIONS}
 unknown = total['unknown']
+resolved = len(now) - sum(total[r] for r in UNRESOLVED)
+unknown_types = by.get('type', {}).get('unknown', 0)
 print(f"  {'all':10} {len(now):5}  " + ', '.join(f'{r} {n}' for r, n in total.items() if n))
-print(f'  resolved {len(now) - unknown} ({100 * (len(now) - unknown) / max(1, len(now)):.1f}%), unknown {unknown}')
+print(f"  resolved {resolved} ({100 * resolved / max(1, len(now)):.1f}%), stand-in {total['primitive']}, never read {total['unread']}, "
+      f"unknown {unknown} ({unknown_types} types, {unknown - unknown_types} other words)")
 if len(sys.argv) > 2:
     _, before = words(sys.argv[2])
     new = [k for k in now if k not in before]

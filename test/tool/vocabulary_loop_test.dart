@@ -14,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../tool/notation/vocabulary.dart' show loadVocabulary, screensOf;
 import '../../tool/notation/vocabulary_harvest.dart' show Harvest;
+import '../../tool/notation/vocabulary_words.dart' show CorpusWords, countLine, countOf;
 
 // A page as a model writes it from the open prompt: unknown types (with
 // lines under them, with nothing under them, over the page), parameters,
@@ -178,6 +179,59 @@ void main() {
     expect(md, contains('```\n// A rotary dial.\ndefine Knob "label" bind=value min=0 max=12 color=#FF22D3EE\n  Column gap=4\n'));
     expect(md, contains('| Knob | dj, seq | synth |'));
     expect(((h.toJson()['definedInMoreThanOne'] as List).single as Map)['answers'], 2);
+  });
+
+  test('the count: a primitive stands in, a word a definition never reads is not resolved, the unknown types apart (Review 7, D32)', () {
+    const answer = '''
+### Plan
+state at=""
+App
+  Main
+    Column pad=24
+      FloorPlan2 "Level 2" rooms=["a"] onPick={at=result}
+      GoKey "Go" shortcut="space" onTap={at="go"}
+      Waveform2 seed=3
+
+// A plan that placed items are dragged about on: no line draws one.
+primitive FloorPlan2 "name" rooms=[] onPick
+define GoKey "label" shortcut="" onTap
+  Button "{label}" onTap={onTap}
+''';
+    final corpus = CorpusWords(components: {for (final c in ds.list) c.type});
+    final defined = readPageDefinitions(answer, others: aliases.definitions).words;
+    final reads = {
+      for (final defs in defined.values)
+        for (final d in defs) d.label: definitionReads(d),
+    };
+    expect(reads['GoKey']!.warnings, ['page:12: GoKey names shortcut and never reads it: a use\'s shortcut= does nothing.']);
+    for (final s in screensOf(answer, 'plan')) {
+      final r = api.Catalog.run(
+          catalog,
+          () => parseNotation(s.text,
+              catalog: catalog, options: NotationOptions.fromDesignSystem(ds, width: 1280).open(vocabulary: aliases), definitions: answer));
+      expect(r.issues, isEmpty);
+      expect([for (final u in r.vocabulary) if (u.kind == 'primitive' || u.kind == 'definition' || u.kind == 'type') '${u.kind} ${u.word}'],
+          ['primitive FloorPlan2', 'definition GoKey', 'type Waveform2']);
+      corpus.screen('plan', s.text, r, reads: reads);
+    }
+    String how(String kind, String? on, String word) => corpus.words['$kind ${on ?? ''} $word']!.resolved;
+    expect(how('type', null, 'FloorPlan2'), 'primitive');
+    expect(how('parameter', 'FloorPlan2', 'rooms'), 'primitive');
+    expect(how('type', null, 'GoKey'), 'definition');
+    expect(how('text', 'GoKey', 'text1'), 'definition');
+    expect(how('parameter', 'GoKey', 'shortcut'), 'unread');
+    expect(how('event', 'GoKey', 'onTap'), 'definition');
+    expect(how('type', null, 'Waveform2'), 'unknown');
+    expect(how('parameter', 'Waveform2', 'seed'), 'unknown');
+    final count = countOf(corpus, primitives: 1);
+    expect(count, containsPair('primitivesDeclared', 1));
+    expect(count, containsPair('primitiveUses', 1));
+    // FloorPlan2, its string, rooms and onPick.
+    expect(count['standIn'], 4);
+    expect(count['unread'], 1);
+    expect((count['unknownTypes'], count['unknownOther']), (1, 1));
+    expect(count['resolved'], count['words']! - 4 - 1 - 2);
+    expect(countLine(count), endsWith('stand-in 4 (1 primitives declared, 1 uses), never read 1, unknown 2 (1 types, 1 other words: parameters, texts, flags, events, variants, verbs, functions)'));
   });
 
   test('a corpus file is its screens, each under a ### line; a file without one is one screen', () {

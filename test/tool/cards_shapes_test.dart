@@ -121,22 +121,48 @@ state attach={"name":"plan.pdf","size":"2 MB","progress":0.5}
     });
   }
 
-  test('the open prompt with Cards names its words on one line; --no-glossary leaves it out (D29)', () {
-    String prompt({bool glossary = true}) => api.Catalog.run(
-        catalog,
-        () => notationPrompt(
-            catalog: catalog,
-            options: NotationOptions.fromDesignSystem(ds, width: 1280).define(loadDefinitionTexts('design_systems/cards')),
-            designSystem: ds,
-            open: true,
-            glossary: glossary));
-    final names = api.Catalog.run(catalog, () => notationGlossary(ds, vocabulary, prompt: prompt(glossary: false)));
+  String openPrompt({bool glossary = true, bool signatures = true}) => api.Catalog.run(
+      catalog,
+      () => notationPrompt(
+          catalog: catalog,
+          options: NotationOptions.fromDesignSystem(ds, width: 1280).define(loadDefinitionTexts('design_systems/cards')),
+          designSystem: ds,
+          open: true,
+          glossary: glossary,
+          signatures: signatures));
+
+  test('the open prompt with Cards names its words on one line with --glossary=names; --no-glossary leaves it out (D29)', () {
+    final names = api.Catalog.run(catalog, () => notationGlossary(ds, vocabulary, prompt: openPrompt(glossary: false)));
     expect(names, containsAll(['Stepper', 'Timeline', 'Countdown', 'Rating', 'MapView', 'SignaturePad', 'Banner', 'FileUploader']));
     // Taught by the prompt, so not named again.
     expect(names, isNot(anyOf(contains('Button'), contains('Card'), contains('Badge'), contains('StickyNote'))));
-    final page = prompt();
+    final page = openPrompt(signatures: false);
     expect(page, contains('${notationGlossaryLead()}\n${names.join(' ')}\n\n'));
-    expect(page.length - prompt(glossary: false).length, lessThan(4000));
+    expect(page.length - openPrompt(glossary: false).length, lessThan(4000));
+  });
+
+  test('by default it gives each of Cards\' words as a line uses it: the shapes the standalone runs could not see (D33)', () {
+    final page = openPrompt();
+    final at = page.indexOf(notationSignaturesLead(ds.name));
+    expect(at, greaterThan(0));
+    final lines = page.substring(at + notationSignaturesLead(ds.name).length).trim().split('\n');
+    final names = api.Catalog.run(catalog, () => notationGlossary(ds, vocabulary, prompt: openPrompt(glossary: false)));
+    // One line for each word, and one more for each further meaning.
+    expect(lines.length, greaterThanOrEqualTo(names.length));
+    expect({for (final l in lines) l.trim().split(RegExp(r'[ .]')).first}, names.toSet());
+    String line(String start) => lines.firstWhere((l) => l.trim().startsWith('$start '), orElse: () => '').trim();
+    // Words the runs renamed for want of their shape.
+    expect(line('MapView'), startsWith('MapView bind center=[] zoom=12 pins=[] h=320 onSelect ... : '));
+    expect(line('FloorPlan'), startsWith('FloorPlan "name" bind rooms=[] pins=[] selected placing=false h=360 onPick onPlace ... : '));
+    expect(line('Counter'), startsWith('Counter "label" "detail" bind min='));
+    expect(line('StatusBadge'), startsWith('StatusBadge "label" tone='));
+    expect(lines.where((l) => RegExp(r'^Timeline[ .]').hasMatch(l.trim())), hasLength(3));
+    // Every line ends with what the word is, in a few words.
+    for (final l in lines.where((l) => l.contains(' : '))) {
+      expect(l.split(' : ').last.split(' ').length, lessThanOrEqualTo(7), reason: l);
+    }
+    // Twenty or so thousand characters: the switch keeps the names.
+    expect(page.length - openPrompt(glossary: false).length, lessThan(28000));
   });
 
   test('the steps Stepper and the number control are one word with two meanings', () {

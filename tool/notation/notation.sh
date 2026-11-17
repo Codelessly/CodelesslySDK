@@ -1,7 +1,7 @@
 #!/bin/bash
 # The compact notation's tools, runnable from a fresh checkout:
 #
-#   tool/notation/notation.sh prompt [--design-system <folder>] [--width <canvas width>] [--open [--no-define] [--no-glossary]]
+#   tool/notation/notation.sh prompt [--design-system <folder>] [--width <canvas width>] [--open [--no-define] [--no-glossary | --glossary=names|signatures]]
 #   tool/notation/notation.sh expand <file.txt> [--design-system <folder>] [--named] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--site <site.json>] [--out <file.json>] [--open [--vocabulary <file.json>]] [--aliases <file.json>]
 #   tool/notation/notation.sh vocabulary <folder or files> [--design-system <folder>] [--aliases <file.json>] [--no-aliases] [--out <dir>] [--sites <dir>]
 #   tool/notation/notation.sh apply <document.json> <ops.json> [--design-system <folder>] [--out <file.json>]
@@ -10,9 +10,10 @@
 # --open is the open vocabulary (codelessly_api docs/design/19-open-vocabulary.md):
 # prompt --open teaches the grammar and the core only, and asks for every
 # word the answer invents to be defined after its last screen (--no-define:
-# not asked, as the first corpus was written); with --design-system it names
-# the design system's words beyond the core on one line, the glossary
-# (--no-glossary: left out, as corpus-define d01 and d02 were written); expand --open lets a
+# not asked, as the first corpus was written); with --design-system it lists
+# the design system's words beyond the core, the glossary, one signature line
+# each (--glossary=names: their names on one line, as corpus-define d03 was
+# written; --no-glossary: left out, as d01 and d02 were written); expand --open lets a
 # word the notation does not have stand in and records it; vocabulary reads a
 # corpus of answers (tool/vocabulary/corpus/<name>) and writes which words
 # they reached for and how each resolved (vocabulary.json, VOCABULARY.md).
