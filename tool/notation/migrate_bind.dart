@@ -8,6 +8,15 @@
 // a line that still writes `bind=` shows too); this file finds the notation in
 // a file and places the state lines.
 //
+// What it rewrites is only what 33 read as a binding: a value in braces
+// (`value={s}`) was shown, one way, and is left as written. A state line is
+// added only for a variable this rewrite itself turned into `@name`, only in a
+// text that is a page (its lines at the margin are lines of the notation),
+// with the value the control, the block or the definition it binds starts at.
+// What it leaves for a hand is said in [BindMigration.notes]: a binding of a
+// name the runtime reserves (`theme`, `device`), prose that mentions bind=,
+// bind= put together by code, a page it would not add state lines to.
+//
 // Every rewrite is idempotent: a line already in the 34 form is left as it is,
 // and a variable already declared gets no second state line. Everything but
 // the rewritten words and the added lines is kept byte for byte, line endings
@@ -32,10 +41,89 @@ String? bindKindOf(String path) {
   };
 }
 
-/// One file's rewrite: [log] says what changed, [left] the lines that still
-/// write `bind=` and could not be rewritten (by their 1-based line).
+/// What a definition binds, read from its signature and its lines (in 33's
+/// form or 34's): the name of the value it keeps, and what each variable it
+/// keeps starts at as written (`0`, `[0, 100]`), for the state line of a page
+/// variable a use binds to it.
+final class BindDefinition {
+  BindDefinition(this.value, this.starts);
+
+  /// The value a use's bare `@name` binds (`@value`, 33's `bind=value`), or
+  /// null.
+  final String? value;
+
+  /// By the name the definition keeps it under: its start, as written.
+  final Map<String, String> starts;
+
+  /// What a page variable bound to [key] of a use starts at (`value` or
+  /// null: the word's value), or null when the definition says nothing.
+  Object? start(String? key) {
+    final raw = key == null || (key == 'value' && value != null) ? starts[value ?? 'value'] : starts[key];
+    if (raw == null) return null;
+    try {
+      return jsonDecode(raw);
+    } on FormatException {
+      return null;
+    }
+  }
+
+  static final _state = RegExp(r'^state\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+?)(\s+saved)?\s*$');
+
+  /// The definitions of [text] by word: each signature at the margin
+  /// (`define Word …`, `primitive Word …`; in a file of definitions
+  /// [definitionFile], every line at the margin), with the lines under it.
+  static Map<String, BindDefinition> read(String text, {bool definitionFile = false}) {
+    final out = <String, BindDefinition>{};
+    final lines = [for (final l in text.split('\n')) l.endsWith('\r') ? l.substring(0, l.length - 1) : l];
+    for (var i = 0; i < lines.length; i++) {
+      final l = lines[i];
+      if (l.isEmpty || l.startsWith(' ') || l.startsWith('//')) continue;
+      final m = RegExp(r'^(?:define|primitive)\s+').firstMatch(l);
+      if (m == null && !definitionFile) continue;
+      final parts = LineParts.of(m == null ? l : l.substring(m.end));
+      if (parts == null || out.containsKey(parts.word)) continue;
+      final body = <String, String>{};
+      for (var k = i + 1; k < lines.length && (lines[k].trim().isEmpty || lines[k].startsWith(' ')); k++) {
+        if (_state.firstMatch(lines[k].trim()) case final s?) body.putIfAbsent(s[1]!, () => s[2]!);
+      }
+      String? value;
+      final starts = <String, String?>{};
+      String? unbraced(String v) => v.startsWith('{') && v.endsWith('}') ? v.substring(1, v.length - 1).trim() : v;
+      for (final p in parts.parts) {
+        if (p.kind == 'pair' && !p.isEvent) {
+          final k = p.key!, v = p.value!;
+          final old = RegExp(r'^bind([A-Z][A-Za-z0-9]*)?$').firstMatch(k);
+          if (k == 'bind') {
+            value = unbraced(v);
+          } else if (old != null) {
+            starts['${old[1]![0].toLowerCase()}${old[1]!.substring(1)}'] = v;
+          } else if (v.startsWith('@')) {
+            starts[k] = v.length > 1 ? v.substring(1) : null;
+          } else {
+            starts[k] = v;
+          }
+        } else if (p.kind == 'word' && p.raw.startsWith('@')) {
+          final w = RegExp(r'^@([A-Za-z_][A-Za-z0-9_]*)(?:=(.+))?$').firstMatch(p.raw);
+          if (w != null) {
+            value = w[1];
+            starts[w[1]!] = w[2];
+          }
+        }
+      }
+      if (value != null) starts.putIfAbsent(value, () => null);
+      out[parts.word] = BindDefinition(value, {
+        for (final e in starts.entries)
+          if ((e.value != null && notationIsLiteral(e.value!) ? e.value : body[e.key]) case final String s when notationIsLiteral(s)) e.key: s,
+      });
+    }
+    return out;
+  }
+}
+
+/// One file's rewrite: [log] says what changed, [notes] what is left for a
+/// hand, each by its 1-based line.
 final class BindMigration {
-  BindMigration(this.catalog, {this.declared = const {}, this.definitionFile = false});
+  BindMigration(this.catalog, {this.declared = const {}, this.definitionFile = false, this.definitions = const {}});
 
   /// The file is a design system's definitions (`vocabulary/<Word>.txt`):
   /// its texts are read as definitions whatever they look like.
@@ -49,26 +137,78 @@ final class BindMigration {
   /// Variables declared outside the file (a site's, in its site.json).
   final Set<String> declared;
 
+  /// The design systems' definitions ([BindDefinition.read] of their
+  /// `vocabulary/` files): what a variable bound to one of their words
+  /// starts at. A file's own definitions are read from it, and come first.
+  final Map<String, BindDefinition> definitions;
+
   final log = <String>[];
 
+  /// What the rewrite left for a hand, each with its line: a binding of a
+  /// name the runtime reserves, prose that mentions bind=, bind= put
+  /// together by code, the state lines a text that is no page would need.
+  final notes = <String>[];
+
+  /// The definitions of the file being rewritten.
+  Map<String, BindDefinition> _own = const {};
+
   /// [text], a file of [kind] ([bindKindOf]), rewritten.
-  String file(String text, String kind) => switch (kind) {
-        'notation' => notation(text),
-        'markdown' => markdown(text),
-        'dart' => code(text, python: false),
-        'python' => code(text, python: true),
-        'json' => json(text),
-        'html' => loose(text),
-        _ => text,
-      };
+  String file(String text, String kind) {
+    _own = kind == 'notation' ? BindDefinition.read(text, definitionFile: definitionFile) : const {};
+    return switch (kind) {
+      'notation' => notation(text),
+      'markdown' => markdown(text),
+      'dart' => code(text, python: false),
+      'python' => code(text, python: true),
+      'json' => json(text),
+      'html' => loose(text),
+      _ => text,
+    };
+  }
 
   static final _head = RegExp(r'^[A-Z][A-Za-z0-9]*(\.[A-Za-z][A-Za-z0-9]*)*(#[A-Za-z_][A-Za-z0-9_-]*)?(?=\s|$)');
   static final _headAt = RegExp(r'[A-Z][A-Za-z0-9]*(\.[A-Za-z][A-Za-z0-9]*)*(#[A-Za-z_][A-Za-z0-9_-]*)?(?=\s|$)');
   static final _stateLine = RegExp(r'^(?:state|project|let|derived|const|var|computed)\s+([A-Za-z_][A-Za-z0-9_]*)');
   static final _bareState = RegExp(r'^([a-z_][A-Za-z0-9_]*)\s*=(?!=)');
   static final _old = RegExp(r'(?<![A-Za-z0-9_.@-])bind(?:[A-Z][A-Za-z0-9]*)?=');
+  static final _statement = RegExp(r'^(?:state|project|let|derived|const|var|computed|define|primitive|each|for|if|else|every|key)\b');
+  static const _pageWords = {'Page', 'App', 'Section', 'Screen', 'Main', 'Sidebar', 'Nav', 'Dialog', 'Sheet', 'Drawer', 'Menu', 'Popover', 'Lightbox', 'Header', 'Footer', 'Hero'};
 
-  /// Whether [text] is a file of definitions as a design system keeps them
+  /// Whether [word] is the word of a line of the notation: a type of ours, a
+  /// block of a design system, a page word, an alias, a defined word, or a
+  /// word of the open vocabulary written as one (`CropFrame`: two capitals).
+  bool typeWord(String word) =>
+      notationTypes.containsKey(word) ||
+      catalog.widget(word) != null ||
+      catalog.widget('${word[0].toLowerCase()}${word.substring(1)}') != null ||
+      _pageWords.contains(word) ||
+      NotationVocabulary.core.types.containsKey(word) ||
+      _own.containsKey(word) ||
+      definitions.containsKey(word) ||
+      RegExp(r'^[A-Z][a-z0-9]+[A-Z][A-Za-z0-9]*$').hasMatch(word);
+
+  /// Whether [lines] are a page (or an answer of several screens, or
+  /// definitions): every line at the margin is a line of the notation (a
+  /// node line whose word is a type word, a statement, a `###` heading, a
+  /// comment), and one at least is a node line. A docstring or a block of
+  /// prose that quotes the notation is none.
+  bool isPage(List<String> lines) {
+    var nodes = 0;
+    for (final raw in lines) {
+      final l = raw.endsWith('\r') ? raw.substring(0, raw.length - 1) : raw;
+      final t = l.trimLeft();
+      if (t.isEmpty || t.startsWith('//') || t.startsWith('```') || t.startsWith('###')) continue;
+      if (l.length != t.length) continue;
+      final rest = t.substring(RegExp(r'^(?:\$\{[^{}]*\}|\$[A-Za-z_][A-Za-z0-9_]*)*').stringMatch(t)!.length);
+      if (rest.isEmpty || _statement.hasMatch(rest) || _bareState.hasMatch(rest)) continue;
+      final head = _head.stringMatch(rest);
+      if (head == null || !typeWord(RegExp(r'^[A-Z][A-Za-z0-9]*').stringMatch(head)!) || LineParts.of(rest) == null) return false;
+      nodes++;
+    }
+    return nodes > 0;
+  }
+
+  /// Whether [lines] are a file of definitions as a design system keeps them
   /// (each signature at the margin without `define`, its lines indented
   /// under it), not a page.
   ///
@@ -77,7 +217,7 @@ final class BindMigration {
   /// under it, strings that are names (`"label"`, not prose), and something
   /// only a signature writes (a bare event `onPick`, a parameter with no value,
   /// `min`, the value it keeps, `bind=value`).
-  bool definitions(List<String> lines) {
+  bool isDefinitions(List<String> lines) {
     if (definitionFile) return true;
     var signatures = 0;
     for (var i = 0; i < lines.length; i++) {
@@ -107,18 +247,23 @@ final class BindMigration {
 
   /// A text that is notation through and through: a page (or an answer of
   /// several screens, each under its `###` line) or a file of definitions.
-  /// [states]: whether the variables a screen binds and nothing declares
-  /// get a state line. [at] names where the text is, for [log].
-  String notation(String text, {bool states = true, String at = 'line'}) {
+  /// [states]: whether the variables a screen's rewritten lines bind and
+  /// nothing declares get a state line; [pageOnly]: only when the text
+  /// [isPage] (else they are said in [notes]). [firstLine] is the file's line
+  /// the text starts on, [at] names where the text is, for [log].
+  String notation(String text, {bool states = true, bool pageOnly = false, String at = 'line', int firstLine = 1}) {
     final lines = text.split('\n');
     final cr = [for (final l in lines) l.endsWith('\r')];
     final raw = [for (final l in lines) l.endsWith('\r') ? l.substring(0, l.length - 1) : l];
-    final defs = definitions(raw);
+    final defs = isDefinitions(raw);
+    final own = BindDefinition.read(text, definitionFile: defs);
     final out = <String>[];
     // Each screen: where it starts, the state lines at its head, what it
     // declares and what its lines bind.
     final screens = <_Screen>[_Screen(0, null)];
     var inDefine = false;
+    // A signature's `bindX=0.5` is `x=@0.5`: its lines' bindX is x.
+    var renames = const <String, String>{};
     for (var i = 0; i < raw.length; i++) {
       var line = raw[i];
       final trimmed = line.trimLeft();
@@ -127,8 +272,10 @@ final class BindMigration {
       if (indent == 0 && trimmed.startsWith('###')) {
         screens.add(_Screen(out.length, out.length));
         inDefine = false;
+        renames = const {};
       } else if (indent == 0 && trimmed.isNotEmpty && !trimmed.startsWith('//')) {
         inDefine = defs || trimmed.startsWith('define ') || trimmed.startsWith('primitive ');
+        renames = inDefine ? _renames(raw, i, defs, at, firstLine) : const {};
       }
       if (trimmed.isNotEmpty && !trimmed.startsWith('//') && !trimmed.startsWith('```') && !trimmed.startsWith('###')) {
         final signature = inDefine && indent == 0;
@@ -138,9 +285,17 @@ final class BindMigration {
         final rest = line.substring(lead.length);
         final r = notationBindRewrite(signature && defs ? 'define $rest' : rest, catalog: catalog);
         var next = '$lead${signature && defs ? r.line.replaceFirst('define ', '') : r.line}';
+        if (inDefine && !signature) {
+          for (final e in renames.entries) {
+            next = next.replaceAll(RegExp('(?<![A-Za-z0-9_.])${e.key}(?![A-Za-z0-9_])'), e.value);
+          }
+        }
         if (next != line) {
-          log.add('$at ${i + 1}: ${line.trim()}  →  ${next.trim()}');
+          log.add('$at ${firstLine + i}: ${line.trim()}  →  ${next.trim()}');
           line = next;
+        }
+        for (final name in r.refused) {
+          notes.add('$at ${firstLine + i}: binds $name, a name the runtime reserves (no state line declares it): rename it by hand: ${line.trim()}');
         }
         if (!inDefine) {
           if (_stateLine.firstMatch(trimmed) case final m?) {
@@ -154,13 +309,16 @@ final class BindMigration {
           } else if (indent == 0) {
             screen.firstNode ??= out.length;
           }
+          final starts = _definedStarts(r.line.trimLeft(), own);
           for (final b in r.bound) {
-            screen.bound.putIfAbsent(b.name, () => b.start);
+            screen.bound.putIfAbsent(b.name, () => starts.containsKey(b.name) ? starts[b.name] : b.start);
+            screen.lines.putIfAbsent(b.name, () => firstLine + i);
           }
         }
       }
       out.add('$line${cr[i] ? '\r' : ''}');
     }
+    final page = !pageOnly || isPage(raw);
     if (states && !defs) {
       for (final s in screens.reversed) {
         final missing = [
@@ -168,6 +326,12 @@ final class BindMigration {
             if (!s.declared.contains(e.key) && !declared.contains(e.key)) e,
         ];
         if (missing.isEmpty) continue;
+        if (!page) {
+          for (final e in missing) {
+            notes.add('$at ${s.lines[e.key]}: not a page (its lines at the margin are not all notation), so no state line was added: state ${e.key}=${jsonEncode(e.value)} if it is one');
+          }
+          continue;
+        }
         var place = s.lastState != null ? s.lastState! + 1 : (s.heading != null ? s.heading! + 1 : s.start);
         if (s.lastState == null) {
           // Past the blank lines, comments and a fence that open it.
@@ -178,82 +342,187 @@ final class BindMigration {
         final end = cr.any((c) => c) ? '\r' : '';
         final added = [for (final e in missing) 'state ${e.key}=${jsonEncode(e.value)}'];
         out.insertAll(place, [for (final a in added) '$a$end']);
-        log.add('$at ${place + 1}: + ${added.join(', ')}');
+        log.add('$at ${firstLine + place}: + ${added.join(', ')}');
       }
     }
     return out.join('\n');
   }
 
-  /// One line of something else that holds notation (a code span, a string
-  /// of a JSON file, a line of an HTML page): each notation line in it from
-  /// its word to its end (or the code span's), rewritten; a `bind=name` with
-  /// no line around it is `@name`.
-  String loose(String text) {
+  /// The renames a definition's signature at [i] asks of its lines: 33's
+  /// `bindX=0.5` is `x=@0.5`, so the lines' `bindX` is `x`. One whose new
+  /// name the definition already uses is said in [notes] and not made.
+  Map<String, String> _renames(List<String> raw, int i, bool defs, String at, int firstLine) {
+    final sig = raw[i].replaceFirst(RegExp(r'^(?:define|primitive)\s+'), '');
+    final parts = LineParts.of(sig);
+    if (parts == null) return const {};
+    final body = [for (var k = i + 1; k < raw.length && (raw[k].trim().isEmpty || raw[k].startsWith(' ')); k++) raw[k]].join('\n');
+    final out = <String, String>{};
+    for (final p in parts.parts) {
+      if (p.kind != 'pair' || p.isEvent) continue;
+      final m = RegExp(r'^bind([A-Z][A-Za-z0-9]*)$').firstMatch(p.key!);
+      if (m == null) continue;
+      final to = '${m[1]![0].toLowerCase()}${m[1]!.substring(1)}';
+      final used = RegExp('(?<![A-Za-z0-9_.])$to(?![A-Za-z0-9_])');
+      if (used.hasMatch(body) || parts.parts.any((x) => x.key == to || x.raw == to || x.raw.startsWith('@$to'))) {
+        notes.add('$at ${firstLine + i}: ${p.key} is $to=@ in 34, and the definition already uses the name $to: rename ${p.key} in its lines by hand');
+        continue;
+      }
+      out[p.key!] = to;
+    }
+    return out;
+  }
+
+  /// What the page variables [line] (rewritten) binds to a defined word
+  /// start at, by the definition ([own] first, then the design systems'):
+  /// its value's or the named variable's default.
+  Map<String, Object?> _definedStarts(String line, Map<String, BindDefinition> own) {
+    final parts = LineParts.of(line);
+    if (parts == null) return const {};
+    final d = own[parts.word] ?? _own[parts.word] ?? definitions[parts.word];
+    if (d == null) return const {};
+    final bare = [for (final p in parts.parts) if (p.kind == 'word' && p.raw.startsWith('@')) p.raw.substring(1)];
+    final out = <String, Object?>{};
+    // Two bare marks are a range (our Slider), not the definition's value.
+    if (bare.length == 1) {
+      if (d.start(null) case final Object v) out[bare.single] = v;
+    }
+    for (final p in parts.parts) {
+      if (p.kind == 'pair' && p.value!.startsWith('@') && p.value!.length > 1) {
+        if (d.start(p.key) case final Object v) out[p.value!.substring(1)] = v;
+      }
+    }
+    return out;
+  }
+
+  /// One line of something else that holds notation (a line of an HTML page,
+  /// a string of a JSON file, a one-line literal of code): each notation line
+  /// in it, from its type word to its end (or its code span's), rewritten.
+  /// A bind= in no such line (prose that names the old form) is left, and
+  /// said.
+  String loose(String text, {int firstLine = 1}) {
     final lines = text.split('\n');
     for (var i = 0; i < lines.length; i++) {
       final l = lines[i];
       if (!_old.hasMatch(l)) continue;
-      final next = _looseLine(l);
+      final next = _looseLine(l, firstLine + i);
       if (next != l) {
-        log.add('line ${i + 1}: ${l.trim()}  →  ${next.trim()}');
+        log.add('line ${firstLine + i}: ${l.trim()}  →  ${next.trim()}');
         lines[i] = next;
       }
     }
     return lines.join('\n');
   }
 
-  String _looseLine(String l) {
+  String _looseLine(String l, int lineNo) {
     var line = l;
+    var from = 0;
     for (var guard = 0; guard < 20; guard++) {
-      final m = _old.firstMatch(line);
+      final m = _old.allMatches(line, from).firstOrNull;
       if (m == null) break;
-      // The notation line the key is on: from the nearest word before it
-      // that starts a line of the notation (after a space, a quote, a
+      // The notation line the key is on: from the nearest type word before
+      // it that starts a line of the notation (after a space, a quote, a
       // backtick, a parenthesis or a colon, and not inside one of the line's
       // strings), to the end of its code span.
       var start = -1;
       for (var p = m.start - 1; p >= 0; p--) {
         if (line[p] == '`' && p < m.start - 1) break;
-        if ((p == 0 || ' `"(\'>:'.contains(line[p - 1])) &&
+        if ((p == 0 || ' `"(\'>:}'.contains(line[p - 1])) &&
             _headAt.matchAsPrefix(line, p) != null &&
+            typeWord(RegExp(r'[A-Z][A-Za-z0-9]*').matchAsPrefix(line, p)![0]!) &&
             RegExp(r'(?<!\\)"').allMatches(line.substring(p, m.start)).length.isEven) {
           start = p;
           break;
         }
       }
-      String rewritten;
-      int from, to;
+      // A notation line that ends before the key (a pattern's `\` or a
+      // parenthesis closed before it) is not the key's.
+      if (start >= 0 && _lineEnd(line, start) < m.end) start = -1;
       if (start >= 0) {
-        final tick = line.indexOf('`', m.end);
-        to = tick < 0 ? line.length : tick;
-        from = start;
-        rewritten = notationBindRewrite(line.substring(from, to), catalog: catalog).line;
-      } else {
-        rewritten = '';
-        from = to = 0;
-      }
-      if (start < 0 || rewritten == line.substring(from, to)) {
-        // No line around it: the key alone.
-        // Its value: braced, or a word up to what ends it in prose.
-        final value = RegExp(r'^(\{[^{}\s]*(\{[^{}\s]*\}[^{}\s]*)*\}|[A-Za-z_][^\s`|,;]*)').stringMatch(line.substring(m.end));
-        if (value == null) break;
-        final name = value.startsWith('{') ? value.substring(1, value.length - 1) : value.replaceFirst(RegExp(r'[.)]+$'), '');
-        if (!value.startsWith('{') && name.length < value.length) {
-          line = line.replaceRange(m.start, m.end + name.length, '@$name');
+        final to = _lineEnd(line, start);
+        final r = notationBindRewrite(line.substring(start, to), catalog: catalog);
+        for (final name in r.refused) {
+          notes.add('line $lineNo: binds $name, a name the runtime reserves (no state line declares it): rename it by hand: ${l.trim()}');
+        }
+        if (r.line != line.substring(start, to)) {
+          line = line.replaceRange(start, to, r.line);
+          from = start;
           continue;
         }
-        line = line.replaceRange(m.start, m.end + value.length, '@$name');
-        continue;
+        if (r.refused.isNotEmpty) {
+          from = to;
+          continue;
+        }
       }
-      line = line.replaceRange(from, to, rewritten);
+      notes.add('line $lineNo: mentions bind= in prose, left: ${l.trim()}');
+      from = m.end;
     }
     return line;
   }
 
+  /// Where the notation line that starts at [start] of [line] ends: at the
+  /// end of its code span or of the line, or where prose (or a pattern)
+  /// closes around it, at a backslash or a parenthesis it did not open
+  /// (`\(or Progress bind=done\)`).
+  static int _lineEnd(String line, int start) {
+    var depth = 0;
+    var quoted = false;
+    for (var k = start; k < line.length; k++) {
+      final c = line[k];
+      // `\"` in a literal of code is a quote of the line.
+      if (c == r'\' && k + 1 < line.length && (line[k + 1] == '"' || line[k + 1] == "'")) {
+        if (line[k + 1] == '"') quoted = !quoted;
+        k++;
+        continue;
+      }
+      if (c == '"') quoted = !quoted;
+      if (quoted) continue;
+      if (c == '`' || c == r'\' || (c == ')' && depth == 0)) return k;
+      if ('([{'.contains(c)) depth++;
+      if (')]}'.contains(c)) depth--;
+    }
+    return line.length;
+  }
+
+  /// Prose (a Markdown line out of a fence, a docstring): only a code span
+  /// that is a whole notation line (it starts with a type word) is
+  /// rewritten; any other bind= (`bind=name` is gone) is left, and said.
+  String prose(String text, {int firstLine = 1}) {
+    final lines = text.split('\n');
+    for (var i = 0; i < lines.length; i++) {
+      final l = lines[i];
+      if (!_old.hasMatch(l)) continue;
+      var said = false;
+      final next = l.replaceAllMapped(RegExp(r'(`+)(.+?)\1'), (s) {
+        final span = s[2]!;
+        if (!_old.hasMatch(span)) return s[0]!;
+        final head = _head.stringMatch(span);
+        if (head != null && typeWord(RegExp(r'^[A-Z][A-Za-z0-9]*').stringMatch(head)!)) {
+          final r = notationBindRewrite(span, catalog: catalog);
+          for (final name in r.refused) {
+            notes.add('line ${firstLine + i}: binds $name, a name the runtime reserves (no state line declares it): rename it by hand: ${l.trim()}');
+          }
+          if (r.line != span) return '${s[1]}${r.line}${s[1]}';
+          if (r.refused.isNotEmpty) return s[0]!;
+        }
+        said = true;
+        return s[0]!;
+      });
+      if (said || _old.hasMatch(next.replaceAll(RegExp(r'(`+).+?\1'), ''))) {
+        notes.add('line ${firstLine + i}: mentions bind= in prose, left: ${l.trim()}');
+      }
+      if (next != l) {
+        log.add('line ${firstLine + i}: ${l.trim()}  →  ${next.trim()}');
+        lines[i] = next;
+      }
+    }
+    return lines.join('\n');
+  }
+
   /// A Markdown file: its fenced blocks of notation (no language, `text`,
-  /// `txt`, `notation`) as notation, the rest line by line ([loose]: code
-  /// spans and the prose that writes `bind=`).
-  String markdown(String source) {
+  /// `txt`, `notation`) as notation (state lines only in one that is a
+  /// page), any other fence that writes bind= line by line ([loose]), and its
+  /// prose by its code spans ([prose]).
+  String markdown(String source, {int firstLine = 1}) {
     final lines = source.split('\n');
     final out = <String>[];
     for (var i = 0; i < lines.length; i++) {
@@ -267,9 +536,9 @@ final class BindMigration {
         out.add(lines[i]);
         final body = lines.sublist(i + 1, end).join('\n');
         if (const {'', 'text', 'notation', 'txt'}.contains(fence[3])) {
-          out.add(notation(body, at: 'block at line ${i + 2}, line'));
+          out.add(notation(body, pageOnly: true, at: 'line', firstLine: firstLine + i + 1));
         } else if (_old.hasMatch(body)) {
-          out.add(loose(body));
+          out.add(loose(body, firstLine: firstLine + i + 1));
         } else {
           out.add(body);
         }
@@ -277,19 +546,21 @@ final class BindMigration {
         i = end;
         continue;
       }
-      out.add(_old.hasMatch(lines[i]) ? _looseLine(lines[i]) : lines[i]);
-      if (out.last != lines[i]) log.add('line ${i + 1}: ${lines[i].trim()}  →  ${out.last.trim()}');
+      out.add(_old.hasMatch(lines[i]) ? prose(lines[i], firstLine: firstLine + i) : lines[i]);
     }
     return out.join('\n');
   }
 
   /// A Dart or Python file: the notation in its string literals. A literal
-  /// of several lines is a text of its own (state lines are added at its
-  /// top); one of a single line is rewritten alone.
+  /// of several lines that is a page is a text of its own (state lines are
+  /// added at its top); one that is not (a docstring) is prose; one of a
+  /// single line is rewritten alone. A literal that puts bind= together
+  /// (`' bind=$key'`, `f"bind={name}"`) is left, and said.
   String code(String source, {required bool python}) {
     final out = StringBuffer();
     var i = 0;
     final comment = python ? '#' : '//';
+    int lineAt(int offset) => '\n'.allMatches(source.substring(0, offset)).length + 1;
     while (i < source.length) {
       final c = source[i];
       if (source.startsWith(comment, i)) {
@@ -306,7 +577,9 @@ final class BindMigration {
       }
       // A raw string (r'…' in either language) has no escapes.
       final prefix = RegExp(r'([A-Za-z]{1,2})$').stringMatch(source.substring(i > 2 ? i - 2 : 0, i)) ?? '';
-      final raw = prefix.toLowerCase().contains('r') && (i - prefix.length == 0 || !RegExp(r'[A-Za-z0-9_]').hasMatch(source[i - prefix.length - 1]));
+      final standalone = i - prefix.length == 0 || !RegExp(r'[A-Za-z0-9_]').hasMatch(source[i - prefix.length - 1]);
+      final raw = prefix.toLowerCase().contains('r') && standalone;
+      final formatted = python && prefix.toLowerCase().contains('f') && standalone;
       final triple = source.startsWith(c * 3, i);
       final quote = triple ? c * 3 : c;
       var j = i + quote.length;
@@ -332,17 +605,45 @@ final class BindMigration {
       }
       final body = source.substring(i + quote.length, j);
       var next = body;
-      if (_old.hasMatch(body) || body.contains('@')) {
-        // `\n` in a one-line literal is a line of the notation.
-        final escaped = !triple && !raw && body.contains(r'\n');
-        final text = escaped ? body.replaceAll(r'\n', '\n') : body;
-        final before = log.length;
-        final several = text.trim().contains('\n');
-        final migrated = several ? notation(text, at: 'literal at offset $i, line') : loose(text);
-        if (migrated != text) {
-          next = escaped ? migrated.replaceAll('\n', r'\n') : migrated;
+      if (_old.hasMatch(body)) {
+        final line = lineAt(i);
+        // bind= whose value the code puts in (`bind=$key`, `bind=${k}`,
+        // f"bind={name}", 'bind=%s', or a literal that ends at bind=): no
+        // line of notation to rewrite here.
+        final built = [
+          for (final m in _old.allMatches(body))
+            if (m.end == body.length ||
+                RegExp(r'^[\s%]').hasMatch(body.substring(m.end)) ||
+                (!python && !raw && body.startsWith(r'$', m.end)) ||
+                (formatted && body.startsWith('{', m.end) && !body.startsWith('{{', m.end)) ||
+                body.startsWith('{}', m.end))
+              m,
+        ];
+        if (built.isNotEmpty) {
+          for (final m in built) {
+            notes.add('line ${line + '\n'.allMatches(body.substring(0, m.start)).length}: bind= built in code: rewrite by hand: ${body.trim().split('\n').first}');
+          }
         } else {
-          log.removeRange(before, log.length);
+          // `\n` in a one-line literal is a line of the notation.
+          final escaped = !triple && !raw && body.contains(r'\n');
+          // `\"` in a literal of "…" is a quote of the notation (and `\'` in
+          // one of '…'): read as one, and escaped again after.
+          final quoted = !triple && !raw && body.contains('\\$c');
+          var text = escaped ? body.replaceAll(r'\n', '\n') : body;
+          if (quoted) text = text.replaceAll('\\$c', c);
+          final before = log.length;
+          final several = text.trim().contains('\n');
+          final migrated = !several
+              ? loose(text, firstLine: line)
+              : isPage(text.split('\n'))
+                  ? notation(text, at: 'line', firstLine: line)
+                  : prose(text, firstLine: line);
+          if (migrated != text) {
+            next = quoted ? migrated.replaceAll(c, '\\$c') : migrated;
+            next = escaped ? next.replaceAll('\n', r'\n') : next;
+          } else {
+            log.removeRange(before, log.length);
+          }
         }
       }
       out.write('$quote$next$quote');
@@ -370,16 +671,17 @@ final class BindMigration {
       final literal = source.substring(i, j + 1 > source.length ? source.length : j + 1);
       var next = literal;
       if (_old.hasMatch(literal)) {
+        final line = '\n'.allMatches(source.substring(0, i)).length + 1;
         try {
           final value = jsonDecode(literal) as String;
           // A string of Markdown (a design system's patterns, a block's doc
           // with code spans) as Markdown; one of several lines as a page;
           // one line alone.
           final migrated = value.contains('`')
-              ? markdown(value)
+              ? markdown(value, firstLine: line)
               : value.contains('\n')
-                  ? notation(value, states: false, at: 'string at offset $i, line')
-                  : loose(value);
+                  ? notation(value, states: false, at: 'string at line $line, line')
+                  : loose(value, firstLine: line);
           if (migrated != value) next = jsonEncode(migrated);
         } on FormatException {
           // Not a string of JSON after all: as it is.
@@ -470,7 +772,8 @@ final class BindMigration {
 }
 
 /// A screen of a text: where it starts (its `###` line), where its head of
-/// state lines ends, what it declares and what its lines bind.
+/// state lines ends, what it declares, what its lines bind and where each is
+/// first bound.
 final class _Screen {
   _Screen(this.start, this.heading);
   final int start;
@@ -478,4 +781,5 @@ final class _Screen {
   int? lastState, firstNode;
   final declared = <String>{};
   final bound = <String, Object?>{};
+  final lines = <String, int>{};
 }

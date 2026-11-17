@@ -1,8 +1,11 @@
 // Rewrites notation to the grammar codelessly_api reads now.
 //
 //   dart run tool/notation/migrate.dart <file or folder>... [options]
-//       --check                         change nothing; list each file that would change, and each line
-//                                       that still writes bind= the tool cannot rewrite; exit 1 when any
+//       --check                         change nothing; list each file that would change, each line
+//                                       that still writes bind= the tool cannot rewrite, and each note of
+//                                       what is left for a hand (a binding of a name the runtime reserves,
+//                                       prose that mentions bind=, bind= built in code, state lines a text
+//                                       that is no page would need); exit 1 when any
 //       --stdout                        print the one file instead of rewriting it
 //       --design-system <folder>        the blocks the files call (repeatable); without it, every design
 //                                       system under the SDK's design_systems/
@@ -33,17 +36,30 @@
 //   Progress bind=done                    Progress value={done}              (a value shown keeps none)
 //   Text bind=label                       Text "{label}"
 //   Thing bindStart=from                  Thing start=@from                  (a word the notation does not have)
+//   Column selectable reorder bind=xs     Column selectable reorder selected=@xs
+//   Column reorder bind=xs                Column reorder                     (the each's list is what is reordered)
 //   define Stepper "label" bind=value     define Stepper "label" @value
-//   (a variable a screen binds that nothing declares)
+//   define Bar value=0 bind=value         define Bar @value=0
+//   define Crop bindX=0.5                 define Crop x=@0.5                 (and the definition's bindX is x)
+//   (a variable a rewritten line binds that nothing declares)
 //                                         state heat=14 added at the screen's head (under its ### line, after
-//                                         its state lines, else at the top), with the control's empty value
+//                                         its state lines, else at the top), with the control's empty value,
+//                                         a defined word's default for it
+//
+// Left as written: a value in braces on any key but bind= (`value={s}`,
+// `lo={lo}`: shown, one way, in 33), a mark already written `@name` (no state
+// line for it either), and a binding of a name the runtime reserves
+// (`bind=theme`: no state line can declare it; said, for a rename by hand).
 //
 // In a Markdown file the fenced blocks of notation (no language, text, txt,
-// notation) are rewritten as pages; any other line's notation (a code span, a
-// line of prose that writes bind=) line by line, with no state lines. In a
-// Dart or Python file, the string literals: one of several lines as a page,
-// one of a single line alone. In a JSON file, its strings; in an HTML file,
-// its lines. A file of definitions as a design system keeps them (each
+// notation) are rewritten as pages (state lines only in one whose lines at
+// the margin are all notation); in its prose, only a code span that is a
+// whole notation line (`Slider bind=volume`); any other mention of bind= in
+// prose is left and said. In a Dart or Python file, the string literals: one
+// of several lines as a page when it is one, else as prose (a docstring); one
+// of a single line alone; one that builds bind= (`' bind=$key'`,
+// f"bind={name}") is left and said. In a JSON file, its strings; in an HTML
+// file, its lines. A file of definitions as a design system keeps them (each
 // signature at the margin, its lines under it) gets no state lines.
 //
 // From 32 (the original grammar, --from 32: key:value, =name, key:=expression,
@@ -110,6 +126,18 @@ Future<void> main(List<String> args) async {
   }
   var catalog = standardCatalog;
   final catalogs = <Catalog>[];
+  // The design systems' definitions (vocabulary/<Word>.txt): what a variable
+  // a use binds to one of their words starts at.
+  final definitions = <String, BindDefinition>{};
+  for (final dir in folders) {
+    final vocabulary = Directory('$dir/vocabulary');
+    if (!vocabulary.existsSync()) continue;
+    for (final f in vocabulary.listSync().whereType<File>().where((f) => f.path.endsWith('.txt')).toList()..sort((a, b) => a.path.compareTo(b.path))) {
+      for (final e in BindDefinition.read(f.readAsStringSync(), definitionFile: true).entries) {
+        definitions.putIfAbsent(e.key, () => e.value);
+      }
+    }
+  }
   for (final dir in folders) {
     final ds = await DesignSystem.load((ref) async {
       final f = File('$dir/$ref');
@@ -131,7 +159,7 @@ Future<void> main(List<String> args) async {
     }
   }
   files.sort();
-  var changed = 0, leftLines = 0;
+  var changed = 0, leftLines = 0, noted = 0;
   for (final path in files) {
     final file = File(path);
     if (!file.existsSync()) {
@@ -167,21 +195,30 @@ Future<void> main(List<String> args) async {
     // A design system's definitions: design_systems/<name>/vocabulary/<Word>.txt.
     final segments = File(path).absolute.path.replaceAll(r'\', '/').split('/');
     final definitionFile = segments.length > 2 && segments[segments.length - 2] == 'vocabulary' && File('${segments.sublist(0, segments.length - 2).join('/')}/design_system.json').existsSync();
-    final m = BindMigration(catalog, declared: _siteVariables(site, path), definitionFile: definitionFile);
+    final m = BindMigration(catalog, declared: _siteVariables(site, path), definitionFile: definitionFile, definitions: definitions);
     final migrated = m.file(start, as);
     log.addAll(m.log);
     final left = BindMigration.left(migrated, as);
     if (print) {
       stdout.write(migrated);
+      for (final n in m.notes) {
+        stderr.writeln('$path: $n');
+      }
       continue;
     }
     if (migrated != text) changed++;
+    noted += m.notes.length;
+    // What is left for a hand (a reserved name, prose, bind= built in code,
+    // a text that is no page), in both modes.
+    for (final n in m.notes) {
+      stdout.writeln('$path: $n');
+    }
     if (check) {
       if (migrated != text) stdout.writeln('$path: in the old form (${log.length} change${log.length == 1 ? '' : 's'})');
       for (final l in left) {
         stdout.writeln('$path:$l: still writes bind= after the rewrite: ${migrated.split('\n')[l - 1].trim()}');
       }
-      if (migrated != text || left.isNotEmpty) exitCode = 1;
+      if (migrated != text || left.isNotEmpty || m.notes.isNotEmpty) exitCode = 1;
     } else {
       if (migrated != text) file.writeAsStringSync(migrated);
       for (final l in log) {
@@ -193,7 +230,10 @@ Future<void> main(List<String> args) async {
     }
     leftLines += left.length;
   }
-  if (!print) stderr.writeln('${files.length} files: $changed ${check ? 'to rewrite' : 'rewritten'}${leftLines == 0 ? '' : ', $leftLines lines still writing bind= to look at'}');
+  if (!print) {
+    stderr.writeln('${files.length} files: $changed ${check ? 'to rewrite' : 'rewritten'}${leftLines == 0 ? '' : ', $leftLines lines still writing bind= to look at'}'
+        '${noted == 0 ? '' : ', $noted notes of what is left for a hand'}');
+  }
 }
 
 /// The variables of the site [path] belongs to: [given]'s site.json, else
