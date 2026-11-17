@@ -146,6 +146,7 @@ void loopLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool ani
   if (animates && be.tooltip.isNotEmpty) {
     chain.add(b.obtain<RenderTooltipRegion>('tooltip', RenderTooltipRegion.new)
       ..message = be.tooltip
+      ..direction = be.textDirection == api.TextDirection.rtl ? ui.TextDirection.rtl : ui.TextDirection.ltr
       ..tokens = ControlTokens.of(b));
   }
   final hasMotion = _hasMotionLayer(b, n, animates);

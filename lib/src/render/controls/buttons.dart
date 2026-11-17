@@ -63,6 +63,10 @@ void buttonRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
         : null;
   box.enabled = box.spec.enabled && !states.contains(api.WidgetState.disabled);
   box.busy = box.spec.loading;
+  // An icon-only button has no visible label: its tooltip is its name for
+  // assistive technology, as well as the hint shown to sighted users.
+  box.semanticsLabel = box.spec.label.isEmpty && n.behaviors.tooltip.isNotEmpty ? n.behaviors.tooltip : null;
+  box.semanticsDirection = n.behaviors.textDirection == api.TextDirection.rtl ? TextDirection.rtl : TextDirection.ltr;
   box.autofocus = interactive && box.spec.autofocus;
   chain.add(box);
   // A touch lands on it in a 44 × 44 target around a smaller button

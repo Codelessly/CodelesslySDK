@@ -17,6 +17,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support.dart';
+import '../support/keyboard.dart';
 
 RenderButton _button(RenderTree tree, String id) {
   RenderButton? found;
@@ -425,6 +426,76 @@ void main() {
     await mouse.moveTo(const Offset(390, 290));
     await tester.pump();
     expect(root.overlayEntries, isEmpty);
+    await mouse.moveTo(centerOf(tree, 'more'));
+    await tester.pump(const Duration(milliseconds: 450));
+    expect(root.overlayEntries, hasLength(1), reason: 'a later hover schedules a new hint');
+  });
+
+  testWidgets('an icon tooltip opens on keyboard focus and Escape dismisses it without moving focus', (tester) async {
+    final semantics = tester.ensureSemantics();
+    final (tree, recorded) = await _show(tester, {
+      'more': hugging('iconButton', {'icon': 'more_horiz'}, {'tooltip': 'More actions'}),
+    });
+    final root = tester.renderObject<RenderControlRoot>(find.byType(NodeView));
+    final keys = Keyboard(tester);
+    expect(keys.stopIds(tree.boxOf('more')!), ['more']);
+    await keys.tab();
+    expect(keys.focusedId, 'more');
+    expect(keys.ringShown, isTrue);
+    expect(keys.semantics!.isButton, isTrue);
+    expect(keys.semantics!.isFocused, isTrue);
+    expect(keys.semantics!.label, 'More actions');
+    expect((root.overlayEntries.single as RenderTooltipBubble).message, 'More actions');
+    await keys.escape();
+    expect(keys.focusedId, 'more');
+    expect(root.overlayEntries, isEmpty);
+    await tester.pump(const Duration(seconds: 1));
+    expect(root.overlayEntries, isEmpty, reason: 'Escape suppresses the tooltip until focus leaves');
+    await keys.space();
+    await keys.enter();
+    expect(recorded.fired, ['more click', 'more click']);
+    semantics.dispose();
+  });
+
+  testWidgets('a phone touch hold shows a tooltip and leaves its button tappable', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final (tree, recorded) = await _show(tester, {
+      'more': hugging('iconButton', {'icon': 'more_horiz'}, {'tooltip': 'More actions'}),
+    });
+    final root = tester.renderObject<RenderControlRoot>(find.byType(NodeView));
+    final finger = await tester.startGesture(centerOf(tree, 'more'), kind: PointerDeviceKind.touch);
+    await tester.pump(const Duration(milliseconds: 450));
+    expect((root.overlayEntries.single as RenderTooltipBubble).message, 'More actions');
+    await finger.up();
+    await tester.pump();
+    expect(root.overlayEntries, hasLength(1));
+    await tester.pump(const Duration(seconds: 2));
+    expect(root.overlayEntries, isEmpty);
+    await tester.tapAt(centerOf(tree, 'more'));
+    await tester.pump();
+    expect(recorded.fired, contains('more click'));
+  });
+
+  testWidgets('a dark RTL tooltip keeps its text direction and keyboard behavior', (tester) async {
+    final semantics = tester.ensureSemantics();
+    final (_, _) = await _show(tester, {
+      'more': hugging('iconButton', {'icon': 'more_horiz'}, {'tooltip': 'مزيد من الخيارات', 'textDirection': 'rtl'}),
+    }, dark: true, fill: '#FF111111');
+    final root = tester.renderObject<RenderControlRoot>(find.byType(NodeView));
+    final keys = Keyboard(tester);
+    await keys.tab();
+    expect(keys.focusedId, 'more');
+    expect(keys.ringShown, isTrue);
+    expect(keys.semantics!.data.textDirection, TextDirection.rtl);
+    final bubble = root.overlayEntries.single as RenderTooltipBubble;
+    expect(bubble.message, 'مزيد من الخيارات');
+    expect(bubble.direction, TextDirection.rtl);
+    await keys.escape();
+    expect(root.overlayEntries, isEmpty);
+    semantics.dispose();
   });
 
   testWidgets('on a touch screen a small button takes taps in a 44 × 44 target around it', (tester) async {

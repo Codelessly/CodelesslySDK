@@ -26,6 +26,7 @@ import 'package:flutter/services.dart';
 
 import '../../render/controls/focus.dart';
 import '../../render/controls/kit.dart' show firstTextUnder, paintFocusRing;
+import '../../render/controls/overlay.dart' show tooltipFocusChanged;
 import '../../render/controls/root.dart' show RenderControlRoot;
 import '../../render/controls/text_field.dart' show RenderTextField;
 import '../../render/controls/tokens.dart' show ControlTokens;
@@ -790,6 +791,7 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
   void _focusChanged() {
     markNeedsPaint();
     markNeedsSemanticsUpdate();
+    if (_focus case final node?) tooltipFocusChanged(node);
     final shown = _focus?.showsHighlight ?? false;
     if (shown == _shownFocused) return;
     _shownFocused = shown;
