@@ -1888,6 +1888,8 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       if (o is RenderRunningTable) return true;
       if (o is NodeBox && control != null) {
         if (o.source.node(o.id)?.actions.isNotEmpty ?? false) return true;
+        // A reorder handle: a press focuses it, for Alt and the arrows.
+        if (o.source.node(o.id)?.behaviors.reorderHandle ?? false) return true;
         control = null;
       }
       if (o is NodeBox) inWidget = false;
