@@ -2,7 +2,7 @@
 // (package:codelessly_api/notation.dart): the grammar, the words, and, with
 // a design system, its components.
 //
-//   dart run tool/notation/prompt.dart [--design-system <folder>] [--width <canvas width>]
+//   dart run tool/notation/prompt.dart [--design-system <folder>] [--width <canvas width>] [--open [--no-define] [--no-glossary]]
 import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
@@ -14,9 +14,14 @@ Future<void> main(List<String> args) async {
   // --open: the open-vocabulary prompt (the grammar and the core only; a
   // design system's components are not listed), which asks the model to
   // define every word it invents after its last screen; --no-define leaves
-  // that out (the prompt the first corpus was written with).
+  // that out (the prompt the first corpus was written with). With a design
+  // system the open prompt names its components and defined words on one
+  // line, the glossary (the vocabulary loop's Review 6, D29); --no-glossary
+  // leaves it out (the prompt the self-defining corpora d01 and d02 were
+  // written with).
   final open = args.contains('--open');
   final define = !args.contains('--no-define');
+  final glossary = !args.contains('--no-glossary');
   final w = args.indexOf('--width');
   final width = w >= 0 && w + 1 < args.length ? double.tryParse(args[w + 1]) ?? 390.0 : 390.0;
   final i = args.indexOf('--design-system');
@@ -43,10 +48,12 @@ Future<void> main(List<String> args) async {
     catalog,
     () => notationPrompt(
       catalog: catalog,
-      options: ds == null ? NotationOptions(width: width) : NotationOptions.fromDesignSystem(ds, width: width),
+      // The design system's defined words, for the glossary to name.
+      options: ds == null ? NotationOptions(width: width) : NotationOptions.fromDesignSystem(ds, width: width).define(loadDefinitionTexts(args[i + 1])),
       designSystem: ds,
       open: open,
       define: define,
+      glossary: glossary,
     ),
   ));
   if (defined.isNotEmpty) {

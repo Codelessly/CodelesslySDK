@@ -4,6 +4,11 @@ Needs codelessly_api from its master branch (universal words, docs/design/21-uni
 
 ### Added
 
+- **`notation.sh prompt --open --design-system <folder>` names the design system's words: the glossary** (Review
+  6, D29): one line with the names of its components and defined words the open prompt does not teach, and the
+  instruction to use one as expected and define only what is in neither list. `--no-glossary` leaves it out (the
+  prompt `corpus-define/d01` and `d02` were written with). With Cards: 3,664 characters (24,206 for a page at
+  1280 against 20,542 without; 14,874 for a card at 390 against 11,202).
 - **The vocabulary tool lists the named words used in a shape we do not take** (Review 6, D30): a section of
   `VOCABULARY.md` ranks, by answers, the parameters, flags, events and variants answers gave a component of the
   design system or a word it defines that it does not take (the glossary's bug list); the sections that were
