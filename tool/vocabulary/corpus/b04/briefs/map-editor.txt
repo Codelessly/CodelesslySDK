@@ -1,0 +1,3 @@
+App: Cartograph, a map annotation tool. A drawn map with layers toggled in a panel; add markers, lines and areas with tools, vertices dragged to reshape, a measure tool that reads distance; a feature's properties form; style pickers for stroke, fill and icon; snap toggle; coordinates under the cursor; import a file with a column-mapping step.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

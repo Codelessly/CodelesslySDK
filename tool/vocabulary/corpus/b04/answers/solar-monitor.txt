@@ -1,0 +1,175 @@
+### Live
+state tab="live"
+state storm=false
+state battery=0.72
+state flow={"solar":4.8,"home":2.1,"battery":1.9,"grid":0.8}
+state range="Today"
+state hours=["6a","8a","10a","12p","2p","4p","6p","8p"]
+state production=[0.2,1.4,3.8,5.2,4.9,3.1,0.9,0]
+state usage=[0.8,1.9,1.6,1.8,2.1,2.6,3.2,2.4]
+every 2s onTick={flow=with(flow,"solar",round(4.4+(flow.grid*0.5),1))}
+App
+  Sidebar
+    Brand "Sunroof" icon="wb_sunny"
+    NavItem "Live" icon="bolt" selected={tab=="live"} onTap={tab="live"}
+    NavItem "Savings" icon="savings" selected={tab=="savings"} onTap={go savings}
+    NavItem "Roof" icon="solar_power" selected={tab=="roof"} onTap={go roof}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Whitfield" size=32
+      Text.muted "14 Alder Lane"
+  Main
+    Nav
+      Heading "Live energy" level=1
+      Row gap=12 middle
+        Toggle "Storm watch" bind=storm onChange={result ? toast "Storm watch on: battery reserved for outages" : toast "Storm watch off"}
+        IconButton "refresh" tooltip="Refresh" onTap={toast "Updated just now"}
+    Column pad=24 gap=16
+      if storm
+        Card gap=8 fill=#FFFFF3CD
+          Row gap=8 middle
+            Icon "thunderstorm"
+            Text.strong "Storm watch is on"
+          Text.muted "Battery is held at 100% and grid export is paused until the alert clears."
+      Card gap=16
+        Row between
+          Text.strong "Power flow"
+          Badge.success "Grid connected"
+        FlowDiagram h=260
+          FlowNode#solar "Panels" icon="solar_power" value="{flow.solar} kW"
+          FlowNode#battery "Battery" icon="battery_charging_full" value="{flow.battery} kW"
+          FlowNode#home "Home" icon="home" value="{flow.home} kW"
+          FlowNode#grid "Grid" icon="electrical_services" value="{flow.grid} kW"
+          FlowArrow from=solar to=home label="{flow.home} kW" animate=pulse
+          FlowArrow from=solar to=battery label="{flow.battery} kW" animate=pulse
+          FlowArrow from=solar to=grid label="{flow.grid} kW" animate=pulse hidden={storm}
+      Grid cols=3 gap=16
+        Card gap=8
+          Text.muted "Self-powered today"
+          Row gap=12 middle
+            Ring 0.86
+            Text.heading1 "86%"
+        Card gap=8
+          Text.muted "Produced today"
+          Text "{sum(production,x=>x)} kWh" size=32 weight=700
+          Sparkline values={production}
+        Card gap=8
+          Text.muted "Used today"
+          Text "{sum(usage,x=>x)} kWh" size=32 weight=700
+          Sparkline values={usage}
+      Card gap=12
+        Row between
+          Text.strong "Production and use"
+          SegmentedButton bind=range items=["Today","Week"]
+        AreaChart labels={hours} series=[{"name":"Production","values":[0.2,1.4,3.8,5.2,4.9,3.1,0.9,0]},{"name":"Use","values":[0.8,1.9,1.6,1.8,2.1,2.6,3.2,2.4]}] h=220
+      Card gap=12
+        Row between
+          Text.strong "Battery"
+          Text.muted "Full in 1 h 40 min"
+        Row gap=16 middle
+          BatteryShape bind=battery w=80 h=120
+          Column grow gap=4
+            Text "{round(battery*100,0)}%" size=40 weight=700
+            Text.muted "13.5 kWh capacity, charging at 1.9 kW"
+            Progress bind=battery
+
+### Savings
+state tab="savings"
+state year="2026"
+state months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov"]
+state saved=[62,71,98,126,158,187,201,194,149,104,68]
+state selMonth=""
+App
+  Sidebar
+    Brand "Sunroof" icon="wb_sunny"
+    NavItem "Live" icon="bolt" selected={tab=="live"} onTap={go live}
+    NavItem "Savings" icon="savings" selected={tab=="savings"} onTap={tab="savings"}
+    NavItem "Roof" icon="solar_power" selected={tab=="roof"} onTap={go roof}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Whitfield" size=32
+      Text.muted "14 Alder Lane"
+  Main
+    Nav
+      Heading "Savings" level=1
+      Row gap=8
+        Select bind=year items=["2025","2026"] w=120
+        Button.outline "Export" icon="download" onTap={open exportSheet}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Saved this year"
+          Text "{money(sum(saved,x=>x),"$",0)}" size=36 weight=700
+          Text.success "+12% vs last year"
+        Card gap=4
+          Text.muted "Best month"
+          Text "{money(max(max(saved[5],saved[6]),saved[7]),"$",0)}" size=36 weight=700
+          Text.muted "July"
+        Card gap=4
+          Text.muted "Payback"
+          Text "6.4 years" size=36 weight=700
+          Progress 0.31
+      Card gap=12
+        Text.strong "Savings by month"
+        BarChart values={saved} labels={months} h=240
+      Card gap=8
+        Text.strong "Month by month"
+        each m in months
+          ListTile "{m} {year}" subtitle="Solar offset your bill" trailing="{money(saved[indexOf(months,m)],"$",0)}" onTap={selMonth=m; open monthDetail}
+  Sheet#exportSheet "Export savings"
+    Column gap=12 pad=16
+      Select "Format" items=["CSV","PDF"] bind=fmt
+      Button "Download" onTap={emit exportSavings fmt; toast "Export started"; close}
+  Dialog#monthDetail "{selMonth} savings" "Bill offset by your panels"
+    Column gap=8
+      Text "{money(saved[indexOf(months,selMonth)],"$",0)} saved"
+      Button.outline "Close" onTap={close}
+
+### Roof
+state tab="roof"
+state sel=-1
+state panels=[{"id":1,"w":310,"s":"S1"},{"id":2,"w":298,"s":"S1"},{"id":3,"w":305,"s":"S1"},{"id":4,"w":280,"s":"S1"},{"id":5,"w":290,"s":"S2"},{"id":6,"w":142,"s":"S2"},{"id":7,"w":301,"s":"S2"},{"id":8,"w":312,"s":"S2"},{"id":9,"w":308,"s":"S3"},{"id":10,"w":296,"s":"S3"},{"id":11,"w":88,"s":"S3"},{"id":12,"w":303,"s":"S3"}]
+App
+  Sidebar
+    Brand "Sunroof" icon="wb_sunny"
+    NavItem "Live" icon="bolt" selected={tab=="live"} onTap={go live}
+    NavItem "Savings" icon="savings" selected={tab=="savings"} onTap={go savings}
+    NavItem "Roof" icon="solar_power" selected={tab=="roof"} onTap={tab="roof"}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Whitfield" size=32
+      Text.muted "14 Alder Lane"
+  Main
+    Nav
+      Heading "Panel output" level=1
+      Text.muted "12 panels, 3.1 kW now"
+    Column pad=24 gap=16
+      Card gap=12
+        Row between
+          Text.strong "Roof layout"
+          Text.muted "Tinted by output, tap a panel for details"
+        Grid cols=4 gap=8
+          each p in panels
+            Box fill={p.w>=280 ? "#FF2E7D32" : (p.w>=150 ? "#FFF9A825" : "#FFC62828")} radius=6 pad=12 center middle onTap={sel=p.id; open panelInfo}
+              Text "{p.w} W" color=#FFFFFFFF weight=700
+              Text.caption "{p.s}-{p.id}" color=#FFFFFFFF
+        Row gap=16
+          Row gap=4 middle
+            Box fill=#FF2E7D32 w=12 h=12 radius=2
+            Text.caption "Normal"
+          Row gap=4 middle
+            Box fill=#FFF9A825 w=12 h=12 radius=2
+            Text.caption "Reduced"
+          Row gap=4 middle
+            Box fill=#FFC62828 w=12 h=12 radius=2
+            Text.caption "Shaded or faulty"
+      if count(panels,p=>p.w<150)>0
+        Card gap=8
+          Text.strong "Needs attention"
+          Text.muted "{count(panels,p=>p.w<150)} panels are producing far less than their neighbours. Check for shade, leaves or a loose connector."
+          Button.outline "Request inspection" onTap={emit requestInspection; toast "Inspection requested"}
+  Dialog#panelInfo "Panel {sel}" "String details"
+    Column gap=8
+      Text "Output now: {find(panels,p=>p.id==sel).w} W"
+      Text.muted "String {find(panels,p=>p.id==sel).s}"
+      Button "Done" onTap={close}

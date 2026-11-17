@@ -1,0 +1,170 @@
+### Pick list
+state tab="pick"
+state picks=[{"id":1,"bin":"A-03-2","name":"Oat milk 1 L, 12 pack","sku":"OM-1012","photo":"https://img.aisle.app/sku/om-1012.jpg","qty":2,"got":0,"status":"open","tote":"T1"},{"id":2,"bin":"A-07-1","name":"Basmati rice 5 kg","sku":"BR-5005","photo":"https://img.aisle.app/sku/br-5005.jpg","qty":1,"got":0,"status":"open","tote":"T1"},{"id":3,"bin":"B-02-4","name":"Olive oil 750 ml","sku":"OO-0750","photo":"https://img.aisle.app/sku/oo-0750.jpg","qty":3,"got":0,"status":"open","tote":"T2"},{"id":4,"bin":"C-11-3","name":"Dish soap lemon 500 ml","sku":"DS-0500","photo":"https://img.aisle.app/sku/ds-0500.jpg","qty":4,"got":0,"status":"open","tote":"T2"},{"id":5,"bin":"D-05-1","name":"Paper towels 6 roll","sku":"PT-0006","photo":"https://img.aisle.app/sku/pt-0006.jpg","qty":2,"got":0,"status":"open","tote":"T3"}]
+state cur=0
+state scanned=""
+state reason=""
+state shortQty=0
+state secs=272
+state running=true
+every 1s when running onTick={secs=max(0,secs-1)}
+App
+  Sidebar
+    Brand "Aisle" icon="inventory_2"
+    NavItem "Pick list" icon="checklist" badge="{count(picks,p=>p.status==\"open\")}" selected={tab=="pick"} onTap={tab="pick"}
+    NavItem "Aisle map" icon="map" selected={tab=="map"} onTap={go aisle-map}
+    NavItem "Totes" icon="shopping_basket" selected={tab=="totes"} onTap={go totes}
+    Spacer grow
+    Card gap=4
+      Text.caption "Next order in"
+      Text.strong "{floor(secs/60)}:{secs%60<10 ? \"0\" : \"\"}{secs%60}" size=28
+      Text.muted "Order 48213, 9 lines"
+    Text.muted "Dana Whitfield, Zone A-D"
+  Main
+    Nav
+      Column
+        Heading "Order 47990" level=1
+        Text.muted "Route 3, aisles A to D"
+      Row gap=8
+        Badge.info "Tote T1 T2 T3"
+        Button.outline "Aisle map" icon="map" onTap={go aisle-map}
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Row between
+          Text.strong "{count(picks,p=>p.status!=\"open\")} of {length(picks)} lines done"
+          Text.muted "{sum(picks,p=>p.got)} of {sum(picks,p=>p.qty)} units"
+        Progress {sum(picks,p=>p.got)/sum(picks,p=>p.qty)}
+      Grid cols=3 gap=16
+        Card gap=12 grow
+          Text.caption "GO TO BIN"
+          Text "{picks[cur].bin}" size=72 weight=800
+          Row gap=8
+            Badge.primary "Tote {picks[cur].tote}"
+            Badge.neutral "Stop {cur+1} of {length(picks)}"
+          Button.outline "Show on map" icon="route" onTap={go aisle-map}
+        Card gap=12 grow
+          Image "{picks[cur].photo}" h=160
+          Text.heading "{picks[cur].name}"
+          Text.mono "SKU {picks[cur].sku}"
+        Card gap=12 grow
+          Text.caption "QUANTITY TO PICK"
+          Text "{picks[cur].qty}" size=64 weight=800
+          Row gap=12 middle
+            IconButton "remove" tooltip="One fewer" onTap={picks=updateWhere(picks,p=>p.id==picks[cur].id,p=>with(p,"got",max(0,p.got-1)))}
+            Text.strong "{picks[cur].got}" size=32
+            IconButton "add" tooltip="One more" onTap={picks=updateWhere(picks,p=>p.id==picks[cur].id,p=>with(p,"got",min(p.qty,p.got+1)))}
+          Text.muted "picked so far"
+      Row gap=12
+        Button "Scan to verify" icon="qr_code_scanner" grow onTap={open scan}
+        Button.outline "Confirm {picks[cur].got} picked" icon="check" grow onTap={picks[cur].got==picks[cur].qty ? {picks=updateWhere(picks,p=>p.id==picks[cur].id,p=>with(p,"status","done")); cur=min(cur+1,length(picks)-1); toast "Line confirmed"} : toast "Pick the full quantity or short-pick"}
+        Button.destructive "Short pick" icon="report" onTap={shortQty=picks[cur].got; open shortpick}
+      Card gap=0
+        Text.strong "Route"
+        each p in picks
+          ListTile "{p.bin}  {p.name}" "{p.got} of {p.qty}, tote {p.tote}" onTap={cur=index}
+            Badge.success "Done" visible={p.status=="done"}
+            Badge.warning "Short" visible={p.status=="short"}
+            Badge.neutral "Open" visible={p.status=="open"}
+  Dialog#scan "Scan to verify" "Scan the label on the shelf or the item"
+    Input "Scanned code" "SKU or barcode" bind=scanned
+    Row gap=8
+      Button.outline "Cancel" onTap={scanned=""; close}
+      Button "Check" grow onTap={scanned==picks[cur].sku ? {close; toast "Matched {picks[cur].sku}"; scanned=""} : {close; open mismatch}}
+  Dialog#mismatch "Wrong item" "The code does not match this line"
+    Card gap=8 fill=#FFFDECEA
+      Row gap=8
+        Icon "error" color=#FFB3261E
+        Text.strong "Scanned {scanned}"
+      Text "Expected {picks[cur].sku}, {picks[cur].name}. Put it back and check bin {picks[cur].bin}."
+    Row gap=8
+      Button.outline "Scan again" onTap={scanned=""; close; open scan}
+      Button.destructive "Report wrong stock" onTap={emit stockMismatch picks[cur].id; scanned=""; close; toast "Reported to the lead"}
+  Dialog#shortpick "Short pick" "{picks[cur].name}, wanted {picks[cur].qty}"
+    Row gap=12 middle
+      IconButton "remove" tooltip="One fewer" onTap={shortQty=max(0,shortQty-1)}
+      Text.strong "{shortQty} found" size=24
+      IconButton "add" tooltip="One more" onTap={shortQty=min(picks[cur].qty-1,shortQty+1)}
+    Select "Reason" items=["Bin empty","Damaged","Wrong item in bin","Can't reach","Other"] bind=reason
+    Row gap=8
+      Button.outline "Cancel" onTap={close}
+      Button "Save short pick" grow onTap={reason!="" ? {picks=updateWhere(picks,p=>p.id==picks[cur].id,p=>with(with(p,"got",shortQty),"status","short")); emit shortPick {"id":picks[cur].id,"reason":reason}; cur=min(cur+1,length(picks)-1); reason=""; close; toast "Short pick recorded"} : toast "Choose a reason"}
+
+### Aisle map
+state aisle="B"
+state picks=[{"id":1,"bin":"A-03-2","status":"done"},{"id":2,"bin":"A-07-1","status":"done"},{"id":3,"bin":"B-02-4","status":"open"},{"id":4,"bin":"C-11-3","status":"open"},{"id":5,"bin":"D-05-1","status":"open"}]
+App
+  Sidebar
+    Brand "Aisle" icon="inventory_2"
+    NavItem "Pick list" icon="checklist" onTap={go pick-list}
+    NavItem "Aisle map" icon="map" selected={true}
+    NavItem "Totes" icon="shopping_basket" onTap={go totes}
+    Spacer grow
+    Text.muted "Dana Whitfield, Zone A-D"
+  Main
+    Nav
+      Heading "Aisle map" level=1
+      Row gap=8
+        SegmentedButton items=["A","B","C","D"] bind=aisle
+        Button "Back to list" onTap={go pick-list}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=12
+          Row between
+            Text.strong "Route for order 47990"
+            Text.muted "412 m, about 9 min"
+          FloorMap h=420 aisles=["A","B","C","D"] stops={map(picks,p=>p.bin)} done={map(filter(picks,p=>p.status=="done"),p=>p.bin)} path="auto" start="Dock 2" focus={aisle} onTapAisle={aisle=result}
+        Column w=300 gap=12
+          Card gap=8
+            Text.strong "Stops"
+            each p in picks
+              Row gap=8 middle
+                Icon "check_circle" visible={p.status=="done"}
+                Icon "radio_button_unchecked" visible={p.status!="done"}
+                Text "{p.bin}"
+                Spacer grow
+                Text.muted "{p.status}"
+          Card gap=8
+            Text.strong "Aisle {aisle}"
+            Text.muted "{count(picks,p=>startsWith(p.bin,aisle))} stops here"
+            Text.muted "Forklift traffic in C until 14:00" visible={aisle=="C"}
+
+### Totes
+state totes=[{"id":"T1","orders":"47990","lines":2,"state":"filling"},{"id":"T2","orders":"47990","lines":2,"state":"filling"},{"id":"T3","orders":"47990","lines":1,"state":"empty"},{"id":"T4","orders":"","lines":0,"state":"free"}]
+state sel=""
+state secs=272
+state running=true
+every 1s when running onTick={secs=max(0,secs-1)}
+App
+  Sidebar
+    Brand "Aisle" icon="inventory_2"
+    NavItem "Pick list" icon="checklist" onTap={go pick-list}
+    NavItem "Aisle map" icon="map" onTap={go aisle-map}
+    NavItem "Totes" icon="shopping_basket" selected={true}
+    Spacer grow
+    Text.muted "Dana Whitfield, Zone A-D"
+  Main
+    Nav
+      Heading "Tote assignment" level=1
+      Row gap=8
+        Badge.warning "Next order in {floor(secs/60)}:{secs%60<10 ? \"0\" : \"\"}{secs%60}"
+        Button "Start next order" disabled={secs>0} onTap={emit startOrder 48213; go pick-list}
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Row between
+          Text.strong "Order 48213 is next"
+          Text.muted "9 lines, 2 totes needed"
+        Progress {1-secs/272}
+      Grid cols=4 gap=16
+        each t in totes
+          Card gap=8
+            Row between
+              Text.heading "{t.id}"
+              Badge.success "Free" visible={t.state=="free"}
+              Badge.info "Filling" visible={t.state=="filling"}
+              Badge.neutral "Empty" visible={t.state=="empty"}
+            Text.muted "{t.lines} lines, order {t.orders}" visible={t.orders!=""}
+            Button.outline "Assign" onTap={sel=t.id; open assign}
+  Sheet#assign "Assign tote {sel}"
+    Text.muted "Choose the order this tote will carry."
+    Select "Order" items=["47990","48213"] bind=pickOrder
+    Button "Assign" onTap={totes=updateWhere(totes,t=>t.id==sel,t=>with(with(t,"orders",pickOrder),"state","empty")); emit assignTote {"tote":sel,"order":pickOrder}; close; toast "Tote {sel} assigned"}

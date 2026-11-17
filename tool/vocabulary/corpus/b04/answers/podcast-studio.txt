@@ -1,0 +1,133 @@
+### Studio
+state recording=false
+state elapsed=0
+state markers=[]
+state ready=false
+state people=[{"id":1,"name":"Maya Reyes","role":"Host","level":0.62,"muted":false},{"id":2,"name":"Dev Patel","role":"Guest","level":0.35,"muted":false},{"id":3,"name":"Lena Fischer","role":"Guest","level":0.08,"muted":true}]
+state sel=0
+every 1s when recording onTick={elapsed=elapsed+1}
+App
+  Sidebar
+    Brand "Take Two" icon="mic"
+    NavItem "Studio" icon="graphic_eq" selected={true} onTap={go studio}
+    NavItem "Tracks" icon="library_music" badge="4" onTap={go tracks}
+    NavItem "Soundboard" icon="grid_view" onTap={go soundboard}
+    Spacer grow
+    Text.muted "Episode 42: The Long Tail"
+  Main
+    Nav
+      Heading "Studio" level=1
+      Row gap=8
+        Button.outline "Pre-flight check" icon="fact_check" onTap={open preflight}
+        Button.ghost "Invite guest" icon="person_add" onTap={emit invite}
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        each p in people
+          Card gap=12
+            Row between
+              Row gap=8
+                Avatar "{p.name}" size=40
+                Column
+                  Text.strong "{p.name}"
+                  Text.muted "{p.role}"
+              IconButton {p.muted ? "mic_off" : "mic"} tooltip="Mute or unmute" onTap={people=updateWhere(people,x=>x.id==p.id,x=>with(x,"muted",!x.muted))}
+            LevelMeter value={p.muted ? 0 : p.level} peak=0.9
+            Row between
+              Badge.neutral "{p.muted ? 'Muted' : 'Live'}"
+              Text.muted "{p.muted ? '-inf dB' : fixed(p.level*60-60,0) + ' dB'}"
+      Card gap=16 center
+        Text.muted "{recording ? 'Recording' : 'Ready to record'}"
+        Text "{duration(elapsed)}" size=64 weight=700 color={recording ? "#FFD32F2F" : "#FF444444"}
+        Button.destructive "Stop" icon="stop" size=large hidden={!recording} onTap={recording=false; toast "Take saved: 4 tracks"}
+        Button "Record" icon="fiber_manual_record" size=large hidden={recording} onTap={recording=true; elapsed=0; markers=[]}
+        Row gap=8 hidden={!recording}
+          Button.outline "Drop marker" icon="flag" onTap={markers=append(markers,{"t":elapsed,"label":"Marker {length(markers)+1}"})}
+          Button.ghost "Pause" icon="pause" onTap={recording=false}
+      Card gap=8
+        Row between
+          Text.strong "Markers"
+          Text.muted "{length(markers)} dropped"
+        if isEmpty(markers)
+          Text.muted "Markers you drop while recording show up here."
+        each m in markers
+          ListTile "{m.label}" "{duration(m.t)}" icon="flag"
+            IconButton "close" tooltip="Remove marker" onTap={markers=without(markers,m)}
+  Dialog#preflight "Pre-flight check" "Run before you hit record"
+    Column gap=12
+      ListTile "Microphone" "Shure MV7, input level good" icon="mic"
+        Badge.success "Pass"
+      ListTile "Headphones" "No output device found" icon="headphones"
+        Badge.error "Fail"
+      ListTile "Connection" "42 Mbps up, 18 ms latency" icon="wifi"
+        Badge.success "Pass"
+      Row between
+        Button.ghost "Run again" icon="refresh" onTap={toast "Checking..."}
+        Button "Done" onTap={close}
+
+### Tracks
+state tab="all"
+state tracks=[{"id":1,"name":"Maya Reyes","size":"184 MB","up":1.0,"wave":[3,8,12,6,14,9,4,11,15,7,5,10]},{"id":2,"name":"Dev Patel","size":"171 MB","up":0.74,"wave":[2,5,9,12,8,3,7,13,10,6,4,9]},{"id":3,"name":"Lena Fischer","size":"96 MB","up":0.31,"wave":[1,2,4,3,6,2,1,5,3,2,4,1]},{"id":4,"name":"Soundboard","size":"22 MB","up":0.0,"wave":[0,0,9,14,2,0,0,0,11,6,0,0]}]
+state playing=0
+App
+  Sidebar
+    Brand "Take Two" icon="mic"
+    NavItem "Studio" icon="graphic_eq" onTap={go studio}
+    NavItem "Tracks" icon="library_music" badge="4" selected={true} onTap={go tracks}
+    NavItem "Soundboard" icon="grid_view" onTap={go soundboard}
+    Spacer grow
+    Text.muted "Episode 42: The Long Tail"
+  Main
+    Nav
+      Heading "Tracks" level=1
+      Row gap=8
+        Button.outline "Upload all" icon="cloud_upload" onTap={tracks=map(tracks,t=>with(t,"up",1.0)); toast "Uploading 4 tracks"}
+        Button "Export mix" icon="download" onTap={emit exportMix}
+    Column pad=24 gap=16 scroll
+      SegmentedButton bind=tab items=["all","uploading","done"]
+      each t in tracks
+        if tab=="all" || (tab=="done" && t.up==1.0) || (tab=="uploading" && t.up<1.0)
+          Card gap=12
+            Row between middle
+              Row gap=12 middle
+                IconButton {playing==t.id ? "pause" : "play_arrow"} tooltip="Play track" onTap={playing=(playing==t.id ? 0 : t.id)}
+                Column
+                  Text.strong "{t.name}"
+                  Text.muted "{t.size}"
+              Badge.success "Uploaded" hidden={t.up<1.0}
+              Badge.info "{round(t.up*100,0)}%" hidden={t.up>=1.0}
+            Waveform values={t.wave} h=56 progress={playing==t.id ? 0.4 : 0}
+            Row gap=12 middle
+              Progress {t.up} grow
+              Button.ghost "Retry" icon="refresh" hidden={t.up>=0.3 || t.up==0} onTap={tracks=updateWhere(tracks,x=>x.id==t.id,x=>with(x,"up",0.5))}
+              Button.ghost "Upload" hidden={t.up!=0} onTap={tracks=updateWhere(tracks,x=>x.id==t.id,x=>with(x,"up",0.1))}
+
+### Soundboard
+state pads=[{"id":1,"name":"Intro sting","icon":"music_note","key":"1"},{"id":2,"name":"Applause","icon":"celebration","key":"2"},{"id":3,"name":"Laugh","icon":"sentiment_very_satisfied","key":"3"},{"id":4,"name":"Rimshot","icon":"sports_bar","key":"4"},{"id":5,"name":"Ad break","icon":"campaign","key":"5"},{"id":6,"name":"Outro","icon":"queue_music","key":"6"},{"id":7,"name":"Whoosh","icon":"air","key":"7"},{"id":8,"name":"Buzzer","icon":"notifications_active","key":"8"}]
+state last=""
+state vol=80
+App
+  Sidebar
+    Brand "Take Two" icon="mic"
+    NavItem "Studio" icon="graphic_eq" onTap={go studio}
+    NavItem "Tracks" icon="library_music" badge="4" onTap={go tracks}
+    NavItem "Soundboard" icon="grid_view" selected={true} onTap={go soundboard}
+    Spacer grow
+    Text.muted "Episode 42: The Long Tail"
+  Main
+    Nav
+      Heading "Soundboard" level=1
+      Row gap=8
+        Icon "volume_up"
+        Slider bind=vol min=0 max=100 w=160
+    Column pad=24 gap=16 scroll
+      Grid cols=4 gap=16
+        each p in pads
+          Card gap=8 center onTap={last=p.name; emit playPad p.id}
+            IconTile "{p.icon}"
+            Text.strong "{p.name}" center
+            Badge.neutral "{p.key}"
+      Text.muted "{last == '' ? 'Tap a pad to play it into the mix.' : 'Last played: ' + last}"
+    Footer
+      Row between middle
+        Text.muted "Pads play into the recording at {vol}%"
+        Button.outline "Stop all" icon="stop" onTap={last=""; emit stopPads}

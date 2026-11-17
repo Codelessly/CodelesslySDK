@@ -1,0 +1,178 @@
+### Schedule
+state tab="schedule"
+state day="Mon"
+state zone="Living room"
+state days=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+state blocks=[{"id":1,"day":"Mon","zone":"Living room","start":6.0,"end":8.5,"temp":20.5},{"id":2,"day":"Mon","zone":"Living room","start":8.5,"end":17.0,"temp":17.0},{"id":3,"day":"Mon","zone":"Living room","start":17.0,"end":22.5,"temp":21.0},{"id":4,"day":"Mon","zone":"Living room","start":22.5,"end":30.0,"temp":16.0}]
+state copyTo=[]
+state picked=0
+state boostLeft=0
+state boostOn=false
+state away=false
+state efficient=true
+every 1s when boostOn onTick={boostLeft=max(0,boostLeft-1); boostOn=boostLeft>0}
+App
+  Sidebar
+    Brand "Degrees" icon="thermostat"
+    NavItem "Schedule" icon="calendar_month" selected={tab=="schedule"} onTap={tab="schedule"}
+    NavItem "Now" icon="device_thermostat" selected={tab=="now"} onTap={go now}
+    NavItem "Rooms" icon="meeting_room" selected={tab=="rooms"} onTap={go rooms}
+    NavItem "Away" icon="flight_takeoff" selected={away} onTap={open awaySheet}
+    Spacer grow
+    if efficient
+      Row gap=8 middle
+        Icon "eco"
+        Text.muted "Running efficiently"
+  Main
+    Nav
+      Heading "Weekly schedule"
+      Row gap=8 middle
+        Badge.success "18.9 kWh this week" hide=phone
+        Button.outline "Boost 1 hour" icon="bolt" onTap={boostLeft=3600; boostOn=true; toast "Boost on for 1 hour"}
+        if boostOn
+          Chip "{duration(boostLeft)} left" onTap={boostOn=false; boostLeft=0; toast "Boost cancelled"}
+    Column pad=24 gap=16
+      Row gap=8 wrap
+        each d in days
+          ChoiceChip "{d}" selected={day==d} onTap={day=d}
+        Spacer grow
+        Select bind=zone items=["Living room","Bedroom","Kitchen","Study"]
+        Button.outline "Copy day" icon="content_copy" onTap={copyTo=[]; open copyDialog}
+      Card gap=12
+        Row between
+          Text.strong "{day} in {zone}"
+          Text.muted "Drag an edge to resize, double tap to split"
+        TimeBands bind=blocks day={day} zone={zone} min=5 max=30 step=0.5 snap=0.25 labels=["0","3","6","9","12","15","18","21","24"] onResize={blocks=updateWhere(blocks,b=>b.id==result.id,b=>with(with(b,"start",result.start),"end",result.end))} onSplit={blocks=concat(updateWhere(blocks,b=>b.id==result.id,b=>with(b,"end",result.at)),[{"id":max(1,length(blocks)+1),"day":day,"zone":zone,"start":result.at,"end":result.end,"temp":result.temp}])} onSelect={picked=result.id; open blockMenu}
+      Card gap=8
+        Text.strong "Blocks"
+        each b in filter(blocks,x=>x.day==day && x.zone==zone)
+          ListTile "{formatTime(b.start)} to {formatTime(b.end)}" subtitle="{b.temp} degrees" icon="schedule" onTap={picked=b.id; open blockMenu}
+  Menu#blockMenu
+    MenuItem "Warmer" icon="add" onTap={blocks=updateWhere(blocks,b=>b.id==picked,b=>with(b,"temp",b.temp+0.5))}
+    MenuItem "Cooler" icon="remove" onTap={blocks=updateWhere(blocks,b=>b.id==picked,b=>with(b,"temp",b.temp-0.5))}
+    MenuItem "Merge with next" icon="call_merge" onTap={blocks=removeWhere(blocks,b=>b.id==picked+1)}
+    MenuItem "Delete" icon="delete" onTap={blocks=removeWhere(blocks,b=>b.id==picked); toast "Block removed"}
+  Dialog#copyDialog "Copy {day} to" "The blocks of {zone} on {day} replace those on the days you tick"
+    Grid cols=4 gap=8
+      each d in days
+        Checkbox "{d}" selected={contains(copyTo,d)} hidden={d==day} onChange={copyTo=result ? append(copyTo,d) : without(copyTo,d)}
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Copy" onTap={length(copyTo)>0 ? {blocks=concat(filter(blocks,b=>!(contains(copyTo,b.day) && b.zone==zone)),concat(map(copyTo,t=>map(filter(blocks,b=>b.day==day && b.zone==zone),b=>with(b,"day",t)))[0],[])); toast "Copied to {length(copyTo)} days"; close} : toast "Tick at least one day"}
+
+### Now
+state tab="now"
+state target=20.5
+state current=19.2
+state holdOn=true
+state holdUntil="18:30"
+state boostLeft=1800
+state boostOn=true
+state efficient=true
+state mode="Heat"
+every 1s when boostOn onTick={boostLeft=max(0,boostLeft-1); boostOn=boostLeft>0}
+App
+  Sidebar
+    Brand "Degrees" icon="thermostat"
+    NavItem "Schedule" icon="calendar_month" onTap={go schedule}
+    NavItem "Now" icon="device_thermostat" selected={tab=="now"} onTap={tab="now"}
+    NavItem "Rooms" icon="meeting_room" onTap={go rooms}
+    NavItem "Away" icon="flight_takeoff" onTap={open awaySheet}
+    Spacer grow
+    Text.muted "Living room, 19.2 degrees"
+  Main
+    Nav
+      Heading "Right now"
+      Row gap=8 middle
+        if efficient
+          Badge.success "Efficient" icon="eco"
+        SegmentedButton bind=mode items=["Heat","Auto","Off"]
+    Column pad=24 gap=16 center
+      Card gap=16 maxw=480
+        Column center gap=8
+          Dial bind=target min=10 max=30 step=0.5 unit="°" current={current} size=280 onChange={holdOn=true; toast "Set to {result} degrees"}
+          Text.muted "Now {current} degrees, heating to {target}"
+          Row gap=8 middle
+            Icon "eco" hidden={!efficient}
+            Text.success "Leaf: this setting saves about 6 percent" hidden={!efficient}
+        Divider
+        Row between middle
+          Column gap=4
+            Toggle "Hold this temperature" bind=holdOn
+            Text.muted "Until {holdUntil}, then the schedule resumes" visible={holdOn}
+          TimePicker "Hold until" bind=holdUntil disabled={!holdOn}
+        Row gap=8
+          Button.outline "Cooler" icon="remove" grow onTap={target=max(10,target-0.5)}
+          Button.outline "Warmer" icon="add" grow onTap={target=min(30,target+0.5)}
+      Card gap=12 maxw=480
+        Row between middle
+          Column gap=4
+            Text.strong "Boost"
+            Text.muted "Heats to 24 degrees for an hour" visible={!boostOn}
+            Text.strong "{duration(boostLeft)} left" visible={boostOn}
+          if boostOn
+            Button.destructive "Stop" onTap={boostOn=false; boostLeft=0; toast "Boost stopped"}
+          else
+            Button "Boost" icon="bolt" onTap={boostLeft=3600; boostOn=true; target=24; toast "Boost on"}
+        Progress {boostLeft/3600} visible={boostOn}
+
+### Rooms and away
+state tab="rooms"
+state away=false
+state awayFrom=today()
+state awayTo=today()
+state awayTemp=14
+state awayNote=""
+state zones=[{"id":"living","name":"Living room","icon":"weekend","temp":19.2,"target":20.5,"on":true,"follow":true},{"id":"bed","name":"Bedroom","icon":"bed","temp":17.8,"target":17.0,"on":true,"follow":true},{"id":"kitchen","name":"Kitchen","icon":"kitchen","temp":18.4,"target":19.0,"on":true,"follow":false},{"id":"study","name":"Study","icon":"desk","temp":16.1,"target":16.0,"on":false,"follow":true}]
+state sel=""
+App
+  Sidebar
+    Brand "Degrees" icon="thermostat"
+    NavItem "Schedule" icon="calendar_month" onTap={go schedule}
+    NavItem "Now" icon="device_thermostat" onTap={go now}
+    NavItem "Rooms" icon="meeting_room" selected={tab=="rooms"} onTap={tab="rooms"}
+    NavItem "Away" icon="flight_takeoff" selected={away} onTap={open awaySheet}
+    Spacer grow
+    Text.muted "4 zones, 3 heating"
+  Main
+    Nav
+      Heading "Rooms"
+      Row gap=8
+        if away
+          Badge.info "Away until {formatDate(awayTo,"MMM d")}"
+        Button "Away mode" icon="flight_takeoff" onTap={open awaySheet}
+    Column pad=24 gap=16
+      Grid cols=2 gap=16
+        each z in zones
+          Card gap=12
+            Row between middle
+              Row gap=8 middle
+                IconTile "{z.icon}"
+                Column gap=2
+                  Text.strong "{z.name}"
+                  Text.muted "Now {z.temp}, set {z.target}"
+              IconButton "more_vert" tooltip="Room options" onTap={sel=z.id; open zoneMenu}
+            Toggle "Heating" bind=z.on
+            Toggle "Follow the schedule" bind=z.follow
+            Slider bind=z.target min=10 max=30 step=0.5 disabled={z.follow || !z.on}
+            Sparkline values=[17,17.5,18.2,19,19.2,19.2]
+  Menu#zoneMenu
+    MenuItem "Edit schedule" icon="edit_calendar" onTap={go schedule}
+    MenuItem "Rename" icon="edit" onTap={open renameDialog}
+    MenuItem "Turn off" icon="power_settings_new" onTap={zones=updateWhere(zones,z=>z.id==sel,z=>with(z,"on",false)); toast "Zone off"}
+  Dialog#renameDialog "Rename room"
+    Input "Name" bind=awayNote
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Save" onTap={zones=updateWhere(zones,z=>z.id==sel,z=>with(z,"name",awayNote)); close}
+  Sheet#awaySheet "Away mode"
+    Text.muted "Holds a low temperature while you are gone and resumes the schedule on your return."
+    Row gap=12
+      DatePicker "From" bind=awayFrom grow
+      DatePicker "Back on" bind=awayTo grow
+    Slider "Away temperature: {awayTemp} degrees" bind=awayTemp min=7 max=18
+    Row end gap=8
+      if away
+        Button.destructive "End away mode" onTap={away=false; toast "Welcome back"; close}
+      Button.ghost "Cancel" onTap={close}
+      Button "Start away mode" onTap={away=true; toast "Away until {formatDate(awayTo,"MMM d")}"; close}

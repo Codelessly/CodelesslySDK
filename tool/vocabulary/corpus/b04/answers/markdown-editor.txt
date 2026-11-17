@@ -1,0 +1,189 @@
+### Editor
+state doc="# Launch notes\n\nQuillpad ships on **Friday**. Things left to do:\n\n- Final copy review\n- Update the changelog\n- Record the demo\n\n## Timeline\n\n| Day | Task |\n|-----|------|\n| Mon | Freeze features |\n| Wed | Release candidate |\n\n## Links\n\nSee the [roadmap](https://quillpad.app/roadmap).\n\n```dart\nvoid main() => print('hello');\n```\n"
+state title="Launch notes"
+state split=0.5
+state scrollPos=0
+state focus=false
+state showOutline=true
+state showPreview=true
+state findOpen=false
+state query=""
+state replacement=""
+state caseSensitive=false
+state matchIndex=0
+state saved=true
+state lastSaved="just now"
+state slashQuery=""
+state headings=[{"level":1,"text":"Launch notes","line":1},{"level":2,"text":"Timeline","line":10},{"level":2,"text":"Links","line":16}]
+state words=0
+state matches=0
+every 2s when !saved onTick={saved=true; lastSaved="just now"}
+App
+  Sidebar w=240 hide=tablet
+    Brand "Quillpad" icon="edit_note"
+    Row between
+      Text.panelTitle "Outline"
+      IconButton "visibility_off" tooltip="Hide outline" onTap={showOutline=false}
+    if showOutline
+      Column gap=2
+        each h in headings
+          NavItem "{h.text}" icon={h.level==1 ? "title" : "subdirectory_arrow_right"} onTap={scroll {"line-" + h.line}}
+    Spacer grow
+    Divider
+    NavItem "Drafts" icon="folder_open" badge="4" onTap={go drafts}
+    NavItem "Focus mode" icon="center_focus_strong" onTap={focus=true; go focus}
+  Main
+    Nav
+      Row gap=8
+        Input bind=title w=220
+        if saved
+          Badge.success "Saved {lastSaved}"
+        if !saved
+          Badge.warning "Saving..."
+      Row gap=4
+        IconButton "search" tooltip="Find and replace" onTap={findOpen=!findOpen}
+        IconButton "center_focus_strong" tooltip="Focus mode" onTap={focus=true; go focus}
+        IconButton "view_sidebar" tooltip="Toggle preview" onTap={showPreview=!showPreview}
+        Button.outline "Export" icon="download" onTap={open exportMenu}
+    Row gap=2 pad=[12,6,12,6] border-bottom=#FFE0E0E0
+      IconButton "format_bold" tooltip="Bold" onTap={doc=wrap(doc,"**")}
+      IconButton "format_italic" tooltip="Italic" onTap={doc=wrap(doc,"*")}
+      IconButton "strikethrough_s" tooltip="Strikethrough" onTap={doc=wrap(doc,"~~")}
+      Divider
+      IconButton "title" tooltip="Heading" onTap={doc=prefixLine(doc,"## ")}
+      IconButton "format_list_bulleted" tooltip="Bulleted list" onTap={doc=prefixLine(doc,"- ")}
+      IconButton "format_list_numbered" tooltip="Numbered list" onTap={doc=prefixLine(doc,"1. ")}
+      IconButton "checklist" tooltip="Task list" onTap={doc=prefixLine(doc,"- [ ] ")}
+      Divider
+      IconButton "link" tooltip="Link" onTap={open linkDialog}
+      IconButton "table_chart" tooltip="Table" onTap={open tableDialog}
+      IconButton "code" tooltip="Inline code" onTap={doc=wrap(doc,"`")}
+      IconButton "data_object" tooltip="Code block" onTap={doc=wrap(doc,"```")}
+      IconButton "format_quote" tooltip="Quote" onTap={doc=prefixLine(doc,"> ")}
+    if findOpen
+      Row gap=8 pad=[12,8,12,8] fill=#FFF7F7F7
+        Input "Find" bind=query w=200
+        Text.muted "{matches == 0 ? 'No matches' : (matchIndex+1) + ' of ' + matches}"
+        IconButton "keyboard_arrow_up" tooltip="Previous match" onTap={matchIndex=(matchIndex-1+max(1,matches))%max(1,matches)}
+        IconButton "keyboard_arrow_down" tooltip="Next match" onTap={matchIndex=(matchIndex+1)%max(1,matches)}
+        Input "Replace with" bind=replacement w=200
+        Button.outline "Replace" onTap={doc=replaceNth(doc,query,replacement,matchIndex); saved=false}
+        Button.outline "Replace all" onTap={doc=replace(doc,query,replacement); saved=false; toast "Replaced {matches} matches"}
+        Checkbox "Match case" bind=caseSensitive
+        Spacer grow
+        IconButton "close" tooltip="Close find" onTap={findOpen=false}
+    SplitPane bind=split min=0.25 max=0.75 grow
+      CodeEditor bind=doc lang="markdown" lineNumbers find={query} findIndex={matchIndex} caseSensitive={caseSensitive} scrollSync={scrollPos} onScroll={scrollPos=result} onSlash={slashQuery=result; open slashMenu} onChange={saved=false} onMatches={matches=result}
+      if showPreview
+        MarkdownPreview source={doc} scrollSync={scrollPos} onScroll={scrollPos=result} onLinkTap={link result}
+    Footer
+      Row between pad=[16,8,16,8]
+        Row gap=16
+          Text.small "{wordCount(doc)} words"
+          Text.small "{ceil(wordCount(doc)/220)} min read"
+          Text.small "{length(headings)} headings"
+        Row gap=8
+          Icon "cloud_done" size=16
+          Text.small "Draft autosaved"
+  Menu#slashMenu
+    MenuItem "Heading 1" icon="looks_one" onTap={doc=insertAtCursor(doc,"# ")}
+    MenuItem "Heading 2" icon="looks_two" onTap={doc=insertAtCursor(doc,"## ")}
+    MenuItem "Bulleted list" icon="format_list_bulleted" onTap={doc=insertAtCursor(doc,"- ")}
+    MenuItem "Task list" icon="checklist" onTap={doc=insertAtCursor(doc,"- [ ] ")}
+    MenuItem "Table" icon="table_chart" onTap={open tableDialog}
+    MenuItem "Code block" icon="data_object" onTap={doc=insertAtCursor(doc,"```\n\n```")}
+    MenuItem "Quote" icon="format_quote" onTap={doc=insertAtCursor(doc,"> ")}
+    MenuItem "Divider" icon="horizontal_rule" onTap={doc=insertAtCursor(doc,"\n---\n")}
+    MenuItem "Today's date" icon="today" onTap={doc=insertAtCursor(doc,formatDate(today(),"MMM d, yyyy"))}
+  Menu#exportMenu end
+    MenuItem "Markdown (.md)" icon="description" onTap={emit exportFile "md"; toast "Exported Markdown"}
+    MenuItem "HTML (.html)" icon="html" onTap={emit exportFile "html"; toast "Exported HTML"}
+    MenuItem "PDF" icon="picture_as_pdf" onTap={emit exportFile "pdf"; toast "Exported PDF"}
+    MenuItem "Copy as rich text" icon="content_copy" onTap={copy doc; toast "Copied"}
+  Dialog#linkDialog "Insert link"
+    Input "Text" bind=linkText
+    Input "URL" "https://" bind=linkUrl
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Insert" onTap={doc=insertAtCursor(doc,"[" + linkText + "](" + linkUrl + ")"); saved=false; close}
+  Dialog#tableDialog "Insert table"
+    Row gap=12
+      Input "Rows" type=number bind=tableRows grow
+      Input "Columns" type=number bind=tableCols grow
+    Toggle "Header row" bind=tableHeader
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Insert table" onTap={doc=insertAtCursor(doc,markdownTable(tableRows,tableCols,tableHeader)); saved=false; close}
+
+### Focus mode
+state doc=""
+state focus=true
+state typewriter=true
+state wordGoal=500
+state saved=true
+Page
+  Nav sticky
+    Row gap=8
+      IconButton "arrow_back" tooltip="Leave focus mode" onTap={focus=false; go editor}
+      Text.muted "Launch notes"
+    Row gap=12
+      Text.small "{wordCount(doc)} / {wordGoal} words"
+      Progress {min(1, wordCount(doc)/wordGoal)} w=120
+      Toggle "Typewriter scroll" bind=typewriter
+      if saved
+        Badge.success "Saved"
+      if !saved
+        Badge.warning "Saving..."
+  Section narrow
+    CodeEditor bind=doc lang="markdown" focusMode dimOthers=true typewriter={typewriter} onChange={saved=false} onSlash={open focusSlash}
+  Footer
+    Row center gap=16
+      Text.small "{ceil(wordCount(doc)/220)} min read"
+      Text.small "Press Esc to leave"
+  Menu#focusSlash
+    MenuItem "Heading" icon="title" onTap={doc=insertAtCursor(doc,"## ")}
+    MenuItem "List" icon="format_list_bulleted" onTap={doc=insertAtCursor(doc,"- ")}
+    MenuItem "Quote" icon="format_quote" onTap={doc=insertAtCursor(doc,"> ")}
+    MenuItem "Code block" icon="data_object" onTap={doc=insertAtCursor(doc,"```\n\n```")}
+
+### Drafts
+state drafts=[{"id":1,"title":"Launch notes","words":184,"edited":"2 min ago","pinned":true},{"id":2,"title":"Meeting minutes, Oct 14","words":642,"edited":"Yesterday","pinned":false},{"id":3,"title":"Blog: why plain text wins","words":1310,"edited":"Mon","pinned":false},{"id":4,"title":"Recipe: miso ramen","words":298,"edited":"Last week","pinned":false}]
+state q=""
+state sel=0
+state sortBy="edited"
+App
+  Sidebar w=240
+    Brand "Quillpad" icon="edit_note"
+    NavItem "Editor" icon="edit" onTap={go editor}
+    NavItem "Drafts" icon="folder_open" badge="{length(drafts)}" selected={true}
+    NavItem "Focus mode" icon="center_focus_strong" onTap={go focus}
+  Main
+    Nav
+      Heading "Drafts" level=1
+      Row gap=8
+        Input "Search drafts" bind=q w=220
+        Select bind=sortBy items=["edited","title","words"]
+        Button "New draft" icon="add" onTap={drafts=append(drafts,{"id":length(drafts)+1,"title":"Untitled","words":0,"edited":"Just now","pinned":false}); go editor}
+    Column pad=24 gap=12 scroll
+      each d in sortByDesc(filter(drafts,x=>contains(lower(x.title),lower(q))),x=>x.pinned)
+        Card
+          Row between
+            Column gap=2 grow
+              Row gap=8
+                Text.strong "{d.title}"
+                if d.pinned
+                  Badge.info "Pinned"
+              Text.muted "{d.words} words, edited {d.edited}"
+            Row gap=4
+              Button.outline "Open" onTap={go editor}
+              IconButton "more_vert" tooltip="More" onTap={sel=d.id; open draftMenu}
+      if isEmpty(filter(drafts,x=>contains(lower(x.title),lower(q))))
+        Text.muted "No drafts match \"{q}\"."
+  Menu#draftMenu end
+    MenuItem "Pin" icon="push_pin" onTap={drafts=updateWhere(drafts,x=>x.id==sel,x=>with(x,"pinned",!x.pinned))}
+    MenuItem "Duplicate" icon="content_copy" onTap={drafts=append(drafts,with(find(drafts,x=>x.id==sel),"id",length(drafts)+1)); toast "Duplicated"}
+    MenuItem "Delete" icon="delete" onTap={open confirmDelete}
+  Dialog#confirmDelete "Delete this draft?" "This cannot be undone."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Delete" onTap={drafts=removeWhere(drafts,x=>x.id==sel); toast "Draft deleted"; close}
