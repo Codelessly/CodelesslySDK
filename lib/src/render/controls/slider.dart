@@ -297,10 +297,15 @@ class RenderSlider extends RenderControl {
 
   // --- keyboard ------------------------------------------------------------------------
 
-  /// A key step: a division, else 1 % of the range.
+  /// A key step: a division, else 1 % of the range, and at least 1 between
+  /// whole-number ends ten or more apart (a web range input's step): 16 to
+  /// 30 moves by 1, not by a 0.14 a rounded label never shows; 0 to 1 by
+  /// 0.01.
   double get step {
     final d = divisions, range = max - min;
-    return d != null ? range / d : range / 100;
+    if (d != null) return range / d;
+    final whole = min == min.roundToDouble() && max == max.roundToDouble();
+    return whole && range >= 10 ? math.max(1.0, range / 100) : range / 100;
   }
 
   bool _key(KeyEvent event) {

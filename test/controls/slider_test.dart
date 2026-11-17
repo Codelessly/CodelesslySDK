@@ -113,6 +113,21 @@ void main() {
     expect(slider.value, 19);
   });
 
+  testWidgets('between whole-number ends an arrow moves by at least 1', (tester) async {
+    final (tree, _) = await _show(tester, {
+      'heat': _node({'value': 18, 'rangeEnd': 24, 'min': 16, 'max': 30}),
+      'level': _node({'value': 0.5, 'min': 0, 'max': 1}),
+    });
+    final keys = Keyboard(tester);
+    await keys.tab();
+    await keys.right();
+    expect(_slider(tree, 'heat').value, 19);
+    await keys.tab();
+    await keys.tab();
+    await keys.right();
+    expect(_slider(tree, 'level').value, closeTo(0.51, 1e-9));
+  });
+
   testWidgets('range slider mirrors its track and horizontal keys in right-to-left text', (tester) async {
     final (tree, _) = await _show(tester, {
       'price': {..._node({'value': 20, 'rangeEnd': 80, 'min': 0, 'max': 100}), 'textDirection': 'rtl'}
