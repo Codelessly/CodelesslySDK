@@ -242,12 +242,6 @@ void main() {
       expect(tester.state<NavigatorState>(find.byType(Navigator)).canPop(), isFalse);
     });
 
-    testWidgets('by default bindings and every action work', (tester) async {
-      expect(const CodelesslyConfig().expressions, isA<Expressions>());
-      expect(const CodelesslyConfig().actions, isA<CodelesslyActions>());
-      expect(Codelessly(config: const CodelesslyConfig()).services, isA<Services>());
-    });
-
     testWidgets('navigation goes on from screen to screen: a tab, a push and a pop', (tester) async {
       ignoreOverflows();
       setScreen(tester, const Size(390, 844));

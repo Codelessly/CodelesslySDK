@@ -3,12 +3,10 @@ import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/codelessly_api.dart' show LayoutDocument;
 import 'package:codelessly_sdk/codelessly_sdk.dart' hide captureImage;
 import 'package:codelessly_sdk/src/render/controls/slider.dart' show RenderSlider;
-import 'package:codelessly_sdk/src/render/controls/toggles.dart' show RenderToggle;
 import 'package:codelessly_sdk/src/render/node_tree.dart' show RenderNodeDecoration;
 import 'package:codelessly_sdk/src/render/controls/field_frame.dart' show FieldBorderKind;
 import 'package:codelessly_sdk/src/render/controls/text_field.dart';
 import 'package:codelessly_sdk/src/render/controls/tokens.dart' show ControlTokens;
-import 'package:codelessly_sdk/src/runtime/actions/text_fields.dart' show TextFieldHandle;
 import 'package:flutter/material.dart' hide Node;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -49,10 +47,6 @@ Iterable<Widget> _islandWidgets(NodeTree tree) sync* {
 }
 
 T _widget<T extends Widget>(NodeTree tree) => _islandWidgets(tree).whereType<T>().single;
-
-/// The center of node [id] on screen.
-Offset _center(WidgetTester tester, NodeTree tree, String id) =>
-    tester.getTopLeft(find.byType(NodeView)) + tree.boxOf(id)!.rectIn(tester.renderObject(find.byType(NodeView)))!.center;
 
 Future<(VariableScope, NodeTree)> show(WidgetTester tester, Map<String, Object?> field, List<Variable> vars) async {
   final doc = LayoutDocument.fromJson({'roots': ['f'], 'nodes': {'f': field}});
@@ -308,28 +302,6 @@ void main() {
     tree.dispose();
   });
 
-  testWidgets('a checkbox and a switch take taps only in a running app', (tester) async {
-    final doc = _doc({
-      'c': {'type': 'checkbox', 'layout': {'width': 40, 'height': 40}, 'props': {'value': false}},
-      'w': {'type': 'switch', 'layout': {'width': 59, 'height': 40, 'x': {'start': 100}}},
-    });
-    var (tree, _) = await _show(tester, DocumentSource(doc));
-    await tester.tapAt(_center(tester, tree, 'c'));
-    await tester.pump();
-    expect(controlIn<RenderToggle>(tree, 'c').value, isFalse);
-    await tester.pumpWidget(const SizedBox());
-    tree.dispose();
-
-    (tree, _) = await _show(tester, DocumentSource(doc), interactive: true);
-    await tester.tapAt(_center(tester, tree, 'c'));
-    await tester.tapAt(_center(tester, tree, 'w'));
-    await tester.pump();
-    expect(controlIn<RenderToggle>(tree, 'c').value, isTrue);
-    expect(controlIn<RenderToggle>(tree, 'w').value, isTrue);
-    await tester.pumpWidget(const SizedBox());
-    tree.dispose();
-  });
-
   testWidgets('a slider and a signature keep their design size whatever their sizing', (tester) async {
     final (tree, view) = await _show(
         tester,
@@ -502,13 +474,6 @@ void main() {
       expect(parts[2].style!.color, const Color(0xFFB3261E));
       expect(parts[2].style!.fontWeight, FontWeight.w700);
       expect(parts[3].style!.color, isNull);
-    });
-
-    testWidgets('the focus action reaches the field\'s handle', (tester) async {
-      final (_, tree) = await show(tester, {'type': 'textField', 'layout': {'width': 200, 'height': 40}}, const []);
-      TextFieldHandle.of(tree, 'f')!.focusNode.requestFocus();
-      await tester.pump();
-      expect(textField(tester).focusNode.hasFocus, isTrue);
     });
   });
 

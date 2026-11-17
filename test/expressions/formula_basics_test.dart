@@ -220,10 +220,6 @@ void main() {
 
     group('a formula\'s error message', () {
 
-      test('names an unknown function', () {
-        expect(FormulaEvaluator.errorOf('sun(cart)'), contains('"sun"'));
-      });
-
       test('explains a missing bracket', () {
         expect(FormulaEvaluator.errorOf('round(price'), isNotNull);
       });

@@ -207,3 +207,10 @@ See the model's DESIGN.md §5.4 and §5.3.
   is shared: keep changes there minimal and additive.
 * `dart analyze` clean in both packages; `flutter test` and `dart test`
   green.
+* `dart run tool/fast_test.dart` runs the SDK's whole suite in under half a
+  minute: it bundles the test files into a few shard files, so Flutter
+  compiles and starts two dozen processes instead of one per file (`flutter
+  test` alone takes about twice as long). Give it paths to run a part
+  (`dart run tool/fast_test.dart test/tool`); what follows `--` goes to
+  `flutter test`. A test file that only passes in a process of its own is
+  listed at the top of the script.

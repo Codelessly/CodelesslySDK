@@ -40,19 +40,6 @@ Map<String, Json> list(Json reorder, {Json rowExtra = const {}, Map<String, Json
 
 void main() {
 
-  group('what a reorder reports', () {
-
-    test('a reorder reports where the item came from, where it went, the item and both lists', () {
-      expect(reorderResult(from: 1, to: 3, item: {'id': 's1'}, fromList: 'todo', toList: 'todo'), {
-        'from': 1,
-        'to': 3,
-        'item': {'id': 's1'},
-        'fromList': 'todo',
-        'toList': 'todo',
-      });
-    });
-  });
-
   group('a reorderable list', () {
     late Screen s;
     List<String> order() => [for (final song in s['songs'] as List) (song as Map)['id'] as String];

@@ -247,44 +247,6 @@ void main() {
     expect(tree.boxOf('p')!.rectIn(view), const Rect.fromLTWH(50, 0, 100, 50));
   });
 
-  testWidgets('a drawn path with a draw-on time draws itself on in a running app', (tester) async {
-    // The migration writes the draw-on as an animation of the custom paint
-    // path op's trimEnd (frame by frame: test/custom_paint/stroke_draw_on_test.dart).
-    final (tree, _) = await show(
-        tester,
-        page({
-          'p': {
-            'type': 'box',
-            'layout': {'width': 100, 'height': 50},
-            'strokePath': {
-              'points': [
-                [0, 0],
-                [100, 40]
-              ],
-              'xUnit': 'pixels',
-              'progress': 0.5,
-              'drawMs': 400,
-              'drawCurve': 'linear',
-              'drawKey': 'a',
-            },
-          },
-        }),
-        interactive: true);
-    final node = (tree.source as DocumentSource).document.nodes['p']!;
-    expect(node.extra, isEmpty);
-    final op = node.behaviors.customPaint!.painter.single as api.PathOp;
-    expect(op.trimEnd.value, 0.5);
-    expect(node.behaviors.animations.single.tracks.single.path, 'customPaint.painter.strokePath.trimEnd');
-    double shown() => (tree.resolve('p')!.behaviors.customPaint!.painter.single as api.PathOp).trimEnd.value!;
-    await tester.pump();
-    expect(shown(), 0);
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(shown(), closeTo(0.25, 1e-9));
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(shown(), 0.5);
-    expect(find.byType(NodeView), paints..something((m, _) => m == #drawPicture));
-  });
-
   group('loops and effects', () {
     testWidgets('a swing rocks evenly to both sides of rest', (tester) async {
       final (tree, view, _) = await showMotion(

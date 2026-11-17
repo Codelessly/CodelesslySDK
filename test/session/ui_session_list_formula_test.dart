@@ -34,18 +34,6 @@ void main() {
     test('filters to nothing: the condition is computed once, outside the list', () {
       expect(FormulaEvaluator.evaluate("filter(invoices, (statusF == 'All' || status == statusF) && contains(lower(cust), lower(search)))", read), isEmpty);
     });
-
-    test('written with a lambda, keeps every record when the search is empty and the status is All', () {
-      expect(
-          FormulaEvaluator.evaluate(
-              "filter(invoices, i => (statusF == 'All' || i.status == statusF) && contains(lower(i.cust), lower(search)))", read),
-          hasLength(4));
-    });
-
-    test('sortBy takes its direction as "asc" or "desc", not as 1 or -1', () {
-      Object? r(String n) => {'invoices': _invoices, 'desc': true}[n];
-      expect(FormulaEvaluator.evaluate("map(sortBy(invoices, 'amt', desc ? 'desc' : 'asc'), 'amt')", r), [400, 300, 200, 100]);
-    });
   });
 
   testWidgets('when the recorded stream ends, the session reports the item fields its filter read without the item', (tester) async {

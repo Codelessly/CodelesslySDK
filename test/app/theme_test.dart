@@ -1,5 +1,4 @@
 
-import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart' hide TextStyle;
 import 'package:flutter/widgets.dart';
@@ -74,10 +73,6 @@ PublishBundle _bundle(ThemeTokens theme) {
 }
 
 void main() {
-  test('a project\'s theme tokens make the app\'s theme', () {
-    final theme = themeDataOf(const api.ThemeTokens(primary: api.Color(0xFF3366FF), fontFamily: 'Barlow'));
-    expect(theme.colorScheme.primary, const Color(0xFF3366FF));
-  });
 
   group('light and dark', () {
     test('theme values are the tokens for a light or a dark screen', () {

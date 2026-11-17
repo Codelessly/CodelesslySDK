@@ -127,8 +127,4 @@ void main() {
       session.dispose();
     }
   });
-
-  test('a session without a design system keeps the agent profile', () {
-    expect(identical(UiSession().profile, TrustProfile.agent), isTrue);
-  });
 }

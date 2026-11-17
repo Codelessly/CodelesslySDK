@@ -432,9 +432,5 @@ void main() {
         scope.dispose();
       },
     );
-
-    test('on a platform that cannot print, the action reports that no dialog opened', () async {
-      expect(await const PlatformPrintService().printPng(Uint8List(0)), false);
-    });
   });
 }

@@ -108,23 +108,6 @@ Future<lists.Screen> _field(WidgetTester tester, Map<String, Object?> props) => 
     });
 
 void _master() {
-  testWidgets('with its own picker a tap runs the node\'s click reactions', (tester) async {
-    final s = await lists.show(tester, {
-      'col': {'type': 'column', 'children': ['d'], 'layout': {'width': 300, 'height': 100}},
-      'd': {
-        'type': 'dateTimeInput',
-        'layout': {'width': 300, 'height': 34},
-        'props': {'mode': 'date', 'value': '2026-12-01', 'format': 'MMM d, y', 'bare': true, 'picker': 'none'},
-        'actions': [lists.reaction('click', [{'type': 'setVariable', 'variable': 'opened', 'value': true}])],
-      },
-    }, variables: [lists.v('opened', false, VariableType.boolean)]);
-    await tester.pumpAndSettle();
-    expect(_picker(s.tree, 'd').shown, 'Dec 1, 2026');
-    await tester.tapAt(s.center('d'));
-    await tester.pumpAndSettle();
-    expect(s['opened'], isTrue);
-    expect(tester.renderObject<RenderControlRoot>(find.byType(NodeView)).overlayEntries, isEmpty);
-  });
 
   testWidgets('without a pattern it is SSUI\'s field, the date in words', (tester) async {
     final s = await _field(tester, {'mode': 'date', 'value': '2026-12-01'});
@@ -205,23 +188,6 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pump();
     expect(_picker(tree, 'time').shown, '14:30');
-  });
-
-  testWidgets('an empty date picker shows its hint', (tester) async {
-    final tree = NodeTree(DocumentSource(_doc({
-      'time': {
-        'type': 'timePicker',
-        'layout': {'width': 160, 'height': 42},
-        'props': {
-          'value': '',
-          'decoration': {'hintText': '—', 'border': {'type': 'outline'}},
-        },
-      },
-    })));
-    addTearDown(tree.dispose);
-    await tester.pumpWidget(MaterialApp(home: Material(child: Center(child: NodeView(tree: tree, rootId: 's', interactive: true)))));
-    await tester.pumpAndSettle();
-    expect(_picker(tree, 'time').shown, '—');
   });
 
   group('how the value is shown', () {

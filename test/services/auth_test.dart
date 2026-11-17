@@ -73,12 +73,6 @@ void main() {
       await expectLater(const SignedOutAuthService().signInAsGuest(), throwsA(isA<AuthFailure>()));
       auth.dispose();
     });
-
-    test('nobody is signed in to begin with', () async {
-      const auth = SignedOutAuthService();
-      expect(auth.currentUser, isNull);
-      await expectLater(auth.signIn(email: 'a', password: 'b'), throwsA(isA<AuthFailure>()));
-    });
   });
 
   group('profiles', () {

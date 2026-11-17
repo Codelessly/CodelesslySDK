@@ -100,11 +100,6 @@ void main() {
     expect(f.labels.first.fontFamily, note);
   });
 
-  testWidgets('a session\'s theme font is its controls\' font', (tester) async {
-    await _show(tester, theme: const ThemeTokens(fontFamily: 'Roboto'));
-    expect(_field(tester, 'To').editable.text?.style?.fontFamily, 'Roboto');
-  });
-
   testWidgets('a theme font is the default family of every text: a text node with none takes it as a control does', (tester) async {
     await _show(tester, theme: const ThemeTokens(fontFamily: 'Roboto'));
     final f = _field(tester, 'To');

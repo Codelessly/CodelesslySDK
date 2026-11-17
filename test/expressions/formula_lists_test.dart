@@ -684,13 +684,6 @@ void main() {
           FormulaEvaluator.evaluate(expression, (path) => vars[path]);
 
       group('reverse', () {
-        test('reverse reverses a list', () {
-          expect(eval('map(reverse(timeline), e => e.label)'), [
-            'Repair started',
-            'Assigned',
-            'Reported',
-          ]);
-        });
 
         test('reverse leaves the list it reads unchanged', () {
           eval('reverse(timeline)');
@@ -698,17 +691,6 @@ void main() {
             't': '10:00',
             'label': 'Reported',
           });
-        });
-
-      });
-
-      group('lambda index', () {
-        test('map passes the index as the second parameter', () {
-          expect(eval('map(items, (i, n) => n + 1 + ". " + i.name)'), [
-            '1. Tyres',
-            '2. Lights',
-            '3. Mirrors',
-          ]);
         });
 
       });

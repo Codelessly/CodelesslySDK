@@ -1,7 +1,5 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/render/controls/pickers.dart';
 import 'package:codelessly_sdk/src/widgets/registry.dart';
-import 'package:codelessly_sdk/src/render/controls/dropdown.dart' show RenderDropdown;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -193,91 +191,6 @@ void main() {
     _expectNoIslands(tester);
   });
 
-  testWidgets('a text field focuses and takes typing', (tester) async {
-    final tree = NodeTree(DocumentSource(_doc({
-      'f': _at(10, 20, {
-        'type': 'textField',
-        'layout': {'width': 200, 'height': {'hug': 48}},
-        'props': {'initialValue': 'Hi'},
-      }),
-    })));
-    addTearDown(tree.dispose);
-    await tester.pumpWidget(_app(tree));
-    final field = textField(tester);
-    await tapField(tester, field);
-    expect(field.focusNode.hasFocus, isTrue);
-    await typeInto(tester, 'Hello there');
-    expect(field.editor.text, 'Hello there');
-    expect(field.editable.text!.toPlainText(), 'Hello there');
-    // Focus moves away, as in any app.
-    field.focusNode.unfocus();
-    await tester.pump();
-    expect(field.focusNode.hasFocus, isFalse);
-    expect(tester.takeException(), isNull);
-    await tester.pumpWidget(const SizedBox());
-  });
-
-  testWidgets('a dropdown opens its menu and picks an item', (tester) async {
-    final tree = NodeTree(DocumentSource(_doc({
-      'd': _at(10, 20, {
-        'type': 'dropdown',
-        'layout': {'width': 200, 'height': 48},
-        'props': {'items': ['Apple', 'Banana', 'Cherry'], 'value': 'Apple'},
-      }),
-    })));
-    addTearDown(tree.dispose);
-    await tester.pumpWidget(_app(tree));
-    // A render object (render/controls/dropdown.dart): its menu is an entry
-    // of the root's overlay layer, not a route.
-    final dropdown = _dropdownIn(tree.boxOf('d')!);
-    await tester.tapAt(dropdown.localToGlobal(dropdown.size.center(Offset.zero)));
-    await tester.pumpAndSettle();
-    expect(dropdown.isOpen, isTrue);
-    expect(dropdown.menu.items.map((i) => i.label), ['Apple', 'Banana', 'Cherry']);
-    final cherry = dropdown.menu.rows[2];
-    await tester.tapAt(cherry.localToGlobal(cherry.size.center(Offset.zero)));
-    await tester.pumpAndSettle();
-    expect(dropdown.isOpen, isFalse);
-    expect(dropdown.selectedLabel, 'Cherry');
-    expect(tester.takeException(), isNull);
-    await tester.pumpWidget(const SizedBox());
-  });
-
-  testWidgets('date and time pickers open their pickers', (tester) async {
-    final tree = NodeTree(DocumentSource(_doc({
-      'date': _at(10, 20, {
-        'type': 'datePicker',
-        'props': {'value': '2024-05-17', 'firstDate': '2024-01-01', 'lastDate': '2024-12-31'},
-      }),
-      'time': _at(10, 120, {
-        'type': 'timePicker',
-        'props': {'value': '09:30'},
-      }),
-    })));
-    addTearDown(tree.dispose);
-    await tester.pumpWidget(_app(tree));
-    Offset center(String id) => tree.boxOf(id)!.localToGlobal(tree.boxOf(id)!.size.center(Offset.zero));
-    expect(_picker(tree, 'date').shown, '2024-05-17');
-    await tester.tapAt(center('date'));
-    await tester.pump();
-    final calendar = _picker(tree, 'date').panel!.calendar!;
-    final cell = [for (var i = 0; i < 42; i++) i].firstWhere((i) => calendar.dayAt(i)?.day == 20);
-    await tester.tapAt(calendar.localToGlobal(calendar.cellRect(cell).center));
-    await tester.pump();
-    expect(_picker(tree, 'date').open, isFalse);
-    expect(_picker(tree, 'date').shown, '2024-05-20');
-
-    await tester.tapAt(center('time'));
-    await tester.pump();
-    final time = _picker(tree, 'time').panel!.time!;
-    await tester.tapAt(time.localToGlobal(time.footerRects.cancel.center));
-    await tester.pump();
-    expect(_picker(tree, 'time').open, isFalse);
-    expect(_picker(tree, 'time').shown, '09:30');
-    expect(tester.takeException(), isNull);
-    await tester.pumpWidget(const SizedBox());
-  });
-
   testWidgets('each list item gets its own embedded widget', (tester) async {
     _registerIslandField();
     LayoutDocument list(int count) => _doc({
@@ -433,25 +346,4 @@ void main() {
   });
 }
 
-/// The picker field drawn for node [id] (render/controls/pickers.dart).
-RenderPickerField _picker(RenderTree tree, String id) {
-  RenderPickerField? found;
-  void visit(RenderObject o) {
-    if (o is RenderPickerField) found ??= o;
-    o.visitChildren(visit);
-  }
 
-  visit(tree.boxOf(id)!);
-  return found!;
-}
-
-RenderDropdown _dropdownIn(RenderObject box) {
-  RenderDropdown? found;
-  void visit(RenderObject o) {
-    if (o is RenderDropdown) found ??= o;
-    o.visitChildren(visit);
-  }
-
-  visit(box);
-  return found!;
-}

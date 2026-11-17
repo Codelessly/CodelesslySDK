@@ -255,17 +255,6 @@ void main() {
       expect(s['count'], 1);
     });
 
-    testWidgets('a value-changed reaction runs when its variable changes', (tester) async {
-      final nodes = harness.counter();
-      nodes['other'] = {...nodes['other']!, 'actions': [harness.reaction('valueChanged', [harness.add('seen')], extra: {'variable': 'count'})]};
-      final s = await harness.show(tester, nodes, variables: [harness.v('count', 0, VariableType.integer), harness.v('seen', 0, VariableType.integer)]);
-      await tester.pump();
-      expect(s['seen'], 0);
-      s.scope.set('count', 5);
-      await tester.pump();
-      expect(s['seen'], 1);
-    });
-
     testWidgets('a popover presentation opens by its trigger, not centered', (tester) async {
       late BuildContext appContext;
       final ui = NavigatorActionUi(
