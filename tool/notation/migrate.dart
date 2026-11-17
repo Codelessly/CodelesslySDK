@@ -11,7 +11,8 @@
 //                                       above each file
 //       --notation | --markdown | --dart | --python | --json | --html
 //                                       read every file as that kind (else by its extension: .txt and
-//                                       .notation, .md, .dart, .py, .json, .html)
+//                                       .notation, .md, .dart, .py, .json, .html; a prompt*.txt or brief*.txt
+//                                       is prose, rewritten line by line with no state line)
 //       --from 32                       the files are older still (the grammar up to 32.x): rewritten to
 //                                       33's first, then to this one's
 //
@@ -145,7 +146,10 @@ Future<void> main(List<String> args) async {
       stderr.writeln('$path: not text');
       continue;
     }
-    final as = kind ?? bindKindOf(path);
+    // A prompt or a list of briefs kept as .txt is prose that quotes the
+    // notation: its lines are rewritten one by one, with no state line.
+    final prose = RegExp(r'(^|[\\/])(prompt|briefs?)[^\\/]*\.txt$').hasMatch(path);
+    final as = kind ?? (prose ? 'html' : bindKindOf(path));
     if (as == null) {
       stderr.writeln('$path: not a kind of file this reads (.txt, .md, .dart, .py, .json, .html): give --notation or another');
       continue;
