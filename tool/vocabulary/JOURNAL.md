@@ -438,6 +438,34 @@ list and ours to fix.
   specification; a named word that an answer uses with a parameter we do not take is listed by the tool under
   its own heading ("named words used in a shape we do not take"), since that list is the glossary's bug list.
 
+**Addendum: D25, D26, D29 and D30 merged.** Our words take the harvested shapes: `Timeline items=` (with
+`events`, `steps`, `entries` as aliases, `current` for `selected`); `Stepper` keeps the number control and
+gains `Stepper#steps`, chosen when the line fits it strictly better; `Countdown#timer` with `warnAt` and
+`onEnd`; `Rating max=`; `ChatBubble`, `Banner icon= action=`, `Breadcrumb`, `Barcode`/`QRCode`,
+`TimelineItem date= done= current=`, `Text strike`, `FileUploader accept=`. Honest stand-ins with the agreed
+signatures for what needs a primitive: `MapView`, `RouteMap`, `FloorPlan`, `SignaturePad`, `CameraView`,
+`PhotoPicker`, `Waveform`. The glossary is in the open prompt when a design system is given
+(`--no-glossary` leaves it out): 284 names, 3,664 characters. A board keeps its columns on a phone (three or
+more columns of small pressed cells; five or more of small cells; a grid may have up to 24 columns).
+
+Recounted, with no new answers:
+
+| | before | after |
+|---|---|---|
+| d03 (17, glossary) resolved | 93.8% | **97.8%** |
+| d01 + d02 (111, define) resolved | 96.5% | 97.0% |
+| first corpus (313) resolved | 40.6% | 41.8% |
+| first corpus, lines that stand in | 908 | 813 |
+
+So review 6's condition is met: with the shapes behind the names accepted, the glossary answers resolve
+better than the define-only answers of the same briefs did (96.3%), in seven percent fewer lines and with a
+third fewer definitions. What d03 still refuses is fourteen words, each in one answer.
+
+Known and not fixed: a wrapping row over an `each` whose item is a row or a box lays its items one to a line
+(worked around in three definitions); the crossword's cells are not square on a phone and its footer covers
+the last row in a full-page capture; `batch.sh prepare` writes the open prompt without a design system, so
+without the glossary.
+
 **Where the goal stands.** The corpus the owner asked for exists: 5,154 distinct words from 313 answers, plus
 111 self-defining answers with 422 definitions. Six reviews' worth of decisions are merged: every word counted,
 words defined as data, universal words, the parser's narrow spots, self-definition as the open prompt, the
