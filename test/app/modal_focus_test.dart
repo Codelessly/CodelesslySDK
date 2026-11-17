@@ -148,13 +148,18 @@ PublishBundle _bundle() {
   );
 }
 
-Future<CodelesslyWidgetController> _show(WidgetTester tester) async {
-  setScreen(tester, const Size(1200, 800));
+Future<CodelesslyWidgetController> _show(WidgetTester tester,
+    {Size size = const Size(1200, 800), ThemeData? theme, TextDirection direction = TextDirection.ltr}) async {
+  setScreen(tester, size);
   final app = Codelessly.fromBundle(_bundle());
   addTearDown(app.dispose);
   final controller = CodelesslyWidgetController();
   addTearDown(controller.dispose);
-  await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: app, controller: controller)));
+  await tester.pumpWidget(MaterialApp(
+    theme: theme,
+    builder: (context, child) => Directionality(textDirection: direction, child: child!),
+    home: CodelesslyWidget(codelessly: app, controller: controller),
+  ));
   await settle(tester);
   return controller;
 }
@@ -383,6 +388,10 @@ void main() {
     expect(find.text('Delete it?'), findsOneWidget);
     expect(keys.topOverlay, isNotNull);
     expect(keys.routeName, 'Delete it?');
+    final cancel = find.byKey(const ValueKey('codelessly-confirm-cancel'));
+    expect(cancel, findsOneWidget);
+    final cancelLabel = find.descendant(of: cancel, matching: find.text('Cancel')).first;
+    expect(Focus.of(tester.element(cancelLabel)).hasFocus, isTrue, reason: 'Cancel is the safe initial choice');
     // The page under it takes no key.
     await keys.tab();
     expect(keys.focused, isNull);
@@ -391,6 +400,47 @@ void main() {
     expect(find.text('Delete it?'), findsNothing);
     expect(keys.topOverlay, isNull);
     expect(keys.focusedId, 'openConfirm');
+    handle.dispose();
+  });
+
+  for (final direction in [TextDirection.ltr, TextDirection.rtl]) {
+    testWidgets('confirm at phone width in dark theme with $direction keeps safe focus and button semantics', (tester) async {
+      final handle = tester.ensureSemantics();
+      await _show(tester, size: const Size(390, 844), theme: ThemeData.dark(), direction: direction);
+      final keys = Keyboard(tester);
+      await _tabTo(keys, 'openConfirm');
+      await keys.space();
+      await settle(tester);
+      expect(keys.routeName, 'Delete it?');
+      final cancel = find.byKey(const ValueKey('codelessly-confirm-cancel'));
+      final cancelLabel = find.descendant(of: cancel, matching: find.text('Cancel')).first;
+      expect(Focus.of(tester.element(cancelLabel)).hasFocus, isTrue);
+      expect(tester.getSemantics(cancel).hasFlag(SemanticsFlag.isButton), isTrue);
+      expect(tester.takeException(), isNull);
+      await keys.enter();
+      await settle(tester);
+      expect(keys.topOverlay, isNull);
+      expect(keys.focusedId, 'openConfirm');
+      handle.dispose();
+    });
+  }
+
+  testWidgets('confirm pointer choices expose buttons and close on Cancel or OK', (tester) async {
+    final handle = tester.ensureSemantics();
+    final controller = await _show(tester);
+    final keys = Keyboard(tester);
+    await tapNode(tester, controller, 'openConfirm');
+    final cancel = find.byKey(const ValueKey('codelessly-confirm-cancel'));
+    final ok = find.byKey(const ValueKey('codelessly-confirm-ok'));
+    expect(tester.getSemantics(cancel).hasFlag(SemanticsFlag.isButton), isTrue);
+    expect(tester.getSemantics(ok).hasFlag(SemanticsFlag.isButton), isTrue);
+    await tester.tap(cancel);
+    await settle(tester);
+    expect(keys.topOverlay, isNull);
+    await tapNode(tester, controller, 'openConfirm');
+    await tester.tap(ok);
+    await settle(tester);
+    expect(keys.topOverlay, isNull);
     handle.dispose();
   });
 

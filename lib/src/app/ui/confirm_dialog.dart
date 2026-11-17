@@ -492,6 +492,7 @@ class ThemedConfirmDialog extends StatelessWidget {
 
     final cancel = TextButton(
       key: const ValueKey('codelessly-confirm-cancel'),
+      autofocus: true,
       onPressed: () => Navigator.of(context).pop(false),
       style: TextButton.styleFrom(
         foregroundColor: onCancel,
