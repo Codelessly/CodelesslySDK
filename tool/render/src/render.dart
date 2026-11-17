@@ -304,8 +304,8 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       for (final scope in (api.readMap(d['variables']) ?? const {}).values)
         for (final v in api.readList(scope) ?? const [])
           if (api.readMap(v) case final api.Json m when (api.readList(m['parameters'])?.isNotEmpty ?? false) && m['name'] is String) m['name'] as String,
-    for (final v in api.readList(site.manifest?['variables']) ?? const [])
-      if (api.readMap(v) case final api.Json m when (api.readList(m['parameters'])?.isNotEmpty ?? false) && m['name'] is String) m['name'] as String,
+    for (final v in api.Variable.declarationsFromJson(site.manifest?['variables']))
+      if (v.isFunction) v.name,
   };
   FormulaReport check(String formula) =>
       (error: FormulaEvaluator.errorOf(formula, functionNames: functions), paths: FormulaEvaluator.referencedPaths(formula));
@@ -327,6 +327,9 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   report.diagnostics.addAll(validateTheme(themeJson,
           breakpoints: site.manifest?['breakpoints'] == null ? null : api.Breakpoints.fromJson(site.manifest!['breakpoints']))
       .map((d) => d.withFile(api.SiteManifest.fileName).toJson()));
+  // Its variables: a record that cannot be read is not declared, and says so.
+  report.diagnostics
+      .addAll(validateSiteVariables(site.manifest?['variables']).map((d) => d.withFile(api.SiteManifest.fileName).toJson()));
   // The fonts it declares: their shape and formats.
   report.diagnostics.addAll(validateSiteFonts(site.manifest?['fonts']).map((d) => d.withFile(api.SiteManifest.fileName).toJson()));
   if (args.validateOnly || docs.isEmpty) return _finish(report, args);

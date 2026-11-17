@@ -116,6 +116,10 @@
   minimum height adds (it sat at the top: Cards' FilterBar showed its search text 4 px above the icon beside it).
 - A page route opened from an overlay sized to its design fills the window.
 - `tool/render/render.sh` runs under Git Bash on Windows (it gave Dart `/c/…` paths).
+- A site's variables written by name in `site.json` (`"variables": {"cart": [], "plan": "pro"}`) or as records with
+  no `type` work in the notation's expander (it threw a Dart cast error on the object form), the render command and
+  the runtime: they are read by codelessly_api's manifest reader, each typed by its value, and a record that cannot
+  be read is an `invalid_variable` error on `site.json` (the expander prints it as one line).
 
 ## 32.0.0
 
