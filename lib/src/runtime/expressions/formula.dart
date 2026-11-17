@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 
 // Pure Dart (no Flutter): a recorder checks formulas with it outside Flutter.
 import 'formula_time.dart';
+import 'fuzzy_match.dart';
 
 /// The body of a formula: text and quoted strings, with braces only in
 /// balanced pairs nested up to [depth] deep, such as the object literal in
@@ -699,6 +700,31 @@ class FormulaEvaluator {
       'luminance',
       'luminance(color)',
       'luminance("#FFFFFF") → 1',
+    ),
+    FormulaFunctionDoc(
+      'fuzzy',
+      'fuzzy(list, query, item => text)',
+      'fuzzy(episodes, q, e => e.title)',
+    ),
+    FormulaFunctionDoc(
+      'fuzzyScore',
+      'fuzzyScore(text, query)',
+      'fuzzyScore(title, q) → 100',
+    ),
+    FormulaFunctionDoc(
+      'matchRanges',
+      'matchRanges(text, query)',
+      'matchRanges(title, q) → [[0, 5]]',
+    ),
+    FormulaFunctionDoc(
+      'matchRuns',
+      'matchRuns(text, query)',
+      'matchRuns(title, q) → text runs',
+    ),
+    FormulaFunctionDoc(
+      'matchReason',
+      'matchReason(text, query)',
+      'matchReason(title, q) → Exact phrase',
     ),
     FormulaFunctionDoc(
       'filter',
@@ -2870,6 +2896,53 @@ Map<String, Object?> _toMap(List<Object?> args) {
 }
 
 final Map<String, _Function> _functions = {
+  'fuzzy': (a) {
+    final source = _arg(a, 0);
+    if (source is! Iterable) return <Object?>[];
+    final query = FormulaEvaluator.stringify(_arg(a, 1));
+    if (query.trim().isEmpty) return source.toList();
+    final ranked = source.indexed
+        .map((entry) {
+          final text = FormulaEvaluator.stringify(
+            _select(entry.$2, _arg(a, 2), entry.$1),
+          );
+          return (entry.$1, entry.$2, FuzzyMatch.find(text, query).score);
+        })
+        .where((entry) => entry.$3 > 0)
+        .toList();
+    ranked.sort((x, y) {
+      final byScore = y.$3.compareTo(x.$3);
+      return byScore != 0 ? byScore : x.$1.compareTo(y.$1);
+    });
+    return ranked.map((entry) => entry.$2).toList();
+  },
+  'fuzzyScore': (a) => FuzzyMatch.find(
+    FormulaEvaluator.stringify(_arg(a, 0)),
+    FormulaEvaluator.stringify(_arg(a, 1)),
+  ).score,
+  'matchReason': (a) => FuzzyMatch.find(
+    FormulaEvaluator.stringify(_arg(a, 0)),
+    FormulaEvaluator.stringify(_arg(a, 1)),
+  ).reason,
+  'matchRanges': (a) => [
+    for (final span in FuzzyMatch.find(
+      FormulaEvaluator.stringify(_arg(a, 0)),
+      FormulaEvaluator.stringify(_arg(a, 1)),
+    ).ranges)
+      [span.$1, span.$2],
+  ],
+  'matchRuns': (a) => [
+    for (final span in FuzzyMatch.find(
+      FormulaEvaluator.stringify(_arg(a, 0)),
+      FormulaEvaluator.stringify(_arg(a, 1)),
+    ).ranges)
+      {
+        'start': span.$1,
+        'end': span.$2,
+        'style': {'fontWeight': 700, 'decoration': 'underline'},
+      },
+  ],
+
   'money': (a) => _money(_arg(a, 0), _arg(a, 1), _arg(a, 2)),
   'formatNumber': _formatNumber,
   'formatCurrency': (a) =>

@@ -474,6 +474,28 @@ void main() {
     });
   });
 
+  testWidgets('fuzzy search input accepts touch and keyboard and retains field semantics', (tester) async {
+    final semantics = tester.ensureSemantics();
+    final (scope, _) = await show(tester, {
+      'type': 'textField', 'layout': {'width': 240, 'height': 44},
+      'props': {'decoration': {'labelText': 'Search episodes'}},
+      'bind': {'props.initialValue': r'${query}'},
+      'actions': [harness.reaction('changed', [
+        {'type': 'setVariable', 'variable': 'query', 'value': r'${result}'},
+      ])],
+    }, [harness.v('query', '')]);
+    await tapField(tester, textField(tester));
+    await typeInto(tester, 'ligth');
+    expect(scope.read('query'), 'ligth');
+    expect(FormulaEvaluator.evaluate('fuzzy(["The keeper of the light", "Platform seventeen"], query)',
+        (path) => path == 'query' ? scope.read('query') : null), ['The keeper of the light']);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    final tree = tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!.toStringDeep();
+    expect(tree, contains('Search episodes'));
+    semantics.dispose();
+  });
+
   group('typing into a bound field', () {
     testWidgets('a late update from an earlier keystroke does not undo what was typed since', (tester) async {
       final (scope, _) = await show(tester, {
