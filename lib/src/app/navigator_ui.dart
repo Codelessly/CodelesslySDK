@@ -435,6 +435,10 @@ Future<Object?> showScreenModal(
   );
 }
 
+/// The name of the route a popover (a menu, a picker by its trigger) is
+/// shown in ([PopoverUi.popoverOnTop]).
+const String popoverRouteName = 'codelessly.popover';
+
 /// Shows [content] as a popover by [anchor] (a global rect: the node that
 /// opened it, or the pointer as an empty rect) at [placement], [gap] away
 /// from it and shifted [offset] along it.
@@ -442,10 +446,6 @@ Future<Object?> showScreenModal(
 /// its anchor with a [reserve], it doesn't flip: it keeps that much room
 /// under its top, moving up when that would pass the screen's bottom margin
 /// (a menu that may grow keeps its place; a tall card overlaps its anchor).
-/// The name of the route a popover (a menu, a picker by its trigger) is
-/// shown in ([PopoverUi.popoverOnTop]).
-const String popoverRouteName = 'codelessly.popover';
-
 Future<Object?> showAnchoredModal(
   BuildContext context,
   Widget content, {

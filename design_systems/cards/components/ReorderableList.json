@@ -49,7 +49,7 @@
      "flutter": "bool"
     },
     "default": true,
-    "doc": "The + in the header."
+    "doc": "The + in the header and the x on each row. False: a fixed set of items, only their order changes."
    }
   ],
   "events": [
@@ -486,7 +486,10 @@
       }
      ]
     }
-   ]
+   ],
+   "bind": {
+    "visible": "${props.addable}"
+   }
   },
   "x": {
    "type": "icon",

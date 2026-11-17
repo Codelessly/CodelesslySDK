@@ -169,6 +169,8 @@
   written at the top of `site.json`, outside `"theme"`, is a `site_key_ignored` warning that says where it goes.
   Cards' DESIGN.md says how a site sets its accent, its fonts (`fontFamily` for the Inter styles; the display and
   mono styles one by one) and dark as its default (`"mode": "dark"`).
+- Cards: `ReorderableList addable=false` is a fixed set of items whose order alone changes: it hid the + of the
+  header and still drew the x that removes each row. The x goes with the +.
 
 ## 32.0.0
 

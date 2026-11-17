@@ -131,7 +131,17 @@ def _sort_menu(doc):
     return doc
 
 
-REPAIRS = {'MenuPopover': _menu_popover, 'MenuItem': _menu_item, 'SortMenu': _sort_menu}
+def _reorderable_list(doc):
+    """`addable=false` is a fixed set of items whose order alone changes: SSUI hid the + of the header and still
+    drew the x that removes a row. The x goes with the +."""
+    doc['nodes']['remove'].setdefault('bind', {})['visible'] = '${props.addable}'
+    for p in doc['widget'].get('props', []):
+        if p['key'] == 'addable':
+            p['doc'] = 'The + in the header and the x on each row. False: a fixed set of items, only their order changes.'
+    return doc
+
+
+REPAIRS = {'MenuPopover': _menu_popover, 'MenuItem': _menu_item, 'SortMenu': _sort_menu, 'ReorderableList': _reorderable_list}
 
 # A removed key in a recorded patch. JSON null cannot say it: a document may hold a null of its own.
 REMOVED = {'$removed': True}
