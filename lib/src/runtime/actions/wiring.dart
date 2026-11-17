@@ -151,6 +151,8 @@ class TreeReactions implements NodeInteractions {
       // finger hands the gesture to the pinch.
       ..yieldsToPinch = types.contains(TriggerType.pinch) || (g != null && g.enabled && (g.zoom || g.rotate))
       ..holdMs = n.actions.firstWhere((r) => r.trigger.type == TriggerType.hold, orElse: () => n.actions.first).trigger.holdMs
+      ..repeatDelayMs = n.actions.where((r) => r.trigger.type == TriggerType.click && r.trigger.repeat).firstOrNull?.trigger.holdMs
+      ..repeatIntervalMs = n.actions.where((r) => r.trigger.type == TriggerType.click && r.trigger.repeat).firstOrNull?.trigger.effectiveIntervalMs
       ..visibleFraction = viewport ? n.actions.firstWhere((r) => _isViewport(r.trigger.type)).trigger.visibleFraction : null
       ..visibleMs = viewport
           ? n.actions.firstWhere((r) => r.trigger.type == TriggerType.enterViewport, orElse: () => n.actions.first).trigger.visibleMs
@@ -200,6 +202,12 @@ class TreeReactions implements NodeInteractions {
       if (i is! int || i < 0 || i >= destinations.length || destinations[i].actions.isEmpty) return;
       node = node.copyWith(actions: destinations[i].actions);
       trigger = 'click';
+    }
+    // A held press repeats only click reactions that opted in; a node may
+    // also have a one-shot click reaction (for example, opening a panel).
+    if (trigger == 'click' && event['repeat'] == true) {
+      node = node.copyWith(actions: node.actions.where((r) => r.trigger.type == TriggerType.click && r.trigger.repeat).toList());
+      if (node.actions.isEmpty) return;
     }
     // What a custom paint has under the pointer (render/custom_paint.dart).
     if (node.behaviors.customPaint != null) event = customPaintEvent(box, event);
@@ -648,6 +656,22 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
 
   int holdMs = 1200;
 
+  /// A click with `repeat: true` repeats after this delay at this interval.
+  /// Null disables repetition; the short-tap click is unchanged.
+  int? repeatDelayMs;
+  int? repeatIntervalMs;
+  Timer? _repeatDelay;
+  Timer? _repeatTimer;
+  Offset? _repeatStart;
+  bool _repeated = false;
+
+  void _stopRepeat() {
+    _repeatDelay?.cancel();
+    _repeatTimer?.cancel();
+    _repeatDelay = _repeatTimer = null;
+    _repeatStart = null;
+  }
+
   /// A second finger cancels a plain drag (and its swipes), so a pinch on
   /// this node (a transform gesture's zoom, pinch reactions) wins.
   bool yieldsToPinch = false;
@@ -894,6 +918,7 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
         ..onTapUp = ((_) {})
         ..onTap = (_has(TriggerType.click)
             ? () {
+                if (_repeated) return;
                 // What an overlay this press opens gives the focus back to.
                 if (_focus case final f?) ControlFocusScope.noteActivation(f, keyboard: false);
                 _fire(TriggerType.click, at ?? const {});
@@ -998,6 +1023,7 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
     if (event is PointerUpEvent || event is PointerCancelEvent) {
       _down.remove(event.pointer);
       _fingers.remove(event.pointer);
+      _stopRepeat();
     }
     if (event is PointerMoveEvent && _fingers.containsKey(event.pointer)) {
       if (_fingers.length > 1 && _has(TriggerType.pinch)) {
@@ -1008,6 +1034,22 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
     }
     if (event is PointerDownEvent) {
       _down.add(event.pointer);
+      _repeated = false;
+      if (_has(TriggerType.click) && repeatDelayMs != null && _down.length == 1) {
+        _repeatStart = event.position;
+        _repeatDelay = Timer(Duration(milliseconds: repeatDelayMs!), () {
+          if (!attached || !_down.contains(event.pointer) || !pressEnabled) return;
+          _repeated = true;
+          _fire(TriggerType.click, const {'repeat': true});
+          _repeatTimer = Timer.periodic(Duration(milliseconds: repeatIntervalMs ?? 120), (_) {
+            if (!attached || !_down.contains(event.pointer) || !pressEnabled) {
+              _stopRepeat();
+            } else {
+              _fire(TriggerType.click, const {'repeat': true});
+            }
+          });
+        });
+      }
       if (event.kind == PointerDeviceKind.touch) _fingers[event.pointer] = event.localPosition;
       if (yieldsToPinch && _down.length > 1 && _pan != null) {
         // Disposing rejects its pointers in the arena; it is made again on
@@ -1037,6 +1079,7 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
         });
       }
     } else if (event is PointerMoveEvent) {
+      if (_repeatStart case final start? when (event.position - start).distance > kTouchSlop) _stopRepeat();
       final start = _holdStart;
       if (_hold != null && start != null && (event.position - start).distance > kTouchSlop) {
         _hold?.cancel();
@@ -1131,6 +1174,7 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
     }
     _hold?.cancel();
     _hold = null;
+    _stopRepeat();
     if (_hovering && _has(TriggerType.cursorExit)) _fire(TriggerType.cursorExit);
     _hovering = false;
     super.detach();

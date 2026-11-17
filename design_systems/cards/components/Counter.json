@@ -249,7 +249,10 @@
    "actions": [
     {
      "trigger": {
-      "type": "click"
+      "type": "click",
+      "repeat": true,
+      "holdMs": 420,
+      "intervalMs": 120
      },
      "actions": [
       {
@@ -263,6 +266,18 @@
        "value": "${props.value}"
       }
      ]
+    }
+   ],
+   "focusable": false,
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 44,
+       "height": 44
+      }
+     }
     }
    ]
   },
@@ -315,7 +330,10 @@
    "actions": [
     {
      "trigger": {
-      "type": "click"
+      "type": "click",
+      "repeat": true,
+      "holdMs": 420,
+      "intervalMs": 120
      },
      "actions": [
       {
@@ -329,6 +347,18 @@
        "value": "${props.value}"
       }
      ]
+    }
+   ],
+   "focusable": false,
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 44,
+       "height": 44
+      }
+     }
     }
    ]
   },
@@ -345,18 +375,50 @@
    }
   },
   "stepValue": {
-   "type": "text",
+   "type": "textField",
    "props": {
-    "text": "${= props.value}",
     "style": "numberSmall",
-    "textAlign": "center"
+    "textAlign": "center",
+    "keyboardType": "number",
+    "decoration": {
+     "isCollapsed": true,
+     "border": {
+      "type": "none"
+     }
+    }
    },
    "layout": {
     "width": 26,
     "height": {
-     "hug": 0
+     "hug": 20
     }
-   }
+   },
+   "bind": {
+    "props.initialValue": "${props.value}",
+    "props.min": "${props.min}",
+    "props.max": "${props.max}",
+    "props.step": "${props.step}",
+    "props.semanticLabel": "${props.label}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= clamp(number(result), props.min, props.max)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
   },
   "step": {
    "type": "row",

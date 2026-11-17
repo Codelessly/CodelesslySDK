@@ -1,0 +1,209 @@
+{
+ "widget": {
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "number",
+      "flutter": "double"
+     }
+    },
+    "default": "",
+    "doc": "The name of your number variable."
+   },
+   {
+    "key": "min",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "The least it goes."
+   },
+   {
+    "key": "max",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 1000000,
+    "doc": "The most it goes."
+   },
+   {
+    "key": "step",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 1,
+    "doc": "How much a step button changes it."
+   },
+   {
+    "key": "prefix",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Before the value ($)."
+   },
+   {
+    "key": "suffix",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "After the value (px, %)."
+   },
+   {
+    "key": "showStepper",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "The up and down buttons."
+   },
+   {
+    "key": "size",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "small",
+      "medium",
+      "large"
+     ]
+    },
+    "default": "medium",
+    "doc": "small, medium or large."
+   },
+   {
+    "key": "enabled",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False dims it and stops input."
+   },
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Number",
+    "doc": "Accessible name for the field."
+   }
+  ]
+ },
+ "nodes": {
+  "field": {
+   "bind": {
+    "props.min": "${props.min}",
+    "props.max": "${props.max}",
+    "props.step": "${props.step}",
+    "props.semanticLabel": "${props.label}"
+   }
+  },
+  "steps": {
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 44,
+       "height": 88
+      }
+     }
+    }
+   ]
+  },
+  "up": {
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "props.enabled",
+      "repeat": true,
+      "holdMs": 420,
+      "intervalMs": 120
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= clamp(props.value + props.step, props.min, props.max)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ],
+   "focusable": false,
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 44,
+       "height": 44
+      },
+      "bind": {
+       "layout.width": null,
+       "layout.height": null
+      }
+     }
+    }
+   ]
+  },
+  "down": {
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "props.enabled",
+      "repeat": true,
+      "holdMs": 420,
+      "intervalMs": 120
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= clamp(props.value - props.step, props.min, props.max)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ],
+   "focusable": false,
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 44,
+       "height": 44
+      },
+      "bind": {
+       "layout.width": null,
+       "layout.height": null
+      }
+     }
+    }
+   ]
+  }
+ }
+}

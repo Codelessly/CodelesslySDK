@@ -1,0 +1,228 @@
+{
+ "widget": {
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Item",
+    "doc": "The item's name.",
+    "required": true
+   },
+   {
+    "key": "detail",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A quiet second line: a size, a unit price."
+   },
+   {
+    "key": "price",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The price, as text ($4.75)."
+   },
+   {
+    "key": "qty",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 1,
+    "doc": "The quantity shown between minus and plus.",
+    "required": true
+   },
+   {
+    "key": "max",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 99,
+    "doc": "The most items."
+   },
+   {
+    "key": "step",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 1,
+    "doc": "How much each press changes the quantity."
+   },
+   {
+    "key": "kind",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "box",
+    "doc": "The drawn thumbnail, a Media kind: shoe, mug, tote, box, beans, laptop, banana, milk, bread, eggs, cheese, apple."
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "auto",
+    "doc": "The thumbnail's tone (sand, rose, mint, sky, lilac, slate; auto picks one)."
+   }
+  ]
+ },
+ "nodes": {
+  "line": {
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 8
+      }
+     }
+    }
+   ]
+  },
+  "texts": {
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 200
+       },
+       "basis": 180
+      }
+     }
+    }
+   ]
+  },
+  "right": {
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 150
+      }
+     }
+    }
+   ]
+  },
+  "stepMinus": {
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "repeat": true,
+      "holdMs": 420,
+      "intervalMs": 120
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= max(0, props.qty - props.step)}"
+      }
+     ]
+    }
+   ],
+   "focusable": false,
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 44,
+       "height": 44
+      }
+     }
+    }
+   ]
+  },
+  "stepPlus": {
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "repeat": true,
+      "holdMs": 420,
+      "intervalMs": 120
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= min(props.max, props.qty + props.step)}"
+      }
+     ]
+    }
+   ],
+   "focusable": false,
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 44,
+       "height": 44
+      }
+     }
+    }
+   ]
+  },
+  "stepValue": {
+   "type": "textField",
+   "props": {
+    "keyboardType": "number",
+    "decoration": {
+     "isCollapsed": true,
+     "border": {
+      "type": "none"
+     }
+    },
+    "text": {
+     "$removed": true
+    }
+   },
+   "layout": {
+    "height": {
+     "hug": 20
+    }
+   },
+   "bind": {
+    "props.initialValue": "${props.qty}",
+    "props.min": "${= 0}",
+    "props.max": "${props.max}",
+    "props.step": "${props.step}",
+    "props.semanticLabel": "${= 'Quantity of ' + props.title}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= clamp(number(result), 0, props.max)}"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

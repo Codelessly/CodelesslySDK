@@ -1,0 +1,138 @@
+{
+ "nodes": {
+  "group": {
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "height": 46
+      }
+     }
+    }
+   ]
+  },
+  "minus": {
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "props.enabled && props.value > props.min",
+      "repeat": true,
+      "holdMs": 420,
+      "intervalMs": 120
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= max(props.min, props.value - props.step)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ],
+   "focusable": false,
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 44,
+       "height": 44
+      }
+     }
+    }
+   ]
+  },
+  "number": {
+   "type": "textField",
+   "props": {
+    "textAlign": "center",
+    "keyboardType": "number",
+    "decoration": {
+     "isCollapsed": true,
+     "border": {
+      "type": "none"
+     }
+    },
+    "text": {
+     "$removed": true
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 26
+    }
+   },
+   "bind": {
+    "props.initialValue": "${props.value}",
+    "props.min": "${props.min}",
+    "props.max": "${props.max}",
+    "props.step": "${props.step}",
+    "props.enabled": "${props.enabled}",
+    "props.semanticLabel": "${= props.label == '' ? 'Number' : props.label}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= clamp(number(result), props.min, props.max)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "plus": {
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "props.enabled && props.value < props.max",
+      "repeat": true,
+      "holdMs": 420,
+      "intervalMs": 120
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= min(props.max, props.value + props.step)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ],
+   "focusable": false,
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 44,
+       "height": 44
+      }
+     }
+    }
+   ]
+  }
+ }
+}
