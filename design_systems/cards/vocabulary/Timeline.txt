@@ -1,5 +1,22 @@
-// A clip editor's timeline: the ruler and tracks written under it, with the playhead's time and zoom buttons.
-Timeline#tracks zoom=1 playhead=0 onZoom
+// A list of dated entries down a rail: each item a record with a date or time, a title and a note (items=[…]; a text is its title), then the lines written under it; the selected one (its index, kept in bind or shown with selected=) is ringed, and a tap picks one.
+Timeline.vertical#events items=[] bind=at selected onPick
+  state at=-1
+  Column w=fill gap=12 pad=[12,0,0,0] border-left=line
+    if length(items) > 0
+      Column w=fill gap=12
+        each item in items
+          Row w=fill gap=10 top onTap={at=index; onPick(index)}
+            Icon "{index == coalesce(selected, at) ? "radio_button_checked" : coalesce(item.icon, "circle")}" size=12 color=accent
+            Column grow gap=2
+              Row gap=8 middle
+                Text.strong "{coalesce(item.title, coalesce(item.label, coalesce(item.name, item)))}"
+                Text.caption "{coalesce(item.date, coalesce(item.time, coalesce(item.when, coalesce(item.year, ""))))}"
+              if coalesce(item.note, coalesce(item.detail, item.text)) != null
+                Text.muted "{coalesce(item.note, coalesce(item.detail, item.text))}"
+    ...
+
+// A clip editor's timeline: the ruler and the tracks written under it (or named in tracks=[…]), with the playhead's time and zoom buttons.
+Timeline#tracks zoom=1 playhead=0 tracks=[] onZoom
   Column w=fill gap=0 radius=8 fill=#FF1E1E24 border=#FF2E2E36
     Row w=fill gap=8 pad=[8,6,8,6] middle
       Text.caption "{fixed(playhead, 1)} s" color=#FFFFFFFF
@@ -7,19 +24,23 @@ Timeline#tracks zoom=1 playhead=0 onZoom
       IconButton "zoom_out" onTap={onZoom(max(0.25, zoom / 2))}
       IconButton "zoom_in" onTap={onZoom(min(8, zoom * 2))}
     Column w=fill gap=2
+      if length(tracks) > 0
+        Column w=fill gap=2
+          each track in tracks
+            Row w=fill h=32 pad=[8,0,8,0] middle fill=#FF2A2A33
+              Text.caption "{coalesce(track.name, track)}" color=#FFD1D5DB
       ...
 
-// A list of dated events down a rail: each line under it is one event.
-Timeline.vertical#events
-  Column w=fill gap=12 pad=[12,0,0,0] border-left=line
-    ...
-
-// A route's stops down a rail, with where the vehicle is: each line under it is a stop.
-Timeline.vertical#route bind=at position marker="directions_bus"
+// A route's stops down a rail, with where the vehicle is: the stops named in stops=[…], then each line under it.
+Timeline.vertical#route bind=at position marker="directions_bus" stops=[]
   state at=0
   Column w=fill gap=10 pad=[12,0,0,0] border-left=accent
     if position != null
       Row gap=6 middle
         Icon "{marker}" size=18 color=accent
         Text.caption "Between stops {floor(position) + 1} and {floor(position) + 2}"
+    if length(stops) > 0
+      Column w=fill gap=10
+        each stop in stops
+          TimelineStop "{coalesce(stop.name, stop)}" passed={position != null && index <= position} current={index == at}
     ...

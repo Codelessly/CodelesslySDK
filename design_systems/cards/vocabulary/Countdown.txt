@@ -1,3 +1,16 @@
+// The seconds left, under a label, as the time they make (format: "m:ss", "h m s", or "d h m s" for days); red from warnAt down, when onWarn runs once; onEnd runs once at 0. It shows the seconds it is given: the page counts them down (an every 1s).
+Countdown#timer "label" seconds=0 warnAt=0 format="m:ss" onWarn onEnd
+  state ended=false
+  state warned=false
+  every 1s when seconds <= 0 && !ended onTick={ended=true; onEnd}
+  every 1s when seconds > 0 && seconds <= warnAt && !warned onTick={warned=true; onWarn}
+  Row gap=8 middle
+    Icon "timer" size=18 color={seconds <= warnAt ? "#FFDC2626" : "#FF6B7280"}
+    Column gap=0
+      if label != null
+        Text.caption "{label}"
+      Text.strong "{contains(format, "d") ? floor(seconds / 86400) + "d " + floor(seconds % 86400 / 3600) + "h " + floor(seconds % 3600 / 60) + "m " + floor(seconds % 60) + "s" : contains(format, "h") ? floor(seconds / 3600) + "h " + floor(seconds % 3600 / 60) + "m " + floor(seconds % 60) + "s" : duration(seconds)}" color={seconds <= warnAt ? "#FFDC2626" : "#FF111827"}
+
 // A countdown of seconds as a ring with the seconds left in it; onEnd runs once when it reaches 0.
 Countdown#seconds value=0 total=60 size=56 onEnd
   state ended=false

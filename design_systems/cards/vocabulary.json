@@ -1,6 +1,33 @@
 {
+  "types": {
+    "StarRating": {"to": "Rating"},
+    "Breadcrumbs": {"to": "Breadcrumb"},
+    "Map": {"to": "MapView"},
+    "Camera": {"to": "CameraView"},
+    "Signature": {"to": "SignaturePad"}
+  },
   "parameters": {
-    "Tabs": {"items": "tabs"}
+    "Tabs": {"items": "tabs"},
+    "Timeline": {"events": "items", "steps": "items", "entries": "items", "current": "selected"},
+    "Stepper": {"items": "steps"},
+    "Countdown": {"warnBelow": "warnAt", "warn": "warnAt"},
+    "MapView": {"markers": "pins", "places": "pins", "locations": "pins", "apps": "pins"},
+    "RouteMap": {"points": "stops", "route": "stops"},
+    "FloorPlan": {"items": "pins", "markers": "pins"},
+    "Waveform": {"peaks": "values", "samples": "values", "bars": "values", "progress": "position", "marks": "cues", "markers": "cues"},
+    "ChatBubble": {"from": "sender", "author": "sender"},
+    "Breadcrumb": {"crumbs": "items", "path": "items"}
+  },
+  "events": {
+    "Timeline": {"onSelect": "onPick"},
+    "Stepper": {"onSelect": "onPick"},
+    "Countdown": {"onDone": "onEnd", "onFinish": "onEnd", "onComplete": "onEnd"},
+    "MapView": {"onPick": "onSelect", "onPin": "onSelect"},
+    "RouteMap": {"onPin": "onPick", "onSelect": "onPick"},
+    "FloorPlan": {"onSelect": "onPick"},
+    "SignaturePad": {"onSign": "onChange"},
+    "CameraView": {"onShutter": "onCapture", "onTake": "onCapture"},
+    "Breadcrumb": {"onPick": "onNavigate", "onSelect": "onNavigate"}
   },
   "flags": {
     "Rating": {"readonly": "readOnly"}

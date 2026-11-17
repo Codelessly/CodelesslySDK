@@ -1,0 +1,9 @@
+// A sound as bars, one for each value (0 to 1 is a share of the height, a larger number its pixels), coloured up to position (a share from 0 to 1), with the cue count; a tap on a bar runs onSeek (result: its index).
+// It plays and reads no sound: the bars stand for the values given (the vocabulary loop's D18: a drawn series is a primitive to build).
+Waveform values=[] position=0 cues=[] h=48 onSeek
+  Column w=fill gap=4
+    Row w=fill h={h} gap=2 middle
+      each v in values
+        Box w=3 h={min(h, max(2, v <= 1 ? v * h : v))} radius=2 fill={index < position * length(values) ? "#FF2563EB" : "#FF9CA3AF"} onTap={onSeek(index)}
+    if length(cues) > 0
+      Text.caption "{length(cues)} {length(cues) == 1 ? "cue" : "cues"}"

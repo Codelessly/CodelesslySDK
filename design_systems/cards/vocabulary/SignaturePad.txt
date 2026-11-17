@@ -1,0 +1,9 @@
+// Where one signs: a framed area with its hint; a tap marks it signed (bind keeps "signed", onChange runs with it), and the clear button empties it.
+// It draws no strokes: there is no drawing surface yet (the vocabulary loop's D18); a tap stands for signing.
+SignaturePad "hint" bind=signature h=160 onChange
+  state signature=""
+  Column w=fill gap=6
+    Stack w=fill h={h} radius=8 border=#FFCBD5E1 fill=#FFFFFFFF center middle onTap={signature="signed"; onChange("signed")}
+      Text.muted "{signature == "" || signature == null ? coalesce(hint, "Sign here") : "Signed"}"
+    if signature != "" && signature != null
+      Button.ghost "Clear" icon="close" onTap={signature=""; onChange("")}

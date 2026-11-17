@@ -1,0 +1,14 @@
+// A camera's view: a dark frame naming its source and hint, the lines under it over the frame, and a shutter button that runs onCapture.
+// It shows no picture: there is no camera primitive yet (the vocabulary loop's D18).
+CameraView "hint" source="camera" h=320 onCapture
+  Stack w=fill h={h} radius=12 fill=#FF1F2937
+    Column w=fill h=fill center middle gap=6
+      Icon "videocam" size=40 color=#FF9CA3AF
+      Text.caption "Camera: {source}" color=#FFD1D5DB
+      if hint != null
+        Text.caption "{hint}" color=#FF9CA3AF
+    ...
+    if onCapture
+      Column w=fill h=fill center pad=12
+        Spacer grow
+        IconButton "photo_camera" tooltip="Take photo" onTap={onCapture}

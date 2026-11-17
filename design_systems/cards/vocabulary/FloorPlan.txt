@@ -1,0 +1,17 @@
+// A floor plan: a quiet placeholder with its name, its rooms as tiles and its pins as chips (a tap on either picks it: onPick, result its name or id, else its index); while placing, a button places a pin (onPlace).
+// It draws no plan and places nothing by position (a pin's x and y are not read): there is no positioned surface yet (the vocabulary loop's D18).
+FloorPlan "name" rooms=[] pins=[] bind=picked selected placing=false h=360 onPick onPlace
+  state picked=""
+  Column w=fill h={h} gap=10 pad=12 radius=12 fill=#FFF8FAFC border=#FFCBD5E1 scroll
+    Row gap=8 middle
+      Icon "grid_view" size=20 color=#FF475569
+      Text.caption "{name == null ? "Floor plan" : name} · {length(rooms)} rooms · {length(pins)} {length(pins) == 1 ? "pin" : "pins"}" color=#FF475569
+    Row gap=6 wrap
+      each room in rooms
+        Chip "{coalesce(room.name, room)}" icon="meeting_room" selected={coalesce(selected, picked) == coalesce(room.name, room)} onTap={picked=coalesce(room.name, room); onPick(coalesce(room.name, room))}
+    Row gap=6 wrap
+      each pin in pins
+        Chip "{coalesce(pin.label, coalesce(pin.name, coalesce(pin.title, coalesce(pin.id, index + 1))))}" icon="push_pin" selected={coalesce(selected, picked) == coalesce(pin.id, index)} onTap={picked=coalesce(pin.id, index); onPick(coalesce(pin.id, index))}
+    if placing
+      Button.outline "Place a pin" icon="add_location" onTap={onPlace}
+    ...

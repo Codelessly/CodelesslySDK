@@ -49,8 +49,12 @@ void main() {
     expect(read.problems, isEmpty);
     final meanings = [for (final defs in read.words.values) ...defs];
     expect(meanings.length, greaterThanOrEqualTo(25));
-    for (final w in read.words.keys) {
-      expect(catalog.widget(w) == null && catalog.widget('${w[0].toLowerCase()}${w.substring(1)}') == null && !notationTypes.containsKey(w), isTrue, reason: '$w is a word Cards or the notation has');
+    for (final e in read.words.entries) {
+      final w = e.key;
+      expect(catalog.widget('${w[0].toLowerCase()}${w.substring(1)}') == null && !notationTypes.containsKey(w), isTrue, reason: '$w is a word the notation has');
+      // A component's word takes only named meanings beside the component
+      // (codelessly_api docs/design/20 section 5: Stepper#steps).
+      if (catalog.widget(w) != null) expect(e.value.every((d) => d.name != null), isTrue, reason: '$w is a Cards component: its meanings here are named');
     }
     // Each meaning of a word with several is named.
     for (final defs in read.words.values.where((d) => d.length > 1)) {

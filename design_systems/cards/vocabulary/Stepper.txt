@@ -1,0 +1,19 @@
+// Where one is in named steps (the number control is Cards' Stepper component, the word's first meaning): each step numbered, done ones checked (done=[…] or before the current), the current one lit; a tap picks one. bind keeps the current step's index; current= shows one without keeping it.
+Stepper#steps steps=[] bind=step current done=[] orientation="horizontal" onPick
+  state step=0
+  Column w=fill gap=4
+    if orientation == "vertical"
+      each s in steps
+        Row gap=10 middle pad=[8,6,8,6] radius=8 fill={index == coalesce(current, step) ? "#FFEFF6FF" : "#00000000"} onTap={step=index; onPick(index)}
+          Box w=24 h=24 radius=12 center middle fill={contains(done, index) || index < coalesce(current, step) ? "#FF16A34A" : index == coalesce(current, step) ? "#FF2563EB" : "#FFE5E7EB"}
+            Text.small "{contains(done, index) || index < coalesce(current, step) ? "✓" : index + 1}" color={index <= coalesce(current, step) || contains(done, index) ? "#FFFFFFFF" : "#FF374151"}
+          Text.small "{s}" weight={index == coalesce(current, step) ? 700 : 400}
+    if orientation != "vertical"
+      Row gap=8 middle scroll
+        each s in steps
+          Row gap=6 middle onTap={step=index; onPick(index)}
+            Box w=24 h=24 radius=12 center middle fill={contains(done, index) || index < coalesce(current, step) ? "#FF16A34A" : index == coalesce(current, step) ? "#FF2563EB" : "#FFE5E7EB"}
+              Text.small "{contains(done, index) || index < coalesce(current, step) ? "✓" : index + 1}" color={index <= coalesce(current, step) || contains(done, index) ? "#FFFFFFFF" : "#FF374151"}
+            Text.small "{s}" weight={index == coalesce(current, step) ? 700 : 400}
+            if index < length(steps) - 1
+              Divider w=24

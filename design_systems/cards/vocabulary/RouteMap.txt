@@ -1,0 +1,15 @@
+// A route on a map: a quiet placeholder with how far along it is (progress from 0 to 1) and its stops in order, numbered, the current one lit; a tap on a stop runs onPick (result: its id, else its index).
+// It draws no map and no line: there is no map primitive yet (the vocabulary loop's D18).
+RouteMap stops=[] current progress=0 h=240 onPick
+  Column w=fill h={h} gap=10 pad=12 radius=12 fill=#FFE0F2FE border=#FFBAE6FD
+    Row gap=8 middle
+      Icon "route" size=20 color=#FF0369A1
+      Text.caption "Route · {length(stops)} stops · {round(progress * 100, 0)}% along" color=#FF0369A1
+    Progress {progress} w=fill
+    Row gap=8 middle scroll
+      each stop in stops
+        Row gap=6 middle onTap={onPick(coalesce(stop.id, index))}
+          Box w=24 h=24 radius=12 center middle fill={coalesce(stop.id, coalesce(stop.name, stop)) == current ? "#FF2563EB" : "#FF475569"}
+            Text.small "{index + 1}" color=#FFFFFFFF
+          Text.small "{coalesce(stop.name, coalesce(stop.label, coalesce(stop.address, stop)))}"
+    ...

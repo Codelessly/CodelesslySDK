@@ -1,0 +1,12 @@
+// A map with pins: a quiet placeholder saying where it is centred and at what zoom, with the pins listed under it as chips (a record's label, name, title or id); a tap on one picks it (onSelect: result is its id, else its index).
+// It draws no map: there is no map primitive yet (the vocabulary loop's D18). The signature is the one three answers agreed on.
+MapView center=[0,0] zoom=12 pins=[] bind=picked h=320 onSelect
+  state picked=""
+  Column w=fill h={h} gap=8 pad=12 radius=12 fill=#FFE0F2FE border=#FFBAE6FD
+    Row gap=8 middle
+      Icon "map" size=20 color=#FF0369A1
+      Text.caption "Map · centre {coalesce(center.lat, center[0])}, {coalesce(center.lng, center[1])} · zoom {zoom} · {length(pins)} {length(pins) == 1 ? "pin" : "pins"}" color=#FF0369A1
+    Row gap=6 wrap
+      each pin in pins
+        Chip "{coalesce(pin.label, coalesce(pin.name, coalesce(pin.title, coalesce(pin.id, pin))))}" icon="place" selected={picked == coalesce(pin.id, index)} onTap={picked=coalesce(pin.id, index); onSelect(coalesce(pin.id, index))}
+    ...
