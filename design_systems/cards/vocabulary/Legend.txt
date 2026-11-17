@@ -1,5 +1,11 @@
 // The key of a heat map: a row of squares from the faintest shade to the strongest.
-Legend count=4 from="#FFE8F3EC" to="#FF16A34A"
+Legend#scale count=4 from="#FFE8F3EC" to="#FF16A34A"
   Row gap=3 middle
     each step in range(count)
       Box w=12 h=12 radius=3 fill={mix(from, to, step / max(1, count - 1))}
+
+// One entry of a key: a square of its color and its label (Free, Occupied).
+Legend#entry "label" color="#FF9CA3AF"
+  Row gap=6 middle
+    Box w=10 h=10 radius=3 fill={color}
+    Text.caption "{label}"

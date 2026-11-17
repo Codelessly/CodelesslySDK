@@ -9,7 +9,8 @@
 //       [--width <canvas width>] [--out <dir>] [--sites <dir>] [--no-definitions]
 //
 // A corpus file may hold several screens, each under a `### name` line; a
-// file without one is a single screen. A folder is read for its *.txt (and
+// file without one is a single screen; state and overlays before the first
+// heading belong to every screen. A folder is read for its *.txt (and
 // those of its answers/ folder). The design system is design_systems/cards
 // unless named; its vocabulary.json (aliases) is read over the built-in
 // table, then --aliases over both; --no-aliases reads none (the count before
@@ -71,8 +72,10 @@ Map<String, String> loadDefinitionTexts(String dir) {
 }
 
 /// The screens of [text]: each `### name` line starts one; a text without
-/// one is a single screen called [fallback]. `from` is the 1-based line of
-/// the screen's first line in the file.
+/// one is a single screen called [fallback]. State and overlays written
+/// before the first heading are every screen's, not a screen of their own.
+/// `from` is the 1-based line in the file of the screen's first line (its
+/// text's first line less the app's lines put before it).
 List<({String name, String id, String text, int from})> screensOf(String text, String fallback) {
   final lines = const LineSplitter().convert(text);
   final out = <({String name, String id, String text, int from})>[];
@@ -90,7 +93,28 @@ List<({String name, String id, String text, int from})> screensOf(String text, S
   String? name;
   var from = 1;
   final body = <String>[];
+  // What is written before the first heading when it is only state and
+  // overlays (no line of a page) is the app's, not a screen: its statements
+  // come before each screen's lines (`state x=0` as `project x=0`, a value
+  // every screen shares), its overlays after them.
+  var before = <String>[], after = <String>[];
   void close() {
+    if (name == null && body.isNotEmpty && lines.any(_heading.hasMatch) && _appOnly(body)) {
+      var overlay = false;
+      for (final l in body) {
+        if (l.trim().isEmpty || l.trimLeft().startsWith('//')) continue;
+        if (!l.startsWith(' ')) overlay = !RegExp(r'^(state|project|computed|key|every)\s').hasMatch(l);
+        if (overlay) {
+          after.add(l);
+        } else if (RegExp(r'^state\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+?)(\s+saved)?\s*$').firstMatch(l) case final m? when _json(m[2]!)) {
+          before.add('project ${m[1]}=${m[2]}${m[3] ?? ''}');
+        } else {
+          before.add(l);
+        }
+      }
+      body.clear();
+      return;
+    }
     if (body.any((l) => l.trim().isNotEmpty)) {
       final n = name ?? fallback;
       out.add((name: n, id: slug(n), text: body.join('\n'), from: from));
@@ -99,7 +123,7 @@ List<({String name, String id, String text, int from})> screensOf(String text, S
   }
 
   for (var i = 0; i < lines.length; i++) {
-    final m = RegExp(r'^###\s+(.+?)\s*$').firstMatch(lines[i]);
+    final m = _heading.firstMatch(lines[i]);
     if (m != null) {
       close();
       name = m[1];
@@ -109,7 +133,41 @@ List<({String name, String id, String text, int from})> screensOf(String text, S
     }
   }
   close();
-  return out;
+  if (before.isEmpty && after.isEmpty) return out;
+  // `from` stays the file's line of each screen's own first line.
+  return [
+    for (final s in out) (name: s.name, id: s.id, text: [...before, s.text, ...after].join('\n'), from: s.from - before.length),
+  ];
+}
+
+final _heading = RegExp(r'^###\s+(.+?)\s*$');
+
+/// Whether [lines] (what comes before a text's first heading) hold no line
+/// of a page: only state, shortcuts, timers, comments and overlays
+/// (`Dialog#id` at the margin, with what is under it).
+bool _appOnly(List<String> lines) {
+  var inOverlay = false;
+  for (final l in lines) {
+    if (l.trim().isEmpty || l.trimLeft().startsWith('//')) continue;
+    if (l.startsWith(' ')) {
+      if (!inOverlay) return false;
+      continue;
+    }
+    inOverlay = RegExp(r'^(Dialog|Modal|Sheet|BottomSheet|Drawer|Menu|Dropdown|Popover|Popup|Lightbox|ConfirmDialog)#').hasMatch(l);
+    if (inOverlay) continue;
+    if (!RegExp(r'^(state|project|computed|key|every)\s').hasMatch(l)) return false;
+  }
+  return true;
+}
+
+/// Whether [value] is a JSON value (a state's literal start).
+bool _json(String value) {
+  try {
+    jsonDecode(value);
+    return true;
+  } on FormatException {
+    return false;
+  }
 }
 
 class _Word {
@@ -300,7 +358,10 @@ Future<void> main(List<String> args) async {
     var shared = <String, Map<String, Object?>>{};
 
     NotationResult? expand(({String name, String id, String text, int from}) screen) {
-      final options = NotationOptions.fromDesignSystem(ds, width: width, screen: screen.id, projectVariables: shared).open(vocabulary: table);
+      // `go recipes` is the screen called Recipes, even beside a list called recipes.
+      final options = NotationOptions.fromDesignSystem(ds, width: width, screen: screen.id, projectVariables: shared)
+          .open(vocabulary: table)
+          .withScreens([for (final s in screens) s.id]);
       try {
         // A word the answer defines anywhere (models write the definitions
         // after the last screen) holds for every one of its screens.
@@ -482,15 +543,8 @@ Future<void> main(List<String> args) async {
     }
     // A page named by part of its name (go cook: "Cook mode"; go add-recipe:
     // "Add a recipe") is that page.
-    String page(String to) {
-      if (pages.contains(to)) return to;
-      // `go decks_and_mixer`: a screen's id here is its name with hyphens.
-      final t = to.replaceAll('_', '-').toLowerCase();
-      if (pages.contains(t)) return t;
-      final words = t.split('-');
-      final near = pages.where((p) => p.startsWith('$t-') || words.every(p.split('-').contains)).toList();
-      return near.length == 1 ? near.first : to;
-    }
+    // `go decks_and_mixer`: a screen's id here is its name with hyphens.
+    String page(String to) => notationScreen(to, pages) ?? to;
 
     void walk(Object? v) {
       if (v is Map) {
