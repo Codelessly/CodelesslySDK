@@ -1,0 +1,156 @@
+### Formula
+state tab="formula"
+state total=1000
+state sel=""
+state rows=[{"id":1,"name":"Bread flour","pct":90,"kind":"flour"},{"id":2,"name":"Whole wheat flour","pct":10,"kind":"flour"},{"id":3,"name":"Water","pct":75,"kind":"liquid"},{"id":4,"name":"Salt","pct":2,"kind":"other"},{"id":5,"name":"Levain (starter)","pct":20,"kind":"other"}]
+App
+  Sidebar
+    Brand "Crumb" icon="bakery_dining"
+    NavItem "Formula" icon="scale" selected={tab=="formula"} onTap={tab="formula"}
+    NavItem "Timeline" icon="schedule" selected={tab=="timeline"} onTap={go timeline}
+    NavItem "Timers" icon="timer" selected={tab=="timers"} onTap={go timers}
+    Spacer grow
+    Text.muted "Country loaf, 75% hydration"
+  Main
+    Nav
+      Heading "Country loaf" level=1
+      Button "Add ingredient" onTap={open addrow}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=8
+          Text.fieldLabel "Total dough weight (g)"
+          Input "Grams" type=number bind=total
+        StatCard "Hydration" "{fixed(sum(filter(rows,r=>r.kind=='liquid'),r=>r.pct)/sum(filter(rows,r=>r.kind=='flour'),r=>r.pct)*100,1)}%"
+        StatCard "Flour in the loaf" "{round(total/sum(rows,r=>r.pct)*sum(filter(rows,r=>r.kind=='flour'),r=>r.pct),0)} g"
+      Card gap=8
+        Row gap=8
+          Text.muted "Ingredient" grow
+          Text.muted "Baker's %" w=110
+          Text.muted "Grams" w=90
+          Text.muted "" w=40
+        Divider
+        each row in rows
+          Row gap=8 middle
+            Input bind=row.name grow
+            Input type=number bind=row.pct w=110
+            Text.strong "{round(total/sum(rows,r=>r.pct)*row.pct,0)} g" w=90
+            IconButton "delete" tooltip="Remove" onTap={rows=removeWhere(rows,r=>r.id==row.id)}
+        Divider
+        Row gap=8
+          Text.strong "Total" grow
+          Text.strong "{sum(rows,r=>r.pct)}%" w=110
+          Text.strong "{total} g" w=90
+          Spacer w=40
+      Text.muted "Change the total and every row rescales. Change a percentage and the weights follow."
+Dialog#addrow "Add ingredient"
+  state newName=""
+  state newPct=0
+  state newKind="other"
+  Input "Name" bind=newName
+  Input "Baker's percentage" type=number bind=newPct
+  Select "Kind" items=["flour","liquid","other"] bind=newKind
+  Button "Add" onTap={newName=="" ? toast "Name the ingredient" : {rows=append(rows,{"id":length(rows)+100+newPct,"name":newName,"pct":newPct,"kind":newKind}); newName=""; newPct=0; close}}
+
+### Timeline
+state tab="timeline"
+state mode="Finish at"
+state anchor=1080
+state steps=[{"id":1,"name":"Mix and autolyse","mins":45},{"id":2,"name":"Fold 1","mins":30},{"id":3,"name":"Fold 2","mins":30},{"id":4,"name":"Bulk proof","mins":180},{"id":5,"name":"Shape and cold proof","mins":600},{"id":6,"name":"Bake","mins":45}]
+state timers=[]
+state nextId=1
+App
+  Sidebar
+    Brand "Crumb" icon="bakery_dining"
+    NavItem "Formula" icon="scale" selected={tab=="formula"} onTap={go formula}
+    NavItem "Timeline" icon="schedule" selected={tab=="timeline"} onTap={tab="timeline"}
+    NavItem "Timers" icon="timer" badge="{count(timers,t=>t.running)}" selected={tab=="timers"} onTap={go timers}
+    Spacer grow
+    Text.muted "Country loaf, 75% hydration"
+  Main
+    Nav
+      Heading "Timeline" level=1
+      Button "Add step" onTap={open addstep}
+    Column pad=24 gap=16
+      Card gap=12
+        Row between middle
+          SegmentedButton items=["Start at","Finish at"] bind=mode
+          Row gap=8 middle
+            IconButton "remove" tooltip="15 minutes earlier" onTap={anchor=anchor-15}
+            Clock m={anchor} size=28
+            IconButton "add" tooltip="15 minutes later" onTap={anchor=anchor+15}
+        Row gap=32
+          Column gap=2
+            Text.muted "Starts"
+            Clock m={mode=="Start at" ? anchor : anchor-sum(steps,s=>s.mins)}
+          Column gap=2
+            Text.muted "Done"
+            Clock m={mode=="Start at" ? anchor+sum(steps,s=>s.mins) : anchor}
+          Column gap=2
+            Text.muted "Total time"
+            Text.strong "{floor(sum(steps,s=>s.mins)/60)} h {sum(steps,s=>s.mins)%60} min"
+      Card gap=8
+        each s in steps
+          Row gap=12 middle
+            Column w=70
+              Clock m={(mode=="Start at" ? anchor : anchor-sum(steps,x=>x.mins))+sum(slice(steps,0,index),x=>x.mins)} size=16
+            Box w=10 h=10 radius=5 fill=#FF2563EB
+            Column grow gap=2
+              Text.strong "{s.name}"
+              Progress {sum(slice(steps,0,index),x=>x.mins)/sum(steps,x=>x.mins)}
+            Input type=number bind=s.mins w=80
+            Text.muted "min"
+            IconButton "timer" tooltip="Start a timer" onTap={timers=append(timers,{"id":nextId,"label":s.name,"left":s.mins*60,"total":s.mins*60,"running":true}); nextId=nextId+1; toast "Timer started"}
+            IconButton "arrow_upward" tooltip="Move up" onTap={index==0 ? toast "Already first" : steps=setAt(setAt(steps,index-1,s),index,steps[index-1])}
+            IconButton "delete" tooltip="Remove" onTap={steps=removeWhere(steps,x=>x.id==s.id)}
+Dialog#addstep "Add a step"
+  state stepName=""
+  state stepMins=30
+  Input "Step" bind=stepName
+  Input "Minutes" type=number bind=stepMins
+  Button "Add" onTap={stepName=="" ? toast "Name the step" : {steps=append(steps,{"id":length(steps)+100+stepMins,"name":stepName,"mins":stepMins}); stepName=""; close}}
+
+### Timers
+state tab="timers"
+state timers=[{"id":1,"label":"Fold 1","left":1800,"total":1800,"running":true},{"id":2,"label":"Preheat Dutch oven","left":5,"total":2700,"running":true}]
+state nextId=3
+every 1s onTick={timers=map(timers,t=>t.running && t.left>0 ? with(t,"left",t.left-1) : t)}
+App
+  Sidebar
+    Brand "Crumb" icon="bakery_dining"
+    NavItem "Formula" icon="scale" selected={tab=="formula"} onTap={go formula}
+    NavItem "Timeline" icon="schedule" selected={tab=="timeline"} onTap={go timeline}
+    NavItem "Timers" icon="timer" badge="{count(timers,t=>t.running)}" selected={tab=="timers"} onTap={tab="timers"}
+    Spacer grow
+    Text.muted "Country loaf, 75% hydration"
+  Main
+    Nav
+      Heading "Timers" level=1
+      Button "New timer" onTap={open newtimer}
+    Column pad=24 gap=16
+      if isEmpty(timers)
+        EmptyState "No timers running" "Start one from a step on the Timeline."
+      Grid cols=3 gap=16
+        each t in timers
+          Card gap=12 fill={t.left==0 ? '#FFFEF3C7' : '#FFFFFFFF'}
+            Row between middle
+              Text.strong "{t.label}"
+              IconButton "close" tooltip="Remove" onTap={timers=removeWhere(timers,x=>x.id==t.id)}
+            Stack center middle h=120
+              Ring {t.left/t.total}
+              Text.strong "{floor(t.left/60)}:{t.left%60<10?'0':''}{t.left%60}" size=24
+            if t.left==0
+              Row gap=8 middle animate=pulse
+                Icon "notifications_active"
+                Text.strong "Time is up"
+            Row gap=8
+              Button.outline "{t.running ? 'Pause' : 'Resume'}" onTap={timers=updateWhere(timers,x=>x.id==t.id,x=>with(x,"running",!x.running))}
+              Button.ghost "Add 5 min" onTap={timers=updateWhere(timers,x=>x.id==t.id,x=>with(with(x,"left",x.left+300),"total",x.total+300))}
+Dialog#newtimer "New timer"
+  state label=""
+  state minutes=10
+  Input "Label" bind=label
+  Input "Minutes" type=number bind=minutes
+  Button "Start" onTap={label=="" ? toast "Label the timer" : {timers=append(timers,{"id":nextId,"label":label,"left":minutes*60,"total":minutes*60,"running":true}); nextId=nextId+1; label=""; close}}
+
+define Clock m=0 size=16
+  Text.strong size={size} "{floor((m%1440+1440)%1440/60)}:{((m%60)+60)%60<10?'0':''}{((m%60)+60)%60}"

@@ -1,0 +1,171 @@
+### Pick list
+state picks=[{"id":1,"bin":"A-04-2","name":"Oat Milk 1L","sku":"8801234500011","qty":6,"picked":0,"status":"open","photo":"https://images.example.com/sku/oat-milk.jpg"},{"id":2,"bin":"A-11-1","name":"Basmati Rice 5kg","sku":"8801234500028","qty":2,"picked":0,"status":"open","photo":"https://images.example.com/sku/rice.jpg"},{"id":3,"bin":"B-03-4","name":"Olive Oil 750ml","sku":"8801234500035","qty":4,"picked":0,"status":"open","photo":"https://images.example.com/sku/olive-oil.jpg"},{"id":4,"bin":"C-07-3","name":"Dish Soap Lemon","sku":"8801234500042","qty":3,"picked":0,"status":"open","photo":"https://images.example.com/sku/soap.jpg"},{"id":5,"bin":"D-02-1","name":"AA Batteries 12pk","sku":"8801234500059","qty":1,"picked":0,"status":"open","photo":"https://images.example.com/sku/batteries.jpg"}]
+state cur=0
+state n=0
+state code=""
+state verified=false
+state reason="Damaged"
+state found=0
+state next=312
+state tote="T-17"
+every 1s onTick={next=max(0,next-1)}
+App
+  Sidebar
+    Brand "Aisle" icon="inventory_2"
+    NavItem "Pick list" icon="checklist" badge="{count(picks,p=>p.status==\"open\")}" selected={true}
+    NavItem "Route map" icon="map" onTap={go route-map}
+    NavItem "Hand off" icon="local_shipping" onTap={go hand-off}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Okafor" size=32
+      Text.muted "Dana, zone A-D"
+  Main
+    Nav
+      Column gap=2
+        Heading "Order #48213" level=1
+        Text.muted "Route order, 5 lines, 16 units"
+      Row gap=12 middle
+        Badge.info "Tote {tote}"
+        Button.outline "Change tote" icon="swap_horiz" onTap={open tote}
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Row between
+          Text.strong "Order progress"
+          Text.muted "{count(picks,p=>p.status!=\"open\")} of {length(picks)} lines"
+        ProgressBar {count(picks,p=>p.status!="open")/length(picks)}
+        Row between
+          Text.muted "Next order starts in"
+          Text.strong "{duration(next)}"
+      if cur < length(picks)
+        Row gap=16 top
+          Card grow gap=16
+            Row between
+              Badge.primary "Line {cur+1} of {length(picks)}"
+              Text.muted "Go to aisle {picks[cur].bin}"
+            Text "{picks[cur].bin}" size=72 weight=800
+            Row gap=16 middle
+              Image "{picks[cur].photo}" w=120 h=120 radius=8
+              Column grow gap=4
+                Text.heading "{picks[cur].name}"
+                Text.mono "{picks[cur].sku}"
+                Text "Pick {picks[cur].qty}" size=36 weight=700
+            Divider
+            Text.strong "Confirm quantity"
+            Row gap=12 middle
+              Stepper bind=n min=0 max={picks[cur].qty}
+              Text.muted "of {picks[cur].qty}"
+          Card w=320 gap=12
+            Text.strong "Scan to verify"
+            Scanner "Scan the item barcode" bind=code onScan={code==picks[cur].sku ? verified=true : open mismatch}
+            if verified
+              Banner.success "Item matches {picks[cur].sku}"
+            Row gap=8
+              Button "Confirm pick" grow onTap={!verified ? toast "Scan the item first" : n==0 ? toast "Set the quantity" : {picks=updateWhere(picks,p=>p.id==picks[cur].id,p=>with(with(p,"picked",n),"status",n<p.qty?"short":"done")); cur=cur+1; n=0; code=""; verified=false; toast "Line confirmed"}}
+              Button.outline "Short pick" onTap={found=n; open short}
+      if cur >= length(picks)
+        EmptyState "All lines picked" "Carry tote {tote} to the pack bench."
+          Button "Hand off" onTap={go hand-off}
+      Card gap=8
+        Text.strong "Route"
+        each p in picks
+          Row gap=12 middle
+            Icon "{p.status==\"done\" ? \"check_circle\" : p.status==\"short\" ? \"warning\" : \"radio_button_unchecked\"}"
+            Text.mono "{p.bin}" w=80
+            Text "{p.name}" grow
+            Text.muted "{p.picked}/{p.qty}"
+  Dialog#mismatch "Wrong item scanned" "The barcode does not match this line."
+    Banner.error "Scanned {code}, expected {picks[cur].sku}"
+    Text.muted "Put the item back and check bin {picks[cur].bin}."
+    Row gap=8 end
+      Button.outline "Scan again" onTap={code=""; verified=false; close}
+      Button.destructive "Report bin issue" onTap={emit binIssue picks[cur].bin; toast "Reported"; close}
+  Sheet#short "Short pick"
+    Text "Found {found} of {picks[cur].qty} for {picks[cur].name}."
+    Stepper bind=found min=0 max={picks[cur].qty}
+    Select "Reason" bind=reason items=["Damaged","Bin empty","Not found","Expired"]
+    Button.destructive "Confirm short pick" onTap={picks=updateWhere(picks,p=>p.id==picks[cur].id,p=>with(with(with(p,"picked",found),"status","short"),"reason",reason)); cur=cur+1; n=0; code=""; verified=false; emit shortPick reason; close}
+  Dialog#tote "Assign a tote" "Scan or choose an empty tote."
+    ChoiceChips bind=tote items=["T-14","T-17","T-21","T-22"]
+    Button "Done" onTap={toast "Tote {tote} assigned"; close}
+
+### Route map
+state stop=0
+state stops=["A-04","A-11","B-03","C-07","D-02"]
+App
+  Sidebar
+    Brand "Aisle" icon="inventory_2"
+    NavItem "Pick list" icon="checklist" onTap={go pick-list}
+    NavItem "Route map" icon="map" selected={true}
+    NavItem "Hand off" icon="local_shipping" onTap={go hand-off}
+  Main
+    Nav
+      Heading "Route map" level=1
+      Text.muted "Order #48213, 142 m total"
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow
+          AisleMap aisles=["A","B","C","D"] path={stops} current={stops[stop]} onSelect={stop=indexOf(stops,result)}
+        Column w=320 gap=12
+          Card gap=8
+            Text.strong "Next stop"
+            Text "{stops[stop]}" size=48 weight=800
+            Text.muted "Stop {stop+1} of {length(stops)}"
+            Row gap=8
+              Button.outline "Back" onTap={stop=max(0,stop-1)}
+              Button "Next" grow onTap={stop=min(length(stops)-1,stop+1)}
+          Card gap=8
+            Text.strong "Stops"
+            each s in stops
+              Row gap=8 middle
+                Icon "{index<stop ? \"check_circle\" : \"place\"}"
+                Text "{s}" grow
+                Text.muted "{index+1}"
+
+### Hand off
+state tote="T-17"
+state checked=false
+state next=118
+every 1s onTick={next=max(0,next-1)}
+Page
+  Nav
+    Brand "Aisle" icon="inventory_2"
+    Row gap=4
+      Link "Pick list" onTap={go pick-list}
+      Link "Route map" onTap={go route-map}
+  Section narrow
+    Column gap=16
+      Heading "Order #48213 picked" level=1
+      Card gap=12
+        Row between
+          Text.strong "Tote {tote}"
+          Badge.warning "1 short"
+        Text.muted "4 lines complete, Olive Oil 750ml short by 1 (bin empty)."
+        Checkbox "Tote sealed and labelled" bind=checked
+        Button "Send to pack bench" onTap={!checked ? toast "Seal the tote first" : {emit handOff tote; toast "Sent to pack"; go pick-list}}
+      Card gap=8
+        Row between
+          Text.strong "Next order #48214"
+          Text.strong "{duration(next)}"
+        Progress {1-next/118}
+
+// A camera barcode scanner cannot be drawn here; it shows as a labelled box with a field to type the code.
+define Scanner "hint" bind=code onScan
+  state typed=""
+  Column gap=8
+    Box h=120 radius=8 fill=#FF111827 center middle
+      Icon "qr_code_scanner" color=#FFFFFFFF
+      Text "{hint}" color=#FFFFFFFF
+    Input "Barcode" bind=typed
+    Button.outline "Verify" onTap={code=typed; onScan(typed)}
+
+// A floor plan with the pick path; drawn as aisle boxes with the stops highlighted.
+define AisleMap aisles=["A","B"] path=[] current="" onSelect
+  Column gap=12
+    each a in aisles
+      Row gap=8 middle
+        Text.strong "{a}" w=24
+        Row gap=6 grow
+          each s in path
+            if startsWith(s,a)
+              Box pad=10 radius=6 fill={s==current ? "#FF2563EB" : "#FFE5E7EB"} onTap={onSelect(s)}
+                Text "{s}" color={s==current ? "#FFFFFFFF" : "#FF111827"}

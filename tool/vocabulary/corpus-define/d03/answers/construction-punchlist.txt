@@ -1,0 +1,223 @@
+### Floor Plan
+state pins=[{"id":1,"x":0.22,"y":0.30,"title":"Cracked tile at entry","trade":"Tiling","priority":"High","who":"Marco Bellini","due":"2026-11-24","status":"Open","fixed":false},{"id":2,"x":0.55,"y":0.62,"title":"Paint runs on north wall","trade":"Painting","priority":"Low","who":"Dana Whitfield","due":"2026-11-30","status":"In progress","fixed":false},{"id":3,"x":0.78,"y":0.25,"title":"Outlet cover missing","trade":"Electrical","priority":"Medium","who":"Priya Nair","due":"2026-11-21","status":"Fixed","fixed":true}]
+state level="Level 2"
+state sel=0
+state placing=false
+state draft={"title":"","trade":"Electrical","priority":"Medium","who":"Priya Nair","due":"","markup":[]}
+state newX=0.5
+state newY=0.5
+App
+  Sidebar
+    Brand "Snag" icon="fact_check"
+    NavItem "Floor plan" icon="map" selected={true}
+    NavItem "Punch list" icon="checklist" badge="{count(pins, p=>p.status!='Fixed')}" onTap={go punch-list}
+    NavItem "Sign-off" icon="draw" onTap={go sign-off}
+    NavItem "Report" icon="description" onTap={go sign-off}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Tom Okafor" size=32
+      Text.muted "Tom Okafor"
+  Main
+    Nav
+      Heading "Harbour Lofts, Unit 204" level=1
+      Row gap=8
+        Select bind=level items=["Level 1","Level 2","Level 3"] w=140
+        Button.outline "Drop a pin" icon="push_pin" onTap={placing=true; toast "Tap the plan where the defect is"}
+        Button "Report" onTap={go sign-off}
+    Row gap=16 pad=24 top
+      Column grow gap=12
+        if placing
+          Banner "Tap the plan to place pin {length(pins)+1}"
+        FloorPlan "{level}" pins={pins} selected={sel} placing={placing} onPick={sel=result; open pinForm} onPlace={newX=result.x; newY=result.y; placing=false; open newPin}
+      Pane w=320 gap=12
+        Heading "Open snags" level=3
+        each p in pins
+          Card gap=6 onTap={sel=p.id; open pinForm}
+            Row between middle
+              Text.strong "#{p.id} {p.title}"
+              StatusBadge "{p.status}"
+            Text.muted "{p.trade} - {p.who}"
+            Row between
+              Badge.warning "{p.priority}"
+              Text.caption "Due {formatDate(p.due,'MMM d')}"
+
+Sheet#newPin "New snag"
+  Input "Title" "What is wrong?" bind=draft.title
+  Row gap=12
+    Select "Trade" bind=draft.trade items=["Electrical","Plumbing","Tiling","Painting","Carpentry","HVAC"] grow
+    SegmentedButton bind=draft.priority items=["Low","Medium","High"]
+  Row gap=12
+    Select "Assignee" bind=draft.who items=["Priya Nair","Marco Bellini","Dana Whitfield","Luis Ortega"] grow
+    DatePicker "Due date" bind=draft.due grow
+  PhotoMarkup "Photo" src="https://example.com/photos/new.jpg" bind=draft.markup tools=["arrow","circle","text"] color=#FFDC2626 h=220
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button "Save pin" onTap={draft.title=="" ? toast "Give the snag a title" : {pins=append(pins,{"id":length(pins)+1,"x":newX,"y":newY,"title":draft.title,"trade":draft.trade,"priority":draft.priority,"who":draft.who,"due":draft.due,"status":"Open","fixed":false}); draft={"title":"","trade":"Electrical","priority":"Medium","who":"Priya Nair","due":"","markup":[]}; toast "Pin dropped"; close}}
+
+Sheet#pinForm "Snag details"
+  each p in pins
+    if p.id==sel
+      Column gap=12
+        Row between middle
+          Heading "#{p.id} {p.title}" level=3
+          StatusBadge "{p.status}"
+        Row gap=12
+          Select "Trade" bind=p.trade items=["Electrical","Plumbing","Tiling","Painting","Carpentry","HVAC"] grow
+          SegmentedButton bind=p.priority items=["Low","Medium","High"]
+        Row gap=12
+          Select "Assignee" bind=p.who items=["Priya Nair","Marco Bellini","Dana Whitfield","Luis Ortega"] grow
+          DatePicker "Due date" bind=p.due grow
+        PhotoMarkup "Photo" src="https://example.com/photos/snag-{p.id}.jpg" tools=["arrow","circle","text"] color=#FFDC2626 h=220
+        if p.fixed
+          BeforeAfter before="https://example.com/photos/snag-{p.id}.jpg" after="https://example.com/photos/snag-{p.id}-fixed.jpg" h=220
+        Row end gap=8
+          Button.destructive "Delete pin" onTap={pins=removeWhere(pins,x=>x.id==p.id); close}
+          Button.outline "Mark fixed" onTap={pins=updateWhere(pins,x=>x.id==p.id,x=>with(with(x,"status","Fixed"),"fixed",true)); toast "Marked fixed"}
+          Button "Done" onTap={close}
+
+// A floor plan drawing with numbered pins; shown here as a labelled box with pins positioned by share of its width and height.
+define FloorPlan "name" pins=[] selected=0 placing=false onPick onPlace
+  Stack h=420 fill=#FFF3F4F6 radius=8 border=1 onTap={placing ? onPlace({"x":0.5,"y":0.5}) : close}
+    Text.muted "Floor plan: {name}" center middle
+    each p in pins
+      Box w=28 h=28 radius=14 fill={p.status=="Fixed" ? "#FF16A34A" : (p.priority=="High" ? "#FFDC2626" : "#FFF59E0B")} border={p.id==selected ? 3 : 0} left={p.x*100}% top={p.y*100}% center middle onTap={onPick(p.id)}
+        Text "{p.id}" color=#FFFFFFFF weight=700
+
+// A photo with drawn markup (arrows, circles, text); a real drawing surface shown as a labelled box.
+define PhotoMarkup "label" src="" bind=marks tools=["arrow"] color=#FFDC2626 h=200
+  state marks=[]
+  state tool="arrow"
+  Column gap=6
+    Text.fieldLabel "{label}"
+    Stack h={h} fill=#FF1F2937 radius=8
+      Image "{src}" h={h}
+      Text.muted "Draw on the photo" center middle
+    Row gap=8 middle
+      each t in tools
+        Chip "{t}" selected={tool==t} onTap={tool=t}
+      Spacer grow
+      Button.ghost "Undo" onTap={marks=removeAt(marks,length(marks)-1)}
+      Button.ghost "Clear" onTap={marks=[]}
+
+### Punch List
+state pins=[{"id":1,"title":"Cracked tile at entry","trade":"Tiling","priority":"High","who":"Marco Bellini","due":"2026-11-24","status":"Open"},{"id":2,"title":"Paint runs on north wall","trade":"Painting","priority":"Low","who":"Dana Whitfield","due":"2026-11-30","status":"In progress"},{"id":3,"title":"Outlet cover missing","trade":"Electrical","priority":"Medium","who":"Priya Nair","due":"2026-11-21","status":"Fixed"},{"id":4,"title":"Door binds on frame","trade":"Carpentry","priority":"Medium","who":"Luis Ortega","due":"2026-11-26","status":"Open"},{"id":5,"title":"Slow drain in kitchen sink","trade":"Plumbing","priority":"High","who":"Sam Keller","due":"2026-11-22","status":"In progress"}]
+state filter="All"
+state trade="All"
+state compare=0
+App
+  Sidebar
+    Brand "Snag" icon="fact_check"
+    NavItem "Floor plan" icon="map" onTap={go floor-plan}
+    NavItem "Punch list" icon="checklist" badge="{count(pins, p=>p.status!='Fixed')}" selected={true}
+    NavItem "Sign-off" icon="draw" onTap={go sign-off}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Tom Okafor" size=32
+      Text.muted "Tom Okafor"
+  Main
+    Nav
+      Heading "Punch list" level=1
+      Row gap=8
+        Input "Search" bind=q w=220
+        Button "Sign off" onTap={go sign-off}
+    Column pad=24 gap=16
+      Row gap=8
+        each f in ["All","Open","In progress","Fixed"]
+          ChoiceChip "{f} ({f=='All' ? length(pins) : count(pins,p=>p.status==f)})" selected={filter==f} onTap={filter=f}
+        Spacer grow
+        Select bind=trade items=["All","Electrical","Plumbing","Tiling","Painting","Carpentry","HVAC"] w=160
+      each t in ["Electrical","Plumbing","Tiling","Painting","Carpentry","HVAC"]
+        if (trade=="All" || trade==t) && count(pins,p=>p.trade==t && (filter=="All" || p.status==filter))>0
+          Card gap=8
+            Row between middle
+              Heading "{t}" level=3
+              CountBadge "{count(pins,p=>p.trade==t && (filter=='All' || p.status==filter))}"
+            each p in filter=="All" ? filter(pins,x=>x.trade==t) : filter(pins,x=>x.trade==t && x.status==filter)
+              Row gap=12 middle onTap={compare=p.id; open fixedView}
+                Text.caption w=32 "#{p.id}"
+                Text.strong grow "{p.title}"
+                Text.muted w=110 "{p.who}"
+                Badge.warning w=80 "{p.priority}"
+                StatusBadge "{p.status}"
+                Text.caption w=70 "{formatDate(p.due,'MMM d')}"
+                IconButton "more_vert" tooltip="Actions" onTap={compare=p.id; open rowMenu}
+
+Menu#rowMenu end
+  MenuItem "Mark in progress" icon="engineering" onTap={pins=updateWhere(pins,x=>x.id==compare,x=>with(x,"status","In progress"))}
+  MenuItem "Mark fixed" icon="check_circle" onTap={pins=updateWhere(pins,x=>x.id==compare,x=>with(x,"status","Fixed")); toast "Marked fixed"}
+  MenuItem "Reopen" icon="replay" onTap={pins=updateWhere(pins,x=>x.id==compare,x=>with(x,"status","Open"))}
+  MenuItem "Delete" icon="delete" onTap={pins=removeWhere(pins,x=>x.id==compare)}
+
+Dialog#fixedView "Before and after" "Drag the handle to compare"
+  BeforeAfter before="https://example.com/photos/snag-{compare}.jpg" after="https://example.com/photos/snag-{compare}-fixed.jpg" h=260
+  Row end
+    Button "Close" onTap={close}
+
+### Sign-off and Report
+state pins=[{"id":1,"title":"Cracked tile at entry","trade":"Tiling","status":"Open"},{"id":2,"title":"Paint runs on north wall","trade":"Painting","status":"In progress"},{"id":3,"title":"Outlet cover missing","trade":"Electrical","status":"Fixed"},{"id":4,"title":"Door binds on frame","trade":"Carpentry","status":"Open"},{"id":5,"title":"Slow drain in kitchen sink","trade":"Plumbing","status":"In progress"}]
+state signature=[]
+state signer="Tom Okafor"
+state agreed=false
+state signed=false
+App
+  Sidebar
+    Brand "Snag" icon="fact_check"
+    NavItem "Floor plan" icon="map" onTap={go floor-plan}
+    NavItem "Punch list" icon="checklist" onTap={go punch-list}
+    NavItem "Sign-off" icon="draw" selected={true}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Tom Okafor" size=32
+      Text.muted "Tom Okafor"
+  Main
+    Nav
+      Heading "Sign-off" level=1
+      Row gap=8
+        Button.outline "Preview report" icon="description" onTap={open report}
+        Button.outline "Download PDF" icon="download" onTap={toast "Report downloaded"}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        StatCard "Open" "{count(pins,p=>p.status=='Open')}"
+        StatCard "In progress" "{count(pins,p=>p.status=='In progress')}"
+        StatCard "Fixed" "{count(pins,p=>p.status=='Fixed')}"
+      Card gap=12
+        Heading "Handover acceptance" level=3
+        Text.muted "By signing, the site manager confirms the snags marked Fixed were inspected and accepted."
+        Input "Printed name" bind=signer
+        SignaturePad "Sign here" bind=signature h=140
+        Checkbox "I confirm the Fixed items are accepted; {count(pins,p=>p.status!='Fixed')} remain open" bind=agreed
+        Row end gap=8
+          Button.ghost "Clear" onTap={signature=[]; signed=false}
+          Button "Sign off" onTap={length(signature)==0 ? toast "Please sign first" : (agreed ? {signed=true; toast "Signed off by {signer}"} : toast "Tick the confirmation")}
+        if signed
+          Badge.success "Signed by {signer} on {formatDate(today(),'MMM d, yyyy')}"
+
+Dialog#report "Report preview" "Harbour Lofts, Unit 204"
+  Column gap=10
+    Row between
+      Text.strong "Snag report"
+      Text.muted "{formatDate(today(),'MMM d, yyyy')}"
+    Divider
+    each p in pins
+      Row gap=12 middle
+        Text.caption w=32 "#{p.id}"
+        Text grow "{p.title}"
+        Text.muted w=90 "{p.trade}"
+        StatusBadge "{p.status}"
+    Divider
+    if signed
+      Row gap=8 middle
+        Text.strong "Signed: {signer}"
+        Text.muted "{formatDate(today(),'MMM d, yyyy')}"
+    Row end gap=8
+      Button.ghost "Close" onTap={close}
+      Button "Send to client" onTap={emit sendReport; toast "Report sent"; close}
+
+// A signature drawing surface; shown as a labelled box where the stroke would be drawn.
+define SignaturePad "label" bind=strokes h=140
+  state strokes=[]
+  Column gap=6
+    Text.fieldLabel "{label}"
+    Stack h={h} fill=#FFFFFFFF radius=6 border=1 onTap={strokes=append(strokes,{"stroke":length(strokes)})}
+      Text.muted "Draw signature here" center middle
+      Box h=1 fill=#FF9CA3AF left=16 right=16 bottom=28

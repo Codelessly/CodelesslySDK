@@ -1,0 +1,3 @@
+App: Knockout, tournament brackets. A single-elimination bracket of sixteen that scrolls sideways with lines joining matches, winners advancing when a score is entered; a group stage table with points and goal difference; a match page with a live score, events timeline, lineups; fixtures by day; follow a team to highlight its path.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

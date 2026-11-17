@@ -403,6 +403,41 @@ with their signature already agreed by several writers.
 **To check at review 6.** With the glossary index: definitions per answer, redefinitions of words we have
 (expect near zero), and whether named-but-untaught words are used in the shapes we accept.
 
+### Review 6 (the glossary experiment, `corpus-define/d03`)
+
+**What was run.** Twenty of d02's briefs again, the prompt the same but for one added paragraph: the bare
+names of the 296 words Cards has beyond the core (70 definitions, 226 components), 3,700 characters, with "use
+one as you would expect it to work and do not define it". Seventeen answers arrived (three writers left no
+file); compared with the same seventeen from d02.
+
+| the same 17 briefs | d02 (define) | d03 (define + glossary) |
+|---|---|---|
+| lines | 3,661 | 3,413 (−7%) |
+| definitions written | 58 (3.4 an answer) | 36 (2.1) |
+| lines that use a Cards component | 234 | 289 |
+| `Timeline` / `Stepper` redefined | 4 / 4 answers | 0 / 0 |
+| resolved | 96.3% | 93.8% |
+| unknown words | 21 | 40 |
+| grammar issues | 20 | 45 |
+| validation errors | 18 | 39 |
+
+**What it says.** The glossary does what it was for: writers stop redefining what exists, write fewer
+definitions and fewer lines, and use our components a quarter more. And it costs what review 5 predicted: a
+name with no signature is used in the shape the writer expects, and where ours differs the word half-works.
+The misses are few and specific: `TimelineItem done= current= date=`, `Stepper steps= current= onSelect`
+(the steps meaning again), `Banner icon=`, `Text strike`, `FileUploader accept=`, `Donut values= labels=`.
+Each is a signature we should take, and each was already in the harvest. So the glossary is right, but only
+as good as the shapes behind the names: it turns "words we lack" into "shapes we refuse", which is a shorter
+list and ours to fix.
+
+**Decisions.**
+- D29. The glossary goes into the open prompt once the named words take the harvested shapes (D25): until
+  then it trades eight percent of lines for three points of resolution, which is the wrong trade for a reader
+  of the page.
+- D30. The shape misses above are fixed as aliases or as the definition's signature, with the harvest as the
+  specification; a named word that an answer uses with a parameter we do not take is listed by the tool under
+  its own heading ("named words used in a shape we do not take"), since that list is the glossary's bug list.
+
 **Where the goal stands.** The corpus the owner asked for exists: 5,154 distinct words from 313 answers, plus
 111 self-defining answers with 422 definitions. Six reviews' worth of decisions are merged: every word counted,
 words defined as data, universal words, the parser's narrow spots, self-definition as the open prompt, the

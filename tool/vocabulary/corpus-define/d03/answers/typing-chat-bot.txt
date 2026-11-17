@@ -1,0 +1,134 @@
+### Chat
+state convs=[{"id":1,"title":"Debounce a search input","day":"Today"},{"id":2,"title":"Plan for a Lisbon weekend","day":"Today"},{"id":3,"title":"Explain Postgres indexes","day":"Yesterday"},{"id":4,"title":"Rewrite my cover letter","day":"Yesterday"},{"id":5,"title":"Regex for ISO dates","day":"Previous 7 days"},{"id":6,"title":"Sourdough starter troubleshooting","day":"Previous 7 days"}]
+state current=1
+state sel=0
+state draftTitle=""
+state model="Sidekick Pro"
+state input=""
+state streaming=false
+state shown=0
+state words=["Debouncing","delays","the","search","call","until","the","user","pauses","typing.","Wrap","your","handler","in","a","timer","that","resets","on","every","keystroke,","then","cancel","it","when","the","component","unmounts","so","stale","requests","never","land."]
+state messages=[{"id":1,"role":"user","text":"How do I debounce a search input in React? Also compare the usual delay values."},{"id":2,"role":"bot","text":"Here is a small hook that delays a value until it stops changing.","lang":"typescript","code":"function useDebounced<T>(value: T, ms = 300) {\n  const [v, setV] = useState(value);\n  useEffect(() => {\n    const t = setTimeout(() => setV(value), ms);\n    return () => clearTimeout(t);\n  }, [value, ms]);\n  return v;\n}","after":"Typical delays by use case:","vote":""}]
+state attach={"name":"search-spec.pdf","size":"1.2 MB","progress":0.0}
+state attaching=false
+state followups=["Show a version with AbortController","Add a loading spinner","Write a unit test for it"]
+every 200 when streaming onTick={shown=shown+1; shown>=length(words) ? streaming=false : toast ""}
+every 150 when attaching onTick={attach=with(attach,"progress",min(1,attach.progress+0.1)); attach.progress>=1 ? attaching=false : toast ""}
+App
+  Sidebar
+    Brand "Sidekick" icon="auto_awesome"
+    Button "New chat" icon="add" onTap={current=0; messages=[]; input=""}
+    Input "Search chats" bind=q
+    Column scroll gap=4 grow
+      each day in ["Today","Yesterday","Previous 7 days"]
+        DateDivider "{day}"
+        each c in filter(convs, x=>x.day==day)
+          ConversationRow "{c.title}" selected={current==c.id} onTap={current=c.id} onMore={sel=c.id; open convMenu}
+    Row gap=8 middle
+      Avatar "Maya Reyes" size=32
+      Text.muted "Maya Reyes"
+  Main
+    Nav
+      Button.ghost "{model}" icon="expand_more" onTap={open modelMenu}
+      Row gap=8
+        IconButton "ios_share" tooltip="Share chat" onTap={toast "Link copied"}
+        IconButton "more_horiz" tooltip="Chat options" onTap={sel=current; open convMenu}
+    Column pad=24 gap=20 scroll grow maxw=780
+      each m in messages
+        if m.role=="user"
+          Row end
+            ChatBubble "{m.text}" mine
+        if m.role=="bot"
+          Column gap=10
+            Row gap=8 middle
+              Avatar "Sidekick" size=28
+              Text.strong "Sidekick"
+            Text "{m.text}"
+            CodeBlock "{m.code}" language="{m.lang}" copy
+            Text "{m.after}"
+            Table columns=["Delay","Best for","Feels"] rows=[["150 ms","Autocomplete","Instant"],["300 ms","Search as you type","Responsive"],["500 ms","Expensive queries","Laggy"]]
+            Image "https://images.example.com/debounce-timeline.png" h=160 radius=8
+            Row gap=4
+              IconButton "thumb_up" tooltip="Good answer" selected={m.vote=="up"} onTap={messages=updateWhere(messages,x=>x.id==m.id,x=>with(x,"vote","up"))}
+              IconButton "thumb_down" tooltip="Bad answer" selected={m.vote=="down"} onTap={messages=updateWhere(messages,x=>x.id==m.id,x=>with(x,"vote","down"))}
+              IconButton "content_copy" tooltip="Copy" onTap={copy m.text; toast "Copied"}
+      if streaming || shown>0
+        Column gap=10
+          Row gap=8 middle
+            Avatar "Sidekick" size=28
+            Text.strong "Sidekick"
+          Text "{join(take(words,shown)," ")}"
+          if streaming
+            TypingIndicator
+      if !streaming && shown>=length(words)
+        Row scroll gap=8
+          each f in followups
+            Chip "{f}" onTap={input=f}
+    Footer
+      Column pad=16 gap=8 maxw=780
+        if attach.progress>0
+          AttachmentTile "{attach.name}" "{attach.size}" progress={attach.progress} onRemove={attach=with(attach,"progress",0.0); attaching=false}
+        Row gap=8 middle
+          IconButton "attach_file" tooltip="Attach a file" onTap={attach=with(attach,"progress",0.05); attaching=true}
+          Input "Message Sidekick" bind=input multiline grow
+          if streaming
+            Button.destructive "Stop" icon="stop" onTap={streaming=false}
+          if !streaming
+            Button "Send" icon="send" onTap={input!="" ? messages=append(messages,{"id":length(messages)+10,"role":"user","text":input}); input=""; shown=0; streaming=true : toast "Type a message"}
+Menu#modelMenu
+  MenuItem "Sidekick Pro" icon="bolt" onTap={model="Sidekick Pro"}
+  MenuItem "Sidekick Fast" icon="speed" onTap={model="Sidekick Fast"}
+  MenuItem "Sidekick Mini" icon="eco" onTap={model="Sidekick Mini"}
+Menu#convMenu
+  MenuItem "Rename" icon="edit" onTap={draftTitle=find(convs,x=>x.id==sel).title; open rename}
+  MenuItem "Delete" icon="delete" onTap={open confirmDelete}
+Dialog#rename "Rename chat" "Give this conversation a name"
+  Input "Title" bind=draftTitle
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button "Save" onTap={trim(draftTitle)=="" ? toast "Title cannot be empty" : convs=updateWhere(convs,x=>x.id==sel,x=>with(x,"title",trim(draftTitle))); close}
+Dialog#confirmDelete "Delete this chat?" "This removes the conversation for good."
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button.destructive "Delete" onTap={convs=removeWhere(convs,x=>x.id==sel); current=0; toast "Chat deleted"; close}
+
+### All conversations
+state convs=[{"id":1,"title":"Debounce a search input","day":"Today","count":12},{"id":2,"title":"Plan for a Lisbon weekend","day":"Today","count":7},{"id":3,"title":"Explain Postgres indexes","day":"Yesterday","count":19},{"id":4,"title":"Rewrite my cover letter","day":"Yesterday","count":5},{"id":5,"title":"Regex for ISO dates","day":"Previous 7 days","count":9},{"id":6,"title":"Sourdough starter troubleshooting","day":"Previous 7 days","count":14}]
+state q=""
+state sel=0
+state draftTitle=""
+Page
+  Nav
+    Brand "Sidekick" icon="auto_awesome"
+    Row gap=4
+      Link "Chat" onTap={go chat}
+      Link "All conversations"
+    Button "New chat" onTap={go chat}
+  Section narrow
+    Column gap=16
+      Heading "All conversations" level=1
+      Input "Search conversations" bind=q
+      each day in ["Today","Yesterday","Previous 7 days"]
+        if count(convs, x=>x.day==day && contains(lower(x.title), lower(q)))>0
+          Column gap=8
+            Text.fieldLabel "{day}"
+            each c in filter(convs, x=>x.day==day && contains(lower(x.title), lower(q)))
+              Card
+                Row between middle
+                  Column grow gap=2
+                    Text.strong "{c.title}"
+                    Text.muted "{c.count} messages"
+                  Row gap=4
+                    IconButton "edit" tooltip="Rename" onTap={sel=c.id; draftTitle=c.title; open rename}
+                    IconButton "delete" tooltip="Delete" onTap={sel=c.id; open confirmDelete}
+      if isEmpty(filter(convs, x=>contains(lower(x.title), lower(q))))
+        EmptyState "No conversations match" "Try a different search"
+Dialog#rename "Rename chat" "Give this conversation a name"
+  Input "Title" bind=draftTitle
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button "Save" onTap={trim(draftTitle)=="" ? toast "Title cannot be empty" : convs=updateWhere(convs,x=>x.id==sel,x=>with(x,"title",trim(draftTitle))); close}
+Dialog#confirmDelete "Delete this chat?" "This removes the conversation for good."
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button.destructive "Delete" onTap={convs=removeWhere(convs,x=>x.id==sel); toast "Chat deleted"; close}

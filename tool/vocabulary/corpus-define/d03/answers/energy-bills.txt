@@ -1,0 +1,230 @@
+### Overview
+state tab="overview"
+state day="Tue 12"
+state range="Week"
+state halfHours=[0.2,0.2,0.1,0.1,0.1,0.1,0.3,0.6,0.9,0.7,0.4,0.3,0.3,0.2,0.2,0.3,0.4,0.5,0.9,1.2,1.4,1.1,0.8,0.6]
+state days=[{"d":"Thu 7","kwh":9.4},{"d":"Fri 8","kwh":11.2},{"d":"Sat 9","kwh":13.8},{"d":"Sun 10","kwh":12.1},{"d":"Mon 11","kwh":8.7},{"d":"Tue 12","kwh":10.3},{"d":"Wed 13","kwh":9.9}]
+App
+  Sidebar
+    Brand "Kilowatt" icon="bolt"
+    NavItem "Overview" icon="dashboard" selected={tab=="overview"} onTap={go overview}
+    NavItem "Tariffs" icon="compare_arrows" selected={tab=="tariffs"} onTap={go tariffs}
+    NavItem "Meter reading" icon="speed" selected={tab=="meter"} onTap={go meter}
+    NavItem "Payments" icon="payments" selected={tab=="payments"} onTap={go payments}
+    Spacer grow
+    Text.muted "Account 4471-0983"
+  Main
+    Nav
+      Heading "Your energy" level=1
+      Row gap=8
+        SegmentedButton bind=range items=["Week","Month"]
+        Button "Submit a reading" onTap={go meter}
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=12
+          Text.caption "This month vs last"
+          Row gap=16 bottom
+            Column grow gap=4 center
+              Text.strong "312 kWh"
+              Box h=120 fill=#FF2563EB radius=6
+              Text.caption "November"
+            Column grow gap=4 center
+              Text.strong "268 kWh"
+              Box h=102 fill=#FF94A3B8 radius=6
+              Text.caption "October"
+          Badge.warning "16% higher than last month"
+        Card gap=8
+          Text.caption "Forecast bill"
+          Text "£118.40" size=40 weight=700
+          Text.muted "Based on 17 days of use at your current rate"
+          Progress 0.57
+          Text.caption "Billing day 28 Nov, 11 days left"
+        Card gap=8
+          Text.caption "Today so far"
+          Row gap=8 middle
+            Text "9.4 kWh" size=28 weight=700
+            Sparkline values=[0.2,0.2,0.1,0.3,0.9,0.7,0.4,0.3]
+          Text.muted "Peak at 7pm yesterday: 1.4 kWh"
+      Card gap=12
+        Row between
+          Text.strong "Daily use"
+          Text.muted "Tap a day to see its half hours"
+        BarChart values=[9.4,11.2,13.8,12.1,8.7,10.3,9.9] labels=["Thu","Fri","Sat","Sun","Mon","Tue","Wed"] h=200 onSelect={day=days[result].d; open halfhour}
+      Card gap=12
+        Text.strong "Where it goes"
+        Donut values=[38,24,16,12,10] labels=["Heating","Water heater","Fridge and freezer","Cooking","Lighting and other"]
+
+Sheet#halfhour "Half-hour use"
+  Text.muted "{day}, kWh per half hour"
+  BarChart values={halfHours} labels=["12am","","1am","","2am","","3am","","4am","","5am","","6am","","7am","","8am","","9am","","10am","","11am",""] h=220
+  Row between
+    Text.caption "Total {fixed(sum(halfHours,x=>x),1)} kWh"
+    Text.caption "Peak {fixed(max(halfHours[19],halfHours[20]),1)} kWh at 9.30pm"
+  Button.outline "Close" onTap={close}
+
+### Tariffs
+state tab="tariffs"
+state sort="Yearly cost"
+state chosen=""
+state tariffs=[{"id":"flex","name":"Kilowatt Flex","type":"Variable","rate":28.4,"standing":46.0,"yearly":1184,"current":true},{"id":"fix12","name":"Fixed 12 Months","type":"Fixed","rate":26.1,"standing":44.5,"yearly":1096,"current":false},{"id":"night","name":"Off-Peak Saver","type":"Time of use","rate":24.7,"standing":48.0,"yearly":1058,"current":false},{"id":"green","name":"Green Fixed 24","type":"Fixed","rate":27.3,"standing":45.0,"yearly":1127,"current":false}]
+App
+  Sidebar
+    Brand "Kilowatt" icon="bolt"
+    NavItem "Overview" icon="dashboard" selected={tab=="overview"} onTap={go overview}
+    NavItem "Tariffs" icon="compare_arrows" selected={tab=="tariffs"} onTap={go tariffs}
+    NavItem "Meter reading" icon="speed" selected={tab=="meter"} onTap={go meter}
+    NavItem "Payments" icon="payments" selected={tab=="payments"} onTap={go payments}
+    Spacer grow
+    Text.muted "Account 4471-0983"
+  Main
+    Nav
+      Heading "Compare tariffs" level=1
+      Select bind=sort items=["Yearly cost","Unit rate","Name"] w=180
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Text.strong "You are on Kilowatt Flex"
+        Text.muted "Based on 3,640 kWh used in the last 12 months. Prices include VAT."
+      Card gap=8
+        Row gap=12
+          Text.caption "Tariff" grow=true
+          Text.caption "Type" w=110
+          Text.caption "Unit rate" w=90
+          Text.caption "Standing" w=90
+          Text.caption "Yearly cost" w=100
+          Text.caption "" w=120
+        Divider
+        each t in (sort=="Yearly cost" ? sortBy(tariffs,x=>x.yearly) : (sort=="Unit rate" ? sortBy(tariffs,x=>x.rate) : sortBy(tariffs,x=>x.name)))
+          Row gap=12 middle
+            Column grow gap=2
+              Text.strong "{t.name}"
+              if t.current
+                Badge.info "Current"
+            Text "{t.type}" w=110
+            Text "{t.rate}p" w=90
+            Text "{t.standing}p" w=90
+            Text.strong "{money(t.yearly,"£",0)}" w=100
+            if t.current
+              Text.muted "Your plan" w=120
+            if !t.current
+              Button "Switch" w=120 onTap={chosen=t.id; open confirm}
+          Divider
+      Text.caption "Savings are an estimate and change with your use."
+
+Dialog#confirm "Switch tariff" "Check the details before you confirm"
+  Text "You will move to {find(tariffs,x=>x.id==chosen).name}."
+  Text.muted "Estimated yearly saving: {money(1184-find(tariffs,x=>x.id==chosen).yearly,"£",0)}"
+  Text.caption "Your new tariff starts on 28 November. Nothing changes until then."
+  Row gap=8 end
+    Button.outline "Not now" onTap={close}
+    Button "Confirm switch" onTap={emit switchTariff chosen; toast "Switch requested"; close}
+
+### Meter reading
+state tab="meter"
+state electric=""
+state gas=""
+state photo=""
+state submitted=false
+define DigitBoxes "label" bind=value count=6 onChange
+  state cells=[{"d":""},{"d":""},{"d":""},{"d":""},{"d":""},{"d":""}]
+  Column gap=6
+    Text.fieldLabel "{label}"
+    Row gap=6
+      each cell in cells
+        Input bind=cell.d type=number w=44 center onChange={value=join(map(cells,c=>c.d),""); onChange(value)}
+App
+  Sidebar
+    Brand "Kilowatt" icon="bolt"
+    NavItem "Overview" icon="dashboard" selected={tab=="overview"} onTap={go overview}
+    NavItem "Tariffs" icon="compare_arrows" selected={tab=="tariffs"} onTap={go tariffs}
+    NavItem "Meter reading" icon="speed" selected={tab=="meter"} onTap={go meter}
+    NavItem "Payments" icon="payments" selected={tab=="payments"} onTap={go payments}
+    Spacer grow
+    Text.muted "Account 4471-0983"
+  Main
+    Nav
+      Heading "Submit a meter reading" level=1
+    Column pad=24 gap=16 scroll
+      Card gap=16
+        Text.strong "Electricity meter"
+        Text.muted "Last reading: 48,215 kWh on 28 October. Enter the black digits only, no decimals."
+        DigitBoxes "Electricity reading" bind=electric count=5
+        Text.strong "Gas meter"
+        DigitBoxes "Gas reading" bind=gas count=5
+      Card gap=12
+        Text.strong "Add a photo"
+        Text.muted "A photo of the dial helps us check your reading."
+        ImageUpload bind=photo accept="image/*" onChange={toast "Photo added"}
+        if photo!=""
+          Image "{photo}" h=160 radius=8
+      Row gap=8 end
+        Button.outline "Cancel" onTap={go overview}
+        Button "Submit reading" onTap={length(electric)==5 ? {submitted=true; emit reading electric; open thanks} : toast "Enter all five electricity digits"}
+
+Dialog#thanks "Reading received" "Thank you"
+  Text "Electricity: {electric}"
+  Text.muted "Your forecast bill will update within an hour."
+  Button "Done" onTap={close; go overview}
+
+### Payments
+state tab="payments"
+state filter="All"
+state bank=""
+state sortcode=""
+state dayOfMonth="1"
+state ddOn=true
+state payments=[{"id":"p1","date":"28 Oct","amount":104.20,"method":"Direct debit","status":"Paid"},{"id":"p2","date":"28 Sep","amount":96.75,"method":"Direct debit","status":"Paid"},{"id":"p3","date":"14 Sep","amount":40.00,"method":"Card","status":"Paid"},{"id":"p4","date":"28 Aug","amount":88.10,"method":"Direct debit","status":"Failed"},{"id":"p5","date":"28 Jul","amount":79.35,"method":"Direct debit","status":"Paid"}]
+App
+  Sidebar
+    Brand "Kilowatt" icon="bolt"
+    NavItem "Overview" icon="dashboard" selected={tab=="overview"} onTap={go overview}
+    NavItem "Tariffs" icon="compare_arrows" selected={tab=="tariffs"} onTap={go tariffs}
+    NavItem "Meter reading" icon="speed" selected={tab=="meter"} onTap={go meter}
+    NavItem "Payments" icon="payments" selected={tab=="payments"} onTap={go payments}
+    Spacer grow
+    Text.muted "Account 4471-0983"
+  Main
+    Nav
+      Heading "Payments" level=1
+      Button "Set up direct debit" onTap={open dd}
+    Column pad=24 gap=16 scroll
+      Grid cols=2 gap=16
+        Card gap=4
+          Text.caption "Balance"
+          Text "£0.00 in credit" size=28 weight=700
+          Text.muted "Next bill around 28 November"
+        Card gap=4
+          Text.caption "Direct debit"
+          Row gap=8 middle
+            Badge.success "Active"
+            Text.strong "£104.20 on the 28th"
+          Text.muted "Barclays, ending 4821"
+      Card gap=8
+        Row between
+          Text.strong "History"
+          SegmentedButton bind=filter items=["All","Paid","Failed"]
+        Row gap=12
+          Text.caption "Date" w=80
+          Text.caption "Method" grow=true
+          Text.caption "Amount" w=90
+          Text.caption "Status" w=90
+        Divider
+        each p in filter=="All" ? payments : filter=="Paid" ? filter(payments,x=>x.status=="Paid") : filter(payments,x=>x.status=="Failed")
+          Row gap=12 middle
+            Text "{p.date}" w=80
+            Text "{p.method}" grow=true
+            Text.strong "{money(p.amount,"£",2)}" w=90
+            if p.status=="Paid"
+              Badge.success "Paid"
+            if p.status=="Failed"
+              Badge.error "Failed"
+          Divider
+
+Dialog#dd "Set up direct debit" "Pay automatically each month"
+  Input "Account holder" bind=holder
+  Input "Sort code" "00-00-00" bind=sortcode
+  Input "Account number" "8 digits" bind=bank type=number
+  Select "Collection day" bind=dayOfMonth items=["1","7","14","21","28"]
+  Text.caption "Under the Direct Debit Guarantee you can cancel at any time."
+  Row gap=8 end
+    Button.outline "Cancel" onTap={close}
+    Button "Confirm direct debit" onTap={length(bank)==8 ? {ddOn=true; emit directDebit; toast "Direct debit set up"; close} : toast "Account number needs 8 digits"}

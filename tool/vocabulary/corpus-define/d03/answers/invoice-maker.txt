@@ -1,0 +1,206 @@
+### Invoices
+state filter="all"
+state q=""
+state sel=""
+state invoices=[{"id":"INV-1042","client":"Northwind Studio","issued":"2026-10-28","due":"2026-11-27","status":"sent","total":2480.00},{"id":"INV-1041","client":"Halden & Roe","issued":"2026-10-14","due":"2026-11-13","status":"overdue","total":1350.50},{"id":"INV-1040","client":"Pixel Orchard","issued":"2026-10-02","due":"2026-11-01","status":"paid","total":4200.00},{"id":"INV-1039","client":"Marlow Bakery","issued":"2026-09-20","due":"2026-10-20","status":"overdue","total":640.00},{"id":"INV-1038","client":"Northwind Studio","issued":"2026-09-05","due":"2026-10-05","status":"paid","total":1980.00},{"id":"INV-1043","client":"Juniper Labs","issued":"2026-11-15","due":"2026-12-15","status":"draft","total":3100.00}]
+App
+  Sidebar
+    Brand "Ledger Lane" icon="receipt_long"
+    NavItem "Invoices" icon="description" badge="{count(invoices,i=>i.status!='paid')}" selected={true}
+    NavItem "New invoice" icon="add_circle" onTap={go invoice-editor}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Whitfield" size=32
+      Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "Invoices" level=1
+      Row gap=8
+        Input "Search invoices" bind=q w=220
+        Button "New invoice" icon="add" onTap={go invoice-editor}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        StatCard "Outstanding" value="{money(sum(filter(invoices,i=>i.status=='sent'||i.status=='overdue'),i=>i.total),'$',2)}" caption="{count(invoices,i=>i.status=='sent'||i.status=='overdue')} unpaid invoices"
+        StatCard "Overdue" value="{money(sum(filter(invoices,i=>i.status=='overdue'),i=>i.total),'$',2)}" caption="{count(invoices,i=>i.status=='overdue')} past due" tone="danger"
+        StatCard "Paid this quarter" value="{money(sum(filter(invoices,i=>i.status=='paid'),i=>i.total),'$',2)}" caption="{count(invoices,i=>i.status=='paid')} invoices" tone="success"
+      Row gap=8
+        ChoiceChip "All" selected={filter=="all"} onTap={filter="all"}
+        ChoiceChip "Draft" selected={filter=="draft"} onTap={filter="draft"}
+        ChoiceChip "Sent" selected={filter=="sent"} onTap={filter="sent"}
+        ChoiceChip "Overdue" selected={filter=="overdue"} onTap={filter="overdue"}
+        ChoiceChip "Paid" selected={filter=="paid"} onTap={filter="paid"}
+      Card gap=0
+        Row gap=12 pad=[12,8,12,8] border-bottom=#FFE5E7EB
+          Text.caption "Invoice" w=90
+          Text.caption "Client" grow
+          Text.caption "Due" w=100 hide=phone
+          Text.caption "Status" w=90
+          Text.caption "Amount" w=100
+          Spacer w=40
+        each inv in sortByDesc(filter(invoices,i=>(filter=="all"||i.status==filter)&&(q==""||contains(lower(i.client),lower(q))||contains(lower(i.id),lower(q)))),i=>i.id)
+          Row gap=12 middle pad=[12,10,12,10] border-bottom=#FFF3F4F6 onTap={go invoice-editor}
+            Text.strong "{inv.id}" w=90
+            Text "{inv.client}" grow
+            Text.muted "{formatDate(inv.due,'MMM d, yyyy')}" w=100 hide=phone
+            StatusPill "{inv.status}" w=90
+            Text.strong "{money(inv.total,'$',2)}" w=100
+            IconButton "more_vert" tooltip="Change status" onTap={sel=inv.id; open rowMenu}
+        if length(filter(invoices,i=>(filter=="all"||i.status==filter)&&(q==""||contains(lower(i.client),lower(q)))))==0
+          EmptyState "No invoices match" "Try another status or clear the search." icon="search_off"
+Menu#rowMenu end
+  MenuItem "Mark as sent" icon="send" onTap={invoices=updateWhere(invoices,i=>i.id==sel,i=>with(i,"status","sent")); toast "Marked as sent"}
+  MenuItem "Mark as paid" icon="paid" onTap={invoices=updateWhere(invoices,i=>i.id==sel,i=>with(i,"status","paid")); toast "Marked as paid"}
+  MenuItem "Mark as overdue" icon="schedule" onTap={invoices=updateWhere(invoices,i=>i.id==sel,i=>with(i,"status","overdue")); toast "Marked as overdue"}
+  MenuItem "Delete" icon="delete" onTap={invoices=removeWhere(invoices,i=>i.id==sel); toast "Invoice deleted"}
+
+### Invoice Editor
+state status="draft"
+state client="Northwind Studio"
+state number="INV-1044"
+state issued="2026-11-17"
+state due="2026-12-17"
+state notes="Payment due within 30 days. Thank you for your business."
+state discType="%"
+state disc=10
+state lines=[{"id":1,"desc":"Brand identity workshop","qty":2,"rate":450,"tax":10},{"id":2,"desc":"Logo suite and guidelines","qty":1,"rate":1200,"tax":10},{"id":3,"desc":"Stock photography licence","qty":4,"rate":35,"tax":0}]
+state clients=[{"name":"Northwind Studio","email":"ap@northwind.studio"},{"name":"Halden & Roe","email":"accounts@haldenroe.com"},{"name":"Pixel Orchard","email":"hello@pixelorchard.io"},{"name":"Marlow Bakery","email":"orders@marlowbakery.com"}]
+state nextId=4
+state newName=""
+state newEmail=""
+App
+  Sidebar
+    Brand "Ledger Lane" icon="receipt_long"
+    NavItem "Invoices" icon="description" onTap={go invoices}
+    NavItem "New invoice" icon="add_circle" selected={true}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Whitfield" size=32
+      Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Row gap=12 middle
+        IconButton "arrow_back" tooltip="Back to invoices" onTap={go invoices}
+        Heading "{number}" level=1
+        StatusPill "{status}"
+      Row gap=8
+        Button.outline "Save draft" onTap={toast "Draft saved"}
+        Button.outline "Mark overdue" hide=phone onTap={status="overdue"; toast "Marked as overdue"}
+        Button.outline "Mark paid" hide=phone onTap={status="paid"; toast "Marked as paid"}
+        Button "Mark sent" icon="send" onTap={status="sent"; toast "Invoice sent to {client}"}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Heading "Details" level=3
+        Combobox "Client" items={map(clients,c=>c.name)} bind=client addable="Add new client" onAdd={open newClient}
+        Grid cols=3 gap=12
+          Input "Invoice number" bind=number
+          DatePicker "Issued" bind=issued
+          DatePicker "Due" bind=due
+      Card gap=12
+        Row between middle
+          Heading "Line items" level=3
+          Button.outline "Add item" icon="add" onTap={lines=append(lines,{"id":nextId,"desc":"","qty":1,"rate":0,"tax":0}); nextId=nextId+1}
+        Row gap=8 hide=phone
+          Spacer w=28
+          Text.caption "Description" grow
+          Text.caption "Qty" w=60
+          Text.caption "Rate" w=90
+          Text.caption "Tax %" w=64
+          Text.caption "Amount" w=90
+          Spacer w=40
+        ReorderableList bind=lines
+          each line in lines
+            Row gap=8 middle
+              Icon "drag_indicator"
+              Input "Description" hint="What was delivered" bind=line.desc grow
+              Input "Qty" type=number bind=line.qty w=60
+              Input "Rate" type=number bind=line.rate w=90
+              Input "Tax %" type=number bind=line.tax w=64
+              Text.strong "{money(line.qty*line.rate,'$',2)}" w=90
+              IconButton "delete" tooltip="Remove line" onTap={lines=removeWhere(lines,l=>l.id==line.id)}
+        if length(lines)==0
+          EmptyState "No line items yet" "Add the first item to start the invoice." icon="playlist_add"
+      Card gap=12
+        Heading "Discount" level=3
+        Row gap=12 middle
+          SegmentedButton bind=discType items=["%","$"]
+          Input "Discount" type=number bind=disc w=120
+        InvoiceTotals lines={lines} discType={discType} disc={disc}
+      Card gap=8
+        Heading "Notes" level=3
+        Input "Notes" multiline bind=notes
+      Card gap=16
+        Row between middle
+          Heading "Preview" level=3
+          Text.muted "Updates as you type"
+        PaperInvoice number={number} client={client} issued={issued} due={due} lines={lines} discType={discType} disc={disc} notes={notes} status={status}
+Dialog#newClient "Add a client" "They will appear in the client list."
+  Input "Client name" bind=newName
+  Input "Email" type=email bind=newEmail
+  Row end gap=8
+    Button.outline "Cancel" onTap={close}
+    Button "Add client" onTap={trim(newName)=="" ? toast "Enter a name" : {clients=append(clients,{"name":newName,"email":newEmail}); client=newName; newName=""; newEmail=""; close; toast "Client added"}}
+
+// A coloured pill for an invoice status.
+define StatusPill "status" w
+  Badge.neutral "{upper(status)}" w={w} hidden={status!="draft"}
+  Badge.info "{upper(status)}" w={w} hidden={status!="sent"}
+  Badge.success "{upper(status)}" w={w} hidden={status!="paid"}
+  Badge.error "{upper(status)}" w={w} hidden={status!="overdue"}
+
+define StatCard "label" value="" caption="" tone="neutral"
+  Card gap=4
+    Text.caption "{label}"
+    Text.heading "{value}" color={tone=="danger" ? "#FFDC2626" : tone=="success" ? "#FF16A34A" : "#FF111827"}
+    Text.muted "{caption}"
+
+define InvoiceTotals lines=[] discType="%" disc=0
+  Column gap=6
+    Row between
+      Text.muted "Subtotal"
+      Text "{money(sum(lines,l=>l.qty*l.rate),'$',2)}"
+    Row between
+      Text.muted "Discount"
+      Text "-{money(discType=='%' ? sum(lines,l=>l.qty*l.rate)*disc/100 : disc,'$',2)}"
+    Row between
+      Text.muted "Tax"
+      Text "{money(sum(lines,l=>l.qty*l.rate*l.tax/100),'$',2)}"
+    Divider
+    Row between
+      Text.strong "Total due"
+      Text.heading "{money(sum(lines,l=>l.qty*l.rate)-(discType=='%' ? sum(lines,l=>l.qty*l.rate)*disc/100 : disc)+sum(lines,l=>l.qty*l.rate*l.tax/100),'$',2)}"
+
+// Looks like a sheet of paper: white, shadowed, serif-like spacing.
+define PaperInvoice number="" client="" issued="" due="" lines=[] discType="%" disc=0 notes="" status="draft"
+  Box fill=#FFFFFFFF pad=40 gap=24 radius=2 border=1 maxw=720
+    Row between top
+      Column gap=2
+        Text.heading "INVOICE"
+        Text.muted "{number}"
+      Column gap=2 end
+        Text.strong "Dana Whitfield Design"
+        Text.muted "14 Alder Street, Portland OR"
+    Row between top
+      Column gap=2
+        Text.caption "BILLED TO"
+        Text.strong "{client}"
+      Column gap=2 end
+        Text.caption "ISSUED  {formatDate(issued,'MMM d, yyyy')}"
+        Text.caption "DUE  {formatDate(due,'MMM d, yyyy')}"
+    Column gap=0
+      Row gap=8 pad=[0,6,0,6] border-bottom=#FF111827
+        Text.caption "Description" grow
+        Text.caption "Qty" w=40
+        Text.caption "Rate" w=70
+        Text.caption "Amount" w=80
+      each line in lines
+        Row gap=8 pad=[0,8,0,8] border-bottom=#FFE5E7EB
+          Text "{line.desc}" grow
+          Text "{line.qty}" w=40
+          Text "{money(line.rate,'$',2)}" w=70
+          Text "{money(line.qty*line.rate,'$',2)}" w=80
+    Row end
+      Column w=260
+        InvoiceTotals lines={lines} discType={discType} disc={disc}
+    Text.muted "{notes}"
+    Row end
+      StatusPill "{status}"

@@ -1,0 +1,225 @@
+### Catalog
+state q=""
+state format="All"
+state lang="All"
+state onlyAvail=false
+state sel=0
+state books=[{"id":1,"title":"The Overstory","author":"Richard Powers","format":"Book","lang":"English","year":2018,"queue":3,"branches":[{"branch":"Central","n":2},{"branch":"Eastside","n":0},{"branch":"Riverside","n":1}]},{"id":2,"title":"Pachinko","author":"Min Jin Lee","format":"E-book","lang":"English","year":2017,"queue":0,"branches":[{"branch":"Online","n":5}]},{"id":3,"title":"Cien anos de soledad","author":"Gabriel Garcia Marquez","format":"Book","lang":"Spanish","year":1967,"queue":1,"branches":[{"branch":"Central","n":0},{"branch":"Eastside","n":0},{"branch":"Riverside","n":0}]},{"id":4,"title":"Braiding Sweetgrass","author":"Robin Wall Kimmerer","format":"Audiobook","lang":"English","year":2013,"queue":0,"branches":[{"branch":"Online","n":3}]},{"id":5,"title":"Le Petit Prince","author":"Antoine de Saint-Exupery","format":"Book","lang":"French","year":1943,"queue":0,"branches":[{"branch":"Central","n":1},{"branch":"Riverside","n":2}]}]
+App
+  Sidebar
+    Brand "Stacks" icon="local_library"
+    NavItem "Catalog" icon="search" selected={true}
+    NavItem "My loans" icon="menu_book" badge="3" onTap={go loans}
+    NavItem "Reading list" icon="bookmark" onTap={go loans}
+    NavItem "Library card" icon="qr_code" onTap={open card}
+    Spacer grow
+    Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "Find a book" level=1
+      Row gap=8
+        Input "Search title, author or ISBN" bind=q w=280
+        IconButton "tune" tooltip="Filters" onTap={open filters}
+    Column pad=24 gap=16
+      Row gap=8
+        ChoiceChip "All formats" selected={format=="All"} onTap={format="All"}
+        ChoiceChip "Book" selected={format=="Book"} onTap={format="Book"}
+        ChoiceChip "E-book" selected={format=="E-book"} onTap={format="E-book"}
+        ChoiceChip "Audiobook" selected={format=="Audiobook"} onTap={format="Audiobook"}
+        Spacer grow
+        Toggle "Available now" bind=onlyAvail
+      Text.muted "{length(filter(books, b => (format==\"All\" || b.format==format) && (lang==\"All\" || b.lang==lang) && (!onlyAvail || sum(b.branches, x => x.n) > 0) && (q==\"\" || contains(lower(b.title), lower(q)) || contains(lower(b.author), lower(q)))))} results"
+      each b in filter(books, b => (format=="All" || b.format==format) && (lang=="All" || b.lang==lang) && (!onlyAvail || sum(b.branches, x => x.n) > 0) && (q=="" || contains(lower(b.title), lower(q)) || contains(lower(b.author), lower(q))))
+        Card onTap={sel=b.id; go book}
+          Row gap=16 middle
+            BookCover "{b.title}" w=64 h=92
+            Column grow gap=4
+              Text.strong "{b.title}"
+              Text.muted "{b.author} - {b.year}"
+              Row gap=8
+                Badge.neutral "{b.format}"
+                Badge.neutral "{b.lang}"
+            Column gap=4 end
+              if sum(b.branches, x => x.n) > 0
+                Badge.success "{sum(b.branches, x => x.n)} available"
+              if sum(b.branches, x => x.n) == 0
+                Badge.warning "{b.queue} waiting"
+              Icon "chevron_right"
+      if length(filter(books, b => (format=="All" || b.format==format) && (lang=="All" || b.lang==lang) && (!onlyAvail || sum(b.branches, x => x.n) > 0) && (q=="" || contains(lower(b.title), lower(q)) || contains(lower(b.author), lower(q))))) == 0
+        EmptyState "No matches" "Try another format or language."
+Sheet#filters "Filters"
+  Column gap=12
+    Text.fieldLabel "Language"
+    Row gap=8
+      ChoiceChip "All" selected={lang=="All"} onTap={lang="All"}
+      ChoiceChip "English" selected={lang=="English"} onTap={lang="English"}
+      ChoiceChip "Spanish" selected={lang=="Spanish"} onTap={lang="Spanish"}
+      ChoiceChip "French" selected={lang=="French"} onTap={lang="French"}
+    Toggle "Only show copies available now" bind=onlyAvail
+    Row gap=8 end
+      Button.ghost "Reset" onTap={format="All"; lang="All"; onlyAvail=false; q=""}
+      Button "Show results" onTap={close}
+Dialog#card "Library card" "Scan at any self-checkout"
+  Column gap=12 center
+    Barcode "29034 00718 4421" w=260 h=90
+    Text.strong "Dana Whitfield"
+    Text.muted "Card expires Mar 2027"
+
+// A drawn cover: a coloured box with the title on it, since no real image exists.
+define BookCover "title" w=64 h=92 fill=#FF1E3A5F
+  Column w={w} h={h} pad=6 center middle fill={fill} radius=4
+    Text.small "{title}" color=#FFFFFFFF center
+
+// A barcode drawn as a labelled box; a real scanner pattern needs a renderer.
+define Barcode "number" w=240 h=80
+  Column w={w} h={h} pad=8 center middle gap=4 fill=#FFFFFFFF radius=4 border=1
+    Text.mono "||| || ||| | |||| || |||" size=22
+    Text.small "{number}"
+
+### Book
+state sel=1
+state pickup="Central"
+state holdPlaced=false
+state book={"id":1,"title":"The Overstory","author":"Richard Powers","format":"Book","lang":"English","year":2018,"queue":3,"pages":502,"about":"Nine strangers are called by trees to a final stand against the loggers of the Pacific Northwest.","branches":[{"branch":"Central","n":2},{"branch":"Eastside","n":0},{"branch":"Riverside","n":1}]}
+Page
+  Nav
+    BackButton "Catalog" onTap={go catalog}
+    Row gap=8
+      Button.outline "Add to reading list" onTap={toast "Added to your reading list"}
+      Button "Read sample" onTap={go reader}
+  Section
+    Row gap=40
+      BookCover "{book.title}" w=200 h=290
+      Column grow gap=16
+        Heading "{book.title}" level=1
+        Text.muted "{book.author} - {book.year} - {book.pages} pages"
+        Row gap=8
+          Badge.neutral "{book.format}"
+          Badge.neutral "{book.lang}"
+          Rating 4.5 readonly
+        Text "{book.about}"
+        Card gap=8
+          Text.strong "Copies by branch"
+          each br in book.branches
+            Row between middle
+              Text "{br.branch}"
+              if br.n > 0
+                Badge.success "{br.n} on shelf"
+              if br.n == 0
+                Badge.error "All out"
+        Card gap=12
+          Text.strong "Place a hold"
+          Select "Pick up at" items=["Central","Eastside","Riverside"] bind=pickup
+          Text.muted "Queue position: {book.queue + 1} of {book.queue + 1}. Estimated wait {(book.queue + 1) * 2} weeks."
+          if holdPlaced
+            Badge.success "Hold placed. We will email you when it is ready at {pickup}."
+          if !holdPlaced
+            Button "Place hold" onTap={open confirmHold}
+Dialog#confirmHold "Confirm your hold" "Ready for pickup at the branch you choose."
+  Column gap=12
+    Text "{book.title} will be held for you at {pickup}. You are number {book.queue + 1} in the queue."
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button "Confirm hold" onTap={holdPlaced=true; toast "Hold placed"; close}
+
+### Loans
+state tab="loans"
+state loans=[{"id":1,"title":"Braiding Sweetgrass","due":"2026-11-10","renewals":0,"fineRate":0.25},{"id":2,"title":"The Overstory","due":"2026-11-24","renewals":1,"fineRate":0.25},{"id":3,"title":"Pachinko","due":"2026-12-01","renewals":0,"fineRate":0}]
+state overdueDays={"1":7}
+state readingList=["Le Petit Prince","Cien anos de soledad","Piranesi"]
+state picked=""
+App
+  Sidebar
+    Brand "Stacks" icon="local_library"
+    NavItem "Catalog" icon="search" onTap={go catalog}
+    NavItem "My loans" icon="menu_book" selected={tab=="loans"} onTap={tab="loans"}
+    NavItem "Reading list" icon="bookmark" selected={tab=="list"} onTap={tab="list"}
+    Spacer grow
+    Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "My shelf" level=1
+      Button.outline "Show library card" onTap={open card}
+    Column pad=24 gap=16
+      SegmentedButton bind=tab items=["loans","list"]
+      if tab=="loans"
+        Banner "You owe $1.75 in overdue fines on Braiding Sweetgrass." icon="warning"
+        each l in loans
+          Card gap=8
+            Row between middle
+              Column gap=2
+                Text.strong "{l.title}"
+                Text.muted "Due {formatDate(l.due, \"MMM d\")} - renewed {l.renewals} of 2 times"
+              Row gap=8 middle
+                if l.fineRate > 0
+                  Badge.error "Overdue: $1.75"
+                if l.fineRate == 0
+                  Badge.neutral "On time"
+                Button.outline "Renew" onTap={l.renewals >= 2 ? toast "No renewals left" : {loans=updateWhere(loans, x => x.id==l.id, x => with(x, "renewals", x.renewals + 1)); toast "Renewed for 2 weeks"}}
+        Row between
+          Text.strong "Total fines"
+          Text.danger "$1.75"
+        Button "Pay fines" onTap={open payFines}
+      if tab=="list"
+        each title in readingList
+          ListTile "{title}" onTap={picked=title; open listMenu}
+            IconButton "more_vert" tooltip="More" onTap={picked=title; open listMenu}
+        if length(readingList) == 0
+          EmptyState "Nothing saved" "Add books from the catalog."
+Menu#listMenu
+  MenuItem "Place hold" icon="hourglass_top" onTap={go book}
+  MenuItem "Remove" icon="delete" onTap={readingList=without(readingList, picked); toast "Removed"}
+Dialog#payFines "Pay fines" "Total due: $1.75"
+  Column gap=12
+    Text "Fines are paid at the desk or online with a card."
+    Row gap=8 end
+      Button.ghost "Later" onTap={close}
+      Button "Pay $1.75" onTap={emit payFines; toast "Payment started"; close}
+Dialog#card "Library card" "Scan at any self-checkout"
+  Column gap=12 center
+    Barcode "29034 00718 4421" w=260 h=90
+    Text.strong "Dana Whitfield"
+
+### Reader
+state size=18
+state theme="Light"
+state page=120
+state total=502
+state marks=[34,87]
+state fills={"Light":"#FFFFFFFF","Sepia":"#FFF4ECD8","Dark":"#FF111827"}
+state inks={"Light":"#FF111827","Sepia":"#FF3B2F1E","Dark":"#FFE5E7EB"}
+App
+  Main
+    Nav
+      BackButton "Pachinko" onTap={go book}
+      Row gap=8
+        IconButton "bookmark" tooltip="Bookmark this page" onTap={contains(marks, page) ? {marks=without(marks, page); toast "Bookmark removed"} : {marks=append(marks, page); toast "Page bookmarked"}}
+        IconButton "text_fields" tooltip="Text and theme" onTap={open style}
+        IconButton "list" tooltip="Bookmarks" onTap={open marksSheet}
+    Column pad=24 gap=16 maxw=680 center fill={fills[theme]}
+      Text.heading "Chapter 4: The Boarding House" color={inks[theme]}
+      Text "Hoonie wore a coat that had been his father's, and the sea wind pushed through the seams as he walked down to the harbour. Each morning the house filled with the smell of rice and fish, and each morning Sunja carried the trays out to the men who had come to lodge." size={size} color={inks[theme]}
+      Text "She did not speak much, and when she did, it was in the careful voice of someone counting coins." size={size} color={inks[theme]}
+    Footer
+      Column gap=6 pad=12
+        Slider bind=page min=1 max=502
+        Row between
+          Text.muted "Page {page} of {total}"
+          Text.muted "{round(page / total * 100, 0)}% read"
+Sheet#style "Text and theme"
+  Column gap=12
+    Text.fieldLabel "Font size"
+    Row gap=12 middle
+      IconButton "remove" tooltip="Smaller" onTap={size=max(12, size-2)}
+      Text.strong "{size}"
+      IconButton "add" tooltip="Larger" onTap={size=min(32, size+2)}
+    Text.fieldLabel "Theme"
+    SegmentedButton bind=theme items=["Light","Sepia","Dark"]
+    Button "Done" onTap={close}
+Sheet#marksSheet "Bookmarks"
+  Column gap=8
+    each m in sortBy(marks, x => x)
+      ListTile "Page {m}" onTap={page=m; close}
+        IconButton "close" tooltip="Remove" onTap={marks=without(marks, m)}
+    if length(marks) == 0
+      Text.muted "No bookmarks yet."

@@ -1,0 +1,176 @@
+### Subscriptions
+state tab="subs"
+state yearly=false
+state sort="date"
+state sel=0
+state name=""
+state price=""
+state cycle="Monthly"
+state first=""
+state remind="3 days before"
+state subs=[{"id":1,"name":"Netflix","cat":"Streaming","price":15.49,"cycle":"Monthly","color":"#FFDC2626","days":3,"trial":false,"rise":false},{"id":2,"name":"Spotify","cat":"Streaming","price":11.99,"cycle":"Monthly","color":"#FF16A34A","days":6,"trial":false,"rise":true},{"id":3,"name":"Notion","cat":"Work","price":96,"cycle":"Yearly","color":"#FF111827","days":2,"trial":true,"rise":false},{"id":4,"name":"iCloud+","cat":"Storage","price":2.99,"cycle":"Monthly","color":"#FF2563EB","days":11,"trial":false,"rise":false},{"id":5,"name":"Adobe Creative Cloud","cat":"Work","price":59.99,"cycle":"Monthly","color":"#FFB91C1C","days":14,"trial":false,"rise":true},{"id":6,"name":"Gym Membership","cat":"Health","price":39,"cycle":"Monthly","color":"#FFEA580C","days":19,"trial":false,"rise":false}]
+state monthly=sum(subs,s=>s.cycle=="Yearly" ? s.price/12 : s.price)
+App
+  Sidebar
+    Brand "Recurring" icon="autorenew"
+    NavItem "Subscriptions" icon="list" badge="{length(subs)}" selected={tab=="subs"} onTap={tab="subs"}
+    NavItem "Calendar" icon="calendar_month" selected={tab=="cal"} onTap={go calendar}
+    NavItem "Insights" icon="donut_large" selected={tab=="ins"} onTap={go calendar}
+    NavItem "Cancel guides" icon="cancel" onTap={go cancel-guide}
+    Spacer grow
+    Text.muted "Alex Morgan"
+  Main
+    Nav
+      Heading "Subscriptions" level=1
+      Row gap=8
+        SearchBar "Search subscriptions" bind=q w=220
+        Button "Add subscription" icon="add" onTap={open add}
+    Column pad=24 gap=16 scroll
+      if any(subs,s=>s.trial && s.days<=3)
+        Banner "Your Notion free trial ends in {find(subs,s=>s.trial).days} days. You will be billed $96.00 on renewal." icon="hourglass_bottom" actionLabel="Cancel trial" onAction={go cancel-guide} onDismiss={subs=map(subs,s=>with(s,"trial",false))}
+      Grid cols=3 gap=16
+        Card gap=8
+          Row between
+            Text.muted "{yearly ? 'Per year' : 'Per month'}"
+            Row gap=8 middle
+              Text.small "Monthly"
+              Switch bind=yearly
+              Text.small "Yearly"
+          Text "{money(yearly ? monthly*12 : monthly, '$', 2)}" size=44 weight=700
+          Text.muted "across {length(subs)} subscriptions"
+        Card gap=8
+          Text.muted "Next payment"
+          Text.heading "{first(sortBy(subs,s=>s.days)).name}"
+          Text.muted "in {first(sortBy(subs,s=>s.days)).days} days"
+        Card gap=8
+          Text.muted "Price rises"
+          Text "{count(subs,s=>s.rise)}" size=44 weight=700
+          Text.muted "need your attention"
+      Card gap=12
+        Row between middle
+          Text.strong "By next payment date"
+          SegmentedButton bind=sort items=["date","price"]
+        each s in (sort=="date" ? sortBy(subs,x=>x.days) : sortByDesc(subs,x=>x.price))
+          Row gap=12 middle border-bottom=#FFE5E7EB pad=[0,8,0,8]
+            LogoMark "{s.name}" color={s.color}
+            Column grow gap=2
+              Text.strong "{s.name}"
+              Text.muted "{s.cat} · {s.cycle}"
+            if s.rise
+              Badge.warning "Price rise"
+            if s.trial
+              Badge.info "Free trial"
+            Chip "{s.days} days left" selected={s.days<=3}
+            Text.strong "{money(s.price,'$',2)}" w=80
+            IconButton "more_vert" tooltip="Options" onTap={sel=s.id; open rowMenu}
+      Card gap=12
+        Text.strong "Price-rise alerts"
+        each s in filter(subs,x=>x.rise)
+          Row gap=12 middle
+            Icon "trending_up"
+            Column grow gap=2
+              Text.strong "{s.name} is going up"
+              Text.muted "from {money(s.price,'$',2)} to {money(s.price*1.12,'$',2)} per {s.cycle=='Yearly' ? 'year' : 'month'}"
+            Button.outline "Review" onTap={go cancel-guide}
+            Button.ghost "Dismiss" onTap={subs=updateWhere(subs,x=>x.id==s.id,x=>with(x,"rise",false))}
+  Menu#rowMenu end
+    MenuItem "Cancel guide" icon="cancel" onTap={go cancel-guide}
+    MenuItem "Set reminder" icon="notifications" onTap={toast "Reminder set"}
+    MenuItem "Remove" icon="delete" onTap={subs=removeWhere(subs,x=>x.id==sel); toast "Removed"}
+  Dialog#add "Add subscription" "Pick from the catalogue or enter it by hand"
+    Text.strong "Popular"
+    Row gap=8 scroll
+      Chip "Netflix" onTap={name="Netflix"; price="15.49"}
+      Chip "Spotify" onTap={name="Spotify"; price="11.99"}
+      Chip "Disney+" onTap={name="Disney+"; price="13.99"}
+      Chip "YouTube Premium" onTap={name="YouTube Premium"; price="13.99"}
+      Chip "Dropbox" onTap={name="Dropbox"; price="11.99"}
+    Input "Name" bind=name
+    Input "Price" bind=price type=number
+    Select "Billing cycle" bind=cycle items=["Weekly","Monthly","Quarterly","Yearly"]
+    DatePicker "First bill" bind=first
+    Select "Remind me" bind=remind items=["Never","1 day before","3 days before","1 week before"]
+    Button "Add subscription" onTap={name!="" && price!="" ? {subs=append(subs,{"id":length(subs)+10,"name":name,"cat":"Other","price":price+0,"cycle":cycle,"color":"#FF7C3AED","days":7,"trial":false,"rise":false}); name=""; price=""; toast "Subscription added"; close} : toast "Enter a name and a price"}
+
+### Calendar and insights
+state month="November 2026"
+state picked=0
+state subs=[{"name":"Netflix","cat":"Streaming","price":15.49,"day":20,"color":"#FFDC2626"},{"name":"Spotify","cat":"Streaming","price":11.99,"day":23,"color":"#FF16A34A"},{"name":"Notion","cat":"Work","price":96,"day":19,"color":"#FF111827"},{"name":"iCloud+","cat":"Storage","price":2.99,"day":28,"color":"#FF2563EB"},{"name":"Adobe Creative Cloud","cat":"Work","price":59.99,"day":1,"color":"#FFB91C1C"},{"name":"Gym Membership","cat":"Health","price":39,"day":5,"color":"#FFEA580C"}]
+App
+  Sidebar
+    Brand "Recurring" icon="autorenew"
+    NavItem "Subscriptions" icon="list" onTap={go subscriptions}
+    NavItem "Calendar" icon="calendar_month" selected={true}
+    NavItem "Cancel guides" icon="cancel" onTap={go cancel-guide}
+  Main
+    Nav
+      Heading "Calendar" level=1
+      Button "Add subscription" icon="add" onTap={go subscriptions}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=12
+          MonthCalendar "{month}" marks={map(subs,s=>{"day":s.day,"label":s.name,"color":s.color})} onPick={picked=result}
+        Column gap=16 w=320
+          Card gap=8
+            Text.strong "{picked==0 ? 'Pick a day' : 'Payments on day ' + picked}"
+            each s in filter(subs,x=>x.day==picked)
+              Row gap=8 middle
+                LogoMark "{s.name}" color={s.color} size=32
+                Text grow "{s.name}"
+                Text.strong "{money(s.price,'$',2)}"
+            if picked!=0 && count(subs,x=>x.day==picked)==0
+              Text.muted "Nothing is due."
+          Card gap=8
+            Text.strong "By category"
+            Donut values=[27.48,98.99,2.99,39] labels=["Streaming","Work","Storage","Health"]
+
+### Cancel guide
+state step=0
+state reason=""
+Page
+  Nav
+    Brand "Recurring" icon="autorenew"
+    Button.ghost "Back to subscriptions" icon="arrow_back" onTap={go subscriptions}
+  Section narrow
+    Column gap=16
+      Row gap=12 middle
+        LogoMark "Notion" color=#FF111827 size=48
+        Column gap=2
+          Heading "Cancel Notion" level=1
+          Text.muted "Step {step+1} of 4 · about 3 minutes"
+      Progress {(step+1)/4}
+      Card gap=12
+        if step==0
+          Text.strong "Why are you leaving?"
+          Select "Reason" bind=reason items=["Too expensive","Not using it","Switching to another app","Just testing"]
+          Text.muted "Your answer stays on your device."
+        if step==1
+          Text.strong "Open Settings"
+          Text "Sign in at notion.so, open Settings and choose Plans."
+        if step==2
+          Text.strong "Choose Downgrade to Free"
+          Text "Select Downgrade, then confirm. Your workspace stays; paid features end at the next billing date."
+        if step==3
+          Text.strong "Confirm by email"
+          Text "Look for the confirmation email, then mark this subscription as cancelled here."
+          Button "Mark as cancelled" onTap={toast "Notion marked as cancelled"; go subscriptions}
+        Row between
+          Button.outline "Back" onTap={step=max(0,step-1)}
+          Button "Next" hidden={step==3} onTap={step=min(3,step+1)}
+
+// A round logo drawn as coloured initials
+define LogoMark "name" color=#FF2563EB size=40
+  Box w={size} h={size} radius={size/4} fill={color} center middle
+    Text.strong "{upper(slice(name,0,1))}" color=#FFFFFFFF
+
+// A month grid of days; marked days show a dot of the payment's colour
+define MonthCalendar "title" marks=[] onPick
+  state picked=0
+  Column gap=8
+    Text.strong "{title}"
+    Grid cols=7 gap=4
+      each d in range(30)
+        Box h=56 radius=8 pad=4 border={picked==d+1 ? 2 : 1} onTap={picked=d+1; onPick(d+1)}
+          Text.small "{d+1}"
+          each m in filter(marks,x=>x.day==d+1)
+            Dot color={m.color}

@@ -1,0 +1,198 @@
+### Search
+state q=""
+state mode="Flight number"
+state recent=[{"id":"UA 889","route":"SFO to NRT","status":"En route"},{"id":"DL 412","route":"JFK to LAX","status":"Delayed"},{"id":"BA 286","route":"SFO to LHR","status":"Landed"}]
+state results=[{"id":"UA 889","from":"SFO","to":"NRT","dep":"11:05","arr":"15:20","status":"En route"},{"id":"NH 7","from":"SFO","to":"HND","dep":"12:40","arr":"16:55","status":"On time"},{"id":"JL 1","from":"SFO","to":"HND","dep":"13:15","arr":"17:30","status":"Delayed"}]
+App
+  Sidebar
+    Brand "Contrail" icon="flight"
+    NavItem "Search" icon="search" selected={true} onTap={go search}
+    NavItem "Flight" icon="flight_takeoff" onTap={go flight}
+    NavItem "Airport board" icon="departure_board" onTap={go board}
+    NavItem "Alerts" icon="notifications" badge="3" onTap={go alerts}
+    Spacer grow
+    Text.muted "Signed in as Maya Reyes"
+  Main
+    Nav
+      Heading "Find a flight" level=1
+      Row gap=8
+        IconButton "tune" tooltip="Filters" onTap={open filters}
+    Column pad=24 gap=16 maxw=720
+      SegmentedButton bind=mode items=["Flight number","Route"]
+      Row gap=8
+        Input "Search" "UA 889 or SFO to NRT" bind=q grow
+        Button "Search" onTap={emit search q; toast "Searching {q}"}
+      Text.sectionTitle "Matching flights"
+      each r in results
+        Card gap=8 onTap={emit pick r.id; go flight}
+          Row between middle
+            Column gap=2
+              Text.strong "{r.id}"
+              Text.muted "{r.from} to {r.to}"
+            Row gap=24 middle
+              Text "{r.dep}"
+              Icon "arrow_forward"
+              Text "{r.arr}"
+              Badge.info "{r.status}"
+      Text.sectionTitle "Recent"
+      each f in recent
+        ListTile "{f.id}  {f.route}" onTap={emit pick f.id; go flight}
+          Badge.neutral "{f.status}"
+Sheet#filters "Filters"
+  state airline="Any"
+  Select "Airline" items=["Any","United","Delta","British Airways","ANA"] bind=airline
+  Toggle "Only flights in the air" bind=airOnly
+  Button "Apply" onTap={emit filter airline; close}
+
+### Flight
+state tab="UA 889"
+state progress=0.62
+state delayed=true
+state gate="B32"
+state terminal="3"
+state belt="7"
+state gateChanged=false
+state followed=false
+every 5s onTick={progress=min(1,progress+0.01)}
+App
+  Sidebar
+    Brand "Contrail" icon="flight"
+    NavItem "Search" icon="search" onTap={go search}
+    NavItem "Flight" icon="flight_takeoff" selected={true} onTap={go flight}
+    NavItem "Airport board" icon="departure_board" onTap={go board}
+    NavItem "Alerts" icon="notifications" badge="3" onTap={go alerts}
+  Main
+    Nav
+      Row gap=12 middle
+        IconButton "arrow_back" tooltip="Back" onTap={go search}
+        Heading "UA 889 San Francisco to Tokyo" level=1
+      Row gap=8
+        Button.outline "{followed ? 'Following' : 'Follow'}" onTap={followed=!followed; toast followed ? "Unfollowed UA 889" : "Following UA 889"}
+        IconButton "share" tooltip="Share" onTap={open shareFlight}
+    Column pad=24 gap=16 scroll
+      Card gap=16
+        Row between middle
+          Column gap=4
+            Text.caption "DEPARTED SFO"
+            Text "11:05" size=48 weight=700
+            Row gap=8 middle
+              Text "11:35" strike=true color=#FF9CA3AF
+              Text "11:42" color=#FFDC2626 weight=700
+              Badge.warning "Delayed 37 min"
+          Column gap=4 end
+            Text.caption "ARRIVES NRT"
+            Text "15:20" size=48 weight=700
+            Row gap=8 middle
+              Text "15:55" strike=true color=#FF9CA3AF
+              Text "16:02" color=#FFDC2626 weight=700
+        FlightProgress value={progress} from="SFO" to="NRT"
+        Text.muted "{round(progress*100,0)}% of 8,280 km flown. Over the Pacific at 11,200 m, 905 km/h."
+      Row gap=12
+        GateChip "Gate" value={gate} changed={gateChanged}
+        GateChip "Terminal" value={terminal}
+        GateChip "Belt" value={belt}
+        Spacer grow
+        Button.ghost "Simulate gate change" onTap={gate="C14"; gateChanged=true}
+      Card gap=12
+        Text.sectionTitle "Route"
+        FlightMap from="SFO" to="NRT" progress={progress} h=280
+        Row gap=24
+          InlineStat "Distance" "8,280 km"
+          InlineStat "Altitude" "11,200 m"
+          InlineStat "Ground speed" "905 km/h"
+      Card gap=8
+        Text.sectionTitle "Aircraft"
+        Text "Boeing 787-9, registration N27958"
+        Text.muted "Operated by United Airlines. Arriving at Narita Terminal 1."
+
+Sheet#shareFlight "Share flight"
+  Input "Link" bind=shareLink
+  Button "Copy link" onTap={copy "contrail.app/f/UA889"; toast "Link copied"; close}
+
+### Airport board
+state airport="SFO"
+state filter="All"
+state board=[{"time":"11:05","flight":"UA 889","to":"Tokyo Narita","gate":"B32","status":"Departed"},{"time":"11:50","flight":"DL 1180","to":"Seattle","gate":"C14","status":"Boarding"},{"time":"12:20","flight":"BA 286","to":"London Heathrow","gate":"G8","status":"Delayed 25 min"},{"time":"12:45","flight":"AS 330","to":"Portland","gate":"D2","status":"On time"},{"time":"13:10","flight":"AA 17","to":"New York JFK","gate":"E5","status":"On time"},{"time":"13:40","flight":"AF 79","to":"Paris CDG","gate":"G12","status":"Cancelled"}]
+App
+  Sidebar
+    Brand "Contrail" icon="flight"
+    NavItem "Search" icon="search" onTap={go search}
+    NavItem "Flight" icon="flight_takeoff" onTap={go flight}
+    NavItem "Airport board" icon="departure_board" selected={true} onTap={go board}
+    NavItem "Alerts" icon="notifications" badge="3" onTap={go alerts}
+  Main
+    Nav
+      Heading "Departures" level=1
+      Select bind=airport items=["SFO","JFK","LAX","LHR"] w=120
+    Column pad=24 gap=16
+      ChipTabs bind=filter items=["All","On time","Delayed","Cancelled"]
+      Table
+        TableHeader
+          Text.caption "Time" w=70
+          Text.caption "Flight" w=90
+          Text.caption "Destination" grow
+          Text.caption "Gate" w=60
+          Text.caption "Status" w=130
+        each b in board
+          if filter=="All" || contains(b.status, lower(filter)) || contains(b.status, filter)
+            TableRow onTap={emit pick b.flight; go flight}
+              Text.strong "{b.time}" w=70
+              Text "{b.flight}" w=90
+              Text "{b.to}" grow
+              Text "{b.gate}" w=60
+              StatusBadge "{b.status}" w=130
+
+### Alerts
+state gateAlerts=true
+state delayAlerts=true
+state landingAlerts=false
+state boardingAlerts=true
+state quiet=false
+state channel="Push"
+App
+  Sidebar
+    Brand "Contrail" icon="flight"
+    NavItem "Search" icon="search" onTap={go search}
+    NavItem "Flight" icon="flight_takeoff" onTap={go flight}
+    NavItem "Airport board" icon="departure_board" onTap={go board}
+    NavItem "Alerts" icon="notifications" badge="3" selected={true} onTap={go alerts}
+  Main
+    Nav
+      Heading "Alerts" level=1
+      Button "Send test alert" onTap={toast "Test alert sent via {channel}"}
+    Column pad=24 gap=16 maxw=720
+      Card gap=4
+        Text.sectionTitle "For UA 889"
+        SettingRow "Gate and terminal changes" "Tell me the moment a gate, terminal or belt changes"
+          Switch bind=gateAlerts
+        SettingRow "Delays" "When the departure or arrival moves by 15 minutes or more"
+          Switch bind=delayAlerts
+        SettingRow "Landing" "When the plane touches down"
+          Switch bind=landingAlerts
+        SettingRow "Boarding" "When boarding opens"
+          Switch bind=boardingAlerts
+      Card gap=8
+        Text.sectionTitle "Delivery"
+        SegmentedButton bind=channel items=["Push","Email","SMS"]
+        Toggle "Quiet hours 22:00 to 07:00" bind=quiet
+        if quiet
+          Row gap=12
+            TimePicker "From" bind=quietFrom
+            TimePicker "Until" bind=quietTo
+      Button "Save" onTap={emit saveAlerts; toast "Alerts saved"}
+
+// A drawn map: the great-circle arc between two airports with a plane marker at the given share, shown as a labelled box with the arc.
+define FlightMap from="SFO" to="NRT" progress=0.5 h=240
+  Stack h={h} radius=12 fill=#FFE0F2FE
+    Row between pad=16
+      Text.strong "{from}"
+      Text.strong "{to}"
+    Text.muted "Route map {from} to {to}" center
+    Box w={progress*100} h=4 fill=#FF2563EB radius=2 animate=pulse
+    Icon "flight"
+
+// Shows a gate, terminal or belt value; flashes when it has changed.
+define GateChip "label" value="" changed=false
+  Box pad=12 gap=2 radius=10 fill={changed ? '#FFFEF3C7' : '#FFF3F4F6'} animate={changed ? 'pulse' : 'fade'}
+    Text.caption "{label}"
+    Text.strong "{value}" size=24

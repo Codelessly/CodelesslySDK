@@ -1,0 +1,239 @@
+### Interview
+state step=1
+state q=0
+state hadJob=""
+state wages=0
+state withheld=0
+state hasInterest=""
+state interest=0
+state freelance=""
+state freelanceIncome=0
+state dependents=0
+state deduction="standard"
+state filing="Single"
+state photoMatched=true
+state signed=false
+state sigName=""
+state sigData=[]
+App
+  Sidebar
+    Brand "Returnly" icon="receipt_long"
+    Text.caption "2025 federal return"
+    Stepper steps=["About you","Income","Deductions","Documents","Review","Sign"] current={step} onSelect={step=result}
+    Spacer grow
+    Card gap=4
+      Text.caption "Estimated"
+      Text.heading "{refund >= 0 ? 'Refund' : 'You owe'}"
+      Text size=28 weight=700 color={refund >= 0 ? "#FF15803D" : "#FFB91C1C"} "{money(abs(refund),'$',0)}"
+  Main
+    Nav
+      Heading "Income" level=1
+      Row gap=8
+        Select bind=filing items=["Single","Married filing jointly","Head of household"]
+        Button.ghost "Save and exit" onTap={toast "Progress saved"}
+    Column pad=24 gap=16 scroll maxw=720
+      Row between
+        Text.muted "Question {q+1} of 4"
+        Progress {(q+1)/4} w=160
+      if q==0
+        YesNoCard "Did you work for an employer in 2025?" bind=hadJob help="If you received a W-2 from any employer, answer yes. Tips and seasonal work count too."
+        if hadJob=="yes"
+          CurrencyInput "Total wages (W-2 box 1)" bind=wages help="Add up box 1 from every W-2. Do not include tips reported separately."
+          CurrencyInput "Federal tax withheld (box 2)" bind=withheld help="This is the tax your employer already paid for you during the year."
+      if q==1
+        YesNoCard "Did you earn interest from a bank or savings account?" bind=hasInterest help="Banks send a 1099-INT if you earned more than $10. Smaller amounts are still taxable."
+        if hasInterest=="yes"
+          CurrencyInput "Total interest earned" bind=interest help="Add the amounts from all your 1099-INT forms."
+      if q==2
+        YesNoCard "Did you do any freelance or gig work?" bind=freelance help="Driving, design, tutoring, selling online: if clients paid you directly it is self-employment income."
+        if freelance=="yes"
+          CurrencyInput "Net freelance income" bind=freelanceIncome help="Income minus business expenses. We apply self-employment tax for you."
+      if q==3
+        Card gap=12
+          Text.strong "Dependents"
+          Row gap=12 middle
+            IconButton "remove" tooltip="Fewer" onTap={dependents=max(0,dependents-1)}
+            Text.heading "{dependents}"
+            IconButton "add" tooltip="More" onTap={dependents=dependents+1}
+          Text.muted "Each qualifying child under 17 reduces your tax by $2,000."
+        Card gap=8
+          Text.strong "Deduction"
+          Radio "Standard deduction ($14,600)" selected={deduction=="standard"} onTap={deduction="standard"}
+          Radio "Itemize deductions" selected={deduction=="itemized"} onTap={deduction="itemized"}
+      Row between
+        Button.outline "Back" onTap={q>0 ? q=q-1 : toast "This is the first question"}
+        Button "Continue" onTap={q<3 ? q=q+1 : step=4; go documents}
+
+### Documents
+App
+  Sidebar
+    Brand "Returnly" icon="receipt_long"
+    Stepper steps=["About you","Income","Deductions","Documents","Review","Sign"] current={step} onSelect={step=result}
+    Spacer grow
+    Card gap=4
+      Text.caption "Estimated"
+      Text.heading "{refund >= 0 ? 'Refund' : 'You owe'}"
+      Text size=28 weight=700 color={refund >= 0 ? "#FF15803D" : "#FFB91C1C"} "{money(abs(refund),'$',0)}"
+  Main
+    Nav
+      Heading "Your documents" level=1
+      Button.ghost "Skip for now" onTap={go review}
+    Column pad=24 gap=16 scroll
+      Text.muted "Drop your forms here. We read each one and fill in the matching fields, then you confirm."
+      FileUploader accept=["pdf","jpg","png"] multiple onUpload={docs=concat(docs,result)}
+      each d in docs
+        Card gap=8
+          Row between middle
+            Row gap=12 middle
+              Icon "description"
+              Column gap=2
+                Text.strong "{d.name}"
+                Text.caption "{d.kind} - matched to {d.field}"
+            Row gap=8
+              Badge.success "Matched" visible={d.confirmed}
+              Button.outline "Confirm" visible={!d.confirmed} onTap={docs=updateWhere(docs,x=>x.id==d.id,x=>with(x,"confirmed",true)); toast "Matched to {d.field}"}
+              IconButton "delete" tooltip="Remove" onTap={docs=removeWhere(docs,x=>x.id==d.id)}
+          Row gap=8 middle
+            Text.muted "Read value"
+            Text.strong "{money(d.amount,'$',2)}"
+            Button.ghost "Edit" onTap={sel=d.id; open fixAmount}
+      if isEmpty(docs)
+        EmptyState "No documents yet" "Upload a W-2 or 1099 to start matching."
+      Row between
+        Button.outline "Back" onTap={go interview}
+        Button "Review my return" onTap={step=5; go review}
+  Dialog#fixAmount "Correct the amount" "We read this from your upload."
+    CurrencyInput "Amount" bind=fixValue
+    Button "Save" onTap={docs=updateWhere(docs,x=>x.id==sel,x=>with(x,"amount",fixValue)); close}
+
+### Review
+App
+  Sidebar
+    Brand "Returnly" icon="receipt_long"
+    Stepper steps=["About you","Income","Deductions","Documents","Review","Sign"] current={step} onSelect={step=result}
+    Spacer grow
+    Card gap=4
+      Text.caption "Estimated"
+      Text.heading "{refund >= 0 ? 'Refund' : 'You owe'}"
+      Text size=28 weight=700 color={refund >= 0 ? "#FF15803D" : "#FFB91C1C"} "{money(abs(refund),'$',0)}"
+  Main
+    Nav
+      Heading "Review your return" level=1
+      Button "Continue to sign" onTap={step=6; go sign}
+    Column pad=24 gap=16 scroll maxw=720
+      Card gap=12
+        Row between middle
+          Text.strong "Wages"
+          Row gap=8 middle
+            Text "{money(wages,'$',2)}"
+            IconButton "edit" tooltip="Edit" onTap={sel="wages"; open editField}
+        Divider
+        Row between middle
+          Text.strong "Federal tax withheld"
+          Row gap=8 middle
+            Text "{money(withheld,'$',2)}"
+            IconButton "edit" tooltip="Edit" onTap={sel="withheld"; open editField}
+        Divider
+        Row between middle
+          Text.strong "Interest"
+          Row gap=8 middle
+            Text "{money(interest,'$',2)}"
+            IconButton "edit" tooltip="Edit" onTap={sel="interest"; open editField}
+        Divider
+        Row between middle
+          Text.strong "Freelance income"
+          Row gap=8 middle
+            Text "{money(freelanceIncome,'$',2)}"
+            IconButton "edit" tooltip="Edit" onTap={sel="freelanceIncome"; open editField}
+        Divider
+        Row between middle
+          Text.strong "Dependents"
+          Row gap=8 middle
+            Text "{dependents}"
+            IconButton "edit" tooltip="Edit" onTap={go interview}
+      Card gap=8
+        Row between
+          Text.muted "Taxable income"
+          Text "{money(taxable,'$',2)}"
+        Row between
+          Text.muted "Tax before credits"
+          Text "{money(tax,'$',2)}"
+        Row between
+          Text.muted "Child credits"
+          Text "-{money(dependents*2000,'$',2)}"
+        Divider
+        Row between
+          Text.strong "{refund >= 0 ? 'Refund' : 'Amount you owe'}"
+          Text size=24 weight=700 "{money(abs(refund),'$',2)}"
+      Row between
+        Button.outline "Back" onTap={go documents}
+        Button "Continue to sign" onTap={step=6; go sign}
+  Dialog#editField "Edit amount"
+    CurrencyInput "New amount" bind=editValue
+    Button "Save" onTap={sel=="wages" ? wages=editValue : sel=="withheld" ? withheld=editValue : sel=="interest" ? interest=editValue : freelanceIncome=editValue; toast "Updated"; close}
+
+### Sign
+App
+  Sidebar
+    Brand "Returnly" icon="receipt_long"
+    Stepper steps=["About you","Income","Deductions","Documents","Review","Sign"] current={step} onSelect={step=result}
+    Spacer grow
+    Card gap=4
+      Text.caption "Estimated"
+      Text.heading "{refund >= 0 ? 'Refund' : 'You owe'}"
+      Text size=28 weight=700 color={refund >= 0 ? "#FF15803D" : "#FFB91C1C"} "{money(abs(refund),'$',0)}"
+  Main
+    Nav
+      Heading "Sign and file" level=1
+    Column pad=24 gap=16 scroll maxw=720
+      Card gap=8
+        Text.strong "Declaration"
+        Text.muted "Under penalties of perjury, I declare that I have examined this return and, to the best of my knowledge, it is true, correct and complete."
+      Input "Full legal name" bind=sigName
+      Text.fieldLabel "Draw your signature"
+      SignaturePad bind=sigData h=160 onChange={signed=length(sigData)>0}
+      Row between
+        Button.ghost "Clear" onTap={sigData=[]; signed=false}
+        Text.caption "{signed ? 'Signature captured' : 'Sign above with your finger or mouse'}"
+      Checkbox "I agree to e-file this return" bind=agree
+      Row between
+        Button.outline "Back" onTap={go review}
+        Button "File my return" onTap={signed && agree && sigName!="" ? open filed : toast "Add your name, signature and agreement"}
+  Dialog#filed "Return filed" "Confirmation RTN-2025-48213"
+    Text "We sent your return to the IRS. {refund >= 0 ? 'Expect your refund of ' : 'Your balance due is '}{money(abs(refund),'$',2)}."
+    Button "Done" onTap={close; go interview}
+
+define YesNoCard "question" bind=value help=""
+  state value=""
+  state helpOpen=false
+  Card gap=12
+    Text.heading "{question}"
+    Row gap=12
+      Box grow pad=16 radius=8 center fill={value=="yes" ? "#FFDBEAFE" : "#FFF3F4F6"} border={value=="yes" ? 2 : 1} onTap={value="yes"}
+        Icon "check_circle"
+        Text.strong "Yes"
+      Box grow pad=16 radius=8 center fill={value=="no" ? "#FFDBEAFE" : "#FFF3F4F6"} border={value=="no" ? 2 : 1} onTap={value="no"}
+        Icon "cancel"
+        Text.strong "No"
+    Text.muted "Why are we asking?" onTap={helpOpen=!helpOpen}
+    if helpOpen
+      Text.caption "{help}"
+
+define CurrencyInput "label" bind=value help=""
+  state value=0
+  state helpOpen=false
+  Column gap=4
+    Text.fieldLabel "{label}"
+    Row gap=8 middle
+      Text.strong "$"
+      Input type=number bind=value grow
+    Text.caption "{money(value,'$',2)}"
+    Text.muted "What is this?" onTap={helpOpen=!helpOpen}
+    if helpOpen
+      Text.caption "{help}"
+
+// A real signature capture surface is not possible; shown as a labelled box.
+define SignaturePad bind=strokes h=160 onChange
+  state strokes=[]
+  Box h={h} radius=8 border=1 fill=#FFFAFAFA center middle onTap={strokes=append(strokes,"stroke"); onChange(strokes)}
+    Text.muted "Signature pad"

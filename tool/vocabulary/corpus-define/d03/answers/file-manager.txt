@@ -1,0 +1,170 @@
+### Files
+state cwd="root"
+state view="list"
+state sortCol="name"
+state sortDesc=false
+state sel=[]
+state anchor=""
+state renaming=""
+state draftName=""
+state clip=[]
+state clipMode=""
+state trash=[]
+state lastDeleted=[]
+state q=""
+state kind="all"
+state when="any"
+state ctxId=""
+state target=""
+state uploads=[{"id":"u1","name":"Q3-report.pdf","pct":0.72},{"id":"u2","name":"holiday.mov","pct":0.18}]
+state used=64.2
+state quota=100
+state expanded=["root","docs"]
+state files=[{"id":"root","name":"My files","kind":"folder","parent":"","size":0,"modified":"2026-11-10","type":"folder"},{"id":"docs","name":"Documents","kind":"folder","parent":"root","size":0,"modified":"2026-11-14","type":"folder"},{"id":"pics","name":"Pictures","kind":"folder","parent":"root","size":0,"modified":"2026-11-02","type":"folder"},{"id":"work","name":"Work","kind":"folder","parent":"docs","size":0,"modified":"2026-11-12","type":"folder"},{"id":"f1","name":"Q3-report.pdf","kind":"file","parent":"root","size":2400,"modified":"2026-11-16","type":"pdf"},{"id":"f2","name":"budget.xlsx","kind":"file","parent":"root","size":880,"modified":"2026-11-15","type":"sheet"},{"id":"f3","name":"beach.jpg","kind":"file","parent":"root","size":3100,"modified":"2026-10-28","type":"image"},{"id":"f4","name":"notes.txt","kind":"file","parent":"root","size":4,"modified":"2026-09-30","type":"text"},{"id":"f5","name":"launch-plan.docx","kind":"file","parent":"root","size":410,"modified":"2026-11-09","type":"doc"}]
+every 1s when length(uploads) > 0 onTick={uploads=filter(map(uploads,u=>with(u,"pct",min(1,u.pct+0.05))),u=>u.pct<1)}
+App
+  Sidebar
+    Brand "Shelf" icon="folder_open"
+    FileTree items={filter(files,f=>f.kind=="folder")} bind=cwd expanded={expanded} onSelect={cwd=result; sel=[]} onToggle={expanded=contains(expanded,result) ? without(expanded,result) : append(expanded,result)} drop=file onDrop={files=updateWhere(files,f=>contains(sel,f.id),f=>with(f,"parent",result.target))}
+    NavItem "Trash" icon="delete" badge="{length(trash)}" onTap={open trashSheet}
+    Spacer grow
+    Column gap=6
+      Row between
+        Text.small "Storage"
+        Text.small "{used} of {quota} GB"
+      ProgressBar value={used/quota}
+      Button.outline "Upgrade" onTap={emit upgrade}
+  Main
+    Nav
+      Breadcrumb items={map(files,f=>f)} current={cwd} onNavigate={cwd=result; sel=[]}
+      Row gap=8
+        Input "Search" "Search files" bind=q w=220
+        Select "Type" items=["all","image","pdf","doc","sheet","text","folder"] bind=kind
+        Select "Modified" items=["any","today","7 days","30 days"] bind=when
+        SegmentedButton items=["list","grid"] bind=view
+        Button "Upload" icon="upload" onTap={uploads=append(uploads,{"id":"u{length(uploads)+1}","name":"new-file.zip","pct":0}); toast "Upload started"}
+    Column gap=0 grow
+      if length(sel) > 0
+        Row between pad=[16,8,16,8] fill=#FFE8F0FE
+          Text.strong "{length(sel)} selected"
+          Row gap=8
+            Button.ghost "Cut" icon="content_cut" onTap={clip=sel; clipMode="cut"}
+            Button.ghost "Copy" icon="content_copy" onTap={clip=sel; clipMode="copy"; toast "Copied"}
+            Button.ghost "Share" icon="share" onTap={open shareDlg}
+            Button.ghost "Delete" icon="delete" onTap={lastDeleted=filter(files,f=>contains(sel,f.id)); trash=concat(trash,lastDeleted); files=removeWhere(files,f=>contains(sel,f.id)); sel=[]; toast "Moved to trash. Undo from the Trash sheet"}
+      Marquee onSelect={sel=result.ids}
+        if view=="list"
+          Row pad=[16,8,16,8] border-bottom=#FFE5E7EB
+            Row grow gap=4 onTap={sortDesc=sortCol=="name" ? !sortDesc : false; sortCol="name"}
+              Text.strong "Name"
+              Icon "{sortCol=='name' ? (sortDesc ? 'arrow_downward' : 'arrow_upward') : 'unfold_more'}"
+            Row w=90 gap=4 onTap={sortDesc=sortCol=="size" ? !sortDesc : false; sortCol="size"}
+              Text.strong "Size"
+              Icon "{sortCol=='size' ? (sortDesc ? 'arrow_downward' : 'arrow_upward') : 'unfold_more'}"
+            Row w=110 gap=4 onTap={sortDesc=sortCol=="modified" ? !sortDesc : false; sortCol="modified"}
+              Text.strong "Modified"
+              Icon "{sortCol=='modified' ? (sortDesc ? 'arrow_downward' : 'arrow_upward') : 'unfold_more'}"
+          each f in (sortDesc ? reverse(sortBy(filter(files,x=>x.parent==cwd && (q=="" || contains(lower(x.name),lower(q))) && (kind=="all" || x.type==kind)),x=>sortCol=="name" ? lower(x.name) : (sortCol=="size" ? x.size : x.modified))) : sortBy(filter(files,x=>x.parent==cwd && (q=="" || contains(lower(x.name),lower(q))) && (kind=="all" || x.type==kind)),x=>sortCol=="name" ? lower(x.name) : (sortCol=="size" ? x.size : x.modified)))
+            Row pad=[16,8,16,8] gap=8 middle fill={contains(sel,f.id) ? "#FFE8F0FE" : "#00FFFFFF"} drag=file(f.id) drop={f.kind=="folder" ? "file" : ""} menu=fileMenu onDrop={files=updateWhere(files,x=>contains(sel,x.id) || x.id==result.data,x=>with(x,"parent",f.id)); toast "Moved to {f.name}"} onTap={result.shift ? sel=map(slice(files,min(indexOf(files,find(files,x=>x.id==anchor)),indexOf(files,f)),max(indexOf(files,find(files,x=>x.id==anchor)),indexOf(files,f))+1),x=>x.id) : (result.ctrl ? sel=(contains(sel,f.id) ? without(sel,f.id) : append(sel,f.id)) : sel=[f.id]); anchor=f.id} onDoubleTap={f.kind=="folder" ? cwd=f.id : emit open f.id} onRightClick={ctxId=f.id; sel=contains(sel,f.id) ? sel : [f.id]}
+              Icon "{f.kind=='folder' ? 'folder' : 'description'}"
+              if renaming==f.id
+                Input "Name" bind=draftName grow onSubmit={files=updateWhere(files,x=>x.id==f.id,x=>with(x,"name",draftName)); renaming=""} onBlur={renaming=""}
+              if renaming!=f.id
+                Text.strong "{f.name}" grow onDoubleTap={renaming=f.id; draftName=f.name}
+              Text.muted "{f.kind=='folder' ? '-' : f.size + ' KB'}" w=90
+              Text.muted "{formatDate(f.modified,'MMM d')}" w=110
+        if view=="grid"
+          Grid cols=4 gap=16 pad=16
+            each f in sortBy(filter(files,x=>x.parent==cwd && (q=="" || contains(lower(x.name),lower(q))) && (kind=="all" || x.type==kind)),x=>lower(x.name))
+              Card gap=6 center fill={contains(sel,f.id) ? "#FFE8F0FE" : "#FFFFFFFF"} drag=file(f.id) drop={f.kind=="folder" ? "file" : ""} menu=fileMenu onDrop={files=updateWhere(files,x=>contains(sel,x.id) || x.id==result.data,x=>with(x,"parent",f.id))} onTap={result.ctrl ? sel=(contains(sel,f.id) ? without(sel,f.id) : append(sel,f.id)) : sel=[f.id]; anchor=f.id} onRightClick={ctxId=f.id}
+                Icon "{f.kind=='folder' ? 'folder' : 'description'}" size=48
+                Text.strong "{f.name}" center
+                Text.caption "{formatDate(f.modified,'MMM d')}"
+        if length(filter(files,x=>x.parent==cwd)) == 0
+          EmptyState "This folder is empty" "Drop files here or press Upload"
+    UploadTray items={uploads} onCancel={uploads=removeWhere(uploads,u=>u.id==result)}
+  Pane w=300 pad=16 gap=12
+    if length(sel) == 1
+      Heading "{find(files,f=>f.id==sel[0]).name}" level=3
+      Image "https://picsum.photos/seed/shelf/280/180" h=160 radius=8
+      FileMetadataCard name={find(files,f=>f.id==sel[0]).name} size="{find(files,f=>f.id==sel[0]).size} KB" modified={find(files,f=>f.id==sel[0]).modified} owner="You"
+      Row gap=8
+        Button "Open" onTap={emit open sel[0]}
+        Button.outline "Share" onTap={open shareDlg}
+        DownloadButton "Download" onTap={emit download sel[0]}
+    if length(sel) != 1
+      Text.muted "Select one file to preview it"
+Menu#fileMenu
+  MenuItem "Open" icon="open_in_new" onTap={emit open ctxId}
+  MenuItem "Rename" icon="edit" onTap={renaming=ctxId; draftName=find(files,f=>f.id==ctxId).name}
+  MenuItem "Cut" icon="content_cut" onTap={clip=sel; clipMode="cut"}
+  MenuItem "Copy" icon="content_copy" onTap={clip=sel; clipMode="copy"; toast "Copied"}
+  MenuItem "Paste" icon="content_paste" onTap={files=clipMode=="cut" ? updateWhere(files,f=>contains(clip,f.id),f=>with(f,"parent",cwd)) : concat(files,map(filter(files,f=>contains(clip,f.id)),f=>with(with(f,"id",f.id+"-copy"),"parent",cwd))); clip=[]}
+  MenuItem "Share" icon="share" onTap={open shareDlg}
+  MenuItem "Delete" icon="delete" onTap={lastDeleted=filter(files,f=>contains(sel,f.id)); trash=concat(trash,lastDeleted); files=removeWhere(files,f=>contains(sel,f.id)); sel=[]; toast "Moved to trash"}
+Dialog#shareDlg "Share" "Anyone with the link can view"
+  Input "Add people" "name@example.com" bind=shareWith
+  Select "Access" items=["Can view","Can edit"] bind=access
+  Row between
+    Button.outline "Copy link" onTap={copy "https://shelf.app/s/k29fj"; toast "Link copied"}
+    Button "Done" onTap={emit share sel; close}
+Sheet#trashSheet "Trash"
+  if length(trash) == 0
+    Text.muted "Trash is empty"
+  each t in trash
+    Row between middle
+      Text "{t.name}"
+      Button.ghost "Restore" onTap={files=append(files,t); trash=without(trash,t); toast "Restored"}
+  Row gap=8
+    Button.outline "Undo last delete" onTap={files=concat(files,lastDeleted); trash=filter(trash,t=>!contains(map(lastDeleted,d=>d.id),t.id)); lastDeleted=[]; close}
+    Button.destructive "Empty trash" onTap={trash=[]; close}
+
+### Search results
+state q="report"
+state kind="all"
+state when="30 days"
+state results=[{"id":"r1","name":"Q3-report.pdf","path":"My files","type":"pdf","modified":"2026-11-16","size":2400},{"id":"r2","name":"annual-report-2025.pdf","path":"My files / Documents","type":"pdf","modified":"2026-02-20","size":5200},{"id":"r3","name":"report-draft.docx","path":"My files / Work","type":"doc","modified":"2026-11-03","size":310}]
+state picked=""
+Page
+  Nav
+    Brand "Shelf" icon="folder_open"
+    Row gap=8
+      Input "Search" bind=q w=320
+      Button "Back to files" onTap={go files}
+  Section
+    Row gap=12
+      Select "Type" items=["all","image","pdf","doc","sheet","text","folder"] bind=kind
+      Select "Modified" items=["any","today","7 days","30 days","this year"] bind=when
+      DateRangePicker bind=range
+      Button.ghost "Clear" onTap={kind="all"; when="any"; q=""}
+    Text.muted "{length(filter(results,r=>(kind=='all' || r.type==kind) && contains(lower(r.name),lower(q))))} results for \"{q}\""
+    Card gap=0
+      each r in filter(results,r=>(kind=="all" || r.type==kind) && contains(lower(r.name),lower(q)))
+        Row gap=12 middle pad=12 border-bottom=#FFE5E7EB onTap={picked=r.id}
+          IconTile "description"
+          Column grow gap=2
+            Text.strong "{r.name}"
+            Text.caption "{r.path}"
+          Text.muted "{formatDate(r.modified,'MMM d')}" w=90
+          Text.muted "{r.size} KB" w=90
+          IconButton "more_vert" tooltip="More" onTap={picked=r.id; open resultMenu}
+Menu#resultMenu end
+  MenuItem "Show in folder" icon="folder_open" onTap={go files}
+  MenuItem "Share" icon="share" onTap={emit share picked}
+  MenuItem "Delete" icon="delete" onTap={results=removeWhere(results,r=>r.id==picked); toast "Moved to trash"}
+
+// A rubber-band selection area; shown here as a plain column, the drag-rectangle itself needs pointer geometry.
+define Marquee onSelect
+  Column grow
+    ...
+
+define UploadTray items=[] onCancel
+  if length(items) > 0
+    Card gap=8 pad=12 fill=#FFFFFFFF
+      Text.strong "Uploading {length(items)} file(s)"
+      each u in items
+        Row gap=8 middle
+          Text.small "{u.name}" grow
+          Progress {u.pct} w=120
+          Text.caption "{round(u.pct*100,0)}%"
+          IconButton "close" tooltip="Cancel" onTap={onCancel(u.id)}

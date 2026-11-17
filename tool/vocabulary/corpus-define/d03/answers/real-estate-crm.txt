@@ -1,0 +1,268 @@
+### Pipeline
+state stages=["Lead","Qualified","Viewing","Offer","Closed"]
+state deals=[{"id":1,"client":"Priya Natarajan","address":"42 Alder Lane","value":685000,"stage":"Lead","days":2},{"id":2,"client":"Marcus Bell","address":"9 Harbor View #5C","value":420000,"stage":"Lead","days":6},{"id":3,"client":"Elena Rossi","address":"118 Birchwood Ct","value":912000,"stage":"Qualified","days":4},{"id":4,"client":"The Okafor family","address":"27 Mill Street","value":560000,"stage":"Viewing","days":1},{"id":5,"client":"Tom Whitaker","address":"301 Ridge Road","value":745000,"stage":"Offer","days":3},{"id":6,"client":"Aiko Tanaka","address":"15 Willow Park","value":498000,"stage":"Closed","days":9}]
+state q=""
+App
+  Sidebar
+    Brand "Keystone" icon="vpn_key"
+    NavItem "Pipeline" icon="view_kanban" selected={true}
+    NavItem "Contacts" icon="people" onTap={go contact}
+    NavItem "Properties" icon="home_work" onTap={go property}
+    NavItem "Follow-ups" icon="task_alt" badge="5" onTap={go followups}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Whitfield" size=32
+      Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "Pipeline" level=1
+      Row gap=8
+        Input "Search deals" bind=q w=220
+        Button.outline "Log a call" icon="call" onTap={open calllog}
+        Button "New deal" icon="add" onTap={open newdeal}
+    Column pad=24 gap=16
+      Row gap=24
+        InlineStat "Open deals" "{count(deals,d=>d.stage!="Closed")}"
+        InlineStat "Pipeline value" "{money(sum(filter(deals,d=>d.stage!="Closed"),d=>d.value),"$",0)}"
+        InlineStat "Closed" "{money(sum(filter(deals,d=>d.stage=="Closed"),d=>d.value),"$",0)}"
+      Row scroll gap=12 top
+        each stage in stages
+          Column w=260 gap=8 pad=8 fill=#FFF3F4F6 radius=8 drop=deal onDrop={deals=updateWhere(deals,d=>d.id==result.data,d=>with(d,"stage",stage))}
+            Row between middle
+              Row gap=8 middle
+                Text.strong "{stage}"
+                CountBadge "{count(deals,d=>d.stage==stage)}"
+              Text.muted "{money(sum(filter(deals,d=>d.stage==stage),d=>d.value),"$",0)}"
+            each deal in filter(deals,d=>d.stage==stage && (q=="" || contains(lower(d.client),lower(q)) || contains(lower(d.address),lower(q))))
+              DealCard client="{deal.client}" address="{deal.address}" value={deal.value} days={deal.days} drag=deal(deal.id) onTap={go contact}
+            if count(deals,d=>d.stage==stage)==0
+              Text.muted "Drop a deal here" center
+
+Dialog#newdeal "New deal" "Add a client and a property to the pipeline"
+  state nclient=""
+  state naddress=""
+  state nvalue=0
+  Input "Client" bind=nclient
+  Input "Property address" bind=naddress
+  Input "Asking price" type=number bind=nvalue
+  Row end gap=8
+    Button.outline "Cancel" onTap={close}
+    Button "Add deal" onTap={nclient=="" ? toast "Enter a client name" : {deals=append(deals,{"id":length(deals)+1,"client":nclient,"address":naddress,"value":nvalue,"stage":"Lead","days":0}); toast "Deal added"; close}}
+
+Dialog#calllog "Log a call" "Record what was said and what happens next"
+  state outcome=""
+  state notes=""
+  state nextdue=""
+  Text.fieldLabel "Outcome"
+  Row gap=8
+    ChoiceChip "Reached" selected={outcome=="Reached"} onTap={outcome="Reached"}
+    ChoiceChip "Left voicemail" selected={outcome=="Left voicemail"} onTap={outcome="Left voicemail"}
+    ChoiceChip "No answer" selected={outcome=="No answer"} onTap={outcome="No answer"}
+    ChoiceChip "Wants a viewing" selected={outcome=="Wants a viewing"} onTap={outcome="Wants a viewing"}
+  Input "Notes" multiline bind=notes
+  DatePicker "Next action due" bind=nextdue
+  Row end gap=8
+    Button.outline "Cancel" onTap={close}
+    Button "Save call" onTap={outcome=="" ? toast "Pick an outcome" : {emit callLogged outcome; toast "Call logged"; outcome=""; notes=""; close}}
+
+### Contact
+state tags=["Buyer","Pre-approved","Downsizing"]
+state newtag=""
+state filter="All"
+state done=false
+state events=[{"id":1,"kind":"call","title":"Call, 12 min","detail":"Confirmed budget up to 700k, wants a garden.","date":"Nov 12"},{"id":2,"kind":"email","title":"Sent 3 listings","detail":"Alder Lane, Mill Street and Ridge Road.","date":"Nov 13"},{"id":3,"kind":"viewing","title":"Viewing at 42 Alder Lane","detail":"Liked the kitchen, worried about the road noise.","date":"Nov 15"},{"id":4,"kind":"call","title":"Call, 4 min","detail":"Left voicemail about a second viewing.","date":"Nov 16"}]
+App
+  Sidebar
+    Brand "Keystone" icon="vpn_key"
+    NavItem "Pipeline" icon="view_kanban" onTap={go pipeline}
+    NavItem "Contacts" icon="people" selected={true}
+    NavItem "Properties" icon="home_work" onTap={go property}
+    NavItem "Follow-ups" icon="task_alt" badge="5" onTap={go followups}
+  Main
+    Nav
+      Row gap=12 middle
+        BackButton onTap={go pipeline}
+        Heading "Priya Natarajan" level=1
+      Row gap=8
+        IconButton "mail" tooltip="Email Priya" onTap={emit email}
+        Button.outline "Log a call" icon="call" onTap={open calllog}
+        Button "Schedule viewing" icon="event" onTap={go property}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Column grow gap=16
+          Card gap=12
+            Row between middle
+              Text.strong "Timeline"
+              SegmentedControl bind=filter items=["All","call","email","viewing"]
+            Timeline
+              each ev in filter(events,e=>filter=="All" || e.kind==filter)
+                TimelineItem "{ev.title}" "{ev.detail}" date="{ev.date}" icon={ev.kind=="call" ? "call" : ev.kind=="email" ? "mail" : "home"}
+        Column w=320 gap=16
+          Card gap=8
+            Text.strong "Next action"
+            Row between middle
+              Column gap=2
+                Text "Offer a second viewing at Alder Lane" strike={done}
+                Text.muted "Due Thu, Nov 19"
+              Checkbox bind=done onChange={done ? toast "Marked done" : toast "Reopened"}
+            Button.outline "Change due date" onTap={open due}
+          Card gap=8
+            Text.strong "Contact"
+            Row gap=8 middle
+              Icon "call"
+              Text "(555) 014-2290"
+            Row gap=8 middle
+              Icon "mail"
+              Text "priya.n@example.com"
+            Row gap=8 middle
+              Icon "payments"
+              Text "Budget 650k to 700k"
+          Card gap=8
+            Text.strong "Tags"
+            Row gap=8
+              each tag in tags
+                Chip "{tag}" removable onTap={tags=without(tags,tag)}
+            Row gap=8
+              Input "Add a tag" bind=newtag
+              Button.outline "Add" onTap={newtag=="" ? toast "Type a tag" : {tags=append(tags,newtag); newtag=""}}
+
+Dialog#due "Next action due" "When should Keystone remind you?"
+  state due=""
+  DatePicker "Due date" bind=due
+  Row end gap=8
+    Button.outline "Cancel" onTap={close}
+    Button "Save" onTap={toast "Due date updated"; close}
+
+Dialog#calllog "Log a call" "Record what was said and what happens next"
+  state outcome=""
+  state notes=""
+  Text.fieldLabel "Outcome"
+  Row gap=8
+    ChoiceChip "Reached" selected={outcome=="Reached"} onTap={outcome="Reached"}
+    ChoiceChip "Left voicemail" selected={outcome=="Left voicemail"} onTap={outcome="Left voicemail"}
+    ChoiceChip "No answer" selected={outcome=="No answer"} onTap={outcome="No answer"}
+    ChoiceChip "Wants a viewing" selected={outcome=="Wants a viewing"} onTap={outcome="Wants a viewing"}
+  Input "Notes" multiline bind=notes
+  Row end gap=8
+    Button.outline "Cancel" onTap={close}
+    Button "Save call" onTap={outcome=="" ? toast "Pick an outcome" : {events=append(events,{"id":length(events)+1,"kind":"call","title":"Call, {outcome}","detail":notes,"date":formatDate(today(),"MMM d")}); outcome=""; notes=""; toast "Call logged"; close}}
+
+### Property
+state day=0
+state slot=""
+state viewings=[{"day":1,"time":"10:00","who":"Priya Natarajan"},{"day":3,"time":"14:30","who":"The Okafor family"}]
+state times=["09:00","10:00","11:30","14:30","16:00"]
+state buyer="Priya Natarajan"
+App
+  Sidebar
+    Brand "Keystone" icon="vpn_key"
+    NavItem "Pipeline" icon="view_kanban" onTap={go pipeline}
+    NavItem "Contacts" icon="people" onTap={go contact}
+    NavItem "Properties" icon="home_work" selected={true}
+    NavItem "Follow-ups" icon="task_alt" badge="5" onTap={go followups}
+  Main
+    Nav
+      Row gap=12 middle
+        BackButton onTap={go pipeline}
+        Heading "42 Alder Lane" level=1
+      Row gap=8
+        Badge.success "Active"
+        Button.outline "Share listing" icon="share" onTap={toast "Link copied"}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Column grow gap=16
+          Card gap=12
+            Pages bind=photo h=220 peek=0.9
+              Image "https://images.example.com/alder-front.jpg"
+              Image "https://images.example.com/alder-kitchen.jpg"
+              Image "https://images.example.com/alder-garden.jpg"
+            Dots bind=photo count=3
+            Row between
+              Heading "$685,000" level=3
+              Text.muted "4 bed, 2 bath, 2,150 sq ft"
+            Text.muted "Renovated 1960s family home with a south-facing garden, new kitchen and a double garage."
+          Card gap=12
+            Text.strong "Schedule a viewing"
+            WeekStrip bind=day start={today()}
+            Text.fieldLabel "Time"
+            Row gap=8
+              each t in times
+                ChoiceChip "{t}" selected={slot==t} disabled={any(viewings,v=>v.day==day && v.time==t)} onTap={slot=t}
+            Select "Buyer" items=["Priya Natarajan","The Okafor family","Marcus Bell","Elena Rossi"] bind=buyer
+            Button "Book viewing" onTap={slot=="" ? toast "Pick a time" : {viewings=append(viewings,{"day":day,"time":slot,"who":buyer}); toast "Viewing booked for {slot}"; slot=""}}
+        Column w=320 gap=16
+          Card gap=8
+            Text.strong "Viewings this day"
+            if count(viewings,v=>v.day==day)==0
+              Text.muted "Nothing booked."
+            each v in sortBy(filter(viewings,v=>v.day==day),v=>v.time)
+              Row between middle
+                Column gap=2
+                  Text.strong "{v.time}"
+                  Text.muted "{v.who}"
+                IconButton "close" tooltip="Cancel viewing" onTap={viewings=removeWhere(viewings,x=>x.day==v.day && x.time==v.time)}
+          Card gap=8
+            Text.strong "Owner"
+            Row gap=8 middle
+              Avatar "Graham Pierce" size=40
+              Column gap=2
+                Text "Graham Pierce"
+                Text.muted "Lists through Keystone since June"
+
+### Follow-ups
+state tasks=[{"id":1,"who":"Priya Natarajan","what":"Offer a second viewing at Alder Lane","due":"Today","done":false},{"id":2,"who":"Tom Whitaker","what":"Send the counter-offer draft","due":"Today","done":false},{"id":3,"who":"Marcus Bell","what":"Ask about mortgage pre-approval","due":"Today","done":true},{"id":4,"who":"Elena Rossi","what":"Share school catchment map","due":"Tomorrow","done":false},{"id":5,"who":"The Okafor family","what":"Confirm Saturday viewing","due":"Tomorrow","done":false}]
+state show="Open"
+state newtask=""
+App
+  Sidebar
+    Brand "Keystone" icon="vpn_key"
+    NavItem "Pipeline" icon="view_kanban" onTap={go pipeline}
+    NavItem "Contacts" icon="people" onTap={go contact}
+    NavItem "Properties" icon="home_work" onTap={go property}
+    NavItem "Follow-ups" icon="task_alt" badge="{count(tasks,t=>!t.done)}" selected={true}
+  Main
+    Nav
+      Heading "Today's follow-ups" level=1
+      SegmentedButton bind=show items=["Open","Done","All"]
+    Column pad=24 gap=16
+      Row gap=8
+        Input "Add a follow-up" bind=newtask grow
+        Button "Add" onTap={newtask=="" ? toast "Describe the follow-up" : {tasks=append(tasks,{"id":length(tasks)+1,"who":"General","what":newtask,"due":"Today","done":false}); newtask=""}}
+      Progress {count(tasks,t=>t.done)/length(tasks)}
+      Text.muted "{count(tasks,t=>t.done)} of {length(tasks)} done"
+      Card gap=4
+        each task in filter(tasks,t=>show=="All" || (show=="Done" && t.done) || (show=="Open" && !t.done))
+          Row between middle
+            Row gap=12 middle
+              Checkbox bind=task.done
+              Column gap=2
+                Text "{task.what}" strike={task.done}
+                Text.muted "{task.who}"
+            Row gap=8 middle
+              Badge.warning "{task.due}"
+              IconButton "call" tooltip="Log a call" onTap={open calllog}
+              IconButton "delete" tooltip="Remove" onTap={tasks=removeWhere(tasks,t=>t.id==task.id)}
+        if count(tasks,t=>show=="All" || (show=="Done" && t.done) || (show=="Open" && !t.done))==0
+          Text.muted "Nothing here. Enjoy the quiet." center
+
+Dialog#calllog "Log a call" "Record what was said and what happens next"
+  state outcome=""
+  state notes=""
+  Text.fieldLabel "Outcome"
+  Row gap=8
+    ChoiceChip "Reached" selected={outcome=="Reached"} onTap={outcome="Reached"}
+    ChoiceChip "Left voicemail" selected={outcome=="Left voicemail"} onTap={outcome="Left voicemail"}
+    ChoiceChip "No answer" selected={outcome=="No answer"} onTap={outcome="No answer"}
+    ChoiceChip "Wants a viewing" selected={outcome=="Wants a viewing"} onTap={outcome="Wants a viewing"}
+  Input "Notes" multiline bind=notes
+  Row end gap=8
+    Button.outline "Cancel" onTap={close}
+    Button "Save call" onTap={outcome=="" ? toast "Pick an outcome" : {toast "Call logged"; outcome=""; notes=""; close}}
+
+define DealCard client="" address="" value=0 days=0 onTap
+  Card gap=4 pad=12 onTap={onTap}
+    Row between middle
+      Text.strong "{client}"
+      Text.muted "{days}d"
+    Text.muted "{address}"
+    Text.strong "{money(value,"$",0)}"

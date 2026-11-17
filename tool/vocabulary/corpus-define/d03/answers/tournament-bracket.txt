@@ -1,0 +1,221 @@
+### Bracket
+state follow="Brazil"
+state r1=[{"a":"Brazil","b":"Japan","sa":"","sb":""},{"a":"France","b":"Morocco","sa":"","sb":""},{"a":"Argentina","b":"Australia","sa":"","sb":""},{"a":"England","b":"Senegal","sa":"","sb":""},{"a":"Spain","b":"Korea","sa":"","sb":""},{"a":"Netherlands","b":"USA","sa":"","sb":""},{"a":"Portugal","b":"Switzerland","sa":"","sb":""},{"a":"Germany","b":"Croatia","sa":"","sb":""}]
+state s2=[{"sa":"","sb":""},{"sa":"","sb":""},{"sa":"","sb":""},{"sa":"","sb":""}]
+state s3=[{"sa":"","sb":""},{"sa":"","sb":""}]
+state s4=[{"sa":"","sb":""}]
+state w1=["TBD","TBD","TBD","TBD","TBD","TBD","TBD","TBD"]
+state w2=["TBD","TBD","TBD","TBD"]
+state w3=["TBD","TBD"]
+state champ="TBD"
+every 300 onTick={w1=map(r1,m=>m.sa==""||m.sb==""?"TBD":(m.sa>m.sb?m.a:m.b)); w2=map(range(4),i=>s2[i].sa==""||s2[i].sb==""?"TBD":(s2[i].sa>s2[i].sb?w1[2*i]:w1[2*i+1])); w3=map(range(2),i=>s3[i].sa==""||s3[i].sb==""?"TBD":(s3[i].sa>s3[i].sb?w2[2*i]:w2[2*i+1])); champ=s4[0].sa==""||s4[0].sb==""?"TBD":(s4[0].sa>s4[0].sb?w3[0]:w3[1])}
+App
+  Sidebar
+    Brand "Knockout" icon="emoji_events"
+    NavItem "Bracket" icon="account_tree" selected={true}
+    NavItem "Groups" icon="table_chart" onTap={go groups}
+    NavItem "Fixtures" icon="calendar_month" onTap={go fixtures}
+    NavItem "Live match" icon="sports_soccer" badge="LIVE" onTap={go match}
+    Spacer grow
+    Text.muted "Following"
+    Row gap=8 middle
+      Icon "star"
+      Text.strong "{follow}"
+  Main
+    Nav
+      Heading "Round of 16 bracket" level=1
+      Row gap=8 middle
+        Select "Follow a team" bind=follow items=["Brazil","France","Argentina","England","Spain","Netherlands","Portugal","Germany","Japan","Morocco","Australia","Senegal","Korea","USA","Switzerland","Croatia"]
+        Button.outline "Clear scores" onTap={r1=map(r1,m=>with(with(m,"sa",""),"sb","")); s2=map(s2,m=>with(with(m,"sa",""),"sb","")); s3=map(s3,m=>with(with(m,"sa",""),"sb","")); s4=map(s4,m=>with(with(m,"sa",""),"sb",""))}
+    Column pad=24 gap=16
+      Row between middle
+        Text.muted "Enter a score and the winner moves on. Your team's path is outlined."
+        if champ!="TBD"
+          Badge.success "Champion: {champ}"
+      Row scroll top gap=0
+        Column gap=16 w=200
+          Text.caption "ROUND OF 16"
+          each m in r1
+            BracketTie a={m.a} b={m.b} sa={m.sa} sb={m.sb} mine={m.a==follow||m.b==follow} onScoreA={r1=setAt(r1,index,with(m,"sa",result))} onScoreB={r1=setAt(r1,index,with(m,"sb",result))}
+        Column pad=[0,60,0,0] gap=88
+          each i in range(4)
+            Elbow h=88
+        Column pad=[0,44,0,0] gap=104 w=200
+          Text.caption "QUARTERFINALS"
+          each m in s2
+            BracketTie a={w1[2*index]} b={w1[2*index+1]} sa={m.sa} sb={m.sb} mine={w1[2*index]==follow||w1[2*index+1]==follow} onScoreA={s2=setAt(s2,index,with(m,"sa",result))} onScoreB={s2=setAt(s2,index,with(m,"sb",result))}
+        Column pad=[0,104,0,0] gap=176
+          each i in range(2)
+            Elbow h=176
+        Column pad=[0,132,0,0] gap=280 w=200
+          Text.caption "SEMIFINALS"
+          each m in s3
+            BracketTie a={w2[2*index]} b={w2[2*index+1]} sa={m.sa} sb={m.sb} mine={w2[2*index]==follow||w2[2*index+1]==follow} onScoreA={s3=setAt(s3,index,with(m,"sa",result))} onScoreB={s3=setAt(s3,index,with(m,"sb",result))}
+        Column pad=[0,192,0,0]
+          Elbow h=352
+        Column pad=[0,308,0,0] gap=8 w=200
+          Text.caption "FINAL"
+          BracketTie a={w3[0]} b={w3[1]} sa={s4[0].sa} sb={s4[0].sb} mine={w3[0]==follow||w3[1]==follow} onScoreA={s4=[with(s4[0],"sa",result)]} onScoreB={s4=[with(s4[0],"sb",result)]}
+
+// a line joining two ties into the one they feed
+define Elbow h=88 color=#FF9CA3AF
+  Box w=24 h={h} border-top={1} border-right={1} border-bottom={1} border-color={color}
+
+// one match of a bracket: two teams, two score boxes, outlined when it is on the followed team's path
+define BracketTie "title" a="TBD" b="TBD" sa="" sb="" mine=false onScoreA onScoreB
+  Card gap=4 pad=8 h=72 border={mine ? 2 : 1} fill={mine ? #FFFEF3C7 : #FFFFFFFF}
+    Row between middle
+      Text.strong "{a}"
+      Input type=number w=48 value={sa} disabled={a=="TBD"||b=="TBD"} onChange={onScoreA(result)}
+    Row between middle
+      Text.strong "{b}"
+      Input type=number w=48 value={sb} disabled={a=="TBD"||b=="TBD"} onChange={onScoreB(result)}
+
+### Groups
+state follow="Brazil"
+state grp="A"
+state fx=[{"g":"A","h":"Brazil","a":"Serbia","hs":2,"as":0},{"g":"A","h":"Switzerland","a":"Cameroon","hs":1,"as":0},{"g":"A","h":"Brazil","a":"Switzerland","hs":1,"as":1},{"g":"A","h":"Cameroon","a":"Serbia","hs":3,"as":3},{"g":"A","h":"Serbia","a":"Switzerland","hs":"","as":""},{"g":"A","h":"Cameroon","a":"Brazil","hs":"","as":""},{"g":"B","h":"France","a":"Australia","hs":4,"as":1},{"g":"B","h":"Denmark","a":"Tunisia","hs":0,"as":0},{"g":"B","h":"France","a":"Denmark","hs":2,"as":1},{"g":"B","h":"Tunisia","a":"Australia","hs":0,"as":1},{"g":"B","h":"Tunisia","a":"France","hs":"","as":""},{"g":"B","h":"Australia","a":"Denmark","hs":"","as":""}]
+state teams=[{"g":"A","n":"Brazil"},{"g":"A","n":"Switzerland"},{"g":"A","n":"Cameroon"},{"g":"A","n":"Serbia"},{"g":"B","n":"France"},{"g":"B","n":"Australia"},{"g":"B","n":"Denmark"},{"g":"B","n":"Tunisia"}]
+App
+  Sidebar
+    Brand "Knockout" icon="emoji_events"
+    NavItem "Bracket" icon="account_tree" onTap={go bracket}
+    NavItem "Groups" icon="table_chart" selected={true}
+    NavItem "Fixtures" icon="calendar_month" onTap={go fixtures}
+    NavItem "Live match" icon="sports_soccer" badge="LIVE" onTap={go match}
+  Main
+    Nav
+      Heading "Group stage" level=1
+      SegmentedButton bind=grp items=["A","B"]
+    Column pad=24 gap=16
+      Card gap=8
+        Text.strong "Group {grp}"
+        Row gap=8
+          Text.caption "#" w=24
+          Text.caption "Team" grow
+          Text.caption "P" w=32
+          Text.caption "W" w=32
+          Text.caption "D" w=32
+          Text.caption "L" w=32
+          Text.caption "GD" w=40
+          Text.caption "Pts" w=40
+        Divider
+        each t in sortByDesc(filter(teams,x=>x.g==grp),x=>sum(filter(fx,f=>f.g==grp&&f.hs!=""&&(f.h==x.n||f.a==x.n)),f=>(f.h==x.n?(f.hs>f.as?3:(f.hs==f.as?1:0)):(f.as>f.hs?3:(f.as==f.hs?1:0))))*1000+sum(filter(fx,f=>f.g==grp&&f.hs!=""&&(f.h==x.n||f.a==x.n)),f=>(f.h==x.n?f.hs-f.as:f.as-f.hs)))
+          Row gap=8 middle pad=[0,4,0,4] fill={t.n==follow ? #FFFEF3C7 : #00FFFFFF}
+            Text.muted "{index+1}" w=24
+            Row grow gap=8 middle
+              Icon "star" visible={t.n==follow}
+              Text.strong "{t.n}"
+            Text "{count(fx,f=>f.g==grp&&f.hs!=""&&(f.h==t.n||f.a==t.n))}" w=32
+            Text "{count(fx,f=>f.g==grp&&f.hs!=""&&((f.h==t.n&&f.hs>f.as)||(f.a==t.n&&f.as>f.hs)))}" w=32
+            Text "{count(fx,f=>f.g==grp&&f.hs!=""&&f.hs==f.as&&(f.h==t.n||f.a==t.n))}" w=32
+            Text "{count(fx,f=>f.g==grp&&f.hs!=""&&((f.h==t.n&&f.hs<f.as)||(f.a==t.n&&f.as<f.hs)))}" w=32
+            Text "{sum(filter(fx,f=>f.g==grp&&f.hs!=""&&(f.h==t.n||f.a==t.n)),f=>(f.h==t.n?f.hs-f.as:f.as-f.hs))}" w=40
+            Text.strong "{sum(filter(fx,f=>f.g==grp&&f.hs!=""&&(f.h==t.n||f.a==t.n)),f=>(f.h==t.n?(f.hs>f.as?3:(f.hs==f.as?1:0)):(f.as>f.hs?3:(f.as==f.hs?1:0))))}" w=40
+      Card gap=8
+        Text.strong "Results and remaining matches"
+        each f in fx
+          if f.g==grp
+            Row gap=8 middle between
+              Text.strong "{f.h}"
+              Row gap=8 middle
+                Input type=number w=56 value={f.hs} onChange={fx=updateWhere(fx,x=>x.g==f.g&&x.h==f.h&&x.a==f.a,x=>with(x,"hs",result))}
+                Text.muted "-"
+                Input type=number w=56 value={f.as} onChange={fx=updateWhere(fx,x=>x.g==f.g&&x.h==f.h&&x.a==f.a,x=>with(x,"as",result))}
+              Text.strong "{f.a}"
+        Text.muted "Top two of each group go through to the round of 16."
+
+### Match
+state follow="Brazil"
+state running=true
+state minute=63
+state ha=2
+state aa=1
+state tab="events"
+state events=[{"min":"12'","text":"Goal: Vinicius Jr (Brazil)","icon":"sports_soccer"},{"min":"29'","text":"Yellow card: Tchouameni","icon":"style"},{"min":"41'","text":"Goal: Kolo Muani (France)","icon":"sports_soccer"},{"min":"55'","text":"Substitution: Rodrygo on, Raphinha off","icon":"swap_horiz"},{"min":"61'","text":"Goal: Paqueta (Brazil)","icon":"sports_soccer"}]
+every 1s when running onTick={minute=min(90,minute+1); running=minute<90}
+App
+  Sidebar
+    Brand "Knockout" icon="emoji_events"
+    NavItem "Bracket" icon="account_tree" onTap={go bracket}
+    NavItem "Groups" icon="table_chart" onTap={go groups}
+    NavItem "Fixtures" icon="calendar_month" onTap={go fixtures}
+    NavItem "Live match" icon="sports_soccer" badge="LIVE" selected={true}
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Back to fixtures" onTap={go fixtures}
+        Heading "Quarterfinal 2" level=1
+      Row gap=8
+        Button.outline "Follow Brazil" icon="star" onTap={follow="Brazil"; toast "Following Brazil"}
+        Button.outline "Follow France" icon="star" onTap={follow="France"; toast "Following France"}
+    Column pad=24 gap=16
+      Card gap=12
+        Row between middle
+          Column center gap=4 grow
+            Avatar "Brazil" size=56
+            Text.strong "Brazil"
+          Column center gap=4
+            Row gap=16 middle
+              Text "{ha}" size=56 weight=700
+              Text.muted "-"
+              Text "{aa}" size=56 weight=700
+            Badge.error "LIVE {minute}'"
+            Row gap=8
+              Button.outline "Brazil +" onTap={ha=ha+1; events=append(events,{"min":"{minute}'","text":"Goal: Brazil","icon":"sports_soccer"})}
+              Button.outline "France +" onTap={aa=aa+1; events=append(events,{"min":"{minute}'","text":"Goal: France","icon":"sports_soccer"})}
+              Button.ghost "{running ? 'Pause' : 'Resume'}" onTap={running=!running}
+          Column center gap=4 grow
+            Avatar "France" size=56
+            Text.strong "France"
+        Progress {minute/90}
+      SegmentedButton bind=tab items=["events","lineups"]
+      if tab=="events"
+        Card gap=8
+          Text.strong "Match events"
+          Timeline items={reverse(events)}
+      if tab=="lineups"
+        Grid cols=2 gap=16
+          Lineup "Brazil" formation="4-2-3-1" players=["Alisson","Danilo","Marquinhos","Militao","Telles","Casemiro","Paqueta","Raphinha","Vinicius Jr","Neymar","Richarlison"]
+          Lineup "France" formation="4-3-3" players=["Lloris","Kounde","Varane","Upamecano","Hernandez","Tchouameni","Rabiot","Griezmann","Dembele","Giroud","Mbappe"]
+
+// a team's starting eleven listed with shirt numbers
+define Lineup "team" formation="4-4-2" players=[]
+  Card gap=8
+    Row between
+      Text.strong "{team}"
+      Badge.neutral "{formation}"
+    each p in players
+      Row gap=12 middle
+        Text.muted "{index+1}" w=24
+        Text "{p}"
+
+### Fixtures
+state follow="Brazil"
+state onlyFollowed=false
+state days=[{"day":"Sat 3 Dec","matches":[{"h":"Netherlands","a":"USA","t":"16:00","s":"3 - 1"},{"h":"Argentina","a":"Australia","t":"20:00","s":"2 - 1"}]},{"day":"Sun 4 Dec","matches":[{"h":"France","a":"Poland","t":"16:00","s":"3 - 1"},{"h":"England","a":"Senegal","t":"20:00","s":"3 - 0"}]},{"day":"Mon 5 Dec","matches":[{"h":"Japan","a":"Croatia","t":"16:00","s":"1 - 1"},{"h":"Brazil","a":"Korea","t":"20:00","s":"4 - 1"}]},{"day":"Tue 6 Dec","matches":[{"h":"Morocco","a":"Spain","t":"16:00","s":""},{"h":"Portugal","a":"Switzerland","t":"20:00","s":""}]}]
+App
+  Sidebar
+    Brand "Knockout" icon="emoji_events"
+    NavItem "Bracket" icon="account_tree" onTap={go bracket}
+    NavItem "Groups" icon="table_chart" onTap={go groups}
+    NavItem "Fixtures" icon="calendar_month" selected={true}
+    NavItem "Live match" icon="sports_soccer" badge="LIVE" onTap={go match}
+  Main
+    Nav
+      Heading "Fixtures by day" level=1
+      Row gap=12 middle
+        Toggle "Only {follow}" bind=onlyFollowed
+        Select "Follow" bind=follow items=["Brazil","France","Argentina","England","Spain","Netherlands","Portugal","Germany"]
+    Column pad=24 gap=16
+      each d in days
+        Card gap=8
+          Text.strong "{d.day}"
+          each m in d.matches
+            if !onlyFollowed||m.h==follow||m.a==follow
+              Row gap=12 middle pad=[8,4,8,4] fill={m.h==follow||m.a==follow ? #FFFEF3C7 : #00FFFFFF} onTap={go match}
+                Text.muted "{m.t}" w=56
+                Text.strong "{m.h}" grow
+                Text.strong "{m.s == "" ? "vs" : m.s}" w=56 center
+                Text.strong "{m.a}" grow
+                IconButton "{m.h==follow||m.a==follow ? 'star' : 'star_border'}" tooltip="Follow team" onTap={follow=(m.h==follow ? m.a : m.h)}

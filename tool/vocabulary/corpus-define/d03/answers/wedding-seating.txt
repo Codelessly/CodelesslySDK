@@ -1,0 +1,102 @@
+### Floor plan
+state q=""
+state side="All"
+state diet="Any"
+state sel=""
+state grp="Bride's family"
+state target="t1"
+state guests=[{"id":"g1","name":"Margaret Hale","side":"Bride's family","diet":"Vegetarian","table":"t1"},{"id":"g2","name":"Thomas Hale","side":"Bride's family","diet":"None","table":"t1"},{"id":"g3","name":"Priya Nair","side":"Groom's family","diet":"Vegan","table":"t2"},{"id":"g4","name":"Daniel Okafor","side":"Friends","diet":"Gluten-free","table":""},{"id":"g5","name":"Sofia Marchetti","side":"Friends","diet":"None","table":""},{"id":"g6","name":"Uncle Raymond Cole","side":"Groom's family","diet":"None","table":"t2"},{"id":"g7","name":"Aunt Beverly Cole","side":"Groom's family","diet":"Nut allergy","table":""},{"id":"g8","name":"Hannah Brooks","side":"Colleagues","diet":"None","table":""},{"id":"g9","name":"Marcus Lee","side":"Colleagues","diet":"Vegetarian","table":""},{"id":"g10","name":"Elena Rossi","side":"Bride's family","diet":"None","table":""}]
+state tables=[{"id":"t1","name":"Table 1 - Head","shape":"long","seats":10},{"id":"t2","name":"Table 2","shape":"round","seats":8},{"id":"t3","name":"Table 3","shape":"round","seats":8},{"id":"t4","name":"Table 4 - Friends","shape":"long","seats":12}]
+state apart=[{"a":"g6","b":"g2","why":"Raymond and Thomas have not spoken since 2019"},{"a":"g7","b":"g1","why":"Beverly and Margaret asked to be kept apart"}]
+App
+  Sidebar w=320
+    Brand "Tablecloth" icon="table_restaurant"
+    Row between
+      Text.strong "Guests"
+      Badge.warning "{count(guests,g=>g.table==\"\")} unseated"
+    SearchBar "Search guests" bind=q
+    Row gap=8
+      Select "Side" items=["All","Bride's family","Groom's family","Friends","Colleagues"] bind=side
+      Select "Diet" items=["Any","None","Vegetarian","Vegan","Gluten-free","Nut allergy"] bind=diet
+    Column gap=6 scroll drop=guest onDrop={guests=updateWhere(guests,g=>g.id==result.data,g=>with(g,"table",""))}
+      Text.caption "Drag a guest onto a table. Drop one here to unseat."
+      each g in filter(guests,x=>(side=="All"||x.side==side)&&(diet=="Any"||x.diet==diet)&&contains(lower(x.name),lower(q)))
+        GuestRow "{g.name}" side={g.side} diet={g.diet} seated={g.table!=""} drag=guest(g.id)
+  Main
+    Nav
+      Heading "Reception floor plan" level=1
+      Row gap=8
+        Button.outline "Add table" icon="add" onTap={tables=append(tables,{"id":"t{length(tables)+1}","name":"Table {length(tables)+1}","shape":"round","seats":8})}
+        Button.outline "Auto-seat a group" icon="auto_fix_high" onTap={open autoseat}
+        Button "Print view" icon="print" onTap={go print}
+    Column pad=24 gap=16 scroll
+      if length(apart)>0 && any(apart,c=>find(guests,g=>g.id==c.a).table!=""&&find(guests,g=>g.id==c.a).table==find(guests,g=>g.id==c.b).table)
+        Banner.warning "Seating conflicts"
+          each c in filter(apart,x=>find(guests,g=>g.id==x.a).table!=""&&find(guests,g=>g.id==x.a).table==find(guests,g=>g.id==x.b).table)
+            Text "{find(guests,g=>g.id==c.a).name} and {find(guests,g=>g.id==c.b).name}: {c.why}"
+      Grid cols=2 gap=24
+        each t in tables
+          FloorTable "{t.name}" shape={t.shape} seats={t.seats} filled={count(guests,g=>g.table==t.id)} clash={any(apart,c=>find(guests,g=>g.id==c.a).table==t.id&&find(guests,g=>g.id==c.b).table==t.id)} drop=guest onDrop={guests=updateWhere(guests,g=>g.id==result.data,g=>with(g,"table",t.id))} onTap={sel=t.id; open tableMenu}
+            each g in filter(guests,x=>x.table==t.id)
+              Chip "{g.name}" drag=guest(g.id) onTap={guests=updateWhere(guests,x=>x.id==g.id,x=>with(x,"table",""))}
+  Menu#tableMenu
+    MenuItem "Make round" icon="circle" onTap={tables=updateWhere(tables,t=>t.id==sel,t=>with(t,"shape","round"))}
+    MenuItem "Make long" icon="rectangle" onTap={tables=updateWhere(tables,t=>t.id==sel,t=>with(t,"shape","long"))}
+    MenuItem "Add a seat" icon="event_seat" onTap={tables=updateWhere(tables,t=>t.id==sel,t=>with(t,"seats",t.seats+1))}
+    MenuItem "Clear table" icon="person_remove" onTap={guests=updateWhere(guests,g=>g.table==sel,g=>with(g,"table",""))}
+    MenuItem "Remove table" icon="delete" onTap={guests=updateWhere(guests,g=>g.table==sel,g=>with(g,"table","")); tables=removeWhere(tables,t=>t.id==sel)}
+  Dialog#autoseat "Auto-seat a group" "Seats every unseated guest in the group at one table."
+    Select "Group" items=["Bride's family","Groom's family","Friends","Colleagues"] bind=grp
+    Select "Table" items=map(tables,t=>t.id) bind=target
+    Text.muted "{count(guests,g=>g.table==\"\"&&g.side==grp)} unseated guests in this group."
+    Button "Seat them" onTap={guests=updateWhere(guests,g=>g.table==""&&g.side==grp,g=>with(g,"table",target)); toast "Group seated"; close}
+
+define GuestRow "name" side="" diet="None" seated=false onTap
+  Row gap=10 middle pad=8 radius=8 border=1 onTap={onTap}
+    Avatar "{name}" size=32
+    Column grow gap=2
+      Text.strong "{name}"
+      Row gap=6
+        Badge.info "{side}"
+        if diet!="None"
+          Badge.warning "{diet}"
+    if seated
+      Icon "check_circle"
+
+define FloorTable "name" shape="round" seats=8 filled=0 clash=false onDrop onTap
+  Card gap=10 border={clash ? 2 : 1} onTap={onTap}
+    Row between
+      Text.strong "{name}"
+      Badge.neutral "{filled}/{seats}"
+    Progress {filled/seats}
+    Box center middle pad=16 fill={clash ? #FFFEE2E2 : #FFF3F4F6} radius={shape=="round" ? 80 : 12} h={shape=="round" ? 220 : 140}
+      Row gap=6 wrap center
+        ...
+    if clash
+      Text.danger "Two guests kept apart share this table"
+
+### Print view
+state tables=[{"id":"t1","name":"Table 1 - Head","shape":"long","seats":10},{"id":"t2","name":"Table 2","shape":"round","seats":8},{"id":"t3","name":"Table 3","shape":"round","seats":8},{"id":"t4","name":"Table 4 - Friends","shape":"long","seats":12}]
+state guests=[{"id":"g1","name":"Margaret Hale","side":"Bride's family","diet":"Vegetarian","table":"t1"},{"id":"g2","name":"Thomas Hale","side":"Bride's family","diet":"None","table":"t1"},{"id":"g3","name":"Priya Nair","side":"Groom's family","diet":"Vegan","table":"t2"},{"id":"g6","name":"Uncle Raymond Cole","side":"Groom's family","diet":"None","table":"t2"},{"id":"g4","name":"Daniel Okafor","side":"Friends","diet":"Gluten-free","table":""}]
+Page
+  Nav
+    Brand "Tablecloth" icon="table_restaurant"
+    Row gap=8
+      Button.outline "Back to floor plan" onTap={go floor-plan}
+      Button "Print" icon="print" onTap={emit print}
+  Section narrow
+    Heading "Seating list by table" level=1
+    Text.muted "{count(guests,g=>g.table!=\"\")} seated, {count(guests,g=>g.table==\"\")} still unseated"
+    each t in tables
+      Card gap=8
+        Row between
+          Heading "{t.name}" level=3
+          Text.muted "{count(guests,g=>g.table==t.id)} of {t.seats}"
+        each g in sortBy(filter(guests,x=>x.table==t.id),x=>x.name)
+          Row between
+            Text "{g.name}"
+            Text.muted "{g.diet != \"None\" ? g.diet : \"\"}"
+    Card gap=8
+      Heading "Not yet seated" level=3
+      each g in filter(guests,x=>x.table=="")
+        Text "{g.name} ({g.side})"
