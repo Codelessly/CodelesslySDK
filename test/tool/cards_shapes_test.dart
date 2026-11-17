@@ -192,13 +192,17 @@ state attach={"name":"plan.pdf","size":"2 MB","progress":0.5}
   });
 
   test('what those names become: a tone, an x in a ListRow\'s slot, a SectionHeader\'s action, a whole ChoiceChips off', () {
+    // taken is a state worked out: a list, read in parentheses.
     final r = read('''
+state taken=filter(["18:00","18:30"],t=>t=="18:30")
 ${state}Column
   StatusBadge#badge "LIVE" status="success"
   ListRow#row "Milk" onDelete={toast "removed"}
   SectionHeader#head "Files" action="View all" onAction={toast "all"}
   ChoiceChips#chips @filter options=["18:00","18:30"] disabled={placing}
   ChoiceChips#some @filter options=["18:00","18:30"] disabled=["18:30"]
+  ChoiceChips#worked @filter options=["18:00","18:30"] disabled={taken}
+  ChoiceChips#late @filter options=["18:00","18:30"] disabled={length(taken)>1}
 ''');
     expect(r.issues, isEmpty);
     Map<String, Object?> node(String id) => ((r.document['nodes']! as Map)[id] as Map).cast<String, Object?>();
@@ -210,6 +214,8 @@ ${state}Column
     expect(jsonEncode(node(action)['actions']), contains('"message":"all"'));
     expect(node('chips')['bind'], {'disabled': r'${= placing}'});
     expect(node('some')['props'], containsPair('disabled', ['18:30']));
+    expect((node('worked')['bind']! as Map).keys, ['props.disabled']);
+    expect((node('late')['bind']! as Map).keys, ['disabled']);
     expect(invalid(r.document), isEmpty);
   });
 
