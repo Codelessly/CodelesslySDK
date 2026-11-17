@@ -1,0 +1,179 @@
+### Album
+state tab="all"
+state photos=[{"id":1,"url":"https://picsum.photos/seed/reel1/600/450","by":"Maya","liked":true,"rating":5,"score":47,"delta":3,"sel":false},{"id":2,"url":"https://picsum.photos/seed/reel2/600/450","by":"Dev","liked":false,"rating":4,"score":41,"delta":-2,"sel":false},{"id":3,"url":"https://picsum.photos/seed/reel3/600/450","by":"Lena","liked":true,"rating":4,"score":38,"delta":5,"sel":false},{"id":4,"url":"https://picsum.photos/seed/reel4/600/450","by":"Maya","liked":false,"rating":3,"score":22,"delta":0,"sel":false},{"id":5,"url":"https://picsum.photos/seed/reel5/600/450","by":"Tomas","liked":false,"rating":0,"score":17,"delta":-1,"sel":false},{"id":6,"url":"https://picsum.photos/seed/reel6/600/450","by":"Dev","liked":true,"rating":5,"score":34,"delta":2,"sel":false}]
+state at=0
+state selecting=false
+App
+  Sidebar
+    Brand "Reel Vote" icon="photo_library"
+    NavItem "All photos" icon="grid_view" selected={tab=="all"} onTap={tab="all"}
+    NavItem "Top picks" icon="emoji_events" selected={tab=="top"} onTap={go top-picks}
+    NavItem "Vote" icon="how_to_vote" onTap={go vote}
+    NavItem "Faces" icon="face" onTap={go faces}
+    Spacer grow
+    Countdown "Final book closes in" seconds=432000
+  Main
+    Nav
+      Heading "Summer in Lisbon" level=1
+      Row gap=8
+        Button.outline "Select" onTap={selecting=!selecting}
+        Button.outline "Download selected" icon="download" onTap={count(photos,p=>p.sel)>0 ? emit download : toast "Select some photos first"}
+        Button "Add photos" icon="add_a_photo" onTap={open upload}
+    Column pad=24 gap=16 scroll
+      Row gap=8
+        Text.muted "{length(photos)} photos"
+        Text.muted "{count(photos,p=>p.sel)} selected"
+      Grid cols=3 gap=16
+        each p in photos
+          Card gap=8 pad=8 onTap={selecting ? photos=updateWhere(photos,x=>x.id==p.id,x=>with(x,"sel",!x.sel)) : (at=index; open shots)}
+            Stack
+              Image "{p.url}" h=180 radius=8
+              Box hidden={!p.sel} fill=#990F766E radius=8 center middle
+                Icon "check_circle" color=#FFFFFFFF
+            Row between middle
+              Uploader "{p.by}"
+              Row gap=4 middle
+                LikeButton bind=p.liked
+                Text.small "{p.rating}/5"
+  Lightbox#shots photos={photos} bind=at
+
+Dialog#upload "Add photos" "Your name tag goes on every photo you add"
+  state name="Maya"
+  Input "Name tag" bind=name
+  Button.outline "Choose files" icon="upload_file" onTap={toast "Choose files"}
+  Button "Upload" onTap={emit upload name; toast "Photos added"; close}
+
+define Uploader "name"
+  Row gap=6 middle
+    Avatar "{name}" size=24
+    Text.small "{name}"
+
+define LikeButton bind=liked onChange
+  state liked=false
+  IconButton {liked ? "favorite" : "favorite_border"} tooltip="Like" onTap={liked=!liked; onChange(liked)}
+
+define Countdown "label" seconds=0
+  state left=seconds
+  every 1s when left>0 onTick={left=left-1}
+  Column gap=2 pad=12
+    Text.caption "{label}"
+    Text.strong "{duration(left)}"
+
+### Photo viewer
+state photos=[{"id":1,"url":"https://picsum.photos/seed/reel1/1200/900","by":"Maya","caption":"Alfama rooftops at dusk","liked":true,"rating":5},{"id":2,"url":"https://picsum.photos/seed/reel2/1200/900","by":"Dev","caption":"Tram 28 on the hill","liked":false,"rating":4},{"id":3,"url":"https://picsum.photos/seed/reel3/1200/900","by":"Lena","caption":"Pastel de nata run","liked":true,"rating":4}]
+state page=0
+Page
+  Nav
+    Brand "Reel Vote" icon="photo_library"
+    Link "Back to album" onTap={go album}
+  Section narrow
+    Column gap=16
+      Pages bind=page h=420 peek=0.92
+        each p in photos
+          Image "{p.url}" radius=12
+      Row center
+        Dots bind=page count={length(photos)}
+      Row between middle
+        Column gap=2
+          Text.strong "{photos[page].caption}"
+          Uploader "{photos[page].by}"
+        Text.muted "{page+1} of {length(photos)}"
+      Card gap=12
+        Row between middle
+          Text.strong "Your vote"
+          LikeButton bind=photos[page].liked onChange={photos=setAt(photos,page,with(photos[page],"liked",result))}
+        Row between middle
+          Text "Rating"
+          Rating bind=photos[page].rating max=5 onChange={photos=setAt(photos,page,with(photos[page],"rating",result)); toast "Rated {result} of 5"}
+      Row gap=8
+        Button.outline "Previous" icon="chevron_left" onTap={page=max(0,page-1)}
+        Button.outline "Next" icon="chevron_right" onTap={page=min(length(photos)-1,page+1)}
+        Spacer grow
+        Button.outline "Download" icon="download" onTap={emit download photos[page].id}
+
+define Rating bind=value max=5 onChange
+  state value=0
+  Row gap=2 middle
+    each i in range(max)
+      IconButton {i<value ? "star" : "star_border"} tooltip="{i+1} of {max}" onTap={value=i+1; onChange(i+1)}
+
+### Top picks
+state period="Week"
+state photos=[{"id":2,"url":"https://picsum.photos/seed/reel2/200/150","by":"Dev","score":41,"delta":-2},{"id":1,"url":"https://picsum.photos/seed/reel1/200/150","by":"Maya","score":47,"delta":3},{"id":3,"url":"https://picsum.photos/seed/reel3/200/150","by":"Lena","score":38,"delta":5},{"id":6,"url":"https://picsum.photos/seed/reel6/200/150","by":"Dev","score":34,"delta":2},{"id":4,"url":"https://picsum.photos/seed/reel4/200/150","by":"Maya","score":22,"delta":0},{"id":5,"url":"https://picsum.photos/seed/reel5/200/150","by":"Tomas","score":17,"delta":-1}]
+App
+  Sidebar
+    Brand "Reel Vote" icon="photo_library"
+    NavItem "All photos" icon="grid_view" onTap={go album}
+    NavItem "Top picks" icon="emoji_events" selected={true}
+    NavItem "Vote" icon="how_to_vote" onTap={go vote}
+    NavItem "Faces" icon="face" onTap={go faces}
+    Spacer grow
+    Countdown "Final book closes in" seconds=432000
+  Main
+    Nav
+      Heading "Top picks" level=1
+      SegmentedButton bind=period items=["Day","Week","All time"]
+    Column pad=24 gap=12 scroll
+      each p in sortByDesc(photos,x=>x.score)
+        Card
+          Row gap=16 middle
+            Text.heading "{index+1}" w=32
+            Image "{p.url}" w=96 h=72 radius=8
+            Column grow gap=2
+              Text.strong "Photo by {p.by}"
+              Text.muted "{p.score} points"
+            TrendArrow delta={p.delta}
+            Button.outline "Open" onTap={go photo}
+      Card gap=8
+        Text.strong "Score history"
+        BarChart values={map(sortByDesc(photos,x=>x.score),x=>x.score)} labels={map(sortByDesc(photos,x=>x.score),x=>x.by)} h=160
+
+define TrendArrow delta=0
+  Row gap=4 middle
+    Icon {delta>0 ? "arrow_upward" : delta<0 ? "arrow_downward" : "remove"} color={delta>0 ? "#FF16A34A" : delta<0 ? "#FFDC2626" : "#FF6B7280"}
+    Text.small "{abs(delta)}" color={delta>0 ? "#FF16A34A" : delta<0 ? "#FFDC2626" : "#FF6B7280"}
+
+### Vote and faces
+state round=1
+state pair=[{"id":3,"url":"https://picsum.photos/seed/reel3/600/450","by":"Lena"},{"id":6,"url":"https://picsum.photos/seed/reel6/600/450","by":"Dev"}]
+state picked=0
+state people=[{"name":"Maya","count":42,"photo":"https://picsum.photos/seed/faceA/120/120"},{"name":"Dev","count":31,"photo":"https://picsum.photos/seed/faceB/120/120"},{"name":"Lena","count":27,"photo":"https://picsum.photos/seed/faceC/120/120"},{"name":"Unnamed","count":9,"photo":"https://picsum.photos/seed/faceD/120/120"}]
+state who=""
+App
+  Sidebar
+    Brand "Reel Vote" icon="photo_library"
+    NavItem "All photos" icon="grid_view" onTap={go album}
+    NavItem "Top picks" icon="emoji_events" onTap={go top-picks}
+    NavItem "Vote" icon="how_to_vote" selected={true}
+    NavItem "Faces" icon="face" onTap={who=""}
+    Spacer grow
+    Countdown "Final book closes in" seconds=432000
+  Main
+    Nav
+      Heading "Voting round {round} of 10" level=1
+      Button.outline "Skip" onTap={round=round+1; picked=0}
+    Column pad=24 gap=24 scroll
+      Progress {round/10}
+      Row gap=24
+        each p in pair
+          Card grow gap=12 onTap={picked=p.id}
+            Image "{p.url}" h=260 radius=8
+            Row between middle
+              Uploader "{p.by}"
+              Icon "check_circle" hidden={picked!=p.id}
+      Row center
+        Button "Pick this one" icon="how_to_vote" onTap={picked==0 ? toast "Tap a photo first" : (emit vote picked; round=round+1; picked=0; toast "Vote counted")}
+      Divider
+      Row between middle
+        Heading "Faces" level=3
+        Button.outline "Download selected" icon="download" onTap={emit download who; toast "Preparing download"}
+      Grid cols=4 gap=16
+        each f in people
+          FaceGroup "{f.name}" photo="{f.photo}" count={f.count} selected={who==f.name} onTap={who=f.name}
+
+define FaceGroup "name" photo="" count=0 selected=false onTap
+  Card gap=6 center onTap={onTap}
+    Avatar src="{photo}" size=64
+    Text.strong "{name}"
+    Text.muted "{count} photos"
+    Badge.primary "Selected" hidden={!selected}

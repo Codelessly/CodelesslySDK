@@ -1,0 +1,200 @@
+### Editor
+state sel=1
+state onlyOpen=false
+state comment=""
+state segs=[{"id":1,"src":"Your order #48213 ships within 3 business days.","parts":[{"t":"Your "},{"t":"order","term":"Bestellung"},{"t":" #48213 ships within 3 business days."}],"tgt":"Ihre Bestellung #48213 wird innerhalb von 3 Werktagen versendet.","status":"approved","words":8,"nums":["48213","3"],"tags":[]},{"id":2,"src":"Click <b>Track parcel</b> to see where it is.","parts":[{"t":"Click <b>Track parcel</b> to see where it is."}],"tgt":"Klicken Sie auf Sendung verfolgen, um den Standort zu sehen.","status":"draft","words":9,"nums":[],"tags":["<b>","</b>"]},{"id":3,"src":"Free returns within 30 days of delivery.","parts":[{"t":"Free returns within 30 days of delivery."}],"tgt":"Kostenlose Rücksendung innerhalb von 14 Tagen nach Lieferung.","status":"draft","words":7,"nums":["30"],"tags":[]},{"id":4,"src":"Your invoice is attached to this email.","parts":[{"t":"Your "},{"t":"invoice","term":"Rechnung"},{"t":" is attached to this email."}],"tgt":"","status":"new","words":7,"nums":[],"tags":[]},{"id":5,"src":"Questions? Contact support at any time.","parts":[{"t":"Questions? Contact support at any time."}],"tgt":"","status":"new","words":6,"nums":[],"tags":[]}]
+state memory=[{"id":1,"pct":94,"src":[{"t":"Free returns within "},{"t":"14","c":"#FFDC2626"},{"t":" days of delivery."}],"tgt":"Kostenlose Rücksendung innerhalb von 14 Tagen nach Lieferung."},{"id":2,"pct":78,"src":[{"t":"Free "},{"t":"shipping","c":"#FFDC2626"},{"t":" within 30 days."}],"tgt":"Kostenloser Versand innerhalb von 30 Tagen."},{"id":3,"pct":62,"src":[{"t":"Contact "},{"t":"our team","c":"#FFDC2626"},{"t":" at any time."}],"tgt":"Kontaktieren Sie unser Team jederzeit."}]
+state reviewer="Lena Vogt"
+
+App
+  Sidebar
+    Brand "Segment" icon="translate"
+    NavItem "Editor" icon="edit_note" selected={true}
+    NavItem "Termbase" icon="menu_book" onTap={go termbase}
+    NavItem "Review" icon="rate_review" badge="2" onTap={go review}
+    Spacer grow
+    Text.muted "EN to DE, Order emails"
+  Main
+    Nav
+      Heading "Shipping confirmation" level=1
+      Row gap=12
+        Toggle "Unapproved only" bind=onlyOpen
+        Button.outline "Comment to reviewer" icon="comment" onTap={open reviewer}
+        Button "Approve all drafts" onTap={segs=updateWhere(segs,x=>x.status=="draft",x=>with(x,"status","approved")); toast "Drafts approved"}
+    Column pad=24 gap=16
+      Card gap=8
+        Row between
+          Text.strong "Words done"
+          Text.muted "{sum(filter(segs,x=>x.status==\"approved\"),x=>x.words)} of {sum(segs,x=>x.words)} words"
+        Progress {sum(filter(segs,x=>x.status=="approved"),x=>x.words)/sum(segs,x=>x.words)}
+      Row gap=16 top
+        Column grow gap=8
+          Row gap=12
+            Text.fieldLabel "Source (English)" grow
+            Text.fieldLabel "Target (German)" grow
+          each s in segs
+            if !onlyOpen || s.status!="approved"
+              Card gap=8 onTap={sel=s.id} border={sel==s.id ? 2 : 1}
+                Row gap=12 top
+                  Column grow gap=4
+                    Text.caption "#{s.id}"
+                    SourceText parts={s.parts}
+                  Column grow gap=4
+                    Row between
+                      Text.caption "{s.words} words"
+                      StatusChip status={s.status}
+                    Input "Translation" bind=s.tgt multiline onChange={segs=updateWhere(segs,x=>x.id==s.id,x=>with(with(x,"tgt",result),"status",trim(result)==""?"new":"draft"))}
+                    if any(s.nums,n=>s.tgt!="" && !contains(s.tgt,n))
+                      Row gap=4 middle
+                        Icon "warning" color=#FFD97706
+                        Text.small "Number missing in target: {join(filter(s.nums,n=>!contains(s.tgt,n)),\", \")}" color=#FFD97706
+                    if any(s.tags,g=>s.tgt!="" && !contains(s.tgt,g))
+                      Row gap=4 middle
+                        Icon "code_off" color=#FFD97706
+                        Text.small "Tag missing in target: {join(filter(s.tags,g=>!contains(s.tgt,g)),\" \")}" color=#FFD97706
+                    Row gap=8
+                      Button.ghost "Approve" icon="check" onTap={segs=updateWhere(segs,x=>x.id==s.id,x=>with(x,"status","approved"))}
+                      Button.ghost "Clear" icon="backspace" onTap={segs=updateWhere(segs,x=>x.id==s.id,x=>with(with(x,"tgt",""),"status","new"))}
+        Pane w=320 pad=16 gap=12
+          Heading "Translation memory" level=3
+          Text.muted "Matches for segment {sel}"
+          each m in memory
+            MemoryMatch pct={m.pct} source={m.src} target={m.tgt} onInsert={segs=updateWhere(segs,x=>x.id==sel,x=>with(with(x,"tgt",m.tgt),"status","draft")); toast "Inserted {m.pct}% match"}
+          Divider
+          Heading "Terms in this segment" level=3
+          each s in filter(segs,x=>x.id==sel)
+            each p in filter(s.parts,q=>q.term)
+              Row between middle
+                Text.strong "{p.t}"
+                Badge.primary "{p.term}"
+            if isEmpty(filter(s.parts,q=>q.term))
+              Text.muted "No termbase entries here."
+
+Dialog#reviewer "Comment to reviewer" "Visible on segment {sel} in the review"
+  Select "Reviewer" items=["Lena Vogt","Omar Haddad","Priya Nair"] bind=reviewer
+  Input "Comment" "What should the reviewer check?" bind=comment multiline
+  Row end gap=8
+    Button.outline "Cancel" onTap={close}
+    Button "Send" onTap={comment=="" ? toast "Write a comment first" : {emit comment {"to":reviewer,"segment":sel,"text":comment}; toast "Sent to {reviewer}"; comment=""; close}}
+
+// A coloured read-only line of the source text, with term parts highlighted.
+define SourceText parts=[]
+  Row wrap gap=0
+    each p in parts
+      if p.term
+        Text "{p.t}" fill=#FFFEF3C7 color=#FF92400E weight=700 tooltip="{p.term}"
+      if !p.term
+        Text "{p.t}"
+
+define StatusChip "status"="new"
+  if status=="new"
+    Badge.neutral "New"
+  if status=="draft"
+    Badge.warning "Draft"
+  if status=="approved"
+    Badge.success "Approved"
+
+define MemoryMatch pct=100 source=[] target="" onInsert
+  Card gap=8
+    Row between middle
+      Badge.info "{pct}% match"
+      Button.outline "Insert" icon="subdirectory_arrow_left" onTap={onInsert}
+    Row wrap gap=0
+      each p in source
+        Text "{p.t}" color={coalesce(p.c,"#FF111827")} weight={p.c ? 700 : 400}
+    Text.muted "{target}"
+
+### Termbase
+state q=""
+state terms=[{"id":1,"src":"order","tgt":"Bestellung","note":"Never Auftrag","status":"approved"},{"id":2,"src":"invoice","tgt":"Rechnung","note":"","status":"approved"},{"id":3,"src":"parcel","tgt":"Paket","note":"Not Päckchen","status":"approved"},{"id":4,"src":"support","tgt":"Kundenservice","note":"","status":"proposed"},{"id":5,"src":"return","tgt":"Rücksendung","note":"Noun only","status":"proposed"}]
+state newSrc=""
+state newTgt=""
+
+App
+  Sidebar
+    Brand "Segment" icon="translate"
+    NavItem "Editor" icon="edit_note" onTap={go editor}
+    NavItem "Termbase" icon="menu_book" selected={true}
+    NavItem "Review" icon="rate_review" badge="2" onTap={go review}
+    Spacer grow
+    Text.muted "EN to DE, Order emails"
+  Main
+    Nav
+      Heading "Termbase" level=1
+      Row gap=8
+        Input "Search terms" bind=q w=220
+        Button "Add term" icon="add" onTap={open addTerm}
+    Column pad=24 gap=16
+      Card gap=0
+        Row gap=12 pad=8 border-bottom=#FFE5E7EB
+          Text.fieldLabel "Source" w=140
+          Text.fieldLabel "Approved translation" w=180
+          Text.fieldLabel "Note" grow
+          Text.fieldLabel "Status" w=100
+          Text.fieldLabel "" w=48
+        each t in terms
+          if q=="" || contains(lower(t.src),lower(q)) || contains(lower(t.tgt),lower(q))
+            Row gap=12 pad=8 middle border-bottom=#FFE5E7EB
+              Text.strong "{t.src}" w=140
+              Text "{t.tgt}" w=180
+              Text.muted "{t.note}" grow
+              Row w=100
+                if t.status=="approved"
+                  Badge.success "Approved"
+                if t.status=="proposed"
+                  Badge.warning "Proposed"
+              Row w=48
+                IconButton "check" tooltip="Approve term" onTap={terms=updateWhere(terms,x=>x.id==t.id,x=>with(x,"status","approved"))}
+      if isEmpty(filter(terms,t=>contains(lower(t.src),lower(q)) || contains(lower(t.tgt),lower(q))))
+        Text.muted "No terms match \"{q}\"."
+
+Dialog#addTerm "Add term" "It is highlighted in the source of every segment"
+  Input "Source term" bind=newSrc
+  Input "Approved translation" bind=newTgt
+  Row end gap=8
+    Button.outline "Cancel" onTap={close}
+    Button "Add" onTap={trim(newSrc)=="" || trim(newTgt)=="" ? toast "Fill in both fields" : {terms=append(terms,{"id":length(terms)+1,"src":newSrc,"tgt":newTgt,"note":"","status":"proposed"}); newSrc=""; newTgt=""; close}}
+
+### Review
+state filter="all"
+state items=[{"id":3,"src":"Free returns within 30 days of delivery.","tgt":"Kostenlose Rücksendung innerhalb von 14 Tagen nach Lieferung.","issue":"Number differs: 30 vs 14","comment":"Please confirm the return window with the shop team.","from":"Ray","resolved":false},{"id":2,"src":"Click <b>Track parcel</b> to see where it is.","tgt":"Klicken Sie auf Sendung verfolgen, um den Standort zu sehen.","issue":"Tags missing: <b> </b>","comment":"","from":"","resolved":false}]
+state reply=""
+
+App
+  Sidebar
+    Brand "Segment" icon="translate"
+    NavItem "Editor" icon="edit_note" onTap={go editor}
+    NavItem "Termbase" icon="menu_book" onTap={go termbase}
+    NavItem "Review" icon="rate_review" badge="{count(items,i=>!i.resolved)}" selected={true}
+  Main
+    Nav
+      Heading "Review" level=1
+      SegmentedButton items=["All","Open","Resolved"] bind=filter
+    Column pad=24 gap=16
+      each i in items
+        if filter=="All" || (filter=="Open" && !i.resolved) || (filter=="Resolved" && i.resolved)
+          Card gap=8
+            Row between middle
+              Text.strong "Segment {i.id}"
+              if i.resolved
+                Badge.success "Resolved"
+              if !i.resolved
+                Badge.warning "Open"
+            Text.muted "{i.src}"
+            Text "{i.tgt}"
+            Row gap=4 middle
+              Icon "warning" color=#FFD97706
+              Text.small "{i.issue}" color=#FFD97706
+            if i.comment!=""
+              Row gap=8 middle
+                Avatar "{i.from}" size=28
+                Text.small "{i.comment}"
+            Row gap=8
+              Button.outline "Mark resolved" onTap={items=updateWhere(items,x=>x.id==i.id,x=>with(x,"resolved",true))}
+              Button.ghost "Reply" onTap={open replyBox}
+
+Dialog#replyBox "Reply" "Goes to the translator"
+  Input "Reply" bind=reply multiline
+  Row end gap=8
+    Button.outline "Cancel" onTap={close}
+    Button "Send" onTap={reply=="" ? toast "Write a reply first" : {emit reply reply; toast "Reply sent"; reply=""; close}}

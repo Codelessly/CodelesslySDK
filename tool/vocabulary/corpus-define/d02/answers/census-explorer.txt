@@ -1,0 +1,178 @@
+### Explorer
+state measure="Median age"
+state place="Travis County, TX"
+state year=2020
+state q=""
+state breaks=[30,35,40,45]
+state sortCol="pop"
+state sortDir="desc"
+state places=[{"name":"Travis County, TX","pop":1290188,"age":35.1,"hh":2.5,"spanish":28},{"name":"Harris County, TX","pop":4731145,"age":33.9,"hh":2.9,"spanish":44},{"name":"Cook County, IL","pop":5275541,"age":37.4,"hh":2.6,"spanish":24},{"name":"King County, WA","pop":2269675,"age":37.0,"hh":2.4,"spanish":9},{"name":"Maricopa County, AZ","pop":4420568,"age":37.2,"hh":2.7,"spanish":31},{"name":"Kings County, NY","pop":2736074,"age":35.8,"hh":2.8,"spanish":20}]
+state pyramid={"ages":["0-9","10-19","20-29","30-39","40-49","50-59","60-69","70-79","80+"],"male":[7.1,6.8,9.6,9.9,7.6,6.0,4.4,2.3,0.9],"female":[6.8,6.5,9.4,9.8,7.7,6.2,4.8,2.8,1.4]}
+state years=[1980,1990,2000,2010,2020]
+App
+  Sidebar
+    Brand "Headcount" icon="groups"
+    NavItem "Explorer" icon="map" selected={true}
+    NavItem "Compare" icon="compare_arrows" onTap={go compare}
+    NavItem "Table" icon="table_chart" onTap={go table}
+    Spacer grow
+    Text.muted "Source: Census Bureau, decennial counts"
+  Main
+    Nav
+      Heading "Explorer" level=1
+      Row gap=8
+        Input "Search places" "Try Travis County" bind=q w=240
+        Select bind=measure items=["Median age","Household size","Spanish at home"] w=180
+        Button.outline "Download table" onTap={download places filename="headcount.csv"; toast "Table downloaded"}
+    Column pad=24 gap=16
+      Card gap=8
+        Text.caption "In {year}, {place} is the one to watch."
+        Text.strong "{place} has a median age of {find(places,p=>p.name==place).age}, and {find(places,p=>p.name==place).spanish}% of homes speak Spanish, among the highest in the state."
+      Row gap=16 top
+        Card grow gap=12
+          Row between middle
+            Text.panelTitle "{measure} by county"
+            Text.muted "{year}"
+          ChoroplethMap measure={measure} year={year} bind=place regions={filter(places,p=>contains(lower(p.name),lower(q)))} breaks={breaks} h=360 onSelect={place=result}
+          BreakLegend bind=breaks min=20 max=60 colors=["#FFDBEAFE","#FF93C5FD","#FF3B82F6","#FF1D4ED8","#FF1E3A8A"] onChange={breaks=result}
+          Row gap=12 middle
+            Text.fieldLabel "Decade"
+            Slider bind=year min=1980 max=2020 step=10 grow
+            Text.strong "{year}"
+        Column w=320 gap=16
+          Card gap=8
+            Text.panelTitle "Population pyramid"
+            Text.muted "{place}, share of residents by age"
+            PopulationPyramid ages={pyramid.ages} left={pyramid.male} right={pyramid.female} leftLabel="Male" rightLabel="Female" h=260
+          Card gap=8
+            Text.panelTitle "Search results"
+            each p in filter(places,p=>contains(lower(p.name),lower(q)))
+              ListTile "{p.name}" "{money(p.pop,"",0)} people" selected={place==p.name} onTap={place=p.name}
+
+### Compare
+state placeA="Travis County, TX"
+state placeB="King County, WA"
+state placeList=["Travis County, TX","Harris County, TX","Cook County, IL","King County, WA","Maricopa County, AZ","Kings County, NY"]
+state ages=["0-9","10-19","20-29","30-39","40-49","50-59","60-69","70-79","80+"]
+state shareA=[13.9,12.8,18.6,19.9,15.3,11.4,6.9,3.1,1.1]
+state shareB=[11.2,11.4,14.2,19.3,14.1,12.5,10.8,6.7,3.3]
+state stat=[{"label":"Population","a":"1.29M","b":"2.27M"},{"label":"Median age","a":"35.1","b":"37.0"},{"label":"Household size","a":"2.5","b":"2.4"},{"label":"Spanish at home","a":"28%","b":"9%"}]
+App
+  Sidebar
+    Brand "Headcount" icon="groups"
+    NavItem "Explorer" icon="map" onTap={go explorer}
+    NavItem "Compare" icon="compare_arrows" selected={true}
+    NavItem "Table" icon="table_chart" onTap={go table}
+  Main
+    Nav
+      Heading "Compare two places" level=1
+      Button.outline "Swap" icon="swap_horiz" onTap={placeA=placeB; placeB=placeA}
+    Column pad=24 gap=16
+      Row gap=16
+        Select "Place A" bind=placeA items={placeList} grow
+        Select "Place B" bind=placeB items={placeList} grow
+      Card gap=8
+        Text.panelTitle "Share of residents by age"
+        GroupedBarChart labels={ages} series=[{"name":"{placeA}","values":shareA},{"name":"{placeB}","values":shareB}] h=260
+      Card gap=8
+        Text.panelTitle "At a glance"
+        each s in stat
+          Row between border-bottom=#FFE5E7EB
+            Text.muted "{s.label}"
+            Row gap=24
+              Text.strong "{s.a}" w=90
+              Text.strong "{s.b}" w=90
+      Card gap=4
+        Text.strong "What stands out"
+        Text.muted "{placeB} is older and far less Spanish-speaking than {placeA}, though households are about the same size."
+
+### Table
+state sortCol="pop"
+state sortDir="desc"
+state minPop=0
+state rows=[{"name":"Travis County, TX","pop":1290188,"age":35.1,"hh":2.5,"spanish":28},{"name":"Harris County, TX","pop":4731145,"age":33.9,"hh":2.9,"spanish":44},{"name":"Cook County, IL","pop":5275541,"age":37.4,"hh":2.6,"spanish":24},{"name":"King County, WA","pop":2269675,"age":37.0,"hh":2.4,"spanish":9},{"name":"Maricopa County, AZ","pop":4420568,"age":37.2,"hh":2.7,"spanish":31},{"name":"Kings County, NY","pop":2736074,"age":35.8,"hh":2.8,"spanish":20}]
+App
+  Sidebar
+    Brand "Headcount" icon="groups"
+    NavItem "Explorer" icon="map" onTap={go explorer}
+    NavItem "Compare" icon="compare_arrows" onTap={go compare}
+    NavItem "Table" icon="table_chart" selected={true}
+  Main
+    Nav
+      Heading "Table of numbers" level=1
+      Row gap=8
+        Button.outline "Filters" icon="tune" onTap={open filters}
+        Button "Download CSV" icon="download" onTap={download rows filename="headcount.csv"; toast "Table downloaded"}
+    Column pad=24 gap=16
+      Card gap=0
+        DataTable bind=sortCol dir=sortDir rows={filter(rows,r=>r.pop>=minPop)} onSort={sortCol=result.column; sortDir=result.dir}
+          Column "Place" key=name
+          Column "Population" key=pop align=right
+          Column "Median age" key=age align=right
+          Column "Household" key=hh align=right
+          Column "Spanish %" key=spanish align=right
+      Text.muted "Sorted by {sortCol}, {sortDir}. {count(rows,r=>r.pop>=minPop)} places shown."
+  Sheet#filters "Filters"
+    Text.fieldLabel "Minimum population: {minPop}"
+    Slider bind=minPop min=0 max=5000000 step=250000
+    Button "Done" onTap={close}
+
+define ChoroplethMap measure="Median age" year=2020 bind=selected regions=[] breaks=[] h=360 onSelect
+  // a real map is a labelled box here: regions are listed as tiles shaded by break
+  Box h={h} fill=#FFF1F5F9 radius=8 pad=12 gap=8
+    Text.caption "Map: {measure}, {year}"
+    Grid cols=3 gap=8
+      each r in regions
+        Box pad=10 radius=6 fill={r.age < breaks[0] ? "#FFDBEAFE" : r.age < breaks[1] ? "#FF93C5FD" : r.age < breaks[2] ? "#FF3B82F6" : "#FF1D4ED8"} border={selected==r.name ? 2 : 0} onTap={selected=r.name; onSelect(r.name)}
+          Text.small "{r.name}"
+
+define BreakLegend bind=breaks min=0 max=100 colors=[] onChange
+  Column gap=6
+    Row gap=2
+      each c in colors
+        Box grow h=12 fill={c}
+    Row gap=8
+      each b in breaks
+        Slider bind=b min={min} max={max} grow onChange={onChange(breaks)}
+    Text.caption "Drag a break to change the shading: {join(breaks," / ")}"
+
+define PopulationPyramid ages=[] left=[] right=[] leftLabel="Left" rightLabel="Right" h=260
+  Column gap=4 h={h}
+    Row between
+      Text.caption "{leftLabel}"
+      Text.caption "{rightLabel}"
+    each a in ages
+      Row gap=4 middle
+        Row grow right
+          Box h=14 w={left[indexOf(ages,a)]*12} fill=#FF3B82F6 radius=2
+        Text.caption "{a}" w=44 center
+        Row grow
+          Box h=14 w={right[indexOf(ages,a)]*12} fill=#FFF59E0B radius=2
+
+define GroupedBarChart labels=[] series=[] h=260
+  Column gap=8
+    Row gap=12
+      each s in series
+        Text.caption "{s.name}"
+    Row gap=6 bottom h={h}
+      each l in labels
+        Column grow center gap=2
+          Row gap=2 bottom
+            each s in series
+              Box w=14 h={s.values[indexOf(labels,l)]*10} fill={indexOf(series,s)==0 ? "#FF3B82F6" : "#FFF59E0B"} radius=2
+          Text.caption "{l}"
+
+define DataTable bind=sortCol dir="asc" rows=[] onSort
+  Column gap=0
+    Row gap=8 pad=12 border-bottom=#FFE5E7EB
+      ...
+    each r in rows
+      Row gap=8 pad=12 border-bottom=#FFF3F4F6
+        Text "{r.name}" grow
+        Text "{r.pop}" w=110
+        Text "{r.age}" w=90
+        Text "{r.hh}" w=90
+        Text "{r.spanish}" w=90
+
+define Column "title" key="" align="left"
+  Text.strong "{title}" grow={align=="left"} w={align=="left" ? 0 : 110}

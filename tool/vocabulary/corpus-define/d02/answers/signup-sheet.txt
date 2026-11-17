@@ -1,0 +1,155 @@
+### Shifts
+state tab="shifts"
+state shifts=[{"id":"mon-am","day":"Mon","time":"8:00 Setup","needed":4,"filled":4},{"id":"tue-am","day":"Tue","time":"8:00 Setup","needed":4,"filled":2},{"id":"wed-am","day":"Wed","time":"8:00 Setup","needed":4,"filled":1},{"id":"thu-am","day":"Thu","time":"8:00 Setup","needed":4,"filled":0},{"id":"mon-md","day":"Mon","time":"11:00 Serving","needed":6,"filled":6},{"id":"tue-md","day":"Tue","time":"11:00 Serving","needed":6,"filled":3},{"id":"wed-md","day":"Wed","time":"11:00 Serving","needed":6,"filled":5},{"id":"thu-md","day":"Thu","time":"11:00 Serving","needed":6,"filled":2},{"id":"mon-pm","day":"Mon","time":"2:00 Cleanup","needed":3,"filled":1},{"id":"tue-pm","day":"Tue","time":"2:00 Cleanup","needed":3,"filled":3},{"id":"wed-pm","day":"Wed","time":"2:00 Cleanup","needed":3,"filled":0},{"id":"thu-pm","day":"Thu","time":"2:00 Cleanup","needed":3,"filled":2}]
+state mine=[{"id":"tue-md","note":"Can bring my own apron","remind":"1 hour before"}]
+state waitlist=[]
+state sel=""
+state name="Maya Reyes"
+state note=""
+state remind="1 hour before"
+App
+  Sidebar
+    Brand "Slots" icon="event_available"
+    NavItem "Shifts" icon="grid_view" selected={tab=="shifts"} onTap={tab="shifts"}
+    NavItem "My commitments" icon="checklist" badge="{length(mine)}" selected={tab=="mine"} onTap={go commitments}
+    NavItem "Organiser" icon="admin_panel_settings" onTap={go organiser}
+    Spacer grow
+    Text.muted "Signed in as {name}"
+  Main
+    Nav
+      Heading "Food Bank Week 12" level=1
+      Row gap=8
+        Badge.warning "{sum(shifts,s=>s.needed-s.filled)} spots open"
+        Button.outline "My commitments" onTap={go commitments}
+    Column pad=24 gap=16
+      Text.muted "Tap an open shift to add your name. Full shifts are greyed out and take a waitlist."
+      Grid cols=4 gap=12
+        each d in ["Mon","Tue","Wed","Thu"]
+          Text.strong "{d}" center
+      Grid cols=4 gap=12
+        each s in shifts
+          ShiftCell "{s.time}" needed={s.needed} filled={s.filled} mine={any(mine,m=>m.id==s.id)} waiting={contains(waitlist,s.id)} onTap={sel=s.id; note=""; s.filled>=s.needed ? open waitlist : open signup}
+
+Dialog#signup "Add your name" "Pick up this shift and leave a note for the organiser"
+  Input "Your name" bind=name
+  Input "Note" "Allergies, a friend coming along, a late start" bind=note multiline
+  Select "Remind me" items=["15 minutes before","1 hour before","The evening before","No reminder"] bind=remind
+  Button "Sign me up" onTap={mine=append(mine,{"id":sel,"note":note,"remind":remind}); shifts=updateWhere(shifts,s=>s.id==sel,s=>with(s,"filled",s.filled+1)); toast "You are signed up. Reminder: {remind}"; close}
+
+Dialog#waitlist "This shift is full" "Join the waitlist and we will message you if a spot opens"
+  Input "Your name" bind=name
+  Text.muted "{length(filter(waitlist,w=>w==sel))} already waiting"
+  Button "Join waitlist" onTap={waitlist=append(waitlist,sel); toast "You are on the waitlist"; close}
+
+// A grid cell of the sheet: the shift's time, one dot per slot (filled or empty), greyed with a waitlist note when full.
+define ShiftCell "label" needed=4 filled=0 mine=false waiting=false onTap
+  Card gap=8 pad=12 fill={filled>=needed ? #FFE5E7EB : #FFFFFFFF} border={mine ? 2 : 1} onTap={onTap}
+    Text.small "{label}"
+    Dots needed={needed} filled={filled}
+    Row between
+      Text.caption "{filled} of {needed}"
+      if mine
+        Badge.success "You"
+      if filled>=needed && !mine
+        Badge.neutral "{waiting ? 'Waitlisted' : 'Waitlist'}"
+
+define Dots needed=4 filled=0 size=12
+  Row gap=4
+    each i in range(needed)
+      Box w={size} h={size} radius={size/2} fill={i<filled ? #FF2563EB : #FFD1D5DB}
+
+### My commitments
+state shifts=[{"id":"mon-am","day":"Mon","time":"8:00 Setup","needed":4,"filled":4},{"id":"tue-am","day":"Tue","time":"8:00 Setup","needed":4,"filled":2},{"id":"wed-am","day":"Wed","time":"8:00 Setup","needed":4,"filled":1},{"id":"thu-am","day":"Thu","time":"8:00 Setup","needed":4,"filled":0},{"id":"mon-md","day":"Mon","time":"11:00 Serving","needed":6,"filled":6},{"id":"tue-md","day":"Tue","time":"11:00 Serving","needed":6,"filled":3},{"id":"wed-md","day":"Wed","time":"11:00 Serving","needed":6,"filled":5},{"id":"thu-md","day":"Thu","time":"11:00 Serving","needed":6,"filled":2},{"id":"mon-pm","day":"Mon","time":"2:00 Cleanup","needed":3,"filled":1},{"id":"tue-pm","day":"Tue","time":"2:00 Cleanup","needed":3,"filled":3},{"id":"wed-pm","day":"Wed","time":"2:00 Cleanup","needed":3,"filled":0},{"id":"thu-pm","day":"Thu","time":"2:00 Cleanup","needed":3,"filled":2}]
+state mine=[{"id":"tue-md","note":"Can bring my own apron","remind":"1 hour before"}]
+state sel=""
+state swapTo=""
+App
+  Sidebar
+    Brand "Slots" icon="event_available"
+    NavItem "Shifts" icon="grid_view" onTap={go shifts}
+    NavItem "My commitments" icon="checklist" badge="{length(mine)}" selected={true}
+    NavItem "Organiser" icon="admin_panel_settings" onTap={go organiser}
+  Main
+    Nav
+      Heading "My commitments" level=1
+      Button "Find a shift" onTap={go shifts}
+    Column pad=24 gap=16
+      if isEmpty(mine)
+        Card gap=8
+          Text.strong "Nothing on your list yet"
+          Text.muted "Open the shift grid and tap a shift with free dots."
+      each m in mine
+        Card gap=8
+          Row between middle
+            Column gap=4
+              Text.strong "{find(shifts,s=>s.id==m.id).day}, {find(shifts,s=>s.id==m.id).time}"
+              Text.muted "Note: {m.note == '' ? 'none' : m.note}"
+            Badge.info "Reminder {m.remind}"
+          Row gap=8
+            Select "Reminder" items=["15 minutes before","1 hour before","The evening before","No reminder"] bind=m.remind
+            Spacer grow
+            Button.outline "Swap" onTap={sel=m.id; swapTo=""; open swap}
+            Button.destructive "Cancel" onTap={sel=m.id; open cancel}
+
+Dialog#swap "Swap this shift" "Choose an open shift to move to"
+  Select "New shift" items={map(filter(shifts,s=>s.filled<s.needed && s.id!=sel),s=>s.id)} bind=swapTo
+  Button "Swap" onTap={swapTo=="" ? toast "Pick a shift first" : {shifts=updateWhere(shifts,s=>s.id==sel,s=>with(s,"filled",s.filled-1)); shifts=updateWhere(shifts,s=>s.id==swapTo,s=>with(s,"filled",s.filled+1)); mine=updateWhere(mine,m=>m.id==sel,m=>with(m,"id",swapTo)); toast "Moved to {swapTo}"; close}}
+
+Dialog#cancel "Cancel this shift?" "Your spot opens up for the next person on the waitlist"
+  Row gap=8 end
+    Button.outline "Keep it" onTap={close}
+    Button.destructive "Cancel shift" onTap={mine=removeWhere(mine,m=>m.id==sel); shifts=updateWhere(shifts,s=>s.id==sel,s=>with(s,"filled",s.filled-1)); toast "Shift cancelled"; close}
+
+### Organiser
+state shifts=[{"id":"mon-am","day":"Mon","time":"8:00 Setup","needed":4,"filled":4},{"id":"tue-am","day":"Tue","time":"8:00 Setup","needed":4,"filled":2},{"id":"wed-am","day":"Wed","time":"8:00 Setup","needed":4,"filled":1},{"id":"mon-md","day":"Mon","time":"11:00 Serving","needed":6,"filled":6},{"id":"tue-md","day":"Tue","time":"11:00 Serving","needed":6,"filled":3},{"id":"wed-md","day":"Wed","time":"11:00 Serving","needed":6,"filled":5}]
+state fromDay="Mon"
+state toDay="Fri"
+state copies=1
+state template="Reminder"
+state subject=""
+state body=""
+App
+  Sidebar
+    Brand "Slots" icon="event_available"
+    NavItem "Shifts" icon="grid_view" onTap={go shifts}
+    NavItem "My commitments" icon="checklist" onTap={go commitments}
+    NavItem "Organiser" icon="admin_panel_settings" selected={true}
+  Main
+    Nav
+      Heading "Organiser" level=1
+      Button "Message all" onTap={open message}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Spots still missing"
+          Text "{sum(shifts,s=>s.needed-s.filled)}" size=48 weight=700
+        Card gap=4
+          Text.muted "Shifts with no one yet"
+          Text "{count(shifts,s=>s.filled==0)}" size=48 weight=700
+        Card gap=4
+          Text.muted "Full shifts"
+          Text "{count(shifts,s=>s.filled>=s.needed)}" size=48 weight=700
+      Card gap=12
+        Heading "Add shifts by copying a day" level=3
+        Row gap=12 middle
+          Select "Copy from" items=["Mon","Tue","Wed","Thu"] bind=fromDay
+          Select "To" items=["Tue","Wed","Thu","Fri","Sat"] bind=toDay
+          Input "Times" type=number bind=copies
+          Button "Copy day" onTap={shifts=concat(shifts,map(filter(shifts,s=>s.day==fromDay),s=>with(with(with(s,"day",toDay),"filled",0),"id",toDay+s.time))); toast "Copied {fromDay} to {toDay}"}
+      Card gap=8
+        Heading "Who is missing" level=3
+        each s in sortByDesc(filter(shifts,s=>s.filled<s.needed),s=>s.needed-s.filled)
+          Row between middle
+            Text "{s.day}, {s.time}"
+            Row gap=12 middle
+              Dots needed={s.needed} filled={s.filled}
+              Badge.warning "{s.needed-s.filled} missing"
+              IconButton "remove_circle" tooltip="Remove this shift" onTap={shifts=removeWhere(shifts,x=>x.id==s.id)}
+
+Dialog#message "Message all volunteers" "Start from a template, then edit"
+  SegmentedButton items=["Reminder","Thanks","Urgent need"] bind=template onChange={template=result; subject=result=="Reminder" ? "Your shift is coming up" : result=="Thanks" ? "Thank you for helping" : "We still need people"; body=result=="Reminder" ? "Hi all, a reminder that your shift is this week. Please arrive ten minutes early." : result=="Thanks" ? "Thank you for giving your time this week. The food bank could not run without you." : "We are short on volunteers. {sum(shifts,s=>s.needed-s.filled)} spots are still open: please sign up if you can."}
+  Input "Subject" bind=subject
+  Input "Message" bind=body multiline
+  Row gap=8 end
+    Button.outline "Cancel" onTap={close}
+    Button "Send to all" onTap={emit sendAll body; toast "Message sent"; close}

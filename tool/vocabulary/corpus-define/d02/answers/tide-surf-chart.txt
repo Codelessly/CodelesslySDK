@@ -1,0 +1,260 @@
+### Today
+state tab="today"
+state spot="Ocean Beach"
+state day=0
+state level="Intermediate"
+state tideValues=[1.2,0.6,0.3,0.8,1.7,2.4,2.1,1.4,0.7,0.4,0.9,1.6]
+state tideLabels=["12a","2a","4a","6a","8a","10a","12p","2p","4p","6p","8p","10p"]
+state hours=[{"h":"6a","ft":2.5,"period":11,"dir":"W"},{"h":"8a","ft":3.0,"period":12,"dir":"WNW"},{"h":"10a","ft":3.5,"period":12,"dir":"WNW"},{"h":"12p","ft":4.0,"period":13,"dir":"NW"},{"h":"2p","ft":3.5,"period":12,"dir":"NW"},{"h":"4p","ft":3.0,"period":11,"dir":"NW"},{"h":"6p","ft":2.0,"period":10,"dir":"NNW"}]
+state nowHour=14
+App
+  Sidebar
+    Brand "Swell Table" icon="waves"
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={tab="today"; go today}
+    NavItem "Spots" icon="place" selected={tab=="spots"} onTap={tab="spots"; go spots}
+    NavItem "Week" icon="calendar_month" selected={tab=="week"} onTap={tab="week"; go week}
+    NavItem "Alerts" icon="notifications" badge="2" selected={tab=="alerts"} onTap={tab="alerts"; go alerts}
+    Spacer grow
+    Text.muted "Your level: {level}"
+  Main
+    Nav
+      Heading "{spot}"
+      Row gap=8
+        Select bind=spot items=["Ocean Beach","Linda Mar","Mavericks","Steamer Lane"]
+        Button.outline "Alerts" onTap={go alerts}
+    Column pad=24 gap=16 scroll
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.muted "Surf now"
+          Text "3.5 ft" size=32 weight=700
+          Text.caption "12 s from WNW"
+        Card gap=4
+          Text.muted "Wind"
+          WindArrow dir="NE" speed=8 unit="mph"
+        Card gap=4
+          Text.muted "Water"
+          WaterTemp value=54 unit="F" trend="rising"
+        Card gap=4
+          Text.muted "Next high tide"
+          Text "2:14 PM" size=32 weight=700
+          Text.caption "6.1 ft"
+      Card gap=12
+        Row between
+          Text.strong "Tide today"
+          Text.muted "Low 4:02 AM 0.3 ft, high 2:14 PM 2.4 ft"
+        TideCurve values={tideValues} labels={tideLabels} now={nowHour} highs=["10a","10p"] lows=["4a","6p"] h=220
+      Card gap=12
+        Row between
+          Text.strong "Surf by hour"
+          Row gap=8
+            ChoiceChip "Today" selected={day==0} onTap={day=0}
+            ChoiceChip "Tomorrow" selected={day==1} onTap={day=1}
+        SurfBars hours={hours} h=200
+        BestWindow label="Best window today" start="10a" end="2p" score=82
+      Card gap=12
+        Row between
+          Text.strong "Spots nearby"
+          Button.ghost "All spots" onTap={go spots}
+        each s in ["Ocean Beach","Linda Mar","Mavericks"]
+          ListTile "{s}" onTap={spot=s}
+            Row gap=4
+              StarRating value={s=="Ocean Beach" ? 4 : (s=="Linda Mar" ? 3 : 5)} readonly
+### Spots
+state tab="spots"
+state view="list"
+state q=""
+state minStars=0
+state selected="Ocean Beach"
+state spots=[{"name":"Ocean Beach","stars":4,"ft":3.5,"wind":"offshore","lat":37.76,"lng":-122.51,"x":0.28,"y":0.35},{"name":"Linda Mar","stars":3,"ft":2.5,"wind":"light","lat":37.59,"lng":-122.50,"x":0.22,"y":0.62},{"name":"Mavericks","stars":5,"ft":12.0,"wind":"offshore","lat":37.49,"lng":-122.50,"x":0.18,"y":0.8},{"name":"Steamer Lane","stars":4,"ft":4.0,"wind":"cross","lat":36.95,"lng":-122.02,"x":0.62,"y":0.9},{"name":"Rockaway","stars":2,"ft":2.0,"wind":"onshore","lat":37.60,"lng":-122.50,"x":0.24,"y":0.56}]
+App
+  Sidebar
+    Brand "Swell Table" icon="waves"
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={go today}
+    NavItem "Spots" icon="place" selected={tab=="spots"} onTap={tab="spots"}
+    NavItem "Week" icon="calendar_month" selected={tab=="week"} onTap={go week}
+    NavItem "Alerts" icon="notifications" badge="2" selected={tab=="alerts"} onTap={go alerts}
+  Main
+    Nav
+      Heading "Spots"
+      Row gap=8
+        Input "Search spots" bind=q w=220
+        SegmentedButton bind=view items=["list","map"]
+        IconButton "filter_list" tooltip="Filter by rating" onTap={open ratingFilter}
+    Column pad=24 gap=16 scroll
+      if view=="list"
+        each s in filter(spots, x => (q=="" || contains(lower(x.name), lower(q))) && x.stars >= minStars)
+          Card gap=8 onTap={selected=s.name; open spotSheet}
+            Row between middle
+              Column gap=4
+                Text.strong "{s.name}"
+                Text.muted "{s.ft} ft, wind {s.wind}"
+              StarRating value={s.stars} readonly
+        if isEmpty(filter(spots, x => x.stars >= minStars))
+          Text.muted "No spots at that rating."
+      if view=="map"
+        SpotMap spots={spots} bind=selected h=420 onPick={selected=result; open spotSheet}
+        Text.muted "Tap a pin for conditions."
+Sheet#ratingFilter "Minimum rating"
+  Row gap=8
+    ChoiceChip "Any" selected={minStars==0} onTap={minStars=0; close}
+    ChoiceChip "3 stars" selected={minStars==3} onTap={minStars=3; close}
+    ChoiceChip "4 stars" selected={minStars==4} onTap={minStars=4; close}
+    ChoiceChip "5 stars" selected={minStars==5} onTap={minStars=5; close}
+Sheet#spotSheet "{selected}"
+  Column gap=12
+    Row between
+      Text.muted "Rate this spot"
+      StarRating bind=myRating
+    Row gap=8
+      Button "Open today" onTap={spot=selected; go today; close}
+      Button.outline "Set an alert" onTap={close; go alerts}
+### Week
+state tab="week"
+state weekDays=[{"d":"Mon","ft":3.0,"score":55},{"d":"Tue","ft":3.5,"score":64},{"d":"Wed","ft":5.0,"score":88},{"d":"Thu","ft":4.5,"score":79},{"d":"Fri","ft":3.0,"score":48},{"d":"Sat","ft":2.5,"score":40},{"d":"Sun","ft":3.5,"score":60}]
+state pickedDay="Wed"
+Page
+  Nav sticky
+    Brand "Swell Table" icon="waves"
+    Row gap=4
+      Link "Today" onTap={go today}
+      Link "Spots" onTap={go spots}
+      Link "Week" onTap={go week}
+      Link "Alerts" onTap={go alerts}
+    Button "Set alert" onTap={go alerts}
+  Section
+    Column gap=16
+      Heading "The week at Ocean Beach" level=1
+      Text.muted "Wednesday is the best window: 5 ft, 14 s, light offshore wind."
+      BestWindow label="Best window this week" start="Wed 7a" end="Wed 11a" score=88
+  Section tint
+    Column gap=16
+      Heading "Surf height and score by day"
+      Card gap=12
+        BarChart values={map(weekDays, x => x.ft)} labels={map(weekDays, x => x.d)} h=220
+      Grid cols=7 gap=8
+        each w in weekDays
+          Card gap=4 onTap={pickedDay=w.d} fill={w.score>=75 ? "#FFBBF7D0" : "#FFFFFFFF"}
+            Text.strong "{w.d}"
+            Text "{w.ft} ft"
+            Text.caption "score {w.score}"
+      if pickedDay!=""
+        Card gap=8
+          Text.strong "{pickedDay} in detail"
+          WindArrow dir="NE" speed={pickedDay=="Wed" ? 6 : 14} unit="mph"
+          WaterTemp value=54 unit="F" trend="steady"
+  Footer
+    Row between
+      Text.strong "Swell Table"
+      Text.muted "Forecast refreshed every 3 hours"
+### Alerts
+state tab="alerts"
+state level="Intermediate"
+state minFt=3
+state maxFt=6
+state maxWind=12
+state minPeriod=10
+state notify=true
+state rules=[{"id":1,"spot":"Ocean Beach","label":"3 to 6 ft, wind under 12 mph","on":true},{"id":2,"spot":"Linda Mar","label":"2 to 4 ft, period over 9 s","on":true}]
+state matches=[{"when":"Wed 7a","spot":"Ocean Beach","ft":5.0,"wind":"6 mph NE"},{"when":"Thu 8a","spot":"Linda Mar","ft":3.5,"wind":"8 mph NE"}]
+App
+  Sidebar
+    Brand "Swell Table" icon="waves"
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={go today}
+    NavItem "Spots" icon="place" selected={tab=="spots"} onTap={go spots}
+    NavItem "Week" icon="calendar_month" selected={tab=="week"} onTap={go week}
+    NavItem "Alerts" icon="notifications" badge={length(matches)} selected={tab=="alerts"} onTap={tab="alerts"}
+  Main
+    Nav
+      Heading "Alerts"
+      Button "New rule" onTap={open newRule}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Text.strong "Your levels"
+        SegmentedButton bind=level items=["Beginner","Intermediate","Advanced"] onChange={minFt=(result=="Beginner" ? 1 : (result=="Intermediate" ? 3 : 5)); maxFt=(result=="Beginner" ? 3 : (result=="Intermediate" ? 6 : 12))}
+        Toggle "Notify me when conditions match" bind=notify
+      Card gap=8
+        Text.strong "Matching now"
+        each m in matches
+          ListTile "{m.spot}, {m.when}" onTap={go today}
+            Text.muted "{m.ft} ft, wind {m.wind}"
+      Card gap=8
+        Text.strong "Rules"
+        each r in rules
+          Row between middle
+            Column gap=2
+              Text.strong "{r.spot}"
+              Text.muted "{r.label}"
+            Row gap=8 middle
+              Toggle bind=r.on
+              IconButton "delete" tooltip="Remove rule" onTap={rules=removeWhere(rules, x => x.id==r.id); toast "Rule removed"}
+Dialog#newRule "New alert rule" "Tell me when the surf matches"
+  Select "Spot" bind=newSpot items=["Ocean Beach","Linda Mar","Mavericks","Steamer Lane"]
+  Row gap=12
+    Input "Min height (ft)" bind=minFt type=number
+    Input "Max height (ft)" bind=maxFt type=number
+  Slider bind=maxWind min=0 max=30
+  Text.muted "Max wind {maxWind} mph"
+  Slider bind=minPeriod min=6 max=20
+  Text.muted "Min period {minPeriod} s"
+  Button "Save rule" onTap={rules=append(rules, {"id": length(rules)+10, "spot": coalesce(newSpot,"Ocean Beach"), "label": "{minFt} to {maxFt} ft, wind under {maxWind} mph", "on": true}); toast "Alert saved"; close}
+
+// A wind arrow pointing the way the wind blows, with its strength.
+define WindArrow dir="N" speed=10 unit="mph"
+  state angles={"N":0,"NE":45,"E":90,"SE":135,"S":180,"SW":225,"W":270,"NW":315}
+  Row gap=8 middle
+    Icon "navigation" size=32 rotate={coalesce(angles[dir],0)}
+    Column gap=2
+      Text "{speed} {unit}" size=32 weight=700
+      Text.caption "{dir}, {speed < 8 ? "light" : (speed < 15 ? "moderate" : "strong")}"
+
+// A water temperature reading with its trend.
+define WaterTemp value=55 unit="F" trend="steady"
+  Row gap=8 middle
+    Icon "thermostat"
+    Text "{value} {unit}" size=32 weight=700
+    Text.caption "{trend}"
+
+// A row of star icons; read only or tapped to set the rating.
+define StarRating bind=value max=5 readonly=false
+  Row gap=2
+    each i in range(max)
+      Icon {i < value ? "star" : "star_border"} onTap={readonly ? "" : value=i+1}
+
+// A tide curve across the day as a smooth wave with a now line and high and low markers.
+define TideCurve values=[] labels=[] now=12 highs=[] lows=[] h=200
+  Stack h={h}
+    AreaChart values={values} labels={labels} smooth h={h}
+    Box w=2 h={h} fill=#FF2563EB left={now/24*100}
+    Row between pad=8
+      each hl in highs
+        Badge.info "High {hl}"
+      each lw in lows
+        Badge.neutral "Low {lw}"
+
+// Surf height by hour as bars, each with its period and a direction arrow.
+define SurfBars hours=[] h=200
+  Column gap=8
+    BarChart values={map(hours, x => x.ft)} labels={map(hours, x => x.h)} h={h}
+    Row between
+      each x in hours
+        Column center gap=2
+          Icon "arrow_upward" size=16
+          Text.caption "{x.period}s"
+          Text.caption "{x.dir}"
+
+// A highlighted green band for the best surf window.
+define BestWindow label="Best window" start="" end="" score=80
+  Row gap=12 middle pad=12 fill=#FFBBF7D0 radius=8
+    Icon "check_circle" color=#FF166534
+    Column grow gap=2
+      Text.strong "{label}"
+      Text.muted "{start} to {end}"
+    Badge.success "{score}"
+
+// A real map is not drawable here: shown as a labelled box with a pin for each spot.
+define SpotMap spots=[] bind=selected h=360 onPick
+  state selected=""
+  Stack h={h} fill=#FFDBEAFE radius=8
+    Text.muted "Map of spots" center
+    each s in spots
+      Icon "location_on" color={s.name==selected ? "#FFDC2626" : "#FF2563EB"} left={s.x*100} top={s.y*100} onTap={selected=s.name; onPick(s.name)}

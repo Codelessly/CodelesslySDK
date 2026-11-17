@@ -1,0 +1,3 @@
+App: Swell Table, tide and surf. A tide curve across the day as a smooth wave with a now line, high and low times marked; a surf height by hour as bars with period and direction arrows; a wind arrow and strength; a spot list with ratings in stars; a best window highlighted in green for the week; a water temperature; a map of spots with pins; alerts when conditions match your levels.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

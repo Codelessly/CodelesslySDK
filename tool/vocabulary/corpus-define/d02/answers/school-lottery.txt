@@ -1,0 +1,265 @@
+### Rank schools
+state tab="rank"
+state ranked=[{"id":"mh","name":"Maple Hill Elementary","seats":24,"taken":19,"sibling":true},{"id":"rv","name":"Riverside Montessori","seats":30,"taken":12,"sibling":false},{"id":"ck","name":"Cedar Knoll K-8","seats":18,"taken":17,"sibling":true},{"id":"ob","name":"Oak Bridge Academy","seats":40,"taken":22,"sibling":false}]
+state pool=[{"id":"nl","name":"North Lake STEM","seats":28,"taken":9,"sibling":false},{"id":"st","name":"St. Anne Magnet","seats":20,"taken":20,"sibling":true}]
+state locked=false
+every 1s onTick={secs=max(0,secs-1)}
+state secs=432000
+App
+  Sidebar
+    Brand "Seatdraw" icon="casino"
+    NavItem "Rank schools" icon="format_list_numbered" selected={tab=="rank"} onTap={tab="rank"}
+    NavItem "Draw day" icon="stars" selected={tab=="draw"} onTap={go draw-day}
+    NavItem "My offer" icon="mail" badge="1" onTap={go offer}
+    NavItem "Waitlist" icon="hourglass_top" onTap={go offer}
+    NavItem "Zone map" icon="map" selected={tab=="map"} onTap={tab="map"}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Okafor" size=32
+      Text.muted "Dana Okafor"
+  Main
+    Nav
+      Heading "Rank your schools" level=1
+      Row gap=12 middle
+        Badge.warning "Closes in"
+        Countdown seconds={secs} format="d h m"
+        Button "Submit ranking" disabled={locked || length(ranked)==0} onTap={open confirm}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Column grow gap=12
+          Card gap=12
+            Row between
+              Text.strong "Your ranking ({length(ranked)} of 6)"
+              Text.muted "Drag to reorder"
+            ReorderList bind=ranked disabled={locked}
+              each s in ranked
+                Row gap=12 middle
+                  Badge.primary "{index+1}"
+                  Column grow gap=4
+                    Row gap=8 middle
+                      Text.strong "{s.name}"
+                      if s.sibling
+                        PriorityTag "Sibling"
+                    SeatBar taken={s.taken} seats={s.seats}
+                  IconButton "close" tooltip="Remove" onTap={pool=append(pool,s); ranked=without(ranked,s)}
+            if length(ranked)==0
+              Text.muted "Add up to six schools from the list on the right."
+          Card gap=8
+            Text.strong "How the draw works"
+            Text.muted "Families are given a random number on draw day. Numbers are called in order, and each family is offered its highest-ranked school that still has a seat. Sibling priority is applied before numbers."
+        Column w=320 gap=12
+          Card gap=12
+            Text.strong "Available schools"
+            each p in pool
+              Row gap=8 middle
+                Column grow gap=4
+                  Text "{p.name}"
+                  SeatBar taken={p.taken} seats={p.seats}
+                IconButton "add" tooltip="Add to ranking" disabled={length(ranked)>=6} onTap={ranked=append(ranked,p); pool=without(pool,p)}
+            if length(pool)==0
+              Text.muted "All schools are ranked."
+          Card gap=8
+            Text.strong "Deadline"
+            Text.muted "Rankings lock on March 14 at 5:00 PM. You can reorder as often as you like until then."
+Dialog#confirm "Submit your ranking?" "You can still change it until the deadline."
+  Column gap=8
+    each s in ranked
+      Text "{index+1}. {s.name}"
+  Row gap=8 end
+    Button.ghost "Keep editing" onTap={close}
+    Button "Submit" onTap={locked=true; emit rankingSubmitted ranked; toast "Ranking submitted"; close}
+
+### Draw day
+state called=[]
+state drum="idle"
+state mine=[17,203,388]
+state all=[88,17,251,402,203,19,388,64,330,120]
+state n=0
+every 1500 when drum=="spinning" onTick={n=n+1; called=take(all,n); drum=n>=length(all) ? "done" : "spinning"}
+App
+  Sidebar
+    Brand "Seatdraw" icon="casino"
+    NavItem "Rank schools" icon="format_list_numbered" onTap={go rank-schools}
+    NavItem "Draw day" icon="stars" selected={true}
+    NavItem "My offer" icon="mail" badge="1" onTap={go offer}
+    NavItem "Zone map" icon="map" onTap={go rank-schools}
+  Main
+    Nav
+      Heading "Draw day: March 21" level=1
+      Row gap=8 middle
+        Badge.error "Live"
+        Button disabled={drum=="spinning"} onTap={drum="spinning"; n=0; called=[]} "Start the draw"
+    Column pad=24 gap=16
+      Grid cols=2 gap=16
+        Card gap=12 center
+          Text.strong "The drum"
+          Drum spinning={drum=="spinning"} balls={all} current={last(called)}
+          if drum=="idle"
+            Text.muted "Waiting for the registrar to start the draw."
+          if drum=="spinning"
+            Text.muted "Drawing number {n} of {length(all)}"
+          if drum=="done"
+            Text.success "The draw is complete."
+        Card gap=12
+          Text.strong "Your family numbers"
+          Row gap=8
+            each m in mine
+              Chip "#{m}" selected={contains(called,m)}
+          if any(mine, m=>contains(called,m))
+            Row gap=8 middle animate=pop
+              Icon "celebration"
+              Text.success "A number of yours was just called."
+          Text.muted "Your numbers light up as they are called."
+          Progress {n/length(all)}
+      Card gap=12
+        Row between
+          Text.strong "Numbers called, in order"
+          Text.muted "{length(called)} of {length(all)}"
+        Row scroll gap=8
+          each c in called
+            Box w=56 h=56 radius=28 center middle fill={contains(mine,c) ? "#FF2563EB" : "#FFE5E7EB"} animate=scale stagger=80
+              Text.strong "{c}" color={contains(mine,c) ? "#FFFFFFFF" : "#FF111827"}
+        if length(called)==0
+          Text.muted "No numbers called yet."
+
+### Offer and waitlist
+state offer="pending"
+state secs=86400
+state pos=14
+state posHistory=[31,27,22,19,16,14]
+every 1s onTick={secs=max(0,secs-1)}
+every 30s onTick={pos=max(1,pos-1)}
+App
+  Sidebar
+    Brand "Seatdraw" icon="casino"
+    NavItem "Rank schools" icon="format_list_numbered" onTap={go rank-schools}
+    NavItem "Draw day" icon="stars" onTap={go draw-day}
+    NavItem "My offer" icon="mail" selected={true}
+    NavItem "Zone map" icon="map" onTap={go zone-map}
+  Main
+    Nav
+      Heading "Your offer" level=1
+      Avatar "Dana Okafor" size=32
+    Column pad=24 gap=16
+      Row gap=24 top
+        Column grow gap=16
+          Card gap=12 animate=slide-up
+            Row between middle
+              Column gap=2
+                Text.caption "OFFER FOR LEO OKAFOR, KINDERGARTEN"
+                Heading "Maple Hill Elementary" level=3
+              Badge.success "Rank 1 of 4"
+            Text.muted "A seat is held for you in the Kindergarten class of 2027-28. Sibling priority was applied."
+            if offer=="pending"
+              Row gap=8 middle
+                Icon "timer"
+                Text.strong "Respond within"
+                Countdown seconds={secs} format="h m s"
+              Progress {secs/86400}
+              Row gap=8
+                Button "Accept seat" onTap={offer="accepted"; emit offerAccepted; toast "Seat accepted"}
+                Button.outline "Decline" onTap={open declineConfirm}
+            if offer=="accepted"
+              Row gap=8 middle
+                Icon "check_circle"
+                Text.success "Accepted. Registration paperwork opens April 1."
+            if offer=="declined"
+              Row gap=8 middle
+                Icon "cancel"
+                Text.muted "Declined. Your next ranked school is now being considered."
+          Card gap=12
+            Row between
+              Text.strong "Waitlist: Riverside Montessori"
+              Badge.info "Rank 2"
+            Row gap=12 middle
+              Text "#{pos}" size=48 weight=700
+              Column gap=2
+                Text.strong "Your position"
+                Text.muted "Moves up as families decline"
+            LineChart values={posHistory} labels=["Mar 22","Mar 23","Mar 24","Mar 25","Mar 26","Today"] h=140
+        Column w=320 gap=12
+          Card gap=8
+            Text.strong "What happens next"
+            Text.muted "1. Accept or decline within 24 hours."
+            Text.muted "2. Accepting removes you from lower-ranked waitlists."
+            Text.muted "3. A declined seat goes to the next family in the draw."
+Dialog#declineConfirm "Decline this seat?" "This cannot be undone."
+  Text.muted "Maple Hill Elementary will be offered to the next family. You will stay on higher-ranked waitlists only."
+  Row gap=8 end
+    Button.ghost "Go back" onTap={close}
+    Button.destructive "Decline" onTap={offer="declined"; emit offerDeclined; close}
+
+### Zone map
+state zone="all"
+state homes=[{"name":"Okafor","lat":40.2,"lng":-75.1,"zone":"mh"},{"name":"Reyes","lat":40.25,"lng":-75.05,"zone":"rv"},{"name":"Patel","lat":40.18,"lng":-75.15,"zone":"mh"}]
+state sel=""
+App
+  Sidebar
+    Brand "Seatdraw" icon="casino"
+    NavItem "Rank schools" icon="format_list_numbered" onTap={go rank-schools}
+    NavItem "Draw day" icon="stars" onTap={go draw-day}
+    NavItem "My offer" icon="mail" onTap={go offer-and-waitlist}
+    NavItem "Zone map" icon="map" selected={true}
+  Main
+    Nav
+      Heading "Homes and school zones" level=1
+      SegmentedButton bind=zone items=["all","mh","rv","ck"]
+    Row grow top
+      MapView grow h=520 center={[40.2,-75.1]} zoom=11
+        each z in ["mh","rv","ck"]
+          ZoneLayer zoneId={z} visible={zone=="all" || zone==z}
+        each h in homes
+          MapPin lat={h.lat} lng={h.lng} label={h.name} selected={sel==h.name} onTap={sel=h.name}
+      Pane w=320 pad=16 gap=12
+        Text.strong "Selected home"
+        if sel==""
+          Text.muted "Tap a pin to see which zone it falls in."
+        each h in filter(homes, x=>x.name==sel)
+          Card gap=4
+            Text.strong "{h.name} household"
+            Text.muted "In the {upper(h.zone)} attendance zone"
+            Badge.success "Zone priority applies"
+        Divider
+        Text.strong "Zones"
+        each z in ["mh","rv","ck"]
+          ListTile "{upper(z)} zone" selected={zone==z} onTap={zone=z}
+
+// A map with pins and shaded zones is not drawable from the core words; it shows as a labelled box.
+define MapView center=[0,0] zoom=10 h=400
+  Box h={h} fill=#FFE0F2FE radius=8 center middle
+    Text.muted "Map"
+    ...
+
+// Draws a shaded region on the map; shown as a labelled tag.
+define ZoneLayer zoneId="" visible=true
+  if visible
+    Badge.info "Zone {upper(zoneId)}"
+
+// A marker on the map; shown as a tappable labelled badge.
+define MapPin lat=0 lng=0 label="" selected=false onTap
+  Badge.primary "{label}" onTap={onTap}
+
+define Countdown seconds=0 format="h m s"
+  Row gap=4 middle
+    Icon "schedule"
+    Text.strong "{floor(seconds/86400)}d {floor(seconds%86400/3600)}h {floor(seconds%3600/60)}m {seconds%60}s"
+
+define SeatBar taken=0 seats=1
+  Row gap=8 middle
+    Progress {taken/seats} w=120
+    Text.caption "{seats-taken} of {seats} seats left"
+
+define PriorityTag "label"
+  Badge.warning "{label} priority"
+
+define ReorderList bind=items disabled=false
+  state items=[]
+  Column gap=8
+    ...
+
+// A spinning drum with numbered balls is not drawable from the core words; it shows as a labelled box that spins.
+define Drum spinning=false balls=[] current=0
+  Stack center middle
+    Box w=200 h=200 radius=100 fill=#FFFEF3C7 border=3 animate={spinning ? "spin" : "none"}
+      Text.muted "drum"
+    Text "{current}" size=48 weight=700

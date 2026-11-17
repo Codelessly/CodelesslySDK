@@ -1,0 +1,166 @@
+### Scoresheet
+state view="sheet"
+state teams=[{"id":0,"name":"Quizzy Rascals","guess":0},{"id":1,"name":"The Cluedo Crew","guess":0},{"id":2,"name":"Pie Hards","guess":0},{"id":3,"name":"Les Quizerables","guess":0}]
+state rounds=[{"id":1,"name":"General Knowledge","joker":false,"s":[7,6,8,5]},{"id":2,"name":"Geography","joker":true,"s":[5,8,6,7]},{"id":3,"name":"Music","joker":false,"s":[9,7,6,8]},{"id":4,"name":"Sport","joker":false,"s":[4,6,7,5]},{"id":5,"name":"Film and TV","joker":false,"s":[0,0,0,0]}]
+state tbAnswer=1066
+state tab=[{"id":1,"item":"Pint of Landlord","qty":4,"price":5.2},{"id":2,"item":"Cheesy chips","qty":2,"price":6.5}]
+state tabNote="Table 7, Ray paying. Keep it open for the second half."
+state newItem=""
+state newPrice=0
+App
+  Sidebar
+    Brand "Round Table" icon="quiz"
+    NavItem "Scoresheet" icon="grid_on" selected={view=="sheet"} onTap={view="sheet"}
+    NavItem "Question reader" icon="campaign" onTap={go reader}
+    NavItem "Leaderboard" icon="leaderboard" onTap={go leaderboard}
+    NavItem "Bar tab" icon="sports_bar" badge="{length(tab)}" onTap={open tabDrawer}
+    Spacer grow
+    Text.muted "Quizmaster: Dee Okafor"
+  Main
+    Nav
+      Heading "Thursday Quiz Night" level=1
+      Row gap=8
+        Button.outline "Tiebreaker" icon="straighten" onTap={open tiebreak}
+        Button "Add round" icon="add" onTap={rounds=append(rounds,{"id":length(rounds)+1,"name":"New round","joker":false,"s":[0,0,0,0]})}
+    Column pad=24 gap=16
+      Card gap=4
+        Row between
+          Column gap=2
+            Text.muted "Leading after {count(rounds,r=>r.s[0]>=0)} rounds"
+            Text.heading "{first(sortByDesc(teams,t=>sum(rounds,r=>r.s[t.id]*(r.joker?2:1)))).name}"
+          Badge.success "{max(max(sum(rounds,r=>r.s[0]*(r.joker?2:1)),sum(rounds,r=>r.s[1]*(r.joker?2:1))),max(sum(rounds,r=>r.s[2]*(r.joker?2:1)),sum(rounds,r=>r.s[3]*(r.joker?2:1))))} points"
+      Card gap=0 pad=0
+        Row scroll
+          Column gap=0
+            Row gap=0 pad=12 border-bottom=#FFE5E7EB
+              Text.strong "Round" w=200
+              each team in teams
+                Text.strong "{team.name}" w=130 center
+              Text.strong "Joker" w=90 center
+            each round in rounds
+              Row gap=0 pad=8 middle border-bottom=#FFF3F4F6 fill={round.joker ? "#FFFEF3C7" : "#00FFFFFF"}
+                Input bind=round.name w=200
+                each team in teams
+                  Row w=130 center
+                    ScoreCell value={round.s[team.id]} joker={round.joker} onChange={rounds=updateWhere(rounds,r=>r.id==round.id,r=>with(r,"s",setAt(r.s,team.id,result)))}
+                Row w=90 center
+                  Toggle bind=round.joker
+            Row gap=0 pad=12 middle fill=#FFF9FAFB
+              Text.strong "Total" w=200
+              each team in teams
+                Row w=130 center
+                  Box pad=[10,4,10,4] radius=6 fill={sum(rounds,r=>r.s[team.id]*(r.joker?2:1)) == max(max(sum(rounds,r=>r.s[0]*(r.joker?2:1)),sum(rounds,r=>r.s[1]*(r.joker?2:1))),max(sum(rounds,r=>r.s[2]*(r.joker?2:1)),sum(rounds,r=>r.s[3]*(r.joker?2:1)))) ? "#FF16A34A" : "#00FFFFFF"}
+                    Text.strong "{sum(rounds,r=>r.s[team.id]*(r.joker?2:1))}" size=20 color={sum(rounds,r=>r.s[team.id]*(r.joker?2:1)) == max(max(sum(rounds,r=>r.s[0]*(r.joker?2:1)),sum(rounds,r=>r.s[1]*(r.joker?2:1))),max(sum(rounds,r=>r.s[2]*(r.joker?2:1)),sum(rounds,r=>r.s[3]*(r.joker?2:1)))) ? "#FFFFFFFF" : "#FF111827"}
+              Spacer w=90
+      Text.muted "A joker doubles that round's score for every team that played it."
+  Dialog#tiebreak "Tiebreaker" "Closest number wins. In what year was the Battle of Hastings?"
+    Input "Correct answer" type=number bind=tbAnswer
+    each team in teams
+      Input "{team.name}" type=number bind=team.guess
+    Card gap=4
+      Text.muted "Closest so far"
+      Text.heading "{first(sortBy(teams,t=>abs(t.guess-tbAnswer))).name}"
+      Text.caption "Off by {abs(first(sortBy(teams,t=>abs(t.guess-tbAnswer))).guess-tbAnswer)}"
+    Button "Done" onTap={toast "Tiebreak recorded"; close}
+  Drawer#tabDrawer "Bar tab" right
+    each line in tab
+      Row between middle
+        Column gap=2
+          Text.strong "{line.item}"
+          Text.muted "{line.qty} x {money(line.price,"£",2)}"
+        Row gap=4 middle
+          Text "{money(line.qty*line.price,"£",2)}"
+          IconButton "delete" tooltip="Remove" onTap={tab=removeWhere(tab,l=>l.id==line.id)}
+    Divider
+    Row between
+      Text.strong "Tab total"
+      Text.strong "{money(sum(tab,l=>l.qty*l.price),"£",2)}"
+    Input "Item" bind=newItem
+    Input "Price" type=number bind=newPrice
+    Button.outline "Add to tab" onTap={newItem=="" ? toast "Name the item" : {tab=append(tab,{"id":length(tab)+10,"item":newItem,"qty":1,"price":newPrice}); newItem=""; newPrice=0}}
+    Input "Note" multiline bind=tabNote
+
+### Question reader
+state qi=0
+state questions=[{"round":"Geography","q":"Which river flows through both Vienna and Budapest?","a":"The Danube"},{"round":"Geography","q":"What is the only country in the world with a non-rectangular national flag?","a":"Nepal"},{"round":"Music","q":"Which band released the 1975 album Wish You Were Here?","a":"Pink Floyd"}]
+state left=10
+state running=true
+state revealed=false
+state clipPlaying=false
+every 1s when running onTick={left=left-1; left<=1 ? {running=false; revealed=true} : toast ""}
+App
+  Sidebar
+    Brand "Round Table" icon="quiz"
+    NavItem "Scoresheet" icon="grid_on" onTap={go scoresheet}
+    NavItem "Question reader" icon="campaign" selected={true}
+    NavItem "Leaderboard" icon="leaderboard" onTap={go leaderboard}
+    Spacer grow
+    Text.muted "Question {qi+1} of {length(questions)}"
+  Main
+    Nav
+      Heading "{questions[qi].round}" level=1
+      Row gap=8
+        Button.outline "Previous" icon="chevron_left" onTap={qi=max(0,qi-1); left=10; running=true; revealed=false}
+        Button "Next question" icon="chevron_right" onTap={qi=min(length(questions)-1,qi+1); left=10; running=true; revealed=false}
+    Column pad=24 gap=24 center
+      Progress {left/10}
+      Text "{questions[qi].q}" size=44 weight=700 center
+      if questions[qi].round=="Music"
+        MusicClip "Mystery track" title={questions[qi].a} hideTitle={!revealed} playing={clipPlaying} onPlay={clipPlaying=true} onPause={clipPlaying=false}
+      Row gap=16 middle center
+        Ring {left/10}
+        Text.strong "{max(left,0)}s to answer" size=24
+      if revealed
+        Card gap=8 center animate=pop
+          Text.muted "The answer"
+          Text "{questions[qi].a}" size=40 weight=700 color=#FF16A34A
+      if !revealed
+        Button.outline "Reveal now" onTap={revealed=true; running=false}
+    Footer
+      Row between pad=12
+        Text.muted "Pens down when the timer ends"
+        Button.ghost "Restart timer" icon="replay" onTap={left=10; running=true; revealed=false}
+
+### Leaderboard
+state standings=[{"name":"Quizzy Rascals","points":38},{"name":"The Cluedo Crew","points":39},{"name":"Pie Hards","points":44},{"name":"Les Quizerables","points":31}]
+state shown=2
+every 4s onTick={standings=updateWhere(standings,s=>s.name=="Quizzy Rascals",s=>with(s,"points",s.points+(shown==2?7:0))); shown=shown+1}
+Page
+  Nav
+    Brand "Round Table" icon="quiz"
+    Row gap=4
+      Link "Scoresheet" onTap={go scoresheet}
+      Link "Question reader" onTap={go reader}
+    Badge.primary "After round {shown}"
+  Section center
+    Heading "Leaderboard" level=1
+    Text.muted "Standings as the rounds are scored"
+  Section narrow
+    RankBoard items={standings} labelKey="name" valueKey="points" unit="pts"
+
+// The fixed rows of a ranking: a name and a value, drawn from the highest down
+define ScoreCell value=0 joker=false onChange
+  state v=value
+  Input type=number bind=v w=70 center onChange={onChange(result)}
+
+// A mystery clip: the player cannot play real sound here, so it is a labelled box that hides the title until revealed
+define MusicClip "label" title="" hideTitle=true playing=false onPlay onPause
+  Card gap=12 pad=16
+    Row gap=12 middle
+      IconButton {playing ? "pause_circle" : "play_circle"} tooltip="Play" onTap={playing ? onPause : onPlay}
+      Column grow gap=4
+        Text.strong "{label}"
+        Text.muted "{hideTitle ? "Title hidden" : title}"
+      Icon "graphic_eq"
+    Progress {playing ? 0.5 : 0}
+
+// A ranked list sorted by value with each row sliding to its new place
+define RankBoard items=[] labelKey="name" valueKey="value" unit=""
+  Column gap=8
+    each row in sortByDesc(items,x=>x[valueKey])
+      Card pad=16 animate=slide-up stagger=80 fill={index==0 ? "#FFFEF3C7" : "#FFFFFFFF"}
+        Row gap=16 middle
+          Text.strong "{index+1}" size=28 w=40
+          Text.strong "{row[labelKey]}" size=24
+          Spacer grow
+          Text.strong "{row[valueKey]} {unit}" size=28

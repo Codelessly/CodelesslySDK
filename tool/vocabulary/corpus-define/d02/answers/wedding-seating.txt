@@ -1,0 +1,133 @@
+### Floor plan
+state guests=[{"id":"g1","name":"Maya Reyes","side":"Bride","diet":"Vegetarian","party":"Family","table":"","apart":["g4"]},{"id":"g2","name":"Daniel Reyes","side":"Bride","diet":"","party":"Family","table":"t1","apart":[]},{"id":"g3","name":"Priya Nair","side":"Groom","diet":"Vegan","party":"College","table":"t2","apart":[]},{"id":"g4","name":"Tom Becker","side":"Groom","diet":"","party":"Family","table":"","apart":["g1"]},{"id":"g5","name":"Lena Fischer","side":"Bride","diet":"Gluten-free","party":"Work","table":"t1","apart":[]},{"id":"g6","name":"Omar Haddad","side":"Groom","diet":"Halal","party":"College","table":"","apart":[]},{"id":"g7","name":"Grace Okafor","side":"Bride","diet":"","party":"Work","table":"","apart":[]},{"id":"g8","name":"Sam Whitlock","side":"Groom","diet":"Nut allergy","party":"College","table":"t2","apart":[]}]
+state tables=[{"id":"t1","name":"Table 1","shape":"round","cap":8},{"id":"t2","name":"Table 2","shape":"round","cap":8},{"id":"t3","name":"Head table","shape":"long","cap":12}]
+state q=""
+state sideFilter="All"
+state dietOnly=false
+state selTable="t1"
+state grp="College"
+App
+  Sidebar
+    Brand "Tablecloth" icon="table_restaurant"
+    NavItem "Floor plan" icon="grid_view" selected={true}
+    NavItem "Print view" icon="print" onTap={go print-view}
+    NavItem "Auto-seat" icon="auto_awesome" onTap={open autoseat}
+    Spacer grow
+    Text.muted "Reyes and Becker wedding, 14 June"
+  Main
+    Nav
+      Heading "Seating plan"
+      Row gap=8
+        Badge.warning "{count(guests,g=>g.table==\"\")} unseated"
+        Button.outline "Add table" onTap={open addtable}
+        Button "Auto-seat a group" onTap={open autoseat}
+    Row top
+      Pane w=320 pad=16 gap=12
+        Text.panelTitle "Guests"
+        Input "Search guests" bind=q
+        SegmentedButton bind=sideFilter items=["All","Bride","Groom"]
+        Toggle "Dietary needs only" bind=dietOnly
+        Text.caption "Drag a guest onto a table"
+        Column gap=8 drop=guest onDrop={guests=updateWhere(guests,g=>g.id==result.data,g=>with(g,"table",""))}
+          each g in filter(guests,x=>x.table=="" && (sideFilter=="All" || x.side==sideFilter) && (!dietOnly || x.diet!="") && contains(lower(x.name),lower(q)))
+            GuestRow name={g.name} side={g.side} diet={g.diet} drag=guest(g.id) onTap={sel=g.id; open guestmenu}
+          if count(guests,x=>x.table=="")==0
+            Text.muted "Everyone has a seat."
+      Column grow pad=24 gap=16 scroll
+        Grid cols=2 gap=16
+          each t in tables
+            SeatTable name={t.name} shape={t.shape} cap={t.cap} filled={count(guests,g=>g.table==t.id)} conflicts={count(guests,g=>g.table==t.id && any(guests,o=>o.table==t.id && contains(g.apart,o.id)))} drop=guest onDrop={guests=updateWhere(guests,g=>g.id==result.data,g=>with(g,"table",t.id))} onTap={selTable=t.id}
+              each g in filter(guests,x=>x.table==t.id)
+                GuestRow name={g.name} side={g.side} diet={g.diet} drag=guest(g.id) onTap={sel=g.id; open guestmenu}
+        if count(guests,g=>any(guests,o=>o.table==g.table && g.table!="" && contains(g.apart,o.id)))>0
+          Card gap=8 border-left=#FFDC2626
+            Text.strong "Seating conflicts"
+            each g in filter(guests,x=>any(guests,o=>o.table==x.table && x.table!="" && contains(x.apart,o.id)))
+              Row gap=8 middle
+                Icon "warning" color=#FFDC2626
+                Text "{g.name} is kept apart from someone at the same table."
+                Spacer grow
+                Button.outline "Move to unseated" onTap={guests=updateWhere(guests,x=>x.id==g.id,x=>with(x,"table",""))}
+Menu#guestmenu
+  MenuItem "Unseat" icon="event_seat" onTap={guests=updateWhere(guests,g=>g.id==sel,g=>with(g,"table",""))}
+  MenuItem "Seat at selected table" icon="chair" onTap={guests=updateWhere(guests,g=>g.id==sel,g=>with(g,"table",selTable))}
+  MenuItem "Keep apart from..." icon="block" onTap={open apart}
+Dialog#apart "Keep apart" "Pick the guest this person should not sit with."
+  Select "Guest" bind=apartWith items={map(filter(guests,g=>g.id!=sel),g=>g.name)}
+  Button "Save" onTap={guests=updateWhere(guests,g=>g.id==sel,g=>with(g,"apart",append(g.apart,find(guests,o=>o.name==apartWith).id))); toast "Conflict rule saved"; close}
+Dialog#addtable "Add a table"
+  Input "Name" bind=newName
+  SegmentedButton bind=newShape items=["round","long"]
+  Input "Seats" type=number bind=newCap
+  Button "Add" onTap={tables=append(tables,{"id":concat(["t"],[length(tables)+1])[1],"name":newName,"shape":newShape,"cap":newCap}); close}
+Dialog#autoseat "Auto-seat a group" "Seats every unseated guest of the group at one table."
+  Select "Group" bind=grp items=["Family","College","Work"]
+  Select "Table" bind=selTable items={map(tables,t=>t.id)}
+  Text.muted "{count(guests,g=>g.table==\"\" && g.party==grp)} guests to seat, {find(tables,t=>t.id==selTable).cap-count(guests,g=>g.table==selTable)} seats free"
+  Button "Seat group" onTap={count(guests,g=>g.table=="" && g.party==grp)>find(tables,t=>t.id==selTable).cap-count(guests,g=>g.table==selTable) ? toast "Not enough free seats at that table" : {guests=map(guests,g=>g.table=="" && g.party==grp ? with(g,"table",selTable) : g); toast "Group seated"; close}}
+
+// A guest line: avatar, name, side and dietary tags.
+define GuestRow "name" side="" diet="" onTap
+  Row gap=8 middle pad=6 radius=6 border=1 onTap={onTap}
+    Avatar "{name}" size=28
+    Column grow
+      Text.strong "{name}"
+      Row gap=4
+        Badge.neutral "{side}"
+        if diet!=""
+          Badge.info "{diet}"
+    Icon "drag_indicator"
+
+// A table on the floor plan with its fill, a conflict warning and seats for its guests.
+define SeatTable "name" shape="round" cap=8 filled=0 conflicts=0 onTap
+  Card gap=8 onTap={onTap} border={conflicts>0 ? 2 : 1}
+    Row between middle
+      Text.strong "{name}"
+      Badge.neutral "{filled}/{cap}"
+    Progress {filled/cap}
+    Box w={shape=="round" ? 120 : 280} h={shape=="round" ? 120 : 56} radius={shape=="round" ? 60 : 12} fill=#FFF3F4F6 center middle
+      Text.caption "{shape}"
+    if conflicts>0
+      Row gap=4
+        Icon "warning" color=#FFDC2626
+        Text.danger "{conflicts} conflict(s)"
+    if filled>=cap
+      Badge.success "Full"
+    ...
+
+### Print view
+App
+  Sidebar
+    Brand "Tablecloth" icon="table_restaurant"
+    NavItem "Floor plan" icon="grid_view" onTap={go floor-plan}
+    NavItem "Print view" icon="print" selected={true}
+  Main
+    Nav
+      Heading "Seating list"
+      Row gap=8
+        Select "Sort" bind=printSort items=["By table","By name"]
+        Button "Print" icon="print" onTap={emit print}
+    Column pad=24 gap=16 scroll
+      if printSort!="By name"
+        each t in tables
+          Card gap=8
+            Row between
+              Heading "{t.name}" level=3
+              Text.muted "{count(guests,g=>g.table==t.id)} of {t.cap} seats"
+            each g in sortBy(filter(guests,x=>x.table==t.id),x=>x.name)
+              Row gap=12
+                Text.strong "{g.name}" w=180
+                Text.muted "{g.side}" w=80
+                Text "{g.diet}"
+        Card gap=8
+          Heading "Unseated" level=3
+          each g in filter(guests,x=>x.table=="")
+            Row gap=12
+              Text "{g.name}" w=180
+              Text.muted "{g.side}"
+      if printSort=="By name"
+        Card gap=8
+          each g in sortBy(guests,x=>x.name)
+            Row gap=12
+              Text.strong "{g.name}" w=180
+              Text "{coalesce(find(tables,t=>t.id==g.table).name,\"Unseated\")}"

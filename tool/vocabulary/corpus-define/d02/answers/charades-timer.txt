@@ -1,0 +1,204 @@
+### Setup
+state cats=["film","animal"]
+state level="Medium"
+state teams=[{"name":"Red Foxes"},{"name":"Blue Herons"}]
+state scores=[0,0]
+state team=0
+state streak=0
+state best=0
+state idx=0
+state left=60
+state running=false
+state revealed=false
+state played=[]
+state deck=[{"word":"Titanic","cat":"film","d":"Easy"},{"word":"Jaws","cat":"film","d":"Easy"},{"word":"The Lion King","cat":"film","d":"Easy"},{"word":"Back to the Future","cat":"film","d":"Medium"},{"word":"Inception","cat":"film","d":"Hard"},{"word":"Flamingo","cat":"animal","d":"Easy"},{"word":"Sloth","cat":"animal","d":"Easy"},{"word":"Octopus","cat":"animal","d":"Medium"},{"word":"Praying mantis","cat":"animal","d":"Hard"},{"word":"Brushing teeth","cat":"action","d":"Easy"},{"word":"Parallel parking","cat":"action","d":"Medium"},{"word":"Threading a needle","cat":"action","d":"Hard"}]
+state pool=[]
+App
+  Sidebar
+    Brand "Mime Time" icon="theater_comedy"
+    NavItem "Setup" icon="tune" selected={true} onTap={go setup}
+    NavItem "Play" icon="timer" onTap={go play}
+    NavItem "Rules" icon="menu_book" onTap={open rules}
+    Spacer grow
+    Text.muted "Next up: {teams[team].name}"
+  Main
+    Nav
+      Heading "Set up the game" level=1
+      Button "How to play" onTap={open rules}
+    Column pad=24 gap=16 maxw=720
+      Card gap=12
+        Text.strong "Categories"
+        Row gap=8
+          FilterChip "Film" selected={contains(cats,"film")} onTap={cats=contains(cats,"film") ? without(cats,"film") : append(cats,"film")}
+          FilterChip "Animal" selected={contains(cats,"animal")} onTap={cats=contains(cats,"animal") ? without(cats,"animal") : append(cats,"animal")}
+          FilterChip "Action" selected={contains(cats,"action")} onTap={cats=contains(cats,"action") ? without(cats,"action") : append(cats,"action")}
+        Text.strong "Difficulty"
+        SegmentedButton bind=level items=["Easy","Medium","Hard"]
+        Text.muted "{count(deck,c=>contains(cats,c.cat) && c.d==level)} cards match"
+      Card gap=12
+        Text.strong "Teams"
+        each t in teams
+          Row gap=12 middle
+            Avatar "{t.name}" size=40
+            Input "Team name" bind=t.name grow
+            Text.strong "{scores[index]}"
+        Row gap=8
+          Button.outline "Add a team" onTap={teams=append(teams,{"name":"Team " + (length(teams)+1)}); scores=append(scores,0)}
+          Button.ghost "Reset scores" onTap={scores=map(scores,s=>0); streak=0; best=0; team=0}
+      Card gap=8
+        Text.strong "Scoreboard"
+        Scoreboard teams={teams} scores={scores} active={team}
+      Button "Start {teams[team].name}'s round" size=large onTap={pool=filter(deck,c=>contains(cats,c.cat) && c.d==level); idx=0; left=60; played=[]; revealed=false; running=false; go play}
+Dialog#rules "Rules of Mime Time" "Read once, then play"
+  Column gap=8
+    Text "1. The acting team sends one player. Only they see the card."
+    Text "2. Press and hold the card to reveal the word. Let go and it hides again."
+    Text "3. Act it out in silence. No sounds, no pointing at objects, no spelling."
+    Text "4. Tap Got it (or tilt the phone down) when your team guesses: +1 point and the streak grows."
+    Text "5. Tap Pass to skip. Skipping breaks the streak and scores nothing."
+    Text "6. You have sixty seconds. The ring pulses over the last ten. The buzzer ends the round."
+    Text "7. Teams alternate. The highest score after every team has had three rounds wins."
+  Button "Got it" onTap={close}
+
+### Play
+state left=60
+state running=false
+state revealed=false
+state idx=0
+state team=0
+state streak=0
+state best=0
+state scores=[0,0]
+state teams=[{"name":"Red Foxes"},{"name":"Blue Herons"}]
+state pool=[{"word":"Titanic","cat":"film","d":"Easy"}]
+state played=[]
+every 1s when running onTick={left=left-1; left<=1 ? {running=false; open timeup} : {}}
+App
+  Main
+    Nav
+      Button.ghost "Quit" icon="arrow_back" onTap={running=false; go setup}
+      Text.strong "{teams[team].name}"
+      Row gap=8
+        Badge.warning "Streak {streak}"
+        IconButton "help_outline" tooltip="Rules" onTap={open rules}
+    Column pad=24 gap=20 center maxw=720
+      Stack center middle
+        if left>10
+          Ring {left/60} size=160
+        if left<=10
+          Ring {left/60} size=160 color=#FFDC2626 animate=pulse
+        Text "{left}" size=56 weight=700 color={left<=10 ? "#FFDC2626" : "#FF111827"}
+      Text.muted "seconds left"
+      HoldReveal word={pool[idx % length(pool)].word} category={pool[idx % length(pool)].cat} bind=revealed
+      Row gap=12 center
+        Button.outline "Pass" icon="skip_next" size=large disabled={!running} onTap={played=append(played,{"word":pool[idx % length(pool)].word,"ok":false}); streak=0; idx=idx+1; revealed=false}
+        Button "Got it" icon="check" size=large disabled={!running} onTap={scores=setAt(scores,team,scores[team]+1); streak=streak+1; best=max(best,streak+1); played=append(played,{"word":pool[idx % length(pool)].word,"ok":true}); idx=idx+1; revealed=false; toast "+1 for {teams[team].name}"}
+      if !running
+        Button "Start the clock" icon="play_arrow" size=large onTap={running=true}
+      if running
+        Button.ghost "Pause" icon="pause" onTap={running=false}
+      TiltGesture "Tilt the phone down for Got it" disabled={!running} onTilt={scores=setAt(scores,team,scores[team]+1); streak=streak+1; played=append(played,{"word":pool[idx % length(pool)].word,"ok":true}); idx=idx+1; revealed=false; toast "Tilt! +1"}
+    Footer
+      Scoreboard teams={teams} scores={scores} active={team}
+Dialog#timeup "Time is up"
+  Buzzer sound="horn" playing={left<=1} label="Buzzer"
+  Column gap=8 center
+    Text.heading "Round over"
+    Text.muted "{count(played,p=>p.ok)} words guessed by {teams[team].name}"
+    Button "See the summary" onTap={close; go summary}
+
+### Summary
+state played=[{"word":"Titanic","ok":true},{"word":"Octopus","ok":true},{"word":"Parallel parking","ok":false},{"word":"Jaws","ok":true},{"word":"Sloth","ok":false}]
+state teams=[{"name":"Red Foxes"},{"name":"Blue Herons"}]
+state scores=[3,2]
+state team=0
+state best=2
+state streak=0
+state left=60
+state idx=0
+state revealed=false
+Page
+  Nav
+    Brand "Mime Time" icon="theater_comedy"
+    Row gap=4
+      Link "Setup" onTap={go setup}
+      Link "Rules" onTap={open rules}
+    Button.outline "Scoreboard" onTap={open board}
+  Section narrow
+    Heading "{teams[team].name}: round summary" level=1
+    Text.muted "{count(played,p=>p.ok)} of {length(played)} words guessed. Best streak {best}."
+    Card gap=0
+      each p in played
+        ListTile "{p.word}" leading={p.ok ? "check_circle" : "skip_next"} trailing={p.ok ? "+1" : "Passed"}
+    Row gap=12
+      Button "Next team" icon="swap_horiz" onTap={team=(team+1) % length(teams); streak=0; left=60; idx=idx+1; played=[]; revealed=false; go setup}
+      Button.outline "Share result" icon="share" onTap={emit share {team: teams[team].name, score: scores[team]}}
+  Footer
+    Text.muted "Mime Time. Keep it silent."
+Sheet#board "Scoreboard"
+  Scoreboard teams={teams} scores={scores} active={team}
+  Button "Close" onTap={close}
+
+### Rules
+Page
+  Nav
+    Brand "Mime Time" icon="theater_comedy"
+    Row gap=4
+      Link "Setup" onTap={go setup}
+      Link "Play" onTap={go play}
+  Section narrow
+    Heading "How to play" level=1
+    Text.muted "Charades against the clock. Two teams, sixty seconds, no talking."
+    Grid cols=2 gap=16
+      Card gap=8
+        IconTile "visibility"
+        Heading "Hold to reveal" level=3
+        Text.muted "Only the actor sees the word. Press and hold the card; let go to hide it."
+      Card gap=8
+        IconTile "timer"
+        Heading "Sixty seconds" level=3
+        Text.muted "The ring drains and pulses over the final ten. A buzzer ends the round."
+      Card gap=8
+        IconTile "check_circle"
+        Heading "Got it or pass" level=3
+        Text.muted "Got it scores and builds a streak. Pass moves on and breaks it."
+      Card gap=8
+        IconTile "screen_rotation"
+        Heading "Tilt to score" level=3
+        Text.muted "Tilt the phone down to log a Got it without touching the screen."
+    Button "Back to setup" onTap={go setup}
+
+// A card that hides its word until the player presses and holds; the hold itself (press and release events) cannot be drawn, so it shows the word on a tap toggle.
+define HoldReveal word="" category="film" bind=revealed
+  state revealed=false
+  Card gap=8 center fill={revealed ? "#FFFEF3C7" : "#FF1F2937"} h=180 onTap={revealed=!revealed}
+    Badge.neutral "{upper(category)}"
+    if revealed
+      Text.title "{word}" size=32 weight=700 center color=#FF111827
+    if !revealed
+      Icon "visibility_off"
+      Text.muted "Press and hold to reveal" color=#FFE5E7EB
+
+// A device tilt sensor cannot be drawn here, so it shows as a labelled box; a tap stands in for the tilt.
+define TiltGesture "label" disabled=false onTilt
+  Box pad=12 radius=8 fill=#FFEEF2FF center onTap={disabled ? {} : onTilt}
+    Row gap=8 middle
+      Icon "screen_rotation"
+      Text.small "{label}"
+
+// A sound cannot be played here, so it shows as a labelled box that lights up while it plays.
+define Buzzer sound="horn" playing=false label="Buzzer"
+  Box pad=8 radius=8 fill={playing ? "#FFFEE2E2" : "#FFF3F4F6"}
+    Row gap=8 middle
+      Icon "volume_up"
+      Text.small "{label}: {sound}"
+
+define Scoreboard teams=[] scores=[] active=0
+  Column gap=8
+    each t in teams
+      Row gap=12 middle between border-bottom=#FFE5E7EB
+        Row gap=8 middle
+          Avatar "{t.name}" size=32
+          Text.strong "{t.name}"
+          Badge.primary "Up" hidden={index != active}
+        Text.heading "{scores[index]}"

@@ -322,6 +322,93 @@ some flags that were counted twice are one word now. On the first 40 answers wit
 What it left unknown and is not universal: `bind` and `items` on types we do not have, `labels`, `max`,
 `from`/`to`, which a definition gives.
 
-**To check at review 5.** With D19 to D21 merged: grammar issues per 1,000 lines on self-defining answers
+### Review 5 (D16 to D22 merged; `corpus-define/d02`: self-definition at scale)
+
+**What changed in the product.** Self-definition is the open prompt (`notation.sh prompt --open`; `--no-define`
+reproduces the first corpus's prompt). A `define` anywhere in a text holds for the whole text and, in the tool,
+for every screen of an answer (`hoist.py` is gone). The narrow spots are closed: an expression where the text
+or the icon goes, a drag value as a string or a record, `hide={cond}` and `show={cond}`, a badge's tone from
+data, a border's colour and width, a timer's interval as a formula, a fixed height on a box that holds text,
+a wrapping row over an `each`, a word whose id is written from data. An `open` to an overlay that was never
+written opens a placeholder sheet. The report has a harvest section.
+
+**Numbers.**
+
+| | first corpus (313 answers) | d01 (20) | d02 (91) |
+|---|---|---|---|
+| asked to define | no | yes | yes |
+| resolved | 40.6% (31.5% at review 3) | 97.1% | **96.6%** |
+| the same briefs before | | 54.1% | 49.1% |
+| unknown types | 425 | 0 | 4 (167 before) |
+| lines that stand in | 908 (1.9%) | 1 | 5 (276 before) |
+| grammar issues per 1,000 lines | 6.7 (16.2 at review 3, 39.5 at the start) | 6.9 | 10.6 |
+| validation errors | 445 | 21 | 79 (113 before) |
+
+d02 is 97 briefs taken from all three brief files (every third line), one Sonnet writer each; six writers
+returned without leaving a file, so 91 answers. They wrote **357 definitions** (3.9 an answer) for six percent
+more lines.
+
+**Did review 4's expectations hold?**
+- Resolved share at scale: yes, 96.6% on 91 answers against 96.0% on the first 20. It is not a property of
+  the briefs chosen.
+- Grammar issues under 10 per 1,000 on self-defining answers: 6.9 on d01, 10.6 on d02. Not quite. What is left
+  is a long list of small things inside definition bodies (a `define` for a function, `animate` given a
+  condition, `duration` without `animate`, a parameter the body passes on that the core word does not take),
+  each in one to four answers. There is no single cause left to fix.
+- The first corpus's own issue rate fell from 16.2 to 6.7 per 1,000 lines. 265 of its "open of no overlay"
+  issues were ours: an app's drawer took an id with a hyphen and its menu button's `open` was lost. Only 33
+  overlays were really never written.
+
+**The harvest.** Twenty words were defined by more than one answer, and the definitions mostly agree:
+- `Timeline`: 9 answers. Five wrote exactly `define Timeline items=[]`; the others `events=[]` or `steps=[]`
+  with a `selected`/`current` index. One meaning (a vertical list of dated entries), one parameter under three
+  names.
+- `Stepper`: 7 answers, two meanings. Five are the number control (`bind=value min= max= step= onChange`);
+  two are a steps indicator (`steps=[] bind=step`). The same split the first corpus showed.
+- `Countdown`: 5 answers, all `seconds=0`, two with a label, two with a warning threshold.
+- `Rating` (3), `MapView` (3: `center`, `zoom`, `h`, pins under three names), `SignaturePad` (3), `FloorPlan`
+  (3), `Barcode` (3), `ChatBubble` (3).
+
+Two things stand out. First, models converge without being told: five of nine independent writers produced
+the same signature for `Timeline`. A harvested definition is not one model's guess; it is a measured default.
+Second, most of these twenty are words *we already have* (Cards defines `Timeline`, `Countdown`, `Rating`,
+`Stepper`, `ChatBubble`; the core has `Barcode`). The writers redefined them because the open prompt does not
+say they exist, and a page's own definition wins. That is wasted lines, and it hides our better version.
+
+**Insight.** The open prompt needs one more thing, and it is small: a *glossary index*, the bare names of the
+words a design system already defines, on one line, with no parameters. A name costs about ten characters. It
+tells the writer "this exists, use it as you would expect" without teaching it, which is exactly the contract
+the alias table and the universal words are built to honour. Then the three tiers are clear: the core is
+taught (grammar and about seventy words); the glossary is named (hundreds of words, a few characters each);
+everything else the writer defines. And the harvest tells us which defined words to move into the glossary,
+with their signature already agreed by several writers.
+
+**Decisions.**
+- D24. Glossary index in the open prompt: the names of the design system's definitions and components that
+  the core does not teach, one line, no parameters. Measure on the d02 briefs: definitions written per answer
+  (expect well under 3.9), how often a named word is used in a shape our definition does not take (those are
+  alias or signature fixes, read from the harvest), and the resolved share.
+- D25. Promote from the harvest: where three or more answers agree on a signature, our definition takes that
+  signature (aliasing the other names: `events`, `steps` to `items`), and a word with two meanings gets two
+  (`Stepper#number`, `Stepper#steps`, chosen by what the line gives, as `Timeline` already is).
+- D26. A grid inside a definition keeps its columns on a phone when it is a board (the crossword's twelve
+  columns became two; the lift's button grid one): the kept-grid rule runs on the expansion, wherever the
+  `Grid` line came from.
+- D27. The primitives (D18) are unchanged and are next: the writers' own definitions say where they gave up
+  (`MapView`, `RouteMap`, `FloorPlan`, `SignaturePad`, `CameraView`, `Waveform` are all labelled boxes with a
+  comment).
+- D28. The loop's standing form from here: a batch is self-defining answers; the count is the regression
+  check on both corpora; the harvest is the work list; a review ends in what moves between the three tiers.
+
+**To check at review 6.** With the glossary index: definitions per answer, redefinitions of words we have
+(expect near zero), and whether named-but-untaught words are used in the shapes we accept.
+
+**Where the goal stands.** The corpus the owner asked for exists: 5,154 distinct words from 313 answers, plus
+111 self-defining answers with 422 definitions. Six reviews' worth of decisions are merged: every word counted,
+words defined as data, universal words, the parser's narrow spots, self-definition as the open prompt, the
+harvest. What is not done: D24 to D27, the primitives, and a release (everything since 33.0.0 is on master,
+unreleased).
+
+**To check at review 5 (kept for the record).** With D19 to D21 merged: grammar issues per 1,000 lines on self-defining answers
 (expect under 10), the share of definitions that validate, and for the ten most defined words whether the
 definitions agree enough to promote one.

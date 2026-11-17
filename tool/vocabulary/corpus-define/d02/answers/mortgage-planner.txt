@@ -1,0 +1,163 @@
+### Planner
+state price=450000
+state deposit=90000
+state term=25
+state rate=4.6
+state fixed=true
+state over=0
+state year=5
+state payment=2047
+state stressPayment=2301
+state yearsSaved=0
+state interestSaved=0
+state schedule=[{"year":1,"interest":16240,"principal":8330,"balance":351670},{"year":2,"interest":15850,"principal":8720,"balance":342950},{"year":3,"interest":15440,"principal":9130,"balance":333820},{"year":4,"interest":15010,"principal":9560,"balance":324260},{"year":5,"interest":14560,"principal":10010,"balance":314250},{"year":6,"interest":14090,"principal":10480,"balance":303770}]
+state interestSeries=[16240,15850,15440,15010,14560,14090,13600,13090,12560,12000,11420,10810]
+state principalSeries=[8330,8720,9130,9560,10010,10480,10970,11480,12010,12570,13150,13760]
+state balanceAtYear=314250
+state scenarios=[{"name":"Base","price":450000,"deposit":90000,"term":25,"rate":4.6,"payment":2047,"interest":254100},{"name":"Longer term","price":450000,"deposit":90000,"term":30,"rate":4.6,"payment":1845,"interest":304200}]
+App
+  Sidebar
+    Brand "Hearthloan" icon="home"
+    NavItem "Planner" icon="calculate" selected={true}
+    NavItem "Compare" icon="compare_arrows" badge="{length(scenarios)}" onTap={go compare}
+    Spacer grow
+    Text.muted "Draft plan, not an offer"
+  Main
+    Nav
+      Heading "Mortgage planner" level=1
+      Row gap=8
+        Button.outline "Reset" onTap={price=450000; deposit=90000; term=25; rate=4.6; over=0; emit recalc}
+        Button "Save scenario" onTap={open saveScenario}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=12
+          Text.strong "Your loan"
+          Row gap=12 middle
+            Input "Home price" type=number bind=price w=160 onChange={emit recalc}
+            Slider bind=price min=100000 max=1500000 grow onChange={emit recalc}
+          Row gap=12 middle
+            Input "Deposit" type=number bind=deposit w=160 onChange={emit recalc}
+            Slider bind=deposit min=0 max={price} grow onChange={emit recalc}
+          Row gap=12 middle
+            Input "Term (years)" type=number bind=term w=160 onChange={emit recalc}
+            Slider bind=term min=5 max=40 grow onChange={emit recalc}
+          Row gap=12 middle
+            Input "Rate (%)" type=number bind=rate w=160 onChange={emit recalc}
+            Slider bind=rate min=0.5 max=10 grow onChange={emit recalc}
+          Row between middle
+            Text "Rate type"
+            SegmentedButton bind=fixed items=["Fixed","Variable"] onChange={fixed=(result=="Fixed"); emit recalc}
+          Text.caption "Loan amount {money(price-deposit,"$",0)}, deposit {round(deposit/price*100,1)}%"
+        Card w=320 gap=8 fill=#FF1E3A5F
+          Text "Monthly payment" color=#FFCBD5E1
+          Text "{money(payment,"$",0)}" size=48 weight=700 color=#FFFFFFFF
+          Text.caption "{fixed ? "Fixed" : "Variable"} at {rate}% over {term} years" color=#FFCBD5E1
+          Divider
+          Row between
+            Text "At +2% rate" color=#FFCBD5E1
+            Text.strong "{money(stressPayment,"$",0)}" color=#FFFFFFFF
+          Row between
+            Text "Difference" color=#FFCBD5E1
+            Text.strong "+{money(stressPayment-payment,"$",0)} a month" color=#FFFCA5A5
+          if !fixed
+            Badge.warning "Your payment can rise with the market"
+      Card gap=12
+        Row between middle
+          Text.strong "Interest and principal by year"
+          Badge.info "Year {year}: balance {money(balanceAtYear,"$",0)}"
+        StackedAreaChart labels=["1","2","3","4","5","6","7","8","9","10","11","12"] series=[{"name":"Interest","values":interestSeries},{"name":"Principal","values":principalSeries}] bind=year h=220 onChange={emit readBalance}
+        Text.caption "Drag the point along the chart to read the balance left at the end of a year."
+      Row gap=16 top
+        Card grow gap=12
+          Text.strong "Pay it off sooner"
+          Row gap=12 middle
+            Text "Overpay" w=80
+            Slider bind=over min=0 max=1500 step=25 grow onChange={emit recalc}
+            Text.strong "{money(over,"$",0)} / mo" w=110
+          Row gap=16
+            Column grow gap=2
+              Text.caption "Time saved"
+              Text.success "{yearsSaved} years" size=28 weight=700
+            Column grow gap=2
+              Text.caption "Interest saved"
+              Text.success "{money(interestSaved,"$",0)}" size=28 weight=700
+        Card grow gap=8
+          Text.strong "First years"
+          Row gap=8
+            Text.caption "Year" w=50
+            Text.caption "Interest" w=90
+            Text.caption "Principal" w=90
+            Text.caption "Balance" grow
+          each row in schedule
+            Row gap=8 middle border-top=#FFE5E7EB
+              Text "{row.year}" w=50
+              Text "{money(row.interest,"$",0)}" w=90
+              Text "{money(row.principal,"$",0)}" w=90
+              Text.strong "{money(row.balance,"$",0)}" grow
+
+Dialog#saveScenario "Save this scenario" "Keep it to compare with others"
+  state scenarioName=""
+  Input "Name" "e.g. 5-year fix, overpay $200" bind=scenarioName
+  Text.muted "{money(price-deposit,"$",0)} at {rate}% over {term} years, {money(payment,"$",0)} a month"
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button "Save" onTap={scenarioName=="" ? toast "Give it a name" : {scenarios=append(scenarios,{"name":scenarioName,"price":price,"deposit":deposit,"term":term,"rate":rate,"payment":payment,"interest":payment*term*12-(price-deposit)}); toast "Scenario saved"; close}}
+
+### Compare
+App
+  Sidebar
+    Brand "Hearthloan" icon="home"
+    NavItem "Planner" icon="calculate" onTap={go planner}
+    NavItem "Compare" icon="compare_arrows" badge="{length(scenarios)}" selected={true}
+    Spacer grow
+    Text.muted "Draft plan, not an offer"
+  Main
+    Nav
+      Heading "Saved scenarios" level=1
+      Button "New scenario" onTap={go planner}
+    Column pad=24 gap=16 scroll
+      if length(scenarios)==0
+        Card gap=8 center
+          Icon "folder_open"
+          Text.strong "Nothing saved yet"
+          Text.muted "Save a scenario from the planner to compare it here."
+          Button "Open planner" onTap={go planner}
+      Row scroll gap=16 top
+        each s in scenarios
+          Card w=300 gap=10
+            Row between middle
+              Text.heading "{s.name}"
+              IconButton "delete" tooltip="Remove" onTap={scenarios=removeWhere(scenarios,x=>x.name==s.name)}
+            Text "{money(s.payment,"$",0)}" size=40 weight=700
+            Text.caption "a month"
+            Divider
+            Row between
+              Text.muted "Price"
+              Text.strong "{money(s.price,"$",0)}"
+            Row between
+              Text.muted "Deposit"
+              Text.strong "{money(s.deposit,"$",0)}"
+            Row between
+              Text.muted "Term"
+              Text.strong "{s.term} years"
+            Row between
+              Text.muted "Rate"
+              Text.strong "{s.rate}%"
+            Row between
+              Text.muted "Total interest"
+              Text.strong "{money(s.interest,"$",0)}"
+            Row between
+              Text.muted "Vs cheapest"
+              Badge.neutral "+{money(s.payment-min(s.payment,scenarios[0].payment),"$",0)} / mo"
+            Button.outline "Load into planner" onTap={price=s.price; deposit=s.deposit; term=s.term; rate=s.rate; emit recalc; go planner}
+      if length(scenarios)>1
+        Card gap=8
+          Text.strong "Total interest by scenario"
+          BarChart values={map(scenarios,s=>s.interest)} labels={map(scenarios,s=>s.name)} h=200
+
+// StackedAreaChart: an area chart whose series stack, with a draggable point on the years axis that sets the bound year
+define StackedAreaChart labels=[] series=[] bind=at h=220 onChange
+  state at=0
+  Column gap=4
+    AreaChart labels={labels} series={series} h={h}
+    Slider bind=at min=1 max={length(labels)} step=1 onChange={onChange(at)}

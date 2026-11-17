@@ -1,0 +1,241 @@
+### Welcome
+state lang="English"
+state idle=0
+every 1s onTick={idle=idle+1; idle==45 ? open idleWarn : idle=idle}
+App
+  Main
+    Nav
+      Brand "Checkpoint" icon="flight_takeoff"
+      Text.muted "Self check-in"
+    Column pad=48 gap=32 center middle grow onTap={idle=0}
+      Heading "Welcome. Check in for your flight" level=1
+      Text.muted "Choose your language to begin" size=24
+      Grid cols=3 gap=24 maxw=900
+        each l in [{"flag":"GB","name":"English"},{"flag":"ES","name":"Espanol"},{"flag":"FR","name":"Francais"},{"flag":"DE","name":"Deutsch"},{"flag":"JP","name":"Japanese"},{"flag":"CN","name":"Chinese"}]
+          LanguageFlag code="{l.flag}" label="{l.name}" selected={lang==l.name} onTap={lang=l.name; idle=0}
+      Button "Start check-in" size=large h=88 w=480 onTap={idle=0; go find-booking}
+    Footer
+      Row between pad=16
+        Text.muted "Need help? A colleague is one tap away."
+        AssistButton onCall={emit callAssistance}
+  Dialog#idleWarn "Are you still there?" "This session will end soon"
+    Column center gap=16
+      CountdownRing seconds=15 onDone={close; idle=0; go welcome}
+      Button "I am still here" size=large h=80 w=360 onTap={idle=0; close}
+
+### Find booking
+state method="scan"
+state code=""
+state found=false
+state idle=0
+state scanning=false
+every 1s onTick={idle=idle+1; idle==45 ? open idleWarn : idle=idle}
+every 1500ms when scanning onTick={scanning=false; found=true; code="K7QX9M"}
+App
+  Main
+    Nav
+      Button.ghost "Back" icon="arrow_back" size=large onTap={go welcome}
+      Heading "Find your booking" level=1
+      Text.muted "Step 1 of 4"
+    Column pad=32 gap=24 scroll
+      SegmentedButton bind=method items=["Scan passport","Type booking code"] size=large onChange={idle=0}
+      if method=="scan"
+        PassportScanner scanning={scanning} onScan={scanning=true; idle=0}
+      if method=="code"
+        Row gap=32 top
+          Column grow gap=16
+            Input "Booking code" bind=code size=large readonly
+            Text.muted "Six letters and numbers, found on your confirmation email"
+          KeyPad bind=code maxLength=6 onKey={idle=0}
+      if found
+        FlightCard airline="Northwind Air" flight="NW 482" from="JFK" to="LHR" depart="18:40" gate="B22" boarding="18:00" passenger="Maya Reyes" animate=slide-up
+        Row gap=16
+          Button.outline "Not me" size=large h=80 grow onTap={found=false; code=""}
+          Button "Yes, continue" size=large h=80 grow onTap={go seat-and-bags}
+      if !found && code!="" && length(code)==6
+        Button "Find my flight" size=large h=80 onTap={found=true}
+    Footer
+      Row between pad=16
+        Text.muted "Session ends after 45 seconds without a touch"
+        AssistButton onCall={emit callAssistance}
+  Dialog#idleWarn "Are you still there?" "This session will end soon"
+    Column center gap=16
+      CountdownRing seconds=15 onDone={close; idle=0; go welcome}
+      Button "I am still here" size=large h=80 w=360 onTap={idle=0; close}
+
+### Seat and bags
+state seat=""
+state bags=0
+state idle=0
+state taken=["2A","2B","3C","4D","5A","5F","6B","7C","8E","9A","9B","10D"]
+state legroom=["1A","1B","1C","1D","12A","12B","12C","12D"]
+every 1s onTick={idle=idle+1; idle==45 ? open idleWarn : idle=idle}
+App
+  Main
+    Nav
+      Button.ghost "Back" icon="arrow_back" size=large onTap={go find-booking}
+      Heading "Seat and baggage" level=1
+      Text.muted "Step 2 of 4"
+    Row pad=32 gap=32 top scroll
+      Column grow gap=12
+        Heading "Choose your seat" level=3
+        Row gap=16
+          Row gap=6
+            Box w=20 h=20 radius=4 border=2
+            Text.small "Free"
+          Row gap=6
+            Box w=20 h=20 radius=4 fill=#FF9CA3AF
+            Text.small "Taken"
+          Row gap=6
+            Box w=20 h=20 radius=4 fill=#FFF59E0B
+            Text.small "Extra legroom +$35"
+        SeatMap rows=14 layout="3-3" taken={taken} extraLegroom={legroom} bind=seat onSelect={idle=0}
+      Column w=320 gap=16
+        Card gap=12
+          Heading "Checked bags" level=3
+          Stepper bind=bags min=0 max=4 label="Bags" onChange={idle=0}
+          Text.muted "First bag $0, second $40, then $75 each. Up to 23 kg per bag."
+          Divider
+          Row between
+            Text "Baggage fee"
+            Text.strong "{money(bags<=1 ? 0 : (bags==2 ? 40 : 40+(bags-2)*75),"$",2)}"
+        Card gap=8
+          Row between
+            Text "Seat"
+            Text.strong "{seat==\"\" ? \"None yet\" : seat}"
+          Row between
+            Text "Seat fee"
+            Text.strong "{contains(legroom,seat) ? \"$35.00\" : \"$0.00\"}"
+        Button "Print boarding pass" size=large h=88 onTap={seat=="" ? toast "Please choose a seat" : go boarding-pass}
+    Footer
+      Row between pad=16
+        Text.muted "Taxes included"
+        AssistButton onCall={emit callAssistance}
+  Dialog#idleWarn "Are you still there?" "This session will end soon"
+    Column center gap=16
+      CountdownRing seconds=15 onDone={close; idle=0; go welcome}
+      Button "I am still here" size=large h=80 w=360 onTap={idle=0; close}
+
+### Boarding pass
+state printed=false
+state progress=0
+every 100ms when !printed onTick={progress=min(1,progress+0.05); progress>=1 ? printed=true : progress=progress}
+App
+  Main
+    Nav
+      Heading "Your boarding pass" level=1
+      Text.muted "Step 4 of 4"
+    Column pad=32 gap=24 center
+      if !printed
+        Text.heading "Printing your boarding pass..."
+        PrinterSlot progress={progress}
+        Progress bind=progress
+      if printed
+        Icon "check_circle" size=72 color=#FF16A34A animate=pop
+        Text.heading "All set, Maya. Take your boarding pass below"
+        BoardingPass name="Maya Reyes" flight="NW 482" from="JFK" to="LHR" gate="B22" boarding="18:00" seat="14C" animate=slide-up
+        Row gap=16
+          Button.outline "Print another copy" size=large h=80 onTap={printed=false; progress=0}
+          Button "Finish" size=large h=80 w=320 onTap={go welcome}
+    Footer
+      Row between pad=16
+        Text.muted "Have a safe flight."
+        AssistButton onCall={emit callAssistance}
+
+define LanguageFlag code="GB" label="" selected=false onTap
+  Card gap=8 center h=140 border={selected ? 4 : 1} onTap={onTap}
+    Text.strong "{code}" size=40
+    Text.strong "{label}" size=24
+
+// the camera and the scanner are shown as a labelled box
+define PassportScanner scanning=false onScan
+  Column gap=16 center
+    Box w=480 h=280 radius=12 fill=#FF111827 center middle
+      Icon "document_scanner" size=72 color=#FFFFFFFF animate={scanning ? "pulse" : "fade"}
+      Text "{scanning ? \"Reading passport...\" : \"Place your passport photo page on the glass\"}" color=#FFFFFFFF center
+    Button "Scan passport" size=large h=80 w=480 onTap={onScan}
+
+define KeyPad bind=value maxLength=6 onKey
+  state value=""
+  Grid cols=10 gap=8 maxw=900
+    each k in ["Q","W","E","R","T","Y","U","I","O","P","A","S","D","F","G","H","J","K","L","7","Z","X","C","V","B","N","M","8","9","0","1","2","3","4","5","6"]
+      Button.outline "{k}" h=64 onTap={length(value)<maxLength ? value=value+k : value=value; onKey(k)}
+    Button.destructive "Delete" h=64 onTap={value=slice(value,0,length(value)-1); onKey("del")}
+
+define FlightCard airline="" flight="" from="" to="" depart="" gate="" boarding="" passenger=""
+  Card gap=12 pad=24
+    Row between
+      Text.strong "{airline}  {flight}"
+      Badge.success "On time"
+    Row between middle
+      Column
+        Text.heading "{from}" size=48
+        Text.muted "New York"
+      Icon "flight_takeoff" size=40
+      Column end
+        Text.heading "{to}" size=48
+        Text.muted "London"
+    Divider
+    Row between
+      Text "Passenger: {passenger}"
+      Text "Departs {depart}"
+      Text "Gate {gate}, boarding {boarding}"
+
+define SeatMap rows=10 layout="3-3" taken=[] extraLegroom=[] bind=seat onSelect
+  state seat=""
+  Column gap=6 scroll h=520
+    each r in range(rows)
+      Row gap=6 center
+        each c in ["A","B","C","D","E","F"]
+          Box w=56 h=56 radius=8 center middle fill={contains(taken,concat(r+1,c)) ? "#FF9CA3AF" : (contains(extraLegroom,concat(r+1,c)) ? "#FFF59E0B" : "#FFFFFFFF")} border={seat==concat(r+1,c) ? 4 : 1} onTap={contains(taken,concat(r+1,c)) ? toast "Seat taken" : {seat=concat(r+1,c); onSelect(seat)}}
+            Text.small "{r+1}{c}"
+
+define Stepper bind=value min=0 max=10 label="" onChange
+  state value=0
+  Row gap=16 middle
+    Text.strong "{label}"
+    Spacer grow
+    Button.outline "-" size=large w=72 h=72 onTap={value=max(min,value-1); onChange(value)}
+    Text.heading "{value}" size=40
+    Button.outline "+" size=large w=72 h=72 onTap={value=min(max,value+1); onChange(value)}
+
+define AssistButton onCall
+  Button.destructive "Call for assistance" icon="support_agent" size=large h=72 onTap={toast "A colleague is on the way"; onCall}
+
+define CountdownRing seconds=15 onDone
+  state left=15
+  every 1s onTick={left=left-1; left<=0 ? onDone : left=left}
+  Stack center middle w=160 h=160
+    Ring {left/seconds}
+    Text.heading "{left}" size=48
+
+// a paper slot that shows a ticket sliding out
+define PrinterSlot progress=0
+  Column center gap=0
+    Box w=420 h=24 radius=12 fill=#FF374151
+    Box w=360 h={progress*220} fill=#FFFFFFFF border=1
+      Text.mono "NW 482  JFK - LHR" center
+      Text.mono "Printing..." center
+
+define BoardingPass name="" flight="" from="" to="" gate="" boarding="" seat=""
+  Card gap=12 pad=24 w=640
+    Row between
+      Text.strong "Boarding pass"
+      Text.strong "{flight}"
+    Text.heading "{name}" size=32
+    Row between
+      Text.heading "{from}" size=48
+      Icon "flight" size=40
+      Text.heading "{to}" size=48
+    Divider
+    Row between
+      Column
+        Text.caption "GATE"
+        Text.heading "{gate}"
+      Column
+        Text.caption "BOARDING"
+        Text.heading "{boarding}"
+      Column
+        Text.caption "SEAT"
+        Text.heading "{seat}"
+    Text.mono "||| || ||||| | |||| || ||| ||||" center

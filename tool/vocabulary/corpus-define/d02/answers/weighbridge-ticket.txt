@@ -1,0 +1,215 @@
+### Weigh Desk
+state t=0
+state weight=0
+state locked=false
+state base=38460
+state stage=0
+state plate=""
+state product="Crushed gravel"
+state grossKg=0
+state tareKg=0
+state current=""
+state tickets=[{"code":"SH-1041","plate":"KX 4471","product":"Sand","net":24180,"price":18,"total":435.24},{"code":"SH-1042","plate":"BR 2208","product":"Crushed gravel","net":27620,"price":26,"total":718.12}]
+state products=[{"name":"Sand","price":18},{"name":"Crushed gravel","price":26},{"name":"Cement","price":112},{"name":"Topsoil","price":21}]
+state queue=[{"id":1,"plate":"LM 9034","company":"Orrin Haulage","product":"Sand"},{"id":2,"plate":"TZ 1187","company":"Bellfield Aggregates","product":"Crushed gravel"},{"id":3,"plate":"AQ 7752","company":"Northgate Cement","product":"Cement"}]
+state axles=[{"name":"Steer","kg":7200,"limit":7500},{"name":"Drive","kg":18100,"limit":18000},{"name":"Trailer 1","kg":8900,"limit":9000},{"name":"Trailer 2","kg":8700,"limit":9000}]
+every 100 when !locked onTick={t=t+1; weight=base+(t<30 ? ((t*37)%41-20)*(30-t) : 0); locked=t>=30}
+state net=0
+App
+  Sidebar
+    Brand "Scalehouse" icon="scale"
+    NavItem "Weigh desk" icon="monitor_weight" selected={true}
+    NavItem "Ticket" icon="receipt_long" onTap={go ticket}
+    NavItem "Day log" icon="history" badge="{length(tickets)}" onTap={go day-log}
+    Spacer grow
+    Text.muted "Operator: D. Okafor"
+  Main
+    Nav
+      Heading "Weigh desk" level=1
+      Row gap=8
+        Badge.success "Platform online" hide=phone
+        Button.outline "Re-weigh" onTap={t=0; locked=false}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Column grow gap=16
+          Card gap=12
+            Row between
+              Text.strong "Platform weight"
+              if locked
+                Badge.success "Locked"
+              if !locked
+                Badge.warning "Settling"
+            WeightReadout value={weight} locked={locked} unit="kg"
+            TickSound playing={!locked}
+          Card gap=12
+            Text.strong "Vehicle"
+            Row gap=8 middle
+              Input "Plate" "KX 4471" bind=plate grow
+              PlateCapture onCapture={plate=result}
+            Select "Product" bind=product items={map(products,p=>p.name)}
+            Text.muted "Price per tonne: {money(find(products,p=>p.name==product).price,"$",2)}"
+          Card gap=12
+            Row between
+              Text.strong "Weighs"
+              Badge.neutral "{stage==0 ? 'Awaiting first weigh' : stage==1 ? 'Loaded, awaiting second weigh' : 'Complete'}"
+            Row gap=16
+              Column grow gap=4
+                Text.caption "First weigh, in (gross)"
+                Text.strong "{grossKg > 0 ? fixed(grossKg,0) + ' kg' : '-'}"
+              Column grow gap=4
+                Text.caption "Second weigh, out (tare)"
+                Text.strong "{tareKg > 0 ? fixed(tareKg,0) + ' kg' : '-'}"
+            Row gap=8
+              Button "Record first weigh" onTap={plate=="" ? toast "Enter or capture the plate" : (!locked ? toast "Wait for the weight to lock" : (grossKg=weight; stage=1; t=0; locked=false; base=14280; toast "First weigh recorded"))} hidden={stage!=0}
+              Button "Record second weigh" onTap={!locked ? toast "Wait for the weight to lock" : (tareKg=weight; net=grossKg-weight; stage=2)} hidden={stage!=1}
+              Button.outline "Start over" onTap={stage=0; grossKg=0; tareKg=0; net=0; plate=""; t=0; locked=false; base=38460}
+          if grossKg > 40000
+            Card gap=12 fill=#FFFEE2E2
+              Row between middle
+                Row gap=8 middle
+                  Icon "warning" color=#FFB91C1C
+                  Text.strong "Overweight: {fixed(grossKg-40000,0)} kg over the 40,000 kg limit" color=#FFB91C1C
+                Button.destructive "Axle breakdown" onTap={open axleSheet}
+        Pane w=320 pad=16 gap=12
+          Text.strong "Queue ({length(queue)} waiting)"
+          each q in queue
+            ListTile "{q.plate}" subtitle="{q.company} - {q.product}" onTap={plate=q.plate; product=q.product; current=q.id; toast "Called {q.plate} onto the platform"}
+              Button.ghost "Remove" onTap={queue=removeWhere(queue,x=>x.id==q.id)}
+      if stage==2
+        Card gap=12 fill=#FF111827
+          Text.caption "NET WEIGHT" color=#FFD1D5DB
+          Text "{fixed(net,0)} kg" size=64 weight=700 color=#FFFFFFFF
+          Row between middle
+            Text "{fixed(net/1000,2)} t at {money(find(products,p=>p.name==product).price,"$",2)} per tonne = {money(net/1000*find(products,p=>p.name==product).price,"$",2)}" color=#FFE5E7EB
+            Button "Print ticket" onTap={tickets=append(tickets,{"code":"SH-{1043+length(tickets)-2}","plate":plate,"product":product,"net":net,"price":find(products,p=>p.name==product).price,"total":round(net/1000*find(products,p=>p.name==product).price,2)}); open printed}
+  Sheet#axleSheet "Axle breakdown"
+    AxleBreakdown axles={axles}
+    Text.muted "Drive axle exceeds its limit. Shift load rearward before leaving."
+    Button.outline "Close" onTap={close}
+  Dialog#printed "Ticket printed" "Sent to the desk printer"
+    Text.strong "{last(tickets).code}"
+    Text "{last(tickets).plate}, {last(tickets).product}, {fixed(last(tickets).net,0)} kg net"
+    Row gap=8
+      Button "View ticket" onTap={close; go ticket}
+      Button.outline "Next truck" onTap={close; stage=0; grossKg=0; tareKg=0; net=0; plate=""; t=0; locked=false; base=38460}
+
+// A camera is not available: shown as a labelled box with a captured plate sample
+define PlateCapture onCapture
+  Button.outline "Capture plate" icon="photo_camera" onTap={onCapture("KX 4471")}
+
+// Sound is not available: shown as a small labelled indicator
+define TickSound playing=false
+  Row gap=6 middle
+    Icon "volume_up" color={playing ? "#FF16A34A" : "#FF9CA3AF"}
+    Text.caption "{playing ? 'Tick: weighing' : 'Tick off'}"
+
+define WeightReadout value=0 locked=false unit="kg"
+  Box fill=#FF0B1220 radius=8 pad=16 center
+    Text "{fixed(value,0)}" size=72 weight=700 color={locked ? "#FF4ADE80" : "#FFFBBF24"} animate={locked ? "pop" : "pulse"}
+    Text.caption "{unit}" color=#FF9CA3AF
+
+define AxleBreakdown axles=[]
+  Column gap=8
+    each a in axles
+      Row gap=8 middle
+        Text.strong "{a.name}" w=90
+        Progress {clamp(a.kg/a.limit,0,1)} grow
+        Text "{fixed(a.kg,0)} / {fixed(a.limit,0)} kg" w=140
+        if a.kg > a.limit
+          Badge.error "Over"
+        if a.kg <= a.limit
+          Badge.success "OK"
+
+### Ticket
+Page
+  Nav
+    Brand "Scalehouse" icon="scale"
+    Row gap=4
+      Link "Weigh desk" onTap={go weigh-desk}
+      Link "Day log" onTap={go day-log}
+    Button "Print" icon="print" onTap={toast "Sent to printer"}
+  Section narrow
+    Card gap=16
+      Row between middle
+        Heading "Weighbridge ticket" level=2
+        Badge.primary "{last(tickets).code}"
+      Divider
+      Grid cols=2 gap=12
+        Column gap=2
+          Text.caption "Plate"
+          Text.strong "{last(tickets).plate}"
+        Column gap=2
+          Text.caption "Product"
+          Text.strong "{last(tickets).product}"
+        Column gap=2
+          Text.caption "Date"
+          Text.strong "{formatDate(today(),"MMM d, yyyy")}"
+        Column gap=2
+          Text.caption "Price per tonne"
+          Text.strong "{money(last(tickets).price,"$",2)}"
+      Box fill=#FF111827 radius=8 pad=16 center
+        Text.caption "NET" color=#FFD1D5DB
+        Text "{fixed(last(tickets).net,0)} kg" size=48 weight=700 color=#FFFFFFFF
+      Row between
+        Text.strong "Amount due"
+        Text.strong "{money(last(tickets).total,"$",2)}"
+      Divider
+      Barcode "{last(tickets).code}"
+  Section tint compact
+    Grid cols=3 gap=16
+      Card gap=4
+        Text.caption "Tickets today"
+        Text.strong "{length(tickets)}" size=32
+      Card gap=4
+        Text.caption "Total net"
+        Text.strong "{fixed(sum(tickets,t=>t.net)/1000,2)} t" size=32
+      Card gap=4
+        Text.caption "Day's total"
+        Text.strong "{money(sum(tickets,t=>t.total),"$",2)}" size=32
+  Footer
+    Text.muted "Scalehouse weighbridge ticket desk"
+
+// A printed barcode is not available: shown as a labelled box with the code under it
+define Barcode "code"
+  Box center gap=4 pad=12 fill=#FFFFFFFF border=1
+    Box w=240 h=48 fill=#FF111827
+    Text.mono "{code}"
+
+### Day Log
+App
+  Sidebar
+    Brand "Scalehouse" icon="scale"
+    NavItem "Weigh desk" icon="monitor_weight" onTap={go weigh-desk}
+    NavItem "Ticket" icon="receipt_long" onTap={go ticket}
+    NavItem "Day log" icon="history" selected={true}
+  Main
+    Nav
+      Heading "Day log" level=1
+      Row gap=8
+        Input "Search plate" bind=q w=220
+        Select "Product" bind=filter items=["All","Sand","Crushed gravel","Cement","Topsoil"]
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.caption "Trucks weighed"
+          Text.strong "{length(tickets)}" size=32
+        Card gap=4
+          Text.caption "Total net"
+          Text.strong "{fixed(sum(tickets,t=>t.net)/1000,2)} t" size=32
+        Card gap=4
+          Text.caption "Day's total"
+          Text.strong "{money(sum(tickets,t=>t.total),"$",2)}" size=32
+      Card gap=8
+        Row gap=8
+          Text.caption "Code" w=90
+          Text.caption "Plate" w=100
+          Text.caption "Product" grow
+          Text.caption "Net kg" w=90
+          Text.caption "Amount" w=90
+        each t in filter(tickets,x=>(filter=="All" || filter=="" || x.product==filter) && contains(lower(x.plate),lower(q)))
+          Row gap=8 middle
+            Text.strong "{t.code}" w=90
+            Text "{t.plate}" w=100
+            Text "{t.product}" grow
+            Text "{fixed(t.net,0)}" w=90
+            Text "{money(t.total,"$",2)}" w=90

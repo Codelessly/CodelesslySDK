@@ -1,0 +1,177 @@
+### Route
+state stops=[{"id":"s1","n":"Harlow Bakery","addr":"14 Mill Lane","win":"13:30-14:00","parcels":2,"status":"pending","phone":"555-0141"},{"id":"s2","n":"Dr. Amara Osei","addr":"82 Crown St, Flat 3","win":"13:45-14:30","parcels":1,"status":"pending","phone":"555-0178"},{"id":"s3","n":"Bellwether Books","addr":"6 Quay Row","win":"14:00-15:00","parcels":4,"status":"pending","phone":"555-0102"},{"id":"s4","n":"Tom Kerrigan","addr":"3 Alder Close","win":"14:30-15:30","parcels":1,"status":"pending","phone":"555-0166"},{"id":"s5","n":"Northgate Dental","addr":"120 North Gate","win":"15:00-16:00","parcels":3,"status":"pending","phone":"555-0119"}]
+state clock=850
+state current="s1"
+state view="list"
+state failed=[]
+every 60s onTick={clock=clock+1}
+project mins=11
+App
+  Sidebar
+    Brand "Dropoff" icon="local_shipping"
+    NavItem "Route" icon="route" selected={true} onTap={go route}
+    NavItem "Proof" icon="photo_camera" onTap={go proof}
+    NavItem "Day summary" icon="insights" onTap={go summary}
+    Spacer grow
+    Text.muted "Van 12, Jonas Berg"
+  Main
+    Nav
+      Heading "Today's route" level=1
+      Row gap=8
+        Badge.info "{count(stops,s=>s.status=='pending')} left"
+        SegmentedButton bind=view items=["list","map"]
+    Column pad=24 gap=16
+      Card gap=4
+        Row between
+          Column gap=2
+            Text.caption "Estimated finish"
+            Text.heading "{floor((clock+count(stops,s=>s.status=='pending')*11)/60)}:{(clock+count(stops,s=>s.status=='pending')*11)%60 < 10 ? '0' : ''}{(clock+count(stops,s=>s.status=='pending')*11)%60}"
+          Column gap=2 end
+            Text.caption "Parcels left"
+            Text.heading "{sum(filter(stops,s=>s.status=='pending'),s=>s.parcels)}"
+        Progress "{count(stops,s=>s.status!='pending')}" bind=share
+      Row gap=16 top
+        Column grow gap=8
+          Text.sectionTitle "Stops in order (drag to reorder)"
+          each s in stops
+            Card gap=6 drag=stop(s.id) drop=stop onDrop={stops=concat(append(take(without(stops,find(stops,x=>x.id==result.data)),index),find(stops,x=>x.id==result.data)),slice(without(stops,find(stops,x=>x.id==result.data)),index,length(stops)))}
+              Row gap=12 middle
+                Icon "drag_indicator"
+                Avatar "{index+1}" size=32
+                Column grow gap=2
+                  Text.strong "{s.n}" strike={s.status=="done"}
+                  Text.muted "{s.addr}"
+                Column gap=2 end
+                  Badge.neutral "{s.win}"
+                  Text.caption "{s.parcels} parcels"
+                IconButton "more_vert" tooltip="Stop options" onTap={current=s.id; open stopMenu}
+        if view=="map"
+          Card grow gap=8
+            RouteMap stops={stops} current={current} onPin={current=result}
+        Pane w=320 gap=12
+          Card gap=10
+            Text.caption "NEXT STOP"
+            Heading "{find(stops,s=>s.id==current).n}" level=3
+            Text.muted "{find(stops,s=>s.id==current).addr}"
+            Badge.warning "Window {find(stops,s=>s.id==current).win}"
+            Row gap=8
+              Button "Navigate" icon="navigation" grow onTap={link https://maps.example.com/route}
+              Button.outline "Call" icon="call" grow onTap={link tel:{find(stops,s=>s.id==current).phone}}
+            Button.secondary "Proof of delivery" onTap={go proof}
+            Button.destructive "Could not deliver" onTap={open failSheet}
+  Menu#stopMenu
+    MenuItem "Make next stop" icon="flag" onTap={stops=concat([find(stops,x=>x.id==current)],without(stops,find(stops,x=>x.id==current)))}
+    MenuItem "Call customer" icon="call" onTap={link tel:{find(stops,s=>s.id==current).phone}}
+    MenuItem "Skip for now" icon="skip_next" onTap={stops=concat(without(stops,find(stops,x=>x.id==current)),[find(stops,x=>x.id==current)]); toast "Moved to the end"}
+  Sheet#failSheet "Why could it not be delivered?"
+    state reason=""
+    Column gap=8
+      ChoiceChip "Nobody home" selected={reason=="Nobody home"} onTap={reason="Nobody home"}
+      ChoiceChip "Address not found" selected={reason=="Address not found"} onTap={reason="Address not found"}
+      ChoiceChip "Customer refused" selected={reason=="Customer refused"} onTap={reason="Customer refused"}
+      ChoiceChip "Access blocked" selected={reason=="Access blocked"} onTap={reason="Access blocked"}
+      ChoiceChip "Parcel damaged" selected={reason=="Parcel damaged"} onTap={reason="Parcel damaged"}
+      Input "Note for dispatch" multiline bind=failNote
+      Button "Record failed delivery" onTap={reason=="" ? toast "Pick a reason" : {stops=updateWhere(stops,x=>x.id==current,x=>with(x,"status","failed")); failed=append(failed,{"id":current,"reason":reason}); emit failedDelivery current; close}}
+
+### Proof
+state method="photo"
+state photo=""
+state sig=""
+state code=""
+state expected="4821"
+state stops=[]
+Page
+  Nav
+    Brand "Dropoff" icon="local_shipping"
+    Row gap=4
+      Link "Route" onTap={go route}
+      Link "Day summary" onTap={go summary}
+  Section narrow
+    Column gap=16
+      Heading "Proof of delivery" level=1
+      Text.muted "Harlow Bakery, 14 Mill Lane. 2 parcels."
+      SegmentedButton bind=method items=["photo","signature","code"]
+      if method=="photo"
+        Card gap=8
+          Text.strong "Photo of the parcel at the door"
+          CameraCapture bind=photo h=240
+          if photo!=""
+            Badge.success "Photo attached"
+      if method=="signature"
+        Card gap=8
+          Text.strong "Recipient signs below"
+          SignaturePad bind=sig h=180
+          Button.ghost "Clear" onTap={sig=""}
+      if method=="code"
+        Card gap=8
+          Text.strong "Ask the customer for the 4-digit code"
+          Input "Delivery code" type=number bind=code
+          if code!="" && length(code)==4 && code!=expected
+            Text.danger "That code does not match."
+      Row gap=8
+        Button.outline "Back" grow onTap={go route}
+        Button "Confirm delivery" grow onTap={(method=="photo" && photo=="") || (method=="signature" && sig=="") || (method=="code" && code!=expected) ? toast "Proof is missing" : {emit delivered; toast "Delivered"; go route}}
+
+### Day summary
+state results=[{"n":"Harlow Bakery","status":"done","parcels":2},{"n":"Dr. Amara Osei","status":"done","parcels":1},{"n":"Bellwether Books","status":"done","parcels":4},{"n":"Tom Kerrigan","status":"failed","parcels":1},{"n":"Northgate Dental","status":"done","parcels":3}]
+state hours=[3,5,4,6,2]
+Page
+  Nav
+    Brand "Dropoff" icon="local_shipping"
+    Row gap=4
+      Link "Route" onTap={go route}
+      Link "Proof" onTap={go proof}
+  Section
+    Column gap=16
+      Heading "Day summary" level=1
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.caption "Delivered"
+          Text.heading "{count(results,r=>r.status=='done')}"
+        Card gap=4
+          Text.caption "Failed"
+          Text.heading "{count(results,r=>r.status=='failed')}"
+        Card gap=4
+          Text.caption "Parcels"
+          Text.heading "{sum(results,r=>r.parcels)}"
+      Row gap=16 top
+        Card grow gap=8
+          Text.strong "Deliveries per hour"
+          BarChart values={hours} labels=["12","13","14","15","16"] h=180
+        Card grow gap=8
+          Text.strong "Outcome"
+          Donut values=[4,1] labels=["Delivered","Failed"]
+      Card gap=8
+        Text.strong "Stops"
+        each r in results
+          Row between
+            Text "{r.n}"
+            Badge.success "Delivered" hide={r.status!="done"}
+            Badge.error "Failed" hide={r.status=="done"}
+      Button "Send report to dispatch" onTap={emit sendReport; toast "Report sent"}
+
+// A real map is not available: shown as a labelled box with a route line and numbered pins.
+define RouteMap stops=[] current="" onPin
+  Box h=360 fill=#FFE5EDF3 radius=8 pad=12 gap=8
+    Text.caption "Map (route preview)"
+    Row gap=10 middle scroll
+      each s in stops
+        Row gap=10 middle
+          Box w=32 h=32 radius=16 fill={s.id == current ? "#FF2563EB" : "#FF475569"} onTap={onPin(s.id)}
+            Text "{index+1}" color=#FFFFFFFF center
+          if index < length(stops)-1
+            Divider w=24
+
+// A camera is not available: shown as a labelled box that sets a placeholder photo name.
+define CameraCapture bind=photo h=200
+  state photo=""
+  Box h={h} fill=#FF111827 radius=8 center middle gap=8 onTap={photo="parcel-photo.jpg"}
+    Icon "photo_camera"
+    Text "{photo == '' ? 'Tap to take a photo' : photo}" color=#FFFFFFFF
+
+// A drawing surface is not available: shown as a labelled box that stores a placeholder signature.
+define SignaturePad bind=sig h=160
+  state sig=""
+  Box h={h} fill=#FFFFFFFF border=1 radius=8 center middle onTap={sig="signed"}
+    Text.muted "{sig == '' ? 'Sign here' : 'Signature captured'}"

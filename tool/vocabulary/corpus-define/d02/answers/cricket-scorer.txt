@@ -1,0 +1,206 @@
+### Scoring
+state target=186
+state battingTeam="Harbour XI"
+state bowlingTeam="Northgate CC"
+state bowler="J. Archer"
+state batters=[{"name":"R. Sharma","runs":34,"balls":27,"strike":true,"out":false,"how":""},{"name":"S. Iyer","runs":12,"balls":14,"strike":false,"out":false,"how":""},{"name":"A. Khan","runs":9,"balls":11,"strike":false,"out":true,"how":"c Brooks b Archer"}]
+state balls=[{"r":1,"k":"run","w":false},{"r":4,"k":"run","w":false},{"r":0,"k":"run","w":true},{"r":6,"k":"run","w":false},{"r":2,"k":"run","w":false},{"r":1,"k":"wide","w":false},{"r":0,"k":"run","w":false}]
+state over=[{"r":2,"k":"run","w":false},{"r":1,"k":"wide","w":false},{"r":0,"k":"run","w":false}]
+state overRuns=[8,6,12,5,9]
+state history=[]
+state pstart=3
+state how="Bowled"
+state outName="R. Sharma"
+state newBatter=""
+App
+  Sidebar
+    Brand "Over by Over" icon="sports_cricket"
+    NavItem "Scoring" icon="scoreboard" selected={true}
+    NavItem "Innings summary" icon="insights" onTap={go innings-summary}
+    NavItem "Scorecard" icon="receipt_long" onTap={go scorecard}
+    Spacer grow
+    Text.muted "{battingTeam} v {bowlingTeam}"
+  Main
+    Nav
+      Column
+        Heading "{battingTeam} {sum(balls,b=>b.r)}/{count(balls,b=>b.w)}" level=1
+        Text.muted "Overs {floor(count(balls,b=>b.k=="run"||b.k=="bye")/6)}.{count(balls,b=>b.k=="run"||b.k=="bye")%6} of 20, target {target}"
+      Row gap=8
+        Button.outline "Undo last ball" onTap={length(history)>0 ? {balls=last(history).balls; over=last(history).over; batters=last(history).batters; pstart=last(history).pstart; history=removeAt(history,length(history)-1)} : toast "Nothing to undo"}
+        Button.secondary "Innings summary" onTap={go innings-summary}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Row between
+          Text.strong "This over, {bowler} to {find(batters,b=>b.strike).name}"
+          Button.ghost "End over" onTap={overRuns=append(overRuns,sum(over,b=>b.r)); over=[]; batters=updateWhere(batters,b=>true,b=>with(b,"strike",!b.strike)); toast "Over complete"}
+        OverTracker balls={over}
+      Grid cols=2 gap=16
+        Card gap=8
+          Text.strong "Batters"
+          each b in filter(batters,x=>!x.out)
+            PlayerRow "{b.name}" runs={b.runs} balls={b.balls} strike={b.strike}
+        Card gap=8
+          Text.strong "Bowler"
+          Row between
+            Text "{bowler}"
+            Text.strong "{floor(count(balls,b=>b.k=="run"||b.k=="bye")/6)}.{count(balls,b=>b.k=="run"||b.k=="bye")%6}-0-{sum(balls,b=>b.r)}-{count(balls,b=>b.w)}"
+          Text.muted "Economy {fixed(sum(balls,b=>b.r)*6/max(1,count(balls,b=>b.k=="run"||b.k=="bye")),2)}"
+      Card gap=12
+        Text.strong "Score the ball"
+        RunPad onRun={history=append(history,{"balls":balls,"over":over,"batters":batters,"pstart":pstart}); balls=append(balls,with({"k":"run","w":false},"r",result)); over=append(over,with({"k":"run","w":false},"r",result)); batters=updateWhere(batters,b=>!b.out,b=>with(with(with(b,"runs",b.runs+(b.strike?result:0)),"balls",b.balls+(b.strike?1:0)),"strike",b.strike!=(result%2==1)))} onExtra={history=append(history,{"balls":balls,"over":over,"batters":batters,"pstart":pstart}); balls=append(balls,{"r":1,"k":result,"w":false}); over=append(over,{"r":1,"k":result,"w":false}); batters=updateWhere(batters,b=>!b.out,b=>with(with(b,"balls",b.balls+(result=="bye"&&b.strike?1:0)),"strike",b.strike!=(result=="bye")))} onWicket={open wicket}
+      Grid cols=2 gap=16
+        Card gap=8
+          Text.strong "Run rate against required"
+          Row gap=24
+            Column
+              Text.muted "Current"
+              Text "{fixed(sum(balls,b=>b.r)*6/max(1,count(balls,b=>b.k=="run"||b.k=="bye")),2)}" size=32 weight=700
+            Column
+              Text.muted "Required"
+              Text "{fixed((target-sum(balls,b=>b.r))*6/max(1,120-count(balls,b=>b.k=="run"||b.k=="bye")),2)}" size=32 weight=700 color=#FFDC2626
+          LineChart labels={map(range(length(overRuns)),i=>"Ov {i+1}")} series={[{"name":"Run rate","values":map(range(length(overRuns)),i=>round(sum(take(overRuns,i+1),x=>x)/(i+1),2))},{"name":"Required","values":map(range(length(overRuns)),i=>round((target-sum(take(overRuns,i+1),x=>x))/(20-(i+1)),2))}]} h=180
+        Card gap=8
+          Text.strong "Partnership"
+          PartnershipBar a="R. Sharma" b="S. Iyer" aRuns={22} bRuns={12}
+          Text.muted "{sum(slice(balls,pstart,length(balls)),b=>b.r)} runs off {count(slice(balls,pstart,length(balls)),b=>b.k=="run"||b.k=="bye")} balls"
+    Footer
+      Row between
+        Text.muted "{length(history)} balls can be undone"
+        Button "Share scorecard" icon="image" onTap={go scorecard}
+
+Dialog#wicket "Wicket" "Record how the batter is out"
+  Select "How out" bind=how items=["Bowled","Caught","LBW","Run out","Stumped","Hit wicket"]
+  Select "Who is out" bind=outName items={map(filter(batters,b=>!b.out),b=>b.name)}
+  Input "Incoming batter" "Name" bind=newBatter
+  Button "Confirm wicket" onTap={trim(newBatter)=="" ? toast "Name the next batter" : {history=append(history,{"balls":balls,"over":over,"batters":batters,"pstart":pstart}); balls=append(balls,{"r":0,"k":"run","w":true}); over=append(over,{"r":0,"k":"run","w":true}); batters=append(updateWhere(batters,b=>b.name==outName,b=>with(with(b,"out",true),"how",how)),{"name":newBatter,"runs":0,"balls":0,"strike":find(batters,b=>b.name==outName).strike,"out":false,"how":""}); pstart=length(balls)+1; newBatter=""; close}}
+
+// The six circles of the over: each fills with its runs, a W or an extra mark
+define OverTracker balls=[]
+  Row gap=10 middle
+    each i in range(6)
+      Box w=44 h=44 radius=22 center middle fill={i<length(balls) ? (balls[i].w ? #FFDC2626 : (balls[i].r>=4 ? #FF16A34A : (balls[i].k!="run" ? #FFF59E0B : #FF1F2937))) : #FFE5E7EB}
+        Text "{i<length(balls) ? (balls[i].w ? "W" : (balls[i].k=="wide" ? "Wd" : (balls[i].k=="noball" ? "Nb" : (balls[i].k=="bye" ? "B" : balls[i].r)))) : ""}" color=#FFFFFFFF weight=700
+
+define RunPad onRun onExtra onWicket
+  Column gap=12
+    Row gap=12
+      each n in range(7)
+        Button.elevated "{n}" size=large grow border={n>=4 ? 2 : 0} onTap={onRun(n)}
+    Row gap=12
+      Button.outline "Wide" grow onTap={onExtra("wide")}
+      Button.outline "No ball" grow onTap={onExtra("noball")}
+      Button.outline "Bye" grow onTap={onExtra("bye")}
+      Button.destructive "Wicket" grow onTap={onWicket}
+
+define PlayerRow "name" runs=0 balls=0 strike=false
+  Row between middle
+    Row gap=8 middle
+      Icon "sports_cricket" visible={strike}
+      Text.strong "{name}"
+    Row gap=16
+      Text.strong "{runs}"
+      Text.muted "({balls})"
+      Text.muted "SR {fixed(runs*100/max(1,balls),1)}"
+
+define PartnershipBar a="Batter A" b="Batter B" aRuns=0 bRuns=0
+  Column gap=6
+    Progress {aRuns/max(1,aRuns+bRuns)}
+    Row between
+      Text.small "{a} {aRuns}"
+      Text.small "{b} {bRuns}"
+
+### Innings summary
+Page
+  Nav
+    Brand "Over by Over" icon="sports_cricket"
+    Row gap=4
+      Link "Scoring" onTap={go scoring}
+      Link "Innings summary"
+      Link "Scorecard" onTap={go scorecard}
+    Button "Share scorecard" onTap={go scorecard}
+  Section
+    Column gap=8
+      Heading "{battingTeam} {sum(balls,b=>b.r)}/{count(balls,b=>b.w)}" level=1
+      Text.muted "After {floor(count(balls,b=>b.k=="run"||b.k=="bye")/6)}.{count(balls,b=>b.k=="run"||b.k=="bye")%6} overs, chasing {target}"
+    Grid cols=4 gap=16
+      Card gap=4
+        Text.muted "Run rate"
+        Text "{fixed(sum(balls,b=>b.r)*6/max(1,count(balls,b=>b.k=="run"||b.k=="bye")),2)}" size=32 weight=700
+      Card gap=4
+        Text.muted "Required"
+        Text "{fixed((target-sum(balls,b=>b.r))*6/max(1,120-count(balls,b=>b.k=="run"||b.k=="bye")),2)}" size=32 weight=700
+      Card gap=4
+        Text.muted "Boundaries"
+        Text "{count(balls,b=>b.r>=4)}" size=32 weight=700
+      Card gap=4
+        Text.muted "Extras"
+        Text "{sum(filter(balls,b=>b.k!="run"),b=>b.r)}" size=32 weight=700
+  Section tint
+    Grid cols=2 gap=24
+      Card gap=12
+        Heading "Runs by over" level=3
+        BarChart values={overRuns} labels={map(range(length(overRuns)),i=>"{i+1}")} h=220
+      Card gap=12
+        Heading "Where the runs came from" level=3
+        Donut values={[sum(filter(balls,b=>b.k=="run"),b=>b.r),sum(filter(balls,b=>b.k!="run"),b=>b.r)]} labels=["Off the bat","Extras"]
+  Section
+    Card gap=12
+      Heading "Fall of wickets" level=3
+      each b in filter(batters,x=>x.out)
+        Row between
+          Text.strong "{b.name}"
+          Text.muted "{b.how}"
+    Row gap=12
+      Button.outline "Back to scoring" onTap={go scoring}
+      Button "Share scorecard" onTap={go scorecard}
+  Footer
+    Text.muted "Over by Over"
+
+### Scorecard
+Page
+  Nav
+    Brand "Over by Over" icon="sports_cricket"
+    Row gap=4
+      Link "Scoring" onTap={go scoring}
+      Link "Innings summary" onTap={go innings-summary}
+      Link "Scorecard"
+    Button "Share as picture" icon="image" onTap={open share}
+  Section narrow
+    Card#scorecard gap=16
+      Row between
+        Column
+          Heading "{battingTeam} v {bowlingTeam}" level=2
+          Text.muted "Twenty20, {formatDate(today(),"MMM d")}"
+        Text "{sum(balls,b=>b.r)}/{count(balls,b=>b.w)}" size=40 weight=700
+      Divider
+      Text.strong "Batting"
+      each b in batters
+        Row between
+          Column
+            Text.strong "{b.name}"
+            Text.muted "{b.out ? b.how : "not out"}"
+          Row gap=16
+            Text.strong "{b.runs}"
+            Text.muted "({b.balls})"
+      Divider
+      Text.strong "Bowling"
+      Row between
+        Text "{bowler}"
+        Text.strong "{floor(count(balls,b=>b.k=="run"||b.k=="bye")/6)}.{count(balls,b=>b.k=="run"||b.k=="bye")%6}-0-{sum(balls,b=>b.r)}-{count(balls,b=>b.w)}"
+      Divider
+      Row between
+        Text.muted "Extras"
+        Text "{sum(filter(balls,b=>b.k!="run"),b=>b.r)}"
+      Row between
+        Text.muted "Run rate"
+        Text "{fixed(sum(balls,b=>b.r)*6/max(1,count(balls,b=>b.k=="run"||b.k=="bye")),2)}"
+    Row gap=12
+      Button.outline "Back to scoring" onTap={go scoring}
+      Button "Share as picture" icon="image" onTap={open share}
+
+Sheet#share "Share scorecard"
+  Text.muted "The scorecard is sent as a picture."
+  Row gap=12
+    Button "Save to photos" icon="download" onTap={saveImage scorecard; toast "Saved"; close}
+    Button.outline "Copy picture" icon="content_copy" onTap={copyImage scorecard; toast "Copied"; close}
+    Button.outline "Share" icon="share" onTap={shareImage scorecard; close}

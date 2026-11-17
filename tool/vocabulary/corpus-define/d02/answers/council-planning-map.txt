@@ -1,0 +1,200 @@
+### Map
+state q=""
+state layers=["applications"]
+state status="all"
+state apps=[{"id":"24/0412","address":"14 Mill Lane","status":"received","title":"Rear extension and loft conversion"},{"id":"24/0377","address":"2 Quay Street","status":"approved","title":"Change of use to cafe"},{"id":"24/0301","address":"61 Harbour Road","status":"refused","title":"Three-storey block of 9 flats"},{"id":"24/0455","address":"Unit 4, Foundry Yard","status":"received","title":"Replacement shopfront"}]
+state addresses=["14 Mill Lane","16 Mill Lane","2 Quay Street","Mill Lane Allotments","Millbank Court"]
+state picked=""
+App
+  Sidebar
+    Brand "Zoned" icon="map"
+    NavItem "Map" icon="map" selected={true}
+    NavItem "My comments" icon="forum" badge="2" onTap={go comments}
+    NavItem "Alerts" icon="notifications" onTap={open alerts}
+    Spacer grow
+    Text.muted "Harbourside ward"
+  Main
+    Nav
+      Heading "Planning map" level=1
+      Row gap=8
+        Input "Search by address" bind=q w=260
+        Button.outline "Alert me" onTap={open alerts}
+    Row gap=0
+      Column grow gap=0
+        if q != ""
+          Card gap=0 pad=8
+            each a in filter(addresses, s => contains(lower(s), lower(q)))
+              ListTile "{a}" icon="place" onTap={picked=a; q=a}
+            if count(addresses, s => contains(lower(s), lower(q))) == 0
+              Text.muted "No address matches"
+        MapView h=560 center=[51.4545,-2.5879] zoom=15 status={status} layers={layers} apps={apps} onSelect={picked=result; go application}
+      Pane w=320 pad=16 gap=12
+        Text.strong "Layers"
+        Toggle "Applications" selected={contains(layers,"applications")} onChange={layers=result ? append(layers,"applications") : without(layers,"applications")}
+        Toggle "Conservation areas" selected={contains(layers,"conservation")} onChange={layers=result ? append(layers,"conservation") : without(layers,"conservation")}
+        Toggle "Flood zones" selected={contains(layers,"flood")} onChange={layers=result ? append(layers,"flood") : without(layers,"flood")}
+        Divider
+        Text.strong "Status"
+        Row gap=8
+          ChoiceChip "All" selected={status=="all"} onTap={status="all"}
+          ChoiceChip "Received" selected={status=="received"} onTap={status="received"}
+        Row gap=8
+          ChoiceChip "Approved" selected={status=="approved"} onTap={status="approved"}
+          ChoiceChip "Refused" selected={status=="refused"} onTap={status="refused"}
+        Divider
+        Text.strong "{count(apps, a => status == 'all' || a.status == status)} applications"
+        Column scroll gap=8
+          each a in filter(apps, a => status == "all" || a.status == status)
+            Card gap=4 onTap={picked=a.id; go application}
+              Row between
+                Text.strong "{a.id}"
+                StatusBadge "{a.status}"
+              Text "{a.address}"
+              Text.muted "{a.title}"
+  Dialog#alerts "Alerts near you" "We email you when a new application is received inside the circle."
+    state radius=500
+    state email=""
+    state alertsOn=true
+    Input "Email" "you@example.com" bind=email type=email
+    Input "Centre address" bind=q
+    Text.fieldLabel "Radius: {radius} m"
+    Slider bind=radius min=100 max=2000
+    RadiusPreview radius={radius}
+    Toggle "Include decisions as well as new applications" bind=alertsOn
+    Button "Start alerts" onTap={email == "" ? toast "Enter your email" : (emit subscribe {"email":email,"radius":radius}; toast "Alerts on within {radius} m"; close)}
+
+### Application
+state tab="details"
+state vote=""
+state comment=""
+state commentCount=37
+state docs=[{"name":"Site location plan","type":"PDF","size":"1.2 MB"},{"name":"Proposed elevations","type":"PDF","size":"3.8 MB"},{"name":"Design and access statement","type":"PDF","size":"640 KB"},{"name":"Officer report","type":"PDF","size":"410 KB"}]
+state events=[{"date":"2024-03-04","label":"Application received","done":true},{"date":"2024-03-12","label":"Valid and registered","done":true},{"date":"2024-03-26","label":"Consultation opened","done":true},{"date":"2024-04-16","label":"Consultation closes","done":false},{"date":"2024-05-06","label":"Decision due","done":false}]
+state daysLeft=19
+Page
+  Nav sticky
+    Brand "Zoned" icon="map"
+    Row gap=4
+      Link "Map" onTap={go map}
+      Link "My comments" onTap={go comments}
+    Button.outline "Alert me" onTap={open alerts}
+  Section
+    Column gap=12
+      Link "Back to map" onTap={go map}
+      Row between
+        Heading "24/0412 - 14 Mill Lane" level=1
+        StatusBadge "received"
+      Text.muted "Rear extension and loft conversion to a two-storey terraced house."
+      Row gap=16 top
+        Card grow gap=4
+          Text.muted "Comments deadline"
+          Text.heading "{daysLeft} days left"
+          Progress {(28 - daysLeft) / 28}
+          Text.caption "Closes 16 April 2024"
+        Card grow gap=4
+          Text.muted "Comments so far"
+          Text.heading "{commentCount}"
+          Text.caption "21 for, 16 against"
+        Card grow gap=4
+          Text.muted "Case officer"
+          Text.strong "Priya Nair"
+          Text.caption "planning@harbourside.example"
+  Section tint
+    Row gap=32 top
+      Column grow gap=16
+        SegmentedButton bind=tab items=["details","documents"]
+        if tab == "details"
+          Heading "Timeline" level=3
+          Timeline items={events}
+        if tab == "documents"
+          Heading "Documents" level=3
+          each d in docs
+            ListTile "{d.name}" "{d.type}, {d.size}" icon="description" onTap={link https://planning.harbourside.example/docs/{d.name}}
+      Column w=320 sticky gap=12
+        Card gap=12
+          Heading "Have your say" level=3
+          Text.muted "{commentCount} people have commented."
+          Button "Comment on this application" onTap={open commentForm}
+        Card gap=8
+          Heading "Constraints" level=3
+          Row gap=8
+            Badge.warning "Conservation area"
+            Badge.info "Flood zone 2"
+  Footer
+    Row between
+      Text.strong "Zoned"
+      Text.muted "Data from Harbourside Council"
+  Dialog#commentForm "Comment on 24/0412" "Comments are public and shown with your name."
+    Row gap=8
+      ChoiceChip "Support" icon="thumb_up" selected={vote=="for"} onTap={vote="for"}
+      ChoiceChip "Object" icon="thumb_down" selected={vote=="against"} onTap={vote="against"}
+    Input "Your comment" multiline bind=comment maxLength=1000
+    Row between
+      Text.caption "{length(comment)} / 1000"
+      Text.danger "Too long" hidden={length(comment) <= 1000}
+    Button "Submit comment" onTap={vote == "" ? toast "Choose support or object" : (length(comment) < 10 ? toast "Write at least 10 characters" : (commentCount=commentCount+1; emit comment {"vote":vote,"text":comment}; comment=""; vote=""; toast "Comment sent"; close))}
+
+### Comments
+state mine=[{"id":"24/0412","address":"14 Mill Lane","vote":"against","text":"The loft will overlook our garden.","date":"2024-03-28"},{"id":"24/0377","address":"2 Quay Street","vote":"for","text":"A cafe here would be welcome.","date":"2024-03-20"}]
+state sel=""
+Page
+  Nav
+    Brand "Zoned" icon="map"
+    Row gap=4
+      Link "Map" onTap={go map}
+  Section narrow
+    Column gap=12
+      Heading "My comments" level=1
+      each c in mine
+        Card gap=6
+          Row between
+            Text.strong "{c.id} - {c.address}"
+            IconButton "more_vert" tooltip="Options" onTap={sel=c.id; open rowMenu}
+          Row gap=8
+            Badge.success "Support" hidden={c.vote != "for"}
+            Badge.error "Object" hidden={c.vote != "against"}
+            Text.caption "{formatDate(c.date,'MMM d')}"
+          Text "{c.text}"
+  Footer
+    Text.muted "Data from Harbourside Council"
+  Menu#rowMenu end
+    MenuItem "View application" icon="open_in_new" onTap={go application}
+    MenuItem "Withdraw comment" icon="delete" onTap={mine=removeWhere(mine, m => m.id == sel); toast "Comment withdrawn"}
+
+// A real map cannot be drawn here: shown as a labelled box with the applications as coloured tags and the layers listed.
+define MapView center=[0,0] zoom=14 status="all" layers=[] apps=[] h=400 onSelect
+  Stack h={h} fill=#FFE5E7EB radius=8
+    Text.muted "Map ({center[0]}, {center[1]}) zoom {zoom}"
+    Column gap=6 pad=12 top left
+      if contains(layers, "conservation")
+        Badge.warning "Conservation area layer"
+      if contains(layers, "flood")
+        Badge.info "Flood zone layer"
+      if contains(layers, "applications")
+        each a in filter(apps, a => status == "all" || a.status == status)
+          Box pad=8 radius=4 fill={a.status == "approved" ? #FF86EFAC : (a.status == "refused" ? #FFFCA5A5 : #FFFDE68A)} onTap={onSelect(a.id)}
+            Text.small "{a.id} {a.address}"
+
+define StatusBadge "status"
+  if status == "approved"
+    Badge.success "Approved"
+  if status == "refused"
+    Badge.error "Refused"
+  if status == "received"
+    Badge.info "Received"
+
+// Shows the alert circle as a ring sized by the radius; a real map is not available.
+define RadiusPreview radius=500
+  Stack h=140 fill=#FFE5E7EB radius=8 center middle
+    Box w={clamp(radius / 20, 20, 130)} h={clamp(radius / 20, 20, 130)} radius={clamp(radius / 40, 10, 65)} fill=#332563EB border=2
+    Icon "place"
+    Text.caption "{radius} m radius"
+
+define Timeline items=[]
+  Column gap=0
+    each e in items
+      Row gap=12 top
+        Icon {e.done ? "check_circle" : "radio_button_unchecked"}
+        Column gap=2
+          Text.strong "{e.label}"
+          Text.caption "{formatDate(e.date,'MMM d, yyyy')}"

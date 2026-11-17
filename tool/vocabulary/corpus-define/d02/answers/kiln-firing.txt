@@ -1,0 +1,142 @@
+### Firing
+state preset="Glaze cone 6"
+state points=[{"h":0,"t":20},{"h":3,"t":600},{"h":6,"t":1000},{"h":8,"t":1222},{"h":8.25,"t":1222},{"h":12,"t":700}]
+state actual=[20,260,540,760,980,1120,1190]
+state temp=1190
+state status="climbing"
+state coolLeft=14400
+state running=true
+state limit=1240
+state selPoint=3
+every 1s when status=="cooling"
+  onTick={coolLeft=max(0,coolLeft-1)}
+every 5s when running
+  onTick={temp=temp+2}
+App
+  Sidebar
+    Brand "Cone Ten" icon="local_fire_department"
+    NavItem "Firing" icon="show_chart" selected={true} onTap={go firing}
+    NavItem "Load" icon="inventory_2" badge="{length(pieces)}" onTap={go load}
+    NavItem "Notes" icon="edit_note" onTap={go notes}
+    Spacer grow
+    Text.muted "Skutt KM-1027"
+  Main
+    Nav
+      Heading "Glaze firing" level=1
+      Row gap=8
+        Select bind=preset items=["Bisque cone 04","Glaze cone 6","Crystalline cone 10"] onChange={points=result=="Bisque cone 04" ? [{"h":0,"t":20},{"h":4,"t":600},{"h":8,"t":1060},{"h":9,"t":1060}] : (result=="Crystalline cone 10" ? [{"h":0,"t":20},{"h":4,"t":900},{"h":7,"t":1280},{"h":9,"t":1280},{"h":10,"t":1100},{"h":14,"t":1100}] : [{"h":0,"t":20},{"h":3,"t":600},{"h":6,"t":1000},{"h":8,"t":1222},{"h":8.25,"t":1222},{"h":12,"t":700}]); toast "Preset loaded"}
+        Button "Start firing" onTap={running=true; status="climbing"; emit startFiring preset}
+    Column pad=24 gap=16
+      if max(map(points,p=>p.t))>limit
+        Card fill=#FFFEE2E2 gap=4
+          Row gap=8 middle
+            Icon "warning" color=#FFB91C1C
+            Text.strong "Peak {max(map(points,p=>p.t))} C is over the element limit of {limit} C" color=#FFB91C1C
+          Text.small "Lower the highest point before you start." color=#FF7F1D1D
+      Row gap=16 top
+        Card grow gap=4
+          Text.caption "Now"
+          Text "{temp} C" size=64 weight=700
+          Row gap=8 middle
+            Badge.warning "{status}"
+            Text.muted "plan says {last(actual)} C at this hour"
+        Card grow gap=8
+          Text.caption "Lid"
+          if status=="cooling" && coolLeft>0
+            Text "{duration(coolLeft)}" size=40 weight=700
+            Text.muted "until the lid can be opened"
+            Progress {1-coolLeft/14400}
+          if status!="cooling"
+            Text.strong "Locked"
+            Text.muted "Opens after cooling below 100 C"
+          Button.outline "Start cooling" onTap={status="cooling"; running=false}
+      Card gap=12
+        Row between
+          Text.strong "Plan and real firing"
+          Row gap=8
+            Chip "plan"
+            Chip "actual"
+        CurveEditor bind=points actual=actual h=280 unit="C" selected=selPoint onSelect={selPoint=result}
+        if selPoint>=0
+          Row gap=12 middle
+            Text.strong "Point {selPoint+1}"
+            Text.muted "hour {points[selPoint].h}"
+            Slider bind=pointTemp min=20 max=1300
+            Button.outline "Set {points[selPoint].t} C" onTap={points=setAt(points,selPoint,with(points[selPoint],"t",clamp(points[selPoint].t+10,20,1300)))}
+            Button.ghost "Remove" onTap={points=removeAt(points,selPoint); selPoint=0}
+        Row gap=8
+          Button.outline "Add ramp" onTap={points=append(points,{"h":last(points).h+2,"t":last(points).t})}
+          Button.outline "Add hold" onTap={points=append(points,{"h":last(points).h+1,"t":last(points).t})}
+
+### Load
+state pieces=[{"id":1,"name":"Tall vase","clay":"Stoneware","glaze":"Celadon","shelf":2},{"id":2,"name":"Dinner plates (4)","clay":"Porcelain","glaze":"Satin white","shelf":1},{"id":3,"name":"Mugs (6)","clay":"Stoneware","glaze":"Tenmoku","shelf":1}]
+state clay="Stoneware"
+state sel=0
+App
+  Sidebar
+    Brand "Cone Ten" icon="local_fire_department"
+    NavItem "Firing" icon="show_chart" onTap={go firing}
+    NavItem "Load" icon="inventory_2" badge="{length(pieces)}" selected={true} onTap={go load}
+    NavItem "Notes" icon="edit_note" onTap={go notes}
+  Main
+    Nav
+      Heading "Kiln load" level=1
+      Button "Add piece" icon="add" onTap={open addPiece}
+    Column pad=24 gap=16
+      Text.muted "{length(pieces)} pieces, {count(pieces,p=>p.clay=="Porcelain")} porcelain. Check the glaze matches the cone."
+      Card gap=0
+        Row gap=8 pad=8 border-bottom=#FFE5E7EB
+          Text.strong "Piece" grow
+          Text.strong "Clay" w=110
+          Text.strong "Glaze" w=110
+          Text.strong "Shelf" w=60
+          Spacer w=40
+        each p in sortBy(pieces,p=>p.shelf)
+          Row gap=8 pad=8 middle
+            Text "{p.name}" grow
+            Text.muted "{p.clay}" w=110
+            Text.muted "{p.glaze}" w=110
+            Text "{p.shelf}" w=60
+            IconButton "more_vert" tooltip="More" onTap={sel=p.id; open rowMenu}
+  Menu#rowMenu end
+    MenuItem "Move to top shelf" icon="vertical_align_top" onTap={pieces=updateWhere(pieces,p=>p.id==sel,p=>with(p,"shelf",1))}
+    MenuItem "Remove" icon="delete" onTap={pieces=removeWhere(pieces,p=>p.id==sel); toast "Removed"}
+  Dialog#addPiece "Add a piece" "It goes on the next free spot"
+    Input "Name" bind=newName
+    Select bind=clay items=["Stoneware","Porcelain","Earthenware","Raku"]
+    Input "Glaze" bind=newGlaze
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Add" onTap={newName!="" ? {pieces=append(pieces,{"id":length(pieces)+10,"name":newName,"clay":clay,"glaze":newGlaze,"shelf":1}); newName=""; newGlaze=""; close} : toast "Give the piece a name"}
+
+### Notes
+state notes=[{"id":1,"when":"Nov 14, 21:10","text":"Candled with the lid propped for two hours."},{"id":2,"when":"Nov 15, 02:40","text":"Cone 6 bent at 1222 C, hold felt right."}]
+state draft=""
+App
+  Sidebar
+    Brand "Cone Ten" icon="local_fire_department"
+    NavItem "Firing" icon="show_chart" onTap={go firing}
+    NavItem "Load" icon="inventory_2" onTap={go load}
+    NavItem "Notes" icon="edit_note" selected={true} onTap={go notes}
+  Main
+    Nav
+      Heading "Firing notes" level=1
+    Column pad=24 gap=16
+      Card gap=8
+        Input "New note" "What did you see?" bind=draft multiline
+        Row end
+          Button "Add note" onTap={draft!="" ? {notes=prepend(notes,draft); draft=""; toast "Note saved"} : toast "Write something first"}
+      each n in reverse(notes)
+        Card gap=4
+          Row between
+            Text.caption "{n.when}"
+            IconButton "delete" tooltip="Delete note" onTap={notes=removeWhere(notes,x=>x.id==n.id)}
+          Text "{n.text}"
+
+// A draggable temperature curve cannot be drawn on a canvas here; it shows the plan as a line, the real firing as a second line, and each point as a tappable chip.
+define CurveEditor bind=points actual=[] h=240 unit="C" selected=0 onSelect
+  Column gap=8
+    LineChart labels={map(points,p=>p.h)} series=[{"name":"Plan","values":map(points,p=>p.t)},{"name":"Actual","values":actual}] h={h}
+    Row scroll gap=8
+      each p in points
+        ChoiceChip "{p.h}h  {p.t}{unit}" selected={index==selected} onTap={onSelect(index)}

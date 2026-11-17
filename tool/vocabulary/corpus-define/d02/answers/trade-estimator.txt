@@ -1,0 +1,246 @@
+### Estimate
+state tab="estimate"
+state jobName="Harlan St. panel upgrade"
+state client="Dana Whitfield"
+state labourRate=92
+state overhead=8
+state sections=[{"id":"s1","name":"Service and panel","open":true,"markup":18,"items":[{"code":"CB-200","desc":"200A main breaker, Square D","qty":1,"cost":184.5},{"code":"PNL-40","desc":"40-space load centre","qty":1,"cost":212.0},{"code":"GND-6","desc":"Ground rod 5/8 x 8 ft","qty":2,"cost":19.75}]},{"id":"s2","name":"Branch circuits","open":true,"markup":22,"items":[{"code":"WR-142","desc":"14/2 NM-B cable, 250 ft roll","qty":4,"cost":96.4},{"code":"WR-122","desc":"12/2 NM-B cable, 250 ft roll","qty":6,"cost":131.2},{"code":"RC-15","desc":"15A tamper-resistant receptacle","qty":32,"cost":2.35}]},{"id":"s3","name":"Lighting","open":false,"markup":20,"items":[{"code":"LED-6","desc":"6 in LED recessed retrofit","qty":18,"cost":14.9},{"code":"SW-DM","desc":"Preset dimmer switch","qty":6,"cost":21.0}]}]
+state labour=[{"task":"Rough-in","hours":24},{"task":"Panel swap","hours":8},{"task":"Trim-out","hours":14},{"task":"Inspection and testing","hours":3}]
+state pasted=""
+state staged=[{"raw":"10x 14/2 NM-B 250ft","code":"WR-142","match":true},{"raw":"2 gang old work box","code":"","match":false},{"raw":"6 AFCI breaker 20A","code":"CB-AF20","match":true},{"raw":"wirenuts yellow bag","code":"","match":false}]
+App
+  Sidebar
+    Brand "Joist" icon="electrical_services"
+    NavItem "Estimate" icon="calculate" selected={tab=="estimate"} onTap={tab="estimate"}
+    NavItem "Labour" icon="engineering" selected={tab=="labour"} onTap={go labour}
+    NavItem "Client quote" icon="request_quote" onTap={go quote}
+    NavItem "Compare versions" icon="compare_arrows" onTap={go compare}
+    Spacer grow
+    Text.muted "Estimator: Luis Ortega"
+  Main
+    Nav
+      Column
+        Heading "{jobName}" level=1
+        Text.muted "Client: {client}"
+      Row gap=8
+        Button.outline "Paste items" icon="content_paste" onTap={open paste}
+        Button "Preview quote" onTap={go quote}
+    Column pad=24 gap=16 scroll
+      each sec in sections
+        Card gap=8
+          Row between middle
+            Row gap=8 middle
+              IconButton "{sec.open ? 'expand_more' : 'chevron_right'}" tooltip="Fold section" onTap={sections=updateWhere(sections,s=>s.id==sec.id,s=>with(s,"open",!s.open))}
+              Text.strong "{sec.name}"
+              Badge.neutral "{length(sec.items)} items"
+            Row gap=16 middle
+              Text.muted "Subtotal {money(sum(sec.items,r=>r.qty*r.cost),'$',2)}"
+              Text.strong "With markup {money(sum(sec.items,r=>r.qty*r.cost)*(1+sec.markup/100),'$',2)}"
+          if sec.open
+            Row gap=8 middle
+              Text.caption "Code" w=90
+              Text.caption "Description" grow
+              Text.caption "Qty" w=70
+              Text.caption "Unit cost" w=100
+              Text.caption "Line total" w=110
+              Spacer w=40
+            each row in sec.items
+              Row gap=8 middle
+                Text.mono "{row.code}" w=90
+                Input "Description" bind=row.desc grow
+                Input "Qty" type=number bind=row.qty w=70
+                Input "Unit cost" type=number bind=row.cost w=100
+                Text.strong "{money(row.qty*row.cost,'$',2)}" w=110
+                IconButton "delete" tooltip="Remove line" onTap={sections=updateWhere(sections,s=>s.id==sec.id,s=>with(s,"items",removeWhere(s.items,r=>r.code==row.code)))}
+            Row between middle
+              Button.ghost "Add line" icon="add" onTap={sections=updateWhere(sections,s=>s.id==sec.id,s=>with(s,"items",append(s.items,{"code":"NEW","desc":"","qty":1,"cost":0})))}
+              Row gap=8 middle
+                Text.fieldLabel "Markup %"
+                Input "Markup" type=number bind=sec.markup w=80
+      Card gap=12
+        Text.strong "Totals"
+        Grid cols=4 gap=16
+          Column
+            Text.caption "Materials at cost"
+            Text.heading "{money(sum(sections,s=>sum(s.items,r=>r.qty*r.cost)),'$',2)}"
+          Column
+            Text.caption "Materials with markup"
+            Text.heading "{money(sum(sections,s=>sum(s.items,r=>r.qty*r.cost)*(1+s.markup/100)),'$',2)}"
+          Column
+            Text.caption "Labour ({sum(labour,l=>l.hours)} h at {money(labourRate,'$',0)})"
+            Text.heading "{money(sum(labour,l=>l.hours)*labourRate,'$',2)}"
+          Column
+            Text.caption "Overhead {overhead}%"
+            Text.heading "{money((sum(sections,s=>sum(s.items,r=>r.qty*r.cost)*(1+s.markup/100))+sum(labour,l=>l.hours)*labourRate)*overhead/100,'$',2)}"
+        Divider
+        Row between middle
+          Column
+            Text.caption "Quote total"
+            Text "{money((sum(sections,s=>sum(s.items,r=>r.qty*r.cost)*(1+s.markup/100))+sum(labour,l=>l.hours)*labourRate)*(1+overhead/100),'$',2)}" size=32 weight=700
+          Column
+            Text.caption "Margin on cost"
+            Text "{fixed(((sum(sections,s=>sum(s.items,r=>r.qty*r.cost)*(1+s.markup/100))+sum(labour,l=>l.hours)*labourRate)*(1+overhead/100)-sum(sections,s=>sum(s.items,r=>r.qty*r.cost))-sum(labour,l=>l.hours)*labourRate*0.6)/((sum(sections,s=>sum(s.items,r=>r.qty*r.cost)*(1+s.markup/100))+sum(labour,l=>l.hours)*labourRate)*(1+overhead/100))*100,1)}%" size=32 weight=700
+Dialog#paste "Paste a list of items" "One item per line. Unmatched lines turn amber."
+  Input "Pasted list" multiline bind=pasted h=120
+  Row gap=8
+    Button "Match to catalogue" onTap={emit matchPaste pasted; toast "Matched against the price book"}
+    Text.muted "{count(staged,x=>!x.match)} unknown of {length(staged)}"
+  each item in staged
+    Row gap=8 middle fill={item.match ? "#FFF0FDF4" : "#FFFEF3C7"} pad=8 radius=6
+      Icon "{item.match ? 'check_circle' : 'help'}"
+      Text "{item.raw}" grow
+      if item.match
+        Text.mono "{item.code}"
+      if !item.match
+        Badge.warning "Unknown"
+        Button.outline "Pick code" onTap={emit pickCode item.raw}
+  Button "Add matched lines" onTap={sections=updateWhere(sections,s=>s.id=="s2",s=>with(s,"items",concat(s.items,map(filter(staged,x=>x.match),x=>{"code":x.code,"desc":x.raw,"qty":1,"cost":0})))); close; toast "Lines added"}
+
+### Labour
+state labour=[{"task":"Rough-in","hours":24},{"task":"Panel swap","hours":8},{"task":"Trim-out","hours":14},{"task":"Inspection and testing","hours":3}]
+state labourRate=92
+state overhead=8
+state crew=["Journeyman","Apprentice"]
+App
+  Sidebar
+    Brand "Joist" icon="electrical_services"
+    NavItem "Estimate" icon="calculate" onTap={go estimate}
+    NavItem "Labour" icon="engineering" selected onTap={go labour}
+    NavItem "Client quote" icon="request_quote" onTap={go quote}
+    NavItem "Compare versions" icon="compare_arrows" onTap={go compare}
+  Main
+    Nav
+      Heading "Labour" level=1
+      Button "Add task" icon="add" onTap={labour=append(labour,{"task":"New task","hours":1})}
+    Column pad=24 gap=16
+      Card gap=12
+        Text.strong "Rate"
+        Row gap=16 middle
+          Input "Hourly rate" type=number bind=labourRate w=140
+          Select "Crew" items=crew bind=crewPick w=200
+          Input "Overhead %" type=number bind=overhead w=120
+      Card gap=8
+        Row gap=8 middle
+          Text.caption "Task" grow
+          Text.caption "Hours" w=90
+          Text.caption "Cost" w=110
+          Spacer w=40
+        each row in labour
+          Row gap=8 middle
+            Input "Task" bind=row.task grow
+            Input "Hours" type=number bind=row.hours w=90
+            Text.strong "{money(row.hours*labourRate,'$',2)}" w=110
+            IconButton "delete" tooltip="Remove task" onTap={labour=removeWhere(labour,l=>l.task==row.task)}
+        Divider
+        Row between
+          Text.strong "Total hours: {sum(labour,l=>l.hours)}"
+          Text.strong "{money(sum(labour,l=>l.hours)*labourRate,'$',2)}"
+      Card gap=8
+        Text.strong "Hours by task"
+        BarChart values={map(labour,l=>l.hours)} labels={map(labour,l=>l.task)} h=180
+
+### Client quote
+state jobName="Harlan St. panel upgrade"
+state client="Dana Whitfield"
+state quoteNo="Q-2417"
+state showLines=true
+state sections=[{"id":"s1","name":"Service and panel","open":true,"markup":18,"items":[{"code":"CB-200","desc":"200A main breaker, Square D","qty":1,"cost":184.5},{"code":"PNL-40","desc":"40-space load centre","qty":1,"cost":212.0},{"code":"GND-6","desc":"Ground rod 5/8 x 8 ft","qty":2,"cost":19.75}]},{"id":"s2","name":"Branch circuits","open":true,"markup":22,"items":[{"code":"WR-142","desc":"14/2 NM-B cable, 250 ft roll","qty":4,"cost":96.4},{"code":"WR-122","desc":"12/2 NM-B cable, 250 ft roll","qty":6,"cost":131.2},{"code":"RC-15","desc":"15A tamper-resistant receptacle","qty":32,"cost":2.35}]}]
+state labourTotal=4232
+Page
+  Nav sticky
+    Brand "Joist" icon="electrical_services"
+    Row gap=8
+      Toggle "Show line items" bind=showLines
+      Button.outline "Back to estimate" onTap={go estimate}
+      Button "Send to client" icon="send" onTap={open send}
+  Section narrow
+    Column gap=16
+      Row between top
+        Column gap=4
+          Heading "Quote {quoteNo}" level=1
+          Text.muted "{jobName}"
+        Column right
+          Text.strong "Prepared for"
+          Text "{client}"
+          Text.muted "Valid for 30 days"
+      Divider
+      each sec in sections
+        Column gap=6
+          Row between
+            Heading "{sec.name}" level=3
+            Text.strong "{money(sum(sec.items,r=>r.qty*r.cost)*(1+sec.markup/100),'$',2)}"
+          if showLines
+            each row in sec.items
+              Row gap=8
+                Text.muted "{row.qty} x" w=50
+                Text "{row.desc}" grow
+                Text.muted "{money(row.qty*row.cost*(1+sec.markup/100),'$',2)}"
+      Row between
+        Heading "Labour" level=3
+        Text.strong "{money(labourTotal,'$',2)}"
+      Divider
+      Row between middle
+        Text.heading "Total, before tax"
+        Text "{money(sum(sections,s=>sum(s.items,r=>r.qty*r.cost)*(1+s.markup/100))+labourTotal,'$',2)}" size=32 weight=700
+      Text.caption "Work to code, permit and inspection included. Drywall repair by others."
+Dialog#send "Send quote" "Emails a PDF to the client"
+  Input "To" "client@example.com" bind=client
+  Button "Send" onTap={emit sendQuote; close; toast "Quote sent"}
+
+### Compare versions
+state vA="v1 (sent Mar 3)"
+state vB="v2 (draft)"
+state versions=["v1 (sent Mar 3)","v2 (draft)","v3 (client change)"]
+state diff=[{"code":"CB-200","desc":"200A main breaker","qtyA":1,"qtyB":1,"costA":184.5,"costB":184.5},{"code":"PNL-40","desc":"40-space load centre","qtyA":1,"qtyB":1,"costA":212.0,"costB":236.0},{"code":"WR-122","desc":"12/2 NM-B cable, 250 ft","qtyA":6,"qtyB":8,"costA":131.2,"costB":131.2},{"code":"RC-15","desc":"15A TR receptacle","qtyA":32,"qtyB":40,"costA":2.35,"costB":2.35},{"code":"LED-6","desc":"6 in LED retrofit","qtyA":18,"qtyB":0,"costA":14.9,"costB":0}]
+state onlyChanged=false
+App
+  Sidebar
+    Brand "Joist" icon="electrical_services"
+    NavItem "Estimate" icon="calculate" onTap={go estimate}
+    NavItem "Labour" icon="engineering" onTap={go labour}
+    NavItem "Client quote" icon="request_quote" onTap={go quote}
+    NavItem "Compare versions" icon="compare_arrows" selected onTap={go compare}
+  Main
+    Nav
+      Heading "Compare versions" level=1
+      Toggle "Changed lines only" bind=onlyChanged
+    Column pad=24 gap=16
+      Row gap=16 middle
+        Select "Base" items=versions bind=vA w=220
+        Icon "arrow_forward"
+        Select "Compare to" items=versions bind=vB w=220
+        Spacer grow
+        Badge.warning "{count(diff,d=>d.qtyA!=d.qtyB || d.costA!=d.costB)} lines changed"
+      Card gap=4
+        Row gap=8
+          Text.caption "Code" w=80
+          Text.caption "Description" grow
+          Text.caption "Qty" w=110
+          Text.caption "Unit cost" w=130
+          Text.caption "Line total" w=150
+        each d in diff
+          if !onlyChanged || d.qtyA!=d.qtyB || d.costA!=d.costB
+            Row gap=8 middle
+              Text.mono "{d.code}" w=80
+              Text "{d.desc}" grow
+              DiffCell a={d.qtyA} b={d.qtyB} w=110
+              DiffCell a={d.costA} b={d.costB} money=true w=130
+              DiffCell a={d.qtyA*d.costA} b={d.qtyB*d.costB} money=true w=150
+      Card gap=8
+        Row between
+          Text.strong "Total {vA}"
+          Text "{money(sum(diff,d=>d.qtyA*d.costA),'$',2)}"
+        Row between
+          Text.strong "Total {vB}"
+          Text "{money(sum(diff,d=>d.qtyB*d.costB),'$',2)}"
+        Divider
+        Row between
+          Text.strong "Difference"
+          Text.strong "{money(sum(diff,d=>d.qtyB*d.costB)-sum(diff,d=>d.qtyA*d.costA),'$',2)}"
+
+define DiffCell a=0 b=0 money=false w=100
+  Row w={w} gap=6 middle pad=4 radius=4 fill={a != b ? (b > a ? "#FFFEF3C7" : "#FFFEE2E2") : "#00000000"}
+    Text.muted strike={a != b} "{money ? money(a,'$',2) : a}"
+    if a != b
+      Icon "arrow_forward" size=14
+      Text.strong "{money ? money(b,'$',2) : b}"

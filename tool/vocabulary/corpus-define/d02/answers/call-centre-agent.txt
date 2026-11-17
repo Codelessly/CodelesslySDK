@@ -1,0 +1,253 @@
+### Desk
+state status="Ready"
+state seconds=0
+state incoming=true
+state onCall=false
+state held=false
+state whisper=false
+state notes=""
+state target=""
+state steps=[{"id":1,"text":"Greet and confirm the account holder","done":true},{"id":2,"text":"Verify identity: postcode and date of birth","done":false},{"id":3,"text":"Confirm the fault and when it started","done":false},{"id":4,"text":"Offer an engineer visit or a remote reset","done":false},{"id":5,"text":"Read back the booking and close","done":false}]
+state history=[{"when":"12 Nov","title":"Chat: router light red","detail":"Advised a restart, resolved","kind":"chat"},{"when":"28 Oct","title":"Call: billing query","detail":"Credit of $12.00 applied","kind":"call"},{"when":"03 Oct","title":"Engineer visit","detail":"Line tested, no fault found","kind":"visit"},{"when":"19 Sep","title":"Plan upgraded to Fibre 500","detail":"Online order","kind":"order"}]
+state directory=[{"name":"Billing team","ext":"2210","free":4},{"name":"Technical tier 2","ext":"2340","free":1},{"name":"Retention","ext":"2415","free":0},{"name":"Complaints","ext":"2502","free":2}]
+state q=""
+every 1s onTick={seconds=seconds+1}
+App
+  Sidebar
+    Brand "Handset" icon="headset_mic"
+    NavItem "Desk" icon="support_agent" selected={true}
+    NavItem "Wrap-up" icon="fact_check" onTap={go wrap-up}
+    NavItem "Queue and stats" icon="insights" onTap={go queue}
+    Spacer grow
+    Row gap=10 middle
+      Avatar "Priya Nair" size=36
+      Column
+        Text.strong "Priya Nair"
+        Text.caption "Seat 14, Tier 1"
+  Main
+    Nav
+      Heading "Agent desk" level=1
+      Row gap=12 middle
+        if whisper
+          WhisperIndicator "Dana Okafor" "Supervisor is coaching you"
+        CallTimer seconds={seconds} label={status}
+        SegmentedButton bind=status items=["Ready","On a call","Wrap-up","Break"] onChange={seconds=0; result=="Break" ? toast "Break started, queue paused" : toast "Status: {result}"}
+    Column pad=24 gap=16 scroll
+      if incoming && !onCall
+        Card gap=12 animate=slide-up
+          Row between middle
+            Row gap=12 middle
+              Avatar "Marcus Holloway" size=48
+              Column
+                Text.heading "Marcus Holloway"
+                Text.muted "+1 (415) 555-0142, Fibre 500 customer since 2021"
+            Badge.warning "Ringing"
+          Grid cols=3 gap=12
+            Column
+              Text.caption "Matched account"
+              Text.strong "AC-884213"
+            Column
+              Text.caption "Last contact"
+              Text.strong "12 Nov, chat"
+            Column
+              Text.caption "Sentiment risk"
+              Badge.warning "Medium"
+          Row gap=8
+            Button "Answer" icon="call" onTap={onCall=true; incoming=false; status="On a call"; seconds=0}
+            Button.destructive "Decline" icon="call_end" onTap={incoming=false; toast "Call declined and returned to queue"}
+      if onCall
+        Row gap=16 top
+          Column grow gap=16
+            Card gap=12
+              Row between middle
+                Column
+                  Text.heading "Marcus Holloway"
+                  Text.muted "AC-884213, Fibre 500"
+                Row gap=8
+                  if held
+                    Badge.warning "On hold"
+                  IconButton "pause" tooltip="Hold" onTap={held=!held; toast held ? "Call resumed" : "Call on hold"}
+                  IconButton "phone_forwarded" tooltip="Transfer" onTap={open transfer}
+                  Button.destructive "End call" onTap={onCall=false; status="Wrap-up"; seconds=0; emit callEnded}
+            Card gap=10
+              Row between middle
+                Text.strong "Call script: connection fault"
+                Text.muted "{count(steps,s=>s.done)} of {length(steps)} steps"
+              Progress {count(steps,s=>s.done)/length(steps)}
+              each step in steps
+                Checkbox "{step.text}" bind=step.done
+            Card gap=8
+              Text.strong "Notes"
+              Input "Call notes" "Fault reported, symptoms, what was tried" bind=notes multiline
+              Row between
+                Text.caption "{length(notes)} characters, saved to the case"
+                Button.outline "Insert reference" onTap={notes=notes+" [Ref AC-884213] "}
+          Column w=320 gap=16
+            Card gap=10
+              Text.strong "Customer history"
+              Timeline items={history}
+      if !onCall && !incoming
+        Card gap=8 center
+          Icon "headset_mic" size=40
+          Text.heading "Waiting for the next call"
+          Text.muted "Set your status to Ready to receive calls."
+          Button "Simulate incoming call" onTap={incoming=true; status="Ready"}
+      Row gap=16 top
+        Card grow gap=8
+          Text.strong "Queue"
+          Row gap=24
+            Column
+              Text "9" size=40 weight=700
+              Text.caption "Waiting"
+            Column
+              Text "04:38" size=40 weight=700 color=#FFDC2626
+              Text.caption "Longest wait"
+        Card grow gap=8
+          Text.strong "Your day"
+          Row gap=24
+            StatTile "Calls" "23"
+            StatTile "Avg handle" "5:12"
+            StatTile "CSAT" "94%"
+            StatTile "Adherence" "97%"
+  Dialog#transfer "Transfer call" "Pick a team, the customer stays on hold while it rings"
+    Input "Search directory" bind=q
+    Column gap=4
+      each d in filter(directory,x=>contains(lower(x.name),lower(q)))
+        ListTile "{d.name}" subtitle="Ext {d.ext}, {d.free} agents free" onTap={target=d.name}
+          Badge.success "{d.free} free" hidden={d.free==0}
+          Badge.neutral "Busy" hidden={d.free>0}
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button "Transfer to {target}" onTap={target=="" ? toast "Choose a team first" : {onCall=false; status="Wrap-up"; seconds=0; toast "Transferred to {target}"; close}}
+
+### Wrap-up
+state code=""
+state outcome="Resolved"
+state callback=false
+state when=""
+state seconds=0
+state wrapNote=""
+state codes=[{"id":"fault-fixed","label":"Fault fixed on call","icon":"build"},{"id":"visit","label":"Engineer visit booked","icon":"event"},{"id":"billing","label":"Billing adjustment","icon":"payments"},{"id":"upgrade","label":"Upgrade offered","icon":"trending_up"},{"id":"complaint","label":"Complaint logged","icon":"report"},{"id":"nofault","label":"No fault found","icon":"check_circle"}]
+every 1s onTick={seconds=seconds+1}
+App
+  Sidebar
+    Brand "Handset" icon="headset_mic"
+    NavItem "Desk" icon="support_agent" onTap={go desk}
+    NavItem "Wrap-up" icon="fact_check" selected={true}
+    NavItem "Queue and stats" icon="insights" onTap={go queue}
+    Spacer grow
+    Text.muted "Priya Nair"
+  Main
+    Nav
+      Heading "Wrap-up" level=1
+      Row gap=12 middle
+        CallTimer seconds={seconds} label="Wrap-up"
+        Badge.warning "Target 60s"
+    Column pad=24 gap=16 scroll maxw=900
+      Card gap=12
+        Text.strong "Call with Marcus Holloway, 14:02 to 14:11"
+        Text.muted "Duration 9m 04s, hold 0m 41s, no transfers"
+      Card gap=12
+        Text.strong "Pick a wrap-up code"
+        Grid cols=3 gap=8
+          each c in codes
+            Card gap=6 fill={code==c.id ? "#FFDBEAFE" : "#FFFFFFFF"} onTap={code=c.id}
+              IconTile "{c.icon}"
+              Text.strong "{c.label}"
+      Card gap=12
+        Text.strong "Outcome"
+        SegmentedButton bind=outcome items=["Resolved","Follow-up","Escalated"]
+        Toggle "Schedule a callback" bind=callback
+        if callback
+          Row gap=12
+            DatePicker "Callback date" bind=when
+            TimePicker "Time" bind=whenTime
+        Input "Summary for the next agent" bind=wrapNote multiline
+      Row end gap=8
+        Button.outline "Back to the call" onTap={go desk}
+        Button "Submit and go Ready" onTap={code=="" ? toast "Choose a wrap-up code" : {emit wrapped {"code":code,"outcome":outcome,"note":wrapNote}; toast "Wrap-up saved, you are Ready"; go desk}}
+
+### Queue and stats
+state tab="Today"
+state skill="All queues"
+state hourly=[2,3,4,3,5,4,6,3]
+App
+  Sidebar
+    Brand "Handset" icon="headset_mic"
+    NavItem "Desk" icon="support_agent" onTap={go desk}
+    NavItem "Wrap-up" icon="fact_check" onTap={go wrap-up}
+    NavItem "Queue and stats" icon="insights" selected={true}
+    Spacer grow
+    Text.muted "Priya Nair"
+  Main
+    Nav
+      Heading "Queue and stats" level=1
+      Row gap=8 middle
+        Select bind=skill items=["All queues","Billing","Technical","Retention"]
+        SegmentedButton bind=tab items=["Today","This week"]
+    Column pad=24 gap=16 scroll
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.caption "Waiting now"
+          Text "9" size=40 weight=700
+          Sparkline values=[4,5,7,6,8,9,9]
+        Card gap=4
+          Text.caption "Longest wait"
+          Text "04:38" size=40 weight=700 color=#FFDC2626
+          Badge.error "Over 3 min target"
+        Card gap=4
+          Text.caption "Agents ready"
+          Text "6 of 31" size=40 weight=700
+        Card gap=4
+          Text.caption "Service level"
+          Gauge 82 min=0 max=100 limit=80 unit="%"
+      Row gap=16 top
+        Card grow gap=8
+          Text.strong "Your calls per hour"
+          BarChart values={hourly} labels=["8","9","10","11","12","13","14","15"] h=200
+        Card grow gap=8
+          Text.strong "Time by status"
+          Donut values=[62,14,16,8] labels=["On a call","Ready","Wrap-up","Break"]
+      Card gap=12
+        Text.strong "Your stats, {tab}"
+        Row gap=24 scroll
+          StatTile "Calls handled" {tab=="Today" ? "23" : "117"}
+          StatTile "Avg handle time" "5:12"
+          StatTile "First call resolution" "88%"
+          StatTile "CSAT" "94%"
+          StatTile "Adherence" "97%"
+        Row gap=8 middle
+          Text.muted "Daily goal"
+          Progress {tab=="Today" ? 0.77 : 0.58} grow
+
+// A supervisor whisper indicator: a pulsing badge with the supervisor's name; the audio itself cannot be drawn.
+define WhisperIndicator "name" "caption"
+  Row gap=8 middle pad=[10,6,12,6] fill=#FFFEF3C7 radius=16 animate=pulse
+    Icon "hearing"
+    Column
+      Text.strong "Whisper: {name}"
+      Text.caption "{caption}"
+
+define CallTimer seconds=0 label=""
+  Row gap=8 middle
+    Icon "timer"
+    Text.mono "{floor(seconds/60)}:{seconds%60<10 ? "0" : ""}{seconds%60}"
+    Text.caption "{label}"
+
+define StatTile "label" "value"
+  Column gap=2
+    Text "{value}" size=28 weight=700
+    Text.caption "{label}"
+
+define Timeline items=[]
+  Column gap=0
+    each item in items
+      Row gap=10 top
+        Column center w=24
+          IconTile "{item.kind=="chat" ? "chat" : item.kind=="call" ? "call" : item.kind=="visit" ? "home_repair_service" : "shopping_bag"}"
+          Divider
+        Column grow gap=2 pad=[0,0,0,12]
+          Row between
+            Text.strong "{item.title}"
+            Text.caption "{item.when}"
+          Text.muted "{item.detail}"

@@ -1,0 +1,172 @@
+### Titration
+state start=0.50
+state end=24.85
+state cbase=0.1000
+state vacid=25.00
+state indicator="Phenolphthalein"
+state indicators=[{"name":"Phenolphthalein","before":"#FFF3F4F6","at":"#FFEC4899"},{"name":"Methyl orange","before":"#FFDC2626","at":"#FFF59E0B"},{"name":"Bromothymol blue","before":"#FFFACC15","at":"#FF2563EB"},{"name":"Methyl red","before":"#FFDC2626","at":"#FFFACC15"}]
+state trials=[{"id":1,"start":0.50,"end":24.85},{"id":2,"start":0.00,"end":24.40},{"id":3,"start":0.20,"end":24.70}]
+state limit=0.10
+state reached=false
+App
+  Sidebar
+    Brand "Dropwise" icon="science"
+    NavItem "Titration" icon="water_drop" selected={true}
+    NavItem "Trials" icon="table_rows" badge="{length(trials)}" onTap={go trials}
+    NavItem "Curve and result" icon="show_chart" onTap={go curve}
+    Spacer grow
+    Text.muted "Bench 4, Dr. Okafor"
+  Main
+    Nav
+      Heading "HCl against NaOH, run {length(trials)+1}"
+      Row gap=8
+        Button.outline "Settings" onTap={open limits}
+        Button "Record trial" onTap={trials=append(trials,{"id":length(trials)+1,"start":start,"end":end}); toast "Trial recorded"}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Card w=200 gap=12 center
+          Text.strong "Burette"
+          Burette level={end} max=50 endpoint={reached}
+          Text.muted "Reading {fixed(end,2)} mL"
+        Column grow gap=16
+          Card gap=12
+            Heading "Readings" level=3
+            Row gap=16
+              Input "Start volume (mL)" type=number bind=start grow
+              Input "End volume (mL)" type=number bind=end grow
+            Row between
+              Text.muted "Volume used"
+              Text size=32 weight=700 "{fixed(end-start,2)} mL"
+            if end<=start
+              Text.danger "End reading must be above the start reading."
+          Card gap=12
+            Heading "Indicator" level=3
+            Row gap=12
+              each ind in indicators
+                Column gap=4 center onTap={indicator=ind.name}
+                  Box w=44 h=44 radius=22 fill={ind.before} border={indicator==ind.name ? 3 : 1}
+                  Text.caption "{ind.name}"
+            Row gap=12 middle
+              Toggle "Endpoint reached" bind=reached
+              Text.muted "Colour at endpoint"
+              Box w=44 h=44 radius=22 fill={reached ? find(indicators,i=>i.name==indicator).at : find(indicators,i=>i.name==indicator).before}
+          Card gap=12
+            Heading "Solutions" level=3
+            Row gap=16
+              Input "NaOH concentration (mol/L)" type=number bind=cbase grow
+              Input "HCl aliquot (mL)" type=number bind=vacid grow
+  Dialog#limits "Spread limit" "Runs further apart than this are flagged"
+    Input "Limit (mL)" type=number bind=limit
+    Button "Done" onTap={close}
+
+// A burette: a tall tube with a graduated scale and the liquid level; drawn as a bordered box with a fill.
+define Burette level=0 max=50 endpoint=false
+  Row gap=8 h=240
+    Box w=40 h=240 border=2 radius=4
+      Column end h=240
+        Box h={240*(max-level)/max} fill={endpoint ? "#FFEC4899" : "#FFBFDBFE"}
+    Column between h=240
+      Text.caption "0"
+      Text.caption "{max/2}"
+      Text.caption "{max}"
+
+### Trials
+state cbase=0.1000
+state vacid=25.00
+state limit=0.10
+state trials=[{"id":1,"start":0.50,"end":24.85},{"id":2,"start":0.00,"end":24.40},{"id":3,"start":0.20,"end":24.70}]
+App
+  Sidebar
+    Brand "Dropwise" icon="science"
+    NavItem "Titration" icon="water_drop" onTap={go titration}
+    NavItem "Trials" icon="table_rows" badge="{length(trials)}" selected={true}
+    NavItem "Curve and result" icon="show_chart" onTap={go curve}
+    Spacer grow
+    Text.muted "Bench 4, Dr. Okafor"
+  Main
+    Nav
+      Heading "Trials"
+      Row gap=8
+        Button.outline "Add a row" onTap={trials=append(trials,{"id":length(trials)+1,"start":0,"end":0})}
+        Button "Clear" onTap={open confirmClear}
+    Column pad=24 gap=16
+      Card gap=12
+        Row between
+          Column gap=4
+            Text.strong "Spread check"
+            Text.muted "Limit {fixed(limit,2)} mL between the largest and smallest volume"
+          if length(trials)>1
+            Badge.success "Spread {fixed(last(sortBy(trials,t=>t.end-t.start)).end-last(sortBy(trials,t=>t.end-t.start)).start-(first(sortBy(trials,t=>t.end-t.start)).end-first(sortBy(trials,t=>t.end-t.start)).start),2)} mL" visible={last(sortBy(trials,t=>t.end-t.start)).end-last(sortBy(trials,t=>t.end-t.start)).start-(first(sortBy(trials,t=>t.end-t.start)).end-first(sortBy(trials,t=>t.end-t.start)).start)<=limit}
+            Badge.error "Spread {fixed(last(sortBy(trials,t=>t.end-t.start)).end-last(sortBy(trials,t=>t.end-t.start)).start-(first(sortBy(trials,t=>t.end-t.start)).end-first(sortBy(trials,t=>t.end-t.start)).start),2)} mL" visible={last(sortBy(trials,t=>t.end-t.start)).end-last(sortBy(trials,t=>t.end-t.start)).start-(first(sortBy(trials,t=>t.end-t.start)).end-first(sortBy(trials,t=>t.end-t.start)).start)>limit}
+      Card gap=8
+        Row gap=12
+          Text.strong "Trial" w=60
+          Text.strong "Start (mL)" w=120
+          Text.strong "End (mL)" w=120
+          Text.strong "Used (mL)" w=100
+          Text.strong "Check" grow
+        each t in trials
+          Row gap=12 middle
+            Text "{t.id}" w=60
+            Input "Start" type=number bind=t.start w=120
+            Input "End" type=number bind=t.end w=120
+            Text.strong "{fixed(t.end-t.start,2)}" w=100
+            Row grow gap=8
+              if abs((t.end-t.start)-sum(trials,x=>x.end-x.start)/length(trials))>limit
+                Badge.warning "Outlier"
+              else
+                Badge.success "In range"
+            IconButton "delete" tooltip="Remove trial" onTap={trials=removeWhere(trials,x=>x.id==t.id)}
+      Card gap=4
+        Text.muted "Mean volume"
+        Text size=32 weight=700 "{fixed(sum(trials,x=>x.end-x.start)/length(trials),2)} mL"
+  Dialog#confirmClear "Clear all trials?" "This removes every row."
+    Row gap=8 end
+      Button.outline "Keep them" onTap={close}
+      Button.destructive "Clear" onTap={trials=[]; close}
+
+### Curve and result
+state cbase=0.1000
+state vacid=25.00
+state trials=[{"id":1,"start":0.50,"end":24.85},{"id":2,"start":0.00,"end":24.40},{"id":3,"start":0.20,"end":24.70}]
+state pts=[{"v":0,"ph":1.0},{"v":10,"ph":1.4},{"v":20,"ph":2.0},{"v":24,"ph":2.9}]
+state vnew=0
+state phnew=0
+state steepV=22
+state steepSlope=0.2
+App
+  Sidebar
+    Brand "Dropwise" icon="science"
+    NavItem "Titration" icon="water_drop" onTap={go titration}
+    NavItem "Trials" icon="table_rows" badge="{length(trials)}" onTap={go trials}
+    NavItem "Curve and result" icon="show_chart" selected={true}
+    Spacer grow
+    Text.muted "Bench 4, Dr. Okafor"
+  Main
+    Nav
+      Heading "Curve and result"
+      Button.outline "Copy result" onTap={copy "{fixed(cbase*sum(trials,x=>x.end-x.start)/length(trials)/vacid,4)} mol/L"; toast "Copied"}
+    Column pad=24 gap=16
+      Card gap=12
+        Row between
+          Heading "pH against volume" level=3
+          Badge.info "Steepest at {fixed(steepV,1)} mL"
+        TitrationCurve points={pts} steepest={steepV} h=280
+        Row gap=12 middle
+          Input "Volume (mL)" type=number bind=vnew grow
+          Input "pH" type=number bind=phnew grow
+          Button "Add point" onTap={(length(pts)>0 && (phnew-last(pts).ph)/(vnew-last(pts).v)>steepSlope) ? {steepSlope=(phnew-last(pts).ph)/(vnew-last(pts).v); steepV=(vnew+last(pts).v)/2; pts=append(pts,{"v":vnew,"ph":phnew})} : {pts=append(pts,{"v":vnew,"ph":phnew})}}
+      Card gap=8
+        Text.muted "Concentration of HCl"
+        Row gap=8 bottom
+          Text size=48 weight=700 "{fixed(cbase*sum(trials,x=>x.end-x.start)/length(trials)/vacid,4)}"
+          Text.strong "mol/L"
+        Text.muted "From {fixed(cbase,4)} mol/L NaOH, mean titre {fixed(sum(trials,x=>x.end-x.start)/length(trials),2)} mL, {fixed(vacid,2)} mL aliquot"
+
+// A titration curve: line of pH against volume with the steepest part marked; drawn here as a line chart and a labelled marker.
+define TitrationCurve points=[] steepest=0 h=240
+  Column gap=8 h={h}
+    LineChart values={map(points,p=>p.ph)} labels={map(points,p=>p.v)} h={h-28}
+    Row gap=8 middle
+      Box w=12 h=12 radius=6 fill=#FFDC2626
+      Text.caption "Steepest part near {steepest} mL"

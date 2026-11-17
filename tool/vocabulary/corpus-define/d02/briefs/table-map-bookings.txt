@@ -1,0 +1,3 @@
+App: Covers, a restaurant table map with reservations. A floor plan of tables with shapes and seat counts, a time slider that moves through the evening to show which tables are taken and when; a booking dragged from a list onto a table; a party size mismatch warning; a walk-in added with a quick name and a timer to wait; table states seated, ordered, dessert, paying and free; a turn-time estimate; a waitlist with text a guest; a covers total for the night.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

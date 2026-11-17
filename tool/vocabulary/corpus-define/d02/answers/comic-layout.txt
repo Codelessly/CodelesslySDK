@@ -1,0 +1,209 @@
+### Page Editor
+state pages=[{"id":"p1","name":"Cover","panels":[{"id":"a1","x":0,"y":0,"w":100,"h":55,"order":1,"sketch":"Rooftop at dusk, Mira alone","caption":"Midnight, Gutter Street.","bubbles":[{"id":"b1","text":"Nobody's coming.","x":60,"y":20,"tx":30,"ty":40}]},{"id":"a2","x":0,"y":55,"w":50,"h":45,"order":2,"sketch":"Close-up: her hand on a rusty latch","caption":"","bubbles":[]},{"id":"a3","x":50,"y":55,"w":50,"h":45,"order":3,"sketch":"The door swings open on blue light","caption":"","bubbles":[{"id":"b2","text":"Then I'll go in.","x":55,"y":62,"tx":20,"ty":30}]}]},{"id":"p2","name":"Page 2","panels":[]},{"id":"p3","name":"Page 3","panels":[]}]
+state pageId="p1"
+state selId="a1"
+state tool="select"
+state showBleed=true
+state showOrder=true
+state snap=true
+state zoom=100
+state selBubble=""
+state exportKind="PDF"
+state exportScope="all"
+
+App
+  Sidebar
+    Brand "Gutters" icon="grid_view"
+    Text.caption "PAGES"
+    each pg in pages
+      Card gap=6 pad=8 border={pg.id == pageId ? 2 : 1} onTap={pageId=pg.id; selId=""} drag=thumb(pg.id) drop=thumb onDrop={pages=moveItem(pages,result.data,pg.id)}
+        PageThumb pageData={pg} showOrder={showOrder} h=120
+        Row between middle
+          Text.small "{pg.name}"
+          Badge.neutral "{length(pg.panels)}"
+    Button.outline "Add page" icon="add" onTap={pages=append(pages,{"id":"p" + (length(pages)+1),"name":"Page " + (length(pages)+1),"panels":[]}); pageId="p" + length(pages)}
+    Spacer grow
+    NavItem "Page turn preview" icon="auto_stories" onTap={go spread}
+    NavItem "Export set" icon="ios_share" onTap={go export}
+  Main
+    Nav
+      Heading "Issue 1: Midnight on Gutter Street" level=3
+      Row gap=8 middle
+        SegmentedButton bind=tool items=["select","draw","cut","bubble"]
+        Toggle "Bleed and safe area" bind=showBleed
+        Toggle "Reading order" bind=showOrder
+        Toggle "Snap to gutter" bind=snap
+        Button "Export" icon="download" onTap={open exportSheet}
+    Row grow top
+      Column grow gap=12 pad=24 center
+        Row gap=12 middle
+          IconButton "zoom_out" tooltip="Zoom out" onTap={zoom=max(50,zoom-10)}
+          Text.strong "{zoom}%"
+          IconButton "zoom_in" tooltip="Zoom in" onTap={zoom=min(200,zoom+10)}
+          Spacer grow
+          Text.muted "Drag on the page to draw a panel. Use the cut tool to slice one in two."
+        PageCanvas pageData={find(pages,p=>p.id==pageId)} tool={tool} selected={selId} showBleed={showBleed} showOrder={showOrder} snap={snap} zoom={zoom} gutter=3 bleed=3 safe=5 onDraw={pages=updateWhere(pages,p=>p.id==pageId,p=>with(p,"panels",append(p.panels,with(result,"order",length(p.panels)+1)))); selId=result.id; tool="select"} onCut={pages=updateWhere(pages,p=>p.id==pageId,p=>with(p,"panels",concat(without(p.panels,find(p.panels,q=>q.id==result.id)),result.parts)))} onResize={pages=updateWhere(pages,p=>p.id==pageId,p=>with(p,"panels",result))} onSelect={selId=result} onBubbleTail={pages=updateWhere(pages,p=>p.id==pageId,p=>with(p,"panels",updateWhere(p.panels,q=>q.id==selId,q=>with(q,"bubbles",updateWhere(q.bubbles,b=>b.id==result.id,b=>with(with(b,"tx",result.tx),"ty",result.ty))))))}
+      Pane w=320 pad=16 gap=12
+        Heading "Panel" level=3
+        if selId == ""
+          Text.muted "Select a panel to edit its sketch, caption and bubbles."
+        if selId != ""
+          each pg in filter(pages,p=>p.id==pageId)
+            each pn in filter(pg.panels,q=>q.id==selId)
+              Text.fieldLabel "Order on page"
+              Row gap=8 middle
+                IconButton "arrow_back" tooltip="Earlier" onTap={pages=updateWhere(pages,p=>p.id==pageId,p=>with(p,"panels",reorderPanel(p.panels,selId,-1)))}
+                Badge.primary "{pn.order}"
+                IconButton "arrow_forward" tooltip="Later" onTap={pages=updateWhere(pages,p=>p.id==pageId,p=>with(p,"panels",reorderPanel(p.panels,selId,1)))}
+                Spacer grow
+                IconButton "delete" tooltip="Delete panel" onTap={pages=updateWhere(pages,p=>p.id==pageId,p=>with(p,"panels",removeWhere(p.panels,q=>q.id==selId))); selId=""}
+              Input "Sketch note" "What is drawn here" multiline value={pn.sketch} onChange={pages=updateWhere(pages,p=>p.id==pageId,p=>with(p,"panels",updateWhere(p.panels,q=>q.id==selId,q=>with(q,"sketch",result))))}
+              Input "Caption box" "Narration" multiline value={pn.caption} onChange={pages=updateWhere(pages,p=>p.id==pageId,p=>with(p,"panels",updateWhere(p.panels,q=>q.id==selId,q=>with(q,"caption",result))))}
+              Divider
+              Row between middle
+                Text.strong "Speech bubbles"
+                Button.outline "Add" icon="add" onTap={pages=updateWhere(pages,p=>p.id==pageId,p=>with(p,"panels",updateWhere(p.panels,q=>q.id==selId,q=>with(q,"bubbles",append(q.bubbles,{"id":"b" + (length(q.bubbles)+10),"text":"New line","x":30,"y":30,"tx":20,"ty":60})))))}
+              each bb in pn.bubbles
+                Card gap=6 pad=10 border={selBubble == bb.id ? 2 : 1} onTap={selBubble=bb.id}
+                  SpeechBubble "{bb.text}" tailX={bb.tx} tailY={bb.ty} style="speech" onTailDrag={pages=updateWhere(pages,p=>p.id==pageId,p=>with(p,"panels",updateWhere(p.panels,q=>q.id==selId,q=>with(q,"bubbles",updateWhere(q.bubbles,b=>b.id==bb.id,b=>with(with(b,"tx",result.x),"ty",result.y))))))}
+                  Row gap=8 middle
+                    Input "Dialogue" value={bb.text} grow onChange={pages=updateWhere(pages,p=>p.id==pageId,p=>with(p,"panels",updateWhere(p.panels,q=>q.id==selId,q=>with(q,"bubbles",updateWhere(q.bubbles,b=>b.id==bb.id,b=>with(b,"text",result))))))}
+                    IconButton "close" tooltip="Remove bubble" onTap={pages=updateWhere(pages,p=>p.id==pageId,p=>with(p,"panels",updateWhere(p.panels,q=>q.id==selId,q=>with(q,"bubbles",without(q.bubbles,bb)))))}
+        Divider
+        Text.fieldLabel "Reading order"
+        each pg in filter(pages,p=>p.id==pageId)
+          each pn in sortBy(pg.panels,q=>q.order)
+            Row gap=8 middle drag=order(pn.id) drop=order onDrop={pages=updateWhere(pages,p=>p.id==pageId,p=>with(p,"panels",moveOrder(p.panels,result.data,pn.id)))} onTap={selId=pn.id}
+              Badge.primary "{pn.order}"
+              Text.small "{pn.sketch}" grow
+              Icon "drag_indicator"
+
+Sheet#exportSheet "Export"
+  Text.muted "Choose what to send out of the editor."
+  SegmentedButton bind=exportKind items=["PDF","PNG","CBZ"]
+  SegmentedButton bind=exportScope items=["all","current","spread"]
+  Toggle "Include bleed" bind=showBleed
+  Row gap=8
+    Button.outline "Cancel" onTap={close}
+    Button "Export {exportKind}" onTap={emit exportSet {"kind":exportKind,"scope":exportScope,"bleed":showBleed}; toast "Export started"; close}
+
+### Page Turn Spread
+state left=0
+state showSafe=true
+state pages=[{"id":"p1","name":"Cover","panels":[]},{"id":"p2","name":"Page 2","panels":[]},{"id":"p3","name":"Page 3","panels":[]},{"id":"p4","name":"Page 4","panels":[]}]
+state turning=false
+
+App
+  Sidebar
+    Brand "Gutters" icon="grid_view"
+    NavItem "Page editor" icon="edit" onTap={go page-editor}
+    NavItem "Page turn preview" icon="auto_stories" selected={true}
+    NavItem "Export set" icon="ios_share" onTap={go export}
+    Spacer grow
+    Text.muted "Issue 1, 4 pages"
+  Main
+    Nav
+      Heading "Page turn preview" level=3
+      Row gap=8 middle
+        Toggle "Safe area" bind=showSafe
+        Button.outline "Back to editor" onTap={go page-editor}
+    Column pad=24 gap=16 center grow
+      Row gap=4 middle center
+        PageSpread left={pages[left]} right={pages[left+1]} showSafe={showSafe} turning={turning} h=420 onTurnNext={left=min(length(pages)-2,left+2)} onTurnBack={left=max(0,left-2)}
+      Row gap=12 middle center
+        IconButton "chevron_left" tooltip="Previous spread" onTap={turning=true; left=max(0,left-2)}
+        Text.strong "Pages {left+1} and {left+2}"
+        IconButton "chevron_right" tooltip="Next spread" onTap={turning=true; left=min(length(pages)-2,left+2)}
+      Text.muted "A reveal on the right page lands harder when it waits behind the turn. Keep big reveals on even-numbered pages."
+      Card gap=8
+        Text.strong "Reveal check"
+        Row gap=8
+          Badge.success "Page 2 ends on a cliffhanger"
+          Badge.warning "Page 3 opens mid-action"
+
+### Export Set
+state exportKind="PDF"
+state dpi=300
+state bleed=true
+state marks=true
+state selected=["p1","p2","p3"]
+state log=[]
+state name="gutters-issue-1"
+
+Page
+  Nav
+    Brand "Gutters" icon="grid_view"
+    Row gap=4
+      Link "Editor" onTap={go page-editor}
+      Link "Spread" onTap={go spread}
+    Button "Export set" onTap={open confirmExport}
+  Section narrow
+    Heading "Export a set" level=1
+    Text.muted "Send selected pages to print or screen."
+    Card gap=12
+      Input "File name" bind=name
+      SegmentedButton bind=exportKind items=["PDF","PNG","CBZ"]
+      Select "Resolution" bind=dpi items=[150,300,600]
+      Toggle "Include bleed" bind=bleed
+      Toggle "Crop marks" bind=marks
+    Card gap=8
+      Text.strong "Pages in the set"
+      each pid in ["p1","p2","p3"]
+        Checkbox "Page {indexOf(["p1","p2","p3"],pid)+1}" value={contains(selected,pid)} onChange={selected=result ? append(selected,pid) : without(selected,pid)}
+      Text.muted "{length(selected)} of 3 pages, {dpi} dpi"
+    Card gap=8
+      Text.strong "Recent exports"
+      if isEmpty(log)
+        Text.muted "Nothing exported yet."
+      each entry in log
+        ListTile "{entry}" icon="description"
+
+Dialog#confirmExport "Export {length(selected)} pages?" "{name}.{lower(exportKind)} at {dpi} dpi"
+  Row gap=8
+    Button.outline "Cancel" onTap={close}
+    Button "Export" onTap={log=append(log,name + "." + lower(exportKind)); emit exportSet {"kind":exportKind,"pages":selected,"dpi":dpi,"bleed":bleed,"marks":marks}; toast "Exported"; close}
+
+// The page canvas draws and edits panels by dragging on it; the labelled box stands for that surface.
+define PageCanvas pageData={} tool="select" selected="" showBleed=true showOrder=true snap=true zoom=100 gutter=3 bleed=3 safe=5 onDraw onCut onResize onSelect onBubbleTail
+  Stack center middle
+    Box w={5.5*zoom} h={8.5*zoom} fill=#FFFFFFFF border=1
+      Text.muted "{tool} tool, {length(pageData.panels)} panels"
+    if showBleed
+      Box w={5.5*zoom} h={8.5*zoom} border=1 fill=#00000000
+        Text.caption "Bleed {bleed}mm, safe {safe}mm"
+    each pn in pageData.panels
+      Box w={pn.w/100*5.5*zoom} h={pn.h/100*8.5*zoom} border={selected == pn.id ? 3 : 1} onTap={onSelect(pn.id)}
+        Text.small "{pn.sketch}"
+        if showOrder
+          Badge.primary "{pn.order}"
+    ...
+
+define PageThumb pageData={} showOrder=true h=120
+  Box h={h} fill=#FFFFFFFF border=1
+    each pn in pageData.panels
+      Box h={pn.h/100*h} border=1
+        if showOrder
+          Text.caption "{pn.order}"
+
+// A speech bubble with a draggable tail; the tail is shown as a label.
+define SpeechBubble "text" tailX=20 tailY=60 style="speech" onTailDrag
+  Box pad=10 radius=16 border=1 fill=#FFFFFFFF
+    Text "{text}"
+    Text.caption "tail at {tailX}, {tailY}"
+
+// Two facing pages with a page turn animation, shown as two boxes.
+define PageSpread left={} right={} showSafe=true turning=false h=420 onTurnNext onTurnBack
+  Row gap=2
+    Box h={h} w=280 fill=#FFFFFFFF border=1 onTap={onTurnBack}
+      Text.strong "{left.name}"
+    Box h={h} w=280 fill=#FFFFFFFF border=1 onTap={onTurnNext}
+      Text.strong "{right.name}"
+
+define moveItem list from to
+  state result=list
+
+define reorderPanel list id step
+  state result=list
+
+define moveOrder list from to
+  state result=list

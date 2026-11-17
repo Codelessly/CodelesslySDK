@@ -1,0 +1,194 @@
+### Last night
+state tab="night"
+state at=95
+state stages=[{"s":"awake","m":12,"t":0},{"s":"light","m":38,"t":12},{"s":"deep","m":55,"t":50},{"s":"light","m":30,"t":105},{"s":"dream","m":28,"t":135},{"s":"light","m":42,"t":163},{"s":"deep","m":40,"t":205},{"s":"dream","m":35,"t":245},{"s":"light","m":50,"t":280},{"s":"dream","m":32,"t":330},{"s":"light","m":28,"t":362},{"s":"awake","m":8,"t":390}]
+App
+  Sidebar
+    Brand "Nightshade" icon="bedtime"
+    NavItem "Last night" icon="nightlight" selected={tab=="night"} onTap={go last-night}
+    NavItem "This week" icon="insights" selected={tab=="week"} onTap={go this-week}
+    NavItem "Wind down" icon="self_improvement" selected={tab=="wind"} onTap={go wind-down}
+    NavItem "Alarm" icon="alarm" selected={tab=="alarm"} onTap={go alarm}
+    Spacer grow
+    Text.muted "Sleep goal 7h 30m"
+  Main
+    Nav
+      Heading "Tuesday night" level=1
+      Row gap=8
+        Button.outline "Add note" icon="edit_note" onTap={open note}
+        Button "Wind down" onTap={go wind-down}
+    Column pad=24 gap=16 scroll
+      Row gap=16
+        Card grow gap=12
+          Row between
+            Text.strong "Sleep stages"
+            Text.muted "11:10 pm to 6:40 am"
+          StageChart stages={stages} bind=at
+          Slider bind=at min=0 max=449
+          Row between
+            Text.strong "{duration(at*60)} after lights out"
+            Text.muted "{find(stages,x=>x.t<=at && at<x.t+x.m).s}"
+        Card w=280 gap=12 center
+          Text.strong "Sleep score"
+          Stack center middle
+            Ring 0.84
+            Text "84" size=48 weight=700
+          Text.muted "Good. Deep sleep was 1h 35m."
+      Card gap=12
+        Row between
+          Text.strong "Heart rate and breathing"
+          Row gap=8
+            Badge.info "Resting 54 bpm"
+            Badge.neutral "14 breaths/min"
+        LineChart labels=["11pm","12","1","2","3","4","5","6am"] series=[{"name":"Heart rate (bpm)","values":[66,58,55,53,54,52,57,64]},{"name":"Breathing (per min)","values":[16,14,13,13,14,13,15,16]}] h=200
+        Text.caption "Same time scale as the stages above. Moving the slider above marks {duration(at*60)} here too."
+      Row gap=16
+        Card grow gap=4
+          Text.muted "Awake"
+          Text.strong "20 min"
+        Card grow gap=4
+          Text.muted "Light"
+          Text.strong "3h 08m"
+        Card grow gap=4
+          Text.muted "Deep"
+          Text.strong "1h 35m"
+        Card grow gap=4
+          Text.muted "Dream"
+          Text.strong "1h 35m"
+  Dialog#note "Note for tonight" "Caffeine and screens before bed"
+    state caffeine="none"
+    state lastCup="3:00 pm"
+    state screens=true
+    state memo=""
+    Select "Caffeine today" items=["none","1 cup","2 cups","3 or more"] bind=caffeine
+    TimePicker "Last cup" bind=lastCup
+    Toggle "Screens in the hour before bed" bind=screens
+    Input "Anything else" multiline bind=memo
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Save note" onTap={emit saveNote; toast "Note saved"; close}
+
+### This week
+state tab="week"
+state picked=-1
+state days=[{"d":"Wed","bed":"11:05 pm","off":-5},{"d":"Thu","bed":"11:30 pm","off":20},{"d":"Fri","bed":"12:40 am","off":90},{"d":"Sat","bed":"1:10 am","off":120},{"d":"Sun","bed":"11:15 pm","off":5},{"d":"Mon","bed":"11:00 pm","off":-10},{"d":"Tue","bed":"11:10 pm","off":0}]
+App
+  Sidebar
+    Brand "Nightshade" icon="bedtime"
+    NavItem "Last night" icon="nightlight" selected={tab=="night"} onTap={go last-night}
+    NavItem "This week" icon="insights" selected={tab=="week"} onTap={go this-week}
+    NavItem "Wind down" icon="self_improvement" selected={tab=="wind"} onTap={go wind-down}
+    NavItem "Alarm" icon="alarm" selected={tab=="alarm"} onTap={go alarm}
+    Spacer grow
+    Text.muted "Sleep goal 7h 30m"
+  Main
+    Nav
+      Heading "Bedtime consistency" level=1
+      SegmentedButton items=["Week","Month"] bind=range
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Row between
+          Text.strong "Minutes from your usual 11:10 pm"
+          Badge.warning "Fri and Sat ran late"
+        BarChart values={map(days,x=>x.off)} labels={map(days,x=>x.d)} h=220
+        Text.caption "Above zero is later than usual, below is earlier."
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Average bedtime"
+          Text.strong "11:48 pm" size=28
+        Card gap=4
+          Text.muted "Spread"
+          Text.strong "1h 12m" size=28
+        Card gap=4
+          Text.muted "On target"
+          Text.strong "{count(days,x=>abs(x.off)<=30)} of 7 nights" size=28
+      Card gap=8
+        Text.strong "Night by night"
+        each day in days
+          ListTile "{day.d}" "Lights out {day.bed}" selected={picked==index} onTap={picked=index}
+        if picked>=0
+          Text.muted "{days[picked].d}: {abs(days[picked].off)} minutes {days[picked].off>0 ? 'later' : 'earlier'} than usual."
+
+### Wind down
+state tab="wind"
+state secs=1800
+state running=false
+state warmth=0
+every 1s when running onTick={secs=max(0,secs-1); warmth=round((1800-secs)/1800*100,0); running=secs>1}
+App
+  Sidebar
+    Brand "Nightshade" icon="bedtime"
+    NavItem "Last night" icon="nightlight" selected={tab=="night"} onTap={go last-night}
+    NavItem "This week" icon="insights" selected={tab=="week"} onTap={go this-week}
+    NavItem "Wind down" icon="self_improvement" selected={tab=="wind"} onTap={go wind-down}
+    NavItem "Alarm" icon="alarm" selected={tab=="alarm"} onTap={go alarm}
+  Main
+    Nav
+      Heading "Wind down" level=1
+      Button.ghost "Add note" onTap={open note}
+    Column pad=24 gap=16 center
+      Box gap=16 pad=32 radius=16 center fill={warmth<34 ? "#FF1E293B" : (warmth<67 ? "#FF7C2D12" : "#FF1C0A04")}
+        Text "Screen warmth {warmth}%" color=#FFFDE68A
+        Text "{duration(secs)}" size=72 weight=700 color=#FFFFFFFF
+        Text "until lights out at 11:10 pm" color=#FFFDE68A
+        Row gap=8
+          Button "Start" onTap={running=true}
+          Button.outline "Pause" onTap={running=false}
+          Button.ghost "Reset" onTap={running=false; secs=1800; warmth=0}
+      Card gap=8
+        Text.strong "Tonight's routine"
+        Checkbox "Phone on the charger across the room" bind=c1
+        Checkbox "Lights low, warm bulbs only" bind=c2
+        Checkbox "No caffeine after 3 pm" bind=c3
+        Checkbox "Stretch for five minutes" bind=c4
+        Progress {count([c1,c2,c3,c4],x=>x)/4}
+      Select "Length" items=["15 min","30 min","45 min"] onChange={secs=(result=="15 min" ? 900 : (result=="30 min" ? 1800 : 2700)); running=false}
+  Dialog#note "Note for tonight" "Caffeine and screens"
+    Toggle "Had caffeine after 3 pm" bind=lateCaffeine
+    Toggle "Screens in the last hour" bind=lateScreens
+    Button "Save note" onTap={emit saveNote; toast "Note saved"; close}
+
+### Alarm
+state tab="alarm"
+state wake="6:30 am"
+state window=20
+state days=["Mon","Tue","Wed","Thu","Fri"]
+state gentle=true
+App
+  Sidebar
+    Brand "Nightshade" icon="bedtime"
+    NavItem "Last night" icon="nightlight" selected={tab=="night"} onTap={go last-night}
+    NavItem "This week" icon="insights" selected={tab=="week"} onTap={go this-week}
+    NavItem "Wind down" icon="self_improvement" selected={tab=="wind"} onTap={go wind-down}
+    NavItem "Alarm" icon="alarm" selected={tab=="alarm"} onTap={go alarm}
+  Main
+    Nav
+      Heading "Alarm" level=1
+      Button "Edit alarm" icon="edit" onTap={open alarmWindow}
+    Column pad=24 gap=16
+      Card gap=8 center
+        Text.muted "Gentle wake"
+        Text "{wake}" size=64 weight=700
+        Text.muted "Wakes you in the lightest sleep between {wake} and {window} minutes later"
+        Row gap=8
+          each d in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+            FilterChip "{d}" selected={contains(days,d)} onTap={days=(contains(days,d) ? without(days,d) : append(days,d))}
+      Card gap=8
+        Row between
+          Text.strong "Sunrise light and soft chime"
+          Toggle bind=gentle
+        Text.muted "Light builds over the last ten minutes of the window."
+  Dialog#alarmWindow "Wake alarm" "Set the time and how long it can look for light sleep"
+    TimePicker "Wake no later than" bind=wake
+    Text.fieldLabel "Wake range: {window} minutes"
+    Slider bind=window min=0 max=45
+    Text.caption "Earliest wake {wake} minus {window} minutes"
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Save" onTap={emit saveAlarm; toast "Alarm set"; close}
+
+define StageChart bind=at stages=[] h=140
+  Row gap=0 bottom
+    each st in stages
+      Column w={st.m*1.6} h={h} bottom onTap={at=st.t+st.m/2}
+        Box h={st.s=="awake" ? h : (st.s=="dream" ? h*0.72 : (st.s=="light" ? h*0.48 : h*0.24))} fill={st.s=="awake" ? "#FFF59E0B" : (st.s=="dream" ? "#FFA78BFA" : (st.s=="light" ? "#FF60A5FA" : "#FF1D4ED8"))} border={at>=st.t && at<st.t+st.m ? 2 : 0}

@@ -1,0 +1,147 @@
+### Phrase Board
+project speed=1200 saved
+project hold=300 saved
+project cue="Click" saved
+project backout=true saved
+project spoken=""
+state mode="row"
+state rowIdx=0
+state tileIdx=0
+state rows=[{"label":"Needs","phrases":["I need water","I am hungry","Bathroom, please","I am in pain"]},{"label":"Comfort","phrases":["I am cold","I am too warm","Adjust my pillow","Turn off the light"]},{"label":"People","phrases":["Call my nurse","Please get Maria","Thank you","Stay with me"]},{"label":"Chat","phrases":["Yes","No","Wait a moment","I love you"]}]
+every {speed} when mode!="paused" onTick={mode=="row" ? {rowIdx=(rowIdx+1)%(length(rows)+(backout?1:0)); cue!="Off" ? emit cue cue : } : {tileIdx=(tileIdx+1)%(length(rows[rowIdx].phrases)+(backout?1:0)); cue!="Off" ? emit cue cue : }}
+App
+  Sidebar
+    Brand "SingleSwitch" icon="touch_app"
+    NavItem "Phrases" icon="grid_view" selected={true} onTap={go phrase-board}
+    NavItem "Keyboard" icon="keyboard" onTap={go keyboard}
+    NavItem "Settings" icon="tune" onTap={go settings}
+    Spacer grow
+    Text.muted "Scan every {fixed(speed/1000,1)} s"
+  Main
+    Nav
+      Heading "Phrases" level=1
+      Row gap=8
+        Badge.info "{mode=="row" ? "Choosing a row" : (mode=="tile" ? "Choosing a phrase" : "Paused")}"
+        Button.outline "{mode=="paused" ? "Resume" : "Pause"}" icon="{mode=="paused" ? "play_arrow" : "pause"}" onTap={mode=="paused" ? {mode="row"; rowIdx=0; tileIdx=0} : {mode="paused"}}
+    Column pad=24 gap=16
+      SpeechBar "{spoken}" onSpeak={speak spoken} onClear={spoken=""}
+      Column gap=12
+        each row in rows
+          Card gap=8 border={mode=="row" && rowIdx==index ? 3 : 1}
+            Row between
+              Text.small "{row.label}"
+              if mode=="tile" && rowIdx==index
+                Badge.primary "Row chosen"
+            Grid cols=4 gap=8
+              each p in row.phrases
+                ScanTile "{p}" lit={mode=="tile" && rowIdx==index && tileIdx==indexOf(row.phrases,p)} rowLit={mode=="row" && rowIdx==index}
+            if mode=="tile" && rowIdx==index && backout
+              Button.ghost "Back to rows" icon="undo" lit={tileIdx==length(row.phrases)}
+      if mode=="row" && backout
+        Button.outline "Rest: stop scanning" icon="bedtime" border={rowIdx==length(rows) ? 3 : 1}
+      Row center
+        SwitchButton "Press to choose" hold={hold} onActivate={mode=="paused" ? {mode="row"; rowIdx=0; tileIdx=0} : (mode=="row" ? (rowIdx==length(rows) ? {mode="paused"} : {mode="tile"; tileIdx=0}) : (tileIdx==length(rows[rowIdx].phrases) ? {mode="row"; rowIdx=0; tileIdx=0} : {spoken=rows[rowIdx].phrases[tileIdx]; speak spoken; mode="row"; rowIdx=0; tileIdx=0}))}
+
+### Keyboard
+project speed=1200 saved
+project hold=300 saved
+project cue="Click" saved
+project backout=true saved
+project spoken=""
+state mode="row"
+state rowIdx=0
+state tileIdx=0
+state chars=[]
+state word=[]
+state vocab=["the","that","this","there","then","to","today","tired","thirsty","and","am","are","at","help","hungry","hello","have","home","I","in","is","it","love","me","my","need","nurse","please","pain","want","water","with","you","your"]
+state keys=[["E","T","A","O","I","N","S"],["R","H","L","D","C","U","M"],["F","P","G","W","Y","B","V"],["K","X","J","Q","Z","Space","Delete"],["Speak","Clear"]]
+every {speed} when mode!="paused" onTick={mode=="row" ? {rowIdx=(rowIdx+1)%(length(concat([[]],keys))+(backout?1:0)); cue!="Off" ? emit cue cue : } : {tileIdx=(tileIdx+1)%(length(concat([take(filter(vocab,w=>startsWith(lower(w),join(word,""))),4)],keys)[rowIdx])+(backout?1:0)); cue!="Off" ? emit cue cue : }}
+App
+  Sidebar
+    Brand "SingleSwitch" icon="touch_app"
+    NavItem "Phrases" icon="grid_view" onTap={go phrase-board}
+    NavItem "Keyboard" icon="keyboard" selected={true} onTap={go keyboard}
+    NavItem "Settings" icon="tune" onTap={go settings}
+    Spacer grow
+    Text.muted "Letters ordered by how often they are used"
+  Main
+    Nav
+      Heading "Keyboard" level=1
+      Row gap=8
+        Badge.info "{mode=="row" ? "Choosing a row" : (mode=="tile" ? "Choosing a key" : "Paused")}"
+        Button.outline "{mode=="paused" ? "Resume" : "Pause"}" icon="{mode=="paused" ? "play_arrow" : "pause"}" onTap={mode=="paused" ? {mode="row"; rowIdx=0; tileIdx=0} : {mode="paused"}}
+    Column pad=24 gap=16
+      SpeechBar "{join(chars,"")}" onSpeak={speak join(chars,"")} onClear={chars=[]; word=[]}
+      Card gap=8 border={mode=="row" && rowIdx==0 ? 3 : 1}
+        Text.small "Predictions"
+        Row gap=8
+          each w in take(filter(vocab,v=>startsWith(lower(v),join(word,""))),4)
+            ScanTile "{w}" lit={mode=="tile" && rowIdx==0 && tileIdx==indexOf(take(filter(vocab,v=>startsWith(lower(v),join(word,""))),4),w)} rowLit={mode=="row" && rowIdx==0}
+          if isEmpty(take(filter(vocab,v=>startsWith(lower(v),join(word,""))),4))
+            Text.muted "No suggestions yet"
+      each krow in keys
+        Card gap=8 border={mode=="row" && rowIdx==index+1 ? 3 : 1}
+          Row gap=8
+            each k in krow
+              ScanTile "{k}" lit={mode=="tile" && rowIdx==index+1 && tileIdx==indexOf(krow,k)} rowLit={mode=="row" && rowIdx==index+1}
+      if mode!="paused" && backout
+        Button.outline "{mode=="row" ? "Rest: stop scanning" : "Back to rows"}" icon="undo" border={(mode=="row" && rowIdx==length(keys)+1) || (mode=="tile" && tileIdx==length(concat([take(filter(vocab,v=>startsWith(lower(v),join(word,""))),4)],keys)[rowIdx])) ? 3 : 1}
+      Row center
+        SwitchButton "Press to choose" hold={hold} onActivate={mode=="paused" ? {mode="row"; rowIdx=0; tileIdx=0} : (mode=="row" ? (rowIdx==length(keys)+1 ? {mode="paused"} : {mode="tile"; tileIdx=0}) : (tileIdx==length(concat([take(filter(vocab,v=>startsWith(lower(v),join(word,""))),4)],keys)[rowIdx]) ? {mode="row"; rowIdx=0; tileIdx=0} : (rowIdx==0 ? {chars=concat(take(chars,length(chars)-length(word)),[concat([],[])]); chars=concat(chars,[take(filter(vocab,v=>startsWith(lower(v),join(word,""))),4)[tileIdx]," "]); word=[]; mode="row"; rowIdx=0; tileIdx=0} : (keys[rowIdx-1][tileIdx]=="Space" ? {chars=append(chars," "); word=[]; mode="row"; rowIdx=0; tileIdx=0} : (keys[rowIdx-1][tileIdx]=="Delete" ? {chars=removeAt(chars,length(chars)-1); word=removeAt(word,length(word)-1); mode="row"; rowIdx=0; tileIdx=0} : (keys[rowIdx-1][tileIdx]=="Speak" ? {speak join(chars,""); mode="row"; rowIdx=0; tileIdx=0} : (keys[rowIdx-1][tileIdx]=="Clear" ? {chars=[]; word=[]; mode="row"; rowIdx=0; tileIdx=0} : {chars=append(chars,lower(keys[rowIdx-1][tileIdx])); word=append(word,lower(keys[rowIdx-1][tileIdx])); mode="row"; rowIdx=0; tileIdx=0})))))))}
+
+### Settings
+project speed=1200 saved
+project hold=300 saved
+project cue="Click" saved
+project backout=true saved
+App
+  Sidebar
+    Brand "SingleSwitch" icon="touch_app"
+    NavItem "Phrases" icon="grid_view" onTap={go phrase-board}
+    NavItem "Keyboard" icon="keyboard" onTap={go keyboard}
+    NavItem "Settings" icon="tune" selected={true} onTap={go settings}
+  Main
+    Nav
+      Heading "Settings" level=1
+      Button.outline "Reset to defaults" onTap={speed=1200; hold=300; cue="Click"; backout=true; toast "Defaults restored"}
+    Column pad=24 gap=16 maxw=720
+      Card gap=12
+        Heading "Scan speed" level=3
+        Text.muted "How long the highlight stays on each row or tile."
+        Row gap=12
+          Text.small "Faster"
+          Slider bind=speed min=400 max=3000 step=100 grow
+          Text.small "Slower"
+        Text.strong "{fixed(speed/1000,1)} seconds per step"
+      Card gap=12
+        Heading "Hold time" level=3
+        Text.muted "How long the switch must be held before a press counts. Raise it to ignore accidental touches."
+        Slider bind=hold min=0 max=1500 step=50
+        Text.strong "{hold} ms"
+      Card gap=12
+        Heading "Sound cue" level=3
+        Text.muted "A sound as the highlight moves."
+        SegmentedButton bind=cue items=["Off","Click","Tone","Voice"]
+        Button.outline "Hear it" icon="volume_up" onTap={cue!="Off" ? emit cue cue : toast "Sound cue is off"}
+      Card gap=12
+        Heading "Back-out" level=3
+        Toggle "Offer a back-out option at the end of each pass" bind=backout
+        Text.muted "At the end of the rows you can rest; at the end of a row you can return to the rows."
+        Button.ghost "Try scanning" icon="play_arrow" onTap={go phrase-board}
+
+// A big switch target; a press only counts once held for hold milliseconds. Drawn as a labelled box with a fill that grows while held.
+define SwitchButton "label" hold=300 onActivate
+  Box h=96 w=320 radius=48 fill=#FF2563EB center middle onTap={onActivate} onHold={onActivate} holdTime={hold}
+    Text.strong "{label}" color=#FFFFFFFF size=24
+
+define SpeechBar "text" onSpeak onClear
+  Card pad=12
+    Row gap=12 middle
+      Icon "record_voice_over"
+      Text.title "{text == "" ? "Choose a phrase to speak" : text}" grow
+      IconButton "volume_up" tooltip="Speak again" onTap={onSpeak}
+      IconButton "backspace" tooltip="Clear" onTap={onClear}
+
+define ScanTile "label" lit=false rowLit=false
+  Box pad=14 radius=8 grow center middle fill={lit ? #FFFBBF24 : (rowLit ? #FFDBEAFE : #FFF3F4F6)} border={lit ? 3 : 0}
+    Text.strong "{label}"

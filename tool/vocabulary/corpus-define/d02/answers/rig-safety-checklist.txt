@@ -1,0 +1,215 @@
+### Round
+state tab="round"
+state sel=""
+state noteDraft=""
+state sevDraft="Minor"
+state photoDraft=""
+state areas=[{"id":"a1","name":"Helideck","deck":"Upper","x":0.2,"y":0.25},{"id":"a2","name":"Crane pedestal","deck":"Upper","x":0.7,"y":0.3},{"id":"a3","name":"Drill floor","deck":"Main","x":0.35,"y":0.5},{"id":"a4","name":"Mud pits","deck":"Main","x":0.75,"y":0.55},{"id":"a5","name":"Pump room","deck":"Lower","x":0.3,"y":0.8},{"id":"a6","name":"Generator hall","deck":"Lower","x":0.72,"y":0.78}]
+state checks=[{"id":"c1","area":"a1","text":"Net and perimeter lights intact","answer":"","note":"","sev":"","photo":""},{"id":"c2","area":"a1","text":"Foam monitor pressure in range","answer":"","note":"","sev":"","photo":""},{"id":"c3","area":"a2","text":"Load chart posted and legible","answer":"","note":"","sev":"","photo":""},{"id":"c4","area":"a3","text":"BOP control panel free of alarms","answer":"","note":"","sev":"","photo":""},{"id":"c5","area":"a3","text":"Handrails and kickplates secure","answer":"","note":"","sev":"","photo":""},{"id":"c6","area":"a4","text":"Pit level alarms tested","answer":"","note":"","sev":"","photo":""},{"id":"c7","area":"a5","text":"No fluid leaks at pump seals","answer":"","note":"","sev":"","photo":""},{"id":"c8","area":"a6","text":"Fire damper indicators green","answer":"","note":"","sev":"","photo":""},{"id":"c9","area":"a6","text":"Extinguisher tags in date","answer":"","note":"","sev":"","photo":""}]
+state expanded="a1"
+state gas=[{"id":"g1","label":"H2S, Drill floor","limit":10,"value":0},{"id":"g2","label":"H2S, Pump room","limit":10,"value":0},{"id":"g3","label":"LEL, Generator hall","limit":20,"value":0},{"id":"g4","label":"O2 low, Mud pits","limit":19.5,"value":20.9}]
+state onboard=84
+state mustered=0
+state missing=[]
+state signer=""
+state signed=false
+App
+  Sidebar
+    Brand "Derrick Daily" icon="oil_barrel"
+    NavItem "Safety round" icon="checklist" badge="{count(checks,c=>c.answer!='')}/{length(checks)}" selected={tab=="round"} onTap={tab="round"}
+    NavItem "Gas readings" icon="air" onTap={go gas-readings}
+    NavItem "Muster" icon="groups" onTap={go muster}
+    NavItem "Sign-off" icon="draw" onTap={go sign-off}
+    Spacer grow
+    Text.muted "Day shift, 14 Nov"
+    Text.muted "Walk lead: R. Okafor"
+  Main
+    Nav
+      Heading "Safety round" level=1
+      Row gap=8
+        Badge.warning "{count(checks,c=>c.answer=='Fail')} failed"
+        Button.outline "Gas readings" onTap={go gas-readings}
+        Button "Sign off" onTap={go sign-off}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Column grow gap=12
+          Progress {count(checks,c=>c.answer!="")/length(checks)}
+          Text.muted "{count(checks,c=>c.answer!='')} of {length(checks)} checks answered, in walking order"
+          each area in areas
+            Card gap=8
+              Row between middle onTap={expanded = expanded==area.id ? "" : area.id}
+                Row gap=8 middle
+                  Icon name={count(checks,c=>c.area==area.id && c.answer=="")==0 ? "check_circle" : "radio_button_unchecked"}
+                  Text.strong "{index+1}. {area.name}"
+                  Badge.neutral "{area.deck} deck"
+                Text.muted "{count(checks,c=>c.area==area.id && c.answer!='')}/{count(checks,c=>c.area==area.id)}"
+              if expanded==area.id
+                each row in filter(checks,c=>c.area==area.id)
+                  Column gap=6
+                    Text "{row.text}"
+                    SegmentedButton items=["Pass","Fail","N/A"] value={row.answer} onChange={checks=updateWhere(checks,c=>c.id==row.id,c=>with(c,"answer",result)); result=="Fail" ? {sel=row.id; noteDraft=row.note; sevDraft=coalesce(row.sev,"Minor"); photoDraft=row.photo; open fail} : }
+                    if row.answer=="Fail"
+                      Row gap=8 middle
+                        Badge.error "{row.sev}"
+                        Text.muted "{row.note}"
+                        Spacer grow
+                        Button.ghost "Edit" onTap={sel=row.id; noteDraft=row.note; sevDraft=row.sev; photoDraft=row.photo; open fail}
+                  Divider
+        Column w=320 gap=12 sticky
+          Card gap=8
+            Text.strong "Platform decks"
+            DeckMap decks=["Upper","Main","Lower"] dots={map(areas,a=>with(with(a,"done",count(checks,c=>c.area==a.id && c.answer=="")==0),"label",a.name))} onSelect={expanded=result}
+            Row gap=8 middle
+              Icon name="circle" color=#FF16A34A size=14
+              Text.small "area answered"
+              Icon name="circle" color=#FF9CA3AF size=14
+              Text.small "to do"
+Sheet#fail "Record the failure"
+  Column gap=12
+    Text.muted "{find(checks,c=>c.id==sel).text}"
+    PhotoCapture bind=photoDraft label="Add a photo"
+    Input "Note" "What did you see?" bind=noteDraft multiline
+    Text.fieldLabel "Severity"
+    SegmentedButton items=["Minor","Major","Critical"] bind=sevDraft
+    Row gap=8 end
+      Button.outline "Cancel" onTap={checks=updateWhere(checks,c=>c.id==sel && c.note=="",c=>with(c,"answer","")); close}
+      Button "Save failure" onTap={noteDraft=="" ? toast "Add a note first" : {checks=updateWhere(checks,c=>c.id==sel,c=>with(with(with(c,"note",noteDraft),"sev",sevDraft),"photo",photoDraft)); toast "Failure recorded"; close}}
+
+// a camera capture, shown as a labelled box
+define PhotoCapture bind=photo label="Add a photo"
+  state photo=""
+  Box h=120 radius=8 fill=#FFF3F4F6 center middle onTap={photo = photo=="" ? "captured" : ""}
+    Column center gap=4
+      Icon name={photo=="" ? "photo_camera" : "image"}
+      Text.muted "{photo=="" ? label : "Photo attached, tap to remove"}"
+
+// a deck diagram with a dot per area; a real drawing is shown as a labelled stack of bands
+define DeckMap decks=["Upper","Main"] dots=[] onSelect
+  Column gap=6
+    each deck in decks
+      Stack h=70 radius=6 fill=#FFE5E7EB
+        Text.small "{deck} deck" left top pad=4
+        each dot in filter(dots,d=>d.deck==deck)
+          Icon name="circle" color={dot.done ? #FF16A34A : #FF9CA3AF} size=18 onTap={onSelect(dot.id)}
+
+### Gas Readings
+App
+  Sidebar
+    Brand "Derrick Daily" icon="oil_barrel"
+    NavItem "Safety round" icon="checklist" onTap={go round}
+    NavItem "Gas readings" icon="air" selected={true}
+    NavItem "Muster" icon="groups" onTap={go muster}
+    NavItem "Sign-off" icon="draw" onTap={go sign-off}
+  Main
+    Nav
+      Heading "Gas readings" level=1
+      Row gap=8
+        Badge.error "{count(gas,g=>g.id!='g4' && g.value>g.limit) + count(gas,g=>g.id=='g4' && g.value<g.limit)} over limit"
+        Button "Back to round" onTap={go round}
+    Column pad=24 gap=16 maxw=720
+      Text.muted "Type the detector figure at each point. A box turns red beyond its limit."
+      Grid cols=2 gap=16
+        each row in gas
+          GasReading "{row.label}" bind=row.value limit={row.limit} low={row.id=="g4"} unit={row.id=="g4" ? "% vol" : row.id=="g3" ? "% LEL" : "ppm"}
+      if any(gas,g=>g.id!="g4" && g.value>g.limit)
+        Card gap=8 fill=#FFFEE2E2
+          Text.strong color=#FFB91C1C "Toxic or flammable gas above limit"
+          Text color=#FF7F1D1D "Stop work in the area, alert the control room and log a failure on the round."
+          Button.destructive "Call control room" onTap={emit controlRoom; toast "Control room alerted"}
+
+define GasReading "label" bind=value limit=10 low=false unit="ppm"
+  state value=0
+  Card gap=6 fill={(low ? value<limit : value>limit) ? #FFFEE2E2 : #FFFFFFFF}
+    Text.fieldLabel "{label}"
+    Input "Reading ({unit})" type=number bind=value
+    Row between
+      Text.small "Limit {low ? 'below' : 'above'} {limit} {unit}"
+      Text.strong color={(low ? value<limit : value>limit) ? #FFDC2626 : #FF16A34A} "{(low ? value<limit : value>limit) ? 'OVER LIMIT' : 'OK'}"
+
+### Muster
+state phase="idle"
+state seconds=0
+every 1s when phase=="running" onTick={seconds=seconds+1}
+App
+  Sidebar
+    Brand "Derrick Daily" icon="oil_barrel"
+    NavItem "Safety round" icon="checklist" onTap={go round}
+    NavItem "Gas readings" icon="air" onTap={go gas-readings}
+    NavItem "Muster" icon="groups" selected={true}
+    NavItem "Sign-off" icon="draw" onTap={go sign-off}
+  Main
+    Nav
+      Heading "Muster headcount" level=1
+      Badge.info "{onboard} persons on board"
+    Column pad=24 gap=16 center maxw=720
+      Card gap=12 center
+        Text.muted "Time since alarm"
+        Text "{duration(seconds)}" size=48 weight=700
+        Row gap=8
+          Button "Start drill" onTap={phase="running"; seconds=0; mustered=0; missing=[]}
+          Button.outline "Stop" onTap={phase="idle"}
+      Card gap=12 center
+        Ring {mustered/onboard}
+        Text "{mustered} of {onboard} at muster stations" size=24 weight=600
+        Row gap=8
+          Button.outline "-5" onTap={mustered=max(0,mustered-5)}
+          Button.outline "-1" onTap={mustered=max(0,mustered-1)}
+          Button "+1" onTap={mustered=min(onboard,mustered+1)}
+          Button "+5" onTap={mustered=min(onboard,mustered+5)}
+        Button.destructive "Mark unaccounted" onTap={open unaccounted}
+      if mustered==onboard
+        Card fill=#FFDCFCE7 gap=4
+          Text.strong color=#FF166534 "All persons accounted for in {duration(seconds)}"
+      if length(missing)>0
+        Card gap=6
+          Text.strong "Unaccounted"
+          each name in missing
+            ListTile "{name}" icon="person_search"
+              Button.ghost "Found" onTap={missing=without(missing,name); mustered=min(onboard,mustered+1)}
+Dialog#unaccounted "Unaccounted person" "Enter a name or badge number"
+  Input "Name or badge" bind=who
+  Button "Add to list" onTap={who=="" ? toast "Enter a name" : {missing=append(missing,who); who=""; close}}
+
+### Sign-off
+App
+  Sidebar
+    Brand "Derrick Daily" icon="oil_barrel"
+    NavItem "Safety round" icon="checklist" onTap={go round}
+    NavItem "Gas readings" icon="air" onTap={go gas-readings}
+    NavItem "Muster" icon="groups" onTap={go muster}
+    NavItem "Sign-off" icon="draw" selected={true}
+  Main
+    Nav
+      Heading "Sign-off" level=1
+    Column pad=24 gap=16 maxw=720
+      Card gap=8
+        Row between
+          Text.strong "Areas answered"
+          Text "{count(checks,c=>c.answer!='')} of {length(checks)}"
+        Progress {count(checks,c=>c.answer!="")/length(checks)}
+        Row between
+          Text "Passed"
+          Text.success "{count(checks,c=>c.answer=='Pass')}"
+        Row between
+          Text "Failed"
+          Text.danger "{count(checks,c=>c.answer=='Fail')}"
+        Row between
+          Text "Not applicable"
+          Text.muted "{count(checks,c=>c.answer=='N/A')}"
+      if count(checks,c=>c.answer=="")>0
+        Card gap=8 fill=#FFFEF3C7
+          Row gap=8 middle
+            Icon name="lock"
+            Text.strong "Locked: {count(checks,c=>c.answer=='')} checks still unanswered"
+          each area in areas
+            if count(checks,c=>c.area==area.id && c.answer=="")>0
+              Row between
+                Text "{area.name}"
+                Button.ghost "Go" onTap={expanded=area.id; go round}
+      Card gap=12
+        Input "Full name" bind=signer
+        Input "Comments" multiline bind=comments
+        Button "Sign off the round" disabled={count(checks,c=>c.answer=="")>0 || trim(signer)==""} onTap={signed=true; emit signoff signer; open done}
+Dialog#done "Round signed off" "Report sent to the OIM"
+  Text "Signed by {signer}. {count(checks,c=>c.answer=='Fail')} failures are logged."
+  Button "Close" onTap={close; go round}

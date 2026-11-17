@@ -1,0 +1,177 @@
+### Analyzer
+state centre=433.92
+state span=2.0
+state ref=-20
+state limit=-60
+state running=true
+state trace=[]
+state peak=[]
+state history=[]
+state marker={"freq":433.92,"level":-48}
+state signals=[{"freq":433.92,"level":-48,"name":"Key fob"},{"freq":433.35,"level":-61,"name":"Weather sensor"},{"freq":434.40,"level":-67,"name":"Pager"},{"freq":432.90,"level":-72,"name":"Unknown"},{"freq":433.10,"level":-78,"name":"Unknown"}]
+state centreText="433.92"
+state spanText="2.0"
+every 500 when running onTick={emit sweep}
+App
+  Sidebar
+    Brand "Bandscape" icon="graphic_eq"
+    NavItem "Analyzer" icon="show_chart" selected={true}
+    NavItem "Signals" icon="table_rows" onTap={go signals}
+    NavItem "Settings" icon="tune" onTap={go settings}
+    Spacer grow
+    Text.muted "RTL-SDR, 24 to 1766 MHz"
+  Main
+    Nav
+      Heading "Spectrum" level=1
+      Row gap=8
+        Button.outline "Zoom to marker" icon="center_focus_strong" onTap={centre=marker.freq; span=max(0.1,span/2); centreText="{marker.freq}"; spanText="{span}"}
+        Button.outline "Reset" onTap={centre=433.92; span=2.0; ref=-20; centreText="433.92"; spanText="2.0"}
+        Button "{running ? 'Pause' : 'Run'}" icon="{running ? 'pause' : 'play_arrow'}" onTap={running=!running}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Input "Centre (MHz)" bind=centreText type=number w=160 onChange={centre=result}
+        Input "Span (MHz)" bind=spanText type=number w=160 onChange={span=max(0.01,result)}
+        Input "Limit (dBm)" bind=limit type=number w=160
+        Spacer grow
+        Column gap=2
+          Text.caption "Marker"
+          Text.mono "{fixed(marker.freq,3)} MHz   {marker.level} dBm"
+      Card gap=8
+        SpectrumPlot trace={trace} peak={peak} centre={centre} span={span} ref={ref} limit={limit} marker={marker} h=320 onPinch={centre=result.centre; span=result.span; centreText="{fixed(result.centre,3)}"; spanText="{fixed(result.span,2)}"} onPick={marker=result} onRefDrag={ref=result}
+        Row between
+          Text.caption "Ref {ref} dBm (drag the top edge)"
+          Row gap=12
+            Row gap=4 middle
+              Box w=16 h=3 fill=#FF2563EB
+              Text.caption "Live"
+            Row gap=4 middle
+              Box w=16 h=3 fill=#552563EB
+              Text.caption "Peak hold"
+            Row gap=4 middle
+              Box w=16 h=3 fill=#FFDC2626
+              Text.caption "Limit {limit} dBm"
+        if any(trace, v => v > limit)
+          Badge.error "Over limit"
+      Card gap=8
+        Row between
+          Text.strong "Waterfall"
+          Text.caption "newest at top, 60 s"
+        Waterfall rows={history} min={ref-80} max={ref} h=140
+      Card gap=8
+        Row between
+          Text.strong "Five strongest"
+          Button.ghost "All signals" onTap={go signals}
+        Row gap=8
+          Text.caption "Frequency" w=120
+          Text.caption "Level" w=90
+          Text.caption "Name" grow
+          Text.caption "" w=60
+        each s in take(sortByDesc(signals, x => x.level), 5)
+          Row gap=8 middle
+            Text.mono "{fixed(s.freq,3)} MHz" w=120
+            Text.mono "{s.level} dBm" w=90 color={s.level > limit ? "#FFDC2626" : "#FF111827"}
+            Text "{s.name}" grow
+            IconButton "place" tooltip="Place marker" onTap={marker={"freq":s.freq,"level":s.level}; centre=s.freq; centreText="{s.freq}"}
+
+// a live frequency plot: a line over a grid, a fainter peak line, a limit line, a marker, pinch and drag; drawn here as a labelled box
+define SpectrumPlot trace=[] peak=[] centre=433.92 span=2.0 ref=-20 limit=-60 marker={} h=320 onPinch onPick onRefDrag
+  Stack h={h} fill=#FF0B1120 radius=6
+    LineChart series=[{"name":"Peak hold","values":peak},{"name":"Live","values":trace}] h={h}
+    Box h=2 fill=#FFDC2626 hide=false
+    Text.caption "{limit} dBm limit" color=#FFDC2626
+    Row between top pad=8
+      Text.caption "{fixed(centre-span/2,2)} MHz" color=#FF9CA3AF
+      Text.caption "{fixed(centre,2)} MHz" color=#FFE5E7EB
+      Text.caption "{fixed(centre+span/2,2)} MHz" color=#FF9CA3AF
+    Box h=14 fill=#33FFFFFF drag=refline(ref) onDrop={onRefDrag(result.data)}
+    Icon "place" color=#FFFBBF24 onTap={onPick(marker)}
+
+// a scrolling colour strip of past sweeps, strongest as brightest; drawn here as a labelled box
+define Waterfall rows=[] min=-100 max=-20 h=140
+  Box h={h} fill=#FF1E1B4B radius=6
+    Sparkline values={map(rows, r => max(r))}
+    Text.caption "waterfall: {length(rows)} sweeps, {min} to {max} dBm" color=#FFE5E7EB
+
+### Signals
+state q=""
+state band="All"
+state sel=""
+App
+  Sidebar
+    Brand "Bandscape" icon="graphic_eq"
+    NavItem "Analyzer" icon="show_chart" onTap={go analyzer}
+    NavItem "Signals" icon="table_rows" selected={true}
+    NavItem "Settings" icon="tune" onTap={go settings}
+  Main
+    Nav
+      Heading "Signals" level=1
+      Row gap=8
+        Input "Search" bind=q w=220
+        Select bind=band items=["All","Over limit","Under limit"] w=150
+    Column pad=24 gap=16
+      Card gap=8
+        Row gap=8
+          Text.caption "Frequency" w=120
+          Text.caption "Level" w=90
+          Text.caption "Seen" w=90
+          Text.caption "Name" grow
+          Text.caption "" w=40
+        each s in filter(signals, x => contains(lower(x.name), lower(q)) && (band == "All" || (band == "Over limit" && x.level > limit) || (band == "Under limit" && x.level <= limit)))
+          Row gap=8 middle
+            Text.mono "{fixed(s.freq,3)} MHz" w=120
+            Text.mono "{s.level} dBm" w=90 color={s.level > limit ? "#FFDC2626" : "#FF111827"}
+            Text.muted "{s.name == 'Unknown' ? 'new' : 'known'}" w=90
+            Text "{s.name}" grow
+            IconButton "more_vert" tooltip="Actions" onTap={sel=s.freq; open signalMenu}
+        if length(signals) == 0
+          Text.muted "No signals yet. Run a sweep on the Analyzer."
+Menu#signalMenu end
+  MenuItem "Place marker" icon="place" onTap={marker=find(signals, x => x.freq == sel); centre=sel; go analyzer}
+  MenuItem "Rename" icon="edit" onTap={open renameSignal}
+  MenuItem "Delete" icon="delete" onTap={signals=removeWhere(signals, x => x.freq == sel)}
+Dialog#renameSignal "Rename signal" "Give it a name you will recognise"
+  state newName=""
+  Input "Name" bind=newName
+  Button "Save" onTap={signals=updateWhere(signals, x => x.freq == sel, x => with(x,"name",newName)); toast "Renamed"; close}
+
+### Settings
+state rbw="1 kHz"
+state avg=4
+state hold=true
+state gain=30
+state sweepMs=500
+App
+  Sidebar
+    Brand "Bandscape" icon="graphic_eq"
+    NavItem "Analyzer" icon="show_chart" onTap={go analyzer}
+    NavItem "Signals" icon="table_rows" onTap={go signals}
+    NavItem "Settings" icon="tune" selected={true}
+  Main
+    Nav
+      Heading "Settings" level=1
+      Button "Done" onTap={go analyzer}
+    Column pad=24 gap=16 maxw=720
+      Card gap=12
+        Text.strong "Measurement"
+        Select "Resolution bandwidth" bind=rbw items=["100 Hz","1 kHz","10 kHz","100 kHz"]
+        Row gap=8 middle
+          Text "Averaging" w=120
+          Slider bind=avg min=1 max=16 grow
+          Text.mono "{avg}"
+        Row gap=8 middle
+          Text "Tuner gain" w=120
+          Slider bind=gain min=0 max=50 grow
+          Text.mono "{gain} dB"
+        Row gap=8 middle
+          Text "Sweep every" w=120
+          Slider bind=sweepMs min=100 max=2000 grow
+          Text.mono "{sweepMs} ms"
+      Card gap=12
+        Text.strong "Display"
+        Toggle "Peak hold line" bind=hold
+        Input "Limit line (dBm)" bind=limit type=number
+        Input "Reference level (dBm)" bind=ref type=number
+        Text.muted "The trace turns red wherever it crosses the limit line."
+      Card gap=8
+        Text.strong "Data"
+        Button.destructive "Clear peak hold and waterfall" onTap={peak=[]; history=[]; toast "Cleared"}

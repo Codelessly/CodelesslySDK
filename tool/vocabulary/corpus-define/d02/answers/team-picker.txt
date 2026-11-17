@@ -1,0 +1,268 @@
+### Roster
+state tab="roster"
+state players=[{"id":1,"name":"Maya Reyes","skill":5,"team":-1},{"id":2,"name":"Jonah Pike","skill":4,"team":-1},{"id":3,"name":"Priya Nair","skill":4,"team":-1},{"id":4,"name":"Tomas Weber","skill":3,"team":-1},{"id":5,"name":"Lena Fischer","skill":3,"team":-1},{"id":6,"name":"Dre Washington","skill":2,"team":-1},{"id":7,"name":"Sofia Marchetti","skill":5,"team":-1},{"id":8,"name":"Kenji Ito","skill":2,"team":-1},{"id":9,"name":"Amara Okafor","skill":3,"team":-1},{"id":10,"name":"Luis Ortega","skill":1,"team":-1}]
+state q=""
+state nextId=11
+state newName=""
+state newSkill=3
+state sel=0
+App
+  Sidebar
+    Brand "Draftroom" icon="sports_soccer"
+    NavItem "Roster" icon="groups" badge="{length(players)}" selected={tab=="roster"} onTap={go roster}
+    NavItem "Teams" icon="shuffle" selected={tab=="teams"} onTap={go teams}
+    NavItem "Toss and captains" icon="toll" selected={tab=="toss"} onTap={go toss}
+    NavItem "Saved matches" icon="bookmark" selected={tab=="saved"} onTap={go saved}
+    Spacer grow
+    Text.muted "Thursday five-a-side"
+  Main
+    Nav
+      Heading "Roster" level=1
+      Row gap=8
+        Input "Search players" bind=q w=220
+        Button "Add player" icon="person_add" onTap={open addPlayer}
+    Column pad=24 gap=16 scroll
+      Row gap=16
+        Card grow gap=4
+          Text.muted "Players"
+          Text.strong "{length(players)}" size=32
+        Card grow gap=4
+          Text.muted "Average skill"
+          Text.strong "{fixed(sum(players,p=>p.skill)/max(1,length(players)),1)}" size=32
+        Card grow gap=4
+          Text.muted "Top rated"
+          Text.strong "{first(sortByDesc(players,p=>p.skill)).name}" size=20
+      Card gap=0
+        Row between pad=[0,0,0,8]
+          Text.fieldLabel "Player" grow
+          Text.fieldLabel "Skill" w=140 hide=phone
+          Text.fieldLabel "Rating" w=60
+          Text.fieldLabel "" w=40
+        Divider
+        each p in filter(players,x=>contains(lower(x.name),lower(q)))
+          Row middle gap=12 pad=[0,8,0,8]
+            Avatar "{p.name}" size=36
+            Text.strong "{p.name}" grow
+            StarRating bind=p.skill max=5 hide=phone
+            Input "" bind=p.skill type=number w=60
+            IconButton "more_vert" tooltip="Player options" onTap={sel=p.id; open rowMenu}
+          Divider
+Dialog#addPlayer "Add a player" "Set a rating with the stars"
+  Input "Name" bind=newName
+  StarRating bind=newSkill max=5
+  Button "Add to roster" onTap={newName=="" ? toast "Enter a name" : {players=append(players,{"id":nextId,"name":newName,"skill":newSkill,"team":-1}); nextId=nextId+1; newName=""; newSkill=3; close}}
+Menu#rowMenu end
+  MenuItem "Rate 5 stars" icon="star" onTap={players=updateWhere(players,r=>r.id==sel,r=>with(r,"skill",5))}
+  MenuItem "Rate 1 star" icon="star_border" onTap={players=updateWhere(players,r=>r.id==sel,r=>with(r,"skill",1))}
+  MenuItem "Remove" icon="delete" onTap={players=removeWhere(players,r=>r.id==sel); toast "Player removed"}
+
+// stars set a rating from 1 to max; tapping a star sets the value
+define StarRating bind=value max=5 size=20 onChange
+  state value=0
+  Row gap=2
+    each i in range(max)
+      Icon "{i<value ? 'star' : 'star_border'}" size={size} color={i<value ? '#FFF59E0B' : '#FF9CA3AF'} onTap={value=i+1; onChange(i+1)}
+
+### Teams
+state tab="teams"
+state players=[{"id":1,"name":"Maya Reyes","skill":5,"team":0},{"id":2,"name":"Jonah Pike","skill":4,"team":1},{"id":3,"name":"Priya Nair","skill":4,"team":1},{"id":4,"name":"Tomas Weber","skill":3,"team":0},{"id":5,"name":"Lena Fischer","skill":3,"team":0},{"id":6,"name":"Dre Washington","skill":2,"team":1},{"id":7,"name":"Sofia Marchetti","skill":5,"team":1},{"id":8,"name":"Kenji Ito","skill":2,"team":0},{"id":9,"name":"Amara Okafor","skill":3,"team":0},{"id":10,"name":"Luis Ortega","skill":1,"team":1}]
+state teamCount=2
+state spinning=false
+state spin=0
+state seed=7
+state totals=[]
+state locks=[]
+state lockA=1
+state lockB=2
+state lockMode="together"
+state matchName="Thursday night"
+state saved=[] saved
+every 50 onTick={seed=(seed*37+11)%1009}
+every 200 onTick={totals=map(range(teamCount),t=>sum(filter(players,p=>p.team==t),p=>p.skill))}
+every 90 when spinning onTick={spin=spin+1; players=map(players,p=>with(p,"team",(p.id+spin+seed)%teamCount)); spin>=10 ? {spinning=false; spin=0; players=map(players,p=>with(p,"team",(indexOf(map(sortByDesc(players,x=>x.skill),x=>x.id),p.id)%(2*teamCount))<teamCount ? (indexOf(map(sortByDesc(players,x=>x.skill),x=>x.id),p.id)%(2*teamCount)) : 2*teamCount-1-(indexOf(map(sortByDesc(players,x=>x.skill),x=>x.id),p.id)%(2*teamCount)))); players=map(players,p=>find(locks,l=>l.b==p.id && l.mode=="together") ? with(p,"team",find(players,z=>z.id==find(locks,l=>l.b==p.id && l.mode=="together").a).team) : p); players=map(players,p=>find(locks,l=>l.b==p.id && l.mode=="apart" && find(players,z=>z.id==l.a).team==p.team) ? with(p,"team",(p.team+1)%teamCount) : p); toast "Teams landed"} : }
+App
+  Sidebar
+    Brand "Draftroom" icon="sports_soccer"
+    NavItem "Roster" icon="groups" selected={tab=="roster"} onTap={go roster}
+    NavItem "Teams" icon="shuffle" selected={tab=="teams"} onTap={go teams}
+    NavItem "Toss and captains" icon="toll" selected={tab=="toss"} onTap={go toss}
+    NavItem "Saved matches" icon="bookmark" badge="{length(saved)}" selected={tab=="saved"} onTap={go saved}
+    Spacer grow
+    Text.muted "Thursday five-a-side"
+  Main
+    Nav
+      Heading "Teams" level=1
+      Row gap=8
+        SegmentedButton bind=teamCount items=[2,3,4]
+        Button.outline "Locks" icon="link" onTap={open locksSheet}
+        Button "Shuffle" icon="shuffle" onTap={spinning=true}
+        Button.secondary "Save" icon="bookmark_add" onTap={open saveDialog}
+        Button.ghost "Share" icon="ios_share" onTap={open shareDialog}
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Row between middle
+          Column gap=2
+            Text.strong "Balance"
+            Text.muted "Drag a player onto another to swap them, or onto a team to move them"
+          if length(totals)>0
+            Row gap=8 middle
+              Text.muted "Difference"
+              Badge "{last(sortBy(totals,x=>x))-first(sortBy(totals,x=>x))}" variant={last(sortBy(totals,x=>x))-first(sortBy(totals,x=>x))<=1 ? "success" : "warning"}
+        Progress {1-clamp((last(sortBy(totals,x=>x))-first(sortBy(totals,x=>x)))/max(1,last(sortBy(totals,x=>x))),0,1)}
+      Grid cols={teamCount} gap=16
+        each t in range(teamCount)
+          Card gap=8 drop=player onDrop={players=updateWhere(players,r=>r.id==result.data,r=>with(r,"team",t))} animate={spinning ? "shake" : "fade"}
+            Row between middle
+              Text.heading "Team {t+1}"
+              Badge.primary "{sum(filter(players,p=>p.team==t),p=>p.skill)}"
+            Divider
+            each p in sortByDesc(filter(players,x=>x.team==t),x=>x.skill)
+              Card drag=player(p.id) drop=player onDrop={players=map(players,r=>r.id==result.data ? with(r,"team",p.team) : (r.id==p.id ? with(r,"team",find(players,z=>z.id==result.data).team) : r))}
+                Row middle gap=8
+                  Avatar "{p.name}" size=28
+                  Text.strong "{p.name}" grow
+                  StarRating value={p.skill} size=14
+                  if any(locks,l=>l.a==p.id || l.b==p.id)
+                    Icon "link" size=16
+Sheet#locksSheet "Lock players"
+  Text.muted "Keep two players on the same team, or force them apart."
+  Row gap=8
+    Select bind=lockA items={map(players,p=>p.id)}
+    SegmentedButton bind=lockMode items=["together","apart"]
+    Select bind=lockB items={map(players,p=>p.id)}
+  Button "Add lock" onTap={lockA==lockB ? toast "Pick two different players" : {locks=append(locks,{"a":lockA,"b":lockB,"mode":lockMode}); toast "Locked"}}
+  each l in locks
+    ListTile "{find(players,p=>p.id==l.a).name} and {find(players,p=>p.id==l.b).name}" subtitle="{l.mode}"
+      IconButton "close" tooltip="Remove lock" onTap={locks=without(locks,l)}
+Dialog#saveDialog "Save teams" "For a match"
+  Input "Match name" bind=matchName
+  DatePicker "Date" bind=matchDate
+  Button "Save teams" onTap={saved=append(saved,{"name":matchName,"date":matchDate,"count":teamCount,"players":players,"totals":totals}); toast "Saved for {matchName}"; close}
+Dialog#shareDialog "Share image"
+  ShareImage title={matchName} teams={map(range(teamCount),t=>{"name":join(["Team ",t+1],""),"total":sum(filter(players,p=>p.team==t),p=>p.skill),"players":map(filter(players,p=>p.team==t),p=>p.name)})} w=420 h=420
+  Button "Copy image" onTap={copy "image"; toast "Copied"}
+
+// a rendered share card of the teams; no real image export, so a labelled box
+define ShareImage title="" teams=[] w=360 h=360
+  Box w={w} h={h} fill=#FF111827 radius=12 pad=20 gap=10
+    Text "{title}" color=#FFFFFFFF size=22 weight=700
+    Text "Draftroom" color=#FF9CA3AF size=12
+    Row gap=12
+      each t in teams
+        Column grow gap=4
+          Text "{t.name} ({t.total})" color=#FFFFFFFF weight=700
+          each n in t.players
+            Text "{n}" color=#FFE5E7EB size=13
+
+### Toss and captains
+state tab="toss"
+state seed=7
+state coin=""
+state captains=["Maya Reyes","Sofia Marchetti"]
+state order=["Maya Reyes","Sofia Marchetti"]
+state pool=["Jonah Pike","Priya Nair","Tomas Weber","Lena Fischer","Dre Washington","Kenji Ito","Amara Okafor","Luis Ortega"]
+state picks=[[],[]]
+state turn=0
+state spinOrder=false
+every 50 onTick={seed=(seed*37+11)%1009}
+App
+  Sidebar
+    Brand "Draftroom" icon="sports_soccer"
+    NavItem "Roster" icon="groups" selected={tab=="roster"} onTap={go roster}
+    NavItem "Teams" icon="shuffle" selected={tab=="teams"} onTap={go teams}
+    NavItem "Toss and captains" icon="toll" selected={tab=="toss"} onTap={go toss}
+    NavItem "Saved matches" icon="bookmark" selected={tab=="saved"} onTap={go saved}
+  Main
+    Nav
+      Heading "Toss and captains" level=1
+      Button.outline "Reset draft" icon="restart_alt" onTap={pool=["Jonah Pike","Priya Nair","Tomas Weber","Lena Fischer","Dre Washington","Kenji Ito","Amara Okafor","Luis Ortega"]; picks=[[],[]]; turn=0; coin=""}
+    Column pad=24 gap=16 scroll
+      Grid cols=2 gap=16
+        Card gap=12 center
+          Text.heading "Coin toss"
+          CoinFlip bind=coin seed={seed} size=120 heads="Maya calls heads" tails="Sofia calls tails"
+          if coin!=""
+            Text.strong "{coin} wins the toss and picks first"
+        Card gap=12 center
+          Text.heading "Pick order"
+          PickOrderWheel bind=order names=captains seed={seed} size=200 onSpin={turn=0; toast "Order set"}
+          Text.muted "First pick: {first(order)}"
+      Card gap=12
+        Row between middle
+          Text.heading "Draft"
+          Badge.info "{order[turn%length(order)]} to pick"
+        Row gap=16 top
+          Column grow gap=6
+            Text.fieldLabel "Available"
+            each n in pool
+              Button.outline "{n}" onTap={picks=updateWhere(picks,x=>false,x=>x); picks=map(range(length(order)),i=>i==turn%length(order) ? append(picks[i],n) : picks[i]); pool=without(pool,n); turn=turn+1}
+            if isEmpty(pool)
+              Text.success "Draft complete"
+          each c in order
+            Column grow gap=6
+              Text.fieldLabel "{c}"
+              each n in picks[indexOf(order,c)]
+                Chip "{n}"
+
+// a coin that spins in the air then lands on heads or tails from the seed
+define CoinFlip bind=result seed=0 size=100 heads="Heads" tails="Tails" onLanded
+  state result=""
+  state flipping=false
+  state n=0
+  every 120 when flipping onTick={n=n+1; n>=12 ? {flipping=false; n=0; result=seed%2==0 ? heads : tails; onLanded(result)} : }
+  Column center gap=10
+    Stack center middle w={size} h={size}
+      Box w={size} h={size} radius={size/2} fill={result==tails ? '#FF9CA3AF' : '#FFF59E0B'} animate={flipping ? 'spin' : 'pop'} duration=240
+      Text "{flipping ? '?' : (result==tails ? 'T' : (result=='' ? '' : 'H'))}" size={size/2} weight=700 color=#FF111827
+    Button "{flipping ? 'Flipping' : 'Flip the coin'}" onTap={result=""; flipping=true}
+
+// a wheel of names that spins and stops, leaving the names in the order drawn; drawn as a labelled disc
+define PickOrderWheel bind=order names=[] seed=0 size=200 onSpin
+  state order=[]
+  state spinning=false
+  state k=0
+  every 100 when spinning onTick={k=k+1; order=map(range(length(names)),i=>names[(i+k+seed)%length(names)]); k>=12 ? {spinning=false; k=0; onSpin(order)} : }
+  Column center gap=10
+    Stack center middle w={size} h={size}
+      Box w={size} h={size} radius={size/2} fill=#FF2563EB animate={spinning ? 'spin' : 'fade'} duration=500
+      Text "{coalesce(first(order),'Spin')}" color=#FFFFFFFF weight=700
+    Button.secondary "Spin the wheel" icon="autorenew" onTap={spinning=true}
+
+### Saved matches
+state tab="saved"
+state saved=[{"name":"Thursday night","date":"2026-11-12","count":2,"totals":[17,17]},{"name":"Cup warm-up","date":"2026-11-05","count":3,"totals":[12,11,12]}] saved
+state sel=""
+App
+  Sidebar
+    Brand "Draftroom" icon="sports_soccer"
+    NavItem "Roster" icon="groups" selected={tab=="roster"} onTap={go roster}
+    NavItem "Teams" icon="shuffle" selected={tab=="teams"} onTap={go teams}
+    NavItem "Toss and captains" icon="toll" selected={tab=="toss"} onTap={go toss}
+    NavItem "Saved matches" icon="bookmark" badge="{length(saved)}" selected={tab=="saved"} onTap={go saved}
+  Main
+    Nav
+      Heading "Saved matches" level=1
+      Button "New teams" icon="add" onTap={go teams}
+    Column pad=24 gap=16 scroll
+      if isEmpty(saved)
+        Card center gap=8
+          Icon "bookmark_border" size=40
+          Text.muted "No saved teams yet"
+      Grid cols=2 gap=16
+        each m in saved
+          Card gap=8
+            Row between middle
+              Text.heading "{m.name}"
+              IconButton "more_vert" tooltip="Match options" onTap={sel=m.name; open matchMenu}
+            Text.muted "{formatDate(m.date,'MMM d')} · {m.count} teams"
+            Row gap=8
+              each t in m.totals
+                Badge.neutral "{t}"
+            Row gap=8
+              Button.outline "Open" onTap={go teams}
+              Button.ghost "Share" icon="ios_share" onTap={sel=m.name; open shareSaved}
+Menu#matchMenu end
+  MenuItem "Delete" icon="delete" onTap={saved=removeWhere(saved,m=>m.name==sel); toast "Match deleted"}
+Dialog#shareSaved "Share image"
+  ShareImage title={sel} teams={map(find(saved,m=>m.name==sel).totals,t=>{"name":"Team","total":t,"players":[]})} w=420 h=300
+  Button "Copy image" onTap={copy "image"; toast "Copied"}

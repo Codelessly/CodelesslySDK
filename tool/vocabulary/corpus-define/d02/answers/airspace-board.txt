@@ -1,0 +1,161 @@
+### Board
+state mode="Departures"
+state terminal="All"
+state sel=""
+state secs=0
+state flights=[{"id":"SK412","city":"Lisbon","gate":"B14","term":"B","sched":"14:05","est":"14:05","status":"On time","dir":"Departures","changed":false},{"id":"SK88","city":"Tokyo Haneda","gate":"A02","term":"A","sched":"14:10","est":"14:32","status":"Delayed","dir":"Departures","changed":true},{"id":"SK230","city":"New York JFK","gate":"C07","term":"C","sched":"14:15","est":"14:15","status":"Boarding","dir":"Departures","changed":false},{"id":"SK951","city":"Berlin","gate":"B09","term":"B","sched":"14:20","est":"14:20","status":"On time","dir":"Departures","changed":false},{"id":"SK17","city":"Dubai","gate":"A11","term":"A","sched":"14:30","est":"14:30","status":"Gate change","dir":"Departures","changed":true},{"id":"SK604","city":"Oslo","gate":"C03","term":"C","sched":"14:40","est":"15:05","status":"Delayed","dir":"Departures","changed":false},{"id":"SK311","city":"Madrid","gate":"B02","term":"B","sched":"14:00","est":"14:08","status":"Landed","dir":"Arrivals","changed":false},{"id":"SK75","city":"Singapore","gate":"A06","term":"A","sched":"14:12","est":"14:12","status":"On time","dir":"Arrivals","changed":false},{"id":"SK502","city":"Chicago O'Hare","gate":"C10","term":"C","sched":"14:25","est":"14:50","status":"Delayed","dir":"Arrivals","changed":true},{"id":"SK140","city":"Rome","gate":"B11","term":"B","sched":"14:35","est":"14:35","status":"Cancelled","dir":"Arrivals","changed":false}]
+state zone2="Tokyo"
+every 1s onTick={secs=secs+1}
+App
+  Sidebar
+    Brand "Skyline Ops" icon="flight"
+    NavItem "Flight board" icon="departure_board" selected={true}
+    NavItem "Gates" icon="meeting_room" onTap={go gates}
+    NavItem "Weather" icon="air" onTap={go weather}
+    Spacer grow
+    WorldClock zone="Local" offset=0 secs={secs}
+    WorldClock zone={zone2} offset=9 secs={secs}
+  Main
+    Nav
+      Heading "{mode} board" level=1
+      Row gap=8
+        SegmentedButton bind=mode items=["Departures","Arrivals"]
+        Select bind=zone2 items=["Tokyo","London","New York","Dubai"]
+    Column pad=24 gap=16
+      Row gap=8 wrap
+        each t in ["All","A","B","C"]
+          FilterChip "{t == "All" ? "All terminals" : "Terminal " + t}" selected={terminal == t} onTap={terminal=t}
+      RunwayStrip movements={take(sortBy(flights, f => f.est), 10)}
+      Card gap=0 pad=0
+        Row gap=8 pad=[16,12,16,12] border-bottom=#FFE5E7EB
+          Text.caption "Flight" w=80
+          Text.caption "Destination" grow
+          Text.caption "Gate" w=60
+          Text.caption "Sched" w=70
+          Text.caption "Est" w=70
+          Text.caption "Status" w=110
+        each f in sortBy(filter(flights, x => x.dir == mode && (terminal == "All" || x.term == terminal)), x => x.est)
+          FlightRow flight={f} onTap={sel=f.id; open detail}
+      Row gap=8 middle
+        Icon "sync"
+        Text.muted "Live: rows update in place and re-sort as estimated times change."
+        Spacer grow
+        Button.outline "Mark all seen" onTap={flights=map(flights, f => with(f,"changed",false))}
+  Pane w=320 pad=16 gap=12
+    Text.panelTitle "Weather and wind"
+    WeatherPanel temp=12 condition="Light rain" visibility=8 gust=34 windDir=240 windSpeed=22 runway="27L"
+
+Dialog#detail "Flight details" "Status and gate information"
+  each f in filter(flights, x => x.id == sel)
+    Column gap=8
+      Row between
+        Text.heading "{f.id} to {f.city}"
+        StatusPill status={f.status}
+      Row gap=24
+        Column
+          Text.caption "Gate"
+          Text.strong "{f.gate}"
+        Column
+          Text.caption "Scheduled"
+          Text.strong "{f.sched}"
+        Column
+          Text.caption "Estimated"
+          Text.strong "{f.est}"
+      Button "Notify me of changes" onTap={toast "You will be notified about {f.id}"; close}
+
+define StatusPill "status"
+  Badge.neutral "{status}" fill={status == "On time" ? "#FFDCFCE7" : status == "Boarding" ? "#FFDBEAFE" : status == "Delayed" ? "#FFFEF3C7" : status == "Gate change" ? "#FFFFEDD5" : status == "Cancelled" ? "#FFFEE2E2" : "#FFE5E7EB"} color={status == "On time" ? "#FF166534" : status == "Boarding" ? "#FF1E40AF" : status == "Delayed" ? "#FF92400E" : status == "Gate change" ? "#FF9A3412" : status == "Cancelled" ? "#FF991B1B" : "#FF374151"}
+
+define FlightRow flight={} onTap
+  Row gap=8 pad=[16,12,16,12] middle border-bottom=#FFF3F4F6 animate=slide-up duration=300 onTap={onTap}
+    Text.strong "{flight.id}" w=80
+    Text "{flight.city}" grow
+    Text "{flight.gate}" w=60 fill={flight.changed ? "#FFFEF08A" : "#00000000"}
+    Text "{flight.sched}" w=70
+    Text "{flight.est}" w=70 fill={flight.changed ? "#FFFEF08A" : "#00000000"} animate={flight.changed ? "pulse" : "none"}
+    Box w=110
+      StatusPill status={flight.status}
+
+define RunwayStrip movements=[]
+  Card gap=8
+    Row between
+      Text.panelTitle "Runway 27L / 09R: next ten movements"
+      Text.caption "time order"
+    Row gap=4 scroll
+      each m in movements
+        Box w=96 pad=8 gap=2 radius=4 fill={m.dir == "Departures" ? "#FFDBEAFE" : "#FFDCFCE7"} onTap={emit focusFlight m.id}
+          Text.caption "{m.est}"
+          Text.strong "{m.id}"
+          Row gap=4 middle
+            Icon "{m.dir == "Departures" ? "flight_takeoff" : "flight_land"}"
+            Text.small "{m.term}"
+
+define WorldClock zone="Local" offset=0 secs=0
+  Column gap=0
+    Text.caption "{zone}"
+    Text.mono "{fixed(floor((50400 + secs + offset * 3600) / 3600) % 24, 0)}:{fixed(floor((secs + 300) / 60) % 60, 0)}:{fixed(secs % 60, 0)}"
+
+// A real wind compass cannot be drawn; the arrow is a labelled box.
+define WeatherPanel temp=0 condition="" visibility=0 gust=0 windDir=0 windSpeed=0 runway=""
+  Column gap=12
+    Row between middle
+      Text size=40 weight=700 "{temp}°C"
+      Text.muted "{condition}"
+    Box w=120 h=120 radius=60 border=1 center middle
+      Text.caption "Wind from {windDir}°"
+      Text.strong "{windSpeed} kt"
+    Gauge bind=gust min=0 max=60 limit=40 unit="kt"
+    Row between
+      Text.muted "Visibility"
+      Text.strong "{visibility} km"
+    Row between
+      Text.muted "Active runway"
+      Text.strong "{runway}"
+    Sparkline values=[18,20,22,25,31,34,28,22]
+    Text.caption "Gusts, last 8 hours"
+
+### Gates
+state gateTerm="A"
+App
+  Sidebar
+    Brand "Skyline Ops" icon="flight"
+    NavItem "Flight board" icon="departure_board" onTap={go board}
+    NavItem "Gates" icon="meeting_room" selected={true}
+    NavItem "Weather" icon="air" onTap={go weather}
+  Main
+    Nav
+      Heading "Gate occupancy" level=1
+      SegmentedButton bind=gateTerm items=["A","B","C"]
+    Column pad=24 gap=16
+      Grid cols=4 gap=12
+        each g in range(8)
+          Card gap=4 onTap={toast "Gate {gateTerm}{g+1}"}
+            Text.strong "{gateTerm}{g+1 < 10 ? "0" : ""}{g+1}"
+            Badge.success "Free" visible={g % 3 == 0}
+            Badge.info "Occupied" visible={g % 3 != 0}
+            Progress {(g * 0.13) % 1}
+      Card gap=8
+        Text.panelTitle "Turnaround times"
+        BarChart values=[42,38,55,47,61,40] labels=["A02","A06","B09","B14","C03","C07"] h=200
+
+### Weather
+App
+  Sidebar
+    Brand "Skyline Ops" icon="flight"
+    NavItem "Flight board" icon="departure_board" onTap={go board}
+    NavItem "Gates" icon="meeting_room" onTap={go gates}
+    NavItem "Weather" icon="air" selected={true}
+  Main
+    Nav
+      Heading "Weather and wind" level=1
+    Column pad=24 gap=16
+      Grid cols=2 gap=16
+        Card gap=8
+          Text.panelTitle "Wind speed, next 12 hours (kt)"
+          LineChart values=[18,20,22,25,31,34,28,22,19,17,15,14] h=200
+        Card gap=8
+          Text.panelTitle "Gusts and crosswind"
+          Gauge 34 min=0 max=60 limit=40 unit="kt"
+      Card gap=8
+        Text.panelTitle "Visibility"
+        AreaChart values=[8,8,7,6,6,7,8,9] labels=["12","13","14","15","16","17","18","19"] h=160

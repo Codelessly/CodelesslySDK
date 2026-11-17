@@ -1,0 +1,193 @@
+### Rooms
+state filter="all"
+state activeRoom={"id":1,"title":"Late night indie hackers","host":"Maya Reyes"}
+state rooms=[{"id":1,"title":"Late night indie hackers","host":"Maya Reyes","topic":"tech","speakers":["Maya Reyes","Dev Patel","Lin Zhou","Omar Haddad"],"listeners":212},{"id":2,"title":"Sunday jazz and talk","host":"Ines Duarte","topic":"music","speakers":["Ines Duarte","Tomas Weber"],"listeners":87},{"id":3,"title":"Ask a nurse anything","host":"Grace Okafor","topic":"health","speakers":["Grace Okafor","Sam Whitaker","Priya Nair"],"listeners":341},{"id":4,"title":"Learning Portuguese together","host":"Rui Costa","topic":"language","speakers":["Rui Costa","Ana Lima"],"listeners":45}]
+App
+  Sidebar
+    Brand "Murmur" icon="graphic_eq"
+    NavItem "Live now" icon="sensors" badge="4" selected={true} onTap={go rooms}
+    NavItem "Schedule" icon="event" onTap={go schedule}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Sam Patel" size=32
+      Text.muted "Sam Patel"
+  Main
+    Nav
+      Heading "Live rooms" level=1
+      Row gap=8
+        Input "Search rooms" bind=q w=220
+        Button "Start a room" icon="mic" onTap={open newRoom}
+    Column pad=24 gap=16 scroll
+      Row gap=8
+        ChoiceChip "All" selected={filter=="all"} onTap={filter="all"}
+        ChoiceChip "Tech" selected={filter=="tech"} onTap={filter="tech"}
+        ChoiceChip "Music" selected={filter=="music"} onTap={filter="music"}
+        ChoiceChip "Health" selected={filter=="health"} onTap={filter="health"}
+        ChoiceChip "Language" selected={filter=="language"} onTap={filter="language"}
+      each room in filter=="all" ? rooms : filter(rooms, r=>r.topic==filter)
+        Card gap=10 onTap={activeRoom=room; go room}
+          Row between middle
+            Row gap=8 middle
+              LiveDot
+              Text.strong "{room.title}"
+            Badge.neutral "{room.topic}"
+          Row between middle
+            Column gap=4
+              AvatarStack names={room.speakers} size=36 max=4
+              Text.muted "{join(room.speakers, ', ')}"
+            Row gap=4 middle
+              Icon "headphones"
+              Text.strong "{room.listeners}"
+              Text.muted "listening"
+          Row gap=8
+            Button "Join quietly" onTap={activeRoom=room; go room}
+            Button.ghost "Share" icon="ios_share" onTap={toast "Link copied"}
+      if isEmpty(rooms)
+        Text.muted "No live rooms right now. Start one."
+
+Dialog#newRoom "Start a room" "Pick a title people will want to join"
+  state newTitle=""
+  state newTopic="tech"
+  Input "Room title" bind=newTitle
+  Select "Topic" items=["tech","music","health","language"] bind=newTopic
+  Button "Go live" onTap={newTitle=="" ? toast "Give your room a title" : rooms=append(rooms,{"id":length(rooms)+10,"title":newTitle,"host":"Sam Patel","topic":newTopic,"speakers":["Sam Patel"],"listeners":0}); close}
+
+### Room
+state activeRoom={"id":1,"title":"Late night indie hackers","host":"Maya Reyes"}
+state isHost=true
+state muted=true
+state handUp=false
+state activeSpeaker="Dev Patel"
+state speakers=[{"id":"u1","name":"Maya Reyes","role":"host"},{"id":"u2","name":"Dev Patel","role":"speaker"},{"id":"u3","name":"Lin Zhou","role":"speaker"},{"id":"u4","name":"Omar Haddad","role":"speaker"}]
+state listeners=[{"id":"u5","name":"Ana Lima"},{"id":"u6","name":"Rui Costa"},{"id":"u7","name":"Priya Nair"},{"id":"u8","name":"Tomas Weber"},{"id":"u9","name":"Grace Okafor"},{"id":"u10","name":"Sam Whitaker"},{"id":"u11","name":"Ines Duarte"},{"id":"u12","name":"Jonas Berg"}]
+state queue=[{"id":"u13","name":"Kai Tanaka"},{"id":"u14","name":"Noor Aziz"}]
+state reactions=[]
+state picked={"id":"","name":""}
+every 3s onTick={activeSpeaker=speakers[(indexOf(map(speakers,s=>s.name),activeSpeaker)+1)%length(speakers)].name}
+App
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Back to rooms" onTap={go rooms}
+        Column gap=2
+          Heading "{activeRoom.title}" level=3
+          Text.muted "Hosted by {activeRoom.host} - {length(listeners)+length(speakers)} here"
+      Row gap=8
+        Button.outline "Invite" icon="person_add" visible={isHost} onTap={open invite}
+        Button.destructive "Leave quietly" icon="logout" onTap={toast "You left quietly"; go rooms}
+    Column pad=24 gap=20 scroll
+      Stack center
+        SpeakerCircle speakers={speakers} active={activeSpeaker} onTap={picked=result; isHost ? open speakerMenu : toast "{result.name}"}
+        FloatingReactions items={reactions}
+      Column gap=8
+        Text.sectionTitle "Listeners ({length(listeners)})"
+        Grid cols=4 gap=12
+          each p in listeners
+            Column center gap=4
+              Avatar "{p.name}" size=44
+              Text.caption "{p.name}"
+    Footer
+      Row between middle
+        Row gap=8 middle
+          IconButton "{muted ? 'mic_off' : 'mic'}" tooltip="{muted ? 'Unmute' : 'Mute'}" onTap={muted=!muted}
+          Text.muted "{muted ? 'You are muted' : 'You are live'}"
+        Row gap=8
+          Button.outline "{handUp ? 'Lower hand' : 'Raise hand'}" icon="back_hand" onTap={handUp ? (handUp=false; queue=removeWhere(queue,q=>q.id=="me"); toast "Hand lowered") : (handUp=true; queue=append(queue,{"id":"me","name":"Sam Patel"}); toast "The host can see your hand")}
+          IconButton "add_reaction" tooltip="React" onTap={open reactMenu}
+  Pane w=320 pad=16 gap=12 visible={isHost}
+    Heading "Host panel" level=3
+    Text.muted "Hands raised ({length(queue)})"
+    if isEmpty(queue)
+      Text.muted "No hands up."
+    each q in queue
+      Card gap=8
+        Row between middle
+          Row gap=8 middle
+            Avatar "{q.name}" size=32
+            Text.strong "{q.name}"
+          Badge.primary "{index+1}"
+        Row gap=4
+          IconButton "arrow_upward" tooltip="Move up" disabled={index==0} onTap={queue=setAt(setAt(queue,index-1,q),index,queue[index-1])}
+          IconButton "arrow_downward" tooltip="Move down" disabled={index==length(queue)-1} onTap={queue=setAt(setAt(queue,index+1,q),index,queue[index+1])}
+          Spacer grow
+          Button "Bring up" onTap={speakers=append(speakers,{"id":q.id,"name":q.name,"role":"speaker"}); queue=removeWhere(queue,x=>x.id==q.id); toast "{q.name} is now a speaker"}
+          IconButton "close" tooltip="Dismiss" onTap={queue=removeWhere(queue,x=>x.id==q.id)}
+
+Menu#speakerMenu
+  MenuItem "Move down to listeners" icon="arrow_downward" onTap={speakers=removeWhere(speakers,s=>s.id==picked.id); listeners=append(listeners,{"id":picked.id,"name":picked.name}); toast "{picked.name} moved to listeners"}
+  MenuItem "Mute" icon="mic_off" onTap={toast "{picked.name} muted"}
+  MenuItem "Remove from room" icon="person_remove" onTap={speakers=removeWhere(speakers,s=>s.id==picked.id)}
+
+Menu#reactMenu above
+  MenuItem "Clap" icon="celebration" onTap={reactions=append(reactions,{"id":length(reactions),"emoji":"👏"})}
+  MenuItem "Heart" icon="favorite" onTap={reactions=append(reactions,{"id":length(reactions),"emoji":"❤️"})}
+  MenuItem "Laugh" icon="sentiment_very_satisfied" onTap={reactions=append(reactions,{"id":length(reactions),"emoji":"😂"})}
+
+Dialog#invite "Invite someone" "They get a link to join as a listener"
+  state inviteName=""
+  Input "Name or @handle" bind=inviteName
+  Row gap=8
+    Button "Send invite" onTap={inviteName=="" ? toast "Enter a name" : (toast "Invited {inviteName}"; inviteName=""; close)}
+    Button.ghost "Cancel" onTap={close}
+
+### Schedule
+state reminded=[]
+state sched=[{"id":"s1","title":"Founders AMA: pricing mistakes","host":"Lin Zhou","when":"Today, 7:00 PM","speakers":["Lin Zhou","Dev Patel"]},{"id":"s2","title":"Open mic poetry night","host":"Ines Duarte","when":"Tomorrow, 9:30 PM","speakers":["Ines Duarte","Jonas Berg","Noor Aziz"]},{"id":"s3","title":"Morning stretch and chat","host":"Grace Okafor","when":"Fri, 7:00 AM","speakers":["Grace Okafor"]},{"id":"s4","title":"Beginner Rust study group","host":"Kai Tanaka","when":"Sat, 11:00 AM","speakers":["Kai Tanaka","Omar Haddad"]}]
+App
+  Sidebar
+    Brand "Murmur" icon="graphic_eq"
+    NavItem "Live now" icon="sensors" badge="4" onTap={go rooms}
+    NavItem "Schedule" icon="event" selected={true} onTap={go schedule}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Sam Patel" size=32
+      Text.muted "Sam Patel"
+  Main
+    Nav
+      Heading "Upcoming rooms" level=1
+      Badge.info "{length(reminded)} reminders set"
+    Column pad=24 gap=16 scroll
+      each s in sched
+        Card gap=8
+          Row between middle
+            Column gap=4
+              Text.strong "{s.title}"
+              Text.muted "{s.when} - hosted by {s.host}"
+            AvatarStack names={s.speakers} size=32 max=3
+          Row gap=8
+            if contains(reminded, s.id)
+              Button.outline "Reminder set" icon="notifications_active" onTap={reminded=without(reminded,s.id); toast "Reminder removed"}
+            if !contains(reminded, s.id)
+              Button "Remind me" icon="notifications" onTap={reminded=append(reminded,s.id); toast "We will remind you 10 minutes before"}
+            Button.ghost "Share" icon="ios_share" onTap={toast "Link copied"}
+
+// A small red dot that pulses; marks a room as live.
+define LiveDot color=#FFDC2626 size=10
+  Box w={size} h={size} radius={size/2} fill={color} animate=pulse
+
+define AvatarStack names=[] size=32 max=3
+  Row middle
+    each n in take(names, max)
+      Avatar "{n}" size={size} border=2
+    if length(names) > max
+      Text.caption "+{length(names)-max}"
+
+// Speakers are shown in a wrapped ring-like layout; a true circular placement is approximated by a centered grid.
+define SpeakerCircle speakers=[] active="" size=72 onTap
+  Grid cols=3 gap=20 center
+    each s in speakers
+      Column center gap=6 onTap={onTap(s)}
+        Stack center middle
+          Box w={size+16} h={size+16} radius={(size+16)/2} fill={s.name==active ? #3322C55E : #00000000} animate={s.name==active ? "pulse" : ""}
+          Avatar "{s.name}" size={size}
+        Row gap=4 middle
+          Text.strong "{s.name}"
+          if s.role=="host"
+            Badge.primary "Host"
+        Icon "{s.name==active ? 'graphic_eq' : 'mic_off'}"
+
+// Emoji drift upward from the bottom of the circle and fade; each item rises when it appears.
+define FloatingReactions items=[] h=160
+  Stack h={h} right bottom
+    each r in take(reverse(items), 8)
+      Text "{r.emoji}" size=32 animate=slide-up duration=1200

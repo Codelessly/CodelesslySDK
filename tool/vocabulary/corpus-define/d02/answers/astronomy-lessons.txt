@@ -1,0 +1,185 @@
+### Solar System
+state speed=1
+state trueScale=false
+state selected=""
+state planets=[{"name":"Mercury","au":0.39,"diam":4879,"moons":0,"day":"59 Earth days","year":"88 days","color":"#FF9CA3AF"},{"name":"Venus","au":0.72,"diam":12104,"moons":0,"day":"243 Earth days","year":"225 days","color":"#FFF59E0B"},{"name":"Earth","au":1.0,"diam":12742,"moons":1,"day":"24 hours","year":"365 days","color":"#FF2563EB"},{"name":"Mars","au":1.52,"diam":6779,"moons":2,"day":"24.6 hours","year":"687 days","color":"#FFDC2626"},{"name":"Jupiter","au":5.2,"diam":139820,"moons":95,"day":"9.9 hours","year":"11.9 years","color":"#FFD97706"},{"name":"Saturn","au":9.58,"diam":116460,"moons":146,"day":"10.7 hours","year":"29.5 years","color":"#FFCA8A04"}]
+App
+  Sidebar
+    Brand "Orbit School" icon="public"
+    NavItem "Solar system" icon="brightness_5" selected={true}
+    NavItem "Compare planets" icon="compare" onTap={go compare}
+    NavItem "Moon quiz" icon="quiz" onTap={go quiz}
+    NavItem "Sky tonight" icon="nights_stay" onTap={go sky}
+    Spacer grow
+    Text.muted "Lesson 4 of 12"
+  Main
+    Nav
+      Heading "The solar system"
+      Row gap=12
+        Toggle "True distances" bind=trueScale
+        Button.outline "Glossary" icon="menu_book" onTap={go sky}
+    Column pad=24 gap=16
+      Card gap=12
+        Row between
+          Text.strong "Time speed"
+          Text.muted "{speed == 0 ? 'Paused' : speed + ' years per second'}"
+        Slider bind=speed min=0 max=10
+        if trueScale
+          Text.muted "True scale: the planets are tiny dots, and Saturn is nearly ten times farther out than Earth."
+        SolarSystem planets={planets} speed={speed} trueScale={trueScale} bind=selected h=420
+      if selected == ""
+        Text.muted "Tap a planet to zoom in and see its facts."
+  Pane w=320 pad=16 gap=12
+    if selected == ""
+      Text.panelTitle "Facts"
+      Text.muted "Nothing selected yet."
+    each p in planets
+      if p.name == selected
+        Text.panelTitle "{p.name}"
+        PlanetFacts planet={p}
+        Button.outline "Compare with Earth" onTap={go compare}
+        Button.ghost "Zoom out" onTap={selected=""}
+
+### Compare planets
+state planets=[{"name":"Mercury","diam":4879,"color":"#FF9CA3AF"},{"name":"Venus","diam":12104,"color":"#FFF59E0B"},{"name":"Earth","diam":12742,"color":"#FF2563EB"},{"name":"Mars","diam":6779,"color":"#FFDC2626"},{"name":"Jupiter","diam":139820,"color":"#FFD97706"},{"name":"Saturn","diam":116460,"color":"#FFCA8A04"}]
+state left="Earth"
+state right="Jupiter"
+App
+  Sidebar
+    Brand "Orbit School" icon="public"
+    NavItem "Solar system" icon="brightness_5" onTap={go solar-system}
+    NavItem "Compare planets" icon="compare" selected={true}
+    NavItem "Moon quiz" icon="quiz" onTap={go quiz}
+    NavItem "Sky tonight" icon="nights_stay" onTap={go sky}
+  Main
+    Nav
+      Heading "Compare two planets"
+    Column pad=24 gap=16
+      Row gap=16
+        Select "First planet" items=["Mercury","Venus","Earth","Mars","Jupiter","Saturn"] bind=left grow
+        Select "Second planet" items=["Mercury","Venus","Earth","Mars","Jupiter","Saturn"] bind=right grow
+      Card gap=16
+        Row center bottom gap=48
+          each p in planets
+            if p.name == left
+              Column center gap=8
+                Box w={max(8, p.diam / 600)} h={max(8, p.diam / 600)} radius={max(8, p.diam / 600) / 2} fill={p.color}
+                Text.strong "{p.name}"
+                Text.muted "{p.diam} km across"
+          each p in planets
+            if p.name == right
+              Column center gap=8
+                Box w={max(8, p.diam / 600)} h={max(8, p.diam / 600)} radius={max(8, p.diam / 600) / 2} fill={p.color}
+                Text.strong "{p.name}"
+                Text.muted "{p.diam} km across"
+        each a in planets
+          each b in planets
+            if a.name == left && b.name == right
+              Text.body "{b.name} is {fixed(b.diam / a.diam, 1)} times as wide as {a.name}."
+              Text.caption "Circles are drawn to the same scale, 1 pixel for 600 km."
+
+### Moon quiz
+state qs=[{"q":"How many moons does Mars have?","options":["0","2","14","79"],"answer":1},{"q":"Which planet has the most known moons?","options":["Jupiter","Earth","Saturn","Neptune"],"answer":2},{"q":"What is the name of Earth's only moon?","options":["Luna","Titan","Europa","Io"],"answer":0},{"q":"Which moon of Jupiter may hide an ocean under its ice?","options":["Phobos","Europa","Triton","Charon"],"answer":1}]
+state i=0
+state picked=-1
+state score=0
+state done=false
+App
+  Sidebar
+    Brand "Orbit School" icon="public"
+    NavItem "Solar system" icon="brightness_5" onTap={go solar-system}
+    NavItem "Compare planets" icon="compare" onTap={go compare}
+    NavItem "Moon quiz" icon="quiz" selected={true}
+    NavItem "Sky tonight" icon="nights_stay" onTap={go sky}
+  Main
+    Nav
+      Heading "Moon quiz"
+      Badge.primary "Score {score}"
+    Column pad=24 gap=16 maxw=720
+      if !done
+        Progress {(i + 1) / length(qs)}
+        Text.caption "Question {i + 1} of {length(qs)}"
+        each q in qs
+          if index == i
+            Card gap=12
+              Text.heading "{q.q}"
+              each o in q.options
+                ChoiceChip "{o}" selected={picked == index} onTap={picked == -1 ? picked = index : toast "Already answered"}
+              if picked != -1
+                Text.success "{picked == q.answer ? 'Correct!' : 'Not quite. The answer is ' + q.options[q.answer] + '.'}"
+              Row end gap=8
+                Button "{i + 1 == length(qs) ? 'Finish' : 'Next'}" onTap={picked == -1 ? toast "Pick an answer first" : {score = score + (picked == q.answer ? 1 : 0); picked = -1; i + 1 == length(qs) ? done = true : i = i + 1}}
+      if done
+        Card gap=12 center
+          Text.heading "You scored {score} out of {length(qs)}"
+          Button "Try again" onTap={i=0; picked=-1; score=0; done=false}
+          Button.outline "Back to the solar system" onTap={go solar-system}
+
+### Sky tonight
+state tab="tonight"
+state term=""
+state glossary=[{"word":"Orbit","text":"The curved path a planet takes around the Sun.","img":"https://images.example.com/glossary/orbit.jpg"},{"word":"Eclipse","text":"When one body moves into the shadow of another.","img":"https://images.example.com/glossary/eclipse.jpg"},{"word":"Asteroid belt","text":"A ring of rocky debris between Mars and Jupiter.","img":"https://images.example.com/glossary/asteroid-belt.jpg"},{"word":"Light year","text":"The distance light travels in one year, about 9.5 trillion km.","img":"https://images.example.com/glossary/light-year.jpg"}]
+state sky=[{"name":"Jupiter","rises":"6:42 pm","best":"10:30 pm","where":"High in the southeast","mag":"-2.7"},{"name":"Saturn","rises":"5:15 pm","best":"8:10 pm","where":"Low in the south","mag":"0.9"},{"name":"Mars","rises":"11:50 pm","best":"5:20 am","where":"Rising in the east","mag":"1.1"},{"name":"Moon (waxing gibbous)","rises":"1:05 pm","best":"7:00 pm","where":"Southwest","mag":"-12.4"}]
+App
+  Sidebar
+    Brand "Orbit School" icon="public"
+    NavItem "Solar system" icon="brightness_5" onTap={go solar-system}
+    NavItem "Compare planets" icon="compare" onTap={go compare}
+    NavItem "Moon quiz" icon="quiz" onTap={go quiz}
+    NavItem "Sky tonight" icon="nights_stay" selected={true}
+  Main
+    Nav
+      Heading "Sky tonight"
+      SegmentedButton items=["Tonight","Glossary"] bind=tab
+    Column pad=24 gap=16
+      if tab == "Tonight" || tab == "tonight"
+        Text.muted "What to look for after dark, for 40 degrees north."
+        each s in sky
+          ListTile "{s.name}" "{s.where}. Best at {s.best}." icon="star" trailing="Rises {s.rises}" onTap={open detail; term=s.name}
+      if tab == "Glossary"
+        Input "Search the glossary" bind=term
+        Grid cols=2 gap=16
+          each g in glossary
+            if term == "" || contains(lower(g.word), lower(term))
+              Card gap=8
+                Image "{g.img}" h=140
+                Text.strong "{g.word}"
+                Text.muted "{g.text}"
+  Dialog#detail "{term}" "Tonight's viewing"
+    each s in sky
+      if s.name == term
+        Text.body "Rises at {s.rises}, best seen at {s.best}."
+        Text.body "Look: {s.where}."
+        Text.muted "Brightness (magnitude): {s.mag}. Lower is brighter."
+    Button "Got it" onTap={close}
+
+// A round map of the planets circling a Sun; a real animation is shown as a labelled box
+define SolarSystem planets=[] speed=1 trueScale=false bind=selected h=420 onSelect
+  state selected=""
+  Stack h={h} fill=#FF0B1026 radius=12
+    Box w=40 h=40 radius=20 fill=#FFFBBF24
+    Row scroll gap={trueScale ? 4 : 24} middle pad=16
+      each p in planets
+        Column center gap=4 onTap={selected=p.name; onSelect(p.name)}
+          Box w={trueScale ? 6 : max(14, p.diam / 4000)} h={trueScale ? 6 : max(14, p.diam / 4000)} radius={trueScale ? 3 : max(14, p.diam / 4000) / 2} fill={p.color} border={selected == p.name ? 2 : 0}
+          Text.caption "{p.name}" color=#FFFFFFFF
+          Text.caption "{p.au} AU" color=#FF9CA3AF
+    Text.caption "Orbit animation at {speed} years per second" color=#FF9CA3AF
+
+define PlanetFacts planet={}
+  Column gap=8
+    Row between
+      Text.muted "Distance from Sun"
+      Text.strong "{planet.au} AU"
+    Row between
+      Text.muted "Width"
+      Text.strong "{planet.diam} km"
+    Row between
+      Text.muted "Moons"
+      Text.strong "{planet.moons}"
+    Row between
+      Text.muted "Day"
+      Text.strong "{planet.day}"
+    Row between
+      Text.muted "Year"
+      Text.strong "{planet.year}"

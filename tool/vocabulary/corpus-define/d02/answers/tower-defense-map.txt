@@ -1,0 +1,115 @@
+### Campaign
+state level=""
+state unlocked=3
+state levels=[{"id":1,"name":"Mossy Crossing","waves":10,"stars":3},{"id":2,"name":"Ember Pass","waves":12,"stars":2},{"id":3,"name":"Frostbite Ridge","waves":15,"stars":0},{"id":4,"name":"Hollow Keep","waves":18,"stars":0}]
+App
+  Main
+    Nav
+      Brand "Bastion Line" icon="castle"
+      Row gap=8
+        IconButton "settings" tooltip="Settings" onTap={open settings}
+    Column pad=24 gap=16
+      Heading "Choose a battlefield" level=1
+      Text.muted "Hold the line against twelve kinds of raiders. Earn stars to unlock harder maps."
+      Grid cols=2 gap=16
+        each lv in levels
+          Card gap=8 onTap={lv.id <= unlocked ? go battle : toast "Clear the previous map first"}
+            Row between
+              Text.heading "{lv.name}"
+              if lv.id > unlocked
+                Icon "lock"
+            Text.muted "{lv.waves} waves"
+            Row gap=4
+              each s in range(3)
+                Icon "star" color={s < lv.stars ? "#FFF59E0B" : "#FF9CA3AF"}
+  Dialog#settings "Settings"
+    Toggle "Sound effects" bind=sfx
+    Toggle "Show range on hover" bind=showRange
+    Button "Done" onTap={close}
+
+### Battle
+state gold=250
+state lives=20
+state wave=3
+state totalWaves=10
+state speed=1
+state paused=false
+state running=true
+state selPlot=""
+state selTower=""
+state result=""
+state bonus=40
+state plots=[{"id":"p1","x":0.18,"y":0.30,"tower":""},{"id":"p2","x":0.42,"y":0.62,"tower":"archer"},{"id":"p3","x":0.58,"y":0.28,"tower":""},{"id":"p4","x":0.80,"y":0.55,"tower":"cannon"}]
+state towerTypes=[{"id":"archer","icon":"gps_fixed","name":"Archer","cost":60,"range":0.18},{"id":"cannon","icon":"adjust","name":"Cannon","cost":120,"range":0.14},{"id":"frost","icon":"ac_unit","name":"Frost","cost":90,"range":0.16},{"id":"mage","icon":"auto_awesome","name":"Mage","cost":150,"range":0.20}]
+state levelsOfTower={"archer":1,"cannon":1}
+every 1s when running && !paused onTick={gold=gold+1}
+App
+  Main
+    Nav
+      Row gap=16 middle
+        Row gap=4 middle
+          Icon "paid" color=#FFF59E0B
+          Text.strong "{gold}"
+        Row gap=4 middle
+          Icon "favorite" color=#FFDC2626
+          Text.strong "{lives}"
+        Badge.primary "Wave {wave} / {totalWaves}"
+      Row gap=8
+        SegmentedButton items=["1x","2x","3x"] bind=speedLabel onChange={speed=indexOf(["1x","2x","3x"],result)+1}
+        Button.outline "Next wave +{bonus}" icon="skip_next" onTap={wave=wave+1; gold=gold+bonus; toast "Wave called early, +{bonus} gold"}
+        IconButton "pause" tooltip="Pause" onTap={paused=true; open pauseMenu}
+    Column pad=16 gap=12
+      GameMap path=[[0,0.5],[0.3,0.5],[0.3,0.2],[0.7,0.2],[0.7,0.75],[1,0.75]] plots={plots} wave={wave} speed={speed} paused={paused} selected={selPlot} showRange={selTower != ""} rangeOf={selTower} onPlotTap={selPlot=result; selTower=find(plots,p=>p.id==result).tower; open buildRing} onLeak={lives=max(0,lives-1); lives==0 ? open defeat : toast "An enemy slipped through"} onWaveCleared={wave==totalWaves ? open victory : toast "Wave cleared"}
+      if selTower != ""
+        Card gap=8
+          Row between
+            Text.heading "{find(towerTypes,t=>t.id==selTower).name} tower, level {levelsOfTower[selTower]}"
+            Badge.info "Range {find(towerTypes,t=>t.id==selTower).range * 100}"
+          Row gap=8
+            Button "Upgrade ({levelsOfTower[selTower] * 80})" icon="upgrade" onTap={gold >= levelsOfTower[selTower] * 80 ? gold=gold-levelsOfTower[selTower]*80 : toast "Not enough gold"}
+            Button.destructive "Sell (+{round(find(towerTypes,t=>t.id==selTower).cost * 0.6,0)})" icon="sell" onTap={gold=gold+round(find(towerTypes,t=>t.id==selTower).cost*0.6,0); plots=updateWhere(plots,p=>p.id==selPlot,p=>with(p,"tower","")); selTower=""; selPlot=""}
+            Button.ghost "Close" onTap={selTower=""; selPlot=""}
+  Sheet#buildRing "Build a tower"
+    Row gap=12 center
+      each t in towerTypes
+        Column center gap=4 onTap={gold >= t.cost ? gold=gold-t.cost; plots=updateWhere(plots,p=>p.id==selPlot,p=>with(p,"tower",t.id)); selTower=t.id; close : toast "Need {t.cost - gold} more gold"}
+          IconTile t.icon
+          Text.strong "{t.name}"
+          Text.muted "{t.cost} gold"
+  Dialog#pauseMenu "Paused"
+    Column gap=8
+      Button "Resume" onTap={paused=false; close}
+      Button.outline "Restart map" onTap={gold=250; lives=20; wave=1; paused=false; close}
+      Toggle "Sound effects" bind=sfx
+      Button.destructive "Quit to campaign" onTap={close; go campaign}
+  Dialog#victory "Victory"
+    Column center gap=12
+      Row gap=4
+        Icon "star" color=#FFF59E0B
+        Icon "star" color=#FFF59E0B
+        Icon "star" color=#FFF59E0B
+      Text.heading "The line held with {lives} lives left"
+      Text.muted "Gold earned: {gold}"
+      Row gap=8
+        Button "Next map" onTap={close; go campaign}
+        Button.outline "Replay" onTap={gold=250; lives=20; wave=1; close}
+  Dialog#defeat "Defeat"
+    Column center gap=12
+      Icon "heart_broken" color=#FFDC2626 size=48
+      Text.heading "Bastion Line fell on wave {wave}"
+      Row gap=8
+        Button "Try again" onTap={gold=250; lives=20; wave=1; close}
+        Button.outline "Campaign" onTap={close; go campaign}
+
+// A drawn map with a walking enemy path, plots and range circles is shown as a labelled box.
+define GameMap path=[] plots=[] wave=1 speed=1 paused=false selected="" showRange=false rangeOf="" onPlotTap onLeak onWaveCleared
+  Box h=360 fill=#FF3F6B3A radius=8 pad=12 gap=8
+    Text.strong "Map: enemy path with {length(path)} turns, wave {wave}, speed {speed}x" color=#FFFFFFFF
+    Row gap=12 scroll
+      each p in plots
+        Box w=64 h=64 radius=32 fill={p.id == selected ? "#FFFDE68A" : "#FF8B7355"} border={p.id == selected ? 3 : 0} center middle onTap={onPlotTap(p.id)}
+          Icon {p.tower == "" ? "add" : "shield"}
+    if showRange
+      Text.caption "Range circle shown for {rangeOf}" color=#FFFFFFFF
+    if paused
+      Badge.warning "Paused"

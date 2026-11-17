@@ -1,0 +1,214 @@
+### Search
+state q=""
+state mode="Flight"
+state recent=[{"id":"BA117","route":"LHR to JFK","status":"On time","dep":"09:40","arr":"12:35"},{"id":"DL404","route":"JFK to LAX","status":"Delayed","dep":"14:10","arr":"17:45"},{"id":"LH401","route":"FRA to EWR","status":"Landed","dep":"07:55","arr":"10:20"},{"id":"AF11","route":"CDG to JFK","status":"Boarding","dep":"11:30","arr":"14:05"}]
+App
+  Sidebar
+    Brand "Contrail" icon="flight"
+    NavItem "Search" icon="search" selected onTap={go search}
+    NavItem "My flight" icon="flight_takeoff" onTap={go flight}
+    NavItem "Departures" icon="departure_board" onTap={go departures}
+    NavItem "Alerts" icon="notifications" badge="2" onTap={go alerts}
+    Spacer grow
+    Text.muted "Signed in as Dana Kim"
+  Main
+    Nav
+      Heading "Find a flight" level=1
+      Avatar "Dana Kim" size=36
+    Column pad=24 gap=16 maxw=720
+      SegmentedButton bind=mode items=["Flight","Route"]
+      if mode=="Flight"
+        Input "Flight number" "e.g. BA117" bind=q
+      if mode=="Route"
+        Row gap=12
+          Input "From" "LHR" grow
+          Icon "swap_horiz"
+          Input "To" "JFK" grow
+      Button "Track" onTap={go flight}
+      Text.sectionTitle "Recent"
+      each f in filter(recent, r => q=="" || contains(lower(r.id), lower(q)) || contains(lower(r.route), lower(q)))
+        Card gap=8 onTap={go flight}
+          Row between middle
+            Column gap=2
+              Text.strong "{f.id}"
+              Text.muted "{f.route}"
+            Badge.info "{f.status}" visible={f.status=="Boarding"}
+            Badge.warning "{f.status}" visible={f.status=="Delayed"}
+            Badge.success "{f.status}" visible={f.status=="On time" || f.status=="Landed"}
+          Row between
+            Text.caption "Departs {f.dep}"
+            Text.caption "Arrives {f.arr}"
+
+### Flight
+state delayed=true
+state gate="B22"
+state terminal="5"
+state belt="7"
+state gateChanged=true
+state terminalChanged=false
+state beltChanged=false
+state progress=0.58
+state tracking=true
+every 5s when tracking onTick={progress=min(1,progress+0.01)}
+App
+  Sidebar
+    Brand "Contrail" icon="flight"
+    NavItem "Search" icon="search" onTap={go search}
+    NavItem "My flight" icon="flight_takeoff" selected onTap={go flight}
+    NavItem "Departures" icon="departure_board" onTap={go departures}
+    NavItem "Alerts" icon="notifications" badge="2" onTap={go alerts}
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Back to search" onTap={go search}
+        Heading "BA117  London to New York" level=1
+      Row gap=8
+        Toggle "Follow" bind=tracking
+        IconButton "more_vert" tooltip="More" onTap={open flightMenu}
+    Column pad=24 gap=20 scroll
+      Row between middle
+        Column gap=2
+          Text.caption "LHR  Heathrow, Terminal 5"
+          Row gap=12 middle
+            Text "{delayed ? '10:05' : '09:40'}" size=56 weight=700
+            Text.muted "09:40" size=24 strike visible={delayed}
+        Icon "flight" size=32
+        Column gap=2 end
+          Text.caption "JFK  Kennedy, Terminal 7"
+          Row gap=12 middle
+            Text "{delayed ? '13:00' : '12:35'}" size=56 weight=700
+            Text.muted "12:35" size=24 strike visible={delayed}
+      if delayed
+        Badge.warning "Delayed 25 min: late inbound aircraft"
+      FlightProgress value={progress} from="LHR" to="JFK" label="{round(progress*100,0)}% flown"
+      Row gap=12
+        ChangeChip "Gate" value={gate} changed={gateChanged}
+        ChangeChip "Terminal" value={terminal} changed={terminalChanged}
+        ChangeChip "Belt" value={belt} changed={beltChanged}
+      Card gap=8
+        Row between middle
+          Text.panelTitle "Route"
+          Text.muted "5,540 km  7h 25m"
+        FlightMap from="LHR" to="JFK" progress={progress} h=260
+      Grid cols=3 gap=12
+        Card gap=4
+          Text.caption "Altitude"
+          Text.strong "37,000 ft"
+        Card gap=4
+          Text.caption "Ground speed"
+          Text.strong "902 km/h"
+        Card gap=4
+          Text.caption "Aircraft"
+          Text.strong "Boeing 787-9"
+      Row gap=8
+        Button.outline "Simulate gate change" onTap={gate="B24"; gateChanged=true; toast "Gate changed to B24"}
+        Button.outline "Clear flashes" onTap={gateChanged=false; terminalChanged=false; beltChanged=false}
+        Button "Set alert" onTap={go alerts}
+  Menu#flightMenu end
+    MenuItem "Share flight" icon="share" onTap={toast "Link copied"}
+    MenuItem "Add to calendar" icon="event" onTap={toast "Added to calendar"}
+    MenuItem "Stop following" icon="notifications_off" onTap={tracking=false}
+
+### Departures
+state airport="LHR"
+state filter="All"
+state board=[{"time":"09:40","new":"10:05","flight":"BA117","to":"New York JFK","gate":"B22","status":"Delayed"},{"time":"09:50","new":"","flight":"IB3171","to":"Madrid","gate":"A14","status":"Boarding"},{"time":"10:10","new":"","flight":"LH903","to":"Frankfurt","gate":"B07","status":"On time"},{"time":"10:25","new":"10:55","flight":"AA101","to":"Boston","gate":"C31","status":"Delayed"},{"time":"10:40","new":"","flight":"VS3","to":"Los Angeles","gate":"A02","status":"On time"},{"time":"11:05","new":"","flight":"EK2","to":"Dubai","gate":"C12","status":"Check-in"}]
+App
+  Sidebar
+    Brand "Contrail" icon="flight"
+    NavItem "Search" icon="search" onTap={go search}
+    NavItem "My flight" icon="flight_takeoff" onTap={go flight}
+    NavItem "Departures" icon="departure_board" selected onTap={go departures}
+    NavItem "Alerts" icon="notifications" badge="2" onTap={go alerts}
+  Main
+    Nav
+      Heading "Departures" level=1
+      Select "Airport" bind=airport items=["LHR","JFK","CDG","FRA"]
+    Column pad=24 gap=16
+      Row gap=8
+        ChoiceChip "All" selected={filter=="All"} onTap={filter="All"}
+        ChoiceChip "Delayed" selected={filter=="Delayed"} onTap={filter="Delayed"}
+        ChoiceChip "On time" selected={filter=="On time"} onTap={filter="On time"}
+      Card gap=0
+        Row pad=8 border-bottom=#FFE5E7EB
+          Text.caption "Time" w=90
+          Text.caption "Flight" w=80
+          Text.caption "Destination" grow
+          Text.caption "Gate" w=60
+          Text.caption "Status" w=90
+        each r in filter(board, b => filter=="All" || b.status==filter)
+          Row pad=8 middle border-bottom=#FFF3F4F6 onTap={go flight}
+            Row w=90 gap=4
+              Text "{r.new!='' ? r.new : r.time}" weight=700
+              Text.caption "{r.time}" strike visible={r.new!=""}
+            Text "{r.flight}" w=80
+            Text "{r.to}" grow
+            Text "{r.gate}" w=60
+            Badge.warning "{r.status}" w=90 visible={r.status=="Delayed"}
+            Badge.info "{r.status}" w=90 visible={r.status=="Boarding" || r.status=="Check-in"}
+            Badge.success "{r.status}" w=90 visible={r.status=="On time"}
+
+### Alerts
+state gateAlert=true
+state delayAlert=true
+state landAlert=false
+state boardAlert=true
+state beltAlert=false
+state channel="Push"
+state minutes=30
+App
+  Sidebar
+    Brand "Contrail" icon="flight"
+    NavItem "Search" icon="search" onTap={go search}
+    NavItem "My flight" icon="flight_takeoff" onTap={go flight}
+    NavItem "Departures" icon="departure_board" onTap={go departures}
+    NavItem "Alerts" icon="notifications" selected badge="2" onTap={go alerts}
+  Main
+    Nav
+      Heading "Alerts for BA117" level=1
+      Button "Save" onTap={toast "Alerts saved"; go flight}
+    Column pad=24 gap=16 maxw=720
+      Card gap=4
+        Toggle "Gate changes" bind=gateAlert
+        Toggle "Delays over 15 minutes" bind=delayAlert
+        Toggle "Boarding starts" bind=boardAlert
+        Toggle "Landing" bind=landAlert
+        Toggle "Baggage belt assigned" bind=beltAlert
+      Card gap=8
+        Text.panelTitle "Notify me by"
+        SegmentedButton bind=channel items=["Push","Email","SMS"]
+        Text.fieldLabel "Boarding reminder: {minutes} min before"
+        Slider bind=minutes min=10 max=90
+      Text.muted "You will get {count([gateAlert,delayAlert,boardAlert,landAlert,beltAlert], x=>x)} kinds of alert by {lower(channel)}."
+
+define FlightProgress value=0.5 from="" to="" label=""
+  Column gap=6
+    Stack h=32
+      Progress {value}
+      Row w=fill middle start pad=[0,0,0,0]
+        Spacer w={value*100}
+        Icon "flight" size=28
+    Row between
+      Text.caption "{from}"
+      Text.caption "{label}"
+      Text.caption "{to}"
+
+define ChangeChip "label" value="" changed=false
+  Chip gap=6 animate={changed ? "pulse" : "none"} duration=600
+    Text.caption "{label}"
+    Text.strong "{value}"
+    if changed
+      Badge.warning "changed"
+
+// A real map is shown as a labelled box with the route arc drawn over it.
+define FlightMap from="" to="" progress=0.5 h=240
+  Stack h={h} radius=8 fill=#FFE8F0F8
+    Text.caption "Map: {from} to {to}"
+    Row between middle pad=16
+      Column center gap=2
+        Icon "trip_origin"
+        Text.small "{from}"
+      Sparkline values=[0,3,5,6,5,3,0]
+      Column center gap=2
+        Icon "place"
+        Text.small "{to}"

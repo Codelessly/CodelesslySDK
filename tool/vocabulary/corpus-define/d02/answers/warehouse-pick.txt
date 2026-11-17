@@ -1,0 +1,227 @@
+### Pick
+state tab="pick"
+state cur=0
+state qty=0
+state scanned=""
+state scanState="idle"
+state reason="Not found in bin"
+state note=""
+state eta=312
+state tote="T-14"
+state picks=[{"id":1,"sku":"HX-4410","name":"Hex bolt M8 x 40, box of 100","bin":"A-04-02","aisle":"A","need":3,"got":0,"status":"open","img":"https://images.example.com/sku/hx-4410.jpg"},{"id":2,"sku":"WS-2203","name":"Washer M8 zinc, bag of 250","bin":"A-11-01","aisle":"A","need":2,"got":0,"status":"open","img":"https://images.example.com/sku/ws-2203.jpg"},{"id":3,"sku":"GL-7781","name":"Work gloves, size L","bin":"B-03-04","aisle":"B","need":6,"got":0,"status":"open","img":"https://images.example.com/sku/gl-7781.jpg"},{"id":4,"sku":"TP-0956","name":"Packing tape 48mm, clear","bin":"C-07-03","aisle":"C","need":12,"got":0,"status":"open","img":"https://images.example.com/sku/tp-0956.jpg"},{"id":5,"sku":"LB-3318","name":"Thermal label roll 100x150","bin":"D-02-01","aisle":"D","need":4,"got":0,"status":"open","img":"https://images.example.com/sku/lb-3318.jpg"}]
+every 1s when eta>0 onTick={eta=eta-1}
+App
+  Sidebar
+    Brand "Aisle" icon="warehouse"
+    NavItem "Pick list" icon="checklist" badge="{count(picks,p=>p.status==\"open\")}" selected={tab=="pick"} onTap={tab="pick"}
+    NavItem "Aisle map" icon="map" selected={tab=="map"} onTap={go aisle-map}
+    NavItem "Order summary" icon="inventory_2" onTap={go summary}
+    Spacer grow
+    Card gap=6
+      Text.caption "Next order in"
+      Text.strong "{duration(eta)}"
+      Text.caption "Order 58213, 5 lines"
+    Row gap=8 middle
+      Avatar "Dana Whitfield" size=32
+      Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "Order 58213" level=1
+      Row gap=8 middle
+        Badge.info "Tote {tote}"
+        Button.outline "Change tote" icon="swap_horiz" onTap={open tote}
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Row between middle
+          Text.strong "Progress"
+          Text.muted "{count(picks,p=>p.status!=\"open\")} of {length(picks)} lines done"
+        Progress {count(picks,p=>p.status!="open")/length(picks)}
+      Row gap=16 top
+        Column grow gap=16
+          Card gap=16
+            Row between middle
+              Badge.primary "Stop {cur+1} of {length(picks)}"
+              Badge.neutral "Aisle {picks[cur].aisle}"
+            Text "{picks[cur].bin}" size=72 weight=800 center
+            Row gap=16 top
+              Image "{picks[cur].img}" w=160 h=160 radius=8
+              Column grow gap=8
+                Text.heading "{picks[cur].name}"
+                Text.mono "SKU {picks[cur].sku}"
+                Text.caption "Quantity to pick"
+                Text "{picks[cur].need}" size=48 weight=700
+            Divider
+            Row between middle
+              Text.strong "Confirm quantity"
+              Stepper bind=qty min=0 max={picks[cur].need} onChange={qty=result}
+            Row gap=8
+              Button "Confirm pick" icon="check" grow onTap={qty==picks[cur].need && scanState=="ok" ? {picks=updateWhere(picks,p=>p.id==picks[cur].id,p=>with(with(p,"got",qty),"status","done")); cur=min(cur+1,length(picks)-1); qty=0; scanned=""; scanState="idle"; toast "Line confirmed"} : toast "Scan the bin item and set the full quantity first"}
+              Button.outline "Short pick" icon="report" onTap={open short}
+          Card gap=12
+            Text.strong "Scan to verify"
+            ScanInput "Scan item barcode" bind=scanned onScan={scanned=result; scanState=result==picks[cur].sku ? "ok" : "mismatch"; result==picks[cur].sku ? toast "Item verified" : open mismatch}
+            if scanState=="ok"
+              Row gap=8 middle
+                Icon "check_circle" color=#FF16A34A
+                Text.success "Matches {picks[cur].sku}"
+            if scanState=="mismatch"
+              Row gap=8 middle
+                Icon "error" color=#FFDC2626
+                Text.danger "Scanned {scanned}, expected {picks[cur].sku}"
+        Pane w=320 pad=16 gap=12
+          Text.strong "Route"
+          each p in picks
+            ListTile "{p.bin}" subtitle="{p.name}" selected={cur==index} onTap={cur=index; qty=0; scanned=""; scanState="idle"}
+              Row gap=8 middle
+                if p.status=="done"
+                  Badge.success "Done {p.got}/{p.need}"
+                if p.status=="short"
+                  Badge.warning "Short {p.got}/{p.need}"
+                if p.status=="open"
+                  Badge.neutral "x{p.need}"
+          Button.outline "Show aisle map" icon="map" onTap={go aisle-map}
+  Dialog#mismatch "Wrong item scanned" "The barcode does not match this bin"
+    Row gap=8 middle
+      Icon "warning" color=#FFDC2626
+      Text.danger "Scanned {scanned} but this stop needs {picks[cur].sku}."
+    Text.muted "Check the bin label {picks[cur].bin} and scan again."
+    Row gap=8 end
+      Button.outline "Rescan" onTap={scanned=""; scanState="idle"; close}
+      Button.destructive "Report wrong stock" onTap={emit wrongStock picks[cur].sku; scanned=""; scanState="idle"; close}
+  Sheet#short "Short pick"
+    Text.muted "{picks[cur].name}, bin {picks[cur].bin}, needed {picks[cur].need}"
+    Row gap=8 middle
+      Text.strong "Quantity found"
+      Stepper bind=qty min=0 max={picks[cur].need} onChange={qty=result}
+    Select "Reason" bind=reason items=["Not found in bin","Damaged","Bin empty","Wrong item in bin","Other"]
+    if reason=="Other"
+      Input "Note" bind=note multiline
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button "Submit short pick" onTap={picks=updateWhere(picks,p=>p.id==picks[cur].id,p=>with(with(p,"got",qty),"status","short")); emit shortPick {"sku":picks[cur].sku,"found":qty,"reason":reason,"note":note}; cur=min(cur+1,length(picks)-1); qty=0; scanned=""; scanState="idle"; note=""; toast "Short pick recorded"; close}
+  Dialog#tote "Assign tote" "Scan or choose the tote for this order"
+    Grid cols=3 gap=8
+      each t in ["T-12","T-13","T-14","T-15","T-16","T-17"]
+        ChoiceChip "{t}" selected={tote==t} onTap={tote=t}
+    Input "Or scan tote label" bind=tote
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button "Assign {tote}" onTap={emit toteAssigned tote; toast "Tote {tote} assigned"; close}
+
+### Aisle map
+state route=["A-04-02","A-11-01","B-03-04","C-07-03","D-02-01"]
+state stop=0
+state eta=312
+every 1s when eta>0 onTick={eta=eta-1}
+App
+  Sidebar
+    Brand "Aisle" icon="warehouse"
+    NavItem "Pick list" icon="checklist" onTap={go pick}
+    NavItem "Aisle map" icon="map" selected={true}
+    NavItem "Order summary" icon="inventory_2" onTap={go summary}
+    Spacer grow
+    Card gap=6
+      Text.caption "Next order in"
+      Text.strong "{duration(eta)}"
+  Main
+    Nav
+      Heading "Aisle map" level=1
+      Row gap=8
+        Badge.info "Tote T-14"
+        Button.outline "Back to picking" onTap={go pick}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=12
+          Row between middle
+            Text.strong "Path for order 58213"
+            Text.muted "About 148 m walking"
+          AisleMap aisles=["A","B","C","D"] stops=route current={stop} start="Dock 2" h=380 onSelect={stop=result}
+        Column w=320 gap=12
+          Card gap=8
+            Text.strong "Stops"
+            each s in route
+              ListTile "{s}" subtitle="Stop {index+1}" selected={stop==index} onTap={stop=index}
+          Card gap=8
+            Text.strong "Distance left"
+            Text "{round(148-stop*30,0)} m" size=32 weight=700
+            Progress {stop/(length(route)-1)}
+
+### Order summary
+state tote="T-14"
+state eta=312
+state lines=[{"sku":"HX-4410","name":"Hex bolt M8 x 40","need":3,"got":3,"status":"done"},{"sku":"WS-2203","name":"Washer M8 zinc","need":2,"got":2,"status":"done"},{"sku":"GL-7781","name":"Work gloves, size L","need":6,"got":4,"status":"short"},{"sku":"TP-0956","name":"Packing tape 48mm","need":12,"got":12,"status":"done"},{"sku":"LB-3318","name":"Thermal label roll","need":4,"got":4,"status":"done"}]
+every 1s when eta>0 onTick={eta=eta-1}
+App
+  Sidebar
+    Brand "Aisle" icon="warehouse"
+    NavItem "Pick list" icon="checklist" onTap={go pick}
+    NavItem "Aisle map" icon="map" onTap={go aisle-map}
+    NavItem "Order summary" icon="inventory_2" selected={true}
+    Spacer grow
+    Card gap=6
+      Text.caption "Next order in"
+      Text.strong "{duration(eta)}"
+  Main
+    Nav
+      Heading "Order 58213 summary" level=1
+      Button "Close tote and start next" icon="arrow_forward" onTap={emit closeTote tote; go pick}
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.caption "Units picked"
+          Text "{sum(lines,l=>l.got)} of {sum(lines,l=>l.need)}" size=32 weight=700
+        Card gap=4
+          Text.caption "Short lines"
+          Text "{count(lines,l=>l.status==\"short\")}" size=32 weight=700
+        Card gap=4
+          Text.caption "Tote"
+          Text "{tote}" size=32 weight=700
+      Card gap=8
+        Text.strong "Lines"
+        Row gap=8
+          Text.caption "SKU" w=90
+          Text.caption "Item" grow
+          Text.caption "Picked" w=80
+          Text.caption "Status" w=90
+        each l in lines
+          Row gap=8 middle
+            Text.mono "{l.sku}" w=90
+            Text "{l.name}" grow
+            Text "{l.got}/{l.need}" w=80
+            if l.status=="done"
+              Badge.success "Done"
+            if l.status=="short"
+              Badge.warning "Short"
+
+// A scan field: a text field with a scan button; a real camera or laser scanner is shown as a labelled box.
+define ScanInput "label" bind=value onScan
+  state value=""
+  Column gap=8
+    Row gap=8 middle
+      Input "{label}" bind=value grow
+      Button.outline "Scan" icon="qr_code_scanner" onTap={onScan(value)}
+    Box h=64 radius=8 fill=#FF111827 center middle
+      Text.caption "Camera viewfinder" color=#FFD1D5DB
+
+define Stepper bind=value min=0 max=99 step=1 onChange
+  state value=0
+  Row gap=8 middle
+    IconButton "remove" tooltip="Less" onTap={value=max(min,value-step); onChange(value)}
+    Text.strong "{value}" w=40 center
+    IconButton "add" tooltip="More" onTap={value=min(max,value+step); onChange(value)}
+
+// A floor plan of the aisles with the walking path drawn between stops; shown as a labelled box with a stop list since lines cannot be drawn.
+define AisleMap aisles=["A","B","C"] stops=[] current=0 start="Dock" h=360 onSelect
+  Box h={h} radius=8 fill=#FFF3F4F6 pad=16 gap=8
+    Row between
+      Text.caption "{start}"
+      Text.caption "Floor plan"
+    Row gap=12 grow
+      each a in aisles
+        Column grow gap=6 center
+          Text.strong "Aisle {a}"
+          Box grow radius=6 fill=#FFE5E7EB
+            each s in stops
+              if startsWith(s,a)
+                Chip "{s}" selected={indexOf(stops,s)==current} onTap={onSelect(indexOf(stops,s))}
+    Text.caption "Path: {start} to {join(stops,\" > \")}"

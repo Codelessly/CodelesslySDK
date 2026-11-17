@@ -1,0 +1,202 @@
+### Game
+state turn="w"
+state running=true
+state wTime=487
+state bTime=512
+state sel=-1
+state legal=[]
+state lastFrom=52
+state lastTo=36
+state checkSq=-1
+state ply=7
+state view=7
+state flip=false
+state pieces=["r","n","b","q","k","b","n","r","p","p","p","p","","p","p","p","","","","","","","","","","","","","p","","","","","","","","P","","","","","","","N","","","","","","P","P","P","P","","P","P","P","R","N","B","Q","K","B","","R"]
+state moves=[{"n":1,"w":"e4","b":"e5"},{"n":2,"w":"Nf3","b":"d6"},{"n":3,"w":"d4","b":"exd4"},{"n":4,"w":"Nxd4","b":"Nf6"}]
+state capByWhite=["p"]
+state capByBlack=[]
+state promoSq=-1
+state promoColor="w"
+every 1s when running onTick={turn=="w" ? wTime=max(0,wTime-1) : bTime=max(0,bTime-1)}
+App
+  Sidebar
+    Brand "Fianchetto" icon="swap_horiz"
+    NavItem "Play" icon="sports_esports" selected={true}
+    NavItem "Games" icon="history" onTap={go games}
+    NavItem "Puzzles" icon="extension" onTap={go puzzles}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Ines Duarte" size=32
+      Column
+        Text.strong "Ines Duarte"
+        Text.caption "Rapid 1482"
+  Main
+    Nav
+      Heading "Rapid 10+0 - rated"
+      Row gap=8
+        Button.outline "Flip board" onTap={flip=!flip}
+        Button.outline "Offer draw" onTap={open drawOffer}
+        Button.destructive "Resign" onTap={open resignConfirm}
+    Row gap=24 pad=24 top
+      Column grow gap=8
+        Row between middle
+          Row gap=8 middle
+            Avatar "Tomasz Wrobel" size=32
+            Column
+              Text.strong "Tomasz Wrobel"
+              Text.caption "1519"
+            CapturedPieces pieces={capByBlack} color="w"
+          Clock time={bTime} active={turn=="b" && running}
+        ChessBoard pieces={pieces} flip={flip} selected={sel} legal={legal} lastFrom={lastFrom} lastTo={lastTo} checkSquare={checkSq} onSquare={emit square result} onMove={emit move result.from result.to}
+        Row between middle
+          Row gap=8 middle
+            Avatar "Ines Duarte" size=32
+            Column
+              Text.strong "Ines Duarte"
+              Text.caption "1482"
+            CapturedPieces pieces={capByWhite} color="b"
+          Clock time={wTime} active={turn=="w" && running}
+      Column w=320 gap=12
+        Card gap=8
+          Text.panelTitle "Moves"
+          MoveList moves={moves} bind=view onStep={emit viewPosition result}
+          Row gap=8 center
+            IconButton "first_page" tooltip="Start" onTap={view=0; emit viewPosition 0}
+            IconButton "chevron_left" tooltip="Back" onTap={view=max(0,view-1); emit viewPosition view}
+            IconButton "chevron_right" tooltip="Forward" onTap={view=min(ply,view+1); emit viewPosition view}
+            IconButton "last_page" tooltip="Live position" onTap={view=ply; emit viewPosition ply}
+        if view != ply
+          Badge.warning "Viewing move {view} - tap the last arrow to return"
+        Card gap=8
+          Text.panelTitle "Game"
+          Row between
+            Text.muted "Opening"
+            Text "Scotch Game"
+          Row between
+            Text.muted "Time control"
+            Text "10 + 0"
+          Row between
+            Text.muted "To move"
+            Text.strong "{turn == 'w' ? 'You' : 'Tomasz'}"
+  Dialog#drawOffer "Offer a draw?" "Tomasz can accept or decline."
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button "Offer draw" onTap={emit offerDraw; toast "Draw offered"; close}
+  Dialog#resignConfirm "Resign this game?" "You will lose 8 rating points."
+    Row gap=8 end
+      Button.outline "Keep playing" onTap={close}
+      Button.destructive "Resign" onTap={running=false; emit resign; toast "You resigned"; close}
+  Popover#promotion
+    PromotionPicker square={promoSq} color={promoColor} onPick={emit promote promoSq result; promoSq=-1; close}
+
+### Games
+state filter="all"
+state q=""
+state games=[{"id":"g1","opp":"Tomasz Wrobel","result":"1-0","control":"10+0","moves":42,"date":"Nov 16","opening":"Scotch Game"},{"id":"g2","opp":"Aiko Mori","result":"0-1","control":"5+3","moves":58,"date":"Nov 15","opening":"Sicilian Najdorf"},{"id":"g3","opp":"Lena Fischer","result":"1/2","control":"15+10","moves":71,"date":"Nov 13","opening":"Queen's Gambit Declined"},{"id":"g4","opp":"Omar Haddad","result":"1-0","control":"10+0","moves":33,"date":"Nov 11","opening":"Italian Game"}]
+App
+  Sidebar
+    Brand "Fianchetto" icon="swap_horiz"
+    NavItem "Play" icon="sports_esports" onTap={go game}
+    NavItem "Games" icon="history" selected={true}
+    NavItem "Puzzles" icon="extension" onTap={go puzzles}
+  Main
+    Nav
+      Heading "Game history"
+      Input "Search opponent" bind=q w=220
+    Column pad=24 gap=16
+      Row gap=8
+        ChoiceChip "All" selected={filter=="all"} onTap={filter="all"}
+        ChoiceChip "Won" selected={filter=="won"} onTap={filter="won"}
+        ChoiceChip "Lost" selected={filter=="lost"} onTap={filter="lost"}
+        ChoiceChip "Drawn" selected={filter=="drawn"} onTap={filter="drawn"}
+      Card gap=8
+        Row gap=8
+          Text.caption "Date" w=70
+          Text.caption "Opponent" grow
+          Text.caption "Control" w=70
+          Text.caption "Moves" w=60
+          Text.caption "Result" w=60
+        Divider
+        each g in filter(games, x => contains(lower(x.opp), lower(q)))
+          Row gap=8 middle onTap={emit openGame g.id}
+            Text.muted "{g.date}" w=70
+            Column grow
+              Text.strong "{g.opp}"
+              Text.caption "{g.opening}"
+            Text "{g.control}" w=70
+            Text "{g.moves}" w=60
+            Badge.neutral "{g.result}" w=60
+
+### Puzzles
+state solved=3
+state step=0
+state hint=false
+state pieces=["","","","","k","","","","","","","","","p","p","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","Q","","","","","","","","","","","","","","","","K","","","R",""]
+state sel=-1
+state legal=[]
+App
+  Sidebar
+    Brand "Fianchetto" icon="swap_horiz"
+    NavItem "Play" icon="sports_esports" onTap={go game}
+    NavItem "Games" icon="history" onTap={go games}
+    NavItem "Puzzles" icon="extension" selected={true}
+  Main
+    Nav
+      Heading "Puzzle 4 - Mate in 2"
+      Text.muted "{solved} solved today"
+    Row gap=24 pad=24 top
+      Column grow gap=12
+        ChessBoard pieces={pieces} selected={sel} legal={legal} lastFrom={-1} lastTo={-1} checkSquare={-1} onSquare={emit square result} onMove={emit move result.from result.to}
+      Column w=320 gap=12
+        Card gap=8
+          Text.panelTitle "White to move"
+          Text.muted "Find the move that forces mate on the next turn."
+          Progress {step/2}
+          Row gap=8
+            Button.outline "Hint" onTap={hint=true}
+            Button.ghost "Skip" onTap={emit skipPuzzle}
+          if hint
+            Text.muted "Look at the back rank."
+
+define ChessBoard pieces=[] flip=false selected=-1 legal=[] lastFrom=-1 lastTo=-1 checkSquare=-1 onSquare onMove
+  Grid cols=8 gap=0 w=480
+    each i in range(64)
+      Box w=60 h=60 center middle fill={(i == lastFrom || i == lastTo) ? "#FFF6E58D" : ((floor(i/8) + i%8) % 2 == 0 ? "#FFEEEED2" : "#FF769656")} border={i == selected ? 3 : 0} onTap={onSquare(i)} drag=piece(i) drop=piece onDrop={onMove({"from":result.data,"to":i})}
+        Stack center middle
+          if i == checkSquare
+            Box w=48 h=48 radius=24 fill=#66FF0000
+          if contains(legal, i)
+            if pieces[i] == ""
+              Box w=18 h=18 radius=9 fill=#55000000
+            else
+              Box w=52 h=52 radius=26 border=4
+          Text "{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(pieces[i],'K','♔'),'Q','♕'),'R','♖'),'B','♗'),'N','♘'),'P','♙'),'k','♚'),'q','♛'),'r','♜'),'b','♝'),'n','♞'),'p','♟')}" size=44
+
+define Clock time=600 active=false
+  Box pad=[16,8,16,8] radius=8 fill={active ? (time < 10 ? "#FFDC2626" : "#FF1F2937") : "#FFE5E7EB"}
+    if active && time < 10
+      Text "{floor(time/60)}:{time%60 < 10 ? '0' : ''}{time%60}" size=28 weight=700 color=#FFFFFFFF animate=pulse duration=500
+    else
+      Text "{floor(time/60)}:{time%60 < 10 ? '0' : ''}{time%60}" size=28 weight=700 color={active ? "#FFFFFFFF" : "#FF374151"}
+
+define MoveList moves=[] bind=view onStep
+  state view=0
+  Column gap=2 h=220 scroll
+    each m in moves
+      Row gap=8 middle
+        Text.caption "{m.n}." w=28
+        Box grow pad=6 radius=4 fill={view == m.n*2-1 ? "#FFDBEAFE" : "#00FFFFFF"} onTap={view=m.n*2-1; onStep(m.n*2-1)}
+          Text.mono "{m.w}"
+        Box grow pad=6 radius=4 fill={view == m.n*2 ? "#FFDBEAFE" : "#00FFFFFF"} onTap={view=m.n*2; onStep(m.n*2)}
+          Text.mono "{coalesce(m.b,'')}"
+
+define CapturedPieces pieces=[] color="w"
+  Row gap=0 middle
+    each p in pieces
+      Text "{replace(replace(replace(replace(replace(replace(p,'q','♛'),'r','♜'),'b','♝'),'n','♞'),'p','♟'),'k','♚')}" size=20
+
+define PromotionPicker square=-1 color="w" onPick
+  Row gap=4 pad=8
+    each p in ["Q","R","B","N"]
+      Box w=48 h=48 radius=8 center middle fill=#FFF3F4F6 onTap={onPick(p)}
+        Text "{replace(replace(replace(p,'Q',color=='w' ? '♕' : '♛'),'R',color=='w' ? '♖' : '♜'),'B',color=='w' ? '♗' : '♝')}" size=32

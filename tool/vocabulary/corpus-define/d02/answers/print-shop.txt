@@ -1,0 +1,273 @@
+### Upload and configure
+state tab="photos"
+state photos=[{"id":1,"name":"IMG_2041.jpg","url":"https://img.pressroom.example/p1.jpg","progress":1,"w":4032,"h":3024,"size":"4x6","paper":"Glossy","qty":2,"lowres":false},{"id":2,"name":"beach-day.jpg","url":"https://img.pressroom.example/p2.jpg","progress":1,"w":1024,"h":768,"size":"8x10","paper":"Matte","qty":1,"lowres":true},{"id":3,"name":"grandma-birthday.jpg","url":"https://img.pressroom.example/p3.jpg","progress":0.62,"w":3000,"h":2000,"size":"5x7","paper":"Glossy","qty":3,"lowres":false},{"id":4,"name":"IMG_2077.jpg","url":"https://img.pressroom.example/p4.jpg","progress":0.2,"w":640,"h":480,"size":"4x6","paper":"Lustre","qty":1,"lowres":true}]
+state selected=[]
+state cropId=0
+state cropRatio="3:2"
+state cropZoom=1
+state cropX=0.5
+state cropY=0.5
+state bulkSize="4x6"
+state bulkPaper="Glossy"
+state fulfil="delivery"
+state sizePrices={"4x6":0.29,"5x7":0.79,"8x10":2.49,"11x14":5.99}
+state paperExtra={"Glossy":0,"Matte":0.1,"Lustre":0.15,"Metallic":0.45}
+state tiers=[{"min":10,"off":0.1},{"min":25,"off":0.15},{"min":50,"off":0.2}]
+state copies=0
+state subtotal=0
+state discount=0
+
+every 1s onTick={photos=map(photos,p=>p.progress<1?with(p,"progress",min(1,p.progress+0.18)):p)}
+
+App
+  Sidebar
+    Brand "Pressroom" icon="photo_library"
+    NavItem "Upload and configure" icon="upload" selected={tab=="photos"} onTap={tab="photos"}
+    NavItem "Checkout" icon="shopping_cart" badge="{sum(photos,p=>p.qty)}" selected={tab=="checkout"} onTap={go checkout}
+    NavItem "Track order" icon="local_shipping" onTap={go tracking}
+    Spacer grow
+    Text.muted "Signed in as Dana Whitfield"
+  Main
+    Nav
+      Heading "Your prints" level=1
+      Row gap=8
+        Button.outline "Add photos" icon="add_photo_alternate" onTap={emit pickFiles}
+        Button "Continue to checkout" onTap={photos.length==0 ? toast "Add at least one photo" : go checkout}
+    Column pad=24 gap=16 scroll
+      Card gap=12 drop=files onDrop={emit uploadFiles result.data}
+        Row between
+          Column gap=4
+            Text.strong "Drop photos here"
+            Text.muted "JPG, PNG or HEIC, up to 50 MB each. 1200 px on the short side or more prints sharp at 8x10."
+          Button "Choose files" onTap={emit pickFiles}
+      Row gap=24 top
+        Column grow gap=16
+          Row between middle
+            Text.heading "{length(photos)} photos, {sum(photos,p=>p.qty)} prints"
+            Row gap=8
+              Checkbox "Select all" onChange={selected=result ? map(photos,p=>p.id) : []}
+              Button.ghost "Remove selected" icon="delete" onTap={photos=filter(photos,p=>!contains(selected,p.id)); selected=[]; toast "Removed"}
+          Card gap=12
+            Text.strong "Apply to {length(selected)==0 ? 'all photos' : length(selected) + ' selected'}"
+            Row gap=12 middle
+              Select "Size" items=["4x6","5x7","8x10","11x14"] bind=bulkSize
+              Select "Paper" items=["Glossy","Matte","Lustre","Metallic"] bind=bulkPaper
+              Button.secondary "Apply" onTap={photos=map(photos,p=>(length(selected)==0 || contains(selected,p.id)) ? with(with(p,"size",bulkSize),"paper",bulkPaper) : p); toast "Applied"}
+          Grid cols=3 gap=16
+            each photo in photos
+              Card gap=8
+                Stack
+                  Image "{photo.url}" h=140 radius=6
+                  Checkbox bind=photo.picked onChange={selected=result ? append(selected,photo.id) : without(selected,photo.id)}
+                  if photo.lowres
+                    Badge.warning "Low resolution" icon="warning"
+                Text.strong "{photo.name}"
+                if photo.progress<1
+                  Progress {photo.progress}
+                  Text.caption "Uploading {round(photo.progress*100,0)}%"
+                if photo.progress>=1
+                  Text.caption "{photo.w} x {photo.h} px"
+                  if photo.lowres
+                    Text.danger "May look soft at {photo.size}. Try a smaller size or upload a larger file."
+                  Row gap=8
+                    Select "Size" items=["4x6","5x7","8x10","11x14"] bind=photo.size
+                    Select "Paper" items=["Glossy","Matte","Lustre","Metallic"] bind=photo.paper
+                  Row between middle
+                    Stepper bind=photo.qty min=1 max=99
+                    Text.strong "{money((sizePrices[photo.size]+paperExtra[photo.paper])*photo.qty,'$',2)}"
+                  Row gap=8
+                    Button.outline "Crop" icon="crop" onTap={cropId=photo.id; open crop}
+                    IconButton "delete" tooltip="Remove photo" onTap={photos=removeWhere(photos,p=>p.id==photo.id)}
+        Pane w=320 pad=16 gap=12
+          Text.heading "Live price"
+          each photo in photos
+            Row between
+              Text.small "{photo.name} x{photo.qty}"
+              Text.small "{money((sizePrices[photo.size]+paperExtra[photo.paper])*photo.qty,'$',2)}"
+          Divider
+          Row between
+            Text "Subtotal"
+            Text "{money(sum(photos,p=>(sizePrices[p.size]+paperExtra[p.paper])*p.qty),'$',2)}"
+          Row between
+            Text.success "Bulk discount"
+            Text.success "-{money(sum(photos,p=>(sizePrices[p.size]+paperExtra[p.paper])*p.qty)*coalesce(last(filter(tiers,t=>sum(photos,p=>p.qty)>=t.min)).off,0),'$',2)}"
+          Divider
+          Text.strong "Bulk discount tiers"
+          TierTable tiers={tiers} count={sum(photos,p=>p.qty)}
+          Text.caption "Add {coalesce(first(filter(tiers,t=>t.min>sum(photos,p=>p.qty))).min,0)-sum(photos,p=>p.qty)} more prints for the next tier."
+          Button "Checkout" onTap={go checkout}
+
+Dialog#crop "Crop photo" "Drag the frame, zoom to fit"
+  CropFrame src="{find(photos,p=>p.id==cropId).url}" ratio={cropRatio} zoom={cropZoom} bindX=cropX bindY=cropY
+  SegmentedButton items=["2:3","3:2","4:5","1:1"] bind=cropRatio
+  Row gap=12 middle
+    Icon "zoom_out"
+    Slider bind=cropZoom min=1 max=4 grow
+    Icon "zoom_in"
+  Row end gap=8
+    Button.outline "Reset" onTap={cropZoom=1; cropX=0.5; cropY=0.5}
+    Button "Apply crop" onTap={emit crop {"id":cropId,"ratio":cropRatio,"zoom":cropZoom,"x":cropX,"y":cropY}; toast "Crop saved"; close}
+
+// shows a framed picture with a ratio frame; the frame drags and the zoom scales the picture, drawn here as a stack with sliders for the offset
+define CropFrame src="" ratio="3:2" zoom=1 bindX=0.5 bindY=0.5
+  state fx=0.5
+  state fy=0.5
+  Column gap=8
+    Stack h=280 radius=6 fill=#FF111827
+      Image "{src}" h={280*zoom}
+      Box w={ratio=="1:1" ? 200 : 240} h={ratio=="2:3" ? 260 : 170} border=2 drag=frame(1)
+    Row gap=8 middle
+      Text.caption "Left to right"
+      Slider bind=fx min=0 max=1 grow onChange={bindX=result}
+    Row gap=8 middle
+      Text.caption "Top to bottom"
+      Slider bind=fy min=0 max=1 grow onChange={bindY=result}
+
+define Stepper bind=value min=0 max=99 onChange
+  Row gap=4 middle
+    IconButton "remove" tooltip="Fewer" onTap={value=max(min,value-1); onChange(value)}
+    Text.strong "{value}" w=32 center
+    IconButton "add" tooltip="More" onTap={value=min(max,value+1); onChange(value)}
+
+define TierTable tiers=[] count=0
+  Column gap=4
+    each t in tiers
+      Row between
+        Text.small "{t.min}+ prints" strike={false}
+        Badge.success "{t.off*100}% off" selected={count>=t.min}
+
+### Checkout
+state step="delivery"
+state fulfil="delivery"
+state speed="standard"
+state pickup="Downtown, 214 Market St"
+state addr={"name":"Dana Whitfield","line1":"48 Orchard Lane","city":"Portland","zip":"97205","phone":"503 555 0142"}
+state promo=""
+state promoOk=false
+state photos=[]
+state tiers=[{"min":10,"off":0.1},{"min":25,"off":0.15},{"min":50,"off":0.2}]
+
+Page
+  Nav
+    Brand "Pressroom" icon="photo_library"
+    Row gap=4
+      Link "Upload" onTap={go upload_and_configure}
+      Link "Checkout"
+      Link "Track order" onTap={go tracking}
+    Button.outline "Help" icon="help" onTap={open help}
+  Section
+    Column gap=8
+      Heading "Checkout" level=1
+      Timeline steps=["Prints","Delivery","Payment","Done"] current=1
+  Section tint
+    Row gap=32 top
+      Column grow gap=16
+        Card gap=12
+          Heading "How do you want them?" level=3
+          SegmentedButton items=["delivery","pickup"] bind=fulfil
+          if fulfil=="delivery"
+            Input "Full name" bind=addr.name
+            Input "Street address" bind=addr.line1
+            Row gap=12
+              Input "City" bind=addr.city grow
+              Input "ZIP" bind=addr.zip w=120
+            Input "Phone" type=phone bind=addr.phone
+            Radio "Standard, 4 to 6 days, $4.50" value="standard" bind=speed
+            Radio "Express, 2 days, $12.00" value="express" bind=speed
+          if fulfil=="pickup"
+            Select "Pickup store" items=["Downtown, 214 Market St","Eastside, 9 Burnside Ave","Airport Road, 77 Mill Rd"] bind=pickup
+            Text.muted "Ready in 2 hours, free. Bring your order number."
+        Card gap=12
+          Heading "Promo code" level=3
+          Row gap=8
+            Input "Code" bind=promo grow
+            Button.secondary "Apply" onTap={promo=="PRINT10" ? promoOk=true : toast "That code is not valid"}
+          if promoOk
+            Text.success "PRINT10 applied: 10% off"
+      Column w=320 sticky gap=12
+        Card gap=8
+          Heading "Order summary" level=3
+          each photo in photos
+            Row between
+              Text.small "{photo.name} ({photo.size}, {photo.paper}) x{photo.qty}"
+              Text.small "{money(photo.qty*0.5,'$',2)}"
+          Divider
+          Row between
+            Text "Prints"
+            Text "{sum(photos,p=>p.qty)}"
+          Row between
+            Text "Delivery"
+            Text "{fulfil=='pickup' ? 'Free' : (speed=='express' ? '$12.00' : '$4.50')}"
+          if promoOk
+            Row between
+              Text.success "Promo"
+              Text.success "-10%"
+          Divider
+          Row between
+            Text.strong "Total"
+            Text.strong "{money(sum(photos,p=>p.qty*0.5)*(promoOk?0.9:1)+(fulfil=='pickup'?0:(speed=='express'?12:4.5)),'$',2)}"
+          Button "Place order" size=large onTap={emit placeOrder {"fulfil":fulfil,"speed":speed,"pickup":pickup,"addr":addr}; go tracking}
+          Text.caption "You pay at the next step. Nothing is charged yet."
+  Footer
+    Row between
+      Text.strong "Pressroom"
+      Text.muted "Prints made in Portland, Oregon"
+  Dialog#help "Need help?"
+    Text "Chat with us weekdays 9 to 5 Pacific, or email help@pressroom.example."
+    Button "Close" onTap={close}
+
+// a row of numbered steps with the current one marked
+define Timeline steps=[] current=0
+  Row gap=8 middle
+    each s in steps
+      Row gap=6 middle
+        Box w=24 h=24 radius=12 fill={index<=current ? '#FF2563EB' : '#FFE5E7EB'}
+          Text.small "{index+1}" color=#FFFFFFFF center
+        Text.small "{s}"
+        if index<length(steps)-1
+          Divider w=32
+
+### Tracking
+state orderNo="PR-48213"
+state status=2
+state events=[{"title":"Order received","when":"Mon 9:12 am","note":"We have your 6 prints"},{"title":"Printing","when":"Mon 2:40 pm","note":"On Glossy and Matte paper"},{"title":"Packed and handed to carrier","when":"Tue 8:05 am","note":"Tracking 1Z 48A 920"},{"title":"Out for delivery","when":"","note":""},{"title":"Delivered","when":"","note":""}]
+
+Page
+  Nav
+    Brand "Pressroom" icon="photo_library"
+    Row gap=4
+      Link "Upload" onTap={go upload_and_configure}
+      Link "Track order"
+    Button.outline "Order again" onTap={go upload_and_configure}
+  Section narrow
+    Column gap=16
+      Row between middle
+        Heading "Order {orderNo}" level=1
+        Badge.info "In transit"
+      Text.muted "Estimated delivery Thursday, between 10 am and 2 pm."
+      Progress {status/4}
+      Card gap=16
+        Heading "Where it is" level=3
+        each e in events
+          Row gap=12 top
+            Icon "{index<=status ? 'check_circle' : 'radio_button_unchecked'}"
+            Column grow gap=2
+              Text.strong "{e.title}"
+              Text.muted "{e.note}"
+            Text.caption "{e.when}"
+      Card gap=8
+        Heading "Delivering to" level=3
+        Text "Dana Whitfield, 48 Orchard Lane, Portland, OR 97205"
+        Row gap=8
+          Button.outline "Copy tracking number" icon="content_copy" onTap={copy "1Z48A920"; toast "Copied"}
+          Button.outline "Open carrier page" onTap={link https://carrier.example/track/1Z48A920}
+      Card gap=8
+        Heading "Something wrong?" level=3
+        Text.muted "Prints damaged or colors off? We reprint free within 30 days."
+        Button.secondary "Report a problem" onTap={open report}
+  Footer
+    Text.muted "Pressroom"
+  Dialog#report "Report a problem" "Tell us what happened"
+    Select "What went wrong" items=["Damaged in transit","Colors look off","Wrong size","Missing prints"] bind=issue
+    Input "Details" multiline bind=details
+    Button "Send" onTap={emit reportProblem {"order":orderNo,"issue":issue,"details":details}; toast "Thanks, we will reprint"; close}

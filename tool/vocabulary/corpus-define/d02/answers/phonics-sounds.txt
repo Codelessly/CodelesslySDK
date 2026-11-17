@@ -1,0 +1,195 @@
+### Learn
+state letters=[{"l":"s","word":"sun","icon":"wb_sunny","color":"#FFFDE68A"},{"l":"m","word":"moon","icon":"nightlight","color":"#FFC7D2FE"},{"l":"c","word":"cat","icon":"pets","color":"#FFFED7AA"},{"l":"t","word":"tree","icon":"park","color":"#FFBBF7D0"},{"l":"b","word":"bus","icon":"directions_bus","color":"#FFBFDBFE"}]
+state at=0
+state playing=false
+state stars=3
+every 1s when playing onTick={playing=false}
+App
+  Sidebar
+    Brand "Soundbox" icon="graphic_eq"
+    NavItem "Letters" icon="abc" selected={true} onTap={go learn}
+    NavItem "Basket game" icon="shopping_basket" onTap={go game}
+    NavItem "Blend" icon="join_inner" onTap={go blend}
+    Spacer grow
+    NavItem "Parent corner" icon="lock" onTap={open sum}
+  Main
+    Nav
+      Heading "Meet the sounds" level=1
+      Row gap=8 middle
+        Icon "star" color=#FFF59E0B
+        Text.strong "{stars}"
+    Column pad=24 gap=20 center
+      Row gap=8 center
+        each item in letters
+          ChoiceChip "{upper(item.l)}" selected={at==index} onTap={at=index; playing=false}
+      LetterCard letter="{letters[at].l}" word="{letters[at].word}" picture="{letters[at].icon}" fill="{letters[at].color}" playing={playing} onTap={playing=true; emit playSound letters[at].l}
+      SoundWaves playing={playing} color=#FF2563EB
+      Text.muted "Tap the letter to hear it"
+      Row gap=12
+        Button.outline "Back" icon="chevron_left" onTap={at=max(0,at-1); playing=false}
+        Button "Next sound" icon="chevron_right" onTap={at=min(length(letters)-1,at+1); playing=false}
+      StarShelf count={stars} total=10
+Dialog#sum "Parent corner" "Answer this to continue"
+  state a=7
+  state b=5
+  state answer=""
+  Text.heading "What is {a} + {b}?"
+  Input "Your answer" type=number bind=answer
+  Button "Open" onTap={answer==a+b ? {answer=""; close; go parent} : toast "Not quite, try again"}
+
+### Basket game
+state rounds=[{"sound":"s","pics":[{"word":"sun","icon":"wb_sunny"},{"word":"dog","icon":"pets"},{"word":"bus","icon":"directions_bus"}]},{"sound":"b","pics":[{"word":"ball","icon":"sports_soccer"},{"word":"cup","icon":"coffee"},{"word":"bed","icon":"bed"}]},{"sound":"t","pics":[{"word":"fish","icon":"set_meal"},{"word":"tent","icon":"holiday_village"},{"word":"tree","icon":"park"}]}]
+state round=0
+state stars=3
+state tries=0
+App
+  Sidebar
+    Brand "Soundbox" icon="graphic_eq"
+    NavItem "Letters" icon="abc" onTap={go learn}
+    NavItem "Basket game" icon="shopping_basket" selected={true} onTap={go game}
+    NavItem "Blend" icon="join_inner" onTap={go blend}
+    Spacer grow
+    NavItem "Parent corner" icon="lock" onTap={open sum}
+  Main
+    Nav
+      Heading "Which one starts with {upper(rounds[round].sound)}?" level=1
+      Button.outline "Hear it again" icon="volume_up" onTap={emit playSound rounds[round].sound}
+    Column pad=24 gap=20
+      Row between middle
+        Text.muted "Round {round+1} of {length(rounds)}"
+        Progress {round/length(rounds)}
+      Row gap=24 center top
+        each p in rounds[round].pics
+          FloatingPic word="{p.word}" icon="{p.icon}" delay={index*300} drag=pic(p.word)
+      Column center gap=8
+        Box w=200 h=120 radius=24 fill=#FFFDE68A center middle drop=pic onDrop={startsWith(result.data, rounds[round].sound) ? {stars=stars+1; tries=0; toast "Yes! {result.data} starts with {rounds[round].sound}"; round=round+1>=length(rounds) ? 0 : round+1} : {tries=tries+1; toast "Not that one, try again"}}
+          Icon "shopping_basket" size=56
+          Text.strong "Drop it here"
+      if tries>=2
+        Text.muted "Say the sound out loud: {rounds[round].sound}"
+      StarShelf count={stars} total=10
+Dialog#sum "Parent corner" "Answer this to continue"
+  state a=7
+  state b=5
+  state answer=""
+  Text.heading "What is {a} + {b}?"
+  Input "Your answer" type=number bind=answer
+  Button "Open" onTap={answer==a+b ? {answer=""; close; go parent} : toast "Not quite, try again"}
+
+### Blend
+state words=[{"parts":["c","a","t"],"word":"cat","icon":"pets"},{"parts":["s","u","n"],"word":"sun","icon":"wb_sunny"},{"parts":["b","u","s"],"word":"bus","icon":"directions_bus"},{"parts":["p","i","g"],"word":"pig","icon":"cruelty_free"}]
+state w=0
+state gap=40
+state merged=false
+state stars=3
+App
+  Sidebar
+    Brand "Soundbox" icon="graphic_eq"
+    NavItem "Letters" icon="abc" onTap={go learn}
+    NavItem "Basket game" icon="shopping_basket" onTap={go game}
+    NavItem "Blend" icon="join_inner" selected={true} onTap={go blend}
+    Spacer grow
+    NavItem "Parent corner" icon="lock" onTap={open sum}
+  Main
+    Nav
+      Heading "Slide the sounds together" level=1
+      Row gap=8 middle
+        Icon "star" color=#FFF59E0B
+        Text.strong "{stars}"
+    Column pad=24 gap=24 center
+      Icon "{words[w].icon}" size=72
+      if !merged
+        Row center middle gap={gap}
+          each part in words[w].parts
+            BlendTile letter="{part}" onTap={emit playSound part}
+      if merged
+        BlendTile letter="{words[w].word}" wide=true animate=pop onTap={emit speak words[w].word}
+        Text.success "{words[w].word}"
+      Slider bind=gap min=0 max=40 w=280 onChange={result<=0 ? {merged=true; stars=stars+1; emit speak words[w].word} : {merged=false}}
+      Text.muted "Drag the slider to slide the tiles together"
+      Row gap=12
+        Button.outline "Again" icon="refresh" onTap={gap=40; merged=false}
+        Button "Next word" icon="chevron_right" onTap={w=w+1>=length(words) ? 0 : w+1; gap=40; merged=false}
+      StarShelf count={stars} total=10
+Dialog#sum "Parent corner" "Answer this to continue"
+  state a=7
+  state b=5
+  state answer=""
+  Text.heading "What is {a} + {b}?"
+  Input "Your answer" type=number bind=answer
+  Button "Open" onTap={answer==a+b ? {answer=""; close; go parent} : toast "Not quite, try again"}
+
+### Parent corner
+state progress=[{"sound":"s","score":0.9,"plays":24},{"sound":"m","score":0.8,"plays":18},{"sound":"c","score":0.55,"plays":12},{"sound":"t","score":0.7,"plays":15},{"sound":"b","score":0.3,"plays":6}]
+state minutes=20
+state soundOn=true
+App
+  Sidebar
+    Brand "Soundbox" icon="graphic_eq"
+    NavItem "Letters" icon="abc" onTap={go learn}
+    NavItem "Basket game" icon="shopping_basket" onTap={go game}
+    NavItem "Blend" icon="join_inner" onTap={go blend}
+    Spacer grow
+    NavItem "Parent corner" icon="lock_open" selected={true}
+  Main
+    Nav
+      Heading "Parent corner" level=1
+      Button.outline "Back to play" icon="child_care" onTap={go learn}
+    Column pad=24 gap=16 maxw=720
+      Card gap=12
+        Heading "Progress by sound" level=3
+        each p in sortBy(progress, x=>x.score)
+          SoundProgress letter="{p.sound}" score={p.score} plays={p.plays}
+      Card gap=12
+        Heading "Needs practice" level=3
+        Row gap=8
+          each p in filter(progress, x=>x.score<0.6)
+            Chip "{upper(p.sound)}"
+        Text.muted "Play the Basket game with these sounds to help them stick."
+      Card gap=12
+        Heading "Settings" level=3
+        Toggle "Sound on" bind=soundOn
+        Row between middle
+          Text "Daily play limit: {minutes} minutes"
+          Slider bind=minutes min=5 max=60 w=200
+        Button "Save" onTap={emit saveSettings; toast "Saved"}
+
+// Sound cannot play here; the waves are drawn bars that pulse while a sound is playing.
+define SoundWaves playing=false color=#FF2563EB
+  Row gap=4 middle center h=56
+    each i in range(9)
+      Box w=6 h={8 + (playing ? ((i*5)%4+1)*10 : 0)} radius=3 fill={color} animate=pulse delay={i*80}
+
+define LetterCard letter="a" word="apple" picture="apple" fill=#FFFDE68A playing=false onTap
+  Row gap=32 middle center pad=24 fill={fill} radius=32 onTap={onTap}
+    Column center gap=0
+      Text "{upper(letter)}{letter}" size=140 weight=800
+    Column center gap=8
+      Icon "{picture}" size=96
+      Text.strong "{word}"
+      if playing
+        Icon "volume_up" animate=pulse
+
+define StarShelf count=0 total=10
+  Card gap=8 pad=12
+    Row between middle
+      Text.strong "My stars"
+      Text.muted "{count} of {total}"
+    Row gap=6
+      each i in range(total)
+        Icon "{i<count ? 'star' : 'star_border'}" size=28 color={i<count ? '#FFF59E0B' : '#FF9CA3AF'}
+
+define FloatingPic "word" icon="star" delay=0 drag
+  Box w=120 h=120 radius=60 fill=#FFE0F2FE center middle animate=slide-up duration=700 delay={delay} drag={drag}
+    Icon "{icon}" size=56
+    Text.strong "{word}"
+
+define BlendTile "letter" wide=false onTap
+  Box w={wide ? 140 : 64} h=72 radius=14 fill=#FF2563EB center middle onTap={onTap}
+    Text "{letter}" size=40 weight=800 color=#FFFFFFFF
+
+define SoundProgress letter="a" score=0 plays=0
+  Row gap=12 middle
+    Text.strong "{upper(letter)}" w=24
+    Progress {score} grow
+    Text.muted "{plays} plays" w=70

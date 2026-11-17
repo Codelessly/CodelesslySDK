@@ -1,0 +1,228 @@
+### Questions
+state step=1
+state filing="Single"
+state hasKids=""
+state kids=0
+state wages=62000
+state interest=140
+state withheld=7450
+state showHelp=false
+state done=[0]
+App
+  Sidebar
+    Brand "Returnly" icon="receipt_long"
+    Text.muted "Tax year 2025"
+    Stepper bind=step done={done} steps=["About you","Income","Credits","Documents","Review","Sign"] orientation="vertical"
+    Spacer grow
+    Text.muted "Saved a moment ago"
+  Main
+    Nav
+      Heading "Credits and dependents" level=1
+      Row gap=8
+        RefundMeter value={withheld - max(0, round(max(0, wages + interest - (filing == "Married" ? 29200 : 14600)) * 0.12, 0) - kids * 2000)}
+        Button.ghost "Save and exit" onTap={toast "Progress saved"}
+    Column pad=24 gap=16 maxw=720
+      Progress {(step + 1) / 6}
+      Text.muted "Step {step + 1} of 6"
+      Card gap=16
+        Text.title "Did you support any children in 2025?"
+        Row gap=12
+          YesNoCard "Yes" icon="child_care" selected={hasKids == "yes"} onTap={hasKids="yes"}
+          YesNoCard "No" icon="block" selected={hasKids == "no"} onTap={hasKids="no"; kids=0}
+        Accordion "Who counts as a dependent child?"
+          Text.muted "A child under 17 who lived with you more than half of the year and did not provide over half of their own support. Each one can earn a $2,000 credit."
+        if hasKids == "yes"
+          Select "Filing status" bind=filing items=["Single","Married","Head of household"]
+          Row gap=12 middle
+            Text.strong "Number of children"
+            IconButton "remove" tooltip="Fewer" onTap={kids=max(0,kids-1)}
+            Text.title "{kids}"
+            IconButton "add" tooltip="More" onTap={kids=kids+1}
+          CurrencyInput "Federal tax already withheld" bind=withheld currency="$"
+      if hasKids == "yes" && kids > 0
+        Card gap=4 fill=#FFECFDF5
+          Text.success "Child tax credit: {money(kids * 2000, "$", 0)}"
+          Text.muted "It reduces what you owe dollar for dollar."
+      Row between
+        Button.outline "Back" onTap={step=max(0,step-1)}
+        Button "Continue" onTap={hasKids == "" ? toast "Choose yes or no to go on" : {done=append(without(done,step),step); step=step+1; go documents}}
+
+### Documents
+state step=3
+state matched=[{"file":"W-2_Northwind.pdf","kind":"W-2","field":"Wages","amount":62000,"status":"matched"},{"file":"1099-INT_Harbor.pdf","kind":"1099-INT","field":"Interest income","amount":140,"status":"matched"}]
+state pending=[{"file":"scan_0042.jpg","kind":"Unknown","field":"","amount":0,"status":"needs-review"}]
+state pick="Wages"
+App
+  Sidebar
+    Brand "Returnly" icon="receipt_long"
+    Text.muted "Tax year 2025"
+    Stepper bind=step done={done} steps=["About you","Income","Credits","Documents","Review","Sign"] orientation="vertical"
+    Spacer grow
+    Text.muted "{length(matched)} of 3 documents matched"
+  Main
+    Nav
+      Heading "Upload your documents" level=1
+      RefundMeter value={withheld - max(0, round(max(0, wages + interest - (filing == "Married" ? 29200 : 14600)) * 0.12, 0) - kids * 2000)}
+    Column pad=24 gap=16
+      FileDropzone "Drop W-2s, 1099s and receipts here" accept=["pdf","jpg","png"] multiple onUpload={pending=append(pending,{"file":result.name,"kind":"Unknown","field":"","amount":0,"status":"needs-review"})}
+      Text.strong "Matched to your return"
+      each doc in matched
+        Card
+          Row gap=12 middle
+            IconTile "description"
+            Column grow gap=2
+              Text.strong "{doc.file}"
+              Text.muted "{doc.kind} fills {doc.field}"
+            Text.strong "{money(doc.amount, "$", 2)}"
+            Badge.success "Matched"
+            IconButton "delete" tooltip="Remove" onTap={matched=removeWhere(matched,d=>d.file==doc.file)}
+      if length(pending) > 0
+        Text.strong "Needs your attention"
+        each doc in pending
+          Card gap=12
+            Row gap=12 middle
+              IconTile "image"
+              Column grow gap=2
+                Text.strong "{doc.file}"
+                Text.muted "We could not read this one. Tell us what it is."
+              Badge.warning "Review"
+            Row gap=12 bottom
+              Select "Fills this field" bind=pick items=["Wages","Interest income","Tax withheld"] grow
+              Button "Match" onTap={matched=append(matched,with(with(with(doc,"field",pick),"status","matched"),"kind","Manual")); pending=removeWhere(pending,d=>d.file==doc.file); toast "Matched to {pick}"}
+      Row between
+        Button.outline "Back" onTap={go questions}
+        Button "Continue to review" onTap={length(pending) > 0 ? toast "Match or remove the unread file first" : {step=4; go review}}
+
+### Review
+state step=4
+state editing=""
+state draft=0
+state agreed=false
+App
+  Sidebar
+    Brand "Returnly" icon="receipt_long"
+    Text.muted "Tax year 2025"
+    Stepper bind=step done={done} steps=["About you","Income","Credits","Documents","Review","Sign"] orientation="vertical"
+  Main
+    Nav
+      Heading "Review your return" level=1
+      Button "Looks right, sign" onTap={step=5; go sign}
+    Column pad=24 gap=16 maxw=720
+      Card gap=4 fill=#FFEFF6FF
+        Text.muted "Your estimated federal refund"
+        Text "{money(withheld - max(0, round(max(0, wages + interest - (filing == "Married" ? 29200 : 14600)) * 0.12, 0) - kids * 2000), "$", 0)}" size=40 weight=700
+        Text.muted "Standard deduction {money(filing == "Married" ? 29200 : 14600, "$", 0)} applied"
+      Card gap=0
+        Row between middle pad=[0,12,0,12]
+          Text.muted "Filing status"
+          Text.strong "{filing}"
+          IconButton "edit" tooltip="Edit filing status" onTap={go questions}
+        Divider
+        Row between middle pad=[0,12,0,12]
+          Text.muted "Wages (W-2)"
+          Text.strong "{money(wages, "$", 0)}"
+          IconButton "edit" tooltip="Edit wages" onTap={editing="wages"; draft=wages; open editAmount}
+        Divider
+        Row between middle pad=[0,12,0,12]
+          Text.muted "Interest income"
+          Text.strong "{money(interest, "$", 0)}"
+          IconButton "edit" tooltip="Edit interest" onTap={editing="interest"; draft=interest; open editAmount}
+        Divider
+        Row between middle pad=[0,12,0,12]
+          Text.muted "Tax withheld"
+          Text.strong "{money(withheld, "$", 0)}"
+          IconButton "edit" tooltip="Edit withheld tax" onTap={editing="withheld"; draft=withheld; open editAmount}
+        Divider
+        Row between middle pad=[0,12,0,12]
+          Text.muted "Dependent children"
+          Text.strong "{kids}"
+          IconButton "edit" tooltip="Edit children" onTap={go questions}
+      Row between
+        Button.outline "Back" onTap={go documents}
+        Button "Continue to sign" onTap={step=5; go sign}
+  Dialog#editAmount "Edit amount" "Your refund updates as soon as you save."
+    CurrencyInput "Amount" bind=draft currency="$"
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button "Save" onTap={editing == "wages" ? wages=draft : (editing == "interest" ? interest=draft : withheld=draft); toast "Updated"; close}
+
+### Sign
+state step=5
+state signature=""
+state agreed=false
+state submitted=false
+App
+  Sidebar
+    Brand "Returnly" icon="receipt_long"
+    Text.muted "Tax year 2025"
+    Stepper bind=step done={done} steps=["About you","Income","Credits","Documents","Review","Sign"] orientation="vertical"
+  Main
+    Nav
+      Heading "Sign and file" level=1
+      RefundMeter value={withheld - max(0, round(max(0, wages + interest - (filing == "Married" ? 29200 : 14600)) * 0.12, 0) - kids * 2000)}
+    Column pad=24 gap=16 maxw=720
+      if submitted
+        Card gap=8 center
+          Icon "check_circle" size=48 color=#FF16A34A
+          Text.title "Your return is on its way"
+          Text.muted "We will email you when the IRS accepts it."
+          Button.outline "Download a copy" onTap={toast "Copy saved"}
+      if !submitted
+        Card gap=12
+          Text.title "Declaration"
+          Text.muted "Under penalties of perjury, I declare that I have examined this return and, to the best of my knowledge and belief, it is true, correct, and complete."
+          Checkbox "I agree and want to file electronically" bind=agreed
+        Card gap=12
+          Text.strong "Draw your signature"
+          SignaturePad bind=signature h=160
+          Row between
+            Text.muted "{signature == "" ? "Sign with your finger or mouse" : "Signature captured"}"
+            Button.ghost "Clear" onTap={signature=""}
+        Row between
+          Button.outline "Back" onTap={go review}
+          Button "Submit return" onTap={!agreed ? toast "Tick the declaration first" : (signature == "" ? toast "Please sign above" : {submitted=true; emit fileReturn})}
+
+// A step indicator: a numbered list of steps with done marks and the current one lit; a tap goes to that step.
+define Stepper steps=[] bind=step done=[] orientation="horizontal" onPick
+  Column gap=4
+    each s in steps
+      Row gap=10 middle pad=[8,6,8,6] radius=8 fill={index == step ? "#FFEFF6FF" : "#00000000"} onTap={step=index; onPick(index)}
+        Box w=24 h=24 radius=12 center middle fill={contains(done,index) ? "#FF16A34A" : (index == step ? "#FF2563EB" : "#FFE5E7EB")}
+          if contains(done,index)
+            Icon "check" size=14 color=#FFFFFFFF
+          if !contains(done,index)
+            Text "{index + 1}" size=12 color={index == step ? "#FFFFFFFF" : "#FF374151"}
+        Text.small "{s}" weight={index == step ? 700 : 400}
+
+define YesNoCard "label" icon="check" selected=false onTap
+  Card grow gap=6 center border={selected ? 2 : 1} fill={selected ? "#FFEFF6FF" : "#FFFFFFFF"} onTap={onTap}
+    Icon "{icon}" size=28
+    Text.strong "{label}"
+
+define CurrencyInput "label" bind=amount currency="$" hint=""
+  state amount=0
+  Column gap=4
+    Text.fieldLabel "{label}"
+    Row gap=8 middle
+      Text.strong "{currency}"
+      Input "" "{hint}" bind=amount type=number grow
+    Text.muted "{money(amount, currency, 2)}"
+
+define RefundMeter value=0
+  Row gap=8 middle pad=[12,6,12,6] radius=20 fill={value >= 0 ? "#FFECFDF5" : "#FFFEF2F2"}
+    Icon {value >= 0 ? "trending_up" : "trending_down"} size=18 color={value >= 0 ? "#FF16A34A" : "#FFDC2626"}
+    Text.muted "{value >= 0 ? "Refund" : "You owe"}"
+    Text.strong "{money(abs(value), "$", 0)}"
+
+// A file drop target cannot read real files here, so it shows a labelled box.
+define FileDropzone "label" accept=[] multiple=false onUpload
+  Box pad=24 gap=8 center middle radius=12 border=2 fill=#FFF9FAFB onTap={onUpload({"name":"scan_0042.jpg"})}
+    Icon "upload_file" size=32
+    Text.strong "{label}"
+    Text.muted "or click to browse ({join(accept,", ")})"
+
+// A drawn signature needs a touch surface, so it shows a labelled box.
+define SignaturePad bind=signature h=160 onChange
+  state signature=""
+  Box h={h} radius=8 border=1 fill=#FFFFFFFF center middle onTap={signature="signed"; onChange("signed")}
+    Text.muted "{signature == "" ? "Signature area" : "Signed"}"

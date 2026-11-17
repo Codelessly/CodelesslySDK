@@ -1,0 +1,227 @@
+### Claim form
+state tab="claim"
+state tag="LH 482913"
+state shape="hard"
+state color="#FF1F2937"
+state size="Medium"
+state marks=["Red ribbon on handle"]
+state markDraft=""
+state filed=false
+App
+  Sidebar
+    Brand "Baggage Trail" icon="luggage"
+    NavItem "File a claim" icon="edit_note" selected={tab=="claim"} onTap={go claim-form}
+    NavItem "Where is my bag" icon="route" selected={tab=="trace"} onTap={go trace}
+    NavItem "Delivery" icon="local_shipping" selected={tab=="delivery"} onTap={go delivery}
+    NavItem "Agent chat" icon="chat" badge="1" selected={tab=="chat"} onTap={go chat}
+    Spacer grow
+    Text.muted "Ref BT-20418"
+  Main
+    Nav
+      Heading "Report a delayed bag" level=1
+      Row gap=8
+        Button.outline "Save draft" onTap={toast "Draft saved"}
+        Button "Submit claim" onTap={filed=true; open confirm}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Text.strong "1. Your bag tag"
+        Text.muted "Type the 10 character tag number from your baggage receipt, or scan the barcode."
+        TagScanner "Tag number" bind=tag onScan={tag=result; toast "Tag read: {result}"}
+      Card gap=12
+        Text.strong "2. Shape"
+        BagShapePicker bind=shape
+      Card gap=12
+        Text.strong "3. Colour and size"
+        ColorSwatches bind=color
+        SegmentedButton bind=size items=["Small","Medium","Large"]
+      Card gap=12
+        Text.strong "4. Distinguishing marks"
+        Row gap=8
+          each m in marks
+            Chip "{m}" onTap={marks=without(marks,m)}
+        Row gap=8
+          Input "Add a mark" "Sticker, scratch, luggage strap" bind=markDraft grow
+          Button.outline "Add" onTap={trim(markDraft)!="" ? {marks=append(marks,trim(markDraft)); markDraft=""} : toast "Describe the mark first"}
+      Card gap=8
+        Text.strong "Summary"
+        Text.muted "Tag {tag}, {shape} case, {size}, {length(marks)} marks"
+Dialog#confirm "Claim submitted" "We have started tracing your bag."
+  Text "Reference BT-20418. Updates arrive in Agent chat."
+  Button "See where it is" onTap={close; go trace}
+
+### Bag trace
+state tab="trace"
+state status="Located"
+state events=[{"airport":"LHR","city":"London","time":"Mon 06:40","label":"Checked in","done":true},{"airport":"LHR","city":"London","time":"Mon 09:15","label":"Loaded on LH 482","done":true},{"airport":"FRA","city":"Frankfurt","time":"Mon 12:05","label":"Transfer missed, held at belt 7","done":true},{"airport":"FRA","city":"Frankfurt","time":"Tue 07:30","label":"Rerouted to LH 6911","done":true},{"airport":"JFK","city":"New York","time":"Tue 14:10","label":"Arrived, scanned at claim office","done":true},{"airport":"JFK","city":"New York","time":"Wed 09:00","label":"Customs and delivery handover","done":false}]
+state sel=4
+App
+  Sidebar
+    Brand "Baggage Trail" icon="luggage"
+    NavItem "File a claim" icon="edit_note" selected={tab=="claim"} onTap={go claim-form}
+    NavItem "Where is my bag" icon="route" selected={tab=="trace"} onTap={go trace}
+    NavItem "Delivery" icon="local_shipping" selected={tab=="delivery"} onTap={go delivery}
+    NavItem "Agent chat" icon="chat" badge="1" selected={tab=="chat"} onTap={go chat}
+  Main
+    Nav
+      Heading "Bag LH 482913" level=1
+      Badge.success "{status}"
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        StatusSteps steps=["Reported","In transit","Located","Ready to deliver"] current=2
+        Text.muted "Last seen at JFK, New York, Tuesday 14:10"
+      Card gap=12
+        Text.strong "Route"
+        RouteLine stops=["LHR","FRA","JFK"] current="JFK" bind=sel
+      Card gap=12
+        Text.strong "Scan history"
+        ScanTimeline events={events} bind=sel onSelect={sel=result; open scan}
+      Row gap=8
+        Button "Arrange delivery" onTap={go delivery}
+        Button.outline "Message agent" onTap={go chat}
+Sheet#scan "Scan details"
+  Text.strong "{events[sel].label}"
+  Text.muted "{events[sel].airport}, {events[sel].city}, {events[sel].time}"
+  Button.outline "Close" onTap={close}
+
+### Delivery and compensation
+state tab="delivery"
+state address="214 Bedford Ave, Apt 5B, Brooklyn NY 11211"
+state day="Wed"
+state window="10:00-12:00"
+state items=[{"name":"Rain jacket","price":120,"claim":true},{"name":"Toiletries","price":45,"claim":true},{"name":"Phone charger","price":30,"claim":false}]
+state newItem=""
+state newPrice=0
+state booked=false
+App
+  Sidebar
+    Brand "Baggage Trail" icon="luggage"
+    NavItem "File a claim" icon="edit_note" selected={tab=="claim"} onTap={go claim-form}
+    NavItem "Where is my bag" icon="route" selected={tab=="trace"} onTap={go trace}
+    NavItem "Delivery" icon="local_shipping" selected={tab=="delivery"} onTap={go delivery}
+    NavItem "Agent chat" icon="chat" badge="1" selected={tab=="chat"} onTap={go chat}
+  Main
+    Nav
+      Heading "Delivery and compensation" level=1
+      Badge.info "Ready to deliver"
+    Column pad=24 gap=16 scroll
+      Row gap=16
+        Card grow gap=12
+          Text.strong "Deliver to"
+          Input "Address" bind=address
+          SegmentedButton bind=day items=["Wed","Thu","Fri"]
+          TimeWindowPicker bind=window slots=["08:00-10:00","10:00-12:00","12:00-14:00","14:00-16:00","16:00-18:00"]
+          Button "Confirm delivery" onTap={booked=true; toast "Booked {day} {window}"}
+          if booked
+            Text.success "Booked for {day}, {window}"
+        Card grow gap=12
+          Text.strong "Compensation estimate"
+          Text.muted "Tick what you had to buy while without your bag. Receipts are required."
+          each it in items
+            Row between
+              Checkbox "{it.name}" bind=it.claim
+              Text "{money(it.price,'$',2)}"
+          Row gap=8
+            Input "Item" bind=newItem grow
+            Input "Price" type=number bind=newPrice w=100
+            Button.outline "Add" onTap={newItem!="" ? {items=append(items,{"name":newItem,"price":newPrice,"claim":true}); newItem=""; newPrice=0} : toast "Name the item"}
+          Divider
+          Row between
+            Text.strong "Estimated payout"
+            Text.strong "{money(min(1500,sum(filter(items,i=>i.claim),i=>i.price)),'$',2)}"
+          Text.caption "Capped at $1,500 per passenger."
+
+### Agent chat
+state tab="chat"
+state draft=""
+state messages=[{"mine":false,"text":"Hi Sam, your bag was scanned at JFK this afternoon. It is safe.","time":"14:32"},{"mine":true,"text":"Great. Can it come tomorrow morning?","time":"14:35"},{"mine":false,"text":"Yes, the 10:00 to 12:00 window is open. Please confirm the address.","time":"14:36"}]
+App
+  Sidebar
+    Brand "Baggage Trail" icon="luggage"
+    NavItem "File a claim" icon="edit_note" selected={tab=="claim"} onTap={go claim-form}
+    NavItem "Where is my bag" icon="route" selected={tab=="trace"} onTap={go trace}
+    NavItem "Delivery" icon="local_shipping" selected={tab=="delivery"} onTap={go delivery}
+    NavItem "Agent chat" icon="chat" selected={tab=="chat"} onTap={go chat}
+  Main
+    Nav
+      Row gap=8 middle
+        Avatar "Priya Nair" size=36
+        Column
+          Text.strong "Priya Nair"
+          Text.caption "Baggage agent, JFK"
+      Badge.success "Online"
+    ChatLog messages={messages}
+    Footer
+      Row gap=8 pad=12
+        Input "Message" bind=draft grow
+        IconButton "send" tooltip="Send" onTap={trim(draft)!="" ? {messages=append(messages,{"mine":true,"text":trim(draft),"time":"now"}); draft=""} : toast "Type a message"}
+
+// A barcode camera is not available; the scan button is shown as a labelled box.
+define TagScanner "label" bind=tag onScan
+  state tag=""
+  Row gap=8 middle
+    Input "{label}" bind=tag grow
+    Box w=96 h=48 radius=8 fill=#FF111827 center middle onTap={onScan("LH 482913")}
+      Icon "qr_code_scanner"
+      Text.caption "Scan" color=#FFFFFFFF
+
+define BagShapePicker bind=shape shapes=[{"id":"hard","name":"Hard case","icon":"luggage"},{"id":"soft","name":"Soft duffel","icon":"work"},{"id":"back","name":"Backpack","icon":"backpack"},{"id":"tote","name":"Tote","icon":"shopping_bag"}]
+  state shape=""
+  Grid cols=4 gap=12
+    each s in shapes
+      Card center gap=4 border={s.id==shape ? 2 : 1} onTap={shape=s.id}
+        Icon "{s.icon}" size=40
+        Text.small "{s.name}"
+
+define ColorSwatches bind=color colors=["#FF111827","#FF6B7280","#FFFFFFFF","#FFDC2626","#FF2563EB","#FF16A34A","#FFF59E0B"] size=32
+  state color=""
+  Row gap=8 middle
+    each c in colors
+      Box w={size} h={size} radius={size/2} fill={c} border={c==color ? 3 : 1} onTap={color=c}
+
+define StatusSteps steps=["Reported","In transit","Located","Delivered"] current=0
+  Row gap=8 middle
+    each s in steps
+      Row gap=8 middle grow
+        Box w=28 h=28 radius=14 center middle fill={index<=current ? "#FF16A34A" : "#FFE5E7EB"}
+          Text "{index+1}" color=#FFFFFFFF
+        Text.small "{s}"
+        Divider grow
+
+define RouteLine stops=["A","B"] current="" bind=sel
+  state sel=0
+  Row middle gap=0
+    each s in stops
+      Row middle grow
+        Column center gap=4
+          Box w=16 h=16 radius=8 fill={s==current ? "#FF16A34A" : "#FF2563EB"}
+          Text.strong "{s}"
+        Divider grow
+
+define ScanTimeline events=[] bind=sel onSelect
+  state sel=0
+  Column gap=0
+    each e in events
+      Row gap=12 onTap={onSelect(index)}
+        Column center gap=0
+          Box w=14 h=14 radius=7 fill={e.done ? "#FF16A34A" : "#FF9CA3AF"} border={index==sel ? 3 : 0}
+          Divider w=2 h=36
+        Column gap=2 grow
+          Text.strong "{e.airport} - {e.label}"
+          Text.caption "{e.city}, {e.time}"
+
+define ChatBubble "text" mine=false time=""
+  Row {mine ? "end" : "start"}
+    Box pad=12 radius=12 fill={mine ? "#FF2563EB" : "#FFF3F4F6"} maxw=420 gap=2
+      Text "{text}" color={mine ? "#FFFFFFFF" : "#FF111827"}
+      Text.caption "{time}" color={mine ? "#FFDBEAFE" : "#FF6B7280"}
+
+define ChatLog messages=[]
+  Column pad=24 gap=8 scroll grow
+    each m in messages
+      ChatBubble "{m.text}" mine={m.mine} time={m.time}
+
+define TimeWindowPicker bind=window slots=["09:00-11:00"]
+  state window=""
+  Row gap=8
+    each s in slots
+      ChoiceChip "{s}" selected={window==s} onTap={window=s}

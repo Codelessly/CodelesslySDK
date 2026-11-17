@@ -1,0 +1,164 @@
+### Floor Board
+state order=["dirty","progress","clean","inspected","dnd"]
+state rooms=[{"id":"201","status":"dirty","time":"","early":true,"staff":"Maria Lopez"},{"id":"202","status":"progress","time":"9:12 AM","early":false,"staff":"Maria Lopez"},{"id":"203","status":"clean","time":"9:40 AM","early":false,"staff":"Maria Lopez"},{"id":"204","status":"dnd","time":"","early":false,"staff":""},{"id":"205","status":"dirty","time":"","early":false,"staff":"Tomas Berg"},{"id":"206","status":"inspected","time":"8:55 AM","early":false,"staff":"Tomas Berg"},{"id":"207","status":"dirty","time":"","early":true,"staff":"Tomas Berg"},{"id":"208","status":"clean","time":"10:05 AM","early":false,"staff":"Aiko Tanaka"},{"id":"209","status":"dirty","time":"","early":false,"staff":"Aiko Tanaka"},{"id":"210","status":"progress","time":"10:20 AM","early":false,"staff":"Aiko Tanaka"},{"id":"211","status":"dirty","time":"","early":false,"staff":""},{"id":"212","status":"dnd","time":"","early":false,"staff":""}]
+state staff=[{"name":"Maria Lopez","cap":6},{"name":"Tomas Berg","cap":6},{"name":"Aiko Tanaka","cap":5}]
+state tab="floor"
+state selected=""
+state minibar=[]
+state lost=[]
+state item="Water 500ml"
+state qty=1
+state lostText=""
+state lostPlace=""
+state arrivals=[{"name":"Hannah Brooks","room":"201","eta":"11:00 AM","early":true},{"name":"Ivan Petrov","room":"207","eta":"11:30 AM","early":true},{"name":"Chloe Martin","room":"209","eta":"2:00 PM","early":false},{"name":"Samuel Okafor","room":"211","eta":"3:30 PM","early":false}]
+state checks=[{"id":1,"label":"Bed made, linen straight","result":""},{"id":2,"label":"Bathroom spotless, towels replaced","result":""},{"id":3,"label":"Minibar stocked and counted","result":""},{"id":4,"label":"Floors vacuumed, no marks","result":""},{"id":5,"label":"Amenities and remote in place","result":""}]
+App
+  Sidebar
+    Brand "Turndown" icon="bed"
+    NavItem "Floor board" icon="grid_view" selected={tab=="floor"} onTap={tab="floor"}
+    NavItem "Staff" icon="groups" selected={tab=="staff"} onTap={tab="staff"}
+    NavItem "Arrivals" icon="luggage" badge="{length(arrivals)}" onTap={open arrivals}
+    NavItem "Inspection" icon="fact_check" onTap={go inspection}
+    Spacer grow
+    Text.muted "Floor 2, day shift"
+  Main
+    Nav
+      Heading "Floor 2" level=1
+      Row gap=8
+        Badge.warning "{count(rooms, r=>r.status!="clean" && r.status!="inspected" && r.status!="dnd")} rooms left"
+        Button.outline "Minibar" onTap={open minibar}
+        Button.outline "Lost property" onTap={open lostprop}
+    Column pad=24 gap=16
+      Row gap=12
+        Chip "Dirty {count(rooms, r=>r.status=="dirty")}"
+        Chip "In progress {count(rooms, r=>r.status=="progress")}"
+        Chip "Clean {count(rooms, r=>r.status=="clean")}"
+        Chip "Inspected {count(rooms, r=>r.status=="inspected")}"
+        Chip "Do not disturb {count(rooms, r=>r.status=="dnd")}"
+      Text.muted "Tap a room to move it to the next state. Drag a room onto a name to assign it."
+      Grid cols=4 gap=12
+        each r in rooms
+          RoomTile "{r.id}" status={r.status} time={r.time} early={r.early} staff={r.staff} drag=room(r.id) onTap={rooms=updateWhere(rooms,x=>x.id==r.id,x=>with(with(x,"status",order[(indexOf(order,x.status)+1)%5]),"time",formatDate(today(),"h:mm a")))}
+      Card gap=12
+        Text.strong "Housekeepers"
+        Grid cols=3 gap=12
+          each s in staff
+            StaffCard "{s.name}" assigned={count(rooms, r=>r.staff==s.name)} cap={s.cap} done={count(rooms, r=>r.staff==s.name && (r.status=="clean" || r.status=="inspected"))} drop=room onDrop={rooms=updateWhere(rooms,r=>r.id==result.data,r=>with(r,"staff",s.name))}
+
+Sheet#arrivals "Today's arrivals"
+  Column gap=8
+    each a in arrivals
+      ListTile "{a.name}" subtitle="Room {a.room}, ETA {a.eta}"
+        Row gap=8
+          if a.early
+            Badge.error "Early check-in"
+          Button.outline "Prioritise" onTap={rooms=updateWhere(rooms,r=>r.id==a.room,r=>with(r,"early",true)); toast "Room {a.room} marked priority"}
+  Button "Close" onTap={close}
+
+Dialog#minibar "Minibar" "Record items taken from a room"
+  Select "Room" bind=selected items=["201","202","203","205","206","207","208","209","210","211"]
+  Select "Item" bind=item items=["Water 500ml","Cola","Beer","Chocolate bar","Mixed nuts","Prosecco split"]
+  Row gap=8 middle
+    Button.outline "-" onTap={qty=max(1,qty-1)}
+    Text.strong "{qty}"
+    Button.outline "+" onTap={qty=qty+1}
+  if length(minibar) > 0
+    Text.caption "Logged: {length(minibar)} entries"
+  Button "Add to bill" onTap={selected=="" ? toast "Choose a room" : {minibar=append(minibar,{"room":selected,"item":item,"qty":qty}); toast "Charged {qty} x {item} to room {selected}"; qty=1; close}}
+
+Dialog#lostprop "Lost property" "Log something found in a room"
+  Input "What was found" bind=lostText hint="Black umbrella"
+  Input "Where" bind=lostPlace hint="Room 208, wardrobe"
+  Button "Log item" onTap={lostText=="" ? toast "Describe the item" : {lost=append(lost,{"text":lostText,"place":lostPlace,"at":formatDate(today(),"MMM d")}); lostText=""; lostPlace=""; toast "Logged"; close}}
+
+// A drag-and-tap tile of the floor grid, coloured by the state of the room.
+define RoomTile "number" status="dirty" time="" early=false staff="" onTap
+  Column gap=4 pad=12 radius=8 fill={status=="dirty" ? "#FFFCA5A5" : status=="progress" ? "#FFFDE68A" : status=="clean" ? "#FFA7F3D0" : status=="inspected" ? "#FF93C5FD" : "#FFD1D5DB"} onTap={onTap}
+    Row between
+      Text.strong "{number}" color=#FF111827
+      if early
+        Icon "priority_high" color=#FFB91C1C
+    Text.caption "{status=="progress" ? "In progress" : status=="dnd" ? "Do not disturb" : upper(status)}" color=#FF111827
+    Text.caption "{time == "" ? "-" : time}" color=#FF374151
+    Text.caption "{staff == "" ? "Unassigned" : staff}" color=#FF374151
+
+define StaffCard "name" assigned=0 cap=6 done=0 drop onDrop
+  Card gap=8 drop=room onDrop={onDrop}
+    Row middle gap=8
+      Avatar "{name}" size=32
+      Text.strong "{name}"
+    Progress {assigned / cap}
+    Text.caption "{assigned} of {cap} rooms assigned, {done} finished"
+
+### Staff Load
+App
+  Sidebar
+    Brand "Turndown" icon="bed"
+    NavItem "Floor board" icon="grid_view" onTap={go floor-board}
+    NavItem "Staff" icon="groups" selected={true}
+    NavItem "Inspection" icon="fact_check" onTap={go inspection}
+  Main
+    Nav
+      Heading "Staff" level=1
+      Button "Clear all assignments" onTap={rooms=map(rooms,r=>with(r,"staff","")); toast "Assignments cleared"}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Column grow gap=12
+          Text.strong "Housekeepers"
+          each s in staff
+            Card gap=8 drop=room onDrop={rooms=updateWhere(rooms,r=>r.id==result.data,r=>with(r,"staff",s.name))}
+              Row between middle
+                Row gap=8 middle
+                  Avatar "{s.name}" size=36
+                  Text.strong "{s.name}"
+                Badge.neutral "{count(rooms, r=>r.staff==s.name)} / {s.cap}"
+              Progress {count(rooms, r=>r.staff==s.name) / s.cap}
+              Row gap=8 scroll
+                each r in filter(rooms, x=>x.staff==s.name)
+                  Chip "{r.id}{r.early ? " !" : ""}" drag=room(r.id)
+              if count(rooms, r=>r.staff==s.name) > s.cap
+                Text.danger "Over capacity"
+        Column w=320 gap=12
+          Text.strong "Unassigned"
+          Card gap=8
+            if count(rooms, r=>r.staff=="") == 0
+              Text.muted "Everyone is covered."
+            each r in filter(rooms, x=>x.staff=="")
+              Row between middle
+                Text "Room {r.id}"
+                Badge.neutral "{r.status}"
+                Chip "Drag" drag=room(r.id)
+
+### Inspection
+state active="202"
+App
+  Sidebar
+    Brand "Turndown" icon="bed"
+    NavItem "Floor board" icon="grid_view" onTap={go floor-board}
+    NavItem "Staff" icon="groups" onTap={go staff-load}
+    NavItem "Inspection" icon="fact_check" selected={true}
+  Main
+    Nav
+      Heading "Inspector's checklist" level=1
+      Row gap=8 middle
+        Text.muted "Room"
+        Select bind=active items=["203","208","210"]
+    Column pad=24 gap=16 maxw=720
+      Card gap=4
+        Row between middle
+          Text.strong "Room {active}"
+          Badge.info "{count(checks, c=>c.result=="pass")} pass, {count(checks, c=>c.result=="fail")} fail"
+        Progress {count(checks, c=>c.result!="") / length(checks)}
+      each c in checks
+        CheckRow "{c.label}" result={c.result} onPass={checks=updateWhere(checks,x=>x.id==c.id,x=>with(x,"result","pass"))} onFail={checks=updateWhere(checks,x=>x.id==c.id,x=>with(x,"result","fail"))}
+      Row gap=8
+        Button "Sign off room" onTap={count(checks, c=>c.result!="pass") > 0 ? toast "Every item must pass" : {rooms=updateWhere(rooms,r=>r.id==active,r=>with(with(r,"status","inspected"),"time",formatDate(today(),"h:mm a"))); checks=map(checks,c=>with(c,"result","")); toast "Room {active} inspected"}}
+        Button.destructive "Send back dirty" onTap={count(checks, c=>c.result=="fail") == 0 ? toast "Mark at least one failure" : {rooms=updateWhere(rooms,r=>r.id==active,r=>with(r,"status","dirty")); checks=map(checks,c=>with(c,"result","")); toast "Room {active} returned to housekeeping"}}
+
+define CheckRow "label" result="" onPass onFail
+  Card
+    Row between middle
+      Text "{label}"
+      Row gap=8
+        Button.outline "Pass" selected={result=="pass"} onTap={onPass}
+        Button.destructive "Fail" selected={result=="fail"} onTap={onFail}

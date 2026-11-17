@@ -1,0 +1,197 @@
+### Floor
+state t=120
+state sel=""
+state warn=""
+state tick=0
+state tables=[{"id":"T1","seats":2,"shape":"round","status":"free"},{"id":"T2","seats":2,"shape":"round","status":"seated"},{"id":"T3","seats":4,"shape":"square","status":"ordered"},{"id":"T4","seats":4,"shape":"square","status":"free"},{"id":"T5","seats":6,"shape":"rect","status":"dessert"},{"id":"T6","seats":6,"shape":"rect","status":"free"},{"id":"T7","seats":8,"shape":"rect","status":"paying"},{"id":"T8","seats":2,"shape":"round","status":"free"}]
+state res=[{"id":"r1","name":"Okafor","party":4,"time":0,"table":"T3","phone":"555-0142"},{"id":"r2","name":"Lindqvist","party":2,"time":30,"table":"T2","phone":"555-0177"},{"id":"r3","name":"Marchetti","party":6,"time":60,"table":"T5","phone":"555-0109"},{"id":"r4","name":"Haddad","party":8,"time":90,"table":"T7","phone":"555-0163"},{"id":"r5","name":"Tanaka","party":2,"time":120,"table":"","phone":"555-0121"},{"id":"r6","name":"Brooks","party":5,"time":150,"table":"","phone":"555-0188"},{"id":"r7","name":"Alvarez","party":3,"time":180,"table":"","phone":"555-0134"},{"id":"r8","name":"Whitfield","party":4,"time":210,"table":"","phone":"555-0156"}]
+state walkins=[{"id":"w1","name":"Priya","party":2,"added":0,"quote":15,"phone":"555-0190"},{"id":"w2","name":"Gus","party":4,"added":0,"quote":30,"phone":"555-0102"}]
+state wname=""
+state wparty=2
+state wquote=15
+state msg=""
+state who=""
+every 1s onTick={tick=tick+1}
+App
+  AppRail tab="floor"
+  Main
+    Nav
+      Heading "Floor plan" level=1
+      Row gap=8 middle
+        Text.strong "{17+floor(t/60)}:{t%60<10?"0":""}{t%60}"
+        Button "Walk-in" icon="person_add" onTap={wname=""; wparty=2; wquote=15; open walkin}
+    Row top grow
+      Column grow pad=24 gap=16 scroll
+        Card gap=8
+          Row between middle
+            Text.strong "Time of evening"
+            Text.muted "{count(tables,x=>find(res,r=>r.table==x.id && r.time<=t && t<r.time+45+r.party*10)!=null)} of {length(tables)} tables taken"
+          Slider bind=t min=0 max=300 step=15
+          Row between
+            Text.caption "5:00 pm"
+            Text.caption "10:00 pm"
+        if warn!=""
+          Card gap=8 fill=#FFFEF3C7
+            Row between middle
+              Row gap=8 middle
+                Icon "warning" color=#FFB45309
+                Text.strong "{warn}"
+              IconButton "close" tooltip="Dismiss" onTap={warn=""}
+        Row gap=12 wrap
+          each s in ["free","seated","ordered","dessert","paying"]
+            Row gap=6 middle
+              Box w=12 h=12 radius=6 fill={s=="free"?"#FFD1D5DB":(s=="seated"?"#FF60A5FA":(s=="ordered"?"#FFFBBF24":(s=="dessert"?"#FFF472B6":"#FF34D399")))}
+              Text.caption "{s}"
+        Grid cols=4 gap=16
+          each tb in tables
+            TableTile table={tb} at={t} reservations={res} onTap={sel=tb.id; open tableMenu} onDrop={result.booking!="" ? (find(tables,x=>x.id==result.table).seats<find(res,r=>r.id==result.booking).party ? {warn="Party of {find(res,r=>r.id==result.booking).party} does not fit {result.table}, which seats {find(tables,x=>x.id==result.table).seats}."; toast "Party size mismatch"} : {res=updateWhere(res,r=>r.id==result.booking,r=>with(r,"table",result.table)); toast "Booked {result.table}"}) : toast "Nothing to book"}
+      Pane w=320 pad=16 gap=12 scroll
+        Text.panelTitle "Bookings"
+        Text.muted "Drag a booking onto a table."
+        each b in sortBy(res,r=>r.time)
+          Card gap=6 drag=booking(b.id)
+            Row between middle
+              Text.strong "{b.name}"
+              Badge.neutral "{b.party} guests"
+            Row between middle
+              Text.muted "{17+floor(b.time/60)}:{b.time%60<10?"0":""}{b.time%60}"
+              if b.table!=""
+                Badge.success "{b.table}"
+              if b.table==""
+                Badge.warning "Unassigned"
+            Text.caption "Turn estimate {45+b.party*10} min"
+            Row gap=8
+              Button.outline "Text guest" size=small onTap={who=b.name; msg="Hi {b.name}, your table for {b.party} at Covers is ready."; open textguest}
+  Menu#tableMenu
+    MenuItem "Mark free" icon="event_available" onTap={tables=updateWhere(tables,x=>x.id==sel,x=>with(x,"status","free"))}
+    MenuItem "Mark seated" icon="chair" onTap={tables=updateWhere(tables,x=>x.id==sel,x=>with(x,"status","seated"))}
+    MenuItem "Mark ordered" icon="restaurant" onTap={tables=updateWhere(tables,x=>x.id==sel,x=>with(x,"status","ordered"))}
+    MenuItem "Mark dessert" icon="icecream" onTap={tables=updateWhere(tables,x=>x.id==sel,x=>with(x,"status","dessert"))}
+    MenuItem "Mark paying" icon="payments" onTap={tables=updateWhere(tables,x=>x.id==sel,x=>with(x,"status","paying"))}
+    MenuItem "Clear booking" icon="clear" onTap={res=updateWhere(res,r=>r.table==sel,r=>with(r,"table",""))}
+Dialog#walkin "Add a walk-in" "Quick name and a wait quote"
+  Input "Name" "Guest name" bind=wname
+  Row gap=8 middle
+    Text.strong "Party"
+    Button.outline "-" onTap={wparty=max(1,wparty-1)}
+    Text.strong "{wparty}"
+    Button.outline "+" onTap={wparty=min(12,wparty+1)}
+  Select "Quoted wait" items=["5","10","15","20","30","45"] bind=wquote
+  Button "Add to waitlist" onTap={trim(wname)=="" ? toast "Enter a name" : {walkins=append(walkins,{"id":"w{tick}","name":wname,"party":wparty,"added":tick,"quote":wquote,"phone":""}); toast "{wname} added"; close}}
+Dialog#textguest "Text a guest" "Sent by SMS"
+  Text.muted "To {who}"
+  Input "Message" bind=msg multiline
+  Button "Send text" onTap={emit sendText {"to":who,"body":msg}; toast "Text sent to {who}"; close}
+
+### Waitlist
+App
+  AppRail tab="waitlist"
+  Main
+    Nav
+      Heading "Waitlist" level=1
+      Button "Walk-in" icon="person_add" onTap={wname=""; wparty=2; wquote=15; open walkin}
+    Column pad=24 gap=16 scroll
+      Row gap=16
+        Card grow gap=4
+          Text.muted "Waiting"
+          Text "{length(walkins)}" size=32 weight=700
+        Card grow gap=4
+          Text.muted "Guests waiting"
+          Text "{sum(walkins,w=>w.party)}" size=32 weight=700
+        Card grow gap=4
+          Text.muted "Free tables now"
+          Text "{count(tables,x=>x.status=="free")}" size=32 weight=700
+      Card gap=8
+        Row between middle
+          Text.strong "Walk-ins"
+          Text.caption "Timers count down from the quoted wait"
+        if length(walkins)==0
+          Text.muted "Nobody is waiting."
+        each w in walkins
+          Row gap=12 middle border-bottom=#FFE5E7EB
+            Avatar "{w.name}" size=40
+            Column grow gap=2
+              Text.strong "{w.name}"
+              Text.muted "Party of {w.party}"
+            Column gap=2 w=110
+              Text.strong "{duration(max(0,w.quote*60-(tick-w.added)))}"
+              Progress {clamp((tick-w.added)/(w.quote*60),0,1)}
+            Button.outline "Text" size=small onTap={who=w.name; msg="Hi {w.name}, we will have a table for {w.party} shortly."; open textguest}
+            Button "Seat" size=small onTap={walkins=removeWhere(walkins,x=>x.id==w.id); toast "Seating {w.name}"}
+            IconButton "close" tooltip="Remove" onTap={walkins=removeWhere(walkins,x=>x.id==w.id)}
+      Card gap=8
+        Text.strong "Tables that fit"
+        Grid cols=4 gap=12
+          each tb in filter(tables,x=>x.status=="free")
+            Card gap=4
+              Text.strong "{tb.id}"
+              Text.muted "{tb.seats} seats"
+Dialog#walkin "Add a walk-in" "Quick name and a wait quote"
+  Input "Name" "Guest name" bind=wname
+  Row gap=8 middle
+    Text.strong "Party"
+    Button.outline "-" onTap={wparty=max(1,wparty-1)}
+    Text.strong "{wparty}"
+    Button.outline "+" onTap={wparty=min(12,wparty+1)}
+  Select "Quoted wait" items=["5","10","15","20","30","45"] bind=wquote
+  Button "Add to waitlist" onTap={trim(wname)=="" ? toast "Enter a name" : {walkins=append(walkins,{"id":"w{tick}","name":wname,"party":wparty,"added":tick,"quote":wquote,"phone":""}); toast "{wname} added"; close}}
+Dialog#textguest "Text a guest" "Sent by SMS"
+  Text.muted "To {who}"
+  Input "Message" bind=msg multiline
+  Button "Send text" onTap={emit sendText {"to":who,"body":msg}; toast "Text sent to {who}"; close}
+
+### Tonight
+App
+  AppRail tab="tonight"
+  Main
+    Nav
+      Heading "Tonight" level=1
+      Text.muted "{formatDate(today(),"MMM d")}"
+    Column pad=24 gap=16 scroll
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.muted "Covers booked"
+          Text "{sum(res,r=>r.party)}" size=40 weight=700
+        Card gap=4
+          Text.muted "Walk-ins waiting"
+          Text "{sum(walkins,w=>w.party)}" size=40 weight=700
+        Card gap=4
+          Text.muted "Covers total"
+          Text "{sum(res,r=>r.party)+sum(walkins,w=>w.party)}" size=40 weight=700
+        Card gap=4
+          Text.muted "Average turn"
+          Text "{round(sum(res,r=>45+r.party*10)/length(res),0)} min" size=40 weight=700
+      Row gap=16 top
+        Card grow gap=8
+          Text.strong "Covers by hour"
+          BarChart values=[sum(filter(res,r=>r.time<60),r=>r.party),sum(filter(res,r=>r.time>=60 && r.time<120),r=>r.party),sum(filter(res,r=>r.time>=120 && r.time<180),r=>r.party),sum(filter(res,r=>r.time>=180 && r.time<240),r=>r.party),sum(filter(res,r=>r.time>=240),r=>r.party)] labels=["5pm","6pm","7pm","8pm","9pm"] h=220
+        Card grow gap=8
+          Text.strong "Tables right now"
+          Donut values=[count(tables,x=>x.status=="free"),count(tables,x=>x.status=="seated"),count(tables,x=>x.status=="ordered"),count(tables,x=>x.status=="dessert"),count(tables,x=>x.status=="paying")] labels=["Free","Seated","Ordered","Dessert","Paying"]
+      Card gap=8
+        Text.strong "Turn-time estimate by table"
+        each tb in tables
+          Row gap=12 middle
+            Text.strong "{tb.id}" w=50
+            Text.muted "{tb.seats} seats" w=80
+            Text "About {45+tb.seats*10} min a turn" grow
+            Badge.neutral "{tb.status}"
+
+define AppRail tab="floor"
+  Sidebar
+    Brand "Covers" icon="restaurant"
+    NavItem "Floor plan" icon="table_restaurant" selected={tab=="floor"} onTap={go floor}
+    NavItem "Waitlist" icon="hourglass_top" badge="{length(walkins)}" selected={tab=="waitlist"} onTap={go waitlist}
+    NavItem "Tonight" icon="insights" selected={tab=="tonight"} onTap={go tonight}
+    Spacer grow
+    Text.muted "Maria, host"
+
+define TableTile table at=0 reservations=[] onTap onDrop
+  Column gap=6 center middle h=130 drop=booking onDrop={onDrop({"table":table.id,"booking":result.data})} onTap={onTap}
+    Box w={table.shape=="rect"?160:110} h={table.shape=="rect"?80:110} radius={table.shape=="round"?55:(table.shape=="square"?10:14)} center middle fill={table.status=="free"?"#FFD1D5DB":(table.status=="seated"?"#FF60A5FA":(table.status=="ordered"?"#FFFBBF24":(table.status=="dessert"?"#FFF472B6":"#FF34D399")))} border={find(reservations,r=>r.table==table.id && r.time<=at && at<r.time+45+r.party*10)!=null ? 3 : 0}
+      Text.strong "{table.id}"
+      Text.caption "{table.seats} seats"
+    if find(reservations,r=>r.table==table.id && r.time<=at && at<r.time+45+r.party*10)!=null
+      Text.caption "{find(reservations,r=>r.table==table.id && r.time<=at && at<r.time+45+r.party*10).name} until {17+floor((find(reservations,r=>r.table==table.id && r.time<=at && at<r.time+45+r.party*10).time+45+find(reservations,r=>r.table==table.id && r.time<=at && at<r.time+45+r.party*10).party*10)/60)}:{(find(reservations,r=>r.table==table.id && r.time<=at && at<r.time+45+r.party*10).time+45+find(reservations,r=>r.table==table.id && r.time<=at && at<r.time+45+r.party*10).party*10)%60<10?"0":""}{(find(reservations,r=>r.table==table.id && r.time<=at && at<r.time+45+r.party*10).time+45+find(reservations,r=>r.table==table.id && r.time<=at && at<r.time+45+r.party*10).party*10)%60}"
+    if find(reservations,r=>r.table==table.id && r.time<=at && at<r.time+45+r.party*10)==null
+      Text.caption "Free at this time"

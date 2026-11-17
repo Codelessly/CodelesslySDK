@@ -1,0 +1,3 @@
+App: Sweeper, a mine-clearing puzzle. A grid of covered squares, tap to open one and numbers show how many neighbours hide a bomb, long press to plant a flag; opening a zero cascades outward; a counter of bombs left beside a timer; first tap always safe; a chord tap on a number opens its neighbours; size and difficulty choice including a custom one by steppers; a lost state showing wrong flags crossed; best times table.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

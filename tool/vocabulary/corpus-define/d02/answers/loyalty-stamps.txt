@@ -1,0 +1,204 @@
+### Wallet
+state cards=[{"id":"c1","shop":"Bean & Leaf Coffee","stamps":7,"total":10,"color":"#FF7C4A2D","reward":"Free flat white","expires":"Dec 14","days":27,"code":"4829 1735 0062"},{"id":"c2","shop":"Rye Street Bakery","stamps":10,"total":10,"color":"#FFB45309","reward":"Free loaf of sourdough","expires":"Dec 02","days":15,"code":"7731 0094 5521"},{"id":"c3","shop":"Petal & Stem Florist","stamps":3,"total":8,"color":"#FF15803D","reward":"Free posy","expires":"Mar 30","days":133,"code":"2210 6648 9183"}]
+state at=0
+state bonus=true
+state stampedNow=false
+state secs=120
+state redeeming=false
+every 1s when redeeming onTick={secs=max(0,secs-1)}
+App
+  Sidebar
+    Brand "Stampbook" icon="loyalty"
+    NavItem "Wallet" icon="wallet" selected={true} onTap={go wallet}
+    NavItem "Shop finder" icon="map" onTap={go shop-finder}
+    NavItem "History" icon="history" onTap={go history}
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Wallet"
+      Row gap=8
+        IconButton "notifications" tooltip="Expiry alerts" onTap={open expiry}
+        Button "Scan a stamp" icon="qr_code_scanner" onTap={stampedNow=false; open scan}
+    Column pad=24 gap=16 scroll
+      if bonus
+        Banner "Double stamp day" "Every visit today earns two stamps at Bean & Leaf and Rye Street." icon="bolt" onDismiss={bonus=false}
+      each c in cards
+        if c.days <= 30
+          Card gap=8 border-left=#FFDC2626
+            Row gap=8 middle
+              Icon "schedule" color=#FFDC2626
+              Text.strong "{c.shop} card expires in {c.days} days"
+              Spacer grow
+              Badge.warning "{c.expires}"
+      CardStack bind=at count={length(cards)}
+        each c in cards
+          StampCard shop="{c.shop}" stamps={c.stamps} total={c.total} color={c.color} reward="{c.reward}" onRedeem={at=index; secs=120; redeeming=true; open redeem}
+      Row center gap=8
+        Dots bind=at count={length(cards)}
+      Card gap=8
+        Text.strong "Next free stamp"
+        Text.muted "{cards[at].shop}: {cards[at].total - cards[at].stamps} more stamps until {cards[at].reward}."
+        Progress {cards[at].stamps / cards[at].total}
+
+Sheet#scan "Scan the code at the till"
+  ScanView hint="Point the camera at the shop's stamp code"
+  if !stampedNow
+    Button "Simulate scan" onTap={cards=updateWhere(cards,x=>x.id==cards[at].id,x=>with(x,"stamps",min(x.total,x.stamps+(bonus ? 2 : 1)))); stampedNow=true}
+  if stampedNow
+    Column center gap=8
+      Icon "verified" size=64 color=#FF15803D animate=pop duration=500
+      Text.heading "{bonus ? 2 : 1} stamp{bonus ? 's' : ''} added"
+      Text.muted "{cards[at].shop}: {cards[at].stamps} of {cards[at].total}"
+      Button "Done" onTap={emit stamped cards[at].id; close}
+
+Sheet#redeem "Redeem your reward"
+  Column center gap=12
+    Text.heading "{cards[at].reward}"
+    Text.muted "{cards[at].shop}"
+    Barcode value="{cards[at].code}" h=96
+    Row gap=8 middle center
+      Icon "timer"
+      Text.strong "{floor(secs/60)}:{secs % 60 < 10 ? '0' : ''}{secs % 60}"
+      Text.muted "left on this code"
+    if secs == 0
+      Text.danger "Code expired. Slide again for a new one."
+      Button.outline "Get a new code" onTap={secs=120}
+    SlideToConfirm "Slide to redeem" onConfirm={redeeming=false; cards=updateWhere(cards,x=>x.id==cards[at].id,x=>with(x,"stamps",0)); emit redeemed cards[at].id; toast "Reward redeemed"; close}
+
+Menu#expiry end
+  MenuItem "Rye Street Bakery: 15 days left" icon="warning" onTap={at=1; close}
+  MenuItem "Bean & Leaf Coffee: 27 days left" icon="schedule" onTap={at=0; close}
+
+### Shop finder
+state q=""
+state pick="b1"
+state shops=[{"id":"b1","name":"Bean & Leaf Coffee","street":"14 Alder Lane","dist":"0.2 mi","open":true,"stamps":"7 of 10","lat":0.32,"lng":0.41},{"id":"b2","name":"Rye Street Bakery","street":"88 Rye Street","dist":"0.4 mi","open":true,"stamps":"10 of 10","lat":0.58,"lng":0.28},{"id":"b3","name":"Petal & Stem Florist","street":"3 Mill Yard","dist":"0.9 mi","open":false,"stamps":"3 of 8","lat":0.71,"lng":0.66},{"id":"b4","name":"Corner Record Shop","street":"41 Wharf Road","dist":"1.1 mi","open":true,"stamps":"Not joined","lat":0.2,"lng":0.74}]
+App
+  Sidebar
+    Brand "Stampbook" icon="loyalty"
+    NavItem "Wallet" icon="wallet" onTap={go wallet}
+    NavItem "Shop finder" icon="map" selected={true} onTap={go shop-finder}
+    NavItem "History" icon="history" onTap={go history}
+  Main
+    Nav
+      Heading "Shop finder"
+      Input "Search shops" bind=q w=220
+    Row gap=0 top grow
+      Pane w=320 pad=16 gap=12
+        each s in shops
+          if q=="" || contains(lower(s.name),lower(q))
+            ListTile "{s.name}" "{s.street} · {s.dist}" selected={pick==s.id} onTap={pick=s.id}
+              Badge.neutral "{s.stamps}"
+      Column grow pad=16 gap=12
+        MapView h=420 pins={map(shops,s=>{"id":s.id,"label":s.name,"lat":s.lat,"lng":s.lng})} bind=pick
+        Card gap=8
+          Text.strong "{find(shops,s=>s.id==pick).name}"
+          Text.muted "{find(shops,s=>s.id==pick).street}"
+          Row gap=8
+            Badge.success "Open now" visible={find(shops,s=>s.id==pick).open}
+            Badge.neutral "Closed" visible={!find(shops,s=>s.id==pick).open}
+          Button "Directions" icon="directions" onTap={link https://maps.example.com}
+
+### History
+state filter="all"
+state visits=[{"id":"v1","shop":"Bean & Leaf Coffee","when":"Today, 8:12 am","kind":"stamp","note":"2 stamps (double stamp day)"},{"id":"v2","shop":"Rye Street Bakery","when":"Yesterday, 4:40 pm","kind":"stamp","note":"1 stamp"},{"id":"v3","shop":"Bean & Leaf Coffee","when":"Nov 12, 9:05 am","kind":"reward","note":"Redeemed a free flat white"},{"id":"v4","shop":"Petal & Stem Florist","when":"Nov 9, 1:30 pm","kind":"stamp","note":"1 stamp"},{"id":"v5","shop":"Rye Street Bakery","when":"Nov 4, 5:15 pm","kind":"stamp","note":"1 stamp"}]
+App
+  Sidebar
+    Brand "Stampbook" icon="loyalty"
+    NavItem "Wallet" icon="wallet" onTap={go wallet}
+    NavItem "Shop finder" icon="map" onTap={go shop-finder}
+    NavItem "History" icon="history" selected={true} onTap={go history}
+  Main
+    Nav
+      Heading "History"
+      Row gap=8
+        ChoiceChip "All" selected={filter=="all"} onTap={filter="all"}
+        ChoiceChip "Stamps" selected={filter=="stamp"} onTap={filter="stamp"}
+        ChoiceChip "Rewards" selected={filter=="reward"} onTap={filter="reward"}
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Text.strong "This month"
+        BarChart values=[3,5,2,4] labels=["Wk 1","Wk 2","Wk 3","Wk 4"] h=140
+      Timeline
+        each v in visits
+          if filter=="all" || filter==v.kind
+            TimelineItem "{v.shop}" "{v.note}" time="{v.when}" icon={v.kind=="reward" ? "redeem" : "approval"}
+
+// A card of one shop: its name, a grid of stamps and a redeem button once full.
+define StampCard shop="" stamps=0 total=10 color=#FF7C4A2D reward="" onRedeem
+  Column gap=12 pad=20 fill={color} radius=16
+    Row between middle
+      Text.heading "{shop}" color=#FFFFFFFF
+      Text.strong "{stamps}/{total}" color=#FFFFFFFF
+    StampGrid filled={stamps} total={total}
+    Row between middle
+      Text.small "Reward: {reward}" color=#FFFFFFFF
+      Button.elevated "Redeem" visible={stamps >= total} onTap={onRedeem}
+
+define StampGrid filled=0 total=10 cols=5
+  Grid cols={cols} gap=8
+    each i in range(total)
+      if i < filled
+        Box w=44 h=44 radius=22 fill=#FFFFFFFF center middle animate=pop
+          Icon "check" color=#FF15803D
+      if i == filled
+        Box w=44 h=44 radius=22 border=2 center middle animate=pulse
+          Icon "add" color=#FFFFFFFF
+      if i > filled
+        Box w=44 h=44 radius=22 border=1
+
+// A stack of cards flicked through; shows the one at the page index.
+define CardStack bind=at count=0
+  state at=0
+  Pages bind=at h=260 peek=0.9
+    ...
+
+define Banner "title" "text" icon="info" onDismiss
+  Row gap=12 pad=12 middle fill=#FFFEF3C7 radius=8
+    Icon "{icon}" color=#FFB45309
+    Column grow gap=2
+      Text.strong "{title}"
+      Text.small "{text}"
+    IconButton "close" tooltip="Dismiss" onTap={onDismiss}
+
+// Shows a labelled box because a camera cannot be drawn.
+define ScanView hint=""
+  Box h=240 radius=12 fill=#FF111827 center middle
+    Icon "qr_code_scanner" size=48 color=#FFFFFFFF
+    Text.small "{hint}" color=#FFFFFFFF
+
+// Shows bars of a code; a real barcode renderer is not available.
+define Barcode value="" h=96
+  Column gap=4 center
+    Row gap=2 h={h}
+      each i in range(40)
+        Box w={i % 3 == 0 ? 4 : 2} h={h} fill=#FF111827
+    Text.mono "{value}"
+
+define SlideToConfirm "label" onConfirm
+  state pos=0
+  Stack h=48 radius=24 fill=#FFE5E7EB
+    Slider bind=pos min=0 max=100 onChange={pos >= 95 ? onConfirm : toast "Keep sliding"}
+    Text.muted "{label}" center
+
+// Shows a labelled box because a real map is not available.
+define MapView h=320 pins=[] bind=pick
+  state pick=""
+  Stack h={h} radius=12 fill=#FFD1E7DD
+    Text.muted "Map" center
+    each p in pins
+      Box w=32 h=32 radius=16 fill={pick==p.id ? '#FFDC2626' : '#FF2563EB'} center middle onTap={pick=p.id}
+        Icon "place" color=#FFFFFFFF
+
+define Timeline
+  Column gap=0
+    ...
+
+define TimelineItem "title" "text" time="" icon="circle"
+  Row gap=12 top
+    IconTile "{icon}"
+    Column grow gap=2 pad=[0,0,0,16] border-left=#FFE5E7EB
+      Text.strong "{title}"
+      Text.muted "{text}"
+      Text.caption "{time}"

@@ -1,0 +1,158 @@
+### Pay
+state bay="14B"
+state rate=240
+state total=0
+state coins=[]
+state plate=["K","L","7","2","P","X"]
+state stage="insert"
+state contactless=false
+state chargeFree=false
+state freeMins=15
+state freeStart="08:00"
+state maxMins=120
+state purchase={"plate":"","mins":0,"start":"","end":"","paid":0}
+state minsLeft=0
+state mins=floor(total*60/rate)
+every 1s when minsLeft > 0 onTick={minsLeft=max(0,minsLeft-1)}
+Page
+  Nav
+    Brand "Feeder" icon="local_parking"
+    Row gap=8
+      Badge.neutral "Bay {bay}"
+      Link "Time left" onTap={go remaining}
+  Section narrow
+    Column gap=16 center
+      Lcd bay={bay} rate="{money(rate/100,'$',2)} per hour" minutes={mins}
+      if chargeFree
+        Card gap=4 fill=#FFDCFCE7
+          Row gap=8 middle
+            Icon "celebration"
+            Text.strong "No charge today"
+          Text.muted "Parking in this bay is free from 18:00 to 08:00 and all day Sunday. You do not need a ticket."
+      if !chargeFree
+        Card gap=6 fill=#FFEFF6FF
+          Row gap=8 middle
+            Icon "schedule"
+            Text.strong "Free for the first {freeMins} minutes"
+          Text.muted "Your free period starts at {freeStart}. Time you buy is added after it."
+        if mins >= maxMins
+          Card gap=4 fill=#FFFEF3C7
+            Row gap=8 middle
+              Icon "warning"
+              Text.strong "Maximum stay reached"
+            Text.muted "This bay allows {maxMins / 60} hours. Extra coins will not add time."
+        if contactless
+          Badge.info "Contactless only: coins are not accepted"
+        if stage=="insert"
+          if !contactless
+            CoinCounter coins={coins} total={total} onDrop={total=total+result; coins=append(coins,result); play tick}
+            Row gap=8 wrap center
+              Button.outline "10c" onTap={total=min(total+10, rate*maxMins/60); coins=append(coins,10); play tick}
+              Button.outline "20c" onTap={total=min(total+20, rate*maxMins/60); coins=append(coins,20); play tick}
+              Button.outline "50c" onTap={total=min(total+50, rate*maxMins/60); coins=append(coins,50); play tick}
+              Button.outline "$1" onTap={total=min(total+100, rate*maxMins/60); coins=append(coins,100); play tick}
+              Button.outline "$2" onTap={total=min(total+200, rate*maxMins/60); coins=append(coins,200); play tick}
+          Column gap=8
+            Text.fieldLabel "Number plate"
+            PlateEntry bind=plate
+          Row gap=8
+            Button.outline "Clear" grow onTap={total=0; coins=[]}
+            Button "Tap card" grow icon="contactless" onTap={total>0 ? stage="card" : toast "Choose a time first"}
+            Button "Print ticket" grow onTap={total>0 ? {purchase={"plate":join(plate,""),"mins":mins,"start":"09:12","end":"11:12","paid":total}; minsLeft=mins*60; stage="done"; emit paid total} : toast "Insert coins first"}
+          Switch "Contactless only" bind=contactless
+        if stage=="card"
+          Card gap=12 center
+            Icon "contactless" size=64
+            Text.title "Hold your card to the reader"
+            Text.muted "Amount due: {money(total/100,'$',2)}"
+            Progress 0.5 animate=pulse
+            Row gap=8
+              Button.outline "Cancel" onTap={stage="insert"}
+              Button "Simulate approval" onTap={purchase={"plate":join(plate,""),"mins":mins,"start":"09:12","end":"11:12","paid":total}; minsLeft=mins*60; stage="done"; play beep; emit paid total}
+        if stage=="done"
+          Card gap=12 center animate=pop
+            Icon "check_circle" size=64 color=#FF16A34A
+            Text.title "Payment complete"
+            Text.muted "Valid until {purchase.end} for {purchase.plate}"
+            Slip plate={purchase.plate} bay={bay} paid={purchase.paid} start={purchase.start} end={purchase.end} printing=true
+            Row gap=8
+              Button.outline "Time left" onTap={go remaining}
+              Button "New purchase" onTap={total=0; coins=[]; stage="insert"}
+      Row gap=8
+        Text.caption "Test free hours"
+        Toggle bind=chargeFree
+
+define Lcd bay="14A" rate="" minutes=0
+  Box fill=#FF0F172A radius=12 pad=16 gap=6
+    Row between
+      Text.mono "BAY {bay}" color=#FF86EFAC
+      Text.mono "{rate}" color=#FF86EFAC
+    Text.mono "{floor(minutes/60)}h {fixed(minutes%60,0)}m" size=56 weight=700 color=#FF4ADE80 center
+    Text.mono "TIME BOUGHT" color=#FF86EFAC center size=12
+
+// plays a tick sound as each coin is counted, shown here as a silent counter
+define CoinCounter coins=[] total=0 onDrop
+  Box gap=8 pad=12 radius=12 fill=#FFF1F5F9 center
+    Row gap=8 middle center
+      Icon "paid"
+      Text.strong "{length(coins)} coins"
+      Text.title "{money(total/100,'$',2)}" size=28 weight=700 animate=pulse
+    Row gap=4 wrap center
+      each c in coins
+        Box w=28 h=28 radius=14 fill=#FFFBBF24 center middle animate=slide-up
+          Text.small "{c >= 100 ? c/100 : c}"
+
+define PlateEntry bind=plate
+  state plate=["A","B","C","1","2","3"]
+  Row gap=6 center
+    each ch in plate
+      Column gap=2 center
+        IconButton "keyboard_arrow_up" tooltip="Next letter" onTap={plate=setAt(plate,index,nextChar(ch))}
+        Box w=40 h=52 radius=6 fill=#FFFFFFFF border=2 center middle
+          Text.mono "{ch}" size=28 weight=700
+        IconButton "keyboard_arrow_down" tooltip="Previous letter" onTap={plate=setAt(plate,index,prevChar(ch))}
+
+// a paper slip with a torn edge, drawn as a plain card that slides down as it prints
+define Slip plate="" bay="" paid=0 start="" end="" printing=false
+  Box w=220 pad=14 gap=4 fill=#FFFFFFFF border=1 animate={printing ? "slide-down" : "fade"} duration=900
+    Text.mono "FEEDER PARKING" center weight=700
+    Divider
+    Text.mono "Bay {bay}"
+    Text.mono "Plate {plate}"
+    Text.mono "From {start}"
+    Text.mono "Until {end}"
+    Text.mono "Paid {money(paid/100,'$',2)}"
+    Divider
+    Text.mono "DISPLAY ON DASHBOARD" center size=11
+
+### Remaining
+state minsLeft=0
+state purchase={"plate":"","mins":0,"start":"","end":"","paid":0}
+Page
+  Nav
+    Brand "Feeder" icon="local_parking"
+    Link "Back to meter" onTap={go pay}
+  Section narrow
+    Column gap=16 center
+      Heading "Time remaining" level=1
+      if purchase.mins == 0
+        Card gap=8 center
+          Icon "history" size=48
+          Text.title "No recent purchase"
+          Text.muted "Buy time at the meter and it will show here."
+          Button "Buy time" onTap={go pay}
+      if purchase.mins > 0
+        Card gap=12 center
+          Text.muted "Last purchase, plate {purchase.plate}"
+          Ring {minsLeft / (purchase.mins*60)} size=180
+          Text.mono "{duration(minsLeft)}" size=44 weight=700 center
+          Progress {minsLeft / (purchase.mins*60)}
+          Row between
+            Text.caption "Started {purchase.start}"
+            Text.caption "Ends {purchase.end}"
+          if minsLeft < 600 && minsLeft > 0
+            Badge.warning "Under 10 minutes left"
+          if minsLeft == 0
+            Badge.error "Expired"
+          Text.muted "Paid {money(purchase.paid/100,'$',2)}"
+          Button "Add more time" onTap={go pay}

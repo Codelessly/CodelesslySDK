@@ -1,0 +1,106 @@
+### Check out
+project lang="English"
+project big=false
+state items=[{"id":"b1","title":"The Overstory","due":"Dec 8","hold":false},{"id":"b2","title":"Braiding Sweetgrass","due":"Dec 8","hold":false},{"id":"b3","title":"Piranesi","due":"Dec 8","hold":true}]
+state cardOn=true
+state idle=0
+state warned=false
+every 1s onTick={idle=idle+1; idle>=20 && !warned ? {warned=true; open timeout} : }
+App
+  Main
+    Nav
+      Brand "Handover" icon="local_library"
+      Row gap=12 middle
+        SegmentedButton bind=lang items=["English","Español","中文"]
+        Toggle "Large text" bind=big
+    Column pad=24 gap=16 maxw=900 center
+      Card gap=12 fill={cardOn ? #FFECFDF5 : #FFFFFBEB}
+        Row gap=12 middle
+          Icon {cardOn ? "check_circle" : "contactless"} size={big ? 48 : 32}
+          Column grow gap=4
+            Text.strong "{cardOn ? 'Library card read: Jordan Alvarez' : 'Put your library card on the pad'}" size={big ? 30 : 18}
+            Text.muted "Then place one book at a time on the shelf plate." size={big ? 24 : 14}
+        Row gap=8 middle
+          Input "Scan or type a barcode" "3 9021 0482 7716" bind=code grow
+          Button "Add" size={big ? "large" : "medium"} onTap={code=="" ? toast "Scan a book first" : {items=append(items,{"id":code,"title":"Book " + code,"due":"Dec 8","hold":false}); code=""; idle=0}}
+      Row between middle
+        Text.heading "Your items" size={big ? 32 : 20}
+        Badge.primary "{length(items)} items"
+      if length(items)==0
+        Text.muted "Nothing scanned yet." size={big ? 24 : 14}
+      each item in items
+        Column gap=4 animate=slide-up
+          ListTile "{item.title}" subtitle="Due {item.due}" leading="menu_book"
+            IconButton "close" tooltip="Remove" onTap={items=removeWhere(items,b=>b.id==item.id); idle=0}
+          if item.hold
+            Row gap=8 middle pad=8 fill=#FFFEE2E2 radius=6
+              Icon "block" color=#FFDC2626
+              Text "On hold for another patron. Please give this book to the desk." color=#FFDC2626 size={big ? 22 : 14}
+    Footer
+      Row between middle
+        Button.outline "Fines: $4.50" icon="receipt" onTap={go fines}
+        Button "Finish" size={big ? "large" : "medium"} onTap={go finish}
+  Dialog#timeout "Still there?" "This session ends soon."
+    Text.muted "Touch the screen to keep going."
+    Progress bind=left
+    state left=1
+    every 1s when warned onTick={left=max(0,left-0.1); left<=0 ? {close; items=[]; warned=false; idle=0; go check-out} : }
+    Button "Keep going" onTap={warned=false; idle=0; left=1; close}
+
+### Finish
+state receipt="print"
+state sent=false
+App
+  Main
+    Nav
+      Button.ghost "Back" icon="arrow_back" onTap={go check-out}
+      Heading "Finish" level=1
+    Column pad=24 gap=16 maxw=720 center
+      Card gap=12
+        Text.heading "Items borrowed: {length(items)}" size={big ? 32 : 20}
+        each item in filter(items,b=>!b.hold)
+          Row between
+            Text "{item.title}" size={big ? 26 : 16}
+            Text.muted "Due {item.due}" size={big ? 26 : 16}
+        if any(items,b=>b.hold)
+          Text.danger "{count(items,b=>b.hold)} held item stays at the desk."
+      Card gap=12
+        Text.strong "How would you like your receipt?"
+        Row gap=12
+          ChoiceChip "Print" icon="print" selected={receipt=="print"} onTap={receipt="print"}
+          ChoiceChip "Email" icon="mail" selected={receipt=="email"} onTap={receipt="email"}
+        if receipt=="email"
+          Input "Email" "you@example.com" type=email bind=email
+      Button "Done" size=large onTap={receipt=="email" && trim(email)=="" ? toast "Enter an email" : {emit finish receipt; sent=true; toast receipt=="print" ? "Printing receipt" : "Receipt sent"; items=[]; go check-out}}
+
+### Fines
+state method="card"
+state fines=[{"id":"f1","title":"Educated","days":6,"amount":1.5},{"id":"f2","title":"The Road","days":12,"amount":3.0}]
+App
+  Main
+    Nav
+      Button.ghost "Back" icon="arrow_back" onTap={go check-out}
+      Heading "Fines" level=1
+    Column pad=24 gap=16 maxw=720 center
+      Card gap=8
+        each f in fines
+          Row between middle
+            Column
+              Text.strong "{f.title}" size={big ? 26 : 16}
+              Text.muted "{f.days} days late"
+            Text.strong "{money(f.amount,'$',2)}"
+        Divider
+        Row between
+          Text.heading "Total"
+          Text.heading "{money(sum(fines,f=>f.amount),'$',2)}"
+      Button "Pay by card" icon="credit_card" size=large onTap={open pay}
+  Dialog#pay "Pay by card" "Tap, insert or swipe your card"
+    CardReader amount={sum(fines,f=>f.amount)} onPaid={fines=[]; close; toast "Paid. Thank you"}
+    Button.outline "Cancel" onTap={close}
+
+// A payment terminal cannot be drawn here: shown as a labelled box.
+define CardReader amount=0 onPaid
+  Column gap=12 center pad=16 fill=#FFF3F4F6 radius=8
+    Icon "contactless" size=48
+    Text.strong "Card terminal: {money(amount,'$',2)}"
+    Button "Simulate payment" onTap={onPaid}

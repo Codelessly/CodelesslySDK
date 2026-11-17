@@ -1,0 +1,188 @@
+### Subscriptions
+state yearly=false
+state subs=[{"id":1,"name":"Netflix","cat":"Streaming","price":15.49,"cycle":"monthly","next":"Nov 19","days":2,"color":"#FFDC2626","rise":0,"trial":false},{"id":2,"name":"Spotify","cat":"Music","price":11.99,"cycle":"monthly","next":"Nov 22","days":5,"color":"#FF16A34A","rise":1.0,"trial":false},{"id":3,"name":"Notion","cat":"Work","price":96,"cycle":"yearly","next":"Nov 28","days":11,"color":"#FF111827","rise":0,"trial":false},{"id":4,"name":"Figma","cat":"Work","price":15,"cycle":"monthly","next":"Dec 02","days":15,"color":"#FF7C3AED","rise":0,"trial":false},{"id":5,"name":"Headspace","cat":"Health","price":12.99,"cycle":"monthly","next":"Nov 21","days":4,"color":"#FFF59E0B","rise":0,"trial":true},{"id":6,"name":"iCloud+","cat":"Storage","price":2.99,"cycle":"monthly","next":"Dec 05","days":18,"color":"#FF2563EB","rise":0.5,"trial":false}]
+state sel=0
+state dismissed=false
+state catalogue=["Netflix","Spotify","Disney+","YouTube Premium","Dropbox","Adobe Creative Cloud","ChatGPT Plus","Duolingo"]
+state pick=""
+state newName=""
+state newPrice=""
+state newCycle="Monthly"
+state newFirst=""
+state newRemind="3 days before"
+state newCat="Streaming"
+state steps=["Open the Account page and choose Membership","Select Cancel membership","Confirm on the last screen and keep the confirmation email","Remove the card from the service so it cannot renew"]
+App
+  Sidebar
+    Brand "Recurring" icon="autorenew"
+    NavItem "Subscriptions" icon="list_alt" selected={true}
+    NavItem "Calendar" icon="calendar_month" onTap={go calendar}
+    NavItem "Insights" icon="donut_large" badge="2" onTap={go insights}
+    Spacer grow
+    Text.muted "Mia Johnson"
+  Main
+    Nav
+      Heading "Subscriptions" level=1
+      Row gap=8
+        Button.outline "Add by hand" icon="edit" onTap={open addManual}
+        Button "Add from catalogue" icon="add" onTap={open addCatalogue}
+    Column pad=24 gap=16 scroll
+      if !dismissed && any(subs, s=>s.trial)
+        Card gap=8 fill=#FFFEF3C7
+          Row between middle
+            Row gap=12 middle
+              Icon "hourglass_bottom"
+              Column gap=2
+                Text.strong "Your Headspace free trial ends in 4 days"
+                Text.small "You will be charged $12.99 on Nov 21 unless you cancel first."
+            Row gap=8
+              Button.outline "How to cancel" onTap={sel=5; open cancelGuide}
+              IconButton "close" tooltip="Dismiss" onTap={dismissed=true}
+      Card gap=12
+        Row between middle
+          Column gap=4
+            Text.muted "{yearly ? 'Yearly total' : 'Monthly total'}"
+            Text "{money(yearly ? sum(subs, s=>s.cycle=='yearly' ? s.price : s.price*12) : sum(subs, s=>s.cycle=='yearly' ? s.price/12 : s.price), '$', 2)}" size=48 weight=700
+            Text.muted "{length(subs)} active subscriptions"
+          Row gap=8 middle
+            Text.small "Monthly"
+            Toggle bind=yearly
+            Text.small "Yearly"
+      each s in filter(subs, x=>x.rise>0)
+        Card gap=8 fill=#FFFEE2E2
+          Row between middle
+            Row gap=8 middle
+              Icon "trending_up"
+              Text "{s.name} is going up by {money(s.rise,'$',2)} a month from Dec 1."
+            Button.outline "Review" onTap={sel=s.id; open cancelGuide}
+      Text.sectionTitle "Next payments"
+      Card gap=0
+        each s in sortBy(subs, x=>x.days)
+          Row between middle pad=12 border-bottom=#FFE5E7EB
+            Row gap=12 middle grow
+              Avatar "{s.name}" size=40
+              Column gap=2
+                Text.strong "{s.name}"
+                Text.muted "{s.cat} - {s.cycle} - next {s.next}"
+            Row gap=12 middle
+              Badge.neutral "{s.days} days left" hide=phone
+              if s.trial
+                Badge.warning "Trial"
+              Text.strong "{money(s.price,'$',2)}" w=80 right
+              IconButton "more_vert" tooltip="More" onTap={sel=s.id; open rowMenu}
+  Menu#rowMenu end
+    MenuItem "Cancel guide" icon="help_outline" onTap={open cancelGuide}
+    MenuItem "Remind me" icon="notifications" onTap={toast "Reminder set"}
+    MenuItem "Remove" icon="delete" onTap={subs=removeWhere(subs, x=>x.id==sel); toast "Removed"}
+  Sheet#cancelGuide "How to cancel"
+    each step in steps
+      Row gap=12 top
+        Badge.primary "{indexOf(steps, step)+1}"
+        Text "{step}"
+    Row gap=8 end
+      Button.outline "Close" onTap={close}
+      Button.destructive "I cancelled it" onTap={subs=removeWhere(subs, x=>x.id==sel); toast "Marked as cancelled"; close}
+  Dialog#addCatalogue "Add from catalogue" "Pick a service and set the details"
+    Select "Service" items={catalogue} bind=pick
+    Input "Price" type=number bind=newPrice
+    SegmentedButton items=["Monthly","Yearly"] bind=newCycle
+    DatePicker "First bill" bind=newFirst
+    Select "Remind me" items=["Same day","1 day before","3 days before","1 week before"] bind=newRemind
+    Button "Add" onTap={pick=="" ? toast "Choose a service" : {subs=append(subs, {"id":length(subs)+10,"name":pick,"cat":"Other","price":coalesce(newPrice,0),"cycle":lower(newCycle),"next":formatDate(newFirst,"MMM d"),"days":7,"color":"#FF2563EB","rise":0,"trial":false}); toast "Added {pick}"; close}}
+  Dialog#addManual "Add by hand" "For anything not in the catalogue"
+    Input "Name" bind=newName
+    Select "Category" items=["Streaming","Music","Work","Health","Storage","Other"] bind=newCat
+    Input "Price" type=number bind=newPrice
+    SegmentedButton items=["Monthly","Yearly"] bind=newCycle
+    DatePicker "First bill" bind=newFirst
+    Select "Remind me" items=["Same day","1 day before","3 days before","1 week before"] bind=newRemind
+    Button "Add" onTap={newName=="" ? toast "Name it first" : {subs=append(subs, {"id":length(subs)+10,"name":newName,"cat":newCat,"price":coalesce(newPrice,0),"cycle":lower(newCycle),"next":formatDate(newFirst,"MMM d"),"days":7,"color":"#FF2563EB","rise":0,"trial":false}); toast "Added {newName}"; newName=""; close}}
+
+### Calendar
+state subs=[{"id":1,"name":"Netflix","price":15.49,"day":19},{"id":2,"name":"Spotify","price":11.99,"day":22},{"id":3,"name":"Notion","price":96,"day":28},{"id":4,"name":"Figma","price":15,"day":2},{"id":5,"name":"Headspace","price":12.99,"day":21},{"id":6,"name":"iCloud+","price":2.99,"day":5}]
+state day=19
+// A month grid with a mark on the days that carry a payment; a tap picks a day.
+define PaymentCalendar "title" marks=[] startOffset=0 days=30 selected=0 onPick
+  Card gap=8
+    Text.strong "{title}"
+    Grid cols=7 gap=4
+      each d in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+        Text.caption "{d}" center
+      each i in range(startOffset)
+        Box h=48
+      each n in range(days)
+        Box h=48 radius=8 center middle fill={selected==n+1 ? '#FFDBEAFE' : (any(marks, m=>m.day==n+1) ? '#FFF3F4F6' : '#00000000')} onTap={onPick(n+1)}
+          Text "{n+1}"
+          if any(marks, m=>m.day==n+1)
+            Box w=6 h=6 radius=3 fill=#FF2563EB
+App
+  Sidebar
+    Brand "Recurring" icon="autorenew"
+    NavItem "Subscriptions" icon="list_alt" onTap={go subscriptions}
+    NavItem "Calendar" icon="calendar_month" selected={true}
+    NavItem "Insights" icon="donut_large" badge="2" onTap={go insights}
+    Spacer grow
+    Text.muted "Mia Johnson"
+  Main
+    Nav
+      Heading "Calendar" level=1
+      Text.muted "November 2026"
+    Column pad=24 gap=16 scroll
+      Row gap=24 top
+        Column grow gap=12
+          PaymentCalendar "November 2026" marks={subs} startOffset=6 selected={day} onPick={day=result}
+        Column w=320 gap=12
+          Card gap=8
+            Text.strong "Nov {day}"
+            if !any(subs, s=>s.day==day)
+              Text.muted "No payments this day."
+            each s in filter(subs, x=>x.day==day)
+              Row between middle
+                Row gap=8 middle
+                  Avatar "{s.name}" size=32
+                  Text "{s.name}"
+                Text.strong "{money(s.price,'$',2)}"
+          Card gap=8
+            Text.strong "Due this month"
+            Text "{money(sum(subs, s=>s.price),'$',2)}" size=32 weight=700
+            Text.muted "{length(subs)} payments"
+
+### Insights
+state subs=[{"id":1,"name":"Netflix","cat":"Streaming","price":15.49,"rise":0},{"id":2,"name":"Spotify","cat":"Music","price":11.99,"rise":1.0},{"id":3,"name":"Notion","cat":"Work","price":8,"rise":0},{"id":4,"name":"Figma","cat":"Work","price":15,"rise":0},{"id":5,"name":"Headspace","cat":"Health","price":12.99,"rise":0},{"id":6,"name":"iCloud+","cat":"Storage","price":2.99,"rise":0.5}]
+state cats=["Streaming","Music","Work","Health","Storage"]
+state sel=0
+state steps=["Open the Account page and choose Membership","Select Cancel membership","Confirm on the last screen and keep the confirmation email","Remove the card from the service so it cannot renew"]
+App
+  Sidebar
+    Brand "Recurring" icon="autorenew"
+    NavItem "Subscriptions" icon="list_alt" onTap={go subscriptions}
+    NavItem "Calendar" icon="calendar_month" onTap={go calendar}
+    NavItem "Insights" icon="donut_large" badge="2" selected={true}
+    Spacer grow
+    Text.muted "Mia Johnson"
+  Main
+    Nav
+      Heading "Insights" level=1
+    Column pad=24 gap=16 scroll
+      Grid cols=2 gap=16
+        Card gap=12
+          Text.strong "Spend by category"
+          Donut values={map(cats, c=>sum(filter(subs, s=>s.cat==c), s=>s.price))} labels={cats} h=220
+        Card gap=12
+          Text.strong "Price rises"
+          each s in filter(subs, x=>x.rise>0)
+            Row between middle
+              Column gap=2
+                Text.strong "{s.name}"
+                Text.muted "{money(s.price,'$',2)} to {money(s.price+s.rise,'$',2)} a month"
+              Row gap=8 middle
+                Badge.error "+{money(s.rise,'$',2)}"
+                Button.outline "Cancel guide" onTap={sel=s.id; open guide}
+          if count(subs, x=>x.rise>0)==0
+            Text.muted "No price rises announced."
+  Sheet#guide "How to cancel"
+    each step in steps
+      Row gap=12 top
+        Badge.primary "{indexOf(steps, step)+1}"
+        Text "{step}"
+    Button.destructive "I cancelled it" onTap={subs=removeWhere(subs, x=>x.id==sel); toast "Marked as cancelled"; close}

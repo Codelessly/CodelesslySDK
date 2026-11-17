@@ -1,0 +1,206 @@
+### Ride
+project slots=["time","distance","cadence","power","hr"] saved
+state tab="ride"
+state speed=32.4
+state elapsed=4328
+state idle=0
+state autoPause=true
+state laps=[{"n":1,"time":"22:41","avg":31.2}]
+state lapStart=0
+state metrics=[{"key":"time","label":"Time","value":"1:12:08","unit":""},{"key":"distance","label":"Distance","value":"38.6","unit":"km"},{"key":"cadence","label":"Cadence","value":"88","unit":"rpm"},{"key":"power","label":"Power","value":"214","unit":"W"},{"key":"hr","label":"Heart rate","value":"148","unit":"bpm"}]
+every 1s when !(autoPause && idle>=3) onTick={elapsed=elapsed+1}
+every 1s when autoPause && speed<2 onTick={idle=idle+1}
+App
+  Sidebar
+    Brand "Cadence" icon="pedal_bike"
+    NavItem "Ride" icon="speed" selected={tab=="ride"} onTap={tab="ride"}
+    NavItem "Layout" icon="dashboard_customize" onTap={go setup}
+    NavItem "Route" icon="route" onTap={go route}
+    NavItem "Summary" icon="insights" onTap={go summary}
+    Spacer grow
+    Toggle "Auto pause" bind=autoPause
+  Main
+    Nav
+      Heading "Morning loop" level=1
+      Row gap=8
+        if autoPause && idle>=3
+          Badge.warning "Auto paused"
+        Badge.success "GPS locked"
+        Button.outline "Lap" icon="flag" onTap={laps=append(laps,{"n":length(laps)+1,"time":duration(elapsed-lapStart),"avg":speed}); lapStart=elapsed; toast "Lap {length(laps)+1} started"}
+    Column pad=24 gap=16
+      Card gap=4 center
+        Text.muted "Speed"
+        Text "{fixed(speed,1)}" size=120 weight=700
+        Text.muted "km/h"
+        Row gap=8 center
+          Button.secondary "Simulate stop" onTap={speed=0}
+          Button.secondary "Pedal on" onTap={speed=29.8; idle=0}
+      Grid cols=3 gap=12
+        each key in slots
+          MetricTile label={find(metrics,m=>m.key==key).label} value={find(metrics,m=>m.key==key).value} unit={find(metrics,m=>m.key==key).unit}
+      Card gap=8
+        Row between
+          Text.strong "Laps"
+          Text.muted "Lap {length(laps)+1} running {duration(elapsed-lapStart)}"
+        each lap in laps
+          ListTile "Lap {lap.n}" "{lap.time} at {lap.avg} km/h avg"
+
+### Layout and Sensors
+project slots=["time","distance","cadence","power","hr"] saved
+state pool=[{"key":"time","label":"Time"},{"key":"distance","label":"Distance"},{"key":"cadence","label":"Cadence"},{"key":"power","label":"Power"},{"key":"hr","label":"Heart rate"},{"key":"speedavg","label":"Avg speed"},{"key":"elev","label":"Elevation"}]
+state sensors=[{"id":"hrm","name":"Wahoo TICKR","kind":"Heart rate","bars":4,"on":true},{"id":"pwr","name":"Stages Power L","kind":"Power","bars":3,"on":true},{"id":"cad","name":"Garmin Cadence 2","kind":"Cadence","bars":2,"on":true},{"id":"spd","name":"Bryton Speed","kind":"Speed","bars":1,"on":false}]
+App
+  Sidebar
+    Brand "Cadence" icon="pedal_bike"
+    NavItem "Ride" icon="speed" onTap={go ride}
+    NavItem "Layout" icon="dashboard_customize" selected
+    NavItem "Route" icon="route" onTap={go route}
+    NavItem "Summary" icon="insights" onTap={go summary}
+  Main
+    Nav
+      Heading "Ride screen layout" level=1
+      Button "Done" onTap={go ride}
+    Column pad=24 gap=16
+      Text.muted "Drag a metric onto a slot to place it. Dropping on a slot replaces what was there."
+      Card gap=8
+        Text.strong "Slots"
+        Grid cols=3 gap=12
+          each slot in slots
+            Box pad=12 radius=8 fill=#FF1F2937 gap=4 drop=metric onDrop={slots=setAt(slots,index,result.data)} drag=metric(slot)
+              Text.caption "Slot {index+1}" color=#FF9CA3AF
+              Text.strong "{find(pool,p=>p.key==slot).label}" color=#FFFFFFFF
+      Card gap=8
+        Text.strong "Available metrics"
+        Row scroll gap=8
+          each p in pool
+            Chip "{p.label}" icon="drag_indicator" drag=metric(p.key)
+      Card gap=8
+        Row between
+          Text.strong "Sensors"
+          Button.outline "Scan" icon="bluetooth_searching" onTap={toast "Scanning for sensors"}
+        each s in sensors
+          ListTile "{s.name}" "{s.kind}"
+            Row gap=12 middle
+              SignalBars level={s.bars} max=4
+              Toggle bind=s.on
+
+### Route and Climb
+state tab="route"
+state distToTurn=180
+state nextTurn="Left onto Mill Lane"
+state progress=0.41
+state grade=7.2
+state climbPoints=[12,14,18,26,34,48,62,70,74,72,76,82]
+App
+  Sidebar
+    Brand "Cadence" icon="pedal_bike"
+    NavItem "Ride" icon="speed" onTap={go ride}
+    NavItem "Layout" icon="dashboard_customize" onTap={go setup}
+    NavItem "Route" icon="route" selected
+    NavItem "Summary" icon="insights" onTap={go summary}
+  Main
+    Nav
+      Heading "Route" level=1
+      SegmentedButton items=["Map","Climb"] bind=tab
+    Column pad=24 gap=16
+      if distToTurn<=200
+        Card fill=#FFFEF3C7 gap=4 animate=pulse
+          Row gap=12 middle
+            Icon "turn_left" size=40
+            Column grow
+              Text.strong "In {distToTurn} m"
+              Text "{nextTurn}"
+            Button.outline "Dismiss" onTap={distToTurn=999}
+      if tab=="Map"
+        RouteMap h=320 points=[[0,0],[1,0.4],[1.6,1.2],[2.8,1.5],[3.4,2.6],[4.6,2.9]] progress={progress} warning={distToTurn<=200}
+        Row gap=12
+          Card grow gap=2
+            Text.muted "Remaining"
+            Text.heading "21.4 km"
+          Card grow gap=2
+            Text.muted "ETA"
+            Text.heading "10:42"
+      if tab=="Climb"
+        Card gap=12
+          Row between
+            Text.strong "Cote de Verrieres"
+            Badge.warning "{grade}% now"
+          ElevationProfile values={climbPoints} here={4} unit="m" h=200
+          Row gap=12
+            Column grow
+              Text.muted "Length"
+              Text.strong "2.1 km"
+            Column grow
+              Text.muted "Gain"
+              Text.strong "148 m"
+            Column grow
+              Text.muted "Avg grade"
+              Text.strong "7.0%"
+
+### Ride Summary
+state tab="overview"
+state laps=[{"n":1,"time":"22:41","avg":31.2},{"n":2,"time":"24:03","avg":28.7},{"n":3,"time":"21:12","avg":33.4}]
+App
+  Sidebar
+    Brand "Cadence" icon="pedal_bike"
+    NavItem "Ride" icon="speed" onTap={go ride}
+    NavItem "Layout" icon="dashboard_customize" onTap={go setup}
+    NavItem "Route" icon="route" onTap={go route}
+    NavItem "Summary" icon="insights" selected
+  Main
+    Nav
+      Heading "Morning loop, Sat 15 Nov" level=1
+      Button.outline "Share" icon="share" onTap={open share}
+    Column pad=24 gap=16
+      RouteMap h=280 points=[[0,0],[1,0.4],[1.6,1.2],[2.8,1.5],[3.4,2.6],[4.6,2.9],[5.2,1.8],[3.9,0.6],[1.8,-0.3],[0,0]] progress=1
+      Grid cols=4 gap=12
+        Card gap=2
+          Text.muted "Distance"
+          Text.heading "62.4 km"
+        Card gap=2
+          Text.muted "Moving time"
+          Text.heading "2:08:15"
+        Card gap=2
+          Text.muted "Avg power"
+          Text.heading "196 W"
+        Card gap=2
+          Text.muted "Elevation"
+          Text.heading "684 m"
+      Card gap=8
+        Text.strong "Speed (km/h)"
+        LineChart values=[0,24,31,33,29,18,9,27,34,36,30,22] labels=["0","10","20","30","40","50","60","70","80","90","100","110"] h=160
+      Card gap=8
+        Text.strong "Heart rate"
+        AreaChart values=[96,128,142,151,148,166,158,139,152,160,144,120] h=160
+      Card gap=8
+        Text.strong "Laps"
+        each lap in laps
+          ListTile "Lap {lap.n}" "{lap.time} at {lap.avg} km/h avg"
+  Sheet#share "Share ride"
+    Button "Copy link" icon="link" onTap={toast "Link copied"; close}
+    Button.outline "Export FIT file" icon="download" onTap={emit export; close}
+
+// A map with a drawn line; shown as a labelled box because the core has no map
+define RouteMap points=[] progress=0 warning=false h=240
+  Box h={h} radius=12 fill=#FFE5E7EB pad=12 gap=4 border={warning ? 2 : 0}
+    Text.caption "Route map, {length(points)} points, {round(progress*100,0)}% ridden"
+    Progress {progress}
+    if warning
+      Badge.warning "Turn ahead"
+
+define MetricTile label="" value="" unit=""
+  Card gap=2
+    Text.caption "{label}"
+    Row gap=4 middle
+      Text "{value}" size=40 weight=700
+      Text.muted "{unit}"
+
+define SignalBars level=0 max=4
+  Row gap=2 bottom
+    each i in range(max)
+      Box w=5 h={6+i*5} radius=1 fill={i<level ? #FF16A34A : #FFD1D5DB}
+
+define ElevationProfile values=[] here=0 unit="m" h=160
+  Stack h={h}
+    AreaChart values={values} h={h}
+    Badge.info "{values[here]} {unit}"

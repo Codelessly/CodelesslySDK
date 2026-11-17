@@ -1,0 +1,3 @@
+App: Passing On, an elder care handover. A shift note screen with a person's photo and a care plan summary as short lines; tasks for the shift as ticks (breakfast, medicine, walk) with times and who did them; medicines given logged with a time and a hold to confirm; a mood chosen from faces and a pain scale along a line; a free-text note saved and marked for the next carer; an alert for a fall with a call list; a visit log with arrival and leave times.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

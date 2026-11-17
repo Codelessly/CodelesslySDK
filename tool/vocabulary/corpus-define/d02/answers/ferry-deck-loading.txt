@@ -1,0 +1,173 @@
+### Deck Plan
+state vehicles=[{"id":1,"plate":"LK21 VWA","kind":"car","len":4.5,"weight":1.4,"lane":"U1","pos":0},{"id":2,"plate":"BX70 HTR","kind":"lorry","len":12,"weight":32,"lane":"L1","pos":0},{"id":3,"plate":"YN19 OPD","kind":"van","len":5.8,"weight":3.2,"lane":"","pos":0},{"id":4,"plate":"HG68 KTE","kind":"lorry","len":14,"weight":38,"lane":"","pos":0},{"id":5,"plate":"MC 4412","kind":"bike","len":2.2,"weight":0.3,"lane":"","pos":0},{"id":6,"plate":"SA22 JJF","kind":"car","len":4.3,"weight":1.6,"lane":"","pos":0}]
+state lanes=[{"id":"U1","deck":"upper","cap":40,"x":-6},{"id":"U2","deck":"upper","cap":40,"x":-2},{"id":"U3","deck":"upper","cap":40,"x":2},{"id":"U4","deck":"upper","cap":40,"x":6},{"id":"L1","deck":"lower","cap":48,"x":-4},{"id":"L2","deck":"lower","cap":48,"x":0},{"id":"L3","deck":"lower","cap":48,"x":4}]
+state deck="upper"
+state secs=5400
+state placed=[]
+state sel=0
+every 1s onTick={secs=max(0,secs-1)}
+App
+  Sidebar
+    Brand "Roll On" icon="directions_boat"
+    NavItem "Deck plan" icon="view_quilt" selected={true}
+    NavItem "Load order" icon="format_list_numbered" onTap={go load-order}
+    NavItem "Sailing" icon="schedule" onTap={go sailing}
+    Spacer grow
+    Text.muted "MV Corran, 14:30 to Oban"
+  Main
+    Nav
+      Heading "Deck plan" level=1
+      Row gap=8
+        Countdown "Departs in" seconds={secs} warnBelow=900
+        Button "Add vehicle" icon="add" onTap={open addveh}
+    Column pad=24 gap=16 scroll
+      if abs(sum(filter(vehicles,v=>v.lane!=""),v=>v.weight*find(lanes,l=>l.id==v.lane).x))/max(1,sum(filter(vehicles,v=>v.lane!=""),v=>v.weight)) > 1.5
+        Card fill=#FFFEE2E2 gap=4
+          Row gap=8 middle
+            Icon "warning" color=#FFB91C1C
+            Text.strong "Trim warning: the ship is listing. Move weight towards the lighter side." color=#FF991B1B
+      SegmentedButton bind=deck items=["upper","lower"]
+      Card gap=12
+        Row between
+          Text.strong "{upper(deck)} deck, bow to the right"
+          Text.muted "{count(vehicles,v=>v.lane!='')} of {length(vehicles)} vehicles placed"
+        each lane in filter(lanes,l=>l.deck==deck)
+          Lane lane={lane} vehicles={vehicles} selected={sel} onDrop={ (lane.deck != "lower" && find(vehicles,v=>v.id==result.data).kind == "lorry") ? toast "Lorries go on the lower deck" : (sum(filter(vehicles,v=>v.lane==lane.id),v=>v.len) + find(vehicles,v=>v.id==result.data).len > lane.cap ? toast "Lane {lane.id} is full" : vehicles=updateWhere(vehicles,v=>v.id==result.data,v=>with(with(v,"lane",lane.id),"pos",sum(filter(vehicles,w=>w.lane==lane.id),w=>w.len)))) } onPick={sel=result}
+      Grid cols=2 gap=16
+        Card gap=12
+          Text.strong "Port to starboard"
+          TrimNeedle value={sum(filter(vehicles,v=>v.lane!=""),v=>v.weight*find(lanes,l=>l.id==v.lane).x)/max(1,sum(filter(vehicles,v=>v.lane!=""),v=>v.weight))} min=-6 max=6 leftLabel="Port" rightLabel="Starboard" limit=1.5
+          Text.muted "Load {fixed(sum(filter(vehicles,v=>v.lane!=""),v=>v.weight),1)} t on board"
+        Card gap=12
+          Text.strong "Bow to stern"
+          Progress {(sum(filter(vehicles,v=>v.lane!=""),v=>v.weight*(v.pos+v.len/2))/max(1,sum(filter(vehicles,v=>v.lane!=""),v=>v.weight)))/48}
+          Row between
+            Text.muted "Stern"
+            Text.muted "Bow"
+      Card gap=8
+        Text.strong "Waiting on the quay"
+        Row scroll gap=8
+          each v in filter(vehicles,v=>v.lane=="")
+            VehicleBox vehicle={v} drag=veh(v.id) onTap={sel=v.id}
+  Dialog#addveh "Add a vehicle" "Plate, type and length"
+    Input "Plate" "AB12 CDE" bind=plate
+    Select "Type" bind=kind items=["car","van","lorry","bike"]
+    Input "Length (m)" type=number bind=length
+    Input "Weight (t)" type=number bind=wt
+    Button "Add to quay" onTap={trim(plate)=="" ? toast "Enter a plate" : (vehicles=append(vehicles,{"id":length(vehicles)+1,"plate":upper(plate),"kind":kind,"len":length,"weight":wt,"lane":"","pos":0}); plate=""; close)}
+
+### Load Order
+App
+  Sidebar
+    Brand "Roll On" icon="directions_boat"
+    NavItem "Deck plan" icon="view_quilt" onTap={go deck-plan}
+    NavItem "Load order" icon="format_list_numbered" selected={true}
+    NavItem "Sailing" icon="schedule" onTap={go sailing}
+    Spacer grow
+    Text.muted "MV Corran, 14:30 to Oban"
+  Main
+    Nav
+      Heading "Load order" level=1
+      Row gap=8
+        Countdown "Departs in" seconds={secs} warnBelow=900
+        Button.outline "Clear plan" onTap={vehicles=map(vehicles,v=>with(v,"lane",""))}
+    Column pad=24 gap=16 scroll
+      Text.muted "Vehicles board lane by lane, lower deck first, front of each lane first. The list follows the plan."
+      Card gap=0
+        Row pad=8 border-bottom=#FFE5E7EB
+          Text.caption "#" w=36
+          Text.caption "Plate" w=110
+          Text.caption "Type" w=70
+          Text.caption "Lane" w=60
+          Text.caption "Length" w=70 hide=phone
+          Text.caption "Weight" grow hide=phone
+        each v in sortBy(filter(vehicles,v=>v.lane!=""),v=>(find(lanes,l=>l.id==v.lane).deck=="lower"?0:100)+indexOf(map(lanes,l=>l.id),v.lane)*10+v.pos/100)
+          Row pad=8 middle border-bottom=#FFF3F4F6 onTap={sel=v.id; go deck-plan}
+            Text.strong "{index+1}" w=36
+            Text "{v.plate}" w=110
+            Badge.neutral "{v.kind}" w=70
+            Text "{v.lane}" w=60
+            Text "{v.len} m" w=70 hide=phone
+            Text "{v.weight} t" grow hide=phone
+      if count(vehicles,v=>v.lane=="")>0
+        Card gap=8
+          Text.strong "Not yet placed"
+          each v in filter(vehicles,v=>v.lane=="")
+            ListTile "{v.plate}" "{v.kind}, {v.len} m"
+              Button.outline "Place" onTap={go deck-plan}
+
+### Sailing
+App
+  Sidebar
+    Brand "Roll On" icon="directions_boat"
+    NavItem "Deck plan" icon="view_quilt" onTap={go deck-plan}
+    NavItem "Load order" icon="format_list_numbered" onTap={go load-order}
+    NavItem "Sailing" icon="schedule" selected={true}
+    Spacer grow
+    Text.muted "MV Corran, 14:30 to Oban"
+  Main
+    Nav
+      Heading "Sailing" level=1
+      Countdown "Departs in" seconds={secs} warnBelow=900
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=8
+          Text.muted "Lane space used"
+          Text "{round(100*sum(filter(vehicles,v=>v.lane!=""),v=>v.len)/sum(lanes,l=>l.cap),0)}%" size=40 weight=700
+        Card gap=8
+          Text.muted "Weight on board"
+          Text "{fixed(sum(filter(vehicles,v=>v.lane!=""),v=>v.weight),1)} t" size=40 weight=700
+        Card gap=8
+          Text.muted "Lorries on lower deck"
+          Text "{count(vehicles,v=>v.kind=="lorry"&&v.lane!=""&&find(lanes,l=>l.id==v.lane).deck=="lower")} of {count(vehicles,v=>v.kind=="lorry")}" size=40 weight=700
+      Card gap=12
+        Text.strong "Lanes"
+        each lane in lanes
+          Row between middle
+            Text "{lane.deck} {lane.id}" w=110
+            Progress {sum(filter(vehicles,v=>v.lane==lane.id),v=>v.len)/lane.cap} grow
+            if sum(filter(vehicles,v=>v.lane==lane.id),v=>v.len)>=lane.cap-2
+              Badge.error "Full"
+            else
+              Text.muted "{fixed(lane.cap-sum(filter(vehicles,v=>v.lane==lane.id),v=>v.len),1)} m free" w=90
+      Row gap=12
+        Button "Close loading" icon="lock" onTap={count(vehicles,v=>v.lane=="")>0 ? toast "Vehicles still on the quay" : (emit closeLoading; toast "Loading closed")}
+        Button.outline "Back to plan" onTap={go deck-plan}
+
+// A countdown to a sailing; turns red below warnBelow seconds. Shows as a labelled figure.
+define Countdown "label" seconds=0 warnBelow=600
+  Row gap=8 middle
+    Icon "schedule" color={seconds<warnBelow ? "#FFDC2626" : "#FF475569"}
+    Column gap=0
+      Text.caption "{label}"
+      Text.strong "{duration(seconds)}" color={seconds<warnBelow ? "#FFDC2626" : "#FF111827"}
+
+// A box for one vehicle, scaled by its length and tinted by its kind.
+define VehicleBox vehicle={} scale=10 onTap
+  Column center middle gap=2 w={max(36,vehicle.len*scale)} h=44 radius=4 fill={vehicle.kind=="lorry" ? "#FFF59E0B" : vehicle.kind=="van" ? "#FF60A5FA" : vehicle.kind=="bike" ? "#FF86EFAC" : "#FFA5B4FC"} onTap={onTap}
+    Text.small "{vehicle.plate}" color=#FF111827
+    Text.small "{vehicle.len} m" color=#FF111827
+
+// One lane of the deck: a long strip with its vehicles in order, a gap marker and a full marker. Vehicles are dropped onto it.
+define Lane lane={} vehicles=[] selected=0 onDrop onPick
+  Row gap=8 middle
+    Text.strong "{lane.id}" w=32
+    Row scroll grow gap=2 h=52 pad=4 radius=6 fill=#FFE5E7EB drop=veh onDrop={onDrop}
+      each v in sortBy(filter(vehicles,v=>v.lane==lane.id),v=>v.pos)
+        VehicleBox vehicle={v} onTap={onPick(v.id)}
+    if sum(filter(vehicles,v=>v.lane==lane.id),v=>v.len)>=lane.cap-2
+      Badge.error "Full"
+    else
+      Text.muted "{fixed(lane.cap-sum(filter(vehicles,v=>v.lane==lane.id),v=>v.len),1)} m" w=60
+
+// A needle between two ends (port and starboard); a real dial is drawn as a labelled track with a marker.
+define TrimNeedle value=0 min=-6 max=6 leftLabel="" rightLabel="" limit=1.5
+  Column gap=6
+    Stack h=24
+      Box h=8 radius=4 fill=#FFE5E7EB
+      Box w={(2*limit)/(max-min)*260} h=8 radius=4 fill=#FFBBF7D0
+      Icon "arrow_drop_down" color={abs(value)>limit ? "#FFDC2626" : "#FF111827"}
+    Row between
+      Text.muted "{leftLabel}"
+      Text.strong "{fixed(value,1)}" color={abs(value)>limit ? "#FFDC2626" : "#FF111827"}
+      Text.muted "{rightLabel}"

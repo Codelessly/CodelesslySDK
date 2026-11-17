@@ -1,0 +1,159 @@
+### Gallery Wall
+state lang="en"
+state centuryFrom=1400
+state centuryTo=2000
+state sel=""
+state at=0
+state idle=0
+state circles=[{"id":1,"name":"Circle 1","x":0.2,"y":0.3,"color":"#FF2563EB"},{"id":2,"name":"Circle 2","x":0.7,"y":0.6,"color":"#FFDC2626"}]
+state works=[{"id":"w1","title":"Girl with a Pearl Earring","artist":"Johannes Vermeer","year":1665,"url":"https://images.museum.example/vermeer-pearl.jpg"},{"id":"w2","title":"The Night Watch","artist":"Rembrandt van Rijn","year":1642,"url":"https://images.museum.example/nightwatch.jpg"},{"id":"w3","title":"Wheatfield with Crows","artist":"Vincent van Gogh","year":1890,"url":"https://images.museum.example/crows.jpg"},{"id":"w4","title":"The Birth of Venus","artist":"Sandro Botticelli","year":1485,"url":"https://images.museum.example/venus.jpg"},{"id":"w5","title":"Water Lilies","artist":"Claude Monet","year":1916,"url":"https://images.museum.example/lilies.jpg"},{"id":"w6","title":"The Kiss","artist":"Gustav Klimt","year":1908,"url":"https://images.museum.example/kiss.jpg"},{"id":"w7","title":"Self-Portrait with Fur Coat","artist":"Albrecht Durer","year":1500,"url":"https://images.museum.example/durer.jpg"},{"id":"w8","title":"Composition VIII","artist":"Wassily Kandinsky","year":1923,"url":"https://images.museum.example/comp8.jpg"}]
+state spots=[{"x":0.46,"y":0.38,"text":"The pearl is painted with just two strokes: a bright highlight and a soft reflected glow."},{"x":0.62,"y":0.2,"text":"The blue turban uses natural ultramarine, then costlier than gold."},{"x":0.5,"y":0.62,"text":"The dark ground was once a deep green glaze that has faded over time."}]
+state related=[{"id":"w5","title":"Water Lilies"},{"id":"w6","title":"The Kiss"},{"id":"w3","title":"Wheatfield with Crows"},{"id":"w8","title":"Composition VIII"}]
+every 1s when idle < 90 onTick={idle=idle+1}
+every 1s when idle == 90 onTick={sel=""; centuryFrom=1400; centuryTo=2000; lang="en"; circles=[]; idle=91; go attract}
+App
+  Main
+    Nav
+      Brand "Gallery Wall" icon="museum"
+      Row gap=12
+        Text.muted "{count(works, w => w.year >= centuryFrom && w.year <= centuryTo)} works shown"
+        LanguageSwitch bind=lang languages=["en","fr","de","nl","ja"] onChange={idle=0}
+        Button.outline "New circle" icon="add_circle" onTap={circles=append(circles,{"id":length(circles)+1,"name":"Circle {length(circles)+1}","x":0.5,"y":0.5,"color":"#FF059669"}); idle=0}
+        Button.ghost "Reset" icon="restart_alt" onTap={sel=""; centuryFrom=1400; centuryTo=2000; circles=[]; idle=0}
+    Column grow gap=0
+      DriftingWall grow items={filter(works, w => w.year >= centuryFrom && w.year <= centuryTo)} speed=12 columns=6 onDrag={idle=0} onPick={sel=result; idle=0; open work}
+        each c in circles
+          TouchCircle x={c.x} y={c.y} color={c.color} label={c.name} radius=120 onMove={circles=updateWhere(circles, k => k.id == c.id, k => with(with(k,"x",result.x),"y",result.y)); idle=0} onClose={circles=removeWhere(circles, k => k.id == c.id)}
+      Box pad=[24,12,24,16] fill=#FF111827
+        Text "Slide to choose a century" color=#FFE5E7EB size=14
+        TimelineSlider min=1400 max=2000 step=100 from={centuryFrom} to={centuryTo} marks=["1400","1500","1600","1700","1800","1900","2000"] onChange={centuryFrom=result.from; centuryTo=result.to; idle=0}
+
+Dialog#work "{find(works, w => w.id == sel).title}" "{find(works, w => w.id == sel).artist}, {find(works, w => w.id == sel).year}"
+  Column gap=12 w=960
+    HotspotImage h=420 src="{find(works, w => w.id == sel).url}" hotspots={spots} maxZoom=6 onHotspot={at=result; open note}
+    Text.muted "Pinch to zoom. Tap a dot to read about a detail."
+    Text.strong "Related works"
+    RelatedStrip items={related} onPick={sel=result; idle=0}
+    Row between
+      Button.outline "Full details" onTap={go work-detail}
+      Button "Close" onTap={close}
+
+Popover#note
+  Column gap=8 w=300
+    Text.strong "Detail {at+1} of {length(spots)}"
+    Text "{spots[at].text}"
+    Row gap=8
+      Button.ghost "Previous" onTap={at=max(0,at-1)}
+      Button.ghost "Next" onTap={at=min(length(spots)-1,at+1)}
+
+### Work Detail
+state sel="w1"
+state lang="en"
+state favorites=[]
+state works=[{"id":"w1","title":"Girl with a Pearl Earring","artist":"Johannes Vermeer","year":1665,"medium":"Oil on canvas","size":"44.5 x 39 cm","room":"Room 12","url":"https://images.museum.example/vermeer-pearl.jpg","story":"A tronie, a study of a face rather than a portrait of a sitter. The identity of the girl has never been established."}]
+state spots=[{"x":0.46,"y":0.38,"text":"The pearl is painted with just two strokes."},{"x":0.62,"y":0.2,"text":"The blue turban uses natural ultramarine."}]
+state circleNotes={"1":"Saved for later by Circle 1"}
+App
+  Main
+    Nav
+      Row gap=8
+        IconButton "arrow_back" tooltip="Back to the wall" onTap={go gallery-wall}
+        Heading "{works[0].title}" level=1
+      Row gap=8
+        LanguageSwitch bind=lang languages=["en","fr","de","nl","ja"]
+        IconButton "share" tooltip="Send to my phone" onTap={open share}
+    Row gap=24 pad=24 top
+      Column grow gap=8
+        HotspotImage h=560 src="{works[0].url}" hotspots={spots} maxZoom=8 onHotspot={toast spots[result].text}
+        Text.caption "Pinch to zoom, drag to look around."
+      Column w=320 gap=16
+        Card gap=8
+          Text.strong "{works[0].artist}, {works[0].year}"
+          Text.muted "{works[0].medium}"
+          Text.muted "{works[0].size}"
+          Row gap=8
+            Icon "place"
+            Text.muted "{works[0].room}"
+        Text "{works[0].story}"
+        Row gap=8
+          Button "Save to my circle" icon="bookmark" onTap={favorites=append(favorites,works[0].id); toast "Saved"}
+          Button.outline "Listen" icon="headphones" onTap={emit audio works[0].id}
+        Text.strong "Related works"
+        RelatedStrip items={[{"id":"w5","title":"Water Lilies"},{"id":"w6","title":"The Kiss"}]} onPick={sel=result; go gallery-wall}
+
+Sheet#share "Send to my phone"
+  Column gap=12 center
+    QRCode value="https://museum.example/works/{sel}" size=200
+    Text.muted "Scan with your phone camera"
+    Button "Done" onTap={close}
+
+### Attract
+state lang="en"
+state started=false
+state works=[{"id":"w1","url":"https://images.museum.example/vermeer-pearl.jpg"},{"id":"w2","url":"https://images.museum.example/nightwatch.jpg"},{"id":"w3","url":"https://images.museum.example/crows.jpg"},{"id":"w4","url":"https://images.museum.example/venus.jpg"}]
+Page
+  Section center bleed
+    Stack center middle h=720
+      DriftingWall items={works} speed=6 columns=4 dim=0.55
+      Column center gap=16
+        Heading "Touch to begin" level=1 animate=pulse duration=1800
+        Text.muted "Explore 600 years of art together. Up to six people can play at once."
+        LanguageSwitch bind=lang languages=["en","fr","de","nl","ja"]
+        Button "Start exploring" size=large onTap={go gallery-wall}
+
+define LanguageSwitch bind=lang languages=["en"] onChange
+  state lang="en"
+  SegmentedButton items={languages} bind=lang onChange={onChange(result)}
+
+// Drifting thumbnails: a canvas that slowly moves and follows a drag; shown as a grid of tiles here.
+define DriftingWall items=[] speed=10 columns=6 dim=0 onDrag onPick
+  state offset=0
+  every 1s onTick={offset=offset+speed}
+  Stack onSwipeLeft={offset=offset+200; onDrag(offset)} onSwipeRight={offset=offset-200; onDrag(offset)}
+    Grid cols={columns} gap=8 pad=8
+      each w in items
+        Image "{w.url}" h=160 radius=6 onTap={onPick(w.id)}
+    Box fill=#FF000000 w=fill h=fill
+    ...
+
+// A circle of one visitor's own touch space on the wall, shown as a draggable ring with a label.
+define TouchCircle x=0.5 y=0.5 color="#FF2563EB" label="" radius=100 onMove onClose
+  Stack
+    Ring 1 size={radius*2} color={color}
+    Row gap=4
+      Text.small "{label}" color={color}
+      IconButton "close" tooltip="Remove circle" onTap={onClose}
+
+// A century range slider with tick labels; the draggable handles are shown as two sliders.
+define TimelineSlider min=0 max=100 step=1 from=0 to=100 marks=[] onChange
+  state lo=0
+  state hi=100
+  Column gap=4
+    Slider bind=lo min={min} max={max} step={step} onChange={lo=result; onChange({"from":lo,"to":hi})}
+    Slider bind=hi min={min} max={max} step={step} onChange={hi=result; onChange({"from":lo,"to":hi})}
+    Row between
+      each m in marks
+        Text.small "{m}" color=#FF9CA3AF
+
+// A picture you pinch to zoom, with dots over it that open short texts.
+define HotspotImage src="" hotspots=[] maxZoom=4 onHotspot
+  state zoom=1
+  Stack onTap={zoom=min(maxZoom,zoom+1)}
+    Image "{src}" h=fill radius=8
+    each s in hotspots
+      Box w=24 h=24 radius=12 fill=#FFFFFFFF border=2 onTap={onHotspot(indexOf(hotspots,s))}
+        Icon "add"
+    Text.small "x{zoom}" color=#FFFFFFFF
+
+// A horizontal strip of related works.
+define RelatedStrip items=[] onPick
+  Row scroll gap=12
+    each r in items
+      Card gap=4 w=160 onTap={onPick(r.id)}
+        Box h=100 fill=#FFE5E7EB radius=6
+        Text.small "{r.title}"
+
+// A QR code, shown as a labelled box since no code can be drawn here.
+define QRCode value="" size=160
+  Box w={size} h={size} fill=#FFFFFFFF border=1 pad=8
+    Text.caption "{value}"

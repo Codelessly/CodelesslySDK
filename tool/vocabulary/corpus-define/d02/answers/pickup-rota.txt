@@ -1,0 +1,207 @@
+### Week
+state view="week"
+state sel=""
+state target=""
+state people=[{"name":"Maya Reyes","color":"#FFDBEAFE"},{"name":"Tom Okafor","color":"#FFDCFCE7"},{"name":"Priya Nair","color":"#FFFEF3C7"},{"name":"Luis Ortega","color":"#FFFCE7F3"}]
+state days=["Mon","Tue","Wed","Thu","Fri"]
+state rota=[{"id":"mon-am","day":"Mon","slot":"Morning","adult":"Maya Reyes","kids":"Ella, Noah"},{"id":"mon-pm","day":"Mon","slot":"Afternoon","adult":"Tom Okafor","kids":"Ella, Noah"},{"id":"tue-am","day":"Tue","slot":"Morning","adult":"Priya Nair","kids":"Ella, Arjun"},{"id":"tue-pm","day":"Tue","slot":"Afternoon","adult":"","kids":"Ella, Arjun"},{"id":"wed-am","day":"Wed","slot":"Morning","adult":"Luis Ortega","kids":"Sofia"},{"id":"wed-pm","day":"Wed","slot":"Afternoon","adult":"Maya Reyes","kids":"Sofia, Noah"},{"id":"thu-am","day":"Thu","slot":"Morning","adult":"Tom Okafor","kids":"Noah"},{"id":"thu-pm","day":"Thu","slot":"Afternoon","adult":"Priya Nair","kids":"Arjun"},{"id":"fri-am","day":"Fri","slot":"Morning","adult":"Maya Reyes","kids":"Ella, Noah"},{"id":"fri-pm","day":"Fri","slot":"Afternoon","adult":"","kids":"Ella, Noah"}]
+state requests=[{"id":"r1","cell":"thu-pm","from":"Priya Nair","to":"Luis Ortega","status":"pending"}]
+state clubs=[{"kid":"Noah","day":"Tue","note":"Chess club until 4:30"},{"kid":"Sofia","day":"Thu","note":"Swimming until 5:00"}]
+state me="Maya Reyes"
+App
+  Sidebar
+    Brand "Gate Duty" icon="school"
+    NavItem "Week" icon="view_week" selected={view=="week"} onTap={view="week"}
+    NavItem "Month" icon="calendar_month" selected={view=="month"} onTap={view="month"}
+    NavItem "Requests" icon="swap_horiz" badge="{count(requests,r=>r.status=='pending')}" onTap={open requests}
+    NavItem "Pickup code" icon="qr_code" onTap={open code}
+    Spacer grow
+    Text.muted "Signed in as {me}"
+  Main
+    Nav
+      Heading "Pickup rota, week of 17 Nov" level=1
+      Row gap=8
+        Button.outline "Gate map" onTap={open gate}
+        Button.outline "Late note" onTap={open late}
+        Button "Remind me" onTap={open reminder}
+    Column pad=24 gap=16 scroll
+      if count(rota,c=>c.adult=="")>0
+        Card fill=#FFFEE2E2 gap=4
+          Text.danger "{count(rota,c=>c.adult=='')} slots have nobody on the gate"
+          Text.muted "Drag a name from below onto a red cell to fill it."
+      if view=="week"
+        Text.strong "Drag a name onto a slot"
+        Row gap=8 scroll
+          each p in people
+            Chip "{p.name}" fill={p.color} drag=adult(p.name)
+        Card gap=8
+          Row gap=8
+            Text.strong "" w=90
+            each d in days
+              Text.strong "{d}" grow center
+          each slot in ["Morning","Afternoon"]
+            Row gap=8 top
+              Text.muted "{slot}" w=90
+              each d in days
+                each c in filter(rota,x=>x.day==d && x.slot==slot)
+                  Box grow gap=4 pad=10 radius=8 fill={c.adult=="" ? "#FFFEE2E2" : find(people,p=>p.name==c.adult).color} border={c.adult=="" ? 2 : 0} border-color=#FFDC2626 drop=adult onDrop={rota=updateWhere(rota,x=>x.id==c.id,x=>with(x,"adult",result.data))} onTap={sel=c.id; open cell}
+                    if c.adult==""
+                      Row gap=4 middle
+                        Icon "warning" color=#FFDC2626
+                        Text.danger "Gap"
+                    if c.adult!=""
+                      Text.strong "{c.adult}"
+                    Text.small "{c.kids}"
+        Card gap=8
+          Text.strong "After-school clubs"
+          each k in clubs
+            ListTile "{k.kid}, {k.day}" subtitle="{k.note}" icon="sports_soccer"
+          Button.ghost "Add a club" onTap={open club}
+      if view=="month"
+        MonthView bind=day marks={map(rota,c=>{"date":c.day,"label":c.adult,"gap":c.adult==""})} onSelect={day=result; open day}
+
+Menu#cellmenu
+  MenuItem "Ask someone to swap" icon="swap_horiz" onTap={open swap}
+  MenuItem "Clear this slot" icon="delete" onTap={rota=updateWhere(rota,x=>x.id==sel,x=>with(x,"adult",""))}
+
+Dialog#cell "{find(rota,x=>x.id==sel).day} {find(rota,x=>x.id==sel).slot}" "{find(rota,x=>x.id==sel).kids}"
+  Text "On the gate: {coalesce(find(rota,x=>x.id==sel).adult,'nobody')}"
+  Row gap=8
+    Button "Ask to swap" onTap={close; open swap}
+    Button.outline "Take it myself" onTap={rota=updateWhere(rota,x=>x.id==sel,x=>with(x,"adult",me)); close; toast "Slot is yours"}
+
+Dialog#swap "Ask for a swap" "Pick the adult you want to swap with"
+  Select "Swap with" items={map(filter(people,p=>p.name!=me),p=>p.name)} bind=target
+  Input "Message" "Can you cover this one?" bind=swapnote multiline
+  Button "Send request" onTap={target=="" ? toast "Choose someone" : {requests=append(requests,{"id":concat([sel],[target]),"cell":sel,"from":me,"to":target,"status":"pending"}); emit swapRequest sel; toast "Request sent"; close}}
+
+Dialog#requests "Swap requests"
+  each r in requests
+    Card gap=8
+      Text.strong "{r.from} asks {r.to} to take {r.cell}"
+      Badge.warning "{r.status}"
+      if r.status=="pending"
+        Row gap=8
+          Button "Accept" onTap={requests=updateWhere(requests,x=>x.id==r.id,x=>with(x,"status","accepted")); rota=updateWhere(rota,x=>x.id==r.cell,x=>with(x,"adult",r.to)); toast "Swapped"}
+          Button.outline "Decline" onTap={requests=updateWhere(requests,x=>x.id==r.id,x=>with(x,"status","declined"))}
+
+Dialog#club "Add a regular club"
+  Input "Child" bind=clubkid
+  Select "Day" items=["Mon","Tue","Wed","Thu","Fri"] bind=clubday
+  Input "What and until when" bind=clubnote
+  Button "Save" onTap={clubs=append(clubs,{"kid":clubkid,"day":clubday,"note":clubnote}); close}
+
+Dialog#day "{day}"
+  each c in filter(rota,x=>x.day==day)
+    ListTile "{c.slot}: {coalesce(c.adult,'nobody')}" subtitle="{c.kids}"
+
+### Alerts
+state lead=30
+state chimeOn=true
+state noteKey="running late"
+state sent=false
+Page
+  Nav
+    Brand "Gate Duty" icon="school"
+    Row gap=4
+      Link "Week" onTap={go week}
+      Link "Alerts" onTap={go alerts}
+  Section narrow
+    Heading "Reminder and late note" level=1
+    Card gap=12
+      Heading "Chime before pickup" level=3
+      Toggle "Play a chime" bind=chimeOn
+      Slider bind=lead min=5 max=60
+      Text.muted "Chimes {lead} minutes before your slot, with the gate map"
+      Chime when={chimeOn} minutes={lead} onPlay={emit chime}
+    Card gap=12
+      Heading "School gate map" level=3
+      GateMap pin="Gate B, Elm Street" onTap={open mapbig}
+    Card gap=12
+      Heading "Late note" level=3
+      Text.muted "Tap a key to message the school office"
+      Row gap=8
+        each k in ["running late","child unwell","someone else collecting","at the gate"]
+          LateKey "{k}" selected={noteKey==k} onTap={noteKey=k}
+      Button "Send to school" onTap={sent=true; emit lateNote noteKey; toast "Message sent to the school"}
+      if sent
+        Text.success "Sent: {noteKey}"
+    Card gap=12
+      Heading "Pickup code for the teacher" level=3
+      PickupCode value="GD-4821" label="Show at the classroom door" ttl=300
+  Footer
+    Text.muted "Gate Duty, Oakfield Primary"
+
+Lightbox#mapbig "School gate map" "Gate B opens at 3:10"
+  GateMap pin="Gate B, Elm Street"
+
+Dialog#reminder "Reminder set"
+  Text "You will hear a chime {lead} minutes before."
+  Button "OK" onTap={close}
+
+### Month
+state month="Nov"
+state picked=""
+state weeks=[{"d":"Mon 3","who":"Maya","gap":false},{"d":"Tue 4","who":"","gap":true},{"d":"Wed 5","who":"Priya","gap":false},{"d":"Thu 6","who":"Tom","gap":false},{"d":"Fri 7","who":"Luis","gap":false}]
+App
+  Sidebar
+    Brand "Gate Duty" icon="school"
+    NavItem "Week" icon="view_week" onTap={go week}
+    NavItem "Month" icon="calendar_month" selected={true}
+  Main
+    Nav
+      Heading "{month} 2026" level=1
+      Row gap=8
+        IconButton "chevron_left" tooltip="Previous month" onTap={month="Oct"}
+        IconButton "chevron_right" tooltip="Next month" onTap={month="Dec"}
+        Button.outline "Pickup code" onTap={open code}
+    Column pad=24 gap=16
+      MonthView bind=picked marks={weeks} onSelect={open daysheet}
+      Row gap=12
+        Badge.danger "Red day: nobody on the gate"
+        Badge.primary "Coloured by person"
+
+Sheet#daysheet "{picked}"
+  Text "Who is on the gate"
+  Button "Ask for a swap" onTap={close; emit swapRequest picked}
+
+Dialog#code "Pickup code" "For the teacher"
+  PickupCode value="GD-4821" label="Show at the classroom door" ttl=300
+  Button "Done" onTap={close}
+
+define MonthView bind=day marks=[] onSelect
+  state day=""
+  Card gap=8
+    Grid cols=7 gap=4
+      each h in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+        Text.muted "{h}" center
+      each n in range(30)
+        Box pad=8 radius=6 fill={day==n+1 ? "#FFDBEAFE" : "#00000000"} onTap={day=n+1; onSelect(n+1)}
+          Text "{n+1}" center
+    Text.small "Red marks days with a gap"
+
+// shows a sound as a labelled box; no audio is played here
+define Chime when=true minutes=30 onPlay
+  Box pad=12 radius=8 fill=#FFEEF2FF
+    Row gap=8 middle
+      Icon "notifications_active"
+      Text "Chime sound, {minutes} minutes ahead"
+      Button.outline "Test" onTap={onPlay}
+
+// a real map and floor plan are shown as a labelled box with the pin text
+define GateMap pin="" onTap
+  Box h=160 pad=12 radius=8 fill=#FFE0F2FE center middle onTap={onTap}
+    Icon "place" color=#FFDC2626
+    Text.strong "{pin}"
+    Text.small "School gate map"
+
+define LateKey "label" selected=false onTap
+  ChoiceChip "{label}" selected={selected} onTap={onTap}
+
+// the code is drawn as a labelled box, not a scannable image
+define PickupCode value="" label="" ttl=300
+  Card gap=8 center
+    Text "{label}" center
+    Box pad=16 radius=8 fill=#FF111827
+      Text "{value}" size=40 weight=700 color=#FFFFFFFF center
+    Text.small "Valid for {ttl} seconds"

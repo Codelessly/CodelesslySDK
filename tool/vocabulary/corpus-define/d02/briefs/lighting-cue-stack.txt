@@ -1,0 +1,3 @@
+App: Followspot, a stage lighting desk. A cue list as rows (number, name, fade time, wait) with the live cue marked and the next cue ready; a go button that fires with a visible crossfade bar; channels as vertical faders with levels typed or dragged; a group of lamps picked by touching a stage plan; colour mixing with three sliders and a swatch; a blackout key that pulses; record the current look as a new cue between two others.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

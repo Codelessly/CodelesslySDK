@@ -1,0 +1,168 @@
+### Spectrum
+state tab="spectrum"
+state lo=400
+state hi=700
+state matched=[{"name":"H-alpha","nm":656},{"name":"Na D","nm":589},{"name":"H-beta","nm":486}]
+state showLines=true
+state exposure=120
+state running=false
+state remaining=120
+state target="Vega"
+every 1s when running onTick={remaining=max(0,remaining-1); running=remaining>0}
+App
+  Sidebar
+    Brand "Stellarline" icon="auto_awesome"
+    NavItem "Spectrum" icon="show_chart" selected={tab=="spectrum"} onTap={go spectrum}
+    NavItem "Calibration" icon="tune" selected={tab=="calibration"} onTap={go calibration}
+    NavItem "Stack" icon="layers" selected={tab=="stack"} onTap={go stack}
+    NavItem "Targets" icon="public" badge="6" selected={tab=="targets"} onTap={go targets}
+    Spacer grow
+    Text.muted "Night 14, Mt. Kessler"
+  Main
+    Nav
+      Heading "{target} spectrum"
+      Row gap=8
+        Button.outline "Reset zoom" onTap={lo=400; hi=700}
+        Button "Start exposure" onTap={open exposure}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=12
+          Row between
+            Text.strong "Brightness vs wavelength"
+            Text.muted "{lo} to {hi} nm"
+          SpectrumChart values=[12,14,13,30,18,16,40,22,19,15,28,17,14,13,12] from=400 to=700 lines={matched} zoomFrom={lo} zoomTo={hi} h=280 onZoom={lo=result.from; hi=result.to} onLineTap={toast "{result.name} at {result.nm} nm"}
+          Toggle "Mark matched lines" bind=showLines
+        Pane w=320 gap=12
+          Text.strong "Matched lines"
+          each m in matched
+            ListTile "{m.name}" subtitle="{m.nm} nm" trailing="matched" onTap={toast "{m.name}: {m.nm} nm"}
+          Button.outline "Match a line" onTap={open pick}
+      Card gap=8
+        Text.strong "Exposure"
+        Row gap=16 middle
+          Slider bind=exposure min=10 max=600
+          Text.strong "{exposure} s"
+        Row gap=16 middle
+          Ring {1-remaining/exposure}
+          Column gap=4
+            Text.heading "{duration(remaining)} left"
+            Text.muted "{running ? 'Integrating' : 'Idle'}"
+          Spacer grow
+          Button.destructive "Stop" hidden={!running} onTap={running=false}
+Dialog#exposure "Start exposure" "Integrate {target}"
+  Text "Exposure time: {exposure} s"
+  Slider bind=exposure min=10 max=600
+  Button "Begin" onTap={remaining=exposure; running=true; close}
+Dialog#pick "Match a line" "Name the dip"
+  Select "Line" bind=lineName items=["H-alpha","H-beta","Na D","Ca K","Mg b"]
+  Input "Wavelength (nm)" bind=lineNm type=number
+  Button "Add" onTap={matched=append(matched,{"name":lineName,"nm":lineNm}); close}
+
+### Calibration
+state tab="calibration"
+state peaks=[]
+state refs=[{"peak":0,"nm":0}]
+state lamp="Neon"
+state calibrated=false
+App
+  Sidebar
+    Brand "Stellarline" icon="auto_awesome"
+    NavItem "Spectrum" icon="show_chart" selected={tab=="spectrum"} onTap={go spectrum}
+    NavItem "Calibration" icon="tune" selected={tab=="calibration"} onTap={go calibration}
+    NavItem "Stack" icon="layers" selected={tab=="stack"} onTap={go stack}
+    NavItem "Targets" icon="public" selected={tab=="targets"} onTap={go targets}
+    Spacer grow
+    Text.muted "Night 14, Mt. Kessler"
+  Main
+    Nav
+      Heading "Lamp calibration"
+      Select bind=lamp items=["Neon","Argon","ThAr"]
+    Column pad=24 gap=16
+      Card gap=12
+        Text.strong "Tap two peaks"
+        SpectrumChart values=[2,3,2,40,3,2,2,55,4,2,3,30,2,2] from=0 to=1024 peaksSelected={peaks} maxPeaks=2 h=240 onPeakTap={peaks=length(peaks)<2 ? append(peaks,result.x) : peaks}
+        Row gap=8
+          each p in peaks
+            Chip "Peak at pixel {p}" onTap={peaks=without(peaks,p)}
+      if length(peaks)==2
+        Card gap=12
+          Text.strong "Known wavelengths"
+          Row gap=12 top
+            Input "First peak (nm)" bind=nm1 type=number grow
+            Input "Second peak (nm)" bind=nm2 type=number grow
+          Button "Apply calibration" onTap={calibrated=nm1!="" && nm2!="" ? true : false; calibrated ? toast "Calibrated: {fixed(abs(nm2-nm1)/abs(peaks[1]-peaks[0]),3)} nm per pixel" : toast "Enter both wavelengths"}
+      if calibrated
+        Badge.success "Calibrated with {lamp}"
+      Button.ghost "Clear peaks" onTap={peaks=[]; calibrated=false}
+
+### Stack
+state tab="stack"
+state exposures=[{"id":1,"noise":9.4,"on":true},{"id":2,"noise":6.8,"on":true},{"id":3,"noise":5.5,"on":true},{"id":4,"noise":4.9,"on":true},{"id":5,"noise":4.2,"on":false}]
+App
+  Sidebar
+    Brand "Stellarline" icon="auto_awesome"
+    NavItem "Spectrum" icon="show_chart" selected={tab=="spectrum"} onTap={go spectrum}
+    NavItem "Calibration" icon="tune" selected={tab=="calibration"} onTap={go calibration}
+    NavItem "Stack" icon="layers" selected={tab=="stack"} onTap={go stack}
+    NavItem "Targets" icon="public" selected={tab=="targets"} onTap={go targets}
+    Spacer grow
+    Text.muted "Night 14, Mt. Kessler"
+  Main
+    Nav
+      Heading "Averaged stack"
+      Button "Save stack" onTap={emit saveStack; toast "Stack saved"}
+    Column pad=24 gap=16
+      Card gap=12
+        Row between
+          Text.strong "Noise level"
+          Text.muted "{count(exposures,e=>e.on)} of {length(exposures)} exposures averaged"
+        LineChart values=map(filter(exposures,e=>e.on),e=>e.noise) labels=map(filter(exposures,e=>e.on),e=>"#{e.id}") h=200
+      Card gap=8
+        Text.strong "Exposures"
+        each e in exposures
+          Row between middle
+            Checkbox "Exposure {e.id}" bind=e.on
+            Text.mono "noise {e.noise}"
+            IconButton "delete" tooltip="Remove" onTap={exposures=removeWhere(exposures,x=>x.id==e.id)}
+
+### Targets
+state tab="targets"
+state targets=[{"name":"Vega","alt":78,"type":"A0 star"},{"name":"Deneb","alt":64,"type":"A2 supergiant"},{"name":"M57 Ring Nebula","alt":71,"type":"Planetary nebula"},{"name":"Betelgeuse","alt":32,"type":"M1 supergiant"},{"name":"Sirius","alt":18,"type":"A1 star"},{"name":"Capella","alt":55,"type":"G-type binary"}]
+state sel=""
+App
+  Sidebar
+    Brand "Stellarline" icon="auto_awesome"
+    NavItem "Spectrum" icon="show_chart" selected={tab=="spectrum"} onTap={go spectrum}
+    NavItem "Calibration" icon="tune" selected={tab=="calibration"} onTap={go calibration}
+    NavItem "Stack" icon="layers" selected={tab=="stack"} onTap={go stack}
+    NavItem "Targets" icon="public" selected={tab=="targets"} onTap={go targets}
+    Spacer grow
+    Text.muted "Night 14, Mt. Kessler"
+  Main
+    Nav
+      Heading "Tonight's targets"
+      Text.muted "Ordered by height in the sky"
+    Column pad=24 gap=8
+      each t in sortByDesc(targets,x=>x.alt)
+        Card
+          Row between middle
+            Column gap=2
+              Text.strong "{t.name}"
+              Text.muted "{t.type}"
+            Row gap=12 middle
+              Text.strong "{t.alt} deg"
+              Button.outline "Observe" onTap={sel=t.name; open observe}
+Dialog#observe "Observe {sel}" "Set it as the current target?"
+  Button "Observe" onTap={target=sel; go spectrum; close}
+
+// A graph of brightness against wavelength: a line of values over a range, dark dips marked by name for matched lines, a box dragged to zoom, peaks that can be tapped. Drawn here as an area chart with a labelled strip, since dragging a zoom box is not drawable.
+define SpectrumChart values=[] from=400 to=700 lines=[] zoomFrom=400 zoomTo=700 peaksSelected=[] maxPeaks=2 h=240 onZoom onPeakTap onLineTap
+  Column gap=8
+    AreaChart values={values} h={h} onTap={onPeakTap({"x":from})}
+    Row between
+      Text.caption "{zoomFrom} nm"
+      Text.caption "drag a box to zoom"
+      Text.caption "{zoomTo} nm"
+    Row gap=8 scroll
+      each l in lines
+        Chip "{l.name} {l.nm}" onTap={onLineTap(l)}

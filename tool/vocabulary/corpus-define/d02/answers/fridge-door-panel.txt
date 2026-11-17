@@ -1,0 +1,205 @@
+### Family Board
+state doorOpen=true
+state note=""
+state week=[{"name":"Mum","color":"#FFDC2626","events":[{"day":0,"time":"08:30","title":"Dentist"},{"day":2,"time":"18:00","title":"Yoga"},{"day":4,"time":"19:30","title":"Dinner at Jo's"}]},{"name":"Dad","color":"#FF2563EB","events":[{"day":1,"time":"07:15","title":"Early shift"},{"day":3,"time":"17:00","title":"Football pickup"}]},{"name":"Maya","color":"#FF16A34A","events":[{"day":0,"time":"15:45","title":"Piano"},{"day":2,"time":"16:00","title":"Swim club"},{"day":5,"time":"10:00","title":"Birthday party"}]}]
+App
+  Sidebar
+    Brand "Icebox" icon="kitchen"
+    NavItem "Board" icon="dashboard" selected={true}
+    NavItem "Shopping" icon="shopping_cart" badge="3" onTap={go shopping}
+    NavItem "Inside" icon="photo_camera" onTap={go inside}
+    NavItem "Recipe" icon="restaurant_menu" onTap={go recipe}
+    Spacer grow
+    Text.muted "Thursday 17 Nov"
+  Main
+    Nav
+      Heading "This week"
+      Row gap=8
+        Button.outline "Cooling" icon="ac_unit" onTap={go inside}
+    Column pad=24 gap=16
+      AlarmBanner "Fridge door open" seconds=45 visible={doorOpen} onDismiss={doorOpen=false}
+      WeekCalendar people={week} days=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] today=3 onAdd={open addEvent}
+      Card gap=8
+        Row between
+          Text.strong "Family note"
+          Button.ghost "Clear" onTap={note=""}
+        HandwritingPad bind=note h=180 pen=#FF111827 onChange={emit noteSaved result}
+  Dialog#addEvent "Add to the board" "Who is it for, and when?"
+    Select "Person" items=["Mum","Dad","Maya"] bind=who
+    Input "What" bind=what
+    TimePicker "Time" bind=at
+    Button "Add" onTap={emit addEvent; toast "Added to the board"; close}
+
+### Shopping List
+state items=[{"id":1,"name":"Oat milk","qty":"2","left":0.1,"done":false},{"id":2,"name":"Eggs","qty":"12","left":0.2,"done":false},{"id":3,"name":"Butter","qty":"1","left":0.15,"done":false},{"id":4,"name":"Spinach","qty":"1 bag","left":0.5,"done":true}]
+state listening=false
+state heard=""
+App
+  Sidebar
+    Brand "Icebox" icon="kitchen"
+    NavItem "Board" icon="dashboard" onTap={go family-board}
+    NavItem "Shopping" icon="shopping_cart" badge="{count(items,i=>!i.done)}" selected={true}
+    NavItem "Inside" icon="photo_camera" onTap={go inside}
+    NavItem "Recipe" icon="restaurant_menu" onTap={go recipe}
+  Main
+    Nav
+      Heading "Shopping list"
+      Row gap=8
+        Button.outline "Clear ticked" icon="done_all" onTap={items=removeWhere(items,i=>i.done)}
+    Row gap=16 pad=24 top
+      Column grow gap=12
+        Card gap=8
+          Row middle gap=12
+            VoiceInput bind=heard listening={listening} prompt="Say an item, like two cartons of milk" onResult={items=append(items,{"id":length(items)+10,"name":result,"qty":"1","left":1,"done":false}); toast "Added {result}"}
+            Input "Or type an item" bind=draft grow
+            Button "Add" onTap={draft!="" ? {items=append(items,{"id":length(items)+10,"name":draft,"qty":"1","left":1,"done":false}); draft=""} : toast "Type an item first"}
+        Card gap=4
+          each item in items
+            ListTile "{item.name}" subtitle="{item.qty}" onTap={items=updateWhere(items,i=>i.id==item.id,i=>with(i,"done",!i.done))}
+              Checkbox bind=item.done
+              IconButton "delete" tooltip="Remove" onTap={items=removeWhere(items,i=>i.id==item.id)}
+      Column w=320 gap=12
+        Card gap=8
+          Text.strong "Nearly out"
+          each item in filter(items,i=>i.left<=0.2)
+            Column gap=4
+              Row between
+                Text "{item.name}"
+                Badge.warning "{round(item.left*100,0)}% left"
+              Progress {item.left}
+          if count(items,i=>i.left<=0.2)==0
+            Text.muted "Nothing is running low."
+        Button "Add all low items" onTap={emit restock; toast "Added to the order"}
+
+### Inside the Fridge
+state zone="Fridge"
+state fridgeT=3
+state freezerT=-18
+state doorOpen=false
+state tagged=true
+App
+  Sidebar
+    Brand "Icebox" icon="kitchen"
+    NavItem "Board" icon="dashboard" onTap={go family-board}
+    NavItem "Shopping" icon="shopping_cart" onTap={go shopping-list}
+    NavItem "Inside" icon="photo_camera" selected={true}
+    NavItem "Recipe" icon="restaurant_menu" onTap={go recipe}
+  Main
+    Nav
+      Heading "Inside"
+      Row gap=8
+        Toggle "Expiry tags" bind=tagged
+    Column pad=24 gap=16
+      AlarmBanner "Fridge door open" seconds=62 visible={doorOpen} onDismiss={doorOpen=false}
+      Row gap=16 top
+        Column grow gap=12
+          CameraView h=320 source="fridge-interior" onCapture={toast "Photo saved"}
+            if tagged
+              ExpiryTag "Milk" days=1 x=0.18 y=0.3
+              ExpiryTag "Chicken breast" days=2 x=0.5 y=0.42
+              ExpiryTag "Yoghurt" days=6 x=0.78 y=0.28
+              ExpiryTag "Cheddar" days=12 x=0.3 y=0.72
+          Text.muted "Tags show days until the use-by date. Red means today or tomorrow."
+        Column w=320 gap=12
+          Card gap=12
+            Text.strong "Temperature"
+            SegmentedButton items=["Fridge","Freezer"] bind=zone
+            if zone=="Fridge"
+              TempDial bind=fridgeT min=1 max=8 unit="C" onChange={emit setTemp {"zone":"fridge","value":result}}
+            if zone=="Freezer"
+              TempDial bind=freezerT min=-24 max=-14 unit="C" onChange={emit setTemp {"zone":"freezer","value":result}}
+          Card gap=8
+            Text.strong "Door"
+            Button.outline "Test the door alarm" onTap={doorOpen=true}
+
+### Recipe Steps
+state step=0
+state steps=[{"title":"Heat the pan","text":"Warm 2 tbsp olive oil in a wide pan over medium heat."},{"title":"Soften the onion","text":"Add one sliced onion and a pinch of salt. Cook for 8 minutes until golden."},{"title":"Add the tomatoes","text":"Stir in 400 g chopped tomatoes and simmer for 15 minutes."},{"title":"Stir in the spinach","text":"Add two handfuls of spinach and cook until it wilts."},{"title":"Serve","text":"Spoon over pasta and finish with grated cheddar."}]
+state timerLeft=0
+state timerOn=false
+every 1s when timerOn onTick={timerLeft=max(0,timerLeft-1)}
+App
+  Sidebar
+    Brand "Icebox" icon="kitchen"
+    NavItem "Board" icon="dashboard" onTap={go family-board}
+    NavItem "Shopping" icon="shopping_cart" onTap={go shopping-list}
+    NavItem "Inside" icon="photo_camera" onTap={go inside-the-fridge}
+    NavItem "Recipe" icon="restaurant_menu" selected={true}
+  Main
+    Nav
+      Heading "Tomato and spinach pasta"
+      Text.muted "Step {step+1} of {length(steps)}"
+    Column pad=24 gap=24 center
+      Progress {(step+1)/length(steps)}
+      Text.heading "{steps[step].title}" size=40 weight=700
+      Text "{steps[step].text}" size=32
+      Row gap=12 middle
+        Button.outline "Timer 5 min" icon="timer" onTap={timerLeft=300; timerOn=true}
+        if timerOn
+          Text.strong "{duration(timerLeft)}" size=32
+          Button.ghost "Stop" onTap={timerOn=false}
+      Row gap=16
+        Button.outline "Back" size=large onTap={step=max(0,step-1)}
+        Button "Next" size=large onTap={step<length(steps)-1 ? step=step+1 : {toast "Enjoy your meal"; go family-board}}
+
+// A banner across the top of a screen for an alarm; the beeping is shown as a pulsing icon only
+define AlarmBanner "message" seconds=0 visible=true onDismiss
+  if visible
+    Row between middle pad=12 fill=#FFDC2626 radius=8 animate=pulse
+      Row gap=8 middle
+        Icon "warning" color=#FFFFFFFF
+        Text.strong "{message} for {seconds}s" color=#FFFFFFFF
+      Button.outline "Dismiss" onTap={onDismiss}
+
+// A week grid with one coloured column per person, events listed under each day
+define WeekCalendar people=[] days=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] today=0 onAdd
+  Card gap=12
+    Row between
+      Text.strong "Week"
+      Button.outline "Add" icon="add" onTap={onAdd}
+    Row scroll gap=8 top
+      each day in days
+        Column w=150 gap=6 pad=8 radius=8 fill={index==today ? "#FFEFF6FF" : "#FFF9FAFB"}
+          Text.strong "{day}"
+          each person in people
+            each ev in filter(person.events,e=>e.day==index)
+              Box pad=6 radius=6 fill={person.color}
+                Text.small "{ev.time} {ev.title}" color=#FFFFFFFF
+                Text.caption "{person.name}" color=#FFFFFFFF
+
+// A drawing area for a finger or pen; the strokes are drawn by the platform, shown here as a labelled box
+define HandwritingPad bind=note h=160 pen=#FF111827 onChange
+  state note=""
+  Box h={h} radius=8 border=1 center middle fill=#FFFFFDE7
+    Text.muted "Write here with your finger"
+
+// A microphone control that listens for speech and returns the text; the sound itself is shown as a labelled button
+define VoiceInput bind=heard listening=false prompt="Say something" onResult
+  state heard=""
+  Row gap=8 middle
+    IconButton "mic" tooltip="{prompt}" onTap={onResult(heard)}
+    if listening
+      Text.muted "Listening..."
+
+// A live camera view with tags over it; the video is shown as a labelled box
+define CameraView h=240 source="camera" onCapture
+  Stack h={h} radius=8 fill=#FF1F2937
+    Column center middle h=fill
+      Icon "videocam" color=#FFFFFFFF
+      Text.muted "Camera: {source}" color=#FFD1D5DB
+    ...
+    IconButton "photo_camera" tooltip="Take photo" onTap={onCapture}
+
+// A tag with a product name and days until its use-by date, placed by fractions of the camera view
+define ExpiryTag "label" days=7 x=0.5 y=0.5
+  Box pad=6 radius=12 fill={days<=2 ? "#FFDC2626" : "#FF16A34A"}
+    Text.small "{label} - {days}d" color=#FFFFFFFF
+
+// A round temperature dial with plus and minus; the circular drag is shown as Gauge with buttons
+define TempDial bind=temp min=0 max=10 unit="C" onChange
+  state temp=0
+  Column center gap=8
+    Gauge bind=temp min={min} max={max} unit={unit}
+    Row gap=16
+      IconButton "remove" tooltip="Colder" onTap={temp=clamp(temp-1,min,max); onChange(temp)}
+      IconButton "add" tooltip="Warmer" onTap={temp=clamp(temp+1,min,max); onChange(temp)}

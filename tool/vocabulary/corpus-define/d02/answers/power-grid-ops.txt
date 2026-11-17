@@ -1,0 +1,169 @@
+### Control Room
+state tab="control"
+state freq=50.0
+state tick=0
+state subs=[{"id":"s1","name":"Northfield 400kV","load":42,"mw":610},{"id":"s2","name":"Harbour 275kV","load":68,"mw":420},{"id":"s3","name":"Eastgate 132kV","load":91,"mw":260},{"id":"s4","name":"Millbrook 132kV","load":77,"mw":185}]
+state lines=[{"id":"l1","name":"NF-HB","load":55,"mw":380},{"id":"l2","name":"HB-EG","load":88,"mw":240},{"id":"l3","name":"EG-MB","load":73,"mw":150}]
+state breakers=[{"id":"b1","name":"CB-4102 Harbour","closed":true},{"id":"b2","name":"CB-2207 Eastgate","closed":true},{"id":"b3","name":"CB-1318 Millbrook","closed":false}]
+state pending=""
+state reason=""
+state note2=""
+state live=true
+state alarms=[{"id":1,"time":"14:02","text":"Eastgate transformer T2 over 90% load","sev":"high","ack":false},{"id":2,"time":"13:47","text":"Harbour 275kV voltage low 268 kV","sev":"medium","ack":false},{"id":3,"time":"13:20","text":"Millbrook CB-1318 opened by protection","sev":"medium","ack":true}]
+every 1s onTick={tick=tick+1; freq=round(50+(tick%4==0 ? 0.04 : tick%4==1 ? -0.06 : tick%4==2 ? 0.02 : -0.03),2)}
+every 20s when live onTick={alarms=append(alarms,{"id":length(alarms)+1,"time":"14:{10+tick%40}","text":"Line HB-EG thermal warning","sev":"low","ack":false})}
+App
+  Sidebar
+    Brand "Gridwatch" icon="bolt"
+    NavItem "Control room" icon="hub" selected={tab=="control"} onTap={tab="control"}
+    NavItem "Forecast" icon="query_stats" selected={tab=="forecast"} onTap={go forecast}
+    NavItem "Switching plan" icon="checklist" selected={tab=="plan"} onTap={go switching-plan}
+    NavItem "Alarms" icon="notifications_active" badge="{count(alarms,a=>!a.ack)}"
+    Spacer grow
+    Text.muted "Shift: Priya Nair"
+  Main
+    Nav
+      Heading "Control room"
+      Row gap=8
+        Toggle "Live alarms" bind=live
+        Button.outline "Handover" onTap={go switching-plan}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Row between
+          Text.strong "Single-line diagram"
+          Row gap=8
+            Badge.success "under 60%"
+            Badge.warning "60 to 85%"
+            Badge.error "over 85%"
+        Row scroll middle gap=8
+          each s in subs
+            SubstationNode "{s.name}" load={s.load} mw={s.mw}
+            if s.id != "s4"
+              LineSegment "{find(lines,l=>startsWith(l.name,upper(slice(s.name,0,2))))==null ? '' : ''}" load={s.id=="s1" ? lines[0].load : s.id=="s2" ? lines[1].load : lines[2].load} mw={s.id=="s1" ? lines[0].mw : s.id=="s2" ? lines[1].mw : lines[2].mw}
+      Row gap=16 top
+        Card grow gap=12
+          Text.strong "System frequency"
+          Column center gap=4
+            FrequencyDial bind=freq min=49.5 max=50.5 nominal=50
+            Text.muted "Nominal 50.00 Hz, limits 49.80 to 50.20"
+        Card grow gap=8
+          Text.strong "Breakers"
+          each b in breakers
+            Row between middle
+              Column gap=2
+                Text "{b.name}"
+                Text.muted "{b.closed ? 'Closed' : 'Open'}"
+              BreakerSymbol closed={b.closed} onTap={pending=b.id; reason=""; open confirm}
+      Card gap=8
+        Row between
+          Text.strong "Alarms"
+          Text.muted "{count(alarms,a=>!a.ack)} unacknowledged"
+        each a in reverse(alarms)
+          Row between middle border-bottom=#FFE5E7EB
+            Row gap=8 middle
+              Badge.{a.sev == "high" ? "error" : a.sev == "medium" ? "warning" : "info"} "{a.sev}"
+              Text.small "{a.time}"
+              Text strike={a.ack} "{a.text}"
+            Button.outline "Acknowledge" hidden={a.ack} onTap={alarms=updateWhere(alarms,x=>x.id==a.id,x=>with(x,"ack",true)); toast "Alarm acknowledged"}
+Dialog#confirm "Confirm breaker operation" "This changes the live network."
+  Text "{find(breakers,b=>b.id==pending).name} will be {find(breakers,b=>b.id==pending).closed ? 'opened' : 'closed'}."
+  Select "Reason" items=["Planned maintenance","Fault isolation","Load transfer","Voltage control"] bind=reason
+  Row gap=8 end
+    Button.outline "Cancel" onTap={close}
+    Button.destructive "Confirm" onTap={reason=="" ? toast "Choose a reason" : breakers=updateWhere(breakers,b=>b.id==pending,b=>with(b,"closed",!b.closed)); close}
+
+### Forecast
+state horizon="Today"
+state demand=[{"h":"06","fc":520,"act":505},{"h":"09","fc":780,"act":812},{"h":"12","fc":905,"act":930},{"h":"15","fc":870,"act":842},{"h":"18","fc":1010,"act":1044},{"h":"21","fc":820,"act":801}]
+App
+  Sidebar
+    Brand "Gridwatch" icon="bolt"
+    NavItem "Control room" icon="hub" onTap={go control-room}
+    NavItem "Forecast" icon="query_stats" selected
+    NavItem "Switching plan" icon="checklist" onTap={go switching-plan}
+    Spacer grow
+    Text.muted "Shift: Priya Nair"
+  Main
+    Nav
+      Heading "Demand forecast"
+      SegmentedButton items=["Today","Tomorrow","Week"] bind=horizon
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Peak actual"
+          Text.strong "{max(1,last(map(demand,d=>d.act)))} MW" size=28
+        Card gap=4
+          Text.muted "Mean error"
+          Text.strong "{round(sum(demand,d=>abs(d.act-d.fc))/length(demand),1)} MW" size=28
+        Card gap=4
+          Text.muted "Reserve margin"
+          Text.strong "7.4%" size=28
+      Card gap=8
+        Text.strong "Forecast against actual demand, {horizon}"
+        LineChart labels={map(demand,d=>d.h)} series=[{"name":"Forecast","values":[520,780,905,870,1010,820]},{"name":"Actual","values":[505,812,930,842,1044,801]}] h=260
+      Card gap=8
+        Text.strong "Hourly detail"
+        Row
+          Text.muted "Hour" w=80
+          Text.muted "Forecast" w=100
+          Text.muted "Actual" w=100
+          Text.muted "Error" grow
+        each d in demand
+          Row
+            Text "{d.h}:00" w=80
+            Text "{d.fc} MW" w=100
+            Text "{d.act} MW" w=100
+            Text.{abs(d.act-d.fc) > 30 ? "danger" : "success"} "{d.act-d.fc}" grow
+
+### Switching Plan
+state steps=[{"n":1,"text":"Confirm Eastgate T2 load transferred to T1","done":true},{"n":2,"text":"Open CB-2207 at Eastgate","done":false},{"n":3,"text":"Apply earths to line EG-MB","done":false},{"n":4,"text":"Issue permit to work 5581","done":false},{"n":5,"text":"Record times in the log","done":false}]
+state note="Eastgate T2 held at 91% since 14:02. Millbrook CB-1318 tripped on protection at 13:20, cause not found. Keep Harbour voltage under watch."
+state author="Priya Nair"
+App
+  Sidebar
+    Brand "Gridwatch" icon="bolt"
+    NavItem "Control room" icon="hub" onTap={go control-room}
+    NavItem "Forecast" icon="query_stats" onTap={go forecast}
+    NavItem "Switching plan" icon="checklist" selected
+    Spacer grow
+    Text.muted "Shift: Priya Nair"
+  Main
+    Nav
+      Heading "Switching plan SP-0417"
+      Progress {count(steps,s=>s.done)/length(steps)} w=160
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Text.strong "Isolate line EG-MB for maintenance"
+        Text.muted "Steps must be ticked in order. {count(steps,s=>s.done)} of {length(steps)} done."
+        each step in steps
+          Row middle gap=12 border-bottom=#FFE5E7EB
+            Text.strong "{step.n}" w=24
+            Text strike={step.done} grow "{step.text}"
+            IconButton {step.done ? "check_circle" : "radio_button_unchecked"} tooltip="Tick step" onTap={step.done ? toast "Already done" : step.n == count(steps,s=>s.done)+1 ? steps=updateWhere(steps,s=>s.n==step.n,s=>with(s,"done",true)) : toast "Finish step {count(steps,s=>s.done)+1} first"}
+      Card gap=8
+        Text.strong "Handover note"
+        Input "Outgoing operator" bind=author
+        Input "Note for the next shift" multiline bind=note
+        Row end
+          Button "Hand over" onTap={emit handover note; toast "Handover saved"}
+
+define SubstationNode "name" load=0 mw=0 onTap
+  Box w=150 pad=10 gap=4 radius=8 fill={load<60 ? "#FF166534" : load<85 ? "#FFB45309" : "#FF991B1B"} onTap={onTap}
+    Text.strong "{name}" color=#FFFFFFFF
+    Text "{mw} MW" color=#FFFFFFFF
+    Text.small "{load}% loaded" color=#FFFFFFFF
+
+define LineSegment "label" load=0 mw=0
+  Column center gap=2 w=90
+    Text.small "{mw} MW"
+    Box h=6 w=90 radius=3 fill={load<60 ? "#FF16A34A" : load<85 ? "#FFF59E0B" : "#FFDC2626"}
+    Text.small "{load}%"
+
+define BreakerSymbol closed=true onTap
+  Box w=44 h=44 radius=6 border=2 center middle fill={closed ? "#FF16A34A" : "#FFFFFFFF"} onTap={onTap}
+    Icon {closed ? "power" : "power_off"}
+
+// a dial that wobbles around its nominal value; shown as a gauge with a limit band
+define FrequencyDial bind=freq min=49.5 max=50.5 nominal=50
+  state freq=50
+  Gauge {freq} min={min} max={max} limit={nominal+0.2} unit="Hz"

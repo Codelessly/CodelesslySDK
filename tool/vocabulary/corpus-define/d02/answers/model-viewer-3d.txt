@@ -1,0 +1,195 @@
+### Viewer
+state parts=[{"id":"body","name":"Body","hidden":false,"kind":"mesh"},{"id":"lid","name":"Lid","hidden":false,"kind":"mesh"},{"id":"handle","name":"Handle","hidden":false,"kind":"mesh"},{"id":"spout","name":"Spout","hidden":false,"kind":"mesh"},{"id":"base","name":"Base plate","hidden":false,"kind":"mesh"},{"id":"gasket","name":"Gasket","hidden":false,"kind":"mesh"}]
+state selected="body"
+state isolated=""
+state yaw=30
+state pitch=20
+state zoom=1
+state panX=0
+state panY=0
+state view="iso"
+state wireframe=false
+state section=100
+state sectionOn=false
+state light=[0.5,0.7,0.5]
+state measuring=false
+state points=[]
+state dist=0
+state color="#FFB45309"
+state rough=0.4
+state metal=0.8
+
+App
+  Sidebar
+    Brand "Turntable" icon="view_in_ar"
+    Text.sectionTitle "Hierarchy"
+    Row gap=8
+      Text.caption "{count(parts, p => !p.hidden)} of {length(parts)} visible"
+      Spacer grow
+      Button.ghost "Show all" onTap={parts=map(parts, p => with(p,"hidden",false)); isolated=""}
+    each part in parts
+      ListTile "{part.name}" selected={selected == part.id} onTap={selected=part.id; isolated=part.id}
+        IconButton "{part.hidden ? 'visibility_off' : 'visibility'}" tooltip="Hide or show" onTap={parts=updateWhere(parts, p => p.id == part.id, p => with(p,"hidden",!p.hidden))}
+    Spacer grow
+    Text.muted "kettle_v3.glb, 48,210 triangles"
+  Main
+    Nav
+      Heading "Kettle v3" level=1
+      Row gap=8
+        Toggle "Wireframe" bind=wireframe
+        Button.outline "Measure" onTap={measuring=!measuring; points=[]; dist=0}
+        Button.outline "Section" onTap={sectionOn=!sectionOn}
+        Button.outline "Reset view" onTap={yaw=30; pitch=20; zoom=1; panX=0; panY=0; view="iso"}
+        IconButton "more_vert" tooltip="More" onTap={open more}
+    Column pad=24 gap=16
+      Stack h=520
+        Model3D src="kettle_v3.glb" bind=yaw pitch={pitch} zoom={zoom} panX={panX} panY={panY} view={view} wireframe={wireframe} sectionAt={sectionOn ? section : 100} light={light} measuring={measuring} hidden={map(filter(parts, p => p.hidden), p => p.id)} isolated={isolated} selected={selected} color={color} roughness={rough} metalness={metal} onOrbit={yaw=result.yaw; pitch=result.pitch} onZoom={zoom=result} onPan={panX=result.x; panY=result.y} onPick={selected=result} onMeasure={points=result.points; dist=result.distance}
+        Box top right pad=12
+          ViewCube bind=view onPick={view=result; yaw=0; pitch=0}
+        Box bottom left pad=12
+          Text.caption "Drag to orbit, wheel or pinch to zoom, two fingers to pan"
+        if measuring
+          Box bottom center pad=12 fill=#CC111827 radius=8
+            Text "{length(points) < 2 ? 'Tap two points on the model (' + length(points) + ' of 2)' : 'Distance: ' + fixed(dist,1) + ' mm'}" color=#FFFFFFFF
+      if sectionOn
+        Card gap=8
+          Row between
+            Text.strong "Section plane"
+            Text.muted "{section}%"
+          Slider bind=section min=0 max=100
+      if measuring && length(points) == 2
+        Card gap=8
+          Row between
+            Text.strong "Measurement"
+            Button.ghost "Clear" onTap={points=[]; dist=0}
+          Text.heading "{fixed(dist,1)} mm"
+          Text.muted "{fixed(dist/25.4,2)} in between the two points"
+  Pane w=320 pad=16 gap=16
+    Text.panelTitle "Material"
+    Text.muted "{selected}"
+    Column gap=12
+      Text.fieldLabel "Colour"
+      ColorPicker bind=color swatches=["#FFB45309","#FFDC2626","#FF2563EB","#FF16A34A","#FF9CA3AF","#FF111827"]
+      Text.fieldLabel "Roughness"
+      Slider bind=rough min=0 max=1 step=0.01
+      Text.fieldLabel "Metal"
+      Slider bind=metal min=0 max=1 step=0.01
+    Divider
+    Text.panelTitle "Light"
+    Row gap=16 middle
+      LightBall bind=light size=96
+      Column gap=4
+        Text.caption "x {fixed(light[0],2)}"
+        Text.caption "y {fixed(light[1],2)}"
+        Text.caption "z {fixed(light[2],2)}"
+    Button.outline "Reset light" onTap={light=[0.5,0.7,0.5]}
+  Menu#more end
+    MenuItem "Export PNG" icon="image" onTap={open export}
+    MenuItem "Copy view link" icon="link" onTap={copy "turntable.app/v/kettle-v3"; toast "Link copied"}
+
+// A real 3D renderer cannot be drawn with the core words, so it shows as a labelled box that stands for the model.
+define Model3D "src" yaw=30 pitch=20 zoom=1 panX=0 panY=0 view="iso" wireframe=false sectionAt=100 light=[0.5,0.7,0.5] measuring=false hidden=[] isolated="" selected="" color="#FFB45309" roughness=0.4 metalness=0.8 onOrbit onZoom onPan onPick onMeasure
+  Box h=fill fill=#FF1F2937 radius=8 center middle
+    Text "3D view of {src}: yaw {yaw}, pitch {pitch}, zoom {zoom}" color=#FF9CA3AF
+
+// A real cube widget is drawn as a grid of the six face buttons.
+define ViewCube bind=view onPick
+  state view="iso"
+  Card gap=4 pad=6
+    Row gap=4
+      Chip "Top" selected={view == "top"} onTap={view="top"; onPick("top")}
+      Chip "Front" selected={view == "front"} onTap={view="front"; onPick("front")}
+    Row gap=4
+      Chip "Left" selected={view == "left"} onTap={view="left"; onPick("left")}
+      Chip "Right" selected={view == "right"} onTap={view="right"; onPick("right")}
+    Row gap=4
+      Chip "Back" selected={view == "back"} onTap={view="back"; onPick("back")}
+      Chip "Bottom" selected={view == "bottom"} onTap={view="bottom"; onPick("bottom")}
+
+// A draggable ball needs pointer capture the core words lack, so it shows as a labelled ball.
+define LightBall bind=light size=96 onChange
+  state light=[0.5,0.7,0.5]
+  Stack w={size} h={size}
+    Box w={size} h={size} radius={size/2} fill=#FF374151
+    Box w=14 h=14 radius=7 fill=#FFFBBF24 left={light[0]*size/2+size/2-7} top={size/2-light[1]*size/2-7}
+
+define ColorPicker bind=color swatches=["#FF111827","#FFDC2626","#FF2563EB"] size=28 onPick
+  state color=""
+  Row gap=8
+    each swatch in swatches
+      Box w={size} h={size} radius={size/2} fill={swatch} border={swatch == color ? 2 : 0} onTap={color=swatch; onPick(swatch)}
+
+Dialog#export "Export image" "Render the current view"
+  Select "Size" items=["1024 x 1024","2048 x 2048","4096 x 4096"] bind=exportSize
+  Toggle "Transparent background" bind=exportAlpha
+  Button "Export" onTap={emit exportImage; toast "Saved to Downloads"; close}
+
+### Parts
+state parts=[{"id":"body","name":"Body","material":"Brushed steel","tris":21400,"hidden":false},{"id":"lid","name":"Lid","material":"Brushed steel","tris":6800,"hidden":false},{"id":"handle","name":"Handle","material":"Matte plastic","tris":9100,"hidden":false},{"id":"spout","name":"Spout","material":"Brushed steel","tris":4300,"hidden":false},{"id":"base","name":"Base plate","material":"Black rubber","tris":4100,"hidden":false},{"id":"gasket","name":"Gasket","material":"Black rubber","tris":2510,"hidden":false}]
+state q=""
+state sort="name"
+state picked=""
+
+App
+  Sidebar
+    Brand "Turntable" icon="view_in_ar"
+    NavItem "Viewer" icon="view_in_ar" onTap={go viewer}
+    NavItem "Parts" icon="account_tree" selected={true}
+    NavItem "Measurements" icon="straighten" onTap={go measurements}
+  Main
+    Nav
+      Heading "Parts" level=1
+      Row gap=8
+        Input "Search" bind=q w=220
+        Select "Sort" items=["name","triangles"] bind=sort
+    Column pad=24 gap=16
+      Card gap=8
+        Row gap=8
+          Text.strong "Name" grow=true
+          Text.strong "Material" w=140
+          Text.strong "Triangles" w=90
+          Text.strong "" w=48
+        each part in sortBy(filter(parts, p => contains(lower(p.name), lower(q))), p => sort == "name" ? p.name : p.tris)
+          Row gap=8 middle onTap={picked=part.id; open partSheet}
+            Text "{part.name}" grow
+            Text.muted "{part.material}" w=140
+            Text.muted "{part.tris}" w=90
+            IconButton "{part.hidden ? 'visibility_off' : 'visibility'}" tooltip="Hide or show" onTap={parts=updateWhere(parts, p => p.id == part.id, p => with(p,"hidden",!p.hidden))}
+      Text.muted "{sum(parts, p => p.tris)} triangles in total"
+  Sheet#partSheet "Part details"
+    Text.heading "{find(parts, p => p.id == picked).name}"
+    Text.muted "{find(parts, p => p.id == picked).material}"
+    Button "Isolate in viewer" onTap={emit isolate picked; close; go viewer}
+    Button.outline "Hide part" onTap={parts=updateWhere(parts, p => p.id == picked, p => with(p,"hidden",true)); close}
+
+### Measurements
+state measures=[{"id":1,"label":"Body width","mm":182.4},{"id":2,"label":"Spout to handle","mm":264.0},{"id":3,"label":"Lid height","mm":38.5}]
+state unit="mm"
+state sel=0
+
+App
+  Sidebar
+    Brand "Turntable" icon="view_in_ar"
+    NavItem "Viewer" icon="view_in_ar" onTap={go viewer}
+    NavItem "Parts" icon="account_tree" onTap={go parts}
+    NavItem "Measurements" icon="straighten" selected={true}
+  Main
+    Nav
+      Heading "Measurements" level=1
+      SegmentedButton items=["mm","in"] bind=unit
+    Column pad=24 gap=16
+      if length(measures) == 0
+        Text.muted "No measurements yet. Use Measure in the viewer to place two points."
+      each m in measures
+        Card
+          Row between middle
+            Column gap=2
+              Text.strong "{m.label}"
+              Text.muted "{unit == 'mm' ? fixed(m.mm,1) + ' mm' : fixed(m.mm/25.4,2) + ' in'}"
+            Row gap=4
+              IconButton "edit" tooltip="Rename" onTap={sel=m.id; open rename}
+              IconButton "delete" tooltip="Delete" onTap={measures=removeWhere(measures, x => x.id == m.id); toast "Deleted"}
+      Button.outline "Clear all" onTap={measures=[]}
+  Dialog#rename "Rename measurement"
+    Input "Label" bind=newLabel
+    Button "Save" onTap={measures=updateWhere(measures, x => x.id == sel, x => with(x,"label",newLabel)); close}

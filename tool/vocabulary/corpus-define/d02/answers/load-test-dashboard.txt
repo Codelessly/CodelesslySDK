@@ -1,0 +1,232 @@
+### Scenario
+state tab="scenario"
+state name="Checkout peak, 20 min"
+state points=[{"min":0,"users":0},{"min":2,"users":200},{"min":6,"users":800},{"min":12,"users":800},{"min":16,"users":1500},{"min":20,"users":0}]
+state threshold=800
+state target="https://staging.shop.example.com"
+App
+  Sidebar
+    Brand "Hammer" icon="hardware"
+    NavItem "Scenario" icon="show_chart" selected={tab=="scenario"} onTap={tab="scenario"}
+    NavItem "Live run" icon="speed" selected={tab=="live"} onTap={go live-run}
+    NavItem "Compare runs" icon="compare_arrows" selected={tab=="compare"} onTap={go report}
+    NavItem "Reports" icon="description" badge="14" onTap={go report}
+    Spacer grow
+    Text.muted "Priya Nair"
+  Main
+    Nav
+      Heading "Scenario"
+      Row gap=8
+        Button.outline "Save" icon="save" onTap={toast "Scenario saved"; emit saveScenario}
+        Button "Start run" icon="play_arrow" onTap={open countdown}
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=8
+          Input "Scenario name" bind=name
+        Card gap=8
+          Input "Target URL" bind=target
+        Card gap=8
+          Text.fieldLabel "Fail the run if p99 latency crosses (ms)"
+          Row gap=12 middle
+            Slider bind=threshold min=100 max=2000 grow
+            Text.strong "{threshold} ms"
+      Card gap=12
+        Row between middle
+          Column gap=2
+            Text.panelTitle "Virtual users over time"
+            Text.muted "Drag a point to change its users. Peak: {max(points[0].users, max(points[1].users, max(points[2].users, max(points[3].users, max(points[4].users, points[5].users)))))} users"
+          Row gap=8
+            Button.outline "Add point" icon="add" onTap={points=append(points,{"min":last(points).min+2,"users":0})}
+            Button.ghost "Reset" onTap={points=[{"min":0,"users":0},{"min":2,"users":200},{"min":6,"users":800},{"min":12,"users":800},{"min":16,"users":1500},{"min":20,"users":0}]}
+        RampEditor bind=points h=260 maxUsers=2000 unit="min"
+      Card gap=8
+        Text.panelTitle "Stages"
+        each p in points
+          Row gap=12 middle
+            Text.mono "{p.min} min" w=70
+            Text "{p.users} virtual users"
+            Spacer grow
+            IconButton "delete" tooltip="Remove point" onTap={points=removeWhere(points,x=>x.min==p.min)}
+
+Dialog#countdown "Start run" "{name}"
+  state counting=false
+  state left=5
+  every 1s when counting onTick={left=left-1; left<=0 ? {counting=false; left=5; close; go live-run} : toast ""}
+  Column gap=12 center
+    Text.muted "Target {target}, fails if p99 passes {threshold} ms"
+    if counting
+      Text "{left}" size=72 weight=700 center animate=pulse
+      Button.destructive "Abort" onTap={counting=false; left=5}
+    if !counting
+      Button "Begin 5 second countdown" icon="timer" onTap={counting=true}
+
+// A draggable line editor: shown as a line chart with a drag handle for each point.
+define RampEditor bind=points maxUsers=2000 unit="min" h=240 onChange
+  Column gap=8
+    LineChart values={map(points,p=>p.users)} labels={map(points,p=>p.min)} h={h}
+    Row gap=8 between top
+      each p in points
+        Column grow gap=4 center
+          Icon "drag_indicator"
+          Slider bind=p.users min=0 max={maxUsers} drag=ramp(p.min)
+          Text.small "{p.users}"
+          Text.caption "{p.min} {unit}"
+
+### Live run
+state running=true
+state elapsed=0
+state threshold=800
+state rps=[120,180,260,340,420,480,510,530]
+state p50=[42,45,51,58,63,66,70,71]
+state p95=[110,130,160,210,260,310,340,360]
+state p99=[220,260,340,460,590,720,810,860]
+state errors=[0.1,0.1,0.2,0.4,0.9,1.6,2.4,3.1]
+state endpoints=[{"path":"POST /api/checkout","p95":612,"rps":84,"err":4.2},{"path":"GET /api/cart","p95":388,"rps":146,"err":1.1},{"path":"GET /api/search","p95":271,"rps":203,"err":0.6},{"path":"GET /api/product/:id","p95":142,"rps":97,"err":0.2}]
+every 1s when running onTick={elapsed=elapsed+1}
+App
+  Sidebar
+    Brand "Hammer" icon="hardware"
+    NavItem "Scenario" icon="show_chart" onTap={go scenario}
+    NavItem "Live run" icon="speed" selected={true}
+    NavItem "Compare runs" icon="compare_arrows" onTap={go report}
+    NavItem "Reports" icon="description" onTap={go report}
+    Spacer grow
+    Text.muted "Priya Nair"
+  Main
+    Nav
+      Row gap=12 middle
+        Heading "Checkout peak, 20 min"
+        if running
+          Badge.info "Running {duration(elapsed)}"
+        if !running
+          Badge.neutral "Stopped at {duration(elapsed)}"
+      Row gap=8
+        if last(p99) > threshold
+          Badge.error "p99 over threshold"
+        Button.destructive "Stop" icon="stop" onTap={running=false; emit stopRun; toast "Run stopped"}
+    Column pad=24 gap=16 scroll
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.caption "Requests per second"
+          Text "{last(rps)}" size=36 weight=700
+          Sparkline values={rps}
+        Card gap=4
+          Text.caption "Virtual users"
+          Text "1,500" size=36 weight=700
+          Progress {elapsed/1200}
+        Card gap=4
+          Text.caption "Error rate"
+          Text "{last(errors)}%" size=36 weight=700 color=#FFDC2626
+          Sparkline values={errors} color=#FFDC2626
+        Card gap=4
+          Text.caption "p99 vs threshold"
+          Text "{last(p99)} / {threshold} ms" size=24 weight=700 color={last(p99) > threshold ? "#FFDC2626" : "#FF16A34A"}
+          Progress {clamp(last(p99)/threshold,0,1)}
+      Row gap=16 top
+        Card grow gap=8
+          Row between
+            Text.panelTitle "Requests per second"
+            Badge.success "Live"
+          AreaChart values={rps} labels=["1m","2m","3m","4m","5m","6m","7m","8m"] h=200
+        Card grow gap=8
+          Text.panelTitle "Latency percentiles (ms)"
+          LineChart labels=["1m","2m","3m","4m","5m","6m","7m","8m"] series={[{"name":"p50","values":p50},{"name":"p95","values":p95},{"name":"p99","values":p99}]} threshold={threshold} thresholdLabel="Fail threshold" h=200
+      Card gap=8
+        Text.panelTitle "Error rate (%)"
+        LineChart values={errors} labels=["1m","2m","3m","4m","5m","6m","7m","8m"] color=#FFDC2626 unit="%" h=140
+      Card gap=8
+        Row between
+          Text.panelTitle "Endpoints, slowest first"
+          Button.ghost "Full report" onTap={go report}
+        EndpointTable rows={sortByDesc(endpoints,e=>e.p95)} threshold={threshold}
+
+// A table of endpoints with a latency bar, flagging rows over the threshold.
+define EndpointTable rows=[] threshold=800
+  Column gap=4
+    Row gap=8 border-bottom=#FFE5E7EB
+      Text.caption "Endpoint" grow
+      Text.caption "p95 ms" w=80
+      Text.caption "Req/s" w=70
+      Text.caption "Errors" w=70
+    each r in rows
+      Row gap=8 middle
+        Text.mono "{r.path}" grow
+        Text.strong "{r.p95}" w=80 color={r.p95 > threshold ? "#FFDC2626" : "#FF111827"}
+        Text "{r.rps}" w=70
+        Text "{r.err}%" w=70 color={r.err > 2 ? "#FFDC2626" : "#FF111827"}
+
+### Report
+state runA="Run 41 (Mon)"
+state runB="Run 42 (today)"
+state threshold=800
+state p99A=[210,250,310,400,520,640,700,730]
+state p99B=[220,260,340,460,590,720,810,860]
+state peakA=730
+state peakB=860
+state totalReq=1284500
+state errPct=2.4
+state avgRps=412
+Page
+  Nav
+    Brand "Hammer" icon="hardware"
+    Row gap=4
+      Link "Scenario" onTap={go scenario}
+      Link "Live run" onTap={go live-run}
+      Link "Report" onTap={go report}
+    Button.outline "Export PDF" icon="download" onTap={toast "Report exported"; emit exportReport}
+  Section
+    Row gap=32 middle
+      Column grow gap=8
+        Heading "Checkout peak, 20 min" level=1
+        Text.muted "Completed today at 14:32 against staging.shop.example.com"
+        Row gap=8
+          Select bind=runA items=["Run 40 (Sun)","Run 41 (Mon)","Run 42 (today)"]
+          Select bind=runB items=["Run 40 (Sun)","Run 41 (Mon)","Run 42 (today)"]
+      Seal "{peakB > threshold ? 'FAIL' : 'PASS'}" pass={peakB <= threshold}
+  Section tint
+    Grid cols=4 gap=16
+      Card gap=4
+        Text.caption "Total requests"
+        Text "{totalReq}" size=32 weight=700
+      Card gap=4
+        Text.caption "Average req/s"
+        Text "{avgRps}" size=32 weight=700
+      Card gap=4
+        Text.caption "Error rate"
+        Text "{errPct}%" size=32 weight=700 color=#FFDC2626
+      Card gap=4
+        Text.caption "Peak p99"
+        Text "{peakB} ms" size=32 weight=700 color={peakB > threshold ? "#FFDC2626" : "#FF16A34A"}
+        Text.muted "Threshold {threshold} ms"
+  Section
+    Column gap=16
+      Heading "Comparison: p99 latency" level=2
+      Card gap=8
+        LineChart labels=["2m","4m","6m","8m","10m","12m","14m","16m"] series={[{"name":runA,"values":p99A},{"name":runB,"values":p99B}]} threshold={threshold} thresholdLabel="Fail threshold" h=260
+        Row gap=16
+          Text.muted "{runA}: peak {peakA} ms"
+          Text.muted "{runB}: peak {peakB} ms"
+          Badge.error "{peakB - peakA} ms slower"
+  Section tint
+    Column gap=12
+      Heading "Verdict" level=2
+      Text.muted "The run failed: p99 crossed {threshold} ms at minute 14 and stayed over it for 6 minutes, with errors reaching {errPct}%."
+      Row gap=8
+        Button "Run again" icon="replay" onTap={go scenario}
+        Button.outline "Share report" icon="share" onTap={open share}
+  Footer
+    Row between
+      Text.strong "Hammer"
+      Text.muted "Load testing for teams"
+
+Dialog#share "Share report" "Anyone with the link can view"
+  Input "Link" "https://hammer.example.com/r/42"
+  Button "Copy link" onTap={copy "https://hammer.example.com/r/42"; toast "Copied"; close}
+
+// A round stamp saying PASS or FAIL, green or red.
+define Seal "verdict" pass=true size=140
+  Stack w={size} h={size} center middle
+    Ring {pass ? 1 : 1} w={size} h={size} color={pass ? "#FF16A34A" : "#FFDC2626"}
+    Column center gap=2
+      Icon {pass ? "verified" : "gpp_bad"} color={pass ? "#FF16A34A" : "#FFDC2626"}
+      Text.strong "{verdict}" size=28 weight=700 color={pass ? "#FF16A34A" : "#FFDC2626"}

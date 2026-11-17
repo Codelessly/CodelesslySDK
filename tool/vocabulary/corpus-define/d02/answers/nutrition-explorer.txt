@@ -1,0 +1,219 @@
+### Recipes
+state avoid=[]
+state q=""
+state recipes=[{"id":"r1","name":"Coconut chickpea curry","time":"40 min","kcal":664,"allergens":[],"tag":"Vegan"},{"id":"r2","name":"Lemon butter salmon","time":"25 min","kcal":540,"allergens":["Dairy"],"tag":"High protein"},{"id":"r3","name":"Pesto pasta","time":"20 min","kcal":720,"allergens":["Gluten","Nuts","Dairy"],"tag":"Vegetarian"},{"id":"r4","name":"Shakshuka","time":"30 min","kcal":410,"allergens":["Egg"],"tag":"Vegetarian"},{"id":"r5","name":"Teriyaki tofu bowl","time":"35 min","kcal":590,"allergens":["Soy","Gluten"],"tag":"Vegan"},{"id":"r6","name":"Almond banana pancakes","time":"15 min","kcal":480,"allergens":["Nuts","Egg","Gluten"],"tag":"Breakfast"}]
+App
+  Sidebar
+    Brand "Plateful" icon="restaurant"
+    NavItem "Recipes" icon="menu_book" selected={true} onTap={go recipes}
+    NavItem "Recipe detail" icon="monitor_heart" onTap={go recipe-detail}
+    NavItem "Compare" icon="compare_arrows" onTap={go compare}
+    NavItem "Plate" icon="donut_large" onTap={go plate}
+    Spacer grow
+    Text.muted "Daily target 2,000 kcal"
+  Main
+    Nav
+      Heading "Recipes" level=1
+      Input "Search recipes" bind=q w=240
+    Column pad=24 gap=16
+      Card gap=12
+        Row between
+          Text.strong "Dietary filter"
+          Button.ghost "Clear" onTap={avoid=[]}
+        Text.muted "Pick the allergens to avoid. Recipes that contain them grey out."
+        Row gap=8
+          each a in ["Gluten","Dairy","Nuts","Soy","Egg","Shellfish"]
+            FilterChip "{a}" selected={contains(avoid,a)} onTap={avoid=contains(avoid,a) ? without(avoid,a) : append(avoid,a)}
+      Grid cols=3 gap=16
+        each r in filter(recipes,x=>contains(lower(x.name),lower(q)))
+          Card gap=8 fill={any(r.allergens,a=>contains(avoid,a)) ? #FFE5E7EB : #FFFFFFFF} onTap={go recipe-detail}
+            Row between
+              Text.strong "{r.name}" color={any(r.allergens,a=>contains(avoid,a)) ? #FF9CA3AF : #FF111827}
+              Badge.neutral "{r.tag}"
+            Text.muted "{r.time} · {r.kcal} kcal per serving"
+            Row gap=6
+              each a in r.allergens
+                Badge.warning "{a}"
+            if any(r.allergens,a=>contains(avoid,a))
+              Row gap=6 middle
+                Icon "block" color=#FFDC2626
+                Text.danger "Contains {join(filter(r.allergens,a=>contains(avoid,a)),", ")}"
+
+### Recipe detail
+state servings=4
+state sel=""
+state target={"kcal":2000,"fat":70,"carb":260,"pro":50}
+state prev={"kcal":664,"fat":40,"carb":69,"pro":19}
+state ings=[{"id":"i1","name":"Chickpeas, canned","base":400,"unit":"g","kcal":1.64,"fat":0.026,"carb":0.27,"pro":0.09},{"id":"i2","name":"Basmati rice","base":240,"unit":"g","kcal":3.5,"fat":0.006,"carb":0.78,"pro":0.08},{"id":"i3","name":"Coconut milk","base":400,"unit":"ml","kcal":1.97,"fat":0.21,"carb":0.028,"pro":0.02},{"id":"i4","name":"Spinach","base":200,"unit":"g","kcal":0.23,"fat":0.004,"carb":0.036,"pro":0.029},{"id":"i5","name":"Onion","base":150,"unit":"g","kcal":0.4,"fat":0.001,"carb":0.093,"pro":0.011},{"id":"i6","name":"Olive oil","base":30,"unit":"ml","kcal":8.84,"fat":1.0,"carb":0,"pro":0}]
+state swaps=[{"name":"Cauliflower rice","kcal":0.25,"fat":0.003,"carb":0.05,"pro":0.02},{"name":"Brown rice","kcal":3.7,"fat":0.03,"carb":0.77,"pro":0.08},{"name":"Quinoa","kcal":3.68,"fat":0.06,"carb":0.64,"pro":0.14},{"name":"Light coconut milk","kcal":0.7,"fat":0.07,"carb":0.03,"pro":0.01}]
+App
+  Sidebar
+    Brand "Plateful" icon="restaurant"
+    NavItem "Recipes" icon="menu_book" onTap={go recipes}
+    NavItem "Recipe detail" icon="monitor_heart" selected={true} onTap={go recipe-detail}
+    NavItem "Compare" icon="compare_arrows" onTap={go compare}
+    NavItem "Plate" icon="donut_large" onTap={go plate}
+    Spacer grow
+    Text.muted "Daily target 2,000 kcal"
+  Main
+    Nav
+      Heading "Coconut chickpea curry" level=1
+      Row gap=8
+        Text.muted "Servings"
+        Stepper bind=servings min=1 max=12 step=1
+    Row gap=16 pad=24 top
+      Column grow gap=16
+        Card gap=8
+          Row between
+            Text.strong "Ingredients"
+            Text.muted "{servings} servings"
+          each i in ings
+            Row between middle
+              Column gap=2
+                Text.strong "{i.name}"
+                Text.muted "{round(i.base*servings/4,0)} {i.unit}"
+              IconButton "swap_horiz" tooltip="Swap ingredient" onTap={sel=i.id; open swap}
+        Card gap=8
+          Text.strong "Method"
+          Text "1. Soften the onion in the oil for 8 minutes."
+          Text "2. Add chickpeas and coconut milk and simmer for 15 minutes."
+          Text "3. Fold in the spinach and serve over rice."
+      Pane w=340 pad=16 gap=12
+        Text.strong "Per serving"
+        Stack center middle h=170
+          Ring {sum(ings,i=>i.base*i.kcal)/4/target.kcal}
+          Column center
+            Text "{round(sum(ings,i=>i.base*i.kcal)/4,0)}" size=32 weight=700
+            Text.muted "of {target.kcal} kcal"
+        TrendArrow now={round(sum(ings,i=>i.base*i.kcal)/4,0)} prev={prev.kcal} unit="kcal" goodWhen="down"
+        MacroBar "Fat" now={round(sum(ings,i=>i.base*i.fat)/4,0)} prev={prev.fat} target={target.fat} unit="g" goodWhen="down"
+        MacroBar "Carbs" now={round(sum(ings,i=>i.base*i.carb)/4,0)} prev={prev.carb} target={target.carb} unit="g" goodWhen="down"
+        MacroBar "Protein" now={round(sum(ings,i=>i.base*i.pro)/4,0)} prev={prev.pro} target={target.pro} unit="g" goodWhen="up"
+        Divider
+        Text.muted "Whole recipe: {round(sum(ings,i=>i.base*i.kcal)*servings/4,0)} kcal across {servings} servings"
+Menu#swap
+  each s in swaps
+    MenuItem "{s.name}" icon="swap_horiz" onTap={prev={"kcal":round(sum(ings,i=>i.base*i.kcal)/4,0),"fat":round(sum(ings,i=>i.base*i.fat)/4,0),"carb":round(sum(ings,i=>i.base*i.carb)/4,0),"pro":round(sum(ings,i=>i.base*i.pro)/4,0)}; ings=updateWhere(ings,i=>i.id==sel,i=>with(with(with(with(with(i,"name",s.name),"kcal",s.kcal),"fat",s.fat),"carb",s.carb),"pro",s.pro)); toast "Swapped to {s.name}"}
+
+### Compare
+state a="Coconut chickpea curry"
+state b="Lemon butter salmon"
+state cmp=[{"name":"Coconut chickpea curry","kcal":664,"fat":40,"carb":69,"pro":19,"fibre":14},{"name":"Lemon butter salmon","kcal":540,"fat":34,"carb":18,"pro":42,"fibre":3},{"name":"Pesto pasta","kcal":720,"fat":38,"carb":78,"pro":22,"fibre":6},{"name":"Shakshuka","kcal":410,"fat":24,"carb":28,"pro":21,"fibre":7}]
+App
+  Sidebar
+    Brand "Plateful" icon="restaurant"
+    NavItem "Recipes" icon="menu_book" onTap={go recipes}
+    NavItem "Recipe detail" icon="monitor_heart" onTap={go recipe-detail}
+    NavItem "Compare" icon="compare_arrows" selected={true} onTap={go compare}
+    NavItem "Plate" icon="donut_large" onTap={go plate}
+  Main
+    Nav
+      Heading "Compare recipes" level=1
+      Button.outline "Swap sides" icon="swap_horiz" onTap={a=b; b=a}
+    Column pad=24 gap=16
+      Grid cols=2 gap=16
+        Select "Recipe A" bind=a items=["Coconut chickpea curry","Lemon butter salmon","Pesto pasta","Shakshuka"]
+        Select "Recipe B" bind=b items=["Coconut chickpea curry","Lemon butter salmon","Pesto pasta","Shakshuka"]
+      Card gap=12
+        Row between
+          Text.strong "Per serving"
+          Row gap=16
+            Row gap=6 middle
+              Box w=12 h=12 radius=6 fill=#FF2563EB
+              Text.muted "{a}"
+            Row gap=6 middle
+              Box w=12 h=12 radius=6 fill=#FFF59E0B
+              Text.muted "{b}"
+        BarChart labels=["Calories / 10","Fat g","Carbs g","Protein g","Fibre g"] series=[{"name":"{a}","values":[find(cmp,x=>x.name==a).kcal/10,find(cmp,x=>x.name==a).fat,find(cmp,x=>x.name==a).carb,find(cmp,x=>x.name==a).pro,find(cmp,x=>x.name==a).fibre]},{"name":"{b}","values":[find(cmp,x=>x.name==b).kcal/10,find(cmp,x=>x.name==b).fat,find(cmp,x=>x.name==b).carb,find(cmp,x=>x.name==b).pro,find(cmp,x=>x.name==b).fibre]}] h=240
+      Card gap=8
+        Row
+          Text.muted "Nutrient" grow
+          Text.muted "{a}" w=140
+          Text.muted "{b}" w=140
+          Text.muted "Difference" w=100
+        Divider
+        Row middle
+          Text.strong "Calories" grow
+          Text "{find(cmp,x=>x.name==a).kcal}" w=140
+          Text "{find(cmp,x=>x.name==b).kcal}" w=140
+          TrendArrow now={find(cmp,x=>x.name==b).kcal} prev={find(cmp,x=>x.name==a).kcal} unit="kcal" goodWhen="down" w=100
+        Row middle
+          Text.strong "Fat" grow
+          Text "{find(cmp,x=>x.name==a).fat} g" w=140
+          Text "{find(cmp,x=>x.name==b).fat} g" w=140
+          TrendArrow now={find(cmp,x=>x.name==b).fat} prev={find(cmp,x=>x.name==a).fat} unit="g" goodWhen="down" w=100
+        Row middle
+          Text.strong "Carbs" grow
+          Text "{find(cmp,x=>x.name==a).carb} g" w=140
+          Text "{find(cmp,x=>x.name==b).carb} g" w=140
+          TrendArrow now={find(cmp,x=>x.name==b).carb} prev={find(cmp,x=>x.name==a).carb} unit="g" goodWhen="down" w=100
+        Row middle
+          Text.strong "Protein" grow
+          Text "{find(cmp,x=>x.name==a).pro} g" w=140
+          Text "{find(cmp,x=>x.name==b).pro} g" w=140
+          TrendArrow now={find(cmp,x=>x.name==b).pro} prev={find(cmp,x=>x.name==a).pro} unit="g" goodWhen="up" w=100
+
+### Plate
+state groups=[{"name":"Vegetables","share":40,"color":"#FF16A34A"},{"name":"Grains","share":25,"color":"#FFF59E0B"},{"name":"Protein","share":25,"color":"#FFDC2626"},{"name":"Fats and dairy","share":10,"color":"#FF2563EB"}]
+App
+  Sidebar
+    Brand "Plateful" icon="restaurant"
+    NavItem "Recipes" icon="menu_book" onTap={go recipes}
+    NavItem "Recipe detail" icon="monitor_heart" onTap={go recipe-detail}
+    NavItem "Compare" icon="compare_arrows" onTap={go compare}
+    NavItem "Plate" icon="donut_large" selected={true} onTap={go plate}
+  Main
+    Nav
+      Heading "Your plate" level=1
+      Button.outline "Reset" onTap={groups=[{"name":"Vegetables","share":40,"color":"#FF16A34A"},{"name":"Grains","share":25,"color":"#FFF59E0B"},{"name":"Protein","share":25,"color":"#FFDC2626"},{"name":"Fats and dairy","share":10,"color":"#FF2563EB"}]}
+    Row gap=24 pad=24 top
+      Card grow center
+        PlateDiagram groups={groups} size=280
+      Column grow gap=16
+        Card gap=12
+          Text.strong "Coconut chickpea curry on the plate"
+          each g in groups
+            Column gap=4
+              Row between
+                Row gap=8 middle
+                  Box w=12 h=12 radius=6 fill={g.color}
+                  Text "{g.name}"
+                Text.strong "{g.share}%"
+              Slider min=0 max=100 value={g.share} onChange={groups=updateWhere(groups,x=>x.name==g.name,x=>with(x,"share",result))}
+        if sum(groups,g=>g.share) != 100
+          Card fill=#FFFEF3C7
+            Text "The shares add up to {sum(groups,g=>g.share)}%. A balanced plate adds up to 100%."
+
+define Stepper bind=value min=0 max=99 step=1 onChange
+  state value=1
+  Row gap=8 middle
+    IconButton "remove" tooltip="Fewer" onTap={value=max(min,value-step); onChange(value)}
+    Text.strong "{value}"
+    IconButton "add" tooltip="More" onTap={value=min(max,value+step); onChange(value)}
+
+define TrendArrow "label" now=0 prev=0 unit="" goodWhen="down"
+  Row gap=4 middle
+    if now > prev
+      Icon "arrow_upward" color={goodWhen=="up" ? #FF16A34A : #FFDC2626"}
+    if now < prev
+      Icon "arrow_downward" color={goodWhen=="down" ? #FF16A34A : #FFDC2626}
+    if now == prev
+      Icon "remove" color=#FF6B7280
+    Text.muted "{label} {abs(now-prev)} {unit}"
+
+define MacroBar "label" now=0 prev=0 target=100 unit="g" goodWhen="down"
+  Column gap=4
+    Row between
+      Text.strong "{label}"
+      Text.muted "{now} of {target} {unit}"
+    Progress {clamp(now/target,0,1)}
+    TrendArrow now={now} prev={prev} unit={unit} goodWhen={goodWhen}
+
+// a plate drawn as a round box split into coloured bands, one per food group, each as tall as its share
+define PlateDiagram groups=[] size=240
+  Stack center middle
+    Box w={size} h={size} radius={size/2} fill=#FFF3F4F6 border=2
+    Column w={size-40} h={size-40} radius={(size-40)/2} gap=0
+      each g in groups
+        Box h={(size-40)*g.share/100} fill={g.color} center middle
+          Text.small "{g.name}" color=#FFFFFFFF

@@ -1,0 +1,208 @@
+### Thread
+state tab="family"
+state me="Ana"
+state draft=""
+state replyTo=""
+state openOrig=""
+state sel=""
+state typing=["Kenji","Lucia"]
+state glossary=["Bridge","Okonomiyaki","Abuela Rosa","Shibuya"]
+state reactions=[{"msg":2,"emoji":"❤️","by":"Ana"},{"msg":2,"emoji":"😂","by":"Kenji"},{"msg":4,"emoji":"👍","by":"Lucia"}]
+state msgs=[{"id":1,"who":"Kenji","lang":"JP","text":"I landed in Tokyo, the train is so fast!","orig":"東京に着いたよ、電車がすごく速い！","mine":false,"kind":"text","reply":0},{"id":2,"who":"Lucia","lang":"ES","text":"Send photos of the food, please. Abuela Rosa wants to see it.","orig":"Mándanos fotos de la comida, por favor. Abuela Rosa quiere verla.","mine":false,"kind":"text","reply":0},{"id":3,"who":"Ana","lang":"EN","text":"Dinner at Shibuya tonight, okonomiyaki for everyone?","orig":"","mine":true,"kind":"text","reply":1},{"id":4,"who":"Kenji","lang":"JP","text":"Voice note","orig":"","mine":false,"kind":"voice","reply":0,"secs":14,"en":"There is a small place near the station, they do not take reservations, so we should go early.","ja":"駅の近くに小さなお店があります。予約はできないので、早めに行きましょう。"}]
+state previews=[{"lang":"JP","text":"今夜は渋谷で夕食、みんなでお好み焼きはどう？"},{"lang":"ES","text":"Cena en Shibuya esta noche, ¿okonomiyaki para todos?"}]
+every 4s onTick={typing=length(typing)==2 ? ["Kenji"] : ["Kenji","Lucia"]}
+App
+  Sidebar
+    Brand "Bridge" icon="translate"
+    NavItem "Family trip" icon="groups" badge="3" selected={tab=="family"} onTap={tab="family"}
+    NavItem "Work lunch" icon="restaurant" selected={tab=="work"} onTap={tab="work"}
+    NavItem "Glossary" icon="menu_book" onTap={go glossary}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Ana Torres" size=32
+      Column
+        Text.strong "Ana"
+        Row gap=4 middle
+          LangFlag "EN"
+          Text.caption "Reading in English"
+  Main
+    Nav
+      Column
+        Heading "Family trip" level=3
+        Row gap=6 middle
+          LangFlag "JP"
+          LangFlag "ES"
+          LangFlag "EN"
+          Text.caption "3 people, 3 languages"
+      Row gap=8
+        Button.outline "Glossary" onTap={go glossary}
+        IconButton "more_vert" tooltip="More" onTap={open threadMenu}
+    Column pad=24 gap=14 scroll
+      each m in msgs
+        Column gap=4
+          if m.reply > 0
+            ReplyQuote sender={find(msgs,x=>x.id==m.reply).who} text={find(msgs,x=>x.id==m.reply).text} onJump={scroll {"m"+m.reply}}
+          if m.kind == "text"
+            ChatBubble#m{m.id} "{m.text}" sender={m.who} lang={m.lang} original={m.orig} mine={m.mine} showOriginal={openOrig==m.id} onTap={openOrig = openOrig==m.id ? "" : m.id} onLongPress={sel=m.id; open react}
+          if m.kind == "voice"
+            VoiceNote sender={m.who} lang={m.lang} seconds={m.secs} transcripts=[{"lang":"EN","text":m.en},{"lang":"JP","text":m.ja}] onLongPress={sel=m.id; open react}
+          if count(reactions, r=>r.msg==m.id) > 0
+            Row gap=6
+              each e in unique(map(filter(reactions, r=>r.msg==m.id), r=>r.emoji))
+                Chip "{e} {count(filter(reactions, r=>r.msg==m.id), r=>r.emoji==e)}" onTap={reactions = any(reactions, r=>r.msg==m.id && r.emoji==e && r.by==me) ? removeWhere(reactions, r=>r.msg==m.id && r.emoji==e && r.by==me) : append(reactions, {"msg":m.id,"emoji":e,"by":me})}
+          Row gap=12
+            Text.caption "Tap to show the original" hidden={m.orig=="" || openOrig==m.id}
+            Link "Reply" onTap={replyTo=m.id}
+      Row gap=8 middle
+        each who in typing
+          TypingIndicator "{who}"
+    Footer
+      Column gap=8 pad=12
+        if replyTo != ""
+          Row between middle
+            ReplyQuote sender={find(msgs,x=>x.id==replyTo).who} text={find(msgs,x=>x.id==replyTo).text}
+            IconButton "close" tooltip="Cancel reply" onTap={replyTo=""}
+        if draft != ""
+          Card gap=8
+            Row between
+              Text.strong "How it reads for the others"
+              Text.caption "Names in your glossary stay as written"
+            each p in previews
+              Row gap=8 middle
+                LangFlag "{p.lang}"
+                Text "{p.text}"
+        Row gap=8 middle
+          IconButton "mic" tooltip="Record a voice note" onTap={toast "Recording"}
+          Input "Message in English" bind=draft grow
+          Button "Send" onTap={draft=="" ? toast "Write something first" : {emit send draft; draft=""; replyTo=""}}
+  Popover#react
+    Row gap=8
+      each e in ["👍","❤️","😂","😮","🙏"]
+        Button.ghost "{e}" onTap={reactions=append(reactions,{"msg":sel,"emoji":e,"by":me}); close}
+      IconButton "reply" tooltip="Reply" onTap={replyTo=sel; close}
+  Menu#threadMenu end
+    MenuItem "Mute thread" icon="notifications_off" onTap={toast "Muted"}
+    MenuItem "Show every original" icon="visibility" onTap={openOrig=""; toast "Tap a message for its original"}
+    MenuItem "Leave thread" icon="logout" onTap={emit leave}
+
+### Glossary
+state gl=["Bridge","Okonomiyaki","Abuela Rosa","Shibuya"]
+state newTerm=""
+state note=""
+App
+  Sidebar
+    Brand "Bridge" icon="translate"
+    NavItem "Family trip" icon="groups" onTap={go thread}
+    NavItem "Work lunch" icon="restaurant" onTap={go thread}
+    NavItem "Glossary" icon="menu_book" selected={true}
+  Main
+    Nav
+      Heading "Glossary" level=3
+      Button "Add a name" onTap={open addTerm}
+    Column pad=24 gap=16
+      Text.muted "Names and words here are never translated, in any language."
+      Card gap=8
+        each g in gl
+          Row between middle
+            Column
+              Text.strong "{g}"
+              Text.caption "Stays as written for JP, ES and EN"
+            IconButton "delete" tooltip="Remove" onTap={gl=without(gl,g)}
+        Text.muted "Nothing here yet" hidden={length(gl)>0}
+      Card gap=8
+        Text.strong "Try it"
+        Input "Type a sentence" bind=note
+        if note != ""
+          Row gap=8 middle
+            LangFlag "JP"
+            Text "{note}"
+          Text.caption "Words in the glossary are kept: {join(filter(gl, g=>contains(note,g)), ', ')}"
+  Dialog#addTerm "Add a name" "It will stay as written everywhere"
+    Input "Name or word" bind=newTerm
+    Button "Add" onTap={newTerm=="" ? toast "Write the name" : {gl=append(gl,newTerm); newTerm=""; close}}
+
+### Voice note
+state playing=false
+state pos=0
+state lang="EN"
+every 1s when playing onTick={pos=pos>=14 ? 0 : pos+1; playing=pos>=14 ? false : playing}
+Page
+  Nav
+    Brand "Bridge" icon="translate"
+    Link "Back to thread" onTap={go thread}
+  Section narrow
+    Column gap=16
+      Row gap=8 middle
+        Avatar "Kenji Mori" size=40
+        Column
+          Text.strong "Kenji"
+          Row gap=4 middle
+            LangFlag "JP"
+            Text.caption "Voice note, 0:14"
+      Card gap=12
+        Row gap=12 middle
+          IconButton {playing ? "pause" : "play_arrow"} tooltip="Play" onTap={playing=!playing}
+          Waveform values=[3,5,8,6,9,4,7,10,6,3,5,8,4,2] progress={pos/14} grow
+          Text.caption "{duration(pos)} / {duration(14)}"
+        SegmentedButton bind=lang items=["EN","JP"]
+        Text "There is a small place near the station, they do not take reservations, so we should go early." hidden={lang!="EN"}
+        Text "駅の近くに小さなお店があります。予約はできないので、早めに行きましょう。" hidden={lang!="JP"}
+        Row gap=8
+          Button.outline "Copy transcript" onTap={copy "transcript"; toast "Copied"}
+          Button.outline "Reply" onTap={go thread}
+
+// A small round language mark: a flag-style code on a tinted dot.
+define LangFlag "code" size=18
+  Box w={size+10} h={size} radius={size/2} fill="#FFE5E7EB" center middle
+    Text.caption "{code}"
+
+define TypingIndicator "who" onTap
+  Row gap=6 middle animate=pulse
+    Avatar "{who}" size=20
+    Text.caption "{who} is typing"
+    Row gap=3
+      Box w=5 h=5 radius=3 fill="#FF9CA3AF"
+      Box w=5 h=5 radius=3 fill="#FF9CA3AF"
+      Box w=5 h=5 radius=3 fill="#FF9CA3AF"
+
+define ReplyQuote sender="" text="" onJump
+  Row gap=8 border-left="#FF2563EB" pad=[8,4,8,4] onTap={onJump}
+    Column
+      Text.caption "{sender}"
+      Text.small "{text}"
+
+define ChatBubble "text" sender="" lang="" original="" mine=false showOriginal=false onTap onLongPress
+  Row {mine ? "end" : "start"} gap=8 top
+    if !mine
+      Avatar "{sender}" size=32
+    Column gap=4 pad=12 radius=14 fill={mine ? "#FFDBEAFE" : "#FFF3F4F6"} onTap={onTap} onLongPress={onLongPress}
+      Row gap=6 middle
+        Text.strong "{sender}"
+        LangFlag "{lang}"
+      Text "{text}"
+      if showOriginal
+        Divider
+        Text.muted "{original}"
+      ...
+
+define VoiceNote sender="" lang="" seconds=0 transcripts=[] onLongPress
+  Row start gap=8 top
+    Avatar "{sender}" size=32
+    Card gap=8 w=320 onLongPress={onLongPress}
+      Row gap=6 middle
+        Text.strong "{sender}"
+        LangFlag "{lang}"
+      Row gap=8 middle
+        Icon "play_arrow"
+        Waveform values=[3,5,8,6,9,4,7,10,6,3,5,8] grow
+        Text.caption "{duration(seconds)}"
+      each t in transcripts
+        Row gap=6 top
+          LangFlag "{t.lang}"
+          Text.small "{t.text}"
+
+// Sound is not available, so this is a row of bars.
+define Waveform values=[] progress=0 barW=3
+  Row gap=2 middle h=32
+    each v in values
+      Box w={barW} h={v*3} radius=2 fill={index/length(values) < progress ? "#FF2563EB" : "#FF9CA3AF"}

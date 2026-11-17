@@ -1,0 +1,241 @@
+### Pipeline
+state stages=["Lead","Viewing","Offer","Closing"]
+state q=""
+state deals=[{"id":1,"name":"Priya Nair","home":"14 Alder Lane","value":685000,"stage":"Lead"},{"id":2,"name":"Tom Whitfield","home":"220 Harbor St #4B","value":512000,"stage":"Lead"},{"id":3,"name":"Marisol Vega","home":"9 Cedar Court","value":749000,"stage":"Viewing"},{"id":4,"name":"The Okafor family","home":"31 Mill Road","value":930000,"stage":"Viewing"},{"id":5,"name":"Daniel Kim","home":"5 Linden Ave","value":598000,"stage":"Offer"},{"id":6,"name":"Hannah Brooks","home":"77 Quay Walk #12","value":455000,"stage":"Closing"}]
+state contactId=1
+state propertyId=1
+App
+  Sidebar
+    Brand "Keystone" icon="vpn_key"
+    NavItem "Pipeline" icon="view_kanban" selected={true} onTap={go pipeline}
+    NavItem "Contacts" icon="people" onTap={go contact}
+    NavItem "Properties" icon="home_work" onTap={go property}
+    NavItem "Follow-ups" icon="checklist" badge="5" onTap={go todo}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Whitaker" size=32
+      Text.muted "Dana Whitaker"
+  Main
+    Nav
+      Heading "Pipeline"
+      Row gap=8
+        Input "Search deals" bind=q w=220
+        Button.outline "Log a call" icon="call" onTap={open calllog}
+        Button "New deal" icon="add" onTap={emit newDeal}
+    Column pad=24 gap=16
+      Row gap=16 top scroll
+        each stage in stages
+          Column w=280 gap=8 drop=deal onDrop={deals=updateWhere(deals,d=>d.id==result.data,d=>with(d,"stage",stage)); toast "Moved to {stage}"}
+            Row between middle
+              Row gap=8 middle
+                Text.strong "{stage}"
+                Badge.neutral "{count(deals,d=>d.stage==stage)}"
+              Text.muted "{money(sum(filter(deals,d=>d.stage==stage),d=>d.value),"$",0)}"
+            each deal in filter(deals,d=>d.stage==stage && (q=="" || contains(lower(d.name),lower(q)) || contains(lower(d.home),lower(q))))
+              Card gap=6 drag=deal(deal.id) onTap={contactId=deal.id; go contact}
+                Row between middle
+                  Text.strong "{deal.name}"
+                  Text.muted "{money(deal.value,"$",0)}"
+                Text.muted "{deal.home}"
+                Row gap=6 middle
+                  Icon "event" size=16
+                  Text.caption "Follow up Thu"
+            if count(deals,d=>d.stage==stage)==0
+              Card
+                Text.muted "Drop a deal here"
+      Card gap=8
+        Text.strong "Pipeline value by stage"
+        BarChart values=[1197000,1679000,598000,455000] labels=["Lead","Viewing","Offer","Closing"] h=160
+
+### Contact
+state tags=["Buyer","Pre-approved","Prefers east side"]
+state newTag=""
+state nextAction="Send comparable listings"
+state due="Thu, Nov 20"
+state events=[{"kind":"call","title":"Call, 12 min","when":"Today, 9:40","note":"Wants a third bedroom. Budget firm at 700k."},{"kind":"email","title":"Sent listing packet","when":"Mon, Nov 17","note":"Alder Lane, Cedar Court, Mill Road."},{"kind":"viewing","title":"Viewing at 14 Alder Lane","when":"Sat, Nov 15","note":"Liked the kitchen, worried about street noise."},{"kind":"call","title":"Intro call, 8 min","when":"Nov 10","note":"Relocating for work in January."}]
+App
+  Sidebar
+    Brand "Keystone" icon="vpn_key"
+    NavItem "Pipeline" icon="view_kanban" onTap={go pipeline}
+    NavItem "Contacts" icon="people" selected={true} onTap={go contact}
+    NavItem "Properties" icon="home_work" onTap={go property}
+    NavItem "Follow-ups" icon="checklist" badge="5" onTap={go todo}
+  Main
+    Nav
+      Row gap=12 middle
+        IconButton "arrow_back" tooltip="Back to pipeline" onTap={go pipeline}
+        Avatar "Priya Nair" size=40
+        Column
+          Heading "Priya Nair"
+          Text.muted "Buyer, Lead stage"
+      Row gap=8
+        IconButton "call" tooltip="Call"
+        IconButton "mail" tooltip="Email"
+        Button "Log a call" icon="add_call" onTap={open calllog}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Column grow gap=16
+          Card gap=8
+            Text.strong "Next action"
+            Row between middle
+              Column
+                Text "{nextAction}"
+                Row gap=6 middle
+                  Icon "event" size=16
+                  Text.muted "Due {due}"
+              Row gap=8
+                Button.outline "Reschedule" onTap={open reschedule}
+                Button "Mark done" onTap={nextAction="Book second viewing"; due="Mon, Nov 24"; toast "Follow-up done"}
+          Card gap=12
+            Row between middle
+              Text.strong "Activity"
+              Row gap=8
+                Button.ghost "Email" icon="mail" onTap={emit composeEmail}
+                Button.ghost "Viewing" icon="home" onTap={go property}
+            Timeline items={events}
+        Column w=300 gap=16
+          Card gap=8
+            Text.strong "Details"
+            ListTile "priya.nair@example.com" icon="mail"
+            ListTile "(415) 555-0142" icon="phone"
+            ListTile "Budget up to $700,000" icon="payments"
+          Card gap=8
+            Text.strong "Tags"
+            Row gap=6
+              each tag in tags
+                Chip "{tag}" removable onTap={tags=without(tags,tag)}
+            Row gap=8 middle
+              Input "Add a tag" bind=newTag grow
+              Button.outline "Add" onTap={newTag=="" ? toast "Type a tag first" : {tags=append(tags,newTag); newTag=""}}
+  Dialog#calllog "Log a call" "Priya Nair"
+    state outcome=""
+    state notes=""
+    state followUp=true
+    Column gap=12
+      Text.fieldLabel "Outcome"
+      Row gap=8
+        ChoiceChip "Connected" selected={outcome=="connected"} onTap={outcome="connected"}
+        ChoiceChip "Left voicemail" selected={outcome=="voicemail"} onTap={outcome="voicemail"}
+        ChoiceChip "No answer" selected={outcome=="none"} onTap={outcome="none"}
+        ChoiceChip "Wrong number" selected={outcome=="wrong"} onTap={outcome="wrong"}
+      Input "Notes" "What was discussed" multiline bind=notes
+      Toggle "Schedule a follow-up" bind=followUp
+      if followUp
+        DatePicker "Follow-up date" bind=due
+      Row end gap=8
+        Button.ghost "Cancel" onTap={close}
+        Button "Save call" onTap={outcome=="" ? toast "Pick an outcome" : {events=concat([{"kind":"call","title":"Call, " + outcome,"when":"Just now","note":notes}],events); outcome=""; notes=""; toast "Call logged"; close}}
+  Dialog#reschedule "Reschedule next action"
+    DatePicker "New due date" bind=due
+    Button "Save" onTap={toast "Rescheduled to {due}"; close}
+
+### Property
+state day=2
+state slot=""
+state viewings=[{"day":2,"time":"10:00","who":"Priya Nair"},{"day":2,"time":"14:30","who":"Marisol Vega"},{"day":4,"time":"11:00","who":"Tom Whitfield"}]
+Page
+  Nav sticky
+    Brand "Keystone" icon="vpn_key"
+    Row gap=4
+      Link "Pipeline" onTap={go pipeline}
+      Link "Contacts" onTap={go contact}
+      Link "Properties"
+      Link "Follow-ups" onTap={go todo}
+    Button "Schedule viewing" onTap={open schedule}
+  Section
+    Row gap=32 top
+      Column grow gap=12
+        Image "https://images.example.com/14-alder-lane.jpg" h=320 radius=12
+        Row gap=8
+          Badge.success "Active"
+          Badge.neutral "3 bd"
+          Badge.neutral "2 ba"
+          Badge.neutral "1,840 sq ft"
+        Heading "14 Alder Lane" level=1
+        Text.muted "Portland, OR 97214. Listed at $685,000. Corner lot, renovated kitchen, detached garage."
+      Column w=320 gap=16
+        Card gap=8
+          Text.strong "Viewings this week"
+          WeekStrip bind=day marks={map(viewings,v=>v.day)}
+          each v in filter(viewings,v=>v.day==day)
+            ListTile "{v.time}, {v.who}" icon="schedule"
+          if count(viewings,v=>v.day==day)==0
+            Text.muted "Nothing booked for this day."
+          Button "Book this day" onTap={open schedule}
+        Card gap=8
+          Text.strong "Interested buyers"
+          ListTile "Priya Nair" icon="person" onTap={go contact}
+          ListTile "Marisol Vega" icon="person"
+          ListTile "Tom Whitfield" icon="person"
+  Dialog#schedule "Schedule a viewing" "14 Alder Lane"
+    WeekStrip bind=day marks={map(viewings,v=>v.day)}
+    Row gap=8
+      ChoiceChip "10:00" selected={slot=="10:00"} onTap={slot="10:00"}
+      ChoiceChip "12:00" selected={slot=="12:00"} onTap={slot="12:00"}
+      ChoiceChip "14:30" selected={slot=="14:30"} onTap={slot="14:30"}
+      ChoiceChip "16:00" selected={slot=="16:00"} onTap={slot="16:00"}
+    Select "Buyer" items=["Priya Nair","Marisol Vega","Tom Whitfield"] bind=who
+    Button "Confirm viewing" onTap={slot=="" ? toast "Pick a time" : {viewings=append(viewings,{"day":day,"time":slot,"who":who}); slot=""; toast "Viewing booked"; close}}
+
+### Follow-ups
+state filterMode="today"
+state todos=[{"id":1,"who":"Priya Nair","task":"Send comparable listings","due":"Today","done":false},{"id":2,"who":"Marisol Vega","task":"Confirm Cedar Court viewing","due":"Today","done":false},{"id":3,"who":"Daniel Kim","task":"Chase lender for offer letter","due":"Today","done":true},{"id":4,"who":"Hannah Brooks","task":"Book closing walkthrough","due":"Tomorrow","done":false},{"id":5,"who":"Tom Whitfield","task":"Call back about 220 Harbor St","due":"Tomorrow","done":false}]
+App
+  Sidebar
+    Brand "Keystone" icon="vpn_key"
+    NavItem "Pipeline" icon="view_kanban" onTap={go pipeline}
+    NavItem "Contacts" icon="people" onTap={go contact}
+    NavItem "Properties" icon="home_work" onTap={go property}
+    NavItem "Follow-ups" icon="checklist" selected={true} badge="{count(todos,t=>!t.done)}"
+  Main
+    Nav
+      Heading "Follow-ups"
+      Row gap=8
+        SegmentedButton items=["Today","Tomorrow","All"] bind=filterLabel
+        Button "Add follow-up" icon="add" onTap={open addTodo}
+    Column pad=24 gap=16 maxw=720
+      Row gap=12 middle
+        Progress {count(todos,t=>t.done)/length(todos)} grow
+        Text.muted "{count(todos,t=>t.done)} of {length(todos)} done"
+      each todo in todos
+        Card gap=4
+          Row gap=12 middle
+            Checkbox "" bind=todo.done
+            Column grow
+              Text.strong "{todo.task}" strike={todo.done}
+              Text.muted "{todo.who}"
+            Badge.warning "{todo.due}"
+            IconButton "more_vert" tooltip="More" onTap={sel=todo.id; open todoMenu}
+  Menu#todoMenu end
+    MenuItem "Open contact" icon="person" onTap={go contact}
+    MenuItem "Snooze to tomorrow" icon="snooze" onTap={todos=updateWhere(todos,t=>t.id==sel,t=>with(t,"due","Tomorrow"))}
+    MenuItem "Delete" icon="delete" onTap={todos=removeWhere(todos,t=>t.id==sel); toast "Removed"}
+  Dialog#addTodo "New follow-up"
+    Input "Contact" bind=newWho
+    Input "What needs doing" bind=newTask
+    Select "Due" items=["Today","Tomorrow","This week"] bind=newDue
+    Button "Add" onTap={newTask=="" ? toast "Describe the task" : {todos=append(todos,{"id":length(todos)+10,"who":newWho,"task":newTask,"due":newDue,"done":false}); newTask=""; close}}
+
+define Timeline items=[]
+  Column gap=12
+    each item in items
+      TimelineEvent title={item.title} kind={item.kind} when={item.when} note={item.note}
+
+define TimelineEvent "title" kind="call" when="" note=""
+  Row gap=12 top
+    IconTile {kind=="call" ? "call" : kind=="email" ? "mail" : "home"}
+    Column grow gap=2
+      Row between
+        Text.strong "{title}"
+        Text.caption "{when}"
+      Text.muted "{note}"
+
+// a week strip of seven day buttons with a dot under days that have something booked
+define WeekStrip bind=day marks=[] labels=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"] onPick
+  Row gap=4 between
+    each label in labels
+      Column center gap=2 grow onTap={day=index; onPick(index)}
+        Text.caption "{label}"
+        Box w=36 h=36 radius=18 fill={day==index ? "#FF2563EB" : "#00000000"} center middle
+          Text "{index+13}" color={day==index ? "#FFFFFFFF" : "#FF111827"}
+        Box w=6 h=6 radius=3 fill={contains(marks,index) ? "#FF16A34A" : "#00000000"}

@@ -1,0 +1,192 @@
+### Layout
+state tab="layout"
+state size="M"
+state seam=1.5
+state fabricW=140
+state snap=true
+state sel="front"
+state sizes=[{"name":"XS","chest":82,"waist":64,"hip":88,"k":0.9},{"name":"S","chest":88,"waist":70,"hip":94,"k":0.95},{"name":"M","chest":94,"waist":76,"hip":100,"k":1},{"name":"L","chest":100,"waist":82,"hip":106,"k":1.06},{"name":"XL","chest":108,"waist":90,"hip":114,"k":1.13}]
+state pieces=[{"id":"front","name":"Front bodice","x":10,"y":10,"w":46,"h":58,"rot":0,"notches":[0.3,0.7]},{"id":"back","name":"Back bodice","x":62,"y":10,"w":44,"h":58,"rot":0,"notches":[0.35]},{"id":"sleeve","name":"Sleeve","x":10,"y":76,"w":40,"h":52,"rot":0,"notches":[0.5]},{"id":"collar","name":"Collar band","x":58,"y":76,"w":50,"h":10,"rot":0,"notches":[]}]
+App
+  Sidebar
+    Brand "Seamstress Scale" icon="content_cut"
+    NavItem "Layout" icon="grid_view" selected={tab=="layout"} onTap={tab="layout"}
+    NavItem "Sizes" icon="straighten" selected={tab=="sizes"} onTap={go sizes}
+    NavItem "Print" icon="print" selected={tab=="print"} onTap={go print}
+    Spacer grow
+    Text.muted "Pattern: Linen shirtdress"
+  Main
+    Nav
+      Heading "Cloth layout" level=1
+      Row gap=8
+        Select bind=size items=["XS","S","M","L","XL"]
+        Button.outline "Help" onTap={open help}
+        Button "Print pattern" onTap={go print}
+    Row gap=16 pad=24 top
+      Column grow gap=12
+        Card gap=12
+          Row between
+            Text.strong "Fabric {fabricW} cm wide"
+            Row gap=8
+              Text.muted "Snap to edges"
+              Toggle bind=snap
+          ClothCanvas pieces={pieces} width={fabricW} scale={find(sizes,s=>s.name==size).k} seam={seam} snap={snap} selected={sel} h=420 onSelect={sel=result} onMove={pieces=updateWhere(pieces,p=>p.id==sel,p=>with(with(p,"x",result.x),"y",result.y))}
+          Row gap=8 middle
+            Text.caption "Selected: {find(pieces,p=>p.id==sel).name}"
+            Spacer grow
+            IconButton "rotate_left" tooltip="Rotate 15 degrees left" onTap={pieces=updateWhere(pieces,p=>p.id==sel,p=>with(p,"rot",(p.rot+345)%360))}
+            IconButton "rotate_right" tooltip="Rotate 15 degrees right" onTap={pieces=updateWhere(pieces,p=>p.id==sel,p=>with(p,"rot",(p.rot+15)%360))}
+            Button.outline "Rotate 90" onTap={pieces=updateWhere(pieces,p=>p.id==sel,p=>with(p,"rot",(p.rot+90)%360))}
+            Button.ghost "Reset" onTap={pieces=updateWhere(pieces,p=>p.id==sel,p=>with(with(p,"rot",0),"x",10))}
+        Card gap=8
+          Text.strong "Pieces"
+          each p in pieces
+            ListTile "{p.name}" selected={sel==p.id} onTap={sel=p.id}
+              Text.caption "{round(p.w*find(sizes,s=>s.name==size).k,1)} x {round(p.h*find(sizes,s=>s.name==size).k,1)} cm, rotated {p.rot} degrees, {length(p.notches)} notches"
+      Pane w=320 pad=16 gap=16
+        Card gap=8
+          Text.muted "Length needed"
+          Text "{fixed(ceil(sum(pieces,p=>(p.w*find(sizes,s=>s.name==size).k+seam*0.2)*(p.h*find(sizes,s=>s.name==size).k+seam*0.2))/fabricW*1.15)/100*1.0,2)} m" size=40 weight=700
+          Text.caption "Includes a 15 percent margin for the grain and waste."
+        Card gap=12
+          Text.strong "Seam allowance"
+          Slider bind=seam min=0.5 max=3 step=0.5
+          Text.muted "{seam} cm, shown as a dashed line"
+        Card gap=12
+          Text.strong "Fabric width"
+          SegmentedButton bind=fabricW items=["90","112","140","150"]
+          Input "Custom width (cm)" type=number bind=fabricW
+        Card gap=8
+          Text.strong "Legend"
+          Row gap=8 middle
+            Icon "arrow_upward"
+            Text.caption "Grain line: keep parallel to the selvage"
+          Row gap=8 middle
+            Icon "change_history"
+            Text.caption "Notch: match when sewing"
+  Dialog#help "Moving pieces" "Drag a piece onto the cloth."
+    Text "Pieces snap to the cloth edge and to each other when Snap is on."
+    Text "Rotate in 15 degree steps; the grain line must stay along the cloth."
+    Button "Got it" onTap={close}
+
+// draws the cloth rectangle, each piece as an outline at x,y turned by rot, with a dashed seam allowance, a grain line arrow and notch marks; drag moves a piece. A real canvas cannot be built from the core words, so it is a labelled box.
+define ClothCanvas pieces=[] width=140 scale=1 seam=1.5 snap=true selected="" h=400 onSelect onMove
+  Box h={h} fill=#FFF5F0E6 radius=8 border=1 center middle
+    Text.muted "Cloth {width} cm, {length(pieces)} pieces at {scale}x, seam {seam} cm, snap {snap}"
+
+### Sizes
+state size="M"
+state seam=1.5
+state sizes=[{"name":"XS","chest":82,"waist":64,"hip":88,"k":0.9},{"name":"S","chest":88,"waist":70,"hip":94,"k":0.95},{"name":"M","chest":94,"waist":76,"hip":100,"k":1},{"name":"L","chest":100,"waist":82,"hip":106,"k":1.06},{"name":"XL","chest":108,"waist":90,"hip":114,"k":1.13}]
+state pieces=[{"id":"front","name":"Front bodice","w":46,"h":58,"notches":[0.3,0.7]},{"id":"back","name":"Back bodice","w":44,"h":58,"notches":[0.35]},{"id":"sleeve","name":"Sleeve","w":40,"h":52,"notches":[0.5]},{"id":"collar","name":"Collar band","w":50,"h":10,"notches":[]}]
+state unit="cm"
+App
+  Sidebar
+    Brand "Seamstress Scale" icon="content_cut"
+    NavItem "Layout" icon="grid_view" onTap={go layout}
+    NavItem "Sizes" icon="straighten" selected onTap={go sizes}
+    NavItem "Print" icon="print" onTap={go print}
+  Main
+    Nav
+      Heading "Sizes" level=1
+      SegmentedButton bind=unit items=["cm","in"]
+    Row gap=16 pad=24 top
+      Column grow gap=16
+        Card gap=12
+          Text.strong "Choose a size"
+          Row gap=8
+            each s in sizes
+              ChoiceChip "{s.name}" selected={size==s.name} onTap={size=s.name}
+        Card gap=12
+          Text.strong "Pieces at size {size}"
+          Grid cols=2 gap=12
+            each p in pieces
+              Card gap=8
+                Text.small "{p.name}"
+                PatternPiece name="{p.name}" w={p.w*find(sizes,s=>s.name==size).k} h={p.h*find(sizes,s=>s.name==size).k} seam={seam} notches={p.notches} grain=true
+                Text.caption "{fixed(p.w*find(sizes,s=>s.name==size).k*(unit=="in"?0.3937:1),1)} x {fixed(p.h*find(sizes,s=>s.name==size).k*(unit=="in"?0.3937:1),1)} {unit}"
+      Pane w=320 pad=16 gap=16
+        Card gap=12
+          Text.strong "Measurements"
+          Row
+            Text.fieldLabel "Size" w=50
+            Text.fieldLabel "Chest" w=70
+            Text.fieldLabel "Waist" w=70
+            Text.fieldLabel "Hip" grow
+          each s in sizes
+            Row middle fill={size==s.name ? "#FFE0E7FF" : "#00000000"} radius=4 onTap={size=s.name}
+              Text.strong "{s.name}" w=50
+              Text "{fixed(s.chest*(unit=="in"?0.3937:1),0)}" w=70
+              Text "{fixed(s.waist*(unit=="in"?0.3937:1),0)}" w=70
+              Text "{fixed(s.hip*(unit=="in"?0.3937:1),0)}" grow
+        Card gap=8
+          Text.strong "Seam allowance"
+          Slider bind=seam min=0.5 max=3 step=0.5
+          Text.muted "{seam} cm all round"
+
+// draws one pattern piece as an outline sized to w and h, a dashed line seam cm outside it, a grain line arrow and notch marks along the edge at the given shares. Shapes cannot be drawn from the core words, so it is a labelled box.
+define PatternPiece name="" w=40 h=50 seam=1.5 notches=[] grain=true
+  Box h={h*2} fill=#FFFAFAFA radius=4 border=1 center middle
+    Text.caption "{name}: {round(w,1)} x {round(h,1)}, seam {seam}, {length(notches)} notches"
+
+### Print
+state page=0
+state paper="A4"
+state cols=3
+state rows=2
+state tileOverlap=1
+state showReg=true
+state tiles=[{"n":1,"label":"A1"},{"n":2,"label":"A2"},{"n":3,"label":"A3"},{"n":4,"label":"B1"},{"n":5,"label":"B2"},{"n":6,"label":"B3"}]
+App
+  Sidebar
+    Brand "Seamstress Scale" icon="content_cut"
+    NavItem "Layout" icon="grid_view" onTap={go layout}
+    NavItem "Sizes" icon="straighten" onTap={go sizes}
+    NavItem "Print" icon="print" selected onTap={go print}
+  Main
+    Nav
+      Heading "Print layout" level=1
+      Row gap=8
+        Button.outline "Assembly guide" onTap={open guide}
+        Button "Print {cols*rows} pages" onTap={emit print; toast "Sent to printer"}
+    Row gap=16 pad=24 top
+      Column grow gap=16
+        Card gap=12
+          Row between
+            Text.strong "Tiled pages, {cols} across by {rows} down"
+            Text.muted "Page {page+1} of {length(tiles)}"
+          Grid cols={cols} gap=4
+            each t in tiles
+              PrintPage label={t.label} reg={showReg} selected={page==index} onTap={page=index}
+        Card gap=8
+          Text.strong "Assembled size"
+          Text "{cols*21-(cols-1)*tileOverlap} x {rows*29.7-(rows-1)*tileOverlap} cm" size=28 weight=700
+          Text.caption "Trim the margin on the right and bottom edges, then tape the pages along the registration squares."
+      Pane w=320 pad=16 gap=16
+        Card gap=12
+          Text.strong "Paper"
+          SegmentedButton bind=paper items=["A4","Letter"]
+          Text.fieldLabel "Pages across"
+          Slider bind=cols min=1 max=4 step=1
+          Text.fieldLabel "Pages down"
+          Slider bind=rows min=1 max=4 step=1
+          Text.fieldLabel "Overlap {tileOverlap} cm"
+          Slider bind=tileOverlap min=0 max=2 step=0.5
+        Card gap=8
+          Row between
+            Text.strong "Registration squares"
+            Toggle bind=showReg
+          Text.caption "A 2 cm square in each corner marks where neighbouring pages meet."
+          Row gap=8 middle
+            Icon "crop_square"
+            Text.caption "Check that the test square prints at exactly 2 cm."
+  Dialog#guide "Assembling the pattern" "Lay the pages out in rows."
+    Text "Match each registration square to the one on the next page and tape from the back."
+    Button "Close" onTap={close}
+
+// draws one printed page as a sheet with its label, a registration square in each corner when reg is on, and a highlight when selected; the sheet is a labelled box because shapes cannot be drawn from the core words.
+define PrintPage label="" reg=true selected=false onTap
+  Box h=120 fill=#FFFFFFFF radius=2 border={selected ? 3 : 1} center middle onTap={onTap}
+    Text.strong "{label}"
+    if reg
+      Text.caption "registration square"

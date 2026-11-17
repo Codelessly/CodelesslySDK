@@ -1,0 +1,200 @@
+### Lock
+state pin=""
+state tries=0
+Page
+  Section center
+    Column center gap=20 maxw=360
+      IconTile "spa"
+      Heading "Soil" level=1
+      Text.muted "Enter your passcode to open your garden"
+      PinPad bind=pin length=4 onComplete={pin=="2468" ? go garden : {tries=tries+1; pin=""; toast "Not quite, try again"}}
+      if tries >= 3
+        Text.danger "Three misses. Wait a minute before the next try."
+      Button.ghost "Use Face ID" onTap={go garden}
+
+### Garden
+state month="November"
+state sel=null
+state view="garden"
+state entries=[{"id":1,"day":3,"mood":"calm","color":"#FF60A5FA","note":"Slow morning, long walk by the canal.","weather":"cloudy","sleep":"7h+","gratitude":["Coffee with Jo","A quiet train","Soup for dinner"]},{"id":2,"day":4,"mood":"joyful","color":"#FFFACC15","note":"Finished the pottery bowl.","weather":"sunny","sleep":"6-7h","gratitude":["The bowl came out round","Sun on the desk","Mum called"]},{"id":3,"day":5,"mood":"anxious","color":"#FFF97316","note":"Deadline looming, chest tight all afternoon.","weather":"rain","sleep":"<6h","gratitude":["Tea","A friend's message","Dry socks"]},{"id":4,"day":6,"mood":"tired","color":"#FF94A3B8","note":"Slept badly, got through it.","weather":"rain","sleep":"<6h","gratitude":["Early night","The cat","Leftovers"]},{"id":5,"day":7,"mood":"content","color":"#FF4ADE80","note":"Market, fresh bread, no screens.","weather":"sunny","sleep":"7h+","gratitude":["Warm bread","Neighbour's wave","Clean sheets"]}]
+App
+  Sidebar
+    Brand "Soil" icon="spa"
+    NavItem "Garden" icon="yard" selected={view=="garden"} onTap={view="garden"}
+    NavItem "Today" icon="add_circle" onTap={go today}
+    NavItem "Seasons" icon="show_chart" onTap={go seasons}
+    NavItem "Reminders" icon="alarm" onTap={open reminders}
+    Spacer grow
+    NavItem "Lock now" icon="lock" onTap={go lock}
+  Main
+    Nav
+      Heading "{month} garden" level=1
+      Row gap=8
+        SegmentedButton bind=month items=["October","November","December"]
+        Button "Plant today" onTap={go today}
+    Column pad=24 gap=16
+      Card gap=12
+        Row between
+          Text.strong "Your plot"
+          Text.muted "{length(entries)} plants this month. Drag to pan, tap a plant to read it."
+        GardenPlot entries={entries} days=30 bind=sel onPick={sel=result; open entry}
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Most common mood"
+          Text.heading "{first(sortByDesc(unique(map(entries,e=>e.mood)),m=>count(entries,e=>e.mood==m)))}"
+        Card gap=4
+          Text.muted "Days planted"
+          Text.heading "{length(entries)} of 30"
+        Card gap=4
+          Text.muted "Gratitude lines"
+          Text.heading "{length(entries)*3}"
+
+Dialog#entry "Entry"
+  if sel != null
+    Column gap=12
+      Row gap=12 middle
+        PlantGlyph mood={sel.mood} color={sel.color} size=56
+        Column
+          Text.strong "Nov {sel.day}, feeling {sel.mood}"
+          Row gap=6
+            Badge.info "{sel.weather}"
+            Badge.neutral "sleep {sel.sleep}"
+      Text "{sel.note}"
+      Divider
+      Text.fieldLabel "Grateful for"
+      each g in sel.gratitude
+        Row gap=8 middle
+          Icon "favorite" size=16
+          Text "{g}"
+      Row gap=8 end
+        Button.destructive "Pull up" onTap={entries=removeWhere(entries,e=>e.id==sel.id); sel=null; close; toast "Plant removed"}
+        Button "Close" onTap={close}
+
+Sheet#reminders "Reminders"
+  state remindOn=true
+  state times=["08:30","21:00"]
+  Column gap=12
+    Toggle "Daily check-in" bind=remindOn
+    if remindOn
+      each t in times
+        Row between middle
+          Text.strong "{t}"
+          IconButton "close" tooltip="Remove" onTap={times=without(times,t)}
+      Row gap=8 middle
+        TimePicker "New reminder" bind=newTime
+        Button.outline "Add" onTap={newTime!="" ? {times=append(times,newTime); toast "Reminder set"} : toast "Pick a time"}
+    Text.muted "A gentle nudge at these times. Nothing else."
+    Button "Done" onTap={close}
+
+### Today
+state mood=""
+state color="#FF4ADE80"
+state g1=""
+state g2=""
+state g3=""
+state weather=""
+state sleep=""
+state note=""
+Page
+  Nav
+    Brand "Soil" icon="spa"
+    Row gap=4
+      Link "Garden" onTap={go garden}
+      Link "Seasons" onTap={go seasons}
+  Section narrow
+    Column gap=20
+      Heading "How does today feel?" level=1
+      Text.muted "Choose a colour on the wheel. It decides the shape of today's plant."
+      Row gap=24 top
+        Column grow center gap=8
+          MoodWheel bind=mood size=240 onPick={color=result.color; mood=result.mood}
+          if mood != ""
+            Text.strong "{mood}"
+        Column w=220 center gap=8
+          Text.muted "Today's plant"
+          PlantGlyph mood={mood} color={color} size=140 animate=pop
+      Card gap=12
+        Text.strong "Three things I am grateful for"
+        Input "One" bind=g1 maxlength=60
+        Input "Two" bind=g2 maxlength=60
+        Input "Three" bind=g3 maxlength=60
+      Card gap=12
+        Text.strong "Weather"
+        Row gap=8
+          ChoiceChip "Sunny" selected={weather=="sunny"} onTap={weather="sunny"}
+          ChoiceChip "Cloudy" selected={weather=="cloudy"} onTap={weather="cloudy"}
+          ChoiceChip "Rain" selected={weather=="rain"} onTap={weather="rain"}
+          ChoiceChip "Snow" selected={weather=="snow"} onTap={weather="snow"}
+        Text.strong "Sleep"
+        SegmentedButton bind=sleep items=["<6h","6-7h","7h+"]
+        Input "A few words about today" bind=note multiline
+      Button "Plant it" size=large onTap={mood=="" ? toast "Pick a mood first" : {entries=append(entries,{"id":length(entries)+1,"day":8,"mood":mood,"color":color,"note":note,"weather":weather,"sleep":sleep,"gratitude":[g1,g2,g3]}); toast "Planted"; go garden}}
+
+### Seasons
+state range="Year"
+Page
+  Nav
+    Brand "Soil" icon="spa"
+    Row gap=4
+      Link "Garden" onTap={go garden}
+      Link "Today" onTap={go today}
+  Section
+    Column gap=20
+      Row between middle
+        Heading "Your seasons" level=1
+        SegmentedButton bind=range items=["Season","Year"]
+      Card gap=12
+        Text.strong "Mood across the year"
+        SeasonGraph months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"] values=[2.8,2.6,3.1,3.4,3.9,4.2,4.4,4.1,3.5,3.2,3.6,0] h=240
+      Row gap=16
+        Card grow gap=8
+          IconTile "wb_sunny"
+          Heading "What lifts you" level=3
+          Text "On sunny days with 7h or more of sleep your mood averages 4.3, against 2.9 on rainy, short nights."
+          Row gap=8
+            Badge.success "Sunny"
+            Badge.success "7h+ sleep"
+            Badge.success "Walks"
+        Card grow gap=8
+          IconTile "favorite"
+          Heading "Gratitude" level=3
+          Text "You wrote three lines on 41 of the last 60 days. Most often: tea, friends, the cat."
+          Progress 0.68
+
+define PinPad bind=pin length=4 onComplete
+  state pin=""
+  Column center gap=16
+    Row gap=12
+      each i in range(length)
+        Box w=14 h=14 radius=7 fill={i < length(pin) ? "#FF2563EB" : "#FFE2E8F0"}
+    Grid cols=3 gap=10 w=240
+      each d in ["1","2","3","4","5","6","7","8","9","","0","<"]
+        Button.outline "{d}" hidden={d==""} onTap={d=="<" ? pin=slice(pin,0,length(pin)-1) : {pin=pin+d; length(pin)+1==length ? onComplete(pin+d) : ""}}
+
+define MoodWheel bind=mood size=240 onPick
+  state mood=""
+  // a true colour wheel is drawn as a ring of tappable swatches
+  Grid cols=4 gap=8 w={size}
+    each m in [{"mood":"joyful","color":"#FFFACC15"},{"mood":"excited","color":"#FFF97316"},{"mood":"angry","color":"#FFDC2626"},{"mood":"anxious","color":"#FFEC4899"},{"mood":"sad","color":"#FF6366F1"},{"mood":"calm","color":"#FF60A5FA"},{"mood":"tired","color":"#FF94A3B8"},{"mood":"content","color":"#FF4ADE80"}]
+      Box w={size/4-8} h={size/4-8} radius={size/8} fill={m.color} border={mood==m.mood ? 3 : 0} onTap={mood=m.mood; onPick(m)}
+
+define PlantGlyph mood="" color=#FF4ADE80 size=64
+  Stack w={size} h={size} center middle
+    Box w={size/8} h={size/2} radius={size/16} fill=#FF3F6212
+    Box w={size*0.7} h={size*0.7} radius={mood=="sharp" || mood=="angry" ? 4 : size/2} fill={color}
+
+define GardenPlot entries=[] days=30 bind=sel onPick
+  state sel=null
+  Row scroll gap=10 pad=12 fill=#FF5B3A29 radius=12
+    each d in range(days)
+      Column center gap=4 w=72 h=120 end
+        if any(entries,e=>e.day==d+1)
+          PlantGlyph mood={find(entries,e=>e.day==d+1).mood} color={find(entries,e=>e.day==d+1).color} size=56 onTap={onPick(find(entries,e=>e.day==d+1))}
+        Text.small "{d+1}" color=#FFE7D5C3
+
+define SeasonGraph months=[] values=[] h=240
+  Column gap=8
+    LineChart values={values} labels={months} h={h}
+    Row between
+      Text.caption "low"
+      Text.caption "high"

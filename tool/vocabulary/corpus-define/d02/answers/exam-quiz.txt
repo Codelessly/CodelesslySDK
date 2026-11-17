@@ -1,0 +1,179 @@
+### Exam
+state cur=0
+state remaining=2700
+state running=true
+state flagged=[]
+state seen=[0]
+state answers=["",[],["Mitochondria","Nucleus","Ribosome","Golgi"],[],"",""]
+state qs=[{"topic":"Cell biology","type":"single","text":"Which organelle produces most of a cell's ATP?","options":["Nucleus","Mitochondrion","Ribosome","Lysosome"]},{"topic":"Cell biology","type":"multi","text":"Select all structures found in a plant cell but not in an animal cell.","options":["Cell wall","Chloroplast","Centriole","Large central vacuole"]},{"topic":"Genetics","type":"order","text":"Put the steps of protein synthesis in order. Drag to reorder.","options":["Mitochondria","Nucleus","Ribosome","Golgi"]},{"topic":"Genetics","type":"match","text":"Match each molecule to its role.","left":["DNA","mRNA","tRNA","rRNA"],"right":["Stores the genetic code","Carries the code to the ribosome","Delivers amino acids","Forms the ribosome"]},{"topic":"Genetics","type":"blank","text":"The base pairing rule says adenine always pairs with ____ in DNA."},{"topic":"Anatomy","type":"spot","text":"Tap the part of the heart that pumps blood to the body.","src":"https://img.viva.example/heart-diagram.png","regions":["Right atrium","Right ventricle","Left atrium","Left ventricle","Aorta","Vena cava"]}]
+every 1s when running onTick={remaining=max(0,remaining-1); remaining==0 ? {running=false; go result} : {}}
+App
+  Sidebar
+    Brand "Viva" icon="school"
+    Text.strong "Biology midterm"
+    Text.muted "{count(answers,a=>!isEmpty(a))} of {length(qs)} answered"
+    QuestionPalette count={length(qs)} bind=cur answers={answers} flagged={flagged} seen={seen}
+    Row gap=12 wrap
+      Row gap=4
+        Icon "check_circle"
+        Text.small "Answered"
+      Row gap=4
+        Icon "flag"
+        Text.small "Flagged"
+      Row gap=4
+        Icon "radio_button_unchecked"
+        Text.small "Unseen"
+    Spacer grow
+    Button.outline "Review and submit" onTap={go review}
+  Main
+    Nav
+      Heading "Question {cur+1} of {length(qs)}"
+      Row gap=12 middle
+        Countdown seconds={remaining} warnAt=300 onWarn={toast "Five minutes left"}
+        IconButton "flag" tooltip="Flag for review" onTap={flagged=contains(flagged,cur) ? without(flagged,cur) : append(flagged,cur)}
+    Column pad=24 gap=16 maxw=720
+      Badge.info "{qs[cur].topic}"
+      Heading "{qs[cur].text}" level=3
+      if qs[cur].type=="single"
+        each o in qs[cur].options
+          Radio "{o}" selected={answers[cur]==o} onTap={answers=setAt(answers,cur,o)}
+      if qs[cur].type=="multi"
+        each o in qs[cur].options
+          Checkbox "{o}" checked={contains(answers[cur],o)} onChange={answers=setAt(answers,cur,contains(answers[cur],o) ? without(answers[cur],o) : append(answers[cur],o))}
+      if qs[cur].type=="order"
+        OrderList items={answers[cur]} onChange={answers=setAt(answers,cur,result)}
+      if qs[cur].type=="match"
+        MatchPairs left={qs[cur].left} right={qs[cur].right} bind=pairs onChange={answers=setAt(answers,cur,result)}
+      if qs[cur].type=="blank"
+        Input "Your answer" "one word" onChange={answers=setAt(answers,cur,result)}
+      if qs[cur].type=="spot"
+        Hotspot src={qs[cur].src} regions={qs[cur].regions} onPick={answers=setAt(answers,cur,result)}
+      Row between
+        Button.outline "Previous" onTap={cur=max(0,cur-1); seen=unique(append(seen,max(0,cur-1)))}
+        if cur<length(qs)-1
+          Button "Next" onTap={cur=cur+1; seen=unique(append(seen,cur+1))}
+        if cur==length(qs)-1
+          Button "Review" onTap={go review}
+
+### Review
+App
+  Sidebar
+    Brand "Viva" icon="school"
+    NavItem "Back to questions" icon="arrow_back" onTap={go exam}
+    Spacer grow
+    Countdown seconds={remaining} warnAt=300 onWarn={toast "Five minutes left"}
+  Main
+    Nav
+      Heading "Review before you submit" level=1
+      Button "Submit exam" onTap={open confirm}
+    Column pad=24 gap=16 maxw=720
+      Row gap=12
+        Card grow gap=4
+          Text.muted "Answered"
+          Text "{count(answers,a=>!isEmpty(a))}" size=32 weight=700
+        Card grow gap=4
+          Text.muted "Flagged"
+          Text "{length(flagged)}" size=32 weight=700
+        Card grow gap=4
+          Text.muted "Unanswered"
+          Text "{count(answers,a=>isEmpty(a))}" size=32 weight=700
+      each q in qs
+        ListTile "{index+1}. {q.text}" subtitle="{q.topic}" onTap={cur=index; go exam}
+          Row gap=8
+            if contains(flagged,index)
+              Badge.warning "Flagged"
+            if isEmpty(answers[index])
+              Badge.error "Unanswered"
+            if !isEmpty(answers[index])
+              Badge.success "Answered"
+Dialog#confirm "Submit your exam?" "You cannot change answers after submitting."
+  Text "{count(answers,a=>isEmpty(a))} questions are still unanswered."
+  Row gap=8 end
+    Button.outline "Keep working" onTap={close}
+    Button "Submit" onTap={running=false; close; go result}
+
+### Result
+state scores=[{"topic":"Cell biology","got":3,"of":4},{"topic":"Genetics","got":2,"of":4},{"topic":"Anatomy","got":1,"of":2}]
+state worked=[{"q":"Which organelle produces most of a cell's ATP?","yours":"Mitochondrion","right":"Mitochondrion","ok":true,"why":"Oxidative phosphorylation on the inner membrane of the mitochondrion makes most of the cell's ATP."},{"q":"The base pairing rule says adenine always pairs with ____ in DNA.","yours":"Guanine","right":"Thymine","ok":false,"why":"Adenine pairs with thymine through two hydrogen bonds; guanine pairs with cytosine through three."},{"q":"Tap the part of the heart that pumps blood to the body.","yours":"Left ventricle","right":"Left ventricle","ok":true,"why":"The left ventricle has the thickest wall because it drives blood through the aorta to the whole body."}]
+App
+  Sidebar
+    Brand "Viva" icon="school"
+    NavItem "Result" icon="emoji_events" selected={true}
+    NavItem "Retake exam" icon="replay" onTap={go exam}
+  Main
+    Nav
+      Heading "Your result" level=1
+      Button.outline "Download report" onTap={emit download}
+    Column pad=24 gap=16 maxw=720
+      Card gap=12
+        Row between middle
+          Column gap=4
+            Text.muted "Score"
+            Text "{sum(scores,s=>s.got)} / {sum(scores,s=>s.of)}" size=48 weight=700
+            Badge.success "Passed"
+          Ring {sum(scores,s=>s.got)/sum(scores,s=>s.of)}
+      Card gap=8
+        Heading "Score by topic" level=3
+        BarChart values={map(scores,s=>round(s.got/s.of*100,0))} labels={map(scores,s=>s.topic)} h=180
+        each s in scores
+          Row between
+            Text "{s.topic}"
+            Text.strong "{s.got} of {s.of}"
+      Heading "Worked answers" level=3
+      each w in worked
+        Accordion "{w.q}"
+          Row gap=8
+            Badge.neutral "You: {w.yours}"
+            Badge.success "Correct: {w.right}"
+          Text.muted "{w.why}"
+
+// A countdown timer that turns urgent below a threshold; uses a plain Text with a warning style.
+define Countdown seconds=0 warnAt=300 onWarn
+  Row gap=6 middle
+    Icon "timer"
+    Text.strong "{floor(seconds/60)}:{seconds%60<10 ? "0" : ""}{seconds%60}" color={seconds<=warnAt ? "#FFDC2626" : "#FF111827"} animate={seconds<=warnAt ? "pulse" : ""}
+    if seconds==warnAt
+      Badge.warning "5 min left"
+
+define QuestionPalette bind=cur count=0 answers=[] flagged=[] seen=[]
+  Grid cols=5 gap=6
+    each i in range(count)
+      Box w=36 h=36 radius=18 center middle fill={contains(flagged,i) ? "#FFFDE68A" : !isEmpty(answers[i]) ? "#FFBBF7D0" : contains(seen,i) ? "#FFE5E7EB" : "#FFFFFFFF"} border={cur==i ? 2 : 1} onTap={cur=i}
+        Text.small "{i+1}"
+
+// Drag to reorder: each row can be dragged onto another row.
+define OrderList items=[] onChange
+  Column gap=8
+    each item in items
+      Card drag=ord(item) drop=ord onDrop={onChange(concat(append(take(without(items,result.data),indexOf(items,item)),result.data),slice(without(items,result.data),indexOf(items,item),length(items))))}
+        Row gap=8 middle
+          Icon "drag_indicator"
+          Text "{index+1}. {item}"
+
+// Matching by lines cannot be drawn; a pair is made by tapping a left item then a right item and shown as a connected row.
+define MatchPairs left=[] right=[] bind=pairs onChange
+  state pairs=[]
+  state pick=-1
+  Row gap=24 top
+    Column grow gap=8
+      each l in left
+        Button.outline "{l}" selected={pick==index} onTap={pick=index}
+    Column grow gap=8
+      each r in right
+        Button.outline "{r}" onTap={pick>=0 ? {pairs=append(without(pairs,find(pairs,p=>p.l==left[pick])),{"l":left[pick],"r":r}); onChange(pairs); pick=-1} : toast "Pick a term first"}
+  each p in pairs
+    Row gap=6 middle
+      Text.small "{p.l}"
+      Icon "arrow_right_alt"
+      Text.small "{p.r}"
+
+// An image whose parts can be tapped; the tappable zones are drawn as a grid of boxes over the picture.
+define Hotspot src="" regions=[] onPick
+  state chosen=""
+  Stack
+    Image "{src}" h=260
+    Grid cols=3 gap=0
+      each r in regions
+        Box h=130 border={chosen==r ? 2 : 0} onTap={chosen=r; onPick(r)}
+  if chosen!=""
+    Text.muted "Selected: {chosen}"

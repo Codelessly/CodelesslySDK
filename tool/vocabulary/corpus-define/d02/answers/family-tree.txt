@@ -1,0 +1,224 @@
+### Tree
+state people=[{"id":"p1","gen":0,"name":"Walter Hale","born":"1921","died":"1994","photo":"https://example.com/p/walter.jpg","notes":true,"anc":[]},{"id":"p2","gen":0,"name":"Edith Hale","born":"1924","died":"2003","photo":"https://example.com/p/edith.jpg","notes":false,"anc":[]},{"id":"p3","gen":0,"name":"Samuel Okafor","born":"1919","died":"1988","photo":"https://example.com/p/samuel.jpg","notes":false,"anc":[]},{"id":"p4","gen":0,"name":"Ngozi Okafor","born":"1925","died":"2010","photo":"https://example.com/p/ngozi.jpg","notes":true,"anc":[]},{"id":"p5","gen":1,"name":"Robert Hale","born":"1948","died":"","photo":"https://example.com/p/robert.jpg","notes":false,"anc":["p1","p2"]},{"id":"p6","gen":1,"name":"Adaeze Okafor-Hale","born":"1952","died":"","photo":"https://example.com/p/adaeze.jpg","notes":true,"anc":["p3","p4"]},{"id":"p7","gen":2,"name":"Maya Hale","born":"1979","died":"","photo":"https://example.com/p/maya.jpg","notes":true,"anc":["p5","p6","p1","p2","p3","p4"]},{"id":"p8","gen":2,"name":"Daniel Hale","born":"1982","died":"","photo":"https://example.com/p/daniel.jpg","notes":false,"anc":["p5","p6","p1","p2","p3","p4"]}]
+state selId="p7"
+state focus=false
+state zoom=1
+state addTo=""
+state addKind="child"
+state newName=""
+state newBorn=""
+state sidebarTab="tree"
+App
+  Sidebar
+    Brand "Rootwork" icon="park"
+    NavItem "Tree" icon="account_tree" selected={sidebarTab=="tree"} onTap={sidebarTab="tree"}
+    NavItem "Timeline" icon="timeline" onTap={go timeline}
+    NavItem "Birthplaces" icon="public" onTap={go birthplaces}
+    NavItem "Print chart" icon="print" onTap={go print-chart}
+    Spacer grow
+    Text.muted "Hale and Okafor families"
+  Main
+    Nav
+      Heading "Hale family tree" level=1
+      Row gap=12
+        Toggle "Focus: direct ancestors" bind=focus
+        IconButton "zoom_out" tooltip="Zoom out" onTap={zoom=max(0.4,zoom-0.2)}
+        Text.strong "{round(zoom*100,0)}%"
+        IconButton "zoom_in" tooltip="Zoom in" onTap={zoom=min(2,zoom+0.2)}
+        IconButton "center_focus_strong" tooltip="Reset view" onTap={zoom=1}
+    PanZoom bind=zoom h=620
+      Column gap=48 center
+        each g in [0,1,2]
+          Row gap=40 center middle
+            each p in filter(people, x=>x.gen==g && (!focus || x.id==selId || contains(find(people, y=>y.id==selId).anc, x.id)))
+              PersonCard name={p.name} born={p.born} died={p.died} photo={p.photo} notes={p.notes} selected={p.id==selId} onTap={selId=p.id} onNotes={selId=p.id; open notes} onAddParent={addTo=p.id; addKind="parent"; open addPerson} onAddPartner={addTo=p.id; addKind="partner"; open addPerson} onAddChild={addTo=p.id; addKind="child"; open addPerson}
+    Footer
+      Row between middle
+        Text.muted "{length(people)} people. Drag to pan, pinch to zoom."
+        Row gap=8
+          Button.outline "Open timeline" onTap={go timeline}
+          Button "Print chart" onTap={go print-chart}
+  Popover#notes
+    Column gap=8 pad=12
+      Text.strong "{find(people, x=>x.id==selId).name}"
+      Text.muted "Emigrated from Enugu in 1971. Letters kept in the blue trunk."
+      Button.ghost "Open full notes" onTap={close; go timeline}
+Dialog#addPerson "Add a {addKind}" "Fill in what you know"
+  Input "Full name" bind=newName
+  Input "Born (year)" type=number bind=newBorn
+  Row gap=8 end
+    Button.outline "Cancel" onTap={newName=""; newBorn=""; close}
+    Button "Add" onTap={newName=="" ? toast "A name is needed" : {people=append(people, {"id":"p{length(people)+1}","gen":addKind=="parent" ? find(people, x=>x.id==addTo).gen-1 : addKind=="child" ? find(people, x=>x.id==addTo).gen+1 : find(people, x=>x.id==addTo).gen,"name":newName,"born":newBorn,"died":"","photo":"","notes":false,"anc":[]}); newName=""; newBorn=""; toast "Added"; close}}
+
+### Timeline
+state events=[{"year":1979,"title":"Born in Leeds","icon":"child_care","text":"Maya arrives three weeks early."},{"year":1985,"title":"Starts school","icon":"school","text":"St. Anne's Primary."},{"year":1997,"title":"Moves to Lagos","icon":"flight","text":"A year with her grandmother Ngozi."},{"year":2004,"title":"Graduates","icon":"workspace_premium","text":"BA History, Manchester."},{"year":2011,"title":"Marries Tomas Weber","icon":"favorite","text":"A small ceremony in Hebden Bridge."},{"year":2014,"title":"First child, Ines","icon":"cake","text":"Born at home."}]
+state selYear=0
+state showNotes=true
+App
+  Sidebar
+    Brand "Rootwork" icon="park"
+    NavItem "Tree" icon="account_tree" onTap={go tree}
+    NavItem "Timeline" icon="timeline" selected={true}
+    NavItem "Birthplaces" icon="public" onTap={go birthplaces}
+    NavItem "Print chart" icon="print" onTap={go print-chart}
+  Main
+    Nav
+      Row gap=12 middle
+        IconButton "arrow_back" tooltip="Back to tree" onTap={go tree}
+        Heading "Maya Hale" level=1
+      Row gap=8
+        Button.outline "Edit person" onTap={open editLife}
+        Button "Add event" onTap={open editLife}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Card w=280 gap=12 center
+          Avatar src="https://example.com/p/maya.jpg" size=120
+          Text.title "Maya Hale"
+          Text.muted "Born 12 March 1979, Leeds"
+          Badge.info "Generation 3"
+          Divider
+          Row gap=8 middle
+            Icon "sticky_note_2"
+            Text.strong "Notes"
+          Text.muted "Keeps the family recipes. Spoken languages: English, Igbo, German."
+        Card grow gap=12
+          Row between middle
+            Text.strong "Life timeline"
+            SegmentedButton bind=sortOrder items=["Oldest first","Newest first"]
+          Timeline events={sortOrder=="Newest first" ? sortByDesc(events, e=>e.year) : sortBy(events, e=>e.year)} selected={selYear} onPick={selYear=result; toast "Event {result}"}
+Dialog#editLife "Add a life event"
+  Input "Year" type=number bind=evYear
+  Input "Title" bind=evTitle
+  Input "What happened" multiline bind=evText
+  Button "Save" onTap={events=append(events, {"year":evYear,"title":evTitle,"icon":"event","text":evText}); evTitle=""; evText=""; close}
+
+### Birthplaces
+state places=[{"gen":1,"name":"Ibadan, Nigeria","people":["Samuel Okafor","Ngozi Okafor"],"lat":7.38,"lng":3.94},{"gen":1,"name":"Norwich, England","people":["Walter Hale","Edith Hale"],"lat":52.63,"lng":1.29},{"gen":2,"name":"Enugu, Nigeria","people":["Adaeze Okafor-Hale"],"lat":6.45,"lng":7.5},{"gen":2,"name":"Leeds, England","people":["Robert Hale"],"lat":53.8,"lng":-1.55},{"gen":3,"name":"Leeds, England","people":["Maya Hale","Daniel Hale"],"lat":53.8,"lng":-1.55}]
+state genFilter=0
+state picked=""
+App
+  Sidebar
+    Brand "Rootwork" icon="park"
+    NavItem "Tree" icon="account_tree" onTap={go tree}
+    NavItem "Timeline" icon="timeline" onTap={go timeline}
+    NavItem "Birthplaces" icon="public" selected={true}
+    NavItem "Print chart" icon="print" onTap={go print-chart}
+  Main
+    Nav
+      Heading "Where we were born" level=1
+      Row gap=8
+        ChoiceChip "All" selected={genFilter==0} onTap={genFilter=0}
+        ChoiceChip "Generation 1" selected={genFilter==1} onTap={genFilter=1}
+        ChoiceChip "Generation 2" selected={genFilter==2} onTap={genFilter=2}
+        ChoiceChip "Generation 3" selected={genFilter==3} onTap={genFilter=3}
+    Row gap=0 top
+      Map grow h=620 places={genFilter==0 ? places : filter(places, x=>x.gen==genFilter)} colorBy="gen" onPick={picked=result}
+      Pane w=320 pad=16 gap=12
+        Text.strong "Places by generation"
+        each g in [1,2,3]
+          Column gap=6
+            Text.fieldLabel "Generation {g}"
+            each pl in filter(places, x=>x.gen==g)
+              ListTile "{pl.name}" subtitle="{join(pl.people, ", ")}" icon="place" selected={picked==pl.name} onTap={picked=pl.name}
+        Divider
+        Text.muted "{count(places, x=>true)} places across 3 generations"
+
+### Print chart
+state paper="A4"
+state orient="Landscape"
+state showDates=true
+state showPhotos=false
+state perPage=8
+state people=[{"name":"Walter Hale","born":"1921","gen":0},{"name":"Edith Hale","born":"1924","gen":0},{"name":"Samuel Okafor","born":"1919","gen":0},{"name":"Ngozi Okafor","born":"1925","gen":0},{"name":"Robert Hale","born":"1948","gen":1},{"name":"Adaeze Okafor-Hale","born":"1952","gen":1},{"name":"Maya Hale","born":"1979","gen":2},{"name":"Daniel Hale","born":"1982","gen":2},{"name":"Ines Weber","born":"2014","gen":3},{"name":"Leo Hale","born":"2016","gen":3}]
+App
+  Sidebar
+    Brand "Rootwork" icon="park"
+    NavItem "Tree" icon="account_tree" onTap={go tree}
+    NavItem "Timeline" icon="timeline" onTap={go timeline}
+    NavItem "Birthplaces" icon="public" onTap={go birthplaces}
+    NavItem "Print chart" icon="print" selected={true}
+  Main
+    Nav
+      Heading "Print chart" level=1
+      Row gap=8
+        Button.outline "Back to tree" onTap={go tree}
+        Button "Print" icon="print" onTap={print}
+    Row gap=0 top
+      Column grow pad=24 gap=16
+        PrintSheet paper={paper} orient={orient}
+          each page in range(ceil(length(people)/perPage))
+            Column gap=12 pad=16
+              Text.caption "Rootwork, the Hale and Okafor families. Page {page+1} of {ceil(length(people)/perPage)}"
+              Grid cols=4 gap=12
+                each p in slice(people, page*perPage, (page+1)*perPage)
+                  Card gap=4
+                    if showPhotos
+                      Avatar "{p.name}" size=48
+                    Text.strong "{p.name}"
+                    if showDates
+                      Text.muted "b. {p.born}"
+            PageBreak "Page {page+1} ends here"
+      Pane w=320 pad=16 gap=12
+        Text.strong "Chart settings"
+        Select "Paper" bind=paper items=["A4","Letter","A3"]
+        SegmentedButton bind=orient items=["Portrait","Landscape"]
+        Slider "People per page" bind=perPage min=4 max=16
+        Text.muted "{perPage} people per page, {ceil(length(people)/perPage)} pages"
+        Toggle "Show dates" bind=showDates
+        Toggle "Show photos" bind=showPhotos
+        Button.outline "Download PDF" onTap={emit exportPdf; toast "PDF ready"}
+
+// A canvas dragged to pan and pinched to zoom; drawn as a framed box that shows its zoom, the movement itself cannot be drawn.
+define PanZoom bind=zoom h=400
+  state zoom=1
+  Box h={h} fill=#FFF8FAFC radius=8 border=1
+    Text.caption "Canvas, zoom {zoom}"
+    ...
+
+define PersonCard name="" born="" died="" photo="" notes=false selected=false onTap onNotes onAddParent onAddPartner onAddChild
+  Column center gap=4
+    IconButton "add" tooltip="Add parent" onTap={onAddParent}
+    Row middle gap=4
+      IconButton "add" tooltip="Add partner" onTap={onAddPartner}
+      Card w={160} gap=6 center border={selected ? 2 : 1} onTap={onTap}
+        Avatar src="{photo}" size=56
+        Text.strong "{name}" center
+        Text.muted "{born}{died != "" ? " - " + died : ""}" center
+        if notes
+          IconButton "sticky_note_2" tooltip="Notes" onTap={onNotes}
+      IconButton "add" tooltip="Add partner" onTap={onAddPartner}
+    IconButton "add" tooltip="Add child" onTap={onAddChild}
+
+define Timeline events=[] selected=0 onPick
+  Column gap=0
+    each e in events
+      Row gap=12 top onTap={onPick(e.year)}
+        Text.strong "{e.year}" w=56
+        Column center gap=0
+          IconTile "{e.icon}"
+          Box w=2 h=24 fill=#FFCBD5E1
+        Column grow gap=2
+          Text.strong "{e.title}"
+          Text.muted "{e.text}"
+
+// A real map with markers cannot be drawn; shown as a labelled box listing its markers.
+define Map places=[] colorBy="" onPick
+  Box fill=#FFE0F2FE radius=8 pad=16 gap=8
+    Text.caption "Map"
+    each pl in places
+      Row gap=8 middle onTap={onPick(pl.name)}
+        Icon "place"
+        Text "{pl.name}"
+        Badge.neutral "Gen {pl.gen}"
+
+// A sheet of paper at its size with its pages stacked; the paper size is shown as a label only.
+define PrintSheet paper="A4" orient="Portrait"
+  Box fill=#FFFFFFFF border=1 radius=2 pad=16 gap=8
+    Text.caption "{paper}, {orient}"
+    ...
+
+define PageBreak "label"
+  Row middle gap=8
+    Divider grow
+    Text.caption "{label}"
+    Divider grow

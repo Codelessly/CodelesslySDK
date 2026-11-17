@@ -1,0 +1,154 @@
+### Workspace
+state panes=[{"id":"p0","title":"0: nvim src/main.rs","lines":["fn main() {","    let cfg = load_config()?;","    serve(cfg).await","}","~","~"]},{"id":"p1","title":"1: cargo watch","lines":["[Running 'cargo check']","   Compiling splitscreen v0.4.2","    Finished dev in 2.41s","[Finished running. Exit status: 0]"]},{"id":"p2","title":"2: tail -f app.log","lines":["14:31:07 INFO  listening on :8080","14:31:19 INFO  GET /health 200 2ms","14:31:44 WARN  slow query 840ms","14:32:02 INFO  GET /api/items 200 31ms"]}]
+state focus="p0"
+state zoomed=""
+state split="cols"
+state ratio=3
+state prefix=false
+state cmd=""
+state windows=["editor","build","ssh prod"]
+state win=0
+state secs=52320
+state session="work"
+every 1s onTick={secs=secs+1}
+every 3s when prefix onTick={prefix=false}
+App
+  Main
+    Nav
+      Brand "Splitscreen" icon="view_quilt"
+      Row gap=8
+        Text.muted "session {session}"
+        IconButton "vertical_split" tooltip="Split side by side" onTap={split="cols"}
+        IconButton "horizontal_split" tooltip="Split stacked" onTap={split="rows"}
+        IconButton "swap_horiz" tooltip="Swap panes" onTap={panes=concat([panes[1],panes[0]],slice(panes,2,3))}
+        IconButton "fullscreen" tooltip="Zoom pane (prefix z)" onTap={zoomed=(zoomed=="" ? focus : "")}
+        IconButton "terminal" tooltip="Command prompt (prefix :)" onTap={open cmdprompt}
+        Button.outline "Prefix C-b" onTap={prefix=true}
+        Button.outline "Copy mode" onTap={go copy_mode}
+        Button.outline "Sessions" onTap={open sessions}
+    Column grow gap=4 pad=8 fill=#FF0B0F14
+      if zoomed!=""
+        each p in panes
+          if p.id==zoomed
+            TerminalPane "{p.title}" lines={p.lines} focused=true zoomed=true onTap={focus=p.id} onZoom={zoomed=""}
+      if zoomed==""
+        Split dir={split} ratio={ratio}
+          each p in panes
+            TerminalPane "{p.title}" lines={p.lines} focused={focus==p.id} onTap={focus=p.id} onZoom={zoomed=p.id}
+    Footer
+      Row between middle pad=[12,4,12,4] fill=#FF1F7A4D
+        Row gap=4
+          Text.strong "[{session}]" color=#FFFFFFFF
+          each w in windows
+            Chip "{index}:{w}" selected={win==index} onTap={win=index}
+          if zoomed!=""
+            Badge.warning "Z"
+          if prefix
+            Badge.info "PREFIX"
+        Row gap=12
+          Text.mono "{focus}" color=#FFFFFFFF
+          Text.mono "{duration(secs)}" color=#FFFFFFFF
+
+Dialog#cmdprompt "Command prompt" "Type a command, as after the prefix and a colon"
+  Input "command" "resize-right, resize-left, swap-pane, zoom, split-cols, split-rows" bind=cmd
+  Row gap=8 end
+    Button.outline "Cancel" onTap={cmd=""; close}
+    Button "Run" onTap={cmd=="resize-right" ? {ratio=min(8,ratio+1); cmd=""; close} : cmd=="resize-left" ? {ratio=max(1,ratio-1); cmd=""; close} : cmd=="swap-pane" ? {panes=concat([panes[1],panes[0]],slice(panes,2,3)); cmd=""; close} : cmd=="zoom" ? {zoomed=(zoomed=="" ? focus : ""); cmd=""; close} : cmd=="split-cols" ? {split="cols"; cmd=""; close} : cmd=="split-rows" ? {split="rows"; cmd=""; close} : toast "unknown command: {cmd}"}
+
+Dialog#sessions "Sessions" "Switch the attached session"
+  each s in ["work","notes","deploy"]
+    ListTile "{s}" subtitle="{s=="work" ? "3 windows, attached" : "1 window, detached"}" selected={session==s} onTap={session=s; toast "Attached to {s}"; close}
+  Button.outline "New session" icon="add" onTap={toast "Created session new-1"; close}
+
+// A terminal pane: a title bar over scrolling output; the focused pane has an outline
+define TerminalPane "title" lines=[] focused=false zoomed=false onTap onZoom
+  Column grow gap=0 onTap={onTap} border={focused ? 2 : 1} bordercolor={focused ? "#FF3FB950" : "#FF30363D"} fill=#FF0D1117
+    Row between middle pad=[8,2,8,2] fill={focused ? "#FF1F7A4D" : "#FF21262D"}
+      Text.mono "{title}" color=#FFFFFFFF
+      IconButton "{zoomed ? "fullscreen_exit" : "fullscreen"}" tooltip="Zoom" onTap={onZoom}
+    Column scroll pad=8 gap=2
+      each line in lines
+        Text.mono "{line}" color=#FFC9D1D9
+      if focused
+        Text.mono "_" color=#FF3FB950 animate=pulse
+
+// Divides its children side by side (cols) or stacked (rows); the first takes ratio parts against one each for the rest
+define Split dir="cols" ratio=3
+  if dir=="cols"
+    Row grow gap=4
+      ...
+  if dir=="rows"
+    Column grow gap=4
+      ...
+
+### Copy mode
+state lines=["$ git log --oneline -5","a41c9e2 fix: pane resize off by one","9be07d1 feat: session list","3c55f0a chore: bump deps","d812b46 feat: zoom toggle","0f6a7be init","$ cargo test","running 14 tests","test result: ok. 14 passed; 0 failed"]
+state cursor=0
+state anchor=-1
+state copied=""
+state secs=52341
+every 1s onTick={secs=secs+1}
+App
+  Main
+    Nav
+      Brand "Splitscreen" icon="view_quilt"
+      Row gap=8
+        Text.muted "-- COPY MODE --"
+        Button.outline "Up" icon="keyboard_arrow_up" onTap={cursor=max(0,cursor-1)}
+        Button.outline "Down" icon="keyboard_arrow_down" onTap={cursor=min(length(lines)-1,cursor+1)}
+        Button.outline "Start selection" onTap={anchor=cursor}
+        Button "Copy and exit" onTap={anchor<0 ? toast "Nothing selected" : {copied=join(slice(lines,min(anchor,cursor),max(anchor,cursor)+1),"\n"); emit copy copied; toast "Copied {abs(cursor-anchor)+1} lines"; go workspace}}
+        Button.ghost "Cancel" onTap={go workspace}
+    Column grow gap=0 pad=8 fill=#FF0B0F14 scroll
+      each line in lines
+        CopyLine "{line}" cursor={cursor==index} selected={anchor>=0 && index>=min(anchor,cursor) && index<=max(anchor,cursor)} onTap={cursor=index}
+    Footer
+      Row between middle pad=[12,4,12,4] fill=#FFB08800
+        Text.mono "[work] 0:editor  1:build*  2:ssh prod" color=#FFFFFFFF
+        Text.mono "{cursor+1}/{length(lines)}  {duration(secs)}" color=#FFFFFFFF
+
+// One line of scrollback; the cursor line and selected lines show in reverse colour
+define CopyLine "text" cursor=false selected=false onTap
+  Row pad=[8,1,8,1] fill={cursor ? "#FFC9D1D9" : selected ? "#FF264F78" : "#00000000"} onTap={onTap}
+    Text.mono "{text}" color={cursor ? "#FF0D1117" : "#FFC9D1D9"}
+
+### Session list
+state sessions=[{"name":"work","windows":3,"attached":true,"created":"Mon 09:12"},{"name":"notes","windows":1,"attached":false,"created":"Tue 18:40"},{"name":"deploy","windows":2,"attached":false,"created":"Wed 07:05"}]
+state sel="work"
+state q=""
+App
+  Sidebar
+    Brand "Splitscreen" icon="view_quilt"
+    NavItem "Workspace" icon="terminal" onTap={go workspace}
+    NavItem "Sessions" icon="folder_open" badge="{length(sessions)}" selected={true}
+    Spacer grow
+    Text.muted "tmux-compatible"
+  Main
+    Nav
+      Heading "Sessions" level=1
+      Row gap=8
+        Input "Filter" bind=q w=200
+        Button "New session" icon="add" onTap={sessions=append(sessions,{"name":"session-{length(sessions)}","windows":1,"attached":false,"created":"now"}); toast "Created"}
+    Column pad=24 gap=12
+      each s in filter(sessions,x=>contains(x.name,lower(q)))
+        Card gap=8 onTap={sel=s.name}
+          Row between middle
+            Column gap=2
+              Text.strong "{s.name}"
+              Text.muted "{s.windows} windows, created {s.created}"
+            Row gap=8 middle
+              if s.attached
+                Badge.success "attached"
+              Button.outline "Attach" onTap={sessions=map(sessions,x=>with(x,"attached",x.name==s.name)); toast "Attached to {s.name}"; go workspace}
+              IconButton "more_vert" tooltip="More" onTap={sel=s.name; open sessmenu}
+          if sel==s.name
+            Text.mono "0:editor  1:build  2:ssh prod" color=#FF8B949E
+
+Menu#sessmenu end
+  MenuItem "Detach" icon="link_off" onTap={sessions=map(sessions,x=>with(x,"attached",false)); toast "Detached {sel}"}
+  MenuItem "Rename" icon="edit" onTap={open renamer}
+  MenuItem "Kill session" icon="delete" onTap={sessions=removeWhere(sessions,x=>x.name==sel); toast "Killed {sel}"}
+
+Dialog#renamer "Rename session"
+  Input "New name" bind=newname
+  Button "Rename" onTap={sessions=updateWhere(sessions,x=>x.name==sel,x=>with(x,"name",newname)); newname=""; close}

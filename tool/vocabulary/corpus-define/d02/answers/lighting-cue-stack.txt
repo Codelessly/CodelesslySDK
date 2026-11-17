@@ -1,0 +1,204 @@
+### Cue List
+state tab="cues"
+state cues=[{"num":1,"name":"House to half","fade":3,"wait":0},{"num":2,"name":"Preset warm wash","fade":4,"wait":0},{"num":3,"name":"Act One open","fade":6,"wait":1},{"num":4,"name":"Spot on lead","fade":2,"wait":0.5},{"num":5,"name":"Window sunset","fade":8,"wait":2},{"num":6,"name":"Scene change blue","fade":5,"wait":0},{"num":7,"name":"Finale full","fade":3,"wait":0}]
+state liveIdx=2
+state fading=false
+state progress=0
+state blackout=false
+state newNum=3.5
+state newName=""
+state afterNum=3
+every 100 when fading onTick={progress>=1 ? {fading=false; liveIdx=liveIdx+1; progress=0} : progress=progress+0.1/max(0.5,cues[liveIdx+1].fade)}
+App
+  Sidebar
+    Brand "Followspot" icon="highlight"
+    NavItem "Cue list" icon="format_list_numbered" badge="{length(cues)}" selected={tab=="cues"} onTap={go cue-list}
+    NavItem "Channels" icon="tune" selected={tab=="channels"} onTap={go channels}
+    NavItem "Stage plan" icon="grid_view" selected={tab=="plan"} onTap={go stage-plan}
+    Spacer grow
+    Text.muted "Show: Hamlet, tech run 2"
+  Main
+    Nav
+      Heading "Cue list" level=1
+      Row gap=8
+        Badge.success "Live: Q{cues[liveIdx].num}"
+        Badge.info "Next: Q{cues[liveIdx+1].num}"
+        Button.outline "Record cue" onTap={open record}
+        if blackout
+          Button.destructive "BLACKOUT" animate=pulse onTap={blackout=false; toast "Lights restored"}
+        if !blackout
+          Button.outline "Blackout" onTap={blackout=true; fading=false; toast "Blackout"}
+    Column pad=24 gap=16
+      Card gap=12
+        Row between
+          Column gap=4
+            Text.caption "NEXT CUE"
+            Text.title "Q{cues[liveIdx+1].num}  {cues[liveIdx+1].name}"
+            Text.muted "Fade {cues[liveIdx+1].fade}s, wait {cues[liveIdx+1].wait}s"
+          Button "GO" size=large disabled={fading || liveIdx>=length(cues)-1} onTap={progress=0; fading=true; blackout=false}
+        CrossfadeBar value={progress} from="Q{cues[liveIdx].num}" to="Q{cues[liveIdx+1].num}" active={fading}
+      Card gap=4
+        Row gap=8
+          Text.fieldLabel "Cue" w=60
+          Text.fieldLabel "Name" grow
+          Text.fieldLabel "Fade" w=70
+          Text.fieldLabel "Wait" w=70
+          Text.fieldLabel "" w=40
+        Divider
+        each cue in cues
+          Box pad=8 radius=6 fill={index==liveIdx ? "#FF14532D" : index==liveIdx+1 ? "#FF1E3A8A" : "#00000000"} onTap={liveIdx=index}
+            Row gap=8 middle
+              Text.strong "{cue.num}" w=60 color={index==liveIdx || index==liveIdx+1 ? "#FFFFFFFF" : "#FF111827"}
+              Text "{cue.name}" grow color={index==liveIdx || index==liveIdx+1 ? "#FFFFFFFF" : "#FF111827"}
+              Text.mono "{fixed(cue.fade,1)}s" w=70 color={index==liveIdx || index==liveIdx+1 ? "#FFFFFFFF" : "#FF111827"}
+              Text.mono "{fixed(cue.wait,1)}s" w=70 color={index==liveIdx || index==liveIdx+1 ? "#FFFFFFFF" : "#FF111827"}
+              if index==liveIdx
+                Badge.success "LIVE"
+              if index==liveIdx+1
+                Badge.info "NEXT"
+  Footer
+    Row between
+      Text.muted "{length(cues)} cues"
+      Text.muted "Fade {fading ? round(progress*100,0) : 0}%"
+
+Dialog#record "Record current look" "Stores the levels as a new cue"
+  Input "After cue" bind=afterNum type=number
+  Input "Cue number" "e.g. 3.5" bind=newNum type=number
+  Input "Name" "e.g. Lead special" bind=newName
+  Row gap=8 end
+    Button.ghost "Cancel" onTap={close}
+    Button "Record" onTap={newName=="" ? toast "Give the cue a name" : {cues=sortBy(append(cues,{"num":newNum,"name":newName,"fade":3,"wait":0}),c=>c.num); newName=""; toast "Recorded cue {newNum}"; close}}
+
+// A bar showing a crossfade from one cue to the next
+define CrossfadeBar value=0 from="" to="" active=false
+  Column gap=4
+    Row between
+      Text.small "{from}"
+      Text.small "{to}"
+    Stack h=14
+      Box h=14 radius=7 fill=#FF374151
+      Box w={value*100} h=14 radius=7 fill={active ? "#FFF59E0B" : "#FF6B7280"}
+    Progress {value}
+
+### Channels and Colour
+state tab="channels"
+state levels=[{"ch":1,"name":"Front wash","v":80},{"ch":2,"name":"Back light","v":55},{"ch":3,"name":"Specials","v":30},{"ch":4,"name":"Cyc","v":65},{"ch":5,"name":"Gobo","v":0},{"ch":6,"name":"Haze","v":15}]
+state red=255
+state green=170
+state blue=90
+state blackout=false
+App
+  Sidebar
+    Brand "Followspot" icon="highlight"
+    NavItem "Cue list" icon="format_list_numbered" selected={tab=="cues"} onTap={go cue-list}
+    NavItem "Channels" icon="tune" selected={tab=="channels"} onTap={go channels}
+    NavItem "Stage plan" icon="grid_view" selected={tab=="plan"} onTap={go stage-plan}
+    Spacer grow
+    Text.muted "Show: Hamlet, tech run 2"
+  Main
+    Nav
+      Heading "Channels" level=1
+      Row gap=8
+        Button.outline "Record cue" onTap={emit recordLook}
+        Button.destructive "Blackout" onTap={blackout=!blackout; toast "Blackout"}
+    Column pad=24 gap=16
+      Card gap=12
+        Text.strong "Channel faders"
+        Row gap=16 center
+          each lv in levels
+            Fader "{lv.name}" bind=lv.v number={lv.ch} dark={blackout}
+      Card gap=12
+        Text.strong "Colour mix"
+        Row gap=24 top
+          Column grow gap=8
+            Row gap=8 middle
+              Text "Red" w=60
+              Slider bind=red min=0 max=255
+              Text.mono "{round(red,0)}" w=40
+            Row gap=8 middle
+              Text "Green" w=60
+              Slider bind=green min=0 max=255
+              Text.mono "{round(green,0)}" w=40
+            Row gap=8 middle
+              Text "Blue" w=60
+              Slider bind=blue min=0 max=255
+              Text.mono "{round(blue,0)}" w=40
+          Column gap=8 center
+            Box w=140 h=100 radius=8 fill={"#FF" + upper(hex(red)) + upper(hex(green)) + upper(hex(blue))}
+            Text.mono "{round(red,0)}, {round(green,0)}, {round(blue,0)}"
+            Button.outline "Apply to group" onTap={emit applyColour; toast "Colour sent to picked lamps"}
+
+// A vertical fader: a column of ten tappable steps with a typed level under it
+define Fader "label" bind=v number=1 dark=false
+  state v=0
+  Column gap=6 center w=88
+    Text.caption "{number}"
+    Column gap=1
+      each i in range(10)
+        Box w=44 h=14 radius=2 fill={dark ? "#FF1F2937" : (10-i)*10<=v ? "#FFF59E0B" : "#FF374151"} onTap={v=(10-i)*10}
+    Input "" bind=v type=number w=70
+    Text.small "{label}"
+
+### Stage Plan
+state tab="plan"
+state picked=[]
+state lamps=[{"id":"FOH1","name":"FOH 1","kind":"profile"},{"id":"FOH2","name":"FOH 2","kind":"profile"},{"id":"FOH3","name":"FOH 3","kind":"fresnel"},{"id":"FOH4","name":"FOH 4","kind":"fresnel"},{"id":"MID1","name":"Mid 1","kind":"par"},{"id":"MID2","name":"Mid 2","kind":"par"},{"id":"MID3","name":"Mid 3","kind":"par"},{"id":"MID4","name":"Mid 4","kind":"par"},{"id":"BK1","name":"Back 1","kind":"par"},{"id":"BK2","name":"Back 2","kind":"par"},{"id":"BK3","name":"Back 3","kind":"par"},{"id":"BK4","name":"Back 4","kind":"par"}]
+state red=255
+state green=170
+state blue=90
+App
+  Sidebar
+    Brand "Followspot" icon="highlight"
+    NavItem "Cue list" icon="format_list_numbered" selected={tab=="cues"} onTap={go cue-list}
+    NavItem "Channels" icon="tune" selected={tab=="channels"} onTap={go channels}
+    NavItem "Stage plan" icon="grid_view" selected={tab=="plan"} onTap={go stage-plan}
+    Spacer grow
+    Text.muted "Show: Hamlet, tech run 2"
+  Main
+    Nav
+      Heading "Stage plan" level=1
+      Row gap=8
+        Badge.info "{length(picked)} lamps picked"
+        Button.outline "Clear" onTap={picked=[]}
+        Button.outline "Select all" onTap={picked=map(lamps,l=>l.id)}
+    Row pad=24 gap=16 top
+      Card grow gap=12
+        Text.strong "Plan, audience at the bottom"
+        StagePlan lamps={lamps} bind=picked
+      Column w=320 gap=16
+        Card gap=8
+          Text.strong "Picked group"
+          if isEmpty(picked)
+            Text.muted "Touch lamps on the plan to pick them."
+          each id in picked
+            ListTile "{id}" onTap={picked=without(picked,id)}
+          Button "Save as group" disabled={isEmpty(picked)} onTap={open saveGroup}
+        Card gap=8
+          Text.strong "Colour for the group"
+          Slider bind=red min=0 max=255
+          Slider bind=green min=0 max=255
+          Slider bind=blue min=0 max=255
+          Box h=48 radius=8 fill={"#FF" + upper(hex(red)) + upper(hex(green)) + upper(hex(blue))}
+          Button "Apply colour" disabled={isEmpty(picked)} onTap={emit applyColour {"lamps":picked,"r":red,"g":green,"b":blue}; toast "Colour sent to {length(picked)} lamps"}
+
+Dialog#saveGroup "Save group" "Name this set of lamps"
+  Input "Group name" bind=groupName
+  Row gap=8 end
+    Button.ghost "Cancel" onTap={close}
+    Button "Save" onTap={emit saveGroup {"name":groupName,"lamps":picked}; toast "Group saved"; close}
+
+// A top-down stage plan; each lamp is a tappable dot that joins or leaves the picked list
+define StagePlan lamps=[] bind=picked
+  state picked=[]
+  Column gap=12 pad=12 fill=#FF111827 radius=8
+    Grid cols=4 gap=16
+      each l in lamps
+        Column center gap=4 onTap={picked=contains(picked,l.id) ? without(picked,l.id) : append(picked,l.id)}
+          Box w=44 h=44 radius=22 fill={contains(picked,l.id) ? "#FFF59E0B" : "#FF374151"} border={contains(picked,l.id) ? 2 : 0}
+          Text.caption "{l.name}" color=#FFE5E7EB
+    Box h=24 radius=4 fill=#FF1F2937
+      Text.caption "Stage edge" center color=#FF9CA3AF
+
+// hex(n) returns the two-digit hex text of a number from 0 to 255
+define hex n=0
+  Text "{n}"

@@ -1,0 +1,208 @@
+### Canvas
+state tool="pen"
+state zoom=100
+state snap=true
+state showGuides=true
+state penOpen=false
+state sel=[2]
+state guides=[{"id":1,"axis":"v","at":120},{"id":2,"axis":"h","at":340}]
+state openGroups=["g1"]
+state layers=[{"id":1,"name":"Barn","kind":"group","parent":"","locked":false,"hidden":false,"depth":0},{"id":2,"name":"Roof curve","kind":"path","parent":"g1","locked":false,"hidden":false,"depth":1},{"id":3,"name":"Door","kind":"rect","parent":"g1","locked":false,"hidden":false,"depth":1},{"id":4,"name":"Sun","kind":"ellipse","parent":"","locked":false,"hidden":false,"depth":0},{"id":5,"name":"Hill","kind":"path","parent":"","locked":true,"hidden":false,"depth":0},{"id":6,"name":"Sky","kind":"rect","parent":"","locked":false,"hidden":true,"depth":0}]
+state shapes=[{"id":2,"x":80,"y":120,"w":320,"h":140},{"id":3,"x":190,"y":260,"w":90,"h":120},{"id":4,"x":420,"y":60,"w":70,"h":70},{"id":5,"x":0,"y":330,"w":640,"h":150}]
+state points=[{"x":80,"y":260,"hx":110,"hy":180},{"x":240,"y":120,"hx":300,"hy":120},{"x":400,"y":260,"hx":370,"hy":190}]
+state selPoint=1
+state toolbox=["near_me","pen","rectangle","ellipse","pan_tool"]
+
+App
+  Sidebar
+    Brand "Bezier Barn" icon="draw"
+    Row between
+      Text.panelTitle "Layers"
+      Row gap=4
+        IconButton "create_new_folder" tooltip="Group selected" onTap={layers=append(layers,{"id":length(layers)+10,"name":"Group {length(layers)+1}","kind":"group","parent":"","locked":false,"hidden":false,"depth":0}); layers=updateWhere(layers,l=>contains(sel,l.id),l=>with(with(l,"parent","g1"),"depth",1)); toast "Grouped {length(sel)} layers"}
+        IconButton "folder_off" tooltip="Ungroup" onTap={layers=updateWhere(layers,l=>contains(sel,l.id),l=>with(with(l,"parent",""),"depth",0))}
+    Column gap=2 scroll
+      each layer in layers
+        LayerRow "{layer.name}" kind={layer.kind} depth={layer.depth} selected={contains(sel,layer.id)} locked={layer.locked} hidden={layer.hidden} onTap={sel=layer.locked ? sel : [layer.id]} onToggleLock={layers=updateWhere(layers,l=>l.id==layer.id,l=>with(l,"locked",!l.locked))} onToggleHide={layers=updateWhere(layers,l=>l.id==layer.id,l=>with(l,"hidden",!l.hidden))}
+    Spacer grow
+    Text.muted "{length(sel)} selected"
+  Main
+    Nav
+      Row gap=4
+        each t in toolbox
+          IconButton "{t}" tooltip="{t}" selected={tool==t} onTap={tool=t; penOpen=false}
+      Row gap=12
+        Toggle "Snap to points" bind=snap
+        Toggle "Guides" bind=showGuides
+        IconButton "remove" tooltip="Zoom out" onTap={zoom=max(10,zoom-25)}
+        Select bind=zoom items=[25,50,100,150,200,400] w=100
+        IconButton "add" tooltip="Zoom in" onTap={zoom=min(800,zoom+25)}
+    Row grow
+      Column grow gap=0
+        Ruler orient="h" zoom={zoom} guides={guides} onPull={guides=append(guides,{"id":length(guides)+1,"axis":result.axis,"at":result.at})}
+        Row grow gap=0
+          Ruler orient="v" zoom={zoom} guides={guides} onPull={guides=append(guides,{"id":length(guides)+1,"axis":result.axis,"at":result.at})}
+          VectorCanvas grow shapes={shapes} points={points} guides={guides} showGuides={showGuides} tool={tool} zoom={zoom} snap={snap} selected={sel} selectedPoint={selPoint} onSelect={sel=[result]} onAddPoint={points=append(points,result); penOpen=true; selPoint=length(points)} onClosePath={penOpen=false; toast "Path closed"} onMovePoint={points=setAt(points,selPoint,with(with(points[selPoint],"x",result.x),"y",result.y))} onMoveHandle={points=setAt(points,selPoint,with(with(points[selPoint],"hx",result.x),"hy",result.y))} onPickPoint={selPoint=result} onMoveGuide={guides=updateWhere(guides,g=>g.id==result.id,g=>with(g,"at",result.at))} onRemoveGuide={guides=removeWhere(guides,g=>g.id==result)} onZoom={zoom=result}
+      Pane w=300 pad=16 gap=12
+        Text.panelTitle "Align"
+        Row gap=4
+          IconButton "align_horizontal_left" tooltip="Align left" onTap={shapes=updateWhere(shapes,s=>contains(sel,s.id),s=>with(s,"x",first(sortBy(filter(shapes,q=>contains(sel,q.id)),q=>q.x)).x))}
+          IconButton "align_horizontal_center" tooltip="Align centers" onTap={emit alignCenter sel}
+          IconButton "align_horizontal_right" tooltip="Align right" onTap={emit alignRight sel}
+          IconButton "align_vertical_top" tooltip="Align top" onTap={shapes=updateWhere(shapes,s=>contains(sel,s.id),s=>with(s,"y",first(sortBy(filter(shapes,q=>contains(sel,q.id)),q=>q.y)).y))}
+          IconButton "align_vertical_center" tooltip="Align middles" onTap={emit alignMiddle sel}
+          IconButton "align_vertical_bottom" tooltip="Align bottom" onTap={emit alignBottom sel}
+        Row gap=4
+          Button.outline "Distribute horizontally" onTap={length(sel)>=3 ? emit distribute "h" : toast "Select three or more shapes"}
+          Button.outline "Distribute vertically" onTap={length(sel)>=3 ? emit distribute "v" : toast "Select three or more shapes"}
+        Divider
+        Text.panelTitle "Fill and stroke"
+        Button.outline "Open fill and stroke" icon="palette" onTap={go fill-stroke}
+        Divider
+        Text.panelTitle "Path"
+        Button.outline "Edit points" icon="timeline" onTap={go path-points}
+        Text.muted "Pen: click to drop a point, drag to pull a handle. Double-click the first point to close."
+    Footer
+      Row between
+        Text.muted "Zoom {zoom}%  |  {length(points)} points  |  {length(guides)} guides"
+        Row gap=8
+          Button.ghost "Clear guides" onTap={guides=[]}
+          Button.ghost "Fit to window" onTap={zoom=100}
+
+### Fill and Stroke
+state stops=[{"at":0,"color":"#FFF59E0B"},{"at":0.55,"color":"#FFDC2626"},{"at":1,"color":"#FF7C2D12"}]
+state activeStop=1
+state fillKind="linear"
+state angle=90
+state strokeColor="#FF111827"
+state strokeWidth=2
+state strokeJoin="Round"
+state opacity=100
+
+App
+  Sidebar
+    Brand "Bezier Barn" icon="draw"
+    NavItem "Canvas" icon="brush" onTap={go canvas}
+    NavItem "Fill and stroke" icon="palette" selected={true}
+    NavItem "Path points" icon="timeline" onTap={go path-points}
+    Spacer grow
+    Text.muted "Roof curve"
+  Main
+    Nav
+      Heading "Fill and stroke" level=1
+      Row gap=8
+        Button.outline "Revert" onTap={stops=[{"at":0,"color":"#FFF59E0B"},{"at":1,"color":"#FF7C2D12"}]; activeStop=0}
+        Button "Apply to selection" onTap={emit applyFill {"kind":fillKind,"stops":stops,"angle":angle}; toast "Fill applied"}
+    Column pad=24 gap=16 scroll
+      Grid cols=2 gap=16
+        Card gap=12
+          Text.strong "Fill"
+          SegmentedButton bind=fillKind items=["none","solid","linear","radial"]
+          if fillKind=="linear" || fillKind=="radial"
+            GradientBar bind=stops active={activeStop} kind={fillKind} angle={angle} onPickStop={activeStop=result} onMoveStop={stops=setAt(stops,result.index,with(stops[result.index],"at",clamp(result.at,0,1)))} onAddStop={stops=sortBy(append(stops,{"at":result.at,"color":"#FFFFFFFF"}),s=>s.at); activeStop=indexOf(sortBy(append(stops,{"at":result.at,"color":"#FFFFFFFF"}),s=>s.at),find(append(stops,{"at":result.at,"color":"#FFFFFFFF"}),s=>s.at==result.at))}
+            Text.caption "Drag a stop along the bar. Double-click the bar to add one."
+            Row gap=12 middle
+              Text.fieldLabel "Stop {activeStop+1} position"
+              Slider min=0 max=1 value={stops[activeStop].at} onChange={stops=setAt(stops,activeStop,with(stops[activeStop],"at",result))} grow
+              Text.mono "{round(stops[activeStop].at*100,0)}%"
+            Row gap=12 middle
+              Text.fieldLabel "Stop color"
+              Input "Hex" value={stops[activeStop].color} onChange={stops=setAt(stops,activeStop,with(stops[activeStop],"color",result))} w=140
+              Box w=28 h=28 radius=14 fill={stops[activeStop].color}
+            Row gap=8
+              Button.outline "Remove stop" onTap={length(stops)>2 ? stops=removeAt(stops,activeStop); activeStop=0 : toast "A gradient needs two stops"}
+              Button.outline "Reverse" onTap={stops=reverse(map(stops,s=>with(s,"at",1-s.at)))}
+            if fillKind=="linear"
+              Row gap=12 middle
+                Text.fieldLabel "Angle"
+                Slider bind=angle min=0 max=360 grow
+                Text.mono "{angle}"
+        Card gap=12
+          Text.strong "Stroke"
+          Row gap=12 middle
+            Text.fieldLabel "Color"
+            Input "Hex" bind=strokeColor w=140
+            Box w=28 h=28 radius=14 fill={strokeColor}
+          Row gap=12 middle
+            Text.fieldLabel "Width"
+            Slider bind=strokeWidth min=0 max=24 grow
+            Text.mono "{strokeWidth} px"
+          Row gap=12 middle
+            Text.fieldLabel "Join"
+            SegmentedButton bind=strokeJoin items=["Miter","Round","Bevel"]
+          Row gap=12 middle
+            Text.fieldLabel "Opacity"
+            Slider bind=opacity min=0 max=100 grow
+            Text.mono "{opacity}%"
+      Card gap=8
+        Text.strong "Preview"
+        Box h=120 radius=8 fill={stops[0].color} border=1
+          Text "{fillKind} fill, {length(stops)} stops, {strokeWidth}px stroke" color=#FFFFFFFF
+
+### Path Points
+state points=[{"x":80,"y":260,"hx":110,"hy":180,"smooth":true},{"x":240,"y":120,"hx":300,"hy":120,"smooth":true},{"x":400,"y":260,"hx":370,"hy":190,"smooth":false}]
+state sel=1
+state snap=true
+state pulled=false
+state mode="Smooth"
+
+App
+  Sidebar
+    Brand "Bezier Barn" icon="draw"
+    NavItem "Canvas" icon="brush" onTap={go canvas}
+    NavItem "Fill and stroke" icon="palette" onTap={go fill-stroke}
+    NavItem "Path points" icon="timeline" selected={true}
+    Spacer grow
+    Text.muted "Roof curve"
+  Main
+    Nav
+      Heading "Path points" level=1
+      Row gap=8
+        Toggle "Snap to points" bind=snap
+        Button.outline "Add point" icon="add" onTap={points=append(points,{"x":points[length(points)-1].x+60,"y":points[length(points)-1].y,"hx":points[length(points)-1].x+90,"hy":points[length(points)-1].y-40,"smooth":true}); sel=length(points)-1}
+        Button.destructive "Delete point" icon="delete" onTap={length(points)>2 ? points=removeAt(points,sel); sel=0 : toast "A path needs two points"}
+    Row grow
+      VectorCanvas grow tool="select" points={points} selectedPoint={sel} snap={snap} zoom=200 shapes=[] guides=[] onPickPoint={sel=result} onMovePoint={points=setAt(points,sel,with(with(points[sel],"x",result.x),"y",result.y))} onMoveHandle={points=setAt(points,sel,with(with(points[sel],"hx",result.x),"hy",result.y))}
+      Pane w=320 pad=16 gap=12
+        Text.panelTitle "Points"
+        Column gap=4 scroll
+          each p in points
+            ListTile "Point {index+1}" subtitle="x {p.x}, y {p.y}" selected={sel==index} onTap={sel=index}
+        Divider
+        Text.panelTitle "Point {sel+1}"
+        Grid cols=2 gap=8
+          Input "X" type=number value={points[sel].x} onChange={points=setAt(points,sel,with(points[sel],"x",result))}
+          Input "Y" type=number value={points[sel].y} onChange={points=setAt(points,sel,with(points[sel],"y",result))}
+          Input "Handle X" type=number value={points[sel].hx} onChange={points=setAt(points,sel,with(points[sel],"hx",result))}
+          Input "Handle Y" type=number value={points[sel].hy} onChange={points=setAt(points,sel,with(points[sel],"hy",result))}
+        SegmentedButton bind=mode items=["Corner","Smooth","Symmetric"] onChange={points=setAt(points,sel,with(points[sel],"smooth",result!="Corner"))}
+        Text.caption "Drag the point to move it, the round handle to curve the segment. Snaps to neighbouring points when Snap is on."
+
+// A ruler along one edge of the canvas with tick labels; pulling from it drops a guide. Drawn as a labelled strip: the real tick marks and the drag out of the ruler need a canvas.
+define Ruler orient="h" zoom=100 guides=[] onPull
+  Box w={orient=="h" ? fill : 24} h={orient=="h" ? 24 : fill} fill=#FFF3F4F6 border-bottom=#FFD1D5DB drag=guide(orient)
+    Text.caption "{orient=="h" ? "0 ... 640 px" : "0 ... 480"} at {zoom}%  ({length(guides)} guides)"
+
+// The drawing surface: shapes, pen path with draggable points and handles, guides and snapping. A real vector canvas needs pointer drags and curves, so it shows as a labelled box.
+define VectorCanvas shapes=[] points=[] guides=[] showGuides=true tool="select" zoom=100 snap=true selected=[] selectedPoint=0 onSelect onAddPoint onClosePath onMovePoint onMoveHandle onPickPoint onMoveGuide onRemoveGuide onZoom
+  Box fill=#FFE5E7EB pad=16 grow center middle
+    Box w=320 h=240 fill=#FFFFFFFF radius=2 border=1 center middle onTap={tool=="pen" ? onAddPoint({"x":0,"y":0,"hx":20,"hy":-30,"smooth":true}) : onSelect(0)}
+      Text.muted "Canvas: {length(shapes)} shapes, {length(points)} path points, tool {tool}, {zoom}%{snap ? ", snapping" : ""}"
+
+// A layers row: icon by kind, name indented by depth, lock and hide toggles.
+define LayerRow "name" kind="path" depth=0 selected=false locked=false hidden=false onTap onToggleLock onToggleHide
+  Row middle gap=6 pad=[{depth*16+6},4,6,4] fill={selected ? "#FFDBEAFE" : "#00000000"} radius=4 onTap={onTap}
+    Icon "{kind=="group" ? "folder" : kind=="rect" ? "crop_square" : kind=="ellipse" ? "circle" : "gesture"}"
+    Text "{name}" grow strike={hidden}
+    IconButton "{locked ? "lock" : "lock_open"}" tooltip="Lock" onTap={onToggleLock}
+    IconButton "{hidden ? "visibility_off" : "visibility"}" tooltip="Hide" onTap={onToggleHide}
+
+// A gradient bar with a draggable marker per stop. The real gradient and the marker drags need a canvas, so it shows as a labelled bar with a chip per stop.
+define GradientBar bind=stops active=0 kind="linear" angle=90 onPickStop onMoveStop onAddStop
+  state stops=[]
+  Column gap=6
+    Box h=28 radius=6 fill={stops[0].color} border=1 onTap={onAddStop({"at":0.5})}
+      Text.caption "{kind} gradient, {angle}" color=#FFFFFFFF
+    Row gap=6
+      each stop in stops
+        Chip "{round(stop.at*100,0)}%" selected={active==index} drag=stop(index) onTap={onPickStop(index)}

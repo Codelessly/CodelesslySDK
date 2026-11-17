@@ -1,0 +1,261 @@
+### Search
+state q=""
+state formats=[]
+state lang="Any language"
+state onlyAvailable=false
+state sort="Relevance"
+state books=[{"id":"b1","title":"The Overstory","author":"Richard Powers","year":2018,"format":"Book","lang":"English","avail":3,"total":5,"color":"#FF2F6B4F","queue":0},{"id":"b2","title":"Piranesi","author":"Susanna Clarke","year":2020,"format":"E-book","lang":"English","avail":0,"total":4,"color":"#FF3B4F8A","queue":7},{"id":"b3","title":"Pedro Paramo","author":"Juan Rulfo","year":1955,"format":"Book","lang":"Spanish","avail":1,"total":2,"color":"#FF9A5B2E","queue":0},{"id":"b4","title":"Braiding Sweetgrass","author":"Robin Wall Kimmerer","year":2013,"format":"Audiobook","lang":"English","avail":0,"total":3,"color":"#FF6B7F2A","queue":4},{"id":"b5","title":"Le Petit Prince","author":"Antoine de Saint-Exupery","year":1943,"format":"Book","lang":"French","avail":2,"total":2,"color":"#FF1F6F8B","queue":0},{"id":"b6","title":"Klara and the Sun","author":"Kazuo Ishiguro","year":2021,"format":"E-book","lang":"English","avail":5,"total":8,"color":"#FFB2872D","queue":0}]
+state selected="b1"
+state readingList=["b3"]
+App
+  Sidebar
+    Brand "Stacks" icon="local_library"
+    NavItem "Search" icon="search" selected={true} onTap={go search}
+    NavItem "My loans" icon="menu_book" badge="3" onTap={go loans}
+    NavItem "Reading list" icon="bookmarks" badge="{length(readingList)}" onTap={go search}
+    NavItem "Library card" icon="qr_code_2" onTap={open card}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Maya Reyes" size=32
+      Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Find a book" level=1
+      Row gap=8
+        Input "Search title, author or ISBN" bind=q w=280
+        IconButton "tune" tooltip="Filters" onTap={open filters}
+    Row pad=24 gap=24 top
+      Column grow gap=16
+        Row gap=8
+          FilterChip "Book" selected={contains(formats,"Book")} onTap={formats=contains(formats,"Book") ? without(formats,"Book") : append(formats,"Book")}
+          FilterChip "E-book" selected={contains(formats,"E-book")} onTap={formats=contains(formats,"E-book") ? without(formats,"E-book") : append(formats,"E-book")}
+          FilterChip "Audiobook" selected={contains(formats,"Audiobook")} onTap={formats=contains(formats,"Audiobook") ? without(formats,"Audiobook") : append(formats,"Audiobook")}
+          Spacer grow
+          Select bind=sort items=["Relevance","Title","Newest","Most available"] w=170
+        Row gap=16
+          Toggle "Available now" bind=onlyAvailable
+          Select bind=lang items=["Any language","English","Spanish","French"] w=170
+        Text.muted "{count(books, b => (length(formats)==0 || contains(formats,b.format)) && (lang==\"Any language\" || b.lang==lang) && (!onlyAvailable || b.avail>0) && (q==\"\" || contains(lower(b.title),lower(q)) || contains(lower(b.author),lower(q))))} results"
+        each b in books
+          if (length(formats)==0 || contains(formats,b.format)) && (lang=="Any language" || b.lang==lang) && (!onlyAvailable || b.avail>0) && (q=="" || contains(lower(b.title),lower(q)) || contains(lower(b.author),lower(q)))
+            Card gap=16 onTap={selected=b.id; go book}
+              Row gap=16 middle
+                BookCover "{b.title}" color={b.color} w=64 h=92
+                Column grow gap=4
+                  Text.strong "{b.title}"
+                  Text.muted "{b.author}, {b.year}"
+                  Row gap=8
+                    Badge.neutral "{b.format}"
+                    Badge.neutral "{b.lang}"
+                Column gap=6 end
+                  Badge.success "{b.avail} of {b.total} available" visible={b.avail>0}
+                  Badge.warning "Hold queue: {b.queue}" visible={b.avail==0}
+                  IconButton "bookmark" tooltip="Save to reading list" onTap={readingList=contains(readingList,b.id) ? without(readingList,b.id) : append(readingList,b.id); toast "Reading list updated"}
+  Sheet#filters "Filters"
+    Text.fieldLabel "Format"
+    Row gap=8
+      Checkbox "Book" onChange={formats=result ? append(formats,"Book") : without(formats,"Book")}
+      Checkbox "E-book" onChange={formats=result ? append(formats,"E-book") : without(formats,"E-book")}
+      Checkbox "Audiobook" onChange={formats=result ? append(formats,"Audiobook") : without(formats,"Audiobook")}
+    Select "Language" bind=lang items=["Any language","English","Spanish","French"]
+    Toggle "Available now" bind=onlyAvailable
+    Row gap=8 end
+      Button.ghost "Reset" onTap={formats=[]; lang="Any language"; onlyAvailable=false}
+      Button "Show results" onTap={close}
+  Dialog#card "Library card" "Scan at any self-checkout"
+    Column center gap=12
+      Text.strong "Maya Reyes"
+      Barcode "2 9040 1187 3321" w=260 h=90
+      Text.muted "Card expires 03/2028"
+
+define BookCover "title" color=#FF2F6B4F w=96 h=140
+  Column w={w} h={h} pad=8 fill={color} radius=4 middle center
+    Text "{title}" center size=12 weight=700 color=#FFFFFFFF
+
+// A scannable barcode cannot be drawn with these words; it is shown as a labelled box.
+define Barcode "value" w=240 h=80
+  Column w={w} h={h} fill=#FFFFFFFF radius=4 border=1 center middle gap=4
+    Icon "view_week"
+    Text.mono "{value}"
+
+### Book
+state hold=false
+state pickup="Central Library"
+state fmtPick="Book"
+App
+  Sidebar
+    Brand "Stacks" icon="local_library"
+    NavItem "Search" icon="search" selected={true} onTap={go search}
+    NavItem "My loans" icon="menu_book" badge="3" onTap={go loans}
+    NavItem "Reading list" icon="bookmarks" onTap={go search}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Maya Reyes" size=32
+      Text.muted "Maya Reyes"
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Back to results" onTap={go search}
+        Heading "The Overstory" level=1
+      Button.outline "Save to reading list" icon="bookmark_add" onTap={readingList=append(readingList,"b1"); toast "Saved to your reading list"}
+    Row pad=24 gap=32 top
+      Column w=220 gap=12
+        BookCover "The Overstory" color=#FF2F6B4F w=220 h=320
+        Button "Place a hold" onTap={open holdDialog}
+        Button.outline "Read a sample" icon="chrome_reader_mode" onTap={go reader}
+      Column grow gap=16
+        Text.muted "Richard Powers, 2018, 502 pages"
+        Row gap=8
+          Badge.neutral "Book"
+          Badge.neutral "English"
+          Badge.info "Fiction"
+        Text "A sweeping novel of nine strangers whose lives are changed by trees, and who are called to save them. Winner of the Pulitzer Prize for Fiction."
+        Heading "Copies by branch" level=3
+        Card gap=8
+          Row between
+            Text "Central Library"
+            Badge.success "2 available"
+          Divider
+          Row between
+            Text "Riverside Branch"
+            Badge.success "1 available"
+          Divider
+          Row between
+            Text "Eastgate Branch"
+            Badge.warning "Checked out, due Dec 4"
+          Divider
+          Row between
+            Text "Hillcrest Branch"
+            Badge.warning "Checked out, due Dec 9"
+        Heading "Holds" level=3
+        Card gap=6
+          Row between
+            Text "Queue position if you place a hold"
+            Text.strong "{hold ? \"1 of 1\" : \"Available now\"}"
+          Text.muted "Copies are on the shelf, so you would be first in line." visible={!hold}
+          Text.success "Hold placed. Pickup at {pickup} within 7 days of notice." visible={hold}
+  Dialog#holdDialog "Place a hold" "The Overstory by Richard Powers"
+    Select "Pickup branch" bind=pickup items=["Central Library","Riverside Branch","Eastgate Branch","Hillcrest Branch"]
+    SegmentedButton bind=fmtPick items=["Book","E-book"]
+    Text.muted "Queue position: 1 of 1. We will email you when it is ready."
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button "Confirm hold" onTap={hold=true; toast "Hold placed at {pickup}"; close}
+
+### Loans
+state tab="out"
+state loans=[{"id":"l1","title":"Piranesi","author":"Susanna Clarke","due":"Nov 12","daysLeft":-5,"renewals":0,"fine":1.25,"color":"#FF3B4F8A"},{"id":"l2","title":"Klara and the Sun","author":"Kazuo Ishiguro","due":"Nov 24","daysLeft":7,"renewals":1,"fine":0,"color":"#FFB2872D"},{"id":"l3","title":"Pedro Paramo","author":"Juan Rulfo","due":"Dec 1","daysLeft":14,"renewals":0,"fine":0,"color":"#FF9A5B2E"}]
+state holds=[{"id":"h1","title":"Braiding Sweetgrass","queue":4,"branch":"Central Library","color":"#FF6B7F2A"},{"id":"h2","title":"The Overstory","queue":1,"branch":"Riverside Branch","color":"#FF2F6B4F"}]
+state readingList2=[{"id":"r1","title":"Le Petit Prince","author":"Antoine de Saint-Exupery","color":"#FF1F6F8B"},{"id":"r2","title":"Pedro Paramo","author":"Juan Rulfo","color":"#FF9A5B2E"}]
+App
+  Sidebar
+    Brand "Stacks" icon="local_library"
+    NavItem "Search" icon="search" onTap={go search}
+    NavItem "My loans" icon="menu_book" badge="3" selected={tab!="list"} onTap={tab="out"}
+    NavItem "Reading list" icon="bookmarks" selected={tab=="list"} onTap={tab="list"}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Maya Reyes" size=32
+      Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "My loans" level=1
+      Button.outline "Library card" icon="qr_code_2" onTap={open card2}
+    Column pad=24 gap=16
+      Row gap=8
+        ChoiceChip "Checked out" selected={tab=="out"} onTap={tab="out"}
+        ChoiceChip "Holds" selected={tab=="holds"} onTap={tab="holds"}
+        ChoiceChip "Reading list" selected={tab=="list"} onTap={tab="list"}
+      if tab=="out"
+        if sum(loans, l => l.fine) > 0
+          Card fill=#FFFEF2F2 gap=8
+            Row between middle
+              Row gap=8 middle
+                Icon "warning" color=#FFDC2626
+                Text.strong "Overdue fines: {money(sum(loans, l => l.fine),\"$\",2)}"
+              Button.destructive "Pay fines" onTap={open payFines}
+        each l in loans
+          Card gap=12
+            Row gap=16 middle
+              BookCover "{l.title}" color={l.color} w=48 h=70
+              Column grow gap=4
+                Text.strong "{l.title}"
+                Text.muted "{l.author}"
+                Text.danger "Overdue by {abs(l.daysLeft)} days, due {l.due}" visible={l.daysLeft<0}
+                Text.muted "Due {l.due}, {l.daysLeft} days left" visible={l.daysLeft>=0}
+              Column gap=6 end
+                Badge.error "Fine {money(l.fine,\"$\",2)}" visible={l.fine>0}
+                Badge.neutral "Renewed {l.renewals} of 2"
+                Button.outline "Renew" onTap={l.renewals>=2 ? toast "No renewals left" : (loans=updateWhere(loans,x=>x.id==l.id,x=>with(with(x,"renewals",x.renewals+1),"daysLeft",x.daysLeft+21)); toast "Renewed for 21 days")}
+      if tab=="holds"
+        each h in holds
+          Card gap=12
+            Row gap=16 middle
+              BookCover "{h.title}" color={h.color} w=48 h=70
+              Column grow gap=4
+                Text.strong "{h.title}"
+                Text.muted "Pickup at {h.branch}"
+                Row gap=8 middle
+                  Text "Queue position {h.queue}"
+                  Progress {1/h.queue} w=120
+              Button.ghost "Cancel hold" onTap={holds=removeWhere(holds,x=>x.id==h.id); toast "Hold cancelled"}
+      if tab=="list"
+        Text.muted "{length(readingList2)} books you want to read"
+        each r in readingList2
+          Card gap=12
+            Row gap=16 middle
+              BookCover "{r.title}" color={r.color} w=48 h=70
+              Column grow gap=4
+                Text.strong "{r.title}"
+                Text.muted "{r.author}"
+              Button.outline "Place a hold" onTap={toast "Hold placed"}
+              IconButton "delete" tooltip="Remove" onTap={readingList2=removeWhere(readingList2,x=>x.id==r.id)}
+  Dialog#payFines "Pay overdue fines" "You will be sent to the secure payment page"
+    Text "Total due: {money(sum(loans, l => l.fine),\"$\",2)}"
+    Row gap=8 end
+      Button.ghost "Not now" onTap={close}
+      Button "Continue" onTap={link https://pay.stacks-library.example/fines}
+  Dialog#card2 "Library card" "Scan at any self-checkout"
+    Column center gap=12
+      Text.strong "Maya Reyes"
+      Barcode "2 9040 1187 3321" w=260 h=90
+
+### Reader
+state fontSize=18
+state theme="Light"
+state page=42
+state total=502
+state bookmarks=[12,88]
+App
+  Sidebar
+    Brand "Stacks" icon="local_library"
+    NavItem "Back to loans" icon="arrow_back" onTap={go loans}
+    Text.fieldLabel "Bookmarks"
+    each bm in bookmarks
+      NavItem "Page {bm}" icon="bookmark" selected={bm==page} onTap={page=bm}
+    Spacer grow
+    Text.muted "Klara and the Sun"
+  Main
+    Nav
+      Heading "Klara and the Sun" level=1
+      Row gap=8 middle
+        IconButton "bookmark" tooltip="Bookmark this page" onTap={contains(bookmarks,page) ? bookmarks=without(bookmarks,page) : (bookmarks=append(bookmarks,page); toast "Bookmarked page {page}")}
+        IconButton "text_fields" tooltip="Text and theme" onTap={open textMenu}
+    Column pad=24 gap=16 center fill={theme=="Dark" ? "#FF111827" : theme=="Sepia" ? "#FFF4ECD8" : "#FFFFFFFF"}
+      Column maxw=640 gap=16
+        Text "When we were in the store, Manager would let us stand at the front window so we could see the sun while it was out. I always tried to make the most of it, watching the passers-by, and the changing light on the street." size={fontSize} color={theme=="Dark" ? "#FFE5E7EB" : "#FF1F2937"}
+        Text "Rosa and I would try to guess which customers would stop and look at us, and which would hurry past." size={fontSize} color={theme=="Dark" ? "#FFE5E7EB" : "#FF1F2937"}
+    Footer
+      Row gap=16 middle
+        IconButton "chevron_left" tooltip="Previous page" onTap={page=max(1,page-1)}
+        Column grow gap=4
+          Slider bind=page min=1 max=502
+          Text.muted "Page {page} of {total}, {round(page/total*100,0)}% read"
+        IconButton "chevron_right" tooltip="Next page" onTap={page=min(total,page+1)}
+  Popover#textMenu
+    Column gap=12 w=260
+      Row between middle
+        IconButton "text_decrease" tooltip="Smaller" onTap={fontSize=max(12,fontSize-2)}
+        Text.strong "{fontSize} pt"
+        IconButton "text_increase" tooltip="Larger" onTap={fontSize=min(32,fontSize+2)}
+      SegmentedButton bind=theme items=["Light","Sepia","Dark"]

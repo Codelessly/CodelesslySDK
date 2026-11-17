@@ -1,0 +1,117 @@
+### Sports
+state sport="Run"
+state sports=[{"name":"Run","icon":"directions_run"},{"name":"Walk","icon":"directions_walk"},{"name":"Cycle","icon":"directions_bike"},{"name":"Swim","icon":"pool"},{"name":"Row","icon":"rowing"},{"name":"HIIT","icon":"fitness_center"},{"name":"Yoga","icon":"self_improvement"}]
+App
+  Main
+    Nav
+      Heading "Workouts" level=3
+      Text.muted "{formatDate(today(),'EEE')}"
+    Column pad=12 gap=8 scroll
+      each s in sports
+        ListTile "{s.name}" icon="{s.icon}" selected={sport == s.name} onTap={sport=s.name; go running}
+      Button "Start {sport}" onTap={go running}
+
+### Running
+state running=true
+state locked=false
+state elapsed=0
+state hr=128
+state km=0.0
+state paceSec=345
+state page=0
+state laps=[]
+state banner=""
+state pulse=false
+state zones=[{"name":"Easy","max":120,"color":"#FF60A5FA"},{"name":"Fat burn","max":140,"color":"#FF34D399"},{"name":"Cardio","max":160,"color":"#FFFBBF24"},{"name":"Peak","max":200,"color":"#FFEF4444"}]
+every 1s when running onTick={elapsed=elapsed+1; km=round(km+0.0029,2); hr=clamp(hr+(elapsed%7<4 ? 1 : -1),100,185); (floor(km) > length(laps) ? {laps=append(laps,{"n":length(laps)+1,"pace":paceSec+(elapsed%9)-4}); banner="Lap " + (length(laps)+1) + " done"; pulse=true; open lapBanner} : {})}
+every 1s when pulse onTick={pulse=false}
+App
+  Main
+    Stack center middle
+      Column center middle gap=6 pad=16
+        if locked
+          Row gap=6 middle
+            Icon "lock"
+            Text.caption "Water lock on"
+        Text "{duration(elapsed)}" size=44 weight=700
+        Pages bind=page h=140
+          Column center gap=6
+            ZoneRing value={hr} zones={zones}
+            Text.caption "Heart rate bpm"
+          Column center gap=6
+            Text "{fixed(floor(paceSec/60),0)}:{paceSec%60 < 10 ? '0' : ''}{paceSec%60}" size=40 weight=700
+            Text.caption "Pace /km"
+          Column center gap=6
+            Text "{fixed(km,2)}" size=40 weight=700
+            Text.caption "Distance km"
+        Dots bind=page count=3
+        if !locked
+          Row gap=12
+            IconButton "pause" tooltip="Pause" onTap={running=false; go pause}
+            IconButton "water_drop" tooltip="Water lock" onTap={locked=true; toast "Touch locked. Press crown to unlock"}
+        if locked
+          Button.outline "Hold to unlock" onLongPress={locked=false; toast "Unlocked"}
+      HapticPulse active={pulse} strength="strong"
+  Dialog#lapBanner "{banner}" "Auto-lap every 1 km"
+    Text.strong "Split {last(laps).pace} s/km"
+    Button "OK" onTap={close}
+
+### Pause
+state ended=false
+App
+  Main
+    Column center middle gap=10 pad=16
+      Text.heading "Paused"
+      Text.muted "{duration(elapsed)} · {fixed(km,2)} km"
+      Row gap=10
+        Button.outline "Lap" icon="flag" onTap={laps=append(laps,{"n":length(laps)+1,"pace":paceSec}); toast "Lap {length(laps)}"}
+        Button.destructive "End" icon="stop" onTap={ended=true; go summary}
+      Button "Resume" icon="play_arrow" onTap={running=true; go running}
+
+### Summary
+state splitPaces=[342,338,351,345,330]
+App
+  Main
+    Nav
+      Heading "Summary" level=3
+      Text.muted "{formatDate(today(),'MMM d')}"
+    Column pad=12 gap=12 scroll
+      Grid cols=2 gap=8
+        Card
+          Text.caption "Distance"
+          Text.strong "5.02 km"
+        Card
+          Text.caption "Time"
+          Text.strong "28:41"
+        Card
+          Text.caption "Avg HR"
+          Text.strong "148 bpm"
+        Card
+          Text.caption "Avg pace"
+          Text.strong "5:43 /km"
+      Card gap=6
+        Text.strong "Route"
+        RouteLine points=[[0,0],[2,1],[3,3],[5,3],[6,1],[8,0]] h=100
+      Card gap=6
+        Text.strong "Splits"
+        BarChart values={splitPaces} labels=["1","2","3","4","5"] h=120
+      Button "Save" onTap={emit saveWorkout; toast "Saved"; go sports}
+      Button.ghost "Discard" onTap={emit discardWorkout; go sports}
+
+// a heart rate ring coloured by zone; the number inside
+define ZoneRing value=120 zones=[] size=110
+  Stack center middle w={size} h={size}
+    Ring {clamp(value/200,0,1)} size={size} color={find(zones,z=>value<=z.max).color}
+    Column center
+      Text "{value}" size=32 weight=700
+      Text.caption "{find(zones,z=>value<=z.max).name}"
+
+// shows a route as a labelled box; no real map or drawing of the path
+define RouteLine points=[] h=100
+  Box h={h} fill=#FF1F2937 radius=8 center middle
+    Text.muted "Route ({length(points)} points)"
+
+// a visible stand-in for a haptic tap: a pulsing ring on screen
+define HapticPulse active=false strength="soft"
+  if active
+    Box w=24 h=24 radius=12 fill=#FFFBBF24 animate=pulse duration=300

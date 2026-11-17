@@ -1,0 +1,229 @@
+### Browse
+state fonts=[{"name":"Fraunces","cat":"Serif","styles":18,"axes":true},{"name":"Inter","cat":"Sans","styles":18,"axes":true},{"name":"JetBrains Mono","cat":"Mono","styles":16,"axes":true},{"name":"Playfair Display","cat":"Serif","styles":12,"axes":true},{"name":"DM Sans","cat":"Sans","styles":18,"axes":true},{"name":"Space Mono","cat":"Mono","styles":4,"axes":false},{"name":"Bungee","cat":"Display","styles":1,"axes":false},{"name":"Lora","cat":"Serif","styles":8,"axes":true},{"name":"Work Sans","cat":"Sans","styles":18,"axes":true},{"name":"Abril Fatface","cat":"Display","styles":1,"axes":false},{"name":"IBM Plex Mono","cat":"Mono","styles":14,"axes":false},{"name":"Rubik","cat":"Sans","styles":12,"axes":true}]
+state sample="Sphinx of black quartz, judge my vow."
+state size=32
+state weight=400
+state italic=false
+state cat="All"
+state minStyles=1
+state q=""
+state tray=[]
+state project=[]
+state current="Fraunces"
+state applied=[]
+App
+  Sidebar
+    Brand "Specimen" icon="match_case"
+    NavItem "Browse" icon="grid_view" selected={true}
+    NavItem "Compare" icon="compare" badge="{length(tray)}" onTap={open tray}
+    NavItem "Project" icon="folder_special" badge="{length(project)}" onTap={go project}
+    Spacer grow
+    Text.muted "{length(filter(fonts,f=>(cat==\"All\"||f.cat==cat)&&f.styles>=minStyles&&contains(lower(f.name),lower(q))))} typefaces shown"
+  Main
+    Nav
+      Heading "Typefaces" level=1
+      Row gap=8
+        Input "Search fonts" bind=q w=220
+        Button.outline "Filters" icon="tune" show=phone onTap={open filters}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Input "Sample text" bind=sample
+        Row gap=24 middle
+          Column grow gap=4
+            Text.caption "Size {size}px"
+            Slider bind=size min=12 max=96
+          Column grow gap=4
+            Text.caption "Weight {weight}"
+            Slider bind=weight min=100 max=900 step=100
+          Toggle "Italic" bind=italic
+      Row gap=8 hide=phone
+        ChoiceChip "All" selected={cat=="All"} onTap={cat="All"}
+        ChoiceChip "Serif" selected={cat=="Serif"} onTap={cat="Serif"}
+        ChoiceChip "Sans" selected={cat=="Sans"} onTap={cat="Sans"}
+        ChoiceChip "Mono" selected={cat=="Mono"} onTap={cat="Mono"}
+        ChoiceChip "Display" selected={cat=="Display"} onTap={cat="Display"}
+        Spacer grow
+        Text.muted "Styles"
+        SegmentedButton bind=minStyles items=[1,4,12]
+      Grid cols=3 gap=16
+        each f in filter(fonts,f=>(cat=="All"||f.cat==cat)&&f.styles>=minStyles&&contains(lower(f.name),lower(q)))
+          Card gap=8 onTap={current=f.name; go font}
+            Row between
+              Text.strong "{f.name}"
+              Badge.neutral "{f.cat}"
+            Text "{sample}" font={f.name} size={size} weight={weight} italic={italic}
+            Row between
+              Text.caption "{f.styles} styles"
+              Row gap=4
+                IconButton "compare" tooltip="Add to compare" onTap={contains(tray,f.name) ? toast "Already in the tray" : (length(tray)<4 ? tray=append(tray,f.name) : toast "Compare holds four")}
+                IconButton "bookmark_add" tooltip="Add to project" onTap={current=f.name; open collect}
+    Footer
+      Row between middle pad=12 hidden={length(tray)==0}
+        Row gap=8 middle
+          Text.strong "Compare"
+          each t in tray
+            Chip "{t}" removable onRemove={tray=without(tray,t)}
+        Row gap=8
+          Button.ghost "Clear" onTap={tray=[]}
+          Button "Compare {length(tray)}" disabled={length(tray)<2} onTap={open tray}
+Sheet#filters "Filters"
+  Column gap=12
+    Text.fieldLabel "Category"
+    Row gap=8
+      ChoiceChip "All" selected={cat=="All"} onTap={cat="All"}
+      ChoiceChip "Serif" selected={cat=="Serif"} onTap={cat="Serif"}
+      ChoiceChip "Sans" selected={cat=="Sans"} onTap={cat="Sans"}
+      ChoiceChip "Mono" selected={cat=="Mono"} onTap={cat="Mono"}
+      ChoiceChip "Display" selected={cat=="Display"} onTap={cat="Display"}
+    Text.fieldLabel "At least this many styles"
+    SegmentedButton bind=minStyles items=[1,4,12]
+    Button "Show results" onTap={close}
+Dialog#tray "Compare" "Same sample, same size, side by side"
+  Column gap=12
+    Grid cols=2 gap=12
+      each t in tray
+        Card gap=6
+          Row between
+            Text.strong "{t}"
+            IconButton "close" tooltip="Remove" onTap={tray=without(tray,t)}
+          Text "{sample}" font={t} size={size} weight={weight} italic={italic}
+    if length(tray)==0
+      Text.muted "Add up to four typefaces from the grid."
+    Row end gap=8
+      Button.outline "Clear" onTap={tray=[]; close}
+      Button "Done" onTap={close}
+Dialog#collect "Add to project" "{current}"
+  Column gap=12
+    Select "Project" bind=target items=["Brand refresh","Marketing site","Mobile app"]
+    Row gap=8
+      Checkbox "Headings" bind=roleHead
+      Checkbox "Body" bind=roleBody
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Add" onTap={project=append(project,{"name":current,"project":coalesce(target,"Brand refresh")}); toast "{current} added to {coalesce(target,\"Brand refresh\")}"; close}
+
+### Font page
+Page
+  Nav sticky
+    Brand "Specimen" icon="match_case"
+    Row gap=4
+      Link "Browse" onTap={go browse}
+      Link "Project" onTap={go project}
+    Row gap=8
+      Button.outline "Compare" icon="compare" onTap={contains(tray,current) ? toast "Already in the tray" : (length(tray)<4 ? tray=append(tray,current) : toast "Compare holds four")}
+      Button "Add to project" icon="bookmark_add" onTap={open collect}
+  Section
+    Column gap=12
+      Row gap=8
+        Badge.neutral "Serif"
+        Badge.info "Variable"
+      Heading "{current}" level=1
+      Text.muted "18 styles, designed by Undercase Type. Open source under the OFL."
+      Input "Try your own text" bind=sample
+      Row gap=24 middle
+        Column grow gap=4
+          Text.caption "Size {size}px"
+          Slider bind=size min=12 max=160
+        Toggle "Italic" bind=italic
+      Text "{sample}" font={current} size={size} weight={weight} italic={italic}
+  Section tint
+    Column gap=16
+      Heading "Glyphs"
+      GlyphGrid font={current} weight={weight} cols=12 onPick={toast "Copied {result}"}
+  Section
+    Column gap=16
+      Heading "Waterfall"
+      Waterfall font={current} text={sample} sizes=[12,16,20,28,40,64] weight={weight}
+  Section tint
+    Column gap=16
+      Heading "Variable axes"
+      Grid cols=3 gap=24
+        Column gap=4
+          Text.caption "Weight {weight}"
+          Slider bind=weight min=100 max=900
+        Column gap=4
+          Text.caption "Optical size {opsz}"
+          Slider bind=opsz min=9 max=144
+        Column gap=4
+          Text.caption "Softness {soft}"
+          Slider bind=soft min=0 max=100
+      Text "{sample}" font={current} size=48 weight={weight} axes={{"opsz":opsz,"SOFT":soft}}
+  Section
+    Column gap=16
+      Heading "Pairings"
+      Grid cols=3 gap=16
+        each p in [{"name":"Inter","role":"Body"},{"name":"DM Sans","role":"Captions"},{"name":"JetBrains Mono","role":"Code"}]
+          Card gap=8
+            Text.caption "{p.role}"
+            Text "{current}" font={current} size=28 weight=700
+            Text "{sample}" font={p.name} size=16
+            Row between
+              Text.strong "{p.name}"
+              Button.outline "Open" onTap={current=p.name; scroll top}
+  Footer
+    Row between
+      Text.strong "Specimen"
+      Text.muted "Fonts shown are examples"
+Dialog#collect "Add to project" "{current}"
+  Column gap=12
+    Select "Project" bind=target items=["Brand refresh","Marketing site","Mobile app"]
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Add" onTap={project=append(project,{"name":current,"project":coalesce(target,"Brand refresh")}); toast "Added to project"; close}
+
+### Project
+state selectedProject="Brand refresh"
+App
+  Sidebar
+    Brand "Specimen" icon="match_case"
+    NavItem "Browse" icon="grid_view" onTap={go browse}
+    NavItem "Compare" icon="compare" badge="{length(tray)}" onTap={open tray}
+    NavItem "Project" icon="folder_special" selected={true}
+    Spacer grow
+    Text.muted "{length(project)} fonts collected"
+  Main
+    Nav
+      Heading "Project" level=1
+      Row gap=8
+        Select bind=selectedProject items=["Brand refresh","Marketing site","Mobile app"] w=200
+        Button "Export CSS" icon="download" onTap={emit exportCss {selectedProject}}
+    Column pad=24 gap=16 scroll
+      if isEmpty(filter(project,p=>p.project==selectedProject))
+        Card center gap=8
+          Icon "bookmark_border" size=40
+          Text.strong "Nothing collected yet"
+          Text.muted "Add fonts from the browser with the bookmark button."
+          Button "Browse typefaces" onTap={go browse}
+      each p in filter(project,p=>p.project==selectedProject)
+        Card gap=8
+          Row between middle
+            Text.strong "{p.name}"
+            Row gap=4
+              IconButton "open_in_new" tooltip="Open" onTap={current=p.name; go font}
+              IconButton "delete" tooltip="Remove" onTap={project=removeWhere(project,x=>x.name==p.name&&x.project==p.project)}
+          Text "{sample}" font={p.name} size=28
+Dialog#tray "Compare" "Same sample, same size, side by side"
+  Column gap=12
+    Grid cols=2 gap=12
+      each t in tray
+        Card gap=6
+          Row between
+            Text.strong "{t}"
+            IconButton "close" tooltip="Remove" onTap={tray=without(tray,t)}
+          Text "{sample}" font={t} size={size}
+    Button "Done" onTap={close}
+
+// Text rendered in a given font, with weight, italic and variable axes, is drawn in the nearest available face.
+// GlyphGrid: a grid of every character of a font, tap one to copy it; shown as a grid of sample letters.
+define GlyphGrid font="" weight=400 cols=10 onPick
+  Grid cols={cols} gap=4
+    each g in ["A","B","C","D","E","F","G","H","I","J","K","L","a","b","c","d","e","f","g","h","i","j","k","l","0","1","2","3","4","5","6","7","8","9","&","@","!","?","(",")","%","$","€","£","fi","ff","ß","ñ"]
+      Box center middle h=48 radius=6 border=1 onTap={onPick(g)}
+        Text "{g}" font={font} weight={weight} size=24
+
+define Waterfall font="" text="Sphinx of black quartz" sizes=[12,16,24,36,48] weight=400
+  Column gap=8
+    each s in sizes
+      Row gap=16 middle
+        Text.caption "{s}px" w=48
+        Text "{text}" font={font} size={s} weight={weight}

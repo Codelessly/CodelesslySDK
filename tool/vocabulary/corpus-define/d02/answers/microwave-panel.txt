@@ -1,0 +1,96 @@
+### Panel
+state entry=0
+state left=0
+state running=false
+state door=false
+state beeping=false
+state locked=false
+state power=100
+state note=""
+every 1s when running onTick={left=left-1; running=left>1; beeping=left<=1; left=max(0,left-0)}
+App
+  Main
+    Nav
+      Brand "Quickwave" icon="microwave"
+      Row gap=8
+        if locked
+          Badge.warning "Locked"
+        Badge.neutral "{power}% power"
+        Button.ghost "Guide" onTap={go cooking-guide}
+    Column pad=24 gap=16 center maxw=560
+      Card gap=12 fill=#FF111827
+        Row between middle
+          Column gap=4
+            if running
+              Text "{duration(left)}" size=56 weight=700 color=#FF86EFAC
+            if !running && beeping
+              Text "END" size=56 weight=700 color=#FFFCA5A5 animate=pulse
+            if !running && !beeping
+              Text "{floor(entry/100)}:{entry%100<10 ? '0' : ''}{entry%100}" size=56 weight=700 color=#FFF9FAFB
+            Text "{note}" size=14 color=#FF9CA3AF
+          if running
+            Icon "autorenew" size=64 color=#FF86EFAC animate=spin duration=2000
+          if !running
+            Icon "autorenew" size=64 color=#FF4B5563
+        if door
+          Text "Door open. Close the door to cook." color=#FFFCD34D
+        if beeping
+          Text "Finished. Open the door to stop the beep." color=#FFFCA5A5
+      Beep playing={beeping} repeat
+      Grid cols=3 gap=8
+        each d in [1,2,3,4,5,6,7,8,9]
+          KeyButton "{d}" disabled={locked || running} onTap={entry=entry<1000 ? entry*10+d : entry}
+        KeyButton "Clear" disabled={locked} onTap={entry=0; note=""}
+        KeyButton "0" disabled={locked || running} onTap={entry=entry<1000 ? entry*10 : entry}
+        KeyButton "Power" disabled={locked || running} onTap={power=power>=100 ? 10 : power+10}
+      Row gap=8
+        Button "Start" grow disabled={locked || door || (entry==0 && left==0)} onTap={left=left>0 ? left : floor(entry/100)*60+entry%100; running=true; beeping=false; note=""}
+        Button.destructive "Stop" grow disabled={locked} onTap={running=false; beeping=false; note="Stopped"}
+      Text.caption "Quick keys"
+      Row gap=8
+        Button.outline "Popcorn" grow disabled={locked || running || door} onTap={left=150; power=100; note="Popcorn"; running=true; beeping=false}
+        Button.outline "Defrost" grow disabled={locked || running || door} onTap={open defrost}
+        Button.outline "Reheat" grow disabled={locked || running || door} onTap={left=60; power=70; note="Reheat"; running=true; beeping=false}
+      Row gap=8 between
+        Button.secondary "{door ? 'Close door' : 'Open door'}" onTap={door=!door; running=false; beeping=false; note=door ? "" : "Door open"}
+        HoldKey "{locked ? 'Hold to unlock' : 'Hold to lock'}" ms=3000 onHold={locked=!locked; toast locked ? "Child lock off" : "Child lock on"}
+Dialog#defrost "Defrost by weight" "Enter the weight of the food"
+  state grams=500
+  Input "Weight in grams" type=number bind=grams
+  Text.muted "About {ceil(grams/100*60)} seconds at 30% power."
+  Button "Start defrost" onTap={grams>0 ? {left=ceil(grams/100*60); power=30; note="Defrost {grams} g"; running=true; beeping=false; close} : toast "Enter a weight"}
+
+// A beep cannot be heard here, so it is shown as a labelled box
+define Beep playing=false repeat
+  if playing
+    Box pad=6 radius=4 fill=#FFFEE2E2 animate=pulse
+      Text.small "Beep beep (repeats until the door opens)"
+
+define KeyButton "label" disabled=false onTap
+  Button.outline "{label}" disabled={disabled} onTap={onTap}
+
+// Press and hold needs a gesture; it is drawn as a button that fires on a long press
+define HoldKey "label" ms=3000 onHold
+  Button.ghost "{label}" onLongPress={onHold}
+
+### Cooking Guide
+Page
+  Nav
+    Brand "Quickwave" icon="microwave"
+    Button.ghost "Back to panel" onTap={go panel}
+  Section narrow
+    Column gap=16
+      Heading "Cooking guide" level=1
+      Text.muted "Power steps from 10 to 100 percent. Press Power repeatedly to step up; after 100 it returns to 10."
+      Card gap=8
+        Heading "Quick keys" level=3
+        each k in [{"n":"Popcorn","t":"2:30 at 100%"},{"n":"Reheat","t":"1:00 at 70%"},{"n":"Defrost","t":"1 minute per 100 g at 30%"}]
+          Row between
+            Text.strong "{k.n}"
+            Text.muted "{k.t}"
+      Card gap=8
+        Heading "Child lock" level=3
+        Text "Hold the lock key for three seconds to lock all keys. Hold it again to unlock."
+      Card gap=8
+        Heading "Door and beep" level=3
+        Text "Cooking stops when the door opens. At the end the beep repeats until you open the door."

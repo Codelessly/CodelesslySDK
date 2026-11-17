@@ -1,0 +1,163 @@
+### Live map
+state tab="map"
+state line="T4"
+state lines=[{"id":"T1","name":"Harbour Loop","color":"#FFDC2626"},{"id":"T4","name":"Northgate - Docklands","color":"#FF2563EB"},{"id":"T7","name":"University Express","color":"#FF16A34A"}]
+state trams=[{"id":"4012","line":"T4","lat":0.42,"lng":0.31,"heading":65,"crowd":2,"delay":3,"next":["Market Square","Canal Street","Docklands"]},{"id":"4018","line":"T4","lat":0.55,"lng":0.58,"heading":120,"crowd":1,"delay":0,"next":["Canal Street","Docklands","Pier 9"]},{"id":"1103","line":"T1","lat":0.30,"lng":0.70,"heading":200,"crowd":3,"delay":7,"next":["Old Mill","Harbour Gate","Fish Market"]},{"id":"7021","line":"T7","lat":0.72,"lng":0.22,"heading":30,"crowd":1,"delay":1,"next":["Library","Science Park","Campus North"]}]
+state stops=[{"name":"Northgate","eta":"2 min"},{"name":"Market Square","eta":"5 min"},{"name":"Canal Street","eta":"8 min"},{"name":"Docklands","eta":"12 min"},{"name":"Pier 9","eta":"15 min"},{"name":"Fish Market","eta":"19 min"}]
+state picked=""
+App
+  Sidebar
+    Brand "Liveline" icon="tram"
+    NavItem "Live map" icon="map" selected={tab=="map"} onTap={tab="map"}
+    NavItem "Fleet" icon="list_alt" badge="2" selected={tab=="fleet"} onTap={go fleet}
+    NavItem "Disruptions" icon="warning" selected={tab=="disruptions"} onTap={go disruptions}
+    Spacer grow
+    Text.muted "Control room, Shift B"
+  Main
+    Nav
+      Heading "Live map" level=1
+      Row gap=8
+        each l in lines
+          ChoiceChip "{l.id}" selected={line==l.id} onTap={line=l.id}
+        IconButton "my_location" tooltip="Centre on network" onTap={toast "Centred"}
+    Column pad=24 gap=16
+      LiveMap lines={lines} trams={trams} selectedLine={line} h=420 onPickTram={picked=result; open tram}
+      Card gap=12
+        Row between
+          Text.title "Line {line} stops"
+          Badge.info "{count(trams, t=>t.line==line)} trams running"
+        Row scroll gap=12
+          each s in stops
+            Card gap=4 w=140
+              Text.strong "{s.name}"
+              Text.small "Next tram"
+              Text.title "{s.eta}"
+Sheet#tram "Tram {picked}"
+  each t in filter(trams, x=>x.id==picked)
+    Column gap=16
+      Row between
+        Column gap=4
+          Text.strong "Line {t.line}"
+          Text.muted "Tram {t.id}"
+        Badge.warning "{t.delay} min late" hidden={t.delay==0}
+        Badge.success "On time" hidden={t.delay>0}
+      Row gap=12 middle
+        Text.fieldLabel "Crowding"
+        CrowdingMeter level={t.crowd}
+      Text.fieldLabel "Next stops"
+      each n in t.next
+        ListTile "{n}" icon="place"
+      Button "Open in fleet table" onTap={close; go fleet}
+
+### Fleet table
+state sortKey="delay"
+state sortDesc=true
+state lateOnly=false
+state fleet=[{"id":"4012","line":"T4","driver":"M. Okafor","crowd":2,"delay":3,"status":"Running"},{"id":"4018","line":"T4","driver":"S. Lindqvist","crowd":1,"delay":0,"status":"Running"},{"id":"1103","line":"T1","driver":"R. Petrov","crowd":3,"delay":7,"status":"Held at Old Mill"},{"id":"1107","line":"T1","driver":"A. Haddad","crowd":2,"delay":0,"status":"Running"},{"id":"7021","line":"T7","driver":"J. Whitfield","crowd":1,"delay":1,"status":"Running"},{"id":"7025","line":"T7","driver":"L. Moreau","crowd":2,"delay":5,"status":"Signal fault"}]
+App
+  Sidebar
+    Brand "Liveline" icon="tram"
+    NavItem "Live map" icon="map" onTap={go live-map}
+    NavItem "Fleet" icon="list_alt" badge="2" selected={true}
+    NavItem "Disruptions" icon="warning" onTap={go disruptions}
+    Spacer grow
+    Text.muted "Control room, Shift B"
+  Main
+    Nav
+      Heading "Fleet" level=1
+      Row gap=8
+        Input "Search tram or driver" bind=q w=220
+        Toggle "Late only" bind=lateOnly
+        Button.outline "Export" onTap={toast "Exported 6 trams"}
+    Column pad=24 gap=16
+      Card gap=0
+        Row gap=8 border-bottom=#FFE5E7EB
+          SortHeader "Tram" key="id" w=80 sortKey={sortKey} sortDesc={sortDesc} onSort={sortKey=result.key; sortDesc=result.desc}
+          SortHeader "Line" key="line" w=70 sortKey={sortKey} sortDesc={sortDesc} onSort={sortKey=result.key; sortDesc=result.desc}
+          SortHeader "Driver" key="driver" grow sortKey={sortKey} sortDesc={sortDesc} onSort={sortKey=result.key; sortDesc=result.desc}
+          SortHeader "Crowding" key="crowd" w=100 sortKey={sortKey} sortDesc={sortDesc} onSort={sortKey=result.key; sortDesc=result.desc}
+          SortHeader "Delay" key="delay" w=90 sortKey={sortKey} sortDesc={sortDesc} onSort={sortKey=result.key; sortDesc=result.desc}
+          Text.fieldLabel "Status" w=140 hide=tablet
+        each f in (sortDesc ? sortByDesc(filter(fleet, x=>(!lateOnly || x.delay>0) && (isEmpty(q) || contains(lower(x.driver), lower(q)) || contains(x.id, q))), x=>x[sortKey]) : sortBy(filter(fleet, x=>(!lateOnly || x.delay>0) && (isEmpty(q) || contains(lower(x.driver), lower(q)) || contains(x.id, q))), x=>x[sortKey]))
+          Row gap=8 middle pad=[0,10,0,10] onTap={emit pickTram f.id}
+            Text.strong "{f.id}" w=80
+            Badge.primary "{f.line}" w=70
+            Text "{f.driver}" grow
+            CrowdingMeter level={f.crowd} w=100
+            Text "{f.delay} min" w=90 color={f.delay>=5 ? "#FFDC2626" : "#FF111827"}
+            Text.muted "{f.status}" w=140 hide=tablet
+      Text.muted "{count(fleet, x=>x.delay>0)} of {length(fleet)} trams are late."
+
+### Disruption editor
+state line="T4"
+state stopsList=["Northgate","Market Square","Canal Street","Docklands","Pier 9","Fish Market"]
+state from="Market Square"
+state to="Docklands"
+state reason="Track works"
+state closed=false
+state alternatives=[{"name":"Bus replacement B4","detail":"Every 6 min, adds 9 min","mode":"directions_bus"},{"name":"Reroute via T1 at Canal Street","detail":"Every 8 min, adds 4 min","mode":"tram"},{"name":"Walk to Harbour Gate","detail":"11 min on foot","mode":"directions_walk"}]
+App
+  Sidebar
+    Brand "Liveline" icon="tram"
+    NavItem "Live map" icon="map" onTap={go live-map}
+    NavItem "Fleet" icon="list_alt" onTap={go fleet-table}
+    NavItem "Disruptions" icon="warning" selected={true}
+    Spacer grow
+    Text.muted "Control room, Shift B"
+  Main
+    Nav
+      Heading "Disruption editor" level=1
+      Row gap=8
+        Button.outline "Discard" onTap={closed=false; toast "Draft discarded"}
+        Button "Publish closure" onTap={open confirm}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Card grow gap=12
+          Text.title "Close a stretch"
+          Select "Line" items=["T1","T4","T7"] bind=line
+          Row gap=12
+            Select "From" items={stopsList} bind=from grow
+            Select "To" items={stopsList} bind=to grow
+          Select "Reason" items=["Track works","Signal fault","Accident","Event"] bind=reason
+          Row gap=12
+            DatePicker "Starts" bind=startDate grow
+            TimePicker "At" bind=startTime grow
+          Button.secondary "Preview closure" onTap={closed=true}
+        Card grow gap=12
+          Text.title "Affected stretch"
+          LiveMap lines=[] trams=[] selectedLine={line} closedFrom={from} closedTo={to} h=240
+          if closed
+            Badge.error "Closed: {from} to {to}"
+      if closed
+        Card gap=8
+          Text.title "Alternatives for passengers"
+          each a in alternatives
+            ListTile "{a.name}" "{a.detail}" icon="{a.mode}"
+Dialog#confirm "Publish this closure?" "Line {line}, {from} to {to}"
+  Text.muted "Reason: {reason}. Passengers see it in the app within a minute."
+  Row gap=8 end
+    Button.outline "Cancel" onTap={close}
+    Button.destructive "Publish" onTap={emit publishClosure; toast "Closure published"; close}
+
+// A real map is not available: drawn as a labelled box with a tram marker per tram.
+define LiveMap lines=[] trams=[] selectedLine="" closedFrom="" closedTo="" h=360 onPickTram
+  Stack h={h} fill=#FFE8EEF4 radius=8
+    Text.muted "Map: line {selectedLine}"
+    each t in trams
+      Box w={t.line==selectedLine ? 64 : 48} h=28 radius=14 fill={t.line==selectedLine ? "#FF2563EB" : "#FF6B7280"} onTap={onPickTram(t.id)}
+        Row gap=4 center middle
+          Icon "navigation"
+          Text.small "{t.id}" color=#FFFFFFFF
+    if closedFrom!=""
+      Badge.error "Closed {closedFrom} to {closedTo}"
+
+define CrowdingMeter level=1 w=100
+  Row gap=2 w={w} middle
+    Icon "person" color={level>=1 ? "#FF16A34A" : "#FFD1D5DB"}
+    Icon "person" color={level>=2 ? "#FFF59E0B" : "#FFD1D5DB"}
+    Icon "person" color={level>=3 ? "#FFDC2626" : "#FFD1D5DB"}
+
+define SortHeader "label" key="" w=100 sortKey="" sortDesc=false onSort
+  Row gap=2 middle w={w} onTap={onSort({"key": key, "desc": sortKey==key ? !sortDesc : false})}
+    Text.fieldLabel "{label}"
+    Icon "{sortKey==key ? (sortDesc ? 'arrow_downward' : 'arrow_upward') : 'unfold_more'}"

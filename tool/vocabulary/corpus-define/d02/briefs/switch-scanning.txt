@@ -1,0 +1,3 @@
+App: Single Switch, an app for scanning with one button. A grid of phrase tiles where a highlight steps along each row in turn at a speed you set, press to choose the row, then the highlight steps along tiles in that row, press to choose; the chosen phrase appearing in a speech bar and spoken; a letter keyboard in a frequency order with word predictions; a pause; scan speed, a hold time and a sound cue settings; a back-out option at the end of each pass.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

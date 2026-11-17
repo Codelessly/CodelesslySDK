@@ -1,0 +1,3 @@
+App: Needle, a log explorer. A search field with a query that colours field names and operators, a time range picker with presets and a drag-select on a histogram of log counts; results as rows with level colours and a time, a row expands into its fields as key-value pairs with add-as-filter plus and minus buttons; fields list with top values; saved searches; live tail with a pause; a share link.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

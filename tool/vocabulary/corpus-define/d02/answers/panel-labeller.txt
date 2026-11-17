@@ -1,0 +1,164 @@
+### Panel
+state circuits=[{"id":1,"slot":1,"amps":20,"name":"Kitchen counters","room":"Kitchen","wire":"12","phase":"A","spare":false},{"id":2,"slot":2,"amps":15,"name":"Living room lights","room":"Living room","wire":"14","phase":"A","spare":false},{"id":3,"slot":3,"amps":20,"name":"Dishwasher","room":"Kitchen","wire":"12","phase":"B","spare":false},{"id":4,"slot":4,"amps":30,"name":"Dryer","room":"Laundry","wire":"12","phase":"B","spare":false},{"id":5,"slot":5,"amps":20,"name":"Bathroom GFCI","room":"Bathroom","wire":"12","phase":"C","spare":false},{"id":6,"slot":6,"amps":15,"name":"Bedroom outlets","room":"Bedroom","wire":"14","phase":"C","spare":false},{"id":7,"slot":7,"amps":40,"name":"Oven","room":"Kitchen","wire":"8","phase":"A","spare":false},{"id":8,"slot":8,"amps":15,"name":"","room":"","wire":"14","phase":"A","spare":true},{"id":9,"slot":9,"amps":20,"name":"Garage outlets","room":"Garage","wire":"12","phase":"B","spare":false},{"id":10,"slot":10,"amps":15,"name":"","room":"","wire":"14","phase":"B","spare":true}] saved
+state sel=0
+state edAmps=15
+state edName=""
+state edRoom=""
+state edWire="14"
+state edSpare=false
+state photoAt=0
+App
+  Sidebar
+    Brand "Breakerbook" icon="electrical_services"
+    NavItem "Panel" icon="grid_view" selected={true}
+    NavItem "Warnings" icon="warning" badge="{count(circuits, c => c.amps > (c.wire == \"14\" ? 15 : c.wire == \"12\" ? 20 : c.wire == \"10\" ? 30 : 40))}" onTap={go warnings}
+    NavItem "Print directory" icon="print" onTap={go print}
+    Spacer grow
+    Text.muted "Main panel, basement"
+  Main
+    Nav
+      Heading "Main panel" level=1
+      Row gap=8
+        Badge.neutral "{count(circuits, c => !c.spare)} in use"
+        Badge.info "{count(circuits, c => c.spare)} spare"
+        Button.outline "Print directory" onTap={go print}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Column grow gap=12
+          Card gap=12
+            Text.strong "Breakers"
+            Text.muted "Tap a breaker to set its amperage, name and room."
+            Grid cols=2 gap=8 keep
+              each c in sortBy(circuits, x => x.slot)
+                Breaker "{c.slot}" amps={c.amps} name={c.name} room={c.room} phase={c.phase} spare={c.spare} warn={c.amps > (c.wire == "14" ? 15 : c.wire == "12" ? 20 : c.wire == "10" ? 30 : 40)} selected={sel == c.id} onTap={sel=c.id; edAmps=c.amps; edName=c.name; edRoom=c.room; edWire=c.wire; edSpare=c.spare; open breaker}
+          Card gap=12
+            Text.strong "Load per phase"
+            BalanceBar "A" value={sum(filter(circuits, c => c.phase == "A" && !c.spare), c => c.amps)} max=100
+            BalanceBar "B" value={sum(filter(circuits, c => c.phase == "B" && !c.spare), c => c.amps)} max=100
+            BalanceBar "C" value={sum(filter(circuits, c => c.phase == "C" && !c.spare), c => c.amps)} max=100
+            Text.muted "Breaker ratings summed per phase; spares not counted."
+        Column w=320 gap=12 hide=tablet
+          Card gap=8
+            Text.strong "The real panel"
+            Image "https://example.com/photos/basement-panel.jpg" h=260 onTap={open zoom}
+            Text.caption "Photographed 12 March, door open"
+          if count(circuits, c => c.amps > (c.wire == "14" ? 15 : c.wire == "12" ? 20 : c.wire == "10" ? 30 : 40)) > 0
+            Card gap=8 fill=#FFFEF3C7
+              Row gap=8 middle
+                Icon "warning"
+                Text.strong "Check the wire"
+              each c in filter(circuits, c => c.amps > (c.wire == "14" ? 15 : c.wire == "12" ? 20 : c.wire == "10" ? 30 : 40))
+                Text "Slot {c.slot} {c.name}: {c.amps} A on {c.wire} AWG"
+Dialog#breaker "Edit breaker" "Set what this breaker protects"
+  Column gap=12
+    SegmentedButton bind=edAmps items=[15,20,30,40]
+    Input "Circuit name" "Kitchen counters" bind=edName
+    Input "Room" "Kitchen" bind=edRoom
+    Select "Wire gauge (AWG)" bind=edWire items=["14","12","10","8"]
+    Toggle "Spare (nothing connected)" bind=edSpare
+    if edAmps > (edWire == "14" ? 15 : edWire == "12" ? 20 : edWire == "10" ? 30 : 40)
+      Row gap=8 middle
+        Icon "warning"
+        Text.danger "{edAmps} A is too much for {edWire} AWG wire."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Save" onTap={circuits=updateWhere(circuits, c => c.id == sel, c => with(with(with(with(with(c, "amps", edAmps), "name", edName), "room", edRoom), "wire", edWire), "spare", edSpare)); toast "Breaker saved"; close}
+Lightbox#zoom "https://example.com/photos/basement-panel.jpg" "Basement panel, door open"
+
+### Warnings
+App
+  Sidebar
+    Brand "Breakerbook" icon="electrical_services"
+    NavItem "Panel" icon="grid_view" onTap={go panel}
+    NavItem "Warnings" icon="warning" selected={true}
+    NavItem "Print directory" icon="print" onTap={go print}
+    Spacer grow
+    Text.muted "Main panel, basement"
+  Main
+    Nav
+      Heading "Warnings" level=1
+      Button.outline "Back to panel" onTap={go panel}
+    Column pad=24 gap=16
+      Card gap=12
+        Text.strong "Wire does not suit the rating"
+        if count(circuits, c => c.amps > (c.wire == "14" ? 15 : c.wire == "12" ? 20 : c.wire == "10" ? 30 : 40)) == 0
+          Row gap=8 middle
+            Icon "check_circle"
+            Text.success "Every wire gauge suits its breaker."
+        each c in filter(circuits, c => c.amps > (c.wire == "14" ? 15 : c.wire == "12" ? 20 : c.wire == "10" ? 30 : 40))
+          ListTile "Slot {c.slot}: {c.name}" subtitle="{c.amps} A breaker on {c.wire} AWG wire (limit {c.wire == \"14\" ? 15 : c.wire == \"12\" ? 20 : c.wire == \"10\" ? 30 : 40} A)" icon="warning"
+            Button.outline "Lower to limit" onTap={circuits=updateWhere(circuits, x => x.id == c.id, x => with(x, "amps", x.wire == "14" ? 15 : x.wire == "12" ? 20 : x.wire == "10" ? 30 : 40)); toast "Lowered"}
+      Card gap=12
+        Text.strong "Spare breakers"
+        each c in filter(circuits, c => c.spare)
+          Row between middle
+            Text "Slot {c.slot} ({c.amps} A)"
+            Badge.neutral "Spare"
+        if count(circuits, c => c.spare) == 0
+          Text.muted "No spare breakers."
+
+### Print directory
+state cut=true
+App
+  Sidebar
+    Brand "Breakerbook" icon="electrical_services"
+    NavItem "Panel" icon="grid_view" onTap={go panel}
+    NavItem "Warnings" icon="warning" onTap={go warnings}
+    NavItem "Print directory" icon="print" selected={true}
+    Spacer grow
+    Text.muted "Main panel, basement"
+  Main
+    Nav
+      Heading "Directory card" level=1
+      Row gap=8
+        Toggle "Cut lines" bind=cut
+        Button "Print" icon="print" onTap={emit print}
+    Column pad=24 gap=16 scroll
+      Text.muted "Printed at true size, 3.25 in by 5 in. Set the printer to 100 percent, no scaling."
+      Row gap=24 top
+        PrintCard w=312 h=480 cut={cut} title="Main panel" subtitle="Basement, 12 March"
+          each c in sortBy(circuits, x => x.slot)
+            Row gap=6 middle border-bottom=#FFD1D5DB
+              Text.mono "{c.slot}" w=22
+              Text.mono "{c.amps}A" w=32
+              if c.spare
+                Text.muted "SPARE"
+              if !c.spare
+                Text.small "{c.name} ({c.room})"
+        Column grow gap=12
+          Card gap=8
+            Text.strong "Preview notes"
+            Text.muted "Left column is odd slots, right is even, as on the real panel."
+            Text.muted "{count(circuits, c => !c.spare)} circuits labelled, {count(circuits, c => c.spare)} spare."
+
+// shows a card sized in true inches as a bordered box with corner cut marks, since the notation cannot measure physical size
+define PrintCard "title" "subtitle" w=312 h=480 cut=true
+  Column w={w} h={h} pad=16 gap=6 fill=#FFFFFFFF border=1 border-color={cut ? "#FF111827" : "#00000000"} radius=0
+    Row between
+      Text.strong "{title}"
+      Text.caption "{subtitle}"
+    Divider
+    ...
+    Spacer grow
+    if cut
+      Text.caption "- - - - cut here - - - -" center
+
+define Breaker "slot" amps=20 name="" room="" phase="A" spare=false warn=false selected=false onTap
+  Row gap=8 middle pad=8 radius=6 border={selected ? 2 : 1} fill={spare ? "#FFF3F4F6" : warn ? "#FFFEE2E2" : "#FFFFFFFF"} onTap={onTap}
+    Text.mono "{slot}" w=24
+    Box w=44 h=32 radius=4 fill={spare ? "#FF9CA3AF" : "#FF1F2937"} center middle
+      Text.small "{amps}A" color=#FFFFFFFF
+    Column grow gap=0
+      if spare
+        Text.muted "Spare"
+      if !spare
+        Text.strong "{name}"
+        Text.caption "{room} / phase {phase}"
+    if warn
+      Icon "warning"
+
+define BalanceBar "label" value=0 max=100
+  Row gap=8 middle
+    Text.strong "{label}" w=20
+    Progress {clamp(value / max, 0, 1)} grow
+    Text.mono "{value} A" w=56

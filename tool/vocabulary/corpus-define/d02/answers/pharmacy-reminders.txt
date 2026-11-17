@@ -1,0 +1,193 @@
+### Today
+state tab="today"
+state nowMins=600
+state doses=[{"id":1,"name":"Metformin","detail":"500 mg tablet, with breakfast","time":"8:00 AM","mins":480,"part":"Morning","status":"due"},{"id":2,"name":"Lisinopril","detail":"10 mg tablet","time":"8:00 AM","mins":480,"part":"Morning","status":"taken"},{"id":3,"name":"Vitamin D3","detail":"2000 IU softgel","time":"9:30 AM","mins":570,"part":"Morning","status":"due"},{"id":4,"name":"Metformin","detail":"500 mg tablet, with dinner","time":"6:00 PM","mins":1080,"part":"Evening","status":"due"},{"id":5,"name":"Atorvastatin","detail":"20 mg tablet","time":"9:00 PM","mins":1260,"part":"Evening","status":"due"}]
+state caregiver=true
+state warnShown=true
+App
+  Sidebar
+    Brand "Dosewell" icon="medication"
+    NavItem "Today" icon="today" badge="{count(doses,d=>d.status==\"due\")}" selected={tab=="today"} onTap={tab="today"}
+    NavItem "Medicines" icon="medication_liquid" selected={tab=="medicines"} onTap={go medicines}
+    NavItem "Month" icon="calendar_month" selected={tab=="month"} onTap={go month}
+    Spacer grow
+    Toggle "Share with caregiver" bind=caregiver onChange={toast result ? "Maria Alvarez can now see your doses" : "Sharing turned off"}
+    Text.muted "Signed in as Jordan Ellis"
+  Main
+    Nav
+      Heading "Today, {formatDate(today(),\"EEEE MMM d\")}" level=1
+      Row gap=8
+        Chip "{count(doses,d=>d.status==\"taken\")} of {length(doses)} taken"
+        Button "Add medicine" icon="add" onTap={open addMed}
+    Column pad=24 gap=16 scroll
+      if warnShown
+        Banner.warning "Possible interaction: Lisinopril and potassium supplements" "Ask your pharmacist before adding a potassium product." icon="warning" action="Review" onAction={open interaction} onDismiss={warnShown=false}
+      Progress {count(doses,d=>d.status!="due")/length(doses)}
+      each part in ["Morning","Evening"]
+        Text.sectionTitle "{part}"
+        Grid cols=2 gap=16
+          each d in filter(doses,x=>x.part==part)
+            DoseCard "{d.name}" detail="{d.detail}" time="{d.time}" status={d.status} late={d.status=="due" && d.mins<nowMins} onTake={doses=updateWhere(doses,x=>x.id==d.id,x=>with(x,"status","taken")); toast "{d.name} marked taken"} onSkip={doses=updateWhere(doses,x=>x.id==d.id,x=>with(x,"status","skipped"))} onSnooze={doses=updateWhere(doses,x=>x.id==d.id,x=>with(with(x,"mins",x.mins+15),"time","snoozed 15 min")); toast "Reminder in 15 minutes"}
+      Card gap=8
+        Text.strong "Running low"
+        Row between
+          Text "Metformin 500 mg"
+          Badge.warning "9 days left"
+        Row between
+          Text "Atorvastatin 20 mg"
+          Badge.success "41 days left"
+Dialog#interaction "Interaction warning" "Lisinopril with potassium"
+  Text "Lisinopril can raise potassium in the blood. Taking a potassium supplement or salt substitute with it may cause levels to climb too high."
+  Text.muted "This is general information, not medical advice."
+  Row gap=8 end
+    Button.outline "Dismiss" onTap={warnShown=false; close}
+    Button "Call pharmacy" onTap={link tel:+15555550142; close}
+Dialog#addMed "Add a medicine"
+  Input "Name" "Metformin" bind=newName
+  Row gap=8
+    Input "Strength" "500 mg" bind=newStrength grow
+    Select "Form" items=["Tablet","Capsule","Liquid","Injection","Patch"] bind=newForm grow
+  Button "Save" onTap={emit addMedicine; toast "Medicine added"; close}
+
+### Medicines
+state sel=1
+state meds=[{"id":1,"name":"Metformin","strength":"500 mg","form":"Tablet","mode":"Set times","schedule":"8:00 AM and 6:00 PM","left":18,"perDay":2,"total":60},{"id":2,"name":"Lisinopril","strength":"10 mg","form":"Tablet","mode":"Every n hours","schedule":"Every 24 hours","left":52,"perDay":1,"total":90},{"id":3,"name":"Vitamin D3","strength":"2000 IU","form":"Softgel","mode":"Days of week","schedule":"Mon, Wed, Fri","left":30,"perDay":1,"total":60},{"id":4,"name":"Atorvastatin","strength":"20 mg","form":"Tablet","mode":"Set times","schedule":"9:00 PM","left":41,"perDay":1,"total":90}]
+state mode="Set times"
+state hours=8
+state days=["Mon","Wed","Fri"]
+state caregiver=true
+App
+  Sidebar
+    Brand "Dosewell" icon="medication"
+    NavItem "Today" icon="today" onTap={go today}
+    NavItem "Medicines" icon="medication_liquid" selected={true}
+    NavItem "Month" icon="calendar_month" onTap={go month}
+    Spacer grow
+    Text.muted "Signed in as Jordan Ellis"
+  Main
+    Nav
+      Heading "Medicines" level=1
+      Button "Add medicine" icon="add" onTap={emit addMedicine}
+    Row gap=16 top pad=24
+      Column grow gap=8
+        each m in meds
+          ListTile "{m.name} {m.strength}" subtitle="{m.form}, {m.schedule}" selected={sel==m.id} onTap={sel=m.id}
+            Badge.warning "{floor(m.left/m.perDay)} days" hidden={m.left/m.perDay>14}
+            IconButton "more_vert" tooltip="More" onTap={sel=m.id; open medMenu}
+      Pane w=360 pad=16 gap=12
+        each m in filter(meds,x=>x.id==sel)
+          Heading "{m.name}" level=3
+          Text.muted "{m.strength} {m.form}"
+          Refill left={m.left} total={m.total} perDay={m.perDay} onRefill={toast "Refill requested for {m.name}"}
+          Text.fieldLabel "Schedule"
+          SegmentedButton bind=mode items=["Every n hours","Set times","Days of week"]
+          if mode=="Every n hours"
+            Row gap=8 middle
+              Text "Every"
+              Input bind=hours type=number w=80
+              Text "hours"
+          if mode=="Set times"
+            Row gap=8
+              TimePicker "First dose" bind=t1 grow
+              TimePicker "Second dose" bind=t2 grow
+          if mode=="Days of week"
+            Row gap=6
+              each dd in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+                FilterChip "{dd}" selected={contains(days,dd)} onTap={days=contains(days,dd) ? without(days,dd) : append(days,dd)}
+          Toggle "Share with caregiver" bind=caregiver
+          Button "Save schedule" onTap={toast "Schedule saved"}
+Menu#medMenu
+  MenuItem "Edit" icon="edit" onTap={toast "Editing"}
+  MenuItem "Request refill" icon="local_pharmacy" onTap={toast "Refill requested"}
+  MenuItem "Delete" icon="delete" onTap={meds=removeWhere(meds,x=>x.id==sel)}
+
+### Month
+state day=17
+state month=[{"d":1,"s":"taken"},{"d":2,"s":"taken"},{"d":3,"s":"missed"},{"d":4,"s":"taken"},{"d":5,"s":"taken"},{"d":6,"s":"taken"},{"d":7,"s":"taken"},{"d":8,"s":"taken"},{"d":9,"s":"missed"},{"d":10,"s":"taken"},{"d":11,"s":"taken"},{"d":12,"s":"taken"},{"d":13,"s":"taken"},{"d":14,"s":"taken"},{"d":15,"s":"taken"},{"d":16,"s":"missed"},{"d":17,"s":"partial"}]
+App
+  Sidebar
+    Brand "Dosewell" icon="medication"
+    NavItem "Today" icon="today" onTap={go today}
+    NavItem "Medicines" icon="medication_liquid" onTap={go medicines}
+    NavItem "Month" icon="calendar_month" selected={true}
+    Spacer grow
+    Text.muted "Signed in as Jordan Ellis"
+  Main
+    Nav
+      Heading "November 2026" level=1
+      Row gap=8
+        IconButton "chevron_left" tooltip="Previous month"
+        IconButton "chevron_right" tooltip="Next month"
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Taken"
+          Text "{count(month,x=>x.s==\"taken\")}" size=32 weight=700
+        Card gap=4
+          Text.muted "Missed"
+          Text.danger "{count(month,x=>x.s==\"missed\")}" size=32 weight=700
+        Card gap=4
+          Text.muted "Adherence"
+          Text "{round(100*count(month,x=>x.s==\"taken\")/length(month),0)}%" size=32 weight=700
+      Card gap=12
+        MonthCalendar days={month} bind=day firstWeekday="Sun" onPick={day=result}
+        Row gap=16
+          Row gap=6 middle
+            Box w=12 h=12 radius=6 fill=#FF16A34A
+            Text.small "Taken"
+          Row gap=6 middle
+            Box w=12 h=12 radius=6 fill=#FFDC2626
+            Text.small "Missed"
+          Row gap=6 middle
+            Box w=12 h=12 radius=6 fill=#FFF59E0B
+            Text.small "Some taken"
+      Card gap=8
+        Text.strong "November {day}"
+        each d in filter(month,x=>x.d==day)
+          Badge.neutral "{d.s}"
+
+// MonthCalendar draws a month as a grid of day cells coloured by status.
+define MonthCalendar days=[] bind=day firstWeekday="Mon" onPick
+  state day=1
+  Column gap=8
+    Grid cols=7 gap=6
+      each w in ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
+        Text.caption "{w}" center
+      each c in days
+        Box h=44 radius=8 fill={c.s=="taken" ? #FFDCFCE7 : c.s=="missed" ? #FFFEE2E2 : #FFFEF3C7} border={day==c.d ? 2 : 0} center middle onTap={day=c.d; onPick(c.d)}
+          Text "{c.d}"
+
+define Banner "title" "text" icon="info" action="" onAction onDismiss
+  Row gap=12 pad=12 radius=8 fill=#FFFEF3C7 middle
+    Icon "{icon}"
+    Column grow gap=2
+      Text.strong "{title}"
+      Text.small "{text}"
+    Button.outline "{action}" hidden={action==""} onTap={onAction}
+    IconButton "close" tooltip="Dismiss" onTap={onDismiss}
+
+define DoseCard "name" detail="" time="" status="due" late=false onTake onSkip onSnooze
+  Card gap=8 fill={late ? #FFFEE2E2 : #FFFFFFFF}
+    Row between middle
+      Text.strong "{name}"
+      Badge.error "Late" hidden={!late}
+      Badge.success "Taken" hidden={status!="taken"}
+      Badge.neutral "Skipped" hidden={status!="skipped"}
+    Text.muted "{detail}"
+    Row gap=6 middle
+      Icon "schedule"
+      Text.danger "{time}" hidden={!late}
+      Text.small "{time}" hidden={late}
+    if status=="due"
+      Row gap=8
+        Button "Take" onTap={onTake}
+        Button.outline "Snooze" onTap={onSnooze}
+        Button.ghost "Skip" onTap={onSkip}
+
+define Refill left=0 total=1 perDay=1 onRefill
+  Column gap=6
+    Row between
+      Text.strong "{floor(left/perDay)} days until refill"
+      Text.muted "{left} pills left"
+    Progress {left/total}
+    Button.outline "Request refill" onTap={onRefill}

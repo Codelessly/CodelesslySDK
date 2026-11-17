@@ -1,0 +1,198 @@
+### Score
+state tab="score"
+state bar=1
+state marks=[{"letter":"A","bar":1},{"letter":"B","bar":17},{"letter":"C","bar":33},{"letter":"D","bar":49},{"letter":"E","bar":65},{"letter":"F","bar":81}]
+App
+  Sidebar
+    Brand "Rehearsal" icon="music_note"
+    NavItem "Score" icon="library_music" selected={tab=="score"} onTap={go score}
+    NavItem "Take" icon="mic" selected={tab=="take"} onTap={go take}
+    NavItem "Notes" icon="sticky_note_2" badge="6" selected={tab=="notes"} onTap={go notes}
+    NavItem "Run-through" icon="timer" selected={tab=="run"} onTap={go run-through}
+    Spacer grow
+    Text.muted "Mahler 5, mvt. 1"
+  Main
+    Nav
+      Heading "Score overview" level=1
+      Row gap=8
+        Badge.info "Bar {bar}"
+        Button "Add mark" onTap={open addMark}
+    Column pad=24 gap=16
+      Card gap=12
+        Text.strong "Letters A to F"
+        RehearsalStrip marks={marks} bars=96 bind=bar onJump={toast "Jumped to bar {result}"}
+      Card gap=8
+        Text.strong "Where you are"
+        Row gap=16
+          Text "Bar {bar} of 96"
+          Text.muted "Letter {last(filter(marks, m => m.bar <= bar)).letter}"
+        Progress {bar/96}
+      Card gap=8
+        Text.strong "Part cut list"
+        Text.muted "Bars to skip in the run-through"
+        each cut in cuts
+          Row between
+            Text "{cut.part}: bars {cut.from} to {cut.to}"
+            Toggle "Cut" bind=cut.on
+state cuts=[{"part":"Horn 2","from":21,"to":28,"on":true},{"part":"Tuba","from":49,"to":52,"on":false},{"part":"Timpani","from":65,"to":72,"on":true}]
+Dialog#addMark "Add rehearsal mark" "Pick the bar"
+  Input "Letter" bind=newLetter
+  Input "Bar" type=number bind=newBar
+  Button "Save" onTap={marks=append(marks, {"letter":newLetter,"bar":newBar}); close}
+
+### Take
+state playing=false
+state t=0
+state peaks=[2,5,9,14,10,6,8,15,18,12,7,4,9,16,20,13,8,5,3,7,11,17,14,9,6,4,8,12,10,5]
+state dropped=[{"t":6,"label":"Rush"},{"t":14,"label":"Tuning"}]
+every 1s when playing onTick={t=min(30,t+1); playing=t<30}
+App
+  Sidebar
+    Brand "Rehearsal" icon="music_note"
+    NavItem "Score" icon="library_music" onTap={go score}
+    NavItem "Take" icon="mic" selected={true} onTap={go take}
+    NavItem "Notes" icon="sticky_note_2" onTap={go notes}
+    NavItem "Run-through" icon="timer" onTap={go run-through}
+  Main
+    Nav
+      Heading "Take 3, letter A" level=1
+      Text.muted "{duration(t)} of 0:30"
+    Column pad=24 gap=16
+      Card gap=12
+        Waveform peaks={peaks} marks={dropped} bind=t h=120
+        Row gap=8 middle
+          Button.outline "Back 5s" onTap={t=max(0,t-5)}
+          Button "{playing ? 'Pause' : 'Play'}" onTap={playing=!playing}
+          Button.outline "Drop mark" icon="flag" onTap={dropped=append(dropped, {"t":t,"label":"Mark"})}
+          Spacer grow
+          Button.ghost "Clear marks" onTap={dropped=[]}
+      Card gap=8
+        Text.strong "Marks"
+        if isEmpty(dropped)
+          Text.muted "No marks yet. Drop one while the take plays."
+        each d in sortBy(dropped, x => x.t)
+          Row between middle
+            Text "{duration(d.t)}  {d.label}"
+            Row gap=4
+              IconButton "play_arrow" tooltip="Play from here" onTap={t=d.t; playing=true}
+              IconButton "delete" tooltip="Remove" onTap={dropped=without(dropped,d)}
+
+### Notes
+state tab="notes"
+state section="all"
+state bar=1
+state notes=[{"id":1,"section":"strings","bar":9,"text":"Violins: lift the bow before B"},{"id":2,"section":"brass","bar":17,"text":"Trumpets enter softer, mp"},{"id":3,"section":"percussion","bar":33,"text":"Timpani: dry stick, no ring"},{"id":4,"section":"strings","bar":41,"text":"Cellos: shift on the bar line"},{"id":5,"section":"brass","bar":49,"text":"Horns: breathe after bar 52"},{"id":6,"section":"percussion","bar":65,"text":"Cymbal: choke on beat 4"}]
+state sel=0
+App
+  Sidebar
+    Brand "Rehearsal" icon="music_note"
+    NavItem "Score" icon="library_music" onTap={go score}
+    NavItem "Take" icon="mic" onTap={go take}
+    NavItem "Notes" icon="sticky_note_2" badge="6" selected={tab=="notes"} onTap={go notes}
+    NavItem "Run-through" icon="timer" onTap={go run-through}
+  Main
+    Nav
+      Heading "Notes by bar" level=1
+      Button "New note" onTap={open newNote}
+    Row gap=0 top
+      Column grow pad=24 gap=12
+        Row gap=8
+          ChoiceChip "All" selected={section=="all"} onTap={section="all"}
+          ChoiceChip "Strings" selected={section=="strings"} onTap={section="strings"}
+          ChoiceChip "Brass" selected={section=="brass"} onTap={section="brass"}
+          ChoiceChip "Percussion" selected={section=="percussion"} onTap={section="percussion"}
+        each n in sortBy(filter(notes, x => section=="all" || x.section==section), x => x.bar)
+          ListTile "{n.text}" subtitle="Bar {n.bar}, {n.section}" onTap={sel=n.id; bar=n.bar}
+            Badge.neutral "{n.section}"
+            IconButton "more_vert" onTap={sel=n.id; open noteMenu}
+      Pane w=320 pad=16 gap=12
+        Text.strong "Page at bar {bar}"
+        PageScan src="https://example.com/scans/mahler5-p14.jpg" marks=[{"x":40,"y":60,"w":120,"h":18,"note":"cresc."},{"x":90,"y":140,"w":80,"h":18,"note":"breathe"}] h=300
+Menu#noteMenu end
+  MenuItem "Delete" icon="delete" onTap={notes=removeWhere(notes, x => x.id==sel)}
+  MenuItem "Copy" icon="content_copy" onTap={copy sel; toast "Copied"}
+Dialog#newNote "New note" "Pin it to a bar"
+  Input "Bar" type=number bind=nbar
+  Select "Section" items=["strings","brass","percussion"] bind=nsec
+  Input "Note" multiline bind=ntext
+  Button "Pin" onTap={notes=append(notes, {"id":length(notes)+1,"section":nsec,"bar":nbar,"text":ntext}); close}
+
+### Run-through
+state tab="run"
+state running=false
+state secs=0
+state current=0
+state sections=[{"name":"Strings","t":312},{"name":"Brass","t":248},{"name":"Percussion","t":96}]
+state rit=[{"bar":1,"bpm":72},{"bar":17,"bpm":76},{"bar":33,"bpm":80},{"bar":49,"bpm":66},{"bar":65,"bpm":52}]
+every 1s when running onTick={secs=secs+1; sections=updateWhere(sections, (s,i)=>i==current, s=>with(s,"t",s.t+1))}
+App
+  Sidebar
+    Brand "Rehearsal" icon="music_note"
+    NavItem "Score" icon="library_music" onTap={go score}
+    NavItem "Take" icon="mic" onTap={go take}
+    NavItem "Notes" icon="sticky_note_2" onTap={go notes}
+    NavItem "Run-through" icon="timer" selected={tab=="run"} onTap={go run-through}
+  Main
+    Nav
+      Heading "Run-through" level=1
+      Text.strong "Total {duration(sum(sections, s => s.t))}"
+    Column pad=24 gap=16
+      Card gap=12
+        Text "Timer {duration(secs)}" size=40 weight=700
+        Row gap=8
+          Button "{running ? 'Stop' : 'Start'}" onTap={running=!running}
+          Button.outline "Reset" onTap={secs=0; running=false}
+        Row gap=8
+          ChoiceChip "Strings" selected={current==0} onTap={current=0}
+          ChoiceChip "Brass" selected={current==1} onTap={current=1}
+          ChoiceChip "Percussion" selected={current==2} onTap={current=2}
+      Card gap=8
+        Text.strong "Section times"
+        each s in sections
+          Row between
+            Text "{s.name}"
+            Text.strong "{duration(s.t)}"
+        Divider
+        Row between
+          Text.strong "Total"
+          Text.strong "{duration(sum(sections, s => s.t))}"
+      Card gap=8
+        Text.strong "Tempo"
+        TempoCurve points={rit} ritardando={[{"from":49,"to":72,"label":"rit."}]} h=180
+
+// A waveform with marks along it; the audio itself is shown as bars.
+define Waveform peaks=[] marks=[] bind=t h=120 onSeek
+  state t=0
+  Stack h={h}
+    Row gap=2 middle h={h}
+      each p in peaks
+        Box w=8 h={p*4} fill=#FF2563EB radius=2 onTap={t=index; onSeek(index)}
+    each m in marks
+      Box w=2 h={h} fill=#FFDC2626 x={m.t*10}
+    Box w=2 h={h} fill=#FF111827 x={t*10}
+
+define RehearsalStrip marks=[] bars=96 bind=bar onJump
+  state bar=1
+  Column gap=6
+    Row scroll gap=0
+      each i in range(bars)
+        Box w=24 h=40 fill={i+1 == bar ? #FF2563EB : #FFE5E7EB} border=1 onTap={bar=i+1; onJump(i+1)}
+    Row gap=8
+      each m in marks
+        Chip "{m.letter}" onTap={bar=m.bar; onJump(m.bar)}
+
+// A drawn curve of tempo over bars with a ritardando span marked.
+define TempoCurve points=[] ritardando=[] h=180
+  Stack h={h}
+    LineChart values={map(points, p => p.bpm)} labels={map(points, p => "bar " + p.bar)} h={h}
+    each r in ritardando
+      Row start top
+        Badge.warning "{r.label} bars {r.from} to {r.to}"
+
+// A scanned page; pencil marks are shown as outlined boxes.
+define PageScan src="" marks=[] h=300
+  Stack h={h}
+    Image "{src}" h={h}
+    each m in marks
+      Box x={m.x} y={m.y} w={m.w} h={m.h} border=2 radius=2
+        Text.small "{m.note}" color=#FFDC2626

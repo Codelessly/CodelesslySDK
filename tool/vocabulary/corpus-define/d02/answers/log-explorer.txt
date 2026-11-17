@@ -1,0 +1,165 @@
+### Search
+state query="service:checkout AND level:error"
+state range="Last 15 min"
+state from=0
+state to=100
+state live=true
+state paused=false
+state openId=0
+state filters=[{"field":"service","value":"checkout","op":"+"}]
+state tab="search"
+state hits=[{"id":1,"time":"14:02:11.482","level":"error","service":"checkout","msg":"Payment gateway timeout after 3000ms","fields":[{"k":"service","v":"checkout"},{"k":"trace_id","v":"9f2c71ab"},{"k":"http.status","v":"504"},{"k":"region","v":"eu-west-1"}]},{"id":2,"time":"14:02:09.117","level":"warn","service":"checkout","msg":"Retrying charge attempt 2 of 3","fields":[{"k":"service","v":"checkout"},{"k":"attempt","v":"2"},{"k":"region","v":"eu-west-1"}]},{"id":3,"time":"14:02:07.930","level":"info","service":"cart","msg":"Cart 88421 updated, 3 items","fields":[{"k":"service","v":"cart"},{"k":"items","v":"3"},{"k":"region","v":"us-east-1"}]},{"id":4,"time":"14:02:04.006","level":"error","service":"checkout","msg":"Card declined: insufficient_funds","fields":[{"k":"service","v":"checkout"},{"k":"code","v":"insufficient_funds"},{"k":"region","v":"us-east-1"}]},{"id":5,"time":"14:01:58.651","level":"debug","service":"auth","msg":"Token refreshed for session 4417","fields":[{"k":"service","v":"auth"},{"k":"session","v":"4417"}]}]
+state saved=[{"name":"Checkout errors","q":"service:checkout AND level:error"},{"name":"Slow requests","q":"duration_ms:>2000"},{"name":"Auth failures","q":"service:auth AND level:warn"}]
+state fieldTop=[{"name":"level","top":[{"v":"error","n":412},{"v":"warn","n":233},{"v":"info","n":98}]},{"name":"region","top":[{"v":"eu-west-1","n":377},{"v":"us-east-1","n":290}]},{"name":"http.status","top":[{"v":"504","n":201},{"v":"500","n":144},{"v":"402","n":67}]}]
+every 2s when live && !paused onTick={hits=hits}
+App
+  Sidebar
+    Brand "Needle" icon="manage_search"
+    NavItem "Search" icon="search" selected={tab=="search"} onTap={tab="search"}
+    NavItem "Saved searches" icon="bookmarks" badge="{length(saved)}" selected={tab=="saved"} onTap={open savedSheet}
+    NavItem "Live tail" icon="stream" selected={live} onTap={live=!live; paused=false}
+    Spacer grow
+    Text.muted "prod-logs, 14 days retention"
+  Main
+    Nav
+      Heading "Search logs" level=1
+      Row gap=8
+        Button.outline "Save search" icon="bookmark_add" onTap={saved=append(saved,{"name":"Untitled search","q":query}); toast "Search saved"}
+        Button "Share link" icon="link" onTap={open share}
+    Column pad=24 gap=16 scroll
+      Row gap=12 top
+        QueryBar bind=query grow onSubmit={toast "Searching: {query}"}
+        TimeRangePicker bind=range presets=["Last 5 min","Last 15 min","Last hour","Last 24 hours","Last 7 days"] onPick={toast "Range: {result}"}
+      Row gap=8
+        each f in filters
+          Chip "{f.field} {f.op=='+' ? 'is' : 'is not'} {f.value}" icon="close" onTap={filters=removeWhere(filters,x=>x.field==f.field && x.value==f.value)}
+        if length(filters)==0
+          Text.muted "No filters. Use + or - on a field to add one."
+      Card gap=8
+        Row between
+          Text.strong "Log volume"
+          Text.caption "{round(to-from,0)}% of the range selected. Drag across the bars to zoom."
+        Histogram values=[12,18,15,22,40,95,130,88,41,27,19,16,22,31,28,20,17,14,19,24] labels=["13:48","13:50","13:52","13:54","13:56","13:58","14:00","14:02"] h=110 bind=range onSelect={from=result.from; to=result.to; toast "Zoomed to selection"}
+      Row gap=16 top
+        Column grow gap=8
+          Row between middle
+            Text.strong "{length(hits)} results"
+            Row gap=8 middle
+              if live
+                Badge.success "LIVE"
+              if paused
+                Badge.warning "PAUSED"
+              Button.outline "{paused ? 'Resume' : 'Pause'}" icon="{paused ? 'play_arrow' : 'pause'}" onTap={paused=!paused}
+              Toggle "Live tail" bind=live
+          each hit in hits
+            LogRow log={hit} expanded={openId==hit.id} onToggle={openId=(openId==hit.id ? 0 : hit.id)} onInclude={filters=append(filters,{"field":result.k,"value":result.v,"op":"+"})} onExclude={filters=append(filters,{"field":result.k,"value":result.v,"op":"-"})}
+        Pane w=320 pad=16 gap=12
+          Text.strong "Fields"
+          Input "Filter fields" "e.g. region" bind=fieldQ
+          each fld in fieldTop
+            FieldSummary name={fld.name} top={fld.top} total=745 onPick={filters=append(filters,{"field":fld.name,"value":result,"op":"+"})}
+
+Sheet#savedSheet "Saved searches"
+  each s in saved
+    ListTile "{s.name}" subtitle="{s.q}" icon="bookmark" onTap={query=s.q; close; toast "Loaded {s.name}"}
+  Button.outline "Close" onTap={close}
+
+Dialog#share "Share this search" "Anyone in the workspace with the link sees the same query and range."
+  Input "Link" bind=shareUrl readonly
+  Row gap=8
+    Button "Copy link" icon="content_copy" onTap={copy shareUrl; toast "Link copied"; close}
+    Button.outline "Cancel" onTap={close}
+
+### Saved searches
+state tab="saved"
+state saved=[{"id":1,"name":"Checkout errors","q":"service:checkout AND level:error","owner":"Priya N.","runs":184},{"id":2,"name":"Slow requests","q":"duration_ms:>2000","owner":"Marcus T.","runs":96},{"id":3,"name":"Auth failures","q":"service:auth AND level:warn","owner":"Priya N.","runs":41}]
+state sel=0
+state find=""
+App
+  Sidebar
+    Brand "Needle" icon="manage_search"
+    NavItem "Search" icon="search" selected={tab=="search"} onTap={go search}
+    NavItem "Saved searches" icon="bookmarks" selected={tab=="saved"} onTap={tab="saved"}
+    Spacer grow
+    Text.muted "prod-logs"
+  Main
+    Nav
+      Heading "Saved searches" level=1
+      Input "Find a search" bind=find w=220
+    Column pad=24 gap=12 scroll
+      each s in filter(saved,x=>contains(lower(x.name),lower(find)))
+        Card gap=8
+          Row between middle
+            Column grow gap=4
+              Text.strong "{s.name}"
+              Text.mono "{s.q}"
+              Text.caption "{s.owner}, run {s.runs} times"
+            Row gap=8
+              Button "Run" icon="play_arrow" onTap={emit runSaved s.q; go search}
+              IconButton "more_vert" tooltip="More" onTap={sel=s.id; open rowMenu}
+      if length(filter(saved,x=>contains(lower(x.name),lower(find))))==0
+        Text.muted "No saved search matches \"{find}\"."
+
+Menu#rowMenu end
+  MenuItem "Copy link" icon="link" onTap={copy "https://needle.example/s/{sel}"; toast "Link copied"}
+  MenuItem "Delete" icon="delete" onTap={saved=removeWhere(saved,x=>x.id==sel); toast "Deleted"}
+
+// A query field that colours field names and operators as it is typed.
+define QueryBar bind=query placeholder="service:checkout AND level:error" onSubmit
+  state query=""
+  Column gap=4
+    Input "Query" "{placeholder}" bind=query onSubmit={onSubmit}
+    Row gap=6
+      each tok in split(query," ")
+        Text.mono "{tok}" color={contains(tok,":") ? "#FF2563EB" : (tok=="AND" || tok=="OR" || tok=="NOT") ? "#FFDC2626" : "#FF111827"}
+
+// A time range menu with presets and a custom range.
+define TimeRangePicker bind=range presets=["Last 15 min"] onPick
+  state range=""
+  state openMenu=false
+  Column gap=4
+    Button.outline "{range}" icon="schedule" onTap={openMenu=!openMenu}
+    if openMenu
+      Card gap=4
+        each p in presets
+          ListTile "{p}" selected={range==p} onTap={range=p; openMenu=false; onPick(p)}
+
+// Bars of log counts; a drag across them selects a span (shown as the highlighted bars).
+define Histogram values=[] labels=[] h=100 bind=range onSelect
+  state range=""
+  state lo=-1
+  state hi=-1
+  Column gap=4
+    Row gap=2 bottom h={h}
+      each v in values
+        Box grow h={max(4, v/max(1,max(values[0],max(values[5],values[6])))*h)} radius=2 fill={index>=lo && index<=hi ? "#FF2563EB" : "#FF93C5FD"} onTap={lo=index; hi=index; onSelect({"from":index*5,"to":index*5+5})}
+    Row between
+      each l in labels
+        Text.caption "{l}"
+
+// A single log line with a level colour, a time and an expandable field list.
+define LogRow log={} expanded=false onToggle onInclude onExclude
+  Card gap=6 onTap={onToggle}
+    Row gap=10 middle
+      Box w=4 h=20 radius=2 fill={log.level=="error" ? "#FFDC2626" : log.level=="warn" ? "#FFD97706" : log.level=="info" ? "#FF2563EB" : "#FF9CA3AF"}
+      Text.mono "{log.time}" color=#FF6B7280
+      Badge "{upper(log.level)}"
+      Text "{log.msg}" grow
+      Icon "{expanded ? 'expand_less' : 'expand_more'}"
+    if expanded
+      Column gap=4 pad=[14,4,0,0]
+        each f in log.fields
+          Row gap=8 middle
+            Text.mono "{f.k}" color=#FF2563EB w=110
+            Text.mono "{f.v}" grow
+            IconButton "add_circle" tooltip="Add as filter" onTap={onInclude(f)}
+            IconButton "do_not_disturb_on" tooltip="Exclude from results" onTap={onExclude(f)}
+
+// A field with its most common values and their shares.
+define FieldSummary name="" top=[] total=1 onPick
+  Accordion "{name}"
+    each t in top
+      Row gap=8 middle onTap={onPick(t.v)}
+        Text.mono "{t.v}" grow
+        Text.caption "{round(t.n/total*100,0)}%"
+        Progress {t.n/total} w=60

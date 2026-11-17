@@ -1,0 +1,210 @@
+### Level Map
+state levels=[{"n":1,"name":"First Steps","stars":3,"limit":4,"par":3,"sx":3,"sy":2,"rx":0,"ry":2,"rocks":[]},{"n":2,"name":"Turn Around","stars":2,"limit":5,"par":4,"sx":3,"sy":0,"rx":0,"ry":2,"rocks":[{"x":2,"y":2}]},{"n":3,"name":"Loop-the-Loop","stars":0,"limit":4,"par":3,"sx":4,"sy":2,"rx":0,"ry":2,"rocks":[]},{"n":4,"name":"Rock Garden","stars":0,"limit":6,"par":5,"sx":4,"sy":4,"rx":0,"ry":0,"rocks":[{"x":1,"y":0},{"x":2,"y":2},{"x":3,"y":3}]},{"n":5,"name":"Staircase","stars":0,"limit":5,"par":4,"sx":4,"sy":4,"rx":0,"ry":0,"rocks":[]},{"n":6,"name":"Big Square","stars":0,"limit":6,"par":5,"sx":0,"sy":0,"rx":0,"ry":0,"rocks":[]}]
+state unlocked=3
+state curIdx=0
+state script=[]
+state nextId=1
+state pc=0
+state bi=0
+state lap=0
+state rx=0
+state ry=2
+state rdir=1
+state running=false
+state go1=false
+state hintOpen=false
+state hintNo=0
+state won=false
+App
+  Sidebar
+    Brand "Lego-ish Logic" icon="smart_toy"
+    NavItem "Adventure Map" icon="map" selected={true} onTap={go level-map}
+    NavItem "My Robot" icon="android" onTap={toast "Bolt is polishing his bolts!"}
+    NavItem "Grown-ups" icon="family_restroom" onTap={go grown-ups}
+    Spacer grow
+    HintBuddy "Tap a glowing level to begin!"
+  Main
+    Nav
+      Heading "Choose a level" level=1
+      Row gap=8
+        StarCount value={sum(levels, l => l.stars)} total={length(levels)*3}
+    Column pad=24 gap=16 scroll
+      Text.muted "Reach the star with the fewest pieces. Finish a level to unlock the next one."
+      Grid cols=3 gap=16
+        each l in levels
+          LevelNode "{l.n}" name={l.name} stars={l.stars} locked={l.n > unlocked} onTap={curIdx=index; script=[]; nextId=1; pc=0; bi=0; lap=0; rx=l.rx; ry=l.ry; rdir=1; running=false; go1=false; hintOpen=false; hintNo=0; go play}
+
+// a labelled tile standing for a level on the adventure map
+define LevelNode "n" name="" stars=0 locked=false onTap
+  Card gap=8 center animate=pop onTap={locked ? toast "Finish the earlier levels first" : onTap}
+    if locked
+      IconTile "lock"
+      Text.muted "Level {n}"
+    if !locked
+      Text.heading "{n}"
+      Text.strong "{name}"
+      Row gap=2 center
+        Icon "star" color={stars >= 1 ? "#FFF59E0B" : "#FFD1D5DB"}
+        Icon "star" color={stars >= 2 ? "#FFF59E0B" : "#FFD1D5DB"}
+        Icon "star" color={stars >= 3 ? "#FFF59E0B" : "#FFD1D5DB"}
+
+define StarCount value=0 total=18
+  Row gap=4 middle
+    Icon "star" color=#FFF59E0B
+    Text.strong "{value} / {total}"
+
+define HintBuddy "text"
+  Card gap=8 fill=#FFEEF2FF
+    Row gap=8 middle
+      Avatar "Bolt" size=36
+      Text.strong "Bolt"
+    Text.small "{text}"
+
+### Play
+App
+  Pane w=240 pad=12 gap=8
+    Text.strong "Pieces"
+    Text.muted "Drag a piece into your script."
+    BlockPiece "Forward" icon="arrow_upward" fill=#FF2563EB drag=piece("forward")
+    BlockPiece "Turn left" icon="rotate_left" fill=#FFF97316 drag=piece("turn_left")
+    BlockPiece "Turn right" icon="rotate_right" fill=#FFF97316 drag=piece("turn_right")
+    BlockPiece "Repeat 3 times" icon="repeat" fill=#FF7C3AED drag=piece("repeat")
+    Spacer grow
+    Row between middle
+      Text.small "Pieces used"
+      Badge.primary "{sum(script, s => s.cmd == 'repeat' ? 1 + length(s.body) : 1)} / {levels[curIdx].limit}"
+    HintBuddy "{hintOpen ? (hintNo == 0 ? 'Start by walking forward.' : 'Wrap the same pieces in a Repeat to save space!') : 'Stuck? Tap Hint and I will help.'}"
+    Button.outline "Hint" onTap={hintOpen=true; hintNo=(hintNo+1)%2}
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Back to the map" onTap={go level-map}
+        Heading "Level {levels[curIdx].n}: {levels[curIdx].name}" level=1
+      Row gap=8
+        IconButton "replay" tooltip="Start over" onTap={pc=0; bi=0; lap=0; rx=levels[curIdx].rx; ry=levels[curIdx].ry; rdir=1; running=false; go1=false}
+        IconButton "delete" tooltip="Clear script" onTap={script=[]; pc=0; bi=0; lap=0; rx=levels[curIdx].rx; ry=levels[curIdx].ry; rdir=1; running=false; go1=false}
+    Row pad=24 gap=24 top
+      Column grow gap=12
+        Text.strong "Your script"
+        Column#scriptArea gap=6 pad=12 radius=12 fill=#FFF3F4F6 h=360 scroll drop=piece onDrop={length(script) >= levels[curIdx].limit ? toast "That is all the pieces you may use" : {script=append(script,{"id":nextId,"cmd":result.data,"n":3,"body":[]}); nextId=nextId+1}}
+          if length(script) == 0
+            Text.muted "Drop pieces here, one under another"
+          each s in script
+            if s.cmd != "repeat"
+              BlockPiece "{replace(s.cmd, '_', ' ')}" icon={s.cmd == "forward" ? "arrow_upward" : (s.cmd == "turn_left" ? "rotate_left" : "rotate_right")} fill={s.cmd == "forward" ? "#FF2563EB" : "#FFF97316"} active={running && pc == index}
+            if s.cmd == "repeat"
+              LoopBlock n={s.n} active={running && pc == index} onMinus={script=updateWhere(script, x => x.id == s.id, x => with(x, "n", max(1, x.n-1)))} onPlus={script=updateWhere(script, x => x.id == s.id, x => with(x, "n", min(9, x.n+1)))} onDropIn={script=updateWhere(script, x => x.id == s.id, x => with(x, "body", append(x.body, result.data)))}
+                each b in s.body
+                  BlockPiece "{replace(b, '_', ' ')}" icon={b == "forward" ? "arrow_upward" : (b == "turn_left" ? "rotate_left" : "rotate_right")} fill={b == "forward" ? "#FF2563EB" : "#FFF97316"} active={running && pc == index && bi == indexOf(s.body, b)}
+        Row gap=8
+          Button "Play" icon="play_arrow" onTap={script == [] ? toast "Add some pieces first" : {pc=0; bi=0; lap=0; rx=levels[curIdx].rx; ry=levels[curIdx].ry; rdir=1; running=true}}
+          Button.outline "Step" icon="skip_next" onTap={go1=true}
+          Button.ghost "Stop" icon="stop" onTap={running=false; go1=false}
+      Column w=320 gap=12
+        Text.strong "Stage"
+        StageGrid cols=5 rows=5 robotX={rx} robotY={ry} robotDir={rdir} starX={levels[curIdx].sx} starY={levels[curIdx].sy} rocks={levels[curIdx].rocks}
+        Row gap=8 middle
+          Icon "flag" color=#FFF59E0B
+          Text.small "Goal: help the robot reach the star"
+
+every 600 when (running || go1) && pc < length(script) onTick={nx=rx+(rdir==1 ? 1 : (rdir==3 ? -1 : 0)); ny=ry+(rdir==2 ? 1 : (rdir==0 ? -1 : 0)); cmd=script[pc].cmd == "repeat" ? script[pc].body[bi] : script[pc].cmd; blocked=nx<0 || nx>4 || ny<0 || ny>4 || any(levels[curIdx].rocks, r => r.x==nx && r.y==ny); rx=(cmd=="forward" && !blocked) ? nx : rx; ry=(cmd=="forward" && !blocked) ? ny : ry; rdir=cmd=="turn_left" ? (rdir+3)%4 : (cmd=="turn_right" ? (rdir+1)%4 : rdir); script[pc].cmd == "repeat" ? (bi+1 < length(script[pc].body) ? {bi=bi+1} : (lap+1 < script[pc].n ? {bi=0; lap=lap+1} : {bi=0; lap=0; pc=pc+1})) : {pc=pc+1}; go1=false}
+every 600 when (running || go1) && length(script) > 0 && pc >= length(script) onTick={running=false; go1=false; won=(rx==levels[curIdx].sx && ry==levels[curIdx].sy); won ? {levels=updateWhere(levels, l => l.n == levels[curIdx].n, l => with(l, "stars", max(l.stars, sum(script, s => s.cmd=='repeat' ? 1+length(s.body) : 1) <= l.par ? 3 : (sum(script, s => s.cmd=='repeat' ? 1+length(s.body) : 1) <= l.limit - 1 ? 2 : 1)))); unlocked=max(unlocked, levels[curIdx].n + 1); open win} : open oops}
+
+// a coloured puzzle piece that snaps into the script, highlighted while it runs
+define BlockPiece "label" icon="arrow_upward" fill=#FF2563EB active=false
+  Row gap=8 pad=[12,10,12,10] radius=10 fill={fill} middle border={active ? 3 : 0} animate={active ? "pulse" : ""}
+    Icon "{icon}" color=#FFFFFFFF
+    Text.strong "{label}" color=#FFFFFFFF
+
+// a C-shaped wrapper that loops the pieces dropped inside it
+define LoopBlock n=3 active=false onMinus onPlus onDropIn
+  Column gap=6 pad=8 radius=12 fill=#FF7C3AED border={active ? 3 : 0}
+    Row gap=8 middle
+      Icon "repeat" color=#FFFFFFFF
+      Text.strong "Repeat" color=#FFFFFFFF
+      IconButton "remove" tooltip="Fewer" onTap={onMinus}
+      Text.strong "{n}" color=#FFFFFFFF
+      IconButton "add" tooltip="More" onTap={onPlus}
+      Text.strong "times" color=#FFFFFFFF
+    Column gap=6 pad=[16,4,4,4] drop=piece onDrop={onDropIn(result.data)}
+      ...
+      Text.small "Drop pieces inside" color=#FFE9D5FF
+
+// a grid with a robot, a star and rocks drawn from the cells
+define StageGrid cols=5 rows=5 robotX=0 robotY=0 robotDir=1 starX=4 starY=4 rocks=[]
+  Grid cols={cols} gap=4
+    each i in range(cols*rows)
+      Box h=56 radius=8 fill={(i%cols + floor(i/cols)) % 2 == 0 ? "#FFDCFCE7" : "#FFBBF7D0"} center middle
+        if i%cols == robotX && floor(i/cols) == robotY
+          Icon "smart_toy" size=36 color=#FF2563EB rotate={robotDir*90-90}
+        if (i%cols != robotX || floor(i/cols) != robotY) && i%cols == starX && floor(i/cols) == starY
+          Icon "star" size=36 color=#FFF59E0B animate=pulse
+        if count(rocks, r => r.x == i%cols && r.y == floor(i/cols)) > 0
+          Icon "landscape" size=32 color=#FF6B7280
+
+Dialog#win "You did it!" "Bolt reached the star"
+  Column gap=12 center
+    Row gap=4 center
+      Icon "star" size=40 color={sum(script, s => s.cmd=='repeat' ? 1+length(s.body) : 1) <= levels[curIdx].par ? "#FFF59E0B" : "#FFF59E0B"}
+      Icon "star" size=40 color={sum(script, s => s.cmd=='repeat' ? 1+length(s.body) : 1) <= levels[curIdx].limit - 1 ? "#FFF59E0B" : "#FFD1D5DB"}
+      Icon "star" size=40 color={sum(script, s => s.cmd=='repeat' ? 1+length(s.body) : 1) <= levels[curIdx].par ? "#FFF59E0B" : "#FFD1D5DB"}
+    Text.muted "Fewer pieces earns more stars. Try a Repeat!"
+    Row gap=8
+      Button.outline "Again" onTap={pc=0; bi=0; lap=0; rx=levels[curIdx].rx; ry=levels[curIdx].ry; rdir=1; close}
+      Button "Next level" onTap={levels[curIdx].n < length(levels) ? {curIdx=curIdx+1; script=[]; nextId=1; pc=0; bi=0; lap=0; rx=levels[curIdx].rx; ry=levels[curIdx].ry; rdir=1; hintOpen=false; close} : {close; go level-map}}
+
+Dialog#oops "Not quite" "Bolt stopped before the star"
+  Column gap=12
+    Text.muted "Watch where the robot ends up, then fix your script. Try Step to go one piece at a time."
+    Row gap=8
+      Button "Try again" onTap={pc=0; bi=0; lap=0; rx=levels[curIdx].rx; ry=levels[curIdx].ry; rdir=1; close}
+      Button.outline "Show hint" onTap={hintOpen=true; close}
+
+### Grown-ups
+state gameMinutes=20
+state readAloud=true
+state soundOn=true
+Page
+  Nav
+    Brand "Lego-ish Logic" icon="smart_toy"
+    Row gap=4
+      Link "Adventure Map" onTap={go level-map}
+      Link "Grown-ups"
+    Button "Back to play" onTap={go level-map}
+  Section
+    Column gap=16
+      Heading "How Maya is doing" level=1
+      Text.muted "A summary for parents and teachers. Maya has completed {count(levels, l => l.stars > 0)} of {length(levels)} levels."
+      Grid cols=3 gap=24
+        Card gap=8
+          IconTile "star"
+          Heading "Stars earned" level=3
+          Text "{sum(levels, l => l.stars)} of {length(levels)*3}" size=32 weight=700
+        Card gap=8
+          IconTile "repeat"
+          Heading "Loops used" level=3
+          Text "7 this week" size=32 weight=700
+        Card gap=8
+          IconTile "lightbulb"
+          Heading "Hints asked" level=3
+          Text "4 this week" size=32 weight=700
+  Section tint
+    Column gap=16
+      Heading "Stars per level" level=2
+      BarChart values={map(levels, l => l.stars)} labels={map(levels, l => "L" + l.n)} h=200
+  Section
+    Column gap=12
+      Heading "Settings" level=2
+      Row between middle
+        Text "Daily play limit (minutes)"
+        Slider bind=gameMinutes min=5 max=60 w=240
+      Toggle "Read instructions aloud" bind=readAloud
+      Toggle "Sound effects" bind=soundOn
+      Button.destructive "Reset all progress" onTap={open reset}
+  Footer
+    Text.muted "Made for ages 5 to 9"
+
+Dialog#reset "Reset progress?" "All stars will be cleared."
+  Row gap=8
+    Button.destructive "Reset" onTap={levels=map(levels, l => with(l, "stars", 0)); unlocked=1; toast "Progress cleared"; close}
+    Button.outline "Keep it" onTap={close}

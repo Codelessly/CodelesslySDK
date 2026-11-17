@@ -1,0 +1,247 @@
+### Today
+state tab="today"
+state readings=[{"id":1,"t":"06:45","h":6.75,"v":104,"meal":"Fasting","ins":0},{"id":2,"t":"09:10","h":9.17,"v":158,"meal":"After breakfast","ins":4},{"id":3,"t":"12:30","h":12.5,"v":92,"meal":"Before lunch","ins":0},{"id":4,"t":"14:20","h":14.33,"v":171,"meal":"After lunch","ins":5},{"id":5,"t":"17:55","h":17.92,"v":64,"meal":"Before dinner","ins":0},{"id":6,"t":"20:40","h":20.67,"v":126,"meal":"After dinner","ins":3}]
+state entry=""
+state context="Fasting"
+state units=0
+state lowAt=70
+state highAt=180
+App
+  Sidebar
+    Brand "Sugarcube" icon="water_drop"
+    NavItem "Today" icon="monitor_heart" selected={tab=="today"} onTap={tab="today"}
+    NavItem "Week" icon="calendar_view_week" selected={tab=="week"} onTap={go week}
+    NavItem "Alerts" icon="notifications" badge="2" onTap={go alerts}
+    NavItem "Export" icon="ios_share" onTap={go export}
+    Spacer grow
+    Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "Today" level=1
+      Row gap=8
+        Button.outline "Export for clinic" icon="ios_share" onTap={go export}
+        Button "Add reading" icon="add" onTap={entry=""; units=0; open addReading}
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=8
+          Text.muted "Latest reading"
+          ReadingBand value={last(readings).v} low={lowAt} high={highAt}
+          Row gap=8 middle
+            Icon {last(readings).v - readings[length(readings)-2].v > 10 ? "trending_up" : (last(readings).v - readings[length(readings)-2].v < -10 ? "trending_down" : "trending_flat")}
+            Text.muted "{last(readings).v - readings[length(readings)-2].v} mg/dL since {readings[length(readings)-2].t}"
+          Text.caption "{last(readings).meal} at {last(readings).t}"
+        Card gap=8
+          Text.strong "Time in range"
+          Row gap=16 middle
+            Donut values=[count(readings,r=>r.v>=lowAt && r.v<=highAt),count(readings,r=>r.v<lowAt),count(readings,r=>r.v>highAt)] labels=["In range","Low","High"]
+          Text.muted "{round(count(readings,r=>r.v>=lowAt && r.v<=highAt)*100/length(readings),0)}% of today's readings between {lowAt} and {highAt}"
+        Card gap=8
+          Text.strong "Insulin today"
+          Text "{sum(readings,r=>r.ins)} units" size=32 weight=700
+          Text.muted "{count(readings,r=>r.ins>0)} doses"
+      Card gap=12
+        Row between
+          Text.strong "Day chart"
+          Row gap=8
+            Chip "In range 70 to 180"
+            Row gap=4 middle
+              Icon "restaurant"
+              Text.caption "Meal"
+        DayChart readings={readings} low={lowAt} high={highAt} h=240
+      Card gap=8
+        Text.strong "Readings"
+        each r in readings
+          ListTile "{r.v} mg/dL" subtitle="{r.t}, {r.meal}" trailing={r.ins > 0 ? "{r.ins} u" : ""}
+
+Sheet#addReading "Add reading"
+  Column gap=12
+    Text "{entry == "" ? "0" : entry}" size=56 weight=700 center
+    Text.muted "mg/dL" center
+    NumberPad bind=entry max=3
+    Text.fieldLabel "Meal context"
+    Row gap=8
+      ChoiceChip "Fasting" selected={context=="Fasting"} onTap={context="Fasting"}
+      ChoiceChip "Before meal" selected={context=="Before meal"} onTap={context="Before meal"}
+      ChoiceChip "After meal" selected={context=="After meal"} onTap={context="After meal"}
+      ChoiceChip "Bedtime" selected={context=="Bedtime"} onTap={context="Bedtime"}
+    Row gap=12 middle between
+      Text.fieldLabel "Insulin units"
+      Row gap=8 middle
+        IconButton "remove" tooltip="Fewer units" onTap={units=max(0,units-1)}
+        Text.strong "{units}"
+        IconButton "add" tooltip="More units" onTap={units=units+1}
+    Button "Save reading" onTap={entry=="" ? toast "Enter a number first" : {readings=append(readings,{"id":length(readings)+1,"t":"now","h":24,"v":entry*1,"meal":context,"ins":units}); toast "Reading saved"; close}}
+
+### Week
+state lowAt=70
+state highAt=180
+state week=[{"day":"Mon","cells":[104,150,0,98,0,122]},{"day":"Tue","cells":[99,163,110,0,142,118]},{"day":"Wed","cells":[112,171,95,185,0,131]},{"day":"Thu","cells":[108,149,102,121,66,127]},{"day":"Fri","cells":[101,158,0,171,138,124]},{"day":"Sat","cells":[118,192,140,0,150,133]},{"day":"Sun","cells":[96,144,99,129,0,115]}]
+App
+  Sidebar
+    Brand "Sugarcube" icon="water_drop"
+    NavItem "Today" icon="monitor_heart" onTap={go today}
+    NavItem "Week" icon="calendar_view_week" selected={true}
+    NavItem "Alerts" icon="notifications" badge="2" onTap={go alerts}
+    NavItem "Export" icon="ios_share" onTap={go export}
+    Spacer grow
+    Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "Week by hour" level=1
+      Button.outline "Export for clinic" icon="ios_share" onTap={go export}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Text.strong "Average by day"
+        LineChart labels=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] values=[115,114,116,111,127,138,117] h=180
+      Card gap=12
+        Text.strong "Readings by time of day"
+        Text.muted "Blank cells have no reading. Colour shows low, in range or high."
+        Row scroll
+          HourTable rows={week} columns=["06:00","09:00","12:00","15:00","18:00","21:00"] low={lowAt} high={highAt} onPick={emit pickReading}
+      Card gap=8
+        Text.strong "Week summary"
+        Row gap=24
+          Column grow
+            Text.muted "Average"
+            Text "122 mg/dL" size=28 weight=700
+          Column grow
+            Text.muted "Lowest"
+            Text "64 mg/dL" size=28 weight=700
+          Column grow
+            Text.muted "Highest"
+            Text "192 mg/dL" size=28 weight=700
+          Column grow
+            Text.muted "Time in range"
+            Text "81%" size=28 weight=700
+
+### Alerts
+state lowOn=true
+state highOn=true
+state lowAt=70
+state highAt=180
+state urgentLow=54
+state quiet=false
+state notify="Phone and watch"
+App
+  Sidebar
+    Brand "Sugarcube" icon="water_drop"
+    NavItem "Today" icon="monitor_heart" onTap={go today}
+    NavItem "Week" icon="calendar_view_week" onTap={go week}
+    NavItem "Alerts" icon="notifications" badge="2" selected={true}
+    NavItem "Export" icon="ios_share" onTap={go export}
+    Spacer grow
+    Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "Alerts" level=1
+      Button "Save thresholds" onTap={emit saveAlerts; toast "Thresholds saved"}
+    Column pad=24 gap=16 maxw=720
+      Card gap=16
+        Toggle "Alert when low" bind=lowOn
+        if lowOn
+          Column gap=4
+            Row between
+              Text "Low below"
+              Text.strong "{lowAt} mg/dL"
+            Slider bind=lowAt min=50 max=90
+        Divider
+        Toggle "Alert when high" bind=highOn
+        if highOn
+          Column gap=4
+            Row between
+              Text "High above"
+              Text.strong "{highAt} mg/dL"
+            Slider bind=highAt min=140 max=300
+        Divider
+        Column gap=4
+          Row between
+            Text "Urgent low below"
+            Text.strong "{urgentLow} mg/dL"
+          Slider bind=urgentLow min=40 max=60
+        Select "Send alerts to" bind=notify items=["Phone only","Phone and watch","Phone and caregiver"]
+        Toggle "Quiet hours 22:00 to 06:00 (urgent low still sounds)" bind=quiet
+      Card gap=8
+        Text.strong "Recent alerts"
+        ListTile "Low: 64 mg/dL" subtitle="Yesterday, 17:55" leading="warning"
+        ListTile "High: 192 mg/dL" subtitle="Saturday, 09:20" leading="arrow_upward"
+
+### Export
+state range="Last 30 days"
+state format="PDF"
+state include=["Readings","Insulin","Meals","Time in range"]
+state note=""
+App
+  Sidebar
+    Brand "Sugarcube" icon="water_drop"
+    NavItem "Today" icon="monitor_heart" onTap={go today}
+    NavItem "Week" icon="calendar_view_week" onTap={go week}
+    NavItem "Alerts" icon="notifications" badge="2" onTap={go alerts}
+    NavItem "Export" icon="ios_share" selected={true}
+    Spacer grow
+    Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "Export for the clinic" level=1
+    Column pad=24 gap=16 maxw=720
+      Card gap=12
+        Text.strong "Period"
+        Row gap=8
+          ChoiceChip "Last 14 days" selected={range=="Last 14 days"} onTap={range="Last 14 days"}
+          ChoiceChip "Last 30 days" selected={range=="Last 30 days"} onTap={range="Last 30 days"}
+          ChoiceChip "Last 90 days" selected={range=="Last 90 days"} onTap={range="Last 90 days"}
+        Text.strong "Format"
+        SegmentedButton bind=format items=["PDF","CSV"]
+        Text.strong "Include"
+        Row gap=8
+          FilterChip "Readings" selected={contains(include,"Readings")} onTap={include=contains(include,"Readings") ? without(include,"Readings") : append(include,"Readings")}
+          FilterChip "Insulin" selected={contains(include,"Insulin")} onTap={include=contains(include,"Insulin") ? without(include,"Insulin") : append(include,"Insulin")}
+          FilterChip "Meals" selected={contains(include,"Meals")} onTap={include=contains(include,"Meals") ? without(include,"Meals") : append(include,"Meals")}
+          FilterChip "Time in range" selected={contains(include,"Time in range")} onTap={include=contains(include,"Time in range") ? without(include,"Time in range") : append(include,"Time in range")}
+        Input "Note for your care team" "Dizzy most mornings this week" bind=note multiline
+      Card gap=8
+        Text.strong "Preview"
+        Text.muted "{range}, {format}: {join(include,", ")}"
+        Text.caption "Prepared for Dr. Okafor, Riverside Diabetes Clinic"
+      Row gap=8
+        Button "Download {format}" icon="download" onTap={emit exportReport; toast "Report ready"}
+        Button.outline "Share with clinic" icon="send" onTap={emit shareReport; toast "Sent to Riverside Diabetes Clinic"}
+
+// a coloured band behind a big reading: low, in range or high
+define ReadingBand value=100 low=70 high=180
+  Box pad=12 radius=12 fill={value < low ? #FFFEE2E2 : (value > high ? #FFFEF3C7 : #FFDCFCE7)}
+    Row gap=8 middle
+      Text "{value}" size=64 weight=700 color={value < low ? #FFB91C1C : (value > high ? #FFB45309 : #FF15803D)}
+      Column
+        Text.strong "mg/dL"
+        Badge "{value < low ? "Low" : (value > high ? "High" : "In range")}"
+
+// a number pad with digits, a delete key and a clear key
+define NumberPad bind=value max=3
+  state value=""
+  Grid cols=3 gap=8
+    each d in ["1","2","3","4","5","6","7","8","9","C","0","<"]
+      Button.outline "{d}" onTap={d=="C" ? value="" : (d=="<" ? value=slice(value,0,length(value)-1) : (length(value) < max ? value=value+d : toast "Three digits at most"))}
+
+// a day chart: dots joined by a line, a green band between low and high, a small plate over meal readings
+define DayChart readings=[] low=70 high=180 h=240
+  Stack h={h}
+    Box fill=#2216A34A radius=4 h={h*(high-low)/300} top={h*(300-high)/300}
+    LineChart values={map(readings,r=>r.v)} labels={map(readings,r=>r.t)} h={h} dots=true
+    Row between
+      each r in readings
+        if r.meal != "Fasting"
+          Icon "restaurant"
+
+// a table of hours by day; each cell is coloured by its reading, blank when none
+define HourTable rows=[] columns=[] low=70 high=180 onPick
+  Column gap=4
+    Row gap=4
+      Text.caption "" w=48
+      each c in columns
+        Text.caption "{c}" w=64 center
+    each row in rows
+      Row gap=4 middle
+        Text.strong "{row.day}" w=48
+        each cell in row.cells
+          Box w=64 h=36 radius=6 fill={cell == 0 ? #FFF3F4F6 : (cell < low ? #FFFECACA : (cell > high ? #FFFDE68A : #FFBBF7D0))} onTap={onPick(cell)}
+            Text "{cell == 0 ? "" : cell}" center

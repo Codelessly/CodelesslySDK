@@ -1,0 +1,162 @@
+### Chat
+state convs=[{"id":1,"title":"Debounce a search input","day":"Today"},{"id":2,"title":"Trip plan for Lisbon","day":"Today"},{"id":3,"title":"SQL window functions","day":"Yesterday"},{"id":4,"title":"Cover letter edits","day":"Yesterday"},{"id":5,"title":"Sourdough starter help","day":"Earlier this week"}]
+state current=1
+state sel=0
+state renameText=""
+state model="Sidekick 4 Sonnet"
+state draft=""
+state streaming=false
+state words=["A","debounce","delays","running","a","function","until","the","user","has","stopped","typing","for","a","set","time.","Here","is","a","small","version","in","Dart,","and","a","comparison","of","delays:"]
+state shown=0
+state vote=""
+state attached=false
+state progress=0
+state fileName="search_spec.pdf"
+state followups=["Add a cancel method","Show it in Flutter","Compare with throttle"]
+every 120 when streaming onTick={shown=shown+1; shown>=length(words) ? streaming=false : shown=shown}
+every 200 when attached && progress<1 onTick={progress=min(1,progress+0.1)}
+App
+  Sidebar
+    Brand "Sidekick" icon="auto_awesome"
+    Button "New chat" icon="add" onTap={current=0; shown=0; toast "New chat"}
+    Input "Search chats" bind=q
+    Column scroll grow gap=4
+      each day in unique(map(convs,c=>c.day))
+        Text.caption "{upper(day)}"
+        each c in filter(convs,x=>x.day==day)
+          Row between middle
+            NavItem "{c.title}" selected={current==c.id} grow onTap={current=c.id}
+            IconButton "more_vert" tooltip="Conversation options" onTap={sel=c.id; open convMenu}
+    Text.muted "Ada Lovelace"
+  Main
+    Nav
+      Heading "{find(convs,c=>c.id==current).title}"
+      Row gap=8 middle
+        Button.outline "{model}" icon="expand_more" onTap={open modelMenu}
+        IconButton "ios_share" tooltip="Share"
+    Column scroll pad=24 gap=16 maxw=720
+      ChatBubble role="user"
+        Text "How do I debounce a search input? Here is the spec, too."
+        if attached
+          FileChip "{fileName}" progress={progress} onRemove={attached=false; progress=0}
+      ChatBubble role="assistant"
+        Markdown "{join(take(words,shown)," ")}"
+        if shown>=length(words)
+          CodeBlock lang="dart" code="Timer? _t;\nvoid onChanged(String q) {\n  _t?.cancel();\n  _t = Timer(const Duration(milliseconds: 300), () => search(q));\n}"
+          Table columns=["Delay","Feels","Requests"] rows=[["150 ms","Snappy","High"],["300 ms","Balanced","Medium"],["600 ms","Sluggish","Low"]]
+          Image "https://images.example.com/diagrams/debounce-timeline.png" h=180 radius=8
+        if streaming
+          Row gap=8 middle
+            Progress bind=shown
+            Button.outline "Stop" icon="stop" onTap={streaming=false}
+        if !streaming && shown>=length(words)
+          Row gap=4
+            IconButton "content_copy" tooltip="Copy answer" onTap={copy join(words," "); toast "Copied"}
+            IconButton "thumb_up" tooltip="Good answer" selected={vote=="up"} onTap={vote="up"; emit feedback "up"}
+            IconButton "thumb_down" tooltip="Bad answer" selected={vote=="down"} onTap={vote="down"; emit feedback "down"}
+            IconButton "refresh" tooltip="Regenerate" onTap={shown=0; streaming=true}
+      if !streaming && shown>=length(words)
+        Row scroll gap=8
+          each f in followups
+            Chip "{f}" onTap={draft=f}
+    Footer
+      Column pad=12 gap=8
+        if attached
+          FileChip "{fileName}" progress={progress} onRemove={attached=false; progress=0}
+        Row gap=8 middle
+          IconButton "attach_file" tooltip="Attach a file" onTap={attached=true; progress=0}
+          Input "Message Sidekick" bind=draft multiline grow
+          Button "Send" icon="send" onTap={draft!="" ? {shown=0; streaming=true; draft=""} : toast "Type a message"}
+  Menu#convMenu
+    MenuItem "Rename" icon="edit" onTap={renameText=find(convs,c=>c.id==sel).title; open renameDlg}
+    MenuItem "Delete" icon="delete" onTap={open deleteDlg}
+  Menu#modelMenu end
+    MenuItem "Sidekick 4 Sonnet" icon="bolt" onTap={model="Sidekick 4 Sonnet"}
+    MenuItem "Sidekick 4 Opus" icon="psychology" onTap={model="Sidekick 4 Opus"}
+    MenuItem "Sidekick 4 Haiku" icon="speed" onTap={model="Sidekick 4 Haiku"}
+  Dialog#renameDlg "Rename chat"
+    Input "Title" bind=renameText
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Save" onTap={convs=updateWhere(convs,c=>c.id==sel,c=>with(c,"title",renameText)); toast "Renamed"; close}
+  Dialog#deleteDlg "Delete this chat?" "This cannot be undone."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Delete" onTap={convs=removeWhere(convs,c=>c.id==sel); toast "Chat deleted"; close}
+
+### Welcome
+state draft=""
+state model="Sidekick 4 Sonnet"
+state recent=[{"title":"Debounce a search input","day":"Today"},{"title":"Trip plan for Lisbon","day":"Today"},{"title":"SQL window functions","day":"Yesterday"}]
+App
+  Sidebar
+    Brand "Sidekick" icon="auto_awesome"
+    Button "New chat" icon="add"
+    each day in unique(map(recent,c=>c.day))
+      Text.caption "{upper(day)}"
+      each c in filter(recent,x=>x.day==day)
+        NavItem "{c.title}" onTap={go chat}
+  Main
+    Nav
+      Heading "New chat"
+      Button.outline "{model}" icon="expand_more" onTap={open picker}
+    Column pad=24 gap=24 center maxw=720
+      Heading "What can I help with?" level=1
+      Grid cols=2 gap=12
+        Card gap=8 onTap={draft="Explain debouncing"; go chat}
+          IconTile "code"
+          Text.strong "Write code"
+          Text.muted "Debounce a search input in Dart"
+        Card gap=8 onTap={draft="Plan a trip"; go chat}
+          IconTile "map"
+          Text.strong "Plan a trip"
+          Text.muted "Three days in Lisbon"
+      Row gap=8
+        Chip "Summarise a PDF" onTap={draft="Summarise this PDF"}
+        Chip "Draft an email" onTap={draft="Draft an email"}
+        Chip "Explain a table" onTap={draft="Explain this table"}
+    Footer
+      Row pad=12 gap=8 middle
+        IconButton "attach_file" tooltip="Attach a file"
+        Input "Message Sidekick" bind=draft grow
+        Button "Send" icon="send" onTap={go chat}
+  Sheet#picker "Choose a model"
+    ListTile "Sidekick 4 Sonnet" "Fast and balanced" onTap={model="Sidekick 4 Sonnet"; close}
+    ListTile "Sidekick 4 Opus" "Best for hard problems" onTap={model="Sidekick 4 Opus"; close}
+    ListTile "Sidekick 4 Haiku" "Quickest replies" onTap={model="Sidekick 4 Haiku"; close}
+
+define ChatBubble role="assistant"
+  Row gap=12 top
+    Avatar "{role == "user" ? "Ada Lovelace" : "Sidekick"}" size=32
+    Column grow gap=8 pad=12 radius=12 fill={role == "user" ? "#FFEFF6FF" : "#FFF9FAFB"}
+      ...
+
+define Markdown "text"
+  Text "{text}"
+
+// the copy button on the block copies the code; the language label sits in the header
+define CodeBlock lang="text" code=""
+  Column radius=8 fill=#FF111827
+    Row between middle pad=[12,6,12,6]
+      Text.caption "{lang}" color=#FF9CA3AF
+      Button.ghost "Copy" icon="content_copy" onTap={copy code; toast "Code copied"}
+    Text.mono "{code}" color=#FFE5E7EB pad=12
+
+define Table columns=[] rows=[]
+  Column gap=0 radius=8 border=1
+    Row pad=8 fill=#FFF3F4F6
+      each c in columns
+        Text.strong "{c}" grow
+    each r in rows
+      Row pad=8 border-top=#FFE5E7EB
+        each cell in r
+          Text "{cell}" grow
+
+define FileChip "name" progress=1 onRemove
+  Row gap=8 middle pad=8 radius=8 border=1
+    Icon "description"
+    Column grow gap=4
+      Text.small "{name}"
+      if progress<1
+        Progress {progress}
+    IconButton "close" tooltip="Remove" onTap={onRemove}

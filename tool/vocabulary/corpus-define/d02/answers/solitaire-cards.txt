@@ -1,0 +1,171 @@
+### Table
+state tableau=[[{"id":"KS","r":13,"s":"S","up":true}],[{"id":"3H","r":3,"s":"H","up":false},{"id":"9D","r":9,"s":"D","up":true}],[{"id":"5C","r":5,"s":"C","up":false},{"id":"JH","r":11,"s":"H","up":false},{"id":"QS","r":12,"s":"S","up":true}],[{"id":"2D","r":2,"s":"D","up":false},{"id":"8C","r":8,"s":"C","up":false},{"id":"4S","r":4,"s":"S","up":false},{"id":"10H","r":10,"s":"H","up":true}],[{"id":"7S","r":7,"s":"S","up":false},{"id":"AD","r":1,"s":"D","up":false},{"id":"6H","r":6,"s":"H","up":false},{"id":"3C","r":3,"s":"C","up":false},{"id":"JD","r":11,"s":"D","up":true}],[{"id":"9S","r":9,"s":"S","up":false},{"id":"2H","r":2,"s":"H","up":false},{"id":"QD","r":12,"s":"D","up":false},{"id":"5S","r":5,"s":"S","up":false},{"id":"8H","r":8,"s":"H","up":false},{"id":"4C","r":4,"s":"C","up":true}],[{"id":"KC","r":13,"s":"C","up":false},{"id":"7D","r":7,"s":"D","up":false},{"id":"2S","r":2,"s":"S","up":false},{"id":"10C","r":10,"s":"C","up":false},{"id":"6D","r":6,"s":"D","up":false},{"id":"AH","r":1,"s":"H","up":false},{"id":"5H","r":5,"s":"H","up":true}]]
+state stock=[{"id":"AS","r":1,"s":"S","up":false},{"id":"3D","r":3,"s":"D","up":false},{"id":"7H","r":7,"s":"H","up":false},{"id":"KH","r":13,"s":"H","up":false},{"id":"9C","r":9,"s":"C","up":false},{"id":"4D","r":4,"s":"D","up":false}]
+state waste=[]
+state found=[[],[],[],[]]
+state moves=0
+state history=[]
+state dragging=null
+state seconds=0
+every 1s onTick={seconds=seconds+1}
+App
+  Sidebar
+    Brand "Tableau" icon="style"
+    NavItem "Table" icon="casino" selected={true}
+    NavItem "Statistics" icon="insights" onTap={go statistics}
+    NavItem "Rules" icon="menu_book" onTap={open rules}
+    Spacer grow
+    Text.muted "Draw three, Vegas off"
+  Main
+    Nav
+      Heading "Klondike" level=1
+      Row gap=16 middle
+        Text.muted "Moves {moves}"
+        Text.muted "Time {duration(seconds)}"
+        IconButton "undo" tooltip="Undo" onTap={length(history)>0 ? {tableau=last(history).t; stock=last(history).s; waste=last(history).w; found=last(history).f; history=removeAt(history,length(history)-1); moves=moves+1} : toast "Nothing to undo"}
+        Button "New game" onTap={open newgame}
+    Column pad=24 gap=24
+      Row between top
+        Row gap=12
+          each f in found
+            FoundationSpot suit={["S","H","D","C"][index]} cards={f} glow={dragging!=null} onDrop={result.data.id != "" ? {history=append(history,{"t":tableau,"s":stock,"w":waste,"f":found}); found=setAt(found,index,append(f,find(flatten(tableau),c=>c.id==result.data.id))); tableau=setAt(tableau,result.data.col,removeWhere(tableau[result.data.col],c=>c.id==result.data.id)); moves=moves+1; dragging=null; length(filter(flatten(found),c=>true))==51 ? go win : close} : close}
+        Row gap=12
+          Box w=72 h=100 radius=8 border=1 onTap={stock=isEmpty(stock) ? reverse(waste) : stock; waste=isEmpty(stock) ? [] : append(waste,first(stock)); history=append(history,{"t":tableau,"s":stock,"w":waste,"f":found}); moves=moves+1}
+            if length(stock)>0
+              CardBack count={length(stock)}
+            if length(stock)==0
+              Icon "refresh"
+          Stack w=72 h=100
+            each c in take(reverse(waste),3)
+              PlayingCard rank={c.r} suit={c.s} faceUp={true} drag=card({"col":-1,"id":c.id}) onDragStart={dragging=c.id} onDoubleTap={emit sendHome c.id}
+      Row gap=12 top
+        each col in tableau
+          TableauColumn cards={col} column={index} glow={dragging!=null} onDrop={history=append(history,{"t":tableau,"s":stock,"w":waste,"f":found}); tableau=setAt(tableau,index,concat(tableau[index],slice(tableau[result.data.col],indexOf(map(tableau[result.data.col],c=>c.id),result.data.id),length(tableau[result.data.col])))); tableau=setAt(tableau,result.data.col,slice(tableau[result.data.col],0,indexOf(map(tableau[result.data.col],c=>c.id),result.data.id))); moves=moves+1; dragging=null} onPick={dragging=result}
+      if dragging!=null
+        Text.muted "Drop on a glowing spot, or release to put the cards back."
+  Footer
+    Row between middle
+      Text.muted "Tap the stock to turn over three. Double tap a card to send it home."
+      Row gap=8
+        Button.outline "Hint" onTap={emit hint}
+        Button.outline "Undo" onTap={length(history)>0 ? {tableau=last(history).t; stock=last(history).s; waste=last(history).w; found=last(history).f; history=removeAt(history,length(history)-1)} : toast "Nothing to undo"}
+
+Dialog#newgame "Start a new game" "Your current game will be counted as a loss."
+  Column gap=12
+    SegmentedButton bind=draw items=["Draw one","Draw three"]
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button "Deal" onTap={emit newGame draw; moves=0; seconds=0; history=[]; close}
+
+Sheet#rules "How to play"
+  Column gap=8
+    Text "Build the four foundations from ace to king in suit."
+    Text "Stack cards on the columns in descending order, alternating colors."
+    Text "Only a king may fill an empty column."
+    Button "Got it" onTap={close}
+
+define PlayingCard rank=1 suit="S" faceUp=true w=72 h=100 onTap onDoubleTap onDragStart
+  // a playing card face with its rank and suit
+  Box w={w} h={h} radius=8 fill={faceUp ? #FFFFFFFF : #FF1E3A8A} border=1 onTap={onTap} onDoubleTap={onDoubleTap} onDragStart={onDragStart}
+    if faceUp
+      Column pad=6 gap=0
+        Text.strong "{rank==1 ? "A" : rank==11 ? "J" : rank==12 ? "Q" : rank==13 ? "K" : rank}" color={suit=="H" || suit=="D" ? #FFDC2626 : #FF111827"}
+        Icon {suit=="H" ? "favorite" : suit=="D" ? "diamond" : suit=="S" ? "spa" : "eco"}
+    if !faceUp
+      Icon "style"
+
+define CardBack count=0 w=72 h=100
+  Box w={w} h={h} radius=8 fill=#FF1E3A8A center middle
+    Text "{count}" color=#FFFFFFFF
+
+define FoundationSpot suit="S" cards=[] glow=false onDrop
+  Box w=72 h=100 radius=8 border={glow ? 3 : 1} fill={glow ? #FFFEF3C7 : #00FFFFFF} center middle drop=card onDrop={onDrop}
+    if length(cards)==0
+      Icon {suit=="H" ? "favorite" : suit=="D" ? "diamond" : suit=="S" ? "spa" : "eco"}
+    if length(cards)>0
+      PlayingCard rank={last(cards).r} suit={last(cards).s}
+
+define TableauColumn cards=[] column=0 glow=false onDrop onPick
+  Column grow gap=0 h=420 radius=8 border={glow ? 2 : 0} drop=card onDrop={onDrop}
+    if length(cards)==0
+      Box w=72 h=100 radius=8 border=1
+    each c in cards
+      Box h={c.up ? 28 : 14}
+        PlayingCard rank={c.r} suit={c.s} faceUp={c.up} drag=card({"col":column,"id":c.id}) onDragStart={onPick(c.id)} onDoubleTap={emit sendHome c.id}
+
+### Win
+state moves=118
+state seconds=412
+App
+  Sidebar
+    Brand "Tableau" icon="style"
+    NavItem "Table" icon="casino" onTap={go table}
+    NavItem "Statistics" icon="insights" onTap={go statistics}
+    Spacer grow
+  Main
+    Nav
+      Heading "You won" level=1
+      Button "New game" onTap={go table}
+    Column pad=24 gap=24 center
+      CardCascade suits=["S","H","D","C"] count=52 animate=fade duration=600
+      Card gap=12 maxw=480
+        Text.heading "Solved in {moves} moves"
+        Row gap=24
+          Column gap=4
+            Text.muted "Time"
+            Text.strong "{duration(seconds)}"
+          Column gap=4
+            Text.muted "Best time"
+            Text.strong "6:48"
+          Column gap=4
+            Text.muted "Streak"
+            Text.strong "3 wins"
+        Row gap=8
+          Button "Play again" onTap={emit newGame; go table}
+          Button.outline "Share result" onTap={emit share}
+
+define CardCascade suits=["S","H","D","C"] count=52
+  // cards bouncing across the screen; drawn as a stack of tilted card boxes
+  Stack h=220
+    each s in suits
+      Box w=72 h=100 radius=8 fill=#FFFFFFFF border=1 animate=pop stagger=80
+        Icon {s=="H" ? "favorite" : s=="D" ? "diamond" : s=="S" ? "spa" : "eco"}
+
+### Statistics
+state range="All time"
+App
+  Sidebar
+    Brand "Tableau" icon="style"
+    NavItem "Table" icon="casino" onTap={go table}
+    NavItem "Statistics" icon="insights" selected={true}
+    Spacer grow
+  Main
+    Nav
+      Heading "Statistics" level=1
+      SegmentedButton bind=range items=["Week","Month","All time"]
+    Column pad=24 gap=16
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.muted "Games played"
+          Text "212" size=32 weight=700
+        Card gap=4
+          Text.muted "Win rate"
+          Text "31%" size=32 weight=700
+        Card gap=4
+          Text.muted "Best time"
+          Text "6:48" size=32 weight=700
+        Card gap=4
+          Text.muted "Fewest moves"
+          Text "94" size=32 weight=700
+      Card gap=8
+        Text.strong "Wins per week"
+        BarChart values=[4,6,3,8,5,7] labels=["W1","W2","W3","W4","W5","W6"] h=200
+      Card gap=8
+        Text.strong "Recent games"
+        each g in [{"d":"Nov 16","m":118,"t":"6:52","w":true},{"d":"Nov 15","m":0,"t":"3:10","w":false},{"d":"Nov 14","m":126,"t":"8:01","w":true}]
+          Row between
+            Text "{g.d}"
+            Text.muted "{g.m} moves"
+            Text.muted "{g.t}"
+            Badge.success "Won" visible={g.w}
+            Badge.neutral "Lost" visible={!g.w}

@@ -1,0 +1,181 @@
+### Call Taker
+state callSecs=94
+state holdSecs=0
+state onHold=false
+state step=0
+state priority=0
+state type=""
+state address="1420 Alder Street, Unit 3B"
+state notes=""
+state assigned=[]
+state log=[{"time":"00:08","who":"Taker","text":"911, what is the address of your emergency?"},{"time":"00:15","who":"Caller","text":"1420 Alder Street, my neighbour just collapsed."},{"time":"00:31","who":"Taker","text":"Stay on the line, help is being arranged."}]
+state units=[{"id":"M12","name":"Medic 12","kind":"Ambulance","status":"Available","km":1.2},{"id":"E4","name":"Engine 4","kind":"Fire","status":"Available","km":0.8},{"id":"P31","name":"Patrol 31","kind":"Police","status":"En route elsewhere","km":2.4},{"id":"M7","name":"Medic 7","kind":"Ambulance","status":"Busy","km":4.9}]
+state colors=["#FF16A34A","#FFCA8A04","#FFEA580C","#FFDC2626"]
+state levels=["P4 Low","P3 Moderate","P2 Urgent","P1 Critical"]
+every 1s onTick={callSecs=callSecs+1}
+every 1s when onHold onTick={holdSecs=holdSecs+1}
+App
+  Sidebar
+    Brand "Dispatch One" icon="support_agent"
+    NavItem "Active call" icon="call" selected={true}
+    NavItem "Incident log" icon="history" onTap={go incident-log}
+    Spacer grow
+    Text.muted "Taker 204, Ines Moreau"
+  Main
+    Nav
+      Row gap=12 middle
+        Heading "Incoming call 0412" level=1
+        Badge.neutral "{duration(callSecs)}"
+      Row gap=8 middle
+        Box fill={colors[priority]} radius=6 pad=[12,6,12,6]
+          Text.strong "{levels[priority]}" color=#FFFFFFFF
+        if onHold
+          Badge.warning "On hold {duration(holdSecs)}"
+        Button.outline "Hold" icon="pause" onTap={onHold=true; open hold}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Column grow gap=16
+          Card gap=12
+            Text.strong "Caller location"
+            LocationMap lat=47.6205 lng=-122.3493 accuracy=35 h=220
+            Row gap=8 middle
+              Input "Address" bind=address grow
+              Button.outline "Re-locate" icon="my_location" onTap={toast "Location refreshed, accuracy 35 m"}
+          Card gap=12
+            Text.strong "Type of emergency"
+            Grid cols=4 gap=8
+              Card onTap={type="Medical"; priority=max(priority,2)}
+                Column center gap=4
+                  Icon "medical_services"
+                  Text.strong "Medical" center
+              Card onTap={type="Fire"; priority=max(priority,2)}
+                Column center gap=4
+                  Icon "local_fire_department"
+                  Text.strong "Fire" center
+              Card onTap={type="Police"; priority=max(priority,1)}
+                Column center gap=4
+                  Icon "local_police"
+                  Text.strong "Police" center
+              Card onTap={type="Traffic"; priority=max(priority,1)}
+                Column center gap=4
+                  Icon "car_crash"
+                  Text.strong "Traffic" center
+            if type!=""
+              Badge.primary "Selected: {type}"
+          Card gap=12
+            Row between middle
+              Text.strong "Call script"
+              Text.muted "Step {min(step+1,5)} of 5"
+            Progress {min(step,5)/5}
+            if step==0
+              Text.heading "Is this the exact address of the emergency?"
+              Row gap=8
+                ChoiceChip "Yes, confirmed" onTap={log=append(log,{"time":duration(callSecs),"who":"Caller","text":"Address confirmed."}); step=1}
+                ChoiceChip "Different location" onTap={log=append(log,{"time":duration(callSecs),"who":"Caller","text":"Different location given."}); address=""; toast "Enter the new address"}
+            if step==1
+              Text.heading "Is the person awake and breathing normally?"
+              Row gap=8
+                ChoiceChip "Yes" onTap={log=append(log,{"time":duration(callSecs),"who":"Caller","text":"Awake and breathing."}); step=2}
+                ChoiceChip "No" onTap={log=append(log,{"time":duration(callSecs),"who":"Caller","text":"Not breathing normally."}); priority=3; step=3}
+            if step==2
+              Text.heading "Is there severe bleeding or chest pain?"
+              Row gap=8
+                ChoiceChip "Yes" onTap={log=append(log,{"time":duration(callSecs),"who":"Caller","text":"Severe bleeding or chest pain."}); priority=max(priority,2); step=4}
+                ChoiceChip "No" onTap={log=append(log,{"time":duration(callSecs),"who":"Caller","text":"No bleeding or chest pain."}); priority=max(priority,1); step=4}
+            if step==3
+              Text.heading "Can someone start chest compressions now? Count out loud with them."
+              Row gap=8
+                ChoiceChip "Yes, started" onTap={log=append(log,{"time":duration(callSecs),"who":"Taker","text":"CPR instructions given, compressions started."}); step=4}
+                ChoiceChip "No one able" onTap={log=append(log,{"time":duration(callSecs),"who":"Caller","text":"No one able to do CPR."}); step=4}
+            if step>=4
+              Text.success "Script complete. Assign a unit and keep the caller on the line."
+            Row gap=8
+              Button.ghost "Back" disabled={step==0} onTap={step=max(0,step-1)}
+              Button.ghost "Restart script" onTap={step=0; priority=0}
+        Pane w=360 pad=0 gap=16
+          Card gap=8
+            Text.strong "Nearby units"
+            each u in units
+              UnitRow name="{u.name}" kind="{u.kind}" status="{u.status}" km={u.km} assigned={contains(assigned,u.id)} onAssign={assigned=append(assigned,u.id); log=append(log,{"time":duration(callSecs),"who":"Dispatch","text":"{u.name} assigned."}); toast "{u.name} assigned"}
+          Card gap=8
+            Text.strong "What was said"
+            Timeline items={log}
+          Card gap=8
+            Text.strong "Notes"
+            Input "Notes" "Door code, pets, hazards" multiline bind=notes
+            Button "Save notes" onTap={log=append(log,{"time":duration(callSecs),"who":"Note","text":notes}); notes=""; toast "Note saved"}
+Sheet#hold "Caller on hold"
+  Column center gap=12
+    Text "Hold time" center
+    Text.strong "{duration(holdSecs)}" size=48 center
+    Text.muted "The caller hears the hold message. Release before 60 seconds." center
+    Row gap=8
+      Button.outline "Release" onTap={onHold=false; holdSecs=0; close}
+      Button "Keep holding" onTap={close}
+
+### Incident Log
+state filter="All"
+state sel=""
+state incidents=[{"id":"0412","time":"14:32","type":"Medical","address":"1420 Alder Street","level":3,"status":"Active"},{"id":"0411","time":"14:18","type":"Traffic","address":"Route 9 and Pine","level":1,"status":"Units assigned"},{"id":"0410","time":"14:02","type":"Fire","address":"88 Mill Lane","level":2,"status":"Closed"},{"id":"0409","time":"13:47","type":"Police","address":"310 Harbor Way","level":1,"status":"Closed"}]
+state levels=["P4 Low","P3 Moderate","P2 Urgent","P1 Critical"]
+App
+  Sidebar
+    Brand "Dispatch One" icon="support_agent"
+    NavItem "Active call" icon="call" onTap={go call-taker}
+    NavItem "Incident log" icon="history" selected={true}
+    Spacer grow
+    Text.muted "Taker 204, Ines Moreau"
+  Main
+    Nav
+      Heading "Incident log" level=1
+      Row gap=8
+        SegmentedButton items=["All","Active","Closed"] bind=filter
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Row gap=8
+          Text.muted "No." w=60
+          Text.muted "Time" w=70
+          Text.muted "Type" w=90
+          Text.muted "Address" grow
+          Text.muted "Priority" w=110
+          Text.muted "Status" w=130
+        Divider
+        each i in filter=="All" ? incidents : filter=="Active" ? filter(incidents,x=>x.status!="Closed") : filter(incidents,x=>x.status=="Closed")
+          Row gap=8 middle onTap={sel=i.id; open detail}
+            Text.strong "{i.id}" w=60
+            Text "{i.time}" w=70
+            Text "{i.type}" w=90
+            Text "{i.address}" grow
+            Text "{levels[i.level]}" w=110
+            Badge.info "{i.status}"
+Dialog#detail "Incident {sel}" "Summary of the selected incident"
+  Column gap=8
+    Text "Opened by Taker 204. Caller location accurate to 35 m."
+    Button "Close" onTap={close}
+
+// A map cannot be drawn with the core words; shown as a labelled box with a pin and an accuracy ring.
+define LocationMap lat=0 lng=0 accuracy=50 h=200
+  Stack h={h} fill=#FFE5E7EB radius=8 center middle
+    Box w={accuracy*2} h={accuracy*2} radius={accuracy} fill=#334285F4 border=1
+    Icon "location_on" color=#FFDC2626
+    Text.caption "Map {lat}, {lng}  (accuracy {accuracy} m)"
+
+define UnitRow name="" kind="" status="" km=0 assigned=false onAssign
+  Row gap=8 middle
+    Icon "local_shipping"
+    Column grow
+      Text.strong "{name}"
+      Text.caption "{kind}, {status}, {km} km"
+    if assigned
+      Badge.success "Assigned"
+    if !assigned
+      Button.outline "Assign" onTap={onAssign}
+
+define Timeline items=[]
+  Column gap=8
+    each e in items
+      Row gap=8 top
+        Text.mono "{e.time}" w=50
+        Column grow
+          Text.caption "{e.who}"
+          Text "{e.text}"

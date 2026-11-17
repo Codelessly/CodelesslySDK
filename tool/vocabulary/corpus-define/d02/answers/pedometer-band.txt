@@ -1,0 +1,124 @@
+### Today
+state page=0
+state steps=7412
+state goal=10000
+state reached=false
+state hr=72
+state dim=false
+state charging=false
+state battery=64
+state idle=0
+every 1s onTick={steps=steps+4; hr=clamp(hr+(steps%3)-1,64,96); idle=idle+1; dim=idle>8; reached=reached || steps>=goal}
+every 500 when steps>=goal && !reached onTick={vibrate 400}
+Stack w=240 h=240 radius=120 fill=#FF000000 onTap={idle=0; dim=false} onRaise={idle=0; dim=false}
+  if charging
+    Column center middle gap=10
+      Battery level={battery} charging=true
+      Text "{battery}%" color=#FFFFFFFF size=36 weight=700
+      Text.caption "Charging" color=#FF9CA3AF
+  if !charging
+    Pages bind=page h=240 onSwipeLeft={idle=0} onSwipeRight={idle=0}
+      Column center middle gap=4 opacity={dim ? 0.3 : 1}
+        Stack center middle w=170 h=170
+          Ring {min(steps/goal,1)} size=170 thickness=14 color=#FF22C55E
+          Column center gap=0
+            Icon "directions_walk" color=#FF22C55E
+            Text "{steps}" size=40 weight=700 color=#FFFFFFFF
+            Text.caption "of {goal}" color=#FF9CA3AF
+        if reached
+          Row gap=4 center animate=pop
+            Icon "star" color=#FFFACC15
+            Text.caption "Goal reached" color=#FFFACC15
+      Column center middle gap=6
+        Icon "route" color=#FF38BDF8
+        Text "{fixed(steps*0.00078,2)} km" size=36 weight=700 color=#FFFFFFFF
+        Text.caption "distance today" color=#FF9CA3AF
+        Progress {min(steps*0.00078/8,1)} w=140
+      Column center middle gap=6
+        Icon "local_fire_department" color=#FFF97316
+        Text "{round(steps*0.04,0)} kcal" size=36 weight=700 color=#FFFFFFFF
+        Text.caption "active energy" color=#FF9CA3AF
+      Column center middle gap=4
+        Heart bpm={hr} size=64
+        Text "{hr}" size=44 weight=700 color=#FFFFFFFF
+        Text.caption "bpm" color=#FF9CA3AF
+        Sparkline values=[68,70,71,74,72,75,73,{hr}] w=120 h=30
+    Dots bind=page count=4
+
+### Stopwatch and Sleep
+state page=0
+state running=false
+state ms=0
+state laps=[]
+state lastLap=0
+every 100 when running onTick={ms=ms+100}
+Stack w=240 h=240 radius=120 fill=#FF000000
+  Pages bind=page h=240
+    Column center middle gap=8
+      Text.caption "STOPWATCH" color=#FF9CA3AF
+      Text.mono "{duration(floor(ms/1000))}.{floor((ms%1000)/100)}" size=38 weight=700 color=#FFFFFFFF
+      Row gap=10
+        IconButton {running ? "stop" : "play_arrow"} tooltip="Start or stop" onTap={running=!running}
+        IconButton "flag" tooltip="Lap" onTap={running ? {laps=append(laps,{"n":length(laps)+1,"t":ms-lastLap}); lastLap=ms} : }
+        IconButton "restart_alt" tooltip="Reset" onTap={running=false; ms=0; laps=[]; lastLap=0}
+      if length(laps)>0
+        Text.caption "Lap {last(laps).n}  {fixed(last(laps).t/1000,1)} s" color=#FF38BDF8
+    Column center middle gap=6
+      Icon "bedtime" color=#FFA78BFA
+      Text "7 h 24 min" size=32 weight=700 color=#FFFFFFFF
+      Text.caption "slept last night" color=#FF9CA3AF
+      BarChart values=[6.5,7,5.8,7.4,8,6.9,7.4] labels=["M","T","W","T","F","S","S"] w=170 h=60
+  Dots bind=page count=2
+
+### Alarm and Alerts
+state hour=6
+state minute=45
+state alarmOn=true
+state field="hour"
+state note="Maya: Running late, start without me. See you at the trail head at 7"
+state battery=64
+state charging=false
+state dim=false
+state offset=0
+every 200 onTick={offset=(offset+4)%360}
+Stack w=240 h=240 radius=120 fill=#FF000000 onRaise={dim=false} onWristDown={dim=true}
+  Column center middle gap=8 opacity={dim ? 0.25 : 1}
+    Text.caption "NOTIFICATION" color=#FF9CA3AF
+    Marquee "{note}" speed=40 w=170 color=#FFFFFFFF
+    Divider w=150
+    Text.caption "ALARM" color=#FF9CA3AF
+    Row middle gap=6
+      DigitWheel bind=hour min=0 max=23 pad=2 onChange={vibrate 20}
+      Text "{':'}" size=34 color=#FFFFFFFF
+      DigitWheel bind=minute min=0 max=59 pad=2 onChange={vibrate 20}
+    Toggle "On" bind=alarmOn
+    Row gap=6 middle
+      Battery level={battery} charging={charging} size=18
+      Text.caption "{battery}%" color=#FF9CA3AF
+      Button.outline "Charge" onTap={charging=!charging}
+
+// A tiny-screen battery graphic, drawn as a bar in a case with a bolt when charging.
+define Battery level=50 charging=false size=48
+  Row middle gap=2
+    Box w={size*1.6} h={size} radius=6 border=2 pad=3
+      Box w={(size*1.6-10)*level/100} h={size-10} radius=3 fill={level<20 ? "#FFEF4444" : "#FF22C55E"}
+    Box w=4 h={size/3} radius=2 fill=#FF9CA3AF
+    if charging
+      Icon "bolt" color=#FFFACC15
+
+// A heart that beats with the pulse; the beat rate follows bpm.
+define Heart bpm=72 size=48
+  Icon "favorite" size={size} color=#FFEF4444 animate=pulse duration={60000/bpm}
+
+// A single line of text that scrolls sideways when longer than its width.
+define Marquee "text" speed=40 w=180 color=#FFFFFFFF
+  Row scroll w={w} animate=slide-left duration={length(text)*1000/speed}
+    Text "{text}" color={color}
+
+// A column of digits turned by swiping up or down; tap steps it by one.
+define DigitWheel bind=value min=0 max=59 pad=2 onChange
+  state value=0
+  Column center gap=0 onSwipeUp={value=value>=max ? min : value+1; onChange(value)} onSwipeDown={value=value<=min ? max : value-1; onChange(value)}
+    Text.caption "{value<=min ? max : value-1}" color=#FF6B7280
+    Text "{value<10 ? '0' : ''}{value}" size=40 weight=700 color=#FFFFFFFF onTap={value=value>=max ? min : value+1; onChange(value)}
+    Text.caption "{value>=max ? min : value+1}" color=#FF6B7280

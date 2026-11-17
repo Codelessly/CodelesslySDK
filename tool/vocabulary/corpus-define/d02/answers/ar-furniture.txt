@@ -1,0 +1,269 @@
+### Product
+state angle=0
+state colorIdx=0
+state material="Boucle"
+state showDims=true
+state qty=1
+state fav=false
+state colors=[{"name":"Oat","hex":"#FFD8CBB5"},{"name":"Moss","hex":"#FF6B7A58"},{"name":"Clay","hex":"#FFB5654A"},{"name":"Ink","hex":"#FF2B3240"}]
+state materials=["Boucle","Linen","Velvet","Leather"]
+state prices={"Boucle":649,"Linen":599,"Velvet":699,"Leather":899}
+Page
+  Nav sticky
+    Brand "Placewell" icon="chair"
+    Row gap=4
+      Link "Living" onTap={toast "Living room"}
+      Link "Bedroom" onTap={toast "Bedroom"}
+      Link "Office" onTap={toast "Office"}
+    Row gap=8
+      IconButton "favorite" tooltip="Saved" onTap={fav=!fav}
+      Button.outline "Cart" onTap={go cart}
+  Section
+    Row gap=48
+      Column grow gap=12
+        Viewer3D "Oslo Lounge Chair" angle={angle} color={colors[colorIdx].hex} dims={showDims} onRotate={angle=result}
+        Row gap=12 middle
+          IconButton "rotate_left" tooltip="Rotate left" onTap={angle=(angle+330)%360}
+          Slider bind=angle min=0 max=359
+          IconButton "rotate_right" tooltip="Rotate right" onTap={angle=(angle+30)%360}
+        Row between
+          Text.muted "Drag the chair or the slider to turn it. {angle} degrees"
+          Toggle "Dimensions" bind=showDims
+      Column grow gap=16
+        Row between
+          Badge.success "In stock, ships in 5 days"
+          Row gap=4 middle
+            Icon "star"
+            Text.strong "4.8"
+            Text.muted "(212)"
+        Heading "Oslo Lounge Chair" level=1
+        Text.muted "A low, deep armchair in solid ash with a high-density foam seat. Made to order in Porto."
+        Text.strong "Colour: {colors[colorIdx].name}"
+        Row gap=12
+          each c in colors
+            Swatch "{c.name}" fill={c.hex} selected={colorIdx==index} onTap={colorIdx=index}
+        Text.strong "Material: {material}"
+        Row gap=8
+          each m in materials
+            ChoiceChip "{m}" selected={material==m} onTap={material=m}
+        Divider
+        Row between middle
+          Text size=32 weight=700 "{money(prices[material]*qty,'$',0)}"
+          Row gap=8 middle
+            Button.outline "-" onTap={qty=max(1,qty-1)}
+            Text.strong "{qty}"
+            Button.outline "+" onTap={qty=min(9,qty+1)}
+        Row gap=12
+          Button "Add to cart" size=large grow onTap={emit addToCart; toast "Added to cart"}
+          Button.outline "View in your room" size=large grow onTap={go view-in-room}
+        Accordion "Dimensions and care"
+          Text.muted "Width 78 cm, depth 84 cm, height 72 cm, seat height 41 cm. Wipe clean with a damp cloth."
+    Section tint
+      Heading "Pairs well with" level=3
+      Grid cols=3 gap=24
+        Card gap=8
+          Image "https://images.placewell.example/ottoman.jpg" h=140
+          Text.strong "Oslo Ottoman"
+          Text.muted "$229"
+        Card gap=8
+          Image "https://images.placewell.example/sidetable.jpg" h=140
+          Text.strong "Fjord Side Table"
+          Text.muted "$189"
+        Card gap=8
+          Image "https://images.placewell.example/floorlamp.jpg" h=140
+          Text.strong "Arc Floor Lamp"
+          Text.muted "$159"
+  Footer
+    Row between
+      Text.strong "Placewell"
+      Text.muted "30-day returns on every order"
+
+### View in room
+state placed=false
+state turn=0
+state scale=100
+state shots=[]
+state flash=false
+App
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Back" onTap={go product}
+        Heading "View in your room"
+      Button.outline "Planner" onTap={go room-planner}
+    Column pad=24 gap=16 maxw=720
+      CameraView "Point your phone at the floor" ring={placed} item="Oslo Lounge Chair" turn={turn} scale={scale} onPlace={placed=true} onMove={emit moveItem result}
+      if !placed
+        Text.muted center "Move your phone slowly until the ring appears, then tap the floor to place the chair."
+        Button "Place the chair here" onTap={placed=true; toast "Chair placed"}
+      if placed
+        Card gap=12
+          Row between middle
+            Text.strong "Rotate"
+            Row gap=8 middle
+              IconButton "rotate_left" tooltip="Rotate left" onTap={turn=(turn+345)%360}
+              Text.muted w=60 center "{turn} deg"
+              IconButton "rotate_right" tooltip="Rotate right" onTap={turn=(turn+15)%360}
+          Row gap=12 middle
+            Icon "zoom_out_map"
+            Slider bind=scale min=70 max=130
+            Text.muted w=50 "{scale}%"
+        Row gap=12 center
+          IconButton "refresh" tooltip="Reset" onTap={placed=false; turn=0; scale=100}
+          Button "Take snapshot" icon="photo_camera" onTap={shots=append(shots,{"id":length(shots)+1,"turn":turn}); flash=true; toast "Snapshot saved"}
+          Button.outline "Add to cart" onTap={emit addToCart; toast "Added to cart"}
+        if length(shots)>0
+          Text.strong "Snapshots ({length(shots)})"
+          Row scroll gap=8
+            each s in shots
+              Box w=96 h=96 radius=8 fill=#FFE5E7EB center middle onTap={open shot}
+                Icon "image"
+                Text.caption "View {s.id}"
+  Sheet#shot "Snapshot"
+    Box h=200 radius=8 fill=#FFE5E7EB center middle
+      Icon "image"
+    Row gap=8
+      Button "Share" icon="share" onTap={toast "Shared"; close}
+      Button.outline "Delete" onTap={shots=removeAt(shots,length(shots)-1); close}
+
+### Room planner
+state sel="chair"
+state placedAt={"sofa":10,"chair":21,"table":13}
+state rotation={"sofa":0,"chair":0,"table":0}
+state pieces=[{"id":"sofa","name":"Lund Sofa","size":"210 x 90 cm","icon":"weekend"},{"id":"chair","name":"Oslo Lounge Chair","size":"78 x 84 cm","icon":"chair"},{"id":"table","name":"Fjord Side Table","size":"45 x 45 cm","icon":"table_restaurant"}]
+state cartCount=2
+App
+  Sidebar
+    Brand "Placewell" icon="chair"
+    NavItem "Product" icon="chair" onTap={go product}
+    NavItem "View in room" icon="photo_camera" onTap={go view-in-room}
+    NavItem "Room planner" icon="map" selected={true}
+    NavItem "Cart" icon="shopping_cart" badge="{cartCount}" onTap={go cart}
+    Spacer grow
+    Text.muted "Living room, 4.2 x 3.6 m"
+  Main
+    Nav
+      Heading "Room planner"
+      Row gap=8
+        Button.outline "Reset layout" onTap={placedAt={"sofa":10,"chair":21,"table":13}; rotation={"sofa":0,"chair":0,"table":0}}
+        Button "Save plan" onTap={toast "Plan saved"}
+    Column pad=24 gap=16
+      Text.muted "Drag a piece from the list onto the floor plan. Select one to rotate it."
+      FloorPlan cols=8 rows=6 items={pieces} placed={placedAt} rotation={rotation} selected={sel} onMove={placedAt=with(placedAt,result.id,result.cell)} onSelect={sel=result}
+  Pane w=320 pad=16 gap=12
+    Text.strong "Pieces"
+    each p in pieces
+      Card gap=8 drag=piece(p.id) onTap={sel=p.id}
+        Row gap=12 middle
+          IconTile "{p.icon}"
+          Column grow
+            Text.strong "{p.name}"
+            Text.muted "{p.size}"
+          if sel==p.id
+            Icon "check_circle"
+    Divider
+    Text.strong "Rotate selected"
+    Row gap=8 middle
+      IconButton "rotate_left" tooltip="Rotate left" onTap={rotation=with(rotation,sel,(rotation[sel]+270)%360)}
+      Text.muted grow center "{rotation[sel]} deg"
+      IconButton "rotate_right" tooltip="Rotate right" onTap={rotation=with(rotation,sel,(rotation[sel]+90)%360)}
+    Button.outline "Remove from plan" onTap={placedAt=with(placedAt,sel,-1)}
+
+### Cart
+state items=[{"id":1,"name":"Oslo Lounge Chair","opt":"Moss, Boucle","qty":1,"price":649},{"id":2,"name":"Fjord Side Table","opt":"Ash","qty":2,"price":189}]
+state promo=""
+state promoApplied=false
+state shipping="standard"
+Page
+  Nav sticky
+    Brand "Placewell" icon="chair"
+    Row gap=4
+      Link "Living" onTap={go product}
+      Link "Room planner" onTap={go room-planner}
+    Button.outline "Continue shopping" onTap={go product}
+  Section
+    Heading "Your cart" level=1
+    Row gap=32 top
+      Column grow gap=12
+        if isEmpty(items)
+          Card gap=8 center
+            Text.muted "Your cart is empty."
+            Button "Browse furniture" onTap={go product}
+        each it in items
+          Card
+            Row gap=16 middle
+              Image "https://images.placewell.example/item-{it.id}.jpg" w=96 h=96
+              Column grow gap=4
+                Text.strong "{it.name}"
+                Text.muted "{it.opt}"
+                Row gap=8 middle
+                  Button.outline "-" onTap={items=updateWhere(items,r=>r.id==it.id,r=>with(r,"qty",max(1,r.qty-1)))}
+                  Text.strong "{it.qty}"
+                  Button.outline "+" onTap={items=updateWhere(items,r=>r.id==it.id,r=>with(r,"qty",r.qty+1))}
+              Column end gap=8
+                Text.strong "{money(it.price*it.qty,'$',0)}"
+                IconButton "delete" tooltip="Remove" onTap={items=removeWhere(items,r=>r.id==it.id)}
+      Column w=320 gap=12 sticky
+        Card gap=12
+          Heading "Order summary" level=3
+          Row between
+            Text.muted "Subtotal"
+            Text "{money(sum(items,x=>x.price*x.qty),'$',0)}"
+          Row gap=8
+            Input "Promo code" bind=promo grow
+            Button.outline "Apply" onTap={promo=="NEST10" ? promoApplied=true : toast "Code not valid"}
+          if promoApplied
+            Row between
+              Text.success "Promo NEST10"
+              Text.success "-{money(sum(items,x=>x.price*x.qty)*0.1,'$',0)}"
+          Select "Delivery" items=["standard","white glove"] bind=shipping
+          Row between
+            Text.muted "Delivery"
+            Text "{shipping=='standard' ? 'Free' : '$79'}"
+          Divider
+          Row between
+            Text.strong "Total"
+            Text.strong "{money(sum(items,x=>x.price*x.qty)*(promoApplied ? 0.9 : 1)+(shipping=='standard' ? 0 : 79),'$',0)}"
+          Button "Checkout" size=large onTap={emit checkout; open confirm}
+  Footer
+    Text.muted "30-day returns on every order"
+  Dialog#confirm "Order placed" "A confirmation is on its way to your email."
+    Button "Done" onTap={items=[]; close}
+
+// A 3D model viewer cannot be drawn; it shows a labelled tinted box that turns with the swipe.
+define Viewer3D "name" angle=0 color=#FFD8CBB5 dims=true onRotate
+  Stack h=360 radius=12 fill=#FFF3F4F6 center middle onSwipeLeft={onRotate((angle+30)%360)} onSwipeRight={onRotate((angle+330)%360)}
+    Column center gap=4
+      Box w={160-abs(90-angle%180)} h=150 radius=24 fill={color}
+      Text.caption "3D model: {name}, view {angle} deg"
+    if dims
+      Column end bottom pad=12
+        Text.caption "W 78 cm   D 84 cm   H 72 cm"
+
+define Swatch "name" fill=#FFD8CBB5 selected=false onTap
+  Column center gap=4 onTap={onTap}
+    Box w=36 h=36 radius=18 fill={fill} border={selected ? 3 : 1}
+    Text.caption "{name}"
+
+// A live camera cannot be drawn; it shows a labelled frame with a placement ring and handles.
+define CameraView "hint" ring=false item="" turn=0 scale=100 onPlace onMove
+  Stack h=420 radius=12 fill=#FF1F2937 center middle onTap={onPlace}
+    Text.caption color=#FFD1D5DB "Camera: {hint}"
+    if ring
+      Column center middle gap=4
+        Box w={1.2*scale} h={1.2*scale} radius={0.6*scale} border=2 center middle
+          Icon "chair"
+        Text.caption color=#FFFFFFFF "{item}, {turn} deg"
+    Row between pad=12 top
+      Icon "videocam"
+      Text.caption color=#FFD1D5DB "Floor detected"
+
+define FloorPlan cols=8 rows=6 items=[] placed={} rotation={} selected="" onMove onSelect
+  Grid cols={cols} gap=2 border=4
+    each cell in range(cols*rows)
+      Box h=56 fill=#FFF9FAFB border=1 center middle drop=piece onDrop={onMove({"id":result.data,"cell":cell})}
+        each it in items
+          if placed[it.id]==cell
+            Box pad=6 radius=6 fill={selected==it.id ? #FF2563EB : #FF6B7280} onTap={onSelect(it.id)}
+              Icon "{it.icon}" color=#FFFFFFFF
+              Text.caption color=#FFFFFFFF "{rotation[it.id]}"

@@ -1,0 +1,3 @@
+App: Stampbook, a loyalty card wallet. Cards for local shops as a stack you flick through, each with a grid of stamps filled in and the next free one pulsing; add a stamp by scanning a code at the till with a stamp animation; a reward unlocked with a redeem slide that shows a timed barcode; a shop finder map; a history of visits; expiry warnings; a bonus double stamp day banner.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.
