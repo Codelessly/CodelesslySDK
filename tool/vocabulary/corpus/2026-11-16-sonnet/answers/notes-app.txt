@@ -1,0 +1,218 @@
+### Workspace
+state notebooks=[{"id":"all","name":"All notes","parent":""},{"id":"journal","name":"Journal","parent":""},{"id":"j24","name":"2026","parent":"journal"},{"id":"work","name":"Work","parent":""},{"id":"proj","name":"Projects","parent":"work"},{"id":"read","name":"Reading","parent":""},{"id":"recipes","name":"Recipes","parent":""}] persist
+state notes=[{"id":"n1","title":"Morning pages","body":"Woke before the light and wrote three pages by hand. The trick is not to reread them.\n\nThe quiet hour is the only one that belongs to me.","nb":"j24","tags":["journal","habit"],"pinned":true,"created":"2026-11-02","edited":"2026-11-15","trashed":false},{"id":"n2","title":"Q4 planning notes","body":"Three bets for the quarter: onboarding, offline mode, and the export format.\n\nOpen question: who owns the migration?","nb":"proj","tags":["work","planning"],"pinned":false,"created":"2026-10-28","edited":"2026-11-14","trashed":false},{"id":"n3","title":"On Marginalia","body":"Notes on reading with a pencil: underline sparingly, argue in the margin, and return a year later.","nb":"read","tags":["reading","habit"],"pinned":false,"created":"2026-09-12","edited":"2026-11-10","trashed":false},{"id":"n4","title":"Sourdough, third attempt","body":"900g flour, 700g water, 20g salt, 180g starter. Fold every thirty minutes for three hours.","nb":"recipes","tags":["recipes","baking"],"pinned":false,"created":"2026-11-01","edited":"2026-11-09","trashed":false},{"id":"n5","title":"Meeting with Priya","body":"She wants the draft by Friday. Send the outline first and ask about the budget line.","nb":"proj","tags":["work"],"pinned":false,"created":"2026-11-05","edited":"2026-11-08","trashed":false},{"id":"n6","title":"Old shopping list","body":"Oats, lemons, candles, stamps.","nb":"journal","tags":[],"pinned":false,"created":"2026-08-03","edited":"2026-08-03","trashed":true}] persist
+state theme="Paper" persist
+state fontSize=18 persist
+state sort="Edited" persist
+state nb="all" persist
+state openId="n1" persist
+state pane="list"
+state folded=[] persist
+state q=""
+state selecting=false
+state picked=[]
+state saved=true
+state tagDraft=""
+state tag=""
+state view="workspace"
+state expandedNb={}
+Shortcut "mod+k" onPress={open palette}
+Shortcut "mod+n" onPress={notes=append(notes,{"id":"n"+(length(notes)+1),"title":"Untitled","body":"","nb":nb=="all"?"journal":nb,"tags":[],"pinned":false,"created":today(),"edited":today(),"trashed":false}); openId="n"+(length(notes)+1); pane="note"}
+App
+  Sidebar w=240 border-right=#FFE3D9C3 fill=#FFF3EBDA show=desktop
+    Brand "Inkwell" icon="auto_stories"
+    Button "New note" icon="add" onTap={emit newNote}
+    Input "Search" "Ctrl K" icon="search" readonly onTap={open palette}
+    Text.caption "NOTEBOOKS"
+    Tree items={notebooks} bind=nb parent="parent" foldable foldedBind=folded label="name" count={n=>count(notes,x=>!x.trashed && (n.id=="all" || x.nb==n.id))} onSelect={nb=result; view="workspace"; pane="list"}
+    Divider
+    NavItem "Tags" icon="sell" selected={view=="tags"} onTap={view="tags"}
+    NavItem "Trash" icon="delete" badge="{count(notes,x=>x.trashed)}" selected={view=="trash"} onTap={view="trash"}
+    NavItem "Settings" icon="settings" selected={view=="settings"} onTap={view="settings"}
+    Spacer grow
+    Text.caption "{count(notes,x=>!x.trashed)} notes"
+  Main
+    Nav show=phone
+      IconButton "menu" onTap={open nbSheet}
+      Heading "Inkwell" level=3
+      Row gap=4
+        IconButton "search" onTap={open palette}
+        IconButton "add" onTap={emit newNote}
+    Splitter#panes
+      Pane w=340 minw=260 resizable show={view=="workspace" && (pane=="list" || !phone)}
+        Nav
+          Heading "{first(map(filter(notebooks,x=>x.id==nb),x=>x.name))}" level=3
+          Row gap=4
+            Select bind=sort items=["Edited","Created","Title"] w=110
+            IconButton "checklist" onTap={selecting=!selecting; picked=[]}
+        if selecting
+          Row gap=8 pad=8 fill=#FFEFE4CC
+            Text.small "{length(picked)} selected"
+            Spacer grow
+            Button.ghost "Move" icon="drive_file_move" onTap={open moveMenu}
+            Button.ghost "Tag" icon="sell" onTap={open tagPopover}
+            Button.ghost "Delete" icon="delete" onTap={open confirmMany}
+        if count(notes,x=>!x.trashed && (nb=="all" || x.nb==nb))==0
+          EmptyState "This notebook is empty" "Start with a blank page." icon="edit_note"
+            Button "New note" onTap={emit newNote}
+        ListView scroll
+          each n in sortBy(sortByDesc(filter(notes,x=>!x.trashed && (nb=="all" || x.nb==nb)),x=>sort=="Title"?0:(sort=="Created"?x.created:x.edited)),x=>x.pinned?0:1)
+            ListTile selected={openId==n.id} onTap={openId=n.id; pane="note"} onLongPress={selecting=true; picked=append(picked,n.id)} menu=noteMenu
+              if selecting
+                Checkbox bind=picked value={n.id}
+              Column gap=2 grow
+                Row gap=6
+                  if n.pinned
+                    Icon "push_pin" size=14
+                  Text.strong "{n.title}"
+                Text.muted "{slice(n.body,0,70)}"
+                Row gap=4
+                  Text.caption "{formatDate(n.edited,"MMM d")}"
+                  each t in n.tags
+                    Chip "{t}" size=small
+      Pane grow show={view=="workspace" && (pane=="note" || !phone)}
+        Nav show=phone
+          IconButton "arrow_back" onTap={pane="list"}
+          Heading "Note" level=3
+        Column pad=32 gap=12 maxw=760 scroll
+          Row between
+            Input.plain "Title" bind={find(notes,x=>x.id==openId).title} size=28 font="serif" weight=700 onChange={saved=false; notes=updateWhere(notes,x=>x.id==openId,x=>with(x,"edited",today()))} debounce=600 onSaved={saved=true}
+            Row gap=8
+              if saved
+                Row gap=4
+                  Icon "check" size=14 color=#FF8A6A3D
+                  Text.caption "Saved"
+              if !saved
+                Text.caption "Saving..."
+              Toggle "Pin" bind={find(notes,x=>x.id==openId).pinned}
+              IconButton "folder_open" onTap={open moveNote}
+              IconButton "delete" onTap={open confirmOne}
+          Row gap=6 wrap
+            each t in find(notes,x=>x.id==openId).tags
+              Chip "{t}" removable onRemove={notes=updateWhere(notes,x=>x.id==openId,x=>with(x,"tags",without(x.tags,t)))}
+            Autocomplete "Add tag" bind=tagDraft suggestions={unique(concat(["journal","work","reading","recipes","planning","habit","baking"],[]))} w=160 onSubmit={notes=updateWhere(notes,x=>x.id==openId,x=>with(x,"tags",unique(append(x.tags,lower(result))))); tagDraft=""}
+          Input.plain "Start writing..." multiline autogrow bind={find(notes,x=>x.id==openId).body} font="serif" size={fontSize} lineHeight=1.7 onChange={saved=false} debounce=600 onSaved={saved=true}
+          Text.caption "{length(filter(split(find(notes,x=>x.id==openId).body," "),w=>w!=""))} words"
+      Main grow show={view=="tags"}
+        Column pad=24 gap=16
+          Heading "Tags" level=1
+          Row gap=8 wrap
+            each t in unique(concat(map(notes,x=>x.tags[0]),[]))
+              ChoiceChip "{t} {count(notes,x=>!x.trashed && contains(x.tags,t))}" selected={tag==t} onTap={tag=t}
+          if tag!=""
+            Heading "Notes tagged {tag}" level=3
+            each n in filter(notes,x=>!x.trashed && contains(x.tags,tag))
+              ListTile "{n.title}" subtitle="{formatDate(n.edited,"MMM d")}" onTap={openId=n.id; view="workspace"; pane="note"}
+  Dialog#confirmOne "Move to trash?" "The note can be restored from the trash."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Move to trash" onTap={notes=updateWhere(notes,x=>x.id==openId,x=>with(x,"trashed",true)); toast "Moved to trash"; close}
+  Dialog#confirmMany "Delete {length(picked)} notes?" "They go to the trash."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Delete" onTap={notes=map(notes,x=>contains(picked,x.id)?with(x,"trashed",true):x); picked=[]; selecting=false; close}
+  Menu#moveNote
+    each b in notebooks
+      MenuItem "{b.name}" icon="folder" onTap={notes=updateWhere(notes,x=>x.id==openId,x=>with(x,"nb",b.id)); toast "Moved to {b.name}"}
+  Menu#moveMenu
+    each b in notebooks
+      MenuItem "{b.name}" icon="folder" onTap={notes=map(notes,x=>contains(picked,x.id)?with(x,"nb",b.id):x); picked=[]; selecting=false}
+  Popover#tagPopover
+    Autocomplete "Tag" bind=tagDraft suggestions=["journal","work","reading","recipes","planning","habit","baking"] onSubmit={notes=map(notes,x=>contains(picked,x.id)?with(x,"tags",unique(append(x.tags,lower(result)))):x); tagDraft=""; picked=[]; selecting=false; close}
+  Menu#noteMenu
+    MenuItem "Pin" icon="push_pin" onTap={notes=updateWhere(notes,x=>x.id==openId,x=>with(x,"pinned",!x.pinned))}
+    MenuItem "Move to..." icon="drive_file_move" onTap={open moveNote}
+    MenuItem "Delete" icon="delete" onTap={open confirmOne}
+  Sheet#nbSheet "Notebooks"
+    Tree items={notebooks} bind=nb parent="parent" foldable foldedBind=folded label="name" onSelect={nb=result; view="workspace"; pane="list"; close}
+    NavItem "Tags" icon="sell" onTap={view="tags"; close}
+    NavItem "Trash" icon="delete" onTap={view="trash"; close}
+    NavItem "Settings" icon="settings" onTap={view="settings"; close}
+
+### Search
+state pq=""
+state pcursor=0
+Dialog#palette "" top w=560
+  Input "Search notes, notebooks, actions" bind=pq autofocus icon="search" onChange={pcursor=0} onKeyDown={key=="ArrowDown"?pcursor=pcursor+1:(key=="ArrowUp"?pcursor=max(0,pcursor-1):pcursor=pcursor)}
+  CommandList query={pq} bind=pcursor fuzzy highlight onEnter={emit paletteRun result} onPick={close}
+    Group "Notes"
+      each n in filter(notes,x=>!x.trashed)
+        CommandItem "{n.title}" hint="{first(map(filter(notebooks,b=>b.id==n.nb),b=>b.name))}" icon="description" keywords="{n.body} {join(n.tags," ")}" onTap={openId=n.id; view="workspace"; pane="note"; close}
+    Group "Notebooks"
+      each b in notebooks
+        CommandItem "{b.name}" icon="folder" onTap={nb=b.id; view="workspace"; pane="list"; close}
+    Group "Actions"
+      CommandItem "New note" icon="add" shortcut="Ctrl N" onTap={emit newNote; close}
+      CommandItem "Open settings" icon="settings" onTap={view="settings"; close}
+      CommandItem "Open trash" icon="delete" onTap={view="trash"; close}
+      CommandItem "Toggle dark theme" icon="dark_mode" onTap={theme=theme=="Dark"?"Paper":"Dark"; close}
+    EmptyState "No matches" icon="search_off"
+  Row between pad=8
+    Text.caption "Up and down to move, Enter to open, Esc to close"
+    Text.caption "{length(notes)} notes"
+
+### Trash
+App
+  Sidebar w=240 fill=#FFF3EBDA
+    Brand "Inkwell" icon="auto_stories"
+    NavItem "Notes" icon="notes" onTap={go workspace}
+    NavItem "Tags" icon="sell" onTap={go tags}
+    NavItem "Trash" icon="delete" selected badge="{count(notes,x=>x.trashed)}"
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main
+    Nav
+      Heading "Trash" level=1
+      Button.outline "Empty trash" icon="delete_forever" disabled={count(notes,x=>x.trashed)==0} onTap={open confirmEmpty}
+    Column pad=24 gap=12 maxw=760
+      if count(notes,x=>x.trashed)==0
+        EmptyState "The trash is empty" "Deleted notes wait here until you empty it." icon="delete_outline"
+      each n in filter(notes,x=>x.trashed)
+        Card
+          Row between
+            Column gap=2
+              Text.strong "{n.title}"
+              Text.muted "{slice(n.body,0,80)}"
+            Row gap=8
+              Button.outline "Restore" icon="restore" onTap={notes=updateWhere(notes,x=>x.id==n.id,x=>with(x,"trashed",false)); toast "Restored"}
+              Button.destructive "Delete for ever" onTap={sel=n.id; open confirmForever}
+  Dialog#confirmForever "Delete for ever?" "This cannot be undone."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Delete for ever" onTap={notes=removeWhere(notes,x=>x.id==sel); close}
+  Dialog#confirmEmpty "Empty the trash?" "{count(notes,x=>x.trashed)} notes will be removed for ever."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Empty trash" onTap={notes=removeWhere(notes,x=>x.trashed); toast "Trash emptied"; close}
+
+### Settings
+App
+  Sidebar w=240 fill=#FFF3EBDA
+    Brand "Inkwell" icon="auto_stories"
+    NavItem "Notes" icon="notes" onTap={go workspace}
+    NavItem "Tags" icon="sell" onTap={go tags}
+    NavItem "Trash" icon="delete" onTap={go trash}
+    NavItem "Settings" icon="settings" selected
+  Main
+    Nav
+      Heading "Settings" level=1
+    Column pad=24 gap=20 maxw=640
+      Card gap=12
+        Text.strong "Theme"
+        SegmentedButton bind=theme items=["Paper","Sepia","Dark"]
+      Card gap=12
+        Text.strong "Font size"
+        Slider bind=fontSize min=14 max=28 step=1
+        Text.caption "{fontSize} px"
+        Box fill=#FFFBF6EA radius=8 pad=16
+          Text "The quiet hour is the only one that belongs to me." font="serif" size={fontSize} lineHeight=1.7
+      Card gap=12
+        Text.strong "Default sort"
+        Select bind=sort items=["Edited","Created","Title"]
+      Card gap=8
+        Text.strong "Shortcuts"
+        Row between
+          Text "Search and commands"
+          Text.mono "Ctrl K"
+        Row between
+          Text "New note"
+          Text.mono "Ctrl N"

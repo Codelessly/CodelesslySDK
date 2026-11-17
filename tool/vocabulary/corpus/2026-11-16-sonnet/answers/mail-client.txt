@@ -1,0 +1,237 @@
+### Mailbox
+state folder="inbox"
+state folders=[{"id":"inbox","name":"Inbox","icon":"inbox"},{"id":"starred","name":"Starred","icon":"star"},{"id":"drafts","name":"Drafts","icon":"edit_note"},{"id":"sent","name":"Sent","icon":"send"},{"id":"archive","name":"Archive","icon":"archive"},{"id":"trash","name":"Trash","icon":"delete"}]
+state msgs=[{"id":1,"folder":"inbox","from":"Ines Marchetti","email":"ines@harborlabs.io","to":"me@postbox.app","subject":"Q4 roadmap: review before Thursday","preview":"I've attached the draft with the three scenarios we discussed. Can you flag anything that looks off?","body":"Hi,\n\nI've attached the draft with the three scenarios we discussed on Monday. The second one assumes the migration lands in October, which I'm not sure is realistic.\n\nCan you flag anything that looks off before Thursday's review?\n\nThanks,\nInes","quoted":"On Mon, Nov 10, Ray wrote:\n> Let's go through the scenarios once the numbers are in.\n> I'll block an hour on Wednesday.","time":"9:42 AM","date":"Nov 16, 2026, 9:42 AM","unread":true,"starred":true,"attach":[{"name":"roadmap-q4.pdf","size":"1.2 MB","icon":"picture_as_pdf"},{"name":"scenarios.xlsx","size":"84 KB","icon":"table_chart"}]},{"id":2,"folder":"inbox","from":"Tomas Weber","email":"tomas@weber.dev","to":"me@postbox.app","subject":"Re: Build failing on main","preview":"Found it: the lockfile was regenerated with a different resolver. Pinning it back fixes the cache miss.","body":"Found it. The lockfile was regenerated with a different resolver, so every CI run missed the cache. Pinning it back fixes it.\n\nI'll open a PR shortly.\n\nTomas","quoted":"On Fri, Nov 14, Ray wrote:\n> CI went from 4 to 19 minutes overnight. Any idea?","time":"9:10 AM","date":"Nov 16, 2026, 9:10 AM","unread":true,"starred":false,"attach":[]},{"id":3,"folder":"inbox","from":"Northwind Airlines","email":"no-reply@northwind.example","to":"me@postbox.app","subject":"Your boarding pass for NW 218 to Lisbon","preview":"Check-in is open. Your seat is 14A. Gate information will appear 40 minutes before departure.","body":"Check-in is open for NW 218, Tuesday Nov 24.\n\nSeat 14A, Boarding group 3. Gate information appears 40 minutes before departure.","quoted":"","time":"Yesterday","date":"Nov 15, 2026, 6:30 PM","unread":false,"starred":false,"attach":[{"name":"boarding-pass.pdf","size":"212 KB","icon":"picture_as_pdf"}]},{"id":4,"folder":"inbox","from":"Priya Raman","email":"priya@raman.studio","to":"me@postbox.app","subject":"Invoice 0142 and the revised scope","preview":"Attached is the invoice for October. I also added a note on the scope change we agreed on the call.","body":"Hello,\n\nAttached is the invoice for October. I also added a note on the scope change we agreed on the call: the onboarding screens move to the next sprint.\n\nBest,\nPriya","quoted":"On Thu, Nov 12, Ray wrote:\n> Can you send the invoice before the 15th?","time":"Yesterday","date":"Nov 15, 2026, 11:05 AM","unread":false,"starred":false,"attach":[{"name":"invoice-0142.pdf","size":"96 KB","icon":"picture_as_pdf"}]},{"id":5,"folder":"inbox","from":"Fieldnotes Weekly","email":"hello@fieldnotes.example","to":"me@postbox.app","subject":"Issue 87: The quiet return of server rendering","preview":"This week: why teams are moving state back to the server, a field guide to cache headers, and a map of 40 tools.","body":"This week: why teams are moving state back to the server, a field guide to cache headers, and a map of 40 tools worth knowing.","quoted":"","time":"Nov 14","date":"Nov 14, 2026, 7:00 AM","unread":false,"starred":false,"attach":[]},{"id":6,"folder":"inbox","from":"Dana Okafor","email":"dana@okafor.co","to":"me@postbox.app","subject":"Lunch on Friday?","preview":"There's a new place by the canal that does a proper ramen. Noon work for you?","body":"There's a new place by the canal that does a proper ramen. Noon work for you?\n\nDana","quoted":"","time":"Nov 13","date":"Nov 13, 2026, 4:20 PM","unread":true,"starred":false,"attach":[]},{"id":7,"folder":"archive","from":"Harbor Labs HR","email":"hr@harborlabs.io","to":"me@postbox.app","subject":"Benefits enrolment closes Nov 30","preview":"A reminder that open enrolment closes at the end of the month.","body":"A reminder that open enrolment closes at the end of the month.","quoted":"","time":"Nov 6","date":"Nov 6, 2026, 8:00 AM","unread":false,"starred":false,"attach":[]}]
+state contacts=[{"name":"Ines Marchetti","email":"ines@harborlabs.io"},{"name":"Tomas Weber","email":"tomas@weber.dev"},{"name":"Priya Raman","email":"priya@raman.studio"},{"name":"Dana Okafor","email":"dana@okafor.co"},{"name":"Harbor Labs HR","email":"hr@harborlabs.io"}]
+state sel=[]
+state anchor=-1
+state openId=0
+state fUnread=false
+state fStarred=false
+state fAttach=false
+state headersOpen=false
+state quoteOpen=false
+state pane="list"
+state density="compact"
+state signature="Ray\nPostbox user"
+state visible={filter(msgs, m => m.folder==folder && (!fUnread || m.unread) && (!fStarred || m.starred) && (!fAttach || length(m.attach)>0))}
+state current={find(msgs, m => m.id==openId)}
+state unreadIn={count(msgs, m => m.folder==folder && m.unread)}
+Shortcut "c" onPress={open compose}
+Shortcut "r" when openId!=0 onPress={open compose}
+Shortcut "e" when openId!=0 onPress={msgs=updateWhere(msgs, m=>m.id==openId, m=>with(m,"folder","archive")); openId=0; toast "Archived"}
+Shortcut "j" onPress={openId=coalesce(first(slice(visible, min(length(visible)-1, indexOf(map(visible, m=>m.id), openId)+1), length(visible))).id, openId)}
+Shortcut "k" onPress={openId=coalesce(visible[max(0, indexOf(map(visible, m=>m.id), openId)-1)].id, openId)}
+Shortcut "ctrl+a" onPress={sel=map(visible, m=>m.id)}
+Shortcut "ctrl+k" onPress={open search}
+Shortcut "escape" onPress={sel=[]}
+App
+  SplitPane persist="postbox.panes" h=fill
+    Pane#folders w=220 min=160 max=320 collapse=tablet hide=phone
+      Column pad=12 gap=8
+        Brand "Postbox" icon="mail"
+        Button "Compose" icon="edit" onTap={open compose}
+        each f in folders
+          NavItem "{f.name}" icon="{f.icon}" badge="{count(msgs, m => m.folder==f.id && m.unread)}" selected={folder==f.id} onTap={folder=f.id; sel=[]; openId=0; pane="list"}
+        Spacer grow
+        NavItem "Search" icon="search" onTap={open search}
+        NavItem "Settings" icon="settings" onTap={go settings}
+    Splitter bind=paneA step=16 label="Resize folders and message list" hide=phone
+    Pane#list w=380 min=280 max=560 show={pane=="list"} grow-phone
+      Nav
+        Row gap=8 middle
+          IconButton "menu" show=phone onTap={open folderSheet}
+          Heading "{upper(first(folder))}{slice(folder,1,99)}" level=3
+          Badge.primary "{unreadIn} unread" visible={unreadIn>0}
+        Row gap=4
+          IconButton "search" onTap={open search}
+          IconButton "edit" show=phone onTap={open compose}
+      if length(sel) > 0
+        Row between middle pad=[12,6,12,6] fill=#FFE6F4F2 animate=slide-up duration=150
+          Row gap=8 middle
+            Checkbox bind=allSelected onChange={sel=result ? map(visible, m=>m.id) : []} checked={length(sel)==length(visible)}
+            Text.strong "{length(sel)} selected"
+          Row gap=4
+            IconButton "archive" tooltip="Archive" onTap={msgs=map(msgs, m=>contains(sel,m.id) ? with(m,"folder","archive") : m); sel=[]; toast "Archived"}
+            IconButton "mark_email_read" tooltip="Mark read" onTap={msgs=map(msgs, m=>contains(sel,m.id) ? with(m,"unread",false) : m); sel=[]}
+            IconButton "drive_file_move" tooltip="Move" onTap={open bulkMove}
+            IconButton "delete" tooltip="Delete" onTap={open confirmBulkDelete}
+            IconButton "close" tooltip="Clear selection" onTap={sel=[]}
+      Row gap=6 pad=[12,8,12,8] scroll border-bottom=#FFE2E8F0
+        FilterChip "Unread" bind=fUnread
+        FilterChip "Starred" bind=fStarred
+        FilterChip "Attachments" icon="attach_file" bind=fAttach
+      if length(visible) == 0
+        EmptyState icon="{(fUnread||fStarred||fAttach) ? 'filter_list_off' : 'inbox'}" title="{(fUnread||fStarred||fAttach) ? 'No messages match' : 'Nothing in ' + folder}" text="{(fUnread||fStarred||fAttach) ? 'Try turning off a filter.' : 'Messages you move here will show up.'}"
+          Button.outline "Clear filters" visible={fUnread||fStarred||fAttach} onTap={fUnread=false; fStarred=false; fAttach=false}
+      if length(visible) > 0
+        ListView density={density} selectable
+          each m in visible
+            SwipeRow onSwipeRight={msgs=updateWhere(msgs, x=>x.id==m.id, x=>with(x,"folder","archive")); toast "Archived"} onSwipeLeft={sel=[m.id]; open confirmBulkDelete} leftIcon="archive" leftColor=#FF0F766E rightIcon="delete" rightColor=#FFB42318 menu=rowMenu
+              Row gap=10 pad=[12,8,12,8] top selected={contains(sel,m.id) || openId==m.id} fill={contains(sel,m.id) ? '#FFE6F4F2' : (openId==m.id ? '#FFF1F5F9' : '#FFFFFFFF')} border-bottom=#FFEEF2F6 border-left={m.unread ? '#FF0F766E' : '#00000000'} onTap={openId=m.id; sel=[]; anchor=index; pane="read"; msgs=updateWhere(msgs, x=>x.id==m.id, x=>with(x,"unread",false))} onCtrlTap={sel=contains(sel,m.id) ? without(sel,m.id) : append(sel,m.id); anchor=index} onShiftTap={sel=map(slice(visible, min(max(anchor,0),index), max(max(anchor,0),index)+1), x=>x.id)}
+                Checkbox checked={contains(sel,m.id)} hide=phone onChange={sel=result ? append(sel,m.id) : without(sel,m.id); anchor=index}
+                Column grow gap=2
+                  Row between
+                    Text "{m.from}" weight={m.unread ? 700 : 400} color=#FF1E293B
+                    Row gap=4 middle
+                      Icon "attach_file" size=14 visible={length(m.attach)>0} color=#FF64748B
+                      Text.caption "{m.time}" color=#FF64748B
+                  Text "{m.subject}" weight={m.unread ? 700 : 500} color=#FF1E293B maxLines=1
+                  Row gap=6
+                    Text.caption "{m.preview}" color=#FF64748B maxLines=1 grow
+                    Icon "star" size=14 visible={m.starred} color=#FFD97706
+      Row between pad=[12,6,12,6] border-top=#FFE2E8F0
+        Text.caption "{length(visible)} messages"
+        Text.caption "Shift for a range, Ctrl to add" hide=phone color=#FF64748B
+    Splitter bind=paneB step=16 label="Resize message list and reading pane" hide=phone
+    Pane#read grow show={pane=="read"} show-tablet
+      if openId == 0
+        EmptyState icon="drafts" title="Select a message" text="Pick one from the list to read it here."
+      if openId != 0
+        Nav
+          Row gap=4 middle
+            IconButton "arrow_back" show=phone onTap={pane="list"}
+            IconButton "reply" tooltip="Reply (r)" onTap={open compose}
+            IconButton "forward" tooltip="Forward" onTap={open compose}
+            IconButton "{current.starred ? 'star' : 'star_border'}" tooltip="Star" onTap={msgs=updateWhere(msgs, x=>x.id==openId, x=>with(x,"starred",!x.starred))}
+          Row gap=4
+            IconButton "archive" tooltip="Archive (e)" onTap={msgs=updateWhere(msgs, x=>x.id==openId, x=>with(x,"folder","archive")); openId=0; pane="list"; toast "Archived"}
+            IconButton "drive_file_move" tooltip="Move to folder" onTap={open moveMenu}
+            IconButton "delete" tooltip="Delete" onTap={open confirmDelete}
+        Column scroll pad=24 gap=16 maxw=720
+          Heading "{current.subject}" level=2
+          Row gap=12 middle
+            Avatar "{current.from}" size=40
+            Column grow gap=2
+              Text.strong "{current.from}"
+              Text.caption "to me" color=#FF64748B
+            Text.caption "{current.time}" color=#FF64748B
+            IconButton "{headersOpen ? 'expand_less' : 'expand_more'}" tooltip="Details" onTap={headersOpen=!headersOpen}
+          if headersOpen
+            Card gap=4 animate=fade duration=150
+              Row gap=12
+                Text.caption "From" w=48 color=#FF64748B
+                Text.mono "{current.from} <{current.email}>"
+              Row gap=12
+                Text.caption "To" w=48 color=#FF64748B
+                Text.mono "{current.to}"
+              Row gap=12
+                Text.caption "Date" w=48 color=#FF64748B
+                Text.mono "{current.date}"
+          Text "{current.body}" lineHeight=1.65 selectable
+          if length(current.attach) > 0
+            Row gap=12 scroll
+              each a in current.attach
+                AttachmentTile "{a.name}" subtitle="{a.size}" icon="{a.icon}" onTap={emit openAttachment a.name} onDownload={toast "Saved {a.name}"}
+          if current.quoted != ""
+            Button.ghost "{quoteOpen ? 'Hide quoted text' : 'Show quoted text'}" icon="more_horiz" onTap={quoteOpen=!quoteOpen}
+            if quoteOpen
+              Box pad=12 border-left=#FFCBD5E1 animate=fade duration=150
+                Text.muted "{current.quoted}"
+          Row gap=8
+            Button "Reply" icon="reply" onTap={open compose}
+            Button.outline "Forward" icon="forward" onTap={open compose}
+  Menu#moveMenu
+    each f in folders
+      MenuItem "{f.name}" icon="{f.icon}" onTap={msgs=updateWhere(msgs, x=>x.id==openId, x=>with(x,"folder",f.id)); openId=0; pane="list"; toast "Moved to {f.name}"}
+  Menu#rowMenu
+    MenuItem "Archive" icon="archive" onTap={msgs=map(msgs, m=>contains(sel,m.id) ? with(m,"folder","archive") : m); sel=[]; toast "Archived"}
+    MenuItem "Delete" icon="delete" onTap={open confirmBulkDelete}
+    MenuItem "Mark as read" icon="mark_email_read" onTap={msgs=map(msgs, m=>contains(sel,m.id) ? with(m,"unread",false) : m)}
+  Menu#bulkMove
+    each f in folders
+      MenuItem "{f.name}" icon="{f.icon}" onTap={msgs=map(msgs, m=>contains(sel,m.id) ? with(m,"folder",f.id) : m); sel=[]; toast "Moved to {f.name}"}
+  Sheet#folderSheet "Folders"
+    each f in folders
+      NavItem "{f.name}" icon="{f.icon}" badge="{count(msgs, m => m.folder==f.id && m.unread)}" selected={folder==f.id} onTap={folder=f.id; sel=[]; openId=0; pane="list"; close}
+  Dialog#confirmDelete "Delete this message?" "It moves to Trash and is removed after 30 days."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Delete" onTap={msgs=updateWhere(msgs, x=>x.id==openId, x=>with(x,"folder","trash")); openId=0; pane="list"; close; toast "Moved to Trash"}
+  Dialog#confirmBulkDelete "Delete {length(sel)} messages?" "They move to Trash and are removed after 30 days."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Delete" onTap={msgs=map(msgs, m=>contains(sel,m.id) ? with(m,"folder","trash") : m); sel=[]; close; toast "Moved to Trash"}
+
+### Compose
+state to=[]
+state toText=""
+state subject=""
+state bodyText=""
+state attachments=[]
+state discardAsk=false
+Dialog#compose "New message" onClose={bodyText!="" || subject!="" || length(to)>0 ? open keepDraft : close} resizable maxw=640
+  Column gap=8
+    ChipInput "To" bind=to text=toText suggestions={filter(contacts, c => toText!="" && (contains(lower(c.name),lower(toText)) || contains(lower(c.email),lower(toText))) && !contains(to,c.email))} suggestionLabel="{item.name}" suggestionHint="{item.email}" separators=",; " validate=email onInvalid={toast "Not a valid address"}
+    Input "Subject" bind=subject
+    Input "Message" multiline bind=bodyText minLines=10 initial="\n\n-- \n{signature}"
+    Row gap=8 scroll visible={length(attachments)>0}
+      each a in attachments
+        AttachmentTile "{a.name}" subtitle="{a.size}" icon="description" removable onRemove={attachments=without(attachments,a)}
+    Row between middle
+      Row gap=8
+        Button "Send" icon="send" disabled={length(to)==0} onTap={emit send {"to":to,"subject":subject,"body":bodyText}; to=[]; subject=""; bodyText=""; attachments=[]; close; toast "Message sent"}
+        FilePicker "Attach" icon="attach_file" multiple onPick={attachments=concat(attachments,result)}
+      IconButton "delete" tooltip="Discard" onTap={open keepDraft}
+Dialog#keepDraft "Keep this draft?" "You have text that has not been sent."
+  Row end gap=8
+    Button.ghost "Discard" onTap={to=[]; subject=""; bodyText=""; attachments=[]; close; close compose; toast "Draft discarded"}
+    Button.outline "Keep editing" onTap={close}
+    Button "Save draft" onTap={emit saveDraft {"to":to,"subject":subject,"body":bodyText}; to=[]; subject=""; bodyText=""; attachments=[]; close; close compose; toast "Draft saved"}
+
+### Search
+state q=""
+state results={filter(msgs, m => q!="" && (fuzzy(m.subject,q) || fuzzy(m.from,q) || fuzzy(m.body,q)))}
+Dialog#search "Search mail" maxw=640
+  Column gap=12
+    Input "Search" "Sender, subject or words in a message" bind=q icon="search" autofocus clearable
+    if q == ""
+      Text.muted "Typos are fine: 'robmap' finds 'roadmap'."
+    if q != "" && length(results) == 0
+      EmptyState icon="search_off" title="No results for \"{q}\"" text="Check the spelling or try fewer words."
+    if length(results) > 0
+      Column scroll h=360 gap=8
+        each f in folders
+          if count(results, m => m.folder==f.id) > 0
+            Text.sectionTitle "{f.name} ({count(results, m => m.folder==f.id)})"
+            each m in filter(results, x => x.folder==f.id)
+              ListTile onTap={folder=m.folder; openId=m.id; pane="read"; q=""; close; go mailbox}
+                Row between
+                  Highlight "{m.from}" match={q} weight=600
+                  Text.caption "{m.time}" color=#FF64748B
+                Highlight "{m.subject}" match={q}
+                Highlight "{m.preview}" match={q} maxLines=1 color=#FF64748B
+
+### Settings
+state signatureDraft={signature}
+state shortcuts=[{"keys":"C","does":"Compose a new message"},{"keys":"R","does":"Reply to the open message"},{"keys":"E","does":"Archive the open message"},{"keys":"J","does":"Next message"},{"keys":"K","does":"Previous message"},{"keys":"Ctrl+A","does":"Select all messages"},{"keys":"Shift+Click","does":"Select a range"},{"keys":"Ctrl+Click","does":"Add to the selection"},{"keys":"Ctrl+K","does":"Search"},{"keys":"Esc","does":"Clear the selection"}]
+App
+  Sidebar
+    Brand "Postbox" icon="mail"
+    NavItem "Mailbox" icon="inbox" onTap={go mailbox}
+    NavItem "Settings" icon="settings" selected={true}
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" show=phone onTap={go mailbox}
+        Heading "Settings" level=1
+      Button "Save" onTap={signature=signatureDraft; toast "Settings saved"}
+    Column scroll pad=24 gap=16 maxw=720
+      Card gap=12
+        Heading "Signature" level=3
+        Input "Signature" multiline bind=signatureDraft minLines=4
+        Text.caption "Added below every new message." color=#FF64748B
+      Card gap=12
+        Heading "Density" level=3
+        SegmentedButton bind=density items=["comfortable","compact","dense"]
+        Text.caption "Compact shows about 12 rows in the list on a laptop." color=#FF64748B
+      Card gap=12
+        Heading "Panes" level=3
+        Text.muted "Widths are remembered. Double-click a divider to reset it."
+        Button.outline "Reset pane widths" icon="restart_alt" onTap={reset "postbox.panes"; toast "Pane widths reset"}
+      Card gap=8
+        Heading "Keyboard shortcuts" level=3
+        each s in shortcuts
+          Row between middle pad=[0,4,0,4] border-bottom=#FFEEF2F6
+            Text "{s.does}"
+            Kbd "{s.keys}"

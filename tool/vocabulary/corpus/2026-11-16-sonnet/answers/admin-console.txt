@@ -1,0 +1,411 @@
+### Members
+state tab="members"
+state q=""
+state roleFilter="All roles"
+state statusFilter="All statuses"
+state sortKey="name"
+state sortDir="asc"
+state selected=[]
+state anchor=""
+state focusId=""
+state panelId=""
+state panelW=380
+state invites=[]
+state inviteDraft=""
+state inviteRole="Member"
+state target=""
+state bulkRole="Member"
+state bulkTeam="Design"
+state members=[{"id":"m1","name":"Ada Lindqvist","email":"ada@tenant.io","role":"Owner","teams":["Platform","Security"],"last":"2 min ago","status":"Active"},{"id":"m2","name":"Ben Okafor","email":"ben@tenant.io","role":"Admin","teams":["Platform"],"last":"1 h ago","status":"Active"},{"id":"m3","name":"Chloe Martin","email":"chloe@tenant.io","role":"Member","teams":["Design"],"last":"Yesterday","status":"Active"},{"id":"m4","name":"Dmitri Volkov","email":"dmitri@tenant.io","role":"Member","teams":["Data","Platform"],"last":"3 days ago","status":"Invited"},{"id":"m5","name":"Elena Rossi","email":"elena@tenant.io","role":"Billing","teams":["Finance"],"last":"Today","status":"Active"},{"id":"m6","name":"Farid Haddad","email":"farid@tenant.io","role":"Viewer","teams":[],"last":"6 weeks ago","status":"Deactivated"}]
+state sessions=[{"id":"s1","device":"MacBook Pro, Chrome","where":"Oslo, NO","when":"Active now"},{"id":"s2","device":"iPhone 15, App","where":"Oslo, NO","when":"2 h ago"},{"id":"s3","device":"Windows, Edge","where":"Bergen, NO","when":"5 days ago"}]
+state activity=[{"id":"a1","text":"Changed role to Admin","when":"Mon"},{"id":"a2","text":"Added to Platform","when":"Mon"},{"id":"a3","text":"Signed in from a new device","when":"Last week"}]
+state all=["Platform","Security","Design","Data","Finance","Support"]
+Shortcut keys="/" onPress={focus search}
+Shortcut keys="ctrl+a" onPress={selected=map(filter(members,m=>true),m=>m.id)}
+Shortcut keys="escape" onPress={selected=[]; panelId=""}
+Shortcut keys="ctrl+i" onPress={open invite}
+App
+  Sidebar
+    Brand "Tenant" icon="hub"
+    NavItem "Members" icon="group" badge="50" selected={tab=="members"} onTap={go members}
+    NavItem "Roles" icon="admin_panel_settings" onTap={go roles}
+    NavItem "Teams" icon="groups" onTap={go teams}
+    NavItem "Audit log" icon="history" onTap={go audit-log}
+    NavItem "Billing" icon="credit_card" onTap={go billing}
+    NavItem "API keys" icon="key" onTap={go api-keys}
+    NavItem "Settings" icon="settings" onTap={go settings}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Ada Lindqvist" size=32
+      Text.muted "Ada Lindqvist"
+  Main
+    Nav
+      Heading "Members" level=1
+      Row gap=8
+        Input#search "Search members" "Name or email" bind=q w=240 icon="search" fuzzy
+        Button "Invite" icon="person_add" onTap={open invite}
+        Text.caption "Ctrl+I" hide=tablet
+    Row grow
+      Column grow gap=12 pad=24 scroll
+        Row gap=8 wrap
+          Select "Role" bind=roleFilter items=["All roles","Owner","Admin","Member","Billing","Viewer"]
+          Select "Status" bind=statusFilter items=["All statuses","Active","Invited","Deactivated"]
+          Spacer grow
+          Text.muted "{length(filter(members,m=>(roleFilter=='All roles'||m.role==roleFilter)&&(statusFilter=='All statuses'||m.status==statusFilter)&&fuzzy(m.name+' '+m.email,q)))} of 50 members"
+        if length(selected)>0
+          Box fill=#FFE8F0FE radius=8 pad=12 live=polite
+            Row between middle gap=12
+              Text.strong "{length(selected)} selected"
+              Row gap=8 wrap
+                Select "Change role" bind=bulkRole items=["Owner","Admin","Member","Billing","Viewer"] onChange={members=updateWhere(members,m=>contains(selected,m.id),m=>with(m,"role",result)); announce "Role changed to {result} for {length(selected)} members"; toast "Role changed for {length(selected)} members"}
+                Button.outline "Add to team" icon="group_add" onTap={open bulkTeam}
+                Button.destructive "Deactivate" onTap={open confirmDeactivate}
+                Button.ghost "Clear" onTap={selected=[]}
+        Table rows={sortDir=="asc"?sortBy(filter(members,m=>(roleFilter=="All roles"||m.role==roleFilter)&&(statusFilter=="All statuses"||m.status==statusFilter)&&fuzzy(m.name+" "+m.email,q)),m=>m[sortKey]):sortByDesc(filter(members,m=>(roleFilter=="All roles"||m.role==roleFilter)&&(statusFilter=="All statuses"||m.status==statusFilter)&&fuzzy(m.name+" "+m.email,q)),m=>m[sortKey])} dense sticky-header selectable multi bind=selected onRowTap={panelId=result.id} onSelect={selected=result.ids} rowKey=id
+          Column "Name" key=name sortable w=200 onSort={sortKey="name"; sortDir=sortDir=="asc"?"desc":"asc"}
+          Column "Email" key=email sortable w=220 onSort={sortKey="email"; sortDir=sortDir=="asc"?"desc":"asc"}
+          Column "Role" key=role sortable w=100 onSort={sortKey="role"; sortDir=sortDir=="asc"?"desc":"asc"}
+          Column "Teams" w=200
+          Column "Last active" key=last sortable w=120 onSort={sortKey="last"; sortDir=sortDir=="asc"?"desc":"asc"}
+          Column "Status" key=status sortable w=110 onSort={sortKey="status"; sortDir=sortDir=="asc"?"desc":"asc"}
+          Column "" w=48
+      if panelId!=""
+        Splitter bind=panelW min=300 max=560 side=right label="Resize member panel"
+        Pane w={panelW} pad=16 gap=12 scroll
+          Row between middle
+            Heading "Member" level=3
+            IconButton "close" tooltip="Close panel" onTap={panelId=""}
+          Row gap=12 middle
+            Avatar "{find(members,m=>m.id==panelId).name}" size=48
+            Column gap=2
+              Text.strong "{find(members,m=>m.id==panelId).name}"
+              Text.muted "{find(members,m=>m.id==panelId).email}"
+          Select "Role" bind=panelRole items=["Owner","Admin","Member","Billing","Viewer"] onChange={members=updateWhere(members,m=>m.id==panelId,m=>with(m,"role",result)); announce "Role saved"; toast "Role saved"}
+          Text.sectionTitle "Teams"
+          each t in all
+            Checkbox "{t}" checked={contains(find(members,m=>m.id==panelId).teams,t)} onChange={members=updateWhere(members,m=>m.id==panelId,m=>with(m,"teams",result?append(m.teams,t):without(m.teams,t)))}
+          Divider
+          Text.sectionTitle "Sessions"
+          each s in sessions
+            Row between middle gap=8
+              Column grow gap=2
+                Text.strong "{s.device}"
+                Text.caption "{s.where} · {s.when}"
+              Button.outline "Revoke" size=small onTap={sessions=removeWhere(sessions,x=>x.id==s.id); announce "Session revoked"; toast "Session revoked"}
+          Divider
+          Text.sectionTitle "Activity"
+          each a in activity
+            Row between
+              Text "{a.text}"
+              Text.caption "{a.when}"
+  Dialog#invite "Invite members" "Separate emails with a comma or Enter"
+    ChipInput "Emails" bind=invites draft=inviteDraft separators=[",",";"," "] validate="email" hint="name@company.com" onInvalid={announce "Not a valid email"}
+    Select "Role" bind=inviteRole items=["Admin","Member","Billing","Viewer"]
+    Row end gap=8
+      Button.ghost "Cancel" onTap={invites=[]; close}
+      Button "Send {length(invites)} invites" disabled={length(invites)==0||any(invites,i=>!i.valid)} onTap={emit invite {"emails":invites,"role":inviteRole}; toast "{length(invites)} invitations sent"; announce "Invitations sent"; invites=[]; close}
+  Dialog#confirmDeactivate "Deactivate {length(selected)} members?" "They lose access immediately. Their data is kept."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Deactivate {length(selected)}" onTap={members=updateWhere(members,m=>contains(selected,m.id),m=>with(m,"status","Deactivated")); announce "{length(selected)} members deactivated"; toast "{length(selected)} members deactivated"; selected=[]; close}
+  Dialog#bulkTeam "Add {length(selected)} members to a team"
+    Select "Team" bind=bulkTeam items=["Platform","Security","Design","Data","Finance","Support"]
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Add" onTap={members=updateWhere(members,m=>contains(selected,m.id),m=>with(m,"teams",unique(append(m.teams,bulkTeam)))); toast "Added to {bulkTeam}"; announce "Added to {bulkTeam}"; close}
+  Menu#rowMenu end
+    MenuItem "Open profile" icon="person" onTap={panelId=target}
+    MenuItem "Change role" icon="badge" onTap={open roleDialog}
+    MenuItem "Resend invite" icon="mail" onTap={toast "Invite resent"}
+    MenuItem "Deactivate" icon="block" danger onTap={selected=[target]; open confirmDeactivate}
+
+### Roles
+state roles=["Owner","Admin","Member","Billing","Viewer"]
+state perms=["View members","Invite members","Remove members","Manage roles","Manage teams","View audit log","Manage billing","Manage API keys","Edit settings"]
+state grid={"View members":{"Owner":true,"Admin":true,"Member":true,"Billing":false,"Viewer":true},"Invite members":{"Owner":true,"Admin":true,"Member":false,"Billing":false,"Viewer":false},"Remove members":{"Owner":true,"Admin":true,"Member":false,"Billing":false,"Viewer":false},"Manage roles":{"Owner":true,"Admin":false,"Member":false,"Billing":false,"Viewer":false},"Manage teams":{"Owner":true,"Admin":true,"Member":false,"Billing":false,"Viewer":false},"View audit log":{"Owner":true,"Admin":true,"Member":false,"Billing":false,"Viewer":false},"Manage billing":{"Owner":true,"Admin":false,"Member":false,"Billing":true,"Viewer":false},"Manage API keys":{"Owner":true,"Admin":true,"Member":false,"Billing":false,"Viewer":false},"Edit settings":{"Owner":true,"Admin":false,"Member":false,"Billing":false,"Viewer":false}}
+state saved={}
+state dirty=false
+state leaveTo=""
+Shortcut keys="ctrl+s" onPress={saved=grid; dirty=false; toast "Permissions saved"; announce "Permissions saved"}
+Shortcut keys="ctrl+z" onPress={grid=saved; dirty=false}
+App
+  Sidebar
+    Brand "Tenant" icon="hub"
+    NavItem "Members" icon="group" onTap={dirty?open leave:go members}
+    NavItem "Roles" icon="admin_panel_settings" selected
+    NavItem "Teams" icon="groups" onTap={dirty?open leave:go teams}
+    NavItem "Audit log" icon="history" onTap={dirty?open leave:go audit-log}
+    NavItem "Billing" icon="credit_card" onTap={dirty?open leave:go billing}
+    NavItem "API keys" icon="key" onTap={dirty?open leave:go api-keys}
+    NavItem "Settings" icon="settings" onTap={dirty?open leave:go settings}
+  Main
+    Nav
+      Heading "Roles and permissions" level=1
+      Text.caption "Ctrl+S saves"
+    Column pad=24 gap=16 scroll
+      Card
+        Row scroll
+          Table dense sticky-header
+            Row header
+              Text.strong "Permission" w=200
+              each r in roles
+                Column w=96 center gap=4
+                  Text.strong "{r}"
+                  Checkbox bind=colAll[r] tristate checked={all(perms,p=>grid[p][r])} aria-label="Select all for {r}" onChange={grid=with(grid,"all",grid); dirty=true; announce "{r}: all permissions {result?'on':'off'}"}
+            each p in perms
+              Row middle
+                Row w=200 gap=8 middle
+                  Checkbox tristate checked={all(roles,r=>grid[p][r])} aria-label="Select all roles for {p}" onChange={grid=with(grid,p,mapValues(grid[p],v=>result)); dirty=true}
+                  Text "{p}"
+                each r in roles
+                  Box w=96 center
+                    Checkbox checked={grid[p][r]} disabled={r=="Owner"} aria-label="{p} for {r}" onChange={grid=with(grid,p,with(grid[p],r,result)); dirty=true}
+      if dirty
+        Box fill=#FF0B1F3A radius=8 pad=12 sticky=bottom live=polite
+          Row between middle
+            Text "You have unsaved changes" color=#FFFFFFFF
+            Row gap=8
+              Button.outline "Discard" onTap={grid=saved; dirty=false; toast "Changes discarded"}
+              Button "Save changes" onTap={saved=grid; dirty=false; toast "Permissions saved"; announce "Permissions saved"}
+  Dialog#leave "Leave without saving?" "Your permission changes will be lost."
+    Row end gap=8
+      Button.ghost "Stay" onTap={close}
+      Button.destructive "Discard and leave" onTap={grid=saved; dirty=false; close; go {leaveTo}}
+
+### Teams
+state teams=[{"id":"t1","name":"Platform","members":["Ada Lindqvist","Ben Okafor","Dmitri Volkov"]},{"id":"t2","name":"Design","members":["Chloe Martin","Gustav Berg"]},{"id":"t3","name":"Finance","members":["Elena Rossi"]}]
+state left="t1"
+state right="t2"
+state picked=""
+state pickedFrom=""
+App
+  Sidebar
+    Brand "Tenant" icon="hub"
+    NavItem "Members" icon="group" onTap={go members}
+    NavItem "Roles" icon="admin_panel_settings" onTap={go roles}
+    NavItem "Teams" icon="groups" selected
+    NavItem "Audit log" icon="history" onTap={go audit-log}
+    NavItem "Billing" icon="credit_card" onTap={go billing}
+    NavItem "API keys" icon="key" onTap={go api-keys}
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main
+    Nav
+      Heading "Teams" level=1
+      Button "New team" icon="add" onTap={open newTeam}
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        each t in teams
+          Card gap=8 onTap={left=t.id}
+            Row between
+              Text.strong "{t.name}"
+              Badge.neutral "{length(t.members)}"
+            AvatarStack names={t.members} max=4
+      Card gap=12
+        Text.sectionTitle "Move members between teams"
+        Text.caption "Mouse: drag a member to the other list. Keyboard: Tab to a member, Space to pick up, arrow keys to reorder, Left or Right arrow to move to the other team, Space to drop, Esc to cancel."
+        Row gap=16 top
+          Column grow gap=8
+            Select "Team" bind=left items={map(teams,t=>t.id)} labels={map(teams,t=>t.name)}
+            SortableList#listL items={find(teams,t=>t.id==left).members} group="roster" drop=roster keyboard onReorder={teams=updateWhere(teams,t=>t.id==left,t=>with(t,"members",result)); announce "Moved to position {result.index+1}"} onDrop={teams=updateWhere(updateWhere(teams,t=>t.id==right,t=>with(t,"members",without(t.members,result.data))),t=>t.id==left,t=>with(t,"members",unique(append(t.members,result.data)))); announce "{result.data} moved to {find(teams,t=>t.id==left).name}"} onKeyMoveSide={teams=updateWhere(updateWhere(teams,t=>t.id==left,t=>with(t,"members",without(t.members,result.item))),t=>t.id==right,t=>with(t,"members",append(t.members,result.item))); announce "{result.item} moved to {find(teams,t=>t.id==right).name}"}
+              each m in find(teams,t=>t.id==left).members
+                ListTile "{m}" icon="drag_indicator" drag=roster(m) aria-label="{m}, position {index+1} of {length(find(teams,t=>t.id==left).members)}"
+          Column grow gap=8
+            Select "Team" bind=right items={map(teams,t=>t.id)} labels={map(teams,t=>t.name)}
+            SortableList#listR items={find(teams,t=>t.id==right).members} group="roster" drop=roster keyboard onReorder={teams=updateWhere(teams,t=>t.id==right,t=>with(t,"members",result)); announce "Moved to position {result.index+1}"} onDrop={teams=updateWhere(updateWhere(teams,t=>t.id==left,t=>with(t,"members",without(t.members,result.data))),t=>t.id==right,t=>with(t,"members",unique(append(t.members,result.data)))); announce "{result.data} moved to {find(teams,t=>t.id==right).name}"} onKeyMoveSide={teams=updateWhere(updateWhere(teams,t=>t.id==right,t=>with(t,"members",without(t.members,result.item))),t=>t.id==left,t=>with(t,"members",append(t.members,result.item))); announce "{result.item} moved to {find(teams,t=>t.id==left).name}"}
+              each m in find(teams,t=>t.id==right).members
+                ListTile "{m}" icon="drag_indicator" drag=roster(m) aria-label="{m}, position {index+1} of {length(find(teams,t=>t.id==right).members)}"
+  Dialog#newTeam "New team"
+    Input "Team name" bind=newName
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Create" onTap={teams=append(teams,{"id":"t"+(length(teams)+1),"name":newName,"members":[]}); toast "Team created"; close}
+
+### Audit log
+state actor="Anyone"
+state action="Any action"
+state range={"from":"","to":""}
+state entries=[{"id":"e1","actor":"Ada Lindqvist","action":"role.change","summary":"Changed Ben Okafor to Admin","time":"Today 09:41","detail":"ip 84.210.4.12 · before: Member · after: Admin"},{"id":"e2","actor":"Elena Rossi","action":"billing.plan","summary":"Switched plan to Team","time":"Today 08:12","detail":"ip 84.210.9.3 · seats 12 → 15"},{"id":"e3","actor":"Ben Okafor","action":"key.create","summary":"Created API key ci-deploy","time":"Yesterday 17:03","detail":"scope: read, write"}]
+state expanded=""
+state loading=false
+App
+  Sidebar
+    Brand "Tenant" icon="hub"
+    NavItem "Members" icon="group" onTap={go members}
+    NavItem "Roles" icon="admin_panel_settings" onTap={go roles}
+    NavItem "Teams" icon="groups" onTap={go teams}
+    NavItem "Audit log" icon="history" selected
+    NavItem "Billing" icon="credit_card" onTap={go billing}
+    NavItem "API keys" icon="key" onTap={go api-keys}
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main
+    Nav
+      Heading "Audit log" level=1
+      Button.outline "Export" icon="download" onTap={open exportMenu}
+    Column pad=24 gap=12
+      Row gap=8 wrap
+        Select "Actor" bind=actor items=["Anyone","Ada Lindqvist","Ben Okafor","Elena Rossi"]
+        Select "Action" bind=action items=["Any action","role.change","billing.plan","key.create","member.invite","sso.update"]
+        Button.outline "{range.from==''?'Pick dates':range.from+' to '+range.to}" icon="date_range" onTap={open dates}
+        Button.ghost "Reset" onTap={actor="Anyone"; action="Any action"; range={"from":"","to":""}}
+      InfiniteList items={filter(entries,e=>(actor=="Anyone"||e.actor==actor)&&(action=="Any action"||e.action==action))} loading={loading} onLoadMore={loading=true; emit loadMoreAudit}
+        each e in filter(entries,e=>(actor=="Anyone"||e.actor==actor)&&(action=="Any action"||e.action==action))
+          Card gap=4 onTap={expanded=expanded==e.id?"":e.id}
+            Row between middle
+              Row gap=8 middle
+                Avatar "{e.actor}" size=28
+                Text.strong "{e.actor}"
+                Text "{e.summary}"
+              Row gap=8 middle
+                Badge.neutral "{e.action}"
+                Text.caption "{e.time}"
+                Icon "{expanded==e.id?'expand_less':'expand_more'}"
+            if expanded==e.id
+              Text.mono "{e.detail}"
+      if loading
+        Progress indeterminate
+  Popover#dates
+    Calendar mode=range bind=range onChange={announce "Range {result.from} to {result.to}"}
+    Row end gap=8
+      Button.ghost "Clear" onTap={range={"from":"","to":""}; close}
+      Button "Apply" onTap={close}
+  Menu#exportMenu end
+    MenuItem "Export as CSV" icon="table_view" onTap={emit export "csv"; toast "Exporting CSV"}
+    MenuItem "Export as JSON" icon="data_object" onTap={emit export "json"; toast "Exporting JSON"}
+    MenuItem "Send to SIEM" icon="send" onTap={emit export "siem"; toast "Sent to SIEM"}
+
+### Billing
+state plan="Team"
+state seats=15
+state pending=""
+state plans=[{"name":"Starter","price":0,"seats":5,"features":["5 seats","7 day audit log"]},{"name":"Team","price":12,"seats":50,"features":["Up to 50 seats","1 year audit log","SSO"]},{"name":"Enterprise","price":24,"seats":500,"features":["Unlimited seats","Unlimited audit log","SCIM and SSO"]}]
+state invoices=[{"id":"INV-1042","date":"Nov 1, 2026","amount":180,"status":"Paid"},{"id":"INV-1031","date":"Oct 1, 2026","amount":168,"status":"Paid"},{"id":"INV-1020","date":"Sep 1, 2026","amount":144,"status":"Paid"}]
+App
+  Sidebar
+    Brand "Tenant" icon="hub"
+    NavItem "Members" icon="group" onTap={go members}
+    NavItem "Roles" icon="admin_panel_settings" onTap={go roles}
+    NavItem "Teams" icon="groups" onTap={go teams}
+    NavItem "Audit log" icon="history" onTap={go audit-log}
+    NavItem "Billing" icon="credit_card" selected
+    NavItem "API keys" icon="key" onTap={go api-keys}
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main
+    Nav
+      Heading "Billing" level=1
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        each p in plans
+          Card gap=8
+            Row between
+              Text.strong "{p.name}"
+              if plan==p.name
+                Badge.primary "Current"
+            Text "{money(p.price,'$',0)} per seat per month" size=18
+            each f in p.features
+              Row gap=8
+                Icon "check"
+                Text.muted "{f}"
+            Button.outline "Choose {p.name}" disabled={plan==p.name} onTap={pending=p.name; open confirmPlan}
+      Card gap=12
+        Text.sectionTitle "Seats"
+        Row gap=12 middle
+          IconButton "remove" tooltip="Remove a seat" onTap={seats=max(1,seats-1); announce "{seats} seats"}
+          Input type=number bind=seats w=80
+          IconButton "add" tooltip="Add a seat" onTap={seats=seats+1; announce "{seats} seats"}
+          Spacer grow
+          Text.strong "{money(seats*find(plans,p=>p.name==plan).price,'$',2)} per month" live=polite
+        Button "Save seats" w=140 onTap={toast "Seats updated to {seats}"; announce "Seats updated"}
+      Card gap=8
+        Text.sectionTitle "Invoices"
+        Table rows={invoices} dense
+          Column "Invoice" key=id w=140
+          Column "Date" key=date w=140
+          Column "Amount" w=100
+          Column "Status" w=100
+          Column "" w=48
+  Dialog#confirmPlan "Change to {pending}?" "What changes"
+    Text "Price: {money(find(plans,p=>p.name==plan).price*seats,'$',2)} becomes {money(find(plans,p=>p.name==pending).price*seats,'$',2)} per month."
+    Text "Seat limit: {find(plans,p=>p.name==plan).seats} becomes {find(plans,p=>p.name==pending).seats}."
+    Text.muted "Takes effect on your next invoice."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Confirm change" onTap={plan=pending; toast "Plan changed to {pending}"; announce "Plan changed to {pending}"; close}
+
+### API keys
+state keys=[{"id":"k1","name":"ci-deploy","prefix":"tk_live_9f2a","secret":"tk_live_9f2a7c41d0e8b6","created":"Oct 12","used":"2 h ago"},{"id":"k2","name":"reporting","prefix":"tk_live_41bd","secret":"tk_live_41bd03aa91cc72","created":"Sep 3","used":"Never"}]
+state revealed=""
+state newName=""
+state newScope="Read"
+state fresh=""
+state revoking=""
+App
+  Sidebar
+    Brand "Tenant" icon="hub"
+    NavItem "Members" icon="group" onTap={go members}
+    NavItem "Roles" icon="admin_panel_settings" onTap={go roles}
+    NavItem "Teams" icon="groups" onTap={go teams}
+    NavItem "Audit log" icon="history" onTap={go audit-log}
+    NavItem "Billing" icon="credit_card" onTap={go billing}
+    NavItem "API keys" icon="key" selected
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main
+    Nav
+      Heading "API keys" level=1
+      Button "Create key" icon="add" onTap={open createKey}
+    Column pad=24 gap=12 scroll
+      each k in keys
+        Card
+          Row between middle gap=12
+            Column grow gap=2
+              Text.strong "{k.name}"
+              Text.caption "Created {k.created} · last used {k.used}"
+            Text.mono "{revealed==k.id?k.secret:k.prefix+'••••••••'}"
+            IconButton "{revealed==k.id?'visibility_off':'visibility'}" tooltip="{revealed==k.id?'Hide key':'Reveal key'}" onTap={revealed=revealed==k.id?"":k.id; after 10s revealed=""}
+            IconButton "content_copy" tooltip="Copy key" onTap={copy k.secret; toast "Key copied"; announce "Key copied"}
+            IconButton "delete" tooltip="Revoke key" danger onTap={revoking=k.id; open confirmRevoke}
+  Dialog#createKey "Create API key"
+    Input "Name" bind=newName
+    Select "Scope" bind=newScope items=["Read","Read and write","Admin"]
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Create" disabled={trim(newName)==""} onTap={fresh="tk_live_"+randomHex(20); keys=append(keys,{"id":"k"+(length(keys)+1),"name":newName,"prefix":slice(fresh,0,12),"secret":fresh,"created":"Today","used":"Never"}); close; open showKey; announce "Key created"}
+  Dialog#showKey "Copy your key now" "You will not see it again."
+    Text.mono "{fresh}"
+    Row end gap=8
+      Button.outline "Copy" icon="content_copy" onTap={copy fresh; toast "Key copied"}
+      Button "Done" onTap={fresh=""; close}
+  Dialog#confirmRevoke "Revoke this key?" "Anything using it stops working immediately."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Revoke key" onTap={keys=removeWhere(keys,k=>k.id==revoking); toast "Key revoked"; announce "Key revoked"; close}
+
+### Settings
+state sso=false
+state code=["","","","","",""]
+state sessionLen="8 hours"
+state codeError=""
+App
+  Sidebar
+    Brand "Tenant" icon="hub"
+    NavItem "Members" icon="group" onTap={go members}
+    NavItem "Roles" icon="admin_panel_settings" onTap={go roles}
+    NavItem "Teams" icon="groups" onTap={go teams}
+    NavItem "Audit log" icon="history" onTap={go audit-log}
+    NavItem "Billing" icon="credit_card" onTap={go billing}
+    NavItem "API keys" icon="key" onTap={go api-keys}
+    NavItem "Settings" icon="settings" selected
+  Main
+    Nav
+      Heading "Settings" level=1
+    Column pad=24 gap=16 maxw=640 scroll
+      Card gap=12
+        Toggle "Single sign-on" checked={sso} onChange={result?open ssoCode:sso=false}
+        Text.muted "Members sign in through your identity provider."
+      Card gap=12
+        Select "Session length" bind=sessionLen items=["1 hour","8 hours","1 day","7 days","30 days"] onChange={toast "Session length set to {result}"; announce "Session length saved"}
+  Dialog#ssoCode "Enter your verification code" "Six digits from your authenticator app"
+    CodeInput length=6 bind=code autofocus onComplete={code==["1","2","3","4","5","6"]?sso=true:codeError="That code is not right"; announce sso?"Single sign-on enabled":"Code rejected"; sso?close:null}
+    if codeError!=""
+      Text.danger "{codeError}"
+    Row end gap=8
+      Button.ghost "Cancel" onTap={sso=false; code=["","","","","",""]; codeError=""; close}

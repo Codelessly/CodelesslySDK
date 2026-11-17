@@ -1,0 +1,191 @@
+### Photos
+state photos=[{"id":1,"seed":11,"date":"2026-03-02","place":"Lisbon","size":"4.2 MB","tags":["street","tram"],"fav":false,"deleted":false},{"id":2,"seed":12,"date":"2026-03-09","place":"Lisbon","size":"3.8 MB","tags":["sea","sunset"],"fav":true,"deleted":false},{"id":3,"seed":13,"date":"2026-02-21","place":"Oslo","size":"5.1 MB","tags":["snow","fjord"],"fav":false,"deleted":false},{"id":4,"seed":14,"date":"2026-02-14","place":"Oslo","size":"2.9 MB","tags":["portrait","cafe"],"fav":false,"deleted":false}]
+state albums=[{"id":"a1","name":"Portugal","ids":[1,2]},{"id":"a2","name":"Winter","ids":[3,4]}] persist
+state gridSize=3 persist
+state favs=[2] persist
+state sel=[]
+state anchor=0
+state at=0
+state q=""
+state screen="photos"
+state newName=""
+photoSource photos count=60 drawn seed=7
+App
+  Sidebar
+    Brand "Contact Sheet" icon="photo_library"
+    NavItem "Photos" icon="photo" selected={screen=="photos"} onTap={go photos}
+    NavItem "Albums" icon="collections" selected={screen=="albums"} onTap={go albums}
+    NavItem "Search" icon="search" selected={screen=="search"} onTap={go search}
+    NavItem "Favourites" icon="favorite" badge="{length(favs)}" selected={screen=="favs"} onTap={go favourites}
+    Spacer grow
+    NavItem "Recently deleted" icon="delete" badge="{count(photos,p=>p.deleted)}" onTap={go recently-deleted}
+  Main
+    Nav
+      Heading "Photos" level=1
+      Row gap=12
+        Icon "photo_size_select_small"
+        Slider bind=gridSize min=2 max=6 step=1 w=140
+        Icon "photo_size_select_large"
+    if length(sel)>0
+      SelectionBar "{length(sel)} selected" sticky onClear={sel=[]}
+        Button.ghost "Add to album" icon="add" onTap={open addAlbum}
+        Button.ghost "Favourite" icon="favorite" onTap={favs=concat(favs,sel); toast "Added to favourites"}
+        Button.ghost "Delete" icon="delete" onTap={open confirmDelete}
+    PhotoGrid photos={filter(photos,p=>!p.deleted)} cols={gridSize} gap=2 groupBy=month stickyHeaders bind=sel selectMode=range,toggle,drag onOpen={at=result; go viewer} onDropOnto=albums
+  Dialog#addAlbum "Add to album" "{length(sel)} pictures"
+    each a in albums
+      ListTile "{a.name}" subtitle="{length(a.ids)} pictures" onTap={albums=updateWhere(albums,x=>x.id==a.id,x=>with(x,"ids",concat(x.ids,sel))); sel=[]; toast "Added to {a.name}"; close}
+    Button.outline "New album" onTap={close; open newAlbum}
+  Dialog#confirmDelete "Delete {length(sel)} pictures?" "They move to Recently deleted for 30 days."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Delete" onTap={photos=map(photos,p=>contains(sel,p.id)?with(p,"deleted",true):p); sel=[]; toast "Deleted"; close}
+
+### Viewer
+state info=false
+state zoom=1
+state compare=false
+Page
+  Stack
+    Zoomable bind=zoom pinch wheel doubleTap pan onSwipeLeft={at=min(at+1,59)} onSwipeRight={at=max(at-1,0)} onDragDown={go photos} onKey="Escape" onEscape={go photos}
+      Image "{photos[at].url}" fit=contain
+    Row between pad=16 top
+      IconButton "close" onTap={go photos}
+      Text.muted "{at+1} of {length(photos)}"
+      Row gap=8
+        IconButton "info" onTap={info=!info; open infoSheet}
+        IconButton "favorite" selected={contains(favs,photos[at].id)} onTap={favs=contains(favs,photos[at].id)?without(favs,photos[at].id):append(favs,photos[at].id)}
+        IconButton "tune" onTap={go edit}
+        IconButton "delete" onTap={open confirmOne}
+    IconButton "chevron_left" onTap={at=max(at-1,0)} shortcut="ArrowLeft"
+    IconButton "chevron_right" onTap={at=min(at+1,59)} shortcut="ArrowRight"
+    ThumbnailStrip photos={photos} bind=at bottom h=64 gap=2
+  Sheet#infoSheet "Info" right
+    Column gap=12 pad=16
+      Text.strong "{formatDate(photos[at].date,"MMM d, yyyy")}"
+      Row gap=8
+        Icon "place"
+        Text "{photos[at].place}"
+      Row gap=8
+        Icon "storage"
+        Text "{photos[at].size}"
+      Row gap=8 wrap
+        each t in photos[at].tags
+          Chip "{t}" onTap={q=t; go search}
+  Dialog#confirmOne "Delete this picture?" "It moves to Recently deleted."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Delete" onTap={photos=updateWhere(photos,p=>p.id==photos[at].id,p=>with(p,"deleted",true)); close; go photos}
+
+### Edit
+state light=0
+state contrast=0
+state warmth=0
+state ratio="original"
+state showBefore=false
+state split=0.5
+App
+  Main
+    Nav
+      Row gap=8
+        IconButton "arrow_back" onTap={go viewer}
+        Heading "Edit" level=1
+      Row gap=8
+        Button.outline "Reset" onTap={light=0; contrast=0; warmth=0; ratio="original"}
+        Button "Save" onTap={emit saveEdit; toast "Saved"; go viewer}
+    Row gap=24 pad=24 top
+      Column grow gap=8
+        BeforeAfter before="{photos[at].url}" after="{photos[at].url}" bind=split showBefore={showBefore} light={light} contrast={contrast} warmth={warmth} crop={ratio} h=520
+        Button.outline "Hold to compare" icon="compare" onPressStart={showBefore=true} onPressEnd={showBefore=false}
+      Column w=320 gap=16
+        Text.fieldLabel "Light"
+        Slider bind=light min=-100 max=100
+        Text.fieldLabel "Contrast"
+        Slider bind=contrast min=-100 max=100
+        Text.fieldLabel "Warmth"
+        Slider bind=warmth min=-100 max=100
+        Text.fieldLabel "Crop"
+        SegmentedButton bind=ratio items=["Original","1:1","4:3","16:9"]
+
+### Albums
+state albumId=""
+state order=[]
+App
+  Main
+    Nav
+      Heading "Albums" level=1
+      Button "New album" icon="add" onTap={open newAlbum}
+    if length(albums)==0
+      EmptyState "No albums yet" "Create one to collect your favourite pictures." icon="collections" actionLabel="New album" onAction={open newAlbum}
+    if albumId==""
+      Grid cols=4 gap=8 pad=24
+        each a in albums
+          Card drop=photo onDrop={albums=updateWhere(albums,x=>x.id==a.id,x=>with(x,"ids",append(x.ids,result.data))); toast "Added to {a.name}"} onTap={albumId=a.id}
+            Image "{photos[a.ids[0]].url}" h=160
+            Text.strong "{a.name}"
+            Text.muted "{length(a.ids)} pictures"
+    if albumId!=""
+      Column pad=24 gap=12
+        Row between
+          Button.ghost "Back" icon="arrow_back" onTap={albumId=""}
+          Text.strong "{find(albums,x=>x.id==albumId).name}"
+        if isEmpty(find(albums,x=>x.id==albumId).ids)
+          EmptyState "This album is empty" "Drag pictures here from Photos." icon="image"
+        ReorderableGrid cols=4 gap=2 items={find(albums,x=>x.id==albumId).ids} keyboard onReorder={albums=updateWhere(albums,x=>x.id==albumId,x=>with(x,"ids",result))}
+          each id in find(albums,x=>x.id==albumId).ids
+            Image "{photos[id].url}" drag=photo(id)
+  Dialog#newAlbum "New album" "Give it a name"
+    Input "Name" "Summer 2026" bind=newName
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Create" onTap={albums=append(albums,{"id":"a{length(albums)+1}","name":newName,"ids":[]}); newName=""; close}
+
+### Search
+state placeF=""
+state monthF=""
+App
+  Main
+    Nav
+      Heading "Search" level=1
+      Input "Search tags, places, months" bind=q w=320 icon="search"
+    Column pad=24 gap=16
+      Row gap=8 wrap
+        if q!=""
+          FilterChip "{q}" selected onTap={q=""}
+        if placeF!=""
+          FilterChip "{placeF}" selected onTap={placeF=""}
+        if monthF!=""
+          FilterChip "{monthF}" selected onTap={monthF=""}
+      Row gap=8 wrap
+        Select "Place" bind=placeF items=["","Lisbon","Oslo","Kyoto"]
+        Select "Month" bind=monthF items=["","January","February","March"]
+      PhotoGrid photos={filter(photos,p=>!p.deleted && (q=="" || fuzzy(p.tags,q) || fuzzy(p.place,q)) && (placeF=="" || p.place==placeF) && (monthF=="" || formatDate(p.date,"MMMM")==monthF))} cols={gridSize} gap=2 onOpen={at=result; go viewer}
+      if count(photos,p=>!p.deleted && contains(lower(p.place),lower(q)))==0
+        Text.muted "No pictures match."
+
+### Favourites
+App
+  Main
+    Nav
+      Heading "Favourites" level=1
+    Column pad=24 gap=16
+      if isEmpty(favs)
+        EmptyState "No favourites" "Tap the heart on a picture to keep it here." icon="favorite"
+      PhotoGrid photos={filter(photos,p=>contains(favs,p.id) && !p.deleted)} cols={gridSize} gap=2 onOpen={at=result; go viewer}
+
+### Recently deleted
+App
+  Main
+    Nav
+      Heading "Recently deleted" level=1
+      Row gap=8
+        Button.outline "Restore" onTap={photos=map(photos,p=>contains(sel,p.id)?with(p,"deleted",false):p); sel=[]; toast "Restored"}
+        Button.destructive "Delete for ever" onTap={open confirmForever}
+    Column pad=24 gap=16
+      if count(photos,p=>p.deleted)==0
+        EmptyState "Nothing here" "Deleted pictures stay for 30 days." icon="delete"
+      PhotoGrid photos={filter(photos,p=>p.deleted)} cols={gridSize} gap=2 bind=sel selectMode=range,toggle,drag
+  Dialog#confirmForever "Delete for ever?" "This cannot be undone."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Delete for ever" onTap={photos=removeWhere(photos,p=>contains(sel,p.id)); sel=[]; toast "Deleted for ever"; close}

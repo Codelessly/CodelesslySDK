@@ -1,0 +1,190 @@
+### Practice
+state tab="practice"
+state clef="Treble"
+state range="C4-C5"
+state target="E4"
+state answer=""
+state flash=""
+state streak=7
+state best=19
+state asked=24
+state correct=20
+state answerMode="Keyboard"
+state history=[{"note":"G4","ms":1100,"ok":true},{"note":"B3","ms":2400,"ok":false},{"note":"D5","ms":1900,"ok":true},{"note":"F4","ms":900,"ok":true}]
+state startedAt=0
+state elapsed=0
+every 1s onTick={elapsed=elapsed+1}
+App
+  Sidebar
+    Brand "Stave" icon="music_note"
+    NavItem "Practice" icon="piano" selected={tab=="practice"} onTap={tab="practice"; go practice}
+    NavItem "Rhythm" icon="graphic_eq" selected={tab=="rhythm"} onTap={tab="rhythm"; go rhythm}
+    NavItem "Summary" icon="insights" badge="{asked}" selected={tab=="summary"} onTap={tab="summary"; go summary}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Mia Okafor" size=32
+      Text.muted "Mia Okafor"
+  Main
+    Nav
+      Heading "Sight-reading" level=1
+      Row gap=8 middle
+        Badge.success "Streak {streak}"
+        Text.muted "Best {best}"
+        Text.muted "{duration(elapsed)}"
+        IconButton "tune" tooltip="Clef and range" onTap={open settings}
+        Button.outline "End session" onTap={go summary}
+    Column pad=24 gap=16 maxw=820
+      Card gap=16 center
+        Row between
+          Text.caption "Name this note ({clef} clef, {range})"
+          Text.caption "{correct} of {asked} right"
+        Stack center middle animate={flash=="wrong" ? "shake" : "fade"}
+          Staff clef={clef} notes=[target] h=180 flash={flash}
+        if flash=="right"
+          Text.success "Correct, that was {target}" animate=pop
+        if flash=="wrong"
+          Text.danger "Not {answer}. It was {target}" animate=shake
+        SegmentedButton bind=answerMode items=["Keyboard","Names"]
+      if answerMode=="Keyboard"
+        Card gap=8
+          PianoKeyboard from="C4" to="C5" labels=false highlight={answer} correct={flash=="right" ? target : ""} wrong={flash=="wrong" ? answer : ""} h=160 onKey={answer=result; flash=result==target?"right":"wrong"; streak=result==target?streak+1:0; best=max(best,result==target?streak+1:best); asked=asked+1; correct=result==target?correct+1:correct; history=append(history,{"note":target,"ms":1500,"ok":result==target}); emit answered result}
+      if answerMode=="Names"
+        Card gap=12
+          Grid cols=7 gap=8
+            Button.outline "C" onTap={answer="C4"; flash=target=="C4"?"right":"wrong"; streak=target=="C4"?streak+1:0; asked=asked+1; emit answered "C4"}
+            Button.outline "D" onTap={answer="D4"; flash=target=="D4"?"right":"wrong"; streak=target=="D4"?streak+1:0; asked=asked+1; emit answered "D4"}
+            Button.outline "E" onTap={answer="E4"; flash=target=="E4"?"right":"wrong"; streak=target=="E4"?streak+1:0; asked=asked+1; emit answered "E4"}
+            Button.outline "F" onTap={answer="F4"; flash=target=="F4"?"right":"wrong"; streak=target=="F4"?streak+1:0; asked=asked+1; emit answered "F4"}
+            Button.outline "G" onTap={answer="G4"; flash=target=="G4"?"right":"wrong"; streak=target=="G4"?streak+1:0; asked=asked+1; emit answered "G4"}
+            Button.outline "A" onTap={answer="A4"; flash=target=="A4"?"right":"wrong"; streak=target=="A4"?streak+1:0; asked=asked+1; emit answered "A4"}
+            Button.outline "B" onTap={answer="B4"; flash=target=="B4"?"right":"wrong"; streak=target=="B4"?streak+1:0; asked=asked+1; emit answered "B4"}
+      Row gap=8 end
+        Button.ghost "Skip" onTap={flash=""; emit nextNote}
+        Button "Next note" onTap={flash=""; answer=""; emit nextNote}
+  Sheet#settings "Clef and range"
+    Column gap=16
+      Text.fieldLabel "Clef"
+      SegmentedButton bind=clef items=["Treble","Bass","Alto"]
+      Select "Range" bind=range items=["C4-C5","G3-G5","C3-C5","A2-C6"]
+      Toggle "Include sharps and flats" bind=accidentals
+      Toggle "Show note names after a miss" bind=hints
+      Slider "Seconds per note" bind=limit min=2 max=20
+      Row gap=8 end
+        Button.outline "Reset streak" onTap={streak=0; toast "Streak reset"}
+        Button "Done" onTap={emit settingsChanged; close}
+
+### Rhythm
+state tab="rhythm"
+state bpm=84
+state running=false
+state beat=0
+state taps=[{"beat":1,"offset":-12},{"beat":2,"offset":8},{"beat":3,"offset":-64},{"beat":4,"offset":41}]
+state pattern="Quarter notes"
+state tolerance=50
+every 1s when running onTick={beat=beat+1}
+App
+  Sidebar
+    Brand "Stave" icon="music_note"
+    NavItem "Practice" icon="piano" selected={tab=="practice"} onTap={tab="practice"; go practice}
+    NavItem "Rhythm" icon="graphic_eq" selected={tab=="rhythm"} onTap={tab="rhythm"; go rhythm}
+    NavItem "Summary" icon="insights" selected={tab=="summary"} onTap={tab="summary"; go summary}
+    Spacer grow
+    Text.muted "Mia Okafor"
+  Main
+    Nav
+      Heading "Rhythm" level=1
+      Row gap=8 middle
+        Select bind=pattern items=["Quarter notes","Eighth notes","Syncopated","Triplets"] w=180
+        Button {running ? "Stop" : "Start"} onTap={running=!running; beat=0}
+    Column pad=24 gap=16 maxw=820
+      Card gap=16
+        Row between middle
+          Column gap=4
+            Text.caption "Tempo"
+            Text "{bpm} BPM" size=32 weight=700
+          Metronome bpm={bpm} running={running} beats=4 bind=beat
+        Slider bind=bpm min=40 max=200
+        Staff clef="percussion" rhythm={pattern} cursor={beat} h=120
+        Text.caption "Tap along on the pad or press the space bar."
+      Card gap=12 center
+        TapPad "Tap" bpm={bpm} running={running} tolerance={tolerance} h=140 onTap={taps=append(taps,{"beat":length(taps)+1,"offset":result.offset}); emit tapped result.offset}
+        Row gap=8 center
+          Badge.error "Early {count(taps,t=>t.offset < 0-tolerance)}"
+          Badge.success "On time {count(taps,t=>abs(t.offset)<=tolerance)}"
+          Badge.warning "Late {count(taps,t=>t.offset > tolerance)}"
+      Card gap=8
+        Row between
+          Text.strong "Your taps"
+          Button.ghost "Clear" onTap={taps=[]}
+        Row scroll gap=8
+          each t in taps
+            Column gap=4 center w=72
+              Badge.neutral "{t.beat}"
+              Text.small "{t.offset > tolerance ? 'Late' : (t.offset < 0-tolerance ? 'Early' : 'On time')}" color={abs(t.offset)<=tolerance ? #FF2E7D32 : #FFC62828}
+              Text.caption "{t.offset > 0 ? '+' : ''}{t.offset} ms"
+        Slider "Timing window (ms)" bind=tolerance min=20 max=120
+
+### Summary
+state tab="summary"
+state sort="Slowest"
+state notes=[{"note":"B3","avg":2.6,"miss":4,"seen":7},{"note":"F#4","avg":2.3,"miss":3,"seen":5},{"note":"D5","avg":1.9,"miss":2,"seen":6},{"note":"A3","avg":1.7,"miss":1,"seen":8},{"note":"E4","avg":1.1,"miss":0,"seen":9},{"note":"C4","avg":0.8,"miss":0,"seen":10}]
+state picked=""
+Page
+  Nav
+    Brand "Stave" icon="music_note"
+    Row gap=4
+      Link "Practice" onTap={go practice}
+      Link "Rhythm" onTap={go rhythm}
+      Link "Summary"
+    Button "New session" onTap={go practice}
+  Section
+    Column gap=16
+      Heading "Session summary" level=1
+      Text.muted "Tuesday, 24 questions in 11 minutes"
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.caption "Accuracy"
+          Text "83%" size=32 weight=700
+          Progress 0.83
+        Card gap=4
+          Text.caption "Best streak"
+          Text "19" size=32 weight=700
+        Card gap=4
+          Text.caption "Average answer"
+          Text "1.7 s" size=32 weight=700
+          Sparkline values=[2.4,2.1,1.9,1.8,1.7,1.6,1.7]
+        Card gap=4
+          Text.caption "Rhythm, on time"
+          Text "71%" size=32 weight=700
+          Ring 0.71
+  Section tint
+    Column gap=16
+      Row between middle
+        Heading "Slowest notes" level=2
+        SegmentedButton bind=sort items=["Slowest","Most missed"]
+      Grid cols=2 gap=24
+        Card gap=8
+          BarChart values=[2.6,2.3,1.9,1.7,1.1,0.8] labels=["B3","F#4","D5","A3","E4","C4"] h=220
+          Text.caption "Average seconds to answer"
+        Card gap=8
+          Row gap=8
+            Text.caption "Note" w=60
+            Text.caption "Avg" w=70
+            Text.caption "Missed" grow
+          each n in {sort=="Slowest" ? sortByDesc(notes,x=>x.avg) : sortByDesc(notes,x=>x.miss)}
+            Row gap=8 middle onTap={picked=n.note; open drill}
+              Text.strong "{n.note}" w=60
+              Text "{n.avg} s" w=70
+              Progress {n.miss / n.seen} grow
+              Text.muted "{n.miss}/{n.seen}" w=48
+  Section
+    Row gap=12 center
+      Button "Drill my slowest notes" onTap={emit drillSlowest; go practice}
+      Button.outline "Share summary" onTap={emit share; toast "Summary copied"}
+  Footer
+    Text.muted "Stave, sight-reading practice"
+  Dialog#drill "Drill {picked}" "Five rounds on this note"
+    Staff clef="Treble" notes=[picked] h=140
+    Row gap=8 end
+      Button.outline "Not now" onTap={close}
+      Button "Start" onTap={emit drillNote picked; close; go practice}

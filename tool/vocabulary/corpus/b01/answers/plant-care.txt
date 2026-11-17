@@ -1,0 +1,182 @@
+### My Plants
+state tab="plants"
+state sel=""
+state plants=[{"id":"p1","name":"Monstera","species":"Monstera deliciosa","photo":"https://images.fernwise.app/monstera.jpg","water":0.35},{"id":"p2","name":"Fiddle Leaf Fig","species":"Ficus lyrata","photo":"https://images.fernwise.app/fig.jpg","water":0.8},{"id":"p3","name":"Snake Plant","species":"Dracaena trifasciata","photo":"https://images.fernwise.app/snake.jpg","water":0.6},{"id":"p4","name":"Pothos","species":"Epipremnum aureum","photo":"https://images.fernwise.app/pothos.jpg","water":0.15},{"id":"p5","name":"Calathea","species":"Goeppertia orbifolia","photo":"https://images.fernwise.app/calathea.jpg","water":0.5},{"id":"p6","name":"Aloe","species":"Aloe vera","photo":"https://images.fernwise.app/aloe.jpg","water":0.9}]
+state q=""
+App
+  Sidebar
+    Brand "Fernwise" icon="eco"
+    NavItem "My plants" icon="grid_view" badge="6" selected={tab=="plants"} onTap={tab="plants"}
+    NavItem "Today" icon="task_alt" badge="3" selected={tab=="today"} onTap={go today}
+    NavItem "Identify" icon="photo_camera" selected={tab=="identify"} onTap={go identify}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Jo Alvarez" size=32
+      Text.muted "Jo Alvarez"
+  Main
+    Nav
+      Heading "My plants" level=1
+      Row gap=8
+        Input "Search plants" bind=q w=220
+        Button "Add plant" icon="add" onTap={open addPlant}
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        each p in plants
+          if q=="" || contains(lower(p.name),lower(q))
+            Card gap=8 onTap={sel=p.id; go plant} animate=fade
+              Image "{p.photo}" h=140 radius=8
+              Row between middle
+                Column gap=2
+                  Text.strong "{p.name}"
+                  Text.caption "{p.species}"
+                Column center gap=2
+                  WaterDrop value={p.water}
+                  Text.caption "{round(p.water*100,0)}%"
+              Progress {p.water}
+  Dialog#addPlant "Add a plant" "Name it and pick where it lives"
+    Input "Name" bind=newName
+    Select "Room" items=["Living room","Bedroom","Kitchen","Office"] bind=room
+    Button "Identify from photo" onTap={close; go identify}
+
+### Plant
+state sel="p1"
+state tab="plants"
+state waterLog=[{"date":"2026-11-14","ml":250,"note":"Thorough soak"},{"date":"2026-11-07","ml":200,"note":"Top watered"},{"date":"2026-10-31","ml":250,"note":"Thorough soak"},{"date":"2026-10-24","ml":180,"note":"Leaves a little droopy"}]
+state growth=[{"date":"Aug 2","url":"https://images.fernwise.app/monstera-aug.jpg","leaves":4},{"date":"Sep 6","url":"https://images.fernwise.app/monstera-sep.jpg","leaves":6},{"date":"Oct 9","url":"https://images.fernwise.app/monstera-oct.jpg","leaves":7},{"date":"Nov 12","url":"https://images.fernwise.app/monstera-nov.jpg","leaves":9}]
+state ml=250
+state note=""
+state watered=false
+App
+  Sidebar
+    Brand "Fernwise" icon="eco"
+    NavItem "My plants" icon="grid_view" selected={tab=="plants"} onTap={go my-plants}
+    NavItem "Today" icon="task_alt" badge="3" onTap={go today}
+    NavItem "Identify" icon="photo_camera" onTap={go identify}
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Back" onTap={go my-plants}
+        Heading "Monstera" level=1
+      Row gap=8
+        IconButton "edit" tooltip="Edit plant"
+        Button "Water now" icon="water_drop" onTap={open logWater}
+    Column pad=24 gap=16 scroll
+      Row gap=24 top
+        Image "https://images.fernwise.app/monstera.jpg" w=280 h=280 radius=12
+        Column grow gap=16
+          Text.muted "Monstera deliciosa, in the living room by the east window"
+          Card gap=12
+            Heading "Watering schedule" level=3
+            Row between middle
+              Text.strong "Every 7 days"
+              Badge.warning "Due tomorrow"
+            Row gap=8
+              Chip "Mon"
+              ChoiceChip "Tue"
+              Chip "Wed"
+              Chip "Thu"
+              Chip "Fri"
+              Chip "Sat"
+              ChoiceChip "Sun"
+            Toggle "Remind me at 9:00" bind=remind
+          Grid cols=3 gap=12
+            Card center gap=4
+              Gauge 70 min=0 max=100 unit="% light"
+              Text.caption "Bright, indirect"
+            Card center gap=4
+              Gauge 55 min=0 max=100 limit=40 unit="% humidity"
+              Text.caption "Likes it moist"
+            Card center gap=4
+              Gauge 22 min=0 max=40 unit="°C"
+              Text.caption "Comfortable"
+      Card gap=12
+        Heading "Growth" level=3
+        Timeline
+          each g in growth
+            TimelineItem "{g.date}" "{g.leaves} leaves"
+              Image "{g.url}" w=160 h=120 radius=8 onTap={photo=g.url; open zoom}
+      Card gap=12
+        Row between middle
+          Heading "Watering log" level=3
+          Text.muted "{length(waterLog)} entries"
+        each w in waterLog
+          ListTile "{formatDate(w.date,'MMM d')}" "{w.note}" icon="water_drop" trailing="{w.ml} ml"
+  Dialog#logWater "Log a watering" "How much did {sel} get?"
+    Slider bind=ml min=50 max=500 label="Amount (ml)"
+    Input "Note" bind=note
+    DatePicker "Date" bind=wdate
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Save" onTap={waterLog=concat([{"date":today(),"ml":ml,"note":note}],waterLog); note=""; toast "Watering logged"; close}
+  Lightbox#zoom "{photo}" "Growth photo"
+
+### Today
+state tab="today"
+state tasks=[{"id":1,"plant":"Pothos","task":"Water, soil is dry","time":"8:00","icon":"water_drop","done":false},{"id":2,"plant":"Calathea","task":"Mist the leaves","time":"10:30","icon":"cloud","done":false},{"id":3,"plant":"Fiddle Leaf Fig","task":"Rotate a quarter turn","time":"18:00","icon":"autorenew","done":false},{"id":4,"plant":"Monstera","task":"Feed with fertilizer","time":"19:00","icon":"science","done":true}]
+App
+  Sidebar
+    Brand "Fernwise" icon="eco"
+    NavItem "My plants" icon="grid_view" onTap={go my-plants}
+    NavItem "Today" icon="task_alt" badge="{count(tasks,t=>!t.done)}" selected={tab=="today"} onTap={tab="today"}
+    NavItem "Identify" icon="photo_camera" onTap={go identify}
+  Main
+    Nav
+      Heading "Today" level=1
+      Text.muted "{formatDate(today(),'EEEE, MMM d')}"
+    Column pad=24 gap=12 scroll maxw=640
+      Row between middle
+        Text.strong "{count(tasks,t=>t.done)} of {length(tasks)} done"
+        Text.caption "Swipe a card left to finish it"
+      Progress {count(tasks,t=>t.done)/length(tasks)}
+      each t in tasks
+        Card gap=8 onSwipeLeft={tasks=updateWhere(tasks,x=>x.id==t.id,x=>with(x,"done",true)); toast "Done: {t.task}"} animate=slide-up stagger=80
+          Row gap=12 middle
+            IconTile "{t.icon}"
+            Column grow gap=2
+              Text.strong "{t.plant}" strike={t.done}
+              Text.muted "{t.task}" strike={t.done}
+            Column gap=2 end
+              Text.caption "{t.time}"
+              if t.done
+                Badge.success "Done"
+              if !t.done
+                Badge.neutral "To do"
+      if count(tasks,t=>!t.done)==0
+        Card center gap=8
+          Icon "check_circle" size=48
+          Text.heading "All plants are happy"
+          Text.muted "Nothing left for today."
+
+### Identify
+state tab="identify"
+state shot=false
+state guesses=[{"name":"Monstera deliciosa","common":"Swiss cheese plant","conf":0.87},{"name":"Philodendron bipinnatifidum","common":"Split-leaf philodendron","conf":0.09},{"name":"Rhaphidophora tetrasperma","common":"Mini monstera","conf":0.04}]
+state pick=""
+App
+  Sidebar
+    Brand "Fernwise" icon="eco"
+    NavItem "My plants" icon="grid_view" onTap={go my-plants}
+    NavItem "Today" icon="task_alt" badge="3" onTap={go today}
+    NavItem "Identify" icon="photo_camera" selected={tab=="identify"} onTap={tab="identify"}
+  Main
+    Nav
+      Heading "Identify a plant" level=1
+    Column pad=24 gap=16 scroll maxw=560
+      CameraFrame onCapture={shot=true} facing=back
+        Text.caption "Fit one leaf and the stem in the frame" center
+      Row center gap=12
+        IconButton "photo_library" tooltip="Choose from library"
+        Button "Take photo" icon="photo_camera" onTap={shot=true; toast "Looking closely"}
+        IconButton "flip_camera_android" tooltip="Switch camera"
+      if shot
+        Card gap=12 animate=slide-up
+          Heading "Three best guesses" level=3
+          each g in guesses
+            Column gap=4
+              Row between middle
+                Column gap=0
+                  Text.strong "{g.name}"
+                  Text.caption "{g.common}"
+                Text.strong "{round(g.conf*100,0)}%"
+              Progress {g.conf}
+              Button.outline "This is it" size=small onTap={pick=g.name; toast "Added {g.name} to your plants"; go my-plants}

@@ -1,0 +1,392 @@
+### Home
+project devices=[{"id":"l1","name":"Ceiling light","room":"Living room","kind":"light","on":true,"level":70,"ct":"warm","online":true},{"id":"t1","name":"Thermostat","room":"Living room","kind":"thermostat","on":true,"heat":66,"cool":74,"cur":71,"online":true},{"id":"b1","name":"West blind","room":"Living room","kind":"blind","pos":40,"online":true},{"id":"s1","name":"Sonos Beam","room":"Living room","kind":"speaker","playing":true,"vol":35,"track":"Rainy Sunday","online":true},{"id":"l2","name":"Pendant lights","room":"Kitchen","kind":"light","on":false,"level":100,"ct":"neutral","online":true},{"id":"k1","name":"Back door","room":"Kitchen","kind":"lock","locked":true,"online":true},{"id":"m1","name":"Fridge sensor","room":"Kitchen","kind":"sensor","value":"3.4 C","online":true},{"id":"l3","name":"Bedside lamp","room":"Bedroom","kind":"light","on":true,"level":25,"ct":"warm","online":true},{"id":"b2","name":"Bedroom blind","room":"Bedroom","kind":"blind","pos":0,"online":false},{"id":"k2","name":"Front door","room":"Hallway","kind":"lock","locked":true,"online":true},{"id":"m2","name":"Motion sensor","room":"Hallway","kind":"sensor","value":"Clear","online":true}] persist
+project alert="Front door has been open for 10 minutes"
+project rooms=["Living room","Kitchen","Bedroom","Hallway"]
+state room="Living room"
+state sel=""
+App
+  Sidebar fill=#FFFAF5F0
+    Brand "Hearth" icon="local_fire_department"
+    NavItem "Home" icon="home" selected onTap={go home}
+    NavItem "Scenes" icon="auto_awesome" onTap={go scenes}
+    NavItem "Schedules" icon="schedule" onTap={go schedules}
+    NavItem "Automations" icon="rule" onTap={go automations}
+    NavItem "Activity" icon="history" badge="3" onTap={go activity}
+    NavItem "Energy" icon="bolt" onTap={go energy}
+    Spacer grow
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main fill=#FFFAF5F0
+    Nav
+      Heading "Home" level=1
+      Row gap=8
+        Text.muted "{count(devices,d=>d.on||d.playing)} on, {count(devices,d=>!d.online)} offline"
+        Button.outline "Everything off" icon="power_settings_new" onTap={open allOff}
+    Column pad=24 gap=16 scroll
+      Banner.warning "{alert}" icon="door_front" announce=assertive visible={alert!=""} onDismiss={alert=""}
+        Button.ghost "Lock up" onTap={alert=""; toast "Front door locked"}
+      Row scroll gap=8
+        each r in rooms
+          ChoiceChip "{r}" size=large selected={room==r} onTap={room=r}
+      Grid cols=3 gap=16
+        each d in filter(devices,x=>x.room==room)
+          Box gap=12 pad=16 radius=24 animate=scale menu=tileMenu fill={!d.online ? "#FF4A4743" : (d.on||d.playing||d.locked==false) ? "#FFFFB547" : "#FF2B2926"} onLongPress={sel=d.id; open details}
+            Row between middle
+              Row gap=8 middle
+                Icon "{d.kind=='light'?'lightbulb':d.kind=='thermostat'?'thermostat':d.kind=='blind'?'blinds':d.kind=='lock'?(d.locked?'lock':'lock_open'):d.kind=='speaker'?'speaker':'sensors'}" color={(d.on||d.playing||d.locked==false)&&d.online ? "#FF2B2926" : "#FFFAF5F0"}
+                Text.strong "{d.name}" color={(d.on||d.playing||d.locked==false)&&d.online ? "#FF2B2926" : "#FFFAF5F0"}
+              IconButton "more_vert" onTap={sel=d.id; open tileMenu}
+            if !d.online
+              Badge.error "Offline"
+              Text.small "Last seen 2 hours ago" color=#FFD9D4CC
+              Button.outline "Retry" onTap={toast "Reconnecting {d.name}..."}
+            if d.online && d.kind=="light"
+              Row between middle
+                Text "{d.on ? d.level + '%' : 'Off'}" size=28 weight=700 color={d.on ? "#FF2B2926" : "#FFFAF5F0"}
+                Toggle bind=d.on size=large
+              Slider bind=d.level min=1 max=100 disabled={!d.on}
+              SegmentedButton items=["warm","neutral","cool"] bind=d.ct disabled={!d.on}
+            if d.online && d.kind=="thermostat"
+              Row between middle
+                Text "{d.cur}°" size=44 weight=700 color=#FFFAF5F0
+                Text.small "now" color=#FFD9D4CC
+              RangeSlider lo={d.heat} hi={d.cool} min=55 max=85 labels=["Heat to {d.heat}°","Cool to {d.cool}°"] onChange={devices=updateWhere(devices,x=>x.id==d.id,x=>with(with(x,"heat",result[0]),"cool",result[1]))}
+            if d.online && d.kind=="blind"
+              Text "{d.pos}% open" size=24 weight=700 color=#FFFAF5F0
+              Slider bind=d.pos min=0 max=100 step=5
+              Row gap=8
+                Button.outline "Close" onTap={d.pos=0}
+                Button.outline "Open" onTap={d.pos=100}
+            if d.online && d.kind=="lock"
+              Text "{d.locked ? 'Locked' : 'Unlocked'}" size=24 weight=700 color={d.locked ? "#FFFAF5F0" : "#FF2B2926"}
+              Button "{d.locked ? 'Unlock' : 'Lock'}" size=large onTap={sel=d.id; d.locked ? open confirmUnlock : devices=updateWhere(devices,x=>x.id==d.id,x=>with(x,"locked",true))}
+            if d.online && d.kind=="speaker"
+              Text.small "{d.playing ? d.track : 'Paused'}" color={d.playing ? "#FF2B2926" : "#FFFAF5F0"}
+              Row gap=8 middle
+                IconButton "{d.playing ? 'pause' : 'play_arrow'}" size=large onTap={d.playing=!d.playing}
+                Slider grow bind=d.vol min=0 max=100
+                Text.small "{d.vol}" color={d.playing ? "#FF2B2926" : "#FFFAF5F0"}
+            if d.online && d.kind=="sensor"
+              Text "{d.value}" size=36 weight=700 color=#FFFAF5F0
+              Text.small "Read only" color=#FFD9D4CC
+  Menu#tileMenu
+    MenuItem "Details" icon="tune" onTap={open details}
+    MenuItem "Rename" icon="edit" onTap={open renameDevice}
+    MenuItem "Add to scene" icon="auto_awesome" onTap={go scenes}
+  Dialog#renameDevice "Rename device"
+    Input "Name" bind=newName
+    Button "Save" onTap={devices=updateWhere(devices,x=>x.id==sel,x=>with(x,"name",newName)); close}
+  Sheet#details "{find(devices,x=>x.id==sel).name}"
+    Column gap=16 pad=16
+      Text.muted "{find(devices,x=>x.id==sel).room} · {find(devices,x=>x.id==sel).kind}"
+      if find(devices,x=>x.id==sel).kind=="light"
+        Text.fieldLabel "Brightness"
+        Slider bind=detailLevel min=0 max=100 stops=[0,25,50,75,100] stopLabels=["Off","Dim","Mid","Bright","Full"] onChange={devices=updateWhere(devices,x=>x.id==sel,x=>with(with(x,"level",max(1,result)),"on",result>0))}
+        Text.fieldLabel "Colour temperature"
+        Slider min=2200 max=6500 stops=[2200,2700,4000,5000,6500] stopLabels=["Candle","Warm","Neutral","Day","Cool"]
+      if find(devices,x=>x.id==sel).kind=="blind"
+        Text.fieldLabel "Position"
+        Slider min=0 max=100 stops=[0,25,50,75,100] stopLabels=["Closed","¼","Half","¾","Open"] onChange={devices=updateWhere(devices,x=>x.id==sel,x=>with(x,"pos",result))}
+      Divider
+      Row between
+        Text "Firmware 2.4.1"
+        Text.muted "Signal strong"
+      Button.outline "Close" onTap={close}
+  Dialog#allOff "Turn everything off?" "Lights, speakers and blinds will switch off. Locks stay as they are."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Turn off" onTap={devices=map(devices,x=>with(with(x,"on",false),"playing",false)); toast "Everything is off"; close}
+  Dialog#confirmUnlock "Unlock {find(devices,x=>x.id==sel).name}?" "Anyone nearby will be able to open it."
+    Row end gap=8
+      Button.ghost "Keep locked" onTap={close}
+      Button "Unlock" onTap={devices=updateWhere(devices,x=>x.id==sel,x=>with(x,"locked",false)); toast "Unlocked"; close}
+
+### Scenes
+project scenes=[{"id":"s1","name":"Good morning","icon":"wb_sunny","targets":[{"name":"Ceiling light","on":true,"level":80},{"name":"West blind","on":true,"level":100},{"name":"Thermostat","on":true,"level":70}]},{"id":"s2","name":"Movie night","icon":"movie","targets":[{"name":"Ceiling light","on":true,"level":10},{"name":"West blind","on":false,"level":0},{"name":"Sonos Beam","on":true,"level":30}]},{"id":"s3","name":"Away","icon":"flight_takeoff","targets":[{"name":"Ceiling light","on":false,"level":0},{"name":"Front door","on":true,"level":0},{"name":"Thermostat","on":true,"level":62}]},{"id":"s4","name":"Goodnight","icon":"bedtime","targets":[{"name":"Bedside lamp","on":false,"level":0},{"name":"Back door","on":true,"level":0}]}] persist
+state sceneId=""
+state dname=""
+state dtargets=[]
+App
+  Sidebar fill=#FFFAF5F0
+    Brand "Hearth" icon="local_fire_department"
+    NavItem "Home" icon="home" onTap={go home}
+    NavItem "Scenes" icon="auto_awesome" selected onTap={go scenes}
+    NavItem "Schedules" icon="schedule" onTap={go schedules}
+    NavItem "Automations" icon="rule" onTap={go automations}
+    NavItem "Activity" icon="history" onTap={go activity}
+    NavItem "Energy" icon="bolt" onTap={go energy}
+    Spacer grow
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main fill=#FFFAF5F0
+    Nav
+      Heading "Scenes" level=1
+      Button "New scene" icon="add" onTap={sceneId=""; dname=""; dtargets=[{"name":"Ceiling light","on":true,"level":60}]; open editScene}
+    Column pad=24 gap=16 scroll
+      Banner.warning "{alert}" announce=assertive visible={alert!=""} onDismiss={alert=""}
+      Text.muted "Tap a scene to run it. Drag cards to reorder."
+      Grid cols=2 gap=16 reorder onReorder={scenes=result}
+        each s in scenes
+          Box gap=12 pad=20 radius=24 fill=#FF2B2926 drag=scene(s.id) onTap={toast "Running {s.name}"; emit runScene s.id}
+            Row between middle
+              Icon "{s.icon}" size=32 color=#FFFFB547
+              IconButton "edit" onTap={sceneId=s.id; dname=s.name; dtargets=s.targets; open editScene}
+            Text.heading "{s.name}" color=#FFFAF5F0
+            Text.small "{length(s.targets)} devices" color=#FFD9D4CC
+  Dialog#editScene "{sceneId=='' ? 'New scene' : 'Edit scene'}" "Set each device's target"
+    Column gap=12
+      Input "Scene name" bind=dname
+      each t in dtargets
+        Row between middle gap=12
+          Text.strong "{t.name}" grow
+          Slider w=160 bind=t.level min=0 max=100
+          Toggle bind=t.on
+          IconButton "close" onTap={dtargets=removeWhere(dtargets,x=>x.name==t.name)}
+      Select "Add a device" items=["Ceiling light","Pendant lights","Bedside lamp","West blind","Sonos Beam","Thermostat","Front door"] onChange={dtargets=append(dtargets,{"name":result,"on":true,"level":50})}
+      Row between
+        Button.destructive "Delete" visible={sceneId!=""} onTap={scenes=removeWhere(scenes,x=>x.id==sceneId); close}
+        Button "Save scene" onTap={scenes=sceneId=="" ? append(scenes,{"id":"s"+(length(scenes)+1)+"x","name":dname,"icon":"auto_awesome","targets":dtargets}) : updateWhere(scenes,x=>x.id==sceneId,x=>with(with(x,"name",dname),"targets",dtargets)); toast "Scene saved"; close}
+
+### Schedules
+project schedules=[{"id":1,"time":"06:30","label":"Warm up the house","days":["Mon","Tue","Wed","Thu","Fri"],"on":true,"action":"Thermostat to 70°"},{"id":2,"time":"07:00","label":"Open blinds","days":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"on":true,"action":"West blind open"},{"id":3,"time":"18:30","label":"Evening lights","days":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"on":true,"action":"Scene Movie night"},{"id":4,"time":"23:00","label":"Lock up","days":["Sun","Mon","Tue","Wed","Thu"],"on":false,"action":"Lock all doors"}] persist
+state alldays=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+state stime="08:00"
+state slabel=""
+state sdays=["Mon","Tue","Wed","Thu","Fri"]
+App
+  Sidebar fill=#FFFAF5F0
+    Brand "Hearth" icon="local_fire_department"
+    NavItem "Home" icon="home" onTap={go home}
+    NavItem "Scenes" icon="auto_awesome" onTap={go scenes}
+    NavItem "Schedules" icon="schedule" selected onTap={go schedules}
+    NavItem "Automations" icon="rule" onTap={go automations}
+    NavItem "Activity" icon="history" onTap={go activity}
+    NavItem "Energy" icon="bolt" onTap={go energy}
+    Spacer grow
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main fill=#FFFAF5F0
+    Nav
+      Heading "Schedules" level=1
+      Button "Add schedule" icon="add" onTap={open addSchedule}
+    Column pad=24 gap=12 scroll
+      Banner.warning "{alert}" announce=assertive visible={alert!=""} onDismiss={alert=""}
+      each s in sortBy(schedules,x=>x.time)
+        Card gap=8 swipe onSwipeLeft={schedules=removeWhere(schedules,x=>x.id==s.id); toast "Schedule removed"}
+          Row between middle gap=16
+            Text s.time size=28 weight=700 w=90
+            Column grow gap=4
+              Text.strong "{s.label}"
+              Text.muted "{s.action}"
+              Row gap=4
+                each day in alldays
+                  Chip "{day}" selected={contains(s.days,day)}
+            Toggle bind=s.on size=large
+            IconButton "delete" onTap={schedules=removeWhere(schedules,x=>x.id==s.id)}
+  Dialog#addSchedule "New schedule" "Pick a time and the days it repeats"
+    Column gap=12
+      Input "Name" "e.g. Wake up" bind=slabel
+      TimePicker "Time" bind=stime
+      Text.fieldLabel "Repeat on"
+      Row gap=8 wrap
+        each day in alldays
+          FilterChip "{day}" selected={contains(sdays,day)} onTap={sdays=contains(sdays,day) ? without(sdays,day) : append(sdays,day)}
+      Row end gap=8
+        Button.ghost "Cancel" onTap={close}
+        Button "Add" onTap={schedules=append(schedules,{"id":length(schedules)+10,"time":stime,"label":slabel,"days":sdays,"on":true,"action":"Scene Good morning"}); slabel=""; close}
+
+### Automations
+project rules=[{"id":1,"name":"Door left open","trigger":"A door opens","conds":[{"field":"Time","op":"is after","value":"22:00"}],"acts":[{"device":"Phone","value":"Send alert"},{"device":"Hall light","value":"On"}],"on":true},{"id":2,"name":"Arrive home","trigger":"Someone arrives","conds":[{"field":"Sun","op":"is","value":"down"}],"acts":[{"device":"Ceiling light","value":"On"}],"on":true}] persist
+state ruleId=0
+state rname=""
+state rtrigger="Motion is detected"
+state dconds=[{"field":"Time","op":"is after","value":"22:00"}]
+state dacts=[{"device":"Hall light","value":"On"}]
+state rsel=0
+App
+  Sidebar fill=#FFFAF5F0
+    Brand "Hearth" icon="local_fire_department"
+    NavItem "Home" icon="home" onTap={go home}
+    NavItem "Scenes" icon="auto_awesome" onTap={go scenes}
+    NavItem "Schedules" icon="schedule" onTap={go schedules}
+    NavItem "Automations" icon="rule" selected onTap={go automations}
+    NavItem "Activity" icon="history" onTap={go activity}
+    NavItem "Energy" icon="bolt" onTap={go energy}
+    Spacer grow
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main fill=#FFFAF5F0
+    Nav
+      Heading "Automations" level=1
+      Button "New automation" icon="add" onTap={ruleId=0; rname=""; rtrigger="Motion is detected"; dconds=[]; dacts=[]; open builder}
+    Column pad=24 gap=12 scroll
+      Banner.warning "{alert}" announce=assertive visible={alert!=""} onDismiss={alert=""}
+      each r in rules
+        Card gap=8
+          Row between middle gap=12
+            Column grow gap=4
+              Text.strong "{r.name}"
+              Text.muted "When {lower(r.trigger)}{isEmpty(r.conds) ? '' : ', if ' + join(map(r.conds,c=>lower(c.field)+' '+c.op+' '+c.value),' and ')}, then {join(map(r.acts,a=>lower(a.device)+': '+lower(a.value)),', ')}."
+            Toggle bind=r.on size=large
+            IconButton "edit" onTap={ruleId=r.id; rname=r.name; rtrigger=r.trigger; dconds=r.conds; dacts=r.acts; open builder}
+            IconButton "delete" onTap={rsel=r.id; open confirmDelete}
+  Dialog#builder "{ruleId==0 ? 'New automation' : 'Edit automation'}" "When, if, then"
+    Column gap=16 scroll
+      Input "Name" bind=rname
+      Text.sectionTitle "When"
+      Select "Trigger" bind=rtrigger items=["Motion is detected","A door opens","Someone arrives","Sunset","Temperature rises above","Time of day"]
+      Text.sectionTitle "If"
+      Column gap=8 reorder onReorder={dconds=result}
+        each c in dconds
+          Row gap=8 middle drag=cond(index)
+            Icon "drag_indicator"
+            Select bind=c.field items=["Time","Sun","Anyone home","Temperature","Mode"] grow
+            Select bind=c.op items=["is","is not","is after","is before","above","below"]
+            Input bind=c.value w=100
+            IconButton "close" onTap={dconds=removeAt(dconds,index)}
+      Button.outline "Add condition" icon="add" onTap={dconds=append(dconds,{"field":"Time","op":"is after","value":"20:00"})}
+      Text.sectionTitle "Then"
+      Column gap=8 reorder onReorder={dacts=result}
+        each a in dacts
+          Row gap=8 middle drag=act(index)
+            Icon "drag_indicator"
+            Select bind=a.device items=["Ceiling light","Hall light","Thermostat","West blind","Front door","Sonos Beam","Phone"] grow
+            Select bind=a.value items=["On","Off","Lock","Unlock","Open","Close","Send alert"]
+            IconButton "close" onTap={dacts=removeAt(dacts,index)}
+      Button.outline "Add action" icon="add" onTap={dacts=append(dacts,{"device":"Ceiling light","value":"On"})}
+      Box pad=16 radius=16 fill=#FFFFF1D6 gap=4
+        Text.fieldLabel "In plain words"
+        Text "When {lower(rtrigger)}{isEmpty(dconds) ? '' : ', if ' + join(map(dconds,c=>lower(c.field)+' '+c.op+' '+c.value),' and ')}, then {isEmpty(dacts) ? 'do nothing' : join(map(dacts,a=>lower(a.device)+': '+lower(a.value)),', ')}."
+      Row end gap=8
+        Button.ghost "Cancel" onTap={close}
+        Button "Save" disabled={rname=="" || isEmpty(dacts)} onTap={rules=ruleId==0 ? append(rules,{"id":length(rules)+10,"name":rname,"trigger":rtrigger,"conds":dconds,"acts":dacts,"on":true}) : updateWhere(rules,x=>x.id==ruleId,x=>with(with(with(with(x,"name",rname),"trigger",rtrigger),"conds",dconds),"acts",dacts)); toast "Automation saved"; close}
+  Dialog#confirmDelete "Delete this automation?" "It will stop running and cannot be restored."
+    Row end gap=8
+      Button.ghost "Keep it" onTap={close}
+      Button.destructive "Delete" onTap={rules=removeWhere(rules,x=>x.id==rsel); toast "Deleted"; close}
+
+### Activity
+project rooms=["Living room","Kitchen","Bedroom","Hallway"]
+state log=[{"id":1,"t":"07:02","room":"Bedroom","kind":"light","text":"Bedside lamp turned on"},{"id":2,"t":"07:05","room":"Living room","kind":"blind","text":"West blind opened to 40%"},{"id":3,"t":"07:41","room":"Hallway","kind":"lock","text":"Front door locked"},{"id":4,"t":"08:15","room":"Kitchen","kind":"sensor","text":"Fridge at 3.4 C"},{"id":5,"t":"08:30","room":"Living room","kind":"speaker","text":"Sonos Beam started playing"}]
+state pool=[{"t":"now","room":"Kitchen","kind":"light","text":"Pendant lights turned on"},{"t":"now","room":"Hallway","kind":"sensor","text":"Motion detected"},{"t":"now","room":"Living room","kind":"thermostat","text":"Heating to 66°"},{"t":"now","room":"Hallway","kind":"lock","text":"Front door unlocked by Ray"},{"t":"now","room":"Bedroom","kind":"blind","text":"Bedroom blind closed"}]
+state n=0
+state following=true
+state froom="All"
+state fkind="All"
+every 4s onTick={n=n+1; log=append(log,with(pool[n%length(pool)],"id",100+n))}
+App
+  Sidebar fill=#FFFAF5F0
+    Brand "Hearth" icon="local_fire_department"
+    NavItem "Home" icon="home" onTap={go home}
+    NavItem "Scenes" icon="auto_awesome" onTap={go scenes}
+    NavItem "Schedules" icon="schedule" onTap={go schedules}
+    NavItem "Automations" icon="rule" onTap={go automations}
+    NavItem "Activity" icon="history" selected onTap={go activity}
+    NavItem "Energy" icon="bolt" onTap={go energy}
+    Spacer grow
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main fill=#FFFAF5F0
+    Nav
+      Heading "Activity" level=1
+      Row gap=8
+        Select "Room" bind=froom items=["All","Living room","Kitchen","Bedroom","Hallway"] w=160
+        Select "Kind" bind=fkind items=["All","light","lock","blind","speaker","sensor","thermostat"] w=140
+    Column pad=24 gap=12 grow
+      Banner.warning "{alert}" announce=assertive visible={alert!=""} onDismiss={alert=""}
+      Stack grow
+        ListView#log follow={following} onFollowChange={following=result} gap=4
+          each e in filter(log,x=>(froom=="All"||x.room==froom)&&(fkind=="All"||x.kind==fkind))
+            ListTile "{e.text}" subtitle="{e.room}" leading="{e.kind=='light'?'lightbulb':e.kind=='lock'?'lock':e.kind=='blind'?'blinds':e.kind=='speaker'?'speaker':e.kind=='thermostat'?'thermostat':'sensors'}" trailing="{e.t}" animate=slide-up
+        Button.elevated "Jump to latest" icon="arrow_downward" bottom end visible={!following} onTap={following=true; scroll log}
+      Text.caption "{following ? 'Following the newest entry' : 'Paused while you read earlier entries'}"
+
+### Energy
+state range="Today"
+state asTable=false
+state hours=[0.4,0.3,0.3,0.3,0.5,1.1,1.8,1.2,0.8,0.7,0.8,0.9]
+state days=[14.2,12.8,15.1,13.4,16.0,18.2,17.5]
+App
+  Sidebar fill=#FFFAF5F0
+    Brand "Hearth" icon="local_fire_department"
+    NavItem "Home" icon="home" onTap={go home}
+    NavItem "Scenes" icon="auto_awesome" onTap={go scenes}
+    NavItem "Schedules" icon="schedule" onTap={go schedules}
+    NavItem "Automations" icon="rule" onTap={go automations}
+    NavItem "Activity" icon="history" onTap={go activity}
+    NavItem "Energy" icon="bolt" selected onTap={go energy}
+    Spacer grow
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main fill=#FFFAF5F0
+    Nav
+      Heading "Energy" level=1
+      SegmentedButton items=["Today","Week"] bind=range
+    Column pad=24 gap=16 scroll
+      Banner.warning "{alert}" announce=assertive visible={alert!=""} onDismiss={alert=""}
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "{range=='Today' ? 'Used today' : 'Used this week'}"
+          Text "{range=='Today' ? sum(hours,h=>h) + ' kWh' : sum(days,d=>d) + ' kWh'}" size=36 weight=700
+        Card gap=4
+          Text.muted "Cost"
+          Text "{money(range=='Today' ? sum(hours,h=>h)*0.18 : sum(days,d=>d)*0.18,'$',2)}" size=36 weight=700
+        Card gap=4
+          Text.muted "Biggest user"
+          Text "Heating" size=36 weight=700
+      Card gap=12
+        Row between middle
+          Text.strong "{range=='Today' ? 'By hour' : 'By day'}"
+          Toggle "Show as table" bind=asTable
+        if !asTable
+          if range=="Today"
+            AreaChart values={hours} labels=["12a","2a","4a","6a","8a","10a","12p","2p","4p","6p","8p","10p"] unit="kWh" h=240
+          if range=="Week"
+            BarChart values={days} labels=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] unit="kWh" h=240
+        if asTable
+          Table cols=["{range=='Today' ? 'Time' : 'Day'}","kWh"] rows={range=="Today" ? map(range(12),i=>[(i*2)+':00',hours[i]]) : map(range(7),i=>[['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i],days[i]])}
+      Card gap=8
+        Text.strong "By device"
+        Donut values=[48,22,18,12] labels=["Heating","Lights","Fridge","Other"]
+
+### Settings
+state home="Maple Street"
+state units="°F"
+state notify=true
+state doorAlert=true
+state quiet=false
+state quietFrom="22:00"
+state quietTo="07:00"
+App
+  Sidebar fill=#FFFAF5F0
+    Brand "Hearth" icon="local_fire_department"
+    NavItem "Home" icon="home" onTap={go home}
+    NavItem "Scenes" icon="auto_awesome" onTap={go scenes}
+    NavItem "Schedules" icon="schedule" onTap={go schedules}
+    NavItem "Automations" icon="rule" onTap={go automations}
+    NavItem "Activity" icon="history" onTap={go activity}
+    NavItem "Energy" icon="bolt" onTap={go energy}
+    Spacer grow
+    NavItem "Settings" icon="settings" selected onTap={go settings}
+  Main fill=#FFFAF5F0
+    Nav
+      Heading "Settings" level=1
+    Column pad=24 gap=16 scroll maxw=720
+      Banner.warning "{alert}" announce=assertive visible={alert!=""} onDismiss={alert=""}
+      Card gap=12
+        Text.strong "Home"
+        Input "Home name" bind=home
+        SegmentedButton items=["°F","°C"] bind=units
+      Card gap=12
+        Text.strong "Alerts"
+        Toggle "Notify me on this device" bind=notify
+        Toggle "Door left open" bind=doorAlert
+        Toggle "Quiet hours" bind=quiet
+        if quiet
+          Row gap=12
+            TimePicker "From" bind=quietFrom grow
+            TimePicker "To" bind=quietTo grow
+      Card gap=12
+        Text.strong "Members"
+        ListTile "Ray Li" subtitle="Owner" leading="person"
+        ListTile "Maya Reyes" subtitle="Member" leading="person"
+        Button.outline "Invite someone" icon="person_add" onTap={toast "Invite link copied"}
+      Button.destructive "Reset all devices" onTap={open resetAll}
+  Dialog#resetAll "Reset all devices?" "Scenes, schedules and automations are kept."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Reset" onTap={emit resetDevices; toast "Devices reset"; close}

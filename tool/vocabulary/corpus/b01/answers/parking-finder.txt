@@ -1,0 +1,143 @@
+### Find
+state parks=[{"id":"p1","name":"Cathedral Quarter Car Park","lat":51.5128,"lng":-0.0914,"free":112,"total":240,"rate":3.2,"height":2.1,"hours":"24 hours","dist":"0.2 mi","prices":[{"h":1,"p":3.2},{"h":2,"p":6},{"h":4,"p":10.5},{"h":8,"p":18},{"h":24,"p":28}]},{"id":"p2","name":"Riverside Multi-storey","lat":51.5087,"lng":-0.0961,"free":14,"total":180,"rate":4.0,"height":1.9,"hours":"06:00 - 23:00","dist":"0.4 mi","prices":[{"h":1,"p":4},{"h":2,"p":7.5},{"h":4,"p":13},{"h":8,"p":22},{"h":24,"p":34}]},{"id":"p3","name":"Market Street Surface Park","lat":51.5149,"lng":-0.0869,"free":0,"total":60,"rate":2.5,"height":0,"hours":"07:00 - 20:00","dist":"0.5 mi","prices":[{"h":1,"p":2.5},{"h":2,"p":4.5},{"h":4,"p":8},{"h":8,"p":14},{"h":24,"p":20}]},{"id":"p4","name":"Station Approach Underground","lat":51.5106,"lng":-0.0838,"free":63,"total":150,"rate":3.6,"height":2.0,"hours":"24 hours","dist":"0.7 mi","prices":[{"h":1,"p":3.6},{"h":2,"p":6.8},{"h":4,"p":11.5},{"h":8,"p":19},{"h":24,"p":30}]}]
+state sel="p1"
+state q=""
+state onlyFree=false
+state arrive="09:00"
+state leave="11:00"
+state arriveDate=today()
+state plate=""
+state agreed=false
+state booking={"id":"","park":"","plate":"","arrive":"","leave":"","total":0}
+state sortBy="dist"
+App
+  Sidebar
+    Brand "Bay" icon="local_parking"
+    NavItem "Find parking" icon="map" selected={true}
+    NavItem "My tickets" icon="confirmation_number" onTap={go ticket}
+    NavItem "Saved places" icon="bookmark" onTap={toast "No saved places yet"}
+    Spacer grow
+    Text.muted "Signed in as Jo Marsh"
+  Main
+    Nav
+      Heading "Car parks near the Cathedral Quarter"
+      Row gap=8
+        Input "Search" "Street or postcode" bind=q w=220
+        Toggle "Free spaces only" bind=onlyFree
+        IconButton "my_location" tooltip="Centre on me" onTap={toast "Centred on your location"}
+    Column pad=24 gap=16 scroll
+      Card gap=0 pad=0
+        Map h=360 center=[51.5108,-0.0903] zoom=15 onPinTap={sel=result.id}
+          each p in parks
+            Pin "{p.free}" lat={p.lat} lng={p.lng} id={p.id} selected={sel==p.id} color={p.free==0 ? "#FFB3261E" : (p.free/p.total < 0.2 ? "#FFE8A317" : "#FF2E7D32")} onTap={sel=p.id}
+        Row gap=16 pad=12
+          Row gap=6
+            Icon "circle" color=#FF2E7D32
+            Text.small "Plenty free"
+          Row gap=6
+            Icon "circle" color=#FFE8A317
+            Text.small "Filling up"
+          Row gap=6
+            Icon "circle" color=#FFB3261E
+            Text.small "Full"
+      Row between
+        Text.sectionTitle "{length(filter(parks,p=>(!onlyFree || p.free>0) && (q=="" || contains(lower(p.name),lower(q)))))} car parks"
+        SegmentedButton bind=sortBy items=["dist","rate","free"]
+      each p in sortByDesc(filter(parks,p=>(!onlyFree || p.free>0) && (q=="" || contains(lower(p.name),lower(q)))),p=>p.id==sel)
+        ListTile "{p.name}" "{p.dist} away - from {money(p.rate,"£",2)} an hour - {p.free==0 ? "Full" : p.free+" spaces free"}" selected={sel==p.id} onTap={sel=p.id; open park}
+          Ring {p.free/p.total} size=40
+          Badge.success "{p.free}" visible={p.free>10}
+          Badge.warning "{p.free}" visible={p.free>0 && p.free<=10}
+          Badge.error "Full" visible={p.free==0}
+  Sheet#park "{find(parks,p=>p.id==sel).name}" "{find(parks,p=>p.id==sel).dist} away - open {find(parks,p=>p.id==sel).hours}"
+    Row gap=12
+      Card grow gap=4
+        Text.caption "Free now"
+        Text.strong "{find(parks,p=>p.id==sel).free} of {find(parks,p=>p.id==sel).total}" size=24
+        Progress {find(parks,p=>p.id==sel).free/find(parks,p=>p.id==sel).total}
+      Card grow gap=4
+        Text.caption "Height limit"
+        Text.strong "{find(parks,p=>p.id==sel).height==0 ? "None" : find(parks,p=>p.id==sel).height+" m"}" size=24
+      Card grow gap=4
+        Text.caption "Opening hours"
+        Text.strong "{find(parks,p=>p.id==sel).hours}"
+    Text.sectionTitle "Prices"
+    Card gap=8
+      each pr in find(parks,p=>p.id==sel).prices
+        Row between
+          Text "Up to {pr.h} {pr.h==1 ? "hour" : "hours"}"
+          Text.strong "{money(pr.p,"£",2)}"
+    Row gap=8
+      Button.outline "Directions" icon="directions" onTap={link "https://maps.example.com/route"}
+      Button "Book a space" grow disabled={find(parks,p=>p.id==sel).free==0} onTap={close; open book}
+  Dialog#book "Book a space" "{find(parks,p=>p.id==sel).name}"
+    Row gap=12
+      DatePicker "Date" bind=arriveDate grow
+      TimePicker "Arrive" bind=arrive grow
+      TimePicker "Leave" bind=leave grow
+    Input "Number plate" "AB12 CDE" bind=plate
+    Checkbox "I understand the height limit is {find(parks,p=>p.id==sel).height} m" bind=agreed
+    Card gap=4
+      Row between
+        Text.muted "Estimated total"
+        Text.strong "{money(find(parks,p=>p.id==sel).rate*max(1,ceil((parseHours(leave)-parseHours(arrive)))),"£",2)}"
+      Text.caption "Free cancellation until 30 minutes before arrival"
+    if plate=="" || !agreed
+      Text.danger "Enter your plate and tick the box to continue."
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button "Pay and book" disabled={plate=="" || !agreed} onTap={booking={"id":"BAY-"+upper(replace(plate," ","")),"park":find(parks,p=>p.id==sel).name,"plate":upper(plate),"arrive":formatDate(arriveDate,"MMM d")+" "+arrive,"leave":leave,"total":find(parks,p=>p.id==sel).rate*max(1,ceil((parseHours(leave)-parseHours(arrive))))}; emit book booking; close; toast "Space booked"; go ticket}
+
+### Ticket
+App
+  Sidebar
+    Brand "Bay" icon="local_parking"
+    NavItem "Find parking" icon="map" onTap={go find}
+    NavItem "My tickets" icon="confirmation_number" selected={true}
+    NavItem "Saved places" icon="bookmark" onTap={toast "No saved places yet"}
+    Spacer grow
+    Text.muted "Signed in as Jo Marsh"
+  Main
+    Nav
+      Heading "Your ticket"
+      Row gap=8
+        IconButton "share" tooltip="Share ticket" onTap={emit shareTicket booking.id}
+        IconButton "more_vert" tooltip="More" onTap={open ticketMenu}
+    Column pad=24 gap=16 center maxw=480
+      if booking.id==""
+        Card gap=8
+          Text.title "No active ticket"
+          Text.muted "Book a space from the map and your ticket appears here."
+          Button "Find parking" onTap={go find}
+      if booking.id!=""
+        Card gap=16
+          Row between
+            Text.title "{booking.park}"
+            Badge.success "Confirmed"
+          Row gap=24
+            Column gap=2
+              Text.caption "Arrive"
+              Text.strong "{booking.arrive}"
+            Column gap=2
+              Text.caption "Leave"
+              Text.strong "{booking.leave}"
+            Column gap=2
+              Text.caption "Plate"
+              Text.mono "{booking.plate}"
+          Divider
+          Barcode "{booking.id}" format=code128 h=96
+          Text.mono "{booking.id}" center
+          Divider
+          Row between
+            Text.muted "Paid"
+            Text.strong "{money(booking.total,"£",2)}"
+        Row gap=8
+          Button.outline "Copy ticket number" icon="content_copy" grow onTap={copy booking.id; toast "Copied"}
+          Button.destructive "Cancel booking" grow onTap={open cancel}
+  Menu#ticketMenu end
+    MenuItem "Add to calendar" icon="event" onTap={emit addToCalendar booking.id}
+    MenuItem "Download PDF" icon="download" onTap={emit downloadTicket booking.id}
+  Dialog#cancel "Cancel this booking?" "You will be refunded in full."
+    Row gap=8 end
+      Button.ghost "Keep it" onTap={close}
+      Button.destructive "Cancel booking" onTap={booking={"id":"","park":"","plate":"","arrive":"","leave":"","total":0}; close; toast "Booking cancelled"; go find}

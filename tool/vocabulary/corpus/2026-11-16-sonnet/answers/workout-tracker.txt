@@ -1,0 +1,423 @@
+### Today
+state screen="today" persist
+state unit="kg" persist
+state restDefault=90 persist
+state theme="dark" persist
+state plan={"name":"Push Pull Legs","day":"Push A","exercises":[{"name":"Bench Press","target":"4 x 6-8"},{"name":"Overhead Press","target":"3 x 8"},{"name":"Incline Dumbbell Press","target":"3 x 10"},{"name":"Cable Fly","target":"3 x 12"},{"name":"Triceps Pushdown","target":"3 x 12"}]} persist
+state active=false persist
+state last={"name":"Pull B","date":"Mon","time":"58 min","volume":7420,"sets":19,"records":1}
+state week=[true,false,true,true,false,false,false]
+App
+  Sidebar fill=#FF0A0A0A
+    Brand "Rep" icon="fitness_center"
+    NavItem "Today" icon="today" selected={true} onTap={go today}
+    NavItem "History" icon="calendar_month" onTap={go history}
+    NavItem "Exercises" icon="list" onTap={go exercises}
+    NavItem "Plans" icon="assignment" onTap={go plans}
+    NavItem "Body" icon="monitor_weight" onTap={go body}
+    Spacer grow
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main fill=#FF0A0A0A
+    Nav
+      Heading "Today" level=1 color=#FFFFFFFF
+      if active
+        Button "Back to workout" icon="timer" fill=#FFC6FF00 color=#FF0A0A0A onTap={go workout}
+    Column pad=24 gap=20 maxw=720
+      Card gap=16 fill=#FF161616 radius=24
+        Row between
+          Column gap=4
+            Text.caption "PLANNED" color=#FFC6FF00 weight=700
+            Text "{plan.day}" size=44 weight=800 color=#FFFFFFFF
+            Text.muted "{plan.name}"
+          Badge.neutral "{length(plan.exercises)} exercises"
+        Column gap=8
+          each ex in plan.exercises
+            Row between
+              Text.strong "{ex.name}" color=#FFFFFFFF
+              Text.muted "{ex.target}"
+            Divider
+        if !active
+          Button "Start workout" size=large icon="play_arrow" fill=#FFC6FF00 color=#FF0A0A0A radius=20 onTap={active=true; go workout}
+        if active
+          Button "Continue workout" size=large icon="timer" fill=#FFC6FF00 color=#FF0A0A0A radius=20 onTap={go workout}
+      Card gap=12 fill=#FF161616 radius=24
+        Text.strong "This week" color=#FFFFFFFF
+        Row between
+          each d in range(7)
+            Column center gap=6
+              Ring {week[d] ? 1 : 0} size=36 thickness=8 color=#FFC6FF00 track=#FF2A2A2A
+              Text.caption "{['M','T','W','T','F','S','S'][d]}"
+      Card gap=12 fill=#FF161616 radius=24
+        Row between
+          Text.strong "Last workout" color=#FFFFFFFF
+          Text.muted "{last.date}"
+        Text "{last.name}" size=28 weight=800 color=#FFFFFFFF
+        Row gap=24
+          Column
+            Text "{last.time}" size=24 weight=800 color=#FFFFFFFF
+            Text.caption "time"
+          Column
+            Text "{money(last.volume,'',0)} {unit}" size=24 weight=800 color=#FFFFFFFF
+            Text.caption "moved"
+          Column
+            Text "{last.sets}" size=24 weight=800 color=#FFFFFFFF
+            Text.caption "sets"
+          Column
+            Text "{last.records}" size=24 weight=800 color=#FFC6FF00
+            Text.caption "records"
+
+### Workout in progress
+state unit="kg" persist
+state restDefault=90 persist
+state active=true persist
+state elapsed=1260 persist
+state resting=false persist
+state rest=0 persist
+state restTotal=90 persist
+state addQuery=""
+state addGroup="All"
+state noteOpen=-1
+state menuEx=-1
+state menuSet=-1
+state exercises=[{"id":1,"name":"Bench Press","group":"Chest","note":"Pause on the chest","sets":[{"id":11,"kg":80,"reps":8,"done":true,"prevKg":77.5,"prevReps":8},{"id":12,"kg":80,"reps":7,"done":false,"prevKg":77.5,"prevReps":8},{"id":13,"kg":82.5,"reps":6,"done":false,"prevKg":80,"prevReps":6}]},{"id":2,"name":"Overhead Press","group":"Shoulders","note":"","sets":[{"id":21,"kg":50,"reps":8,"done":false,"prevKg":47.5,"prevReps":8},{"id":22,"kg":50,"reps":8,"done":false,"prevKg":47.5,"prevReps":7}]},{"id":3,"name":"Incline Dumbbell Press","group":"Chest","note":"","sets":[{"id":31,"kg":30,"reps":10,"done":false,"prevKg":28,"prevReps":10}]}] persist
+every 1s onTick={elapsed=elapsed+1}
+every 1s when rest>0 onTick={rest=rest-1}
+on rest==0 when resting onTrigger={resting=false; announce "Rest over, next set"; haptic}
+leaveGuard when active onLeave={open leaveAsk}
+Shortcut "alt+up" onPress={exercises=moveUp(exercises,focusedIndex)}
+Shortcut "alt+down" onPress={exercises=moveDown(exercises,focusedIndex)}
+App
+  Main fill=#FF0A0A0A
+    Nav
+      IconButton "arrow_back" onTap={open leaveAsk}
+      Column
+        Text.caption "WORKOUT" color=#FFC6FF00 weight=700
+        Text "{duration(elapsed)}" size=40 weight=800 color=#FFFFFFFF
+      Button "Finish" fill=#FFC6FF00 color=#FF0A0A0A radius=20 onTap={count(flatten(map(exercises,e=>e.sets)),s=>!s.done)>0 ? open finishAsk : go summary}
+    Column pad=16 gap=16 scroll maxw=720
+      if resting
+        Card fill=#FF161616 radius=24 gap=12
+          Row between middle
+            Stack center middle
+              Ring {rest/restTotal} size=120 thickness=14 color=#FFC6FF00 track=#FF2A2A2A
+              Text "{rest}" size=48 weight=800 color=#FFFFFFFF
+            Column gap=8
+              Text.strong "Rest" color=#FFFFFFFF
+              Row gap=8
+                Button.outline "+15s" onTap={rest=rest+15; restTotal=restTotal+15}
+                Button.ghost "Skip" onTap={rest=0; resting=false}
+      Column reorder bind=exercises handle=drag_handle onReorder={exercises=result} gap=16
+        each ex in exercises
+          Card gap=12 fill=#FF161616 radius=24 key={ex.id}
+            Row between middle
+              Row gap=8 middle
+                Icon "drag_handle" color=#FF777777
+                Column
+                  Text "{ex.name}" size=24 weight=800 color=#FFFFFFFF
+                  Text.caption "{ex.group}"
+              Row gap=4
+                IconButton "edit_note" onTap={noteOpen=noteOpen==ex.id?-1:ex.id}
+                IconButton "more_vert" onTap={menuEx=ex.id; open exMenu}
+            if noteOpen==ex.id
+              Input "Note" "Cues, how it felt" bind=ex.note multiline
+            Row gap=8
+              Text.caption "SET" w=36
+              Text.caption "PREVIOUS" w=90
+              Text.caption grow "{unit.toUpperCase}"
+              Text.caption grow "REPS"
+              Text.caption w=48 "DONE"
+            Column gap=8
+              each s in ex.sets
+                SwipeAction onSwipeLeft={exercises=updateWhere(exercises,e=>e.id==ex.id,e=>with(e,"sets",removeWhere(e.sets,x=>x.id==s.id)))} actionIcon="delete" actionColor=#FFFF3B30
+                  Row gap=8 middle fill={s.done?"#33C6FF00":"#00000000"} radius=16 pad=4 menu=setMenu onMenu={menuEx=ex.id; menuSet=s.id}
+                    Text.strong w=36 "{index+1}"
+                    Text.muted w=90 opacity=0.5 "{s.prevKg} x {s.prevReps}"
+                    Stepper bind=s.kg step=2.5 holdRepeat grow size=large type=number
+                    Stepper bind=s.reps step=1 holdRepeat grow size=large type=number
+                    Checkbox bind=s.done w=48 color=#FFC6FF00 onChange={resting=result; rest=result?restDefault:0; restTotal=restDefault}
+            Button.ghost "Add set" icon="add" onTap={exercises=updateWhere(exercises,e=>e.id==ex.id,e=>with(e,"sets",append(e.sets,{"id":length(e.sets)+ex.id*10+100,"kg":last(e.sets).kg,"reps":last(e.sets).reps,"done":false,"prevKg":0,"prevReps":0})))}
+      Button.outline "Add exercise" icon="add" size=large onTap={open addSheet}
+  Menu#exMenu
+    MenuItem "Move up" icon="arrow_upward" onTap={exercises=moveUp(exercises,indexOf(map(exercises,e=>e.id),menuEx))}
+    MenuItem "Move down" icon="arrow_downward" onTap={exercises=moveDown(exercises,indexOf(map(exercises,e=>e.id),menuEx))}
+    MenuItem "Remove exercise" icon="delete" onTap={exercises=removeWhere(exercises,e=>e.id==menuEx); toast "Exercise removed"}
+  Menu#setMenu
+    MenuItem "Delete set" icon="delete" onTap={exercises=updateWhere(exercises,e=>e.id==menuEx,e=>with(e,"sets",removeWhere(e.sets,x=>x.id==menuSet)))}
+    MenuItem "Duplicate set" icon="content_copy" onTap={exercises=updateWhere(exercises,e=>e.id==menuEx,e=>with(e,"sets",append(e.sets,with(find(e.sets,x=>x.id==menuSet),"id",menuSet+1000))))}
+  Sheet#addSheet "Add exercise"
+    Input "Search" "bench, squat..." bind=addQuery icon="search" fuzzy
+    Row scroll gap=8
+      each g in ["All","Chest","Back","Shoulders","Arms","Legs","Core"]
+        ChoiceChip "{g}" selected={addGroup==g} onTap={addGroup=g}
+    Column gap=4
+      each e in fuzzyFilter(catalog,addQuery,"name")
+        if addGroup=="All" || e.group==addGroup
+          ListTile "{e.name}" subtitle="{e.group}" trailing="add" onTap={exercises=append(exercises,{"id":length(exercises)+100,"name":e.name,"group":e.group,"note":"","sets":[{"id":index+900,"kg":20,"reps":10,"done":false,"prevKg":0,"prevReps":0}]}); close}
+  ConfirmDialog#finishAsk "Finish with unticked sets?" "Some sets are not ticked. They will be left out of your totals."
+    Button.ghost "Keep training" onTap={close}
+    Button "Finish anyway" onTap={close; go summary}
+  ConfirmDialog#leaveAsk "Leave this workout?" "Your progress is saved and the workout stays open on Today."
+    Button.ghost "Stay" onTap={close}
+    Button "Leave" onTap={close; go today}
+
+### Summary
+state unit="kg" persist
+state exercises=[] persist
+state elapsed=3480
+state rating=0
+state history=[] persist
+state summary={"time":"58 min","volume":8120,"sets":14,"records":[{"name":"Bench Press","what":"82.5 x 6"},{"name":"Overhead Press","what":"50 x 8"}]}
+App
+  Main fill=#FF0A0A0A
+    Nav
+      Heading "Summary" level=1 color=#FFFFFFFF
+    Column pad=24 gap=20 maxw=720
+      Card fill=#FF161616 radius=24 gap=16
+        Text.caption "WORKOUT COMPLETE" color=#FFC6FF00 weight=700
+        Grid cols=3 gap=16
+          Column
+            Text "{summary.time}" size=40 weight=800 color=#FFFFFFFF
+            Text.caption "time"
+          Column
+            Text "{money(summary.volume,'',0)}" size=40 weight=800 color=#FFFFFFFF
+            Text.caption "{unit} moved"
+          Column
+            Text "{summary.sets}" size=40 weight=800 color=#FFFFFFFF
+            Text.caption "sets"
+      Card fill=#FF161616 radius=24 gap=12
+        Text.strong "Records beaten" color=#FFFFFFFF
+        each r in summary.records
+          Row between middle
+            Row gap=8 middle
+              Icon "emoji_events" color=#FFC6FF00
+              Text.strong "{r.name}" color=#FFFFFFFF
+            Badge.success "{r.what}"
+      Card fill=#FF161616 radius=24 gap=12
+        Text.strong "How was the session?" color=#FFFFFFFF
+        Rating bind=rating count=5 size=40 color=#FFC6FF00
+      Button "Save workout" size=large fill=#FFC6FF00 color=#FF0A0A0A radius=20 onTap={history=append(history,{"date":today(),"name":"Push A","rating":rating,"summary":summary,"exercises":exercises}); active=false; exercises=[]; elapsed=0; toast "Workout saved"; go today}
+      Button.ghost "Discard" onTap={open discardAsk}
+  ConfirmDialog#discardAsk "Discard this workout?" "It will not be saved to your history."
+    Button.ghost "Cancel" onTap={close}
+    Button.destructive "Discard" onTap={active=false; exercises=[]; elapsed=0; close; go today}
+
+### History
+state history=[{"date":"2026-11-10","name":"Pull B","time":"58 min","volume":7420,"sets":19,"rating":4},{"date":"2026-11-12","name":"Legs A","time":"64 min","volume":12300,"sets":20,"rating":5},{"date":"2026-11-14","name":"Push A","time":"52 min","volume":8120,"sets":14,"rating":4},{"date":"2026-11-05","name":"Push B","time":"49 min","volume":7010,"sets":16,"rating":3}] persist
+state unit="kg" persist
+state month="2026-11"
+state day="2026-11-14"
+state opened=null
+App
+  Sidebar fill=#FF0A0A0A
+    Brand "Rep" icon="fitness_center"
+    NavItem "Today" icon="today" onTap={go today}
+    NavItem "History" icon="calendar_month" selected={true} onTap={go history}
+    NavItem "Exercises" icon="list" onTap={go exercises}
+    NavItem "Plans" icon="assignment" onTap={go plans}
+    NavItem "Body" icon="monitor_weight" onTap={go body}
+    Spacer grow
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main fill=#FF0A0A0A
+    Nav
+      Heading "History" level=1 color=#FFFFFFFF
+    Column pad=24 gap=16 maxw=720
+      Card fill=#FF161616 radius=24
+        Calendar bind=day month={month} onMonthChange={month=result} marked={map(history,h=>h.date)} markColor=#FFC6FF00 inline
+      Text.strong "{formatDate(day,'EEEE, MMM d')}" color=#FFFFFFFF
+      if count(history,h=>h.date==day)==0
+        Text.muted "No workout on this day."
+      each h in filter(history,h=>h.date==day)
+        Card fill=#FF161616 radius=24 gap=8 onTap={opened=h; open detail}
+          Row between
+            Text "{h.name}" size=24 weight=800 color=#FFFFFFFF
+            Rating value={h.rating} count=5 readonly size=18 color=#FFC6FF00
+          Text.muted "{h.time}  {money(h.volume,'',0)} {unit}  {h.sets} sets"
+  Dialog#detail "{opened.name}" "{opened.date}"
+    Grid cols=3 gap=12
+      Column
+        Text "{opened.time}" size=24 weight=800
+        Text.caption "time"
+      Column
+        Text "{money(opened.volume,'',0)}" size=24 weight=800
+        Text.caption "{unit}"
+      Column
+        Text "{opened.sets}" size=24 weight=800
+        Text.caption "sets"
+    Button "Close" onTap={close}
+
+### Exercises
+state unit="kg" persist
+state group="All"
+state q=""
+state picked=null
+state view="chart"
+state catalog=[{"name":"Bench Press","group":"Chest","best":[{"d":"Oct 12","w":70},{"d":"Oct 26","w":75},{"d":"Nov 9","w":80},{"d":"Nov 14","w":82.5}],"records":{"1RM":100,"Max reps":12,"Volume":3280}},{"name":"Squat","group":"Legs","best":[{"d":"Oct 12","w":100},{"d":"Oct 26","w":105},{"d":"Nov 12","w":110}],"records":{"1RM":135,"Max reps":10,"Volume":4400}},{"name":"Deadlift","group":"Back","best":[{"d":"Oct 14","w":120},{"d":"Nov 2","w":130}],"records":{"1RM":150,"Max reps":8,"Volume":3900}},{"name":"Overhead Press","group":"Shoulders","best":[{"d":"Oct 12","w":45},{"d":"Nov 14","w":50}],"records":{"1RM":60,"Max reps":10,"Volume":1600}},{"name":"Barbell Row","group":"Back","best":[{"d":"Oct 14","w":70},{"d":"Nov 10","w":77.5}],"records":{"1RM":95,"Max reps":10,"Volume":2800}}]
+App
+  Sidebar fill=#FF0A0A0A
+    Brand "Rep" icon="fitness_center"
+    NavItem "Today" icon="today" onTap={go today}
+    NavItem "History" icon="calendar_month" onTap={go history}
+    NavItem "Exercises" icon="list" selected={true} onTap={go exercises}
+    NavItem "Plans" icon="assignment" onTap={go plans}
+    NavItem "Body" icon="monitor_weight" onTap={go body}
+    Spacer grow
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main fill=#FF0A0A0A
+    Nav
+      Heading "Exercises" level=1 color=#FFFFFFFF
+    Row
+      Pane w=320 pad=16 gap=12
+        Input "Search" bind=q icon="search" fuzzy
+        Row scroll gap=8
+          each g in ["All","Chest","Back","Shoulders","Arms","Legs","Core"]
+            ChoiceChip "{g}" selected={group==g} onTap={group=g}
+        Column gap=4 scroll
+          each e in fuzzyFilter(catalog,q,"name")
+            if group=="All" || e.group==group
+              ListTile "{e.name}" subtitle="{e.group}" selected={picked.name==e.name} onTap={picked=e}
+      Column grow pad=24 gap=16
+        if picked==null
+          Text.muted "Pick an exercise to see its progress."
+        if picked!=null
+          Text "{picked.name}" size=36 weight=800 color=#FFFFFFFF
+          SegmentedButton bind=view items=["chart","table"]
+          if view=="chart"
+            Card fill=#FF161616 radius=24
+              LineChart values={map(picked.best,b=>b.w)} labels={map(picked.best,b=>b.d)} color=#FFC6FF00 h=220
+          if view=="table"
+            Table items={picked.best} columns=[{"key":"d","title":"Date"},{"key":"w","title":"Best set ({unit})"}] sortable
+          Card fill=#FF161616 radius=24 gap=8
+            Text.strong "Records" color=#FFFFFFFF
+            Row between
+              Text.muted "Estimated 1RM"
+              Text.strong "{picked.records['1RM']} {unit}" color=#FFC6FF00
+            Row between
+              Text.muted "Max reps"
+              Text.strong "{picked.records['Max reps']}" color=#FFC6FF00
+            Row between
+              Text.muted "Best volume"
+              Text.strong "{picked.records['Volume']} {unit}" color=#FFC6FF00
+
+### Plans
+state plans=[{"id":1,"name":"Push Pull Legs","days":[{"name":"Push A","items":[{"name":"Bench Press","sets":4},{"name":"Overhead Press","sets":3},{"name":"Cable Fly","sets":3}]},{"name":"Pull A","items":[{"name":"Barbell Row","sets":4},{"name":"Pull Up","sets":3}]},{"name":"Legs A","items":[{"name":"Squat","sets":4},{"name":"Romanian Deadlift","sets":3}]}]},{"id":2,"name":"Upper Lower","days":[{"name":"Upper","items":[{"name":"Bench Press","sets":3}]},{"name":"Lower","items":[{"name":"Squat","sets":3}]}]}] persist
+state editing=null
+state dayTab=0
+state delId=0
+state newEx=""
+App
+  Sidebar fill=#FF0A0A0A
+    Brand "Rep" icon="fitness_center"
+    NavItem "Today" icon="today" onTap={go today}
+    NavItem "History" icon="calendar_month" onTap={go history}
+    NavItem "Exercises" icon="list" onTap={go exercises}
+    NavItem "Plans" icon="assignment" selected={true} onTap={go plans}
+    NavItem "Body" icon="monitor_weight" onTap={go body}
+    Spacer grow
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main fill=#FF0A0A0A
+    Nav
+      Heading "Plans" level=1 color=#FFFFFFFF
+      Button "New plan" icon="add" onTap={plans=append(plans,{"id":length(plans)+10,"name":"New plan","days":[{"name":"Day 1","items":[]}]})}
+    Column pad=24 gap=16 maxw=720
+      if editing==null
+        Grid cols=2 gap=16
+          each p in plans
+            Card fill=#FF161616 radius=24 gap=8 onTap={editing=p.id; dayTab=0}
+              Text "{p.name}" size=24 weight=800 color=#FFFFFFFF
+              Text.muted "{length(p.days)} days"
+              Row gap=8
+                Button.outline "Duplicate" icon="content_copy" onTap={plans=append(plans,with(with(p,"id",length(plans)+10),"name",p.name+" copy")); toast "Plan duplicated"}
+                Button.ghost "Delete" icon="delete" onTap={delId=p.id; open delAsk}
+      if editing!=null
+        Row between
+          Button.ghost "Back" icon="arrow_back" onTap={editing=null}
+        each p in filter(plans,p=>p.id==editing)
+          Input "Plan name" bind=p.name
+          Row scroll gap=8
+            each d in p.days
+              ChoiceChip "{d.name}" selected={dayTab==index} onTap={dayTab=index}
+            Button.ghost "Add day" icon="add" onTap={plans=updateWhere(plans,x=>x.id==p.id,x=>with(x,"days",append(x.days,{"name":"Day "+(length(x.days)+1),"items":[]})))}
+          Column reorder handle=drag_handle onReorder={plans=updateWhere(plans,x=>x.id==p.id,x=>with(x,"days",setAt(x.days,dayTab,with(x.days[dayTab],"items",result))))} gap=8
+            each it in p.days[dayTab].items
+              Card fill=#FF161616 radius=20
+                Row between middle
+                  Row gap=8 middle
+                    Icon "drag_handle" color=#FF777777
+                    Text.strong "{it.name}" color=#FFFFFFFF
+                  Row gap=8 middle
+                    Stepper bind=it.sets min=1 max=10 step=1 holdRepeat
+                    IconButton "delete" onTap={plans=updateWhere(plans,x=>x.id==p.id,x=>with(x,"days",setAt(x.days,dayTab,with(x.days[dayTab],"items",without(x.days[dayTab].items,it)))))}
+          Row gap=8
+            Input "Add exercise" bind=newEx grow fuzzy suggestions={catalogNames}
+            Button "Add" onTap={plans=updateWhere(plans,x=>x.id==p.id,x=>with(x,"days",setAt(x.days,dayTab,with(x.days[dayTab],"items",append(x.days[dayTab].items,{"name":newEx,"sets":3}))))); newEx=""}
+  ConfirmDialog#delAsk "Delete this plan?" "This cannot be undone."
+    Button.ghost "Cancel" onTap={close}
+    Button.destructive "Delete" onTap={plans=removeWhere(plans,x=>x.id==delId); close; toast "Plan deleted"}
+
+### Body
+state unit="kg" persist
+state goal=78 persist
+state weights=[{"d":"2026-10-20","w":84.2},{"d":"2026-10-27","w":83.6},{"d":"2026-11-03","w":82.9},{"d":"2026-11-10","w":82.1}] persist
+state entryDate=""
+state entryW=0
+App
+  Sidebar fill=#FF0A0A0A
+    Brand "Rep" icon="fitness_center"
+    NavItem "Today" icon="today" onTap={go today}
+    NavItem "History" icon="calendar_month" onTap={go history}
+    NavItem "Exercises" icon="list" onTap={go exercises}
+    NavItem "Plans" icon="assignment" onTap={go plans}
+    NavItem "Body" icon="monitor_weight" selected={true} onTap={go body}
+    Spacer grow
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main fill=#FF0A0A0A
+    Nav
+      Heading "Body" level=1 color=#FFFFFFFF
+    Column pad=24 gap=16 maxw=720
+      Card fill=#FF161616 radius=24 gap=12
+        Text "{last(weights).w} {unit}" size=56 weight=800 color=#FFFFFFFF
+        Text.muted "Goal {goal} {unit}"
+        LineChart values={map(weights,x=>x.w)} labels={map(weights,x=>formatDate(x.d,"MMM d"))} goalLine={goal} goalColor=#FFC6FF00 color=#FFFFFFFF h=220
+      Card fill=#FF161616 radius=24 gap=12
+        Text.strong "Log weight" color=#FFFFFFFF
+        Row gap=8 middle
+          DatePicker "Date" bind=entryDate grow
+          Input "Weight" bind=entryW type=number grow
+          Button "Add" onTap={weights=sortBy(append(removeWhere(weights,x=>x.d==entryDate),{"d":entryDate,"w":entryW}),x=>x.d); toast "Logged"}
+        Stepper "Goal" bind=goal step=0.5 holdRepeat
+      Card fill=#FF161616 radius=24 gap=8
+        each x in reverse(weights)
+          Row between
+            Text.muted "{formatDate(x.d,'MMM d, yyyy')}"
+            Text.strong "{x.w} {unit}" color=#FFFFFFFF
+
+### Settings
+state unit="kg" persist
+state restDefault=90 persist
+state theme="dark" persist
+state exercises=[] persist
+state weights=[] persist
+state goal=78 persist
+state plans=[] persist
+App
+  Sidebar fill=#FF0A0A0A
+    Brand "Rep" icon="fitness_center"
+    NavItem "Today" icon="today" onTap={go today}
+    NavItem "History" icon="calendar_month" onTap={go history}
+    NavItem "Exercises" icon="list" onTap={go exercises}
+    NavItem "Plans" icon="assignment" onTap={go plans}
+    NavItem "Body" icon="monitor_weight" onTap={go body}
+    Spacer grow
+    NavItem "Settings" icon="settings" selected={true} onTap={go settings}
+  Main fill=#FF0A0A0A
+    Nav
+      Heading "Settings" level=1 color=#FFFFFFFF
+    Column pad=24 gap=16 maxw=720
+      Card fill=#FF161616 radius=24 gap=16
+        Toggle "Use pounds" bind=unitIsLb value={unit=="lb"} onChange={unit=result?"lb":"kg"; exercises=map(exercises,e=>with(e,"sets",map(e.sets,s=>with(with(s,"kg",round(s.kg*(result?2.2046:0.4536),1)),"prevKg",round(s.prevKg*(result?2.2046:0.4536),1))))); weights=map(weights,x=>with(x,"w",round(x.w*(result?2.2046:0.4536),1))); goal=round(goal*(result?2.2046:0.4536),1)}
+        Row between middle
+          Column
+            Text.strong "Default rest" color=#FFFFFFFF
+            Text.muted "{restDefault} seconds"
+          Stepper bind=restDefault min=15 max=300 step=15 holdRepeat
+        SegmentedButton "Theme" bind=theme items=["dark","light","system"]

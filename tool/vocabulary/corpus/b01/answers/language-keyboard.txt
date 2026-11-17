@@ -1,0 +1,130 @@
+### Lessons
+state lessons=[{"id":1,"name":"Home row","keys":"asdf jkl;","best":46,"acc":97,"passed":true,"text":"a sad lad asks dad; a flask falls."},{"id":2,"name":"Top row","keys":"qwer uiop","best":38,"acc":94,"passed":true,"text":"we were quite upset; pure power wrote it."},{"id":3,"name":"Bottom row","keys":"zxcv nm,.","best":0,"acc":0,"passed":false,"text":"maze vexed zack, but calm men can vanquish."},{"id":4,"name":"Capitals and punctuation","keys":"Shift ' \"","best":0,"acc":0,"passed":false,"text":"Mary said, \"Wait for Tom.\" It's Friday!"},{"id":5,"name":"Numbers","keys":"1234567890","best":0,"acc":0,"passed":false,"text":"Call 555-0142 before 9:30 on 14 May."}]
+state lessonId=1
+state typed=""
+state running=false
+state elapsed=0
+state errors=0
+state tab="lessons"
+App
+  Sidebar
+    Brand "Glyph" icon="keyboard"
+    NavItem "Lessons" icon="school" selected={tab=="lessons"} onTap={tab="lessons"; go lessons}
+    NavItem "Practice" icon="keyboard" selected={tab=="practice"} onTap={tab="practice"; go practice}
+    NavItem "Results" icon="insights" selected={tab=="results"} onTap={tab="results"; go results}
+    Spacer grow
+    Text.muted "{count(lessons,l=>l.passed)} of {length(lessons)} passed"
+    Progress {count(lessons,l=>l.passed)/length(lessons)}
+  Main
+    Nav
+      Heading "Lessons" level=1
+      Row gap=8
+        Badge.success "Best {max(46,38)} WPM"
+    Column pad=24 gap=16 scroll
+      Text.muted "Pass a lesson with 30 WPM and 92% accuracy to unlock the next."
+      each lesson in lessons
+        Card gap=8
+          ListTile "{lesson.id}. {lesson.name}" subtitle="Keys: {lesson.keys}" icon={lesson.passed ? "check_circle" : (lesson.id==1 || any(lessons,l=>l.id==lesson.id-1 && l.passed)) ? "play_circle" : "lock"} disabled={!(lesson.id==1 || any(lessons,l=>l.id==lesson.id-1 && l.passed))} onTap={lessonId=lesson.id; typed=""; running=false; elapsed=0; errors=0; go practice}
+            Row gap=8
+              if lesson.passed
+                Badge.success "{lesson.best} WPM"
+                Badge.neutral "{lesson.acc}%"
+              if !lesson.passed && !(lesson.id==1 || any(lessons,l=>l.id==lesson.id-1 && l.passed))
+                Badge.warning "Locked"
+                Text.muted "Pass lesson {lesson.id-1} first"
+          if !(lesson.id==1 || any(lessons,l=>l.id==lesson.id-1 && l.passed))
+            Button.ghost "Why is this locked?" onTap={open locked}
+  Dialog#locked "Lesson locked" "Each lesson builds on the keys before it."
+    Text "Reach 30 WPM at 92% accuracy on the previous lesson to unlock this one."
+    Button "Got it" onTap={close}
+
+### Practice
+state typed=""
+state running=false
+state elapsed=0
+state errors=0
+state lessonId=3
+state showFingers=true
+state result={"wpm":0,"acc":100}
+App
+  Sidebar
+    Brand "Glyph" icon="keyboard"
+    NavItem "Lessons" icon="school" onTap={go lessons}
+    NavItem "Practice" icon="keyboard" selected={true}
+    NavItem "Results" icon="insights" onTap={go results}
+  Main
+    Nav
+      Heading "Lesson {lessonId}: {find(lessons,l=>l.id==lessonId).name}" level=1
+      Row gap=8
+        Toggle "Finger guide" bind=showFingers
+        Button.outline "Restart" icon="restart_alt" onTap={typed=""; running=false; elapsed=0; errors=0}
+    Column pad=24 gap=16 scroll
+      every 1s when running onTick={elapsed=elapsed+1}
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Words per minute"
+          Text "{elapsed>0 ? round(length(typed)/5/(elapsed/60),0) : 0}" size=48 weight=700
+        Card gap=4
+          Text.muted "Accuracy"
+          Text "{length(typed)>0 ? round(100*(length(typed)-errors)/length(typed),0) : 100}%" size=48 weight=700
+        Card gap=4
+          Text.muted "Time"
+          Text "{duration(elapsed)}" size=48 weight=700
+      Card gap=12
+        TypingText target={find(lessons,l=>l.id==lessonId).text} bind=typed autofocus size=28 correctColor=#FF2E7D32 wrongColor=#FFC62828 onKeyDown={running=true} onError={errors=errors+1} onComplete={running=false; result={"wpm":round(length(typed)/5/(elapsed/60),0),"acc":round(100*(length(typed)-errors)/length(typed),0)}; open done}
+        Progress {length(typed)/length(find(lessons,l=>l.id==lessonId).text)}
+      Keyboard layout="qwerty" typed={typed} target={find(lessons,l=>l.id==lessonId).text} highlightNext showFingers={showFingers}
+      Row gap=8 center
+        Icon "back_hand"
+        Text.strong "Next key: {substring(find(lessons,l=>l.id==lessonId).text,length(typed),length(typed)+1)}"
+        Text.muted "use your {fingerFor(substring(find(lessons,l=>l.id==lessonId).text,length(typed),length(typed)+1))}"
+  Dialog#done "Lesson complete" "Here is how that went."
+    Row gap=24 center
+      Column center gap=4
+        Text "{result.wpm}" size=48 weight=700
+        Text.muted "WPM"
+      Column center gap=4
+        Text "{result.acc}%" size=48 weight=700
+        Text.muted "Accuracy"
+    if result.wpm>=30 && result.acc>=92
+      Badge.success "Passed: the next lesson is unlocked"
+      Button "Next lesson" onTap={lessons=updateWhere(lessons,l=>l.id==lessonId,l=>with(with(with(l,"passed",true),"best",max(l.best,result.wpm)),"acc",max(l.acc,result.acc))); lessonId=lessonId+1; typed=""; elapsed=0; errors=0; close}
+    if !(result.wpm>=30 && result.acc>=92)
+      Badge.warning "Not yet: aim for 30 WPM and 92% accuracy"
+      Button "Try again" onTap={typed=""; elapsed=0; errors=0; close}
+    Button.ghost "See results" onTap={close; go results}
+
+### Results
+state range="all"
+state history=[{"lesson":1,"wpm":38,"acc":93},{"lesson":1,"wpm":42,"acc":95},{"lesson":1,"wpm":46,"acc":97},{"lesson":2,"wpm":31,"acc":91},{"lesson":2,"wpm":35,"acc":93},{"lesson":2,"wpm":38,"acc":94},{"lesson":3,"wpm":29,"acc":90}]
+state chosen=0
+App
+  Sidebar
+    Brand "Glyph" icon="keyboard"
+    NavItem "Lessons" icon="school" onTap={go lessons}
+    NavItem "Practice" icon="keyboard" onTap={go practice}
+    NavItem "Results" icon="insights" selected={true}
+  Main
+    Nav
+      Heading "Results" level=1
+      Select "Lesson" bind=chosen items=["All lessons","Lesson 1","Lesson 2","Lesson 3"] w=180
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Best speed"
+          Text "{max(46,38)} WPM" size=36 weight=700
+        Card gap=4
+          Text.muted "Average accuracy"
+          Text "{round(sum(history,h=>h.acc)/length(history),0)}%" size=36 weight=700
+        Card gap=4
+          Text.muted "Sessions"
+          Text "{length(history)}" size=36 weight=700
+      Card gap=12
+        Text.strong "Words per minute by session"
+        LineChart values={map(filter(history,h=>chosen==0 || h.lesson==chosen),h=>h.wpm)} labels={map(filter(history,h=>chosen==0 || h.lesson==chosen),h=>"L{h.lesson}")} h=220
+      Card gap=12
+        Text.strong "Accuracy by session"
+        BarChart values={map(filter(history,h=>chosen==0 || h.lesson==chosen),h=>h.acc)} labels={map(filter(history,h=>chosen==0 || h.lesson==chosen),h=>"L{h.lesson}")} h=180
+      Card gap=8
+        Text.strong "Slowest keys"
+        KeyHeatmap layout="qwerty" data={[{"key":"p","ms":410},{"key":"z","ms":380},{"key":"q","ms":360},{"key":"x","ms":340}]}

@@ -1,0 +1,169 @@
+### Request Builder
+state nav="builder"
+state method="GET"
+state url="https://api.relayroom.dev/v2/projects/:projectId/orders/:orderId"
+state tab="Params"
+state resTab="Body"
+state nextId=10
+state params=[{"id":1,"on":true,"key":"expand","value":"items"},{"id":2,"on":false,"key":"limit","value":"20"}]
+state headers=[{"id":3,"on":true,"key":"Accept","value":"application/json"},{"id":4,"on":true,"key":"Authorization","value":"Bearer {{token}}"}]
+state body="{\n  \"status\": \"shipped\",\n  \"carrier\": \"DHL\",\n  \"tracking\": \"JD0146000030\"\n}"
+state bodyError=""
+state sending=false
+state sent=true
+state response={"status":200,"statusText":"OK","time":184,"size":2150,"headers":[{"key":"content-type","value":"application/json"},{"key":"x-request-id","value":"9f3a-71c2"},{"key":"cache-control","value":"no-store"}],"body":{"id":"ord_8841","status":"shipped","items":[{"sku":"BN-204","qty":2},{"sku":"MG-017","qty":1}],"customer":{"name":"Ada Lovelace","tier":"gold"}}}
+state history=[{"id":"h1","method":"GET","url":"/projects/42/orders/8841","status":200},{"id":"h2","method":"POST","url":"/projects/42/orders","status":201},{"id":"h3","method":"DELETE","url":"/projects/42/orders/8790","status":404}]
+state saveName=""
+every 1s when sending onTick={sending=false; sent=true; history=concat([{"id":"h{nextId}","method":method,"url":url,"status":response.status}],history); nextId=nextId+1}
+App
+  Sidebar
+    Brand "Relay Room" icon="swap_horiz"
+    NavItem "Builder" icon="send" selected={nav=="builder"} onTap={nav="builder"}
+    NavItem "Collections" icon="folder" selected={nav=="collections"} onTap={go collections}
+    NavItem "Environments" icon="tune" onTap={go environments}
+    Spacer grow
+    Text.muted "Workspace: Harbor API"
+  Main
+    Nav
+      Heading "Update order"
+      Row gap=8
+        Button.outline "Save" icon="bookmark" onTap={open save}
+        IconButton "history" tooltip="History" onTap={go collections}
+    Column pad=24 gap=16 scroll
+      Row gap=8
+        Select bind=method items=["GET","POST","PUT","PATCH","DELETE"] w=120
+        Input#url bind=url mono grow highlight=":[A-Za-z]+" hint="https://"
+        Button "Send" icon="send" disabled={sending} onTap={sending=true; sent=false}
+        if sending
+          Spinner
+      Text.caption "Path parameters: projectId, orderId"
+      Tabs bind=tab items=["Params","Headers","Body"]
+      if tab=="Params"
+        Column gap=8
+          each row in params
+            Row gap=8 middle
+              Checkbox bind=row.on
+              Input "Key" bind=row.key grow
+              Input "Value" bind=row.value grow
+              IconButton "delete" tooltip="Remove" onTap={params=removeWhere(params,r=>r.id==row.id)}
+          Row
+            Button.ghost "Add parameter" icon="add" onTap={params=append(params,{"id":nextId,"on":true,"key":"","value":""}); nextId=nextId+1}
+      if tab=="Headers"
+        Column gap=8
+          each row in headers
+            Row gap=8 middle
+              Checkbox bind=row.on
+              Input "Header" bind=row.key grow
+              Input "Value" bind=row.value grow
+              IconButton "delete" tooltip="Remove" onTap={headers=removeWhere(headers,r=>r.id==row.id)}
+          Row
+            Button.ghost "Add header" icon="add" onTap={headers=append(headers,{"id":nextId,"on":true,"key":"","value":""}); nextId=nextId+1}
+      if tab=="Body"
+        Column gap=8
+          CodeEditor bind=body language=json lineNumbers h=200 onError={bodyError=result}
+          if bodyError!=""
+            Row gap=8
+              Icon "error"
+              Text.danger "{bodyError}"
+          Row gap=8
+            Button.outline "Format" icon="format_align_left" onTap={emit formatBody}
+            Text.caption "{length(body)} characters"
+      Divider
+      if sending
+        Row gap=12 middle
+          Spinner
+          Text.muted "Waiting for api.relayroom.dev..."
+      if sent
+        Row gap=12 middle
+          Badge.success "{response.status} {response.statusText}"
+          Text.muted "{response.time} ms"
+          Text.muted "{fixed(response.size/1024,1)} KB"
+          Spacer grow
+          Button.ghost "Copy" icon="content_copy" onTap={copy response.body; toast "Copied"}
+        Tabs bind=resTab items=["Body","Headers"]
+        if resTab=="Body"
+          JsonTree value={response.body} collapsible expanded=2
+        if resTab=="Headers"
+          Column gap=4
+            each h in response.headers
+              Row gap=12
+                Text.mono "{h.key}" w=180
+                Text.mono "{h.value}" grow
+  Dialog#save "Save request" "Add it to a collection"
+    Input "Name" bind=saveName
+    Select "Collection" items=["Orders","Billing","Auth"] bind=saveTo
+    Button "Save" onTap={emit saveRequest saveName; toast "Saved"; close}
+
+### Collections and History
+state nav="collections"
+state sel="h1"
+state q=""
+state history=[{"id":"h1","method":"GET","url":"/projects/42/orders/8841","status":200,"at":"10:42"},{"id":"h2","method":"POST","url":"/projects/42/orders","status":201,"at":"10:31"},{"id":"h3","method":"DELETE","url":"/projects/42/orders/8790","status":404,"at":"09:58"}]
+state collections=[{"id":"c1","name":"Orders","children":[{"id":"r1","name":"List orders","method":"GET"},{"id":"r2","name":"Create order","method":"POST"},{"id":"r3","name":"Cancel order","method":"DELETE"}]},{"id":"c2","name":"Billing","children":[{"id":"r4","name":"Issue invoice","method":"POST"}]}]
+App
+  Sidebar
+    Brand "Relay Room" icon="swap_horiz"
+    NavItem "Builder" icon="send" onTap={go request-builder}
+    NavItem "Collections" icon="folder" selected={nav=="collections"} onTap={nav="collections"}
+    NavItem "Environments" icon="tune" onTap={go environments}
+    Spacer grow
+    Text.muted "Workspace: Harbor API"
+  Main
+    Nav
+      Heading "Collections"
+      Row gap=8
+        Input "Search" bind=q w=220
+        Button "New collection" icon="create_new_folder" onTap={open newCollection}
+    Column pad=24 gap=16 scroll
+      Row gap=24 top
+        Column grow gap=8
+          Text.strong "Saved"
+          Tree items={collections} bind=sel label=name icon=method onSelect={emit openRequest result} menu=nodeMenu
+        Column grow gap=8
+          Text.strong "History"
+          each h in history
+            ListTile "{h.method} {h.url}" subtitle="{h.at}" selected={sel==h.id} onTap={sel=h.id; go request-builder}
+              Badge.neutral "{h.status}"
+              IconButton "more_vert" onTap={sel=h.id; open rowMenu}
+          Button.ghost "Clear history" icon="delete_sweep" onTap={history=[]; toast "History cleared"}
+  Menu#rowMenu end
+    MenuItem "Open" icon="open_in_new" onTap={go request-builder}
+    MenuItem "Save to collection" icon="bookmark" onTap={open newCollection}
+    MenuItem "Remove" icon="delete" onTap={history=removeWhere(history,h=>h.id==sel)}
+  Menu#nodeMenu
+    MenuItem "Rename" icon="edit" onTap={emit renameNode sel}
+    MenuItem "Duplicate" icon="content_copy" onTap={emit duplicateNode sel}
+    MenuItem "Delete" icon="delete" onTap={emit deleteNode sel}
+  Dialog#newCollection "New collection"
+    Input "Name" bind=collectionName
+    Button "Create" onTap={collections=append(collections,{"id":"c{length(collections)+3}","name":collectionName,"children":[]}); close}
+
+### Environments
+state vars=[{"id":1,"on":true,"key":"baseUrl","value":"https://api.relayroom.dev/v2"},{"id":2,"on":true,"key":"token","value":"sk_test_51Hq"}]
+state nextId=10
+state env="Staging"
+App
+  Sidebar
+    Brand "Relay Room" icon="swap_horiz"
+    NavItem "Builder" icon="send" onTap={go request-builder}
+    NavItem "Collections" icon="folder" onTap={go collections}
+    NavItem "Environments" icon="tune" selected
+    Spacer grow
+    Text.muted "Workspace: Harbor API"
+  Main
+    Nav
+      Heading "Environments"
+      Select bind=env items=["Local","Staging","Production"] w=160
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Text.strong "Variables for {env}"
+        each row in vars
+          Row gap=8 middle
+            Checkbox bind=row.on
+            Input "Name" bind=row.key grow
+            Input "Value" bind=row.value grow password={row.key=="token"}
+            IconButton "delete" tooltip="Remove" onTap={vars=removeWhere(vars,r=>r.id==row.id)}
+        Row
+          Button.ghost "Add variable" icon="add" onTap={vars=append(vars,{"id":nextId,"on":true,"key":"","value":""}); nextId=nextId+1}
+      Row
+        Button "Save environment" onTap={emit saveEnv; toast "Environment saved"}

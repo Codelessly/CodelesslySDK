@@ -1,0 +1,198 @@
+### Story
+state chapter=0
+state step=0
+state year=1920
+state note=0
+state region="Alps"
+state span=[1950,2020]
+state showTable=[false,false,false,false,false]
+state split=0.5
+state shared=false
+Page
+  ScrollProgress h=3 fill=#FFE8782A sticky
+  ChapterRail right bind=chapter hide=phone
+    ChapterRailItem "Opening" id=top onTap={scroll top}
+    ChapterRailItem "The ice line" id=c1 onTap={scroll c1}
+    ChapterRailItem "A century of warming" id=c2 onTap={scroll c2}
+    ChapterRailItem "Where it melts" id=c3 onTap={scroll c3}
+    ChapterRailItem "What is lost" id=c4 onTap={scroll c4}
+    ChapterRailItem "One valley" id=c5 onTap={scroll c5}
+    ChapterRailItem "Explore" id=explore onTap={scroll explore}
+  Nav sticky
+    Brand "Glacier Lines" icon="ac_unit"
+    Row gap=4
+      Link "Story" onTap={scroll c1}
+      Link "Explore" onTap={scroll explore}
+      Link "Method" onTap={scroll method}
+    Button.outline "Share" onTap={open share}
+  Section#top bleed
+    ParallaxScene h=720 fill=#FF16222E
+      ParallaxLayer "sky" speed=0.1 fill=#FFDCE9F2
+      ParallaxLayer "far-peaks" speed=0.25 fill=#FF8FAFC6
+      ParallaxLayer "ice-fields" speed=0.5 fill=#FFC9DDEA
+      ParallaxLayer "near-ridge" speed=0.8 fill=#FF22313F
+      Column center middle gap=16 pad=24
+        Text.caption "A DATA STORY IN FIVE CHAPTERS" color=#FFE8782A animate=fade
+        Text "Glacier Lines" size=88 weight=700 color=#FFFFFFFF center animate=slide-up font="Playfair Display"
+        Text "A century of retreat, measured one summer at a time." size=22 color=#FFE6EEF4 center animate=slide-up delay=200 maxw=560
+        Button.outline "Begin reading" icon="arrow_downward" onTap={scroll c1} animate=pulse
+      Column bottom center pad=24
+        Text.caption "Scroll" color=#FFFFFFFF
+        Icon "keyboard_arrow_down" color=#FFFFFFFF animate=pulse
+  Section#c1
+    Scrolly bind=step stack=phone onEnter={chapter=0}
+      Sticky w=520 top=96
+        Card gap=8
+          Text.caption "CHAPTER ONE"
+          Heading "The ice line" level=2
+          GlacierDrawing#ice retreat={step} steps=4 labels=["1920","1960","2000","2024"] h=380 fill=#FFEAF3F9 iceColor=#FF9CC3DA presentColor=#FFE8782A
+          Row between
+            Text.caption "Aletsch tongue, Switzerland"
+            Button.ghost "Table" icon="table_chart" onTap={showTable=setAt(showTable,0,!showTable[0])}
+          if showTable[0]
+            Table columns=["Year","Length (km)"] rows=[["1920","24.6"],["1960","23.9"],["2000","23.0"],["2024","20.8"]] animate=fade
+      Column grow gap=0
+        Step index=0 minh=520
+          Text "In 1920 the Great Aletsch Glacier reached almost to the valley floor, a river of ice nearly twenty-five kilometres long." size=20 font="Source Serif 4"
+          Footnote 1 bind=note onTap={note=1; open noteCard}
+        Step index=1 minh=520
+          Text "By 1960 the tongue had thinned. Survey stakes drilled each autumn show the surface dropping by a metre in a typical year." size=20 font="Source Serif 4"
+          Footnote 2 bind=note onTap={note=2; open noteCard}
+        Step index=2 minh=520
+          Text "The turn of the century brought the fastest losses on record. The ice line climbed hundreds of metres up the valley wall." size=20 font="Source Serif 4"
+        Step index=3 minh=520
+          Text "Today the line sits where the orange mark falls. What is left is thinner, steeper and darker with dust." size=20 font="Source Serif 4"
+          Footnote 3 bind=note onTap={note=3; open noteCard}
+  Section tint#c2
+    Scrolly bind=step stack=phone onEnter={chapter=1}
+      Sticky w=520 top=96
+        Card gap=8
+          Text.caption "CHAPTER TWO"
+          Heading "A century of warming" level=2
+          LineChart draw={year} from=1900 to=2020 labels=["1900","1930","1960","1990","2020"] series=[{"name":"Mean annual temperature (C)","values":[6.1,6.3,6.2,6.9,7.8]},{"name":"Glacier mass (index)","values":[100,96,90,78,61]}] h=340 drawAnimation=true highlight=2020 highlightColor=#FFE8782A
+          Row between
+            Text.caption "Year shown: {year}"
+            Button.ghost "Table" icon="table_chart" onTap={showTable=setAt(showTable,1,!showTable[1])}
+          if showTable[1]
+            Table columns=["Year","Temp (C)","Mass index"] rows=[["1900","6.1","100"],["1930","6.3","96"],["1960","6.2","90"],["1990","6.9","78"],["2020","7.8","61"]]
+      Column grow gap=0
+        Step index=0 minh=520 onActive={year=1930}
+          Text "Between 1900 and 1930 the line barely moves. Winters are long and the snow that falls still outlasts the summer." size=20 font="Source Serif 4"
+        Step index=1 minh=520 onActive={year=1960}
+          Text "Mid century, temperatures wobble. Ice holds on, helped by a few cool decades." size=20 font="Source Serif 4"
+        Step index=2 minh=520 onActive={year=1990}
+          Text "Then the lines part. Temperature turns up and glacier mass turns down, and they never meet again." size=20 font="Source Serif 4"
+          Footnote 4 bind=note onTap={note=4; open noteCard}
+        Step index=3 minh=520 onActive={year=2020}
+          Text "By 2020 the Alps have warmed nearly two degrees and lost four tenths of the ice they carried in 1900." size=20 font="Source Serif 4"
+  Section#c3
+    Scrolly bind=step stack=phone onEnter={chapter=2}
+      Sticky w=520 top=96
+        Card gap=8
+          Text.caption "CHAPTER THREE"
+          Heading "Where it melts" level=2
+          MapDrawing h=360 map="world-glacier-regions" lit={step} regions=["Alaska","Andes","Alps","Himalaya","Svalbard"] litColor=#FFE8782A baseColor=#FFCFE0EC
+          Button.ghost "Table" icon="table_chart" onTap={showTable=setAt(showTable,2,!showTable[2])}
+          if showTable[2]
+            Table columns=["Region","Loss since 1960"] rows=[["Alaska","-28%"],["Andes","-42%"],["Alps","-39%"],["Himalaya","-21%"],["Svalbard","-18%"]]
+      Column grow gap=0
+        Step index=0 minh=480
+          Text "In Alaska the glaciers are vast and their loss is the largest in absolute tonnes." size=20 font="Source Serif 4"
+        Step index=1 minh=480
+          Text "In the Andes small tropical glaciers are vanishing within a single generation." size=20 font="Source Serif 4"
+        Step index=2 minh=480
+          Text "The Alps hold the best record, and some of the clearest retreat." size=20 font="Source Serif 4"
+        Step index=3 minh=480
+          Text "The Himalaya feed rivers for nearly two billion people, and their ice is going slower, for now." size=20 font="Source Serif 4"
+          Footnote 5 bind=note onTap={note=5; open noteCard}
+        Step index=4 minh=480
+          Text "At Svalbard the ice meets a sea that is warming faster than almost anywhere." size=20 font="Source Serif 4"
+  Section tint#c4
+    Scrolly bind=step stack=phone onEnter={chapter=3}
+      Sticky w=520 top=96
+        Card gap=8
+          Text.caption "CHAPTER FOUR"
+          Heading "What is lost" level=2
+          BarChart values=[12,34,58,91] labels=["1960s","1980s","2000s","2010s"] growWith={step} h=340 color=#FF6FA5C8 highlightLast=true highlightColor=#FFE8782A unit="Gt per year"
+          Button.ghost "Table" icon="table_chart" onTap={showTable=setAt(showTable,3,!showTable[3])}
+          if showTable[3]
+            Table columns=["Decade","Loss (Gt/yr)"] rows=[["1960s","12"],["1980s","34"],["2000s","58"],["2010s","91"]]
+      Column grow gap=0
+        Step index=0 minh=480
+          Text "In the 1960s the world's glaciers lost a modest twelve gigatonnes a year." size=20 font="Source Serif 4"
+        Step index=1 minh=480
+          Text "Twenty years on the loss had nearly tripled." size=20 font="Source Serif 4"
+        Step index=2 minh=480
+          Text "After 2000 it kept climbing, year on year." size=20 font="Source Serif 4"
+        Step index=3 minh=480
+          Text "The last decade lost ninety-one gigatonnes a year, enough to cover Switzerland in two metres of water." size=20 font="Source Serif 4"
+          Footnote 6 bind=note onTap={note=6; open noteCard}
+  Section#c5 bleed
+    Scrolly bind=step stack=phone onEnter={chapter=4}
+      Sticky w=640 top=96
+        Card gap=8
+          Text.caption "CHAPTER FIVE"
+          Heading "One valley, two photographs" level=2
+          CompareSlider bind=split before="https://images.glacierlines.org/rhone-1900.jpg" after="https://images.glacierlines.org/rhone-2023.jpg" beforeLabel="1900" afterLabel="2023" h=380 handleColor=#FFE8782A
+          Row between
+            Text.caption "Rhone Glacier, Valais. Drag the handle."
+            Button.ghost "Table" icon="table_chart" onTap={showTable=setAt(showTable,4,!showTable[4])}
+          if showTable[4]
+            Table columns=["Year","Ice front altitude (m)"] rows=[["1900","1,820"],["1950","1,905"],["2000","2,040"],["2023","2,190"]]
+      Column grow gap=0
+        Step index=0 minh=520 onActive={split=0.9}
+          Text "Here is the Rhone valley in 1900, ice filling it wall to wall." size=20 font="Source Serif 4"
+        Step index=1 minh=520 onActive={split=0.5}
+          Text "Drag across to see the same view a century later." size=20 font="Source Serif 4"
+        Step index=2 minh=520 onActive={split=0.1}
+          Text "The ice has gone. What remains is bare rock and a lake the colour of milk." size=20 font="Source Serif 4"
+  Section tint center#figures
+    Heading "Three numbers" level=2
+    Grid cols=3 gap=24
+      Column center gap=4
+        CountUp 39 suffix="%" size=72 color=#FFE8782A duration=1800 onView
+        Text.muted "of Alpine ice lost since 1960"
+      Column center gap=4
+        CountUp 91 suffix=" Gt" size=72 color=#FFE8782A duration=1800 onView
+        Text.muted "lost worldwide each year"
+      Column center gap=4
+        CountUp 1.9 decimals=1 suffix=" C" size=72 color=#FFE8782A duration=1800 onView
+        Text.muted "warmer than in 1900"
+  Section#explore
+    Column gap=16
+      Text.caption "AFTER THE STORY"
+      Heading "Explore the record" level=2
+      Row gap=16 top
+        Select "Region" bind=region items=["Alps","Alaska","Andes","Himalaya","Svalbard"] w=220
+        Column grow gap=4
+          Text.fieldLabel "Years {span[0]} to {span[1]}"
+          RangeSlider bind=span min=1900 max=2020 step=5
+      LineChart labels=["1900","1930","1960","1990","2020"] series=[{"name":"Ice volume, {region}","values":[100,96,90,78,61]}] range={span} h=320
+      Row between
+        Text.caption "Showing {region}, {span[0]} to {span[1]}"
+        Button.ghost "Reset" icon="restart_alt" onTap={span=[1950,2020]; region="Alps"}
+  Section tint#method narrow
+    Heading "Method and credits" level=2
+    Text "Glacier length and mass figures come from the World Glacier Monitoring Service and the Swiss Glacier Monitoring Network. Temperatures are homogenised station records from MeteoSwiss. Regional losses are averaged over reference glaciers and scaled by area." size=18 font="Source Serif 4"
+    Text.muted "Words by Maren Holt. Graphics and code by the Glacier Lines desk. Photographs courtesy of the Swiss Federal Archives."
+    Row gap=8
+      Text.strong "Share this story"
+      IconButton "link" onTap={copy "https://glacierlines.org/story"; toast "Link copied"}
+      IconButton "mail" onTap={link "mailto:?subject=Glacier%20Lines&body=https://glacierlines.org/story"}
+      IconButton "share" onTap={open share}
+  Footer
+    Row between
+      Text.strong "Glacier Lines"
+      Text.muted "© 2026 Glacier Lines"
+  Popover#noteCard hover=true focus=true
+    Card gap=8 w=320
+      Row between
+        Text.strong "Note {note}"
+        IconButton "close" onTap={close}
+      Text.small "{noteSource(note)}"
+      Link "Open the source" onTap={link noteUrl(note)}
+  Sheet#share "Share Glacier Lines"
+    Column gap=12
+      Button.outline "Copy link" icon="link" onTap={copy "https://glacierlines.org/story"; toast "Link copied"; close}
+      Button.outline "Email" icon="mail" onTap={link "mailto:?subject=Glacier%20Lines"; close}
+      Button.outline "Post" icon="share" onTap={link "https://social.example/share?u=glacierlines.org"; close}

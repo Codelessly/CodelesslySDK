@@ -1,0 +1,334 @@
+### Decks
+state decks=[{"id":1,"title":"Spanish Basics","count":48,"due":12,"learned":31},{"id":2,"title":"Travel Phrases","count":30,"due":7,"learned":14},{"id":3,"title":"Food and Cooking","count":64,"due":0,"learned":64},{"id":4,"title":"Verbs in the Past","count":40,"due":22,"learned":9}] persist
+state sel=0
+state newTitle=""
+state renameTo=""
+state streak=6 persist
+App
+  Sidebar fill=#FFFFFFFF border-right=#FFEFE9FB
+    Brand "Lexi" icon="translate"
+    NavItem "Decks" icon="style" selected={true} onTap={go decks}
+    NavItem "Study" icon="school" badge="{sum(decks,d=>d.due)}" onTap={go study}
+    NavItem "Quiz" icon="quiz" onTap={go quiz}
+    NavItem "Progress" icon="insights" onTap={go progress}
+    NavItem "Settings" icon="settings" onTap={go settings}
+    Spacer grow
+    Card fill=#FFFFF4C2 radius=24 gap=4
+      Row gap=8 middle
+        Icon "local_fire_department" color=#FFF59E0B
+        Text.strong "{streak} day streak" color=#FF4C1D95
+      Text.caption "Study today to keep it going" color=#FF4C1D95
+  Main
+    Nav
+      Heading "Your decks" level=1 color=#FF4C1D95
+      Button "New deck" icon="add" onTap={newTitle=""; open newDeck}
+    Column pad=24 gap=20 scroll
+      Text.muted "{sum(decks,d=>d.due)} cards are waiting for you today."
+      Grid cols=2 gap=20
+        each d in decks
+          Card gap=16 radius=32 fill=#FFFFFFFF animate=slide-up stagger=80 hover=lift onTap={sel=d.id; go deck}
+            Row between middle
+              Column gap=4 grow
+                Heading "{d.title}" level=3 color=#FF4C1D95
+                Text.muted "{d.count} cards"
+              Stack center middle
+                Ring {d.learned/d.count} size=64 color=#FF6D28D9 track=#FFFFF4C2
+                Text.small weight=700 "{round(d.learned/d.count*100,0)}%"
+              IconButton "more_vert" onTap={sel=d.id; open deckMenu}
+            Row between middle
+              if d.due>0
+                Badge.warning "{d.due} due"
+              if d.due==0
+                Badge.success "All caught up"
+              Button "Study" size=small fill=#FFFACC15 color=#FF4C1D95 onTap={sel=d.id; go study}
+  Dialog#newDeck "New deck" "Give it a name you will recognise"
+    Input "Deck name" "Spanish Basics" bind=newTitle
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Create deck" onTap={decks=append(decks,{"id":length(decks)+10,"title":newTitle,"count":0,"due":0,"learned":0}); toast "Deck created"; close}
+  Menu#deckMenu end
+    MenuItem "Rename" icon="edit" onTap={renameTo=find(decks,d=>d.id==sel).title; open renameDeck}
+    MenuItem "Reset progress" icon="restart_alt" onTap={open confirmReset}
+    MenuItem "Delete" icon="delete" onTap={open confirmDelete}
+  Dialog#renameDeck "Rename deck"
+    Input "Deck name" bind=renameTo
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Save" onTap={decks=updateWhere(decks,d=>d.id==sel,d=>with(d,"title",renameTo)); toast "Renamed"; close}
+  Dialog#confirmReset "Reset this deck?" "All progress in it goes back to zero."
+    Row end gap=8
+      Button.ghost "Keep it" onTap={close}
+      Button.destructive "Reset" onTap={decks=updateWhere(decks,d=>d.id==sel,d=>with(with(d,"learned",0),"due",d.count)); toast "Progress reset"; close}
+  Dialog#confirmDelete "Delete this deck?" "Its cards are deleted too. This cannot be undone."
+    Row end gap=8
+      Button.ghost "Keep it" onTap={close}
+      Button.destructive "Delete" onTap={decks=removeWhere(decks,d=>d.id==sel); toast "Deck deleted"; close}
+
+### Study
+state queue=[{"id":1,"word":"la ventana","meaning":"the window","example":"Abre la ventana, por favor."},{"id":2,"word":"el aeropuerto","meaning":"the airport","example":"Llegamos al aeropuerto temprano."},{"id":3,"word":"cansado","meaning":"tired","example":"Estoy muy cansado hoy."},{"id":4,"word":"la receta","meaning":"the recipe","example":"Me das la receta del pastel?"},{"id":5,"word":"aprender","meaning":"to learn","example":"Quiero aprender mas palabras."}]
+state at=0
+state flipped=false
+state known=[]
+state again=[]
+state history=[]
+state studied=[] persist
+state streak=6 persist
+state drag=0
+App
+  Sidebar fill=#FFFFFFFF border-right=#FFEFE9FB
+    Brand "Lexi" icon="translate"
+    NavItem "Decks" icon="style" onTap={go decks}
+    NavItem "Study" icon="school" selected={true} onTap={go study}
+    NavItem "Quiz" icon="quiz" onTap={go quiz}
+    NavItem "Progress" icon="insights" onTap={go progress}
+    NavItem "Settings" icon="settings" onTap={go settings}
+    Spacer grow
+    Card fill=#FFFFF4C2 radius=24
+      Row gap=8 middle
+        Icon "local_fire_department" color=#FFF59E0B
+        Text.strong "{streak} day streak" color=#FF4C1D95
+  Main
+    Nav
+      Heading "Study: Spanish Basics" level=1 color=#FF4C1D95
+      Button.ghost "Undo" icon="undo" disabled={isEmpty(history)} onTap={at=last(history); history=removeAt(history,length(history)-1); known=without(known,at); again=without(again,at); flipped=false}
+    Shortcut keys="Space" onPress={flipped=!flipped}
+    Shortcut keys="ArrowRight" when={flipped && at<length(queue)} onPress={known=append(known,at); history=append(history,at); at=at+1; flipped=false}
+    Shortcut keys="ArrowLeft" when={flipped && at<length(queue)} onPress={again=append(again,at); history=append(history,at); at=at+1; flipped=false}
+    Shortcut keys="Ctrl+Z" onPress={at=at-1}
+    Column pad=24 gap=20 center maxw=640
+      if at<length(queue)
+        Row gap=12 middle
+          Progress {at/length(queue)} grow color=#FF6D28D9
+          Text.strong "{at+1} of {length(queue)}"
+        Row gap=8 center
+          Badge.success "{length(known)} known"
+          Badge.warning "{length(again)} again"
+        SwipeCard bind=drag threshold=120 tintRight=#FF86EFAC tintLeft=#FFFCA5A5 follow onSwipeRight={known=append(known,at); history=append(history,at); at=at+1; flipped=false} onSwipeLeft={again=append(again,at); history=append(history,at); at=at+1; flipped=false}
+          FlipCard bind=flipped duration=450 onTap={flipped=!flipped} h=340 radius=40
+            Front fill=#FF6D28D9
+              Column center middle gap=12 pad=32
+                Text.caption "TAP OR PRESS SPACE TO FLIP" color=#FFFDE68A
+                Text "{queue[at].word}" size=56 weight=800 color=#FFFFFFFF center
+            Back fill=#FFFFF4C2
+              Column center middle gap=12 pad=32
+                Text "{queue[at].meaning}" size=36 weight=700 color=#FF4C1D95 center
+                Text.muted "{queue[at].example}" center
+        Row gap=16 center
+          Button.outline "Again" icon="arrow_back" size=large disabled={!flipped} onTap={again=append(again,at); history=append(history,at); at=at+1; flipped=false}
+          Button "Known" icon="arrow_forward" size=large fill=#FFFACC15 color=#FF4C1D95 disabled={!flipped} onTap={known=append(known,at); history=append(history,at); at=at+1; flipped=false}
+        Text.caption "Swipe right for known, left for again. Arrow keys work too." center
+      if at>=length(queue)
+        Card gap=16 radius=40 center animate=pop pad=32
+          Icon "celebration" size=64 color=#FFF59E0B
+          Heading "Deck done!" level=1 color=#FF4C1D95
+          Row gap=32 center
+            Column center
+              Text "{length(known)}" size=48 weight=800 color=#FF16A34A
+              Text.muted "known"
+            Column center
+              Text "{length(again)}" size=48 weight=800 color=#FFDC2626
+              Text.muted "again"
+          Text.muted "{length(again)} cards come back tomorrow, {length(known)} in four days."
+          Row gap=12 center
+            Button.outline "Study again" onTap={at=0; known=[]; again=[]; history=[]; flipped=false}
+            Button "Back to decks" onTap={studied=append(studied,today()); go decks}
+    every 3s when at>=length(queue) onTick={streak=streak}
+
+### Quiz
+state qs=[{"kind":"choice","word":"la ventana","meaning":"the window","options":["the door","the window","the table","the street"]},{"kind":"typed","word":"cansado","meaning":"tired"},{"kind":"match","pairs":[{"a":"casa","b":"house"},{"a":"perro","b":"dog"},{"a":"agua","b":"water"},{"a":"libro","b":"book"},{"a":"luz","b":"light"}]},{"kind":"choice","word":"aprender","meaning":"to learn","options":["to eat","to learn","to wait","to run"]}]
+state qi=0
+state score=0
+state picked=-1
+state answer=""
+state verdict=""
+state pl=""
+state pr=""
+state matched=[]
+state shake=false
+App
+  Sidebar fill=#FFFFFFFF border-right=#FFEFE9FB
+    Brand "Lexi" icon="translate"
+    NavItem "Decks" icon="style" onTap={go decks}
+    NavItem "Study" icon="school" onTap={go study}
+    NavItem "Quiz" icon="quiz" selected={true} onTap={go quiz}
+    NavItem "Progress" icon="insights" onTap={go progress}
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main
+    Nav
+      Heading "Quiz" level=1 color=#FF4C1D95
+      Badge.primary "Score {score}"
+    Column pad=24 gap=20 center maxw=640
+      if qi<length(qs)
+        Row gap=12 middle
+          Progress {qi/length(qs)} grow color=#FF6D28D9
+          Text.strong "{qi+1} of {length(qs)}"
+        if qs[qi].kind=="choice"
+          Shortcut keys="1" onPress={picked=0; verdict=qs[qi].options[0]==qs[qi].meaning?"right":"wrong"; score=score+(verdict=="right"?1:0)}
+          Shortcut keys="2" onPress={picked=1; verdict=qs[qi].options[1]==qs[qi].meaning?"right":"wrong"; score=score+(verdict=="right"?1:0)}
+          Shortcut keys="3" onPress={picked=2; verdict=qs[qi].options[2]==qs[qi].meaning?"right":"wrong"; score=score+(verdict=="right"?1:0)}
+          Shortcut keys="4" onPress={picked=3; verdict=qs[qi].options[3]==qs[qi].meaning?"right":"wrong"; score=score+(verdict=="right"?1:0)}
+          Card gap=16 radius=40 center pad=32
+            Text.caption "WHAT DOES THIS MEAN?"
+            Text "{qs[qi].word}" size=48 weight=800 color=#FF4C1D95
+          Grid cols=2 gap=12
+            each o in qs[qi].options
+              Button.outline "{index+1}. {o}" size=large radius=24 disabled={picked>=0} fill={picked==index ? (o==qs[qi].meaning ? #FFBBF7D0 : #FFFECACA) : #FFFFFFFF} onTap={picked=index; verdict=o==qs[qi].meaning?"right":"wrong"; score=score+(o==qs[qi].meaning?1:0)}
+        if qs[qi].kind=="typed"
+          Card gap=16 radius=40 center pad=32
+            Text.caption "TYPE THE SPANISH WORD"
+            Text "{qs[qi].meaning}" size=40 weight=800 color=#FF4C1D95
+            TypedAnswer "Your answer" bind=answer answer={qs[qi].word} tolerance=1 showDiff autofocus onResult={verdict=result.correct?"right":"wrong"; score=score+(result.correct?1:0)}
+        if qs[qi].kind=="match"
+          Text.title "Match the five pairs" center
+          Row gap=24 top
+            Column grow gap=8
+              each p in qs[qi].pairs
+                Button.outline "{p.a}" radius=20 disabled={contains(matched,p.a)} selected={pl==p.a} onTap={pl=p.a; matched=pr!="" && find(qs[qi].pairs,x=>x.a==p.a).b==pr ? append(matched,p.a) : matched; score=score+(pr!="" && find(qs[qi].pairs,x=>x.a==p.a).b==pr ? 1 : 0); verdict=pr==""?"":(find(qs[qi].pairs,x=>x.a==p.a).b==pr?"right":"wrong"); pl=pr!=""?"":p.a; pr=pr!=""?"":pr}
+            Column grow gap=8
+              each p in reverse(qs[qi].pairs)
+                Button.outline "{p.b}" radius=20 disabled={contains(map(filter(qs[qi].pairs,x=>contains(matched,x.a)),x=>x.b),p.b)} selected={pr==p.b} onTap={pr=p.b; matched=pl!="" && find(qs[qi].pairs,x=>x.a==pl).b==p.b ? append(matched,pl) : matched; score=score+(pl!="" && find(qs[qi].pairs,x=>x.a==pl).b==p.b ? 1 : 0); verdict=pl==""?"":(find(qs[qi].pairs,x=>x.a==pl).b==p.b?"right":"wrong"); pr=pl!=""?"":p.b; pl=pl!=""?"":pl}
+        if verdict=="right"
+          Row gap=8 center animate=pop announce="Correct"
+            Icon "check_circle" color=#FF16A34A
+            Text.success "Correct!"
+        if verdict=="wrong"
+          Row gap=8 center animate=shake announce="Not quite"
+            Icon "cancel" color=#FFDC2626
+            Text.danger "Not quite. The answer is {qs[qi].kind=="typed" ? qs[qi].word : qs[qi].meaning}"
+        Row end
+          Button "Next" icon="arrow_forward" disabled={verdict=="" && !(qs[qi].kind=="match" && length(matched)==5)} onTap={qi=qi+1; picked=-1; answer=""; verdict=""; pl=""; pr=""; matched=[]}
+      if qi>=length(qs)
+        Card gap=16 radius=40 center animate=pop pad=32
+          Icon "emoji_events" size=64 color=#FFF59E0B
+          Heading "Quiz complete" level=1 color=#FF4C1D95
+          Text "{score}" size=64 weight=800 color=#FF6D28D9
+          Text.muted "points across {length(qs)} questions"
+          Button "Play again" onTap={qi=0; score=0; picked=-1; answer=""; verdict=""; matched=[]}
+
+### Deck
+state cards=[{"id":1,"word":"la ventana","meaning":"the window","example":"Abre la ventana.","due":"Today"},{"id":2,"word":"el aeropuerto","meaning":"the airport","example":"Llegamos temprano.","due":"Tomorrow"},{"id":3,"word":"cansado","meaning":"tired","example":"Estoy cansado.","due":"Today"},{"id":4,"word":"la receta","meaning":"the recipe","example":"Me das la receta?","due":"In 3 days"},{"id":5,"word":"aprender","meaning":"to learn","example":"Quiero aprender.","due":"Today"}] persist
+state q=""
+state picks=[]
+state editId=0
+state fWord=""
+state fMeaning=""
+state fExample=""
+state moveTo="Travel Phrases"
+App
+  Sidebar fill=#FFFFFFFF border-right=#FFEFE9FB
+    Brand "Lexi" icon="translate"
+    NavItem "Decks" icon="style" selected={true} onTap={go decks}
+    NavItem "Study" icon="school" onTap={go study}
+    NavItem "Quiz" icon="quiz" onTap={go quiz}
+    NavItem "Progress" icon="insights" onTap={go progress}
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" onTap={go decks}
+        Heading "Spanish Basics" level=1 color=#FF4C1D95
+      Row gap=8
+        Input "Search cards" bind=q w=220 icon="search"
+        Button "Add card" icon="add" onTap={editId=0; fWord=""; fMeaning=""; fExample=""; open cardDialog}
+    Column pad=24 gap=16
+      if length(picks)>0
+        Card fill=#FFEFE9FB radius=24
+          Row between middle
+            Text.strong "{length(picks)} selected"
+            Row gap=8
+              Button.outline "Move" icon="drive_file_move" onTap={open moveDialog}
+              Button.destructive "Delete" icon="delete" onTap={cards=filter(cards,c=>!contains(picks,c.id)); picks=[]; toast "Cards deleted"}
+      Table rows={filter(cards,c=>contains(lower(c.word),lower(q)) || contains(lower(c.meaning),lower(q)))} sortable selectable bind=picks rowKey=id radius=24
+        Column "Word" field=word grow sortable
+        Column "Meaning" field=meaning grow sortable
+        Column "Example" field=example grow
+        Column "Due" field=due w=100 sortable
+        Column "" w=60
+          IconButton "edit" onTap={editId=row.id; fWord=row.word; fMeaning=row.meaning; fExample=row.example; open cardDialog}
+  Dialog#cardDialog "{editId==0 ? 'Add a card' : 'Edit card'}"
+    Input "Word" bind=fWord
+    Input "Meaning" bind=fMeaning
+    Input "Example" multiline bind=fExample
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Save" disabled={trim(fWord)=="" || trim(fMeaning)==""} onTap={cards=editId==0 ? append(cards,{"id":length(cards)+100,"word":fWord,"meaning":fMeaning,"example":fExample,"due":"Today"}) : updateWhere(cards,c=>c.id==editId,c=>with(with(with(c,"word",fWord),"meaning",fMeaning),"example",fExample)); toast "Saved"; close}
+  Dialog#moveDialog "Move to deck"
+    Select "Deck" bind=moveTo items=["Travel Phrases","Food and Cooking","Verbs in the Past"]
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Move" onTap={cards=filter(cards,c=>!contains(picks,c.id)); picks=[]; toast "Moved to {moveTo}"; close}
+
+### Progress
+state month=0
+state studiedDays=[1,2,3,5,6,7,8,9,12,13,14,15,16] persist
+state streak=6 persist
+state weekly=[12,20,18,25,31,28] persist
+state accuracy=[{"deck":"Spanish Basics","pct":0.86},{"deck":"Travel Phrases","pct":0.72},{"deck":"Food and Cooking","pct":0.94},{"deck":"Verbs in the Past","pct":0.58}]
+App
+  Sidebar fill=#FFFFFFFF border-right=#FFEFE9FB
+    Brand "Lexi" icon="translate"
+    NavItem "Decks" icon="style" onTap={go decks}
+    NavItem "Study" icon="school" onTap={go study}
+    NavItem "Quiz" icon="quiz" onTap={go quiz}
+    NavItem "Progress" icon="insights" selected={true} onTap={go progress}
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main
+    Nav
+      Heading "Your progress" level=1 color=#FF4C1D95
+    Column pad=24 gap=20 scroll
+      Grid cols=2 gap=20
+        Card gap=12 radius=32
+          Row between middle
+            Row gap=8 middle
+              Icon "local_fire_department" color=#FFF59E0B size=32
+              Text "{streak} day streak" size=28 weight=800 color=#FF4C1D95
+            Row gap=4 middle
+              IconButton "chevron_left" onTap={month=month-1}
+              Text.strong "{formatDate(today(),'MMMM yyyy')}"
+              IconButton "chevron_right" disabled={month>=0} onTap={month=month+1}
+          CalendarMonth offset={month} marked={studiedDays} markColor=#FFFACC15 markIcon="local_fire_department" todayRing=#FF6D28D9 animate=fade
+        Card gap=12 radius=32
+          Heading "Cards learned by week" level=3
+          BarChart values={weekly} labels=["W1","W2","W3","W4","W5","W6"] h=220 color=#FF6D28D9 animate=slide-up
+      Card gap=16 radius=32
+        Heading "Accuracy by deck" level=3
+        each a in accuracy
+          Row gap=12 middle
+            Text.strong "{a.deck}" w=160
+            Progress {a.pct} grow color={a.pct>0.8 ? #FF16A34A : #FFF59E0B}
+            Text.strong "{round(a.pct*100,0)}%" w=56
+
+### Settings
+state perDay=20 persist
+state direction="Spanish to English" persist
+state sounds=true persist
+state theme="Light" persist
+App
+  Sidebar fill=#FFFFFFFF border-right=#FFEFE9FB
+    Brand "Lexi" icon="translate"
+    NavItem "Decks" icon="style" onTap={go decks}
+    NavItem "Study" icon="school" onTap={go study}
+    NavItem "Quiz" icon="quiz" onTap={go quiz}
+    NavItem "Progress" icon="insights" onTap={go progress}
+    NavItem "Settings" icon="settings" selected={true} onTap={go settings}
+  Main
+    Nav
+      Heading "Settings" level=1 color=#FF4C1D95
+    Column pad=24 gap=16 maxw=640
+      Card gap=20 radius=32
+        Row between middle
+          Column gap=4
+            Text.strong "Cards a day"
+            Text.muted "How many new cards to learn each day"
+          Stepper bind=perDay min=5 max=100 step=5
+        Divider
+        Column gap=8
+          Text.strong "Direction"
+          SegmentedButton bind=direction items=["Spanish to English","English to Spanish"]
+        Divider
+        Toggle "Sounds" bind=sounds
+        Divider
+        Column gap=8
+          Text.strong "Theme"
+          SegmentedButton bind=theme items=["Light","Dark","Auto"]
+      Button "Save" onTap={toast "Settings saved"}

@@ -1,0 +1,246 @@
+### Conversations
+state q=""
+state active="c1"
+state following=true
+state showNew=false
+state convos=[{"id":"c1","name":"design-crit","kind":"channel","unread":3,"last":"Priya: the new onboarding flow is up","time":"9:42"},{"id":"c2","name":"Maya Reyes","kind":"dm","unread":0,"last":"You: sending the files now","time":"9:15"},{"id":"c3","name":"eng-standup","kind":"channel","unread":12,"last":"Tom: blocked on the API key","time":"8:58"},{"id":"c4","name":"Jonas Weber","kind":"dm","unread":1,"last":"Lunch at one?","time":"Tue"},{"id":"c5","name":"launch-plan","kind":"channel","unread":0,"last":"Ana: copy is approved","time":"Mon"}]
+state people=[{"id":"p1","name":"Maya Reyes","role":"Design"},{"id":"p2","name":"Jonas Weber","role":"Engineering"},{"id":"p3","name":"Priya Nair","role":"Product"},{"id":"p4","name":"Tom Okafor","role":"Engineering"},{"id":"p5","name":"Ana Costa","role":"Marketing"}]
+state picked=[]
+state pickQ=""
+Shortcut "ctrl+k" onPress={focus search}
+Shortcut "alt+down" onPress={active=nextId(convos,active)}
+Shortcut "alt+up" onPress={active=prevId(convos,active)}
+App
+  Sidebar w=320 fill=#FFFBF8F3
+    Row between pad=16
+      Brand "Murmur" icon="forum"
+      Row gap=4
+        IconButton "edit_square" onTap={open newConvo}
+        IconButton "settings" onTap={go settings}
+    Column pad=[16,0,16,8]
+      FuzzySearch#search "Search conversations" bind=q items={convos} keys=["name","last"] onResults={hits=result}
+    Column scroll grow
+      Text.caption "CHANNELS AND PEOPLE" pad=[16,8,16,4]
+      each c in convos
+        ListTile selected={active==c.id} onTap={active=c.id; go thread}
+          Avatar "{c.name}" size=40
+          Column grow gap=2
+            Row between
+              HighlightText "{c.name}" query={q} weight=600
+              Text.caption "{c.time}"
+            Row between
+              HighlightText "{c.last}" query={q} size=13 color=#FF6B6670
+              if c.unread>0
+                Badge.primary "{c.unread}"
+  Main
+    Nav
+      Heading "Pick a conversation" level=3
+    Column pad=24 center middle grow
+      Icon "chat_bubble_outline" size=48 color=#FFB9A8E8
+      Text.muted "Choose a channel or start a new message."
+      Button "New conversation" onTap={open newConvo}
+Dialog#newConvo "New conversation" "Pick one or more people"
+  Input "Search people" bind=pickQ
+  Column gap=4 h=240 scroll
+    each p in filter(people,x=>contains(lower(x.name),lower(pickQ)))
+      ListTile onTap={picked=contains(picked,p.id)?without(picked,p.id):append(picked,p.id)}
+        Avatar "{p.name}" size=32
+        Column grow
+          Text.strong "{p.name}"
+          Text.caption "{p.role}"
+        Checkbox bind=sel onChange={picked=result?append(picked,p.id):without(picked,p.id)}
+  Row between
+    Text.muted "{length(picked)} selected"
+    Row gap=8
+      Button.ghost "Cancel" onTap={picked=[]; close}
+      Button "Start chat" disabled={length(picked)==0} onTap={emit startConvo picked; picked=[]; close; go thread}
+
+### Thread
+state msgs=[{"id":"m1","from":"Priya Nair","mine":false,"day":"Yesterday","time":"4:10 PM","text":"Shared the onboarding flow, three screens.","pics":[],"reactions":[{"e":"👍","n":2,"me":false}],"replyTo":""},{"id":"m2","from":"You","mine":true,"day":"Yesterday","time":"4:14 PM","text":"Looks clean. The empty state needs work.","pics":[],"reactions":[],"replyTo":""},{"id":"m3","from":"Priya Nair","mine":false,"day":"Today","time":"9:40 AM","text":"Updated mockups, take a look.","pics":["https://img.murmur.app/a.jpg","https://img.murmur.app/b.jpg","https://img.murmur.app/c.jpg"],"reactions":[{"e":"🔥","n":1,"me":true}],"replyTo":""},{"id":"m4","from":"You","mine":true,"day":"Today","time":"9:42 AM","text":"Love the second one.","pics":[],"reactions":[],"replyTo":"m3"}]
+state sel=""
+state at=0
+state photos=[]
+state typing="Priya is typing"
+state showDetails=false
+state replyId=""
+Shortcut "alt+down" onPress={emit nextConversation}
+Shortcut "alt+up" onPress={emit prevConversation}
+App
+  Sidebar w=320 fill=#FFFBF8F3 hide=tablet
+    Brand "Murmur" icon="forum"
+    NavItem "design-crit" icon="tag" badge="3" selected={true}
+    NavItem "Maya Reyes" icon="person"
+    NavItem "eng-standup" icon="tag" badge="12"
+  Main
+    Nav
+      Row gap=12
+        IconButton "arrow_back" show=phone onTap={go conversations}
+        Column
+          Heading "design-crit" level=3
+          Text.caption "6 members"
+      Row gap=8
+        IconButton "search"
+        IconButton "info" onTap={showDetails=!showDetails; open detailsSheet}
+    Stack grow
+      FollowScroll#thread bind=following onFollowChange={showNew=!result} newestOnAppend=true
+        Column gap=4 pad=16
+          each m in msgs
+            if index==0 || msgs[index-1].day!=m.day
+              DateDivider "{m.day}"
+            ChatBubble mine={m.mine} sender={m.from} time="{m.time}" grouped={index>0 && msgs[index-1].from==m.from && msgs[index-1].day==m.day} menu=msgMenu onLongPress={sel=m.id; open msgMenu}
+              if m.replyTo!=""
+                QuoteBlock "{find(msgs,x=>x.id==m.replyTo).from}" "{find(msgs,x=>x.id==m.replyTo).text}"
+              Text "{m.text}"
+              if length(m.pics)>0
+                PhotoGrid photos={m.pics} cols=2 onTapPhoto={photos=m.pics; at=result; open shots}
+              Row gap=4 wrap
+                each r in m.reactions
+                  FilterChip "{r.e} {r.n}" selected={r.me} onTap={msgs=updateWhere(msgs,x=>x.id==m.id,x=>with(x,"reactions",updateWhere(x.reactions,y=>y.e==r.e,y=>with(with(y,"n",y.me?y.n-1:y.n+1),"me",!y.me))))}
+          if typing!=""
+            TypingIndicator "{typing}"
+      if showNew
+        Pill "New messages" icon="arrow_downward" bottom=12 animate=pop onTap={scroll thread end; following=true; showNew=false}
+    Composer
+  Pane w=320 pad=16 gap=12 hide=tablet visible={showDetails}
+    Heading "Details" level=3
+    Text.muted "Open the info button for members and media."
+Menu#msgMenu
+  MenuItem "React" icon="add_reaction" onTap={open emoji}
+  MenuItem "Reply" icon="reply" onTap={replyId=sel}
+  MenuItem "Copy" icon="content_copy" onTap={copy find(msgs,x=>x.id==sel).text; toast "Copied"}
+  Divider
+  MenuItem.danger "Delete" icon="delete" onTap={open confirmDelete}
+Dialog#confirmDelete "Delete this message?" "This can not be undone."
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button.destructive "Delete" onTap={msgs=removeWhere(msgs,x=>x.id==sel); toast "Message deleted"; close}
+Popover#emoji
+  Grid cols=6 gap=4
+    each e in ["👍","❤️","😂","🎉","🔥","👀"]
+      IconButton "{e}" onTap={msgs=updateWhere(msgs,x=>x.id==sel,x=>with(x,"reactions",any(x.reactions,y=>y.e==e)?updateWhere(x.reactions,y=>y.e==e,y=>with(with(y,"n",y.n+1),"me",true)):append(x.reactions,{"e":e,"n":1,"me":true}))); close}
+Lightbox#shots photos={photos} bind=at
+
+### Composer
+state draft=""
+state attachments=[]
+state replyId=""
+state msgs=[]
+App
+  Main
+    Column grow
+      Text.muted "Composer, shown at the foot of a thread."
+    Column gap=8 pad=12 border-top=#FFECE6DE
+      if replyId!=""
+        Row between fill=#FFF3EEFC radius=8 pad=8
+          QuoteBlock "{find(msgs,x=>x.id==replyId).from}" "{find(msgs,x=>x.id==replyId).text}"
+          IconButton "close" onTap={replyId=""}
+      if length(attachments)>0
+        Row gap=8 scroll
+          each a in attachments
+            Chip "{a}" onDelete={attachments=without(attachments,a)}
+      Row gap=8 bottom
+        IconButton "attach_file" onTap={open attachMenu}
+        Input "Message design-crit" bind=draft multiline autogrow maxLines=5 grow onSubmit={send} submitKey=enter newlineKey=shift+enter
+        IconButton "mood" onTap={open emojiPicker}
+        IconButton "send" disabled={trim(draft)=="" && length(attachments)==0} onTap={msgs=append(msgs,{"id":"m{length(msgs)+9}","from":"You","mine":true,"day":"Today","time":"now","text":draft,"pics":attachments,"reactions":[],"replyTo":replyId}); draft=""; attachments=[]; replyId=""}
+Shortcut "enter" when trim(draft)!="" onPress={msgs=append(msgs,{"id":"m{length(msgs)+9}","from":"You","mine":true,"day":"Today","time":"now","text":draft,"pics":attachments,"reactions":[],"replyTo":replyId}); draft=""; attachments=[]; replyId=""}
+Menu#attachMenu above
+  MenuItem "Photo or video" icon="image" onTap={pickFile image; attachments=append(attachments,result)}
+  MenuItem "File" icon="description" onTap={pickFile any; attachments=append(attachments,result)}
+  MenuItem "Take a photo" icon="photo_camera" onTap={pickFile camera; attachments=append(attachments,result)}
+Popover#emojiPicker
+  Grid cols=6 gap=4
+    each e in ["😀","😂","😍","👍","🎉","🙏","🔥","👀","💜","✅","🚀","🤔"]
+      IconButton "{e}" onTap={draft="{draft}{e}"}
+
+### Details
+state showDetails=true
+state mute=false
+state pin=true
+state at=0
+state members=[{"name":"Priya Nair","role":"Product"},{"name":"Maya Reyes","role":"Design"},{"name":"Tom Okafor","role":"Engineering"},{"name":"Ana Costa","role":"Marketing"},{"name":"You","role":"Design lead"}]
+state shared=["https://img.murmur.app/a.jpg","https://img.murmur.app/b.jpg","https://img.murmur.app/c.jpg","https://img.murmur.app/d.jpg"]
+App
+  Main
+    Nav
+      Heading "design-crit" level=3
+      IconButton "info" onTap={open detailsSheet}
+    Column pad=24
+      Text.muted "On desktop the details sit in a side pane; on a phone the same content rises as a sheet."
+  Pane w=320 pad=16 gap=16 hide=phone
+    Row between
+      Heading "Details" level=3
+      IconButton "close" onTap={showDetails=false}
+    Column gap=4
+      Text.strong "design-crit"
+      Text.muted "Critique for work in progress"
+    Divider
+    Toggle "Mute notifications" bind=mute
+    Toggle "Pin conversation" bind=pin
+    Divider
+    Text.sectionTitle "Members ({length(members)})"
+    each m in members
+      ListTile
+        Avatar "{m.name}" size=32
+        Column grow
+          Text.strong "{m.name}"
+          Text.caption "{m.role}"
+    Divider
+    Text.sectionTitle "Shared pictures"
+    Grid cols=3 gap=4
+      each p in shared
+        Image "{p}" radius=8 onTap={at=index; open zoomShots}
+Sheet#detailsSheet "Details" show=phone stops=[0.5,1.0] snap=true
+  Column gap=16
+    Toggle "Mute notifications" bind=mute
+    Toggle "Pin conversation" bind=pin
+    Text.sectionTitle "Members ({length(members)})"
+    each m in members
+      ListTile
+        Avatar "{m.name}" size=32
+        Column grow
+          Text.strong "{m.name}"
+          Text.caption "{m.role}"
+    Text.sectionTitle "Shared pictures"
+    Grid cols=3 gap=4
+      each p in shared
+        Image "{p}" radius=8 onTap={at=index; open zoomShots}
+Lightbox#zoomShots photos={shared} bind=at
+
+### Settings
+state tab="profile"
+state name="Ray Li"
+state status="Heads down until 3"
+state notifyAll=true
+state notifyMentions=true
+state sound=false
+state theme="Light"
+App
+  Sidebar
+    Brand "Settings" icon="settings"
+    NavItem "Profile" icon="person" selected={tab=="profile"} onTap={tab="profile"}
+    NavItem "Notifications" icon="notifications" selected={tab=="notify"} onTap={tab="notify"}
+    NavItem "Appearance" icon="palette" selected={tab=="theme"} onTap={tab="theme"}
+    Spacer grow
+    NavItem "Back to chats" icon="arrow_back" onTap={go conversations}
+  Main
+    Nav
+      Heading "Settings" level=1
+    Column pad=24 gap=16 maxw=560
+      if tab=="profile"
+        Card gap=12
+          Row gap=16
+            Avatar "{name}" size=64
+            Button.outline "Change photo" onTap={pickFile image}
+          Input "Display name" bind=name
+          Input "Status" bind=status
+          Button "Save profile" onTap={emit saveProfile; toast "Profile saved"}
+      if tab=="notify"
+        Card gap=12
+          Toggle "All messages" bind=notifyAll
+          Toggle "Mentions and replies only" bind=notifyMentions
+          Toggle "Play a sound" bind=sound
+      if tab=="theme"
+        Card gap=12
+          Text.strong "Theme"
+          SegmentedButton bind=theme items=["Light","Dark","System"] onChange={emit setTheme result}

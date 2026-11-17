@@ -1,0 +1,355 @@
+### What's on
+state shows=[{"id":"hamlet","title":"Hamlet","sub":"A new staging","from":28,"dates":"12 Dec - 8 Feb","days":[3,4,5,10,11,12,17,18,19,24,25,26],"soldOut":false},{"id":"cherry","title":"The Cherry Orchard","sub":"Chekhov, in a new version","from":24,"dates":"5 Dec - 31 Jan","days":[2,6,9,13,16,20,23,27],"soldOut":false},{"id":"salome","title":"Salome","sub":"Wilde, one act","from":32,"dates":"19 Dec - 24 Jan","days":[7,14,21,28],"soldOut":true}]
+state perfs=[{"id":"p1","show":"hamlet","day":12,"time":"19:30","free":118,"soldOut":false},{"id":"p2","show":"hamlet","day":12,"time":"14:30","free":4,"soldOut":false},{"id":"p3","show":"cherry","day":13,"time":"19:30","free":203,"soldOut":false},{"id":"p4","show":"salome","day":14,"time":"19:30","free":0,"soldOut":true}]
+state selDay=12
+state month="December 2026"
+project basket=[]
+project holdEnds=0
+Page
+  Nav sticky fill=#FF120712
+    Brand "Proscenium" icon="theater_comedy" color=#FFD4A64A
+    Row gap=4
+      Link "What's on" onTap={go whats-on}
+      Link "Visit" onTap={go whats-on}
+    Row gap=8
+      if length(basket)>0
+        Chip "{length(basket)} seats held" icon="timer" onTap={go seats}
+      Button "Sign in" onTap={emit signin}
+  Section
+    Column gap=8
+      Text "THE WINTER SEASON" color=#FFD4A64A size=14 weight=700
+      Heading "What's on" level=1 font=serif color=#FFF5E9D0
+      Text.muted "Three productions, one stage, and the best seats while they last."
+  Section tint
+    Column gap=24
+      each s in shows
+        Card gap=16 fill=#FF2A0F2E animate=slide-up stagger=80
+          Row gap=24 top
+            Poster title="{s.title}" seed={s.id} w=160 h=220 radius=8
+            Column grow gap=8
+              Row between
+                Heading "{s.title}" level=2 font=serif color=#FFF5E9D0
+                if s.soldOut
+                  Badge.error "Sold out"
+                if !s.soldOut
+                  Badge.success "On sale"
+              Text.muted "{s.sub}"
+              Text "{s.dates}" color=#FFD4A64A
+              Spacer grow
+              Row between middle
+                Text.strong "From {money(s.from,'$',2)}"
+                Button "See performances" onTap={go production}
+  Section
+    Column gap=16
+      Heading "Find a night" level=2 font=serif
+      Row gap=32 top
+        Card grow gap=12
+          Row between middle
+            IconButton "chevron_left" onTap={month="November 2026"}
+            Text.strong "{month}"
+            IconButton "chevron_right" onTap={month="January 2027"}
+          Calendar bind=selDay month={month} marked={unique(concat(shows[0].days,concat(shows[1].days,shows[2].days)))} markColor=#FFD4A64A onSelect={selDay=result}
+        Column w=320 gap=12
+          Heading "Fri {selDay} December" level=3
+          if count(perfs,p=>p.day==selDay)==0
+            Text.muted "Nothing on this night. Try a gold-marked day."
+          each p in filter(perfs,p=>p.day==selDay)
+            ListTile "{find(shows,s=>s.id==p.show).title}" subtitle="{p.time} - {p.soldOut ? 'Sold out' : p.free + ' seats left'}" onTap={go production}
+              Badge.warning "Few left" visible={p.free>0 && p.free<10}
+  Footer
+    Row between
+      Text.strong "Proscenium Theatre"
+      Text.muted "Box office 020 7946 0321"
+
+### Production
+state tab="about"
+state perfId="p1"
+state ratings=[{"stars":5,"n":62},{"stars":4,"n":28},{"stars":3,"n":9},{"stars":2,"n":3},{"stars":1,"n":1}]
+state cast=[{"name":"Imogen Hale","role":"Hamlet"},{"name":"Dev Rao","role":"Claudius"},{"name":"Marguerite Obi","role":"Gertrude"},{"name":"Tom Whitlock","role":"Polonius"}]
+state reviews=[{"who":"The Evening Standard","stars":5,"text":"A Hamlet that finally lets the silences speak."},{"who":"Stagewise","stars":4,"text":"Hale is magnetic; the second half drags a little."}]
+Page
+  Nav sticky fill=#FF120712
+    Brand "Proscenium" icon="theater_comedy" color=#FFD4A64A
+    Row gap=4
+      Link "What's on" onTap={go whats-on}
+    Button.ghost "Back" icon="arrow_back" onTap={go whats-on}
+  Section
+    Row gap=40 top
+      Poster title="Hamlet" seed="hamlet" w=300 h=420 radius=12 animate=fade
+      Column grow gap=16
+        Text "A NEW STAGING" color=#FFD4A64A size=14 weight=700
+        Heading "Hamlet" level=1 font=serif color=#FFF5E9D0
+        Row gap=8
+          Rating value=4.6 readonly
+          Text.muted "4.6 from 103 reviews"
+        Text "Elsinore, rebuilt in a single room of mirrors. Imogen Hale leads a company of eleven in this stripped, three-hour production of Shakespeare's tragedy, with one interval."
+        Row gap=8
+          Chip "3 hr incl. interval"
+          Chip "Ages 12+"
+          Chip "Dim lighting"
+  Section tint
+    Column gap=16
+      SegmentedButton bind=tab items=["about","cast","reviews"]
+      if tab=="about"
+        Text "Directed by Sofia Marchetti. Music by Lena Ode. Designed by Julian Frost. Recommended for ages 12 and over; haze and strobe are used in Act Two."
+      if tab=="cast"
+        Grid cols=4 gap=16
+          each c in cast
+            Column gap=4 center
+              Avatar "{c.name}" size=64
+              Text.strong "{c.name}"
+              Text.muted "{c.role}"
+      if tab=="reviews"
+        Row gap=32 top
+          Card w=320 gap=8
+            Text "4.6" size=48 weight=700 color=#FFD4A64A
+            each r in ratings
+              Row gap=8 middle
+                Text.small "{r.stars}" w=16
+                Progress {r.n/103} grow
+                Text.small "{r.n}" w=28
+          Column grow gap=12
+            each r in reviews
+              Card gap=4
+                Row between
+                  Text.strong "{r.who}"
+                  Rating value={r.stars} readonly
+                Text.muted "{r.text}"
+  Section
+    Column gap=16
+      Heading "Performances" level=2 font=serif
+      each p in filter(perfs,p=>p.show=="hamlet")
+        Card
+          Row between middle gap=16
+            Column gap=4
+              Text.strong "{p.day} December, {p.time}"
+              Row gap=8
+                if p.soldOut
+                  Badge.error "Sold out"
+                if !p.soldOut && p.free<10
+                  Badge.warning "Only {p.free} left"
+                if !p.soldOut && p.free>=10
+                  Badge.success "{p.free} seats available"
+            if p.soldOut
+              Button.outline "Join waiting list" onTap={open waitlist}
+            if !p.soldOut
+              Button "Choose seats" onTap={perfId=p.id; go seats}
+      Card fill=#FF3A1128 gap=8
+        Text.strong "Sold out? We release returns every Tuesday at noon."
+  Dialog#waitlist "Waiting list" "We will email you if seats are returned."
+    Input "Email" type=email bind=waitEmail
+    Button "Notify me" onTap={emit waitlist waitEmail; toast "You are on the list"; close}
+
+### Seats
+state perfId="p1"
+state count=2
+state chosen=[]
+state hover=null
+state focus=null
+state zoom=1
+state pan=[0,0]
+state now=0
+state holdLeft=600
+state holdOn=false
+state warned=false
+state plan={"stage":"Stage","sections":[{"id":"stalls","label":"Stalls","rows":["A","B","C","D","E","F","G","H"],"seatsPerRow":[10,12,14,14,16,16,18,18],"curve":0.12},{"id":"circle","label":"Circle","rows":["J","K","L","M"],"seatsPerRow":[20,22,22,24],"curve":0.18}],"bands":[{"id":"A","name":"Premium","price":68,"color":"#FFD4A64A"},{"id":"B","name":"Standard","price":48,"color":"#FFB5536E"},{"id":"C","name":"Restricted view","price":28,"color":"#FF6B4A9E"}],"taken":["A-4","A-5","A-6","B-7","B-8","C-6","C-7","D-3","E-10","F-8","F-9","K-10","K-11","L-12"],"accessible":["A-1","A-10","H-1","H-18"]}
+state basket=[]
+state holdEnds=0
+project basket=[]
+project holdEnds=0
+every 1s when holdOn onTick={holdLeft=max(0,holdLeft-1)}
+every 1s when holdOn && holdLeft==60 onTick={warned=true; toast "Your hold ends in one minute"}
+every 1s when holdOn && holdLeft==0 onTick={basket=[]; chosen=[]; holdOn=false; open expired}
+App
+  Sidebar w=240 hide=phone fill=#FF120712
+    Brand "Proscenium" icon="theater_comedy"
+    NavItem "What's on" icon="theaters" onTap={go whats-on}
+    NavItem "Hamlet" icon="info" onTap={go production}
+    NavItem "Choose seats" icon="event_seat" selected={true}
+    Spacer grow
+    Text.muted "Hamlet, Fri 12 Dec, 19:30"
+  Main
+    Nav
+      Heading "Choose your seats" level=3 font=serif
+      Row gap=8
+        if holdOn
+          Chip "Held {floor(holdLeft/60)}:{fixed(holdLeft%60,0)} left" icon="timer" color={holdLeft<=60 ? #FFE0586B : #FFD4A64A} animate={holdLeft<=60 ? pulse : none}
+        Button.outline "Sold-out view" onTap={go sold-out-performance}
+    Column pad=24 gap=16 scroll
+      Row gap=24 top
+        Column grow gap=12
+          Row between middle gap=12
+            Row gap=8 middle
+              Text.strong "Seats together"
+              Stepper bind=count min=1 max=8
+              Button.secondary "Best available" icon="auto_awesome" onTap={chosen=bestAvailable(plan,count,taken)}
+            Row gap=8
+              IconButton "remove" onTap={zoom=clamp(zoom-0.25,1,3)} show=phone
+              IconButton "add" onTap={zoom=clamp(zoom+0.25,1,3)} show=phone
+          Card fill=#FF0B050C pad=12
+            SeatMap#plan data={plan} chosen={chosen} bind=chosen max=8 curve=true stage="top" legend=true bandColors=true freeColor=#FF3B2547 takenColor=#FF1B1220 chosenColor=#FFFFE08A accessibleIcon="accessible" keyboard=true zoom={zoom} pan={pan} pinchZoom=true panEnabled=true minZoom=1 maxZoom=3 announce="Row {seat.row}, seat {seat.number}, {seat.band.name}, {money(seat.price,'$',2)}, {seat.state}" onHover={hover=result} onFocus={focus=result} onChange={chosen=result; holdOn=true; holdLeft=holdOn ? holdLeft : 600; basket=map(result,s=>with(s,"concession","Adult")); holdEnds=today()} onLimit={toast "You can choose up to eight seats"} onZoom={zoom=result.zoom; pan=result.pan}
+          Row gap=12 wrap
+            each b in plan.bands
+              Row gap=4 middle
+                Box w=14 h=14 radius=7 fill={b.color}
+                Text.small "{b.name} {money(b.price,'$',0)}"
+            Row gap=4 middle
+              Icon "accessible"
+              Text.small "Accessible"
+            Row gap=4 middle
+              Box w=14 h=14 radius=7 fill=#FF1B1220
+              Text.small "Taken"
+            Row gap=4 middle
+              Box w=14 h=14 radius=7 fill=#FFFFE08A
+              Text.small "Yours"
+          Text.caption "Use the arrow keys to move along and between rows, Space to choose or release a seat."
+        Pane w=320 hide=phone pad=16 gap=12
+          if hover!=null || focus!=null
+            Card gap=8 fill=#FF2A0F2E
+              Text.strong "Row {coalesce(hover,focus).row}, seat {coalesce(hover,focus).number}"
+              Image "{coalesce(hover,focus).viewUrl}" h=120 radius=8 alt="View from this seat"
+              Text.small "{coalesce(hover,focus).band.name} - {money(coalesce(hover,focus).price,'$',2)}"
+          Heading "Your seats" level=3
+          if length(basket)==0
+            Text.muted "Choose up to eight seats."
+          each b in basket
+            Card gap=8
+              Row between middle
+                Column
+                  Text.strong "Row {b.row}, seat {b.number}"
+                  Text.muted "{b.band.name}"
+                IconButton "close" onTap={chosen=removeWhere(chosen,s=>s.id==b.id); basket=removeWhere(basket,s=>s.id==b.id)}
+              Select "Concession" items=["Adult","Child","Student","Senior"] bind=b.concession
+              Text.strong "{money(b.concession=='Adult' ? b.price : b.price*0.75,'$',2)}"
+          Divider
+          Row between
+            Text.strong "Total"
+            Text.strong "{money(sum(basket,b=>b.concession=='Adult' ? b.price : b.price*0.75),'$',2)}" size=22 color=#FFD4A64A
+          Button "Checkout" disabled={length(basket)==0} onTap={go checkout}
+      Sheet#basketSheet "Your seats" show=phone
+        each b in basket
+          ListTile "Row {b.row}, seat {b.number}" subtitle="{b.band.name}"
+            Select items=["Adult","Child","Student","Senior"] bind=b.concession
+        Row between
+          Text.strong "Total"
+          Text.strong "{money(sum(basket,b=>b.concession=='Adult' ? b.price : b.price*0.75),'$',2)}"
+        Button "Checkout" onTap={close; go checkout}
+      Row show=phone between middle pad=12 fill=#FF2A0F2E
+        Text.strong "{length(basket)} seats - {money(sum(basket,b=>b.price),'$',2)}"
+        Button "View basket" onTap={open basketSheet}
+  Dialog#expired "Your hold has ended" "The seats were released so others can book them."
+    Button "Choose again" onTap={close}
+  Toast#holdWarn "Your hold ends in one minute" visible={warned && holdLeft<=60 && holdLeft>0}
+
+### Checkout
+state name=""
+state email=""
+state code=["","","","","",""]
+state codeSent=false
+state step=1
+state phone=""
+state agree=false
+state basket=[]
+project basket=[]
+project holdLeft=0
+every 1s when holdLeft>0 onTick={holdLeft=holdLeft-1}
+App
+  Sidebar w=240 hide=phone fill=#FF120712
+    Brand "Proscenium" icon="theater_comedy"
+    NavItem "Seats" icon="event_seat" onTap={go seats}
+    NavItem "Checkout" icon="credit_card" selected={true}
+  Main
+    Nav
+      Heading "Checkout" level=3 font=serif
+      Chip "Held {floor(holdLeft/60)}:{fixed(holdLeft%60,0)}" icon="timer" color=#FFD4A64A
+    Column pad=24 gap=16 scroll maxw=960
+      Stepper.progress steps=["Details","Verify","Pay"] value={step}
+      Row gap=24 top
+        Column grow gap=16
+          if step==1
+            Card gap=12
+              Heading "Your details" level=3
+              Input "Full name" bind=name required minLength=2 error="Enter your full name"
+              Input "Email" bind=email type=email required pattern="email" error="Enter a valid email"
+              Input "Phone" bind=phone type=phone hint="Optional, for changes to the performance"
+              Checkbox "I accept the booking terms" bind=agree
+              Button "Send me a code" disabled={!(length(trim(name))>1 && contains(email,'@') && agree)} onTap={codeSent=true; step=2; toast "Code sent to {email}"}
+          if step==2
+            Card gap=12
+              Heading "Enter the six-digit code" level=3
+              Text.muted "Sent to {email}"
+              CodeInput bind=code length=6 autoAdvance=true onComplete={step=3}
+              Row gap=12
+                Button.ghost "Resend code" onTap={toast "A new code is on its way"}
+                Button.ghost "Change email" onTap={step=1}
+          if step==3
+            Card gap=12
+              Heading "Payment" level=3
+              Text.muted "You will be taken to our payment partner. Nothing is charged until you confirm."
+              Select "Pay with" items=["Card","Apple Pay","Gift voucher"] bind=method
+              Button "Confirm and pay {money(sum(basket,b=>b.price),'$',2)}" onTap={emit confirmOrder; go tickets}
+        Card w=320 gap=8 fill=#FF2A0F2E
+          Heading "Summary" level=3
+          Text.muted "Hamlet, Fri 12 Dec, 19:30"
+          each b in basket
+            Row between
+              Text "Row {b.row}, seat {b.number}"
+              Text "{money(b.price,'$',2)}"
+          Divider
+          Row between
+            Text.strong "Total"
+            Text.strong "{money(sum(basket,b=>b.price),'$',2)}" color=#FFD4A64A
+
+### Tickets
+state tix=[{"id":"T1","row":"B","number":5,"band":"Premium","code":"PRO-HAM-1B5-9X2K"},{"id":"T2","row":"B","number":6,"band":"Premium","code":"PRO-HAM-1B6-4M7Q"}]
+Page
+  Nav sticky fill=#FF120712
+    Brand "Proscenium" icon="theater_comedy" color=#FFD4A64A
+    Button.ghost "What's on" onTap={go whats-on}
+  Section
+    Column gap=8
+      Text "ORDER CONFIRMED" color=#FFD4A64A size=14 weight=700
+      Heading "Your tickets" level=1 font=serif color=#FFF5E9D0
+      Text.muted "Hamlet, Friday 12 December, 19:30. We have emailed a copy to you."
+      Row gap=8
+        Button "Add to calendar" icon="event" onTap={emit addToCalendar; toast "Added to your calendar"}
+        Button.outline "Download all" icon="download" onTap={emit download}
+  Section tint
+    Grid cols=2 gap=24
+      each t in tix
+        Card gap=12 fill=#FF2A0F2E animate=slide-up stagger=80
+          Row between middle gap=16
+            Column gap=4
+              Text.strong "Hamlet"
+              Text.muted "Fri 12 Dec, 19:30"
+              Text "Row {t.row}, seat {t.number}"
+              Badge.primary "{t.band}"
+            QRCode value={t.code} size=120
+          Text.mono "{t.code}"
+          Divider
+          Text.caption "Doors open at 18:45. Present this code at the door."
+
+### Sold-out performance
+state perfId="p4"
+state joined=false
+state joinEmail=""
+Page
+  Nav sticky fill=#FF120712
+    Brand "Proscenium" icon="theater_comedy" color=#FFD4A64A
+    Button.ghost "Back" icon="arrow_back" onTap={go production}
+  Section center
+    Column gap=16 center maxw=560
+      Icon "event_busy" size=48 color=#FFD4A64A
+      Heading "Salome, Sat 14 December, 19:30" level=1 font=serif color=#FFF5E9D0
+      Badge.error "Sold out"
+      Text.muted "Every seat has gone. Returned seats are released on Tuesdays at noon and we will tell you first."
+      if !joined
+        Input "Email" type=email bind=joinEmail
+        Button "Join the waiting list" onTap={joined=true; emit waitlist joinEmail; toast "You are on the list"}
+      if joined
+        Text.success "You are on the list for this performance."
+      Divider
+      Text.strong "Other nights with seats"
+      Row gap=8 wrap
+        ChoiceChip "Thu 21 Dec, 19:30" onTap={go seats}
+        ChoiceChip "Sun 24 Jan, 14:30" onTap={go seats}

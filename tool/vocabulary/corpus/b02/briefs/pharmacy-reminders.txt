@@ -1,0 +1,3 @@
+App: Dosewell, medication reminders. Today's doses by time of day as cards to take, skip or snooze, a late dose in red; a medicine with strength, form, schedule (every n hours, set times, days of week), a refill countdown with pills left; a month view of taken and missed; a caregiver share toggle; an interaction warning banner.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

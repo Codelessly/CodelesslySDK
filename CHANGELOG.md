@@ -22,6 +22,26 @@
 
 ### Added
 
+- **The vocabulary loop** (codelessly_api docs/design/19-open-vocabulary.md): the prompt teaches the grammar and a
+  small core, the model writes any word it expects, and we count the words it reached for.
+  - `tool/notation/notation.sh prompt --open`: the open-vocabulary prompt (no component list, no behaviour words).
+  - `tool/notation/notation.sh expand <file.txt> --open [--vocabulary <file.json>] [--aliases <file.json>]`: a word
+    the notation does not have stands in (a type) or is left out, and is recorded; `--vocabulary` writes the
+    record. The aliases are codelessly_api's built-in table and the design system's `vocabulary.json`.
+  - `tool/notation/notation.sh vocabulary <folder or files> [--design-system <folder>] [--aliases <file.json>]
+    [--no-aliases] [--out <dir>] [--sites <dir>]` (`tool/notation/vocabulary.dart`): reads a corpus of answers
+    (several screens to a file, each under a `### name` line), expands every screen open with Cards, and writes
+    `vocabulary.json` and `VOCABULARY.md`: every word with the files and uses that reached for it and how it
+    resolved (core, component, alias, unknown), its parameters, events and example lines; names that share a part
+    side by side; the parameters, flags, events, verbs, variants and formula functions we do not have; the grammar
+    issues by message; and what does not validate, each file checked as a site with formulas parsed as the
+    renderer parses them. `--sites` writes each file as a site folder for `tool/render/render.sh`.
+  - `design_systems/cards/vocabulary.json`: Cards' own aliases (`Tabs items=` is `tabs=`, `Rating … readonly` is
+    `readOnly`).
+  - `tool/vocabulary/corpus/2026-11-16-sonnet/`: the first corpus (the prompt, 20 app briefs, Sonnet's answers)
+    with the tool's output: 105 screens, 4,657 lines; 81.3% a core word, 11.6% a Cards component, 3.1% an alias,
+    4.0% a word we do not have (6.5% before the aliases; `no-aliases/` has that run).
+
 - **Nineteen behaviours, folded from the `dsl5/*` branches** (their notation in the 33.0.0 grammar; an example page
   with all of them is `examples/showcase/desktop/behaviours/words.txt`):
   - **Confirm**: the built-in confirm opens with the focus on Cancel (`onTap={confirm "Remove it?" then {rows=[]}}`).

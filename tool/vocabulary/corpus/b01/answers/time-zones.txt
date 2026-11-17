@@ -1,0 +1,112 @@
+### Meridian
+state clock24=false
+state utc=14
+state selected=-1
+state sel=0
+state q=""
+state cities=[{"id":1,"name":"San Francisco","tz":"PST","off":-8,"start":9,"end":17},{"id":2,"name":"New York","tz":"EST","off":-5,"start":9,"end":17},{"id":3,"name":"London","tz":"GMT","off":0,"start":8,"end":16},{"id":4,"name":"Berlin","tz":"CET","off":1,"start":9,"end":17},{"id":5,"name":"Bengaluru","tz":"IST","off":5.5,"start":10,"end":18},{"id":6,"name":"Tokyo","tz":"JST","off":9,"start":9,"end":17}]
+state slotLabel=""
+App
+  Sidebar
+    Brand "Meridian" icon="public"
+    NavItem "Meeting finder" icon="schedule" selected={true}
+    NavItem "Add a city" icon="add_location_alt" onTap={open addCity}
+    NavItem "Settings" icon="settings" onTap={open prefs}
+    Spacer grow
+    Text.muted "{length(cities)} cities"
+  Main
+    Nav
+      Heading "Find a time" level=1
+      Row gap=8
+        SegmentedButton bind=clock24 items=["12 h","24 h"]
+        Button "Add city" icon="add" onTap={open addCity}
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Row between
+          Text.strong "Drag to move every city together"
+          Text.strong "UTC {utc<10?"0":""}{floor(utc)}:{utc%1==0?"00":"30"}"
+        Slider bind=utc min=0 max=23.5 step=0.5
+        Row between
+          Text.caption "00:00 UTC"
+          Text.caption "12:00 UTC"
+          Text.caption "23:30 UTC"
+      each c in cities
+        Card gap=8 menu=cityMenu drag=city(c.id) drop=city onDrop={sel=indexOf(map(cities,x=>x.id),result.data)}
+          Row middle gap=12
+            Column gap=4
+              IconButton "keyboard_arrow_up" tooltip="Move up" onTap={cities=index==0?cities:concat(concat(take(cities,index-1),[cities[index]]),concat([cities[index-1]],slice(cities,index+1,length(cities))))}
+              IconButton "keyboard_arrow_down" tooltip="Move down" onTap={cities=index==length(cities)-1?cities:concat(concat(take(cities,index),[cities[index+1]]),concat([cities[index]],slice(cities,index+2,length(cities))))}
+            Column grow gap=2
+              Text.strong "{c.name}"
+              Text.muted "{c.tz}  UTC{c.off>=0?"+":""}{c.off}"
+            Icon "{((utc+c.off)%24+24)%24>=6 && ((utc+c.off)%24+24)%24<20 ? "wb_sunny" : "dark_mode"}"
+            Text "{clock24 ? ((floor(((utc+c.off)%24+24)%24))<10?"0":"")+floor(((utc+c.off)%24+24)%24)+":"+(((utc+c.off)%1==0)?"00":"30") : ((floor(((utc+c.off)%24+24)%24))%12==0?12:(floor(((utc+c.off)%24+24)%24))%12)+":"+(((utc+c.off)%1==0)?"00":"30")+(((utc+c.off)%24+24)%24<12?" AM":" PM")}" size=28 weight=700
+            Badge.success "Working" visible={((utc+c.off)%24+24)%24>=c.start && ((utc+c.off)%24+24)%24<c.end}
+            Badge.neutral "Off hours" visible={!(((utc+c.off)%24+24)%24>=c.start && ((utc+c.off)%24+24)%24<c.end)}
+            IconButton "more_vert" tooltip="More" onTap={sel=c.id; open cityMenu}
+          Row gap=1
+            each h in range(24)
+              Box grow h=14 fill={((utc+c.off+h-utc)%24+24)%24>=c.start && ((utc+c.off+h-utc)%24+24)%24<c.end ? "#FF4CAF50" : (((utc+c.off+h-utc)%24+24)%24>=6 && ((utc+c.off+h-utc)%24+24)%24<20 ? "#FFE3E8EF" : "#FF1F2A44")}
+      Card gap=12
+        Row between
+          Text.strong "Everyone is working"
+          Text.muted "Tap a slot to copy an invite"
+        Row scroll gap=8
+          each h in range(24)
+            Chip "{clock24 ? (h<10?"0":"")+h+":00" : (h%12==0?12:h%12)+(h<12?" am":" pm")} UTC" selected={floor(utc)==h && all(cities,c=>((h+c.off)%24+24)%24>=c.start && ((h+c.off)%24+24)%24<c.end)} visible={all(cities,c=>((h+c.off)%24+24)%24>=c.start && ((h+c.off)%24+24)%24<c.end)} onTap={utc=h; slotLabel=(clock24 ? (h<10?"0":"")+h+":00" : (h%12==0?12:h%12)+":00"+(h<12?" AM":" PM"))+" UTC"; open invite}
+        if count(range(24),h=>all(cities,c=>((h+c.off)%24+24)%24>=c.start && ((h+c.off)%24+24)%24<c.end))==0
+          Text.danger "No hour works for everyone. Widen working hours in Settings."
+        Button "Copy invite for the slider time" icon="content_copy" onTap={slotLabel="{floor(utc)}:{utc%1==0?"00":"30"} UTC"; open invite}
+  Menu#cityMenu
+    MenuItem "Working hours" icon="schedule" onTap={open hours}
+    MenuItem "Move to top" icon="vertical_align_top" onTap={cities=concat(filter(cities,x=>x.id==sel),filter(cities,x=>x.id!=sel))}
+    MenuItem "Remove" icon="delete" onTap={cities=removeWhere(cities,x=>x.id==sel); toast "City removed"}
+  Dialog#invite "Meeting invite" "Copy the text and paste it into your calendar"
+    Card gap=8
+      Text.strong "Sync with {join(map(cities,c=>c.name),", ")}"
+      Text.muted "When: {slotLabel}"
+      each c in cities
+        Text "{c.name}: {clock24 ? ((floor(((utc+c.off)%24+24)%24))<10?"0":"")+floor(((utc+c.off)%24+24)%24)+":"+(((utc+c.off)%1==0)?"00":"30") : ((floor(((utc+c.off)%24+24)%24))%12==0?12:(floor(((utc+c.off)%24+24)%24))%12)+":"+(((utc+c.off)%1==0)?"00":"30")+(((utc+c.off)%24+24)%24<12?" AM":" PM")} {c.tz}"
+    Row gap=8 end
+      Button.ghost "Close" onTap={close}
+      Button "Copy invite text" icon="content_copy" onTap={copy "Sync with {join(map(cities,c=>c.name),", ")} at {slotLabel}"; toast "Invite copied"; close}
+  Dialog#hours "Working hours" "Hours shown in the city's local time"
+    Text.strong "{first(filter(cities,x=>x.id==sel)).name}"
+    Row gap=12
+      Select "Starts" items=[6,7,8,9,10,11] bind=ws
+      Select "Ends" items=[15,16,17,18,19,20] bind=we
+    Button "Save" onTap={cities=updateWhere(cities,x=>x.id==sel,x=>with(with(x,"start",ws),"end",we)); toast "Hours saved"; close}
+  Dialog#addCity "Add a city" "Search by city or time zone"
+    Input "Search" "Paris, Sydney, UTC+2" bind=q icon="search"
+    each r in filter([{"id":7,"name":"Paris","tz":"CET","off":1},{"id":8,"name":"Sydney","tz":"AEDT","off":11},{"id":9,"name":"Dubai","tz":"GST","off":4},{"id":10,"name":"Sao Paulo","tz":"BRT","off":-3},{"id":11,"name":"Singapore","tz":"SGT","off":8},{"id":12,"name":"Lagos","tz":"WAT","off":1},{"id":13,"name":"Chicago","tz":"CST","off":-6}],x=>contains(lower(x.name),lower(q)) || q=="")
+      ListTile "{r.name}" "{r.tz}  UTC{r.off>=0?"+":""}{r.off}" onTap={cities=append(cities,{"id":r.id,"name":r.name,"tz":r.tz,"off":r.off,"start":9,"end":17}); toast "{r.name} added"; close}
+  Dialog#prefs "Settings"
+    Toggle "24 hour clock" bind=clock24
+    Button "Done" onTap={close}
+
+### Meridian Phone
+state clock24=false
+state utc=14
+state cities=[{"id":1,"name":"San Francisco","tz":"PST","off":-8,"start":9,"end":17},{"id":3,"name":"London","tz":"GMT","off":0,"start":8,"end":16},{"id":6,"name":"Tokyo","tz":"JST","off":9,"start":9,"end":17}]
+Page
+  Nav
+    Brand "Meridian" icon="public"
+    Row gap=8
+      Toggle "24 h" bind=clock24
+      IconButton "add" tooltip="Add city" onTap={open addSheet}
+  Section
+    Column gap=16
+      Heading "Today's overlap" level=2
+      Slider bind=utc min=0 max=23.5 step=0.5
+      Grid cols=3 gap=8
+        each c in cities
+          Card gap=4 animate=fade
+            Text.strong "{c.name}"
+            Text.muted "{c.tz}"
+            Text "{((utc+c.off)%24+24)%24}:00" size=24 weight=700
+            Badge.success "Working" visible={((utc+c.off)%24+24)%24>=c.start && ((utc+c.off)%24+24)%24<c.end}
+      Button "Copy invite" icon="content_copy" onTap={copy "Meeting at {utc}:00 UTC with {join(map(cities,c=>c.name),", ")}"; toast "Invite copied"}
+  Sheet#addSheet "Add a city"
+    Input "Search" bind=q icon="search"
+    ListTile "Paris" "CET UTC+1" onTap={cities=append(cities,{"id":7,"name":"Paris","tz":"CET","off":1,"start":9,"end":17}); close}
+    ListTile "Sydney" "AEDT UTC+11" onTap={cities=append(cities,{"id":8,"name":"Sydney","tz":"AEDT","off":11,"start":9,"end":17}); close}
