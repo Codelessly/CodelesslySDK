@@ -7,6 +7,7 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/controls/focus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fields.dart';
@@ -32,7 +33,7 @@ Json _label(String text) => {
 
 /// An overlay's screen: a title and two press targets, `<id>-a` (closes it)
 /// and `<id>-b`.
-PublishLayout _overlay(String id, String title, {Json canvasProps = const {}, List<Json> canvasActions = const [], Json? first, List<Variable> variables = const []}) =>
+PublishLayout _overlay(String id, String title, {Json canvasProps = const {}, Json canvasBind = const {}, List<Json> canvasActions = const [], Json? first, Json? second, List<Variable> variables = const []}) =>
     PublishLayout.fromJson({
       'schema': 2,
       'id': '$id-layout',
@@ -48,6 +49,7 @@ PublishLayout _overlay(String id, String title, {Json canvasProps = const {}, Li
           'layout': {'width': 320, 'height': 200},
           'decoration': {'fills': [{'color': '#FFFFFFFF'}]},
           if (canvasProps.isNotEmpty) 'props': canvasProps,
+          if (canvasBind.isNotEmpty) 'bind': canvasBind,
           if (canvasActions.isNotEmpty) 'actions': canvasActions,
         },
         '$id-body': {
@@ -58,7 +60,7 @@ PublishLayout _overlay(String id, String title, {Json canvasProps = const {}, Li
         },
         '$id-title': _label(title),
         '$id-a': first ?? _press('Close', [{'type': 'closeModal'}]),
-        '$id-b': _press('Other', [{'type': 'showToast', 'message': 'Other'}]),
+        '$id-b': second ?? _press('Other', [{'type': 'showToast', 'message': 'Other'}]),
       },
     });
 
@@ -87,7 +89,7 @@ PublishBundle _bundle() {
         'props': {'spacing': 16},
         'children': [
           'openDialog', 'openSheet', 'openSide', 'openPopover', 'openFull', 'openLocked', 'openGuard', 'openMenu', //
-          'openConfirm', 'search',
+          'openConfirm', 'search', 'openLiveGuard', 'openSnapSheet',
         ],
       },
       'openDialog': _press('Dialog', [_open('dialog', 'dialog')]),
@@ -97,6 +99,8 @@ PublishBundle _bundle() {
       'openFull': _press('Full', [_open('full', 'fullScreen')]),
       'openLocked': _press('Locked', [_open('locked', 'dialog', extra: {'barrierDismissible': false})]),
       'openGuard': _press('Guard', [_open('guard', 'dialog')]),
+      'openLiveGuard': _press('Live guard', [_open('liveGuard', 'dialog')]),
+      'openSnapSheet': _press('Snap sheet', [_open('snap', 'bottomSheet', extra: {'maxHeightFactor': 0.9, 'snapHeights': [0.5, 0.9]})]),
       'openMenu': _press('More', [_open('menu', 'popover', extra: {'anchor': 'trigger'})]),
       'openConfirm': _press('Delete', [
         {'type': 'confirm', 'title': 'Delete it?', 'message': 'This cannot be undone.'},
@@ -120,6 +124,10 @@ PublishBundle _bundle() {
     _overlay('popover', 'What is this?'),
     _overlay('full', 'Onboarding'),
     _overlay('locked', 'Terms', canvasProps: {'semanticLabel': 'Accept the terms'}),
+    _overlay('liveGuard', 'Draft', canvasBind: {'props.blockBack': r'${= name != ""}'}, variables: [v('name', '')],
+      first: _press('Type', [{'type': 'setVariable', 'variable': 'name', 'value': 'Jo'}]),
+      second: _press('Discard', [{'type': 'setVariable', 'variable': 'name', 'value': ''}, {'type': 'closeModal'}])),
+    _overlay('snap', 'Booking details'),
     _overlay(
       'guard',
       'Unsaved changes',
@@ -327,6 +335,59 @@ void main() {
     expect(keys.topOverlay, isNotNull);
     expect(_texts(tester), contains('Asked 1'));
     expect(keys.focusedId, 'guard-a');
+  });
+
+  testWidgets('a live guard blocks outside press and Escape only after input changes', (tester) async {
+    await _show(tester);
+    final keys = Keyboard(tester);
+    await _tabTo(keys, 'openLiveGuard');
+    await keys.enter();
+    await settle(tester);
+    await keys.enter();
+    await settle(tester);
+    await tester.tapAt(const Offset(10, 10));
+    await settle(tester);
+    expect(keys.topOverlay, isNotNull);
+    await keys.escape();
+    await settle(tester);
+    expect(keys.topOverlay, isNotNull);
+    await keys.tab();
+    await keys.enter();
+    await settle(tester);
+    expect(keys.topOverlay, isNull);
+    await keys.enter();
+    await settle(tester);
+    await tester.tapAt(const Offset(10, 10));
+    await settle(tester);
+    expect(keys.topOverlay, isNull);
+  });
+
+  testWidgets('sheet handle drags between half and full stops and exposes adjustable semantics', (tester) async {
+    final handle = tester.ensureSemantics();
+    await _show(tester);
+    final keys = Keyboard(tester);
+    await _tabTo(keys, 'openSnapSheet');
+    await keys.enter();
+    await settle(tester);
+    final drag = find.byKey(const ValueKey('Codelessly sheet drag handle'));
+    expect(drag, findsOneWidget);
+    final halfTop = tester.getTopLeft(drag).dy;
+    expect(halfTop, greaterThan(300));
+    expect(tester.getSemantics(find.bySemanticsLabel('Sheet height')).value, '50% of screen');
+    await tester.drag(drag, const Offset(0, -340));
+    await settle(tester);
+    expect(tester.getTopLeft(drag).dy, lessThan(halfTop - 200));
+    expect(find.bySemanticsLabel('Sheet height'), findsOneWidget);
+    expect(tester.getSemantics(find.bySemanticsLabel('Sheet height')).value, '90% of screen');
+    await tester.drag(drag, const Offset(0, 340));
+    await settle(tester);
+    expect(tester.getTopLeft(drag).dy, closeTo(halfTop, 2));
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+    await settle(tester);
+    expect(tester.getTopLeft(drag).dy, lessThan(halfTop - 200));
+    handle.dispose();
   });
 
   testWidgets('nested overlays unwind: a menu item opens a dialog, Escape goes back to the item, then to the button', (tester) async {

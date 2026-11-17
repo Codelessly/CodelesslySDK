@@ -38,6 +38,7 @@ class PresentationRoute<T> extends PopupRoute<T> {
     this.sheetMargin = 0,
     this.cornerRadius,
     this.maxHeightFactor = 1,
+    this.snapHeights = const [],
     this.insets = EdgeInsets.zero,
     this.showDragHandle = false,
     this.barrierDismissible = true,
@@ -76,6 +77,7 @@ class PresentationRoute<T> extends PopupRoute<T> {
 
   /// The most of the screen's height a bottom sheet takes.
   final double maxHeightFactor;
+  final List<double> snapHeights;
 
   /// Inset of a side sheet from the screen's edges.
   final EdgeInsets insets;
@@ -117,6 +119,7 @@ class PresentationRoute<T> extends PopupRoute<T> {
             margin: sheetMargin,
             cornerRadius: cornerRadius ?? bottomSheetRadius,
             maxHeightFactor: maxHeightFactor,
+            snapHeights: snapHeights,
             showDragHandle: showDragHandle,
             builder: builder,
           ),
@@ -158,35 +161,75 @@ class PresentationRoute<T> extends PopupRoute<T> {
   }
 }
 
-class _BottomSheet extends StatelessWidget {
-  const _BottomSheet({this.width, this.margin = 0, required this.cornerRadius, required this.maxHeightFactor, required this.showDragHandle, required this.builder});
+class _BottomSheet extends StatefulWidget {
+  const _BottomSheet({this.width, this.margin = 0, required this.cornerRadius, required this.maxHeightFactor, required this.snapHeights, required this.showDragHandle, required this.builder});
 
   final double? width;
   final double margin;
   final double cornerRadius;
   final double maxHeightFactor;
+  final List<double> snapHeights;
   final bool showDragHandle;
   final WidgetBuilder builder;
+
+  @override
+  State<_BottomSheet> createState() => _BottomSheetState();
+}
+
+class _BottomSheetState extends State<_BottomSheet> {
+  int _stop = 0;
+  double? _dragHeight;
+
+  @override
+  void initState() {
+    super.initState();
+    HardwareKeyboard.instance.addHandler(_handleKey);
+  }
+
+  @override
+  void dispose() {
+    HardwareKeyboard.instance.removeHandler(_handleKey);
+    super.dispose();
+  }
+
+  bool _handleKey(KeyEvent event) {
+    if (!mounted || ModalRoute.of(context)?.isCurrent != true || event is! KeyDownEvent ||
+        !HardwareKeyboard.instance.isAltPressed || _stops.isEmpty) return false;
+    if (event.logicalKey == LogicalKeyboardKey.arrowUp) { _move(1); return true; }
+    if (event.logicalKey == LogicalKeyboardKey.arrowDown) { _move(-1); return true; }
+    return false;
+  }
+
+  List<double> get _stops => widget.snapHeights.where((h) => h > 0 && h <= widget.maxHeightFactor && h <= 1).toList()..sort();
+
+  void _move(int delta) {
+    final stops = _stops;
+    if (stops.isEmpty) return;
+    setState(() { _stop = (_stop + delta).clamp(0, stops.length - 1); _dragHeight = null; });
+  }
 
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
     // The keyboard pushes the sheet up.
     final keyboard = media.viewInsets.bottom;
-    final sheetWidth = math.min(width ?? media.size.width, media.size.width);
+    final sheetWidth = math.min(widget.width ?? media.size.width, media.size.width);
     // Narrower than the screen: it floats [margin] above the bottom, every
     // corner rounded.
-    final floating = margin > 0 && sheetWidth < media.size.width;
-    final maxHeight = math.max(0.0, media.size.height - keyboard - (floating ? margin : 0)) * maxHeightFactor.clamp(0, 1);
+    final floating = widget.margin > 0 && sheetWidth < media.size.width;
+    final available = math.max(0.0, media.size.height - keyboard - (floating ? widget.margin : 0));
+    final stops = _stops;
+    final maxHeight = available * widget.maxHeightFactor.clamp(0, 1);
+    final height = stops.isEmpty ? null : (_dragHeight ?? available * stops[_stop.clamp(0, stops.length - 1)]).clamp(0.0, maxHeight);
     return Padding(
-      padding: EdgeInsets.only(bottom: keyboard + (floating ? margin : 0)),
+      padding: EdgeInsets.only(bottom: keyboard + (floating ? widget.margin : 0)),
       child: Align(
         alignment: Alignment.bottomCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: sheetWidth, maxHeight: maxHeight),
+          constraints: BoxConstraints(maxWidth: sheetWidth, maxHeight: maxHeight, minHeight: height ?? 0),
           child: ClipRRect(
             key: const ValueKey('Codelessly bottom sheet'),
-            borderRadius: floating ? BorderRadius.circular(cornerRadius) : BorderRadius.vertical(top: Radius.circular(cornerRadius)),
+            borderRadius: floating ? BorderRadius.circular(widget.cornerRadius) : BorderRadius.vertical(top: Radius.circular(widget.cornerRadius)),
             child: MediaQuery.removePadding(
               context: context,
               removeTop: true,
@@ -195,13 +238,32 @@ class _BottomSheet extends StatelessWidget {
                 removeBottom: true,
                 child: Stack(
                   children: [
-                    Builder(builder: builder),
-                    if (showDragHandle)
-                      const Positioned(
+                    SizedBox(height: height, child: Builder(builder: widget.builder)),
+                    if (widget.showDragHandle)
+                      Positioned(
                         top: PresentationRoute.dragHandleTop,
                         left: 0,
                         right: 0,
-                        child: Center(child: _DragHandle()),
+                        child: Center(child: Semantics(
+                          label: 'Sheet height',
+                          value: stops.isEmpty ? null : '${(stops[_stop.clamp(0, stops.length - 1)] * 100).round()}% of screen',
+                          increasedValue: stops.isEmpty ? null : '${(stops[(_stop + 1).clamp(0, stops.length - 1)] * 100).round()}% of screen',
+                          decreasedValue: stops.isEmpty ? null : '${(stops[(_stop - 1).clamp(0, stops.length - 1)] * 100).round()}% of screen',
+                          onIncrease: stops.isEmpty ? null : () => _move(1),
+                          onDecrease: stops.isEmpty ? null : () => _move(-1),
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onVerticalDragUpdate: stops.isEmpty ? null : (details) => setState(() {
+                              _dragHeight = ((_dragHeight ?? available * stops[_stop]) - details.delta.dy).clamp(available * stops.first, available * stops.last);
+                            }),
+                            onVerticalDragEnd: stops.isEmpty ? null : (_) => setState(() {
+                              final dragged = _dragHeight ?? available * stops[_stop];
+                              _stop = [for (var i = 0; i < stops.length; i++) i].reduce((a, b) => (available * stops[a] - dragged).abs() <= (available * stops[b] - dragged).abs() ? a : b);
+                              _dragHeight = null;
+                            }),
+                            child: const Padding(padding: EdgeInsets.symmetric(horizontal: 12, vertical: 20), child: _DragHandle()),
+                          ),
+                        )),
                       ),
                   ],
                 ),

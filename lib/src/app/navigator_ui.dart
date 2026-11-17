@@ -154,6 +154,7 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker {
         sheetWidth: action.sheetWidth,
         sheetRadius: action.sheetRadius,
         maxHeightFactor: action.maxHeightFactor == 1 ? null : action.maxHeightFactor,
+        snapHeights: action.snapHeights,
         barrierBlur: action.barrierBlur,
         enterScale: action.enterScale,
         sheetBelowWidth: sheetBelowWidth,
@@ -290,6 +291,7 @@ Future<Object?> showScreenModal(
   double sheetMargin = 0,
   double? sheetRadius,
   double? maxHeightFactor,
+  List<double> snapHeights = const [],
   double barrierBlur = 0,
   double enterScale = 1,
   bool cover = false,
@@ -329,7 +331,7 @@ Future<Object?> showScreenModal(
   // the screen, on its transparent background: invisible over the scrim,
   // and a gap over the screen's own surface.)
   final presented = presentation == ModalPresentation.sideSheet ||
-      (sheet && (maxHeightFactor != null || sheetRadius != null || showDragHandle || sheetMargin > 0)) ||
+      (sheet && (maxHeightFactor != null || sheetRadius != null || showDragHandle || snapHeights.isNotEmpty || sheetMargin > 0)) ||
       (!sheet && presentation == ModalPresentation.dialog && (barrierBlur > 0 || enterScale != 1));
   if (presented) {
     return Navigator.of(context).push<Object?>(PresentationRoute<Object?>(
@@ -341,7 +343,8 @@ Future<Object?> showScreenModal(
       sheetMargin: sheetMargin,
       cornerRadius: sheetRadius,
       maxHeightFactor: maxHeightFactor ?? 1,
-      showDragHandle: showDragHandle,
+      snapHeights: snapHeights,
+      showDragHandle: showDragHandle || snapHeights.isNotEmpty,
       barrierBlur: barrierBlur,
       enterScale: enterScale,
       builder: (_) => sheet || presentation == ModalPresentation.sideSheet
