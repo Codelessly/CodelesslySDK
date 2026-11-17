@@ -1190,6 +1190,7 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
   Future<ui.Image> shot(RenderRepaintBoundary b) async => (await tester.runAsync(() => b.toImage(pixelRatio: 1)))!;
   final first = await shot(ro);
   final slices = <(ui.Image, double)>[];
+  ui.Image? bare;
   const hidden = Offset(0, -1e6);
   for (final b in over) {
     b.capturePaintShift = hidden;
@@ -1241,6 +1242,43 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
       if (at >= page.maxScrollExtent - 0.5) break;
       target = at + view.height;
     }
+    // What stands beside the page view (a sidebar, a rail, the canvas's own
+    // margin) is as tall as the window, and the capture is taller: below
+    // the first window those columns continue with the pane's own
+    // background (its fill and border, without what is in it), so nothing
+    // is left unpainted under a sidebar.
+    if (view.left > 0.5 || view.right < window.width - 0.5) {
+      final beside = pageBox == null ? const <NodeBox>[] : _fixedAround(binding, pageBox);
+      final shown = [for (final b in over) if (_rectOf(b).right <= view.left + 0.5 || _rectOf(b).left >= view.right - 0.5) b];
+      final inside = <NodeBox>[];
+      for (final b in beside) {
+        final stack = <RenderObject>[];
+        b.visitChildren(stack.add);
+        while (stack.isNotEmpty) {
+          final o = stack.removeLast();
+          if (o is NodeBox) {
+            inside.add(o);
+          } else {
+            o.visitChildren(stack.add);
+          }
+        }
+      }
+      for (final b in shown) {
+        b.capturePaintShift = Offset.zero;
+      }
+      final was = [for (final b in inside) b.capturePaintShift];
+      for (final b in inside) {
+        b.capturePaintShift = hidden;
+      }
+      await tester.pump();
+      bare = await shot(layer);
+      for (final (i, b) in inside.indexed) {
+        b.capturePaintShift = was[i];
+      }
+      for (final b in shown) {
+        b.capturePaintShift = hidden;
+      }
+    }
   } finally {
     for (final b in over) {
       b.capturePaintShift = Offset.zero;
@@ -1268,6 +1306,18 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
   // Below the page view at the page's end (the fixed boxes left out).
   final (last, lastAt) = slices.last;
   rows(last, view.bottom, window.height - view.bottom, view.bottom + lastAt);
+  // Beside the page view, under the first window: the panes' backgrounds
+  // carried on from the window's last row.
+  if (bare != null && max > 0) {
+    void carry(double left, double right) {
+      if (right - left < 0.5) return;
+      canvas.drawImageRect(bare!, Rect.fromLTWH(left - layerAt.dx, window.height - 1 - layerAt.dy, right - left, 1),
+          Rect.fromLTWH(left, window.height, right - left, total - window.height), paint);
+    }
+
+    carry(0, view.left);
+    carry(view.right, window.width);
+  }
   // The first window on top, as it shows.
   canvas.drawImage(first, Offset.zero, paint);
   final picture = recorder.endRecording();
@@ -1277,6 +1327,7 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
     image.dispose();
     picture.dispose();
     first.dispose();
+    bare?.dispose();
     for (final (img, _) in slices) {
       img.dispose();
     }

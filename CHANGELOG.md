@@ -120,6 +120,11 @@
   no `type` work in the notation's expander (it threw a Dart cast error on the object form), the render command and
   the runtime: they are read by codelessly_api's manifest reader, each typed by its value, and a record that cannot
   be read is an `invalid_variable` error on `site.json` (the expander prints it as one line).
+- The render command's `--full-page` capture of an app frame (`App` with a `Sidebar` beside a `Main` taller than the
+  window) left the columns beside the scrolling pane unpainted below the first window (a black or transparent strip
+  under the sidebar, and a `transparent_background` warning). The frame is right as written: the sidebar is as tall
+  as the window and stays in view while `Main` scrolls. The capture now carries each side pane's own background (its
+  fill and border, without its content) down to its bottom; the pane's content shows once, in the first window.
 
 ## 32.0.0
 
