@@ -105,3 +105,70 @@ be short and is the real research output.
 
 **To check at review 2.** Does the fuller count (D1) grow per app, or does it flatten too? What share of all
 words resolves? Did the grammar issue rate fall after the parser branch?
+
+### Review 2 (after batch b02; 33.0.0 released; D1, D2, D3 and two fix branches merged)
+
+**Numbers** (40 answers, 169 screens, 7,427 lines, counted with every word recorded):
+
+| | words | resolved | unknown types | lines that stand in | grammar issues / 1,000 lines |
+|---|---|---|---|---|---|
+| Review 1's parser, old count | 541 | 21.8% | 116 | 244 (3.3%) | 29.6 |
+| Now | **1,687** | **54.9%** | 70 | 119 (1.6%) | 19.5 |
+
+By kind: 205 types, 92 text positions, 854 parameters, 199 flags, 180 events, 36 variants, 52 verbs, 61
+functions, 8 statements. Resolved as: core 624, component 106, alias 23, definition 174. Unknown 760.
+
+**Did review 1's decisions work?**
+- D1 (count every word): yes. The corpus is three times larger than the old count said and grows about 40
+  words an answer, so 5,000 is roughly a hundred more answers, not a thousand.
+- D2 (words defined in the notation): yes, and it is the result of the week. 40 definition files written as
+  data took 44 of 98 unknown types to resolved and halved the lines that stand in, with no renderer change. A
+  definition is the line as a use would write it with its defaults, and the lines it stands for under it.
+- The parser branch: grammar issues fell by a third on the same answers (a choice between actions, binding to a
+  field, slots).
+
+**What the fuller count says.** The unknown words are now 444 parameters, 98 flags, 89 events, 70 types, and
+little else. Grouped by name instead of by type (`gaps.py`):
+1. *269 of the 444 unknown parameters are on a type we do not have.* They are not 269 problems: each goes when
+   its type is defined. And many of those are words every line understands (`h` on 23 types, `w`, `fill`, `gap`,
+   `bind` on 31), which the stand-in already honours: the count calls them unknown only because the type is.
+   That is a counting error.
+2. *The same names recur across types.* `color` is written on 12 types, `size` on 10, `icon` on 6, `items` on
+   11, `selected`, `labels`, `value`, `max`; flags `sortable`, `selectable`, `reorder`, `resizable`, `removable`,
+   `readonly`, `required`, `autofocus`; events `onReorder` (6 types), `onSelect` (6), `onRemove`, `onMove`. A
+   model does not think "Chip has no color parameter": it thinks every thing has a colour, a size, an icon, a
+   selected state, and every list can be reordered and selected from.
+3. *One core type carries a tenth of the problem.* `Input` has 27 unknown words and is in 37 of 40 answers
+   (`clearable`, `required`, `maxlength`, `autofocus`, `readonly`, `fuzzy`, `onKeyDown`…). `Column`, `Row`,
+   `Pane`, `Pages`, `LineChart` follow.
+4. *What cannot be a definition is a short list of primitives*, each behind many words: a surface where things
+   are placed by position and dragged, resized and selected (`Shape`, `StickyNote` move, `Clip`, `TimeBlock`,
+   `Pin`, `SeatMap`, `Cursor`, `Minimap`); a value that follows the scroll (`Scrolly`, `Sticky`, `Parallax…`,
+   `ScrollProgress`, `ScrollTabs`, `CollapsingHeader`); a drawn path (`Waveform`, `Arrow`, `QRCode`, maps).
+
+**Insight.** Vocabulary has two axes, and we were only working one. Types are the nouns; parameters, flags and
+events are adjectives and verbs that models apply to *any* noun. Fixing them type by type is the same mistake
+as building each tail type in Dart. The cross-cutting form is a small set of **universal words**: a parameter,
+flag or event that means the same on every line (a colour, a size, an icon, selected, disabled, read-only, a
+tooltip; reorderable with `onReorder`; selectable with `onSelect`; removable with `onRemove`), implemented once
+and inherited by core types, components and definitions. With definitions for nouns and universal words for
+the rest, what is left for Dart is the primitives list in 4, and that list is the real roadmap.
+
+**Decisions.**
+- D6. Count: a universal word on a type we do not have is resolved (the stand-in honours it). (Tool.)
+- D7. Universal words: one table, one implementation. Start with `color`, `size` (small, medium, large), `icon`,
+  `selected`, `disabled`/`readonly`, `tooltip`, `required`; then `reorder`/`sortable` + `onReorder` and
+  `removable` + `onRemove` on any container or list; then `selectable` + `onSelect` with the selection kept in a
+  list variable (the multi-selection eighteen apps asked for). A definition gets them without declaring them.
+- D8. `Input`: its unknown words, by reach.
+- D9. A bare number where the text goes (`Footnote 1`, `CountUp 39`) is the text.
+- D10. Definitions are written by Sonnet from the answers' own lines, checked by the tool (every definition
+  expands and validates; the lines that use it expand without issues), and committed. Opus is for what needs
+  code. This makes the "map it or add it" step of the loop cheap enough to run after every batch.
+- D11. Batches grow to about 15 answers. Families for b03: games, hardware and control panels, creative tools,
+  dense data entry, maps and places, media, health, education.
+- D12. Primitives, one at a time, by how many words wait on each: first the positioned surface (drag, resize,
+  select, snap), reading what the document model already has before adding anything.
+
+**To check at review 3.** Resolved share after D6 to D9 (expect well over 60%). Do Sonnet-written definitions
+pass the checks first time, and how do the pages look? Does the per-answer growth hold near 40 words?
