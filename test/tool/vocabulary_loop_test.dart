@@ -75,7 +75,10 @@ void main() {
     expect(aliases.flags['Rating'], {'readonly': 'readOnly'});
     expect(aliases.types.keys, containsAll(['Shortcut', 'RangeSlider', 'ConfirmDialog']));
     expect(aliases.parameters['*'], {'disabled': '!enabled', 'readonly': 'readOnly'});
-    expect(loadVocabulary(dir: 'design_systems/cards', builtIn: false).types, isEmpty);
+    // Cards' own names for its words (the vocabulary loop's Review 5, D25), and none of the built-in ones.
+    final own = loadVocabulary(dir: 'design_systems/cards', builtIn: false).types.keys;
+    expect(own, containsAll(['StarRating', 'Map']));
+    expect(own, isNot(contains('Shortcut')));
   });
 
   test('an open page with Cards: nothing is an issue, the document validates, and every word is recorded', () {
@@ -87,19 +90,20 @@ void main() {
             options: ValidateOptions(theme: api.ThemeTokens.fromJson(ds.manifest.theme.toJson()), components: ds.components))).where((d) => d.severity == Severity.error);
     expect(invalid.map((d) => '${d.code.name} ${d.path}: ${d.message}'), isEmpty);
     List<String> of(String kind) => [for (final u in r.vocabulary) if (u.kind == kind) '${u.on == null ? '' : '${u.on}.'}${u.word}'];
-    expect(of('type'), ['SeatMap', 'Waveform', 'QuickSwitcher']);
+    // Waveform is Cards' stand-in since the harvest (Review 5, D25).
+    expect(of('type'), ['SeatMap', 'QuickSwitcher']);
     // Words Cards defines in the notation (its vocabulary/*.txt) are words we
     // have; what a use gives that its definition does not take is recorded.
-    expect(of('definition'), ['Legend', 'CommandItem']);
-    expect(of('parameter'), ['Legend.string1']);
+    expect(of('definition'), ['Legend', 'Waveform', 'CommandItem']);
+    expect(of('parameter'), ['Legend.string1', 'Waveform.seed']);
     // A universal word (codelessly_api docs/design/21) on a defined word goes on its root;
     // clearable is an Input's own now.
     expect(of('universal'), contains('Legend.color'));
     expect(of('flag'), isEmpty);
     expect(of('verb'), ['Button.haptic', 'ListTile.vibrate']);
     expect(of('variant'), ['Button.Button.danger']);
-    // Cards' Rating needs a label, which the line did not give.
-    expect(of('missing'), ['Rating.label']);
+    // Cards' Rating no longer needs a label (Review 6, D30).
+    expect(of('missing'), isEmpty);
     expect(of('alias').toSet(), {'state.persist', 'Shortcut', 'Button.disabled', 'Rating.readonly', 'Tabs.items', 'ListTile.subtitle'});
     final seat = r.vocabulary.firstWhere((u) => u.word == 'SeatMap');
     expect(seat.path, ['App', 'Main', 'Column']);
