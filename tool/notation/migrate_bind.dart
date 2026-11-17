@@ -468,7 +468,13 @@ final class BindMigration {
     var quoted = false;
     for (var k = start; k < line.length; k++) {
       final c = line[k];
-      if (c == '"' && line[k - 1] != r'\') quoted = !quoted;
+      // `\"` in a literal of code is a quote of the line.
+      if (c == r'\' && k + 1 < line.length && (line[k + 1] == '"' || line[k + 1] == "'")) {
+        if (line[k + 1] == '"') quoted = !quoted;
+        k++;
+        continue;
+      }
+      if (c == '"') quoted = !quoted;
       if (quoted) continue;
       if (c == '`' || c == r'\' || (c == ')' && depth == 0)) return k;
       if ('([{'.contains(c)) depth++;
@@ -620,7 +626,11 @@ final class BindMigration {
         } else {
           // `\n` in a one-line literal is a line of the notation.
           final escaped = !triple && !raw && body.contains(r'\n');
-          final text = escaped ? body.replaceAll(r'\n', '\n') : body;
+          // `\"` in a literal of "…" is a quote of the notation (and `\'` in
+          // one of '…'): read as one, and escaped again after.
+          final quoted = !triple && !raw && body.contains('\\$c');
+          var text = escaped ? body.replaceAll(r'\n', '\n') : body;
+          if (quoted) text = text.replaceAll('\\$c', c);
           final before = log.length;
           final several = text.trim().contains('\n');
           final migrated = !several
@@ -629,7 +639,8 @@ final class BindMigration {
                   ? notation(text, at: 'line', firstLine: line)
                   : prose(text, firstLine: line);
           if (migrated != text) {
-            next = escaped ? migrated.replaceAll('\n', r'\n') : migrated;
+            next = quoted ? migrated.replaceAll(c, '\\$c') : migrated;
+            next = escaped ? next.replaceAll('\n', r'\n') : next;
           } else {
             log.removeRange(before, log.length);
           }

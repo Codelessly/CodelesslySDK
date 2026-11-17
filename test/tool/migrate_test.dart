@@ -206,6 +206,9 @@ void main() {
       expect(m.code(py, python: true), py.replaceFirst('Progress bind=done', 'Progress value={done}'));
       expect(_m().markdown('Write `Progress bind=done`.\n'), 'Write `Progress value={done}`.\n');
       expect(_m().loose('(as Progress bind=done) here\n'), '(as Progress value={done}) here\n');
+      // A quote escaped in a literal of code is the line's own, no end.
+      const doc = 'x = "A field: Input \\"Email\\" bind=email keeps it"\n';
+      expect(_m().code(doc, python: true), doc.replaceFirst('bind=email', '@email'));
     });
   });
 
