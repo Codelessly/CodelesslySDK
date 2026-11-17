@@ -245,4 +245,4 @@ App
       if tab=="theme"
         Card gap=12
           Text.strong "Theme"
-          SegmentedButton bind=theme items=["Light","Dark","System"] onChange={emit setTheme result}
+          SegmentedButton @theme items=["Light","Dark","System"] onChange={emit setTheme result}

@@ -421,4 +421,4 @@ App
             Text.strong "Default rest" color=#FFFFFFFF
             Text.muted "{restDefault} seconds"
           Stepper @restDefault min=15 max=300 step=15 holdRepeat
-        SegmentedButton "Theme" bind=theme items=["dark","light","system"]
+        SegmentedButton "Theme" @theme items=["dark","light","system"]

@@ -153,7 +153,7 @@ App
   Sheet#settings "Terminal settings"
     Toggle "Flash price ticks" @flash
     Toggle "Sound on fill" @sound
-    Select "Theme" bind=theme items=["Dark","Midnight","High contrast"]
+    Select "Theme" @theme items=["Dark","Midnight","High contrast"]
     Button "Done" onTap={close}
   Menu#rowMenu
     MenuItem "Open chart" icon="show_chart" onTap={symbol=sel}

@@ -200,7 +200,7 @@ App
     Column pad=24 gap=20 maxw=640
       Card gap=12
         Text.strong "Theme"
-        SegmentedButton bind=theme items=["Paper","Sepia","Dark"]
+        SegmentedButton @theme items=["Paper","Sepia","Dark"]
       Card gap=12
         Text.strong "Font size"
         Slider @fontSize min=14 max=28 step=1

@@ -214,7 +214,7 @@ Sheet#style "Text and theme"
       Text.strong "{size}"
       IconButton "add" tooltip="Larger" onTap={size=min(32, size+2)}
     Text.fieldLabel "Theme"
-    SegmentedButton bind=theme items=["Light","Sepia","Dark"]
+    SegmentedButton @theme items=["Light","Sepia","Dark"]
     Button "Done" onTap={close}
 Sheet#marksSheet "Bookmarks"
   Column gap=8
