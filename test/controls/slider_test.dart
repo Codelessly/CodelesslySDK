@@ -14,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'support.dart';
 import 'toggles_support.dart';
+import '../support/keyboard.dart';
 
 Future<(NodeTree, RecordedInteractions)> _show(WidgetTester tester, Map<String, Map<String, Object?>> nodes,
     {bool dark = false, Object? fill}) async {
@@ -32,6 +33,68 @@ Map<String, Object?> _node(Map<String, Object?> props, {Object width = 200, Obje
     };
 
 void main() {
+  for (final dark in [false, true]) {
+    testWidgets('range slider: pointer, one keyboard stop, both values and semantics (dark: $dark)', (tester) async {
+      final handle = tester.ensureSemantics();
+      final (tree, recorded) = await _show(tester, {
+        'price': _node({'value': 20, 'rangeEnd': 80, 'min': 0, 'max': 100, 'label': 'Price range'})
+      }, dark: dark);
+      final slider = _slider(tree, 'price');
+      final keys = Keyboard(tester);
+      expect(slider.size.height, 44);
+      await keys.tab();
+      expect(keys.focusedId, 'price');
+      expect(keys.stopIds(slider), ['price']);
+      expect(keys.ringShown, isTrue);
+      expect(keys.semantics!.label, 'Price range');
+      expect(keys.semantics!.data.hint, contains('Space'));
+      expect(keys.semantics!.data.flagsCollection.isSlider, isTrue);
+      expect(keys.semantics!.value, '20 to 80; lower thumb');
+      await keys.right();
+      expect(slider.value, 21);
+      await keys.space();
+      expect(keys.semantics!.value, '21 to 80; upper thumb');
+      await keys.press(LogicalKeyboardKey.pageUp);
+      expect(slider.rangeEnd, 90);
+      await keys.press(LogicalKeyboardKey.pageDown);
+      expect(slider.rangeEnd, 80);
+      await keys.end();
+      expect(slider.rangeEnd, 100);
+      final high = slider.localToGlobal(slider.highThumbCenter);
+      await tester.tapAt(high);
+      await tester.pump();
+      expect(slider.highActive, isTrue);
+      expect(keys.ringShown, isFalse, reason: 'a pointer does not leave a keyboard ring');
+      await tester.dragFrom(slider.localToGlobal(slider.highThumbCenter), const Offset(-40, 0));
+      await tester.pump();
+      expect(slider.rangeEnd, lessThan(100));
+      expect(slider.rangeEnd, greaterThan(slider.value));
+      await keys.home();
+      expect(slider.rangeEnd, 21, reason: 'the thumbs cannot cross');
+      await keys.enter();
+      expect(slider.highActive, isFalse);
+      await tester.dragFrom(slider.localToGlobal(slider.thumbCenter), const Offset(40, 0));
+      await tester.pump();
+      expect(slider.rangeEnd, greaterThan(slider.value), reason: 'a collapsed range can open again by dragging');
+      expect(recorded.fired, contains('price changed'));
+      handle.dispose();
+    });
+  }
+
+  testWidgets('range slider mirrors its track and horizontal keys in right-to-left text', (tester) async {
+    final (tree, _) = await _show(tester, {
+      'price': {..._node({'value': 20, 'rangeEnd': 80, 'min': 0, 'max': 100}), 'textDirection': 'rtl'}
+    });
+    final slider = _slider(tree, 'price');
+    expect(slider.thumbCenter.dx, greaterThan(slider.highThumbCenter.dx));
+    final keys = Keyboard(tester);
+    await keys.tab();
+    await keys.right();
+    expect(slider.value, 19);
+    await keys.left();
+    expect(slider.value, 20);
+  });
+
   testWidgets('with nothing styled it is SSUI\'s slider: 28 high, a 6 px rail, a ringed 14 px thumb and no shadow',
       (tester) async {
     final (tree, _) = await _show(tester, {'s': hugging('slider', {'value': 0.5})});
