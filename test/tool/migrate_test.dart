@@ -194,6 +194,21 @@ void main() {
     });
   });
 
+  group('displays', () {
+    test('13. a display with a value of its own keeps it: the bind is dropped, never a second value=', () {
+      expect(_m().notation('Column\n  Progress bind=x value=0.5\n  Progress bind={0} value={done/total}\n  Progress bind=share\n'),
+          'Column\n  Progress value=0.5\n  Progress value={done/total}\n  Progress value={share}\n');
+    });
+
+    test('14. prose and patterns read a display as a page does: value={done}', () {
+      final m = _m();
+      const py = r"pattern = re.compile(r'A bar \(or Progress bind=done\) shows it')" '\n';
+      expect(m.code(py, python: true), py.replaceFirst('Progress bind=done', 'Progress value={done}'));
+      expect(_m().markdown('Write `Progress bind=done`.\n'), 'Write `Progress value={done}`.\n');
+      expect(_m().loose('(as Progress bind=done) here\n'), '(as Progress value={done}) here\n');
+    });
+  });
+
   // 9: each heuristic of the file rewrite, with what it must not touch.
   group('left as it is', () {
     test('code: comments, code that names bind, literals with no notation', () {

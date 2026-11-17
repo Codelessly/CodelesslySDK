@@ -434,9 +434,11 @@ final class BindMigration {
           break;
         }
       }
+      // A notation line that ends before the key (a pattern's `\` or a
+      // parenthesis closed before it) is not the key's.
+      if (start >= 0 && _lineEnd(line, start) < m.end) start = -1;
       if (start >= 0) {
-        final tick = line.indexOf('`', m.end);
-        final to = tick < 0 ? line.length : tick;
+        final to = _lineEnd(line, start);
         final r = notationBindRewrite(line.substring(start, to), catalog: catalog);
         for (final name in r.refused) {
           notes.add('line $lineNo: binds $name, a name the runtime reserves (no state line declares it): rename it by hand: ${l.trim()}');
@@ -455,6 +457,24 @@ final class BindMigration {
       from = m.end;
     }
     return line;
+  }
+
+  /// Where the notation line that starts at [start] of [line] ends: at the
+  /// end of its code span or of the line, or where prose (or a pattern)
+  /// closes around it, at a backslash or a parenthesis it did not open
+  /// (`\(or Progress bind=done\)`).
+  static int _lineEnd(String line, int start) {
+    var depth = 0;
+    var quoted = false;
+    for (var k = start; k < line.length; k++) {
+      final c = line[k];
+      if (c == '"' && line[k - 1] != r'\') quoted = !quoted;
+      if (quoted) continue;
+      if (c == '`' || c == r'\' || (c == ')' && depth == 0)) return k;
+      if ('([{'.contains(c)) depth++;
+      if (')]}'.contains(c)) depth--;
+    }
+    return line.length;
   }
 
   /// Prose (a Markdown line out of a fence, a docstring): only a code span
