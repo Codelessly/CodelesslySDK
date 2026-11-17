@@ -211,8 +211,8 @@ final class CorpusWords {
       final unused = typeHow == 'definition' ? reads[r.typeTo] : null;
       String given(String word, String how) {
         if (how != 'definition' || unused == null) return how;
-        // `bind=x` gives the variable the definition calls by its own name.
-        final name = word == 'bind' ? unused.definition.bind : word;
+        // A bare `@x` gives the variable the definition calls by its own name.
+        final name = word == '@' ? unused.definition.bind : word;
         return unused.unread.contains(name) || unused.unfired.contains(name) ? 'unread' : how;
       }
       for (final v in parts.variant.split('.').where((v) => v.isNotEmpty)) {
@@ -234,6 +234,9 @@ final class CorpusWords {
           case 'pair':
             final kind = p.isEvent ? 'event' : 'parameter';
             _add(kind, type, p.key!, given(p.key!, how(kind, p.key!, partsHow)), file, line, to: r.alias['$kind:${p.key}']);
+          case 'word' when p.raw.startsWith('@'):
+            // A bare `@x`: the line's value, bound (a parameter named `@`).
+            _add('parameter', type, '@', given('@', how('parameter', '@', partsHow)), file, line);
           case 'word':
             _add('flag', type, p.raw, given(p.raw, how('flag', p.raw, partsHow)), file, line, to: r.alias['flag:${p.raw}']);
         }

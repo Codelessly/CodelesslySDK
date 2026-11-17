@@ -825,7 +825,7 @@ Future<void> main(List<String> args) async {
   }
   final takes = <String, Set<String>>{
     for (final c in ds.list) c.type: {for (final p in c.spec.props) p.key, for (final e in c.spec.events) e.key},
-    for (final e in table.definitions.entries) e.key: {for (final d in e.value) ...[...d.parameters.keys, ...d.events, ...d.strings, if (d.bind != null) 'bind']},
+    for (final e in table.definitions.entries) e.key: {for (final d in e.value) ...[...d.parameters.keys, ...d.events, ...d.strings, if (d.bind != null) '@']},
   };
   md
     ..writeln()

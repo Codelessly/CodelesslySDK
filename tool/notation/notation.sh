@@ -5,7 +5,7 @@
 #   tool/notation/notation.sh expand <file.txt> [--design-system <folder>] [--named] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--site <site.json>] [--out <file.json>] [--open [--vocabulary <file.json>]] [--aliases <file.json>]
 #   tool/notation/notation.sh vocabulary <folder or files> [--design-system <folder>] [--aliases <file.json>] [--no-aliases] [--out <dir>] [--sites <dir>]
 #   tool/notation/notation.sh apply <document.json> <ops.json> [--design-system <folder>] [--out <file.json>]
-#   tool/notation/notation.sh migrate <file.txt> [more files] [--design-system <folder>]... [--check] [--stdout] [--dart | --markdown]
+#   tool/notation/notation.sh migrate <file or folder>... [--check] [--stdout] [--design-system <folder>]... [--site <site.json>] [--notation | --markdown | --dart | --python | --json | --html] [--from 32]
 #
 # --open is the open vocabulary (codelessly_api docs/design/19-open-vocabulary.md):
 # prompt --open teaches the grammar and the core only, and asks for every
@@ -18,12 +18,13 @@
 # corpus of answers (tool/vocabulary/corpus/<name>) and writes which words
 # they reached for and how each resolved (vocabulary.json, VOCABULARY.md).
 #
-# migrate is a one-off: it rewrites files written in the grammar codelessly_api
-# read up to 32.x (key:value, =name, key:=expression, -> actions) to the
-# grammar of 33.0.0 (key=value, key={expression}, bind=name, onTap={actions}),
-# in place. The parser reads the new grammar only; migrate.dart carries its
-# own copy of how the old one split a line, and is to be deleted, with this
-# command, once the sites written before 2026-11-16 are migrated.
+# migrate rewrites files, in place, to the grammar codelessly_api reads now:
+# a variable bound as `@name` (`bind=name`, `bindEnd=name` and a block's
+# `key=name` rewritten; a state line added for each variable a screen binds
+# and nothing declares), in notation files, Markdown, Dart, Python, JSON and
+# HTML, a folder at a time; --check lists what is still to rewrite. --from 32
+# first rewrites the grammar read up to 32.x (key:value, =name, key:=expression,
+# -> actions). The head of migrate.dart says what each form becomes.
 #
 # It finds Flutter's dart, makes the SDK use the codelessly_api checked out
 # beside it (../CodelesslyAPI: the notation is newer than the published

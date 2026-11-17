@@ -118,7 +118,7 @@ final class Harvest {
     final files = {for (final h in defs) h.file};
     final named = <String, Set<String>>{};
     for (final h in defs) {
-      for (final p in [...h.definition.parameters.keys, ...h.definition.events, if (h.definition.bind != null) 'bind']) {
+      for (final p in [...h.definition.parameters.keys, ...h.definition.events, if (h.definition.bind != null) '@${h.definition.bind}']) {
         named.putIfAbsent(p, () => {}).add(h.file);
       }
     }

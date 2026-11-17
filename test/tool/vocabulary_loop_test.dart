@@ -24,6 +24,7 @@ const _page = '''
 state q=""
 state n=2 persist
 state stars=4
+state view=""
 Shortcut "ctrl+k" onPress={open palette}
 App
   Sidebar
@@ -33,7 +34,7 @@ App
     Nav
       Heading "Choose your seats"
       Row gap=8
-        Input#find "Find a row" bind=q clearable
+        Input#find "Find a row" @q clearable
         Button.danger "Clear" disabled={n==0} onTap={n=0; haptic}
     Column pad=24 gap=16
       SeatMap#plan "Stalls" rows={seats} chosen={picked} selectable max=8 h=120 fill=#FF111827 radius=12 onChange={n=length(result)}
@@ -43,7 +44,7 @@ App
       Row gap=12 middle
         Text#count "{n} seats"
         Rating value=4.6 readonly
-        Tabs bind=view items=["Plan","List"]
+        Tabs @view items=["Plan","List"]
       ListTile "Row A" subtitle="Two seats left" onTap={vibrate find}
       Progress {n/8}
 QuickSwitcher#palette "Commands"
@@ -157,8 +158,8 @@ void main() {
 
   test('the harvest: a word defined in more than one answer, side by side, with what each leans on and where they disagree', () {
     final h = Harvest(kindOf: (w) => const {'Column', 'Row', 'Text', 'Ring', 'Slider', 'Box'}.contains(w) ? 'core' : 'unknown');
-    h.answer('dj', '### Deck\nApp\n  Knob "Gain"\n\n// A rotary dial.\ndefine Knob "label" bind=value min=0 max=12 color=#FF22D3EE\n  Column gap=4\n    Ring {value/max} w=56 color={color}\n    Text "{label}"\n');
-    h.answer('seq', 'Column\n  Knob "Swing"\ndefine Knob "label" bind=value low=0 max=100 unit=""\n  Column\n    Pip\n    Slider bind=value min={low} max={max}\ndefine Pip\n  Box w=4 h=4\n');
+    h.answer('dj', '### Deck\nApp\n  Knob "Gain"\n\n// A rotary dial.\ndefine Knob "label" @value min=0 max=12 color=#FF22D3EE\n  Column gap=4\n    Ring {value/max} w=56 color={color}\n    Text "{label}"\n');
+    h.answer('seq', 'Column\n  Knob "Swing"\ndefine Knob "label" @value low=0 max=100 unit=""\n  Column\n    Pip\n    Slider @value min={low} max={max}\ndefine Pip\n  Box w=4 h=4\n');
     h.answer('synth', 'Column\n  Knob "Cutoff"\n');
     h.unknown('Knob', 'synth');
     h.unknown('Knob', 'dj');
@@ -177,7 +178,7 @@ void main() {
     expect([for (final w in h.wouldResolve) '${w.word}: ${w.definedIn} / ${w.unknownIn}'], ['Knob: [dj, seq] / [synth]']);
     final md = h.markdown();
     expect(md, contains('### Knob (2 answers)'));
-    expect(md, contains('```\n// A rotary dial.\ndefine Knob "label" bind=value min=0 max=12 color=#FF22D3EE\n  Column gap=4\n'));
+    expect(md, contains('```\n// A rotary dial.\ndefine Knob "label" @value min=0 max=12 color=#FF22D3EE\n  Column gap=4\n'));
     expect(md, contains('| Knob | dj, seq | synth |'));
     expect(((h.toJson()['definedInMoreThanOne'] as List).single as Map)['answers'], 2);
   });
