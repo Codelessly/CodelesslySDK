@@ -28,14 +28,14 @@
   resolved (core, component, alias, definition, unknown), and `summary`; `VOCABULARY.md` opens with the table by
   kind and resolution and adds, for each word we have, what the answers gave it (and what a component or a defined
   word takes that nobody gave). `tool/vocabulary/count.py` counts all of them (the 30 answers of the first two
-  batches: 1,580 words, where the old count was 517) and still diffs two runs, an old one too. The parser is
+  batches: 1,580 words, where the old count says 508) and still diffs two runs, an old one too. The parser is
   unchanged: what it knew is read from the answer's line, what it did not from its record.
 - **Cards defines words in the notation** (`design_systems/cards/vocabulary/*.txt`, codelessly_api
-  docs/design/20-defined-words.md): 41 files, 47 meanings, for words the corpus reached for (`StickyNote`,
+  docs/design/20-defined-words.md): 40 files, 46 meanings, for words the corpus reached for (`StickyNote`,
   `FlipCard` with `Front` and `Back`, `ChatBubble`, `Table` in three shapes, `Timeline` in three, `ColorPicker`,
   `RangeSlider bind=range`, `Countdown`…). `expand`, `vocabulary` and `prompt` load them with the design system;
   `prompt` lists their signatures in the taught mode only; `vocabulary --no-definitions` counts without them. On
-  the corpus: lines that stand in 222 → 99, unknown types 99 → 54, words resolved 45.8% → 57.0%.
+  the corpus: lines that stand in 220 → 99, unknown types 98 → 54, words resolved 46.6% → 57.7%.
 
 - **The vocabulary loop** (codelessly_api docs/design/19-open-vocabulary.md): the prompt teaches the grammar and a
   small core, the model writes any word it expects, and we count the words it reached for.
