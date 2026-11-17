@@ -4,6 +4,27 @@ Needs codelessly_api from its master branch (universal words, docs/design/21-uni
 
 ### Added
 
+- **Cards' words take the shapes the self-defining answers agreed on** (the vocabulary loop's Review 5, D25;
+  codelessly_api docs/design/20-defined-words.md section 10). From the harvest of `corpus-define/d01` and `d02`
+  (111 answers), where three or more answers defined a word, or a word Cards already had: `Timeline` is first a
+  list of dated records (`items=[] bind=at selected onPick`; `events=`, `steps=`, `entries=` and `current=`,
+  `onSelect` are aliases; a bare `Timeline` is still it), its tracks and route meanings name `tracks=[]` and
+  `stops=[]`; `Stepper#steps` (`steps=[] bind=step current done=[] orientation onPick`) is the steps indicator
+  beside the `Stepper` component, the number control, read when a line fits it better; `Countdown#timer`
+  (`"label" seconds=0 warnAt=0 format="m:ss" onWarn onEnd`; `warnBelow=`, `onDone` aliases); `ChatBubble` takes its
+  text as a string and `role="user"`; `StarRating` is `Rating`, `Breadcrumbs` and `crumbs=` are `Breadcrumb`'s.
+  Where the writers' definitions were labelled boxes because the thing needs a primitive, Cards has a stand-in in
+  the agreed signature, its events declared and a `//` line saying what it does not do: `MapView` (and `Map`),
+  `RouteMap`, `FloorPlan`, `SignaturePad`, `CameraView`, `PhotoPicker`, `Waveform`.
+- **The shapes the glossary's answers wrote, taken** (the vocabulary loop's Review 6, D30; from
+  `corpus-define/d03`): repaired components (`tool/repairs/`) `Banner icon= action= onAction` (and
+  `actionLabel=`; `Banner.warning` is its tone, in the notation), `FileUploader accept=` (a text or a list, said in
+  its hint) and `multiple`, `Rating max=` (its label no longer required); definitions `TimelineItem date= done=
+  current=`, `AttachmentTile "name" "size" progress=` (its close button with `onRemove` alone), `FlightProgress
+  value=`; aliases for a component's list under the name answers gave it (`ChipTabs`, `ChoiceChips`, `Combobox`,
+  `SegmentedControl`, `StepIndicator items=`), `StatusBadge status=`, `StatCard caption=`, `ImageUpload accept=`,
+  `CodeBlock lang= copy`. `test/tool/cards_shapes_test.dart` expands each line as an answer wrote it, with no word
+  left unknown and a document that validates. d03's unknown words 40 to 14.
 - **The vocabulary tool counts universal words** (`tool/notation/vocabulary_words.dart`, `tool/vocabulary/count.py`):
   a new resolution, `universal`, for a word every line understands read where the type has no word of that name, and
   for each word a stand-in of a type we do not have honours (the parser says which: Review 2, D6). A bare number in
