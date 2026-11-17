@@ -73,7 +73,7 @@ void main() {
     expect(aliases.parameters['Tabs'], {'items': 'tabs'});
     expect(aliases.flags['Rating'], {'readonly': 'readOnly'});
     expect(aliases.types.keys, containsAll(['Shortcut', 'RangeSlider', 'ConfirmDialog']));
-    expect(aliases.parameters['*'], {'disabled': '!enabled'});
+    expect(aliases.parameters['*'], {'disabled': '!enabled', 'readonly': 'readOnly'});
     expect(loadVocabulary(dir: 'design_systems/cards', builtIn: false).types, isEmpty);
   });
 
@@ -90,8 +90,11 @@ void main() {
     // Words Cards defines in the notation (its vocabulary/*.txt) are words we
     // have; what a use gives that its definition does not take is recorded.
     expect(of('definition'), ['Legend', 'CommandItem']);
-    expect(of('parameter'), ['Legend.string1', 'Legend.color']);
-    expect(of('flag'), ['Input.clearable']);
+    expect(of('parameter'), ['Legend.string1']);
+    // A universal word (codelessly_api docs/design/21) on a defined word goes on its root;
+    // clearable is an Input's own now.
+    expect(of('universal'), contains('Legend.color'));
+    expect(of('flag'), isEmpty);
     expect(of('verb'), ['Button.haptic', 'ListTile.vibrate']);
     expect(of('variant'), ['Button.Button.danger']);
     // Cards' Rating needs a label, which the line did not give.

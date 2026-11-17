@@ -20,8 +20,10 @@
 //   statement   a line's first word that is not a type    state, each, if
 //
 // and resolves as one of: core, component, alias (with what it was read
-// as), definition (a word defined in the notation, with which meaning), or
-// unknown.
+// as), definition (a word defined in the notation, with which meaning),
+// universal (a word every line understands, read where the type has no word
+// of that name, or honoured by a stand-in for a type we do not have:
+// codelessly_api docs/design/21-universal-words.md), or unknown.
 import 'package:codelessly_api/notation.dart';
 import 'package:codelessly_sdk/src/runtime/expressions/formula.dart' show FormulaEvaluator;
 
@@ -32,7 +34,7 @@ const vocabularyStatements = {'state', 'if', 'each', 'else', 'for', 'key', 'ever
 const wordKinds = ['type', 'text', 'parameter', 'flag', 'event', 'variant', 'verb', 'function', 'statement'];
 
 /// The resolutions, in the order they are listed.
-const wordResolutions = ['core', 'component', 'alias', 'definition', 'unknown'];
+const wordResolutions = ['core', 'component', 'alias', 'definition', 'universal', 'unknown'];
 
 final class CorpusWord {
   CorpusWord(this.kind, this.on, this.word);
@@ -59,6 +61,7 @@ final class CorpusWord {
         if (how.length > 1) 'how': how,
         if (to.isNotEmpty) 'to': (to.toList()..sort()).join(', '),
         'files': files.length,
+        'in': files.toList()..sort(),
         'uses': uses,
         if (example != null) 'example': example,
       };
@@ -70,6 +73,7 @@ final class _LineRecord {
   String? typeTo;
   final unknown = <String>{}; // kind:word
   final alias = <String, String>{}; // kind:word -> to
+  final universal = <String>{}; // kind:word
 }
 
 final class CorpusWords {
@@ -104,6 +108,8 @@ final class CorpusWords {
         case 'definition':
           r.type = 'definition';
           r.typeTo = u.to;
+        case 'universal':
+          r.universal.add('${u.of}:${u.word}');
         case 'alias':
           if (u.of == 'type' || u.of == 'line') {
             r.type = 'alias';
@@ -131,6 +137,7 @@ final class CorpusWords {
       String how(String kind, String word, String typeHow) {
         if (r.unknown.contains('$kind:$word')) return 'unknown';
         if (r.alias.containsKey('$kind:$word')) return 'alias';
+        if (r.universal.contains('$kind:$word')) return 'universal';
         return typeHow;
       }
 
@@ -160,8 +167,13 @@ final class CorpusWords {
         _add('variant', type, v, r.unknown.contains('variant:$type.$v') ? 'unknown' : partsHow, file, line);
       }
       var strings = 0;
+      // A bare number before any key or word is in the text position (D9:
+      // codelessly_api docs/design/21 section 8), counted as a text.
+      var keyed = false;
       for (final p in parts.parts) {
-        switch (p.kind) {
+        final number = p.kind == 'word' && !keyed && num.tryParse(p.raw) != null;
+        if (p.kind == 'pair' || (p.kind == 'word' && !number)) keyed = true;
+        switch (number ? 'string' : p.kind) {
           case 'string':
             strings++;
             final word = 'text$strings';

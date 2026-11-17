@@ -4,8 +4,9 @@ The size of a vocabulary corpus: the distinct words in a run of `notation.sh voc
 used, known or not (its `words`; tool/notation/vocabulary_words.dart says how each kind is read). A word is
 counted once per kind and, for a text, parameter, flag, event or variant, once per type it was written on
 (`size` on IconButton and `size` on Chip are two entries: each is mapped or built on its own). Each resolves as
-core, component, alias, definition (a word defined in the notation) or unknown; the resolved share is all but
-unknown.
+core, component, alias, definition (a word defined in the notation), universal (a word every line understands,
+read where the type has no word of that name or honoured by the stand-in of a type we do not have: codelessly_api
+docs/design/21-universal-words.md) or unknown; the resolved share is all but unknown.
 
 With an earlier file, also lists the words that are new since it, and those that resolve otherwise. An earlier
 file written before every word was recorded (it has no `words`) is read as it was counted then: every type, and
@@ -15,7 +16,7 @@ import json
 import sys
 
 KINDS = ['type', 'text', 'parameter', 'flag', 'event', 'variant', 'verb', 'function', 'statement']
-RESOLUTIONS = ['core', 'component', 'alias', 'definition', 'unknown']
+RESOLUTIONS = ['core', 'component', 'alias', 'definition', 'universal', 'unknown']
 OLD = {'types': 'type', 'parameters': 'parameter', 'flags': 'flag', 'events': 'event', 'verbs': 'verb',
        'functions': 'function', 'variants': 'variant', 'aliases': 'alias'}
 

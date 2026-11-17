@@ -185,6 +185,9 @@ class TreeReactions implements NodeInteractions {
   Future<void> fire(NodeBox box, String trigger, {Json event = const {}}) async {
     var node = box.node;
     if (node == null) return;
+    // A disabled node runs no actions of the pointer (its `disabled`
+    // binding: api WidgetState.disabled): a box written `disabled`.
+    if (TriggerType.pointer.any((t) => t.name == trigger) && box.tree.statesOf(box.id, instance: box.instance).contains(api.WidgetState.disabled)) return;
     // A tap on an input's prefix or suffix icon runs that icon's own
     // reactions (`InputIcon.actions`), as a click of the node.
     if (trigger == iconTapPrefix || trigger == iconTapSuffix) {

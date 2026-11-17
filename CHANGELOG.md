@@ -1,3 +1,24 @@
+## Unreleased
+
+Needs codelessly_api from its master branch (universal words, docs/design/21-universal-words.md).
+
+### Added
+
+- **The vocabulary tool counts universal words** (`tool/notation/vocabulary_words.dart`, `tool/vocabulary/count.py`):
+  a new resolution, `universal`, for a word every line understands read where the type has no word of that name, and
+  for each word a stand-in of a type we do not have honours (the parser says which: Review 2, D6). A bare number in
+  the text position is counted as a text. `vocabulary.json`'s words carry the files that used them (`in`), so
+  `gaps.py` counts files again (it printed 0).
+- **`examples/showcase/desktop/behaviours/universal.txt`**: the universal words on several kinds of line, rendered in
+  light and dark.
+
+### Fixed
+
+- A box whose bound interaction state changes (`selected`, `disabled` from its binding) is re-applied even when its
+  node is otherwise unchanged: a list's row that became selected kept its old press target (not announced selected)
+  and did not show its state style until something else re-applied it.
+- A node in its `disabled` state runs no pointer actions (before, it was only taken out of the focus order).
+
 ## 33.0.0
 
 Needs codelessly_api 33.0.0.

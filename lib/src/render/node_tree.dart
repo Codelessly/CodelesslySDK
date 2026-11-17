@@ -1199,8 +1199,11 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     final n = _withTextDefault(bound?.node);
     // While its animations patch it, the node as shown can stay the same
     // while what they draw over changed (a bound value a transition eases):
-    // its player must see it, so it re-applies.
-    if (bound != null && n != null && bound.collapsed == _collapsed && !_animatedOver) {
+    // its player must see it, so it re-applies. So does one whose bound
+    // interaction states changed (`selected`, `disabled`): its layers read
+    // them (a press target's announced selected, a disabled node's taps).
+    if (bound != null && n != null && bound.collapsed == _collapsed && !_animatedOver &&
+        setEquals(tree.statesOf(id, instance: instance), _statesApplied)) {
       if (n == old) {
         _watchBindings(bound.watch);
         return;
@@ -1607,13 +1610,17 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     // A top-level node that only moved: its content doesn't depend on where
     // it sits (the host offsets it), so nothing re-applies or repaints. Not
     // while its animations patch it: what they draw over can change under
-    // the same shown node (a bound value a transition eases).
+    // the same shown node (a bound value a transition eases). Nor when its
+    // interaction states changed (a list's row selected or disabled by its
+    // binding): its layers read them (a press target's announced selected).
+    final states = tree.statesOf(id, instance: instance);
     if (collapsed == _collapsed && _slot.kind == SlotKind.root && n != null && _applied != null && _onlyMoved(_applied!, n) &&
-        !_animatedOver) {
+        !_animatedOver && setEquals(states, _statesApplied)) {
       _node = n;
       _applied = n;
       return;
     }
+    _statesApplied = {...states};
     _prepareLayoutChanges();
     if (collapsed != _collapsed) {
       _collapsed = collapsed;
@@ -1768,6 +1775,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
   bool _relayoutQueued = false;
 
   /// [a] and [b] differ at most in their position.
+  /// The interaction states the box was last applied in.
+  Set<api.WidgetState> _statesApplied = const {};
+
   static bool _onlyMoved(Node a, Node b) {
     if (identical(a, b)) return true;
     if (a.layout.width != b.layout.width || a.layout.height != b.layout.height) return false;
