@@ -56,6 +56,16 @@
   CommandPalette, FeatureCard, InputField, CallToAction), a new `BeforeAfter`, `radii.menu`, and menu items at
   the body size. `design_systems/cards/tool/repairs.py` keeps changes made to generated components across a
   rebuild (`--record`).
+- **Cards, tabs**: Tabs, TabToggle, SegmentedControl, ChipTabs and BrowserTabs are Cards blocks, and with Segments
+  they stay on one line and scroll where the options do not fit (never a second row): hover and pressed states,
+  44 high tap areas on a phone, an edge fade, the chosen option brought into view. ChoiceChips keeps equal columns
+  while the labels fit, else chips as wide as their labels that wrap. The patterns say which of Tabs, Segments
+  and ChipTabs to write.
+- **A photo viewer**: the notation's `Lightbox` renders as a viewer over the window (zoom by pinch, wheel and
+  double tap, pan, a gallery that pages with thumbnails and a count); Cards' PhotoGallery takes
+  `viewer="overlay"`, which leaves its grid in place for it. Render steps `--double-tap`, `--wheel` and `--pinch`
+  (the CLI and the MCP tool) drive it; `examples/showcase/desktop/behaviours` has a gallery, a list of pictures
+  and one picture.
 - **Examples**: overlays, an app's sidebar drawer and a lightbox written in the notation
   (`examples/showcase/desktop/behaviours`).
 
