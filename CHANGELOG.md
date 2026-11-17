@@ -1,3 +1,12 @@
+## Unreleased
+
+### Fixed
+
+- **A control's label is centered on its glyphs** by the font's own ascent and descent from the baseline. A style with
+  no line height of its own has its line rounded up to a whole pixel, and the label was centered on that box: up to
+  half a pixel too high, a pixel once snapped (13 px over and 16 under "Send" in a 40 px button). Buttons, chips,
+  dropdowns, menu rows, tabs and pickers share the label.
+
 ## 33.1.0
 
 Needs codelessly_api 33.1.0.

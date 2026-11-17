@@ -529,7 +529,48 @@ class ControlLabel {
       if (b.bottom > bottom) bottom = b.bottom;
     }
     _glyphCenter = (top + bottom) / 2;
+    // The boxes above are cut to the line's height, which a style with no
+    // line height of its own rounds up to a whole pixel: their middle is then
+    // up to half a pixel under the glyphs', and the label is drawn that much
+    // too high (a pixel, once snapped). The baseline is exact, and so are the
+    // font's own ascent and descent: the glyphs' middle is half their
+    // difference above it.
+    final rise = _naturalRise();
+    if (rise != null) _glyphCenter = _painter.computeDistanceToActualBaseline(TextBaseline.alphabetic) - rise;
   }
+
+  /// Half of ascent less descent of the style's font at its size, as the
+  /// font gives them (no line height applied, nothing rounded); null when
+  /// the style has no size to measure.
+  double? _naturalRise() {
+    final s = _style;
+    if (s == null || s.fontSize == null) return null;
+    if (_riseFor == s) return _rise;
+    final p = TextPainter(
+      text: TextSpan(
+        text: 'H',
+        style: TextStyle(
+          inherit: false,
+          fontFamily: s.fontFamily,
+          fontFamilyFallback: s.fontFamilyFallback,
+          fontSize: s.fontSize,
+          fontWeight: s.fontWeight,
+          fontStyle: s.fontStyle,
+          fontVariations: s.fontVariations,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    )..layout();
+    final lines = p.computeLineMetrics();
+    _riseFor = s;
+    _rise = lines.isEmpty ? null : (lines.first.ascent - lines.first.descent) / 2;
+    p.dispose();
+    return _rise;
+  }
+
+  TextStyle? _riseFor;
+  double? _rise;
 
   /// Its width on one line, uncut.
   double get intrinsicWidth {
