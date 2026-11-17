@@ -1,0 +1,149 @@
+### Today
+state habits=[{"id":"h1","name":"Morning run","icon":"directions_run","color":"#FFEF6C00","streak":12,"best":21,"done":true,"week":[1,1,1,0,1,1,1],"target":5,"unit":"km","paused":false,"reminder":"06:30"},{"id":"h2","name":"Read 20 pages","icon":"menu_book","color":"#FF1E88E5","streak":5,"best":34,"done":false,"week":[1,1,0,1,1,1,0],"target":20,"unit":"pages","paused":false,"reminder":"21:00"},{"id":"h3","name":"Drink water","icon":"water_drop","color":"#FF00ACC1","streak":31,"best":31,"done":false,"week":[1,1,1,1,1,1,1],"target":8,"unit":"glasses","paused":false,"reminder":"09:00"},{"id":"h4","name":"Meditate","icon":"self_improvement","color":"#FF8E24AA","streak":0,"best":9,"done":false,"week":[0,1,0,0,1,0,0],"target":10,"unit":"minutes","paused":false,"reminder":"07:15"}]
+state sel="h1"
+state tab="today"
+state days=["M","T","W","T","F","S","S"]
+App
+  Sidebar
+    Brand "Streaks" icon="local_fire_department"
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={tab="today"}
+    NavItem "Habits" icon="checklist" badge="{length(habits)}" selected={tab=="habits"} onTap={tab="habits"; go habit-detail}
+    NavItem "Archive" icon="inventory_2" selected={tab=="archive"} onTap={tab="archive"}
+    Spacer grow
+    Text.muted "Best streak: {max(31,0)} days"
+  Main
+    Nav
+      Heading "Today" level=1
+      Row gap=8
+        Row gap=4 middle
+          Icon "local_fire_department" color=#FFEF6C00
+          Text.strong "{sum(habits,h=>h.streak)}"
+        Button "New habit" icon="add" onTap={go new-habit}
+    Column pad=24 gap=16 scroll
+      Row between middle
+        Column gap=4
+          Text.heading2 "{formatDate(today(),"EEEE, MMM d")}"
+          Text.muted "{count(habits,h=>h.done)} of {length(habits)} done"
+        Ring "{count(habits,h=>h.done)/length(habits)}" size=56
+      Progress "{count(habits,h=>h.done)/length(habits)}"
+      each h in habits
+        Card gap=12 animate=slide-up stagger=60
+          Row gap=12 middle
+            Checkbox bind=h.done onChange={habits=updateWhere(habits,x=>x.id==h.id,x=>with(with(x,"done",result),"streak",result?x.streak+1:max(0,x.streak-1))); haptic light; if result then toast "{h.name} done, streak {h.streak+1}"}
+            IconTile "{h.icon}" color={h.color}
+            Column grow gap=2
+              Text.strong "{h.name}" strike={h.done}
+              Text.muted "{h.target} {h.unit} a day"
+            Row gap=4 middle
+              Icon "local_fire_department" color={h.streak>0?"#FFEF6C00":"#FF9E9E9E"}
+              Text.strong "{h.streak}"
+            IconButton "chevron_right" tooltip="Details" onTap={sel=h.id; go habit-detail}
+          Row gap=8 between
+            each d in days
+              Column gap=4 center
+                Text.caption "{d}"
+                Icon "{h.week[index]==1?"circle":"radio_button_unchecked"}" size=14 color={h.week[index]==1?h.color:"#FFBDBDBD"} onTap={habits=updateWhere(habits,x=>x.id==h.id,x=>with(x,"week",setAt(x.week,index,1-x.week[index])))}
+
+### Habit detail
+state best=21
+state reminderOn=true
+state remindAt="06:30"
+state yearDays=range(365)
+App
+  Sidebar
+    Brand "Streaks" icon="local_fire_department"
+    NavItem "Today" icon="today" onTap={go today}
+    NavItem "Habits" icon="checklist" selected onTap={go habit-detail}
+    NavItem "Archive" icon="inventory_2" onTap={go today}
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Back" onTap={go today}
+        Heading "{find(habits,h=>h.id==sel).name}" level=1
+      Row gap=8
+        Button.outline "Edit" icon="edit" onTap={go new-habit}
+        IconButton "more_vert" tooltip="More" onTap={open habitMenu}
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Current streak"
+          Row gap=8 middle
+            Icon "local_fire_department" color=#FFEF6C00
+            Text "{find(habits,h=>h.id==sel).streak} days" size=28 weight=700
+        Card gap=4
+          Text.muted "Best streak"
+          Text "{find(habits,h=>h.id==sel).best} days" size=28 weight=700
+        Card gap=4
+          Text.muted "Done this year"
+          Text "214 days" size=28 weight=700
+      Card gap=12
+        Row between middle
+          Text.strong "Last 12 months"
+          Row gap=4 middle
+            Text.caption "Less"
+            Legend count=4
+            Text.caption "More"
+        Heatmap values={yearDays} start="2026-01-01" weeks=53 cols=7 onTapCell={toast "{result.date}: {result.value>0?"done":"missed"}"}
+      Card gap=12
+        Text.strong "Reminder"
+        Toggle "Remind me every day" bind=reminderOn
+        if reminderOn
+          TimePicker "Time" bind=remindAt
+          Row gap=8
+            each d in ["M","T","W","T","F","S","S"]
+              FilterChip "{d}" selected={true}
+      Card gap=12
+        Text.strong "Status"
+        Toggle "Pause this habit" bind=paused onChange={habits=updateWhere(habits,x=>x.id==sel,x=>with(x,"paused",result)); toast result?"Paused, your streak is kept":"Resumed"}
+        Button.destructive "Archive habit" icon="inventory_2" onTap={open archiveConfirm}
+  Menu#habitMenu end
+    MenuItem "Edit habit" icon="edit" onTap={go new-habit}
+    MenuItem "Reset streak" icon="restart_alt" onTap={habits=updateWhere(habits,x=>x.id==sel,x=>with(x,"streak",0)); toast "Streak reset"}
+    MenuItem "Archive" icon="inventory_2" onTap={open archiveConfirm}
+  Dialog#archiveConfirm "Archive this habit?" "It leaves Today but your history is kept."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Archive" onTap={habits=removeWhere(habits,x=>x.id==sel); toast "Archived"; close; go today}
+
+### New habit
+state name=""
+state icon="directions_run"
+state color="#FF1E88E5"
+state dow=[true,true,true,true,true,false,false]
+state target=1
+state unit="times"
+Page
+  Nav
+    Row gap=8 middle
+      IconButton "close" tooltip="Cancel" onTap={go today}
+      Heading "New habit" level=1
+    Button "Save" onTap={habits=append(habits,{"id":"h{length(habits)+1}","name":name,"icon":icon,"color":color,"streak":0,"best":0,"done":false,"week":[0,0,0,0,0,0,0],"target":target,"unit":unit,"paused":false,"reminder":"08:00"}); toast "Habit added"; go today}
+  Section narrow
+    Column gap=20
+      Input "Name" "e.g. Stretch for 10 minutes" bind=name
+      Column gap=8
+        Text.fieldLabel "Icon"
+        Grid cols=6 gap=8
+          each i in ["directions_run","menu_book","water_drop","self_improvement","fitness_center","bedtime","restaurant","savings","code","brush","music_note","pets"]
+            ChoiceChip "{i}" icon="{i}" selected={icon==i} onTap={icon=i}
+      Column gap=8
+        Text.fieldLabel "Colour"
+        Row gap=12
+          each c in ["#FFEF6C00","#FF1E88E5","#FF00ACC1","#FF8E24AA","#FF43A047","#FFE53935"]
+            Box w=36 h=36 radius=18 fill={c} border-width={color==c?3:0} onTap={color=c}
+              if color==c
+                Icon "check" color=#FFFFFFFF
+      Column gap=8
+        Text.fieldLabel "Repeat on"
+        Row gap=8
+          each d in ["M","T","W","T","F","S","S"]
+            FilterChip "{d}" selected={dow[index]} onTap={dow=setAt(dow,index,!dow[index])}
+      Row gap=12 bottom
+        Input "Target per day" type=number bind=target grow
+        Select "Unit" items=["times","minutes","pages","glasses","km"] bind=unit grow
+      Card gap=8
+        Row gap=12 middle
+          IconTile "{icon}" color={color}
+          Column grow
+            Text.strong "{name==""?"Your habit":name}"
+            Text.muted "{target} {unit} a day, {count(dow,x=>x)} days a week"

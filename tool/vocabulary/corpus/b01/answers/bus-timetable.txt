@@ -1,0 +1,181 @@
+### Nearby
+state tab="nearby"
+state alertOpen=true
+state favs=["s2","s5"]
+state onlyFavs=false
+state q=""
+state stops=[{"id":"s1","name":"Market Square","code":"MK1","dist":120,"routes":["12","47","N3"]},{"id":"s2","name":"Castle Street","code":"CS4","dist":240,"routes":["12","8"]},{"id":"s3","name":"Central Station","code":"CE2","dist":410,"routes":["47","15","22","N3"]},{"id":"s4","name":"Riverside Park","code":"RP1","dist":560,"routes":["8"]},{"id":"s5","name":"St Mary's Hospital","code":"SM3","dist":780,"routes":["15","22"]}]
+state selStop="s1"
+App
+  Sidebar
+    Brand "Stopwatch City" icon="directions_bus"
+    NavItem "Nearby" icon="near_me" selected={tab=="nearby"} onTap={tab="nearby"}
+    NavItem "Favourites" icon="star" badge="{length(favs)}" selected={tab=="favs"} onTap={tab="favs"}
+    NavItem "Journey planner" icon="route" onTap={go journey-planner}
+    Spacer grow
+    Text.muted "Updated just now"
+  Main
+    Nav
+      Heading "Nearby stops" level=1
+      Row gap=8
+        Input "Search stops" bind=q w=220
+        IconButton "my_location" tooltip="Use my location" onTap={toast "Location updated"}
+    Column pad=24 gap=16 scroll
+      if alertOpen
+        Banner.warning "Route 47 diverted" "Roadworks on Bridge Road until 18:00. Buses stop at Central Station instead of Market Square." icon="warning" action="Details" onAction={open alertDetail} onDismiss={alertOpen=false}
+      Row gap=8
+        ChoiceChip "All stops" selected={!onlyFavs} onTap={onlyFavs=false}
+        ChoiceChip "Favourites" selected={onlyFavs} onTap={onlyFavs=true}
+      Grid cols=2 gap=16
+        each s in stops
+          if (!onlyFavs || contains(favs,s.id)) && (q=="" || contains(lower(s.name),lower(q)))
+            Card gap=8
+              Row between
+                Column gap=2
+                  Text.strong "{s.name}"
+                  Text.muted "Stop {s.code} · {s.dist} m away"
+                IconButton "star" tooltip="Favourite" selected={contains(favs,s.id)} onTap={favs=contains(favs,s.id)?without(favs,s.id):append(favs,s.id)}
+              Row gap=4
+                each r in s.routes
+                  Badge.info "{r}"
+              Button.outline "See departures" onTap={selStop=s.id; go stop-board}
+  Dialog#alertDetail "Route 47 diverted" "Service alert"
+    Text "Roadworks on Bridge Road until 18:00. Buses on route 47 skip Market Square and Bridge Road and stop at Central Station instead. Allow an extra 8 minutes."
+    Button "Got it" onTap={close}
+
+### Stop departures
+state stopName="Market Square"
+state now=0
+state filter="all"
+state faved=true
+state deps=[{"id":"d1","route":"12","dest":"Harbour","due":240,"status":"ontime"},{"id":"d2","route":"47","dest":"University","due":420,"status":"late","delay":4},{"id":"d3","route":"N3","dest":"Airport","due":600,"status":"cancelled"},{"id":"d4","route":"12","dest":"Harbour","due":1080,"status":"ontime"},{"id":"d5","route":"47","dest":"University","due":1500,"status":"ontime"}]
+state pick={}
+every 1s onTick={now=now+1}
+App
+  Sidebar
+    Brand "Stopwatch City" icon="directions_bus"
+    NavItem "Nearby" icon="near_me" onTap={go nearby}
+    NavItem "Favourites" icon="star" onTap={go nearby}
+    NavItem "Journey planner" icon="route" onTap={go journey-planner}
+  Main
+    Nav
+      Row gap=8
+        IconButton "arrow_back" tooltip="Back" onTap={go nearby}
+        Heading "{stopName}" level=1
+      Row gap=8
+        IconButton "star" tooltip="Favourite" selected={faved} onTap={faved=!faved; toast faved?"Added to favourites":"Removed from favourites"}
+        IconButton "refresh" tooltip="Refresh" onTap={toast "Times refreshed"}
+    Column pad=24 gap=16 scroll
+      Banner.warning "Route 47 diverted" "Roadworks on Bridge Road until 18:00." icon="warning"
+      Row gap=8
+        ChoiceChip "All" selected={filter=="all"} onTap={filter="all"}
+        ChoiceChip "12" selected={filter=="12"} onTap={filter="12"}
+        ChoiceChip "47" selected={filter=="47"} onTap={filter="47"}
+        ChoiceChip "N3" selected={filter=="N3"} onTap={filter="N3"}
+      Card gap=0
+        Row pad=12 border-bottom=#FFDDDDDD
+          Text.muted "Route" w=70
+          Text.muted "Destination" grow
+          Text.muted "Due" w=120
+        each d in sortBy(deps,x=>x.due)
+          if filter=="all" || filter==d.route
+            Row pad=12 middle onTap={pick=d; open depMenu} animate=fade
+              Badge.primary "{d.route}" w=70
+              Column grow gap=2
+                Text strike={d.status=="cancelled"} "{d.dest}"
+                if d.status=="late"
+                  Text.small "Delayed {d.delay} min" color=#FFB26A00
+                if d.status=="cancelled"
+                  Text.danger "Cancelled"
+              if d.status=="cancelled"
+                Text strike "{ceil((d.due-now)/60)} min" w=120 color=#FF888888
+              else
+                if d.status=="late"
+                  Text.strong "{max(0,ceil((d.due+d.delay*60-now)/60))} min" w=120 color=#FFB26A00
+                else
+                  Text.strong "{max(0,ceil((d.due-now)/60))} min" w=120
+      Text.muted "Times count down live. Amber means the bus is running late."
+  Menu#depMenu
+    MenuItem "Track this bus" icon="my_location" onTap={go route-line}
+    MenuItem "Remind me 5 min before" icon="notifications" onTap={toast "Reminder set for route {pick.route}"}
+    MenuItem "Share departure" icon="share" onTap={emit share pick.id}
+
+### Route 47
+state at=6
+state stopsOnRoute=["University","Science Park","Hospital Road","Bridge Road","Central Station","Market Square","Castle Street","Old Town","Harbour"]
+state bus=4.4
+every 3s onTick={bus=min(8,bus+0.1)}
+App
+  Sidebar
+    Brand "Stopwatch City" icon="directions_bus"
+    NavItem "Nearby" icon="near_me" onTap={go nearby}
+    NavItem "Journey planner" icon="route" onTap={go journey-planner}
+  Main
+    Nav
+      Row gap=8
+        IconButton "arrow_back" tooltip="Back" onTap={go stop-board}
+        Heading "Route 47 to Harbour" level=1
+      Badge.warning "4 min late"
+    Column pad=24 gap=16 maxw=720 scroll
+      Banner.warning "Diverted at Bridge Road" "Buses skip Bridge Road until 18:00." icon="warning"
+      Card gap=0
+        Timeline.vertical bind=at position={bus} marker="directions_bus"
+          each s in stopsOnRoute
+            TimelineStop "{s}" passed={index<floor(bus)} current={index==at} onTap={at=index}
+              if index==3
+                Text.danger "Skipped today"
+              else
+                Text.muted "{formatDate(today(),"MMM d")} · {fixed(10+index*4,0)}:{index*4<10?"0":""}{index*4}"
+      Row gap=8
+        Button "Set alarm for {stopsOnRoute[at]}" onTap={toast "We will alert you near {stopsOnRoute[at]}"}
+        Button.outline "Open map" onTap={emit openMap}
+
+### Journey planner
+state from="Market Square"
+state to="Harbour"
+state mode="leave"
+state when="08:30"
+state day=today()
+state results=[]
+state searched=false
+state chosen=-1
+App
+  Sidebar
+    Brand "Stopwatch City" icon="directions_bus"
+    NavItem "Nearby" icon="near_me" onTap={go nearby}
+    NavItem "Journey planner" icon="route" selected={true}
+  Main
+    Nav
+      Heading "Plan a journey" level=1
+      Button.ghost "Swap" onTap={from=to; to=from}
+    Column pad=24 gap=16 maxw=720 scroll
+      Card gap=12
+        Input "From" bind=from
+        Input "To" bind=to
+        SegmentedButton bind=mode items=["Leave at","Arrive by"]
+        Row gap=12
+          DatePicker "Day" bind=day grow
+          TimePicker "Time" bind=when grow
+        Button "Find journeys" onTap={searched=true; chosen=-1; results=[{"dep":"08:34","arr":"08:58","mins":24,"legs":["12"],"changes":0,"late":false},{"dep":"08:41","arr":"09:10","mins":29,"legs":["47","15"],"changes":1,"late":true},{"dep":"08:52","arr":"09:21","mins":29,"legs":["8"],"changes":0,"late":false}]}
+      if searched
+        Text.sectionTitle "{mode=="leave"?"Leaving at":"Arriving by"} {when}"
+        each r in results
+          Card gap=8 onTap={chosen=index; open journeyDetail}
+            Row between
+              Text.heading "{r.dep} to {r.arr}"
+              Text.strong "{r.mins} min"
+            Row gap=8
+              each l in r.legs
+                Badge.info "{l}"
+              Text.muted "{r.changes==0?"Direct":"1 change"}"
+              if r.late
+                Badge.warning "Running late"
+  Sheet#journeyDetail "Journey details"
+    Text.strong "{results[chosen].dep} to {results[chosen].arr}"
+    Text.muted "{from} to {to}"
+    Timeline.vertical
+      TimelineStop "{from}" "Board route {results[chosen].legs[0]}"
+      TimelineStop "{to}" "Arrive {results[chosen].arr}"
+    Row gap=8
+      Button "Save journey" onTap={toast "Journey saved"; close}
+      Button.outline "Close" onTap={close}
