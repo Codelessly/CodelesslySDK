@@ -1,31 +1,31 @@
-Row h:fill
-  Sidebar bind:section brand:"Harbor" sectionLabel:"Workspace" items:["Overview","Orders","Inventory","Customers","Reports","Settings"] icons:["dashboard","receipt_long","inventory_2","group","bar_chart","settings"] w:240
+Row h=fill
+  Sidebar bind=section brand="Harbor" sectionLabel="Workspace" items=["Overview","Orders","Inventory","Customers","Reports","Settings"] icons=["dashboard","receipt_long","inventory_2","group","bar_chart","settings"] w=240
     Divider
-    Row gap:10 pad:12 middle
-      Avatar "Maya Reyes" size:36
+    Row gap=10 pad=12 middle
+      Avatar "Maya Reyes" size=36
       Column
         Text.strong "Maya Reyes"
         Text.caption "maya@harbor.co"
-  Column grow gap:16 pad:24 scroll
+  Column grow gap=16 pad=24 scroll
     Row between middle
       Text.pageTitle "Overview"
-      Row gap:12 middle
-        Segments bind:range options:["7d","30d","90d"]
-        SearchBar "Search orders, customers" bind:q w:260
-        Button "New order" icon:"add" -> emit newOrder
-    Grid cols:4 gap:12
-      StatTile "Revenue" "vs previous period" value:"$128,400" delta:"+8.2%" icon:"payments"
-      StatTile "Orders" "vs previous period" value:"1,942" delta:"+3.1%" icon:"shopping_cart"
-      StatTile "Returns" "vs previous period" value:"2.4%" delta:"-0.6%" invert:true icon:"assignment_return"
-      StatTile "Avg. order" "vs previous period" value:"$66.10" delta:"+1.9%" icon:"sell"
-    Row gap:16 top
-      ChartCard "Revenue, last 12 weeks" value:"$128,400" kind:"line" delta:"+8.2%" values:[8.2,9.1,8.7,9.8,10.4,9.9,11.2,10.8,11.9,12.6,12.1,13.7] labels:["W1","W2","W3","W4","W5","W6","W7","W8","W9","W10","W11","W12"] grow
-      ChartCard "Revenue by channel" value:"$128,400" kind:"bars" values:[52,34,21,13,8] labels:["Web","Mobile","Retail","Wholesale","Market"] w:400
+      Row gap=12 middle
+        Segments bind=range options=["7d","30d","90d"]
+        SearchBar "Search orders, customers" bind=q w=260
+        Button "New order" icon="add" onTap={emit newOrder}
+    Grid cols=4 gap=12
+      StatTile "Revenue" "vs previous period" value="$128,400" delta="+8.2%" icon="payments"
+      StatTile "Orders" "vs previous period" value="1,942" delta="+3.1%" icon="shopping_cart"
+      StatTile "Returns" "vs previous period" value="2.4%" delta="-0.6%" invert=true icon="assignment_return"
+      StatTile "Avg. order" "vs previous period" value="$66.10" delta="+1.9%" icon="sell"
+    Row gap=16 top
+      ChartCard "Revenue, last 12 weeks" value="$128,400" kind="line" delta="+8.2%" values=[8.2,9.1,8.7,9.8,10.4,9.9,11.2,10.8,11.9,12.6,12.1,13.7] labels=["W1","W2","W3","W4","W5","W6","W7","W8","W9","W10","W11","W12"] grow
+      ChartCard "Revenue by channel" value="$128,400" kind="bars" values=[52,34,21,13,8] labels=["Web","Mobile","Retail","Wholesale","Market"] w=400
     state orders=[{"id":"#10482","customer":"Olivia Bennett","status":"Paid","total":182.4,"date":"Mar 14"},{"id":"#10481","customer":"Daniel Okafor","status":"Due","total":64.9,"date":"Mar 14"},{"id":"#10480","customer":"Priya Nair","status":"Paid","total":239.0,"date":"Mar 13"},{"id":"#10479","customer":"Lucas Meyer","status":"Overdue","total":41.5,"date":"Mar 12"},{"id":"#10478","customer":"Sofia Alvarez","status":"Paid","total":97.2,"date":"Mar 12"},{"id":"#10477","customer":"Henry Walsh","status":"Due","total":128.75,"date":"Mar 11"},{"id":"#10476","customer":"Aiko Tanaka","status":"Paid","total":56.3,"date":"Mar 10"},{"id":"#10475","customer":"Noah Fischer","status":"Overdue","total":310.0,"date":"Mar 9"}]
-    Card gap:8
+    Card gap=8
       Row between middle
         Text.heading "Latest orders"
-        Button.ghost "View all" -> emit viewAll
-      TableHeader columns:["Order","Customer","Total","Date","Status"]
+        Button.ghost "View all" onTap={emit viewAll}
+      TableHeader columns=["Order","Customer","Total","Date","Status"]
       each o in orders
-        TableRow cells:{[o.id,o.customer,money(o.total,"$",2),o.date]} badge:{o.status}
+        TableRow cells={[o.id,o.customer,money(o.total,"$",2),o.date]} badge={o.status}

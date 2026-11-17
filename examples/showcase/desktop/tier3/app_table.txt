@@ -10,67 +10,67 @@ state page=0
 state rows=[{"id":1,"name":"Maya Reyes","company":"Northwind Traders","status":"Active","plan":"Business","value":480,"seen":"2 hours ago","days":0},{"id":2,"name":"Liam Chen","company":"Bluepeak Labs","status":"Trial","plan":"Starter","value":0,"seen":"Yesterday","days":1},{"id":3,"name":"Sofia Alvarez","company":"Casa Verde","status":"Active","plan":"Team","value":220,"seen":"3 days ago","days":3},{"id":4,"name":"Noah Becker","company":"Becker & Sons","status":"Churned","plan":"Starter","value":0,"seen":"41 days ago","days":41},{"id":5,"name":"Aiko Tanaka","company":"Sakura Foods","status":"Active","plan":"Business","value":560,"seen":"5 hours ago","days":0},{"id":6,"name":"Oliver Grant","company":"Grant Logistics","status":"Trial","plan":"Team","value":0,"seen":"2 days ago","days":2},{"id":7,"name":"Priya Nair","company":"Lumen Studio","status":"Active","plan":"Team","value":240,"seen":"Today","days":0},{"id":8,"name":"Lucas Meyer","company":"Meyer Hardware","status":"Churned","plan":"Business","value":0,"seen":"87 days ago","days":87},{"id":9,"name":"Emma Okafor","company":"Harbor Health","status":"Active","plan":"Enterprise","value":1200,"seen":"1 hour ago","days":0},{"id":10,"name":"Jack Wilson","company":"Wilson Cycles","status":"Trial","plan":"Starter","value":0,"seen":"6 days ago","days":6}]
 App
   Sidebar
-    Brand "Fieldbook" icon:"menu_book"
-    NavItem "Overview" icon:"dashboard" selected:{tab=="overview"} -> tab="overview"
-    NavItem "Customers" icon:"groups" badge:"248" selected:{tab=="customers"} -> tab="customers"
-    NavItem "Deals" icon:"handshake" selected:{tab=="deals"} -> tab="deals"
-    NavItem "Tasks" icon:"task_alt" badge:"7" selected:{tab=="tasks"} -> tab="tasks"
-    NavItem "Reports" icon:"bar_chart" selected:{tab=="reports"} -> tab="reports"
+    Brand "Fieldbook" icon="menu_book"
+    NavItem "Overview" icon="dashboard" selected={tab=="overview"} onTap={tab="overview"}
+    NavItem "Customers" icon="groups" badge="248" selected={tab=="customers"} onTap={tab="customers"}
+    NavItem "Deals" icon="handshake" selected={tab=="deals"} onTap={tab="deals"}
+    NavItem "Tasks" icon="task_alt" badge="7" selected={tab=="tasks"} onTap={tab="tasks"}
+    NavItem "Reports" icon="bar_chart" selected={tab=="reports"} onTap={tab="reports"}
     Spacer grow
-    Row gap:8 middle
-      Avatar "Sam Patel" size:32
+    Row gap=8 middle
+      Avatar "Sam Patel" size=32
       Text.muted "Sam Patel"
   Main
     Nav
-      Row gap:12 middle
-        Heading "Customers" level:1
+      Row gap=12 middle
+        Heading "Customers" level=1
         Badge.neutral "248"
-      Row gap:8
-        Button.outline "Import" -> emit import
-        Button "Add customer" -> emit addCustomer
-    Column pad:24 gap:16 scroll
-      Row gap:12 middle
-        Input "Search customers" bind:q w:280
-        Select bind:status items:["All","Active","Trial","Churned"] w:140
+      Row gap=8
+        Button.outline "Import" onTap={emit import}
+        Button "Add customer" onTap={emit addCustomer}
+    Column pad=24 gap=16 scroll
+      Row gap=12 middle
+        Input "Search customers" bind=q w=280
+        Select bind=status items=["All","Active","Trial","Churned"] w=140
         Spacer grow
-        SegmentedButton bind:seg items:["All customers","Mine","Recently added"]
+        SegmentedButton bind=seg items=["All customers","Mine","Recently added"]
       if length(picked)>0
-        Row gap:12 middle pad:[16,10,16,10] fill:#FF1E293B radius:8
-          Text "{length(picked)} selected" color:#FFFFFFFF weight:600
+        Row gap=12 middle pad=[16,10,16,10] fill=#FF1E293B radius=8
+          Text "{length(picked)} selected" color=#FFFFFFFF weight=600
           Spacer grow
-          Button.outline "Export" -> emit exportCustomers picked
-          Button.destructive "Delete" -> rows=filter(rows,r=>!contains(picked,r.id)); picked=[]; all=false; emit deleteCustomers picked
-      Card gap:0 pad:0
-        Row gap:12 middle pad:[16,10,16,10] border-bottom:#FFE2E8F0
-          Checkbox bind:all w:28 -> picked=all?map(rows,r=>r.id):[]
-          Button.ghost "Name" grow -> rows=(sort=="name"&&!desc)?sortByDesc(rows,x=>x.name):sortBy(rows,x=>x.name); desc=(sort=="name"&&!desc); sort="name"
-          Button.ghost "Company" w:170 -> rows=(sort=="company"&&!desc)?sortByDesc(rows,x=>x.company):sortBy(rows,x=>x.company); desc=(sort=="company"&&!desc); sort="company"
-          Button.ghost "Status" w:90 -> rows=(sort=="status"&&!desc)?sortByDesc(rows,x=>x.status):sortBy(rows,x=>x.status); desc=(sort=="status"&&!desc); sort="status"
-          Button.ghost "Plan" w:100 -> rows=(sort=="plan"&&!desc)?sortByDesc(rows,x=>x.plan):sortBy(rows,x=>x.plan); desc=(sort=="plan"&&!desc); sort="plan"
-          Button.ghost "Monthly" w:90 -> rows=(sort=="value"&&!desc)?sortByDesc(rows,x=>x.value):sortBy(rows,x=>x.value); desc=(sort=="value"&&!desc); sort="value"
-          Button.ghost "Last seen" w:110 -> rows=(sort=="days"&&!desc)?sortByDesc(rows,x=>x.days):sortBy(rows,x=>x.days); desc=(sort=="days"&&!desc); sort="days"
-          Spacer w:40
+          Button.outline "Export" onTap={emit exportCustomers picked}
+          Button.destructive "Delete" onTap={rows=filter(rows,r=>!contains(picked,r.id)); picked=[]; all=false; emit deleteCustomers picked}
+      Card gap=0 pad=0
+        Row gap=12 middle pad=[16,10,16,10] border-bottom=#FFE2E8F0
+          Checkbox bind=all w=28 onChange={picked=all?map(rows,r=>r.id):[]}
+          Button.ghost "Name" grow onTap={rows=(sort=="name"&&!desc)?sortByDesc(rows,x=>x.name):sortBy(rows,x=>x.name); desc=(sort=="name"&&!desc); sort="name"}
+          Button.ghost "Company" w=170 onTap={rows=(sort=="company"&&!desc)?sortByDesc(rows,x=>x.company):sortBy(rows,x=>x.company); desc=(sort=="company"&&!desc); sort="company"}
+          Button.ghost "Status" w=90 onTap={rows=(sort=="status"&&!desc)?sortByDesc(rows,x=>x.status):sortBy(rows,x=>x.status); desc=(sort=="status"&&!desc); sort="status"}
+          Button.ghost "Plan" w=100 onTap={rows=(sort=="plan"&&!desc)?sortByDesc(rows,x=>x.plan):sortBy(rows,x=>x.plan); desc=(sort=="plan"&&!desc); sort="plan"}
+          Button.ghost "Monthly" w=90 onTap={rows=(sort=="value"&&!desc)?sortByDesc(rows,x=>x.value):sortBy(rows,x=>x.value); desc=(sort=="value"&&!desc); sort="value"}
+          Button.ghost "Last seen" w=110 onTap={rows=(sort=="days"&&!desc)?sortByDesc(rows,x=>x.days):sortBy(rows,x=>x.days); desc=(sort=="days"&&!desc); sort="days"}
+          Spacer w=40
         each c in rows
           if (status=="All"||c.status==status)&&contains(lower(c.name),lower(q))
-            Row gap:12 middle pad:[16,10,16,10] border-bottom:#FFF1F5F9
-              Checkbox w:28 checked:{contains(picked,c.id)} -> picked=contains(picked,c.id)?without(picked,c.id):append(picked,c.id)
-              Row gap:10 middle grow
-                Avatar "{c.name}" size:32
+            Row gap=12 middle pad=[16,10,16,10] border-bottom=#FFF1F5F9
+              Checkbox w=28 checked={contains(picked,c.id)} onChange={picked=contains(picked,c.id)?without(picked,c.id):append(picked,c.id)}
+              Row gap=10 middle grow
+                Avatar "{c.name}" size=32
                 Text.strong "{c.name}"
-              Text "{c.company}" w:170
-              Row w:90
+              Text "{c.company}" w=170
+              Row w=90
                 if c.status=="Active"
                   Badge.success "Active"
                 if c.status=="Trial"
                   Badge.warning "Trial"
                 if c.status=="Churned"
                   Badge.error "Churned"
-              Text "{c.plan}" w:100
-              Text "{money(c.value,'$',0)}" w:90
-              Text.muted "{c.seen}" w:110
-              IconButton "more_vert" w:40 -> emit rowMenu c.id
+              Text "{c.plan}" w=100
+              Text "{money(c.value,'$',0)}" w=90
+              Text.muted "{c.seen}" w=110
+              IconButton "more_vert" w=40 onTap={emit rowMenu c.id}
       Row between middle
         Text.muted "Rows {page*10+1}-{page*10+10} of 248"
-        Row gap:8
-          Button.outline "Previous" -> page=max(0,page-1)
-          Button.outline "Next" -> page=min(24,page+1)
+        Row gap=8
+          Button.outline "Previous" onTap={page=max(0,page-1)}
+          Button.outline "Next" onTap={page=min(24,page+1)}

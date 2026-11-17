@@ -3,24 +3,24 @@ state total=2300
 state playing=false
 state speed=1.5
 state bars=[{"i":0,"h":14},{"i":1,"h":24},{"i":2,"h":34},{"i":3,"h":20},{"i":4,"h":42},{"i":5,"h":30},{"i":6,"h":50},{"i":7,"h":36},{"i":8,"h":22},{"i":9,"h":44},{"i":10,"h":56},{"i":11,"h":38},{"i":12,"h":26},{"i":13,"h":48},{"i":14,"h":32},{"i":15,"h":18},{"i":16,"h":40},{"i":17,"h":54},{"i":18,"h":42},{"i":19,"h":28},{"i":20,"h":16},{"i":21,"h":36},{"i":22,"h":52},{"i":23,"h":46},{"i":24,"h":30},{"i":25,"h":20},{"i":26,"h":38},{"i":27,"h":58},{"i":28,"h":44},{"i":29,"h":26},{"i":30,"h":34},{"i":31,"h":48},{"i":32,"h":22},{"i":33,"h":40},{"i":34,"h":30},{"i":35,"h":18},{"i":36,"h":28},{"i":37,"h":36},{"i":38,"h":20},{"i":39,"h":12}]
-every 1s when playing -> pos=min(total,pos+speed)
-Column gap:20 pad:24 center maxw:420
-  Box w:220 h:220 radius:20 fill:#FF3F51B5
-    Column center middle h:220
-      Icon "podcasts" size:96 color:#FFFFFFFF
-  Column gap:4 center
+every 1s when playing onTick={pos=min(total,pos+speed)}
+Column gap=20 pad=24 center maxw=420
+  Box w=220 h=220 radius=20 fill=#FF3F51B5
+    Column center middle h=220
+      Icon "podcasts" size=96 color=#FFFFFFFF
+  Column gap=4 center
     Text.heading2 "Shipping on Fridays" center
     Text.bodySecondary "The Daily Build · Episode 47" center
-  Column gap:6
-    Row gap:3 middle h:64
+  Column gap=6
+    Row gap=3 middle h=64
       each b in bars
-        Box w:6 h:{b.h} radius:3 fill:{(b.i+0.5)/40<=pos/total?'#FF3F51B5':'#FFBDBDBD'} -> pos=round(b.i/40*total,0)
+        Box w=6 h={b.h} radius=3 fill={(b.i+0.5)/40<=pos/total?'#FF3F51B5':'#FFBDBDBD'} onTap={pos=round(b.i/40*total,0)}
     Row between
       Text.caption "{duration(floor(pos))}"
       Text.caption "{duration(total)}"
-  Row gap:12 center middle
-    Button.outline "-15s" -> pos=max(0,pos-15)
-    IconButton "play_arrow" visible:{!playing} -> playing=true
-    IconButton "pause" visible:{playing} -> playing=false
-    Button.outline "+30s" -> pos=min(total,pos+30)
-  Button.tertiary "{speed}x" -> speed=speed==1?1.5:speed==1.5?2:1
+  Row gap=12 center middle
+    Button.outline "-15s" onTap={pos=max(0,pos-15)}
+    IconButton "play_arrow" visible={!playing} onTap={playing=true}
+    IconButton "pause" visible={playing} onTap={playing=false}
+    Button.outline "+30s" onTap={pos=min(total,pos+30)}
+  Button.tertiary "{speed}x" onTap={speed=speed==1?1.5:speed==1.5?2:1}

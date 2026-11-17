@@ -1,3 +1,3 @@
 state photos=[{"kind":"harbor","caption":"Harbour at sunrise"},{"kind":"market","caption":"Old town market"},{"kind":"forest","caption":"Forest trail"},{"kind":"dunes","caption":"Desert dunes"},{"kind":"skyline","caption":"Evening skyline"},{"kind":"lagoon","caption":"Hidden lagoon"}]
-ChatCard "Trip highlights" "Scroll sideways · tap to open" icon:"photo_library_rounded" status:{open>0?open+" of 6":"6 photos"}
-  PhotoGallery#g bind:open photos:{photos} layout:"strip"
+ChatCard "Trip highlights" "Scroll sideways · tap to open" icon="photo_library_rounded" status={open>0?open+" of 6":"6 photos"}
+  PhotoGallery#g bind=open photos={photos} layout="strip"

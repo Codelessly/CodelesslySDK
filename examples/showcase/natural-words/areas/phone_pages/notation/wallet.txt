@@ -1,59 +1,59 @@
-Column h:fill
-  Column scroll grow gap:20 pad:16
+Column h=fill
+  Column scroll grow gap=20 pad=16
     Row between center
       Text.pageTitle "Wallet"
-      IconButton "qr_code_scanner" -> emit scan
-    Column gap:8
-      Pages bind:page h:170 peek:0.88
+      IconButton "qr_code_scanner" onTap={emit scan}
+    Column gap=8
+      Pages bind=page h=170 peek=0.88
         each c in cards
-          Box fill:{c.fill} radius:16 pad:16 gap:6 w:fill
+          Box fill={c.fill} radius=16 pad=16 gap=6 w=fill
             Row between
-              Text "{c.name}" color:#FFFFFFFF weight:700
-              Icon "contactless" color:#FFFFFFFF
-            Text "•••• {c.last}" color:#CCFFFFFF
+              Text "{c.name}" color=#FFFFFFFF weight=700
+              Icon "contactless" color=#FFFFFFFF
+            Text "•••• {c.last}" color=#CCFFFFFF
             Spacer grow
-            Text "Balance" color:#B3FFFFFF size:12
-            Text "{c.balance}" color:#FFFFFFFF size:28 weight:700
+            Text "Balance" color=#B3FFFFFF size=12
+            Text "{c.balance}" color=#FFFFFFFF size=28 weight=700
       Row center
-        Dots bind:page count:3
+        Dots bind=page count=3
     Row between
-      Column center gap:4
-        IconButton "send" -> emit send
+      Column center gap=4
+        IconButton "send" onTap={emit send}
         Text.caption "Send"
-      Column center gap:4
-        IconButton "request_page" -> emit request
+      Column center gap=4
+        IconButton "request_page" onTap={emit request}
         Text.caption "Request"
-      Column center gap:4
-        IconButton "add_card" -> emit topup
+      Column center gap=4
+        IconButton "add_card" onTap={emit topup}
         Text.caption "Top up"
-      Column center gap:4
-        IconButton "receipt_long" -> emit paybills
+      Column center gap=4
+        IconButton "receipt_long" onTap={emit paybills}
         Text.caption "Pay bills"
-    Column gap:8
+    Column gap=8
       Row between center
         Text.sectionTitle "Recent activity"
-        Button.ghost "See all" -> emit seeAll
+        Button.ghost "See all" onTap={emit seeAll}
       each tx in activity
-        Row gap:12 center pad:[0,6,0,6]
-          Box fill:#FFEEF1F6 radius:20 w:40 h:40 center middle
+        Row gap=12 center pad=[0,6,0,6]
+          Box fill=#FFEEF1F6 radius=20 w=40 h=40 center middle
             Icon "{tx.icon}"
           Column grow
             Text.strong "{tx.name}"
             Text.caption "{tx.date}"
-          Text.strong "{tx.text}" color:{tx.amt>0?"#FF2E7D32":"#FFC62828"}
+          Text.strong "{tx.text}" color={tx.amt>0?"#FF2E7D32":"#FFC62828"}
   Divider
-  Row between pad:[16,8,16,8]
-    Column center gap:2
-      IconButton "account_balance_wallet" -> tab="wallet"
+  Row between pad=[16,8,16,8]
+    Column center gap=2
+      IconButton "account_balance_wallet" onTap={tab="wallet"}
       Text.caption "Wallet"
-    Column center gap:2
-      IconButton "swap_horiz" -> tab="transfers"
+    Column center gap=2
+      IconButton "swap_horiz" onTap={tab="transfers"}
       Text.caption "Transfers"
-    Column center gap:2
-      IconButton "bar_chart" -> tab="insights"
+    Column center gap=2
+      IconButton "bar_chart" onTap={tab="insights"}
       Text.caption "Insights"
-    Column center gap:2
-      IconButton "person" -> tab="profile"
+    Column center gap=2
+      IconButton "person" onTap={tab="profile"}
       Text.caption "Profile"
 
 state page=0

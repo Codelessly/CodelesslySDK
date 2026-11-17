@@ -1,107 +1,107 @@
-Row w:1280 h:800 fill:"#FFFFFFFF"
+Row w=1280 h=800 fill="#FFFFFFFF"
   state folder="Inbox"
   state sel=2
   state reply=""
   state convs=[{"id":1,"name":"Maya Reyes","subject":"Can't log in after password reset","preview":"I reset my password but the link says it already expired","time":"9:41 AM","unread":true},{"id":2,"name":"Daniel Okafor","subject":"Invoice charged twice for March","preview":"Thanks, I'll wait for the refund confirmation then.","time":"9:12 AM","unread":false},{"id":3,"name":"Sofia Lindqvist","subject":"CSV export is missing columns","preview":"The export leaves out the Region and Owner columns","time":"8:50 AM","unread":true},{"id":4,"name":"Tom Becker","subject":"Switching to the annual plan","preview":"Do I keep my current discount if I switch to annual?","time":"Yesterday","unread":false},{"id":5,"name":"Aiko Tanaka","subject":"Webhook retries are not firing","preview":"Our endpoint returned 500 but nothing was retried","time":"Yesterday","unread":true},{"id":6,"name":"Carlos Mendes","subject":"Adding a teammate seat","preview":"Can you add one more seat before the end of the month?","time":"Mon","unread":false},{"id":7,"name":"Hannah Weiss","subject":"Please cancel my subscription","preview":"We are closing the project, so no need to renew","time":"Mon","unread":false},{"id":8,"name":"Ravi Patel","subject":"Feature request: dark mode","preview":"Our night shift would love a dark theme for the inbox","time":"Sun","unread":false}]
-  Column w:220 h:fill pad:16 gap:6 fill:"#FFF6F7F9"
-    Row gap:8 middle pad:[4,4,4,16]
-      Icon "support_agent" color:"#FF2563EB"
+  Column w=220 h=fill pad=16 gap=6 fill="#FFF6F7F9"
+    Row gap=8 middle pad=[4,4,4,16]
+      Icon "support_agent" color="#FF2563EB"
       Text.heading3 "Relaydesk"
-    Row between middle pad:[12,10,12,10] radius:8 fill:"#FFE0E9FF" -> folder="Inbox"
-      Row gap:8 middle
+    Row between middle pad=[12,10,12,10] radius=8 fill="#FFE0E9FF" onTap={folder="Inbox"}
+      Row gap=8 middle
         Icon "inbox"
         Text.strong "Inbox"
       Badge.primary "12"
-    Row between middle pad:[12,10,12,10] radius:8 -> folder="Assigned"
-      Row gap:8 middle
+    Row between middle pad=[12,10,12,10] radius=8 onTap={folder="Assigned"}
+      Row gap=8 middle
         Icon "person"
         Text "Assigned to me"
       Text.muted "4"
-    Row between middle pad:[12,10,12,10] radius:8 -> folder="Waiting"
-      Row gap:8 middle
+    Row between middle pad=[12,10,12,10] radius=8 onTap={folder="Waiting"}
+      Row gap=8 middle
         Icon "schedule"
         Text "Waiting"
       Text.muted "7"
-    Row middle gap:8 pad:[12,10,12,10] radius:8 -> folder="Closed"
+    Row middle gap=8 pad=[12,10,12,10] radius=8 onTap={folder="Closed"}
       Icon "check_circle"
       Text "Closed"
-  Box w:1 h:fill fill:"#FFE5E7EB"
-  Column w:360 h:fill
-    Row between middle pad:[16,14,16,14]
+  Box w=1 h=fill fill="#FFE5E7EB"
+  Column w=360 h=fill
+    Row between middle pad=[16,14,16,14]
       Text.heading3 "Inbox"
       Text.muted "12 open"
     Divider
     Column scroll grow
       each c in convs
-        Row gap:12 pad:[16,12,16,12] top fill:{sel==c.id?"#FFE8F0FE":"#FFFFFFFF"} -> sel=c.id
-          Avatar "{c.name}" size:40
-          Column grow gap:2
+        Row gap=12 pad=[16,12,16,12] top fill={sel==c.id?"#FFE8F0FE":"#FFFFFFFF"} onTap={sel=c.id}
+          Avatar "{c.name}" size=40
+          Column grow gap=2
             Row between middle
               Text.strong "{c.name}"
               Text.caption "{c.time}"
-            Text "{c.subject}" maxLines:1
-            Row gap:8 middle
-              Text.muted "{c.preview}" maxLines:1 grow
-              Box w:8 h:8 radius:4 fill:"#FF2563EB" visible:{c.unread}
-  Box w:1 h:fill fill:"#FFE5E7EB"
-  Row grow h:fill
-    Column grow h:fill
-      Column gap:6 pad:[24,16,24,12]
+            Text "{c.subject}" maxLines=1
+            Row gap=8 middle
+              Text.muted "{c.preview}" maxLines=1 grow
+              Box w=8 h=8 radius=4 fill="#FF2563EB" visible={c.unread}
+  Box w=1 h=fill fill="#FFE5E7EB"
+  Row grow h=fill
+    Column grow h=fill
+      Column gap=6 pad=[24,16,24,12]
         Text.heading2 "Invoice charged twice for March"
-        Row gap:12 middle
+        Row gap=12 middle
           Badge.warning "Waiting on customer"
-          Icon "person" size:16
+          Icon "person" size=16
           Text.muted "Assigned to Priya Nair"
       Divider
-      Column scroll grow gap:14 pad:24
-        Row gap:10 top
-          Avatar "Daniel Okafor" size:32
-          Box w:480 pad:12 radius:10 fill:"#FFF3F4F6" gap:4
+      Column scroll grow gap=14 pad=24
+        Row gap=10 top
+          Avatar "Daniel Okafor" size=32
+          Box w=480 pad=12 radius=10 fill="#FFF3F4F6" gap=4
             Text.caption "Daniel Okafor · 8:41 AM"
             Text "Hi, my card was charged twice for the March invoice, $149 each. Could you check?"
-        Row gap:10 top
+        Row gap=10 top
           Spacer grow
-          Box w:480 pad:12 radius:10 fill:"#FFDCE8FF" gap:4
+          Box w=480 pad=12 radius=10 fill="#FFDCE8FF" gap=4
             Text.caption "Priya Nair · 8:55 AM"
             Text "Hi Daniel, sorry about that. I can see both charges and I'm starting a refund for the duplicate now."
-          Avatar "Priya Nair" size:32
-        Row gap:10 top
-          Avatar "Daniel Okafor" size:32
-          Box w:480 pad:12 radius:10 fill:"#FFF3F4F6" gap:4
+          Avatar "Priya Nair" size=32
+        Row gap=10 top
+          Avatar "Daniel Okafor" size=32
+          Box w=480 pad=12 radius=10 fill="#FFF3F4F6" gap=4
             Text.caption "Daniel Okafor · 9:03 AM"
             Text "Great, how long will it take to show up on my statement?"
-        Row gap:10 top
+        Row gap=10 top
           Spacer grow
-          Box w:480 pad:12 radius:10 fill:"#FFDCE8FF" gap:4
+          Box w=480 pad=12 radius=10 fill="#FFDCE8FF" gap=4
             Text.caption "Priya Nair · 9:08 AM"
             Text "Usually 5 to 7 business days. I'll send you the refund confirmation as soon as it is issued."
-          Avatar "Priya Nair" size:32
-        Row gap:10 top
-          Box grow pad:12 radius:10 fill:"#FFFFF4CC" gap:4
-            Row gap:6 middle
-              Icon "lock" size:14 color:"#FF92400E"
-              Text.caption "Internal note · Priya Nair · 9:10 AM" color:"#FF92400E"
-            Text "Duplicate came from a retried payment. Refund ticket opened with Billing, ref #BL-2291." color:"#FF78350F"
-        Row gap:10 top
-          Avatar "Daniel Okafor" size:32
-          Box w:480 pad:12 radius:10 fill:"#FFF3F4F6" gap:4
+          Avatar "Priya Nair" size=32
+        Row gap=10 top
+          Box grow pad=12 radius=10 fill="#FFFFF4CC" gap=4
+            Row gap=6 middle
+              Icon "lock" size=14 color="#FF92400E"
+              Text.caption "Internal note · Priya Nair · 9:10 AM" color="#FF92400E"
+            Text "Duplicate came from a retried payment. Refund ticket opened with Billing, ref #BL-2291." color="#FF78350F"
+        Row gap=10 top
+          Avatar "Daniel Okafor" size=32
+          Box w=480 pad=12 radius=10 fill="#FFF3F4F6" gap=4
             Text.caption "Daniel Okafor · 9:12 AM"
             Text "Thanks, I'll wait for the refund confirmation then."
       Divider
-      Column gap:10 pad:16
-        Input "Reply" "Write a reply to Daniel…" multiline bind:reply
-        Row gap:8 end
-          Button.outline "Send and close" -> emit sendAndClose reply; reply=""; toast "Sent and closed"
-          Button "Send" -> emit send reply; reply=""; toast "Reply sent"
-    Box w:1 h:fill fill:"#FFE5E7EB"
-    Column w:260 h:fill pad:20 gap:16 fill:"#FFFAFAFB"
-      Column gap:6 center
-        Avatar "Daniel Okafor" size:64
+      Column gap=10 pad=16
+        Input "Reply" "Write a reply to Daniel…" multiline bind=reply
+        Row gap=8 end
+          Button.outline "Send and close" onTap={emit sendAndClose reply; reply=""; toast "Sent and closed"}
+          Button "Send" onTap={emit send reply; reply=""; toast "Reply sent"}
+    Box w=1 h=fill fill="#FFE5E7EB"
+    Column w=260 h=fill pad=20 gap=16 fill="#FFFAFAFB"
+      Column gap=6 center
+        Avatar "Daniel Okafor" size=64
         Text.heading3 "Daniel Okafor"
         Text.muted "daniel@northwind.io"
       Divider
       Text.eyebrow "CUSTOMER DETAILS"
-      Column gap:10
+      Column gap=10
         Row between
           Text.muted "Plan"
           Text.strong "Business"
@@ -113,7 +113,7 @@ Row w:1280 h:800 fill:"#FFFFFFFF"
           Text.strong "#48213"
       Divider
       Text.eyebrow "TAGS"
-      Row gap:6
+      Row gap=6
         Badge.info "Billing"
         Badge.warning "Priority"
         Badge.neutral "EU"

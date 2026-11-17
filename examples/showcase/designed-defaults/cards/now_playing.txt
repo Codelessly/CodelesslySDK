@@ -1,31 +1,31 @@
-Card w:390 gap:14
+Card w=390 gap=14
   state playing=true
   state liked=false
   state pos=83
   state dur=214
   state queue=[{"title":"Midnight City","artist":"M83"},{"title":"Instant Crush","artist":"Daft Punk"},{"title":"Intro","artist":"The xx"}]
-  every 1s when playing -> pos=pos>=dur?0:pos+1
-  Row gap:14 middle
-    Image "https://picsum.photos/seed/album/200" w:80 h:80 radius:8
-    Column grow gap:2
+  every 1s when playing onTick={pos=pos>=dur?0:pos+1}
+  Row gap=14 middle
+    Image "https://picsum.photos/seed/album/200" w=80 h=80 radius=8
+    Column grow gap=2
       Text.caption "NOW PLAYING"
       Text.heading "Neon Skyline"
       Text.bodySecondary "Aurora Vale"
       Text.caption "Album: Electric Dreams"
-    IconButton "favorite" -> liked=!liked
-  Column gap:4
-    Progress bind:prog w:fill
+    IconButton "favorite" onTap={liked=!liked}
+  Column gap=4
+    Progress bind=prog w=fill
     Row between
       Text.caption "{floor(pos/60)}:{pos%60<10?'0':''}{pos%60}"
       Text.caption "-{floor((dur-pos)/60)}:{(dur-pos)%60<10?'0':''}{(dur-pos)%60}"
-  Row center middle gap:16
-    IconButton "skip_previous" -> pos=0
-    IconButton "pause" -> playing=!playing
-    IconButton "skip_next" -> pos=0
+  Row center middle gap=16
+    IconButton "skip_previous" onTap={pos=0}
+    IconButton "pause" onTap={playing=!playing}
+    IconButton "skip_next" onTap={pos=0}
   Divider
   Text.sectionTitle "Up next"
   each t in queue
-    Row gap:8 middle
+    Row gap=8 middle
       Icon "music_note"
       Column grow
         Text.strong "{t.title}"

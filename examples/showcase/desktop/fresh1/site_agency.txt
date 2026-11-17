@@ -1,128 +1,128 @@
 Page
   Nav
-    Brand "Northlight" icon:"north"
-    Row gap:4
+    Brand "Northlight" icon="north"
+    Row gap=4
       Link "Work"
       Link "Services"
       Link "About"
       Link "Journal"
-    Button "Start a project" -> emit start
+    Button "Start a project" onTap={emit start}
   Section
-    Row gap:48 middle
-      Column grow gap:20
+    Row gap=48 middle
+      Column grow gap=20
         Text.eyebrow "DESIGN STUDIO"
-        Heading "Brands that feel like themselves" level:1
+        Heading "Brands that feel like themselves" level=1
         Text.lead "Northlight is a small studio that shapes identities, websites and campaigns around what makes each client distinct."
-        Row gap:12
-          Button "See our work" size:large -> emit work
+        Row gap=12
+          Button "See our work" size=large onTap={emit work}
         Text.caption "Booking new projects for this autumn."
       Card grow
-        Media kind:"harbor" tone:"dawn" h:320
+        Media kind="harbor" tone="dawn" h=320
   Section tint
-    Column gap:12
+    Column gap=12
       Text.eyebrow "SELECTED WORK"
       Heading "Recent case studies"
-    Grid cols:3 gap:24
-      Card gap:12
-        Media kind:"mountain" tone:"dawn" h:180
-        Heading "Alpenglow Outfitters" level:3
+    Grid cols=3 gap=24
+      Card gap=12
+        Media kind="mountain" tone="dawn" h=180
+        Heading "Alpenglow Outfitters" level=3
         Row between
           Text.muted "Brand identity"
           Text.caption "2025"
-      Card gap:12
-        Media kind:"harbor" tone:"day" h:180
-        Heading "Harbor & Pine" level:3
+      Card gap=12
+        Media kind="harbor" tone="day" h=180
+        Heading "Harbor & Pine" level=3
         Row between
           Text.muted "Website design"
           Text.caption "2025"
-      Card gap:12
-        Media kind:"skyline" tone:"dusk" h:180
-        Heading "Meridian Bank" level:3
+      Card gap=12
+        Media kind="skyline" tone="dusk" h=180
+        Heading "Meridian Bank" level=3
         Row between
           Text.muted "Visual system"
           Text.caption "2024"
-      Card gap:12
-        Media kind:"market" tone:"day" h:180
-        Heading "Saffron Market" level:3
+      Card gap=12
+        Media kind="market" tone="day" h=180
+        Heading "Saffron Market" level=3
         Row between
           Text.muted "Packaging"
           Text.caption "2024"
-      Card gap:12
-        Media kind:"forest" tone:"night" h:180
-        Heading "Fernwood Tea" level:3
+      Card gap=12
+        Media kind="forest" tone="night" h=180
+        Heading "Fernwood Tea" level=3
         Row between
           Text.muted "Brand identity"
           Text.caption "2023"
-      Card gap:12
-        Media kind:"festival" tone:"dusk" h:180
-        Heading "Lumen Festival" level:3
+      Card gap=12
+        Media kind="festival" tone="dusk" h=180
+        Heading "Lumen Festival" level=3
         Row between
           Text.muted "Campaign"
           Text.caption "2023"
   Section
-    Column gap:12
+    Column gap=12
       Text.eyebrow "SERVICES"
-      Heading "What we do" level:2
-    Grid cols:4 gap:24
-      Column gap:12
+      Heading "What we do" level=2
+    Grid cols=4 gap=24
+      Column gap=12
         IconTile "palette"
-        Heading "Brand identity" level:3
+        Heading "Brand identity" level=3
         Text.muted "Logos, color and type that sound like you."
-      Column gap:12
+      Column gap=12
         IconTile "web"
-        Heading "Web design" level:3
+        Heading "Web design" level=3
         Text.muted "Fast, clear websites built to be lived in."
-      Column gap:12
+      Column gap=12
         IconTile "inventory_2"
-        Heading "Packaging" level:3
+        Heading "Packaging" level=3
         Text.muted "Boxes and labels that earn a place on the shelf."
-      Column gap:12
+      Column gap=12
         IconTile "campaign"
-        Heading "Campaigns" level:3
+        Heading "Campaigns" level=3
         Text.muted "Launch ideas told across print, screen and street."
   Section tint compact
-    Grid cols:3 gap:24
-      Column gap:4 center
+    Grid cols=3 gap=24
+      Column gap=4 center
         Text.numberHero "120"
         Text.muted "projects delivered"
-      Column gap:4 center
+      Column gap=4 center
         Text.numberHero "14"
         Text.muted "years in practice"
-      Column gap:4 center
+      Column gap=4 center
         Text.numberHero "9"
         Text.muted "people in the studio"
   Section narrow center
-    Column gap:16 center
-      Icon "format_quote" size:32 color:#FF2563EB
+    Column gap=16 center
+      Icon "format_quote" size=32 color=#FF2563EB
       Text.lead "Northlight listened first and designed second. Our new identity feels like us on our best day." center
-      Row gap:12 middle center
-        Avatar "Maya Reyes" size:40
+      Row gap=12 middle center
+        Avatar "Maya Reyes" size=40
         Column
           Text.strong "Maya Reyes"
           Text.muted "Founder, Harbor & Pine"
   Section tint center
-    Column gap:16 center
-      Heading "Have a project in mind?" level:2
+    Column gap=16 center
+      Heading "Have a project in mind?" level=2
       Text.lead "Tell us a little about it and we will reply within two working days." center
-      Row gap:12 middle center
-        Input "Email" hint:"you@example.com" bind:email w:320
-        Button "Start a project" size:large -> emit start email; toast "Thanks, we will be in touch"
+      Row gap=12 middle center
+        Input "Email" hint="you@example.com" bind=email w=320
+        Button "Start a project" size=large onTap={emit start email; toast "Thanks, we will be in touch"}
   Footer
     Row between top
-      Column gap:8
+      Column gap=8
         Text.strong "Northlight"
         Text.muted "Design studio, est. 2011"
-      Column gap:8
+      Column gap=8
         Text.strong "Studio"
         Text.muted "About"
         Text.muted "Work"
         Text.muted "Careers"
-      Column gap:8
+      Column gap=8
         Text.strong "Services"
         Text.muted "Identity"
         Text.muted "Web design"
         Text.muted "Campaigns"
-      Column gap:8
+      Column gap=8
         Text.strong "Follow"
         Text.muted "Journal"
         Text.muted "Instagram"

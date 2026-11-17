@@ -5,26 +5,26 @@ state tried=false
 state email=""
 state sub=sum(cart,c=>c.price*c.qty)
 state fee=ship=="Express"?12:4
-ChatCard "Checkout" "{sum(cart,c=>c.qty)} items" icon:"shopping_cart_rounded" status:"{step>3?"Paid":"Step "+step+" of 3"}" tone:{step>3?"good":"accent"}
-  Steps current:{step} steps:["Cart","Shipping","Payment"]
+ChatCard "Checkout" "{sum(cart,c=>c.qty)} items" icon="shopping_cart_rounded" status="{step>3?"Paid":"Step "+step+" of 3"}" tone={step>3?"good":"accent"}
+  Steps current={step} steps=["Cart","Shipping","Payment"]
   if step==1
     each c in cart
-      CartLine#line "{c.name}" "{c.note}" price:"{money(c.price*c.qty,"$",2)}" qty:{c.qty} kind:"{c.kind}" -> cart=updateWhere(cart,x=>x.id==c.id,x=>with(x,"qty",result))
-    TotalBar#next1 "Subtotal" amount:"{money(sub,"$",2)}" cta:"Shipping" enabled:{sub>0} -> step=2
+      CartLine#line "{c.name}" "{c.note}" price="{money(c.price*c.qty,"$",2)}" qty={c.qty} kind="{c.kind}" onChanged={cart=updateWhere(cart,x=>x.id==c.id,x=>with(x,"qty",result))}
+    TotalBar#next1 "Subtotal" amount="{money(sub,"$",2)}" cta="Shipping" enabled={sub>0} onPressed={step=2}
   if step==2
-    InputField#name "Full name" "Ada Lovelace" bind:name error:{tried&&name==""?"Enter your name":""}
-    InputField#address "Address" "12 Analytical Street" bind:address error:{tried&&address==""?"Enter your address":""}
-    Row gap:10 top
-      InputField#city "City" "London" bind:city error:{tried&&city==""?"Enter a city":""} grow
-      InputField#zip "Postcode" "N1 9GU" bind:zip error:{tried&&zip==""?"Enter a postcode":""} grow
-    InputField#email "Email" "you@example.com" bind:email keyboard:"emailAddress" error:{tried&&!contains(email,"@")?"Enter a valid email":""}
-    Row gap:10
-      ActionButton#back2 "Back" tone:"quiet" grow -> step=1
-      ActionButton#next2 "Continue to payment" grow:2 -> tried=true; step=name!=""&&address!=""&&city!=""&&zip!=""&&contains(email,"@")?3:2
+    InputField#name "Full name" "Ada Lovelace" bind=name error={tried&&name==""?"Enter your name":""}
+    InputField#address "Address" "12 Analytical Street" bind=address error={tried&&address==""?"Enter your address":""}
+    Row gap=10 top
+      InputField#city "City" "London" bind=city error={tried&&city==""?"Enter a city":""} grow
+      InputField#zip "Postcode" "N1 9GU" bind=zip error={tried&&zip==""?"Enter a postcode":""} grow
+    InputField#email "Email" "you@example.com" bind=email keyboard="emailAddress" error={tried&&!contains(email,"@")?"Enter a valid email":""}
+    Row gap=10
+      ActionButton#back2 "Back" tone="quiet" grow onPressed={step=1}
+      ActionButton#next2 "Continue to payment" grow=2 onPressed={tried=true; step=name!=""&&address!=""&&city!=""&&zip!=""&&contains(email,"@")?3:2}
   if step==3
-    OptionList#ship "Delivery" bind:ship options:["Standard","Express"] details:["3 to 5 working days","Next working day"] prices:["$4.00","$12.00"] icons:["local_shipping_rounded","bolt_rounded"]
-    Details rows:{[["Items",money(sub,"$",2)],["Delivery, "+lower(ship),money(fee,"$",2)]]}
-    TotalBar#pay "Total" amount:"{money(sub+fee,"$",2)}" cta:"Place order" -> step=4; emit place_order sub+fee
-    ActionButton "Back to shipping" tone:"quiet" -> step=2
+    OptionList#ship "Delivery" bind=ship options=["Standard","Express"] details=["3 to 5 working days","Next working day"] prices=["$4.00","$12.00"] icons=["local_shipping_rounded","bolt_rounded"]
+    Details rows={[["Items",money(sub,"$",2)],["Delivery, "+lower(ship),money(fee,"$",2)]]}
+    TotalBar#pay "Total" amount="{money(sub+fee,"$",2)}" cta="Place order" onPressed={step=4; emit place_order sub+fee}
+    ActionButton "Back to shipping" tone="quiet" onPressed={step=2}
   if step==4
-    Receipt "Order confirmed" "Thanks, {name}. A receipt is on its way to {email}." code:"CL-48213" codeLabel:"Order"
+    Receipt "Order confirmed" "Thanks, {name}. A receipt is on its way to {email}." code="CL-48213" codeLabel="Order"

@@ -1,9 +1,9 @@
 Screen
-  TopBar "Your progress" "Your weekly total is climbing. Nice work." back:true -> emit open_home
-  ChartCard "Jumps this week" values:{map(weeks,w=>w.jumps)} labels:{map(weeks,w=>w.label)} unit:"jumps" deltaLabel:"vs last week"
-  StatTrio values:{[sum(sessions,s=>s.jumps),sum(sessions,s=>s.minutes),length(sessions)]} labels:["Total jumps","Minutes","Sessions"]
-  RecordCard "Best run without a miss" "{first(sortByDesc(sessions,s=>s.best)).name} · {first(sortByDesc(sessions,s=>s.best)).date}" value:"{first(sortByDesc(sessions,s=>s.best)).best}" unit:"jumps in a row" -> emit open_session first(sortByDesc(sessions,s=>s.best)).date
+  TopBar "Your progress" "Your weekly total is climbing. Nice work." back=true onTap={emit open_home}
+  ChartCard "Jumps this week" values={map(weeks,w=>w.jumps)} labels={map(weeks,w=>w.label)} unit="jumps" deltaLabel="vs last week"
+  StatTrio values={[sum(sessions,s=>s.jumps),sum(sessions,s=>s.minutes),length(sessions)]} labels=["Total jumps","Minutes","Sessions"]
+  RecordCard "Best run without a miss" "{first(sortByDesc(sessions,s=>s.best)).name} · {first(sortByDesc(sessions,s=>s.best)).date}" value="{first(sortByDesc(sessions,s=>s.best)).best}" unit="jumps in a row" onPressed={emit open_session first(sortByDesc(sessions,s=>s.best)).date}
   SectionTitle "Past sessions"
-  Column gap:12
+  Column gap=12
     each s in sessions
-      SessionRow "{s.name}" "{s.date} · {s.minutes} min" value:"{s.jumps}" unit:"jumps" share:{s.jumps/max(map(sessions,x=>x.jumps))} -> emit open_session s.date
+      SessionRow "{s.name}" "{s.date} · {s.minutes} min" value="{s.jumps}" unit="jumps" share={s.jumps/max(map(sessions,x=>x.jumps))} onPressed={emit open_session s.date}

@@ -7,66 +7,66 @@ state activity=[{"task":"t6","who":"Maya Reyes","what":"moved this to In progres
 App
   Main
     Nav
-      Row gap:16 middle
-        Text.strong "Lanes" color:#FF4F46E5
-        Divider h:20
+      Row gap=16 middle
+        Text.strong "Lanes" color=#FF4F46E5
+        Divider h=20
         Heading "Website relaunch"
-      Row gap:12 middle
-        Row gap:4
-          Avatar "Maya Reyes" size:30
-          Avatar "Jonas Berg" size:30
-          Avatar "Priya Shah" size:30
-          Avatar "Leo Martins" size:30
-          Avatar "Aiko Tanaka" size:30
-        Input "Filter" "Filter tasks" bind:q w:220
-        Button "New task" -> emit newTask
-    Column pad:24 gap:16
-      Row gap:16 top
+      Row gap=12 middle
+        Row gap=4
+          Avatar "Maya Reyes" size=30
+          Avatar "Jonas Berg" size=30
+          Avatar "Priya Shah" size=30
+          Avatar "Leo Martins" size=30
+          Avatar "Aiko Tanaka" size=30
+        Input "Filter" "Filter tasks" bind=q w=220
+        Button "New task" onTap={emit newTask}
+    Column pad=24 gap=16
+      Row gap=16 top
         each c in cols
-          Box grow fill:#FFF3F4F6 radius:12 pad:12 gap:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col",c.id)); activity=concat([{"task":result.data,"who":"You","what":"moved this to "+c.name,"when":"Just now"}],activity)
+          Box grow fill=#FFF3F4F6 radius=12 pad=12 gap=10 drop=task onDrop={tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col",c.id)); activity=concat([{"task":result.data,"who":"You","what":"moved this to "+c.name,"when":"Just now"}],activity)}
             Row between middle
-              Row gap:8 middle
+              Row gap=8 middle
                 Text.strong "{c.name}"
-                CountBadge count:{count(tasks,x=>x.col==c.id&&contains(lower(x.title),lower(q)))}
-              IconButton "add" -> emit addTask c.id
+                CountBadge count={count(tasks,x=>x.col==c.id&&contains(lower(x.title),lower(q)))}
+              IconButton "add" onTap={emit addTask c.id}
             each t in tasks
               if t.col==c.id && contains(lower(t.title),lower(q))
-                Card gap:10 drag:task(t.id) border:{sel==t.id?"#FF4F46E5":"#FFE5E7EB"} -> sel=t.id
+                Card gap=10 drag=task(t.id) border={sel==t.id?"#FF4F46E5":"#FFE5E7EB"} onTap={sel=t.id}
                   Text.strong "{t.title}"
                   Row
-                    Box fill:{t.tint} radius:10 pad:[8,2,8,2]
-                      Text.caption "{t.label}" color:{t.ink} weight:600
+                    Box fill={t.tint} radius=10 pad=[8,2,8,2]
+                      Text.caption "{t.label}" color={t.ink} weight=600
                   Row between middle
-                    Row gap:12 middle
-                      Row gap:4 middle
+                    Row gap=12 middle
+                      Row gap=4 middle
                         Icon "event" {"props":{"size":14}}
                         Text.caption "{t.due}"
-                      Row gap:4 middle
+                      Row gap=4 middle
                         Icon "chat_bubble_outline" {"props":{"size":14}}
                         Text.caption "{t.comments}"
-                    Avatar "{t.who}" size:24
+                    Avatar "{t.who}" size=24
   if sel!=""
-    Pane w:340 pad:16 gap:14
+    Pane w=340 pad=16 gap=14
       Row between top
         Text.title "{find(tasks,x=>x.id==sel).title}"
-        IconButton "close" -> sel=""
+        IconButton "close" onTap={sel=""}
       Row
-        Box fill:{find(tasks,x=>x.id==sel).tint} radius:10 pad:[8,2,8,2]
-          Text.caption "{find(tasks,x=>x.id==sel).label}" color:{find(tasks,x=>x.id==sel).ink} weight:600
-      Details rows:{[["Status",find(cols,c=>c.id==find(tasks,x=>x.id==sel).col).name],["Assignee",find(tasks,x=>x.id==sel).who],["Due",find(tasks,x=>x.id==sel).due],["Comments",""+find(tasks,x=>x.id==sel).comments]]}
+        Box fill={find(tasks,x=>x.id==sel).tint} radius=10 pad=[8,2,8,2]
+          Text.caption "{find(tasks,x=>x.id==sel).label}" color={find(tasks,x=>x.id==sel).ink} weight=600
+      Details rows={[["Status",find(cols,c=>c.id==find(tasks,x=>x.id==sel).col).name],["Assignee",find(tasks,x=>x.id==sel).who],["Due",find(tasks,x=>x.id==sel).due],["Comments",""+find(tasks,x=>x.id==sel).comments]]}
       SectionLabel "Description"
       Paragraph "{find(tasks,x=>x.id==sel).desc}"
-      Checklist "Checklist" bind:ticked items:{find(tasks,x=>x.id==sel).steps}
+      Checklist "Checklist" bind=ticked items={find(tasks,x=>x.id==sel).steps}
       SectionLabel "Activity"
       each a in activity
         if a.task==sel
-          Row gap:10 top
-            Avatar "{a.who}" size:26
-            Column gap:2 grow
+          Row gap=10 top
+            Avatar "{a.who}" size=26
+            Column gap=2 grow
               Text.small "{a.who} {a.what}"
               Text.caption "{a.when}"
-      Row gap:10 top
-        Avatar "{find(tasks,x=>x.id==sel).who}" size:26
-        Column gap:2 grow
+      Row gap=10 top
+        Avatar "{find(tasks,x=>x.id==sel).who}" size=26
+        Column gap=2 grow
           Text.small "{find(tasks,x=>x.id==sel).who} was assigned"
           Text.caption "When created"

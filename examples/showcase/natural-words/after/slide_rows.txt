@@ -1,8 +1,8 @@
-Card gap:4
+Card gap=4
   Text.title "Notifications"
   Divider
   each n in notes
-    ListTile "{n.title}" animate:slide-left duration:400 stagger:100
+    ListTile "{n.title}" animate=slide-left duration=400 stagger=100
       Text.muted "{n.body}"
 
 state notes=[{"title":"New message from Ada","body":"Can we move the meeting to 3pm?"},{"title":"Payment received","body":"$120.00 from Northwind Ltd."},{"title":"Build succeeded","body":"main passed all 214 checks."},{"title":"Reminder","body":"Design review starts in 30 minutes."},{"title":"Storage almost full","body":"You have used 92% of your space."}]

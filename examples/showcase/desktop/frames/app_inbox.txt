@@ -4,76 +4,76 @@ state reply=""
 state convos=[{"id":1,"name":"Tom Becker","subject":"Cannot reset my password","preview":"I tried the link twice but it says it expired","time":"9:41","unread":true},{"id":2,"name":"Maya Reyes","subject":"Charged twice for May invoice","preview":"Thanks, could you confirm the refund amount?","time":"9:12","unread":true},{"id":3,"name":"Jonas Weber","subject":"Export to CSV is missing columns","preview":"The tags column is not in the file anymore","time":"8:55","unread":false},{"id":4,"name":"Priya Nair","subject":"Add a teammate to our plan","preview":"We would like to add three seats before Friday","time":"8:30","unread":true},{"id":5,"name":"Lucas Moreau","subject":"Webhook retries not firing","preview":"Our endpoint was down for an hour and nothing came","time":"Yesterday","unread":false},{"id":6,"name":"Hannah Cole","subject":"Question about annual billing","preview":"Is there a discount if we switch from monthly?","time":"Yesterday","unread":false},{"id":7,"name":"Samir Haddad","subject":"Login loop on mobile Safari","preview":"It keeps sending me back to the sign-in page","time":"Mon","unread":false},{"id":8,"name":"Elena Petrova","subject":"Thank you, all sorted","preview":"That fixed it, great support as always","time":"Mon","unread":false}]
 App
   Sidebar
-    Text.strong "Relaydesk" size:18
-    NavItem "Inbox" icon:"inbox" badge:"12" selected:{folder=="inbox"} -> folder="inbox"
-    NavItem "Assigned to me" icon:"person" badge:"4" selected:{folder=="mine"} -> folder="mine"
-    NavItem "Waiting" icon:"schedule" badge:"7" selected:{folder=="waiting"} -> folder="waiting"
-    NavItem "Closed" icon:"check_circle" selected:{folder=="closed"} -> folder="closed"
+    Text.strong "Relaydesk" size=18
+    NavItem "Inbox" icon="inbox" badge="12" selected={folder=="inbox"} onTap={folder="inbox"}
+    NavItem "Assigned to me" icon="person" badge="4" selected={folder=="mine"} onTap={folder="mine"}
+    NavItem "Waiting" icon="schedule" badge="7" selected={folder=="waiting"} onTap={folder="waiting"}
+    NavItem "Closed" icon="check_circle" selected={folder=="closed"} onTap={folder="closed"}
     Spacer grow
-    Row gap:8 center
-      Avatar "Dan Whitaker" size:32
+    Row gap=8 center
+      Avatar "Dan Whitaker" size=32
       Text.muted "Dan Whitaker"
-  Pane w:340 border-left:#FFE5E7EB border-right:#FFE5E7EB scroll
-    Box pad:[16,14,16,14] border-bottom:#FFE5E7EB
+  Pane w=340 border-left=#FFE5E7EB border-right=#FFE5E7EB scroll
+    Box pad=[16,14,16,14] border-bottom=#FFE5E7EB
       Text.strong "Inbox"
     each c in convos
-      Box pad:12 fill:{sel==c.id?"#FFEEF2FF":"#FFFFFFFF"} border-bottom:#FFF0F1F3 -> sel=c.id
-        Row gap:12 top
-          Avatar "{c.name}" size:40
-          Column grow gap:2
+      Box pad=12 fill={sel==c.id?"#FFEEF2FF":"#FFFFFFFF"} border-bottom=#FFF0F1F3 onTap={sel=c.id}
+        Row gap=12 top
+          Avatar "{c.name}" size=40
+          Column grow gap=2
             Text.strong "{c.name}"
             Text.small "{c.subject}"
-            Text.muted "{c.preview}" size:12
-          Column gap:6 end
+            Text.muted "{c.preview}" size=12
+          Column gap=6 end
             Text.caption "{c.time}"
-            Box w:8 h:8 radius:4 fill:#FF2563EB visible:{c.unread}
+            Box w=8 h=8 radius=4 fill=#FF2563EB visible={c.unread}
   Main
     Nav
-      Column gap:2
-        Heading "Charged twice for May invoice" level:3
+      Column gap=2
+        Heading "Charged twice for May invoice" level=3
         Text.muted "Maya Reyes · maya.reyes@northfield.io"
-      Row gap:12 center
+      Row gap=12 center
         Badge.warning "Waiting"
-        Row gap:6 center
-          Avatar "Dan Whitaker" size:24
+        Row gap=6 center
+          Avatar "Dan Whitaker" size=24
           Text.small "Assigned to Dan Whitaker"
     Row grow top
-      Column grow gap:12 pad:24 scroll
+      Column grow gap=12 pad=24 scroll
         Row
-          Box fill:#FFF3F4F6 radius:12 pad:12 gap:4 maxw:480
+          Box fill=#FFF3F4F6 radius=12 pad=12 gap=4 maxw=480
             Text.caption "Maya Reyes · 8:20"
             Text "Hi, I was charged twice for the May invoice, once on the 2nd and again on the 4th. Can you check this?"
         Row
           Spacer grow
-          Box fill:#FFDBEAFE radius:12 pad:12 gap:4 maxw:480
+          Box fill=#FFDBEAFE radius=12 pad=12 gap=4 maxw=480
             Text.caption "Dan Whitaker · 8:34"
             Text "Hi Maya, sorry about that. I can see both charges of $49.00 on your card. Let me look into why the second one went through."
-        Box fill:#FFFEF3C7 radius:12 pad:12 gap:4 border:#FFF59E0B
-          Text.caption "Internal note · Dan Whitaker · 8:51" color:#FF92400E
-          Text "Duplicate caused by the retry bug on the 4th. Finance approved a full refund of the second charge, it should land in 3 to 5 days." color:#FF78350F
+        Box fill=#FFFEF3C7 radius=12 pad=12 gap=4 border=#FFF59E0B
+          Text.caption "Internal note · Dan Whitaker · 8:51" color=#FF92400E
+          Text "Duplicate caused by the retry bug on the 4th. Finance approved a full refund of the second charge, it should land in 3 to 5 days." color=#FF78350F
         Row
-          Box fill:#FFF3F4F6 radius:12 pad:12 gap:4 maxw:480
+          Box fill=#FFF3F4F6 radius=12 pad=12 gap=4 maxw=480
             Text.caption "Maya Reyes · 9:05"
             Text "Thank you for looking into it so quickly. Will the refund go back to the same card?"
         Row
           Spacer grow
-          Box fill:#FFDBEAFE radius:12 pad:12 gap:4 maxw:480
+          Box fill=#FFDBEAFE radius=12 pad=12 gap=4 maxw=480
             Text.caption "Dan Whitaker · 9:12"
             Text "Yes, $49.00 goes back to the card ending 4417. You will see it within 3 to 5 business days."
-        Card gap:8
-          Input "Reply to Maya" "Write your reply..." bind:reply multiline
-          Row gap:8 end
-            Button.outline "Send and close" -> emit sendAndClose reply; reply=""
-            Button "Send" -> emit send reply; reply=""
-      Pane w:260 pad:16 gap:12 border-left:#FFE5E7EB
-        Column gap:8 center
-          Avatar "Maya Reyes" size:56
+        Card gap=8
+          Input "Reply to Maya" "Write your reply..." bind=reply multiline
+          Row gap=8 end
+            Button.outline "Send and close" onTap={emit sendAndClose reply; reply=""}
+            Button "Send" onTap={emit send reply; reply=""}
+      Pane w=260 pad=16 gap=12 border-left=#FFE5E7EB
+        Column gap=8 center
+          Avatar "Maya Reyes" size=56
           Text.strong "Maya Reyes"
           Text.muted "Northfield Studio"
         Divider
-        Details rows:{[["Plan","Pro, annual"],["Customer since","March 2022"],["Last order","#48213, May 4"]]}
+        Details rows={[["Plan","Pro, annual"],["Customer since","March 2022"],["Last order","#48213, May 4"]]}
         Text.eyebrow "Tags"
-        Row gap:6
+        Row gap=6
           Badge.info "billing"
           Badge.neutral "refund"
           Badge.success "VIP"

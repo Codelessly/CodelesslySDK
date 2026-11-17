@@ -3,91 +3,91 @@ state reply=""
 state convos=[{"id":1,"name":"Daniel Okafor","subject":"Invoice shows wrong VAT","preview":"Hi, the March invoice lists 20% VAT but we are exempt","time":"9:41","unread":true,"img":"https://i.pravatar.cc/80?img=12"},{"id":2,"name":"Maya Reyes","subject":"Order #48213 arrived damaged","preview":"The box was crushed and one lamp is cracked","time":"9:12","unread":false,"img":"https://i.pravatar.cc/80?img=47"},{"id":3,"name":"Tom Becker","subject":"Cannot reset my password","preview":"The reset link says it has expired every time","time":"8:55","unread":true,"img":"https://i.pravatar.cc/80?img=33"},{"id":4,"name":"Lena Fischer","subject":"Upgrade to the annual plan","preview":"Is there a discount if we pay for the year?","time":"8:30","unread":true,"img":"https://i.pravatar.cc/80?img=45"},{"id":5,"name":"Ravi Menon","subject":"Webhook retries not firing","preview":"We see the first attempt but no retries after","time":"Yesterday","unread":false,"img":"https://i.pravatar.cc/80?img=15"},{"id":6,"name":"Sofia Alves","subject":"Add a teammate to our workspace","preview":"Can you add jo@brightly.io as an admin?","time":"Yesterday","unread":false,"img":"https://i.pravatar.cc/80?img=49"},{"id":7,"name":"Chen Wei","subject":"Export to CSV is empty","preview":"I picked last quarter but the file has no rows","time":"Mon","unread":false,"img":"https://i.pravatar.cc/80?img=52"},{"id":8,"name":"Grace Holloway","subject":"Thanks for the quick fix","preview":"Everything works again, much appreciated!","time":"Mon","unread":false,"img":"https://i.pravatar.cc/80?img=44"}]
 App
   Sidebar
-    Text.strong "Relaydesk" size:18
-    Button "New conversation" -> emit newConversation
-    NavItem "Inbox" icon:"inbox" badge:"12" selected:{tab=="inbox"} -> tab="inbox"
-    NavItem "Assigned to me" icon:"person" badge:"4" selected:{tab=="mine"} -> tab="mine"
-    NavItem "Waiting" icon:"schedule" badge:"7" selected:{tab=="waiting"} -> tab="waiting"
-    NavItem "Closed" icon:"check_circle" selected:{tab=="closed"} -> tab="closed"
+    Text.strong "Relaydesk" size=18
+    Button "New conversation" onTap={emit newConversation}
+    NavItem "Inbox" icon="inbox" badge="12" selected={tab=="inbox"} onTap={tab="inbox"}
+    NavItem "Assigned to me" icon="person" badge="4" selected={tab=="mine"} onTap={tab="mine"}
+    NavItem "Waiting" icon="schedule" badge="7" selected={tab=="waiting"} onTap={tab="waiting"}
+    NavItem "Closed" icon="check_circle" selected={tab=="closed"} onTap={tab="closed"}
     Spacer grow
-    Row gap:8 middle
-      Avatar "Priya Natarajan" size:32
+    Row gap=8 middle
+      Avatar "Priya Natarajan" size=32
       Text.muted "Priya Natarajan"
-  Pane w:380 pad:0 gap:0
-    Row between middle pad:16 border-bottom:#FFE5E7EB
-      Heading "Inbox" level:3
+  Pane w=380 pad=0 gap=0
+    Row between middle pad=16 border-bottom=#FFE5E7EB
+      Heading "Inbox" level=3
       Text.muted "12 open"
     each c in convos
-      Row gap:12 pad:14 top fill:{c.id==2?"#FFEAF1FF":"#FFFFFFFF"} border-bottom:#FFE5E7EB -> emit open c.id
-        Avatar src:"{c.img}" size:40
-        Column grow gap:2
+      Row gap=12 pad=14 top fill={c.id==2?"#FFEAF1FF":"#FFFFFFFF"} border-bottom=#FFE5E7EB onTap={emit open c.id}
+        Avatar src="{c.img}" size=40
+        Column grow gap=2
           Row between
             Text.strong "{c.name}"
             Text.caption "{c.time}"
           Text.rowTitle "{c.subject}"
           Text.bodySecondary "{c.preview}"
-        Box w:10 h:10 radius:5 fill:#FF2563EB visible:{c.unread}
+        Box w=10 h=10 radius=5 fill=#FF2563EB visible={c.unread}
   Main
     Nav
-      Column gap:2
-        Heading "Order #48213 arrived damaged" level:1
-        Row gap:8 middle
+      Column gap=2
+        Heading "Order #48213 arrived damaged" level=1
+        Row gap=8 middle
           Badge.warning "Waiting on customer"
-          Avatar "Priya Natarajan" size:20
+          Avatar "Priya Natarajan" size=20
           Text.muted "Assigned to Priya Natarajan"
-      Row gap:8
+      Row gap=8
         IconButton "star_border"
         IconButton "more_vert"
     Row top grow
-      Column grow gap:14 pad:24 scroll
-        Row gap:10 top
-          Avatar src:"https://i.pravatar.cc/80?img=47" size:32
-          Column gap:4
+      Column grow gap=14 pad=24 scroll
+        Row gap=10 top
+          Avatar src="https://i.pravatar.cc/80?img=47" size=32
+          Column gap=4
             Text.caption "Maya Reyes · 9:12"
-            Box fill:#FFF3F4F6 radius:12 pad:12 maxw:520
+            Box fill=#FFF3F4F6 radius=12 pad=12 maxw=520
               Text "Hello, my order #48213 arrived this morning and the box was crushed. One of the two lamps is cracked. Can you help?"
-        Row end gap:10 top
-          Column gap:4
+        Row end gap=10 top
+          Column gap=4
             Text.caption "Priya Natarajan · 9:20" right
-            Box fill:#FFDCE9FF radius:12 pad:12 maxw:520
+            Box fill=#FFDCE9FF radius=12 pad=12 maxw=520
               Text "Hi Maya, I'm so sorry about that. Could you send a photo of the lamp and the box so I can file the claim?"
-          Avatar "Priya Natarajan" size:32
-        Row gap:10 top
-          Avatar src:"https://i.pravatar.cc/80?img=47" size:32
-          Column gap:4
+          Avatar "Priya Natarajan" size=32
+        Row gap=10 top
+          Avatar src="https://i.pravatar.cc/80?img=47" size=32
+          Column gap=4
             Text.caption "Maya Reyes · 9:26"
-            Box fill:#FFF3F4F6 radius:12 pad:12 maxw:520
+            Box fill=#FFF3F4F6 radius=12 pad=12 maxw=520
               Text "Of course, photos attached. The cracked part is the base, it is split right through."
-        Box fill:#FFFFF4D6 border:#FFE5B93C radius:12 pad:12 gap:4
-          Row gap:6 middle
-            Icon "lock" size:16 color:#FF9A6B00
-            Text.caption "Internal note · only your team sees this" color:#FF9A6B00
-          Text "Photos confirm the damage. Carrier claim is open, approve a free replacement. Check stock for the Linen lamp before promising a date." color:#FF5C4300
-        Row end gap:10 top
-          Column gap:4
+        Box fill=#FFFFF4D6 border=#FFE5B93C radius=12 pad=12 gap=4
+          Row gap=6 middle
+            Icon "lock" size=16 color=#FF9A6B00
+            Text.caption "Internal note · only your team sees this" color=#FF9A6B00
+          Text "Photos confirm the damage. Carrier claim is open, approve a free replacement. Check stock for the Linen lamp before promising a date." color=#FF5C4300
+        Row end gap=10 top
+          Column gap=4
             Text.caption "Priya Natarajan · 9:38" right
-            Box fill:#FFDCE9FF radius:12 pad:12 maxw:520
+            Box fill=#FFDCE9FF radius=12 pad=12 maxw=520
               Text "Thank you, Maya. I've approved a free replacement and it ships tomorrow. Is the same address still correct?"
-          Avatar "Priya Natarajan" size:32
-        Card gap:10
-          Input "Reply to Maya" "Write your reply" multiline bind:reply
+          Avatar "Priya Natarajan" size=32
+        Card gap=10
+          Input "Reply to Maya" "Write your reply" multiline bind=reply
           Row between middle
-            Row gap:8
+            Row gap=8
               IconButton "attach_file"
               IconButton "sentiment_satisfied"
-            Row gap:8
-              Button.outline "Send and close" -> emit sendAndClose reply; reply=""; toast "Sent and closed"
-              Button "Send" -> emit send reply; reply=""; toast "Reply sent"
-      Pane w:280 pad:16 gap:14 border-left:#FFE5E7EB
-        Heading "Customer" level:3
-        Row gap:12 middle
-          Avatar src:"https://i.pravatar.cc/80?img=47" size:48
-          Column gap:2
+            Row gap=8
+              Button.outline "Send and close" onTap={emit sendAndClose reply; reply=""; toast "Sent and closed"}
+              Button "Send" onTap={emit send reply; reply=""; toast "Reply sent"}
+      Pane w=280 pad=16 gap=14 border-left=#FFE5E7EB
+        Heading "Customer" level=3
+        Row gap=12 middle
+          Avatar src="https://i.pravatar.cc/80?img=47" size=48
+          Column gap=2
             Text.strong "Maya Reyes"
             Text.muted "maya@northlight.co"
-        Details rows:[["Plan","Business"],["Customer since","Mar 2021"],["Last order","#48213, May 2"]]
+        Details rows=[["Plan","Business"],["Customer since","Mar 2021"],["Last order","#48213, May 2"]]
         Text.eyebrow "TAGS"
-        Row gap:6
+        Row gap=6
           Badge.primary "VIP"
           Badge.info "Shipping"
           Badge.neutral "Damaged"

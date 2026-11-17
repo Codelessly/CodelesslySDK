@@ -3,134 +3,134 @@ state rows=[{"f":"Invoicing and payments","a":true,"b":true,"c":true},{"f":"Bank
 Page
   Nav
     Text.strong "Ledgerly"
-    Row gap:4
+    Row gap=4
       Link "Features"
       Link "Pricing"
       Link "Customers"
       Link "Docs"
-    Row gap:8
-      Button.ghost "Sign in" -> emit signin
-      Button "Start free trial" -> emit start
+    Row gap=8
+      Button.ghost "Sign in" onTap={emit signin}
+      Button "Start free trial" onTap={emit start}
   Section center
-    Column center gap:16
+    Column center gap=16
       Text.eyebrow "PRICING"
-      Heading "Simple pricing for every stage" level:1 center
+      Heading "Simple pricing for every stage" level=1 center
       Text.lead "Choose the plan that fits your books today. Change or cancel any time." center
-      Segments bind:billing options:["Monthly","Yearly"]
-      Text.muted "Yearly billing saves you 20%" visible:{billing=="Yearly"}
+      Segments bind=billing options=["Monthly","Yearly"]
+      Text.muted "Yearly billing saves you 20%" visible={billing=="Yearly"}
   Section
-    Grid cols:3 gap:24
-      Card gap:16 pad:24
-        Heading "Solo" level:3
+    Grid cols=3 gap=24
+      Card gap=16 pad=24
+        Heading "Solo" level=3
         Text.muted "For freelancers and sole traders."
-        Row gap:6 bottom
-          Text "{billing==\"Yearly\" ? \"$7.20\" : \"$9\"}" size:44 weight:700
+        Row gap=6 bottom
+          Text "{billing==\"Yearly\" ? \"$7.20\" : \"$9\"}" size=44 weight=700
           Text.muted "/mo"
-        Text.small "Billed yearly at $86.40" visible:{billing=="Yearly"}
+        Text.small "Billed yearly at $86.40" visible={billing=="Yearly"}
         Divider
-        Column gap:10
-          Row gap:8
+        Column gap=10
+          Row gap=8
             Icon "check"
             Text "1 user"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "50 invoices a month"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Bank feeds for 1 account"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Basic reports"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Email support"
         Spacer grow
-        Button.outline "Choose Solo" -> emit choose "solo"
-      Card gap:16 pad:24 fill:#FFEEF3FF border:#FF3B5BDB
+        Button.outline "Choose Solo" onTap={emit choose "solo"}
+      Card gap=16 pad=24 fill=#FFEEF3FF border=#FF3B5BDB
         Row between
-          Heading "Team" level:3
+          Heading "Team" level=3
           Badge.primary "Most popular"
         Text.muted "For growing teams that share the books."
-        Row gap:6 bottom
-          Text "{billing==\"Yearly\" ? \"$23.20\" : \"$29\"}" size:44 weight:700
+        Row gap=6 bottom
+          Text "{billing==\"Yearly\" ? \"$23.20\" : \"$29\"}" size=44 weight=700
           Text.muted "/mo"
-        Text.small "Billed yearly at $278.40" visible:{billing=="Yearly"}
+        Text.small "Billed yearly at $278.40" visible={billing=="Yearly"}
         Divider
-        Column gap:10
-          Row gap:8
+        Column gap=10
+          Row gap=8
             Icon "check"
             Text "Up to 5 users"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Unlimited invoices"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Unlimited bank feeds"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Expense approvals"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Priority support"
         Spacer grow
-        Button "Choose Team" -> emit choose "team"
-      Card gap:16 pad:24
-        Heading "Scale" level:3
+        Button "Choose Team" onTap={emit choose "team"}
+      Card gap=16 pad=24
+        Heading "Scale" level=3
         Text.muted "For firms with many entities and needs."
-        Row gap:6 bottom
-          Text "{billing==\"Yearly\" ? \"$63.20\" : \"$79\"}" size:44 weight:700
+        Row gap=6 bottom
+          Text "{billing==\"Yearly\" ? \"$63.20\" : \"$79\"}" size=44 weight=700
           Text.muted "/mo"
-        Text.small "Billed yearly at $758.40" visible:{billing=="Yearly"}
+        Text.small "Billed yearly at $758.40" visible={billing=="Yearly"}
         Divider
-        Column gap:10
-          Row gap:8
+        Column gap=10
+          Row gap=8
             Icon "check"
             Text "Unlimited users"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Multi-entity consolidation"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Custom reports"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "API access"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Dedicated account manager"
         Spacer grow
-        Button.outline "Choose Scale" -> emit choose "scale"
+        Button.outline "Choose Scale" onTap={emit choose "scale"}
   Section tint
-    Column gap:24
-      Column gap:8 center
+    Column gap=24
+      Column gap=8 center
         Text.eyebrow "COMPARE PLANS"
-        Heading "Every feature, side by side" level:2
-      Card gap:0 pad:0
-        Row pad:16 border-bottom:#FFD0D5DD
+        Heading "Every feature, side by side" level=2
+      Card gap=0 pad=0
+        Row pad=16 border-bottom=#FFD0D5DD
           Text.strong "Feature" grow
-          Column w:140 center
+          Column w=140 center
             Text.strong "Solo"
-          Column w:140 center
+          Column w=140 center
             Text.strong "Team"
-          Column w:140 center
+          Column w=140 center
             Text.strong "Scale"
         each row in rows
-          Row pad:16 border-bottom:#FFE4E7EC
+          Row pad=16 border-bottom=#FFE4E7EC
             Text "{row.f}" grow
-            Column w:140 center
-              Icon "check" visible:{row.a}
-              Text.muted "—" visible:{!row.a}
-            Column w:140 center
-              Icon "check" visible:{row.b}
-              Text.muted "—" visible:{!row.b}
-            Column w:140 center
-              Icon "check" visible:{row.c}
-              Text.muted "—" visible:{!row.c}
+            Column w=140 center
+              Icon "check" visible={row.a}
+              Text.muted "—" visible={!row.a}
+            Column w=140 center
+              Icon "check" visible={row.b}
+              Text.muted "—" visible={!row.b}
+            Column w=140 center
+              Icon "check" visible={row.c}
+              Text.muted "—" visible={!row.c}
   Section narrow
-    Column gap:16
-      Column gap:8 center
+    Column gap=16
+      Column gap=8 center
         Text.eyebrow "FAQ"
-        Heading "Frequently asked questions" level:2
+        Heading "Frequently asked questions" level=2
       Accordion "Can I switch plans later?"
         Text.muted "Yes. Upgrade or downgrade at any time from your account settings. Changes apply at your next billing date and we prorate any difference."
       Accordion "How does the yearly discount work?"
@@ -141,10 +141,10 @@ Page
         Text.muted "Your data is encrypted in transit and at rest, backed up daily, and you can export it whenever you like."
   Footer
     Row between
-      Column gap:4
+      Column gap=4
         Text.strong "Ledgerly"
         Text.muted "Accounting software for every stage."
-      Row gap:16
+      Row gap=16
         Link "Features"
         Link "Pricing"
         Link "Security"

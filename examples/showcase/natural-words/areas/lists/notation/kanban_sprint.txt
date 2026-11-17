@@ -1,38 +1,38 @@
-Row gap:12 pad:16
-  Column grow gap:12
+Row gap=12 pad=16
+  Column grow gap=12
     Text.pageTitle "Sprint 14"
-    Row gap:12 top
-      Box grow gap:10 pad:12 radius:12 fill:#FFF1F3F5 h:480 drop:task -> cards=updateWhere(cards,c=>c.id==result.data,c=>with(c,"status","todo"))
+    Row gap=12 top
+      Box grow gap=10 pad=12 radius=12 fill=#FFF1F3F5 h=480 drop=task onDrop={cards=updateWhere(cards,c=>c.id==result.data,c=>with(c,"status","todo"))}
         Row between
           Text.heading3 "To Do"
           Badge.neutral "{count(cards,c=>c.status=='todo')}"
         each row in cards
           if row.status=="todo"
-            Card drag:task(row.id) gap:6
+            Card drag=task(row.id) gap=6
               Text.strong "{row.title}"
               if row.tag!=""
                 Badge.error "{row.tag}"
               if row.owner!=""
                 Text.caption "{row.owner}"
-      Box grow gap:10 pad:12 radius:12 fill:#FFE7F0FB h:480 drop:task -> cards=updateWhere(cards,c=>c.id==result.data,c=>with(c,"status","doing"))
+      Box grow gap=10 pad=12 radius=12 fill=#FFE7F0FB h=480 drop=task onDrop={cards=updateWhere(cards,c=>c.id==result.data,c=>with(c,"status","doing"))}
         Row between
           Text.heading3 "In Progress"
           Badge.info "{count(cards,c=>c.status=='doing')}"
         each row in cards
           if row.status=="doing"
-            Card drag:task(row.id) gap:6
+            Card drag=task(row.id) gap=6
               Text.strong "{row.title}"
               if row.tag!=""
                 Badge.error "{row.tag}"
               if row.owner!=""
                 Text.caption "{row.owner}"
-      Box grow gap:10 pad:12 radius:12 fill:#FFE8F5E9 h:480 drop:task -> cards=updateWhere(cards,c=>c.id==result.data,c=>with(c,"status","done"))
+      Box grow gap=10 pad=12 radius=12 fill=#FFE8F5E9 h=480 drop=task onDrop={cards=updateWhere(cards,c=>c.id==result.data,c=>with(c,"status","done"))}
         Row between
           Text.heading3 "Done"
           Badge.success "{count(cards,c=>c.status=='done')}"
         each row in cards
           if row.status=="done"
-            Card drag:task(row.id) gap:6
+            Card drag=task(row.id) gap=6
               Text.strong "{row.title}"
               if row.tag!=""
                 Badge.error "{row.tag}"

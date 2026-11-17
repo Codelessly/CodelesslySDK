@@ -2,39 +2,39 @@ state shoes=[{"id":0,"name":"Aero Runner","price":120,"rating":4.8,"desc":"Light
 state i=0
 state detail=false
 state size=""
-Card w:390 gap:12
+Card w=390 gap=12
   if !detail
     Text.title "Running shoes"
-    Row middle gap:8
-      IconButton "chevron_left" -> i=i==0?5:i-1
-      Box grow gap:8 pad:12 fill:#FFF2F2F2 radius:12 -> detail=true; size=""
-        Box h:160 fill:#FFD9D9D9 radius:8 center middle
+    Row middle gap=8
+      IconButton "chevron_left" onTap={i=i==0?5:i-1}
+      Box grow gap=8 pad=12 fill=#FFF2F2F2 radius=12 onTap={detail=true; size=""}
+        Box h=160 fill=#FFD9D9D9 radius=8 center middle
           Icon "image"
         Text.heading "{shoes[i].name}"
         Row between
           Text.strong "${shoes[i].price}"
-          Row gap:4
+          Row gap=4
             Icon "star"
             Text "{shoes[i].rating}"
-      IconButton "chevron_right" -> i=i==5?0:i+1
-    Row center gap:8
+      IconButton "chevron_right" onTap={i=i==5?0:i+1}
+    Row center gap=8
       each n in range(6)
-        Box w:10 h:10 radius:5 fill:{n==i?"#FF3366CC":"#FFCCCCCC"} -> i=n
+        Box w=10 h=10 radius=5 fill={n==i?"#FF3366CC":"#FFCCCCCC"} onTap={i=n}
   if detail
-    Row middle gap:8
-      IconButton "arrow_back" -> detail=false
+    Row middle gap=8
+      IconButton "arrow_back" onTap={detail=false}
       Text.heading "{shoes[i].name}"
-    Box h:160 fill:#FFD9D9D9 radius:8 center middle
+    Box h=160 fill=#FFD9D9D9 radius=8 center middle
       Icon "image"
     Row between
       Text.strong "${shoes[i].price}"
-      Row gap:4
+      Row gap=4
         Icon "star"
         Text "{shoes[i].rating}"
     Text.muted "{shoes[i].desc}"
     Text.strong "Size"
-    Row gap:8
+    Row gap=8
       each s in [7,8,9,10,11]
-        ChoiceChip "{s}" selected:{size==s} -> size=s
-    Button "Add to bag" enabled:{size!=""} -> emit addToBag shoes[i].id; toast "Added to bag"
-    Button.ghost "Back to carousel" -> detail=false
+        ChoiceChip "{s}" selected={size==s} onTap={size=s}
+    Button "Add to bag" enabled={size!=""} onTap={emit addToBag shoes[i].id; toast "Added to bag"}
+    Button.ghost "Back to carousel" onTap={detail=false}

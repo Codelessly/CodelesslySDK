@@ -1,26 +1,26 @@
-Card gap:12
+Card gap=12
   Text.sectionTitle "Rows and columns"
   Text.bodySecondary "Children are indented two spaces under their parent. Words on a Row or Column place them; gap and pad set the space."
   Row between middle
     Text "between pushes the ends apart"
     Badge.info "end"
-  Row gap:8 middle
+  Row gap=8 middle
     Button.outline "One"
     Button.outline "Two"
     Spacer grow
     Button "After a Spacer"
   Divider
-  Row gap:8
-    Box grow pad:12 radius:8 fill:#FFF3F4F6
+  Row gap=8
+    Box grow pad=12 radius=8 fill=#FFF3F4F6
       Text.strong "grow"
       Text.caption "Takes the remaining room"
-    Box pad:12 radius:8 fill:#FFF3F4F6
+    Box pad=12 radius=8 fill=#FFF3F4F6
       Text.strong "hug"
       Text.caption "As big as its content"
-  Grid cols:3 gap:8
-    Box pad:12 radius:8 fill:#1A2563EB center
+  Grid cols=3 gap=8
+    Box pad=12 radius=8 fill=#1A2563EB center
       Text.strong "1"
-    Box pad:12 radius:8 fill:#1A2563EB center
+    Box pad=12 radius=8 fill=#1A2563EB center
       Text.strong "2"
-    Box pad:12 radius:8 fill:#1A2563EB center
+    Box pad=12 radius=8 fill=#1A2563EB center
       Text.strong "3"

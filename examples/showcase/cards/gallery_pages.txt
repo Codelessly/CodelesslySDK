@@ -1,3 +1,3 @@
 state photos=[{"kind":"lagoon","caption":"Hidden lagoon"},{"kind":"temple","caption":"Temple at dawn"},{"kind":"skyline","caption":"Evening skyline"},{"kind":"mountain","caption":"Mountain hut","tone":"night"},{"kind":"festival","caption":"Street festival"}]
-ChatCard "Photo of the day" "Swipe through the week" icon:"collections_rounded" status:"{max(1,shot)} of 5"
-  PhotoGallery#g =shot photos:=photos layout:"pages"
+ChatCard "Photo of the day" "Swipe through the week" icon="collections_rounded" status="{max(1,shot)} of 5"
+  PhotoGallery#g bind=shot photos={photos} layout="pages"

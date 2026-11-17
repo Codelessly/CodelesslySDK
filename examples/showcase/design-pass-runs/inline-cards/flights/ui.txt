@@ -1,18 +1,18 @@
-Card w:390 gap:12
+Card w=390 gap=12
   state sel=0
   state flights=[{"id":0,"dep":"07:15","arr":"09:50","airline":"TAP Air Portugal","dur":"2h 35m","price":128,"tag":"Best time"},{"id":1,"dep":"11:40","arr":"14:20","airline":"easyJet","dur":"2h 40m","price":84,"tag":"Cheapest"},{"id":2,"dep":"18:05","arr":"20:40","airline":"British Airways","dur":"2h 35m","price":156,"tag":""}]
-  Column gap:2
+  Column gap=2
     Text.title "London to Lisbon"
     Text.muted "This Friday · 1 adult · Direct flights"
   each f in flights
-    Card gap:6 fill:{sel==f.id?"#FFE8F0FE":"#FFFFFFFF"} -> sel=f.id
+    Card gap=6 fill={sel==f.id?"#FFE8F0FE":"#FFFFFFFF"} onTap={sel=f.id}
       Row between middle
         Text.heading "{f.dep} → {f.arr}"
         Text.heading "£{f.price}"
       Row between middle
         Text.body "{f.airline}"
         Text.muted "{f.dur}"
-      Row gap:6 middle
+      Row gap=6 middle
         Badge.neutral "Direct"
         if f.tag!=""
           Badge.success "{f.tag}"
@@ -23,4 +23,4 @@ Card w:390 gap:12
   Row between middle
     Text.muted "Total"
     Text.title "£{flights[sel].price}"
-  Button "Confirm flight" -> emit confirm flights[sel].id; toast "Flight confirmed"
+  Button "Confirm flight" onTap={emit confirm flights[sel].id; toast "Flight confirmed"}

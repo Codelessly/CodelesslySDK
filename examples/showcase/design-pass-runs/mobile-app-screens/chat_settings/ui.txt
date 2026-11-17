@@ -1,41 +1,41 @@
-Column scroll w:390 pad:16 gap:16
+Column scroll w=390 pad=16 gap=16
   state notifications=true
   state receipts=true
   state lastSeen=false
   state devices=[{"id":1,"name":"iPhone 15 Pro","detail":"Barcelona · Active now","icon":"smartphone"},{"id":2,"name":"MacBook Air","detail":"Barcelona · 2 hours ago","icon":"laptop_mac"},{"id":3,"name":"iPad mini","detail":"Valencia · Mar 14","icon":"tablet_mac"}]
-  Row gap:16 middle
-    Box w:72 h:72 radius:36 fill:#FF6750A4 center middle
-      Text "MR" color:#FFFFFFFF size:26 weight:700
-    Column grow gap:2
+  Row gap=16 middle
+    Box w=72 h=72 radius=36 fill=#FF6750A4 center middle
+      Text "MR" color=#FFFFFFFF size=26 weight=700
+    Column grow gap=2
       Text.heading1 "Maya Reyes"
       Text.success "Online"
       Text.caption "Designing things, drinking tea"
-    Button.outline "Edit" -> emit editProfile
-  Card gap:12
+    Button.outline "Edit" onTap={emit editProfile}
+  Card gap=12
     Text.sectionTitle "Account"
     Row between middle
-      Column gap:2
+      Column gap=2
         Text.caption "Phone"
         Text "+34 612 345 678"
       Icon "chevron_right"
     Divider
     Row between middle
-      Column gap:2
+      Column gap=2
         Text.caption "Username"
         Text "@mayareyes"
       Icon "chevron_right"
     Divider
     Row between middle
-      Column grow gap:2
+      Column grow gap=2
         Text.caption "Bio"
         Text "Product designer. Coffee, climbing and bad puns."
       Icon "chevron_right"
-  Card gap:8
+  Card gap=8
     Text.sectionTitle "Privacy and notifications"
-    Toggle "Notifications" bind:notifications
-    Toggle "Read receipts" bind:receipts
-    Toggle "Last seen" bind:lastSeen
-  Card gap:12
+    Toggle "Notifications" bind=notifications
+    Toggle "Read receipts" bind=receipts
+    Toggle "Last seen" bind=lastSeen
+  Card gap=12
     Text.sectionTitle "Storage"
     Row between middle
       Text.strong "3.1 GB of 5 GB used"
@@ -43,16 +43,16 @@ Column scroll w:390 pad:16 gap:16
     Progress 0.62
     Row between middle
       Text.caption "Photos 1.8 GB · Videos 1.0 GB · Files 0.3 GB"
-    Button.secondary "Manage" -> emit manageStorage
-  Card gap:12
+    Button.secondary "Manage" onTap={emit manageStorage}
+  Card gap=12
     Text.sectionTitle "Linked devices"
     each device in devices
-      Row gap:12 middle
+      Row gap=12 middle
         Icon "{device.icon}"
-        Column grow gap:2
+        Column grow gap=2
           Text.strong "{device.name}"
           Text.caption "{device.detail}"
-        Button.ghost "Unlink" -> devices=removeWhere(devices,d=>d.id==device.id); toast "Device unlinked"
+        Button.ghost "Unlink" onTap={devices=removeWhere(devices,d=>d.id==device.id); toast "Device unlinked"}
     if isEmpty(devices)
       Text.muted "No linked devices."
-  Button.destructive "Log out" -> emit logout
+  Button.destructive "Log out" onTap={emit logout}

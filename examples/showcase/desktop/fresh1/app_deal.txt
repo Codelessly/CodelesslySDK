@@ -5,77 +5,77 @@ state events=[{"icon":"call","title":"Call with Maria Keller","who":"Dana Brooks
 state contacts=[{"name":"Maria Keller","role":"VP Operations, decision maker","email":"maria.keller@northwind.com"},{"name":"Tom Becker","role":"IT Manager, champion","email":"tom.becker@northwind.com"},{"name":"Priya Nair","role":"Procurement lead","email":"priya.nair@northwind.com"}]
 App
   Sidebar
-    Brand "Pipeline" icon:"filter_alt"
-    NavItem "Inbox" icon:"inbox" badge:"4" selected:{page=="inbox"} -> page="inbox"
-    NavItem "Deals" icon:"handshake" selected:{page=="deals"} -> page="deals"
-    NavItem "Contacts" icon:"contacts" selected:{page=="contacts"} -> page="contacts"
-    NavItem "Companies" icon:"apartment" selected:{page=="companies"} -> page="companies"
-    NavItem "Reports" icon:"bar_chart" selected:{page=="reports"} -> page="reports"
+    Brand "Pipeline" icon="filter_alt"
+    NavItem "Inbox" icon="inbox" badge="4" selected={page=="inbox"} onTap={page="inbox"}
+    NavItem "Deals" icon="handshake" selected={page=="deals"} onTap={page="deals"}
+    NavItem "Contacts" icon="contacts" selected={page=="contacts"} onTap={page="contacts"}
+    NavItem "Companies" icon="apartment" selected={page=="companies"} onTap={page="companies"}
+    NavItem "Reports" icon="bar_chart" selected={page=="reports"} onTap={page="reports"}
     Spacer grow
-    Row gap:10 middle
-      Avatar "Dana Brooks" size:36
+    Row gap=10 middle
+      Avatar "Dana Brooks" size=36
       Column
         Text.strong "Dana Brooks"
         Text.caption "Account executive"
   Main
     Nav
-      Breadcrumb items:["Deals","Northwind renewal"]
-      Steps steps:["Lead","Qualified","Proposal","Negotiation","Won"] current:3
-      Row gap:8
-        Button "Mark as won" icon:"check" -> toast "Deal marked as won"
-        Button.outline "More" icon:"more_horiz" -> emit more
+      Breadcrumb items=["Deals","Northwind renewal"]
+      Steps steps=["Lead","Qualified","Proposal","Negotiation","Won"] current=3
+      Row gap=8
+        Button "Mark as won" icon="check" onTap={toast "Deal marked as won"}
+        Button.outline "More" icon="more_horiz" onTap={emit more}
     Row grow top
-      Pane w:280 pad:16 gap:16 border-right:#FFE5E7EB
+      Pane w=280 pad=16 gap=16 border-right=#FFE5E7EB
         Text.eyebrow "DEAL"
-        Column gap:2
+        Column gap=2
           Text.numberLarge "$48,000"
           Text.muted "Northwind renewal"
-        Details rows:[["Close date","Jun 30, 2026"],["Owner","Dana Brooks"],["Created","Mar 4, 2026"],["Source","Existing customer"]]
-        Column gap:8
+        Details rows=[["Close date","Jun 30, 2026"],["Owner","Dana Brooks"],["Created","Mar 4, 2026"],["Source","Existing customer"]]
+        Column gap=8
           Row between middle
             Text.muted "Probability"
             Text.strong "60%"
           Progress 0.6
-        Card gap:8
+        Card gap=8
           Text.eyebrow "NEXT STEP"
           Text.strong "Send the order form for signature"
-          Row gap:6 middle
-            Icon "event" size:16
+          Row gap=6 middle
+            Icon "event" size=16
             Text.caption "Due Friday, Jun 5"
-      Pane grow pad:16 gap:16
-        TabToggle bind:tab options:["Activity","Notes","Emails","Files"]
+      Pane grow pad=16 gap=16
+        TabToggle bind=tab options=["Activity","Notes","Emails","Files"]
         if tab=="Activity"
-          Card gap:8
-            Input "Add a note" "Write something the team should know" multiline bind:note
+          Card gap=8
+            Input "Add a note" "Write something the team should know" multiline bind=note
             Row end
-              Button "Add note" enabled:{trim(note)!=""} -> events=concat([{"icon":"sticky_note_2","title":"Note added","who":"Dana Brooks","when":"Just now","detail":note}],events); note=""
-          Card pad:0 gap:0
+              Button "Add note" enabled={trim(note)!=""} onTap={events=concat([{"icon":"sticky_note_2","title":"Note added","who":"Dana Brooks","when":"Just now","detail":note}],events); note=""}
+          Card pad=0 gap=0
             each e in events
-              Row gap:12 pad:[16,14,16,14] top border-bottom:#FFE5E7EB
+              Row gap=12 pad=[16,14,16,14] top border-bottom=#FFE5E7EB
                 IconTile "{e.icon}"
-                Column grow gap:2
+                Column grow gap=2
                   Row between
                     Text.strong "{e.title}"
                     Text.caption "{e.when}"
                   Text.caption "{e.who}"
                   Text.muted "{e.detail}"
         if tab!="Activity"
-          EmptyState "Nothing here yet" "Switch to Activity to see everything that happened on this deal." icon:"inbox"
-      Pane w:320 pad:16 gap:16 border-left:#FFE5E7EB
-        Heading "Contacts on this deal" level:3
+          EmptyState "Nothing here yet" "Switch to Activity to see everything that happened on this deal." icon="inbox"
+      Pane w=320 pad=16 gap=16 border-left=#FFE5E7EB
+        Heading "Contacts on this deal" level=3
         each c in contacts
-          Row gap:10 top
-            Avatar "{c.name}" size:40
-            Column grow gap:2
+          Row gap=10 top
+            Avatar "{c.name}" size=40
+            Column grow gap=2
               Text.strong "{c.name}"
               Text.caption "{c.role}"
               Text.caption "{c.email}"
         Divider
-        Heading "Company" level:3
-        Card gap:12
-          Row gap:10 middle
+        Heading "Company" level=3
+        Card gap=12
+          Row gap=10 middle
             IconTile "apartment"
             Column
               Text.strong "Northwind Traders"
               Text.caption "northwind.com"
-          Details rows:[["Industry","Logistics"],["Employees","65"],["Headquarters","Rotterdam, NL"],["Customer since","2022"]]
+          Details rows=[["Industry","Logistics"],["Employees","65"],["Headquarters","Rotterdam, NL"],["Customer since","2022"]]

@@ -1,18 +1,18 @@
 state temp=21
 state mode="Heat"
-Card gap:16
+Card gap=16
   Row between middle
-    Column gap:2
+    Column gap=2
       Text.heading "Living room"
       Text.muted "Thermostat"
     Badge.info "{mode}ing to {temp}°"
-  Row center middle gap:16
-    Button.outline "-" -> temp=max(16,temp-1)
-    Stack center w:180 h:180
-      CircularProgressIndicator value:{(temp-16)/12} w:180 h:180
-      Column center gap:0
-        Text "{temp}°" size:48 weight:700 color:{mode=="Heat"?"#FFE65100":"#FF0277BD"}
+  Row center middle gap=16
+    Button.outline "-" onTap={temp=max(16,temp-1)}
+    Stack center w=180 h=180
+      CircularProgressIndicator value={(temp-16)/12} w=180 h=180
+      Column center gap=0
+        Text "{temp}°" size=48 weight=700 color={mode=="Heat"?"#FFE65100":"#FF0277BD"}
         Text.caption "16° – 28°"
-    Button.outline "+" -> temp=min(28,temp+1)
-  Slider bind:temp min:16 max:28 step:1
-  SegmentedButton bind:mode items:["Heat","Cool"]
+    Button.outline "+" onTap={temp=min(28,temp+1)}
+  Slider bind=temp min=16 max=28 step=1
+  SegmentedButton bind=mode items=["Heat","Cool"]

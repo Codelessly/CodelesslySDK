@@ -1,4 +1,4 @@
-Column gap:8 pad:16
+Column gap=8 pad=16
   Text.heading1 "Shipping FAQ"
   Accordion "How long does shipping take?"
     Text.bodySecondary "Orders in the US arrive in 3-5 business days."

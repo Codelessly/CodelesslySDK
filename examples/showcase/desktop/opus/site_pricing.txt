@@ -3,122 +3,122 @@ state faqs=[{"id":1,"q":"Can I switch plans later?","a":"Yes. You can upgrade or
 state rows=[{"name":"Invoicing & quotes","solo":true,"team":true,"scale":true},{"name":"Bank feeds","solo":true,"team":true,"scale":true},{"name":"Expense tracking","solo":true,"team":true,"scale":true},{"name":"Multi-user access","solo":false,"team":true,"scale":true},{"name":"Payroll","solo":false,"team":true,"scale":true},{"name":"Multi-currency","solo":false,"team":true,"scale":true},{"name":"Custom reports","solo":false,"team":false,"scale":true},{"name":"Dedicated account manager","solo":false,"team":false,"scale":true}]
 Page
   Nav
-    Row gap:8 middle
+    Row gap=8 middle
       Icon "account_balance_wallet"
       Text.strong "Ledgerly"
-    Row gap:4
+    Row gap=4
       Link "Product"
       Link "Pricing"
       Link "Customers"
       Link "Resources"
-    Row gap:8
-      Button.ghost "Sign in" -> emit signIn
-      Button "Start free trial" -> emit start
+    Row gap=8
+      Button.ghost "Sign in" onTap={emit signIn}
+      Button "Start free trial" onTap={emit start}
   Section center
-    Column center gap:16
-      Heading "Simple pricing for every stage" level:1
+    Column center gap=16
+      Heading "Simple pricing for every stage" level=1
       Text.muted "Start free for 14 days. No credit card required." center
-      Segments bind:period options:["Monthly","Yearly"]
+      Segments bind=period options=["Monthly","Yearly"]
       Text.success "Save 20% with yearly billing" center
   Section
-    Grid cols:3 gap:24
-      Card gap:16
+    Grid cols=3 gap=24
+      Card gap=16
         Text.cardTitle "Solo"
         Text.muted "For freelancers and sole traders."
-        Row gap:4 bottom
-          Text "{period=='Yearly'?'$7.20':'$9'}" size:44 weight:700
+        Row gap=4 bottom
+          Text "{period=='Yearly'?'$7.20':'$9'}" size=44 weight=700
           Text.muted "/mo"
         Text.caption "{period=='Yearly'?'Billed $86.40 yearly':'Billed monthly'}"
         Divider
-        Column gap:10
-          Row gap:8
+        Column gap=10
+          Row gap=8
             Icon "check"
             Text "1 user"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Unlimited invoices"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Bank feeds"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Expense tracking"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Email support"
         Spacer grow
-        Button.outline "Choose Solo" -> emit choose "solo"
-      Card gap:16 fill:#FFEEF2FF border:#FF4F46E5
+        Button.outline "Choose Solo" onTap={emit choose "solo"}
+      Card gap=16 fill=#FFEEF2FF border=#FF4F46E5
         Row between middle
           Text.cardTitle "Team"
           Badge.primary "Most popular"
         Text.muted "For growing businesses with a team."
-        Row gap:4 bottom
-          Text "{period=='Yearly'?'$23.20':'$29'}" size:44 weight:700 color:#FF4F46E5
+        Row gap=4 bottom
+          Text "{period=='Yearly'?'$23.20':'$29'}" size=44 weight=700 color=#FF4F46E5
           Text.muted "/mo"
         Text.caption "{period=='Yearly'?'Billed $278.40 yearly':'Billed monthly'}"
         Divider
-        Column gap:10
-          Row gap:8
+        Column gap=10
+          Row gap=8
             Icon "check"
             Text "Up to 10 users"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Everything in Solo"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Payroll"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Multi-currency"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Priority support"
         Spacer grow
-        Button "Choose Team" -> emit choose "team"
-      Card gap:16
+        Button "Choose Team" onTap={emit choose "team"}
+      Card gap=16
         Text.cardTitle "Scale"
         Text.muted "For established companies."
-        Row gap:4 bottom
-          Text "{period=='Yearly'?'$63.20':'$79'}" size:44 weight:700
+        Row gap=4 bottom
+          Text "{period=='Yearly'?'$63.20':'$79'}" size=44 weight=700
           Text.muted "/mo"
         Text.caption "{period=='Yearly'?'Billed $758.40 yearly':'Billed monthly'}"
         Divider
-        Column gap:10
-          Row gap:8
+        Column gap=10
+          Row gap=8
             Icon "check"
             Text "Unlimited users"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Everything in Team"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Custom reports"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "API access"
-          Row gap:8
+          Row gap=8
             Icon "check"
             Text "Dedicated account manager"
         Spacer grow
-        Button.outline "Choose Scale" -> emit choose "scale"
+        Button.outline "Choose Scale" onTap={emit choose "scale"}
   Section
-    Column gap:16
+    Column gap=16
       Heading "Compare plans" center
-      Card gap:0
-        Row pad:[16,12,16,12] border-bottom:#FFE5E7EB
+      Card gap=0
+        Row pad=[16,12,16,12] border-bottom=#FFE5E7EB
           Text.strong "Feature" grow
-          Text.strong "Solo" w:160 center
-          Text.strong "Team" w:160 center color:#FF4F46E5
-          Text.strong "Scale" w:160 center
+          Text.strong "Solo" w=160 center
+          Text.strong "Team" w=160 center color=#FF4F46E5
+          Text.strong "Scale" w=160 center
         each r in rows
-          Row pad:[16,12,16,12] border-bottom:#FFF3F4F6
+          Row pad=[16,12,16,12] border-bottom=#FFF3F4F6
             Text "{r.name}" grow
-            Text "{r.solo?'✓':'—'}" w:160 center color:{r.solo?"#FF16A34A":"#FF9CA3AF"}
-            Text "{r.team?'✓':'—'}" w:160 center color:{r.team?"#FF16A34A":"#FF9CA3AF"}
-            Text "{r.scale?'✓':'—'}" w:160 center color:{r.scale?"#FF16A34A":"#FF9CA3AF"}
-  Section narrow fill:#FFF9FAFB
-    Column gap:12
+            Text "{r.solo?'✓':'—'}" w=160 center color={r.solo?"#FF16A34A":"#FF9CA3AF"}
+            Text "{r.team?'✓':'—'}" w=160 center color={r.team?"#FF16A34A":"#FF9CA3AF"}
+            Text "{r.scale?'✓':'—'}" w=160 center color={r.scale?"#FF16A34A":"#FF9CA3AF"}
+  Section narrow fill=#FFF9FAFB
+    Column gap=12
       Heading "Frequently asked questions" center
       each q in faqs
         Card
@@ -126,10 +126,10 @@ Page
             Text.muted "{q.a}"
   Footer
     Row between middle
-      Row gap:8 middle
+      Row gap=8 middle
         Icon "account_balance_wallet"
         Text.strong "Ledgerly"
-      Row gap:16
+      Row gap=16
         Link "Privacy"
         Link "Terms"
         Link "Contact"

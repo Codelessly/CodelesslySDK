@@ -1,8 +1,8 @@
-Card gap:8
+Card gap=8
   Text.title "Road Trip Playlist"
   Text.muted "Drag a song to reorder"
   each song in songs
-    Row gap:12 middle pad:8 radius:8 drag:song(song.id) drop:song -> songs=concat(concat(take(removeWhere(songs,s=>s.id==result.data),indexOf(map(songs,s=>s.id),song.id)),[find(songs,s=>s.id==result.data)]),slice(removeWhere(songs,s=>s.id==result.data),indexOf(map(songs,s=>s.id),song.id),length(songs)))
+    Row gap=12 middle pad=8 radius=8 drag=song(song.id) drop=song onDrop={songs=concat(concat(take(removeWhere(songs,s=>s.id==result.data),indexOf(map(songs,s=>s.id),song.id)),[find(songs,s=>s.id==result.data)]),slice(removeWhere(songs,s=>s.id==result.data),indexOf(map(songs,s=>s.id),song.id),length(songs)))}
       Icon "drag_handle"
       Column grow
         Text.strong "{song.title}"

@@ -1,7 +1,7 @@
 Screen
-  TopBar "History" "Jumps per week" back:true -> emit open_home
-  ChartCard "Jumps per week" values:{map(weeks,w=>w.jumps)} labels:{map(weeks,w=>w.label)} unit:"jumps" deltaLabel:"vs W41"
-  StatTrio values:{[sum(sessions,s=>s.jumps),sum(sessions,s=>s.minutes),max(max(sessions[0].best,sessions[1].best),max(sessions[2].best,sessions[3].best))]} labels:["Jumps","Minutes","Best run"] icons:["repeat","timer","bolt"]
+  TopBar "History" "Jumps per week" back=true onTap={emit open_home}
+  ChartCard "Jumps per week" values={map(weeks,w=>w.jumps)} labels={map(weeks,w=>w.label)} unit="jumps" deltaLabel="vs W41"
+  StatTrio values={[sum(sessions,s=>s.jumps),sum(sessions,s=>s.minutes),max(max(sessions[0].best,sessions[1].best),max(sessions[2].best,sessions[3].best))]} labels=["Jumps","Minutes","Best run"] icons=["repeat","timer","bolt"]
   SectionTitle "Sessions"
   each s in sessions
-    SessionRow "{s.name}" "{s.date} · {s.minutes} min · best {s.best}" value:{"{s.jumps}"} unit:"jumps" share:{s.jumps/1304} -> emit open_session s.date
+    SessionRow "{s.name}" "{s.date} · {s.minutes} min · best {s.best}" value={"{s.jumps}"} unit="jumps" share={s.jumps/1304} onPressed={emit open_session s.date}

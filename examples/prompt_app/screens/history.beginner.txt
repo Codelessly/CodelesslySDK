@@ -1,25 +1,25 @@
-Column scroll gap:16 pad:16
+Column scroll gap=16 pad=16
   Row between middle
-    BackButton "Home" -> emit open_home
+    BackButton "Home" onPressed={emit open_home}
     Text.pageTitle "Your progress"
-  Banner "Nice work, keep it going" "You jumped on {sessionsThisWeek} of {weeklyGoal} days this week. Short sessions count." tone:success
-  Card gap:8
+  Banner "Nice work, keep it going" "You jumped on {sessionsThisWeek} of {weeklyGoal} days this week. Short sessions count." tone=success
+  Card gap=8
     Text.sectionTitle "Jumps each week"
     Text.bodySecondary "Your weekly total is climbing. This week: {weeks[3].jumps} jumps."
-    BarChart values:{map(weeks,w=>w.jumps)} labels:{map(weeks,w=>w.label)}
-  SectionHeader "Past sessions" count:4
+    BarChart values={map(weeks,w=>w.jumps)} labels={map(weeks,w=>w.label)}
+  SectionHeader "Past sessions" count=4
   Text.bodySecondary "Best run is the most jumps in a row without a miss."
   each s in sessions
-    Card gap:8
+    Card gap=8
       Row between middle
         Text.strong "{s.name}"
         Text.caption "{s.date}"
-      Row gap:16
-        InlineStat "{s.minutes} min" icon:timer
-        InlineStat "{s.jumps} jumps" icon:fitness_center
-        InlineStat "Best run {s.best}" icon:star
-      Button.ghost "See details" -> emit open_session s.date
-  Card gap:8
+      Row gap=16
+        InlineStat "{s.minutes} min" icon=timer
+        InlineStat "{s.jumps} jumps" icon=fitness_center
+        InlineStat "Best run {s.best}" icon=star
+      Button.ghost "See details" onTap={emit open_session s.date}
+  Card gap=8
     Text.sectionTitle "Next up: {today.name}"
     Text.bodySecondary "{today.minutes} minutes. Jump hard for {today.work} seconds (work), then rest for {today.rest} seconds. Repeat {today.rounds} times."
-    Button "Start today's session" -> emit start_session
+    Button "Start today's session" onTap={emit start_session}

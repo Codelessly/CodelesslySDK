@@ -1,21 +1,21 @@
 state loading=false
 state updated="2 min ago"
 state stocks=[{"t":"AAPL","p":228.14,"c":1.2},{"t":"NVDA","p":131.60,"c":-0.8},{"t":"MSFT","p":419.35,"c":0.4},{"t":"TSLA","p":252.90,"c":-2.1},{"t":"AMZN","p":187.02,"c":0.9}]
-every 1500 when loading -> loading=false; updated="just now"
+every 1500 when loading onTick={loading=false; updated="just now"}
 
-Column gap:12 pad:16 onSwipeDown:{loading=true}
+Column gap=12 pad=16 onSwipeDown={loading=true}
   Row between middle
     Text.heading1 "Watchlist"
     if loading
-      Icon "refresh" animate:spin
+      Icon "refresh" animate=spin
     if !loading
-      IconButton "refresh" -> loading=true
+      IconButton "refresh" onTap={loading=true}
   Text.caption "{loading ? 'Updating…' : 'Last updated ' + updated}"
-  Card gap:8
+  Card gap=8
     each s in stocks
       Row between middle
         Text.strong "{s.t}"
-        Row gap:16 middle
+        Row gap=16 middle
           Text "${fixed(s.p,2)}"
-          Text.strong "{s.c>=0?'+':''}{s.c}%" color:{s.c>=0?"#FF2E7D32":"#FFC62828"}
+          Text.strong "{s.c>=0?'+':''}{s.c}%" color={s.c>=0?"#FF2E7D32":"#FFC62828"}
       Divider

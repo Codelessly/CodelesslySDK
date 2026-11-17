@@ -1,22 +1,22 @@
-Card w:390 pad:12
+Card w=390 pad=12
   state open=false
   state cur=0
   state photos=[{"i":0,"c":"#FF42A5F5","t":"Harbour at sunrise"},{"i":1,"c":"#FFEF5350","t":"Old town market"},{"i":2,"c":"#FF66BB6A","t":"Forest trail"},{"i":3,"c":"#FFFFA726","t":"Desert dunes"},{"i":4,"c":"#FFAB47BC","t":"Evening skyline"},{"i":5,"c":"#FF26A69A","t":"Hidden lagoon"},{"i":6,"c":"#FF8D6E63","t":"Mountain hut"},{"i":7,"c":"#FFEC407A","t":"Street festival"},{"i":8,"c":"#FF5C6BC0","t":"Night train"}]
   Stack
-    Column gap:12
+    Column gap=12
       Text.title "My trip"
-      GridView cols:3 gap:8
+      GridView cols=3 gap=8
         each p in photos
-          Column gap:4
-            Box h:90 radius:8 fill:{p.c} -> cur=p.i; open=true
+          Column gap=4
+            Box h=90 radius=8 fill={p.c} onTap={cur=p.i; open=true}
             Text.caption "{p.t}"
     if open
-      Box w:fill h:fill fill:#F2000000 pad:16 gap:12 radius:12 center middle
+      Box w=fill h=fill fill=#F2000000 pad=16 gap=12 radius=12 center middle
         Row between middle
           Text.strong "{cur+1} of {length(photos)}"
-          IconButton "close" -> open=false
-        Box w:fill h:240 radius:12 fill:{photos[cur].c}
+          IconButton "close" onTap={open=false}
+        Box w=fill h=240 radius=12 fill={photos[cur].c}
         Text.heading "{photos[cur].t}"
         Row between middle
-          IconButton "chevron_left" -> cur=cur==0?length(photos)-1:cur-1
-          IconButton "chevron_right" -> cur=cur==length(photos)-1?0:cur+1
+          IconButton "chevron_left" onTap={cur=cur==0?length(photos)-1:cur-1}
+          IconButton "chevron_right" onTap={cur=cur==length(photos)-1?0:cur+1}

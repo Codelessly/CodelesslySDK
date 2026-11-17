@@ -3,90 +3,90 @@ state sel=2
 state reply=""
 state convs=[{"id":1,"name":"Priya Nair","subject":"Cannot log in after password reset","preview":"I tried the reset link twice and it says expired.","time":"9:42","unread":true},{"id":2,"name":"Marcus Chen","subject":"Charged twice for the Team plan","preview":"Thanks, that would be great. Can you also confirm...","time":"9:15","unread":true},{"id":3,"name":"Elena Rossi","subject":"Export to CSV is missing columns","preview":"The tags column is not in the file anymore.","time":"8:50","unread":false},{"id":4,"name":"Tom Becker","subject":"Question about API rate limits","preview":"We are planning to send about 50k requests a day.","time":"8:12","unread":true},{"id":5,"name":"Aisha Khan","subject":"Add a teammate to our workspace","preview":"I sent the invite but she never received it.","time":"Yesterday","unread":false},{"id":6,"name":"Lucas Meyer","subject":"Invoice needs our VAT number","preview":"Could you reissue invoice 2291 with the VAT ID?","time":"Yesterday","unread":false},{"id":7,"name":"Sofia Alves","subject":"Mobile app crashes on launch","preview":"It started after the latest update on Android 14.","time":"Mon","unread":false},{"id":8,"name":"Daniel Kim","subject":"Cancel my subscription","preview":"Please cancel at the end of this billing period.","time":"Mon","unread":false}]
 App
-  Sidebar w:216
-    Brand "Relaydesk" icon:"support_agent"
-    NavItem "Inbox" icon:"inbox" badge:"12" selected:{folder=="inbox"} -> folder="inbox"
-    NavItem "Assigned to me" icon:"person" badge:"4" selected:{folder=="mine"} -> folder="mine"
-    NavItem "Waiting" icon:"hourglass_empty" badge:"7" selected:{folder=="waiting"} -> folder="waiting"
-    NavItem "Closed" icon:"check_circle" selected:{folder=="closed"} -> folder="closed"
+  Sidebar w=216
+    Brand "Relaydesk" icon="support_agent"
+    NavItem "Inbox" icon="inbox" badge="12" selected={folder=="inbox"} onTap={folder="inbox"}
+    NavItem "Assigned to me" icon="person" badge="4" selected={folder=="mine"} onTap={folder="mine"}
+    NavItem "Waiting" icon="hourglass_empty" badge="7" selected={folder=="waiting"} onTap={folder="waiting"}
+    NavItem "Closed" icon="check_circle" selected={folder=="closed"} onTap={folder="closed"}
     Spacer grow
-    Row gap:8 middle
-      Avatar "Dana Ortiz" size:32
+    Row gap=8 middle
+      Avatar "Dana Ortiz" size=32
       Text.muted "Dana Ortiz"
-  Pane w:360
-    Column pad:16 gap:12
+  Pane w=360
+    Column pad=16 gap=12
       Row between middle
-        Heading "Inbox" level:3
+        Heading "Inbox" level=3
         Text.caption "8 conversations"
-      Input "Search conversations" bind:q
+      Input "Search conversations" bind=q
     each c in convs
-      Box pad:12 fill:{sel==c.id?"#FFEEF3FF":"#00FFFFFF"} border-bottom:#FFE5E7EB -> sel=c.id
-        Row gap:12 top
-          Avatar "{c.name}" size:40
-          Column grow gap:2
+      Box pad=12 fill={sel==c.id?"#FFEEF3FF":"#00FFFFFF"} border-bottom=#FFE5E7EB onTap={sel=c.id}
+        Row gap=12 top
+          Avatar "{c.name}" size=40
+          Column grow gap=2
             Row between middle
               Text.strong "{c.name}"
               Text.caption "{c.time}"
             Text.small "{c.subject}"
-            Row between middle gap:8
+            Row between middle gap=8
               Text.muted "{c.preview}" grow
-              Box w:8 h:8 radius:4 fill:#FF2563EB visible:{c.unread}
+              Box w=8 h=8 radius=4 fill=#FF2563EB visible={c.unread}
   Main
     Nav
-      Column gap:4
-        Heading "Charged twice for the Team plan" level:1
-        Row gap:12 middle
+      Column gap=4
+        Heading "Charged twice for the Team plan" level=1
+        Row gap=12 middle
           Badge.warning "Open"
-          Row gap:6 middle
-            Avatar "Dana Ortiz" size:20
+          Row gap=6 middle
+            Avatar "Dana Ortiz" size=20
             Text.muted "Assigned to Dana Ortiz"
-      Row gap:8
-        Button.outline "Reassign" -> toast "Reassign opened"
-        Button.ghost "Close" -> toast "Conversation closed"
-    Column pad:24 gap:16 scroll grow
+      Row gap=8
+        Button.outline "Reassign" onTap={toast "Reassign opened"}
+        Button.ghost "Close" onTap={toast "Conversation closed"}
+    Column pad=24 gap=16 scroll grow
       Row start
-        Box maxw:520 pad:12 radius:12 fill:#FFF1F2F4
-          Column gap:4
+        Box maxw=520 pad=12 radius=12 fill=#FFF1F2F4
+          Column gap=4
             Text.caption "Marcus Chen · Tue 9:02"
             Text "Hi, I just noticed two charges of $49 on my card for the Team plan this month. Can you check what happened?"
       Row end
-        Box maxw:520 pad:12 radius:12 fill:#FFDCE8FF
-          Column gap:4
+        Box maxw=520 pad=12 radius=12 fill=#FFDCE8FF
+          Column gap=4
             Text.caption "Dana Ortiz · Tue 9:06"
             Text "Hi Marcus, sorry about that. I can see both charges on my side. Let me look into why the second one went through."
-      Box pad:12 radius:12 fill:#FFFFF4D6 border:#FFE8C766
-        Column gap:4
-          Row gap:6 middle
-            Icon "lock" size:14
+      Box pad=12 radius=12 fill=#FFFFF4D6 border=#FFE8C766
+        Column gap=4
+          Row gap=6 middle
+            Icon "lock" size=14
             Text.caption "Internal note · Priya Nair · Tue 9:10"
           Text "Duplicate came from a retried payment after a gateway timeout. First charge is the valid one. Refund the second, no approval needed under $100."
       Row start
-        Box maxw:520 pad:12 radius:12 fill:#FFF1F2F4
-          Column gap:4
+        Box maxw=520 pad=12 radius=12 fill=#FFF1F2F4
+          Column gap=4
             Text.caption "Marcus Chen · Tue 9:13"
             Text "Thanks, that would be great. Can you also confirm the refund will show up on the same card?"
       Row end
-        Box maxw:520 pad:12 radius:12 fill:#FFDCE8FF
-          Column gap:4
+        Box maxw=520 pad=12 radius=12 fill=#FFDCE8FF
+          Column gap=4
             Text.caption "Dana Ortiz · Tue 9:15"
             Text "Yes, the refund of $49 goes back to the same card and usually appears within 3 to 5 business days."
-    Column pad:16 gap:10 border-top:#FFE5E7EB
-      Input "Reply to Marcus" "Write your reply..." bind:reply multiline
-      Row gap:8 middle
-        Button "Send" -> emit send reply; reply=""; toast "Reply sent"
-        Button.outline "Send and close" -> emit sendAndClose reply; reply=""; toast "Sent and closed"
+    Column pad=16 gap=10 border-top=#FFE5E7EB
+      Input "Reply to Marcus" "Write your reply..." bind=reply multiline
+      Row gap=8 middle
+        Button "Send" onTap={emit send reply; reply=""; toast "Reply sent"}
+        Button.outline "Send and close" onTap={emit sendAndClose reply; reply=""; toast "Sent and closed"}
         Spacer grow
         Text.caption "Replies go to marcus.chen@northwind.io"
-  Pane w:280 pad:16 gap:16
-    Column center gap:8
-      Avatar "Marcus Chen" size:64
+  Pane w=280 pad=16 gap=16
+    Column center gap=8
+      Avatar "Marcus Chen" size=64
       Text.strong "Marcus Chen"
       Text.muted "marcus.chen@northwind.io"
     Divider
     Text.eyebrow "CUSTOMER DETAILS"
-    Details rows:{[["Plan","Team, $49/mo"],["Customer since","March 2022"],["Last order","#4821 · Jun 3"]]}
+    Details rows={[["Plan","Team, $49/mo"],["Customer since","March 2022"],["Last order","#4821 · Jun 3"]]}
     Text.eyebrow "TAGS"
-    Row gap:8
+    Row gap=8
       Badge.info "billing"
       Badge.neutral "team plan"
       Badge.success "loyal"

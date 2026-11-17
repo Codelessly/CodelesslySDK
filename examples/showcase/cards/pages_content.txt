@@ -1,10 +1,10 @@
 state tips=[{"t":"Pack light","d":"One carry-on each keeps every train change easy.","k":"train"},{"t":"Book the gardens","d":"Timed tickets sell out a week ahead in spring.","k":"bamboo"},{"t":"Carry some cash","d":"Small shrines and market stalls rarely take cards.","k":"market"},{"t":"Start early","d":"The famous spots are quiet before nine.","k":"temple"}]
-ChatCard "Before you go" "Four tips for Kyoto" icon:"tips_and_updates_rounded" status:"{tip+1} of 4"
-  Pages#pages bind:tip h:186 peek:0.9 gap:10
+ChatCard "Before you go" "Four tips for Kyoto" icon="tips_and_updates_rounded" status="{tip+1} of 4"
+  Pages#pages bind=tip h=186 peek=0.9 gap=10
     each x in tips
-      Column gap:8
-        Media kind:"{x.k}" h:120
-        Paragraph "{x.t}" strong:true
+      Column gap=8
+        Media kind="{x.k}" h=120
+        Paragraph "{x.t}" strong=true
         Paragraph "{x.d}"
-  PageDots#dots bind:tip count:4
-  Pager#pager "Tip" bind:tip count:4
+  PageDots#dots bind=tip count=4
+  Pager#pager "Tip" bind=tip count=4

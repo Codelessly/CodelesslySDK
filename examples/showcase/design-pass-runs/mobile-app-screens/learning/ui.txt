@@ -1,58 +1,58 @@
-Column w:390 h:fill
+Column w=390 h=fill
   state tab="learn"
   state units=[{"title":"Greetings","icon":"waving_hand","progress":1.0,"note":"Complete"},{"title":"Food & Drink","icon":"restaurant","progress":0.65,"note":"13 of 20"},{"title":"Travel","icon":"flight","progress":0.3,"note":"6 of 20"},{"title":"Family","icon":"family_restroom","progress":0.1,"note":"2 of 20"},{"title":"Shopping","icon":"shopping_bag","progress":0,"note":"Not started"},{"title":"Weather","icon":"wb_sunny","progress":0,"note":"Not started"}]
   state leaders=[{"rank":1,"name":"Marta Silva","xp":3120},{"rank":2,"name":"You","xp":2480},{"rank":3,"name":"Jonas Weber","xp":2315}]
-  Column scroll grow gap:16 pad:[16,24,16,16]
+  Column scroll grow gap=16 pad=[16,24,16,16]
     Row between middle
-      Row gap:6 middle
-        Icon "local_fire_department" color:#FFFF9600 size:28
+      Row gap=6 middle
+        Icon "local_fire_department" color=#FFFF9600 size=28
         Text.heading "12 day streak"
-      Row gap:6 middle
-        Icon "bolt" color:#FFF5B800 size:28
+      Row gap=6 middle
+        Icon "bolt" color=#FFF5B800 size=28
         Text.heading "2,480 XP"
-    Card gap:8
+    Card gap=8
       Row between
         Text.strong "Daily goal"
         Text.muted "35 / 50 XP"
       Progress 0.7
       Text.caption "15 XP to go. Keep it up, Spanish learner!"
-    Box fill:#FF1B7F5C radius:16 pad:16 gap:10
-      Text "CONTINUE LESSON" color:#FFB8F0D9 size:12 weight:700
-      Text "Unit 2: Food & Drink" color:#FFFFFFFF size:22 weight:700
-      Text "Lesson 14: Ordering at a café" color:#FFE6FFF4
+    Box fill=#FF1B7F5C radius=16 pad=16 gap=10
+      Text "CONTINUE LESSON" color=#FFB8F0D9 size=12 weight=700
+      Text "Unit 2: Food & Drink" color=#FFFFFFFF size=22 weight=700
+      Text "Lesson 14: Ordering at a café" color=#FFE6FFF4
       Progress 0.65
       Row between middle
-        Text "65% complete" color:#FFE6FFF4 size:12
-        Button.elevated "Continue" -> emit continueLesson
+        Text "65% complete" color=#FFE6FFF4 size=12
+        Button.elevated "Continue" onTap={emit continueLesson}
     Text.sectionTitle "Units"
-    Grid cols:2 gap:12
+    Grid cols=2 gap=12
       each u in units
-        Card gap:8 -> emit openUnit u.title
-          Icon "{u.icon}" size:32 color:#FF1B7F5C
+        Card gap=8 onTap={emit openUnit u.title}
+          Icon "{u.icon}" size=32 color=#FF1B7F5C
           Text.strong "{u.title}"
-          Progress bind:u.progress
+          Progress bind=u.progress
           Text.caption "{u.note}"
     Row between middle
       Text.sectionTitle "Leaderboard"
-      Button.ghost "See all" -> emit leaderboard
-    Card gap:12
+      Button.ghost "See all" onTap={emit leaderboard}
+    Card gap=12
       each p in leaders
-        Row gap:12 middle
+        Row gap=12 middle
           Text.strong "{p.rank}"
-          Icon "account_circle" size:32
+          Icon "account_circle" size=32
           Text.strong "{p.name}" grow
           Text.muted "{p.xp} XP"
   Divider
-  Row pad:[8,8,8,12] between
-    Column center gap:2 grow -> tab="learn"
-      Icon "school" color:{tab=='learn'?'#FF1B7F5C':'#FF777777'}
-      Text.caption "Learn" color:{tab=='learn'?'#FF1B7F5C':'#FF777777'}
-    Column center gap:2 grow -> tab="practice"
-      Icon "fitness_center" color:{tab=='practice'?'#FF1B7F5C':'#FF777777'}
-      Text.caption "Practice" color:{tab=='practice'?'#FF1B7F5C':'#FF777777'}
-    Column center gap:2 grow -> tab="league"
-      Icon "emoji_events" color:{tab=='league'?'#FF1B7F5C':'#FF777777'}
-      Text.caption "League" color:{tab=='league'?'#FF1B7F5C':'#FF777777'}
-    Column center gap:2 grow -> tab="profile"
-      Icon "person" color:{tab=='profile'?'#FF1B7F5C':'#FF777777'}
-      Text.caption "Profile" color:{tab=='profile'?'#FF1B7F5C':'#FF777777'}
+  Row pad=[8,8,8,12] between
+    Column center gap=2 grow onTap={tab="learn"}
+      Icon "school" color={tab=='learn'?'#FF1B7F5C':'#FF777777'}
+      Text.caption "Learn" color={tab=='learn'?'#FF1B7F5C':'#FF777777'}
+    Column center gap=2 grow onTap={tab="practice"}
+      Icon "fitness_center" color={tab=='practice'?'#FF1B7F5C':'#FF777777'}
+      Text.caption "Practice" color={tab=='practice'?'#FF1B7F5C':'#FF777777'}
+    Column center gap=2 grow onTap={tab="league"}
+      Icon "emoji_events" color={tab=='league'?'#FF1B7F5C':'#FF777777'}
+      Text.caption "League" color={tab=='league'?'#FF1B7F5C':'#FF777777'}
+    Column center gap=2 grow onTap={tab="profile"}
+      Icon "person" color={tab=='profile'?'#FF1B7F5C':'#FF777777'}
+      Text.caption "Profile" color={tab=='profile'?'#FF1B7F5C':'#FF777777'}

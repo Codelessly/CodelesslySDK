@@ -16,66 +16,66 @@ App
   Sidebar
     Text.strong "Plume"
     Text.eyebrow "ACCOUNT SETTINGS"
-    NavItem "Profile" icon:"person" selected:{tab=="profile"} -> tab="profile"
-    NavItem "Account" icon:"manage_accounts" selected:{tab=="account"} -> tab="account"
-    NavItem "Notifications" icon:"notifications" selected:{tab=="notifications"} -> tab="notifications"
-    NavItem "Appearance" icon:"palette" selected:{tab=="appearance"} -> tab="appearance"
-    NavItem "Billing" icon:"credit_card" selected:{tab=="billing"} -> tab="billing"
-    NavItem "Team" icon:"group" selected:{tab=="team"} -> tab="team"
+    NavItem "Profile" icon="person" selected={tab=="profile"} onTap={tab="profile"}
+    NavItem "Account" icon="manage_accounts" selected={tab=="account"} onTap={tab="account"}
+    NavItem "Notifications" icon="notifications" selected={tab=="notifications"} onTap={tab="notifications"}
+    NavItem "Appearance" icon="palette" selected={tab=="appearance"} onTap={tab="appearance"}
+    NavItem "Billing" icon="credit_card" selected={tab=="billing"} onTap={tab="billing"}
+    NavItem "Team" icon="group" selected={tab=="team"} onTap={tab="team"}
     Spacer grow
-    Row gap:10 middle
-      Avatar "Maya Reyes" size:32
+    Row gap=10 middle
+      Avatar "Maya Reyes" size=32
       Text.muted "mayareyes"
   Main
     Nav
-      Heading "Profile" level:1
+      Heading "Profile" level=1
       Text.muted "Manage how you appear on Plume"
-    Column grow scroll pad:24 gap:20
+    Column grow scroll pad=24 gap=20
       if tab!="profile"
-        EmptyState "Nothing to change here yet" "This section of your settings is coming soon." icon:"tune"
+        EmptyState "Nothing to change here yet" "This section of your settings is coming soon." icon="tune"
       if tab=="profile"
-        Column gap:20 maxw:720
-          Card gap:16
-            Heading "Public profile" level:3
-            Row gap:16 middle
-              Avatar "Maya Reyes" size:72
-              Column gap:4
-                Button.outline "Change" -> emit changePicture; dirty=true
+        Column gap=20 maxw=720
+          Card gap=16
+            Heading "Public profile" level=3
+            Row gap=16 middle
+              Avatar "Maya Reyes" size=72
+              Column gap=4
+                Button.outline "Change" onTap={emit changePicture; dirty=true}
                 Text.caption "JPG or PNG, up to 4 MB"
-            Input "Name" bind:name -> dirty=true
-            Input "Username" bind:username -> dirty=true
-            Column gap:4
-              Input "Bio" "Tell readers a little about your writing" bind:bio multiline -> dirty=true
+            Input "Name" bind=name onChange={dirty=true}
+            Input "Username" bind=username onChange={dirty=true}
+            Column gap=4
+              Input "Bio" "Tell readers a little about your writing" bind=bio multiline onChange={dirty=true}
               Row end
-                Text.caption "{length(bio)}/160" color:{length(bio)>160?"#FFB3261E":"#FF6B6B6B"}
+                Text.caption "{length(bio)}/160" color={length(bio)>160?"#FFB3261E":"#FF6B6B6B"}
             Field "Time zone"
-              Select bind:tz items:["(UTC-08:00) Pacific Time","(UTC-07:00) Mountain Time","(UTC-06:00) Central Time","(UTC-05:00) Eastern Time","(UTC+00:00) London","(UTC+01:00) Central European Time","(UTC+05:30) India Standard Time","(UTC+09:00) Tokyo"] -> dirty=true
-            ToggleRow "Public profile" "Anyone with the link can read your profile and published pieces." bind:public -> dirty=true
-          Card gap:12
-            Heading "Notifications" level:3
-            ToggleRow "Draft reminders" "A nudge when a draft has been untouched for three days." bind:nDrafts -> dirty=true
+              Select bind=tz items=["(UTC-08:00) Pacific Time","(UTC-07:00) Mountain Time","(UTC-06:00) Central Time","(UTC-05:00) Eastern Time","(UTC+00:00) London","(UTC+01:00) Central European Time","(UTC+05:30) India Standard Time","(UTC+09:00) Tokyo"] onChange={dirty=true}
+            ToggleRow "Public profile" "Anyone with the link can read your profile and published pieces." bind=public onChanged={dirty=true}
+          Card gap=12
+            Heading "Notifications" level=3
+            ToggleRow "Draft reminders" "A nudge when a draft has been untouched for three days." bind=nDrafts onChanged={dirty=true}
             Divider
-            ToggleRow "Comments and replies" "Email me when someone responds to your writing." bind:nComments -> dirty=true
+            ToggleRow "Comments and replies" "Email me when someone responds to your writing." bind=nComments onChanged={dirty=true}
             Divider
-            ToggleRow "Weekly digest" "A Sunday summary of your words written and reads." bind:nWeekly -> dirty=true
+            ToggleRow "Weekly digest" "A Sunday summary of your words written and reads." bind=nWeekly onChanged={dirty=true}
             Divider
-            ToggleRow "Writing goals" "Progress updates and streak milestones." bind:nGoals -> dirty=true
+            ToggleRow "Writing goals" "Progress updates and streak milestones." bind=nGoals onChanged={dirty=true}
             Divider
-            ToggleRow "Product news" "New features, tips and occasional announcements." bind:nProduct -> dirty=true
-          Box gap:12 pad:16 radius:8 fill:#FFFEF3F2 border:#FFF5C2BE
-            Heading "Danger zone" level:3
+            ToggleRow "Product news" "New features, tips and occasional announcements." bind=nProduct onChanged={dirty=true}
+          Box gap=12 pad=16 radius=8 fill=#FFFEF3F2 border=#FFF5C2BE
+            Heading "Danger zone" level=3
             Text.muted "Deleting your account permanently removes your drafts, published pieces and followers. This cannot be undone."
             if !confirming
               Row
-                Button.destructive "Delete account" -> confirming=true
+                Button.destructive "Delete account" onTap={confirming=true}
             if confirming
-              Callout "Are you sure?" "Type DELETE to confirm. Your account and all of its writing will be erased." tone:danger icon:"warning"
-              Input "Confirmation" "DELETE" bind:confirmText
-              Row gap:10
-                ActionButton "Cancel" tone:quiet w:140 -> confirming=false; confirmText=""
-                ActionButton "Permanently delete" tone:danger w:200 enabled:{confirmText=="DELETE"} -> emit deleteAccount; confirming=false; confirmText=""; toast "Account deletion requested"
-    Row between middle pad:[24,14,24,14] border-top:#FFE2E2E2
+              Callout "Are you sure?" "Type DELETE to confirm. Your account and all of its writing will be erased." tone=danger icon="warning"
+              Input "Confirmation" "DELETE" bind=confirmText
+              Row gap=10
+                ActionButton "Cancel" tone=quiet w=140 onPressed={confirming=false; confirmText=""}
+                ActionButton "Permanently delete" tone=danger w=200 enabled={confirmText=="DELETE"} onPressed={emit deleteAccount; confirming=false; confirmText=""; toast "Account deletion requested"}
+    Row between middle pad=[24,14,24,14] border-top=#FFE2E2E2
       Text.muted "{dirty ? 'You have unsaved changes' : 'All changes saved'}"
-      Row gap:10
-        ActionButton "Cancel" tone:quiet w:120 enabled:{dirty} -> name="Maya Reyes"; username="mayareyes"; bio="Essayist and slow-fiction writer. Drafting my first novel, one chapter a week."; tz="(UTC-05:00) Eastern Time"; public=true; nDrafts=true; nComments=true; nWeekly=false; nGoals=true; nProduct=false; dirty=false
-        ActionButton "Save changes" tone:primary w:160 enabled:{dirty&&length(bio)<=160} -> emit save; dirty=false; toast "Changes saved"
+      Row gap=10
+        ActionButton "Cancel" tone=quiet w=120 enabled={dirty} onPressed={name="Maya Reyes"; username="mayareyes"; bio="Essayist and slow-fiction writer. Drafting my first novel, one chapter a week."; tz="(UTC-05:00) Eastern Time"; public=true; nDrafts=true; nComments=true; nWeekly=false; nGoals=true; nProduct=false; dirty=false}
+        ActionButton "Save changes" tone=primary w=160 enabled={dirty&&length(bio)<=160} onPressed={emit save; dirty=false; toast "Changes saved"}

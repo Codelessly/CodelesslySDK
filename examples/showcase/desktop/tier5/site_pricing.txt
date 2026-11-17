@@ -1,51 +1,51 @@
 state billing="Monthly"
 state rows=[{"f":"Invoices and estimates","a":true,"b":true,"c":true},{"f":"Bank feeds","a":true,"b":true,"c":true},{"f":"Receipt scanning","a":true,"b":true,"c":true},{"f":"Multiple users","a":false,"b":true,"c":true},{"f":"Multi-currency","a":false,"b":true,"c":true},{"f":"Custom reports","a":false,"b":false,"c":true},{"f":"API access","a":false,"b":false,"c":true},{"f":"Phone support","a":false,"b":false,"c":true}]
 Page
-  SiteNav "Ledgerly" icon:"account_balance" links:["Features","Pricing","Resources"] active:"Pricing" secondary:"Sign in" cta:"Start free" -> emit nav result
+  SiteNav "Ledgerly" icon="account_balance" links=["Features","Pricing","Resources"] active="Pricing" secondary="Sign in" cta="Start free" onNavigate={emit nav result}
   Section center
-    Column center gap:16
+    Column center gap=16
       Text.eyebrow "PRICING"
-      Heading "Simple pricing for every stage" level:1 center
+      Heading "Simple pricing for every stage" level=1 center
       Text.lead "Pick the plan that fits your books today. Change it whenever you grow." center
-      SegmentedButton bind:billing items:["Monthly","Yearly"]
+      SegmentedButton bind=billing items=["Monthly","Yearly"]
       Text.caption "Yearly billing saves you 20%"
   Section
-    Grid cols:3 gap:24
-      PricingPlan "Solo" price:{billing=="Yearly"?"$7.20":"$9"} period:"/mo" note:{billing=="Yearly"?"$86.40 billed yearly":"For freelancers"} features:["1 user","Unlimited invoices","Bank feeds","Receipt scanning","Email support"] cta:"Choose Solo" -> emit choose result
-      PricingPlan "Team" price:{billing=="Yearly"?"$23.20":"$29"} period:"/mo" note:{billing=="Yearly"?"$278.40 billed yearly":"For growing teams"} features:["Up to 5 users","Everything in Solo","Multi-currency","Client portal","Priority email support"] cta:"Choose Team" featured:true badge:"Most popular" -> emit choose result
-      PricingPlan "Scale" price:{billing=="Yearly"?"$63.20":"$79"} period:"/mo" note:{billing=="Yearly"?"$758.40 billed yearly":"For established firms"} features:["Unlimited users","Everything in Team","Custom reports","API access","Phone support"] cta:"Choose Scale" -> emit choose result
+    Grid cols=3 gap=24
+      PricingPlan "Solo" price={billing=="Yearly"?"$7.20":"$9"} period="/mo" note={billing=="Yearly"?"$86.40 billed yearly":"For freelancers"} features=["1 user","Unlimited invoices","Bank feeds","Receipt scanning","Email support"] cta="Choose Solo" onChoose={emit choose result}
+      PricingPlan "Team" price={billing=="Yearly"?"$23.20":"$29"} period="/mo" note={billing=="Yearly"?"$278.40 billed yearly":"For growing teams"} features=["Up to 5 users","Everything in Solo","Multi-currency","Client portal","Priority email support"] cta="Choose Team" featured=true badge="Most popular" onChoose={emit choose result}
+      PricingPlan "Scale" price={billing=="Yearly"?"$63.20":"$79"} period="/mo" note={billing=="Yearly"?"$758.40 billed yearly":"For established firms"} features=["Unlimited users","Everything in Team","Custom reports","API access","Phone support"] cta="Choose Scale" onChoose={emit choose result}
   Section tint
-    Column gap:12 center
+    Column gap=12 center
       Text.eyebrow "COMPARE PLANS"
-      Heading "Every feature, side by side" level:2
-    Card pad:0 gap:0
-      Row pad:[20,12,20,12] gap:16 middle
+      Heading "Every feature, side by side" level=2
+    Card pad=0 gap=0
+      Row pad=[20,12,20,12] gap=16 middle
         Text.columnHead "Feature" grow
-        Row w:140 center
+        Row w=140 center
           Text.columnHead "Solo"
-        Row w:140 center
+        Row w=140 center
           Text.columnHead "Team"
-        Row w:140 center
+        Row w=140 center
           Text.columnHead "Scale"
       each r in rows
-        Row pad:[20,0,20,0] gap:16 h:52 middle border-top:#FFE5E7EB
+        Row pad=[20,0,20,0] gap=16 h=52 middle border-top=#FFE5E7EB
           Text "{r.f}" grow
-          Row w:140 center
-            Icon "check" color:#FF16A34A size:20 visible:{r.a}
-            Text.muted "–" visible:{!r.a}
-          Row w:140 center
-            Icon "check" color:#FF16A34A size:20 visible:{r.b}
-            Text.muted "–" visible:{!r.b}
-          Row w:140 center
-            Icon "check" color:#FF16A34A size:20 visible:{r.c}
-            Text.muted "–" visible:{!r.c}
+          Row w=140 center
+            Icon "check" color=#FF16A34A size=20 visible={r.a}
+            Text.muted "–" visible={!r.a}
+          Row w=140 center
+            Icon "check" color=#FF16A34A size=20 visible={r.b}
+            Text.muted "–" visible={!r.b}
+          Row w=140 center
+            Icon "check" color=#FF16A34A size=20 visible={r.c}
+            Text.muted "–" visible={!r.c}
   Section narrow
-    Column gap:12 center
+    Column gap=12 center
       Text.eyebrow "FAQ"
-      Heading "Frequently asked questions" level:2
+      Heading "Frequently asked questions" level=2
     Column
       FaqItem "Can I switch plans later?" "Yes. Upgrade or downgrade at any time from your settings, and we prorate the difference on your next invoice."
       FaqItem "Is there a free trial?" "Every plan starts with a 14-day free trial. No credit card is needed until you decide to stay."
       FaqItem "How does yearly billing work?" "You pay for the year up front and save 20% compared with paying monthly. You can switch back to monthly at renewal."
-      FaqItem "Is my financial data secure?" "Your data is encrypted in transit and at rest, backed up daily, and never shared with third parties." divider:false
-  SiteFooter brand:"Ledgerly" tagline:"Accounting software that keeps you ahead of the books." icon:"account_balance" headings:["Product","Company","Resources"] links:[["Features","Pricing","Integrations"],["About","Careers","Contact"],["Help center","Guides","Security"]] legal:"© 2026 Ledgerly" small:["Privacy","Terms"] -> emit nav result
+      FaqItem "Is my financial data secure?" "Your data is encrypted in transit and at rest, backed up daily, and never shared with third parties." divider=false
+  SiteFooter brand="Ledgerly" tagline="Accounting software that keeps you ahead of the books." icon="account_balance" headings=["Product","Company","Resources"] links=[["Features","Pricing","Integrations"],["About","Careers","Contact"],["Help center","Guides","Security"]] legal="© 2026 Ledgerly" small=["Privacy","Terms"] onNavigate={emit nav result}

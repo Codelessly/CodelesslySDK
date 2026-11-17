@@ -1,20 +1,20 @@
 Screen
-  TopBar "Let's jump!" "Round {round} of {today.rounds}" back:true -> emit open_home
-  Box gap:4 pad:24 radius:28 fill:{phase=="work"?"primary":"secondary"}
+  TopBar "Let's jump!" "Round {round} of {today.rounds}" back=true onTap={emit open_home}
+  Box gap=4 pad=24 radius=28 fill={phase=="work"?"primary":"secondary"}
     Text.eyebrow "{phase=='work' ? 'JUMP!' : 'REST'}"
-    Text.display "{started ? left : today.work}" size:120 weight:800
+    Text.display "{started ? left : today.work}" size=120 weight=800
     Text.body "{phase=='work' ? 'Go go go!' : 'Breathe. You rock!'}"
   Row between middle
-    Column gap:2
+    Column gap=2
       Text.eyebrow "Your jumps"
       Text.numberLarge "{count}"
-    Button "Jump +1" -> count=count+1
+    Button "Jump +1" onTap={count=count+1}
   if count>=50
     Text.sectionTitle "Wow! 50 jumps! Star jumper!"
   if !started
-    Button "Start" w:fill -> started=true; left=today.work; phase="work"; round=1; emit start_session
+    Button "Start" w=fill onTap={started=true; left=today.work; phase="work"; round=1; emit start_session}
   if started
-    Row gap:12
-      Button.secondary "{paused ? 'Resume' : 'Pause'}" grow -> paused=!paused
-      Button.secondary "Next" grow -> phase=(phase=="work")?"rest":"work"; left=(phase=="work")?today.rest:today.work; round=(phase=="rest")?round+1:round
-  Button.ghost "Finish" w:fill -> emit finish_session count
+    Row gap=12
+      Button.secondary "{paused ? 'Resume' : 'Pause'}" grow onTap={paused=!paused}
+      Button.secondary "Next" grow onTap={phase=(phase=="work")?"rest":"work"; left=(phase=="work")?today.rest:today.work; round=(phase=="rest")?round+1:round}
+  Button.ghost "Finish" w=fill onTap={emit finish_session count}

@@ -2,47 +2,47 @@ state filter="All"
 state query=""
 state tab="Notes"
 state notes=[{"id":1,"title":"Q3 roadmap","preview":"Outline the key milestones for the next quarter, review dependencies with design and engineering, and confirm owners.","date":"Today","tag":"Work","color":"#FF3B82F6","pinned":true},{"id":2,"title":"Grocery list","preview":"Oat milk, spinach, eggs, sourdough bread, tomatoes, olive oil, and something nice for Sunday dinner with friends.","date":"Yesterday","tag":"Personal","color":"#FF22C55E","pinned":true},{"id":3,"title":"Meeting notes: Design sync","preview":"Agreed to simplify the onboarding flow. Follow up on the icon set and update the component library by Friday.","date":"Mar 12","tag":"Work","color":"#FF3B82F6","pinned":false},{"id":4,"title":"Book recommendations","preview":"The Pragmatic Programmer, Atomic Habits, Piranesi, and the new essay collection that Sam mentioned last week.","date":"Mar 10","tag":"Personal","color":"#FF22C55E","pinned":false},{"id":5,"title":"Client feedback","preview":"They loved the new dashboard but want clearer export options and a faster loading state on the reports page.","date":"Mar 8","tag":"Work","color":"#FF3B82F6","pinned":false},{"id":6,"title":"Trip ideas","preview":"Lisbon in May, a long weekend in the mountains, or a train trip through northern Italy. Check flight prices.","date":"Mar 5","tag":"Personal","color":"#FF22C55E","pinned":false},{"id":7,"title":"Hiring checklist","preview":"Draft job description, set up interview panel, prepare take-home exercise, and schedule debrief sessions.","date":"Mar 2","tag":"Work","color":"#FF3B82F6","pinned":false},{"id":8,"title":"Workout plan","preview":"Monday strength, Wednesday run, Friday mobility and core. Increase running distance by ten percent each week.","date":"Feb 27","tag":"Personal","color":"#FF22C55E","pinned":false}]
-Column h:fill
+Column h=fill
   Stack grow
-    Column scroll gap:16 pad:16
+    Column scroll gap=16 pad=16
       Text.pageTitle "Notes"
-      Input "Search notes" bind:query
-      Row scroll gap:8
-        ChoiceChip "All" selected:{filter=="All"} -> filter="All"
-        ChoiceChip "Pinned" selected:{filter=="Pinned"} -> filter="Pinned"
-        ChoiceChip "Work" selected:{filter=="Work"} -> filter="Work"
-        ChoiceChip "Personal" selected:{filter=="Personal"} -> filter="Personal"
-      Row gap:6
+      Input "Search notes" bind=query
+      Row scroll gap=8
+        ChoiceChip "All" selected={filter=="All"} onTap={filter="All"}
+        ChoiceChip "Pinned" selected={filter=="Pinned"} onTap={filter="Pinned"}
+        ChoiceChip "Work" selected={filter=="Work"} onTap={filter="Work"}
+        ChoiceChip "Personal" selected={filter=="Personal"} onTap={filter="Personal"}
+      Row gap=6
         Icon "push_pin"
         Text.sectionTitle "Pinned"
       each note in notes
         if note.pinned && (filter=="All" || filter=="Pinned" || note.tag==filter) && contains(lower(note.title),lower(query))
-          Card gap:6
-            Row gap:10 middle
-              Box w:10 h:10 radius:5 fill:{note.color}
+          Card gap=6
+            Row gap=10 middle
+              Box w=10 h=10 radius=5 fill={note.color}
               Text.strong "{note.title}" grow
               Text.caption "{note.date}"
             Text.bodySecondary "{note.preview}" {"props": {"maxLines": 2}}
       Text.sectionTitle "All notes"
       each note in notes
         if !note.pinned && filter!="Pinned" && (filter=="All" || note.tag==filter) && contains(lower(note.title),lower(query))
-          Card gap:6
-            Row gap:10 middle
-              Box w:10 h:10 radius:5 fill:{note.color}
+          Card gap=6
+            Row gap=10 middle
+              Box w=10 h=10 radius=5 fill={note.color}
               Text.strong "{note.title}" grow
               Text.caption "{note.date}"
             Text.bodySecondary "{note.preview}" {"props": {"maxLines": 2}}
             Text.caption "{note.tag}"
-    Column h:fill end right pad:[0,0,16,16]
-      Button "+ New note" -> emit addNote
+    Column h=fill end right pad=[0,0,16,16]
+      Button "+ New note" onTap={emit addNote}
   Divider
-  Row between pad:[8,8,8,8]
-    Column grow center gap:2
+  Row between pad=[8,8,8,8]
+    Column grow center gap=2
       Icon "description"
       Text.caption "Notes"
-    Column grow center gap:2
+    Column grow center gap=2
       Icon "folder"
       Text.caption "Folders"
-    Column grow center gap:2
+    Column grow center gap=2
       Icon "settings"
       Text.caption "Settings"

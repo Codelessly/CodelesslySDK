@@ -2,72 +2,72 @@ state tab=0
 state steps=7240
 state stepGoal=10000
 state workouts=[{"name":"Morning Run","meta":"Today · 5.2 km · 31 min","kcal":412,"icon":"directions_run"},{"name":"Upper Body Strength","meta":"Yesterday · 45 min","kcal":338,"icon":"fitness_center"},{"name":"Vinyasa Yoga","meta":"Mon · 40 min","kcal":186,"icon":"self_improvement"},{"name":"Evening Ride","meta":"Sun · 18.4 km · 52 min","kcal":497,"icon":"directions_bike"}]
-Column h:fill w:390
-  Column scroll grow pad:[16,24,16,16] gap:16
+Column h=fill w=390
+  Column scroll grow pad=[16,24,16,16] gap=16
     Row between middle
-      Column gap:2
+      Column gap=2
         Text.caption "{formatDate(today(),'EEEE, MMM d')}"
         Text.heading1 "Good morning, Maya"
-      IconButton "notifications" -> emit notifications
-    Card gap:10
+      IconButton "notifications" onTap={emit notifications}
+    Card gap=10
       Row between middle
         Text.title "Daily goal"
         Badge.success "72%"
-      Text size:32 weight:700 "{steps} steps"
-      Progress bind:goalShare value:0.72
+      Text size=32 weight=700 "{steps} steps"
+      Progress bind=goalShare value=0.72
       Text.muted "{stepGoal-steps} steps to reach your goal of {stepGoal}"
-    Row gap:12
-      Card grow gap:4
+    Row gap=12
+      Card grow gap=4
         Icon "directions_walk"
-        Text.strong size:20 "7,240"
+        Text.strong size=20 "7,240"
         Text.caption "Steps"
-      Card grow gap:4
+      Card grow gap=4
         Icon "local_fire_department"
-        Text.strong size:20 "1,284"
+        Text.strong size=20 "1,284"
         Text.caption "Calories"
-      Card grow gap:4
+      Card grow gap=4
         Icon "timer"
-        Text.strong size:20 "46 min"
+        Text.strong size=20 "46 min"
         Text.caption "Active"
-    Card gap:12
+    Card gap=12
       Row between middle
         Text.sectionTitle "Next workout"
         Badge.info "Today, 6:30 PM"
-      Row gap:12 middle
-        Box fill:#FFE3F2FD radius:12 pad:12
+      Row gap=12 middle
+        Box fill=#FFE3F2FD radius=12 pad=12
           Icon "fitness_center"
-        Column grow gap:2
+        Column grow gap=2
           Text.heading3 "Full Body HIIT"
           Text.muted "35 min · Intermediate · ~380 kcal"
-      Button "Start" -> emit startWorkout; toast "Workout started"
+      Button "Start" onTap={emit startWorkout; toast "Workout started"}
     Row between middle
       Text.sectionTitle "Recent workouts"
-      Button.ghost "See all" -> emit seeAll
+      Button.ghost "See all" onTap={emit seeAll}
     each w in workouts
       Card
-        Row gap:12 middle
-          Box fill:#FFF1F3F4 radius:10 pad:10
+        Row gap=12 middle
+          Box fill=#FFF1F3F4 radius=10 pad=10
             Icon "{w.icon}"
-          Column grow gap:2
+          Column grow gap=2
             Text.strong "{w.name}"
             Text.caption "{w.meta}"
-          Column end gap:0
+          Column end gap=0
             Text.strong "{w.kcal}"
             Text.caption "kcal"
   Divider
-  Row pad:[8,8,8,8] between
-    Column grow center gap:2 -> tab=0
-      Icon "home" color:{tab==0?"#FF1E88E5":"#FF757575"}
-      Text.caption "Home" color:{tab==0?"#FF1E88E5":"#FF757575"}
-    Column grow center gap:2 -> tab=1
-      Icon "fitness_center" color:{tab==1?"#FF1E88E5":"#FF757575"}
-      Text.caption "Workouts" color:{tab==1?"#FF1E88E5":"#FF757575"}
-    Column grow center gap:2 -> tab=2
-      Icon "event_note" color:{tab==2?"#FF1E88E5":"#FF757575"}
-      Text.caption "Plans" color:{tab==2?"#FF1E88E5":"#FF757575"}
-    Column grow center gap:2 -> tab=3
-      Icon "bar_chart" color:{tab==3?"#FF1E88E5":"#FF757575"}
-      Text.caption "Progress" color:{tab==3?"#FF1E88E5":"#FF757575"}
-    Column grow center gap:2 -> tab=4
-      Icon "person" color:{tab==4?"#FF1E88E5":"#FF757575"}
-      Text.caption "Profile" color:{tab==4?"#FF1E88E5":"#FF757575"}
+  Row pad=[8,8,8,8] between
+    Column grow center gap=2 onTap={tab=0}
+      Icon "home" color={tab==0?"#FF1E88E5":"#FF757575"}
+      Text.caption "Home" color={tab==0?"#FF1E88E5":"#FF757575"}
+    Column grow center gap=2 onTap={tab=1}
+      Icon "fitness_center" color={tab==1?"#FF1E88E5":"#FF757575"}
+      Text.caption "Workouts" color={tab==1?"#FF1E88E5":"#FF757575"}
+    Column grow center gap=2 onTap={tab=2}
+      Icon "event_note" color={tab==2?"#FF1E88E5":"#FF757575"}
+      Text.caption "Plans" color={tab==2?"#FF1E88E5":"#FF757575"}
+    Column grow center gap=2 onTap={tab=3}
+      Icon "bar_chart" color={tab==3?"#FF1E88E5":"#FF757575"}
+      Text.caption "Progress" color={tab==3?"#FF1E88E5":"#FF757575"}
+    Column grow center gap=2 onTap={tab=4}
+      Icon "person" color={tab==4?"#FF1E88E5":"#FF757575"}
+      Text.caption "Profile" color={tab==4?"#FF1E88E5":"#FF757575"}

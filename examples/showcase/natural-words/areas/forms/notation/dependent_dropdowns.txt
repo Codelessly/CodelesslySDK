@@ -2,14 +2,14 @@ state make="Toyota"
 state model="Camry"
 state year="2022"
 state trim="SE"
-Card gap:12 pad:16 maxw:480
+Card gap=12 pad=16 maxw=480
   Text.heading "Find parts for your vehicle"
   Text.fieldLabel "Make"
-  Select bind:make items:["Toyota","Honda","Ford"] -> model=""; trim=""
+  Select bind=make items=["Toyota","Honda","Ford"] onChange={model=""; trim=""}
   Text.fieldLabel "Model"
-  Select bind:model items:{make=="Toyota"?["Camry","Corolla","RAV4","Highlander"]:[]} enabled:{make!=""}
+  Select bind=model items={make=="Toyota"?["Camry","Corolla","RAV4","Highlander"]:[]} enabled={make!=""}
   Text.fieldLabel "Year"
-  Select bind:year items:["2019","2020","2021","2022","2023","2024"]
+  Select bind=year items=["2019","2020","2021","2022","2023","2024"]
   Text.fieldLabel "Trim"
-  Select bind:trim items:["LE","SE","XLE","XSE"] enabled:{year!=""}
-  Button "Find parts" -> emit findParts {"make":make}
+  Select bind=trim items=["LE","SE","XLE","XSE"] enabled={year!=""}
+  Button "Find parts" onTap={emit findParts {"make":make}}

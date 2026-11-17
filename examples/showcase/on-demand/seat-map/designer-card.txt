@@ -1,10 +1,10 @@
 state seats=[]
 state done=false
-ChatCard "Choose your seats" "Lisbon to Paris · A320 · 2 travelers" icon:"airline_seat_recline_normal_rounded" status:"{length(seats)} of 2"
+ChatCard "Choose your seats" "Lisbon to Paris · A320 · 2 travelers" icon="airline_seat_recline_normal_rounded" status="{length(seats)} of 2"
   if !done
-    SeatMap bind:seats maxSeats:2 extra:[6] occupied:["1A","1B","1F","2C","2D","3A","3E","4B","4C","4F","5D","5E","6A","7A","7F","8B","8C","8D","9E","9F","10A","10C","11D","12B","12E","12F"]
+    SeatMap bind=seats maxSeats=2 extra=[6] occupied=["1A","1B","1F","2C","2D","3A","3E","4B","4C","4F","5D","5E","6A","7A","7F","8B","8C","8D","9E","9F","10A","10C","11D","12B","12E","12F"]
     SectionLabel "Your seats" "two together"
-    Details rows:{[["Traveler 1",length(seats)>0?seats[0]:"Tap a seat"],["Traveler 2",length(seats)>1?seats[1]:"Tap a seat"]]} icons:["person_rounded","person_rounded"]
-    TotalBar "Seats" "No seat fee" amount:{length(seats)==2?join(seats,", "):""+length(seats)+" of 2"} cta:"Continue" enabled:{length(seats)==2} -> done=true; emit continue seats
+    Details rows={[["Traveler 1",length(seats)>0?seats[0]:"Tap a seat"],["Traveler 2",length(seats)>1?seats[1]:"Tap a seat"]]} icons=["person_rounded","person_rounded"]
+    TotalBar "Seats" "No seat fee" amount={length(seats)==2?join(seats,", "):""+length(seats)+" of 2"} cta="Continue" enabled={length(seats)==2} onPressed={done=true; emit continue seats}
   if done
-    Receipt "Seats held" "{join(seats,", ")} are held for 15 minutes." tone:"good" icon:"airline_seat_recline_normal_rounded"
+    Receipt "Seats held" "{join(seats,", ")} are held for 15 minutes." tone="good" icon="airline_seat_recline_normal_rounded"

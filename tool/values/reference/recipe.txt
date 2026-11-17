@@ -2,15 +2,15 @@ state servings=4
 state cooking=false
 state ings=[{"n":"chicken thighs","a":800,"u":" g","done":false},{"n":"baby potatoes","a":600,"u":" g","done":false},{"n":"lemons","a":2,"u":"","done":false},{"n":"olive oil","a":4,"u":" tbsp","done":false},{"n":"garlic cloves","a":4,"u":"","done":false},{"n":"dried oregano","a":2,"u":" tsp","done":false}]
 state steps=["Heat the oven to 220C","Toss everything in the oil, lemon and oregano","Roast 35 minutes, turning once","Rest 5 minutes and serve"]
-ChatCard "Lemon chicken traybake" "A weeknight dinner" icon:"restaurant_menu_rounded" status:"Serves {servings}"
-  Details rows:[["Total time","45 min"],["Difficulty","Easy"]]
-  Counter#serv "Servings" "2 to 8" bind:servings min:2 max:8
+ChatCard "Lemon chicken traybake" "A weeknight dinner" icon="restaurant_menu_rounded" status="Serves {servings}"
+  Details rows=[["Total time","45 min"],["Difficulty","Easy"]]
+  Counter#serv "Servings" "2 to 8" bind=servings min=2 max=8
   SectionLabel "Ingredients" "{count(ings,x=>x.done)} of {length(ings)} ticked"
   each x in ings
-    ListRow#tick "{x.a*servings/4}{x.u} {x.n}" icon:"{x.done?"check_circle_rounded":"radio_button_unchecked_rounded"}" selected:{x.done} -> ings=updateWhere(ings,y=>y.n==x.n,y=>with(y,"done",!y.done))
+    ListRow#tick "{x.a*servings/4}{x.u} {x.n}" icon="{x.done?"check_circle_rounded":"radio_button_unchecked_rounded"}" selected={x.done} onPressed={ings=updateWhere(ings,y=>y.n==x.n,y=>with(y,"done",!y.done))}
   SectionLabel "Method" "4 steps"
   each s in steps
     Paragraph "{index+1}. {s}"
   if cooking
-    Callout "Step 1 of 4" "{steps[0]}" tone:"accent" icon:"timer_rounded"
-  ActionButton#start "Start cooking" icon:"play_arrow_rounded" -> cooking=true
+    Callout "Step 1 of 4" "{steps[0]}" tone="accent" icon="timer_rounded"
+  ActionButton#start "Start cooking" icon="play_arrow_rounded" onPressed={cooking=true}

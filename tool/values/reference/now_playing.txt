@@ -6,16 +6,16 @@ state liked=false
 state left=tracks[i].len-t
 state el=floor(t/60)+":"+(t%60<10?"0":"")+(t%60)
 state rem=floor(left/60)+":"+(left%60<10?"0":"")+(left%60)
-every 1s when playing && t<tracks[i].len -> t=t+1
-ChatCard "Now playing" "Living room speaker" icon:"speaker_rounded" status:{playing?"Playing":"Paused"} tone:{playing?"accent":"neutral"}
-  Media kind:"skyline" tone:"dusk" h:150
+every 1s when playing && t<tracks[i].len onTick={t=t+1}
+ChatCard "Now playing" "Living room speaker" icon="speaker_rounded" status={playing?"Playing":"Paused"} tone={playing?"accent":"neutral"}
+  Media kind="skyline" tone="dusk" h=150
   Text.cardTitle "{tracks[i].title}"
   Text.meta "{tracks[i].artist}"
-  ProgressLine "{el}" "-{rem}" value:{t/tracks[i].len}
-  Row gap:10
-    ActionButton#prev "Prev" tone:"quiet" icon:"skip_previous_rounded" grow -> i=t>3?i:max(0,i-1); t=0
-    ActionButton#play "{playing?"Pause":"Play"}" icon:"{playing?"pause_rounded":"play_arrow_rounded"}" grow -> playing=!playing
-    ActionButton#next "Next" tone:"quiet" icon:"skip_next_rounded" grow -> i=min(i+1,4); t=0
-  ActionButton#like "{liked?"Liked":"Like"}" tone:"quiet" icon:"{liked?"favorite_rounded":"favorite_border_rounded"}" -> liked=!liked; emit like tracks[i].title
+  ProgressLine "{el}" "-{rem}" value={t/tracks[i].len}
+  Row gap=10
+    ActionButton#prev "Prev" tone="quiet" icon="skip_previous_rounded" grow onPressed={i=t>3?i:max(0,i-1); t=0}
+    ActionButton#play "{playing?"Pause":"Play"}" icon="{playing?"pause_rounded":"play_arrow_rounded"}" grow onPressed={playing=!playing}
+    ActionButton#next "Next" tone="quiet" icon="skip_next_rounded" grow onPressed={i=min(i+1,4); t=0}
+  ActionButton#like "{liked?"Liked":"Like"}" tone="quiet" icon="{liked?"favorite_rounded":"favorite_border_rounded"}" onPressed={liked=!liked; emit like tracks[i].title}
   SectionLabel "Up next" "{length(slice(tracks,i+1,i+4))} tracks"
-  Details rows:{map(slice(tracks,i+1,i+4),q=>[q.title+" · "+q.artist,q.dur])}
+  Details rows={map(slice(tracks,i+1,i+4),q=>[q.title+" · "+q.artist,q.dur])}

@@ -5,26 +5,26 @@ state sel=""
 state files=[{"id":"a","name":"Budget.xlsx"},{"id":"b","name":"Plan.docx"},{"id":"c","name":"Notes.txt"}]
 Page
   Section
-    Heading "Files" level:1
+    Heading "Files" level=1
     Text.muted#picked "Picked: {sel}"
-    Row gap:16
-      Image#thumb "photo.png" w:240 h:160 radius:12 -> open zoom
-      Column grow gap:4
+    Row gap=16
+      Image#thumb "photo.png" w=240 h=160 radius=12 onTap={open zoom}
+      Column grow gap=4
         each f in files
-          Row#fileRow gap:12 middle pad:[12,10,12,10] radius:8 fill:#FFF3F4F6 onRightClick:{sel=f.name; open fileMenu} onLongPress:{sel=f.name; open fileMenu}
+          Row#fileRow gap=12 middle pad=[12,10,12,10] radius=8 fill=#FFF3F4F6 onRightClick={sel=f.name; open fileMenu} onLongPress={sel=f.name; open fileMenu}
             Icon "description"
             Text "{f.name}" grow
-            IconButton#fileMore "more_vert" -> sel=f.name; open fileMenu
-    Card#area gap:8 menu:areaMenu
+            IconButton#fileMore "more_vert" onTap={sel=f.name; open fileMenu}
+    Card#area gap=8 menu=areaMenu
       Text.strong "Right-click this card"
       Text.muted "A long press does the same on a phone."
 
 Lightbox#zoom "{photo}" "The landing page"
 
 Menu#fileMenu "{sel}"
-  MenuItem#rename "Rename" icon:"edit" -> toast "Rename {sel}"
-  MenuItem "Delete" icon:"delete" tone:danger -> files=removeWhere(files,x=>x.name==sel)
+  MenuItem#rename "Rename" icon="edit" onTap={toast "Rename {sel}"}
+  MenuItem "Delete" icon="delete" tone=danger onTap={files=removeWhere(files,x=>x.name==sel)}
 
 Menu#areaMenu
-  MenuItem "Refresh" icon:"refresh" -> toast "Refreshed"
-  MenuItem "Select all" icon:"select_all" -> sel="all"
+  MenuItem "Refresh" icon="refresh" onTap={toast "Refreshed"}
+  MenuItem "Select all" icon="select_all" onTap={sel="all"}

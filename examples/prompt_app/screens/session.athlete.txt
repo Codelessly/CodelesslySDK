@@ -3,29 +3,29 @@ state round=1
 state left=today.work
 state count=0
 state paused=true
-every 1s when !paused -> left=left-1; phase=left<=1?(phase=="work"?"rest":"work"):phase; round=(left<=1&&phase=="rest")?round+1:round; left=left<=1?(phase=="work"?today.rest:today.work):left-1
-Column scroll gap:12 pad:16
+every 1s when !paused onTick={left=left-1; phase=left<=1?(phase=="work"?"rest":"work"):phase; round=(left<=1&&phase=="rest")?round+1:round; left=left<=1?(phase=="work"?today.rest:today.work):left-1}
+Column scroll gap=12 pad=16
   Row between middle
     Text.sectionTitle "{today.name}"
-    StatusBadge "{phase=='work'?'WORK':'REST'}" tone:{phase=="work"?"success":"info"}
-  Card gap:4
+    StatusBadge "{phase=='work'?'WORK':'REST'}" tone={phase=="work"?"success":"info"}
+  Card gap=4
     Text.caption "ROUND"
     Text.heading1 "{round}/{today.rounds}"
     Text.caption "{phase=='work'?'WORK':'REST'} · seconds left"
     Text.heading1 "{left}"
-    Progress bind:{0} value:{left/(phase=="work"?today.work:today.rest)}
-  Row gap:8
+    Progress bind={0} value={left/(phase=="work"?today.work:today.rest)}
+  Row gap=8
     InlineStat "{today.work}s work"
     InlineStat "{today.rest}s rest"
     InlineStat "{today.rounds*(today.work+today.rest)/60} min total"
-  Card gap:8
+  Card gap=8
     Text.caption "JUMPS"
     Text.heading1 "{count}"
-    Row gap:8
-      Button.outline "+1" -> count=count+1
-      Button.outline "+10" -> count=count+10
-      Button.ghost "-1" -> count=max(0,count-1)
-  Row gap:8
-    Button.secondary "Resume" hidden:{!paused} -> paused=false
-    Button.secondary "Pause" hidden:{paused} -> paused=true
-    Button.destructive "Finish" -> emit finish_session count
+    Row gap=8
+      Button.outline "+1" onTap={count=count+1}
+      Button.outline "+10" onTap={count=count+10}
+      Button.ghost "-1" onTap={count=max(0,count-1)}
+  Row gap=8
+    Button.secondary "Resume" hidden={!paused} onTap={paused=false}
+    Button.secondary "Pause" hidden={paused} onTap={paused=true}
+    Button.destructive "Finish" onTap={emit finish_session count}

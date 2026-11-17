@@ -1,53 +1,53 @@
-Card w:390 gap:12
+Card w=390 gap=12
   Row between middle
-    Column gap:2
+    Column gap=2
       Text.heading "Wireless Headphones"
       Text.muted "Order #A-48213"
     Badge.info "In transit"
   Divider
   Row between
-    Column gap:2
+    Column gap=2
       Text.caption "Carrier"
       Text.strong "UPS"
-    Column gap:2 end
+    Column gap=2 end
       Text.caption "Tracking number"
       Text.mono "1Z999AA10123456784"
-  Box fill:#FFE8F0FE radius:8 pad:12 gap:2
+  Box fill=#FFE8F0FE radius=8 pad=12 gap=2
     Text.caption "Estimated delivery"
     Text.heading2 "Thursday, May 16"
   state stage=2
   Text.sectionTitle "Shipment progress"
-  Column gap:0
-    Row gap:12 middle
-      Icon "check_circle" color:#FF2E7D32
-      Column gap:0
+  Column gap=0
+    Row gap=12 middle
+      Icon "check_circle" color=#FF2E7D32
+      Column gap=0
         Text.strong "Order placed"
         Text.caption "May 12, 9:41 AM"
-    Row gap:12 middle
-      Icon "check_circle" color:#FF2E7D32
-      Column gap:0
+    Row gap=12 middle
+      Icon "check_circle" color=#FF2E7D32
+      Column gap=0
         Text.strong "Packed"
         Text.caption "May 12, 4:15 PM"
-    Row gap:12 middle
-      Icon "local_shipping" color:#FF1565C0
-      Column gap:0
-        Text.strong "In transit · Current" color:#FF1565C0
+    Row gap=12 middle
+      Icon "local_shipping" color=#FF1565C0
+      Column gap=0
+        Text.strong "In transit · Current" color=#FF1565C0
         Text.caption "Departed Denver, CO hub"
-    Row gap:12 middle
-      Icon "radio_button_unchecked" color:#FF9E9E9E
-      Column gap:0
+    Row gap=12 middle
+      Icon "radio_button_unchecked" color=#FF9E9E9E
+      Column gap=0
         Text.muted "Out for delivery"
         Text.caption "Expected May 16"
-    Row gap:12 middle
-      Icon "radio_button_unchecked" color:#FF9E9E9E
-      Column gap:0
+    Row gap=12 middle
+      Icon "radio_button_unchecked" color=#FF9E9E9E
+      Column gap=0
         Text.muted "Delivered"
         Text.caption "Expected May 16"
   Divider
   state showNote=false
   state note=""
-  Button.outline "Delivery instructions" -> showNote=!showNote
+  Button.outline "Delivery instructions" onTap={showNote=!showNote}
   if showNote
-    Column gap:8
-      Input "Instructions" hint:"e.g. Leave with the front desk" bind:note
-      Button "Save instructions" -> emit saveInstructions note; toast "Instructions saved"; showNote=false
+    Column gap=8
+      Input "Instructions" hint="e.g. Leave with the front desk" bind=note
+      Button "Save instructions" onTap={emit saveInstructions note; toast "Instructions saved"; showNote=false}

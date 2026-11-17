@@ -12,68 +12,68 @@ state nSecurity=true
 state dirty=false
 state confirmDelete=false
 App
-  Sidebar w:240
-    Text.strong "Plume" size:20
+  Sidebar w=240
+    Text.strong "Plume" size=20
     Text.muted "Settings"
-    NavItem "Profile" icon:"person" selected:{tab=="profile"} -> tab="profile"
-    NavItem "Account" icon:"manage_accounts" selected:{tab=="account"} -> tab="account"
-    NavItem "Notifications" icon:"notifications" selected:{tab=="notifications"} -> tab="notifications"
-    NavItem "Appearance" icon:"palette" selected:{tab=="appearance"} -> tab="appearance"
-    NavItem "Billing" icon:"credit_card" selected:{tab=="billing"} -> tab="billing"
-    NavItem "Team" icon:"group" selected:{tab=="team"} -> tab="team"
+    NavItem "Profile" icon="person" selected={tab=="profile"} onTap={tab="profile"}
+    NavItem "Account" icon="manage_accounts" selected={tab=="account"} onTap={tab="account"}
+    NavItem "Notifications" icon="notifications" selected={tab=="notifications"} onTap={tab="notifications"}
+    NavItem "Appearance" icon="palette" selected={tab=="appearance"} onTap={tab="appearance"}
+    NavItem "Billing" icon="credit_card" selected={tab=="billing"} onTap={tab="billing"}
+    NavItem "Team" icon="group" selected={tab=="team"} onTap={tab="team"}
     Spacer grow
-    Row gap:8 middle
-      Avatar "{name}" size:28
+    Row gap=8 middle
+      Avatar "{name}" size=28
       Text.muted "{name}"
   Main
     Nav
       Heading "Profile"
-      Row gap:8 middle
+      Row gap=8 middle
         if dirty
-          StatusBadge "Unsaved changes" tone:"warning"
-    Column grow scroll pad:24 gap:16 maxw:760
-      Card gap:16
+          StatusBadge "Unsaved changes" tone="warning"
+    Column grow scroll pad=24 gap=16 maxw=760
+      Card gap=16
         SectionHeader "Public profile"
-        Row gap:16 middle
-          Avatar "{name}" size:72
-          Column gap:4
+        Row gap=16 middle
+          Avatar "{name}" size=72
+          Column gap=4
             Text.strong "Profile picture"
             Text.muted "PNG or JPG, at least 256 × 256."
           Spacer grow
-          Button.outline "Change" -> emit changePhoto; dirty=true
-        Row gap:16
+          Button.outline "Change" onTap={emit changePhoto; dirty=true}
+        Row gap=16
           Column grow
-            Input "Name" bind:name -> dirty=true
+            Input "Name" bind=name onChange={dirty=true}
           Column grow
-            Input "Username" "yourname" bind:username -> dirty=true
-        Input "Bio" "Tell readers about yourself" bind:bio multiline -> dirty=true
+            Input "Username" "yourname" bind=username onChange={dirty=true}
+        Input "Bio" "Tell readers about yourself" bind=bio multiline onChange={dirty=true}
         Row between
           Text.muted "Shown on your public profile."
-          Text.caption "{length(bio)}/160" color:{length(bio)>160?"#FFDC2626":"#FF6B7280"}
+          Text.caption "{length(bio)}/160" color={length(bio)>160?"#FFDC2626":"#FF6B7280"}
         Text.fieldLabel "Time zone"
-        Select bind:tz items:["(GMT-08:00) Los Angeles","(GMT-05:00) New York","(GMT+00:00) London","(GMT+01:00) Paris","(GMT+05:30) Mumbai","(GMT+09:00) Tokyo"] -> dirty=true
-        ToggleRow "Public profile" "Anyone can see your profile and published pieces." bind:isPublic -> dirty=true
-      Card gap:8
+        Select bind=tz items=["(GMT-08:00) Los Angeles","(GMT-05:00) New York","(GMT+00:00) London","(GMT+01:00) Paris","(GMT+05:30) Mumbai","(GMT+09:00) Tokyo"] onChange={dirty=true}
+        ToggleRow "Public profile" "Anyone can see your profile and published pieces." bind=isPublic onChanged={dirty=true}
+      Card gap=8
         SectionHeader "Notifications"
-        ToggleRow "Comments" "When someone comments on your drafts or posts." bind:nComments -> dirty=true
-        ToggleRow "Mentions" "When a collaborator mentions you in a document." bind:nMentions -> dirty=true
-        ToggleRow "Weekly summary" "A Monday email with your words written and reads." bind:nWeekly -> dirty=true
-        ToggleRow "Product news" "New features and tips for writing in Plume." bind:nProduct -> dirty=true
-        ToggleRow "Security alerts" "Sign-ins from new devices and password changes." bind:nSecurity -> dirty=true
-      Card gap:12 border:"#FFFCA5A5"
-        Text.strong "Danger zone" color:#FFDC2626
+        ToggleRow "Comments" "When someone comments on your drafts or posts." bind=nComments onChanged={dirty=true}
+        ToggleRow "Mentions" "When a collaborator mentions you in a document." bind=nMentions onChanged={dirty=true}
+        ToggleRow "Weekly summary" "A Monday email with your words written and reads." bind=nWeekly onChanged={dirty=true}
+        ToggleRow "Product news" "New features and tips for writing in Plume." bind=nProduct onChanged={dirty=true}
+        ToggleRow "Security alerts" "Sign-ins from new devices and password changes." bind=nSecurity onChanged={dirty=true}
+      Card gap=12 border="#FFFCA5A5"
+        Text.strong "Danger zone" color=#FFDC2626
         Row between middle
-          Column gap:4
+          Column gap=4
             Text.strong "Delete account"
             Text.muted "Permanently remove your account, drafts and published work."
-          Button.destructive "Delete account" -> confirmDelete=true
+          Button.destructive "Delete account" onTap={confirmDelete=true}
         if confirmDelete
-          Callout "Delete your account?" "This cannot be undone. All your documents will be erased." tone:"danger"
-          Row gap:8 end
-            Button.ghost "Keep account" -> confirmDelete=false
-            Button.destructive "Yes, delete permanently" -> emit deleteAccount; confirmDelete=false
-    Row gap:8 end middle pad:[24,12,24,12] border-top:#FFE5E7EB
-      Text.muted "Changes apply to your whole account." visible:{dirty}
+          Callout "Delete your account?" "This cannot be undone. All your documents will be erased." tone="danger"
+          Row gap=8 end
+            Button.ghost "Keep account" onTap={confirmDelete=false}
+            Button.destructive "Yes, delete permanently" onTap={emit deleteAccount; confirmDelete=false}
+    Row gap=8 end middle pad=[24,12,24,12] border-top=#FFE5E7EB
+      Text.muted "Changes apply to your whole account." visible={dirty}
       Spacer grow
-      Button.outline "Cancel" enabled:{dirty} -> name="Maya Reyes"; username="mayawrites"; bio="Essayist and newsletter writer. Drafting my second book in Plume."; tz="(GMT+01:00) Paris"; isPublic=true; nComments=true; nMentions=true; nWeekly=false; nProduct=true; nSecurity=true; dirty=false
-      Button "Save changes" enabled:{dirty&&length(bio)<=160} -> emit save; dirty=false; toast "Settings saved"
+      Button.outline "Cancel" enabled={dirty} onTap={name="Maya Reyes"; username="mayawrites"; bio="Essayist and newsletter writer. Drafting my second book in Plume."; tz="(GMT+01:00) Paris"; isPublic=true; nComments=true; nMentions=true; nWeekly=false; nProduct=true; nSecurity=true; dirty=false}
+      Button "Save changes" enabled={dirty&&length(bio)<=160} onTap={emit save; dirty=false; toast "Settings saved"}

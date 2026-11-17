@@ -1,23 +1,23 @@
 Screen
   if phase=="ready"
-    TopBar "Let's jump!" "Today: {today.name}" back:true -> emit open_home
-    HeroSession "{today.name}" "{today.rounds} rounds. Jump {today.work}, rest {today.rest}." minutes:{today.minutes} cta:"Start" audience:"kid" -> phase="set"; left=3; round=0; count=0; elapsed=0; paused=false
-    StreakFlame "days in a row" "Keep it going!" count:{streak}
+    TopBar "Let's jump!" "Today: {today.name}" back=true onTap={emit open_home}
+    HeroSession "{today.name}" "{today.rounds} rounds. Jump {today.work}, rest {today.rest}." minutes={today.minutes} cta="Start" audience="kid" onPressed={phase="set"; left=3; round=0; count=0; elapsed=0; paused=false}
+    StreakFlame "days in a row" "Keep it going!" count={streak}
   if phase=="set"
-    SessionBar "Get ready!" "{today.name}" -> phase="ready"
-    SessionDial "Here we go!" left:{left} phase:{"set"} round:{round} rounds:{today.rounds} work:{today.work} rest:{today.rest} paused:{paused} audience:"kid"
-    SessionControls bind:paused -> phase="done"
+    SessionBar "Get ready!" "{today.name}" onPressed={phase="ready"}
+    SessionDial "Here we go!" left={left} phase={"set"} round={round} rounds={today.rounds} work={today.work} rest={today.rest} paused={paused} audience="kid"
+    SessionControls bind=paused onPressed={phase="done"}
   if phase=="work"
-    SessionBar "Jump!" "{today.name}" -> phase="done"
-    SessionDial "Jump jump jump!" left:{left} phase:{"work"} round:{round} rounds:{today.rounds} work:{today.work} rest:{today.rest} paused:{paused} audience:"kid"
-    TapPad "Tap each jump" bind:count
-    SessionControls bind:paused -> phase="done"
+    SessionBar "Jump!" "{today.name}" onPressed={phase="done"}
+    SessionDial "Jump jump jump!" left={left} phase={"work"} round={round} rounds={today.rounds} work={today.work} rest={today.rest} paused={paused} audience="kid"
+    TapPad "Tap each jump" bind=count
+    SessionControls bind=paused onPressed={phase="done"}
   if phase=="rest"
-    SessionBar "Rest" "{today.name}" -> phase="done"
-    SessionDial "Breathe. Shake it out!" left:{left} phase:{"rest"} round:{round} rounds:{today.rounds} work:{today.work} rest:{today.rest} paused:{paused} audience:"kid"
-    TapPad "Missed some? Add them" bind:count
-    SessionControls bind:paused -> phase="done"
+    SessionBar "Rest" "{today.name}" onPressed={phase="done"}
+    SessionDial "Breathe. Shake it out!" left={left} phase={"rest"} round={round} rounds={today.rounds} work={today.work} rest={today.rest} paused={paused} audience="kid"
+    TapPad "Missed some? Add them" bind=count
+    SessionControls bind=paused onPressed={phase="done"}
   if phase=="done"
-    SessionSummary "You did it!" "Great job. See you next time!" jumps:{count} best:{0} rounds:{round} of:{today.rounds} seconds:{elapsed} streak:{streak} streakLabel:"days in a row" audience:"kid"
-    BigButton "Home" icon:"home" -> emit open_home
-    BigButton "See my jumps" icon:"star" tone:"quiet" -> emit open_history
+    SessionSummary "You did it!" "Great job. See you next time!" jumps={count} best={0} rounds={round} of={today.rounds} seconds={elapsed} streak={streak} streakLabel="days in a row" audience="kid"
+    BigButton "Home" icon="home" onPressed={emit open_home}
+    BigButton "See my jumps" icon="star" tone="quiet" onPressed={emit open_history}

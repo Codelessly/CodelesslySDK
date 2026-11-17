@@ -10,70 +10,70 @@ state rows=[{"id":1,"name":"Maya Reyes","company":"Northwind Traders","status":"
 App
   Sidebar
     Text.strong "Fieldbook"
-    NavItem "Dashboard" icon:"dashboard" selected:{tab=="dashboard"} -> tab="dashboard"
-    NavItem "Customers" icon:"groups" selected:{tab=="customers"} -> tab="customers"
-    NavItem "Deals" icon:"handshake" badge:"8" selected:{tab=="deals"} -> tab="deals"
-    NavItem "Tasks" icon:"task_alt" badge:"5" selected:{tab=="tasks"} -> tab="tasks"
-    NavItem "Reports" icon:"bar_chart" selected:{tab=="reports"} -> tab="reports"
+    NavItem "Dashboard" icon="dashboard" selected={tab=="dashboard"} onTap={tab="dashboard"}
+    NavItem "Customers" icon="groups" selected={tab=="customers"} onTap={tab="customers"}
+    NavItem "Deals" icon="handshake" badge="8" selected={tab=="deals"} onTap={tab="deals"}
+    NavItem "Tasks" icon="task_alt" badge="5" selected={tab=="tasks"} onTap={tab="tasks"}
+    NavItem "Reports" icon="bar_chart" selected={tab=="reports"} onTap={tab="reports"}
     Spacer grow
-    Row gap:10 middle
-      Avatar "Sam Patel" size:32
+    Row gap=10 middle
+      Avatar "Sam Patel" size=32
       Text.muted "Sam Patel"
   Main
     Nav
-      Row gap:12 middle
-        Heading "Customers" level:1
+      Row gap=12 middle
+        Heading "Customers" level=1
         Badge.neutral "248"
-      Row gap:8
-        Button.outline "Import" -> emit import
-        Button "Add customer" -> emit addCustomer
-    Column pad:24 gap:16
-      Row gap:12 middle
-        Input "Search customers" bind:q w:280
-        Select bind:status items:["All","Active","Trial","Churned"] w:160
+      Row gap=8
+        Button.outline "Import" onTap={emit import}
+        Button "Add customer" onTap={emit addCustomer}
+    Column pad=24 gap=16
+      Row gap=12 middle
+        Input "Search customers" bind=q w=280
+        Select bind=status items=["All","Active","Trial","Churned"] w=160
         Spacer grow
-        Segments bind:view options:["All","Mine","Starred"]
+        Segments bind=view options=["All","Mine","Starred"]
       if length(picked)>0
-        Row between middle fill:#FF1E293B radius:8 pad:[16,8,16,8]
-          Text "{length(picked)} selected" color:#FFFFFFFF weight:600
-          Row gap:8
-            Button.outline "Export" -> emit exportCustomers picked
-            Button.destructive "Delete" -> rows=removeWhere(rows,r=>contains(picked,r.id)); picked=[]
-      Card gap:0 pad:0
-        Row gap:12 middle pad:[16,8,16,8] fill:#FFF8FAFC
-          Checkbox checked:{length(picked)==length(rows)} -> picked=length(picked)==length(rows)?[]:map(rows,x=>x.id)
-          Button.ghost "Name" w:200 -> desc=sort=="name"?!desc:false; sort="name"
-          Button.ghost "Company" w:180 -> desc=sort=="company"?!desc:false; sort="company"
-          Button.ghost "Status" w:110 -> desc=sort=="status"?!desc:false; sort="status"
-          Button.ghost "Plan" w:100 -> desc=sort=="plan"?!desc:false; sort="plan"
-          Button.ghost "Monthly value" w:130 -> desc=sort=="value"?!desc:false; sort="value"
-          Button.ghost "Last seen" w:120 -> desc=sort=="days"?!desc:false; sort="days"
+        Row between middle fill=#FF1E293B radius=8 pad=[16,8,16,8]
+          Text "{length(picked)} selected" color=#FFFFFFFF weight=600
+          Row gap=8
+            Button.outline "Export" onTap={emit exportCustomers picked}
+            Button.destructive "Delete" onTap={rows=removeWhere(rows,r=>contains(picked,r.id)); picked=[]}
+      Card gap=0 pad=0
+        Row gap=12 middle pad=[16,8,16,8] fill=#FFF8FAFC
+          Checkbox checked={length(picked)==length(rows)} onChange={picked=length(picked)==length(rows)?[]:map(rows,x=>x.id)}
+          Button.ghost "Name" w=200 onTap={desc=sort=="name"?!desc:false; sort="name"}
+          Button.ghost "Company" w=180 onTap={desc=sort=="company"?!desc:false; sort="company"}
+          Button.ghost "Status" w=110 onTap={desc=sort=="status"?!desc:false; sort="status"}
+          Button.ghost "Plan" w=100 onTap={desc=sort=="plan"?!desc:false; sort="plan"}
+          Button.ghost "Monthly value" w=130 onTap={desc=sort=="value"?!desc:false; sort="value"}
+          Button.ghost "Last seen" w=120 onTap={desc=sort=="days"?!desc:false; sort="days"}
           Spacer grow
         Divider
         each r in desc?sortByDesc(rows,x=>sort=="name"?x.name:sort=="company"?x.company:sort=="status"?x.status:sort=="plan"?x.plan:sort=="value"?x.value:x.days):sortBy(rows,x=>sort=="name"?x.name:sort=="company"?x.company:sort=="status"?x.status:sort=="plan"?x.plan:sort=="value"?x.value:x.days)
           if (status=="All"||r.status==status)&&(q==""||contains(lower(r.name),lower(q))||contains(lower(r.company),lower(q)))&&(view=="All"||(view=="Starred"&&r.starred)||(view=="Mine"&&r.owner=="Me"))
-            Column gap:0
-              Row gap:12 middle pad:[16,10,16,10] fill:{contains(picked,r.id)?"#FFEFF6FF":"#00FFFFFF"}
-                Checkbox checked:{contains(picked,r.id)} -> picked=contains(picked,r.id)?without(picked,r.id):append(picked,r.id)
-                Row gap:10 middle w:200
-                  Avatar "{r.name}" size:32
+            Column gap=0
+              Row gap=12 middle pad=[16,10,16,10] fill={contains(picked,r.id)?"#FFEFF6FF":"#00FFFFFF"}
+                Checkbox checked={contains(picked,r.id)} onChange={picked=contains(picked,r.id)?without(picked,r.id):append(picked,r.id)}
+                Row gap=10 middle w=200
+                  Avatar "{r.name}" size=32
                   Text.strong "{r.name}"
-                Text "{r.company}" w:180
-                Row w:110
+                Text "{r.company}" w=180
+                Row w=110
                   if r.status=="Active"
                     Badge.success "Active"
                   if r.status=="Trial"
                     Badge.warning "Trial"
                   if r.status=="Churned"
                     Badge.error "Churned"
-                Text "{r.plan}" w:100
-                Text "{money(r.value,'$',0)}" w:130
-                Text.muted "{r.seen}" w:120
+                Text "{r.plan}" w=100
+                Text "{money(r.value,'$',0)}" w=130
+                Text.muted "{r.seen}" w=120
                 Spacer grow
-                IconButton "more_vert" -> emit rowMenu r.id
+                IconButton "more_vert" onTap={emit rowMenu r.id}
               Divider
       Row between middle
         Text.muted "Rows {page*10+1}-{page*10+10} of 248"
-        Row gap:8
-          Button.outline "Previous" -> page=max(0,page-1)
-          Button.outline "Next" -> page=min(24,page+1)
+        Row gap=8
+          Button.outline "Previous" onTap={page=max(0,page-1)}
+          Button.outline "Next" onTap={page=min(24,page+1)}

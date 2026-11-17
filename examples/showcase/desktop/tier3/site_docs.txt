@@ -2,66 +2,66 @@ state version="v2.4"
 state page="quickstart"
 Page
   Nav
-    Brand "Beacon" icon:"flare"
-    Row gap:12
+    Brand "Beacon" icon="flare"
+    Row gap=12
       HeaderSearchInput "Search the docs"
-      Select bind:version items:["v2.4","v2.3","v2.2"]
+      Select bind=version items=["v2.4","v2.3","v2.2"]
   Section
-    Row gap:32 top
-      Column w:220 gap:20
-        Column gap:4
+    Row gap=32 top
+      Column w=220 gap=20
+        Column gap=4
           Text.eyebrow "START"
-          NavItem "Overview" icon:"home" selected:{page=="overview"} -> page="overview"
-          NavItem "Quickstart" icon:"bolt" selected:{page=="quickstart"} -> page="quickstart"
-          NavItem "Installation" icon:"download" selected:{page=="installation"} -> page="installation"
-          NavItem "Configuration" icon:"tune" selected:{page=="configuration"} -> page="configuration"
-        Column gap:4
+          NavItem "Overview" icon="home" selected={page=="overview"} onTap={page="overview"}
+          NavItem "Quickstart" icon="bolt" selected={page=="quickstart"} onTap={page="quickstart"}
+          NavItem "Installation" icon="download" selected={page=="installation"} onTap={page="installation"}
+          NavItem "Configuration" icon="tune" selected={page=="configuration"} onTap={page="configuration"}
+        Column gap=4
           Text.eyebrow "GUIDES"
-          NavItem "Authentication" icon:"lock" selected:{page=="auth"} -> page="auth"
-          NavItem "Events and tracking" icon:"timeline" selected:{page=="events"} -> page="events"
-          NavItem "Offline mode" icon:"cloud_off" selected:{page=="offline"} -> page="offline"
-          NavItem "Testing" icon:"science" selected:{page=="testing"} -> page="testing"
-        Column gap:4
+          NavItem "Authentication" icon="lock" selected={page=="auth"} onTap={page="auth"}
+          NavItem "Events and tracking" icon="timeline" selected={page=="events"} onTap={page="events"}
+          NavItem "Offline mode" icon="cloud_off" selected={page=="offline"} onTap={page="offline"}
+          NavItem "Testing" icon="science" selected={page=="testing"} onTap={page="testing"}
+        Column gap=4
           Text.eyebrow "REFERENCE"
-          NavItem "Client API" icon:"code" selected:{page=="client"} -> page="client"
-          NavItem "Options" icon:"settings" selected:{page=="options"} -> page="options"
-          NavItem "Errors" icon:"error" selected:{page=="errors"} -> page="errors"
-          NavItem "Changelog" icon:"history" selected:{page=="changelog"} -> page="changelog"
-      Column grow gap:20
-        Breadcrumb items:["Docs","Start","Quickstart"]
-        Heading "Quickstart" level:1
+          NavItem "Client API" icon="code" selected={page=="client"} onTap={page="client"}
+          NavItem "Options" icon="settings" selected={page=="options"} onTap={page="options"}
+          NavItem "Errors" icon="error" selected={page=="errors"} onTap={page="errors"}
+          NavItem "Changelog" icon="history" selected={page=="changelog"} onTap={page="changelog"}
+      Column grow gap=20
+        Breadcrumb items=["Docs","Start","Quickstart"]
+        Heading "Quickstart" level=1
         Text.lead "Get Beacon running in your app in about five minutes: install the SDK, create a client and send your first event."
-        Column gap:12
-          Row gap:12 top
-            Box w:28 h:28 radius:14 fill:#FF2563EB center
-              Text.strong "1" color:#FFFFFFFF
-            Heading "Install the SDK" level:3
-          CodeBlock "Terminal" "npm install @beacon/sdk" language:"bash" copyable:true
-        Column gap:12
-          Row gap:12 top
-            Box w:28 h:28 radius:14 fill:#FF2563EB center
-              Text.strong "2" color:#FFFFFFFF
-            Heading "Initialize the client" level:3
-          CodeBlock "app.js" "import { Beacon } from '@beacon/sdk';\n\nconst beacon = new Beacon({ apiKey: 'YOUR_API_KEY' });" language:"javascript" copyable:true
-        Column gap:12
-          Row gap:12 top
-            Box w:28 h:28 radius:14 fill:#FF2563EB center
-              Text.strong "3" color:#FFFFFFFF
-            Heading "Send your first event" level:3
-          CodeBlock "app.js" "beacon.track('app_opened', { source: 'quickstart' });" language:"javascript" copyable:true
-        Callout "Note" "Keep your API key out of source control. Load it from an environment variable or your secrets manager." tone:accent icon:"info"
-        Heading "Options" level:2
-        Card gap:0
-          TableHeader columns:["Option","Type","Default","Description"]
-          TableRow cells:["apiKey","string","none","Your project key. Required."]
-          TableRow cells:["environment","string","production","Where events are recorded."]
-          TableRow cells:["flushInterval","number","5000","Milliseconds between event uploads."]
-          TableRow cells:["debug","boolean","false","Logs every call to the console."]
+        Column gap=12
+          Row gap=12 top
+            Box w=28 h=28 radius=14 fill=#FF2563EB center
+              Text.strong "1" color=#FFFFFFFF
+            Heading "Install the SDK" level=3
+          CodeBlock "Terminal" "npm install @beacon/sdk" language="bash" copyable=true
+        Column gap=12
+          Row gap=12 top
+            Box w=28 h=28 radius=14 fill=#FF2563EB center
+              Text.strong "2" color=#FFFFFFFF
+            Heading "Initialize the client" level=3
+          CodeBlock "app.js" "import { Beacon } from '@beacon/sdk';\n\nconst beacon = new Beacon({ apiKey: 'YOUR_API_KEY' });" language="javascript" copyable=true
+        Column gap=12
+          Row gap=12 top
+            Box w=28 h=28 radius=14 fill=#FF2563EB center
+              Text.strong "3" color=#FFFFFFFF
+            Heading "Send your first event" level=3
+          CodeBlock "app.js" "beacon.track('app_opened', { source: 'quickstart' });" language="javascript" copyable=true
+        Callout "Note" "Keep your API key out of source control. Load it from an environment variable or your secrets manager." tone=accent icon="info"
+        Heading "Options" level=2
+        Card gap=0
+          TableHeader columns=["Option","Type","Default","Description"]
+          TableRow cells=["apiKey","string","none","Your project key. Required."]
+          TableRow cells=["environment","string","production","Where events are recorded."]
+          TableRow cells=["flushInterval","number","5000","Milliseconds between event uploads."]
+          TableRow cells=["debug","boolean","false","Logs every call to the console."]
         Divider
         Row between
-          Button.outline "← Previous: Overview" -> page="overview"
-          Button.outline "Next: Installation →" -> page="installation"
-      Column w:200 gap:8
+          Button.outline "← Previous: Overview" onTap={page="overview"}
+          Button.outline "Next: Installation →" onTap={page="installation"}
+      Column w=200 gap=8
         Text.eyebrow "ON THIS PAGE"
         Link "Install the SDK"
         Link "Initialize the client"

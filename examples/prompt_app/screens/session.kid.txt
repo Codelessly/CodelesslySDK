@@ -6,27 +6,27 @@ state paused=false
 state started=false
 state done=false
 
-every 1s when started && !paused && !done -> remaining=remaining>1?remaining-1:(phase=="Jump"?(today.rest):(today.work)); phase=remaining>1?phase:(phase=="Jump"?"Rest":"Jump"); round=(remaining>1||phase=="Jump")?round:round+1; done=(remaining<=1&&phase=="Rest"&&round>=today.rounds)
+every 1s when started && !paused && !done onTick={remaining=remaining>1?remaining-1:(phase=="Jump"?(today.rest):(today.work)); phase=remaining>1?phase:(phase=="Jump"?"Rest":"Jump"); round=(remaining>1||phase=="Jump")?round:round+1; done=(remaining<=1&&phase=="Rest"&&round>=today.rounds)}
 
-Column scroll gap:16 pad:16
+Column scroll gap=16 pad=16
   Row between middle
-    BackButton "Home" -> emit open_home
-    StatusBadge "Round {round} of {today.rounds}" tone:info
-  Card gap:8 center
+    BackButton "Home" onPressed={emit open_home}
+    StatusBadge "Round {round} of {today.rounds}" tone=info
+  Card gap=8 center
     Text.heading2 "{phase=='Jump' ? 'JUMP!' : 'Rest. Breathe!'}"
     Text.heading1 "{remaining}"
-    Progress bind:{0}
+    Progress bind={0}
   if !started
-    Button "Let's go!" -> started=true; remaining=today.work; phase="Jump"; round=1; count=0; emit start_session
+    Button "Let's go!" onTap={started=true; remaining=today.work; phase="Jump"; round=1; count=0; emit start_session}
   if started
-    Card gap:12 center
+    Card gap=12 center
       Text.muted "Your jumps"
       Text.heading1 "{count}"
-      Button "Tap! +1" h:80 -> count=count+1
+      Button "Tap! +1" h=80 onTap={count=count+1}
       if count>=50
         Text.success "Wow! 50 jumps! Keep going!"
-    Row gap:12
-      Button.outline "{paused ? 'Resume' : 'Pause'}" grow -> paused=!paused
-      Button.secondary "Finish" grow -> emit finish_session count
+    Row gap=12
+      Button.outline "{paused ? 'Resume' : 'Pause'}" grow onTap={paused=!paused}
+      Button.secondary "Finish" grow onTap={emit finish_session count}
   if done
-    Banner "You did it!" "All rounds done. You are a star!" tone:success
+    Banner "You did it!" "All rounds done. You are a star!" tone=success

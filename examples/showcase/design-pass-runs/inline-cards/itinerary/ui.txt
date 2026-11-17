@@ -4,75 +4,75 @@ state d1c=false
 state d2a=false
 state d2b=false
 state d2c=false
-Card w:390 gap:12
+Card w=390 gap=12
   Text.title "Two days in Kyoto"
-  Row gap:8 middle
+  Row gap=8 middle
     Icon "event_available"
     Text.strong "{(d1a?0:1)+(d1b?0:1)+(d1c?0:1)+(d2a?0:1)+(d2b?0:1)+(d2c?0:1)} of 6 bookings left"
-  Progress bind:{0}
+  Progress bind={0}
   Divider
   Row between middle
     Text.heading "Day 1: Higashiyama"
     Badge.info "Temples"
   Accordion "08:00 Fushimi Inari Shrine"
-    Column gap:4 pad:8
+    Column gap=4 pad=8
       Text "Walk thousands of torii gates up the mountain. Go early to avoid crowds."
       Text.muted "Stay about 2 hours"
-  Row gap:8 middle
+  Row gap=8 middle
     Icon "train"
     Text.caption "JR Nara Line to Kyoto Station, 5 min, then bus 206, 20 min"
   Accordion "11:30 Lunch at Nishiki Market"
-    Column gap:4 pad:8
+    Column gap=4 pad=8
       Text "Try tamagoyaki, pickles and fresh tofu doughnuts along the covered street."
       Text.muted "Stay about 1.5 hours"
-  Row gap:8 middle
+  Row gap=8 middle
     Icon "directions_walk"
     Text.caption "Walk east to Gion, 20 min"
   Accordion "14:00 Kiyomizu-dera"
-    Column gap:4 pad:8
+    Column gap=4 pad=8
       Text "Wooden stage over the hillside. Wander Sannenzaka and Ninenzaka lanes after."
       Text.muted "Stay about 2 hours"
-  Row gap:8 middle
+  Row gap=8 middle
     Icon "directions_walk"
     Text.caption "Walk to Gion, 15 min"
   Accordion "18:00 Gion evening stroll and dinner"
-    Column gap:4 pad:8
+    Column gap=4 pad=8
       Text "Hanamikoji Street at dusk, then kaiseki or izakaya dinner."
       Text.muted "Stay about 2.5 hours"
   Text.strong "Book ahead"
-  Checkbox "Dinner reservation in Gion" bind:d1a
-  Checkbox "Kiyomizu-dera evening illumination tickets" bind:d1b
-  Checkbox "Tea ceremony in Higashiyama" bind:d1c
+  Checkbox "Dinner reservation in Gion" bind=d1a
+  Checkbox "Kiyomizu-dera evening illumination tickets" bind=d1b
+  Checkbox "Tea ceremony in Higashiyama" bind=d1c
   Divider
   Row between middle
     Text.heading "Day 2: Arashiyama and north"
     Badge.success "Nature"
   Accordion "08:30 Bamboo Grove"
-    Column gap:4 pad:8
+    Column gap=4 pad=8
       Text "Quiet path through towering bamboo, best before the tour groups arrive."
       Text.muted "Stay about 1 hour"
-  Row gap:8 middle
+  Row gap=8 middle
     Icon "directions_walk"
     Text.caption "Walk to Tenryu-ji, 5 min"
   Accordion "10:00 Tenryu-ji Garden"
-    Column gap:4 pad:8
+    Column gap=4 pad=8
       Text "Zen temple with a pond garden that has barely changed in 700 years."
       Text.muted "Stay about 1.5 hours"
-  Row gap:8 middle
+  Row gap=8 middle
     Icon "train"
     Text.caption "JR Sagano Line then bus 205, 45 min total"
   Accordion "13:00 Lunch and Kinkaku-ji"
-    Column gap:4 pad:8
+    Column gap=4 pad=8
       Text "Soba lunch nearby, then the Golden Pavilion reflected in its pond."
       Text.muted "Stay about 2.5 hours"
-  Row gap:8 middle
+  Row gap=8 middle
     Icon "directions_bus"
     Text.caption "Bus 101 to Gion, 40 min"
   Accordion "17:00 Pontocho Alley dinner"
-    Column gap:4 pad:8
+    Column gap=4 pad=8
       Text "Lantern-lit lane along the Kamo River with small restaurants."
       Text.muted "Stay about 2 hours"
   Text.strong "Book ahead"
-  Checkbox "Pontocho dinner table" bind:d2a
-  Checkbox "Tenryu-ji garden and temple entry" bind:d2b
-  Checkbox "Rickshaw ride in Arashiyama" bind:d2c
+  Checkbox "Pontocho dinner table" bind=d2a
+  Checkbox "Tenryu-ji garden and temple entry" bind=d2b
+  Checkbox "Rickshaw ride in Arashiyama" bind=d2c

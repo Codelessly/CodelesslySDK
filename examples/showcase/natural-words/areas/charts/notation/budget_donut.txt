@@ -1,13 +1,13 @@
-Card gap:16 pad:16
+Card gap=16 pad=16
   Text.title "Household budget"
   Text.muted "This month"
-  Stack center middle h:240
-    Donut values:[1650,720,380,290,460,700] labels:["Rent 39%","Groceries 17%","Transport 9%","Utilities 7%","Dining out 11%","Savings 17%"]
-    Column center gap:2
+  Stack center middle h=240
+    Donut values=[1650,720,380,290,460,700] labels=["Rent 39%","Groceries 17%","Transport 9%","Utilities 7%","Dining out 11%","Savings 17%"]
+    Column center gap=2
       Text.heading "$4,200"
       Text.caption "Total" center
   Divider
-  Column gap:8
+  Column gap=8
     Row between
       Text "Rent · 39%"
       Text.strong "$1,650"

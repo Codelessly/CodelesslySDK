@@ -1,11 +1,11 @@
 state remaining=300
 state running=false
-every 1s when running -> remaining=max(0,remaining-1); running=remaining>1
-Card gap:16 pad:20
+every 1s when running onTick={remaining=max(0,remaining-1); running=remaining>1}
+Card gap=16 pad=20
   Text.heading "Countdown"
-  Text "{duration(remaining)}" size:64 weight:700
-  Progress bind:{remaining/300}
-  Row gap:8 center
-    Button "Start" visible:{!running} -> running=remaining>0
-    Button.secondary "Pause" visible:{running} -> running=false
-    Button.outline "Reset" -> running=false; remaining=300
+  Text "{duration(remaining)}" size=64 weight=700
+  Progress bind={remaining/300}
+  Row gap=8 center
+    Button "Start" visible={!running} onTap={running=remaining>0}
+    Button.secondary "Pause" visible={running} onTap={running=false}
+    Button.outline "Reset" onTap={running=false; remaining=300}

@@ -1,11 +1,11 @@
-Card gap:12
+Card gap=12
   Text.title "Watchlist"
   state stocks=[{"name":"AAPL","price":189.34,"change":1.24,"history":[184,185,183,186,187,188,189]},{"name":"TSLA","price":242.18,"change":-2.37,"history":[255,252,250,248,246,244,242]},{"name":"MSFT","price":415.6,"change":0.58,"history":[410,411,409,412,413,414,415]}]
   each s in stocks
-    Row between middle gap:12
-      Column gap:2 w:70
+    Row between middle gap=12
+      Column gap=2 w=70
         Text.strong "{s.name}"
         Text.caption "{money(s.price,'$',2)}"
-      LineChart values:{s.history} w:90 h:40 color:{"s.change>=0?'#FF2E7D32':'#FFC62828'"}
-      Text.strong "{s.change>=0?'+':''}{fixed(s.change,2)}%" color:{"s.change>=0?'#FF2E7D32':'#FFC62828'"}
+      LineChart values={s.history} w=90 h=40 color={"s.change>=0?'#FF2E7D32':'#FFC62828'"}
+      Text.strong "{s.change>=0?'+':''}{fixed(s.change,2)}%" color={"s.change>=0?'#FF2E7D32':'#FFC62828'"}
     Divider

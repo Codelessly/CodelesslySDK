@@ -7,48 +7,48 @@ state storageLimit=500
 state apiCalls=742000
 state apiLimit=1000000
 state invoices=[{"id":"INV-2025-006","date":"Jun 14, 2025","desc":"Team plan, 25 seats","amount":180,"status":"Due"},{"id":"INV-2025-005","date":"May 14, 2025","desc":"Team plan, 25 seats","amount":180,"status":"Paid"},{"id":"INV-2025-004","date":"Apr 14, 2025","desc":"Team plan, 25 seats + 50 GB add-on","amount":195,"status":"Paid"},{"id":"INV-2025-003","date":"Mar 14, 2025","desc":"Team plan, 25 seats","amount":180,"status":"Paid"},{"id":"INV-2025-002","date":"Feb 14, 2025","desc":"Team plan, 20 seats","amount":150,"status":"Overdue"},{"id":"INV-2025-001","date":"Jan 14, 2025","desc":"Team plan, 20 seats","amount":150,"status":"Paid"}]
-Row w:1280 top
-  Sidebar bind:nav w:260 brand:"Northwind Cloud" sectionLabel:"Account settings" items:["Profile","Workspace","Billing","Team members","Security","Integrations","Notifications"] icons:["person","apartment","credit_card","group","lock","extension","notifications"] badges:["","","","3","","",""]
-  Column grow gap:24 pad:[40,32,40,40] scroll
-    Column gap:4
+Row w=1280 top
+  Sidebar bind=nav w=260 brand="Northwind Cloud" sectionLabel="Account settings" items=["Profile","Workspace","Billing","Team members","Security","Integrations","Notifications"] icons=["person","apartment","credit_card","group","lock","extension","notifications"] badges=["","","","3","","",""]
+  Column grow gap=24 pad=[40,32,40,40] scroll
+    Column gap=4
       Text.pageTitle "Billing"
       Text.bodySecondary "Manage your plan, payment method and invoices for Northwind Labs."
-    Panel "Current plan" "Team plan, renews on Jul 14, 2025" icon:"workspace_premium" open:true
-      Column gap:16 pad:16
+    Panel "Current plan" "Team plan, renews on Jul 14, 2025" icon="workspace_premium" open=true
+      Column gap=16 pad=16
         Row between middle
-          Column gap:4
-            Row gap:8 middle
+          Column gap=4
+            Row gap=8 middle
               Text.heading2 "Team"
               Badge.success "Active"
             Paragraph "{cycle=='Monthly' ? '$180 per month' : '$1,728 per year'} for up to 25 seats, 500 GB storage and 1M API calls."
-          Segments bind:cycle options:["Monthly","Annual"]
+          Segments bind=cycle options=["Monthly","Annual"]
         if cycle=="Annual"
-          Callout "You save $432 a year" "Switching to annual billing takes effect at your next renewal." tone:good icon:"savings"
+          Callout "You save $432 a year" "Switching to annual billing takes effect at your next renewal." tone=good icon="savings"
         SectionLabel "Usage this period" "Resets Jul 14"
-        ProgressLine "Seats" "{seats} of {seatLimit} used" value:{seats/seatLimit}
-        ProgressLine "Storage" "{storage} GB of {storageLimit} GB" value:{storage/storageLimit}
-        ProgressLine "API calls" "{round(apiCalls/1000,0)}k of {round(apiLimit/1000,0)}k" value:{apiCalls/apiLimit}
-        Row gap:10 end
-          ActionButton "Change plan" tone:quiet icon:"swap_vert" -> emit changePlan
-          ActionButton "Add seats" tone:primary icon:"person_add" -> emit addSeats
-    Panel "Payment method" "Used for all future invoices" icon:"credit_card" open:true
-      Column gap:12 pad:16
-        Details rows:{[["Card","Visa ending in 4242"],["Expires","08 / 2027"],["Cardholder","Maya Okafor"],["Billing email","billing@northwindlabs.io"],["Billing address","218 Harbor Street, Portland, OR 97209"]]} icons:["credit_card","event","person","mail","home"]
-        Row gap:10 end
-          ActionButton "Edit billing details" tone:quiet icon:"edit" -> emit editBilling
-          ActionButton "Update card" tone:dark icon:"credit_card" -> emit updateCard
-    Panel "Invoices" "Last six months" icon:"receipt_long" open:true
-      Column pad:16 gap:4
+        ProgressLine "Seats" "{seats} of {seatLimit} used" value={seats/seatLimit}
+        ProgressLine "Storage" "{storage} GB of {storageLimit} GB" value={storage/storageLimit}
+        ProgressLine "API calls" "{round(apiCalls/1000,0)}k of {round(apiLimit/1000,0)}k" value={apiCalls/apiLimit}
+        Row gap=10 end
+          ActionButton "Change plan" tone=quiet icon="swap_vert" onPressed={emit changePlan}
+          ActionButton "Add seats" tone=primary icon="person_add" onPressed={emit addSeats}
+    Panel "Payment method" "Used for all future invoices" icon="credit_card" open=true
+      Column gap=12 pad=16
+        Details rows={[["Card","Visa ending in 4242"],["Expires","08 / 2027"],["Cardholder","Maya Okafor"],["Billing email","billing@northwindlabs.io"],["Billing address","218 Harbor Street, Portland, OR 97209"]]} icons=["credit_card","event","person","mail","home"]
+        Row gap=10 end
+          ActionButton "Edit billing details" tone=quiet icon="edit" onPressed={emit editBilling}
+          ActionButton "Update card" tone=dark icon="credit_card" onPressed={emit updateCard}
+    Panel "Invoices" "Last six months" icon="receipt_long" open=true
+      Column pad=16 gap=4
         Row middle
-          TableHeader bind:sort desc:true columns:["Invoice","Date","Description","Amount","Status"] keys:["id","date","desc","amount","status"] grow
-          Spacer w:48
+          TableHeader bind=sort desc=true columns=["Invoice","Date","Description","Amount","Status"] keys=["id","date","desc","amount","status"] grow
+          Spacer w=48
         each inv in invoices
           Row middle
-            TableRow cells:{[inv.id,inv.date,inv.desc,money(inv.amount,"$",2)]} badge:{inv.status} grow
-            IconButton "download" w:48 -> toast "Downloading {inv.id}.pdf"
-    Panel "Danger zone" "These actions cannot be undone" icon:"warning" open:true
-      Column gap:14 pad:16
-        Callout "Cancelling ends access on Jul 14" "All 18 seats lose access and your 412 GB of files are kept for 30 days before deletion." tone:danger icon:"error"
-        Row gap:10
-          ActionButton "Cancel subscription" tone:danger icon:"block" -> emit cancelPlan
-          ActionButton "Delete account" tone:danger icon:"delete_forever" -> emit deleteAccount
+            TableRow cells={[inv.id,inv.date,inv.desc,money(inv.amount,"$",2)]} badge={inv.status} grow
+            IconButton "download" w=48 onTap={toast "Downloading {inv.id}.pdf"}
+    Panel "Danger zone" "These actions cannot be undone" icon="warning" open=true
+      Column gap=14 pad=16
+        Callout "Cancelling ends access on Jul 14" "All 18 seats lose access and your 412 GB of files are kept for 30 days before deletion." tone=danger icon="error"
+        Row gap=10
+          ActionButton "Cancel subscription" tone=danger icon="block" onPressed={emit cancelPlan}
+          ActionButton "Delete account" tone=danger icon="delete_forever" onPressed={emit deleteAccount}

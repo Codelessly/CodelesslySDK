@@ -1,96 +1,96 @@
 Page
   Nav
-    Brand "Beacon" icon:"flare"
-    Row gap:12 middle
-      Input "Search docs" bind:q w:280
-      Select bind:version items:["v2.4","v2.3","v2.2"]
+    Brand "Beacon" icon="flare"
+    Row gap=12 middle
+      Input "Search docs" bind=q w=280
+      Select bind=version items=["v2.4","v2.3","v2.2"]
   Section
-    Row gap:32 top
-      Column w:200 gap:20
-        Column gap:4
+    Row gap=32 top
+      Column w=200 gap=20
+        Column gap=4
           Text.eyebrow "START"
-          NavItem "Introduction" selected:{page=="intro"} -> page="intro"
-          NavItem "Quickstart" selected:{page=="quickstart"} -> page="quickstart"
-          NavItem "Installation" selected:{page=="install"} -> page="install"
-          NavItem "Configuration" selected:{page=="config"} -> page="config"
-        Column gap:4
+          NavItem "Introduction" selected={page=="intro"} onTap={page="intro"}
+          NavItem "Quickstart" selected={page=="quickstart"} onTap={page="quickstart"}
+          NavItem "Installation" selected={page=="install"} onTap={page="install"}
+          NavItem "Configuration" selected={page=="config"} onTap={page="config"}
+        Column gap=4
           Text.eyebrow "GUIDES"
-          NavItem "Authentication" selected:{page=="auth"} -> page="auth"
-          NavItem "Tracking events" selected:{page=="events"} -> page="events"
-          NavItem "Offline mode" selected:{page=="offline"} -> page="offline"
-          NavItem "Testing" selected:{page=="testing"} -> page="testing"
-        Column gap:4
+          NavItem "Authentication" selected={page=="auth"} onTap={page="auth"}
+          NavItem "Tracking events" selected={page=="events"} onTap={page="events"}
+          NavItem "Offline mode" selected={page=="offline"} onTap={page="offline"}
+          NavItem "Testing" selected={page=="testing"} onTap={page="testing"}
+        Column gap=4
           Text.eyebrow "REFERENCE"
-          NavItem "Client API" selected:{page=="client"} -> page="client"
-          NavItem "Options" selected:{page=="options"} -> page="options"
-          NavItem "Errors" selected:{page=="errors"} -> page="errors"
-          NavItem "Changelog" selected:{page=="changelog"} -> page="changelog"
-      Column grow gap:24
-        Breadcrumb items:["Docs","Start","Quickstart"]
+          NavItem "Client API" selected={page=="client"} onTap={page="client"}
+          NavItem "Options" selected={page=="options"} onTap={page="options"}
+          NavItem "Errors" selected={page=="errors"} onTap={page="errors"}
+          NavItem "Changelog" selected={page=="changelog"} onTap={page="changelog"}
+      Column grow gap=24
+        Breadcrumb items=["Docs","Start","Quickstart"]
         Heading "Quickstart"
         Text.lead "Get Beacon running in your app in about five minutes: install the package, create a client and send your first event."
-        Row gap:16 top
-          Box w:28 h:28 radius:14 fill:#FF2563EB center
-            Text.strong "1" color:#FFFFFFFF
-          Column grow gap:10
-            Heading "Install the SDK" level:3
+        Row gap=16 top
+          Box w=28 h=28 radius=14 fill=#FF2563EB center
+            Text.strong "1" color=#FFFFFFFF
+          Column grow gap=10
+            Heading "Install the SDK" level=3
             Text.muted "Add the package to your project with your package manager."
-            CodeBlock "Terminal" "npm install @beacon/sdk" language:"bash" copyable:true
-        Row gap:16 top
-          Box w:28 h:28 radius:14 fill:#FF2563EB center
-            Text.strong "2" color:#FFFFFFFF
-          Column grow gap:10
-            Heading "Create a client" level:3
+            CodeBlock "Terminal" "npm install @beacon/sdk" language="bash" copyable=true
+        Row gap=16 top
+          Box w=28 h=28 radius=14 fill=#FF2563EB center
+            Text.strong "2" color=#FFFFFFFF
+          Column grow gap=10
+            Heading "Create a client" level=3
             Text.muted "Initialise Beacon once, as early as possible in your app."
-            CodeBlock "index.js" "import { Beacon } from '@beacon/sdk';\n\nconst beacon = new Beacon({\n  apiKey: process.env.BEACON_KEY,\n});" language:"javascript" copyable:true
-        Row gap:16 top
-          Box w:28 h:28 radius:14 fill:#FF2563EB center
-            Text.strong "3" color:#FFFFFFFF
-          Column grow gap:10
-            Heading "Send your first event" level:3
+            CodeBlock "index.js" "import { Beacon } from '@beacon/sdk';\n\nconst beacon = new Beacon({\n  apiKey: process.env.BEACON_KEY,\n});" language="javascript" copyable=true
+        Row gap=16 top
+          Box w=28 h=28 radius=14 fill=#FF2563EB center
+            Text.strong "3" color=#FFFFFFFF
+          Column grow gap=10
+            Heading "Send your first event" level=3
             Text.muted "Events appear in your dashboard within a few seconds."
-            CodeBlock "index.js" "beacon.track('app_opened', {\n  platform: 'web',\n});" language:"javascript" copyable:true
-        Callout "Keep your key private" "Never commit your API key. Load it from an environment variable or a secrets manager." tone:accent icon:"info"
-        Heading "Options" level:3
-        Card pad:0 gap:0
-          Row pad:[20,12,20,12] gap:16
-            Text.columnHead "Name" w:120
-            Text.columnHead "Type" w:90
-            Text.columnHead "Default" w:110
+            CodeBlock "index.js" "beacon.track('app_opened', {\n  platform: 'web',\n});" language="javascript" copyable=true
+        Callout "Keep your key private" "Never commit your API key. Load it from an environment variable or a secrets manager." tone=accent icon="info"
+        Heading "Options" level=3
+        Card pad=0 gap=0
+          Row pad=[20,12,20,12] gap=16
+            Text.columnHead "Name" w=120
+            Text.columnHead "Type" w=90
+            Text.columnHead "Default" w=110
             Text.columnHead "Description" grow
-          Row pad:[20,0,20,0] gap:16 h:52 middle border-top:#FFE5E7EB
-            Text.mono "apiKey" w:120
-            Text.muted "string" w:90
-            Text.muted "none" w:110
+          Row pad=[20,0,20,0] gap=16 h=52 middle border-top=#FFE5E7EB
+            Text.mono "apiKey" w=120
+            Text.muted "string" w=90
+            Text.muted "none" w=110
             Text.body "Your project key. Required." grow
-          Row pad:[20,0,20,0] gap:16 h:52 middle border-top:#FFE5E7EB
-            Text.mono "env" w:120
-            Text.muted "string" w:90
-            Text.muted "\"production\"" w:110
+          Row pad=[20,0,20,0] gap=16 h=52 middle border-top=#FFE5E7EB
+            Text.mono "env" w=120
+            Text.muted "string" w=90
+            Text.muted "\"production\"" w=110
             Text.body "Which environment receives events." grow
-          Row pad:[20,0,20,0] gap:16 h:52 middle border-top:#FFE5E7EB
-            Text.mono "timeout" w:120
-            Text.muted "number" w:90
-            Text.muted "5000" w:110
+          Row pad=[20,0,20,0] gap=16 h=52 middle border-top=#FFE5E7EB
+            Text.mono "timeout" w=120
+            Text.muted "number" w=90
+            Text.muted "5000" w=110
             Text.body "Request timeout in milliseconds." grow
-          Row pad:[20,0,20,0] gap:16 h:52 middle border-top:#FFE5E7EB
-            Text.mono "debug" w:120
-            Text.muted "boolean" w:90
-            Text.muted "false" w:110
+          Row pad=[20,0,20,0] gap=16 h=52 middle border-top=#FFE5E7EB
+            Text.mono "debug" w=120
+            Text.muted "boolean" w=90
+            Text.muted "false" w=110
             Text.body "Log every event to the console." grow
-        Row between gap:16
-          Card grow gap:4 -> page="intro"
+        Row between gap=16
+          Card grow gap=4 onTap={page="intro"}
             Text.caption "Previous"
             Text.strong "← Introduction"
-          Card grow gap:4 right -> page="install"
+          Card grow gap=4 right onTap={page="install"}
             Text.caption "Next" right
             Text.strong "Installation →" right
-      Column w:180 gap:10
+      Column w=180 gap=10
         Text.eyebrow "ON THIS PAGE"
-        Text.muted "Install the SDK" -> emit goto "install"
-        Text.muted "Create a client" -> emit goto "client"
-        Text.muted "Send your first event" -> emit goto "event"
-        Text.muted "Options" -> emit goto "options"
+        Text.muted "Install the SDK" onTap={emit goto "install"}
+        Text.muted "Create a client" onTap={emit goto "client"}
+        Text.muted "Send your first event" onTap={emit goto "event"}
+        Text.muted "Options" onTap={emit goto "options"}
   Footer
     Row between
       Text.strong "Beacon"

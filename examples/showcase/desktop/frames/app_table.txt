@@ -9,87 +9,87 @@ state picked=[2,4,6]
 state customers=[{"id":1,"name":"Maya Reyes","company":"Northwind Traders","status":"Active","plan":"Pro","value":480,"seen":"2 hours ago"},{"id":2,"name":"Daniel Okafor","company":"Brightside Dental","status":"Trial","plan":"Starter","value":0,"seen":"Yesterday"},{"id":3,"name":"Priya Natarajan","company":"Lumen Studio","status":"Active","plan":"Business","value":1250,"seen":"5 hours ago"},{"id":4,"name":"Tomas Lindqvist","company":"Fjord Logistics","status":"Churned","plan":"Pro","value":0,"seen":"3 weeks ago"},{"id":5,"name":"Sofia Marino","company":"Casa Marino","status":"Active","plan":"Starter","value":89,"seen":"Today"},{"id":6,"name":"Ethan Brooks","company":"Brooks & Daughters","status":"Trial","plan":"Pro","value":0,"seen":"2 days ago"},{"id":7,"name":"Aiko Tanaka","company":"Sakura Labs","status":"Active","plan":"Business","value":2100,"seen":"1 hour ago"},{"id":8,"name":"Liam Foster","company":"Foster Hardware","status":"Churned","plan":"Starter","value":0,"seen":"2 months ago"},{"id":9,"name":"Grace Mwangi","company":"Savanna Coffee","status":"Active","plan":"Pro","value":520,"seen":"Yesterday"},{"id":10,"name":"Noah Becker","company":"Becker Engineering","status":"Trial","plan":"Business","value":0,"seen":"4 days ago"}]
 App
   Sidebar
-    Row gap:8 center
+    Row gap=8 center
       Icon "menu_book"
       Text.strong "Fieldbook"
-    NavItem "Dashboard" icon:"dashboard" selected:{tab=="dashboard"} -> tab="dashboard"
-    NavItem "Customers" icon:"groups" selected:{tab=="customers"} -> tab="customers"
-    NavItem "Deals" icon:"handshake" selected:{tab=="deals"} -> tab="deals"
-    NavItem "Tasks" icon:"task_alt" badge:"7" selected:{tab=="tasks"} -> tab="tasks"
-    NavItem "Reports" icon:"bar_chart" selected:{tab=="reports"} -> tab="reports"
+    NavItem "Dashboard" icon="dashboard" selected={tab=="dashboard"} onTap={tab="dashboard"}
+    NavItem "Customers" icon="groups" selected={tab=="customers"} onTap={tab="customers"}
+    NavItem "Deals" icon="handshake" selected={tab=="deals"} onTap={tab="deals"}
+    NavItem "Tasks" icon="task_alt" badge="7" selected={tab=="tasks"} onTap={tab="tasks"}
+    NavItem "Reports" icon="bar_chart" selected={tab=="reports"} onTap={tab="reports"}
     Spacer grow
-    Row gap:8 center
-      Avatar "Sam Patel" size:32
+    Row gap=8 center
+      Avatar "Sam Patel" size=32
       Text.muted "Sam Patel"
   Main
     Nav
-      Row gap:10 center
-        Heading "Customers" level:1
+      Row gap=10 center
+        Heading "Customers" level=1
         Badge.neutral "248"
-      Row gap:8
-        Button.outline "Import" -> emit import
-        Button "Add customer" -> emit addCustomer
-    Column pad:24 gap:16
-      Row gap:12 center between
-        Row gap:12 center
-          Input "Search customers" bind:q w:260
-          Row gap:6
-            ChoiceChip "All" selected:{status=="All"} -> status="All"
-            ChoiceChip "Active" selected:{status=="Active"} -> status="Active"
-            ChoiceChip "Trial" selected:{status=="Trial"} -> status="Trial"
-            ChoiceChip "Churned" selected:{status=="Churned"} -> status="Churned"
-        Segments bind:scope options:["Everyone","My accounts"]
+      Row gap=8
+        Button.outline "Import" onTap={emit import}
+        Button "Add customer" onTap={emit addCustomer}
+    Column pad=24 gap=16
+      Row gap=12 center between
+        Row gap=12 center
+          Input "Search customers" bind=q w=260
+          Row gap=6
+            ChoiceChip "All" selected={status=="All"} onTap={status="All"}
+            ChoiceChip "Active" selected={status=="Active"} onTap={status="Active"}
+            ChoiceChip "Trial" selected={status=="Trial"} onTap={status="Trial"}
+            ChoiceChip "Churned" selected={status=="Churned"} onTap={status="Churned"}
+        Segments bind=scope options=["Everyone","My accounts"]
       if length(picked)>0
-        Box fill:#FFEEF2FF radius:8 pad:[16,10,16,10]
-          Row gap:12 center
+        Box fill=#FFEEF2FF radius=8 pad=[16,10,16,10]
+          Row gap=12 center
             Text.strong "{length(picked)} selected"
             Spacer grow
-            Button.outline "Export" -> emit exportSelected picked
-            Button.destructive "Delete" -> customers=filter(customers,x=>!contains(picked,x.id)); picked=[]; toast "Deleted"
-      Card gap:0 pad:0
-        Box pad:[16,6,16,6] fill:#FFF9FAFB
-          Row gap:12 center
-            Box w:32
-              Checkbox "" checked:{length(picked)==length(customers)} -> picked=length(picked)==length(customers)?[]:map(customers,x=>x.id)
+            Button.outline "Export" onTap={emit exportSelected picked}
+            Button.destructive "Delete" onTap={customers=filter(customers,x=>!contains(picked,x.id)); picked=[]; toast "Deleted"}
+      Card gap=0 pad=0
+        Box pad=[16,6,16,6] fill=#FFF9FAFB
+          Row gap=12 center
+            Box w=32
+              Checkbox "" checked={length(picked)==length(customers)} onChange={picked=length(picked)==length(customers)?[]:map(customers,x=>x.id)}
             Row grow
-              Button.ghost "Name {sort==\"name\"?(desc?\"↓\":\"↑\"):\"\"}" -> desc=sort=="name"?!desc:false; sort="name"
-            Box w:170
-              Button.ghost "Company {sort==\"company\"?(desc?\"↓\":\"↑\"):\"\"}" -> desc=sort=="company"?!desc:false; sort="company"
-            Box w:100
-              Button.ghost "Status {sort==\"status\"?(desc?\"↓\":\"↑\"):\"\"}" -> desc=sort=="status"?!desc:false; sort="status"
-            Box w:100
-              Button.ghost "Plan {sort==\"plan\"?(desc?\"↓\":\"↑\"):\"\"}" -> desc=sort=="plan"?!desc:false; sort="plan"
-            Box w:110
-              Button.ghost "Value {sort==\"value\"?(desc?\"↓\":\"↑\"):\"\"}" -> desc=sort=="value"?!desc:false; sort="value"
-            Box w:110
+              Button.ghost "Name {sort==\"name\"?(desc?\"↓\":\"↑\"):\"\"}" onTap={desc=sort=="name"?!desc:false; sort="name"}
+            Box w=170
+              Button.ghost "Company {sort==\"company\"?(desc?\"↓\":\"↑\"):\"\"}" onTap={desc=sort=="company"?!desc:false; sort="company"}
+            Box w=100
+              Button.ghost "Status {sort==\"status\"?(desc?\"↓\":\"↑\"):\"\"}" onTap={desc=sort=="status"?!desc:false; sort="status"}
+            Box w=100
+              Button.ghost "Plan {sort==\"plan\"?(desc?\"↓\":\"↑\"):\"\"}" onTap={desc=sort=="plan"?!desc:false; sort="plan"}
+            Box w=110
+              Button.ghost "Value {sort==\"value\"?(desc?\"↓\":\"↑\"):\"\"}" onTap={desc=sort=="value"?!desc:false; sort="value"}
+            Box w=110
               Text.fieldLabel "Last seen"
-            Box w:40
+            Box w=40
         Divider
         each c in desc?reverse(sortBy(filter(customers,x=>(status=="All"||x.status==status)&&contains(lower(x.name),lower(q))),x=>x[sort])):sortBy(filter(customers,x=>(status=="All"||x.status==status)&&contains(lower(x.name),lower(q))),x=>x[sort])
-          Column gap:0
-            Box pad:[16,10,16,10]
-              Row gap:12 center
-                Box w:32
-                  Checkbox "" checked:{contains(picked,c.id)} -> picked=contains(picked,c.id)?without(picked,c.id):append(picked,c.id)
-                Row grow gap:10 center
-                  Avatar "{c.name}" size:32
+          Column gap=0
+            Box pad=[16,10,16,10]
+              Row gap=12 center
+                Box w=32
+                  Checkbox "" checked={contains(picked,c.id)} onChange={picked=contains(picked,c.id)?without(picked,c.id):append(picked,c.id)}
+                Row grow gap=10 center
+                  Avatar "{c.name}" size=32
                   Text.strong "{c.name}"
-                Text w:170 "{c.company}"
-                Row w:100
+                Text w=170 "{c.company}"
+                Row w=100
                   if c.status=="Active"
                     Badge.success "Active"
                   if c.status=="Trial"
                     Badge.warning "Trial"
                   if c.status=="Churned"
                     Badge.neutral "Churned"
-                Text w:100 "{c.plan}"
-                Text.strong w:110 "{money(c.value,\"$\",0)}/mo"
-                Text.muted w:110 "{c.seen}"
-                Row w:40 end
-                  IconButton "more_vert" -> toast "Row menu"
+                Text w=100 "{c.plan}"
+                Text.strong w=110 "{money(c.value,\"$\",0)}/mo"
+                Text.muted w=110 "{c.seen}"
+                Row w=40 end
+                  IconButton "more_vert" onTap={toast "Row menu"}
             Divider
       Row between center
         Text.muted "Rows {page*10+1}-{page*10+10} of 248"
-        Row gap:8
-          Button.outline "Previous" -> page=max(0,page-1)
-          Button.outline "Next" -> page=min(24,page+1)
+        Row gap=8
+          Button.outline "Previous" onTap={page=max(0,page-1)}
+          Button.outline "Next" onTap={page=min(24,page+1)}

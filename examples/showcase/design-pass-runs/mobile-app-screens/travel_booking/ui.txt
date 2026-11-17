@@ -1,83 +1,83 @@
-Column scroll gap:16 pad:16 w:390
-  Column gap:4
+Column scroll gap=16 pad=16 w=390
+  Column gap=4
     Text.pageTitle "Lisbon, Portugal"
-    Row gap:8 middle
-      Icon "calendar_today" size:16
+    Row gap=8 middle
+      Icon "calendar_today" size=16
       Text.bodySecondary "12 – 19 Jun 2025 · 7 nights"
-    Row gap:8
+    Row gap=8
       Badge.success "Confirmed"
       Badge.neutral "Ref LX4821"
-  Card gap:12
+  Card gap=12
     Row between middle
-      Row gap:8 middle
+      Row gap=8 middle
         Icon "flight"
         Text.heading3 "Flight"
       Text.caption "Fri, 12 Jun"
     Text.strong "TAP Air Portugal · TP 237"
     Row between middle
-      Column gap:2
+      Column gap=2
         Text.heading2 "08:45"
         Text.strong "JFK"
         Text.caption "New York"
       Icon "arrow_forward"
-      Column gap:2 right
+      Column gap=2 right
         Text.heading2 "20:30"
         Text.strong "LIS"
         Text.caption "Lisbon"
     Divider
     Row between
-      Column gap:2
+      Column gap=2
         Text.caption "Gate"
         Text.strong "B22"
-      Column gap:2
+      Column gap=2
         Text.caption "Boarding"
         Text.strong "08:10"
-      Column gap:2
+      Column gap=2
         Text.caption "Seat"
         Text.strong "14A"
-  Card gap:8
-    Row gap:8 middle
+  Card gap=8
+    Row gap=8 middle
       Icon "hotel"
       Text.heading3 "Hotel"
     Text.strong "Memmo Alfama Hotel"
     Row between
       Text.bodySecondary "7 nights · 1 king room"
       Text.bodySecondary "Check-in 15:00"
-    Row gap:8 top
-      Icon "place" size:16
+    Row gap=8 top
+      Icon "place" size=16
       Text.bodySecondary "Travessa das Merceeiras 27, 1100-348 Lisboa"
   Text.heading3 "Your plan"
-  Card gap:12
+  Card gap=12
     Text.sectionTitle "Day 1 · Sat 13 Jun"
-    Row gap:12 middle
+    Row gap=12 middle
       Text.caption "10:00"
       Text.body "Alfama walking tour" grow
-      Icon "directions_walk" size:18
-    Row gap:12 middle
+      Icon "directions_walk" size=18
+    Row gap=12 middle
       Text.caption "19:30"
       Text.body "Dinner at Taberna da Rua das Flores" grow
-      Icon "restaurant" size:18
-  Card gap:12
+      Icon "restaurant" size=18
+  Card gap=12
     Text.sectionTitle "Day 2 · Sun 14 Jun"
-    Row gap:12 middle
+    Row gap=12 middle
       Text.caption "09:30"
       Text.body "Day trip to Sintra" grow
-      Icon "castle" size:18
-    Row gap:12 middle
+      Icon "castle" size=18
+    Row gap=12 middle
       Text.caption "18:00"
       Text.body "Sunset at Miradouro da Graça" grow
-      Icon "wb_twilight" size:18
-  Card gap:12
+      Icon "wb_twilight" size=18
+  Card gap=12
     Text.sectionTitle "Day 3 · Mon 15 Jun"
-    Row gap:12 middle
+    Row gap=12 middle
       Text.caption "11:00"
       Text.body "Belém Tower and pastéis de nata" grow
-      Icon "museum" size:18
-    Row gap:12 middle
+      Icon "museum" size=18
+    Row gap=12 middle
       Text.caption "20:00"
       Text.body "Fado night in Mouraria" grow
-      Icon "music_note" size:18
-  Card gap:8
+      Icon "music_note" size=18
+  Card gap=8
     Text.heading3 "Total paid"
     Row between
       Text.bodySecondary "Flights"
@@ -92,6 +92,6 @@ Column scroll gap:16 pad:16 w:390
     Row between middle
       Text.strong "Total"
       Text.heading2 "$2,206.50"
-  Row gap:12
-    Button "Manage booking" grow -> emit manage
-    Button.outline "Share" -> emit share; toast "Trip link copied"
+  Row gap=12
+    Button "Manage booking" grow onTap={emit manage}
+    Button.outline "Share" onTap={emit share; toast "Trip link copied"}

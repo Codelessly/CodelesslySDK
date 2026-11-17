@@ -7,16 +7,16 @@ state holidays=true
 state hours=["8 AM","9 AM","10 AM","11 AM","12 PM","1 PM","2 PM","3 PM","4 PM","5 PM","6 PM"]
 state events=[{"id":1,"title":"Standup","time":"Mon, Jun 8 · 9:00 – 10:00 AM","place":"Room Atlas","note":"Quick round: yesterday, today, blockers.","guests":[{"name":"Maya Reyes","reply":"Accepted"},{"name":"Leo Kim","reply":"Accepted"},{"name":"Priya Nair","reply":"Pending"}]},{"id":2,"title":"Design review","time":"Mon, Jun 8 · 2:00 – 3:30 PM","place":"Room Borealis","note":"Walk through the new onboarding flow.","guests":[{"name":"Maya Reyes","reply":"Accepted"},{"name":"Tom Becker","reply":"Declined"},{"name":"Priya Nair","reply":"Accepted"}]},{"id":3,"title":"Dentist","time":"Tue, Jun 9 · 10:00 – 11:30 AM","place":"Smile Clinic, 4th Ave","note":"Bring insurance card.","guests":[{"name":"Ana Souza","reply":"Accepted"},{"name":"Jon Walsh","reply":"Pending"},{"name":"Leo Kim","reply":"Pending"}]},{"id":4,"title":"Team sync","time":"Tue, Jun 9 · 4:00 – 5:00 PM","place":"Video call","note":"Weekly priorities and handoffs.","guests":[{"name":"Maya Reyes","reply":"Accepted"},{"name":"Leo Kim","reply":"Accepted"},{"name":"Tom Becker","reply":"Pending"}]},{"id":5,"title":"1:1 with Maya","time":"Wed, Jun 10 · 9:30 – 10:30 AM","place":"Cafe corner","note":"Career goals and feedback.","guests":[{"name":"Maya Reyes","reply":"Accepted"},{"name":"Priya Nair","reply":"Accepted"},{"name":"Jon Walsh","reply":"Pending"}]},{"id":6,"title":"Planning workshop","time":"Wed, Jun 10 · 11:00 AM – 1:00 PM","place":"Room Cirrus, 3rd floor","note":"Bring your Q3 estimates. Lunch is provided.","guests":[{"name":"Maya Reyes","reply":"Accepted"},{"name":"Leo Kim","reply":"Pending"},{"name":"Tom Becker","reply":"Declined"}]},{"id":7,"title":"Gym","time":"Thu, Jun 11 · 8:30 – 9:30 AM","place":"Harbor Fitness","note":"Leg day.","guests":[{"name":"Ana Souza","reply":"Accepted"},{"name":"Jon Walsh","reply":"Accepted"},{"name":"Leo Kim","reply":"Pending"}]},{"id":8,"title":"Lunch with Ana","time":"Thu, Jun 11 · 1:00 – 2:00 PM","place":"Olive & Fig","note":"Table booked under Ana.","guests":[{"name":"Ana Souza","reply":"Accepted"},{"name":"Maya Reyes","reply":"Pending"},{"name":"Priya Nair","reply":"Declined"}]},{"id":9,"title":"Sprint demo","time":"Fri, Jun 12 · 3:00 – 4:30 PM","place":"Main hall","note":"Show what shipped this sprint.","guests":[{"name":"Maya Reyes","reply":"Accepted"},{"name":"Leo Kim","reply":"Accepted"},{"name":"Tom Becker","reply":"Accepted"}]}]
 App
-  Sidebar w:240
-    Brand "Cadence" icon:"event"
-    Button "New event" icon:"add" w:fill -> emit newEvent
-    Column gap:8
+  Sidebar w=240
+    Brand "Cadence" icon="event"
+    Button "New event" icon="add" w=fill onTap={emit newEvent}
+    Column gap=8
       Row between middle
         Text.strong "June 2026"
         Row
-          IconButton "chevron_left" -> emit prevMonth
-          IconButton "chevron_right" -> emit nextMonth
-      Grid cols:7 gap:2
+          IconButton "chevron_left" onTap={emit prevMonth}
+          IconButton "chevron_right" onTap={emit nextMonth}
+      Grid cols=7 gap=2
         Text.caption "M" center
         Text.caption "T" center
         Text.caption "W" center
@@ -25,124 +25,124 @@ App
         Text.caption "S" center
         Text.caption "S" center
         each d in range(30)
-          Box w:28 h:28 radius:14 center fill:{d+1==10?"#FF2563EB":"#00000000"}
-            Text.caption "{d+1}" center color:{d+1==10?"#FFFFFFFF":"#FF111827"}
+          Box w=28 h=28 radius=14 center fill={d+1==10?"#FF2563EB":"#00000000"}
+            Text.caption "{d+1}" center color={d+1==10?"#FFFFFFFF":"#FF111827"}
     Text.eyebrow "MY CALENDARS"
-    Column gap:6
-      Checkbox "Work" bind:work color:#FF2563EB
-      Checkbox "Personal" bind:personal color:#FF16A34A
-      Checkbox "Team" bind:team color:#FF7C3AED
-      Checkbox "Holidays" bind:holidays color:#FFEA580C
+    Column gap=6
+      Checkbox "Work" bind=work color=#FF2563EB
+      Checkbox "Personal" bind=personal color=#FF16A34A
+      Checkbox "Team" bind=team color=#FF7C3AED
+      Checkbox "Holidays" bind=holidays color=#FFEA580C
     Spacer grow
   Main
     Nav
-      Row gap:8 middle
-        Heading "Jun 8 – 14, 2026" level:1
-        IconButton "chevron_left" -> emit prevWeek
-        IconButton "chevron_right" -> emit nextWeek
-        Button.outline "Today" -> emit today
-      SegmentedButton bind:view items:["Day","Week","Month"]
-    Column pad:[16,12,16,16] gap:0 scroll
-      Row gap:0 pad:[0,0,0,8]
-        Box w:56
-        Column grow center gap:2
+      Row gap=8 middle
+        Heading "Jun 8 – 14, 2026" level=1
+        IconButton "chevron_left" onTap={emit prevWeek}
+        IconButton "chevron_right" onTap={emit nextWeek}
+        Button.outline "Today" onTap={emit today}
+      SegmentedButton bind=view items=["Day","Week","Month"]
+    Column pad=[16,12,16,16] gap=0 scroll
+      Row gap=0 pad=[0,0,0,8]
+        Box w=56
+        Column grow center gap=2
           Text.caption "MON" center
-          Box w:28 h:28 center
+          Box w=28 h=28 center
             Text.strong "8" center
-        Column grow center gap:2
+        Column grow center gap=2
           Text.caption "TUE" center
-          Box w:28 h:28 center
+          Box w=28 h=28 center
             Text.strong "9" center
-        Column grow center gap:2
-          Text.caption "WED" center color:#FF2563EB
-          Box w:28 h:28 radius:14 fill:#FF2563EB center
-            Text.strong "10" center color:#FFFFFFFF
-        Column grow center gap:2
+        Column grow center gap=2
+          Text.caption "WED" center color=#FF2563EB
+          Box w=28 h=28 radius=14 fill=#FF2563EB center
+            Text.strong "10" center color=#FFFFFFFF
+        Column grow center gap=2
           Text.caption "THU" center
-          Box w:28 h:28 center
+          Box w=28 h=28 center
             Text.strong "11" center
-        Column grow center gap:2
+        Column grow center gap=2
           Text.caption "FRI" center
-          Box w:28 h:28 center
+          Box w=28 h=28 center
             Text.strong "12" center
-        Column grow center gap:2
+        Column grow center gap=2
           Text.caption "SAT" center
-          Box w:28 h:28 center
+          Box w=28 h=28 center
             Text.strong "13" center
-        Column grow center gap:2
+        Column grow center gap=2
           Text.caption "SUN" center
-          Box w:28 h:28 center
+          Box w=28 h=28 center
             Text.strong "14" center
       Divider
-      Row gap:0
-        Column w:56 gap:0
+      Row gap=0
+        Column w=56 gap=0
           each t in hours
-            Text.caption "{t}" h:48
-        Column grow gap:0 pad:[2,0,2,0] h:528 border-left:#FFE5E7EB
-          Spacer h:48
-          Box h:48 fill:#FFDBEAFE radius:6 pad:[6,4,6,4] gap:0 border:{sel==1?"#FF111827":"#00000000"} -> sel=1
-            Text.strong "Standup" size:12 color:#FF1E3A8A
-            Text.caption "9:00–10:00" size:11 color:#FF1E3A8A
-          Spacer h:192
-          Box h:72 fill:#FFDBEAFE radius:6 pad:[6,4,6,4] gap:0 border:{sel==2?"#FF111827":"#00000000"} -> sel=2
-            Text.strong "Design review" size:12 color:#FF1E3A8A
-            Text.caption "2:00–3:30" size:11 color:#FF1E3A8A
-        Column grow gap:0 pad:[2,0,2,0] h:528 border-left:#FFE5E7EB
-          Spacer h:96
-          Box h:72 fill:#FFDCFCE7 radius:6 pad:[6,4,6,4] gap:0 border:{sel==3?"#FF111827":"#00000000"} -> sel=3
-            Text.strong "Dentist" size:12 color:#FF166534
-            Text.caption "10:00–11:30" size:11 color:#FF166534
-          Spacer h:216
-          Box h:48 fill:#FFEDE9FE radius:6 pad:[6,4,6,4] gap:0 border:{sel==4?"#FF111827":"#00000000"} -> sel=4
-            Text.strong "Team sync" size:12 color:#FF5B21B6
-            Text.caption "4:00–5:00" size:11 color:#FF5B21B6
-        Column grow gap:0 pad:[2,0,2,0] h:528 border-left:#FFE5E7EB fill:#0F2563EB
-          Spacer h:72
-          Box h:48 fill:#FFDBEAFE radius:6 pad:[6,4,6,4] gap:0 border:{sel==5?"#FF111827":"#00000000"} -> sel=5
-            Text.strong "1:1 with Maya" size:12 color:#FF1E3A8A
-            Text.caption "9:30–10:30" size:11 color:#FF1E3A8A
-          Spacer h:24
-          Box h:96 fill:#FFEDE9FE radius:6 pad:[6,4,6,4] gap:0 border:{sel==6?"#FF111827":"#00000000"} -> sel=6
-            Text.strong "Planning workshop" size:12 color:#FF5B21B6
-            Text.caption "11:00–1:00" size:11 color:#FF5B21B6
-        Column grow gap:0 pad:[2,0,2,0] h:528 border-left:#FFE5E7EB
-          Spacer h:24
-          Box h:48 fill:#FFDCFCE7 radius:6 pad:[6,4,6,4] gap:0 border:{sel==7?"#FF111827":"#00000000"} -> sel=7
-            Text.strong "Gym" size:12 color:#FF166534
-            Text.caption "8:30–9:30" size:11 color:#FF166534
-          Spacer h:168
-          Box h:48 fill:#FFDCFCE7 radius:6 pad:[6,4,6,4] gap:0 border:{sel==8?"#FF111827":"#00000000"} -> sel=8
-            Text.strong "Lunch with Ana" size:12 color:#FF166534
-            Text.caption "1:00–2:00" size:11 color:#FF166534
-        Column grow gap:0 pad:[2,0,2,0] h:528 border-left:#FFE5E7EB
-          Spacer h:336
-          Box h:72 fill:#FFEDE9FE radius:6 pad:[6,4,6,4] gap:0 border:{sel==9?"#FF111827":"#00000000"} -> sel=9
-            Text.strong "Sprint demo" size:12 color:#FF5B21B6
-            Text.caption "3:00–4:30" size:11 color:#FF5B21B6
-        Column grow gap:0 h:528 border-left:#FFE5E7EB
-        Column grow gap:0 h:528 border-left:#FFE5E7EB
-  Pane w:300 pad:16 gap:12
+            Text.caption "{t}" h=48
+        Column grow gap=0 pad=[2,0,2,0] h=528 border-left=#FFE5E7EB
+          Spacer h=48
+          Box h=48 fill=#FFDBEAFE radius=6 pad=[6,4,6,4] gap=0 border={sel==1?"#FF111827":"#00000000"} onTap={sel=1}
+            Text.strong "Standup" size=12 color=#FF1E3A8A
+            Text.caption "9:00–10:00" size=11 color=#FF1E3A8A
+          Spacer h=192
+          Box h=72 fill=#FFDBEAFE radius=6 pad=[6,4,6,4] gap=0 border={sel==2?"#FF111827":"#00000000"} onTap={sel=2}
+            Text.strong "Design review" size=12 color=#FF1E3A8A
+            Text.caption "2:00–3:30" size=11 color=#FF1E3A8A
+        Column grow gap=0 pad=[2,0,2,0] h=528 border-left=#FFE5E7EB
+          Spacer h=96
+          Box h=72 fill=#FFDCFCE7 radius=6 pad=[6,4,6,4] gap=0 border={sel==3?"#FF111827":"#00000000"} onTap={sel=3}
+            Text.strong "Dentist" size=12 color=#FF166534
+            Text.caption "10:00–11:30" size=11 color=#FF166534
+          Spacer h=216
+          Box h=48 fill=#FFEDE9FE radius=6 pad=[6,4,6,4] gap=0 border={sel==4?"#FF111827":"#00000000"} onTap={sel=4}
+            Text.strong "Team sync" size=12 color=#FF5B21B6
+            Text.caption "4:00–5:00" size=11 color=#FF5B21B6
+        Column grow gap=0 pad=[2,0,2,0] h=528 border-left=#FFE5E7EB fill=#0F2563EB
+          Spacer h=72
+          Box h=48 fill=#FFDBEAFE radius=6 pad=[6,4,6,4] gap=0 border={sel==5?"#FF111827":"#00000000"} onTap={sel=5}
+            Text.strong "1:1 with Maya" size=12 color=#FF1E3A8A
+            Text.caption "9:30–10:30" size=11 color=#FF1E3A8A
+          Spacer h=24
+          Box h=96 fill=#FFEDE9FE radius=6 pad=[6,4,6,4] gap=0 border={sel==6?"#FF111827":"#00000000"} onTap={sel=6}
+            Text.strong "Planning workshop" size=12 color=#FF5B21B6
+            Text.caption "11:00–1:00" size=11 color=#FF5B21B6
+        Column grow gap=0 pad=[2,0,2,0] h=528 border-left=#FFE5E7EB
+          Spacer h=24
+          Box h=48 fill=#FFDCFCE7 radius=6 pad=[6,4,6,4] gap=0 border={sel==7?"#FF111827":"#00000000"} onTap={sel=7}
+            Text.strong "Gym" size=12 color=#FF166534
+            Text.caption "8:30–9:30" size=11 color=#FF166534
+          Spacer h=168
+          Box h=48 fill=#FFDCFCE7 radius=6 pad=[6,4,6,4] gap=0 border={sel==8?"#FF111827":"#00000000"} onTap={sel=8}
+            Text.strong "Lunch with Ana" size=12 color=#FF166534
+            Text.caption "1:00–2:00" size=11 color=#FF166534
+        Column grow gap=0 pad=[2,0,2,0] h=528 border-left=#FFE5E7EB
+          Spacer h=336
+          Box h=72 fill=#FFEDE9FE radius=6 pad=[6,4,6,4] gap=0 border={sel==9?"#FF111827":"#00000000"} onTap={sel=9}
+            Text.strong "Sprint demo" size=12 color=#FF5B21B6
+            Text.caption "3:00–4:30" size=11 color=#FF5B21B6
+        Column grow gap=0 h=528 border-left=#FFE5E7EB
+        Column grow gap=0 h=528 border-left=#FFE5E7EB
+  Pane w=300 pad=16 gap=12
     each e in filter(events,x=>x.id==sel)
-      Column gap:14
+      Column gap=14
         Text.eyebrow "EVENT DETAILS"
-        Heading "{e.title}" level:3
-        Row gap:10 middle
-          Icon "schedule" size:18
+        Heading "{e.title}" level=3
+        Row gap=10 middle
+          Icon "schedule" size=18
           Text "{e.time}"
-        Row gap:10 middle
-          Icon "place" size:18
+        Row gap=10 middle
+          Icon "place" size=18
           Text "{e.place}"
         Divider
         Text.eyebrow "GUESTS (3)"
         each g in e.guests
-          Row gap:10 middle
-            Avatar "{g.name}" size:28
-            Column grow gap:0
+          Row gap=10 middle
+            Avatar "{g.name}" size=28
+            Column grow gap=0
               Text.strong "{g.name}"
-              Text.caption "{g.reply}" color:{g.reply=="Accepted"?"#FF16A34A":(g.reply=="Declined"?"#FFDC2626":"#FF6B7280")}
+              Text.caption "{g.reply}" color={g.reply=="Accepted"?"#FF16A34A":(g.reply=="Declined"?"#FFDC2626":"#FF6B7280")}
         Divider
         Text.eyebrow "NOTE"
         Text.muted "{e.note}"
-        Row gap:8
-          Button.outline "Edit" grow -> emit edit e.id
-          Button.destructive "Delete" grow -> emit delete e.id
+        Row gap=8
+          Button.outline "Edit" grow onTap={emit edit e.id}
+          Button.destructive "Delete" grow onTap={emit delete e.id}

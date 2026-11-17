@@ -1,24 +1,24 @@
-Column scroll gap:16 pad:16
+Column scroll gap=16 pad=16
   Row between middle
-    BackButton "Home" -> emit open_home
-    StatusBadge "{paused ? 'Paused' : (phase=='work' ? 'Jump' : 'Rest')}" tone:{paused?"warning":(phase=="work"?"success":"info")}
+    BackButton "Home" onPressed={emit open_home}
+    StatusBadge "{paused ? 'Paused' : (phase=='work' ? 'Jump' : 'Rest')}" tone={paused?"warning":(phase=="work"?"success":"info")}
   Text.pageTitle "{today.name}"
   Text.bodySecondary "{today.rounds} rounds, about {today.minutes} minutes. Jump for {today.work} seconds (work), then catch your breath for {today.rest} seconds (rest)."
-  Card gap:8 center
+  Card gap=8 center
     Text.caption "Round {round} of {today.rounds}"
     Text.heading1 "{left}"
     Text.title "{phase=='work' ? 'Jump!' : 'Rest and breathe'}"
-    Progress bind:progress
-  Card gap:12 center
+    Progress bind=progress
+  Card gap=12 center
     Text.caption "Jumps so far"
     Text.heading1 "{count}"
-    Button "Tap for each jump" -> count=count+1
-    Row gap:8 center
-      Button.outline "-1" -> count=max(0,count-1)
-      Button.outline "+10" -> count=count+10
-  Row gap:12
-    Button.secondary "{paused ? 'Resume' : 'Pause'}" grow -> paused=!paused
-    Button "Finish" grow -> emit finish_session count
+    Button "Tap for each jump" onTap={count=count+1}
+    Row gap=8 center
+      Button.outline "-1" onTap={count=max(0,count-1)}
+      Button.outline "+10" onTap={count=count+10}
+  Row gap=12
+    Button.secondary "{paused ? 'Resume' : 'Pause'}" grow onTap={paused=!paused}
+    Button "Finish" grow onTap={emit finish_session count}
   Text.muted "Short and steady counts. Finishing early is fine, you showed up."
 
 state left=40
@@ -27,5 +27,5 @@ state round=1
 state count=0
 state paused=false
 state progress=0
-every 1s when !paused && !done -> left=left>1?left-1:(phase=="work"?today.rest:today.work); progress=1-((left-1)/(phase=="work"?today.work:today.rest)); phase=left>1?phase:(phase=="work"?"rest":"work"); round=(left<=1 && phase=="rest")?min(round+1,today.rounds):round
+every 1s when !paused && !done onTick={left=left>1?left-1:(phase=="work"?today.rest:today.work); progress=1-((left-1)/(phase=="work"?today.work:today.rest)); phase=left>1?phase:(phase=="work"?"rest":"work"); round=(left<=1 && phase=="rest")?min(round+1,today.rounds):round}
 state done=false

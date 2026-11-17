@@ -2,25 +2,25 @@ state items=[{"id":1,"name":"Bananas, 1 kg","price":2.5,"qty":1},{"id":2,"name":
 state promo=""
 state applied=false
 state sub=0
-Card w:390 gap:12 pad:16
+Card w=390 gap=12 pad=16
   Text.title "Your grocery order"
   if length(items)==0
     Text.muted "Your basket is empty."
   each it in items
-    Row gap:12 middle
-      Box w:48 h:48 fill:#FFE0E0E0 radius:8 center middle
+    Row gap=12 middle
+      Box w=48 h=48 fill=#FFE0E0E0 radius=8 center middle
         Icon "image"
-      Column grow gap:2
+      Column grow gap=2
         Text.strong "{it.name}"
         Text.muted "{money(it.price,'$',2)}"
-      Row gap:4 middle
-        IconButton "remove" -> items=it.qty<=1?removeWhere(items,r=>r.id==it.id):updateWhere(items,r=>r.id==it.id,r=>with(r,"qty",r.qty-1))
+      Row gap=4 middle
+        IconButton "remove" onTap={items=it.qty<=1?removeWhere(items,r=>r.id==it.id):updateWhere(items,r=>r.id==it.id,r=>with(r,"qty",r.qty-1))}
         Text.strong "{it.qty}"
-        IconButton "add" -> items=updateWhere(items,r=>r.id==it.id,r=>with(r,"qty",r.qty+1))
+        IconButton "add" onTap={items=updateWhere(items,r=>r.id==it.id,r=>with(r,"qty",r.qty+1))}
   Divider
-  Row gap:8 middle
-    Input "Promo code" "SAVE10" bind:promo grow
-    Button.outline "Apply" -> applied=upper(trim(promo))=="SAVE10"; toast applied?"Applied":"Promo code applied or invalid"
+  Row gap=8 middle
+    Input "Promo code" "SAVE10" bind=promo grow
+    Button.outline "Apply" onTap={applied=upper(trim(promo))=="SAVE10"; toast applied?"Applied":"Promo code applied or invalid"}
   if applied
     Text.success "SAVE10 applied: 10% off"
   if upper(trim(promo))!="SAVE10" && trim(promo)!=""
@@ -39,6 +39,6 @@ Card w:390 gap:12 pad:16
   Row between
     Text.heading "Total"
     Text.heading "{money(sum(items,i=>i.price*i.qty)*(applied&&upper(trim(promo))=='SAVE10'?0.9:1)+(sum(items,i=>i.price*i.qty)>=30||length(items)==0?0:4.99),'$',2)}"
-  Row gap:8 end
-    Button.outline "Cancel" -> emit cancel
-    Button.primary "Confirm order" -> emit confirm
+  Row gap=8 end
+    Button.outline "Cancel" onTap={emit cancel}
+    Button.primary "Confirm order" onTap={emit confirm}

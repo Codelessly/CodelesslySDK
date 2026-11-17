@@ -2,89 +2,89 @@ state version="v2.4"
 state doc="Quickstart"
 Page
   Nav
-    Brand "Beacon" icon:"flare"
-    Row gap:12 middle
-      Input "Search docs" hint:"Search docs…" w:280
-      Select bind:version items:["v2.4","v2.3","v1.9"] w:110
-  Row top gap:40 pad:[32,32,32,48]
-    Column w:220 gap:4
+    Brand "Beacon" icon="flare"
+    Row gap=12 middle
+      Input "Search docs" hint="Search docs…" w=280
+      Select bind=version items=["v2.4","v2.3","v1.9"] w=110
+  Row top gap=40 pad=[32,32,32,48]
+    Column w=220 gap=4
       Text.eyebrow "START"
-      NavItem "Introduction" selected:{doc=="Introduction"} -> doc="Introduction"
-      NavItem "Quickstart" selected:{doc=="Quickstart"} -> doc="Quickstart"
-      NavItem "Installation" selected:{doc=="Installation"} -> doc="Installation"
-      NavItem "Authentication" selected:{doc=="Authentication"} -> doc="Authentication"
-      Spacer h:16
+      NavItem "Introduction" selected={doc=="Introduction"} onTap={doc="Introduction"}
+      NavItem "Quickstart" selected={doc=="Quickstart"} onTap={doc="Quickstart"}
+      NavItem "Installation" selected={doc=="Installation"} onTap={doc="Installation"}
+      NavItem "Authentication" selected={doc=="Authentication"} onTap={doc="Authentication"}
+      Spacer h=16
       Text.eyebrow "GUIDES"
-      NavItem "Tracking events" selected:{doc=="Tracking events"} -> doc="Tracking events"
-      NavItem "Offline mode" selected:{doc=="Offline mode"} -> doc="Offline mode"
-      NavItem "Batching" selected:{doc=="Batching"} -> doc="Batching"
-      NavItem "Testing" selected:{doc=="Testing"} -> doc="Testing"
-      Spacer h:16
+      NavItem "Tracking events" selected={doc=="Tracking events"} onTap={doc="Tracking events"}
+      NavItem "Offline mode" selected={doc=="Offline mode"} onTap={doc="Offline mode"}
+      NavItem "Batching" selected={doc=="Batching"} onTap={doc="Batching"}
+      NavItem "Testing" selected={doc=="Testing"} onTap={doc="Testing"}
+      Spacer h=16
       Text.eyebrow "REFERENCE"
-      NavItem "Client" selected:{doc=="Client"} -> doc="Client"
-      NavItem "Configuration" selected:{doc=="Configuration"} -> doc="Configuration"
-      NavItem "Errors" selected:{doc=="Errors"} -> doc="Errors"
-      NavItem "Changelog" selected:{doc=="Changelog"} -> doc="Changelog"
-    Column grow gap:24 maxw:720
-      Breadcrumb items:["Docs","Start","Quickstart"]
+      NavItem "Client" selected={doc=="Client"} onTap={doc="Client"}
+      NavItem "Configuration" selected={doc=="Configuration"} onTap={doc="Configuration"}
+      NavItem "Errors" selected={doc=="Errors"} onTap={doc="Errors"}
+      NavItem "Changelog" selected={doc=="Changelog"} onTap={doc="Changelog"}
+    Column grow gap=24 maxw=720
+      Breadcrumb items=["Docs","Start","Quickstart"]
       Heading "Quickstart"
       Text.lead "Get Beacon running in your app in about five minutes: install the SDK, create a client and send your first event."
-      Row gap:16 top
-        Box w:28 h:28 radius:14 fill:#FF2563EB center
-          Text.strong "1" color:#FFFFFFFF
-        Column grow gap:8
-          Heading "Install the SDK" level:3
+      Row gap=16 top
+        Box w=28 h=28 radius=14 fill=#FF2563EB center
+          Text.strong "1" color=#FFFFFFFF
+        Column grow gap=8
+          Heading "Install the SDK" level=3
           Text.muted "Add the package to your project with your package manager."
-          CodeBlock "Terminal" "npm install @beacon/sdk" language:"bash" copyable:true
-      Row gap:16 top
-        Box w:28 h:28 radius:14 fill:#FF2563EB center
-          Text.strong "2" color:#FFFFFFFF
-        Column grow gap:8
-          Heading "Create a client" level:3
+          CodeBlock "Terminal" "npm install @beacon/sdk" language="bash" copyable=true
+      Row gap=16 top
+        Box w=28 h=28 radius=14 fill=#FF2563EB center
+          Text.strong "2" color=#FFFFFFFF
+        Column grow gap=8
+          Heading "Create a client" level=3
           Text.muted "Initialize Beacon once, as early as possible in your app."
-          CodeBlock "client.js" "import { Beacon } from '@beacon/sdk';\n\nconst beacon = new Beacon({\n  apiKey: 'YOUR_API_KEY'\n});" language:"javascript" copyable:true
-      Row gap:16 top
-        Box w:28 h:28 radius:14 fill:#FF2563EB center
-          Text.strong "3" color:#FFFFFFFF
-        Column grow gap:8
-          Heading "Send your first event" level:3
+          CodeBlock "client.js" "import { Beacon } from '@beacon/sdk';\n\nconst beacon = new Beacon({\n  apiKey: 'YOUR_API_KEY'\n});" language="javascript" copyable=true
+      Row gap=16 top
+        Box w=28 h=28 radius=14 fill=#FF2563EB center
+          Text.strong "3" color=#FFFFFFFF
+        Column grow gap=8
+          Heading "Send your first event" level=3
           Text.muted "Track an event and check that it appears in your dashboard."
-          CodeBlock "track.js" "beacon.track('app_opened', {\n  platform: 'web'\n});" language:"javascript" copyable:true
-      Callout "Keep your key private" "Use a server-side key for production builds. Public keys can only send events, never read them." tone:"accent" icon:"info"
-      Heading "Options" level:3
-      Card pad:0 gap:0
-        Row pad:[20,12,20,12] gap:16
-          Text.columnHead "Name" w:130
-          Text.columnHead "Type" w:90
-          Text.columnHead "Default" w:130
+          CodeBlock "track.js" "beacon.track('app_opened', {\n  platform: 'web'\n});" language="javascript" copyable=true
+      Callout "Keep your key private" "Use a server-side key for production builds. Public keys can only send events, never read them." tone="accent" icon="info"
+      Heading "Options" level=3
+      Card pad=0 gap=0
+        Row pad=[20,12,20,12] gap=16
+          Text.columnHead "Name" w=130
+          Text.columnHead "Type" w=90
+          Text.columnHead "Default" w=130
           Text.columnHead "Description" grow
-        Row pad:[20,0,20,0] gap:16 h:52 middle border-top:#FFE5E7EB
-          Text.mono "apiKey" w:130
-          Text.muted "string" w:90
-          Text.muted "none" w:130
+        Row pad=[20,0,20,0] gap=16 h=52 middle border-top=#FFE5E7EB
+          Text.mono "apiKey" w=130
+          Text.muted "string" w=90
+          Text.muted "none" w=130
           Text.body "Your project key. Required." grow
-        Row pad:[20,0,20,0] gap:16 h:52 middle border-top:#FFE5E7EB
-          Text.mono "endpoint" w:130
-          Text.muted "string" w:90
-          Text.muted "api.beacon.dev" w:130
+        Row pad=[20,0,20,0] gap=16 h=52 middle border-top=#FFE5E7EB
+          Text.mono "endpoint" w=130
+          Text.muted "string" w=90
+          Text.muted "api.beacon.dev" w=130
           Text.body "Where events are sent." grow
-        Row pad:[20,0,20,0] gap:16 h:52 middle border-top:#FFE5E7EB
-          Text.mono "flushInterval" w:130
-          Text.muted "number" w:90
-          Text.muted "5000" w:130
+        Row pad=[20,0,20,0] gap=16 h=52 middle border-top=#FFE5E7EB
+          Text.mono "flushInterval" w=130
+          Text.muted "number" w=90
+          Text.muted "5000" w=130
           Text.body "Milliseconds between batched sends." grow
-        Row pad:[20,0,20,0] gap:16 h:52 middle border-top:#FFE5E7EB
-          Text.mono "debug" w:130
-          Text.muted "boolean" w:90
-          Text.muted "false" w:130
+        Row pad=[20,0,20,0] gap=16 h=52 middle border-top=#FFE5E7EB
+          Text.mono "debug" w=130
+          Text.muted "boolean" w=90
+          Text.muted "false" w=130
           Text.body "Log every event to the console." grow
-      Row between pad:[0,16,0,0]
-        Button.outline "← Previous: Introduction" -> doc="Introduction"
-        Button.outline "Next: Installation →" -> doc="Installation"
-    Column w:200 gap:8
+      Row between pad=[0,16,0,0]
+        Button.outline "← Previous: Introduction" onTap={doc="Introduction"}
+        Button.outline "Next: Installation →" onTap={doc="Installation"}
+    Column w=200 gap=8
       Text.eyebrow "ON THIS PAGE"
-      Text.muted "Install the SDK" -> emit goto "install"
-      Text.muted "Create a client" -> emit goto "client"
-      Text.muted "Send your first event" -> emit goto "event"
-      Text.muted "Keep your key private" -> emit goto "note"
-      Text.muted "Options" -> emit goto "options"
+      Text.muted "Install the SDK" onTap={emit goto "install"}
+      Text.muted "Create a client" onTap={emit goto "client"}
+      Text.muted "Send your first event" onTap={emit goto "event"}
+      Text.muted "Keep your key private" onTap={emit goto "note"}
+      Text.muted "Options" onTap={emit goto "options"}

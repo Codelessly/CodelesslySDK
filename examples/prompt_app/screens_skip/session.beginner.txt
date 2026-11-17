@@ -1,21 +1,21 @@
 Screen
   if phase=="ready"
-    SessionBar "Today's session" "{today.minutes} minutes, {today.rounds} rounds" -> emit open_home
-    Illustration role:hero w:200 h:200
-    Card gap:8
+    SessionBar "Today's session" "{today.minutes} minutes, {today.rounds} rounds" onPressed={emit open_home}
+    Illustration role=hero w=200 h=200
+    Card gap=8
       Text.title "What will happen"
       Text "You jump for {today.work} seconds. That is your work time."
       Text "Then you rest for {today.rest} seconds to catch your breath."
       Text.muted "That repeats {today.rounds} times. About {today.minutes} minutes in all."
     Text.muted "Short and steady is enough. You have done {sessionsThisWeek} of {weeklyGoal} sessions this week."
-    BigButton "Start session" icon:"play_arrow" -> phase="set"; left=3; round=0; count=0; elapsed=0; paused=false; saved=false; emit start_session
+    BigButton "Start session" icon="play_arrow" onPressed={phase="set"; left=3; round=0; count=0; elapsed=0; paused=false; saved=false; emit start_session}
   if phase=="set"||phase=="work"||phase=="rest"
-    SessionBar "{today.name}" "Round {round<1?1:round} of {today.rounds}" -> phase="done"
-    SessionDial "Jump while it is bright, rest while it is calm" left:{left} phase:{phase} round:{round<1?1:round} rounds:{today.rounds} work:{today.work} rest:{today.rest} paused:{paused} workLabel:"Jump" restLabel:"Rest" setLabel:"Get ready" readyLabel:"Ready"
+    SessionBar "{today.name}" "Round {round<1?1:round} of {today.rounds}" onPressed={phase="done"}
+    SessionDial "Jump while it is bright, rest while it is calm" left={left} phase={phase} round={round<1?1:round} rounds={today.rounds} work={today.work} rest={today.rest} paused={paused} workLabel="Jump" restLabel="Rest" setLabel="Get ready" readyLabel="Ready"
     if phase=="work"
-      TapPad "Tap for every jump" bind:count hint:"Tap each time you jump"
-    SessionControls bind:paused pause:"Pause" resume:"Keep going" finish:"Finish" -> phase="done"
+      TapPad "Tap for every jump" bind=count hint="Tap each time you jump"
+    SessionControls bind=paused pause="Pause" resume="Keep going" finish="Finish" onPressed={phase="done"}
   if phase=="done"
-    SessionSummary "Well done" "Next: a rest day, then come back for your next short session." jumps:{count} best:{0} rounds:{round} of:{today.rounds} seconds:{elapsed} streak:{streak} streakLabel:"sessions in a row" unit:"jumps" eyebrow:"Session complete"
-    BigButton "Back to home" icon:"home" -> emit open_home
-    BigButton "See my progress" icon:"show_chart" tone:"quiet" -> emit open_history
+    SessionSummary "Well done" "Next: a rest day, then come back for your next short session." jumps={count} best={0} rounds={round} of={today.rounds} seconds={elapsed} streak={streak} streakLabel="sessions in a row" unit="jumps" eyebrow="Session complete"
+    BigButton "Back to home" icon="home" onPressed={emit open_home}
+    BigButton "See my progress" icon="show_chart" tone="quiet" onPressed={emit open_history}

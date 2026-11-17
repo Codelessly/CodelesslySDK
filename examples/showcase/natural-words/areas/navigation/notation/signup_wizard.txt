@@ -1,22 +1,22 @@
 state step=1
 state interests=[]
-Column gap:16 pad:16 maxw:480
+Column gap=16 pad=16 maxw=480
   Row between
     Text.title "Account setup"
     Text.muted "{step} of 3"
-  Progress bind:{step/3}
-  Card gap:12
+  Progress bind={step/3}
+  Card gap=12
     if step==1
       Text.heading "Your details"
-      Input "Name" "Jane Doe" bind:name
-      Input "Email" "you@example.com" bind:email type:email
+      Input "Name" "Jane Doe" bind=name
+      Input "Email" "you@example.com" bind=email type={email}
     if step==2
       Text.heading "Choose your interests"
-      Row gap:8
-        FilterChip "Travel" selected:{contains(interests,"Travel")} -> interests=contains(interests,"Travel")?without(interests,"Travel"):append(interests,"Travel")
-        FilterChip "Food" selected:{contains(interests,"Food")} -> interests=contains(interests,"Food")?without(interests,"Food"):append(interests,"Food")
-        FilterChip "Music" selected:{contains(interests,"Music")} -> interests=contains(interests,"Music")?without(interests,"Music"):append(interests,"Music")
-        FilterChip "Sports" selected:{contains(interests,"Sports")} -> interests=contains(interests,"Sports")?without(interests,"Sports"):append(interests,"Sports")
+      Row gap=8
+        FilterChip "Travel" selected={contains(interests,"Travel")} onTap={interests=contains(interests,"Travel")?without(interests,"Travel"):append(interests,"Travel")}
+        FilterChip "Food" selected={contains(interests,"Food")} onTap={interests=contains(interests,"Food")?without(interests,"Food"):append(interests,"Food")}
+        FilterChip "Music" selected={contains(interests,"Music")} onTap={interests=contains(interests,"Music")?without(interests,"Music"):append(interests,"Music")}
+        FilterChip "Sports" selected={contains(interests,"Sports")} onTap={interests=contains(interests,"Sports")?without(interests,"Sports"):append(interests,"Sports")}
     if step==3
       Text.heading "Review"
       Row between
@@ -28,8 +28,8 @@ Column gap:16 pad:16 maxw:480
       Row between
         Text.muted "Interests"
         Text.strong "{isEmpty(interests)?'None':join(interests,', ')}"
-  Row gap:8
-    Button.outline "Back" visible:{step>1} -> step=max(1,step-1)
+  Row gap=8
+    Button.outline "Back" visible={step>1} onTap={step=max(1,step-1)}
     Spacer grow
-    Button "Next" visible:{step<3} -> step=min(3,step+1)
-    Button "Finish" visible:{step==3} -> emit finish; toast "Account created"
+    Button "Next" visible={step<3} onTap={step=min(3,step+1)}
+    Button "Finish" visible={step==3} onTap={emit finish; toast "Account created"}

@@ -1,101 +1,101 @@
 Page
   Nav
-    Row gap:8 middle
+    Row gap=8 middle
       Icon "graphic_eq"
       Text.strong "Signal & Noise"
-    Row gap:4
+    Row gap=4
       Link "Architecture"
       Link "Reliability"
       Link "Data"
       Link "Culture"
-    Row gap:8 middle
-      IconButton "search" -> emit search
-      Button "Subscribe" -> emit subscribe
+    Row gap=8 middle
+      IconButton "search" onTap={emit search}
+      Button "Subscribe" onTap={emit subscribe}
   Section
-    Column gap:16 maxw:820
-      Row gap:8
+    Column gap=16 maxw=820
+      Row gap=8
         Badge.primary "Infrastructure"
-      Heading "What we learned moving 40 services to one queue" level:1
-      Row gap:12 middle
-        Avatar "Maya Reyes" size:44
-        Column gap:2
+      Heading "What we learned moving 40 services to one queue" level=1
+      Row gap=12 middle
+        Avatar "Maya Reyes" size=44
+        Column gap=2
           Text.strong "Maya Reyes"
           Text.muted "Staff Engineer, Platform"
         Spacer grow
         Text.muted "March 12, 2026"
         Text.muted "·"
         Text.muted "9 min read"
-    Media kind:"skyline" tone:"dusk" h:440 radius:16
+    Media kind="skyline" tone="dusk" h=440 radius=16
   Section
-    Row gap:56 top
-      Column grow gap:18 maxw:720
+    Row gap=56 top
+      Column grow gap=18 maxw=720
         Text.lead "Two years ago every one of our services spoke to its neighbours in its own way: HTTP callbacks here, a cron job polling a table there, three different brokers in between. This is the story of folding all of it into a single queue, and what it cost us."
-        Heading "Why one queue" level:2 #why
+        Heading "Why one queue" level=2 id=why
         Paragraph "Each integration had been a sensible choice on the day it was made. Together they meant forty failure modes, forty retry policies and no single place to see where a message was stuck. On-call engineers spent more time tracing hops than fixing causes."
         Paragraph "We set ourselves a narrow goal: every asynchronous message between services would pass through one durable, partitioned queue with one retry policy and one dashboard."
-        Box pad:[20,12,12,12] border-left:#FF4F46E5 fill:#FFF5F3FF radius:8
-          Text "“The hard part was never the broker. It was agreeing, forty times over, on what a message is.”" size:22 weight:600 color:#FF312E81
+        Box pad=[20,12,12,12] border-left=#FF4F46E5 fill=#FFF5F3FF radius=8
+          Text "“The hard part was never the broker. It was agreeing, forty times over, on what a message is.”" size=22 weight=600 color=#FF312E81
           Text.muted "— Platform team retrospective"
         Paragraph "We started with a shared envelope: an id, a type, a version, a producer, and the payload. Every consumer reads the envelope first and can reject a version it does not understand without crashing."
-        CodeBlock "envelope.ts" "export interface Envelope<T> {\n  id: string;          // ULID, sortable\n  type: string;        // e.g. \"order.created\"\n  version: number;     // schema version\n  producer: string;    // service name\n  sentAt: string;      // ISO 8601\n  payload: T;\n}\n\nawait queue.publish(\"orders\", {\n  type: \"order.created\", version: 2, payload: order,\n});" language:"typescript" copyable:true
-        Heading "What we would do differently" level:2 #lessons
+        CodeBlock "envelope.ts" "export interface Envelope<T> {\n  id: string;          // ULID, sortable\n  type: string;        // e.g. \"order.created\"\n  version: number;     // schema version\n  producer: string;    // service name\n  sentAt: string;      // ISO 8601\n  payload: T;\n}\n\nawait queue.publish(\"orders\", {\n  type: \"order.created\", version: 2, payload: order,\n});" language="typescript" copyable=true
+        Heading "What we would do differently" level=2 id=lessons
         Paragraph "The migration took eleven months instead of the four we planned. Looking back, three decisions would have saved most of that time:"
-        Column gap:10 pad:[8,0,0,0]
-          Row gap:10 top
+        Column gap=10 pad=[8,0,0,0]
+          Row gap=10 top
             Text.strong "•"
             Text "Publish the envelope schema and a validator before migrating a single service."
-          Row gap:10 top
+          Row gap=10 top
             Text.strong "•"
             Text "Run old and new paths in parallel with shadow consumers, and compare outputs automatically."
-          Row gap:10 top
+          Row gap=10 top
             Text.strong "•"
             Text "Give every team a dead-letter dashboard on day one, not as a follow-up project."
         Paragraph "Today a stuck message shows up on one screen with its full history. Incidents involving async work dropped by 63%, and new services connect in an afternoon."
         Divider
-        Row gap:8
+        Row gap=8
           Chip "Queues"
           Chip "Migration"
           Chip "Distributed systems"
-      Column w:300 gap:20 {"props": {"sticky": true, "top": 88}}
-        Card gap:10
+      Column w=300 gap=20 {"props": {"sticky": true, "top": 88}}
+        Card gap=10
           Text.eyebrow "On this page"
-          Link "Why one queue" -> emit scrollTo "why"
-          Link "The shared envelope" -> emit scrollTo "envelope"
-          Link "What we would do differently" -> emit scrollTo "lessons"
-          Link "Results" -> emit scrollTo "results"
-        Card gap:12 fill:#FFF5F3FF
+          Link "Why one queue" onTap={emit scrollTo "why"}
+          Link "The shared envelope" onTap={emit scrollTo "envelope"}
+          Link "What we would do differently" onTap={emit scrollTo "lessons"}
+          Link "Results" onTap={emit scrollTo "results"}
+        Card gap=12 fill=#FFF5F3FF
           Icon "mail"
           Text.strong "Get the next post"
           Text.muted "One engineering story every two weeks. No spam."
-          Input "Email" "you@example.com" bind:email type:email
-          Button "Subscribe" -> emit subscribe email; toast "Thanks for subscribing!"
-  Section fill:#FFF3F4F6
-    Heading "Related articles" level:2
-    Grid cols:3 gap:24
-      Card gap:10
-        Media kind:"train" tone:"day" h:160 radius:10
+          Input "Email" "you@example.com" bind=email type={email}
+          Button "Subscribe" onTap={emit subscribe email; toast "Thanks for subscribing!"}
+  Section fill=#FFF3F4F6
+    Heading "Related articles" level=2
+    Grid cols=3 gap=24
+      Card gap=10
+        Media kind="train" tone="day" h=160 radius=10
         Badge.info "Reliability"
         Text.strong "Backpressure without tears"
         Text.muted "How we taught producers to slow down before the queue filled up."
         Text.small "Feb 20 · 7 min read"
-      Card gap:10
-        Media kind:"harbor" tone:"dawn" h:160 radius:10
+      Card gap=10
+        Media kind="harbor" tone="dawn" h=160 radius=10
         Badge.success "Data"
         Text.strong "Exactly-once is a lie we tell kindly"
         Text.muted "Idempotency keys, deduplication windows and the cases they miss."
         Text.small "Jan 28 · 11 min read"
-      Card gap:10
-        Media kind:"mountain" tone:"dusk" h:160 radius:10
+      Card gap=10
+        Media kind="mountain" tone="dusk" h=160 radius=10
         Badge.warning "Culture"
         Text.strong "Running a migration across 12 teams"
         Text.muted "Roadmaps, office hours and the spreadsheet that kept us honest."
         Text.small "Jan 9 · 6 min read"
   Footer
     Row between middle
-      Row gap:8 middle
+      Row gap=8 middle
         Icon "graphic_eq"
         Text.strong "Signal & Noise"
-      Row gap:16
+      Row gap=16
         Link "About"
         Link "RSS"
         Link "Careers"

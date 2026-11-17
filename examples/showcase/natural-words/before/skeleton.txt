@@ -2,23 +2,23 @@ state loading=true
 state dim=false
 state articles=[{"title":"Designing calm interfaces","meta":"5 min read · Design"},{"title":"Why small teams ship faster","meta":"4 min read · Process"},{"title":"A gentle intro to data charts","meta":"7 min read · Data"}]
 state ghosts=[1,2,3]
-every 2s when loading -> loading=false
-every 500 when loading -> dim=!dim
-Card gap:12
+every 2s when loading onTick={loading=false}
+every 500 when loading onTick={dim=!dim}
+Card gap=12
   Text.heading "Latest articles"
   if loading
     each g in ghosts
-      Row gap:12 middle
-        Box w:48 h:48 radius:8 fill:{dim?'#FFE0E0E0':'#FFF2F2F2'}
-        Column gap:8 grow
-          Box h:14 radius:4 fill:{dim?'#FFE0E0E0':'#FFF2F2F2'}
-          Box w:120 h:12 radius:4 fill:{dim?'#FFF2F2F2':'#FFE0E0E0'}
+      Row gap=12 middle
+        Box w=48 h=48 radius=8 fill={dim?'#FFE0E0E0':'#FFF2F2F2'}
+        Column gap=8 grow
+          Box h=14 radius=4 fill={dim?'#FFE0E0E0':'#FFF2F2F2'}
+          Box w=120 h=12 radius=4 fill={dim?'#FFF2F2F2':'#FFE0E0E0'}
   if !loading
     each a in articles
-      Row gap:12 middle
-        Box w:48 h:48 radius:8 fill:#FFD6E4FF center middle
+      Row gap=12 middle
+        Box w=48 h=48 radius=8 fill=#FFD6E4FF center middle
           Icon "article"
-        Column gap:2 grow
+        Column gap=2 grow
           Text.strong "{a.title}"
           Text.caption "{a.meta}"
         Icon "chevron_right"

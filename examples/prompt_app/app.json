@@ -21,8 +21,8 @@
         "state paused=false",
         "state elapsed=0",
         "state saved=false",
-        "every 1s when (phase==\"set\"||phase==\"work\"||phase==\"rest\") && !paused -> elapsed=elapsed+(phase==\"set\"?0:1); phase=left>1?phase:(phase!=\"work\"?\"work\":(round<today.rounds?\"rest\":\"done\")); round=(left<=1&&phase==\"work\")?round+1:round; left=left>1?left-1:(phase==\"work\"?today.work:today.rest)",
-        "every 1s when phase==\"done\" && !saved -> emit finish_session count; saved=true"
+        "every 1s when (phase==\"set\"||phase==\"work\"||phase==\"rest\") && !paused onTick={elapsed=elapsed+(phase==\"set\"?0:1); phase=left>1?phase:(phase!=\"work\"?\"work\":(round<today.rounds?\"rest\":\"done\")); round=(left<=1&&phase==\"work\")?round+1:round; left=left>1?left-1:(phase==\"work\"?today.work:today.rest)}",
+        "every 1s when phase==\"done\" && !saved onTick={emit finish_session count; saved=true}"
       ],
       "preludeNote": "This screen's state and clock are already written by the host (below): do not write state or every lines. phase is one of \"ready\", \"set\" (a 3 second count-in), \"work\", \"rest\", \"done\". Start by setting phase=\"set\"; finish by setting phase=\"done\" (the host then emits finish_session). left is the seconds left in the phase, round the round number, count the jumps, paused whether the clock is held, elapsed the seconds moved, saved whether the result is stored. Show different things by phase with if lines."
     }

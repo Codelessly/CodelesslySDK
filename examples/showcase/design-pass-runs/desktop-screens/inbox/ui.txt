@@ -4,57 +4,57 @@ state reply=""
 state cur={"id":1,"from":"Priya Raman","email":"priya.raman@brightlane.io","subject":"Invoice charged twice for March","time":"9:42 AM","unread":false,"status":"Open","body":"Hi team, I noticed two charges of $49.00 on my card for the March billing cycle, both dated March 3rd. I only have one workspace on the Team plan. Could you refund the duplicate? I've attached a screenshot of my bank statement. Thanks, Priya"}
 state convos=[{"id":1,"from":"Priya Raman","email":"priya.raman@brightlane.io","subject":"Invoice charged twice for March","snippet":"Hi team, I noticed two charges of $49.00 on my card…","time":"9:42 AM","unread":true,"status":"Open","body":"Hi team, I noticed two charges of $49.00 on my card for the March billing cycle, both dated March 3rd. I only have one workspace on the Team plan. Could you refund the duplicate? I've attached a screenshot of my bank statement. Thanks, Priya"},{"id":2,"from":"Marcus Eilert","email":"marcus@eilertdesign.com","subject":"Can't reset my password","snippet":"The reset email never arrives, I've checked spam twice…","time":"9:15 AM","unread":true,"status":"Open","body":"The reset email never arrives. I've checked spam twice and tried three times in the last hour. My account email is marcus@eilertdesign.com. Is there a problem with your mail delivery today?"},{"id":3,"from":"Dana Whitfield","email":"dana.w@northwindlabs.com","subject":"SSO login loops back to sign-in","snippet":"After we switched to Okta, users bounce back to the…","time":"8:51 AM","unread":true,"status":"Open","body":"After we switched our identity provider to Okta yesterday, users bounce back to the sign-in page after authenticating. About 40 people on our team are blocked. Our SAML ACS URL hasn't changed. Please escalate if needed."},{"id":4,"from":"Tomás Herrera","email":"tomas.herrera@cobaltfreight.co","subject":"Feature request: export reports to CSV","snippet":"We'd love to download the weekly shipment report as…","time":"8:20 AM","unread":false,"status":"Open","body":"We'd love to download the weekly shipment report as a CSV file. Right now my team copies the table into a spreadsheet by hand every Monday, which takes about an hour. Is this on the roadmap?"},{"id":5,"from":"Aiko Tanaka","email":"aiko@lumenapps.jp","subject":"Re: API rate limit increase","snippet":"Thanks for the quick reply. We expect roughly 2,000…","time":"Yesterday","unread":false,"status":"Waiting","body":"Thanks for the quick reply. We expect roughly 2,000 requests per minute during our launch next Thursday, up from the current 600 limit. Can you confirm the increase will be in place by Wednesday evening?"},{"id":6,"from":"Greg Olawale","email":"greg.olawale@mailbox.org","subject":"Please cancel my subscription","snippet":"I'm moving to a different tool and would like to cancel…","time":"Yesterday","unread":true,"status":"Open","body":"I'm moving to a different tool and would like to cancel my subscription before the next renewal on the 18th. Please confirm once it's done and let me know how to export my data first."},{"id":7,"from":"Sofia Lindqvist","email":"sofia.lindqvist@fjordstudio.se","subject":"Mobile app crashes on launch","snippet":"Since the 4.2 update on my Pixel 8 the app closes right…","time":"Yesterday","unread":false,"status":"Open","body":"Since the 4.2 update on my Pixel 8 the app closes right after the splash screen. I've reinstalled it and cleared the cache, with no luck. Android 15, app version 4.2.0."},{"id":8,"from":"Hannah Boyd","email":"hboyd@meridianclinic.org","subject":"Team seats not showing up","snippet":"We bought 5 extra seats this morning but the admin page…","time":"Mon","unread":false,"status":"Waiting","body":"We bought 5 extra seats this morning but the admin page still shows 10 total instead of 15. The payment went through and I have the receipt. Can someone take a look?"},{"id":9,"from":"Raj Patel","email":"raj.patel@quillworks.dev","subject":"Thanks, that fixed it!","snippet":"Clearing the browser cache did the trick. Really…","time":"Mon","unread":false,"status":"Resolved","body":"Clearing the browser cache did the trick. Really appreciate the fast help and the clear steps. Feel free to close this one out."},{"id":10,"from":"Elena Petrova","email":"elena.petrova@kestrelbank.eu","subject":"Data processing agreement request","snippet":"Our legal team needs a signed DPA before we can roll…","time":"Sun","unread":false,"status":"Open","body":"Our legal team needs a signed data processing agreement before we can roll out to the EU offices. Could you send over your standard DPA, along with your list of sub-processors?"}]
 
-Row w:1280 h:800 fill:#FFFFFFFF
-  Column w:210 h:fill gap:4 pad:12 fill:#FFF3F4F6
+Row w=1280 h=800 fill=#FFFFFFFF
+  Column w=210 h=fill gap=4 pad=12 fill=#FFF3F4F6
     Text.sectionTitle "Northwind Support"
-    Spacer h:8
-    Button "Compose" icon:"edit"
-    Spacer h:8
-    Row gap:10 pad:[10,8,10,8] radius:6 fill:{folder=="Inbox"?"#FFE0E7FF":"#00000000"} -> folder="Inbox"
+    Spacer h=8
+    Button "Compose" icon="edit"
+    Spacer h=8
+    Row gap=10 pad=[10,8,10,8] radius=6 fill={folder=="Inbox"?"#FFE0E7FF":"#00000000"} onTap={folder="Inbox"}
       Icon "inbox"
       Text "Inbox"
       Spacer grow
       Text.strong "{count(convos,x=>x.unread)}"
-    Row gap:10 pad:[10,8,10,8] radius:6 fill:{folder=="Assigned"?"#FFE0E7FF":"#00000000"} -> folder="Assigned"
+    Row gap=10 pad=[10,8,10,8] radius=6 fill={folder=="Assigned"?"#FFE0E7FF":"#00000000"} onTap={folder="Assigned"}
       Icon "person"
       Text "Assigned to me"
       Spacer grow
       Text.muted "4"
-    Row gap:10 pad:[10,8,10,8] radius:6 fill:{folder=="Waiting"?"#FFE0E7FF":"#00000000"} -> folder="Waiting"
+    Row gap=10 pad=[10,8,10,8] radius=6 fill={folder=="Waiting"?"#FFE0E7FF":"#00000000"} onTap={folder="Waiting"}
       Icon "schedule"
       Text "Waiting"
       Spacer grow
       Text.muted "{count(convos,x=>x.status=='Waiting')}"
-    Row gap:10 pad:[10,8,10,8] radius:6 fill:{folder=="Resolved"?"#FFE0E7FF":"#00000000"} -> folder="Resolved"
+    Row gap=10 pad=[10,8,10,8] radius=6 fill={folder=="Resolved"?"#FFE0E7FF":"#00000000"} onTap={folder="Resolved"}
       Icon "check_circle"
       Text "Resolved"
       Spacer grow
       Text.muted "{count(convos,x=>x.status=='Resolved')}"
-    Row gap:10 pad:[10,8,10,8] radius:6 fill:{folder=="Spam"?"#FFE0E7FF":"#00000000"} -> folder="Spam"
+    Row gap=10 pad=[10,8,10,8] radius=6 fill={folder=="Spam"?"#FFE0E7FF":"#00000000"} onTap={folder="Spam"}
       Icon "report"
       Text "Spam"
       Spacer grow
       Text.muted "12"
   Divider
-  Column w:390 h:fill
-    Row between middle pad:[16,14,16,14]
+  Column w=390 h=fill
+    Row between middle pad=[16,14,16,14]
       Text.sectionTitle "{folder}"
       Text.muted "{count(convos,x=>x.unread)} unread"
     Divider
     Column scroll grow
       each c in convos
-        Row gap:10 top pad:[16,12,16,12] fill:{sel==c.id?"#FFEEF2FF":"#FFFFFFFF"} -> sel=c.id; cur=c; convos=updateWhere(convos,x=>x.id==c.id,x=>with(x,"unread",false))
-          Box w:8 h:8 radius:4 fill:{c.unread?"#FF2563EB":"#00000000"}
-          Column grow gap:2
+        Row gap=10 top pad=[16,12,16,12] fill={sel==c.id?"#FFEEF2FF":"#FFFFFFFF"} onTap={sel=c.id; cur=c; convos=updateWhere(convos,x=>x.id==c.id,x=>with(x,"unread",false))}
+          Box w=8 h=8 radius=4 fill={c.unread?"#FF2563EB":"#00000000"}
+          Column grow gap=2
             Row between
               Text.strong "{c.from}"
               Text.caption "{c.time}"
             Text.rowTitle "{c.subject}"
-            Text.muted "{c.snippet}" size:12
+            Text.muted "{c.snippet}" size=12
   Divider
-  Column grow h:fill pad:24 gap:14
+  Column grow h=fill pad=24 gap=14
     Row between top
-      Column gap:4 grow
+      Column gap=4 grow
         Text.heading2 "{cur.subject}"
         Text.muted "{cur.from} · {cur.email}"
       Badge.info "{cur.status}"
@@ -64,7 +64,7 @@ Row w:1280 h:800 fill:#FFFFFFFF
     Spacer grow
     Divider
     Text.fieldLabel "Reply to {cur.from}"
-    TextArea "Write your reply…" bind:reply h:130
-    Row gap:10 end
-      Button.outline "Close ticket" -> convos=updateWhere(convos,x=>x.id==cur.id,x=>with(x,"status","Resolved")); cur=with(cur,"status","Resolved"); toast "Ticket closed"
-      Button "Send" enabled:{trim(reply)!=""} -> convos=updateWhere(convos,x=>x.id==cur.id,x=>with(x,"status","Waiting")); cur=with(cur,"status","Waiting"); reply=""; toast "Reply sent"
+    TextArea "Write your reply…" bind=reply h=130
+    Row gap=10 end
+      Button.outline "Close ticket" onTap={convos=updateWhere(convos,x=>x.id==cur.id,x=>with(x,"status","Resolved")); cur=with(cur,"status","Resolved"); toast "Ticket closed"}
+      Button "Send" enabled={trim(reply)!=""} onTap={convos=updateWhere(convos,x=>x.id==cur.id,x=>with(x,"status","Waiting")); cur=with(cur,"status","Waiting"); reply=""; toast "Reply sent"}

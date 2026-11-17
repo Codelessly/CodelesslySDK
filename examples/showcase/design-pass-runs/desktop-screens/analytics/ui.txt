@@ -1,31 +1,31 @@
-Row w:1280 h:900
-  Sidebar bind:nav brand:"Beacon Analytics" sectionLabel:"Workspace" items:["Overview","Acquisition","Behavior","Revenue","Retention","Experiments","Settings"] icons:["dashboard","group_add","touch_app","payments","autorenew","science","settings"] badges:["","","","","","3",""]
-  Column grow gap:20 pad:24 scroll
+Row w=1280 h=900
+  Sidebar bind=nav brand="Beacon Analytics" sectionLabel="Workspace" items=["Overview","Acquisition","Behavior","Revenue","Retention","Experiments","Settings"] icons=["dashboard","group_add","touch_app","payments","autorenew","science","settings"] badges=["","","","","","3",""]
+  Column grow gap=20 pad=24 scroll
     state range="30 days"
     state sort="views"
     state desc=true
     state pages=[{"path":"/pricing","views":48210,"visitors":31840,"conv":"6.8%","bounce":"32%"},{"path":"/","views":112480,"visitors":78200,"conv":"3.1%","bounce":"47%"},{"path":"/features/automations","views":27650,"visitors":19420,"conv":"4.9%","bounce":"38%"},{"path":"/signup","views":21380,"visitors":17910,"conv":"41.2%","bounce":"21%"},{"path":"/blog/churn-benchmarks-2024","views":19870,"visitors":16500,"conv":"1.4%","bounce":"63%"},{"path":"/docs/getting-started","views":15240,"visitors":9870,"conv":"2.7%","bounce":"29%"}]
     state events=[{"title":"Acme Robotics upgraded to Business","detail":"$1,188 / year · 4 min ago","icon":"workspace_premium"},{"title":"New sign-up from Product Hunt","detail":"maya@loopwork.io · 11 min ago","icon":"person_add"},{"title":"Trial ended without conversion","detail":"Northwind Studio · 26 min ago","icon":"hourglass_bottom"},{"title":"Payment failed, retry scheduled","detail":"Invoice #4821 · 41 min ago","icon":"error_outline"},{"title":"Seat count increased to 25","detail":"Brightside Health · 1 h ago","icon":"group"},{"title":"Experiment “Annual toggle” reached 95%","detail":"Pricing page · 2 h ago","icon":"science"}]
     Row between middle
-      Column gap:4
+      Column gap=4
         Text.pageTitle "Overview"
         Text.muted "Product performance for Beacon, updated 2 minutes ago"
-      Segments bind:range options:["7 days","30 days","90 days"]
-    Grid cols:4 gap:16
-      StatTile "Monthly recurring revenue" "vs. previous period" value:"$184,230" delta:"+8.5%" icon:"payments"
-      StatTile "Active users" "weekly average" value:"42,918" delta:"+5.2%" icon:"group"
-      StatTile "Trial conversion" "trial to paid" value:"18.6%" delta:"+1.3%" icon:"trending_up"
-      StatTile "Churn rate" "monthly, logo churn" value:"2.4%" delta:"-0.4%" invert:true icon:"person_remove"
-    Row gap:16 top
-      ChartCard "Revenue" value:"$184,230" kind:"line" delta:"+8.5%" values:[121,128,126,139,147,152,149,160,168,171,177,184] labels:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"] grow
-      ChartCard "Sign-ups by channel" value:"5,010" kind:"bars" delta:"+12.1%" values:[1840,1220,960,610,380] labels:["Organic","Paid","Referral","Social","Email"] grow
-    Row gap:16 top
-      Column grow gap:0
-        ChatCard "Top pages" "Ranked by page views" icon:"article" status:"Live" tone:"accent"
-          TableHeader bind:sort desc:desc columns:["Page","Views","Visitors","Conversion","Bounce"] keys:["path","views","visitors","conv","bounce"]
+      Segments bind=range options=["7 days","30 days","90 days"]
+    Grid cols=4 gap=16
+      StatTile "Monthly recurring revenue" "vs. previous period" value="$184,230" delta="+8.5%" icon="payments"
+      StatTile "Active users" "weekly average" value="42,918" delta="+5.2%" icon="group"
+      StatTile "Trial conversion" "trial to paid" value="18.6%" delta="+1.3%" icon="trending_up"
+      StatTile "Churn rate" "monthly, logo churn" value="2.4%" delta="-0.4%" invert=true icon="person_remove"
+    Row gap=16 top
+      ChartCard "Revenue" value="$184,230" kind="line" delta="+8.5%" values=[121,128,126,139,147,152,149,160,168,171,177,184] labels=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"] grow
+      ChartCard "Sign-ups by channel" value="5,010" kind="bars" delta="+12.1%" values=[1840,1220,960,610,380] labels=["Organic","Paid","Referral","Social","Email"] grow
+    Row gap=16 top
+      Column grow gap=0
+        ChatCard "Top pages" "Ranked by page views" icon="article" status="Live" tone="accent"
+          TableHeader bind=sort desc={desc} columns=["Page","Views","Visitors","Conversion","Bounce"] keys=["path","views","visitors","conv","bounce"]
           each p in desc?sortByDesc(pages,sort):sortBy(pages,sort)
-            TableRow cells:{[p.path,p.views,p.visitors,p.conv,p.bounce]}
-      Column gap:0 w:420
-        ChatCard "Recent events" "Across all workspaces" icon:"bolt" status:"6 new" tone:"good"
+            TableRow cells={[p.path,p.views,p.visitors,p.conv,p.bounce]}
+      Column gap=0 w=420
+        ChatCard "Recent events" "Across all workspaces" icon="bolt" status="6 new" tone="good"
           each e in events
-            ListRow "{e.title}" "{e.detail}" icon:{e.icon}
+            ListRow "{e.title}" "{e.detail}" icon={e.icon}

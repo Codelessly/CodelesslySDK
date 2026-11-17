@@ -4,62 +4,62 @@ state detail=""
 state budget=500
 state recs=[]
 
-Card w:390 gap:16
+Card w=390 gap=16
   Row between middle
     Text.heading "Laptop finder"
     Text.muted "Step {min(step,3)} of 3"
-  Progress bind:{step/3} visible:{step<=3}
+  Progress bind={step/3} visible={step<=3}
   if step==1
     Text.strong "What will you mostly use it for?"
-    Column gap:8
-      ChoiceChip "School or study" selected:{use=="study"} -> use="study"; detail=""
-      ChoiceChip "Work and office" selected:{use=="work"} -> use="work"; detail=""
-      ChoiceChip "Gaming" selected:{use=="gaming"} -> use="gaming"; detail=""
-      ChoiceChip "Creative projects" selected:{use=="creative"} -> use="creative"; detail=""
-    Button "Next" enabled:{use!=""} -> step=2
+    Column gap=8
+      ChoiceChip "School or study" selected={use=="study"} onTap={use="study"; detail=""}
+      ChoiceChip "Work and office" selected={use=="work"} onTap={use="work"; detail=""}
+      ChoiceChip "Gaming" selected={use=="gaming"} onTap={use="gaming"; detail=""}
+      ChoiceChip "Creative projects" selected={use=="creative"} onTap={use="creative"; detail=""}
+    Button "Next" enabled={use!=""} onTap={step=2}
   if step==2
     if use=="study"
       Text.strong "What matters most for school?"
-      Column gap:8
-        ChoiceChip "Long battery life" selected:{detail=="battery"} -> detail="battery"
-        ChoiceChip "Light to carry" selected:{detail=="light"} -> detail="light"
-        ChoiceChip "Note-taking with a pen" selected:{detail=="pen"} -> detail="pen"
+      Column gap=8
+        ChoiceChip "Long battery life" selected={detail=="battery"} onTap={detail="battery"}
+        ChoiceChip "Light to carry" selected={detail=="light"} onTap={detail="light"}
+        ChoiceChip "Note-taking with a pen" selected={detail=="pen"} onTap={detail="pen"}
     if use=="work"
       Text.strong "How do you work?"
-      Column gap:8
-        ChoiceChip "Travel a lot" selected:{detail=="travel"} -> detail="travel"
-        ChoiceChip "Mostly at a desk" selected:{detail=="desk"} -> detail="desk"
-        ChoiceChip "Video calls all day" selected:{detail=="calls"} -> detail="calls"
+      Column gap=8
+        ChoiceChip "Travel a lot" selected={detail=="travel"} onTap={detail="travel"}
+        ChoiceChip "Mostly at a desk" selected={detail=="desk"} onTap={detail="desk"}
+        ChoiceChip "Video calls all day" selected={detail=="calls"} onTap={detail="calls"}
     if use=="gaming"
       Text.strong "What kind of games?"
-      Column gap:8
-        ChoiceChip "Competitive and fast" selected:{detail=="fast"} -> detail="fast"
-        ChoiceChip "Big modern titles" selected:{detail=="aaa"} -> detail="aaa"
-        ChoiceChip "Casual and indie" selected:{detail=="casual"} -> detail="casual"
+      Column gap=8
+        ChoiceChip "Competitive and fast" selected={detail=="fast"} onTap={detail="fast"}
+        ChoiceChip "Big modern titles" selected={detail=="aaa"} onTap={detail="aaa"}
+        ChoiceChip "Casual and indie" selected={detail=="casual"} onTap={detail="casual"}
     if use=="creative"
       Text.strong "What do you create?"
-      Column gap:8
-        ChoiceChip "Photo editing" selected:{detail=="photo"} -> detail="photo"
-        ChoiceChip "Video editing" selected:{detail=="video"} -> detail="video"
-        ChoiceChip "Music and design" selected:{detail=="music"} -> detail="music"
-    Row gap:8
-      Button.outline "Back" -> step=1
+      Column gap=8
+        ChoiceChip "Photo editing" selected={detail=="photo"} onTap={detail="photo"}
+        ChoiceChip "Video editing" selected={detail=="video"} onTap={detail="video"}
+        ChoiceChip "Music and design" selected={detail=="music"} onTap={detail="music"}
+    Row gap=8
+      Button.outline "Back" onTap={step=1}
       Spacer grow
-      Button "Next" enabled:{detail!=""} -> step=3
+      Button "Next" enabled={detail!=""} onTap={step=3}
   if step==3
     Text.strong "What is your budget?"
     Text.heading "{money(budget,'$',0)}"
-    Slider bind:budget min:400 max:3000
+    Slider bind=budget min=400 max=3000
     Row between
       Text.caption "$400"
       Text.caption "$3,000"
-    Row gap:8
-      Button.outline "Back" -> step=2
+    Row gap=8
+      Button.outline "Back" onTap={step=2}
       Spacer grow
-      Button "See my match" -> step=4
+      Button "See my match" onTap={step=4}
   if step==4
     Text.caption "Your match"
-    Card gap:8
+    Card gap=8
       if budget<800
         Text.heading "Acer Aspire 5"
         Text.muted "About $650"
@@ -71,16 +71,16 @@ Card w:390 gap:16
         Text.muted "About $2,000+"
       Divider
       Text.strong "Why it fits"
-      Row gap:8
+      Row gap=8
         Icon "check"
         Text "Fits your {use} use, with a focus on {detail}"
-      Row gap:8
+      Row gap=8
         Icon "check"
         Text "Within your {money(budget,'$',0)} budget"
-      Row gap:8
+      Row gap=8
         Icon "check"
         Text "{budget<800 ? 'Solid value without extras you will not use' : budget<1500 ? 'Balanced speed, build quality and battery' : 'Top performance and a premium display'}"
-    Row gap:8
-      Button.outline "Back" -> step=3
+    Row gap=8
+      Button.outline "Back" onTap={step=3}
       Spacer grow
-      Button.secondary "Start over" -> step=1; use=""; detail=""; budget=500
+      Button.secondary "Start over" onTap={step=1; use=""; detail=""; budget=500}

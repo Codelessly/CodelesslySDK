@@ -3,17 +3,17 @@ state use=""
 state focus=""
 state budget=""
 state rec=use=="Gaming"?"Volt 16 Gaming · $1,399":(use=="Creative projects"?"Studio 14 Pro · $1,799":(budget=="Under $800"?"Slate 13 · $649":"Aero 14 · $1,099"))
-ChatCard "Find your laptop" "Three quick questions" icon:"laptop_mac_rounded" status:"{step>3?"Your match":"Question "+step+" of 3"}" tone:{step>3?"good":"accent"}
-  Steps current:{step} steps:["Use","Details","Budget"]
+ChatCard "Find your laptop" "Three quick questions" icon="laptop_mac_rounded" status="{step>3?"Your match":"Question "+step+" of 3"}" tone={step>3?"good":"accent"}
+  Steps current={step} steps=["Use","Details","Budget"]
   if step==1
-    OptionList#q1 "What will you mostly use it for?" bind:use options:["School or study","Work and office","Gaming","Creative projects"] -> step=2; focus=""
+    OptionList#q1 "What will you mostly use it for?" bind=use options=["School or study","Work and office","Gaming","Creative projects"] onChanged={step=2; focus=""}
   if step==2
-    OptionList#q2 "{use=="Gaming"?"What do you play?":"What matters most day to day?"}" bind:focus options:{use=="Gaming"?["Competitive esports","Big open-world titles"]:["All-day battery","A big screen and keyboard","As light as possible"]} -> step=3
+    OptionList#q2 "{use=="Gaming"?"What do you play?":"What matters most day to day?"}" bind=focus options={use=="Gaming"?["Competitive esports","Big open-world titles"]:["All-day battery","A big screen and keyboard","As light as possible"]} onChanged={step=3}
   if step==3
-    OptionList#q3 "What is your budget?" bind:budget options:["Under $800","$800 to $1,500","Over $1,500"] -> step=4
+    OptionList#q3 "What is your budget?" bind=budget options=["Under $800","$800 to $1,500","Over $1,500"] onChanged={step=4}
   if step==4
-    Recommendation "{rec}" "The best fit for what you told me." reasons:{["Made for "+lower(use),"Chosen for: "+lower(focus)+", budget "+lower(budget)]} kind:"laptop" eyebrow:"Your match"
+    Recommendation "{rec}" "The best fit for what you told me." reasons={["Made for "+lower(use),"Chosen for: "+lower(focus)+", budget "+lower(budget)]} kind="laptop" eyebrow="Your match"
   if step>1
-    Row gap:10
-      ActionButton#back "Back" tone:"quiet" icon:"arrow_back_rounded" grow -> step=step-1
-      ActionButton#again "Start over" tone:"quiet" icon:"refresh_rounded" grow -> step=1; use=""; focus=""; budget=""
+    Row gap=10
+      ActionButton#back "Back" tone="quiet" icon="arrow_back_rounded" grow onPressed={step=step-1}
+      ActionButton#again "Start over" tone="quiet" icon="refresh_rounded" grow onPressed={step=1; use=""; focus=""; budget=""}

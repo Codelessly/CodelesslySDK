@@ -6,71 +6,71 @@ state done=[]
 App
   Main
     Nav
-      Row gap:16 middle
-        Brand "Lanes" icon:"view_column"
-        Heading "Website relaunch" level:1
-      Row gap:6 middle
-        Avatar "Maya Reyes" size:32
-        Avatar "Jon Park" size:32
-        Avatar "Ana Silva" size:32
-        Avatar "Li Wei" size:32
-        Avatar "Sam Patel" size:32
-      Row gap:8 middle
-        Input "Filter tasks" bind:q w:220
-        Button "New task" -> emit newTask
-    Row gap:12 pad:16 top grow
+      Row gap=16 middle
+        Brand "Lanes" icon="view_column"
+        Heading "Website relaunch" level=1
+      Row gap=6 middle
+        Avatar "Maya Reyes" size=32
+        Avatar "Jon Park" size=32
+        Avatar "Ana Silva" size=32
+        Avatar "Li Wei" size=32
+        Avatar "Sam Patel" size=32
+      Row gap=8 middle
+        Input "Filter tasks" bind=q w=220
+        Button "New task" onTap={emit newTask}
+    Row gap=12 pad=16 top grow
       each col in cols
-        Column grow gap:10 pad:10 fill:#FFF3F4F6 radius:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col",col))
+        Column grow gap=10 pad=10 fill=#FFF3F4F6 radius=10 drop=task onDrop={tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col",col))}
           Row between middle
-            Row gap:8 middle
+            Row gap=8 middle
               Text.strong "{col}"
               Badge.neutral "{count(tasks,x=>x.col==col)}"
-            IconButton "add" -> emit addTask col
+            IconButton "add" onTap={emit addTask col}
           each t in filter(tasks,x=>x.col==col && contains(lower(x.title),lower(q)))
-            Card gap:10 pad:12 drag:task(t.id) border:{sel==t.id?"#FF2563EB":"#FFE5E7EB"} -> sel=t.id
-              Box fill:{t.tint} radius:4 pad:[6,2,6,2]
-                Text.caption "{t.label}" color:{t.color}
+            Card gap=10 pad=12 drag=task(t.id) border={sel==t.id?"#FF2563EB":"#FFE5E7EB"} onTap={sel=t.id}
+              Box fill={t.tint} radius=4 pad=[6,2,6,2]
+                Text.caption "{t.label}" color={t.color}
               Text.strong "{t.title}"
               Row between middle
-                Row gap:12 middle
-                  Row gap:4 middle
-                    Icon "event" size:14
+                Row gap=12 middle
+                  Row gap=4 middle
+                    Icon "event" size=14
                     Text.caption "{t.due}"
-                  Row gap:4 middle
-                    Icon "chat_bubble_outline" size:14
+                  Row gap=4 middle
+                    Icon "chat_bubble_outline" size=14
                     Text.caption "{t.c}"
-                Avatar "{t.who}" size:24
+                Avatar "{t.who}" size=24
   if sel!=0
-    Pane w:360 pad:16 gap:14 scroll border-left:#FFE5E7EB
+    Pane w=360 pad=16 gap=14 scroll border-left=#FFE5E7EB
       Row between middle
         Text.eyebrow "TASK DETAILS"
-        IconButton "close" -> sel=0
-      Heading "{find(tasks,x=>x.id==sel).title}" level:3
-      Row gap:8 middle
-        Box fill:{find(tasks,x=>x.id==sel).tint} radius:4 pad:[6,2,6,2]
-          Text.caption "{find(tasks,x=>x.id==sel).label}" color:{find(tasks,x=>x.id==sel).color}
+        IconButton "close" onTap={sel=0}
+      Heading "{find(tasks,x=>x.id==sel).title}" level=3
+      Row gap=8 middle
+        Box fill={find(tasks,x=>x.id==sel).tint} radius=4 pad=[6,2,6,2]
+          Text.caption "{find(tasks,x=>x.id==sel).label}" color={find(tasks,x=>x.id==sel).color}
         Badge.info "{find(tasks,x=>x.id==sel).col}"
         Text.caption "Due {find(tasks,x=>x.id==sel).due}"
-      Row gap:8 middle
-        Avatar "{find(tasks,x=>x.id==sel).who}" size:28
+      Row gap=8 middle
+        Avatar "{find(tasks,x=>x.id==sel).who}" size=28
         Text.muted "{find(tasks,x=>x.id==sel).who}"
       Text.strong "Description"
       Text.muted "Plan and complete this piece of the relaunch so the new site can go live on schedule. Share progress in the comments and move the card when it is ready for the next step."
-      Checklist "Checklist" bind:done items:["Confirm scope with the team","Prepare first version","Get feedback from a reviewer","Final check before launch"]
+      Checklist "Checklist" bind=done items=["Confirm scope with the team","Prepare first version","Get feedback from a reviewer","Final check before launch"]
       Text.strong "Activity"
-      Column gap:12
-        Row gap:10 top
-          Avatar "Maya Reyes" size:28
-          Column grow gap:2
+      Column gap=12
+        Row gap=10 top
+          Avatar "Maya Reyes" size=28
+          Column grow gap=2
             Text "Maya commented: looks good so far."
             Text.caption "2 hours ago"
-        Row gap:10 top
-          Avatar "Jon Park" size:28
-          Column grow gap:2
+        Row gap=10 top
+          Avatar "Jon Park" size=28
+          Column grow gap=2
             Text "Jon moved this card to {find(tasks,x=>x.id==sel).col}."
             Text.caption "Yesterday"
-        Row gap:10 top
-          Avatar "Ana Silva" size:28
-          Column grow gap:2
+        Row gap=10 top
+          Avatar "Ana Silva" size=28
+          Column grow gap=2
             Text "Ana changed the due date."
             Text.caption "2 days ago"

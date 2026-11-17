@@ -1,33 +1,33 @@
-Card w:390 gap:12
+Card w=390 gap=12
   Row between middle
-    Column gap:2
+    Column gap=2
       Text.title "Pro plan"
       Text.muted "Renews in 3 days"
     Badge.warning "Renewing soon"
-  Row middle gap:4
-    Text "{annual ? money(biller*10,'$',0) : money(biller,'$',0)}" size:32 weight:700
+  Row middle gap=4
+    Text "{annual ? money(biller*10,'$',0) : money(biller,'$',0)}" size=32 weight=700
     Text.muted "{annual ? '/ year' : '/ month'}"
   Divider
-  Column gap:4
+  Column gap=4
     Row between
       Text.fieldLabel "Storage"
       Text.small "{storageUsed} of {storageTotal} GB"
-    Progress bind:storageShare
-  Column gap:4
+    Progress bind=storageShare
+  Column gap=4
     Row between
       Text.fieldLabel "Seats"
       Text.small "{seatsUsed} of {seatsTotal} seats"
-    Progress bind:seatShare
+    Progress bind=seatShare
   Divider
-  Toggle "Switch to annual billing" bind:annual
+  Toggle "Switch to annual billing" bind=annual
   if annual
-    Box fill:#FFE8F5E9 radius:8 pad:10
-      Text "You save {money(biller*2,'$',0)} a year (2 months free)" color:#FF1B5E20
+    Box fill=#FFE8F5E9 radius=8 pad=10
+      Text "You save {money(biller*2,'$',0)} a year (2 months free)" color=#FF1B5E20
   if !annual
     Text.muted "Pay yearly and get 2 months free."
-  Row gap:8
-    Button "Manage plan" -> emit manage
-    Button.outline "Cancel renewal" -> emit cancelRenewal; toast "Renewal canceled"
+  Row gap=8
+    Button "Manage plan" onTap={emit manage}
+    Button.outline "Cancel renewal" onTap={emit cancelRenewal; toast "Renewal canceled"}
 
 state biller=20
 state annual=false

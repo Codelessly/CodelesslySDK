@@ -1,17 +1,17 @@
 state live=true
 state muted=false
 state levels=[6,14,22,12,26,18,8,20,28,16,10,24,14,6,18,26,12,20,8,16]
-Card gap:12
-  Row gap:10
+Card gap=12
+  Row gap=10
     Avatar "Claude"
-    Column gap:1 grow
+    Column gap=1 grow
       Text.sectionTitle "Voice conversation"
       Text.caption "{live?(muted?"Muted · 02:14":"Listening · 02:14"):"Ended after 02:14"}"
-    Badge.success "Live" visible:{live}
-  Row gap:3 middle center h:32
+    Badge.success "Live" visible={live}
+  Row gap=3 middle center h=32
     each l in levels
-      Box w:3 radius:2 h:{live&&!muted?l:4} fill:{live&&!muted?"#FF2563EB":"#FFD1D5DB"}
+      Box w=3 radius=2 h={live&&!muted?l:4} fill={live&&!muted?"#FF2563EB":"#FFD1D5DB"}
   Text.bodySecondary "\"…and the second option would cost about forty dollars more a month.\""
-  Row center gap:8
-    Button.outline "{muted?"Unmute":"Mute"}" enabled:{live} -> muted=!muted
-    Button "{live?"End":"Start again"}" -> live=!live; emit voice_toggle
+  Row center gap=8
+    Button.outline "{muted?"Unmute":"Mute"}" enabled={live} onTap={muted=!muted}
+    Button "{live?"End":"Start again"}" onTap={live=!live; emit voice_toggle}

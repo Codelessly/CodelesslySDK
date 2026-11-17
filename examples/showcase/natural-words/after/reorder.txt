@@ -1,10 +1,10 @@
 state songs=[{"id":1,"title":"Midnight City","artist":"M83","time":"4:03"},{"id":2,"title":"Electric Feel","artist":"MGMT","time":"3:49"},{"id":3,"title":"Dreams","artist":"Fleetwood Mac","time":"4:14"},{"id":4,"title":"Teardrop","artist":"Massive Attack","time":"5:29"},{"id":5,"title":"Genghis Khan","artist":"Miike Snow","time":"3:42"},{"id":6,"title":"Heartbeats","artist":"The Knife","time":"3:52"}]
-Card gap:8
+Card gap=8
   Text.title "My Playlist"
   Text.caption "Drag a song onto another to reorder"
   Divider
   each row in songs
-    Row middle gap:12 pad:8 drag:song(row.id) drop:song -> songs=concat(append(take(removeWhere(songs,s=>s.id==result.data),indexOf(songs,row)),find(songs,s=>s.id==result.data)),slice(removeWhere(songs,s=>s.id==result.data),indexOf(songs,row),length(songs)))
+    Row middle gap=12 pad=8 drag=song(row.id) drop=song onDrop={songs=concat(append(take(removeWhere(songs,s=>s.id==result.data),indexOf(songs,row)),find(songs,s=>s.id==result.data)),slice(removeWhere(songs,s=>s.id==result.data),indexOf(songs,row),length(songs)))}
       Icon "drag_handle"
       Column grow
         Text.strong "{row.title}"

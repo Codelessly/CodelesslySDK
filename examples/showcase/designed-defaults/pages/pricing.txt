@@ -1,51 +1,51 @@
 state annual=true
 state chosen=""
-Column scroll gap:16 pad:16
-  Column gap:6 center
+Column scroll gap=16 pad=16
+  Column gap=6 center
     Badge.primary "Pricing"
     Text.title "Plans that grow with you"
     Text.muted "Start free. Upgrade when your team does."
-  Row center gap:8
+  Row center gap=8
     Text.small "Monthly"
-    Toggle "" bind:annual
+    Toggle "" bind=annual
     Text.small "Annual"
     Badge.success "Save 20%"
-  Card gap:10
+  Card gap=10
     Text.heading "Starter"
     Text.muted "For individuals trying things out."
-    Row gap:4 bottom
-      Text "$0" size:32 weight:700
+    Row gap=4 bottom
+      Text "$0" size=32 weight=700
       Text.muted "/ month"
     Divider
     Text "✓  3 projects"
     Text "✓  Basic analytics"
     Text "✓  Community support"
-    Button.outline "Start free" -> chosen="Starter"
-  Card gap:10
+    Button.outline "Start free" onTap={chosen="Starter"}
+  Card gap=10
     Row between
       Text.heading "Pro"
       Badge.primary "Most popular"
     Text.muted "For growing teams that ship every week."
-    Row gap:4 bottom
-      Text "{annual ? '$16' : '$20'}" size:32 weight:700
+    Row gap=4 bottom
+      Text "{annual ? '$16' : '$20'}" size=32 weight=700
       Text.muted "/ seat / month"
     Divider
     Text "✓  Unlimited projects"
     Text "✓  Advanced analytics"
     Text "✓  Priority support"
     Text "✓  SSO"
-    Button "Choose Pro" -> chosen="Pro"
-  Card gap:10
+    Button "Choose Pro" onTap={chosen="Pro"}
+  Card gap=10
     Text.heading "Enterprise"
     Text.muted "Security, compliance and a dedicated manager."
-    Text "Custom" size:32 weight:700
+    Text "Custom" size=32 weight=700
     Divider
     Text "✓  Everything in Pro"
     Text "✓  Audit logs"
     Text "✓  99.99% uptime SLA"
-    Button.secondary "Talk to sales" -> chosen="Enterprise"
+    Button.secondary "Talk to sales" onTap={chosen="Enterprise"}
   if chosen!=""
-    Card gap:4
+    Card gap=4
       Text.success "You picked {chosen}."
       Text.muted "We'll take you to checkout next."
   Text.heading "Questions"

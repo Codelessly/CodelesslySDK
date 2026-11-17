@@ -8,81 +8,81 @@ state plans=[{"name":"Free","label":"48,210","delta":"+4.2%","up":true,"trend":[
 state saved=[{"name":"Checkout by plan","note":"Line, 30 days","icon":"show_chart"},{"name":"Weekly conversion","note":"Funnel, 7 days","icon":"filter_alt"},{"name":"Revenue by country","note":"Bars, 90 days","icon":"bar_chart"},{"name":"Trial to paid","note":"Retention, 12 weeks","icon":"grid_on"}]
 App
   Sidebar
-    Brand "Lumen" icon:"insights"
-    NavItem "Home" icon:"home" selected:{tab=="home"} -> tab="home"
-    NavItem "Explore" icon:"explore" selected:{tab=="explore"} -> tab="explore"
-    NavItem "Funnels" icon:"filter_alt" selected:{tab=="funnels"} -> tab="funnels"
-    NavItem "Retention" icon:"replay" selected:{tab=="retention"} -> tab="retention"
-    NavItem "Cohorts" icon:"groups" selected:{tab=="cohorts"} -> tab="cohorts"
-    NavItem "Settings" icon:"settings" selected:{tab=="settings"} -> tab="settings"
+    Brand "Lumen" icon="insights"
+    NavItem "Home" icon="home" selected={tab=="home"} onTap={tab="home"}
+    NavItem "Explore" icon="explore" selected={tab=="explore"} onTap={tab="explore"}
+    NavItem "Funnels" icon="filter_alt" selected={tab=="funnels"} onTap={tab="funnels"}
+    NavItem "Retention" icon="replay" selected={tab=="retention"} onTap={tab="retention"}
+    NavItem "Cohorts" icon="groups" selected={tab=="cohorts"} onTap={tab="cohorts"}
+    NavItem "Settings" icon="settings" selected={tab=="settings"} onTap={tab="settings"}
     Spacer grow
-    Row gap:10 middle
-      Avatar "Maya Reyes" size:36
+    Row gap=10 middle
+      Avatar "Maya Reyes" size=36
       Column
         Text.strong "Maya Reyes"
         Text.caption "Product team"
   Main
     Nav
-      Heading "Explore" level:1
-      Row gap:8 middle
-        Select bind:range items:["7 days","30 days","90 days","12 months"] w:150
-        Button "Save chart" icon:"bookmark_add" -> toast "Chart saved"
-    Column pad:24 gap:20
-      Card gap:16
-        Heading "Query" level:3
-        Row gap:16 bottom
-          Column gap:4 grow
+      Heading "Explore" level=1
+      Row gap=8 middle
+        Select bind=range items=["7 days","30 days","90 days","12 months"] w=150
+        Button "Save chart" icon="bookmark_add" onTap={toast "Chart saved"}
+    Column pad=24 gap=20
+      Card gap=16
+        Heading "Query" level=3
+        Row gap=16 bottom
+          Column gap=4 grow
             Text.fieldLabel "Event"
-            Select bind:event items:["Checkout completed","Signed up","Project created","Invite sent"]
-          Column gap:4 grow
+            Select bind=event items=["Checkout completed","Signed up","Project created","Invite sent"]
+          Column gap=4 grow
             Text.fieldLabel "Grouped by"
-            Select bind:groupBy items:["Plan","Country","Platform"]
-        Row gap:8 middle
+            Select bind=groupBy items=["Plan","Country","Platform"]
+        Row gap=8 middle
           Text.fieldLabel "Filters"
           each f in filters
-            Row gap:4 middle pad:[12,2,4,2] fill:#FFEFF4FF radius:16
+            Row gap=4 middle pad=[12,2,4,2] fill=#FFEFF4FF radius=16
               Text.small "{f}"
-              IconButton "close" -> filters=without(filters,f)
-          Button.outline "Add filter" icon:"add" -> filters=contains(filters,"Device is Mobile")?filters:append(filters,"Device is Mobile")
-      Card gap:12
+              IconButton "close" onTap={filters=without(filters,f)}
+          Button.outline "Add filter" icon="add" onTap={filters=contains(filters,"Device is Mobile")?filters:append(filters,"Device is Mobile")}
+      Card gap=12
         Row between middle
-          Column gap:2
-            Heading "{event} by {lower(groupBy)}" level:3
+          Column gap=2
+            Heading "{event} by {lower(groupBy)}" level=3
             Text.muted "Last {range}, daily"
-          Row gap:20 middle
-            Row gap:6 middle
-              Box w:10 h:10 radius:5 fill:#FF2563EB
+          Row gap=20 middle
+            Row gap=6 middle
+              Box w=10 h=10 radius=5 fill=#FF2563EB
               Text.small "Free"
-            Row gap:6 middle
-              Box w:10 h:10 radius:5 fill:#FF16A34A
+            Row gap=6 middle
+              Box w=10 h=10 radius=5 fill=#FF16A34A
               Text.small "Team"
-            Row gap:6 middle
-              Box w:10 h:10 radius:5 fill:#FFF59E0B
+            Row gap=6 middle
+              Box w=10 h=10 radius=5 fill=#FFF59E0B
               Text.small "Business"
-        LineChart labels:["Mar 1","Mar 6","Mar 11","Mar 16","Mar 21","Mar 26","Mar 31"] series:[{"name":"Free","color":"#FF2563EB","values":[1380,1420,1510,1470,1590,1640,1710]},{"name":"Team","color":"#FF16A34A","values":[560,610,640,690,720,760,810]},{"name":"Business","color":"#FFF59E0B","values":[320,310,300,305,296,298,292]}] h:280
-      Card pad:0 gap:0
-        Row pad:[20,12,20,12] gap:16 between
+        LineChart labels=["Mar 1","Mar 6","Mar 11","Mar 16","Mar 21","Mar 26","Mar 31"] series=[{"name":"Free","color":"#FF2563EB","values":[1380,1420,1510,1470,1590,1640,1710]},{"name":"Team","color":"#FF16A34A","values":[560,610,640,690,720,760,810]},{"name":"Business","color":"#FFF59E0B","values":[320,310,300,305,296,298,292]}] h=280
+      Card pad=0 gap=0
+        Row pad=[20,12,20,12] gap=16 between
           Text.columnHead "Plan" grow
-          Text.columnHead "Count" w:120 right
-          Text.columnHead "vs previous period" w:160 right
-          Text.columnHead "Trend" w:120 right
+          Text.columnHead "Count" w=120 right
+          Text.columnHead "vs previous period" w=160 right
+          Text.columnHead "Trend" w=120 right
         each p in plans
-          Row pad:[20,0,20,0] gap:16 h:52 middle border-top:#FFE5E7EB
+          Row pad=[20,0,20,0] gap=16 h=52 middle border-top=#FFE5E7EB
             Text.strong "{p.name}" grow
-            Text "{p.label}" w:120 right
-            Text.strong "{p.delta}" w:160 right color:{p.up?"#FF16A34A":"#FFDC2626"}
-            Row w:120 end
-              Sparkline values:{p.trend} w:96 h:28
-  Pane w:320 pad:16 gap:12
+            Text "{p.label}" w=120 right
+            Text.strong "{p.delta}" w=160 right color={p.up?"#FF16A34A":"#FFDC2626"}
+            Row w=120 end
+              Sparkline values={p.trend} w=96 h=28
+  Pane w=320 pad=16 gap=12
     Row between middle
-      Heading "Saved charts" level:3
+      Heading "Saved charts" level=3
       Badge.neutral "4"
     each c in saved
-      Row pad:[12,10,12,10] gap:12 middle radius:8 fill:{sel==c.name?"#142563EB":"#00FFFFFF"} -> sel=c.name
+      Row pad=[12,10,12,10] gap=12 middle radius=8 fill={sel==c.name?"#142563EB":"#00FFFFFF"} onTap={sel=c.name}
         IconTile "{c.icon}"
         Column grow
           Text.strong "{c.name}"
           Text.caption "{c.note}"
         Icon "chevron_right"
     Spacer grow
-    Button.outline "New chart" icon:"add" w:fill -> toast "New chart"
+    Button.outline "New chart" icon="add" w=fill onTap={toast "New chart"}

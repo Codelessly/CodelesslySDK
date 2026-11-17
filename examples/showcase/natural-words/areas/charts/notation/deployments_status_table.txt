@@ -1,21 +1,21 @@
-Card gap:8
+Card gap=8
   Row between
     Text.heading "Recent deployments"
     Text.muted "Last 3 hours"
   Divider
-  Row gap:12 center
-    Text.caption "SERVICE" w:140
-    Text.caption "VERSION" w:80
-    Text.caption "STATUS" w:110
-    Text.caption "STARTED" w:90
+  Row gap=12 center
+    Text.caption "SERVICE" w=140
+    Text.caption "VERSION" w=80
+    Text.caption "STATUS" w=110
+    Text.caption "STARTED" w=90
     Spacer grow
     Text.caption "ACTIONS"
   Divider
   each row in deployments
-    Row gap:12 center
-      Text.strong "{row.service}" w:140
-      Text.mono "{row.version}" w:80
-      Row w:110
+    Row gap=12 center
+      Text.strong "{row.service}" w=140
+      Text.mono "{row.version}" w=80
+      Row w=110
         if row.status=="Succeeded"
           Badge.success "Succeeded"
         if row.status=="Failed"
@@ -24,10 +24,10 @@ Card gap:8
           Badge.info "In progress"
         if row.status=="Rolled back"
           Badge.warning "Rolled back"
-      Text.muted "{row.started}" w:90
-      Row grow end gap:8
-        Button.ghost "Logs" -> emit logs row.id
-        Button.outline "Redeploy" -> emit redeploy row.id; toast "Redeploying {row.service}"
+      Text.muted "{row.started}" w=90
+      Row grow end gap=8
+        Button.ghost "Logs" onTap={emit logs row.id}
+        Button.outline "Redeploy" onTap={emit redeploy row.id; toast "Redeploying {row.service}"}
     Divider
 
 state deployments=[{"id":1,"service":"api-gateway","version":"v2.4.1","status":"Succeeded","started":"4 min ago"},{"id":2,"service":"billing-service","version":"v1.9.0","status":"Failed","started":"22 min ago"},{"id":3,"service":"web-frontend","version":"v5.12.3","status":"In progress","started":"1 min ago"},{"id":4,"service":"auth-service","version":"v3.0.2","status":"Succeeded","started":"1 hr ago"},{"id":5,"service":"search-indexer","version":"v0.8.7","status":"Rolled back","started":"3 hr ago"}]

@@ -4,41 +4,41 @@ state q=""
 state orders=[{"id":"#10482","customer":"Maya Reyes","status":"Paid","total":182.40,"date":"Jun 14"},{"id":"#10481","customer":"Jon Albrecht","status":"Pending","total":64.00,"date":"Jun 14"},{"id":"#10480","customer":"Priya Nair","status":"Shipped","total":249.90,"date":"Jun 13"},{"id":"#10479","customer":"Tom Okafor","status":"Paid","total":38.25,"date":"Jun 13"},{"id":"#10478","customer":"Lena Fischer","status":"Refunded","total":92.10,"date":"Jun 12"},{"id":"#10477","customer":"Carlos Mendes","status":"Shipped","total":131.75,"date":"Jun 12"},{"id":"#10476","customer":"Aiko Tanaka","status":"Pending","total":57.60,"date":"Jun 11"},{"id":"#10475","customer":"Sara Lindqvist","status":"Paid","total":210.00,"date":"Jun 11"}]
 App
   Sidebar
-    Row gap:8
+    Row gap=8
       IconTile "sailing"
       Text.strong "Harbor"
-    NavItem "Overview" icon:"dashboard" selected:{tab=="overview"} -> tab="overview"
-    NavItem "Orders" icon:"receipt_long" selected:{tab=="orders"} -> tab="orders"
-    NavItem "Inventory" icon:"inventory_2" selected:{tab=="inventory"} -> tab="inventory"
-    NavItem "Customers" icon:"group" selected:{tab=="customers"} -> tab="customers"
-    NavItem "Reports" icon:"bar_chart" selected:{tab=="reports"} -> tab="reports"
-    NavItem "Settings" icon:"settings" selected:{tab=="settings"} -> tab="settings"
+    NavItem "Overview" icon="dashboard" selected={tab=="overview"} onTap={tab="overview"}
+    NavItem "Orders" icon="receipt_long" selected={tab=="orders"} onTap={tab="orders"}
+    NavItem "Inventory" icon="inventory_2" selected={tab=="inventory"} onTap={tab="inventory"}
+    NavItem "Customers" icon="group" selected={tab=="customers"} onTap={tab="customers"}
+    NavItem "Reports" icon="bar_chart" selected={tab=="reports"} onTap={tab="reports"}
+    NavItem "Settings" icon="settings" selected={tab=="settings"} onTap={tab="settings"}
     Spacer grow
-    Row gap:10 middle
-      Avatar "Sam Patel" size:36
+    Row gap=10 middle
+      Avatar "Sam Patel" size=36
       Column
         Text.strong "Sam Patel"
         Text.muted "sam@harbor.co"
   Main
     Nav
-      Heading "Overview" level:1
-      Row gap:12 middle
-        Segments bind:range options:["7d","30d","90d"]
-        Input "Search" bind:q w:220
-        Button "New order" -> emit newOrder
-    Column pad:24 gap:16 scroll
-      Grid cols:4 gap:16
-        StatTile "Revenue" "vs previous period" value:"$128,400" delta:"+8.2%" icon:"payments"
-        StatTile "Orders" "vs previous period" value:"1,942" delta:"+3.1%" icon:"shopping_bag"
-        StatTile "Returns" "vs previous period" value:"2.4%" delta:"-0.6%" invert:true icon:"assignment_return"
-        StatTile "Avg. order" "vs previous period" value:"$66.10" delta:"+1.9%" icon:"sell"
-      Row gap:16 top
+      Heading "Overview" level=1
+      Row gap=12 middle
+        Segments bind=range options=["7d","30d","90d"]
+        Input "Search" bind=q w=220
+        Button "New order" onTap={emit newOrder}
+    Column pad=24 gap=16 scroll
+      Grid cols=4 gap=16
+        StatTile "Revenue" "vs previous period" value="$128,400" delta="+8.2%" icon="payments"
+        StatTile "Orders" "vs previous period" value="1,942" delta="+3.1%" icon="shopping_bag"
+        StatTile "Returns" "vs previous period" value="2.4%" delta="-0.6%" invert=true icon="assignment_return"
+        StatTile "Avg. order" "vs previous period" value="$66.10" delta="+1.9%" icon="sell"
+      Row gap=16 top
         Column grow
-          ChartCard "Revenue, last 12 weeks" "$128,400" values:[8200,8900,9400,9100,10200,10800,10500,11600,12100,12800,13400,14100] labels:["W1","W2","W3","W4","W5","W6","W7","W8","W9","W10","W11","W12"] kind:"line" delta:"+8.2%"
-        Card w:380 gap:12
-          Heading "Sales by channel" level:3
-          Donut values:[52,28,14,6] labels:["Online store","Marketplace","Retail","Wholesale"] h:180
-          Column gap:6
+          ChartCard "Revenue, last 12 weeks" "$128,400" values=[8200,8900,9400,9100,10200,10800,10500,11600,12100,12800,13400,14100] labels=["W1","W2","W3","W4","W5","W6","W7","W8","W9","W10","W11","W12"] kind="line" delta="+8.2%"
+        Card w=380 gap=12
+          Heading "Sales by channel" level=3
+          Donut values=[52,28,14,6] labels=["Online store","Marketplace","Retail","Wholesale"] h=180
+          Column gap=6
             Row between
               Text.muted "Online store"
               Text.strong "52%"
@@ -51,22 +51,22 @@ App
             Row between
               Text.muted "Wholesale"
               Text.strong "6%"
-      Card gap:12
+      Card gap=12
         Row between middle
-          Heading "Latest orders" level:3
-          Link "View all" -> emit viewAll
-        Row gap:12
-          Text.columnHead "Order" w:110
+          Heading "Latest orders" level=3
+          Link "View all" onTap={emit viewAll}
+        Row gap=12
+          Text.columnHead "Order" w=110
           Text.columnHead "Customer" grow
-          Text.columnHead "Status" w:120
-          Text.columnHead "Total" w:100
-          Text.columnHead "Date" w:100
+          Text.columnHead "Status" w=120
+          Text.columnHead "Total" w=100
+          Text.columnHead "Date" w=100
         Divider
         each o in orders
-          Row gap:12 middle
-            Text.strong "{o.id}" w:110
+          Row gap=12 middle
+            Text.strong "{o.id}" w=110
             Text "{o.customer}" grow
-            Row w:120
+            Row w=120
               if o.status=="Paid"
                 Badge.success "Paid"
               if o.status=="Pending"
@@ -75,5 +75,5 @@ App
                 Badge.info "Shipped"
               if o.status=="Refunded"
                 Badge.error "Refunded"
-            Text "{money(o.total,"$",2)}" w:100
-            Text.muted "{o.date}" w:100
+            Text "{money(o.total,"$",2)}" w=100
+            Text.muted "{o.date}" w=100

@@ -1,19 +1,19 @@
 state mails=[{"id":1,"from":"Stripe","subject":"Your payout of $2,430 is on the way","time":"9:12 AM"},{"id":2,"from":"Linear","subject":"3 issues assigned to you","time":"8:47 AM"},{"id":3,"from":"Mom","subject":"Sunday dinner?","time":"Yesterday"},{"id":4,"from":"GitHub","subject":"PR #212 approved","time":"Yesterday"},{"id":5,"from":"Figma","subject":"Anna commented on Checkout flow","time":"Mon"}]
 state archived=[]
-Column gap:8 pad:16 maxw:720
+Column gap=8 pad=16 maxw=720
   Row between
     Text.heading1 "Inbox"
     Badge.primary "{length(mails)}"
   Text.caption "Swipe left to delete, right to archive"
   each m in mails
-    Box onSwipeLeft:{mails=removeWhere(mails,x=>x.id==m.id); toast "Deleted"}
-      Card onSwipeRight:{archived=append(archived,m); mails=removeWhere(mails,x=>x.id==m.id); toast "Archived"}
-        Row between gap:12
-          Column gap:2 grow
+    Box onSwipeLeft={mails=removeWhere(mails,x=>x.id==m.id); toast "Deleted"}
+      Card onSwipeRight={archived=append(archived,m); mails=removeWhere(mails,x=>x.id==m.id); toast "Archived"}
+        Row between gap=12
+          Column gap=2 grow
             Text.strong "{m.from}"
             Text "{m.subject}"
           Text.caption "{m.time}"
   if length(mails)==0
-    Column center pad:32
+    Column center pad=32
       Icon "inbox"
       Text.muted "Inbox zero"

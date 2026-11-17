@@ -21,58 +21,58 @@ state s4=true
 state s5=false
 state confirmDelete=false
 state dirty=name!=sName || username!=sUsername || bio!=sBio || tz!=sTz || pub!=sPub || n1!=s1 || n2!=s2 || n3!=s3 || n4!=s4 || n5!=s5
-Column h:fill
+Column h=fill
   Row grow
-    Box w:260 fill:#FFF7F6F3 pad:[12,20,12,20]
-      Sidebar bind:section brand:"Plume" sectionLabel:"Settings" items:["Profile","Account","Notifications","Appearance","Billing","Team"] icons:["person","lock","notifications","palette","credit_card","group"]
-    Column grow scroll pad:[40,32,40,32] center
-      Column maxw:720 gap:24
+    Box w=260 fill=#FFF7F6F3 pad=[12,20,12,20]
+      Sidebar bind=section brand="Plume" sectionLabel="Settings" items=["Profile","Account","Notifications","Appearance","Billing","Team"] icons=["person","lock","notifications","palette","credit_card","group"]
+    Column grow scroll pad=[40,32,40,32] center
+      Column maxw=720 gap=24
         if section=="Profile"
-          Column gap:4
+          Column gap=4
             Text.pageTitle "Profile"
             Text.bodySecondary "How you appear to readers and collaborators on Plume."
-          Row gap:16 middle
-            Avatar "{name}" size:72
-            Column gap:4
-              Button.outline "Change" -> toast "Choose a new picture"
+          Row gap=16 middle
+            Avatar "{name}" size=72
+            Column gap=4
+              Button.outline "Change" onTap={toast "Choose a new picture"}
               Text.caption "JPG or PNG, up to 4 MB"
-          Input "Name" bind:name
-          Input "Username" bind:username
-          Column gap:4
-            Input "Bio" "Tell readers a little about you" multiline bind:bio
+          Input "Name" bind=name
+          Input "Username" bind=username
+          Column gap=4
+            Input "Bio" "Tell readers a little about you" multiline bind=bio
             Row end
-              Text.caption "{length(bio)}/160" color:{length(bio)>160?"#FFD32F2F":"#FF6B7280"}
-          Column gap:6
+              Text.caption "{length(bio)}/160" color={length(bio)>160?"#FFD32F2F":"#FF6B7280"}
+          Column gap=6
             Text.fieldLabel "Time zone"
-            Select bind:tz items:["UTC-08:00 Los Angeles","UTC-05:00 New York","UTC+00:00 London","UTC+01:00 Paris","UTC+05:30 Mumbai","UTC+09:00 Tokyo"]
-          ToggleRow "Public profile" "Anyone with the link can read your profile and published pieces." bind:pub
+            Select bind=tz items=["UTC-08:00 Los Angeles","UTC-05:00 New York","UTC+00:00 London","UTC+01:00 Paris","UTC+05:30 Mumbai","UTC+09:00 Tokyo"]
+          ToggleRow "Public profile" "Anyone with the link can read your profile and published pieces." bind=pub
           Divider
-          Column gap:4
+          Column gap=4
             Text.sectionTitle "Notifications"
             Text.bodySecondary "Choose what Plume tells you about."
-          Column gap:4
-            ToggleRow "Comments" "When someone comments on one of your drafts or posts." bind:n1
-            ToggleRow "Mentions" "When a collaborator mentions you with @." bind:n2
-            ToggleRow "New followers" "When a reader starts following you." bind:n3
-            ToggleRow "Weekly summary" "A Monday email with your writing streak and word count." bind:n4
-            ToggleRow "Product updates" "News about new features and improvements." bind:n5
-          Box fill:#FFFFF5F5 radius:12 pad:20 gap:12 border:#FFF2B8B5
-            Text.cardTitle "Danger zone" color:#FFB3261E
+          Column gap=4
+            ToggleRow "Comments" "When someone comments on one of your drafts or posts." bind=n1
+            ToggleRow "Mentions" "When a collaborator mentions you with @." bind=n2
+            ToggleRow "New followers" "When a reader starts following you." bind=n3
+            ToggleRow "Weekly summary" "A Monday email with your writing streak and word count." bind=n4
+            ToggleRow "Product updates" "News about new features and improvements." bind=n5
+          Box fill=#FFFFF5F5 radius=12 pad=20 gap=12 border=#FFF2B8B5
+            Text.cardTitle "Danger zone" color=#FFB3261E
             Text.bodySecondary "Deleting your account removes all drafts, published pieces and followers. This cannot be undone."
             if !confirmDelete
               Row
-                ActionButton "Delete account" tone:danger -> confirmDelete=true
+                ActionButton "Delete account" tone=danger onPressed={confirmDelete=true}
             if confirmDelete
-              Callout "Delete your account?" "All your writing will be permanently erased." tone:danger
-              Row gap:10
-                ActionButton "Keep my account" tone:quiet -> confirmDelete=false
-                ActionButton "Yes, delete it" tone:danger -> emit deleteAccount; confirmDelete=false
+              Callout "Delete your account?" "All your writing will be permanently erased." tone=danger
+              Row gap=10
+                ActionButton "Keep my account" tone=quiet onPressed={confirmDelete=false}
+                ActionButton "Yes, delete it" tone=danger onPressed={emit deleteAccount; confirmDelete=false}
         if section!="Profile"
-          EmptyState "{section}" "These settings are not part of this view yet." icon:"settings"
+          EmptyState "{section}" "These settings are not part of this view yet." icon="settings"
   Divider
-  Row between middle pad:[40,14,40,14] fill:#FFFFFFFF
-    Text.caption "You have unsaved changes." hidden:{!dirty}
+  Row between middle pad=[40,14,40,14] fill=#FFFFFFFF
+    Text.caption "You have unsaved changes." hidden={!dirty}
     Spacer grow
-    Row gap:10 w:340
-      ActionButton "Cancel" tone:quiet enabled:{dirty} -> name=sName; username=sUsername; bio=sBio; tz=sTz; pub=sPub; n1=s1; n2=s2; n3=s3; n4=s4; n5=s5
-      ActionButton "Save changes" tone:primary enabled:{dirty&&length(bio)<=160} -> sName=name; sUsername=username; sBio=bio; sTz=tz; sPub=pub; s1=n1; s2=n2; s3=n3; s4=n4; s5=n5; toast "Changes saved"
+    Row gap=10 w=340
+      ActionButton "Cancel" tone=quiet enabled={dirty} onPressed={name=sName; username=sUsername; bio=sBio; tz=sTz; pub=sPub; n1=s1; n2=s2; n3=s3; n4=s4; n5=s5}
+      ActionButton "Save changes" tone=primary enabled={dirty&&length(bio)<=160} onPressed={sName=name; sUsername=username; sBio=bio; sTz=tz; sPub=pub; s1=n1; s2=n2; s3=n3; s4=n4; s5=n5; toast "Changes saved"}

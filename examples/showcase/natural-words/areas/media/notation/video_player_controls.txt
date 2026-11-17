@@ -4,25 +4,25 @@ state buffered=0.45
 state volume=70
 state cc=false
 state full=false
-every 1s when playing -> pos=min(872,pos+1)
+every 1s when playing onTick={pos=min(872,pos+1)}
 
-Card gap:0 pad:0 maxw:640
+Card gap=0 pad=0 maxw=640
   Stack center middle
-    Image "https://picsum.photos/seed/sourdough/800/450" w:fill h:220
-    Box fill:#88000000 radius:40 pad:12 visible:{!playing} animate:pop
-      IconButton "play_arrow" -> playing=true
-  Column gap:8 pad:12
-    Column gap:0
+    Image "https://picsum.photos/seed/sourdough/800/450" w=fill h=220
+    Box fill=#88000000 radius=40 pad=12 visible={!playing} animate=pop
+      IconButton "play_arrow" onTap={playing=true}
+  Column gap=8 pad=12
+    Column gap=0
       Text.title "Intro to Sourdough - Episode 2"
       Text.caption "14:32"
     Stack
-      Progress bind:buffered
-      Slider bind:pos min:0 max:872
-    Row gap:8 center
-      IconButton "{playing?'pause':'play_arrow'}" -> playing=!playing
+      Progress bind=buffered
+      Slider bind=pos min=0 max=872
+    Row gap=8 center
+      IconButton "{playing?'pause':'play_arrow'}" onTap={playing=!playing}
       Text.small "{duration(pos)} / {duration(872)}"
       Spacer grow
-      IconButton "{volume==0?'volume_off':'volume_up'}" -> volume=volume==0?70:0
-      Slider bind:volume min:0 max:100 w:90
-      IconButton "{cc?'closed_caption':'closed_caption_off'}" -> cc=!cc
-      IconButton "{full?'fullscreen_exit':'fullscreen'}" -> full=!full; emit fullscreen full
+      IconButton "{volume==0?'volume_off':'volume_up'}" onTap={volume=volume==0?70:0}
+      Slider bind=volume min=0 max=100 w=90
+      IconButton "{cc?'closed_caption':'closed_caption_off'}" onTap={cc=!cc}
+      IconButton "{full?'fullscreen_exit':'fullscreen'}" onTap={full=!full; emit fullscreen full}

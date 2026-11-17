@@ -1,60 +1,60 @@
-Card gap:20 pad:16
+Card gap=20 pad=16
   Row between
     Text.heading "Order #48213"
     Badge.info "In transit"
   Row
-    Column grow center gap:6
+    Column grow center gap=6
       Row middle
         Spacer grow
-        Box w:28 h:28 radius:14 fill:#FF1976D2 center middle
-          Icon "check" color:#FFFFFFFF size:16
-        Box grow h:2 fill:#FF1976D2
+        Box w=28 h=28 radius=14 fill=#FF1976D2 center middle
+          Icon "check" color=#FFFFFFFF size=16
+        Box grow h=2 fill=#FF1976D2
       Text.strong "Ordered" center
       Text.caption "Nov 10" center
-    Column grow center gap:6
+    Column grow center gap=6
       Row middle
-        Box grow h:2 fill:#FF1976D2
-        Box w:28 h:28 radius:14 fill:#FF1976D2 center middle
-          Icon "check" color:#FFFFFFFF size:16
-        Box grow h:2 fill:#FF1976D2
+        Box grow h=2 fill=#FF1976D2
+        Box w=28 h=28 radius=14 fill=#FF1976D2 center middle
+          Icon "check" color=#FFFFFFFF size=16
+        Box grow h=2 fill=#FF1976D2
       Text.strong "Packed" center
       Text.caption "Nov 11" center
-    Column grow center gap:6
+    Column grow center gap=6
       Row middle
-        Box grow h:2 fill:#FF1976D2
-        Box w:28 h:28 radius:14 fill:#FF1976D2 center middle
-          Icon "check" color:#FFFFFFFF size:16
+        Box grow h=2 fill=#FF1976D2
+        Box w=28 h=28 radius=14 fill=#FF1976D2 center middle
+          Icon "check" color=#FFFFFFFF size=16
         Row grow between middle
-          Box w:6 h:2 fill:#FFBDBDBD
-          Box w:6 h:2 fill:#FFBDBDBD
-          Box w:6 h:2 fill:#FFBDBDBD
-          Box w:6 h:2 fill:#FFBDBDBD
+          Box w=6 h=2 fill=#FFBDBDBD
+          Box w=6 h=2 fill=#FFBDBDBD
+          Box w=6 h=2 fill=#FFBDBDBD
+          Box w=6 h=2 fill=#FFBDBDBD
       Text.strong "Shipped" center
       Text.caption "Nov 12" center
-    Column grow center gap:6
+    Column grow center gap=6
       Row middle
         Row grow between middle
-          Box w:6 h:2 fill:#FFBDBDBD
-          Box w:6 h:2 fill:#FFBDBDBD
-          Box w:6 h:2 fill:#FFBDBDBD
-          Box w:6 h:2 fill:#FFBDBDBD
-        Box w:28 h:28 radius:14 fill:#FFFFFFFF border:#FF1976D2 center middle animate:pulse duration:1200
-          Box w:12 h:12 radius:6 fill:#FF1976D2
+          Box w=6 h=2 fill=#FFBDBDBD
+          Box w=6 h=2 fill=#FFBDBDBD
+          Box w=6 h=2 fill=#FFBDBDBD
+          Box w=6 h=2 fill=#FFBDBDBD
+        Box w=28 h=28 radius=14 fill=#FFFFFFFF border=#FF1976D2 center middle animate=pulse duration=1200
+          Box w=12 h=12 radius=6 fill=#FF1976D2
         Row grow between middle
-          Box w:6 h:2 fill:#FFBDBDBD
-          Box w:6 h:2 fill:#FFBDBDBD
-          Box w:6 h:2 fill:#FFBDBDBD
-          Box w:6 h:2 fill:#FFBDBDBD
+          Box w=6 h=2 fill=#FFBDBDBD
+          Box w=6 h=2 fill=#FFBDBDBD
+          Box w=6 h=2 fill=#FFBDBDBD
+          Box w=6 h=2 fill=#FFBDBDBD
       Text.strong "Out for delivery" center
       Text.caption "In progress" center
-    Column grow center gap:6
+    Column grow center gap=6
       Row middle
         Row grow between middle
-          Box w:6 h:2 fill:#FFBDBDBD
-          Box w:6 h:2 fill:#FFBDBDBD
-          Box w:6 h:2 fill:#FFBDBDBD
-          Box w:6 h:2 fill:#FFBDBDBD
-        Box w:28 h:28 radius:14 fill:#FFE0E0E0
+          Box w=6 h=2 fill=#FFBDBDBD
+          Box w=6 h=2 fill=#FFBDBDBD
+          Box w=6 h=2 fill=#FFBDBDBD
+          Box w=6 h=2 fill=#FFBDBDBD
+        Box w=28 h=28 radius=14 fill=#FFE0E0E0
         Spacer grow
       Text.strong "Delivered" center
       Text.caption "Pending" center

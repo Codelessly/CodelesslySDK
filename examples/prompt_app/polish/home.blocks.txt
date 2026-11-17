@@ -1,9 +1,9 @@
 Screen
-  TopBar "Ready to jump?" "Short and steady wins. Today takes just {today.minutes} minutes." eyebrow:"Skip"
-  HeroSession "{today.name}" "{today.rounds} easy rounds: jump for {today.work} seconds, then rest for {today.rest}." minutes:"{today.minutes}" cta:"Start today's session" -> emit start_session
-  Row gap:12
-    StreakFlame "sessions in a row" "Jump today to make it {streak+1}. Keep going." count:{streak}
-    ProgressGoal "This week" "{weeklyGoal-sessionsThisWeek} more short ones to reach your goal." done:{sessionsThisWeek} goal:{weeklyGoal}
-  WeekStrip done:{map(take(sessions,sessionsThisWeek),s=>s.date)} today:"Sat"
-  SectionTitle "Last session" action:"See all" -> emit open_history
-  SessionRow "{sessions[0].name}" "{sessions[0].date} · {sessions[0].minutes} min" value:"{sessions[0].jumps}" unit:"jumps" share:{sessions[0].jumps/max(map(sessions,s=>s.jumps))} -> emit open_session sessions[0].date
+  TopBar "Ready to jump?" "Short and steady wins. Today takes just {today.minutes} minutes." eyebrow="Skip"
+  HeroSession "{today.name}" "{today.rounds} easy rounds: jump for {today.work} seconds, then rest for {today.rest}." minutes="{today.minutes}" cta="Start today's session" onPressed={emit start_session}
+  Row gap=12
+    StreakFlame "sessions in a row" "Jump today to make it {streak+1}. Keep going." count={streak}
+    ProgressGoal "This week" "{weeklyGoal-sessionsThisWeek} more short ones to reach your goal." done={sessionsThisWeek} goal={weeklyGoal}
+  WeekStrip done={map(take(sessions,sessionsThisWeek),s=>s.date)} today="Sat"
+  SectionTitle "Last session" action="See all" onPressed={emit open_history}
+  SessionRow "{sessions[0].name}" "{sessions[0].date} · {sessions[0].minutes} min" value="{sessions[0].jumps}" unit="jumps" share={sessions[0].jumps/max(map(sessions,s=>s.jumps))} onPressed={emit open_session sessions[0].date}

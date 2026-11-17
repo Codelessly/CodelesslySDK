@@ -6,43 +6,43 @@ state desc=true
 state orders=[{"id":"#10482","customer":"Maya Reyes","status":"Paid","total":184.20,"date":"Jun 14"},{"id":"#10481","customer":"Liam Chen","status":"Due","total":62.50,"date":"Jun 14"},{"id":"#10480","customer":"Sofia Rossi","status":"Paid","total":129.00,"date":"Jun 13"},{"id":"#10479","customer":"Noah Becker","status":"Overdue","total":48.75,"date":"Jun 13"},{"id":"#10478","customer":"Ava Thompson","status":"Paid","total":215.40,"date":"Jun 12"},{"id":"#10477","customer":"Kenji Sato","status":"Due","total":89.90,"date":"Jun 12"},{"id":"#10476","customer":"Elena García","status":"Paid","total":34.60,"date":"Jun 11"},{"id":"#10475","customer":"Omar Haddad","status":"Overdue","total":156.30,"date":"Jun 11"}]
 App
   Sidebar
-    Row gap:8
+    Row gap=8
       Icon "sailing"
       Text.strong "Harbor"
-    NavItem "Overview" icon:"dashboard" selected:{tab=="overview"} -> tab="overview"
-    NavItem "Orders" icon:"receipt_long" badge:"12" selected:{tab=="orders"} -> tab="orders"
-    NavItem "Inventory" icon:"inventory_2" selected:{tab=="inventory"} -> tab="inventory"
-    NavItem "Customers" icon:"group" selected:{tab=="customers"} -> tab="customers"
-    NavItem "Reports" icon:"bar_chart" selected:{tab=="reports"} -> tab="reports"
-    NavItem "Settings" icon:"settings" selected:{tab=="settings"} -> tab="settings"
+    NavItem "Overview" icon="dashboard" selected={tab=="overview"} onTap={tab="overview"}
+    NavItem "Orders" icon="receipt_long" badge="12" selected={tab=="orders"} onTap={tab="orders"}
+    NavItem "Inventory" icon="inventory_2" selected={tab=="inventory"} onTap={tab="inventory"}
+    NavItem "Customers" icon="group" selected={tab=="customers"} onTap={tab="customers"}
+    NavItem "Reports" icon="bar_chart" selected={tab=="reports"} onTap={tab="reports"}
+    NavItem "Settings" icon="settings" selected={tab=="settings"} onTap={tab="settings"}
     Spacer grow
-    Row gap:10
-      Avatar "Sam Patel" size:32
+    Row gap=10
+      Avatar "Sam Patel" size=32
       Column
         Text.strong "Sam Patel"
         Text.muted "Operations lead"
   Main
     Nav
       Heading "Overview"
-      Row gap:8
-        Segments bind:range options:["7d","30d","90d"]
-        Input "Search" "Orders, customers…" bind:q w:220
-        Button "New order" -> emit newOrder
-    Column pad:24 gap:16
-      Grid cols:4 gap:16
-        StatTile "Revenue" value:"$128,400" delta:"+8.2%" icon:"payments"
-        StatTile "Orders" value:"1,942" delta:"+3.1%" icon:"receipt_long"
-        StatTile "Returns" value:"2.4%" delta:"-0.6%" invert:true icon:"undo"
-        StatTile "Avg. order" value:"$66.10" delta:"+1.9%" icon:"shopping_cart"
-      Row gap:16 top
+      Row gap=8
+        Segments bind=range options=["7d","30d","90d"]
+        Input "Search" "Orders, customers…" bind=q w=220
+        Button "New order" onTap={emit newOrder}
+    Column pad=24 gap=16
+      Grid cols=4 gap=16
+        StatTile "Revenue" value="$128,400" delta="+8.2%" icon="payments"
+        StatTile "Orders" value="1,942" delta="+3.1%" icon="receipt_long"
+        StatTile "Returns" value="2.4%" delta="-0.6%" invert=true icon="undo"
+        StatTile "Avg. order" value="$66.10" delta="+1.9%" icon="shopping_cart"
+      Row gap=16 top
         Column grow
-          ChartCard "Revenue, last 12 weeks" value:"$128,400" delta:"+8.2%" kind:"line" values:[8200,8900,8600,9400,9800,9500,10300,10800,10400,11200,11900,12600] labels:["W1","W2","W3","W4","W5","W6","W7","W8","W9","W10","W11","W12"]
-        Column w:380
-          ChartCard "Revenue by channel" value:"4 channels" kind:"bars" values:[54,22,15,9] labels:["Online","Retail","Wholesale","Marketplace"]
-      Card gap:8
+          ChartCard "Revenue, last 12 weeks" value="$128,400" delta="+8.2%" kind="line" values=[8200,8900,8600,9400,9800,9500,10300,10800,10400,11200,11900,12600] labels=["W1","W2","W3","W4","W5","W6","W7","W8","W9","W10","W11","W12"]
+        Column w=380
+          ChartCard "Revenue by channel" value="4 channels" kind="bars" values=[54,22,15,9] labels=["Online","Retail","Wholesale","Marketplace"]
+      Card gap=8
         Row between
           Text.strong "Latest orders"
-          Link "View all" -> tab="orders"
-        TableHeader bind:sort desc:desc columns:["Order","Customer","Total","Date","Status"] keys:["id","customer","total","date","status"]
+          Link "View all" onTap={tab="orders"}
+        TableHeader bind=sort desc={desc} columns=["Order","Customer","Total","Date","Status"] keys=["id","customer","total","date","status"]
         each o in desc ? sortByDesc(orders,x=>x[sort]) : sortBy(orders,x=>x[sort])
-          TableRow cells:{[o.id,o.customer,money(o.total,"$",2),o.date]} badge:{o.status} -> emit openOrder o.id
+          TableRow cells={[o.id,o.customer,money(o.total,"$",2),o.date]} badge={o.status} onPressed={emit openOrder o.id}

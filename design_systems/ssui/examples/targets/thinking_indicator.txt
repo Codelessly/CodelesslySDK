@@ -1,18 +1,18 @@
 state open=false
-Card gap:8
-  Row gap:8
+Card gap=8
+  Row gap=8
     PulsingDots
     Text.body "Thinking" grow
     Text.caption "12 s"
-    Button.ghost "{open?"Hide steps":"Show steps"}" -> open=!open
+    Button.ghost "{open?"Hide steps":"Show steps"}" onTap={open=!open}
   if open
-    Column gap:6 pad:[24,0,0,0]
-      Row gap:8
-        Icon "check_circle" size:14 color:#FF16A34A
+    Column gap=6 pad=[24,0,0,0]
+      Row gap=8
+        Icon "check_circle" size=14 color=#FF16A34A
         Text.bodySecondary "Read the three files you attached"
-      Row gap:8
-        Icon "check_circle" size:14 color:#FF16A34A
+      Row gap=8
+        Icon "check_circle" size=14 color=#FF16A34A
         Text.bodySecondary "Compared the March and April totals"
-      Row gap:8
+      Row gap=8
         ActivityIndicator
         Text.bodySecondary "Checking why refunds doubled"

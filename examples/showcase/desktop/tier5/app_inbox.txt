@@ -3,90 +3,90 @@ state open=2
 state reply=""
 state convs=[{"id":1,"name":"Elena Vasquez","initials":"EV","tone":"rose","subject":"Cannot log in after password reset","preview":"I reset my password twice but the link keeps saying it expired.","time":"10:12","unread":true},{"id":2,"name":"Marcus Webb","initials":"MW","tone":"sky","subject":"Refund for a duplicate charge","preview":"Thanks, that would be great. I was billed twice on the 3rd.","time":"9:41","unread":true},{"id":3,"name":"Aiko Tanaka","initials":"AT","tone":"mint","subject":"Export to CSV is missing columns","preview":"The export leaves out the tags column since the last update.","time":"9:05","unread":false},{"id":4,"name":"Daniel Okafor","initials":"DO","tone":"sand","subject":"Add a teammate to our plan","preview":"We hired two people this week and need seats for both of them.","time":"8:47","unread":true},{"id":5,"name":"Sofia Marino","initials":"SM","tone":"lilac","subject":"Invoice needs our VAT number","preview":"Could you reissue invoice 1042 with our VAT ID included?","time":"Yesterday","unread":false},{"id":6,"name":"Liam Foster","initials":"LF","tone":"slate","subject":"Webhook retries not firing","preview":"Our endpoint returned 500 but I see no retry attempts in the log.","time":"Yesterday","unread":false},{"id":7,"name":"Priya Raman","initials":"PR","tone":"rose","subject":"Question about annual billing","preview":"If we switch to annual, does the discount apply to add-ons too?","time":"Mon","unread":false},{"id":8,"name":"Tom Hargreaves","initials":"TH","tone":"mint","subject":"Thank you for the quick fix","preview":"Everything works again. Appreciate the fast turnaround!","time":"Mon","unread":false}]
 App
-  Sidebar w:220
-    Brand "Relaydesk" icon:"support_agent"
+  Sidebar w=220
+    Brand "Relaydesk" icon="support_agent"
     Text.eyebrow "FOLDERS"
-    NavItem "Inbox" icon:"inbox" badge:"12" selected:{folder=="inbox"} -> folder="inbox"
-    NavItem "Assigned to me" icon:"person" badge:"4" selected:{folder=="mine"} -> folder="mine"
-    NavItem "Waiting" icon:"schedule" badge:"7" selected:{folder=="waiting"} -> folder="waiting"
-    NavItem "Closed" icon:"check_circle" selected:{folder=="closed"} -> folder="closed"
+    NavItem "Inbox" icon="inbox" badge="12" selected={folder=="inbox"} onTap={folder="inbox"}
+    NavItem "Assigned to me" icon="person" badge="4" selected={folder=="mine"} onTap={folder="mine"}
+    NavItem "Waiting" icon="schedule" badge="7" selected={folder=="waiting"} onTap={folder="waiting"}
+    NavItem "Closed" icon="check_circle" selected={folder=="closed"} onTap={folder="closed"}
     Spacer grow
-    Row gap:10 middle
-      Avatar "Priya Raman" size:32
+    Row gap=10 middle
+      Avatar "Priya Raman" size=32
       Column
         Text.strong "Priya Raman"
         Text.caption "Support agent"
-  Pane w:360 pad:0 gap:0 border-right:#FFE5E7EB
-    Column pad:16 gap:12 border-bottom:#FFE5E7EB
+  Pane w=360 pad=0 gap=0 border-right=#FFE5E7EB
+    Column pad=16 gap=12 border-bottom=#FFE5E7EB
       Row between middle
-        Heading "Inbox" level:3
+        Heading "Inbox" level=3
         Text.caption "12 open"
-      Input "Search conversations" bind:q
+      Input "Search conversations" bind=q
     each c in convs
-      ConversationRow "{c.name}" subject:"{c.subject}" preview:"{c.preview}" time:"{c.time}" initials:"{c.initials}" tone:"{c.tone}" unread:{c.unread} selected:{open==c.id} -> open=c.id
+      ConversationRow "{c.name}" subject="{c.subject}" preview="{c.preview}" time="{c.time}" initials="{c.initials}" tone="{c.tone}" unread={c.unread} selected={open==c.id} onPressed={open=c.id}
   Main
     Nav
-      Column gap:4
-        Heading "Refund for a duplicate charge" level:1
-        Row gap:8 middle
+      Column gap=4
+        Heading "Refund for a duplicate charge" level=1
+        Row gap=8 middle
           Badge.warning "Open"
           Text.muted "Assigned to Priya Raman"
-      Row gap:8
-        Button.outline "Reassign" -> toast "Reassign opened"
-        Button.outline "Snooze" -> toast "Snoozed until tomorrow"
-    Column pad:24 gap:16 scroll grow
-      Row gap:12 top
-        Avatar "Marcus Webb" size:36
-        Column gap:4 maxw:560
+      Row gap=8
+        Button.outline "Reassign" onTap={toast "Reassign opened"}
+        Button.outline "Snooze" onTap={toast "Snoozed until tomorrow"}
+    Column pad=24 gap=16 scroll grow
+      Row gap=12 top
+        Avatar "Marcus Webb" size=36
+        Column gap=4 maxw=560
           Text.caption "Marcus Webb · 9:12"
-          Box fill:#FFF3F4F6 radius:12 pad:12
+          Box fill=#FFF3F4F6 radius=12 pad=12
             Text "Hi, I was charged twice for my Business plan on the 3rd. Both payments of $49 show on my card statement."
-      Row end gap:12 top
-        Column gap:4 maxw:560
+      Row end gap=12 top
+        Column gap=4 maxw=560
           Text.caption "Priya Raman · 9:20" right
-          Box fill:#FFDBEAFE radius:12 pad:12
+          Box fill=#FFDBEAFE radius=12 pad=12
             Text "Hello Marcus, sorry about that. Can you send me the last four digits of the card so I can find both payments?"
-        Avatar "Priya Raman" size:36
-      Row gap:12 top
-        Avatar "Marcus Webb" size:36
-        Column gap:4 maxw:560
+        Avatar "Priya Raman" size=36
+      Row gap=12 top
+        Avatar "Marcus Webb" size=36
+        Column gap=4 maxw=560
           Text.caption "Marcus Webb · 9:31"
-          Box fill:#FFF3F4F6 radius:12 pad:12
+          Box fill=#FFF3F4F6 radius=12 pad=12
             Text "Sure, it ends in 4417. The charges are 2 minutes apart."
-      Box fill:#FFFEF3C7 border:#FFF59E0B radius:12 pad:12 gap:4
-        Row gap:6 middle
-          Icon "lock" size:16 color:#FFB45309
-          Text.caption "Internal note · Priya Raman · 9:36" color:#FFB45309
-        Text "Confirmed in billing: duplicate from a payment retry. Refund of $49 is approved, no manager sign-off needed." color:#FF78350F
-      Row end gap:12 top
-        Column gap:4 maxw:560
+      Box fill=#FFFEF3C7 border=#FFF59E0B radius=12 pad=12 gap=4
+        Row gap=6 middle
+          Icon "lock" size=16 color=#FFB45309
+          Text.caption "Internal note · Priya Raman · 9:36" color=#FFB45309
+        Text "Confirmed in billing: duplicate from a payment retry. Refund of $49 is approved, no manager sign-off needed." color=#FF78350F
+      Row end gap=12 top
+        Column gap=4 maxw=560
           Text.caption "Priya Raman · 9:41" right
-          Box fill:#FFDBEAFE radius:12 pad:12
+          Box fill=#FFDBEAFE radius=12 pad=12
             Text "Found it. I can refund the second payment to your card now. It usually takes 3 to 5 business days. Shall I go ahead?"
-        Avatar "Priya Raman" size:36
-      Row gap:12 top
-        Avatar "Marcus Webb" size:36
-        Column gap:4 maxw:560
+        Avatar "Priya Raman" size=36
+      Row gap=12 top
+        Avatar "Marcus Webb" size=36
+        Column gap=4 maxw=560
           Text.caption "Marcus Webb · 9:41"
-          Box fill:#FFF3F4F6 radius:12 pad:12
+          Box fill=#FFF3F4F6 radius=12 pad=12
             Text "Thanks, that would be great. I was billed twice on the 3rd."
-    Column pad:[24,16,24,24] gap:12 border-top:#FFE5E7EB
-      Input "Reply to Marcus" "Write your reply…" multiline bind:reply
+    Column pad=[24,16,24,24] gap=12 border-top=#FFE5E7EB
+      Input "Reply to Marcus" "Write your reply…" multiline bind=reply
       Row between middle
         Text.caption "Replying to marcus.webb@example.com"
-        Row gap:8
-          Button.outline "Send and close" -> reply=""; toast "Sent and closed"
-          Button "Send" -> reply=""; toast "Reply sent"
-  Pane w:300 pad:20 gap:16 border-left:#FFE5E7EB
-    Column gap:8 center
-      Avatar "Marcus Webb" size:64
+        Row gap=8
+          Button.outline "Send and close" onTap={reply=""; toast "Sent and closed"}
+          Button "Send" onTap={reply=""; toast "Reply sent"}
+  Pane w=300 pad=20 gap=16 border-left=#FFE5E7EB
+    Column gap=8 center
+      Avatar "Marcus Webb" size=64
       Text.strong "Marcus Webb"
       Text.muted "marcus.webb@example.com"
     Divider
     Text.eyebrow "CUSTOMER DETAILS"
-    Details rows:{[["Plan","Business"],["Customer since","Mar 2022"],["Last order","#48213 · $49.00"]]}
+    Details rows={[["Plan","Business"],["Customer since","Mar 2022"],["Last order","#48213 · $49.00"]]}
     Text.eyebrow "TAGS"
-    Row gap:6
+    Row gap=6
       Badge.primary "Billing"
       Badge.success "Loyal"
       Badge.neutral "EU"

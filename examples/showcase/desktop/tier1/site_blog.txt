@@ -1,87 +1,87 @@
 Page
   Nav
     Text.strong "Signal & Noise"
-    Row gap:4
+    Row gap=4
       Link "Articles"
       Link "Topics"
       Link "About"
-    Button "Subscribe" -> emit subscribe
+    Button "Subscribe" onTap={emit subscribe}
   Section
-    Column gap:16
+    Column gap=16
       Badge.primary "Infrastructure"
-      Heading "What we learned moving 40 services to one queue" level:1
-      Row gap:12 middle
-        Avatar "Priya Nair" size:44
-        Column gap:2
+      Heading "What we learned moving 40 services to one queue" level=1
+      Row gap=12 middle
+        Avatar "Priya Nair" size=44
+        Column gap=2
           Text.strong "Priya Nair"
-          Row gap:8
+          Row gap=8
             Text.muted "March 12, 2026"
             Text.muted "·"
             Text.muted "9 min read"
   Section compact
-    Media kind:"skyline" tone:"dusk" h:380 radius:12
+    Media kind="skyline" tone="dusk" h=380 radius=12
   Section
-    Row gap:64 top
-      Column grow gap:20 maxw:720
-        Heading "Why we wanted one queue" level:2
+    Row gap=64 top
+      Column grow gap=20 maxw=720
+        Heading "Why we wanted one queue" level=2
         Text.lead "For years every team ran its own broker, its own retry rules and its own dashboards. Moving to a single queue was less about speed than about being able to reason about the whole system."
         Text "Forty services meant forty slightly different ideas of what a failed message is. Some retried forever, some dropped work silently, and a few did both depending on the day. When an incident crossed team lines, nobody could say where a message had been."
         Text "We started by writing down the guarantees we actually needed: at-least-once delivery, per-key ordering and a dead-letter path that a human can read. Everything else was negotiable."
-        Box pad:[20,8,0,8] border-left:#FF3D5AFE gap:8
-          Text "“The queue did not remove our failures. It made every one of them visible, in one place, in the same shape.”" size:22 weight:600
+        Box pad=[20,8,0,8] border-left=#FF3D5AFE gap=8
+          Text "“The queue did not remove our failures. It made every one of them visible, in one place, in the same shape.”" size=22 weight=600
           Text.muted "Priya Nair"
-        Heading "How the migration worked" level:2
+        Heading "How the migration worked" level=2
         Text "We moved one service at a time behind a thin client library. The library hid the broker, enforced a common envelope and attached a trace id to every message, so old and new paths could run side by side."
-        CodeBlock "client.ts" "const queue = connect({ name: 'orders' });\nawait queue.publish({\n  key: order.id,\n  type: 'order.created',\n  payload: order,\n  retries: 5,\n  deadLetter: 'orders.dlq'\n});" language:"typescript" copyable:true
+        CodeBlock "client.ts" "const queue = connect({ name: 'orders' });\nawait queue.publish({\n  key: order.id,\n  type: 'order.created',\n  payload: order,\n  retries: 5,\n  deadLetter: 'orders.dlq'\n});" language="typescript" copyable=true
         Text "Three lessons stood out once the last service had moved over:"
-        Column gap:8
-          Row gap:10
+        Column gap=8
+          Row gap=10
             Text "•"
             Text "Standardize the message envelope before you move anything."
-          Row gap:10
+          Row gap=10
             Text "•"
             Text "Give every queue a dead-letter path and an owner on call."
-          Row gap:10
+          Row gap=10
             Text "•"
             Text "Migrate the noisiest consumer last, not first."
         Text "None of this was glamorous, but incidents that used to take an afternoon to trace now take a few minutes."
-      Column w:300 gap:20 {"props":{"sticky":true,"top":24}}
-        Card gap:10
+      Column w=300 gap=20 {"props":{"sticky":true,"top":24}}
+        Card gap=10
           Text.eyebrow "ON THIS PAGE"
           Link "Why we wanted one queue"
           Link "How the migration worked"
           Link "Three lessons"
-        Card gap:12
-          Heading "Get the next post" level:3
+        Card gap=12
+          Heading "Get the next post" level=3
           Text.muted "One engineering story in your inbox, every other week."
-          Input "Email" hint:"you@example.com" type:email bind:email
-          Button "Subscribe" -> emit newsletter email; toast "You're on the list"
+          Input "Email" hint="you@example.com" type=email bind=email
+          Button "Subscribe" onTap={emit newsletter email; toast "You're on the list"}
   Section tint
-    Column gap:24
-      Heading "Related articles" level:2
-      Grid cols:3 gap:24
-        Card gap:12
-          Media kind:"train" tone:"dawn" h:160
+    Column gap=24
+      Heading "Related articles" level=2
+      Grid cols=3 gap=24
+        Card gap=12
+          Media kind="train" tone="dawn" h=160
           Badge.neutral "Reliability"
-          Heading "Retries without the retry storm" level:3
+          Heading "Retries without the retry storm" level=3
           Text.muted "Backoff, jitter and the day we took ourselves down."
           Text.caption "6 min read"
-        Card gap:12
-          Media kind:"harbor" tone:"day" h:160
+        Card gap=12
+          Media kind="harbor" tone="day" h=160
           Badge.neutral "Observability"
-          Heading "Tracing a message across forty services" level:3
+          Heading "Tracing a message across forty services" level=3
           Text.muted "How one trace id changed how we debug."
           Text.caption "8 min read"
-        Card gap:12
-          Media kind:"mountain" tone:"night" h:160
+        Card gap=12
+          Media kind="mountain" tone="night" h=160
           Badge.neutral "Culture"
-          Heading "Running a calm on-call rotation" level:3
+          Heading "Running a calm on-call rotation" level=3
           Text.muted "Fewer pages, better handoffs, happier engineers."
           Text.caption "5 min read"
   Footer
     Row between
       Text.strong "Signal & Noise"
-      Row gap:16
+      Row gap=16
         Link "Articles"
         Link "RSS"
         Link "Contact"

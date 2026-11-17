@@ -1,13 +1,13 @@
 state open=0
 state faqs=[{"id":0,"q":"How do I cancel my membership?","a":"You can cancel any time from Account > Membership > Cancel, or at the front desk. Cancellations take effect at the end of your current billing period, and no fee applies after the first 3 months."},{"id":1,"q":"Can I freeze my membership?","a":"Yes. You can freeze for 1 to 3 months per year for a small fee of $5 a month. Freezes can be started in the app or at the front desk with 48 hours notice."},{"id":2,"q":"How do guest passes work?","a":"Every member gets 2 free guest passes a month. Guests must be 16 or older, bring photo ID and sign a waiver at check-in. Extra passes cost $10 each."},{"id":3,"q":"What are the opening hours?","a":"Monday to Friday 5:00 am to 11:00 pm, Saturday and Sunday 7:00 am to 9:00 pm. Holiday hours are posted in the app and at the entrance."},{"id":4,"q":"How and when am I charged?","a":"Memberships are billed monthly on the day you joined, by card or direct debit. You can update your payment method under Account > Billing, where all receipts are also available."}]
 
-Column gap:12 pad:16 maxw:720
+Column gap=12 pad=16 maxw=720
   Text.pageTitle "Help Center"
   Text.bodySecondary "Gym membership questions"
   each f in faqs
-    Card gap:8
-      Row between center -> open=open==f.id?-1:f.id
+    Card gap=8
+      Row between center onTap={open=open==f.id?-1:f.id}
         Text.strong "{f.q}"
         Icon "expand_more"
       if open==f.id
-        Text.bodySecondary "{f.a}" animate:fade duration:250
+        Text.bodySecondary "{f.a}" animate=fade duration=250

@@ -1,21 +1,21 @@
 Screen
-  TopBar "Today's session" "{today.name}: {today.rounds} rounds, about {today.minutes} minutes" back:true -> emit open_home
-  Card gap:12
+  TopBar "Today's session" "{today.name}: {today.rounds} rounds, about {today.minutes} minutes" back=true onTap={emit open_home}
+  Card gap=12
     Text.eyebrow "{phase==\"work\" ? \"Jump\" : \"Rest\"}"
-    Text.display "{left}" size:96 weight:700
+    Text.display "{left}" size=96 weight=700
     Text.bodySecondary "{phase==\"work\" ? \"Jump for \" + today.work + \" seconds, then rest.\" : \"Catch your breath. Next round starts soon.\"}"
-    Progress bind:frac
+    Progress bind=frac
     Text.strong "Round {round} of {today.rounds}"
-  Card gap:12
+  Card gap=12
     Text.sectionTitle "Jumps so far"
     Text.numberLarge "{count}"
-    Row gap:8
-      Button.outline "-1" -> count=max(0,count-1)
-      Button "Tap for each jump" grow -> count=count+1
-  Row gap:12
-    Button.secondary "{paused ? \"Resume\" : \"Pause\"}" grow -> paused=!paused
-    Button "Finish" grow -> emit finish_session count
-  Card gap:4
+    Row gap=8
+      Button.outline "-1" onTap={count=max(0,count-1)}
+      Button "Tap for each jump" grow onTap={count=count+1}
+  Row gap=12
+    Button.secondary "{paused ? \"Resume\" : \"Pause\"}" grow onTap={paused=!paused}
+    Button "Finish" grow onTap={emit finish_session count}
+  Card gap=4
     Text.strong "How it works"
     Text.bodySecondary "Work is when you jump. Rest is a short break. Each round is one of each. Stopping early is fine."
 
@@ -25,5 +25,5 @@ state left=40
 state count=0
 state paused=false
 state frac=0
-every 1s when !paused && !done -> left=left>1?left-1:(phase=="work"?today.rest:today.work); frac=left>1?(phase=="work"?(today.work-left+1)/today.work:(today.rest-left+1)/today.rest):0; round=(left<=1&&phase=="rest"&&round<today.rounds)?round+1:round; phase=left<=1?(phase=="work"?"rest":"work"):phase
+every 1s when !paused && !done onTick={left=left>1?left-1:(phase=="work"?today.rest:today.work); frac=left>1?(phase=="work"?(today.work-left+1)/today.work:(today.rest-left+1)/today.rest):0; round=(left<=1&&phase=="rest"&&round<today.rounds)?round+1:round; phase=left<=1?(phase=="work"?"rest":"work"):phase}
 state done=false

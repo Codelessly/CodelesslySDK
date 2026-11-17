@@ -3,39 +3,39 @@ state sel=contacts[1]
 state q=""
 state sort="name"
 state desc=false
-Row w:1280 h:800 stretch fill:#FFF5F6F8
-  Sidebar bind:nav brand:"Northwind CRM" sectionLabel:"Workspace" items:["Dashboard","Contacts","Companies","Deals","Reports"] icons:["dashboard","people","business","handshake","bar_chart"] badges:["","8","","5",""]
-  Column grow gap:16 pad:24
-    Row gap:12 middle
+Row w=1280 h=800 stretch fill=#FFF5F6F8
+  Sidebar bind=nav brand="Northwind CRM" sectionLabel="Workspace" items=["Dashboard","Contacts","Companies","Deals","Reports"] icons=["dashboard","people","business","handshake","bar_chart"] badges=["","8","","5",""]
+  Column grow gap=16 pad=24
+    Row gap=12 middle
       Text.pageTitle "Contacts"
       Spacer grow
-      SearchBar "Search contacts, companies…" bind:q
-      Button "Add contact" -> emit addContact
-    Row gap:8
+      SearchBar "Search contacts, companies…" bind=q
+      Button "Add contact" onTap={emit addContact}
+    Row gap=8
       Text.muted "{length(contacts)} contacts"
       Text.muted "·"
       Text.muted "Pipeline value {money(sum(contacts,c=>c.value),"$",0)}"
-    Card gap:0 pad:0
-      TableHeader bind:sort desc:desc columns:["Name","Company","Owner","Last contact","Deal value","Stage"] keys:["name","company","owner","last","value","stage"]
+    Card gap=0 pad=0
+      TableHeader bind=sort desc={desc} columns=["Name","Company","Owner","Last contact","Deal value","Stage"] keys=["name","company","owner","last","value","stage"]
       each c in filter(contacts,c=>contains(lower(c.name),lower(q))||contains(lower(c.company),lower(q)))
-        TableRow cells:{[c.name,c.company,c.owner,c.last,money(c.value,"$",0)]} badge:{c.stage} -> sel=c
-  Box w:340 fill:#FFFFFFFF pad:20
-    Column gap:14 scroll
-      Row gap:12 middle
-        Avatar "{sel.name}" size:48
-        Column grow gap:2
+        TableRow cells={[c.name,c.company,c.owner,c.last,money(c.value,"$",0)]} badge={c.stage} onPressed={sel=c}
+  Box w=340 fill=#FFFFFFFF pad=20
+    Column gap=14 scroll
+      Row gap=12 middle
+        Avatar "{sel.name}" size=48
+        Column grow gap=2
           Text.heading "{sel.name}"
           Text.muted "{sel.role}, {sel.company}"
-      StatusBadge "{sel.stage}" tone:info
-      Details rows:{[["Email",sel.email],["Phone",sel.phone],["Owner",sel.owner],["Last contact",sel.last],["Deal value",money(sel.value,"$",0)]]}
+      StatusBadge "{sel.stage}" tone=info
+      Details rows={[["Email",sel.email],["Phone",sel.phone],["Owner",sel.owner],["Last contact",sel.last],["Deal value",money(sel.value,"$",0)]]}
       SectionLabel "Notes"
       Paragraph "{sel.notes}"
       SectionLabel "Next steps" "{length(sel.steps)} open"
-      Column gap:8
+      Column gap=8
         each s in sel.steps
-          Row gap:8 middle
+          Row gap=8 middle
             Icon "radio_button_unchecked"
             Text "{s}"
-      Row gap:10
-        ActionButton "Log note" tone:quiet icon:"edit_note" -> emit logNote sel.id
-        ActionButton "Email" tone:primary icon:"mail" -> emit email sel.id
+      Row gap=10
+        ActionButton "Log note" tone=quiet icon="edit_note" onPressed={emit logNote sel.id}
+        ActionButton "Email" tone=primary icon="mail" onPressed={emit email sel.id}

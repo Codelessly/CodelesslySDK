@@ -3,15 +3,15 @@ state code=""
 state decided=""
 state sub=sum(items,i=>i.price*i.qty)
 state off=upper(trim(code))=="SAVE10"?sub*0.1:0
-ChatCard "Your grocery order" "{sum(items,i=>i.qty)} items · arrives today, 6 to 7 pm" icon:"shopping_basket_rounded" status:{decided==""?"Review":decided} tone:{decided=="Cancelled"?"neutral":(decided==""?"accent":"good")}
+ChatCard "Your grocery order" "{sum(items,i=>i.qty)} items · arrives today, 6 to 7 pm" icon="shopping_basket_rounded" status={decided==""?"Review":decided} tone={decided=="Cancelled"?"neutral":(decided==""?"accent":"good")}
   if decided==""
     each i in filter(items,x=>x.qty>0)
-      CartLine#line "{i.name}" "{i.note} · {money(i.price,"$",2)} each" price:"{money(i.price*i.qty,"$",2)}" qty:{i.qty} kind:"{i.kind}" -> items=updateWhere(items,x=>x.id==i.id,x=>with(x,"qty",result))
-    InputField#promo "Promo code" "Try SAVE10" bind:code icon:"sell_rounded" success:{off>0?"SAVE10 applied: 10% off":""}
-    Details rows:{[["Subtotal",money(sub,"$",2)],["Promo SAVE10",off>0?"-"+money(off,"$",2):""],["Delivery","$4.99"]]}
-    TotalBar#confirm "Total" amount:"{money(sub-off+4.99,"$",2)}" cta:"Confirm order" enabled:{sub>0} -> decided="Confirmed"; emit order_decision "confirm"
-    ActionButton#cancel "Cancel order" tone:"quiet" -> decided="Cancelled"; emit order_decision "cancel"
+      CartLine#line "{i.name}" "{i.note} · {money(i.price,"$",2)} each" price="{money(i.price*i.qty,"$",2)}" qty={i.qty} kind="{i.kind}" onChanged={items=updateWhere(items,x=>x.id==i.id,x=>with(x,"qty",result))}
+    InputField#promo "Promo code" "Try SAVE10" bind=code icon="sell_rounded" success={off>0?"SAVE10 applied: 10% off":""}
+    Details rows={[["Subtotal",money(sub,"$",2)],["Promo SAVE10",off>0?"-"+money(off,"$",2):""],["Delivery","$4.99"]]}
+    TotalBar#confirm "Total" amount="{money(sub-off+4.99,"$",2)}" cta="Confirm order" enabled={sub>0} onPressed={decided="Confirmed"; emit order_decision "confirm"}
+    ActionButton#cancel "Cancel order" tone="quiet" onPressed={decided="Cancelled"; emit order_decision "cancel"}
   if decided=="Confirmed"
-    Receipt "Order confirmed" "{sum(items,i=>i.qty)} items, {money(sub-off+4.99,"$",2)}. Arriving today between 6 and 7 pm." code:"GR-20418" codeLabel:"Order"
+    Receipt "Order confirmed" "{sum(items,i=>i.qty)} items, {money(sub-off+4.99,"$",2)}. Arriving today between 6 and 7 pm." code="GR-20418" codeLabel="Order"
   if decided=="Cancelled"
-    Receipt "Order cancelled" "Nothing was placed and you were not charged." tone:"neutral" icon:"close_rounded"
+    Receipt "Order cancelled" "Nothing was placed and you were not charged." tone="neutral" icon="close_rounded"
