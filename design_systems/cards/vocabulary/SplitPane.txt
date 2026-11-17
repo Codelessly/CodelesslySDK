@@ -1,0 +1,4 @@
+// Panes side by side with a divider to drag between them: the Pane and Splitter lines written under it.
+SplitPane h=fill
+  Row w=fill h={h} gap=0
+    ...

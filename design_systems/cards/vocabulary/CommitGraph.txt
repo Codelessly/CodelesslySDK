@@ -1,0 +1,4 @@
+// A history of commits: one row for each line under it, a GraphNode at the start of a row.
+CommitGraph
+  Column w=fill gap=2
+    ...

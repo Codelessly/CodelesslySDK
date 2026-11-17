@@ -1,0 +1,12 @@
+// A row of pictures a person has added (a url each, or a record with url), with a remove button on each and an add tile while there is room.
+PhotoStrip bind=photos max=6 size=72 onAdd onRemove
+  state photos=[]
+  Row w=fill gap=8 scroll middle
+    each p in photos
+      Stack w={size} h={size}
+        Image "{coalesce(p.url, p)}" w={size} h={size} radius=10 fill=tile
+        Row w=fill end
+          IconButton "close" tooltip="Remove" onTap={onRemove({"index": index})}
+    if length(photos) < max
+      Column w={size} h={size} radius=10 border=lineStrong fill=tile center middle onTap={onAdd}
+        Icon "add_a_photo" size=22 color=inkSoft

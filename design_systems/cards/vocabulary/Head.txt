@@ -1,0 +1,4 @@
+// The header cell at the start of a track (its name and switches), apart from the lane beside it.
+Head w=160 pad=8 gap=6
+  Column w={w} pad={pad} gap={gap} fill=tile border-right=line
+    ...

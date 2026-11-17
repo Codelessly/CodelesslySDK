@@ -1,0 +1,6 @@
+// A row of small pictures to move through (a viewer's strip): the one at `at` is ringed, a tap goes to it.
+ThumbnailStrip photos=[] bind=at h=64 gap=2
+  state at=0
+  Row w=fill gap={gap} scroll middle
+    each p in photos
+      Image "{p.url}" w={h} h={h} radius=6 fill=tile border={index == at ? "accent" : "line"} onTap={at=index}

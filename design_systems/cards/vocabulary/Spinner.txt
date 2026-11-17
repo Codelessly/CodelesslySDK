@@ -1,0 +1,3 @@
+// A small turning ring: something is loading.
+Spinner size=20
+  Icon "autorenew" size={size} color=accent animate=spin

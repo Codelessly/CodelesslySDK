@@ -1,0 +1,16 @@
+// A choice from a long list by searching it: type to see the best matches (name, a line under it and a small picture, each by the key named), a tap chooses one; bind holds the chosen name.
+SearchSelect "label" bind=picked items=[] labelKey="name" subtitleKey imageKey hint
+  state picked=""
+  state query=""
+  Column w=fill gap=4
+    Input "{label}" "{hint}" icon="search" bind=query
+    if query != "" && query != picked
+      Column w=fill gap=0 radius=10 fill=card border=line
+        each item in take(fuzzy(items, query, x => x[labelKey]), 6)
+          Row w=fill gap=10 pad=[12,8,12,8] middle onTap={picked=item[labelKey]; query=item[labelKey]}
+            if imageKey != null
+              Avatar src={item[imageKey]} size=32
+            Column grow gap=1
+              Text.strong "{item[labelKey]}"
+              if subtitleKey != null
+                Text.caption "{item[subtitleKey]}"

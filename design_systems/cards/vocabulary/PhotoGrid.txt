@@ -1,0 +1,10 @@
+// Pictures as a grid of square tiles: a tap opens one (onOpen: result is its place), or, with selectMode, ticks it into the list bind keeps.
+PhotoGrid photos=[] cols=3 gap=2 h=120 bind=sel selectMode onOpen onTapPhoto
+  state sel=[]
+  Grid cols={cols} keep gap={gap}
+    each p in photos
+      Stack w=fill h={h} onTap={selectMode != null ? sel=(contains(sel, p.id) ? without(sel, p.id) : append(sel, p.id)) : onOpen(index)}
+        Image "{p.url}" w=fill h={h} radius=4 fill=tile border={contains(sel, p.id) ? "accent" : "line"}
+        if contains(sel, p.id)
+          Row w=fill end pad=6
+            Icon "check_circle" size=22 color=accent

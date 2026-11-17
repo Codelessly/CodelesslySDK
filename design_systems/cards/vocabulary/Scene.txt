@@ -1,0 +1,7 @@
+// A drawn scene to set a story against: a tinted panel with a landscape icon and the scene's name.
+Scene "name" fill=accentTint color=inkSoft w=fill h=160 radius=0
+  Row w={w} h={h} radius={radius} center middle fill={fill}
+    Column gap=6 center
+      Icon "landscape" size={min(44, h * 0.3)} color={color}
+      if name != null
+        Text.caption "{name}" color={color}

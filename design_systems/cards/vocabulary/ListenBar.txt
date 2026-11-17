@@ -1,0 +1,4 @@
+// The bar of a read-aloud (or listen) control at the foot of a page: the lines under it.
+ListenBar
+  Column w=fill pad=[12,8,12,8] border-top=line
+    ...
