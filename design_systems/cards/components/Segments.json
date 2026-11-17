@@ -452,11 +452,13 @@
      "from": "chip",
      "fontSize": 13
     },
-    "maxLines": 1
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "textAlign": "center"
    },
    "layout": {
     "width": {
-     "hug": 0
+     "fill": 0
     },
     "height": {
      "hug": 0
@@ -593,11 +595,13 @@
      "from": "chip",
      "fontSize": 13
     },
-    "maxLines": 1
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "textAlign": "center"
    },
    "layout": {
     "width": {
-     "hug": 0
+     "fill": 0
     },
     "height": {
      "hug": 0
@@ -734,11 +738,13 @@
      "from": "chip",
      "fontSize": 13
     },
-    "maxLines": 1
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "textAlign": "center"
    },
    "layout": {
     "width": {
-     "hug": 0
+     "fill": 0
     },
     "height": {
      "hug": 0
@@ -875,11 +881,13 @@
      "from": "chip",
      "fontSize": 13
     },
-    "maxLines": 1
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "textAlign": "center"
    },
    "layout": {
     "width": {
-     "hug": 0
+     "fill": 0
     },
     "height": {
      "hug": 0
@@ -1016,11 +1024,13 @@
      "from": "chip",
      "fontSize": 13
     },
-    "maxLines": 1
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "textAlign": "center"
    },
    "layout": {
     "width": {
-     "hug": 0
+     "fill": 0
     },
     "height": {
      "hug": 0
@@ -1157,11 +1167,13 @@
      "from": "chip",
      "fontSize": 13
     },
-    "maxLines": 1
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "textAlign": "center"
    },
    "layout": {
     "width": {
-     "hug": 0
+     "fill": 0
     },
     "height": {
      "hug": 0

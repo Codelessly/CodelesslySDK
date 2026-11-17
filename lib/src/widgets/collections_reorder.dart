@@ -122,13 +122,14 @@ Widget _rowNode(ListRuntime r, String itemId, List<Object?> items, int index) {
 // from the shared control focus scope. Connect that stop to the list move.
 RenderControl? _handleControl(ListRuntime r, String handle, List<Object?> items, int index) {
   final box = r.tree.boxOf(handle, instance: _rowInstance(r, _rowKey(items, index)));
-  RenderControl? controlOf(RenderObject? object) {
-    if (object is RenderControl) return object;
-    RenderControl? found;
-    object?.visitChildren((child) { found ??= controlOf(child); });
-    return found;
-  }
-  return controlOf(box?.contentBox ?? box);
+  return _controlUnder(box?.contentBox ?? box);
+}
+
+RenderControl? _controlUnder(RenderObject? object) {
+  if (object is RenderControl) return object;
+  RenderControl? found;
+  object?.visitChildren((child) { found ??= _controlUnder(child); });
+  return found;
 }
 
 void _wireHandle(ListRuntime r, String handle, List<Object?> items, int index, bool Function(KeyEvent) onKey) {
@@ -429,6 +430,10 @@ class _HandleDragStart extends StatelessWidget {
   Widget build(BuildContext context) => Listener(
         onPointerDown: (event) {
           if (!_onHandle(event)) return;
+          // A press on the handle focuses it (no ring: a pointer's), as a
+          // click focuses a button: Alt and the arrows then move its row.
+          final box = handleBox();
+          _controlUnder(box?.contentBox ?? box)?.focusNode.requestFocus(highlight: false);
           SliverReorderableList.maybeOf(context)?.startItemDragReorder(
             index: index,
             event: event,

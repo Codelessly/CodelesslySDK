@@ -344,9 +344,13 @@ DateTime? parseDay(String? value) {
   return DateTime.tryParse('${value.substring(0, 10)}T00:00:00');
 }
 
-/// [value] as a time of day (`HH:mm...`): minutes since midnight, or null.
+/// [value] as a time of day (`HH:mm...`, or a whole number of minutes since
+/// midnight as a variable may hold it: `1170` is 19:30): minutes since
+/// midnight, or null.
 int? parseClock(String? value) {
   if (value == null) return null;
+  final minutes = RegExp(r'^\d+(\.0+)?$').hasMatch(value.trim()) ? double.parse(value.trim()).toInt() : null;
+  if (minutes != null) return minutes < 24 * 60 ? minutes : null;
   final m = RegExp(r'^(\d{1,2}):(\d{2})').firstMatch(value.trim());
   if (m == null) return null;
   final h = int.parse(m[1]!), min = int.parse(m[2]!);
