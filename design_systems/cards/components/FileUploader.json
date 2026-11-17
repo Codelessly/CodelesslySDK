@@ -27,6 +27,24 @@
     "doc": "A muted line under it (accepted types, a size limit)."
    },
    {
+    "key": "accept",
+    "type": {
+     "kind": "json",
+     "flutter": "Object"
+    },
+    "default": "",
+    "doc": "The kinds of file it takes, a text or a list (image/*, [\"pdf\",\"jpg\"]), said under it when there is no hint."
+   },
+   {
+    "key": "multiple",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "Whether it takes several files (false: the hint says one file)."
+   },
+   {
     "key": "compact",
     "type": {
      "kind": "boolean",
@@ -228,7 +246,7 @@
   "dropHint": {
    "type": "text",
    "props": {
-    "text": "${props.hint}",
+    "text": "${= props.hint != '' ? props.hint : ((length(props.accept) > 0 ? 'Accepts ' + props.accept : '') + (props.multiple ? '' : (length(props.accept) > 0 ? ', one file' : 'One file')))}",
     "style": {
      "fontSize": 12,
      "fontWeight": 400,
@@ -246,7 +264,7 @@
     }
    },
    "bind": {
-    "visible": "${= props.hint != ''}"
+    "visible": "${= props.hint != '' || length(props.accept) > 0 || !props.multiple}"
    }
   },
   "dropTexts": {

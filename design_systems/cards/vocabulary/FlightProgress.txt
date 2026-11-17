@@ -1,10 +1,10 @@
-// How far a flight has gone: the two airports at the ends of a bar that fills as bind (0 to 1) grows, with a label under it.
-FlightProgress bind=progress from to label
+// How far a flight has gone: the two airports at the ends of a bar that fills as bind (0 to 1) grows, or as value= says, with a label under it.
+FlightProgress bind=progress value from to label
   state progress=0
   Column w=fill gap=6
     Row w=fill gap=10 middle
       Text.strong "{from}"
-      Progress bind=progress grow
+      Progress {coalesce(value, progress)} grow
       Text.strong "{to}"
     if label != null
       Row gap=6 center middle

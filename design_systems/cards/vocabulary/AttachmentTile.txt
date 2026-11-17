@@ -1,12 +1,14 @@
-// A file attached to a message: its icon, name and size, with a download or a remove button.
-AttachmentTile "name" subtitle icon="description" removable=false onTap onDownload onRemove
+// A file attached to a message: its icon, name and size, a bar while it uploads (progress from 0 to 1), with a download or a remove button.
+AttachmentTile "name" "subtitle" icon="description" progress removable=false onTap onDownload onRemove
   Row gap=10 pad=[10,8,10,8] radius=10 fill=tile border=line middle onTap={onTap}
     Icon "{icon}" color=accent size=20
     Column grow gap=2
       Text.strong "{name}"
       if subtitle != null
         Text.caption "{subtitle}"
+      if progress != null && progress < 1
+        Progress {progress} w=fill
     if onDownload
       IconButton "download" onTap={onDownload}
-    if removable
+    if removable || onRemove
       IconButton "close" onTap={onRemove}

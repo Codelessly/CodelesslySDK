@@ -1,0 +1,127 @@
+{
+ "widget": {
+  "doc": "An inline message (info, success, warning, error): the tone's tint, icon and an optional action (the actions slot). Fires onDismiss. icon= puts an icon of its own in place of the tone's; action= a button at its end that fires onAction.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A bold first line (empty: none)."
+   },
+   {
+    "key": "message",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Message",
+    "doc": "The text.",
+    "required": true
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "info",
+      "success",
+      "warning",
+      "error",
+      "neutral"
+     ]
+    },
+    "default": "info",
+    "doc": "The color and icon."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "An icon in place of the tone's (a Material icon name)."
+   },
+   {
+    "key": "action",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The label of one button at its end (empty: none); pressing it fires onAction."
+   },
+   {
+    "key": "dismissible",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "An x that fires onDismiss."
+   }
+  ],
+  "events": [
+   {
+    "key": "onDismiss"
+   },
+   {
+    "key": "onAction"
+   }
+  ]
+ },
+ "nodes": {
+  "banner": {
+   "children": [
+    "glyph",
+    "texts",
+    "actions",
+    "action",
+    "dismiss"
+   ]
+  },
+  "glyph": {
+   "bind": {
+    "props.icon": "${= props.icon != '' ? props.icon : (props.icon != '' ? props.icon : (props.icon != '' ? props.icon : (props.icon != '' ? props.icon : (props.icon != '' ? props.icon : (props.tone == 'success' ? 'check_circle' : (props.tone == 'warning' ? 'warning_amber' : (props.tone == 'error' ? 'error_outline' : 'info_outline')))))))}"
+   }
+  },
+  "action": {
+   "type": "Button",
+   "props": {
+    "label": "",
+    "variant": "outline",
+    "size": "xs"
+   },
+   "bind": {
+    "props.label": "${props.action}",
+    "visible": "${= props.action != ''}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onAction"
+      }
+     ]
+    }
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}

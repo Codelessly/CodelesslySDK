@@ -1,0 +1,87 @@
+{
+ "widget": {
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Drop files here or click to browse",
+    "doc": "What the drop area says."
+   },
+   {
+    "key": "hint",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A muted line under it (accepted types, a size limit)."
+   },
+   {
+    "key": "accept",
+    "type": {
+     "kind": "json",
+     "flutter": "Object"
+    },
+    "default": "",
+    "doc": "The kinds of file it takes, a text or a list (image/*, [\"pdf\",\"jpg\"]), said under it when there is no hint."
+   },
+   {
+    "key": "multiple",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "Whether it takes several files (false: the hint says one file)."
+   },
+   {
+    "key": "compact",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A small bordered button in place of the drop area."
+   },
+   {
+    "key": "files",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "The picked files' names."
+   },
+   {
+    "key": "sizes",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "One size per file (empty: none)."
+   }
+  ]
+ },
+ "nodes": {
+  "dropHint": {
+   "props": {
+    "text": "${= props.hint != '' ? props.hint : ((length(props.accept) > 0 ? 'Accepts ' + props.accept : '') + (props.multiple ? '' : (length(props.accept) > 0 ? ', one file' : 'One file')))}"
+   },
+   "bind": {
+    "visible": "${= props.hint != '' || length(props.accept) > 0 || !props.multiple}"
+   }
+  }
+ }
+}

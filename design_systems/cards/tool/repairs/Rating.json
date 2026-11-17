@@ -1,0 +1,72 @@
+{
+ "widget": {
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Rating",
+    "doc": "What it rates, for a screen reader (Rating when not given)."
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "number",
+      "flutter": "double"
+     }
+    },
+    "default": "",
+    "doc": "A bound score variable, from 0 to 5."
+   },
+   {
+    "key": "score",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "A fixed score when readOnly is true."
+   },
+   {
+    "key": "max",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 5,
+    "doc": "How many stars."
+   },
+   {
+    "key": "half",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "True: half-star steps."
+   },
+   {
+    "key": "readOnly",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "True: display the score without allowing changes."
+   }
+  ]
+ },
+ "nodes": {
+  "stars": {
+   "bind": {
+    "props.divisions": "${= props.half ? props.max * 2 : props.max}",
+    "props.max": "${props.max}",
+    "layout.width": "${= props.max * 40}"
+   }
+  }
+ }
+}

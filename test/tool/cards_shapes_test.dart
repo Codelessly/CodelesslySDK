@@ -1,0 +1,150 @@
+// The shapes writers gave Cards' named words (the vocabulary loop's Reviews 5
+// and 6, D25 and D30): each line below is as an answer of
+// tool/vocabulary/corpus-define wrote it (d03 was written with the glossary
+// of names; d01 and d02 defined their own words), and each now expands with
+// no word left unknown, to a document that validates. What each became is
+// what the line says it is.
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:codelessly_api/codelessly_api.dart' as api;
+import 'package:codelessly_api/notation.dart';
+import 'package:codelessly_api/validate.dart';
+import 'package:codelessly_sdk/src/runtime/expressions/formula.dart' show FormulaEvaluator;
+import 'package:flutter_test/flutter_test.dart';
+
+import '../../tool/notation/vocabulary.dart' show loadDefinitionTexts, loadVocabulary;
+
+void main() {
+  late api.DesignSystem ds;
+  late api.Catalog catalog;
+  late NotationVocabulary vocabulary;
+
+  setUpAll(() async {
+    final problems = <String>[];
+    ds = await api.DesignSystem.load((ref) async {
+      final f = File('design_systems/cards/$ref');
+      return f.existsSync() ? f.readAsStringSync() : null;
+    }, problems: problems);
+    expect(problems, isEmpty);
+    catalog = ds.catalogOver(api.standardCatalog);
+    vocabulary = loadVocabulary(dir: 'design_systems/cards');
+  });
+
+  NotationResult read(String text) => api.Catalog.run(
+      catalog, () => parseNotation(text, catalog: catalog, options: NotationOptions.fromDesignSystem(ds, width: 1280).open(vocabulary: vocabulary)));
+
+  List<String> invalid(Map<String, Object?> doc) => [
+        for (final d in api.Catalog.run(
+            catalog,
+            () => validateDocument(doc,
+                options: ValidateOptions(
+                  theme: api.ThemeTokens.fromJson(ds.manifest.theme.toJson()),
+                  components: ds.components,
+                  formulas: (f) => (error: FormulaEvaluator.errorOf(f), paths: FormulaEvaluator.referencedPaths(f)),
+                ))))
+          if (d.severity == Severity.error) '${d.code.name} ${d.path}: ${d.message}',
+      ];
+
+  // What the lines below read from the page.
+  const state = '''
+state stage=1
+state steps=[{"label":"Listed","note":"On the market","date":"Mar 2"},{"label":"Offer","note":"Accepted","date":"Mar 20"}]
+state events=[{"title":"Planted","date":"Apr 1","note":"Three leaves"},{"title":"Repotted","time":"May 4"}]
+state step=0
+state progress=0.4
+state signature=""
+state sel=""
+state placing=false
+state pins=[{"id":"P1","label":"Crack"},{"id":"P2","label":"Leak"}]
+state filter="All"
+state photo=""
+state attach={"name":"plan.pdf","size":"2 MB","progress":0.5}
+''';
+
+  // Each line, the words it is read with (what records it), and what is not
+  // to be left unknown.
+  final lines = <String, List<String>>{
+    'each s in steps\n    TimelineItem "{s.label}" "{s.note}" date={s.date} done={index<stage} current={index==stage}': ['definition TimelineItem'],
+    'Timeline items={events}': ['definition Timeline#events'],
+    'Timeline events={events} current={stage} onSelect={stage=result}': ['definition Timeline#events', 'alias events>items', 'alias current>selected', 'alias onSelect>onPick'],
+    'Stepper steps=["About you","Income","Deductions"] current={step} onSelect={step=result}': ['definition Stepper#steps', 'alias onSelect>onPick'],
+    'Stepper bind=step min=0 max=10 onChange={toast "{result}"}': [],
+    'Countdown "Exam ends in" seconds=600 warnBelow=300 onWarn={toast "5 min"} onDone={toast "Time"}': ['definition Countdown#timer', 'alias warnBelow>warnAt', 'alias onDone>onEnd'],
+    'ChatBubble "Where is my bag?" mine time="10:02"': ['definition ChatBubble'],
+    'Banner "You owe \$1.75 in overdue fines." icon="warning"': [],
+    'Banner "Your trial ends in 3 days." icon="hourglass_bottom" actionLabel="Cancel trial" onAction={toast "Cancelled"} onDismiss={toast "Hidden"}': ['alias actionLabel>action'],
+    'Banner.warning "Possible interaction with potassium." onDismiss={toast "ok"}': [],
+    'Text "11:35" strike=true color=#FF9CA3AF': [],
+    'Text "{filter}" strike={stage > 0}': [],
+    'FileUploader "Drop photos here or browse" accept="image/*" multiple onPick={toast "pick"}': [],
+    'FileUploader accept=["pdf","jpg","png"] multiple': [],
+    'ImageUpload bind=photo accept="image/*"': ['alias accept>hint'],
+    'Donut values=[38,24,16] labels=["Heating","Water heater","Fridge"]': [],
+    'StatusBadge status="Open"': ['alias status>label'],
+    'StatusBadge "{filter}"': [],
+    'Barcode "29034 00718 4421" w=260 h=90': [],
+    'Rating 4.5 readonly': ['alias readonly>readOnly'],
+    'Rating score=3 max=10': [],
+    'StarRating bind=step max=5': ['alias StarRating>Rating'],
+    'AttachmentTile "{attach.name}" "{attach.size}" progress={attach.progress} onRemove={attach={}}': ['definition AttachmentTile'],
+    'FlightProgress value={progress} from="SFO" to="NRT"': ['definition FlightProgress'],
+    'ChipTabs bind=filter items=["All","On time","Delayed"]': ['alias items>tabs'],
+    'ChoiceChips bind=filter items=["T-14","T-17"]': ['alias items>options'],
+    'SegmentedControl bind=filter items=["All","call","email"]': ['alias items>options'],
+    'StepIndicator steps=["Cart","Pay"] current=1': [],
+    'CodeBlock "print(1)" language="python" copy': ['alias copy>copyable'],
+    'StatCard "Outstanding" value="\$1,200" caption="3 unpaid invoices"': ['alias caption>note'],
+    'Breadcrumb crumbs=["Home","Docs"] onPick={toast "{result}"}': ['alias crumbs>items', 'alias onPick>onNavigate'],
+    'MapView center=[51.5,-0.12] zoom=14 markers={pins} onPick={sel=result}': ['definition MapView', 'alias markers>pins', 'alias onPick>onSelect'],
+    'Map places={pins} h=300': ['alias Map>MapView', 'definition MapView', 'alias places>pins'],
+    'RouteMap points={pins} progress={progress} onPin={toast "{result}"}': ['definition RouteMap', 'alias points>stops', 'alias onPin>onPick'],
+    'FloorPlan "Level 1" pins={pins} selected={sel} placing={placing} onPick={sel=result} onPlace={placing=false}': ['definition FloorPlan'],
+    'SignaturePad "Sign here" bind=signature h=140': ['definition SignaturePad'],
+    'CameraView "Point at the meter" source="rear" h=240 onCapture={toast "Captured"}': ['definition CameraView'],
+    'PhotoPicker "Meter photo" bind=photo onPick={photo="meter.jpg"}': ['definition PhotoPicker'],
+    'Waveform peaks=[0.2,0.8,0.5,0.9] progress={progress} onSeek={toast "{result}"}': ['definition Waveform', 'alias peaks>values', 'alias progress>position'],
+  };
+
+  for (final e in lines.entries) {
+    test(e.key.split('\n').last, () {
+      final r = read('${state}Column\n  ${e.key}\n');
+      expect(r.issues.map((i) => i.message), isEmpty);
+      final records = [
+        for (final u in r.vocabulary)
+          if (u.kind == 'definition' && u.node != null) 'definition ${u.to}' else if (u.kind == 'alias') 'alias ${u.word}>${u.to}',
+      ];
+      expect(records, containsAll(e.value));
+      // Nothing left unknown: no stand-in, no word dropped.
+      expect([for (final u in r.vocabulary) if (!const {'definition', 'alias', 'universal'}.contains(u.kind)) '${u.kind} ${u.on ?? ''}.${u.word}'], isEmpty);
+      expect(invalid(r.document), isEmpty);
+    });
+  }
+
+  test('the open prompt with Cards names its words on one line; --no-glossary leaves it out (D29)', () {
+    String prompt({bool glossary = true}) => api.Catalog.run(
+        catalog,
+        () => notationPrompt(
+            catalog: catalog,
+            options: NotationOptions.fromDesignSystem(ds, width: 1280).define(loadDefinitionTexts('design_systems/cards')),
+            designSystem: ds,
+            open: true,
+            glossary: glossary));
+    final names = api.Catalog.run(catalog, () => notationGlossary(ds, vocabulary, prompt: prompt(glossary: false)));
+    expect(names, containsAll(['Stepper', 'Timeline', 'Countdown', 'Rating', 'MapView', 'SignaturePad', 'Banner', 'FileUploader']));
+    // Taught by the prompt, so not named again.
+    expect(names, isNot(anyOf(contains('Button'), contains('Card'), contains('Badge'), contains('StickyNote'))));
+    final page = prompt();
+    expect(page, contains('${notationGlossaryLead()}\n${names.join(' ')}\n\n'));
+    expect(page.length - prompt(glossary: false).length, lessThan(4000));
+  });
+
+  test('the steps Stepper and the number control are one word with two meanings', () {
+    final r = read('${state}Column\n  Stepper#qty "Guests" bind=step min=1 max=8\n  Stepper steps=["A","B","C"] bind=step\n');
+    expect(r.issues, isEmpty);
+    final nodes = r.document['nodes']! as Map;
+    expect((nodes['qty'] as Map)['type'], 'Stepper');
+    expect([for (final u in r.vocabulary) if (u.kind == 'definition' && u.node != null) u.to], ['Stepper#steps']);
+    expect(jsonEncode(r.document), contains(r'[\"A\",\"B\",\"C\"]'));
+  });
+}

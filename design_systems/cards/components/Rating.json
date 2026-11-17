@@ -15,8 +15,7 @@
      "flutter": "String"
     },
     "default": "Rating",
-    "doc": "The name announced with the score.",
-    "required": true
+    "doc": "What it rates, for a screen reader (Rating when not given)."
    },
    {
     "key": "value",
@@ -38,6 +37,15 @@
     },
     "default": 0,
     "doc": "A fixed score when readOnly is true."
+   },
+   {
+    "key": "max",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 5,
+    "doc": "How many stars."
    },
    {
     "key": "half",
@@ -107,9 +115,11 @@
    },
    "bind": {
     "props.value": "${= props.value == null ? props.score : props.value}",
-    "props.divisions": "${= props.half ? 10 : 5}",
+    "props.divisions": "${= props.half ? props.max * 2 : props.max}",
     "props.label": "${props.label}",
-    "props.readOnly": "${props.readOnly}"
+    "props.readOnly": "${props.readOnly}",
+    "props.max": "${props.max}",
+    "layout.width": "${= props.max * 40}"
    },
    "actions": [
     {

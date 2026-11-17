@@ -1,12 +1,12 @@
-// One event of a timeline: a dot on the rail, its title and when, and the lines under it.
-TimelineItem "title" "detail" time icon="circle"
+// One event of a timeline: a dot on the rail (a check once done, ringed when current), its title and when (time= or date=), and the lines under it.
+TimelineItem "title" "detail" time date icon="circle" done=false current=false
   Row w=fill gap=10 top
-    Icon "{icon}" size=12 color=accent
+    Icon "{done ? "check_circle" : current ? "radio_button_checked" : icon}" size=14 color={done ? "#FF16A34A" : "#FF2563EB"}
     Column grow gap=4
       Row gap=8 middle
-        Text.strong "{title}"
-        if time != null
-          Text.caption "{time}"
+        Text.strong "{title}" color={current ? "#FF2563EB" : "#FF111827"}
+        if coalesce(time, date) != null
+          Text.caption "{coalesce(time, date)}"
       if detail != null
         Text.muted "{detail}"
       ...

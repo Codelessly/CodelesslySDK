@@ -16,7 +16,17 @@
     "FloorPlan": {"items": "pins", "markers": "pins"},
     "Waveform": {"peaks": "values", "samples": "values", "bars": "values", "progress": "position", "marks": "cues", "markers": "cues"},
     "ChatBubble": {"from": "sender", "author": "sender"},
-    "Breadcrumb": {"crumbs": "items", "path": "items"}
+    "Banner": {"actionLabel": "action", "text": "message"},
+    "Breadcrumb": {"crumbs": "items", "path": "items"},
+    "StatusBadge": {"status": "label", "text": "label"},
+    "StatCard": {"caption": "note", "subtitle": "note"},
+    "ChipTabs": {"items": "tabs"},
+    "ChoiceChips": {"items": "options"},
+    "Combobox": {"items": "options"},
+    "SegmentedControl": {"items": "options"},
+    "StepIndicator": {"items": "steps"},
+    "ImageUpload": {"accept": "hint"},
+    "CodeBlock": {"lang": "language"}
   },
   "events": {
     "Timeline": {"onSelect": "onPick"},
@@ -30,6 +40,7 @@
     "Breadcrumb": {"onPick": "onNavigate", "onSelect": "onNavigate"}
   },
   "flags": {
-    "Rating": {"readonly": "readOnly"}
+    "Rating": {"readonly": "readOnly"},
+    "CodeBlock": {"copy": "copyable"}
   }
 }
