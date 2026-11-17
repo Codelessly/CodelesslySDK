@@ -125,6 +125,15 @@
   under the sidebar, and a `transparent_background` warning). The frame is right as written: the sidebar is as tall
   as the window and stays in view while `Main` scrolls. The capture now carries each side pane's own background (its
   fill and border, without its content) down to its bottom; the pane's content shows once, in the first window.
+- A card dragged onto a drop target whose `drop` reaction takes it out of its list (a board's column) threw `Cannot
+  hit test a render box that has never been laid out`, and the drop did nothing. Three causes: a layer added to the
+  middle of a node's chain between frames (the dragged card's opacity) was hit tested by the next pointer event
+  before it was laid out (a node whose own layers are not all laid out now takes no hit, as one whose first layer is
+  not already did); the dragged copy of a component instance was built without the component registry, so it showed
+  the component's defaults instead of the call's parameters, at another size (a flex overflow in the copy); and a
+  `draggable` or `dropTarget` written on a component's call (`TaskCard … drag=task(c.id)` inside `each`) evaluated
+  its data, key and conditions inside the component, where the list's `item` and the page's variables do not exist,
+  so `result.data` was empty. They read in the caller's scope now, as the call's reactions do.
 
 ## 32.0.0
 

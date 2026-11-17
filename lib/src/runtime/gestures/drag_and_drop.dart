@@ -36,6 +36,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import '../../render/components.dart' show componentInstanceOf;
 import '../../render/islands.dart';
 import '../../render/node_tree.dart';
 import '../../render/play.dart' show FlightRegistry;
@@ -398,13 +399,30 @@ class DropSlotNode {
 /// The scope node [box] reads, and its expressions.
 ValueScope? _scopeOf(NodeBox box) => box.tree.binder?.scopeFor(box.source, box.id, box.instance);
 
+/// Whether the behavior [has] finds on the root of a component instance was
+/// written on its call (`TaskCard … drag=task(c.id)` in a list): it then
+/// reads where the call does (the page's variables, the list's item), as the
+/// call's reactions do, not inside the component.
+bool _writtenOnCall(NodeBox box, bool Function(api.Behaviors) has) {
+  final ci = componentInstanceOf(box.instance);
+  if (ci == null || !box.tree.isInstanceRoot(box.id, box.instance)) return false;
+  final call = box.tree.sourceOf(ci.outer).node(ci.call);
+  return call != null && has(call.behaviors);
+}
+
+/// The scope of the call of the component instance [box] is the root of.
+ValueScope? _callScopeOf(NodeBox box) {
+  final ci = componentInstanceOf(box.instance);
+  return ci == null ? null : box.tree.binder?.scopeFor(box.tree.sourceOf(ci.outer), ci.call, ci.outer);
+}
+
 /// Evaluates [text] (a `${...}` path, a `${= ...}` formula or text with
 /// paths) to a value where [box] reads.
-Object? _evaluate(NodeBox box, String text) {
+Object? _evaluate(NodeBox box, String text, {bool onCall = false}) {
   final t = text.trim();
   if (t.isEmpty) return null;
   final binder = box.tree.binder;
-  final scope = _scopeOf(box);
+  final scope = (onCall ? _callScopeOf(box) : null) ?? _scopeOf(box);
   if (binder == null || scope == null) return t;
   return binder.engine.evaluate(t, scope);
 }
@@ -654,6 +672,10 @@ class _SourceDrag implements Drag {
       catalog: box.tree.catalog,
       gestures: box.tree.gestures,
       imageLoader: box.tree.imageLoader,
+      // A dragged component instance reads its call's parameters in the
+      // copy too (without them its bound parts show at their defaults, at
+      // another size than the node it copies).
+      components: box.tree.components,
     );
     final size = feedbackId.isEmpty ? source.size : (source._feedbackSize ?? source.size);
     // A feedback node of its own that hugs its content on an axis (a chip
@@ -813,11 +835,16 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
   /// Whether the feedback node hugs its content across and down.
   (bool, bool) _feedbackHugs = (false, false);
 
+  /// Whether the source was written on the call of the component instance
+  /// this node is the root of: its data reads in the caller's scope.
+  bool _onCall = false;
+
   void configure(NodeBox box, Node n, api.DragSource model) {
     final restart = model.start != _model.start || model.axis != _model.axis;
     _box = box;
     _model = model;
     _data = n.bind['draggable.data'] ?? model.data;
+    _onCall = _writtenOnCall(box, (b) => b.draggable != null);
     final f = model.feedback.isEmpty ? null : box.source.node(model.feedback);
     _feedbackSize = f == null ? null : Size(f.layout.width.value, f.layout.height.value);
     _feedbackHugs = f == null ? (false, false) : (f.layout.width.isHug, f.layout.height.isHug);
@@ -842,7 +869,7 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
   /// The ids this node's payload carries now.
   List<String> get _ownIds {
     final box = _box;
-    return box == null ? const [] : dragPayloadIds(_evaluate(box, _data));
+    return box == null ? const [] : dragPayloadIds(_evaluate(box, _data, onCall: _onCall));
   }
 
   // --- how it shows while dragged ---------------------------------------------
@@ -1011,7 +1038,7 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
     final dnd = DragAndDrop.of(box.tree);
     final session = DragSession(
       group: _model.group,
-      data: _evaluate(box, _data),
+      data: _evaluate(box, _data, onCall: _onCall),
       source: _sourceKey(box),
       size: draggedSize(size, feedbackSize: _feedbackSize, feedbackScale: _model.feedbackScale),
     )..grab = globalToLocal(position);
@@ -1148,9 +1175,15 @@ class RenderDropTarget extends RenderProxyBox {
   NodeBox? _box;
   api.DropTarget _model = const api.DropTarget();
 
+  /// Whether the target was written on the call of the component instance
+  /// this node is the root of: its key and conditions read in the caller's
+  /// scope.
+  bool _onCall = false;
+
   void configure(NodeBox box, Node n, api.DropTarget model) {
     _box = box;
     _model = model;
+    _onCall = _writtenOnCall(box, (b) => b.dropTarget != null);
     _register();
   }
 
@@ -1171,7 +1204,7 @@ class RenderDropTarget extends RenderProxyBox {
     final text = _model.key.trim();
     if (box == null) return '';
     if (text.isEmpty) return box.id;
-    return FormulaEvaluator.stringify(_evaluate(box, text));
+    return FormulaEvaluator.stringify(_evaluate(box, text, onCall: _onCall));
   }
 
   /// Whether a drag of [group] may come onto this target at all: a group it
@@ -1182,7 +1215,7 @@ class RenderDropTarget extends RenderProxyBox {
     final condition = _model.acceptIf.trim();
     if (condition.isEmpty) return true;
     dnd.publish();
-    return _holds(_evaluate(_box!, condition));
+    return _holds(_evaluate(_box!, condition, onCall: _onCall));
   }
 
   bool _entered = false;
