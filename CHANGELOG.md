@@ -143,6 +143,11 @@
   reactions fired nothing: its pointer moves carried no times, so the release had no speed and no swipe was
   recognized (the renderer's trigger fires as before). The moves are now timed a frame apart: a drag by a distance
   is a swipe that way.
+- A menu item that opens a dialog, a sheet or a screen (`MenuItem "Delete" onTap={open confirmDelete}`) left its
+  menu drawn, dimmed, under the dialog until the dialog closed: an `openModal` waits for its modal, so the chain's
+  own "close the menu" ran afterwards. Opening a modal that is not a popover from inside a popover now closes the
+  popover first, and the chain's following `closeModal` (the menu's) closes nothing else. A popover opened from a
+  popover (a submenu) keeps it.
 
 ## 32.0.0
 
