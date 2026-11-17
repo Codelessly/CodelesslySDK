@@ -15,6 +15,8 @@ Needs codelessly_api from master (after 33.0.0).
 - **`notation.sh vocabulary`: overlays opened and never written** (Review 3, D17): codelessly_api now opens a
   placeholder sheet for them with the open vocabulary; the report counts them (`overlays` in `vocabulary.json`, a
   section in `VOCABULARY.md`, and the summary line) instead of as grammar issues.
+- `notation.sh vocabulary`: `go decks_and_mixer` reaches the screen `### Decks and Mixer` (its id is
+  `decks-and-mixer`); it did not validate.
 
 ## 33.0.0
 

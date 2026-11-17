@@ -441,8 +441,11 @@ Future<void> main(List<String> args) async {
     // "Add a recipe") is that page.
     String page(String to) {
       if (pages.contains(to)) return to;
-      final words = to.split('-');
-      final near = pages.where((p) => p.startsWith('$to-') || words.every(p.split('-').contains)).toList();
+      // `go decks_and_mixer`: a screen's id here is its name with hyphens.
+      final t = to.replaceAll('_', '-').toLowerCase();
+      if (pages.contains(t)) return t;
+      final words = t.split('-');
+      final near = pages.where((p) => p.startsWith('$t-') || words.every(p.split('-').contains)).toList();
       return near.length == 1 ? near.first : to;
     }
 
