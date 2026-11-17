@@ -57,17 +57,8 @@ final class OnDemandBlocks {
   final UiSession session;
   final BlockDesigner design;
 
-  /// The validator, when the host has one: the problems it finds in a
-  /// design, none to pass. The session's own code is the core only, so the
-  /// strict validator of `package:codelessly_api/validate.dart` is given
-  /// here, with the session's theme and components:
-  ///
-  /// ```dart
-  /// validate: (json) => [
-  ///   for (final d in validateDocument(json, options: ValidateOptions(theme: session.theme, components: session.designSystem!.components)))
-  ///     if (d.code.severity == Severity.error) '${d.code.name} at ${d.path}: ${d.message}',
-  /// ],
-  /// ```
+  /// A check of the host's own, when it has one: the problems it finds in
+  /// a design (each a line the designer reads on its next try), none to pass.
   final List<String> Function(Json definition)? validate;
 
   /// Checks past those (the built-in ones: a component of the name asked

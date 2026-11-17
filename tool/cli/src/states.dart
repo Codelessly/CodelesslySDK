@@ -112,7 +112,7 @@ Future<int> statesMain(List<String> argv) async {
         merged['images']!.addAll(d['images'] as List? ?? const []);
         merged['comparisons']!.addAll(d['comparisons'] as List? ?? const []);
         for (final x in d['diagnostics'] as List? ?? const []) {
-          if (seen.add(jsonEncode(x))) merged['diagnostics']!.add(x); // validation problems repeat in every run
+          if (seen.add(jsonEncode(x))) merged['diagnostics']!.add(x); // a problem met before the first capture repeats in every run
         }
       }
     }

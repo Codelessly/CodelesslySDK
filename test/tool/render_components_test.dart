@@ -122,7 +122,7 @@ void main() {
       expect(again.images.map((f) => f.split('/').last), ['Card-hello@320x240.png']);
     });
 
-    testWidgets('a call to a component the site lacks: validation names it, the render reports it', (tester) async {
+    testWidgets('a call to a component the site lacks: the render reports it', (tester) async {
       final dir = Directory('${out.path}/site')..createSync();
       File('${dir.path}/home.json').writeAsStringSync(jsonEncode({
         'schema': 2,
@@ -134,7 +134,7 @@ void main() {
       }));
       File('${dir.path}/site.json').writeAsStringSync('{"schema": 2}');
       final report = await runRender(tester, RenderArgs(inputs: [dir.path], out: '${out.path}/o', sizes: const [Size(390, 844)]));
-      expect(codes(report), containsAll(['unknown_component', 'component_missing']));
+      expect(codes(report), contains('component_missing'));
       expect(report.diagnostics.firstWhere((d) => d['code'] == 'component_missing')['nodeId'], 'c');
     });
 
@@ -171,15 +171,6 @@ void main() {
         expect(named.diagnostics, isEmpty, reason: '${named.diagnostics}');
         expect(File(named.images.single).readAsBytesSync(), File(inline.images.single).readAsBytesSync(), reason: '$size');
       }
-    });
-
-    testWidgets('an unknown name is an error naming the nearest', (tester) async {
-      final dir = Directory('${out.path}/site')..createSync();
-      File('$t/named/site.json').copySync('${dir.path}/site.json');
-      File('${dir.path}/home.json').writeAsStringSync(File('$t/named/home.json').readAsStringSync().replaceFirst('"style": "body"', '"style": "bdy"'));
-      final r = await runRender(tester, RenderArgs(inputs: [dir.path], out: '${out.path}/o', sizes: const [Size(390, 844)], validateOnly: true));
-      final d = r.diagnostics.singleWhere((d) => d['code'] == 'unknown_theme_name');
-      expect(d['suggestion'], 'body');
     });
   });
 }

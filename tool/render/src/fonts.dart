@@ -225,7 +225,7 @@ List<FontFace> declaredFonts(List<FontFamily> families, String siteDir, List<Dec
         problems.add((family: f.family, asset: a.asset, reason: 'no file ${file.path}', missing: true));
         continue;
       }
-      if (a.asset.toLowerCase().endsWith('.woff2')) continue; // validation reports it (font_format)
+      if (a.asset.toLowerCase().endsWith('.woff2')) continue; // not a format this renderer reads
       final bytes = file.readAsBytesSync();
       String? reason;
       final sfnt = sfntOf(bytes, why: (r) => reason = r);

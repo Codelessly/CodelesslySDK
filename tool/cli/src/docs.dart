@@ -7,7 +7,7 @@
 //   tool/codelessly docs --starter               the path of STARTER.md (the base an agent reads in full first)
 //
 // The reference is generated from the API's declarations (CodelesslyAPI/tool/reference/generate.dart), so a
-// section printed here is what the validator and the renderer implement. Sections are cut at the next heading of
+// section printed here is what the renderer implements. Sections are cut at the next heading of
 // the same level; --full prints a long one whole (otherwise it stops after --max-lines lines and says so).
 //
 // The reference folder is --ref <dir>, else $CODELESSLY_REFERENCE, else docs/reference of $CODELESSLY_API, else

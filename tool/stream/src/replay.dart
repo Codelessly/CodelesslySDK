@@ -9,7 +9,6 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/validate.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources;
 import 'package:codelessly_sdk/src/scripting/sandbox/quickjs_sandbox.dart' show QuickJsLibrary;
@@ -196,11 +195,6 @@ Future<Map<String, Object?>> _replayAt(WidgetTester tester, RecordedStream strea
     catalog: api.Catalog.core,
     designSystem: ds,
     profile: apps ? api.TrustProfile.agentApps : api.TrustProfile.agent,
-    check: strictEditCheck(ValidateOptions(
-      formulas: FormulaEvaluator.report,
-      components: ds?.components,
-      theme: ds == null ? null : theme,
-    )),
     glyphCoverage: glyphs,
     theme: theme,
   );

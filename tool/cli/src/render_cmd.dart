@@ -1,13 +1,12 @@
-// `tool/codelessly render`, `validate` and `sheet`: the render command (tool/render/render.sh) with conveniences
+// `tool/codelessly render` and `sheet`: the render command (tool/render/render.sh) with conveniences
 // for agents.
 //
 //   tool/codelessly render <documents> --out <dir> [render options] [--outline] [--sheet]
-//   tool/codelessly validate <documents> [--out <dir>]
 //   tool/codelessly sheet <png | dir>... --out <png> [--height 480] [--columns n] [--title text]
 //
 // --outline also dumps the layout and prints every capture's outline (tool/codelessly outline). --sheet writes
-// <out>/sheet.png, every capture of the run on one image. validate is render --validate-only with a scratch --out
-// when none is given. Every other option is the render command's (tool/render/README.md); the exit status is its.
+// <out>/sheet.png, every capture of the run on one image. Every other option is the render command's
+// (tool/render/README.md); the exit status is its.
 import 'dart:io';
 
 import 'common.dart';
@@ -49,33 +48,23 @@ Future<(int, String)> sheet(List<String> inputs, String out, {int height = 480, 
   ]);
 }
 
-Future<int> renderMain(List<String> argv, {required bool validate}) async {
+Future<int> renderMain(List<String> argv) async {
   if (argv.isEmpty || argv.contains('-h') || argv.contains('--help')) {
     stdout.writeln(_doc);
-    if (!validate) {
-      final readme = File('${sdkRoot.path}/tool/render/README.md');
-      if (readme.existsSync()) stdout.writeln(readme.readAsStringSync().split('## What it reports').first);
-    }
+    final readme = File('${sdkRoot.path}/tool/render/README.md');
+    if (readme.existsSync()) stdout.writeln(readme.readAsStringSync().split('## What it reports').first);
     return argv.isEmpty ? 2 : 0;
   }
   final outline = argv.contains('--outline'), wantSheet = argv.contains('--sheet');
   final args = [for (final a in argv) if (a != '--outline' && a != '--sheet') a];
   final (docs, out) = splitRenderArgs(args);
-  Directory? scratch;
-  if (validate) {
-    if (!args.contains('--validate-only')) args.add('--validate-only');
-    if (out == null) {
-      scratch = Directory.systemTemp.createTempSync('codelessly-validate-');
-      args.addAll(['--out', scratch.path]);
-    }
-  } else if (out == null) {
+  if (out == null) {
     stderr.writeln('--out <dir> is required (where the PNGs and diagnostics.json go).');
     return 2;
   }
   if (outline && !args.contains('--dump-layout')) args.add('--dump-layout');
   final code = await runInherited(renderScript, args);
-  scratch?.deleteSync(recursive: true);
-  if (code != 2 && out != null) {
+  if (code != 2) {
     if (outline) stdout.write('\n${outlineText(out, docs)}');
     if (wantSheet) {
       final (_, text) = await sheet([out], '$out/sheet.png');
@@ -96,11 +85,10 @@ Future<int> sheetMain(List<String> argv) async {
 }
 
 const _doc = '''tool/codelessly render <documents> --out <dir> [render options] [--outline] [--sheet]
-tool/codelessly validate <documents> [--out <dir>]
 
 --outline also dumps the layout and prints every capture's outline (each node's box and text with its problems).
---sheet writes <out>/sheet.png, every capture of the run on one image. validate is render --validate-only with a
-scratch --out when none is given. Every other option is the render command's; the exit status is its.''';
+--sheet writes <out>/sheet.png, every capture of the run on one image. Every other option is the render command's;
+the exit status is its.''';
 
 const _sheetDoc = '''tool/codelessly sheet <png | dir>... --out <png> [--height 480] [--columns n] [--title text]
 

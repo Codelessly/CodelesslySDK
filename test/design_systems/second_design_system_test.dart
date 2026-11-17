@@ -1,13 +1,11 @@
 // A second design system (design_systems/paper), written by
 // design_systems/tool/new_design_system.py from a ten-line brand file: SSUI's
-// components over another theme. It loads, every component validates
-// against its own tokens, and a UI made for SSUI validates with it
-// unchanged: a design system is a drop-in.
+// components over another theme. It loads with every name SSUI's theme has:
+// a design system is a drop-in.
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:codelessly_api/validate.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<DesignSystem> _load(String dir, List<String> problems) =>
@@ -30,10 +28,9 @@ void main() {
     // Every name SSUI's theme has, Paper's has: a component finds each one.
     expect(paper.tokens.colors.keys.toSet(), ssui.tokens.colors.keys.toSet());
     expect(paper.tokens.textStyles.keys.toSet(), ssui.tokens.textStyles.keys.toSet());
-    expect(validateTheme(paper.tokens.toJson()), isEmpty);
   });
 
-  test('density and type scale are brand choices: Harbor is SSUI roomier and a tenth larger, and still validates', () async {
+  test('density and type scale are brand choices: Harbor is SSUI roomier and a tenth larger', () async {
     final problems = <String>[];
     final harbor = await _load('design_systems/harbor', problems);
     final ssui = await _load('design_systems/ssui', []);
@@ -51,24 +48,5 @@ void main() {
     // A dot or a marker stays round whatever the corners.
     final steps = _json('design_systems/paper/components/StepIndicator.json')['nodes'] as Map;
     expect(((steps['marker'] as Map)['decoration'] as Map)['radius'], 9999);
-    final docs = {
-      for (final f in Directory('design_systems/harbor/components').listSync().whereType<File>()) 'components/${f.uri.pathSegments.last}': _json(f.path),
-    };
-    expect(validateProject(docs, options: ValidateOptions(theme: harbor.tokens)).where((d) => d.severity != Severity.info).map((d) => '$d'), isEmpty);
-  });
-
-  test('every component validates against Paper, and SSUI\'s cards validate with it unchanged', () async {
-    final paper = await _load('design_systems/paper', []);
-    final docs = {
-      for (final f in Directory('design_systems/paper/components').listSync().whereType<File>()) 'components/${f.uri.pathSegments.last}': _json(f.path),
-    };
-    expect(validateProject(docs, options: ValidateOptions(theme: paper.tokens)).where((d) => d.severity != Severity.info).map((d) => '$d'), isEmpty);
-    for (final card in ['flight_picker', 'order_summary', 'contact_form']) {
-      final doc = _json('design_systems/ssui/examples/cards/$card.json');
-      final problems = validateDocument(doc, options: ValidateOptions(theme: paper.tokens, components: paper.components))
-          .where((d) => d.severity != Severity.info)
-          .map((d) => '$d');
-      expect(problems, isEmpty, reason: card);
-    }
   });
 }

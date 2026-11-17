@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Validate and render Codelessly layout documents. See tool/render/README.md.
+# Render Codelessly layout documents. See tool/render/README.md.
 #   tool/render/render.sh <document.json | dir> --out <dir> [--sizes 390x844,...] [--screen id]
 #       [--full-page] [--fonts dir] [--theme light|dark|system] [--tap id] [--hover id] [--focus id] [--type id=text]
 #       [--set name=json] [--scroll id=px] [--drag id=dx,dy] [--double-tap id] [--long-press id] [--right-click id] [--reload] [--wheel id=dy] [--pinch id=scale] [--navigate screen?param=value] [--wait ms] [--now time]
-#       [--label text] [--compare png|dir] [--compare-map screen=name] [--validate-only]
+#       [--label text] [--compare png|dir] [--compare-map screen=name]
 #       [--component Type [--props json] [--slots file]]
 #       [--design-system folder]   (with one document: render it with that design system's blocks and theme)
 # Exit status: 0 no errors (warnings allowed), 1 errors, 2 bad arguments or a crash.

@@ -1,9 +1,9 @@
 // Records one real generation written in the compact notation
 // (package:codelessly_api/notation.dart), for the comparison with ui_apply:
 // the same briefs, the notation's own small prompt, no tools. The answer's
-// text is saved delta by delta with its timing, then expanded, validated
+// text is saved delta by delta with its timing, then expanded
 // and summarized (prompt and output tokens, time to first token and to the
-// end, nodes, what the notation could not read, validation errors).
+// end, nodes, what the notation could not read).
 //
 //   ANTHROPIC_API_KEY=... dart run tool/record_notation.dart --ui approval \
 //       --model claude-haiku-5-5 --out recordings/approval@claude-haiku-5-5.notation.jsonl
@@ -27,7 +27,6 @@ import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_api/notation.dart';
-import 'package:codelessly_api/validate.dart';
 import 'package:stream_chat/src/llm.dart';
 
 Future<void> main(List<String> args) async {
@@ -91,11 +90,6 @@ Future<void> main(List<String> args) async {
     for (var n = 0; n <= retries; n++) {
       final turn = await _turn(key, model, system, messages);
       final r = Catalog.run(catalog, () => parseNotation('$prelude${turn.text}', catalog: catalog, options: options));
-      final problems = Catalog.run(
-              catalog, () => validateDocument(r.document, options: ValidateOptions(components: ds?.components, theme: ds?.tokens)))
-          .where((d) => d.severity == Severity.error)
-          .map((d) => '${d.code.name} ${d.path}: ${d.message}')
-          .toList();
       final nodes = (r.document['nodes'] as Map).length;
       final lines = const LineSplitter().convert(turn.text).where((l) => l.trim().isNotEmpty).toList();
       final file = n == 0 ? out : out.replaceFirst(RegExp(r'\.jsonl$'), '.retry$n.jsonl');
@@ -117,16 +111,15 @@ Future<void> main(List<String> args) async {
         'nodes': nodes,
         'outputTokensPerNode': nodes == 0 ? null : ((turn.usage['output_tokens'] as int? ?? 0) / nodes).toStringAsFixed(1),
         'notationIssues': [for (final i in r.issues) '$i'],
-        'errors': problems,
       });
-      if (r.issues.isEmpty && problems.isEmpty) break;
+      if (r.issues.isEmpty) break;
       if (n == retries) break;
       messages
         ..add({'role': 'assistant', 'content': turn.text})
         ..add({
           'role': 'user',
           'content': 'That had problems. Write the whole UI again in the notation, fixed:\n'
-              '${[for (final i in r.issues) '- $i', for (final p in problems.take(12)) '- $p'].join('\n')}',
+              '${[for (final i in r.issues) '- $i'].join('\n')}',
         });
     }
   } catch (e) {

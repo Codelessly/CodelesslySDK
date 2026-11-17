@@ -3,9 +3,9 @@
 // published schemas and basic catalog as the instructions (tool/a2ui_v1),
 // no tools, and the answer drawn by this renderer through
 // package:codelessly_api's A2UI front end. The answer's
-// text is saved delta by delta with its timing, then expanded, validated
+// text is saved delta by delta with its timing, then expanded
 // and summarized (prompt and output tokens, time to first token and to the
-// end, nodes, what the notation could not read, validation errors).
+// end, nodes, what the notation could not read).
 //
 //   ANTHROPIC_API_KEY=... dart run tool/record_a2ui.dart --ui approval \
 //       --model claude-haiku-5-5 --out recordings/approval@claude-haiku-5-5.a2ui.jsonl
@@ -17,7 +17,6 @@ import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_api/notation.dart';
-import 'package:codelessly_api/validate.dart';
 import 'package:stream_chat/src/llm.dart';
 
 Future<void> main(List<String> args) async {
@@ -63,10 +62,7 @@ Future<void> main(List<String> args) async {
     for (var n = 0; n <= retries; n++) {
       final turn = await _turn(key, model, system, messages);
       final r = Catalog.run(standardCatalog, () => parseA2ui(turn.text, catalog: standardCatalog));
-      final problems = Catalog.run(standardCatalog, () => validateDocument(r.document))
-          .where((d) => d.severity == Severity.error)
-          .map((d) => '${d.code.name} ${d.path}: ${d.message}')
-          .toList();
+      final problems = <String>[];
       final nodes = (r.document['nodes'] as Map).length;
       final lines = const LineSplitter().convert(turn.text).where((l) => l.trim().isNotEmpty).toList();
       final file = n == 0 ? out : out.replaceFirst(RegExp(r'\.jsonl$'), '.retry$n.jsonl');

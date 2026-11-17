@@ -11,8 +11,8 @@ tool/stream/run_all.sh                                      # every stream into 
 ```
 
 `replay.sh <stream.jsonl> --out <dir> [--sizes 390x844,1440x900] [--fonts dir]... [--frame-ms n | --frames n]
-[--no-video] [--design-system id|folder] [--theme light|dark] [--dump-document]` replays the stream through `UiSession.applyStream` (the core catalog, `TrustProfile.agent`, the strict
-validator on each op) on a virtual clock, at each size, and writes `<dir>/<size>/`:
+[--no-video] [--design-system id|folder] [--theme light|dark] [--dump-document]` replays the stream through `UiSession.applyStream` (the core catalog, `TrustProfile.agent`, the
+session's catalog check on each op) on a virtual clock, at each size, and writes `<dir>/<size>/`:
 
 | File | |
 |---|---|
@@ -24,7 +24,7 @@ validator on each op) on a virtual clock, at each size, and writes `<dir>/<size>
 
 A recording made with a design system (`examples/stream_chat/tool/record.dart --design-system`: its meta's
 `designSystem`) replays with it: `UiSession(designSystem:)`, so its components render as their definitions and its
-token names resolve, with the strict validator given its components and tokens. `--design-system <id|folder>`
+token names resolve. `--design-system <id|folder>`
 replays with another (an id of `design_systems/`), `--theme dark` in its dark mode (light by default). `metrics.json`
 then has `designSystem`: `componentNodes`, `componentsRendered` (calls drawn as their definition's root),
 `componentsNotRendered`, and `replacedControls` (nodes of a core control type the design system replaces), and

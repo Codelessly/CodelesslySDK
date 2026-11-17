@@ -11,29 +11,28 @@ with Flutter installed; `codelessly_api` comes from the `CodelesslyAPI` checkout
 One entry point for the authoring loop. `tool/codelessly help` lists the commands; each has `--help`.
 
 ```
-                    ┌──────────────── fix what it reports ────────────────┐
-                    v                                                     │
- docs ──> write JSON (or a nested tree ─> flatten) ──> validate ──> render --outline ──> look at the PNGs / sheet
- (look up                                                           (problems per node,     │
-  a section)                                                         boxes, texts)          v
-                                                                              states: every state, compared
-                                                                              with its reference, worst first
+                    ┌────────── fix what it reports ─────────┐
+                    v                                        │
+ docs ──> write JSON (or a nested tree ─> flatten) ──> render --outline ──> look at the PNGs / sheet
+ (look up                                              (problems per node,     │
+  a section)                                            boxes, texts)          v
+                                                                 states: every state, compared
+                                                                 with its reference, worst first
 ```
 
 | Command | What it does | When |
 |---|---|---|
 | `doctor [--warm]` | Says what the toolkit finds: Flutter, the API checkout, the reference, the compiled commands, QuickJS. `--warm` compiles the render harness so the first render is fast. | Once per machine or session; when a command can't find something. |
-| `docs [query]` | The API reference from the shell: no query lists the pages; an anchor (`forms-validation-and-an-error-state`), a name (`row`, `navigate`, `textField`) or words (`sticky header`) print the best section and other matches. `--starter` prints the base's path. | Before writing a feature you haven't used; when a validation code names a field you don't know. |
+| `docs [query]` | The API reference from the shell: no query lists the pages; an anchor (`forms-validation-and-an-error-state`), a name (`row`, `navigate`, `textField`) or words (`sticky header`) print the best section and other matches. `--starter` prints the base's path. | Before writing a feature you haven't used. |
 | `flatten <tree.json>` | A nested node tree, trees per breakpoint (`{"trees": {"mobile": ..., "desktop": ...}}`, as the editor's `layouts.createResponsive` takes them) or a document with nested children, to a flat layout document. `key` names a node; `"@key"` elsewhere becomes its id. | You (or a generator) write screens as nested trees; render them headless before installing them in the editor. |
-| `validate <doc \| site>...` | Strict validation only: every problem with a code, a JSON pointer and a suggestion. Exit 1 on errors. | After every edit; fastest check. |
-| `render <doc \| site>... --out <dir>` | Validates, publishes as the editor would, renders every screen at each size (`--sizes`, default phone, tablet, desktop) with `CodelesslyWidget`, after optional steps (`--tap`, `--type`, `--navigate`, `--hover`, `--drag`, `--set`, `--now`...), and reports what only rendering shows (overflow, clipped text, failed taps, missing fonts and images). `--outline` prints every capture's outline; `--sheet` writes `<out>/sheet.png`; `--compare` diffs against reference screenshots. All other options: [render/README.md](render/README.md). | Every time you want to see the result or check an interaction. |
+| `render <doc \| site>... --out <dir>` | Publishes as the editor would, renders every screen at each size (`--sizes`, default phone, tablet, desktop) with `CodelesslyWidget`, after optional steps (`--tap`, `--type`, `--navigate`, `--hover`, `--drag`, `--set`, `--now`...), and reports what only rendering shows (overflow, clipped text, failed taps, missing fonts and images). `--outline` prints every capture's outline; `--sheet` writes `<out>/sheet.png`; `--compare` diffs against reference screenshots. All other options: [render/README.md](render/README.md). | Every time you want to see the result or check an interaction. |
 | `outline <out> <doc \| site>...` | What a render drew, as text: each node's type, id, box and text, indented as the tree, with its problems. Zero-size nodes are marked. | Read before the PNG: most layout mistakes show as numbers. |
 | `states <states.json>` | Renders every state a manifest lists (screen, steps, sizes, reference), compares each with its reference, writes `summary.md`/`summary.json` worst first and one `sheet.png`. Exit 1 when a state has errors or matches its reference less than `minMatch`. | Recreating an app screen by screen; checking a whole site after a change. |
 | `sheet <png \| dir>... --out <png>` | Captures on one labelled image, one row per state, narrowest size first. | Showing a model (or a person) many captures at once. |
 | `notation prompt\|expand\|apply` | The compact authoring notation ([notation/notation.sh](notation/notation.sh)): the prompt a model gets, a notation text expanded to a document, ops applied to a document. | Generating UI with a model in the notation instead of JSON. |
 | `replay <stream.jsonl> --out <dir>` | A recorded `ui_apply` stream replayed headless: video, contact sheet, metrics ([stream/README.md](stream/README.md)). | Working on streaming generative UI. |
-| `serve [--stop\|--status]` | Keeps the renderer running in the background ([render/serve.sh](render/serve.sh)), so every `render`, `validate` and `states` run on this checkout skips Flutter's start: about 1 s a run instead of about 6. It serves the code it started with; after a change to the SDK or the API it is stopped and runs go the usual way until it is started again. Stops after 30 idle minutes. | Any session that will render more than a few times. The MCP server starts it by itself. |
-| `mcp` | All of the above as an MCP server on stdio: `codelessly_docs`, `codelessly_validate`, `codelessly_render` (report, outline and PNGs in one answer), `codelessly_flatten`, `codelessly_states`. | Giving any MCP client (Claude Code, an IDE agent, your own) the render loop as tool calls. |
+| `serve [--stop\|--status]` | Keeps the renderer running in the background ([render/serve.sh](render/serve.sh)), so every `render` and `states` run on this checkout skips Flutter's start: about 1 s a run instead of about 6. It serves the code it started with; after a change to the SDK or the API it is stopped and runs go the usual way until it is started again. Stops after 30 idle minutes. | Any session that will render more than a few times. The MCP server starts it by itself. |
+| `mcp` | All of the above as an MCP server on stdio: `codelessly_docs`, `codelessly_render` (report, outline and PNGs in one answer), `codelessly_flatten`, `codelessly_states`. | Giving any MCP client (Claude Code, an IDE agent, your own) the render loop as tool calls. |
 
 Register the MCP server with a client, e.g. a project's `.mcp.json`:
 
@@ -65,7 +64,7 @@ use git worktrees for runs in parallel.
 | Path | What | Docs |
 |---|---|---|
 | `codelessly` | The entry point above. | this file |
-| `cli/` | The entry point's commands, in Dart: `codelessly.dart` (the dispatcher) and `src/` (`docs`, `flatten`, `outline`, `states`, `render_cmd` (render/validate with `--outline`/`--sheet`, and `sheet`), `mcp`). `tool/codelessly` compiles them to `build/codelessly_cli` when they change (about 3 s, once); they need nothing but Flutter's Dart. `test/tool/cli_test.dart` tests them. | each file's header |
+| `cli/` | The entry point's commands, in Dart: `codelessly.dart` (the dispatcher) and `src/` (`docs`, `flatten`, `outline`, `states`, `render_cmd` (render with `--outline`/`--sheet`, and `sheet`), `mcp`). `tool/codelessly` compiles them to `build/codelessly_cli` when they change (about 3 s, once); they need nothing but Flutter's Dart. `test/tool/cli_test.dart` tests them. | each file's header |
 | `lib/env.sh` | Shared by every launcher: finds Flutter, points the SDK at the sibling `codelessly_api` (a `pubspec_overrides.yaml` marked as written by the tools), resolves dependencies when stale, the per-checkout lock. | its header |
 | `render/` | The render command: `render.sh` (launcher), `serve.sh` (the render server), `render_harness.dart` (the `flutter test` entry, one run or the server's loop), `src/` (arguments, site loading, publishing, fonts, rendering, steps, checks, compare). | [render/README.md](render/README.md), codelessly_api `docs/reference/render.md` |
 | `notation/` | The compact notation's tools: `prompt.dart`, `expand.dart`, `apply.dart`, launched by `notation.sh`. | `notation.sh` header |

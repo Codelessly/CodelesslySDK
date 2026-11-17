@@ -59,12 +59,4 @@ void main() {
     expect(c[3], c[0]);
     expect(c[4].toRadixString(16), 'ffffff');
   });
-
-  testWidgets('"primary" beside "theme" in site.json is a warning that says where it goes', (tester) async {
-    final report = await runRender(tester, RenderArgs(inputs: [_site], out: out.path, sizes: const [Size(400, 400)], validateOnly: true));
-    final d = report.diagnostics.where((d) => d['code'] == 'site_key_ignored').single;
-    expect(d['severity'], 'warning');
-    expect(d['file'], 'site.json');
-    expect(d['message'], contains('"theme": {"primary": "#FFB45309"}'));
-  });
 }

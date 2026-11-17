@@ -1,15 +1,13 @@
 // The words Cards defines in the notation itself (design_systems/cards/
 // vocabulary/*.txt; codelessly_api docs/design/20-defined-words.md): every
-// definition reads, expands with its defaults to a document that validates,
+// definition reads, expands with its defaults,
 // and the corpus's own lines that use one expand with no issue of the
 // definition's; a page of them renders.
 import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/notation.dart';
-import 'package:codelessly_api/validate.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/runtime/expressions/formula.dart' show FormulaEvaluator;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -31,18 +29,6 @@ void main() {
     vocabulary = loadVocabulary(dir: 'design_systems/cards');
   });
 
-  List<String> invalid(Map<String, Object?> doc) => [
-        for (final d in api.Catalog.run(
-            catalog,
-            () => validateDocument(doc,
-                options: ValidateOptions(
-                  theme: api.ThemeTokens.fromJson(ds.manifest.theme.toJson()),
-                  components: ds.components,
-                  formulas: (f) => (error: FormulaEvaluator.errorOf(f), paths: FormulaEvaluator.referencedPaths(f)),
-                ))))
-          if (d.severity == Severity.error) '${d.code.name} ${d.path}: ${d.message}',
-      ];
-
   test('every definition reads, and none uses a word the notation already has', () {
     final texts = loadDefinitionTexts('design_systems/cards');
     final read = readDefinitions(texts);
@@ -62,9 +48,9 @@ void main() {
     }
   });
 
-  test('each expands with its defaults, closed, with no issue, to a document that validates', () {
+  test('each expands with its defaults, closed, with no issue', () {
     final problems = api.Catalog.run(
-        catalog, () => checkDefinitions(vocabulary, catalog: catalog, options: NotationOptions.fromDesignSystem(ds, width: 1280), validate: invalid));
+        catalog, () => checkDefinitions(vocabulary, catalog: catalog, options: NotationOptions.fromDesignSystem(ds, width: 1280)));
     expect(problems, isEmpty);
   });
 

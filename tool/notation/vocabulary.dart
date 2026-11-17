@@ -28,8 +28,6 @@ import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_api/notation.dart';
-import 'package:codelessly_api/validate.dart';
-import 'package:codelessly_sdk/src/runtime/expressions/formula.dart' show FormulaEvaluator;
 
 import 'vocabulary_harvest.dart';
 import 'vocabulary_words.dart';
@@ -237,7 +235,6 @@ Future<void> main(List<String> args) async {
   final catalog = ds.catalogOver(standardCatalog);
   final components = {for (final c in ds.list) c.type};
   final corpus = CorpusWords(components: components);
-  final theme = ThemeTokens.fromJson(ds.manifest.theme.toJson());
 
   final types = <String, _Word>{};
   // What a first word of a definition's line is outside it: core, a
@@ -253,9 +250,8 @@ Future<void> main(List<String> args) async {
                 ? 'unknown'
                 : 'core',
   );
-  final others = <String, Map<String, _Word>>{'parameter': {}, 'flag': {}, 'event': {}, 'verb': {}, 'variant': {}, 'missing': {}, 'children': {}, 'function': {}, 'alias': {}, 'overlay': {}};
+  final others = <String, Map<String, _Word>>{'parameter': {}, 'flag': {}, 'event': {}, 'verb': {}, 'variant': {}, 'missing': {}, 'children': {}, 'alias': {}, 'overlay': {}};
   final issueShapes = <String, ({int count, Set<String> files, List<String> examples})>{};
-  final invalidShapes = <String, ({int count, Set<String> files, List<String> examples})>{};
   final perFile = <Map<String, Object?>>[];
   final total = {'core': 0, 'component': 0, 'alias': 0, 'definition': 0, 'unknown': 0};
   var screenCount = 0, statementLines = 0;
@@ -266,7 +262,7 @@ Future<void> main(List<String> args) async {
     harvest.answer(name, whole);
     final screens = screensOf(whole, name);
     final count = {'core': 0, 'component': 0, 'alias': 0, 'definition': 0, 'unknown': 0};
-    var issues = 0, invalid = 0, standIns = 0, lines = 0;
+    var issues = 0, standIns = 0, lines = 0;
     final pages = <String>[];
     final written = <String, Map<String, Object?>>{};
     // The state one screen declares and another of the same app reads or
@@ -477,34 +473,6 @@ Future<void> main(List<String> args) async {
     }
 
     written.values.forEach(walk);
-    // What does not validate, as a site (an open-vocabulary page always
-    // should): each page against the others' screens and the app's state.
-    final manifest = SiteManifest.fromJson({'schema': 3, 'pages': [for (final p in pages) '$p.json'], if (shared.isNotEmpty) 'variables': shared.values.toList()});
-    final invalidHere = Catalog.run(
-            catalog,
-            () => validateProject({for (final e in written.entries) '${e.key}.json': e.value},
-                options: ValidateOptions(
-                    theme: theme,
-                    components: ds.components,
-                    // Formulas are parsed as the renderer parses them.
-                    formulas: (formula) => (error: FormulaEvaluator.errorOf(formula), paths: FormulaEvaluator.referencedPaths(formula))),
-                manifest: manifest))
-        .where((d) => d.severity == Severity.error)
-        .toList();
-    invalid = invalidHere.length;
-    for (final d in invalidHere) {
-      // A function a formula calls that we do not have is vocabulary too.
-      if (RegExp(r'Unknown function "([A-Za-z_][A-Za-z0-9_]*)"').firstMatch(d.message) case final RegExpMatch m) {
-        final w = others['function']!.putIfAbsent(m[1]!, () => _Word(m[1]!, 'function'));
-        w.files.add(name);
-        w.uses++;
-        w.example(RegExp(r'The formula "(.*)" does not parse').firstMatch(d.message)?[1] ?? d.message);
-      }
-      final shape = '${d.code.name}: ${_shape(d.message)}';
-      final at = invalidShapes[shape] ?? (count: 0, files: <String>{}, examples: <String>[]);
-      if (at.examples.length < 3) at.examples.add('$name/${d.file ?? ''} ${d.path}: ${d.message.length > 160 ? '${d.message.substring(0, 157)}...' : d.message}');
-      invalidShapes[shape] = (count: at.count + 1, files: at.files..add(name), examples: at.examples);
-    }
     if (sites != null) {
       final dir = Directory('$sites/$name')..createSync(recursive: true);
       for (final e in written.entries) {
@@ -524,7 +492,6 @@ Future<void> main(List<String> args) async {
       ...count,
       'standIns': standIns,
       'issues': issues,
-      'invalid': invalid,
     });
   }
 
@@ -562,12 +529,8 @@ Future<void> main(List<String> args) async {
     'issues': [
       for (final e in shapes) {'message': e.key, 'count': e.value.count, 'files': e.value.files.length, 'examples': e.value.examples},
     ],
-    'invalid': [
-      for (final e in invalidShapes.entries.toList()..sort((a, b) => b.value.count - a.value.count))
-        {'message': e.key, 'count': e.value.count, 'files': e.value.files.length, 'examples': e.value.examples},
-    ],
     'types': [for (final w in typeWords) w.toJson()],
-    for (final k in const ['parameter', 'flag', 'event', 'verb', 'function', 'variant', 'missing', 'children', 'alias', 'overlay'])
+    for (final k in const ['parameter', 'flag', 'event', 'verb', 'variant', 'missing', 'children', 'alias', 'overlay'])
       switch (k) { 'alias' => 'aliases', 'missing' => 'missing', 'children' => 'children', _ => '${k}s' }: [for (final w in _sorted(others[k]!.values)) w.toJson()],
     'summary': corpus.summary(),
     'words': [for (final w in corpus.sorted()) w.toJson()],
@@ -612,10 +575,10 @@ Future<void> main(List<String> args) async {
     ..writeln()
     ..writeln('## By file')
     ..writeln()
-    ..writeln('| file | screens | lines | core | component | alias | definition | unknown | grammar issues | does not validate |')
-    ..writeln('|---|---|---|---|---|---|---|---|---|---|');
+    ..writeln('| file | screens | lines | core | component | alias | definition | unknown | grammar issues |')
+    ..writeln('|---|---|---|---|---|---|---|---|---|');
   for (final f in perFile) {
-    md.writeln('| ${f['file']} | ${f['screens']} | ${f['lines']} | ${f['core']} | ${f['component']} | ${f['alias']} | ${f['definition']} | ${f['unknown']} | ${f['issues']} | ${f['invalid']} |');
+    md.writeln('| ${f['file']} | ${f['screens']} | ${f['lines']} | ${f['core']} | ${f['component']} | ${f['alias']} | ${f['definition']} | ${f['unknown']} | ${f['issues']} |');
   }
   md
     ..writeln()
@@ -673,7 +636,6 @@ Future<void> main(List<String> args) async {
   section('Flags we do not have, on core words', 'Left out of the document.', _sorted(others['flag']!.values.where((w) => !named(w))));
   section('Events we do not have, on core words', 'Their actions are read; the event is left out.', _sorted(others['event']!.values.where((w) => !named(w))));
   section('Action verbs we do not have', 'Left out of the event they are in.', _sorted(others['verb']!.values), withOn: false);
-  section('Formula functions we do not have', 'Counted where a formula that calls one does not parse (once per formula): the value it gives is empty.', _sorted(others['function']!.values), withOn: false);
   section('Variants we do not have', 'The plain type is drawn.', _sorted(others['variant']!.values), withOn: false);
   section('Parameters a component needs that the line did not give', 'The answer\'s idea of the word is not the component\'s: it is given an empty value.', _sorted(others['missing']!.values));
   section('Words given lines under them that take none', 'The lines are drawn after the word, not in it.', _sorted(others['children']!.values), withOn: false);
@@ -728,24 +690,12 @@ Future<void> main(List<String> args) async {
   for (final e in shapes) {
     md.writeln('| ${e.value.count} | ${e.value.files.length} | ${e.key.replaceAll('|', r'\|')} | ${e.value.examples.isEmpty ? '' : code(e.value.examples.first)} |');
   }
-  md
-    ..writeln()
-    ..writeln('## What does not validate')
-    ..writeln()
-    ..writeln('Each file\'s screens checked together as a site, with the state one screen declares and another uses taken as the site\'s.')
-    ..writeln()
-    ..writeln('| count | files | problem | an example |')
-    ..writeln('|---|---|---|---|');
-  for (final e in invalidShapes.entries.toList()..sort((a, b) => b.value.count - a.value.count)) {
-    md.writeln('| ${e.value.count} | ${e.value.files.length} | ${e.key.replaceAll('|', r'\|')} | ${e.value.examples.isEmpty ? '' : code(e.value.examples.first)} |');
-  }
   File('${outDir.path}/VOCABULARY.md').writeAsStringSync(md.toString());
 
   stdout.writeln('${files.length} files, $screenCount screens, $nodeLines node lines: core ${total['core']}, component ${total['component']}, alias ${total['alias']}, definition ${total['definition']}, unknown ${total['unknown']}; '
       '$allWords words, $resolvedWords resolved; '
       '${unknownTypes.length} unknown words; ${shapes.fold<int>(0, (n, e) => n + e.value.count)} grammar issues; '
       '${others['overlay']!.values.fold<int>(0, (n, w) => n + w.uses)} overlays opened and never written; '
-      '${harvest.words.length} words defined in more than one answer; '
-      '${perFile.fold<int>(0, (n, f) => n + (f['invalid']! as int))} validation errors.');
+      '${harvest.words.length} words defined in more than one answer.');
   stdout.writeln('${outDir.path}/vocabulary.json, ${outDir.path}/VOCABULARY.md');
 }

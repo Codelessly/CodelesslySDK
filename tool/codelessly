@@ -6,9 +6,8 @@
 #   tool/codelessly doctor                         is everything here? (Flutter, the API checkout, the reference)
 #   tool/codelessly docs [words | anchor | name]   the API reference: the pages, a section, a search
 #   tool/codelessly flatten <tree.json>            nested node trees (as the editor takes them) to a document
-#   tool/codelessly validate <doc | site>...       strict validation only: codes, JSON pointers, suggestions
 #   tool/codelessly render <doc | site>... --out <dir> [--outline] [--sheet] [steps...]
-#                                                  validate, render every screen at each size, report problems
+#                                                  render every screen at each size, report problems
 #   tool/codelessly outline <out dir> <doc | site> what a render drew, as text: boxes, texts, problems per node
 #   tool/codelessly states <states.json>           every state of a site rendered, compared, summarized
 #   tool/codelessly sheet <png | dir>... --out <png> many captures on one labelled image
@@ -49,7 +48,7 @@ run_cli() {
 }
 
 case "$cmd" in
-  docs|flatten|outline|sheet|states|render|validate|mcp) run_cli "$cmd" "$@" ;;
+  docs|flatten|outline|sheet|states|render|mcp) run_cli "$cmd" "$@" ;;
   notation) exec "$sdk/tool/notation/notation.sh" "$@" ;;
   replay) exec "$sdk/tool/stream/replay.sh" "$@" ;;
   serve) exec "$sdk/tool/render/serve.sh" "$@" ;;
@@ -60,7 +59,7 @@ case "$cmd" in
     if codelessly_find_flutter "tool/codelessly doctor" 2>/dev/null; then
       say flutter "$flutter_bin ($("$flutter_bin" --version 2>/dev/null | head -1))"
     else
-      say flutter "MISSING: set FLUTTER=/path/to/flutter/bin/flutter (render, validate, states, notation, replay need it)"
+      say flutter "MISSING: set FLUTTER=/path/to/flutter/bin/flutter (render, states, notation, replay need it)"
       ok=0
     fi
     codelessly_find_api

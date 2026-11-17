@@ -156,9 +156,8 @@ class UiSession implements NodeSource {
   TrustProfile get profile => _profile;
   TrustProfile _profile;
 
-  /// The check each op's nodes pass ([catalogCheck] by default;
-  /// `strictEditCheck()` from `package:codelessly_api/validate.dart` runs the
-  /// strict validator); null: structure and the profile only.
+  /// The check each op's nodes pass ([catalogCheck] by default); null:
+  /// structure and the profile only.
   final EditCheck? check;
 
   /// The color (ARGB) of a placeholder: the box shown for a pending child
@@ -280,7 +279,10 @@ class UiSession implements NodeSource {
   /// and result. What the notation could not read is in [notationIssues].
   ///
   /// With a [designSystem], its blocks and components are called by name and
-  /// its looks are the defaults ([options] replaces them). [prelude] is
+  /// its looks are the defaults ([options] replaces them): the looks it adds are written as
+  /// the theme's names, so the UI follows dark mode and a change of design
+  /// system, and a color the answer writes stays as written.
+  /// [prelude] is
   /// notation the host puts before the model's answer: the state of an app's
   /// data contract, a screen's clock, anything that must be right and is not
   /// the model's to write (see [notationInstructions]). With [replace], the

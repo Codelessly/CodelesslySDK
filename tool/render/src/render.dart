@@ -1,7 +1,7 @@
-// The render command's core: strict validation, then each screen rendered
-// by the SDK at each size (CodelesslyWidget over the published bundle, as
-// an app shows it), interactions applied, PNGs written, and the runtime
-// problems validation can't see reported as diagnostics.
+// The render command's core: each screen rendered by the SDK at each size
+// (CodelesslyWidget over the published bundle, as an app shows it),
+// interactions applied, PNGs written, and the problems met while rendering
+// reported as diagnostics.
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -10,7 +10,6 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/validate.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/controls/focus.dart' show ControlFocusScope;
 import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabeledControl, firstTextUnder;
@@ -43,8 +42,7 @@ import 'prepare.dart';
 import 'publish.dart';
 import 'site.dart';
 
-/// A problem found while rendering (validation's [Diagnostic]s have the
-/// same JSON shape).
+/// A problem found while rendering.
 final class RuntimeIssue {
   RuntimeIssue(this.code, this.severity, this.message, {this.nodeId, this.screen, this.size, this.file, this.path});
   final String code;
@@ -70,11 +68,11 @@ final class RuntimeIssue {
   String get key => '$code|$nodeId|$message';
 }
 
-/// Every code the render step reports beyond validation's, with its
+/// Every code the render step reports, with its
 /// severity and meaning (for the README and the reference).
 const runtimeCodes = <(String, String, String)>[
   ('invalid_json', 'error', 'A file is not valid JSON (the message gives the line and column).'),
-  ('page_not_written', 'warning', 'A page site.json lists has no file yet: one note per file, with the links that name its screen (checked once it is written).'),
+  ('page_not_written', 'warning', 'A page site.json lists has no file yet: one note per file.'),
   ('no_documents', 'error', 'No .json documents were found at the paths given.'),
   ('unknown_screen_arg', 'error', '--screen names no canvas, screen or layout.'),
   ('render_exception', 'error', 'Flutter threw while building, laying out or painting the screen.'),
@@ -182,78 +180,6 @@ List<({String name, String path, String text})> loadInputs(List<String> inputs) 
   return out;
 }
 
-/// One `unknown_screen` per screen that is missing, not one per link to
-/// it: a site whose pages are written before its manifest lists them all
-/// has dozens of links to each page still to come.
-List<api.Json> _summarizeUnknownScreens(List<api.Json> diagnostics, {List<String> unwritten = const []}) {
-  final byScreen = <String, List<api.Json>>{};
-  for (final d in diagnostics) {
-    if (d['code'] != 'unknown_screen') continue;
-    final to = RegExp(r'^No screen "([^"]*)"').firstMatch('${d['message']}')?[1];
-    if (to != null) (byScreen[to] ??= []).add(d);
-  }
-  // A listed page not written yet is the screen its file is named after
-  // (`about.json`: "about"), as its canvas id usually is.
-  String key(String s) => s.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
-  final fileOfScreen = <String, String>{};
-  final out = <api.Json>[];
-  for (final file in unwritten) {
-    final stem = file.split('/').last.replaceFirst(RegExp(r'\.json$'), '');
-    final links = [
-      for (final e in byScreen.entries)
-        if (key(e.key) == key(stem)) ...e.value,
-    ];
-    for (final e in byScreen.keys) {
-      if (key(e) == key(stem)) fileOfScreen[e] = file;
-    }
-    final where = [for (final g in links) '${g['file'] == null ? '' : '${g['file']} '}${g['path']}'];
-    out.add({
-      'code': 'page_not_written',
-      'severity': 'warning',
-      'file': file,
-      'message': '$file is listed in site.json, file not written yet'
-          '${links.isEmpty ? '' : ': ${links.length} link${links.length == 1 ? '' : 's'} name${links.length == 1 ? 's' : ''} its screen "$stem" (${where.take(6).join('; ')}${where.length > 6 ? '; and ${where.length - 6} more' : ''})'}. '
-          'Links to it are checked once it is written; its canvas id is the screen they name.',
-      if (links.isNotEmpty) 'count': links.length,
-    });
-  }
-  for (final d in diagnostics) {
-    final match = d['code'] == 'unknown_screen' ? RegExp(r'^No screen "([^"]*)"').firstMatch('${d['message']}') : null;
-    final to = match?[1];
-    if (to != null && fileOfScreen.containsKey(to)) continue;
-    final group = to == null ? null : byScreen[to];
-    if (group == null || group.length == 1) {
-      out.add(d);
-      continue;
-    }
-    if (!identical(group.first, d)) continue;
-    final where = [for (final g in group) '${g['file'] == null ? '' : '${g['file']} '}${g['path']}'];
-    out.add({
-      ...d,
-      'message': 'No screen "$to": ${group.length} links name it (${where.take(6).join('; ')}${where.length > 6 ? '; and ${where.length - 6} more' : ''}). '
-          '"to" is a canvas id of a page of the site: list every page in site.json\'s "pages" before writing the pages that link to them, '
-          'or correct the links.',
-      'count': group.length,
-    });
-  }
-  // While a listed page is still to be written, a screen no written page
-  // has may be one of its canvases (a modal it defines): a warning until
-  // every page is there, then the error it is.
-  if (unwritten.isEmpty) return out;
-  return [
-    for (final d in out)
-      if (d['code'] == 'unknown_screen' && '${d['message']}'.startsWith('No screen "'))
-        {
-          ...d,
-          'severity': 'warning',
-          'message': '${d['message']} It may be a canvas of a page listed and not written yet (${unwritten.join(', ')}): '
-              'this is an error once every listed page is written.',
-        }
-      else
-        d,
-  ];
-}
-
 String _jsonError(Object e, String text) {
   if (e is FormatException && e.offset != null) {
     final before = text.substring(0, e.offset!.clamp(0, text.length));
@@ -287,7 +213,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     return _finish(report, args);
   }
 
-  // 1. Parse and validate.
+  // 1. Parse.
   final docs = <String, api.Json>{};
   final dirs = <String, String>{};
   for (final i in inputs) {
@@ -300,42 +226,20 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       issue(RuntimeIssue('invalid_json', 'error', 'Not valid JSON: ${_jsonError(e, i.text)}.', file: i.name));
     }
   }
-  final functions = <String>{
-    for (final d in docs.values)
-      for (final scope in (api.readMap(d['variables']) ?? const {}).values)
-        for (final v in api.readList(scope) ?? const [])
-          if (api.readMap(v) case final api.Json m when (api.readList(m['parameters'])?.isNotEmpty ?? false) && m['name'] is String) m['name'] as String,
-    for (final v in api.Variable.declarationsFromJson(site.manifest?['variables']))
-      if (v.isFunction) v.name,
-  };
-  FormulaReport check(String formula) =>
-      (error: FormulaEvaluator.errorOf(formula, functionNames: functions), paths: FormulaEvaluator.referencedPaths(formula));
   final manifest = site.manifest == null ? null : api.SiteManifest.fromJson(site.manifest);
-  final diagnostics = validateProject(docs, options: ValidateOptions(formulas: check, variables: functions), manifest: manifest);
-  // Notes (a schema-2 document, migrated as it loads) are not findings.
   // Pages site.json lists whose files are not there yet (a site written
-  // page by page): one note per file, with the links that name its screen.
-  final unwritten = <String>[
-    for (final i in args.inputs)
-      if (File('$i/${api.SiteManifest.fileName}').existsSync())
-        for (final p in api.SiteManifest.fromJson(site.manifest).pages)
-          if (!File('$i/$p').existsSync()) p,
-  ];
-  report.diagnostics.addAll(_summarizeUnknownScreens(diagnostics.where((d) => d.severity != Severity.info).map((d) => d.toJson()).toList(),
-      unwritten: unwritten));
+  // page by page): one note per file.
+  for (final i in args.inputs) {
+    if (!File('$i/${api.SiteManifest.fileName}').existsSync()) continue;
+    for (final p in manifest?.pages ?? const <String>[]) {
+      if (!File('$i/$p').existsSync()) {
+        issue(RuntimeIssue('page_not_written', 'warning', '$p is listed in site.json, file not written yet.', file: p));
+      }
+    }
+  }
   // The site's theme: its named colors and text styles.
   final themeJson = api.readMap(site.manifest?['theme']);
-  report.diagnostics.addAll(validateTheme(themeJson,
-          breakpoints: site.manifest?['breakpoints'] == null ? null : api.Breakpoints.fromJson(site.manifest!['breakpoints']))
-      .map((d) => d.withFile(api.SiteManifest.fileName).toJson()));
-  // Its own keys: a theme key beside "theme" (or a key nothing reads) says so.
-  report.diagnostics.addAll(validateSiteManifest(site.manifest).map((d) => d.withFile(api.SiteManifest.fileName).toJson()));
-  // Its variables: a record that cannot be read is not declared, and says so.
-  report.diagnostics
-      .addAll(validateSiteVariables(site.manifest?['variables']).map((d) => d.withFile(api.SiteManifest.fileName).toJson()));
-  // The fonts it declares: their shape and formats.
-  report.diagnostics.addAll(validateSiteFonts(site.manifest?['fonts']).map((d) => d.withFile(api.SiteManifest.fileName).toJson()));
-  if (args.validateOnly || docs.isEmpty) return _finish(report, args);
+  if (docs.isEmpty) return _finish(report, args);
 
   // 2. Fonts and assets. A font handler left by an earlier run in this
   // process would load into a disposed instance.
@@ -2535,7 +2439,7 @@ String formatReport(RenderReport report) {
     ].join(' ');
     b.writeln('${(d['severity'] as String).toUpperCase().padRight(7)} ${d['code']}${where.isEmpty ? '' : ' [$where]'}'
         '${(d['path'] as String?)?.isNotEmpty ?? false ? ' ${d['path']}' : (d['nodeId'] != null ? ' node ${d['nodeId']}' : '')}');
-    b.writeln('        ${d['message']}${d['suggestion'] != null ? ' Did you mean "${d['suggestion']}"?' : ''}');
+    b.writeln('        ${d['message']}');
   }
   for (final i in report.images) {
     b.writeln('wrote $i');

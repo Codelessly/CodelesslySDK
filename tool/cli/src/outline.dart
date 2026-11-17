@@ -121,8 +121,8 @@ List<String> outlineCapture(List entries, DocumentTree tree, List<Map> diags, {i
       }
     }
   }
-  // Problems of nodes this capture did not draw. Validation problems (no size) of nodes not on this capture at all
-  // (another breakpoint's canvas) belong to the capture that draws them.
+  // Problems of nodes this capture did not draw. Problems without a size, of nodes not on this capture at all
+  // (another breakpoint's canvas), belong to the capture that draws them.
   for (final e in byNode.entries) {
     if (shown.contains(e.key)) continue;
     for (final d in e.value) {

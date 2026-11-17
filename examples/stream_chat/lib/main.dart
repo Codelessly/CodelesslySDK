@@ -9,7 +9,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:codelessly_api/validate.dart' show ValidateOptions, strictEditCheck;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart'; // ignore: deprecated_member_use
 import 'package:flutter/services.dart' show rootBundle;
@@ -59,14 +58,9 @@ class ReplyMessage extends ChatMessage {
   EditResult? result;
 }
 
-/// A reply's session: its ops checked as they arrive with the strict
-/// validator, the model's formulas read by the SDK's parser (a formula that
-/// does not parse, an item's field read without its item), against the
-/// design system's components and tokens.
-UiSession newSession(DesignSystem? designSystem) => UiSession(
-    designSystem: designSystem,
-    check: strictEditCheck(
-        ValidateOptions(formulas: FormulaEvaluator.report, components: designSystem?.components, theme: designSystem?.tokens)));
+/// A reply's session: its ops checked as they arrive against the catalog
+/// (the session's default check), with the design system's components.
+UiSession newSession(DesignSystem? designSystem) => UiSession(designSystem: designSystem);
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key, this.source});

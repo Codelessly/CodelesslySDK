@@ -254,11 +254,11 @@ A layout is data, so an agent can write one. Five things in this repository are 
   script uses the codelessly_api checked out beside this repository
   (`../CodelesslyAPI`, its master branch): the notation is newer than the published package.
 - **A render tool** ([`tool/render`](https://github.com/Codelessly/CodelesslySDK/tree/master/tool/render)). It
-  validates a document, draws it at the sizes asked for, and drives it (`--tap`, `--type`, `--drag`, `--scroll`), so
+  draws a document at the sizes asked for, and drives it (`--tap`, `--type`, `--drag`, `--scroll`), so
   what was generated can be checked without an app.
 - **The toolkit around it** ([`tool/codelessly`](https://github.com/Codelessly/CodelesslySDK/blob/master/tool/README.md)).
   One entry point for the whole loop: `docs` (look the reference up), `flatten` (nested trees to a document),
-  `validate`, `render --outline` (every node's box, text and problems as text), `states` (every state of a site
+  `render --outline` (every node's box, text and problems as text), `states` (every state of a site
   against its references, worst first), `sheet` (captures on one image), and `mcp`, an MCP server that gives any
   agent those as tool calls, screenshots included.
 

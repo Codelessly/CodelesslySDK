@@ -23,11 +23,11 @@ the UI natively while your ops stream in.
 
 ## Node types you may use
 
-`canvas`, `stack`, `box`, `row`, `column`, `flex`, `text`, `icon`, `spacer`, `variance`, `listView`, `gridView`, `pageView`, `tabs`, `tabBar`, `accordion`, `expansionTile`, `pagination`, `tableView`, `textField`, `checkbox`, `switch`, `radio`, `slider`, `dropdown`, `datePicker`, `timePicker`, `dateTimeInput`, `segmentedButton`, `signature`, `elevatedButton`, `filledButton`, `textButton`, `outlinedButton`, `iconButton`, `floatingActionButton`, `chip`, `actionChip`, `choiceChip`, `filterChip`, `inputChip`, `badge`, `listTile`, `appBar`, `navigationBar`, `bottomNavigationBar`, `divider`, `verticalDivider`, `modal`, `circularProgressIndicator`, `activityIndicator`, `progressBar`, `radialGauge`, `gaugeMeter`, `chart`, `plotChart`, `barChart`, `lineChart`, `barcode`, `path`, `external`, `placeholder`, `singlePlaceholder`, `slot`
+`canvas`, `stack`, `box`, `row`, `column`, `flex`, `text`, `icon`, `spacer`, `variance`, `listView`, `gridView`, `pageView`, `tabs`, `tabBar`, `accordion`, `expansionTile`, `pagination`, `tableView`, `textField`, `checkbox`, `switch`, `radio`, `slider`, `splitter`, `dropdown`, `datePicker`, `calendar`, `timePicker`, `dateTimeInput`, `segmentedButton`, `signature`, `elevatedButton`, `filledButton`, `textButton`, `outlinedButton`, `iconButton`, `floatingActionButton`, `chip`, `actionChip`, `choiceChip`, `filterChip`, `inputChip`, `badge`, `listTile`, `appBar`, `navigationBar`, `bottomNavigationBar`, `divider`, `verticalDivider`, `modal`, `circularProgressIndicator`, `activityIndicator`, `progressBar`, `radialGauge`, `gaugeMeter`, `chart`, `plotChart`, `barChart`, `lineChart`, `barcode`, `path`, `external`, `placeholder`, `singlePlaceholder`, `slot`
 
 ## Action types you may use
 
-`navigate`, `openModal`, `closeModal`, `retryFailed`, `setValue`, `setVariant`, `setVariable`, `if`, `forEach`, `showToast`, `confirm`, `delay`, `focus`, `scrollTo`, `animate`, `haptic`, `paginate`, `componentEvent`
+`navigate`, `openModal`, `closeModal`, `retryFailed`, `setValue`, `setVariant`, `setVariable`, `if`, `forEach`, `announce`, `showToast`, `confirm`, `delay`, `focus`, `scrollTo`, `animate`, `haptic`, `paginate`, `componentEvent`
 
 No scripts, links or host functions. The guide below mentions other files of the reference: you cannot read them here; use what this guide shows.
 
@@ -41,7 +41,7 @@ behavior. This file is the **base**: read it in full first; it is enough to buil
 a page of its own in this folder, linked from here and listed in the [index](#base-index) at the end (the same
 index, with an A–Z of every name, is `index.md`). Open a page when you need what it covers; do not read the folder
 end to end. On a page, *Patterns* is usually what you need; *Reference* holds the generated tables to look one prop
-up. This describes `codelessly_api` 30.1.0; every example here is checked by a test.
+up. This describes `codelessly_api` 33.1.1; every example is checked by a test.
 
 <a id="base-the-model-in-one-table"></a>
 ## The model in one table
@@ -81,7 +81,7 @@ flat map:
 | `scripts` | The layout's scripts (JavaScript), a list of script objects. |
 | `breakpoints` | The project's breakpoints: `[{"id", "name", "minWidth", "width", "height"}]`; absent: the defaults. |
 
-The smallest useful document: a canvas whose `body` slot holds a column with two texts. Every key not written takes
+The smallest document: a canvas whose `body` slot holds a column with two texts. Every key not written takes
 its default.
 
 ```json
@@ -136,6 +136,8 @@ The theme is the `theme` of the site manifest, `site.json`, next to the pages:
   "schema": 3,
   "pages": ["home.json"],
   "theme": {
+    "primary": "ember",
+    "onPrimary": "paper",
     "colors": {"ink": "#FF1B1B1B", "ember": "#FFE4572E", "paper": "#FFF6F1E9"},
     "textStyles": {
       "body": {"fontSize": 16, "height": 1.5, "color": "ink"},
@@ -153,12 +155,10 @@ The theme is the `theme` of the site manifest, `site.json`, next to the pages:
   "body", "fontSize": 32}`). A text names its style: `"style": "title"`; to change a few fields of it,
   `"style": {"from": "title", "color": "ember"}`.
 - In a binding a name is not read: bind the value, `"${theme.colors.ember}"`.
-- Validation reports a name the theme does not have (`unknown_theme_name`, with the nearest name).
 
 Controls (buttons, chips, fields, switches, pickers, tabs) take the colors and fonts their props leave unset
-from the theme's roles (`primary`, `onPrimary`, `surface`, `onSurface`, `error`, `fontFamily`, `buttonRadius`...).
-Without a theme they are neutral: ink on paper and the greys between. Nothing comes from Material's defaults or
-from the app the layout is shown in.
+from the theme's top-level **roles** (`ColorScheme` names: `primary`, `onPrimary`, `surface`, `onSurface`, `error`),
+which may name a color but never sit in `colors`. Unstyled controls are SSUI's, never Material's.
 
 **Light and dark.** `"dark": {"colors": {...}}` in the theme gives the colors that differ in dark mode, and
 `"mode"` which one the site starts in (Flutter's `ThemeMode`: `system`, the default, follows the device; `light`;
@@ -198,7 +198,7 @@ Which types take children, which take named slots, which take neither:
 |---|---|
 | `children` (a list of ids) | `stack`, `row`, `column`, `flex`, `variance`, `listView` (and slots loading, error, end, sectionHeader, reorderPlaceholder), `gridView` (and slots loading, error, end, reorderPlaceholder), `pageView`, `tabs`, `accordion`, `expansionTile` (and slots tile), `singlePlaceholder`, `slot` |
 | `slots` (name → id) | `canvas` (body, appBar, floatingActionButton, bottomNavigationBar), `tableView` (cell, columnHeader, rowHeader, corner), `badge` (child), `listTile` (leading, title, subtitle, trailing), `modal` (trigger, content) |
-| nothing | `box`, `text`, `icon`, `spacer`, `tabBar`, `pagination`, `textField`, `checkbox`, `switch`, `radio`, `slider`, `dropdown`, `datePicker`, `timePicker`, `dateTimeInput`, `segmentedButton`, `signature`, `elevatedButton`, `filledButton`, `textButton`, `outlinedButton`, `iconButton`, `floatingActionButton`, `chip`, `actionChip`, `choiceChip`, `filterChip`, `inputChip`, `appBar`, `navigationBar`, `bottomNavigationBar`, `divider`, `verticalDivider`, `circularProgressIndicator`, `activityIndicator`, `progressBar`, `radialGauge`, `gaugeMeter`, `chart`, `plotChart`, `barChart`, `lineChart`, `barcode`, `path`, `external`, `placeholder`, `video`, `embeddedVideo`, `audioPlayer`, `webView` |
+| nothing | `box`, `text`, `icon`, `spacer`, `tabBar`, `pagination`, `textField`, `checkbox`, `switch`, `radio`, `slider`, `splitter`, `dropdown`, `datePicker`, `calendar`, `timePicker`, `dateTimeInput`, `segmentedButton`, `signature`, `elevatedButton`, `filledButton`, `textButton`, `outlinedButton`, `iconButton`, `floatingActionButton`, `chip`, `actionChip`, `choiceChip`, `filterChip`, `inputChip`, `appBar`, `navigationBar`, `bottomNavigationBar`, `divider`, `verticalDivider`, `circularProgressIndicator`, `activityIndicator`, `progressBar`, `radialGauge`, `gaugeMeter`, `chart`, `plotChart`, `barChart`, `lineChart`, `barcode`, `path`, `external`, `placeholder`, `video`, `embeddedVideo`, `audioPlayer`, `webView` |
 
 A type with "no decoration" draws no box: put it inside a `box`, `row`, `column` or `stack` that has the fill or
 border.
@@ -222,8 +222,8 @@ Each axis has a **mode** and a **number**:
 
 The number is the **design size**: the size of a fixed node, and the size used where a mode cannot apply (a fill
 inside something that scrolls on that axis, or inside a parent that hugs that axis: `fill_fallback`). For `hug` and
-`fill` it does not limit the size: cap a fill with `"constraints": {"maxWidth": 760}`. **A node without `width` or
-`height` is 0 × 0 and draws nothing** (`zero_size`); give every node both, except a `canvas` and a `spacer`.
+`fill` it does not limit the size: cap a fill with `"constraints": {"maxWidth": 760}`. Unsized, a text, icon or
+control hugs (wrapping at its parent's width); **other nodes are 0 × 0**, but a `canvas` or `spacer`.
 
 <a id="base-rows-columns-and-flex"></a>
 ### Rows, columns and flex
@@ -247,8 +247,8 @@ only in a row or column that has some (a fill or fixed main size).
 <a id="base-padding-margin-constraints-a-capped-width"></a>
 ### Padding, margin, constraints, a capped width
 
-- `padding` is space inside the node's box, `margin` outside it: a number (all sides) or **four** numbers
-  `[left, top, right, bottom]` (two numbers are not read).
+- `padding` is space inside the node's box, `margin` outside it: a number (all sides), **four** numbers
+  `[left, top, right, bottom]` (two are not read), or `{"start","top","end","bottom"}` ([RTL](layout.md#layout-rtl)).
 - `constraints`: `{"minWidth", "maxWidth", "minHeight", "maxHeight"}`. `aspectRatio`: width / height.
 - **A full-width band with capped, centered content** (CSS `max-width: 1200px; margin: 0 auto`): the band fills
   the width and holds the background; its one child fills with `"constraints": {"maxWidth": 1200}`, centered by the
@@ -262,7 +262,7 @@ only in a row or column that has some (a fill or fixed main size).
 A `stack` places each child by its `layout.x` and `layout.y`: `16` or `{"start": 16}` from the left/top,
 `{"end": 16}` from the right/bottom, `{"start": 16, "end": 16}` stretched between, `{"align": 0}` aligned (-1 start,
 0 center, 1 end). Later children paint on top. `x`/`y` mean nothing under a row or column, `flex`/`align` nothing
-under a stack (`layout_field_ignored`).
+under a stack.
 
 ```json
 {
@@ -496,8 +496,8 @@ A node's `actions` is a list of **reactions**: a trigger and the actions it runs
   expression), `navigate` (`to`: a canvas id; `"mode": "pop"` goes back), `openModal` / `closeModal`, `showToast`,
   `if` (`"condition"`: a predicate, `{"left": "${count}", "op": "greaterThan", "right": "5"}` or `{"left":
   "${= valid}", "op": "isTrue"}`; `then` and `else`: action lists), `scrollTo`, `componentEvent` (a component's event, or at run time the event
-  to the host app). Action types here: `navigate`, `openModal`, `closeModal`, `retryFailed`, `openLink`, `setValue`, `setVariant`, `setVariable`, `callFunction`, `if`, `forEach`, `showToast`, `confirm`, `delay`, `copyToClipboard`, `setThemeMode`, `editText`, `focus`, `validate`, `controlTrack`, `controlDismissible`, `controlTransform`, `scrollTo`, `animate`, `haptic`, `runScript`, `paginate`, `componentEvent`, `callApi`, `setStorage`, `cloudDocuments`, `loadCloudData`, `reloadCloudData`, `cloudFiles`, `cloudData`, `cloudBatch`, `submitForm`, `auth`, `paywall`, `print`, `preloadImages`, `speak`, `playSound`, `captureScreenshot`, `downloadFile`, `emitEvent`.
-- Keys are exact; validation names the one meant: `{"type": "scrollTo", "node": "faq"}`, `{"type":
+  to the host app). Action types here: `navigate`, `openModal`, `closeModal`, `retryFailed`, `openLink`, `setValue`, `setVariant`, `setVariable`, `callFunction`, `if`, `forEach`, `announce`, `showToast`, `confirm`, `delay`, `copyToClipboard`, `setThemeMode`, `editText`, `focus`, `validate`, `controlTrack`, `controlDismissible`, `controlTransform`, `scrollTo`, `animate`, `haptic`, `runScript`, `paginate`, `componentEvent`, `callApi`, `setStorage`, `cloudDocuments`, `loadCloudData`, `reloadCloudData`, `cloudFiles`, `cloudData`, `cloudBatch`, `submitForm`, `auth`, `paywall`, `print`, `preloadImages`, `speak`, `playSound`, `captureScreenshot`, `downloadFile`, `emitEvent`.
+- Keys are exact (a misspelled one is dropped): `{"type": "scrollTo", "node": "faq"}`, `{"type":
   "copyToClipboard", "text": "${address}"}`, `{"type": "downloadFile", "fileName": "trip.txt", "text": "${brief}"}`;
   a list appends with `"op": "add"` (`insert` takes an `index`).
 - In a chain `${result}` is the trigger's event (a text field's text) until an action gives another value.
@@ -523,14 +523,14 @@ Hover and pressed styles (`states`), drag, gestures: [interaction](interaction.m
    over it; later rules win (the cascade). Write for phones, add `minWidth` rules (mobile first).
 5. A row that becomes a column: a `flex` with a rule patching `"direction": "vertical"`; another order: patch
    `layout.order`; hidden: `"visible": false`.
-6. A field both patched and bound shows the binding (`media_overridden`): put the binding in the rule's patch.
+6. A field both patched and bound shows the binding: put the binding in the rule's patch.
 
 Breakpoints, sticky headers, scrolling, a canvas per breakpoint: [responsive layout](layout.md#page-layout).
 
 <a id="base-rules-that-are-easy-to-get-wrong"></a>
 ## Rules that are easy to get wrong
 
-1. Every node needs `layout.width` and `layout.height`; without them it is 0 × 0.
+1. Boxes, rows, columns and stacks need `layout.width` and `layout.height`; without them they are 0 × 0.
 2. Every text needs a color; without one it is white.
 3. Padding and margin are a number or four numbers, never two.
 4. Colors are `#AARRGGBB`, `#RRGGBB` or a theme color's name; define the theme first and name its colors and
@@ -556,13 +556,13 @@ that has not been checked. Run the render command from the SDK repository:
 tool/render/render.sh site/ --out shots/ --sizes 390x844,834x1112,1440x900 --full-page
 ```
 
-It validates every document strictly, renders each screen at each size (`shots/<screen>@<w>x<h>.png`,
+It renders each screen at each size (`shots/<screen>@<w>x<h>.png`,
 `shots/diagnostics.json`) and prints one line per problem: a code, the JSON pointer
 (`/nodes/hero-title/props/style/fontSize`) and what to do. It exits 1 on errors. Steps before the capture:
 `--tap <id>` (`<id>#<n>` for the n-th list item), `--hover`, `--focus`, `--type <id>=<text>`,
 `--set <variable>=<json>`, `--scroll <id>=<px>`, `--drag <id>=<dx>,<dy>`, `--navigate <canvas>?<param>=<value>`,
 `--label <name>`. Look at the
-screenshots: validation cannot tell you a page is ugly. Every option and diagnostic code: [render](render.md#page-render).
+screenshots: a diagnostic cannot tell you a page is ugly. Every option and render code: [render](render.md#page-render).
 
 <a id="base-sites-and-components-as-files"></a>
 ## Sites and components as files
@@ -678,18 +678,18 @@ Every page is in this folder; `index.md` has the full task table and an A–Z of
 | Keep a value on the device | [data-storage-on-the-device](data.md#data-storage-on-the-device) |
 | Show the signed-in user | [auth-show-the-signed-in-user](auth.md#auth-show-the-signed-in-user) |
 | Capture the states (after a tap, typing, an open menu) with the render command | [render-capturing-states](render.md#render-capturing-states) |
-| Every validation and render code | [render-validation-codes](render.md#render-validation-codes) |
+| Every render code | [render-render-codes](render.md#render-render-codes) |
 | Build and edit with ops; streaming; the retry protocol | [edit-ops-the-ops](edit-ops.md#edit-ops-the-ops) |
 | How one value type is written (color, alignment, insets) | [values-colors-and-alignments](values.md#values-colors-and-alignments) |
 
 - [layout.md](layout.md): Responsive layout. Documents canvas, row, column, flex, stack, box, spacer, divider, verticalDivider, variance, sticky, floating, measure, scroll, scrollEnd, enterViewport, exitViewport, scrollTo.
 - [theme.md](theme.md): Theme and text. Documents text, textDirection, defaultTextStyle, setThemeMode.
 - [decoration.md](decoration.md): Decoration, images, icons and drawing. Documents icon, path, customPaint, imageLoading, imageLoaded, imageError.
-- [forms.md](forms.md): Buttons, forms and inputs. Documents filledButton, elevatedButton, outlinedButton, textButton, iconButton, floatingActionButton, textField, checkbox, switch, radio, slider, dropdown, segmentedButton, datePicker, timePicker, dateTimeInput, signature, chip, actionChip, choiceChip, filterChip, inputChip, form, radioGroup, changed, changeEnd, submitted, editingComplete, focusGained, focusLost, keyDown, keyUp, editText, focus, validate.
-- [lists.md](lists.md): Lists, grids, tables and repeated data. Documents listView, gridView, pageView, tableView, listTile, pagination, reorderHandle, reorder, refresh, swipeAction, rowTap, paginate.
-- [navigation.md](navigation.md): Screens, navigation, modals and toasts. Documents appBar, navigationBar, bottomNavigationBar, tabs, tabBar, accordion, expansionTile, modal, load, backPressed, navigate, openModal, closeModal, showToast, confirm, openLink.
+- [forms.md](forms.md): Buttons, forms and inputs. Documents filledButton, elevatedButton, outlinedButton, textButton, iconButton, floatingActionButton, textField, checkbox, switch, radio, slider, splitter, calendar, dropdown, segmentedButton, datePicker, timePicker, dateTimeInput, signature, chip, actionChip, choiceChip, filterChip, inputChip, form, radioGroup, changed, changeEnd, submitted, deleted, editingComplete, focusGained, focusLost, keyDown, keyUp, editText, focus, validate.
+- [lists.md](lists.md): Lists, grids, tables and repeated data. Documents listView, gridView, pageView, tableView, listTile, pagination, reorderHandle, reorder, refresh, swipeAction, rowTap, sort, paginate.
+- [navigation.md](navigation.md): Screens, navigation, modals and toasts. Documents appBar, navigationBar, bottomNavigationBar, tabs, tabBar, accordion, expansionTile, modal, load, backPressed, navigate, openModal, closeModal, showToast, announce, confirm, openLink.
 - [state.md](state.md): State and logic. Documents valueChanged, actionError, setVariable, setValue, setVariant, callFunction, if, forEach, delay, runScript, retryFailed.
-- [interaction.md](interaction.md): Interaction: reactions, states and gestures. Documents states, inkWell, tooltip, ignorePointer, draggable, dropTarget, track, dismissible, pan, transformGesture, click, doubleTap, longPress, hold, secondaryClick, pointerDown, pointerUp, hover, cursorEnter, cursorExit, swipeLeft, swipeRight, swipeUp, swipeDown, drag, dragEnd, wheel, pinch, dragStart, dragCancel, dragCompleted, drop, dragEnter, dragExit, dropRejected, controlTrack, controlDismissible, controlTransform, copyToClipboard, haptic.
+- [interaction.md](interaction.md): Interaction: reactions, states and gestures. Documents states, inkWell, tooltip, ignorePointer, focusable, focusGroup, draggable, dropTarget, track, dismissible, pan, transformGesture, click, doubleTap, longPress, hold, secondaryClick, pointerDown, pointerUp, hover, cursorEnter, cursorExit, swipeLeft, swipeRight, swipeUp, swipeDown, drag, dragEnd, wheel, pinch, dragStart, dragCancel, dragCompleted, drop, dragEnter, dragExit, dropRejected, controlTrack, controlDismissible, controlTransform, copyToClipboard, haptic.
 - [animation.md](animation.md): Animation and motion. Documents motion, animations, transitions, shimmer, reveal, typewriter, particles, flip, tilt, hero, viewProgress, timer, frame, animate.
 - [components.md](components.md): Components and sections. Documents slot, external, placeholder, singlePlaceholder, event, componentEvent.
 - [design-systems.md](design-systems.md): Design systems.

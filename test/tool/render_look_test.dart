@@ -88,14 +88,4 @@ void main() {
     expect(missingImage['message'], contains('images/missing.jpg'));
     expect(missingImage['nodeId'], 'card');
   });
-
-  testWidgets('a declared WOFF2 file is reported as not read', (tester) async {
-    final site = copySite();
-    final manifest = File('${site.path}/site.json');
-    manifest.writeAsStringSync(manifest.readAsStringSync().replaceFirst('dm-sans-latin-700-normal.woff', 'dm-sans-latin-700-normal.woff2'));
-    final r = await runRender(tester, RenderArgs(inputs: [site.path], out: '${out.path}/png', sizes: const [Size(390, 844)], validateOnly: true));
-    final d = r.diagnostics.singleWhere((d) => d['code'] == 'font_format');
-    expect(d['message'], contains('WOFF2'));
-    expect(d['file'], 'site.json');
-  });
 }

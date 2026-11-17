@@ -1,7 +1,7 @@
 // The formula parser and evaluator import no Flutter, so a tool that runs on
 // the Dart VM alone (the stream chat's recorder, examples/stream_chat/
-// tool/record.dart) can check a model's formulas with the same parser the
-// runtime uses: FormulaEvaluator.report is what strictEditCheck takes.
+// tool/record.dart) can read a model's formulas with the same parser the
+// runtime uses.
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';

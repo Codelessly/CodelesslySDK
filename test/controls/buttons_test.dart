@@ -5,7 +5,6 @@
 import 'dart:ui' show Tristate;
 
 import 'package:codelessly_api/codelessly_api.dart' as api show WidgetState;
-import 'package:codelessly_api/validate.dart' show validateDocument;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/controls/buttons.dart';
 import 'package:codelessly_sdk/src/render/controls/kit.dart' show ControlTransition;
@@ -111,8 +110,6 @@ void main() {
     for (var i = 1; i < rects.length; i++) {
       expect(rects[i].top, rects[i - 1].bottom + 12, reason: 'stacked by the column\'s spacing');
     }
-    final validation = validateDocument(columnDoc({'b': {'type': 'filledButton'}}));
-    expect(validation.where((d) => d.code.name == 'zero_size'), isEmpty);
   });
 
   testWidgets('a floating action button is primary, radius 12 (8 small, 18 large), SSUI\'s floating shadow; it hugs to its type\'s size',

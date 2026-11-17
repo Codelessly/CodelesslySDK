@@ -1,4 +1,4 @@
-// The render command (tool/render): strict validation, rendering every
+// The render command (tool/render): rendering every
 // screen at each size, interactions, and the runtime checks, run in-process
 // on the fixtures next to this file.
 import 'dart:convert';
@@ -78,25 +78,6 @@ void main() {
     );
     expect(report.errors, 0, reason: '${report.diagnostics}');
     expect(File('${out.path}/home@1440x900-contact.png').existsSync(), isTrue);
-  });
-
-  testWidgets('a document with mistakes gets validation codes with paths and suggestions, and an error exit status', (tester) async {
-    final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/mistakes.json'], out: out.path, sizes: const [Size(390, 844)]));
-    final found = codes(report);
-    expect(
-      found,
-      containsAll(<String>[
-        'dangling_child', 'unknown_prop', 'invalid_enum', 'wrong_type', 'unknown_field', 'unknown_name', //
-        'layout_field_ignored', 'unknown_bind_path', 'expression_syntax', 'unknown_screen', 'unknown_action_key',
-      ]),
-    );
-    expect(report.errors, greaterThan(0));
-    final color = report.diagnostics.firstWhere((d) => d['code'] == 'unknown_field');
-    expect(color['path'], '/nodes/title/props/style/colour');
-    expect(color['suggestion'], 'color');
-    // The formula is parsed by the SDK's own parser.
-    final formula = report.diagnostics.firstWhere((d) => d['code'] == 'expression_syntax');
-    expect(formula['message'], contains('does not parse'));
   });
 
   testWidgets('the children of a node moved by its motion do not overflow it; a child laid out past its parent does', (tester) async {

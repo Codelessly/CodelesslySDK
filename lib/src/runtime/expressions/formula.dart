@@ -209,10 +209,8 @@ class FormulaEvaluator {
     return names;
   }
 
-  /// What a validator needs of [formula] (`ValidateOptions.formulas` in
-  /// codelessly_api's validate library): its syntax error ([errorOf]) and
-  /// the paths it reads ([referencedPaths]). A host gives it to
-  /// `strictEditCheck`, so a model's formulas are checked as it writes them.
+  /// What a check of a host's own needs of [formula]: its syntax error
+  /// ([errorOf]) and the paths it reads ([referencedPaths]).
   static ({String? error, Set<String> paths}) report(String formula) => (error: errorOf(formula), paths: referencedPaths(formula));
 
   /// The variable paths [expression] reads, e.g. `storage.cart` and `qty`.

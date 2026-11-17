@@ -6,7 +6,6 @@
 import 'dart:ui' show Tristate;
 
 import 'package:codelessly_api/codelessly_api.dart' as api show WidgetState;
-import 'package:codelessly_api/validate.dart' show validateDocument;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/controls/chips.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
@@ -77,8 +76,6 @@ void main() {
       // A selectable chip keeps its check mark's room; an input chip its x.
       expect(rectOf(tree, 'filterChip').width, closeTo(plain + 12 + 6, .01));
       expect(rectOf(tree, 'inputChip').width, closeTo(plain + 12 + 6 + 12 + 6, .01));
-      final validation = validateDocument(columnDoc({'c': {'type': 'filterChip', 'props': {'label': 'A'}}}));
-      expect(validation.where((d) => d.code.name == 'zero_size'), isEmpty, reason: 'a chip with no layout hugs');
     });
 
     testWidgets('dark mode takes SSUI\'s dark tokens', (tester) async {

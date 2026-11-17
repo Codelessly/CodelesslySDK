@@ -1,3 +1,14 @@
+## Unreleased
+
+### Changed
+
+- **Notation**: `tool/notation expand` takes `--nearest-colors`; a `UiSession` writes the notation's looks as theme
+  names and leaves written colors as written.
+
+### Removed
+
+- **The strict validator is gone** (codelessly_api no longer has `package:codelessly_api/validate.dart`): `tool/codelessly validate`, `render.sh --validate-only` and the MCP server's `codelessly_validate` are removed, and a render reports only what it meets while rendering.
+
 ## 33.1.1
 
 Needs codelessly_api 33.1.1.

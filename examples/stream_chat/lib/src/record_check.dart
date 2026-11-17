@@ -1,7 +1,7 @@
 // What tool/record.dart does with a recorded turn, offline: the ops of a
-// ui_apply tool input applied as a session applies a stream (strict
-// validation per op against the catalog, the design system's components
-// and its tokens; the end of the stream; the lints of a finished UI), and
+// ui_apply tool input applied as a session applies a stream (each op
+// checked against the catalog and the design system's components; the end
+// of the stream; the lints of a finished UI), and
 // the design system a recording is made with, found by id or folder.
 // Pure Dart with dart:io: the record command and the tests use it, the app
 // does not.
@@ -9,10 +9,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:codelessly_api/core.dart';
-import 'package:codelessly_api/validate.dart';
-// The SDK's formula parser, which imports no Flutter: the formulas a model
-// writes are checked with the parser the runtime uses.
-import 'package:codelessly_sdk/src/runtime/expressions/formula.dart' show FormulaEvaluator;
 
 /// The design system [idOrPath] names: a design system folder (with a
 /// `design_system.json`), a bundle (`.json`, `tool/design_system_bundle.dart`),
@@ -62,14 +58,8 @@ Map<String, Object?> designSystemMeta(DesignSystem ds) => {'id': ds.id, 'name': 
 /// components' declarations.
 Catalog catalogFor(DesignSystem? ds) => ds?.catalogOver(Catalog.core) ?? Catalog.core;
 
-/// The check a recorded turn is validated with: the strict validator, its
-/// formulas read by the SDK's parser, against [designSystem]'s components
-/// and tokens when there is one. What UiSession hosts give their sessions.
-EditCheck recordCheck(DesignSystem? designSystem) =>
-    strictEditCheck(ValidateOptions(formulas: FormulaEvaluator.report, components: designSystem?.components, theme: designSystem?.tokens));
-
 /// The ops of [toolInput] applied to [doc] as a session applies a stream:
-/// one by one (incomplete), strictly validated ([recordCheck]), then the end
+/// one by one (incomplete), checked ([catalogCheck]), then the end
 /// of the stream (references still unresolved are errors, as a session
 /// reports them) and the lints.
 CheckedTurn checkToolInput(LayoutDocument doc, String toolInput,
@@ -84,7 +74,7 @@ CheckedTurn checkToolInput(LayoutDocument doc, String toolInput,
   final diagnostics = <EditDiagnostic>[...end.diagnostics];
   final applied = <int>{}, rejected = <int>{};
   final appliedOps = <EditOp>[];
-  final check = recordCheck(designSystem);
+  const check = catalogCheck;
   for (final s in streamed) {
     final r = applyOps(doc, [s.op],
         catalog: catalog, profile: allowed, check: check, incomplete: true, protectRoots: protect && before.roots.isNotEmpty);

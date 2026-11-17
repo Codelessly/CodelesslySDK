@@ -1,8 +1,7 @@
 // What tool/record.dart checks a recorded turn with, offline (no request):
 // with --design-system the ops are applied as UiSession(designSystem:)
-// applies them (its components are types the agent may call, its token
-// names are colors and text styles), and the counts say how much of the UI
-// is the design system's.
+// applies them (its components are types the agent may call), and the
+// counts say how much of the UI is the design system's.
 import 'dart:convert';
 import 'dart:io';
 
@@ -39,7 +38,7 @@ void main() {
 
   test('the same UI without the design system is rejected, so a retry would be asked for', () {
     final checked = checkToolInput(LayoutDocument(), _ssuiCard(), profile: TrustProfile.agent, protect: false, rev: 1);
-    expect(checked.result.errors.map((d) => d.code), containsAll(['capability_not_allowed', 'unknown_theme_name']));
+    expect(checked.result.errors.map((d) => d.code), contains('capability_not_allowed'));
     expect(checked.needsFix, isTrue);
     expect(checked.counts().containsKey('designSystemComponents'), isFalse);
   });
@@ -60,27 +59,5 @@ void main() {
     final checked = checkToolInput(LayoutDocument(catalog: catalogFor(ds)), ops, profile: TrustProfile.agent, protect: false, rev: 1, designSystem: ds);
     expect(checked.counts(), containsPair('designSystemComponents', 0));
     expect(checked.counts(), containsPair('replacedControls', 1));
-  });
-
-  test('a recorded turn\'s formulas are checked with the SDK\'s parser, and references unresolved at the end are errors', () async {
-    // reservation@claude-sonnet-5-5 wrote a slot formula as JavaScript;
-    // data_table@claude-sonnet-5-5 filtered with a condition, not a lambda.
-    // Neither was reported to the model when recorded.
-    final ds = await loadDesignSystem('ssui');
-    String ops(String file) => File('../../tool/stream/streams/live/2026-11-14-ssui/$file')
-        .readAsLinesSync()
-        .skip(1)
-        .map((l) => (jsonDecode(l) as Map)['delta'] as String? ?? '')
-        .join();
-    final reservation = checkToolInput(LayoutDocument(catalog: catalogFor(ds)), ops('reservation@claude-sonnet-5-5.compact.ssui.r1.jsonl'),
-        profile: TrustProfile.agent, protect: false, rev: 1, designSystem: ds);
-    expect([for (final d in reservation.result.errors) '${d.code} ${d.path}'], ['expression_syntax /variables/book/6/formula']);
-    expect(reservation.needsFix, isTrue);
-    expect(reservation.toolResult(1)['next'], isNotNull);
-    final table = checkToolInput(LayoutDocument(catalog: catalogFor(ds)), ops('data_table@claude-sonnet-5-5.compact.ssui.r1.jsonl'),
-        profile: TrustProfile.agent, protect: false, rev: 1, designSystem: ds);
-    final status = table.result.errors.firstWhere((d) => d.code == 'unknown_name' && d.message.contains('"status" is not a variable'));
-    expect(status.op, -1, reason: 'reported when the stream ends');
-    expect(status.message, contains('filter(invoices, r => r.status == x)'));
   });
 }

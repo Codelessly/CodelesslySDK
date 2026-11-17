@@ -1,12 +1,15 @@
 // Expands a UI written in the compact notation
 // (package:codelessly_api/notation.dart) into a layout document.
 //
-//   dart run tool/notation/expand.dart <file.txt> [--design-system <folder>] [--named] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--site <site.json>] [--out <file.json>]
+//   dart run tool/notation/expand.dart <file.txt> [--design-system <folder>] [--named] [--nearest-colors] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--site <site.json>] [--out <file.json>]
 //
 // With --design-system (a folder holding design_system.json) the notation
 // may call that design system's components by name and takes its looks.
 // With --named as well, a look the theme names is written as that name (as
-// a UiSession writes it: the document follows dark mode and the theme).
+// a UiSession writes it: the document follows dark mode and the theme); a
+// color the notation writes stays as written. --nearest-colors (with --named)
+// reads a written color as the theme's nearest color too: a dark design on a
+// light theme then loses its own panel colors.
 // A page (--width 700 or more) is given the media rules that lay it out on a
 // tablet and a phone; --no-reflow leaves it written for its one width.
 // The variables of the site.json beside --out (or of --site) are the site's:
@@ -28,7 +31,6 @@ import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_api/notation.dart';
-import 'package:codelessly_api/validate.dart' show validateSiteVariables;
 
 import 'vocabulary.dart' show loadVocabulary;
 
@@ -40,7 +42,7 @@ Future<void> main(List<String> args) async {
 
   final file = args.where((a) => !a.startsWith('--')).firstOrNull;
   if (file == null || !File(file).existsSync()) {
-    stderr.writeln('usage: expand.dart <file.txt> [--design-system <folder>] [--named] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--site <site.json>] [--out <file.json>] [--open [--vocabulary <file.json>]] [--aliases <file.json>]');
+    stderr.writeln('usage: expand.dart <file.txt> [--design-system <folder>] [--named] [--nearest-colors] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--site <site.json>] [--out <file.json>] [--open [--vocabulary <file.json>]] [--aliases <file.json>]');
     exit(2);
   }
   DesignSystem? ds;
@@ -72,9 +74,6 @@ Future<void> main(List<String> args) async {
       for (final v in Variable.declarationsFromJson(declared)) {
         projectVariables[v.name] = {'type': v.type.name, ...v.toJson()};
       }
-      for (final d in validateSiteVariables(declared)) {
-        stderr.writeln('$sitePath: ${d.path}: ${d.message}');
-      }
     } on FormatException catch (e) {
       stderr.writeln('$sitePath is not JSON (${e.message}): its variables were not read.');
     }
@@ -89,7 +88,7 @@ Future<void> main(List<String> args) async {
   }
   final options = (ds == null
           ? NotationOptions(screen: screen, width: width, reflow: !args.contains('--no-reflow'), projectVariables: projectVariables)
-          : NotationOptions.fromDesignSystem(ds, screen: screen, width: width, named: args.contains('--named'), reflow: !args.contains('--no-reflow'), projectVariables: projectVariables))
+          : NotationOptions.fromDesignSystem(ds, screen: screen, width: width, named: args.contains('--named'), nearestColors: args.contains('--nearest-colors'), reflow: !args.contains('--no-reflow'), projectVariables: projectVariables))
       .open(openVocabulary: open, vocabulary: aliases);
   final result = Catalog.run(catalog, () => parseNotation(File(file).readAsStringSync(), catalog: catalog, options: options));
   for (final issue in result.issues) {

@@ -25,7 +25,6 @@ final class RenderArgs {
     this.steps = const [],
     this.fontDirs = const [],
     this.label,
-    this.validateOnly = false,
     this.dumpLayout = false,
     this.component,
     this.componentsAll = false,
@@ -48,7 +47,6 @@ final class RenderArgs {
   final List<Step> steps;
   final List<String> fontDirs;
   final String? label;
-  final bool validateOnly;
 
   /// Also write each capture's node boxes (`<png name>.layout.json`).
   final bool dumpLayout;
@@ -99,7 +97,6 @@ final class RenderArgs {
         steps: steps,
         fontDirs: fontDirs,
         label: label,
-        validateOnly: validateOnly,
         dumpLayout: dumpLayout,
         component: component,
         componentsAll: componentsAll,
@@ -116,9 +113,9 @@ final class RenderArgs {
 const usage = '''
 Usage: tool/render/render.sh <document.json | directory> [...] --out <dir> [options]
 
-Validates Codelessly layout documents strictly, renders every screen with the
-SDK at each size, and reports what is wrong. Writes <out>/<screen>@<w>x<h>.png
-and <out>/diagnostics.json. Exits 1 when there are errors, 0 otherwise.
+Renders every screen of Codelessly layout documents with the SDK at each
+size, and reports what went wrong. Writes <out>/<screen>@<w>x<h>.png and
+<out>/diagnostics.json. Exits 1 when there are errors, 0 otherwise.
 
 Options:
   --out <dir>             Where PNGs and diagnostics.json go (required).
@@ -190,7 +187,6 @@ Options:
                           https://cdn.example.com/art/=assets/art. Repeatable.
   --label <text>          Append -<text> to the PNG names (state screenshots);
                           diagnostics go to diagnostics-<text>.json.
-  --validate-only         Only validate; render nothing.
   --dump-layout           Also write <png>.layout.json: every node's box (x, y, w, h) and the text it shows.
   --component <Type>      Render one component of the site alone: once per preview
                           (at its size), or with --props at each size.
@@ -217,7 +213,7 @@ RenderArgs parseArgs(List<String> argv) {
   final screens = <String>[];
   final steps = <Step>[];
   final fonts = <String>[];
-  var fullPage = false, validateOnly = false, dumpLayout = false, componentsAll = false;
+  var fullPage = false, dumpLayout = false, componentsAll = false;
   String? label, component, props, slots, compare, theme;
   DateTime? now;
   final compareMap = <String, String>{};
@@ -244,8 +240,6 @@ RenderArgs parseArgs(List<String> argv) {
         screens.add(next(i++, a));
       case '--full-page':
         fullPage = true;
-      case '--validate-only':
-        validateOnly = true;
       case '--dump-layout':
         dumpLayout = true;
       case '--fonts':
@@ -311,7 +305,6 @@ RenderArgs parseArgs(List<String> argv) {
     steps: steps,
     fontDirs: fonts,
     label: label,
-    validateOnly: validateOnly,
     dumpLayout: dumpLayout,
     component: component,
     componentsAll: componentsAll,

@@ -2,15 +2,13 @@
 // and 6, D25 and D30): each line below is as an answer of
 // tool/vocabulary/corpus-define wrote it (d03 was written with the glossary
 // of names; d01 and d02 defined their own words), and each now expands with
-// no word left unknown, to a document that validates. What each became is
+// no word left unknown. What each became is
 // what the line says it is.
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/notation.dart';
-import 'package:codelessly_api/validate.dart';
-import 'package:codelessly_sdk/src/runtime/expressions/formula.dart' show FormulaEvaluator;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../tool/notation/vocabulary.dart' show loadDefinitionTexts, loadVocabulary;
@@ -33,18 +31,6 @@ void main() {
 
   NotationResult read(String text) => api.Catalog.run(
       catalog, () => parseNotation(text, catalog: catalog, options: NotationOptions.fromDesignSystem(ds, width: 1280).open(vocabulary: vocabulary)));
-
-  List<String> invalid(Map<String, Object?> doc) => [
-        for (final d in api.Catalog.run(
-            catalog,
-            () => validateDocument(doc,
-                options: ValidateOptions(
-                  theme: api.ThemeTokens.fromJson(ds.manifest.theme.toJson()),
-                  components: ds.components,
-                  formulas: (f) => (error: FormulaEvaluator.errorOf(f), paths: FormulaEvaluator.referencedPaths(f)),
-                ))))
-          if (d.severity == Severity.error) '${d.code.name} ${d.path}: ${d.message}',
-      ];
 
   // What the lines below read from the page.
   const state = '''
@@ -117,7 +103,6 @@ state attach={"name":"plan.pdf","size":"2 MB","progress":0.5}
       expect(records, containsAll(e.value));
       // Nothing left unknown: no stand-in, no word dropped.
       expect([for (final u in r.vocabulary) if (!const {'definition', 'alias', 'universal'}.contains(u.kind)) '${u.kind} ${u.on ?? ''}.${u.word}'], isEmpty);
-      expect(invalid(r.document), isEmpty);
     });
   }
 

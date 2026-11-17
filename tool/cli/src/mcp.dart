@@ -7,8 +7,8 @@
 //
 //   {"mcpServers": {"codelessly": {"command": "/path/to/CodelesslySDK/tool/codelessly", "args": ["mcp"]}}}
 //
-// Tools: codelessly_docs, codelessly_validate, codelessly_render (the report, the outline and the PNGs),
-// codelessly_flatten, codelessly_states. The first validate, render or states call starts the render server
+// Tools: codelessly_docs, codelessly_render (the report, the outline and the PNGs),
+// codelessly_flatten, codelessly_states. The first render or states call starts the render server
 // (tool/render/serve.sh) when it is down, so later calls cost about a second; CODELESSLY_MCP_NO_SERVER=1 keeps every
 // run separate. Inline documents are written under $CODELESSLY_MCP_WORK (default: a temp folder), one folder per
 // call; every answer names its folder. Messages are newline-delimited JSON-RPC 2.0 (MCP stdio).
@@ -78,16 +78,10 @@ final tools = <Map<String, Object?>>[
     },
   },
   {
-    'name': 'codelessly_validate',
-    'description': 'Validate a Codelessly document strictly, without rendering: every problem with a code, a JSON '
-        'pointer and a suggestion. Faster than codelessly_render when you only changed JSON.',
-    'inputSchema': {'type': 'object', 'properties': _docProps},
-  },
-  {
     'name': 'codelessly_render',
-    'description': 'Validate a Codelessly document (or site) and render it headless with the real SDK at each screen '
-        'size, after optional interaction steps. Returns the problems found (validation and what only rendering '
-        "shows: overflow, clipped text, missing fonts, failed taps), an outline of every node's box and text, and the "
+    'description': 'Render a Codelessly document (or site) headless with the real SDK at each screen '
+        'size, after optional interaction steps. Returns the problems found while rendering '
+        "(overflow, clipped text, missing fonts, failed taps), an outline of every node's box and text, and the "
         'screenshots. Fix the problems, then render again.',
     'inputSchema': {
       'type': 'object',
@@ -173,12 +167,6 @@ Future<(List<Map<String, Object?>>, bool)> _call(String name, Map args) async {
       }
       final (code, text) = docsText([if (args['query'] case final String q when q.isNotEmpty) q, if (args['full'] == true) '--full']);
       return ([_text(text)], code != 0);
-    case 'codelessly_validate':
-      await _ensureServer();
-      final d = _callDir('validate');
-      final doc = _documentArg(args, d);
-      final (code, out) = await runCaptured(renderScript, [doc, '--out', '${d.path}/out', '--validate-only']);
-      return ([_text('${out.trim()}\n\n(files: ${d.path})')], code == 2);
     case 'codelessly_render':
       await _ensureServer();
       final d = _callDir('render');
@@ -280,7 +268,7 @@ Future<void> _handle(Map msg) async {
 
 Future<int> mcpMain(List<String> argv) async {
   if (argv.contains('-h') || argv.contains('--help')) {
-    stdout.writeln('tool/codelessly mcp: the toolkit as an MCP server on stdio (codelessly_docs, codelessly_validate, '
+    stdout.writeln('tool/codelessly mcp: the toolkit as an MCP server on stdio (codelessly_docs, '
         'codelessly_render, codelessly_flatten, codelessly_states).');
     return 0;
   }

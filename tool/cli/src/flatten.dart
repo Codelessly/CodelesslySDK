@@ -1,4 +1,4 @@
-// Nested node trees to a flat layout document (schema 3), the form the validator and the renderer read.
+// Nested node trees to a flat layout document (schema 3), the form the renderer reads.
 //
 //   tool/codelessly flatten <tree.json | -> [--out doc.json] [--size 390x844] [--screen name] [--keys-out keys.json]
 //

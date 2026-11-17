@@ -25,7 +25,7 @@ CodelesslyView(session: session);
 
 | | |
 |---|---|
-| `UiSession({document, catalog = Catalog.core, profile = TrustProfile.agent, check = catalogCheck, arrivalFade, holdEmptyContainers = true})` | A document an agent writes. `check: strictEditCheck()` (from `package:codelessly_api/validate.dart`) runs the strict validator on each op's nodes. |
+| `UiSession({document, catalog = Catalog.core, profile = TrustProfile.agent, check = catalogCheck, arrivalFade, holdEmptyContainers = true})` | A document an agent writes. `check` is what each op's nodes pass (`catalogCheck`: types, keys and values against the catalog). |
 | `apply(ops, {author, baseRev, atomic})` | One batch (a list of `EditOp`s or the tool input JSON): one revision, one undo step. Returns the `EditResult`. |
 | `applyStream(deltas, {author, baseRev, map, onOp})` | A streamed tool input: each op applies the moment its text is complete; one revision and one undo step for the whole stream; ids still pending at the end are `dangling_child` errors in the result. `map` rewrites each op first (asset URLs to a CDN); `onOp` reports each op. |
 | `outline()`, `read(input)` | What a model reads (the `ui_read` tool). |
@@ -121,9 +121,7 @@ if (outcomes.any((o) => o.added)) {
 ```
 
 A design is kept only when it is a component of the name asked for, made of node types the session has, calls
-no cycle, and passes `validate` and `check`. Give `validate` the strict validator of
-`package:codelessly_api/validate.dart` (the session's own code is the core only, so it is the host's to pass;
-the class's comment has the four lines). A refused design is asked for again
+no cycle, and passes `validate` and `check` (checks of the host's own, when it gives any). A refused design is asked for again
 with the problems as `notes`, up to `maxTries`. A block already being designed is not asked for twice. Designing
 one takes a strong model two to four minutes (`examples/showcase/on-demand`); composing with it afterwards
 costs nothing extra.

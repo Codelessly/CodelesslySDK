@@ -1,6 +1,6 @@
 // Expands recorded notation answers again with the current parser: for each
 // `<cell>.notation[.retryN].jsonl` in a folder, the last turn's text becomes
-// `<out>/<cell>.json`, and a line says how it validates. No model is called.
+// `<out>/<cell>.json`, and a line says what the parser could not read. No model is called.
 //
 //   dart run tool/reexpand_notation.dart <recordings dir> <out dir>
 import 'dart:convert';
@@ -8,7 +8,6 @@ import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_api/notation.dart';
-import 'package:codelessly_api/validate.dart';
 
 void main(List<String> args) {
   final dir = Directory(args[0]), out = Directory(args[1])..createSync(recursive: true);
@@ -21,11 +20,10 @@ void main(List<String> args) {
   for (final e in last.entries) {
     final meta = (jsonDecode(e.value.readAsLinesSync().first) as Map)['meta'] as Map;
     final r = Catalog.run(standardCatalog, () => parseNotation(meta['text'] as String, catalog: standardCatalog));
-    final errors = Catalog.run(standardCatalog, () => validateDocument(r.document)).where((d) => d.severity == Severity.error).toList();
     File('${out.path}/${e.key}.json').writeAsStringSync(jsonEncode(r.document));
-    final clean = r.issues.isEmpty && errors.isEmpty;
+    final clean = r.issues.isEmpty;
     if (clean) ok++;
-    stdout.writeln('${clean ? 'ok ' : 'ERR'} ${e.key}${clean ? '' : '  ${[...r.issues.take(2), ...errors.take(2).map((d) => '${d.code.name} ${d.path}')].join(' | ')}'}');
+    stdout.writeln('${clean ? 'ok ' : 'ERR'} ${e.key}${clean ? '' : '  ${r.issues.take(2).join(' | ')}'}');
   }
   stdout.writeln('$ok of ${last.length} clean');
 }

@@ -1,7 +1,7 @@
 // Records one real generation as replayable streams: the exact ui_apply
 // input deltas with their times, plus usage and every lookup (ui_docs,
 // ui_read) the model made first. Then checks the ops as a session applies
-// them (strict validation per op, the end of the stream, the lints a
+// them (the catalog check per op, the end of the stream, the lints a
 // finished UI gets: a button with no label, text in its background's color,
 // characters the font cannot draw), and while anything is rejected, pending
 // or linted, sends the tool result back (what the document holds, and "fix
@@ -14,8 +14,8 @@
 //
 // With --design-system (compact prompt only) the UI is made with that design
 // system, as the app's DESIGN_SYSTEM does: the system prompt and the ui_docs
-// answers are generated from it, and each op is validated against its
-// components and tokens (the retries too). The recordings' meta names it
+// answers are generated from it, and each op is checked against its
+// components (the retries too). The recordings' meta names it
 // (`designSystem`: id, name, version), so the replay renders with it. An id
 // is looked up in the SDK's design_systems/ (ssui: ../../design_systems/ssui).
 //

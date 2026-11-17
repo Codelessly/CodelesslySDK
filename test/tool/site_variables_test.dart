@@ -1,7 +1,7 @@
 // A site's variables written by name ({"cart": [], "count": 2}) or as
 // records without a type: the render command, the runtime and the notation's
 // expander read them as the values they are, and a record none of them can
-// read is reported, never thrown.
+// read is never thrown.
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' show Size;
@@ -86,27 +86,6 @@ void main() {
     expect(text, '4 items, 10 next, team, 0 tags');
   });
 
-  testWidgets('a record that cannot be read is one precise error on site.json', (tester) async {
-    final (report, _) = await render(tester, [
-      {'name': 'cart', 'type': 'integer', 'value': []},
-      'count',
-      {'name': 'count', 'value': 1},
-      {'name': 'plan', 'value': ''},
-      {'name': 'tags', 'value': []},
-    ]);
-    final found = [
-      for (final d in report.diagnostics)
-        if (d['file'] == 'site.json') '${d['code']} ${d['path']}',
-    ];
-    expect(found, ['invalid_variable /variables/0/value', 'invalid_variable /variables/1']);
-    expect(report.diagnostics.firstWhere((d) => d['path'] == '/variables/1')['message'], contains('{"name": "cart", "value": []}'));
-  });
-
-  testWidgets('"variables" that is neither form is an error, not an exception', (tester) async {
-    final (report, _) = await render(tester, 'cart');
-    expect(report.diagnostics.where((d) => d['file'] == 'site.json').single['code'], 'invalid_variable');
-  });
-
   // The notation's expander beside a site.json whose variables are written
   // by name: the page uses them without declaring them, and nothing throws.
   test('expand.dart reads a site\'s variables written by name', () async {
@@ -129,10 +108,9 @@ void main() {
     final doc = jsonDecode(File('${dir.path}/home.json').readAsStringSync()) as Map;
     expect(jsonEncode(doc['variables'] ?? const {}), isNot(contains('"cart"')), reason: 'the site\'s variable is not declared again on the page');
 
-    // A manifest whose variables are unreadable: one line each, no stack trace.
+    // A manifest whose variables are unreadable: no stack trace.
     File('${dir.path}/site.json').writeAsStringSync(jsonEncode({'schema': 3, 'variables': 'cart'}));
     final bad = await Process.run(dart.path, ['run', 'tool/notation/expand.dart', '${dir.path}/home.txt', '--out', '${dir.path}/home.json']);
     expect(bad.stderr, isNot(contains('Unhandled exception')));
-    expect(bad.stderr, contains('"variables" is'));
   }, timeout: const Timeout(Duration(minutes: 5)));
 }

@@ -1,6 +1,6 @@
-// A reply whose UI validates but shows nothing: the result the model reads
+// A reply whose UI applies but shows nothing: the result the model reads
 // next (EditTurn's tool result) carries what the drawn UI shows wrong
-// (UiSession.shownDiagnostics), and the session checks formulas as it goes.
+// (UiSession.shownDiagnostics).
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -20,7 +20,7 @@ class _Fixed implements StreamSource {
 }
 
 void main() {
-  testWidgets('a card whose list reads a formula that does not parse: the reply\'s result says so, and that the list shows nothing',
+  testWidgets('a card whose list reads a formula that does not parse: the reply\'s result says that the list shows nothing',
       (tester) async {
     const ops = '{"ops": ['
         '{"op": "roots", "roots": ["c"]},'
@@ -43,7 +43,7 @@ void main() {
     final result = chat.messages.whereType<ReplyMessage>().single.result!;
     final json = result.toModelJson();
     final rejected = [for (final d in json['rejected']! as List) '${(d as Map)['code']} ${d['path']}'];
-    expect(rejected, containsAll(['expression_syntax /variables/c/0/formula', 'list_empty /nodes/grid/bind~1data']));
+    expect(rejected, contains('list_empty /nodes/grid/bind~1data'));
     expect(json['next'], isNotNull, reason: 'the model is told to fix it');
   });
 }

@@ -1,6 +1,6 @@
 # The render command
 
-`tool/render/render.sh` checks Codelessly layout documents strictly and renders them with this SDK, headless,
+`tool/render/render.sh` renders Codelessly layout documents with this SDK, headless,
 so a person or an agent writing documents by hand can see what they made and what is wrong with it.
 
 ```sh
@@ -9,18 +9,16 @@ tool/render/render.sh <document.json | directory> [...] --out <dir> [options]
 
 The documents themselves are described by codelessly_api's reference: start with `docs/reference/STARTER.md` (the
 base, which ends with an index of the feature pages); `docs/reference/render.md` is this command's page there
-(the loop of checking, capturing states, every validation code).
+(the loop of checking and capturing states).
 
 It:
 
-1. **validates** every document strictly (`validateProject` from `package:codelessly_api/validate.dart`, with the
-   SDK's own formula parser for `${= ...}`), printing each problem with a code, a JSON pointer and a suggestion;
-2. **publishes** the documents as the editor does: each document is a page; canvases that share `props.screen`
+1. **publishes** the documents as the editor does: each document is a page; canvases that share `props.screen`
    are one screen with a canvas per breakpoint (`props.breakpoint`); every other canvas is a screen of its own;
-3. **renders** every screen with `CodelesslyWidget` (bindings, variables, conditions, breakpoints and reactions
+2. **renders** every screen with `CodelesslyWidget` (bindings, variables, conditions, breakpoints and reactions
    run as in a published app) at each size, writing `<out>/<screen>@<w>x<h>.png`;
-4. **reports** what only rendering shows (below), tied to node ids;
-5. writes everything to `<out>/diagnostics.json` (`<out>/diagnostics-<label>.json` with `--label`, so one run per
+3. **reports** what only rendering shows (below), tied to node ids;
+4. writes everything to `<out>/diagnostics.json` (`<out>/diagnostics-<label>.json` with `--label`, so one run per
    state keeps each state's) and **exits 1 when there are errors**, 0 when there are only warnings or none, 2 for
    bad arguments.
 
@@ -30,10 +28,10 @@ manifest's `pages`, else its `.json` files), its components (the manifest's `com
 by its path, the call ids from the page down and then its id (`--tap plans/card1/cta`; `#n` picks the n-th copy a
 list repeats: `--tap faq/fq#1`); `--dump-layout` writes each such node's `path`.
 
-The manifest's `theme` (named colors and text styles, codelessly_api guide "the theme") is validated, published as
+The manifest's `theme` (named colors and text styles, codelessly_api guide "the theme") is published as
 the project's theme and resolved as an app resolves it: at each size its media rules, the fonts its styles name.
 A manifest that names a design system (`"designSystem": "../design_systems/ssui"`, its folder relative to
-`site.json`) gets its components (callable by type, validated and rendered as the site's own; `--components-all`
+`site.json`) gets its components (callable by type, rendered as the site's own; `--components-all`
 renders them too), its tokens as the base theme the site's `theme` is merged over, and its fonts.
 
 A directory is every `.json` file in it (not those starting with `_`, nor `diagnostics*.json`), as the pages of one
@@ -77,7 +75,6 @@ site: navigation may name a canvas of another page.
 | `--component <Type>` | Render one component of the site alone: once per preview (at its size), else with its defaults at each size. |
 | `--props '<json>'` | With `--component`: its parameters, as a call's `props`, at each size. A `variable` parameter becomes a page variable of the same name. |
 | `--slots <file>` | With `--component`: what the call passes, `{"children": [ids], "slots": {"name": id}, "nodes": {...}}`. |
-| `--validate-only` | Only validate. |
 
 Steps (`--tap`, `--double-tap`, `--long-press`, `--right-click`, `--hover`, `--focus`, `--unfocus`, `--key`, `--type`, `--set`, `--scroll`, `--drag`, `--wheel`, `--pinch`, `--navigate`, `--reload`, `--wait`) run in the order given, after the screen
 has loaded and before the capture, at every size. Each step settles about a second; before the capture, number variables still counting (`animate`
@@ -128,16 +125,13 @@ tabbed into, an overlay a tap opened). To walk a page by keyboard, add one `--ke
 
 ## What it reports
 
-Validation codes are listed in the API reference (codelessly_api's `docs/reference/render.md`, "Validation
-codes"; the reference starts with `docs/reference/STARTER.md`, the base). Links to one missing screen are reported
-once per screen (`unknown_screen`, with how many links name it and where), not once per link. A page `site.json`
-lists whose file is not written yet is one `page_not_written` warning per file (with the links that name its
-screen, the file's name), not an error: write the site page by page. The render step adds:
+A page `site.json` lists whose file is not written yet is one `page_not_written` warning per file, not an
+error: write the site page by page. The codes:
 
 | Code | Severity | Meaning |
 |---|---|---|
 | `invalid_json` | error | A file is not valid JSON (with line and column). |
-| `page_not_written` | warning | A page `site.json` lists has no file yet: once per file, with how many links name its screen and where (they are checked once it is written). |
+| `page_not_written` | warning | A page `site.json` lists has no file yet: once per file. |
 | `design_system_missing` | error | The design system `site.json` names (`"designSystem"`, a folder relative to it) has no readable `design_system.json`. |
 | `no_documents` | error | No `.json` documents at the paths given. |
 | `unknown_screen_arg` | error | `--screen` names no canvas, screen or layout. |
