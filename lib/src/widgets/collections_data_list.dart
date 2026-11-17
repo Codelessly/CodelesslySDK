@@ -394,6 +394,7 @@ class DataListViewState extends State<DataListView> {
       child = SwipeActionsBox(
         key: ValueKey(('swipe', key)),
         model: swipe,
+        semanticLabel: 'Swipe actions for ${_swipeRowLabel(item, index)}',
         offered: (action) => _r.holds(action.when, item: item, index: index),
         onAction: (action) => _onSwipe(action, index, item),
         textDefault: _node.behaviors.defaultTextStyle,
@@ -404,6 +405,17 @@ class DataListViewState extends State<DataListView> {
   }
 
   void _onSwipe(SwipeAction action, int index, Object? item) => _m.onSwipe(action, index, item);
+
+  String _swipeRowLabel(Object? item, int index) {
+    if (item is Map) {
+      for (final field in const ['label', 'name', 'title', 'id']) {
+        final value = item[field];
+        if (value != null && '$value'.trim().isNotEmpty) return '$value';
+      }
+    }
+    if (item is String && item.trim().isNotEmpty) return item;
+    return 'row ${index + 1}';
+  }
   void _undo(PendingSwipe pending) => _m.undo(pending);
   List<ListSection>? _sectionsFor(List<Object?> items) => _m.sectionsFor(items);
   List<Object?> _indexKeys(List<ListSection> sections) => _m.indexKeys(sections);
