@@ -51,7 +51,7 @@ App
               Row between middle
                 Text "{d.cur}°" size=44 weight=700 color=#FFFAF5F0
                 Text.small "now" color=#FFD9D4CC
-              RangeSlider @d.heat @d.cool min=55 max=85 labels=["Heat to {d.heat}°","Cool to {d.cool}°"] onChange={devices=updateWhere(devices,x=>x.id==d.id,x=>with(with(x,"heat",result[0]),"cool",result[1]))}
+              RangeSlider lo={d.heat} hi={d.cool} min=55 max=85 labels=["Heat to {d.heat}°","Cool to {d.cool}°"] onChange={devices=updateWhere(devices,x=>x.id==d.id,x=>with(with(x,"heat",result[0]),"cool",result[1]))}
             if d.online && d.kind=="blind"
               Text "{d.pos}% open" size=24 weight=700 color=#FFFAF5F0
               Slider @d.pos min=0 max=100 step=5

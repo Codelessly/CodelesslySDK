@@ -6,7 +6,7 @@ state flagged=[]
 state seen=[0]
 state answers=["",[],["Mitochondria","Nucleus","Ribosome","Golgi"],[],"",""]
 state qs=[{"topic":"Cell biology","type":"single","text":"Which organelle produces most of a cell's ATP?","options":["Nucleus","Mitochondrion","Ribosome","Lysosome"]},{"topic":"Cell biology","type":"multi","text":"Select all structures found in a plant cell but not in an animal cell.","options":["Cell wall","Chloroplast","Centriole","Large central vacuole"]},{"topic":"Genetics","type":"order","text":"Put the steps of protein synthesis in order. Drag to reorder.","options":["Mitochondria","Nucleus","Ribosome","Golgi"]},{"topic":"Genetics","type":"match","text":"Match each molecule to its role.","left":["DNA","mRNA","tRNA","rRNA"],"right":["Stores the genetic code","Carries the code to the ribosome","Delivers amino acids","Forms the ribosome"]},{"topic":"Genetics","type":"blank","text":"The base pairing rule says adenine always pairs with ____ in DNA."},{"topic":"Anatomy","type":"spot","text":"Tap the part of the heart that pumps blood to the body.","src":"https://img.viva.example/heart-diagram.png","regions":["Right atrium","Right ventricle","Left atrium","Left ventricle","Aorta","Vena cava"]}]
-state pairs=""
+state pairs=[]
 every 1s when running onTick={remaining=max(0,remaining-1); remaining==0 ? {running=false; go result} : {}}
 App
   Sidebar

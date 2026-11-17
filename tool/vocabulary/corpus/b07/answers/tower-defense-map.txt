@@ -30,7 +30,7 @@ Page
             Heading "{lv.name}" level=3
             Badge.neutral "{lv.waves} waves"
           Row gap=4
-            Rating value=@lv.stars max=3 readonly
+            Rating value={lv.stars} max=3 readonly
           if lv.open
             Button "Play" onTap={level=lv.id; go battle}
           if !lv.open

@@ -114,7 +114,7 @@ Page
               Card gap=4
                 Row between
                   Text.strong "{r.who}"
-                  Rating value=@r.stars readonly
+                  Rating value={r.stars} readonly
                 Text.muted "{r.text}"
   Section
     Column gap=16
@@ -265,7 +265,7 @@ App
       Heading "Checkout" level=3 font=serif
       Chip "Held {floor(holdLeft/60)}:{fixed(holdLeft%60,0)}" icon="timer" color=#FFD4A64A
     Column pad=24 gap=16 scroll maxw=960
-      Stepper.progress steps=["Details","Verify","Pay"] value=@step
+      Stepper.progress steps=["Details","Verify","Pay"] value={step}
       Row gap=24 top
         Column grow gap=16
           if step==1

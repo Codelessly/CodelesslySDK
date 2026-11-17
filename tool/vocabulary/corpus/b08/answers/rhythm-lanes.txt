@@ -25,7 +25,7 @@ App
                   Badge.primary "{s.grade}"
                 Text.muted "{s.artist} - {s.bpm} BPM"
                 Row gap=2
-                  Rating value=@s.stars max=10 readonly
+                  Rating value={s.stars} max=10 readonly
         Card w=320 gap=12
           Heading "{find(songs,s=>s.id==at).title}" level=3
           Text.muted "{find(songs,s=>s.id==at).artist}"

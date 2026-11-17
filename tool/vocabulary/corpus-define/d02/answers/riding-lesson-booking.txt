@@ -178,7 +178,7 @@ Page
             Column gap=2
               Text.strong "{note.coach}"
               Text.caption "{note.date}"
-          Rating value=@note.stars max=5
+          Rating value={note.stars} max=5
         Text "{note.text}"
       Input "Reply to your coach" @reply multiline
       Button "Send reply" onTap={reply=="" ? toast "Write a reply first" : {emit replyToCoach reply; reply=""; toast "Reply sent"}}

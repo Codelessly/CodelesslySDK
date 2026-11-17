@@ -65,7 +65,7 @@ App
         Button "Continue" onTap={q<3 ? q=q+1 : step=4; go documents}
 
 ### Documents
-state fixValue=""
+state fixValue=0
 App
   Sidebar
     Brand "Returnly" icon="receipt_long"
@@ -108,7 +108,7 @@ App
     Button "Save" onTap={docs=updateWhere(docs,x=>x.id==sel,x=>with(x,"amount",fixValue)); close}
 
 ### Review
-state editValue=""
+state editValue=0
 App
   Sidebar
     Brand "Returnly" icon="receipt_long"
@@ -176,7 +176,7 @@ App
 
 ### Sign
 state sigName=""
-state sigData=""
+state sigData=[]
 state agree=false
 App
   Sidebar

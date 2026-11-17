@@ -38,7 +38,7 @@ App
               Avatar "{p.name}" size=36
               Text.strong "{p.name}"
             Row gap=16 middle
-              Rating value=@p.skill max=5 onChange={players=updateWhere(players,r=>r.id==p.id,r=>with(r,"skill",result))}
+              Rating value={p.skill} max=5 onChange={players=updateWhere(players,r=>r.id==p.id,r=>with(r,"skill",result))}
               Input type=number @p.skill w=64
               IconButton "more_vert" tooltip="More" onTap={sel=p.id; open rowMenu}
       if length(players)<4

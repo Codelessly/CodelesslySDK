@@ -258,4 +258,4 @@ App
         IconButton "text_decrease" tooltip="Smaller" onTap={fontSize=max(12,fontSize-2)}
         Text.strong "{fontSize} pt"
         IconButton "text_increase" tooltip="Larger" onTap={fontSize=min(32,fontSize+2)}
-      SegmentedButton @theme items=["Light","Sepia","Dark"]
+      SegmentedButton bind=theme items=["Light","Sepia","Dark"]

@@ -104,7 +104,7 @@ state dev=false
 state staging=false
 state reason=""
 state approver=""
-define RolloutBar "label" value=0 @value
+define RolloutBar "label" @value=0
   state value=0
   Column gap=4
     Row between

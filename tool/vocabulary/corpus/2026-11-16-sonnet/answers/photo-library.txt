@@ -45,7 +45,7 @@ App
 state info=false
 state zoom=1
 state compare=false
-state at=""
+state at=0
 Page
   Stack
     Zoomable @zoom pinch wheel doubleTap pan onSwipeLeft={at=min(at+1,59)} onSwipeRight={at=max(at-1,0)} onDragDown={go photos} onKey="Escape" onEscape={go photos}
@@ -177,7 +177,7 @@ App
       PhotoGrid photos={filter(photos,p=>contains(favs,p.id) && !p.deleted)} cols={gridSize} gap=2 onOpen={at=result; go viewer}
 
 ### Recently deleted
-state sel=""
+state sel=[]
 App
   Main
     Nav

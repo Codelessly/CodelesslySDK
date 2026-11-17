@@ -103,7 +103,7 @@ App
         Row gap=8 center
           Badge.success "{length(known)} known"
           Badge.warning "{length(again)} again"
-        SwipeCard @drag threshold=120 tintRight=#FF86EFAC tintLeft=#FFFCA5A5 follow onSwipeRight={known=append(known,at); history=append(history,at); at=at+1; flipped=false} onSwipeLeft={again=append(again,at); history=append(history,at); at=at+1; flipped=false}
+        SwipeCard bind=drag threshold=120 tintRight=#FF86EFAC tintLeft=#FFFCA5A5 follow onSwipeRight={known=append(known,at); history=append(history,at); at=at+1; flipped=false} onSwipeLeft={again=append(again,at); history=append(history,at); at=at+1; flipped=false}
           FlipCard @flipped duration=450 onTap={flipped=!flipped} h=340 radius=40
             Front fill=#FF6D28D9
               Column center middle gap=12 pad=32
@@ -330,5 +330,5 @@ App
         Divider
         Column gap=8
           Text.strong "Theme"
-          SegmentedButton @theme items=["Light","Dark","Auto"]
+          SegmentedButton bind=theme items=["Light","Dark","Auto"]
       Button "Save" onTap={toast "Settings saved"}

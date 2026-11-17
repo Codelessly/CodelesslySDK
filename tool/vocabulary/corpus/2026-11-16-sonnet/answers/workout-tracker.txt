@@ -106,7 +106,7 @@ App
               Row gap=8
                 Button.outline "+15s" onTap={rest=rest+15; restTotal=restTotal+15}
                 Button.ghost "Skip" onTap={rest=0; resting=false}
-      Column reorder selected=@exercises handle=drag_handle onReorder={exercises=result} gap=16
+      Column reorder handle=drag_handle onReorder={exercises=result} gap=16
         each ex in exercises
           Card gap=12 fill=#FF161616 radius=24 key={ex.id}
             Row between middle
@@ -230,7 +230,7 @@ App
         Card fill=#FF161616 radius=24 gap=8 onTap={opened=h; open detail}
           Row between
             Text "{h.name}" size=24 weight=800 color=#FFFFFFFF
-            Rating value=@h.rating count=5 readonly size=18 color=#FFC6FF00
+            Rating value={h.rating} count=5 readonly size=18 color=#FFC6FF00
           Text.muted "{h.time}  {money(h.volume,'',0)} {unit}  {h.sets} sets"
   Dialog#detail "{opened.name}" "{opened.date}"
     Grid cols=3 gap=12
@@ -421,4 +421,4 @@ App
             Text.strong "Default rest" color=#FFFFFFFF
             Text.muted "{restDefault} seconds"
           Stepper @restDefault min=15 max=300 step=15 holdRepeat
-        SegmentedButton "Theme" @theme items=["dark","light","system"]
+        SegmentedButton "Theme" bind=theme items=["dark","light","system"]

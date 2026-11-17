@@ -185,7 +185,6 @@ App
       Button.destructive "Empty trash" onTap={notes=removeWhere(notes,x=>x.trashed); toast "Trash emptied"; close}
 
 ### Settings
-state theme=""
 state fontSize=14
 state sort=""
 App
@@ -201,7 +200,7 @@ App
     Column pad=24 gap=20 maxw=640
       Card gap=12
         Text.strong "Theme"
-        SegmentedButton @theme items=["Paper","Sepia","Dark"]
+        SegmentedButton bind=theme items=["Paper","Sepia","Dark"]
       Card gap=12
         Text.strong "Font size"
         Slider @fontSize min=14 max=28 step=1

@@ -111,7 +111,7 @@ App
             Text.strong "Live image, M31"
             Text.muted "{stacked} stacked, {duration(stacked*exposure)} integration"
           LiveImage src="https://astrolabe.local/live/current.jpg" sharpness={clamp(stacked/frames,0.05,1)} stretch={true} h=380
-          Progress value={progress} value={captured/frames}
+          Progress value={captured/frames}
           Row between
             Text.caption "Signal to noise {fixed(sqrt(stacked+1),1)}"
             Text.caption "Frame {captured} of {frames}"

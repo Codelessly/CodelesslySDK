@@ -109,7 +109,7 @@ Dialog#crop "Crop photo" "Drag the frame, zoom to fit"
     Button "Apply crop" onTap={emit crop {"id":cropId,"ratio":cropRatio,"zoom":cropZoom,"x":cropX,"y":cropY}; toast "Crop saved"; close}
 
 // shows a framed picture with a ratio frame; the frame drags and the zoom scales the picture, drawn here as a stack with sliders for the offset
-define CropFrame src="" ratio="3:2" zoom=1 x=@ y=@
+define CropFrame src="" ratio="3:2" zoom=1 x=@0.5 y=@0.5
   state fx=0.5
   state fy=0.5
   Column gap=8
@@ -118,10 +118,10 @@ define CropFrame src="" ratio="3:2" zoom=1 x=@ y=@
       Box w={ratio=="1:1" ? 200 : 240} h={ratio=="2:3" ? 260 : 170} border=2 drag=frame(1)
     Row gap=8 middle
       Text.caption "Left to right"
-      Slider @fx min=0 max=1 grow onChange={bindX=result}
+      Slider @fx min=0 max=1 grow onChange={x=result}
     Row gap=8 middle
       Text.caption "Top to bottom"
-      Slider @fy min=0 max=1 grow onChange={bindY=result}
+      Slider @fy min=0 max=1 grow onChange={y=result}
 
 define Stepper @value min=0 max=99 onChange
   Row gap=4 middle

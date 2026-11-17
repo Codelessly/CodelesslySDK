@@ -89,7 +89,7 @@ Page
           IconButton "{photos[at].liked ? 'favorite' : 'favorite_border'}" tooltip="Like" onTap={photos=updateWhere(photos,x=>x.id==photos[at].id,x=>with(with(x,"liked",!x.liked),"likes",x.liked?x.likes-1:x.likes+1))}
           Text.strong "{photos[at].likes} likes"
         Text.fieldLabel "Your rating"
-        Rating @myRating max=5 value=@photos[at].myRating onChange={photos=updateWhere(photos,x=>x.id==photos[at].id,x=>with(x,"myRating",result)); toast "Rated {result} of 5"}
+        Rating @myRating max=5 value={photos[at].myRating} onChange={photos=updateWhere(photos,x=>x.id==photos[at].id,x=>with(x,"myRating",result)); toast "Rated {result} of 5"}
         Text.muted "Average {fixed(sum(photos[at].ratings,r=>r)/length(photos[at].ratings),1)} from {length(photos[at].ratings)} votes"
         Button.outline "Download" icon="download" onTap={emit download photos[at].id}
 

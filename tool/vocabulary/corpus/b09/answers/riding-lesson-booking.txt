@@ -118,7 +118,7 @@ App
                 Text.muted "{h.breed}, {h.hands} hands"
                 Row gap=6 middle
                   Text.caption "Calm"
-                  Rating value=@h.calm max=5 icon="circle" readonly
+                  Rating value={h.calm} max=5 icon="circle" readonly
               Column gap=4 end
                 Text.small "Max {h.limit} kg"
                 if riderWeight>h.limit

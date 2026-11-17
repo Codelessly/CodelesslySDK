@@ -216,7 +216,7 @@ App
         Text.small "A"
         Slider @fontSize min=12 max=32 grow
         Text "A" size=24
-      SegmentedButton items=["Light","Sepia","Dark"] @theme
+      SegmentedButton items=["Light","Sepia","Dark"] bind=theme
   Sheet#marks "Bookmarks"
     if length(bookmarks)==0
       Text.muted "No bookmarks yet."

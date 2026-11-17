@@ -68,7 +68,7 @@ Sheet#contacts "Trusted contacts"
   Input "Search contacts" @q
   each p in filter(people,x=>contains(lower(x.name),lower(q)) || contains(lower(x.job),lower(q)))
     ListTile "{p.name}" "{p.job}" icon="person"
-      Rating value=@p.rating readonly
+      Rating value={p.rating} readonly
       IconButton "call" tooltip="Call" onTap={link "tel:{p.phone}"}
 
 ### Home plan

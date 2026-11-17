@@ -17,7 +17,6 @@ state hiB=0
 state midB=0
 state loB=0
 state master=78
-state device=""
 state buffer=""
 state cuemix=false
 App
@@ -82,7 +81,7 @@ App
           Button.outline "Load to A" onTap={titleA="Neon Tides"; bpmA=128; keyA="8B"; toast "Loaded to deck A"}
           Button.outline "Load to B" onTap={titleB="Neon Tides"; bpmB=128; keyB="8B"; toast "Loaded to deck B"}
   Dialog#audio "Audio settings" "Output and latency"
-    Select "Output device" items=["Built-in output","USB interface","Bluetooth speaker"] @device
+    Select "Output device" items=["Built-in output","USB interface","Bluetooth speaker"] bind=device
     Select "Buffer size" items=["128 samples","256 samples","512 samples"] @buffer
     Toggle "Headphone cue mix" @cuemix
     Button "Done" onTap={close}

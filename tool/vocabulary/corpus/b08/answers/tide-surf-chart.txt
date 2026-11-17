@@ -108,7 +108,7 @@ App
       Card gap=8
         each s in filter(spots, x => contains(lower(x.name), lower(q)) && x.stars >= minStars)
           ListTile "{s.name}" "{s.height}, {s.wind}, {s.temp} F" icon="place" selected={sel==s.name} onTap={sel=s.name}
-            Rating value=@s.stars max=5
+            Rating value={s.stars} max=5
             IconButton "more_vert" onTap={sel=s.name; open spotMenu}
   Menu#spotMenu end
     MenuItem "Open forecast" icon="water" onTap={go today}
