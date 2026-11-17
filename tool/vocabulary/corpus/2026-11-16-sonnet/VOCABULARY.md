@@ -4,32 +4,32 @@ Written by `tool/notation/notation.sh vocabulary` (codelessly_api docs/design/19
 
 20 files, 105 screens, expanded 1280 wide with Cards; aliases: built-in + Cards.
 
-4657 lines start with a word: 3784 a core word (81.3%), 541 a Cards component (11.6%), 145 an alias of a word we have (3.1%), 187 a word we do not have (4.0%), which stands in. 1031 more are statements (state, if, each, key, every).
+4657 lines start with a word: 3784 a core word (81.3%), 541 a Cards component (11.6%), 147 an alias of a word we have (3.2%), 185 a word we do not have (4.0%), which stands in. 1031 more are statements (state, if, each, key, every).
 
 ## By file
 
 | file | screens | lines | core | component | alias | unknown | grammar issues | does not validate |
 |---|---|---|---|---|---|---|---|---|
-| admin-console | 7 | 325 | 277 | 34 | 6 | 8 | 20 | 2 |
-| calendar-app | 6 | 187 | 129 | 27 | 26 | 5 | 22 | 19 |
-| clip-editor | 2 | 189 | 130 | 29 | 17 | 13 | 17 | 1 |
+| admin-console | 7 | 325 | 277 | 34 | 6 | 8 | 6 | 2 |
+| calendar-app | 6 | 187 | 129 | 27 | 26 | 5 | 15 | 19 |
+| clip-editor | 2 | 189 | 130 | 29 | 17 | 13 | 2 | 1 |
 | flashcards | 6 | 264 | 228 | 21 | 9 | 6 | 1 | 4 |
-| food-ordering | 6 | 261 | 227 | 19 | 0 | 15 | 5 | 0 |
-| kanban-board | 3 | 215 | 187 | 19 | 9 | 0 | 18 | 4 |
+| food-ordering | 6 | 261 | 227 | 19 | 2 | 13 | 5 | 0 |
+| kanban-board | 3 | 215 | 187 | 19 | 9 | 0 | 15 | 6 |
 | mail-client | 4 | 179 | 133 | 34 | 8 | 4 | 6 | 3 |
 | meal-planner | 7 | 349 | 291 | 33 | 14 | 11 | 19 | 0 |
 | money-tracker | 6 | 229 | 204 | 23 | 0 | 2 | 2 | 0 |
-| music-player | 8 | 297 | 235 | 49 | 1 | 12 | 5 | 4 |
-| notes-app | 4 | 174 | 131 | 29 | 2 | 12 | 11 | 4 |
+| music-player | 8 | 297 | 235 | 49 | 1 | 12 | 3 | 4 |
+| notes-app | 4 | 174 | 131 | 29 | 2 | 12 | 7 | 4 |
 | photo-library | 7 | 140 | 108 | 24 | 0 | 8 | 3 | 0 |
 | scrolly-story | 1 | 183 | 117 | 4 | 0 | 62 | 5 | 1 |
 | seat-booking | 6 | 268 | 243 | 20 | 0 | 5 | 1 | 1 |
-| smart-home | 7 | 314 | 270 | 42 | 1 | 1 | 17 | 0 |
-| spreadsheet | 1 | 94 | 44 | 27 | 20 | 3 | 6 | 11 |
-| story-reader | 5 | 162 | 125 | 25 | 2 | 10 | 9 | 8 |
-| support-desk | 6 | 322 | 275 | 31 | 16 | 0 | 7 | 0 |
+| smart-home | 7 | 314 | 270 | 42 | 1 | 1 | 6 | 0 |
+| spreadsheet | 1 | 94 | 44 | 27 | 20 | 3 | 6 | 15 |
+| story-reader | 5 | 162 | 125 | 25 | 2 | 10 | 5 | 8 |
+| support-desk | 6 | 322 | 275 | 31 | 16 | 0 | 4 | 0 |
 | team-chat | 5 | 183 | 139 | 27 | 8 | 9 | 3 | 2 |
-| workout-tracker | 8 | 322 | 291 | 24 | 6 | 1 | 7 | 6 |
+| workout-tracker | 8 | 322 | 291 | 24 | 6 | 1 | 3 | 6 |
 
 ## Words we do not have, by how many files reached for them
 
@@ -63,7 +63,6 @@ Written by `tool/notation/notation.sh vocabulary` (codelessly_api docs/design/19
 | 1 | 2 | Ruler | markers ×2, unit ×2, loopA, loopB, loopVisible |  | onScrub ×2, onLoopChange, onMarkerTap |  | `Ruler unit="mm:ss" loopA={loopA} loopB={loopB} loopVisible={loopOn} onLoopChange={loopA=result.a; loopB=result.b} onScrub={playhead=result} markers={markers} onMarkerTap={playhead=result.t}` |
 | 1 | 2 | Scene | "text" ×2, animate, color, duration, fill, h |  |  |  | `Scene "{item.scene}" color=#33FFF4E0 animate=slide-up duration=700` |
 | 1 | 2 | SortableList | drop ×2, group ×2, items ×2 | keyboard ×2 | onDrop ×2, onKeyMoveSide ×2, onReorder ×2 | ListTile ×2 | `SortableList#listL items={find(teams,t=>t.id==left).members} group="roster" drop=roster keyboard onReorder={teams=updateWhere(teams,t=>t.id==left,t=>with(t,"members",result)); announce "Moved to position {result.index...` |
-| 1 | 2 | StickyBar | visible ×2 | bottom ×2 |  | Row ×2 | `StickyBar bottom visible={length(cart)>0}` |
 | 1 | 2 | TimeBlock | date ×2, fill ×2, from ×2, pad ×2, radius ×2, to ×2 |  | onTap ×2 | Text ×4 | `TimeBlock date={e.start} from={e.from} to={e.to} fill={find(cals,c=>c.id==e.cal).color} radius=6 pad=6 onTap={draft=e; open event}` |
 | 1 | 2 | TimeGrid | days ×2, endHour ×2, firstDay ×2, gutter ×2, hourHeight ×2, nowColor ×2, nowLine ×2, startHour ×2 | scroll ×2 | onSlotTap ×2 | TimeBlock ×2 | `TimeGrid scroll startHour=6 endHour=22 hourHeight=48 days=7 firstDay={startOfWeek(cursor)} nowLine={nowTime} nowColor=#FFDC2626 gutter=56 onSlotTap={draft=with(with(with(draft,"start",result.date),"end",result.date),"...` |
 | 1 | 2 | Timeline | heads ×2, playhead ×2, zoom ×2 | scrollX ×2, wheelZoom | onScrubTo, onZoom | Playhead ×2, Ruler ×2, Track ×2, Selection | `Timeline zoom={zoom} playhead={playhead} onZoom={zoom=result} onScrubTo={playhead=result} scrollX heads=pinned wheelZoom` |
@@ -129,7 +128,6 @@ Unknown words that share a part of their name, side by side (files each).
 - **scene**: Scene (1), ParallaxScene (1)
 - **scroll**: ScrollProgress (1), ScrollTabs (1)
 - **selection**: Selection (1), SelectionBar (1)
-- **sticky**: Sticky (1), StickyBar (1)
 - **chapter**: ChapterRailItem (1), ChapterRail (1)
 - **command**: CommandItem (1), CommandList (1)
 - **drawing**: GlacierDrawing (1), MapDrawing (1)
@@ -157,6 +155,7 @@ Names read as a word we have (the alias table).
 | 1 | 3 |  | MiniCalendar | `Calendar` | `MiniCalendar bind=mini value={cursor} marks={map(events,e=>e.start)} onSelect={cursor=result; mini=result}` |
 | 1 | 2 |  | Highlight | `Text` | `Highlight "{s.head}" match={q}` |
 | 1 | 2 |  | HighlightText | `Text` | `HighlightText "{c.name}" query={q} weight=600` |
+| 1 | 2 |  | StickyBar | `Footer` | `StickyBar bottom visible={length(cart)>0}` |
 | 1 | 2 | Text | match | `mark` | `Highlight "{s.head}" match={q}` |
 | 1 | 2 | Text | query | `mark` | `HighlightText "{c.name}" query={q} weight=600` |
 | 1 | 1 |  | CalendarMonth | `Calendar` | `CalendarMonth offset={month} marked={studiedDays} markColor=#FFFACC15 markIcon="local_fire_department" todayRing=#FF6D28D9 animate=fade` |
@@ -174,12 +173,9 @@ Left out of the document.
 
 | files | uses | on | word | an example |
 |---|---|---|---|---|
-| 4 | 9 | IconButton | size | `IconButton "{playing?'pause':'play_arrow'}" size=large onTap={playing=!playing}` |
 | 4 | 5 | Ring | size | `Ring {d.learned/d.count} size=64 color=#FF6D28D9 track=#FFFFF4C2` |
-| 4 | 5 | Row | selected | `Row#row-{row.id} gap=8 pad=10 middle border-bottom=#FFF1F3F6 selected={contains(sel,row.id)} fill={contains(sel,row.id)?"#FFEAF1FE":"#FFFFFFFF"} focusable focusRing=#FF2F6FED onTap={sel=[row.id]; anchor=index} onTap.s...` |
 | 3 | 15 | Brand | color | `Brand "Tiffin" icon="ramen_dining" color=#FFE5391F` |
 | 3 | 6 | ListTile | leading | `ListTile e.title subtitle={e.allDay?"All day":"{e.from} - {e.to}"} leading={find(cals,c=>c.id==e.cal).color} onTap={draft=e; close; open event}` |
-| 3 | 5 | IconButton | selected | `IconButton "shuffle" selected={shuffleOn} onTap={shuffleOn=!shuffleOn}` |
 | 3 | 3 | Chip | size | `Chip "{t}" size=small` |
 | 3 | 3 | Column | bind | `Column w=fill pad=[20,8,20,24] gap=16 snap=["mini","full"] bind=sheet draggable show=phone` |
 | 3 | 3 | ListTile | trailing | `ListTile "{t.merchant}" subtitle="{t.cat}" trailing="{money(t.amt,cur,2)}"` |
@@ -214,7 +210,6 @@ Left out of the document.
 | 1 | 3 | Slider | stops | `Slider bind=detailLevel min=0 max=100 stops=[0,25,50,75,100] stopLabels=["Off","Dim","Mid","Bright","Full"] onChange={devices=updateWhere(devices,x=>x.id==sel,x=>with(with(x,"level",max(1,result)),"on",result>0))}` |
 | 1 | 3 | Toggle | size | `Toggle bind=d.on size=large` |
 | 1 | 2 | Box | live | `Box fill=#FFE8F0FE radius=8 pad=12 live=polite` |
-| 1 | 2 | Button | selected | `Button.outline "{p.a}" radius=20 disabled={contains(matched,p.a)} selected={pl==p.a} onTap={pl=p.a; matched=pr!="" && find(qs[qi].pairs,x=>x.a==p.a).b==pr ? append(matched,p.a) : matched; score=score+(pr!="" && find(q...` |
 | 1 | 2 | Checkbox | strike | `Checkbox "{round(i.q*serv/cur.serv,2)} {i.u} {i.n}" checked={contains(have,i.n)} strike={contains(have,i.n)} onChange={have=result?append(have,i.n):without(have,i.n)}` |
 | 1 | 2 | Column | handle | `Column reorder bind=exercises handle=drag_handle onReorder={exercises=result} gap=16` |
 | 1 | 2 | EmptyState | text | `EmptyState icon="{(fUnread\|\|fStarred\|\|fAttach) ? 'filter_list_off' : 'inbox'}" title="{(fUnread\|\|fStarred\|\|fAttach) ? 'No messages match' : 'Nothing in ' + folder}" text="{(fUnread\|\|fStarred\|\|fAttach) ? 'Try turning o...` |
@@ -256,7 +251,6 @@ Left out of the document.
 | 1 | 1 | Card | focusRing | `Card#card-{card.id} gap=6 pad=10 fill=#FFFFFFFF radius=6 focusable focusRing=#FF2F6FED selected={focusId==card.id} drag=card(card.id) drop=card onDrop={cards=moveBefore(cards,result.data,card.id,card.col)} onTap={open...` |
 | 1 | 1 | Card | hover | `Card gap=16 radius=32 fill=#FFFFFFFF animate=slide-up stagger=80 hover=lift onTap={sel=d.id; go deck}` |
 | 1 | 1 | Card | key | `Card gap=12 fill=#FF161616 radius=24 key={ex.id}` |
-| 1 | 1 | Card | selected | `Card#card-{card.id} gap=6 pad=10 fill=#FFFFFFFF radius=6 focusable focusRing=#FF2F6FED selected={focusId==card.id} drag=card(card.id) drop=card onDrop={cards=moveBefore(cards,result.data,card.id,card.col)} onTap={open...` |
 | 1 | 1 | Checkbox | enabled | `Checkbox checked={grid[p][r]} disabled={r=="Owner"} aria-label="{p} for {r}" onChange={grid=with(grid,p,with(grid[p],r,result)); dirty=true}` |
 | 1 | 1 | ChoiceChip | size | `ChoiceChip "{r}" size=large selected={room==r} onTap={room=r}` |
 | 1 | 1 | CodeInput | autoAdvance | `CodeInput bind=code length=6 autoAdvance=true onComplete={step=3}` |
@@ -274,6 +268,7 @@ Left out of the document.
 | 1 | 1 | EmptyState | action | `EmptyState "Nothing coming up" "Your calendar is clear. Enjoy the quiet." icon="event_available" action="New event" onAction={open event}` |
 | 1 | 1 | EmptyState | actionLabel | `EmptyState "No albums yet" "Create one to collect your favourite pictures." icon="collections" actionLabel="New album" onAction={open newAlbum}` |
 | 1 | 1 | FilterChip | icon | `FilterChip "Attachments" icon="attach_file" bind=fAttach` |
+| 1 | 1 | IconButton | size | `IconButton.primary "{playing?'pause':'play_arrow'}" size=xlarge onTap={playing=!playing}` |
 | 1 | 1 | IconButton | tooltip | `IconButton "{revealed==k.id?'visibility_off':'visibility'}" tooltip="{revealed==k.id?'Hide key':'Reveal key'}" onTap={revealed=revealed==k.id?"":k.id; after 10s revealed=""}` |
 | 1 | 1 | Image | alt | `Image "{coalesce(hover,focus).viewUrl}" h=120 radius=8 alt="View from this seat"` |
 | 1 | 1 | Input | fuzzy | `Input "Search stories" "Try 'chip' or 'ports'" bind=q fuzzy=true autofocus icon="search" w=420` |
@@ -310,7 +305,6 @@ Left out of the document.
 | 1 | 1 | Pane | bind | `Pane w={panelW} resizable bind=panelW min=280 max=520 pad=16 gap=12 hide=phone scroll fill=#FFFFFFFF` |
 | 1 | 1 | Pane | collapse | `Pane#folders w=220 min=160 max=320 collapse=tablet hide=phone` |
 | 1 | 1 | Pane | minw | `Pane w=340 minw=260 resizable show={view=="workspace" && (pane=="list" \|\| !phone)}` |
-| 1 | 1 | Radio | selected | `Radio "{s.name}  {money(s.price,'$',2)}" selected={sz==index} onTap={sz=index}` |
 | 1 | 1 | Rail | side | `Rail side=right` |
 | 1 | 1 | RangeSlider | labels | `RangeSlider lo={d.heat} hi={d.cool} min=55 max=85 labels=["Heat to {d.heat}°","Cool to {d.cool}°"] onChange={devices=updateWhere(devices,x=>x.id==d.id,x=>with(with(x,"heat",result[0]),"cool",result[1]))}` |
 | 1 | 1 | Rating | max | `Rating value={coalesce(ratings[cur.id],0)} max=5 keyboard onChange={ratings=with(ratings,cur.id,result)}` |
@@ -431,13 +425,13 @@ Left out of the event they are in.
 
 | files | uses | word | an example |
 |---|---|---|---|
-| 4 | 8 | focus | `Shortcut keys="/" onPress={focus search}` |
-| 3 | 5 | copy | `IconButton "content_copy" tooltip="Copy key" onTap={copy k.secret; toast "Key copied"; announce "Key copied"}` |
 | 1 | 12 | grid.setFormat | `IconButton "format_bold" tooltip="Bold (Ctrl+B)" selected={grid.format(range).bold} onTap={undo=append(undo,sheets); redo=[]; grid.setFormat(range,"b",!grid.format(range).bold)}` |
 | 1 | 4 | grid.select | `Input "Find" "Text or number" bind=q w=200 autofocus onChange={matches=grid.find(q); hit=0; grid.mark(matches); grid.select(matches[0])} onSubmit={hit=(hit+1)%max(1,length(matches)); grid.select(matches[hit])}` |
 | 1 | 4 | pickFile | `MenuItem "Photo or video" icon="image" onTap={pickFile image; attachments=append(attachments,result); close}` |
 | 1 | 3 | grid.move | `Shortcut "ArrowUp ArrowDown ArrowLeft ArrowRight" onKey={grid.move(result)}` |
 | 1 | 2 | grid.clear | `IconButton "backspace" tooltip="Clear (Delete)" onTap={undo=append(undo,sheets); redo=[]; grid.clear(range)}` |
+| 1 | 2 | grid.commitAndMove | `Shortcut "Enter" onKey={editing ? grid.commitAndMove("down") : grid.edit(sel)}` |
+| 1 | 2 | grid.edit | `Shortcut "Enter" onKey={editing ? grid.commitAndMove("down") : grid.edit(sel)}` |
 | 1 | 2 | grid.focus | `Input#formula "" bind=draft grow tooltip="Formula bar (F2 to edit in the grid)" onFocus={editing=true; draft=grid.raw(sel)} onSubmit={undo=append(undo,sheets); redo=[]; grid.commit(sel,draft); grid.focus} onCancel={ed...` |
 | 1 | 2 | grid.insertCol | `MenuItem "Insert column left" icon="keyboard_double_arrow_left" onTap={undo=append(undo,sheets); redo=[]; grid.insertCol(menuCol,"before"); close}` |
 | 1 | 2 | grid.insertRow | `MenuItem "Insert row above" icon="vertical_align_top" onTap={undo=append(undo,sheets); redo=[]; grid.insertRow(menuRow,"before"); close}` |
@@ -445,18 +439,13 @@ Left out of the event they are in.
 | 1 | 2 | grid.paste | `IconButton "content_paste" tooltip="Paste (Ctrl+V)" disabled={isEmpty(clip)} onTap={undo=append(undo,sheets); redo=[]; grid.paste(clip,sel)}` |
 | 1 | 2 | grid.sortCol | `MenuItem "Sort A to Z" icon="arrow_upward" onTap={undo=append(undo,sheets); redo=[]; grid.sortCol(menuCol,"asc"); close}` |
 | 1 | 1 | after | `IconButton "{revealed==k.id?'visibility_off':'visibility'}" tooltip="{revealed==k.id?'Hide key':'Reveal key'}" onTap={revealed=revealed==k.id?"":k.id; after 10s revealed=""}` |
-| 1 | 1 | count | `Button "Finish" fill=#FFC6FF00 color=#FF0A0A0A radius=20 onTap={count(flatten(map(exercises,e=>e.sets)),s=>!s.done)>0 ? open finishAsk : go summary}` |
-| 1 | 1 | editing | `Shortcut "Enter" onKey={editing ? grid.commitAndMove("down") : grid.edit(sel)}` |
 | 1 | 1 | grid.cancelEdit | `Shortcut "Escape" onKey={editing=false; draft=grid.raw(sel); grid.cancelEdit}` |
-| 1 | 1 | grid.colHasData | `MenuItem "Delete column" icon="delete" onTap={grid.colHasData(menuCol) ? open confirmDelete : grid.deleteCol(menuCol); close}` |
 | 1 | 1 | grid.commit | `Input#formula "" bind=draft grow tooltip="Formula bar (F2 to edit in the grid)" onFocus={editing=true; draft=grid.raw(sel)} onSubmit={undo=append(undo,sheets); redo=[]; grid.commit(sel,draft); grid.focus} onCancel={ed...` |
-| 1 | 1 | grid.commitAndMove | `Shortcut "Shift+Enter" onKey={grid.commitAndMove("up")}` |
+| 1 | 1 | grid.deleteCol | `MenuItem "Delete column" icon="delete" onTap={grid.colHasData(menuCol) ? open confirmDelete : grid.deleteCol(menuCol); close}` |
 | 1 | 1 | grid.deleteMenuTarget | `Button.destructive "Delete" onTap={undo=append(undo,sheets); redo=[]; grid.deleteMenuTarget; toast "Deleted"; close}` |
-| 1 | 1 | grid.edit | `Shortcut "F2" onKey={editing=true; grid.edit(sel)}` |
-| 1 | 1 | grid.rowHasData | `MenuItem "Delete row" icon="delete" onTap={grid.rowHasData(menuRow) ? open confirmDelete : grid.deleteRow(menuRow); close}` |
+| 1 | 1 | grid.deleteRow | `MenuItem "Delete row" icon="delete" onTap={grid.rowHasData(menuRow) ? open confirmDelete : grid.deleteRow(menuRow); close}` |
 | 1 | 1 | grid.selectAll | `Shortcut "Ctrl+A" onKey={grid.selectAll}` |
 | 1 | 1 | if | `IconButton.filled "add" onTap={cur=d; sz=-1; ex=[]; note=""; q=1; if isEmpty(d.sizes) then null}` |
-| 1 | 1 | item.locked | `Button "{d.locked ? 'Unlock' : 'Lock'}" size=large onTap={sel=d.id; d.locked ? open confirmUnlock : devices=updateWhere(devices,x=>x.id==d.id,x=>with(x,"locked",true))}` |
 | 1 | 1 | reset | `Button.outline "Reset pane widths" icon="restart_alt" onTap={reset "postbox.panes"; toast "Pane widths reset"}` |
 | 1 | 1 | send | `Input "Message design-crit" bind=draft multiline autogrow maxLines=5 grow onSubmit={send} submitKey=enter newlineKey=shift+enter` |
 
@@ -515,11 +504,9 @@ The lines are drawn after the word, not in it.
 | files | uses | word | an example |
 |---|---|---|---|
 | 3 | 4 | ReorderableList | `each c in cats` |
-| 2 | 2 | EmptyState | `Button.outline "Clear filters" visible={fUnread\|\|fStarred\|\|fAttach} onTap={fUnread=false; fStarred=false; fAttach=false}` |
 | 1 | 4 | Stepper | `Step "Order confirmed" icon="receipt_long"` |
 | 1 | 3 | Splitter | `Pane w=340 minw=260 resizable show={view=="workspace" && (pane=="list" \|\| !phone)}` |
 | 1 | 2 | Tabs | `BarChart values=[12,18,15,22,19] labels=["Mon","Tue","Wed","Thu","Fri"] h=180 hidden={view=="Table"}` |
-| 1 | 1 | Banner | `Button.ghost "Lock up" onTap={alert=""; toast "Front door locked"}` |
 | 1 | 1 | MonthGrid | `cell day` |
 | 1 | 1 | cell | `Column gap=2 pad=4 border=#FFE5E7EB tap-target` |
 
@@ -598,6 +585,7 @@ The lines are drawn after the word, not in it.
 | 1 | 2 | HighlightText | alias → Text | query ×2, color, size, weight |  |  |
 | 1 | 2 | Lightbox | core | bind ×2, photos ×2 |  |  |
 | 1 | 2 | Sparkline | core | values ×2 |  |  |
+| 1 | 2 | StickyBar | alias → Footer | visible ×2 | bottom ×2 |  |
 | 1 | 2 | Tree | component | bind ×2, foldedBind ×2, items ×2, label ×2, parent ×2, count | foldable ×2 | onSelect ×2 |
 | 1 | 1 | AreaChart | core | h, labels, unit, values |  |  |
 | 1 | 1 | AttachmentTile | core | icon, subtitle | removable | onRemove |
@@ -625,34 +613,35 @@ What the notation could not read, vocabulary aside (the grammar is not open). Th
 
 | count | files | message | an example |
 |---|---|---|---|
-| 26 | 4 | A control is bound to a variable by its name (bind=name), or under an each to a field of its element (bind=row.name): "…" is neither. | `calendar-app:72: Input "Title" "Add a title" bind=draft.title autofocus` |
-| 22 | 5 | Unknown action "…". Actions: name=value, emit <event>, toast "…", open <id>, close, go <screen>, scroll <id>, link <url>, announce "…", confirm "…" then {…}, or JSON. | `admin-console:134: NavItem "Members" icon="group" onTap={dirty?open leave:go members}` |
-| 19 | 12 | Nothing over this page has the id "…" for an open to show (a Dialog, Sheet, Drawer, Menu or Popover with that id, written after the page at the margin): the action is left out. | `admin-console:118: MenuItem "Change role" icon="badge" onTap={open roleDialog}` |
 | 12 | 2 | A value shown as text is written in a string: "…". | `calendar-app:36: Text.body c.name grow` |
-| 12 | 3 | A control can be bound to a field of a repeated element only when the each is over a variable (each row in rows). | `smart-home:45: Toggle bind=d.on size=large` |
+| 6 | 5 | Nothing over this page has the id "…" for an open to show (a Dialog, Sheet, Drawer, Menu or Popover with that id, written after the page at the margin): the action is left out. Over this page: "…". | `clip-editor:185: IconButton "ios_share" onTap={open exportDlg}` |
 | 6 | 3 | show= takes a size (phone, tablet): a condition is written visible={…}. | `mail-client:40: Pane#list w=380 min=280 max=560 show={pane=="list"} grow-phone` |
-| 6 | 4 | The id "…" is used twice. | `mail-client:163: Dialog#compose "New message" onClose={bodyText!="" \|\| subject!="" \|\| length(to)>0 ? open keepDraft : close} resizable maxw=640` |
-| 4 | 1 | A shortcut is a line of its own: key mod+k onPress={…} (mod, alt, shift and a key, joined by +). | `spreadsheet:52: Shortcut "Shift+ArrowUp Shift+ArrowDown Shift+ArrowLeft Shift+ArrowRight" onKey={grid.extend(result)}` |
+| 4 | 4 | Nothing over this page has the id "…" for an open to show (a Dialog, Sheet, Drawer, Menu or Popover with that id, written after the page at the margin): the action is left out. This page has none: write a Dialog with that id after the page, at the margin, with its lines under it. | `food-ordering:308: Button "Reorder" onTap={cart=o.lines; rid=find(restaurants,r=>r.name==o.rest).id; toast "Basket refilled"; open basket}` |
 | 4 | 2 | An event's actions are written in braces: onKey={…}. | `kanban-board:75: Card#card-{card.id} gap=6 pad=10 fill=#FFFFFFFF radius=6 focusable focusRing=#FF2F6FED selected={focusId==card.id} drag=card(card.id) drop=card onDrop={cards=moveBefore(cards,result.data,card.id,ca...` |
-| 4 | 2 | Unknown word "…" on a Row. Props are written key=value. | `kanban-board:222: Row#row-{row.id} gap=8 pad=10 middle border-bottom=#FFF1F3F6 selected={contains(sel,row.id)} fill={contains(sel,row.id)?"#FFEAF1FE":"#FFFFFFFF"} focusable focusRing=#FF2F6FED onTap={sel=[row.id]; a...` |
-| 4 | 2 | A <Type> keeps its value in a variable: write bind=name. | `music-player:262: ReorderableList bind=playlists[selPl].tracks handle="drag_handle" onReorder={playlists=updateWhere(playlists,p=>p.id==selPl,p=>with(p,"tracks",result))}` |
 | 4 | 1 | Unknown word "…" on a Column. Props are written key=value. | `scrolly-story:66: Section tint#c2` |
+| 4 | 1 | A shortcut is a line of its own: key mod+k onPress={…} (mod, alt, shift and a key, joined by +). | `spreadsheet:52: Shortcut "Shift+ArrowUp Shift+ArrowDown Shift+ArrowLeft Shift+ArrowRight" onKey={grid.extend(result)}` |
 | 3 | 1 | A value has a key: write bind=name for the variable a control keeps its value in, key={…} for a value worked out. | `kanban-board:75: Card#card-{card.id} gap=6 pad=10 fill=#FFFFFFFF radius=6 focusable focusRing=#FF2F6FED selected={focusId==card.id} drag=card(card.id) drop=card onDrop={cards=moveBefore(cards,result.data,card.id,ca...` |
 | 3 | 1 | The {…} tail is a JSON object merged into the node. | `kanban-board:75: Card#card-{card.id} gap=6 pad=10 fill=#FFFFFFFF radius=6 focusable focusRing=#FF2F6FED selected={focusId==card.id} drag=card(card.id) drop=card onDrop={cards=moveBefore(cards,result.data,card.id,ca...` |
+| 3 | 1 | Unknown word "…" on a Row. Props are written key=value. | `meal-planner:221: Row gap=8 middle drag=meal({"rid":r.id,"from":-1}) radius=12 pad=8 fill=#FFF3E2` |
 | 3 | 1 | A value read from the state is written in braces: foldedBind={…}. | `notes-app:27: Tree items={notebooks} bind=nb parent="parent" foldable foldedBind=folded label="name" count={n=>count(notes,x=>!x.trashed && (n.id=="all" \|\| x.nb==n.id))} onSelect={nb=result; view="workspace"; pa...` |
+| 2 | 2 | Unknown action "…". Actions: name=value, emit <event>, toast "…", open <id>, close, go <screen>, scroll <id>, link <url>, announce "…", confirm "…" then {…}, focus <id>, copy "…", a choice cond ? actions : actions, or JSON. | `story-reader:42: Stack fill={item.color} menu=reactMenu onLongPress={pickedId=item.id; pressX=result.x; pressY=result.y; open reactMenu} onHold={held=true} onRelease={held=false} onSwipeUp={pickedId=item.id; sheetS...` |
+| 2 | 2 | Nothing over this page has the id "…" for an open to show (a Dialog, Sheet, Drawer, Menu or Popover with that id, written after the page at the margin): the action is left out. Over this page: "…", "…", "…", "…". | `admin-console:118: MenuItem "Change role" icon="badge" onTap={open roleDialog}` |
+| 2 | 2 | Nothing over this page has the id "…" for an open to show (a Dialog, Sheet, Drawer, Menu or Popover with that id, written after the page at the margin): the action is left out. Over this page: "…", "…". | `admin-console:241: Nav` |
+| 2 | 2 | Nothing over this page has the id "…" for an open to show (a Dialog, Sheet, Drawer, Menu or Popover with that id, written after the page at the margin): the action is left out. Over this page: "…", "…", "…". | `admin-console:352: Nav` |
 | 2 | 2 | A segmentedButton has no text of its own. | `calendar-app:85: SegmentedButton "Repeat" bind=draft.repeat items=["Never","Daily","Weekly","Monthly"]` |
 | 2 | 2 | project favs saved: site.json's variable "…" has to say "…": true for it to be kept. | `food-ordering:7: project favs=[] persist` |
+| 2 | 1 | Nothing over this page has the id "…" for an open to show (a Dialog, Sheet, Drawer, Menu or Popover with that id, written after the page at the margin): the action is left out. Over this page: "…", "…", "…", "…", "…", "…". | `mail-client:20: Shortcut "c" onPress={open compose}` |
 | 2 | 1 | A value read from the state is written in braces: items={…}. | `meal-planner:176: Pages bind=step items=cur.steps h=260 onPage={left=cur.steps[step].s; running=false; ended=false}` |
 | 2 | 1 | drag is written drag=group or drag=group(value): drag=todo(card.id). | `meal-planner:221: Row gap=8 middle drag=meal({"rid":r.id,"from":-1}) radius=12 pad=8 fill=#FFF3E2` |
 | 2 | 2 | A swipe action is written: SwipeAction "…" side=end when={…} onTap={…} (side=start or end, id=name, icon="…", removes). | `money-tracker:119: SwipeAction onSwipeRight={sel=t.id; open catMenu} onSwipeLeft={sel=t.id; open confirmDel} rightLabel="Category" leftLabel="Delete" leftColor=#FFC0452F` |
 | 1 | 1 | Not valid JSON: {…} onKey="…"={…} onKey="…"={…} onKey="…"={…} onKey="…"={…} | `kanban-board:75: Card#card-{card.id} gap=6 pad=10 fill=#FFFFFFFF radius=6 focusable focusRing=#FF2F6FED selected={focusId==card.id} drag=card(card.id) drop=card onDrop={cards=moveBefore(cards,result.data,card.id,ca...` |
-| 1 | 1 | A value read from the state is written in braces: end={…}. | `calendar-app:76: DateRangePicker "Dates" start=draft.start end=draft.end onChange={draft=with(with(draft,"start",result.start),"end",result.end)}` |
-| 1 | 1 | Unknown word "…" on a Input. Props are written key=value. | `kanban-board:93: Input#quick-{col.id} "" "Add a card, press Enter" bind=newText icon="add" onSubmit={cards=append(cards,{"id":max(100,sum(cards,c=>c.id))+1,"title":newText,"col":col.id,"labels":[],"assignee":"","du...` |
+| 1 | 1 | A control is bound to a variable by its name (bind=name), to a field of a record variable (bind=draft.title), or under an each to a field of its element (bind=row.name): "…" is none of these. Show it and write the change yourself: value={…} onChange={…}. | `admin-console:154: Checkbox bind=colAll[r] tristate checked={all(perms,p=>grid[p][r])} aria-label="Select all for {r}" onChange={grid=with(grid,"all",grid); dirty=true; announce "{r}: all permissions {result?'on':'of...` |
 | 1 | 1 | Not valid JSON: {…} | `kanban-board:93: Input#quick-{col.id} "" "Add a card, press Enter" bind=newText icon="add" onSubmit={cards=append(cards,{"id":max(100,sum(cards,c=>c.id))+1,"title":newText,"col":col.id,"labels":[],"assignee":"","du...` |
-| 1 | 1 | A value read from the state is written in braces: mode={…}. | `admin-console:267: Calendar mode=range bind=range onChange={announce "Range {result.from} to {result.to}"}` |
 | 1 | 1 | Not valid JSON: {…} onKey="…"={…} onDoubleTap={…} | `kanban-board:222: Row#row-{row.id} gap=8 pad=10 middle border-bottom=#FFF1F3F6 selected={contains(sel,row.id)} fill={contains(sel,row.id)?"#FFEAF1FE":"#FFFFFFFF"} focusable focusRing=#FF2F6FED onTap={sel=[row.id]; a...` |
 | 1 | 1 | A value read from the state is written in braces: animate={…}. | `flashcards:195: Row gap=8 center animate=shake announce="Not quite"` |
 | 1 | 1 | No node type "…". Write a type of the catalog (Column, Row, Text, Button, Input, Toggle, Slider…). | `calendar-app:56: cell day` |
+| 1 | 1 | The id "…" is this page's own (its canvas): an overlay over the page needs an id of its own (composeOverlay, opened with open composeOverlay). An overlay is opened from the page it is written on; one that other pages open is written on each of them, after the page. | `mail-client:163: Dialog#compose "New message" onClose={bodyText!="" \|\| subject!="" \|\| length(to)>0 ? open keepDraft : close} resizable maxw=640` |
+| 1 | 1 | The id "…" is this page's own (its canvas): an overlay over the page needs an id of its own (searchOverlay, opened with open searchOverlay). An overlay is opened from the page it is written on; one that other pages open is written on each of them, after the page. | `mail-client:185: Dialog#search "Search mail" maxw=640` |
 | 1 | 1 | project recipes saved: site.json's variable "…" has to say "…": true for it to be kept. | `meal-planner:2: project recipes=[{"id":1,"name":"Shakshuka","kind":"pan","meal":"Breakfast","diet":"Vegetarian","mins":25,"lvl":"Easy","rate":4.6,"serv":2,"kcal":340,"pro":18,"carb":22,"fat":20,"ing":[{"q":4,"u":"...` |
 | 1 | 1 | project week saved: site.json's variable "…" has to say "…": true for it to be kept. | `meal-planner:3: project week=[] persist` |
 | 1 | 1 | project ratings saved: site.json's variable "…" has to say "…": true for it to be kept. | `meal-planner:5: project ratings={} persist` |
@@ -663,30 +652,33 @@ What the notation could not read, vocabulary aside (the grammar is not open). Th
 | 1 | 1 | project order saved: site.json's variable "…" has to say "…": true for it to be kept. | `meal-planner:10: project order=[] persist` |
 | 1 | 1 | project orders saved: site.json's variable "…" has to say "…": true for it to be kept. | `food-ordering:8: project orders=[] persist` |
 | 1 | 1 | A value read from the state is written in braces: spyof={…}. | `food-ordering:162: Column id="menu-{c}" spyof=cat spyvalue={c} gap=12` |
+| 1 | 1 | A value read from the state is written in braces: start={…}. | `calendar-app:76: DateRangePicker "Dates" start=draft.start end=draft.end onChange={draft=with(with(draft,"start",result.start),"end",result.end)}` |
 | 1 | 1 | A value is written with =, not a colon: =… (a value worked out: ={…}). | `meal-planner:256: Row gap=4 top drag=meal({"rid":placed[k].rid,"from":k}) focusable` |
 | 1 | 1 | project cards saved: site.json's variable "…" has to say "…": true for it to be kept. | `kanban-board:3: project cards=[{"id":1,"title":"Fix login redirect loop","col":"progress","labels":["bug"],"assignee":"Maya Reyes","due":"2026-11-12","desc":"Users on Safari bounce between /login and /home.","chec...` |
-| 1 | 1 | No line of this page has the id "…" for a scroll to go to (Section#thread end, or id=thread end on a line): the action is left out. | `team-chat:102: Pill "New messages" icon="arrow_downward" bottom=12 animate=pop onTap={scroll thread end; following=true; showNew=false}` |
+| 1 | 1 | No animate==playing?"…":"…". Written animate=fade, fade-up, slide, slide-up, slide-down, slide-left, slide-right, scale, zoom, pulse, spin, bob, sway, pop, bounce, shake, wiggle, flash, shimmer. | `music-player:155: AlbumCover hue={find(albums,a=>a.id==find(tracks,t=>t.id==current).album).hue} w=420 h=420 radius=32 glow={playing} animate={playing?"pulse":""}` |
+| 1 | 1 | bind=it.sets: the each repeats item.days[dayTab].items, which is worked out, so a change has no list to be written to. Repeat the list variable itself (each it in <list>, with an if for the ones to show), give its records an "…" field, or write the change: value={…} onChange={…}. | `workout-tracker:348: Stepper bind=it.sets min=1 max=10 step=1 holdRepeat` |
 | 1 | 1 | A page that is worked out is written in braces: go {…}. A bare word after go is the id of the page. | `kanban-board:46: SegmentedButton items=["Board","List"] bind=view onChange={go lower(result)}` |
-| 1 | 1 | Unknown word "…" on a Card. Props are written key=value. | `kanban-board:75: Card#card-{card.id} gap=6 pad=10 fill=#FFFFFFFF radius=6 focusable focusRing=#FF2F6FED selected={focusId==card.id} drag=card(card.id) drop=card onDrop={cards=moveBefore(cards,result.data,card.id,ca...` |
-| 1 | 1 | Unknown action "…"ArrowDown"…"ArrowUp"…". Actions: name=value, emit <event>, toast "…", open <id>, close, go <screen>, scroll <id>, link <url>, announce "…", confirm "…" then {…}, or JSON. | `notes-app:136: Input "Search notes, notebooks, actions" bind=pq autofocus icon="search" onChange={pcursor=0} onKeyDown={key=="ArrowDown"?pcursor=pcursor+1:(key=="ArrowUp"?pcursor=max(0,pcursor-1):pcursor=pcursor)}` |
+| 1 | 1 | Nothing over this page has the id "…" for an open to show (a Dialog, Sheet, Drawer, Menu or Popover with that id, written after the page at the margin): the action is left out. Over this page: "…", "…", "…", "…", "…", "…", "…". | `notes-app:19: Shortcut "mod+k" onPress={open palette}` |
 | 1 | 1 | An event's actions are written in braces: onDropOnto={…}. | `photo-library:34: PhotoGrid photos={filter(photos,p=>!p.deleted)} cols={gridSize} gap=2 groupBy=month stickyHeaders bind=sel selectMode=range,toggle,drag onOpen={at=result; go viewer} onDropOnto=albums` |
-| 1 | 1 | Unknown action "…"N"…"N"…"N"…"N"…"N"…"N"…"That"…"…"…"…"…"Question" then {…}, or JSON. | `admin-console:407: CodeInput length=6 bind=code autofocus onComplete={code==["1","2","3","4","5","6"]?sso=true:codeError="That code is not right"; announce sso?"Single sign-on enabled":"Code rejected"; sso?close:null}` |
+| 1 | 1 | A value read from the state is written in braces: end={…}. | `calendar-app:76: DateRangePicker "Dates" start=draft.start end=draft.end onChange={draft=with(with(draft,"start",result.start),"end",result.end)}` |
 | 1 | 1 | No line of this page has the id "…" for a scroll to go to (Section#method, or id=method on a line): the action is left out. | `scrolly-story:26: Link "Method" onTap={scroll method}` |
 | 1 | 1 | No animate==holdLeft<=N ? pulse : none. Written animate=fade, fade-up, slide, slide-up, slide-down, slide-left, slide-right, scale, zoom, pulse, spin, bob, sway, pop, bounce, shake, wiggle, flash, shimmer. | `seat-booking:176: Chip "Held {floor(holdLeft/60)}:{fixed(holdLeft%60,0)} left" icon="timer" color={holdLeft<=60 ? #FFE0586B : #FFD4A64A} animate={holdLeft<=60 ? pulse : none}` |
 | 1 | 1 | project devices saved: site.json's variable "…" has to say "…": true for it to be kept. | `smart-home:2: project devices=[{"id":"l1","name":"Ceiling light","room":"Living room","kind":"light","on":true,"level":70,"ct":"warm","online":true},{"id":"t1","name":"Thermostat","room":"Living room","kind":"th...` |
-| 1 | 1 | A value read from the state is written in braces: start={…}. | `calendar-app:76: DateRangePicker "Dates" start=draft.start end=draft.end onChange={draft=with(with(draft,"start",result.start),"end",result.end)}` |
 | 1 | 1 | A range is a slider with a variable for each end: Slider bind=low bindEnd=high min=N max=N. | `smart-home:52: RangeSlider lo={d.heat} hi={d.cool} min=55 max=85 labels=["Heat to {d.heat}°","Cool to {d.cool}°"] onChange={devices=updateWhere(devices,x=>x.id==d.id,x=>with(with(x,"heat",result[0]),"cool",result...` |
 | 1 | 1 | project scenes saved: site.json's variable "…" has to say "…": true for it to be kept. | `smart-home:104: project scenes=[{"id":"s1","name":"Good morning","icon":"wb_sunny","targets":[{"name":"Ceiling light","on":true,"level":80},{"name":"West blind","on":true,"level":100},{"name":"Thermostat","on":tru...` |
 | 1 | 1 | project schedules saved: site.json's variable "…" has to say "…": true for it to be kept. | `smart-home:149: project schedules=[{"id":1,"time":"06:30","label":"Warm up the house","days":["Mon","Tue","Wed","Thu","Fri"],"on":true,"action":"Thermostat to 70°"},{"id":2,"time":"07:00","label":"Open blinds","da...` |
 | 1 | 1 | project rules saved: site.json's variable "…" has to say "…": true for it to be kept. | `smart-home:196: project rules=[{"id":1,"name":"Door left open","trigger":"A door opens","conds":[{"field":"Time","op":"is after","value":"22:00"}],"acts":[{"device":"Phone","value":"Send alert"},{"device":"Hall li...` |
 | 1 | 1 | A value read from the state is written in braces: selected={…}. | `spreadsheet:50: DataGrid#grid cols=26 rows=50 sheet={active} sheets={sheets} bind=sheets selected=sel range=range formulas=true errorMark="#ERR" headers=true frozenHeaders=true colWidths=true grow` |
 | 1 | 1 | A value read from the state is written in braces: range={…}. | `spreadsheet:50: DataGrid#grid cols=26 rows=50 sheet={active} sheets={sheets} bind=sheets selected=sel range=range formulas=true errorMark="#ERR" headers=true frozenHeaders=true colWidths=true grow` |
+| 1 | 1 | A value read from the state is written in braces: mode={…}. | `admin-console:267: Calendar mode=range bind=range onChange={announce "Range {result.from} to {result.to}"}` |
 | 1 | 1 | A value read from the state is written in braces: draft={…}. | `admin-console:102: ChipInput "Emails" bind=invites draft=inviteDraft separators=[",",";"," "] validate="email" hint="name@company.com" onInvalid={announce "Not a valid email"}` |
+| 1 | 1 | The id "…" is this page's own (its canvas): an overlay over the page needs an id of its own (listenOverlay, opened with open listenOverlay). An overlay is opened from the page it is written on; one that other pages open is written on each of them, after the page. | `story-reader:167: Sheet#listen "Listen" stops=["half"] dismiss=drag,escape` |
+| 1 | 1 | A control is bound to a variable by its name (bind=name), to a field of a record variable (bind=draft.title), or under an each to a field of its element (bind=row.name): "…" is none of these. Show it and write the change yourself: value={sectionOn.{…}} onChange={…}. | `story-reader:199: Toggle bind=sectionOn.{sec} onChange={settings=with(settings,"sections",result?append(settings.sections,sec):without(settings.sections,sec))}` |
 | 1 | 1 | project view saved: site.json's variable "…" has to say "…": true for it to be kept. | `support-desk:4: project view="mine" persist` |
 | 1 | 1 | project panelW saved: site.json's variable "…" has to say "…": true for it to be kept. | `support-desk:124: project panelW=340 persist` |
-| 1 | 1 | Unknown action "…""…". Actions: name=value, emit <event>, toast "…", open <id>, close, go <screen>, scroll <id>, link <url>, announce "…", confirm "…" then {…}, or JSON. | `support-desk:137: Shortcut key="c" onPress={draft==""?close_ticket:open discard}` |
-| 1 | 1 | Unknown action "…""…"status"…"solved"…". Actions: name=value, emit <event>, toast "…", open <id>, close, go <screen>, scroll <id>, link <url>, announce "…", confirm "…" then {…}, or JSON. | `support-desk:152: Button.outline "Close ticket" icon="check" onTap={draft==""?(ticket=with(ticket,"status","solved"); toast "Ticket #{ticket.id} set to solved"):open discard}` |
-| 1 | 1 | No animate==playing?"…":"…". Written animate=fade, fade-up, slide, slide-up, slide-down, slide-left, slide-right, scale, zoom, pulse, spin, bob, sway, pop, bounce, shake, wiggle, flash, shimmer. | `music-player:155: AlbumCover hue={find(albums,a=>a.id==find(tracks,t=>t.id==current).album).hue} w=420 h=420 radius=32 glow={playing} animate={playing?"pulse":""}` |
+| 1 | 1 | The id "…" is used twice. Give this line an id of its own. | `team-chat:85: FollowScroll#thread bind=following onFollowChange={showNew=!result} newestOnAppend=true` |
+| 1 | 1 | No line of this page has the id "…" for a scroll to go to (Section#thread end, or id=thread end on a line): the action is left out. | `team-chat:102: Pill "New messages" icon="arrow_downward" bottom=12 animate=pop onTap={scroll thread end; following=true; showNew=false}` |
+| 1 | 1 | A <Type> keeps its value in a variable: write bind=name (or bind=record.field, bind=row.field under an each). | `music-player:262: ReorderableList bind=playlists[selPl].tracks handle="drag_handle" onReorder={playlists=updateWhere(playlists,p=>p.id==selPl,p=>with(p,"tracks",result))}` |
 
 ## What does not validate
 
@@ -696,12 +688,13 @@ Each file's screens checked together as a site, with the state one screen declar
 |---|---|---|---|
 | 24 | 5 | unknown_name: "…" is not a declared variable of canvas "…" nor a runtime scope (data, route, storage, screen, device, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form). | `calendar-app/month.json /nodes/column7/bind/decoration.fills[0].color: "day" is not a declared variable of canvas "month" nor a runtime scope (data, route, storage, screen, device, theme, item, index, parent, result, loop, auth,...` |
 | 19 | 9 | expression_syntax: The formula "…" does not parse: Unknown function "…". | `admin-console/roles.json /nodes/checkbox2/actions/0/actions/0/value: The formula "${= with(grid,item,mapValues(grid[item],v=>result))}" does not parse: Unknown function "mapValues".` |
-| 7 | 1 | expression_syntax: The formula "…" does not parse: Unexpected "…" at N. | `spreadsheet/sheet.json /nodes/sheet/actions/6/actions/1/value: The formula "${= grid.raw(sel)}" does not parse: Unexpected "(" at 9.` |
+| 11 | 1 | expression_syntax: The formula "…" does not parse: Unexpected "…" at N. | `spreadsheet/sheet.json /nodes/sheet/actions/6/actions/1/value: The formula "${= grid.raw(sel)}" does not parse: Unexpected "(" at 9.` |
 | 3 | 1 | expression_syntax: The formula "…"checklist"…" does not parse: Unknown function "…". | `kanban-board/board.json /nodes/row44/actions/0/actions/0/value: The formula "${= updateWhere(cards,c=>c.id==openId,c=>with(c,"checklist",moveItem(c.checklist,result.data,index)))}" does not parse: Unknown function "moveIt...` |
 | 3 | 1 | expression_syntax: The formula "…" "…" does not parse: Unknown function "…". | `story-reader/search.json /nodes/text7/bind/visible: The formula "${= count(stories,s=>s.section==item && fuzzyMatch(s.head+" "+s.sum,q))>0}" does not parse: Unknown function "fuzzyMatch".` |
+| 2 | 1 | unknown_target_node: No node "…" in this document. | `kanban-board/board.json /nodes/board/actions/0/actions/1/node: No node "quick-backlog" in this document.` |
 | 2 | 1 | expression_syntax: The formula "…"All"…""…" "…"Year"…"Artist"…" does not parse: Unknown function "…". | `music-player/library.json /nodes/gridView1/bind/data: The formula "${= sortBy(filter(albums,x=>(genre=="All"\|\|x.genre==genre)&&(q==""\|\|fuzzyMatch(x.title+" "+x.artist,q))),x=>sort=="Year"?x.year:(sort=="Artist"?...` |
-| 2 | 1 | unknown_screen: No screen "…": "…" is a canvas id (of this or another document of the project). Canvases: trash, confirmForever, confirmEmpty, trashMenu, workspace, confirmOne, confirmMany, moveNote, moveMenu, tagPopover, noteMenu, nbSheet, workspaceMenu, search, palette, settings, settingsMenu. | `notes-app/trash.json /nodes/row4/actions/0/actions/0/to: No screen "tags": "to" is a canvas id (of this or another document of the project). Canvases: trash, confirmForever, confirmEmpty, trashMenu, workspace, conf...` |
-| 2 | 1 | unknown_screen: No screen "…": "…" is a canvas id (of this or another document of the project). Canvases: settings, settingsMenu, workspace, confirmOne, confirmMany, moveNote, moveMenu, tagPopover, noteMenu, nbSheet, workspaceMenu, search, palette, trash, confirmForever, confirmEmpty, trashMenu. | `notes-app/settings.json /nodes/row4/actions/0/actions/0/to: No screen "tags": "to" is a canvas id (of this or another document of the project). Canvases: settings, settingsMenu, workspace, confirmOne, confirmMany, mov...` |
+| 2 | 1 | unknown_screen: No screen "…": "…" is a canvas id (of this or another document of the project). Canvases: trash, confirmForever, confirmEmpty, trash_sidebar, workspace, confirmOne, confirmMany, moveNote, moveMenu, tagPopover, noteMenu, nbSheet, workspace_sidebar, search, palette, settings, settings_sidebar. | `notes-app/trash.json /nodes/row4/actions/0/actions/0/to: No screen "tags": "to" is a canvas id (of this or another document of the project). Canvases: trash, confirmForever, confirmEmpty, trash_sidebar, workspace, ...` |
+| 2 | 1 | unknown_screen: No screen "…": "…" is a canvas id (of this or another document of the project). Canvases: settings, settings_sidebar, workspace, confirmOne, confirmMany, moveNote, moveMenu, tagPopover, noteMenu, nbSheet, workspace_sidebar, search, palette, trash, confirmForever, confirmEmpty, trash_sidebar. | `notes-app/settings.json /nodes/row4/actions/0/actions/0/to: No screen "tags": "to" is a canvas id (of this or another document of the project). Canvases: settings, settings_sidebar, workspace, confirmOne, confirmMany,...` |
 | 2 | 1 | expression_syntax: The formula "…"name"…" does not parse: Unknown function "…". | `workout-tracker/workout-in-progress.json /nodes/listView4/bind/data: The formula "${= fuzzyFilter(catalog,addQuery,"name")}" does not parse: Unknown function "fuzzyFilter".` |
 | 1 | 1 | expression_syntax: The formula "…"tk_live_"…" does not parse: Unknown function "…". | `admin-console/api-keys.json /nodes/filledButton2/actions/0/actions/0/value: The formula "${= "tk_live_"+randomHex(20)}" does not parse: Unknown function "randomHex".` |
 | 1 | 1 | expression_syntax: The formula "…"#FF2563EB"…"#FF111827"…" does not parse: Unknown function "…". | `calendar-app/week.json /nodes/text5/bind/props.style.color: The formula "${= addDays(startOfWeek((today())),item)==today()?"#FF2563EB":"#FF111827"}" does not parse: Unknown function "startOfWeek".` |

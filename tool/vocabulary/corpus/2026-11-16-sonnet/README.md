@@ -42,6 +42,11 @@ tool/render/render.sh /tmp/vocab/sites/seat-booking --out /tmp/vocab/renders/sea
 word we do not have (6.5% before the aliases). The words, the parameters on words we have, the verbs, the formula
 functions and the grammar issues are ranked in `VOCABULARY.md`; what was done about them is in the design note.
 
+Counted again after the parser read what the grammar issues asked for (a choice between actions, binding to a
+field, ids, the foot of an app window, `focus` and `copy`: codelessly_api CHANGELOG, Unreleased): 117 grammar
+issues where there were 184, 185 lines of a word we do not have where there were 187 (147 an alias, 3.2%), 76
+problems that do not validate where there were 70 (lines dropped before and read now). The answers are unchanged.
+
 ## The next corpus
 
 A new folder beside this one, named `<date>-<model>`, with its own `prompt.txt` (the prompt it was actually written

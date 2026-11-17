@@ -9,8 +9,8 @@
   "statements": 1031,
   "core": 3784,
   "component": 541,
-  "alias": 145,
-  "unknown": 187
+  "alias": 147,
+  "unknown": 185
  },
  "perFile": [
   {
@@ -22,7 +22,7 @@
    "alias": 6,
    "unknown": 8,
    "standIns": 8,
-   "issues": 20,
+   "issues": 6,
    "invalid": 2
   },
   {
@@ -34,7 +34,7 @@
    "alias": 26,
    "unknown": 5,
    "standIns": 5,
-   "issues": 22,
+   "issues": 15,
    "invalid": 19
   },
   {
@@ -46,7 +46,7 @@
    "alias": 17,
    "unknown": 13,
    "standIns": 17,
-   "issues": 17,
+   "issues": 2,
    "invalid": 1
   },
   {
@@ -67,9 +67,9 @@
    "lines": 261,
    "core": 227,
    "component": 19,
-   "alias": 0,
-   "unknown": 15,
-   "standIns": 15,
+   "alias": 2,
+   "unknown": 13,
+   "standIns": 13,
    "issues": 5,
    "invalid": 0
   },
@@ -82,8 +82,8 @@
    "alias": 9,
    "unknown": 0,
    "standIns": 0,
-   "issues": 18,
-   "invalid": 4
+   "issues": 15,
+   "invalid": 6
   },
   {
    "file": "mail-client",
@@ -130,7 +130,7 @@
    "alias": 1,
    "unknown": 12,
    "standIns": 12,
-   "issues": 5,
+   "issues": 3,
    "invalid": 4
   },
   {
@@ -142,7 +142,7 @@
    "alias": 2,
    "unknown": 12,
    "standIns": 12,
-   "issues": 11,
+   "issues": 7,
    "invalid": 4
   },
   {
@@ -190,7 +190,7 @@
    "alias": 1,
    "unknown": 1,
    "standIns": 1,
-   "issues": 17,
+   "issues": 6,
    "invalid": 0
   },
   {
@@ -203,7 +203,7 @@
    "unknown": 3,
    "standIns": 3,
    "issues": 6,
-   "invalid": 11
+   "invalid": 15
   },
   {
    "file": "story-reader",
@@ -214,7 +214,7 @@
    "alias": 2,
    "unknown": 10,
    "standIns": 10,
-   "issues": 9,
+   "issues": 5,
    "invalid": 8
   },
   {
@@ -226,7 +226,7 @@
    "alias": 16,
    "unknown": 0,
    "standIns": 0,
-   "issues": 7,
+   "issues": 4,
    "invalid": 0
   },
   {
@@ -250,41 +250,11 @@
    "alias": 6,
    "unknown": 1,
    "standIns": 1,
-   "issues": 7,
+   "issues": 3,
    "invalid": 6
   }
  ],
  "issues": [
-  {
-   "message": "A control is bound to a variable by its name (bind=name), or under an each to a field of its element (bind=row.name): \"…\" is neither.",
-   "count": 26,
-   "files": 4,
-   "examples": [
-    "calendar-app:72: Input \"Title\" \"Add a title\" bind=draft.title autofocus",
-    "calendar-app:74: Select \"Calendar\" bind=draft.cal items={map(cals,c=>c.id)} labels={map(cals,c=>c.name)} dots={map(cals,c=>c.color)} grow",
-    "calendar-app:75: Toggle \"All day\" bind=draft.allDay"
-   ]
-  },
-  {
-   "message": "Unknown action \"…\". Actions: name=value, emit <event>, toast \"…\", open <id>, close, go <screen>, scroll <id>, link <url>, announce \"…\", confirm \"…\" then {…}, or JSON.",
-   "count": 22,
-   "files": 5,
-   "examples": [
-    "admin-console:134: NavItem \"Members\" icon=\"group\" onTap={dirty?open leave:go members}",
-    "admin-console:136: NavItem \"Teams\" icon=\"groups\" onTap={dirty?open leave:go teams}",
-    "admin-console:137: NavItem \"Audit log\" icon=\"history\" onTap={dirty?open leave:go audit-log}"
-   ]
-  },
-  {
-   "message": "Nothing over this page has the id \"…\" for an open to show (a Dialog, Sheet, Drawer, Menu or Popover with that id, written after the page at the margin): the action is left out.",
-   "count": 19,
-   "files": 12,
-   "examples": [
-    "admin-console:118: MenuItem \"Change role\" icon=\"badge\" onTap={open roleDialog}",
-    "admin-console:241: Nav",
-    "admin-console:352: Nav"
-   ]
-  },
   {
    "message": "A value shown as text is written in a string: \"…\".",
    "count": 12,
@@ -296,13 +266,13 @@
    ]
   },
   {
-   "message": "A control can be bound to a field of a repeated element only when the each is over a variable (each row in rows).",
-   "count": 12,
-   "files": 3,
+   "message": "Nothing over this page has the id \"…\" for an open to show (a Dialog, Sheet, Drawer, Menu or Popover with that id, written after the page at the margin): the action is left out. Over this page: \"…\".",
+   "count": 6,
+   "files": 5,
    "examples": [
-    "smart-home:45: Toggle bind=d.on size=large",
-    "smart-home:46: Slider bind=d.level min=1 max=100 disabled={!d.on}",
-    "smart-home:47: SegmentedButton items=[\"warm\",\"neutral\",\"cool\"] bind=d.ct disabled={!d.on}"
+    "clip-editor:185: IconButton \"ios_share\" onTap={open exportDlg}",
+    "clip-editor:214: Button.outline \"Library\" icon=\"library_music\" grow onTap={open library}",
+    "food-ordering:180: Row between pad=12 fill=#FFE5391F radius=24 onTap={open basket}"
    ]
   },
   {
@@ -316,23 +286,13 @@
    ]
   },
   {
-   "message": "The id \"…\" is used twice.",
-   "count": 6,
+   "message": "Nothing over this page has the id \"…\" for an open to show (a Dialog, Sheet, Drawer, Menu or Popover with that id, written after the page at the margin): the action is left out. This page has none: write a Dialog with that id after the page, at the margin, with its lines under it.",
+   "count": 4,
    "files": 4,
    "examples": [
-    "mail-client:163: Dialog#compose \"New message\" onClose={bodyText!=\"\" || subject!=\"\" || length(to)>0 ? open keepDraft : close} resizable maxw=640",
-    "mail-client:185: Dialog#search \"Search mail\" maxw=640",
-    "music-player:137: MenuItem \"Add to playlist\" icon=\"playlist_add\" onTap={open addMenu}"
-   ]
-  },
-  {
-   "message": "A shortcut is a line of its own: key mod+k onPress={…} (mod, alt, shift and a key, joined by +).",
-   "count": 4,
-   "files": 1,
-   "examples": [
-    "spreadsheet:52: Shortcut \"Shift+ArrowUp Shift+ArrowDown Shift+ArrowLeft Shift+ArrowRight\" onKey={grid.extend(result)}",
-    "spreadsheet:67: Shortcut \"Ctrl+Y Ctrl+Shift+Z\" onKey={undo=append(undo,sheets); sheets=last(redo); redo=removeAt(redo,length(redo)-1)}",
-    "spreadsheet:69: Shortcut \"Ctrl+ArrowRight Ctrl+Alt+ArrowRight\" onKey={grid.resizeCol(sel,10)}"
+    "food-ordering:308: Button \"Reorder\" onTap={cart=o.lines; rid=find(restaurants,r=>r.name==o.rest).id; toast \"Basket refilled\"; open basket}",
+    "kanban-board:200: Nav",
+    "meal-planner:394: Nav"
    ]
   },
   {
@@ -346,26 +306,6 @@
    ]
   },
   {
-   "message": "Unknown word \"…\" on a Row. Props are written key=value.",
-   "count": 4,
-   "files": 2,
-   "examples": [
-    "kanban-board:222: Row#row-{row.id} gap=8 pad=10 middle border-bottom=#FFF1F3F6 selected={contains(sel,row.id)} fill={contains(sel,row.id)?\"#FFEAF1FE\":\"#FFFFFFFF\"} focusable focusRing=#FF2F6FED onTap={sel=[row.id]; a...",
-    "meal-planner:221: Row gap=8 middle drag=meal({\"rid\":r.id,\"from\":-1}) radius=12 pad=8 fill=#FFF3E2",
-    "meal-planner:221: Row gap=8 middle drag=meal({\"rid\":r.id,\"from\":-1}) radius=12 pad=8 fill=#FFF3E2"
-   ]
-  },
-  {
-   "message": "A <Type> keeps its value in a variable: write bind=name.",
-   "count": 4,
-   "files": 2,
-   "examples": [
-    "music-player:262: ReorderableList bind=playlists[selPl].tracks handle=\"drag_handle\" onReorder={playlists=updateWhere(playlists,p=>p.id==selPl,p=>with(p,\"tracks\",result))}",
-    "workout-tracker:135: Stepper bind=s.kg step=2.5 holdRepeat grow size=large type=number",
-    "workout-tracker:136: Stepper bind=s.reps step=1 holdRepeat grow size=large type=number"
-   ]
-  },
-  {
    "message": "Unknown word \"…\" on a Column. Props are written key=value.",
    "count": 4,
    "files": 1,
@@ -373,6 +313,16 @@
     "scrolly-story:66: Section tint#c2",
     "scrolly-story:110: Section tint#c4",
     "scrolly-story:149: Section tint center#figures"
+   ]
+  },
+  {
+   "message": "A shortcut is a line of its own: key mod+k onPress={…} (mod, alt, shift and a key, joined by +).",
+   "count": 4,
+   "files": 1,
+   "examples": [
+    "spreadsheet:52: Shortcut \"Shift+ArrowUp Shift+ArrowDown Shift+ArrowLeft Shift+ArrowRight\" onKey={grid.extend(result)}",
+    "spreadsheet:67: Shortcut \"Ctrl+Y Ctrl+Shift+Z\" onKey={undo=append(undo,sheets); sheets=last(redo); redo=removeAt(redo,length(redo)-1)}",
+    "spreadsheet:69: Shortcut \"Ctrl+ArrowRight Ctrl+Alt+ArrowRight\" onKey={grid.resizeCol(sel,10)}"
    ]
   },
   {
@@ -396,6 +346,16 @@
    ]
   },
   {
+   "message": "Unknown word \"…\" on a Row. Props are written key=value.",
+   "count": 3,
+   "files": 1,
+   "examples": [
+    "meal-planner:221: Row gap=8 middle drag=meal({\"rid\":r.id,\"from\":-1}) radius=12 pad=8 fill=#FFF3E2",
+    "meal-planner:221: Row gap=8 middle drag=meal({\"rid\":r.id,\"from\":-1}) radius=12 pad=8 fill=#FFF3E2",
+    "meal-planner:256: Row gap=4 top drag=meal({\"rid\":placed[k].rid,\"from\":k}) focusable"
+   ]
+  },
+  {
    "message": "A value read from the state is written in braces: foldedBind={…}.",
    "count": 3,
    "files": 1,
@@ -403,6 +363,42 @@
     "notes-app:27: Tree items={notebooks} bind=nb parent=\"parent\" foldable foldedBind=folded label=\"name\" count={n=>count(notes,x=>!x.trashed && (n.id==\"all\" || x.nb==n.id))} onSelect={nb=result; view=\"workspace\"; pa...",
     "notes-app:127: Tree items={notebooks} bind=nb parent=\"parent\" foldable foldedBind=folded label=\"name\" onSelect={nb=result; view=\"workspace\"; pane=\"list\"; close}",
     "notes-app:130: NavItem \"Settings\" icon=\"settings\" onTap={view=\"settings\"; close}"
+   ]
+  },
+  {
+   "message": "Unknown action \"…\". Actions: name=value, emit <event>, toast \"…\", open <id>, close, go <screen>, scroll <id>, link <url>, announce \"…\", confirm \"…\" then {…}, focus <id>, copy \"…\", a choice cond ? actions : actions, or JSON.",
+   "count": 2,
+   "files": 2,
+   "examples": [
+    "story-reader:42: Stack fill={item.color} menu=reactMenu onLongPress={pickedId=item.id; pressX=result.x; pressY=result.y; open reactMenu} onHold={held=true} onRelease={held=false} onSwipeUp={pickedId=item.id; sheetS...",
+    "support-desk:137: Shortcut key=\"c\" onPress={draft==\"\"?close_ticket:open discard}"
+   ]
+  },
+  {
+   "message": "Nothing over this page has the id \"…\" for an open to show (a Dialog, Sheet, Drawer, Menu or Popover with that id, written after the page at the margin): the action is left out. Over this page: \"…\", \"…\", \"…\", \"…\".",
+   "count": 2,
+   "files": 2,
+   "examples": [
+    "admin-console:118: MenuItem \"Change role\" icon=\"badge\" onTap={open roleDialog}",
+    "team-chat:83: IconButton \"info\" onTap={showDetails=!showDetails; open detailsSheet}"
+   ]
+  },
+  {
+   "message": "Nothing over this page has the id \"…\" for an open to show (a Dialog, Sheet, Drawer, Menu or Popover with that id, written after the page at the margin): the action is left out. Over this page: \"…\", \"…\".",
+   "count": 2,
+   "files": 2,
+   "examples": [
+    "admin-console:241: Nav",
+    "photo-library:38: Button.outline \"New album\" onTap={close; open newAlbum}"
+   ]
+  },
+  {
+   "message": "Nothing over this page has the id \"…\" for an open to show (a Dialog, Sheet, Drawer, Menu or Popover with that id, written after the page at the margin): the action is left out. Over this page: \"…\", \"…\", \"…\".",
+   "count": 2,
+   "files": 2,
+   "examples": [
+    "admin-console:352: Nav",
+    "music-player:133: MenuItem \"New playlist…\" icon=\"add\" onTap={open newPlaylist}"
    ]
   },
   {
@@ -421,6 +417,15 @@
    "examples": [
     "food-ordering:7: project favs=[] persist",
     "meal-planner:4: project favs=[] persist"
+   ]
+  },
+  {
+   "message": "Nothing over this page has the id \"…\" for an open to show (a Dialog, Sheet, Drawer, Menu or Popover with that id, written after the page at the margin): the action is left out. Over this page: \"…\", \"…\", \"…\", \"…\", \"…\", \"…\".",
+   "count": 2,
+   "files": 1,
+   "examples": [
+    "mail-client:20: Shortcut \"c\" onPress={open compose}",
+    "mail-client:26: Shortcut \"ctrl+k\" onPress={open search}"
    ]
   },
   {
@@ -459,19 +464,11 @@
    ]
   },
   {
-   "message": "A value read from the state is written in braces: end={…}.",
+   "message": "A control is bound to a variable by its name (bind=name), to a field of a record variable (bind=draft.title), or under an each to a field of its element (bind=row.name): \"…\" is none of these. Show it and write the change yourself: value={…} onChange={…}.",
    "count": 1,
    "files": 1,
    "examples": [
-    "calendar-app:76: DateRangePicker \"Dates\" start=draft.start end=draft.end onChange={draft=with(with(draft,\"start\",result.start),\"end\",result.end)}"
-   ]
-  },
-  {
-   "message": "Unknown word \"…\" on a Input. Props are written key=value.",
-   "count": 1,
-   "files": 1,
-   "examples": [
-    "kanban-board:93: Input#quick-{col.id} \"\" \"Add a card, press Enter\" bind=newText icon=\"add\" onSubmit={cards=append(cards,{\"id\":max(100,sum(cards,c=>c.id))+1,\"title\":newText,\"col\":col.id,\"labels\":[],\"assignee\":\"\",\"du..."
+    "admin-console:154: Checkbox bind=colAll[r] tristate checked={all(perms,p=>grid[p][r])} aria-label=\"Select all for {r}\" onChange={grid=with(grid,\"all\",grid); dirty=true; announce \"{r}: all permissions {result?'on':'of..."
    ]
   },
   {
@@ -480,14 +477,6 @@
    "files": 1,
    "examples": [
     "kanban-board:93: Input#quick-{col.id} \"\" \"Add a card, press Enter\" bind=newText icon=\"add\" onSubmit={cards=append(cards,{\"id\":max(100,sum(cards,c=>c.id))+1,\"title\":newText,\"col\":col.id,\"labels\":[],\"assignee\":\"\",\"du..."
-   ]
-  },
-  {
-   "message": "A value read from the state is written in braces: mode={…}.",
-   "count": 1,
-   "files": 1,
-   "examples": [
-    "admin-console:267: Calendar mode=range bind=range onChange={announce \"Range {result.from} to {result.to}\"}"
    ]
   },
   {
@@ -512,6 +501,22 @@
    "files": 1,
    "examples": [
     "calendar-app:56: cell day"
+   ]
+  },
+  {
+   "message": "The id \"…\" is this page's own (its canvas): an overlay over the page needs an id of its own (composeOverlay, opened with open composeOverlay). An overlay is opened from the page it is written on; one that other pages open is written on each of them, after the page.",
+   "count": 1,
+   "files": 1,
+   "examples": [
+    "mail-client:163: Dialog#compose \"New message\" onClose={bodyText!=\"\" || subject!=\"\" || length(to)>0 ? open keepDraft : close} resizable maxw=640"
+   ]
+  },
+  {
+   "message": "The id \"…\" is this page's own (its canvas): an overlay over the page needs an id of its own (searchOverlay, opened with open searchOverlay). An overlay is opened from the page it is written on; one that other pages open is written on each of them, after the page.",
+   "count": 1,
+   "files": 1,
+   "examples": [
+    "mail-client:185: Dialog#search \"Search mail\" maxw=640"
    ]
   },
   {
@@ -595,6 +600,14 @@
    ]
   },
   {
+   "message": "A value read from the state is written in braces: start={…}.",
+   "count": 1,
+   "files": 1,
+   "examples": [
+    "calendar-app:76: DateRangePicker \"Dates\" start=draft.start end=draft.end onChange={draft=with(with(draft,\"start\",result.start),\"end\",result.end)}"
+   ]
+  },
+  {
    "message": "A value is written with =, not a colon: =… (a value worked out: ={…}).",
    "count": 1,
    "files": 1,
@@ -611,11 +624,19 @@
    ]
   },
   {
-   "message": "No line of this page has the id \"…\" for a scroll to go to (Section#thread end, or id=thread end on a line): the action is left out.",
+   "message": "No animate==playing?\"…\":\"…\". Written animate=fade, fade-up, slide, slide-up, slide-down, slide-left, slide-right, scale, zoom, pulse, spin, bob, sway, pop, bounce, shake, wiggle, flash, shimmer.",
    "count": 1,
    "files": 1,
    "examples": [
-    "team-chat:102: Pill \"New messages\" icon=\"arrow_downward\" bottom=12 animate=pop onTap={scroll thread end; following=true; showNew=false}"
+    "music-player:155: AlbumCover hue={find(albums,a=>a.id==find(tracks,t=>t.id==current).album).hue} w=420 h=420 radius=32 glow={playing} animate={playing?\"pulse\":\"\"}"
+   ]
+  },
+  {
+   "message": "bind=it.sets: the each repeats item.days[dayTab].items, which is worked out, so a change has no list to be written to. Repeat the list variable itself (each it in <list>, with an if for the ones to show), give its records an \"…\" field, or write the change: value={…} onChange={…}.",
+   "count": 1,
+   "files": 1,
+   "examples": [
+    "workout-tracker:348: Stepper bind=it.sets min=1 max=10 step=1 holdRepeat"
    ]
   },
   {
@@ -627,19 +648,11 @@
    ]
   },
   {
-   "message": "Unknown word \"…\" on a Card. Props are written key=value.",
+   "message": "Nothing over this page has the id \"…\" for an open to show (a Dialog, Sheet, Drawer, Menu or Popover with that id, written after the page at the margin): the action is left out. Over this page: \"…\", \"…\", \"…\", \"…\", \"…\", \"…\", \"…\".",
    "count": 1,
    "files": 1,
    "examples": [
-    "kanban-board:75: Card#card-{card.id} gap=6 pad=10 fill=#FFFFFFFF radius=6 focusable focusRing=#FF2F6FED selected={focusId==card.id} drag=card(card.id) drop=card onDrop={cards=moveBefore(cards,result.data,card.id,ca..."
-   ]
-  },
-  {
-   "message": "Unknown action \"…\"ArrowDown\"…\"ArrowUp\"…\". Actions: name=value, emit <event>, toast \"…\", open <id>, close, go <screen>, scroll <id>, link <url>, announce \"…\", confirm \"…\" then {…}, or JSON.",
-   "count": 1,
-   "files": 1,
-   "examples": [
-    "notes-app:136: Input \"Search notes, notebooks, actions\" bind=pq autofocus icon=\"search\" onChange={pcursor=0} onKeyDown={key==\"ArrowDown\"?pcursor=pcursor+1:(key==\"ArrowUp\"?pcursor=max(0,pcursor-1):pcursor=pcursor)}"
+    "notes-app:19: Shortcut \"mod+k\" onPress={open palette}"
    ]
   },
   {
@@ -651,11 +664,11 @@
    ]
   },
   {
-   "message": "Unknown action \"…\"N\"…\"N\"…\"N\"…\"N\"…\"N\"…\"N\"…\"That\"…\"…\"…\"…\"…\"Question\" then {…}, or JSON.",
+   "message": "A value read from the state is written in braces: end={…}.",
    "count": 1,
    "files": 1,
    "examples": [
-    "admin-console:407: CodeInput length=6 bind=code autofocus onComplete={code==[\"1\",\"2\",\"3\",\"4\",\"5\",\"6\"]?sso=true:codeError=\"That code is not right\"; announce sso?\"Single sign-on enabled\":\"Code rejected\"; sso?close:null}"
+    "calendar-app:76: DateRangePicker \"Dates\" start=draft.start end=draft.end onChange={draft=with(with(draft,\"start\",result.start),\"end\",result.end)}"
    ]
   },
   {
@@ -680,14 +693,6 @@
    "files": 1,
    "examples": [
     "smart-home:2: project devices=[{\"id\":\"l1\",\"name\":\"Ceiling light\",\"room\":\"Living room\",\"kind\":\"light\",\"on\":true,\"level\":70,\"ct\":\"warm\",\"online\":true},{\"id\":\"t1\",\"name\":\"Thermostat\",\"room\":\"Living room\",\"kind\":\"th..."
-   ]
-  },
-  {
-   "message": "A value read from the state is written in braces: start={…}.",
-   "count": 1,
-   "files": 1,
-   "examples": [
-    "calendar-app:76: DateRangePicker \"Dates\" start=draft.start end=draft.end onChange={draft=with(with(draft,\"start\",result.start),\"end\",result.end)}"
    ]
   },
   {
@@ -739,11 +744,35 @@
    ]
   },
   {
+   "message": "A value read from the state is written in braces: mode={…}.",
+   "count": 1,
+   "files": 1,
+   "examples": [
+    "admin-console:267: Calendar mode=range bind=range onChange={announce \"Range {result.from} to {result.to}\"}"
+   ]
+  },
+  {
    "message": "A value read from the state is written in braces: draft={…}.",
    "count": 1,
    "files": 1,
    "examples": [
     "admin-console:102: ChipInput \"Emails\" bind=invites draft=inviteDraft separators=[\",\",\";\",\" \"] validate=\"email\" hint=\"name@company.com\" onInvalid={announce \"Not a valid email\"}"
+   ]
+  },
+  {
+   "message": "The id \"…\" is this page's own (its canvas): an overlay over the page needs an id of its own (listenOverlay, opened with open listenOverlay). An overlay is opened from the page it is written on; one that other pages open is written on each of them, after the page.",
+   "count": 1,
+   "files": 1,
+   "examples": [
+    "story-reader:167: Sheet#listen \"Listen\" stops=[\"half\"] dismiss=drag,escape"
+   ]
+  },
+  {
+   "message": "A control is bound to a variable by its name (bind=name), to a field of a record variable (bind=draft.title), or under an each to a field of its element (bind=row.name): \"…\" is none of these. Show it and write the change yourself: value={sectionOn.{…}} onChange={…}.",
+   "count": 1,
+   "files": 1,
+   "examples": [
+    "story-reader:199: Toggle bind=sectionOn.{sec} onChange={settings=with(settings,\"sections\",result?append(settings.sections,sec):without(settings.sections,sec))}"
    ]
   },
   {
@@ -763,27 +792,27 @@
    ]
   },
   {
-   "message": "Unknown action \"…\"\"…\". Actions: name=value, emit <event>, toast \"…\", open <id>, close, go <screen>, scroll <id>, link <url>, announce \"…\", confirm \"…\" then {…}, or JSON.",
+   "message": "The id \"…\" is used twice. Give this line an id of its own.",
    "count": 1,
    "files": 1,
    "examples": [
-    "support-desk:137: Shortcut key=\"c\" onPress={draft==\"\"?close_ticket:open discard}"
+    "team-chat:85: FollowScroll#thread bind=following onFollowChange={showNew=!result} newestOnAppend=true"
    ]
   },
   {
-   "message": "Unknown action \"…\"\"…\"status\"…\"solved\"…\". Actions: name=value, emit <event>, toast \"…\", open <id>, close, go <screen>, scroll <id>, link <url>, announce \"…\", confirm \"…\" then {…}, or JSON.",
+   "message": "No line of this page has the id \"…\" for a scroll to go to (Section#thread end, or id=thread end on a line): the action is left out.",
    "count": 1,
    "files": 1,
    "examples": [
-    "support-desk:152: Button.outline \"Close ticket\" icon=\"check\" onTap={draft==\"\"?(ticket=with(ticket,\"status\",\"solved\"); toast \"Ticket #{ticket.id} set to solved\"):open discard}"
+    "team-chat:102: Pill \"New messages\" icon=\"arrow_downward\" bottom=12 animate=pop onTap={scroll thread end; following=true; showNew=false}"
    ]
   },
   {
-   "message": "No animate==playing?\"…\":\"…\". Written animate=fade, fade-up, slide, slide-up, slide-down, slide-left, slide-right, scale, zoom, pulse, spin, bob, sway, pop, bounce, shake, wiggle, flash, shimmer.",
+   "message": "A <Type> keeps its value in a variable: write bind=name (or bind=record.field, bind=row.field under an each).",
    "count": 1,
    "files": 1,
    "examples": [
-    "music-player:155: AlbumCover hue={find(albums,a=>a.id==find(tracks,t=>t.id==current).album).hue} w=420 h=420 radius=32 glow={playing} animate={playing?\"pulse\":\"\"}"
+    "music-player:262: ReorderableList bind=playlists[selPl].tracks handle=\"drag_handle\" onReorder={playlists=updateWhere(playlists,p=>p.id==selPl,p=>with(p,\"tracks\",result))}"
    ]
   }
  ],
@@ -810,7 +839,7 @@
   },
   {
    "message": "expression_syntax: The formula \"…\" does not parse: Unexpected \"…\" at N.",
-   "count": 7,
+   "count": 11,
    "files": 1,
    "examples": [
     "spreadsheet/sheet.json /nodes/sheet/actions/6/actions/1/value: The formula \"${= grid.raw(sel)}\" does not parse: Unexpected \"(\" at 9.",
@@ -839,6 +868,15 @@
    ]
   },
   {
+   "message": "unknown_target_node: No node \"…\" in this document.",
+   "count": 2,
+   "files": 1,
+   "examples": [
+    "kanban-board/board.json /nodes/board/actions/0/actions/1/node: No node \"quick-backlog\" in this document.",
+    "kanban-board/board.json /nodes/filledButton1/actions/0/actions/1/node: No node \"quick-backlog\" in this document."
+   ]
+  },
+  {
    "message": "expression_syntax: The formula \"…\"All\"…\"\"…\" \"…\"Year\"…\"Artist\"…\" does not parse: Unknown function \"…\".",
    "count": 2,
    "files": 1,
@@ -848,21 +886,21 @@
    ]
   },
   {
-   "message": "unknown_screen: No screen \"…\": \"…\" is a canvas id (of this or another document of the project). Canvases: trash, confirmForever, confirmEmpty, trashMenu, workspace, confirmOne, confirmMany, moveNote, moveMenu, tagPopover, noteMenu, nbSheet, workspaceMenu, search, palette, settings, settingsMenu.",
+   "message": "unknown_screen: No screen \"…\": \"…\" is a canvas id (of this or another document of the project). Canvases: trash, confirmForever, confirmEmpty, trash_sidebar, workspace, confirmOne, confirmMany, moveNote, moveMenu, tagPopover, noteMenu, nbSheet, workspace_sidebar, search, palette, settings, settings_sidebar.",
    "count": 2,
    "files": 1,
    "examples": [
-    "notes-app/trash.json /nodes/row4/actions/0/actions/0/to: No screen \"tags\": \"to\" is a canvas id (of this or another document of the project). Canvases: trash, confirmForever, confirmEmpty, trashMenu, workspace, conf...",
-    "notes-app/trash.json /nodes/row15/actions/0/actions/0/to: No screen \"tags\": \"to\" is a canvas id (of this or another document of the project). Canvases: trash, confirmForever, confirmEmpty, trashMenu, workspace, conf..."
+    "notes-app/trash.json /nodes/row4/actions/0/actions/0/to: No screen \"tags\": \"to\" is a canvas id (of this or another document of the project). Canvases: trash, confirmForever, confirmEmpty, trash_sidebar, workspace, ...",
+    "notes-app/trash.json /nodes/row15/actions/0/actions/0/to: No screen \"tags\": \"to\" is a canvas id (of this or another document of the project). Canvases: trash, confirmForever, confirmEmpty, trash_sidebar, workspace, ..."
    ]
   },
   {
-   "message": "unknown_screen: No screen \"…\": \"…\" is a canvas id (of this or another document of the project). Canvases: settings, settingsMenu, workspace, confirmOne, confirmMany, moveNote, moveMenu, tagPopover, noteMenu, nbSheet, workspaceMenu, search, palette, trash, confirmForever, confirmEmpty, trashMenu.",
+   "message": "unknown_screen: No screen \"…\": \"…\" is a canvas id (of this or another document of the project). Canvases: settings, settings_sidebar, workspace, confirmOne, confirmMany, moveNote, moveMenu, tagPopover, noteMenu, nbSheet, workspace_sidebar, search, palette, trash, confirmForever, confirmEmpty, trash_sidebar.",
    "count": 2,
    "files": 1,
    "examples": [
-    "notes-app/settings.json /nodes/row4/actions/0/actions/0/to: No screen \"tags\": \"to\" is a canvas id (of this or another document of the project). Canvases: settings, settingsMenu, workspace, confirmOne, confirmMany, mov...",
-    "notes-app/settings.json /nodes/row13/actions/0/actions/0/to: No screen \"tags\": \"to\" is a canvas id (of this or another document of the project). Canvases: settings, settingsMenu, workspace, confirmOne, confirmMany, mov..."
+    "notes-app/settings.json /nodes/row4/actions/0/actions/0/to: No screen \"tags\": \"to\" is a canvas id (of this or another document of the project). Canvases: settings, settings_sidebar, workspace, confirmOne, confirmMany,...",
+    "notes-app/settings.json /nodes/row13/actions/0/actions/0/to: No screen \"tags\": \"to\" is a canvas id (of this or another document of the project). Canvases: settings, settings_sidebar, workspace, confirmOne, confirmMany,..."
    ]
   },
   {
@@ -4030,7 +4068,8 @@
   },
   {
    "word": "StickyBar",
-   "resolved": "unknown",
+   "resolved": "alias",
+   "to": "Footer",
    "files": 1,
    "uses": 2,
    "in": [
@@ -4041,9 +4080,6 @@
    },
    "flags": {
     "bottom": 2
-   },
-   "children": {
-    "Row": 2
    },
    "examples": [
     "StickyBar bottom visible={length(cart)>0}"
@@ -5549,29 +5585,6 @@
  "parameters": [
   {
    "word": "size",
-   "on": "IconButton",
-   "resolved": "unknown",
-   "files": 4,
-   "uses": 9,
-   "in": [
-    "clip-editor",
-    "kanban-board",
-    "music-player",
-    "smart-home"
-   ],
-   "values": {
-    "large": 5,
-    "small": 3,
-    "xlarge": 1
-   },
-   "examples": [
-    "IconButton \"{playing?'pause':'play_arrow'}\" size=large onTap={playing=!playing}",
-    "IconButton \"arrow_upward\" size=small hidden={index==0} onTap={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,\"checklist\",moveItem(c.checklist,index,index-1)))}",
-    "IconButton \"arrow_downward\" size=small hidden={index==length(find(cards,c=>c.id==openId).checklist)-1} onTap={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,\"checklist\",moveItem(c.checklist,index,index+..."
-   ]
-  },
-  {
-   "word": "size",
    "on": "Ring",
    "resolved": "unknown",
    "files": 4,
@@ -5593,27 +5606,6 @@
     "Ring {d.learned/d.count} size=64 color=#FF6D28D9 track=#FFFFF4C2",
     "Ring {left==0&&!ended?1:left/cur.steps[step].s} size=160",
     "Ring {sum(budgets,b=>b.spent)/sum(budgets,b=>b.limit)} size=180 color=#FF1B6B3A"
-   ]
-  },
-  {
-   "word": "selected",
-   "on": "Row",
-   "resolved": "unknown",
-   "files": 4,
-   "uses": 5,
-   "in": [
-    "kanban-board",
-    "mail-client",
-    "music-player",
-    "support-desk"
-   ],
-   "values": {
-    "{…}": 5
-   },
-   "examples": [
-    "Row#row-{row.id} gap=8 pad=10 middle border-bottom=#FFF1F3F6 selected={contains(sel,row.id)} fill={contains(sel,row.id)?\"#FFEAF1FE\":\"#FFFFFFFF\"} focusable focusRing=#FF2F6FED onTap={sel=[row.id]; anchor=index} onTap.s...",
-    "Row gap=10 pad=[12,8,12,8] top selected={contains(sel,m.id) || openId==m.id} fill={contains(sel,m.id) ? '#FFE6F4F2' : (openId==m.id ? '#FFF1F5F9' : '#FFFFFFFF')} border-bottom=#FFEEF2F6 border-left={m.unread ? '#FF0F7...",
-    "Row pad=8 middle selected={current==t.id} menu=trackMenu onTap={current=t.id; pos=0; playing=true}"
    ]
   },
   {
@@ -5658,26 +5650,6 @@
     "ListTile e.title subtitle={e.allDay?\"All day\":\"{e.from} - {e.to}\"} leading={find(cals,c=>c.id==e.cal).color} onTap={draft=e; close; open event}",
     "ListTile e.title subtitle={e.allDay?\"All day\":\"{e.from} - {e.to}\"} leading={find(cals,c=>c.id==e.cal).color} onTap={draft=e; go month}",
     "ListTile \"{e.text}\" subtitle=\"{e.room}\" leading=\"{e.kind=='light'?'lightbulb':e.kind=='lock'?'lock':e.kind=='blind'?'blinds':e.kind=='speaker'?'speaker':e.kind=='thermostat'?'thermostat':'sensors'}\" trailing=\"{e.t}\" a..."
-   ]
-  },
-  {
-   "word": "selected",
-   "on": "IconButton",
-   "resolved": "unknown",
-   "files": 3,
-   "uses": 5,
-   "in": [
-    "music-player",
-    "photo-library",
-    "spreadsheet"
-   ],
-   "values": {
-    "{…}": 5
-   },
-   "examples": [
-    "IconButton \"shuffle\" selected={shuffleOn} onTap={shuffleOn=!shuffleOn}",
-    "IconButton \"{repeat=='one'?'repeat_one':'repeat'}\" selected={repeat!=\"off\"} onTap={repeat=repeat==\"off\"?\"all\":(repeat==\"all\"?\"one\":\"off\")}",
-    "IconButton \"favorite\" selected={contains(favs,photos[at].id)} onTap={favs=contains(favs,photos[at].id)?without(favs,photos[at].id):append(favs,photos[at].id)}"
    ]
   },
   {
@@ -6317,23 +6289,6 @@
    "examples": [
     "Box fill=#FFE8F0FE radius=8 pad=12 live=polite",
     "Box fill=#FF0B1F3A radius=8 pad=12 sticky=bottom live=polite"
-   ]
-  },
-  {
-   "word": "selected",
-   "on": "Button",
-   "resolved": "unknown",
-   "files": 1,
-   "uses": 2,
-   "in": [
-    "flashcards"
-   ],
-   "values": {
-    "{…}": 2
-   },
-   "examples": [
-    "Button.outline \"{p.a}\" radius=20 disabled={contains(matched,p.a)} selected={pl==p.a} onTap={pl=p.a; matched=pr!=\"\" && find(qs[qi].pairs,x=>x.a==p.a).b==pr ? append(matched,p.a) : matched; score=score+(pr!=\"\" && find(q...",
-    "Button.outline \"{p.b}\" radius=20 disabled={contains(map(filter(qs[qi].pairs,x=>contains(matched,x.a)),x=>x.b),p.b)} selected={pr==p.b} onTap={pr=p.b; matched=pl!=\"\" && find(qs[qi].pairs,x=>x.a==pl).b==p.b ? append(mat..."
    ]
   },
   {
@@ -7016,22 +6971,6 @@
    ]
   },
   {
-   "word": "selected",
-   "on": "Card",
-   "resolved": "unknown",
-   "files": 1,
-   "uses": 1,
-   "in": [
-    "kanban-board"
-   ],
-   "values": {
-    "{…}": 1
-   },
-   "examples": [
-    "Card#card-{card.id} gap=6 pad=10 fill=#FFFFFFFF radius=6 focusable focusRing=#FF2F6FED selected={focusId==card.id} drag=card(card.id) drop=card onDrop={cards=moveBefore(cards,result.data,card.id,card.col)} onTap={open..."
-   ]
-  },
-  {
    "word": "enabled",
    "on": "Checkbox",
    "resolved": "unknown",
@@ -7301,6 +7240,22 @@
    },
    "examples": [
     "FilterChip \"Attachments\" icon=\"attach_file\" bind=fAttach"
+   ]
+  },
+  {
+   "word": "size",
+   "on": "IconButton",
+   "resolved": "unknown",
+   "files": 1,
+   "uses": 1,
+   "in": [
+    "music-player"
+   ],
+   "values": {
+    "xlarge": 1
+   },
+   "examples": [
+    "IconButton.primary \"{playing?'pause':'play_arrow'}\" size=xlarge onTap={playing=!playing}"
    ]
   },
   {
@@ -7877,22 +7832,6 @@
    },
    "examples": [
     "Pane w=340 minw=260 resizable show={view==\"workspace\" && (pane==\"list\" || !phone)}"
-   ]
-  },
-  {
-   "word": "selected",
-   "on": "Radio",
-   "resolved": "unknown",
-   "files": 1,
-   "uses": 1,
-   "in": [
-    "food-ordering"
-   ],
-   "values": {
-    "{…}": 1
-   },
-   "examples": [
-    "Radio \"{s.name}  {money(s.price,'$',2)}\" selected={sz==index} onTap={sz=index}"
    ]
   },
   {
@@ -9301,48 +9240,6 @@
  ],
  "verbs": [
   {
-   "word": "focus",
-   "resolved": "unknown",
-   "files": 4,
-   "uses": 8,
-   "in": [
-    "admin-console",
-    "kanban-board",
-    "support-desk",
-    "team-chat"
-   ],
-   "parameters": {
-    "Shortcut": 7,
-    "Button": 1
-   },
-   "examples": [
-    "Shortcut keys=\"/\" onPress={focus search}",
-    "Shortcut \"n\" hint=\"N\" description=\"New card\" onPress={colId=\"backlog\"; focus quick-backlog}",
-    "Shortcut \"/\" hint=\"/\" description=\"Search\" onPress={focus search}"
-   ]
-  },
-  {
-   "word": "copy",
-   "resolved": "unknown",
-   "files": 3,
-   "uses": 5,
-   "in": [
-    "admin-console",
-    "scrolly-story",
-    "team-chat"
-   ],
-   "parameters": {
-    "Button": 2,
-    "IconButton": 2,
-    "MenuItem": 1
-   },
-   "examples": [
-    "IconButton \"content_copy\" tooltip=\"Copy key\" onTap={copy k.secret; toast \"Key copied\"; announce \"Key copied\"}",
-    "Button.outline \"Copy\" icon=\"content_copy\" onTap={copy fresh; toast \"Key copied\"}",
-    "IconButton \"link\" onTap={copy \"https://glacierlines.org/story\"; toast \"Link copied\"}"
-   ]
-  },
-  {
    "word": "grid.setFormat",
    "resolved": "unknown",
    "files": 1,
@@ -9431,6 +9328,38 @@
    "examples": [
     "IconButton \"backspace\" tooltip=\"Clear (Delete)\" onTap={undo=append(undo,sheets); redo=[]; grid.clear(range)}",
     "Shortcut \"Delete Backspace\" onKey={undo=append(undo,sheets); redo=[]; grid.clear(range)}"
+   ]
+  },
+  {
+   "word": "grid.commitAndMove",
+   "resolved": "unknown",
+   "files": 1,
+   "uses": 2,
+   "in": [
+    "spreadsheet"
+   ],
+   "parameters": {
+    "Shortcut": 2
+   },
+   "examples": [
+    "Shortcut \"Enter\" onKey={editing ? grid.commitAndMove(\"down\") : grid.edit(sel)}",
+    "Shortcut \"Shift+Enter\" onKey={grid.commitAndMove(\"up\")}"
+   ]
+  },
+  {
+   "word": "grid.edit",
+   "resolved": "unknown",
+   "files": 1,
+   "uses": 2,
+   "in": [
+    "spreadsheet"
+   ],
+   "parameters": {
+    "Shortcut": 2
+   },
+   "examples": [
+    "Shortcut \"Enter\" onKey={editing ? grid.commitAndMove(\"down\") : grid.edit(sel)}",
+    "Shortcut \"F2\" onKey={editing=true; grid.edit(sel)}"
    ]
   },
   {
@@ -9546,36 +9475,6 @@
    ]
   },
   {
-   "word": "count",
-   "resolved": "unknown",
-   "files": 1,
-   "uses": 1,
-   "in": [
-    "workout-tracker"
-   ],
-   "parameters": {
-    "Button": 1
-   },
-   "examples": [
-    "Button \"Finish\" fill=#FFC6FF00 color=#FF0A0A0A radius=20 onTap={count(flatten(map(exercises,e=>e.sets)),s=>!s.done)>0 ? open finishAsk : go summary}"
-   ]
-  },
-  {
-   "word": "editing",
-   "resolved": "unknown",
-   "files": 1,
-   "uses": 1,
-   "in": [
-    "spreadsheet"
-   ],
-   "parameters": {
-    "Shortcut": 1
-   },
-   "examples": [
-    "Shortcut \"Enter\" onKey={editing ? grid.commitAndMove(\"down\") : grid.edit(sel)}"
-   ]
-  },
-  {
    "word": "grid.cancelEdit",
    "resolved": "unknown",
    "files": 1,
@@ -9588,21 +9487,6 @@
    },
    "examples": [
     "Shortcut \"Escape\" onKey={editing=false; draft=grid.raw(sel); grid.cancelEdit}"
-   ]
-  },
-  {
-   "word": "grid.colHasData",
-   "resolved": "unknown",
-   "files": 1,
-   "uses": 1,
-   "in": [
-    "spreadsheet"
-   ],
-   "parameters": {
-    "MenuItem": 1
-   },
-   "examples": [
-    "MenuItem \"Delete column\" icon=\"delete\" onTap={grid.colHasData(menuCol) ? open confirmDelete : grid.deleteCol(menuCol); close}"
    ]
   },
   {
@@ -9621,7 +9505,7 @@
    ]
   },
   {
-   "word": "grid.commitAndMove",
+   "word": "grid.deleteCol",
    "resolved": "unknown",
    "files": 1,
    "uses": 1,
@@ -9629,10 +9513,10 @@
     "spreadsheet"
    ],
    "parameters": {
-    "Shortcut": 1
+    "MenuItem": 1
    },
    "examples": [
-    "Shortcut \"Shift+Enter\" onKey={grid.commitAndMove(\"up\")}"
+    "MenuItem \"Delete column\" icon=\"delete\" onTap={grid.colHasData(menuCol) ? open confirmDelete : grid.deleteCol(menuCol); close}"
    ]
   },
   {
@@ -9651,22 +9535,7 @@
    ]
   },
   {
-   "word": "grid.edit",
-   "resolved": "unknown",
-   "files": 1,
-   "uses": 1,
-   "in": [
-    "spreadsheet"
-   ],
-   "parameters": {
-    "Shortcut": 1
-   },
-   "examples": [
-    "Shortcut \"F2\" onKey={editing=true; grid.edit(sel)}"
-   ]
-  },
-  {
-   "word": "grid.rowHasData",
+   "word": "grid.deleteRow",
    "resolved": "unknown",
    "files": 1,
    "uses": 1,
@@ -9708,21 +9577,6 @@
    },
    "examples": [
     "IconButton.filled \"add\" onTap={cur=d; sz=-1; ex=[]; note=\"\"; q=1; if isEmpty(d.sizes) then null}"
-   ]
-  },
-  {
-   "word": "item.locked",
-   "resolved": "unknown",
-   "files": 1,
-   "uses": 1,
-   "in": [
-    "smart-home"
-   ],
-   "parameters": {
-    "Button": 1
-   },
-   "examples": [
-    "Button \"{d.locked ? 'Unlock' : 'Lock'}\" size=large onTap={sel=d.id; d.locked ? open confirmUnlock : devices=updateWhere(devices,x=>x.id==d.id,x=>with(x,\"locked\",true))}"
    ]
   },
   {
@@ -10139,20 +9993,6 @@
    ]
   },
   {
-   "word": "EmptyState",
-   "resolved": "unknown",
-   "files": 2,
-   "uses": 2,
-   "in": [
-    "mail-client",
-    "notes-app"
-   ],
-   "examples": [
-    "Button.outline \"Clear filters\" visible={fUnread||fStarred||fAttach} onTap={fUnread=false; fStarred=false; fAttach=false}",
-    "Button \"New note\" onTap={emit newNote}"
-   ]
-  },
-  {
    "word": "Stepper",
    "resolved": "unknown",
    "files": 1,
@@ -10191,18 +10031,6 @@
    "examples": [
     "BarChart values=[12,18,15,22,19] labels=[\"Mon\",\"Tue\",\"Wed\",\"Thu\",\"Fri\"] h=180 hidden={view==\"Table\"}",
     "Table hidden={view!=\"Table\"} columns=[\"Day\",\"Value\"] rows=[[\"Mon\",12],[\"Tue\",18],[\"Wed\",15],[\"Thu\",22],[\"Fri\",19]]"
-   ]
-  },
-  {
-   "word": "Banner",
-   "resolved": "unknown",
-   "files": 1,
-   "uses": 1,
-   "in": [
-    "smart-home"
-   ],
-   "examples": [
-    "Button.ghost \"Lock up\" onTap={alert=\"\"; toast \"Front door locked\"}"
    ]
   },
   {
@@ -10493,6 +10321,19 @@
    ]
   },
   {
+   "word": "StickyBar",
+   "resolved": "alias",
+   "to": "Footer",
+   "files": 1,
+   "uses": 2,
+   "in": [
+    "food-ordering"
+   ],
+   "examples": [
+    "StickyBar bottom visible={length(cart)>0}"
+   ]
+  },
+  {
    "word": "match",
    "on": "Text",
    "resolved": "alias",
@@ -10694,13 +10535,6 @@
    "words": [
     "Selection",
     "SelectionBar"
-   ]
-  },
-  {
-   "stem": "sticky",
-   "words": [
-    "Sticky",
-    "StickyBar"
    ]
   },
   {
