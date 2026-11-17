@@ -475,3 +475,108 @@ unreleased).
 **To check at review 5 (kept for the record).** With D19 to D21 merged: grammar issues per 1,000 lines on self-defining answers
 (expect under 10), the share of definitions that validate, and for the ten most defined words whether the
 definitions agree enough to promote one.
+
+### Review 7 (the standalone runs: test 7, twenty apps through the loop alone; test 6's follow-up, nineteen apps on 33.1.0)
+
+Sources: branches `dsl7/<slug>` and `dsl6/<slug>` of CodelesslyEditor. Counts of lines, words and definitions
+are measured from the files; features, ratings and times are the agents' own claims.
+
+**Test 7, measured.** Round 1 (nothing defined): 1,793 lines, 34.7% of unknown-or-known vocabulary resolved,
+207 stand-in lines, 12 grammar issues in 4 apps (16 apps had none). Final: 2,756 lines, 100% resolved, no
+grammar issue, no validation error, 146 definitions, 3 type aliases and 5 parameter aliases. Vocabulary closed
+in round 2 for 18 of 20; the 3 to 14 rounds agents report are rendering and behaviour work under the same
+counter. Their own feature tally: about 37 complete, 166 partial, 30 missing, 9 not verified.
+
+**What the 100% is worth.** It means every name parses. Of the 146 definitions about 54 are stand-ins for
+something no line can say, and the count cannot tell them from the rest:
+- a parameter or an event in a `define` signature resolves whether or not the body uses it (`shortcut` on four
+  buttons, six key events on tv's `RemoteFrame`, `onTailDrag`);
+- charts that are a `LineChart` with fixed values (candles, scope trace), a histogram of four boxes;
+- maps and canvases that are tinted boxes; data of the caller's hard-coded in the body;
+- one app defined in round 1 and so measured nothing; one (periodic table) asked for a primitive where a grid
+  of tiles from data would do.
+Apps by honesty: mostly real (watch faces, dispatch, golf apart from the map, table bookings, telescope
+controls, lighting); a real shell round a hollow centre (ten); mostly a labelled placeholder (floor plan CAD,
+level builder, comic layout, periodic table).
+
+**Why eight aliases and 146 definitions.** No one found the alias format unclear. The unknown words were
+composites, not synonyms; the glossary gave names with no signatures, so nobody would map to a word whose
+shape they could not see (20 of 20 name this, and it caused every "right word, wrong shape" rename: MapView,
+FloorPlan, CanvasShell, Track, Timeline, StatusBadge, Poster, SectionHeader and twenty more); and an alias
+cannot carry a variant, a fixed parameter or move the main string to a named parameter. Some 12 to 15
+definitions are one line of a core word and would be aliases if aliases could do that.
+
+**Primitives, sixty entries, eleven capabilities** (apps asking):
+1. A surface where items sit at coordinates from data and are dragged, drawn or painted (15). Seven agents
+   wrote the same outline unprompted: records with an id and a position, `selected`, `grid`/`snap`/`zoom`/`tool`,
+   `on<Verb>` events. They split on two things one primitive has to settle: events as a delta (`{id,x,y}`) or
+   the whole new list; coordinates absolute, normalised or cells.
+2. A drawn path: line, polyline or arc between points or two placed items, end markers, label, hit region;
+   bars on an axis (15). Connectors, routes, traces, candles, rings and clock hands are all this.
+3. Host actions with a result: copy, export a node to PNG or PDF, print, download, play a sound (10).
+4. Pan and zoom of a surface as bound values (8).
+5. Keys: `shortcut=` on anything tappable, an app-level key, arrow focus through a grid or a rail (8).
+6. Hit regions and pointer position on a drawing (9). 7. Time, animation, audio (8). 8. Knob, vertical fader,
+   seek bar: value, range, unit, `onChange` (5). 9. A real map (3; 6 with floor and sky). 10. Camera or pixel
+   feed (4). 11. Undo history, sensors, compute the formulas cannot say.
+The follow-up asks for the same from the other side: scroll position and viewport events (8), a drawing
+primitive (8), free placement on an axis (6), focus travel in a grid or a scoped key (6), held gestures (6),
+range and modifier selection (5), reorder of a filtered or nested slice (5), date arithmetic (5).
+
+**Defects that passed the tools silently** (apps):
+- `bind={bind}` inside a definition binds a variable called `bind` (7). The prompt's own example invites it.
+- `drag=group(item)` with a loop item inside a definition (3); `onSubmitted` forwarded through one (1).
+- `selectable` round a `TableRow` or a draggable `Card` does nothing (3). `key left` never fires (1).
+- bare `go name` reads a variable of that name before the screen (4, both tests).
+- `state x=0` is an integer and drops decimals (3). A hyphen in `#id` (2). `state` before `###` adds a blank
+  screen (2). Ids written inside blocks and definitions are not the step targets (about 10).
+- `Calendar bind=day` returns a range worded "check-in/check-out" (2). `ColorPicker` draws nothing (3).
+  A sheet's second stop cannot be dragged to (5). `SwipeAction … removes` removes nothing (2).
+- Cards' `Rating.json` warns `root_placement_bound` on every render of every app (all 39).
+
+**The follow-up, in one paragraph.** All nineteen adopted the 33.1.0 words; no JSON escape before or after;
+5,343 to 5,182 lines across the eighteen that give totals. Persistence simply worked (18), `confirm` deleted
+whole dialogs (16), `fuzzy` caught typos (11), `reorder` with `Handle` and Alt+arrows, `menu=` on right click
+and long press, `CodeInput`, `Rating`. Every word that was used widely hit the same wall: it does the common
+case and has no parameter for the next one. `confirm` has no affirmative label, tone or body (13, 11);
+`key` has no scope or condition (9); `reorder` needs a named whole list (5); `fuzzy` has no threshold and
+`mark=` does not pass through blocks (6, 4); a context menu's actions do not get the pressed row (4);
+`announce` cannot be checked because the render tool keeps no trace of it (12).
+
+**Insights.**
+1. The count has stopped measuring. Self-definition took resolved share to 100% and a third of what resolved
+   is hollow. The next measure is behavioural: a definition is resolved when its parameters are read and its
+   events fire, and a word declared as a primitive is counted apart. Until the tool says so, "100%" is noise.
+2. The missing primitives are few and the writers agree on their shape. One surface with placed children and
+   one path word cover 15 apps each and most of the rest reduce to them plus keys and host actions. This is
+   the next real work; more vocabulary will not move these apps.
+3. Signatures, not names, are what a glossary has to carry. Every wrong-shape rename and most of the
+   reluctance to alias came from a bare name. One line per word: main string, parameters, events, children.
+4. Convergent synonyms are free wins: `description`/`detail`/`note`, `placeholder`/`hint`, `items`/`value`,
+   a main-string label on Counter, NumberInput, Legend, SectionHeader, `color` on StatusDot, `label` on
+   ProgressBar, `disabled` beside `enabled`. Accept them all rather than teach one.
+5. Words need their second parameter. The follow-up's limits are not new words but the next argument of the
+   ones we shipped; each is small and each was hit by a majority of the apps that used the word.
+6. Neither run judged how the result looks next to a designed one. Agents rate their own layout 4 of 5 almost
+   everywhere while the owner sees layout mistakes on every desktop screen. Test 8 (the same briefs built from
+   scratch on UI SDK and compared side by side) is the first measure of that.
+
+**Decisions.**
+- D31. Definitions: `bind=`, loop items in `drag=` and events forward through a definition; until they do,
+  the tool reports them as errors.
+- D32. The vocabulary tool warns on a signature parameter or event the body never uses and on a definition
+  that reads a global; a `primitive Word …` declaration is counted apart; one "unknown" number.
+- D33. The glossary prints signatures. `batch.sh prepare` uses it.
+- D34. Synonyms of insight 4 accepted; `StatusBadge.status` goes to `tone`; `go name` prefers the screen and
+  the expander warns when a variable shares it; unknown key names, hyphenated ids and `selectable` where it
+  cannot work are refused at expand; `state x=0` holds decimals.
+- D35. Second parameters: `confirm` (label, tone, body, closes the menu that opened it, OK and Cancel
+  addressable); `key … when=`; `fuzzy` threshold and `mark=` through ListRow, ConversationRow, PostCard;
+  the pressed row to `menu=` actions; `Calendar` single day; `removable` on ListRow.
+- D36. Bugs: `Rating.json` warning, `ColorPicker`, sheet stops by drag, `SwipeAction removes`, `Handle`
+  focus and wrap on a phone, range slider thumbs by keyboard, CanvasShell's 120 px clip, a missed step target
+  lists the candidates, the step runner takes `/`, `?`, `F2`, `mod+`, an announcement trace.
+- D37. Primitives, in order: the surface (placed children, drag reporting a delta, tap on empty space, pan
+  and zoom as values, cells as one coordinate mode), the path, `shortcut=` and arrow-focus groups, host
+  actions with a result, scroll position and viewport events. Each gets a design note before code.
+- D38. Aliases carry a variant, fixed parameters and a main-string mapping; a definition may shadow a named word.
