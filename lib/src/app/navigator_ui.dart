@@ -45,7 +45,21 @@ typedef ScreenBuilder = Widget? Function(String destination, Json params);
 ///
 /// [context] gives the context the actions run near (a NodeView's, a
 /// screen's); it's read when an action runs, so it can be any later one.
-class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi {
+class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, PopoverUi {
+  @override
+  bool get popoverOnTop {
+    final c = _context;
+    final navigator = c == null ? null : Navigator.maybeOf(c);
+    if (navigator == null) return false;
+    Route<dynamic>? top;
+    navigator.popUntil((r) {
+      top = r;
+      return true;
+    });
+    final route = top;
+    return route is PopupRoute && route.settings.name == popoverRouteName && route.isActive;
+  }
+
   NavigatorActionUi({required this.context, this.route, this.modal, this.sheetModal, this.files, this.breakpoints});
 
   final BuildContext? Function() context;
@@ -145,41 +159,6 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi {
       final session = _hoverCards[navigator] ??= _HoverCardSession(navigator);
       return session.open(c, modalContent, anchor: anchor, action: action);
     }
-    // A menu's item that opens a dialog, a sheet or a screen: the menu
-    // closes first (it would stay drawn under the dialog's scrim until the
-    // dialog closed). A popover opened from a popover (a submenu) keeps it.
-    if (action.presentation != ModalPresentation.popover && _closePopoverOnTop(Navigator.of(c))) {
-      try {
-        return await _show(c, modalContent, action, anchor: anchor, sheet: sheet, sheetBelowWidth: sheetBelowWidth);
-      } finally {
-        // The chain's own "then close the menu" (the action after this one)
-        // has been done: it must not close what is under the menu instead.
-        _openerClosed = true;
-        Timer.run(() => _openerClosed = false);
-      }
-    }
-    return _show(c, modalContent, action, anchor: anchor, sheet: sheet, sheetBelowWidth: sheetBelowWidth);
-  }
-
-  /// Whether the menu a modal was opened from was closed for it, and the
-  /// chain that opened it has not gone on yet.
-  bool _openerClosed = false;
-
-  /// Closes the popover on top of [navigator], if one is ([popoverRouteName]).
-  static bool _closePopoverOnTop(NavigatorState navigator) {
-    Route<dynamic>? top;
-    navigator.popUntil((r) {
-      top = r;
-      return true;
-    });
-    final route = top;
-    if (route is! PopupRoute || route.settings.name != popoverRouteName || !route.isActive) return false;
-    navigator.pop();
-    return true;
-  }
-
-  Future<Object?> _show(BuildContext c, Widget modalContent, OpenModalAction action,
-      {required Rect? anchor, required bool sheet, required double sheetBelowWidth}) {
     // A popover: by the node that opened it, or the pointer.
     if (anchor != null &&
         action.routeTransition == null &&
@@ -218,10 +197,6 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi {
 
   @override
   bool closeModal(Object? result) {
-    if (_openerClosed) {
-      _openerClosed = false;
-      return true;
-    }
     final c = _context;
     if (c == null) return false;
     final hover = _hoverCards[Navigator.of(c)];
@@ -468,7 +443,7 @@ Future<Object?> showScreenModal(
 /// under its top, moving up when that would pass the screen's bottom margin
 /// (a menu that may grow keeps its place; a tall card overlaps its anchor).
 /// The name of the route a popover (a menu, a picker by its trigger) is
-/// shown in: what opens a dialog or a sheet from inside one closes it first.
+/// shown in ([PopoverUi.popoverOnTop]).
 const String popoverRouteName = 'codelessly.popover';
 
 Future<Object?> showAnchoredModal(
