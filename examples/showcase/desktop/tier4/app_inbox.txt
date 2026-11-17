@@ -3,85 +3,85 @@ state folder="inbox"
 state reply=""
 state convos=[{"id":1,"name":"Maya Reyes","subject":"Can't log in on mobile","preview":"I reset my password twice and the app still says…","time":"9:41","unread":true},{"id":2,"name":"Daniel Okafor","subject":"Charged twice for May invoice","preview":"Thanks for looking into it, the second charge is…","time":"9:12","unread":false},{"id":3,"name":"Sofia Lindqvist","subject":"CSV export is missing columns","preview":"The export drops the tags and assignee columns…","time":"8:55","unread":true},{"id":4,"name":"Chen Wei","subject":"Upgrade to the annual plan","preview":"Do you offer a discount if we pay for 12 months…","time":"8:20","unread":false},{"id":5,"name":"Amara Nwosu","subject":"Webhook retries keep failing","preview":"Since Tuesday every retry returns a 502 from…","time":"Yesterday","unread":true},{"id":6,"name":"Lucas Meyer","subject":"Change the billing email","preview":"Please send future invoices to finance@meyer.io…","time":"Yesterday","unread":false},{"id":7,"name":"Hannah Cole","subject":"Thanks, that fixed it","preview":"Clearing the cache worked. Appreciate the quick…","time":"Mon","unread":false},{"id":8,"name":"Rafael Ortiz","subject":"Question about seat count","preview":"We added two teammates but the invoice still shows…","time":"Mon","unread":true}]
 App
-  Sidebar w:200
-    Brand "Relaydesk" icon:"support_agent"
+  Sidebar w=200
+    Brand "Relaydesk" icon="support_agent"
     Text.eyebrow "FOLDERS"
-    NavItem "Inbox" icon:"inbox" badge:"12" selected:=folder=="inbox" -> folder="inbox"
-    NavItem "Assigned to me" icon:"person" badge:"4" selected:=folder=="mine" -> folder="mine"
-    NavItem "Waiting" icon:"schedule" badge:"7" selected:=folder=="waiting" -> folder="waiting"
-    NavItem "Closed" icon:"check_circle" selected:=folder=="closed" -> folder="closed"
+    NavItem "Inbox" icon="inbox" badge="12" selected={folder=="inbox"} onTap={folder="inbox"}
+    NavItem "Assigned to me" icon="person" badge="4" selected={folder=="mine"} onTap={folder="mine"}
+    NavItem "Waiting" icon="schedule" badge="7" selected={folder=="waiting"} onTap={folder="waiting"}
+    NavItem "Closed" icon="check_circle" selected={folder=="closed"} onTap={folder="closed"}
     Spacer grow
-    Row gap:10 middle
-      Avatar "Priya Shah" size:32
+    Row gap=10 middle
+      Avatar "Priya Shah" size=32
       Column
         Text.strong "Priya Shah"
         Text.caption "Support agent"
-  Pane w:340
+  Pane w=340
     Nav
-      Heading "Inbox" level:3
+      Heading "Inbox" level=3
       Text.caption "12 open"
     Column scroll grow
       each c in convos
-        Row pad:[16,12,16,12] gap:12 top border-bottom:#FFE5E7EB fill:=sel==c.id?"#142563EB":"#00FFFFFF" -> sel=c.id
-          Avatar "{c.name}" size:40
-          Column grow gap:2
+        Row pad=[16,12,16,12] gap=12 top border-bottom=#FFE5E7EB fill={sel==c.id?"#142563EB":"#00FFFFFF"} onTap={sel=c.id}
+          Avatar "{c.name}" size=40
+          Column grow gap=2
             Text.strong "{c.name}"
             Text "{c.subject}"
-            Text.muted "{c.preview}" size:12
-          Column gap:6 end
+            Text.muted "{c.preview}" size=12
+          Column gap=6 end
             Text.caption "{c.time}"
-            Box w:8 h:8 radius:4 fill:#FF2563EB visible:=c.unread
+            Box w=8 h=8 radius=4 fill=#FF2563EB visible={c.unread}
   Main
     Nav
-      Column gap:4
-        Heading "Charged twice for May invoice" level:1
-        Row gap:10 middle
+      Column gap=4
+        Heading "Charged twice for May invoice" level=1
+        Row gap=10 middle
           Badge.warning "Waiting on customer"
-          Avatar "Priya Shah" size:22
+          Avatar "Priya Shah" size=22
           Text.muted "Assigned to Priya Shah"
-      Row gap:8
-        Button.outline "Reassign" -> emit reassign
-        Button.outline "Close" -> emit close
-    Column scroll grow pad:24 gap:16
-      Row gap:10 top
-        Avatar "Daniel Okafor" size:32
-        Box fill:#FFF3F4F6 radius:12 pad:12 gap:4 maxw:440
+      Row gap=8
+        Button.outline "Reassign" onTap={emit reassign}
+        Button.outline "Close" onTap={emit close}
+    Column scroll grow pad=24 gap=16
+      Row gap=10 top
+        Avatar "Daniel Okafor" size=32
+        Box fill=#FFF3F4F6 radius=12 pad=12 gap=4 maxw=440
           Text.caption "Daniel Okafor · 8:40"
           Text "Hi, I was charged twice for the May invoice, $129.00 on the 3rd and again on the 4th. Can you check?"
-      Row gap:10 top end
-        Box fill:#FFE0EAFF radius:12 pad:12 gap:4 maxw:440
+      Row gap=10 top end
+        Box fill=#FFE0EAFF radius=12 pad=12 gap=4 maxw=440
           Text.caption "Priya Shah · 8:52"
           Text "Hi Daniel, sorry about that. I'm looking at the billing log now and will confirm shortly."
-        Avatar "Priya Shah" size:32
-      Box fill:#FFFEF3C7 radius:12 pad:12 gap:4 border:#FFF59E0B
-        Row gap:6 middle
-          Icon "lock" size:16 color:#FFB45309
-          Text.caption "Internal note · Marcus Lee · 9:01" color:#FFB45309
-        Text "Confirmed duplicate: the payment retry fired after a timeout. Refund of $129.00 approved, no need to escalate." color:#FF78350F
-      Row gap:10 top
-        Avatar "Daniel Okafor" size:32
-        Box fill:#FFF3F4F6 radius:12 pad:12 gap:4 maxw:440
+        Avatar "Priya Shah" size=32
+      Box fill=#FFFEF3C7 radius=12 pad=12 gap=4 border=#FFF59E0B
+        Row gap=6 middle
+          Icon "lock" size=16 color=#FFB45309
+          Text.caption "Internal note · Marcus Lee · 9:01" color=#FFB45309
+        Text "Confirmed duplicate: the payment retry fired after a timeout. Refund of $129.00 approved, no need to escalate." color=#FF78350F
+      Row gap=10 top
+        Avatar "Daniel Okafor" size=32
+        Box fill=#FFF3F4F6 radius=12 pad=12 gap=4 maxw=440
           Text.caption "Daniel Okafor · 9:12"
           Text "Thanks for looking into it, the second charge is still showing as pending on my card."
-      Row gap:10 top end
-        Box fill:#FFE0EAFF radius:12 pad:12 gap:4 maxw:440
+      Row gap=10 top end
+        Box fill=#FFE0EAFF radius=12 pad=12 gap=4 maxw=440
           Text.caption "Priya Shah · 9:20"
           Text "The refund has been issued. Pending charges usually drop within 3 to 5 business days."
-        Avatar "Priya Shah" size:32
-    Column pad:16 gap:10 border-top:#FFE5E7EB
-      Input "Reply to Daniel" "Write your reply…" =reply multiline
-      Row gap:8 end
-        Button "Send" -> emit send reply; reply=""; toast "Reply sent"
-        Button.outline "Send and close" -> emit sendAndClose reply; reply=""; toast "Sent and closed"
-  Pane w:260 pad:16 gap:16 border-left:#FFE5E7EB
-    Column gap:8 center
-      Avatar "Daniel Okafor" size:64
+        Avatar "Priya Shah" size=32
+    Column pad=16 gap=10 border-top=#FFE5E7EB
+      Input "Reply to Daniel" "Write your reply…" bind=reply multiline
+      Row gap=8 end
+        Button "Send" onTap={emit send reply; reply=""; toast "Reply sent"}
+        Button.outline "Send and close" onTap={emit sendAndClose reply; reply=""; toast "Sent and closed"}
+  Pane w=260 pad=16 gap=16 border-left=#FFE5E7EB
+    Column gap=8 center
+      Avatar "Daniel Okafor" size=64
       Text.strong "Daniel Okafor"
-      Text.muted "daniel@okafor.studio" size:12
+      Text.muted "daniel@okafor.studio" size=12
     Divider
-    Details rows:[["Plan","Business"],["Customer since","Mar 2022"],["Last order","#48213 · $129.00"]]
+    Details rows=[["Plan","Business"],["Customer since","Mar 2022"],["Last order","#48213 · $129.00"]]
     Text.eyebrow "TAGS"
-    Row gap:6
+    Row gap=6
       Badge.primary "Billing"
       Badge.neutral "Refund"
       Badge.success "VIP"

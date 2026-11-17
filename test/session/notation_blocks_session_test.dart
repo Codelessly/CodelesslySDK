@@ -28,10 +28,10 @@ state today={"name":"Intervals","rounds":8,"work":40,"rest":20,"minutes":8}
 
 const _answer = '''
 Screen
-  HeroSession "{today.name}" "{today.rounds} rounds" minutes:=today.minutes cta:"Start" -> emit start_session
-  Row gap:12
-    StreakFlame "sessions in a row" "Keep going." count:=streak
-    ProgressGoal "This week" "Almost there." done:=sessionsThisWeek goal:=weeklyGoal
+  HeroSession "{today.name}" "{today.rounds} rounds" minutes={today.minutes} cta="Start" onPressed={emit start_session}
+  Row gap=12
+    StreakFlame "sessions in a row" "Keep going." count={streak}
+    ProgressGoal "This week" "Almost there." done={sessionsThisWeek} goal={weeklyGoal}
 ''';
 
 void main() {

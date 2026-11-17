@@ -7,56 +7,56 @@ state activity=[{"who":"Maya Reyes","what":"moved this card to In progress","whe
 App
   Main
     Nav
-      Row gap:16
-        Heading "Website relaunch" level:3
-        Row gap:4
-          Avatar "Maya Reyes" size:28
-          Avatar "Jon Okafor" size:28
-          Avatar "Lena Fischer" size:28
-          Avatar "Sam Patel" size:28
-          Avatar "Ana Costa" size:28
-      Row gap:12
-        Input "Filter tasks" =q w:220
-        Button "New task" icon:"add" -> emit newTask
+      Row gap=16
+        Heading "Website relaunch" level=3
+        Row gap=4
+          Avatar "Maya Reyes" size=28
+          Avatar "Jon Okafor" size=28
+          Avatar "Lena Fischer" size=28
+          Avatar "Sam Patel" size=28
+          Avatar "Ana Costa" size=28
+      Row gap=12
+        Input "Filter tasks" bind=q w=220
+        Button "New task" icon="add" onTap={emit newTask}
     Row grow top
-      Row scroll grow gap:16 pad:24 top
+      Row scroll grow gap=16 pad=24 top
         each c in cols
-          Box w:216 h:fill fill:#FFF2F3F6 radius:10 pad:10 gap:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col",c.id))
+          Box w=216 h=fill fill=#FFF2F3F6 radius=10 pad=10 gap=10 drop=task onDrop={tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col",c.id))}
             Row between
-              Row gap:8
+              Row gap=8
                 Text.strong "{c.name}"
                 Badge.neutral "{count(tasks,x=>x.col==c.id)}"
-              IconButton "add" -> emit addTask c.id
+              IconButton "add" onTap={emit addTask c.id}
             each t in filter(tasks,x=>x.col==c.id&&contains(lower(x.title),lower(q)))
-              Card drag:task(t.id) gap:8 pad:12 fill:#FFFFFFFF border:=sel==t.id?"#FF2F6FED":"#FFE2E5EA" -> sel=t.id
-                Box fill:=t.color radius:4 pad:[6,2,6,2]
-                  Text.badge "{t.label}" color:#FFFFFFFF size:11
+              Card drag=task(t.id) gap=8 pad=12 fill=#FFFFFFFF border={sel==t.id?"#FF2F6FED":"#FFE2E5EA"} onTap={sel=t.id}
+                Box fill={t.color} radius=4 pad=[6,2,6,2]
+                  Text.badge "{t.label}" color=#FFFFFFFF size=11
                 Text.rowTitle "{t.title}"
                 Row between
-                  Row gap:10
-                    Row gap:4
-                      Icon "schedule" size:14
+                  Row gap=10
+                    Row gap=4
+                      Icon "schedule" size=14
                       Text.caption "{t.due}"
-                    Row gap:4
-                      Icon "chat_bubble_outline" size:14
+                    Row gap=4
+                      Icon "chat_bubble_outline" size=14
                       Text.caption "{t.comments}"
-                  Avatar "{t.who}" size:24
+                  Avatar "{t.who}" size=24
       if sel!=0
-        Column w:360 h:fill pad:16 gap:14 scroll border-left:#FFE2E5EA
+        Column w=360 h=fill pad=16 gap=14 scroll border-left=#FFE2E5EA
           each d in filter(tasks,x=>x.id==sel)
             Row between
-              Box fill:=d.color radius:4 pad:[6,2,6,2]
-                Text.badge "{d.label}" color:#FFFFFFFF size:11
-              IconButton "close" -> sel=0
-            Heading "{d.title}" level:3
-            Details rows:=[["Assignee",d.who],["Due",d.due],["Comments",d.comments],["Status",d.col]]
+              Box fill={d.color} radius=4 pad=[6,2,6,2]
+                Text.badge "{d.label}" color=#FFFFFFFF size=11
+              IconButton "close" onTap={sel=0}
+            Heading "{d.title}" level=3
+            Details rows={[["Assignee",d.who],["Due",d.due],["Comments",d.comments],["Status",d.col]]}
             SectionLabel "Description"
             Paragraph "{d.desc}"
-            Checklist "Checklist" =done items:["Review requirements","Complete the work","Get a teammate's feedback","Update the project notes"]
+            Checklist "Checklist" bind=done items=["Review requirements","Complete the work","Get a teammate's feedback","Update the project notes"]
             SectionLabel "Activity" "{length(activity)} updates"
             each a in activity
-              Row gap:10 top
-                Avatar "{a.who}" size:28
-                Column grow gap:2
+              Row gap=10 top
+                Avatar "{a.who}" size=28
+                Column grow gap=2
                   Text "{a.who} {a.what}"
                   Text.caption "{a.when}"

@@ -21,9 +21,9 @@ state count=1
 Card
   Text#title "Seats"
   Row#row
-    Button#less "-" -> count=count-1
+    Button#less "-" onTap={count=count-1}
     Text#n "{count}"
-    Button#more "+" -> count=count+1
+    Button#more "+" onTap={count=count+1}
 ''';
 
 const _good = [
@@ -131,7 +131,7 @@ state note="Ready at the desk"
 Card
   Text#title "Lab kit ready"
   Text#where "{note}"
-  Button#go "I'll pick it up" -> emit collect
+  Button#go "I'll pick it up" onTap={emit collect}
 ''';
 
     // The plain button and the title's text go; an ActionButton and a

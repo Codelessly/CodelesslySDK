@@ -4,6 +4,14 @@
 #   tool/notation/notation.sh prompt [--design-system <folder>]
 #   tool/notation/notation.sh expand <file.txt> [--design-system <folder>] [--named] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--site <site.json>] [--out <file.json>]
 #   tool/notation/notation.sh apply <document.json> <ops.json> [--design-system <folder>] [--out <file.json>]
+#   tool/notation/notation.sh migrate <file.txt> [more files] [--design-system <folder>]... [--check] [--stdout] [--dart | --markdown]
+#
+# migrate is a one-off: it rewrites files written in the grammar codelessly_api
+# read up to 32.x (key:value, =name, key:=expression, -> actions) to the
+# grammar of 33.0.0 (key=value, key={expression}, bind=name, onTap={actions}),
+# in place. The parser reads the new grammar only; migrate.dart carries its
+# own copy of how the old one split a line, and is to be deleted, with this
+# command, once the sites written before 2026-11-16 are migrated.
 #
 # It finds Flutter's dart, makes the SDK use the codelessly_api checked out
 # beside it (../CodelesslyAPI: the notation is newer than the published
@@ -13,8 +21,8 @@ set -e
 sdk="$(cd "$(dirname "$0")/../.." && pwd)"
 cmd="${1:-}"
 case "$cmd" in
-  prompt|expand|apply) shift ;;
-  *) echo "usage: tool/notation/notation.sh prompt|expand|apply [arguments] (see the head of this file)" >&2; exit 2 ;;
+  prompt|expand|apply|migrate) shift ;;
+  *) echo "usage: tool/notation/notation.sh prompt|expand|apply|migrate [arguments] (see the head of this file)" >&2; exit 2 ;;
 esac
 
 # Flutter's dart, codelessly_api from the checkout beside the SDK (the same

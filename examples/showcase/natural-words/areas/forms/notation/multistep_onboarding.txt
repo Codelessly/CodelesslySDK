@@ -1,40 +1,40 @@
-Column gap:20 pad:20 maxw:560
+Column gap=20 pad=20 maxw=560
   state name=""
   state job=""
   state bio=""
   Row top
-    Column center gap:4
-      Box center middle w:32 h:32 radius:16 fill:#FF2E7D32
-        Icon "check" color:#FFFFFFFF
+    Column center gap=4
+      Box center middle w=32 h=32 radius=16 fill=#FF2E7D32
+        Icon "check" color=#FFFFFFFF
       Text.caption "Account"
-    Column grow pad:[0,15,0,0]
-      Box h:2 fill:#FF2E7D32
-    Column center gap:4
-      Box center middle w:32 h:32 radius:16 fill:#FF3F51B5
-        Text.strong "2" color:#FFFFFFFF
-      Text.caption "Profile" weight:700
-    Column grow pad:[0,15,0,0]
-      Box h:2 fill:#FFE0E0E0
-    Column center gap:4
-      Box center middle w:32 h:32 radius:16 fill:#FFE0E0E0
-        Text.strong "3" color:#FF757575
+    Column grow pad=[0,15,0,0]
+      Box h=2 fill=#FF2E7D32
+    Column center gap=4
+      Box center middle w=32 h=32 radius=16 fill=#FF3F51B5
+        Text.strong "2" color=#FFFFFFFF
+      Text.caption "Profile" weight=700
+    Column grow pad=[0,15,0,0]
+      Box h=2 fill=#FFE0E0E0
+    Column center gap=4
+      Box center middle w=32 h=32 radius=16 fill=#FFE0E0E0
+        Text.strong "3" color=#FF757575
       Text.caption "Preferences"
-    Column grow pad:[0,15,0,0]
-      Box h:2 fill:#FFE0E0E0
-    Column center gap:4
-      Box center middle w:32 h:32 radius:16 fill:#FFE0E0E0
-        Text.strong "4" color:#FF757575
+    Column grow pad=[0,15,0,0]
+      Box h=2 fill=#FFE0E0E0
+    Column center gap=4
+      Box center middle w=32 h=32 radius=16 fill=#FFE0E0E0
+        Text.strong "4" color=#FF757575
       Text.caption "Review"
-  Card gap:16
-    Column gap:4
+  Card gap=16
+    Column gap=4
       Text.heading2 "Tell us about you"
       Text.bodySecondary "This information appears on your public profile."
-    Input "Display name" "e.g. Maya Reyes" =name
-    Select "Job title" =job items:["Designer","Engineer","Product manager","Marketer","Student","Other"]
-    Column gap:4
-      Input "Bio" "Write a short bio" =bio multiline {"props": {"maxLength": 160}}
+    Input "Display name" "e.g. Maya Reyes" bind=name
+    Select "Job title" bind=job items=["Designer","Engineer","Product manager","Marketer","Student","Other"]
+    Column gap=4
+      Input "Bio" "Write a short bio" bind=bio multiline {"props": {"maxLength": 160}}
       Row end
         Text.caption "{length(bio)}/160"
     Row between
-      Button.outline "Back" -> emit back
-      Button "Continue" -> emit continue
+      Button.outline "Back" onTap={emit back}
+      Button "Continue" onTap={emit continue}

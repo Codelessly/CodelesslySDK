@@ -1,16 +1,16 @@
-Card gap:12 pad:16
+Card gap=12 pad=16
   Row between middle
     Text.heading "Battery"
     Badge.success "Charging"
-  Row gap:16 middle
-    Stack center middle w:120 h:120
-      Ring 0.64 w:120 h:120
+  Row gap=16 middle
+    Stack center middle w=120 h=120
+      Ring 0.64 w=120 h=120
       Column center middle
-        Text.title "64%" weight:700
-        Icon "bolt" color:#FF2E7D32
-    Column gap:4 grow
+        Text.title "64%" weight=700
+        Icon "bolt" color=#FF2E7D32
+    Column gap=4 grow
       Text.muted "Time to full"
-      Text "1 h 12 min" size:24 weight:700
+      Text "1 h 12 min" size=24 weight=700
       Text.caption "Fast charging · 18 W"
   Progress 0.64
   Row between

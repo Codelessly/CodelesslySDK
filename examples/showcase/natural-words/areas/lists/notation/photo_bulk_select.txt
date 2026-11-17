@@ -1,17 +1,17 @@
-Column h:fill
-  Text.heading1 "Uploaded files" pad:16
+Column h=fill
+  Text.heading1 "Uploaded files" pad=16
   Column grow scroll
     each file in files
-      Row between pad:[16,10,16,10]
-        Checkbox "{file.name}" =file.sel
+      Row between pad=[16,10,16,10]
+        Checkbox "{file.name}" bind=file.sel
         Text.muted "{file.size}"
       Divider
   if count(files,f=>f.sel)>0
-    Row between pad:16 fill:#FFF3F3F7 animate:slide-up duration:200
+    Row between pad=16 fill=#FFF3F3F7 animate=slide-up duration=200
       Text.strong "{count(files,f=>f.sel)} selected"
-      Row gap:8
-        Button.outline "Move" -> emit move map(filter(files,f=>f.sel),f=>f.id)
-        Button.outline "Download" -> emit download map(filter(files,f=>f.sel),f=>f.id); toast "Download started"
-        Button.destructive "Delete" -> files=removeWhere(files,f=>f.sel); toast "Files deleted"
+      Row gap=8
+        Button.outline "Move" onTap={emit move map(filter(files,f=>f.sel),f=>f.id)}
+        Button.outline "Download" onTap={emit download map(filter(files,f=>f.sel),f=>f.id); toast "Download started"}
+        Button.destructive "Delete" onTap={files=removeWhere(files,f=>f.sel); toast "Files deleted"}
 
 state files=[{"name":"beach_sunset.jpg","size":"4.2 MB","sel":false,"id":1},{"name":"receipt_march.pdf","size":"180 KB","sel":false,"id":2},{"name":"team_photo.png","size":"3.1 MB","sel":false,"id":3},{"name":"notes.txt","size":"2 KB","sel":false,"id":4},{"name":"invoice_2291.pdf","size":"96 KB","sel":false,"id":5},{"name":"logo_final.svg","size":"14 KB","sel":false,"id":6}]

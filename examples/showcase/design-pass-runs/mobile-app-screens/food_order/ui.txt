@@ -1,41 +1,41 @@
 state cat="All"
 state dishes=[{"id":1,"cat":"Pizza","name":"Margherita Pizza","desc":"San Marzano tomato, fresh mozzarella, basil and olive oil","price":14.5,"qty":0},{"id":2,"cat":"Pizza","name":"Spicy Salami Pizza","desc":"Calabrian chili, cured salami, mozzarella, hot honey","price":17,"qty":0},{"id":3,"cat":"Pasta","name":"Truffle Tagliatelle","desc":"Fresh egg pasta, black truffle cream, parmesan","price":19.5,"qty":0},{"id":4,"cat":"Pasta","name":"Spaghetti Pomodoro","desc":"Slow-cooked tomato sauce, garlic, basil","price":13,"qty":0},{"id":5,"cat":"Salads","name":"Burrata Caprese","desc":"Creamy burrata, heirloom tomatoes, pesto, toasted pine nuts","price":12.5,"qty":0},{"id":6,"cat":"Desserts","name":"Tiramisu","desc":"Espresso-soaked ladyfingers, mascarpone, cocoa","price":8,"qty":0}]
-Column h:fill w:390
+Column h=fill w=390
   Column scroll grow
-    Image "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=780" w:fill h:180
-    Column gap:8 pad:16
+    Image "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=780" w=fill h=180
+    Column gap=8 pad=16
       Text.pageTitle "Trattoria Bella Napoli"
       Text.muted "Italian · Pizza · Pasta · Desserts"
-      Row gap:6 middle
-        Icon "star" color:#FFF5A623
+      Row gap=6 middle
+        Icon "star" color=#FFF5A623
         Text.strong "4.8"
         Text.muted "(2,300+)"
         Text.muted "·"
         Icon "schedule"
         Text "25–35 min"
-      Row gap:6 middle
+      Row gap=6 middle
         Icon "delivery_dining"
         Text.muted "$1.99 delivery fee · Min. order $15"
-    Row scroll gap:8 pad:[16,0,16,8]
-      ChoiceChip "All" selected:=cat=="All" -> cat="All"
-      ChoiceChip "Pizza" selected:=cat=="Pizza" -> cat="Pizza"
-      ChoiceChip "Pasta" selected:=cat=="Pasta" -> cat="Pasta"
-      ChoiceChip "Salads" selected:=cat=="Salads" -> cat="Salads"
-      ChoiceChip "Desserts" selected:=cat=="Desserts" -> cat="Desserts"
-    Column gap:12 pad:16
+    Row scroll gap=8 pad=[16,0,16,8]
+      ChoiceChip "All" selected={cat=="All"} onTap={cat="All"}
+      ChoiceChip "Pizza" selected={cat=="Pizza"} onTap={cat="Pizza"}
+      ChoiceChip "Pasta" selected={cat=="Pasta"} onTap={cat="Pasta"}
+      ChoiceChip "Salads" selected={cat=="Salads"} onTap={cat="Salads"}
+      ChoiceChip "Desserts" selected={cat=="Desserts"} onTap={cat="Desserts"}
+    Column gap=12 pad=16
       Text.sectionTitle "Menu"
       each dish in dishes
-        Card visible:=cat=="All"||dish.cat==cat
-          Row gap:12 middle
-            Column grow gap:4
+        Card visible={cat=="All"||dish.cat==cat}
+          Row gap=12 middle
+            Column grow gap=4
               Text.strong "{dish.name}"
               Text.bodySecondary "{dish.desc}"
               Text.strong "{money(dish.price,'$',2)}"
-            Column gap:6 center
-              Button.outline "Add" -> dishes=updateWhere(dishes,d=>d.id==dish.id,d=>with(d,"qty",d.qty+1))
-              Badge.primary "{dish.qty} in cart" visible:=dish.qty>0
-  Row between middle pad:16 fill:#FF1F2937
-    Column gap:2
-      Text "{sum(dishes,d=>d.qty)} items" color:#FFFFFFFF weight:700
-      Text "{money(sum(dishes,d=>d.qty*d.price),'$',2)}" color:#FFD1D5DB
-    Button "View cart" -> emit viewCart
+            Column gap=6 center
+              Button.outline "Add" onTap={dishes=updateWhere(dishes,d=>d.id==dish.id,d=>with(d,"qty",d.qty+1))}
+              Badge.primary "{dish.qty} in cart" visible={dish.qty>0}
+  Row between middle pad=16 fill=#FF1F2937
+    Column gap=2
+      Text "{sum(dishes,d=>d.qty)} items" color=#FFFFFFFF weight=700
+      Text "{money(sum(dishes,d=>d.qty*d.price),'$',2)}" color=#FFD1D5DB
+    Button "View cart" onTap={emit viewCart}

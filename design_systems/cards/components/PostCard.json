@@ -4,7 +4,7 @@
  "roots": ["tile"],
  "widget": {
   "type": "PostCard",
-  "doc": "One article tile for a blog grid: PostCard kind:\"skyline\" tone:\"day\" tag:\"Infrastructure\" title:\"...\" excerpt:\"...\" author:\"Priya Raman\" initials:\"PR\" meta:\"Mar 12 · 9 min read\" -> open=\"...\" (a drawn cover from kind and tone, default day; a tap fires onPressed with the title).",
+  "doc": "One article tile for a blog grid: PostCard kind=\"skyline\" tone=\"day\" tag=\"Infrastructure\" title=\"...\" excerpt=\"...\" author=\"Priya Raman\" initials=\"PR\" meta=\"Mar 12 · 9 min read\" onPressed={open=\"...\"} (a drawn cover from kind and tone, default day; a tap fires onPressed with the title).",
   "props": [
    {"key": "kind", "type": {"kind": "string", "flutter": "String"}, "default": "skyline", "doc": "The cover scene, as Media: skyline, market, festival, train (a city); harbor, lagoon, dunes (water); mountain, forest, temple, bamboo (hills)."},
    {"key": "tone", "type": {"kind": "string", "flutter": "String"}, "default": "day", "doc": "The cover's time of day: dawn, day, dusk or night."},

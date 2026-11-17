@@ -1,4 +1,4 @@
-Card w:390 gap:12
+Card w=390 gap=12
   state voted=false
   state choice=-1
   state votes=[12,8,5,9]
@@ -6,15 +6,15 @@ Card w:390 gap:12
   Text.title "Where should we go for lunch on Friday?"
   if !voted
     each opt in options
-      Button.outline "{opt}" -> choice=indexOf(options,opt); votes=setAt(votes,indexOf(options,opt),votes[indexOf(options,opt)]+1); voted=true
+      Button.outline "{opt}" onTap={choice=indexOf(options,opt); votes=setAt(votes,indexOf(options,opt),votes[indexOf(options,opt)]+1); voted=true}
   if voted
     each opt in options
-      Column gap:4
+      Column gap=4
         Row between middle
-          Row gap:6 middle
+          Row gap=6 middle
             Text.strong "{opt}"
             if options[choice]==opt
               Badge.primary "Your vote"
           Text.muted "{round(100*votes[indexOf(options,opt)]/sum(votes,v=>v),0)}%"
-        Progress =votes[indexOf(options,opt)]/sum(votes,v=>v)
+        Progress bind={votes[indexOf(options,opt)]/sum(votes,v=>v)}
     Text.caption "{sum(votes,v=>v)} votes in total"

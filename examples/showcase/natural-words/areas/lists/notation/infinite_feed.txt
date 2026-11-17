@@ -1,21 +1,21 @@
 state posts=[{"who":"Lena","text":"shared 'Trip to Lisbon' (12 photos)","time":"2h"},{"who":"Omar","text":"commented 'Congrats on the launch!'","time":"3h"},{"who":"Team Alpha","text":"hit 1,000 signups","time":"5h"},{"who":"Chris","text":"started following you","time":"6h"},{"who":"Nadia","text":"posted 'New recipe: miso ramen'","time":"8h"}]
 state pool=[{"who":"Sofia","text":"liked your photo","time":"9h"},{"who":"Jamal","text":"shared 'Morning run in the park'","time":"10h"},{"who":"Team Beta","text":"released version 2.0","time":"12h"},{"who":"Priya","text":"commented 'Love this recipe!'","time":"14h"},{"who":"Marco","text":"started following you","time":"16h"}]
 state loading=false
-every 800 when loading -> posts=concat(posts,take(pool,5)); pool=slice(pool,5); loading=false
-Column gap:12 pad:16 maxw:640
+every 800 when loading onTick={posts=concat(posts,take(pool,5)); pool=slice(pool,5); loading=false}
+Column gap=12 pad=16 maxw=640
   Text.heading1 "Activity"
   each p in posts
     Card
-      Row gap:12 middle
-        Avatar "{p.who}" size:40
-        Column grow gap:2
+      Row gap=12 middle
+        Avatar "{p.who}" size=40
+        Column grow gap=2
           Text "{p.who} {p.text}"
           Text.caption "{p.time} ago"
   if loading
-    Row center middle gap:8
-      Icon "progress_activity" animate:spin
+    Row center middle gap=8
+      Icon "progress_activity" animate=spin
       Text.muted "Loading…"
   if !loading && length(pool)>0
-    Button.outline "Load more" -> loading=true
+    Button.outline "Load more" onTap={loading=true}
   if length(pool)==0 && !loading
     Text.muted center "You're all caught up"

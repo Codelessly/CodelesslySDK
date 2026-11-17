@@ -10,81 +10,81 @@ state c3=false
 state c4=false
 state cols=[{"name":"Backlog"},{"name":"In progress"},{"name":"In review"},{"name":"Done"}]
 state tasks=[{"id":1,"title":"Write launch copy","label":"Content","tint":"#FFFFF1D6","ink":"#FF9A5B00","due":"Jun 3","n":4,"who":"Maya Reyes","col":"Backlog"},{"id":2,"title":"Audit old URLs for redirects","label":"SEO","tint":"#FFE0F2E9","ink":"#FF1E7A4C","due":"Jun 5","n":2,"who":"Tom Becker","col":"Backlog"},{"id":3,"title":"Collect customer logos","label":"Content","tint":"#FFFFF1D6","ink":"#FF9A5B00","due":"Jun 7","n":0,"who":"Priya Nair","col":"Backlog"},{"id":4,"title":"Define 404 page behavior","label":"Dev","tint":"#FFE3EAFF","ink":"#FF2F4FC0","due":"Jun 9","n":1,"who":"Leo Martin","col":"Backlog"},{"id":5,"title":"Pricing page wireframes","label":"Design","tint":"#FFF5E3FA","ink":"#FF8A3BA8","due":"Jun 10","n":6,"who":"Ana Ruiz","col":"Backlog"},{"id":6,"title":"Homepage hero redesign","label":"Design","tint":"#FFF5E3FA","ink":"#FF8A3BA8","due":"May 30","n":8,"who":"Ana Ruiz","col":"In progress"},{"id":7,"title":"Set up CDN and caching","label":"Dev","tint":"#FFE3EAFF","ink":"#FF2F4FC0","due":"Jun 1","n":3,"who":"Leo Martin","col":"In progress"},{"id":8,"title":"Migrate blog posts","label":"Content","tint":"#FFFFF1D6","ink":"#FF9A5B00","due":"Jun 2","n":5,"who":"Maya Reyes","col":"In progress"},{"id":9,"title":"Navigation accessibility pass","label":"Dev","tint":"#FFE3EAFF","ink":"#FF2F4FC0","due":"May 29","n":7,"who":"Tom Becker","col":"In review"},{"id":10,"title":"Meta titles and descriptions","label":"SEO","tint":"#FFE0F2E9","ink":"#FF1E7A4C","due":"May 28","n":2,"who":"Priya Nair","col":"In review"},{"id":11,"title":"Brand color palette","label":"Design","tint":"#FFF5E3FA","ink":"#FF8A3BA8","due":"May 20","n":9,"who":"Ana Ruiz","col":"Done"},{"id":12,"title":"Choose hosting provider","label":"Dev","tint":"#FFE3EAFF","ink":"#FF2F4FC0","due":"May 18","n":4,"who":"Leo Martin","col":"Done"},{"id":13,"title":"Sitemap and page inventory","label":"SEO","tint":"#FFE0F2E9","ink":"#FF1E7A4C","due":"May 15","n":3,"who":"Priya Nair","col":"Done"},{"id":14,"title":"Kickoff and goals doc","label":"Content","tint":"#FFFFF1D6","ink":"#FF9A5B00","due":"May 12","n":6,"who":"Maya Reyes","col":"Done"}]
-Column w:1280 h:fill fill:#FFF6F7F9
-  Row between center pad:[20,12,20,12] fill:#FFFFFFFF
-    Row gap:16 center
+Column w=1280 h=fill fill=#FFF6F7F9
+  Row between center pad=[20,12,20,12] fill=#FFFFFFFF
+    Row gap=16 center
       Text.eyebrow "LANES"
       Text.heading "Website relaunch"
-      Row gap:4
-        Avatar "Maya Reyes" size:32
-        Avatar "Tom Becker" size:32
-        Avatar "Priya Nair" size:32
-        Avatar "Leo Martin" size:32
-        Avatar "Ana Ruiz" size:32
-    Row gap:12 center
-      Input "Filter" "Filter tasks" =q w:240
-      Button "New task" -> emit newTask
-  Row grow gap:12 pad:16
-    Row grow gap:12
+      Row gap=4
+        Avatar "Maya Reyes" size=32
+        Avatar "Tom Becker" size=32
+        Avatar "Priya Nair" size=32
+        Avatar "Leo Martin" size=32
+        Avatar "Ana Ruiz" size=32
+    Row gap=12 center
+      Input "Filter" "Filter tasks" bind=q w=240
+      Button "New task" onTap={emit newTask}
+  Row grow gap=12 pad=16
+    Row grow gap=12
       each c in cols
-        Column grow gap:10 pad:10 radius:10 fill:#FFEBEDF1 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col",c.name))
+        Column grow gap=10 pad=10 radius=10 fill=#FFEBEDF1 drop=task onDrop={tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col",c.name))}
           Row between center
-            Row gap:8 center
+            Row gap=8 center
               Text.strong "{c.name}"
               Badge.neutral "{count(tasks,x=>x.col==c.name)}"
-            IconButton "add" -> toast "Add a task to {c.name}"
-          Column scroll gap:8
+            IconButton "add" onTap={toast "Add a task to {c.name}"}
+          Column scroll gap=8
             each t in tasks
               if t.col==c.name && (q=="" || contains(lower(t.title),lower(q)))
-                Card gap:8 pad:12 drag:task(t.id) fill:#FFFFFFFF border:=sel==t.id?"#FF3B6CF6":"#FFE3E5EA" -> sel=t.id; selTitle=t.title; selLabel=t.label; selDue=t.due; selWho=t.who
+                Card gap=8 pad=12 drag=task(t.id) fill=#FFFFFFFF border={sel==t.id?"#FF3B6CF6":"#FFE3E5EA"} onTap={sel=t.id; selTitle=t.title; selLabel=t.label; selDue=t.due; selWho=t.who}
                   Text.strong "{t.title}"
-                  Box fill:=t.tint radius:4 pad:[6,2,6,2]
-                    Text.caption "{t.label}" color:=t.ink
+                  Box fill={t.tint} radius=4 pad=[6,2,6,2]
+                    Text.caption "{t.label}" color={t.ink}
                   Row between center
-                    Row gap:12 center
-                      Row gap:4 center
+                    Row gap=12 center
+                      Row gap=4 center
                         Icon "schedule"
                         Text.caption "{t.due}"
-                      Row gap:4 center
+                      Row gap=4 center
                         Icon "chat_bubble_outline"
                         Text.caption "{t.n}"
-                    Avatar "{t.who}" size:24
+                    Avatar "{t.who}" size=24
     if sel!=0
-      Column w:340 gap:12 pad:16 radius:10 fill:#FFFFFFFF scroll
+      Column w=340 gap=12 pad=16 radius=10 fill=#FFFFFFFF scroll
         Row between center
           Text.eyebrow "TASK DETAILS"
-          IconButton "close" -> sel=0
+          IconButton "close" onTap={sel=0}
         Text.heading "{selTitle}"
-        Row gap:12 center
+        Row gap=12 center
           Badge.primary "{selLabel}"
-          Row gap:4 center
+          Row gap=4 center
             Icon "schedule"
             Text.caption "Due {selDue}"
-        Row gap:8 center
-          Avatar "{selWho}" size:28
+        Row gap=8 center
+          Avatar "{selWho}" size=28
           Text.bodySecondary "{selWho}"
         Divider
         Text.strong "Description"
         Text.bodySecondary "Plan, build and review this piece of the relaunch. Align with the brand guidelines and share a draft with the team before the due date."
         Text.strong "Checklist"
-        Checkbox "Draft the first version" =c1
-        Checkbox "Share with the team" =c2
-        Checkbox "Apply feedback" =c3
-        Checkbox "Final sign-off" =c4
+        Checkbox "Draft the first version" bind=c1
+        Checkbox "Share with the team" bind=c2
+        Checkbox "Apply feedback" bind=c3
+        Checkbox "Final sign-off" bind=c4
         Divider
         Text.strong "Activity"
-        Row gap:8
-          Avatar "Maya Reyes" size:24
-          Column gap:2 grow
+        Row gap=8
+          Avatar "Maya Reyes" size=24
+          Column gap=2 grow
             Text.body "Maya commented on this task"
             Text.caption "2 hours ago"
-        Row gap:8
-          Avatar "Tom Becker" size:24
-          Column gap:2 grow
+        Row gap=8
+          Avatar "Tom Becker" size=24
+          Column gap=2 grow
             Text.body "Tom moved it to In progress"
             Text.caption "Yesterday"
-        Row gap:8
-          Avatar "Ana Ruiz" size:24
-          Column gap:2 grow
+        Row gap=8
+          Avatar "Ana Ruiz" size=24
+          Column gap=2 grow
             Text.body "Ana changed the due date"
             Text.caption "2 days ago"

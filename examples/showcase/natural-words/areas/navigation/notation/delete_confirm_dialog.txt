@@ -1,18 +1,18 @@
 state notes=[{"id":1,"title":"Grocery list","body":"Milk, eggs, bread"},{"id":2,"title":"Meeting notes","body":"Q3 planning at 10am"},{"id":3,"title":"Book ideas","body":"Short stories about the sea"},{"id":4,"title":"Gift ideas","body":"Scarf, headphones, plant"}]
 state target={"id":0,"title":""}
-Column gap:12 pad:16
+Column gap=12 pad=16
   Text.heading1 "Notes"
   each note in notes
     Card
       Row between middle
-        Column gap:2 grow
+        Column gap=2 grow
           Text.strong "{note.title}"
           Text.bodySecondary "{note.body}"
-        IconButton "delete" -> target=note; open confirm
+        IconButton "delete" onTap={target=note; open confirm}
   Modal#confirm
-    Column gap:16 pad:20
+    Column gap=16 pad=20
       Text.heading2 "Delete \"{target.title}\"?"
       Text.bodySecondary "This can't be undone."
-      Row gap:8 end
-        Button.outline "Cancel" -> close
-        Button.destructive "Delete" -> notes=removeWhere(notes,n=>n.id==target.id); close
+      Row gap=8 end
+        Button.outline "Cancel" onTap={close}
+        Button.destructive "Delete" onTap={notes=removeWhere(notes,n=>n.id==target.id); close}

@@ -6,92 +6,92 @@ state tasks=[{"id":"t1","title":"Audit current sitemap","label":"Content","tone"
 App
   Main
     Nav
-      Row gap:16 middle
-        Brand "Lanes" icon:"view_kanban"
-        Heading "Website relaunch" level:1
-      Row gap:6 middle
-        Avatar "Maya Reyes" size:32
-        Avatar "Sam Ortiz" size:32
-        Avatar "Jin Kim" size:32
-        Avatar "Tara Lee" size:32
-        Avatar "Omar Haddad" size:32
-      Row gap:8 middle
-        Input "Filter tasks" =q w:220
-        Button "New task" icon:"add" -> tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"Backlog","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1
-    Column pad:24 gap:16 scroll
-      Row gap:12 stretch
-        Column grow gap:10 pad:10 fill:#FFF3F4F6 radius:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","Backlog"))
+      Row gap=16 middle
+        Brand "Lanes" icon="view_kanban"
+        Heading "Website relaunch" level=1
+      Row gap=6 middle
+        Avatar "Maya Reyes" size=32
+        Avatar "Sam Ortiz" size=32
+        Avatar "Jin Kim" size=32
+        Avatar "Tara Lee" size=32
+        Avatar "Omar Haddad" size=32
+      Row gap=8 middle
+        Input "Filter tasks" bind=q w=220
+        Button "New task" icon="add" onTap={tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"Backlog","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1}
+    Column pad=24 gap=16 scroll
+      Row gap=12 stretch
+        Column grow gap=10 pad=10 fill=#FFF3F4F6 radius=10 drop=task onDrop={tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","Backlog"))}
           Row between middle
-            Row gap:8 middle
+            Row gap=8 middle
               Text.strong "Backlog"
-              CountBadge count:=count(tasks,x=>x.col=="Backlog") showZero:true
-            IconButton "add" -> tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"Backlog","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1
+              CountBadge count={count(tasks,x=>x.col=="Backlog")} showZero=true
+            IconButton "add" onTap={tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"Backlog","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1}
           each t in tasks
             if t.col=="Backlog" && contains(lower(t.title),lower(q))
-              TaskCard title:=t.title label:=t.label tone:=t.tone due:=t.due dueTone:=t.dueTone comments:=t.comments assignee:=t.who avatarTone:=t.avTone selected:=sel==t.id drag:task(t.id) -> sel=t.id
-        Column grow gap:10 pad:10 fill:#FFF3F4F6 radius:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","In progress"))
+              TaskCard title={t.title} label={t.label} tone={t.tone} due={t.due} dueTone={t.dueTone} comments={t.comments} assignee={t.who} avatarTone={t.avTone} selected={sel==t.id} drag=task(t.id) onPressed={sel=t.id}
+        Column grow gap=10 pad=10 fill=#FFF3F4F6 radius=10 drop=task onDrop={tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","In progress"))}
           Row between middle
-            Row gap:8 middle
+            Row gap=8 middle
               Text.strong "In progress"
-              CountBadge count:=count(tasks,x=>x.col=="In progress") showZero:true
-            IconButton "add" -> tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"In progress","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1
+              CountBadge count={count(tasks,x=>x.col=="In progress")} showZero=true
+            IconButton "add" onTap={tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"In progress","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1}
           each t in tasks
             if t.col=="In progress" && contains(lower(t.title),lower(q))
-              TaskCard title:=t.title label:=t.label tone:=t.tone due:=t.due dueTone:=t.dueTone comments:=t.comments assignee:=t.who avatarTone:=t.avTone selected:=sel==t.id drag:task(t.id) -> sel=t.id
-        Column grow gap:10 pad:10 fill:#FFF3F4F6 radius:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","In review"))
+              TaskCard title={t.title} label={t.label} tone={t.tone} due={t.due} dueTone={t.dueTone} comments={t.comments} assignee={t.who} avatarTone={t.avTone} selected={sel==t.id} drag=task(t.id) onPressed={sel=t.id}
+        Column grow gap=10 pad=10 fill=#FFF3F4F6 radius=10 drop=task onDrop={tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","In review"))}
           Row between middle
-            Row gap:8 middle
+            Row gap=8 middle
               Text.strong "In review"
-              CountBadge count:=count(tasks,x=>x.col=="In review") showZero:true
-            IconButton "add" -> tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"In review","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1
+              CountBadge count={count(tasks,x=>x.col=="In review")} showZero=true
+            IconButton "add" onTap={tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"In review","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1}
           each t in tasks
             if t.col=="In review" && contains(lower(t.title),lower(q))
-              TaskCard title:=t.title label:=t.label tone:=t.tone due:=t.due dueTone:=t.dueTone comments:=t.comments assignee:=t.who avatarTone:=t.avTone selected:=sel==t.id drag:task(t.id) -> sel=t.id
-        Column grow gap:10 pad:10 fill:#FFF3F4F6 radius:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","Done"))
+              TaskCard title={t.title} label={t.label} tone={t.tone} due={t.due} dueTone={t.dueTone} comments={t.comments} assignee={t.who} avatarTone={t.avTone} selected={sel==t.id} drag=task(t.id) onPressed={sel=t.id}
+        Column grow gap=10 pad=10 fill=#FFF3F4F6 radius=10 drop=task onDrop={tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","Done"))}
           Row between middle
-            Row gap:8 middle
+            Row gap=8 middle
               Text.strong "Done"
-              CountBadge count:=count(tasks,x=>x.col=="Done") showZero:true
-            IconButton "add" -> tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"Done","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1
+              CountBadge count={count(tasks,x=>x.col=="Done")} showZero=true
+            IconButton "add" onTap={tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"Done","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1}
           each t in tasks
             if t.col=="Done" && contains(lower(t.title),lower(q))
-              TaskCard title:=t.title label:=t.label tone:=t.tone due:=t.due dueTone:=t.dueTone comments:=t.comments assignee:=t.who avatarTone:=t.avTone selected:=sel==t.id drag:task(t.id) -> sel=t.id
-  Pane w:340 pad:16 gap:16 border-left:#FFE5E7EB scroll
+              TaskCard title={t.title} label={t.label} tone={t.tone} due={t.due} dueTone={t.dueTone} comments={t.comments} assignee={t.who} avatarTone={t.avTone} selected={sel==t.id} drag=task(t.id) onPressed={sel=t.id}
+  Pane w=340 pad=16 gap=16 border-left=#FFE5E7EB scroll
     if sel==""
-      EmptyState "No task selected" "Select a card to see its details." icon:"touch_app"
+      EmptyState "No task selected" "Select a card to see its details." icon="touch_app"
     if sel!=""
       Row between middle
         Text.eyebrow "{find(tasks,x=>x.id==sel).col}"
-        IconButton "close" -> sel=""
-      Heading "{find(tasks,x=>x.id==sel).title}" level:3
-      Row gap:8 middle
+        IconButton "close" onTap={sel=""}
+      Heading "{find(tasks,x=>x.id==sel).title}" level=3
+      Row gap=8 middle
         Badge.primary "{find(tasks,x=>x.id==sel).label}"
         Text.caption "Due {find(tasks,x=>x.id==sel).due}"
         Spacer grow
-        Avatar "{find(tasks,x=>x.id==sel).who}" size:28
-      Column gap:6
+        Avatar "{find(tasks,x=>x.id==sel).who}" size=28
+      Column gap=6
         Text.fieldLabel "Description"
         Text.muted "{find(tasks,x=>x.id==sel).desc}"
-      Checklist "Checklist" =done items:["Outline the approach","Draft the first version","Get feedback from the team","Publish to staging"]
-      Column gap:10
+      Checklist "Checklist" bind=done items=["Outline the approach","Draft the first version","Get feedback from the team","Publish to staging"]
+      Column gap=10
         Text.fieldLabel "Activity"
-        Row gap:10 top
-          Avatar "Maya Reyes" size:28
+        Row gap=10 top
+          Avatar "Maya Reyes" size=28
           Column grow
             Text.small "Maya moved this task to {find(tasks,x=>x.id==sel).col}"
             Text.caption "2 hours ago"
-        Row gap:10 top
-          Avatar "Sam Ortiz" size:28
+        Row gap=10 top
+          Avatar "Sam Ortiz" size=28
           Column grow
             Text.small "Sam commented: looks good, one small tweak left."
             Text.caption "Yesterday"
-        Row gap:10 top
-          Avatar "Jin Kim" size:28
+        Row gap=10 top
+          Avatar "Jin Kim" size=28
           Column grow
             Text.small "Jin changed the due date to {find(tasks,x=>x.id==sel).due}"
             Text.caption "2 days ago"
-        Row gap:10 top
-          Avatar "Tara Lee" size:28
+        Row gap=10 top
+          Avatar "Tara Lee" size=28
           Column grow
             Text.small "Tara created this task"
             Text.caption "Last week"

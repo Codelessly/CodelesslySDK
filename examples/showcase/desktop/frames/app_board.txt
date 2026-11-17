@@ -6,118 +6,118 @@ state activity=[{"who":"Maya Reyes","text":"Maya moved this card to In progress"
 App
   Main
     Nav
-      Row gap:20 center
-        Heading "Website relaunch" level:3
-        Row gap:4
-          Avatar "Maya Reyes" size:32
-          Avatar "Leo Park" size:32
-          Avatar "Tom Chen" size:32
-          Avatar "Ana Silva" size:32
-          Avatar "Sam Patel" size:32
-      Row gap:8 center
-        Input "Filter tasks" =q w:220
-        Button "New task" icon:"add" -> emit newTask
-    Row gap:16 pad:16 top grow
-      Column grow gap:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","backlog"))
+      Row gap=20 center
+        Heading "Website relaunch" level=3
+        Row gap=4
+          Avatar "Maya Reyes" size=32
+          Avatar "Leo Park" size=32
+          Avatar "Tom Chen" size=32
+          Avatar "Ana Silva" size=32
+          Avatar "Sam Patel" size=32
+      Row gap=8 center
+        Input "Filter tasks" bind=q w=220
+        Button "New task" icon="add" onTap={emit newTask}
+    Row gap=16 pad=16 top grow
+      Column grow gap=10 drop=task onDrop={tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","backlog"))}
         Row between center
-          Row gap:8 center
+          Row gap=8 center
             Text.strong "Backlog"
-            CountBadge count:=count(tasks,x=>x.col=="backlog")
-          IconButton "add" -> emit addTask "backlog"
-        Column scroll gap:10
+            CountBadge count={count(tasks,x=>x.col=="backlog")}
+          IconButton "add" onTap={emit addTask "backlog"}
+        Column scroll gap=10
           each t in filter(tasks,x=>x.col=="backlog" && contains(lower(x.title),lower(q)))
-            Card gap:8 drag:task(t.id) border:=sel==t.id?"#FF2563EB":"#FFE5E7EB" -> sel=t.id
+            Card gap=8 drag=task(t.id) border={sel==t.id?"#FF2563EB":"#FFE5E7EB"} onTap={sel=t.id}
               Text.strong "{t.title}"
               Row
-                Box fill:=t.color radius:8 pad:[8,2,8,2]
-                  Text.caption "{t.label}" color:#FFFFFFFF
-              Row gap:8 center
-                Icon "schedule" size:14
+                Box fill={t.color} radius=8 pad=[8,2,8,2]
+                  Text.caption "{t.label}" color=#FFFFFFFF
+              Row gap=8 center
+                Icon "schedule" size=14
                 Text.caption "{t.due}"
-                Icon "chat_bubble_outline" size:14
+                Icon "chat_bubble_outline" size=14
                 Text.caption "{t.comments}"
                 Spacer grow
-                Avatar "{t.who}" size:24
-      Column grow gap:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","progress"))
+                Avatar "{t.who}" size=24
+      Column grow gap=10 drop=task onDrop={tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","progress"))}
         Row between center
-          Row gap:8 center
+          Row gap=8 center
             Text.strong "In progress"
-            CountBadge count:=count(tasks,x=>x.col=="progress")
-          IconButton "add" -> emit addTask "progress"
-        Column scroll gap:10
+            CountBadge count={count(tasks,x=>x.col=="progress")}
+          IconButton "add" onTap={emit addTask "progress"}
+        Column scroll gap=10
           each t in filter(tasks,x=>x.col=="progress" && contains(lower(x.title),lower(q)))
-            Card gap:8 drag:task(t.id) border:=sel==t.id?"#FF2563EB":"#FFE5E7EB" -> sel=t.id
+            Card gap=8 drag=task(t.id) border={sel==t.id?"#FF2563EB":"#FFE5E7EB"} onTap={sel=t.id}
               Text.strong "{t.title}"
               Row
-                Box fill:=t.color radius:8 pad:[8,2,8,2]
-                  Text.caption "{t.label}" color:#FFFFFFFF
-              Row gap:8 center
-                Icon "schedule" size:14
+                Box fill={t.color} radius=8 pad=[8,2,8,2]
+                  Text.caption "{t.label}" color=#FFFFFFFF
+              Row gap=8 center
+                Icon "schedule" size=14
                 Text.caption "{t.due}"
-                Icon "chat_bubble_outline" size:14
+                Icon "chat_bubble_outline" size=14
                 Text.caption "{t.comments}"
                 Spacer grow
-                Avatar "{t.who}" size:24
-      Column grow gap:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","review"))
+                Avatar "{t.who}" size=24
+      Column grow gap=10 drop=task onDrop={tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","review"))}
         Row between center
-          Row gap:8 center
+          Row gap=8 center
             Text.strong "In review"
-            CountBadge count:=count(tasks,x=>x.col=="review")
-          IconButton "add" -> emit addTask "review"
-        Column scroll gap:10
+            CountBadge count={count(tasks,x=>x.col=="review")}
+          IconButton "add" onTap={emit addTask "review"}
+        Column scroll gap=10
           each t in filter(tasks,x=>x.col=="review" && contains(lower(x.title),lower(q)))
-            Card gap:8 drag:task(t.id) border:=sel==t.id?"#FF2563EB":"#FFE5E7EB" -> sel=t.id
+            Card gap=8 drag=task(t.id) border={sel==t.id?"#FF2563EB":"#FFE5E7EB"} onTap={sel=t.id}
               Text.strong "{t.title}"
               Row
-                Box fill:=t.color radius:8 pad:[8,2,8,2]
-                  Text.caption "{t.label}" color:#FFFFFFFF
-              Row gap:8 center
-                Icon "schedule" size:14
+                Box fill={t.color} radius=8 pad=[8,2,8,2]
+                  Text.caption "{t.label}" color=#FFFFFFFF
+              Row gap=8 center
+                Icon "schedule" size=14
                 Text.caption "{t.due}"
-                Icon "chat_bubble_outline" size:14
+                Icon "chat_bubble_outline" size=14
                 Text.caption "{t.comments}"
                 Spacer grow
-                Avatar "{t.who}" size:24
-      Column grow gap:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","done"))
+                Avatar "{t.who}" size=24
+      Column grow gap=10 drop=task onDrop={tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","done"))}
         Row between center
-          Row gap:8 center
+          Row gap=8 center
             Text.strong "Done"
-            CountBadge count:=count(tasks,x=>x.col=="done")
-          IconButton "add" -> emit addTask "done"
-        Column scroll gap:10
+            CountBadge count={count(tasks,x=>x.col=="done")}
+          IconButton "add" onTap={emit addTask "done"}
+        Column scroll gap=10
           each t in filter(tasks,x=>x.col=="done" && contains(lower(x.title),lower(q)))
-            Card gap:8 drag:task(t.id) border:=sel==t.id?"#FF2563EB":"#FFE5E7EB" -> sel=t.id
+            Card gap=8 drag=task(t.id) border={sel==t.id?"#FF2563EB":"#FFE5E7EB"} onTap={sel=t.id}
               Text.strong "{t.title}"
               Row
-                Box fill:=t.color radius:8 pad:[8,2,8,2]
-                  Text.caption "{t.label}" color:#FFFFFFFF
-              Row gap:8 center
-                Icon "schedule" size:14
+                Box fill={t.color} radius=8 pad=[8,2,8,2]
+                  Text.caption "{t.label}" color=#FFFFFFFF
+              Row gap=8 center
+                Icon "schedule" size=14
                 Text.caption "{t.due}"
-                Icon "chat_bubble_outline" size:14
+                Icon "chat_bubble_outline" size=14
                 Text.caption "{t.comments}"
                 Spacer grow
-                Avatar "{t.who}" size:24
+                Avatar "{t.who}" size=24
   if sel!=0
-    Pane w:360 pad:16 gap:14 border-left:#FFE5E7EB
+    Pane w=360 pad=16 gap=14 border-left=#FFE5E7EB
       Row between center
         Text.eyebrow "TASK DETAILS"
-        IconButton "close" -> sel=0
+        IconButton "close" onTap={sel=0}
       Text.heading "{find(tasks,x=>x.id==sel).title}"
-      Row gap:8 center
-        Box fill:=find(tasks,x=>x.id==sel).color radius:8 pad:[8,2,8,2]
-          Text.caption "{find(tasks,x=>x.id==sel).label}" color:#FFFFFFFF
+      Row gap=8 center
+        Box fill={find(tasks,x=>x.id==sel).color} radius=8 pad=[8,2,8,2]
+          Text.caption "{find(tasks,x=>x.id==sel).label}" color=#FFFFFFFF
         Text.caption "Due {find(tasks,x=>x.id==sel).due}"
         Spacer grow
-        Avatar "{find(tasks,x=>x.id==sel).who}" size:28
+        Avatar "{find(tasks,x=>x.id==sel).who}" size=28
       Text.strong "Description"
       Text.bodySecondary "{find(tasks,x=>x.id==sel).desc}"
-      Checklist "Checklist" =checked items:["Write the first draft","Get design feedback","Update the staging site","Final sign-off"]
+      Checklist "Checklist" bind=checked items=["Write the first draft","Get design feedback","Update the staging site","Final sign-off"]
       Text.strong "Activity"
-      Column gap:10 scroll
+      Column gap=10 scroll
         each a in activity
-          Row gap:8 top
-            Avatar "{a.who}" size:24
-            Column gap:2 grow
+          Row gap=8 top
+            Avatar "{a.who}" size=24
+            Column gap=2 grow
               Text "{a.text}"
               Text.caption "{a.when}"

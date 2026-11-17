@@ -1,4 +1,4 @@
-Card w:390 gap:12
+Card w=390 gap=12
   state day=0
   state party=2
   state time=""
@@ -7,21 +7,21 @@ Card w:390 gap:12
   state slots=[{"i":0,"t":"17:30"},{"i":1,"t":"18:00"},{"i":2,"t":"18:30"},{"i":3,"t":"19:00"},{"i":4,"t":"19:30"},{"i":5,"t":"20:00"},{"i":6,"t":"20:30"},{"i":7,"t":"21:00"},{"i":8,"t":"21:30"}]
   Text.title "Book a table"
   Text.strong "Day"
-  Grid cols:3 gap:8
+  Grid cols=3 gap=8
     each d in days
-      ChoiceChip "{d.l}" selected:=day==d.i -> day=d.i; time=""
+      ChoiceChip "{d.l}" selected={day==d.i} onTap={day=d.i; time=""}
   Text.strong "Party size"
-  Grid cols:4 gap:8
+  Grid cols=4 gap=8
     each p in sizes
-      ChoiceChip "{p}" selected:=party==p -> party=p; time=""
+      ChoiceChip "{p}" selected={party==p} onTap={party=p; time=""}
   Text.strong "Time"
-  Grid cols:3 gap:8
+  Grid cols=3 gap=8
     each s in slots
-      ChoiceChip "{s.t}" selected:=time==s.t enabled:=(day*3+s.i*5+party*2)%4!=0&&!(party>6&&s.i%2==0) -> time=s.t
+      ChoiceChip "{s.t}" selected={time==s.t} enabled={(day*3+s.i*5+party*2)%4!=0&&!(party>6&&s.i%2==0)} onTap={time=s.t}
   Text.caption "Greyed-out times are full."
   Divider
   if time==""
     Text.muted "Choose a day, party size and time."
   if time!=""
     Text "{days[day].l} · party of {party} · {time}"
-    Button "Confirm booking" -> emit book time; toast "Booked: {days[day].l}, table for {party} at {time}"
+    Button "Confirm booking" onTap={emit book time; toast "Booked: {days[day].l}, table for {party} at {time}"}

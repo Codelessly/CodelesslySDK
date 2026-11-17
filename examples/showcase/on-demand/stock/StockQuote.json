@@ -4,7 +4,7 @@
  "roots": ["wrap"],
  "widget": {
   "type": "StockQuote",
-  "doc": "A stock quote: StockQuote symbol:\"ACME\" name:\"Acme Corp\" price:\"$153.62\" change:1.84 percent:1.21 values:[151.9,152.4,...] open:\"$151.90\" high:\"$154.10\" low:\"$151.22\" volume:\"38.4M\" draws the price, a green or red change pill, the day's sparkline and the open, high, low and volume.",
+  "doc": "A stock quote: StockQuote symbol=\"ACME\" name=\"Acme Corp\" price=\"$153.62\" change=1.84 percent=1.21 values=[151.9,152.4,...] open=\"$151.90\" high=\"$154.10\" low=\"$151.22\" volume=\"38.4M\" draws the price, a green or red change pill, the day's sparkline and the open, high, low and volume.",
   "props": [
    {"key": "symbol", "type": {"kind": "string", "flutter": "String"}, "default": "ACME", "doc": "The ticker.", "required": true},
    {"key": "name", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The company name, quiet beside the ticker."},

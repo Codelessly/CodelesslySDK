@@ -4,29 +4,29 @@ state sessionsThisWeek=3
 state today={"name":"Intervals","rounds":8,"work":40,"rest":20,"minutes":8}
 state weeks=[{"label":"W39","jumps":2100},{"label":"W40","jumps":2650},{"label":"W41","jumps":2400},{"label":"W42","jumps":3180}]
 state sessions=[{"date":"Fri 13 Nov","name":"Intervals","minutes":8,"jumps":912,"best":148},{"date":"Wed 11 Nov","name":"Endurance","minutes":12,"jumps":1304,"best":210},{"date":"Mon 9 Nov","name":"Footwork","minutes":6,"jumps":640,"best":96},{"date":"Sat 7 Nov","name":"Intervals","minutes":8,"jumps":880,"best":131}]
-Column scroll gap:16 pad:16
+Column scroll gap=16 pad=16
   Row between middle
     Text.pageTitle "Hi, jumper!"
     Badge.warning "{streak} day streak"
-  Card gap:12
+  Card gap=12
     Text.caption "TODAY'S GAME"
     Text.heading1 "{today.name}"
     Text.bodySecondary "{today.rounds} rounds. Jump {today.work}s, rest {today.rest}s."
-    Button "Let's jump!" w:fill -> emit start_session
-  Card gap:8
-    Row gap:8 middle
+    Button "Let's jump!" w=fill onTap={emit start_session}
+  Card gap=8
+    Row gap=8 middle
       Icon "local_fire_department"
       Text.sectionTitle "{streak} days in a row!"
     Text.bodySecondary "Keep it going. Jump today!"
-  Card gap:8
+  Card gap=8
     Text.sectionTitle "This week"
     Text.heading1 "{sessionsThisWeek} of {weeklyGoal}"
-    Progress =sessionsThisWeek/weeklyGoal
+    Progress bind={sessionsThisWeek/weeklyGoal}
     Text.bodySecondary "{weeklyGoal-sessionsThisWeek} more to win the week!"
-  Card gap:8
-    Row gap:8 middle
+  Card gap=8
+    Row gap=8 middle
       Icon "emoji_events"
       Text.sectionTitle "Your record"
     Text.heading1 "{max(max(sessions[0].best,sessions[1].best),max(sessions[2].best,sessions[3].best))}"
     Text.bodySecondary "jumps in a row. Can you beat it?"
-  Button.ghost "See my old sessions" -> emit open_history
+  Button.ghost "See my old sessions" onTap={emit open_history}

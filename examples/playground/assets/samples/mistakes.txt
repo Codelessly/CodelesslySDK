@@ -1,12 +1,12 @@
-Card gap:12
+Card gap=12
   Text.sectionTitle "Lines the parser cannot read"
   Text.bodySecondary "Each one is listed under Problems with its line and column. Select a problem to go to its line. The rest still renders."
   Button.huge "No such variant"
   Buton "A misspelled type"
   StatTile "A required key is missing"
-  Row gap:8 middle
+  Row gap=8 middle
     Text "This row is fine"
     Badge.success "OK" shiny
     Spacer grow
-    Button.outline "Send" -> notify everyone
+    Button.outline "Send" onTap={notify everyone}
   Text.caption "Fix a line and its problem goes away."

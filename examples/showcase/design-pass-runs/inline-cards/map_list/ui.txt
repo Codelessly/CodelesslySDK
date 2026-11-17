@@ -1,33 +1,33 @@
 state sel=0
 state shops=[{"id":1,"name":"Bean There","rating":4.6,"dist":"0.2 km","hours":"7:00-18:00","x":40,"y":30},{"id":2,"name":"Daily Grind","rating":4.3,"dist":"0.4 km","hours":"6:30-17:00","x":200,"y":24},{"id":3,"name":"Roast & Co","rating":4.8,"dist":"0.6 km","hours":"8:00-20:00","x":120,"y":88},{"id":4,"name":"The Steam Cup","rating":4.1,"dist":"0.9 km","hours":"7:00-15:00","x":260,"y":110},{"id":5,"name":"Cafe Lune","rating":4.5,"dist":"1.1 km","hours":"9:00-22:00","x":60,"y":135}]
-Card w:390 gap:12
+Card w=390 gap=12
   Text.heading "Coffee shops near you"
-  Stack w:fill h:180 fill:#FFF1ECE2 radius:8
-    Box x:0 y:70 w:340 h:6 fill:#FFFFFFFF
-    Box x:0 y:150 w:340 h:4 fill:#FFFFFFFF
-    Box x:90 y:0 w:6 h:180 fill:#FFFFFFFF
-    Box x:230 y:0 w:4 h:180 fill:#FFFFFFFF
-    Box x:0 y:20 w:340 h:3 fill:#FFE2DACB
+  Stack w=fill h=180 fill=#FFF1ECE2 radius=8
+    Box x=0 y=70 w=340 h=6 fill=#FFFFFFFF
+    Box x=0 y=150 w=340 h=4 fill=#FFFFFFFF
+    Box x=90 y=0 w=6 h=180 fill=#FFFFFFFF
+    Box x=230 y=0 w=4 h=180 fill=#FFFFFFFF
+    Box x=0 y=20 w=340 h=3 fill=#FFE2DACB
     each s in shops
-      Box x:=s.x y:=s.y w:28 h:28 radius:14 center middle fill:=sel==s.id?"#FFD9381E":"#FF5A3E2B" -> sel=s.id
+      Box x={s.x} y={s.y} w=28 h=28 radius=14 center middle fill={sel==s.id?"#FFD9381E":"#FF5A3E2B"} onTap={sel=s.id}
         Text.strong "{s.id}"
   each s in shops
-    Box pad:10 radius:8 fill:=sel==s.id?"#FFFBE3DD":"#FFF7F7F7" -> sel=s.id
-      Row gap:10 middle
+    Box pad=10 radius=8 fill={sel==s.id?"#FFFBE3DD":"#FFF7F7F7"} onTap={sel=s.id}
+      Row gap=10 middle
         Badge.neutral "{s.id}"
         Text.strong "{s.name}"
         Spacer grow
         Icon "chevron_right"
   if sel>0
-    Card gap:6
+    Card gap=6
       Text.heading "{find(shops,s=>s.id==sel).name}"
-      Row gap:16
-        Row gap:4
+      Row gap=16
+        Row gap=4
           Icon "star"
           Text "{find(shops,s=>s.id==sel).rating}"
-        Row gap:4
+        Row gap=4
           Icon "place"
           Text "{find(shops,s=>s.id==sel).dist}"
-      Row gap:4
+      Row gap=4
         Icon "schedule"
         Text "Open {find(shops,s=>s.id==sel).hours}"

@@ -1,64 +1,64 @@
-Column w:1280 fill:#FFF8F9FB
+Column w=1280 fill=#FFF8F9FB
   state todo=[{"title":"Audit onboarding screens","tag":"Research","who":"Maya Chen","due":"Mar 18"},{"title":"Write push notification copy","tag":"Content","who":"Ruth Adler","due":"Mar 19"},{"title":"Define empty-state illustrations","tag":"Design","who":"Lena Ortiz","due":"Mar 21"},{"title":"Set up crash reporting alerts","tag":"Engineering","who":"Dev Patel","due":"Mar 22"}]
   state doing=[{"title":"Redesign checkout flow","tag":"Design","who":"Lena Ortiz","due":"Mar 15"},{"title":"Migrate auth to OAuth 2.1","tag":"Engineering","who":"Dev Patel","due":"Mar 16"},{"title":"Usability test, round 2","tag":"Research","who":"Maya Chen","due":"Mar 17"},{"title":"Localize strings for DE and FR","tag":"Content","who":"Sam Okafor","due":"Mar 17"}]
   state done=[{"title":"Competitor teardown","tag":"Research","who":"Maya Chen","due":"Mar 6"},{"title":"Design tokens v1","tag":"Design","who":"Lena Ortiz","due":"Mar 8"},{"title":"Set up CI for mobile builds","tag":"Engineering","who":"Sam Okafor","due":"Mar 10"},{"title":"Kickoff brief approved","tag":"Planning","who":"Ruth Adler","due":"Mar 11"}]
   state activity=[{"who":"Lena Ortiz","what":"moved Redesign checkout flow to In progress","time":"12 min ago"},{"who":"Dev Patel","what":"commented on Migrate auth to OAuth 2.1","time":"41 min ago"},{"who":"Maya Chen","what":"attached 6 recordings to Usability test, round 2","time":"1 h ago"},{"who":"Ruth Adler","what":"completed Kickoff brief approved","time":"3 h ago"},{"who":"Sam Okafor","what":"changed due date of Localize strings to Mar 17","time":"Yesterday"},{"who":"Maya Chen","what":"created Audit onboarding screens","time":"Yesterday"},{"who":"Sam Okafor","what":"completed Set up CI for mobile builds","time":"Mon"}]
-  Row between middle pad:[24,16,24,16] fill:#FFFFFFFF
-    Column gap:2
+  Row between middle pad=[24,16,24,16] fill=#FFFFFFFF
+    Column gap=2
       Text.eyebrow "PROJECT"
       Text.heading1 "Atlas Mobile Redesign"
-    Row gap:16 middle
-      ModelAvatarStack labels:["Maya Chen","Dev Patel","Lena Ortiz","Sam Okafor","Ruth Adler"] max:4
-      Button "New task" icon:"add" -> emit newTask
+    Row gap=16 middle
+      ModelAvatarStack labels=["Maya Chen","Dev Patel","Lena Ortiz","Sam Okafor","Ruth Adler"] max=4
+      Button "New task" icon="add" onTap={emit newTask}
   Divider
-  Row gap:16 pad:24 top
-    Box grow gap:10 pad:12 fill:#FFEEF0F4 radius:12
+  Row gap=16 pad=24 top
+    Box grow gap=10 pad=12 fill=#FFEEF0F4 radius=12
       Row between middle
         Text.cardTitle "To do"
-        CountBadge count:=length(todo)
+        CountBadge count={length(todo)}
       each t in todo
-        Card gap:8 fill:#FFFFFFFF
+        Card gap=8 fill=#FFFFFFFF
           Text.rowTitle "{t.title}"
           Row
             Badge.neutral "{t.tag}"
           Row between middle
-            Avatar "{t.who}" size:24
-            Row gap:4 middle
+            Avatar "{t.who}" size=24
+            Row gap=4 middle
               Icon "event"
               Text.caption "{t.due}"
-    Box grow gap:10 pad:12 fill:#FFEEF0F4 radius:12
+    Box grow gap=10 pad=12 fill=#FFEEF0F4 radius=12
       Row between middle
         Text.cardTitle "In progress"
-        CountBadge count:=length(doing)
+        CountBadge count={length(doing)}
       each t in doing
-        Card gap:8 fill:#FFFFFFFF
+        Card gap=8 fill=#FFFFFFFF
           Text.rowTitle "{t.title}"
           Row
             Badge.info "{t.tag}"
           Row between middle
-            Avatar "{t.who}" size:24
-            Row gap:4 middle
+            Avatar "{t.who}" size=24
+            Row gap=4 middle
               Icon "event"
               Text.caption "{t.due}"
-    Box grow gap:10 pad:12 fill:#FFEEF0F4 radius:12
+    Box grow gap=10 pad=12 fill=#FFEEF0F4 radius=12
       Row between middle
         Text.cardTitle "Done"
-        CountBadge count:=length(done)
+        CountBadge count={length(done)}
       each t in done
-        Card gap:8 fill:#FFFFFFFF
+        Card gap=8 fill=#FFFFFFFF
           Text.rowTitle "{t.title}"
           Row
             Badge.success "{t.tag}"
           Row between middle
-            Avatar "{t.who}" size:24
-            Row gap:4 middle
+            Avatar "{t.who}" size=24
+            Row gap=4 middle
               Icon "check_circle"
               Text.caption "{t.due}"
-    Card w:320 gap:12 fill:#FFFFFFFF
-      SectionHeader "Activity" count:=length(activity)
+    Card w=320 gap=12 fill=#FFFFFFFF
+      SectionHeader "Activity" count={length(activity)}
       each a in activity
-        Row gap:10 top
-          Avatar "{a.who}" size:28
-          Column gap:2 grow
+        Row gap=10 top
+          Avatar "{a.who}" size=28
+          Column gap=2 grow
             Text.body "{a.who} {a.what}"
             Text.caption "{a.time}"

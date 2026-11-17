@@ -1,15 +1,15 @@
 state runs=[{"id":"r1","name":"Migrate invoices table","state":"running","at":"Started 4 min ago","p":0.62},{"id":"r2","name":"Nightly dependency audit","state":"running","at":"Started 11 min ago","p":0.3},{"id":"r3","name":"Regenerate API docs","state":"done","at":"Finished 09:41","p":1},{"id":"r4","name":"Sync staging data","state":"failed","at":"Failed 09:12","p":0.18}]
-Card gap:10
+Card gap=10
   Row between
     Text.sectionTitle "Background runs"
     Badge.primary "{length(filter(runs, r => r.state=="running"))} running"
-  Column gap:0
+  Column gap=0
     each r in runs
-      Column gap:6 pad:[0,8,0,8]
-        Row gap:10
-          Icon "{r.state=="done"?"check_circle":(r.state=="failed"?"error_outline":"sync")}" size:15 color:=r.state=="done"?"#FF16A34A":(r.state=="failed"?"#FFDC2626":"#FF2563EB")
-          Column gap:1 grow
+      Column gap=6 pad=[0,8,0,8]
+        Row gap=10
+          Icon "{r.state=="done"?"check_circle":(r.state=="failed"?"error_outline":"sync")}" size=15 color={r.state=="done"?"#FF16A34A":(r.state=="failed"?"#FFDC2626":"#FF2563EB")}
+          Column gap=1 grow
             Text.body "{r.name}"
             Text.caption "{r.at}"
-          Button.ghost "{r.state=="running"?"Stop":(r.state=="failed"?"Retry":"Open")}" -> emit run_action r.id
-        Progress =r.p visible:=r.state=="running"
+          Button.ghost "{r.state=="running"?"Stop":(r.state=="failed"?"Retry":"Open")}" onTap={emit run_action r.id}
+        Progress bind=r.p visible={r.state=="running"}

@@ -13,70 +13,70 @@ state nProduct=false
 state nSecurity=true
 App
   Sidebar
-    Brand "Plume" icon:"edit"
+    Brand "Plume" icon="edit"
     Text.eyebrow "SETTINGS"
-    NavItem "Profile" icon:"person" selected:=tab=="profile" -> tab="profile"
-    NavItem "Account" icon:"manage_accounts" selected:=tab=="account" -> tab="account"
-    NavItem "Notifications" icon:"notifications" selected:=tab=="notifications" -> tab="notifications"
-    NavItem "Appearance" icon:"palette" selected:=tab=="appearance" -> tab="appearance"
-    NavItem "Billing" icon:"credit_card" selected:=tab=="billing" -> tab="billing"
-    NavItem "Team" icon:"group" selected:=tab=="team" -> tab="team"
+    NavItem "Profile" icon="person" selected={tab=="profile"} onTap={tab="profile"}
+    NavItem "Account" icon="manage_accounts" selected={tab=="account"} onTap={tab="account"}
+    NavItem "Notifications" icon="notifications" selected={tab=="notifications"} onTap={tab="notifications"}
+    NavItem "Appearance" icon="palette" selected={tab=="appearance"} onTap={tab="appearance"}
+    NavItem "Billing" icon="credit_card" selected={tab=="billing"} onTap={tab="billing"}
+    NavItem "Team" icon="group" selected={tab=="team"} onTap={tab="team"}
     Spacer grow
-    Row gap:10 middle
-      Avatar "Maya Reyes" size:36
+    Row gap=10 middle
+      Avatar "Maya Reyes" size=36
       Column
         Text.strong "Maya Reyes"
         Text.caption "Free plan"
   Main
     Nav
-      Heading "Account settings" level:1
-    Column grow scroll pad:24
+      Heading "Account settings" level=1
+    Column grow scroll pad=24
       if tab!="profile"
-        Card maxw:720
+        Card maxw=720
           Text.muted "Nothing to change here yet. Choose Profile to edit your details."
       if tab=="profile"
-        Column maxw:720 gap:20
-          Card gap:16
-            Heading "Profile" level:3
+        Column maxw=720 gap=20
+          Card gap=16
+            Heading "Profile" level=3
             Text.muted "This is how readers see you on Plume."
-            Row gap:16 middle
-              Avatar "Maya Reyes" size:72
-              Column gap:4
-                Button.outline "Change" -> emit changePicture; dirty=true
+            Row gap=16 middle
+              Avatar "Maya Reyes" size=72
+              Column gap=4
+                Button.outline "Change" onTap={emit changePicture; dirty=true}
                 Text.caption "JPG or PNG, up to 2 MB"
-            Row gap:16
-              Input "Name" =name grow -> dirty=true
-              Input "Username" =username grow -> dirty=true
-            Column gap:4
-              Input "Bio" "Tell readers a little about you" =bio multiline maxLength:160 h:110 -> dirty=true
+            Row gap=16
+              Input "Name" bind=name grow onChange={dirty=true}
+              Input "Username" bind=username grow onChange={dirty=true}
+            Column gap=4
+              Input "Bio" "Tell readers a little about you" bind=bio multiline maxLength=160 h=110 onChange={dirty=true}
               Row end
                 Text.caption "{length(bio)}/160"
-            Select "Time zone" =tz items:["Pacific/Honolulu (GMT-10)","America/Los_Angeles (GMT-8)","America/New_York (GMT-5)","Europe/London (GMT+0)","Europe/Berlin (GMT+1)","Asia/Kolkata (GMT+5:30)","Asia/Tokyo (GMT+9)","Australia/Sydney (GMT+11)"] -> dirty=true
-            Toggle "Public profile" =isPublic -> dirty=true
+            Select "Time zone" bind=tz items=["Pacific/Honolulu (GMT-10)","America/Los_Angeles (GMT-8)","America/New_York (GMT-5)","Europe/London (GMT+0)","Europe/Berlin (GMT+1)","Asia/Kolkata (GMT+5:30)","Asia/Tokyo (GMT+9)","Australia/Sydney (GMT+11)"] onChange={dirty=true}
+            Toggle "Public profile" bind=isPublic onChange={dirty=true}
             Text.caption "Anyone with the link can read your profile and published pieces."
-          Card pad:0 gap:0
-            Column pad:[20,16,20,8] gap:4
-              Heading "Notifications" level:3
+          Card pad=0 gap=0
+            Column pad=[20,16,20,8] gap=4
+              Heading "Notifications" level=3
               Text.muted "Choose what Plume emails you about."
-            SettingRow "Comments" "When someone comments on one of your pieces" =nComments divider:false -> dirty=true
-            SettingRow "Replies" "When someone replies to your comment" =nReplies -> dirty=true
-            SettingRow "Weekly digest" "A summary of your reads and new followers" =nDigest -> dirty=true
-            SettingRow "Product updates" "New features and writing tips from the Plume team" =nProduct -> dirty=true
-            SettingRow "Security alerts" "Sign-ins from new devices and password changes" =nSecurity -> dirty=true
-          Card gap:12 fill:#FFFEF2F2 border:#FFFCA5A5
-            Heading "Danger zone" level:3
+            SettingRow "Comments" "When someone comments on one of your pieces" bind=nComments divider=false onPressed={dirty=true}
+            SettingRow "Replies" "When someone replies to your comment" bind=nReplies onPressed={dirty=true}
+            SettingRow "Weekly digest" "A summary of your reads and new followers" bind=nDigest onPressed={dirty=true}
+            SettingRow "Product updates" "New features and writing tips from the Plume team" bind=nProduct onPressed={dirty=true}
+            SettingRow "Security alerts" "Sign-ins from new devices and password changes" bind=nSecurity onPressed={dirty=true}
+          Card gap=12 fill=#FFFEF2F2 border=#FFFCA5A5
+            Heading "Danger zone" level=3
             Text.muted "Deleting your account removes your profile, drafts and published pieces for good. This cannot be undone."
             if !confirm
               Row
-                Button.destructive "Delete account" -> confirm=true
+                Button.destructive "Delete account" onTap={confirm=true}
             if confirm
-              Callout "Delete your account?" "All your writing will be permanently erased." tone:danger icon:"warning"
-              Row gap:8
-                Button.outline "Keep my account" -> confirm=false
-                Button.destructive "Yes, delete it" -> emit deleteAccount; confirm=false; toast "Account deletion requested"
-    Row end middle gap:8 pad:[24,12,24,12] border-top:#FFE5E7EB
+              Callout "Delete your account?" "All your writing will be permanently erased." tone=danger icon="warning"
+              Row gap=8
+                Button.outline "Keep my account" onTap={confirm=false}
+                Button.destructive "Yes, delete it" onTap={emit deleteAccount; confirm=false; toast "Account deletion requested"}
+    Row end middle gap=8 pad=[24,12,24,12] border-top=#FFE5E7EB
       if dirty
         Text.muted "You have unsaved changes"
       Spacer grow
-      Button.outline "Cancel" enabled:=dirty -> name="Maya Reyes"; username="mayareyes"; bio="Writing about slow mornings, small towns and the books that got me through them."; tz="Europe/London (GMT+0)"; isPublic=true; nComments=true; nReplies=true; nDigest=false; nProduct=false; nSecurity=true; dirty=false
-      Button "Save changes" enabled:=dirty -> emit save; dirty=false; toast "Changes saved"
+      Button.outline "Cancel" enabled={dirty} onTap={name="Maya Reyes"; username="mayareyes"; bio="Writing about slow mornings, small towns and the books that got me through them."; tz="Europe/London (GMT+0)"; isPublic=true; nComments=true; nReplies=true; nDigest=false; nProduct=false; nSecurity=true; dirty=false}
+      Button "Save changes" enabled={dirty} onTap={emit save; dirty=false; toast "Changes saved"}

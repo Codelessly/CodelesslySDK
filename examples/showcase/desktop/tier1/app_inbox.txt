@@ -4,84 +4,84 @@ state reply=""
 state q=""
 state convs=[{"id":0,"name":"Priya Nair","subject":"Cannot log in after password reset","preview":"I tried the reset link twice and it says expired.","time":"9:41","unread":true},{"id":1,"name":"Tomás Ibarra","subject":"Refund for damaged kettle","preview":"Thanks, I attached photos of the dent on the lid.","time":"9:12","unread":true},{"id":2,"name":"Hannah Brooks","subject":"Change delivery address","preview":"Can you ship to my office instead? Address below.","time":"8:50","unread":false},{"id":3,"name":"Kenji Watanabe","subject":"Invoice missing VAT number","preview":"Our accounting team needs the VAT ID on the invoice.","time":"8:23","unread":true},{"id":4,"name":"Olivia Grant","subject":"Question about the Pro plan","preview":"Does Pro include more than five seats?","time":"Yesterday","unread":false},{"id":5,"name":"Samir Haddad","subject":"Order arrived without the charger","preview":"The box was sealed but there was no charger inside.","time":"Yesterday","unread":false},{"id":6,"name":"Chloe Martin","subject":"Cancel my subscription","preview":"Please cancel before the next billing date on the 14th.","time":"Mon","unread":false},{"id":7,"name":"Diego Alvarez","subject":"Thank you!","preview":"Everything works now, great support as always.","time":"Mon","unread":false}]
 App
-  Sidebar w:200
-    Row gap:8 middle
+  Sidebar w=200
+    Row gap=8 middle
       IconTile "support_agent"
       Text.strong "Relaydesk"
-    NavItem "Inbox" icon:"inbox" badge:"12" selected:=folder=="inbox" -> folder="inbox"
-    NavItem "Assigned to me" icon:"person" badge:"4" selected:=folder=="mine" -> folder="mine"
-    NavItem "Waiting" icon:"schedule" badge:"7" selected:=folder=="waiting" -> folder="waiting"
-    NavItem "Closed" icon:"check_circle" selected:=folder=="closed" -> folder="closed"
+    NavItem "Inbox" icon="inbox" badge="12" selected={folder=="inbox"} onTap={folder="inbox"}
+    NavItem "Assigned to me" icon="person" badge="4" selected={folder=="mine"} onTap={folder="mine"}
+    NavItem "Waiting" icon="schedule" badge="7" selected={folder=="waiting"} onTap={folder="waiting"}
+    NavItem "Closed" icon="check_circle" selected={folder=="closed"} onTap={folder="closed"}
     Spacer grow
-    Row gap:8 middle
-      Avatar "Dana Kim" size:32
+    Row gap=8 middle
+      Avatar "Dana Kim" size=32
       Text.muted "Dana Kim"
-  Pane w:340 gap:0 border-right:#FFE5E7EB
-    Column pad:12 gap:8
-      Heading "Inbox" level:3
-      Input "Search conversations" =q
+  Pane w=340 gap=0 border-right=#FFE5E7EB
+    Column pad=12 gap=8
+      Heading "Inbox" level=3
+      Input "Search conversations" bind=q
     Divider
-    Column scroll gap:0
+    Column scroll gap=0
       each c in convs
-        Row gap:12 pad:12 top fill:=sel==c.id?"#FFEAF1FF":"#00FFFFFF" border-bottom:#FFEEF0F3 -> sel=c.id
-          Avatar "{c.name}" size:40
-          Column grow gap:2
+        Row gap=12 pad=12 top fill={sel==c.id?"#FFEAF1FF":"#00FFFFFF"} border-bottom=#FFEEF0F3 onTap={sel=c.id}
+          Avatar "{c.name}" size=40
+          Column grow gap=2
             Text.strong "{c.name}"
-            Text "{c.subject}" size:13 weight:600
-            Text.muted "{c.preview}" size:12
-          Column gap:8 end
+            Text "{c.subject}" size=13 weight=600
+            Text.muted "{c.preview}" size=12
+          Column gap=8 end
             Text.caption "{c.time}"
-            Box w:8 h:8 radius:4 fill:#FF2563EB visible:=c.unread
+            Box w=8 h=8 radius=4 fill=#FF2563EB visible={c.unread}
   Main
     Nav
-      Column gap:4
-        Heading "Refund for damaged kettle" level:1
-        Row gap:12 middle
+      Column gap=4
+        Heading "Refund for damaged kettle" level=1
+        Row gap=12 middle
           Badge.warning "Open"
-          Row gap:6 middle
+          Row gap=6 middle
             Icon "person"
             Text.muted "Assigned to Dana Kim"
-      Row gap:8
-        Button.outline "Assign" -> toast "Assign menu"
-        Button.outline "Close" -> toast "Conversation closed"
-    Column scroll pad:24 gap:16
-      Row gap:12 top
-        Avatar "Tomás Ibarra" size:36
-        Column gap:4 maxw:560
+      Row gap=8
+        Button.outline "Assign" onTap={toast "Assign menu"}
+        Button.outline "Close" onTap={toast "Conversation closed"}
+    Column scroll pad=24 gap=16
+      Row gap=12 top
+        Avatar "Tomás Ibarra" size=36
+        Column gap=4 maxw=560
           Text.caption "Tomás Ibarra · 8:41"
-          Box fill:#FFF3F4F6 radius:12 pad:12
+          Box fill=#FFF3F4F6 radius=12 pad=12
             Text "Hi, my Brewline kettle arrived today with a large dent in the lid. I would like a refund or a replacement."
-      Row end gap:12 top
-        Column gap:4 maxw:560
+      Row end gap=12 top
+        Column gap=4 maxw=560
           Text.caption "Dana Kim · 8:52" right
-          Box fill:#FF2563EB radius:12 pad:12
-            Text "Hi Tomás, I'm sorry about that. Could you send a photo of the dent and the shipping label?" color:#FFFFFFFF
-        Avatar "Dana Kim" size:36
-      Box fill:#FFFFF4CC radius:12 pad:12 gap:4 border:#FFF0D77A
-        Row gap:6 middle
+          Box fill=#FF2563EB radius=12 pad=12
+            Text "Hi Tomás, I'm sorry about that. Could you send a photo of the dent and the shipping label?" color=#FFFFFFFF
+        Avatar "Dana Kim" size=36
+      Box fill=#FFFFF4CC radius=12 pad=12 gap=4 border=#FFF0D77A
+        Row gap=6 middle
           Icon "lock"
           Text.strong "Internal note · Dana Kim"
         Text "Order #48213 shipped Jun 3 via Parcelly. Carrier damage claims are covered, approve the refund if the photos match."
-      Row gap:12 top
-        Avatar "Tomás Ibarra" size:36
-        Column gap:4 maxw:560
+      Row gap=12 top
+        Avatar "Tomás Ibarra" size=36
+        Column gap=4 maxw=560
           Text.caption "Tomás Ibarra · 9:12"
-          Box fill:#FFF3F4F6 radius:12 pad:12
+          Box fill=#FFF3F4F6 radius=12 pad=12
             Text "Thanks, I attached photos of the dent on the lid and the label."
-      Card gap:12
-        Input "Reply to Tomás" "Write your reply…" =reply multiline
-        Row end gap:8
-          Button.outline "Send and close" -> emit sendClose reply; reply=""; toast "Sent and closed"
-          Button "Send" -> emit send reply; reply=""; toast "Reply sent"
-  Pane w:280 pad:16 gap:16 border-left:#FFE5E7EB
-    Column center gap:6
-      Avatar "Tomás Ibarra" size:64
+      Card gap=12
+        Input "Reply to Tomás" "Write your reply…" bind=reply multiline
+        Row end gap=8
+          Button.outline "Send and close" onTap={emit sendClose reply; reply=""; toast "Sent and closed"}
+          Button "Send" onTap={emit send reply; reply=""; toast "Reply sent"}
+  Pane w=280 pad=16 gap=16 border-left=#FFE5E7EB
+    Column center gap=6
+      Avatar "Tomás Ibarra" size=64
       Text.strong "Tomás Ibarra"
       Text.muted "tomas.ibarra@example.com"
-    Details rows:[["Plan","Pro, annual"],["Customer since","Mar 2022"],["Last order","#48213, Jun 3"]]
-    Column gap:8
+    Details rows=[["Plan","Pro, annual"],["Customer since","Mar 2022"],["Last order","#48213, Jun 3"]]
+    Column gap=8
       Text.eyebrow "TAGS"
-      Row gap:6
+      Row gap=6
         Badge.info "Refund"
         Badge.primary "VIP"
         Badge.neutral "Shipping"

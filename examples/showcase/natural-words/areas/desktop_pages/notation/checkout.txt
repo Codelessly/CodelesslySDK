@@ -1,92 +1,92 @@
-Row between pad:[24,16,24,16]
-  Row gap:8
+Row between pad=[24,16,24,16]
+  Row gap=8
     Icon "light_mode"
     Text.heading "Lumen Home"
-  Row gap:6
+  Row gap=6
     Icon "lock"
     Text.muted "Secure checkout"
 Divider
-Column scroll gap:24 pad:24
+Column scroll gap=24 pad=24
   state ship="Standard · Free · 5-7 business days"
   state st=""
   state code=""
-  Row center gap:12
-    Row gap:6
-      Box w:24 h:24 radius:12 fill:#FF2E7D32 center
-        Icon "check" size:14 color:#FFFFFFFF
+  Row center gap=12
+    Row gap=6
+      Box w=24 h=24 radius=12 fill=#FF2E7D32 center
+        Icon "check" size=14 color=#FFFFFFFF
       Text.muted "Cart"
-    Divider w:32
-    Row gap:6
-      Box w:24 h:24 radius:12 fill:#FF2E7D32 center
-        Icon "check" size:14 color:#FFFFFFFF
+    Divider w=32
+    Row gap=6
+      Box w=24 h=24 radius=12 fill=#FF2E7D32 center
+        Icon "check" size=14 color=#FFFFFFFF
       Text.muted "Shipping"
-    Divider w:32
-    Row gap:6
-      Box w:24 h:24 radius:12 fill:#FF111111 center
-        Text "3" size:12 color:#FFFFFFFF
+    Divider w=32
+    Row gap=6
+      Box w=24 h=24 radius=12 fill=#FF111111 center
+        Text "3" size=12 color=#FFFFFFFF
       Text.strong "Payment"
-    Divider w:32
-    Row gap:6
-      Box w:24 h:24 radius:12 fill:#FFE0E0E0 center
-        Text "4" size:12
+    Divider w=32
+    Row gap=6
+      Box w=24 h=24 radius=12 fill=#FFE0E0E0 center
+        Text "4" size=12
       Text.muted "Review"
-  Row gap:24 top
-    Column grow gap:16
-      Card gap:12
+  Row gap=24 top
+    Column grow gap=16
+      Card gap=12
         Text.heading2 "Contact"
-        Input "Email" hint:"you@example.com" type:email =email
-      Card gap:12
+        Input "Email" hint="you@example.com" type=email bind=email
+      Card gap=12
         Text.heading2 "Shipping address"
-        Row gap:12
-          Input "First name" =firstName grow
-          Input "Last name" =lastName grow
-        Input "Address" hint:"Street address, apt, suite" =address
-        Row gap:12
-          Input "City" =city grow
-          Select =st items:["Alabama","California","Colorado","Florida","Illinois","New York","Oregon","Texas","Washington"] grow
-          Input "ZIP" type:number =zip w:120
-      Card gap:12
+        Row gap=12
+          Input "First name" bind=firstName grow
+          Input "Last name" bind=lastName grow
+        Input "Address" hint="Street address, apt, suite" bind=address
+        Row gap=12
+          Input "City" bind=city grow
+          Select bind=st items=["Alabama","California","Colorado","Florida","Illinois","New York","Oregon","Texas","Washington"] grow
+          Input "ZIP" type=number bind=zip w=120
+      Card gap=12
         Text.heading2 "Shipping method"
-        Radio =ship items:["Standard · Free · 5-7 business days","Express · $12.99 · 1-2 business days"]
-      Card gap:12
+        Radio bind=ship items=["Standard · Free · 5-7 business days","Express · $12.99 · 1-2 business days"]
+      Card gap=12
         Row between
           Text.heading2 "Payment"
-          Row gap:6
+          Row gap=6
             Icon "credit_card"
             Icon "lock"
-        Input "Card number" hint:"1234 1234 1234 1234" type:number =cardNumber
-        Row gap:12
-          Input "Expiry" hint:"MM / YY" =expiry grow
-          Input "CVC" hint:"123" type:number =cvc grow
-        Input "Name on card" =cardName
-    Column w:360 gap:12
-      Card gap:12
+        Input "Card number" hint="1234 1234 1234 1234" type=number bind=cardNumber
+        Row gap=12
+          Input "Expiry" hint="MM / YY" bind=expiry grow
+          Input "CVC" hint="123" type=number bind=cvc grow
+        Input "Name on card" bind=cardName
+    Column w=360 gap=12
+      Card gap=12
         Text.heading2 "Order summary"
-        Row gap:12 center
-          Box w:56 h:56 radius:8 fill:#FFEFE7DC center
+        Row gap=12 center
+          Box w=56 h=56 radius=8 fill=#FFEFE7DC center
             Icon "weekend"
-          Column grow gap:2
+          Column grow gap=2
             Text.strong "Linen throw blanket"
             Text.muted "Qty 1"
           Text.strong "$89.00"
-        Row gap:12 center
-          Box w:56 h:56 radius:8 fill:#FFF6EBC8 center
+        Row gap=12 center
+          Box w=56 h=56 radius=8 fill=#FFF6EBC8 center
             Icon "lightbulb"
-          Column grow gap:2
+          Column grow gap=2
             Text.strong "Ceramic table lamp"
             Text.muted "Qty 1"
           Text.strong "$79.00"
-        Row gap:12 center
-          Box w:56 h:56 radius:8 fill:#FFDDE7E4 center
+        Row gap=12 center
+          Box w=56 h=56 radius=8 fill=#FFDDE7E4 center
             Icon "local_florist"
-          Column grow gap:2
+          Column grow gap=2
             Text.strong "Stoneware vase"
             Text.muted "Qty 2"
           Text.strong "$46.00"
         Divider
-        Row gap:8
-          Input "Discount code" =code grow
-          Button.outline "Apply" -> toast "Code applied"
+        Row gap=8
+          Input "Discount code" bind=code grow
+          Button.outline "Apply" onTap={toast "Code applied"}
         Divider
         Row between
           Text.muted "Subtotal"
@@ -101,7 +101,7 @@ Column scroll gap:24 pad:24
         Row between
           Text.heading3 "Total"
           Text.heading3 "{money(214+17.12+(startsWith(ship,'Express')?12.99:0),'$',2)}"
-        Button "Place order" -> emit placeOrder; toast "Order placed"
-        Row center gap:6
-          Icon "lock" size:14
+        Button "Place order" onTap={emit placeOrder; toast "Order placed"}
+        Row center gap=6
+          Icon "lock" size=14
           Text.caption "Payments are encrypted and secure"

@@ -1,42 +1,42 @@
-Column pad:16 gap:12
+Column pad=16 gap=12
   Text.heading2 "Invoices"
   Text.muted "Showing 11-15 of 42"
-  Card gap:10
-    Row gap:12 middle
-      Column grow gap:2
+  Card gap=10
+    Row gap=12 middle
+      Column grow gap=2
         Text.strong "INV-1011"
         Text.muted "Acme Corp"
       Text.strong "$1,200"
       Badge.success "Paid"
     Divider
-    Row gap:12 middle
-      Column grow gap:2
+    Row gap=12 middle
+      Column grow gap=2
         Text.strong "INV-1012"
         Text.muted "Globex"
       Text.strong "$850"
       Badge.error "Overdue"
     Divider
-    Row gap:12 middle
-      Column grow gap:2
+    Row gap=12 middle
+      Column grow gap=2
         Text.strong "INV-1013"
         Text.muted "Initech"
       Text.strong "$2,340"
       Badge.success "Paid"
     Divider
-    Row gap:12 middle
-      Column grow gap:2
+    Row gap=12 middle
+      Column grow gap=2
         Text.strong "INV-1014"
         Text.muted "Umbrella Co"
       Text.strong "$415"
       Badge.neutral "Draft"
     Divider
-    Row gap:12 middle
-      Column grow gap:2
+    Row gap=12 middle
+      Column grow gap=2
         Text.strong "INV-1015"
         Text.muted "Hooli"
       Text.strong "$3,100"
       Badge.success "Paid"
   Row between middle
-    Button.outline "Previous" -> emit previousPage
+    Button.outline "Previous" onTap={emit previousPage}
     Text.muted "Page 3 of 9"
-    Button "Next" -> emit nextPage
+    Button "Next" onTap={emit nextPage}

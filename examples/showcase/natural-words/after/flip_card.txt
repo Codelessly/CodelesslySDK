@@ -1,18 +1,18 @@
 state flipped=false
-Card gap:12 pad:16
+Card gap=12 pad=16
   Row between middle
     Text.caption "Flashcard · Geography"
     Badge.info "Card 1 of 10"
   if !flipped
-    Box fill:#FFE8F0FE radius:12 pad:24 gap:8 center middle h:160 animate:fade duration:300 -> flipped=true
-      Text.caption "QUESTION" color:#FF3B5BA9
-      Text.heading2 "What is the capital of Australia?" color:#FF1A2B4C
-      Text.caption "Tap to reveal the answer" color:#FF5C6B8A
+    Box fill=#FFE8F0FE radius=12 pad=24 gap=8 center middle h=160 animate=fade duration=300 onTap={flipped=true}
+      Text.caption "QUESTION" color=#FF3B5BA9
+      Text.heading2 "What is the capital of Australia?" color=#FF1A2B4C
+      Text.caption "Tap to reveal the answer" color=#FF5C6B8A
   if flipped
-    Box fill:#FFE6F4EA radius:12 pad:24 gap:8 center middle h:160 animate:scale duration:300 -> flipped=false
-      Text.caption "ANSWER" color:#FF1E7B3A
-      Text.heading2 "Canberra" color:#FF14532D
-      Text.caption "Tap to flip back" color:#FF3F7D55
-  Row gap:8 center
-    Button.outline "Still learning" -> flipped=false; toast "We'll show it again soon"
-    Button "Got it" -> flipped=false; emit known
+    Box fill=#FFE6F4EA radius=12 pad=24 gap=8 center middle h=160 animate=scale duration=300 onTap={flipped=false}
+      Text.caption "ANSWER" color=#FF1E7B3A
+      Text.heading2 "Canberra" color=#FF14532D
+      Text.caption "Tap to flip back" color=#FF3F7D55
+  Row gap=8 center
+    Button.outline "Still learning" onTap={flipped=false; toast "We'll show it again soon"}
+    Button "Got it" onTap={flipped=false; emit known}

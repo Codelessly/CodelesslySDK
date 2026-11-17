@@ -1,20 +1,20 @@
 state filter="All"
 state orders=[{"id":"#4821","name":"Wireless Earbuds","price":59.99,"status":"Shipped"},{"id":"#4819","name":"Desk Lamp","price":34.50,"status":"Delivered"},{"id":"#4815","name":"USB-C Hub","price":27.00,"status":"Pending"},{"id":"#4810","name":"Running Shoes","price":89.00,"status":"Delivered"},{"id":"#4807","name":"Coffee Grinder","price":45.25,"status":"Shipped"}]
-Column gap:12 pad:16 scroll
+Column gap=12 pad=16 scroll
   Text.pageTitle "Recent orders"
-  Row gap:8 scroll
-    ChoiceChip "All" selected:=filter=="All" -> filter="All"
-    ChoiceChip "Pending" selected:=filter=="Pending" -> filter="Pending"
-    ChoiceChip "Shipped" selected:=filter=="Shipped" -> filter="Shipped"
-    ChoiceChip "Delivered" selected:=filter=="Delivered" -> filter="Delivered"
+  Row gap=8 scroll
+    ChoiceChip "All" selected={filter=="All"} onTap={filter="All"}
+    ChoiceChip "Pending" selected={filter=="Pending"} onTap={filter="Pending"}
+    ChoiceChip "Shipped" selected={filter=="Shipped"} onTap={filter="Shipped"}
+    ChoiceChip "Delivered" selected={filter=="Delivered"} onTap={filter="Delivered"}
   each order in orders
     if filter=="All" || order.status==filter
       Card
         Row between middle
-          Column gap:4
+          Column gap=4
             Text.strong "{order.name}"
             Text.caption "{order.id}"
-          Column gap:4 right
+          Column gap=4 right
             Text.strong "{money(order.price,"$",2)}"
             if order.status=="Pending"
               Badge.warning "Pending"

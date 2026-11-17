@@ -1,28 +1,28 @@
 Page
   Nav
-    Brand "Tidewater" icon:"waves"
-    Row gap:4
+    Brand "Tidewater" icon="waves"
+    Row gap=4
       Link "Features"
       Link "Pricing"
       Link "Customers"
       Link "Docs"
-    Row gap:8 middle
-      Button.ghost "Sign in" -> emit signin
-      Button "Start free" -> emit start
+    Row gap=8 middle
+      Button.ghost "Sign in" onTap={emit signin}
+      Button "Start free" onTap={emit start}
   Section
-    Row gap:48 middle
-      Column grow gap:20
+    Row gap=48 middle
+      Column grow gap=20
         Text.eyebrow "BOOKING FOR SMALL HOTELS"
-        Heading "Fill every room, without the spreadsheets" level:1
+        Heading "Fill every room, without the spreadsheets" level=1
         Text.lead "Tidewater keeps your calendar, channels and prices in one place, so every night gets booked."
-        Row gap:12
-          Button "Start free" size:large -> emit start
-          Button.outline "See how it works" size:large -> emit tour
+        Row gap=12
+          Button "Start free" size=large onTap={emit start}
+          Button.outline "See how it works" size=large onTap={emit tour}
         Text.caption "Free for 30 days. No card needed."
       Card grow
-        Media kind:"harbor" tone:"day" h:320
+        Media kind="harbor" tone="day" h=320
   Section tint compact
-    Column gap:16 center
+    Column gap=16 center
       Text.eyebrow "TRUSTED BY INDEPENDENT HOTELS"
       Row between middle
         Text.strong "Harbor Inn"
@@ -31,68 +31,68 @@ Page
         Text.strong "Juniper & Pine"
         Text.strong "Casa Marisol"
   Section
-    Column gap:12
+    Column gap=12
       Text.eyebrow "FEATURES"
       Heading "Everything a small hotel needs"
       Text.lead "Three tools that replace the spreadsheet, the sticky notes and the guesswork."
-    Grid cols:3 gap:24
-      Card gap:12
+    Grid cols=3 gap=24
+      Card gap=12
         IconTile "calendar_month"
-        Heading "Live calendar" level:3
+        Heading "Live calendar" level=3
         Text.muted "See every room and every guest at a glance, with changes shown the moment they happen."
-      Card gap:12
+      Card gap=12
         IconTile "sync"
-        Heading "Channel sync" level:3
+        Heading "Channel sync" level=3
         Text.muted "Availability stays in step across every booking site, so you never get double-booked."
-      Card gap:12
+      Card gap=12
         IconTile "trending_up"
-        Heading "Smart pricing" level:3
+        Heading "Smart pricing" level=3
         Text.muted "Rates adjust to demand and local events, so you earn more on busy nights."
   Section tint compact
-    Grid cols:3 gap:24
-      Column gap:4 center
+    Grid cols=3 gap=24
+      Column gap=4 center
         Text.numberHero "4,200" center
         Text.muted "hotels" center
-      Column gap:4 center
+      Column gap=4 center
         Text.numberHero "31%" center
         Text.muted "more direct bookings" center
-      Column gap:4 center
+      Column gap=4 center
         Text.numberHero "2 min" center
         Text.muted "setup" center
   Section narrow center
-    Column gap:16 center
-      Icon "format_quote" size:40 color:#FF2563EB
-      Heading "Tidewater paid for itself in the first month. Our direct bookings went up and the spreadsheets are gone." level:2 center
-      Row gap:12 middle center
-        Avatar "Maya Reyes" size:48
+    Column gap=16 center
+      Icon "format_quote" size=40 color=#FF2563EB
+      Heading "Tidewater paid for itself in the first month. Our direct bookings went up and the spreadsheets are gone." level=2 center
+      Row gap=12 middle center
+        Avatar "Maya Reyes" size=48
         Column
           Text.strong "Maya Reyes"
           Text.muted "Owner, The Willow House"
   Section tint center
-    Column gap:16 center
-      Heading "Ready to fill every room?" level:1 center
+    Column gap=16 center
+      Heading "Ready to fill every room?" level=1 center
       Text.lead "Set up in two minutes and see your first direct booking this week." center
-      Row gap:12 center
-        Button "Start free" size:large -> emit start
-        Button.outline "Talk to us" size:large -> emit contact
+      Row gap=12 center
+        Button "Start free" size=large onTap={emit start}
+        Button.outline "Talk to us" size=large onTap={emit contact}
   Footer
     Row between top
-      Column gap:8
+      Column gap=8
         Text.strong "Product"
         Text.muted "Features"
         Text.muted "Pricing"
         Text.muted "Integrations"
-      Column gap:8
+      Column gap=8
         Text.strong "Company"
         Text.muted "About"
         Text.muted "Customers"
         Text.muted "Careers"
-      Column gap:8
+      Column gap=8
         Text.strong "Resources"
         Text.muted "Docs"
         Text.muted "Guides"
         Text.muted "Help centre"
-      Column gap:8
+      Column gap=8
         Text.strong "Legal"
         Text.muted "Privacy"
         Text.muted "Terms"

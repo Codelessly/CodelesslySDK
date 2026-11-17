@@ -8,137 +8,137 @@ state specs=[{"k":"Light source","v":"Integrated LED, 9 W"},{"k":"Colour tempera
 state reviews=[{"name":"Elin Berg","stars":5,"date":"2 weeks ago","title":"Exactly what my desk needed","body":"Solid build, the arm holds any position and the light is warm and even."},{"name":"Marcus Hall","stars":5,"date":"1 month ago","title":"Beautiful in brass","body":"Looks even better in person. Dimming is smooth and the base is heavy enough."},{"name":"Priya Nair","stars":4,"date":"2 months ago","title":"Great lamp, short cable","body":"Love the design and the light quality. I would have liked a slightly longer cable."}]
 Page
   Nav
-    Brand "Nord & Co" icon:"chair_alt"
-    Row gap:4
+    Brand "Nord & Co" icon="chair_alt"
+    Row gap=4
       Link "New in"
       Link "Lighting"
       Link "Furniture"
       Link "Decor"
       Link "Sale"
-    Row gap:12 middle
-      Input "Search" "Search the store" =q w:240
-      Row gap:8 middle
-        IconButton "shopping_bag_outlined" -> emit openCart
+    Row gap=12 middle
+      Input "Search" "Search the store" bind=q w=240
+      Row gap=8 middle
+        IconButton "shopping_bag_outlined" onTap={emit openCart}
         Badge.primary "{cart}"
   Section
-    Column gap:32
-      Breadcrumb items:["Home","Lighting","Desk lamps","Arc One"]
-      Row gap:48 top
-        Column grow gap:16
+    Column gap=32
+      Breadcrumb items=["Home","Lighting","Desk lamps","Arc One"]
+      Row gap=48 top
+        Column grow gap=16
           if img==0
-            Media kind:"box" tone:"sand" h:480
+            Media kind="box" tone="sand" h=480
           if img==1
-            Media kind:"mug" tone:"slate" h:480
+            Media kind="mug" tone="slate" h=480
           if img==2
-            Media kind:"tote" tone:"rose" h:480
+            Media kind="tote" tone="rose" h=480
           if img==3
-            Media kind:"laptop" tone:"sky" h:480
-          Row gap:12
-            Box pad:4 radius:10 border:=img==0?'#FF2563EB':'#FFE5E7EB' -> img=0
-              Media kind:"box" tone:"sand" w:112 h:84
-            Box pad:4 radius:10 border:=img==1?'#FF2563EB':'#FFE5E7EB' -> img=1
-              Media kind:"mug" tone:"slate" w:112 h:84
-            Box pad:4 radius:10 border:=img==2?'#FF2563EB':'#FFE5E7EB' -> img=2
-              Media kind:"tote" tone:"rose" w:112 h:84
-            Box pad:4 radius:10 border:=img==3?'#FF2563EB':'#FFE5E7EB' -> img=3
-              Media kind:"laptop" tone:"sky" w:112 h:84
-        Column grow gap:18
+            Media kind="laptop" tone="sky" h=480
+          Row gap=12
+            Box pad=4 radius=10 border={img==0?'#FF2563EB':'#FFE5E7EB'} onTap={img=0}
+              Media kind="box" tone="sand" w=112 h=84
+            Box pad=4 radius=10 border={img==1?'#FF2563EB':'#FFE5E7EB'} onTap={img=1}
+              Media kind="mug" tone="slate" w=112 h=84
+            Box pad=4 radius=10 border={img==2?'#FF2563EB':'#FFE5E7EB'} onTap={img=2}
+              Media kind="tote" tone="rose" w=112 h=84
+            Box pad=4 radius=10 border={img==3?'#FF2563EB':'#FFE5E7EB'} onTap={img=3}
+              Media kind="laptop" tone="sky" w=112 h=84
+        Column grow gap=18
           Text.eyebrow "DESK LAMPS"
-          Heading "Arc One desk lamp" level:1
-          Row gap:8 middle
-            Row gap:2
-              Icon "star" color:#FFF59E0B size:20
-              Icon "star" color:#FFF59E0B size:20
-              Icon "star" color:#FFF59E0B size:20
-              Icon "star" color:#FFF59E0B size:20
-              Icon "star_half" color:#FFF59E0B size:20
+          Heading "Arc One desk lamp" level=1
+          Row gap=8 middle
+            Row gap=2
+              Icon "star" color=#FFF59E0B size=20
+              Icon "star" color=#FFF59E0B size=20
+              Icon "star" color=#FFF59E0B size=20
+              Icon "star" color=#FFF59E0B size=20
+              Icon "star_half" color=#FFF59E0B size=20
             Text.strong "4.7"
             Text.muted "318 reviews"
-          Row bottom gap:12
+          Row bottom gap=12
             Text.numberHero "$149"
-            Text.lead "$189" strike color:#FF9CA3AF
+            Text.lead "$189" strike color=#FF9CA3AF
             Badge.success "Save 21%"
           Text.muted "A sculptural arc lamp with a dimmable warm LED, a counterweighted arm and a heavy, stable base."
           Divider
-          Column gap:8
+          Column gap=8
             Text.fieldLabel "Finish: {finish}"
-            Row gap:8
-              ChoiceChip "Brass" selected:=finish=="Brass" -> finish="Brass"
-              ChoiceChip "Graphite" selected:=finish=="Graphite" -> finish="Graphite"
-              ChoiceChip "Sand" selected:=finish=="Sand" -> finish="Sand"
-          Column gap:8
+            Row gap=8
+              ChoiceChip "Brass" selected={finish=="Brass"} onTap={finish="Brass"}
+              ChoiceChip "Graphite" selected={finish=="Graphite"} onTap={finish="Graphite"}
+              ChoiceChip "Sand" selected={finish=="Sand"} onTap={finish="Sand"}
+          Column gap=8
             Text.fieldLabel "Quantity"
-            Stepper "Quantity" =qty min:1 max:10
-          Row gap:12
-            Button "Add to cart" size:large grow -> cart=cart+qty; toast "Added to cart"
-            Button.outline "Buy now" size:large grow -> emit buyNow
-          Card gap:14
-            Row gap:12 middle
-              IconTile "local_shipping" size:36
+            Stepper "Quantity" bind=qty min=1 max=10
+          Row gap=12
+            Button "Add to cart" size=large grow onTap={cart=cart+qty; toast "Added to cart"}
+            Button.outline "Buy now" size=large grow onTap={emit buyNow}
+          Card gap=14
+            Row gap=12 middle
+              IconTile "local_shipping" size=36
               Column
                 Text.strong "Free delivery in 2 to 4 days"
                 Text.muted "Orders over $75 ship free. Express available at checkout."
             Divider
-            Row gap:12 middle
-              IconTile "assignment_return" size:36
+            Row gap=12 middle
+              IconTile "assignment_return" size=36
               Column
                 Text.strong "30-day returns"
                 Text.muted "Not right for your desk? Send it back, free of charge."
   Section tint
-    Column gap:24
-      TabToggle =tab options:["Description","Specifications","Reviews"]
+    Column gap=24
+      TabToggle bind=tab options=["Description","Specifications","Reviews"]
       if tab=="Description"
-        Column gap:12 maxw:720
-          Heading "Light that moves with you" level:3
+        Column gap=12 maxw=720
+          Heading "Light that moves with you" level=3
           Text "Arc One brings a warm, even light exactly where you work. The counterweighted arm glides to any angle and stays put, while the touch dimmer moves from soft evening glow to bright task light."
           Text "The base is cast in steel with a felt underside, so it stays steady and leaves your desk unmarked. Available in brushed Brass, Graphite and Sand."
       if tab=="Specifications"
-        Card pad:0 gap:0 maxw:720
+        Card pad=0 gap=0 maxw=720
           each s in specs
-            Row pad:[20,0,20,0] gap:16 h:52 middle border-top:#FFE5E7EB
-              Text.strong "{s.k}" w:220
+            Row pad=[20,0,20,0] gap=16 h=52 middle border-top=#FFE5E7EB
+              Text.strong "{s.k}" w=220
               Text.muted "{s.v}" grow
       if tab=="Reviews"
-        Column gap:16 maxw:720
-          Row gap:12 middle
+        Column gap=16 maxw=720
+          Row gap=12 middle
             Text.numberLarge "4.7"
             Text.muted "Based on 318 reviews"
           each r in reviews
-            Card gap:8
+            Card gap=8
               Row between middle
-                Row gap:10 middle
-                  Avatar "{r.name}" size:36
+                Row gap=10 middle
+                  Avatar "{r.name}" size=36
                   Column
                     Text.strong "{r.name}"
                     Text.caption "{r.date}"
-                Text "{join(map(range(r.stars),x=>'★'),'')}" color:#FFF59E0B size:18
+                Text "{join(map(range(r.stars),x=>'★'),'')}" color=#FFF59E0B size=18
               Text.strong "{r.title}"
               Text.muted "{r.body}"
   Section
-    Column gap:24
+    Column gap=24
       Text.eyebrow "YOU MAY ALSO LIKE"
-      Heading "Related products" level:2
-      Grid cols:4 gap:24
-        ProductTile "Halo floor lamp" "Steel, warm LED" "$229" rating:4.6 kind:"box" tone:"sand"
-        ProductTile "Dune table lamp" "Ceramic base" "$119" rating:4.8 kind:"mug" tone:"rose"
-        ProductTile "Pebble night light" "Rechargeable" "$59" rating:4.5 kind:"tote" tone:"mint"
-        ProductTile "Orbit pendant" "Brushed brass" "$179" rating:4.7 kind:"laptop" tone:"slate"
+      Heading "Related products" level=2
+      Grid cols=4 gap=24
+        ProductTile "Halo floor lamp" "Steel, warm LED" "$229" rating=4.6 kind="box" tone="sand"
+        ProductTile "Dune table lamp" "Ceramic base" "$119" rating=4.8 kind="mug" tone="rose"
+        ProductTile "Pebble night light" "Rechargeable" "$59" rating=4.5 kind="tote" tone="mint"
+        ProductTile "Orbit pendant" "Brushed brass" "$179" rating=4.7 kind="laptop" tone="slate"
   Footer
     Row between top
-      Column gap:8
+      Column gap=8
         Text.strong "Nord & Co"
         Text.muted "Calm, well-made things for home."
-      Column gap:8
+      Column gap=8
         Text.strong "Shop"
         Text.muted "Lighting"
         Text.muted "Furniture"
         Text.muted "Decor"
-      Column gap:8
+      Column gap=8
         Text.strong "Help"
         Text.muted "Delivery"
         Text.muted "Returns"
         Text.muted "Contact us"
-      Column gap:8
+      Column gap=8
         Text.strong "Company"
         Text.muted "About"
         Text.muted "Journal"

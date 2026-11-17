@@ -1,10 +1,10 @@
 state days=["done","done","done","missed","today","ahead","ahead"]
 state streak=12
 state best=21
-ChatCard "Meditation" "10 minutes a day" icon:"self_improvement_rounded" status:=contains(days,"today")?"Due today":"Done today" tone:=contains(days,"today")?"accent":"good"
-  HabitStreak "" streak:=streak best:=best days:=days -> days=setAt(days,indexOf(days,"today"),"done"); streak=streak+1; best=max(best,streak+1)
+ChatCard "Meditation" "10 minutes a day" icon="self_improvement_rounded" status={contains(days,"today")?"Due today":"Done today"} tone={contains(days,"today")?"accent":"good"}
+  HabitStreak "" streak={streak} best={best} days={days} onTap={days=setAt(days,indexOf(days,"today"),"done"); streak=streak+1; best=max(best,streak+1)}
   if contains(days,"today")
     Paragraph "You've kept it going since a missed Thursday. Check in today to make it 13 days."
-    ActionButton "Check in for today" tone:"primary" icon:"check_rounded" -> days=setAt(days,indexOf(days,"today"),"done"); streak=streak+1; best=max(best,streak+1); emit checkin
+    ActionButton "Check in for today" tone="primary" icon="check_rounded" onPressed={days=setAt(days,indexOf(days,"today"),"done"); streak=streak+1; best=max(best,streak+1); emit checkin}
   if !contains(days,"today")
-    Receipt "Checked in" "Today's session is logged. See you tomorrow." tone:"good" icon:"local_fire_department_rounded"
+    Receipt "Checked in" "Today's session is logged. See you tomorrow." tone="good" icon="local_fire_department_rounded"

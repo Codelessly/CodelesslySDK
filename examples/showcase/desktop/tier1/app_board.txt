@@ -8,62 +8,62 @@ state q=""
 App
   Main
     Nav
-      Row gap:12 center
+      Row gap=12 center
         Text.eyebrow "LANES"
-        Heading "Website relaunch" level:1
-      Row gap:12 center
-        Row gap:4
-          Avatar "Maya Reyes" size:32
-          Avatar "Jon Park" size:32
-          Avatar "Ana Ortiz" size:32
-          Avatar "Lee Chen" size:32
-          Avatar "Sam Patel" size:32
-        Input "Filter tasks" =q w:220
-        Button "New task" -> tasks=append(tasks,with(newTask,"id",100+length(tasks)))
-    Row gap:16 pad:24 grow top
+        Heading "Website relaunch" level=1
+      Row gap=12 center
+        Row gap=4
+          Avatar "Maya Reyes" size=32
+          Avatar "Jon Park" size=32
+          Avatar "Ana Ortiz" size=32
+          Avatar "Lee Chen" size=32
+          Avatar "Sam Patel" size=32
+        Input "Filter tasks" bind=q w=220
+        Button "New task" onTap={tasks=append(tasks,with(newTask,"id",100+length(tasks)))}
+    Row gap=16 pad=24 grow top
       each c in cols
-        Column grow gap:10 pad:12 radius:10 fill:#FFF3F4F6 drop:task -> tasks=updateWhere(tasks,t=>t.id==result.data,t=>with(t,"col",c.id))
+        Column grow gap=10 pad=12 radius=10 fill=#FFF3F4F6 drop=task onDrop={tasks=updateWhere(tasks,t=>t.id==result.data,t=>with(t,"col",c.id))}
           Row between center
-            Row gap:8 center
+            Row gap=8 center
               Text.strong "{c.name}"
-              CountBadge count:=count(tasks,x=>x.col==c.id) showZero:true
-            IconButton "add" -> tasks=append(tasks,with(with(newTask,"id",100+length(tasks)),"col",c.id))
+              CountBadge count={count(tasks,x=>x.col==c.id)} showZero=true
+            IconButton "add" onTap={tasks=append(tasks,with(with(newTask,"id",100+length(tasks)),"col",c.id))}
           each t in filter(tasks,x=>x.col==c.id&&contains(lower(x.title),lower(q)))
-            Card gap:8 drag:task(t.id) border:=sel!=""&&sel.id==t.id?"#FF3B5BDB":"#FFE0E0E0" -> sel=t; done=[]
-              Box fill:=t.color radius:4 pad:[6,2,6,2]
-                Text.caption "{t.label}" color:#FFFFFFFF
+            Card gap=8 drag=task(t.id) border={sel!=""&&sel.id==t.id?"#FF3B5BDB":"#FFE0E0E0"} onTap={sel=t; done=[]}
+              Box fill={t.color} radius=4 pad=[6,2,6,2]
+                Text.caption "{t.label}" color=#FFFFFFFF
               Text.strong "{t.title}"
               Row between center
-                Row gap:12 center
-                  Row gap:4 center
+                Row gap=12 center
+                  Row gap=4 center
                     Icon "event"
                     Text.caption "{t.due}"
-                  Row gap:4 center
+                  Row gap=4 center
                     Icon "chat_bubble_outline"
                     Text.caption "{t.comments}"
-                Avatar "{t.who}" size:24
+                Avatar "{t.who}" size=24
   if sel!=""
-    Pane w:360 pad:16 gap:12 border-left:#FFE0E0E0
+    Pane w=360 pad=16 gap=12 border-left=#FFE0E0E0
       Row between center
-        Box fill:=sel.color radius:4 pad:[6,2,6,2]
-          Text.caption "{sel.label}" color:#FFFFFFFF
-        IconButton "close" -> sel=""
-      Heading "{sel.title}" level:3
-      Row gap:16 center
-        Row gap:4 center
+        Box fill={sel.color} radius=4 pad=[6,2,6,2]
+          Text.caption "{sel.label}" color=#FFFFFFFF
+        IconButton "close" onTap={sel=""}
+      Heading "{sel.title}" level=3
+      Row gap=16 center
+        Row gap=4 center
           Icon "event"
           Text.muted "Due {sel.due}"
-        Row gap:8 center
-          Avatar "{sel.who}" size:24
+        Row gap=8 center
+          Avatar "{sel.who}" size=24
           Text.muted "{sel.who}"
       Text.eyebrow "DESCRIPTION"
       Text "{sel.desc}"
-      Checklist "Checklist" =done items:["Draft the first version","Get feedback from the team","Make revisions","Final sign-off"]
+      Checklist "Checklist" bind=done items=["Draft the first version","Get feedback from the team","Make revisions","Final sign-off"]
       Text.eyebrow "ACTIVITY"
-      Column gap:10
+      Column gap=10
         each a in activity
-          Row gap:8 center
-            Avatar "{a.who}" size:24
+          Row gap=8 center
+            Avatar "{a.who}" size=24
             Column
               Text "{a.what}"
               Text.caption "{a.when}"

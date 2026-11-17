@@ -4,7 +4,7 @@
  "roots": ["card"],
  "widget": {
   "type": "StatCard",
-  "doc": "A dashboard figure on a page: StatCard \"Revenue\" value:\"$128,400\" icon:\"payments_rounded\" change:\"+8.2%\" trend:\"up\" note:\"vs prior 30d\"; trend is up, down or flat (default up), good:false when a rise is bad (returns, churn) so the pill turns green on a fall, and it fills its place (four in a row).",
+  "doc": "A dashboard figure on a page: StatCard \"Revenue\" value=\"$128,400\" icon=\"payments_rounded\" change=\"+8.2%\" trend=\"up\" note=\"vs prior 30d\"; trend is up, down or flat (default up), good=false when a rise is bad (returns, churn) so the pill turns green on a fall, and it fills its place (four in a row).",
   "props": [
    {"key": "label", "type": {"kind": "string", "flutter": "String"}, "default": "Revenue", "doc": "What the figure is.", "required": true},
    {"key": "value", "type": {"kind": "string", "flutter": "String"}, "default": "$0", "doc": "The figure, as text ($128,400).", "required": true},

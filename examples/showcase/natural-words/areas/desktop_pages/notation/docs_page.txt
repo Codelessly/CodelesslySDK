@@ -1,77 +1,77 @@
 state version="v3.2"
 state query=""
 state params=[{"name":"Authorization","type":"string","req":"Yes","desc":"Bearer token in the form Bearer YOUR_API_KEY."},{"name":"X-Pulse-Version","type":"string","req":"No","desc":"Pins the request to an API version, e.g. 2024-05-01."},{"name":"X-Idempotency-Key","type":"string","req":"No","desc":"Unique key that makes POST requests safe to retry."},{"name":"scope","type":"string","req":"No","desc":"Space-separated scopes requested for the token."}]
-Column h:fill
-  Row gap:16 pad:[24,12,24,12] middle
-    Row gap:8 middle
-      Icon "bolt" color:#FF1A56DB
+Column h=fill
+  Row gap=16 pad=[24,12,24,12] middle
+    Row gap=8 middle
+      Icon "bolt" color=#FF1A56DB
       Text.heading "Pulse API"
     Spacer grow
-    Box w:320
-      Input "Search" "Search the docs…" =query
-    Select =version items:["v3.2","v3.1","v3.0"] w:100
+    Box w=320
+      Input "Search" "Search the docs…" bind=query
+    Select bind=version items=["v3.2","v3.1","v3.0"] w=100
   Divider
   Row grow top
-    Column w:240 gap:4 pad:16 scroll
+    Column w=240 gap=4 pad=16 scroll
       Text.sectionTitle "Getting Started"
-      Box pad:[12,8,12,8] radius:6 -> emit nav "introduction"
+      Box pad=[12,8,12,8] radius=6 onTap={emit nav "introduction"}
         Text "Introduction"
-      Box pad:[12,8,12,8] radius:6 fill:#FFE8F0FE -> emit nav "authentication"
-        Text "Authentication" color:#FF1A56DB weight:600
-      Box pad:[12,8,12,8] radius:6 -> emit nav "rate-limits"
+      Box pad=[12,8,12,8] radius=6 fill=#FFE8F0FE onTap={emit nav "authentication"}
+        Text "Authentication" color=#FF1A56DB weight=600
+      Box pad=[12,8,12,8] radius=6 onTap={emit nav "rate-limits"}
         Text "Rate limits"
-      Spacer h:12
+      Spacer h=12
       Text.sectionTitle "Endpoints"
-      Box pad:[12,8,12,8] radius:6 -> emit nav "users"
+      Box pad=[12,8,12,8] radius=6 onTap={emit nav "users"}
         Text "Users"
-      Box pad:[12,8,12,8] radius:6 -> emit nav "events"
+      Box pad=[12,8,12,8] radius=6 onTap={emit nav "events"}
         Text "Events"
-      Box pad:[12,8,12,8] radius:6 -> emit nav "webhooks"
+      Box pad=[12,8,12,8] radius=6 onTap={emit nav "webhooks"}
         Text "Webhooks"
     Divider
-    Column grow gap:16 pad:32 scroll maxw:820
-      Row gap:6 middle
+    Column grow gap=16 pad=32 scroll maxw=820
+      Row gap=6 middle
         Text.caption "Docs"
-        Icon "chevron_right" size:16
+        Icon "chevron_right" size=16
         Text.caption "Getting Started"
-        Icon "chevron_right" size:16
+        Icon "chevron_right" size=16
         Text.caption "Authentication"
       Text.pageTitle "Authentication"
       Text "The Pulse API uses API keys to authenticate requests. Every request must include your secret key as a Bearer token in the Authorization header."
       Text "You can create and revoke keys from the Pulse dashboard under Settings → API keys. Keys are scoped to a single workspace and carry the permissions you assign when creating them."
-      Box fill:#FFFFF4E5 radius:8 pad:14
-        Row gap:12 top
-          Icon "warning" color:#FFB45309
-          Column gap:4 grow
-            Text.strong "Keep your keys secret" color:#FF92400E
-            Text "Never expose secret keys in client-side code, public repositories or logs. If a key is compromised, revoke it immediately and generate a new one." color:#FF92400E
+      Box fill=#FFFFF4E5 radius=8 pad=14
+        Row gap=12 top
+          Icon "warning" color=#FFB45309
+          Column gap=4 grow
+            Text.strong "Keep your keys secret" color=#FF92400E
+            Text "Never expose secret keys in client-side code, public repositories or logs. If a key is compromised, revoke it immediately and generate a new one." color=#FF92400E
       Text.heading2 "Making an authenticated request"
       Text "Pass your key in the Authorization header of each request, as shown below."
-      Box fill:#FF0F172A radius:8 pad:16
-        Column gap:2
+      Box fill=#FF0F172A radius=8 pad=16
+        Column gap=2
           Text.mono "curl https://api.pulse.io/v3/users \\" color:#FFE2E8F0
           Text.mono "  -H \"Authorization: Bearer sk_live_4f8a9c2d1e7b\" \\" color:#FFE2E8F0
-          Text.mono "  -H \"Content-Type: application/json\"" color:#FFE2E8F0
+          Text.mono "  -H \"Content-Type: application/json\"" color=#FFE2E8F0
       Text.heading2 "Request headers"
       Text "The following headers are accepted on every authenticated endpoint."
       Column
-        Row pad:[12,10,12,10] fill:#FFF1F5F9 gap:12
-          Text.strong "Name" w:170
-          Text.strong "Type" w:80
-          Text.strong "Required" w:80
+        Row pad=[12,10,12,10] fill=#FFF1F5F9 gap=12
+          Text.strong "Name" w=170
+          Text.strong "Type" w=80
+          Text.strong "Required" w=80
           Text.strong "Description" grow
         each p in params
           Divider
-          Row pad:[12,10,12,10] gap:12 top
-            Text.mono "{p.name}" w:170
-            Text.muted "{p.type}" w:80
-            Text "{p.req}" w:80
+          Row pad=[12,10,12,10] gap=12 top
+            Text.mono "{p.name}" w=170
+            Text.muted "{p.type}" w=80
+            Text "{p.req}" w=80
             Text "{p.desc}" grow
     Divider
-    Column w:200 gap:8 pad:16
+    Column w=200 gap=8 pad=16
       Text.sectionTitle "On this page"
-      Text "Overview" color:#FF64748B
-      Text "Creating an API key" color:#FF64748B
-      Text "Making an authenticated request" color:#FF1A56DB weight:600
-      Text "Request headers" color:#FF64748B
-      Text "Error responses" color:#FF64748B
+      Text "Overview" color=#FF64748B
+      Text "Creating an API key" color=#FF64748B
+      Text "Making an authenticated request" color=#FF1A56DB weight=600
+      Text "Request headers" color=#FF64748B
+      Text "Error responses" color=#FF64748B

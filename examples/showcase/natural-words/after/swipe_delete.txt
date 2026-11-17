@@ -1,18 +1,18 @@
 state todos=[{"id":1,"title":"Buy groceries","done":false},{"id":2,"title":"Call the dentist","done":false},{"id":3,"title":"Finish report","done":true}]
 state newTask=""
-Card gap:12
+Card gap=12
   Row between middle
     Text.title "To-do"
     Badge.neutral "{count(todos,t=>!t.done)} left"
-  Row gap:8 middle
-    Input "New task" "Add a task" =newTask grow
-    Button "Add" -> todos=append(todos,{"id":length(todos)+sum(todos,t=>t.id)+1,"title":newTask,"done":false}); newTask=""
+  Row gap=8 middle
+    Input "New task" "Add a task" bind=newTask grow
+    Button "Add" onTap={todos=append(todos,{"id":length(todos)+sum(todos,t=>t.id)+1,"title":newTask,"done":false}); newTask=""}
   Divider
   if isEmpty(todos)
     Text.muted "Nothing to do. Swipe a row left to delete it."
   each todo in todos
-    Row gap:8 middle swipe:left -> todos=removeWhere(todos,t=>t.id==todo.id); toast "Deleted"
-      Checkbox =todo.done
+    Row gap=8 middle onSwipeLeft={todos=removeWhere(todos,t=>t.id==todo.id); toast "Deleted"}
+      Checkbox bind=todo.done
       Text "{todo.title}" grow
       Icon "chevron_left"
   Text.caption "Swipe a row left to delete it"

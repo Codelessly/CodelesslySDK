@@ -1,120 +1,120 @@
 Page
   Nav
     Text.strong "Ledgerly"
-    Row gap:8
+    Row gap=8
       Link "Product"
       Link "Pricing"
       Link "Integrations"
       Link "Resources"
-    Row gap:8
-      Button.ghost "Sign in" -> emit signin
-      Button "Start free trial" -> emit start
+    Row gap=8
+      Button.ghost "Sign in" onTap={emit signin}
+      Button "Start free trial" onTap={emit start}
   state billing="Monthly"
   Section center
-    Column center gap:16
+    Column center gap=16
       Text.eyebrow "PRICING"
-      Heading "Simple pricing for every stage" level:1
+      Heading "Simple pricing for every stage" level=1
       Text.lead "Bookkeeping, invoicing and reporting that grow with your business." center
-      Row center gap:12
-        Segments =billing options:["Monthly","Yearly"]
+      Row center gap=12
+        Segments bind=billing options=["Monthly","Yearly"]
         Badge.success "Yearly saves 20%"
-    Grid cols:3 gap:24
-      Card gap:16 pad:24
-        Heading "Solo" level:3
+    Grid cols=3 gap=24
+      Card gap=16 pad=24
+        Heading "Solo" level=3
         Text.muted "For freelancers and sole traders."
-        Row gap:4 bottom
+        Row gap=4 bottom
           Text.numberLarge "${billing=='Yearly'?'7.20':'9'}"
           Text.muted "/mo"
         Text.caption "{billing=='Yearly'?'Billed yearly, 20% off':'Billed monthly'}"
         Divider
-        Row gap:8
+        Row gap=8
           Icon "check"
           Text "1 user"
-        Row gap:8
+        Row gap=8
           Icon "check"
           Text "Unlimited invoices"
-        Row gap:8
+        Row gap=8
           Icon "check"
           Text "Bank feeds for 1 account"
-        Row gap:8
+        Row gap=8
           Icon "check"
           Text "Expense tracking"
-        Row gap:8
+        Row gap=8
           Icon "check"
           Text "Email support"
         Spacer grow
-        Button.outline "Choose Solo" -> emit choose "solo"
-      Card gap:16 pad:24 fill:#FFEEF2FF border:#FF4F46E5
+        Button.outline "Choose Solo" onTap={emit choose "solo"}
+      Card gap=16 pad=24 fill=#FFEEF2FF border=#FF4F46E5
         Row between
-          Heading "Team" level:3
+          Heading "Team" level=3
           Badge.primary "Most popular"
         Text.muted "For growing teams that need to collaborate."
-        Row gap:4 bottom
+        Row gap=4 bottom
           Text.numberLarge "${billing=='Yearly'?'23.20':'29'}"
           Text.muted "/mo"
         Text.caption "{billing=='Yearly'?'Billed yearly, 20% off':'Billed monthly'}"
         Divider
-        Row gap:8
+        Row gap=8
           Icon "check"
           Text "Up to 10 users"
-        Row gap:8
+        Row gap=8
           Icon "check"
           Text "Recurring invoices and reminders"
-        Row gap:8
+        Row gap=8
           Icon "check"
           Text "Bank feeds for 5 accounts"
-        Row gap:8
+        Row gap=8
           Icon "check"
           Text "Multi-currency support"
-        Row gap:8
+        Row gap=8
           Icon "check"
           Text "Priority chat support"
         Spacer grow
-        Button "Choose Team" -> emit choose "team"
-      Card gap:16 pad:24
-        Heading "Scale" level:3
+        Button "Choose Team" onTap={emit choose "team"}
+      Card gap=16 pad=24
+        Heading "Scale" level=3
         Text.muted "For firms with advanced needs."
-        Row gap:4 bottom
+        Row gap=4 bottom
           Text.numberLarge "${billing=='Yearly'?'63.20':'79'}"
           Text.muted "/mo"
         Text.caption "{billing=='Yearly'?'Billed yearly, 20% off':'Billed monthly'}"
         Divider
-        Row gap:8
+        Row gap=8
           Icon "check"
           Text "Unlimited users"
-        Row gap:8
+        Row gap=8
           Icon "check"
           Text "Custom roles and approvals"
-        Row gap:8
+        Row gap=8
           Icon "check"
           Text "Unlimited bank feeds"
-        Row gap:8
+        Row gap=8
           Icon "check"
           Text "Advanced reporting and API"
-        Row gap:8
+        Row gap=8
           Icon "check"
           Text "Dedicated account manager"
         Spacer grow
-        Button.outline "Choose Scale" -> emit choose "scale"
+        Button.outline "Choose Scale" onTap={emit choose "scale"}
   Section tint
-    Column gap:12
+    Column gap=12
       Text.eyebrow "COMPARE PLANS"
-      Heading "Everything side by side" level:2
+      Heading "Everything side by side" level=2
     state sort=""
-    Card gap:0 pad:0
-      TableHeader =sort columns:["Feature","Solo","Team","Scale"] keys:["f","a","b","c"]
-      TableRow cells:["Invoicing","✓","✓","✓"]
-      TableRow cells:["Bank feeds","—","✓","✓"]
-      TableRow cells:["Recurring invoices","—","✓","✓"]
-      TableRow cells:["Multi-currency","—","✓","✓"]
-      TableRow cells:["Team roles and permissions","—","—","✓"]
-      TableRow cells:["Advanced reporting","—","—","✓"]
-      TableRow cells:["API access","—","—","✓"]
-      TableRow cells:["Priority support","—","✓","✓"]
+    Card gap=0 pad=0
+      TableHeader bind=sort columns=["Feature","Solo","Team","Scale"] keys=["f","a","b","c"]
+      TableRow cells=["Invoicing","✓","✓","✓"]
+      TableRow cells=["Bank feeds","—","✓","✓"]
+      TableRow cells=["Recurring invoices","—","✓","✓"]
+      TableRow cells=["Multi-currency","—","✓","✓"]
+      TableRow cells=["Team roles and permissions","—","—","✓"]
+      TableRow cells=["Advanced reporting","—","—","✓"]
+      TableRow cells=["API access","—","—","✓"]
+      TableRow cells=["Priority support","—","✓","✓"]
   Section narrow
-    Column gap:12
+    Column gap=12
       Text.eyebrow "FAQ"
-      Heading "Frequently asked questions" level:2
+      Heading "Frequently asked questions" level=2
     Accordion "Can I switch plans later?"
       Text.muted "Yes. You can upgrade or downgrade at any time, and we prorate the difference on your next invoice."
     Accordion "Is there a free trial?"
@@ -125,10 +125,10 @@ Page
       Text.muted "Always. Export your books as CSV or PDF whenever you like, even after cancelling."
   Footer
     Row between
-      Column gap:8
+      Column gap=8
         Text.strong "Ledgerly"
         Text.muted "Accounting software for every stage."
-      Row gap:16
+      Row gap=16
         Link "Product"
         Link "Pricing"
         Link "Security"

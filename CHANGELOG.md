@@ -1,7 +1,30 @@
 ## Unreleased
 
+### Breaking (33.0.0)
+
+- **The compact notation has a new grammar, and codelessly_api reads only it** (its docs/design/17 and 18):
+  `Column gap=12`, `Input "Email" bind=email`, `selected={tab == "a"}`, `Button "Save" onTap={saved=true; toast
+  "Saved"}`, `SiteNav … onNavigate={go {lower(result)}} onCta={go signup}`, where it was `gap:12`, `=email`,
+  `selected:=tab=="a"`, `-> saved=true; toast "Saved"` and `onCta: go signup` on a line of its own. A file in the
+  old grammar does not expand: each old line is an error that says what to write.
+  **To migrate: `tool/notation/notation.sh migrate <file.txt> --design-system <folder>`** (also `--markdown`,
+  `--dart` for notation inside those files; `--check`). It is a one-off tool with its own copy of how the old
+  grammar split a line, to be deleted once the sites written before 2026-11-16 are migrated.
+- Everything in this repository written in the notation is rewritten: 434 files (the showcase's recorded answers,
+  the playground's samples, SSUI's targets, the prompt app's screens, `tool/values/reference`), the design systems'
+  patterns, the line each component is taught by (Cards' through its generator), the prompt app's bundle of Skip,
+  the README and the tests. Each rewritten file expands to the document master's parser gave for the file as it
+  was: 868 expansions (as a card, and as a page with Cards) compared to the byte, and the same for the 217 pages
+  of the twenty sites with Cards. The recorded answers as the models wrote them are in this repository's history
+  (the parent of this change). Answers written with no vocabulary (`examples/showcase/natural-words/**/natural`,
+  the `elicit` streams), recorded prompts and the recorded `.jsonl` streams are evidence of what was written and
+  are left as they were: they no longer expand.
+
 ### Added
 
+- **`tool/notation/expand_all.dart`** with `compare_runs.dart`: many files expanded at once, as a card and as a
+  page with Cards, and two such runs compared to the byte: the proof that a change to the parser, or a rewrite of
+  the files, leaves the documents as they were.
 - **The keyboard on plain nodes**: a node with a `click` reaction is a Tab stop. It shows the theme's focus ring
   (`focusBorder`, the node's corner radius) when the keyboard brings the focus, never for a pointer; Enter and Space
   run its click; its `focused` state applies; a screen reader gets one focusable button named by its text or
@@ -33,6 +56,16 @@
   CommandPalette, FeatureCard, InputField, CallToAction), a new `BeforeAfter`, `radii.menu`, and menu items at
   the body size. `design_systems/cards/tool/repairs.py` keeps changes made to generated components across a
   rebuild (`--record`).
+- **Cards, tabs**: Tabs, TabToggle, SegmentedControl, ChipTabs and BrowserTabs are Cards blocks, and with Segments
+  they stay on one line and scroll where the options do not fit (never a second row): hover and pressed states,
+  44 high tap areas on a phone, an edge fade, the chosen option brought into view. ChoiceChips keeps equal columns
+  while the labels fit, else chips as wide as their labels that wrap. The patterns say which of Tabs, Segments
+  and ChipTabs to write.
+- **A photo viewer**: the notation's `Lightbox` renders as a viewer over the window (zoom by pinch, wheel and
+  double tap, pan, a gallery that pages with thumbnails and a count); Cards' PhotoGallery takes
+  `viewer="overlay"`, which leaves its grid in place for it. Render steps `--double-tap`, `--wheel` and `--pinch`
+  (the CLI and the MCP tool) drive it; `examples/showcase/desktop/behaviours` has a gallery, a list of pictures
+  and one picture.
 - **Examples**: overlays, an app's sidebar drawer and a lightbox written in the notation
   (`examples/showcase/desktop/behaviours`).
 

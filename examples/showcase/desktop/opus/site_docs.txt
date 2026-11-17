@@ -6,70 +6,70 @@ state desc=false
 state options=[{"name":"apiKey","type":"string","def":"—","desc":"Your project key from the Beacon dashboard. Required."},{"name":"region","type":"string","def":"\"us-east\"","desc":"Data region the client sends events to."},{"name":"flushInterval","type":"number","def":"5000","desc":"Milliseconds between batched event uploads."},{"name":"debug","type":"boolean","def":"false","desc":"Logs every tracked event to the console."}]
 Page
   Nav
-    Row gap:10 middle
-      Icon "cell_tower" color:#FF4F46E5
-      Text.strong "Beacon" size:18
+    Row gap=10 middle
+      Icon "cell_tower" color=#FF4F46E5
+      Text.strong "Beacon" size=18
       Badge.neutral "SDK"
-    HeaderSearchInput "Search the docs…" =q
-    Row gap:12 middle
-      Select =version items:["v2.4","v2.3","v2.2","v1.9"] w:110
-      Link "GitHub" href:"https://github.com"
-      Button "Dashboard" -> emit dashboard
+    HeaderSearchInput "Search the docs…" bind=q
+    Row gap=12 middle
+      Select bind=version items=["v2.4","v2.3","v2.2","v1.9"] w=110
+      Link "GitHub" href="https://github.com"
+      Button "Dashboard" onTap={emit dashboard}
   Section
-    Row gap:40 top
-      Column w:220 gap:4
+    Row gap=40 top
+      Column w=220 gap=4
         Text.eyebrow "Start"
-        NavItem "Introduction" selected:=section=="intro" -> section="intro"
-        NavItem "Quickstart" selected:=section=="quickstart" -> section="quickstart"
-        NavItem "Installation" selected:=section=="install" -> section="install"
-        NavItem "Core concepts" selected:=section=="concepts" -> section="concepts"
-        Spacer h:12
+        NavItem "Introduction" selected={section=="intro"} onTap={section="intro"}
+        NavItem "Quickstart" selected={section=="quickstart"} onTap={section="quickstart"}
+        NavItem "Installation" selected={section=="install"} onTap={section="install"}
+        NavItem "Core concepts" selected={section=="concepts"} onTap={section="concepts"}
+        Spacer h=12
         Text.eyebrow "Guides"
-        NavItem "Tracking events" selected:=section=="events" -> section="events"
-        NavItem "Identifying users" selected:=section=="identify" -> section="identify"
-        NavItem "Offline queueing" selected:=section=="offline" -> section="offline"
-        NavItem "Privacy & consent" selected:=section=="privacy" -> section="privacy"
-        Spacer h:12
+        NavItem "Tracking events" selected={section=="events"} onTap={section="events"}
+        NavItem "Identifying users" selected={section=="identify"} onTap={section="identify"}
+        NavItem "Offline queueing" selected={section=="offline"} onTap={section="offline"}
+        NavItem "Privacy & consent" selected={section=="privacy"} onTap={section="privacy"}
+        Spacer h=12
         Text.eyebrow "Reference"
-        NavItem "Client" selected:=section=="client" -> section="client"
-        NavItem "Configuration" selected:=section=="config" -> section="config"
-        NavItem "Events API" selected:=section=="eventsapi" -> section="eventsapi"
-        NavItem "Error codes" selected:=section=="errors" -> section="errors"
-      Column grow gap:20
-        Breadcrumb items:["Docs","Start","Quickstart"] -> emit navigate result
-        Heading "Quickstart" level:1
+        NavItem "Client" selected={section=="client"} onTap={section="client"}
+        NavItem "Configuration" selected={section=="config"} onTap={section="config"}
+        NavItem "Events API" selected={section=="eventsapi"} onTap={section="eventsapi"}
+        NavItem "Error codes" selected={section=="errors"} onTap={section="errors"}
+      Column grow gap=20
+        Breadcrumb items=["Docs","Start","Quickstart"] onNavigate={emit navigate result}
+        Heading "Quickstart" level=1
         Text.lead "Get Beacon running in your app in under five minutes. You will install the SDK, create a client with your project key and send your first event."
-        Heading "1. Install the SDK" level:3
+        Heading "1. Install the SDK" level=3
         Text.muted "Add the package with your package manager of choice."
-        CodeBlock "Terminal" "npm install @beacon/sdk" language:"bash" copyable:true -> toast "Copied"
-        Heading "2. Create a client" level:3
+        CodeBlock "Terminal" "npm install @beacon/sdk" language="bash" copyable=true onCopy={toast "Copied"}
+        Heading "2. Create a client" level=3
         Text.muted "Initialize one client when your app starts and reuse it everywhere."
-        CodeBlock "client.ts" "import { Beacon } from '@beacon/sdk';\n\nexport const beacon = new Beacon({\n  apiKey: process.env.BEACON_KEY,\n  region: 'us-east',\n});" language:"typescript" copyable:true -> toast "Copied"
-        Heading "3. Track your first event" level:3
+        CodeBlock "client.ts" "import { Beacon } from '@beacon/sdk';\n\nexport const beacon = new Beacon({\n  apiKey: process.env.BEACON_KEY,\n  region: 'us-east',\n});" language="typescript" copyable=true onCopy={toast "Copied"}
+        Heading "3. Track your first event" level=3
         Text.muted "Call track with an event name and any properties you want to record."
-        CodeBlock "app.ts" "beacon.track('signup_completed', {\n  plan: 'pro',\n  source: 'landing_page',\n});" language:"typescript" copyable:true -> toast "Copied"
-        Callout "Find your project key" "Your API key lives under Settings → Project in the Beacon dashboard. Keep it in an environment variable, never in source control." tone:accent icon:"info"
-        Heading "Client options" level:3
-        Card gap:0 pad:0
-          TableHeader =sort desc:desc columns:["Name","Type","Default","Description"] keys:["name","type","def","desc"] widths:[160,100,110,420]
+        CodeBlock "app.ts" "beacon.track('signup_completed', {\n  plan: 'pro',\n  source: 'landing_page',\n});" language="typescript" copyable=true onCopy={toast "Copied"}
+        Callout "Find your project key" "Your API key lives under Settings → Project in the Beacon dashboard. Keep it in an environment variable, never in source control." tone=accent icon="info"
+        Heading "Client options" level=3
+        Card gap=0 pad=0
+          TableHeader bind=sort desc={desc} columns=["Name","Type","Default","Description"] keys=["name","type","def","desc"] widths=[160,100,110,420]
           each o in (desc?sortByDesc(options,x=>sort=="type"?x.type:sort=="def"?x.def:sort=="desc"?x.desc:x.name):sortBy(options,x=>sort=="type"?x.type:sort=="def"?x.def:sort=="desc"?x.desc:x.name))
-            TableRow cells:=[o.name,o.type,o.def,o.desc] widths:[160,100,110,420]
+            TableRow cells={[o.name,o.type,o.def,o.desc]} widths=[160,100,110,420]
         Divider
         Row between
-          Column gap:2
+          Column gap=2
             Text.caption "Previous"
-            Link "← Introduction" -> section="intro"
-          Column gap:2 right
+            Link "← Introduction" onTap={section="intro"}
+          Column gap=2 right
             Text.caption "Next"
-            Link "Installation →" -> section="install"
-      Column w:200 gap:8
+            Link "Installation →" onTap={section="install"}
+      Column w=200 gap=8
         Text.eyebrow "On this page"
-        Link "1. Install the SDK" -> emit scrollTo "install"
-        Link "2. Create a client" -> emit scrollTo "client"
-        Link "3. Track your first event" -> emit scrollTo "track"
-        Link "Client options" -> emit scrollTo "options"
+        Link "1. Install the SDK" onTap={emit scrollTo "install"}
+        Link "2. Create a client" onTap={emit scrollTo "client"}
+        Link "3. Track your first event" onTap={emit scrollTo "track"}
+        Link "Client options" onTap={emit scrollTo "options"}
         Divider
-        Link "Edit this page" href:"https://github.com"
+        Link "Edit this page" href="https://github.com"
   Footer
     Row between
       Text.strong "Beacon"

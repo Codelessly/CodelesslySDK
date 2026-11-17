@@ -4,7 +4,7 @@
  "roots": ["band"],
  "widget": {
   "type": "CallToAction",
-  "doc": "The closing band of a landing page: CallToAction \"Ready to start?\" \"One line of reassurance.\" primary:\"Start free\" secondary:\"Talk to sales\" tone:\"accent\" (default hero gradient; accent uses the site's accent gradient; empty secondary: one button), firing onPrimary and onSecondary; place it in a Section and it fills the section's width.",
+  "doc": "The closing band of a landing page: CallToAction \"Ready to start?\" \"One line of reassurance.\" primary=\"Start free\" secondary=\"Talk to sales\" tone=\"accent\" (default hero gradient; accent uses the site's accent gradient; empty secondary: one button), firing onPrimary and onSecondary; place it in a Section and it fills the section's width.",
   "props": [
    {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Ready to get started?", "doc": "The headline.", "required": true},
    {"key": "text", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "One line under the headline (empty: none)."},

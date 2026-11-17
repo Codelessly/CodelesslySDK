@@ -4,7 +4,7 @@
  "roots": ["wrap"],
  "widget": {
   "type": "FaqItem",
-  "doc": "One FAQ question that opens and closes by itself on a tap: FaqItem question:\"Can I switch plans later?\" answer:\"Yes, any time.\" (=faq1 with state faq1=true starts it open; closed by default), stacked one per line in a column with a hairline under each (divider:false on the last).",
+  "doc": "One FAQ question that opens and closes by itself on a tap: FaqItem question=\"Can I switch plans later?\" answer=\"Yes, any time.\" (bind=faq1 with state faq1=true starts it open; closed by default), stacked one per line in a column with a hairline under each (divider=false on the last).",
   "props": [
    {"key": "question", "type": {"kind": "string", "flutter": "String"}, "default": "Can I switch plans later?", "doc": "The question, in semibold.", "required": true},
    {"key": "answer", "type": {"kind": "string", "flutter": "String"}, "default": "Yes. Upgrade or downgrade from Settings at any time.", "doc": "The answer, shown under the question while open.", "required": true},

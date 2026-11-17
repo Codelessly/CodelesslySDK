@@ -1,51 +1,51 @@
-Card gap:16
+Card gap=16
   Row between
-    Column gap:2
+    Column gap=2
       Text.heading "Sales Leaderboard"
       Text.muted "November"
     Badge.primary "Target $200K"
   Divider
-  Column gap:6
-    Row gap:12
-      Text "🥇" size:24 w:32
-      Avatar "Jordan Miles" size:40
-      Column grow gap:2
+  Column gap=6
+    Row gap=12
+      Text "🥇" size=24 w=32
+      Avatar "Jordan Miles" size=40
+      Column grow gap=2
         Text.strong "Jordan Miles"
         Text.caption "32 deals"
       Text.strong "$184,300"
     Progress 0.9215
-  Column gap:6
-    Row gap:12
-      Text "🥈" size:24 w:32
-      Avatar "Sofia Alvarez" size:40
-      Column grow gap:2
+  Column gap=6
+    Row gap=12
+      Text "🥈" size=24 w=32
+      Avatar "Sofia Alvarez" size=40
+      Column grow gap=2
         Text.strong "Sofia Alvarez"
         Text.caption "29 deals"
       Text.strong "$171,950"
     Progress 0.85975
-  Column gap:6
-    Row gap:12
-      Text "🥉" size:24 w:32
-      Avatar "Kenji Watanabe" size:40
-      Column grow gap:2
+  Column gap=6
+    Row gap=12
+      Text "🥉" size=24 w=32
+      Avatar "Kenji Watanabe" size=40
+      Column grow gap=2
         Text.strong "Kenji Watanabe"
         Text.caption "27 deals"
       Text.strong "$158,400"
     Progress 0.792
-  Column gap:6
-    Row gap:12
-      Text.muted "4" size:18 w:32 center
-      Avatar "Rachel Okafor" size:40
-      Column grow gap:2
+  Column gap=6
+    Row gap=12
+      Text.muted "4" size=18 w=32 center
+      Avatar "Rachel Okafor" size=40
+      Column grow gap=2
         Text.strong "Rachel Okafor"
         Text.caption "25 deals"
       Text.strong "$142,800"
     Progress 0.714
-  Column gap:6
-    Row gap:12
-      Text.muted "5" size:18 w:32 center
-      Avatar "Liam O'Connor" size:40
-      Column grow gap:2
+  Column gap=6
+    Row gap=12
+      Text.muted "5" size=18 w=32 center
+      Avatar "Liam O'Connor" size=40
+      Column grow gap=2
         Text.strong "Liam O'Connor"
         Text.caption "22 deals"
       Text.strong "$133,100"

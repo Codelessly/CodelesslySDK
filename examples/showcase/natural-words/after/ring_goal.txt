@@ -1,8 +1,8 @@
-Card gap:12
+Card gap=12
   Text.title "Daily steps"
   Stack center middle
-    Ring =steps/goal w:140 h:140
-    Column center gap:2
+    Ring bind={steps/goal} w=140 h=140
+    Column center gap=2
       Text.heading "{round(steps/goal*100,0)}%" 
       Text.caption "of goal"
   Row between

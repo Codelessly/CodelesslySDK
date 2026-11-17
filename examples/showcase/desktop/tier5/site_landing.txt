@@ -1,19 +1,19 @@
 Page
-  SiteNav brand:"Tidewater" icon:"waves" links:["Features","Pricing","Customers","Docs"] secondary:"Sign in" cta:"Start free" -> emit nav result
-  Hero title:"Fill every room, without the spreadsheets" text:"Tidewater keeps your calendar, channels and pricing in one place, so small hotels book more rooms directly." primary:"Start free" secondary:"Book a demo" note:"No credit card needed" kind:"harbor" tone:"day" -> emit start
-  LogoStrip "Trusted by independent hotels" names:["Harbor House","The Larkspur","Saltmarsh Inn","Juniper & Pine","Old Mill Lodge"] icons:["anchor_rounded","local_florist_rounded","waves","park_rounded","home_rounded"]
+  SiteNav brand="Tidewater" icon="waves" links=["Features","Pricing","Customers","Docs"] secondary="Sign in" cta="Start free" onNavigate={emit nav result}
+  Hero title="Fill every room, without the spreadsheets" text="Tidewater keeps your calendar, channels and pricing in one place, so small hotels book more rooms directly." primary="Start free" secondary="Book a demo" note="No credit card needed" kind="harbor" tone="day" onTap={emit start}
+  LogoStrip "Trusted by independent hotels" names=["Harbor House","The Larkspur","Saltmarsh Inn","Juniper & Pine","Old Mill Lodge"] icons=["anchor_rounded","local_florist_rounded","waves","park_rounded","home_rounded"]
   Section
-    Column gap:12
+    Column gap=12
       Text.eyebrow "FEATURES"
       Heading "Everything a small hotel needs"
       Text.lead "Run your whole property from one calm screen."
-    Grid cols:3 gap:24
-      FeatureCard "Live calendar" "Every room, every night, in one view that updates the moment a guest books." icon:"calendar_month_rounded" tone:"accent" link:"Learn more"
-      FeatureCard "Channel sync" "Availability stays in step across every booking site, so double bookings never happen." icon:"sync" tone:"good" link:"Learn more"
-      FeatureCard "Smart pricing" "Rates adjust to demand, seasons and local events, so you never leave money on the table." icon:"trending_up_rounded" tone:"warn" link:"Learn more"
+    Grid cols=3 gap=24
+      FeatureCard "Live calendar" "Every room, every night, in one view that updates the moment a guest books." icon="calendar_month_rounded" tone="accent" link="Learn more"
+      FeatureCard "Channel sync" "Availability stays in step across every booking site, so double bookings never happen." icon="sync" tone="good" link="Learn more"
+      FeatureCard "Smart pricing" "Rates adjust to demand, seasons and local events, so you never leave money on the table." icon="trending_up_rounded" tone="warn" link="Learn more"
   Section tint compact
-    StatBand values:["4,200","31%","2 min"] labels:["hotels","more direct bookings","setup"]
+    StatBand values=["4,200","31%","2 min"] labels=["hotels","more direct bookings","setup"]
   Section center
-    Testimonial quote:"Tidewater replaced three spreadsheets and a whiteboard. We filled our quiet midweek rooms within a month." name:"Elena Vasquez" role:"Owner, The Larkspur" initials:"EV" rating:5
-  CallToAction "Ready to fill every room?" "Set up in two minutes. No credit card needed." primary:"Start free" secondary:"Talk to sales" -> emit start
-  SiteFooter brand:"Tidewater" tagline:"Booking made simple for small hotels." icon:"waves" headings:["Product","Company","Resources","Legal"] links:[["Features","Pricing","Integrations"],["About","Customers","Careers"],["Docs","Help center","Blog"],["Privacy","Terms","Security"]] legal:"© 2026 Tidewater" small:["Privacy","Terms"] -> emit nav result
+    Testimonial quote="Tidewater replaced three spreadsheets and a whiteboard. We filled our quiet midweek rooms within a month." name="Elena Vasquez" role="Owner, The Larkspur" initials="EV" rating=5
+  CallToAction "Ready to fill every room?" "Set up in two minutes. No credit card needed." primary="Start free" secondary="Talk to sales" onPrimary={emit start}
+  SiteFooter brand="Tidewater" tagline="Booking made simple for small hotels." icon="waves" headings=["Product","Company","Resources","Legal"] links=[["Features","Pricing","Integrations"],["About","Customers","Careers"],["Docs","Help center","Blog"],["Privacy","Terms","Security"]] legal="© 2026 Tidewater" small=["Privacy","Terms"] onNavigate={emit nav result}

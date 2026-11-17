@@ -2,26 +2,26 @@ state fav=false
 state servings=4
 state ingredients=[{"qty":4,"name":"salmon fillets","done":false},{"qty":3,"name":"tbsp butter","done":false},{"qty":4,"name":"cloves garlic","done":false},{"qty":1,"name":"lemon","done":false},{"qty":0,"name":"fresh dill","done":false},{"qty":0,"name":"salt and pepper","done":false}]
 state steps=[{"n":1,"text":"Pat the salmon dry and season both sides with salt and pepper."},{"n":2,"text":"Melt the butter in a large skillet over medium-high heat and sauté the garlic for 30 seconds."},{"n":3,"text":"Add the fillets skin side up and sear for 4 minutes until golden."},{"n":4,"text":"Flip, squeeze in the lemon juice, and cook 4 more minutes, basting with the butter."},{"n":5,"text":"Scatter with fresh dill and serve right away with the pan sauce."}]
-Column h:fill
-  Column scroll grow gap:16
-    Stack h:280
-      Image "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=900" w:fill h:280
-      Row between top pad:16
-        IconButton "arrow_back" -> emit back
+Column h=fill
+  Column scroll grow gap=16
+    Stack h=280
+      Image "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=900" w=fill h=280
+      Row between top pad=16
+        IconButton "arrow_back" onTap={emit back}
         Row
-          IconButton "favorite_border" visible:=!fav -> fav=true; toast "Saved to favorites"
-          IconButton "favorite" visible:=fav -> fav=false
-    Column gap:12 pad:[16,0,16,16]
+          IconButton "favorite_border" visible={!fav} onTap={fav=true; toast "Saved to favorites"}
+          IconButton "favorite" visible={fav} onTap={fav=false}
+    Column gap=12 pad=[16,0,16,16]
       Text.pageTitle "Lemon Garlic Butter Salmon"
-      Row gap:4
-        Icon "star" color:#FFF5A623
-        Icon "star" color:#FFF5A623
-        Icon "star" color:#FFF5A623
-        Icon "star" color:#FFF5A623
-        Icon "star_half" color:#FFF5A623
+      Row gap=4
+        Icon "star" color=#FFF5A623
+        Icon "star" color=#FFF5A623
+        Icon "star" color=#FFF5A623
+        Icon "star" color=#FFF5A623
+        Icon "star_half" color=#FFF5A623
         Text.strong "4.8"
         Text.muted "(1,203 reviews)"
-      Row gap:8
+      Row gap=8
         Chip "25 min"
         Chip "{servings} servings"
         Chip "520 kcal"
@@ -30,22 +30,22 @@ Column h:fill
         Column
           Text.heading3 "Servings"
           Text.muted "Adjust ingredient amounts"
-        Row gap:12 center
-          IconButton "remove" -> servings=max(1,servings-1)
+        Row gap=12 center
+          IconButton "remove" onTap={servings=max(1,servings-1)}
           Text.heading3 "{servings}"
-          IconButton "add" -> servings=min(12,servings+1)
+          IconButton "add" onTap={servings=min(12,servings+1)}
       Divider
       Text.heading2 "Ingredients"
-      Column gap:4
+      Column gap=4
         each row in ingredients
-          Checkbox "{row.qty>0 ? round(row.qty*servings/4,1)+' ' : ''}{row.name}" =row.done
+          Checkbox "{row.qty>0 ? round(row.qty*servings/4,1)+' ' : ''}{row.name}" bind=row.done
       Divider
       Text.heading2 "Steps"
-      Column gap:14
+      Column gap=14
         each step in steps
-          Row gap:12 top
-            Box fill:#FFE8F1E4 radius:16 w:32 h:32 center
+          Row gap=12 top
+            Box fill=#FFE8F1E4 radius=16 w=32 h=32 center
               Text.strong "{step.n}"
             Text.body "{step.text}" grow
-  Box pad:16
-    Button "Start Cooking" w:fill -> emit startCooking; toast "Let's cook!"
+  Box pad=16
+    Button "Start Cooking" w=fill onTap={emit startCooking; toast "Let's cook!"}

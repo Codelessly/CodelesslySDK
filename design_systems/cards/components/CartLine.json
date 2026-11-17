@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "CartLine",
-  "doc": "One line of a cart or order with a drawn thumbnail and a quantity stepper: the title, a detail, the price, kind (the picture, as Media) and qty; minus and plus fire onChanged with the new quantity as result (0 when the last one is removed), so write -> items=updateWhere(items,x=>x.id==i.id,x=>with(x,\"qty\",result)).",
+  "doc": "One line of a cart or order with a drawn thumbnail and a quantity stepper: the title, a detail, the price, kind (the picture, as Media) and qty; minus and plus fire onChanged with the new quantity as result (0 when the last one is removed), so write onChanged={items=updateWhere(items,x=>x.id==i.id,x=>with(x,\"qty\",result))}.",
   "props": [
    {
     "key": "title",

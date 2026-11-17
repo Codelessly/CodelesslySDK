@@ -1,44 +1,44 @@
-Column gap:12 pad:16 scroll
+Column gap=12 pad=16 scroll
   state selected=2
   state shops=[{"id":1,"name":"Stumptown","dist":0.2,"rating":4.6},{"id":2,"name":"Heart Coffee","dist":0.5,"rating":4.7},{"id":3,"name":"Coava","dist":1.1,"rating":4.8},{"id":4,"name":"Barista","dist":0.4,"rating":4.5}]
   Text.heading1 "Downtown Portland"
   Text.bodySecondary "4 coffee shops nearby"
-  Box h:260 radius:16 fill:#FFE9EEE0 clip
+  Box h=260 radius=16 fill=#FFE9EEE0 clip
     Stack
-      Row h:fill w:fill end
-        Box w:70 h:fill fill:#FFB3D4EC
-      Column pad:[0,70,0,0]
-        Box h:14 w:fill fill:#FFFFFFFF
-      Column pad:[0,170,0,0]
-        Box h:10 w:fill fill:#FFFFFFFF
-      Row pad:[90,0,0,0]
-        Box w:14 h:fill fill:#FFFFFFFF
-      Row pad:[200,0,0,0]
-        Box w:10 h:fill fill:#FFFFFFFF
-      Row start top pad:[60,40,0,0]
-        Stack center middle w:32 h:32 -> selected=1
-          Box w:28 h:28 radius:14 fill:=selected==1?"#FFD84315":"#FF455A64"
-          Text "1" color:#FFFFFFFF weight:700
-      Row start top pad:[150,95,0,0]
-        Stack center middle w:44 h:44 -> selected=2
-          Box w:40 h:40 radius:20 fill:=selected==2?"#FFD84315":"#FF455A64"
-          Text "2" color:#FFFFFFFF weight:700 size:18
-      Row start top pad:[230,185,0,0]
-        Stack center middle w:32 h:32 -> selected=3
-          Box w:28 h:28 radius:14 fill:=selected==3?"#FFD84315":"#FF455A64"
-          Text "3" color:#FFFFFFFF weight:700
-      Row start top pad:[40,150,0,0]
-        Stack center middle w:32 h:32 -> selected=4
-          Box w:28 h:28 radius:14 fill:=selected==4?"#FFD84315":"#FF455A64"
-          Text "4" color:#FFFFFFFF weight:700
-  Column gap:8
+      Row h=fill w=fill end
+        Box w=70 h=fill fill=#FFB3D4EC
+      Column pad=[0,70,0,0]
+        Box h=14 w=fill fill=#FFFFFFFF
+      Column pad=[0,170,0,0]
+        Box h=10 w=fill fill=#FFFFFFFF
+      Row pad=[90,0,0,0]
+        Box w=14 h=fill fill=#FFFFFFFF
+      Row pad=[200,0,0,0]
+        Box w=10 h=fill fill=#FFFFFFFF
+      Row start top pad=[60,40,0,0]
+        Stack center middle w=32 h=32 onTap={selected=1}
+          Box w=28 h=28 radius=14 fill={selected==1?"#FFD84315":"#FF455A64"}
+          Text "1" color=#FFFFFFFF weight=700
+      Row start top pad=[150,95,0,0]
+        Stack center middle w=44 h=44 onTap={selected=2}
+          Box w=40 h=40 radius=20 fill={selected==2?"#FFD84315":"#FF455A64"}
+          Text "2" color=#FFFFFFFF weight=700 size=18
+      Row start top pad=[230,185,0,0]
+        Stack center middle w=32 h=32 onTap={selected=3}
+          Box w=28 h=28 radius=14 fill={selected==3?"#FFD84315":"#FF455A64"}
+          Text "3" color=#FFFFFFFF weight=700
+      Row start top pad=[40,150,0,0]
+        Stack center middle w=32 h=32 onTap={selected=4}
+          Box w=28 h=28 radius=14 fill={selected==4?"#FFD84315":"#FF455A64"}
+          Text "4" color=#FFFFFFFF weight=700
+  Column gap=8
     each shop in shops
-      Card fill:=selected==shop.id?"#FFFFF3E0":"#FFFFFFFF" border:=selected==shop.id?"#FFD84315":"#FFE0E0E0" -> selected=shop.id
-        Row gap:12 middle
-          Stack center middle w:32 h:32
-            Box w:28 h:28 radius:14 fill:=selected==shop.id?"#FFD84315":"#FF455A64"
-            Text "{shop.id}" color:#FFFFFFFF weight:700
-          Column grow gap:2
+      Card fill={selected==shop.id?"#FFFFF3E0":"#FFFFFFFF"} border={selected==shop.id?"#FFD84315":"#FFE0E0E0"} onTap={selected=shop.id}
+        Row gap=12 middle
+          Stack center middle w=32 h=32
+            Box w=28 h=28 radius=14 fill={selected==shop.id?"#FFD84315":"#FF455A64"}
+            Text "{shop.id}" color=#FFFFFFFF weight=700
+          Column grow gap=2
             Text.strong "{shop.name}"
             Text.muted "{shop.dist} mi away"
           Icon "star"

@@ -7,132 +7,132 @@ state reviews=[{"name":"Hannah L.","stars":"★★★★★","title":"Beautiful 
 Page
   Nav
     Text.strong "Nord & Co"
-    Row gap:4
+    Row gap=4
       Link "Lighting"
       Link "Furniture"
       Link "Textiles"
       Link "Kitchen"
       Link "Sale"
-    Row gap:16 middle
-      Input "Search" "Search products" =q w:240
-      Row gap:6 middle
+    Row gap=16 middle
+      Input "Search" "Search products" bind=q w=240
+      Row gap=6 middle
         Icon "shopping_cart"
         Badge.primary "{cart}"
   Section compact
-    Breadcrumb items:["Home","Lighting","Desk lamps","Arc One"]
+    Breadcrumb items=["Home","Lighting","Desk lamps","Arc One"]
   Section
-    Row gap:48 top
-      Column grow gap:16
+    Row gap=48 top
+      Column grow gap=16
         if img==0
-          Media kind:"box" tone:"sand" h:480
+          Media kind="box" tone="sand" h=480
         if img==1
-          Media kind:"box" tone:"rose" h:480
+          Media kind="box" tone="rose" h=480
         if img==2
-          Media kind:"box" tone:"mint" h:480
+          Media kind="box" tone="mint" h=480
         if img==3
-          Media kind:"box" tone:"sky" h:480
-        Row gap:12
-          Box pad:4 radius:8 border:=img==0?"#FF222222":"#FFDDDDDD" -> img=0
-            Media kind:"box" tone:"sand" w:96 h:80
-          Box pad:4 radius:8 border:=img==1?"#FF222222":"#FFDDDDDD" -> img=1
-            Media kind:"box" tone:"rose" w:96 h:80
-          Box pad:4 radius:8 border:=img==2?"#FF222222":"#FFDDDDDD" -> img=2
-            Media kind:"box" tone:"mint" w:96 h:80
-          Box pad:4 radius:8 border:=img==3?"#FF222222":"#FFDDDDDD" -> img=3
-            Media kind:"box" tone:"sky" w:96 h:80
-      Column grow gap:16
+          Media kind="box" tone="sky" h=480
+        Row gap=12
+          Box pad=4 radius=8 border={img==0?"#FF222222":"#FFDDDDDD"} onTap={img=0}
+            Media kind="box" tone="sand" w=96 h=80
+          Box pad=4 radius=8 border={img==1?"#FF222222":"#FFDDDDDD"} onTap={img=1}
+            Media kind="box" tone="rose" w=96 h=80
+          Box pad=4 radius=8 border={img==2?"#FF222222":"#FFDDDDDD"} onTap={img=2}
+            Media kind="box" tone="mint" w=96 h=80
+          Box pad=4 radius=8 border={img==3?"#FF222222":"#FFDDDDDD"} onTap={img=3}
+            Media kind="box" tone="sky" w=96 h=80
+      Column grow gap=16
         Text.eyebrow "DESK LAMPS"
-        Heading "Arc One desk lamp" level:1
-        Row gap:8 middle
-          Text "★★★★★" color:#FFF5A623
+        Heading "Arc One desk lamp" level=1
+        Row gap=8 middle
+          Text "★★★★★" color=#FFF5A623
           Text.strong "4.7"
           Text.muted "318 reviews"
-        Row gap:12 middle
+        Row gap=12 middle
           Text.numberLarge "$149"
           Text.muted "$189" strike
           Badge.success "Save $40"
         Text.muted "A dimmable LED desk lamp with a slim counterweighted arm, a weighted base and warm, glare-free light."
         Divider
         Text.fieldLabel "Finish: {finish}"
-        ChoiceChips =finish options:["Brass","Graphite","Sand"] columns:3
+        ChoiceChips bind=finish options=["Brass","Graphite","Sand"] columns=3
         Text.fieldLabel "Quantity"
-        Stepper "Quantity" =qty min:1 max:10
-        Row gap:12
-          Button "Add to cart" size:large grow -> cart=cart+qty; toast "Added to cart"
-          Button.outline "Buy now" size:large grow -> emit buyNow
+        Stepper "Quantity" bind=qty min=1 max=10
+        Row gap=12
+          Button "Add to cart" size=large grow onTap={cart=cart+qty; toast "Added to cart"}
+          Button.outline "Buy now" size=large grow onTap={emit buyNow}
         Divider
-        Card gap:12
-          Row gap:12 middle
+        Card gap=12
+          Row gap=12 middle
             Icon "local_shipping"
-            Column gap:2
+            Column gap=2
               Text.strong "Free delivery"
               Text.muted "Ships in 2 business days, arrives in 3 to 5."
-          Row gap:12 middle
+          Row gap=12 middle
             Icon "autorenew"
-            Column gap:2
+            Column gap=2
               Text.strong "Free 30-day returns"
               Text.muted "Not right for your desk? Send it back, no questions."
-          Row gap:12 middle
+          Row gap=12 middle
             Icon "verified"
-            Column gap:2
+            Column gap=2
               Text.strong "2-year warranty"
               Text.muted "Covers the LED, the driver and the arm."
   Section tint
-    Column gap:20
-      TabToggle =tab options:["Description","Specifications","Reviews"]
+    Column gap=20
+      TabToggle bind=tab options=["Description","Specifications","Reviews"]
       if tab=="Description"
-        Column gap:12
-          Heading "Light that works as hard as you do" level:3
+        Column gap=12
+          Heading "Light that works as hard as you do" level=3
           Text "Arc One pairs a slim steel arm with a weighted base, so it sits where you put it and stays there. The warm-to-neutral LED goes from 2700K to 5000K with a smooth touch dimmer, and the diffuser keeps glare off your screen and your page."
           Text "Each lamp is finished by hand in your choice of brushed brass, graphite or sand powder coat, and ships with a 1.8 m fabric cable."
       if tab=="Specifications"
-        Card gap:0
-          TableHeader columns:["Specification","Detail"] keys:["spec","detail"]
-          TableRow cells:["Height","46 cm (adjustable)"]
-          TableRow cells:["Base","Ø 16 cm, 1.1 kg steel"]
-          TableRow cells:["Light source","Integrated LED, 9 W"]
-          TableRow cells:["Colour temperature","2700 to 5000 K"]
-          TableRow cells:["Materials","Steel, aluminium, fabric cable"]
-          TableRow cells:["Cable","1.8 m, EU/UK/US plug"]
+        Card gap=0
+          TableHeader columns=["Specification","Detail"] keys=["spec","detail"]
+          TableRow cells=["Height","46 cm (adjustable)"]
+          TableRow cells=["Base","Ø 16 cm, 1.1 kg steel"]
+          TableRow cells=["Light source","Integrated LED, 9 W"]
+          TableRow cells=["Colour temperature","2700 to 5000 K"]
+          TableRow cells=["Materials","Steel, aluminium, fabric cable"]
+          TableRow cells=["Cable","1.8 m, EU/UK/US plug"]
       if tab=="Reviews"
-        Column gap:16
-          Row gap:12 middle
+        Column gap=16
+          Row gap=12 middle
             Text.numberLarge "4.7"
-            Text "★★★★★" color:#FFF5A623
+            Text "★★★★★" color=#FFF5A623
             Text.muted "Based on 318 reviews"
           each r in reviews
-            Card gap:8
-              Row gap:12 middle
-                Avatar "{r.name}" size:40
-                Column gap:2
+            Card gap=8
+              Row gap=12 middle
+                Avatar "{r.name}" size=40
+                Column gap=2
                   Text.strong "{r.name}"
-                  Text "{r.stars}" color:#FFF5A623
+                  Text "{r.stars}" color=#FFF5A623
               Text.strong "{r.title}"
               Text.muted "{r.body}"
   Section
-    Column gap:20
-      Heading "You may also like" level:3
-      Grid cols:4 gap:24
-        ProductTile "Arc Mini" "Compact desk lamp" "$99" rating:4.6 kind:"box" tone:"sand" -> emit openProduct "arc-mini"
-        ProductTile "Halo Floor Lamp" "Dimmable, 150 cm" "$229" rating:4.8 kind:"box" tone:"mint" -> emit openProduct "halo-floor"
-        ProductTile "Dune Table Lamp" "Ceramic base, linen shade" "$129" rating:4.5 kind:"mug" tone:"rose" -> emit openProduct "dune-table"
-        ProductTile "Pebble Night Light" "Rechargeable, touch control" "$59" rating:4.4 kind:"mug" tone:"sky" -> emit openProduct "pebble"
+    Column gap=20
+      Heading "You may also like" level=3
+      Grid cols=4 gap=24
+        ProductTile "Arc Mini" "Compact desk lamp" "$99" rating=4.6 kind="box" tone="sand" onPressed={emit openProduct "arc-mini"}
+        ProductTile "Halo Floor Lamp" "Dimmable, 150 cm" "$229" rating=4.8 kind="box" tone="mint" onPressed={emit openProduct "halo-floor"}
+        ProductTile "Dune Table Lamp" "Ceramic base, linen shade" "$129" rating=4.5 kind="mug" tone="rose" onPressed={emit openProduct "dune-table"}
+        ProductTile "Pebble Night Light" "Rechargeable, touch control" "$59" rating=4.4 kind="mug" tone="sky" onPressed={emit openProduct "pebble"}
   Footer
     Row between top
-      Column gap:8
+      Column gap=8
         Text.strong "Nord & Co"
         Text.muted "Considered objects for the home."
-      Column gap:8
+      Column gap=8
         Text.strong "Shop"
         Link "Lighting"
         Link "Furniture"
         Link "Textiles"
-      Column gap:8
+      Column gap=8
         Text.strong "Help"
         Link "Delivery"
         Link "Returns"
         Link "Contact us"
-      Column gap:8
+      Column gap=8
         Text.strong "Company"
         Link "About"
         Link "Journal"

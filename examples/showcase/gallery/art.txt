@@ -1,34 +1,34 @@
-ChatCard "Drawn media" "Every kind once" icon:"palette_rounded"
-  Grid cols:2 gap:10
-    Media kind:"mountain" h:150
-    Media kind:"harbor" h:150
-    Media kind:"skyline" h:150
-    Media kind:"dunes" h:150
-    Media kind:"forest" h:150
-    Media kind:"lagoon" h:150
-    Media kind:"market" h:150
-    Media kind:"festival" h:150
-    Media kind:"train" h:150
-    Media kind:"temple" h:150
-    Media kind:"bamboo" h:150
-    Media kind:"mountain" tone:"night" h:150
-  Grid cols:3 gap:10
-    Media kind:"shoe" h:120
-    Media kind:"mug" h:120
-    Media kind:"tote" h:120
-    Media kind:"box" h:120
-    Media kind:"beans" h:120
-    Media kind:"laptop" h:120
-    Media kind:"banana" h:120
-    Media kind:"milk" h:120
-    Media kind:"bread" h:120
-    Media kind:"eggs" h:120
-    Media kind:"cheese" h:120
-    Media kind:"apple" h:120
-  Row gap:8
-    WeatherGlyph kind:"sun" w:60 h:60
-    WeatherGlyph kind:"partly" w:60 h:60
-    WeatherGlyph kind:"cloud" w:60 h:60
-    WeatherGlyph kind:"rain" w:60 h:60
-    WeatherGlyph kind:"storm" w:60 h:60
-    WeatherGlyph kind:"night" w:60 h:60
+ChatCard "Drawn media" "Every kind once" icon="palette_rounded"
+  Grid cols=2 gap=10
+    Media kind="mountain" h=150
+    Media kind="harbor" h=150
+    Media kind="skyline" h=150
+    Media kind="dunes" h=150
+    Media kind="forest" h=150
+    Media kind="lagoon" h=150
+    Media kind="market" h=150
+    Media kind="festival" h=150
+    Media kind="train" h=150
+    Media kind="temple" h=150
+    Media kind="bamboo" h=150
+    Media kind="mountain" tone="night" h=150
+  Grid cols=3 gap=10
+    Media kind="shoe" h=120
+    Media kind="mug" h=120
+    Media kind="tote" h=120
+    Media kind="box" h=120
+    Media kind="beans" h=120
+    Media kind="laptop" h=120
+    Media kind="banana" h=120
+    Media kind="milk" h=120
+    Media kind="bread" h=120
+    Media kind="eggs" h=120
+    Media kind="cheese" h=120
+    Media kind="apple" h=120
+  Row gap=8
+    WeatherGlyph kind="sun" w=60 h=60
+    WeatherGlyph kind="partly" w=60 h=60
+    WeatherGlyph kind="cloud" w=60 h=60
+    WeatherGlyph kind="rain" w=60 h=60
+    WeatherGlyph kind="storm" w=60 h=60
+    WeatherGlyph kind="night" w=60 h=60

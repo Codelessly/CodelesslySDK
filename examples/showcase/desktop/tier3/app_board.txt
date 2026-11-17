@@ -6,136 +6,136 @@ state tasks=[{"id":1,"title":"Audit existing sitemap","label":"Content","due":"J
 App
   Main
     Nav
-      Row gap:16 middle
-        Brand "Lanes" icon:"view_kanban"
-        Heading "Website relaunch" level:3
-      Row gap:4
-        Avatar "Maya Reyes" size:32
-        Avatar "Tom Okafor" size:32
-        Avatar "Lena Fischer" size:32
-        Avatar "Raj Patel" size:32
-        Avatar "Ana Silva" size:32
-      Row gap:8 middle
-        Input "Filter tasks" =q w:220
-        Button "New task" -> emit newTask
-    Row gap:12 stretch pad:20 grow
-      Column grow gap:10 pad:10 fill:#FFF3F4F7 radius:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"status","backlog"))
+      Row gap=16 middle
+        Brand "Lanes" icon="view_kanban"
+        Heading "Website relaunch" level=3
+      Row gap=4
+        Avatar "Maya Reyes" size=32
+        Avatar "Tom Okafor" size=32
+        Avatar "Lena Fischer" size=32
+        Avatar "Raj Patel" size=32
+        Avatar "Ana Silva" size=32
+      Row gap=8 middle
+        Input "Filter tasks" bind=q w=220
+        Button "New task" onTap={emit newTask}
+    Row gap=12 stretch pad=20 grow
+      Column grow gap=10 pad=10 fill=#FFF3F4F7 radius=10 drop=task onDrop={tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"status","backlog"))}
         Row between middle
-          Row gap:8 middle
+          Row gap=8 middle
             Text.strong "Backlog"
-            CountBadge count:=count(tasks,x=>x.status=="backlog") showZero:true
-          IconButton "add" -> emit addTask "backlog"
+            CountBadge count={count(tasks,x=>x.status=="backlog")} showZero=true
+          IconButton "add" onTap={emit addTask "backlog"}
         each t in filter(tasks,x=>x.status=="backlog"&&contains(lower(x.title),lower(q)))
-          Card gap:8 pad:12 drag:task(t.id) border:=sel==t.id?"#FF3B5BDB":"#FFE2E4EA" -> sel=t.id; cur=t; checks=[]
-            Box fill:=t.label=="Design"?"#FFEDE7FF":t.label=="Dev"?"#FFE0F0FF":"#FFE3F7E8" radius:4 pad:[6,2,6,2]
-              Text.caption "{t.label}" color:=t.label=="Design"?"#FF6741D9":t.label=="Dev"?"#FF1971C2":"#FF2B8A3E"
+          Card gap=8 pad=12 drag=task(t.id) border={sel==t.id?"#FF3B5BDB":"#FFE2E4EA"} onTap={sel=t.id; cur=t; checks=[]}
+            Box fill={t.label=="Design"?"#FFEDE7FF":t.label=="Dev"?"#FFE0F0FF":"#FFE3F7E8"} radius=4 pad=[6,2,6,2]
+              Text.caption "{t.label}" color={t.label=="Design"?"#FF6741D9":t.label=="Dev"?"#FF1971C2":"#FF2B8A3E"}
             Text.strong "{t.title}"
             Row between middle
-              Row gap:10 middle
-                Row gap:4 middle
+              Row gap=10 middle
+                Row gap=4 middle
                   Icon "event"
                   Text.caption "{t.due}"
-                Row gap:4 middle
+                Row gap=4 middle
                   Icon "chat_bubble_outline"
                   Text.caption "{t.c}"
-              Avatar "{t.who}" size:24
-      Column grow gap:10 pad:10 fill:#FFF3F4F7 radius:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"status","progress"))
+              Avatar "{t.who}" size=24
+      Column grow gap=10 pad=10 fill=#FFF3F4F7 radius=10 drop=task onDrop={tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"status","progress"))}
         Row between middle
-          Row gap:8 middle
+          Row gap=8 middle
             Text.strong "In progress"
-            CountBadge count:=count(tasks,x=>x.status=="progress") showZero:true
-          IconButton "add" -> emit addTask "progress"
+            CountBadge count={count(tasks,x=>x.status=="progress")} showZero=true
+          IconButton "add" onTap={emit addTask "progress"}
         each t in filter(tasks,x=>x.status=="progress"&&contains(lower(x.title),lower(q)))
-          Card gap:8 pad:12 drag:task(t.id) border:=sel==t.id?"#FF3B5BDB":"#FFE2E4EA" -> sel=t.id; cur=t; checks=[]
-            Box fill:=t.label=="Design"?"#FFEDE7FF":t.label=="Dev"?"#FFE0F0FF":"#FFE3F7E8" radius:4 pad:[6,2,6,2]
-              Text.caption "{t.label}" color:=t.label=="Design"?"#FF6741D9":t.label=="Dev"?"#FF1971C2":"#FF2B8A3E"
+          Card gap=8 pad=12 drag=task(t.id) border={sel==t.id?"#FF3B5BDB":"#FFE2E4EA"} onTap={sel=t.id; cur=t; checks=[]}
+            Box fill={t.label=="Design"?"#FFEDE7FF":t.label=="Dev"?"#FFE0F0FF":"#FFE3F7E8"} radius=4 pad=[6,2,6,2]
+              Text.caption "{t.label}" color={t.label=="Design"?"#FF6741D9":t.label=="Dev"?"#FF1971C2":"#FF2B8A3E"}
             Text.strong "{t.title}"
             Row between middle
-              Row gap:10 middle
-                Row gap:4 middle
+              Row gap=10 middle
+                Row gap=4 middle
                   Icon "event"
                   Text.caption "{t.due}"
-                Row gap:4 middle
+                Row gap=4 middle
                   Icon "chat_bubble_outline"
                   Text.caption "{t.c}"
-              Avatar "{t.who}" size:24
-      Column grow gap:10 pad:10 fill:#FFF3F4F7 radius:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"status","review"))
+              Avatar "{t.who}" size=24
+      Column grow gap=10 pad=10 fill=#FFF3F4F7 radius=10 drop=task onDrop={tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"status","review"))}
         Row between middle
-          Row gap:8 middle
+          Row gap=8 middle
             Text.strong "In review"
-            CountBadge count:=count(tasks,x=>x.status=="review") showZero:true
-          IconButton "add" -> emit addTask "review"
+            CountBadge count={count(tasks,x=>x.status=="review")} showZero=true
+          IconButton "add" onTap={emit addTask "review"}
         each t in filter(tasks,x=>x.status=="review"&&contains(lower(x.title),lower(q)))
-          Card gap:8 pad:12 drag:task(t.id) border:=sel==t.id?"#FF3B5BDB":"#FFE2E4EA" -> sel=t.id; cur=t; checks=[]
-            Box fill:=t.label=="Design"?"#FFEDE7FF":t.label=="Dev"?"#FFE0F0FF":"#FFE3F7E8" radius:4 pad:[6,2,6,2]
-              Text.caption "{t.label}" color:=t.label=="Design"?"#FF6741D9":t.label=="Dev"?"#FF1971C2":"#FF2B8A3E"
+          Card gap=8 pad=12 drag=task(t.id) border={sel==t.id?"#FF3B5BDB":"#FFE2E4EA"} onTap={sel=t.id; cur=t; checks=[]}
+            Box fill={t.label=="Design"?"#FFEDE7FF":t.label=="Dev"?"#FFE0F0FF":"#FFE3F7E8"} radius=4 pad=[6,2,6,2]
+              Text.caption "{t.label}" color={t.label=="Design"?"#FF6741D9":t.label=="Dev"?"#FF1971C2":"#FF2B8A3E"}
             Text.strong "{t.title}"
             Row between middle
-              Row gap:10 middle
-                Row gap:4 middle
+              Row gap=10 middle
+                Row gap=4 middle
                   Icon "event"
                   Text.caption "{t.due}"
-                Row gap:4 middle
+                Row gap=4 middle
                   Icon "chat_bubble_outline"
                   Text.caption "{t.c}"
-              Avatar "{t.who}" size:24
-      Column grow gap:10 pad:10 fill:#FFF3F4F7 radius:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"status","done"))
+              Avatar "{t.who}" size=24
+      Column grow gap=10 pad=10 fill=#FFF3F4F7 radius=10 drop=task onDrop={tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"status","done"))}
         Row between middle
-          Row gap:8 middle
+          Row gap=8 middle
             Text.strong "Done"
-            CountBadge count:=count(tasks,x=>x.status=="done") showZero:true
-          IconButton "add" -> emit addTask "done"
+            CountBadge count={count(tasks,x=>x.status=="done")} showZero=true
+          IconButton "add" onTap={emit addTask "done"}
         each t in filter(tasks,x=>x.status=="done"&&contains(lower(x.title),lower(q)))
-          Card gap:8 pad:12 drag:task(t.id) border:=sel==t.id?"#FF3B5BDB":"#FFE2E4EA" -> sel=t.id; cur=t; checks=[]
-            Box fill:=t.label=="Design"?"#FFEDE7FF":t.label=="Dev"?"#FFE0F0FF":"#FFE3F7E8" radius:4 pad:[6,2,6,2]
-              Text.caption "{t.label}" color:=t.label=="Design"?"#FF6741D9":t.label=="Dev"?"#FF1971C2":"#FF2B8A3E"
+          Card gap=8 pad=12 drag=task(t.id) border={sel==t.id?"#FF3B5BDB":"#FFE2E4EA"} onTap={sel=t.id; cur=t; checks=[]}
+            Box fill={t.label=="Design"?"#FFEDE7FF":t.label=="Dev"?"#FFE0F0FF":"#FFE3F7E8"} radius=4 pad=[6,2,6,2]
+              Text.caption "{t.label}" color={t.label=="Design"?"#FF6741D9":t.label=="Dev"?"#FF1971C2":"#FF2B8A3E"}
             Text.strong "{t.title}"
             Row between middle
-              Row gap:10 middle
-                Row gap:4 middle
+              Row gap=10 middle
+                Row gap=4 middle
                   Icon "event"
                   Text.caption "{t.due}"
-                Row gap:4 middle
+                Row gap=4 middle
                   Icon "chat_bubble_outline"
                   Text.caption "{t.c}"
-              Avatar "{t.who}" size:24
+              Avatar "{t.who}" size=24
   if sel!=0
-    Pane w:360 pad:16 gap:14 scroll border-left:#FFE2E4EA
+    Pane w=360 pad=16 gap=14 scroll border-left=#FFE2E4EA
       Row between middle
         Text.eyebrow "TASK DETAILS"
-        IconButton "close" -> sel=0
-      Heading "{cur.title}" level:3
-      Row gap:12 middle
-        Box fill:=cur.label=="Design"?"#FFEDE7FF":cur.label=="Dev"?"#FFE0F0FF":"#FFE3F7E8" radius:4 pad:[6,2,6,2]
-          Text.caption "{cur.label}" color:=cur.label=="Design"?"#FF6741D9":cur.label=="Dev"?"#FF1971C2":"#FF2B8A3E"
+        IconButton "close" onTap={sel=0}
+      Heading "{cur.title}" level=3
+      Row gap=12 middle
+        Box fill={cur.label=="Design"?"#FFEDE7FF":cur.label=="Dev"?"#FFE0F0FF":"#FFE3F7E8"} radius=4 pad=[6,2,6,2]
+          Text.caption "{cur.label}" color={cur.label=="Design"?"#FF6741D9":cur.label=="Dev"?"#FF1971C2":"#FF2B8A3E"}
         Text.muted "Due {cur.due}"
         Spacer grow
-        Row gap:6 middle
-          Avatar "{cur.who}" size:24
+        Row gap=6 middle
+          Avatar "{cur.who}" size=24
           Text.caption "{cur.who}"
-      Column gap:4
+      Column gap=4
         Text.strong "Description"
         Text.muted "Scope, owner and acceptance notes for “{cur.title}”. Keep the work aligned with the relaunch plan and flag anything that blocks the launch date."
-      Checklist "Checklist" =checks items:["Draft the content","Review with design","Get stakeholder sign-off","Publish to staging"]
-      Column gap:10
+      Checklist "Checklist" bind=checks items=["Draft the content","Review with design","Get stakeholder sign-off","Publish to staging"]
+      Column gap=10
         Text.strong "Activity"
-        Row gap:8 top
-          Avatar "Tom Okafor" size:24
+        Row gap=8 top
+          Avatar "Tom Okafor" size=24
           Column grow
             Text "Tom commented on this task"
             Text.caption "2 hours ago"
-        Row gap:8 top
-          Avatar "Maya Reyes" size:24
+        Row gap=8 top
+          Avatar "Maya Reyes" size=24
           Column grow
             Text "Maya changed the due date to {cur.due}"
             Text.caption "Yesterday"
-        Row gap:8 top
-          Avatar "Raj Patel" size:24
+        Row gap=8 top
+          Avatar "Raj Patel" size=24
           Column grow
             Text "Raj attached 2 files"
             Text.caption "2 days ago"
-        Row gap:8 top
-          Avatar "Ana Silva" size:24
+        Row gap=8 top
+          Avatar "Ana Silva" size=24
           Column grow
             Text "Ana created this task"
             Text.caption "Last week"

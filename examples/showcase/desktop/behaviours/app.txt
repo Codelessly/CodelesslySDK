@@ -2,19 +2,19 @@
 state tab="orders"
 App
   Sidebar
-    Brand "Harbor" icon:"anchor"
-    NavItem#navOverview "Overview" icon:"dashboard" selected:=tab=="overview" -> tab="overview"
-    NavItem "Orders" icon:"receipt_long" badge:"12" selected:=tab=="orders" -> tab="orders"
-    NavItem "Customers" icon:"group" selected:=tab=="customers" -> tab="customers"
+    Brand "Harbor" icon="anchor"
+    NavItem#navOverview "Overview" icon="dashboard" selected={tab=="overview"} onTap={tab="overview"}
+    NavItem "Orders" icon="receipt_long" badge="12" selected={tab=="orders"} onTap={tab="orders"}
+    NavItem "Customers" icon="group" selected={tab=="customers"} onTap={tab="customers"}
     Spacer grow
     Text.muted "Sam Patel"
   Main
     Nav
-      Heading "{tab}" level:1
-      Row gap:8
-        Input "Search" =q w:220
-        Button "New order" -> emit newOrder
-    Column pad:24 gap:16
-      Card gap:8
+      Heading "{tab}" level=1
+      Row gap=8
+        Input "Search" bind=q w=220
+        Button "New order" onTap={emit newOrder}
+    Column pad=24 gap=16
+      Card gap=8
         Text.strong "Latest orders"
         Text.muted "Showing {tab}"

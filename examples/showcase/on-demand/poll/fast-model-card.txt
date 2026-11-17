@@ -1,9 +1,9 @@
-ChatCard "Team lunch poll" "Where should we go for lunch on Friday?" icon:"poll" status:"Open" w:390
+ChatCard "Team lunch poll" "Where should we go for lunch on Friday?" icon="poll" status="Open" w=390
   state choice=""
   state voted=false
   state votes=[8,5,6,3]
   if !voted
-    OptionList "Where should we go for lunch on Friday?" =choice options:["Ramen bar","Taco truck","Pizza place","Salad café"]
-    ActionButton "Submit vote" tone:primary enabled:=choice!="" -> votes=updateWhere(votes,v=>false,v=>v); voted=true; votes=[8+(choice=="Ramen bar"?1:0),5+(choice=="Taco truck"?1:0),6+(choice=="Pizza place"?1:0),3+(choice=="Salad café"?1:0)]
+    OptionList "Where should we go for lunch on Friday?" bind=choice options=["Ramen bar","Taco truck","Pizza place","Salad café"]
+    ActionButton "Submit vote" tone=primary enabled={choice!=""} onPressed={votes=updateWhere(votes,v=>false,v=>v); voted=true; votes=[8+(choice=="Ramen bar"?1:0),5+(choice=="Taco truck"?1:0),6+(choice=="Pizza place"?1:0),3+(choice=="Salad café"?1:0)]}
   if voted
-    PollResults options:["Ramen bar","Taco truck","Pizza place","Salad café"] votes:=votes choice:=choice note:"Votes are anonymous"
+    PollResults options=["Ramen bar","Taco truck","Pizza place","Salad café"] votes={votes} choice={choice} note="Votes are anonymous"

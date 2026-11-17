@@ -10,77 +10,77 @@ state time="09:30"
 state r="a"
 state open=false
 state rows=[{"n":"Espresso","q":2},{"n":"Mug","q":1},{"n":"Filter","q":4}]
-Column scroll gap:14 pad:16
+Column scroll gap=14 pad=16
   Text.caption "BUTTONS: filledButton, elevatedButton, outlinedButton, textButton, iconButton, floatingActionButton (rest, disabled)"
-  Card gap:10
-    Row gap:8
+  Card gap=10
+    Row gap=8
       Button "Filled"
       Button.elevated "Elevated"
       Button.outline "Outlined"
       Button.ghost "Text"
-    Row gap:8
-      Button "Filled" enabled:false
-      Button.elevated "Elevated" enabled:false
-      Button.outline "Outlined" enabled:false
-      Button.ghost "Text" enabled:false
-    Row gap:8 middle
+    Row gap=8
+      Button "Filled" enabled=false
+      Button.elevated "Elevated" enabled=false
+      Button.outline "Outlined" enabled=false
+      Button.ghost "Text" enabled=false
+    Row gap=8 middle
       IconButton "favorite"
-      IconButton "share" enabled:false
+      IconButton "share" enabled=false
       node {"type": "floatingActionButton", "props": {"icon": "add"}}
       node {"type": "floatingActionButton", "props": {"type": "extended", "icon": "edit", "label": "Compose"}}
       node {"type": "floatingActionButton", "props": {"type": "small", "icon": "add"}}
   Text.caption "CHIPS: chip, actionChip, choiceChip, filterChip, inputChip, badge (rest, selected, disabled)"
-  Card gap:10
-    Row gap:8
+  Card gap=10
+    Row gap=8
       node {"type": "chip", "props": {"label": "Chip"}}
       node {"type": "actionChip", "props": {"label": "Action", "avatar": "bolt"}}
       node {"type": "inputChip", "props": {"label": "Input chip"}}
-    Row gap:8
+    Row gap=8
       node {"type": "choiceChip", "props": {"label": "Choice on", "selected": true}}
       node {"type": "choiceChip", "props": {"label": "Choice off", "selected": false}}
       node {"type": "filterChip", "props": {"label": "Filter on", "selected": true}}
-    Row gap:8
+    Row gap=8
       node {"type": "filterChip", "props": {"label": "Filter off", "selected": false}}
       node {"type": "choiceChip", "props": {"label": "Off", "selected": true, "isEnabled": false}}
-    Row gap:12 middle
+    Row gap=12 middle
       node {"type": "badge", "props": {"label": "Badge"}}
       node {"type": "badge", "props": {"count": 12}}
       node {"type": "badge", "props": {"label": "3"}, "slots": {}}
   Text.caption "FIELDS: textField (rest, filled, error, disabled), dropdown, dateTimeInput, datePicker, timePicker"
-  Card gap:10
-    Input "Name" "Your name" =name
-    Input "Email" "you@example.com" =bad error:"Enter a valid email"
-    Input "Disabled" "Not editable" enabled:false
-    Input "Notes" "A few lines" lines:3
-    Select#sel =size items:["S","M","L"]
+  Card gap=10
+    Input "Name" "Your name" bind=name
+    Input "Email" "you@example.com" bind=bad error="Enter a valid email"
+    Input "Disabled" "Not editable" enabled=false
+    Input "Notes" "A few lines" lines=3
+    Select#sel bind=size items=["S","M","L"]
     node {"type": "dateTimeInput", "id": "dti", "props": {"mode": "date", "value": "2026-11-20", "labelText": "Date"}}
     node {"type": "dateTimeInput", "props": {"mode": "time", "value": "09:30", "labelText": "Time"}}
     DatePicker#dp
     TimePicker#tp
   Text.caption "TOGGLES: switch, checkbox, radio, slider, segmentedButton (on, off, disabled)"
-  Card gap:10
-    Toggle "Switch on" =on
-    Toggle "Switch off" =off
-    Toggle "Switch disabled" =on enabled:false
-    Checkbox "Checkbox on" =on
-    Checkbox "Checkbox off" =off
-    Radio "Radio selected" value:"a" =r
-    Radio "Radio not" value:"b" =r
-    Slider =vol min:0 max:100
-    SegmentedButton =seg items:["Day","Week","Month"]
+  Card gap=10
+    Toggle "Switch on" bind=on
+    Toggle "Switch off" bind=off
+    Toggle "Switch disabled" bind=on enabled=false
+    Checkbox "Checkbox on" bind=on
+    Checkbox "Checkbox off" bind=off
+    Radio "Radio selected" value="a" bind=r
+    Radio "Radio not" value="b" bind=r
+    Slider bind=vol min=0 max=100
+    SegmentedButton bind=seg items=["Day","Week","Month"]
   Text.caption "PROGRESS: progressBar, circularProgressIndicator, activityIndicator, radialGauge, gaugeMeter"
-  Card gap:10
+  Card gap=10
     Progress 0.62
-    Row gap:16 middle
+    Row gap=16 middle
       CircularProgressIndicator
       node {"type": "circularProgressIndicator", "props": {"value": 0.7}}
       node {"type": "activityIndicator"}
-    Row gap:12
+    Row gap=12
       node {"type": "radialGauge", "layout": {"width": 180, "height": 170}, "props": {"value": 64}}
       node {"type": "gaugeMeter", "layout": {"width": 150, "height": 100}, "props": {"value": 72}}
     node {"type": "gaugeMeter", "layout": {"width": {"fill": 0}, "height": 28}, "props": {"value": 40, "shape": "bar"}}
   Text.caption "NAVIGATION: appBar, tabBar, tabs, navigationBar, bottomNavigationBar, pagination"
-  Card gap:10
+  Card gap=10
     node {"type": "appBar", "layout": {"width": {"fill": 0}, "height": 56}, "props": {"title": "Inbox", "leading": {"icon": "menu"}}}
     node {"type": "tabBar", "layout": {"width": {"fill": 0}, "height": 44}, "props": {"tabs": [{"id": "a", "label": "Overview"}, {"id": "b", "label": "Activity"}, {"id": "c", "label": "Settings"}]}}
     node {"type": "tabs", "layout": {"width": {"fill": 0}, "height": 90}, "props": {"titles": ["One", "Two"]}}
@@ -89,41 +89,41 @@ Column scroll gap:14 pad:16
     node {"type": "navigationBar", "layout": {"width": {"fill": 0}, "height": 72}, "props": {"destinations": [{"label": "Home", "icon": "home"}, {"label": "Search", "icon": "search"}, {"label": "Profile", "icon": "person"}]}}
     node {"type": "bottomNavigationBar", "layout": {"width": {"fill": 0}, "height": 60}, "props": {"destinations": [{"label": "Home", "icon": "home"}, {"label": "Search", "icon": "search"}, {"label": "Profile", "icon": "person"}]}}
   Text.caption "LISTS: listTile, listView, gridView, divider, verticalDivider, accordion, expansionTile, tableView"
-  Card gap:10
+  Card gap=10
     ListTile "List tile" "Its subtitle"
     Divider
-    Row gap:12 h:24 middle
+    Row gap=12 h=24 middle
       Text "Left"
       node {"type": "verticalDivider", "layout": {"width": 1, "height": 20}}
       Text "Right"
-    List gap:6
+    List gap=6
       each it in rows
         Row between
           Text "{it.n}"
           Text.strong "{it.q}"
-    Grid cols:3 gap:8
-      Box fill:#FFF5F5F5 radius:8 pad:10
+    Grid cols=3 gap=8
+      Box fill=#FFF5F5F5 radius=8 pad=10
         Text "Cell 1"
-      Box fill:#FFF5F5F5 radius:8 pad:10
+      Box fill=#FFF5F5F5 radius=8 pad=10
         Text "Cell 2"
-      Box fill:#FFF5F5F5 radius:8 pad:10
+      Box fill=#FFF5F5F5 radius=8 pad=10
         Text "Cell 3"
     Accordion#acc "Accordion"
       Text "Accordion body"
     node {"type": "expansionTile", "id": "exp", "slots": {}, "props": {"initiallyExpanded": true}}
       Text "Expansion tile body"
   Text.caption "CHARTS: barChart, lineChart, chart, plotChart, barcode, signature, path"
-  Card gap:10
-    BarChart values:[3,5,4,7,6] labels:["Mon","Tue","Wed","Thu","Fri"]
-    LineChart values:[10,12,11,14,13,17]
+  Card gap=10
+    BarChart values=[3,5,4,7,6] labels=["Mon","Tue","Wed","Thu","Fri"]
+    LineChart values=[10,12,11,14,13,17]
     node {"type": "chart", "layout": {"width": {"fill": 0}, "height": 140}, "props": {"chartType": "bar", "series": [{"field": "v", "name": "Sales"}], "data": [{"label": "Q1", "v": 4}, {"label": "Q2", "v": 6}, {"label": "Q3", "v": 5}]}}
     node {"type": "chart", "layout": {"width": {"fill": 0}, "height": 140}, "props": {"chartType": "donut", "series": [{"field": "v", "name": "Share"}], "data": [{"label": "A", "v": 4}, {"label": "B", "v": 6}, {"label": "C", "v": 5}]}}
     node {"type": "plotChart", "layout": {"width": {"fill": 0}, "height": 120}, "props": {"points": [2, 4, 3, 6, 5, 8]}}
-    Row gap:16
+    Row gap=16
       node {"type": "barcode", "layout": {"width": 90, "height": 90}, "props": {"data": "https://codelessly.com"}}
       node {"type": "signature", "layout": {"width": 200, "height": 90}}
       node {"type": "path", "layout": {"width": 60, "height": 60}, "props": {"data": "M5 30 L30 5 L55 30 L30 55 Z"}}
   Text.caption "TEXT, ICON"
-  Card gap:6
+  Card gap=6
     Text "Body text"
     Icon "star"

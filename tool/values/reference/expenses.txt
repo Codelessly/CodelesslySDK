@@ -2,16 +2,16 @@ state ex=[{"id":1,"m":"Delta Air Lines","cat":"Travel","date":"Nov 3","amt":412.
 state submitted=false
 state ok=filter(ex,e=>e.s=="approved")
 state tot=sum(ok,e=>e.amt)
-ChatCard "Expenses to approve" "One report · 4 expenses" icon:"receipt_long_rounded" status:=submitted?"Submitted":length(ok)+" of 4 approved" tone:=submitted?"good":"accent"
+ChatCard "Expenses to approve" "One report · 4 expenses" icon="receipt_long_rounded" status={submitted?"Submitted":length(ok)+" of 4 approved"} tone={submitted?"good":"accent"}
   if !submitted
-    TableHeader#head columns:["Merchant","Category","Date","Amount"] keys:["m","cat","date","amt"] widths:[8,5,4,5]
+    TableHeader#head columns=["Merchant","Category","Date","Amount"] keys=["m","cat","date","amt"] widths=[8,5,4,5]
     each e in ex
-      TableRow#row cells:=[e.m,e.cat,e.date,money(e.amt,"$",2)] badge:"{e.s}" widths:[8,5,4,5]
+      TableRow#row cells={[e.m,e.cat,e.date,money(e.amt,"$",2)]} badge="{e.s}" widths=[8,5,4,5]
       if !e.rec
-        Callout "No receipt attached" "Ask for one before you approve this." tone:"warn" icon:"warning_rounded"
-      Row gap:10
-        ActionButton#approve "Approve" tone:"good" grow -> ex=updateWhere(ex,x=>x.id==e.id,x=>with(x,"s","approved"))
-        ActionButton#reject "Reject" tone:"quiet" grow -> ex=updateWhere(ex,x=>x.id==e.id,x=>with(x,"s","rejected"))
-    TotalBar#submit "{length(ok)} of 4 approved" amount:"{money(tot,"$",2)}" cta:"Submit" enabled:=length(ok)>0 -> submitted=true; emit submit_expenses ok
+        Callout "No receipt attached" "Ask for one before you approve this." tone="warn" icon="warning_rounded"
+      Row gap=10
+        ActionButton#approve "Approve" tone="good" grow onPressed={ex=updateWhere(ex,x=>x.id==e.id,x=>with(x,"s","approved"))}
+        ActionButton#reject "Reject" tone="quiet" grow onPressed={ex=updateWhere(ex,x=>x.id==e.id,x=>with(x,"s","rejected"))}
+    TotalBar#submit "{length(ok)} of 4 approved" amount="{money(tot,"$",2)}" cta="Submit" enabled={length(ok)>0} onPressed={submitted=true; emit submit_expenses ok}
   if submitted
-    Receipt "Submitted" "{length(ok)} expenses, {money(tot,"$",2)} approved and sent." icon:"check_rounded"
+    Receipt "Submitted" "{length(ok)} expenses, {money(tot,"$",2)} approved and sent." icon="check_rounded"

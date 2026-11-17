@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "SessionDial",
-  "doc": "The session screen's one focal point: a big countdown ring that drains with left (seconds) on a surface that changes with phase (\"ready\" shows the jumper, \"set\" the count-in, \"work\" the bright surface, \"rest\" the calm one), with the round marks (round of rounds), the time to go, and paused:true dimming it; pass work and rest (the phase lengths in seconds).",
+  "doc": "The session screen's one focal point: a big countdown ring that drains with left (seconds) on a surface that changes with phase (\"ready\" shows the jumper, \"set\" the count-in, \"work\" the bright surface, \"rest\" the calm one), with the round marks (round of rounds), the time to go, and paused=true dimming it; pass work and rest (the phase lengths in seconds).",
   "props": [
    {
     "key": "note",

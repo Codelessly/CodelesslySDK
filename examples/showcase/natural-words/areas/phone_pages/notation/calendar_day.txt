@@ -1,80 +1,80 @@
-Column h:fill
-  Column gap:12 pad:[16,16,16,0] h:fill
+Column h=fill
+  Column gap=12 pad=[16,16,16,0] h=fill
     Row between center
-      IconButton "chevron_left" -> emit prevMonth
+      IconButton "chevron_left" onTap={emit prevMonth}
       Column center
         Text.heading "March 2024"
         Text.caption "Tuesday, March 12"
-      IconButton "chevron_right" -> emit nextMonth
+      IconButton "chevron_right" onTap={emit nextMonth}
     Row between
       each day in days
-        Column center gap:4 -> sel=day.n
+        Column center gap=4 onTap={sel=day.n}
           Text.caption "{day.d}"
-          Box w:36 h:36 radius:18 center fill:=sel==day.n?"#FF1A73E8":"#00FFFFFF"
-            Text.strong "{day.n}" color:=sel==day.n?"#FFFFFFFF":"#FF222222"
+          Box w=36 h=36 radius=18 center fill={sel==day.n?"#FF1A73E8":"#00FFFFFF"}
+            Text.strong "{day.n}" color={sel==day.n?"#FFFFFFFF":"#FF222222"}
     Divider
     Column scroll grow
       Stack
         Column
-          Row h:80 gap:8 top
-            Text.caption "8 AM" w:48
+          Row h=80 gap=8 top
+            Text.caption "8 AM" w=48
             Divider grow
-          Row h:80 gap:8 top
-            Text.caption "9 AM" w:48
+          Row h=80 gap=8 top
+            Text.caption "9 AM" w=48
             Divider grow
-          Row h:80 gap:8 top
-            Text.caption "10 AM" w:48
+          Row h=80 gap=8 top
+            Text.caption "10 AM" w=48
             Divider grow
-          Row h:80 gap:8 top
-            Text.caption "11 AM" w:48
+          Row h=80 gap=8 top
+            Text.caption "11 AM" w=48
             Divider grow
-          Row h:80 gap:8 top
-            Text.caption "12 PM" w:48
+          Row h=80 gap=8 top
+            Text.caption "12 PM" w=48
             Divider grow
-          Row h:80 gap:8 top
-            Text.caption "1 PM" w:48
+          Row h=80 gap=8 top
+            Text.caption "1 PM" w=48
             Divider grow
-          Row h:80 gap:8 top
-            Text.caption "2 PM" w:48
+          Row h=80 gap=8 top
+            Text.caption "2 PM" w=48
             Divider grow
-          Row h:80 gap:8 top
-            Text.caption "3 PM" w:48
+          Row h=80 gap=8 top
+            Text.caption "3 PM" w=48
             Divider grow
-          Row h:80 gap:8 top
-            Text.caption "4 PM" w:48
+          Row h=80 gap=8 top
+            Text.caption "4 PM" w=48
             Divider grow
-          Row h:80 gap:8 top
-            Text.caption "5 PM" w:48
+          Row h=80 gap=8 top
+            Text.caption "5 PM" w=48
             Divider grow
-          Row h:20 gap:8 top
-            Text.caption "6 PM" w:48
+          Row h=20 gap=8 top
+            Text.caption "6 PM" w=48
             Divider grow
         Row
-          Spacer w:60
+          Spacer w=60
           Column grow
-            Spacer h:80
-            Box h:20 radius:4 fill:#FF1A73E8 pad:[8,2,8,0]
-              Text "Standup · 9:00" size:11 color:#FFFFFFFF
-            Spacer h:60
-            Box h:120 radius:6 fill:#FF7B1FA2 pad:8
-              Text.strong "Design Review" color:#FFFFFFFF
-              Text.caption "10:00 – 11:30" color:#FFE1BEE7
-            Spacer h:20
-            Box h:2 fill:#FFE53935
-            Spacer h:58
-            Box h:80 radius:6 fill:#FF2E7D32 pad:8
-              Text.strong "Lunch with Priya" color:#FFFFFFFF
-              Text.caption "12:30 – 1:30" color:#FFC8E6C9
-            Spacer h:40
-            Box h:160 radius:6 fill:#FFEF6C00 pad:8
-              Text.strong "Focus Time" color:#FFFFFFFF
-              Text.caption "2:00 – 4:00" color:#FFFFE0B2
-            Spacer h:40
-            Box h:40 radius:6 fill:#FFD81B60 pad:8
-              Text.strong "1:1 with Marcus" color:#FFFFFFFF size:13
-            Spacer h:80
-  Column end right h:fill w:fill pad:20
-    Button "+" w:56 h:56 radius:28 -> emit addEvent
+            Spacer h=80
+            Box h=20 radius=4 fill=#FF1A73E8 pad=[8,2,8,0]
+              Text "Standup · 9:00" size=11 color=#FFFFFFFF
+            Spacer h=60
+            Box h=120 radius=6 fill=#FF7B1FA2 pad=8
+              Text.strong "Design Review" color=#FFFFFFFF
+              Text.caption "10:00 – 11:30" color=#FFE1BEE7
+            Spacer h=20
+            Box h=2 fill=#FFE53935
+            Spacer h=58
+            Box h=80 radius=6 fill=#FF2E7D32 pad=8
+              Text.strong "Lunch with Priya" color=#FFFFFFFF
+              Text.caption "12:30 – 1:30" color=#FFC8E6C9
+            Spacer h=40
+            Box h=160 radius=6 fill=#FFEF6C00 pad=8
+              Text.strong "Focus Time" color=#FFFFFFFF
+              Text.caption "2:00 – 4:00" color=#FFFFE0B2
+            Spacer h=40
+            Box h=40 radius=6 fill=#FFD81B60 pad=8
+              Text.strong "1:1 with Marcus" color=#FFFFFFFF size=13
+            Spacer h=80
+  Column end right h=fill w=fill pad=20
+    Button "+" w=56 h=56 radius=28 onTap={emit addEvent}
 
 state sel=12
 state days=[{"d":"Mon","n":11},{"d":"Tue","n":12},{"d":"Wed","n":13},{"d":"Thu","n":14},{"d":"Fri","n":15},{"d":"Sat","n":16},{"d":"Sun","n":17}]

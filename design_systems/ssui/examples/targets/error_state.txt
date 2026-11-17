@@ -1,18 +1,18 @@
 state details=false
 state retrying=false
-Card gap:10 border:#47DC2626
-  Row gap:10 top
-    Box w:30 h:30 radius:7 fill:#1ADC2626 center middle
-      Icon "error_outline" size:15 color:#FFDC2626
-    Column gap:2 grow
+Card gap=10 border=#47DC2626
+  Row gap=10 top
+    Box w=30 h=30 radius=7 fill=#1ADC2626 center middle
+      Icon "error_outline" size=15 color=#FFDC2626
+    Column gap=2 grow
       Text.sectionTitle "The reply could not be finished"
       Text.bodySecondary "The connection to the model dropped after 41 seconds. Your message was saved."
   if details
-    Column gap:2 pad:10 radius:6 fill:#FFF9FAFB border:#FFE5E7EB
+    Column gap=2 pad=10 radius=6 fill=#FFF9FAFB border=#FFE5E7EB
       Text.mono "stream_error: upstream closed (502)"
       Text.mono "request req_8f2c41 · 14:02:17"
   Row between
-    Button.ghost "{details?"Hide details":"Show details"}" -> details=!details
-    Row gap:8
-      ActivityIndicator visible:=retrying
-      Button "Try again" enabled:=!retrying -> retrying=true; emit retry
+    Button.ghost "{details?"Hide details":"Show details"}" onTap={details=!details}
+    Row gap=8
+      ActivityIndicator visible={retrying}
+      Button "Try again" enabled={!retrying} onTap={retrying=true; emit retry}

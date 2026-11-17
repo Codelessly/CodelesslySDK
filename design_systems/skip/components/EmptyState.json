@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "EmptyState",
-  "doc": "What a screen or a list shows when there is nothing yet: a drawn rope at rest, a title, a message and a cta button that fires onPressed; audience:\"kid\" draws the playful one.",
+  "doc": "What a screen or a list shows when there is nothing yet: a drawn rope at rest, a title, a message and a cta button that fires onPressed; audience=\"kid\" draws the playful one.",
   "props": [
    {
     "key": "title",

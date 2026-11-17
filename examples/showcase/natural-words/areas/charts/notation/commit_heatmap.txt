@@ -1,34 +1,34 @@
 state palette=["#FFEBEDF0","#FF9BE9A8","#FF40C463","#FF30A14E","#FF216E39"]
 state weeks=[[0,1,0,2,3,1,0],[1,2,3,4,2,1,0],[0,0,2,3,3,2,1],[0,1,1,2,4,3,0],[2,3,4,4,3,1,0],[0,1,2,3,2,0,0],[1,3,4,3,4,2,1],[0,2,2,1,3,1,0],[0,1,3,4,4,3,1],[1,2,2,3,2,1,0],[0,0,1,2,3,4,2],[1,2,3,1,2,0,0]]
-Card gap:12
+Card gap=12
   Text.heading "1,284 contributions in the last 3 months"
-  Column gap:6
-    Row gap:4 pad:[36,0,0,0]
-      Box w:76
-        Text.caption "Jan" size:11
-      Box w:76
-        Text.caption "Feb" size:11
-      Box w:76
-        Text.caption "Mar" size:11
-    Row gap:8
-      Column gap:4 w:28
-        Box h:16
-        Box h:16
-          Text.caption "Mon" size:11
-        Box h:16
-        Box h:16
-          Text.caption "Wed" size:11
-        Box h:16
-        Box h:16
-          Text.caption "Fri" size:11
-        Box h:16
-      Row gap:4
+  Column gap=6
+    Row gap=4 pad=[36,0,0,0]
+      Box w=76
+        Text.caption "Jan" size=11
+      Box w=76
+        Text.caption "Feb" size=11
+      Box w=76
+        Text.caption "Mar" size=11
+    Row gap=8
+      Column gap=4 w=28
+        Box h=16
+        Box h=16
+          Text.caption "Mon" size=11
+        Box h=16
+        Box h=16
+          Text.caption "Wed" size=11
+        Box h=16
+        Box h=16
+          Text.caption "Fri" size=11
+        Box h=16
+      Row gap=4
         each week in weeks
-          Column gap:4
+          Column gap=4
             each d in week
-              Box w:16 h:16 radius:3 fill:=palette[d]
-  Row gap:4 end
-    Text.caption "Less" size:11
+              Box w=16 h=16 radius=3 fill={palette[d]}
+  Row gap=4 end
+    Text.caption "Less" size=11
     each c in palette
-      Box w:12 h:12 radius:3 fill:=c
-    Text.caption "More" size:11
+      Box w=12 h=12 radius=3 fill={c}
+    Text.caption "More" size=11

@@ -6,34 +6,34 @@ state sound=true
 state theme="System"
 state volume=60
 state language="English"
-Column scroll gap:16 pad:16
+Column scroll gap=16 pad=16
   Text.title "Settings"
   Text.muted "Manage your account and how the app behaves."
-  Card gap:12
+  Card gap=12
     Text.heading "Profile"
-    Input "Full name" =name
-    Input "Email" "you@example.com" =email type:email
-    Button "Save changes" -> toast "Saved"
-  Card gap:12
+    Input "Full name" bind=name
+    Input "Email" "you@example.com" bind=email type={email}
+    Button "Save changes" onTap={toast "Saved"}
+  Card gap=12
     Text.heading "Notifications"
-    Toggle "Push notifications" =notify
-    Toggle "Weekly digest email" =digest
-    Toggle "Sounds" =sound
+    Toggle "Push notifications" bind=notify
+    Toggle "Weekly digest email" bind=digest
+    Toggle "Sounds" bind=sound
     Text.small "Alert volume"
-    Slider =volume min:0 max:100
-  Card gap:12
+    Slider bind=volume min=0 max=100
+  Card gap=12
     Text.heading "Appearance"
-    SegmentedButton =theme items:["Light","Dark","System"]
+    SegmentedButton bind=theme items=["Light","Dark","System"]
     Text.small "Language"
-    Select =language items:["English","Deutsch","Français","Español"]
-  Card gap:8
+    Select bind=language items=["English","Deutsch","Français","Español"]
+  Card gap=8
     Text.heading "Storage"
     Row between
       Text.muted "Used"
       Text.strong "7.4 GB of 10 GB"
     Progress 0.74
     Text.caption "Upgrade for 100 GB of space."
-  Card gap:10
+  Card gap=10
     Text.heading "Danger zone"
     Text.muted "Deleting your account removes all your data. This cannot be undone."
-    Button.destructive "Delete account" -> emit delete_account
+    Button.destructive "Delete account" onTap={emit delete_account}

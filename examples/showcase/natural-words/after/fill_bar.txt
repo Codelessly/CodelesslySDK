@@ -1,18 +1,18 @@
 state percent=0
-every 200 when percent<100 -> percent=min(100,percent+2)
+every 200 when percent<100 onTick={percent=min(100,percent+2)}
 
-Card gap:12
-  Row gap:12 middle
+Card gap=12
+  Row gap=12 middle
     Icon "description"
-    Column grow gap:2
+    Column grow gap=2
       Text.strong "report-final.pdf"
       if percent<100
         Text.caption "Uploading… {percent}%"
       if percent>=100
         Text.success "Upload complete"
     if percent>=100
-      Icon "check_circle" color:#FF2E7D32 animate:pop
-  Progress =percent/100 color:=percent>=100?#FF2E7D32:#FF1976D2
+      Icon "check_circle" color=#FF2E7D32 animate=pop
+  Progress bind={percent/100} color={percent>=100?#FF2E7D32:#FF1976D2}
   if percent>=100
     Row end
-      Button.ghost "Upload again" -> percent=0
+      Button.ghost "Upload again" onTap={percent=0}

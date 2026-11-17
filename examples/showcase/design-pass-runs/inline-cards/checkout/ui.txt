@@ -9,57 +9,57 @@ state email=""
 state tried=false
 state order=""
 state nameOk=false
-Card w:390 gap:16
+Card w=390 gap=16
   Row between middle
     Text.title "Checkout"
     if step<4
       Badge.info "Step {step} of 3"
   if step<4
-    Progress =step/3
+    Progress bind={step/3}
   if step==1
     Text.heading "My cart"
     each it in items
-      Row between middle gap:8
+      Row between middle gap=8
         Column grow
           Text.strong "{it.name}"
           Text.muted "{money(it.price,'$',2)} each"
-        Row gap:8 middle
-          Button.outline "-" -> items=updateWhere(items,r=>r.id==it.id,r=>with(r,"qty",max(1,r.qty-1)))
+        Row gap=8 middle
+          Button.outline "-" onTap={items=updateWhere(items,r=>r.id==it.id,r=>with(r,"qty",max(1,r.qty-1)))}
           Text.strong "{it.qty}"
-          Button.outline "+" -> items=updateWhere(items,r=>r.id==it.id,r=>with(r,"qty",r.qty+1))
+          Button.outline "+" onTap={items=updateWhere(items,r=>r.id==it.id,r=>with(r,"qty",r.qty+1))}
     Divider
     Row between
       Text.strong "Subtotal"
       Text.strong "{money(sum(items,r=>r.price*r.qty),'$',2)}"
-    Button "Continue to shipping" -> step=2
+    Button "Continue to shipping" onTap={step=2}
   if step==2
     Text.heading "Shipping"
-    Column gap:4
-      Input "Full name" =name
+    Column gap=4
+      Input "Full name" bind=name
       if tried && length(trim(name))<2
         Text.danger "Please enter your full name"
-    Column gap:4
-      Input "Address" =address
+    Column gap=4
+      Input "Address" bind=address
       if tried && length(trim(address))<5
         Text.danger "Please enter your street address"
-    Column gap:4
-      Input "City" =city
+    Column gap=4
+      Input "City" bind=city
       if tried && length(trim(city))<2
         Text.danger "Please enter your city"
-    Column gap:4
-      Input "Postcode" =postcode
+    Column gap=4
+      Input "Postcode" bind=postcode
       if tried && length(trim(postcode))<4
         Text.danger "Postcode must be at least 4 characters"
-    Column gap:4
-      Input "Email" "you@example.com" =email
+    Column gap=4
+      Input "Email" "you@example.com" bind=email
       if tried && !(contains(email,"@") && contains(email,"."))
         Text.danger "Enter a valid email address"
       if !tried
         Text.muted "All fields are required"
-    Row gap:8
-      Button.outline "Back" -> step=1
+    Row gap=8
+      Button.outline "Back" onTap={step=1}
       Spacer grow
-      Button "Continue to payment" -> tried=true; step=(length(trim(name))>=2 && length(trim(address))>=5 && length(trim(city))>=2 && length(trim(postcode))>=4 && contains(email,"@") && contains(email,"."))?3:2
+      Button "Continue to payment" onTap={tried=true; step=(length(trim(name))>=2 && length(trim(address))>=5 && length(trim(city))>=2 && length(trim(postcode))>=4 && contains(email,"@") && contains(email,"."))?3:2}
   if step==3
     Text.heading "Payment summary"
     each it in items
@@ -68,9 +68,9 @@ Card w:390 gap:16
         Text "{money(it.price*it.qty,'$',2)}"
     Divider
     Text.strong "Delivery"
-    Row gap:8
-      ChoiceChip "Standard $5" selected:=delivery=="standard" -> delivery="standard"
-      ChoiceChip "Express $15" selected:=delivery=="express" -> delivery="express"
+    Row gap=8
+      ChoiceChip "Standard $5" selected={delivery=="standard"} onTap={delivery="standard"}
+      ChoiceChip "Express $15" selected={delivery=="express"} onTap={delivery="express"}
     Row between
       Text.muted "Shipping"
       Text "{delivery=='express' ? '$15.00' : '$5.00'}"
@@ -78,15 +78,15 @@ Card w:390 gap:16
       Text.heading "Total"
       Text.heading "{money(sum(items,r=>r.price*r.qty)+(delivery=='express'?15:5),'$',2)}"
     Text.muted "Ship to {name}, {address}, {city} {postcode}"
-    Row gap:8
-      Button.outline "Back" -> step=2
+    Row gap=8
+      Button.outline "Back" onTap={step=2}
       Spacer grow
-      Button "Place order" -> order="ORD-"+(10000+sum(items,r=>r.qty)*137+length(name)*91+length(address)*13); step=4; emit placeOrder order
+      Button "Place order" onTap={order="ORD-"+(10000+sum(items,r=>r.qty)*137+length(name)*91+length(address)*13); step=4; emit placeOrder order}
   if step==4
-    Column gap:12 center
+    Column gap=12 center
       Icon "check_circle"
       Text.title "Thank you, {name}!"
       Text.body "Your order is confirmed."
       Badge.success "Order number {order}"
       Text.muted "A receipt was sent to {email}. Delivery: {delivery}."
-      Button.outline "Start a new order" -> step=1; tried=false; delivery="standard"
+      Button.outline "Start a new order" onTap={step=1; tried=false; delivery="standard"}

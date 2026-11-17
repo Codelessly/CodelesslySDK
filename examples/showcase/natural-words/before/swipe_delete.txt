@@ -1,9 +1,9 @@
 state todos=[{"id":1,"title":"Buy milk","done":false},{"id":2,"title":"Call the dentist","done":false},{"id":3,"title":"Pay rent","done":true}]
-Card gap:8
+Card gap=8
   Text.title "To-do"
   Text.muted "Swipe a row left to delete"
   each row in todos
-    Row middle pad:8 {"interaction": {"swipeLeft": "todos=removeWhere(todos,t=>t.id==row.id)"}}
-      Checkbox "{row.title}" =row.done grow
+    Row middle pad=8 {"interaction": {"swipeLeft": "todos=removeWhere(todos,t=>t.id==row.id)"}}
+      Checkbox "{row.title}" bind=row.done grow
   if isEmpty(todos)
     Text.muted "All done!"

@@ -1,36 +1,36 @@
 state expenses=[{"id":1,"merchant":"Delta Airlines","category":"Travel","date":"Mar 4","amount":412.50,"receipt":true,"status":"pending"},{"id":2,"merchant":"Marriott Downtown","category":"Lodging","date":"Mar 5","amount":289.00,"receipt":true,"status":"pending"},{"id":3,"merchant":"Uber","category":"Transport","date":"Mar 5","amount":36.80,"receipt":false,"status":"pending"},{"id":4,"merchant":"Blue Door Bistro","category":"Meals","date":"Mar 6","amount":74.25,"receipt":true,"status":"pending"}]
-Card w:390 gap:12
+Card w=390 gap=12
   Row between middle
-    Column gap:2
+    Column gap=2
       Text.heading "Expense approvals"
       Text.muted "{count(expenses,e=>e.status=='pending')} of {length(expenses)} waiting"
     Badge.info "{length(expenses)} items"
   Divider
   each e in expenses
-    Column gap:8
+    Column gap=8
       Row between top
-        Column gap:2 grow
+        Column gap=2 grow
           Text.strong "{e.merchant}"
           Text.caption "{e.category} · {e.date}"
         Text.strong "{money(e.amount,'$',2)}"
       if !e.receipt
-        Row gap:4 middle
-          Icon "warning" color:#FFB45309
-          Text.small "Missing receipt" color:#FFB45309
-      Row gap:8 middle
+        Row gap=4 middle
+          Icon "warning" color=#FFB45309
+          Text.small "Missing receipt" color=#FFB45309
+      Row gap=8 middle
         if e.status=="pending"
-          Button.outline "Reject" -> expenses=updateWhere(expenses,x=>x.id==e.id,x=>with(x,"status","rejected"))
-          Button "Approve" -> expenses=updateWhere(expenses,x=>x.id==e.id,x=>with(x,"status","approved"))
+          Button.outline "Reject" onTap={expenses=updateWhere(expenses,x=>x.id==e.id,x=>with(x,"status","rejected"))}
+          Button "Approve" onTap={expenses=updateWhere(expenses,x=>x.id==e.id,x=>with(x,"status","approved"))}
         if e.status=="approved"
           Badge.success "Approved"
           Spacer grow
-          Button.ghost "Undo" -> expenses=updateWhere(expenses,x=>x.id==e.id,x=>with(x,"status","pending"))
+          Button.ghost "Undo" onTap={expenses=updateWhere(expenses,x=>x.id==e.id,x=>with(x,"status","pending"))}
         if e.status=="rejected"
           Badge.error "Rejected"
           Spacer grow
-          Button.ghost "Undo" -> expenses=updateWhere(expenses,x=>x.id==e.id,x=>with(x,"status","pending"))
+          Button.ghost "Undo" onTap={expenses=updateWhere(expenses,x=>x.id==e.id,x=>with(x,"status","pending"))}
       Divider
   Row between middle
     Text "Approved total"
     Text.heading "{money(sum(filter(expenses,e=>e.status=='approved'),e=>e.amount),'$',2)}"
-  Button "Submit" enabled:=count(expenses,e=>e.status=='pending')==0 -> emit submit; toast "Report submitted"
+  Button "Submit" enabled={count(expenses,e=>e.status=='pending')==0} onTap={emit submit; toast "Report submitted"}

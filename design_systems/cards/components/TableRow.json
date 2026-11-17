@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "TableRow",
-  "doc": "One row of a table under a TableHeader: cells:=[r.plan,r.subs,money(r.revenue,\"$\",0)] in column order, badge a status pill as a last column (Paid, Due, Overdue are colored); selectable:true with checked:=contains(picked,r.id) adds a tick box, and a tap fires onPressed (toggle the tick).",
+  "doc": "One row of a table under a TableHeader: cells={[r.plan,r.subs,money(r.revenue,\"$\",0)]} in column order, badge a status pill as a last column (Paid, Due, Overdue are colored); selectable=true with checked={contains(picked,r.id)} adds a tick box, and a tap fires onPressed (toggle the tick).",
   "props": [
    {
     "key": "cells",

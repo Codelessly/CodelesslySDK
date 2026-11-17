@@ -1,4 +1,4 @@
-Card gap:12
+Card gap=12
   Text.title "Split the bill"
   Row between
     Text.muted "Bill"
@@ -6,7 +6,7 @@ Card gap:12
   Row between
     Text.muted "Tip"
     Text.strong "{round(tip,0)}%"
-  Slider =tip min:0 max:30
+  Slider bind=tip min=0 max=30
   Divider
   Row between
     Text.muted "Tip amount"

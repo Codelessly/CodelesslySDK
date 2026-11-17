@@ -1,10 +1,10 @@
 state revenue=0
-every 30 when revenue<48200 -> revenue=min(48200,revenue+964)
+every 30 when revenue<48200 onTick={revenue=min(48200,revenue+964)}
 
-Card gap:8 animate:fade
+Card gap=8 animate=fade
   Row between middle
     Text.fieldLabel "Total revenue"
     Badge.success "+12.4%"
-  Text "{money(revenue,"$",0)}" size:40 weight:700
-  Progress =revenue/48200
+  Text "{money(revenue,"$",0)}" size=40 weight=700
+  Progress bind={revenue/48200}
   Text.caption "vs. $42,880 last month"

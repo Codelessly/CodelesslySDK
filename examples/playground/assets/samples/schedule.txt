@@ -1,22 +1,22 @@
 state on=true
 state runs=[{"when":"Mon 17 Nov","time":"09:00","note":"Weekly revenue summary"},{"when":"Mon 24 Nov","time":"09:00","note":"Weekly revenue summary"},{"when":"Mon 1 Dec","time":"09:00","note":"Weekly revenue summary"}]
-Card gap:10
-  Row gap:10
-    Box w:30 h:30 radius:7 fill:#1A2563EB center middle
-      Icon "event_repeat" size:15 color:#FF2563EB
-    Column gap:1 grow
+Card gap=10
+  Row gap=10
+    Box w=30 h=30 radius=7 fill=#1A2563EB center middle
+      Icon "event_repeat" size=15 color=#FF2563EB
+    Column gap=1 grow
       Text.sectionTitle "Weekly revenue summary"
       Text.bodySecondary "Every Monday at 09:00, Europe/London"
-    Toggle =on
+    Toggle bind=on
   Divider
-  Column gap:0
+  Column gap=0
     each r in runs
-      Row gap:10 pad:[0,6,0,6]
-        Icon "schedule" size:15 color:=on?"#FF2563EB":"#FF9CA3AF"
-        Text.body "{r.when}" grow color:=on?"#FF111827":"#FF9CA3AF"
+      Row gap=10 pad=[0,6,0,6]
+        Icon "schedule" size=15 color={on?"#FF2563EB":"#FF9CA3AF"}
+        Text.body "{r.when}" grow color={on?"#FF111827":"#FF9CA3AF"}
         Text.mono "{r.time}"
   Row between
     Text.caption "{on?"Next run in 2 days":"Paused. Nothing will run."}"
-    Row gap:6
-      Button.ghost "Edit" -> emit edit_schedule
-      Button.outline "Run now" enabled:=on -> emit run_now
+    Row gap=6
+      Button.ghost "Edit" onTap={emit edit_schedule}
+      Button.outline "Run now" enabled={on} onTap={emit run_now}

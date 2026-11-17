@@ -1,88 +1,88 @@
 Page
   Nav
     Text.strong "Signal & Noise"
-    Row gap:4
+    Row gap=4
       Link "Articles"
       Link "Topics"
       Link "Authors"
       Link "About"
-    Button "Subscribe" -> emit subscribe
+    Button "Subscribe" onTap={emit subscribe}
   Section
-    Column gap:16 maxw:820
+    Column gap=16 maxw=820
       Badge.primary "Infrastructure"
-      Heading "What we learned moving 40 services to one queue" level:1
-      Row gap:12 middle
-        Avatar "Priya Nair" size:44
-        Column gap:2
+      Heading "What we learned moving 40 services to one queue" level=1
+      Row gap=12 middle
+        Avatar "Priya Nair" size=44
+        Column gap=2
           Text.strong "Priya Nair"
-          Row gap:8
+          Row gap=8
             Text.muted "March 12, 2026"
             Text.muted "·"
             Text.muted "9 min read"
   Section compact
-    Media kind:"skyline" tone:"dusk" h:420 radius:12
+    Media kind="skyline" tone="dusk" h=420 radius=12
   Section
-    Row gap:56 top
-      Column grow gap:20 maxw:720
+    Row gap=56 top
+      Column grow gap=20 maxw=720
         Text.lead "Two years ago every service of ours talked to the others through its own private channel. Last spring we replaced all of them with a single queue. This is what went well, and what we would do differently."
-        Heading "Why one queue" level:2 id:why
+        Heading "Why one queue" level=2 id=why
         Text "Forty services meant forty ways to retry, forty dead-letter conventions and forty dashboards nobody fully trusted. When an incident crossed three services, we spent the first hour just working out where a message had been lost."
         Text "A shared queue gave us one place to look. Ordering, retries and visibility became properties of the platform instead of habits of each team."
-        Box pad:[20,4,0,4] border-left:#FF3B6EF5
-          Text "The queue did not make our systems simpler. It made their complexity visible, and that was worth more." size:22 weight:600 color:#FF1F2A44
-        Heading "What the migration taught us" level:2 id:lessons
+        Box pad=[20,4,0,4] border-left=#FF3B6EF5
+          Text "The queue did not make our systems simpler. It made their complexity visible, and that was worth more." size=22 weight=600 color=#FF1F2A44
+        Heading "What the migration taught us" level=2 id=lessons
         Text "We moved services in waves of five, starting with the ones that could fail without anyone noticing. Each wave used the same small producer wrapper, so every message carried an id, a schema version and a retry budget."
-        CodeBlock "producer.ts" "const msg = {\n  id: uuid(),\n  schema: 'orders.v2',\n  retries: 5,\n  body: payload,\n};\nawait queue.publish('orders', msg);" language:"typescript" copyable:true
+        CodeBlock "producer.ts" "const msg = {\n  id: uuid(),\n  schema: 'orders.v2',\n  retries: 5,\n  body: payload,\n};\nawait queue.publish('orders', msg);" language="typescript" copyable=true
         Text "The wrapper looks trivial, and that is the point: the less each team had to decide, the faster the waves went."
         Text.strong "Three things we would do again:"
-        Column gap:8
-          Row gap:10
+        Column gap=8
+          Row gap=10
             Text "•"
             Text "Migrate the least critical services first, and measure before each next wave."
-          Row gap:10
+          Row gap=10
             Text "•"
             Text "Give every message an id and a schema version from day one."
-          Row gap:10
+          Row gap=10
             Text "•"
             Text "Keep a dead-letter queue per consumer, not one shared by everybody."
         Text "If you are weighing a similar move, start with the retry policy. It is the part that hurts most when it is wrong."
-      Column w:300 gap:20 sticky:true top:24
-        Card gap:10
+      Column w=300 gap=20 sticky=true top=24
+        Card gap=10
           Text.eyebrow "ON THIS PAGE"
-          Link "Why one queue" href:"#why"
-          Link "What the migration taught us" href:"#lessons"
-          Link "Related articles" href:"#related"
-        Card gap:12
-          Heading "Get new posts by email" level:3
+          Link "Why one queue" href="#why"
+          Link "What the migration taught us" href="#lessons"
+          Link "Related articles" href="#related"
+        Card gap=12
+          Heading "Get new posts by email" level=3
           Text.muted "One engineering story every other week. No noise."
-          Input "Email" hint:"you@example.com" =email type:email
-          Button "Subscribe" -> emit newsletter email; toast "Thanks for subscribing"
-  Section tint id:related
-    Column gap:24
-      Heading "Related articles" level:2
-      Grid cols:3 gap:24
-        Card gap:12
-          Media kind:"train" tone:"dawn" h:160
+          Input "Email" hint="you@example.com" bind=email type={email}
+          Button "Subscribe" onTap={emit newsletter email; toast "Thanks for subscribing"}
+  Section tint id=related
+    Column gap=24
+      Heading "Related articles" level=2
+      Grid cols=3 gap=24
+        Card gap=12
+          Media kind="train" tone="dawn" h=160
           Badge.neutral "Reliability"
-          Heading "Retries without the storms" level:3
+          Heading "Retries without the storms" level=3
           Text.muted "How backoff and jitter stopped our midnight pages."
           Text.caption "7 min read"
-        Card gap:12
-          Media kind:"harbor" tone:"day" h:160
+        Card gap=12
+          Media kind="harbor" tone="day" h=160
           Badge.neutral "Data"
-          Heading "Schemas that survive a rewrite" level:3
+          Heading "Schemas that survive a rewrite" level=3
           Text.muted "Versioning messages so old and new consumers can coexist."
           Text.caption "6 min read"
-        Card gap:12
-          Media kind:"mountain" tone:"dusk" h:160
+        Card gap=12
+          Media kind="mountain" tone="dusk" h=160
           Badge.neutral "Observability"
-          Heading "One dashboard for forty services" level:3
+          Heading "One dashboard for forty services" level=3
           Text.muted "What we chose to graph, and what we stopped graphing."
           Text.caption "8 min read"
   Footer
     Row between
       Text.strong "Signal & Noise"
-      Row gap:16
+      Row gap=16
         Link "Articles"
         Link "RSS"
         Link "Privacy"

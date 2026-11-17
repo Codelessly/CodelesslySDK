@@ -1,10 +1,10 @@
 state tab="Active"
-Column gap:16 pad:16 scroll
+Column gap=16 pad=16 scroll
   Text.pageTitle "Orders"
-  SegmentedButton =tab items:["Active","Completed"]
+  SegmentedButton bind=tab items=["Active","Completed"]
   if tab=="Active"
-    Column gap:12
-      Card gap:8
+    Column gap=12
+      Card gap=8
         Row between
           Text.heading3 "Order #1042"
           Badge.info "Shipped"
@@ -13,8 +13,8 @@ Column gap:16 pad:16 scroll
         Row between
           Text.caption "2 items"
           Text.strong "$84.50"
-        Button.outline "Track order" -> toast "Tracking #1042"
-      Card gap:8
+        Button.outline "Track order" onTap={toast "Tracking #1042"}
+      Card gap=8
         Row between
           Text.heading3 "Order #1043"
           Badge.warning "Processing"
@@ -23,10 +23,10 @@ Column gap:16 pad:16 scroll
         Row between
           Text.caption "1 item"
           Text.strong "$29.00"
-        Button.outline "View details" -> toast "Order #1043"
+        Button.outline "View details" onTap={toast "Order #1043"}
   if tab=="Completed"
-    Column gap:12
-      Card gap:8
+    Column gap=12
+      Card gap=8
         Row between
           Text.heading3 "Order #1038"
           Badge.success "Delivered"
@@ -35,7 +35,7 @@ Column gap:16 pad:16 scroll
         Row between
           Text.caption "3 items"
           Text.strong "$112.30"
-      Card gap:8
+      Card gap=8
         Row between
           Text.heading3 "Order #1031"
           Badge.success "Delivered"
@@ -44,7 +44,7 @@ Column gap:16 pad:16 scroll
         Row between
           Text.caption "1 item"
           Text.strong "$45.00"
-      Card gap:8
+      Card gap=8
         Row between
           Text.heading3 "Order #1024"
           Badge.success "Delivered"

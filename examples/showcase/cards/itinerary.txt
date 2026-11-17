@@ -1,13 +1,13 @@
-ChatCard "Two days in Kyoto" "{6-length(d1)-length(d2)} of 6 bookings left to make" icon:"temple_buddhist_rounded" status:"Sat and Sun"
-  DayHeader "Day 1" "Higashiyama and Gion" kind:"temple" tag:"Temples"
-    ItineraryStop#s1 "Fushimi Inari Shrine" "Walk the first loop of torii gates before the crowds. Allow 90 minutes; the shrine is free and always open." time:"08:00" travel:"JR Nara Line, then bus 206, 25 min"
-    ItineraryStop "Lunch at Nishiki Market" "Graze the stalls: tamagoyaki, pickles, grilled eel. Most close by 17:00." time:"11:30" travel:"Walk east to Kiyomizu, 25 min"
-    ItineraryStop "Kiyomizu-dera" "The wooden stage over the valley. Entry 500 yen; go late for softer light." time:"14:00" travel:"Walk down Sannenzaka to Gion, 15 min"
-    ItineraryStop "Gion stroll and dinner" "Hanamikoji at dusk, then kaiseki nearby." time:"18:00" last:true
-  Checklist#c1 "Book for day 1" =d1 items:["Dinner reservation in Gion","Kiyomizu-dera evening tickets","Tea ceremony in Higashiyama"]
-  DayHeader "Day 2" "Arashiyama and the north" kind:"bamboo" tag:"Nature"
-    ItineraryStop "Bamboo Grove" "Arrive early: by 10:00 the path is full." time:"08:30" travel:"Walk to Tenryu-ji, 5 min"
-    ItineraryStop "Tenryu-ji garden" "A Zen garden with the mountains as its backdrop. Entry 500 yen." time:"10:00" travel:"Randen tram, then bus 205, 45 min"
-    ItineraryStop "Lunch, then Kinkaku-ji" "The Golden Pavilion; the circuit takes 40 minutes." time:"13:00" travel:"Bus 12 to Sanjo, 40 min"
-    ItineraryStop "Pontocho Alley dinner" "A narrow lantern-lit lane of restaurants beside the river." time:"17:30" last:true
-  Checklist "Book for day 2" =d2 items:["Pontocho dinner table","Sagano scenic train seats","Rickshaw ride in Arashiyama"]
+ChatCard "Two days in Kyoto" "{6-length(d1)-length(d2)} of 6 bookings left to make" icon="temple_buddhist_rounded" status="Sat and Sun"
+  DayHeader "Day 1" "Higashiyama and Gion" kind="temple" tag="Temples"
+    ItineraryStop#s1 "Fushimi Inari Shrine" "Walk the first loop of torii gates before the crowds. Allow 90 minutes; the shrine is free and always open." time="08:00" travel="JR Nara Line, then bus 206, 25 min"
+    ItineraryStop "Lunch at Nishiki Market" "Graze the stalls: tamagoyaki, pickles, grilled eel. Most close by 17:00." time="11:30" travel="Walk east to Kiyomizu, 25 min"
+    ItineraryStop "Kiyomizu-dera" "The wooden stage over the valley. Entry 500 yen; go late for softer light." time="14:00" travel="Walk down Sannenzaka to Gion, 15 min"
+    ItineraryStop "Gion stroll and dinner" "Hanamikoji at dusk, then kaiseki nearby." time="18:00" last=true
+  Checklist#c1 "Book for day 1" bind=d1 items=["Dinner reservation in Gion","Kiyomizu-dera evening tickets","Tea ceremony in Higashiyama"]
+  DayHeader "Day 2" "Arashiyama and the north" kind="bamboo" tag="Nature"
+    ItineraryStop "Bamboo Grove" "Arrive early: by 10:00 the path is full." time="08:30" travel="Walk to Tenryu-ji, 5 min"
+    ItineraryStop "Tenryu-ji garden" "A Zen garden with the mountains as its backdrop. Entry 500 yen." time="10:00" travel="Randen tram, then bus 205, 45 min"
+    ItineraryStop "Lunch, then Kinkaku-ji" "The Golden Pavilion; the circuit takes 40 minutes." time="13:00" travel="Bus 12 to Sanjo, 40 min"
+    ItineraryStop "Pontocho Alley dinner" "A narrow lantern-lit lane of restaurants beside the river." time="17:30" last=true
+  Checklist "Book for day 2" bind=d2 items=["Pontocho dinner table","Sagano scenic train seats","Rickshaw ride in Arashiyama"]

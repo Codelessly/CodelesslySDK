@@ -5,24 +5,24 @@ state count=0
 state paused=false
 state started=false
 
-every 1s when started && !paused -> left=left>1?left-1:0
+every 1s when started && !paused onTick={left=left>1?left-1:0}
 
 Screen
-  TopBar "Let's jump!" "Round {round} of {today.rounds}" back:true -> emit open_home
-  Card gap:8 fill:=phase=="work"?"#FFFFB300":"#FF4FC3F7"
-    Text.eyebrow "{phase=='work' ? 'JUMP!' : 'REST'}" color:#FF212121
-    Text.display "{started ? left : today.work}" size:96 weight:800 color:#FF212121
-    Text.body "{phase=='work' ? 'Go go go!' : 'Breathe. You rock!'}" color:#FF212121
-  Card gap:12
+  TopBar "Let's jump!" "Round {round} of {today.rounds}" back=true onTap={emit open_home}
+  Card gap=8 fill={phase=="work"?"#FFFFB300":"#FF4FC3F7"}
+    Text.eyebrow "{phase=='work' ? 'JUMP!' : 'REST'}" color=#FF212121
+    Text.display "{started ? left : today.work}" size=96 weight=800 color=#FF212121
+    Text.body "{phase=='work' ? 'Go go go!' : 'Breathe. You rock!'}" color=#FF212121
+  Card gap=12
     Text.eyebrow "Your jumps"
-    Text.display "{count}" size:80 weight:800
-    Button "Jump +1" -> count=count+1
+    Text.display "{count}" size=80 weight=800
+    Button "Jump +1" onTap={count=count+1}
   if !started
-    Button "Start" -> started=true; left=today.work; phase="work"; round=1; emit start_session
+    Button "Start" onTap={started=true; left=today.work; phase="work"; round=1; emit start_session}
   if started
-    Row gap:12
-      Button.outline "{paused ? 'Resume' : 'Pause'}" -> paused=!paused
-      Button.secondary "Next" -> phase=(phase=="work")?"rest":"work"; left=(phase=="work")?today.rest:today.work; round=(phase=="rest")?round+1:round
-  Button.destructive "Finish" -> emit finish_session count
+    Row gap=12
+      Button.outline "{paused ? 'Resume' : 'Pause'}" onTap={paused=!paused}
+      Button.secondary "Next" onTap={phase=(phase=="work")?"rest":"work"; left=(phase=="work")?today.rest:today.work; round=(phase=="rest")?round+1:round}
+  Button.destructive "Finish" onTap={emit finish_session count}
   if count>=50
-    Text.sectionTitle "Wow! 50 jumps! Star jumper!" color:#FFF57C00
+    Text.sectionTitle "Wow! 50 jumps! Star jumper!" color=#FFF57C00

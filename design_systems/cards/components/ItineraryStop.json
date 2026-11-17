@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "ItineraryStop",
-  "doc": "One stop on a day's timeline: the place (title), time at the left, a detail the stop reveals when tapped (it opens and closes by itself), and travel, how to reach the next stop and how long (\"Walk to Gion, 15 min\"); last:true ends the line. Write the stops one under another.",
+  "doc": "One stop on a day's timeline: the place (title), time at the left, a detail the stop reveals when tapped (it opens and closes by itself), and travel, how to reach the next stop and how long (\"Walk to Gion, 15 min\"); last=true ends the line. Write the stops one under another.",
   "props": [
    {
     "key": "title",

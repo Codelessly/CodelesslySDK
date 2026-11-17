@@ -1,19 +1,19 @@
 state i=0
 state flipped=false
 state cards=[{"q":"What is the capital of France?","a":"Paris"},{"q":"What is 7 × 8?","a":"56"},{"q":"Which planet is known as the Red Planet?","a":"Mars"}]
-Card gap:12
+Card gap=12
   Row between middle
     Text.sectionTitle "Flashcards"
     Badge.neutral "{i+1} of {length(cards)}"
-  Box h:160 radius:12 pad:16 center middle fill:=flipped?"#FFE8F5E9":"#FFE3F2FD" -> flipped=!flipped
+  Box h=160 radius=12 pad=16 center middle fill={flipped?"#FFE8F5E9":"#FFE3F2FD"} onTap={flipped=!flipped}
     if !flipped
-      Text.caption "QUESTION" color:#FF1565C0
-      Text.heading2 "{cards[i].q}" color:#FF0D47A1
+      Text.caption "QUESTION" color=#FF1565C0
+      Text.heading2 "{cards[i].q}" color=#FF0D47A1
     if flipped
-      Text.caption "ANSWER" color:#FF2E7D32
-      Text.heading1 "{cards[i].a}" color:#FF1B5E20
+      Text.caption "ANSWER" color=#FF2E7D32
+      Text.heading1 "{cards[i].a}" color=#FF1B5E20
   Text.caption "Tap the card to flip it"
-  Row gap:8
-    Button.outline "Previous" -> i=(i+length(cards)-1)%length(cards); flipped=false
+  Row gap=8
+    Button.outline "Previous" onTap={i=(i+length(cards)-1)%length(cards); flipped=false}
     Spacer grow
-    Button "Next" -> i=(i+1)%length(cards); flipped=false
+    Button "Next" onTap={i=(i+1)%length(cards); flipped=false}

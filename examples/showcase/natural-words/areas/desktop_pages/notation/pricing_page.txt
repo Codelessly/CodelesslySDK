@@ -3,69 +3,69 @@ state freeF=["Up to 100 notes","1 GB storage","1 collaborator","Mobile and web a
 state proF=["Unlimited notes","50 GB storage","Up to 10 collaborators","30-day version history","Offline access"]
 state bizF=["Unlimited notes","1 TB storage","Unlimited collaborators","Unlimited version history","SSO (SAML)","Priority support"]
 state rows=[{"f":"Notes","a":"100","b":"Unlimited","c":"Unlimited"},{"f":"Storage","a":"1 GB","b":"50 GB","c":"1 TB"},{"f":"Collaborators","a":"1","b":"10","c":"Unlimited"},{"f":"Offline access","a":"—","b":"✓","c":"✓"},{"f":"Version history","a":"—","b":"30 days","c":"Unlimited"},{"f":"Shared workspaces","a":"—","b":"✓","c":"✓"},{"f":"SSO","a":"—","b":"—","c":"✓"},{"f":"Priority support","a":"—","b":"—","c":"✓"}]
-Column scroll gap:32 pad:24 maxw:1040 center
-  Column gap:8 center
+Column scroll gap=32 pad=24 maxw=1040 center
+  Column gap=8 center
     Text.pageTitle "Simple pricing for Notely" center
     Text.bodySecondary "Pick a plan that fits the way you think. Change or cancel any time." center
-  Row center gap:12
+  Row center gap=12
     Text.strong "Monthly"
-    Toggle =annual
+    Toggle bind=annual
     Text.strong "Annual"
     Badge.success "Save 20%"
-  Grid cols:3 gap:16
-    Card gap:12
+  Grid cols=3 gap=16
+    Card gap=12
       Text.heading2 "Free"
       Text.muted "For personal notes and trying things out"
-      Text "$0" size:40 weight:700
+      Text "$0" size=40 weight=700
       Text.caption "Free forever"
-      Button.outline "Get started free" -> emit choosePlan "free"
+      Button.outline "Get started free" onTap={emit choosePlan "free"}
       Divider
       each f in freeF
-        Row gap:8
+        Row gap=8
           Icon "check"
           Text "{f}"
-    Card gap:12 animate:fade
+    Card gap=12 animate=fade
       Row between
         Text.heading2 "Pro"
         Badge.primary "Most popular"
       Text.muted "For power users and small teams"
-      Text "{annual ? '$115' : '$12'}" size:40 weight:700
+      Text "{annual ? '$115' : '$12'}" size=40 weight=700
       Text.caption "{annual ? 'per year, billed annually' : 'per month, billed monthly'}"
-      Button "Start Pro" -> emit choosePlan "pro"
+      Button "Start Pro" onTap={emit choosePlan "pro"}
       Divider
       each f in proF
-        Row gap:8
+        Row gap=8
           Icon "check"
           Text "{f}"
-    Card gap:12
+    Card gap=12
       Text.heading2 "Business"
       Text.muted "For companies that need control and security"
-      Text "{annual ? '$278' : '$29'}" size:40 weight:700
+      Text "{annual ? '$278' : '$29'}" size=40 weight=700
       Text.caption "{annual ? 'per year, billed annually' : 'per month, billed monthly'}"
-      Button.outline "Start Business" -> emit choosePlan "business"
+      Button.outline "Start Business" onTap={emit choosePlan "business"}
       Divider
       each f in bizF
-        Row gap:8
+        Row gap=8
           Icon "check"
           Text "{f}"
-  Column gap:12
+  Column gap=12
     Text.heading1 "Compare all features"
-    Card gap:0
-      Row gap:8 pad:[0,8,0,8]
+    Card gap=0
+      Row gap=8 pad=[0,8,0,8]
         Text.strong "Feature" grow
-        Text.strong "Free" w:100 center
-        Text.strong "Pro" w:100 center
-        Text.strong "Business" w:100 center
+        Text.strong "Free" w=100 center
+        Text.strong "Pro" w=100 center
+        Text.strong "Business" w=100 center
       Divider
       each r in rows
-        Column gap:0
-          Row gap:8 pad:[0,12,0,12]
+        Column gap=0
+          Row gap=8 pad=[0,12,0,12]
             Text "{r.f}" grow
-            Text "{r.a}" w:100 center
-            Text "{r.b}" w:100 center
-            Text "{r.c}" w:100 center
+            Text "{r.a}" w=100 center
+            Text "{r.b}" w=100 center
+            Text "{r.c}" w=100 center
           Divider
-  Column gap:12
+  Column gap=12
     Text.heading1 "Frequently asked questions"
     Accordion "Can I switch plans later?"
       Text.bodySecondary "Yes. You can upgrade or downgrade at any time from your account settings, and we'll prorate the difference."

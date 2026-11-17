@@ -1,45 +1,45 @@
-Column h:fill
-  Row gap:12 pad:[12,12,12,12] center
-    IconButton "arrow_back" -> emit back
-    Avatar "Maya Chen" size:40
-    Column gap:2 grow
+Column h=fill
+  Row gap=12 pad=[12,12,12,12] center
+    IconButton "arrow_back" onTap={emit back}
+    Avatar "Maya Chen" size=40
+    Column gap=2 grow
       Text.strong "Maya Chen"
-      Text.small "Active now" color:#FF2E9E5B
-    IconButton "call" -> emit call
-    IconButton "videocam" -> emit video
+      Text.small "Active now" color=#FF2E9E5B
+    IconButton "call" onTap={emit call}
+    IconButton "videocam" onTap={emit video}
   Divider
-  Column scroll grow gap:10 pad:16
+  Column scroll grow gap=10 pad=16
     Text.caption "Today" center
-    Column left gap:2
-      Box fill:#FFE9E9EE radius:18 pad:[14,10,14,10]
-        Text "Hey! Are we still on for the hike on Saturday?" color:#FF1C1C1E
+    Column left gap=2
+      Box fill=#FFE9E9EE radius=18 pad=[14,10,14,10]
+        Text "Hey! Are we still on for the hike on Saturday?" color=#FF1C1C1E
       Text.caption "9:41 AM"
-    Column right gap:2
-      Box fill:#FF1A73E8 radius:18 pad:[14,10,14,10]
-        Text "Absolutely! I'm bringing snacks 🥾" color:#FFFFFFFF
+    Column right gap=2
+      Box fill=#FF1A73E8 radius=18 pad=[14,10,14,10]
+        Text "Absolutely! I'm bringing snacks 🥾" color=#FFFFFFFF
       Text.caption "9:43 AM"
-    Column left gap:2
-      Box fill:#FFE9E9EE radius:18 pad:[14,10,14,10]
-        Text "Perfect. Look at the view from last time!" color:#FF1C1C1E
+    Column left gap=2
+      Box fill=#FFE9E9EE radius=18 pad=[14,10,14,10]
+        Text "Perfect. Look at the view from last time!" color=#FF1C1C1E
       Text.caption "9:45 AM"
-    Column left gap:2
-      Image "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600" w:220 h:160 radius:18
+    Column left gap=2
+      Image "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600" w=220 h=160 radius=18
       Text.caption "9:45 AM"
-    Column right gap:2
-      Box fill:#FF1A73E8 radius:18 pad:[14,10,14,10]
-        Text "Wow, stunning. I can't wait!" color:#FFFFFFFF
-      Row right gap:6
+    Column right gap=2
+      Box fill=#FF1A73E8 radius=18 pad=[14,10,14,10]
+        Text "Wow, stunning. I can't wait!" color=#FFFFFFFF
+      Row right gap=6
         Text.caption "9:47 AM"
-        Text.caption "Seen" color:#FF1A73E8
+        Text.caption "Seen" color=#FF1A73E8
     Row start
-      Box fill:#FFE9E9EE radius:18 pad:[14,14,14,14]
-        Row gap:4 center
-          Box w:8 h:8 radius:4 fill:#FF8E8E93 animate:pulse duration:900
-          Box w:8 h:8 radius:4 fill:#FF8E8E93 animate:pulse duration:900 delay:200
-          Box w:8 h:8 radius:4 fill:#FF8E8E93 animate:pulse duration:900 delay:400
+      Box fill=#FFE9E9EE radius=18 pad=[14,14,14,14]
+        Row gap=4 center
+          Box w=8 h=8 radius=4 fill=#FF8E8E93 animate=pulse duration=900
+          Box w=8 h=8 radius=4 fill=#FF8E8E93 animate=pulse duration=900 delay=200
+          Box w=8 h=8 radius=4 fill=#FF8E8E93 animate=pulse duration=900 delay=400
   Divider
   state msg=""
-  Row gap:8 pad:[12,8,12,12] center
-    IconButton "add" -> emit attach
-    Input "Message…" =msg grow
-    IconButton "send" -> emit send msg; msg=""
+  Row gap=8 pad=[12,8,12,12] center
+    IconButton "add" onTap={emit attach}
+    Input "Message…" bind=msg grow
+    IconButton "send" onTap={emit send msg; msg=""}

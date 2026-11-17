@@ -9,59 +9,59 @@ state picked=["c1","c2","c3"]
 state customers=[{"id":"c1","name":"Maya Reyes","company":"Larkspur Hotel","status":"Active","plan":"Business","value":480,"seen":"2 min ago","img":5},{"id":"c2","name":"Daniel Okafor","company":"Northwind Foods","status":"Active","plan":"Team","value":240,"seen":"1 hr ago","img":12},{"id":"c3","name":"Priya Raman","company":"Harbor House","status":"Trial","plan":"Team","value":0,"seen":"Today","img":47},{"id":"c4","name":"Tom Becker","company":"Becker & Sons","status":"Churned","plan":"Starter","value":0,"seen":"3 weeks ago","img":15},{"id":"c5","name":"Elena Vasquez","company":"The Larkspur","status":"Active","plan":"Business","value":520,"seen":"Yesterday","img":32},{"id":"c6","name":"Sam Patel","company":"Tidewater Labs","status":"Trial","plan":"Starter","value":0,"seen":"2 days ago","img":33},{"id":"c7","name":"Chloe Martin","company":"Atlas Freight","status":"Active","plan":"Enterprise","value":1200,"seen":"5 hr ago","img":44},{"id":"c8","name":"Jonas Weber","company":"Weber Studio","status":"Churned","plan":"Team","value":0,"seen":"1 month ago","img":53},{"id":"c9","name":"Aiko Tanaka","company":"Kite Design","status":"Active","plan":"Team","value":240,"seen":"Today","img":9},{"id":"c10","name":"Lucas Silva","company":"Bluebird Cafe","status":"Trial","plan":"Starter","value":0,"seen":"4 days ago","img":68}]
 App
   Sidebar
-    Brand "Fieldbook" icon:"menu_book"
-    NavItem "Dashboard" icon:"dashboard" selected:=tab=="dashboard" -> tab="dashboard"
-    NavItem "Customers" icon:"groups" badge:"248" selected:=tab=="customers" -> tab="customers"
-    NavItem "Deals" icon:"handshake" selected:=tab=="deals" -> tab="deals"
-    NavItem "Tasks" icon:"task_alt" badge:"7" selected:=tab=="tasks" -> tab="tasks"
-    NavItem "Reports" icon:"bar_chart" selected:=tab=="reports" -> tab="reports"
+    Brand "Fieldbook" icon="menu_book"
+    NavItem "Dashboard" icon="dashboard" selected={tab=="dashboard"} onTap={tab="dashboard"}
+    NavItem "Customers" icon="groups" badge="248" selected={tab=="customers"} onTap={tab="customers"}
+    NavItem "Deals" icon="handshake" selected={tab=="deals"} onTap={tab="deals"}
+    NavItem "Tasks" icon="task_alt" badge="7" selected={tab=="tasks"} onTap={tab="tasks"}
+    NavItem "Reports" icon="bar_chart" selected={tab=="reports"} onTap={tab="reports"}
     Spacer grow
-    Row gap:10 middle
-      Avatar "Sam Patel" size:36
+    Row gap=10 middle
+      Avatar "Sam Patel" size=36
       Column
         Text.strong "Sam Patel"
         Text.caption "Account owner"
   Main
-    Column pad:24 gap:16 scroll
-      PageHeader "Customers" "Everyone you sell to." count:"248"
-        Button.outline "Import" -> toast "Import started"
-        Button "Add customer" -> emit addCustomer
-      Row gap:12 middle
-        Input "Search customers" =q w:280
-        Select =status items:["All","Active","Trial","Churned"] w:160
+    Column pad=24 gap=16 scroll
+      PageHeader "Customers" "Everyone you sell to." count="248"
+        Button.outline "Import" onTap={toast "Import started"}
+        Button "Add customer" onTap={emit addCustomer}
+      Row gap=12 middle
+        Input "Search customers" bind=q w=280
+        Select bind=status items=["All","Active","Trial","Churned"] w=160
         Spacer grow
-        Segments =view options:["All","Mine","Recent"]
+        Segments bind=view options=["All","Mine","Recent"]
       if length(picked)>0
-        Row gap:12 middle pad:[16,10,16,10] fill:#FFEFF4FF radius:8
+        Row gap=12 middle pad=[16,10,16,10] fill=#FFEFF4FF radius=8
           Text.strong "{length(picked)} selected"
           Spacer grow
-          Button.outline "Export" -> toast "Exported {length(picked)} customers"
-          Button.destructive "Delete" -> customers=removeWhere(customers,x=>contains(picked,x.id)); picked=[]
-      Card pad:0 gap:0
-        Row pad:[20,12,20,12] gap:16 middle
-          Checkbox w:24 checked:=length(picked)==length(customers)&&length(customers)>0 -> picked=length(picked)==length(customers)?[]:map(customers,x=>x.id)
-          Text.columnHead "Name ↕" grow -> desc=sort=="name"?!desc:false; sort="name"
-          Text.columnHead "Company ↕" w:160 -> desc=sort=="company"?!desc:false; sort="company"
-          Text.columnHead "Status ↕" w:90 -> desc=sort=="status"?!desc:false; sort="status"
-          Text.columnHead "Plan ↕" w:90 -> desc=sort=="plan"?!desc:false; sort="plan"
-          Text.columnHead "Monthly value ↕" w:110 right -> desc=sort=="value"?!desc:false; sort="value"
-          Text.columnHead "Last seen" w:110
-          Spacer w:40
+          Button.outline "Export" onTap={toast "Exported {length(picked)} customers"}
+          Button.destructive "Delete" onTap={customers=removeWhere(customers,x=>contains(picked,x.id)); picked=[]}
+      Card pad=0 gap=0
+        Row pad=[20,12,20,12] gap=16 middle
+          Checkbox w=24 checked={length(picked)==length(customers)&&length(customers)>0} onChange={picked=length(picked)==length(customers)?[]:map(customers,x=>x.id)}
+          Text.columnHead "Name ↕" grow onTap={desc=sort=="name"?!desc:false; sort="name"}
+          Text.columnHead "Company ↕" w=160 onTap={desc=sort=="company"?!desc:false; sort="company"}
+          Text.columnHead "Status ↕" w=90 onTap={desc=sort=="status"?!desc:false; sort="status"}
+          Text.columnHead "Plan ↕" w=90 onTap={desc=sort=="plan"?!desc:false; sort="plan"}
+          Text.columnHead "Monthly value ↕" w=110 right onTap={desc=sort=="value"?!desc:false; sort="value"}
+          Text.columnHead "Last seen" w=110
+          Spacer w=40
         each c in (desc ? sortByDesc(filter(customers,x=>(status=="All"||x.status==status)&&contains(lower(x.name+" "+x.company),lower(q))),x=>x[sort]) : sortBy(filter(customers,x=>(status=="All"||x.status==status)&&contains(lower(x.name+" "+x.company),lower(q))),x=>x[sort]))
-          Row pad:[20,0,20,0] gap:16 h:52 middle border-top:#FFE5E7EB
-            Checkbox w:24 checked:=contains(picked,c.id) -> picked=contains(picked,c.id)?without(picked,c.id):append(picked,c.id)
-            Row grow gap:10 middle
-              Avatar src:"https://i.pravatar.cc/64?img={c.img}" size:32
+          Row pad=[20,0,20,0] gap=16 h=52 middle border-top=#FFE5E7EB
+            Checkbox w=24 checked={contains(picked,c.id)} onChange={picked=contains(picked,c.id)?without(picked,c.id):append(picked,c.id)}
+            Row grow gap=10 middle
+              Avatar src="https://i.pravatar.cc/64?img={c.img}" size=32
               Text.strong "{c.name}"
-            Text.muted "{c.company}" w:160
-            Row w:90
-              Badge "{c.status}" fill:=c.status=="Active"?"#FFDCFCE7":(c.status=="Trial"?"#FFFEF3C7":"#FFF3F4F6") color:=c.status=="Active"?"#FF166534":(c.status=="Trial"?"#FF92400E":"#FF4B5563")
-            Text "{c.plan}" w:90
-            Text "{money(c.value,'$',0)}" w:110 right
-            Text.muted "{c.seen}" w:110
-            IconButton "more_vert" w:40 -> toast "Menu for {c.name}"
+            Text.muted "{c.company}" w=160
+            Row w=90
+              Badge "{c.status}" fill={c.status=="Active"?"#FFDCFCE7":(c.status=="Trial"?"#FFFEF3C7":"#FFF3F4F6")} color={c.status=="Active"?"#FF166534":(c.status=="Trial"?"#FF92400E":"#FF4B5563")}
+            Text "{c.plan}" w=90
+            Text "{money(c.value,'$',0)}" w=110 right
+            Text.muted "{c.seen}" w=110
+            IconButton "more_vert" w=40 onTap={toast "Menu for {c.name}"}
       Row between middle
         Text.muted "Rows {page*10+1}-{page*10+10} of 248"
-        Row gap:8
-          Button.outline "Previous" enabled:=page>0 -> page=max(0,page-1)
-          Button.outline "Next" enabled:=page<24 -> page=min(24,page+1)
+        Row gap=8
+          Button.outline "Previous" enabled={page>0} onTap={page=max(0,page-1)}
+          Button.outline "Next" enabled={page<24} onTap={page=min(24,page+1)}

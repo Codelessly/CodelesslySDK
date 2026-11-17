@@ -1,13 +1,13 @@
 state status="stopped"
-Card gap:10
-  Row gap:8
-    Icon "{status=="stopped"?"stop_circle":"play_circle"}" size:16 color:=status=="stopped"?"#FF9CA3AF":"#FF2563EB"
+Card gap=10
+  Row gap=8
+    Icon "{status=="stopped"?"stop_circle":"play_circle"}" size=16 color={status=="stopped"?"#FF9CA3AF":"#FF2563EB"}
     Text.sectionTitle "{status=="stopped"?"You stopped this run":"Run resumed"}" grow
-    Badge.neutral "Step 3 of 7" visible:=status=="stopped"
-    Badge.primary "Running" visible:=status=="resumed"
-  Progress =status=="stopped"?0.43:0.5
+    Badge.neutral "Step 3 of 7" visible={status=="stopped"}
+    Badge.primary "Running" visible={status=="resumed"}
+  Progress bind={status=="stopped"?0.43:0.5}
   Text.bodySecondary "Done so far: 2 files edited, tests not run. Nothing was committed."
   if status=="stopped"
-    Row end gap:6
-      Button.ghost "Discard changes" -> emit discard
-      Button "Resume" -> status="resumed"; emit resume
+    Row end gap=6
+      Button.ghost "Discard changes" onTap={emit discard}
+      Button "Resume" onTap={status="resumed"; emit resume}

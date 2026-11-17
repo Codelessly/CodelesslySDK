@@ -1,11 +1,11 @@
 state decision=""
 state showFiles=false
-Card w:390 gap:12
-  Row gap:8 middle
+Card w=390 gap=12
+  Row gap=8 middle
     Icon "warning"
     Text.heading "Delete 214 old files?"
   Text.body "I'm about to permanently delete old files from your shared drive. Nothing will be removed until you approve."
-  Box fill:#FFF5F5F5 radius:8 pad:12 gap:6
+  Box fill=#FFF5F5F5 radius=8 pad=12 gap=6
     Row between
       Text.muted "Folder"
       Text.strong "Shared Drive / Archive"
@@ -15,14 +15,14 @@ Card w:390 gap:12
     Row between
       Text.muted "Space freed"
       Text.strong "3.2 GB"
-  Row gap:8 middle
+  Row gap=8 middle
     Icon "error"
     Text.danger "This cannot be undone."
   if showFiles==false
-    Button.ghost "Show first file names" -> showFiles=true
+    Button.ghost "Show first file names" onTap={showFiles=true}
   if showFiles
-    Button.ghost "Hide file names" -> showFiles=false
-    Box fill:#FFF5F5F5 radius:8 pad:12 gap:4
+    Button.ghost "Hide file names" onTap={showFiles=false}
+    Box fill=#FFF5F5F5 radius=8 pad=12 gap=4
       Text.small "budget_2017_final.xlsx"
       Text.small "meeting_notes_2016-03.docx"
       Text.small "logo_draft_v2.psd"
@@ -30,12 +30,12 @@ Card w:390 gap:12
       Text.small "invoice_2018-07.pdf"
       Text.caption "…and 209 more"
   if decision==""
-    Row gap:8 end
-      Button.outline "Deny" -> decision="denied"; emit deny
-      Button.destructive "Approve" -> decision="approved"; emit approve
+    Row gap=8 end
+      Button.outline "Deny" onTap={decision="denied"; emit deny}
+      Button.destructive "Approve" onTap={decision="approved"; emit approve}
   if decision!=""
     Divider
-    Row gap:8 middle
+    Row gap=8 middle
       Icon "lock"
       Text.strong "You {decision} this request."
     Text.caption "This decision is locked."

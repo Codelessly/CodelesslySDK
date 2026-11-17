@@ -1,167 +1,167 @@
 Page
   Nav
-    Brand "Signal 2027" icon:"graphic_eq"
-    Row gap:8
-      Link "Speakers" -> emit nav "speakers"
-      Link "Schedule" -> emit nav "schedule"
-      Link "Venue" -> emit nav "venue"
-      Link "Tickets" -> emit nav "tickets"
-    Button "Get tickets" -> emit tickets
+    Brand "Signal 2027" icon="graphic_eq"
+    Row gap=8
+      Link "Speakers" onTap={emit nav "speakers"}
+      Link "Schedule" onTap={emit nav "schedule"}
+      Link "Venue" onTap={emit nav "venue"}
+      Link "Tickets" onTap={emit nav "tickets"}
+    Button "Get tickets" onTap={emit tickets}
   state remaining=17500000
-  every 1s -> remaining=remaining-1
+  every 1s onTick={remaining=remaining-1}
   state speakers=[{"name":"Maya Reyes","role":"Head of Data Platform","company":"Northwind"},{"name":"Daniel Okafor","role":"Staff ML Engineer","company":"Brightpath"},{"name":"Lena Hoffmann","role":"VP Analytics","company":"Kestrel Bank"},{"name":"Arjun Mehta","role":"Data Engineering Lead","company":"Tidewater"},{"name":"Sofia Marques","role":"Chief Data Officer","company":"Atlas Health"},{"name":"Tom Becker","role":"Principal Engineer","company":"Lumen"},{"name":"Yuki Tanaka","role":"Research Scientist","company":"Orbit Labs"},{"name":"Clara Dubois","role":"Director of Insights","company":"Maison Verte"}]
   state sessions=[{"time":"09:00","title":"Opening keynote: Data teams in the age of agents","speaker":"Maya Reyes","track":"Keynote"},{"time":"10:30","title":"Contracts for data: shipping schemas without breaking people","speaker":"Arjun Mehta","track":"Platform"},{"time":"11:45","title":"Evaluating models in production","speaker":"Daniel Okafor","track":"ML"},{"time":"13:45","title":"Measuring what matters: metrics that survive a board meeting","speaker":"Lena Hoffmann","track":"Analytics"},{"time":"15:15","title":"Streaming at scale without the pager","speaker":"Tom Becker","track":"Platform"},{"time":"16:45","title":"Governance people actually follow","speaker":"Sofia Marques","track":"Leadership"}]
   Section
-    Row gap:48 middle
-      Column grow gap:20
+    Row gap=48 middle
+      Column grow gap=20
         Text.eyebrow "14–15 SEPTEMBER 2027 · LISBON"
-        Heading "Signal 2027" level:1
+        Heading "Signal 2027" level=1
         Text.lead "Two days for data teams: engineering, analytics and machine learning, with the people who run them."
-        Row gap:12
-          Card gap:4 w:96
+        Row gap=12
+          Card gap=4 w=96
             Text.numberLarge "{floor(remaining/86400)}"
             Text.muted "days"
-          Card gap:4 w:96
+          Card gap=4 w=96
             Text.numberLarge "{floor(remaining%86400/3600)}"
             Text.muted "hours"
-          Card gap:4 w:96
+          Card gap=4 w=96
             Text.numberLarge "{floor(remaining%3600/60)}"
             Text.muted "minutes"
-        Row gap:12
-          Button "Get tickets" size:large -> emit tickets
-          Button.outline "See the schedule" size:large -> emit nav "schedule"
+        Row gap=12
+          Button "Get tickets" size=large onTap={emit tickets}
+          Button.outline "See the schedule" size=large onTap={emit nav "schedule"}
         Text.caption "800 attendees · 40 talks · 2 days in Lisbon"
       Card grow
-        Media kind:"skyline" tone:"dusk" h:320
+        Media kind="skyline" tone="dusk" h=320
   Section tint
-    Column gap:12
+    Column gap=12
       Text.eyebrow "SPEAKERS"
       Heading "Learn from the people doing the work"
-    Grid cols:4 gap:24
+    Grid cols=4 gap=24
       each s in speakers
-        Card gap:12
-          Avatar "{s.name}" size:72
-          Column gap:2
+        Card gap=12
+          Avatar "{s.name}" size=72
+          Column gap=2
             Text.strong "{s.name}"
             Text.muted "{s.role}"
             Text.caption "{s.company}"
   Section
-    Column gap:12
+    Column gap=12
       Text.eyebrow "SCHEDULE · DAY ONE"
       Heading "Tuesday, 14 September"
-    Card pad:0 gap:0
-      Row pad:[20,12,20,12] gap:16
-        Text.columnHead "Time" w:80
+    Card pad=0 gap=0
+      Row pad=[20,12,20,12] gap=16
+        Text.columnHead "Time" w=80
         Text.columnHead "Session" grow
-        Text.columnHead "Speaker" w:180
-        Text.columnHead "Track" w:110
+        Text.columnHead "Speaker" w=180
+        Text.columnHead "Track" w=110
       each x in sessions
-        Row pad:[20,0,20,0] gap:16 h:64 middle border-top:#FFE5E7EB
-          Text.strong "{x.time}" w:80
+        Row pad=[20,0,20,0] gap=16 h=64 middle border-top=#FFE5E7EB
+          Text.strong "{x.time}" w=80
           Text "{x.title}" grow
-          Text.muted "{x.speaker}" w:180
-          Row w:110
+          Text.muted "{x.speaker}" w=180
+          Row w=110
             Badge.neutral "{x.track}"
   Section tint
-    Column gap:12
+    Column gap=12
       Text.eyebrow "TICKETS"
       Heading "Pick your pass"
-    Grid cols:3 gap:24
-      Card gap:16
-        Heading "Early" level:3
+    Grid cols=3 gap=24
+      Card gap=16
+        Heading "Early" level=3
         Text.muted "For individuals who book ahead."
-        Row bottom gap:4
+        Row bottom gap=4
           Text.numberHero "€390"
           Text.muted "/pass"
-        Button.outline "Choose Early" w:fill size:large -> emit buy "early"
+        Button.outline "Choose Early" w=fill size=large onTap={emit buy "early"}
         Divider
-        Row gap:10
-          Icon "check" color:#FF16A34A size:18
+        Row gap=10
+          Icon "check" color=#FF16A34A size=18
           Text "Both conference days"
-        Row gap:10
-          Icon "check" color:#FF16A34A size:18
+        Row gap=10
+          Icon "check" color=#FF16A34A size=18
           Text "Lunch and coffee"
-        Row gap:10
-          Icon "check" color:#FF16A34A size:18
+        Row gap=10
+          Icon "check" color=#FF16A34A size=18
           Text "Session recordings"
-      Card gap:16 border:#FF2563EB
+      Card gap=16 border=#FF2563EB
         Row between middle
-          Heading "Standard" level:3
+          Heading "Standard" level=3
           Badge.primary "Most popular"
         Text.muted "Full access for you and your team."
-        Row bottom gap:4
+        Row bottom gap=4
           Text.numberHero "€590"
           Text.muted "/pass"
-        Button "Choose Standard" w:fill size:large -> emit buy "standard"
+        Button "Choose Standard" w=fill size=large onTap={emit buy "standard"}
         Divider
-        Row gap:10
-          Icon "check" color:#FF16A34A size:18
+        Row gap=10
+          Icon "check" color=#FF16A34A size=18
           Text "Everything in Early"
-        Row gap:10
-          Icon "check" color:#FF16A34A size:18
+        Row gap=10
+          Icon "check" color=#FF16A34A size=18
           Text "Workshops on day two"
-        Row gap:10
-          Icon "check" color:#FF16A34A size:18
+        Row gap=10
+          Icon "check" color=#FF16A34A size=18
           Text "Speaker dinner"
-        Row gap:10
-          Icon "check" color:#FF16A34A size:18
+        Row gap=10
+          Icon "check" color=#FF16A34A size=18
           Text "Team discount from 5 passes"
-      Card gap:16
-        Heading "Patron" level:3
+      Card gap=16
+        Heading "Patron" level=3
         Text.muted "For leaders who want more time with speakers."
-        Row bottom gap:4
+        Row bottom gap=4
           Text.numberHero "€990"
           Text.muted "/pass"
-        Button.outline "Choose Patron" w:fill size:large -> emit buy "patron"
+        Button.outline "Choose Patron" w=fill size=large onTap={emit buy "patron"}
         Divider
-        Row gap:10
-          Icon "check" color:#FF16A34A size:18
+        Row gap=10
+          Icon "check" color=#FF16A34A size=18
           Text "Everything in Standard"
-        Row gap:10
-          Icon "check" color:#FF16A34A size:18
+        Row gap=10
+          Icon "check" color=#FF16A34A size=18
           Text "Front-row seating"
-        Row gap:10
-          Icon "check" color:#FF16A34A size:18
+        Row gap=10
+          Icon "check" color=#FF16A34A size=18
           Text "Private roundtable with speakers"
   Section
-    Column gap:12
+    Column gap=12
       Text.eyebrow "VENUE"
       Heading "Pavilhão do Conhecimento, Lisbon"
-    Row gap:32 top
+    Row gap=32 top
       Card grow
-        MapPanel =pin count:3
-      Column grow gap:16
-        Row gap:12
+        MapPanel bind=pin count=3
+      Column grow gap=16
+        Row gap=12
           IconTile "place"
           Column
             Text.strong "Address"
             Text.muted "Largo José Mariano Gago 1, 1990-073 Lisbon, Portugal"
-        Row gap:12
+        Row gap=12
           IconTile "train"
           Column
             Text.strong "By metro"
             Text.muted "Red line to Oriente, then a 10-minute walk along the river."
-        Row gap:12
+        Row gap=12
           IconTile "flight"
           Column
             Text.strong "From the airport"
             Text.muted "20 minutes by taxi or 25 minutes by metro."
-        Row gap:12
+        Row gap=12
           IconTile "directions_walk"
           Column
             Text.strong "On foot"
             Text.muted "Doors open at 08:00 on both days."
   Footer
     Row between top
-      Column gap:4
+      Column gap=4
         Text.strong "Signal 2027"
         Text.muted "14–15 September 2027, Lisbon"
-      Column gap:4
+      Column gap=4
         Text.strong "Conference"
-        Text.muted "Speakers" -> emit nav "speakers"
-        Text.muted "Schedule" -> emit nav "schedule"
-        Text.muted "Venue" -> emit nav "venue"
-      Column gap:4
+        Text.muted "Speakers" onTap={emit nav "speakers"}
+        Text.muted "Schedule" onTap={emit nav "schedule"}
+        Text.muted "Venue" onTap={emit nav "venue"}
+      Column gap=4
         Text.strong "Contact"
         Text.muted "hello@signal2027.example"
         Text.muted "© 2027 Signal Conference"

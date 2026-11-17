@@ -1,120 +1,120 @@
 Column scroll center
-  Row between center pad:[48,20,48,20] maxw:1280 w:fill
-    Row gap:8 center
-      Icon "waves" color:#FF0F6E7C size:28
+  Row between center pad=[48,20,48,20] maxw=1280 w=fill
+    Row gap=8 center
+      Icon "waves" color=#FF0F6E7C size=28
       Text.heading3 "Tidewater"
-    Row gap:8 center
+    Row gap=8 center
       Button.ghost "Features"
       Button.ghost "Pricing"
       Button.ghost "Customers"
       Button.ghost "Docs"
-    Row gap:12 center
+    Row gap=12 center
       Button.ghost "Sign in"
       Button "Start free"
   Divider
-  Row gap:56 center pad:[48,72,48,72] maxw:1280 w:fill
-    Column grow gap:20 animate:slide-up
+  Row gap=56 center pad=[48,72,48,72] maxw=1280 w=fill
+    Column grow gap=20 animate=slide-up
       Badge.info "New: Channel sync 2.0"
-      Text.heading1 "Fill every room, without the spreadsheets" size:54 weight:800
+      Text.heading1 "Fill every room, without the spreadsheets" size=54 weight=800
       Text.lead "Tidewater brings your calendar, channels and pricing into one calm place, so small hotels book more rooms with less work."
-      Row gap:12
+      Row gap=12
         Button "Start free"
         Button.outline "Book a demo"
       Text.caption "No credit card needed. Free for 14 days."
     Column grow
-      Card gap:16 radius:20 animate:slide-left delay:150
+      Card gap=16 radius=20 animate=slide-left delay=150
         Row between center
           Text.cardTitle "Harbor House · This week"
           Badge.success "92% booked"
-        Row gap:12
-          Box grow fill:#FFE6F4F6 radius:12 pad:12
+        Row gap=12
+          Box grow fill=#FFE6F4F6 radius=12 pad=12
             Text.caption "Arrivals today"
             Text.numberLarge "8"
-          Box grow fill:#FFFFF3E0 radius:12 pad:12
+          Box grow fill=#FFFFF3E0 radius=12 pad=12
             Text.caption "Avg. rate"
             Text.numberLarge "$148"
-          Box grow fill:#FFE8F5E9 radius:12 pad:12
+          Box grow fill=#FFE8F5E9 radius=12 pad=12
             Text.caption "Direct share"
             Text.numberLarge "64%"
-        BarChart values:[14,18,16,21,24,27,25] labels:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] h:160
-        Row gap:8 center
-          Avatar "Maya Reyes" size:28
+        BarChart values=[14,18,16,21,24,27,25] labels=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] h=160
+        Row gap=8 center
+          Avatar "Maya Reyes" size=28
           Text.bodySecondary "Maya just confirmed Room 4, 3 nights"
-  Box fill:#FFF4F7F8 w:fill pad:[48,32,48,32]
-    Column center gap:16
+  Box fill=#FFF4F7F8 w=fill pad=[48,32,48,32]
+    Column center gap=16
       Text.eyebrow "Trusted by independent hotels"
-      Row between center maxw:1100 w:fill
-        Text.heading3 "Harbor House" color:#FF6B7A80
-        Text.heading3 "The Larkspur" color:#FF6B7A80
-        Text.heading3 "Salt & Pine" color:#FF6B7A80
-        Text.heading3 "Casa Marisol" color:#FF6B7A80
-        Text.heading3 "Northgate Inn" color:#FF6B7A80
-  Column gap:32 pad:[48,80,48,80] maxw:1280 w:fill
-    Column center gap:8
+      Row between center maxw=1100 w=fill
+        Text.heading3 "Harbor House" color=#FF6B7A80
+        Text.heading3 "The Larkspur" color=#FF6B7A80
+        Text.heading3 "Salt & Pine" color=#FF6B7A80
+        Text.heading3 "Casa Marisol" color=#FF6B7A80
+        Text.heading3 "Northgate Inn" color=#FF6B7A80
+  Column gap=32 pad=[48,80,48,80] maxw=1280 w=fill
+    Column center gap=8
       Text.eyebrow "Features"
       Text.heading2 "Everything a small hotel needs" center
-    Row gap:24
-      Card grow gap:12 pad:24
-        Icon "calendar_month" size:32 color:#FF0F6E7C
+    Row gap=24
+      Card grow gap=12 pad=24
+        Icon "calendar_month" size=32 color=#FF0F6E7C
         Text.cardTitle "Live calendar"
         Text.bodySecondary "See every room, every night, in one drag-and-drop view that updates the moment a guest books."
-      Card grow gap:12 pad:24
-        Icon "sync" size:32 color:#FF0F6E7C
+      Card grow gap=12 pad=24
+        Icon "sync" size=32 color=#FF0F6E7C
         Text.cardTitle "Channel sync"
         Text.bodySecondary "Connect Booking.com, Airbnb and your own site. Availability stays in step, so double bookings stop."
-      Card grow gap:12 pad:24
-        Icon "trending_up" size:32 color:#FF0F6E7C
+      Card grow gap=12 pad=24
+        Icon "trending_up" size=32 color=#FF0F6E7C
         Text.cardTitle "Smart pricing"
         Text.bodySecondary "Rates adjust to demand, events and season, within the limits you set."
-  Box fill:#FF0F4C5C w:fill pad:[48,56,48,56]
-    Row between center maxw:1100 w:fill
-      Column center gap:4
-        Text.numberHero "4,200" color:#FFFFFFFF
-        Text.body "hotels run on Tidewater" color:#FFB8D8DE
-      Column center gap:4
-        Text.numberHero "31%" color:#FFFFFFFF
-        Text.body "more direct bookings" color:#FFB8D8DE
-      Column center gap:4
-        Text.numberHero "2 min" color:#FFFFFFFF
-        Text.body "to set up" color:#FFB8D8DE
-  Column center gap:20 pad:[48,80,48,80] maxw:900 w:fill
-    Icon "format_quote" size:40 color:#FF0F6E7C
+  Box fill=#FF0F4C5C w=fill pad=[48,56,48,56]
+    Row between center maxw=1100 w=fill
+      Column center gap=4
+        Text.numberHero "4,200" color=#FFFFFFFF
+        Text.body "hotels run on Tidewater" color=#FFB8D8DE
+      Column center gap=4
+        Text.numberHero "31%" color=#FFFFFFFF
+        Text.body "more direct bookings" color=#FFB8D8DE
+      Column center gap=4
+        Text.numberHero "2 min" color=#FFFFFFFF
+        Text.body "to set up" color=#FFB8D8DE
+  Column center gap=20 pad=[48,80,48,80] maxw=900 w=fill
+    Icon "format_quote" size=40 color=#FF0F6E7C
     Text.heading2 "We stopped juggling three spreadsheets and an inbox. Direct bookings went up the first month, and I get my Sundays back." center
-    Row gap:12 center
-      Avatar "Elena Vasquez" size:48
+    Row gap=12 center
+      Avatar "Elena Vasquez" size=48
       Column
         Text.strong "Elena Vasquez"
         Text.muted "Owner, The Larkspur"
-  Box fill:#FF0F6E7C radius:24 pad:48 w:fill maxw:1100
-    Column center gap:16
-      Text.heading2 "Ready to fill every room?" color:#FFFFFFFF center
-      Text.lead "Set up in two minutes. Free for 14 days." color:#FFD6EBEF center
-      Row gap:12
+  Box fill=#FF0F6E7C radius=24 pad=48 w=fill maxw=1100
+    Column center gap=16
+      Text.heading2 "Ready to fill every room?" color=#FFFFFFFF center
+      Text.lead "Set up in two minutes. Free for 14 days." color=#FFD6EBEF center
+      Row gap=12
         Button.elevated "Start free"
         Button.outline "Talk to sales"
-  Spacer h:56
+  Spacer h=56
   Divider
-  Column gap:32 pad:[48,48,48,32] maxw:1280 w:fill
+  Column gap=32 pad=[48,48,48,32] maxw=1280 w=fill
     Row between
-      Column gap:8
+      Column gap=8
         Text.strong "Product"
         Text.muted "Features"
         Text.muted "Pricing"
         Text.muted "Integrations"
         Text.muted "Changelog"
-      Column gap:8
+      Column gap=8
         Text.strong "Company"
         Text.muted "About"
         Text.muted "Customers"
         Text.muted "Careers"
         Text.muted "Contact"
-      Column gap:8
+      Column gap=8
         Text.strong "Resources"
         Text.muted "Docs"
         Text.muted "Help center"
         Text.muted "Guides"
         Text.muted "Status"
-      Column gap:8
+      Column gap=8
         Text.strong "Legal"
         Text.muted "Privacy"
         Text.muted "Terms"
@@ -122,7 +122,7 @@ Column scroll center
         Text.muted "Cookies"
     Divider
     Row between center
-      Row gap:8 center
-        Icon "waves" color:#FF0F6E7C size:20
+      Row gap=8 center
+        Icon "waves" color=#FF0F6E7C size=20
         Text.strong "Tidewater"
       Text.caption "© 2026 Tidewater"

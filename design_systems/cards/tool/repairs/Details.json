@@ -1,6 +1,6 @@
 {
  "widget": {
-  "doc": "Labels and their values in one quiet tile: rows:=[[\"Subtotal\",money(sub,\"$\",2)],[\"Delivery\",\"$4.99\"]]. A phone stacks each pair, for long values; inlineOnPhone:true keeps short labels and values side by side there (a price breakdown). An empty value hides its row; icons is an optional list alongside.",
+  "doc": "Labels and their values in one quiet tile: rows={[[\"Subtotal\",money(sub,\"$\",2)],[\"Delivery\",\"$4.99\"]]}. A phone stacks each pair, for long values; inlineOnPhone=true keeps short labels and values side by side there (a price breakdown). An empty value hides its row; icons is an optional list alongside.",
   "props": [
    {
     "key": "rows",

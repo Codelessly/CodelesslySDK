@@ -1,50 +1,50 @@
 state range="Week"
 state orders=[{"id":"#1042","who":"Maya Chen","total":"$128.00","status":"Paid"},{"id":"#1041","who":"Leo Park","total":"$54.20","status":"Pending"},{"id":"#1040","who":"Sara Ali","total":"$310.00","status":"Paid"},{"id":"#1039","who":"Tom Reyes","total":"$22.90","status":"Refunded"}]
-Column scroll gap:16 pad:16
+Column scroll gap=16 pad=16
   Row between middle
-    Column gap:2
+    Column gap=2
       Text.title "Dashboard"
       Text.muted "Store overview"
     IconButton "notifications"
-  SegmentedButton =range items:["Day","Week","Month"]
-  Grid cols:2 gap:12
-    Card gap:4
+  SegmentedButton bind=range items=["Day","Week","Month"]
+  Grid cols=2 gap=12
+    Card gap=4
       Text.caption "Revenue"
-      Text "$12,480" size:24 weight:700
+      Text "$12,480" size=24 weight=700
       Badge.success "+8.2%"
-    Card gap:4
+    Card gap=4
       Text.caption "Orders"
-      Text "342" size:24 weight:700
+      Text "342" size=24 weight=700
       Badge.success "+3.1%"
-    Card gap:4
+    Card gap=4
       Text.caption "Visitors"
-      Text "8,912" size:24 weight:700
+      Text "8,912" size=24 weight=700
       Badge.error "-2.4%"
-    Card gap:4
+    Card gap=4
       Text.caption "Conversion"
-      Text "3.8%" size:24 weight:700
+      Text "3.8%" size=24 weight=700
       Badge "flat"
-  Card gap:8
+  Card gap=8
     Row between
       Text.heading "Revenue"
       Text.muted "last 7 days"
-    LineChart values:[1200,1650,1400,1900,1750,2240,2340]
-  Card gap:8
+    LineChart values=[1200,1650,1400,1900,1750,2240,2340]
+  Card gap=8
     Text.heading "Top products"
-    BarChart values:[86,64,52,31] labels:["Mugs","Beans","Totes","Filters"]
-  Card gap:8
+    BarChart values=[86,64,52,31] labels=["Mugs","Beans","Totes","Filters"]
+  Card gap=8
     Row between
       Text.heading "Recent orders"
-      Button.ghost "View all" -> emit open_orders
+      Button.ghost "View all" onTap={emit open_orders}
     each o in orders
       Row between middle
-        Column gap:2
+        Column gap=2
           Text.strong "{o.who}"
           Text.caption "{o.id}"
-        Column gap:4 right
+        Column gap=4 right
           Text.strong "{o.total}"
           Badge "{o.status}"
-  Card gap:8
+  Card gap=8
     Text.heading "Monthly goal"
     Row between
       Text.muted "$12,480 of $20,000"

@@ -1,92 +1,92 @@
-Column scroll fill:#FFFFFFFF
-  Row between center pad:[64,18,64,18]
-    Text.heading3 "Signal & Noise" weight:800
-    Row gap:28 center
+Column scroll fill=#FFFFFFFF
+  Row between center pad=[64,18,64,18]
+    Text.heading3 "Signal & Noise" weight=800
+    Row gap=28 center
       Text.bodySecondary "Articles"
       Text.bodySecondary "Topics"
       Text.bodySecondary "Podcast"
       Text.bodySecondary "About"
-      Button "Subscribe" -> emit subscribe
+      Button "Subscribe" onTap={emit subscribe}
   Divider
-  Column center pad:[64,48,64,0]
-    Column gap:18 maxw:1152 w:fill
+  Column center pad=[64,48,64,0]
+    Column gap=18 maxw=1152 w=fill
       Row
         Badge.primary "Infrastructure"
-      Text.heading1 "What we learned moving 40 services to one queue" size:44 weight:800 maxw:860
-      Row gap:12 center
-        Avatar "Maya Reyes" size:44
-        Column gap:2
+      Text.heading1 "What we learned moving 40 services to one queue" size=44 weight=800 maxw=860
+      Row gap=12 center
+        Avatar "Maya Reyes" size=44
+        Column gap=2
           Text.strong "Maya Reyes"
-          Row gap:8
+          Row gap=8
             Text.muted "March 12, 2025"
             Text.muted "·"
             Text.muted "9 min read"
-      Media kind:"skyline" tone:"dusk" h:440 w:fill radius:16
-  Column center pad:[64,48,64,48]
-    Row gap:56 top maxw:1152 w:fill
-      Column gap:20 w:720
-        Text.lead "Two years ago every service owned its own broker. Last quarter we retired all of them. Here is what broke, what held, and what we would do differently." size:20
-        Text.heading2 "Why we stopped running forty brokers" size:28 weight:700
-        Text "Each team had picked the queue that fit its first use case. That was fine until an incident crossed three of them: nobody could say where a message was, which retry policy applied, or who was paged. Operating forty small brokers cost us more than any one big one ever would." size:17
-        Text "We started by inventorying every producer and consumer. The surprise was not the variety of technology but the sameness of the needs: at-least-once delivery, a dead-letter path, and visibility into lag." size:17
-        Row gap:16
-          Box w:4 fill:#FF3B5BDB radius:2
-          Text "The best migration plan is the one that lets you stop halfway and still be better off." size:24 weight:600 color:#FF1F2937 italic
-        Text.heading2 "Making the move boring" size:28 weight:700
-        Text "We moved one consumer group at a time behind a thin client library. Producers wrote to both systems during the overlap, and a checker compared the two streams until they agreed for a full week." size:17
-        Box fill:#FF111827 radius:10 pad:18
-          Text.code "const queue = connect({\n  topic: 'orders.created',\n  retries: 5,\n  deadLetter: 'orders.dlq',\n});\n\nqueue.consume(async (msg) => {\n  await handle(msg.body);\n  await msg.ack();\n});" color:#FFE5E7EB
-        Text "Three habits made the difference between a smooth cutover and a painful one:" size:17
-        Column gap:10
-          Row gap:12
-            Text "•" size:17 weight:700
-            Text "Dual-write first, switch reads later, and keep the old path for two weeks." size:17
-          Row gap:12
-            Text "•" size:17 weight:700
-            Text "Make every handler idempotent before it moves, not after." size:17
-          Row gap:12
-            Text "•" size:17 weight:700
-            Text "Alert on consumer lag per team, so ownership is obvious at 3 a.m." size:17
-        Text "Today one platform team runs the queue, and product teams ship consumers without opening a ticket. The graphs are quieter, and so are the pagers." size:17
-      Column gap:24 w:320 {"props":{"sticky":true,"top":24}}
-        Card gap:10
+      Media kind="skyline" tone="dusk" h=440 w=fill radius=16
+  Column center pad=[64,48,64,48]
+    Row gap=56 top maxw=1152 w=fill
+      Column gap=20 w=720
+        Text.lead "Two years ago every service owned its own broker. Last quarter we retired all of them. Here is what broke, what held, and what we would do differently." size=20
+        Text.heading2 "Why we stopped running forty brokers" size=28 weight=700
+        Text "Each team had picked the queue that fit its first use case. That was fine until an incident crossed three of them: nobody could say where a message was, which retry policy applied, or who was paged. Operating forty small brokers cost us more than any one big one ever would." size=17
+        Text "We started by inventorying every producer and consumer. The surprise was not the variety of technology but the sameness of the needs: at-least-once delivery, a dead-letter path, and visibility into lag." size=17
+        Row gap=16
+          Box w=4 fill=#FF3B5BDB radius=2
+          Text "The best migration plan is the one that lets you stop halfway and still be better off." size=24 weight=600 color=#FF1F2937 italic
+        Text.heading2 "Making the move boring" size=28 weight=700
+        Text "We moved one consumer group at a time behind a thin client library. Producers wrote to both systems during the overlap, and a checker compared the two streams until they agreed for a full week." size=17
+        Box fill=#FF111827 radius=10 pad=18
+          Text.code "const queue = connect({\n  topic: 'orders.created',\n  retries: 5,\n  deadLetter: 'orders.dlq',\n});\n\nqueue.consume(async (msg) => {\n  await handle(msg.body);\n  await msg.ack();\n});" color=#FFE5E7EB
+        Text "Three habits made the difference between a smooth cutover and a painful one:" size=17
+        Column gap=10
+          Row gap=12
+            Text "•" size=17 weight=700
+            Text "Dual-write first, switch reads later, and keep the old path for two weeks." size=17
+          Row gap=12
+            Text "•" size=17 weight=700
+            Text "Make every handler idempotent before it moves, not after." size=17
+          Row gap=12
+            Text "•" size=17 weight=700
+            Text "Alert on consumer lag per team, so ownership is obvious at 3 a.m." size=17
+        Text "Today one platform team runs the queue, and product teams ship consumers without opening a ticket. The graphs are quieter, and so are the pagers." size=17
+      Column gap=24 w=320 {"props":{"sticky":true,"top":24}}
+        Card gap=10
           Text.eyebrow "ON THIS PAGE"
-          Text.strong "Why we stopped running forty brokers" color:#FF3B5BDB
+          Text.strong "Why we stopped running forty brokers" color=#FF3B5BDB
           Text.bodySecondary "Making the move boring"
           Text.bodySecondary "Three habits that paid off"
           Text.bodySecondary "What we would do differently"
-        Card gap:12 fill:#FFF3F4FF
+        Card gap=12 fill=#FFF3F4FF
           Text.cardTitle "The Signal & Noise letter"
           Text.bodySecondary "One engineering story every two weeks. No spam, no hype."
-          Input "Email" hint:"you@example.com" type:email =email
-          Button "Subscribe" -> emit newsletter email; toast "Thanks for subscribing"
-  Box fill:#FFF9FAFB pad:[64,48,64,56]
-    Column gap:20 center
-      Column gap:20 maxw:1152 w:fill
-        Text.heading2 "Related articles" size:26 weight:700
-        Row gap:24
-          Card gap:10 grow
-            Media kind:"harbor" tone:"day" h:160 radius:10
+          Input "Email" hint="you@example.com" type=email bind=email
+          Button "Subscribe" onTap={emit newsletter email; toast "Thanks for subscribing"}
+  Box fill=#FFF9FAFB pad=[64,48,64,56]
+    Column gap=20 center
+      Column gap=20 maxw=1152 w=fill
+        Text.heading2 "Related articles" size=26 weight=700
+        Row gap=24
+          Card gap=10 grow
+            Media kind="harbor" tone="day" h=160 radius=10
             Badge.info "Reliability"
             Text.cardTitle "Retries without the retry storm"
             Text.muted "Jon Alvarez · 6 min read"
-          Card gap:10 grow
-            Media kind:"train" tone:"dawn" h:160 radius:10
+          Card gap=10 grow
+            Media kind="train" tone="dawn" h=160 radius=10
             Badge.success "Data"
             Text.cardTitle "Backfilling a billion events on a Friday"
             Text.muted "Priya Nair · 11 min read"
-          Card gap:10 grow
-            Media kind:"mountain" tone:"night" h:160 radius:10
+          Card gap=10 grow
+            Media kind="mountain" tone="night" h=160 radius=10
             Badge.warning "Culture"
             Text.cardTitle "Writing the postmortem nobody dreads"
             Text.muted "Sam Okafor · 7 min read"
-  Box fill:#FF111827 pad:[64,40,64,40]
+  Box fill=#FF111827 pad=[64,40,64,40]
     Row between center
-      Column gap:6
-        Text.heading3 "Signal & Noise" color:#FFFFFFFF weight:800
-        Text.small "Notes from the engineering team." color:#FF9CA3AF
-      Row gap:24
-        Text.small "Articles" color:#FFD1D5DB
-        Text.small "RSS" color:#FFD1D5DB
-        Text.small "Privacy" color:#FFD1D5DB
-        Text.small "© 2025 Signal & Noise" color:#FF9CA3AF
+      Column gap=6
+        Text.heading3 "Signal & Noise" color=#FFFFFFFF weight=800
+        Text.small "Notes from the engineering team." color=#FF9CA3AF
+      Row gap=24
+        Text.small "Articles" color=#FFD1D5DB
+        Text.small "RSS" color=#FFD1D5DB
+        Text.small "Privacy" color=#FFD1D5DB
+        Text.small "© 2025 Signal & Noise" color=#FF9CA3AF

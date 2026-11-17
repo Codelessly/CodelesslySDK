@@ -1,66 +1,66 @@
-Column w:1280 h:fill
-  Row between pad:[24,12,24,12] fill:#FFFFFFFF
-    Row gap:10
-      Icon "sensors" color:#FF2563EB size:26
+Column w=1280 h=fill
+  Row between pad=[24,12,24,12] fill=#FFFFFFFF
+    Row gap=10
+      Icon "sensors" color=#FF2563EB size=26
       Text.heading3 "Beacon"
       Badge.neutral "SDK"
-    Box w:360
-      SearchBar "Search the docs" =q
-    Select =version items:["v2.4","v2.3","v2.2"] w:100
+    Box w=360
+      SearchBar "Search the docs" bind=q
+    Select bind=version items=["v2.4","v2.3","v2.2"] w=100
   Divider
   Row top grow
-    Column w:240 pad:[16,24,16,24] gap:4 fill:#FFF8FAFC scroll
+    Column w=240 pad=[16,24,16,24] gap=4 fill=#FFF8FAFC scroll
       Text.eyebrow "START"
       each n in start
-        ListRow "{n}" selected:=page==n dense -> page=n
-      Spacer h:16
+        ListRow "{n}" selected={page==n} dense onPressed={page=n}
+      Spacer h=16
       Text.eyebrow "GUIDES"
       each n in guides
-        ListRow "{n}" selected:=page==n dense -> page=n
-      Spacer h:16
+        ListRow "{n}" selected={page==n} dense onPressed={page=n}
+      Spacer h=16
       Text.eyebrow "REFERENCE"
       each n in reference
-        ListRow "{n}" selected:=page==n dense -> page=n
-    Column grow gap:20 pad:[40,28,40,40] scroll
-      Breadcrumb items:["Docs","Start","Quickstart"]
+        ListRow "{n}" selected={page==n} dense onPressed={page=n}
+    Column grow gap=20 pad=[40,28,40,40] scroll
+      Breadcrumb items=["Docs","Start","Quickstart"]
       Text.pageTitle "Quickstart"
       Text.lead "Beacon is an SDK for sending events and receiving live updates in your app. In a few minutes you will install it, connect a client and send your first event."
       Text.sectionTitle "Get started"
-      Row gap:14 top
-        Box w:28 h:28 radius:14 fill:#FF2563EB center
-          Text.strong "1" color:#FFFFFFFF
-        Column grow gap:8
+      Row gap=14 top
+        Box w=28 h=28 radius=14 fill=#FF2563EB center
+          Text.strong "1" color=#FFFFFFFF
+        Column grow gap=8
           Text.cardTitle "Install the package"
           Text.bodySecondary "Add Beacon to your project with your package manager."
-          CodeBlock "Terminal" "npm install @beacon/sdk" language:"bash" copyable:true
-      Row gap:14 top
-        Box w:28 h:28 radius:14 fill:#FF2563EB center
-          Text.strong "2" color:#FFFFFFFF
-        Column grow gap:8
+          CodeBlock "Terminal" "npm install @beacon/sdk" language="bash" copyable=true
+      Row gap=14 top
+        Box w=28 h=28 radius=14 fill=#FF2563EB center
+          Text.strong "2" color=#FFFFFFFF
+        Column grow gap=8
           Text.cardTitle "Create a client"
           Text.bodySecondary "Initialize the client once, with the API key from your dashboard."
-          CodeBlock "app.js" "import { Beacon } from '@beacon/sdk';\n\nconst beacon = new Beacon({ apiKey: 'YOUR_API_KEY' });" language:"javascript" copyable:true
-      Row gap:14 top
-        Box w:28 h:28 radius:14 fill:#FF2563EB center
-          Text.strong "3" color:#FFFFFFFF
-        Column grow gap:8
+          CodeBlock "app.js" "import { Beacon } from '@beacon/sdk';\n\nconst beacon = new Beacon({ apiKey: 'YOUR_API_KEY' });" language="javascript" copyable=true
+      Row gap=14 top
+        Box w=28 h=28 radius=14 fill=#FF2563EB center
+          Text.strong "3" color=#FFFFFFFF
+        Column grow gap=8
           Text.cardTitle "Send your first event"
           Text.bodySecondary "Track an event and check that it appears in the dashboard."
-          CodeBlock "app.js" "beacon.track('signup', { plan: 'free' });" language:"javascript" copyable:true
-      Callout "Good to know" "Use a test key while developing. Events sent with a test key never count toward your plan." tone:accent icon:"info"
+          CodeBlock "app.js" "beacon.track('signup', { plan: 'free' });" language="javascript" copyable=true
+      Callout "Good to know" "Use a test key while developing. Events sent with a test key never count toward your plan." tone=accent icon="info"
       Text.sectionTitle "Options"
       Text.bodySecondary "Pass these options when you create the client."
       Column
-        TableHeader columns:["Name","Type","Default","Description"] keys:["name","type","def","desc"] widths:[140,100,110,390]
+        TableHeader columns=["Name","Type","Default","Description"] keys=["name","type","def","desc"] widths=[140,100,110,390]
         each o in options
-          TableRow cells:=[o.name,o.type,o.def,o.desc] widths:[140,100,110,390]
+          TableRow cells={[o.name,o.type,o.def,o.desc]} widths=[140,100,110,390]
       Divider
       Row between
-        Button.outline "← Previous: Overview" -> page="Overview"
-        Button.outline "Next: Installation →" -> page="Installation"
-    Column w:220 pad:[40,24,16,16] gap:10
+        Button.outline "← Previous: Overview" onTap={page="Overview"}
+        Button.outline "Next: Installation →" onTap={page="Installation"}
+    Column w=220 pad=[40,24,16,16] gap=10
       Text.eyebrow "ON THIS PAGE"
-      Text.strong "Get started" color:#FF2563EB
+      Text.strong "Get started" color=#FF2563EB
       Text.muted "Install the package"
       Text.muted "Create a client"
       Text.muted "Send your first event"

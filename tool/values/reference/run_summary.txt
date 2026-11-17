@@ -7,14 +7,14 @@ state diff=abs(last-total)
 state tt=floor(total/60)+":"+(total%60<10?"0":"")+(total%60)
 state ap=floor(avg/60)+":"+(avg%60<10?"0":"")+(avg%60)
 state dd=floor(diff/60)+":"+(diff%60<10?"0":"")+(diff%60)
-ChatCard "Morning run" "5.0 km" icon:"directions_run_rounded" status:=shared?"Shared":"Done" tone:=shared?"good":"accent"
-  Grid cols:2 gap:10
-    StatTile "Distance" value:"5.0 km" icon:"straighten_rounded"
-    StatTile "Time" value:"{tt}" icon:"timer_rounded"
-    StatTile "Avg pace" value:"{ap} /km" icon:"speed_rounded"
-    StatTile "Calories" value:"380" icon:"local_fire_department_rounded"
-  ChartCard "Pace per km" value:"{ap}" values:=map(splits,s=>round(s/60,2)) labels:["1","2","3","4","5"] kind:"bars"
+ChatCard "Morning run" "5.0 km" icon="directions_run_rounded" status={shared?"Shared":"Done"} tone={shared?"good":"accent"}
+  Grid cols=2 gap=10
+    StatTile "Distance" value="5.0 km" icon="straighten_rounded"
+    StatTile "Time" value="{tt}" icon="timer_rounded"
+    StatTile "Avg pace" value="{ap} /km" icon="speed_rounded"
+    StatTile "Calories" value="380" icon="local_fire_department_rounded"
+  ChartCard "Pace per km" value="{ap}" values={map(splits,s=>round(s/60,2))} labels=["1","2","3","4","5"] kind="bars"
   SectionLabel "Splits" "min per km"
-  Details rows:=map(range(length(splits)),i=>["Km "+(i+1),floor(splits[i]/60)+":"+(splits[i]%60<10?"0":"")+(splits[i]%60)])
-  Callout "{dd} {total<last?"faster":"slower"} than last time" "Last run: 5.0 km in 28:15." tone:=total<last?"good":"warn" icon:"trending_up_rounded"
-  ActionButton#share "{shared?"Shared":"Share"}" icon:"ios_share_rounded" -> shared=true; emit share_run
+  Details rows={map(range(length(splits)),i=>["Km "+(i+1),floor(splits[i]/60)+":"+(splits[i]%60<10?"0":"")+(splits[i]%60)])}
+  Callout "{dd} {total<last?"faster":"slower"} than last time" "Last run: 5.0 km in 28:15." tone={total<last?"good":"warn"} icon="trending_up_rounded"
+  ActionButton#share "{shared?"Shared":"Share"}" icon="ios_share_rounded" onPressed={shared=true; emit share_run}

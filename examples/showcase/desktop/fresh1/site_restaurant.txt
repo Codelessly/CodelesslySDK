@@ -1,108 +1,108 @@
 Page
   Nav
-    Brand "Olmo" icon:"local_fire_department"
-    Row gap:4
-      Link "Menu" -> emit goMenu
-      Link "Reservations" -> emit goReservations
-      Link "Private dining" -> emit goPrivate
-      Link "Visit" -> emit goVisit
-    Button "Book a table" -> emit goReservations
+    Brand "Olmo" icon="local_fire_department"
+    Row gap=4
+      Link "Menu" onTap={emit goMenu}
+      Link "Reservations" onTap={emit goReservations}
+      Link "Private dining" onTap={emit goPrivate}
+      Link "Visit" onTap={emit goVisit}
+    Button "Book a table" onTap={emit goReservations}
   Section
-    Row gap:48 middle
-      Column grow gap:20
+    Row gap=48 middle
+      Column grow gap=20
         Text.eyebrow "NEIGHBORHOOD ITALIAN"
-        Heading "Wood fire, handmade pasta, long evenings" level:1
+        Heading "Wood fire, handmade pasta, long evenings" level=1
         Text.lead "Seasonal plates from a wood-fired oven, pasta rolled each morning, and a room that stays warm until late."
-        Row gap:8 middle
-          Icon "schedule" size:18
+        Row gap=8 middle
+          Icon "schedule" size=18
           Text.strong "Open today, 5:00 pm to 11:00 pm"
-        Row gap:12
-          Button "Book a table" size:large -> emit goReservations
-          Button.outline "See the menu" size:large -> emit goMenu
-      Card grow pad:0
-        Media kind:"market" tone:"dusk" h:380
+        Row gap=12
+          Button "Book a table" size=large onTap={emit goReservations}
+          Button.outline "See the menu" size=large onTap={emit goMenu}
+      Card grow pad=0
+        Media kind="market" tone="dusk" h=380
   Section tint
-    Column gap:12
+    Column gap=12
       Text.eyebrow "THE MENU"
       Heading "Cooked over fire, finished by hand"
-    Grid cols:3 gap:32
-      Column gap:16
-        Heading "Antipasti" level:3
+    Grid cols=3 gap=32
+      Column gap=16
+        Heading "Antipasti" level=3
         Divider
         each d in antipasti
-          Row between top gap:16
-            Column grow gap:2
+          Row between top gap=16
+            Column grow gap=2
               Text.strong "{d.name}"
               Text.muted "{d.desc}"
             Text.strong "{d.price}"
-      Column gap:16
-        Heading "Primi" level:3
+      Column gap=16
+        Heading "Primi" level=3
         Divider
         each d in primi
-          Row between top gap:16
-            Column grow gap:2
+          Row between top gap=16
+            Column grow gap=2
               Text.strong "{d.name}"
               Text.muted "{d.desc}"
             Text.strong "{d.price}"
-      Column gap:16
-        Heading "Secondi" level:3
+      Column gap=16
+        Heading "Secondi" level=3
         Divider
         each d in secondi
-          Row between top gap:16
-            Column grow gap:2
+          Row between top gap=16
+            Column grow gap=2
               Text.strong "{d.name}"
               Text.muted "{d.desc}"
             Text.strong "{d.price}"
   Section
-    Column gap:12
+    Column gap=12
       Text.eyebrow "RESERVATIONS"
       Heading "Save your table"
       Text.lead "Tell us when and how many. We hold your table for 15 minutes."
-    Card gap:16
-      Row gap:16 bottom
-        DatePicker "Date" =date grow
-        Select "Time" =time items:["6:00 pm","7:00 pm","8:00 pm","9:00 pm"] grow -> left=time=='6:00 pm'?5:time=='7:00 pm'?2:time=='8:00 pm'?1:4
-        Stepper "Guests" =party min:1 max:10
-        Button "Reserve, {left} tables left" size:large -> emit reserve; toast "Table requested for {party} at {time}"
+    Card gap=16
+      Row gap=16 bottom
+        DatePicker "Date" bind=date grow
+        Select "Time" bind=time items=["6:00 pm","7:00 pm","8:00 pm","9:00 pm"] grow onChange={left=time=='6:00 pm'?5:time=='7:00 pm'?2:time=='8:00 pm'?1:4}
+        Stepper "Guests" bind=party min=1 max=10
+        Button "Reserve, {left} tables left" size=large onTap={emit reserve; toast "Table requested for {party} at {time}"}
       Text.caption "Parties of more than 10? Ask about private dining."
   Section tint
-    Column gap:12
+    Column gap=12
       Text.eyebrow "WHAT GUESTS SAY"
       Heading "Neighbors, regulars, first timers"
-    Grid cols:2 gap:24
-      Card gap:12
-        Text "★★★★★" color:#FFF59E0B size:20
+    Grid cols=2 gap=24
+      Card gap=12
+        Text "★★★★★" color=#FFF59E0B size=20
         Text.lead "The cacio e pepe alone is worth the walk. We stayed three hours and nobody rushed us."
-        Row gap:10 middle
-          Avatar "Marta Rossi" size:36
+        Row gap=10 middle
+          Avatar "Marta Rossi" size=36
           Text.muted "Marta R., Tuesday regular"
-      Card gap:12
-        Text "★★★★★" color:#FFF59E0B size:20
+      Card gap=12
+        Text "★★★★★" color=#FFF59E0B size=20
         Text.lead "Charred octopus, a glass of red, the oven glowing in the corner. Our new anniversary place."
-        Row gap:10 middle
-          Avatar "Daniel Kim" size:36
+        Row gap=10 middle
+          Avatar "Daniel Kim" size=36
           Text.muted "Daniel K., first visit"
   Section
-    Column gap:12
+    Column gap=12
       Text.eyebrow "VISIT"
       Heading "14 Linden Street, by the old market"
-    Row gap:32 top
+    Row gap=32 top
       Card grow
-        MapPanel =pick count:3
-      Card grow gap:12
-        Heading "Hours" level:3
-        Details rows:=[["Monday","Closed"],["Tuesday","5:00 pm to 10:00 pm"],["Wednesday","5:00 pm to 10:00 pm"],["Thursday","5:00 pm to 10:30 pm"],["Friday","5:00 pm to 11:30 pm"],["Saturday","12:00 pm to 11:30 pm"],["Sunday","12:00 pm to 9:30 pm"]]
+        MapPanel bind=pick count=3
+      Card grow gap=12
+        Heading "Hours" level=3
+        Details rows={[["Monday","Closed"],["Tuesday","5:00 pm to 10:00 pm"],["Wednesday","5:00 pm to 10:00 pm"],["Thursday","5:00 pm to 10:30 pm"],["Friday","5:00 pm to 11:30 pm"],["Saturday","12:00 pm to 11:30 pm"],["Sunday","12:00 pm to 9:30 pm"]]}
         Text.muted "14 Linden Street · (555) 014-2260"
   Footer
     Row between top
-      Column gap:8
+      Column gap=8
         Text.strong "Olmo"
         Text.muted "Wood fire, handmade pasta."
-      Column gap:8
+      Column gap=8
         Text.strong "Visit"
         Text.muted "14 Linden Street"
         Text.muted "(555) 014-2260"
-      Column gap:8
+      Column gap=8
         Text.strong "Write to us"
         Text.muted "hello@olmo.example"
         Text.muted "events@olmo.example"

@@ -1,59 +1,59 @@
-Column h:fill
-  Row between center pad:[16,12,16,12]
-    IconButton "arrow_back" -> emit back
+Column h=fill
+  Row between center pad=[16,12,16,12]
+    IconButton "arrow_back" onTap={emit back}
     Text.heading "Job details"
     if saved
-      IconButton "bookmark" -> saved=false; toast "Removed from saved"
+      IconButton "bookmark" onTap={saved=false; toast "Removed from saved"}
     if !saved
-      IconButton "bookmark_border" -> saved=true; toast "Job saved"
+      IconButton "bookmark_border" onTap={saved=true; toast "Job saved"}
   Divider
-  Column scroll grow gap:20 pad:16
-    Row gap:16 center
-      Box w:64 h:64 radius:16 fill:#FF4F46E5 center middle
-        Text "L" size:32 weight:700 color:#FFFFFFFF
-      Column gap:4 grow
+  Column scroll grow gap=20 pad=16
+    Row gap=16 center
+      Box w=64 h=64 radius=16 fill=#FF4F46E5 center middle
+        Text "L" size=32 weight=700 color=#FFFFFFFF
+      Column gap=4 grow
         Text.heading1 "Senior iOS Engineer"
         Text.bodySecondary "Lumen Labs"
-    Column gap:8
-      Row gap:8
+    Column gap=8
+      Row gap=8
         Icon "location_on"
         Text "Remote (US)"
-      Row gap:8
+      Row gap=8
         Icon "payments"
         Text "$165k–$195k"
-      Row gap:8
+      Row gap=8
         Icon "schedule"
         Text "Full-time"
-    Row gap:8
+    Row gap=8
       Chip "Swift"
       Chip "SwiftUI"
       Chip "Combine"
     Text.caption "Posted 3 days ago · 142 applicants"
     Divider
-    Column gap:8
+    Column gap=8
       Text.sectionTitle "About the role"
       Text "Lumen Labs is building the next generation of photo and video tools for creators. As a Senior iOS Engineer you will own major parts of our flagship app, shaping its architecture, performance and polish while mentoring a small, talented team."
-    Column gap:8
+    Column gap=8
       Text.sectionTitle "Responsibilities"
       each item in duties
-        Row gap:8
+        Row gap=8
           Text "•"
           Text "{item}" grow
-    Column gap:8
+    Column gap=8
       Text.sectionTitle "Requirements"
       each item in requirements
-        Row gap:8
+        Row gap=8
           Text "•"
           Text "{item}" grow
-    Column gap:8
+    Column gap=8
       Text.sectionTitle "Benefits"
       each item in benefits
-        Row gap:8
+        Row gap=8
           Text "•"
           Text "{item}" grow
   Divider
-  Row gap:12 center pad:16
-    Button "Apply Now" w:fill -> emit apply; toast "Application started"
+  Row gap=12 center pad=16
+    Button "Apply Now" w=fill onTap={emit apply; toast "Application started"}
 
 state saved=false
 state duties=["Design and build new features in Swift and SwiftUI","Lead architecture decisions for our core iOS app","Improve app performance, stability and accessibility","Collaborate with design, product and backend teams","Mentor engineers and review code"]

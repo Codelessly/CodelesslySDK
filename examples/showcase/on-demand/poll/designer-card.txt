@@ -2,11 +2,11 @@ state opts=["Pho Saigon","Taqueria Luz","Green Bowl","Napoli Pizza"]
 state votes=[5,8,3,6]
 state pick=""
 state voted=false
-ChatCard "Friday lunch" "Team poll · closes Thu 5 pm" icon:"restaurant_rounded" status:=voted?"Voted":"Open" tone:=voted?"good":"accent"
+ChatCard "Friday lunch" "Team poll · closes Thu 5 pm" icon="restaurant_rounded" status={voted?"Voted":"Open"} tone={voted?"good":"accent"}
   if !voted
-    OptionList "Where should we go for lunch on Friday?" =pick options:=opts details:["Vietnamese, 5 min walk","Tacos, 8 min walk","Salads and bowls, next door","Wood-fired pizza, 10 min walk"] icons:["ramen_dining_rounded","lunch_dining_rounded","eco_rounded","local_pizza_rounded"]
-    ActionButton "Vote" tone:"primary" icon:"how_to_vote_rounded" enabled:=pick!="" -> votes=map(range(length(opts)),i=>votes[i]+(opts[i]==pick?1:0)); voted=true
+    OptionList "Where should we go for lunch on Friday?" bind=pick options={opts} details=["Vietnamese, 5 min walk","Tacos, 8 min walk","Salads and bowls, next door","Wood-fired pizza, 10 min walk"] icons=["ramen_dining_rounded","lunch_dining_rounded","eco_rounded","local_pizza_rounded"]
+    ActionButton "Vote" tone="primary" icon="how_to_vote_rounded" enabled={pick!=""} onPressed={votes=map(range(length(opts)),i=>votes[i]+(opts[i]==pick?1:0)); voted=true}
   if voted
-    Paragraph "Where should we go for lunch on Friday?" strong:true
-    PollResults options:=opts votes:=votes choice:=pick note:"votes are anonymous"
-    ActionButton "Change my vote" tone:"quiet" icon:"undo_rounded" -> votes=map(range(length(opts)),i=>votes[i]-(opts[i]==pick?1:0)); voted=false
+    Paragraph "Where should we go for lunch on Friday?" strong=true
+    PollResults options={opts} votes={votes} choice={pick} note="votes are anonymous"
+    ActionButton "Change my vote" tone="quiet" icon="undo_rounded" onPressed={votes=map(range(length(opts)),i=>votes[i]-(opts[i]==pick?1:0)); voted=false}

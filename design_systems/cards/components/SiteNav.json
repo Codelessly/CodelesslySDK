@@ -4,7 +4,7 @@
  "roots": ["band"],
  "widget": {
   "type": "SiteNav",
-  "doc": "A website's top bar, written first under Page: SiteNav brand:\"Tidewater\" icon:\"waves\" links:[\"Features\",\"Pricing\"] active:=page secondary:\"Sign in\" cta:\"Start free\" -> page=result (onNavigate gives the link's name; onCta and onSecondary fire on the buttons; an empty label hides its button, and an empty active marks no link). On a phone the menu opens all links and the secondary action; the CTA stays in the bar.",
+  "doc": "A website's top bar, written first under Page: SiteNav brand=\"Tidewater\" icon=\"waves\" links=[\"Features\",\"Pricing\"] active={page} secondary=\"Sign in\" cta=\"Start free\" onNavigate={page=result} (onNavigate gives the link's name; onCta and onSecondary fire on the buttons; an empty label hides its button, and an empty active marks no link). On a phone the menu opens all links and the secondary action; the CTA stays in the bar.",
   "props": [
    {"key": "brand", "type": {"kind": "string", "flutter": "String"}, "default": "Tidewater", "doc": "The product's name, at the left.", "required": true},
    {"key": "icon", "type": {"kind": "string", "flutter": "String"}, "default": "waves", "doc": "A Material icon on the small accent mark before the name (empty: no mark)."},

@@ -1,30 +1,30 @@
-Card gap:12 pad:16
+Card gap=12 pad=16
   Row between middle
     Text.title "Storage"
     Text.caption "182 of 256 GB used"
-  Row h:12 gap:2
-    Box grow:94 h:12 fill:#FF4285F4 radius:6
-    Box grow:52 h:12 fill:#FFF9AB00 radius:6
-    Box grow:36 h:12 fill:#FF9AA0A6 radius:6
-    Box grow:74 h:12 fill:#FFE8EAED radius:6
-  Column gap:8
-    Row gap:8 middle
-      Box w:10 h:10 radius:5 fill:#FF4285F4
+  Row h=12 gap=2
+    Box grow=94 h=12 fill=#FF4285F4 radius=6
+    Box grow=52 h=12 fill=#FFF9AB00 radius=6
+    Box grow=36 h=12 fill=#FF9AA0A6 radius=6
+    Box grow=74 h=12 fill=#FFE8EAED radius=6
+  Column gap=8
+    Row gap=8 middle
+      Box w=10 h=10 radius=5 fill=#FF4285F4
       Text "Photos"
       Spacer grow
       Text.strong "94 GB"
-    Row gap:8 middle
-      Box w:10 h:10 radius:5 fill:#FFF9AB00
+    Row gap=8 middle
+      Box w=10 h=10 radius=5 fill=#FFF9AB00
       Text "Apps"
       Spacer grow
       Text.strong "52 GB"
-    Row gap:8 middle
-      Box w:10 h:10 radius:5 fill:#FF9AA0A6
+    Row gap=8 middle
+      Box w=10 h=10 radius=5 fill=#FF9AA0A6
       Text "Other"
       Spacer grow
       Text.strong "36 GB"
-    Row gap:8 middle
-      Box w:10 h:10 radius:5 fill:#FFE8EAED
+    Row gap=8 middle
+      Box w=10 h=10 radius=5 fill=#FFE8EAED
       Text.muted "Free"
       Spacer grow
       Text.muted "74 GB"

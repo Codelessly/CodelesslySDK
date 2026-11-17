@@ -2,77 +2,77 @@ state dark=false
 state notify=true
 state tab=3
 
-Column h:fill
-  Column grow scroll pad:16 gap:16
+Column h=fill
+  Column grow scroll pad=16 gap=16
     Text.pageTitle "Settings"
     Card
-      Row gap:12 center
-        Avatar "Jordan Rivera" size:56
-        Column grow gap:2
+      Row gap=12 center
+        Avatar "Jordan Rivera" size=56
+        Column grow gap=2
           Text.heading "Jordan Rivera"
           Text.bodySecondary "jordan.rivera@mail.com"
-        Button.outline "Edit" -> emit editProfile
-    Column gap:6
+        Button.outline "Edit" onTap={emit editProfile}
+    Column gap=6
       Text.caption "ACCOUNT"
-      Card gap:0
-        Row gap:12 center pad:[0,12,0,12] -> emit personalInfo
+      Card gap=0
+        Row gap=12 center pad=[0,12,0,12] onTap={emit personalInfo}
           Icon "person"
           Text "Personal info" grow
           Icon "chevron_right"
         Divider
-        Row gap:12 center pad:[0,12,0,12] -> emit security
+        Row gap=12 center pad=[0,12,0,12] onTap={emit security}
           Icon "lock"
           Text "Password & security" grow
           Icon "chevron_right"
         Divider
-        Row gap:12 center pad:[0,12,0,12] -> emit linkedAccounts
+        Row gap=12 center pad=[0,12,0,12] onTap={emit linkedAccounts}
           Icon "link"
           Text "Linked accounts" grow
           Icon "chevron_right"
-    Column gap:6
+    Column gap=6
       Text.caption "PREFERENCES"
-      Card gap:0
-        Row gap:12 center pad:[0,8,0,8]
+      Card gap=0
+        Row gap=12 center pad=[0,8,0,8]
           Icon "dark_mode"
-          Toggle "Dark mode" =dark grow
+          Toggle "Dark mode" bind=dark grow
         Divider
-        Row gap:12 center pad:[0,8,0,8]
+        Row gap=12 center pad=[0,8,0,8]
           Icon "notifications"
-          Toggle "Notifications" =notify grow
+          Toggle "Notifications" bind=notify grow
         Divider
-        Row gap:12 center pad:[0,12,0,12] -> emit language
+        Row gap=12 center pad=[0,12,0,12] onTap={emit language}
           Icon "language"
           Text "Language" grow
           Text.muted "English"
           Icon "chevron_right"
-    Column gap:6
+    Column gap=6
       Text.caption "SUPPORT"
-      Card gap:0
-        Row gap:12 center pad:[0,12,0,12] -> emit help
+      Card gap=0
+        Row gap=12 center pad=[0,12,0,12] onTap={emit help}
           Icon "help"
           Text "Help center" grow
           Icon "chevron_right"
         Divider
-        Row gap:12 center pad:[0,12,0,12] -> emit privacy
+        Row gap=12 center pad=[0,12,0,12] onTap={emit privacy}
           Icon "privacy_tip"
           Text "Privacy policy" grow
           Icon "chevron_right"
     Card
-      Row gap:12 center pad:[0,8,0,8] -> emit logout
-        Icon "logout" color:#FFD32F2F
-        Text.strong "Log out" color:#FFD32F2F grow
+      Row gap=12 center pad=[0,8,0,8] onTap={emit logout}
+        Icon "logout" color=#FFD32F2F
+        Text.strong "Log out" color=#FFD32F2F grow
     Text.caption center "Version 3.4.1"
   Divider
-  Row between pad:[8,8,8,8]
-    Column grow center gap:2 -> tab=0
-      Icon "home" color:=tab==0?"#FF1565C0":"#FF757575"
-      Text.caption "Home" color:=tab==0?"#FF1565C0":"#FF757575"
-    Column grow center gap:2 -> tab=1
-      Icon "search" color:=tab==1?"#FF1565C0":"#FF757575"
-      Text.caption "Explore" color:=tab==1?"#FF1565C0":"#FF757575"
-    Column grow center gap:2 -> tab=2
-      Icon "notifications" color:=tab==2?"#FF1565C0":"#FF757575"
-      Text.caption "Alerts" color:=tab==2?"#FF1565C0":"#FF757575"
-    Column grow center gap:2 -> tab=3
-      Icon "settings" color:=tab==3?"#FF1565C0":"#FF757575"
-      Text.caption "Settings" color:=tab==3?"#FF1565C0":"#FF757575"
+  Row between pad=[8,8,8,8]
+    Column grow center gap=2 onTap={tab=0}
+      Icon "home" color={tab==0?"#FF1565C0":"#FF757575"}
+      Text.caption "Home" color={tab==0?"#FF1565C0":"#FF757575"}
+    Column grow center gap=2 onTap={tab=1}
+      Icon "search" color={tab==1?"#FF1565C0":"#FF757575"}
+      Text.caption "Explore" color={tab==1?"#FF1565C0":"#FF757575"}
+    Column grow center gap=2 onTap={tab=2}
+      Icon "notifications" color={tab==2?"#FF1565C0":"#FF757575"}
+      Text.caption "Alerts" color={tab==2?"#FF1565C0":"#FF757575"}
+    Column grow center gap=2 onTap={tab=3}
+      Icon "settings" color={tab==3?"#FF1565C0":"#FF757575"}
+      Text.caption "Settings" color={tab==3?"#FF1565C0":"#FF757575"}

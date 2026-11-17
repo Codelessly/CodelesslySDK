@@ -1,97 +1,97 @@
 Page
   Nav
-    Brand "Signal & Noise" icon:"graphic_eq"
-    Row gap:4
+    Brand "Signal & Noise" icon="graphic_eq"
+    Row gap=4
       Link "Articles"
       Link "Topics"
       Link "Authors"
       Link "About"
-    Button "Subscribe" -> emit subscribe
+    Button "Subscribe" onTap={emit subscribe}
   Section
-    Column gap:20
+    Column gap=20
       Badge.primary "Infrastructure"
-      Heading "What we learned moving 40 services to one queue" level:1
-      Row gap:12 middle
-        Avatar "Maya Reyes" size:44
-        Column gap:2
+      Heading "What we learned moving 40 services to one queue" level=1
+      Row gap=12 middle
+        Avatar "Maya Reyes" size=44
+        Column gap=2
           Text.strong "Maya Reyes"
           Text.caption "Staff Engineer, Platform"
         Spacer grow
         Text.muted "March 12, 2026"
         Text.muted "·"
         Text.muted "9 min read"
-      Media kind:"train" tone:"dusk" h:400 w:fill
+      Media kind="train" tone="dusk" h=400 w=fill
   Section
-    Row gap:48 top
-      Column grow gap:20
+    Row gap=48 top
+      Column grow gap=20
         Text.lead "A year ago every service of ours talked to its own broker. Today forty of them share one queue. This is what broke, what held and what we would do differently."
-        Heading "Why one queue" level:2
+        Heading "Why one queue" level=2
         Paragraph "We ran six brokers with six sets of dashboards, upgrade windows and failure modes. Every incident began with the question of which queue was involved, and the answer was often two of them at once."
         Paragraph "Consolidating promised one thing to monitor and one thing to scale. It also promised a new shared failure domain, and that trade is the subject of everything below."
-        Box fill:#FFF3F4F6 pad:[24,20,24,20] radius:8 border-left:#FF2563EB
-          Text "“A shared queue does not remove complexity. It moves it to the one place where a single team can afford to own it.”" size:22 weight:600
+        Box fill=#FFF3F4F6 pad=[24,20,24,20] radius=8 border-left=#FF2563EB
+          Text "“A shared queue does not remove complexity. It moves it to the one place where a single team can afford to own it.”" size=22 weight=600
           Text.caption "Maya Reyes"
-        Heading "Making the move safely" level:2
+        Heading "Making the move safely" level=2
         Paragraph "We moved services in waves of five, smallest traffic first. Each service published to both the old and the new queue for a week, and we compared what consumers received before cutting over."
-        CodeBlock "publisher.ts" "const queue = connect(process.env.QUEUE_URL);\n\nawait queue.publish('orders.created', {\n  id: order.id,\n  shadow: true,\n});" language:"typescript"
+        CodeBlock "publisher.ts" "const queue = connect(process.env.QUEUE_URL);\n\nawait queue.publish('orders.created', {\n  id: order.id,\n  shadow: true,\n});" language="typescript"
         Paragraph "Three rules kept the migration boring, which is exactly what we wanted:"
-        Column gap:10
-          Row gap:10 top
-            Icon "check" color:#FF16A34A size:20
+        Column gap=10
+          Row gap=10 top
+            Icon "check" color=#FF16A34A size=20
             Text "Give every service its own consumer group and a hard limit on its share of throughput."
-          Row gap:10 top
-            Icon "check" color:#FF16A34A size:20
+          Row gap=10 top
+            Icon "check" color=#FF16A34A size=20
             Text "Version every message schema and reject anything that does not declare its version."
-          Row gap:10 top
-            Icon "check" color:#FF16A34A size:20
+          Row gap=10 top
+            Icon "check" color=#FF16A34A size=20
             Text "Keep the old broker running for two weeks after the last service has moved."
         Paragraph "None of this is clever. The wins came from doing the same dull steps forty times and writing down what surprised us each time."
-      Column w:320 gap:20 {"props": {"sticky": true, "top": 88}}
-        Card gap:10
+      Column w=320 gap=20 {"props": {"sticky": true, "top": 88}}
+        Card gap=10
           Text.eyebrow "ON THIS PAGE"
-          Text.muted "Why one queue" -> emit goto "why"
-          Text.muted "Making the move safely" -> emit goto "move"
-          Text.muted "Pulled quote" -> emit goto "quote"
-          Text.muted "Code sample" -> emit goto "code"
-          Text.muted "Three rules" -> emit goto "rules"
-        Card gap:12
-          Heading "Get the next post" level:3
+          Text.muted "Why one queue" onTap={emit goto "why"}
+          Text.muted "Making the move safely" onTap={emit goto "move"}
+          Text.muted "Pulled quote" onTap={emit goto "quote"}
+          Text.muted "Code sample" onTap={emit goto "code"}
+          Text.muted "Three rules" onTap={emit goto "rules"}
+        Card gap=12
+          Heading "Get the next post" level=3
           Text.muted "One engineering essay a month. No noise."
-          Input "Email" "you@example.com" =email type:email
-          Button "Subscribe" w:fill -> emit subscribe email; toast "You're on the list"
+          Input "Email" "you@example.com" bind=email type={email}
+          Button "Subscribe" w=fill onTap={emit subscribe email; toast "You're on the list"}
   Section tint
-    Column gap:12
+    Column gap=12
       Text.eyebrow "KEEP READING"
       Heading "Related articles"
-    Grid cols:3 gap:24
-      Card gap:12
-        Media kind:"skyline" tone:"day" h:150
+    Grid cols=3 gap=24
+      Card gap=12
+        Media kind="skyline" tone="day" h=150
         Badge.neutral "Reliability"
-        Heading "Retries without the retry storm" level:3
+        Heading "Retries without the retry storm" level=3
         Text.muted "Backoff, jitter and budgets that keep a bad hour from becoming a bad day."
         Text.caption "Jonas Weber · 7 min read"
-      Card gap:12
-        Media kind:"harbor" tone:"dawn" h:150
+      Card gap=12
+        Media kind="harbor" tone="dawn" h=150
         Badge.neutral "Data"
-        Heading "Schemas that survive a rewrite" level:3
+        Heading "Schemas that survive a rewrite" level=3
         Text.muted "How we version events so old consumers keep working for years."
         Text.caption "Priya Nair · 11 min read"
-      Card gap:12
-        Media kind:"mountain" tone:"night" h:150
+      Card gap=12
+        Media kind="mountain" tone="night" h=150
         Badge.neutral "Culture"
-        Heading "Writing the postmortem nobody fears" level:3
+        Heading "Writing the postmortem nobody fears" level=3
         Text.muted "Blameless reviews, honest timelines and the follow-ups that actually ship."
         Text.caption "Sam Okafor · 6 min read"
   Footer
     Row between top
-      Column gap:8
+      Column gap=8
         Text.strong "Signal & Noise"
         Text.muted "Notes from the engineering team."
-      Column gap:8
+      Column gap=8
         Text.strong "Read"
         Text.muted "Articles"
         Text.muted "Topics"
-      Column gap:8
+      Column gap=8
         Text.strong "Follow"
         Text.muted "RSS"
         Text.muted "Newsletter"

@@ -1,33 +1,33 @@
-Row between pad:[24,16,24,16]
-  Row gap:8
+Row between pad=[24,16,24,16]
+  Row gap=8
     Icon "bolt"
     Text.heading2 "Relay"
-  Row gap:4
+  Row gap=4
     Button.ghost "Product"
     Button.ghost "Pricing"
     Button.ghost "Docs"
     Button.ghost "Changelog"
-  Button "Subscribe to updates" -> toast "You're subscribed to Relay updates"
+  Button "Subscribe to updates" onTap={toast "You're subscribed to Relay updates"}
 Divider
 state filter="All"
 state releases=[{"version":"v4.2.0","date":"Nov 3, 2026","tag":"New","cat":"Features","title":"Shared workspaces","body":"Teams can now collaborate in a single workspace with shared channels, routing rules and usage dashboards.","changes":["Invite teammates with role-based permissions","Shared routing rules across projects","New team usage dashboard"],"image":""},{"version":"v4.1.2","date":"Oct 14, 2026","tag":"Fixed","cat":"Fixes","title":"Stability and delivery fixes","body":"A round of fixes focused on message delivery and notification reliability.","changes":["Fixed duplicate notifications on retry","Resolved a crash when importing large CSV files","Corrected timezone display in scheduled reports"],"image":""},{"version":"v4.1.0","date":"Sep 22, 2026","tag":"Improved","cat":"Improvements","title":"Faster search and smarter filters","body":"Search is now up to 3x faster, and filters remember your last selection across sessions.","changes":["Instant search across all message history","Saved filters in the sidebar","Reduced memory usage on long sessions"],"image":""},{"version":"v4.0.0","date":"Aug 5, 2026","tag":"New","cat":"Features","title":"Relay 4.0: a redesigned experience","body":"A ground-up redesign with a new dashboard, flexible layouts and a refreshed design system.","changes":["Brand new customizable dashboard","Dark mode across the whole app","New public API with webhooks v2"],"image":"https://picsum.photos/seed/relay-dashboard/800/420"},{"version":"v3.9.5","date":"Jul 18, 2026","tag":"Fixed","cat":"Fixes","title":"Patch release","body":"Small fixes ahead of the 4.0 launch to polish rough edges.","changes":["Fixed broken links in email digests","Improved error messages for failed integrations"],"image":""}]
-Column gap:20 pad:[24,32,24,32] maxw:960 scroll
-  Column gap:6
+Column gap=20 pad=[24,32,24,32] maxw=960 scroll
+  Column gap=6
     Text.pageTitle "Changelog"
     Text.bodySecondary "New features, improvements and fixes shipped to Relay. Follow along as we build."
-  SegmentedButton =filter items:["All","Features","Improvements","Fixes"]
-  Column gap:0
+  SegmentedButton bind=filter items=["All","Features","Improvements","Fixes"]
+  Column gap=0
     each r in releases
       if filter=="All"||r.cat==filter
-        Row gap:16 stretch
-          Column w:120 gap:2
+        Row gap=16 stretch
+          Column w=120 gap=2
             Text.strong "{r.version}"
             Text.caption "{r.date}"
-          Column w:16 center gap:0
-            Box w:12 h:12 radius:6 fill:#FF4F46E5
-            Box w:2 grow fill:#FFD0D5DD
-          Column grow gap:10 pad:[0,0,0,32]
-            Row gap:8 center
+          Column w=16 center gap=0
+            Box w=12 h=12 radius=6 fill=#FF4F46E5
+            Box w=2 grow fill=#FFD0D5DD
+          Column grow gap=10 pad=[0,0,0,32]
+            Row gap=8 center
               Text.heading3 "{r.title}"
               if r.tag=="New"
                 Badge.success "New"
@@ -36,17 +36,17 @@ Column gap:20 pad:[24,32,24,32] maxw:960 scroll
               if r.tag=="Fixed"
                 Badge.warning "Fixed"
             Text.body "{r.body}"
-            Column gap:4
+            Column gap=4
               each c in r.changes
                 Text.bodySecondary "• {c}"
             if r.image!=""
-              Image "{r.image}" w:fill radius:8
+              Image "{r.image}" w=fill radius=8
   Row center
-    Button.outline "Load older releases" -> toast "No older releases to load"
+    Button.outline "Load older releases" onTap={toast "No older releases to load"}
   Divider
-  Row between pad:[0,8,0,24]
+  Row between pad=[0,8,0,24]
     Text.caption "© 2026 Relay, Inc. All rights reserved."
-    Row gap:4
+    Row gap=4
       Button.ghost "Privacy"
       Button.ghost "Terms"
       Button.ghost "Status"

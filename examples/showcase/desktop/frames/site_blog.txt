@@ -1,87 +1,87 @@
 Page
   Nav
     Text.strong "Signal & Noise"
-    Row gap:24
+    Row gap=24
       Link "Articles"
       Link "Topics"
       Link "About"
-    Button "Subscribe" -> emit subscribe
+    Button "Subscribe" onTap={emit subscribe}
   Section narrow
-    Column gap:16
+    Column gap=16
       Badge.primary "Infrastructure"
-      Heading "What we learned moving 40 services to one queue" level:1
-      Row gap:12 center
-        Avatar "Maya Reyes" size:44
-        Column gap:2
+      Heading "What we learned moving 40 services to one queue" level=1
+      Row gap=12 center
+        Avatar "Maya Reyes" size=44
+        Column gap=2
           Text.strong "Maya Reyes"
           Text.muted "March 12, 2026 · 9 min read"
   Section
-    Media kind:"harbor" tone:"dusk" h:380 radius:12
+    Media kind="harbor" tone="dusk" h=380 radius=12
   Section
-    Row gap:56 top
-      Column grow gap:16 maxw:700
-        Heading "Why we wanted one queue" level:2
+    Row gap=56 top
+      Column grow gap=16 maxw=700
+        Heading "Why we wanted one queue" level=2
         Text "Two years ago every team ran its own broker. Each one had its own retry rules, its own dashboards and its own idea of what a dead letter was. When something went wrong at night, the first hour went to finding out where the message had even been."
         Text "We set ourselves a simple goal: one queue, one set of guarantees, and a migration that no team had to schedule around. It took us three quarters, and most of what we learned was not about the queue at all."
-        Box fill:#FFF3F4F6 radius:8 pad:[20,16,20,16] border-left:#FF3B5BDB
-          Text "The hard part was never moving the messages. It was agreeing on what a message means." size:22 weight:600
+        Box fill=#FFF3F4F6 radius=8 pad=[20,16,20,16] border-left=#FF3B5BDB
+          Text "The hard part was never moving the messages. It was agreeing on what a message means." size=22 weight=600
           Text.muted "Priya Nair, platform lead"
-        Heading "What the migration looked like" level:2
+        Heading "What the migration looked like" level=2
         Text "We moved services in waves, starting with the ones that could lose a message without anyone noticing. Each service ran in shadow mode first, publishing to both brokers, so we could compare what arrived on each side before cutting over."
         Text "The consumer wrapper below is the one piece of code every team adopted. It makes retries and idempotency the default instead of something to remember."
-        Box fill:#FF111827 radius:8 pad:16 gap:4
-          Text.mono "@queue.consumer(topic='orders.created')" color:#FFE5E7EB
-          Text.mono "def handle(msg):" color:#FFE5E7EB
-          Text.mono "    if seen(msg.id):" color:#FFE5E7EB
-          Text.mono "        return ack(msg)" color:#FFE5E7EB
-          Text.mono "    process(msg.body)" color:#FFE5E7EB
-          Text.mono "    mark_seen(msg.id)" color:#FFE5E7EB
-          Text.mono "    return ack(msg)" color:#FFE5E7EB
+        Box fill=#FF111827 radius=8 pad=16 gap=4
+          Text.mono "@queue.consumer(topic='orders.created')" color=#FFE5E7EB
+          Text.mono "def handle(msg):" color=#FFE5E7EB
+          Text.mono "    if seen(msg.id):" color=#FFE5E7EB
+          Text.mono "        return ack(msg)" color=#FFE5E7EB
+          Text.mono "    process(msg.body)" color=#FFE5E7EB
+          Text.mono "    mark_seen(msg.id)" color=#FFE5E7EB
+          Text.mono "    return ack(msg)" color=#FFE5E7EB
         Text "Three things made the biggest difference:"
-        Column gap:8
-          Row gap:10
+        Column gap=8
+          Row gap=10
             Text "•"
             Text grow "Idempotency keys on every message, set by the producer, never by the broker."
-          Row gap:10
+          Row gap=10
             Text "•"
             Text grow "One shared dead-letter view, so nobody has to hunt for failed work."
-          Row gap:10
+          Row gap=10
             Text "•"
             Text grow "Shadow mode for a full week before any cutover, with no exceptions."
         Text "If we did it again, we would write the message contract first and pick the broker second."
-      Column w:300 gap:20 {"props":{"sticky":true,"top":24}}
-        Column gap:8
+      Column w=300 gap=20 {"props":{"sticky":true,"top":24}}
+        Column gap=8
           Text.eyebrow "On this page"
           Link "Why we wanted one queue"
           Link "What the migration looked like"
           Link "Three things that mattered"
-        Card gap:10
+        Card gap=10
           Text.strong "Get new posts by email"
           Text.muted "One engineering essay a month. No noise."
-          Input "Email" hint:"you@example.com" =email type:email
-          Button "Subscribe" -> emit newsletter email; toast "Thanks for subscribing"
-  Section fill:#FFF9FAFB
-    Heading "Related articles" level:2
-    Grid cols:3 gap:24
-      Card gap:10
-        Media kind:"train" tone:"dawn" h:140
+          Input "Email" hint="you@example.com" bind=email type={email}
+          Button "Subscribe" onTap={emit newsletter email; toast "Thanks for subscribing"}
+  Section fill=#FFF9FAFB
+    Heading "Related articles" level=2
+    Grid cols=3 gap=24
+      Card gap=10
+        Media kind="train" tone="dawn" h=140
         Badge.neutral "Reliability"
         Text.strong "Designing retries that do not melt your database"
         Text.muted "Jonas Weber · 7 min read"
-      Card gap:10
-        Media kind:"skyline" tone:"night" h:140
+      Card gap=10
+        Media kind="skyline" tone="night" h=140
         Badge.neutral "Observability"
         Text.strong "Tracing a message across forty services"
         Text.muted "Aisha Khan · 11 min read"
-      Card gap:10
-        Media kind:"forest" tone:"day" h:140
+      Card gap=10
+        Media kind="forest" tone="day" h=140
         Badge.neutral "Culture"
         Text.strong "How we run migrations without a freeze"
         Text.muted "Priya Nair · 6 min read"
   Footer
     Row between
       Text.strong "Signal & Noise"
-      Row gap:20
+      Row gap=20
         Link "RSS"
         Link "Archive"
         Link "Privacy"

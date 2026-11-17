@@ -9,55 +9,55 @@ state page=0
 state picked=[2,4,5]
 state rows=[{"id":1,"name":"Maya Reyes","company":"Northwind Traders","status":"Active","plan":"Business","mrr":1200,"seen":"2 hours ago","mine":true},{"id":2,"name":"Daniel Okafor","company":"Brightside Dental","status":"Active","plan":"Pro","mrr":480,"seen":"Today","mine":false},{"id":3,"name":"Priya Nair","company":"Lumen Studio","status":"Trial","plan":"Pro","mrr":0,"seen":"Yesterday","mine":true},{"id":4,"name":"Tomas Berg","company":"Fjord Logistics","status":"Churned","plan":"Starter","mrr":0,"seen":"3 weeks ago","mine":false},{"id":5,"name":"Chloe Martin","company":"Atelier Martin","status":"Active","plan":"Starter","mrr":79,"seen":"5 hours ago","mine":true},{"id":6,"name":"Kenji Watanabe","company":"Harbor Coffee Co.","status":"Trial","plan":"Business","mrr":0,"seen":"2 days ago","mine":false},{"id":7,"name":"Sofia Alvarez","company":"Verde Landscaping","status":"Active","plan":"Pro","mrr":480,"seen":"Today","mine":true},{"id":8,"name":"Liam O'Connor","company":"Copperline Plumbing","status":"Churned","plan":"Pro","mrr":0,"seen":"2 months ago","mine":false},{"id":9,"name":"Amara Diallo","company":"Sahel Textiles","status":"Active","plan":"Business","mrr":1650,"seen":"Yesterday","mine":false},{"id":10,"name":"Erik Lindqvist","company":"Nordic Bikes","status":"Trial","plan":"Starter","mrr":0,"seen":"4 days ago","mine":true}]
 
-Row h:fill
-  Sidebar =section brand:"Fieldbook" sectionLabel:"Workspace" items:["Dashboard","Customers","Deals","Tasks","Reports"] icons:["dashboard","people","handshake","check_circle","bar_chart"] badges:["","248","12","5",""] w:240
-  Column grow gap:16 pad:24 fill:#FFF6F7F9
+Row h=fill
+  Sidebar bind=section brand="Fieldbook" sectionLabel="Workspace" items=["Dashboard","Customers","Deals","Tasks","Reports"] icons=["dashboard","people","handshake","check_circle","bar_chart"] badges=["","248","12","5",""] w=240
+  Column grow gap=16 pad=24 fill=#FFF6F7F9
     Row between center
-      Row gap:12 center
+      Row gap=12 center
         Text.pageTitle "Customers"
         Badge.neutral "248"
-      Row gap:8
-        Button.outline "Import" -> emit import
-        Button "Add customer" -> emit add
-    Row gap:12 center
-      SearchBar "Search customers" =query w:320
-      Select =status items:["All","Active","Trial","Churned"] w:140
+      Row gap=8
+        Button.outline "Import" onTap={emit import}
+        Button "Add customer" onTap={emit add}
+    Row gap=12 center
+      SearchBar "Search customers" bind=query w=320
+      Select bind=status items=["All","Active","Trial","Churned"] w=140
       Spacer grow
-      SegmentedControl =view options:["All","Mine"]
+      SegmentedControl bind=view options=["All","Mine"]
     if length(picked)>0
-      Row between center pad:[16,10,16,10] fill:#FFE8F0FE radius:8
+      Row between center pad=[16,10,16,10] fill=#FFE8F0FE radius=8
         Text.strong "{length(picked)} selected"
-        Row gap:8
-          Button.ghost "Clear" -> picked=[]
-          Button.outline "Export" -> emit export picked
-          Button.destructive "Delete" -> rows=removeWhere(rows,c=>contains(picked,c.id)); picked=[]
-    Box fill:#FFFFFFFF radius:10 gap:0
-      Row gap:12 center pad:[16,8,16,8] fill:#FFF1F3F6
-        Checkbox checked:=length(picked)==length(rows) w:28 -> picked=length(picked)==length(rows)?[]:map(rows,c=>c.id)
-        Button.ghost "Name{sortKey=='name'?(sortDesc?' ↓':' ↑'):''}" grow -> rows=sortKey=="name"&&!sortDesc?sortByDesc(rows,c=>c.name):sortBy(rows,c=>c.name); sortDesc=sortKey=="name"&&!sortDesc; sortKey="name"
-        Button.ghost "Company{sortKey=='company'?(sortDesc?' ↓':' ↑'):''}" w:170 -> rows=sortKey=="company"&&!sortDesc?sortByDesc(rows,c=>c.company):sortBy(rows,c=>c.company); sortDesc=sortKey=="company"&&!sortDesc; sortKey="company"
-        Button.ghost "Status{sortKey=='status'?(sortDesc?' ↓':' ↑'):''}" w:110 -> rows=sortKey=="status"&&!sortDesc?sortByDesc(rows,c=>c.status):sortBy(rows,c=>c.status); sortDesc=sortKey=="status"&&!sortDesc; sortKey="status"
-        Button.ghost "Plan{sortKey=='plan'?(sortDesc?' ↓':' ↑'):''}" w:100 -> rows=sortKey=="plan"&&!sortDesc?sortByDesc(rows,c=>c.plan):sortBy(rows,c=>c.plan); sortDesc=sortKey=="plan"&&!sortDesc; sortKey="plan"
-        Button.ghost "Monthly{sortKey=='mrr'?(sortDesc?' ↓':' ↑'):''}" w:110 -> rows=sortKey=="mrr"&&!sortDesc?sortByDesc(rows,c=>c.mrr):sortBy(rows,c=>c.mrr); sortDesc=sortKey=="mrr"&&!sortDesc; sortKey="mrr"
-        Text.caption "Last seen" w:110
-        Spacer w:40
+        Row gap=8
+          Button.ghost "Clear" onTap={picked=[]}
+          Button.outline "Export" onTap={emit export picked}
+          Button.destructive "Delete" onTap={rows=removeWhere(rows,c=>contains(picked,c.id)); picked=[]}
+    Box fill=#FFFFFFFF radius=10 gap=0
+      Row gap=12 center pad=[16,8,16,8] fill=#FFF1F3F6
+        Checkbox checked={length(picked)==length(rows)} w=28 onChange={picked=length(picked)==length(rows)?[]:map(rows,c=>c.id)}
+        Button.ghost "Name{sortKey=='name'?(sortDesc?' ↓':' ↑'):''}" grow onTap={rows=sortKey=="name"&&!sortDesc?sortByDesc(rows,c=>c.name):sortBy(rows,c=>c.name); sortDesc=sortKey=="name"&&!sortDesc; sortKey="name"}
+        Button.ghost "Company{sortKey=='company'?(sortDesc?' ↓':' ↑'):''}" w=170 onTap={rows=sortKey=="company"&&!sortDesc?sortByDesc(rows,c=>c.company):sortBy(rows,c=>c.company); sortDesc=sortKey=="company"&&!sortDesc; sortKey="company"}
+        Button.ghost "Status{sortKey=='status'?(sortDesc?' ↓':' ↑'):''}" w=110 onTap={rows=sortKey=="status"&&!sortDesc?sortByDesc(rows,c=>c.status):sortBy(rows,c=>c.status); sortDesc=sortKey=="status"&&!sortDesc; sortKey="status"}
+        Button.ghost "Plan{sortKey=='plan'?(sortDesc?' ↓':' ↑'):''}" w=100 onTap={rows=sortKey=="plan"&&!sortDesc?sortByDesc(rows,c=>c.plan):sortBy(rows,c=>c.plan); sortDesc=sortKey=="plan"&&!sortDesc; sortKey="plan"}
+        Button.ghost "Monthly{sortKey=='mrr'?(sortDesc?' ↓':' ↑'):''}" w=110 onTap={rows=sortKey=="mrr"&&!sortDesc?sortByDesc(rows,c=>c.mrr):sortBy(rows,c=>c.mrr); sortDesc=sortKey=="mrr"&&!sortDesc; sortKey="mrr"}
+        Text.caption "Last seen" w=110
+        Spacer w=40
       each c in rows
         if (status=="All"||c.status==status)&&(view=="All"||c.mine)&&contains(lower(c.name+" "+c.company),lower(query))
-          Row gap:12 center pad:[16,10,16,10] fill:=contains(picked,c.id)?"#FFF3F7FF":"#FFFFFFFF"
-            Checkbox checked:=contains(picked,c.id) w:28 -> picked=contains(picked,c.id)?without(picked,c.id):append(picked,c.id)
-            Row grow gap:10 center left
-              Avatar "{c.name}" size:32
+          Row gap=12 center pad=[16,10,16,10] fill={contains(picked,c.id)?"#FFF3F7FF":"#FFFFFFFF"}
+            Checkbox checked={contains(picked,c.id)} w=28 onChange={picked=contains(picked,c.id)?without(picked,c.id):append(picked,c.id)}
+            Row grow gap=10 center left
+              Avatar "{c.name}" size=32
               Text.strong "{c.name}"
-            Text "{c.company}" w:170
-            Row w:110 left
-              StatusBadge "{c.status}" tone:=c.status=="Active"?"success":c.status=="Trial"?"info":"neutral"
-            Text "{c.plan}" w:100
-            Text.strong "${c.mrr}" w:110
-            Text.muted "{c.seen}" w:110
-            IconButton "more_horiz" w:40 -> toast "Actions for {c.name}"
+            Text "{c.company}" w=170
+            Row w=110 left
+              StatusBadge "{c.status}" tone={c.status=="Active"?"success":c.status=="Trial"?"info":"neutral"}
+            Text "{c.plan}" w=100
+            Text.strong "${c.mrr}" w=110
+            Text.muted "{c.seen}" w=110
+            IconButton "more_horiz" w=40 onTap={toast "Actions for {c.name}"}
           Divider
     Row between center
       Text.muted "Rows {page*10+1}-{page*10+10} of 248"
-      Row gap:8
-        Button.outline "Previous" enabled:=page>0 -> page=max(0,page-1)
-        Button.outline "Next" enabled:=page<24 -> page=min(24,page+1)
+      Row gap=8
+        Button.outline "Previous" enabled={page>0} onTap={page=max(0,page-1)}
+        Button.outline "Next" enabled={page<24} onTap={page=min(24,page+1)}

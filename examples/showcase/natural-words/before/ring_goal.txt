@@ -1,11 +1,11 @@
 state steps=7240
 state goal=10000
 
-Card gap:12 center
+Card gap=12 center
   Text.title "Daily steps"
-  Stack w:160 h:160 center middle
-    CircularProgressIndicator value:=steps/goal w:160 h:160 strokeWidth:12
-    Column center gap:2
+  Stack w=160 h=160 center middle
+    CircularProgressIndicator value={steps/goal} w=160 h=160 strokeWidth=12
+    Column center gap=2
       Text.heading1 "{round(steps/goal*100,0)}%"
       Text.caption "of goal"
   Text.strong "{money(steps,'',0)} / {money(goal,'',0)} steps"

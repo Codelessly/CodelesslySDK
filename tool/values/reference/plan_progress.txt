@@ -2,12 +2,12 @@ state done=0
 state t=0
 state running=false
 state steps=[{"t":"Back up your content","d":"Export posts, pages and settings."},{"t":"Set up the new host","d":"Create the site and install the theme."},{"t":"Import posts","d":"Copy articles, tags and categories."},{"t":"Move media","d":"Upload images and fix their links."},{"t":"Redirect old URLs","d":"Map old addresses to the new ones."},{"t":"Final checks","d":"Test links, feeds and the DNS switch."}]
-every 1s when running -> t=t+1; done=min(6,floor(t/2)); running=done<6
-ChatCard "Blog migration plan" "Six steps, about two seconds each" icon:"rocket_launch_rounded" status:"{done>=6?"Complete":(running?"Running":(t>0?"Paused":"Ready"))}" tone:=done>=6?"good":"accent"
-  ProgressLine "{done} of 6 steps" "{t} s elapsed" value:=done/6
+every 1s when running onTick={t=t+1; done=min(6,floor(t/2)); running=done<6}
+ChatCard "Blog migration plan" "Six steps, about two seconds each" icon="rocket_launch_rounded" status="{done>=6?"Complete":(running?"Running":(t>0?"Paused":"Ready"))}" tone={done>=6?"good":"accent"}
+  ProgressLine "{done} of 6 steps" "{t} s elapsed" value={done/6}
   each s in steps
-    PlanStep "{s.t}" "{s.d}" index:=index current:=done running:=running last:=index==5
+    PlanStep "{s.t}" "{s.d}" index={index} current={done} running={running} last={index==5}
   if done<6
-    ActionButton#go "{running?"Pause":(t>0?"Resume":"Start migration")}" icon:"{running?"pause_rounded":"play_arrow_rounded"}" tone:"{running?"quiet":"primary"}" -> running=!running
+    ActionButton#go "{running?"Pause":(t>0?"Resume":"Start migration")}" icon="{running?"pause_rounded":"play_arrow_rounded"}" tone="{running?"quiet":"primary"}" onPressed={running=!running}
   if done>=6
     Receipt "Migration complete" "All six steps finished in {t} seconds. Your blog is live on the new host."

@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "StatTile",
-  "doc": "A dashboard figure with its change: the label, value (text) and delta (+8.5% or -0.4%: an up or down chip, green when good; invert:true when a fall is good, as for churn); put four in a Grid cols:2 gap:10.",
+  "doc": "A dashboard figure with its change: the label, value (text) and delta (+8.5% or -0.4%: an up or down chip, green when good; invert=true when a fall is good, as for churn); put four in a Grid cols=2 gap=10.",
   "props": [
    {
     "key": "label",

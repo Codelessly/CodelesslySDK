@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "TopBar",
-  "doc": "The top of a screen: a large title, an optional subtitle, eyebrow (a brand line with the mark), back:true (a round back button that fires onPressed) and badge (a small pill at the right).",
+  "doc": "The top of a screen: a large title, an optional subtitle, eyebrow (a brand line with the mark), back=true (a round back button that fires onPressed) and badge (a small pill at the right).",
   "props": [
    {
     "key": "title",

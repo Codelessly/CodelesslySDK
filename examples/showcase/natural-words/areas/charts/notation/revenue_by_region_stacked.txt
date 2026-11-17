@@ -1,50 +1,50 @@
-Card gap:16 pad:16
+Card gap=16 pad=16
   Text.title "Quarterly revenue by region, 2026"
   Text.caption "Revenue in $M, stacked by region; totals shown above each bar"
-  Row gap:16
-    Row gap:6 middle
-      Box w:12 h:12 radius:6 fill:#FF1E5EFF
+  Row gap=16
+    Row gap=6 middle
+      Box w=12 h=12 radius=6 fill=#FF1E5EFF
       Text.small "North America"
-    Row gap:6 middle
-      Box w:12 h:12 radius:6 fill:#FF12A594
+    Row gap=6 middle
+      Box w=12 h=12 radius=6 fill=#FF12A594
       Text.small "Europe"
-    Row gap:6 middle
-      Box w:12 h:12 radius:6 fill:#FFF5A524
+    Row gap=6 middle
+      Box w=12 h=12 radius=6 fill=#FFF5A524
       Text.small "APAC"
-  Row gap:12 h:250 bottom
-    Column grow center end gap:2
+  Row gap=12 h=250 bottom
+    Column grow center end gap=2
       Text.strong "$2.5M"
-      Box w:56 h:25 center middle fill:#FFF5A524
-        Text "0.5" size:11 color:#FF000000
-      Box w:56 h:40 center middle fill:#FF12A594
-        Text "0.8" size:11 color:#FFFFFFFF
-      Box w:56 h:60 center middle fill:#FF1E5EFF
-        Text "1.2" size:11 color:#FFFFFFFF
+      Box w=56 h=25 center middle fill=#FFF5A524
+        Text "0.5" size=11 color=#FF000000
+      Box w=56 h=40 center middle fill=#FF12A594
+        Text "0.8" size=11 color=#FFFFFFFF
+      Box w=56 h=60 center middle fill=#FF1E5EFF
+        Text "1.2" size=11 color=#FFFFFFFF
       Text.caption "Q1"
-    Column grow center end gap:2
+    Column grow center end gap=2
       Text.strong "$2.9M"
-      Box w:56 h:30 center middle fill:#FFF5A524
-        Text "0.6" size:11 color:#FF000000
-      Box w:56 h:45 center middle fill:#FF12A594
-        Text "0.9" size:11 color:#FFFFFFFF
-      Box w:56 h:70 center middle fill:#FF1E5EFF
-        Text "1.4" size:11 color:#FFFFFFFF
+      Box w=56 h=30 center middle fill=#FFF5A524
+        Text "0.6" size=11 color=#FF000000
+      Box w=56 h=45 center middle fill=#FF12A594
+        Text "0.9" size=11 color=#FFFFFFFF
+      Box w=56 h=70 center middle fill=#FF1E5EFF
+        Text "1.4" size=11 color=#FFFFFFFF
       Text.caption "Q2"
-    Column grow center end gap:2
+    Column grow center end gap=2
       Text.strong "$3.2M"
-      Box w:56 h:35 center middle fill:#FFF5A524
-        Text "0.7" size:11 color:#FF000000
-      Box w:56 h:50 center middle fill:#FF12A594
-        Text "1.0" size:11 color:#FFFFFFFF
-      Box w:56 h:75 center middle fill:#FF1E5EFF
-        Text "1.5" size:11 color:#FFFFFFFF
+      Box w=56 h=35 center middle fill=#FFF5A524
+        Text "0.7" size=11 color=#FF000000
+      Box w=56 h=50 center middle fill=#FF12A594
+        Text "1.0" size=11 color=#FFFFFFFF
+      Box w=56 h=75 center middle fill=#FF1E5EFF
+        Text "1.5" size=11 color=#FFFFFFFF
       Text.caption "Q3"
-    Column grow center end gap:2
+    Column grow center end gap=2
       Text.strong "$3.7M"
-      Box w:56 h:45 center middle fill:#FFF5A524
-        Text "0.9" size:11 color:#FF000000
-      Box w:56 h:55 center middle fill:#FF12A594
-        Text "1.1" size:11 color:#FFFFFFFF
-      Box w:56 h:85 center middle fill:#FF1E5EFF
-        Text "1.7" size:11 color:#FFFFFFFF
+      Box w=56 h=45 center middle fill=#FFF5A524
+        Text "0.9" size=11 color=#FF000000
+      Box w=56 h=55 center middle fill=#FF12A594
+        Text "1.1" size=11 color=#FFFFFFFF
+      Box w=56 h=85 center middle fill=#FF1E5EFF
+        Text "1.7" size=11 color=#FFFFFFFF
       Text.caption "Q4"

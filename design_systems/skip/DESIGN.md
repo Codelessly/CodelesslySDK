@@ -50,6 +50,6 @@ theme takes the athlete set's colors.
 ## Do and do not
 
 - Do lead a screen with exactly one of HeroSession, ChartCard, SessionDial or SessionSummary.
-- Do put StreakFlame and ProgressGoal side by side in a `Row gap:12`.
+- Do put StreakFlame and ProgressGoal side by side in a `Row gap=12`.
 - Do not put two accent-colored things next to each other; the accent marks the one thing to look at.
 - Do not write emoji; icons are Material icon names.

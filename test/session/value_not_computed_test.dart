@@ -24,7 +24,7 @@ void main() {
     final codes = await _codes(tester, '''
 state items=[{"name":"Tea","price":"four"},{"name":"Cake"}]
 state x={"a":1}
-Card gap:8
+Card gap=8
   Text.heading "Your order"
   Text "Total: {items[0].price*2}"
   Text "{items[1].note!="" ? items[1].note : ""}"
@@ -35,7 +35,7 @@ Card gap:8
   testWidgets('a card whose values are right reports nothing of the kind', (tester) async {
     final codes = await _codes(tester, '''
 state items=[{"name":"Tea","price":4},{"name":"Cake","price":3}]
-Card gap:8
+Card gap=8
   Text.heading "Null Island tea room"
   Text "Total: {sum(items,i=>i.price*2)}"
 ''');

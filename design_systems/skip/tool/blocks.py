@@ -176,7 +176,7 @@ def top_bar():
         P('badge', STRING, '', 'A small pill at the right, e.g. the streak count (empty: none).'),
         P('badgeIcon', STRING, 'local_fire_department', 'The icon in the badge.'),
     ]
-    return component('TopBar', "The top of a screen: a large title, an optional subtitle, eyebrow (a brand line with the mark), back:true (a round back button that fires onPressed) and badge (a small pill at the right).",
+    return component('TopBar', "The top of a screen: a large title, an optional subtitle, eyebrow (a brand line with the mark), back=true (a round back button that fires onPressed) and badge (a small pill at the right).",
                      props, nodes, 'bar', events=[('onPressed', 'The back button was tapped.')],
                      previews=[{'name': 'Home', 'size': [350, 150], 'props': {'title': 'Ready to jump?', 'eyebrow': 'Skip',
                                                                                'subtitle': 'Today takes just 8 minutes.'}},
@@ -241,7 +241,7 @@ def hero_session():
         P('cta', STRING, 'Start session', "The button's label."),
         AUDIENCE,
     ]
-    return component('HeroSession', "The screen's one focal point: today's session on the brand gradient with the jumper illustration, minutes as a chip, the detail sentence and one big cta button that fires onPressed; audience:\"kid\" draws the child.", props, nodes, 'hero',
+    return component('HeroSession', "The screen's one focal point: today's session on the brand gradient with the jumper illustration, minutes as a chip, the detail sentence and one big cta button that fires onPressed; audience=\"kid\" draws the child.", props, nodes, 'hero',
                      events=[('onPressed', 'The start button was tapped.')],
                      previews=[{'name': 'Intervals', 'size': [350, 400], 'props': {
                          'title': 'Intervals', 'minutes': '8', 'detail': '8 easy rounds: jump for 40 seconds, rest for 20.'}}])
@@ -567,7 +567,7 @@ def empty_state():
         P('cta', STRING, '', "The button's label (empty: no button); a tap fires onPressed."),
         AUDIENCE,
     ]
-    return component('EmptyState', "What a screen or a list shows when there is nothing yet: a drawn rope at rest, a title, a message and a cta button that fires onPressed; audience:\"kid\" draws the playful one.", props, nodes, 'empty', events=[('onPressed', 'The button was tapped.')],
+    return component('EmptyState', "What a screen or a list shows when there is nothing yet: a drawn rope at rest, a title, a message and a cta button that fires onPressed; audience=\"kid\" draws the playful one.", props, nodes, 'empty', events=[('onPressed', 'The button was tapped.')],
                      previews=[{'name': 'No sessions', 'size': [350, 360], 'props': {
                          'title': 'No sessions yet', 'message': 'Your first one takes five minutes.', 'cta': 'Start a session'}}])
 
@@ -741,7 +741,7 @@ def session_dial():
         P('readyLabel', STRING, 'Ready', 'The chip over the jumper before the start.'),
         AUDIENCE,
     ]
-    return component('SessionDial', "The session screen's one focal point: a big countdown ring that drains with left (seconds) on a surface that changes with phase (\"ready\" shows the jumper, \"set\" the count-in, \"work\" the bright surface, \"rest\" the calm one), with the round marks (round of rounds), the time to go, and paused:true dimming it; pass work and rest (the phase lengths in seconds).",
+    return component('SessionDial', "The session screen's one focal point: a big countdown ring that drains with left (seconds) on a surface that changes with phase (\"ready\" shows the jumper, \"set\" the count-in, \"work\" the bright surface, \"rest\" the calm one), with the round marks (round of rounds), the time to go, and paused=true dimming it; pass work and rest (the phase lengths in seconds).",
                      props, nodes, 'dial',
                      previews=[{'name': 'Work', 'size': [350, DIAL_H], 'props': {'left': 28, 'phase': 'work', 'round': 3}},
                                {'name': 'Rest', 'size': [350, DIAL_H], 'props': {'left': 12, 'phase': 'rest', 'round': 3}},
@@ -802,7 +802,7 @@ def tap_pad():
         P('label', STRING, 'Jumps', 'What is counted, small caps over the number.'),
         P('hint', STRING, 'Tap', 'The word on the round target.'),
     ]
-    return component('TapPad', "The jump counter as one enormous tap target: write TapPad =count and every tap anywhere on it adds 1 to your count variable, shown in display type; its two quiet chips take 1 off or add 10 (onChanged fires with the new count).",
+    return component('TapPad', "The jump counter as one enormous tap target: write TapPad bind=count and every tap anywhere on it adds 1 to your count variable, shown in display type; its two quiet chips take 1 off or add 10 (onChanged fires with the new count).",
                      props, nodes, 'pad', events=[('onChanged', 'The count changed; the value is the new count.')],
                      previews=[{'name': 'Counting', 'size': [350, PAD_H], 'props': {}}])
 
@@ -835,7 +835,7 @@ def session_controls():
         P('resume', STRING, 'Resume', "The big button's label while paused."),
         P('finish', STRING, 'Finish', "The quiet button's label."),
     ]
-    return component('SessionControls', "The session's control bar: write SessionControls =paused and its big button pauses and resumes by toggling your paused variable itself, while the quiet Finish button fires onPressed (write -> for what finishing does).",
+    return component('SessionControls', "The session's control bar: write SessionControls bind=paused and its big button pauses and resumes by toggling your paused variable itself, while the quiet Finish button fires onPressed (write -> for what finishing does).",
                      props, nodes, 'controls', events=[('onPressed', 'Finish was tapped.')],
                      previews=[{'name': 'Running', 'size': [350, 64], 'props': {}}])
 
@@ -865,7 +865,7 @@ def big_button():
         P('icon', STRING, 'play_arrow_rounded', 'The icon in the round mark at the left.'),
         P('tone', enum('primary', 'quiet'), 'primary', 'primary (filled with the brand, the one main action) or quiet (a soft second action).'),
     ]
-    return component('BigButton', "A full-width, thumb-sized button for a screen's main action below its focal block (Start, Done): the label with icon in a round mark, firing onPressed; tone:\"quiet\" is the soft second action.",
+    return component('BigButton', "A full-width, thumb-sized button for a screen's main action below its focal block (Start, Done): the label with icon in a round mark, firing onPressed; tone=\"quiet\" is the soft second action.",
                      props, nodes, 'btn', events=[('onPressed', 'The button was tapped.')],
                      previews=[{'name': 'Start', 'size': [350, 64], 'props': {'label': 'Start'}},
                                {'name': 'Quiet', 'size': [350, 64], 'props': {'label': 'See your progress', 'tone': 'quiet', 'icon': 'bar_chart_rounded'}}])

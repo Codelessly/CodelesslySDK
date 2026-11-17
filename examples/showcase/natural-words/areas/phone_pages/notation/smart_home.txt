@@ -8,78 +8,78 @@ state heat=true
 state locked=true
 state playing=true
 
-Column h:fill maxw:720
-  Column scroll grow gap:16 pad:16
+Column h=fill maxw=720
+  Column scroll grow gap=16 pad=16
     Row between center
-      Column gap:2
+      Column gap=2
         Text.heading1 "Good evening, Sam"
         Text.bodySecondary "{room}"
-      Row gap:6 center
+      Row gap=6 center
         Icon "partly_cloudy_day"
         Text.heading3 "18°C"
-    Row scroll gap:8
-      ChoiceChip "Living Room" selected:=room=="Living Room" -> room="Living Room"
-      ChoiceChip "Kitchen" selected:=room=="Kitchen" -> room="Kitchen"
-      ChoiceChip "Bedroom" selected:=room=="Bedroom" -> room="Bedroom"
-      ChoiceChip "Garage" selected:=room=="Garage" -> room="Garage"
-    Grid cols:2 gap:12
-      Card gap:8
+    Row scroll gap=8
+      ChoiceChip "Living Room" selected={room=="Living Room"} onTap={room="Living Room"}
+      ChoiceChip "Kitchen" selected={room=="Kitchen"} onTap={room="Kitchen"}
+      ChoiceChip "Bedroom" selected={room=="Bedroom"} onTap={room="Bedroom"}
+      ChoiceChip "Garage" selected={room=="Garage"} onTap={room="Garage"}
+    Grid cols=2 gap=12
+      Card gap=8
         Row between center
           Icon "lightbulb"
-          Toggle "" =light
+          Toggle "" bind=light
         Text.strong "Ceiling Light"
         Text.caption "{light ? brightness + '% brightness' : 'Off'}"
-        Slider =brightness min:0 max:100 visible:=light
-      Card gap:8
+        Slider bind=brightness min=0 max=100 visible={light}
+      Card gap=8
         Row between center
           Icon "tv"
-          Toggle "" =tv
+          Toggle "" bind=tv
         Text.strong "Smart TV"
         Text.caption "{tv ? 'On' : 'Off'}"
-      Card gap:8
+      Card gap=8
         Row between center
           Icon "air"
-          Toggle "" =purifier
+          Toggle "" bind=purifier
         Text.strong "Air Purifier"
         Text.caption "{purifier ? 'On' : 'Off'}"
-      Card gap:8
+      Card gap=8
         Row between center
           Icon "thermostat"
-          Toggle "" =heat
+          Toggle "" bind=heat
         Text.strong "Thermostat"
         Text.caption "{heat ? '21.5°C' : 'Off'}"
-      Card gap:8
+      Card gap=8
         Row between center
           Icon "{locked ? 'lock' : 'lock_open'}"
-          Toggle "" =locked
+          Toggle "" bind=locked
         Text.strong "Door Lock"
         Text.caption "{locked ? 'Locked' : 'Unlocked'}"
-      Card gap:8
+      Card gap=8
         Row between center
           Icon "speaker"
-          Toggle "" =playing
+          Toggle "" bind=playing
         Text.strong "Speaker"
         Text.caption "{playing ? 'Playing' : 'Paused'}"
-    Card gap:12
+    Card gap=12
       Row between center
         Text.panelTitle "Energy usage"
         Badge.success "-8% vs. yesterday"
-      Row gap:8 center
-        Text "12.4" size:40 weight:700
+      Row gap=8 center
+        Text "12.4" size=40 weight=700
         Text.bodySecondary "kWh today"
       Progress 0.62
-      BarChart values:[9.8,11.2,10.5,13.1,12.0,8.9,12.4] labels:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+      BarChart values=[9.8,11.2,10.5,13.1,12.0,8.9,12.4] labels=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
   Divider
-  Row between pad:[16,8,16,8]
-    Column center gap:2
-      IconButton "home" -> tab="Home"
-      Text.caption "Home" weight:700
-    Column center gap:2
-      IconButton "meeting_room" -> tab="Rooms"
+  Row between pad=[16,8,16,8]
+    Column center gap=2
+      IconButton "home" onTap={tab="Home"}
+      Text.caption "Home" weight=700
+    Column center gap=2
+      IconButton "meeting_room" onTap={tab="Rooms"}
       Text.caption "Rooms"
-    Column center gap:2
-      IconButton "bolt" -> tab="Energy"
+    Column center gap=2
+      IconButton "bolt" onTap={tab="Energy"}
       Text.caption "Energy"
-    Column center gap:2
-      IconButton "settings" -> tab="Settings"
+    Column center gap=2
+      IconButton "settings" onTap={tab="Settings"}
       Text.caption "Settings"

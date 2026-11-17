@@ -678,7 +678,7 @@ class NotationPlaygroundState extends State<NotationPlayground> {
             controller: _text,
             focusNode: _editorFocus,
             hasError: _failure != null,
-            placeholder: 'Card gap:12\n  Text.sectionTitle "Hello"\n  Button "Save" -> emit save',
+            placeholder: 'Card gap=12\n  Text.sectionTitle "Hello"\n  Button "Save" onTap={emit save}',
           ),
         ),
       ],

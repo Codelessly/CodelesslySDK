@@ -4,7 +4,7 @@
  "roots": ["tile"],
  "widget": {
   "type": "FeatureCard",
-  "doc": "One feature as a page tile, as wide as its cell: FeatureCard \"Live calendar\" \"Every room, every night...\" icon:\"calendar_month_rounded\" tone:\"accent\" link:\"Learn more\" -> onPressed (tone tints the icon square: accent by default, good, warn, bad or neutral; link empty hides it).",
+  "doc": "One feature as a page tile, as wide as its cell: FeatureCard \"Live calendar\" \"Every room, every night...\" icon=\"calendar_month_rounded\" tone=\"accent\" link=\"Learn more\" onPressed={…} (tone tints the icon square: accent by default, good, warn, bad or neutral; link empty hides it).",
   "props": [
    {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Live calendar", "doc": "The feature's name.", "required": true},
    {"key": "text", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "Two lines or so describing it."},

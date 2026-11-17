@@ -1,24 +1,24 @@
-Column gap:16 pad:16
-  Card gap:16
-    Column gap:4
+Column gap=16 pad=16
+  Card gap=16
+    Column gap=4
       Text.heading "Osteria Nonna"
       Text.muted "Reserve a table"
     state date="2026-11-21"
     state slot="7:00 PM"
     state party=4
     Text.fieldLabel "Date"
-    DatePicker =date
+    DatePicker bind=date
     Text.fieldLabel "Time"
-    Row scroll gap:8
-      ChoiceChip "6:00 PM" selected:=slot=="6:00 PM" -> slot="6:00 PM"
-      ChoiceChip "6:30 PM" selected:=slot=="6:30 PM" -> slot="6:30 PM"
-      ChoiceChip "7:00 PM" selected:=slot=="7:00 PM" -> slot="7:00 PM"
-      ChoiceChip "7:30 PM" selected:=slot=="7:30 PM" -> slot="7:30 PM"
-      ChoiceChip "8:00 PM" selected:=slot=="8:00 PM" enabled:=false
+    Row scroll gap=8
+      ChoiceChip "6:00 PM" selected={slot=="6:00 PM"} onTap={slot="6:00 PM"}
+      ChoiceChip "6:30 PM" selected={slot=="6:30 PM"} onTap={slot="6:30 PM"}
+      ChoiceChip "7:00 PM" selected={slot=="7:00 PM"} onTap={slot="7:00 PM"}
+      ChoiceChip "7:30 PM" selected={slot=="7:30 PM"} onTap={slot="7:30 PM"}
+      ChoiceChip "8:00 PM" selected={slot=="8:00 PM"} enabled={false}
     Row between center
       Text.fieldLabel "Party size"
-      Row gap:12 center
-        Button.outline "-" -> party=max(1,party-1)
+      Row gap=12 center
+        Button.outline "-" onTap={party=max(1,party-1)}
         Text.strong "{party}"
-        Button.outline "+" -> party=min(12,party+1)
-    Button "Reserve" -> emit reserve; toast "Table requested for {party} at {slot}"
+        Button.outline "+" onTap={party=min(12,party+1)}
+    Button "Reserve" onTap={emit reserve; toast "Table requested for {party} at {slot}"}

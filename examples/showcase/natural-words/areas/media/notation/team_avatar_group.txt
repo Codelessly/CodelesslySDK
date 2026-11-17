@@ -1,28 +1,28 @@
-Card gap:12 pad:16
+Card gap=12 pad=16
   Row between
     Text.heading "Q3 Launch"
     Badge.success "Active"
-  Stack w:180 h:44
-    Box pad:[0,0,0,0]
-      Box fill:#FFFFFFFF radius:22 pad:2
+  Stack w=180 h=44
+    Box pad=[0,0,0,0]
+      Box fill=#FFFFFFFF radius=22 pad=2
         Stack
-          Avatar "Maya Chen" size:40
-          Box pad:[28,28,0,0]
-            Box w:12 h:12 radius:6 fill:#FF22C55E border:#FFFFFFFF
-    Box pad:[32,0,0,0]
-      Box fill:#FFFFFFFF radius:22 pad:2
-        Avatar "Raj Patel" size:40
-    Box pad:[64,0,0,0]
-      Box fill:#FFFFFFFF radius:22 pad:2
-        Avatar "Lena Fischer" size:40
-    Box pad:[96,0,0,0]
-      Box fill:#FFFFFFFF radius:22 pad:2
+          Avatar "Maya Chen" size=40
+          Box pad=[28,28,0,0]
+            Box w=12 h=12 radius=6 fill=#FF22C55E border=#FFFFFFFF
+    Box pad=[32,0,0,0]
+      Box fill=#FFFFFFFF radius=22 pad=2
+        Avatar "Raj Patel" size=40
+    Box pad=[64,0,0,0]
+      Box fill=#FFFFFFFF radius=22 pad=2
+        Avatar "Lena Fischer" size=40
+    Box pad=[96,0,0,0]
+      Box fill=#FFFFFFFF radius=22 pad=2
         Stack
-          Avatar "Tom Okafor" size:40
-          Box pad:[28,28,0,0]
-            Box w:12 h:12 radius:6 fill:#FF22C55E border:#FFFFFFFF
-    Box pad:[128,0,0,0]
-      Box fill:#FFFFFFFF radius:22 pad:2
-        Stack center middle w:40 h:40 radius:20 fill:#FFE5E7EB
+          Avatar "Tom Okafor" size=40
+          Box pad=[28,28,0,0]
+            Box w=12 h=12 radius=6 fill=#FF22C55E border=#FFFFFFFF
+    Box pad=[128,0,0,0]
+      Box fill=#FFFFFFFF radius=22 pad=2
+        Stack center middle w=40 h=40 radius=20 fill=#FFE5E7EB
           Text.strong "+4"
   Text.muted "8 members - 3 online"

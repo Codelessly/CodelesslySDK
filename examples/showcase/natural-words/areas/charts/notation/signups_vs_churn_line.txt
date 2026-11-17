@@ -1,11 +1,11 @@
-Card gap:12
+Card gap=12
   Text.title "Weekly signups vs churn"
   Text.muted "Last 8 weeks"
-  LineChart labels:["W1","W2","W3","W4","W5","W6","W7","W8"] series:[{"name":"Signups","values":[420,465,510,498,560,610,645,702],"color":"#FF2563EB"},{"name":"Churned","values":[120,118,131,125,140,132,128,135],"color":"#FFDC2626"}] h:220
-  Row gap:16 center
-    Row gap:6 center
-      Box w:10 h:10 radius:5 fill:#FF2563EB
+  LineChart labels=["W1","W2","W3","W4","W5","W6","W7","W8"] series=[{"name":"Signups","values":[420,465,510,498,560,610,645,702],"color":"#FF2563EB"},{"name":"Churned","values":[120,118,131,125,140,132,128,135],"color":"#FFDC2626"}] h=220
+  Row gap=16 center
+    Row gap=6 center
+      Box w=10 h=10 radius=5 fill=#FF2563EB
       Text.small "Signups"
-    Row gap:6 center
-      Box w:10 h:10 radius:5 fill:#FFDC2626
+    Row gap=6 center
+      Box w=10 h=10 radius=5 fill=#FFDC2626
       Text.small "Churned"

@@ -4,54 +4,54 @@ state q=""
 state orders=[{"id":"#10482","customer":"Maya Reyes","status":"Paid","total":142.5,"date":"Mar 14"},{"id":"#10481","customer":"Liam Chen","status":"Shipped","total":89,"date":"Mar 14"},{"id":"#10480","customer":"Sofia Alvarez","status":"Pending","total":214.75,"date":"Mar 13"},{"id":"#10479","customer":"Noah Patel","status":"Paid","total":56.2,"date":"Mar 13"},{"id":"#10478","customer":"Emma Johnson","status":"Refunded","total":73.9,"date":"Mar 12"},{"id":"#10477","customer":"Oliver Smith","status":"Shipped","total":38.4,"date":"Mar 12"},{"id":"#10476","customer":"Ava Müller","status":"Paid","total":126,"date":"Mar 11"},{"id":"#10475","customer":"Lucas Rossi","status":"Pending","total":64.3,"date":"Mar 11"}]
 App
   Sidebar
-    Row gap:8 pad:[0,0,0,16]
+    Row gap=8 pad=[0,0,0,16]
       Icon "sailing"
       Text.strong "Harbor"
-    NavItem "Overview" icon:"dashboard" selected:=tab=="overview" -> tab="overview"
-    NavItem "Orders" icon:"receipt_long" selected:=tab=="orders" -> tab="orders"
-    NavItem "Inventory" icon:"inventory_2" selected:=tab=="inventory" -> tab="inventory"
-    NavItem "Customers" icon:"group" selected:=tab=="customers" -> tab="customers"
-    NavItem "Reports" icon:"bar_chart" selected:=tab=="reports" -> tab="reports"
-    NavItem "Settings" icon:"settings" selected:=tab=="settings" -> tab="settings"
+    NavItem "Overview" icon="dashboard" selected={tab=="overview"} onTap={tab="overview"}
+    NavItem "Orders" icon="receipt_long" selected={tab=="orders"} onTap={tab="orders"}
+    NavItem "Inventory" icon="inventory_2" selected={tab=="inventory"} onTap={tab="inventory"}
+    NavItem "Customers" icon="group" selected={tab=="customers"} onTap={tab="customers"}
+    NavItem "Reports" icon="bar_chart" selected={tab=="reports"} onTap={tab="reports"}
+    NavItem "Settings" icon="settings" selected={tab=="settings"} onTap={tab="settings"}
     Spacer grow
     Divider
-    Row gap:10 pad:[0,12,0,0]
-      Avatar "Sam Patel" size:36
+    Row gap=10 pad=[0,12,0,0]
+      Avatar "Sam Patel" size=36
       Column
         Text.strong "Sam Patel"
         Text.muted "Operations lead"
   Main
     Nav
       Heading "Overview"
-      Row gap:12
-        Segments =range options:["7d","30d","90d"]
-        Input "Search" =q w:220
-        Button "New order" icon:"add" -> emit newOrder
-    Column pad:24 gap:16
-      Grid cols:4 gap:16
-        StatTile "Revenue" "vs previous period" value:"$128,400" delta:"+8.2%" icon:"payments"
-        StatTile "Orders" "vs previous period" value:"1,942" delta:"+3.1%" icon:"shopping_bag"
-        StatTile "Returns" "vs previous period" value:"2.4%" delta:"-0.6%" invert:true icon:"assignment_return"
-        StatTile "Avg. order" "vs previous period" value:"$66.10" delta:"+1.9%" icon:"receipt"
-      Row gap:16 top
-        ChartCard grow "Revenue, last 12 weeks" "$128,400" kind:"line" delta:"+8.2%" values:[8.2,8.9,9.4,9.1,10.2,10.8,10.4,11.5,11.9,12.6,12.2,13.4] labels:["W1","W2","W3","W4","W5","W6","W7","W8","W9","W10","W11","W12"]
-        ChartCard w:380 "Revenue by channel" "4 channels" kind:"bars" values:[48,27,15,10] labels:["Web","Store","App","Partner"]
-      Card gap:12
+      Row gap=12
+        Segments bind=range options=["7d","30d","90d"]
+        Input "Search" bind=q w=220
+        Button "New order" icon="add" onTap={emit newOrder}
+    Column pad=24 gap=16
+      Grid cols=4 gap=16
+        StatTile "Revenue" "vs previous period" value="$128,400" delta="+8.2%" icon="payments"
+        StatTile "Orders" "vs previous period" value="1,942" delta="+3.1%" icon="shopping_bag"
+        StatTile "Returns" "vs previous period" value="2.4%" delta="-0.6%" invert=true icon="assignment_return"
+        StatTile "Avg. order" "vs previous period" value="$66.10" delta="+1.9%" icon="receipt"
+      Row gap=16 top
+        ChartCard grow "Revenue, last 12 weeks" "$128,400" kind="line" delta="+8.2%" values=[8.2,8.9,9.4,9.1,10.2,10.8,10.4,11.5,11.9,12.6,12.2,13.4] labels=["W1","W2","W3","W4","W5","W6","W7","W8","W9","W10","W11","W12"]
+        ChartCard w=380 "Revenue by channel" "4 channels" kind="bars" values=[48,27,15,10] labels=["Web","Store","App","Partner"]
+      Card gap=12
         Row between
           Text.strong "Latest orders"
-          Link "View all" -> tab="orders"
-        Row gap:12
-          Text.caption "Order" w:100
+          Link "View all" onTap={tab="orders"}
+        Row gap=12
+          Text.caption "Order" w=100
           Text.caption "Customer" grow
-          Text.caption "Status" w:120
-          Text.caption "Total" w:100
-          Text.caption "Date" w:100
+          Text.caption "Status" w=120
+          Text.caption "Total" w=100
+          Text.caption "Date" w=100
         Divider
         each o in orders
-          Row gap:12 center
-            Text.strong "{o.id}" w:100
+          Row gap=12 center
+            Text.strong "{o.id}" w=100
             Text "{o.customer}" grow
-            Row w:120
+            Row w=120
               if o.status=="Paid"
                 Badge.success "Paid"
               if o.status=="Shipped"
@@ -60,5 +60,5 @@ App
                 Badge.warning "Pending"
               if o.status=="Refunded"
                 Badge.error "Refunded"
-            Text "{money(o.total,"$",2)}" w:100
-            Text.muted "{o.date}" w:100
+            Text "{money(o.total,"$",2)}" w=100
+            Text.muted "{o.date}" w=100

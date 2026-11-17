@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "BigButton",
-  "doc": "A full-width, thumb-sized button for a screen's main action below its focal block (Start, Done): the label with icon in a round mark, firing onPressed; tone:\"quiet\" is the soft second action.",
+  "doc": "A full-width, thumb-sized button for a screen's main action below its focal block (Start, Done): the label with icon in a round mark, firing onPressed; tone=\"quiet\" is the soft second action.",
   "props": [
    {
     "key": "label",

@@ -1,69 +1,69 @@
 Page
   Nav
-    Row gap:16 middle
+    Row gap=16 middle
       IconTile "sensors"
       Text.strong "Beacon"
-    Row gap:12 middle
-      SearchBar "Search docs" =q w:280
-      Select =version items:["v2.4","v2.3","v2.2"] w:100
+    Row gap=12 middle
+      SearchBar "Search docs" bind=q w=280
+      Select bind=version items=["v2.4","v2.3","v2.2"] w=100
   state page="Quickstart"
   state version="v2.4"
-  Row top gap:32 pad:[24,24,24,24]
-    Column w:220 gap:4 border-right:#FFE5E7EB
+  Row top gap=32 pad=[24,24,24,24]
+    Column w=220 gap=4 border-right=#FFE5E7EB
       Text.eyebrow "START"
-      NavItem "Quickstart" selected:=page=="Quickstart" -> page="Quickstart"
-      NavItem "Installation" selected:=page=="Installation" -> page="Installation"
-      NavItem "Authentication" selected:=page=="Authentication" -> page="Authentication"
-      NavItem "Configuration" selected:=page=="Configuration" -> page="Configuration"
-      Spacer h:12
+      NavItem "Quickstart" selected={page=="Quickstart"} onTap={page="Quickstart"}
+      NavItem "Installation" selected={page=="Installation"} onTap={page="Installation"}
+      NavItem "Authentication" selected={page=="Authentication"} onTap={page="Authentication"}
+      NavItem "Configuration" selected={page=="Configuration"} onTap={page="Configuration"}
+      Spacer h=12
       Text.eyebrow "GUIDES"
-      NavItem "Tracking events" selected:=page=="Tracking events" -> page="Tracking events"
-      NavItem "User identity" selected:=page=="User identity" -> page="User identity"
-      NavItem "Offline mode" selected:=page=="Offline mode" -> page="Offline mode"
-      NavItem "Testing" selected:=page=="Testing" -> page="Testing"
-      Spacer h:12
+      NavItem "Tracking events" selected={page=="Tracking events"} onTap={page="Tracking events"}
+      NavItem "User identity" selected={page=="User identity"} onTap={page="User identity"}
+      NavItem "Offline mode" selected={page=="Offline mode"} onTap={page="Offline mode"}
+      NavItem "Testing" selected={page=="Testing"} onTap={page="Testing"}
+      Spacer h=12
       Text.eyebrow "REFERENCE"
-      NavItem "Client API" selected:=page=="Client API" -> page="Client API"
-      NavItem "Events API" selected:=page=="Events API" -> page="Events API"
-      NavItem "Errors" selected:=page=="Errors" -> page="Errors"
-      NavItem "Changelog" selected:=page=="Changelog" -> page="Changelog"
-    Column grow gap:20 maxw:720
-      Breadcrumb items:["Docs","Start","Quickstart"]
-      Heading "Quickstart" level:1
+      NavItem "Client API" selected={page=="Client API"} onTap={page="Client API"}
+      NavItem "Events API" selected={page=="Events API"} onTap={page="Events API"}
+      NavItem "Errors" selected={page=="Errors"} onTap={page="Errors"}
+      NavItem "Changelog" selected={page=="Changelog"} onTap={page="Changelog"}
+    Column grow gap=20 maxw=720
+      Breadcrumb items=["Docs","Start","Quickstart"]
+      Heading "Quickstart" level=1
       Text.lead "Beacon is an SDK for collecting product events and delivering them reliably. This guide takes you from an empty project to your first tracked event in about five minutes."
-      Column gap:10
-        Row gap:10 middle
+      Column gap=10
+        Row gap=10 middle
           Badge.primary "1"
-          Heading "Install the package" level:3
+          Heading "Install the package" level=3
         Text.muted "Add Beacon to your project with your package manager."
-        CodeBlock "Terminal" "npm install @beacon/sdk" language:"bash" copyable:true
-      Column gap:10
-        Row gap:10 middle
+        CodeBlock "Terminal" "npm install @beacon/sdk" language="bash" copyable=true
+      Column gap=10
+        Row gap=10 middle
           Badge.primary "2"
-          Heading "Initialize the client" level:3
+          Heading "Initialize the client" level=3
         Text.muted "Create one client at startup and reuse it across your app."
-        CodeBlock "app.js" "import { Beacon } from '@beacon/sdk';\n\nconst beacon = new Beacon({\n  apiKey: 'YOUR_API_KEY',\n  flushInterval: 5000\n});" language:"javascript" copyable:true
-      Column gap:10
-        Row gap:10 middle
+        CodeBlock "app.js" "import { Beacon } from '@beacon/sdk';\n\nconst beacon = new Beacon({\n  apiKey: 'YOUR_API_KEY',\n  flushInterval: 5000\n});" language="javascript" copyable=true
+      Column gap=10
+        Row gap=10 middle
           Badge.primary "3"
-          Heading "Send your first event" level:3
+          Heading "Send your first event" level=3
         Text.muted "Track an event with a name and any properties you want to keep."
-        CodeBlock "app.js" "beacon.track('signup_completed', {\n  plan: 'pro',\n  source: 'landing'\n});" language:"javascript" copyable:true
-      Callout "Keep your key private" "Use a server-side key for backend services. Browser apps should use a public key, which can only send events." tone:"accent" icon:"info"
-      Heading "Options" level:2
-      Column gap:0
-        TableHeader columns:["Option","Type","Default","Description"] keys:["name","type","def","desc"] widths:[140,90,100,390]
-        TableRow cells:["apiKey","string","none","Your project key. Required."] widths:[140,90,100,390]
-        TableRow cells:["flushInterval","number","10000","Milliseconds between batched uploads."] widths:[140,90,100,390]
-        TableRow cells:["maxQueue","number","1000","Events kept in memory before the oldest are dropped."] widths:[140,90,100,390]
-        TableRow cells:["debug","boolean","false","Log every event to the console."] widths:[140,90,100,390]
+        CodeBlock "app.js" "beacon.track('signup_completed', {\n  plan: 'pro',\n  source: 'landing'\n});" language="javascript" copyable=true
+      Callout "Keep your key private" "Use a server-side key for backend services. Browser apps should use a public key, which can only send events." tone="accent" icon="info"
+      Heading "Options" level=2
+      Column gap=0
+        TableHeader columns=["Option","Type","Default","Description"] keys=["name","type","def","desc"] widths=[140,90,100,390]
+        TableRow cells=["apiKey","string","none","Your project key. Required."] widths=[140,90,100,390]
+        TableRow cells=["flushInterval","number","10000","Milliseconds between batched uploads."] widths=[140,90,100,390]
+        TableRow cells=["maxQueue","number","1000","Events kept in memory before the oldest are dropped."] widths=[140,90,100,390]
+        TableRow cells=["debug","boolean","false","Log every event to the console."] widths=[140,90,100,390]
       Divider
       Row between
-        Button.outline "← Previous: Overview" -> emit previous
-        Button.outline "Next: Installation →" -> emit next
-    Column w:200 gap:8 pad:[16,0,0,0]
+        Button.outline "← Previous: Overview" onTap={emit previous}
+        Button.outline "Next: Installation →" onTap={emit next}
+    Column w=200 gap=8 pad=[16,0,0,0]
       Text.eyebrow "ON THIS PAGE"
-      Link "Install the package" border-left:#FFE5E7EB
-      Link "Initialize the client" border-left:#FFE5E7EB
-      Link "Send your first event" border-left:#FFE5E7EB
-      Link "Options" border-left:#FFE5E7EB
+      Link "Install the package" border-left=#FFE5E7EB
+      Link "Initialize the client" border-left=#FFE5E7EB
+      Link "Send your first event" border-left=#FFE5E7EB
+      Link "Options" border-left=#FFE5E7EB

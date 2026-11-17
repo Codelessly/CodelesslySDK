@@ -4,24 +4,24 @@ Screen
   state left=today.work
   state count=0
   state paused=true
-  every 1s when !paused -> phase=left<=1?(phase=="work"?"rest":"work"):phase; round=(left<=1&&phase=="rest")?min(round+1,today.rounds):round; left=left<=1?(phase=="work"?today.rest:today.work):left-1
-  TopBar "{today.name}" "{today.rounds} x {today.work}s / {today.rest}s" back:true -> emit open_home
-  Box gap:12 pad:24 radius:28 fill:=phase=="work"?"primary":"surfaceVariant"
+  every 1s when !paused onTick={phase=left<=1?(phase=="work"?"rest":"work"):phase; round=(left<=1&&phase=="rest")?min(round+1,today.rounds):round; left=left<=1?(phase=="work"?today.rest:today.work):left-1}
+  TopBar "{today.name}" "{today.rounds} x {today.work}s / {today.rest}s" back=true onTap={emit open_home}
+  Box gap=12 pad=24 radius=28 fill={phase=="work"?"primary":"surfaceVariant"}
     Row between middle
       Text.eyebrow "{upper(phase)}"
       Text.meta "Round {round}/{today.rounds}"
-    Text.display "{left}s" size:120
-    Progress =0
+    Text.display "{left}s" size=120
+    Progress bind={0}
     Text.meta "Rounds left {today.rounds-round}"
   Row between middle
     Column
       Text.eyebrow "Jumps"
       Text.numberLarge "{count}"
-    Row gap:8
-      Button.ghost "-1" -> count=max(0,count-1)
-      Button.secondary "+1" -> count=count+1
-      Button.secondary "+10" -> count=count+10
-  Row gap:12
-    Button.primary "Resume" grow visible:=paused -> paused=false
-    Button.primary "Pause" grow visible:=!paused -> paused=true
-    Button.ghost "Finish" -> emit finish_session count
+    Row gap=8
+      Button.ghost "-1" onTap={count=max(0,count-1)}
+      Button.secondary "+1" onTap={count=count+1}
+      Button.secondary "+10" onTap={count=count+10}
+  Row gap=12
+    Button.primary "Resume" grow visible={paused} onTap={paused=false}
+    Button.primary "Pause" grow visible={!paused} onTap={paused=true}
+    Button.ghost "Finish" onTap={emit finish_session count}

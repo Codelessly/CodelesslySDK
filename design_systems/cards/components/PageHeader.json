@@ -4,7 +4,7 @@
  "roots": ["wrap"],
  "widget": {
   "type": "PageHeader",
-  "doc": "The header of an app screen's content: PageHeader \"Customers\" \"Everyone you sell to.\" count:\"248\" with the screen's actions (Button.outline, Button, a search Input) indented under it; they sit at the right level with the title and go under it when narrow.",
+  "doc": "The header of an app screen's content: PageHeader \"Customers\" \"Everyone you sell to.\" count=\"248\" with the screen's actions (Button.outline, Button, a search Input) indented under it; they sit at the right level with the title and go under it when narrow.",
   "children": "list",
   "props": [
    {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Customers", "doc": "The screen's title.", "required": true},

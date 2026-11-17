@@ -1,41 +1,41 @@
 state ride="UberX"
 state rides=[{"name":"UberX","price":"$38.20","seats":4,"eta":"4 min away"},{"name":"Comfort","price":"$46.75","seats":4,"eta":"6 min away"},{"name":"XL","price":"$61.10","seats":6,"eta":"8 min away"}]
-Column h:fill
-  Stack h:360 fill:#FFE6ECEF
-    Column pad:16 between h:fill
-      Card gap:4 fill:#FFFFFFFF
-        Row gap:12 center
-          Icon "my_location" color:#FF1A73E8
+Column h=fill
+  Stack h=360 fill=#FFE6ECEF
+    Column pad=16 between h=fill
+      Card gap=4 fill=#FFFFFFFF
+        Row gap=12 center
+          Icon "my_location" color=#FF1A73E8
           Column grow
             Text.caption "PICKUP"
             Text.strong "221 Market St"
       Row center
-        Column center gap:2
-          Icon "more_vert" color:#FF888888
-          Icon "more_vert" color:#FF888888
-      Card gap:4 fill:#FFFFFFFF
-        Row gap:12 center
-          Icon "location_on" color:#FFD93025
+        Column center gap=2
+          Icon "more_vert" color=#FF888888
+          Icon "more_vert" color=#FF888888
+      Card gap=4 fill=#FFFFFFFF
+        Row gap=12 center
+          Icon "location_on" color=#FFD93025
           Column grow
             Text.caption "DROP-OFF"
             Text.strong "SFO Terminal 2"
-  Column gap:12 pad:16 fill:#FFFFFFFF
+  Column gap=12 pad=16 fill=#FFFFFFFF
     Text.heading "Choose a ride"
     each r in rides
-      Box pad:12 radius:12 fill:=ride==r.name?"#FFE8F0FE":"#FFFFFFFF" border:=ride==r.name?"#FF1A73E8":"#FFE0E0E0" -> ride=r.name
-        Row gap:12 center
-          Icon "directions_car" size:32
+      Box pad=12 radius=12 fill={ride==r.name?"#FFE8F0FE":"#FFFFFFFF"} border={ride==r.name?"#FF1A73E8":"#FFE0E0E0"} onTap={ride=r.name}
+        Row gap=12 center
+          Icon "directions_car" size=32
           Column grow
             Text.strong "{r.name}"
-            Row gap:8
-              Row gap:2 center
-                Icon "person" size:14
+            Row gap=8
+              Row gap=2 center
+                Icon "person" size=14
                 Text.caption "{r.seats}"
               Text.caption "{r.eta}"
           Text.strong "{r.price}"
     Divider
-    Row gap:12 center
+    Row gap=12 center
       Icon "credit_card"
       Text.body "Visa •••• 4242" grow
       Icon "chevron_right"
-    Button "Confirm {ride}" h:56 -> emit confirm ride; toast "Booking {ride}…"
+    Button "Confirm {ride}" h=56 onTap={emit confirm ride; toast "Booking {ride}…"}

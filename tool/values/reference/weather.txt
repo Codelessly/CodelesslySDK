@@ -1,10 +1,10 @@
 state alert=false
 ChatCard
-  WeatherNow "Lisbon" "Partly cloudy" temp:22 high:24 low:15 kind:"partly"
+  WeatherNow "Lisbon" "Partly cloudy" temp=22 high=24 low=15 kind="partly"
   SectionLabel "Next 5 hours" "Rain from 5 PM"
-  WeatherHours hours:["1 PM","2 PM","3 PM","4 PM","5 PM"] temps:[23,24,24,23,21] kinds:["sun","sun","partly","cloud","rain"]
+  WeatherHours hours=["1 PM","2 PM","3 PM","4 PM","5 PM"] temps=[23,24,24,23,21] kinds=["sun","sun","partly","cloud","rain"]
   SectionLabel "Next 3 days"
-  WeatherDay "Tue" kind:"rain" low:14 high:20 min:13 max:25
-  WeatherDay "Wed" kind:"partly" low:13 high:18 min:13 max:25
-  WeatherDay "Thu" kind:"sun" low:15 high:25 min:13 max:25
-  ActionButton#alert "{alert?"Rain alert is on":"Alert me before it rains"}" icon:"{alert?"notifications_active_rounded":"notifications_none_rounded"}" tone:"{alert?"good":"primary"}" -> alert=!alert; emit rain_alert alert
+  WeatherDay "Tue" kind="rain" low=14 high=20 min=13 max=25
+  WeatherDay "Wed" kind="partly" low=13 high=18 min=13 max=25
+  WeatherDay "Thu" kind="sun" low=15 high=25 min=13 max=25
+  ActionButton#alert "{alert?"Rain alert is on":"Alert me before it rains"}" icon="{alert?"notifications_active_rounded":"notifications_none_rounded"}" tone="{alert?"good":"primary"}" onPressed={alert=!alert; emit rain_alert alert}

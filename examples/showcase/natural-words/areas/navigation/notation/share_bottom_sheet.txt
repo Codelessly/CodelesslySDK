@@ -1,39 +1,39 @@
 state sheet=false
-Stack w:fill h:fill
-  Column scroll gap:12
-    Row between center pad:[8,8,8,0]
-      IconButton "arrow_back" -> emit back
+Stack w=fill h=fill
+  Column scroll gap=12
+    Row between center pad=[8,8,8,0]
+      IconButton "arrow_back" onTap={emit back}
       Text.title "Photo"
-      IconButton "more_horiz" -> sheet=true
-    Image "https://images.unsplash.com/photo-1506744038136-46273834b3fb" h:360 w:fill radius:12
-    Column gap:8 pad:16
+      IconButton "more_horiz" onTap={sheet=true}
+    Image "https://images.unsplash.com/photo-1506744038136-46273834b3fb" h=360 w=fill radius=12
+    Column gap=8 pad=16
       Text.heading "Mountain lake at sunrise"
       Text.bodySecondary "Shot by Maya Reyes · Jun 12"
-      Row gap:16
-        Row gap:4 center
+      Row gap=16
+        Row gap=4 center
           Icon "favorite"
           Text "1,284"
-        Row gap:4 center
+        Row gap=4 center
           Icon "chat_bubble"
           Text "86"
       Text.body "Early morning light spilling over the ridge, with mist still hanging above the water."
   if sheet
-    Column fill:#99000000 w:fill h:fill animate:fade duration:200
-      Box grow w:fill -> sheet=false
-      Column fill:#FFFFFFFF pad:[16,12,16,16] gap:4 animate:slide-up duration:250 radius:20
+    Column fill=#99000000 w=fill h=fill animate=fade duration=200
+      Box grow w=fill onTap={sheet=false}
+      Column fill=#FFFFFFFF pad=[16,12,16,16] gap=4 animate=slide-up duration=250 radius=20
         Column center
-          Box w:40 h:4 fill:#FFCCCCCC radius:2
-        Row gap:16 center pad:12 -> sheet=false; emit share
+          Box w=40 h=4 fill=#FFCCCCCC radius=2
+        Row gap=16 center pad=12 onTap={sheet=false; emit share}
           Icon "share"
           Text.body "Share"
-        Row gap:16 center pad:12 -> sheet=false; toast "Saved to album"
+        Row gap=16 center pad=12 onTap={sheet=false; toast "Saved to album"}
           Icon "photo_album"
           Text.body "Save to album"
-        Row gap:16 center pad:12 -> sheet=false; toast "Link copied"
+        Row gap=16 center pad=12 onTap={sheet=false; toast "Link copied"}
           Icon "link"
           Text.body "Copy link"
-        Row gap:16 center pad:12 -> sheet=false; emit report
-          Icon "flag" color:#FFD32F2F
+        Row gap=16 center pad=12 onTap={sheet=false; emit report}
+          Icon "flag" color=#FFD32F2F
           Text.danger "Report"
         Divider
-        Button.outline "Cancel" -> sheet=false
+        Button.outline "Cancel" onTap={sheet=false}

@@ -1,24 +1,24 @@
-Card gap:16 pad:20 maxw:560
-  Column gap:4
+Card gap=16 pad=20 maxw=560
+  Column gap=4
     Text.heading2 "Senior Designer"
     Text.bodySecondary "Apply for this role by filling in the details below."
-  Input "Full name" "Maria Lopez" =name
-  Input "Email" "you@example.com" =email type:email
-  Column gap:8
+  Input "Full name" "Maria Lopez" bind=name
+  Input "Email" "you@example.com" bind=email type={email}
+  Column gap=8
     Text.fieldLabel "Resume"
-    Box pad:12 radius:8 gap:8 fill:#FFF5F5F7
-      Row gap:12 middle
+    Box pad=12 radius=8 gap=8 fill=#FFF5F5F7
+      Row gap=12 middle
         Icon "description"
-        Column grow gap:2
+        Column grow gap=2
           Text.strong "maria_resume.pdf · 1.2 MB"
           Text.caption "Uploading… 72%"
-        IconButton "close" -> emit removeResume; toast "Resume removed"
+        IconButton "close" onTap={emit removeResume; toast "Resume removed"}
       Progress 0.72
-  Input "Portfolio link" "https://yourportfolio.com" =portfolio
-  Column gap:8
+  Input "Portfolio link" "https://yourportfolio.com" bind=portfolio
+  Column gap=8
     Text.fieldLabel "Cover letter"
-    Box pad:24 radius:8 center middle gap:8 fill:#FFFAFAFC border:#FFC4C4CC -> emit browseCoverLetter
+    Box pad=24 radius=8 center middle gap=8 fill=#FFFAFAFC border=#FFC4C4CC onTap={emit browseCoverLetter}
       Icon "upload_file"
       Text center "Drag a PDF here or browse"
       Text.caption center "PDF up to 5 MB"
-  Button "Submit application" -> emit submitApplication; toast "Application submitted"
+  Button "Submit application" onTap={emit submitApplication; toast "Application submitted"}

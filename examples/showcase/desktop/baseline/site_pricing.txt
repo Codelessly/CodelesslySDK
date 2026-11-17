@@ -1,123 +1,123 @@
 Column scroll
   state billing="Monthly"
   state features=[{"name":"Invoicing and billing","solo":true,"team":true,"scale":true},{"name":"Bank feeds","solo":true,"team":true,"scale":true},{"name":"Expense tracking","solo":true,"team":true,"scale":true},{"name":"Multi-user access","solo":false,"team":true,"scale":true},{"name":"Payroll","solo":false,"team":true,"scale":true},{"name":"Custom reports","solo":false,"team":true,"scale":true},{"name":"Multi-entity consolidation","solo":false,"team":false,"scale":true},{"name":"Dedicated account manager","solo":false,"team":false,"scale":true}]
-  Row between center pad:[48,20,48,20] fill:#FFFFFFFF
-    Row gap:8 center
+  Row between center pad=[48,20,48,20] fill=#FFFFFFFF
+    Row gap=8 center
       Icon "account_balance"
       Text.sectionTitle "Ledgerly"
-    Row gap:32 center
+    Row gap=32 center
       Text "Product"
-      Text "Pricing" weight:700
+      Text "Pricing" weight=700
       Text "Customers"
       Text "Resources"
-    Row gap:12 center
+    Row gap=12 center
       Button.ghost "Log in"
       Button "Start free trial"
   Divider
-  Column center gap:16 pad:[48,64,48,32]
+  Column center gap=16 pad=[48,64,48,32]
     Text.heading1 "Simple pricing for every stage" center
     Text.lead "Accounting that grows with you. Try any plan free for 14 days." center
-    Row gap:12 center
-      SegmentedButton =billing items:["Monthly","Yearly"]
+    Row gap=12 center
+      SegmentedButton bind=billing items=["Monthly","Yearly"]
       if billing=="Yearly"
         Badge.success "Save 20%"
-  Column center pad:[48,16,48,48]
-    Row gap:24 stretch maxw:1120
-      Card grow gap:16 pad:28
+  Column center pad=[48,16,48,48]
+    Row gap=24 stretch maxw=1120
+      Card grow gap=16 pad=28
         Row between center
           Text.sectionTitle "Solo"
         Text.bodySecondary "For freelancers just getting started."
-        Row gap:4 bottom
-          Text "{billing=='Yearly'?'$7.20':'$9'}" size:44 weight:700
+        Row gap=4 bottom
+          Text "{billing=='Yearly'?'$7.20':'$9'}" size=44 weight=700
           Text.muted "/mo"
         if billing=="Yearly"
           Text.caption "Billed yearly, $86.40 per year"
         Divider
-        Row gap:8 center
+        Row gap=8 center
           Icon "check"
           Text "1 user"
-        Row gap:8 center
+        Row gap=8 center
           Icon "check"
           Text "Unlimited invoices"
-        Row gap:8 center
+        Row gap=8 center
           Icon "check"
           Text "Bank feeds for 1 account"
-        Row gap:8 center
+        Row gap=8 center
           Icon "check"
           Text "Expense tracking"
-        Row gap:8 center
+        Row gap=8 center
           Icon "check"
           Text "Email support"
         Spacer grow
-        Button.outline "Start with Solo" -> toast "Solo trial started"
-      Card grow gap:16 pad:28 fill:#FFEEF3FF border:#FF3B5BDB
+        Button.outline "Start with Solo" onTap={toast "Solo trial started"}
+      Card grow gap=16 pad=28 fill=#FFEEF3FF border=#FF3B5BDB
         Row between center
           Text.sectionTitle "Team"
           Badge.primary "Most popular"
         Text.bodySecondary "For small teams that work together."
-        Row gap:4 bottom
-          Text "{billing=='Yearly'?'$23.20':'$29'}" size:44 weight:700
+        Row gap=4 bottom
+          Text "{billing=='Yearly'?'$23.20':'$29'}" size=44 weight=700
           Text.muted "/mo"
         if billing=="Yearly"
           Text.caption "Billed yearly, $278.40 per year"
         Divider
-        Row gap:8 center
+        Row gap=8 center
           Icon "check"
           Text "Up to 10 users"
-        Row gap:8 center
+        Row gap=8 center
           Icon "check"
           Text "Everything in Solo"
-        Row gap:8 center
+        Row gap=8 center
           Icon "check"
           Text "Payroll for 25 employees"
-        Row gap:8 center
+        Row gap=8 center
           Icon "check"
           Text "Custom reports"
-        Row gap:8 center
+        Row gap=8 center
           Icon "check"
           Text "Priority chat support"
         Spacer grow
-        Button "Start with Team" -> toast "Team trial started"
-      Card grow gap:16 pad:28
+        Button "Start with Team" onTap={toast "Team trial started"}
+      Card grow gap=16 pad=28
         Row between center
           Text.sectionTitle "Scale"
         Text.bodySecondary "For growing companies with complex books."
-        Row gap:4 bottom
-          Text "{billing=='Yearly'?'$63.20':'$79'}" size:44 weight:700
+        Row gap=4 bottom
+          Text "{billing=='Yearly'?'$63.20':'$79'}" size=44 weight=700
           Text.muted "/mo"
         if billing=="Yearly"
           Text.caption "Billed yearly, $758.40 per year"
         Divider
-        Row gap:8 center
+        Row gap=8 center
           Icon "check"
           Text "Unlimited users"
-        Row gap:8 center
+        Row gap=8 center
           Icon "check"
           Text "Everything in Team"
-        Row gap:8 center
+        Row gap=8 center
           Icon "check"
           Text "Multi-entity consolidation"
-        Row gap:8 center
+        Row gap=8 center
           Icon "check"
           Text "Audit trail and approvals"
-        Row gap:8 center
+        Row gap=8 center
           Icon "check"
           Text "Dedicated account manager"
         Spacer grow
-        Button.outline "Start with Scale" -> toast "Scale trial started"
-  Column center pad:[48,32,48,48]
-    Column gap:16 maxw:1120
+        Button.outline "Start with Scale" onTap={toast "Scale trial started"}
+  Column center pad=[48,32,48,48]
+    Column gap=16 maxw=1120
       Text.heading2 "Compare plans" center
-      Card gap:0 pad:0
-        Row center pad:[24,16,24,16] fill:#FFF5F6F8
-          Text.strong "Feature" w:400
+      Card gap=0 pad=0
+        Row center pad=[24,16,24,16] fill=#FFF5F6F8
+          Text.strong "Feature" w=400
           Text.strong "Solo" center grow
           Text.strong "Team" center grow
           Text.strong "Scale" center grow
         each f in features
           Divider
-          Row center pad:[24,14,24,14]
-            Text "{f.name}" w:400
+          Row center pad=[24,14,24,14]
+            Text "{f.name}" w=400
             Row center grow
               if f.solo
                 Icon "check"
@@ -133,8 +133,8 @@ Column scroll
                 Icon "check"
               if !f.scale
                 Text.muted "—"
-  Column center pad:[48,48,48,64]
-    Column gap:16 maxw:800
+  Column center pad=[48,48,48,64]
+    Column gap=16 maxw=800
       Text.heading2 "Frequently asked questions" center
       Accordion "Can I change plans later?"
         Text.bodySecondary "Yes. Upgrade or downgrade at any time from your account settings. Changes apply at your next billing date, and upgrades are prorated."
@@ -144,28 +144,28 @@ Column scroll
         Text.bodySecondary "Paying yearly takes 20% off the monthly price on every plan. You are billed once a year for the full amount."
       Accordion "Is my financial data secure?"
         Text.bodySecondary "Your data is encrypted in transit and at rest, backed up daily, and you can export it whenever you like. We never sell your information."
-  Box fill:#FF111827 pad:[48,48,48,32] gap:32
+  Box fill=#FF111827 pad=[48,48,48,32] gap=32
     Row between top
-      Column gap:8
-        Row gap:8 center
-          Icon "account_balance" color:#FFFFFFFF
-          Text.sectionTitle "Ledgerly" color:#FFFFFFFF
-        Text "Accounting software for every stage." color:#FF9CA3AF
-      Row gap:80
-        Column gap:8
-          Text.strong "Product" color:#FFFFFFFF
-          Text "Features" color:#FF9CA3AF
-          Text "Pricing" color:#FF9CA3AF
-          Text "Integrations" color:#FF9CA3AF
-        Column gap:8
-          Text.strong "Company" color:#FFFFFFFF
-          Text "About" color:#FF9CA3AF
-          Text "Careers" color:#FF9CA3AF
-          Text "Contact" color:#FF9CA3AF
-        Column gap:8
-          Text.strong "Legal" color:#FFFFFFFF
-          Text "Privacy" color:#FF9CA3AF
-          Text "Terms" color:#FF9CA3AF
-          Text "Security" color:#FF9CA3AF
+      Column gap=8
+        Row gap=8 center
+          Icon "account_balance" color=#FFFFFFFF
+          Text.sectionTitle "Ledgerly" color=#FFFFFFFF
+        Text "Accounting software for every stage." color=#FF9CA3AF
+      Row gap=80
+        Column gap=8
+          Text.strong "Product" color=#FFFFFFFF
+          Text "Features" color=#FF9CA3AF
+          Text "Pricing" color=#FF9CA3AF
+          Text "Integrations" color=#FF9CA3AF
+        Column gap=8
+          Text.strong "Company" color=#FFFFFFFF
+          Text "About" color=#FF9CA3AF
+          Text "Careers" color=#FF9CA3AF
+          Text "Contact" color=#FF9CA3AF
+        Column gap=8
+          Text.strong "Legal" color=#FFFFFFFF
+          Text "Privacy" color=#FF9CA3AF
+          Text "Terms" color=#FF9CA3AF
+          Text "Security" color=#FF9CA3AF
     Divider
-    Text.caption "© 2025 Ledgerly, Inc. All rights reserved." color:#FF9CA3AF
+    Text.caption "© 2025 Ledgerly, Inc. All rights reserved." color=#FF9CA3AF

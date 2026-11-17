@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "PhotoGallery",
-  "doc": "A photo gallery with a built-in large view: PhotoGallery =open photos:[{\"kind\":\"harbor\",\"caption\":\"Harbour at sunrise\"},...] draws each photo as a scene (kind: mountain, harbor, skyline, dunes, forest, lagoon, market, festival, train, temple, bamboo; optional tone: dawn, day, dusk, night); layout is grid, strip (one row that scrolls sideways) or pages (full-width photos swiped one at a time, with dots); tapping a photo opens it large with its caption, a \"3 of 9\" counter, dots, arrows and a close button, and a swipe there goes to the next (on a page it opens over the window, where it also zooms: a pinch, the wheel, a double tap); your variable holds the photo in view (0: none open).",
+  "doc": "A photo gallery with a built-in large view: PhotoGallery bind=open photos=[{\"kind\":\"harbor\",\"caption\":\"Harbour at sunrise\"},...] draws each photo as a scene (kind: mountain, harbor, skyline, dunes, forest, lagoon, market, festival, train, temple, bamboo; optional tone: dawn, day, dusk, night); layout is grid, strip (one row that scrolls sideways) or pages (full-width photos swiped one at a time, with dots); tapping a photo opens it large with its caption, a \"3 of 9\" counter, dots, arrows and a close button, and a swipe there goes to the next (on a page it opens over the window, where it also zooms: a pinch, the wheel, a double tap); your variable holds the photo in view (0: none open).",
   "props": [
    {
     "key": "value",

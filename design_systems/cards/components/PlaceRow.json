@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "PlaceRow",
-  "doc": "A numbered place in a list beside a MapPanel: the name, a detail, index (its pin number), rating, distance and hours; selected:=pick==1 highlights it and reveals the three facts, and a tap fires onPressed (-> pick=1).",
+  "doc": "A numbered place in a list beside a MapPanel: the name, a detail, index (its pin number), rating, distance and hours; selected={pick==1} highlights it and reveals the three facts, and a tap fires onPressed (-> pick=1).",
   "props": [
    {
     "key": "name",

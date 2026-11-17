@@ -1,57 +1,57 @@
 state drawer=false
-Stack w:fill h:fill
+Stack w=fill h=fill
   Column
-    Row gap:12 pad:[8,12,16,12] fill:#FFFFFFFF
-      IconButton "menu" -> drawer=true
+    Row gap=12 pad=[8,12,16,12] fill=#FFFFFFFF
+      IconButton "menu" onTap={drawer=true}
       Text.title "Daily News"
       Spacer grow
       IconButton "search"
-    Column gap:12 pad:16 scroll grow
+    Column gap=12 pad=16 scroll grow
       Text.sectionTitle "Top Stories"
-      Card gap:8
+      Card gap=8
         Badge.primary "World"
         Text.heading "Leaders meet for climate summit"
         Text.bodySecondary "Negotiators aim to finalize a new agreement on emissions targets this week."
         Text.caption "2 hours ago"
-      Card gap:8
+      Card gap=8
         Badge.info "Tech"
         Text.heading "New chip promises all-day laptop battery"
         Text.bodySecondary "Manufacturers say the design cuts power use by nearly a third."
         Text.caption "4 hours ago"
-      Card gap:8
+      Card gap=8
         Badge.success "Sports"
         Text.heading "Late goal decides the championship"
         Text.bodySecondary "A stoppage-time strike sealed the title in front of a packed stadium."
         Text.caption "6 hours ago"
   if drawer
-    Box w:fill h:fill fill:#99000000 -> drawer=false
-    Column w:290 h:fill fill:#FFFFFFFF pad:[20,40,20,20] gap:4
-      Row gap:12 middle
-        Avatar "Sam Ortiz" size:56
+    Box w=fill h=fill fill=#99000000 onTap={drawer=false}
+    Column w=290 h=fill fill=#FFFFFFFF pad=[20,40,20,20] gap=4
+      Row gap=12 middle
+        Avatar "Sam Ortiz" size=56
         Column
           Text.strong "Sam Ortiz"
           Text.caption "Reader"
       Divider
-      Row gap:16 pad:[0,14,0,14] -> drawer=false; emit nav "top"
+      Row gap=16 pad=[0,14,0,14] onTap={drawer=false; emit nav "top"}
         Icon "newspaper"
         Text "Top Stories"
-      Row gap:16 pad:[0,14,0,14] -> drawer=false; emit nav "world"
+      Row gap=16 pad=[0,14,0,14] onTap={drawer=false; emit nav "world"}
         Icon "public"
         Text "World"
-      Row gap:16 pad:[0,14,0,14] -> drawer=false; emit nav "tech"
+      Row gap=16 pad=[0,14,0,14] onTap={drawer=false; emit nav "tech"}
         Icon "memory"
         Text "Tech"
-      Row gap:16 pad:[0,14,0,14] -> drawer=false; emit nav "sports"
+      Row gap=16 pad=[0,14,0,14] onTap={drawer=false; emit nav "sports"}
         Icon "sports_soccer"
         Text "Sports"
-      Row gap:16 pad:[0,14,0,14] -> drawer=false; emit nav "bookmarks"
+      Row gap=16 pad=[0,14,0,14] onTap={drawer=false; emit nav "bookmarks"}
         Icon "bookmark"
         Text "Bookmarks"
-      Row gap:16 pad:[0,14,0,14] -> drawer=false; emit nav "settings"
+      Row gap=16 pad=[0,14,0,14] onTap={drawer=false; emit nav "settings"}
         Icon "settings"
         Text "Settings"
       Spacer grow
       Divider
-      Row gap:16 pad:[0,14,0,14] -> drawer=false; emit signout
+      Row gap=16 pad=[0,14,0,14] onTap={drawer=false; emit signout}
         Icon "logout"
         Text.danger "Sign out"

@@ -1,13 +1,13 @@
-Column gap:12
-  Banner "Design system components" "Ready-made and already styled. Switch the design system: the same lines take another look." tone:info
-  Row gap:8
-    StatTile "Requests" value:"48,291" icon:"bolt" grow
-    StatTile "Error rate" value:"0.8%" icon:"warning" grow
+Column gap=12
+  Banner "Design system components" "Ready-made and already styled. Switch the design system: the same lines take another look." tone=info
+  Row gap=8
+    StatTile "Requests" value="48,291" icon="bolt" grow
+    StatTile "Error rate" value="0.8%" icon="warning" grow
   Panel "Team" "Who can edit this project"
-    ListRow "Ada Lovelace" "Owner" icon:"person"
-    ListRow "Grace Hopper" "Editor" icon:"person"
-  Row gap:8 middle
-    StatusBadge "Synced" tone:success
-    StatusDot "Live" status:success
+    ListRow "Ada Lovelace" "Owner" icon="person"
+    ListRow "Grace Hopper" "Editor" icon="person"
+  Row gap=8 middle
+    StatusBadge "Synced" tone=success
+    StatusDot "Live" status=success
     Spacer grow
-    CopyButton "flutter pub add codelessly_sdk" showLabel:true
+    CopyButton "flutter pub add codelessly_sdk" showLabel=true
