@@ -59,6 +59,7 @@ void sliderRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
           }
         : null;
   box.enabled = !states.contains(api.WidgetState.disabled);
+  box.focusNode.canRequestFocus = box.enabled && !n.prop(SliderProps.readOnly);
   box.autofocus = interactive && n.prop(SliderProps.autofocus);
   chain.add(box);
   if (interactive && b is NodeBox) {
@@ -160,6 +161,13 @@ class RenderSlider extends RenderControl {
   double get rangeEnd => (_highValue ?? value).clamp(value, max);
 
   bool get _vertical => _node != null && node.prop(SliderProps.orientation) == api.Axis.vertical;
+  bool get _stars => node.prop(SliderProps.trackShape) == api.SliderTrackShape.stars;
+  bool get _readOnly => node.prop(SliderProps.readOnly);
+  bool get _ratingRtl => _stars && _rightToLeft;
+
+  /// Whether the track runs the other way: `inverted`, or (a range and a
+  /// rating, which follow the text direction) right to left.
+  bool get _reversed => node.prop(SliderProps.inverted) != ((isRange || _stars) && _rightToLeft && !_vertical);
 
   double get min => node.prop(SliderProps.min);
   double get max => math.max(min, node.prop(SliderProps.max));
@@ -220,7 +228,7 @@ class RenderSlider extends RenderControl {
 
   @override
   void handleEvent(PointerEvent event, covariant BoxHitTestEntry entry) {
-    if (!_interactive || !enabled) return;
+    if (!_interactive || !enabled || _readOnly) return;
     if (event is PointerDownEvent) {
       _drag?.addPointer(event);
       _tapper.addPointer(event);
@@ -231,7 +239,7 @@ class RenderSlider extends RenderControl {
   MouseCursor get cursor => _interactive ? super.cursor : MouseCursor.defer;
 
   void _start(Offset local) {
-    if (!enabled) return;
+    if (!enabled || _readOnly) return;
     ControlFocusScope.noteActivation(focusNode, keyboard: false);
     focusNode.requestFocus(highlight: false);
     if (isRange) {
@@ -268,7 +276,7 @@ class RenderSlider extends RenderControl {
     final frame = _vertical ? Offset(size.height - local.dy, local.dx) : local;
     final (:start, :end) = _travel;
     var t = end <= start ? 0.0 : ((frame.dx - start) / (end - start)).clamp(0.0, 1.0);
-    if (node.prop(SliderProps.inverted) != (isRange && _rightToLeft && !_vertical)) t = 1 - t;
+    if (_reversed) t = 1 - t;
     return min + t * (max - min);
   }
 
@@ -281,7 +289,7 @@ class RenderSlider extends RenderControl {
   }
 
   bool _key(KeyEvent event) {
-    if (!_interactive || !enabled) return false;
+    if (!_interactive || !enabled || _readOnly) return false;
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) return false;
     final k = event.logicalKey;
     if (isRange && (k == LogicalKeyboardKey.space || k == LogicalKeyboardKey.enter)) {
@@ -290,7 +298,6 @@ class RenderSlider extends RenderControl {
       markNeedsSemanticsUpdate();
       return true;
     }
-    final inverted = node.prop(SliderProps.inverted);
     final current = isRange && _highActive ? rangeEnd : value;
     double? to;
     if (k == LogicalKeyboardKey.arrowUp) {
@@ -298,9 +305,9 @@ class RenderSlider extends RenderControl {
     } else if (k == LogicalKeyboardKey.arrowDown) {
       to = current - step;
     } else if (k == LogicalKeyboardKey.arrowRight) {
-      to = current + ((inverted != (isRange && _rightToLeft && !_vertical)) ? -step : step);
+      to = current + (_reversed && !_vertical ? -step : step);
     } else if (k == LogicalKeyboardKey.arrowLeft) {
-      to = current - ((inverted != (isRange && _rightToLeft && !_vertical)) ? -step : step);
+      to = current - (_reversed && !_vertical ? -step : step);
     } else if (k == LogicalKeyboardKey.pageUp) {
       to = current + _pageStep;
     } else if (k == LogicalKeyboardKey.pageDown) {
@@ -384,7 +391,7 @@ class RenderSlider extends RenderControl {
   /// The frame's x of [t] (0–1 of the range).
   double _x(double t) {
     final (:start, :end) = _travel;
-    final along = node.prop(SliderProps.inverted) != (isRange && _rightToLeft && !_vertical) ? 1 - t : t;
+    final along = _reversed ? 1 - t : t;
     return start + along * (end - start);
   }
 
@@ -408,7 +415,7 @@ class RenderSlider extends RenderControl {
   Color get thumbColor => _c(node.prop(SliderProps.thumbColor)) ?? _tokens.onAccent;
 
   /// Whether the halo shows (hovered, dragged or focused).
-  bool get haloShown => _interactive && enabled && node.prop(SliderProps.showThumb) && (hovered || _dragging || focusNode.hasFocus);
+  bool get haloShown => _interactive && enabled && !_readOnly && node.prop(SliderProps.showThumb) && (hovered || _dragging || focusNode.hasFocus);
 
   /// The shadows the thumb casts: none (the glow is the node's own).
   List<BoxShadow> get thumbShadows => const [];
@@ -438,8 +445,15 @@ class RenderSlider extends RenderControl {
     }
     final track = trackRect;
     final thumb = thumbCenter;
-    _paintTrack(canvas, track, thumb);
-    _paintTicks(canvas, track);
+    if (_stars) {
+      _paintStars(canvas, track);
+      if (focusHighlight) {
+        paintFocusRing(canvas, RRect.fromRectAndRadius(Offset.zero & frame, const Radius.circular(6)), _tokens.primary);
+      }
+    } else {
+      _paintTrack(canvas, track, thumb);
+      _paintTicks(canvas, track);
+    }
     final locals = <String, Object?>{
       'slider': {
         'value': value,
@@ -450,10 +464,37 @@ class RenderSlider extends RenderControl {
       },
     };
     customPaint?.drawFor(this, canvas, Offset.zero, frame, locals, foreground: false);
-    _paintThumb(canvas, thumb, active: !_highActive);
-    if (isRange) _paintThumb(canvas, highThumbCenter, active: _highActive);
+    if (!_stars) _paintThumb(canvas, thumb, active: !_highActive);
+    if (isRange && !_stars) _paintThumb(canvas, highThumbCenter, active: _highActive);
     customPaint?.drawFor(this, canvas, Offset.zero, frame, locals, foreground: true);
     canvas.restore();
+  }
+
+  void _paintStars(Canvas canvas, Rect track) {
+    final count = math.max(1, (max - min).round());
+    final cell = track.width / count;
+    final radius = math.min(12.0, math.min(cell * .43, frame.height * .42));
+    for (var i = 0; i < count; i++) {
+      final x = track.left + cell * (i + .5);
+      final y = track.center.dy;
+      final star = Path();
+      for (var p = 0; p < 10; p++) {
+        final angle = -math.pi / 2 + p * math.pi / 5;
+        final r = p.isEven ? radius : radius * .46;
+        final point = Offset(x + math.cos(angle) * r, y + math.sin(angle) * r);
+        if (p == 0) { star.moveTo(point.dx, point.dy); } else { star.lineTo(point.dx, point.dy); }
+      }
+      star.close();
+      canvas.drawPath(star, Paint()..color = inactiveTrackColor);
+      final filled = (value - min - (_ratingRtl ? count - 1 - i : i)).clamp(0.0, 1.0);
+      if (filled > 0) {
+        canvas.save();
+        canvas.clipRect(Rect.fromLTWH(_ratingRtl ? x + radius - 2 * radius * filled : x - radius,
+            y - radius, 2 * radius * filled, 2 * radius));
+        canvas.drawPath(star, Paint()..color = activeTrackColor);
+        canvas.restore();
+      }
+    }
   }
 
   void _paintTrack(Canvas canvas, Rect track, Offset thumb) {
@@ -731,21 +772,42 @@ class RenderSlider extends RenderControl {
   // --- semantics ---------------------------------------------------------------------------
 
   @override
-  String get semanticsName => isRange ? (node.prop(SliderProps.label) ?? 'Range') : '';
+  String get semanticsName => _stars
+      ? (node.prop(SliderProps.label) ?? 'Rating')
+      : isRange
+          ? (node.prop(SliderProps.label) ?? 'Range')
+          : '';
 
   String _percent(double v) => max <= min ? '0%' : '${(((v - min) / (max - min)).clamp(0.0, 1.0) * 100).round()}%';
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
+    String score(double v) => '${v == v.roundToDouble() ? v.round() : v.toStringAsFixed(1)} of ${max == max.roundToDouble() ? max.round() : max.toStringAsFixed(1)}';
     config
-      ..isSlider = true
+      ..isSlider = !_readOnly
       ..textDirection = _rightToLeft ? TextDirection.rtl : TextDirection.ltr
-      ..hint = isRange ? 'Press Space to switch between the lower and upper thumbs' : ''
-      ..value = isRange ? '${value.round()} to ${rangeEnd.round()}; ${_highActive ? 'upper' : 'lower'} thumb' : _percent(value)
-      ..increasedValue = isRange ? '${_snap((_highActive ? rangeEnd : value) + step).round()}' : _percent(_selectable(_snap(value + step)))
-      ..decreasedValue = isRange ? '${_snap((_highActive ? rangeEnd : value) - step).round()}' : _percent(_selectable(_snap(value - step)));
-    if (_interactive && enabled) {
+      ..hint = _readOnly
+          ? 'Read only'
+          : isRange
+              ? 'Press Space to switch between the lower and upper thumbs'
+              : ''
+      ..value = isRange
+          ? '${value.round()} to ${rangeEnd.round()}; ${_highActive ? 'upper' : 'lower'} thumb'
+          : _stars
+              ? score(value)
+              : _percent(value)
+      ..increasedValue = isRange
+          ? '${_snap((_highActive ? rangeEnd : value) + step).round()}'
+          : _stars
+              ? score(_selectable(_snap(value + step)))
+              : _percent(_selectable(_snap(value + step)))
+      ..decreasedValue = isRange
+          ? '${_snap((_highActive ? rangeEnd : value) - step).round()}'
+          : _stars
+              ? score(_selectable(_snap(value - step)))
+              : _percent(_selectable(_snap(value - step)));
+    if (_interactive && enabled && !_readOnly) {
       config
         ..onIncrease = increase
         ..onDecrease = decrease;

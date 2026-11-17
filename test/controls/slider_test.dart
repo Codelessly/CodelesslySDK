@@ -95,6 +95,74 @@ void main() {
     expect(slider.value, 20);
   });
 
+  testWidgets('star rating takes a tap, half-step keys, and announces its score', (tester) async {
+    final handle = tester.ensureSemantics();
+    final (tree, _) = await _show(tester, {'s': _node({
+      'value': 0, 'min': 0, 'max': 5, 'divisions': 10, 'trackShape': 'stars',
+      'showThumb': false, 'label': 'Your rating',
+    }, height: 44)});
+    final s = _slider(tree);
+    await tester.tapAt(s.localToGlobal(const Offset(120, 22)));
+    await tester.pump();
+    expect(s.value, 3);
+    expect(s.focusHighlight, isFalse, reason: 'a pointer must not show the keyboard ring');
+    s.focusNode.unfocus();
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(s.focusNode.hasFocus, isTrue);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(s.value, 3.5);
+    expect(s.focusHighlight, isTrue);
+    await tester.sendKeyEvent(LogicalKeyboardKey.home);
+    await tester.pump();
+    expect(s.value, 0);
+    await tester.sendKeyEvent(LogicalKeyboardKey.end);
+    await tester.pump();
+    expect(s.value, 5);
+    final data = s.debugSemantics!.getSemanticsData();
+    expect(data.flagsCollection.isSlider, isTrue);
+    expect(data.label, 'Your rating');
+    expect(data.value, '5 of 5');
+    handle.dispose();
+  });
+
+  testWidgets('read-only star rating remains full color and has no change actions', (tester) async {
+    final handle = tester.ensureSemantics();
+    final (tree, recorded) = await _show(tester, {'s': _node({
+      'value': 4.5, 'min': 0, 'max': 5, 'trackShape': 'stars',
+      'readOnly': true, 'showThumb': false, 'label': 'Course score',
+    }, height: 44)}, dark: true);
+    final s = _slider(tree);
+    await tester.tapAt(s.localToGlobal(const Offset(20, 22)));
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(s.value, 4.5);
+    expect(s.paintedAlpha, 255);
+    expect(s.focusNode.hasFocus, isFalse);
+    expect(recorded.fired, isEmpty);
+    final data = s.debugSemantics!.getSemanticsData();
+    expect(data.value, '4.5 of 5');
+    expect(data.hint, 'Read only');
+    expect(data.hasAction(SemanticsAction.increase), isFalse);
+    handle.dispose();
+  });
+
+  testWidgets('star rating in right-to-left text fills and steps from the right', (tester) async {
+    final n = _node({'value': 0, 'max': 5, 'divisions': 5, 'trackShape': 'stars',
+      'showThumb': false}, height: 44);
+    n['textDirection'] = 'rtl';
+    final (tree, _) = await _show(tester, {'s': n});
+    final s = _slider(tree);
+    await tester.tapAt(s.localToGlobal(const Offset(175, 22)));
+    await tester.pump();
+    expect(s.value, 1);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(s.value, 2);
+  });
+
   testWidgets('with nothing styled it is SSUI\'s slider: 28 high, a 6 px rail, a ringed 14 px thumb and no shadow',
       (tester) async {
     final (tree, _) = await _show(tester, {'s': hugging('slider', {'value': 0.5})});

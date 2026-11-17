@@ -1369,6 +1369,7 @@
   "components/ChoiceChips.json",
   "components/DayPicker.json",
   "components/Counter.json",
+  "components/Rating.json",
   "components/FlightOption.json",
   "components/ProductTile.json",
   "components/Carousel.json",
