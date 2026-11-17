@@ -1,0 +1,12 @@
+// An on-screen keyboard (layout "qwerty", "dvorak" or "azerty") for a typing lesson: the key to press next (the character of target after the typed ones) is ringed with highlightNext, and showFingers tints each column by the finger that types it.
+Keyboard layout="qwerty" typed target highlightNext showFingers
+  Column w=fill gap=4 maxw=440
+    each keys in layout == "dvorak" ? [["'", ",", ".", "p", "y", "f", "g", "c", "r", "l"], ["a", "o", "e", "u", "i", "d", "h", "t", "n", "s"], [";", "q", "j", "k", "x", "b", "m", "w", "v", "z"]] : (layout == "azerty" ? [["a", "z", "e", "r", "t", "y", "u", "i", "o", "p"], ["q", "s", "d", "f", "g", "h", "j", "k", "l", "m"], ["w", "x", "c", "v", "b", "n", ",", ";", ":", "!"]] : [["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"], ["a", "s", "d", "f", "g", "h", "j", "k", "l", ";"], ["z", "x", "c", "v", "b", "n", "m", ",", ".", "/"]])
+      Row w=fill gap=4
+        Box w={[0, 10, 20][index]} h=1
+        each key in keys
+          Row grow h=38 radius=8 center middle fill={showFingers ? ["badTint", "warnTint", "goodTint", "accentTint", "accentTint", "accentTint", "accentTint", "goodTint", "warnTint", "badTint"][index] : "card"} border={highlightNext && key == slice(target, length(typed), length(typed) + 1) ? "accent" : "lineStrong"}
+            Text.mono "{upper(key)}"
+        Box w={[0, 10, 20][index]} h=1
+    Row w=fill h=38 radius=8 center middle fill=card border={highlightNext && " " == slice(target, length(typed), length(typed) + 1) ? "accent" : "lineStrong"}
+      Text.caption "space"

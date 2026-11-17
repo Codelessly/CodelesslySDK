@@ -1,0 +1,20 @@
+// One octave of piano keys, C4 to C5 (white keys with the black ones between): a tap gives the note's name ("C4", "C#4"; onKey: result); highlight rings a note, correct and wrong tint one; labels names the white keys.
+PianoKeyboard h=160 labels=true highlight correct wrong onKey
+  Stack w=fill h={h}
+    Row w=fill h={h} gap=2
+      each note in ["C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5"]
+        Row grow h={h} radius=6 center bottom pad=[0,0,0,8] fill={note == correct ? "goodTint" : (note == wrong ? "badTint" : (note == highlight ? "accentTint" : "card"))} border={note == highlight ? "accent" : "lineStrong"} onTap={onKey(note)}
+          if labels
+            Text.caption "{note}"
+    Row w=fill h={h * 0.6} gap=0
+      Spacer grow=7
+      Row grow=6 h={h * 0.6} radius=4 fill={"C#4" == correct ? "good" : ("C#4" == wrong ? "bad" : ("C#4" == highlight ? "accent" : "ink"))} onTap={onKey("C#4")}
+      Spacer grow=4
+      Row grow=6 h={h * 0.6} radius=4 fill={"D#4" == correct ? "good" : ("D#4" == wrong ? "bad" : ("D#4" == highlight ? "accent" : "ink"))} onTap={onKey("D#4")}
+      Spacer grow=14
+      Row grow=6 h={h * 0.6} radius=4 fill={"F#4" == correct ? "good" : ("F#4" == wrong ? "bad" : ("F#4" == highlight ? "accent" : "ink"))} onTap={onKey("F#4")}
+      Spacer grow=4
+      Row grow=6 h={h * 0.6} radius=4 fill={"G#4" == correct ? "good" : ("G#4" == wrong ? "bad" : ("G#4" == highlight ? "accent" : "ink"))} onTap={onKey("G#4")}
+      Spacer grow=4
+      Row grow=6 h={h * 0.6} radius=4 fill={"A#4" == correct ? "good" : ("A#4" == wrong ? "bad" : ("A#4" == highlight ? "accent" : "ink"))} onTap={onKey("A#4")}
+      Spacer grow=17

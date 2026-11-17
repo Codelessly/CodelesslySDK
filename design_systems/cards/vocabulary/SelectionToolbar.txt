@@ -1,0 +1,4 @@
+// A small toolbar over what is chosen on a canvas (colour swatches, icon buttons): the lines under it in a lifted row, shown while the selection `for` holds anything.
+SelectionToolbar for
+  Row gap=8 pad=[10,6,10,6] radius=12 fill=card border=line middle visible={for != null && !isEmpty(for)}
+    ...

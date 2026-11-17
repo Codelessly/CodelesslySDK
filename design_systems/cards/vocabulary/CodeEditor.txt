@@ -1,0 +1,4 @@
+// A box to write code in: several lines in monospace, h tall; bind keeps the text.
+CodeEditor bind=code h=200
+  state code=""
+  Input multiline bind=code h={h} {"props": {"style": {"fontFamily": "JetBrains Mono", "fontSize": 13}}}

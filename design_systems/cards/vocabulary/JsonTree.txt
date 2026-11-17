@@ -1,0 +1,7 @@
+// The fields of a JSON object, one to a line in monospace: each key and its value (a nested value is shown as written, not folded).
+JsonTree value
+  Column w=fill gap=4 pad=12 radius=10 fill=codeBg border=line
+    each key in keys(value)
+      Row w=fill gap=8 top
+        Text.mono "{key}:" color=accent
+        Text.mono "{text(value[key])}" grow

@@ -1,6 +1,6 @@
-// A commit's dot on the graph, moved right by its lane; hollow when it is a merge.
-GraphNode lane=0 color=accent merge=false
-  Row gap=0 middle w={lane * 16 + 14}
+// A commit's dot on the graph, moved right by its lane (of lanes, so every row's text starts at the same place); hollow when it is a merge.
+GraphNode lane=0 lanes=4 color=accent merge=false
+  Row gap=0 middle w={lanes * 16}
     Box w={lane * 16} h=1
     Box w=12 h=12 radius=999 fill={color} center middle
       if merge

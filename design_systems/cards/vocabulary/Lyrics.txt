@@ -3,5 +3,5 @@ Lyrics lines=[] time bind=pos h=200 highlight=accent onSeek
   state pos=0
   Row w=fill h={h} stretch
     Column grow gap=8 pad=[0,4,0,4] scroll
-      each line in lines
-        Text "{coalesce(line.text, line)}" size={index == count(lines, l => coalesce(l.t, 0) <= coalesce(time, pos)) - 1 ? 20 : 16} weight={index == count(lines, l => coalesce(l.t, 0) <= coalesce(time, pos)) - 1 ? 700 : 400} color={index == count(lines, l => coalesce(l.t, 0) <= coalesce(time, pos)) - 1 ? highlight : "inkFaint"} onTap={pos=coalesce(line.t, 0); onSeek(coalesce(line.t, 0))}
+      each row in map(lines, l => {"text": coalesce(l.text, l), "t": coalesce(l.t, 0), "on": coalesce(l.t, 0) <= coalesce(time, pos) && count(lines, m => coalesce(m.t, 0) > coalesce(l.t, 0) && coalesce(m.t, 0) <= coalesce(time, pos)) == 0})
+        Text "{row.text}" size={row.on ? 20 : 16} weight={row.on ? 700 : 400} color={row.on ? highlight : "inkFaint"} onTap={pos=row.t; onSeek(row.t)}
