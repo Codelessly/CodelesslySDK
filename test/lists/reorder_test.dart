@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support.dart';
+import '../support/keyboard.dart';
 
 List<Object?> songs() => [for (var i = 0; i < 5; i++) {'id': 's$i', 'locked': i == 4}];
 
@@ -151,6 +152,27 @@ void main() {
       expect(order().indexOf('s0'), greaterThan(1));
     });
 
+    testWidgets('a kit handle takes Tab, shows a keyboard ring and moves its list by key', (tester) async {
+      await pumpList(tester, {'apply': 'variable', 'keyboard': true},
+        rowExtra: {'type': 'row', 'children': ['label', 'grip'], 'props': <String, Object?>{}},
+        extra: {
+          'label': {'type': 'text', 'layout': {'width': 250, 'height': 50}, 'props': {'text': r'${item.id}'}},
+          'grip': {'type': 'iconButton', 'layout': {'width': 44, 'height': 44},
+            'props': {'icon': 'drag_indicator'}, 'tooltip': 'Reorder', 'reorderHandle': true},
+        });
+      final keys = Keyboard(tester);
+      await keys.tab();
+      expect(keys.focusedId, 'grip');
+      expect(keys.ringShown, isTrue);
+      expect(keys.semantics!.isButton, isTrue);
+      expect(keys.semantics!.label, 'Reorder s0');
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+      await tester.pumpAndSettle();
+      expect(order(), ['s1', 's0', 's2', 's3', 's4']);
+    });
+
     testWidgets('leaves an item in place when its condition refuses the move', (tester) async {
       await pumpList(tester, {'start': 'press', 'apply': 'variable', 'canReorderIf': r'${= !item.locked}'});
       final listeners =
@@ -256,5 +278,79 @@ void main() {
     expect(ids('todo'), ['t0', 't2']);
     expect(ids('done'), ['d0', 't1', 'd1']);
     expect(s['moves'], 'todo>done@1');
+  });
+
+  testWidgets('moves a focused card between grouped lists by keyboard and exposes transfer actions', (tester) async {
+    Json column(String id) => {
+      'type': 'listView', 'children': ['$id-card'],
+      'layout': {'width': 200, 'height': 300}, 'bind': {'data': '\${$id}'},
+      'props': {'reorder': {'start': 'press', 'group': 'board', 'listKey': id, 'apply': 'variable', 'keyboard': true}},
+    };
+    final s = await show(tester, {
+      'board': {'type': 'row', 'children': ['todo', 'done'], 'layout': {'width': 400, 'height': 350}},
+      'todo': column('todo'), 'done': column('done'),
+      'todo-card': {'type': 'text', 'layout': {'width': 200, 'height': 50}, 'props': {'text': r'${item.id}'}},
+      'done-card': {'type': 'text', 'layout': {'width': 200, 'height': 50}, 'props': {'text': r'${item.id}'}},
+    }, root: 'board', variables: [
+      v('todo', [{'id': 't0'}, {'id': 't1'}], VariableType.list),
+      v('done', [{'id': 'd0'}], VariableType.list),
+    ]);
+    await tester.pumpAndSettle();
+    final first = find.byType(KeyboardReorderItem).first;
+    final semantics = tester.widget<Semantics>(find.descendant(of: first, matching: find.byType(Semantics)).first);
+    expect(semantics.properties.customSemanticsActions!.keys.map((a) => a.label), contains('Move to next list'));
+    tester.widget<KeyboardReorderItem>(first).focusNode!.requestFocus();
+    await tester.pump();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+    await tester.pumpAndSettle();
+    expect((s['todo'] as List).map((x) => (x as Map)['id']), ['t1']);
+    expect((s['done'] as List).map((x) => (x as Map)['id']), ['d0', 't0']);
+  });
+
+  testWidgets('a Handle starts a grouped touch transfer at phone width', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+    Json column(String id) => {
+      'type': 'listView', 'children': ['$id-card'],
+      'layout': {'width': 300, 'height': 130}, 'bind': {'data': '\${$id}'},
+      'props': {'reorder': {'start': 'handle', 'group': 'trip', 'listKey': id, 'apply': 'variable'}},
+    };
+    Json card(String id) => {
+      'type': 'row', 'children': ['$id-grip', '$id-name'],
+      'layout': {'width': 300, 'height': 50},
+    };
+    final s = await show(tester, {
+      'board': {'type': 'column', 'children': ['todo', 'done'], 'layout': {'width': 320, 'height': 350}},
+      'todo': column('todo'), 'done': column('done'),
+      'todo-card': card('todo'), 'done-card': card('done'),
+      'todo-grip': {'type': 'iconButton', 'layout': {'width': 44, 'height': 44},
+        'props': {'icon': 'drag_indicator'}, 'tooltip': 'Reorder', 'reorderHandle': true},
+      'done-grip': {'type': 'iconButton', 'layout': {'width': 44, 'height': 44},
+        'props': {'icon': 'drag_indicator'}, 'tooltip': 'Reorder', 'reorderHandle': true},
+      'todo-name': {'type': 'text', 'layout': {'width': 250, 'height': 50}, 'props': {'text': r'${item.id}'}},
+      'done-name': {'type': 'text', 'layout': {'width': 250, 'height': 50}, 'props': {'text': r'${item.id}'}},
+    }, root: 'board', variables: [
+      v('todo', [{'id': 't0'}], VariableType.list),
+      v('done', [{'id': 'd0'}], VariableType.list),
+    ]);
+    await tester.pumpAndSettle();
+    final from = s.center('todo-grip', instance: const ProvidedItem('row', null, 'todo', ('id', 't0')));
+    final to = s.center('done-name', instance: const ProvidedItem('row', null, 'done', ('id', 'd0')));
+    final drag = await tester.startGesture(from);
+    await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+    for (var i = 1; i <= 10; i++) {
+      await drag.moveTo(Offset.lerp(from, to, i / 10)!);
+      await tester.pump();
+    }
+    await drag.up();
+    await tester.pumpAndSettle();
+    expect(s['todo'], isEmpty);
+    expect((s['done'] as List).map((x) => (x as Map)['id']), containsAll(['t0', 'd0']));
   });
 }

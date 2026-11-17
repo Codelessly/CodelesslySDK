@@ -18,6 +18,7 @@ import 'package:flutter/rendering.dart' show CustomSemanticsAction, SemanticsSer
 import 'package:flutter/services.dart';
 
 import '../render/convert.dart';
+import '../render/controls/kit.dart' show RenderControl;
 import '../render/node_tree.dart';
 import '../render/recipe.dart';
 import '../runtime/actions/wiring.dart';
@@ -74,6 +75,7 @@ void reorderRecipe(
         items: [...items],
         listKey: listKey,
         itemId: itemId,
+        handle: handle,
         itemMain: itemMain,
         itemExtent: itemExtent,
         stretch: stretch,
@@ -114,6 +116,30 @@ Widget _rowNode(ListRuntime r, String itemId, List<Object?> items, int index) {
   final instance = _rowInstance(r, _rowKey(items, index));
   r.binder?.provideItem(r.b.source, instance, index: index, item: items.elementAtOrNull(index));
   return NodeChild(tree: r.tree, id: itemId, instance: instance);
+}
+
+// A Handle is a kit control, so its keyboard focus and visible ring come
+// from the shared control focus scope. Connect that stop to the list move.
+RenderControl? _handleControl(ListRuntime r, String handle, List<Object?> items, int index) {
+  final box = r.tree.boxOf(handle, instance: _rowInstance(r, _rowKey(items, index)));
+  RenderControl? controlOf(RenderObject? object) {
+    if (object is RenderControl) return object;
+    RenderControl? found;
+    object?.visitChildren((child) { found ??= controlOf(child); });
+    return found;
+  }
+  return controlOf(box?.contentBox ?? box);
+}
+
+void _wireHandle(ListRuntime r, String handle, List<Object?> items, int index, bool Function(KeyEvent) onKey) {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    final control = _handleControl(r, handle, items, index);
+    if (control == null) return;
+    final item = items.elementAtOrNull(index);
+    final name = item is Map ? item['name'] ?? item['title'] ?? item['id'] : item;
+    control.semanticsLabel = name == null ? 'Reorder item' : 'Reorder $name';
+    control.focusNode.onKey = onKey;
+  });
 }
 
 /// Marks the nodes of [itemId]'s subtree in row [instance] dragged (their
@@ -310,6 +336,25 @@ class _ReorderListViewState extends State<ReorderListView> {
         itemBuilder: (context, index) {
           final value = widget.items.elementAtOrNull(index);
           final locked = model != null && !_r.holds(model.canReorderIf, item: value, index: index);
+          if (widget.handle case final handle? when !locked && (model?.keyboard ?? false)) {
+            _wireHandle(_r, handle, widget.items, index, (event) {
+              if (event is! KeyDownEvent || !HardwareKeyboard.instance.isAltPressed) return false;
+              final back = vertical ? LogicalKeyboardKey.arrowUp : LogicalKeyboardKey.arrowLeft;
+              final forward = vertical ? LogicalKeyboardKey.arrowDown : LogicalKeyboardKey.arrowRight;
+              final delta = event.logicalKey == back ? -1 : event.logicalKey == forward ? 1 : 0;
+              if (delta == 0 || index + delta < 0 || index + delta >= count) return false;
+              _move(index, index + delta).then((moved) {
+                if (!moved || !mounted) return;
+                SemanticsService.sendAnnouncement(View.of(context),
+                  'Moved to ${index + delta + 1} of $count',
+                  Directionality.maybeOf(context) ?? TextDirection.ltr);
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) _handleControl(_r, handle, _r.data ?? const [], index + delta)?.focusNode.requestFocus(highlight: true);
+                });
+              });
+              return true;
+            });
+          }
           Widget child = MetaData(
             behavior: HitTestBehavior.opaque,
             child: ListItemBox(
@@ -407,11 +452,16 @@ class KeyboardReorderItem extends StatelessWidget {
     required this.vertical,
     required this.onMove,
     required this.child,
+    this.onTransfer,
+    this.focusNode,
   });
 
   final int index, count;
   final bool enabled, vertical;
   final Future<bool> Function(int from, int to) onMove;
+  /// A grouped list can move the focused item to the list on either side.
+  final Future<bool> Function(int direction)? onTransfer;
+  final FocusNode? focusNode;
   final Widget child;
 
   Future<void> _move(BuildContext context, int delta) async {
@@ -436,9 +486,12 @@ class KeyboardReorderItem extends StatelessWidget {
               if (index > 0) CustomSemanticsAction(label: vertical ? 'Move up' : 'Move left'): () => _move(context, -1),
               if (index < count - 1)
                 CustomSemanticsAction(label: vertical ? 'Move down' : 'Move right'): () => _move(context, 1),
+              if (onTransfer != null) CustomSemanticsAction(label: 'Move to previous list'): () => onTransfer!(-1),
+              if (onTransfer != null) CustomSemanticsAction(label: 'Move to next list'): () => onTransfer!(1),
             }
           : null,
       child: Focus(
+        focusNode: focusNode,
         canRequestFocus: enabled,
         onKeyEvent: (node, event) {
           if (event is! KeyDownEvent && event is! KeyRepeatEvent) return KeyEventResult.ignored;
@@ -449,6 +502,14 @@ class KeyboardReorderItem extends StatelessWidget {
           }
           if (event.logicalKey == forward) {
             _move(context, 1);
+            return KeyEventResult.handled;
+          }
+          if (vertical && onTransfer != null && event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+            onTransfer!(-1);
+            return KeyEventResult.handled;
+          }
+          if (vertical && onTransfer != null && event.logicalKey == LogicalKeyboardKey.arrowRight) {
+            onTransfer!(1);
             return KeyEventResult.handled;
           }
           return KeyEventResult.ignored;
@@ -545,6 +606,7 @@ class GroupReorderList extends StatefulWidget {
     required this.items,
     required this.listKey,
     required this.itemId,
+    this.handle,
     this.itemMain,
     this.itemExtent,
     this.stretch = false,
@@ -556,6 +618,7 @@ class GroupReorderList extends StatefulWidget {
   final List<Object?> items;
   final String listKey;
   final String itemId;
+  final String? handle;
   final double? itemMain;
 
   /// The extent each item takes along the list, when known; else items
@@ -569,8 +632,74 @@ class GroupReorderList extends StatefulWidget {
 }
 
 class GroupReorderListState extends State<GroupReorderList> {
+  static final Set<GroupReorderListState> _active = {};
   final ScrollController scrollController = ScrollController();
   final Map<int, GlobalKey> _itemKeys = {};
+  final Map<Object, FocusNode> _focusNodes = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _active.add(this);
+  }
+
+  FocusNode _focusFor(int index) => _focusNodes.putIfAbsent(_rowKey(widget.items, index), () => FocusNode());
+
+  Future<bool> _moveByKey(int from, int to) => runListReorder(
+        _r, model: widget.model, items: widget.items, from: from, to: to, listKey: widget.listKey);
+
+  /// Pick the nearest list of this group in the direction of the arrow.
+  Future<bool> _transferByKey(int index, int direction) async {
+    final box = context.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return false;
+    final center = box.localToGlobal(box.size.center(Offset.zero));
+    final candidates = _active.where((other) => other != this && other.mounted &&
+        other.widget.model.group == widget.model.group &&
+        identical(other._r.b.source, _r.b.source));
+    GroupReorderListState? target;
+    var distance = double.infinity;
+    for (final other in candidates) {
+      final targetBox = other.context.findRenderObject() as RenderBox?;
+      if (targetBox == null || !targetBox.hasSize) continue;
+      final dx = targetBox.localToGlobal(targetBox.size.center(Offset.zero)).dx - center.dx;
+      if (dx * direction <= 0 || dx.abs() >= distance) continue;
+      target = other;
+      distance = dx.abs();
+    }
+    // Reflow stacks columns on a phone; keep keyboard transfer reachable.
+    if (target == null) {
+      for (final other in candidates) {
+        final targetBox = other.context.findRenderObject() as RenderBox?;
+        if (targetBox == null || !targetBox.hasSize) continue;
+        final dy = targetBox.localToGlobal(targetBox.size.center(Offset.zero)).dy - center.dy;
+        if (dy * direction <= 0 || dy.abs() >= distance) continue;
+        target = other;
+        distance = dy.abs();
+      }
+    }
+    if (target == null) return false;
+    final destination = target;
+    final to = destination.widget.items.length;
+    final moved = await runCrossListMove(destination._r,
+      payload: ReorderPayload(group: widget.model.group, list: _r, listKey: widget.listKey,
+        index: index, item: widget.items[index], items: widget.items),
+      model: destination.widget.model, targetKey: destination.widget.listKey,
+      targetItems: destination.widget.items, to: to);
+    if (!moved || !mounted) return moved;
+    SemanticsService.sendAnnouncement(View.of(context),
+      'Moved to ${destination.widget.listKey}, position ${to + 1}',
+      Directionality.maybeOf(context) ?? TextDirection.ltr);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!destination.mounted) return;
+      final handle = destination.widget.handle;
+      if (handle == null) {
+        destination._focusFor(to).requestFocus();
+      } else {
+        _handleControl(destination._r, handle, destination.widget.items, to)?.focusNode.requestFocus(highlight: true);
+      }
+    });
+    return true;
+  }
 
   /// Where a drag over this list would land, if one is over it.
   int? dropIndex;
@@ -588,6 +717,8 @@ class GroupReorderListState extends State<GroupReorderList> {
 
   @override
   void dispose() {
+    _active.remove(this);
+    for (final focus in _focusNodes.values) { focus.dispose(); }
     scrollController.dispose();
     super.dispose();
   }
@@ -666,6 +797,41 @@ class GroupReorderListState extends State<GroupReorderList> {
     final key = _itemKeys.putIfAbsent(index, GlobalKey.new);
     final item = KeyedSubtree(key: key, child: _row(index));
     final locked = !_r.holds(widget.model.canReorderIf, item: value, index: index);
+    if (widget.handle case final handle? when !locked && widget.model.keyboard) {
+      _wireHandle(_r, handle, widget.items, index, (event) {
+        if (event is! KeyDownEvent || !HardwareKeyboard.instance.isAltPressed) return false;
+        final key = event.logicalKey;
+        if (key == LogicalKeyboardKey.arrowUp && index > 0) {
+          _moveByKey(index, index - 1).then((moved) {
+            if (!moved || !mounted) return;
+            SemanticsService.sendAnnouncement(View.of(context),
+              'Moved to $index of ${widget.items.length}',
+              Directionality.maybeOf(context) ?? TextDirection.ltr);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) _handleControl(_r, handle, _r.data ?? const [], index - 1)?.focusNode.requestFocus(highlight: true);
+            });
+          });
+          return true;
+        }
+        if (key == LogicalKeyboardKey.arrowDown && index + 1 < widget.items.length) {
+          _moveByKey(index, index + 1).then((moved) {
+            if (!moved || !mounted) return;
+            SemanticsService.sendAnnouncement(View.of(context),
+              'Moved to ${index + 2} of ${widget.items.length}',
+              Directionality.maybeOf(context) ?? TextDirection.ltr);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) _handleControl(_r, handle, _r.data ?? const [], index + 1)?.focusNode.requestFocus(highlight: true);
+            });
+          });
+          return true;
+        }
+        if (key == LogicalKeyboardKey.arrowLeft || key == LogicalKeyboardKey.arrowRight) {
+          _transferByKey(index, key == LogicalKeyboardKey.arrowLeft ? -1 : 1);
+          return true;
+        }
+        return false;
+      });
+    }
     if (locked || !widget.model.enabled) return item;
     final payload = ReorderPayload(
       group: widget.model.group,
@@ -704,7 +870,7 @@ class GroupReorderListState extends State<GroupReorderList> {
     }
 
     const hidden = SizedBox.shrink();
-    return Listener(
+    final draggable = Listener(
       onPointerDown: (_) => measure(),
       child: switch (widget.model.start) {
         ReorderStart.press => Draggable<ReorderPayload>(
@@ -724,6 +890,13 @@ class GroupReorderListState extends State<GroupReorderList> {
             child: item,
           ),
       },
+    );
+    if (!widget.model.keyboard) return draggable;
+    return KeyboardReorderItem(
+      index: index, count: widget.items.length, enabled: true,
+      vertical: _axis == Axis.vertical, onMove: _moveByKey,
+      onTransfer: _axis == Axis.vertical ? (direction) => _transferByKey(index, direction) : null,
+      focusNode: _focusFor(index), child: draggable,
     );
   }
 
@@ -754,7 +927,7 @@ class GroupReorderListState extends State<GroupReorderList> {
           final count = widget.items.length + (slot == null ? 0 : 1);
           return LayoutBuilder(builder: (context, constraints) {
             final bounded = _axis == Axis.vertical ? constraints.hasBoundedHeight : constraints.hasBoundedWidth;
-            return ListView.builder(
+            final list = ListView.builder(
               controller: scrollController,
               scrollDirection: _axis,
               padding: _padding,
@@ -772,6 +945,13 @@ class GroupReorderListState extends State<GroupReorderList> {
                   child: item,
                 );
               },
+            );
+            // An empty group is still a touch drop target and a keyboard destination.
+            return ConstrainedBox(
+              constraints: _axis == Axis.vertical
+                  ? const BoxConstraints(minHeight: 44)
+                  : const BoxConstraints(minWidth: 44),
+              child: list,
             );
           });
         },

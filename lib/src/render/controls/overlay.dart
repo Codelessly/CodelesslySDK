@@ -8,6 +8,7 @@ import 'dart:ui' show PointerDeviceKind, TextDirection;
 
 import 'package:codelessly_api/core.dart' as api show ThemeTokens;
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'focus.dart';
@@ -232,9 +233,20 @@ class RenderTooltipRegion extends RenderMouseRegion {
     _touchExpiry = null;
     final b = _bubble;
     if (b == null) return;
-    _root?.hideOverlay(b);
+    final root = _root;
     _bubble = null;
     _root = null;
+    // A region taken out of the tree while a frame is being built or laid
+    // out (a list rebuilding the row its focused handle is in) cannot change
+    // the root then: the bubble goes once the frame is done.
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        root?.hideOverlay(b);
+        b.dispose();
+      });
+      return;
+    }
+    root?.hideOverlay(b);
     b.dispose();
   }
 
