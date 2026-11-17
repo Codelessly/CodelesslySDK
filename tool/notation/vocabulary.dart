@@ -239,7 +239,7 @@ Future<void> main(List<String> args) async {
   final theme = ThemeTokens.fromJson(ds.manifest.theme.toJson());
 
   final types = <String, _Word>{};
-  final others = <String, Map<String, _Word>>{'parameter': {}, 'flag': {}, 'event': {}, 'verb': {}, 'variant': {}, 'missing': {}, 'children': {}, 'function': {}, 'alias': {}};
+  final others = <String, Map<String, _Word>>{'parameter': {}, 'flag': {}, 'event': {}, 'verb': {}, 'variant': {}, 'missing': {}, 'children': {}, 'function': {}, 'alias': {}, 'overlay': {}};
   final issueShapes = <String, ({int count, Set<String> files, List<String> examples})>{};
   final invalidShapes = <String, ({int count, Set<String> files, List<String> examples})>{};
   final perFile = <Map<String, Object?>>[];
@@ -541,7 +541,7 @@ Future<void> main(List<String> args) async {
         {'message': e.key, 'count': e.value.count, 'files': e.value.files.length, 'examples': e.value.examples},
     ],
     'types': [for (final w in typeWords) w.toJson()],
-    for (final k in const ['parameter', 'flag', 'event', 'verb', 'function', 'variant', 'missing', 'children', 'alias'])
+    for (final k in const ['parameter', 'flag', 'event', 'verb', 'function', 'variant', 'missing', 'children', 'alias', 'overlay'])
       switch (k) { 'alias' => 'aliases', 'missing' => 'missing', 'children' => 'children', _ => '${k}s' }: [for (final w in _sorted(others[k]!.values)) w.toJson()],
     'summary': corpus.summary(),
     'words': [for (final w in corpus.sorted()) w.toJson()],
@@ -631,6 +631,9 @@ Future<void> main(List<String> args) async {
   section('Variants we do not have', 'The plain type is drawn.', _sorted(others['variant']!.values), withOn: false);
   section('Parameters a component needs that the line did not give', 'The answer\'s idea of the word is not the component\'s: it is given an empty value.', _sorted(others['missing']!.values));
   section('Words given lines under them that take none', 'The lines are drawn after the word, not in it.', _sorted(others['children']!.values), withOn: false);
+  section('Overlays opened and never written', 'An `open <id>` of a dialog the answer did not write: a placeholder sheet titled with the id opens (wanted, not an issue).',
+      _sorted(others['overlay']!.values),
+      withOn: false);
   md
     ..writeln()
     ..writeln('## Words we have, as the answers used them')
@@ -695,6 +698,7 @@ Future<void> main(List<String> args) async {
   stdout.writeln('${files.length} files, $screenCount screens, $nodeLines node lines: core ${total['core']}, component ${total['component']}, alias ${total['alias']}, definition ${total['definition']}, unknown ${total['unknown']}; '
       '$allWords words, $resolvedWords resolved; '
       '${unknownTypes.length} unknown words; ${shapes.fold<int>(0, (n, e) => n + e.value.count)} grammar issues; '
+      '${others['overlay']!.values.fold<int>(0, (n, w) => n + w.uses)} overlays opened and never written; '
       '${perFile.fold<int>(0, (n, f) => n + (f['invalid']! as int))} validation errors.');
   stdout.writeln('${outDir.path}/vocabulary.json, ${outDir.path}/VOCABULARY.md');
 }

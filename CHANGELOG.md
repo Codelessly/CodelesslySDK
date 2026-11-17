@@ -12,6 +12,9 @@ Needs codelessly_api from master (after 33.0.0).
 - **`notation.sh prompt --open` asks for every invented word to be defined** after the last screen (Review 4, D19;
   codelessly_api's `notationDefinePreface`), so `batch.sh prepare` writes self-defining batches. `--no-define`
   gives the prompt the first corpus was written with, identical to `corpus/b09/prompt.txt`.
+- **`notation.sh vocabulary`: overlays opened and never written** (Review 3, D17): codelessly_api now opens a
+  placeholder sheet for them with the open vocabulary; the report counts them (`overlays` in `vocabulary.json`, a
+  section in `VOCABULARY.md`, and the summary line) instead of as grammar issues.
 
 ## 33.0.0
 
