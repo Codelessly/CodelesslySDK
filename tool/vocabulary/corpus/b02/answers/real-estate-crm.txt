@@ -1,0 +1,201 @@
+### Pipeline
+state stages=["Lead","Contacted","Viewing","Offer","Closed"]
+state deals=[{"id":1,"name":"14 Alder Lane","client":"Maya Reyes","value":485000,"stage":"Lead"},{"id":2,"name":"Harbor View Condo 5B","client":"Tom Okafor","value":612000,"stage":"Contacted"},{"id":3,"name":"22 Birch Court","client":"Priya Nair","value":379000,"stage":"Viewing"},{"id":4,"name":"9 Mill Street","client":"Daniel Cho","value":725000,"stage":"Offer"},{"id":5,"name":"Lakeside Cottage","client":"Elena Rossi","value":540000,"stage":"Contacted"},{"id":6,"name":"3 Orchard Way","client":"Sam Whitaker","value":298000,"stage":"Closed"}]
+state q=""
+state minValue=0
+App
+  Sidebar
+    Brand "Keystone" icon="key"
+    NavItem "Pipeline" icon="view_kanban" selected={true} onTap={go pipeline}
+    NavItem "Contact" icon="person" onTap={go contact}
+    NavItem "Property" icon="home" onTap={go property}
+    NavItem "Follow-ups" icon="checklist" badge="5" onTap={go follow-ups}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Jordan Blake" size=32
+      Text.muted "Jordan Blake"
+  Main
+    Nav
+      Heading "Pipeline" level=1
+      Row gap=8
+        Input "Search deals" bind=q w=220
+        Select bind=minValue items=["Any value","Over 300k","Over 500k"] onChange={minValue=result=="Over 500k"?500000:(result=="Over 300k"?300000:0)}
+        Button "New deal" icon="add" onTap={open newDeal}
+    Column pad=24 gap=16
+      Row gap=16 top scroll
+        each stage in stages
+          Column w=280 gap=8 drop=deal onDrop={deals=updateWhere(deals,d=>d.id==result.data,d=>with(d,"stage",stage))}
+            Row between middle
+              Text.strong "{stage}"
+              Badge.neutral "{count(deals,d=>d.stage==stage)}"
+            Text.muted "{money(sum(filter(deals,d=>d.stage==stage),d=>d.value),'$',0)}"
+            Divider
+            each deal in filter(deals,d=>d.stage==stage && d.value>=minValue && (q=="" || contains(lower(d.name),lower(q)) || contains(lower(d.client),lower(q))))
+              Card gap=4 drag=deal(deal.id) onTap={go contact}
+                Text.strong "{deal.name}"
+                Row between middle
+                  Row gap=8 middle
+                    Avatar "{deal.client}" size=24
+                    Text.muted "{deal.client}"
+                  Text.strong "{money(deal.value,'$',0)}"
+  Dialog#newDeal "New deal" "Add a property and a client to the pipeline"
+    Input "Property address" bind=newName
+    Input "Client" bind=newClient
+    Input "Asking price" bind=newValue type=number
+    Select bind=newStage items=["Lead","Contacted","Viewing","Offer","Closed"]
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Add deal" onTap={deals=append(deals,{"id":length(deals)+1,"name":newName,"client":newClient,"value":newValue,"stage":coalesce(newStage,"Lead")}); toast "Deal added"; close}
+
+### Contact
+state tags=["First-time buyer","Pre-approved","Pets"]
+state newTag=""
+state nextAction="Send comparable listings for Alder Lane"
+state dueDate="2026-11-18"
+state outcome=""
+state callNote=""
+state events=[{"id":1,"kind":"call","title":"Intro call","note":"Looking for 3 bed under 500k, school district matters.","when":"Nov 3, 10:15"},{"id":2,"kind":"email","title":"Sent 4 listings","note":"Alder Lane, Birch Court and two others.","when":"Nov 5, 14:02"},{"id":3,"kind":"viewing","title":"Viewing at 14 Alder Lane","note":"Liked the kitchen, worried about the street noise.","when":"Nov 9, 16:30"},{"id":4,"kind":"call","title":"Follow-up call","note":"Wants a second viewing with her partner.","when":"Nov 12, 09:40"}]
+App
+  Sidebar
+    Brand "Keystone" icon="key"
+    NavItem "Pipeline" icon="view_kanban" onTap={go pipeline}
+    NavItem "Contact" icon="person" selected={true} onTap={go contact}
+    NavItem "Property" icon="home" onTap={go property}
+    NavItem "Follow-ups" icon="checklist" badge="5" onTap={go follow-ups}
+  Main
+    Nav
+      Row gap=12 middle
+        Avatar "Maya Reyes" size=40
+        Column
+          Heading "Maya Reyes" level=1
+          Text.muted "Buyer, Offer stage"
+      Row gap=8
+        IconButton "call" tooltip="Log a call" onTap={open callLog}
+        IconButton "mail" tooltip="Email Maya" onTap={emit email maya}
+        Button "Log call" icon="add_call" onTap={open callLog}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Column grow gap=16
+          Card gap=8
+            Heading "Next action" level=3
+            Row gap=12 middle
+              Input bind=nextAction w=360
+              DatePicker bind=dueDate
+              Button.outline "Done" onTap={nextAction=""; toast "Marked done"}
+            if dueDate < today()
+              Text.danger "Overdue"
+            if dueDate >= today()
+              Text.muted "Due {formatDate(dueDate,'MMM d')}"
+          Card gap=12
+            Heading "Activity" level=3
+            Timeline
+              each e in sortByDesc(events,x=>x.id)
+                TimelineItem "{e.title}" icon={e.kind=="call"?"call":(e.kind=="email"?"mail":"home")} time="{e.when}"
+                  Text.muted "{e.note}"
+        Column w=300 gap=16
+          Card gap=8
+            Heading "Details" level=3
+            Text.muted "maya.reyes@example.com"
+            Text.muted "(415) 555-0142"
+            Text.muted "Budget: $450,000 to $500,000"
+          Card gap=8
+            Heading "Tags" level=3
+            Row gap=8
+              each t in tags
+                Chip "{t}" onDelete={tags=without(tags,t)}
+            Row gap=8
+              Input "Add a tag" bind=newTag
+              Button.outline "Add" onTap={tags=append(tags,newTag); newTag=""}
+  Dialog#callLog "Log a call" "What happened on the call with Maya?"
+    Row gap=8
+      ChoiceChip "Answered" selected={outcome=="Answered"} onTap={outcome="Answered"}
+      ChoiceChip "Voicemail" selected={outcome=="Voicemail"} onTap={outcome="Voicemail"}
+      ChoiceChip "No answer" selected={outcome=="No answer"} onTap={outcome="No answer"}
+      ChoiceChip "Wrong number" selected={outcome=="Wrong number"} onTap={outcome="Wrong number"}
+    Input "Notes" bind=callNote multiline
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Save call" onTap={events=append(events,{"id":length(events)+1,"kind":"call","title":"Call: {outcome}","note":callNote,"when":formatDate(today(),"MMM d")}); outcome=""; callNote=""; toast "Call logged"; close}
+
+### Property
+state day=0
+state viewings=[{"id":1,"day":0,"time":"10:00","who":"Maya Reyes"},{"id":2,"day":0,"time":"13:30","who":"Tom Okafor"},{"id":3,"day":2,"time":"11:00","who":"Priya Nair"},{"id":4,"day":4,"time":"15:00","who":"Daniel Cho"}]
+state newWho=""
+state newTime="10:00"
+App
+  Sidebar
+    Brand "Keystone" icon="key"
+    NavItem "Pipeline" icon="view_kanban" onTap={go pipeline}
+    NavItem "Contact" icon="person" onTap={go contact}
+    NavItem "Property" icon="home" selected={true} onTap={go property}
+    NavItem "Follow-ups" icon="checklist" badge="5" onTap={go follow-ups}
+  Main
+    Nav
+      Heading "14 Alder Lane" level=1
+      Button "Schedule viewing" icon="event" onTap={open schedule}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Column grow gap=16
+          Card gap=12
+            Image "https://images.example.com/alder-lane.jpg" h=240 radius=8
+            Row between
+              Text.strong "$485,000"
+              Badge.success "Active"
+            Text.muted "3 bed, 2 bath, 1,840 sq ft. Built 1998, renovated kitchen."
+          Card gap=12
+            Heading "Viewings this week" level=3
+            WeekStrip bind=day start="2026-11-16"
+            if isEmpty(filter(viewings,v=>v.day==day))
+              Text.muted "No viewings booked for this day."
+            each v in sortBy(filter(viewings,v=>v.day==day),v=>v.time)
+              ListTile "{v.time}  {v.who}" subtitle="14 Alder Lane" icon="schedule"
+                IconButton "close" tooltip="Cancel viewing" onTap={viewings=removeWhere(viewings,x=>x.id==v.id); toast "Viewing cancelled"}
+        Column w=300 gap=16
+          Card gap=8
+            Heading "Interested" level=3
+            Row gap=8 middle
+              Avatar "Maya Reyes" size=32
+              Text "Maya Reyes"
+            Row gap=8 middle
+              Avatar "Tom Okafor" size=32
+              Text "Tom Okafor"
+  Dialog#schedule "Schedule viewing" "Pick a time and who is coming"
+    Input "Visitor" bind=newWho
+    TimePicker bind=newTime
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Book" onTap={viewings=append(viewings,{"id":length(viewings)+1,"day":day,"time":newTime,"who":newWho}); newWho=""; toast "Viewing booked"; close}
+
+### Follow-ups
+state filter="Today"
+state tasks=[{"id":1,"title":"Call Maya Reyes about a second viewing","who":"Maya Reyes","due":"Today","done":false},{"id":2,"title":"Email Tom Okafor the HOA documents","who":"Tom Okafor","due":"Today","done":false},{"id":3,"title":"Send offer draft to Daniel Cho","who":"Daniel Cho","due":"Today","done":true},{"id":4,"title":"Confirm inspection with Priya Nair","who":"Priya Nair","due":"Tomorrow","done":false},{"id":5,"title":"Check in with Elena Rossi","who":"Elena Rossi","due":"This week","done":false}]
+state newTask=""
+App
+  Sidebar
+    Brand "Keystone" icon="key"
+    NavItem "Pipeline" icon="view_kanban" onTap={go pipeline}
+    NavItem "Contact" icon="person" onTap={go contact}
+    NavItem "Property" icon="home" onTap={go property}
+    NavItem "Follow-ups" icon="checklist" badge="{count(tasks,t=>!t.done)}" selected={true} onTap={go follow-ups}
+  Main
+    Nav
+      Heading "Follow-ups" level=1
+      Text.muted "{count(filter(tasks,t=>t.due==filter),t=>!t.done)} left"
+    Column pad=24 gap=16 maxw=720
+      Progress {count(tasks,t=>t.done)/length(tasks)}
+      Row gap=8
+        ChoiceChip "Today" selected={filter=="Today"} onTap={filter="Today"}
+        ChoiceChip "Tomorrow" selected={filter=="Tomorrow"} onTap={filter="Tomorrow"}
+        ChoiceChip "This week" selected={filter=="This week"} onTap={filter="This week"}
+      Row gap=8
+        Input "Add a follow-up" bind=newTask grow
+        Button "Add" onTap={tasks=append(tasks,{"id":length(tasks)+1,"title":newTask,"who":"","due":filter,"done":false}); newTask=""}
+      Card gap=8
+        each t in filter(tasks,x=>x.due==filter)
+          Row between middle
+            Checkbox "{t.title}" bind=t.done
+            Row gap=8 middle
+              Text.muted "{t.who}"
+              IconButton "delete" tooltip="Remove" onTap={tasks=removeWhere(tasks,x=>x.id==t.id)}
+        if isEmpty(filter(tasks,x=>x.due==filter))
+          Text.muted "Nothing due. Enjoy the quiet."

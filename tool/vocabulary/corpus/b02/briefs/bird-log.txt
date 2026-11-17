@@ -1,0 +1,3 @@
+App: Feather, a birdwatching log. A sighting form: species picked from a searchable list with pictures, count stepper, place from a drawn map pin, time, weather chips, notes, a photo strip; a life list with first-seen dates and a count; a trip with its checklist; a species page with a range map, a seasonal bar chart and song play button.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

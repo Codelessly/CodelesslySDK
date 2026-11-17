@@ -1,0 +1,3 @@
+App: Gavel, live auctions. A lot page with a gallery, the current bid large, a bid ladder of the last ten bids arriving live, a timer that extends when a late bid lands, quick bid buttons at the next three increments, a max-bid field with a confirm, outbid and winning states; a watchlist; a lot list with time left as a shrinking bar.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

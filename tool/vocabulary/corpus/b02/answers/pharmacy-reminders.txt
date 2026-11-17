@@ -1,0 +1,206 @@
+### Today
+project tab="today"
+state nowMin=870
+state sel=""
+state snoozeMins=15
+state doses=[{"id":"d1","name":"Metformin","strength":"500 mg","form":"tablet","time":"8:00 AM","mins":480,"part":"Morning","status":"taken"},{"id":"d2","name":"Lisinopril","strength":"10 mg","form":"tablet","time":"8:00 AM","mins":480,"part":"Morning","status":"due"},{"id":"d3","name":"Vitamin D3","strength":"2000 IU","form":"softgel","time":"12:30 PM","mins":750,"part":"Afternoon","status":"due"},{"id":"d4","name":"Metformin","strength":"500 mg","form":"tablet","time":"6:00 PM","mins":1080,"part":"Evening","status":"due"},{"id":"d5","name":"Atorvastatin","strength":"20 mg","form":"tablet","time":"9:30 PM","mins":1290,"part":"Evening","status":"due"}]
+state parts=["Morning","Afternoon","Evening"]
+App
+  Sidebar
+    Brand "Dosewell" icon="medication"
+    NavItem "Today" icon="today" badge="{count(doses,d=>d.status==\"due\")}" selected={tab=="today"} onTap={tab="today"}
+    NavItem "Medicines" icon="vaccines" selected={tab=="medicines"} onTap={go medicines}
+    NavItem "History" icon="calendar_month" selected={tab=="history"} onTap={go history}
+    Spacer grow
+    Toggle "Share with caregiver" bind=share
+    Text.muted "Sharing with Maria Alvarez"
+  Main
+    Nav
+      Heading "Today, {formatDate(today(),\"MMM d\")}" level=1
+      Row gap=8
+        Badge.success "{count(doses,d=>d.status==\"taken\")} of {length(doses)} taken"
+        Button "Add medicine" onTap={open addMed}
+    Column pad=24 gap=16 scroll
+      Card gap=8 fill=#FFFFF4E5
+        Row gap=12 middle
+          IconTile "warning"
+          Column grow gap=4
+            Text.strong "Possible interaction: Lisinopril and Potassium supplement"
+            Text.muted "Together they can raise potassium too high. Ask your pharmacist before taking both."
+          Button.outline "Review" onTap={open interaction}
+          IconButton "close" tooltip="Dismiss" onTap={emit dismissWarning; toast "Warning dismissed"}
+      each p in parts
+        Column gap=8
+          Text.sectionTitle "{p}"
+          each d in filter(doses,x=>x.part==p)
+            Card gap=8
+              Row gap=12 middle
+                IconTile "{d.form==\"softgel\"?\"water_drop\":\"medication\"}"
+                Column grow gap=2
+                  Text.strong "{d.name} {d.strength}"
+                  Text.muted "{d.time} - 1 {d.form}"
+                if d.status=="taken"
+                  Badge.success "Taken"
+                if d.status=="skipped"
+                  Badge.neutral "Skipped"
+                if d.status=="due" && d.mins<nowMin
+                  Badge.error "Late {duration((nowMin-d.mins)*60)}"
+                if d.status=="due"
+                  Row gap=8
+                    Button "Take" onTap={doses=updateWhere(doses,x=>x.id==d.id,x=>with(x,"status","taken")); toast "{d.name} marked taken"}
+                    Button.outline "Snooze" onTap={sel=d.id; open snooze}
+                    Button.ghost "Skip" onTap={doses=updateWhere(doses,x=>x.id==d.id,x=>with(x,"status","skipped")); emit skipped d.id}
+  Sheet#snooze "Snooze this dose"
+    Text.muted "Remind me again in"
+    SegmentedButton bind=snoozeMins items=[5,15,30,60]
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Snooze" onTap={doses=updateWhere(doses,x=>x.id==sel,x=>with(x,"mins",nowMin+snoozeMins)); emit snooze sel; toast "Snoozed {snoozeMins} minutes"; close}
+  Dialog#interaction "Interaction warning" "Lisinopril with Potassium supplement"
+    Text "Both raise blood potassium. High levels can cause weakness and an irregular heartbeat."
+    Text.muted "Your pharmacist can suggest a different timing or a substitute."
+    Row end gap=8
+      Button.outline "Call pharmacy" onTap={link tel:+15555550142}
+      Button "Got it" onTap={close}
+  Dialog#addMed "Add medicine"
+    Input "Name" bind=newName
+    Row gap=8
+      Input "Strength" "500 mg" bind=newStrength grow
+      Select bind=newForm items=["Tablet","Capsule","Liquid","Injection","Patch"] grow
+    Select bind=newScheduleType items=["Every n hours","At set times","Days of week"]
+    if newScheduleType=="Every n hours"
+      Input "Hours between doses" type=number bind=newEvery
+    if newScheduleType=="At set times"
+      Row gap=8
+        TimePicker "First dose" bind=newTime1
+        TimePicker "Second dose" bind=newTime2
+    if newScheduleType=="Days of week"
+      Row gap=8
+        each wd in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+          FilterChip "{wd}" selected={contains(newDays,wd)} onTap={newDays=contains(newDays,wd)?without(newDays,wd):append(newDays,wd)}
+    Input "Pills in the bottle" type=number bind=newPills
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Save" onTap={emit addMedicine; toast "Medicine added"; close}
+
+### Medicines
+project tab="medicines"
+state selId="m1"
+state meds=[{"id":"m1","name":"Lisinopril","strength":"10 mg","form":"tablet","schedule":"Every day at 8:00 AM","left":9,"perDay":1,"refillAt":"Nov 25"},{"id":"m2","name":"Metformin","strength":"500 mg","form":"tablet","schedule":"Every 10 hours","left":46,"perDay":2,"refillAt":"Dec 9"},{"id":"m3","name":"Vitamin D3","strength":"2000 IU","form":"softgel","schedule":"Mon, Wed, Fri at 12:30 PM","left":21,"perDay":1,"refillAt":"Dec 20"},{"id":"m4","name":"Atorvastatin","strength":"20 mg","form":"tablet","schedule":"Every day at 9:30 PM","left":4,"perDay":1,"refillAt":"Nov 20"}]
+App
+  Sidebar
+    Brand "Dosewell" icon="medication"
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={go today}
+    NavItem "Medicines" icon="vaccines" selected={tab=="medicines"} onTap={tab="medicines"}
+    NavItem "History" icon="calendar_month" selected={tab=="history"} onTap={go history}
+    Spacer grow
+    Toggle "Share with caregiver" bind=share
+  Main
+    Nav
+      Heading "Medicines" level=1
+      Row gap=8
+        Input "Search" bind=q w=220
+        Button "Add medicine" onTap={open addMed}
+    Column pad=24 gap=12 scroll
+      each m in filter(sortBy(meds,x=>x.left/x.perDay),x=>contains(lower(x.name),lower(coalesce(q,""))))
+        ListTile selected={selId==m.id} onTap={selId=m.id}
+          Row gap=12 middle
+            IconTile "medication"
+            Column grow gap=2
+              Text.strong "{m.name} {m.strength}"
+              Text.muted "{m.schedule}"
+            Column gap=2 end
+              Text.strong "{m.left} pills left"
+              if m.left/m.perDay<=7
+                Badge.error "Refill in {floor(m.left/m.perDay)} days"
+              if m.left/m.perDay>7
+                Badge.neutral "Refill in {floor(m.left/m.perDay)} days"
+            IconButton "more_vert" tooltip="More" onTap={selId=m.id; open medMenu}
+  Pane w=320 pad=16 gap=12
+    each m in filter(meds,x=>x.id==selId)
+      Heading "{m.name}" level=3
+      Text.muted "{m.strength}, {m.form}"
+      Divider
+      Text.fieldLabel "Schedule"
+      Text "{m.schedule}"
+      Text.fieldLabel "Refill countdown"
+      Row gap=16 middle
+        Ring {clamp(m.left/30,0,1)}
+        Column gap=2
+          Text.strong "{m.left} pills left"
+          Text.muted "About {floor(m.left/m.perDay)} days, refill by {m.refillAt}"
+      Progress {clamp(m.left/30,0,1)}
+      Button "Request refill" onTap={emit refill m.id; toast "Refill requested for {m.name}"}
+      Button.outline "Edit schedule" onTap={open editSchedule}
+  Menu#medMenu end
+    MenuItem "Edit schedule" icon="edit" onTap={open editSchedule}
+    MenuItem "Request refill" icon="local_pharmacy" onTap={emit refill selId; toast "Refill requested"}
+    MenuItem "Pause reminders" icon="notifications_off" onTap={emit pause selId; toast "Reminders paused"}
+    MenuItem "Remove" icon="delete" onTap={meds=removeWhere(meds,x=>x.id==selId); selId=first(meds).id}
+  Dialog#editSchedule "Edit schedule"
+    Select bind=schedType items=["Every n hours","At set times","Days of week"]
+    if schedType=="Every n hours"
+      Input "Hours between doses" type=number bind=everyN
+    if schedType=="At set times"
+      Row gap=8
+        TimePicker "Dose 1" bind=t1
+        TimePicker "Dose 2" bind=t2
+    if schedType=="Days of week"
+      Row gap=8
+        each wd in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+          FilterChip "{wd}" selected={contains(days,wd)} onTap={days=contains(days,wd)?without(days,wd):append(days,wd)}
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Save" onTap={emit saveSchedule selId; toast "Schedule saved"; close}
+
+### History
+project tab="history"
+state month=11
+state picked=""
+state log=[{"day":3,"taken":5,"missed":0},{"day":4,"taken":5,"missed":0},{"day":5,"taken":4,"missed":1},{"day":6,"taken":5,"missed":0},{"day":7,"taken":3,"missed":2},{"day":8,"taken":5,"missed":0},{"day":9,"taken":5,"missed":0},{"day":10,"taken":4,"missed":1},{"day":11,"taken":5,"missed":0},{"day":12,"taken":5,"missed":0},{"day":13,"taken":5,"missed":0},{"day":14,"taken":2,"missed":3},{"day":15,"taken":5,"missed":0}]
+App
+  Sidebar
+    Brand "Dosewell" icon="medication"
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={go today}
+    NavItem "Medicines" icon="vaccines" selected={tab=="medicines"} onTap={go medicines}
+    NavItem "History" icon="calendar_month" selected={tab=="history"} onTap={tab="history"}
+    Spacer grow
+    Toggle "Share with caregiver" bind=share
+  Main
+    Nav
+      Heading "History" level=1
+      Row gap=8 middle
+        IconButton "chevron_left" tooltip="Previous month" onTap={month=max(1,month-1)}
+        Text.strong "{formatDate(\"2026-\"+month+\"-01\",\"MMMM yyyy\")}"
+        IconButton "chevron_right" tooltip="Next month" onTap={month=min(12,month+1)}
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Taken this month"
+          Text.strong "{sum(log,x=>x.taken)}" size=32
+        Card gap=4
+          Text.muted "Missed"
+          Text.strong "{sum(log,x=>x.missed)}" size=32 color=#FFC62828
+        Card gap=4
+          Text.muted "Adherence"
+          Text.strong "{round(sum(log,x=>x.taken)*100/(sum(log,x=>x.taken)+sum(log,x=>x.missed)),0)}%" size=32
+      Card gap=12
+        Calendar bind=picked month={month} marks={map(log,x=>{"day":x.day,"color":x.missed==0?"green":"red"})} onSelect={picked=result}
+        Row gap=16
+          Badge.success "All doses taken"
+          Badge.error "Missed doses"
+      if picked!=""
+        Card gap=8
+          each x in filter(log,l=>l.day==picked)
+            Text.strong "Nov {x.day}"
+            Text "{x.taken} taken, {x.missed} missed"
+            if x.missed>0
+              Text.danger "Missed doses on this day"
+      Card gap=8
+        Row between middle
+          Column gap=2
+            Text.strong "Share with caregiver"
+            Text.muted "Maria Alvarez sees your doses and gets a note when one is missed."
+          Toggle bind=share onChange={emit shareChanged result; toast result?"Sharing on":"Sharing off"}
+        if share
+          Button.outline "Send this month to Maria" onTap={emit sendReport; toast "Report sent"}
