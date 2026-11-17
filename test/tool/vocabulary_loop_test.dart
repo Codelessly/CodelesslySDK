@@ -42,7 +42,7 @@ App
         Text#count "{n} seats"
         Rating value=4.6 readonly
         Tabs bind=view items=["Plan","List"]
-      ListTile "Row A" subtitle="Two seats left" onTap={focus find}
+      ListTile "Row A" subtitle="Two seats left" onTap={vibrate find}
       Progress {n/8}
 QuickSwitcher#palette "Commands"
   CommandItem "Best available" onTap={n=2; close}
@@ -89,7 +89,7 @@ void main() {
     expect(of('type'), ['SeatMap', 'Legend', 'Waveform', 'QuickSwitcher', 'CommandItem']);
     expect(of('parameter'), isEmpty);
     expect(of('flag'), ['Input.clearable']);
-    expect(of('verb'), ['Button.haptic', 'ListTile.focus']);
+    expect(of('verb'), ['Button.haptic', 'ListTile.vibrate']);
     expect(of('variant'), ['Button.Button.danger']);
     // Cards' Rating needs a label, which the line did not give.
     expect(of('missing'), ['Rating.label']);
