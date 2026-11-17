@@ -2453,6 +2453,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
       chain.add(_obtain<RenderTypewriter>('typewriter', RenderTypewriter.new)
         ..configure(tw, plainText(span), animates: tree.animates, textDefault: n.behaviors.defaultTextStyle));
     }
+    if (n.prop(TextProps.live)) chain.add(_obtain<_LiveTextSemantics>('liveText', _LiveTextSemantics.new));
     chain.add(paragraph);
   }
 
@@ -3108,4 +3109,15 @@ class RenderNodeDecoration extends RenderDecoratedBox {
 
   @override
   bool hitTestSelf(Offset position) => opaque && super.hitTestSelf(position);
+}
+
+/// Keeps an updating text paragraph as one live semantics region.
+class _LiveTextSemantics extends RenderProxyBox {
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config
+      ..isSemanticBoundary = true
+      ..liveRegion = true;
+  }
 }
