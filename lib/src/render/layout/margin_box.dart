@@ -3,12 +3,14 @@ import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 
+import 'control_line.dart';
+
 /// Space around a child, any side of it negative: a negative side takes the
 /// child that far past this box (a scrim reaching over its parent's
 /// padding, a card overlapping its neighbor). This box keeps the size its
 /// parent gives it; the child is laid out larger by the overhang and placed
 /// out over it. With no negative side it is Flutter's padding.
-class RenderMargin extends RenderShiftedBox {
+class RenderMargin extends RenderShiftedBox implements ControlLineReporter {
   RenderMargin({required EdgeInsets margin, RenderBox? child}) : _margin = margin, super(child); // ignore: prefer_initializing_formals
 
   EdgeInsets get margin => _margin;
@@ -49,6 +51,21 @@ class RenderMargin extends RenderShiftedBox {
   @override
   Size computeDryLayout(covariant BoxConstraints constraints) =>
       _outer(constraints, child?.getDryLayout(_inner(constraints)) ?? Size.zero);
+
+  // Its child's control box (control_line.dart), moved by the margin.
+  @override
+  ControlInsets? get controlInsets {
+    final child = this.child;
+    return child == null || !child.hasSize ? null : ControlLine.through(this, child);
+  }
+
+  @override
+  ControlInsets? dryControlInsets(BoxConstraints constraints) {
+    final child = this.child;
+    final inner = child == null ? null : ControlLine.dryOf(child, _inner(constraints));
+    if (inner == null) return null;
+    return ControlInsets(math.max(0, _margin.top + inner.above), math.max(0, _margin.bottom + inner.below));
+  }
 
   @override
   double computeMinIntrinsicWidth(double height) =>

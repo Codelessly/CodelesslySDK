@@ -27,6 +27,7 @@ import 'controls/focus.dart' show FocusGate;
 import 'controls/tokens.dart' show ControlTokens;
 import 'convert.dart';
 import 'custom_paint.dart' show customPaintLayers;
+import 'layout/control_line.dart' show ControlLineDecoration;
 import 'layout/margin_box.dart';
 import 'layout/scaffold_slots.dart';
 import 'layout/design_scroll.dart';
@@ -1923,7 +1924,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
       // A node that paints a fill is opaque to pointers, as Flutter's
       // Container(color:) is; one without lets them through its gaps to what
       // lies under it (a row of black keys over the white ones).
-      ..opaque = d.fills.any((f) => f.visible));
+      ..opaque = d.fills.any((f) => f.visible)
+      ..drawsBox = d.visibleFills.isNotEmpty || (d.visibleStrokes.isNotEmpty && d.strokeWidth > 0) || shadows.isNotEmpty);
     final clipBehavior = clip(d.clip);
     if (clipBehavior != Clip.none) {
       if (circle) {
@@ -3129,10 +3131,16 @@ class RenderFillBounds extends RenderProxyBox {
 /// A node's box decoration (color, shadows; or its stroke), taking pointers
 /// on its own only while [opaque]: a box with no fill paints nothing there,
 /// so pointers pass to its children, or else to what lies under it.
-class RenderNodeDecoration extends RenderDecoratedBox {
+class RenderNodeDecoration extends RenderDecoratedBox implements ControlLineDecoration {
   RenderNodeDecoration({required super.decoration});
 
   bool opaque = true;
+
+  /// Whether the node draws a box (a visible fill or stroke, or a shadow):
+  /// around a control, what it draws is the control box a row lines up
+  /// (control_line.dart).
+  @override
+  bool drawsBox = false;
 
   @override
   bool hitTestSelf(Offset position) => opaque && super.hitTestSelf(position);

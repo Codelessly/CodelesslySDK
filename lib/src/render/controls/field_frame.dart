@@ -28,6 +28,7 @@ import 'package:flutter/foundation.dart' show immutable;
 import 'package:flutter/rendering.dart';
 
 import '../convert.dart';
+import '../layout/control_line.dart';
 import '../paint/icon_glyph.dart';
 import '../paint/icon_names.dart';
 import 'kit.dart';
@@ -508,7 +509,7 @@ enum FieldFramePart { label, box, prefixIcon, suffixIcon, below, none }
 /// or error below) around content its subclass lays out and paints
 /// ([layoutContent], [paintContent]). The content is one line centered in the
 /// box, or several from its top ([contentMultiline]).
-abstract class RenderFieldFrame extends RenderControl implements LabeledControl {
+abstract class RenderFieldFrame extends RenderControl implements LabeledControl, ControlLineField {
   RenderFieldFrame();
 
   FieldDecoration? _decoration;
@@ -632,6 +633,7 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl 
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
+    ControlLine.fieldAttached();
     for (final c in [..._frameChildren, ...contentChildren]) {
       c.attach(owner);
     }
@@ -640,6 +642,7 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl 
   @override
   void detach() {
     super.detach();
+    ControlLine.fieldDetached();
     for (final c in [..._frameChildren, ...contentChildren]) {
       c.detach();
     }
@@ -933,6 +936,52 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl 
 
   @override
   Size computeDryLayout(covariant BoxConstraints constraints) => _sizeFor(constraints);
+
+  // --- the control line ------------------------------------------------------------
+  //
+  // The box is the control a row lines up (layout/control_line.dart): the
+  // label hangs above it, the helper, error or counter below it.
+
+  @override
+  ControlInsets get controlInsets => hasSize
+      ? ControlInsets(math.max(0, boxRect.top), math.max(0, size.height - boxRect.bottom))
+      : ControlInsets.zero;
+
+  @override
+  ControlInsets dryControlInsets(BoxConstraints constraints) {
+    final d = decoration;
+    final size = getDryLayout(constraints);
+    // Measured on painters of their own: the frame's are laid out for paint.
+    var above = 0.0;
+    if (d.label.isNotEmpty) {
+      final p = TextPainter(text: TextSpan(text: d.label, style: _labelStyle), textDirection: _textDirection, maxLines: 1)
+        ..layout();
+      above = p.height + kFieldLabelGap;
+      p.dispose();
+    }
+    final reserved = d.helper.isNotEmpty || d.counter.isNotEmpty;
+    var below = 0.0;
+    if ((constraints.hasTightHeight ? reserved : (belowText.isNotEmpty || d.counter.isNotEmpty))) {
+      final error = d.hasError && d.errorMessage.isNotEmpty;
+      final line = TextPainter(
+        text: TextSpan(
+          text: belowText,
+          style: error ? _captionStyle(d.errorColor, d.errorStyle) : _captionStyle(d.helperColor, d.helperStyle),
+        ),
+        textDirection: _textDirection,
+        ellipsis: '…',
+        maxLines: (error ? d.errorMaxLines : d.helperMaxLines) ?? (error ? 2 : 1),
+      )..layout(maxWidth: size.width);
+      final counter = TextPainter(
+          text: TextSpan(text: d.counter, style: _captionStyle(d.helperColor, d.counterStyle)), textDirection: _textDirection, maxLines: 1)
+        ..layout();
+      below = kFieldBelowGap + math.max(belowText.isEmpty ? 0.0 : line.height, d.counter.isEmpty ? 0.0 : counter.height);
+      line.dispose();
+      counter.dispose();
+    }
+    final box = math.max(0.0, size.height - above - below);
+    return ControlInsets(math.min(above, size.height), math.max(0, size.height - above - box));
+  }
 
   @override
   void performLayout() {
