@@ -16,7 +16,7 @@ App
         Avatar "Tara Lee" size:32
         Avatar "Omar Haddad" size:32
       Row gap:8 middle
-        Input "Filter tasks" =q w:220
+        Input "Filter tasks" bind:q w:220
         Button "New task" icon:"add" -> tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"Backlog","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1
     Column pad:24 gap:16 scroll
       Row gap:12 stretch
@@ -24,38 +24,38 @@ App
           Row between middle
             Row gap:8 middle
               Text.strong "Backlog"
-              CountBadge count:=count(tasks,x=>x.col=="Backlog") showZero:true
+              CountBadge count:{count(tasks,x=>x.col=="Backlog")} showZero:true
             IconButton "add" -> tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"Backlog","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1
           each t in tasks
             if t.col=="Backlog" && contains(lower(t.title),lower(q))
-              TaskCard title:=t.title label:=t.label tone:=t.tone due:=t.due dueTone:=t.dueTone comments:=t.comments assignee:=t.who avatarTone:=t.avTone selected:=sel==t.id drag:task(t.id) -> sel=t.id
+              TaskCard title:{t.title} label:{t.label} tone:{t.tone} due:{t.due} dueTone:{t.dueTone} comments:{t.comments} assignee:{t.who} avatarTone:{t.avTone} selected:{sel==t.id} drag:task(t.id) -> sel=t.id
         Column grow gap:10 pad:10 fill:#FFF3F4F6 radius:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","In progress"))
           Row between middle
             Row gap:8 middle
               Text.strong "In progress"
-              CountBadge count:=count(tasks,x=>x.col=="In progress") showZero:true
+              CountBadge count:{count(tasks,x=>x.col=="In progress")} showZero:true
             IconButton "add" -> tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"In progress","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1
           each t in tasks
             if t.col=="In progress" && contains(lower(t.title),lower(q))
-              TaskCard title:=t.title label:=t.label tone:=t.tone due:=t.due dueTone:=t.dueTone comments:=t.comments assignee:=t.who avatarTone:=t.avTone selected:=sel==t.id drag:task(t.id) -> sel=t.id
+              TaskCard title:{t.title} label:{t.label} tone:{t.tone} due:{t.due} dueTone:{t.dueTone} comments:{t.comments} assignee:{t.who} avatarTone:{t.avTone} selected:{sel==t.id} drag:task(t.id) -> sel=t.id
         Column grow gap:10 pad:10 fill:#FFF3F4F6 radius:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","In review"))
           Row between middle
             Row gap:8 middle
               Text.strong "In review"
-              CountBadge count:=count(tasks,x=>x.col=="In review") showZero:true
+              CountBadge count:{count(tasks,x=>x.col=="In review")} showZero:true
             IconButton "add" -> tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"In review","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1
           each t in tasks
             if t.col=="In review" && contains(lower(t.title),lower(q))
-              TaskCard title:=t.title label:=t.label tone:=t.tone due:=t.due dueTone:=t.dueTone comments:=t.comments assignee:=t.who avatarTone:=t.avTone selected:=sel==t.id drag:task(t.id) -> sel=t.id
+              TaskCard title:{t.title} label:{t.label} tone:{t.tone} due:{t.due} dueTone:{t.dueTone} comments:{t.comments} assignee:{t.who} avatarTone:{t.avTone} selected:{sel==t.id} drag:task(t.id) -> sel=t.id
         Column grow gap:10 pad:10 fill:#FFF3F4F6 radius:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","Done"))
           Row between middle
             Row gap:8 middle
               Text.strong "Done"
-              CountBadge count:=count(tasks,x=>x.col=="Done") showZero:true
+              CountBadge count:{count(tasks,x=>x.col=="Done")} showZero:true
             IconButton "add" -> tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"Done","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1
           each t in tasks
             if t.col=="Done" && contains(lower(t.title),lower(q))
-              TaskCard title:=t.title label:=t.label tone:=t.tone due:=t.due dueTone:=t.dueTone comments:=t.comments assignee:=t.who avatarTone:=t.avTone selected:=sel==t.id drag:task(t.id) -> sel=t.id
+              TaskCard title:{t.title} label:{t.label} tone:{t.tone} due:{t.due} dueTone:{t.dueTone} comments:{t.comments} assignee:{t.who} avatarTone:{t.avTone} selected:{sel==t.id} drag:task(t.id) -> sel=t.id
   Pane w:340 pad:16 gap:16 border-left:#FFE5E7EB scroll
     if sel==""
       EmptyState "No task selected" "Select a card to see its details." icon:"touch_app"
@@ -72,7 +72,7 @@ App
       Column gap:6
         Text.fieldLabel "Description"
         Text.muted "{find(tasks,x=>x.id==sel).desc}"
-      Checklist "Checklist" =done items:["Outline the approach","Draft the first version","Get feedback from the team","Publish to staging"]
+      Checklist "Checklist" bind:done items:["Outline the approach","Draft the first version","Get feedback from the team","Publish to staging"]
       Column gap:10
         Text.fieldLabel "Activity"
         Row gap:10 top

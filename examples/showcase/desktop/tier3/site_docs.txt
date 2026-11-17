@@ -5,28 +5,28 @@ Page
     Brand "Beacon" icon:"flare"
     Row gap:12
       HeaderSearchInput "Search the docs"
-      Select =version items:["v2.4","v2.3","v2.2"]
+      Select bind:version items:["v2.4","v2.3","v2.2"]
   Section
     Row gap:32 top
       Column w:220 gap:20
         Column gap:4
           Text.eyebrow "START"
-          NavItem "Overview" icon:"home" selected:=page=="overview" -> page="overview"
-          NavItem "Quickstart" icon:"bolt" selected:=page=="quickstart" -> page="quickstart"
-          NavItem "Installation" icon:"download" selected:=page=="installation" -> page="installation"
-          NavItem "Configuration" icon:"tune" selected:=page=="configuration" -> page="configuration"
+          NavItem "Overview" icon:"home" selected:{page=="overview"} -> page="overview"
+          NavItem "Quickstart" icon:"bolt" selected:{page=="quickstart"} -> page="quickstart"
+          NavItem "Installation" icon:"download" selected:{page=="installation"} -> page="installation"
+          NavItem "Configuration" icon:"tune" selected:{page=="configuration"} -> page="configuration"
         Column gap:4
           Text.eyebrow "GUIDES"
-          NavItem "Authentication" icon:"lock" selected:=page=="auth" -> page="auth"
-          NavItem "Events and tracking" icon:"timeline" selected:=page=="events" -> page="events"
-          NavItem "Offline mode" icon:"cloud_off" selected:=page=="offline" -> page="offline"
-          NavItem "Testing" icon:"science" selected:=page=="testing" -> page="testing"
+          NavItem "Authentication" icon:"lock" selected:{page=="auth"} -> page="auth"
+          NavItem "Events and tracking" icon:"timeline" selected:{page=="events"} -> page="events"
+          NavItem "Offline mode" icon:"cloud_off" selected:{page=="offline"} -> page="offline"
+          NavItem "Testing" icon:"science" selected:{page=="testing"} -> page="testing"
         Column gap:4
           Text.eyebrow "REFERENCE"
-          NavItem "Client API" icon:"code" selected:=page=="client" -> page="client"
-          NavItem "Options" icon:"settings" selected:=page=="options" -> page="options"
-          NavItem "Errors" icon:"error" selected:=page=="errors" -> page="errors"
-          NavItem "Changelog" icon:"history" selected:=page=="changelog" -> page="changelog"
+          NavItem "Client API" icon:"code" selected:{page=="client"} -> page="client"
+          NavItem "Options" icon:"settings" selected:{page=="options"} -> page="options"
+          NavItem "Errors" icon:"error" selected:{page=="errors"} -> page="errors"
+          NavItem "Changelog" icon:"history" selected:{page=="changelog"} -> page="changelog"
       Column grow gap:20
         Breadcrumb items:["Docs","Start","Quickstart"]
         Heading "Quickstart" level:1

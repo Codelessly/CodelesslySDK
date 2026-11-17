@@ -33,7 +33,7 @@ Column scroll gap:16 pad:16
     ListTile "Website" "ada.example.com"
     Divider
     ListTile "Joined" "March 2019"
-  SegmentedButton =tab items:["Posts","Replies","Likes"]
+  SegmentedButton bind:tab items:["Posts","Replies","Likes"]
   Card gap:6
     Text.strong "Notes on the engine"
     Text.muted "The engine weaves algebraic patterns just as the loom weaves flowers and leaves."

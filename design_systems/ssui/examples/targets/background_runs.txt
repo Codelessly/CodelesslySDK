@@ -7,9 +7,9 @@ Card gap:10
     each r in runs
       Column gap:6 pad:[0,8,0,8]
         Row gap:10
-          Icon "{r.state=="done"?"check_circle":(r.state=="failed"?"error_outline":"sync")}" size:15 color:=r.state=="done"?"#FF16A34A":(r.state=="failed"?"#FFDC2626":"#FF2563EB")
+          Icon "{r.state=="done"?"check_circle":(r.state=="failed"?"error_outline":"sync")}" size:15 color:{r.state=="done"?"#FF16A34A":(r.state=="failed"?"#FFDC2626":"#FF2563EB")}
           Column gap:1 grow
             Text.body "{r.name}"
             Text.caption "{r.at}"
           Button.ghost "{r.state=="running"?"Stop":(r.state=="failed"?"Retry":"Open")}" -> emit run_action r.id
-        Progress =r.p visible:=r.state=="running"
+        Progress bind:r.p visible:{r.state=="running"}

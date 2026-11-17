@@ -9,10 +9,10 @@ Card gap:16
   Row center middle gap:16
     Button.outline "-" -> temp=max(16,temp-1)
     Stack center w:180 h:180
-      CircularProgressIndicator value:=(temp-16)/12 w:180 h:180
+      CircularProgressIndicator value:{(temp-16)/12} w:180 h:180
       Column center gap:0
-        Text "{temp}°" size:48 weight:700 color:=mode=="Heat"?"#FFE65100":"#FF0277BD"
+        Text "{temp}°" size:48 weight:700 color:{mode=="Heat"?"#FFE65100":"#FF0277BD"}
         Text.caption "16° – 28°"
     Button.outline "+" -> temp=min(28,temp+1)
-  Slider =temp min:16 max:28 step:1
-  SegmentedButton =mode items:["Heat","Cool"]
+  Slider bind:temp min:16 max:28 step:1
+  SegmentedButton bind:mode items:["Heat","Cool"]

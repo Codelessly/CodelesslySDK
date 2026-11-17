@@ -15,21 +15,21 @@ App
           Avatar "Ana Silva" size:32
           Avatar "Sam Patel" size:32
       Row gap:8 center
-        Input "Filter tasks" =q w:220
+        Input "Filter tasks" bind:q w:220
         Button "New task" icon:"add" -> emit newTask
     Row gap:16 pad:16 top grow
       Column grow gap:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","backlog"))
         Row between center
           Row gap:8 center
             Text.strong "Backlog"
-            CountBadge count:=count(tasks,x=>x.col=="backlog")
+            CountBadge count:{count(tasks,x=>x.col=="backlog")}
           IconButton "add" -> emit addTask "backlog"
         Column scroll gap:10
           each t in filter(tasks,x=>x.col=="backlog" && contains(lower(x.title),lower(q)))
-            Card gap:8 drag:task(t.id) border:=sel==t.id?"#FF2563EB":"#FFE5E7EB" -> sel=t.id
+            Card gap:8 drag:task(t.id) border:{sel==t.id?"#FF2563EB":"#FFE5E7EB"} -> sel=t.id
               Text.strong "{t.title}"
               Row
-                Box fill:=t.color radius:8 pad:[8,2,8,2]
+                Box fill:{t.color} radius:8 pad:[8,2,8,2]
                   Text.caption "{t.label}" color:#FFFFFFFF
               Row gap:8 center
                 Icon "schedule" size:14
@@ -42,14 +42,14 @@ App
         Row between center
           Row gap:8 center
             Text.strong "In progress"
-            CountBadge count:=count(tasks,x=>x.col=="progress")
+            CountBadge count:{count(tasks,x=>x.col=="progress")}
           IconButton "add" -> emit addTask "progress"
         Column scroll gap:10
           each t in filter(tasks,x=>x.col=="progress" && contains(lower(x.title),lower(q)))
-            Card gap:8 drag:task(t.id) border:=sel==t.id?"#FF2563EB":"#FFE5E7EB" -> sel=t.id
+            Card gap:8 drag:task(t.id) border:{sel==t.id?"#FF2563EB":"#FFE5E7EB"} -> sel=t.id
               Text.strong "{t.title}"
               Row
-                Box fill:=t.color radius:8 pad:[8,2,8,2]
+                Box fill:{t.color} radius:8 pad:[8,2,8,2]
                   Text.caption "{t.label}" color:#FFFFFFFF
               Row gap:8 center
                 Icon "schedule" size:14
@@ -62,14 +62,14 @@ App
         Row between center
           Row gap:8 center
             Text.strong "In review"
-            CountBadge count:=count(tasks,x=>x.col=="review")
+            CountBadge count:{count(tasks,x=>x.col=="review")}
           IconButton "add" -> emit addTask "review"
         Column scroll gap:10
           each t in filter(tasks,x=>x.col=="review" && contains(lower(x.title),lower(q)))
-            Card gap:8 drag:task(t.id) border:=sel==t.id?"#FF2563EB":"#FFE5E7EB" -> sel=t.id
+            Card gap:8 drag:task(t.id) border:{sel==t.id?"#FF2563EB":"#FFE5E7EB"} -> sel=t.id
               Text.strong "{t.title}"
               Row
-                Box fill:=t.color radius:8 pad:[8,2,8,2]
+                Box fill:{t.color} radius:8 pad:[8,2,8,2]
                   Text.caption "{t.label}" color:#FFFFFFFF
               Row gap:8 center
                 Icon "schedule" size:14
@@ -82,14 +82,14 @@ App
         Row between center
           Row gap:8 center
             Text.strong "Done"
-            CountBadge count:=count(tasks,x=>x.col=="done")
+            CountBadge count:{count(tasks,x=>x.col=="done")}
           IconButton "add" -> emit addTask "done"
         Column scroll gap:10
           each t in filter(tasks,x=>x.col=="done" && contains(lower(x.title),lower(q)))
-            Card gap:8 drag:task(t.id) border:=sel==t.id?"#FF2563EB":"#FFE5E7EB" -> sel=t.id
+            Card gap:8 drag:task(t.id) border:{sel==t.id?"#FF2563EB":"#FFE5E7EB"} -> sel=t.id
               Text.strong "{t.title}"
               Row
-                Box fill:=t.color radius:8 pad:[8,2,8,2]
+                Box fill:{t.color} radius:8 pad:[8,2,8,2]
                   Text.caption "{t.label}" color:#FFFFFFFF
               Row gap:8 center
                 Icon "schedule" size:14
@@ -105,14 +105,14 @@ App
         IconButton "close" -> sel=0
       Text.heading "{find(tasks,x=>x.id==sel).title}"
       Row gap:8 center
-        Box fill:=find(tasks,x=>x.id==sel).color radius:8 pad:[8,2,8,2]
+        Box fill:{find(tasks,x=>x.id==sel).color} radius:8 pad:[8,2,8,2]
           Text.caption "{find(tasks,x=>x.id==sel).label}" color:#FFFFFFFF
         Text.caption "Due {find(tasks,x=>x.id==sel).due}"
         Spacer grow
         Avatar "{find(tasks,x=>x.id==sel).who}" size:28
       Text.strong "Description"
       Text.bodySecondary "{find(tasks,x=>x.id==sel).desc}"
-      Checklist "Checklist" =checked items:["Write the first draft","Get design feedback","Update the staging site","Final sign-off"]
+      Checklist "Checklist" bind:checked items:["Write the first draft","Get design feedback","Update the staging site","Final sign-off"]
       Text.strong "Activity"
       Column gap:10 scroll
         each a in activity

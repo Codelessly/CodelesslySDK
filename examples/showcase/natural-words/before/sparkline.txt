@@ -6,6 +6,6 @@ Card gap:12
       Column gap:2 w:70
         Text.strong "{s.name}"
         Text.caption "{money(s.price,'$',2)}"
-      LineChart values:=s.history w:90 h:40 color:="s.change>=0?'#FF2E7D32':'#FFC62828'"
-      Text.strong "{s.change>=0?'+':''}{fixed(s.change,2)}%" color:="s.change>=0?'#FF2E7D32':'#FFC62828'"
+      LineChart values:{s.history} w:90 h:40 color:{"s.change>=0?'#FF2E7D32':'#FFC62828'"}
+      Text.strong "{s.change>=0?'+':''}{fixed(s.change,2)}%" color:{"s.change>=0?'#FF2E7D32':'#FFC62828'"}
     Divider

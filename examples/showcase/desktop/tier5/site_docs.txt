@@ -5,26 +5,26 @@ Page
     Brand "Beacon" icon:"flare"
     Row gap:12 middle
       Input "Search docs" hint:"Search docs…" w:280
-      Select =version items:["v2.4","v2.3","v1.9"] w:110
+      Select bind:version items:["v2.4","v2.3","v1.9"] w:110
   Row top gap:40 pad:[32,32,32,48]
     Column w:220 gap:4
       Text.eyebrow "START"
-      NavItem "Introduction" selected:=doc=="Introduction" -> doc="Introduction"
-      NavItem "Quickstart" selected:=doc=="Quickstart" -> doc="Quickstart"
-      NavItem "Installation" selected:=doc=="Installation" -> doc="Installation"
-      NavItem "Authentication" selected:=doc=="Authentication" -> doc="Authentication"
+      NavItem "Introduction" selected:{doc=="Introduction"} -> doc="Introduction"
+      NavItem "Quickstart" selected:{doc=="Quickstart"} -> doc="Quickstart"
+      NavItem "Installation" selected:{doc=="Installation"} -> doc="Installation"
+      NavItem "Authentication" selected:{doc=="Authentication"} -> doc="Authentication"
       Spacer h:16
       Text.eyebrow "GUIDES"
-      NavItem "Tracking events" selected:=doc=="Tracking events" -> doc="Tracking events"
-      NavItem "Offline mode" selected:=doc=="Offline mode" -> doc="Offline mode"
-      NavItem "Batching" selected:=doc=="Batching" -> doc="Batching"
-      NavItem "Testing" selected:=doc=="Testing" -> doc="Testing"
+      NavItem "Tracking events" selected:{doc=="Tracking events"} -> doc="Tracking events"
+      NavItem "Offline mode" selected:{doc=="Offline mode"} -> doc="Offline mode"
+      NavItem "Batching" selected:{doc=="Batching"} -> doc="Batching"
+      NavItem "Testing" selected:{doc=="Testing"} -> doc="Testing"
       Spacer h:16
       Text.eyebrow "REFERENCE"
-      NavItem "Client" selected:=doc=="Client" -> doc="Client"
-      NavItem "Configuration" selected:=doc=="Configuration" -> doc="Configuration"
-      NavItem "Errors" selected:=doc=="Errors" -> doc="Errors"
-      NavItem "Changelog" selected:=doc=="Changelog" -> doc="Changelog"
+      NavItem "Client" selected:{doc=="Client"} -> doc="Client"
+      NavItem "Configuration" selected:{doc=="Configuration"} -> doc="Configuration"
+      NavItem "Errors" selected:{doc=="Errors"} -> doc="Errors"
+      NavItem "Changelog" selected:{doc=="Changelog"} -> doc="Changelog"
     Column grow gap:24 maxw:720
       Breadcrumb items:["Docs","Start","Quickstart"]
       Heading "Quickstart"

@@ -14,7 +14,7 @@ Column h:fill w:390
         Text.title "Daily goal"
         Badge.success "72%"
       Text size:32 weight:700 "{steps} steps"
-      Progress =goalShare value:0.72
+      Progress bind:goalShare value:0.72
       Text.muted "{stepGoal-steps} steps to reach your goal of {stepGoal}"
     Row gap:12
       Card grow gap:4
@@ -57,17 +57,17 @@ Column h:fill w:390
   Divider
   Row pad:[8,8,8,8] between
     Column grow center gap:2 -> tab=0
-      Icon "home" color:=tab==0?"#FF1E88E5":"#FF757575"
-      Text.caption "Home" color:=tab==0?"#FF1E88E5":"#FF757575"
+      Icon "home" color:{tab==0?"#FF1E88E5":"#FF757575"}
+      Text.caption "Home" color:{tab==0?"#FF1E88E5":"#FF757575"}
     Column grow center gap:2 -> tab=1
-      Icon "fitness_center" color:=tab==1?"#FF1E88E5":"#FF757575"
-      Text.caption "Workouts" color:=tab==1?"#FF1E88E5":"#FF757575"
+      Icon "fitness_center" color:{tab==1?"#FF1E88E5":"#FF757575"}
+      Text.caption "Workouts" color:{tab==1?"#FF1E88E5":"#FF757575"}
     Column grow center gap:2 -> tab=2
-      Icon "event_note" color:=tab==2?"#FF1E88E5":"#FF757575"
-      Text.caption "Plans" color:=tab==2?"#FF1E88E5":"#FF757575"
+      Icon "event_note" color:{tab==2?"#FF1E88E5":"#FF757575"}
+      Text.caption "Plans" color:{tab==2?"#FF1E88E5":"#FF757575"}
     Column grow center gap:2 -> tab=3
-      Icon "bar_chart" color:=tab==3?"#FF1E88E5":"#FF757575"
-      Text.caption "Progress" color:=tab==3?"#FF1E88E5":"#FF757575"
+      Icon "bar_chart" color:{tab==3?"#FF1E88E5":"#FF757575"}
+      Text.caption "Progress" color:{tab==3?"#FF1E88E5":"#FF757575"}
     Column grow center gap:2 -> tab=4
-      Icon "person" color:=tab==4?"#FF1E88E5":"#FF757575"
-      Text.caption "Profile" color:=tab==4?"#FF1E88E5":"#FF757575"
+      Icon "person" color:{tab==4?"#FF1E88E5":"#FF757575"}
+      Text.caption "Profile" color:{tab==4?"#FF1E88E5":"#FF757575"}

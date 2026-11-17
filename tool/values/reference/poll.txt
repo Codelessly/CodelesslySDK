@@ -2,10 +2,10 @@ state polls=[{"name":"Pho Saigon","v":5},{"name":"Taqueria Luz","v":8},{"name":"
 state pick=""
 state voted=false
 state total=sum(polls,o=>o.v)
-ChatCard "Friday lunch" "Team poll" icon:"restaurant_rounded" status:=voted?"Voted":"Open" tone:=voted?"good":"accent"
+ChatCard "Friday lunch" "Team poll" icon:"restaurant_rounded" status:{voted?"Voted":"Open"} tone:{voted?"good":"accent"}
   if !voted
-    OptionList#q "Where should we go for lunch on Friday?" =pick options:=map(polls,o=>o.name)
-    ActionButton#vote "Vote" icon:"how_to_vote_rounded" enabled:=pick!="" -> polls=updateWhere(polls,o=>o.name==pick,o=>with(o,"v",o.v+1)); voted=true
+    OptionList#q "Where should we go for lunch on Friday?" bind:pick options:{map(polls,o=>o.name)}
+    ActionButton#vote "Vote" icon:"how_to_vote_rounded" enabled:{pick!=""} -> polls=updateWhere(polls,o=>o.name==pick,o=>with(o,"v",o.v+1)); voted=true
   if voted
     Paragraph "Where should we go for lunch on Friday?" strong:true
     each o in polls
@@ -13,5 +13,5 @@ ChatCard "Friday lunch" "Team poll" icon:"restaurant_rounded" status:=voted?"Vot
         Row between
           Text.rowTitle "{o.name}{o.name==pick?" (your vote)":""}"
           Text.number "{floor(o.v*100/total+0.5)}%"
-        ProgressBar value:=o.v/total
+        ProgressBar value:{o.v/total}
     Paragraph "{total} votes"

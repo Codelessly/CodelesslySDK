@@ -5,4 +5,4 @@ ChatCard "ACME today" "Nasdaq · as of 3:42 PM" icon:"show_chart_rounded" status
     Callout "On your watchlist" "ACME will show up in your daily summary." tone:"good" icon:"visibility_rounded"
   Row gap:10
     ActionButton "Set price alert" tone:"quiet" icon:"notifications_rounded" -> emit alert "ACME"
-    ActionButton "Add to watchlist" tone:"primary" icon:"add_rounded" enabled:=!watching -> watching=true; emit watch "ACME"
+    ActionButton "Add to watchlist" tone:"primary" icon:"add_rounded" enabled:{!watching} -> watching=true; emit watch "ACME"

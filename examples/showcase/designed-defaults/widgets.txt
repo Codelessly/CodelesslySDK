@@ -48,26 +48,26 @@ Column scroll gap:14 pad:16
       node {"type": "badge", "props": {"label": "3"}, "slots": {}}
   Text.caption "FIELDS: textField (rest, filled, error, disabled), dropdown, dateTimeInput, datePicker, timePicker"
   Card gap:10
-    Input "Name" "Your name" =name
-    Input "Email" "you@example.com" =bad error:"Enter a valid email"
+    Input "Name" "Your name" bind:name
+    Input "Email" "you@example.com" bind:bad error:"Enter a valid email"
     Input "Disabled" "Not editable" enabled:false
     Input "Notes" "A few lines" lines:3
-    Select#sel =size items:["S","M","L"]
+    Select#sel bind:size items:["S","M","L"]
     node {"type": "dateTimeInput", "id": "dti", "props": {"mode": "date", "value": "2026-11-20", "labelText": "Date"}}
     node {"type": "dateTimeInput", "props": {"mode": "time", "value": "09:30", "labelText": "Time"}}
     DatePicker#dp
     TimePicker#tp
   Text.caption "TOGGLES: switch, checkbox, radio, slider, segmentedButton (on, off, disabled)"
   Card gap:10
-    Toggle "Switch on" =on
-    Toggle "Switch off" =off
-    Toggle "Switch disabled" =on enabled:false
-    Checkbox "Checkbox on" =on
-    Checkbox "Checkbox off" =off
-    Radio "Radio selected" value:"a" =r
-    Radio "Radio not" value:"b" =r
-    Slider =vol min:0 max:100
-    SegmentedButton =seg items:["Day","Week","Month"]
+    Toggle "Switch on" bind:on
+    Toggle "Switch off" bind:off
+    Toggle "Switch disabled" bind:on enabled:false
+    Checkbox "Checkbox on" bind:on
+    Checkbox "Checkbox off" bind:off
+    Radio "Radio selected" value:"a" bind:r
+    Radio "Radio not" value:"b" bind:r
+    Slider bind:vol min:0 max:100
+    SegmentedButton bind:seg items:["Day","Week","Month"]
   Text.caption "PROGRESS: progressBar, circularProgressIndicator, activityIndicator, radialGauge, gaugeMeter"
   Card gap:10
     Progress 0.62

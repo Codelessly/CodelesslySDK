@@ -34,31 +34,31 @@ Column scroll gap:24 pad:24
     Column grow gap:16
       Card gap:12
         Text.heading2 "Contact"
-        Input "Email" hint:"you@example.com" type:email =email
+        Input "Email" hint:"you@example.com" type:email bind:email
       Card gap:12
         Text.heading2 "Shipping address"
         Row gap:12
-          Input "First name" =firstName grow
-          Input "Last name" =lastName grow
-        Input "Address" hint:"Street address, apt, suite" =address
+          Input "First name" bind:firstName grow
+          Input "Last name" bind:lastName grow
+        Input "Address" hint:"Street address, apt, suite" bind:address
         Row gap:12
-          Input "City" =city grow
-          Select =st items:["Alabama","California","Colorado","Florida","Illinois","New York","Oregon","Texas","Washington"] grow
-          Input "ZIP" type:number =zip w:120
+          Input "City" bind:city grow
+          Select bind:st items:["Alabama","California","Colorado","Florida","Illinois","New York","Oregon","Texas","Washington"] grow
+          Input "ZIP" type:number bind:zip w:120
       Card gap:12
         Text.heading2 "Shipping method"
-        Radio =ship items:["Standard · Free · 5-7 business days","Express · $12.99 · 1-2 business days"]
+        Radio bind:ship items:["Standard · Free · 5-7 business days","Express · $12.99 · 1-2 business days"]
       Card gap:12
         Row between
           Text.heading2 "Payment"
           Row gap:6
             Icon "credit_card"
             Icon "lock"
-        Input "Card number" hint:"1234 1234 1234 1234" type:number =cardNumber
+        Input "Card number" hint:"1234 1234 1234 1234" type:number bind:cardNumber
         Row gap:12
-          Input "Expiry" hint:"MM / YY" =expiry grow
-          Input "CVC" hint:"123" type:number =cvc grow
-        Input "Name on card" =cardName
+          Input "Expiry" hint:"MM / YY" bind:expiry grow
+          Input "CVC" hint:"123" type:number bind:cvc grow
+        Input "Name on card" bind:cardName
     Column w:360 gap:12
       Card gap:12
         Text.heading2 "Order summary"
@@ -85,7 +85,7 @@ Column scroll gap:24 pad:24
           Text.strong "$46.00"
         Divider
         Row gap:8
-          Input "Discount code" =code grow
+          Input "Discount code" bind:code grow
           Button.outline "Apply" -> toast "Code applied"
         Divider
         Row between

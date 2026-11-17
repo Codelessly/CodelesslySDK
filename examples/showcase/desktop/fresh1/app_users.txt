@@ -9,12 +9,12 @@ App
   Sidebar
     Brand "Bastion" icon:"shield"
     Text.eyebrow "WORKSPACE"
-    NavItem "Overview" icon:"dashboard" selected:=tab=="overview" -> tab="overview"
-    NavItem "Members" icon:"group" selected:=tab=="members" -> tab="members"
-    NavItem "Roles" icon:"admin_panel_settings" selected:=tab=="roles" -> tab="roles"
-    NavItem "Audit log" icon:"history" selected:=tab=="audit" -> tab="audit"
-    NavItem "Billing" icon:"credit_card" selected:=tab=="billing" -> tab="billing"
-    NavItem "Security" icon:"lock" selected:=tab=="security" -> tab="security"
+    NavItem "Overview" icon:"dashboard" selected:{tab=="overview"} -> tab="overview"
+    NavItem "Members" icon:"group" selected:{tab=="members"} -> tab="members"
+    NavItem "Roles" icon:"admin_panel_settings" selected:{tab=="roles"} -> tab="roles"
+    NavItem "Audit log" icon:"history" selected:{tab=="audit"} -> tab="audit"
+    NavItem "Billing" icon:"credit_card" selected:{tab=="billing"} -> tab="billing"
+    NavItem "Security" icon:"lock" selected:{tab=="security"} -> tab="security"
     Spacer grow
     Row gap:10 middle
       Avatar "Maya Reyes" size:36
@@ -63,9 +63,9 @@ App
             Text.caption "vs last month"
       Card pad:16
         Row gap:12 middle
-          Input "Search members" "Name or email" =q grow
-          Select =roleF items:["All roles","Owner","Admin","Editor","Viewer"] w:180
-          Select =statusF items:["All statuses","Active","Invited","Suspended"] w:180
+          Input "Search members" "Name or email" bind:q grow
+          Select bind:roleF items:["All roles","Owner","Admin","Editor","Viewer"] w:180
+          Select bind:statusF items:["All statuses","Active","Invited","Suspended"] w:180
       Card pad:0 gap:0
         Row pad:[20,12,20,12] gap:16 middle
           Text.columnHead "MEMBER" w:240
@@ -82,7 +82,7 @@ App
                 Avatar "{row.name}" size:32
                 Text.strong "{row.name}"
               Text.muted "{row.email}" grow
-              Select =row.role items:["Owner","Admin","Editor","Viewer"] w:130
+              Select bind:row.role items:["Owner","Admin","Editor","Viewer"] w:130
               Row w:100
                 if row.status=="Active"
                   Badge.success "Active"
@@ -99,7 +99,7 @@ App
               IconButton "more_vert" w:40 -> toast "Actions for {row.name}"
         Row between middle pad:[20,12,20,12] border-top:#FFE5E7EB
           Text.muted "Showing {page*10+1}–{page*10+10} of 48 members"
-          Pager =page count:5
+          Pager bind:page count:5
       Card pad:0 gap:0
         Row between middle pad:[20,16,20,16]
           Column gap:2

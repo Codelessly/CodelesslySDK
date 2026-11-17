@@ -18,7 +18,7 @@ Page
     Column center gap:16
       Heading "Simple pricing for every stage" level:1
       Text.muted "Start free for 14 days. No credit card required." center
-      Segments =period options:["Monthly","Yearly"]
+      Segments bind:period options:["Monthly","Yearly"]
       Text.success "Save 20% with yearly billing" center
   Section
     Grid cols:3 gap:24
@@ -114,9 +114,9 @@ Page
         each r in rows
           Row pad:[16,12,16,12] border-bottom:#FFF3F4F6
             Text "{r.name}" grow
-            Text "{r.solo?'✓':'—'}" w:160 center color:=r.solo?"#FF16A34A":"#FF9CA3AF"
-            Text "{r.team?'✓':'—'}" w:160 center color:=r.team?"#FF16A34A":"#FF9CA3AF"
-            Text "{r.scale?'✓':'—'}" w:160 center color:=r.scale?"#FF16A34A":"#FF9CA3AF"
+            Text "{r.solo?'✓':'—'}" w:160 center color:{r.solo?"#FF16A34A":"#FF9CA3AF"}
+            Text "{r.team?'✓':'—'}" w:160 center color:{r.team?"#FF16A34A":"#FF9CA3AF"}
+            Text "{r.scale?'✓':'—'}" w:160 center color:{r.scale?"#FF16A34A":"#FF9CA3AF"}
   Section narrow fill:#FFF9FAFB
     Column gap:12
       Heading "Frequently asked questions" center

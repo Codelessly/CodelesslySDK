@@ -7,12 +7,12 @@ Card gap:10
     Badge.primary "3 of 5"
   Row gap:3
     each j in jobs
-      Box h:6 radius:3 grow fill:=j.state=="done"?"#FF16A34A":(j.state=="running"?"#FF2563EB":"#FFE5E7EB")
+      Box h:6 radius:3 grow fill:{j.state=="done"?"#FF16A34A":(j.state=="running"?"#FF2563EB":"#FFE5E7EB")}
   Column gap:0
     each j in jobs
       Row gap:10 pad:[0,6,0,6]
-        Icon "{j.state=="done"?"check_circle":(j.state=="running"?"sync":"schedule")}" size:15 color:=j.state=="done"?"#FF16A34A":(j.state=="running"?"#FF2563EB":"#FF9CA3AF")
-        Text.body "{j.name}" grow color:=j.state=="queued"?"#FF9CA3AF":"#FF111827"
+        Icon "{j.state=="done"?"check_circle":(j.state=="running"?"sync":"schedule")}" size:15 color:{j.state=="done"?"#FF16A34A":(j.state=="running"?"#FF2563EB":"#FF9CA3AF")}
+        Text.body "{j.name}" grow color:{j.state=="queued"?"#FF9CA3AF":"#FF111827"}
         Text.mono "{j.time}" {"props": {"style": {"color": "#FF9CA3AF"}}}
   Row end
     Button.ghost "Open pipeline" -> emit open_pipeline

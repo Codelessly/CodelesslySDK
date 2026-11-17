@@ -7,9 +7,9 @@ every 1s when left>0 -> left=left-1
 
 Column h:fill pad:16 gap:16
   Text.pageTitle "Edit profile"
-  Input "Name" =name
-  Input "Email" "you@example.com" =email type:email
-  Input "Bio" "Tell us about yourself" =bio multiline
+  Input "Name" bind:name
+  Input "Email" "you@example.com" bind:email type:email
+  Input "Bio" "Tell us about yourself" bind:bio multiline
   Button "Save" -> emit save; left=3
   Spacer grow
   if left>0

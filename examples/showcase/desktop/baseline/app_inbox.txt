@@ -33,7 +33,7 @@ Row w:1280 h:800 fill:"#FFFFFFFF"
     Divider
     Column scroll grow
       each c in convs
-        Row gap:12 pad:[16,12,16,12] top fill:=sel==c.id?"#FFE8F0FE":"#FFFFFFFF" -> sel=c.id
+        Row gap:12 pad:[16,12,16,12] top fill:{sel==c.id?"#FFE8F0FE":"#FFFFFFFF"} -> sel=c.id
           Avatar "{c.name}" size:40
           Column grow gap:2
             Row between middle
@@ -42,7 +42,7 @@ Row w:1280 h:800 fill:"#FFFFFFFF"
             Text "{c.subject}" maxLines:1
             Row gap:8 middle
               Text.muted "{c.preview}" maxLines:1 grow
-              Box w:8 h:8 radius:4 fill:"#FF2563EB" visible:=c.unread
+              Box w:8 h:8 radius:4 fill:"#FF2563EB" visible:{c.unread}
   Box w:1 h:fill fill:"#FFE5E7EB"
   Row grow h:fill
     Column grow h:fill
@@ -89,7 +89,7 @@ Row w:1280 h:800 fill:"#FFFFFFFF"
             Text "Thanks, I'll wait for the refund confirmation then."
       Divider
       Column gap:10 pad:16
-        Input "Reply" "Write a reply to Daniel…" multiline =reply
+        Input "Reply" "Write a reply to Daniel…" multiline bind:reply
         Row gap:8 end
           Button.outline "Send and close" -> emit sendAndClose reply; reply=""; toast "Sent and closed"
           Button "Send" -> emit send reply; reply=""; toast "Reply sent"

@@ -1,8 +1,8 @@
 state tries=1
 state fixed=false
-Card gap:10 border:=fixed?"#FFE5E7EB":"#47DC2626"
+Card gap:10 border:{fixed?"#FFE5E7EB":"#47DC2626"}
   Row gap:8
-    Icon "{fixed?"check_circle":"error_outline"}" size:16 color:=fixed?"#FF16A34A":"#FFDC2626"
+    Icon "{fixed?"check_circle":"error_outline"}" size:16 color:{fixed?"#FF16A34A":"#FFDC2626"}
     Text.sectionTitle "{fixed?"send_invoice succeeded":"send_invoice failed"}" grow
     Text.caption "Attempt {tries} of 3"
   if !fixed

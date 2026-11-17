@@ -34,11 +34,11 @@ Column h:fill
       Card gap:0
         Row gap:12 center pad:[0,8,0,8]
           Icon "dark_mode"
-          Toggle "Dark mode" =dark grow
+          Toggle "Dark mode" bind:dark grow
         Divider
         Row gap:12 center pad:[0,8,0,8]
           Icon "notifications"
-          Toggle "Notifications" =notify grow
+          Toggle "Notifications" bind:notify grow
         Divider
         Row gap:12 center pad:[0,12,0,12] -> emit language
           Icon "language"
@@ -65,14 +65,14 @@ Column h:fill
   Divider
   Row between pad:[8,8,8,8]
     Column grow center gap:2 -> tab=0
-      Icon "home" color:=tab==0?"#FF1565C0":"#FF757575"
-      Text.caption "Home" color:=tab==0?"#FF1565C0":"#FF757575"
+      Icon "home" color:{tab==0?"#FF1565C0":"#FF757575"}
+      Text.caption "Home" color:{tab==0?"#FF1565C0":"#FF757575"}
     Column grow center gap:2 -> tab=1
-      Icon "search" color:=tab==1?"#FF1565C0":"#FF757575"
-      Text.caption "Explore" color:=tab==1?"#FF1565C0":"#FF757575"
+      Icon "search" color:{tab==1?"#FF1565C0":"#FF757575"}
+      Text.caption "Explore" color:{tab==1?"#FF1565C0":"#FF757575"}
     Column grow center gap:2 -> tab=2
-      Icon "notifications" color:=tab==2?"#FF1565C0":"#FF757575"
-      Text.caption "Alerts" color:=tab==2?"#FF1565C0":"#FF757575"
+      Icon "notifications" color:{tab==2?"#FF1565C0":"#FF757575"}
+      Text.caption "Alerts" color:{tab==2?"#FF1565C0":"#FF757575"}
     Column grow center gap:2 -> tab=3
-      Icon "settings" color:=tab==3?"#FF1565C0":"#FF757575"
-      Text.caption "Settings" color:=tab==3?"#FF1565C0":"#FF757575"
+      Icon "settings" color:{tab==3?"#FF1565C0":"#FF757575"}
+      Text.caption "Settings" color:{tab==3?"#FF1565C0":"#FF757575"}

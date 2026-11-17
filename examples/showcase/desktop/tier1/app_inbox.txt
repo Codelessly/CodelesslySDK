@@ -8,10 +8,10 @@ App
     Row gap:8 middle
       IconTile "support_agent"
       Text.strong "Relaydesk"
-    NavItem "Inbox" icon:"inbox" badge:"12" selected:=folder=="inbox" -> folder="inbox"
-    NavItem "Assigned to me" icon:"person" badge:"4" selected:=folder=="mine" -> folder="mine"
-    NavItem "Waiting" icon:"schedule" badge:"7" selected:=folder=="waiting" -> folder="waiting"
-    NavItem "Closed" icon:"check_circle" selected:=folder=="closed" -> folder="closed"
+    NavItem "Inbox" icon:"inbox" badge:"12" selected:{folder=="inbox"} -> folder="inbox"
+    NavItem "Assigned to me" icon:"person" badge:"4" selected:{folder=="mine"} -> folder="mine"
+    NavItem "Waiting" icon:"schedule" badge:"7" selected:{folder=="waiting"} -> folder="waiting"
+    NavItem "Closed" icon:"check_circle" selected:{folder=="closed"} -> folder="closed"
     Spacer grow
     Row gap:8 middle
       Avatar "Dana Kim" size:32
@@ -19,11 +19,11 @@ App
   Pane w:340 gap:0 border-right:#FFE5E7EB
     Column pad:12 gap:8
       Heading "Inbox" level:3
-      Input "Search conversations" =q
+      Input "Search conversations" bind:q
     Divider
     Column scroll gap:0
       each c in convs
-        Row gap:12 pad:12 top fill:=sel==c.id?"#FFEAF1FF":"#00FFFFFF" border-bottom:#FFEEF0F3 -> sel=c.id
+        Row gap:12 pad:12 top fill:{sel==c.id?"#FFEAF1FF":"#00FFFFFF"} border-bottom:#FFEEF0F3 -> sel=c.id
           Avatar "{c.name}" size:40
           Column grow gap:2
             Text.strong "{c.name}"
@@ -31,7 +31,7 @@ App
             Text.muted "{c.preview}" size:12
           Column gap:8 end
             Text.caption "{c.time}"
-            Box w:8 h:8 radius:4 fill:#FF2563EB visible:=c.unread
+            Box w:8 h:8 radius:4 fill:#FF2563EB visible:{c.unread}
   Main
     Nav
       Column gap:4
@@ -69,7 +69,7 @@ App
           Box fill:#FFF3F4F6 radius:12 pad:12
             Text "Thanks, I attached photos of the dent on the lid and the label."
       Card gap:12
-        Input "Reply to Tomás" "Write your reply…" =reply multiline
+        Input "Reply to Tomás" "Write your reply…" bind:reply multiline
         Row end gap:8
           Button.outline "Send and close" -> emit sendClose reply; reply=""; toast "Sent and closed"
           Button "Send" -> emit send reply; reply=""; toast "Reply sent"

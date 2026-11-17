@@ -10,8 +10,8 @@ Column h:fill
       each day in days
         Column center gap:4 -> sel=day.n
           Text.caption "{day.d}"
-          Box w:36 h:36 radius:18 center fill:=sel==day.n?"#FF1A73E8":"#00FFFFFF"
-            Text.strong "{day.n}" color:=sel==day.n?"#FFFFFFFF":"#FF222222"
+          Box w:36 h:36 radius:18 center fill:{sel==day.n?"#FF1A73E8":"#00FFFFFF"}
+            Text.strong "{day.n}" color:{sel==day.n?"#FFFFFFFF":"#FF222222"}
     Divider
     Column scroll grow
       Stack

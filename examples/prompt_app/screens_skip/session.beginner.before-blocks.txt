@@ -4,7 +4,7 @@ Screen
     Text.eyebrow "{phase==\"work\" ? \"Jump\" : \"Rest\"}"
     Text.display "{left}" size:96 weight:700
     Text.bodySecondary "{phase==\"work\" ? \"Jump for \" + today.work + \" seconds, then rest.\" : \"Catch your breath. Next round starts soon.\"}"
-    Progress =frac
+    Progress bind:frac
     Text.strong "Round {round} of {today.rounds}"
   Card gap:12
     Text.sectionTitle "Jumps so far"

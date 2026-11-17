@@ -1,6 +1,6 @@
 state q="render objects without widgets"
 Card gap:10
-  SearchBar =q placeholder:"Search the web" size:sm
+  SearchBar bind:q placeholder:"Search the web" size:sm
   Row gap:6
     StatusDot status:success
     Text.caption "Searched 3 sites in 1.2 s"

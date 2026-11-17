@@ -7,17 +7,17 @@ Card gap:10
       Text.sectionTitle "Plan"
       Badge.primary "{length(filter(steps, s => s.state=="done"))} of {length(steps)}"
     Button.ghost "{open?"Hide":"Show"}" -> open=!open
-  Progress =length(filter(steps, s => s.state=="done"))/length(steps)
+  Progress bind:{length(filter(steps, s => s.state=="done"))/length(steps)}
   if open
     Column gap:0
       each s in steps
         Row gap:10 pad:[0,7,0,7] border:#FFF3F4F6
-          Box w:18 h:18 radius:9 center fill:=s.state=="done"?"#FF16A34A":(s.state=="running"?"#1A2563EB":"#FFF3F4F6")
-            Icon "{s.state=="done"?"check":(s.state=="running"?"more_horiz":"circle")}" size:11 color:=s.state=="done"?"#FFFFFFFF":(s.state=="running"?"#FF2563EB":"#00000000")
+          Box w:18 h:18 radius:9 center fill:{s.state=="done"?"#FF16A34A":(s.state=="running"?"#1A2563EB":"#FFF3F4F6")}
+            Icon "{s.state=="done"?"check":(s.state=="running"?"more_horiz":"circle")}" size:11 color:{s.state=="done"?"#FFFFFFFF":(s.state=="running"?"#FF2563EB":"#00000000")}
           Column gap:1 grow
-            Text.strong "{s.title}" color:=s.state=="todo"?"#FF9CA3AF":"#FF111827"
+            Text.strong "{s.title}" color:{s.state=="todo"?"#FF9CA3AF":"#FF111827"}
             Text.caption "{s.detail}"
-          Badge.primary "Now" visible:=s.state=="running"
+          Badge.primary "Now" visible:{s.state=="running"}
   Row end gap:8
     Button.ghost "Edit plan" -> emit edit_plan
     Button.outline "Pause" -> emit pause

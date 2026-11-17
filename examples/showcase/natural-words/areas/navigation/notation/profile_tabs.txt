@@ -18,7 +18,7 @@ Column scroll gap:16 pad:16 maxw:720
     Button "Follow" grow -> toast "Following Maya"
     Button.outline "Message" grow -> emit message
   state tab="Posts"
-  SegmentedButton =tab items:["Posts","Saved","Tagged"]
+  SegmentedButton bind:tab items:["Posts","Saved","Tagged"]
   if tab=="Posts"
     Grid cols:3 gap:4
       Image "https://picsum.photos/seed/maya1/300" h:110 radius:4

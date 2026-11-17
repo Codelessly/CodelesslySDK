@@ -33,4 +33,4 @@ Card w:390 gap:12
   Row between middle
     Text "Approved total"
     Text.heading "{money(sum(filter(expenses,e=>e.status=='approved'),e=>e.amount),'$',2)}"
-  Button "Submit" enabled:=count(expenses,e=>e.status=='pending')==0 -> emit submit; toast "Report submitted"
+  Button "Submit" enabled:{count(expenses,e=>e.status=='pending')==0} -> emit submit; toast "Report submitted"

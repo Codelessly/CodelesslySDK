@@ -11,7 +11,7 @@ Column scroll pad:16 gap:16
     Button "Try to beat it" -> emit start_session
   Card gap:8
     Text.sectionTitle "Jumps each week"
-    BarChart values:=map(weeks,w=>w.jumps) labels:=map(weeks,w=>w.label)
+    BarChart values:{map(weeks,w=>w.jumps)} labels:{map(weeks,w=>w.label)}
     Text.body "Wow! {last(weeks).jumps} jumps this week. Keep going!"
   Text.sectionTitle "Your sessions"
   each s in sessions

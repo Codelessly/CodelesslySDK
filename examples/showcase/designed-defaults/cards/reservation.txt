@@ -9,15 +9,15 @@ Card w:390 gap:12
   Text.strong "Day"
   Grid cols:3 gap:8
     each d in days
-      ChoiceChip "{d.l}" selected:=day==d.i -> day=d.i; time=""
+      ChoiceChip "{d.l}" selected:{day==d.i} -> day=d.i; time=""
   Text.strong "Party size"
   Grid cols:4 gap:8
     each p in sizes
-      ChoiceChip "{p}" selected:=party==p -> party=p; time=""
+      ChoiceChip "{p}" selected:{party==p} -> party=p; time=""
   Text.strong "Time"
   Grid cols:3 gap:8
     each s in slots
-      ChoiceChip "{s.t}" selected:=time==s.t enabled:=(day*3+s.i*5+party*2)%4!=0&&!(party>6&&s.i%2==0) -> time=s.t
+      ChoiceChip "{s.t}" selected:{time==s.t} enabled:{(day*3+s.i*5+party*2)%4!=0&&!(party>6&&s.i%2==0)} -> time=s.t
   Text.caption "Greyed-out times are full."
   Divider
   if time==""

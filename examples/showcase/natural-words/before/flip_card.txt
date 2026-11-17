@@ -5,7 +5,7 @@ Card gap:12
   Row between middle
     Text.sectionTitle "Flashcards"
     Badge.neutral "{i+1} of {length(cards)}"
-  Box h:160 radius:12 pad:16 center middle fill:=flipped?"#FFE8F5E9":"#FFE3F2FD" -> flipped=!flipped
+  Box h:160 radius:12 pad:16 center middle fill:{flipped?"#FFE8F5E9":"#FFE3F2FD"} -> flipped=!flipped
     if !flipped
       Text.caption "QUESTION" color:#FF1565C0
       Text.heading2 "{cards[i].q}" color:#FF0D47A1

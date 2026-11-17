@@ -10,4 +10,4 @@ Card gap:10
       Button.ghost "Discard" -> decision="discarded"; emit discard
       Button "Apply both files" -> decision="applied"; emit apply
   if decision!=""
-    Banner decision=="applied" ? "Applied to 2 files." : "Discarded. Nothing was changed." tone:=decision=="applied"?"success":"info"
+    Banner decision=="applied" ? "Applied to 2 files." : "Discarded. Nothing was changed." tone:{decision=="applied"?"success":"info"}

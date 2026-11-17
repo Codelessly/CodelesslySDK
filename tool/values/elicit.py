@@ -15,7 +15,7 @@ import glob, json, os, re, subprocess, sys, time, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SDK = os.path.dirname(os.path.dirname(HERE))
-DROP = ('- =name binds', '- -> runs on tap', '- drag:group', '- state name=value', '- every 1000', '- if expression', '- each row in rows')
+DROP = ('- bind:name keeps', '  key:value gives the node a value','- -> runs on tap', '- drag:group', '- state name=value', '- every 1000', '- if expression', '- each row in rows')
 
 
 def opt(name, default=None):
@@ -35,22 +35,22 @@ def stripped(prompt, blocks):
     for line in prompt.split('\n'):
         if line.startswith(DROP) or line.startswith('  Written like any node:'):
             continue
-        if line.startswith('  LINE') or '[=binding] [-> action' in line:
-            line = line.replace(' [=binding] [-> action; action]', '')
+        if line.startswith('  LINE') or '[-> action; action]' in line:
+            line = line.replace(' [-> action; action]', '')
         m = re.match(r'  ([A-Z][A-Za-z]+) ', line)
         if m and ' : ' in line:  # a block's call line: its parameters stay, the notation's own marks go
             if blocks and m.group(1) not in blocks:
                 continue
             call, doc = line.split(' : ', 1)
-            call = re.sub(r' =(\w+)', r' \1', call)
+            call = re.sub(r' bind:(\w+)', r' \1', call)
             call = re.sub(r' -> (\w+)', r' \1(event)', call)
             # What the block is, without the examples its description gives in today's notation.
             doc = re.split(r'[:;(]', doc)[0].strip()
             line = f'{call} : {doc}.'
         out.append(line)
     text = '\n'.join(out)
-    text = re.sub(r'A look can follow data:[^\n]*?expression\. ', '', text)
-    text = re.sub(r'\(or Progress =done\) ', '', text)
+    text = re.sub(r' A value that follows the state is an expression in braces:[^\n]*', '', text)
+    text = re.sub(r'\(or Progress bind:done\) ', '', text)
     text = '\n'.join(l for l in text.split('\n') if 'BEYOND THESE WORDS' not in l and not l.startswith('  The full vocabulary has more') and not l.startswith('  custom drawing and shapes'))
     return text
 

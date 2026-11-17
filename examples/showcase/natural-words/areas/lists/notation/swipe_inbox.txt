@@ -6,8 +6,8 @@ Column gap:8 pad:16 maxw:720
     Badge.primary "{length(mails)}"
   Text.caption "Swipe left to delete, right to archive"
   each m in mails
-    Box swipe:left -> mails=removeWhere(mails,x=>x.id==m.id); toast "Deleted"
-      Card swipe:right -> archived=append(archived,m); mails=removeWhere(mails,x=>x.id==m.id); toast "Archived"
+    Box onSwipeLeft:{mails=removeWhere(mails,x=>x.id==m.id); toast "Deleted"}
+      Card onSwipeRight:{archived=append(archived,m); mails=removeWhere(mails,x=>x.id==m.id); toast "Archived"}
         Row between gap:12
           Column gap:2 grow
             Text.strong "{m.from}"

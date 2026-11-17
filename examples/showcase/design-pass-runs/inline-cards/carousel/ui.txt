@@ -19,7 +19,7 @@ Card w:390 gap:12
       IconButton "chevron_right" -> i=i==5?0:i+1
     Row center gap:8
       each n in range(6)
-        Box w:10 h:10 radius:5 fill:=n==i?"#FF3366CC":"#FFCCCCCC" -> i=n
+        Box w:10 h:10 radius:5 fill:{n==i?"#FF3366CC":"#FFCCCCCC"} -> i=n
   if detail
     Row middle gap:8
       IconButton "arrow_back" -> detail=false
@@ -35,6 +35,6 @@ Card w:390 gap:12
     Text.strong "Size"
     Row gap:8
       each s in [7,8,9,10,11]
-        ChoiceChip "{s}" selected:=size==s -> size=s
-    Button "Add to bag" enabled:=size!="" -> emit addToBag shoes[i].id; toast "Added to bag"
+        ChoiceChip "{s}" selected:{size==s} -> size=s
+    Button "Add to bag" enabled:{size!=""} -> emit addToBag shoes[i].id; toast "Added to bag"
     Button.ghost "Back to carousel" -> detail=false

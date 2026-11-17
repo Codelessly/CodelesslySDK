@@ -12,7 +12,7 @@ Card gap:12
         Text.success "Upload complete"
     if percent>=100
       Icon "check_circle" color:#FF2E7D32 animate:pop
-  Progress =percent/100 color:=percent>=100?#FF2E7D32:#FF1976D2
+  Progress bind:{percent/100} color:{percent>=100?#FF2E7D32:#FF1976D2}
   if percent>=100
     Row end
       Button.ghost "Upload again" -> percent=0

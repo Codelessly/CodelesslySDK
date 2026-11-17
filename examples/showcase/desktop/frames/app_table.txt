@@ -12,11 +12,11 @@ App
     Row gap:8 center
       Icon "menu_book"
       Text.strong "Fieldbook"
-    NavItem "Dashboard" icon:"dashboard" selected:=tab=="dashboard" -> tab="dashboard"
-    NavItem "Customers" icon:"groups" selected:=tab=="customers" -> tab="customers"
-    NavItem "Deals" icon:"handshake" selected:=tab=="deals" -> tab="deals"
-    NavItem "Tasks" icon:"task_alt" badge:"7" selected:=tab=="tasks" -> tab="tasks"
-    NavItem "Reports" icon:"bar_chart" selected:=tab=="reports" -> tab="reports"
+    NavItem "Dashboard" icon:"dashboard" selected:{tab=="dashboard"} -> tab="dashboard"
+    NavItem "Customers" icon:"groups" selected:{tab=="customers"} -> tab="customers"
+    NavItem "Deals" icon:"handshake" selected:{tab=="deals"} -> tab="deals"
+    NavItem "Tasks" icon:"task_alt" badge:"7" selected:{tab=="tasks"} -> tab="tasks"
+    NavItem "Reports" icon:"bar_chart" selected:{tab=="reports"} -> tab="reports"
     Spacer grow
     Row gap:8 center
       Avatar "Sam Patel" size:32
@@ -32,13 +32,13 @@ App
     Column pad:24 gap:16
       Row gap:12 center between
         Row gap:12 center
-          Input "Search customers" =q w:260
+          Input "Search customers" bind:q w:260
           Row gap:6
-            ChoiceChip "All" selected:=status=="All" -> status="All"
-            ChoiceChip "Active" selected:=status=="Active" -> status="Active"
-            ChoiceChip "Trial" selected:=status=="Trial" -> status="Trial"
-            ChoiceChip "Churned" selected:=status=="Churned" -> status="Churned"
-        Segments =scope options:["Everyone","My accounts"]
+            ChoiceChip "All" selected:{status=="All"} -> status="All"
+            ChoiceChip "Active" selected:{status=="Active"} -> status="Active"
+            ChoiceChip "Trial" selected:{status=="Trial"} -> status="Trial"
+            ChoiceChip "Churned" selected:{status=="Churned"} -> status="Churned"
+        Segments bind:scope options:["Everyone","My accounts"]
       if length(picked)>0
         Box fill:#FFEEF2FF radius:8 pad:[16,10,16,10]
           Row gap:12 center
@@ -50,7 +50,7 @@ App
         Box pad:[16,6,16,6] fill:#FFF9FAFB
           Row gap:12 center
             Box w:32
-              Checkbox "" checked:=length(picked)==length(customers) -> picked=length(picked)==length(customers)?[]:map(customers,x=>x.id)
+              Checkbox "" checked:{length(picked)==length(customers)} -> picked=length(picked)==length(customers)?[]:map(customers,x=>x.id)
             Row grow
               Button.ghost "Name {sort==\"name\"?(desc?\"↓\":\"↑\"):\"\"}" -> desc=sort=="name"?!desc:false; sort="name"
             Box w:170
@@ -70,7 +70,7 @@ App
             Box pad:[16,10,16,10]
               Row gap:12 center
                 Box w:32
-                  Checkbox "" checked:=contains(picked,c.id) -> picked=contains(picked,c.id)?without(picked,c.id):append(picked,c.id)
+                  Checkbox "" checked:{contains(picked,c.id)} -> picked=contains(picked,c.id)?without(picked,c.id):append(picked,c.id)
                 Row grow gap:10 center
                   Avatar "{c.name}" size:32
                   Text.strong "{c.name}"

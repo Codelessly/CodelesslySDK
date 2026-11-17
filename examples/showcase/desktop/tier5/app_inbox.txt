@@ -6,10 +6,10 @@ App
   Sidebar w:220
     Brand "Relaydesk" icon:"support_agent"
     Text.eyebrow "FOLDERS"
-    NavItem "Inbox" icon:"inbox" badge:"12" selected:=folder=="inbox" -> folder="inbox"
-    NavItem "Assigned to me" icon:"person" badge:"4" selected:=folder=="mine" -> folder="mine"
-    NavItem "Waiting" icon:"schedule" badge:"7" selected:=folder=="waiting" -> folder="waiting"
-    NavItem "Closed" icon:"check_circle" selected:=folder=="closed" -> folder="closed"
+    NavItem "Inbox" icon:"inbox" badge:"12" selected:{folder=="inbox"} -> folder="inbox"
+    NavItem "Assigned to me" icon:"person" badge:"4" selected:{folder=="mine"} -> folder="mine"
+    NavItem "Waiting" icon:"schedule" badge:"7" selected:{folder=="waiting"} -> folder="waiting"
+    NavItem "Closed" icon:"check_circle" selected:{folder=="closed"} -> folder="closed"
     Spacer grow
     Row gap:10 middle
       Avatar "Priya Raman" size:32
@@ -21,9 +21,9 @@ App
       Row between middle
         Heading "Inbox" level:3
         Text.caption "12 open"
-      Input "Search conversations" =q
+      Input "Search conversations" bind:q
     each c in convs
-      ConversationRow "{c.name}" subject:"{c.subject}" preview:"{c.preview}" time:"{c.time}" initials:"{c.initials}" tone:"{c.tone}" unread:=c.unread selected:=open==c.id -> open=c.id
+      ConversationRow "{c.name}" subject:"{c.subject}" preview:"{c.preview}" time:"{c.time}" initials:"{c.initials}" tone:"{c.tone}" unread:{c.unread} selected:{open==c.id} -> open=c.id
   Main
     Nav
       Column gap:4
@@ -71,7 +71,7 @@ App
           Box fill:#FFF3F4F6 radius:12 pad:12
             Text "Thanks, that would be great. I was billed twice on the 3rd."
     Column pad:[24,16,24,24] gap:12 border-top:#FFE5E7EB
-      Input "Reply to Marcus" "Write your reply…" multiline =reply
+      Input "Reply to Marcus" "Write your reply…" multiline bind:reply
       Row between middle
         Text.caption "Replying to marcus.webb@example.com"
         Row gap:8
@@ -84,7 +84,7 @@ App
       Text.muted "marcus.webb@example.com"
     Divider
     Text.eyebrow "CUSTOMER DETAILS"
-    Details rows:=[["Plan","Business"],["Customer since","Mar 2022"],["Last order","#48213 · $49.00"]]
+    Details rows:{[["Plan","Business"],["Customer since","Mar 2022"],["Last order","#48213 · $49.00"]]}
     Text.eyebrow "TAGS"
     Row gap:6
       Badge.primary "Billing"

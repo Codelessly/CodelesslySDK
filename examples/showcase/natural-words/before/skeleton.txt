@@ -9,10 +9,10 @@ Card gap:12
   if loading
     each g in ghosts
       Row gap:12 middle
-        Box w:48 h:48 radius:8 fill:=dim?'#FFE0E0E0':'#FFF2F2F2'
+        Box w:48 h:48 radius:8 fill:{dim?'#FFE0E0E0':'#FFF2F2F2'}
         Column gap:8 grow
-          Box h:14 radius:4 fill:=dim?'#FFE0E0E0':'#FFF2F2F2'
-          Box w:120 h:12 radius:4 fill:=dim?'#FFF2F2F2':'#FFE0E0E0'
+          Box h:14 radius:4 fill:{dim?'#FFE0E0E0':'#FFF2F2F2'}
+          Box w:120 h:12 radius:4 fill:{dim?'#FFF2F2F2':'#FFE0E0E0'}
   if !loading
     each a in articles
       Row gap:12 middle

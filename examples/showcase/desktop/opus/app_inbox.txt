@@ -8,10 +8,10 @@ App
       Icon "support_agent"
       Text.strong "Relaydesk"
     Spacer h:8
-    NavItem "Inbox" icon:"inbox" badge:"12" selected:=folder=="inbox" -> folder="inbox"
-    NavItem "Assigned to me" icon:"person" badge:"4" selected:=folder=="mine" -> folder="mine"
-    NavItem "Waiting" icon:"schedule" badge:"7" selected:=folder=="waiting" -> folder="waiting"
-    NavItem "Closed" icon:"check_circle" selected:=folder=="closed" -> folder="closed"
+    NavItem "Inbox" icon:"inbox" badge:"12" selected:{folder=="inbox"} -> folder="inbox"
+    NavItem "Assigned to me" icon:"person" badge:"4" selected:{folder=="mine"} -> folder="mine"
+    NavItem "Waiting" icon:"schedule" badge:"7" selected:{folder=="waiting"} -> folder="waiting"
+    NavItem "Closed" icon:"check_circle" selected:{folder=="closed"} -> folder="closed"
     Spacer grow
     Row gap:8 middle
       Avatar "Sam Patel" size:28
@@ -24,7 +24,7 @@ App
       Badge.primary "12 open"
     Column scroll gap:0
       each c in convos
-        Box pad:[16,12,16,12] fill:=sel==c.id?"#FFEEF2FF":"#00FFFFFF" border-bottom:#FFF1F2F4 -> sel=c.id
+        Box pad:[16,12,16,12] fill:{sel==c.id?"#FFEEF2FF":"#00FFFFFF"} border-bottom:#FFF1F2F4 -> sel=c.id
           Row gap:12 top
             Avatar "{c.name}" size:36
             Column grow gap:2
@@ -32,7 +32,7 @@ App
                 Text.strong "{c.name}"
                 Row gap:6 middle
                   Text.caption "{c.time}"
-                  Box w:8 h:8 radius:4 fill:#FF2563EB visible:=c.unread
+                  Box w:8 h:8 radius:4 fill:#FF2563EB visible:{c.unread}
               Text.rowTitle "{c.subject}"
               Text.muted "{c.preview}" {"props": {"maxLines": 1}}
   Main
@@ -79,12 +79,12 @@ App
             Text "9:10" color:#FFDBEAFE size:12
           Text "Usually 3 to 5 business days, depending on your bank. I'll keep this open until it lands." color:#FFFFFFFF
       Card gap:10
-        Input "Reply to Marco" "Write a reply…" =reply multiline
+        Input "Reply to Marco" "Write a reply…" bind:reply multiline
         Row gap:8 middle
           IconButton "attach_file" -> emit attach
           Spacer grow
-          Button.outline "Send and close" enabled:=trim(reply)!="" -> emit sendClose reply; reply=""; toast "Sent and closed"
-          Button "Send" enabled:=trim(reply)!="" -> emit send reply; reply=""; toast "Sent"
+          Button.outline "Send and close" enabled:{trim(reply)!=""} -> emit sendClose reply; reply=""; toast "Sent and closed"
+          Button "Send" enabled:{trim(reply)!=""} -> emit send reply; reply=""; toast "Sent"
   Pane w:300 pad:16 gap:12
     Text.eyebrow "Customer"
     Row gap:12 middle
@@ -93,7 +93,7 @@ App
         Text.strong "Marco Ruiz"
         Text.muted "marco.ruiz@fastmail.com"
     Divider
-    Details rows:=[["Plan","Pro, annual"],["Customer since","March 2022"],["Last order","#4821 · $86.40"],["Conversations","6"]]
+    Details rows:{[["Plan","Pro, annual"],["Customer since","March 2022"],["Last order","#4821 · $86.40"],["Conversations","6"]]}
     Text.eyebrow "Tags"
     Row gap:6
       Chip "VIP"

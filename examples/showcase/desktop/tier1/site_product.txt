@@ -14,7 +14,7 @@ Page
       Link "Kitchen"
       Link "Sale"
     Row gap:16 middle
-      Input "Search" "Search products" =q w:240
+      Input "Search" "Search products" bind:q w:240
       Row gap:6 middle
         Icon "shopping_cart"
         Badge.primary "{cart}"
@@ -32,13 +32,13 @@ Page
         if img==3
           Media kind:"box" tone:"sky" h:480
         Row gap:12
-          Box pad:4 radius:8 border:=img==0?"#FF222222":"#FFDDDDDD" -> img=0
+          Box pad:4 radius:8 border:{img==0?"#FF222222":"#FFDDDDDD"} -> img=0
             Media kind:"box" tone:"sand" w:96 h:80
-          Box pad:4 radius:8 border:=img==1?"#FF222222":"#FFDDDDDD" -> img=1
+          Box pad:4 radius:8 border:{img==1?"#FF222222":"#FFDDDDDD"} -> img=1
             Media kind:"box" tone:"rose" w:96 h:80
-          Box pad:4 radius:8 border:=img==2?"#FF222222":"#FFDDDDDD" -> img=2
+          Box pad:4 radius:8 border:{img==2?"#FF222222":"#FFDDDDDD"} -> img=2
             Media kind:"box" tone:"mint" w:96 h:80
-          Box pad:4 radius:8 border:=img==3?"#FF222222":"#FFDDDDDD" -> img=3
+          Box pad:4 radius:8 border:{img==3?"#FF222222":"#FFDDDDDD"} -> img=3
             Media kind:"box" tone:"sky" w:96 h:80
       Column grow gap:16
         Text.eyebrow "DESK LAMPS"
@@ -54,9 +54,9 @@ Page
         Text.muted "A dimmable LED desk lamp with a slim counterweighted arm, a weighted base and warm, glare-free light."
         Divider
         Text.fieldLabel "Finish: {finish}"
-        ChoiceChips =finish options:["Brass","Graphite","Sand"] columns:3
+        ChoiceChips bind:finish options:["Brass","Graphite","Sand"] columns:3
         Text.fieldLabel "Quantity"
-        Stepper "Quantity" =qty min:1 max:10
+        Stepper "Quantity" bind:qty min:1 max:10
         Row gap:12
           Button "Add to cart" size:large grow -> cart=cart+qty; toast "Added to cart"
           Button.outline "Buy now" size:large grow -> emit buyNow
@@ -79,7 +79,7 @@ Page
               Text.muted "Covers the LED, the driver and the arm."
   Section tint
     Column gap:20
-      TabToggle =tab options:["Description","Specifications","Reviews"]
+      TabToggle bind:tab options:["Description","Specifications","Reviews"]
       if tab=="Description"
         Column gap:12
           Heading "Light that works as hard as you do" level:3

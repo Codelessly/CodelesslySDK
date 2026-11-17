@@ -7,12 +7,12 @@ App
     Row gap:8
       IconTile "sailing"
       Text.strong "Harbor"
-    NavItem "Overview" icon:"dashboard" selected:=tab=="overview" -> tab="overview"
-    NavItem "Orders" icon:"receipt_long" selected:=tab=="orders" -> tab="orders"
-    NavItem "Inventory" icon:"inventory_2" selected:=tab=="inventory" -> tab="inventory"
-    NavItem "Customers" icon:"group" selected:=tab=="customers" -> tab="customers"
-    NavItem "Reports" icon:"bar_chart" selected:=tab=="reports" -> tab="reports"
-    NavItem "Settings" icon:"settings" selected:=tab=="settings" -> tab="settings"
+    NavItem "Overview" icon:"dashboard" selected:{tab=="overview"} -> tab="overview"
+    NavItem "Orders" icon:"receipt_long" selected:{tab=="orders"} -> tab="orders"
+    NavItem "Inventory" icon:"inventory_2" selected:{tab=="inventory"} -> tab="inventory"
+    NavItem "Customers" icon:"group" selected:{tab=="customers"} -> tab="customers"
+    NavItem "Reports" icon:"bar_chart" selected:{tab=="reports"} -> tab="reports"
+    NavItem "Settings" icon:"settings" selected:{tab=="settings"} -> tab="settings"
     Spacer grow
     Row gap:10 middle
       Avatar "Sam Patel" size:36
@@ -23,8 +23,8 @@ App
     Nav
       Heading "Overview" level:1
       Row gap:12 middle
-        Segments =range options:["7d","30d","90d"]
-        Input "Search" =q w:220
+        Segments bind:range options:["7d","30d","90d"]
+        Input "Search" bind:q w:220
         Button "New order" -> emit newOrder
     Column pad:24 gap:16 scroll
       Grid cols:4 gap:16

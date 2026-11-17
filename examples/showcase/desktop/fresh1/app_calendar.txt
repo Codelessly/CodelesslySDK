@@ -25,14 +25,14 @@ App
         Text.caption "S" center
         Text.caption "S" center
         each d in range(30)
-          Box w:28 h:28 radius:14 center fill:=d+1==10?"#FF2563EB":"#00000000"
-            Text.caption "{d+1}" center color:=d+1==10?"#FFFFFFFF":"#FF111827"
+          Box w:28 h:28 radius:14 center fill:{d+1==10?"#FF2563EB":"#00000000"}
+            Text.caption "{d+1}" center color:{d+1==10?"#FFFFFFFF":"#FF111827"}
     Text.eyebrow "MY CALENDARS"
     Column gap:6
-      Checkbox "Work" =work color:#FF2563EB
-      Checkbox "Personal" =personal color:#FF16A34A
-      Checkbox "Team" =team color:#FF7C3AED
-      Checkbox "Holidays" =holidays color:#FFEA580C
+      Checkbox "Work" bind:work color:#FF2563EB
+      Checkbox "Personal" bind:personal color:#FF16A34A
+      Checkbox "Team" bind:team color:#FF7C3AED
+      Checkbox "Holidays" bind:holidays color:#FFEA580C
     Spacer grow
   Main
     Nav
@@ -41,7 +41,7 @@ App
         IconButton "chevron_left" -> emit prevWeek
         IconButton "chevron_right" -> emit nextWeek
         Button.outline "Today" -> emit today
-      SegmentedButton =view items:["Day","Week","Month"]
+      SegmentedButton bind:view items:["Day","Week","Month"]
     Column pad:[16,12,16,16] gap:0 scroll
       Row gap:0 pad:[0,0,0,8]
         Box w:56
@@ -80,43 +80,43 @@ App
             Text.caption "{t}" h:48
         Column grow gap:0 pad:[2,0,2,0] h:528 border-left:#FFE5E7EB
           Spacer h:48
-          Box h:48 fill:#FFDBEAFE radius:6 pad:[6,4,6,4] gap:0 border:=sel==1?"#FF111827":"#00000000" -> sel=1
+          Box h:48 fill:#FFDBEAFE radius:6 pad:[6,4,6,4] gap:0 border:{sel==1?"#FF111827":"#00000000"} -> sel=1
             Text.strong "Standup" size:12 color:#FF1E3A8A
             Text.caption "9:00–10:00" size:11 color:#FF1E3A8A
           Spacer h:192
-          Box h:72 fill:#FFDBEAFE radius:6 pad:[6,4,6,4] gap:0 border:=sel==2?"#FF111827":"#00000000" -> sel=2
+          Box h:72 fill:#FFDBEAFE radius:6 pad:[6,4,6,4] gap:0 border:{sel==2?"#FF111827":"#00000000"} -> sel=2
             Text.strong "Design review" size:12 color:#FF1E3A8A
             Text.caption "2:00–3:30" size:11 color:#FF1E3A8A
         Column grow gap:0 pad:[2,0,2,0] h:528 border-left:#FFE5E7EB
           Spacer h:96
-          Box h:72 fill:#FFDCFCE7 radius:6 pad:[6,4,6,4] gap:0 border:=sel==3?"#FF111827":"#00000000" -> sel=3
+          Box h:72 fill:#FFDCFCE7 radius:6 pad:[6,4,6,4] gap:0 border:{sel==3?"#FF111827":"#00000000"} -> sel=3
             Text.strong "Dentist" size:12 color:#FF166534
             Text.caption "10:00–11:30" size:11 color:#FF166534
           Spacer h:216
-          Box h:48 fill:#FFEDE9FE radius:6 pad:[6,4,6,4] gap:0 border:=sel==4?"#FF111827":"#00000000" -> sel=4
+          Box h:48 fill:#FFEDE9FE radius:6 pad:[6,4,6,4] gap:0 border:{sel==4?"#FF111827":"#00000000"} -> sel=4
             Text.strong "Team sync" size:12 color:#FF5B21B6
             Text.caption "4:00–5:00" size:11 color:#FF5B21B6
         Column grow gap:0 pad:[2,0,2,0] h:528 border-left:#FFE5E7EB fill:#0F2563EB
           Spacer h:72
-          Box h:48 fill:#FFDBEAFE radius:6 pad:[6,4,6,4] gap:0 border:=sel==5?"#FF111827":"#00000000" -> sel=5
+          Box h:48 fill:#FFDBEAFE radius:6 pad:[6,4,6,4] gap:0 border:{sel==5?"#FF111827":"#00000000"} -> sel=5
             Text.strong "1:1 with Maya" size:12 color:#FF1E3A8A
             Text.caption "9:30–10:30" size:11 color:#FF1E3A8A
           Spacer h:24
-          Box h:96 fill:#FFEDE9FE radius:6 pad:[6,4,6,4] gap:0 border:=sel==6?"#FF111827":"#00000000" -> sel=6
+          Box h:96 fill:#FFEDE9FE radius:6 pad:[6,4,6,4] gap:0 border:{sel==6?"#FF111827":"#00000000"} -> sel=6
             Text.strong "Planning workshop" size:12 color:#FF5B21B6
             Text.caption "11:00–1:00" size:11 color:#FF5B21B6
         Column grow gap:0 pad:[2,0,2,0] h:528 border-left:#FFE5E7EB
           Spacer h:24
-          Box h:48 fill:#FFDCFCE7 radius:6 pad:[6,4,6,4] gap:0 border:=sel==7?"#FF111827":"#00000000" -> sel=7
+          Box h:48 fill:#FFDCFCE7 radius:6 pad:[6,4,6,4] gap:0 border:{sel==7?"#FF111827":"#00000000"} -> sel=7
             Text.strong "Gym" size:12 color:#FF166534
             Text.caption "8:30–9:30" size:11 color:#FF166534
           Spacer h:168
-          Box h:48 fill:#FFDCFCE7 radius:6 pad:[6,4,6,4] gap:0 border:=sel==8?"#FF111827":"#00000000" -> sel=8
+          Box h:48 fill:#FFDCFCE7 radius:6 pad:[6,4,6,4] gap:0 border:{sel==8?"#FF111827":"#00000000"} -> sel=8
             Text.strong "Lunch with Ana" size:12 color:#FF166534
             Text.caption "1:00–2:00" size:11 color:#FF166534
         Column grow gap:0 pad:[2,0,2,0] h:528 border-left:#FFE5E7EB
           Spacer h:336
-          Box h:72 fill:#FFEDE9FE radius:6 pad:[6,4,6,4] gap:0 border:=sel==9?"#FF111827":"#00000000" -> sel=9
+          Box h:72 fill:#FFEDE9FE radius:6 pad:[6,4,6,4] gap:0 border:{sel==9?"#FF111827":"#00000000"} -> sel=9
             Text.strong "Sprint demo" size:12 color:#FF5B21B6
             Text.caption "3:00–4:30" size:11 color:#FF5B21B6
         Column grow gap:0 h:528 border-left:#FFE5E7EB
@@ -139,7 +139,7 @@ App
             Avatar "{g.name}" size:28
             Column grow gap:0
               Text.strong "{g.name}"
-              Text.caption "{g.reply}" color:=g.reply=="Accepted"?"#FF16A34A":(g.reply=="Declined"?"#FFDC2626":"#FF6B7280")
+              Text.caption "{g.reply}" color:{g.reply=="Accepted"?"#FF16A34A":(g.reply=="Declined"?"#FFDC2626":"#FF6B7280")}
         Divider
         Text.eyebrow "NOTE"
         Text.muted "{e.note}"

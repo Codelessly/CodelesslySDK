@@ -4,9 +4,9 @@ Page
       Icon "sensors"
       Text.strong "Beacon"
       Text.muted "Docs"
-    SearchBar "Search the docs" =q w:320
+    SearchBar "Search the docs" bind:q w:320
     Row gap:12 middle
-      Select =version items:["v2.4","v2.3","v2.2"]
+      Select bind:version items:["v2.4","v2.3","v2.2"]
       Link "GitHub" href:"https://github.com"
   Section
     Row gap:32 top
@@ -14,7 +14,7 @@ Page
         Column gap:4
           Text.eyebrow "START"
           NavItem "Introduction" icon:"info" -> emit nav "introduction"
-          NavItem "Quickstart" icon:"bolt" selected:=true -> emit nav "quickstart"
+          NavItem "Quickstart" icon:"bolt" selected:{true} -> emit nav "quickstart"
           NavItem "Installation" icon:"download" -> emit nav "installation"
           NavItem "Configuration" icon:"tune" -> emit nav "configuration"
         Column gap:4

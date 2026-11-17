@@ -15,7 +15,7 @@ Column w:1280 fill:#FFF8F9FB
     Box grow gap:10 pad:12 fill:#FFEEF0F4 radius:12
       Row between middle
         Text.cardTitle "To do"
-        CountBadge count:=length(todo)
+        CountBadge count:{length(todo)}
       each t in todo
         Card gap:8 fill:#FFFFFFFF
           Text.rowTitle "{t.title}"
@@ -29,7 +29,7 @@ Column w:1280 fill:#FFF8F9FB
     Box grow gap:10 pad:12 fill:#FFEEF0F4 radius:12
       Row between middle
         Text.cardTitle "In progress"
-        CountBadge count:=length(doing)
+        CountBadge count:{length(doing)}
       each t in doing
         Card gap:8 fill:#FFFFFFFF
           Text.rowTitle "{t.title}"
@@ -43,7 +43,7 @@ Column w:1280 fill:#FFF8F9FB
     Box grow gap:10 pad:12 fill:#FFEEF0F4 radius:12
       Row between middle
         Text.cardTitle "Done"
-        CountBadge count:=length(done)
+        CountBadge count:{length(done)}
       each t in done
         Card gap:8 fill:#FFFFFFFF
           Text.rowTitle "{t.title}"
@@ -55,7 +55,7 @@ Column w:1280 fill:#FFF8F9FB
               Icon "check_circle"
               Text.caption "{t.due}"
     Card w:320 gap:12 fill:#FFFFFFFF
-      SectionHeader "Activity" count:=length(activity)
+      SectionHeader "Activity" count:{length(activity)}
       each a in activity
         Row gap:10 top
           Avatar "{a.who}" size:28

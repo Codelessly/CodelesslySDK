@@ -5,32 +5,32 @@ Column scroll gap:16 pad:16 w:390
     Text.caption "TODAY"
     Text.pageTitle "Wednesday, June 12"
   Row between
-    Box w:46 pad:[0,8,0,8] center radius:12 fill:=sel==0?"#FF3B5BDB":"#00000000" -> sel=0
-      Text.caption "Mon" color:=sel==0?"#FFFFFFFF":"#FF6B7280"
-      Text.strong "10" color:=sel==0?"#FFFFFFFF":"#FF111827"
-    Box w:46 pad:[0,8,0,8] center radius:12 fill:=sel==1?"#FF3B5BDB":"#00000000" -> sel=1
-      Text.caption "Tue" color:=sel==1?"#FFFFFFFF":"#FF6B7280"
-      Text.strong "11" color:=sel==1?"#FFFFFFFF":"#FF111827"
-    Box w:46 pad:[0,8,0,8] center radius:12 fill:=sel==2?"#FF3B5BDB":"#00000000" -> sel=2
-      Text.caption "Wed" color:=sel==2?"#FFFFFFFF":"#FF6B7280"
-      Text.strong "12" color:=sel==2?"#FFFFFFFF":"#FF111827"
-    Box w:46 pad:[0,8,0,8] center radius:12 fill:=sel==3?"#FF3B5BDB":"#00000000" -> sel=3
-      Text.caption "Thu" color:=sel==3?"#FFFFFFFF":"#FF6B7280"
-      Text.strong "13" color:=sel==3?"#FFFFFFFF":"#FF111827"
-    Box w:46 pad:[0,8,0,8] center radius:12 fill:=sel==4?"#FF3B5BDB":"#00000000" -> sel=4
-      Text.caption "Fri" color:=sel==4?"#FFFFFFFF":"#FF6B7280"
-      Text.strong "14" color:=sel==4?"#FFFFFFFF":"#FF111827"
-    Box w:46 pad:[0,8,0,8] center radius:12 fill:=sel==5?"#FF3B5BDB":"#00000000" -> sel=5
-      Text.caption "Sat" color:=sel==5?"#FFFFFFFF":"#FF6B7280"
-      Text.strong "15" color:=sel==5?"#FFFFFFFF":"#FF111827"
-    Box w:46 pad:[0,8,0,8] center radius:12 fill:=sel==6?"#FF3B5BDB":"#00000000" -> sel=6
-      Text.caption "Sun" color:=sel==6?"#FFFFFFFF":"#FF6B7280"
-      Text.strong "16" color:=sel==6?"#FFFFFFFF":"#FF111827"
+    Box w:46 pad:[0,8,0,8] center radius:12 fill:{sel==0?"#FF3B5BDB":"#00000000"} -> sel=0
+      Text.caption "Mon" color:{sel==0?"#FFFFFFFF":"#FF6B7280"}
+      Text.strong "10" color:{sel==0?"#FFFFFFFF":"#FF111827"}
+    Box w:46 pad:[0,8,0,8] center radius:12 fill:{sel==1?"#FF3B5BDB":"#00000000"} -> sel=1
+      Text.caption "Tue" color:{sel==1?"#FFFFFFFF":"#FF6B7280"}
+      Text.strong "11" color:{sel==1?"#FFFFFFFF":"#FF111827"}
+    Box w:46 pad:[0,8,0,8] center radius:12 fill:{sel==2?"#FF3B5BDB":"#00000000"} -> sel=2
+      Text.caption "Wed" color:{sel==2?"#FFFFFFFF":"#FF6B7280"}
+      Text.strong "12" color:{sel==2?"#FFFFFFFF":"#FF111827"}
+    Box w:46 pad:[0,8,0,8] center radius:12 fill:{sel==3?"#FF3B5BDB":"#00000000"} -> sel=3
+      Text.caption "Thu" color:{sel==3?"#FFFFFFFF":"#FF6B7280"}
+      Text.strong "13" color:{sel==3?"#FFFFFFFF":"#FF111827"}
+    Box w:46 pad:[0,8,0,8] center radius:12 fill:{sel==4?"#FF3B5BDB":"#00000000"} -> sel=4
+      Text.caption "Fri" color:{sel==4?"#FFFFFFFF":"#FF6B7280"}
+      Text.strong "14" color:{sel==4?"#FFFFFFFF":"#FF111827"}
+    Box w:46 pad:[0,8,0,8] center radius:12 fill:{sel==5?"#FF3B5BDB":"#00000000"} -> sel=5
+      Text.caption "Sat" color:{sel==5?"#FFFFFFFF":"#FF6B7280"}
+      Text.strong "15" color:{sel==5?"#FFFFFFFF":"#FF111827"}
+    Box w:46 pad:[0,8,0,8] center radius:12 fill:{sel==6?"#FF3B5BDB":"#00000000"} -> sel=6
+      Text.caption "Sun" color:{sel==6?"#FFFFFFFF":"#FF6B7280"}
+      Text.strong "16" color:{sel==6?"#FFFFFFFF":"#FF111827"}
   Card gap:10
     Row between middle
       Text.heading "{count(habits,h=>h.done)} of {length(habits)} done"
       Badge.success "{round(count(habits,h=>h.done)/length(habits)*100,0)}%"
-    Progress value:=count(habits,h=>h.done)/length(habits)
+    Progress value:{count(habits,h=>h.done)/length(habits)}
     Text.bodySecondary "{length(habits)-count(habits,h=>h.done)} left to keep your streaks alive."
   Card gap:4
     Text.sectionTitle "Your habits"
@@ -42,7 +42,7 @@ Column scroll gap:16 pad:16 w:390
           Row gap:4 middle
             Icon "local_fire_department" size:14
             Text.caption "{h.streak} day streak"
-        Checkbox =h.done
+        Checkbox bind:h.done
       Divider
   Card gap:12
     Row between middle

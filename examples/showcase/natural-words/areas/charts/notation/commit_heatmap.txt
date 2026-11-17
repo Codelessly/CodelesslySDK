@@ -26,9 +26,9 @@ Card gap:12
         each week in weeks
           Column gap:4
             each d in week
-              Box w:16 h:16 radius:3 fill:=palette[d]
+              Box w:16 h:16 radius:3 fill:{palette[d]}
   Row gap:4 end
     Text.caption "Less" size:11
     each c in palette
-      Box w:12 h:12 radius:3 fill:=c
+      Box w:12 h:12 radius:3 fill:{c}
     Text.caption "More" size:11

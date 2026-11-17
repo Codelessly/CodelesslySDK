@@ -16,25 +16,25 @@ Page
       Link "Desk"
       Link "Journal"
     Row gap:12 middle
-      SearchBar "Search the store" =q w:260
-      NotificationBadge count:=cart
+      SearchBar "Search the store" bind:q w:260
+      NotificationBadge count:{cart}
         IconButton "shopping_bag" -> emit openCart
   Section
     Column gap:24
       Breadcrumb items:["Home","Lighting","Desk lamps","Arc One"] showHomeIcon:true
       Row gap:48 top
         Column grow gap:16
-          Box h:480 radius:16 fill:=finish=="Brass"?"#FFF3E9D2":finish=="Graphite"?"#FFE3E4E6":"#FFF1EBE1" center middle gap:12
+          Box h:480 radius:16 fill:{finish=="Brass"?"#FFF3E9D2":finish=="Graphite"?"#FFE3E4E6":"#FFF1EBE1"} center middle gap:12
             Icon "emoji_objects" {"props":{"size":180}}
             Text.muted "{views[img]} · {finish}"
           Grid cols:4 gap:12
-            Box h:96 radius:10 fill:#FFF5F3EE center middle border:=img==0?"#FF111827":"#FFE5E7EB" -> img=0
+            Box h:96 radius:10 fill:#FFF5F3EE center middle border:{img==0?"#FF111827":"#FFE5E7EB"} -> img=0
               Icon "emoji_objects"
-            Box h:96 radius:10 fill:#FFF5F3EE center middle border:=img==1?"#FF111827":"#FFE5E7EB" -> img=1
+            Box h:96 radius:10 fill:#FFF5F3EE center middle border:{img==1?"#FF111827":"#FFE5E7EB"} -> img=1
               Icon "light"
-            Box h:96 radius:10 fill:#FFF5F3EE center middle border:=img==2?"#FF111827":"#FFE5E7EB" -> img=2
+            Box h:96 radius:10 fill:#FFF5F3EE center middle border:{img==2?"#FF111827":"#FFE5E7EB"} -> img=2
               Icon "zoom_in"
-            Box h:96 radius:10 fill:#FFF5F3EE center middle border:=img==3?"#FF111827":"#FFE5E7EB" -> img=3
+            Box h:96 radius:10 fill:#FFF5F3EE center middle border:{img==3?"#FF111827":"#FFE5E7EB"} -> img=3
               Icon "desk"
         Column grow gap:20
           Column gap:8
@@ -56,10 +56,10 @@ Page
           Column gap:8
             Text.fieldLabel "Finish: {finish}"
             Row gap:8
-              ChoiceChip "Brass" selected:=finish=="Brass" -> finish="Brass"
-              ChoiceChip "Graphite" selected:=finish=="Graphite" -> finish="Graphite"
-              ChoiceChip "Sand" selected:=finish=="Sand" -> finish="Sand"
-          Stepper "Quantity" =qty min:1 max:10
+              ChoiceChip "Brass" selected:{finish=="Brass"} -> finish="Brass"
+              ChoiceChip "Graphite" selected:{finish=="Graphite"} -> finish="Graphite"
+              ChoiceChip "Sand" selected:{finish=="Sand"} -> finish="Sand"
+          Stepper "Quantity" bind:qty min:1 max:10
           Row gap:12
             Button "Add to cart" grow -> cart=cart+qty; toast "Added {qty} × Arc One ({finish}) to cart"
             Button.outline "Buy now" grow -> emit buyNow
@@ -77,7 +77,7 @@ Page
                 Text.muted "Changed your mind? Send it back, no questions asked."
   Section
     Column gap:20
-      SegmentedControl =tab options:["Description","Specifications","Reviews"]
+      SegmentedControl bind:tab options:["Description","Specifications","Reviews"]
       if tab=="Description"
         Column gap:12 maxw:760
           Heading "Designed for focus" level:3
@@ -106,7 +106,7 @@ Page
                 Icon "star" color:#FFF59E0B
                 Icon "star" color:#FFF59E0B
                 Icon "star" color:#FFF59E0B
-                Icon "star" color:=r.stars>=5?"#FFF59E0B":"#FFD1D5DB"
+                Icon "star" color:{r.stars>=5?"#FFF59E0B":"#FFD1D5DB"}
               Text "{r.text}"
   Section fill:#FFF7F5F0
     Column gap:20

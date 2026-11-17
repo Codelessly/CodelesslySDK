@@ -41,5 +41,5 @@ Column h:fill
   state msg=""
   Row gap:8 pad:[12,8,12,12] center
     IconButton "add" -> emit attach
-    Input "Message…" =msg grow
+    Input "Message…" bind:msg grow
     IconButton "send" -> emit send msg; msg=""

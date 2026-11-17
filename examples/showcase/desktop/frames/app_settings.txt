@@ -4,12 +4,12 @@ App
       Icon "edit_note"
       Text.strong "Plume"
     Text.eyebrow "Settings"
-    NavItem "Profile" icon:"person" selected:=section=="profile" -> section="profile"
-    NavItem "Account" icon:"manage_accounts" selected:=section=="account" -> section="account"
-    NavItem "Notifications" icon:"notifications" selected:=section=="notifications" -> section="notifications"
-    NavItem "Appearance" icon:"palette" selected:=section=="appearance" -> section="appearance"
-    NavItem "Billing" icon:"credit_card" selected:=section=="billing" -> section="billing"
-    NavItem "Team" icon:"group" selected:=section=="team" -> section="team"
+    NavItem "Profile" icon:"person" selected:{section=="profile"} -> section="profile"
+    NavItem "Account" icon:"manage_accounts" selected:{section=="account"} -> section="account"
+    NavItem "Notifications" icon:"notifications" selected:{section=="notifications"} -> section="notifications"
+    NavItem "Appearance" icon:"palette" selected:{section=="appearance"} -> section="appearance"
+    NavItem "Billing" icon:"credit_card" selected:{section=="billing"} -> section="billing"
+    NavItem "Team" icon:"group" selected:{section=="team"} -> section="team"
     Spacer grow
     Text.muted "maya@plume.app"
   Main
@@ -30,27 +30,27 @@ App
                 Text.muted "PNG or JPG, at least 256 px square"
                 Row
                   Button.outline "Change" -> toast "Choose a picture"
-            Input "Name" =name -> dirty=true
-            Input "Username" =username -> dirty=true
+            Input "Name" bind:name -> dirty=true
+            Input "Username" bind:username -> dirty=true
             Column gap:4
-              Input "Bio" "Tell readers a little about your writing" multiline =bio -> dirty=true
+              Input "Bio" "Tell readers a little about your writing" multiline bind:bio -> dirty=true
               Row end
-                Text.caption "{length(bio)}/160" color:=length(bio)>160?"#FFDC2626":"#FF6B7280"
+                Text.caption "{length(bio)}/160" color:{length(bio)>160?"#FFDC2626":"#FF6B7280"}
             Column gap:4
               Text.fieldLabel "Time zone"
-              Select =tz items:["(UTC-08:00) Pacific Time","(UTC-05:00) Eastern Time","(UTC+00:00) London","(UTC+01:00) Berlin","(UTC+05:30) Mumbai","(UTC+09:00) Tokyo"] -> dirty=true
-            ToggleRow "Public profile" "Anyone with the link can read your profile and published pieces." =public -> dirty=true
+              Select bind:tz items:["(UTC-08:00) Pacific Time","(UTC-05:00) Eastern Time","(UTC+00:00) London","(UTC+01:00) Berlin","(UTC+05:30) Mumbai","(UTC+09:00) Tokyo"] -> dirty=true
+            ToggleRow "Public profile" "Anyone with the link can read your profile and published pieces." bind:public -> dirty=true
           Heading "Notifications" level:3
           Card gap:12
-            ToggleRow "Comments" "Tell me when someone comments on a piece I wrote." =nComments -> dirty=true
+            ToggleRow "Comments" "Tell me when someone comments on a piece I wrote." bind:nComments -> dirty=true
             Divider
-            ToggleRow "Replies" "Tell me when someone replies to my comment." =nReplies -> dirty=true
+            ToggleRow "Replies" "Tell me when someone replies to my comment." bind:nReplies -> dirty=true
             Divider
-            ToggleRow "New followers" "Tell me when a reader starts following me." =nFollowers -> dirty=true
+            ToggleRow "New followers" "Tell me when a reader starts following me." bind:nFollowers -> dirty=true
             Divider
-            ToggleRow "Weekly writing summary" "A Monday email with your word count and streak." =nSummary -> dirty=true
+            ToggleRow "Weekly writing summary" "A Monday email with your word count and streak." bind:nSummary -> dirty=true
             Divider
-            ToggleRow "Product news" "Occasional updates about new Plume features." =nNews -> dirty=true
+            ToggleRow "Product news" "Occasional updates about new Plume features." bind:nNews -> dirty=true
           Heading "Danger zone" level:3
           Box gap:12 pad:16 fill:#FFFEF2F2 radius:8 border:#FFFCA5A5
             Text.strong "Delete account" color:#FFB91C1C
@@ -67,7 +67,7 @@ App
       Text.muted "{dirty ? 'You have unsaved changes' : 'All changes saved'}"
       Row gap:10
         Button.outline "Cancel" -> name="Maya Reyes"; username="mayawrites"; bio="Essayist and slow-fiction writer. Drafting my first novel in public."; tz="(UTC+00:00) London"; public=true; nComments=true; nReplies=true; nFollowers=false; nSummary=true; nNews=false; dirty=false
-        Button "Save changes" enabled:=dirty&&length(bio)<=160 -> emit save; dirty=false; toast "Changes saved"
+        Button "Save changes" enabled:{dirty&&length(bio)<=160} -> emit save; dirty=false; toast "Changes saved"
 
 state section="profile"
 state dirty=false

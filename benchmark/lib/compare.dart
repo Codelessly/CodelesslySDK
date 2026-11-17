@@ -28,9 +28,9 @@ String notationOf(int groups) {
   for (var i = 0; i < groups; i++) {
     b.write('  Column gap:8\n'
         '    Text.sectionTitle "Section $i"\n'
-        '    Toggle "Enabled" =on$i\n'
-        '    Slider =level$i min:0 max:100\n'
-        '    Input "Name" =name$i\n'
+        '    Toggle "Enabled" bind:on$i\n'
+        '    Slider bind:level$i min:0 max:100\n'
+        '    Input "Name" bind:name$i\n'
         '    Button "Save"\n');
   }
   return b.toString();

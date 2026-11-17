@@ -1,14 +1,14 @@
 Column scroll gap:16 pad:16
   Row between middle
     BackButton "Home" -> emit open_home
-    StatusBadge "{paused ? 'Paused' : (phase=='work' ? 'Jump' : 'Rest')}" tone:=paused?"warning":(phase=="work"?"success":"info")
+    StatusBadge "{paused ? 'Paused' : (phase=='work' ? 'Jump' : 'Rest')}" tone:{paused?"warning":(phase=="work"?"success":"info")}
   Text.pageTitle "{today.name}"
   Text.bodySecondary "{today.rounds} rounds, about {today.minutes} minutes. Jump for {today.work} seconds (work), then catch your breath for {today.rest} seconds (rest)."
   Card gap:8 center
     Text.caption "Round {round} of {today.rounds}"
     Text.heading1 "{left}"
     Text.title "{phase=='work' ? 'Jump!' : 'Rest and breathe'}"
-    Progress =progress
+    Progress bind:progress
   Card gap:12 center
     Text.caption "Jumps so far"
     Text.heading1 "{count}"

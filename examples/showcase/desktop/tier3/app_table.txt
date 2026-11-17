@@ -11,11 +11,11 @@ state rows=[{"id":1,"name":"Maya Reyes","company":"Northwind Traders","status":"
 App
   Sidebar
     Brand "Fieldbook" icon:"menu_book"
-    NavItem "Overview" icon:"dashboard" selected:=tab=="overview" -> tab="overview"
-    NavItem "Customers" icon:"groups" badge:"248" selected:=tab=="customers" -> tab="customers"
-    NavItem "Deals" icon:"handshake" selected:=tab=="deals" -> tab="deals"
-    NavItem "Tasks" icon:"task_alt" badge:"7" selected:=tab=="tasks" -> tab="tasks"
-    NavItem "Reports" icon:"bar_chart" selected:=tab=="reports" -> tab="reports"
+    NavItem "Overview" icon:"dashboard" selected:{tab=="overview"} -> tab="overview"
+    NavItem "Customers" icon:"groups" badge:"248" selected:{tab=="customers"} -> tab="customers"
+    NavItem "Deals" icon:"handshake" selected:{tab=="deals"} -> tab="deals"
+    NavItem "Tasks" icon:"task_alt" badge:"7" selected:{tab=="tasks"} -> tab="tasks"
+    NavItem "Reports" icon:"bar_chart" selected:{tab=="reports"} -> tab="reports"
     Spacer grow
     Row gap:8 middle
       Avatar "Sam Patel" size:32
@@ -30,10 +30,10 @@ App
         Button "Add customer" -> emit addCustomer
     Column pad:24 gap:16 scroll
       Row gap:12 middle
-        Input "Search customers" =q w:280
-        Select =status items:["All","Active","Trial","Churned"] w:140
+        Input "Search customers" bind:q w:280
+        Select bind:status items:["All","Active","Trial","Churned"] w:140
         Spacer grow
-        SegmentedButton =seg items:["All customers","Mine","Recently added"]
+        SegmentedButton bind:seg items:["All customers","Mine","Recently added"]
       if length(picked)>0
         Row gap:12 middle pad:[16,10,16,10] fill:#FF1E293B radius:8
           Text "{length(picked)} selected" color:#FFFFFFFF weight:600
@@ -42,7 +42,7 @@ App
           Button.destructive "Delete" -> rows=filter(rows,r=>!contains(picked,r.id)); picked=[]; all=false; emit deleteCustomers picked
       Card gap:0 pad:0
         Row gap:12 middle pad:[16,10,16,10] border-bottom:#FFE2E8F0
-          Checkbox =all w:28 -> picked=all?map(rows,r=>r.id):[]
+          Checkbox bind:all w:28 -> picked=all?map(rows,r=>r.id):[]
           Button.ghost "Name" grow -> rows=(sort=="name"&&!desc)?sortByDesc(rows,x=>x.name):sortBy(rows,x=>x.name); desc=(sort=="name"&&!desc); sort="name"
           Button.ghost "Company" w:170 -> rows=(sort=="company"&&!desc)?sortByDesc(rows,x=>x.company):sortBy(rows,x=>x.company); desc=(sort=="company"&&!desc); sort="company"
           Button.ghost "Status" w:90 -> rows=(sort=="status"&&!desc)?sortByDesc(rows,x=>x.status):sortBy(rows,x=>x.status); desc=(sort=="status"&&!desc); sort="status"
@@ -53,7 +53,7 @@ App
         each c in rows
           if (status=="All"||c.status==status)&&contains(lower(c.name),lower(q))
             Row gap:12 middle pad:[16,10,16,10] border-bottom:#FFF1F5F9
-              Checkbox w:28 checked:=contains(picked,c.id) -> picked=contains(picked,c.id)?without(picked,c.id):append(picked,c.id)
+              Checkbox w:28 checked:{contains(picked,c.id)} -> picked=contains(picked,c.id)?without(picked,c.id):append(picked,c.id)
               Row gap:10 middle grow
                 Avatar "{c.name}" size:32
                 Text.strong "{c.name}"

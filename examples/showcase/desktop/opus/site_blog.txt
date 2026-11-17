@@ -67,7 +67,7 @@ Page
           Icon "mail"
           Text.strong "Get the next post"
           Text.muted "One engineering story every two weeks. No spam."
-          Input "Email" "you@example.com" =email type:email
+          Input "Email" "you@example.com" bind:email type:email
           Button "Subscribe" -> emit subscribe email; toast "Thanks for subscribing!"
   Section fill:#FFF3F4F6
     Heading "Related articles" level:2

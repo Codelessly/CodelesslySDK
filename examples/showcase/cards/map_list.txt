@@ -1,5 +1,5 @@
 state shops=[{"n":1,"name":"Bean There","what":"Specialty coffee · Mill Street","rating":"4.8","dist":"0.2 mi","hours":"7:00 to 18:00"},{"n":2,"name":"Daily Grind","what":"Espresso bar · Canal Road","rating":"4.6","dist":"0.3 mi","hours":"6:30 to 17:00"},{"n":3,"name":"Roast & Co","what":"Roastery and bakery · Park Lane","rating":"4.7","dist":"0.4 mi","hours":"8:00 to 19:00"},{"n":4,"name":"The Steam Cup","what":"Cafe with seating · Dock Street","rating":"4.4","dist":"0.5 mi","hours":"7:30 to 20:00"},{"n":5,"name":"Cafe Lune","what":"Late-night cafe · River Walk","rating":"4.5","dist":"0.6 mi","hours":"10:00 to 23:00"}]
 ChatCard "Coffee near you" "Five shops within a 12 minute walk" icon:"local_cafe_rounded" status:"{pick>0?shops[pick-1].dist:"5 shops"}"
-  MapPanel#map =pick count:5
+  MapPanel#map bind:pick count:5
   each s in shops
-    PlaceRow#place "{s.name}" "{s.what}" index:=s.n rating:"{s.rating}" distance:"{s.dist}" hours:"{s.hours}" selected:=pick==s.n -> pick=pick==s.n?0:s.n
+    PlaceRow#place "{s.name}" "{s.what}" index:{s.n} rating:"{s.rating}" distance:"{s.dist}" hours:"{s.hours}" selected:{pick==s.n} -> pick=pick==s.n?0:s.n

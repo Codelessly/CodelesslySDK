@@ -8,7 +8,7 @@ Card gap:10
     StatusIndicator status:running
   Box h:140 radius:8 fill:#FFF3F4F6 center
     Icon "web" {"props": {"size": 28, "color": "#FF9CA3AF"}}
-  StepIndicator steps:["Open","Fill","Submit"] current:=step-1
+  StepIndicator steps:["Open","Fill","Submit"] current:{step-1}
   Row end gap:8
     Button.ghost "Take over" -> emit take_over
     Button.destructive "Stop" -> emit stop

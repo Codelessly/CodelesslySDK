@@ -8,7 +8,7 @@ Card gap:10
     Badge.primary "{pick<0?"Tap a day":"Day "+pick+": "+days[pick].n+" runs"}"
   Grid cols:12 gap:3
     each d in days
-      Box h:16 radius:3 fill:=d.n==0?"#FFEEF0F3":(d.n<2?"#FFBFD4FB":(d.n<4?"#FF7FA8F5":(d.n<6?"#FF3B76EE":"#FF1D4FD8"))) border:=pick==d.d?"#FF111827":"#00000000" -> pick=d.d
+      Box h:16 radius:3 fill:{d.n==0?"#FFEEF0F3":(d.n<2?"#FFBFD4FB":(d.n<4?"#FF7FA8F5":(d.n<6?"#FF3B76EE":"#FF1D4FD8")))} border:{pick==d.d?"#FF111827":"#00000000"} -> pick=d.d
   Row gap:6 end
     Text.caption "Less"
     Box w:12 h:12 radius:3 fill:#FFEEF0F3

@@ -9,7 +9,7 @@ every 1s when started && !paused -> left=left>1?left-1:0
 
 Screen
   TopBar "Let's jump!" "Round {round} of {today.rounds}" back:true -> emit open_home
-  Card gap:8 fill:=phase=="work"?"#FFFFB300":"#FF4FC3F7"
+  Card gap:8 fill:{phase=="work"?"#FFFFB300":"#FF4FC3F7"}
     Text.eyebrow "{phase=='work' ? 'JUMP!' : 'REST'}" color:#FF212121
     Text.display "{started ? left : today.work}" size:96 weight:800 color:#FF212121
     Text.body "{phase=='work' ? 'Go go go!' : 'Breathe. You rock!'}" color:#FF212121

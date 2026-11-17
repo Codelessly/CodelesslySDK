@@ -16,7 +16,7 @@ App
           Avatar "Sam Patel" size:28
           Avatar "Ana Costa" size:28
       Row gap:12
-        Input "Filter tasks" =q w:220
+        Input "Filter tasks" bind:q w:220
         Button "New task" icon:"add" -> emit newTask
     Row grow top
       Row scroll grow gap:16 pad:24 top
@@ -28,8 +28,8 @@ App
                 Badge.neutral "{count(tasks,x=>x.col==c.id)}"
               IconButton "add" -> emit addTask c.id
             each t in filter(tasks,x=>x.col==c.id&&contains(lower(x.title),lower(q)))
-              Card drag:task(t.id) gap:8 pad:12 fill:#FFFFFFFF border:=sel==t.id?"#FF2F6FED":"#FFE2E5EA" -> sel=t.id
-                Box fill:=t.color radius:4 pad:[6,2,6,2]
+              Card drag:task(t.id) gap:8 pad:12 fill:#FFFFFFFF border:{sel==t.id?"#FF2F6FED":"#FFE2E5EA"} -> sel=t.id
+                Box fill:{t.color} radius:4 pad:[6,2,6,2]
                   Text.badge "{t.label}" color:#FFFFFFFF size:11
                 Text.rowTitle "{t.title}"
                 Row between
@@ -45,14 +45,14 @@ App
         Column w:360 h:fill pad:16 gap:14 scroll border-left:#FFE2E5EA
           each d in filter(tasks,x=>x.id==sel)
             Row between
-              Box fill:=d.color radius:4 pad:[6,2,6,2]
+              Box fill:{d.color} radius:4 pad:[6,2,6,2]
                 Text.badge "{d.label}" color:#FFFFFFFF size:11
               IconButton "close" -> sel=0
             Heading "{d.title}" level:3
-            Details rows:=[["Assignee",d.who],["Due",d.due],["Comments",d.comments],["Status",d.col]]
+            Details rows:{[["Assignee",d.who],["Due",d.due],["Comments",d.comments],["Status",d.col]]}
             SectionLabel "Description"
             Paragraph "{d.desc}"
-            Checklist "Checklist" =done items:["Review requirements","Complete the work","Get a teammate's feedback","Update the project notes"]
+            Checklist "Checklist" bind:done items:["Review requirements","Complete the work","Get a teammate's feedback","Update the project notes"]
             SectionLabel "Activity" "{length(activity)} updates"
             each a in activity
               Row gap:10 top

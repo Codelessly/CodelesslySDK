@@ -9,12 +9,12 @@ App
     Row gap:8
       Icon "sailing"
       Text.strong "Harbor"
-    NavItem "Overview" icon:"dashboard" selected:=tab=="overview" -> tab="overview"
-    NavItem "Orders" icon:"receipt_long" badge:"12" selected:=tab=="orders" -> tab="orders"
-    NavItem "Inventory" icon:"inventory_2" selected:=tab=="inventory" -> tab="inventory"
-    NavItem "Customers" icon:"group" selected:=tab=="customers" -> tab="customers"
-    NavItem "Reports" icon:"bar_chart" selected:=tab=="reports" -> tab="reports"
-    NavItem "Settings" icon:"settings" selected:=tab=="settings" -> tab="settings"
+    NavItem "Overview" icon:"dashboard" selected:{tab=="overview"} -> tab="overview"
+    NavItem "Orders" icon:"receipt_long" badge:"12" selected:{tab=="orders"} -> tab="orders"
+    NavItem "Inventory" icon:"inventory_2" selected:{tab=="inventory"} -> tab="inventory"
+    NavItem "Customers" icon:"group" selected:{tab=="customers"} -> tab="customers"
+    NavItem "Reports" icon:"bar_chart" selected:{tab=="reports"} -> tab="reports"
+    NavItem "Settings" icon:"settings" selected:{tab=="settings"} -> tab="settings"
     Spacer grow
     Row gap:10
       Avatar "Sam Patel" size:32
@@ -25,8 +25,8 @@ App
     Nav
       Heading "Overview"
       Row gap:8
-        Segments =range options:["7d","30d","90d"]
-        Input "Search" "Orders, customers…" =q w:220
+        Segments bind:range options:["7d","30d","90d"]
+        Input "Search" "Orders, customers…" bind:q w:220
         Button "New order" -> emit newOrder
     Column pad:24 gap:16
       Grid cols:4 gap:16
@@ -43,6 +43,6 @@ App
         Row between
           Text.strong "Latest orders"
           Link "View all" -> tab="orders"
-        TableHeader =sort desc:desc columns:["Order","Customer","Total","Date","Status"] keys:["id","customer","total","date","status"]
+        TableHeader bind:sort desc:desc columns:["Order","Customer","Total","Date","Status"] keys:["id","customer","total","date","status"]
         each o in desc ? sortByDesc(orders,x=>x[sort]) : sortBy(orders,x=>x[sort])
-          TableRow cells:=[o.id,o.customer,money(o.total,"$",2),o.date] badge:=o.status -> emit openOrder o.id
+          TableRow cells:{[o.id,o.customer,money(o.total,"$",2),o.date]} badge:{o.status} -> emit openOrder o.id

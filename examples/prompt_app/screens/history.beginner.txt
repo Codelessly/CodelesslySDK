@@ -6,7 +6,7 @@ Column scroll gap:16 pad:16
   Card gap:8
     Text.sectionTitle "Jumps each week"
     Text.bodySecondary "Your weekly total is climbing. This week: {weeks[3].jumps} jumps."
-    BarChart values:=map(weeks,w=>w.jumps) labels:=map(weeks,w=>w.label)
+    BarChart values:{map(weeks,w=>w.jumps)} labels:{map(weeks,w=>w.label)}
   SectionHeader "Past sessions" count:4
   Text.bodySecondary "Best run is the most jumps in a row without a miss."
   each s in sessions

@@ -2,16 +2,16 @@ Card gap:16 pad:16
   Text.title "Payment details"
   Text.muted "Order total: $48.99"
   Row gap:8 bottom
-    Input "Card number" "1234 1234 1234 1234" =cardNumber type:number grow
+    Input "Card number" "1234 1234 1234 1234" bind:cardNumber type:number grow
     Badge.info "VISA"
-  Input "Name on card" "Full name" =cardName
+  Input "Name on card" "Full name" bind:cardName
   Row gap:12 top
     Column gap:4 grow
-      Input "Expiry" "MM/YY" =expiry
+      Input "Expiry" "MM/YY" bind:expiry
       Text.danger "Card expired"
     Column grow
-      Input "CVC" "123" =cvc type:number
-  Input "Billing ZIP" "12345" =zip type:number
+      Input "CVC" "123" bind:cvc type:number
+  Input "Billing ZIP" "12345" bind:zip type:number
   Button "Pay $48.99" -> emit pay
   Row gap:6 center
     Icon "lock" size:16

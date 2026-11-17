@@ -11,14 +11,14 @@ Card gap:0 pad:0
   Row gap:8 pad:[12,7,12,7] fill:#FFF9FAFB border:#FFE5E7EB
     Row gap:2 grow:3 -> desc=sort=="name"?!desc:false; sort="name"
       Text.fieldLabel "Account"
-      Icon "{desc?"arrow_drop_down":"arrow_drop_up"}" visible:=sort=="name" {"props": {"size": 14}}
+      Icon "{desc?"arrow_drop_down":"arrow_drop_up"}" visible:{sort=="name"} {"props": {"size": 14}}
     Text.fieldLabel "Plan" grow:2
     Row gap:2 grow:2 end -> desc=sort=="seats"?!desc:true; sort="seats"
       Text.fieldLabel "Seats"
-      Icon "{desc?"arrow_drop_down":"arrow_drop_up"}" visible:=sort=="seats" {"props": {"size": 14}}
+      Icon "{desc?"arrow_drop_down":"arrow_drop_up"}" visible:{sort=="seats"} {"props": {"size": 14}}
     Row gap:2 grow:2 end -> desc=sort=="revenue"?!desc:true; sort="revenue"
       Text.fieldLabel "Revenue"
-      Icon "{desc?"arrow_drop_down":"arrow_drop_up"}" visible:=sort=="revenue" {"props": {"size": 14}}
+      Icon "{desc?"arrow_drop_down":"arrow_drop_up"}" visible:{sort=="revenue"} {"props": {"size": 14}}
     Text.fieldLabel "Change" grow:2 {"props": {"textAlign": "right"}}
   each r in shown
     Row gap:8 pad:[12,9,12,9] border:#FFF3F4F6
@@ -27,7 +27,7 @@ Card gap:0 pad:0
         Badge "{r.plan}"
       Text.mono "{r.seats}" grow:2 {"props": {"textAlign": "right"}}
       Text.mono "{formatCurrency(r.revenue,"USD","en_US",0)}" grow:2 {"props": {"textAlign": "right"}}
-      Text.mono "{r.change>0?"+":""}{round(r.change,1)}%" grow:2 color:=r.change>0?"#FF16A34A":(r.change<0?"#FFDC2626":"#FF9CA3AF") {"props": {"textAlign": "right"}}
+      Text.mono "{r.change>0?"+":""}{round(r.change,1)}%" grow:2 color:{r.change>0?"#FF16A34A":(r.change<0?"#FFDC2626":"#FF9CA3AF")} {"props": {"textAlign": "right"}}
   Row between pad:[12,8,12,8]
     Text.caption "Sorted by {sort}, {desc?"high to low":"low to high"}"
     Button.ghost "Export CSV" -> emit export shown

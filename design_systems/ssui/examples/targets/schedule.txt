@@ -7,16 +7,16 @@ Card gap:10
     Column gap:1 grow
       Text.sectionTitle "Weekly revenue summary"
       Text.bodySecondary "Every Monday at 09:00, Europe/London"
-    Toggle =on
+    Toggle bind:on
   Divider
   Column gap:0
     each r in runs
       Row gap:10 pad:[0,6,0,6]
-        Icon "schedule" size:15 color:=on?"#FF2563EB":"#FF9CA3AF"
-        Text.body "{r.when}" grow color:=on?"#FF111827":"#FF9CA3AF"
+        Icon "schedule" size:15 color:{on?"#FF2563EB":"#FF9CA3AF"}
+        Text.body "{r.when}" grow color:{on?"#FF111827":"#FF9CA3AF"}
         Text.mono "{r.time}"
   Row between
     Text.caption "{on?"Next run in 2 days":"Paused. Nothing will run."}"
     Row gap:6
       Button.ghost "Edit" -> emit edit_schedule
-      Button.outline "Run now" enabled:=on -> emit run_now
+      Button.outline "Run now" enabled:{on} -> emit run_now

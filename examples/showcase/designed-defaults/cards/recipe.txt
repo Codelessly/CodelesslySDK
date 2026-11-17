@@ -16,7 +16,7 @@ Card w:390 gap:12
       IconButton "add" -> servings=min(12,servings+1)
   Text.sectionTitle "Ingredients"
   each ing in ingredients
-    Checkbox "{round(ing.per*servings,1)} {ing.unit} {ing.name}" =ing.done
+    Checkbox "{round(ing.per*servings,1)} {ing.unit} {ing.name}" bind:ing.done
   Divider
   Text.sectionTitle "Steps"
   Row gap:8

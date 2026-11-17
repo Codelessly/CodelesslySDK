@@ -10,11 +10,11 @@ state rows=[{"id":1,"name":"Maya Reyes","company":"Brightline Studio","status":"
 App
   Sidebar
     Text.strong "Fieldbook"
-    NavItem "Overview" icon:"dashboard" selected:=tab=="overview" -> tab="overview"
-    NavItem "Customers" icon:"groups" selected:=tab=="customers" -> tab="customers"
-    NavItem "Deals" icon:"handshake" badge:"7" selected:=tab=="deals" -> tab="deals"
-    NavItem "Tasks" icon:"task_alt" badge:"3" selected:=tab=="tasks" -> tab="tasks"
-    NavItem "Reports" icon:"bar_chart" selected:=tab=="reports" -> tab="reports"
+    NavItem "Overview" icon:"dashboard" selected:{tab=="overview"} -> tab="overview"
+    NavItem "Customers" icon:"groups" selected:{tab=="customers"} -> tab="customers"
+    NavItem "Deals" icon:"handshake" badge:"7" selected:{tab=="deals"} -> tab="deals"
+    NavItem "Tasks" icon:"task_alt" badge:"3" selected:{tab=="tasks"} -> tab="tasks"
+    NavItem "Reports" icon:"bar_chart" selected:{tab=="reports"} -> tab="reports"
     Spacer grow
     Row gap:8 center
       Avatar "Sam Patel" size:32
@@ -29,10 +29,10 @@ App
         Button "Add customer" -> emit addCustomer
     Column pad:24 gap:16
       Row gap:12 center
-        Input "Search customers" =q w:280
-        Select =status items:["All","Active","Trial","Churned"] w:150
+        Input "Search customers" bind:q w:280
+        Select bind:status items:["All","Active","Trial","Churned"] w:150
         Spacer grow
-        Segments =view options:["Everyone","My accounts"]
+        Segments bind:view options:["Everyone","My accounts"]
       if length(picked)>0
         Row between center pad:[16,10,16,10] fill:#FFEEF3FF radius:8
           Text.strong "{length(picked)} selected"
@@ -41,7 +41,7 @@ App
             Button.destructive "Delete" -> rows=filter(rows,x=>!contains(picked,x.id)); picked=[]
       Card gap:0 pad:0
         Row gap:12 center pad:[16,10,16,10] fill:#FFF6F7F9
-          Checkbox value:=length(picked)==10 -> picked=length(picked)==10?[]:map(rows,x=>x.id)
+          Checkbox value:{length(picked)==10} -> picked=length(picked)==10?[]:map(rows,x=>x.id)
           Row grow
             Button.ghost "Name {sort=='name'?(desc?'↓':'↑'):''}" -> desc=(sort=='name')?!desc:false; sort='name'
           Row w:150
@@ -56,8 +56,8 @@ App
             Button.ghost "Last seen {sort=='days'?(desc?'↓':'↑'):''}" -> desc=(sort=='days')?!desc:false; sort='days'
           Box w:40
         each r in take(desc?sortByDesc(filter(rows,x=>(status=="All"||x.status==status)&&(view=="Everyone"||x.mine)&&contains(lower(x.name),lower(q))),x=>x[sort]):sortBy(filter(rows,x=>(status=="All"||x.status==status)&&(view=="Everyone"||x.mine)&&contains(lower(x.name),lower(q))),x=>x[sort]),10)
-          Row gap:12 center pad:[16,8,16,8] fill:=contains(picked,r.id)?"#FFF1F5FF":"#00000000" border-bottom:#FFE6E8EC
-            Checkbox value:=contains(picked,r.id) -> picked=contains(picked,r.id)?without(picked,r.id):append(picked,r.id)
+          Row gap:12 center pad:[16,8,16,8] fill:{contains(picked,r.id)?"#FFF1F5FF":"#00000000"} border-bottom:#FFE6E8EC
+            Checkbox value:{contains(picked,r.id)} -> picked=contains(picked,r.id)?without(picked,r.id):append(picked,r.id)
             Row grow gap:10 center
               Avatar "{r.name}" size:32
               Text.strong "{r.name}"

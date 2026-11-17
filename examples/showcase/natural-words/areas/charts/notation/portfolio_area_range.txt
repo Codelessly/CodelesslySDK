@@ -16,5 +16,5 @@ Card gap:16 pad:20
     Row gap:4 start
       Icon "trending_up" color:#FF2E7D32
       Text.success "+$1,204.10 (+2.56%) today"
-  AreaChart values:=range=="1W"?w:range=="1M"?m:range=="3M"?q:range=="1Y"?y:a labels:=range=="1W"?wl:range=="1M"?ml:range=="3M"?ql:range=="1Y"?yl:al h:180
-  SegmentedButton =range items:["1W","1M","3M","1Y","All"]
+  AreaChart values:{range=="1W"?w:range=="1M"?m:range=="3M"?q:range=="1Y"?y:a} labels:{range=="1W"?wl:range=="1M"?ml:range=="3M"?ql:range=="1Y"?yl:al} h:180
+  SegmentedButton bind:range items:["1W","1M","3M","1Y","All"]

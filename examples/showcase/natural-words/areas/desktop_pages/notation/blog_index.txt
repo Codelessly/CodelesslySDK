@@ -23,11 +23,11 @@ Column scroll gap:24 pad:24 maxw:1100
         Text.muted "·"
         Text.muted "8 min read"
   Row gap:8 scroll
-    ChoiceChip "All" selected:=category=="All" -> category="All"
-    ChoiceChip "Design" selected:=category=="Design" -> category="Design"
-    ChoiceChip "Engineering" selected:=category=="Engineering" -> category="Engineering"
-    ChoiceChip "Product" selected:=category=="Product" -> category="Product"
-    ChoiceChip "Culture" selected:=category=="Culture" -> category="Culture"
+    ChoiceChip "All" selected:{category=="All"} -> category="All"
+    ChoiceChip "Design" selected:{category=="Design"} -> category="Design"
+    ChoiceChip "Engineering" selected:{category=="Engineering"} -> category="Engineering"
+    ChoiceChip "Product" selected:{category=="Product"} -> category="Product"
+    ChoiceChip "Culture" selected:{category=="Culture"} -> category="Culture"
   Grid cols:3 gap:16
     each p in filter(posts,x=>category=="All"||x.tag==category)
       Card gap:0 pad:0 stagger:80

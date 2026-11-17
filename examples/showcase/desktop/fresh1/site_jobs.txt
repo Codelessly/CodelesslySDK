@@ -46,14 +46,14 @@ Page
       Heading "Find your team" level:2
     Row between middle
       Row gap:8
-        ChoiceChip "All" selected:=team=='All' -> team='All'
-        ChoiceChip "Engineering" selected:=team=='Engineering' -> team='Engineering'
-        ChoiceChip "Science" selected:=team=='Science' -> team='Science'
-        ChoiceChip "Design" selected:=team=='Design' -> team='Design'
-        ChoiceChip "Sales" selected:=team=='Sales' -> team='Sales'
+        ChoiceChip "All" selected:{team=='All'} -> team='All'
+        ChoiceChip "Engineering" selected:{team=='Engineering'} -> team='Engineering'
+        ChoiceChip "Science" selected:{team=='Science'} -> team='Science'
+        ChoiceChip "Design" selected:{team=='Design'} -> team='Design'
+        ChoiceChip "Sales" selected:{team=='Sales'} -> team='Sales'
       Row gap:8 middle
         Text.muted "Place"
-        Select =place items:["All","Remote","Boston","London","Berlin"]
+        Select bind:place items:["All","Remote","Boston","London","Berlin"]
     each t in teams
       if (team=='All'||team==t)&&count(roles,r=>r.team==t&&(place=='All'||r.place==place))>0
         Card pad:0 gap:0

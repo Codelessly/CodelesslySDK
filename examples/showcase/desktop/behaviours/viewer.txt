@@ -15,13 +15,13 @@ state shots=[{"url":"photo.png","caption":"The valley","ratio":1.5},{"url":"tall
 Page
   Section
     Heading "Trip photos" level:1
-    PhotoGallery#trip =open columns:4 photos:[{"kind":"harbor","caption":"Harbour at sunrise"},{"kind":"market","caption":"Old town market"},{"kind":"forest","caption":"Forest trail"},{"kind":"dunes","caption":"Desert dunes"},{"kind":"skyline","caption":"Evening skyline"},{"kind":"lagoon","caption":"Hidden lagoon"},{"kind":"mountain","caption":"Mountain hut"},{"kind":"festival","caption":"Street festival"}]
+    PhotoGallery#trip bind:open columns:4 photos:[{"kind":"harbor","caption":"Harbour at sunrise"},{"kind":"market","caption":"Old town market"},{"kind":"forest","caption":"Forest trail"},{"kind":"dunes","caption":"Desert dunes"},{"kind":"skyline","caption":"Evening skyline"},{"kind":"lagoon","caption":"Hidden lagoon"},{"kind":"mountain","caption":"Mountain hut"},{"kind":"festival","caption":"Street festival"}]
     Text.muted#under "Nothing under the gallery moves when a photo opens."
     Row gap:12
       each s in shots
         Image#shot "{s.url}" w:160 h:110 radius:10 -> at=index; open shots
       Image#cover "photo.png" w:160 h:110 radius:10 -> open zoom
 
-Lightbox#shots photos:=shots =at
+Lightbox#shots photos:{shots} bind:at
 
 Lightbox#zoom "photo.png" "The valley at noon" ratio:1.5

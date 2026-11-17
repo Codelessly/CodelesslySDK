@@ -3,10 +3,10 @@ Card gap:10
   Text.sectionTitle "Which plan fits a team of 12?"
   Row gap:8
     each p in [{"id":"team","name":"Team","price":"$12","note":"per seat / month","points":["Unlimited projects","5 GB per seat","Email support"],"missing":["SSO","Audit log"]},{"id":"pro","name":"Pro","price":"$20","note":"per seat / month","points":["Unlimited projects","50 GB per seat","Priority support","SSO"],"missing":["Audit log"]},{"id":"ent","name":"Enterprise","price":"Custom","note":"annual contract","points":["Unlimited projects","Unlimited storage","Dedicated support","SSO","Audit log"],"missing":[]}]
-      Column gap:8 pad:10 radius:8 grow fill:=pick==p.id?"#0F2563EB":"#FFFFFFFF" border:=pick==p.id?"#FF2563EB":"#FFE5E7EB" -> pick=p.id
+      Column gap:8 pad:10 radius:8 grow fill:{pick==p.id?"#0F2563EB":"#FFFFFFFF"} border:{pick==p.id?"#FF2563EB":"#FFE5E7EB"} -> pick=p.id
         Row between
           Text.strong "{p.name}"
-          Badge.primary "Best fit" visible:=p.id=="pro"
+          Badge.primary "Best fit" visible:{p.id=="pro"}
         Column gap:0
           Text.heading2 "{p.price}"
           Text.caption "{p.note}"

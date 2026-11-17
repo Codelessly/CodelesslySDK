@@ -1,13 +1,13 @@
 Screen
   TopBar "Your progress" "Short sessions add up. Nice work so far." back:true -> emit open_home
-  ChartCard "Jumps per week" values:=map(weeks,w=>w.jumps) labels:=map(weeks,w=>w.label) unit:"jumps" deltaLabel:"vs last week"
-  StatTrio values:=[sessionsThisWeek,streak,weeklyGoal] labels:=["Sessions this week","Session streak","Weekly goal"] icons:=["check_circle","local_fire_department","flag"]
+  ChartCard "Jumps per week" values:{map(weeks,w=>w.jumps)} labels:{map(weeks,w=>w.label)} unit:"jumps" deltaLabel:"vs last week"
+  StatTrio values:{[sessionsThisWeek,streak,weeklyGoal]} labels:{["Sessions this week","Session streak","Weekly goal"]} icons:{["check_circle","local_fire_department","flag"]}
   SectionTitle "Past sessions"
   Text.bodySecondary "Best run is the most jumps in a row without a miss."
   if length(sessions)==0
     EmptyState "No sessions yet" "Your first short session takes about 8 minutes." cta:"Start a session" -> emit start_session
   each s in sessions
-    SessionRow "{s.name}" "{s.date} · {s.minutes} min · best run {s.best}" value:="{s.jumps}" unit:"jumps" share:=s.best/210 -> emit open_session s.date
+    SessionRow "{s.name}" "{s.date} · {s.minutes} min · best run {s.best}" value:{"{s.jumps}"} unit:"jumps" share:{s.best/210} -> emit open_session s.date
   Card gap:8
     Text.cardTitle "Ready for the next one?"
     Text.bodySecondary "{today.name}: {today.rounds} rounds. Jump for {today.work} seconds (work), then rest for {today.rest} seconds. About {today.minutes} minutes in all."

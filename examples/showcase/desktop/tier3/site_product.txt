@@ -16,8 +16,8 @@ Page
       Link "Furniture"
       Link "Sale"
     Row gap:12 middle
-      SearchBar "Search products" =q w:260
-      NotificationBadge count:=cart
+      SearchBar "Search products" bind:q w:260
+      NotificationBadge count:{cart}
         IconButton "shopping_cart" -> emit openCart
   Section
     Column gap:24
@@ -33,13 +33,13 @@ Page
           if img==3
             Media kind:"box" tone:"rose" h:480
           Row gap:12
-            Box border:=img==0?"#FF1F2937":"#FFE5E7EB" radius:8 -> img=0
+            Box border:{img==0?"#FF1F2937":"#FFE5E7EB"} radius:8 -> img=0
               Media kind:"box" tone:"sand" w:88 h:88
-            Box border:=img==1?"#FF1F2937":"#FFE5E7EB" radius:8 -> img=1
+            Box border:{img==1?"#FF1F2937":"#FFE5E7EB"} radius:8 -> img=1
               Media kind:"box" tone:"slate" w:88 h:88
-            Box border:=img==2?"#FF1F2937":"#FFE5E7EB" radius:8 -> img=2
+            Box border:{img==2?"#FF1F2937":"#FFE5E7EB"} radius:8 -> img=2
               Media kind:"box" tone:"mint" w:88 h:88
-            Box border:=img==3?"#FF1F2937":"#FFE5E7EB" radius:8 -> img=3
+            Box border:{img==3?"#FF1F2937":"#FFE5E7EB"} radius:8 -> img=3
               Media kind:"box" tone:"rose" w:88 h:88
         Column grow gap:16
           Text.eyebrow "DESK LAMPS"
@@ -61,10 +61,10 @@ Page
           Divider
           Text.fieldLabel "Finish: {finish}"
           Row gap:8
-            ChoiceChip "Brass" selected:=finish=="Brass" -> finish="Brass"
-            ChoiceChip "Graphite" selected:=finish=="Graphite" -> finish="Graphite"
-            ChoiceChip "Sand" selected:=finish=="Sand" -> finish="Sand"
-          Stepper "Quantity" =qty min:1 max:10
+            ChoiceChip "Brass" selected:{finish=="Brass"} -> finish="Brass"
+            ChoiceChip "Graphite" selected:{finish=="Graphite"} -> finish="Graphite"
+            ChoiceChip "Sand" selected:{finish=="Sand"} -> finish="Sand"
+          Stepper "Quantity" bind:qty min:1 max:10
           Row gap:12
             Button "Add to cart" size:large grow -> cart=cart+qty; toast "Added to cart"
             Button.outline "Buy now" size:large grow -> emit buyNow
@@ -82,7 +82,7 @@ Page
                 Text.muted "Changed your mind? Send it back in its original packaging."
   Section tint
     Column gap:20
-      TabToggle =tab options:["Description","Specifications","Reviews"]
+      TabToggle bind:tab options:["Description","Specifications","Reviews"]
       if tab=="Description"
         Column gap:12
           Heading "Light that moves with you" level:3
@@ -90,9 +90,9 @@ Page
           Text "The integrated LED is dimmable from a soft 2700 K glow to a crisp 4000 K work light, with a touch control on the base. Every lamp is finished by hand in Denmark."
       if tab=="Specifications"
         Card gap:0 pad:0
-          TableHeader =sort columns:["Specification","Details"] keys:["k","v"]
+          TableHeader bind:sort columns:["Specification","Details"] keys:["k","v"]
           each s in specs
-            TableRow cells:=[s.k,s.v]
+            TableRow cells:{[s.k,s.v]}
       if tab=="Reviews"
         Column gap:12
           Row gap:12 middle
@@ -114,7 +114,7 @@ Page
       Heading "You may also like" level:2
       Grid cols:4 gap:24
         each p in related
-          ProductTile "{p.name}" "{p.detail}" price:=p.price rating:=p.rating kind:=p.kind tone:=p.tone -> emit openProduct p.name
+          ProductTile "{p.name}" "{p.detail}" price:{p.price} rating:{p.rating} kind:{p.kind} tone:{p.tone} -> emit openProduct p.name
   Footer
     Row between top
       Column gap:8

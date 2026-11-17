@@ -40,15 +40,15 @@ Page
     Text.muted "Only open rooms: {onlyOpen}. Up to ${maxPrice} a night."
 
 Dialog#signup "Join the waitlist" "We write once, when your room opens."
-  Input#emailField "Email" "you@example.com" =email
+  Input#emailField "Email" "you@example.com" bind:email
   Row gap:8 end
     Button.ghost "Cancel" -> close
-    Button#signupGo "Join" enabled:=email!="" -> joined=true; close
+    Button#signupGo "Join" enabled:{email!=""} -> joined=true; close
 
 Sheet#filters "Filters"
-  Toggle "Only open rooms" =onlyOpen
+  Toggle "Only open rooms" bind:onlyOpen
   Text.muted "Up to ${maxPrice} a night"
-  Slider =maxPrice min:20 max:200
+  Slider bind:maxPrice min:20 max:200
   Button#applyFilters "Show rooms" -> close
 
 Menu#sortMenu

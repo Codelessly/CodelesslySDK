@@ -12,11 +12,11 @@ App
     Row gap:8 middle pad:[8,4,8,12]
       Icon "menu_book"
       Text.strong "Fieldbook"
-    NavItem "Dashboard" icon:"dashboard" selected:=tab=="dashboard" -> tab="dashboard"
-    NavItem "Customers" icon:"group" badge:"248" selected:=tab=="customers" -> tab="customers"
-    NavItem "Deals" icon:"handshake" selected:=tab=="deals" -> tab="deals"
-    NavItem "Tasks" icon:"task_alt" badge:"7" selected:=tab=="tasks" -> tab="tasks"
-    NavItem "Reports" icon:"bar_chart" selected:=tab=="reports" -> tab="reports"
+    NavItem "Dashboard" icon:"dashboard" selected:{tab=="dashboard"} -> tab="dashboard"
+    NavItem "Customers" icon:"group" badge:"248" selected:{tab=="customers"} -> tab="customers"
+    NavItem "Deals" icon:"handshake" selected:{tab=="deals"} -> tab="deals"
+    NavItem "Tasks" icon:"task_alt" badge:"7" selected:{tab=="tasks"} -> tab="tasks"
+    NavItem "Reports" icon:"bar_chart" selected:{tab=="reports"} -> tab="reports"
     Spacer grow
     Row gap:8 middle
       Avatar "Sam Patel" size:32
@@ -33,10 +33,10 @@ App
         Button "Add customer" -> emit addCustomer
     Column pad:24 gap:16
       Row gap:12 middle
-        Input "Search" "Name or company" =q w:280
-        Select =status items:["All","Active","Trial","Churned"] w:160
+        Input "Search" "Name or company" bind:q w:280
+        Select bind:status items:["All","Active","Trial","Churned"] w:160
         Spacer grow
-        SegmentedButton =segment items:["All","SMB","Mid-market","Enterprise"]
+        SegmentedButton bind:segment items:["All","SMB","Mid-market","Enterprise"]
       if length(picked)>0
         Box fill:#FF1F2937 radius:8 pad:[16,10,16,10] animate:slide-up
           Row gap:12 middle
@@ -47,7 +47,7 @@ App
             Button.destructive "Delete" -> emit deleteCustomers picked; picked=[]; toast "Deleted"
       Card gap:0 pad:0
         Row middle pad:[16,8,16,8] border-bottom:#FFE5E7EB fill:#FFF9FAFB
-          Checkbox w:40 checked:=length(picked)==length(customers) -> picked=length(picked)==length(customers)?[]:map(customers,x=>x.id)
+          Checkbox w:40 checked:{length(picked)==length(customers)} -> picked=length(picked)==length(customers)?[]:map(customers,x=>x.id)
           Button.ghost "Name{sort=='name'?(desc?' ↓':' ↑'):''}" w:240 -> desc=sort=="name"?!desc:false; sort="name"
           Button.ghost "Company{sort=='company'?(desc?' ↓':' ↑'):''}" w:180 -> desc=sort=="company"?!desc:false; sort="company"
           Button.ghost "Status{sort=='status'?(desc?' ↓':' ↑'):''}" w:120 -> desc=sort=="status"?!desc:false; sort="status"
@@ -56,14 +56,14 @@ App
           Button.ghost "Last seen{sort=='seen'?(desc?' ↓':' ↑'):''}" w:130 -> desc=sort=="seen"?!desc:false; sort="seen"
           Spacer grow
         each c in (desc?sortByDesc(filter(customers,x=>(q==""||contains(lower(x.name),lower(q))||contains(lower(x.company),lower(q)))&&(status=="All"||x.status==status)&&(segment=="All"||x.seg==segment)),x=>sort=="name"?x.name:sort=="company"?x.company:sort=="status"?x.status:sort=="plan"?x.plan:sort=="mrr"?x.mrr:x.mins):sortBy(filter(customers,x=>(q==""||contains(lower(x.name),lower(q))||contains(lower(x.company),lower(q)))&&(status=="All"||x.status==status)&&(segment=="All"||x.seg==segment)),x=>sort=="name"?x.name:sort=="company"?x.company:sort=="status"?x.status:sort=="plan"?x.plan:sort=="mrr"?x.mrr:x.mins))
-          Row middle pad:[16,10,16,10] border-bottom:#FFE5E7EB fill:=contains(picked,c.id)?"#FFEEF2FF":"#00FFFFFF" animate:fade stagger:30
-            Checkbox w:40 checked:=contains(picked,c.id) -> picked=contains(picked,c.id)?without(picked,c.id):append(picked,c.id)
+          Row middle pad:[16,10,16,10] border-bottom:#FFE5E7EB fill:{contains(picked,c.id)?"#FFEEF2FF":"#00FFFFFF"} animate:fade stagger:30
+            Checkbox w:40 checked:{contains(picked,c.id)} -> picked=contains(picked,c.id)?without(picked,c.id):append(picked,c.id)
             Row gap:10 middle w:240
               Avatar "{c.name}" size:32
               Text.strong "{c.name}"
             Text "{c.company}" w:180
             Row w:120
-              StatusBadge "{c.status}" tone:=c.status=="Active"?"success":c.status=="Trial"?"info":"neutral"
+              StatusBadge "{c.status}" tone:{c.status=="Active"?"success":c.status=="Trial"?"info":"neutral"}
             Text "{c.plan}" w:120
             Text.strong "{money(c.mrr,'$',0)}" w:150
             Text.muted "{c.seen}" w:130
@@ -73,5 +73,5 @@ App
           Text.muted "Rows {page*10+1}-{min(page*10+10,248)} of 248"
           Spacer grow
           Row gap:8
-            Button.outline "Previous" enabled:=page>0 -> page=max(0,page-1); emit loadPage page
-            Button.outline "Next" enabled:=page<24 -> page=min(24,page+1); emit loadPage page
+            Button.outline "Previous" enabled:{page>0} -> page=max(0,page-1); emit loadPage page
+            Button.outline "Next" enabled:{page<24} -> page=min(24,page+1); emit loadPage page

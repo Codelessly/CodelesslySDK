@@ -14,7 +14,7 @@ Page
       Link "Kitchen"
       Link "Sale"
     Row gap:12 middle
-      Input "Search" "Search products" =q w:240
+      Input "Search" "Search products" bind:q w:240
       Row gap:6 middle
         Icon "shopping_cart"
         Badge.primary "{cart}"
@@ -32,13 +32,13 @@ Page
           if img==3
             Media kind:"box" tone:"sky" h:480
           Row gap:12
-            Box w:96 pad:4 radius:8 border:=img==0?"#FF1F1F1F":"#FFDDDDDD" -> img=0
+            Box w:96 pad:4 radius:8 border:{img==0?"#FF1F1F1F":"#FFDDDDDD"} -> img=0
               Media kind:"box" tone:"sand" h:80
-            Box w:96 pad:4 radius:8 border:=img==1?"#FF1F1F1F":"#FFDDDDDD" -> img=1
+            Box w:96 pad:4 radius:8 border:{img==1?"#FF1F1F1F":"#FFDDDDDD"} -> img=1
               Media kind:"box" tone:"slate" h:80
-            Box w:96 pad:4 radius:8 border:=img==2?"#FF1F1F1F":"#FFDDDDDD" -> img=2
+            Box w:96 pad:4 radius:8 border:{img==2?"#FF1F1F1F":"#FFDDDDDD"} -> img=2
               Media kind:"box" tone:"rose" h:80
-            Box w:96 pad:4 radius:8 border:=img==3?"#FF1F1F1F":"#FFDDDDDD" -> img=3
+            Box w:96 pad:4 radius:8 border:{img==3?"#FF1F1F1F":"#FFDDDDDD"} -> img=3
               Media kind:"box" tone:"sky" h:80
         Column grow gap:16
           Text.eyebrow "DESK LAMPS"
@@ -60,11 +60,11 @@ Page
           Divider
           Text.strong "Finish: {finish}"
           Row gap:8
-            ChoiceChip "Brass" selected:=finish=="Brass" -> finish="Brass"
-            ChoiceChip "Graphite" selected:=finish=="Graphite" -> finish="Graphite"
-            ChoiceChip "Sand" selected:=finish=="Sand" -> finish="Sand"
+            ChoiceChip "Brass" selected:{finish=="Brass"} -> finish="Brass"
+            ChoiceChip "Graphite" selected:{finish=="Graphite"} -> finish="Graphite"
+            ChoiceChip "Sand" selected:{finish=="Sand"} -> finish="Sand"
           Text.strong "Quantity"
-          Stepper "Quantity" =qty min:1 max:10
+          Stepper "Quantity" bind:qty min:1 max:10
           Row gap:12
             Button "Add to cart" size:large grow -> cart=cart+qty; toast "Added to cart"
             Button.outline "Buy now" size:large grow -> emit buyNow
@@ -86,7 +86,7 @@ Page
                 Text.muted "Covers the LED and the dimmer"
   Section tint
     Column gap:20
-      TabToggle =tab options:["Description","Specifications","Reviews"]
+      TabToggle bind:tab options:["Description","Specifications","Reviews"]
       if tab=="Description"
         Column gap:12
           Heading "Light that moves with you" level:3

@@ -4,7 +4,7 @@
  "roots": ["wrap"],
  "widget": {
   "type": "DocsNav",
-  "doc": "The left navigation of a docs site, 240 wide and as tall as its links: DocsNav groups:[{\"title\":\"Start\",\"items\":[\"Introduction\",\"Quickstart\"]}] =collapsed active:=page -> page=result. Tap a group title to collapse or expand it; the collapsed group titles are kept in your list variable (empty at first). Links fire onNavigate with the tapped page's name.",
+  "doc": "The left navigation of a docs site, 240 wide and as tall as its links: DocsNav groups:[{\"title\":\"Start\",\"items\":[\"Introduction\",\"Quickstart\"]}] bind:collapsed active:{page} -> page=result. Tap a group title to collapse or expand it; the collapsed group titles are kept in your list variable (empty at first). Links fire onNavigate with the tapped page's name.",
   "props": [
    {"key": "groups", "type": {"kind": "list", "flutter": "List<Map<String, dynamic>>", "item": {"kind": "object", "flutter": "Map<String, dynamic>", "fields": [{"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The group's label."}, {"key": "items", "type": {"kind": "list", "flutter": "List<String>", "item": {"kind": "string", "flutter": "String"}}, "default": [], "doc": "The group's page names."}]}}, "default": [{"title": "Start", "items": ["Introduction", "Quickstart", "Installation"]}, {"title": "Guides", "items": ["Tracking events", "Identifying users"]}], "doc": "The groups in order, each {title, items: [page names]}.", "required": true},
    {"key": "active", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The current page's name, marked with the accent tint (empty: none)."},

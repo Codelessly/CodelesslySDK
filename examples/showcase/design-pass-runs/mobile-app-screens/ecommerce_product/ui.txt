@@ -5,11 +5,11 @@ Column w:390 h:fill
   state images=["https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=780","https://images.unsplash.com/photo-1583394838336-acd977736f90?w=780","https://images.unsplash.com/photo-1484704849700-f032a568e944?w=780","https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=780"]
   Column scroll grow gap:16 pad:[16,16,16,16]
     Column gap:8
-      Pages =page h:280 radius:16
+      Pages bind:page h:280 radius:16
         each img in images
           Image "{img}" w:fill h:280
       Row center
-        Dots =page count:4
+        Dots bind:page count:4
     Column gap:6
       Text.caption "AURALIS AUDIO"
       Text.heading1 "Auralis Pro X Wireless Headphones"
@@ -24,9 +24,9 @@ Column w:390 h:fill
     Column gap:8
       Text.fieldLabel "Color: {color}"
       Row gap:12
-        Box w:44 h:44 radius:22 fill:#FF1C1C1E border:=color=="Midnight Black"?"#FF1E88E5":"#FFDDDDDD" -> color="Midnight Black"
-        Box w:44 h:44 radius:22 fill:#FFE8E3DA border:=color=="Pearl White"?"#FF1E88E5":"#FFDDDDDD" -> color="Pearl White"
-        Box w:44 h:44 radius:22 fill:#FF2F4B7C border:=color=="Ocean Blue"?"#FF1E88E5":"#FFDDDDDD" -> color="Ocean Blue"
+        Box w:44 h:44 radius:22 fill:#FF1C1C1E border:{color=="Midnight Black"?"#FF1E88E5":"#FFDDDDDD"} -> color="Midnight Black"
+        Box w:44 h:44 radius:22 fill:#FFE8E3DA border:{color=="Pearl White"?"#FF1E88E5":"#FFDDDDDD"} -> color="Pearl White"
+        Box w:44 h:44 radius:22 fill:#FF2F4B7C border:{color=="Ocean Blue"?"#FF1E88E5":"#FFDDDDDD"} -> color="Ocean Blue"
     Row middle between
       Text.fieldLabel "Quantity"
       Row gap:12 middle

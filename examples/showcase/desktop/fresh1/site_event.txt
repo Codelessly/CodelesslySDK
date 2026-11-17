@@ -129,7 +129,7 @@ Page
       Heading "Pavilhão do Conhecimento, Lisbon"
     Row gap:32 top
       Card grow
-        MapPanel =pin count:3
+        MapPanel bind:pin count:3
       Column grow gap:16
         Row gap:12
           IconTile "place"

@@ -10,27 +10,27 @@ Row w:1280 h:800 fill:#FFFFFFFF
     Spacer h:8
     Button "Compose" icon:"edit"
     Spacer h:8
-    Row gap:10 pad:[10,8,10,8] radius:6 fill:=folder=="Inbox"?"#FFE0E7FF":"#00000000" -> folder="Inbox"
+    Row gap:10 pad:[10,8,10,8] radius:6 fill:{folder=="Inbox"?"#FFE0E7FF":"#00000000"} -> folder="Inbox"
       Icon "inbox"
       Text "Inbox"
       Spacer grow
       Text.strong "{count(convos,x=>x.unread)}"
-    Row gap:10 pad:[10,8,10,8] radius:6 fill:=folder=="Assigned"?"#FFE0E7FF":"#00000000" -> folder="Assigned"
+    Row gap:10 pad:[10,8,10,8] radius:6 fill:{folder=="Assigned"?"#FFE0E7FF":"#00000000"} -> folder="Assigned"
       Icon "person"
       Text "Assigned to me"
       Spacer grow
       Text.muted "4"
-    Row gap:10 pad:[10,8,10,8] radius:6 fill:=folder=="Waiting"?"#FFE0E7FF":"#00000000" -> folder="Waiting"
+    Row gap:10 pad:[10,8,10,8] radius:6 fill:{folder=="Waiting"?"#FFE0E7FF":"#00000000"} -> folder="Waiting"
       Icon "schedule"
       Text "Waiting"
       Spacer grow
       Text.muted "{count(convos,x=>x.status=='Waiting')}"
-    Row gap:10 pad:[10,8,10,8] radius:6 fill:=folder=="Resolved"?"#FFE0E7FF":"#00000000" -> folder="Resolved"
+    Row gap:10 pad:[10,8,10,8] radius:6 fill:{folder=="Resolved"?"#FFE0E7FF":"#00000000"} -> folder="Resolved"
       Icon "check_circle"
       Text "Resolved"
       Spacer grow
       Text.muted "{count(convos,x=>x.status=='Resolved')}"
-    Row gap:10 pad:[10,8,10,8] radius:6 fill:=folder=="Spam"?"#FFE0E7FF":"#00000000" -> folder="Spam"
+    Row gap:10 pad:[10,8,10,8] radius:6 fill:{folder=="Spam"?"#FFE0E7FF":"#00000000"} -> folder="Spam"
       Icon "report"
       Text "Spam"
       Spacer grow
@@ -43,8 +43,8 @@ Row w:1280 h:800 fill:#FFFFFFFF
     Divider
     Column scroll grow
       each c in convos
-        Row gap:10 top pad:[16,12,16,12] fill:=sel==c.id?"#FFEEF2FF":"#FFFFFFFF" -> sel=c.id; cur=c; convos=updateWhere(convos,x=>x.id==c.id,x=>with(x,"unread",false))
-          Box w:8 h:8 radius:4 fill:=c.unread?"#FF2563EB":"#00000000"
+        Row gap:10 top pad:[16,12,16,12] fill:{sel==c.id?"#FFEEF2FF":"#FFFFFFFF"} -> sel=c.id; cur=c; convos=updateWhere(convos,x=>x.id==c.id,x=>with(x,"unread",false))
+          Box w:8 h:8 radius:4 fill:{c.unread?"#FF2563EB":"#00000000"}
           Column grow gap:2
             Row between
               Text.strong "{c.from}"
@@ -64,7 +64,7 @@ Row w:1280 h:800 fill:#FFFFFFFF
     Spacer grow
     Divider
     Text.fieldLabel "Reply to {cur.from}"
-    TextArea "Write your reply…" =reply h:130
+    TextArea "Write your reply…" bind:reply h:130
     Row gap:10 end
       Button.outline "Close ticket" -> convos=updateWhere(convos,x=>x.id==cur.id,x=>with(x,"status","Resolved")); cur=with(cur,"status","Resolved"); toast "Ticket closed"
-      Button "Send" enabled:=trim(reply)!="" -> convos=updateWhere(convos,x=>x.id==cur.id,x=>with(x,"status","Waiting")); cur=with(cur,"status","Waiting"); reply=""; toast "Reply sent"
+      Button "Send" enabled:{trim(reply)!=""} -> convos=updateWhere(convos,x=>x.id==cur.id,x=>with(x,"status","Waiting")); cur=with(cur,"status","Waiting"); reply=""; toast "Reply sent"

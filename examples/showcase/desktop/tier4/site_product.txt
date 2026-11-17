@@ -16,7 +16,7 @@ Page
       Link "Decor"
       Link "Sale"
     Row gap:12 middle
-      Input "Search" "Search the store" =q w:240
+      Input "Search" "Search the store" bind:q w:240
       Row gap:8 middle
         IconButton "shopping_bag_outlined" -> emit openCart
         Badge.primary "{cart}"
@@ -34,13 +34,13 @@ Page
           if img==3
             Media kind:"laptop" tone:"sky" h:480
           Row gap:12
-            Box pad:4 radius:10 border:=img==0?'#FF2563EB':'#FFE5E7EB' -> img=0
+            Box pad:4 radius:10 border:{img==0?'#FF2563EB':'#FFE5E7EB'} -> img=0
               Media kind:"box" tone:"sand" w:112 h:84
-            Box pad:4 radius:10 border:=img==1?'#FF2563EB':'#FFE5E7EB' -> img=1
+            Box pad:4 radius:10 border:{img==1?'#FF2563EB':'#FFE5E7EB'} -> img=1
               Media kind:"mug" tone:"slate" w:112 h:84
-            Box pad:4 radius:10 border:=img==2?'#FF2563EB':'#FFE5E7EB' -> img=2
+            Box pad:4 radius:10 border:{img==2?'#FF2563EB':'#FFE5E7EB'} -> img=2
               Media kind:"tote" tone:"rose" w:112 h:84
-            Box pad:4 radius:10 border:=img==3?'#FF2563EB':'#FFE5E7EB' -> img=3
+            Box pad:4 radius:10 border:{img==3?'#FF2563EB':'#FFE5E7EB'} -> img=3
               Media kind:"laptop" tone:"sky" w:112 h:84
         Column grow gap:18
           Text.eyebrow "DESK LAMPS"
@@ -63,12 +63,12 @@ Page
           Column gap:8
             Text.fieldLabel "Finish: {finish}"
             Row gap:8
-              ChoiceChip "Brass" selected:=finish=="Brass" -> finish="Brass"
-              ChoiceChip "Graphite" selected:=finish=="Graphite" -> finish="Graphite"
-              ChoiceChip "Sand" selected:=finish=="Sand" -> finish="Sand"
+              ChoiceChip "Brass" selected:{finish=="Brass"} -> finish="Brass"
+              ChoiceChip "Graphite" selected:{finish=="Graphite"} -> finish="Graphite"
+              ChoiceChip "Sand" selected:{finish=="Sand"} -> finish="Sand"
           Column gap:8
             Text.fieldLabel "Quantity"
-            Stepper "Quantity" =qty min:1 max:10
+            Stepper "Quantity" bind:qty min:1 max:10
           Row gap:12
             Button "Add to cart" size:large grow -> cart=cart+qty; toast "Added to cart"
             Button.outline "Buy now" size:large grow -> emit buyNow
@@ -86,7 +86,7 @@ Page
                 Text.muted "Not right for your desk? Send it back, free of charge."
   Section tint
     Column gap:24
-      TabToggle =tab options:["Description","Specifications","Reviews"]
+      TabToggle bind:tab options:["Description","Specifications","Reviews"]
       if tab=="Description"
         Column gap:12 maxw:720
           Heading "Light that moves with you" level:3

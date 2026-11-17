@@ -19,7 +19,7 @@ Card w:390 gap:12 pad:16
         IconButton "add" -> items=updateWhere(items,r=>r.id==it.id,r=>with(r,"qty",r.qty+1))
   Divider
   Row gap:8 middle
-    Input "Promo code" "SAVE10" =promo grow
+    Input "Promo code" "SAVE10" bind:promo grow
     Button.outline "Apply" -> applied=upper(trim(promo))=="SAVE10"; toast applied?"Applied":"Promo code applied or invalid"
   if applied
     Text.success "SAVE10 applied: 10% off"

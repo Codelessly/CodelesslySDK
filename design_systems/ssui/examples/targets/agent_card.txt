@@ -5,12 +5,12 @@ Card gap:10
     Column gap:1 grow
       Text.sectionTitle "Release Bot"
       Text.caption "Ships a build when the checks pass"
-    StatusIndicator status:=on?"running":"paused"
+    StatusIndicator status:{on?"running":"paused"}
   Row gap:6
     Badge.neutral "Repos: 3"
     Badge.neutral "Runs: 128"
     Badge.success "98% passing"
-  ToggleRow "Run on every merge" description:"Off: only when asked." =on
+  ToggleRow "Run on every merge" description:"Off: only when asked." bind:on
   Row end gap:8
     Button.ghost "View runs" -> emit runs
     Button.outline "Configure" -> emit configure

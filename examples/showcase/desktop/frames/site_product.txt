@@ -15,7 +15,7 @@ Page
       Link "Decor"
       Link "Sale"
     Row gap:12
-      Input "Search" "Search products" =q w:240
+      Input "Search" "Search products" bind:q w:240
       Button.outline "Cart · {cart}" icon:"shopping_cart" -> emit openCart
   Section
     Column gap:32
@@ -31,13 +31,13 @@ Page
           if img==3
             Media kind:"box" tone:"sky" h:480 radius:12
           Row gap:12
-            Box w:96 h:96 radius:8 border:=img==0?"#FF1F2937":"#FFE5E7EB" -> img=0
+            Box w:96 h:96 radius:8 border:{img==0?"#FF1F2937":"#FFE5E7EB"} -> img=0
               Media kind:"box" tone:"sand" h:92
-            Box w:96 h:96 radius:8 border:=img==1?"#FF1F2937":"#FFE5E7EB" -> img=1
+            Box w:96 h:96 radius:8 border:{img==1?"#FF1F2937":"#FFE5E7EB"} -> img=1
               Media kind:"box" tone:"slate" h:92
-            Box w:96 h:96 radius:8 border:=img==2?"#FF1F2937":"#FFE5E7EB" -> img=2
+            Box w:96 h:96 radius:8 border:{img==2?"#FF1F2937":"#FFE5E7EB"} -> img=2
               Media kind:"box" tone:"rose" h:92
-            Box w:96 h:96 radius:8 border:=img==3?"#FF1F2937":"#FFE5E7EB" -> img=3
+            Box w:96 h:96 radius:8 border:{img==3?"#FF1F2937":"#FFE5E7EB"} -> img=3
               Media kind:"box" tone:"sky" h:92
         Column grow gap:16
           Heading "Arc One desk lamp" level:1
@@ -58,9 +58,9 @@ Page
           Divider
           Text.strong "Finish: {finish}"
           Row gap:8
-            ChoiceChip "Brass" selected:=finish=="Brass" -> finish="Brass"
-            ChoiceChip "Graphite" selected:=finish=="Graphite" -> finish="Graphite"
-            ChoiceChip "Sand" selected:=finish=="Sand" -> finish="Sand"
+            ChoiceChip "Brass" selected:{finish=="Brass"} -> finish="Brass"
+            ChoiceChip "Graphite" selected:{finish=="Graphite"} -> finish="Graphite"
+            ChoiceChip "Sand" selected:{finish=="Sand"} -> finish="Sand"
           Text.strong "Quantity"
           Row gap:12
             Button.outline "-" -> qty=max(1,qty-1)
@@ -87,7 +87,7 @@ Page
                 Text.muted "Covers the LED driver, switch and finish."
   Section
     Column gap:24
-      TabToggle =tab options:["Description","Specifications","Reviews"]
+      TabToggle bind:tab options:["Description","Specifications","Reviews"]
       if tab=="Description"
         Column gap:12
           Heading "Light, shaped" level:3
@@ -95,7 +95,7 @@ Page
           Text "Every lamp is hand-finished in small batches. The brass develops a gentle patina, the graphite has a matte powder coat, and the sand finish is soft to the touch."
       if tab=="Specifications"
         Column gap:0
-          TableHeader =sort columns:["Specification","Detail"] keys:["spec","detail"]
+          TableHeader bind:sort columns:["Specification","Detail"] keys:["spec","detail"]
           TableRow cells:["Height","46 cm (adjustable)"]
           TableRow cells:["Base diameter","16 cm"]
           TableRow cells:["Materials","Solid brass, steel, silicone"]

@@ -9,12 +9,12 @@ Column w:390 h:fill
         Text.muted "Total balance"
         Row gap:8 middle
           Text.small "Hide"
-          Toggle =hidden
+          Toggle bind:hidden
       Text.pageTitle "{hidden ? '$ ••••••' : money(sum(accounts,a=>a.balance),'$',2)}" size:38 weight:700
       Text.success "+$320.40 this month"
     Row scroll gap:12
       each a in accounts
-        Box w:240 gap:20 pad:16 radius:16 fill:=a.fill
+        Box w:240 gap:20 pad:16 radius:16 fill:{a.fill}
           Row between middle
             Text.strong "{a.name}" color:#FFFFFFFF
             Icon "account_balance" color:#FFFFFFFF
@@ -54,21 +54,21 @@ Column w:390 h:fill
           Column grow
             Text.strong "{row.merchant}"
             Text.caption "{row.category} · {row.date}"
-          Text.strong "{(row.amount>0?'+':'-')+money(abs(row.amount),'$',2)}" color:=row.amount>0?"#FF1B873F":"#FF111827"
+          Text.strong "{(row.amount>0?'+':'-')+money(abs(row.amount),'$',2)}" color:{row.amount>0?"#FF1B873F":"#FF111827"}
   Divider
   Row between pad:[16,8,16,12]
     Column center gap:2 -> tab="home"
-      Icon "home" color:=tab=="home"?"#FF1F3A8A":"#FF9CA3AF"
-      Text.caption "Home" color:=tab=="home"?"#FF1F3A8A":"#FF9CA3AF"
+      Icon "home" color:{tab=="home"?"#FF1F3A8A":"#FF9CA3AF"}
+      Text.caption "Home" color:{tab=="home"?"#FF1F3A8A":"#FF9CA3AF"}
     Column center gap:2 -> tab="cards"
-      Icon "credit_card" color:=tab=="cards"?"#FF1F3A8A":"#FF9CA3AF"
-      Text.caption "Cards" color:=tab=="cards"?"#FF1F3A8A":"#FF9CA3AF"
+      Icon "credit_card" color:{tab=="cards"?"#FF1F3A8A":"#FF9CA3AF"}
+      Text.caption "Cards" color:{tab=="cards"?"#FF1F3A8A":"#FF9CA3AF"}
     Column center gap:2 -> tab="payments"
-      Icon "swap_horiz" color:=tab=="payments"?"#FF1F3A8A":"#FF9CA3AF"
-      Text.caption "Payments" color:=tab=="payments"?"#FF1F3A8A":"#FF9CA3AF"
+      Icon "swap_horiz" color:{tab=="payments"?"#FF1F3A8A":"#FF9CA3AF"}
+      Text.caption "Payments" color:{tab=="payments"?"#FF1F3A8A":"#FF9CA3AF"}
     Column center gap:2 -> tab="insights"
-      Icon "insights" color:=tab=="insights"?"#FF1F3A8A":"#FF9CA3AF"
-      Text.caption "Insights" color:=tab=="insights"?"#FF1F3A8A":"#FF9CA3AF"
+      Icon "insights" color:{tab=="insights"?"#FF1F3A8A":"#FF9CA3AF"}
+      Text.caption "Insights" color:{tab=="insights"?"#FF1F3A8A":"#FF9CA3AF"}
     Column center gap:2 -> tab="profile"
-      Icon "person" color:=tab=="profile"?"#FF1F3A8A":"#FF9CA3AF"
-      Text.caption "Profile" color:=tab=="profile"?"#FF1F3A8A":"#FF9CA3AF"
+      Icon "person" color:{tab=="profile"?"#FF1F3A8A":"#FF9CA3AF"}
+      Text.caption "Profile" color:{tab=="profile"?"#FF1F3A8A":"#FF9CA3AF"}

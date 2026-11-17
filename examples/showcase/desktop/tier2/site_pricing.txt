@@ -16,7 +16,7 @@ Page
       Heading "Simple pricing for every stage" level:1
       Text.lead "Bookkeeping, invoicing and reporting that grow with your business." center
       Row center gap:12
-        Segments =billing options:["Monthly","Yearly"]
+        Segments bind:billing options:["Monthly","Yearly"]
         Badge.success "Yearly saves 20%"
     Grid cols:3 gap:24
       Card gap:16 pad:24
@@ -102,7 +102,7 @@ Page
       Heading "Everything side by side" level:2
     state sort=""
     Card gap:0 pad:0
-      TableHeader =sort columns:["Feature","Solo","Team","Scale"] keys:["f","a","b","c"]
+      TableHeader bind:sort columns:["Feature","Solo","Team","Scale"] keys:["f","a","b","c"]
       TableRow cells:["Invoicing","✓","✓","✓"]
       TableRow cells:["Bank feeds","—","✓","✓"]
       TableRow cells:["Recurring invoices","—","✓","✓"]

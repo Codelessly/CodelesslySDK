@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "SessionControls",
-  "doc": "The session's control bar: write SessionControls =paused and its big button pauses and resumes by toggling your paused variable itself, while the quiet Finish button fires onPressed (write -> for what finishing does).",
+  "doc": "The session's control bar: write SessionControls bind:paused and its big button pauses and resumes by toggling your paused variable itself, while the quiet Finish button fires onPressed (write -> for what finishing does).",
   "props": [
    {
     "key": "paused",

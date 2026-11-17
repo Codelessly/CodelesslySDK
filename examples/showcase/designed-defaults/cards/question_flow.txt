@@ -8,48 +8,48 @@ Card w:390 gap:16
   Row between middle
     Text.heading "Laptop finder"
     Text.muted "Step {min(step,3)} of 3"
-  Progress =step/3 visible:=step<=3
+  Progress bind:{step/3} visible:{step<=3}
   if step==1
     Text.strong "What will you mostly use it for?"
     Column gap:8
-      ChoiceChip "School or study" selected:=use=="study" -> use="study"; detail=""
-      ChoiceChip "Work and office" selected:=use=="work" -> use="work"; detail=""
-      ChoiceChip "Gaming" selected:=use=="gaming" -> use="gaming"; detail=""
-      ChoiceChip "Creative projects" selected:=use=="creative" -> use="creative"; detail=""
-    Button "Next" enabled:=use!="" -> step=2
+      ChoiceChip "School or study" selected:{use=="study"} -> use="study"; detail=""
+      ChoiceChip "Work and office" selected:{use=="work"} -> use="work"; detail=""
+      ChoiceChip "Gaming" selected:{use=="gaming"} -> use="gaming"; detail=""
+      ChoiceChip "Creative projects" selected:{use=="creative"} -> use="creative"; detail=""
+    Button "Next" enabled:{use!=""} -> step=2
   if step==2
     if use=="study"
       Text.strong "What matters most for school?"
       Column gap:8
-        ChoiceChip "Long battery life" selected:=detail=="battery" -> detail="battery"
-        ChoiceChip "Light to carry" selected:=detail=="light" -> detail="light"
-        ChoiceChip "Note-taking with a pen" selected:=detail=="pen" -> detail="pen"
+        ChoiceChip "Long battery life" selected:{detail=="battery"} -> detail="battery"
+        ChoiceChip "Light to carry" selected:{detail=="light"} -> detail="light"
+        ChoiceChip "Note-taking with a pen" selected:{detail=="pen"} -> detail="pen"
     if use=="work"
       Text.strong "How do you work?"
       Column gap:8
-        ChoiceChip "Travel a lot" selected:=detail=="travel" -> detail="travel"
-        ChoiceChip "Mostly at a desk" selected:=detail=="desk" -> detail="desk"
-        ChoiceChip "Video calls all day" selected:=detail=="calls" -> detail="calls"
+        ChoiceChip "Travel a lot" selected:{detail=="travel"} -> detail="travel"
+        ChoiceChip "Mostly at a desk" selected:{detail=="desk"} -> detail="desk"
+        ChoiceChip "Video calls all day" selected:{detail=="calls"} -> detail="calls"
     if use=="gaming"
       Text.strong "What kind of games?"
       Column gap:8
-        ChoiceChip "Competitive and fast" selected:=detail=="fast" -> detail="fast"
-        ChoiceChip "Big modern titles" selected:=detail=="aaa" -> detail="aaa"
-        ChoiceChip "Casual and indie" selected:=detail=="casual" -> detail="casual"
+        ChoiceChip "Competitive and fast" selected:{detail=="fast"} -> detail="fast"
+        ChoiceChip "Big modern titles" selected:{detail=="aaa"} -> detail="aaa"
+        ChoiceChip "Casual and indie" selected:{detail=="casual"} -> detail="casual"
     if use=="creative"
       Text.strong "What do you create?"
       Column gap:8
-        ChoiceChip "Photo editing" selected:=detail=="photo" -> detail="photo"
-        ChoiceChip "Video editing" selected:=detail=="video" -> detail="video"
-        ChoiceChip "Music and design" selected:=detail=="music" -> detail="music"
+        ChoiceChip "Photo editing" selected:{detail=="photo"} -> detail="photo"
+        ChoiceChip "Video editing" selected:{detail=="video"} -> detail="video"
+        ChoiceChip "Music and design" selected:{detail=="music"} -> detail="music"
     Row gap:8
       Button.outline "Back" -> step=1
       Spacer grow
-      Button "Next" enabled:=detail!="" -> step=3
+      Button "Next" enabled:{detail!=""} -> step=3
   if step==3
     Text.strong "What is your budget?"
     Text.heading "{money(budget,'$',0)}"
-    Slider =budget min:400 max:3000
+    Slider bind:budget min:400 max:3000
     Row between
       Text.caption "$400"
       Text.caption "$3,000"

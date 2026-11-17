@@ -22,7 +22,7 @@ Column h:fill
   Column gap:12 pad:16 fill:#FFFFFFFF
     Text.heading "Choose a ride"
     each r in rides
-      Box pad:12 radius:12 fill:=ride==r.name?"#FFE8F0FE":"#FFFFFFFF" border:=ride==r.name?"#FF1A73E8":"#FFE0E0E0" -> ride=r.name
+      Box pad:12 radius:12 fill:{ride==r.name?"#FFE8F0FE":"#FFFFFFFF"} border:{ride==r.name?"#FF1A73E8":"#FFE0E0E0"} -> ride=r.name
         Row gap:12 center
           Icon "directions_car" size:32
           Column grow

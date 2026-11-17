@@ -6,12 +6,12 @@ Column h:fill
   Stack grow
     Column scroll gap:16 pad:16
       Text.pageTitle "Notes"
-      Input "Search notes" =query
+      Input "Search notes" bind:query
       Row scroll gap:8
-        ChoiceChip "All" selected:=filter=="All" -> filter="All"
-        ChoiceChip "Pinned" selected:=filter=="Pinned" -> filter="Pinned"
-        ChoiceChip "Work" selected:=filter=="Work" -> filter="Work"
-        ChoiceChip "Personal" selected:=filter=="Personal" -> filter="Personal"
+        ChoiceChip "All" selected:{filter=="All"} -> filter="All"
+        ChoiceChip "Pinned" selected:{filter=="Pinned"} -> filter="Pinned"
+        ChoiceChip "Work" selected:{filter=="Work"} -> filter="Work"
+        ChoiceChip "Personal" selected:{filter=="Personal"} -> filter="Personal"
       Row gap:6
         Icon "push_pin"
         Text.sectionTitle "Pinned"
@@ -19,7 +19,7 @@ Column h:fill
         if note.pinned && (filter=="All" || filter=="Pinned" || note.tag==filter) && contains(lower(note.title),lower(query))
           Card gap:6
             Row gap:10 middle
-              Box w:10 h:10 radius:5 fill:=note.color
+              Box w:10 h:10 radius:5 fill:{note.color}
               Text.strong "{note.title}" grow
               Text.caption "{note.date}"
             Text.bodySecondary "{note.preview}" {"props": {"maxLines": 2}}
@@ -28,7 +28,7 @@ Column h:fill
         if !note.pinned && filter!="Pinned" && (filter=="All" || note.tag==filter) && contains(lower(note.title),lower(query))
           Card gap:6
             Row gap:10 middle
-              Box w:10 h:10 radius:5 fill:=note.color
+              Box w:10 h:10 radius:5 fill:{note.color}
               Text.strong "{note.title}" grow
               Text.caption "{note.date}"
             Text.bodySecondary "{note.preview}" {"props": {"maxLines": 2}}

@@ -5,22 +5,22 @@ Column w:1280 h:fill
       Text.heading3 "Beacon"
       Badge.neutral "SDK"
     Box w:360
-      SearchBar "Search the docs" =q
-    Select =version items:["v2.4","v2.3","v2.2"] w:100
+      SearchBar "Search the docs" bind:q
+    Select bind:version items:["v2.4","v2.3","v2.2"] w:100
   Divider
   Row top grow
     Column w:240 pad:[16,24,16,24] gap:4 fill:#FFF8FAFC scroll
       Text.eyebrow "START"
       each n in start
-        ListRow "{n}" selected:=page==n dense -> page=n
+        ListRow "{n}" selected:{page==n} dense -> page=n
       Spacer h:16
       Text.eyebrow "GUIDES"
       each n in guides
-        ListRow "{n}" selected:=page==n dense -> page=n
+        ListRow "{n}" selected:{page==n} dense -> page=n
       Spacer h:16
       Text.eyebrow "REFERENCE"
       each n in reference
-        ListRow "{n}" selected:=page==n dense -> page=n
+        ListRow "{n}" selected:{page==n} dense -> page=n
     Column grow gap:20 pad:[40,28,40,40] scroll
       Breadcrumb items:["Docs","Start","Quickstart"]
       Text.pageTitle "Quickstart"
@@ -53,7 +53,7 @@ Column w:1280 h:fill
       Column
         TableHeader columns:["Name","Type","Default","Description"] keys:["name","type","def","desc"] widths:[140,100,110,390]
         each o in options
-          TableRow cells:=[o.name,o.type,o.def,o.desc] widths:[140,100,110,390]
+          TableRow cells:{[o.name,o.type,o.def,o.desc]} widths:[140,100,110,390]
       Divider
       Row between
         Button.outline "← Previous: Overview" -> page="Overview"

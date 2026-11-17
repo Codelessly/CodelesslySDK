@@ -39,4 +39,4 @@ Card w:390 gap:12
     Row gap:8
       Button.outline "Keep" -> d3="keep"
       Button.ghost "Discard" -> d3="discard"
-  Button "Apply changes" enabled:=d1!=""&&d2!=""&&d3!="" -> emit apply; toast "Changes applied"
+  Button "Apply changes" enabled:{d1!=""&&d2!=""&&d3!=""} -> emit apply; toast "Changes applied"

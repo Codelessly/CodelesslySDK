@@ -7,17 +7,17 @@ Card gap:12 pad:16
   state zip="9021"
   state phone=""
   Text.title "Shipping address"
-  Input "Full name" =name
-  Input "Street address" =street
-  Input "Apartment (optional)" =apt
-  Input "City" =city
+  Input "Full name" bind:name
+  Input "Street address" bind:street
+  Input "Apartment (optional)" bind:apt
+  Input "City" bind:city
   Row gap:12
     Column grow gap:4
       Text.fieldLabel "State"
-      Select =region items:["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"]
+      Select bind:region items:["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"]
     Column grow gap:4
-      Input "ZIP code" =zip type:number
+      Input "ZIP code" bind:zip type:number
       if length(zip)!=5
         Text.danger "ZIP must be 5 digits"
-  Input "Phone" =phone type:phone
+  Input "Phone" bind:phone type:phone
   Button "Save address" -> emit saveAddress; toast "Address saved"

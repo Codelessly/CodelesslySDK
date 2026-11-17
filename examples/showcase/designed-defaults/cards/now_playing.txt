@@ -14,7 +14,7 @@ Card w:390 gap:14
       Text.caption "Album: Electric Dreams"
     IconButton "favorite" -> liked=!liked
   Column gap:4
-    Progress =prog w:fill
+    Progress bind:prog w:fill
     Row between
       Text.caption "{floor(pos/60)}:{pos%60<10?'0':''}{pos%60}"
       Text.caption "-{floor((dur-pos)/60)}:{(dur-pos)%60<10?'0':''}{(dur-pos)%60}"

@@ -14,13 +14,13 @@ Column gap:20 pad:24 center maxw:420
   Column gap:6
     Row gap:3 middle h:64
       each b in bars
-        Box w:6 h:=b.h radius:3 fill:=(b.i+0.5)/40<=pos/total?'#FF3F51B5':'#FFBDBDBD' -> pos=round(b.i/40*total,0)
+        Box w:6 h:{b.h} radius:3 fill:{(b.i+0.5)/40<=pos/total?'#FF3F51B5':'#FFBDBDBD'} -> pos=round(b.i/40*total,0)
     Row between
       Text.caption "{duration(floor(pos))}"
       Text.caption "{duration(total)}"
   Row gap:12 center middle
     Button.outline "-15s" -> pos=max(0,pos-15)
-    IconButton "play_arrow" visible:=!playing -> playing=true
-    IconButton "pause" visible:=playing -> playing=false
+    IconButton "play_arrow" visible:{!playing} -> playing=true
+    IconButton "pause" visible:{playing} -> playing=false
     Button.outline "+30s" -> pos=min(total,pos+30)
   Button.tertiary "{speed}x" -> speed=speed==1?1.5:speed==1.5?2:1

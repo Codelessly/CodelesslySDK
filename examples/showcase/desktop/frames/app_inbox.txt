@@ -5,10 +5,10 @@ state convos=[{"id":1,"name":"Tom Becker","subject":"Cannot reset my password","
 App
   Sidebar
     Text.strong "Relaydesk" size:18
-    NavItem "Inbox" icon:"inbox" badge:"12" selected:=folder=="inbox" -> folder="inbox"
-    NavItem "Assigned to me" icon:"person" badge:"4" selected:=folder=="mine" -> folder="mine"
-    NavItem "Waiting" icon:"schedule" badge:"7" selected:=folder=="waiting" -> folder="waiting"
-    NavItem "Closed" icon:"check_circle" selected:=folder=="closed" -> folder="closed"
+    NavItem "Inbox" icon:"inbox" badge:"12" selected:{folder=="inbox"} -> folder="inbox"
+    NavItem "Assigned to me" icon:"person" badge:"4" selected:{folder=="mine"} -> folder="mine"
+    NavItem "Waiting" icon:"schedule" badge:"7" selected:{folder=="waiting"} -> folder="waiting"
+    NavItem "Closed" icon:"check_circle" selected:{folder=="closed"} -> folder="closed"
     Spacer grow
     Row gap:8 center
       Avatar "Dan Whitaker" size:32
@@ -17,7 +17,7 @@ App
     Box pad:[16,14,16,14] border-bottom:#FFE5E7EB
       Text.strong "Inbox"
     each c in convos
-      Box pad:12 fill:=sel==c.id?"#FFEEF2FF":"#FFFFFFFF" border-bottom:#FFF0F1F3 -> sel=c.id
+      Box pad:12 fill:{sel==c.id?"#FFEEF2FF":"#FFFFFFFF"} border-bottom:#FFF0F1F3 -> sel=c.id
         Row gap:12 top
           Avatar "{c.name}" size:40
           Column grow gap:2
@@ -26,7 +26,7 @@ App
             Text.muted "{c.preview}" size:12
           Column gap:6 end
             Text.caption "{c.time}"
-            Box w:8 h:8 radius:4 fill:#FF2563EB visible:=c.unread
+            Box w:8 h:8 radius:4 fill:#FF2563EB visible:{c.unread}
   Main
     Nav
       Column gap:2
@@ -61,7 +61,7 @@ App
             Text.caption "Dan Whitaker · 9:12"
             Text "Yes, $49.00 goes back to the card ending 4417. You will see it within 3 to 5 business days."
         Card gap:8
-          Input "Reply to Maya" "Write your reply..." =reply multiline
+          Input "Reply to Maya" "Write your reply..." bind:reply multiline
           Row gap:8 end
             Button.outline "Send and close" -> emit sendAndClose reply; reply=""
             Button "Send" -> emit send reply; reply=""
@@ -71,7 +71,7 @@ App
           Text.strong "Maya Reyes"
           Text.muted "Northfield Studio"
         Divider
-        Details rows:=[["Plan","Pro, annual"],["Customer since","March 2022"],["Last order","#48213, May 4"]]
+        Details rows:{[["Plan","Pro, annual"],["Customer since","March 2022"],["Last order","#48213, May 4"]]}
         Text.eyebrow "Tags"
         Row gap:6
           Badge.info "billing"

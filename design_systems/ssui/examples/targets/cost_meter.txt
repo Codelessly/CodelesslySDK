@@ -8,9 +8,9 @@ Card gap:12
       Row gap:6
         Text.heading1 "{formatCurrency(used,"USD")}"
         Text.bodySecondary "of {formatCurrency(budget,"USD","en_US",0)}"
-    Badge.warning "{round(used/budget*100)}% used" visible:=used/budget>=0.7
-    Badge.success "{round(used/budget*100)}% used" visible:=used/budget<0.7
-  Progress =used/budget {"props": {"color": "${= used/budget>=0.9?'#FFDC2626':(used/budget>=0.7?'#FFEA580C':'#FF2563EB')}"}}
+    Badge.warning "{round(used/budget*100)}% used" visible:{used/budget>=0.7}
+    Badge.success "{round(used/budget*100)}% used" visible:{used/budget<0.7}
+  Progress bind:{used/budget} {"props": {"color": "${= used/budget>=0.9?'#FFDC2626':(used/budget>=0.7?'#FFEA580C':'#FF2563EB')}"}}
   Column gap:0
     each i in items
       Row gap:8 pad:[0,6,0,6] border:#FFF3F4F6

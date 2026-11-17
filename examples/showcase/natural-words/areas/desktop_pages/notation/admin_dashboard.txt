@@ -65,8 +65,8 @@ Row stretch
           Text.strong "{deal.company}" grow
           Text "{deal.owner}" grow
           Row grow
-            Box fill:=deal.bg radius:12 pad:[10,4,10,4]
-              Text "{deal.stage}" color:=deal.fg size:12 weight:600
+            Box fill:{deal.bg} radius:12 pad:[10,4,10,4]
+              Text "{deal.stage}" color:{deal.fg} size:12 weight:600
           Text "{money(deal.value,'$',0)}" grow
           Text.muted "{deal.date}" grow
         Divider

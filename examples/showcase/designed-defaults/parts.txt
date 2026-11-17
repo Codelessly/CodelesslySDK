@@ -70,22 +70,22 @@ Column gap:16 pad:16
       Badge.error "Error"
       Badge.danger "Danger"
     Row gap:8
-      ChoiceChip "Day" selected:=pick=="Day" -> pick="Day"
-      ChoiceChip "Week" selected:=pick=="Week" -> pick="Week"
-      ChoiceChip "Month" selected:=pick=="Month" -> pick="Month"
+      ChoiceChip "Day" selected:{pick=="Day"} -> pick="Day"
+      ChoiceChip "Week" selected:{pick=="Week"} -> pick="Week"
+      ChoiceChip "Month" selected:{pick=="Month"} -> pick="Month"
     Row gap:8
       Chip "Chip"
       FilterChip "Filter" selected:true
       FilterChip "Off"
   Text.caption "FORM CONTROLS"
   Card gap:12
-    Input "Email" "you@example.com" =email
-    Select =size items:["S","M","L"]
-    SegmentedButton =plan items:["Free","Pro","Team"]
-    Toggle "Notifications" =notify
-    Checkbox "I agree to the terms" =agree
-    Radio "Option A" value:"a" =tab
-    Slider =volume min:0 max:100
+    Input "Email" "you@example.com" bind:email
+    Select bind:size items:["S","M","L"]
+    SegmentedButton bind:plan items:["Free","Pro","Team"]
+    Toggle "Notifications" bind:notify
+    Checkbox "I agree to the terms" bind:agree
+    Radio "Option A" value:"a" bind:tab
+    Slider bind:volume min:0 max:100
     Progress 0.62
     DatePicker
   Text.caption "LISTS AND DIVIDERS"

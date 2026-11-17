@@ -55,7 +55,7 @@ Page
         Card gap:12
           Heading "Get new posts by email" level:3
           Text.muted "One engineering story every other week. No noise."
-          Input "Email" hint:"you@example.com" =email type:email
+          Input "Email" hint:"you@example.com" bind:email type:email
           Button "Subscribe" -> emit newsletter email; toast "Thanks for subscribing"
   Section tint id:related
     Column gap:24

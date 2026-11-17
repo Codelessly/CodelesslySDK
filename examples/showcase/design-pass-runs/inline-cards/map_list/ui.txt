@@ -9,10 +9,10 @@ Card w:390 gap:12
     Box x:230 y:0 w:4 h:180 fill:#FFFFFFFF
     Box x:0 y:20 w:340 h:3 fill:#FFE2DACB
     each s in shops
-      Box x:=s.x y:=s.y w:28 h:28 radius:14 center middle fill:=sel==s.id?"#FFD9381E":"#FF5A3E2B" -> sel=s.id
+      Box x:{s.x} y:{s.y} w:28 h:28 radius:14 center middle fill:{sel==s.id?"#FFD9381E":"#FF5A3E2B"} -> sel=s.id
         Text.strong "{s.id}"
   each s in shops
-    Box pad:10 radius:8 fill:=sel==s.id?"#FFFBE3DD":"#FFF7F7F7" -> sel=s.id
+    Box pad:10 radius:8 fill:{sel==s.id?"#FFFBE3DD":"#FFF7F7F7"} -> sel=s.id
       Row gap:10 middle
         Badge.neutral "{s.id}"
         Text.strong "{s.name}"

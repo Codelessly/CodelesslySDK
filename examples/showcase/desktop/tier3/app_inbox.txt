@@ -5,10 +5,10 @@ state convs=[{"id":1,"name":"Priya Nair","subject":"Cannot log in after password
 App
   Sidebar w:216
     Brand "Relaydesk" icon:"support_agent"
-    NavItem "Inbox" icon:"inbox" badge:"12" selected:=folder=="inbox" -> folder="inbox"
-    NavItem "Assigned to me" icon:"person" badge:"4" selected:=folder=="mine" -> folder="mine"
-    NavItem "Waiting" icon:"hourglass_empty" badge:"7" selected:=folder=="waiting" -> folder="waiting"
-    NavItem "Closed" icon:"check_circle" selected:=folder=="closed" -> folder="closed"
+    NavItem "Inbox" icon:"inbox" badge:"12" selected:{folder=="inbox"} -> folder="inbox"
+    NavItem "Assigned to me" icon:"person" badge:"4" selected:{folder=="mine"} -> folder="mine"
+    NavItem "Waiting" icon:"hourglass_empty" badge:"7" selected:{folder=="waiting"} -> folder="waiting"
+    NavItem "Closed" icon:"check_circle" selected:{folder=="closed"} -> folder="closed"
     Spacer grow
     Row gap:8 middle
       Avatar "Dana Ortiz" size:32
@@ -18,9 +18,9 @@ App
       Row between middle
         Heading "Inbox" level:3
         Text.caption "8 conversations"
-      Input "Search conversations" =q
+      Input "Search conversations" bind:q
     each c in convs
-      Box pad:12 fill:=sel==c.id?"#FFEEF3FF":"#00FFFFFF" border-bottom:#FFE5E7EB -> sel=c.id
+      Box pad:12 fill:{sel==c.id?"#FFEEF3FF":"#00FFFFFF"} border-bottom:#FFE5E7EB -> sel=c.id
         Row gap:12 top
           Avatar "{c.name}" size:40
           Column grow gap:2
@@ -30,7 +30,7 @@ App
             Text.small "{c.subject}"
             Row between middle gap:8
               Text.muted "{c.preview}" grow
-              Box w:8 h:8 radius:4 fill:#FF2563EB visible:=c.unread
+              Box w:8 h:8 radius:4 fill:#FF2563EB visible:{c.unread}
   Main
     Nav
       Column gap:4
@@ -71,7 +71,7 @@ App
             Text.caption "Dana Ortiz · Tue 9:15"
             Text "Yes, the refund of $49 goes back to the same card and usually appears within 3 to 5 business days."
     Column pad:16 gap:10 border-top:#FFE5E7EB
-      Input "Reply to Marcus" "Write your reply..." =reply multiline
+      Input "Reply to Marcus" "Write your reply..." bind:reply multiline
       Row gap:8 middle
         Button "Send" -> emit send reply; reply=""; toast "Reply sent"
         Button.outline "Send and close" -> emit sendAndClose reply; reply=""; toast "Sent and closed"
@@ -84,7 +84,7 @@ App
       Text.muted "marcus.chen@northwind.io"
     Divider
     Text.eyebrow "CUSTOMER DETAILS"
-    Details rows:=[["Plan","Team, $49/mo"],["Customer since","March 2022"],["Last order","#4821 · Jun 3"]]
+    Details rows:{[["Plan","Team, $49/mo"],["Customer since","March 2022"],["Last order","#4821 · Jun 3"]]}
     Text.eyebrow "TAGS"
     Row gap:8
       Badge.info "billing"

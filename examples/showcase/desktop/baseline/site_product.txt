@@ -15,7 +15,7 @@ Column maxw:1280 w:fill scroll
       Text "Sale"
     Row gap:16 center
       SearchBar "Search products" w:260
-      NotificationBadge count:=cart
+      NotificationBadge count:{cart}
         IconButton "shopping_cart"
   Divider
   Column pad:[32,16,32,0]
@@ -31,13 +31,13 @@ Column maxw:1280 w:fill scroll
       if img==3
         Media kind:"box" tone:"sky" h:480 w:580
       Row gap:12
-        Box w:96 h:96 radius:8 pad:6 border:=img==0?"#FF1F2328":"#FFE0E0E0" -> img=0
+        Box w:96 h:96 radius:8 pad:6 border:{img==0?"#FF1F2328":"#FFE0E0E0"} -> img=0
           Media kind:"box" tone:"sand" h:80
-        Box w:96 h:96 radius:8 pad:6 border:=img==1?"#FF1F2328":"#FFE0E0E0" -> img=1
+        Box w:96 h:96 radius:8 pad:6 border:{img==1?"#FF1F2328":"#FFE0E0E0"} -> img=1
           Media kind:"box" tone:"slate" h:80
-        Box w:96 h:96 radius:8 pad:6 border:=img==2?"#FF1F2328":"#FFE0E0E0" -> img=2
+        Box w:96 h:96 radius:8 pad:6 border:{img==2?"#FF1F2328":"#FFE0E0E0"} -> img=2
           Media kind:"box" tone:"mint" h:80
-        Box w:96 h:96 radius:8 pad:6 border:=img==3?"#FF1F2328":"#FFE0E0E0" -> img=3
+        Box w:96 h:96 radius:8 pad:6 border:{img==3?"#FF1F2328":"#FFE0E0E0"} -> img=3
           Media kind:"box" tone:"sky" h:80
     Column gap:16 grow
       Text.eyebrow "DESK LAMPS"
@@ -45,7 +45,7 @@ Column maxw:1280 w:fill scroll
       Row gap:8 center
         Row gap:2
           each s in range(5)
-            Icon "star" color:=s<5?"#FFF5A623":"#FFD0D0D0"
+            Icon "star" color:{s<5?"#FFF5A623":"#FFD0D0D0"}
         Text.strong "4.7"
         Text.muted "318 reviews"
       Row gap:12 center
@@ -56,10 +56,10 @@ Column maxw:1280 w:fill scroll
       Column gap:8
         Text.fieldLabel "Finish: {finish}"
         Row gap:8
-          ChoiceChip "Brass" selected:=finish=="Brass" -> finish="Brass"
-          ChoiceChip "Graphite" selected:=finish=="Graphite" -> finish="Graphite"
-          ChoiceChip "Sand" selected:=finish=="Sand" -> finish="Sand"
-      Stepper "Quantity" =qty min:1 max:10
+          ChoiceChip "Brass" selected:{finish=="Brass"} -> finish="Brass"
+          ChoiceChip "Graphite" selected:{finish=="Graphite"} -> finish="Graphite"
+          ChoiceChip "Sand" selected:{finish=="Sand"} -> finish="Sand"
+      Stepper "Quantity" bind:qty min:1 max:10
       Row gap:12
         Button "Add to cart" grow -> cart=cart+qty; toast "Added {qty} to cart"
         Button.outline "Buy now" grow -> emit buyNow {"finish":finish}
@@ -76,7 +76,7 @@ Column maxw:1280 w:fill scroll
             Text.strong "30-day free returns"
             Text.muted "Not right for your desk? Send it back, no questions asked."
   Column gap:20 pad:[32,32,32,32]
-    TabToggle =tab options:["Description","Specifications","Reviews"]
+    TabToggle bind:tab options:["Description","Specifications","Reviews"]
     if tab=="Description"
       Column gap:12 maxw:760
         Text.heading3 "Light that moves with you"
@@ -103,7 +103,7 @@ Column maxw:1280 w:fill scroll
                   Text.muted "{r.date}"
               Row gap:2
                 each s in range(5)
-                  Icon "star" color:=s<r.stars?"#FFF5A623":"#FFD0D0D0"
+                  Icon "star" color:{s<r.stars?"#FFF5A623":"#FFD0D0D0"}
             Text.strong "{r.title}"
             Text "{r.text}"
   Column gap:16 pad:[32,16,32,32]

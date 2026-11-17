@@ -23,20 +23,20 @@ TYPES
   Text variants: Text.pageTitle, Text.sectionTitle, Text.dialogTitle, Text.panelTitle, Text.body, Text.bodySecondary, Text.inputText, Text.placeholder, Text.fieldLabel, Text.caption, Text.mono, Text.badge, Text.controlXs, Text.controlCompact, Text.controlSmall, Text.controlMedium, Text.controlLarge, Text.heading1, Text.heading2, Text.heading3, Text.cardTitle, Text.blockTitle, Text.rowTitle, Text.lead, Text.meta, Text.eyebrow, Text.chip, Text.cta, Text.field, Text.numberHero, Text.numberLarge, Text.number, Text.numberSmall, Text.figure, Text.code, Text.title, Text.heading, Text.strong, Text.muted, Text.small, Text.gaugeValue, Text.gaugeUnit, Text.titleWide, Text.heading1Wide, Text.heading2Wide, Text.heading3Wide, Text.headingWide, Text.strongWide, Text.bodyWide, Text.leadWide, Text.mutedWide, Text.smallWide, Text.captionWide, Text.eyebrowWide, Text.columnHead, Text.danger, Text.success (plain Text is body text)
   Button variants: Button.primary, Button.secondary, Button.tertiary, Button.outline, Button.ghost, Button.elevated, Button.destructive (plain Button is primary)
   Badge variants: Badge.neutral, Badge.primary, Badge.info, Badge.success, Badge.warning, Badge.error, Badge.danger
-  Card is a padded, bordered Column; Box is a Column you style (fill, radius, pad). Every control already has the design system's look: write no colors or sizes on controls. A Text takes color:#FF…, size:32 and weight:700 (a big number is Text "{n}" size:64); a Box or Card takes fill:#FF… (on a dark fill, give its texts a light color). A look can follow data: fill:=, border:= and color:= take an expression. Column scroll lets a tall screen scroll.
-  Grid cols:3 gap:8 lays its children out in columns. Progress 0.6 (or Progress =done) shows a share from 0 to 1. Select and SegmentedButton take items:["A","B"]. Input takes type:number (or email, phone) for its keyboard. Icon "name" uses Material icon names (check, close, star, chevron_right).
-  Pages =page h:160 shows the lines under it one at a time, swiped across (under it, each item in items gives one page per element); =page is the page shown, from 0, and setting it turns the page. peek:0.86 shows the edge of the next page (a carousel, a gallery). Dots =page count:4 draws its pagination dots (a tap goes to that page); "{page+1} of {length(items)}" is its count. Content wider than the card (a wide table, a strip of tiles) goes in Row scroll, which scrolls sideways.
+  Card is a padded, bordered Column; Box is a Column you style (fill, radius, pad). Every control already has the design system's look: write no colors or sizes on controls. A Text takes color:#FF…, size:32 and weight:700 (a big number is Text "{n}" size:64); a Box or Card takes fill:#FF… (on a dark fill, give its texts a light color). A look can follow data: fill:{,} border:{ and color:=} take an expression. Column scroll lets a tall screen scroll.
+  Grid cols:3 gap:8 lays its children out in columns. Progress 0.6 (or Progress bind:{done)} shows a share from 0 to 1. Select and SegmentedButton take items:["A","B"]. Input takes type:number (or email, phone) for its keyboard. Icon "name" uses Material icon names (check, close, star, chevron_right).
+  Pages bind:page h:160 shows the lines under it one at a time, swiped across (under it, each item in items gives one page per element); bind:page is the page shown, from 0, and setting it turns the page. peek:0.86 shows the edge of the next page (a carousel, a gallery). Dots bind:page count:4 draws its pagination dots (a tap goes to that page); "{page+1} of {length(items)}" is its count. Content wider than the card (a wide table, a strip of tiles) goes in Row scroll, which scrolls sideways.
   BarChart values:[3,5,4] labels:["Mon","Tue","Wed"] and LineChart values:[10,12,11,14] draw charts: never link to a chart image.
   LineChart labels:["W1","W2"] series:[{"name":"Signups","values":[40,52]},{"name":"Churn","values":[8,6]}] draws several lines (AreaChart fills under them); Donut values:[60,25,15] labels:["Rent","Food","Other"] shares of a whole.
-  Gauge 72 min:0 max:180 limit:100 unit:"km/h" is a round meter with its figure inside (Gauge =speed follows a variable); Ring 0.72 a round share (in a Stack center middle with a Text over it for the number inside); Sparkline values:[3,4,3,6] a small trend line.
-  Motion is a word on any line: animate:fade (slide-up, slide-left, scale, pop, shake, pulse, spin, shimmer) with duration:400 delay:200; under an each, stagger:80. swipe:left -> … runs on that swipe. Avatar "Maya Reyes" size:40 is a round mark with initials (Avatar src:"…" a picture). Input "Password" password hides it; Input "Note" multiline is a text area. Text "…" center aligns it, strike crosses it out. maxw:720 keeps a page's content from stretching.
+  Gauge 72 min:0 max:180 limit:100 unit:"km/h" is a round meter with its figure inside (Gauge bind:speed follows a variable); Ring 0.72 a round share (in a Stack center middle with a Text over it for the number inside); Sparkline values:[3,4,3,6] a small trend line.
+  Motion is a word on any line: animate:fade (slide-up, slide-left, scale, pop, shake, pulse, spin, shimmer) with duration:400 delay:200; under an each, stagger:80. onSwipeLeft:{… runs on that swipe. Avatar "Maya Reyes" size:40 is a round mark with initials (Avatar src:"…" a picture). Input "Password" password hides it; Input "Note" multiline is a text area. Text "…" center aligns it, strike crosses it out. maxw:720 keeps a page's content from stretching.}
   Only Row, Column, Stack, Box, Card, Grid, List, Accordion and ListTile take children.
 
 FORMULAS (in {…}, after = and := and in -> name=…)
   Operators: + - * / % == != < <= > >= && || ! and cond ? a : b. Text in "double quotes" or 'single'. Lists [1,2], fields a.b, items list[0].
   Only these functions exist: length(x), upper(t), lower(t), trim(t), contains(textOrList,v), startsWith(t,p), replace(t,a,b), join(list,sep), round(n,d), floor(n), ceil(n), abs(n), min(a,b), max(a,b), clamp(n,lo,hi), fixed(n,d), money(n,"$",2), sum(list,x=>n), count(list,x=>cond), filter(list,x=>cond), find(list,x=>cond), any(list,x=>cond), all(list,x=>cond), map(list,x=>v), sortBy(list,x=>key), sortByDesc(list,x=>key), unique(list), first(list), last(list), slice(list,a,b), take(list,n), reverse(list), range(n), indexOf(list,v), append(list,item), without(list,item), removeAt(list,i), setAt(list,i,item), updateWhere(list,x=>cond,x=>new), removeWhere(list,x=>cond), with(map,key,v), isEmpty(x), coalesce(v,fallback), today(), formatDate(date,"MMM d"), duration(seconds), concat(listA,listB).
   Lists never change in place: set the variable to a new list (-> cart=append(cart,item); -> rows=updateWhere(rows,r=>r.id==row.id,r=>with(r,"qty",r.qty+1))).
-  An action is one of the forms above, never a condition: to choose, set a variable to a formula (-> step=valid?3:2). Chips have selected:=expression and enabled:=expression.
+  An action is one of the forms above, never a condition: to choose, set a variable to a formula (-> step=valid?3:2). Chips have selected:{expression and enabled:=expression.}
 
 BEYOND THESE WORDS
   The full vocabulary has more. Write that part as a node {…} line or a {…} tail; its reference page says how (ask for the page with ui_docs when you have that tool):
@@ -44,9 +44,9 @@ BEYOND THESE WORDS
 
 EXAMPLES
 Column gap:12 pad:16
-  Slider =volume min:0 max:100
-  Input "Email" "you@example.com" =email
-  Toggle "Notifications" =notify
+  Slider bind:volume min:0 max:100
+  Input "Email" "you@example.com" bind:email
+  Toggle "Notifications" bind:notify
   Button "Save" -> emit save
 
 state qty=1
@@ -72,53 +72,53 @@ Card gap:8
     Text.muted "Thanks, you chose {choice}."
 
 COMPONENTS (Cards: ready-made, already styled; prefer one of these to building its look from boxes)
-  Written like any node: Name "text" key:value =variable -> action. The quoted names are filled, in order, by the strings you write; a name ending in ! must be given (key:value). =variable is where the component keeps its value (created for you); -> runs when it is used (its first event). Lists are written ["a","b"]. A component with (children) takes lines indented under it.
+  Written like any node: Name "text" key:value bind:variable -> action. The quoted names are filled, in order, by the strings you write; a name ending in ! must be given (key:value). =variable is where the component keeps its value (created for you); -> runs when it is used (its first event). Lists are written ["a","b"]. A component with (children) takes lines indented under it.
   ChatCard "title" "subtitle" icon status tone (children) : The card itself: put it at the root and write the blocks indented under it (a white rounded card with a header: icon tile, title, subtitle and a status pill; tone colors the tile and pill: accent, good, warn, danger, neutral).
   SectionLabel "label" "note" : A small caps heading over a group of blocks, with a quiet note at the right (a count, a unit).
   Paragraph "text" strong : A sentence or two of body text in the card's own type and color (what will happen, a description): use it instead of Text for prose.
-  ActionButton "label" tone icon enabled -> onPressed : A full-width button that fires onPressed: tone is primary (one per card), quiet, danger, good or dark; enabled:=condition dims and blocks it; put two in a Row gap:10 for a pair such as Cancel and Confirm.
-  TotalBar "label" "note" amount! cta icon enabled -> onPressed : The card's closing bar on dark: a label over a large amount (a total, a count, a chosen time) with a note, and one cta button at the right that fires onPressed; enabled:=condition dims and blocks the button.
-  Details rows! icons : Labels and their values as rows in one quiet tile (a price breakdown, the facts of a request): rows:=[["Subtotal",money(sub,"$",2)],["Delivery","$4.99"]], each a [label, value] pair (a row with an empty value is hidden); icons is an optional list alongside.
+  ActionButton "label" tone icon enabled enabled:{condition} dims and blocks it; put two in a Row gap:10 for a pair such as Cancel and Confirm. -> onPressed : A full-width button that fires onPressed: tone is primary (one per card), quiet, danger, good or dark;
+  TotalBar "label" "note" amount! cta icon enabled enabled:{condition} dims and blocks the button. -> onPressed : The card's closing bar on dark: a label over a large amount (a total, a count, a chosen time) with a note, and one cta button at the right that fires onPressed;
+  Details rows! icons : Labels and their values as rows in one quiet tile (a price breakdown, the facts of a request): rows:{[["Subtotal",money(sub,"$",2)],["Delivery","$4.99"]],} each a [label, value] pair (a row with an empty value is hidden); icons is an optional list alongside.
   Callout "title" "message" tone icon : A tinted note inside a card: a bold title and a message with an icon; tone is warn (default), danger (a risk, cannot be undone), good, accent or neutral.
   Disclosure "label" "note" lines! icon : A link that opens and closes a short list by itself (the first few file names, the fine print): label is the link, lines the list shown in monospace, note a quiet last line.
   Receipt "title" "message" code codeLabel tone icon : The card's end state after a decision: a drawn badge with an icon, a title, a message and an optional code (an order or booking number); tone good for done, danger for denied, neutral for cancelled; show it under an if line in place of the controls.
   Recommendation "title" "why" reasons eyebrow kind : The one recommendation on the accent gradient: a title, why (one sentence), reasons (a list, each with a check), an eyebrow chip and an optional drawn picture (kind, as Media).
   Steps steps! current! : Progress through named steps as numbered dots joined by a line: steps is the list of names, current the step the user is on counted from 1 (earlier ones are checked).
-  Segments =value options! -> onChanged : A switch between two to five options in one track (a period, a tone, a status filter): write Segments =range options:["7 days","30 days"] and it keeps the chosen option's text in your variable; onChanged fires with it.
-  InputField "label" "placeholder" =value lines icon error success keyboard -> onChanged : A labeled text field that keeps what is typed in your variable: InputField "Email" "you@example.com" =email; lines:6 makes a multi-line box, icon:"search_rounded" a search field, error:=cond?"message":"" shows a red message under it, success a green one.
-  OptionList "title" =value options! details icons prices -> onChanged : A question and its answers as a list of rows with a radio (also a delivery method, a plan): OptionList "What will you use it for?" =answer options:["A","B"] keeps the chosen option's text in your variable; details, icons and prices are optional lists alongside; onChanged fires with the choice (-> step=2).
-  ChoiceChips =value options! disabled columns -> onChanged : A single choice as a grid of chips (time slots, sizes): ChoiceChips =time options:["18:00","18:30"] disabled:["18:30"] keeps the chosen chip's text in your variable; disabled lists the ones that are unavailable (full, sold out); columns sets chips per row.
-  DayPicker =value days! -> onChanged : A strip of days to pick one from: DayPicker =day days:["Sat 14","Sun 15","Mon 16"] (each a short weekday, a space, the date) keeps the chosen day's text in your variable; onChanged fires with it.
-  Counter "label" "detail" =value min max step icon -> onChanged : A number raised and lowered with minus and plus (a party size, a count): Counter "Guests" =party min:1 max:8 keeps it in your number variable; onChanged fires with the new number.
-  FlightOption "name" depart! arrive! origin destination duration stops price tag selected -> onPressed : One flight as a selectable option: the airline name, depart and arrive times over origin and destination, the duration and stops on a drawn path, the price, a tag (Cheapest, Best time); selected:=pick==f.id marks it and a tap fires onPressed (-> pick=f.id).
+  Segments bind:value options! -> onChanged : A switch between two to five options in one track (a period, a tone, a status filter): write Segments =range options:["7 days","30 days"] and it keeps the chosen option's text in your variable; onChanged fires with it.
+  InputField "label" "placeholder" bind:value lines icon error success keyboard error:{cond?"message":""} shows a red message under it, success a green one. -> onChanged : A labeled text field that keeps what is typed in your variable: InputField "Email" "you@example.com" =email; lines:6 makes a multi-line box, icon:"search_rounded" a search field,
+  OptionList "title" bind:value options! details icons prices -> onChanged : A question and its answers as a list of rows with a radio (also a delivery method, a plan): OptionList "What will you use it for?" =answer options:["A","B"] keeps the chosen option's text in your variable; details, icons and prices are optional lists alongside; onChanged fires with the choice (-> step=2).
+  ChoiceChips bind:value options! disabled columns -> onChanged : A single choice as a grid of chips (time slots, sizes): ChoiceChips =time options:["18:00","18:30"] disabled:["18:30"] keeps the chosen chip's text in your variable; disabled lists the ones that are unavailable (full, sold out); columns sets chips per row.
+  DayPicker bind:value days! -> onChanged : A strip of days to pick one from: DayPicker =day days:["Sat 14","Sun 15","Mon 16"] (each a short weekday, a space, the date) keeps the chosen day's text in your variable; onChanged fires with it.
+  Counter "label" "detail" bind:value min max step icon -> onChanged : A number raised and lowered with minus and plus (a party size, a count): Counter "Guests" =party min:1 max:8 keeps it in your number variable; onChanged fires with the new number.
+  FlightOption "name" depart! arrive! origin destination duration stops price tag selected selected:{pick==f.id} marks it and a tap fires onPressed (-> pick=f.id). -> onPressed : One flight as a selectable option: the airline name, depart and arrive times over origin and destination, the duration and stops on a drawn path, the price, a tag (Cheapest, Best time);
   ProductTile "name" "detail" price rating kind tone badge cta height -> onPressed : A product with a large drawn picture: the name, a detail, the price, the rating as stars, kind (the picture, as Media: shoe, mug, tote...) and tone (its color: sand, rose, mint, sky, lilac, slate); a tap fires onPressed (open its details).
-  Carousel =value items! kind peek dots arrows counter thumbs cta height fade -> onPressed : A real carousel of products: Carousel =i items:=shoes slides one ProductTile per record (name, detail, price, rating, kind, tone) sideways by swipe, showing the edge of the next (peek), and keeps the position (from 0) in your number variable; dots, arrows, counter ("2 of 6") and thumbs are switches; a tap on an item fires onPressed with its position (-> open=true), and Pager or PageDots on the same variable drive it too.
-  PageDots =value count! -> onChanged : Pagination dots for Pages, a Carousel or any paged content: PageDots =page count:=length(items) draws one dot per page, the current one long and in the accent, and a tap on a dot sets your variable to that page (from 0).
-  Pager "label" =value count! -> onChanged : Paging for a list or for pages of content: "Page 1 of 3" with previous and next buttons; Pager =page count:=ceil(length(rows)/5) keeps the page (from 0) in your number variable, so show slice(rows,page*5,page*5+5), or give it the variable of Pages or a Carousel to turn their pages.
+  Carousel bind:value items! kind peek dots arrows counter thumbs cta height fade items:{shoes} slides one ProductTile per record (name, detail, price, rating, kind, tone) sideways by swipe, showing the edge of the next (peek), and keeps the position (from 0) in your number variable; dots, arrows, counter ("2 of 6") and thumbs are switches; a tap on an item fires onPressed with its position (-> open=true), and Pager or PageDots on the same variable drive it too. -> onPressed : A real carousel of products: Carousel =i
+  PageDots bind:value count! count:{length(items)} draws one dot per page, the current one long and in the accent, and a tap on a dot sets your variable to that page (from 0). -> onChanged : Pagination dots for Pages, a Carousel or any paged content: PageDots =page
+  Pager "label" bind:value count! count:{ceil(length(rows)/5)} keeps the page (from 0) in your number variable, so show slice(rows,page*5,page*5+5), or give it the variable of Pages or a Carousel to turn their pages. -> onChanged : Paging for a list or for pages of content: "Page 1 of 3" with previous and next buttons; Pager =page
   WideScroll width! fade (children) : A frame that scrolls sideways for content wider than the card (a table with many columns): write WideScroll width:640 and the wide blocks indented under it (TableHeader, each row, TableRow) are laid out that wide and scroll together; its edges fade where there is more to scroll to (fade:false turns that off).
   CartLine "title" "detail" price qty! kind tone -> onChanged : One line of a cart or order with a drawn thumbnail and a quantity stepper: the title, a detail, the price, kind (the picture, as Media) and qty; minus and plus fire onChanged with the new quantity as result (0 when the last one is removed), so write -> items=updateWhere(items,x=>x.id==i.id,x=>with(x,"qty",result)).
-  DiffHunk "title" "detail" =value start! lines! -> onChanged : One hunk of a diff with its own Keep and Discard buttons: DiffHunk "Server port" "@@ -4,2 +4,2 @@" =h1 start:4 lines:["-port: 8080","+port: 9090"," host: localhost"] (a line starts with -, + or a space; numbers count from start) sets your text variable to "keep" or "discard" (empty until decided).
+  DiffHunk "title" "detail" bind:value start! lines! -> onChanged : One hunk of a diff with its own Keep and Discard buttons: DiffHunk "Server port" "@@ -4,2 +4,2 @@" =h1 start:4 lines:["-port: 8080","+port: 9090"," host: localhost"] (a line starts with -, + or a space; numbers count from start) sets your text variable to "keep" or "discard" (empty until decided).
   ComparisonTable names! prices notes rows! pick pickLabel cta corner columnWidth fade -> onChoose : Two to five options compared side by side: names and prices head the columns, rows is a list of [label, value per column..., winner] where winner is the winning column's number (1 to 5; 0 a tie) and gets a check; pick names the recommended column (tinted); with more than two options the columns scroll sideways while the labels stay in place; the Choose button under each column fires onChoose with that name as result.
   StatTile "label" "note" value! delta invert icon : A dashboard figure with its change: the label, value (text) and delta (+8.5% or -0.4%: an up or down chip, green when good; invert:true when a fall is good, as for churn); put four in a Grid cols:2 gap:10.
   ChartCard "title" value values! labels kind delta : A designed chart in its own tile: kind:"line" draws values as an area line (a trend), kind:"bars" one rounded bar per value with its number (a breakdown); the title, a headline value, a delta chip and labels (one per value) complete it; never use BarChart or LineChart in a card.
-  TableHeader =value desc columns! keys widths selectable checked -> onToggleAll : The header of a sortable table: columns are the titles, keys the fields they sort by; tapping a title sets your sort variable to its key and flips desc on a second tap, so write state desc=false, TableHeader =sort desc:desc columns:[...] keys:[...] and show sortBy or sortByDesc(rows,sort).
-  TableRow cells! badge widths selectable checked -> onPressed : One row of a table under a TableHeader: cells:=[r.plan,r.subs,money(r.revenue,"$",0)] in column order, badge a status pill as a last column (Paid, Due, Overdue are colored); selectable:true with checked:=contains(picked,r.id) adds a tick box, and a tap fires onPressed (toggle the tick).
-  PhotoGallery =value photos! layout dots columns fade -> onChanged : A photo gallery with a built-in large view: PhotoGallery =open photos:[{"kind":"harbor","caption":"Harbour at sunrise"},...] draws each photo as a scene (kind: mountain, harbor, skyline, dunes, forest, lagoon, market, festival, train, temple, bamboo; optional tone: dawn, day, dusk, night); layout is grid, strip (one row that scrolls sideways) or pages (full-width photos swiped one at a time, with dots); tapping a photo opens it large with its caption, a "3 of 9" counter, dots, arrows and a close button, and a swipe there goes to the next; your variable holds the photo in view (0: none open).
+  TableHeader bind:value desc columns! keys widths selectable checked -> onToggleAll : The header of a sortable table: columns are the titles, keys the fields they sort by; tapping a title sets your sort variable to its key and flips desc on a second tap, so write state desc=false, TableHeader =sort desc:desc columns:[...] keys:[...] and show sortBy or sortByDesc(rows,sort).
+  TableRow cells! badge widths selectable checked cells:{[r.plan,r.subs,money(r.revenue,"$",0)]} in column order, badge a status pill as a last column (Paid, Due, Overdue are colored); selectable:true with checked:{contains(picked,r.id)} adds a tick box, and a tap fires onPressed (toggle the tick). -> onPressed : One row of a table under a TableHeader:
+  PhotoGallery bind:value photos! layout dots columns fade -> onChanged : A photo gallery with a built-in large view: PhotoGallery =open photos:[{"kind":"harbor","caption":"Harbour at sunrise"},...] draws each photo as a scene (kind: mountain, harbor, skyline, dunes, forest, lagoon, market, festival, train, temple, bamboo; optional tone: dawn, day, dusk, night); layout is grid, strip (one row that scrolls sideways) or pages (full-width photos swiped one at a time, with dots); tapping a photo opens it large with its caption, a "3 of 9" counter, dots, arrows and a close button, and a swipe there goes to the next; your variable holds the photo in view (0: none open).
   DayHeader "title" "subtitle" kind tone tag (children) : One day of a trip: a banner drawn as a travel scene (the title, such as Day 1, over the subtitle, where it goes; kind the scene: mountain, harbor, skyline, dunes, forest, lagoon, market, festival, train, temple, bamboo; tone its time of day; tag a pill), with that day's ItineraryStop lines indented under it as its timeline.
   ItineraryStop "title" "detail" time! travel last open : One stop on a day's timeline: the place (title), time at the left, a detail the stop reveals when tapped (it opens and closes by itself), and travel, how to reach the next stop and how long ("Walk to Gion, 15 min"); last:true ends the line.
-  Checklist "title" =value items! -> onChanged : A titled list of things to tick off: Checklist "Book ahead" =booked items:["Dinner in Gion","Tea ceremony"] keeps the ticked items in your list variable, so what is left is length(items)-length(booked); it shows its own count.
-  MapPanel =value count! -> onChanged : A drawn map (an illustration: blocks, streets, a park, water, a dot for you) with numbered pins: MapPanel =pick count:5 shows pins 1 to 5 and keeps the tapped pin's number in your variable (0: none), the same variable the PlaceRow lines use.
-  PlaceRow "name" "detail" index! rating distance hours selected -> onPressed : A numbered place in a list beside a MapPanel: the name, a detail, index (its pin number), rating, distance and hours; selected:=pick==1 highlights it and reveals the three facts, and a tap fires onPressed (-> pick=1).
-  PlanStep "title" "detail" index! current! running last : One step of a plan that runs: the title and a detail, index (its position from 0), current:=done (how many steps are finished) and running:=running; it draws a tick when finished, a spinner when it is the running one, a number while it waits.
-  ProgressLine "label" "detail" value! : A progress bar with its words: the label at the left ("3 of 6 steps"), a detail at the right ("12 s elapsed"), and value:=done/total from 0 to 1 (it turns green when full).
+  Checklist "title" bind:value items! -> onChanged : A titled list of things to tick off: Checklist "Book ahead" =booked items:["Dinner in Gion","Tea ceremony"] keeps the ticked items in your list variable, so what is left is length(items)-length(booked); it shows its own count.
+  MapPanel bind:value count! -> onChanged : A drawn map (an illustration: blocks, streets, a park, water, a dot for you) with numbered pins: MapPanel =pick count:5 shows pins 1 to 5 and keeps the tapped pin's number in your variable (0: none), the same variable the PlaceRow lines use.
+  PlaceRow "name" "detail" index! rating distance hours selected selected:{pick==1} highlights it and reveals the three facts, and a tap fires onPressed (-> pick=1). -> onPressed : A numbered place in a list beside a MapPanel: the name, a detail, index (its pin number), rating, distance and hours;
+  PlanStep "title" "detail" index! current! running last : One step of a plan that runs: the title and a detail, index (its position from 0), current:{done} (how many steps are finished) and running:{running;} it draws a tick when finished, a spinner when it is the running one, a number while it waits.
+  ProgressLine "label" "detail" value! : A progress bar with its words: the label at the left ("3 of 6 steps"), a detail at the right ("12 s elapsed"), and value:{done/total} from 0 to 1 (it turns green when full).
   WeatherNow "title" "detail" temp! high low kind : The weather now as the card's hero on a sky that follows the conditions: the place (title), the conditions in words (detail), temp, high and low (numbers only) and kind (sun, partly, cloud, rain, storm, night) for the drawn glyph.
   WeatherHours hours! temps! kinds : The next hours as a strip of small forecasts: hours (labels), temps (numbers) and kinds (sun, partly, cloud, rain, storm, night), three lists of the same length.
   WeatherDay "label" low! high! kind min max : One day of a forecast with a temperature range bar: the day (label), kind (sun, partly, cloud, rain, storm, night), low and high; min and max are the lowest low and highest high of all the days shown, so the bars line up.
   Media kind! tone round : A drawn picture where a photo would go (never use an image URL): kind is a product or food (shoe, mug, tote, box, beans, laptop, banana, milk, bread, eggs, cheese, apple) on a toned ground, or a travel scene (mountain, harbor, skyline, dunes, forest, lagoon, market, festival, train, temple, bamboo); tone recolors it (products: sand, rose, mint, sky, lilac, slate; scenes: dawn, day, dusk, night); size it with h (and w).
   WeatherGlyph kind! : A drawn weather glyph: kind is sun, partly, cloud, rain, storm, night; size it with w and h.
-  TextInput "placeholder" =value error obscure keyboard enabled -> onChanged : A one-line text field on the control scale (28 by default), its value kept in your variable.
-  TextArea "placeholder" =value error enabled -> onChanged : A multi-line text field (a note, a message), styled as TextInput, its value kept in your variable.
-  SegmentedControl =value options! size -> onChanged : Two to five mutually exclusive options in one control (a view switch, a period), the choice in your variable.
+  TextInput "placeholder" bind:value error obscure keyboard enabled -> onChanged : A one-line text field on the control scale (28 by default), its value kept in your variable.
+  TextArea "placeholder" bind:value error enabled -> onChanged : A multi-line text field (a note, a message), styled as TextInput, its value kept in your variable.
+  SegmentedControl bind:value options! size -> onChanged : Two to five mutually exclusive options in one control (a view switch, a period), the choice in your variable.
   Dialog "title" "description" closable -> onClose (children) : A dialog's frame for a modal canvas: title, optional description, body (the call's children) and footer actions.
   Banner "title" "message" tone dismissible -> onDismiss : An inline message (info, success, warning, error): the tone's tint, icon and an optional action (the actions slot).
   ListRow "title" "subtitle" icon selected dense divider -> onPressed : One row of a list or table-like list: icon, title, optional subtitle and trailing content (the trailing slot).
@@ -131,7 +131,7 @@ COMPONENTS (Cards: ready-made, already styled; prefer one of these to building i
   StatusBadge "label" tone : A run or sync state as a small pill in its tone: neutral, success, warning, error or info.
   InlineStat "value" icon : One small figure with its icon (files, lines, stars): a muted 11 px icon and a bold 10.5 px value.
   IconBox "icon" : A tinted square holding an icon, for a dialog or card header: 30 px, radius 7, the brand color at 10 %.
-  ToggleRow "label" "description" =value enabled -> onChanged : A setting with its switch: a bold title, an optional muted description, the switch at the end.
+  ToggleRow "label" "description" bind:value enabled -> onChanged : A setting with its switch: a bold title, an optional muted description, the switch at the end.
   Skeleton variant : A grey placeholder for content still loading: a line of text, a block or a circle, gently pulsing.
   ErrorBar "message" -> onPressed : A failure under a card or row: a red rule over a one-line message with an alert icon.
   FeatureBulletItem "text" icon : One line of a feature list: a muted icon and a sentence.
@@ -161,8 +161,8 @@ COMPONENTS (Cards: ready-made, already styled; prefer one of these to building i
   Breadcrumb items! showHomeIcon -> onNavigate : The path to this page: each level a link, the last one where you are.
   PageControl currentPage! totalPages! -> onPageTapped : Which page of several: small dots, the current one a wider brand bar.
   StepIndicator steps! current! details -> onStepPressed : Progress through named steps: done steps checked, the current one ringed, the rest to come.
-  Stepper "label" =value min max step enabled -> onChanged : A number changed one step at a time: minus, the value, plus.
-  SearchBar "placeholder" =value size -> onChanged : A rounded search field with a search icon and a clear button, its text kept in your variable.
+  Stepper "label" bind:value min max step enabled -> onChanged : A number changed one step at a time: minus, the value, plus.
+  SearchBar "placeholder" bind:value size -> onChanged : A rounded search field with a search icon and a clear button, its text kept in your variable.
   ThemeToggle -> onChanged : Switches the site between light and dark: a moon in light mode, a sun in dark.
   DownloadButton "label" loading enabled -> onPressed : Starts a download: a download icon with a label, or the icon alone.
   UpgradeButton "label" variant size icon -> onPressed : The call to upgrade a plan: a warm gradient button with a crown or sparkles.
@@ -173,8 +173,8 @@ COMPONENTS (Cards: ready-made, already styled; prefer one of these to building i
   CloudSyncIndicator state -> onPressed : Whether something is saved to the cloud: a small cloud with a mark for synced, syncing, pending, failed or unavailable.
   TextExpandable "title" open -> onToggle (children) : A small heading that opens and closes what is under it (the call's children).
   StackedProgressBar counts! colors! total! showPercent : Progress made of parts: a bar with a colored segment per part, as wide as its count of the total, and the percent done.
-  TabToggle =value options! size -> onChanged : A choice between a few views as a pill track: the chosen one raised.
-  ChipTabs =value tabs! showAdd -> onSelected : Open items as a row of small pills, the chosen one outlined; an optional add button.
+  TabToggle bind:value options! size -> onChanged : A choice between a few views as a pill track: the chosen one raised.
+  ChipTabs bind:value tabs! showAdd -> onSelected : Open items as a row of small pills, the chosen one outlined; an optional add button.
   MenuButton size enabled -> onPressed : A menu (hamburger) button.
   SplitButton "label" icon size tone busy enabled -> onPressed : An action with a second half that opens its choices.
   WindowToolbar "title" icon -> onTitle : The title bar of a document or a pane: an icon, a title and what the call puts at its end.
@@ -189,11 +189,11 @@ COMPONENTS (Cards: ready-made, already styled; prefer one of these to building i
   RunRecordRow "title" "message" timestamp status created modified deleted divider : One past run in a history: what ran, when, a message, what it changed and how it ended.
   TrialBanner "message" urgent actionLabel dismissible -> onUpgrade : A bar telling how much of a trial is left, with an upgrade button and an x.
   AuthPromptBanner "title" "description" buttonLabel icon accent busy dismissible -> onSignIn : An invitation to sign in: an icon plate, a title, a line and a button, tinted in an accent.
-  FullWidthSearchInput "placeholder" =value -> onChanged : The search row at the top of a list or a pane: edge to edge over a hairline.
-  HeaderSearchInput "placeholder" =value -> onChanged : A small search field for a header or a toolbar.
-  AuthInput "placeholder" =value kind error -> onChanged : A sign-in form field: email, password or a code.
-  NumberInput =value min max step prefix suffix showStepper size enabled -> onChanged : A number you type or step: a field with small up and down buttons, an optional prefix and suffix.
-  ColorInput "label" =value error showSwatch size enabled -> onChanged : A color as its hex code, with a swatch of it.
+  FullWidthSearchInput "placeholder" bind:value -> onChanged : The search row at the top of a list or a pane: edge to edge over a hairline.
+  HeaderSearchInput "placeholder" bind:value -> onChanged : A small search field for a header or a toolbar.
+  AuthInput "placeholder" bind:value kind error -> onChanged : A sign-in form field: email, password or a code.
+  NumberInput bind:value min max step prefix suffix showStepper size enabled -> onChanged : A number you type or step: a field with small up and down buttons, an optional prefix and suffix.
+  ColorInput "label" bind:value error showSwatch size enabled -> onChanged : A color as its hex code, with a swatch of it.
   ModelAvatarStack labels! max size : Several people or models as small overlapping round plates with their first letters, and +n for the rest.
   SectionToolbar "title" icon loading : The bar over a section: an icon, a title, a spinner while it loads, and the call's actions at the end.
   PaneToolbar "title" meta icon loading closable -> onTitle : The bar of a pane: an icon, a title, a muted note, the call's actions and a close button.
@@ -201,67 +201,67 @@ COMPONENTS (Cards: ready-made, already styled; prefer one of these to building i
   StatusCategoryHeader "label" count status expanded variant -> onToggle : The header of a group of items in one state: a state icon, a label, how many, and a chevron that opens and closes the group.
   SectionCategoryHeaderFull "title" : The full-width label over a group in a list: small upper-case letters on a soft band.
   ScrollToBottomFAB -> onPressed : The small round button over a conversation or a log that takes it back to its end.
-  TabBarWithBadges =value tabs! icons! badges variant -> onChanged : The tab bar at the foot of an app: icons over labels, with a badge on a tab that has news.
+  TabBarWithBadges bind:value tabs! icons! badges variant -> onChanged : The tab bar at the foot of an app: icons over labels, with a badge on a tab that has news.
   MenuPopover heading size (children) : The surface of a menu: bordered, rounded, with a shadow and an optional heading.
   MenuItem "title" "subtitle" icon trailing tone enabled -> onSelected : A row of a MenuPopover: an icon, a title, an optional subtitle and a note at the end.
   ContextMenu items! icons shortcuts destructive -> onSelected : The menu of a right click or a "more" button: actions with icons and shortcuts, hairlines between groups.
-  SortMenu =value options! direction -> onChanged : The menu that picks what a list is sorted by and which way.
+  SortMenu bind:value options! direction -> onChanged : The menu that picks what a list is sorted by and which way.
   UserMenu "name" email items icons signOutLabel -> onSelected : The account menu: who is signed in, a few actions and Sign out.
   StatusCard "label" "detail" connected letterColor divider -> onConfigure : One connection in a StatusCardList: a letter plate, a name, a line about it and a pill telling whether it is connected.
   StatusCardList updatedLabel refreshLabel -> onRefresh (children) : A list of connections with when they were last checked and a refresh button.
   RunHistoryList empty emptyTitle emptySubtitle (children) : A history of runs: its children are RunRecordRow calls (divider: true after the first).
-  StatsCarousel "label" =index stats! -> onChanged : Several short facts shown one at a time, with arrows and dots to step through them.
-  HistoryTimeline =value events! times notes -> onSelected : What happened over time, as cards down a rail: an event, when, and a note each.
+  StatsCarousel "label" bind:index stats! -> onChanged : Several short facts shown one at a time, with arrows and dots to step through them.
+  HistoryTimeline bind:value events! times notes -> onSelected : What happened over time, as cards down a rail: an event, when, and a note each.
   Terminal lines! levels emptyMessage : A log on a dark surface in monospace: each line with its level (info, debug, warn or error) in color.
   DiffViewer "fileName" lines! status : What changed in a file: a header with the file's name and counts, then the lines, added ones green and removed ones red.
   FileUploader "label" hint compact files sizes -> onPick : Where files are dropped or picked, with the picked files listed under it.
-  CommandPalette "placeholder" =value commands! icons shortcuts emptyMessage -> onSelected : The surface that finds a command by typing: a search row over the commands that match.
-  NavigationMenu =value items! icons badges -> onChanged : A panel of places to go: icons and labels, with badges for news.
-  Sidebar =value brand sectionLabel items! icons badges -> onChanged : An app's side column: a brand, a list of places with icons and counts, and a footer for what the call puts there.
-  PromptInput "placeholder" =value hint attachable busy -> onChanged : Where a prompt is written: a growing text box with an attach button and a send button.
-  Tree =value labels! depths! icons -> onSelected : An outline of nested rows: give each row its label and how deep it sits.
-  BrowserTabs =value tabs! icons closable showAdd -> onChanged : Tabs as in a browser: open documents side by side, each with an x.
-  Combobox "placeholder" =value options! searchPlaceholder size open enabled -> onChanged : A choice from a list you can search: press it and a panel with a search box opens under it, in place.
-  IconSegmentedControl =value icons! density -> onChanged : A choice between a few views shown as icons in one well (list or grid, align left, center or right).
+  CommandPalette "placeholder" bind:value commands! icons shortcuts emptyMessage -> onSelected : The surface that finds a command by typing: a search row over the commands that match.
+  NavigationMenu bind:value items! icons badges -> onChanged : A panel of places to go: icons and labels, with badges for news.
+  Sidebar bind:value brand sectionLabel items! icons badges -> onChanged : An app's side column: a brand, a list of places with icons and counts, and a footer for what the call puts there.
+  PromptInput "placeholder" bind:value hint attachable busy -> onChanged : Where a prompt is written: a growing text box with an attach button and a send button.
+  Tree bind:value labels! depths! icons -> onSelected : An outline of nested rows: give each row its label and how deep it sits.
+  BrowserTabs bind:value tabs! icons closable showAdd -> onChanged : Tabs as in a browser: open documents side by side, each with an x.
+  Combobox "placeholder" bind:value options! searchPlaceholder size open enabled -> onChanged : A choice from a list you can search: press it and a panel with a search box opens under it, in place.
+  IconSegmentedControl bind:value icons! density -> onChanged : A choice between a few views shown as icons in one well (list or grid, align left, center or right).
   ImageUpload "title" "description" hint images -> onPick : Where pictures are dropped or picked, with the picked ones shown as thumbnails under it.
   CodePreview "code" emptyTitle emptySubtitle : Text or code shown as it was written, in monospace, wrapping.
   NotePopover "label" "note" open : Words with a dotted underline that show a short note under them when pressed.
   ViewerDialog "title" padded -> onClose (children) : The frame that shows a document or a picture large: a title bar with a close button over the call's children.
   SlidingPanel "title" "subtitle" icon -> onCollapse (children) : The panel that rises from the foot of a pane: a header with a title, a subtitle and a button that lowers it, over the call's children.
-  DropdownMultiselect "placeholder" =value options! size open enabled -> onChanged : Several choices from a list: press it and the options open under it, in place, each with a checkbox.
-  IconSelect "placeholder" =value options! size open -> onChanged : One choice from a few, each shown with a small letter plate (a provider, a model, a workspace): press it and the options open under it, in place.
+  DropdownMultiselect "placeholder" bind:value options! size open enabled -> onChanged : Several choices from a list: press it and the options open under it, in place, each with a checkbox.
+  IconSelect "placeholder" bind:value options! size open -> onChanged : One choice from a few, each shown with a small letter plate (a provider, a model, a workspace): press it and the options open under it, in place.
   ResourceCard "title" image kind starred deletable -> onSelected : A saved thing as a picture tile: an image, a video, a link, a note or a document, with star and delete buttons.
   WorkspaceSwitcher workspaces! current createLabel -> onSelected : The list that switches workspace: the current one checked, and a row to make a new one.
-  ModelSelectMenu =value models! heading -> onChanged : The menu that picks which models to use, several at once: each row ends in a checkbox.
+  ModelSelectMenu bind:value models! heading -> onChanged : The menu that picks which models to use, several at once: each row ends in a checkbox.
   RichTextToolbar active -> onCommand : The formatting bar of a text editor: undo and redo, bold, italic, underline, code, heading, quote, lists, link and image.
   CollapsibleSection "title" count icon hiddenCount expanded -> onToggle (children) : A section under a header with a title and a count: its children, then a button that asks for the rest ("View 6 more") or folds them again.
-  SplitPaneTabs =value tabs! closable -> onChanged : The tabs over one pane of a split view: square, edge to edge, each with an x.
-  FileTree =value names! depths! -> onSelected : A project's files as an outline: give each row its name and how deep it sits; a row with rows under it is a folder.
+  SplitPaneTabs bind:value tabs! closable -> onChanged : The tabs over one pane of a split view: square, edge to edge, each with an x.
+  FileTree bind:value names! depths! -> onSelected : A project's files as an outline: give each row its name and how deep it sits; a row with rows under it is a folder.
   ImageGallery images! titles columns -> onSelected : Pictures as a grid of square tiles with their titles over a fade at the foot.
   SuggestionReviewItem "title" "why" operation status applyLabel rejectLabel busy -> onApply : A change someone proposed, waiting for a decision: what it does, why, and Apply and Reject buttons; once decided it shows the outcome.
   CompactSuggestionReviewItem "title" "why" operation status applyLabel rejectLabel busy -> onApply : The compact row of a proposed change: what it does, why, and Apply and Reject buttons; once decided it shows the outcome.
   NestedTaskLedger tasks! depths statuses counts progress -> onSelected : Work broken into nested tasks: each row with its state (pending, running, done or failed), a count and a small progress bar.
-  MultiSelectDropdown =value options! emptyMessage -> onChanged : A panel of choices to tick, several at once.
+  MultiSelectDropdown bind:value options! emptyMessage -> onChanged : A panel of choices to tick, several at once.
   AddContextMenu items! icons subtitles -> onSelected : The small menu that adds something to a prompt: a file, a link, a note.
   FileTreeContextMenu items! icons -> onSelected : The menu of a file in a tree: Rename and, past a hairline, Delete in red.
-  RichTextField "label" "placeholder" =value helper error minLines -> onChanged : A box for several lines of text with a label and a helper line.
+  RichTextField "label" "placeholder" bind:value helper error minLines -> onChanged : A box for several lines of text with a label and a helper line.
   CanvasShell padding (children) : The working area of an editor or a viewer: a toolbar from the call over a soft, padded surface that scrolls the call's children.
   SidebarTogglePattern open sideWidth -> onToggle (children) : A main pane beside a side pane that a button opens and closes.
   ResizableRow leftWidth : Two panes side by side with a grip between them.
   VariableContractHover "name" "description" kind type labels values required : A card describing a variable: its name, kind and type, what it is for, and a few labeled facts.
   FolderCard "title" path status progress progressLabel lastRun stats error icon -> onPressed : A folder an automation works in: its name, path and state, how far a run is, when it last ran, a few figures and an error, with the call's actions at the foot.
-  NumberPresetInput =value presets! suffix open -> onChanged : A number you type, or pick from a few usual values that open under it.
-  ExtensionChipsInput "placeholder" =value -> onChanged : A list of file extensions (.dart, .ts): type one and add it; each shows as a chip with an x.
-  HierarchicalPicker =value labels! depths! -> onChanged : A place picked from nested ones (a folder, a category): give each row its label and how deep it sits.
-  PromptInputWithBanner "title" "description" =value suggestions placeholder showBanner -> onSubmitted : A prompt box under a banner that suggests what to ask: a title, a line and a few suggestions to press.
-  TabOverflowScroll =value tabs! -> onChanged : Tabs in a row that scrolls sideways when there are more than fit.
+  NumberPresetInput bind:value presets! suffix open -> onChanged : A number you type, or pick from a few usual values that open under it.
+  ExtensionChipsInput "placeholder" bind:value -> onChanged : A list of file extensions (.dart, .ts): type one and add it; each shows as a chip with an x.
+  HierarchicalPicker bind:value labels! depths! -> onChanged : A place picked from nested ones (a folder, a category): give each row its label and how deep it sits.
+  PromptInputWithBanner "title" "description" bind:value suggestions placeholder showBanner -> onSubmitted : A prompt box under a banner that suggests what to ask: a title, a line and a few suggestions to press.
+  TabOverflowScroll bind:value tabs! -> onChanged : Tabs in a row that scrolls sideways when there are more than fit.
   Toolbar tools! active orientation size -> onAction : An editor's tools as icon buttons in a row or a column, in groups parted by hairlines ("-").
-  ProjectSelector "placeholder" =value projects! counts open -> onChanged : Which project is open: press it and the projects open under it, in place, with a count beside each.
-  DateTimelineAxis =value labels! -> onSelected : Moments along a line, each a tick with a label: versions, days, releases.
-  ReorderableList "title" =value emptyMessage addable -> onChanged : A list you put in order by dragging its rows by their grips, with a count, a + and an x per row.
+  ProjectSelector "placeholder" bind:value projects! counts open -> onChanged : Which project is open: press it and the projects open under it, in place, with a count beside each.
+  DateTimelineAxis bind:value labels! -> onSelected : Moments along a line, each a tick with a label: versions, days, releases.
+  ReorderableList "title" bind:value emptyMessage addable -> onChanged : A list you put in order by dragging its rows by their grips, with a count, a + and an x per row.
   ReorderGhost (children) : The lifted look of something being dragged: its children on a rounded surface with a deep shadow.
   SuggestionActionObject "title" action summary body : What a proposed change would do to a file: its name, whether it edits, creates or deletes, a summary and the proposed text.
-  VariableContractList =value names! types descriptions required emptyLabel -> onSelected : The variables something takes and gives: each with its name, type, whether it is required, and what it is for.
+  VariableContractList bind:value names! types descriptions required emptyLabel -> onSelected : The variables something takes and gives: each with its name, type, whether it is required, and what it is for.
 
 PUTTING THEM TOGETHER (Cards)
   Build the whole answer from the components above; plain Row, Column, Text and Box are only the glue between them. When no component is named after what you are showing, compose it from the general ones (a frame, a section label, rows of details, options, a progress line, a stat, a picture, a callout, a closing action) rather than from boxes.
@@ -274,8 +274,8 @@ PUTTING THEM TOGETHER (Cards)
   quantity, the chosen name). States are `if` lines around blocks, and the end state is a `Receipt`. Repeat rows with
   `each x in list` directly under the card or a block: row blocks stack by themselves. Text parameters are text:
   format money with `money(n,"$",2)`. Pictures are `Media kind:"…"`, never a URL. A block given a list
-  draws its own rows from the records and takes nothing indented under it: `Carousel =i items:=shoes` (records with
-  name, detail, price, rating), `PhotoGallery =open photos:=photos`, `ComparisonTable names:[…] rows:[…]`. Inside
+  draws its own rows from the records and takes nothing indented under it: `Carousel bind:i items:{shoes`} (records with
+  name, detail, price, rating), `PhotoGallery bind:open photos:{photos`,} `ComparisonTable names:[…] rows:[…]`. Inside
   `each x in list` a record's field is read through its name (`{x.price}`), never bare.
 
 PAGES (this UI is a whole window 1280 wide, not a card in a chat)
@@ -290,7 +290,7 @@ PAGES (this UI is a whole window 1280 wide, not a card in a chat)
       Sidebar                a fixed pane at the side (w:240): the name, NavItem lines, Spacer grow, then what sits at its foot
       Main                   the pane that takes the rest: a Nav (its top bar: the title, then a Row of actions) and under it a Column pad:24 gap:16 of content
       Pane w:320             a further pane (a list beside its details, a details panel): Pane w:320 pad:16 gap:12
-  NavItem "Orders" icon:"inbox" badge:"12" selected:=tab=="orders" -> tab="orders" is a line of a sidebar (or of a Nav). Link "Docs" is a link (href:"https://…", or -> an action). Brand "Harbor" icon:"anchor" is the product's mark and name (first in a Sidebar or a Nav). Heading "…" heads a section (level:1 a landing page's headline or an app's page title, level:3 the title of a card or a panel; the title of an article or a docs page is a plain Heading). Link is in the accent; a quiet link (a table of contents, a footer) is Text.muted "…" -> an action. IconTile "sync" is an icon on a small tinted tile (the mark of a feature, a stat, a row).
+  NavItem "Orders" icon:"inbox" badge:"12" selected:{tab=="orders"} -> tab="orders" is a line of a sidebar (or of a Nav). Link "Docs" is a link (href:"https://…", or -> an action). Brand "Harbor" icon:"anchor" is the product's mark and name (first in a Sidebar or a Nav). Heading "…" heads a section (level:1 a landing page's headline or an app's page title, level:3 the title of a card or a panel; the title of an article or a docs page is a plain Heading). Link is in the accent; a quiet link (a table of contents, a footer) is Text.muted "…" -> an action. IconTile "sync" is an icon on a small tinted tile (the mark of a feature, a stat, a row).
   Side by side: Row gap:32 with grow on each child that shares the width (Column grow gap:12), or Grid cols:3 gap:24 for equal cells; write top on a Row whose children differ in height. Row between spreads its children end to end. A rule on one side is border-bottom:#… (border-top, border-left, border-right).
   Inside a frame everything is written as on a card: the components, Card, Text, the controls. A Card in a Grid is a tile of the page.
   A page (a website, an app window) uses the page tier of the same system: the same colors and fonts at a page's
@@ -356,15 +356,15 @@ PAGES (this UI is a whole window 1280 wide, not a card in a chat)
   App
     Sidebar
       Brand "Harbor" icon:"anchor"
-      NavItem "Overview" icon:"dashboard" selected:=tab=="overview" -> tab="overview"
-      NavItem "Orders" icon:"receipt_long" badge:"12" selected:=tab=="orders" -> tab="orders"
+      NavItem "Overview" icon:"dashboard" selected:{tab=="overview"} -> tab="overview"
+      NavItem "Orders" icon:"receipt_long" badge:"12" selected:{tab=="orders"} -> tab="orders"
       Spacer grow
       Text.muted "Sam Patel"
     Main
       Nav
         Heading "Orders"
         Row gap:8
-          Input "Search" =q w:220
+          Input "Search" bind:q w:220
           Button "New order" -> emit newOrder
       Column pad:24 gap:16
         Card gap:8

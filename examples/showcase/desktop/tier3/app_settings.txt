@@ -23,12 +23,12 @@ state s5=false
 App
   Sidebar
     Brand "Plume" icon:"edit_note"
-    NavItem "Profile" icon:"person" selected:=tab=="profile" -> tab="profile"
-    NavItem "Account" icon:"manage_accounts" selected:=tab=="account" -> tab="account"
-    NavItem "Notifications" icon:"notifications" selected:=tab=="notifications" -> tab="notifications"
-    NavItem "Appearance" icon:"palette" selected:=tab=="appearance" -> tab="appearance"
-    NavItem "Billing" icon:"credit_card" selected:=tab=="billing" -> tab="billing"
-    NavItem "Team" icon:"group" selected:=tab=="team" -> tab="team"
+    NavItem "Profile" icon:"person" selected:{tab=="profile"} -> tab="profile"
+    NavItem "Account" icon:"manage_accounts" selected:{tab=="account"} -> tab="account"
+    NavItem "Notifications" icon:"notifications" selected:{tab=="notifications"} -> tab="notifications"
+    NavItem "Appearance" icon:"palette" selected:{tab=="appearance"} -> tab="appearance"
+    NavItem "Billing" icon:"credit_card" selected:{tab=="billing"} -> tab="billing"
+    NavItem "Team" icon:"group" selected:{tab=="team"} -> tab="team"
     Spacer grow
     Row gap:8 middle
       Avatar "Maya Reyes" size:32
@@ -48,27 +48,27 @@ App
               Column gap:4
                 Button.outline "Change" -> emit changePicture
                 Text.caption "JPG or PNG, up to 5 MB"
-            Input "Name" =name
-            Input "Username" =username
+            Input "Name" bind:name
+            Input "Username" bind:username
             Column gap:4
-              Input "Bio" "Tell readers a little about you" =bio multiline
+              Input "Bio" "Tell readers a little about you" bind:bio multiline
               Row end
-                Text.caption "{length(bio)}/160" color:=length(bio)>160?"#FFD32F2F":"#FF6B7280"
+                Text.caption "{length(bio)}/160" color:{length(bio)>160?"#FFD32F2F":"#FF6B7280"}
             Column gap:4
               Text.fieldLabel "Time zone"
-              Select =tz items:["Pacific Time (UTC−8)","Mountain Time (UTC−7)","Central Time (UTC−6)","Eastern Time (UTC−5)","London (UTC+0)","Berlin (UTC+1)","Tokyo (UTC+9)"]
-            ToggleRow "Public profile" "Anyone can find your profile and read your published pieces." =pub
+              Select bind:tz items:["Pacific Time (UTC−8)","Mountain Time (UTC−7)","Central Time (UTC−6)","Eastern Time (UTC−5)","London (UTC+0)","Berlin (UTC+1)","Tokyo (UTC+9)"]
+            ToggleRow "Public profile" "Anyone can find your profile and read your published pieces." bind:pub
           Card gap:8 pad:24
             Heading "Notifications" level:3
-            ToggleRow "Comments" "Tell me when someone comments on my writing." =n1
+            ToggleRow "Comments" "Tell me when someone comments on my writing." bind:n1
             Divider
-            ToggleRow "Replies" "Tell me when someone replies to my comment." =n2
+            ToggleRow "Replies" "Tell me when someone replies to my comment." bind:n2
             Divider
-            ToggleRow "New followers" "Tell me when a reader follows me." =n3
+            ToggleRow "New followers" "Tell me when a reader follows me." bind:n3
             Divider
-            ToggleRow "Weekly summary" "A Monday email with your word count and readers." =n4
+            ToggleRow "Weekly summary" "A Monday email with your word count and readers." bind:n4
             Divider
-            ToggleRow "Product news" "Occasional updates about new Plume features." =n5
+            ToggleRow "Product news" "Occasional updates about new Plume features." bind:n5
           Box gap:12 pad:24 fill:#FFFFF5F5 radius:12 border:#FFF3B8B8
             Heading "Danger zone" level:3
             Text.muted "Deleting your account removes all your drafts, published pieces and followers. This cannot be undone."
@@ -81,4 +81,4 @@ App
                 ActionButton "Yes, delete it" tone:"danger" icon:"delete" -> emit deleteAccount; confirming=false
     Row end gap:10 pad:16 border-top:#FFE5E7EB
       Button.outline "Cancel" -> name=sName; username=sUser; bio=sBio; tz=sTz; pub=sPub; n1=s1; n2=s2; n3=s3; n4=s4; n5=s5
-      Button "Save changes" enabled:=name!=sName||username!=sUser||bio!=sBio||tz!=sTz||pub!=sPub||n1!=s1||n2!=s2||n3!=s3||n4!=s4||n5!=s5 -> sName=name; sUser=username; sBio=bio; sTz=tz; sPub=pub; s1=n1; s2=n2; s3=n3; s4=n4; s5=n5; emit save; toast "Changes saved"
+      Button "Save changes" enabled:{name!=sName||username!=sUser||bio!=sBio||tz!=sTz||pub!=sPub||n1!=s1||n2!=s2||n3!=s3||n4!=s4||n5!=s5} -> sName=name; sUser=username; sBio=bio; sTz=tz; sPub=pub; s1=n1; s2=n2; s3=n3; s4=n4; s5=n5; emit save; toast "Changes saved"

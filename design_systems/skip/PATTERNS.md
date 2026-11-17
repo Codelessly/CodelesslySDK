@@ -6,7 +6,7 @@ A screen is `Screen` with blocks under it, top to bottom: `TopBar`, then the one
 `ChartCard`), then supporting tiles (`Row gap:12` of `StreakFlame` and `ProgressGoal`; `WeekStrip`; `StatTrio`;
 `RecordCard`), then `SectionTitle` over a list of `SessionRow`. Repeat rows with `Column gap:12` and an `each`
 under it. When a list has nothing, show `EmptyState` instead of the list. Figures are passed as data
-(`count:=streak`, `values:=map(weeks,w=>w.jumps)`); a block formats numbers itself (1304 is shown as 1,304).
+(`count:{streak}`, `values:{map(weeks,w=>w.jumps)}`); a block formats numbers itself (1304 is shown as 1,304).
 Every tappable block fires `onPressed`: write `-> emit <action>` on its line.
 
 ## Home
@@ -16,9 +16,9 @@ Screen
   TopBar "Ready to jump?" "Today takes just {today.minutes} minutes." eyebrow:"Skip"
   HeroSession "{today.name}" "What the session is, in a sentence." minutes:"{today.minutes}" -> emit start_session
   Row gap:12
-    StreakFlame "sessions in a row" count:=streak
-    ProgressGoal "This week" done:=sessionsThisWeek goal:=weeklyGoal
-  WeekStrip done:=map(take(sessions,sessionsThisWeek),s=>s.date)
+    StreakFlame "sessions in a row" count:{streak}
+    ProgressGoal "This week" done:{sessionsThisWeek} goal:{weeklyGoal}
+  WeekStrip done:{map(take(sessions,sessionsThisWeek),s=>s.date)}
 ```
 
 ## A history or progress page
@@ -26,7 +26,7 @@ Screen
 ```
 Screen
   TopBar "Your progress" back:true -> emit open_home
-  ChartCard "Jumps this week" values:=map(weeks,w=>w.jumps) labels:=map(weeks,w=>w.label)
+  ChartCard "Jumps this week" values:{map(weeks,w=>w.jumps)} labels:{map(weeks,w=>w.label)}
   SectionTitle "Past sessions"
   Column gap:12
     each s in sessions
@@ -38,8 +38,8 @@ Screen
 The page owns the clock and the state; the blocks draw what they are given. `phase` goes ready, set (a count-in
 from 3), work, rest, work ... done. Three rules make the lines short:
 
-- A block with `=name` shares that page variable and changes it itself: `TapPad =count` adds 1 on every tap (its
-  chips take 1 off or add 10), `SessionControls =paused` toggles pause. Neither needs an action.
+- A block with `bind:name` shares that page variable and changes it itself: `TapPad bind:count` adds 1 on every tap (its
+  chips take 1 off or add 10), `SessionControls bind:paused` toggles pause. Neither needs an action.
 - `->` wires a block's one event: Finish on `SessionControls`, the close button on `SessionBar`, the tap on
   `BigButton`. A block never has two events to wire; a second action is a second block (two `BigButton` lines).
 - States are `if` lines around blocks, not parameters: ready shows a Start button, running shows the pad and the
@@ -58,14 +58,14 @@ every 1s when phase=="done" && !saved -> emit finish_session count; saved=true
 Screen
   if phase!="done"
     SessionBar "{today.name}" "Today's session" -> emit open_home
-    SessionDial left:=left phase:=phase round:=round rounds:=today.rounds work:=today.work rest:=today.rest paused:=paused
+    SessionDial left:{left} phase:{phase} round:{round} rounds:{today.rounds} work:{today.work} rest:{today.rest} paused:{paused}
   if phase=="ready"
     BigButton "Start, {today.minutes} minutes" -> phase="set"
   if phase=="set"||phase=="work"||phase=="rest"
-    TapPad =count
-    SessionControls =paused -> phase="done"
+    TapPad bind:count
+    SessionControls bind:paused -> phase="done"
   if phase=="done"
-    SessionSummary "Session complete" "That makes {streak+1} in a row." jumps:=count best:=max(map(sessions,s=>s.jumps)) rounds:=round of:=today.rounds seconds:=elapsed streak:=streak+1
+    SessionSummary "Session complete" "That makes {streak+1} in a row." jumps:{count} best:{max(map(sessions,s=>s.jumps))} rounds:{round} of:{today.rounds} seconds:{elapsed} streak:{streak+1}
     BigButton "Back to today" icon:"check_rounded" -> emit open_home
     BigButton "See your progress" icon:"bar_chart_rounded" tone:"quiet" -> emit open_history
 ```

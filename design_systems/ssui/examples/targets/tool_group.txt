@@ -1,6 +1,6 @@
 state open=false
 Card gap:8
-  CollapsibleSection "Tool calls" count:3 icon:"build" hiddenCount:=open?0:2 expanded:=open -> open=!open
+  CollapsibleSection "Tool calls" count:3 icon:"build" hiddenCount:{open?0:2} expanded:{open} -> open=!open
     ListRow "search_docs" subtitle:"query: render objects" icon:"search" dense:true
     if open
       ListRow "read_file" subtitle:"lib/src/render/node_tree.dart" icon:"description" dense:true

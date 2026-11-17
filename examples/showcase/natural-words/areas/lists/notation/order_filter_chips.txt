@@ -3,10 +3,10 @@ state orders=[{"id":"#4821","name":"Wireless Earbuds","price":59.99,"status":"Sh
 Column gap:12 pad:16 scroll
   Text.pageTitle "Recent orders"
   Row gap:8 scroll
-    ChoiceChip "All" selected:=filter=="All" -> filter="All"
-    ChoiceChip "Pending" selected:=filter=="Pending" -> filter="Pending"
-    ChoiceChip "Shipped" selected:=filter=="Shipped" -> filter="Shipped"
-    ChoiceChip "Delivered" selected:=filter=="Delivered" -> filter="Delivered"
+    ChoiceChip "All" selected:{filter=="All"} -> filter="All"
+    ChoiceChip "Pending" selected:{filter=="Pending"} -> filter="Pending"
+    ChoiceChip "Shipped" selected:{filter=="Shipped"} -> filter="Shipped"
+    ChoiceChip "Delivered" selected:{filter=="Delivered"} -> filter="Delivered"
   each order in orders
     if filter=="All" || order.status==filter
       Card

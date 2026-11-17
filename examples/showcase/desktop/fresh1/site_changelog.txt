@@ -15,10 +15,10 @@ Page
       Heading "Changelog" level:1
       Text.lead "New features, improvements and fixes to the Relay platform."
       Row gap:8
-        ChoiceChip "All" selected:=filter=="All" -> filter="All"
-        ChoiceChip "Added" selected:=filter=="Added" -> filter="Added"
-        ChoiceChip "Improved" selected:=filter=="Improved" -> filter="Improved"
-        ChoiceChip "Fixed" selected:=filter=="Fixed" -> filter="Fixed"
+        ChoiceChip "All" selected:{filter=="All"} -> filter="All"
+        ChoiceChip "Added" selected:{filter=="Added"} -> filter="Added"
+        ChoiceChip "Improved" selected:{filter=="Improved"} -> filter="Improved"
+        ChoiceChip "Fixed" selected:{filter=="Fixed"} -> filter="Fixed"
     Row gap:48 top
       Column grow gap:24
         each e in entries
@@ -47,7 +47,7 @@ Page
         Card gap:12
           Heading "Subscribe to updates" level:3
           Text.muted "Get release notes in your inbox. No spam."
-          Input "Email" "you@example.com" =email type:email
+          Input "Email" "you@example.com" bind:email type:email
           Button "Subscribe" w:fill -> emit subscribe email; toast "Thanks, you are subscribed"
         Card gap:12
           Heading "Latest versions" level:3

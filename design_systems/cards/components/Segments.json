@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "Segments",
-  "doc": "A small switch between two to four short options in one track, as wide as its place (a period, a tone, a status filter; not a page's tabs: those are Tabs): write Segments =range options:[\"7 days\",\"30 days\"] and it keeps the chosen option's text in your variable; onChanged fires with it. The segments are equally wide while they fit; where they do not, the track scrolls sideways on one line.",
+  "doc": "A small switch between two to four short options in one track, as wide as its place (a period, a tone, a status filter; not a page's tabs: those are Tabs): write Segments bind:range options:[\"7 days\",\"30 days\"] and it keeps the chosen option's text in your variable; onChanged fires with it. The segments are equally wide while they fit; where they do not, the track scrolls sideways on one line.",
   "props": [
    {
     "key": "value",

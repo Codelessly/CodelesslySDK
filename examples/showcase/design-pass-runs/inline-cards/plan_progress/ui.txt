@@ -4,7 +4,7 @@ Card w:390 gap:12 pad:16
   state elapsed=0
   state steps=[{"i":0,"name":"Back up your content","desc":"Export posts, pages and settings."},{"i":1,"name":"Set up the new host","desc":"Create the site and install the theme."},{"i":2,"name":"Import posts","desc":"Copy articles, tags and categories."},{"i":3,"name":"Move media","desc":"Upload images and fix their links."},{"i":4,"name":"Redirect old URLs","desc":"Map old addresses to the new ones."},{"i":5,"name":"Final checks","desc":"Test links, feeds and the DNS switch."}]
   Text.title "Blog migration plan"
-  Progress value:=done/6
+  Progress value:{done/6}
   Row between
     Text.muted "{done} of 6 steps done"
     Text.muted "Elapsed: {elapsed}s"

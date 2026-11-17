@@ -8,8 +8,8 @@ Card gap:10
       Row gap:10
         Text.mono "{e.time}" w:38 {"props": {"style": {"color": "#FF9CA3AF"}}}
         Column gap:0 w:12 {"props": {"crossAxisAlignment": "center"}}
-          Box w:10 h:10 radius:5 fill:=e.kind=="error"?"#FFDC2626":(e.kind=="warning"?"#FFEA580C":(e.kind=="success"?"#FF16A34A":"#FF2563EB"))
-          Box w:2 h:30 fill:#FFE5E7EB visible:=e.time!="09:31"
+          Box w:10 h:10 radius:5 fill:{e.kind=="error"?"#FFDC2626":(e.kind=="warning"?"#FFEA580C":(e.kind=="success"?"#FF16A34A":"#FF2563EB"))}
+          Box w:2 h:30 fill:#FFE5E7EB visible:{e.time!="09:31"}
         Column gap:1 grow pad:[0,0,0,10]
           Text.strong "{e.title}"
           Text.caption "{e.note}"

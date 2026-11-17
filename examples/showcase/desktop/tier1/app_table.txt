@@ -10,11 +10,11 @@ state rows=[{"id":1,"name":"Maya Reyes","company":"Northwind Traders","status":"
 App
   Sidebar
     Text.strong "Fieldbook"
-    NavItem "Dashboard" icon:"dashboard" selected:=tab=="dashboard" -> tab="dashboard"
-    NavItem "Customers" icon:"groups" selected:=tab=="customers" -> tab="customers"
-    NavItem "Deals" icon:"handshake" badge:"8" selected:=tab=="deals" -> tab="deals"
-    NavItem "Tasks" icon:"task_alt" badge:"5" selected:=tab=="tasks" -> tab="tasks"
-    NavItem "Reports" icon:"bar_chart" selected:=tab=="reports" -> tab="reports"
+    NavItem "Dashboard" icon:"dashboard" selected:{tab=="dashboard"} -> tab="dashboard"
+    NavItem "Customers" icon:"groups" selected:{tab=="customers"} -> tab="customers"
+    NavItem "Deals" icon:"handshake" badge:"8" selected:{tab=="deals"} -> tab="deals"
+    NavItem "Tasks" icon:"task_alt" badge:"5" selected:{tab=="tasks"} -> tab="tasks"
+    NavItem "Reports" icon:"bar_chart" selected:{tab=="reports"} -> tab="reports"
     Spacer grow
     Row gap:10 middle
       Avatar "Sam Patel" size:32
@@ -29,10 +29,10 @@ App
         Button "Add customer" -> emit addCustomer
     Column pad:24 gap:16
       Row gap:12 middle
-        Input "Search customers" =q w:280
-        Select =status items:["All","Active","Trial","Churned"] w:160
+        Input "Search customers" bind:q w:280
+        Select bind:status items:["All","Active","Trial","Churned"] w:160
         Spacer grow
-        Segments =view options:["All","Mine","Starred"]
+        Segments bind:view options:["All","Mine","Starred"]
       if length(picked)>0
         Row between middle fill:#FF1E293B radius:8 pad:[16,8,16,8]
           Text "{length(picked)} selected" color:#FFFFFFFF weight:600
@@ -41,7 +41,7 @@ App
             Button.destructive "Delete" -> rows=removeWhere(rows,r=>contains(picked,r.id)); picked=[]
       Card gap:0 pad:0
         Row gap:12 middle pad:[16,8,16,8] fill:#FFF8FAFC
-          Checkbox checked:=length(picked)==length(rows) -> picked=length(picked)==length(rows)?[]:map(rows,x=>x.id)
+          Checkbox checked:{length(picked)==length(rows)} -> picked=length(picked)==length(rows)?[]:map(rows,x=>x.id)
           Button.ghost "Name" w:200 -> desc=sort=="name"?!desc:false; sort="name"
           Button.ghost "Company" w:180 -> desc=sort=="company"?!desc:false; sort="company"
           Button.ghost "Status" w:110 -> desc=sort=="status"?!desc:false; sort="status"
@@ -53,8 +53,8 @@ App
         each r in desc?sortByDesc(rows,x=>sort=="name"?x.name:sort=="company"?x.company:sort=="status"?x.status:sort=="plan"?x.plan:sort=="value"?x.value:x.days):sortBy(rows,x=>sort=="name"?x.name:sort=="company"?x.company:sort=="status"?x.status:sort=="plan"?x.plan:sort=="value"?x.value:x.days)
           if (status=="All"||r.status==status)&&(q==""||contains(lower(r.name),lower(q))||contains(lower(r.company),lower(q)))&&(view=="All"||(view=="Starred"&&r.starred)||(view=="Mine"&&r.owner=="Me"))
             Column gap:0
-              Row gap:12 middle pad:[16,10,16,10] fill:=contains(picked,r.id)?"#FFEFF6FF":"#00FFFFFF"
-                Checkbox checked:=contains(picked,r.id) -> picked=contains(picked,r.id)?without(picked,r.id):append(picked,r.id)
+              Row gap:12 middle pad:[16,10,16,10] fill:{contains(picked,r.id)?"#FFEFF6FF":"#00FFFFFF"}
+                Checkbox checked:{contains(picked,r.id)} -> picked=contains(picked,r.id)?without(picked,r.id):append(picked,r.id)
                 Row gap:10 middle w:200
                   Avatar "{r.name}" size:32
                   Text.strong "{r.name}"

@@ -11,5 +11,5 @@ Card gap:10
       Text.caption "Ran in 0.31 s · 1,204 rows"
   Row end gap:8
     Button.ghost "Edit" -> emit edit
-    Button "Run" visible:=!ran -> ran=true; emit run
-    Button.outline "Run again" visible:=ran -> emit run
+    Button "Run" visible:{!ran} -> ran=true; emit run
+    Button.outline "Run again" visible:{ran} -> emit run

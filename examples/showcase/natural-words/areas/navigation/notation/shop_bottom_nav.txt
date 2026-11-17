@@ -34,7 +34,7 @@ Column h:fill
           Text.muted "$59"
     if tab==1
       Text.pageTitle "Search"
-      Input "Search products" "Shoes, jackets, bags…" =query
+      Input "Search products" "Shoes, jackets, bags…" bind:query
       Text.sectionTitle "Trending searches"
       Row gap:8
         Chip "Sneakers"
@@ -80,17 +80,17 @@ Column h:fill
   Divider
   Row around pad:[8,8,8,8]
     Column center gap:2 grow -> tab=0
-      Icon "home" color:=tab==0?'#FF1565C0':'#FF757575'
-      Text.caption "Home" color:=tab==0?'#FF1565C0':'#FF757575'
+      Icon "home" color:{tab==0?'#FF1565C0':'#FF757575'}
+      Text.caption "Home" color:{tab==0?'#FF1565C0':'#FF757575'}
     Column center gap:2 grow -> tab=1
-      Icon "search" color:=tab==1?'#FF1565C0':'#FF757575'
-      Text.caption "Search" color:=tab==1?'#FF1565C0':'#FF757575'
+      Icon "search" color:{tab==1?'#FF1565C0':'#FF757575'}
+      Text.caption "Search" color:{tab==1?'#FF1565C0':'#FF757575'}
     Column center gap:2 grow -> tab=2
       Stack w:48 h:24 center middle
-        Icon "shopping_cart" color:=tab==2?'#FF1565C0':'#FF757575'
+        Icon "shopping_cart" color:{tab==2?'#FF1565C0':'#FF757575'}
         Row end top
           Badge.danger "3"
-      Text.caption "Cart" color:=tab==2?'#FF1565C0':'#FF757575'
+      Text.caption "Cart" color:{tab==2?'#FF1565C0':'#FF757575'}
     Column center gap:2 grow -> tab=3
-      Icon "person" color:=tab==3?'#FF1565C0':'#FF757575'
-      Text.caption "Profile" color:=tab==3?'#FF1565C0':'#FF757575'
+      Icon "person" color:{tab==3?'#FF1565C0':'#FF757575'}
+      Text.caption "Profile" color:{tab==3?'#FF1565C0':'#FF757575'}

@@ -8,4 +8,4 @@ Card gap:10
   ListRow "Inside Flutter" subtitle:"docs.flutter.dev" icon:"article" -> emit open 3
   if shown
     ListRow "Layout constraints, explained" subtitle:"medium.com · community" icon:"public" -> emit open 4
-  LoadMore loadLabel:=shown?"Show fewer":"Show 1 more" -> shown=!shown
+  LoadMore loadLabel:{shown?"Show fewer":"Show 1 more"} -> shown=!shown

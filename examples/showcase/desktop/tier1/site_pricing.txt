@@ -16,8 +16,8 @@ Page
       Text.eyebrow "PRICING"
       Heading "Simple pricing for every stage" level:1 center
       Text.lead "Choose the plan that fits your books today. Change or cancel any time." center
-      Segments =billing options:["Monthly","Yearly"]
-      Text.muted "Yearly billing saves you 20%" visible:=billing=="Yearly"
+      Segments bind:billing options:["Monthly","Yearly"]
+      Text.muted "Yearly billing saves you 20%" visible:{billing=="Yearly"}
   Section
     Grid cols:3 gap:24
       Card gap:16 pad:24
@@ -26,7 +26,7 @@ Page
         Row gap:6 bottom
           Text "{billing==\"Yearly\" ? \"$7.20\" : \"$9\"}" size:44 weight:700
           Text.muted "/mo"
-        Text.small "Billed yearly at $86.40" visible:=billing=="Yearly"
+        Text.small "Billed yearly at $86.40" visible:{billing=="Yearly"}
         Divider
         Column gap:10
           Row gap:8
@@ -54,7 +54,7 @@ Page
         Row gap:6 bottom
           Text "{billing==\"Yearly\" ? \"$23.20\" : \"$29\"}" size:44 weight:700
           Text.muted "/mo"
-        Text.small "Billed yearly at $278.40" visible:=billing=="Yearly"
+        Text.small "Billed yearly at $278.40" visible:{billing=="Yearly"}
         Divider
         Column gap:10
           Row gap:8
@@ -80,7 +80,7 @@ Page
         Row gap:6 bottom
           Text "{billing==\"Yearly\" ? \"$63.20\" : \"$79\"}" size:44 weight:700
           Text.muted "/mo"
-        Text.small "Billed yearly at $758.40" visible:=billing=="Yearly"
+        Text.small "Billed yearly at $758.40" visible:{billing=="Yearly"}
         Divider
         Column gap:10
           Row gap:8
@@ -118,14 +118,14 @@ Page
           Row pad:16 border-bottom:#FFE4E7EC
             Text "{row.f}" grow
             Column w:140 center
-              Icon "check" visible:=row.a
-              Text.muted "—" visible:=!row.a
+              Icon "check" visible:{row.a}
+              Text.muted "—" visible:{!row.a}
             Column w:140 center
-              Icon "check" visible:=row.b
-              Text.muted "—" visible:=!row.b
+              Icon "check" visible:{row.b}
+              Text.muted "—" visible:{!row.b}
             Column w:140 center
-              Icon "check" visible:=row.c
-              Text.muted "—" visible:=!row.c
+              Icon "check" visible:{row.c}
+              Text.muted "—" visible:{!row.c}
   Section narrow
     Column gap:16
       Column gap:8 center

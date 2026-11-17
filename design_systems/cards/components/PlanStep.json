@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "PlanStep",
-  "doc": "One step of a plan that runs: the title and a detail, index (its position from 0), current:=done (how many steps are finished) and running:=running; it draws a tick when finished, a spinner when it is the running one, a number while it waits. Write the steps one under another; last:true ends the line.",
+  "doc": "One step of a plan that runs: the title and a detail, index (its position from 0), current:{done} (how many steps are finished) and running:{running}; it draws a tick when finished, a spinner when it is the running one, a number while it waits. Write the steps one under another; last:true ends the line.",
   "props": [
    {
     "key": "title",

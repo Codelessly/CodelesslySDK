@@ -16,16 +16,16 @@ Screen
         Text.muted "Total"
         Text.number "{today.minutes} min"
     Row gap:8
-      StreakFlame "days" "streak" count:=streak
-      ProgressGoal "sessions" "this week" done:=sessionsThisWeek goal:=weeklyGoal
+      StreakFlame "days" "streak" count:{streak}
+      ProgressGoal "sessions" "this week" done:{sessionsThisWeek} goal:{weeklyGoal}
     BigButton "Start" icon:"play_arrow" -> phase="set"; left=3; round=0; count=0; elapsed=0; paused=false; saved=false; emit start_session
   if phase=="set"||phase=="work"||phase=="rest"
     SessionBar "{today.name}" "Round {round<1?1:round}/{today.rounds} · {elapsed}s" -> phase="done"
-    SessionDial "{count} jumps" left:=left phase:=phase round:=round<1?1:round rounds:=today.rounds work:=today.work rest:=today.rest paused:=paused
+    SessionDial "{count} jumps" left:{left} phase:{phase} round:{round<1?1:round} rounds:{today.rounds} work:{today.work} rest:{today.rest} paused:{paused}
     if phase=="work"
-      TapPad "Jumps" =count
-    SessionControls =paused -> phase="done"
+      TapPad "Jumps" bind:count
+    SessionControls bind:paused -> phase="done"
   if phase=="done"
-    SessionSummary "{today.rounds} x {today.work}s / {today.rest}s" jumps:=count best:=sessions[0].best rounds:=round of:=today.rounds seconds:=elapsed streak:=streak
+    SessionSummary "{today.rounds} x {today.work}s / {today.rest}s" jumps:{count} best:{sessions[0].best} rounds:{round} of:{today.rounds} seconds:{elapsed} streak:{streak}
     BigButton "History" icon:"bar_chart" -> emit open_history
     BigButton "Home" icon:"home" tone:"quiet" -> emit open_home

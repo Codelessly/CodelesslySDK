@@ -16,13 +16,13 @@ Column scroll
     Row gap:24 top
       Card grow gap:12 animate:slide-up
         Text.panelTitle "Send us a message"
-        Input "Full name" "Jane Doe" =name
-        Input "Email" "you@example.com" =email type:email
-        Input "Phone" "(206) 555-0100" =phone type:phone
+        Input "Full name" "Jane Doe" bind:name
+        Input "Email" "you@example.com" bind:email type:email
+        Input "Phone" "(206) 555-0100" bind:phone type:phone
         Text.fieldLabel "Topic"
-        Select =topic items:["General","Billing","Partnership"]
-        Input "Message" "How can we help?" =message multiline
-        Checkbox "I agree to be contacted about my inquiry" =consent
+        Select bind:topic items:["General","Billing","Partnership"]
+        Input "Message" "How can we help?" bind:message multiline
+        Checkbox "I agree to be contacted about my inquiry" bind:consent
         Button "Send message" -> emit send; toast "Message sent"
       Column grow gap:12 animate:slide-up delay:100
         Card gap:4

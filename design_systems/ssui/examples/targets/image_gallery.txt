@@ -7,4 +7,4 @@ Card gap:10
   Row gap:8
     Text.caption "{picked==""?"Tap one to pick it":"Picked"}" grow
     DownloadButton -> emit download
-    Button "Use this one" enabled:=picked!="" -> emit use picked
+    Button "Use this one" enabled:{picked!=""} -> emit use picked

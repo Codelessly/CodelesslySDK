@@ -5,7 +5,7 @@ Card gap:10
     Column gap:1 grow
       Text.sectionTitle "{taken?"Mira has joined":"Handing you to a person"}"
       Text.caption "{taken?"Support · replies in about 2 min":"Billing questions need someone who can change your plan"}"
-    StatusDot status:=taken?"success":"info"
+    StatusDot status:{taken?"success":"info"}
   Column gap:4 pad:10 radius:8 fill:#FFF9FAFB
     Text.fieldLabel "WHAT THEY WILL SEE"
     Text.small "Asked to move from Pro to Business mid-cycle, with 40 seats, and to keep the yearly price."

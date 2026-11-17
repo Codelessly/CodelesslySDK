@@ -60,9 +60,9 @@ Page
       Text.lead "Tell us when and how many. We hold your table for 15 minutes."
     Card gap:16
       Row gap:16 bottom
-        DatePicker "Date" =date grow
-        Select "Time" =time items:["6:00 pm","7:00 pm","8:00 pm","9:00 pm"] grow -> left=time=='6:00 pm'?5:time=='7:00 pm'?2:time=='8:00 pm'?1:4
-        Stepper "Guests" =party min:1 max:10
+        DatePicker "Date" bind:date grow
+        Select "Time" bind:time items:["6:00 pm","7:00 pm","8:00 pm","9:00 pm"] grow -> left=time=='6:00 pm'?5:time=='7:00 pm'?2:time=='8:00 pm'?1:4
+        Stepper "Guests" bind:party min:1 max:10
         Button "Reserve, {left} tables left" size:large -> emit reserve; toast "Table requested for {party} at {time}"
       Text.caption "Parties of more than 10? Ask about private dining."
   Section tint
@@ -88,10 +88,10 @@ Page
       Heading "14 Linden Street, by the old market"
     Row gap:32 top
       Card grow
-        MapPanel =pick count:3
+        MapPanel bind:pick count:3
       Card grow gap:12
         Heading "Hours" level:3
-        Details rows:=[["Monday","Closed"],["Tuesday","5:00 pm to 10:00 pm"],["Wednesday","5:00 pm to 10:00 pm"],["Thursday","5:00 pm to 10:30 pm"],["Friday","5:00 pm to 11:30 pm"],["Saturday","12:00 pm to 11:30 pm"],["Sunday","12:00 pm to 9:30 pm"]]
+        Details rows:{[["Monday","Closed"],["Tuesday","5:00 pm to 10:00 pm"],["Wednesday","5:00 pm to 10:00 pm"],["Thursday","5:00 pm to 10:30 pm"],["Friday","5:00 pm to 11:30 pm"],["Saturday","12:00 pm to 11:30 pm"],["Sunday","12:00 pm to 9:30 pm"]]}
         Text.muted "14 Linden Street · (555) 014-2260"
   Footer
     Row between top

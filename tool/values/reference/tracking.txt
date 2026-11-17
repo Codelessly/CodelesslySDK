@@ -4,10 +4,10 @@ state today=15
 state eta=18
 state stages=[{"t":"Label created","d":"Nov 12"},{"t":"Picked up","d":"Nov 13"},{"t":"In transit","d":"Nov 14 · now"},{"t":"Out for delivery","d":"Expected Nov 18"},{"t":"Delivered","d":"Expected Nov 18"}]
 ChatCard "Your package" "DHL Express" icon:"local_shipping_rounded" status:"Stage 3 of 5"
-  Details rows:=[["Item","Nikon Z fc camera body"],["Carrier","DHL Express"],["Tracking no.","JD014600003SE"],["Estimated delivery","Tue 18 Nov · in "+(eta-today)+" days"]]
+  Details rows:{[["Item","Nikon Z fc camera body"],["Carrier","DHL Express"],["Tracking no.","JD014600003SE"],["Estimated delivery","Tue 18 Nov · in "+(eta-today)+" days"]]}
   each s in stages
-    PlanStep "{s.t}" "{s.d}" index:=index current:=2 running:=true last:=index==4
-  InputField#instr "Delivery instructions" "e.g. Leave with a neighbour" =instr
-  ActionButton#save "Save instructions" enabled:=instr!="" -> saved=instr
+    PlanStep "{s.t}" "{s.d}" index:{index} current:{2} running:{true} last:{index==4}
+  InputField#instr "Delivery instructions" "e.g. Leave with a neighbour" bind:instr
+  ActionButton#save "Save instructions" enabled:{instr!=""} -> saved=instr
   if saved!=""
     Callout "Instructions saved" "{saved}" tone:"good" icon:"check_rounded"

@@ -7,19 +7,19 @@ Page
       Link "Kitchen"
       Link "Office"
     Row gap:12 middle
-      SearchBar "Search products" =q w:260
-      NotificationBadge count:=cart
+      SearchBar "Search products" bind:q w:260
+      NotificationBadge count:{cart}
         IconButton "shopping_cart" -> emit openCart
   Section
     Column gap:24
       Breadcrumb items:["Home","Lighting","Desk lamps","Arc One"]
       Row gap:56 top
         Column grow gap:16
-          Media kind:"box" tone:=tones[shot] h:480
+          Media kind:"box" tone:{tones[shot]} h:480
           Row gap:12
             each t in thumbs
-              Box pad:4 radius:10 border:=shot==t.i?"#FF2563EB":"#FFE5E7EB" -> shot=t.i
-                Media kind:"box" tone:=t.tone w:96 h:80
+              Box pad:4 radius:10 border:{shot==t.i?"#FF2563EB":"#FFE5E7EB"} -> shot=t.i
+                Media kind:"box" tone:{t.tone} w:96 h:80
         Column grow gap:20
           Column gap:8
             Text.eyebrow "NORD & CO · LIGHTING"
@@ -41,10 +41,10 @@ Page
           Divider
           Column gap:8
             Text.strong "Finish: {finish}"
-            ChoiceChips =finish options:["Brass","Graphite","Sand"] columns:3
+            ChoiceChips bind:finish options:["Brass","Graphite","Sand"] columns:3
           Row gap:12 middle
             Text.strong "Quantity"
-            Stepper "Quantity" =qty min:1 max:10
+            Stepper "Quantity" bind:qty min:1 max:10
           Row gap:12
             Button "Add to cart" size:large grow -> cart=cart+qty; toast "Added to cart"
             Button.outline "Buy now" size:large grow -> emit buyNow
@@ -61,7 +61,7 @@ Page
                 Text.muted "Not the right fit? Send it back free of charge."
   Section tint
     Column gap:20
-      SegmentedButton =tab items:["Description","Specifications","Reviews"]
+      SegmentedButton bind:tab items:["Description","Specifications","Reviews"]
       if tab=="Description"
         Column gap:12 maxw:760
           Heading "Light that moves with you" level:3

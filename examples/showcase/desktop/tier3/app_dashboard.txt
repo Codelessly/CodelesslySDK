@@ -5,12 +5,12 @@ state orders=[{"id":"#10482","customer":"Elena Marsh","total":182.40,"date":"Jun
 App
   Sidebar
     Brand "Harbor" icon:"anchor"
-    NavItem "Overview" icon:"dashboard" selected:=tab=="overview" -> tab="overview"
-    NavItem "Orders" icon:"receipt_long" selected:=tab=="orders" -> tab="orders"
-    NavItem "Inventory" icon:"inventory_2" selected:=tab=="inventory" -> tab="inventory"
-    NavItem "Customers" icon:"group" selected:=tab=="customers" -> tab="customers"
-    NavItem "Reports" icon:"bar_chart" selected:=tab=="reports" -> tab="reports"
-    NavItem "Settings" icon:"settings" selected:=tab=="settings" -> tab="settings"
+    NavItem "Overview" icon:"dashboard" selected:{tab=="overview"} -> tab="overview"
+    NavItem "Orders" icon:"receipt_long" selected:{tab=="orders"} -> tab="orders"
+    NavItem "Inventory" icon:"inventory_2" selected:{tab=="inventory"} -> tab="inventory"
+    NavItem "Customers" icon:"group" selected:{tab=="customers"} -> tab="customers"
+    NavItem "Reports" icon:"bar_chart" selected:{tab=="reports"} -> tab="reports"
+    NavItem "Settings" icon:"settings" selected:{tab=="settings"} -> tab="settings"
     Spacer grow
     Row gap:10 middle
       Avatar "Sam Patel" size:36
@@ -21,8 +21,8 @@ App
     Nav
       Heading "Overview" level:1
       Row gap:12 middle
-        SegmentedButton =range items:["7d","30d","90d"]
-        Input "Search" "Search orders" =q w:220
+        SegmentedButton bind:range items:["7d","30d","90d"]
+        Input "Search" "Search orders" bind:q w:220
         Button "New order" icon:"add" -> emit newOrder
     Column pad:24 gap:16
       Grid cols:4 gap:16
@@ -35,11 +35,11 @@ App
         Card w:380 gap:12
           Heading "Channels" level:3
           Donut values:[52,24,14,10] labels:["Online store","Marketplace","Retail","Wholesale"] h:170
-          Details rows:=[["Online store","52%"],["Marketplace","24%"],["Retail","14%"],["Wholesale","10%"]]
+          Details rows:{[["Online store","52%"],["Marketplace","24%"],["Retail","14%"],["Wholesale","10%"]]}
       Card gap:12
         Row between middle
           Heading "Latest orders" level:3
           Link "View all" -> emit viewAll
         TableHeader columns:["Order","Customer","Total","Date","Status"]
         each o in orders
-          TableRow cells:=[o.id,o.customer,money(o.total,"$",2),o.date] badge:=o.status
+          TableRow cells:{[o.id,o.customer,money(o.total,"$",2),o.date]} badge:{o.status}

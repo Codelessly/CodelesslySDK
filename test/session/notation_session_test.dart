@@ -12,9 +12,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 const _card = '''
 Column gap:12 pad:16
-  Slider =volume
-  Input "Email" =email
-  Toggle "Notifications" =notify
+  Slider bind:volume
+  Input "Email" bind:email
+  Toggle "Notifications" bind:notify
   Button "Save" -> emit save
 ''';
 

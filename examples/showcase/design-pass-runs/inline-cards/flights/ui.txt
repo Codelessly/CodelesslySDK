@@ -5,7 +5,7 @@ Card w:390 gap:12
     Text.title "London to Lisbon"
     Text.muted "This Friday · 1 adult · Direct flights"
   each f in flights
-    Card gap:6 fill:=sel==f.id?"#FFE8F0FE":"#FFFFFFFF" -> sel=f.id
+    Card gap:6 fill:{sel==f.id?"#FFE8F0FE":"#FFFFFFFF"} -> sel=f.id
       Row between middle
         Text.heading "{f.dep} → {f.arr}"
         Text.heading "£{f.price}"

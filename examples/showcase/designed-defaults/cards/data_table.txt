@@ -7,10 +7,10 @@ Card w:390 gap:10
   state q=""
   state page=0
   state sel=[]
-  Input "Search customer" =q -> page=0
-  SegmentedButton =status items:["All","Paid","Due","Overdue"] -> page=0
+  Input "Search customer" bind:q -> page=0
+  SegmentedButton bind:status items:["All","Paid","Due","Overdue"] -> page=0
   Row gap:4 middle
-    Checkbox checked:=all(slice((sortDesc?sortByDesc(filter(invoices,i=>(status=='All'||i.status==status)&&contains(lower(i.customer),lower(q))),i=>(sortKey=='amount'?i.amount:sortKey=='customer'?i.customer:sortKey=='date'?i.date:i.num)):sortBy(filter(invoices,i=>(status=='All'||i.status==status)&&contains(lower(i.customer),lower(q))),i=>(sortKey=='amount'?i.amount:sortKey=='customer'?i.customer:sortKey=='date'?i.date:i.num))),page*5,page*5+5),r=>contains(sel,r.id)) -> sel=map(filter(invoices,i=>contains(sel,i.id)||any(slice((sortDesc?sortByDesc(filter(invoices,i=>(status=='All'||i.status==status)&&contains(lower(i.customer),lower(q))),i=>(sortKey=='amount'?i.amount:sortKey=='customer'?i.customer:sortKey=='date'?i.date:i.num)):sortBy(filter(invoices,i=>(status=='All'||i.status==status)&&contains(lower(i.customer),lower(q))),i=>(sortKey=='amount'?i.amount:sortKey=='customer'?i.customer:sortKey=='date'?i.date:i.num))),page*5,page*5+5),r=>r.id==i.id)),i=>i.id)
+    Checkbox checked:{all(slice((sortDesc?sortByDesc(filter(invoices,i=>(status=='All'||i.status==status)&&contains(lower(i.customer),lower(q))),i=>(sortKey=='amount'?i.amount:sortKey=='customer'?i.customer:sortKey=='date'?i.date:i.num)):sortBy(filter(invoices,i=>(status=='All'||i.status==status)&&contains(lower(i.customer),lower(q))),i=>(sortKey=='amount'?i.amount:sortKey=='customer'?i.customer:sortKey=='date'?i.date:i.num))),page*5,page*5+5),r=>contains(sel,r.id))} -> sel=map(filter(invoices,i=>contains(sel,i.id)||any(slice((sortDesc?sortByDesc(filter(invoices,i=>(status=='All'||i.status==status)&&contains(lower(i.customer),lower(q))),i=>(sortKey=='amount'?i.amount:sortKey=='customer'?i.customer:sortKey=='date'?i.date:i.num)):sortBy(filter(invoices,i=>(status=='All'||i.status==status)&&contains(lower(i.customer),lower(q))),i=>(sortKey=='amount'?i.amount:sortKey=='customer'?i.customer:sortKey=='date'?i.date:i.num))),page*5,page*5+5),r=>r.id==i.id)),i=>i.id)
     Button.ghost "No.{sortKey=='num'?(sortDesc?'↓':'↑'):''}" -> sortDesc=sortKey=='num'&&!sortDesc; sortKey='num'
     Button.ghost "Customer{sortKey=='customer'?(sortDesc?'↓':'↑'):''}" grow -> sortDesc=sortKey=='customer'&&!sortDesc; sortKey='customer'
     Button.ghost "Date{sortKey=='date'?(sortDesc?'↓':'↑'):''}" -> sortDesc=sortKey=='date'&&!sortDesc; sortKey='date'
@@ -19,7 +19,7 @@ Card w:390 gap:10
   each row in slice((sortDesc?sortByDesc(filter(invoices,i=>(status=='All'||i.status==status)&&contains(lower(i.customer),lower(q))),i=>(sortKey=='amount'?i.amount:sortKey=='customer'?i.customer:sortKey=='date'?i.date:i.num)):sortBy(filter(invoices,i=>(status=='All'||i.status==status)&&contains(lower(i.customer),lower(q))),i=>(sortKey=='amount'?i.amount:sortKey=='customer'?i.customer:sortKey=='date'?i.date:i.num))),page*5,page*5+5)
     Column gap:4
       Row gap:6 middle
-        Checkbox checked:=contains(sel,row.id) -> sel=contains(sel,row.id)?without(sel,row.id):append(sel,row.id)
+        Checkbox checked:{contains(sel,row.id)} -> sel=contains(sel,row.id)?without(sel,row.id):append(sel,row.id)
         Column grow
           Text.strong "{row.customer}"
           Text.caption "{row.num} · {formatDate(row.date,'MMM d')}"
@@ -28,10 +28,10 @@ Card w:390 gap:10
           Badge.neutral "{row.status}"
       Divider
   Row between middle
-    Button.outline "Prev" enabled:=page>0 -> page=page-1
+    Button.outline "Prev" enabled:{page>0} -> page=page-1
     Text.small "Page {page+1} of {max(1,ceil(length(filter(invoices,i=>(status=='All'||i.status==status)&&contains(lower(i.customer),lower(q))))/5))}"
-    Button.outline "Next" enabled:=(page+1)*5<length(filter(invoices,i=>(status=='All'||i.status==status)&&contains(lower(i.customer),lower(q)))) -> page=page+1
-  Box fill:#FFE8F0FE radius:8 pad:10 visible:=length(sel)>0
+    Button.outline "Next" enabled:{(page+1)*5<length(filter(invoices,i=>(status=='All'||i.status==status)&&contains(lower(i.customer),lower(q))))} -> page=page+1
+  Box fill:#FFE8F0FE radius:8 pad:10 visible:{length(sel)>0}
     Row between middle
       Text.strong "{length(sel)} selected · {money(sum(filter(invoices,i=>contains(sel,i.id)),i=>i.amount),'$',0)}"
       Button "Send reminders" -> emit remind sel; toast "Reminders sent"

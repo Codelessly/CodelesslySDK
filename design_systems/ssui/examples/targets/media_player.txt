@@ -10,9 +10,9 @@ Card gap:10
   Row gap:8
     IconButton "{playing?"pause":"play_arrow"}" -> playing=!playing; emit toggle
     Text.mono "2:39"
-    Slider =pos min:0 max:100 grow
+    Slider bind:pos min:0 max:100 grow
     Text.mono "6:20"
   Row gap:8
-    SegmentedControl =speed options:["1x","1.5x","2x"]
+    SegmentedControl bind:speed options:["1x","1.5x","2x"]
     Spacer grow
     DownloadButton -> emit download

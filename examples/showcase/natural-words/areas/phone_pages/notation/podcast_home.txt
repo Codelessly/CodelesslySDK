@@ -60,23 +60,23 @@ Column h:fill
     Column grow gap:2
       Text.strong "Ep. 214: Coffee Economics"
       Text.caption "The Daily Grind"
-    IconButton "pause" visible:=playing -> playing=false
-    IconButton "play_arrow" visible:=!playing -> playing=true
+    IconButton "pause" visible:{playing} -> playing=false
+    IconButton "play_arrow" visible:{!playing} -> playing=true
     IconButton "forward_30" -> toast "Skipped 30s"
   Divider
   Row between pad:[8,8,8,8]
     Column center grow gap:2 -> tab=0
-      Icon "home" color:=tab==0?'#FF6750A4':'#FF79747E'
-      Text.caption "Home" color:=tab==0?'#FF6750A4':'#FF79747E'
+      Icon "home" color:{tab==0?'#FF6750A4':'#FF79747E'}
+      Text.caption "Home" color:{tab==0?'#FF6750A4':'#FF79747E'}
     Column center grow gap:2 -> tab=1
-      Icon "explore" color:=tab==1?'#FF6750A4':'#FF79747E'
-      Text.caption "Browse" color:=tab==1?'#FF6750A4':'#FF79747E'
+      Icon "explore" color:{tab==1?'#FF6750A4':'#FF79747E'}
+      Text.caption "Browse" color:{tab==1?'#FF6750A4':'#FF79747E'}
     Column center grow gap:2 -> tab=2
-      Icon "library_music" color:=tab==2?'#FF6750A4':'#FF79747E'
-      Text.caption "Library" color:=tab==2?'#FF6750A4':'#FF79747E'
+      Icon "library_music" color:{tab==2?'#FF6750A4':'#FF79747E'}
+      Text.caption "Library" color:{tab==2?'#FF6750A4':'#FF79747E'}
     Column center grow gap:2 -> tab=3
-      Icon "search" color:=tab==3?'#FF6750A4':'#FF79747E'
-      Text.caption "Search" color:=tab==3?'#FF6750A4':'#FF79747E'
+      Icon "search" color:{tab==3?'#FF6750A4':'#FF79747E'}
+      Text.caption "Search" color:{tab==3?'#FF6750A4':'#FF79747E'}
 
 state tab=0
 state playing=true

@@ -17,7 +17,7 @@ Page
       Text.eyebrow "PRICING"
       Heading "Simple pricing for every stage" level:1 center
       Text.lead "Start with what you need today and upgrade as your books grow." center
-      SegmentedButton =billing items:["Monthly","Yearly"]
+      SegmentedButton bind:billing items:["Monthly","Yearly"]
       Text.caption "Yearly billing saves you 20% on every plan."
     Grid cols:3 gap:24
       Card gap:16

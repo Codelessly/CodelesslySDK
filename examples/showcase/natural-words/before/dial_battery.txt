@@ -7,7 +7,7 @@ Card gap:12 pad:16
       Badge.success "Charging"
   Row gap:16 middle
     Stack w:120 h:120
-      CircularProgressIndicator value:=level/100 w:120 h:120
+      CircularProgressIndicator value:{level/100} w:120 h:120
       Column center middle
         Text.heading1 "{level}%"
         if charging
@@ -15,4 +15,4 @@ Card gap:12 pad:16
     Column gap:4 grow
       Text.strong "{round((100-level)*1.3,0)} min to full"
       Text.muted "Fully charged around 10:45"
-      Progress =level/100
+      Progress bind:{level/100}

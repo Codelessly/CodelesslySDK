@@ -4,7 +4,7 @@
  "roots": ["wrap"],
  "widget": {
   "type": "HabitStreak",
-  "doc": "A habit's streak and its week: HabitStreak \"Meditation\" streak:=streak best:21 days:=days (seven of done, missed, today, ahead; labels default to a Monday-first week) fires onCheckIn when today's mark is tapped (-> days=setAt(days,indexOf(days,\"today\"),\"done\"); streak=streak+1).",
+  "doc": "A habit's streak and its week: HabitStreak \"Meditation\" streak:{streak} best:21 days:{days} (seven of done, missed, today, ahead; labels default to a Monday-first week) fires onCheckIn when today's mark is tapped (-> days=setAt(days,indexOf(days,\"today\"),\"done\"); streak=streak+1).",
   "props": [
    {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Meditation", "doc": "The habit's name (empty: none)."},
    {"key": "streak", "type": {"kind": "number", "flutter": "double"}, "default": 0, "doc": "The current streak in days, the leading figure.", "required": true},

@@ -4,7 +4,7 @@
  "roots": ["wrap"],
  "widget": {
   "type": "CodeSample",
-  "doc": "A docs code sample as wide as its place: CodeSample \"src/beacon.ts\" =copied code:\"line 1\\nline 2\" language:\"ts\" numbers:true (default true; bash/sh/shell/zsh/console show a terminal glyph, others a file) -> onCopy copies the code and fires with it, and the button reads Copied while your boolean variable (default false) is true.",
+  "doc": "A docs code sample as wide as its place: CodeSample \"src/beacon.ts\" bind:copied code:\"line 1\\nline 2\" language:\"ts\" numbers:true (default true; bash/sh/shell/zsh/console show a terminal glyph, others a file) -> onCopy copies the code and fires with it, and the button reads Copied while your boolean variable (default false) is true.",
   "props": [
    {"key": "copied", "type": {"kind": "variable", "of": {"kind": "boolean", "flutter": "bool"}}, "default": false, "doc": "The name of your boolean variable: true once copied (the button reads Copied)."},
    {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "src/index.ts", "doc": "The file name or a label (Terminal), in the header.", "required": true},

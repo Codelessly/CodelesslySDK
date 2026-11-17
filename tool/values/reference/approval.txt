@@ -1,5 +1,5 @@
 state decision=""
-ChatCard "Delete 214 old files?" "Shared drive cleanup · needs your approval" icon:"delete_sweep_rounded" tone:"danger" status:=decision==""?"Awaiting you":(decision=="approve"?"Approved":"Denied")
+ChatCard "Delete 214 old files?" "Shared drive cleanup · needs your approval" icon:"delete_sweep_rounded" tone:"danger" status:{decision==""?"Awaiting you":(decision=="approve"?"Approved":"Denied")}
   Paragraph "I am about to permanently delete old files from your shared drive. Nothing is removed until you approve."
   Details rows:[["Folder","Shared Drive / Archive / 2019"],["Files","214 files, older than 2020"],["Space freed","3.2 GB"]] icons:["folder_rounded","description_rounded","storage_rounded"]
   if decision==""

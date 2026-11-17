@@ -18,7 +18,7 @@ App
           Avatar "Ana Ortiz" size:32
           Avatar "Lee Chen" size:32
           Avatar "Sam Patel" size:32
-        Input "Filter tasks" =q w:220
+        Input "Filter tasks" bind:q w:220
         Button "New task" -> tasks=append(tasks,with(newTask,"id",100+length(tasks)))
     Row gap:16 pad:24 grow top
       each c in cols
@@ -26,11 +26,11 @@ App
           Row between center
             Row gap:8 center
               Text.strong "{c.name}"
-              CountBadge count:=count(tasks,x=>x.col==c.id) showZero:true
+              CountBadge count:{count(tasks,x=>x.col==c.id)} showZero:true
             IconButton "add" -> tasks=append(tasks,with(with(newTask,"id",100+length(tasks)),"col",c.id))
           each t in filter(tasks,x=>x.col==c.id&&contains(lower(x.title),lower(q)))
-            Card gap:8 drag:task(t.id) border:=sel!=""&&sel.id==t.id?"#FF3B5BDB":"#FFE0E0E0" -> sel=t; done=[]
-              Box fill:=t.color radius:4 pad:[6,2,6,2]
+            Card gap:8 drag:task(t.id) border:{sel!=""&&sel.id==t.id?"#FF3B5BDB":"#FFE0E0E0"} -> sel=t; done=[]
+              Box fill:{t.color} radius:4 pad:[6,2,6,2]
                 Text.caption "{t.label}" color:#FFFFFFFF
               Text.strong "{t.title}"
               Row between center
@@ -45,7 +45,7 @@ App
   if sel!=""
     Pane w:360 pad:16 gap:12 border-left:#FFE0E0E0
       Row between center
-        Box fill:=sel.color radius:4 pad:[6,2,6,2]
+        Box fill:{sel.color} radius:4 pad:[6,2,6,2]
           Text.caption "{sel.label}" color:#FFFFFFFF
         IconButton "close" -> sel=""
       Heading "{sel.title}" level:3
@@ -58,7 +58,7 @@ App
           Text.muted "{sel.who}"
       Text.eyebrow "DESCRIPTION"
       Text "{sel.desc}"
-      Checklist "Checklist" =done items:["Draft the first version","Get feedback from the team","Make revisions","Final sign-off"]
+      Checklist "Checklist" bind:done items:["Draft the first version","Get feedback from the team","Make revisions","Final sign-off"]
       Text.eyebrow "ACTIVITY"
       Column gap:10
         each a in activity

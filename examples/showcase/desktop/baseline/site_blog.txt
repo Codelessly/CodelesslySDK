@@ -58,7 +58,7 @@ Column scroll fill:#FFFFFFFF
         Card gap:12 fill:#FFF3F4FF
           Text.cardTitle "The Signal & Noise letter"
           Text.bodySecondary "One engineering story every two weeks. No spam, no hype."
-          Input "Email" hint:"you@example.com" type:email =email
+          Input "Email" hint:"you@example.com" type:email bind:email
           Button "Subscribe" -> emit newsletter email; toast "Thanks for subscribing"
   Box fill:#FFF9FAFB pad:[64,48,64,56]
     Column gap:20 center

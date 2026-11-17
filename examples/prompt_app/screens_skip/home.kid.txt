@@ -2,9 +2,9 @@ Screen
   TopBar "Hey jumper!" "Let's beat your record today" eyebrow:"Skip"
   HeroSession "Today: Intervals" "8 rounds. Jump 40, rest 20. You got this!" minutes:8 cta:"Let's jump!" audience:"kid" -> emit start_session
   Row gap:12
-    StreakFlame "days in a row" "Keep it going!" count:=streak audience:"kid"
-    ProgressGoal "this week" "Almost there!" done:=sessionsThisWeek goal:=weeklyGoal
+    StreakFlame "days in a row" "Keep it going!" count:{streak} audience:"kid"
+    ProgressGoal "this week" "Almost there!" done:{sessionsThisWeek} goal:{weeklyGoal}
   WeekStrip done:["Mon","Wed","Fri"] today:"Sat"
-  RecordCard "Your best jumps" "Intervals, Fri 13 Nov" value:=sessions[1].best unit:"in a row" -> emit open_session sessions[1].date
+  RecordCard "Your best jumps" "Intervals, Fri 13 Nov" value:{sessions[1].best} unit:"in a row" -> emit open_session sessions[1].date
   SectionTitle "Last jump" action:"See all" -> emit open_history
-  SessionRow "{sessions[0].name}" "{sessions[0].date}" value:=sessions[0].jumps unit:"jumps" share:0.7 icon:"star" -> emit open_session sessions[0].date
+  SessionRow "{sessions[0].name}" "{sessions[0].date}" value:{sessions[0].jumps} unit:"jumps" share:0.7 icon:"star" -> emit open_session sessions[0].date

@@ -15,12 +15,12 @@ App
   Sidebar
     Brand "Plume" icon:"edit_note"
     Text.eyebrow "SETTINGS"
-    NavItem "Profile" icon:"person" selected:=tab=="profile" -> tab="profile"
-    NavItem "Account" icon:"manage_accounts" selected:=tab=="account" -> tab="account"
-    NavItem "Notifications" icon:"notifications" selected:=tab=="notifications" -> tab="notifications"
-    NavItem "Appearance" icon:"palette" selected:=tab=="appearance" -> tab="appearance"
-    NavItem "Billing" icon:"credit_card" selected:=tab=="billing" -> tab="billing"
-    NavItem "Team" icon:"group" selected:=tab=="team" -> tab="team"
+    NavItem "Profile" icon:"person" selected:{tab=="profile"} -> tab="profile"
+    NavItem "Account" icon:"manage_accounts" selected:{tab=="account"} -> tab="account"
+    NavItem "Notifications" icon:"notifications" selected:{tab=="notifications"} -> tab="notifications"
+    NavItem "Appearance" icon:"palette" selected:{tab=="appearance"} -> tab="appearance"
+    NavItem "Billing" icon:"credit_card" selected:{tab=="billing"} -> tab="billing"
+    NavItem "Team" icon:"group" selected:{tab=="team"} -> tab="team"
     Spacer grow
     Row gap:10 middle
       Avatar "Maya Reyes" size:36
@@ -44,27 +44,27 @@ App
                 Button.outline "Change" -> emit changePicture; dirty=true
                 Text.caption "JPG or PNG, up to 5 MB"
             Row gap:16
-              Input "Full name" =name grow -> dirty=true
-              Input "Username" "yourname" =username grow -> dirty=true
+              Input "Full name" bind:name grow -> dirty=true
+              Input "Username" "yourname" bind:username grow -> dirty=true
             Column gap:4
-              Input "Bio" "Tell readers a little about you" =bio multiline -> dirty=true
+              Input "Bio" "Tell readers a little about you" bind:bio multiline -> dirty=true
               Row end
-                Text.caption "{length(bio)}/160" color:=length(bio)>160?"#FFDC2626":"#FF6B7280"
-            Select "Time zone" =tz items:["Pacific/Honolulu (UTC-10)","America/Los_Angeles (UTC-8)","America/New_York (UTC-5)","Europe/Lisbon (UTC+0)","Europe/Berlin (UTC+1)","Asia/Kolkata (UTC+5:30)","Asia/Tokyo (UTC+9)"] -> dirty=true
-            Toggle "Public profile" =public -> dirty=true
+                Text.caption "{length(bio)}/160" color:{length(bio)>160?"#FFDC2626":"#FF6B7280"}
+            Select "Time zone" bind:tz items:["Pacific/Honolulu (UTC-10)","America/Los_Angeles (UTC-8)","America/New_York (UTC-5)","Europe/Lisbon (UTC+0)","Europe/Berlin (UTC+1)","Asia/Kolkata (UTC+5:30)","Asia/Tokyo (UTC+9)"] -> dirty=true
+            Toggle "Public profile" bind:public -> dirty=true
             Text.caption "When on, anyone can find your profile and read your published pieces."
           Card gap:4
             Heading "Notifications" level:3
             Text.muted "Choose what Plume tells you about."
-            ToggleRow "Draft reminders" "A gentle nudge when a draft has sat untouched for a week." =nDrafts -> dirty=true
+            ToggleRow "Draft reminders" "A gentle nudge when a draft has sat untouched for a week." bind:nDrafts -> dirty=true
             Divider
-            ToggleRow "Comments and replies" "Someone responds to one of your pieces." =nComments -> dirty=true
+            ToggleRow "Comments and replies" "Someone responds to one of your pieces." bind:nComments -> dirty=true
             Divider
-            ToggleRow "Weekly digest" "A Sunday summary of your words written and readers reached." =nWeekly -> dirty=true
+            ToggleRow "Weekly digest" "A Sunday summary of your words written and readers reached." bind:nWeekly -> dirty=true
             Divider
-            ToggleRow "Writing goals" "Progress updates and streak reminders." =nGoals -> dirty=true
+            ToggleRow "Writing goals" "Progress updates and streak reminders." bind:nGoals -> dirty=true
             Divider
-            ToggleRow "Product news" "New features and occasional tips from the Plume team." =nProduct -> dirty=true
+            ToggleRow "Product news" "New features and occasional tips from the Plume team." bind:nProduct -> dirty=true
           Box gap:12 pad:20 radius:12 border:#FFFCA5A5 fill:#FFFEF2F2
             Heading "Danger zone" level:3
             Text.muted "Deleting your account removes all your drafts, published pieces and followers. This cannot be undone."
@@ -80,5 +80,5 @@ App
       if dirty
         Text.caption "You have unsaved changes"
       Spacer grow
-      Button.outline "Cancel" enabled:=dirty -> name="Maya Reyes"; username="mayawrites"; bio="Novelist and essayist. Drafting my second book one quiet morning at a time."; tz="Europe/Lisbon (UTC+0)"; public=true; nDrafts=true; nComments=true; nWeekly=false; nGoals=true; nProduct=false; dirty=false
-      Button "Save changes" enabled:=dirty -> emit save; toast "Changes saved"; dirty=false
+      Button.outline "Cancel" enabled:{dirty} -> name="Maya Reyes"; username="mayawrites"; bio="Novelist and essayist. Drafting my second book one quiet morning at a time."; tz="Europe/Lisbon (UTC+0)"; public=true; nDrafts=true; nComments=true; nWeekly=false; nGoals=true; nProduct=false; dirty=false
+      Button "Save changes" enabled:{dirty} -> emit save; toast "Changes saved"; dirty=false

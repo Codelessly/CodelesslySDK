@@ -46,7 +46,7 @@ Page
         Card gap:12
           Heading "The Signal & Noise letter" level:3
           Text.muted "One engineering story a week. No noise."
-          Input "Email" hint:"you@example.com" type:email =email
+          Input "Email" hint:"you@example.com" type:email bind:email
           Button "Subscribe" w:fill -> toast "You are subscribed"; email=""
   Section tint
     Column gap:12

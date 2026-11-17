@@ -18,7 +18,7 @@ Column scroll
     Text.heading1 "Simple pricing for every stage" center
     Text.lead "Accounting that grows with you. Try any plan free for 14 days." center
     Row gap:12 center
-      SegmentedButton =billing items:["Monthly","Yearly"]
+      SegmentedButton bind:billing items:["Monthly","Yearly"]
       if billing=="Yearly"
         Badge.success "Save 20%"
   Column center pad:[48,16,48,48]

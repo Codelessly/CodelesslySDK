@@ -9,8 +9,8 @@ Column h:fill
       Row between top pad:16
         IconButton "arrow_back" -> emit back
         Row
-          IconButton "favorite_border" visible:=!fav -> fav=true; toast "Saved to favorites"
-          IconButton "favorite" visible:=fav -> fav=false
+          IconButton "favorite_border" visible:{!fav} -> fav=true; toast "Saved to favorites"
+          IconButton "favorite" visible:{fav} -> fav=false
     Column gap:12 pad:[16,0,16,16]
       Text.pageTitle "Lemon Garlic Butter Salmon"
       Row gap:4
@@ -38,7 +38,7 @@ Column h:fill
       Text.heading2 "Ingredients"
       Column gap:4
         each row in ingredients
-          Checkbox "{row.qty>0 ? round(row.qty*servings/4,1)+' ' : ''}{row.name}" =row.done
+          Checkbox "{row.qty>0 ? round(row.qty*servings/4,1)+' ' : ''}{row.name}" bind:row.done
       Divider
       Text.heading2 "Steps"
       Column gap:14

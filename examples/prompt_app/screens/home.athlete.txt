@@ -15,13 +15,13 @@ Column scroll gap:16 pad:16
     Row between middle
       Text.sectionTitle "Week"
       Text.strong "{sessionsThisWeek}/{weeklyGoal}"
-    Progress value:=sessionsThisWeek/weeklyGoal
+    Progress value:{sessionsThisWeek/weeklyGoal}
     Text.caption "{weeklyGoal-sessionsThisWeek} sessions left"
   Card gap:8
     Row between middle
       Text.sectionTitle "Jumps per week"
       Text.strong "{last(weeks).jumps}"
-    BarChart values:=map(weeks,w=>w.jumps) labels:=map(weeks,w=>w.label)
+    BarChart values:{map(weeks,w=>w.jumps)} labels:{map(weeks,w=>w.label)}
     Text.caption "W42 vs W41: +{last(weeks).jumps-weeks[2].jumps}"
   Row between middle
     Text.sectionTitle "Recent"

@@ -4,7 +4,7 @@
  "roots": ["wrap"],
  "widget": {
   "type": "SettingRow",
-  "doc": "One setting of a settings page, stacked in a Card pad:0 gap:0: SettingRow \"Mentions\" \"When someone tags you\" =mentions (kind switch), kind:\"link\" detail:\"English\" or kind:\"button\" detail:\"Delete account\" danger:true -> confirm=true; divider:false on the first row drops the hairline above it.",
+  "doc": "One setting of a settings page, stacked in a Card pad:0 gap:0: SettingRow \"Mentions\" \"When someone tags you\" bind:mentions (kind switch), kind:\"link\" detail:\"English\" or kind:\"button\" detail:\"Delete account\" danger:true -> confirm=true; divider:false on the first row drops the hairline above it.",
   "props": [
    {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Email notifications", "doc": "The setting's name.", "required": true},
    {"key": "description", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "One line under the name (empty: none)."},

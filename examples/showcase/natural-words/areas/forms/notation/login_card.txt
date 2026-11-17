@@ -15,10 +15,10 @@ Column center pad:24 maxw:420
         Row gap:8 center
           Icon "error" color:#FFD93025
           Text "Incorrect email or password. 2 attempts left." color:#FF8C1D18 grow
-    Input "Email" hint:"you@example.com" type:email =email
-    Input "Password" password:=!showPw =pw
-    Toggle "Show password" =showPw
+    Input "Email" hint:"you@example.com" type:email bind:email
+    Input "Password" password:{!showPw} bind:pw
+    Toggle "Show password" bind:showPw
     Row between center
-      Checkbox "Remember me" =remember
+      Checkbox "Remember me" bind:remember
       Button.ghost "Forgot password?" -> link https://harborbank.example/forgot-password
     Button "Sign in" -> emit signin

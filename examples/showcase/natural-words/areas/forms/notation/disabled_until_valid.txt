@@ -4,24 +4,24 @@ state confirm=""
 
 Card gap:12 maxw:420
   Text.heading "Change password"
-  Input "Current password" password =current
-  Input "New password" password =newpw
+  Input "Current password" password bind:current
+  Input "New password" password bind:newpw
   Column gap:6
     Row gap:8 middle
-      Icon "check_circle" color:#FF2E7D32 visible:=length(newpw)>=8
-      Icon "cancel" color:#FF9E9E9E visible:=length(newpw)<8
+      Icon "check_circle" color:#FF2E7D32 visible:{length(newpw)>=8}
+      Icon "cancel" color:#FF9E9E9E visible:{length(newpw)<8}
       Text.small "At least 8 characters"
     Row gap:8 middle
-      Icon "check_circle" color:#FF2E7D32 visible:=any(["0","1","2","3","4","5","6","7","8","9"],d=>contains(newpw,d))
-      Icon "cancel" color:#FF9E9E9E visible:=!any(["0","1","2","3","4","5","6","7","8","9"],d=>contains(newpw,d))
+      Icon "check_circle" color:#FF2E7D32 visible:{any(["0","1","2","3","4","5","6","7","8","9"],d=>contains(newpw,d))}
+      Icon "cancel" color:#FF9E9E9E visible:{!any(["0","1","2","3","4","5","6","7","8","9"],d=>contains(newpw,d))}
       Text.small "One number"
     Row gap:8 middle
-      Icon "check_circle" color:#FF2E7D32 visible:=newpw!=lower(newpw)
-      Icon "cancel" color:#FF9E9E9E visible:=newpw==lower(newpw)
+      Icon "check_circle" color:#FF2E7D32 visible:{newpw!=lower(newpw)}
+      Icon "cancel" color:#FF9E9E9E visible:{newpw==lower(newpw)}
       Text.small "One uppercase letter"
     Row gap:8 middle
-      Icon "check_circle" color:#FF2E7D32 visible:=newpw!=""&&newpw==confirm
-      Icon "cancel" color:#FF9E9E9E visible:=!(newpw!=""&&newpw==confirm)
+      Icon "check_circle" color:#FF2E7D32 visible:{newpw!=""&&newpw==confirm}
+      Icon "cancel" color:#FF9E9E9E visible:{!(newpw!=""&&newpw==confirm)}
       Text.small "Passwords match"
-  Input "Confirm new password" password =confirm
-  Button "Update password" enabled:=current!=""&&length(newpw)>=8&&any(["0","1","2","3","4","5","6","7","8","9"],d=>contains(newpw,d))&&newpw!=lower(newpw)&&newpw==confirm -> emit updatePassword; toast "Password updated"
+  Input "Confirm new password" password bind:confirm
+  Button "Update password" enabled:{current!=""&&length(newpw)>=8&&any(["0","1","2","3","4","5","6","7","8","9"],d=>contains(newpw,d))&&newpw!=lower(newpw)&&newpw==confirm} -> emit updatePassword; toast "Password updated"

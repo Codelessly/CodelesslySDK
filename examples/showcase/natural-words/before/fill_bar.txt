@@ -6,8 +6,8 @@ Card gap:12
     Column grow gap:2
       Text.strong "report-2024.pdf"
       Text.caption "{pct<1 ? 'Uploading…' : 'Upload complete'}"
-    Text.strong "{round(pct*100,0)}%" visible:=pct<1
-    Icon "check_circle" color:=#FF2E7D32 visible:=pct>=1
-  Progress =pct color:=pct>=1?"#FF2E7D32":"#FF1976D2"
-  Row end visible:=pct>=1
+    Text.strong "{round(pct*100,0)}%" visible:{pct<1}
+    Icon "check_circle" color:{#FF2E7D32} visible:{pct>=1}
+  Progress bind:pct color:{pct>=1?"#FF2E7D32":"#FF1976D2"}
+  Row end visible:{pct>=1}
     Button.ghost "Upload again" -> pct=0

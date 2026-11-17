@@ -6,10 +6,10 @@ App
   Sidebar w:200
     Brand "Relaydesk" icon:"support_agent"
     Text.eyebrow "FOLDERS"
-    NavItem "Inbox" icon:"inbox" badge:"12" selected:=folder=="inbox" -> folder="inbox"
-    NavItem "Assigned to me" icon:"person" badge:"4" selected:=folder=="mine" -> folder="mine"
-    NavItem "Waiting" icon:"schedule" badge:"7" selected:=folder=="waiting" -> folder="waiting"
-    NavItem "Closed" icon:"check_circle" selected:=folder=="closed" -> folder="closed"
+    NavItem "Inbox" icon:"inbox" badge:"12" selected:{folder=="inbox"} -> folder="inbox"
+    NavItem "Assigned to me" icon:"person" badge:"4" selected:{folder=="mine"} -> folder="mine"
+    NavItem "Waiting" icon:"schedule" badge:"7" selected:{folder=="waiting"} -> folder="waiting"
+    NavItem "Closed" icon:"check_circle" selected:{folder=="closed"} -> folder="closed"
     Spacer grow
     Row gap:10 middle
       Avatar "Priya Shah" size:32
@@ -22,7 +22,7 @@ App
       Text.caption "12 open"
     Column scroll grow
       each c in convos
-        Row pad:[16,12,16,12] gap:12 top border-bottom:#FFE5E7EB fill:=sel==c.id?"#142563EB":"#00FFFFFF" -> sel=c.id
+        Row pad:[16,12,16,12] gap:12 top border-bottom:#FFE5E7EB fill:{sel==c.id?"#142563EB":"#00FFFFFF"} -> sel=c.id
           Avatar "{c.name}" size:40
           Column grow gap:2
             Text.strong "{c.name}"
@@ -30,7 +30,7 @@ App
             Text.muted "{c.preview}" size:12
           Column gap:6 end
             Text.caption "{c.time}"
-            Box w:8 h:8 radius:4 fill:#FF2563EB visible:=c.unread
+            Box w:8 h:8 radius:4 fill:#FF2563EB visible:{c.unread}
   Main
     Nav
       Column gap:4
@@ -69,7 +69,7 @@ App
           Text "The refund has been issued. Pending charges usually drop within 3 to 5 business days."
         Avatar "Priya Shah" size:32
     Column pad:16 gap:10 border-top:#FFE5E7EB
-      Input "Reply to Daniel" "Write your reply…" =reply multiline
+      Input "Reply to Daniel" "Write your reply…" bind:reply multiline
       Row gap:8 end
         Button "Send" -> emit send reply; reply=""; toast "Reply sent"
         Button.outline "Send and close" -> emit sendAndClose reply; reply=""; toast "Sent and closed"

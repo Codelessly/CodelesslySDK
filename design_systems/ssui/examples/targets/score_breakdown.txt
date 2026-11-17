@@ -3,8 +3,8 @@ state total=round(sum(parts, p => p.score*p.weight)/100)
 state open=""
 Card gap:12
   Row gap:12
-    Box w:56 h:56 radius:28 center fill:=total>=80?"#1A16A34A":(total>=60?"#1AEA580C":"#1ADC2626")
-      Text.heading2 "{total}" color:=total>=80?"#FF16A34A":(total>=60?"#FFEA580C":"#FFDC2626")
+    Box w:56 h:56 radius:28 center fill:{total>=80?"#1A16A34A":(total>=60?"#1AEA580C":"#1ADC2626")}
+      Text.heading2 "{total}" color:{total>=80?"#FF16A34A":(total>=60?"#FFEA580C":"#FFDC2626")}
     Column gap:2 grow
       Text.sectionTitle "Review score"
       Text.bodySecondary "{total>=80?"Ready to merge":(total>=60?"Mergeable after fixes":"Needs work")} · weighted across 4 areas"
@@ -15,7 +15,7 @@ Card gap:12
           Row gap:6
             Text.strong "{p.name}"
             Text.caption "{p.weight}%"
-          Text.mono "{p.score}" color:=p.score>=80?"#FF16A34A":(p.score>=60?"#FFEA580C":"#FFDC2626")
-        Progress =p.score/100 {"props": {"color": "${= p.score>=80?'#FF16A34A':(p.score>=60?'#FFEA580C':'#FFDC2626')}"}}
-        Text.caption "{p.note}" visible:=open==p.name
+          Text.mono "{p.score}" color:{p.score>=80?"#FF16A34A":(p.score>=60?"#FFEA580C":"#FFDC2626")}
+        Progress bind:{p.score/100} {"props": {"color": "${= p.score>=80?'#FF16A34A':(p.score>=60?'#FFEA580C':'#FFDC2626')}"}}
+        Text.caption "{p.note}" visible:{open==p.name}
   Text.caption "Tap an area for the reason."

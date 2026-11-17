@@ -2,8 +2,8 @@ Card gap:16 pad:20 maxw:560
   Column gap:4
     Text.heading2 "Senior Designer"
     Text.bodySecondary "Apply for this role by filling in the details below."
-  Input "Full name" "Maria Lopez" =name
-  Input "Email" "you@example.com" =email type:email
+  Input "Full name" "Maria Lopez" bind:name
+  Input "Email" "you@example.com" bind:email type:email
   Column gap:8
     Text.fieldLabel "Resume"
     Box pad:12 radius:8 gap:8 fill:#FFF5F5F7
@@ -14,7 +14,7 @@ Card gap:16 pad:20 maxw:560
           Text.caption "Uploading… 72%"
         IconButton "close" -> emit removeResume; toast "Resume removed"
       Progress 0.72
-  Input "Portfolio link" "https://yourportfolio.com" =portfolio
+  Input "Portfolio link" "https://yourportfolio.com" bind:portfolio
   Column gap:8
     Text.fieldLabel "Cover letter"
     Box pad:24 radius:8 center middle gap:8 fill:#FFFAFAFC border:#FFC4C4CC -> emit browseCoverLetter

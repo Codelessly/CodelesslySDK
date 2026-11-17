@@ -30,7 +30,7 @@ Column w:390 h:fill
         Card gap:8 -> emit openUnit u.title
           Icon "{u.icon}" size:32 color:#FF1B7F5C
           Text.strong "{u.title}"
-          Progress =u.progress
+          Progress bind:u.progress
           Text.caption "{u.note}"
     Row between middle
       Text.sectionTitle "Leaderboard"
@@ -45,14 +45,14 @@ Column w:390 h:fill
   Divider
   Row pad:[8,8,8,12] between
     Column center gap:2 grow -> tab="learn"
-      Icon "school" color:=tab=='learn'?'#FF1B7F5C':'#FF777777'
-      Text.caption "Learn" color:=tab=='learn'?'#FF1B7F5C':'#FF777777'
+      Icon "school" color:{tab=='learn'?'#FF1B7F5C':'#FF777777'}
+      Text.caption "Learn" color:{tab=='learn'?'#FF1B7F5C':'#FF777777'}
     Column center gap:2 grow -> tab="practice"
-      Icon "fitness_center" color:=tab=='practice'?'#FF1B7F5C':'#FF777777'
-      Text.caption "Practice" color:=tab=='practice'?'#FF1B7F5C':'#FF777777'
+      Icon "fitness_center" color:{tab=='practice'?'#FF1B7F5C':'#FF777777'}
+      Text.caption "Practice" color:{tab=='practice'?'#FF1B7F5C':'#FF777777'}
     Column center gap:2 grow -> tab="league"
-      Icon "emoji_events" color:=tab=='league'?'#FF1B7F5C':'#FF777777'
-      Text.caption "League" color:=tab=='league'?'#FF1B7F5C':'#FF777777'
+      Icon "emoji_events" color:{tab=='league'?'#FF1B7F5C':'#FF777777'}
+      Text.caption "League" color:{tab=='league'?'#FF1B7F5C':'#FF777777'}
     Column center gap:2 grow -> tab="profile"
-      Icon "person" color:=tab=='profile'?'#FF1B7F5C':'#FF777777'
-      Text.caption "Profile" color:=tab=='profile'?'#FF1B7F5C':'#FF777777'
+      Icon "person" color:{tab=='profile'?'#FF1B7F5C':'#FF777777'}
+      Text.caption "Profile" color:{tab=='profile'?'#FF1B7F5C':'#FF777777'}

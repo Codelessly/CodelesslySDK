@@ -15,7 +15,7 @@ Column gap:20 pad:[24,32,24,32] maxw:960 scroll
   Column gap:6
     Text.pageTitle "Changelog"
     Text.bodySecondary "New features, improvements and fixes shipped to Relay. Follow along as we build."
-  SegmentedButton =filter items:["All","Features","Improvements","Fixes"]
+  SegmentedButton bind:filter items:["All","Features","Improvements","Fixes"]
   Column gap:0
     each r in releases
       if filter=="All"||r.cat==filter

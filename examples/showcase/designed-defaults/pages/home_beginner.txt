@@ -27,10 +27,10 @@ Column scroll gap:16 pad:16
   Card gap:8
     Text.sectionTitle "This week"
     Text.body "{sessionsThisWeek} of {weeklyGoal} sessions done"
-    Progress =sessionsThisWeek/weeklyGoal
+    Progress bind:{sessionsThisWeek/weeklyGoal}
     Text.caption "Just {weeklyGoal-sessionsThisWeek} more to reach your goal."
   Card gap:8
     Text.sectionTitle "Your jumps each week"
-    BarChart values:=map(weeks,w=>w.jumps) labels:=map(weeks,w=>w.label)
+    BarChart values:{map(weeks,w=>w.jumps)} labels:{map(weeks,w=>w.label)}
     Text.caption "You jumped more this week than last. Great progress."
   Button.outline "See my past sessions" -> emit open_history

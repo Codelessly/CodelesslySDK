@@ -22,7 +22,7 @@ Column w:1280 h:fill fill:#FFF6F7F9
         Avatar "Leo Martin" size:32
         Avatar "Ana Ruiz" size:32
     Row gap:12 center
-      Input "Filter" "Filter tasks" =q w:240
+      Input "Filter" "Filter tasks" bind:q w:240
       Button "New task" -> emit newTask
   Row grow gap:12 pad:16
     Row grow gap:12
@@ -36,10 +36,10 @@ Column w:1280 h:fill fill:#FFF6F7F9
           Column scroll gap:8
             each t in tasks
               if t.col==c.name && (q=="" || contains(lower(t.title),lower(q)))
-                Card gap:8 pad:12 drag:task(t.id) fill:#FFFFFFFF border:=sel==t.id?"#FF3B6CF6":"#FFE3E5EA" -> sel=t.id; selTitle=t.title; selLabel=t.label; selDue=t.due; selWho=t.who
+                Card gap:8 pad:12 drag:task(t.id) fill:#FFFFFFFF border:{sel==t.id?"#FF3B6CF6":"#FFE3E5EA"} -> sel=t.id; selTitle=t.title; selLabel=t.label; selDue=t.due; selWho=t.who
                   Text.strong "{t.title}"
-                  Box fill:=t.tint radius:4 pad:[6,2,6,2]
-                    Text.caption "{t.label}" color:=t.ink
+                  Box fill:{t.tint} radius:4 pad:[6,2,6,2]
+                    Text.caption "{t.label}" color:{t.ink}
                   Row between center
                     Row gap:12 center
                       Row gap:4 center
@@ -67,10 +67,10 @@ Column w:1280 h:fill fill:#FFF6F7F9
         Text.strong "Description"
         Text.bodySecondary "Plan, build and review this piece of the relaunch. Align with the brand guidelines and share a draft with the team before the due date."
         Text.strong "Checklist"
-        Checkbox "Draft the first version" =c1
-        Checkbox "Share with the team" =c2
-        Checkbox "Apply feedback" =c3
-        Checkbox "Final sign-off" =c4
+        Checkbox "Draft the first version" bind:c1
+        Checkbox "Share with the team" bind:c2
+        Checkbox "Apply feedback" bind:c3
+        Checkbox "Final sign-off" bind:c4
         Divider
         Text.strong "Activity"
         Row gap:8

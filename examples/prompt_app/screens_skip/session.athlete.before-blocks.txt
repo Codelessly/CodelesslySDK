@@ -11,7 +11,7 @@ Screen
       Text.eyebrow "{upper(phase)}"
       Text.strong "Round {round}/{today.rounds}"
     Text.display "{left}s" size:96
-    Progress =0
+    Progress bind:{0}
     Row between
       Text.meta "Work {today.work}s"
       Text.meta "Rest {today.rest}s"
@@ -26,6 +26,6 @@ Screen
       Button.outline "+10" grow -> count=count+10
       Button.ghost "-1" -> count=max(0,count-1)
   Row gap:8
-    Button.secondary "Resume" grow visible:=paused -> paused=false
-    Button.secondary "Pause" grow visible:=!paused -> paused=true
+    Button.secondary "Resume" grow visible:{paused} -> paused=false
+    Button.secondary "Pause" grow visible:{!paused} -> paused=true
     Button "Finish" grow -> emit finish_session count

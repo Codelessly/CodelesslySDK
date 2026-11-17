@@ -9,12 +9,12 @@ App
     Row gap:10 center
       IconTile "sailing"
       Text.heading "Harbor"
-    NavItem "Overview" icon:"dashboard" selected:=tab=="overview" -> tab="overview"
-    NavItem "Orders" icon:"receipt_long" selected:=tab=="orders" -> tab="orders"
-    NavItem "Inventory" icon:"inventory_2" selected:=tab=="inventory" -> tab="inventory"
-    NavItem "Customers" icon:"group" selected:=tab=="customers" -> tab="customers"
-    NavItem "Reports" icon:"bar_chart" selected:=tab=="reports" -> tab="reports"
-    NavItem "Settings" icon:"settings" selected:=tab=="settings" -> tab="settings"
+    NavItem "Overview" icon:"dashboard" selected:{tab=="overview"} -> tab="overview"
+    NavItem "Orders" icon:"receipt_long" selected:{tab=="orders"} -> tab="orders"
+    NavItem "Inventory" icon:"inventory_2" selected:{tab=="inventory"} -> tab="inventory"
+    NavItem "Customers" icon:"group" selected:{tab=="customers"} -> tab="customers"
+    NavItem "Reports" icon:"bar_chart" selected:{tab=="reports"} -> tab="reports"
+    NavItem "Settings" icon:"settings" selected:{tab=="settings"} -> tab="settings"
     Spacer grow
     Row gap:10 center
       Avatar "Sam Patel" size:36
@@ -25,8 +25,8 @@ App
     Nav
       Heading "Overview" level:1
       Row gap:8 center
-        Segments =range options:["7d","30d","90d"]
-        Input "Search" =q w:220
+        Segments bind:range options:["7d","30d","90d"]
+        Input "Search" bind:q w:220
         Button "New order" -> emit newOrder
     Column pad:24 gap:16
       Grid cols:4 gap:16
@@ -41,11 +41,11 @@ App
           Heading "Sales by channel" level:3
           Row center
             Donut values:[54,24,14,8] labels:["Online store","Marketplace","Retail","Wholesale"] h:160
-          Details rows:=[["Online store","54%"],["Marketplace","24%"],["Retail","14%"],["Wholesale","8%"]]
+          Details rows:{[["Online store","54%"],["Marketplace","24%"],["Retail","14%"],["Wholesale","8%"]]}
       Card gap:12
         Row between center
           Heading "Latest orders" level:3
           Link "View all" -> emit viewAll
-        TableHeader =sort desc:desc columns:["Order","Customer","Total","Date","Status"] keys:["id","customer","total","date","status"]
+        TableHeader bind:sort desc:desc columns:["Order","Customer","Total","Date","Status"] keys:["id","customer","total","date","status"]
         each o in orders
-          TableRow cells:=[o.id,o.customer,money(o.total,"$",2),o.date] badge:=o.status -> emit openOrder o.id
+          TableRow cells:{[o.id,o.customer,money(o.total,"$",2),o.date]} badge:{o.status} -> emit openOrder o.id

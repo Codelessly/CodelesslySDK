@@ -1,8 +1,8 @@
 Screen
   TopBar "Your jumps" "Look how far you got!" back:true -> emit open_home
-  ChartCard "Jumps each week" values:=map(weeks,w=>w.jumps) labels:=map(weeks,w=>w.label) unit:"jumps" deltaLabel:"vs last week"
-  RecordCard "Best run" "No miss! Can you beat it?" value:=max(max(sessions[0].best,sessions[1].best),max(sessions[2].best,sessions[3].best)) unit:"jumps"
+  ChartCard "Jumps each week" values:{map(weeks,w=>w.jumps)} labels:{map(weeks,w=>w.label)} unit:"jumps" deltaLabel:"vs last week"
+  RecordCard "Best run" "No miss! Can you beat it?" value:{max(max(sessions[0].best,sessions[1].best),max(sessions[2].best,sessions[3].best))} unit:"jumps"
   SectionTitle "Past sessions"
   each s in sessions
-    SessionRow "{s.name}" "{s.date} · {s.minutes} min · best run {s.best}" value:="{s.jumps}" unit:"jumps" share:=s.best/210 icon:"star" -> emit open_session s.date
+    SessionRow "{s.name}" "{s.date} · {s.minutes} min · best run {s.best}" value:{"{s.jumps}"} unit:"jumps" share:{s.best/210} icon:"star" -> emit open_session s.date
   Button "Jump again!" -> emit start_session

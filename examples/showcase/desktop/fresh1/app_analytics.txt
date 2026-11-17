@@ -9,12 +9,12 @@ state saved=[{"name":"Checkout by plan","note":"Line, 30 days","icon":"show_char
 App
   Sidebar
     Brand "Lumen" icon:"insights"
-    NavItem "Home" icon:"home" selected:=tab=="home" -> tab="home"
-    NavItem "Explore" icon:"explore" selected:=tab=="explore" -> tab="explore"
-    NavItem "Funnels" icon:"filter_alt" selected:=tab=="funnels" -> tab="funnels"
-    NavItem "Retention" icon:"replay" selected:=tab=="retention" -> tab="retention"
-    NavItem "Cohorts" icon:"groups" selected:=tab=="cohorts" -> tab="cohorts"
-    NavItem "Settings" icon:"settings" selected:=tab=="settings" -> tab="settings"
+    NavItem "Home" icon:"home" selected:{tab=="home"} -> tab="home"
+    NavItem "Explore" icon:"explore" selected:{tab=="explore"} -> tab="explore"
+    NavItem "Funnels" icon:"filter_alt" selected:{tab=="funnels"} -> tab="funnels"
+    NavItem "Retention" icon:"replay" selected:{tab=="retention"} -> tab="retention"
+    NavItem "Cohorts" icon:"groups" selected:{tab=="cohorts"} -> tab="cohorts"
+    NavItem "Settings" icon:"settings" selected:{tab=="settings"} -> tab="settings"
     Spacer grow
     Row gap:10 middle
       Avatar "Maya Reyes" size:36
@@ -25,7 +25,7 @@ App
     Nav
       Heading "Explore" level:1
       Row gap:8 middle
-        Select =range items:["7 days","30 days","90 days","12 months"] w:150
+        Select bind:range items:["7 days","30 days","90 days","12 months"] w:150
         Button "Save chart" icon:"bookmark_add" -> toast "Chart saved"
     Column pad:24 gap:20
       Card gap:16
@@ -33,10 +33,10 @@ App
         Row gap:16 bottom
           Column gap:4 grow
             Text.fieldLabel "Event"
-            Select =event items:["Checkout completed","Signed up","Project created","Invite sent"]
+            Select bind:event items:["Checkout completed","Signed up","Project created","Invite sent"]
           Column gap:4 grow
             Text.fieldLabel "Grouped by"
-            Select =groupBy items:["Plan","Country","Platform"]
+            Select bind:groupBy items:["Plan","Country","Platform"]
         Row gap:8 middle
           Text.fieldLabel "Filters"
           each f in filters
@@ -70,15 +70,15 @@ App
           Row pad:[20,0,20,0] gap:16 h:52 middle border-top:#FFE5E7EB
             Text.strong "{p.name}" grow
             Text "{p.label}" w:120 right
-            Text.strong "{p.delta}" w:160 right color:=p.up?"#FF16A34A":"#FFDC2626"
+            Text.strong "{p.delta}" w:160 right color:{p.up?"#FF16A34A":"#FFDC2626"}
             Row w:120 end
-              Sparkline values:=p.trend w:96 h:28
+              Sparkline values:{p.trend} w:96 h:28
   Pane w:320 pad:16 gap:12
     Row between middle
       Heading "Saved charts" level:3
       Badge.neutral "4"
     each c in saved
-      Row pad:[12,10,12,10] gap:12 middle radius:8 fill:=sel==c.name?"#142563EB":"#00FFFFFF" -> sel=c.name
+      Row pad:[12,10,12,10] gap:12 middle radius:8 fill:{sel==c.name?"#142563EB":"#00FFFFFF"} -> sel=c.name
         IconTile "{c.icon}"
         Column grow
           Text.strong "{c.name}"

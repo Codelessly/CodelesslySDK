@@ -11,11 +11,11 @@ Screen
     BigButton "Start session" icon:"play_arrow" -> phase="set"; left=3; round=0; count=0; elapsed=0; paused=false; saved=false; emit start_session
   if phase=="set"||phase=="work"||phase=="rest"
     SessionBar "{today.name}" "Round {round<1?1:round} of {today.rounds}" -> phase="done"
-    SessionDial "Jump while it is bright, rest while it is calm" left:=left phase:=phase round:=round<1?1:round rounds:=today.rounds work:=today.work rest:=today.rest paused:=paused workLabel:"Jump" restLabel:"Rest" setLabel:"Get ready" readyLabel:"Ready"
+    SessionDial "Jump while it is bright, rest while it is calm" left:{left} phase:{phase} round:{round<1?1:round} rounds:{today.rounds} work:{today.work} rest:{today.rest} paused:{paused} workLabel:"Jump" restLabel:"Rest" setLabel:"Get ready" readyLabel:"Ready"
     if phase=="work"
-      TapPad "Tap for every jump" =count hint:"Tap each time you jump"
-    SessionControls =paused pause:"Pause" resume:"Keep going" finish:"Finish" -> phase="done"
+      TapPad "Tap for every jump" bind:count hint:"Tap each time you jump"
+    SessionControls bind:paused pause:"Pause" resume:"Keep going" finish:"Finish" -> phase="done"
   if phase=="done"
-    SessionSummary "Well done" "Next: a rest day, then come back for your next short session." jumps:=count best:=0 rounds:=round of:=today.rounds seconds:=elapsed streak:=streak streakLabel:"sessions in a row" unit:"jumps" eyebrow:"Session complete"
+    SessionSummary "Well done" "Next: a rest day, then come back for your next short session." jumps:{count} best:{0} rounds:{round} of:{today.rounds} seconds:{elapsed} streak:{streak} streakLabel:"sessions in a row" unit:"jumps" eyebrow:"Session complete"
     BigButton "Back to home" icon:"home" -> emit open_home
     BigButton "See my progress" icon:"show_chart" tone:"quiet" -> emit open_history

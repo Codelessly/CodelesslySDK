@@ -8,8 +8,8 @@ Column h:fill
       Text.heading "Pulse API"
     Spacer grow
     Box w:320
-      Input "Search" "Search the docs…" =query
-    Select =version items:["v3.2","v3.1","v3.0"] w:100
+      Input "Search" "Search the docs…" bind:query
+    Select bind:version items:["v3.2","v3.1","v3.0"] w:100
   Divider
   Row grow top
     Column w:240 gap:4 pad:16 scroll

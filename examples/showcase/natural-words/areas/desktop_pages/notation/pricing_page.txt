@@ -9,7 +9,7 @@ Column scroll gap:32 pad:24 maxw:1040 center
     Text.bodySecondary "Pick a plan that fits the way you think. Change or cancel any time." center
   Row center gap:12
     Text.strong "Monthly"
-    Toggle =annual
+    Toggle bind:annual
     Text.strong "Annual"
     Badge.success "Save 20%"
   Grid cols:3 gap:16
