@@ -4,9 +4,10 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import 'control_line.dart';
 
 /// The render object of [FitBox].
-class RenderFitBox extends RenderProxyBox {
+class RenderFitBox extends RenderProxyBox implements ControlLineReporter {
   RenderFitBox({
     this._width,
     this._height,
@@ -217,6 +218,19 @@ class RenderFitBox extends RenderProxyBox {
     TextBaseline baseline,
   ) => child?.getDryBaseline(_childConstraints(constraints), baseline);
 
+  // Its child's control box is its own: it puts its child at its origin.
+  @override
+  ControlInsets? get controlInsets {
+    final RenderBox? child = this.child;
+    return child == null || !child.hasSize ? null : ControlLine.through(this, child);
+  }
+
+  @override
+  ControlInsets? dryControlInsets(BoxConstraints constraints) {
+    final RenderBox? child = this.child;
+    return child == null ? null : ControlLine.dryOf(child, _childConstraints(constraints));
+  }
+
   // A sized axis reports its design size as its max intrinsic, like a
   // SizedBox, and its content's min-content size (at most the design size)
   // as its min intrinsic: the least it can be squeezed to without clipping,
@@ -315,7 +329,7 @@ class _DiscardedPaint extends PaintingContext {
 /// do in Flutter. The children are then moved along by the gaps before
 /// them, and the flex grows by the gaps. Free space, alignment and
 /// overflow come out as [RenderFlex] computes them with spacing.
-class RenderCodelesslyFlex extends RenderFlex {
+class RenderCodelesslyFlex extends RenderFlex implements ControlLineReporter {
   RenderCodelesslyFlex({
     super.direction,
     super.mainAxisAlignment,
@@ -625,6 +639,7 @@ class RenderCodelesslyFlex extends RenderFlex {
   @override
   void performLayout() {
     _layOut();
+    _lineUp();
     _fillContentCross = 0;
     final bool Function(RenderBox)? fills = _fillsAcross;
     final bool row = direction == Axis.horizontal;
@@ -716,6 +731,252 @@ class RenderCodelesslyFlex extends RenderFlex {
     }
   }
 
+  // --- the control line (control_line.dart) ----------------------------------
+  //
+  // A row aligns its children on their control boxes: a field's label hangs
+  // above the line and its helper or error below it, and a button, a text or
+  // an icon beside it lines up with the field's box. [RenderFlex] lays the
+  // row out as usual; when a child has control insets that aren't zero, the
+  // children are then placed across again and the row is as thick as they
+  // need. A row with no such child keeps [RenderFlex]'s layout untouched.
+
+  /// After a layout of a row: its control insets (null: none of its
+  /// children has any).
+  ControlInsets? _rowInsets;
+
+  /// After a layout of a row that is not stretched: the thickness its
+  /// children need stretched on their line (the tallest label, control box
+  /// and line below, stacked); null when none has insets that aren't zero.
+  /// [RenderHugCross] stretches a hugging row to it.
+  double? get lineStretchExtent => _lineStretchExtent;
+  double? _lineStretchExtent;
+
+  /// [child]'s control insets, read during this row's layout: the insets
+  /// come from boxes below [child], whose sizes only their own parents may
+  /// read during a layout, so they are read as a layout callback.
+  ControlInsets? _insetsOf(RenderBox child) {
+    ControlInsets? insets;
+    invokeLayoutCallback<BoxConstraints>((_) => insets = ControlLine.of(child));
+    return insets;
+  }
+
+  void _lineUp() {
+    _rowInsets = null;
+    _lineStretchExtent = null;
+    if (direction != Axis.horizontal || !ControlLine.anyField) return;
+    final List<RenderBox> shown = ControlLine.shownChildren(this);
+    final List<ControlInsets?> insets = [for (final RenderBox c in shown) _insetsOf(c)];
+    if (insets.every((i) => i == null)) return;
+    _rowInsets = ControlInsets.zero;
+    if (!ControlLine.anyNonZero(insets) || verticalDirection == VerticalDirection.up) return;
+    if (crossAxisAlignment == CrossAxisAlignment.stretch) {
+      _stretchOnLine(shown);
+      return;
+    }
+    final ControlLineAlign? align = ControlLine.alignOf(crossAxisAlignment);
+    if (align == null) return;
+    final ControlLinePlacement line = ControlLine.place([for (final RenderBox c in shown) c.size.height], insets, align);
+    final double height = constraints.constrainHeight(line.extent);
+    size = Size(size.width, height);
+    final double shift = ControlLine.shift(align, height, line.extent);
+    for (int i = 0; i < shown.length; i++) {
+      final FlexParentData data = shown[i].parentData! as FlexParentData;
+      data.offset = Offset(data.offset.dx, shift + line.tops[i]);
+    }
+    _lineStretchExtent = line.stretchExtent;
+    _rowInsets = ControlInsets(
+      math.max(0, shift + line.bandTop),
+      math.max(0, height - shift - line.bandTop - line.band),
+    );
+  }
+
+  /// Stretched on the line: every control box as thick as the row's
+  /// thickness leaves between the tallest label and the tallest line below,
+  /// each child's own label above its box and its own line below. A button
+  /// beside a labelled field is as tall as the field's box, not as the
+  /// field with its label.
+  void _stretchOnLine(List<RenderBox> shown) {
+    final double thickness = size.height;
+    // Each child's insets at its own thickness (laid out stretched, a
+    // child's insets would count the room it was stretched by).
+    final List<ControlInsets?> natural = [
+      for (final RenderBox c in shown)
+        () {
+          c.layout(BoxConstraints(minWidth: c.size.width, maxWidth: c.size.width, maxHeight: thickness), parentUsesSize: true);
+          return _insetsOf(c);
+        }(),
+    ];
+    double above = 0, below = 0;
+    for (final ControlInsets? i in natural) {
+      above = math.max(above, i?.above ?? 0);
+      below = math.max(below, i?.below ?? 0);
+    }
+    final double band = math.max(0, thickness - above - below);
+    for (int i = 0; i < shown.length; i++) {
+      final RenderBox c = shown[i];
+      final double a = ControlLine.stretchTo(c, band, natural[i], _insetsOf);
+      final FlexParentData data = c.parentData! as FlexParentData;
+      data.offset = Offset(data.offset.dx, above - a);
+    }
+    _rowInsets = ControlInsets(above, math.max(0, thickness - above - band));
+  }
+
+  @override
+  ControlInsets? get controlInsets {
+    if (direction == Axis.horizontal) return _rowInsets;
+    if (!ControlLine.anyField || !hasSize) return null;
+    // A column that is a labelled field: its label above, captions below.
+    final List<RenderBox> shown = ControlLine.shownChildren(this);
+    final int? at = ControlLine.labelledFieldIndex(shown);
+    if (at == null) return null;
+    final RenderBox field = shown[at];
+    if (!field.hasSize) return null;
+    final ControlInsets inner = ControlLine.of(field) ?? ControlInsets.zero;
+    final double dy = (field.parentData! as FlexParentData).offset.dy;
+    return ControlInsets(
+      math.max(0, dy + inner.above),
+      math.max(0, size.height - dy - field.size.height + inner.below),
+    );
+  }
+
+  @override
+  ControlInsets? dryControlInsets(BoxConstraints constraints) {
+    if (!ControlLine.anyField) return null;
+    if (direction == Axis.horizontal) return _dryLine(constraints)?.insets;
+    final List<RenderBox> shown = ControlLine.shownChildren(this);
+    final int? at = ControlLine.labelledFieldIndex(shown);
+    if (at == null) return null;
+    final BoxConstraints across = crossAxisAlignment == CrossAxisAlignment.stretch && constraints.hasBoundedWidth
+        ? BoxConstraints.tightFor(width: constraints.maxWidth)
+        : BoxConstraints(maxWidth: constraints.maxWidth);
+    final List<double> heights = [for (final RenderBox c in shown) c.getDryLayout(across).height];
+    final double own = getDryLayout(constraints).height;
+    final double used = heights.fold<double>(0, (s, h) => s + h) + _gaps;
+    final double free = math.max(0, own - used);
+    final int n = shown.length;
+    final (double lead, double between) = switch (mainAxisAlignment) {
+      MainAxisAlignment.start => (0.0, 0.0),
+      MainAxisAlignment.end => (free, 0.0),
+      MainAxisAlignment.center => (free / 2, 0.0),
+      MainAxisAlignment.spaceBetween => (0.0, n > 1 ? free / (n - 1) : 0.0),
+      MainAxisAlignment.spaceAround => (free / n / 2, free / n),
+      MainAxisAlignment.spaceEvenly => (free / (n + 1), free / (n + 1)),
+    };
+    double dy = lead;
+    for (int i = 0; i < at; i++) {
+      dy += heights[i] + _gap + between;
+    }
+    final ControlInsets inner = ControlLine.dryOf(shown[at], across) ?? ControlInsets.zero;
+    return ControlInsets(
+      math.max(0, dy + inner.above),
+      math.max(0, own - dy - heights[at] + inner.below),
+    );
+  }
+
+  /// A row's line for [constraints] without a layout: the thickness its
+  /// children need on it and its insets; null when no child has insets.
+  ({double extent, ControlInsets insets})? _dryLine(BoxConstraints constraints) {
+    final List<RenderBox> shown = ControlLine.shownChildren(this);
+    final List<BoxConstraints> each = _dryChildConstraints(constraints, shown);
+    final List<ControlInsets?> insets = [for (int i = 0; i < shown.length; i++) ControlLine.dryOf(shown[i], each[i])];
+    if (insets.every((i) => i == null)) return null;
+    final List<double> heights = [for (int i = 0; i < shown.length; i++) shown[i].getDryLayout(each[i]).height];
+    return _lineFor(heights, insets, constraints);
+  }
+
+  /// The thickness [heights] with [insets] need on the line, and the row's
+  /// insets, in [constraints].
+  ({double extent, ControlInsets insets}) _lineFor(List<double> heights, List<ControlInsets?> insets, BoxConstraints constraints) {
+    final double tallest = heights.fold<double>(0, math.max);
+    if (!ControlLine.anyNonZero(insets) || verticalDirection == VerticalDirection.up) {
+      return (extent: tallest, insets: ControlInsets.zero);
+    }
+    final ControlLineAlign? align = ControlLine.alignOf(crossAxisAlignment);
+    if (crossAxisAlignment == CrossAxisAlignment.stretch) {
+      final ControlLinePlacement line = ControlLine.place(heights, insets, ControlLineAlign.center);
+      double above = 0, below = 0;
+      for (final ControlInsets? i in insets) {
+        above = math.max(above, i?.above ?? 0);
+        below = math.max(below, i?.below ?? 0);
+      }
+      final double thickness =
+          constraints.hasBoundedHeight ? constraints.maxHeight : constraints.constrainHeight(line.stretchExtent);
+      final double band = math.max(0, thickness - above - below);
+      return (extent: thickness, insets: ControlInsets(above, math.max(0, thickness - above - band)));
+    }
+    if (align == null) return (extent: tallest, insets: ControlInsets.zero);
+    final ControlLinePlacement line = ControlLine.place(heights, insets, align);
+    final double height = constraints.constrainHeight(line.extent);
+    final double shift = ControlLine.shift(align, height, line.extent);
+    return (
+      extent: line.extent,
+      insets: ControlInsets(math.max(0, shift + line.bandTop), math.max(0, height - shift - line.bandTop - line.band)),
+    );
+  }
+
+  /// The constraints [RenderFlex] lays a row's [shown] children out with
+  /// under [constraints] (its flex children sharing what the others leave).
+  List<BoxConstraints> _dryChildConstraints(BoxConstraints constraints, List<RenderBox> shown) {
+    final BoxConstraints across = crossAxisAlignment == CrossAxisAlignment.stretch && constraints.hasBoundedHeight
+        ? BoxConstraints.tightFor(height: constraints.maxHeight)
+        : BoxConstraints(maxHeight: constraints.maxHeight);
+    final bool bounded = constraints.hasBoundedWidth;
+    int flex(RenderBox c) => bounded ? ((c.parentData! as FlexParentData).flex ?? 0) : 0;
+    double inflexible = 0;
+    int total = 0;
+    for (final RenderBox c in shown) {
+      if (flex(c) > 0) {
+        total += flex(c);
+      } else {
+        inflexible += c.getDryLayout(across).width;
+      }
+    }
+    final double perFlex = total == 0 ? 0 : math.max(0, constraints.maxWidth - _gaps - inflexible) / total;
+    return [
+      for (final RenderBox c in shown)
+        if (flex(c) > 0)
+          ((c.parentData! as FlexParentData).fit ?? FlexFit.tight) == FlexFit.tight
+              ? across.copyWith(minWidth: flex(c) * perFlex, maxWidth: flex(c) * perFlex)
+              : across.copyWith(maxWidth: flex(c) * perFlex)
+        else
+          across,
+    ];
+  }
+
+  /// A row's cross intrinsic [base] ([RenderFlex]'s) at [width], made as
+  /// thick as its children need on their line: each child measured at the
+  /// width [RenderFlex] gives it.
+  double _lineIntrinsicHeight(double width, double base, {required bool max}) {
+    if (!ControlLine.anyField) return base;
+    final List<RenderBox> shown = ControlLine.shownChildren(this);
+    if (shown.isEmpty) return base;
+    final double room = _crossExtent(width);
+    int flex(RenderBox c) => room.isFinite ? ((c.parentData! as FlexParentData).flex ?? 0) : 0;
+    double inflexible = 0;
+    int total = 0;
+    for (final RenderBox c in shown) {
+      if (flex(c) > 0) {
+        total += flex(c);
+      } else {
+        inflexible += c.getMaxIntrinsicWidth(double.infinity);
+      }
+    }
+    final double perFlex = total == 0 ? 0 : math.max(0, room - inflexible) / total;
+    final List<double> widths = [
+      for (final RenderBox c in shown) flex(c) > 0 ? flex(c) * perFlex : c.getMaxIntrinsicWidth(double.infinity),
+    ];
+    final List<ControlInsets?> insets = [
+      for (int i = 0; i < shown.length; i++) ControlLine.dryOf(shown[i], BoxConstraints(maxWidth: widths[i])),
+    ];
+    if (!ControlLine.anyNonZero(insets)) return base;
+    final List<double> heights = [
+      for (int i = 0; i < shown.length; i++)
+        max ? shown[i].getMaxIntrinsicHeight(widths[i]) : shown[i].getMinIntrinsicHeight(widths[i]),
+    ];
+    final double extent = _lineFor(heights, insets, const BoxConstraints()).extent;
+    return math.max(base, extent);
+  }
+
   @override
   Size computeDryLayout(covariant BoxConstraints constraints) {
     Size dryLayout() {
@@ -727,10 +988,11 @@ class RenderCodelesslyFlex extends RenderFlex {
       return constraints.constrain(_withGaps(inner, gaps));
     }
 
-    if (!_mainAxisBounded(constraints) && _hasFlexChild) {
-      return _inflexible(dryLayout);
-    }
-    return dryLayout();
+    final Size size = !_mainAxisBounded(constraints) && _hasFlexChild ? _inflexible(dryLayout) : dryLayout();
+    if (direction != Axis.horizontal || !ControlLine.anyField) return size;
+    final ({double extent, ControlInsets insets})? line = _dryLine(constraints);
+    if (line == null || line.extent <= size.height) return size;
+    return Size(size.width, constraints.constrainHeight(line.extent));
   }
 
   @override
@@ -779,12 +1041,12 @@ class RenderCodelesslyFlex extends RenderFlex {
   @override
   double computeMinIntrinsicHeight(double width) => direction == Axis.vertical
       ? _mainIntrinsic(() => super.computeMinIntrinsicHeight(width))
-      : super.computeMinIntrinsicHeight(_crossExtent(width));
+      : _lineIntrinsicHeight(width, super.computeMinIntrinsicHeight(_crossExtent(width)), max: false);
 
   @override
   double computeMaxIntrinsicHeight(double width) => direction == Axis.vertical
       ? _mainIntrinsic(() => super.computeMaxIntrinsicHeight(width))
-      : super.computeMaxIntrinsicHeight(_crossExtent(width));
+      : _lineIntrinsicHeight(width, super.computeMaxIntrinsicHeight(_crossExtent(width)), max: true);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

@@ -11,6 +11,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import 'control_line.dart';
 import 'fit_box.dart';
 
 /// One run of a [RenderCodelesslyWrap]: the indices of its shown children
@@ -218,6 +219,7 @@ class RenderCodelesslyWrap extends RenderBox
     BoxConstraints constraints,
     Size Function(RenderBox child, BoxConstraints constraints) layoutChild, {
     bool computeOffsets = true,
+    ControlInsets? Function(RenderBox child, BoxConstraints constraints)? insetsOf,
   }) {
     final List<RenderBox> children = _children;
     final double mainLimit = _isHorizontal
@@ -268,9 +270,58 @@ class RenderCodelesslyWrap extends RenderBox
       runs = _regroup(runs, sizes);
     }
 
+    // A row's runs each line their children up on their control boxes
+    // (control_line.dart), when one of them has insets that aren't zero:
+    // its own top in the run, and the run as thick as the line needs.
+    final Map<int, double> lineTops = <int, double>{};
+    if (_isHorizontal && insetsOf != null && ControlLine.anyField && _verticalDirection == VerticalDirection.down) {
+      for (final _Run run in runs) {
+        final List<ControlInsets?> insets = [for (final int i in run.children) insetsOf(children[i], childConstraints)];
+        if (!ControlLine.anyNonZero(insets)) continue;
+        if (_stretch) {
+          double above = 0, band = 0, below = 0;
+          for (int k = 0; k < run.children.length; k++) {
+            final double a = insets[k]?.above ?? 0, d = insets[k]?.below ?? 0;
+            above = math.max(above, a);
+            below = math.max(below, d);
+            band = math.max(band, sizes[run.children[k]]!.height - a - d);
+          }
+          for (int k = 0; k < run.children.length; k++) {
+            final int i = run.children[k];
+            final double a = insets[k]?.above ?? 0, d = insets[k]?.below ?? 0;
+            final double width = sizes[i]!.width;
+            BoxConstraints held = BoxConstraints.tightFor(width: width, height: a + band + d);
+            sizes[i] = layoutChild(children[i], held);
+            // As ControlLine.stretchTo: a field held to a height whose box
+            // came out thicker (its error hangs below) is held again.
+            final ControlInsets? now = insets[k] == null ? null : insetsOf(children[i], held);
+            if (now != null && held.maxHeight - now.above - now.below - band > precisionErrorTolerance) {
+              held = BoxConstraints.tightFor(width: width, height: math.max(0, band + now.above + now.below));
+              sizes[i] = layoutChild(children[i], held);
+            }
+            lineTops[i] = above - a;
+          }
+          run.crossExtent = above + band + below;
+          continue;
+        }
+        final ControlLineAlign align = switch (_crossAxisAlignment) {
+          WrapCrossAlignment.start => ControlLineAlign.start,
+          WrapCrossAlignment.end => ControlLineAlign.end,
+          WrapCrossAlignment.center => ControlLineAlign.center,
+        };
+        final ControlLinePlacement line =
+            ControlLine.place([for (final int i in run.children) sizes[i]!.height], insets, align);
+        for (int k = 0; k < run.children.length; k++) {
+          lineTops[run.children[k]] = line.tops[k];
+        }
+        run.crossExtent = line.extent;
+      }
+    }
+
     if (_stretch) {
       for (final _Run run in runs) {
         if (run.children.length < 2 && run.crossExtent <= 0) continue;
+        if (lineTops.containsKey(run.children.first)) continue;
         for (final int i in run.children) {
           final Size own = sizes[i]!;
           if ((_cross(own) - run.crossExtent).abs() < precisionErrorTolerance) continue;
@@ -326,11 +377,12 @@ class RenderCodelesslyWrap extends RenderBox
         final double childMain = _main(childSize);
         final double childCross = _cross(childSize);
         final double free = run.crossExtent - childCross;
-        final double inRun = switch (_crossAxisAlignment) {
-          WrapCrossAlignment.start => 0,
-          WrapCrossAlignment.end => free,
-          WrapCrossAlignment.center => free / 2,
-        };
+        final double inRun = lineTops[i] ??
+            switch (_crossAxisAlignment) {
+              WrapCrossAlignment.start => 0,
+              WrapCrossAlignment.end => free,
+              WrapCrossAlignment.center => free / 2,
+            };
         double main = mainOffset;
         double cross = crossOffset + inRun;
         if (flipMain) main = containerMain - main - childMain;
@@ -347,10 +399,19 @@ class RenderCodelesslyWrap extends RenderBox
 
   @override
   void performLayout() {
-    final _WrapResult result = _layout(constraints, (child, constraints) {
-      child.layout(constraints, parentUsesSize: true);
-      return child.size;
-    });
+    final _WrapResult result = _layout(
+      constraints,
+      (child, constraints) {
+        child.layout(constraints, parentUsesSize: true);
+        return child.size;
+      },
+      // Read as a layout callback: they come from boxes below [child].
+      insetsOf: (child, _) {
+        ControlInsets? insets;
+        invokeLayoutCallback<BoxConstraints>((_) => insets = ControlLine.of(child));
+        return insets;
+      },
+    );
     size = result.size;
     final List<RenderBox> children = _children;
     double contentMain = 0;
@@ -378,6 +439,7 @@ class RenderCodelesslyWrap extends RenderBox
     constraints,
     (child, constraints) => child.getDryLayout(constraints),
     computeOffsets: false,
+    insetsOf: ControlLine.dryOf,
   ).size;
 
   /// The thickness of the runs for a main-axis extent of [mainExtent], from
@@ -388,6 +450,23 @@ class RenderCodelesslyWrap extends RenderBox
         if (_collapsed(child)) null else _intrinsicSize(child, mainExtent),
     ];
     final List<_Run> runs = _runs(sizes, mainExtent);
+    // On the control line, as a layout puts them (control_line.dart).
+    if (_isHorizontal && ControlLine.anyField && _verticalDirection == VerticalDirection.down) {
+      final List<RenderBox> children = _children;
+      for (final _Run run in runs) {
+        final List<ControlInsets?> insets = [
+          for (final int i in run.children) ControlLine.dryOf(children[i], BoxConstraints(maxWidth: sizes[i]!.width)),
+        ];
+        if (!ControlLine.anyNonZero(insets)) continue;
+        final List<double> heights = [for (final int i in run.children) sizes[i]!.height];
+        final ControlLinePlacement line = ControlLine.place(heights, insets, switch (_crossAxisAlignment) {
+          WrapCrossAlignment.start => ControlLineAlign.start,
+          WrapCrossAlignment.end => ControlLineAlign.end,
+          WrapCrossAlignment.center => ControlLineAlign.center,
+        });
+        run.crossExtent = _stretch ? line.stretchExtent : line.extent;
+      }
+    }
     double thickness = 0;
     for (int r = 0; r < runs.length; r++) {
       thickness += runs[r].crossExtent + (r > 0 ? _runSpacing : 0);

@@ -68,7 +68,12 @@ class RenderHugCross extends RenderProxyBox {
     );
     box.layout(loose, parentUsesSize: true);
     double natural = row ? box.size.height : box.size.width;
-    if (box is RenderCodelesslyFlex) natural = math.max(natural, box.fillContentCross);
+    if (box is RenderCodelesslyFlex) {
+      natural = math.max(natural, box.fillContentCross);
+      // Stretched on the control line, its children need the tallest
+      // label, control box and line below stacked (control_line.dart).
+      if (wanted == CrossAxisAlignment.stretch) natural = math.max(natural, box.lineStretchExtent ?? 0);
+    }
     final double cross = row
         ? constraints.constrainHeight(natural)
         : constraints.constrainWidth(natural);
