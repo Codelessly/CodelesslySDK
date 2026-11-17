@@ -144,4 +144,77 @@ void main() {
       expect(report.diagnostics.single['message'], contains('--drag slider=<dx>,<dy>'));
     });
   });
+
+    testWidgets('a table header tap is recognized and sorts in the render harness', (tester) async {
+      Directory('${out.path}/sortable').createSync(recursive: true);
+      File('${out.path}/sortable/doc.json').writeAsStringSync(
+        jsonEncode({
+          'schema': 3,
+          'roots': ['c'],
+          'variables': {
+            'page_variables': [
+              {
+                'name': 'rows',
+                'type': 'list',
+                'value': [
+                  {'name': 'Beta'},
+                  {'name': 'Alpha'},
+                ],
+              },
+            ],
+          },
+          'nodes': {
+            'c': {
+              'type': 'canvas',
+              'layout': {'width': 390, 'height': 300},
+              'slots': {'body': 'tbl'},
+              'decoration': {
+                'fills': [
+                  {'color': '#FFFFFFFF'},
+                ],
+              },
+            },
+            'tbl': {
+              'type': 'tableView',
+              'layout': {
+                'width': {'fill': 1},
+                'height': 180,
+              },
+              'bind': {'data': r'${rows}'},
+              'props': {
+                'sortable': true,
+                'columns': [
+                  {'key': 'name', 'label': 'Name'},
+                ],
+              },
+              'slots': {'cell': 'cellText', 'columnHeader': 'head'},
+            },
+            'cellText': {
+              'type': 'text',
+              'props': {
+                'text': r'${item.value}',
+                'style': {'color': '#FF000000'},
+              },
+            },
+            'head': {
+              'type': 'text',
+              'props': {
+                'text': r'${item.label}',
+                'style': {'color': '#FF000000'},
+              },
+            },
+          },
+        }),
+      );
+      final report = await runRender(tester, RenderArgs(inputs: ['${out.path}/sortable/doc.json'], out: '${out.path}/sortable/o', sizes: const [Size(390, 300)], dumpLayout: true, steps: const [Step('tap', 'head#0')]));
+      expect(codes(report), isNot(contains('tap_no_reaction')));
+      final boxes = jsonDecode(File('${out.path}/sortable/o/c@390x300.layout.json').readAsStringSync()) as List;
+      expect(
+        [
+          for (final b in boxes.cast<Map>())
+            if (b['id'] == 'cellText') b['text'],
+        ],
+        ['Alpha', 'Beta'],
+      );
+    });
 }

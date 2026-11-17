@@ -2,38 +2,49 @@ import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/widgets/collections_table.dart' show RenderRunningTable, tableRowHeight;
+import 'package:codelessly_sdk/src/widgets/collections_table.dart' show RenderRunningTable, sortTableRows, tableRowHeight;
 import 'package:flutter/material.dart' hide Node;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/keyboard.dart';
 
 import 'support.dart' as lists;
 
 // Table view: a running table builds its rows from bound data, only the cells on
 // screen, and pins its header row and column while it scrolls.
 
-
-
 Map<String, Json> table() => {
-      'table': {
-        'type': 'tableView',
-        'layout': {'width': 600, 'height': 400},
-        'bind': {'data': r'${rows}'},
-        'slots': {'cell': 'cell', 'columnHeader': 'colHeader', 'rowHeader': 'rowHeader'},
-        'props': {
-          'columns': [
-            for (var c = 0; c < 50; c++) {'key': 'c$c', 'label': 'Col $c'},
-          ],
-          'columnWidth': 100,
-          'rowHeaderWidth': 80,
-          'rowHeight': 40,
-          'headerHeight': 40,
-        },
-      },
-      'cell': {'type': 'text', 'layout': {'width': 100, 'height': 20}, 'props': {'text': r'${item.value}'}},
-      'colHeader': {'type': 'text', 'layout': {'width': 100, 'height': 20}, 'props': {'text': r'${item.label}'}},
-      'rowHeader': {'type': 'text', 'layout': {'width': 80, 'height': 20}, 'props': {'text': r'R${item.rowIndex}'}},
-    };
+  'table': {
+    'type': 'tableView',
+    'layout': {'width': 600, 'height': 400},
+    'bind': {'data': r'${rows}'},
+    'slots': {'cell': 'cell', 'columnHeader': 'colHeader', 'rowHeader': 'rowHeader'},
+    'props': {
+      'columns': [
+        for (var c = 0; c < 50; c++) {'key': 'c$c', 'label': 'Col $c'},
+      ],
+      'columnWidth': 100,
+      'rowHeaderWidth': 80,
+      'rowHeight': 40,
+      'headerHeight': 40,
+    },
+  },
+  'cell': {
+    'type': 'text',
+    'layout': {'width': 100, 'height': 20},
+    'props': {'text': r'${item.value}'},
+  },
+  'colHeader': {
+    'type': 'text',
+    'layout': {'width': 100, 'height': 20},
+    'props': {'text': r'${item.label}'},
+  },
+  'rowHeader': {
+    'type': 'text',
+    'layout': {'width': 80, 'height': 20},
+    'props': {'text': r'R${item.rowIndex}'},
+  },
+};
 
 final rows = lists.v('rows', [
   for (var r = 0; r < 1000; r++) {for (var c = 0; c < 50; c++) 'c$c': 'r${r}c$c'},
@@ -66,38 +77,279 @@ Map<String, Offset> cells(WidgetTester tester) {
 // A table's last column can stretch to the table's width (at rest and
 // running); a box's stroke can rule a pair of opposite sides.
 
-
 Map<String, Object?> stretchTable({bool stretch = true}) => {
-      'roots': ['t'],
-      'nodes': {
-        't': {
-          'type': 'tableView',
-          'layout': {'width': {'fill': 100}, 'height': {'fill': 100}},
-          'props': {
-            'rowHeight': 30, 'headerHeight': 30, 'stretchLastColumn': stretch,
-            'columns': [{'key': 'x', 'label': 'x', 'width': 80}, {'key': 'y', 'label': 'y', 'width': 100}],
-          },
-          'bind': {'data': r'${rows}'},
-          'slots': {'cell': 'cell', 'columnHeader': 'head'},
-        },
-        'cell': {'type': 'text', 'props': {'text': r'${item.value}'}},
-        'head': {'type': 'text', 'props': {'text': r'${item.label}'}},
+  'roots': ['t'],
+  'nodes': {
+    't': {
+      'type': 'tableView',
+      'layout': {
+        'width': {'fill': 100},
+        'height': {'fill': 100},
       },
-    };
+      'props': {
+        'rowHeight': 30,
+        'headerHeight': 30,
+        'stretchLastColumn': stretch,
+        'columns': [
+          {'key': 'x', 'label': 'x', 'width': 80},
+          {'key': 'y', 'label': 'y', 'width': 100},
+        ],
+      },
+      'bind': {'data': r'${rows}'},
+      'slots': {'cell': 'cell', 'columnHeader': 'head'},
+    },
+    'cell': {
+      'type': 'text',
+      'props': {'text': r'${item.value}'},
+    },
+    'head': {
+      'type': 'text',
+      'props': {'text': r'${item.label}'},
+    },
+  },
+};
 
 Future<NodeTree> show(WidgetTester tester, Map<String, Object?> doc, {required bool interactive}) async {
   final scope = VariableScope([
-    Variable(name: 'rows', type: api.VariableType.list, value: [{'x': '1', 'y': '2'}]),
+    Variable(
+      name: 'rows',
+      type: api.VariableType.list,
+      value: [
+        {'x': '1', 'y': '2'},
+      ],
+    ),
   ]);
   final tree = NodeTree(NodeValues(DocumentSource(LayoutDocument.fromJson(doc))), binder: NodeBinder(scope: scope));
   addTearDown(tree.dispose);
-  await tester.pumpWidget(MaterialApp(home: Align(alignment: Alignment.topLeft,
-      child: SizedBox(width: 400, height: 200, child: NodeView(tree: tree, rootId: 't', interactive: interactive)))));
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          height: 200,
+          child: NodeView(tree: tree, rootId: 't', interactive: interactive),
+        ),
+      ),
+    ),
+  );
   await tester.pump();
   return tree;
 }
 
 void main() {
+  test('table sorting is stable, numeric, and keeps missing values last', () {
+    final data = <Object?>[
+      {'n': 10, 'id': 'a'},
+      {'n': 2, 'id': 'b'},
+      {'n': 2, 'id': 'c'},
+      {'id': 'd'},
+    ];
+    expect([for (final row in sortTableRows(data, 'n', true)) (row as Map)['id']], ['b', 'c', 'a', 'd']);
+    expect([for (final row in sortTableRows(data, 'n', false)) (row as Map)['id']], ['a', 'b', 'c', 'd']);
+    expect(data.first, {'n': 10, 'id': 'a'});
+  });
+  testWidgets('a sortable table uses one keyboard stop for header sort and row selection', (tester) async {
+    final semantics = tester.ensureSemantics();
+    final data = lists.v('rows', [
+      {'name': 'Beta', 'count': 3},
+      {'name': 'Alpha', 'count': 12},
+      {'name': 'Gamma', 'count': 2},
+    ], VariableType.list);
+    final nodes = <String, Json>{
+      'table': {
+        'type': 'tableView',
+        'layout': {'width': 380, 'height': 220},
+        'bind': {'data': r'${rows}'},
+        'props': {
+          'sortable': true,
+          'rowHeight': 48,
+          'headerHeight': 48,
+          'columns': [
+            {'key': 'name', 'label': 'Customer', 'width': 190},
+            {'key': 'count', 'label': 'Incidents', 'width': 160},
+          ],
+        },
+        'slots': {'cell': 'cell', 'columnHeader': 'head'},
+        'actions': [
+          lists.reaction('sort', [
+            {'type': 'setVariable', 'variable': 'sortKey', 'value': r'${result.column}'},
+          ]),
+          lists.reaction('rowTap', [
+            {'type': 'setVariable', 'variable': 'picked', 'value': r'${result.rowIndex}'},
+          ]),
+        ],
+      },
+      'cell': {
+        'type': 'text',
+        'props': {'text': r'${item.value}'},
+      },
+      'head': {
+        'type': 'text',
+        'props': {'text': r'${item.label}'},
+      },
+    };
+    final screen = await lists.show(tester, nodes, root: 'table', variables: [data, lists.v('sortKey', ''), lists.v('picked', -1, VariableType.integer)]);
+    await tester.pumpAndSettle();
+    final table = runningTable(tester)!;
+    expect(table.rowHeights.every((height) => height >= 44), isTrue);
+    final origin = table.localToGlobal(Offset.zero);
+    final keys = Keyboard(tester);
+    await keys.tab();
+    expect(keys.focusedId, 'table');
+    expect(keys.stopIds(table), ['table']);
+    expect(keys.ringShown, isTrue);
+    expect(keys.semantics!.label, contains('Sort by Customer'));
+    expect(keys.semantics!.data.hasAction(SemanticsAction.increase), isTrue);
+    await keys.enter();
+    expect(cells(tester)['Alpha']!.dy, lessThan(cells(tester)['Beta']!.dy));
+    expect(screen['sortKey'], 'name');
+    expect(keys.semantics!.label, contains('ascending'));
+    await keys.down();
+    expect(keys.semantics!.label, contains('Alpha'));
+    await keys.space();
+    expect(keys.semantics!.isSelected, isTrue);
+    expect(screen['picked'], 0);
+    await keys.end();
+    expect(keys.semantics!.label, contains('Gamma'));
+    await keys.home();
+    expect(keys.semantics!.label, contains('Alpha'));
+    await tester.tapAt(origin + const Offset(35, 20));
+    await tester.pumpAndSettle();
+    expect(keys.ringShown, isFalse);
+    expect(cells(tester)['Gamma']!.dy, lessThan(cells(tester)['Beta']!.dy));
+    await tester.tapAt(origin + const Offset(35, 75));
+    await tester.pumpAndSettle();
+    expect(keys.semantics!.isSelected, isTrue);
+    expect(screen['picked'], 0);
+    expect(tester.takeException(), isNull);
+    semantics.dispose();
+  });
+
+  testWidgets('a table mirrors its columns and header arrows in right-to-left text', (tester) async {
+    final nodes = <String, Json>{
+      'table': {
+        'type': 'tableView',
+        'textDirection': 'rtl',
+        'layout': {'width': 380, 'height': 150},
+        'props': {
+          'sortable': true,
+          'columns': [
+            {'key': 'name', 'label': 'Name', 'width': 170},
+            {'key': 'count', 'label': 'Count', 'width': 170},
+          ],
+        },
+        'bind': {'data': r'${rows}'},
+        'slots': {'cell': 'cell', 'columnHeader': 'head'},
+      },
+      'cell': {
+        'type': 'text',
+        'props': {'text': r'${item.value}'},
+      },
+      'head': {
+        'type': 'text',
+        'props': {'text': r'${item.label}'},
+      },
+    };
+    await lists.show(
+      tester,
+      nodes,
+      root: 'table',
+      variables: [
+        lists.v('rows', [
+          {'name': 'A', 'count': 1},
+        ], VariableType.list),
+      ],
+    );
+    await tester.pumpAndSettle();
+    expect(cells(tester)['Name']!.dx, greaterThan(cells(tester)['Count']!.dx));
+    final keys = Keyboard(tester);
+    await keys.tab();
+    expect(keys.semantics!.label, contains('Name'));
+    await keys.left();
+    expect(keys.semantics!.label, contains('Count'));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('an empty sortable table keeps header focus without inventing a row', (tester) async {
+    final nodes = <String, Json>{
+      'table': {
+        'type': 'tableView',
+        'layout': {'width': 300, 'height': 150},
+        'props': {
+          'sortable': true,
+          'columns': [
+            {'key': 'name', 'label': 'Name'},
+          ],
+        },
+        'bind': {'data': r'${rows}'},
+        'slots': {'cell': 'cell', 'columnHeader': 'head'},
+      },
+      'cell': {
+        'type': 'text',
+        'props': {'text': r'${item.value}'},
+      },
+      'head': {
+        'type': 'text',
+        'props': {'text': r'${item.label}'},
+      },
+    };
+    await lists.show(tester, nodes, root: 'table', variables: [lists.v('rows', [], VariableType.list)]);
+    final keys = Keyboard(tester);
+    await keys.tab();
+    await keys.down();
+    expect(keys.semantics!.label, contains('Sort by Name'));
+    await keys.space();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('filtering away the focused row moves to its remaining neighbor', (tester) async {
+    final nodes = <String, Json>{
+      'table': {
+        'type': 'tableView',
+        'layout': {'width': 300, 'height': 180},
+        'props': {
+          'sortable': true,
+          'columns': [
+            {'key': 'name', 'label': 'Name'},
+          ],
+        },
+        'bind': {'data': r'${rows}'},
+        'slots': {'cell': 'cell', 'columnHeader': 'head'},
+      },
+      'cell': {
+        'type': 'text',
+        'props': {'text': r'${item.value}'},
+      },
+      'head': {
+        'type': 'text',
+        'props': {'text': r'${item.label}'},
+      },
+    };
+    final screen = await lists.show(
+      tester,
+      nodes,
+      root: 'table',
+      variables: [
+        lists.v('rows', [
+          {'name': 'A'},
+          {'name': 'B'},
+        ], VariableType.list),
+      ],
+    );
+    expect(runningTable(tester)!.rowHeights.every((height) => height >= 44), isTrue);
+    final keys = Keyboard(tester);
+    await keys.tab();
+    await keys.end();
+    expect(keys.semantics!.label, contains('Name: B'));
+    screen.scope.set('rows', [
+      {'name': 'A'},
+    ]);
+    await tester.pumpAndSettle();
+    expect(keys.focusedId, 'table');
+    expect(keys.semantics!.label, contains('Name: A'));
+    expect(tester.takeException(), isNull);
+  });
   testWidgets('a table builds only the cells on screen, from its bound rows', (tester) async {
     await lists.show(tester, table(), root: 'table', variables: [rows]);
     await tester.pumpAndSettle();
@@ -142,7 +394,9 @@ void main() {
         'bind': {'data': r'${week}'},
         'slots': {'cell': 'cell', 'columnHeader': 'colHeader', 'rowHeader': 'rowHeader'},
         'props': {
-          'columns': [for (var d = 0; d < 5; d++) {'key': 'd$d', 'label': 'D$d'}],
+          'columns': [
+            for (var d = 0; d < 5; d++) {'key': 'd$d', 'label': 'D$d'},
+          ],
           'columnWidth': 100,
           'rowHeaderWidth': 160,
           'rowHeight': 70,
@@ -151,9 +405,21 @@ void main() {
           'fillWidth': true,
         },
       },
-      'cell': {'type': 'text', 'layout': {'width': 60, 'height': 20}, 'props': {'text': r'${item.row.id}${item.columnIndex}'}},
-      'colHeader': {'type': 'text', 'layout': {'width': 60, 'height': 20}, 'props': {'text': r'${item.label}'}},
-      'rowHeader': {'type': 'text', 'layout': {'width': 60, 'height': 20}, 'props': {'text': r'${item.row.id}'}},
+      'cell': {
+        'type': 'text',
+        'layout': {'width': 60, 'height': 20},
+        'props': {'text': r'${item.row.id}${item.columnIndex}'},
+      },
+      'colHeader': {
+        'type': 'text',
+        'layout': {'width': 60, 'height': 20},
+        'props': {'text': r'${item.label}'},
+      },
+      'rowHeader': {
+        'type': 'text',
+        'layout': {'width': 60, 'height': 20},
+        'props': {'text': r'${item.row.id}'},
+      },
     };
     await lists.show(tester, nodes, root: 'table', variables: [week]);
     await tester.pumpAndSettle();
@@ -176,16 +442,36 @@ void main() {
   testWidgets('a table draws its border and rounded corners around its cells', (tester) async {
     final t = table();
     final node = Map<String, Object?>.from(t['table']!);
-    node['layout'] = {'width': 600, 'height': 400, 'padding': [2, 2, 2, 2]};
+    node['layout'] = {
+      'width': 600,
+      'height': 400,
+      'padding': [2, 2, 2, 2],
+    };
     node['decoration'] = {
-      'fills': [{'color': '#FFFFFFFF'}],
+      'fills': [
+        {'color': '#FFFFFFFF'},
+      ],
       'radius': 14,
-      'strokes': [{'color': '#FFFF0000'}],
+      'strokes': [
+        {'color': '#FFFF0000'},
+      ],
       'strokeWidth': 2,
       'clip': 'antiAlias',
     };
     t['table'] = node;
-    t['colHeader'] = {...t['colHeader']!, 'type': 'box', 'decoration': {'fills': [{'color': '#FF0000FF'}]}, 'layout': {'width': {'fill': 100}, 'height': {'fill': 100}}};
+    t['colHeader'] = {
+      ...t['colHeader']!,
+      'type': 'box',
+      'decoration': {
+        'fills': [
+          {'color': '#FF0000FF'},
+        ],
+      },
+      'layout': {
+        'width': {'fill': 100},
+        'height': {'fill': 100},
+      },
+    };
     final screen = await lists.show(tester, t, root: 'table', variables: [rows]);
     await tester.pumpAndSettle();
     final box = screen.tree.boxOf('table')!;

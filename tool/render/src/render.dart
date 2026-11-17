@@ -23,6 +23,7 @@ import 'package:codelessly_sdk/src/runtime/gestures/drag_and_drop.dart' show Ren
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
 import 'package:codelessly_sdk/src/render/controls/buttons.dart' show RenderButton;
 import 'package:codelessly_sdk/src/render/controls/calendar.dart' show RenderCalendar;
+import 'package:codelessly_sdk/src/widgets/collections_table.dart' show RenderRunningTable;
 import 'package:codelessly_sdk/src/render/controls/kit.dart' show RenderControl;
 import 'package:codelessly_sdk/src/render/controls/kit_bars.dart' show RenderItemBar;
 import 'package:codelessly_sdk/src/render/controls/segmented.dart' show RenderSegmentedButton;
@@ -1762,6 +1763,9 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         if (o is! RenderButton && o is! RenderListTile) return true;
       }
       if (o is RenderCalendar && o.inline) return true;
+      // A table sorts from its headers and selects its rows itself; its cell
+      // template is usually a text with no reaction of its own.
+      if (o is RenderRunningTable) return true;
       if (o is NodeBox && control != null) {
         if (o.source.node(o.id)?.actions.isNotEmpty ?? false) return true;
         control = null;
