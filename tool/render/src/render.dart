@@ -328,6 +328,8 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   report.diagnostics.addAll(validateTheme(themeJson,
           breakpoints: site.manifest?['breakpoints'] == null ? null : api.Breakpoints.fromJson(site.manifest!['breakpoints']))
       .map((d) => d.withFile(api.SiteManifest.fileName).toJson()));
+  // Its own keys: a theme key beside "theme" (or a key nothing reads) says so.
+  report.diagnostics.addAll(validateSiteManifest(site.manifest).map((d) => d.withFile(api.SiteManifest.fileName).toJson()));
   // Its variables: a record that cannot be read is not declared, and says so.
   report.diagnostics
       .addAll(validateSiteVariables(site.manifest?['variables']).map((d) => d.withFile(api.SiteManifest.fileName).toJson()));

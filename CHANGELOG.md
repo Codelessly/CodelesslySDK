@@ -162,6 +162,13 @@
   ArrowUp, ArrowDown and the stepper buttons did nothing: the notation declared the variable an integer, which
   rounds what the field sets. codelessly_api's notation now declares it a decimal (the field and the block were
   right); the value keeps the step's precision by typing, by the arrow keys and by the buttons.
+- A site that overrides Cards' accent (`"theme": {"primary": …}`, `colors.accent`) no longer keeps Cards' blue in
+  dark mode, in the selected `Sidebar` row and `ConversationRow`, in the info `Banner`, in links and focus rings:
+  the site's theme is laid over the design system's with codelessly_api's `ThemeTokens.withSiteTheme` (the render
+  command and `UiSession`), which makes what Cards makes from its accent from the site's. `"primary"` or `"colors"`
+  written at the top of `site.json`, outside `"theme"`, is a `site_key_ignored` warning that says where it goes.
+  Cards' DESIGN.md says how a site sets its accent, its fonts (`fontFamily` for the Inter styles; the display and
+  mono styles one by one) and dark as its default (`"mode": "dark"`).
 
 ## 32.0.0
 
