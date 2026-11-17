@@ -1090,12 +1090,16 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
         'step ${c.numberStep}',
       ].join(', ');
       config.hint = config.hint.isEmpty ? range : '${config.hint}; $range';
+      // (A node with an increase or decrease action has to say a value: an
+      // empty field has neither.)
       final current = double.tryParse(editor.text);
-      if (current == null || c.numberMax == null || current < c.numberMax!) {
+      if (v.text.isEmpty) {
+        // Nothing to step from yet.
+      } else if (current == null || c.numberMax == null || current < c.numberMax!) {
         config.onIncrease = () => _stepNumber(1);
         config.increasedValue = _nextNumber(1).toString();
       }
-      if (current == null || c.numberMin == null || current > c.numberMin!) {
+      if (v.text.isNotEmpty && (current == null || c.numberMin == null || current > c.numberMin!)) {
         config.onDecrease = () => _stepNumber(-1);
         config.decreasedValue = _nextNumber(-1).toString();
       }

@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 
 import '../node_tree.dart' show fireTrigger;
 import '../recipe.dart';
-import '../../widgets/picker_locale.dart';
 import 'calendar.dart';
 import 'kit_pickers.dart';
 import 'tokens.dart';
@@ -17,7 +16,7 @@ Map<String, String> _dayMap(api.Json? raw) => switch (raw) {
   _ => const {},
 };
 
-void inlineCalendarRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
+void inlineCalendarRecipe(NodeBuilder b, Node n, List<RenderBox> chain, {PickerLocale locale = PickerLocale.english}) {
   final l = n.layout;
   chain.add(
     b.fitBox(
@@ -27,7 +26,6 @@ void inlineCalendarRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
       Size(l.width.value, l.height.value),
     ),
   );
-  final locale = pickerLocale();
   final box = b.obtain<RenderCalendar>(
     'calendar',
     () => RenderCalendar(

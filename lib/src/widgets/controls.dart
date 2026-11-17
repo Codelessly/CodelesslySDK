@@ -63,7 +63,7 @@ final Map<String, WidgetRecipe> barRecipes = {
 /// Date and time pickers (render/controls/pickers.dart), in the platform
 /// locale's names with the runtime's clock (picker_locale.dart).
 final Map<String, WidgetRecipe> pickerRecipes = {
-  CalendarProps.spec.type: inlineCalendarRecipe,
+  CalendarProps.spec.type: (b, n, chain) => inlineCalendarRecipe(b, n, chain, locale: pickerLocale()),
   for (final type in [DatePickerProps.spec.type, TimePickerProps.spec.type, DateTimeInputProps.spec.type])
     type: (b, n, chain) => pickerRecipe(b, n, chain, locale: pickerLocale()),
 };

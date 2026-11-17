@@ -240,8 +240,11 @@ class _BottomSheetState extends State<_BottomSheet> {
                   children: [
                     SizedBox(height: height, child: Builder(builder: widget.builder)),
                     if (widget.showDragHandle)
+                      // The handle is drawn where it always was; the area
+                      // that takes a finger runs from the sheet's top edge to
+                      // 44 px down.
                       Positioned(
-                        top: PresentationRoute.dragHandleTop,
+                        top: 0,
                         left: 0,
                         right: 0,
                         child: Center(child: Semantics(
@@ -261,7 +264,10 @@ class _BottomSheetState extends State<_BottomSheet> {
                               _stop = [for (var i = 0; i < stops.length; i++) i].reduce((a, b) => (available * stops[a] - dragged).abs() <= (available * stops[b] - dragged).abs() ? a : b);
                               _dragHeight = null;
                             }),
-                            child: const Padding(padding: EdgeInsets.symmetric(horizontal: 12, vertical: 20), child: _DragHandle()),
+                            child: const Padding(
+                              padding: EdgeInsets.fromLTRB(12, PresentationRoute.dragHandleTop, 12, 32),
+                              child: _DragHandle(),
+                            ),
                           ),
                         )),
                       ),
