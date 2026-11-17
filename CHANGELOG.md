@@ -72,6 +72,8 @@
 ### Fixed
 
 - A date or time field given only a label keeps its calendar and chevron, and shows the label as its hint.
+- A borderless text field with a `contentPadding` that hugs its height centers its line in the room the kit's
+  minimum height adds (it sat at the top: Cards' FilterBar showed its search text 4 px above the icon beside it).
 - A page route opened from an overlay sized to its design fills the window.
 - `tool/render/render.sh` runs under Git Bash on Windows (it gave Dart `/c/…` paths).
 

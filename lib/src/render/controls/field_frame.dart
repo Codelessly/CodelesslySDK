@@ -1006,8 +1006,16 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl 
       // top (textAlignVertical null): a padding given puts the line its top
       // below the box's top.
       final outlined = [d.border, d.enabledBorder, d.focusedBorder].any((b) => b?.kind == FieldBorderKind.outline);
+      // A hugging box is never lower than the kit's default height
+      // ([_hugBoxHeight]). Where that floor, not the padding, set the height,
+      // the room it added is shared above and below the line: a borderless
+      // field with no padding in a row (a search row) is level with the icon
+      // beside it, not 4 px above it.
+      final padded = d.contentPadding;
+      final floorRoom =
+          padded == null || d.collapsed || constraints.hasTightHeight ? 0.0 : math.max(0.0, free - padded.vertical);
       if (d.contentPadding != null && _alignVertical == null && !outlined) {
-        top = boxRect.top + d.contentPadding!.top;
+        top = boxRect.top + d.contentPadding!.top + floorRoom / 2;
       } else if (d.contentPadding != null && !d.collapsed && _alignVertical != null && _alignVertical!.y < 0) {
         top = boxRect.top + d.contentPadding!.top;
       } else {
