@@ -123,6 +123,11 @@ final class RenderReport {
   /// Where the keyboard focus is in each capture that has one (after
   /// `--key Tab`, a `--focus`): the node, and whether its ring shows.
   final List<api.Json> focus = [];
+
+  /// What a screen reader was told, in order: an `announce` action's text
+  /// and a live region's (a toast, a text marked `live`) when it changed,
+  /// each with its politeness and the step after which it was said.
+  final List<api.Json> announcements = [];
   int get errors => diagnostics.where((d) => d['severity'] == 'error').length;
   int get warnings => diagnostics.where((d) => d['severity'] == 'warning').length;
 }
@@ -670,7 +675,26 @@ Future<void> _renderAll(
         collect();
       }
 
+      // What a screen reader is told: an `announce` action's text as it
+      // runs, a live region's as it changes (not as it first shows).
+      final heard = <api.Json>[];
+      var live = <RenderObject, String>{};
+      void hear(String after, {bool baseline = false}) {
+        for (final a in tester.takeAnnouncements()) {
+          heard.add({'text': a.message, 'politeness': a.assertiveness.name, 'source': 'announce', 'after': after});
+        }
+        final now = _liveRegions(binding);
+        if (!baseline) {
+          for (final e in now.entries) {
+            if (live[e.key] != e.value) heard.add({'text': e.value, 'politeness': 'polite', 'source': 'live', 'after': after});
+          }
+        }
+        live = now;
+      }
+
+      tester.takeAnnouncements();
       await show();
+      hear('load', baseline: true);
       if (!controller.isLoaded) {
         issue(RuntimeIssue('render_exception', 'error', 'Screen "$label" did not load: ${controller.error ?? 'timed out'}',
             screen: label, size: sizeName));
@@ -704,6 +728,7 @@ Future<void> _renderAll(
             await tester.pump();
           }
           await show();
+          hear('$step', baseline: true);
           if (!controller.isLoaded) {
             issue(RuntimeIssue('interaction_failed', 'error', '--reload: screen "$label" did not load again: ${controller.error ?? 'timed out'}',
                 screen: label, size: sizeName));
@@ -737,6 +762,7 @@ Future<void> _renderAll(
         }
         await _settle(tester);
         collect();
+        hear('$step');
       }
 
       // 5. Full page: the view as tall as the content scrolls.
@@ -881,6 +907,11 @@ Future<void> _renderAll(
                 screen: label, size: sizeName));
           }
         }
+      }
+      // What was said, with the capture it led to.
+      hear('the steps, before the capture');
+      for (final h in heard) {
+        report.announcements.add({'image': name, 'screen': label, 'size': sizeName, ...h});
       }
       // Where the keyboard focus is: the node (a control, a text field, a
       // node with a click reaction), and whether its focus ring shows.
@@ -1505,6 +1536,30 @@ bool _shown(NodeBox b) {
     if (p is NodeBox && !p.drawn) return false;
   }
   return true;
+}
+
+/// The text of each live region on screen (a toast, a text marked `live`, a
+/// status a control announces), by its render object: what a screen reader
+/// speaks when it changes.
+Map<RenderObject, String> _liveRegions(WidgetsBinding binding) {
+  final out = <RenderObject, String>{};
+  final skip = _offstage();
+  for (final view in binding.renderViews) {
+    for (final o in _descendants(view, skip: skip)) {
+      if (!o.attached || (o is RenderBox && !o.hasSize)) continue;
+      final config = SemanticsConfiguration();
+      try {
+        // ignore: invalid_use_of_protected_member
+        o.describeSemanticsConfiguration(config);
+      } catch (_) {
+        continue;
+      }
+      if (!config.liveRegion) continue;
+      final text = (config.label.trim().isNotEmpty ? config.label : firstTextUnder(o) ?? '').trim();
+      if (text.isNotEmpty) out[o] = text;
+    }
+  }
+  return out;
 }
 
 /// How a step names [b]: its path (a component's node by its call ids), with
@@ -2820,6 +2875,7 @@ RenderReport _finish(RenderReport report, RenderArgs args) {
     if (report.downloads.isNotEmpty) 'downloads': report.downloads,
     if (report.clipboard.isNotEmpty) 'clipboard': report.clipboard,
     if (report.focus.isNotEmpty) 'focus': report.focus,
+    if (report.announcements.isNotEmpty) 'announcements': report.announcements,
     'diagnostics': report.diagnostics,
   }));
   return report;
@@ -2854,6 +2910,9 @@ String formatReport(RenderReport report) {
   for (final f in report.focus) {
     b.writeln('focus on ${f['path'] ?? f['id']}${f['text'] == null ? '' : ' ${jsonEncode(f['text'])}'}'
         '${f['ring'] == true ? ' (ring shown)' : ' (no ring)'}${f['inOverlay'] == true ? ', in the open overlay' : ''} [screen ${f['screen']} ${f['size']}]');
+  }
+  for (final a in report.announcements) {
+    b.writeln('${a['source'] == 'live' ? 'live region' : 'announced'} ${jsonEncode(a['text'])} (${a['politeness']}) after ${a['after']} [screen ${a['screen']} ${a['size']}]');
   }
   b.writeln('${report.errors} error(s), ${report.warnings} warning(s).');
   return b.toString();

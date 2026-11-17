@@ -126,6 +126,23 @@ it is called, `ring` whether its focus ring is drawn (the keyboard brought the f
 tabbed into, an overlay a tap opened). To walk a page by keyboard, add one `--key Tab` per stop and read the line;
 `--key Tab --key Tab --key Enter` presses the second stop.
 
+## What a screen reader was told
+
+Each run lists what a screen reader would have spoken, one line per announcement, and the same in the diagnostics
+file's `announcements`: the text of each `announce` action as it ran, and of each live region (a toast, a text marked
+`live`) when its text changed (not as it first showed), with its politeness and the step after which it was said
+(`load` for the screen's load reactions; `the steps, before the capture` for a timer that spoke after the last step).
+
+```
+announced "Added, 2 in the cart" (polite) after --tap add [screen cart 390x844]
+live region "Saved your changes" (polite) after --tap save [screen cart 390x844]
+```
+
+```json
+"announcements": [{"image": "cart@390x844.png", "screen": "cart", "size": "390x844", "text": "Added, 2 in the cart",
+                   "politeness": "polite", "source": "announce", "after": "--tap add"}]
+```
+
 ## What it reports
 
 Validation codes are listed in the API reference (codelessly_api's `docs/reference/render.md`, "Validation

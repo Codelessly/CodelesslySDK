@@ -89,6 +89,7 @@ final _doc = {
         'actions': [
           {'type': 'setVariable', 'variable': 'kept', 'value': r'${= kept + 1}'},
           {'type': 'setVariable', 'variable': 'lost', 'value': r'${= lost + 1}'},
+          {'type': 'announce', 'message': r'Counted ${kept}'},
         ],
       },
     ]),
@@ -96,6 +97,7 @@ final _doc = {
       'type': 'text',
       'layout': {'width': {'fill': 390}, 'height': {'hug': 20}},
       'props': {
+        'live': true,
         'text': r'keys ${keys}, typed ${typed}',
         'style': {'fontSize': 14, 'color': '#FF000000'},
       },
@@ -129,6 +131,16 @@ void main() {
         'keys [?][/][F2][mod+k], typed ');
     expect(await label(tester, const [Step('focus', 'field'), Step('key', 'o'), Step('key', 'shift+k'), Step('key', '?')], id: 'keysLabel'),
         'keys , typed oK?');
+  });
+
+  testWidgets('the report lists what was announced and what a live region said, after which step', (tester) async {
+    await label(tester, const [Step('tap', 'count'), Step('key', '/'), Step('tap', 'count')]);
+    expect([for (final a in last.announcements) '${a['source']} ${a['text']} (${a['politeness']}) after ${a['after']}'], [
+      'announce Counted 1 (polite) after --tap count',
+      'live keys [/], typed (polite) after --key /',
+      'announce Counted 2 (polite) after --tap count',
+    ]);
+    expect(formatReport(last), contains('announced "Counted 1" (polite) after --tap count'));
   });
 
   testWidgets('--long-press on a node with no long press reaction says its tap ran', (tester) async {
