@@ -1,0 +1,3 @@
+App: Sweatbox, class booking. A day strip then classes by time with coach, spots left as dots, waitlist position; book with one tap and a cancel window countdown; a class page with a map of bike or mat positions to choose; a membership card with a code; credits left; a streak and monthly attendance chart.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

@@ -1,0 +1,135 @@
+### Play
+state sol=[["S","T","A","R","#","B","R","A","V","E","#","M","A"],["T","O","N","E","#","L","O","V","E","R","#","A","X"],["A","R","E","N","A","O","V","A","L","#","S","P","E"],["P","E","A","#","S","O","A","P","#","O","P","E","N"],["L","#","T","A","P","M","#","L","I","N","E","#","#"],["E","A","S","T","#","#","A","N","T","E","A","T","E"],["R","I","#","I","D","E","A","#","E","#","R","I","P"],["S","L","I","M","#","#","L","A","M","P","#","E","S"],["#","#","R","E","P","A","I","R","#","O","R","A","L"],["B","E","A","#","L","I","T","#","S","O","A","P","#"],["A","D","D","I","T","I","O","N","#","L","I","D","S"],["G","E","N","I","E","#","N","O","T","E","N","D","S"],["S","N","A","P","S","#","S","E","A","S","O","N","S"]]
+state entries=[{"id":"1A","n":1,"d":"A","s":0,"len":4,"clue":"Celebrity in the sky"},{"id":"5A","n":5,"d":"A","s":5,"len":5,"clue":"Brave, as in a hero's heart"},{"id":"11A","n":6,"d":"A","s":11,"len":2,"clue":"Atlas page"},{"id":"14A","n":7,"d":"A","s":13,"len":4,"clue":"Pitch quality"},{"id":"1D","n":1,"d":"D","s":0,"len":5,"clue":"Rubber ___ on a letter"},{"id":"2D","n":2,"d":"D","s":1,"len":3,"clue":"Opposite of bottom"},{"id":"3D","n":3,"d":"D","s":2,"len":4,"clue":"Gaze at"},{"id":"4D","n":4,"d":"D","s":3,"len":5,"clue":"Burning log remains"}]
+state numbers=[{"i":0,"n":1},{"i":1,"n":2},{"i":2,"n":3},{"i":3,"n":4},{"i":5,"n":5},{"i":11,"n":6},{"i":13,"n":7}]
+state letters=map(range(169),i=>"")
+state pencil=map(range(169),i=>false)
+state wrong=[]
+state sel=0
+state dir="A"
+state ent=first(entries)
+state pencilOn=false
+state secs=0
+state running=true
+state done=false
+state shown=[]
+every 1s when running onTick={secs=secs+1}
+if count(range(169),i=>sol[floor(i/13)][i%13]!="#" && letters[i]==sol[floor(i/13)][i%13])==count(range(169),i=>sol[floor(i/13)][i%13]!="#")
+  Row hidden
+    Text ""
+App
+  Sidebar
+    Brand "Gridword" icon="grid_on"
+    NavItem "Today's puzzle" icon="extension" selected={true}
+    NavItem "Archive" icon="history" onTap={go archive}
+    NavItem "Stats" icon="insights" onTap={go stats}
+    Spacer grow
+    Text.muted "Streak: 12 days"
+  Main
+    Nav
+      Heading "Saturday Mini Plus" level=1
+      Row gap=8
+        Row gap=4
+          Icon "timer"
+          Text.mono "{floor(secs/60)}:{secs%60<10 ? '0' : ''}{secs%60}"
+        IconButton "pause" tooltip="Pause" onTap={running=!running}
+        Toggle "Pencil" bind=pencilOn
+        Button.outline "Check" icon="spellcheck" menu=checkMenu onTap={open checkMenu}
+        Button.outline "Reveal" icon="visibility" onTap={open revealMenu}
+        Button.ghost "Clear" onTap={open confirmClear}
+    Row top gap=24 pad=24 onKey={result}
+      Column grow gap=12 maxw=640
+        Card gap=8
+          Row between
+            Text.strong "{ent.n}{ent.d=='A' ? ' Across' : ' Down'}"
+            Text.muted "{count(letters,l=>l!='')} of {count(range(169),i=>sol[floor(i/13)][i%13]!='#')} filled"
+          Text "{ent.clue}"
+        Grid cols=13 gap=1 keep focus=true onKey={result=="ArrowRight" ? move right : result=="ArrowLeft" ? move left : result=="ArrowDown" ? move down : result=="ArrowUp" ? move up : result=="Tab" ? nextClue : result=="Backspace" ? backspace : result==" " ? dir=(dir=="A" ? "D" : "A") : typeLetter result}
+          each i in range(169)
+            Stack w=44 h=44 fill={sol[floor(i/13)][i%13]=="#" ? #FF1B1B1F : (i==sel ? #FFFFD54F : (contains(map(range(ent.len),k=>ent.s+k*(ent.d=="A" ? 1 : 13)),i) ? #FFCFE3FF : #FFFFFFFF))} onTap={sol[floor(i/13)][i%13]=="#" ? toast "Black square" : select i}
+              if find(numbers,x=>x.i==i)!=null
+                Text "{find(numbers,x=>x.i==i).n}" size=10 color=#FF555555 left top pad=[2,1,0,0]
+              Text "{letters[i]}" center middle size=24 weight={pencil[i] ? 400 : 700} color={contains(wrong,i) ? #FFD32F2F : (pencil[i] ? #FF888888 : #FF111111)}
+        Row gap=8
+          Button.outline "Previous clue" icon="chevron_left" onTap={prevClue}
+          Button.outline "Next clue" icon="chevron_right" onTap={nextClue}
+          Spacer grow
+          Button.ghost "Switch direction" onTap={dir=(dir=="A" ? "D" : "A")}
+      Pane w=320 gap=12
+        Text.sectionTitle "Across"
+        Column scroll h=240 gap=4
+          each e in filter(entries,x=>x.d=="A")
+            ListTile "{e.n}. {e.clue}" selected={ent.id==e.id} onTap={ent=e; dir="A"; sel=e.s}
+        Divider
+        Text.sectionTitle "Down"
+        Column scroll h=240 gap=4
+          each e in filter(entries,x=>x.d=="D")
+            ListTile "{e.n}. {e.clue}" selected={ent.id==e.id} onTap={ent=e; dir="D"; sel=e.s}
+  Menu#checkMenu
+    MenuItem "Check letter" icon="check" onTap={wrong=filter([sel],i=>letters[i]!="" && letters[i]!=sol[floor(i/13)][i%13])}
+    MenuItem "Check word" icon="check" onTap={wrong=filter(map(range(ent.len),k=>ent.s+k*(ent.d=="A" ? 1 : 13)),i=>letters[i]!="" && letters[i]!=sol[floor(i/13)][i%13])}
+    MenuItem "Check grid" icon="grid_on" onTap={wrong=filter(range(169),i=>letters[i]!="" && letters[i]!=sol[floor(i/13)][i%13])}
+  Menu#revealMenu
+    MenuItem "Reveal letter" icon="visibility" onTap={letters=setAt(letters,sel,sol[floor(sel/13)][sel%13])}
+    MenuItem "Reveal word" icon="visibility" onTap={revealCells map(range(ent.len),k=>ent.s+k*(ent.d=="A" ? 1 : 13))}
+    MenuItem "Reveal grid" icon="visibility" onTap={open confirmReveal}
+  Dialog#confirmClear "Clear the grid?" "All letters and pencil marks will be removed."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Clear" onTap={letters=map(range(169),i=>""); pencil=map(range(169),i=>false); wrong=[]; secs=0; close}
+  Dialog#confirmReveal "Reveal the whole grid?" "The puzzle will be marked as revealed and will not count toward your streak."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Reveal" onTap={letters=map(range(169),i=>sol[floor(i/13)][i%13]=="#" ? "" : sol[floor(i/13)][i%13]); running=false; close}
+  Dialog#finished "Puzzle complete" "You filled every square correctly."
+    Column center gap=12
+      Icon "emoji_events" size=48
+      Text.heading "Solved in {floor(secs/60)}:{secs%60<10 ? '0' : ''}{secs%60}"
+      Text.muted "Streak: 13 days"
+      Row gap=8
+        Button.outline "Share" icon="share" onTap={copy "I solved Gridword in {floor(secs/60)} minutes"; toast "Copied"}
+        Button "Next puzzle" onTap={close; go archive}
+
+### Archive
+Page
+  Nav
+    Brand "Gridword" icon="grid_on"
+    Row gap=4
+      Link "Today" onTap={go play}
+      Link "Archive"
+      Link "Stats" onTap={go stats}
+  Section
+    Heading "Archive" level=1
+    Text.muted "Every daily crossword since January."
+    Grid cols=3 gap=24
+      each p in [{"d":"Mon","t":"Easy","best":"6:12"},{"d":"Tue","t":"Easy","best":"7:40"},{"d":"Wed","t":"Medium","best":"11:05"},{"d":"Thu","t":"Medium","best":"13:22"},{"d":"Fri","t":"Hard","best":"--"},{"d":"Sat","t":"Hard","best":"--"}]
+        Card gap=8 onTap={go play}
+          Heading "{p.d} puzzle" level=3
+          Badge.info "{p.t}"
+          Text.muted "Best time: {p.best}"
+  Footer
+    Text.muted "Gridword"
+
+### Stats
+Page
+  Nav
+    Brand "Gridword" icon="grid_on"
+    Row gap=4
+      Link "Today" onTap={go play}
+      Link "Archive" onTap={go archive}
+      Link "Stats"
+  Section
+    Heading "Your solving" level=1
+    Grid cols=3 gap=24
+      Card gap=4
+        Text.muted "Solved"
+        Text "184" size=40 weight=700
+      Card gap=4
+        Text.muted "Average time"
+        Text "12:08" size=40 weight=700
+      Card gap=4
+        Text.muted "Streak"
+        Text "12" size=40 weight=700
+    BarChart values=[9,14,11,16,12,18,10] labels=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] h=220
+  Footer
+    Text.muted "Gridword"

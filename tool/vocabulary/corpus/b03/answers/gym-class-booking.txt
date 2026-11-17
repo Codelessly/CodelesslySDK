@@ -1,0 +1,181 @@
+### Schedule
+state tab="schedule"
+state day=0
+state credits=6
+state booked=[{"id":"c2","cancelBy":5400}]
+state waitlisted=[{"id":"c4","pos":3}]
+state days=[{"d":"Mon","n":17},{"d":"Tue","n":18},{"d":"Wed","n":19},{"d":"Thu","n":20},{"d":"Fri","n":21},{"d":"Sat","n":22},{"d":"Sun","n":23}]
+state classes=[{"id":"c1","time":"6:30 AM","name":"Sunrise Ride","coach":"Dani Ortiz","kind":"bike","spots":2,"cap":24},{"id":"c2","time":"8:00 AM","name":"Power Mat Pilates","coach":"Lena Park","kind":"mat","spots":6,"cap":20},{"id":"c3","time":"12:15 PM","name":"Lunch Burn HIIT","coach":"Marcus Bell","kind":"mat","spots":9,"cap":20},{"id":"c4","time":"5:30 PM","name":"Rhythm Ride","coach":"Dani Ortiz","kind":"bike","spots":0,"cap":24},{"id":"c5","time":"7:00 PM","name":"Yin and Stretch","coach":"Lena Park","kind":"mat","spots":11,"cap":20}]
+state sel=""
+state cancelLeft=5400
+every 1s when length(booked)>0 onTick={cancelLeft=max(0,cancelLeft-1)}
+App
+  Sidebar
+    Brand "Sweatbox" icon="fitness_center"
+    NavItem "Schedule" icon="calendar_month" selected={tab=="schedule"} onTap={tab="schedule"}
+    NavItem "My bookings" icon="confirmation_number" badge="{length(booked)}" selected={tab=="bookings"} onTap={tab="bookings"}
+    NavItem "Membership" icon="badge" onTap={go membership}
+    Spacer grow
+    Card gap=4
+      Text.caption "Credits left"
+      Text "{credits}" size=32 weight=700
+      Text.muted "Renews Dec 1"
+  Main
+    Nav
+      Heading "Schedule" level=1
+      Row gap=8
+        Select "Studio" items=["Downtown","Riverside"] bind=studio
+        IconButton "tune" tooltip="Filters" onTap={open filters}
+    Column pad=24 gap=16 scroll
+      Row scroll gap=8
+        each d in days
+          ChoiceChip "{d.d} {d.n}" selected={day==index} onTap={day=index}
+      if length(booked)>0
+        Card gap=8 fill=#FFE8F5EE
+          Row between
+            Column gap=2
+              Text.strong "You are booked: Power Mat Pilates, 8:00 AM"
+              Text.muted "Free cancel window closes in"
+            Text.strong "{duration(cancelLeft)}"
+          Row gap=8
+            Button.outline "Cancel booking" onTap={cancelLeft>0 ? {booked=[]; credits=credits+1; toast "Cancelled, credit returned"} : toast "Cancel window has closed"}
+            Button.ghost "View class" onTap={sel="c2"; go class}
+      each c in classes
+        Card gap=8
+          Row between
+            Column gap=2 grow
+              Text.caption "{c.time}"
+              Text.heading "{c.name}"
+              Row gap=8
+                Avatar "{c.coach}" size=24
+                Text.muted "{c.coach}"
+            Column end gap=4
+              Dots count={c.cap} filled={c.cap-c.spots} size=6
+              if c.spots>0
+                Text.small "{c.spots} spots left"
+              if c.spots==0
+                Badge.warning "Waitlist"
+          Row gap=8 middle
+            Button.ghost "Details" onTap={sel=c.id; go class}
+            Spacer grow
+            if any(waitlisted,w=>w.id==c.id)
+              Text.muted "You are #{find(waitlisted,w=>w.id==c.id).pos} on the waitlist"
+              Button.outline "Leave" onTap={waitlisted=removeWhere(waitlisted,w=>w.id==c.id); toast "Left the waitlist"}
+            if !any(waitlisted,w=>w.id==c.id) && c.spots==0
+              Button.secondary "Join waitlist" onTap={waitlisted=append(waitlisted,{"id":c.id,"pos":4}); toast "You are #4 on the waitlist"}
+            if c.spots>0 && !any(booked,b=>b.id==c.id)
+              Button "Book, 1 credit" onTap={credits>0 ? {booked=append(booked,{"id":c.id,"cancelBy":5400}); credits=credits-1; cancelLeft=5400; toast "Booked {c.name}"} : open nocredits}
+            if any(booked,b=>b.id==c.id)
+              Badge.success "Booked"
+  Sheet#filters "Filters"
+    Column gap=12
+      SegmentedButton bind=kindFilter items=["All","Bike","Mat"]
+      Select "Coach" items=["Anyone","Dani Ortiz","Lena Park","Marcus Bell"] bind=coachFilter
+      Toggle "Only classes with spots" bind=onlyOpen
+      Button "Apply" onTap={close}
+  Dialog#nocredits "Out of credits" "Top up to keep booking"
+    Text.muted "You have no credits left this month."
+    Button "Buy a 5 class pack" onTap={credits=credits+5; close; toast "5 credits added"}
+
+### Class
+state seat=""
+state taken=["b3","b4","b9","b10","b15","b16","b21"]
+state credits=6
+state reminder=true
+App
+  Sidebar
+    Brand "Sweatbox" icon="fitness_center"
+    NavItem "Schedule" icon="calendar_month" onTap={go schedule}
+    NavItem "My bookings" icon="confirmation_number" onTap={go schedule}
+    NavItem "Membership" icon="badge" onTap={go membership}
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Back" onTap={go schedule}
+        Heading "Sunrise Ride" level=1
+      Badge.info "2 spots left"
+    Column pad=24 gap=16 scroll maxw=720
+      Row gap=12 middle
+        Avatar "Dani Ortiz" size=48
+        Column gap=2
+          Text.strong "Dani Ortiz"
+          Text.muted "Thu 20 Nov, 6:30 AM, 45 min, Studio A"
+      Card gap=12
+        Row between
+          Text.title "Choose your bike"
+          Text.muted "Front is the coach"
+        SeatMap bind=seat rows=4 cols=6 prefix="b" taken={taken} layout="bike" label="Coach"
+        Row gap=16
+          Row gap=4 middle
+            Icon "pedal_bike" size=16
+            Text.small "Free"
+          Row gap=4 middle
+            Icon "block" size=16
+            Text.small "Taken"
+          Row gap=4 middle
+            Icon "check_circle" size=16
+            Text.small "Yours"
+      if seat!=""
+        Card gap=4
+          Text.strong "Bike {seat}"
+          Text.muted "Shoes: clip-in or trainers. Towel is included."
+      Toggle "Remind me 1 hour before" bind=reminder
+      Button "Confirm bike, 1 credit" disabled={seat==""} onTap={taken=append(taken,seat); credits=credits-1; emit book seat; toast "Booked bike {seat}"; go schedule}
+      Text.caption "Free cancel until 2 hours before class" center
+
+### Membership
+state chartMode="Monthly"
+state credits=6
+state streak=12
+state months=["Jun","Jul","Aug","Sep","Oct","Nov"]
+state visits=[9,11,8,14,16,13]
+App
+  Sidebar
+    Brand "Sweatbox" icon="fitness_center"
+    NavItem "Schedule" icon="calendar_month" onTap={go schedule}
+    NavItem "My bookings" icon="confirmation_number" onTap={go schedule}
+    NavItem "Membership" icon="badge" selected={true}
+  Main
+    Nav
+      Heading "Membership" level=1
+      IconButton "more_vert" tooltip="More" onTap={open more}
+    Column pad=24 gap=16 scroll
+      Box fill=#FF1B2A41 radius=16 pad=20 gap=16
+        Row between
+          Column gap=2
+            Text "Unlimited Plus" color=#FFFFFFFF size=22 weight=700
+            Text "Ava Thompson" color=#FFC9D3E3
+          Icon "fitness_center" color=#FFFFFFFF
+        Row center
+          QRCode "SWX-48213-AVA" size=140
+        Row between
+          Text "SWX-48213-AVA" color=#FFFFFFFF
+          Text "Valid to Dec 31" color=#FFC9D3E3
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.caption "Credits left"
+          Text "{credits}" size=40 weight=700
+          Progress {credits/10}
+        Card gap=4
+          Text.caption "Current streak"
+          Row gap=4 middle
+            Icon "local_fire_department"
+            Text "{streak}" size=40 weight=700
+          Text.muted "weeks in a row"
+        Card gap=4
+          Text.caption "This month"
+          Text "13" size=40 weight=700
+          Text.muted "classes attended"
+      Card gap=12
+        Row between
+          Text.title "Attendance"
+          SegmentedButton bind=chartMode items=["Monthly","Weekly"]
+        BarChart values={visits} labels={months} h=200
+      Button.outline "Buy more credits" onTap={open topup}
+  Menu#more end
+    MenuItem "Add card to wallet" icon="wallet" onTap={toast "Added to wallet"}
+    MenuItem "Copy member code" icon="content_copy" onTap={copy "SWX-48213-AVA"; toast "Code copied"}
+    MenuItem "Freeze membership" icon="ac_unit" onTap={emit freeze}
+  Dialog#topup "Buy credits" "Credits never expire while you are a member"
+    Select "Pack" items=["5 classes, $75","10 classes, $140"] bind=pack
+    Button "Pay" onTap={credits=credits+(pack=="10 classes, $140" ? 10 : 5); close; toast "Credits added"}

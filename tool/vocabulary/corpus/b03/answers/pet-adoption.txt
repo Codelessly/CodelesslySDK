@@ -1,0 +1,201 @@
+### Discover
+state species="All"
+state maxAge=15
+state maxDist=25
+state deck=[{"id":1,"name":"Biscuit","species":"Dog","breed":"Beagle mix","age":3,"size":"Medium","dist":4,"photo":"https://images.pawsandco.app/biscuit-1.jpg","photos":["https://images.pawsandco.app/biscuit-1.jpg","https://images.pawsandco.app/biscuit-2.jpg","https://images.pawsandco.app/biscuit-3.jpg"],"energy":0.8,"affection":0.9,"calm":0.4,"goodWith":["Kids","Dogs"]},{"id":2,"name":"Miso","species":"Cat","breed":"Tabby","age":2,"size":"Small","dist":9,"photo":"https://images.pawsandco.app/miso-1.jpg","photos":["https://images.pawsandco.app/miso-1.jpg","https://images.pawsandco.app/miso-2.jpg"],"energy":0.5,"affection":0.7,"calm":0.8,"goodWith":["Cats","Seniors"]},{"id":3,"name":"Juniper","species":"Dog","breed":"Labrador","age":7,"size":"Large","dist":18,"photo":"https://images.pawsandco.app/juniper-1.jpg","photos":["https://images.pawsandco.app/juniper-1.jpg","https://images.pawsandco.app/juniper-2.jpg"],"energy":0.4,"affection":0.95,"calm":0.9,"goodWith":["Kids","Cats","Dogs"]},{"id":4,"name":"Pepper","species":"Rabbit","breed":"Holland lop","age":1,"size":"Small","dist":12,"photo":"https://images.pawsandco.app/pepper-1.jpg","photos":["https://images.pawsandco.app/pepper-1.jpg"],"energy":0.6,"affection":0.5,"calm":0.7,"goodWith":["Kids"]}]
+state favs=[]
+state passed=[]
+state current=null
+state tab="discover"
+state photoAt=0
+App
+  Sidebar
+    Brand "Paws & Co" icon="pets"
+    NavItem "Discover" icon="style" selected={tab=="discover"} onTap={tab="discover"}
+    NavItem "Favourites" icon="favorite" badge="{length(favs)}" selected={tab=="favs"} onTap={go favourites}
+    NavItem "Apply" icon="assignment" onTap={go application}
+    NavItem "My application" icon="timeline" onTap={go status}
+    Spacer grow
+    Text.muted "Signed in as Dana Whitfield"
+  Main
+    Nav
+      Heading "Discover pets" level=1
+      Row gap=8
+        Button.outline "Filters" icon="tune" onTap={open filters}
+    Column pad=24 gap=16 center
+      Row gap=8 scroll
+        each s in ["All","Dog","Cat","Rabbit"]
+          ChoiceChip "{s}" selected={species==s} onTap={species=s}
+      Text.muted "Swipe left to pass, right to like"
+      Pages bind=page h=480 peek=0.86 items={filter(deck, p=>(species=="All" || p.species==species) && p.age<=maxAge && p.dist<=maxDist && !contains(passed,p.id))}
+        Card gap=8 animate=scale onSwipeLeft={passed=append(passed,item.id); toast "Passed on {item.name}"} onSwipeRight={favs=contains(favs,item.id) ? favs : append(favs,item.id); toast "Liked {item.name}"} onTap={current=item; photoAt=0; open detail}
+          Image "{item.photo}" h=300 radius=12
+          Row between
+            Text.heading "{item.name}, {item.age}"
+            Badge.info "{item.dist} km"
+          Text.muted "{item.breed} · {item.size}"
+          Row gap=12 center
+            IconButton "close" tooltip="Pass" onTap={passed=append(passed,item.id); toast "Passed on {item.name}"}
+            IconButton "info" tooltip="Details" onTap={current=item; photoAt=0; open detail}
+            IconButton "favorite" tooltip="Like" onTap={favs=contains(favs,item.id) ? favs : append(favs,item.id); toast "Liked {item.name}"}
+      Dots bind=page count={length(filter(deck, p=>(species=="All" || p.species==species) && p.age<=maxAge && p.dist<=maxDist && !contains(passed,p.id)))}
+      if length(filter(deck, p=>(species=="All" || p.species==species) && p.age<=maxAge && p.dist<=maxDist && !contains(passed,p.id)))==0
+        Card gap=8 center
+          Text.heading "No more pets match"
+          Button.outline "Reset passes" onTap={passed=[]; species="All"; maxAge=15; maxDist=25}
+Sheet#detail "{current.name}"
+  Column gap=12
+    Pages bind=photoAt h=220 items={current.photos}
+      Image "{item}" radius=12
+    Dots bind=photoAt count={length(current.photos)}
+    Row gap=8
+      Badge.primary "{current.age} yrs"
+      Badge.neutral "{current.size}"
+      Badge.neutral "{current.breed}"
+    Text.sectionTitle "Temperament"
+    Row gap=12
+      Text "Energy" w=90
+      Progress {current.energy} grow
+    Row gap=12
+      Text "Affection" w=90
+      Progress {current.affection} grow
+    Row gap=12
+      Text "Calm" w=90
+      Progress {current.calm} grow
+    Text.sectionTitle "Good with"
+    Row gap=8
+      each g in current.goodWith
+        Chip "{g}"
+    Row gap=8
+      Button.outline "Save to favourites" icon="favorite" onTap={favs=contains(favs,current.id) ? favs : append(favs,current.id); toast "Saved"; close}
+      Button "Start application" onTap={close; go application}
+Sheet#filters "Filters"
+  Column gap=16
+    Text.fieldLabel "Species"
+    SegmentedButton bind=species items=["All","Dog","Cat","Rabbit"]
+    Text.fieldLabel "Maximum age: {maxAge} years"
+    Slider bind=maxAge min=1 max=15
+    Text.fieldLabel "Within {maxDist} km"
+    Slider bind=maxDist min=1 max=50
+    Row gap=8
+      Button.outline "Reset" onTap={species="All"; maxAge=15; maxDist=25}
+      Button "Show pets" onTap={close}
+
+### Favourites
+App
+  Sidebar
+    Brand "Paws & Co" icon="pets"
+    NavItem "Discover" icon="style" onTap={go discover}
+    NavItem "Favourites" icon="favorite" badge="{length(favs)}" selected={true}
+    NavItem "Apply" icon="assignment" onTap={go application}
+    NavItem "My application" icon="timeline" onTap={go status}
+  Main
+    Nav
+      Heading "Favourites" level=1
+      Text.muted "{length(favs)} saved"
+    Column pad=24 gap=12
+      if length(favs)==0
+        Card gap=8 center
+          Icon "favorite_border"
+          Text.muted "Nothing saved yet. Swipe right on a pet you like."
+          Button "Browse pets" onTap={go discover}
+      each id in favs
+        ListTile "{find(deck, p=>p.id==id).name}" subtitle="{find(deck, p=>p.id==id).breed} · {find(deck, p=>p.id==id).dist} km away"
+          Avatar src="{find(deck, p=>p.id==id).photo}" size=48
+          Row gap=8
+            Button.outline "Apply" onTap={go application}
+            IconButton "delete" tooltip="Remove" onTap={favs=without(favs,id); toast "Removed"}
+
+### Application
+state step=0
+state housing="House"
+state own=true
+state yard=true
+state fence=false
+state adults=2
+state kids=0
+state otherPets=""
+state moveIn=""
+state ref1Name=""
+state ref1Phone=""
+state ref2Name=""
+state ref2Phone=""
+state agree=false
+Page
+  Nav
+    Brand "Paws & Co" icon="pets"
+    Row gap=4
+      Link "Discover" onTap={go discover}
+      Link "Favourites" onTap={go favourites}
+      Link "My application" onTap={go status}
+  Section narrow
+    Column gap=16
+      Heading "Adoption application" level=1
+      Progress {(step+1)/3}
+      Text.muted "Step {step+1} of 3"
+      if step==0
+        Card gap=12
+          Heading "About you" level=3
+          Input "Full name" bind=fullName
+          Input "Email" bind=email type=email
+          Input "Phone" bind=phone type=phone
+          DatePicker "Ideal move-in date" bind=moveIn
+      if step==1
+        Card gap=12
+          Heading "Your home" level=3
+          Select "Home type" bind=housing items=["House","Apartment","Condo","Farm"]
+          Toggle "I own my home" bind=own
+          Toggle "Has a yard" bind=yard
+          Toggle "Yard is fenced" bind=fence
+          Row gap=16
+            Input "Adults" bind=adults type=number grow
+            Input "Children" bind=kids type=number grow
+          Input "Other pets at home" "e.g. one cat, 4 years old" bind=otherPets multiline
+      if step==2
+        Card gap=12
+          Heading "References" level=3
+          Text.fieldLabel "Reference 1"
+          Input "Name" bind=ref1Name
+          Input "Phone" bind=ref1Phone type=phone
+          Text.fieldLabel "Reference 2"
+          Input "Name" bind=ref2Name
+          Input "Phone" bind=ref2Phone type=phone
+          Checkbox "I confirm the details above are true" bind=agree
+      Row between
+        Button.outline "Back" hidden={step==0} onTap={step=step-1}
+        Spacer grow
+        if step<2
+          Button "Next" onTap={step=step+1}
+        if step==2
+          Button "Submit application" onTap={agree ? emit submitApplication; open done : toast "Please confirm your details"}
+Dialog#done "Application sent" "We will be in touch within two days"
+  Text "Thank you, {fullName}. Track progress any time."
+  Button "View status" onTap={close; go status}
+
+### Status
+state stage=1
+state stages=["Applied","Reviewing","Home check","Approved","Adopted"]
+Page
+  Nav
+    Brand "Paws & Co" icon="pets"
+    Row gap=4
+      Link "Discover" onTap={go discover}
+      Link "Favourites" onTap={go favourites}
+  Section narrow
+    Column gap=16
+      Heading "Your application" level=1
+      Text.muted "Biscuit, Beagle mix · submitted 12 Nov"
+      Card gap=16
+        Timeline items=["Applied","Reviewing","Home check","Approved","Adopted"] current={stage}
+        Progress {stage/4}
+        Text.strong "Now: {stages[stage]}"
+        if stage==1
+          Text.muted "A volunteer is reading your application and calling your references."
+        if stage==2
+          Text.muted "We will visit your home to say hello. Pick a time that suits you."
+          Button "Choose a visit time" onTap={open visit}
+      Button.outline "Message the shelter" icon="chat" onTap={emit message}
+Dialog#visit "Home visit" "Choose a day"
+  DatePicker "Date" bind=visitDate
+  TimePicker "Time" bind=visitTime
+  Button "Confirm" onTap={emit visit; toast "Visit booked"; close}

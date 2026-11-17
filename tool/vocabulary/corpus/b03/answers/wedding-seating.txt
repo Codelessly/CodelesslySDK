@@ -1,0 +1,186 @@
+### Seating
+state tab="seating"
+state q=""
+state side="All"
+state diet="All"
+state sel=""
+state selTable=""
+state conflictsOpen=false
+state guests=[{"id":1,"name":"Eleanor Whitfield","side":"Bride","diet":"Vegetarian","table":1,"group":"Whitfield family"},{"id":2,"name":"Robert Whitfield","side":"Bride","diet":"None","table":1,"group":"Whitfield family"},{"id":3,"name":"Priya Natarajan","side":"Groom","diet":"Vegan","table":2,"group":"College friends"},{"id":4,"name":"Daniel Okafor","side":"Groom","diet":"None","table":2,"group":"College friends"},{"id":5,"name":"Marguerite Dubois","side":"Bride","diet":"Gluten-free","table":0,"group":"Whitfield family"},{"id":6,"name":"Tom Hargreaves","side":"Groom","diet":"None","table":0,"group":"Work"},{"id":7,"name":"Aisha Rahman","side":"Bride","diet":"Halal","table":3,"group":"Work"},{"id":8,"name":"Lucas Moretti","side":"Groom","diet":"Nut allergy","table":0,"group":"College friends"},{"id":9,"name":"Hannah Lindqvist","side":"Bride","diet":"None","table":0,"group":"Neighbours"},{"id":10,"name":"Greg Pemberton","side":"Groom","diet":"None","table":3,"group":"Work"}]
+state tables=[{"id":1,"name":"Table 1","shape":"round","seats":8},{"id":2,"name":"Table 2","shape":"round","seats":8},{"id":3,"name":"Head table","shape":"long","seats":12},{"id":4,"name":"Table 4","shape":"round","seats":6}]
+state apart=[{"a":4,"b":10,"why":"Daniel and Greg: business dispute"},{"a":2,"b":6,"why":"Robert and Tom: not speaking"}]
+state autoGroup="Whitfield family"
+App
+  Sidebar
+    Brand "Tablecloth" icon="table_restaurant"
+    NavItem "Seating plan" icon="event_seat" selected={tab=="seating"} onTap={tab="seating"}
+    NavItem "Guest list" icon="groups" badge="{count(guests,g=>g.table==0)}" selected={tab=="guests"} onTap={tab="guests"}
+    NavItem "Print view" icon="print" selected={tab=="print"} onTap={go print}
+    Spacer grow
+    Text.muted "Eleanor and James, 14 June"
+  Pane w=320 pad=16 gap=12
+    Heading "Guests" level=3
+    Input "Search guests" bind=q
+    Row gap=8 scroll
+      FilterChip "All" selected={side=="All"} onTap={side="All"}
+      FilterChip "Bride" selected={side=="Bride"} onTap={side="Bride"}
+      FilterChip "Groom" selected={side=="Groom"} onTap={side="Groom"}
+    Select "Dietary" items=["All","Vegetarian","Vegan","Gluten-free","Halal","Nut allergy"] bind=diet
+    Row between
+      Badge.warning "{count(guests,g=>g.table==0)} unseated"
+      Button.outline "Auto-seat group" onTap={open autoseat}
+    Column scroll grow gap=8
+      each g in filter(guests,x=>x.table==0 && (side=="All" || x.side==side) && (diet=="All" || x.diet==diet) && contains(lower(x.name),lower(q)))
+        Card gap=4 drag=guest(g.id) onTap={sel=g.id; open guestMenu}
+          Row gap=8 middle
+            Avatar "{g.name}" size=32
+            Column grow
+              Text.strong "{g.name}"
+              Text.caption "{g.side} side, {g.group}"
+            if g.diet!="None"
+              Badge.info "{g.diet}"
+  Main
+    Nav
+      Heading "Seating plan" level=1
+      Row gap=8
+        Badge.error "{length(apart)} conflicts" hidden={length(apart)==0}
+        Button.outline "Conflicts" icon="warning" onTap={open conflicts}
+        Button.outline "Add table" icon="add" onTap={open newTable}
+        Button "Print" icon="print" onTap={go print}
+    Column pad=24 gap=16
+      if any(apart,p=>find(guests,g=>g.id==p.a).table!=0 && find(guests,g=>g.id==p.a).table==find(guests,g=>g.id==p.b).table)
+        Card gap=4 fill=#FFFFF3E0
+          Row gap=8 middle
+            Icon "warning"
+            Text.strong "Two guests who should be kept apart share a table. Open Conflicts to fix it."
+      Grid cols=2 gap=16
+        each t in tables
+          Card gap=12 drop=guest onDrop={guests=updateWhere(guests,g=>g.id==result.data,g=>with(g,"table",t.id))}
+            Row between middle
+              Column
+                Text.strong "{t.name}"
+                Text.caption "{t.shape=="round" ? "Round" : "Long"} table, {t.seats} seats"
+              Row gap=8 middle
+                Text.small "{count(guests,g=>g.table==t.id)} / {t.seats}"
+                IconButton "more_vert" tooltip="Table options" onTap={selTable=t.id; open tableMenu}
+            Progress {count(guests,g=>g.table==t.id)/t.seats}
+            if t.shape=="round"
+              SeatMap "{t.name}" shape=round seats={t.seats} guests={filter(guests,g=>g.table==t.id)} h=200 onDrop={guests=updateWhere(guests,g=>g.id==result.data,g=>with(g,"table",t.id))}
+            if t.shape=="long"
+              SeatMap "{t.name}" shape=long seats={t.seats} guests={filter(guests,g=>g.table==t.id)} h=160 onDrop={guests=updateWhere(guests,g=>g.id==result.data,g=>with(g,"table",t.id))}
+            Row gap=8 scroll
+              each g in filter(guests,x=>x.table==t.id)
+                Chip "{g.name}" drag=guest(g.id) onTap={sel=g.id; open seatedMenu}
+  Menu#guestMenu
+    MenuItem "Seat at Table 1" icon="event_seat" onTap={guests=updateWhere(guests,g=>g.id==sel,g=>with(g,"table",1))}
+    MenuItem "Seat at Table 2" icon="event_seat" onTap={guests=updateWhere(guests,g=>g.id==sel,g=>with(g,"table",2))}
+    MenuItem "Seat at Head table" icon="event_seat" onTap={guests=updateWhere(guests,g=>g.id==sel,g=>with(g,"table",3))}
+    MenuItem "Seat at Table 4" icon="event_seat" onTap={guests=updateWhere(guests,g=>g.id==sel,g=>with(g,"table",4))}
+    MenuItem "Keep apart from..." icon="block" onTap={open keepApart}
+  Menu#seatedMenu
+    MenuItem "Move to unseated" icon="person_remove" onTap={guests=updateWhere(guests,g=>g.id==sel,g=>with(g,"table",0)); toast "Guest unseated"}
+    MenuItem "Keep apart from..." icon="block" onTap={open keepApart}
+  Menu#tableMenu
+    MenuItem "Clear table" icon="clear_all" onTap={guests=updateWhere(guests,g=>g.table==selTable,g=>with(g,"table",0)); toast "Table cleared"}
+    MenuItem "Remove table" icon="delete" onTap={guests=updateWhere(guests,g=>g.table==selTable,g=>with(g,"table",0)); tables=removeWhere(tables,t=>t.id==selTable); toast "Table removed"}
+  Dialog#autoseat "Auto-seat a group" "Seats everyone in the group together, at the table with the most room."
+    Select "Group" items=["Whitfield family","College friends","Work","Neighbours"] bind=autoGroup
+    Text.muted "{count(guests,g=>g.group==autoGroup && g.table==0)} unseated guests in this group"
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button "Seat group" onTap={emit autoSeat autoGroup; toast "Group seated"; close}
+  Dialog#conflicts "Conflicts" "Guests who should be kept apart"
+    each p in apart
+      Card gap=4
+        Row between middle
+          Text.strong "{p.why}"
+          if find(guests,g=>g.id==p.a).table!=0 && find(guests,g=>g.id==p.a).table==find(guests,g=>g.id==p.b).table
+            Badge.error "Same table"
+          if !(find(guests,g=>g.id==p.a).table!=0 && find(guests,g=>g.id==p.a).table==find(guests,g=>g.id==p.b).table)
+            Badge.success "Apart"
+        Row gap=8
+          Button.outline "Unseat {find(guests,g=>g.id==p.b).name}" onTap={guests=updateWhere(guests,g=>g.id==p.b,g=>with(g,"table",0))}
+          Button.ghost "Remove rule" onTap={apart=removeWhere(apart,x=>x.a==p.a && x.b==p.b)}
+  Dialog#keepApart "Keep apart" "Choose a guest who must not share a table with this one."
+    Select "Other guest" items={map(filter(guests,g=>g.id!=sel),g=>g.name)} bind=otherName
+    Button "Add rule" onTap={apart=append(apart,{"a":sel,"b":find(guests,g=>g.name==otherName).id,"why":"Kept apart by request"}); toast "Rule added"; close}
+  Dialog#newTable "Add a table"
+    Input "Name" bind=newName
+    SegmentedButton items=["round","long"] bind=newShape
+    Input "Seats" type=number bind=newSeats
+    Button "Add table" onTap={tables=append(tables,{"id":length(tables)+1,"name":newName,"shape":newShape,"seats":newSeats}); close}
+
+### Guest list
+App
+  Sidebar
+    Brand "Tablecloth" icon="table_restaurant"
+    NavItem "Seating plan" icon="event_seat" onTap={go seating}
+    NavItem "Guest list" icon="groups" selected={true}
+    NavItem "Print view" icon="print" onTap={go print}
+  Main
+    Nav
+      Heading "Guest list" level=1
+      Row gap=8
+        Input "Search" bind=q w=220
+        Button "Add guest" icon="person_add" onTap={open addGuest}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card
+          Text.caption "Invited"
+          Text.strong "{length(guests)}" size=32
+        Card
+          Text.caption "Seated"
+          Text.strong "{count(guests,g=>g.table!=0)}" size=32
+        Card
+          Text.caption "Unseated"
+          Text.strong "{count(guests,g=>g.table==0)}" size=32
+      Card gap=8
+        Row gap=8
+          Text.strong "Name" grow
+          Text.strong "Side" w=90
+          Text.strong "Dietary" w=110
+          Text.strong "Table" w=90
+        Divider
+        each g in filter(guests,x=>contains(lower(x.name),lower(q)))
+          Row gap=8 middle
+            Row gap=8 grow middle
+              Avatar "{g.name}" size=28
+              Text "{g.name}"
+            Text.muted "{g.side}" w=90
+            Text.muted "{g.diet}" w=110
+            Text "{g.table==0 ? "Unseated" : find(tables,t=>t.id==g.table).name}" w=90
+  Dialog#addGuest "Add a guest"
+    Input "Full name" bind=gName
+    SegmentedButton items=["Bride","Groom"] bind=gSide
+    Select "Dietary" items=["None","Vegetarian","Vegan","Gluten-free","Halal","Nut allergy"] bind=gDiet
+    Button "Add guest" onTap={guests=append(guests,{"id":length(guests)+1,"name":gName,"side":gSide,"diet":gDiet,"table":0,"group":"Other"}); toast "Guest added"; close}
+
+### Print view
+App
+  Sidebar
+    Brand "Tablecloth" icon="table_restaurant"
+    NavItem "Seating plan" icon="event_seat" onTap={go seating}
+    NavItem "Guest list" icon="groups" onTap={go guests}
+    NavItem "Print view" icon="print" selected={true}
+  Main
+    Nav
+      Heading "Print view" level=1
+      Row gap=8
+        Button.outline "Download PDF" icon="download" onTap={emit exportPdf}
+        Button "Print" icon="print" onTap={emit print}
+    Column pad=24 gap=16 maxw=720
+      Text.muted "Guests by table, as they will appear on the printed sheet."
+      each t in tables
+        Card gap=8
+          Row between
+            Heading "{t.name}" level=3
+            Text.muted "{count(guests,g=>g.table==t.id)} of {t.seats} seats"
+          Divider
+          each g in sortBy(filter(guests,x=>x.table==t.id),x=>x.name)
+            Row between
+              Text "{g.name}"
+              Text.muted "{g.diet=="None" ? "" : g.diet}"
+      Card gap=8
+        Heading "Not yet seated" level=3
+        each g in filter(guests,x=>x.table==0)
+          Text "{g.name}"

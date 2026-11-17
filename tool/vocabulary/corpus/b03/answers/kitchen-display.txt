@@ -1,0 +1,121 @@
+### Expo board
+state station="grill"
+state now=0
+state tickets=[{"id":"T412","table":"12","at":0,"station":"grill","items":[{"name":"Ribeye 12oz","qty":1,"mods":["Medium rare","No butter"]},{"name":"Burger","qty":2,"mods":["No onion","Add bacon"]}]},{"id":"T413","table":"4","at":120,"station":"grill","items":[{"name":"Salmon","qty":1,"mods":["Allergy: nuts"]},{"name":"Chicken breast","qty":1,"mods":[]}]},{"id":"T414","table":"Bar 2","at":300,"station":"fry","items":[{"name":"Fries","qty":3,"mods":["Extra crispy"]},{"name":"Calamari","qty":1,"mods":["Sauce on side"]}]},{"id":"T415","table":"7","at":420,"station":"cold","items":[{"name":"Caesar salad","qty":2,"mods":["No anchovies"]},{"name":"Burrata","qty":1,"mods":[]}]},{"id":"T416","table":"21","at":600,"station":"grill","items":[{"name":"Burger","qty":1,"mods":["Gluten free bun"]},{"name":"Ribeye 12oz","qty":1,"mods":["Well done"]}]}]
+state bumped=[]
+state rush=true
+every 1s onTick={now=now+1}
+App
+  Sidebar
+    Brand "Pass" icon="restaurant"
+    NavItem "Expo board" icon="view_column" selected={true}
+    NavItem "All-day counts" icon="format_list_numbered" onTap={go all-day}
+    NavItem "Bumped history" icon="history" badge="{length(bumped)}" onTap={go history}
+    Spacer grow
+    Text.muted "Dinner service"
+    Text.muted "Chef: Marta Ruiz"
+  Main
+    Nav
+      Heading "Kitchen" level=1
+      Row gap=8
+        SegmentedButton bind=station items=["grill","fry","cold"] size=large
+        Button.outline "Recall last" size=large icon="undo" hotkey="r" onTap={length(bumped)>0 ? {tickets=append(tickets,last(bumped)); bumped=removeAt(bumped,length(bumped)-1)} : toast "Nothing to recall"}
+        IconButton "volume_up" tooltip="Mute chime"
+    if rush
+      Box fill=#FFB3261E pad=16 radius=8
+        Row between middle
+          Row gap=12 middle
+            Icon "local_fire_department" color=#FFFFFFFF size=36
+            Text "RUSH: {length(tickets)} tickets open, 3 tables seated in the last 5 minutes" color=#FFFFFFFF size=28 weight=700
+          Button.outline "Dismiss" onTap={rush=false}
+    Column pad=24 gap=16
+      Row gap=8
+        Text.muted "Station: {upper(station)}" size=20
+        Text.muted "Open: {count(tickets,t=>t.station==station)}" size=20
+        Text.muted "Press 1 to bump the oldest ticket" size=20
+      Row scroll gap=16 top
+        each t in sortBy(filter(tickets,x=>x.station==station),x=>x.at)
+          Card w=300 gap=12 hotkey={index==0 ? "1" : ""} menu=ticketMenu onTap={bumped=append(bumped,t); tickets=removeWhere(tickets,x=>x.id==t.id); toast "Bumped {t.id}"}
+            Row between middle
+              Text "Table {t.table}" size=36 weight=800
+              Timer since={t.at} now={now} amber=300 red=600 size=32 weight=700
+            Text.muted "{t.id}" size=18
+            Divider
+            each it in t.items
+              Column gap=4
+                Text "{it.qty} x {it.name}" size=28 weight=700
+                each m in it.mods
+                  Text "{m}" size=22 color=#FFD32F2F weight=600
+            Spacer
+            Button "BUMP" size=large icon="check" onTap={bumped=append(bumped,t); tickets=removeWhere(tickets,x=>x.id==t.id); toast "Bumped {t.id}"}
+      if count(tickets,t=>t.station==station)==0
+        Column center middle gap=8 pad=48
+          Icon "check_circle" size=72 color=#FF2E7D32
+          Text "All clear on {station}" size=32 weight=700
+  Menu#ticketMenu
+    MenuItem "Fire again" icon="whatshot" onTap={toast "Re-fired"}
+    MenuItem "Mark as rush" icon="bolt" onTap={rush=true}
+    MenuItem "Void ticket" icon="delete" onTap={toast "Ask a manager to void"}
+
+### All-day counts
+state station="all"
+state dishes=[{"name":"Burger","count":14,"station":"grill"},{"name":"Ribeye 12oz","count":9,"station":"grill"},{"name":"Salmon","count":6,"station":"grill"},{"name":"Chicken breast","count":5,"station":"grill"},{"name":"Fries","count":22,"station":"fry"},{"name":"Calamari","count":7,"station":"fry"},{"name":"Caesar salad","count":8,"station":"cold"},{"name":"Burrata","count":4,"station":"cold"}]
+App
+  Sidebar
+    Brand "Pass" icon="restaurant"
+    NavItem "Expo board" icon="view_column" onTap={go expo-board}
+    NavItem "All-day counts" icon="format_list_numbered" selected={true}
+    NavItem "Bumped history" icon="history" onTap={go history}
+  Main
+    Nav
+      Heading "All-day counts" level=1
+      SegmentedButton bind=station items=["all","grill","fry","cold"] size=large
+    Column pad=24 gap=16
+      Row gap=24
+        Card grow gap=4
+          Text.muted "Dishes out" size=20
+          Text "{sum(dishes,d=>d.count)}" size=64 weight=800
+        Card grow gap=4
+          Text.muted "On the board now" size=20
+          Text "5" size=64 weight=800
+        Card grow gap=4
+          Text.muted "Avg. ticket time" size=20
+          Text "6:40" size=64 weight=800
+      Grid cols=4 gap=16
+        each d in sortByDesc(filter(dishes,x=>station=="all" || x.station==station),x=>x.count)
+          Card gap=8
+            Text "{d.name}" size=28 weight=700
+            Text "{d.count}" size=72 weight=800
+            Progress {d.count/22}
+            Badge.neutral "{d.station}"
+      Card gap=8
+        Text.strong "Dishes by hour"
+        BarChart values=[6,14,22,19,12] labels=["5pm","6pm","7pm","8pm","9pm"] h=200
+
+### Bumped history
+state bumped=[{"id":"T409","table":"3","time":"7:41","by":"Dee"},{"id":"T410","table":"9","time":"7:44","by":"Marta"},{"id":"T411","table":"Bar 1","time":"7:46","by":"Dee"}]
+state sel=""
+App
+  Sidebar
+    Brand "Pass" icon="restaurant"
+    NavItem "Expo board" icon="view_column" onTap={go expo-board}
+    NavItem "All-day counts" icon="format_list_numbered" onTap={go all-day-counts}
+    NavItem "Bumped history" icon="history" selected={true} badge="{length(bumped)}"
+  Main
+    Nav
+      Heading "Bumped history" level=1
+      Button "Recall last" size=large icon="undo" hotkey="r" onTap={length(bumped)>0 ? {emit recall last(bumped).id; bumped=removeAt(bumped,length(bumped)-1); toast "Ticket recalled"} : toast "Nothing to recall"}
+    Column pad=24 gap=12
+      each b in reverse(bumped)
+        Card
+          Row between middle
+            Row gap=16 middle
+              Text "Table {b.table}" size=28 weight=700
+              Text.muted "{b.id}" size=20
+            Row gap=16 middle
+              Text.muted "Bumped {b.time} by {b.by}" size=20
+              Button.outline "Recall" onTap={sel=b.id; open confirm}
+  Dialog#confirm "Recall ticket {sel}" "It goes back to the board with its original timer."
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button "Recall" onTap={emit recall sel; bumped=removeWhere(bumped,x=>x.id==sel); toast "Recalled {sel}"; close}
