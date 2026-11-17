@@ -143,6 +143,11 @@
   and one picture.
 - **Examples**: overlays, an app's sidebar drawer and a lightbox written in the notation
   (`examples/showcase/desktop/behaviours`).
+- Render steps `--long-press <id>` (a `longPress` reaction, a context menu on touch), `--right-click <id>` (a
+  `secondaryClick` reaction, a context menu on a desktop: `menu=<id>` in the notation) and `--reload` (the app is
+  closed and started again on the same screen with what it kept on the device, so a variable marked `saved` can be
+  seen surviving a reload within one run; each capture still starts with nothing stored). In the CLI, `render.sh`,
+  the MCP tool's steps (`{"long-press": "id"}`, `{"right-click": "id"}`, `{"reload": true}`) and the README.
 
 ### Fixed
 
@@ -151,6 +156,60 @@
   minimum height adds (it sat at the top: Cards' FilterBar showed its search text 4 px above the icon beside it).
 - A page route opened from an overlay sized to its design fills the window.
 - `tool/render/render.sh` runs under Git Bash on Windows (it gave Dart `/c/…` paths).
+- A site's variables written by name in `site.json` (`"variables": {"cart": [], "plan": "pro"}`) or as records with
+  no `type` work in the notation's expander (it threw a Dart cast error on the object form), the render command and
+  the runtime: they are read by codelessly_api's manifest reader, each typed by its value, and a record that cannot
+  be read is an `invalid_variable` error on `site.json` (the expander prints it as one line).
+- The render command's `--full-page` capture of an app frame (`App` with a `Sidebar` beside a `Main` taller than the
+  window) left the columns beside the scrolling pane unpainted below the first window (a black or transparent strip
+  under the sidebar, and a `transparent_background` warning). The frame is right as written: the sidebar is as tall
+  as the window and stays in view while `Main` scrolls. The capture now carries each side pane's own background (its
+  fill and border, without its content) down to its bottom; the pane's content shows once, in the first window.
+- A card dragged onto a drop target whose `drop` reaction takes it out of its list (a board's column) threw `Cannot
+  hit test a render box that has never been laid out`, and the drop did nothing. Three causes: a layer added to the
+  middle of a node's chain between frames (the dragged card's opacity) was hit tested by the next pointer event
+  before it was laid out (a node whose own layers are not all laid out now takes no hit, as one whose first layer is
+  not already did); the dragged copy of a component instance was built without the component registry, so it showed
+  the component's defaults instead of the call's parameters, at another size (a flex overflow in the copy); and a
+  `draggable` or `dropTarget` written on a component's call (`TaskCard … drag=task(c.id)` inside `each`) evaluated
+  its data, key and conditions inside the component, where the list's `item` and the page's variables do not exist,
+  so `result.data` was empty. They read in the caller's scope now, as the call's reactions do.
+- The render command's `--drag <id>=<dx>,<dy>` over a node with `swipeLeft`, `swipeRight`, `swipeUp` or `swipeDown`
+  reactions fired nothing: its pointer moves carried no times, so the release had no speed and no swipe was
+  recognized (the renderer's trigger fires as before). The moves are now timed a frame apart: a drag by a distance
+  is a swipe that way.
+- A menu item that opens a dialog, a sheet or a screen (`MenuItem "Delete" onTap={open confirmDelete}`) left its
+  menu drawn, dimmed, under the dialog until the dialog closed: its chain is "open the dialog, close the menu", and
+  an `openModal` waits for its modal, so the close ran afterwards. A chain whose `openModal` (not a popover) is
+  followed at once by a plain `closeModal`, run from a popover, now closes the popover first and then opens. A
+  chain that only opens keeps its popover under what it opens, and Escape goes back to it, as before.
+- The render command's `--key Enter` in a focused text field did nothing (`TextInput … onSubmitted={…}` never ran
+  after `--type`): a field connected to the platform's text input leaves Enter to it, and the test harness's text
+  input sent nothing. The blocks wire `onSubmitted` correctly and a device submits. The step now does what the
+  platform does: it sends a one-line field its action key (its `submitted` reactions run) and types the new line
+  into a multi-line one.
+- Cards: `SortMenu bind=sort options=[…]` drew an open panel of options on first paint, over what was beside it:
+  SSUI's SortMenu is the body of a menu, not a control. Under Cards it is a closed control, 36 tall: the page's
+  dropdown showing the choice (its menu opens on a tap, Enter or Space; the arrows and Enter choose) and the arrow
+  button that flips the direction beside it. A repair in `design_systems/cards/tool/repairs.py`, so a rebuild keeps
+  it.
+- `NumberInput bind=amount step=0.01 showStepper=true` over `state amount=0` saved 26 for a typed 25.50, and
+  ArrowUp, ArrowDown and the stepper buttons did nothing: the notation declared the variable an integer, which
+  rounds what the field sets. codelessly_api's notation now declares it a decimal (the field and the block were
+  right); the value keeps the step's precision by typing, by the arrow keys and by the buttons.
+- A site that overrides Cards' accent (`"theme": {"primary": …}`, `colors.accent`) no longer keeps Cards' blue in
+  dark mode, in the selected `Sidebar` row and `ConversationRow`, in the info `Banner`, in links and focus rings:
+  the site's theme is laid over the design system's with codelessly_api's `ThemeTokens.withSiteTheme` (the render
+  command and `UiSession`), which makes what Cards makes from its accent from the site's. `"primary"` or `"colors"`
+  written at the top of `site.json`, outside `"theme"`, is a `site_key_ignored` warning that says where it goes.
+  Cards' DESIGN.md says how a site sets its accent, its fonts (`fontFamily` for the Inter styles; the display and
+  mono styles one by one) and dark as its default (`"mode": "dark"`).
+- Cards: `ReorderableList addable=false` is a fixed set of items whose order alone changes: it hid the + of the
+  header and still drew the x that removes each row. The x goes with the +.
+- A dialog whose content is taller than the window (a long `Dialog` body on a phone) ran off the screen, its last
+  buttons out of reach, with a flex overflow: it is now laid out at the height it asks for and scrolls inside the
+  window (a drag, a wheel; a step that taps one of its nodes brings the node into view). A dialog that fits is laid
+  out as before.
 
 ## 32.0.0
 

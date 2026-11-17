@@ -1,0 +1,178 @@
+### Week
+state tab="week"
+state week="A"
+state days=["Mon","Tue","Wed","Thu","Fri"]
+state periods=[1,2,3,4,5,6]
+state times=["08:30","09:25","10:40","11:35","13:15","14:10"]
+state nowDay=2
+state nowP=3
+state sel=1
+state lessons=[{"id":1,"wk":"A","day":0,"p":1,"subject":"Maths","room":"M12","teacher":"Ms Okafor","color":"#FF4F7CAC","hw":"Exercise 7C, questions 1-12","due":"Tue","done":false,"notes":"Bring the graphing calculator.","cover":""},{"id":2,"wk":"A","day":0,"p":2,"subject":"English","room":"E3","teacher":"Mr Lindqvist","color":"#FFB5651D","hw":"Read chapters 4-5 of Of Mice and Men","due":"Wed","done":false,"notes":"Essay plan due next week.","cover":""},{"id":3,"wk":"A","day":2,"p":3,"subject":"Physics","room":"S2","teacher":"Dr Haddad","color":"#FF3F8F6B","hw":"Lab write-up: pendulum period","due":"Fri","done":false,"notes":"Wear lab coats. Goggles in the cupboard.","cover":""},{"id":4,"wk":"A","day":2,"p":4,"subject":"History","room":"H1","teacher":"Mrs Bianchi","color":"#FF8C4A8C","hw":"Source analysis worksheet","due":"Thu","done":true,"notes":"Trench warfare sources.","cover":""},{"id":5,"wk":"A","day":1,"p":1,"subject":"Chemistry","room":"S4","teacher":"Dr Haddad","color":"#FFC2524B","hw":"Balance the equations on sheet 3","due":"Thu","done":false,"notes":"","cover":""},{"id":6,"wk":"A","day":3,"p":2,"subject":"French","room":"L6","teacher":"M. Dubois","color":"#FF3A7CA5","hw":"Vocabulary list 9, learn all","due":"Fri","done":false,"notes":"Oral test on Friday.","cover":""},{"id":7,"wk":"A","day":4,"p":5,"subject":"PE","room":"Gym","teacher":"Mr Reyes","color":"#FF6B8E23","hw":"","due":"","done":true,"notes":"Kit required, indoor hockey.","cover":""},{"id":8,"wk":"B","day":0,"p":1,"subject":"Art","room":"A1","teacher":"Ms Tanaka","color":"#FFD1784F","hw":"Finish the still life sketch","due":"Mon","done":false,"notes":"Charcoal provided.","cover":""},{"id":9,"wk":"B","day":2,"p":3,"subject":"Biology","room":"S1","teacher":"Mr Obi","color":"#FF2E8B57","hw":"Cell diagram, labelled","due":"Fri","done":false,"notes":"Microscopes this lesson.","cover":""},{"id":10,"wk":"B","day":3,"p":4,"subject":"Maths","room":"M12","teacher":"Ms Okafor","color":"#FF4F7CAC","hw":"Past paper section B","due":"Mon","done":false,"notes":"","cover":""}]
+state exams=[{"subject":"Maths","date":"2026-12-02","days":16,"room":"Hall"},{"subject":"Physics","date":"2026-12-04","days":18,"room":"Hall"},{"subject":"French oral","date":"2026-11-27","days":11,"room":"L6"}]
+state absentTeacher="Dr Haddad"
+state absentLesson=3
+state coverTeacher="Mr Obi"
+App
+  Sidebar
+    Brand "Period" icon="schedule"
+    NavItem "Week" icon="calendar_view_week" selected={tab=="week"} onTap={tab="week"}
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={go today}
+    NavItem "Exams" icon="school" badge="3" onTap={go exams}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Priya Nair" size=32
+      Text.muted "Priya, Year 10"
+  Main
+    Nav
+      Heading "Week {week}"
+      Row gap=8
+        SegmentedButton items=["A","B"] bind=week
+        Button.outline "Absence notice" icon="campaign" onTap={open absence}
+    Column pad=24 gap=16 scroll
+      each n in filter(lessons,l=>l.cover!="")
+        Card gap=4 fill=#FFFFF3CD
+          Row gap=8 middle
+            Icon "info"
+            Text.strong "Cover notice: {n.subject}, {days[n.day]} period {n.p}"
+          Text.muted "{n.teacher} is absent. Covered by {n.cover} in {n.room}."
+      Card gap=0
+        Row
+          Text.muted "" w=64
+          each d in days
+            Text.strong "{d}" grow center
+        each p in periods
+          Row gap=4 top border-top=#FFE0E0E0
+            Column w=64 pad=4
+              Text.strong "P{p}"
+              Text.caption "{times[p-1]}"
+            each d in range(5)
+              Column grow gap=4 pad=4
+                each l in filter(lessons,x=>x.wk==week&&x.day==d&&x.p==p)
+                  Box fill={l.color} radius=8 pad=8 gap=2 onTap={sel=l.id; open lesson}
+                    Row between
+                      Text.strong "{l.subject}" color=#FFFFFFFF
+                      if l.day==nowDay&&l.p==nowP
+                        Badge.error "Now"
+                    if l.cover==""
+                      Text.caption "{l.room} · {l.teacher}" color=#FFFFFFFF
+                    if l.cover!=""
+                      Text.caption "COVER: {l.cover}" color=#FFFFFFFF strike=false
+                      Text.caption "{l.teacher} absent" color=#FFFFFFFF strike
+                if isEmpty(filter(lessons,x=>x.wk==week&&x.day==d&&x.p==p))
+                  Text.caption "Free" center
+  Dialog#lesson "Lesson details"
+    Column gap=12
+      Row gap=8 middle
+        Text.heading "{find(lessons,x=>x.id==sel).subject}"
+        Badge.primary "Week {find(lessons,x=>x.id==sel).wk}"
+      Text.muted "{days[find(lessons,x=>x.id==sel).day]}, period {find(lessons,x=>x.id==sel).p} · {find(lessons,x=>x.id==sel).room} · {find(lessons,x=>x.id==sel).teacher}"
+      Divider
+      Text.strong "Homework"
+      if find(lessons,x=>x.id==sel).hw==""
+        Text.muted "None set."
+      if find(lessons,x=>x.id==sel).hw!=""
+        Text "{find(lessons,x=>x.id==sel).hw}"
+        Row gap=8 middle
+          Badge.warning "Due {find(lessons,x=>x.id==sel).due}"
+          Checkbox "Done" selected={find(lessons,x=>x.id==sel).done} onChange={lessons=updateWhere(lessons,x=>x.id==sel,x=>with(x,"done",result))}
+      Text.strong "Notes"
+      Input "Notes" bind=noteDraft multiline
+      Row end gap=8
+        Button.ghost "Close" onTap={close}
+        Button "Save note" onTap={lessons=updateWhere(lessons,x=>x.id==sel,x=>with(x,"notes",noteDraft)); toast "Note saved"; close}
+  Dialog#absence "Teacher absence notice" "Replaces a lesson in the grid"
+    Column gap=12
+      Select "Absent teacher" bind=absentTeacher items=["Dr Haddad","Ms Okafor","Mr Lindqvist","Mrs Bianchi"]
+      Select "Cover teacher" bind=coverTeacher items=["Mr Obi","Ms Tanaka","Mr Reyes"]
+      Input "Lesson id" bind=absentLesson type=number
+      Row end gap=8
+        Button.ghost "Cancel" onTap={close}
+        Button "Post notice" onTap={lessons=updateWhere(lessons,x=>x.id==absentLesson,x=>with(x,"cover",coverTeacher)); toast "Notice posted"; close}
+
+### Today
+state tab="today"
+state week="A"
+state nowP=3
+state todayIdx=2
+state days=["Mon","Tue","Wed","Thu","Fri"]
+state times=["08:30","09:25","10:40","11:35","13:15","14:10"]
+state periods=[1,2,3,4,5,6]
+state sel=3
+state lessons=[{"id":3,"wk":"A","day":2,"p":3,"subject":"Physics","room":"S2","teacher":"Dr Haddad","color":"#FF3F8F6B","hw":"Lab write-up: pendulum period","due":"Fri","done":false,"notes":"Wear lab coats.","cover":""},{"id":4,"wk":"A","day":2,"p":4,"subject":"History","room":"H1","teacher":"Mrs Bianchi","color":"#FF8C4A8C","hw":"Source analysis worksheet","due":"Thu","done":true,"notes":"Trench warfare sources.","cover":""},{"id":11,"wk":"A","day":2,"p":1,"subject":"Geography","room":"G2","teacher":"Mr Silva","color":"#FF5B7F3B","hw":"Map skills sheet","due":"Fri","done":false,"notes":"","cover":""},{"id":12,"wk":"A","day":2,"p":6,"subject":"Music","room":"M1","teacher":"Ms Adeyemi","color":"#FF7A5AA6","hw":"","due":"","done":true,"notes":"Bring your instrument.","cover":""}]
+App
+  Sidebar
+    Brand "Period" icon="schedule"
+    NavItem "Week" icon="calendar_view_week" onTap={go week}
+    NavItem "Today" icon="today" selected={tab=="today"} onTap={tab="today"}
+    NavItem "Exams" icon="school" onTap={go exams}
+  Main
+    Nav
+      Heading "Today, {days[todayIdx]}"
+      SegmentedButton items=["A","B"] bind=week
+    Column pad=24 gap=12 scroll maxw=720
+      Text.muted "Week {week}. {count(lessons,l=>l.wk==week&&l.day==todayIdx)} lessons, {6-count(lessons,l=>l.wk==week&&l.day==todayIdx)} free periods."
+      each p in periods
+        Row gap=12 middle
+          Column w=64
+            Text.strong "P{p}"
+            Text.caption "{times[p-1]}"
+          Column grow gap=8
+            each l in filter(lessons,x=>x.wk==week&&x.day==todayIdx&&x.p==p)
+              Card gap=4 border-left={l.color} onTap={sel=l.id; open lesson}
+                Row between middle
+                  Text.strong "{l.subject}"
+                  Row gap=8
+                    if p==nowP
+                      Badge.error "Now"
+                    if p<nowP
+                      Icon "check_circle"
+                if l.cover==""
+                  Text.muted "{l.room} · {l.teacher}"
+                if l.cover!=""
+                  Text.danger "{l.teacher} absent, cover: {l.cover}"
+                if l.hw!=""&&!l.done
+                  Badge.warning "Homework due {l.due}"
+            if isEmpty(filter(lessons,x=>x.wk==week&&x.day==todayIdx&&x.p==p))
+              Card fill=#FFF2F2F2 gap=2
+                Text.strong "Free period"
+                Text.muted "Library or study room"
+  Sheet#lesson "Lesson"
+    Column gap=8
+      Text.heading "{find(lessons,x=>x.id==sel).subject}"
+      Text.muted "{find(lessons,x=>x.id==sel).room} · {find(lessons,x=>x.id==sel).teacher}"
+      Text.strong "Homework"
+      Text "{coalesce(find(lessons,x=>x.id==sel).hw,'None')}"
+      Text.strong "Notes"
+      Text.muted "{find(lessons,x=>x.id==sel).notes}"
+      Button "Close" onTap={close}
+
+### Exams
+state tab="exams"
+state exams=[{"subject":"French oral","date":"27 Nov","days":11,"room":"L6","time":"10:40"},{"subject":"Maths","date":"2 Dec","days":16,"room":"Main hall","time":"09:00"},{"subject":"Physics","date":"4 Dec","days":18,"room":"Main hall","time":"09:00"},{"subject":"History","date":"9 Dec","days":23,"room":"H1","time":"13:15"}]
+state revise=[]
+App
+  Sidebar
+    Brand "Period" icon="schedule"
+    NavItem "Week" icon="calendar_view_week" onTap={go week}
+    NavItem "Today" icon="today" onTap={go today}
+    NavItem "Exams" icon="school" selected={tab=="exams"} onTap={tab="exams"}
+  Main
+    Nav
+      Heading "Exams"
+      Text.muted "{length(exams)} coming up"
+    Column pad=24 gap=16 scroll
+      Grid cols=2 gap=16
+        each e in sortBy(exams,x=>x.days)
+          Card gap=8
+            Row between middle
+              Text.strong "{e.subject}"
+              Badge.info "{e.date}"
+            Row gap=8 middle
+              Text "{e.days}" size=48 weight=700
+              Text.muted "days to go"
+            Progress {1-e.days/30}
+            Text.caption "{e.time} · {e.room}"
+            Row gap=8
+              Button.outline "Revise" onTap={revise=append(revise,e.subject); toast "Added to revision plan"}
+              if contains(revise,e.subject)
+                Badge.success "Planned"

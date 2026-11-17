@@ -17,7 +17,8 @@ import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabeledControl
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide Page, Step; // ignore: deprecated_member_use
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart' show FontLoader, LogicalKeyboardKey, MethodCall, SystemChannels;
+import 'package:flutter/services.dart'
+    show FontLoader, LogicalKeyboardKey, MethodCall, SystemChannels, TextEditingValue, TextInputAction, TextSelection;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk/src/runtime/gestures/drag_and_drop.dart' show RenderDragSource;
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
@@ -304,8 +305,8 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       for (final scope in (api.readMap(d['variables']) ?? const {}).values)
         for (final v in api.readList(scope) ?? const [])
           if (api.readMap(v) case final api.Json m when (api.readList(m['parameters'])?.isNotEmpty ?? false) && m['name'] is String) m['name'] as String,
-    for (final v in api.readList(site.manifest?['variables']) ?? const [])
-      if (api.readMap(v) case final api.Json m when (api.readList(m['parameters'])?.isNotEmpty ?? false) && m['name'] is String) m['name'] as String,
+    for (final v in api.Variable.declarationsFromJson(site.manifest?['variables']))
+      if (v.isFunction) v.name,
   };
   FormulaReport check(String formula) =>
       (error: FormulaEvaluator.errorOf(formula, functionNames: functions), paths: FormulaEvaluator.referencedPaths(formula));
@@ -327,6 +328,11 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   report.diagnostics.addAll(validateTheme(themeJson,
           breakpoints: site.manifest?['breakpoints'] == null ? null : api.Breakpoints.fromJson(site.manifest!['breakpoints']))
       .map((d) => d.withFile(api.SiteManifest.fileName).toJson()));
+  // Its own keys: a theme key beside "theme" (or a key nothing reads) says so.
+  report.diagnostics.addAll(validateSiteManifest(site.manifest).map((d) => d.withFile(api.SiteManifest.fileName).toJson()));
+  // Its variables: a record that cannot be read is not declared, and says so.
+  report.diagnostics
+      .addAll(validateSiteVariables(site.manifest?['variables']).map((d) => d.withFile(api.SiteManifest.fileName).toJson()));
   // The fonts it declares: their shape and formats.
   report.diagnostics.addAll(validateSiteFonts(site.manifest?['fonts']).map((d) => d.withFile(api.SiteManifest.fileName).toJson()));
   if (args.validateOnly || docs.isEmpty) return _finish(report, args);
@@ -558,17 +564,23 @@ Future<void> _renderAll(
         ..screen = label
         ..size = sizeName;
       clipboardAt = (label, sizeName);
-      final codelessly = Codelessly(
-        // The site's files (declared fonts), read from its folder.
-        loader: MemoryPublishLoader(published.bundle, readAsset: siteDir == null ? null : (path) async {
-          final f = File('$siteDir/$path');
-          return f.existsSync() ? f.readAsBytesSync() : null;
-        }),
-        components: components,
-        fonts: fetcher,
-        config: CodelesslyConfig(services: Services(analytics: recorder, exports: exporter), fontTimeout: const Duration(seconds: 5)),
-      );
-      final controller = CodelesslyWidgetController();
+      // What the app keeps on the device (a variable marked saved, a
+      // storage action, the theme mode): fresh for each capture, and handed
+      // on to the app a --reload step starts.
+      var storage = MemoryLocalStorage();
+      Codelessly start() => Codelessly(
+            // The site's files (declared fonts), read from its folder.
+            loader: MemoryPublishLoader(published.bundle, readAsset: siteDir == null ? null : (path) async {
+              final f = File('$siteDir/$path');
+              return f.existsSync() ? f.readAsBytesSync() : null;
+            }),
+            components: components,
+            fonts: fetcher,
+            config: CodelesslyConfig(
+                services: Services(analytics: recorder, exports: exporter, storage: storage), fontTimeout: const Duration(seconds: 5)),
+          );
+      var codelessly = start();
+      var controller = CodelesslyWidgetController();
       final navigator = GlobalKey<NavigatorState>();
       final boundary = GlobalKey();
       // `--theme`: the mode the site starts in, as a setThemeMode action
@@ -631,28 +643,32 @@ Future<void> _renderAll(
         recorder.errors.clear();
       }
 
-      await tester.pumpWidget(RepaintBoundary(
-        key: boundary,
-        child: MaterialApp(
-          navigatorKey: navigator,
-          debugShowCheckedModeBanner: false,
-          // The layout's controls take the project's theme, never this one;
-          // their font without one is the platform's (Roboto, as on Android
-          // and the web), given to the published theme ([prepareTheme]).
-          theme: ThemeData(fontFamily: 'Roboto'),
-          builder: (context, child) => DefaultTextStyle.merge(style: const TextStyle(fontFamily: 'Roboto'), child: child!),
-          onGenerateRoute: CodelesslyWidget.onGenerateRoute(codelessly),
-          home: CodelesslyWidget(codelessly: codelessly, layoutId: screen, controller: controller),
-        ),
-      ));
-      // Loading waits for the layout's fonts (registered with the engine in
-      // real time) up to its font timeout (on the test's clock): let both run.
-      for (var i = 0; i < 100 && !controller.isLoaded && controller.error == null; i++) {
-        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
-        await tester.pump(const Duration(milliseconds: 100));
+      Future<void> show() async {
+        await tester.pumpWidget(RepaintBoundary(
+          key: boundary,
+          child: MaterialApp(
+            navigatorKey: navigator,
+            debugShowCheckedModeBanner: false,
+            // The layout's controls take the project's theme, never this one;
+            // their font without one is the platform's (Roboto, as on Android
+            // and the web), given to the published theme ([prepareTheme]).
+            theme: ThemeData(fontFamily: 'Roboto'),
+            builder: (context, child) => DefaultTextStyle.merge(style: const TextStyle(fontFamily: 'Roboto'), child: child!),
+            onGenerateRoute: CodelesslyWidget.onGenerateRoute(codelessly),
+            home: CodelesslyWidget(codelessly: codelessly, layoutId: screen, controller: controller),
+          ),
+        ));
+        // Loading waits for the layout's fonts (registered with the engine in
+        // real time) up to its font timeout (on the test's clock): let both run.
+        for (var i = 0; i < 100 && !controller.isLoaded && controller.error == null; i++) {
+          await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+          await tester.pump(const Duration(milliseconds: 100));
+        }
+        await _settle(tester);
+        collect();
       }
-      await _settle(tester);
-      collect();
+
+      await show();
       if (!controller.isLoaded) {
         issue(RuntimeIssue('render_exception', 'error', 'Screen "$label" did not load: ${controller.error ?? 'timed out'}',
             screen: label, size: sizeName));
@@ -666,6 +682,33 @@ Future<void> _renderAll(
       // 4. Interactions, in order.
       final skipped = <String>[];
       for (final step in args.steps) {
+        // --reload: the app is closed and started again on the same screen,
+        // with what it kept on the device (and nothing else: every variable
+        // not marked saved starts from its declared value).
+        if (step.kind == 'reload') {
+          final kept = {...storage.getAll()};
+          await _removeMouse();
+          await tester.pumpWidget(const SizedBox());
+          await tester.pump(const Duration(seconds: 1));
+          collect();
+          controller.dispose();
+          codelessly.dispose();
+          storage = MemoryLocalStorage(kept);
+          codelessly = start();
+          controller = CodelesslyWidgetController();
+          if (size.width >= 1024) {
+            _mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+            await _mouse!.moveTo(const Offset(1, 1));
+            await tester.pump();
+          }
+          await show();
+          if (!controller.isLoaded) {
+            issue(RuntimeIssue('interaction_failed', 'error', '--reload: screen "$label" did not load again: ${controller.error ?? 'timed out'}',
+                screen: label, size: sizeName));
+            break;
+          }
+          continue;
+        }
         final problem = await _apply(tester, step, controller, navigator, codelessly, screens: _screenList(published, docs),
             warn: (code, message, nodeId) => issue(RuntimeIssue(code, 'warning', message,
                 nodeId: nodeId, screen: label, size: sizeName, file: nodeId == null ? null : fileOfNode[nodeId])));
@@ -1187,6 +1230,7 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
   Future<ui.Image> shot(RenderRepaintBoundary b) async => (await tester.runAsync(() => b.toImage(pixelRatio: 1)))!;
   final first = await shot(ro);
   final slices = <(ui.Image, double)>[];
+  ui.Image? bare;
   const hidden = Offset(0, -1e6);
   for (final b in over) {
     b.capturePaintShift = hidden;
@@ -1238,6 +1282,43 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
       if (at >= page.maxScrollExtent - 0.5) break;
       target = at + view.height;
     }
+    // What stands beside the page view (a sidebar, a rail, the canvas's own
+    // margin) is as tall as the window, and the capture is taller: below
+    // the first window those columns continue with the pane's own
+    // background (its fill and border, without what is in it), so nothing
+    // is left unpainted under a sidebar.
+    if (view.left > 0.5 || view.right < window.width - 0.5) {
+      final beside = pageBox == null ? const <NodeBox>[] : _fixedAround(binding, pageBox);
+      final shown = [for (final b in over) if (_rectOf(b).right <= view.left + 0.5 || _rectOf(b).left >= view.right - 0.5) b];
+      final inside = <NodeBox>[];
+      for (final b in beside) {
+        final stack = <RenderObject>[];
+        b.visitChildren(stack.add);
+        while (stack.isNotEmpty) {
+          final o = stack.removeLast();
+          if (o is NodeBox) {
+            inside.add(o);
+          } else {
+            o.visitChildren(stack.add);
+          }
+        }
+      }
+      for (final b in shown) {
+        b.capturePaintShift = Offset.zero;
+      }
+      final was = [for (final b in inside) b.capturePaintShift];
+      for (final b in inside) {
+        b.capturePaintShift = hidden;
+      }
+      await tester.pump();
+      bare = await shot(layer);
+      for (final (i, b) in inside.indexed) {
+        b.capturePaintShift = was[i];
+      }
+      for (final b in shown) {
+        b.capturePaintShift = hidden;
+      }
+    }
   } finally {
     for (final b in over) {
       b.capturePaintShift = Offset.zero;
@@ -1265,6 +1346,18 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
   // Below the page view at the page's end (the fixed boxes left out).
   final (last, lastAt) = slices.last;
   rows(last, view.bottom, window.height - view.bottom, view.bottom + lastAt);
+  // Beside the page view, under the first window: the panes' backgrounds
+  // carried on from the window's last row.
+  if (bare != null && max > 0) {
+    void carry(double left, double right) {
+      if (right - left < 0.5) return;
+      canvas.drawImageRect(bare!, Rect.fromLTWH(left - layerAt.dx, window.height - 1 - layerAt.dy, right - left, 1),
+          Rect.fromLTWH(left, window.height, right - left, total - window.height), paint);
+    }
+
+    carry(0, view.left);
+    carry(view.right, window.width);
+  }
   // The first window on top, as it shows.
   canvas.drawImage(first, Offset.zero, paint);
   final picture = recorder.endRecording();
@@ -1274,6 +1367,7 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
     image.dispose();
     picture.dispose();
     first.dispose();
+    bare?.dispose();
     for (final (img, _) in slices) {
       img.dispose();
     }
@@ -1841,12 +1935,39 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       }
       final g = await tester.startGesture(from);
       if (held || ownHeld) await tester.pump(const Duration(milliseconds: 700));
+      // Each move is a frame later than the one before, and says so: a
+      // pointer that crosses the distance in a fifth of a second and lifts
+      // is a swipe (events with no times have no speed, and no swipe fires).
       const moves = 12;
       for (var i = 1; i <= moves; i++) {
-        await g.moveTo(ui.Offset.lerp(from, to, i / moves)!);
+        await g.moveTo(ui.Offset.lerp(from, to, i / moves)!, timeStamp: Duration(milliseconds: 16 * i));
         await tester.pump(const Duration(milliseconds: 16));
       }
-      await g.up();
+      await g.up(timeStamp: const Duration(milliseconds: 16 * moves));
+      return null;
+    case 'long-press':
+      // A finger (or a mouse button) held on the node past the long-press
+      // time, then lifted: a `longPress` reaction, a context menu on touch.
+      final (at, problem) = await pointAt(step.target, 'long-press');
+      if (at == null) return problem;
+      await _unfocusFieldOutside(tester, _boxOf(binding, step.target));
+      final g = await tester.startGesture(at);
+      await tester.pump(const Duration(milliseconds: 700));
+      await g.up(timeStamp: const Duration(milliseconds: 700));
+      return null;
+    case 'right-click':
+      // A mouse's secondary button pressed and released on the node: a
+      // `secondaryClick` reaction, a context menu on a desktop.
+      final (at, problem) = await pointAt(step.target, 'right-click');
+      if (at == null) return problem;
+      await _unfocusFieldOutside(tester, _boxOf(binding, step.target));
+      final mouse = TestPointer(93, PointerDeviceKind.mouse, 93, kSecondaryMouseButton);
+      await tester.sendEventToBinding(mouse.hover(at));
+      await tester.sendEventToBinding(mouse.down(at));
+      await tester.pump(const Duration(milliseconds: 40));
+      await tester.sendEventToBinding(mouse.up());
+      await tester.pump();
+      await tester.sendEventToBinding(mouse.removePointer(location: at));
       return null;
     case 'double-tap':
       // Two taps in quick succession where the node shows.
@@ -2001,6 +2122,30 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         };
         if (k == null) return '--key ${step.target}: "$m" is not a modifier (shift, ctrl, alt, meta).';
         modifiers.add(k);
+      }
+      // Enter in a text field connected to the platform's text input is
+      // the input's to act on (a field leaves it alone: an IME may be
+      // composing): the platform sends the field its action key (Done, Go,
+      // Search: the field's `submitted` reactions) or types the new line.
+      // The test's text input does neither by itself, so the step does.
+      final typing = RenderTextField.focused;
+      if (modifiers.every((m) => m == LogicalKeyboardKey.shiftLeft) &&
+          (key == LogicalKeyboardKey.enter || key == LogicalKeyboardKey.numpadEnter) &&
+          typing != null &&
+          typing.attached &&
+          typing.focusNode.hasFocus &&
+          typing.editor.hasConnection) {
+        final action = typing.editor.inputAction ?? (typing.config.oneLine ? TextInputAction.done : TextInputAction.newline);
+        if (!typing.config.oneLine && (action == TextInputAction.newline || modifiers.isNotEmpty)) {
+          final v = typing.editor.value;
+          final at = v.selection.isValid ? v.selection : TextSelection.collapsed(offset: v.text.length);
+          final text = v.text.replaceRange(at.start, at.end, String.fromCharCode(10));
+          tester.testTextInput.updateEditingValue(TextEditingValue(text: text, selection: TextSelection.collapsed(offset: at.start + 1)));
+        } else {
+          await tester.testTextInput.receiveAction(action);
+        }
+        await tester.pump();
+        return null;
       }
       for (final m in modifiers) {
         await tester.sendKeyDownEvent(m);
