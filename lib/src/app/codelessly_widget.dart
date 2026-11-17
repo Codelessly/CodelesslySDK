@@ -19,6 +19,7 @@ import 'package:codelessly_api/codelessly_api.dart'
         RouteTransition,
         TriggerType;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RendererBinding;
 
 import '../render/node_tree.dart';
 import '../render/node_view.dart';
@@ -745,6 +746,7 @@ class _LayoutViewState extends State<_LayoutView> {
     // The site's theme mode (a setThemeMode action on any screen of the
     // project): every screen follows it at once.
     _codelessly.themeModeChoice.addListener(_themeModeChanged);
+    RendererBinding.instance.mouseTracker.addListener(_updateDevice);
   }
 
   void _themeModeChanged() {
@@ -758,7 +760,17 @@ class _LayoutViewState extends State<_LayoutView> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _updateScreen();
+    _updateDevice();
     _updateTheme();
+  }
+
+  /// Live input capability, independent of viewport width: a narrow desktop
+  /// window can still hover and a wide touch screen may not. MouseTracker
+  /// notifies when the first mouse appears or the last one leaves.
+  void _updateDevice() {
+    final hover = RendererBinding.instance.mouseTracker.mouseIsConnected;
+    final device = {'hover': hover, 'pointer': hover ? 'fine' : 'coarse'};
+    if (!jsonEquality.equals(device, _screen.values['device'])) _screen.values.set('device', device);
   }
 
   /// `screen`: the device's size, breakpoint, orientation and light or
@@ -1243,6 +1255,7 @@ class _LayoutViewState extends State<_LayoutView> {
   @override
   void dispose() {
     _codelessly.themeModeChoice.removeListener(_themeModeChanged);
+    RendererBinding.instance.mouseTracker.removeListener(_updateDevice);
     if (identical(widget.controller?._screen, _screen)) widget.controller?._screen = null;
     for (final p in _persisted) {
       p.dispose();

@@ -574,6 +574,14 @@ Future<void> _renderAll(
       if (args.theme != null) codelessly.setThemeMode(api.ThemeMode.tryParse(args.theme));
       tester.view.devicePixelRatio = 1;
       tester.view.physicalSize = ui.Size(size.width, size.height);
+      // The harness runs on a desktop even when it captures a phone. Give
+      // desktop captures a connected mouse and narrower captures touch
+      // capability, so a page reading device.hover sees the simulated device.
+      if (size.width >= 1024) {
+        _mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+        await _mouse!.moveTo(const Offset(1, 1));
+        await tester.pump();
+      }
       void collect() {
         // Every error Flutter reported since the last look, each with its
         // own details (flutter_test keeps only one: several in a frame
