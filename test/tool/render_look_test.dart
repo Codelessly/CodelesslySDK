@@ -66,6 +66,19 @@ void main() {
     expect(await paper(tester, 'home@390x844-light-toggled.png'), 0x101010);
   });
 
+  testWidgets('--reload starts the app again in the mode --theme gave', (tester) async {
+    final r = await runRender(tester, RenderArgs(
+      inputs: [_fixture],
+      out: out.path,
+      sizes: const [Size(390, 844)],
+      theme: 'dark',
+      steps: const [Step('reload', '')],
+      label: 'reloaded',
+    ));
+    expect(r.diagnostics, isEmpty, reason: '${r.diagnostics}');
+    expect(await paper(tester, 'home@390x844-dark-reloaded.png'), 0x101010);
+  });
+
   testWidgets('a family no one declared is a font_fallback naming the nodes; a missing font or image file is named',
       (tester) async {
     final site = copySite();

@@ -216,6 +216,55 @@ void main() {
     expect(await sheetTop(const [Step('key', 'alt+ArrowUp')]), closeTo(60, 1));
   });
 
+  testWidgets('--reload after a navigation starts again on the page navigated to', (tester) async {
+    Map<String, Object?> page(String id, String text, List<String> extra, Map<String, Object?> nodes) => {
+          'schema': 3,
+          'id': id,
+          'roots': [id],
+          'nodes': {
+            id: {
+              'type': 'canvas',
+              'slots': {'body': '${id}Col'},
+              'layout': {'width': 390, 'height': 600},
+              'decoration': {
+                'fills': [
+                  {'color': '#FFFFFFFF'},
+                ],
+              },
+            },
+            '${id}Col': {'type': 'column', 'children': ['${id}Title', ...extra], 'layout': {'width': {'fill': 390}, 'height': {'fill': 600}}},
+            '${id}Title': {
+              'type': 'text',
+              'layout': {'width': {'fill': 390}, 'height': {'hug': 20}},
+              'props': {'text': text, 'style': {'fontSize': 14, 'color': '#FF000000'}},
+            },
+            ...nodes,
+          },
+        };
+    final site = Directory('${out.path}/site')..createSync();
+    File('${site.path}/site.json').writeAsStringSync(jsonEncode({
+      'pages': ['month.json', 'week.json'],
+    }));
+    File('${site.path}/month.json').writeAsStringSync(jsonEncode(page('month', 'Month view', ['toWeek'], {
+      'toWeek': _pad('toWeek', [
+        {
+          'trigger': {'type': 'click'},
+          'actions': [
+            {'type': 'navigate', 'to': 'week'},
+          ],
+        },
+      ]),
+    })));
+    File('${site.path}/week.json').writeAsStringSync(jsonEncode(page('week', 'Week view', const [], const {})));
+    final report = await runRender(tester, RenderArgs(
+        inputs: [site.path], out: '${out.path}/o', screens: const ['month'], sizes: const [Size(390, 600)],
+        steps: const [Step('tap', 'toWeek'), Step('reload', '')], dumpLayout: true));
+    expect(report.errors, 0, reason: '${report.diagnostics}');
+    final boxes = jsonDecode(File(report.images.single.replaceFirst('.png', '.layout.json')).readAsStringSync()) as List;
+    expect([for (final b in boxes.cast<Map>()) if (b['text'] != null) b['text']], contains('Week view'));
+    expect([for (final b in boxes.cast<Map>()) if (b['text'] != null) b['text']], isNot(contains('Month view')));
+  });
+
   testWidgets('--reload keeps what is marked saved and starts everything else over', (tester) async {
     const taps = [Step('tap', 'count'), Step('tap', 'count')];
     expect(await label(tester, taps), endsWith('kept 2, lost 2'));

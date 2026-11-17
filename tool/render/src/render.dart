@@ -650,11 +650,15 @@ Future<void> _renderAll(
         recorder.errors.clear();
       }
 
+      // The page shown (the last one navigated to): what a --reload starts
+      // again on, as a browser reloads the address it is at.
+      final pages = _PageObserver();
       Future<void> show() async {
         await tester.pumpWidget(RepaintBoundary(
           key: boundary,
           child: MaterialApp(
             navigatorKey: navigator,
+            navigatorObservers: [pages],
             debugShowCheckedModeBanner: false,
             // The layout's controls take the project's theme, never this one;
             // their font without one is the platform's (Roboto, as on Android
@@ -713,6 +717,7 @@ Future<void> _renderAll(
         // not marked saved starts from its declared value).
         if (step.kind == 'reload') {
           final kept = {...storage.getAll()};
+          final at = pages.shown;
           await _removeMouse();
           await tester.pumpWidget(const SizedBox());
           await tester.pump(const Duration(seconds: 1));
@@ -721,13 +726,28 @@ Future<void> _renderAll(
           codelessly.dispose();
           storage = MemoryLocalStorage(kept);
           codelessly = start();
+          // `--theme` is the mode the site starts in, again on a reload
+          // (unless a step stored another, which the app reads back).
+          if (args.theme != null && !kept.containsKey(Codelessly.themeModeStorageKey)) {
+            codelessly.setThemeMode(api.ThemeMode.tryParse(args.theme));
+          }
           controller = CodelesslyWidgetController();
           if (size.width >= 1024) {
             _mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
             await _mouse!.moveTo(const Offset(1, 1));
             await tester.pump();
           }
+          pages.reset();
           await show();
+          // On the page navigated to before, not the one the run began on.
+          if (at != null && controller.isLoaded) {
+            final route = CodelesslyWidget.onGenerateRoute(codelessly)(RouteSettings(name: at.name, arguments: at.arguments));
+            if (route != null) {
+              unawaited(navigator.currentState!.pushReplacement(route));
+              await _settle(tester);
+              collect();
+            }
+          }
           hear('$step', baseline: true);
           if (!controller.isLoaded) {
             issue(RuntimeIssue('interaction_failed', 'error', '--reload: screen "$label" did not load again: ${controller.error ?? 'timed out'}',
@@ -1536,6 +1556,42 @@ bool _shown(NodeBox b) {
     if (p is NodeBox && !p.drawn) return false;
   }
   return true;
+}
+
+/// Follows the pages a navigator shows (not its dialogs and sheets): [shown]
+/// is the name of the page on top that was navigated to (null: the first).
+class _PageObserver extends NavigatorObserver {
+  final List<RouteSettings> _pages = [];
+
+  RouteSettings? get shown => _pages.lastOrNull;
+
+  void reset() => _pages.clear();
+
+  // A screen navigated to (`/week`); not the entry, a paywall or a
+  // presented layout.
+  bool _isPage(Route<dynamic> r) {
+    final name = r.settings.name;
+    return r is PageRoute && name != null && name != '/' && !name.startsWith('/paywall/') && !name.startsWith('/present/');
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (_isPage(route)) _pages.add(route.settings);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (_isPage(route) && _pages.isNotEmpty) _pages.removeLast();
+  }
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) => didPop(route, previousRoute);
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    if (oldRoute != null) didPop(oldRoute, null);
+    if (newRoute != null) didPush(newRoute, null);
+  }
 }
 
 /// The text of each live region on screen (a toast, a text marked `live`, a
