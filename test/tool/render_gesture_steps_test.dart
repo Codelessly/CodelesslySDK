@@ -1,0 +1,124 @@
+// The render command's gesture steps: a --drag that is a swipe, --long-press
+// and --right-click, and --reload, which starts the app again with what it
+// kept on the device.
+import 'dart:convert';
+import 'dart:io';
+import 'dart:ui' show Size;
+
+import 'package:flutter_test/flutter_test.dart';
+
+import '../../tool/render/src/args.dart';
+import '../../tool/render/src/render.dart';
+
+Map<String, Object?> _set(String trigger, String variable, Object value) => {
+      'trigger': {'type': trigger},
+      'actions': [
+        {'type': 'setVariable', 'variable': variable, 'value': value},
+      ],
+    };
+
+Map<String, Object?> _pad(String id, List<Map<String, Object?>> actions) => {
+      'type': 'box',
+      'layout': {'width': 300, 'height': 80},
+      'decoration': {
+        'fills': [
+          {'color': '#FFDDDDDD'},
+        ],
+      },
+      'actions': actions,
+    };
+
+final _doc = {
+  'schema': 3,
+  'id': 'page',
+  'roots': ['page'],
+  'variables': {
+    'page': [
+      {'name': 'swiped', 'type': 'text', 'value': 'none'},
+      {'name': 'pressed', 'type': 'text', 'value': 'none'},
+      {'name': 'kept', 'type': 'integer', 'value': 0, 'persist': true},
+      {'name': 'lost', 'type': 'integer', 'value': 0},
+    ],
+  },
+  'nodes': {
+    'page': {
+      'type': 'canvas',
+      'slots': {'body': 'col'},
+      'layout': {'width': 390, 'height': 600},
+      'decoration': {
+        'fills': [
+          {'color': '#FFFFFFFF'},
+        ],
+      },
+    },
+    'col': {
+      'type': 'column',
+      'children': ['label', 'swipe', 'context', 'count'],
+      'layout': {'width': {'fill': 390}, 'height': {'fill': 600}},
+      'props': {'spacing': 8},
+    },
+    'label': {
+      'type': 'text',
+      'layout': {'width': {'fill': 390}, 'height': {'hug': 20}},
+      'props': {
+        'text': r'swiped ${swiped}, pressed ${pressed}, kept ${kept}, lost ${lost}',
+        'style': {'fontSize': 14, 'color': '#FF000000'},
+      },
+    },
+    'swipe': _pad('swipe', [
+      _set('swipeLeft', 'swiped', 'left'),
+      _set('swipeRight', 'swiped', 'right'),
+      _set('swipeUp', 'swiped', 'up'),
+    ]),
+    'context': _pad('context', [_set('longPress', 'pressed', 'long'), _set('secondaryClick', 'pressed', 'secondary')]),
+    'count': _pad('count', [
+      {
+        'trigger': {'type': 'click'},
+        'actions': [
+          {'type': 'setVariable', 'variable': 'kept', 'value': r'${= kept + 1}'},
+          {'type': 'setVariable', 'variable': 'lost', 'value': r'${= lost + 1}'},
+        ],
+      },
+    ]),
+  },
+};
+
+void main() {
+  late Directory out;
+  setUp(() => out = Directory.systemTemp.createTempSync('render_gesture_steps_test'));
+  tearDown(() => out.deleteSync(recursive: true));
+
+  Future<String> label(WidgetTester tester, List<Step> steps) async {
+    final file = File('${out.path}/page.json')..writeAsStringSync(jsonEncode(_doc));
+    final report = await runRender(
+        tester, RenderArgs(inputs: [file.path], out: '${out.path}/o', sizes: const [Size(390, 600)], steps: steps, dumpLayout: true));
+    expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
+    final boxes = jsonDecode(File('${out.path}/o/page@390x600.layout.json').readAsStringSync()) as List;
+    return '${boxes.cast<Map>().firstWhere((b) => b['id'] == 'label')['text']}';
+  }
+
+  testWidgets('the options parse', (tester) async {
+    final a = parseArgs(['site', '--out', 'o', '--long-press', 'row#0', '--right-click', 'row#1', '--reload', '--drag', 'row=-140,0']);
+    expect(a.steps.map((s) => '$s'), ['--long-press row#0', '--right-click row#1', '--reload ', '--drag row=-140,0']);
+  });
+
+  testWidgets('--drag by a distance fires the swipe that way', (tester) async {
+    expect(await label(tester, const [Step('drag', 'swipe', '-140,0')]), startsWith('swiped left,'));
+    expect(await label(tester, const [Step('drag', 'swipe', '140,0')]), startsWith('swiped right,'));
+    expect(await label(tester, const [Step('drag', 'swipe', '0,-60')]), startsWith('swiped up,'));
+  });
+
+  testWidgets('--long-press and --right-click fire their reactions', (tester) async {
+    expect(await label(tester, const [Step('long-press', 'context')]), contains('pressed long,'));
+    expect(await label(tester, const [Step('right-click', 'context')]), contains('pressed secondary,'));
+  });
+
+  testWidgets('--reload keeps what is marked saved and starts everything else over', (tester) async {
+    const taps = [Step('tap', 'count'), Step('tap', 'count')];
+    expect(await label(tester, taps), endsWith('kept 2, lost 2'));
+    expect(await label(tester, [...taps, const Step('reload', '')]), endsWith('kept 2, lost 0'));
+    expect(await label(tester, [...taps, const Step('reload', ''), const Step('tap', 'count')]), endsWith('kept 3, lost 1'));
+    // Each capture starts with nothing stored.
+    expect(await label(tester, const []), endsWith('kept 0, lost 0'));
+  });
+}

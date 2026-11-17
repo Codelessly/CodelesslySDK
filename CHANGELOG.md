@@ -108,6 +108,11 @@
   and one picture.
 - **Examples**: overlays, an app's sidebar drawer and a lightbox written in the notation
   (`examples/showcase/desktop/behaviours`).
+- Render steps `--long-press <id>` (a `longPress` reaction, a context menu on touch), `--right-click <id>` (a
+  `secondaryClick` reaction, a context menu on a desktop: `menu=<id>` in the notation) and `--reload` (the app is
+  closed and started again on the same screen with what it kept on the device, so a variable marked `saved` can be
+  seen surviving a reload within one run; each capture still starts with nothing stored). In the CLI, `render.sh`,
+  the MCP tool's steps (`{"long-press": "id"}`, `{"right-click": "id"}`, `{"reload": true}`) and the README.
 
 ### Fixed
 
@@ -134,6 +139,10 @@
   `draggable` or `dropTarget` written on a component's call (`TaskCard … drag=task(c.id)` inside `each`) evaluated
   its data, key and conditions inside the component, where the list's `item` and the page's variables do not exist,
   so `result.data` was empty. They read in the caller's scope now, as the call's reactions do.
+- The render command's `--drag <id>=<dx>,<dy>` over a node with `swipeLeft`, `swipeRight`, `swipeUp` or `swipeDown`
+  reactions fired nothing: its pointer moves carried no times, so the release had no speed and no swipe was
+  recognized (the renderer's trigger fires as before). The moves are now timed a frame apart: a drag by a distance
+  is a swipe that way.
 
 ## 32.0.0
 
