@@ -17,7 +17,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart' show DeepCollectionEquality;
 
 import 'package:codelessly_api/core.dart' show InputDecoration, InputIcon, Json, NavigationBarProps, Node, PropDef, SwitchProps, TriggerType, Trigger;
-import 'package:codelessly_api/core.dart' as api show WidgetState;
+import 'package:codelessly_api/core.dart' as api show WidgetState, OpenModalAction;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -43,6 +43,7 @@ import '../expressions/scopes.dart';
 import 'context.dart';
 import 'reveal_anchor.dart' show RevealAnchor;
 import 'runner.dart';
+import 'ui.dart' show HoverCardUi;
 import 'key_matching.dart';
 import '../../render/components.dart' show componentInstanceOf;
 
@@ -138,7 +139,13 @@ class TreeReactions implements NodeInteractions {
         label: n.behaviors.tooltip,
         ringColor: clicks ? ControlTokens.of(box).focusBorder : null,
         ringRadius: n.decoration.radius.flutter,
-        onFocused: (on) => box.tree.setState(box.id, api.WidgetState.focused, on, instance: box.instance),
+        onFocused: (on) {
+          box.tree.setState(box.id, api.WidgetState.focused, on, instance: box.instance);
+          if (on && n.actions.any((r) => r.trigger.type == TriggerType.hover &&
+              r.actions.any((a) => a is api.OpenModalAction && a.hoverCard))) {
+            fire(box, 'hover');
+          }
+        },
       )
       // A plain drag is one finger: on a node that also pinches, a second
       // finger hands the gesture to the pinch.
@@ -203,6 +210,12 @@ class TreeReactions implements NodeInteractions {
     RevealAnchor.lastTrigger =
         box.attached && box.hasSize ? MatrixUtils.transformRect(box.getTransformTo(null), Offset.zero & box.size) : null;
     final ctx = chainContextFor(box);
+    if (trigger == 'cursorExit' && node.actions.any((r) => r.actions.any((a) => a is api.OpenModalAction && a.hoverCard))) {
+      final anchor = RevealAnchor.lastTrigger;
+      if (anchor != null && ctx is ActionHost && ctx.ui is HoverCardUi) {
+        (ctx.ui as HoverCardUi).hoverAnchorExit(anchor);
+      }
+    }
     if (trigger == 'changed' && event.containsKey('value')) _writeBack(node, event['value'], ctx);
     final picked = trigger == 'changed' && (node.type == 'navigationBar' || node.type == 'bottomNavigationBar') && event['value'] is int;
     final state = _boxes[box];

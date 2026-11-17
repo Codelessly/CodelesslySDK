@@ -5,6 +5,7 @@
 // app, a recording one in a test. No widget library is needed to ask.
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui' show Rect;
 
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show ConfirmAction, Json, NavigateAction, OpenModalAction, ShowToastAction;
@@ -37,6 +38,12 @@ abstract interface class ThemeModeUi {
   /// Sets the project's theme mode; with [persist] it is kept in local
   /// storage for the next visit.
   void setThemeMode(api.ThemeMode mode, {bool persist = true});
+}
+
+/// Optional lifecycle for an interactive hover preview. Kept separate from
+/// ActionUi so hosts without a pointer need no extra implementation.
+abstract interface class HoverCardUi {
+  void hoverAnchorExit(Rect anchor);
 }
 
 /// The UI effects of actions, implemented by the app shell.
