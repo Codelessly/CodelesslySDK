@@ -13,7 +13,7 @@ App
     NavItem "Radar" icon="radar" onTap={go radar}
     NavItem "Places" icon="place" badge="{length(places)}" onTap={go places}
     Spacer grow
-    SegmentedButton bind=unit items=["C","F"]
+    SegmentedButton @unit items=["C","F"]
   Main
     Nav
       Column
@@ -90,7 +90,7 @@ App
     Nav
       Heading "Rain radar" level=1
       Row gap=8
-        SegmentedButton bind=layer items=["Rain","Clouds","Wind"]
+        SegmentedButton @layer items=["Rain","Clouds","Wind"]
         IconButton "my_location" tooltip="Center on me" onTap={toast "Centered on Seattle"}
     Column pad=24 gap=16
       Card gap=12
@@ -100,7 +100,7 @@ App
             Text "{frames[frame]} {frame<6 ? "past" : frame==6 ? "now" : "forecast"}" color=#FFFFFFFF
         Row gap=12 middle
           IconButton "{playing ? "pause" : "play_arrow"}" tooltip="Play" onTap={playing=!playing}
-          Slider bind=frame min=0 max=14 grow
+          Slider @frame min=0 max=14 grow
           Text.mono "{frames[frame]}"
         Row between
           Text.caption "-2 h"
@@ -118,6 +118,7 @@ App
 state places=[{"id":"sea","name":"Seattle","region":"WA","temp":14,"sky":"Light rain"},{"id":"pdx","name":"Portland","region":"OR","temp":16,"sky":"Cloudy"},{"id":"sfo","name":"San Francisco","region":"CA","temp":18,"sky":"Clear"},{"id":"van","name":"Vancouver","region":"BC","temp":12,"sky":"Rain"}]
 state q=""
 state sel=""
+state newCity=""
 App
   Sidebar
     Brand "Barometer" icon="speed"
@@ -129,7 +130,7 @@ App
       Heading "Saved places" level=1
       Button "Add place" icon="add" onTap={open addPlace}
     Column pad=24 gap=16
-      Input "Search places" bind=q
+      Input "Search places" @q
       Text.muted "Drag a place or use the arrows to reorder. The first one opens by default."
       Column gap=8 drop=place onDrop={places=filter(places,p=>true)}
         each p in places
@@ -148,5 +149,5 @@ App
     MenuItem "Move to top" icon="vertical_align_top" onTap={places=concat([find(places,p=>p.id==sel)],removeWhere(places,p=>p.id==sel))}
     MenuItem "Remove" icon="delete" onTap={places=removeWhere(places,p=>p.id==sel); toast "Place removed"}
   Dialog#addPlace "Add place" "Search a city or a postcode"
-    Input "City" "e.g. Tacoma" bind=newCity
+    Input "City" "e.g. Tacoma" @newCity
     Button "Add" onTap={places=append(places,{"id":lower(newCity),"name":newCity,"region":"","temp":15,"sky":"Cloudy"}); newCity=""; close}

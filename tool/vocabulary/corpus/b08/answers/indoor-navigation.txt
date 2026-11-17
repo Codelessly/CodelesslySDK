@@ -9,6 +9,7 @@ state step=0
 state offRoute=false
 state steps=[{"text":"Leave Main Entrance and walk straight along the central corridor","dist":"40 m"},{"text":"Turn left at the lifts","dist":"15 m"},{"text":"Take the lift to Level 2","dist":"1 min"},{"text":"Turn right out of the lift; Radiology is the second door on your left","dist":"25 m"}]
 state floors=["L3","L2","L1","B1"]
+state shareWith=""
 every 4s when routing && step < 3 onTick={step=step+1}
 App
   Sidebar
@@ -23,7 +24,7 @@ App
     Nav
       Heading "Floor {floor}" level=1
       Row gap=8
-        Input "Search a department or a person" bind=query w=300
+        Input "Search a department or a person" @query w=300
         Button "Directions" onTap={dest=query; routing=true; step=0; offRoute=false}
         IconButton "more_vert" tooltip="More" onTap={open more}
     if offRoute
@@ -48,8 +49,8 @@ App
           Button.outline "Simulate wrong turn" onTap={offRoute=true}
       Pane w=320 gap=12
         Text.strong "Route options"
-        SegmentedButton items=["Lift","Stairs"] bind=via
-        Toggle "Accessible route (no stairs)" bind=accessible onChange={via=result ? "Lift" : via}
+        SegmentedButton items=["Lift","Stairs"] @via
+        Toggle "Accessible route (no stairs)" @accessible onChange={via=result ? "Lift" : via}
         if routing
           Text.strong "To {dest} - 4 min, 80 m"
           Progress {(step+1)/4}
@@ -67,7 +68,7 @@ App
         if !routing
           Text.muted "Search a department or a person to see a route."
   Dialog#share "Share my location" "Colleagues see your dot on the map"
-    Select "Share with" items=["Anyone with the link","Dr. Okafor","Front desk"] bind=shareWith
+    Select "Share with" items=["Anyone with the link","Dr. Okafor","Front desk"] @shareWith
     Button "Copy link" onTap={copy "https://wayfinder.stmarys.example/loc/8f3k"; toast "Link copied"; close}
   Menu#more end
     MenuItem "Share my location" icon="share" onTap={open share}
@@ -92,9 +93,9 @@ App
   Main
     Nav
       Heading "Directory" level=1
-      Input "Search a department or a person" bind=q w=300
+      Input "Search a department or a person" @q w=300
     Column pad=24 gap=16
-      SegmentedButton items=["All","Departments","People"] bind=kind
+      SegmentedButton items=["All","Departments","People"] @kind
       each p in filter(people, x => contains(lower(x.name), lower(q)) || contains(lower(x.role), lower(q)))
         ListTile "{p.name}" subtitle="{p.role} - {p.room}"
           Button "Navigate" onTap={emit navigate p.name; go map}

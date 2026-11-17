@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "OptionList",
-  "doc": "A question and its answers as a list of rows with a radio (also a delivery method, a plan): OptionList \"What will you use it for?\" bind=answer options=[\"A\",\"B\"] keeps the chosen option's text in your variable; details, icons and prices are optional lists alongside; onChanged fires with the choice (-> step=2).",
+  "doc": "A question and its answers as a list of rows with a radio (also a delivery method, a plan): OptionList \"What will you use it for?\" @answer options=[\"A\",\"B\"] keeps the chosen option's text in your variable; details, icons and prices are optional lists alongside; onChanged fires with the choice (-> step=2).",
   "props": [
    {
     "key": "value",

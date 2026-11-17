@@ -85,7 +85,7 @@ App
     Nav
       Heading "Level {level}: the Okafor dinner"
       Row gap=8
-        Toggle "Show lines" bind=showTies
+        Toggle "Show lines" @showTies
         Button.outline "Undo" disabled={isEmpty(log)} onTap={seats=last(log); log=removeAt(log,length(log)-1); moves=moves+1}
         Button.outline "Hint ({hints})" disabled={hints==0} onTap={hints=hints-1; emit hint seats; toast "Swapped one pair"}
         Button "Done" disabled={score < target} onTap={finished=true; open result}

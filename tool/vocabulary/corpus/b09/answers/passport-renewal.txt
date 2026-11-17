@@ -57,7 +57,7 @@ App
             Icon "radio_button_unchecked"
             Text "Plain background, no shadows"
           Divider
-          Toggle "Simulate: wearing glasses" bind=glasses
+          Toggle "Simulate: wearing glasses" @glasses
   Dialog#camera "Take your photo" "Line your face up with the outline"
     CameraView facing="front" overlay="head-outline" onCapture={photoUrl=result; checked=false; close}
     Button.outline "Cancel" onTap={close}
@@ -72,6 +72,9 @@ state expiry="2026-12-02"
 state scanned=false
 state addresses=[{"id":1,"street":"14 Mill Lane, Bath BA1 2PQ","from":"2019-06-01","to":"2026-11-01"},{"id":2,"street":"Flat 3, 22 Orchard Road, Bristol BS6 5TH","from":"2014-09-01","to":"2019-05-31"}]
 state gaps={count(addresses,a=>a.to=="")}
+state birthplace=""
+state newStreet=""
+state newRange=""
 App
   Sidebar
     Brand "Renewal Desk" icon="badge"
@@ -103,12 +106,12 @@ App
       Card gap=12
         Text.strong "Personal details"
         Grid cols=2 gap=12
-          Input "Surname" bind=surname
-          Input "Given names" bind=given
-          DatePicker "Date of birth" bind=dob
-          Input "Passport number" bind=passportNo
-          DatePicker "Expiry date" bind=expiry
-          Select "Place of birth" items=["Bath","Bristol","London","Leeds","Other"] bind=birthplace
+          Input "Surname" @surname
+          Input "Given names" @given
+          DatePicker "Date of birth" @dob
+          Input "Passport number" @passportNo
+          DatePicker "Expiry date" @expiry
+          Select "Place of birth" items=["Bath","Bristol","London","Leeds","Other"] @birthplace
       Card gap=12
         Row between
           Text.strong "Address history, last 5 years"
@@ -129,8 +132,8 @@ App
       Button.outline "Cancel" onTap={close}
       Button "Use scan" onTap={scanned=true; surname="HOLLOWAY"; given="Imogen Claire"; passportNo="533 218 940"; close; toast "Details copied from your passport"}
   Dialog#addAddress "Add an address"
-    Input "Street and town" bind=newStreet
-    DateRange "Lived here" bind=newRange
+    Input "Street and town" @newStreet
+    DateRange "Lived here" @newRange
     Row gap=8 end
       Button.outline "Cancel" onTap={close}
       Button "Add" onTap={newStreet!="" ? {addresses=append(addresses,{"id":length(addresses)+10,"street":newStreet,"from":newRange.start,"to":newRange.end}); newStreet=""; close} : toast "Enter the address"}
@@ -181,13 +184,13 @@ App
             Text.muted "Arrives by"
             Text.heading "Thu 26 Nov"
             Text.muted "One week, appointment in Newport"
-        Toggle "Special delivery to my address (+£6.50)" bind=postage
+        Toggle "Special delivery to my address (+£6.50)" @postage
         Text.caption "Your current passport expires on 2 Dec 2026. Fast track arrives before it does."
       Card#declaration gap=12
         Text.strong "Declaration"
         Text.muted "I confirm the details above are true, the photo is a true likeness of me, and I have not held another passport under a different name."
-        Input "Countersignatory name" "Someone who has known you two years" bind=witness
-        Checkbox "I declare this is true" bind=agree
+        Input "Countersignatory name" "Someone who has known you two years" @witness
+        Checkbox "I declare this is true" @agree
         Button "Sign declaration" disabled={!agree || witness==""} onTap={declared=true; toast "Declaration signed"}
         if declared
           Badge.success "Signed today, {formatDate(today(),"d MMM yyyy")}"
@@ -205,13 +208,14 @@ App
           Text.strong "Total"
           Text.heading "{money(total,"£",2)}"
         Text.muted "Estimated delivery {delivery}"
-        Input "Name on card" bind=cardName
+        Input "Name on card" @cardName
         CardField "Card details" onChange={cardReady=result.valid}
         Button "Pay {money(total,"£",2)}" size=large disabled={!declared || cardName==""} onTap={emit pay total; paid=true; go tracker}
 
 ### Tracker
 state step=2
 state steps=["Application received","Photo and details checked","Printing","Posted","Delivered"]
+state msg=""
 App
   Sidebar
     Brand "Renewal Desk" icon="badge"
@@ -251,7 +255,7 @@ App
           Text.mono "RM 4821 9930 7GB"
           Button.ghost "Copy" icon="content_copy" onTap={copy "RM 4821 9930 7GB"; toast "Copied"}
   Dialog#help "Contact support" "We reply within a working day"
-    Input "Your message" multiline bind=msg
+    Input "Your message" multiline @msg
     Row gap=8 end
       Button.outline "Cancel" onTap={close}
       Button "Send" onTap={emit support msg; msg=""; close; toast "Message sent"}

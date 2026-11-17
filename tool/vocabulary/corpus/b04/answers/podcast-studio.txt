@@ -83,7 +83,7 @@ App
         Button.outline "Upload all" icon="cloud_upload" onTap={tracks=map(tracks,t=>with(t,"up",1.0)); toast "Uploading 4 tracks"}
         Button "Export mix" icon="download" onTap={emit exportMix}
     Column pad=24 gap=16 scroll
-      SegmentedButton bind=tab items=["all","uploading","done"]
+      SegmentedButton @tab items=["all","uploading","done"]
       each t in tracks
         if tab=="all" || (tab=="done" && t.up==1.0) || (tab=="uploading" && t.up<1.0)
           Card gap=12
@@ -118,7 +118,7 @@ App
       Heading "Soundboard" level=1
       Row gap=8
         Icon "volume_up"
-        Slider bind=vol min=0 max=100 w=160
+        Slider @vol min=0 max=100 w=160
     Column pad=24 gap=16 scroll
       Grid cols=4 gap=16
         each p in pads

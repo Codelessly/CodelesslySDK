@@ -5,6 +5,10 @@ state doorSecs=94
 state day="Wed"
 state note=""
 state pen="ink"
+state evTitle=""
+state evPerson=""
+state evStart=""
+state evEnd=""
 every 1s when doorOpen onTick={doorSecs=doorSecs+1}
 App
   Sidebar
@@ -19,7 +23,7 @@ App
     Nav
       Heading "This week"
       Row gap=8
-        SegmentedButton bind=day items=["Mon","Tue","Wed","Thu"]
+        SegmentedButton @day items=["Mon","Tue","Wed","Thu"]
         Button.outline "Add event" icon="add" onTap={open newEvent}
     if doorOpen
       Banner.error "Fridge door open for {duration(doorSecs)}" icon="door_front" action="Dismiss" onAction={doorOpen=false; doorSecs=0}
@@ -33,13 +37,13 @@ App
             ChoiceChip "Marker" selected={pen=="marker"} onTap={pen="marker"}
             IconButton "undo" tooltip="Undo stroke" onTap={undo note}
             IconButton "delete" tooltip="Clear note" onTap={note=""}
-        Sketchpad bind=note tool={pen} h=180 onChange={emit noteChanged}
+        Sketchpad @note tool={pen} h=180 onChange={emit noteChanged}
   Dialog#newEvent "New event" "Pick who it is for"
-    Input "Title" bind=evTitle
-    Select "Person" bind=evPerson items=["Maya","Leo","Dad","Mum"]
+    Input "Title" @evTitle
+    Select "Person" @evPerson items=["Maya","Leo","Dad","Mum"]
     Row gap=8
-      TimePicker "From" bind=evStart
-      TimePicker "To" bind=evEnd
+      TimePicker "From" @evStart
+      TimePicker "To" @evEnd
     Button "Add" onTap={emit addEvent {"title":evTitle,"person":evPerson,"day":day}; toast "Event added"; close}
   Menu#eventMenu
     MenuItem "Edit" icon="edit" onTap={open newEvent}
@@ -66,19 +70,19 @@ App
     Column pad=24 gap=16
       Card gap=12
         Row gap=12 middle
-          VoiceInput bind=heard listening={listening} onStart={listening=true} onResult={items=append(items,{"id":length(items)+10,"name":result.text,"qty":1,"low":false}); heard=""; listening=false; toast "Added {result.text}"} onError={listening=false; toast "Did not catch that"}
+          VoiceInput @heard listening={listening} onStart={listening=true} onResult={items=append(items,{"id":length(items)+10,"name":result.text,"qty":1,"low":false}); heard=""; listening=false; toast "Added {result.text}"} onError={listening=false; toast "Did not catch that"}
           Column grow gap=2
             Text.strong "{listening ? 'Listening...' : 'Tap the mic and say an item'}"
             if heard!=""
               Text.muted "Heard: {heard}"
-          Input "Or type" bind=draft w=220
+          Input "Or type" @draft w=220
           IconButton "add" tooltip="Add item" onTap={draft!="" ? {items=append(items,{"id":length(items)+10,"name":draft,"qty":1,"low":false}); draft=""} : toast "Type an item first"}
       Row gap=24 top
         Card grow gap=8
           Text.strong "To buy ({length(items)})"
           each it in items
             ListTile "{it.name}" subtitle="{it.low ? 'Nearly out' : 'Added by voice'}"
-              Checkbox bind=it.done
+              Checkbox @it.done
               Row gap=4
                 IconButton "remove" tooltip="Less" onTap={items=updateWhere(items,x=>x.id==it.id,x=>with(x,"qty",max(1,x.qty-1)))}
                 Text.strong "{it.qty}"
@@ -113,7 +117,7 @@ App
   Main
     Nav
       Heading "Inside the fridge"
-      SegmentedButton bind=zone items=["main","drawer","freezer"]
+      SegmentedButton @zone items=["main","drawer","freezer"]
     if doorOpen
       Banner.error "Door open for {duration(doorSecs)}. Close it to protect the food." icon="door_front" action="Silence" onAction={doorOpen=false; doorSecs=0; toast "Alarm silenced"}
     Column pad=24 gap=16
@@ -133,7 +137,7 @@ App
               IconButton "remove" tooltip="Colder" onTap={tempMain=max(1,tempMain-1)}
               Text "{tempMain} °C" size=40 weight=700
               IconButton "add" tooltip="Warmer" onTap={tempMain=min(8,tempMain+1)}
-            Slider bind=tempMain min=1 max=8
+            Slider @tempMain min=1 max=8
           Card gap=12
             Text.strong "Veg drawer"
             Row between middle

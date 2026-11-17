@@ -29,10 +29,10 @@ Column gap=20 pad=20 maxw=560
     Column gap=4
       Text.heading2 "Tell us about you"
       Text.bodySecondary "This information appears on your public profile."
-    Input "Display name" "e.g. Maya Reyes" bind=name
-    Select "Job title" bind=job items=["Designer","Engineer","Product manager","Marketer","Student","Other"]
+    Input "Display name" "e.g. Maya Reyes" @name
+    Select "Job title" @job items=["Designer","Engineer","Product manager","Marketer","Student","Other"]
     Column gap=4
-      Input "Bio" "Write a short bio" bind=bio multiline {"props": {"maxLength": 160}}
+      Input "Bio" "Write a short bio" @bio multiline {"props": {"maxLength": 160}}
       Row end
         Text.caption "{length(bio)}/160"
     Row between

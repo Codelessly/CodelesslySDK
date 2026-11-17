@@ -14,7 +14,7 @@ App
   Main
     Nav
       Heading "Recipes" level=1
-      Input "Search recipes" bind=q w=240
+      Input "Search recipes" @q w=240
     Column pad=24 gap=16
       Card gap=12
         Row between
@@ -60,7 +60,7 @@ App
       Heading "Coconut chickpea curry" level=1
       Row gap=8
         Text.muted "Servings"
-        Stepper bind=servings min=1 max=12 step=1
+        Stepper @servings min=1 max=12 step=1
     Row gap=16 pad=24 top
       Column grow gap=16
         Card gap=8
@@ -112,8 +112,8 @@ App
       Button.outline "Swap sides" icon="swap_horiz" onTap={a=b; b=a}
     Column pad=24 gap=16
       Grid cols=2 gap=16
-        Select "Recipe A" bind=a items=["Coconut chickpea curry","Lemon butter salmon","Pesto pasta","Shakshuka"]
-        Select "Recipe B" bind=b items=["Coconut chickpea curry","Lemon butter salmon","Pesto pasta","Shakshuka"]
+        Select "Recipe A" @a items=["Coconut chickpea curry","Lemon butter salmon","Pesto pasta","Shakshuka"]
+        Select "Recipe B" @b items=["Coconut chickpea curry","Lemon butter salmon","Pesto pasta","Shakshuka"]
       Card gap=12
         Row between
           Text.strong "Per serving"
@@ -184,7 +184,7 @@ App
           Card fill=#FFFEF3C7
             Text "The shares add up to {sum(groups,g=>g.share)}%. A balanced plate adds up to 100%."
 
-define Stepper bind=value min=0 max=99 step=1 onChange
+define Stepper @value min=0 max=99 step=1 onChange
   state value=1
   Row gap=8 middle
     IconButton "remove" tooltip="Fewer" onTap={value=max(min,value-step); onChange(value)}

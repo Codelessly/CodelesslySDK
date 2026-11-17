@@ -4,6 +4,10 @@ state sel="p4"
 state focus=false
 state zoom=1
 state people=[{"id":"p1","name":"Walter Hale","born":1921,"died":1994,"place":"Leeds, England","gen":0,"photo":"https://example.com/p/walter.jpg","notes":2},{"id":"p2","name":"Edith Hale","born":1924,"died":2003,"place":"York, England","gen":0,"photo":"https://example.com/p/edith.jpg","notes":0},{"id":"p3","name":"Harold Hale","born":1948,"died":0,"place":"Leeds, England","gen":1,"photo":"https://example.com/p/harold.jpg","notes":1},{"id":"p4","name":"Maria Santos","born":1951,"died":0,"place":"Porto, Portugal","gen":1,"photo":"https://example.com/p/maria.jpg","notes":3},{"id":"p5","name":"Clara Hale","born":1978,"died":0,"place":"Boston, USA","gen":2,"photo":"https://example.com/p/clara.jpg","notes":0},{"id":"p6","name":"Daniel Hale","born":1981,"died":0,"place":"Boston, USA","gen":2,"photo":"https://example.com/p/daniel.jpg","notes":1}]
+state newPlace=""
+state editName=""
+state editPlace=""
+state noteText=""
 App
   Sidebar
     Brand "Rootwork" icon="park"
@@ -17,14 +21,14 @@ App
     Nav
       Heading "Hale family tree" level=1
       Row gap=8
-        Toggle "Direct ancestors only" bind=focus
+        Toggle "Direct ancestors only" @focus
         IconButton "remove" tooltip="Zoom out" onTap={zoom=max(0.5,zoom-0.25)}
         Text.strong "{round(zoom*100,0)}%"
         IconButton "add" tooltip="Zoom in" onTap={zoom=min(2,zoom+0.25)}
         IconButton "center_focus_strong" tooltip="Reset view" onTap={zoom=1}
     Column pad=24 gap=16
       Text.muted "Drag to pan, pinch to zoom. Tap the plus marks to add a relative."
-      FamilyTree bind=sel zoom={zoom} onZoom={zoom=result} focus={focus} focusOn={sel} people={people} h=520
+      FamilyTree @sel zoom={zoom} onZoom={zoom=result} focus={focus} focusOn={sel} people={people} h=520
         Generation
           Couple
             PersonCard#p1 person=people[0] onTap={sel="p1"}
@@ -99,19 +103,19 @@ App
     state relation="child"
     state newName=""
     state newBorn=""
-    SegmentedButton bind=relation items=["Parent","Partner","Child"]
-    Input "Full name" bind=newName
-    Input "Year of birth" type=number bind=newBorn
-    Input "Birthplace" bind=newPlace
+    SegmentedButton @relation items=["Parent","Partner","Child"]
+    Input "Full name" @newName
+    Input "Year of birth" type=number @newBorn
+    Input "Birthplace" @newPlace
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Add person" onTap={trim(newName)!="" ? {people=append(people,{"id":concat("p",length(people)+1),"name":newName,"born":newBorn,"died":0,"place":newPlace,"gen":2,"photo":"","notes":0}); toast "Added {newName}"; close} : toast "Enter a name"}
   Dialog#editPerson "Edit person"
-    Input "Full name" bind=editName
-    Input "Birthplace" bind=editPlace
+    Input "Full name" @editName
+    Input "Birthplace" @editPlace
     Button "Save" onTap={toast "Saved"; close}
   Sheet#notes "Notes on {find(people,p=>p.id==sel).name}"
-    Input "Add a note" multiline bind=noteText
+    Input "Add a note" multiline @noteText
     Button "Save note" onTap={emit saveNote noteText; toast "Note saved"; close}
 
 ### Timeline
@@ -119,6 +123,10 @@ state tab="timeline"
 state sel="p4"
 state events=[{"year":1951,"title":"Born in Porto","kind":"birth","text":"Daughter of a fishing family on the Douro."},{"year":1969,"title":"Finished school","kind":"school","text":"Left Colegio Sao Joao with honours in languages."},{"year":1972,"title":"Moved to Leeds","kind":"move","text":"Took a job as a translator at a shipping firm."},{"year":1975,"title":"Married Harold Hale","kind":"marriage","text":"Wed at Leeds Register Office."},{"year":1978,"title":"Clara born","kind":"birth","text":"First child, born in Boston after the family emigrated."},{"year":1981,"title":"Daniel born","kind":"birth","text":"Second child."}]
 state kindFilter="all"
+state evYear=""
+state evTitle=""
+state evText=""
+state evKind=""
 App
   Sidebar
     Brand "Rootwork" icon="park"
@@ -133,7 +141,7 @@ App
         Avatar "Maria Santos" size=40
         Heading "Maria Santos, life timeline" level=1
       Row gap=8
-        Select bind=kindFilter items=["all","birth","school","move","marriage"]
+        Select @kindFilter items=["all","birth","school","move","marriage"]
         Button.outline "Add event" icon="add" onTap={open addEvent}
     Column pad=24 gap=16 scroll
       Card gap=4
@@ -148,13 +156,13 @@ App
               Button.ghost "Edit" onTap={sel=e.year; open editEvent}
               Button.ghost "Remove" onTap={events=removeWhere(events,x=>x.year==e.year); toast "Event removed"}
   Dialog#addEvent "Add a life event"
-    Input "Year" type=number bind=evYear
-    Input "Title" bind=evTitle
-    Input "Details" multiline bind=evText
-    Select "Kind" bind=evKind items=["birth","school","move","marriage"]
+    Input "Year" type=number @evYear
+    Input "Title" @evTitle
+    Input "Details" multiline @evText
+    Select "Kind" @evKind items=["birth","school","move","marriage"]
     Button "Add to timeline" onTap={evTitle!="" ? {events=sortBy(append(events,{"year":evYear,"title":evTitle,"kind":evKind,"text":evText}),x=>x.year); close} : toast "Give the event a title"}
   Dialog#editEvent "Edit event"
-    Input "Title" bind=evTitle
+    Input "Title" @evTitle
     Button "Save" onTap={toast "Saved"; close}
 
 ### Birthplaces
@@ -172,7 +180,7 @@ App
   Main
     Nav
       Heading "Where the family was born" level=1
-      SegmentedButton bind=genPick items=["All","Gen 1","Gen 2","Gen 3"]
+      SegmentedButton @genPick items=["All","Gen 1","Gen 2","Gen 3"]
     Column pad=24 gap=16
       MapView h=420 center=[48,-30] zoom=3
         each p in filter(places,x=>genPick==0 || x.gen==genPick-1)
@@ -197,6 +205,8 @@ state paper="A4"
 state orient="Landscape"
 state showPhotos=true
 state breaks=[1,2]
+state markBreaks=false
+state printScale=50
 Page
   Nav sticky
     Brand "Rootwork" icon="park"
@@ -209,11 +219,11 @@ Page
     Row gap=32 top
       Column w=320 sticky gap=12
         Heading "Print settings" level=3
-        Select "Paper" bind=paper items=["A4","Letter","A3"]
-        SegmentedButton bind=orient items=["Portrait","Landscape"]
-        Toggle "Include photos" bind=showPhotos
-        Toggle "Mark page breaks" bind=markBreaks
-        Slider "Scale" bind=printScale min=50 max=100
+        Select "Paper" @paper items=["A4","Letter","A3"]
+        SegmentedButton @orient items=["Portrait","Landscape"]
+        Toggle "Include photos" @showPhotos
+        Toggle "Mark page breaks" @markBreaks
+        Slider "Scale" @printScale min=50 max=100
         Button.outline "Add break after generation" onTap={breaks=append(breaks,length(breaks)+1); toast "Break added"}
         Button.ghost "Clear breaks" onTap={breaks=[]}
         Text.muted "{length(breaks)+1} pages on {paper}"

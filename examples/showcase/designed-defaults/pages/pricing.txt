@@ -7,7 +7,7 @@ Column scroll gap=16 pad=16
     Text.muted "Start free. Upgrade when your team does."
   Row center gap=8
     Text.small "Monthly"
-    Toggle "" bind=annual
+    Toggle "" @annual
     Text.small "Annual"
     Badge.success "Save 20%"
   Card gap=10

@@ -51,7 +51,7 @@ App
             Button.destructive "Stop slew" visible={slewing} onTap={slewing=false; toast "Slew stopped"}
           Card gap=12
             Text.strong "Nudge"
-            SegmentedButton bind=rate items=["Guide","Center","Find","Slew"]
+            SegmentedButton @rate items=["Guide","Center","Find","Slew"]
             Grid cols=3 gap=8
               Spacer
               IconButton "keyboard_arrow_up" tooltip="North" onTap={dec=dec+(rate=="Guide" ? 0.01 : rate=="Center" ? 0.1 : rate=="Find" ? 0.5 : 2)}
@@ -66,7 +66,7 @@ App
             Row between
               Text.strong "Focus"
               Text.mono "{round(focus,0)} steps"
-            Slider bind=focus min=0 max=10000
+            Slider @focus min=0 max=10000
             Row gap=8
               Button.outline "Coarse -" onTap={focus=max(0,focus-100)}
               Button.outline "Fine +" onTap={focus=min(10000,focus+10)}
@@ -74,7 +74,7 @@ App
             Row between
               Text.strong "Dew heater"
               Text.mono "{heater}%"
-            Slider bind=heater min=0 max=100
+            Slider @heater min=0 max=100
             Text.caption "Dew point 4.1 C, optics 5.3 C"
 
 ### Imaging
@@ -111,7 +111,7 @@ App
             Text.strong "Live image, M31"
             Text.muted "{stacked} stacked, {duration(stacked*exposure)} integration"
           LiveImage src="https://astrolabe.local/live/current.jpg" sharpness={clamp(stacked/frames,0.05,1)} stretch={true} h=380
-          Progress bind=progress value={captured/frames}
+          Progress value={captured/frames}
           Row between
             Text.caption "Signal to noise {fixed(sqrt(stacked+1),1)}"
             Text.caption "Frame {captured} of {frames}"
@@ -122,12 +122,12 @@ App
         Column w=320 gap=16
           Card gap=12
             Text.strong "Exposure"
-            Input "Exposure (seconds)" type=number bind=exposure
-            Input "Number of frames" type=number bind=frames
-            Slider bind=gain min=0 max=300
+            Input "Exposure (seconds)" type=number @exposure
+            Input "Number of frames" type=number @frames
+            Slider @gain min=0 max=300
             Text.caption "Gain {gain}"
-            Select "Binning" items=["1x1","2x2","3x3"] bind=binning
-            SegmentedButton bind=filter items=["L","R","G","B"]
+            Select "Binning" items=["1x1","2x2","3x3"] @binning
+            SegmentedButton @filter items=["L","R","G","B"]
             Text.muted "Total {duration(frames*exposure)}"
           Card gap=8
             Text.strong "Sequence"
@@ -154,7 +154,7 @@ App
       Heading "Three star alignment" level=1
       Text.muted "Step {min(step+1,3)} of 3"
     Column pad=24 gap=16 maxw=720
-      Stepper bind=step steps=["Vega","Arcturus","Capella"]
+      Stepper @step steps=["Vega","Arcturus","Capella"]
       each s in stars
         Card gap=8
           Row between middle
@@ -172,7 +172,7 @@ App
           Text.muted "Center the star in the crosshair, then confirm."
           Row gap=8
             Button.outline "Slew to star" icon="gps_fixed" onTap={toast "Slewing to {stars[step].name}"}
-            Toggle "Star is centered" bind=centered
+            Toggle "Star is centered" @centered
           Button "Confirm star" disabled={!centered} onTap={stars=setAt(stars,step,with(with(stars[step],"done",true),"err",round(abs(2.4-step*0.7),1))); step=step+1; centered=false}
       if step==3
         Card gap=8
@@ -186,6 +186,8 @@ App
 state tab="plan"
 state plan=[{"id":"m31","name":"M31 Andromeda Galaxy","alt":62,"start":"22:10","frames":40},{"id":"m45","name":"M45 Pleiades","alt":55,"start":"23:00","frames":30},{"id":"m42","name":"M42 Orion Nebula","alt":48,"start":"00:20","frames":60},{"id":"m13","name":"M13 Hercules Cluster","alt":33,"start":"02:15","frames":25}]
 state sel=""
+state newName=""
+state newFrames=""
 App
   Sidebar
     Brand "Astrolabe Remote" icon="travel_explore"
@@ -212,6 +214,6 @@ App
     MenuItem "Move up" icon="arrow_upward" onTap={plan=updateWhere(plan,p=>p.id==sel,p=>with(p,"alt",p.alt+10))}
     MenuItem "Remove" icon="delete" onTap={plan=removeWhere(plan,p=>p.id==sel)}
   Dialog#addTarget "Add target" "Pick an object for tonight"
-    Input "Name" bind=newName
-    Input "Frames" type=number bind=newFrames
+    Input "Name" @newName
+    Input "Frames" type=number @newFrames
     Button "Add" onTap={newName=="" ? toast "Enter a name" : {plan=append(plan,{"id":lower(newName),"name":newName,"alt":40,"start":"03:00","frames":newFrames}); newName=""; close}}

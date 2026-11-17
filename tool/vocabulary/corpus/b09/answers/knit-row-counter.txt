@@ -8,6 +8,8 @@ state stitches=96
 state note="Cast on 96, 4mm needles. Decrease row marked in red."
 state listening=false
 state repeats=[{"id":1,"label":"Decrease","every":6},{"id":2,"label":"Cable cross","every":8}]
+state newLabel=""
+state newEvery=""
 every 1s when running onTick={secs=secs+1}
 App
   Sidebar
@@ -70,13 +72,13 @@ App
   Dialog#notes "Stitch count and note"
     Row gap=8 middle
       Button.outline "-" onTap={stitches=max(0,stitches-1)}
-      Input "Stitches" type=number bind=stitches
+      Input "Stitches" type=number @stitches
       Button.outline "+" onTap={stitches=stitches+1}
-    Input "Note" "Anything to remember about this row" multiline bind=note
+    Input "Note" "Anything to remember about this row" multiline @note
     Button "Done" onTap={toast "Note saved"; close}
   Dialog#addRepeat "New repeat" "A counter that chimes every N rows"
-    Input "Label" bind=newLabel
-    Input "Every how many rows" type=number bind=newEvery
+    Input "Label" @newLabel
+    Input "Every how many rows" type=number @newEvery
     Button "Add counter" onTap={repeats=append(repeats,{"id":length(repeats)+1,"label":newLabel,"every":newEvery}); close}
 
 ### Pattern
@@ -96,7 +98,7 @@ App
     Nav
       Heading "Fair Isle yoke chart" level=1
       Row gap=8
-        Toggle "Magnifier" bind=lens
+        Toggle "Magnifier" @lens
         Button "Row {row}" onTap={zoomAt=row}
     Column pad=24 gap=16
       Card gap=12
@@ -111,7 +113,7 @@ App
               Text.caption "Colour B (cream)"
         PatternChart grid={pattern} colors=["#FFF5E6D3","#FFC2185B"] cols=12 current={row} currentColor=#FFFFB300 doneColor=#FFBDBDBD onTapRow={row=result}
         if lens
-          Magnifier source=pattern at={zoomAt} rows=3 h=96 bind=zoomAt
+          Magnifier source=pattern at={zoomAt} rows=3 h=96 @zoomAt
       Row gap=8
         Button.outline "Row up" onTap={row=min(total,row+1)}
         Button.outline "Row down" onTap={row=max(1,row-1)}
@@ -124,6 +126,9 @@ state tab="projects"
 state projects=[{"id":1,"name":"Autumn Cardigan","row":42,"rows":118,"yarn":310,"yarnStart":640},{"id":2,"name":"Harbor Socks","row":88,"rows":96,"yarn":22,"yarnStart":100},{"id":3,"name":"Baby Blanket","row":10,"rows":240,"yarn":820,"yarnStart":900}]
 state sel=1
 state q=""
+state pname=""
+state prows=""
+state pyarn=""
 App
   Sidebar
     Brand "Purl Count" icon="checkroom"
@@ -134,7 +139,7 @@ App
     Nav
       Heading "Projects" level=1
       Row gap=8
-        Input "Search" bind=q w=220
+        Input "Search" @q w=220
         Button "New project" onTap={open newProject}
     Column pad=24 gap=16
       each p in filter(projects,x=>contains(lower(x.name),lower(q)))
@@ -153,7 +158,7 @@ App
     MenuItem "Mark yarn used" icon="remove_circle" onTap={projects=updateWhere(projects,x=>x.id==sel,x=>with(x,"yarn",max(0,x.yarn-10)))}
     MenuItem "Delete" icon="delete" onTap={projects=removeWhere(projects,x=>x.id==sel)}
   Dialog#newProject "New project" "Name it and weigh the yarn"
-    Input "Name" bind=pname
-    Input "Rows in pattern" type=number bind=prows
-    Input "Yarn in grams" type=number bind=pyarn
+    Input "Name" @pname
+    Input "Rows in pattern" type=number @prows
+    Input "Yarn in grams" type=number @pyarn
     Button "Create" onTap={projects=append(projects,{"id":length(projects)+1,"name":pname,"row":0,"rows":prows,"yarn":pyarn,"yarnStart":pyarn}); close}

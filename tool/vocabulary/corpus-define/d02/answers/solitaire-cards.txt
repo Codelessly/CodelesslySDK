@@ -7,6 +7,7 @@ state moves=0
 state history=[]
 state dragging=null
 state seconds=0
+state draw=""
 every 1s onTick={seconds=seconds+1}
 App
   Sidebar
@@ -52,7 +53,7 @@ App
 
 Dialog#newgame "Start a new game" "Your current game will be counted as a loss."
   Column gap=12
-    SegmentedButton bind=draw items=["Draw one","Draw three"]
+    SegmentedButton @draw items=["Draw one","Draw three"]
     Row gap=8 end
       Button.ghost "Cancel" onTap={close}
       Button "Deal" onTap={emit newGame draw; moves=0; seconds=0; history=[]; close}
@@ -142,7 +143,7 @@ App
   Main
     Nav
       Heading "Statistics" level=1
-      SegmentedButton bind=range items=["Week","Month","All time"]
+      SegmentedButton @range items=["Week","Month","All time"]
     Column pad=24 gap=16
       Grid cols=4 gap=16
         Card gap=4

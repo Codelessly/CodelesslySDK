@@ -45,24 +45,24 @@ App
                 Button.outline "Change" onTap={emit changePicture; dirty=true}
                 Text.caption "JPG or PNG, up to 2 MB"
             Row gap=16
-              Input "Name" bind=name grow onChange={dirty=true}
-              Input "Username" bind=username grow onChange={dirty=true}
+              Input "Name" @name grow onChange={dirty=true}
+              Input "Username" @username grow onChange={dirty=true}
             Column gap=4
-              Input "Bio" "Tell readers a little about you" bind=bio multiline maxLength=160 h=110 onChange={dirty=true}
+              Input "Bio" "Tell readers a little about you" @bio multiline maxLength=160 h=110 onChange={dirty=true}
               Row end
                 Text.caption "{length(bio)}/160"
-            Select "Time zone" bind=tz items=["Pacific/Honolulu (GMT-10)","America/Los_Angeles (GMT-8)","America/New_York (GMT-5)","Europe/London (GMT+0)","Europe/Berlin (GMT+1)","Asia/Kolkata (GMT+5:30)","Asia/Tokyo (GMT+9)","Australia/Sydney (GMT+11)"] onChange={dirty=true}
-            Toggle "Public profile" bind=isPublic onChange={dirty=true}
+            Select "Time zone" @tz items=["Pacific/Honolulu (GMT-10)","America/Los_Angeles (GMT-8)","America/New_York (GMT-5)","Europe/London (GMT+0)","Europe/Berlin (GMT+1)","Asia/Kolkata (GMT+5:30)","Asia/Tokyo (GMT+9)","Australia/Sydney (GMT+11)"] onChange={dirty=true}
+            Toggle "Public profile" @isPublic onChange={dirty=true}
             Text.caption "Anyone with the link can read your profile and published pieces."
           Card pad=0 gap=0
             Column pad=[20,16,20,8] gap=4
               Heading "Notifications" level=3
               Text.muted "Choose what Plume emails you about."
-            SettingRow "Comments" "When someone comments on one of your pieces" bind=nComments divider=false onPressed={dirty=true}
-            SettingRow "Replies" "When someone replies to your comment" bind=nReplies onPressed={dirty=true}
-            SettingRow "Weekly digest" "A summary of your reads and new followers" bind=nDigest onPressed={dirty=true}
-            SettingRow "Product updates" "New features and writing tips from the Plume team" bind=nProduct onPressed={dirty=true}
-            SettingRow "Security alerts" "Sign-ins from new devices and password changes" bind=nSecurity onPressed={dirty=true}
+            SettingRow "Comments" "When someone comments on one of your pieces" @nComments divider=false onPressed={dirty=true}
+            SettingRow "Replies" "When someone replies to your comment" @nReplies onPressed={dirty=true}
+            SettingRow "Weekly digest" "A summary of your reads and new followers" @nDigest onPressed={dirty=true}
+            SettingRow "Product updates" "New features and writing tips from the Plume team" @nProduct onPressed={dirty=true}
+            SettingRow "Security alerts" "Sign-ins from new devices and password changes" @nSecurity onPressed={dirty=true}
           Card gap=12 fill=#FFFEF2F2 border=#FFFCA5A5
             Heading "Danger zone" level=3
             Text.muted "Deleting your account removes your profile, drafts and published pieces for good. This cannot be undone."

@@ -3,6 +3,6 @@ state desc=true
 state plans=[{"plan":"Pro","subs":1340,"revenue":38900,"arpu":29,"churn":2.1,"trials":212,"status":"Active"},{"plan":"Team","subs":412,"revenue":24700,"arpu":60,"churn":1.4,"trials":64,"status":"Active"},{"plan":"Starter","subs":2980,"revenue":8900,"arpu":3,"churn":5.2,"trials":930,"status":"Trial"},{"plan":"Business","subs":96,"revenue":4800,"arpu":50,"churn":0.9,"trials":11,"status":"Active"},{"plan":"Student","subs":640,"revenue":1600,"arpu":2.5,"churn":6.8,"trials":140,"status":"Pending"}]
 ChatCard "Plans in detail" "Seven columns · scroll sideways" icon="table_chart_rounded" status="5 plans"
   WideScroll#wide width=620
-    TableHeader#head bind=sort desc={desc} columns=["Plan","Subs","Revenue","ARPU","Churn","Trials","Status"] keys=["plan","subs","revenue","arpu","churn","trials","status"] widths=[3,2,3,2,2,2,3]
+    TableHeader#head @sort desc=@desc columns=["Plan","Subs","Revenue","ARPU","Churn","Trials","Status"] keys=["plan","subs","revenue","arpu","churn","trials","status"] widths=[3,2,3,2,2,2,3]
     each p in desc?sortByDesc(plans,sort):sortBy(plans,sort)
       TableRow cells={[p.plan,thousands(p.subs),money(p.revenue,"$",0),money(p.arpu,"$",2),p.churn+"%",thousands(p.trials)]} badge="{p.status}" widths=[3,2,3,2,2,2,3]

@@ -18,7 +18,7 @@ App
     Nav
       Heading "Invoices" level=1
       Row gap=8
-        Input "Search invoices" bind=q w=220
+        Input "Search invoices" @q w=220
         Button "New invoice" icon="add" onTap={editing="new"; go editor}
     Column pad=24 gap=16 scroll
       Grid cols=3 gap=16
@@ -107,13 +107,13 @@ App
         Button.outline "Mark overdue" icon="warning" hide=tablet onTap={status="overdue"}
         Button "Save" onTap={invoices=append(without(invoices,find(invoices,i=>i.id==number)),{"id":number,"client":client,"issued":issued,"due":due,"status":status,"total":sum(items,l=>l.qty*l.rate)-(discountMode=="percent"?sum(items,l=>l.qty*l.rate)*discount/100:discount)+sum(items,l=>l.qty*l.rate*l.tax/100)}); toast "Invoice saved"; go invoices}
     Column pad=24 gap=16 scroll
-      SegmentedButton bind=tab items=["edit","preview"] show=tablet
+      SegmentedButton @tab items=["edit","preview"] show=tablet
       Row gap=24 top
         Column grow gap=16 hide={tab=="preview"&&false}
           Card gap=12
             Text.panelTitle "Client"
             Row gap=8 middle
-              Input "Search clients" "Type a name" bind=clientQ grow
+              Input "Search clients" "Type a name" @clientQ grow
               Button.outline "Add new" icon="person_add" onTap={open newClient}
             each c in filter(clients,c=>clientQ!=""&&contains(lower(c.name),lower(clientQ)))
               ListTile "{c.name}" subtitle="{c.email}" onTap={client=c.name; clientEmail=c.email; clientQ=""}
@@ -126,9 +126,9 @@ App
           Card gap=12
             Text.panelTitle "Details"
             Grid cols=3 gap=12
-              Input "Invoice number" bind=number
-              DatePicker "Issued" bind=issued
-              DatePicker "Due" bind=due
+              Input "Invoice number" @number
+              DatePicker "Issued" @issued
+              DatePicker "Due" @due
           Card gap=12
             Row between middle
               Text.panelTitle "Line items"
@@ -138,10 +138,10 @@ App
                 Column gap=0
                   IconButton "keyboard_arrow_up" tooltip="Move up" onTap={items=index>0?setAt(setAt(items,index,items[index-1]),index-1,items[index]):items}
                   IconButton "keyboard_arrow_down" tooltip="Move down" onTap={items=index<length(items)-1?setAt(setAt(items,index,items[index+1]),index+1,items[index]):items}
-                Input "Description" bind=l.desc grow
-                Input "Qty" bind=l.qty type=number w=70
-                Input "Rate" bind=l.rate type=number w=100
-                Input "Tax %" bind=l.tax type=number w=70
+                Input "Description" @l.desc grow
+                Input "Qty" @l.qty type=number w=70
+                Input "Rate" @l.rate type=number w=100
+                Input "Tax %" @l.tax type=number w=70
                 Text.strong "{money(l.qty*l.rate,'$',2)}" w=90
                 IconButton "delete" tooltip="Remove line" onTap={items=removeWhere(items,x=>x.id==l.id)}
             if length(items)==0
@@ -149,8 +149,8 @@ App
             Divider
             Row gap=12 middle
               Text "Discount"
-              SegmentedButton bind=discountMode items=["percent","amount"]
-              Input "Discount" bind=discount type=number w=100
+              SegmentedButton @discountMode items=["percent","amount"]
+              Input "Discount" @discount type=number w=100
             Column gap=4 end
               Row between
                 Text.muted "Subtotal"
@@ -166,7 +166,7 @@ App
                 Text.heading "Total"
                 Text.heading "{money(sum(items,l=>l.qty*l.rate)-(discountMode=='percent'?sum(items,l=>l.qty*l.rate)*discount/100:discount)+sum(items,l=>l.qty*l.rate*l.tax/100),'$',2)}"
           Card gap=8
-            Input "Notes" bind=notes multiline
+            Input "Notes" @notes multiline
         Column w=420 gap=12 hide={tab=="edit"&&false}
           Text.panelTitle "Preview"
           Box fill=#FFFFFFFF radius=4 pad=32 gap=20 border-top=#FFDDDDDD
@@ -210,8 +210,8 @@ App
             Text "PAID" color=#FF2E7D32 weight=700 size=28 visible={status=="paid"} animate=pop
             Text "OVERDUE" color=#FFC62828 weight=700 size=28 visible={status=="overdue"} animate=pop
   Dialog#newClient "Add a client" "They are saved to your client list"
-    Input "Name" bind=newName
-    Input "Email" bind=newEmail type=email
+    Input "Name" @newName
+    Input "Email" @newEmail type=email
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Add client" onTap={clients=append(clients,{"name":newName,"email":newEmail}); client=newName; clientEmail=newEmail; newName=""; newEmail=""; toast "Client added"; close}

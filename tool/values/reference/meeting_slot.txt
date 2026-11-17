@@ -14,9 +14,9 @@ ChatCard "Team meeting" "30 minutes · next week" icon="event_rounded" status={b
       PersonChip "Priya"
       PersonChip "Marcus"
       PersonChip "Elena"
-    DayPicker#days bind=day days={days} onChanged={time=""}
+    DayPicker#days @day days={days} onChanged={time=""}
     SectionLabel "Time" "Struck-through times are taken"
-    ChoiceChips#slots bind=time options={map(slots,x=>x.t)} disabled={taken} columns=3
+    ChoiceChips#slots @time options={map(slots,x=>x.t)} disabled={taken} columns=3
     TotalBar#confirm "{day} Nov · 30 min" amount="{time==""?"Pick a time":time+" to "+endT}" cta="Confirm" enabled={time!=""} onPressed={booked=true; emit book_meeting day+" "+time}
   if booked
     Receipt "Meeting booked" "{day} Nov, {time} to {endT}, with Priya, Marcus and Elena." icon="event_available_rounded"

@@ -22,8 +22,8 @@ App
     Nav
       Heading "Car parks near the Cathedral Quarter"
       Row gap=8
-        Input "Search" "Street or postcode" bind=q w=220
-        Toggle "Free spaces only" bind=onlyFree
+        Input "Search" "Street or postcode" @q w=220
+        Toggle "Free spaces only" @onlyFree
         IconButton "my_location" tooltip="Centre on me" onTap={toast "Centred on your location"}
     Column pad=24 gap=16 scroll
       Card gap=0 pad=0
@@ -42,7 +42,7 @@ App
             Text.small "Full"
       Row between
         Text.sectionTitle "{length(filter(parks,p=>(!onlyFree || p.free>0) && (q=="" || contains(lower(p.name),lower(q)))))} car parks"
-        SegmentedButton bind=sortBy items=["dist","rate","free"]
+        SegmentedButton @sortBy items=["dist","rate","free"]
       each p in sortByDesc(filter(parks,p=>(!onlyFree || p.free>0) && (q=="" || contains(lower(p.name),lower(q)))),p=>p.id==sel)
         ListTile "{p.name}" "{p.dist} away - from {money(p.rate,"£",2)} an hour - {p.free==0 ? "Full" : p.free+" spaces free"}" selected={sel==p.id} onTap={sel=p.id; open park}
           Ring {p.free/p.total} size=40
@@ -72,11 +72,11 @@ App
       Button "Book a space" grow disabled={find(parks,p=>p.id==sel).free==0} onTap={close; open book}
   Dialog#book "Book a space" "{find(parks,p=>p.id==sel).name}"
     Row gap=12
-      DatePicker "Date" bind=arriveDate grow
-      TimePicker "Arrive" bind=arrive grow
-      TimePicker "Leave" bind=leave grow
-    Input "Number plate" "AB12 CDE" bind=plate
-    Checkbox "I understand the height limit is {find(parks,p=>p.id==sel).height} m" bind=agreed
+      DatePicker "Date" @arriveDate grow
+      TimePicker "Arrive" @arrive grow
+      TimePicker "Leave" @leave grow
+    Input "Number plate" "AB12 CDE" @plate
+    Checkbox "I understand the height limit is {find(parks,p=>p.id==sel).height} m" @agreed
     Card gap=4
       Row between
         Text.muted "Estimated total"

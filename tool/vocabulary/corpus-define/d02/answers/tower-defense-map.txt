@@ -2,6 +2,8 @@
 state level=""
 state unlocked=3
 state levels=[{"id":1,"name":"Mossy Crossing","waves":10,"stars":3},{"id":2,"name":"Ember Pass","waves":12,"stars":2},{"id":3,"name":"Frostbite Ridge","waves":15,"stars":0},{"id":4,"name":"Hollow Keep","waves":18,"stars":0}]
+state sfx=false
+state showRange=false
 App
   Main
     Nav
@@ -23,8 +25,8 @@ App
               each s in range(3)
                 Icon "star" color={s < lv.stars ? "#FFF59E0B" : "#FF9CA3AF"}
   Dialog#settings "Settings"
-    Toggle "Sound effects" bind=sfx
-    Toggle "Show range on hover" bind=showRange
+    Toggle "Sound effects" @sfx
+    Toggle "Show range on hover" @showRange
     Button "Done" onTap={close}
 
 ### Battle
@@ -42,6 +44,8 @@ state bonus=40
 state plots=[{"id":"p1","x":0.18,"y":0.30,"tower":""},{"id":"p2","x":0.42,"y":0.62,"tower":"archer"},{"id":"p3","x":0.58,"y":0.28,"tower":""},{"id":"p4","x":0.80,"y":0.55,"tower":"cannon"}]
 state towerTypes=[{"id":"archer","icon":"gps_fixed","name":"Archer","cost":60,"range":0.18},{"id":"cannon","icon":"adjust","name":"Cannon","cost":120,"range":0.14},{"id":"frost","icon":"ac_unit","name":"Frost","cost":90,"range":0.16},{"id":"mage","icon":"auto_awesome","name":"Mage","cost":150,"range":0.20}]
 state levelsOfTower={"archer":1,"cannon":1}
+state speedLabel=""
+state sfx=false
 every 1s when running && !paused onTick={gold=gold+1}
 App
   Main
@@ -55,7 +59,7 @@ App
           Text.strong "{lives}"
         Badge.primary "Wave {wave} / {totalWaves}"
       Row gap=8
-        SegmentedButton items=["1x","2x","3x"] bind=speedLabel onChange={speed=indexOf(["1x","2x","3x"],result)+1}
+        SegmentedButton items=["1x","2x","3x"] @speedLabel onChange={speed=indexOf(["1x","2x","3x"],result)+1}
         Button.outline "Next wave +{bonus}" icon="skip_next" onTap={wave=wave+1; gold=gold+bonus; toast "Wave called early, +{bonus} gold"}
         IconButton "pause" tooltip="Pause" onTap={paused=true; open pauseMenu}
     Column pad=16 gap=12
@@ -80,7 +84,7 @@ App
     Column gap=8
       Button "Resume" onTap={paused=false; close}
       Button.outline "Restart map" onTap={gold=250; lives=20; wave=1; paused=false; close}
-      Toggle "Sound effects" bind=sfx
+      Toggle "Sound effects" @sfx
       Button.destructive "Quit to campaign" onTap={close; go campaign}
   Dialog#victory "Victory"
     Column center gap=12

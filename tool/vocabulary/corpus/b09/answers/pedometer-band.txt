@@ -22,7 +22,7 @@ App
     Stack center middle w=320 h=320 radius=160 fill=#FF000000
       Column center middle gap=6 pad=24 hidden={dim}
         Marquee "{notice}" speed=40 h=20 color=#FFB0B0B0 size=12 onTap={notice=""}
-        Pages bind=page h=240 w=260
+        Pages @page h=240 w=260
           Stack center middle
             Ring {steps/goal} size=200 stroke=14 color=#FF30D158
             Column center middle gap=2
@@ -58,11 +58,11 @@ App
           Column center middle gap=6
             Text.muted "Alarm" size=12
             Row center middle gap=6
-              DigitWheel bind=ah min=0 max=23 pad=2
+              DigitWheel @ah min=0 max=23 pad=2
               Text ":" size=36 color=#FFFFFFFF
-              DigitWheel bind=am min=0 max=59 pad=2
-            Toggle "On" bind=alarmOn
-        Dots bind=page count=7
+              DigitWheel @am min=0 max=59 pad=2
+            Toggle "On" @alarmOn
+        Dots @page count=7
       Column center middle gap=4 show=phone hidden={!dim}
         Text "{formatDate(today(),"EEE d")}" size=14 color=#FF606060
         Text "{steps}" size=32 color=#FF606060

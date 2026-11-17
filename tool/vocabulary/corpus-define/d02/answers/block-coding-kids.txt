@@ -197,9 +197,9 @@ Page
       Heading "Settings" level=2
       Row between middle
         Text "Daily play limit (minutes)"
-        Slider bind=gameMinutes min=5 max=60 w=240
-      Toggle "Read instructions aloud" bind=readAloud
-      Toggle "Sound effects" bind=soundOn
+        Slider @gameMinutes min=5 max=60 w=240
+      Toggle "Read instructions aloud" @readAloud
+      Toggle "Sound effects" @soundOn
       Button.destructive "Reset all progress" onTap={open reset}
   Footer
     Text.muted "Made for ages 5 to 9"

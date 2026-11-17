@@ -18,7 +18,7 @@ App
           Avatar "Priya Shah" size=30
           Avatar "Leo Martins" size=30
           Avatar "Aiko Tanaka" size=30
-        Input "Filter" "Filter tasks" bind=q w=220
+        Input "Filter" "Filter tasks" @q w=220
         Button "New task" onTap={emit newTask}
     Column pad=24 gap=16
       Row gap=16 top
@@ -56,7 +56,7 @@ App
       Details rows={[["Status",find(cols,c=>c.id==find(tasks,x=>x.id==sel).col).name],["Assignee",find(tasks,x=>x.id==sel).who],["Due",find(tasks,x=>x.id==sel).due],["Comments",""+find(tasks,x=>x.id==sel).comments]]}
       SectionLabel "Description"
       Paragraph "{find(tasks,x=>x.id==sel).desc}"
-      Checklist "Checklist" bind=ticked items={find(tasks,x=>x.id==sel).steps}
+      Checklist "Checklist" @ticked items={find(tasks,x=>x.id==sel).steps}
       SectionLabel "Activity"
       each a in activity
         if a.task==sel

@@ -13,6 +13,7 @@ state code=""
 state lateNote=""
 state arrivalTime="18:00"
 state walking=false
+state stay=""
 
 App
   Sidebar
@@ -31,11 +32,11 @@ App
     Column pad=24 gap=16
       Card gap=12
         Row gap=16 wrap
-          FilterChip "Hookup" icon="bolt" bind=fHookup
-          FilterChip "Shade" icon="park" bind=fShade
-          FilterChip "Near toilets" icon="wc" bind=fToilets
-          Select "Size" items=["Any","Small","Medium","Large"] bind=fSize
-          Input "Van length (m)" type=number bind=vanLen w=140
+          FilterChip "Hookup" icon="bolt" @fHookup
+          FilterChip "Shade" icon="park" @fShade
+          FilterChip "Near toilets" icon="wc" @fToilets
+          Select "Size" items=["Any","Small","Medium","Large"] @fSize
+          Input "Van length (m)" type=number @vanLen w=140
           Button.ghost "Clear" onTap={fHookup=false; fShade=false; fToilets=false; fSize="Any"; vanLen=0}
         Row gap=16
           Badge.success "Free"
@@ -70,7 +71,7 @@ App
       Button "Book this pitch" grow onTap={emit book sel; close; go my-stay}
 
   Dialog#dates "Your dates" "Minimum stay is {minNights} nights"
-    DateRangePicker bind=stay start=checkIn end=checkOut minNights={minNights} min={today()}
+    DateRangePicker @stay start=checkIn end=checkOut minNights={minNights} min={today()}
     Text.muted "Unavailable days are crossed out."
     Button "Apply" onTap={checkIn=stay.start; checkOut=stay.end; close}
 
@@ -90,6 +91,7 @@ state lateNote=""
 state late=false
 state arrivalTime="18:00"
 state stayPitches=[{"id":7,"no":"7","len":14,"wid":8,"price":48}]
+state stay=""
 
 Page
   Nav
@@ -122,17 +124,17 @@ Page
         Button.outline "Change dates" onTap={open dates}
       Card gap=12
         Text.strong "Your van"
-        Input "Van length (m)" "e.g. 7.5" type=number bind=vanLen
+        Input "Van length (m)" "e.g. 7.5" type=number @vanLen
         if vanLen>14
           Text.danger "Pitch 7 fits vans up to 14 m."
         if vanLen>0 && vanLen<=14
           Text.success "Fits with {fixed(14-vanLen,1)} m to spare."
       Card gap=12
         Text.strong "Arriving late?"
-        Toggle "I will arrive after 8 pm" bind=late
+        Toggle "I will arrive after 8 pm" @late
         if late
-          TimePicker "Expected arrival" bind=arrivalTime
-          Input "Note for the warden" "Gate code needed, quiet arrival" multiline bind=lateNote
+          TimePicker "Expected arrival" @arrivalTime
+          Input "Note for the warden" "Gate code needed, quiet arrival" multiline @lateNote
           Button "Save note" onTap={emit lateNote lateNote; toast "The warden has your note"}
       Card gap=12
         Text.strong "Getting there"
@@ -145,7 +147,7 @@ Page
     Text.muted "Pitchup, Riverside Meadow"
 
   Dialog#dates "Change your dates" "Minimum stay is 2 nights"
-    DateRangePicker bind=stay start=checkIn end=checkOut minNights=2 min={today()}
+    DateRangePicker @stay start=checkIn end=checkOut minNights=2 min={today()}
     Button "Apply" onTap={checkIn=stay.start; checkOut=stay.end; close}
 
   Sheet#walk "Walk to pitch 7"
@@ -180,7 +182,7 @@ Page
     Column gap=20 center
       Heading "Check in to pitch 7" level=1
       Text.muted "Enter the six digit code from your confirmation email."
-      CodeInput bind=code length=6 onComplete={codeOk = code=="482915"; tries=tries+1}
+      CodeInput @code length=6 onComplete={codeOk = code=="482915"; tries=tries+1}
       if !codeOk && tries>0
         Text.danger "That code does not match. {tries} tries so far."
       if codeOk
@@ -193,9 +195,9 @@ Page
           Button "Walk me to pitch 7" icon="directions_walk" onTap={open walk}
       Card gap=12
         Text.strong "Running late?"
-        Toggle "I will arrive after 8 pm" bind=late
+        Toggle "I will arrive after 8 pm" @late
         if late
-          Input "Note for the warden" multiline bind=lateNote
+          Input "Note for the warden" multiline @lateNote
           Button.outline "Send note" onTap={emit lateNote lateNote; toast "Note sent"}
       Button.ghost "Back to the site map" onTap={go site-map}
   Footer

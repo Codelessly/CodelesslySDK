@@ -8,7 +8,7 @@ Column scroll gap=16 pad=16
     Text.caption "Round {round} of {today.rounds}"
     Text.heading1 "{left}"
     Text.title "{phase=='work' ? 'Jump!' : 'Rest and breathe'}"
-    Progress bind=progress
+    Progress value={progress}
   Card gap=12 center
     Text.caption "Jumps so far"
     Text.heading1 "{count}"

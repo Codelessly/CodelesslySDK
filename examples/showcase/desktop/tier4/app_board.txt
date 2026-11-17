@@ -16,7 +16,7 @@ App
         Avatar "Li Wei" size=32
         Avatar "Sam Patel" size=32
       Row gap=8 middle
-        Input "Filter tasks" bind=q w=220
+        Input "Filter tasks" @q w=220
         Button "New task" onTap={emit newTask}
     Row gap=12 pad=16 top grow
       each col in cols
@@ -56,7 +56,7 @@ App
         Text.muted "{find(tasks,x=>x.id==sel).who}"
       Text.strong "Description"
       Text.muted "Plan and complete this piece of the relaunch so the new site can go live on schedule. Share progress in the comments and move the card when it is ready for the next step."
-      Checklist "Checklist" bind=done items=["Confirm scope with the team","Prepare first version","Get feedback from a reviewer","Final check before launch"]
+      Checklist "Checklist" @done items=["Confirm scope with the team","Prepare first version","Get feedback from a reviewer","Final check before launch"]
       Text.strong "Activity"
       Column gap=12
         Row gap=10 top

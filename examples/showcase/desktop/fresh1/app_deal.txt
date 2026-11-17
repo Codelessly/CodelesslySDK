@@ -43,10 +43,10 @@ App
             Icon "event" size=16
             Text.caption "Due Friday, Jun 5"
       Pane grow pad=16 gap=16
-        TabToggle bind=tab options=["Activity","Notes","Emails","Files"]
+        TabToggle @tab options=["Activity","Notes","Emails","Files"]
         if tab=="Activity"
           Card gap=8
-            Input "Add a note" "Write something the team should know" multiline bind=note
+            Input "Add a note" "Write something the team should know" multiline @note
             Row end
               Button "Add note" enabled={trim(note)!=""} onTap={events=concat([{"icon":"sticky_note_2","title":"Note added","who":"Dana Brooks","when":"Just now","detail":note}],events); note=""}
           Card pad=0 gap=0

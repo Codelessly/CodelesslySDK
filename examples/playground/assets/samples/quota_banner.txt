@@ -5,7 +5,7 @@ Card gap=10
     Icon "data_usage" size=16 color={used>=limit?"#FFDC2626":"#FFEA580C"}
     Text.sectionTitle "{used>=limit?"You have reached today's limit":"Almost at today's limit"}" grow
     Text.caption "{used} of {limit} messages"
-  Progress bind={used/limit} {"props": {"color": "${= used>=limit?'#FFDC2626':'#FFEA580C'}"}}
+  Progress value={used/limit} {"props": {"color": "${= used>=limit?'#FFDC2626':'#FFEA580C'}"}}
   Row between
     Text.caption "Resets at midnight, in 5 h 12 min."
     Row gap=6

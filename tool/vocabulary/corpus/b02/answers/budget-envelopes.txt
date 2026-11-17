@@ -46,7 +46,7 @@ App
           each row in filter(cats,c=>c.group==g)
             Row gap=12 middle
               Text.strong "{row.name}" grow
-              Input "Assigned" type=number w=110 bind=row.assigned
+              Input "Assigned" type=number w=110 @row.assigned
               Text.muted "{money(row.spent,"$",2)}" w=90
               if row.assigned-row.spent<0
                 Badge.error "{money(row.assigned-row.spent,"$",2)}" w=110
@@ -55,10 +55,10 @@ App
               if row.assigned-row.spent>0
                 Badge.success "{money(row.assigned-row.spent,"$",2)}" w=110
   Dialog#move "Move money" "Take money from one category and give it to another"
-    Select "From" bind=fromCat items={map(cats,c=>c.name)}
+    Select "From" @fromCat items={map(cats,c=>c.name)}
     Text.muted "Available: {money(find(cats,c=>c.name==fromCat).assigned-find(cats,c=>c.name==fromCat).spent,"$",2)}"
-    Select "To" bind=toCat items={map(cats,c=>c.name)}
-    Input "Amount" type=number bind=amount
+    Select "To" @toCat items={map(cats,c=>c.name)}
+    Input "Amount" type=number @amount
     if fromCat==toCat
       Text.danger "Pick two different categories."
     Row gap=8 end
@@ -108,14 +108,14 @@ App
     MenuItem "Edit target date" icon="edit_calendar" onTap={open newGoal}
     MenuItem "Delete goal" icon="delete" onTap={goals=removeAt(goals,sel)}
   Dialog#contribute "Add money to {goals[sel].name}"
-    Input "Amount" type=number bind=contribute
+    Input "Amount" type=number @contribute
     Row gap=8 end
       Button.ghost "Cancel" onTap={close}
       Button "Add" onTap={goals=updateWhere(goals,g=>g.name==goals[sel].name,g=>with(g,"saved",min(g.target,g.saved+contribute))); toast "Added to {goals[sel].name}"; contribute=0; close}
   Dialog#newGoal "New goal" "What are you saving for?"
-    Input "Name" bind=gname
-    Input "Target amount" type=number bind=gtarget
-    DatePicker "Target date" bind=gdue
+    Input "Name" @gname
+    Input "Target amount" type=number @gtarget
+    DatePicker "Target date" @gdue
     Row gap=8 end
       Button.ghost "Cancel" onTap={close}
       Button "Create goal" onTap={goals=append(goals,{"name":gname,"target":gtarget,"saved":0,"due":gdue}); gname=""; gtarget=0; gdue=""; close}

@@ -8,6 +8,8 @@ state n=6
 state gateOpen=false
 state jobs=[{"id":"checkout","name":"Checkout","stage":"build","state":"passed","dur":6,"max":60},{"id":"compile","name":"Compile","stage":"build","state":"passed","dur":142,"max":300},{"id":"lint","name":"Lint","stage":"verify","state":"passed","dur":38,"max":120},{"id":"unit","name":"Unit tests","stage":"verify","state":"failed","dur":211,"max":400},{"id":"integration","name":"Integration tests","stage":"verify","state":"running","dur":97,"max":600},{"id":"e2e","name":"E2E browser","stage":"verify","state":"queued","dur":0,"max":900},{"id":"image","name":"Docker image","stage":"package","state":"queued","dur":0,"max":240},{"id":"sbom","name":"SBOM scan","stage":"package","state":"skipped","dur":0,"max":90},{"id":"staging","name":"Deploy staging","stage":"deploy","state":"queued","dur":0,"max":180}]
 state logPool=["$ git fetch origin feature/checkout-v2","Resolving dependencies...","Running 148 tests in 12 suites","PASS  cart/cart_test.dart (1.2s)","PASS  pricing/discount_test.dart (0.9s)","FAIL  payments/refund_test.dart","  Expected: 1250","  Actual:   1205","  at refund_test.dart:84","PASS  auth/session_test.dart (0.7s)","Retrying flaky: orders/sync_test.dart","PASS  orders/sync_test.dart (2.4s)","Coverage 87.4%","Done in 3m 31s"]
+state follow=false
+state gateNote=""
 every 1s when runState=="running" onTick={n=min(n+1,length(logPool)); jobs=updateWhere(jobs,j=>j.state=="running",j=>with(j,"dur",min(j.dur+1,j.max)))}
 App
   Sidebar
@@ -90,7 +92,7 @@ App
               Text.muted "{find(jobs,j=>j.id==sel).state} · {duration(find(jobs,j=>j.id==sel).dur)}"
             IconButton "close" tooltip="Close log" onTap={sel=""}
           Row gap=8
-            Input "Search log" bind=q hint="error, test name"
+            Input "Search log" @q hint="error, test name"
             IconButton "content_copy" tooltip="Copy log" onTap={copy join(take(logPool,n),"\n"); toast "Copied"}
             IconButton "download" tooltip="Download log" onTap={emit downloadLog sel}
           Box fill=#FF101418 pad=12 radius=8 grow scroll
@@ -98,14 +100,14 @@ App
               Text.mono "{line}" color=#FFCDD6E0
           Row between
             Text.caption "{n} of {length(logPool)} lines"
-            Toggle "Follow" bind=follow
+            Toggle "Follow" @follow
   Dialog#cancelRun "Cancel run #{runId}?" "Running jobs stop and queued jobs are skipped."
     Text.muted "Integration tests has been running for {duration(find(jobs,j=>j.id=="integration").dur)}."
     Row end gap=8
       Button.ghost "Keep running" onTap={close}
       Button.destructive "Cancel run" onTap={runState="cancelled"; jobs=updateWhere(jobs,j=>j.state=="running"||j.state=="queued",j=>with(j,"state","skipped")); close; toast "Run cancelled"}
   Dialog#approveGate "Approve release?" "Promotes build 9f3c2ab to production."
-    Input "Comment" bind=gateNote multiline
+    Input "Comment" @gateNote multiline
     Row end gap=8
       Button.ghost "Not yet" onTap={close}
       Button "Approve" onTap={gateOpen=true; close; toast "Release approved"}
@@ -114,6 +116,10 @@ App
 state branch="all"
 state runs=[{"id":4182,"branch":"feature/checkout-v2","sha":"9f3c2ab","msg":"Refund rounding for partial returns","state":"running","by":"Dana Ortiz","dur":412,"when":"2 min ago"},{"id":4181,"branch":"main","sha":"c71e0d4","msg":"Bump http client to 4.2","state":"passed","by":"Lee Park","dur":688,"when":"1 hr ago"},{"id":4180,"branch":"fix/login-loop","sha":"5ab88e1","msg":"Stop redirect loop on expired session","state":"failed","by":"Mara Jin","dur":301,"when":"3 hr ago"},{"id":4179,"branch":"main","sha":"e02f9b7","msg":"Add SBOM scan stage","state":"passed","by":"Lee Park","dur":702,"when":"Yesterday"},{"id":4178,"branch":"release/2.8","sha":"1d6a4c3","msg":"Cut 2.8.0-rc2","state":"cancelled","by":"Sam Patel","dur":95,"when":"Yesterday"}]
 state sel=0
+state q=""
+state triggerBranch=""
+state triggerSha=""
+state skipE2e=false
 App
   Sidebar
     Brand "Conveyor" icon="conveyor_belt"
@@ -126,8 +132,8 @@ App
     Nav
       Heading "Runs" level=1
       Row gap=8
-        Select bind=branch items=["all","main","feature/checkout-v2","fix/login-loop","release/2.8"]
-        Input "Search commits" bind=q w=220
+        Select @branch items=["all","main","feature/checkout-v2","fix/login-loop","release/2.8"]
+        Input "Search commits" @q w=220
         Button "Trigger run" icon="play_arrow" onTap={open trigger}
     Column pad=24 gap=16
       Row gap=8 scroll
@@ -167,9 +173,9 @@ App
       Button.ghost "Keep" onTap={close}
       Button.destructive "Cancel run" onTap={runs=updateWhere(runs,r=>r.id==sel,r=>with(r,"state","cancelled")); close; toast "Run cancelled"}
   Dialog#trigger "Trigger a run" "Starts the full pipeline."
-    Select "Branch" bind=triggerBranch items=["main","feature/checkout-v2","fix/login-loop","release/2.8"]
-    Input "Commit (optional)" bind=triggerSha hint="9f3c2ab"
-    Toggle "Skip E2E" bind=skipE2e
+    Select "Branch" @triggerBranch items=["main","feature/checkout-v2","fix/login-loop","release/2.8"]
+    Input "Commit (optional)" @triggerSha hint="9f3c2ab"
+    Toggle "Skip E2E" @skipE2e
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Start" onTap={runs=concat([{"id":4183,"branch":coalesce(triggerBranch,"main"),"sha":coalesce(triggerSha,"head"),"msg":"Manual run","state":"running","by":"You","dur":0,"when":"now"}],runs); close; toast "Run #4183 started"}
@@ -177,6 +183,9 @@ App
 ### Approvals
 state items=[{"id":1,"run":4182,"what":"Release 2.8.0 to production","by":"Dana Ortiz","waiting":"14 min","state":"waiting"},{"id":2,"run":4179,"what":"Deploy to staging","by":"Lee Park","waiting":"Yesterday","state":"approved"}]
 state at=0
+state note=""
+state n1=false
+state n2=false
 App
   Sidebar
     Brand "Conveyor" icon="conveyor_belt"
@@ -200,11 +209,11 @@ App
             Badge.warning "waiting" visible={item.state=="waiting"}
             Badge.success "approved" visible={item.state=="approved"}
           if item.state=="waiting"
-            Input "Comment" bind=note hint="Optional note for the audit log"
+            Input "Comment" @note hint="Optional note for the audit log"
             Row gap=8
               Button "Approve" icon="check" onTap={items=updateWhere(items,i=>i.id==item.id,i=>with(i,"state","approved")); toast "Approved"; go pipeline}
               Button.outline "Reject" onTap={items=updateWhere(items,i=>i.id==item.id,i=>with(i,"state","rejected")); toast "Rejected"}
   Sheet#notify "Notify me"
-    Toggle "Gate waiting more than 10 minutes" bind=n1
-    Toggle "Failed job on main" bind=n2
+    Toggle "Gate waiting more than 10 minutes" @n1
+    Toggle "Failed job on main" @n2
     Button "Save" onTap={emit saveNotify; close}

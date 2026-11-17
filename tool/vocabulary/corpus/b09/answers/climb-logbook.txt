@@ -10,6 +10,7 @@ state style="Redpoint"
 state tries=1
 state stars=3
 state logRoute="The Rattler"
+state note=""
 App
   Sidebar
     Brand "Crux" icon="terrain"
@@ -30,7 +31,7 @@ App
           Row between
             Text.strong "Wall photo"
             Text.muted "{count(routes,r=>indexOf(grades,r.grade)>=indexOf(grades,lo) && indexOf(grades,r.grade)<=indexOf(grades,hi))} routes shown"
-          RouteTopo src="https://images.example.com/crags/gorge-du-loup-b.jpg" routes={filter(routes,r=>indexOf(grades,r.grade)>=indexOf(grades,lo) && indexOf(grades,r.grade)<=indexOf(grades,hi))} bind=selId h=420 onSelect={selId=result}
+          RouteTopo src="https://images.example.com/crags/gorge-du-loup-b.jpg" routes={filter(routes,r=>indexOf(grades,r.grade)>=indexOf(grades,lo) && indexOf(grades,r.grade)<=indexOf(grades,hi))} @selId h=420 onSelect={selId=result}
         Pane w=320 pad=16 gap=12
           each r in filter(routes,x=>x.id==selId)
             Row between
@@ -48,23 +49,23 @@ App
             Button.ghost "Beta note" icon="edit_note" onTap={go beta}
   Sheet#filters "Grade range"
     Row gap=12
-      Select "From" bind=lo items=["5a","5b","5c","6a","6b","6c","7a","7b"]
-      Select "To" bind=hi items=["5a","5b","5c","6a","6b","6c","7a","7b"]
+      Select "From" @lo items=["5a","5b","5c","6a","6b","6c","7a","7b"]
+      Select "To" @hi items=["5a","5b","5c","6a","6b","6c","7a","7b"]
     Row gap=8
       Button.outline "Reset" onTap={lo="5a"; hi="7b"}
       Button "Apply" onTap={indexOf(grades,lo)<=indexOf(grades,hi) ? close : toast "Start grade is above end grade"}
   Dialog#logClimb "Log a climb" "{logRoute}"
     Column gap=16
       Text.fieldLabel "Style"
-      SegmentedButton bind=style items=["Flash","Redpoint","Fell"]
+      SegmentedButton @style items=["Flash","Redpoint","Fell"]
       Text.fieldLabel "Attempts"
       Row gap=12 middle
         IconButton "remove" tooltip="Fewer attempts" onTap={tries=max(1,tries-1)}
         Text.strong "{tries}" size=24
         IconButton "add" tooltip="More attempts" onTap={tries=tries+1}
       Text.fieldLabel "Rating"
-      Rating bind=stars max=5
-      Input "Note" "Cruxy move at the third bolt" multiline bind=note
+      Rating @stars max=5
+      Input "Note" "Cruxy move at the third bolt" multiline @note
       Row end gap=8
         Button.ghost "Cancel" onTap={close}
         Button "Save climb" onTap={ascents=append(ascents,{"id":"a{length(ascents)+1}","route":logRoute,"grade":find(routes,r=>r.name==logRoute).grade,"style":style,"tries":tries,"stars":stars,"date":today()}); emit logged logRoute; toast "Climb logged"; close}
@@ -85,7 +86,7 @@ App
   Main
     Nav
       Heading "Progress" level=1
-      SegmentedButton bind=range items=["Month","Year","All"]
+      SegmentedButton @range items=["Month","Year","All"]
     Column pad=24 gap=16
       Grid cols=3 gap=16
         Card gap=4
@@ -141,7 +142,7 @@ App
             Button "Send it" icon="check" onTap={ascents=append(ascents,{"id":"p{p.id}","route":p.route,"grade":p.grade,"style":"Redpoint","tries":p.tries+1,"stars":4,"date":today()}); projects=removeWhere(projects,x=>x.id==p.id); toast "Project sent"}
             Button.ghost "Drop" icon="delete" onTap={projects=removeWhere(projects,x=>x.id==p.id); toast "Removed from projects"}
   Dialog#editNote "Next-try note"
-    Input "Note" bind=draft multiline
+    Input "Note" @draft multiline
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Save" onTap={projects=updateWhere(projects,x=>x.id==editId,x=>with(x,"next",draft)); toast "Note saved"; close}
@@ -167,11 +168,11 @@ App
     Column pad=24 gap=16
       Row gap=24 top
         Card grow
-          NumberedPhoto src="https://images.example.com/crags/the-rattler.jpg" pins={holds} bind=hold h=480 onPlace={holds=append(holds,{"n":length(holds)+1,"x":result.x,"y":result.y,"note":""}); hold=length(holds)} onSelect={hold=result}
+          NumberedPhoto src="https://images.example.com/crags/the-rattler.jpg" pins={holds} @hold h=480 onPlace={holds=append(holds,{"n":length(holds)+1,"x":result.x,"y":result.y,"note":""}); hold=length(holds)} onSelect={hold=result}
         Pane w=320 pad=16 gap=12
           Heading "Hold {hold}" level=3
           each h in filter(holds,x=>x.n==hold)
-            Input "Beta for this hold" bind=h.note multiline
+            Input "Beta for this hold" @h.note multiline
           Row gap=8
             Button.outline "Previous" icon="chevron_left" onTap={hold=max(1,hold-1)}
             Button.outline "Next" icon="chevron_right" onTap={hold=min(length(holds),hold+1)}

@@ -8,6 +8,8 @@ state exposure=120
 state running=false
 state remaining=120
 state target="Vega"
+state lineName=""
+state lineNm=""
 every 1s when running onTick={remaining=max(0,remaining-1); running=remaining>0}
 App
   Sidebar
@@ -31,7 +33,7 @@ App
             Text.strong "Brightness vs wavelength"
             Text.muted "{lo} to {hi} nm"
           SpectrumChart values=[12,14,13,30,18,16,40,22,19,15,28,17,14,13,12] from=400 to=700 lines={matched} zoomFrom={lo} zoomTo={hi} h=280 onZoom={lo=result.from; hi=result.to} onLineTap={toast "{result.name} at {result.nm} nm"}
-          Toggle "Mark matched lines" bind=showLines
+          Toggle "Mark matched lines" @showLines
         Pane w=320 gap=12
           Text.strong "Matched lines"
           each m in matched
@@ -40,7 +42,7 @@ App
       Card gap=8
         Text.strong "Exposure"
         Row gap=16 middle
-          Slider bind=exposure min=10 max=600
+          Slider @exposure min=10 max=600
           Text.strong "{exposure} s"
         Row gap=16 middle
           Ring {1-remaining/exposure}
@@ -51,11 +53,11 @@ App
           Button.destructive "Stop" hidden={!running} onTap={running=false}
 Dialog#exposure "Start exposure" "Integrate {target}"
   Text "Exposure time: {exposure} s"
-  Slider bind=exposure min=10 max=600
+  Slider @exposure min=10 max=600
   Button "Begin" onTap={remaining=exposure; running=true; close}
 Dialog#pick "Match a line" "Name the dip"
-  Select "Line" bind=lineName items=["H-alpha","H-beta","Na D","Ca K","Mg b"]
-  Input "Wavelength (nm)" bind=lineNm type=number
+  Select "Line" @lineName items=["H-alpha","H-beta","Na D","Ca K","Mg b"]
+  Input "Wavelength (nm)" @lineNm type=number
   Button "Add" onTap={matched=append(matched,{"name":lineName,"nm":lineNm}); close}
 
 ### Calibration
@@ -64,6 +66,8 @@ state peaks=[]
 state refs=[{"peak":0,"nm":0}]
 state lamp="Neon"
 state calibrated=false
+state nm1=""
+state nm2=""
 App
   Sidebar
     Brand "Stellarline" icon="auto_awesome"
@@ -76,7 +80,7 @@ App
   Main
     Nav
       Heading "Lamp calibration"
-      Select bind=lamp items=["Neon","Argon","ThAr"]
+      Select @lamp items=["Neon","Argon","ThAr"]
     Column pad=24 gap=16
       Card gap=12
         Text.strong "Tap two peaks"
@@ -88,8 +92,8 @@ App
         Card gap=12
           Text.strong "Known wavelengths"
           Row gap=12 top
-            Input "First peak (nm)" bind=nm1 type=number grow
-            Input "Second peak (nm)" bind=nm2 type=number grow
+            Input "First peak (nm)" @nm1 type=number grow
+            Input "Second peak (nm)" @nm2 type=number grow
           Button "Apply calibration" onTap={calibrated=nm1!="" && nm2!="" ? true : false; calibrated ? toast "Calibrated: {fixed(abs(nm2-nm1)/abs(peaks[1]-peaks[0]),3)} nm per pixel" : toast "Enter both wavelengths"}
       if calibrated
         Badge.success "Calibrated with {lamp}"
@@ -121,7 +125,7 @@ App
         Text.strong "Exposures"
         each e in exposures
           Row between middle
-            Checkbox "Exposure {e.id}" bind=e.on
+            Checkbox "Exposure {e.id}" @e.on
             Text.mono "noise {e.noise}"
             IconButton "delete" tooltip="Remove" onTap={exposures=removeWhere(exposures,x=>x.id==e.id)}
 

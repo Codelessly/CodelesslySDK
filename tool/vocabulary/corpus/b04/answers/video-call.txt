@@ -31,15 +31,15 @@ Page
       Column grow gap=16
         Heading "Weekly design review" level=1
         Text.muted "Today 10:30 AM, hosted by Daniel Okafor, 5 invited"
-        Input "Your name" bind=name
-        Select "Microphone" bind=micDevice items=["MacBook Pro Microphone","AirPods Pro","Jabra Speak 510"]
-        Select "Camera" bind=camDevice items=["FaceTime HD Camera","Logitech C920"]
-        Select "Speakers" bind=speakerDevice items=["MacBook Pro Speakers","AirPods Pro","Jabra Speak 510"]
+        Input "Your name" @name
+        Select "Microphone" @micDevice items=["MacBook Pro Microphone","AirPods Pro","Jabra Speak 510"]
+        Select "Camera" @camDevice items=["FaceTime HD Camera","Logitech C920"]
+        Select "Speakers" @speakerDevice items=["MacBook Pro Speakers","AirPods Pro","Jabra Speak 510"]
         Card gap=8
           Row between
             Text.strong "Test your microphone"
             Button.outline {testing ? "Stop" : "Start test"} onTap={testing=!testing; level=0}
-          LevelMeter bind=level segments=20
+          LevelMeter @level segments=20
           Text.caption "Say something. The bars should move as you speak."
         Row gap=12
           Button "Join now" size=large onTap={go call}
@@ -65,6 +65,10 @@ state draft=""
 state reactions=[]
 state participants=[{"id":1,"name":"Priya Nair","muted":false,"hand":false,"you":true},{"id":2,"name":"Daniel Okafor","muted":false,"hand":false,"you":false},{"id":3,"name":"Mei Lin","muted":true,"hand":false,"you":false},{"id":4,"name":"Tomas Berg","muted":false,"hand":true,"you":false},{"id":5,"name":"Aisha Rahman","muted":true,"hand":false,"you":false}]
 state messages=[{"from":"Daniel Okafor","text":"Sharing the new onboarding flow in a sec","time":"10:32"},{"from":"Mei Lin","text":"Can you zoom in on step three?","time":"10:34"},{"from":"Tomas Berg","text":"Link to the Figma file: roundtable.example/f/ob3","time":"10:35"}]
+state micDevice=""
+state camDevice=""
+state noise=false
+state inviteEmail=""
 every 1s onTick={idle=idle+1}
 every 1s onTick={reactions=filter(reactions,r=>r.age<3)}
 App
@@ -100,13 +104,13 @@ App
         IconButton "more_vert" tooltip="More" onTap={open moreMenu}
         Button.destructive "Leave" icon="call_end" onTap={open leave}
   Pane w=320 pad=16 gap=12
-    SegmentedButton bind=panel items=["chat","people"]
+    SegmentedButton @panel items=["chat","people"]
     if panel=="chat"
       Column grow gap=8 scroll
         each m in messages
           ChatBubble from={m.from} text={m.text} time={m.time} own={m.from==name}
       Row gap=8
-        Input "Message" bind=draft grow
+        Input "Message" @draft grow
         IconButton "send" tooltip="Send" onTap={draft!="" ? {messages=append(messages,{"from":name,"text":draft,"time":"10:41"}); draft=""} : toast "Type a message first"}
     if panel=="people"
       Text.caption "{length(participants)} in this call"
@@ -131,12 +135,12 @@ App
     MenuItem "Pin" icon="push_pin" onTap={speaker=speaker}
     MenuItem "Mute for everyone" icon="mic_off" onTap={emit muteParticipant}
   Dialog#settings "Audio and video"
-    Select "Microphone" bind=micDevice items=["MacBook Pro Microphone","AirPods Pro"]
-    Select "Camera" bind=camDevice items=["FaceTime HD Camera","Logitech C920"]
-    Toggle "Noise suppression" bind=noise
+    Select "Microphone" @micDevice items=["MacBook Pro Microphone","AirPods Pro"]
+    Select "Camera" @camDevice items=["FaceTime HD Camera","Logitech C920"]
+    Toggle "Noise suppression" @noise
     Button "Done" onTap={close}
   Dialog#invite "Invite people"
-    Input "Email addresses" "name@company.com" bind=inviteEmail
+    Input "Email addresses" "name@company.com" @inviteEmail
     Row gap=8
       Button.outline "Copy link" onTap={copy "https://roundtable.example/j/wdr-4821"; toast "Link copied"}
       Button "Send invite" onTap={emit invite inviteEmail; toast "Invite sent"; close}

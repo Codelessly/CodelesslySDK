@@ -4,6 +4,10 @@ state sel={}
 state lines=[{"id":"1","name":"Harbour Loop","color":"#FF1E88E5"},{"id":"4","name":"Old Town - Airport","color":"#FFE53935"},{"id":"7","name":"University Express","color":"#FF43A047"},{"id":"9","name":"Riverside","color":"#FFFB8C00"}]
 state trams=[{"id":"T701","line":"7","heading":45,"lat":52.372,"lng":4.893,"load":2,"delay":0,"next":[{"stop":"Central Station","eta":"2 min"},{"stop":"Dam Square","eta":"5 min"},{"stop":"Rembrandtplein","eta":"8 min"}]},{"id":"T715","line":"7","heading":220,"lat":52.366,"lng":4.905,"load":3,"delay":4,"next":[{"stop":"Waterlooplein","eta":"1 min"},{"stop":"Muiderpoort","eta":"6 min"},{"stop":"Science Park","eta":"11 min"}]},{"id":"T402","line":"4","heading":90,"lat":52.379,"lng":4.88,"load":1,"delay":0,"next":[{"stop":"Leidseplein","eta":"3 min"},{"stop":"Vondelpark","eta":"7 min"},{"stop":"Airport","eta":"19 min"}]},{"id":"T118","line":"1","heading":310,"lat":52.374,"lng":4.91,"load":2,"delay":9,"next":[{"stop":"Harbour East","eta":"4 min"},{"stop":"Pier 6","eta":"9 min"},{"stop":"Ferry Quay","eta":"13 min"}]}]
 state stops=[{"name":"Central Station","eta":"2 min"},{"name":"Dam Square","eta":"5 min"},{"name":"Rembrandtplein","eta":"8 min"},{"name":"Waterlooplein","eta":"11 min"},{"name":"Muiderpoort","eta":"15 min"},{"name":"Science Park","eta":"21 min"},{"name":"University","eta":"24 min"}]
+state q=""
+state showNumbers=false
+state showClosures=false
+state dimOthers=false
 App
   Sidebar
     Brand "Liveline" icon="tram"
@@ -18,7 +22,7 @@ App
     Nav
       Heading "Line {line} live" level=1
       Row gap=8
-        Input "Search tram or stop" bind=q w=220
+        Input "Search tram or stop" @q w=220
         IconButton "my_location" tooltip="Centre on network" onTap={emit recenter}
         IconButton "layers" tooltip="Map layers" onTap={open layers}
     Map center=[52.372,4.9] zoom=13 h=420
@@ -51,9 +55,9 @@ App
       Button.outline "Follow" onTap={emit follow sel.id; close}
       Button "Message driver" onTap={toast "Message sent to {sel.id}"; close}
   Sheet#layers "Map layers"
-    Toggle "Show tram numbers" bind=showNumbers
-    Toggle "Show closed stretches" bind=showClosures
-    Toggle "Dim other lines" bind=dimOthers
+    Toggle "Show tram numbers" @showNumbers
+    Toggle "Show closed stretches" @showClosures
+    Toggle "Dim other lines" @dimOthers
     Button "Done" onTap={close}
 
 ### Fleet
@@ -74,7 +78,7 @@ App
     Nav
       Heading "Fleet" level=1
       Row gap=8
-        Input "Search tram or driver" bind=q w=240
+        Input "Search tram or driver" @q w=240
         Button.outline "Export CSV" icon="download" onTap={emit exportFleet}
     Column pad=24 gap=16
       Row gap=8
@@ -125,11 +129,11 @@ App
     Row gap=16 pad=24 top
       Card grow gap=12
         Heading "Close a stretch" level=3
-        Select "Line" items=["1","4","7","9"] bind=line
+        Select "Line" items=["1","4","7","9"] @line
         Row gap=12
-          Select "From stop" items={stopNames} bind=from grow
-          Select "To stop" items={stopNames} bind=to grow
-        SegmentedButton items=["Track work","Accident","Event"] bind=reason
+          Select "From stop" items={stopNames} @from grow
+          Select "To stop" items={stopNames} @to grow
+        SegmentedButton items=["Track work","Accident","Event"] @reason
         Button.outline "Show alternatives" onTap={alts=[{"name":"Bus 77 shuttle","detail":"{from} to {to}, every 6 min","extra":"+8 min"},{"name":"Line 9 via Riverside","detail":"Change at Rembrandtplein","extra":"+12 min"},{"name":"Metro M52","detail":"Walk 4 min to Dam station","extra":"+5 min"}]}
         if length(alts)>0
           Text.fieldLabel "Alternatives for riders"

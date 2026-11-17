@@ -45,8 +45,8 @@ App
         if battery <= 20
           Text "LOW BATTERY" color=#FFFF9F0A size=12 center animate=pulse
       Row gap=12 center
-        Knob "Volume" bind=volume min=0 max=100 disabled={locked} onChange={emit volume result}
-        Knob "Squelch" bind=squelch min=0 max=9 disabled={locked} onChange={emit squelch result}
+        Knob "Volume" @volume min=0 max=100 disabled={locked} onChange={emit volume result}
+        Knob "Squelch" @squelch min=0 max=9 disabled={locked} onChange={emit squelch result}
       Row gap=8 center
         IconButton "arrow_downward" tooltip="Channel down" disabled={locked || scanning} onTap={ch=ch==1?8:ch-1; chName=find(channels,c=>c.n==ch).name}
         IconButton "arrow_upward" tooltip="Channel up" disabled={locked || scanning} onTap={ch=ch%8+1; chName=find(channels,c=>c.n==ch).name}
@@ -62,7 +62,7 @@ App
         Button.outline "Call tone" icon="notifications_active" disabled={locked} onTap={emit callTone ch; toast "Call tone sent"}
         PushToTalk "Hold to talk" disabled={locked} onPress={tx=true; txSecs=0; scanning=false; emit tx ch} onRelease={tx=false; emit txEnd txSecs}
   Dialog#code "Private code" "Only radios with the same code hear you"
-    Input "Code (0 to 99)" bind=privateCode type=number
+    Input "Code (0 to 99)" @privateCode type=number
     Row gap=8 end
       Button.outline "Off" onTap={privateCode="0"; close}
       Button "Save" onTap={clamp(privateCode,0,99) == privateCode ? close : toast "Enter 0 to 99"}
@@ -86,7 +86,7 @@ App
     MenuItem "Tune to channel" icon="radio" onTap={ch=sel; go radio}
     MenuItem "Rename" icon="edit" onTap={newName=find(channels,c=>c.n==sel).name; open rename}
   Dialog#rename "Rename channel {sel}"
-    Input "Name" bind=newName
+    Input "Name" @newName
     Button "Save" onTap={trim(newName)=="" ? toast "Name required" : {channels=updateWhere(channels,c=>c.n==sel,c=>with(c,"name",trim(newName))); close}}
 
 ### Settings
@@ -104,9 +104,9 @@ App
     Column pad=24 gap=16 maxw=480
       Card gap=12
         Heading "Audio" level=3
-        Slider "Volume" bind=volume min=0 max=100
-        Slider "Squelch" bind=squelch min=0 max=9
-        Select "Call tone" bind=toneType items=["Standard","Double chirp","Long"]
+        Slider "Volume" @volume min=0 max=100
+        Slider "Squelch" @squelch min=0 max=9
+        Select "Call tone" @toneType items=["Standard","Double chirp","Long"]
         Button.outline "Test tone" icon="volume_up" onTap={emit callTone 0; toast "Tone played"}
       Card gap=12
         Heading "Battery" level=3
@@ -114,11 +114,11 @@ App
           Text "Charge"
           Text.strong "{battery}%"
         Progress {battery/100}
-        Toggle "Beep when low" bind=beepOnLow
+        Toggle "Beep when low" @beepOnLow
         if battery <= 20 && beepOnLow
           Text.danger "Low battery: beeping every 30 s"
       Card gap=12
         Heading "Keys" level=3
-        SegmentedButton bind=lockTimeout items=["Off","30 s","2 min"]
+        SegmentedButton @lockTimeout items=["Off","30 s","2 min"]
         Text.muted "Keys lock automatically after {lockTimeout}."
       Button "Done" onTap={emit saveSettings; go radio}

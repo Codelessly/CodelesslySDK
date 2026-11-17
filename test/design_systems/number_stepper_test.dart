@@ -62,7 +62,7 @@ String numberText(WidgetTester tester, [String id = 'number']) {
 void main() {
   testWidgets('Stepper has one number stop and its keys honor step and bounds with semantics', (tester) async {
     final handle = tester.ensureSemantics();
-    await showNumber(tester, 'Stepper#quantity "Quantity" bind=qty min=1 max=9 step=2');
+    await showNumber(tester, 'Stepper#quantity "Quantity" @qty min=1 max=9 step=2');
     final keys = Keyboard(tester);
     for (var i = 0; i < 12 && keys.focusedId != 'number'; i++) { await keys.tab(); }
     expect(keys.focusedId, 'number');
@@ -88,7 +88,7 @@ void main() {
   });
 
   testWidgets('Stepper buttons click once and repeat while held, capped at maximum', (tester) async {
-    await showNumber(tester, 'Stepper#quantity "Quantity" bind=qty min=1 max=9 step=2');
+    await showNumber(tester, 'Stepper#quantity "Quantity" @qty min=1 max=9 step=2');
     final plus = center(box(tester, 'plus'));
     await tester.tapAt(plus);
     await tester.pump(const Duration(milliseconds: 100));
@@ -105,8 +105,8 @@ void main() {
 
   testWidgets('Counter and NumberInput use the same numeric keyboard contract on a phone in dark mode', (tester) async {
     for (final (notation, id) in [
-      ('Counter#quantity "Quantity" bind=qty min=1 max=9 step=2', 'stepValue'),
-      ('NumberInput#quantity bind=qty min=1 max=9 step=2 label="Quantity"', 'field'),
+      ('Counter#quantity "Quantity" @qty min=1 max=9 step=2', 'stepValue'),
+      ('NumberInput#quantity @qty min=1 max=9 step=2 label="Quantity"', 'field'),
     ]) {
       await showNumber(tester, notation, size: const Size(390, 844), dark: true);
       final keys = Keyboard(tester);
@@ -140,7 +140,7 @@ void main() {
   });
 
   testWidgets('plain notation number input steps without a Cards block', (tester) async {
-    await showNumber(tester, 'Input#quantity "Quantity" bind=qty type=number min=1 max=9 step=2');
+    await showNumber(tester, 'Input#quantity "Quantity" @qty type=number min=1 max=9 step=2');
     final keys = Keyboard(tester);
     for (var i = 0; i < 12 && keys.focusedId != 'quantity'; i++) { await keys.tab(); }
     expect(keys.focusedId, 'quantity');
@@ -152,10 +152,10 @@ void main() {
 
   testWidgets('touch step buttons are at least 44 by 44 on a phone', (tester) async {
     for (final (notation, id) in [
-      ('Stepper#quantity "Quantity" bind=qty min=1 max=9 step=2', 'plus'),
-      ('Counter#quantity "Quantity" bind=qty min=1 max=9 step=2', 'stepPlus'),
+      ('Stepper#quantity "Quantity" @qty min=1 max=9 step=2', 'plus'),
+      ('Counter#quantity "Quantity" @qty min=1 max=9 step=2', 'stepPlus'),
       ('CartLine#item "Mug" "Oat" qty={qty} max=9 step=2 onChanged={qty=result}', 'stepPlus'),
-      ('NumberInput#quantity bind=qty min=1 max=9 step=2', 'up'),
+      ('NumberInput#quantity @qty min=1 max=9 step=2', 'up'),
     ]) {
       await showNumber(tester, notation, size: const Size(390, 844));
       expect(box(tester, id).size.width, greaterThanOrEqualTo(44), reason: notation);

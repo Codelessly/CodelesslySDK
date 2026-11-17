@@ -7,8 +7,8 @@ Card w=390 gap=10
   state q=""
   state page=0
   state sel=[]
-  Input "Search customer" bind=q onChange={page=0}
-  SegmentedButton bind=status items=["All","Paid","Due","Overdue"] onChange={page=0}
+  Input "Search customer" @q onChange={page=0}
+  SegmentedButton @status items=["All","Paid","Due","Overdue"] onChange={page=0}
   Row gap=4 middle
     Checkbox checked={all(slice((sortDesc?sortByDesc(filter(invoices,i=>(status=='All'||i.status==status)&&contains(lower(i.customer),lower(q))),i=>(sortKey=='amount'?i.amount:sortKey=='customer'?i.customer:sortKey=='date'?i.date:i.num)):sortBy(filter(invoices,i=>(status=='All'||i.status==status)&&contains(lower(i.customer),lower(q))),i=>(sortKey=='amount'?i.amount:sortKey=='customer'?i.customer:sortKey=='date'?i.date:i.num))),page*5,page*5+5),r=>contains(sel,r.id))} onChange={sel=map(filter(invoices,i=>contains(sel,i.id)||any(slice((sortDesc?sortByDesc(filter(invoices,i=>(status=='All'||i.status==status)&&contains(lower(i.customer),lower(q))),i=>(sortKey=='amount'?i.amount:sortKey=='customer'?i.customer:sortKey=='date'?i.date:i.num)):sortBy(filter(invoices,i=>(status=='All'||i.status==status)&&contains(lower(i.customer),lower(q))),i=>(sortKey=='amount'?i.amount:sortKey=='customer'?i.customer:sortKey=='date'?i.date:i.num))),page*5,page*5+5),r=>r.id==i.id)),i=>i.id)}
     Button.ghost "No.{sortKey=='num'?(sortDesc?'↓':'↑'):''}" onTap={sortDesc=sortKey=='num'&&!sortDesc; sortKey='num'}

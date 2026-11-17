@@ -2,6 +2,9 @@
 state doorOpen=true
 state note=""
 state week=[{"name":"Mum","color":"#FFDC2626","events":[{"day":0,"time":"08:30","title":"Dentist"},{"day":2,"time":"18:00","title":"Yoga"},{"day":4,"time":"19:30","title":"Dinner at Jo's"}]},{"name":"Dad","color":"#FF2563EB","events":[{"day":1,"time":"07:15","title":"Early shift"},{"day":3,"time":"17:00","title":"Football pickup"}]},{"name":"Maya","color":"#FF16A34A","events":[{"day":0,"time":"15:45","title":"Piano"},{"day":2,"time":"16:00","title":"Swim club"},{"day":5,"time":"10:00","title":"Birthday party"}]}]
+state who=""
+state what=""
+state at=""
 App
   Sidebar
     Brand "Icebox" icon="kitchen"
@@ -23,17 +26,18 @@ App
         Row between
           Text.strong "Family note"
           Button.ghost "Clear" onTap={note=""}
-        HandwritingPad bind=note h=180 pen=#FF111827 onChange={emit noteSaved result}
+        HandwritingPad @note h=180 pen=#FF111827 onChange={emit noteSaved result}
   Dialog#addEvent "Add to the board" "Who is it for, and when?"
-    Select "Person" items=["Mum","Dad","Maya"] bind=who
-    Input "What" bind=what
-    TimePicker "Time" bind=at
+    Select "Person" items=["Mum","Dad","Maya"] @who
+    Input "What" @what
+    TimePicker "Time" @at
     Button "Add" onTap={emit addEvent; toast "Added to the board"; close}
 
 ### Shopping List
 state items=[{"id":1,"name":"Oat milk","qty":"2","left":0.1,"done":false},{"id":2,"name":"Eggs","qty":"12","left":0.2,"done":false},{"id":3,"name":"Butter","qty":"1","left":0.15,"done":false},{"id":4,"name":"Spinach","qty":"1 bag","left":0.5,"done":true}]
 state listening=false
 state heard=""
+state draft=""
 App
   Sidebar
     Brand "Icebox" icon="kitchen"
@@ -50,13 +54,13 @@ App
       Column grow gap=12
         Card gap=8
           Row middle gap=12
-            VoiceInput bind=heard listening={listening} prompt="Say an item, like two cartons of milk" onResult={items=append(items,{"id":length(items)+10,"name":result,"qty":"1","left":1,"done":false}); toast "Added {result}"}
-            Input "Or type an item" bind=draft grow
+            VoiceInput @heard listening={listening} prompt="Say an item, like two cartons of milk" onResult={items=append(items,{"id":length(items)+10,"name":result,"qty":"1","left":1,"done":false}); toast "Added {result}"}
+            Input "Or type an item" @draft grow
             Button "Add" onTap={draft!="" ? {items=append(items,{"id":length(items)+10,"name":draft,"qty":"1","left":1,"done":false}); draft=""} : toast "Type an item first"}
         Card gap=4
           each item in items
             ListTile "{item.name}" subtitle="{item.qty}" onTap={items=updateWhere(items,i=>i.id==item.id,i=>with(i,"done",!i.done))}
-              Checkbox bind=item.done
+              Checkbox @item.done
               IconButton "delete" tooltip="Remove" onTap={items=removeWhere(items,i=>i.id==item.id)}
       Column w=320 gap=12
         Card gap=8
@@ -88,7 +92,7 @@ App
     Nav
       Heading "Inside"
       Row gap=8
-        Toggle "Expiry tags" bind=tagged
+        Toggle "Expiry tags" @tagged
     Column pad=24 gap=16
       AlarmBanner "Fridge door open" seconds=62 visible={doorOpen} onDismiss={doorOpen=false}
       Row gap=16 top
@@ -103,11 +107,11 @@ App
         Column w=320 gap=12
           Card gap=12
             Text.strong "Temperature"
-            SegmentedButton items=["Fridge","Freezer"] bind=zone
+            SegmentedButton items=["Fridge","Freezer"] @zone
             if zone=="Fridge"
-              TempDial bind=fridgeT min=1 max=8 unit="C" onChange={emit setTemp {"zone":"fridge","value":result}}
+              TempDial @fridgeT min=1 max=8 unit="C" onChange={emit setTemp {"zone":"fridge","value":result}}
             if zone=="Freezer"
-              TempDial bind=freezerT min=-24 max=-14 unit="C" onChange={emit setTemp {"zone":"freezer","value":result}}
+              TempDial @freezerT min=-24 max=-14 unit="C" onChange={emit setTemp {"zone":"freezer","value":result}}
           Card gap=8
             Text.strong "Door"
             Button.outline "Test the door alarm" onTap={doorOpen=true}
@@ -168,13 +172,13 @@ define WeekCalendar people=[] days=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] t
                 Text.caption "{person.name}" color=#FFFFFFFF
 
 // A drawing area for a finger or pen; the strokes are drawn by the platform, shown here as a labelled box
-define HandwritingPad bind=note h=160 pen=#FF111827 onChange
+define HandwritingPad @note h=160 pen=#FF111827 onChange
   state note=""
   Box h={h} radius=8 border=1 center middle fill=#FFFFFDE7
     Text.muted "Write here with your finger"
 
 // A microphone control that listens for speech and returns the text; the sound itself is shown as a labelled button
-define VoiceInput bind=heard listening=false prompt="Say something" onResult
+define VoiceInput @heard listening=false prompt="Say something" onResult
   state heard=""
   Row gap=8 middle
     IconButton "mic" tooltip="{prompt}" onTap={onResult(heard)}
@@ -196,10 +200,10 @@ define ExpiryTag "label" days=7 x=0.5 y=0.5
     Text.small "{label} - {days}d" color=#FFFFFFFF
 
 // A round temperature dial with plus and minus; the circular drag is shown as Gauge with buttons
-define TempDial bind=temp min=0 max=10 unit="C" onChange
+define TempDial @temp min=0 max=10 unit="C" onChange
   state temp=0
   Column center gap=8
-    Gauge bind=temp min={min} max={max} unit={unit}
+    Gauge value={temp} min={min} max={max} unit={unit}
     Row gap=16
       IconButton "remove" tooltip="Colder" onTap={temp=clamp(temp-1,min,max); onChange(temp)}
       IconButton "add" tooltip="Warmer" onTap={temp=clamp(temp+1,min,max); onChange(temp)}

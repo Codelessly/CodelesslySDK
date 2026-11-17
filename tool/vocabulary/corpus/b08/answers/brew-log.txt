@@ -5,6 +5,8 @@ state nb_name=""
 state nb_style="Pale Ale"
 state nb_size=5
 state batches=[{"id":"b14","name":"Harbor Pale Ale","style":"American Pale Ale","status":"conditioning","brewed":"2026-10-28","ready":"2026-11-25","og":1.054,"fg":1.012},{"id":"b15","name":"Winter Stout","style":"Oatmeal Stout","status":"fermenting","brewed":"2026-11-09","ready":"2026-12-14","og":1.062,"fg":0},{"id":"b13","name":"Saison Farmhouse","style":"Saison","status":"ready","brewed":"2026-09-30","ready":"2026-11-04","og":1.050,"fg":1.006},{"id":"b12","name":"Amber Ale","style":"American Amber","status":"ready","brewed":"2026-09-02","ready":"2026-10-07","og":1.056,"fg":1.014}]
+state q=""
+state day=""
 App
   Sidebar
     Brand "Wort" icon="sports_bar"
@@ -18,7 +20,7 @@ App
     Nav
       Heading "Batches" level=1
       Row gap=8
-        Input "Search" bind=q w=200
+        Input "Search" @q w=200
         Button "New batch" icon="add" onTap={open newbatch}
     Column pad=24 gap=16 scroll
       Row gap=8
@@ -46,7 +48,7 @@ App
                   Text.caption "ABV {b.fg==0 ? '-' : fixed((b.og-b.fg)*131.25,1)}%"
         Card w=320 gap=12
           Heading "Conditioning calendar" level=3
-          Calendar bind=day marks={map(filter(batches,b=>b.status!="fermenting"),b=>b.ready)} month="2026-11"
+          Calendar @day marks={map(filter(batches,b=>b.status!="fermenting"),b=>b.ready)} month="2026-11"
           each b in filter(batches,b=>b.status=="conditioning")
             Row between
               Text.strong "{b.name}"
@@ -59,9 +61,9 @@ App
     MenuItem "Mark ready" icon="check_circle" onTap={batches=updateWhere(batches,b=>b.id==sel,b=>with(b,"status","ready")); toast "Marked ready"}
     MenuItem "Delete" icon="delete" onTap={batches=removeWhere(batches,b=>b.id==sel); toast "Batch deleted"}
   Dialog#newbatch "New batch" "Start a log for the next brew"
-    Input "Name" bind=nb_name
-    Select "Style" bind=nb_style items=["Pale Ale","IPA","Stout","Saison","Pilsner","Wheat"]
-    Slider "Batch size (gal)" bind=nb_size min=1 max=10
+    Input "Name" @nb_name
+    Select "Style" @nb_style items=["Pale Ale","IPA","Stout","Saison","Pilsner","Wheat"]
+    Slider "Batch size (gal)" @nb_size min=1 max=10
     Button "Create batch" onTap={nb_name!="" ? {batches=append(batches,{"id":"b"+(length(batches)+20),"name":nb_name,"style":nb_style,"status":"fermenting","brewed":today(),"ready":today(),"og":1.050,"fg":0}); nb_name=""; close; toast "Batch added"} : toast "Give the batch a name"}
 
 ### Recipe
@@ -103,9 +105,9 @@ App
       Card gap=12
         Heading "Batch" level=3
         Row gap=24
-          Input "Batch size (gal)" bind=batch type=number w=160
-          Input "Mash efficiency %" bind=eff type=number w=160
-          Input "Final gravity" bind=fg type=number w=160
+          Input "Batch size (gal)" @batch type=number w=160
+          Input "Mash efficiency %" @eff type=number w=160
+          Input "Final gravity" @fg type=number w=160
       Card gap=12
         Row between
           Heading "Grains" level=3
@@ -118,10 +120,10 @@ App
           Spacer w=40
         each g in grains
           Row gap=8 middle
-            Input bind=g.name grow
-            Input bind=g.lb type=number w=90
-            Input bind=g.ppg type=number w=70
-            Input bind=g.lov type=number w=90
+            Input @g.name grow
+            Input @g.lb type=number w=90
+            Input @g.ppg type=number w=70
+            Input @g.lov type=number w=90
             IconButton "delete" tooltip="Remove grain" onTap={grains=removeWhere(grains,x=>x.name==g.name)}
         Text.muted "Total grain: {fixed(sum(grains,g=>g.lb),2)} lb"
       Card gap=12
@@ -136,16 +138,16 @@ App
           Spacer w=40
         each h in hops
           Row gap=8 middle
-            Input bind=h.name grow
-            Input bind=h.oz type=number w=80
-            Input bind=h.aa type=number w=80
-            Input bind=h.at type=number w=90
+            Input @h.name grow
+            Input @h.oz type=number w=80
+            Input @h.aa type=number w=80
+            Input @h.at type=number w=90
             IconButton "delete" tooltip="Remove hop" onTap={hops=removeWhere(hops,x=>x.name==h.name&&x.at==h.at)}
       Card gap=12
         Heading "Yeast" level=3
         Table columns=["Strain","Form","Attenuation","Temperature"] rows={map(yeast,y=>[y.name,y.form,y.atten+"%",y.temp])}
   Dialog#scale "Scale recipe" "Change the batch size and the amounts follow"
-    Slider "Batch size (gal)" bind=batch min=1 max=15 step=0.5
+    Slider "Batch size (gal)" @batch min=1 max=15 step=0.5
     Text.muted "Grain and hop amounts are used as written; adjust them above."
     Button "Done" onTap={close}
 
@@ -175,7 +177,7 @@ App
         Card grow gap=8
           Heading "Checklist" level=3
           each s in steps
-            Checkbox "{s.t}" bind=s.done
+            Checkbox "{s.t}" @s.done
         Column grow gap=16
           Card gap=12
             Heading "Mash timer" level=3
@@ -236,19 +238,19 @@ App
             Text.caption "ABV {fixed((first(readings).sg-last(readings).sg)*131.25,1)}%"
         Card w=320 gap=12
           Heading "Add a reading" level=3
-          Input "Day of fermentation" bind=day type=number
-          Input "Specific gravity" "1.012" bind=sg type=number
+          Input "Day of fermentation" @day type=number
+          Input "Specific gravity" "1.012" @sg type=number
           Button "Add reading" onTap={sg>=0.99&&sg<=1.15 ? {readings=append(readings,{"day":day,"sg":sg}); toast "Reading added"} : toast "Enter a gravity like 1.012"}
           Button.outline "Remove last" onTap={readings=slice(readings,0,length(readings)-1)}
       Row gap=16 top
         Card grow gap=12
           Heading "Tasting notes" level=3
-          Slider "Aroma: {aroma}" bind=aroma min=0 max=10 step=1
-          Slider "Bitterness: {bitter}" bind=bitter min=0 max=10 step=1
-          Slider "Malt: {malt}" bind=malt min=0 max=10 step=1
-          Slider "Body: {body}" bind=body min=0 max=10 step=1
-          Rating "Overall" bind=overall max=10
-          Input "Notes" bind=note multiline
+          Slider "Aroma: {aroma}" @aroma min=0 max=10 step=1
+          Slider "Bitterness: {bitter}" @bitter min=0 max=10 step=1
+          Slider "Malt: {malt}" @malt min=0 max=10 step=1
+          Slider "Body: {body}" @body min=0 max=10 step=1
+          Rating "Overall" @overall max=10
+          Input "Notes" @note multiline
           Button "Save tasting" onTap={note!="" ? {notes=append(notes,{"date":today(),"aroma":aroma,"bitter":bitter,"overall":overall,"text":note}); note=""; toast "Tasting saved"} : toast "Write a note first"}
         Column grow gap=8
           each n in reverse(notes)

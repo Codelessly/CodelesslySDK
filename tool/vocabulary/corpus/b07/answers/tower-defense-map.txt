@@ -2,6 +2,10 @@
 state stars=[3,2,1,0,0,0]
 state levels=[{"id":1,"name":"Ashford Pass","waves":10,"stars":3,"open":true},{"id":2,"name":"Miller's Ford","waves":12,"stars":2,"open":true},{"id":3,"name":"Cinder Hollow","waves":15,"stars":1,"open":true},{"id":4,"name":"Frostgate","waves":15,"stars":0,"open":false},{"id":5,"name":"The Drowned Keep","waves":20,"stars":0,"open":false},{"id":6,"name":"Bastion Line","waves":25,"stars":0,"open":false}]
 state diff="Normal"
+state sfx=false
+state music=false
+state dmgNumbers=false
+state volume=0
 Page
   Nav
     Brand "Bastion Line" icon="shield"
@@ -16,7 +20,7 @@ Page
     Column gap=16
       Heading "Choose a battlefield" level=1
       Text.muted "Hold the line against every wave. Three stars for finishing with all your lives."
-      SegmentedButton bind=diff items=["Easy","Normal","Hard"]
+      SegmentedButton @diff items=["Easy","Normal","Hard"]
   Section tint
     Grid cols=3 gap=24
       each lv in levels
@@ -43,10 +47,10 @@ Page
       ListTile "Mage" subtitle="Ignores armour. 150 gold" leading="auto_fix_high"
     Button.outline "Close" onTap={close}
   Dialog#settings "Settings"
-    Toggle "Sound effects" bind=sfx
-    Toggle "Music" bind=music
-    Toggle "Show damage numbers" bind=dmgNumbers
-    Slider bind=volume min=0 max=100
+    Toggle "Sound effects" @sfx
+    Toggle "Music" @music
+    Toggle "Show damage numbers" @dmgNumbers
+    Slider @volume min=0 max=100
     Button "Done" onTap={close}
 
 ### Battle
@@ -64,6 +68,9 @@ state towerTypes=[{"id":"archer","name":"Archer","icon":"gps_fixed","cost":60,"r
 state enemies=[]
 state waveActive=false
 state countdown=30
+state pick=""
+state sfx=false
+state volume=0
 every 1s when running && !paused && !waveActive onTick={countdown=max(0,countdown-1)}
 every 1s when running && !paused && countdown==0 && !waveActive onTick={waveActive=true; emit spawnWave wave}
 every 1s when running && lives<=0 onTick={running=false; over="defeat"; open defeat}
@@ -107,7 +114,7 @@ App
         Progress {waveActive ? 0.5 : 1-countdown/30} w=240
         Text.muted "{length(enemies)} enemies"
   Popover#towerRing "Build"
-    RadialMenu bind=pick
+    RadialMenu @pick
       each t in towerTypes
         RadialItem icon={t.icon} label="{t.name} {t.cost}" disabled={gold<t.cost} onTap={gold=gold-t.cost; plots=updateWhere(plots,p=>p.id==sel,p=>with(p,"tower",{"kind":t.id,"level":1,"range":t.range,"spent":t.cost})); emit build t.id; close}
   Sheet#towerPanel "Tower"
@@ -123,8 +130,8 @@ App
     Column gap=12
       Button "Resume" icon="play_arrow" onTap={paused=false; close}
       Button.outline "Restart level" icon="replay" onTap={emit restart; paused=false; close}
-      Toggle "Sound effects" bind=sfx
-      Slider bind=volume min=0 max=100
+      Toggle "Sound effects" @sfx
+      Slider @volume min=0 max=100
       Button.destructive "Quit to map" icon="logout" onTap={go level-select}
   Dialog#victory "Victory"
     Column gap=12 center

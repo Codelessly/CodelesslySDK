@@ -23,18 +23,26 @@
 // as), definition (a word defined in the notation, with which meaning),
 // universal (a word every line understands, read where the type has no word
 // of that name, or honoured by a stand-in for a type we do not have:
-// codelessly_api docs/design/21-universal-words.md), or unknown.
+// codelessly_api docs/design/21-universal-words.md), primitive (a word
+// declared with `primitive`, for what no line can express, and what its uses
+// were given: it stands in), unread (a string, parameter, flag or event a
+// definition names and its lines never read or fire: codelessly_api
+// docs/design/20 section 12), or unknown. Resolved is the first five.
 import 'package:codelessly_api/notation.dart';
 import 'package:codelessly_sdk/src/runtime/expressions/formula.dart' show FormulaEvaluator;
 
 /// The words a line starts with that are not a type.
-const vocabularyStatements = {'state', 'if', 'each', 'else', 'for', 'key', 'every', 'project', 'node', 'document', 'let', 'derived', 'const', 'var', 'computed', 'shortcut', 'define'};
+const vocabularyStatements = {'state', 'if', 'each', 'else', 'for', 'key', 'every', 'project', 'node', 'document', 'let', 'derived', 'const', 'var', 'computed', 'shortcut', 'define', 'primitive'};
 
 /// The kinds, in the order they are listed.
 const wordKinds = ['type', 'text', 'parameter', 'flag', 'event', 'variant', 'verb', 'function', 'statement'];
 
 /// The resolutions, in the order they are listed.
-const wordResolutions = ['core', 'component', 'alias', 'definition', 'universal', 'unknown'];
+const wordResolutions = ['core', 'component', 'alias', 'definition', 'universal', 'primitive', 'unread', 'unknown'];
+
+/// The resolutions that are not resolved: a stand-in, a word named and never
+/// read, a word we do not have.
+const unresolvedResolutions = {'primitive', 'unread', 'unknown'};
 
 final class CorpusWord {
   CorpusWord(this.kind, this.on, this.word);
@@ -67,6 +75,40 @@ final class CorpusWord {
       };
 }
 
+/// The headline numbers of [corpus], each distinct word once: resolved (core,
+/// component, alias, definition or universal), stand-in (a primitive and what
+/// its uses were given; [primitives] were declared), never read (named by a
+/// definition whose lines do not read it) and unknown, the types apart from
+/// the rest (parameters, texts, flags, events, variants, verbs, functions).
+Map<String, int> countOf(CorpusWords corpus, {int primitives = 0}) {
+  final all = corpus.words.values;
+  int n(String r) => all.where((w) => w.resolved == r).length;
+  final unknownTypes = all.where((w) => w.resolved == 'unknown' && w.kind == 'type').length;
+  return {
+    'words': all.length,
+    'resolved': all.where((w) => !unresolvedResolutions.contains(w.resolved)).length,
+    'standIn': n('primitive'),
+    'primitivesDeclared': primitives,
+    'primitiveUses': corpus.primitiveTypes.uses,
+    'unread': n('unread'),
+    'unknown': n('unknown'),
+    'unknownTypes': unknownTypes,
+    'unknownOther': n('unknown') - unknownTypes,
+  };
+}
+
+/// [count] ([countOf]) as one line: `1069 words: resolved 1001 (93.6%),
+/// stand-in 12 (2 primitives declared, 9 uses), never read 56, unknown 0 (0
+/// types, 0 other words)`.
+String countLine(Map<String, Object?> count) {
+  int n(String k) => (count[k] as int?) ?? 0;
+  final words = n('words');
+  return '$words words: resolved ${n('resolved')} (${words == 0 ? '0.0' : (100 * n('resolved') / words).toStringAsFixed(1)}%), '
+      'stand-in ${n('standIn')} (${n('primitivesDeclared')} primitives declared, ${n('primitiveUses')} uses), '
+      'never read ${n('unread')}, '
+      'unknown ${n('unknown')} (${n('unknownTypes')} types, ${n('unknownOther')} other words: parameters, texts, flags, events, variants, verbs, functions)';
+}
+
 /// What the parser recorded for one line of a screen.
 final class _LineRecord {
   String? type; // unknown, alias or definition
@@ -97,16 +139,18 @@ final class CorpusWords {
   }
 
   /// The words of one screen ([text], as written) of [file], which the
-  /// parser read as [result].
-  void screen(String file, String text, NotationResult result) {
+  /// parser read as [result]. [reads] is what each definition the answer
+  /// reads leaves unused, by its label (`Timeline#events`): a word given to a
+  /// use that its definition names and never reads is `unread`.
+  void screen(String file, String text, NotationResult result, {Map<String, DefinitionReads> reads = const {}}) {
     final records = <int, _LineRecord>{};
     for (final u in result.vocabulary) {
       final r = records.putIfAbsent(u.line, _LineRecord.new);
       switch (u.kind) {
         case 'type':
           r.type = 'unknown';
-        case 'definition':
-          r.type = 'definition';
+        case 'definition' || 'primitive':
+          r.type = u.kind;
           r.typeTo = u.to;
         case 'universal':
           r.universal.add('${u.of}:${u.word}');
@@ -128,8 +172,8 @@ final class CorpusWords {
       final line = raw.trim();
       if (line.isEmpty || line.startsWith('//') || line.startsWith('```')) continue;
       final indent = raw.length - raw.trimLeft().length;
-      // A `define` in the answer is the definition's, not the answer's.
-      if (indent == 0) defining = line.startsWith('define ');
+      // A `define` (or `primitive`) in the answer is the definition's, not the answer's.
+      if (indent == 0) defining = line.startsWith('define ') || line.startsWith('primitive ');
       if (defining) continue;
       final parts = LineParts.of(line);
       if (parts == null) continue;
@@ -161,8 +205,16 @@ final class CorpusWords {
         typeHow = 'core';
       }
       _add('type', null, type, typeHow, file, line, to: r.typeTo);
-      // On a word we do not have, what it was given has no meaning either.
+      // On a word we do not have, what it was given has no meaning either;
+      // on a defined word, a name its definition never reads has none.
       final partsHow = typeHow == 'alias' ? 'core' : typeHow;
+      final unused = typeHow == 'definition' ? reads[r.typeTo] : null;
+      String given(String word, String how) {
+        if (how != 'definition' || unused == null) return how;
+        // A bare `@x` gives the variable the definition calls by its own name.
+        final name = word == '@' ? unused.definition.bind : word;
+        return unused.unread.contains(name) || unused.unfired.contains(name) ? 'unread' : how;
+      }
       for (final v in parts.variant.split('.').where((v) => v.isNotEmpty)) {
         _add('variant', type, v, r.unknown.contains('variant:$type.$v') ? 'unknown' : partsHow, file, line);
       }
@@ -177,12 +229,16 @@ final class CorpusWords {
           case 'string':
             strings++;
             final word = 'text$strings';
-            _add('text', type, word, r.unknown.contains('parameter:string$strings') ? 'unknown' : partsHow, file, line);
+            final name = unused == null || strings > unused.definition.strings.length ? '' : unused.definition.strings[strings - 1];
+            _add('text', type, word, r.unknown.contains('parameter:string$strings') ? 'unknown' : given(name, partsHow), file, line);
           case 'pair':
             final kind = p.isEvent ? 'event' : 'parameter';
-            _add(kind, type, p.key!, how(kind, p.key!, partsHow), file, line, to: r.alias['$kind:${p.key}']);
+            _add(kind, type, p.key!, given(p.key!, how(kind, p.key!, partsHow)), file, line, to: r.alias['$kind:${p.key}']);
+          case 'word' when p.raw.startsWith('@'):
+            // A bare `@x`: the line's value, bound (a parameter named `@`).
+            _add('parameter', type, '@', given('@', how('parameter', '@', partsHow)), file, line);
           case 'word':
-            _add('flag', type, p.raw, how('flag', p.raw, partsHow), file, line, to: r.alias['flag:${p.raw}']);
+            _add('flag', type, p.raw, given(p.raw, how('flag', p.raw, partsHow)), file, line, to: r.alias['flag:${p.raw}']);
         }
       }
       _actions(line, r, file);
@@ -285,6 +341,13 @@ final class CorpusWords {
       out[w.kind]![w.resolved] = out[w.kind]![w.resolved]! + 1;
     }
     return out;
+  }
+
+  /// The words used as a line's first word that resolved as a primitive,
+  /// and their uses.
+  ({int words, int uses}) get primitiveTypes {
+    final types = [for (final w in words.values) if (w.kind == 'type' && w.how.containsKey('primitive')) w];
+    return (words: types.length, uses: types.fold(0, (n, w) => n + w.how['primitive']!));
   }
 
   List<CorpusWord> sorted() => words.values.toList()

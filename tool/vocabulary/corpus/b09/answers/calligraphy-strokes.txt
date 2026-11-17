@@ -34,11 +34,11 @@ App
           ChoiceChip "{g}" selected={glyph==g} onTap={glyph=g; scores=[]; strokesDone=0; step=0}
       Row gap=24 top
         Column grow gap=12
-          WritingSquare bind=strokesDone model={glyph} guide={guide} ghost={ghost} playStep={step} playing={playing} paper={paper} ink={ink} brush={brush} pressure=speed maxw=520 h=520 onStroke={strokesDone=result.index+1; scores=append(scores,result.score)} onComplete={emit practiceDone glyph; toast "Character finished"}
+          WritingSquare @strokesDone model={glyph} guide={guide} ghost={ghost} playStep={step} playing={playing} paper={paper} ink={ink} brush={brush} pressure=speed maxw=520 h=520 onStroke={strokesDone=result.index+1; scores=append(scores,result.score)} onComplete={emit practiceDone glyph; toast "Character finished"}
           Row gap=8 center
             Button "Play stroke order" icon="play_arrow" onTap={step=0; playing=true}
-            Toggle "Ghost model" bind=ghost
-            SegmentedButton bind=guide items=["mi","tian","none"]
+            Toggle "Ghost model" @ghost
+            SegmentedButton @guide items=["mi","tian","none"]
         Pane w=320 pad=16 gap=12
           Text.panelTitle "Strokes"
           each name in strokeNames
@@ -50,7 +50,7 @@ App
           Text "{isEmpty(scores) ? 0 : round(sum(scores, s=>s.total) / length(scores), 0)}" size=48 weight=700
           Progress {strokesDone / 5}
           Text.caption "{strokesDone} of 5 strokes written"
-          Select "Brush" bind=brush items=["Fine","Medium","Broad"]
+          Select "Brush" @brush items=["Fine","Medium","Broad"]
   Sheet#look "Paper and ink"
     Text.fieldLabel "Paper"
     Row gap=12
@@ -90,9 +90,9 @@ App
         Button "Save sheet" icon="save" onTap={emit saveSheet {"glyph": glyph, "cells": filled}; toast "Sheet saved"}
     Column pad=24 gap=16
       Row gap=16 wrap
-        Select "Character" bind=glyph items=["永","山","水","人","大","心"]
-        Select "Columns" bind=cols items=[3,4,5,6]
-        Toggle "Fade the model after the first row" bind=ghost
+        Select "Character" @glyph items=["永","山","水","人","大","心"]
+        Select "Columns" @cols items=[3,4,5,6]
+        Toggle "Fade the model after the first row" @ghost
         Button.outline "Clear sheet" onTap={filled=[]; emit clearSheet}
       Text.muted "{length(filled)} of {length(cells)} squares written. Squares fade from a clear model to a faint one."
       Progress {length(filled) / length(cells)}
@@ -116,8 +116,8 @@ App
     Nav
       Heading "Saved work" level=1
       Row gap=8
-        Select bind=sort items=["Newest","Highest score","Character"]
-        SegmentedButton bind=view items=["grid","list"]
+        Select @sort items=["Newest","Highest score","Character"]
+        SegmentedButton @view items=["grid","list"]
     Column pad=24 gap=16
       Row gap=16
         Card grow gap=4

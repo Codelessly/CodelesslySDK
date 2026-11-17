@@ -168,7 +168,7 @@ App
     each i in intervals
       Row gap=8 middle
         Text i.label w=80
-        Input "Seconds" bind=i.sec type=number w=120
+        Input "Seconds" @i.sec type=number w=120
     Row gap=8 end
       Button.ghost "Cancel" onTap={close}
       Button "Save" onTap={emit saveIntervals intervals; toast "Saved"; close}
@@ -180,6 +180,7 @@ state splits=[114,113,112,112,111,112,113,110]
 state rates=[22,23,24,24,25,24,26,28]
 state labels=["0","500","1000","1500","2000","2500","3000","3500"]
 state forces=[760,790,810,820,805,800,830,850]
+state note=""
 App
   Sidebar
     Brand "Catch & Drive" icon="rowing"
@@ -217,7 +218,7 @@ App
           AreaChart values={forces} labels={labels} h=240
       Card gap=8
         Text.strong "Coach notes"
-        Input "Add a note for the crew" bind=note multiline
+        Input "Add a note for the crew" @note multiline
         Button.outline "Post note" onTap={emit note note; note=""; toast "Posted"}
   Menu#shareMenu end
     MenuItem "Copy link" icon="link" onTap={copy "https://catchdrive.app/s/6k-0412"; toast "Link copied"}

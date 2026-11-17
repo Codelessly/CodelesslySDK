@@ -7,7 +7,7 @@ Card gap=10
       Text.sectionTitle "Plan"
       Badge.primary "{length(filter(steps, s => s.state=="done"))} of {length(steps)}"
     Button.ghost "{open?"Hide":"Show"}" onTap={open=!open}
-  Progress bind={length(filter(steps, s => s.state=="done"))/length(steps)}
+  Progress value={length(filter(steps, s => s.state=="done"))/length(steps)}
   if open
     Column gap=0
       each s in steps

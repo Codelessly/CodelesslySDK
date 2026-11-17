@@ -59,7 +59,7 @@ App
     Nav
       Heading "Series lamp circuit" level=1
       Row gap=8
-        SegmentedButton bind=tool items=["move","wire","probe"]
+        SegmentedButton @tool items=["move","wire","probe"]
         Button.outline "Step" icon="skip_next" onTap={running=false; t=t+1}
         Button "Run" icon="play_arrow" hidden={running} onTap={shorted ? toast "Fix the short first" : running=true}
         Button.destructive "Stop" icon="stop" hidden={!running} onTap={running=false}
@@ -95,9 +95,9 @@ App
           Heading "{upper(p.kind)}" level=3
           Text.muted "Part {p.id}"
           if p.kind=="switch"
-            Toggle "Closed" bind=p.value
+            Toggle "Closed" @p.value
           if p.kind!="switch"
-            Stepper bind=p.value min={p.kind=="battery" ? 1 : 1} max={p.kind=="battery" ? 24 : 1000} step={p.kind=="battery" ? 1 : 10} unit={p.kind=="battery" ? "V" : "Ω"}
+            Stepper @p.value min={p.kind=="battery" ? 1 : 1} max={p.kind=="battery" ? 24 : 1000} step={p.kind=="battery" ? 1 : 10} unit={p.kind=="battery" ? "V" : "Ω"}
           Button.destructive "Remove part" onTap={parts=removeWhere(parts,x=>x.id==p.id); wires=removeWhere(wires,w=>w.from==p.id || w.to==p.id); sel=""}
         Divider
         Heading "Voltage over time" level=3
@@ -140,7 +140,7 @@ define Lamp glow=0 size=48
   Box w={size} h={size} radius={size/2} fill={glow>0.66 ? "#FFFACC15" : glow>0.33 ? "#FFFDE68A" : glow>0.02 ? "#FFFEF3C7" : "#FFE2E8F0"} border="#FF94A3B8" animate={glow>0.02 ? "pulse" : "fade"}
 
 // A number with minus and plus buttons.
-define Stepper "label" bind=value min=0 max=100 step=1 unit="" onChange
+define Stepper "label" @value min=0 max=100 step=1 unit="" onChange
   Row gap=8 middle
     Button.outline "-" onTap={value=max(min,value-step); onChange(value)}
     Text.strong "{value} {unit}"
@@ -163,8 +163,8 @@ App
     Nav
       Heading "Scope" level=1
       Row gap=8
-        Select bind=scale items=["1 s","5 s","30 s"]
-        Toggle "Hold" bind=hold
+        Select @scale items=["1 s","5 s","30 s"]
+        Toggle "Hold" @hold
         Button.outline "Clear" onTap={samples=[]; cursor=0}
     Column pad=24 gap=16 scroll
       Card gap=12
@@ -172,7 +172,7 @@ App
           Text.strong "Voltage at the lamp"
           Badge.info "{scale} per division"
         LineChart values={samples} h=260
-        Slider bind=cursor min=0 max={max(1,length(samples)-1)}
+        Slider @cursor min=0 max={max(1,length(samples)-1)}
         Row between
           Text.muted "Cursor at sample {cursor}"
           Text.strong "{fixed(coalesce(samples[cursor],0),2)} V"
@@ -189,7 +189,7 @@ App
       Card gap=8
         Text.strong "Source voltage"
         Row gap=12 middle
-          Slider bind=source min=0 max=24 grow
+          Slider @source min=0 max=24 grow
           Text.strong "{source} V"
         Text.muted "The trace follows this value every second while Hold is off."
 

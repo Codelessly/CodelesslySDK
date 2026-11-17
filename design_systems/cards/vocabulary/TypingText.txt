@@ -1,5 +1,5 @@
-// A line to type out, set 20 characters to a line: each character is faint until typed, then in correctColor if it matches and wrongColor if not, with a field under it keeping what is typed in bind. onKeyDown runs after each key, onError after a wrong one, onComplete once when all of it is typed (each is looked for ten times a second).
-TypingText target bind=typed size=24 correctColor=good wrongColor=bad autofocus onKeyDown onError onComplete
+// A line to type out, set 20 characters to a line: each character is faint until typed, then in correctColor if it matches and wrongColor if not, with a field under it keeping what is typed in the variable bound (@typed). onKeyDown runs after each key, onError after a wrong one, onComplete once when all of it is typed (each is looked for ten times a second).
+TypingText target @typed size=24 correctColor=good wrongColor=bad autofocus onKeyDown onError onComplete
   state typed=""
   state seen=0
   state finished=false
@@ -11,4 +11,4 @@ TypingText target bind=typed size=24 correctColor=good wrongColor=bad autofocus 
     Grid cols=20 keep gap=0
       each i in range(length(target))
         Text.mono "{slice(target, i, i + 1)}" size={size} color={i >= length(typed) ? "inkFaint" : (slice(typed, i, i + 1) == slice(target, i, i + 1) ? correctColor : wrongColor)}
-    Input "Type here" bind=typed autofocus={autofocus}
+    Input "Type here" @typed autofocus={autofocus}

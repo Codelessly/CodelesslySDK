@@ -15,6 +15,7 @@ import 'package:codelessly_api/core.dart'
         RouteTransition,
         ShowToastAction;
 import 'package:flutter/material.dart' hide NavigationMode;
+import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:flutter/services.dart' show KeyDownEvent, LogicalKeyboardKey;
 import 'package:codelessly_api/core.dart' show NavigationMode;
 
@@ -258,6 +259,25 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, Po
       bound: bound,
       params: params,
     );
+    // Asked from a menu's line: the menu is out of sight while the question
+    // is (its line's chain, and the `close` after it, still run in it).
+    final menu = ModalRoute.of(c);
+    final hidden = menu is PopupRoute && menu.settings.name == popoverRouteName && menu.isCurrent;
+    if (hidden) menu.offstage = true;
+    try {
+      return await _confirm(c, action, request, bound);
+    } finally {
+      // Shown again if the chain leaves it open; a menu that closed is gone.
+      if (hidden) {
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          if (menu.isActive) menu.offstage = false;
+        });
+        SchedulerBinding.instance.scheduleFrame();
+      }
+    }
+  }
+
+  Future<ConfirmOutcome> _confirm(BuildContext c, ConfirmAction action, ConfirmRequest request, Map<String, Object?> bound) async {
     if (action.dialog.isNotEmpty) {
       final content = modal?.call(action.dialog, request.dialogParams);
       if (content != null) {

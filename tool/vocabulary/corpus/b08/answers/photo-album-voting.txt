@@ -25,7 +25,7 @@ App
     Nav
       Heading "Summer Trip Album" level=1
       Row gap=8
-        Input "Your name tag" bind=uploader w=180
+        Input "Your name tag" @uploader w=180
         Button.outline "Add photos" icon="add_a_photo" onTap={open upload}
         Button "Download selected ({length(selected)})" icon="download" onTap={length(selected)>0 ? emit download selected : toast "Select some photos first"}
     Column pad=24 gap=16 scroll
@@ -44,7 +44,7 @@ App
                 Row gap=4
                   Avatar "{p.by}" size=20
                   Badge.neutral "{p.by}"
-              Checkbox bind=selected value={p.id}
+              Checkbox @selected value={p.id}
             Row between
               Row gap=4
                 IconButton "{p.liked ? 'favorite' : 'favorite_border'}" tooltip="Like" onTap={photos=updateWhere(photos,x=>x.id==p.id,x=>with(with(x,"liked",!x.liked),"likes",x.liked?x.likes-1:x.likes+1))}
@@ -52,15 +52,16 @@ App
               Row gap=2
                 Icon "star"
                 Text.muted "{p.myRating>0 ? p.myRating : '-'}"
-  Lightbox#viewer photos={photos} bind=at
+  Lightbox#viewer photos={photos} @at
   Dialog#upload "Add photos" "Everyone in the album can see them"
-    Input "Name tag" bind=uploader
+    Input "Name tag" @uploader
     FileDrop "Drop photos here" accept="image/*" onUpload={photos=append(photos,with(with(with(result,"by",uploader),"likes",0),"liked",false)); toast "Photos added"; close}
     Button "Done" onTap={close}
 
 ### Photo
 state at=0
 state photos=[{"id":1,"url":"https://images.example.com/reel/beach-sunset.jpg","caption":"Beach sunset","by":"Maya Reyes","likes":14,"liked":false,"ratings":[5,4,5],"myRating":0},{"id":2,"url":"https://images.example.com/reel/cabin-porch.jpg","caption":"Cabin porch","by":"Dan Okafor","likes":9,"liked":true,"ratings":[4,4,3],"myRating":4},{"id":3,"url":"https://images.example.com/reel/group-hike.jpg","caption":"Group hike","by":"Priya Nair","likes":21,"liked":false,"ratings":[5,5,4],"myRating":0}]
+state myRating=0
 Page
   Nav
     Brand "Reel Vote" icon="photo_library"
@@ -69,11 +70,11 @@ Page
   Section
     Row gap=32 top
       Column grow gap=12
-        Pages bind=at items=photos h=420 onSwipeLeft={at=min(at+1,length(photos)-1)}
+        Pages @at items=photos h=420 onSwipeLeft={at=min(at+1,length(photos)-1)}
           Image "{item.url}" radius=12
         Row between
           IconButton "chevron_left" tooltip="Previous" onTap={at=max(0,at-1)}
-          Dots bind=at count={length(photos)}
+          Dots @at count={length(photos)}
           IconButton "chevron_right" tooltip="Next" onTap={at=min(length(photos)-1,at+1)}
         Text.muted center "{at+1} of {length(photos)}"
       Column w=320 gap=16
@@ -88,7 +89,7 @@ Page
           IconButton "{photos[at].liked ? 'favorite' : 'favorite_border'}" tooltip="Like" onTap={photos=updateWhere(photos,x=>x.id==photos[at].id,x=>with(with(x,"liked",!x.liked),"likes",x.liked?x.likes-1:x.likes+1))}
           Text.strong "{photos[at].likes} likes"
         Text.fieldLabel "Your rating"
-        Rating bind=myRating max=5 value={photos[at].myRating} onChange={photos=updateWhere(photos,x=>x.id==photos[at].id,x=>with(x,"myRating",result)); toast "Rated {result} of 5"}
+        Rating @myRating max=5 value={photos[at].myRating} onChange={photos=updateWhere(photos,x=>x.id==photos[at].id,x=>with(x,"myRating",result)); toast "Rated {result} of 5"}
         Text.muted "Average {fixed(sum(photos[at].ratings,r=>r)/length(photos[at].ratings),1)} from {length(photos[at].ratings)} votes"
         Button.outline "Download" icon="download" onTap={emit download photos[at].id}
 
@@ -105,7 +106,7 @@ App
   Main
     Nav
       Heading "Top picks" level=1
-      SegmentedButton bind=range items=["Today","This week","All time"]
+      SegmentedButton @range items=["Today","This week","All time"]
     Column pad=24 gap=16 scroll
       Text.muted "Ranked by score. The best twelve go into the final book."
       Card gap=0
@@ -192,5 +193,5 @@ App
     MenuItem "Show photos" icon="photo" onTap={go album}
     MenuItem "Merge with another" icon="merge" onTap={emit mergeFace sel}
   Dialog#rename "Name this person"
-    Input "Name" bind=renameTo
+    Input "Name" @renameTo
     Button "Save" onTap={people=updateWhere(people,x=>x.id==sel,x=>with(x,"name",renameTo)); renameTo=""; close}

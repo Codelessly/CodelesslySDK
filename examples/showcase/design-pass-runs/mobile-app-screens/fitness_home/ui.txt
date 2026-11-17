@@ -14,7 +14,7 @@ Column h=fill w=390
         Text.title "Daily goal"
         Badge.success "72%"
       Text size=32 weight=700 "{steps} steps"
-      Progress bind=goalShare value=0.72
+      Progress value=0.72
       Text.muted "{stepGoal-steps} steps to reach your goal of {stepGoal}"
     Row gap=12
       Card grow gap=4

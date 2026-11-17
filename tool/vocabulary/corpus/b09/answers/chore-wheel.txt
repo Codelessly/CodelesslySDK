@@ -7,6 +7,10 @@ state current=null
 state running=false
 state left=0
 state spinning=false
+state nagTo=""
+state nagTone=""
+state nagText=""
+state swapWith=""
 every 1s when running onTick={left=max(0,left-1)}
 App
   Sidebar
@@ -52,12 +56,12 @@ App
                 Button "Done" icon="check" onTap={people=updateWhere(people,x=>x.id==spinner,x=>with(x,"points",x.points+current.points)); toast "{current.points} points for {find(people,x=>x.id==spinner).name}"; current=null; running=false}
               Button.ghost "Swap with a sibling" icon="swap_horiz" onTap={open swap}
   Dialog#nag "Send a reminder" "A kind nudge, not a nag"
-    Select "To" bind=nagTo items=["Maya","Leo","Ines"]
-    Select "Tone" bind=nagTone items=["Friendly","Funny","Gentle"]
-    Input "Message" "Hey, the dishes are waiting when you have a minute" bind=nagText multiline
+    Select "To" @nagTo items=["Maya","Leo","Ines"]
+    Select "Tone" @nagTone items=["Friendly","Funny","Gentle"]
+    Input "Message" "Hey, the dishes are waiting when you have a minute" @nagText multiline
     Button "Send" icon="send" onTap={emit nag {to: nagTo, text: nagText}; toast "Reminder sent kindly"; close}
   Dialog#swap "Ask for a trade" "Offer this chore to a sibling"
-    Select "Trade with" bind=swapWith items=["Leo","Ines"]
+    Select "Trade with" @swapWith items=["Leo","Ines"]
     Text.muted "They get the points if they accept."
     Row gap=8 end
       Button.ghost "Cancel" onTap={close}

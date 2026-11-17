@@ -14,8 +14,8 @@ App
     Nav
       Heading "Queues" level=1
       Row gap=8
-        Input "Filter queues" bind=q w=220
-        Select bind=sort items=["depth","rate in","oldest"]
+        Input "Filter queues" @q w=220
+        Select @sort items=["depth","rate in","oldest"]
         IconButton "refresh" tooltip="Refresh now" onTap={toast "Refreshed"}
     Column pad=24 gap=16
       Grid cols=3 gap=16
@@ -67,7 +67,7 @@ App
         Heading "orders.incoming" level=1
         Badge.warning "Over threshold" visible={last(depthSeries) > limit}
       Row gap=8
-        SegmentedButton bind=range items=["1h","6h","24h"]
+        SegmentedButton @range items=["1h","6h","24h"]
         Button.outline "Pause consumers" onTap={open pause}
     Column pad=24 gap=16
       Card gap=12

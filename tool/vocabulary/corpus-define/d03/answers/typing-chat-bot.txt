@@ -12,13 +12,14 @@ state messages=[{"id":1,"role":"user","text":"How do I debounce a search input i
 state attach={"name":"search-spec.pdf","size":"1.2 MB","progress":0.0}
 state attaching=false
 state followups=["Show a version with AbortController","Add a loading spinner","Write a unit test for it"]
+state q=""
 every 200 when streaming onTick={shown=shown+1; shown>=length(words) ? streaming=false : toast ""}
 every 150 when attaching onTick={attach=with(attach,"progress",min(1,attach.progress+0.1)); attach.progress>=1 ? attaching=false : toast ""}
 App
   Sidebar
     Brand "Sidekick" icon="auto_awesome"
     Button "New chat" icon="add" onTap={current=0; messages=[]; input=""}
-    Input "Search chats" bind=q
+    Input "Search chats" @q
     Column scroll gap=4 grow
       each day in ["Today","Yesterday","Previous 7 days"]
         DateDivider "{day}"
@@ -70,7 +71,7 @@ App
           AttachmentTile "{attach.name}" "{attach.size}" progress={attach.progress} onRemove={attach=with(attach,"progress",0.0); attaching=false}
         Row gap=8 middle
           IconButton "attach_file" tooltip="Attach a file" onTap={attach=with(attach,"progress",0.05); attaching=true}
-          Input "Message Sidekick" bind=input multiline grow
+          Input "Message Sidekick" @input multiline grow
           if streaming
             Button.destructive "Stop" icon="stop" onTap={streaming=false}
           if !streaming
@@ -83,7 +84,7 @@ Menu#convMenu
   MenuItem "Rename" icon="edit" onTap={draftTitle=find(convs,x=>x.id==sel).title; open rename}
   MenuItem "Delete" icon="delete" onTap={open confirmDelete}
 Dialog#rename "Rename chat" "Give this conversation a name"
-  Input "Title" bind=draftTitle
+  Input "Title" @draftTitle
   Row end gap=8
     Button.ghost "Cancel" onTap={close}
     Button "Save" onTap={trim(draftTitle)=="" ? toast "Title cannot be empty" : convs=updateWhere(convs,x=>x.id==sel,x=>with(x,"title",trim(draftTitle))); close}
@@ -107,7 +108,7 @@ Page
   Section narrow
     Column gap=16
       Heading "All conversations" level=1
-      Input "Search conversations" bind=q
+      Input "Search conversations" @q
       each day in ["Today","Yesterday","Previous 7 days"]
         if count(convs, x=>x.day==day && contains(lower(x.title), lower(q)))>0
           Column gap=8
@@ -124,7 +125,7 @@ Page
       if isEmpty(filter(convs, x=>contains(lower(x.title), lower(q))))
         EmptyState "No conversations match" "Try a different search"
 Dialog#rename "Rename chat" "Give this conversation a name"
-  Input "Title" bind=draftTitle
+  Input "Title" @draftTitle
   Row end gap=8
     Button.ghost "Cancel" onTap={close}
     Button "Save" onTap={trim(draftTitle)=="" ? toast "Title cannot be empty" : convs=updateWhere(convs,x=>x.id==sel,x=>with(x,"title",trim(draftTitle))); close}

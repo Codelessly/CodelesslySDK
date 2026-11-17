@@ -6,6 +6,7 @@ state hideDone=false
 state tag=""
 state sel=""
 state note="Q4 planning"
+state q=""
 App
   Sidebar
     Brand "Indent" icon="format_list_bulleted"
@@ -29,7 +30,7 @@ App
         Text.strong "{coalesce(find(nodes,x=>x.id==focus).text,'Home')}"
       Row gap=8
         IconButton "search" tooltip="Quick search (Ctrl+K)" onTap={open search}
-        Toggle "Tasks" bind=tasksMode
+        Toggle "Tasks" @tasksMode
         IconButton "more_horiz" tooltip="Page options" onTap={open pageMenu}
     Column pad=24 gap=16 maxw=720
       Text.pageTitle "{focus=='' ? 'Home' : find(nodes,x=>x.id==focus).text}"
@@ -37,7 +38,7 @@ App
         Chip "Expand all" onTap={fold all false}
         Chip "Collapse all" onTap={fold all true}
         FilterChip "Hide completed" selected={hideDone} onTap={hideDone=!hideDone}
-      Outline bind=nodes focus={focus} tasks={tasksMode} hideDone={hideDone} placeholder="Type to add a bullet" onFocusNode={focus=result.id} onEdit={nodes=updateWhere(nodes,x=>x.id==result.id,x=>with(x,"text",result.text))} onEnter={addAfter result.id} onIndent={indent result.id} onOutdent={outdent result.id} onFold={nodes=updateWhere(nodes,x=>x.id==result.id,x=>with(x,"folded",!x.folded))} onToggleDone={nodes=updateWhere(nodes,x=>x.id==result.id,x=>with(x,"done",!x.done))} onMove={move result.id result.to} onTagTap={tag=result.tag; go tag-page} onLinkTap={focus=result.id} onContext={sel=result.id; open bulletMenu} menu=bulletMenu
+      Outline @nodes focus={focus} tasks={tasksMode} hideDone={hideDone} placeholder="Type to add a bullet" onFocusNode={focus=result.id} onEdit={nodes=updateWhere(nodes,x=>x.id==result.id,x=>with(x,"text",result.text))} onEnter={addAfter result.id} onIndent={indent result.id} onOutdent={outdent result.id} onFold={nodes=updateWhere(nodes,x=>x.id==result.id,x=>with(x,"folded",!x.folded))} onToggleDone={nodes=updateWhere(nodes,x=>x.id==result.id,x=>with(x,"done",!x.done))} onMove={move result.id result.to} onTagTap={tag=result.tag; go tag-page} onLinkTap={focus=result.id} onContext={sel=result.id; open bulletMenu} menu=bulletMenu
       Divider
       Text.sectionTitle "Linked references"
       Text.muted "Bullets that mention this page."
@@ -56,7 +57,7 @@ App
     MenuItem "Export as Markdown" icon="download" onTap={emit export}
     MenuItem "Copy page link" icon="link" onTap={copy "indent://{focus}"; toast "Copied"}
   Dialog#search "Quick search" "Jump to any bullet, page or tag"
-    Input "Search" "Type to search" bind=q autofocus
+    Input "Search" "Type to search" @q autofocus
     Column gap=4
       each hit in take(filter(nodes,x=>contains(lower(x.text),lower(q))),8)
         ListTile "{hit.text}" onTap={focus=hit.id; close}
@@ -66,6 +67,7 @@ App
 state nodes=[{"id":"n2","parent":"n1","text":"Hiring plan #hiring","folded":false},{"id":"n3","parent":"n2","text":"Open two backend roles","done":false,"task":true},{"id":"n4","parent":"n2","text":"Review intern pipeline with [[Mara Okafor]]","done":true,"task":true},{"id":"n9","parent":"n2","text":"Agree budget with finance","done":false,"task":true}]
 state focus="n2"
 state dragging=""
+state q=""
 App
   Sidebar
     Brand "Indent" icon="format_list_bulleted"
@@ -92,8 +94,8 @@ App
       each n in filter(nodes,x=>x.parent=="n2")
         Row gap=8 middle drag=bullet(n.id) drop=bullet onDrop={move result.data n.id}
           Icon "drag_indicator" tooltip="Drag to move with its children"
-          Checkbox bind=n.done
-          Input bind=n.text onEnter={addAfter n.id} onTab={indent n.id} onShiftTab={outdent n.id}
+          Checkbox @n.done
+          Input @n.text onEnter={addAfter n.id} onTab={indent n.id} onShiftTab={outdent n.id}
           IconButton "more_vert" onTap={sel=n.id; open rowMenu}
       Button.ghost "Add a bullet" icon="add" onTap={addChild focus}
       Divider
@@ -113,13 +115,14 @@ App
     MenuItem "Outdent" icon="format_indent_decrease" onTap={outdent sel}
     MenuItem "Delete" icon="delete" onTap={nodes=removeWhere(nodes,x=>x.id==sel)}
   Dialog#find "Quick search"
-    Input "Search" bind=q autofocus
+    Input "Search" @q autofocus
     Button "Close" onTap={close}
 
 ### Daily notes
 state day=today()
 state entries=[{"date":"2026-11-17","items":[{"text":"Standup moved to 10:15","task":false,"done":false},{"text":"Send offer letter to Priya","task":true,"done":false},{"text":"Book venue for offsite #launch","task":true,"done":true}]},{"date":"2026-11-16","items":[{"text":"Read thresholds chapter, see [[Reading list]]","task":false,"done":false},{"text":"Call with [[Mara Okafor]] about interns","task":false,"done":false}]}]
 state tag=""
+state q=""
 App
   Sidebar
     Brand "Indent" icon="format_list_bulleted"
@@ -127,7 +130,7 @@ App
     NavItem "Daily notes" icon="today" selected={true}
     NavItem "Search" icon="search" onTap={open jump}
     Spacer grow
-    DatePicker "Jump to date" bind=day
+    DatePicker "Jump to date" @day
   Main
     Nav
       Heading "Daily notes"
@@ -143,24 +146,25 @@ App
             Badge.primary "Today" visible={e.date==formatDate(day,'yyyy-MM-dd')}
           each it in e.items
             Row gap=8 middle
-              Checkbox bind=it.done visible={it.task}
+              Checkbox @it.done visible={it.task}
               Icon "circle" size=8 visible={!it.task}
-              Input bind=it.text onTab={indent it} onShiftTab={outdent it}
+              Input @it.text onTab={indent it} onShiftTab={outdent it}
           Button.ghost "Add a bullet" icon="add" onTap={entries=updateWhere(entries,x=>x.date==e.date,x=>with(x,"items",append(x.items,{"text":"","task":false,"done":false})))}
       Text.sectionTitle "Unfinished tasks"
       Card gap=4
         each t in filter(first(entries).items,x=>x.task&&!x.done)
           Row gap=8
-            Checkbox bind=t.done
+            Checkbox @t.done
             Text "{t.text}"
   Dialog#jump "Quick search" "Jump to a day, page or tag"
-    Input "Search" bind=q autofocus
+    Input "Search" @q autofocus
     ListTile "Hiring plan" onTap={go focused-bullet; close}
     ListTile "Q4 planning" onTap={go outline; close}
 
 ### Tag page
 state tag="hiring"
 state nodes=[{"id":"n2","text":"Hiring plan #hiring","path":"Q4 planning"},{"id":"n10","text":"Agree interview loop #hiring","path":"Daily notes / Nov 9"},{"id":"n11","text":"Reference checks for Priya #hiring","path":"Daily notes / Nov 14"}]
+state q=""
 Page
   Nav sticky
     Brand "Indent" icon="format_list_bulleted"
@@ -186,5 +190,5 @@ Page
   Footer
     Text.muted "Indent"
   Dialog#jump "Quick search"
-    Input "Search" bind=q autofocus
+    Input "Search" @q autofocus
     ListTile "Q4 planning" onTap={go outline; close}

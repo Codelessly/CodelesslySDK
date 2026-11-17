@@ -12,7 +12,7 @@ App
   Sidebar
     Brand "Returnly" icon="receipt_long"
     Text.muted "Tax year 2025"
-    Stepper bind=step done={done} steps=["About you","Income","Credits","Documents","Review","Sign"] orientation="vertical"
+    Stepper @step done={done} steps=["About you","Income","Credits","Documents","Review","Sign"] orientation="vertical"
     Spacer grow
     Text.muted "Saved a moment ago"
   Main
@@ -32,13 +32,13 @@ App
         Accordion "Who counts as a dependent child?"
           Text.muted "A child under 17 who lived with you more than half of the year and did not provide over half of their own support. Each one can earn a $2,000 credit."
         if hasKids == "yes"
-          Select "Filing status" bind=filing items=["Single","Married","Head of household"]
+          Select "Filing status" @filing items=["Single","Married","Head of household"]
           Row gap=12 middle
             Text.strong "Number of children"
             IconButton "remove" tooltip="Fewer" onTap={kids=max(0,kids-1)}
             Text.title "{kids}"
             IconButton "add" tooltip="More" onTap={kids=kids+1}
-          CurrencyInput "Federal tax already withheld" bind=withheld currency="$"
+          CurrencyInput "Federal tax already withheld" @withheld currency="$"
       if hasKids == "yes" && kids > 0
         Card gap=4 fill=#FFECFDF5
           Text.success "Child tax credit: {money(kids * 2000, "$", 0)}"
@@ -56,7 +56,7 @@ App
   Sidebar
     Brand "Returnly" icon="receipt_long"
     Text.muted "Tax year 2025"
-    Stepper bind=step done={done} steps=["About you","Income","Credits","Documents","Review","Sign"] orientation="vertical"
+    Stepper @step done={done} steps=["About you","Income","Credits","Documents","Review","Sign"] orientation="vertical"
     Spacer grow
     Text.muted "{length(matched)} of 3 documents matched"
   Main
@@ -87,7 +87,7 @@ App
                 Text.muted "We could not read this one. Tell us what it is."
               Badge.warning "Review"
             Row gap=12 bottom
-              Select "Fills this field" bind=pick items=["Wages","Interest income","Tax withheld"] grow
+              Select "Fills this field" @pick items=["Wages","Interest income","Tax withheld"] grow
               Button "Match" onTap={matched=append(matched,with(with(with(doc,"field",pick),"status","matched"),"kind","Manual")); pending=removeWhere(pending,d=>d.file==doc.file); toast "Matched to {pick}"}
       Row between
         Button.outline "Back" onTap={go questions}
@@ -102,7 +102,7 @@ App
   Sidebar
     Brand "Returnly" icon="receipt_long"
     Text.muted "Tax year 2025"
-    Stepper bind=step done={done} steps=["About you","Income","Credits","Documents","Review","Sign"] orientation="vertical"
+    Stepper @step done={done} steps=["About you","Income","Credits","Documents","Review","Sign"] orientation="vertical"
   Main
     Nav
       Heading "Review your return" level=1
@@ -141,7 +141,7 @@ App
         Button.outline "Back" onTap={go documents}
         Button "Continue to sign" onTap={step=5; go sign}
   Dialog#editAmount "Edit amount" "Your refund updates as soon as you save."
-    CurrencyInput "Amount" bind=draft currency="$"
+    CurrencyInput "Amount" @draft currency="$"
     Row gap=8 end
       Button.outline "Cancel" onTap={close}
       Button "Save" onTap={editing == "wages" ? wages=draft : (editing == "interest" ? interest=draft : withheld=draft); toast "Updated"; close}
@@ -155,7 +155,7 @@ App
   Sidebar
     Brand "Returnly" icon="receipt_long"
     Text.muted "Tax year 2025"
-    Stepper bind=step done={done} steps=["About you","Income","Credits","Documents","Review","Sign"] orientation="vertical"
+    Stepper @step done={done} steps=["About you","Income","Credits","Documents","Review","Sign"] orientation="vertical"
   Main
     Nav
       Heading "Sign and file" level=1
@@ -171,10 +171,10 @@ App
         Card gap=12
           Text.title "Declaration"
           Text.muted "Under penalties of perjury, I declare that I have examined this return and, to the best of my knowledge and belief, it is true, correct, and complete."
-          Checkbox "I agree and want to file electronically" bind=agreed
+          Checkbox "I agree and want to file electronically" @agreed
         Card gap=12
           Text.strong "Draw your signature"
-          SignaturePad bind=signature h=160
+          SignaturePad @signature h=160
           Row between
             Text.muted "{signature == "" ? "Sign with your finger or mouse" : "Signature captured"}"
             Button.ghost "Clear" onTap={signature=""}
@@ -183,7 +183,7 @@ App
           Button "Submit return" onTap={!agreed ? toast "Tick the declaration first" : (signature == "" ? toast "Please sign above" : {submitted=true; emit fileReturn})}
 
 // A step indicator: a numbered list of steps with done marks and the current one lit; a tap goes to that step.
-define Stepper steps=[] bind=step done=[] orientation="horizontal" onPick
+define Stepper steps=[] @step done=[] orientation="horizontal" onPick
   Column gap=4
     each s in steps
       Row gap=10 middle pad=[8,6,8,6] radius=8 fill={index == step ? "#FFEFF6FF" : "#00000000"} onTap={step=index; onPick(index)}
@@ -199,13 +199,13 @@ define YesNoCard "label" icon="check" selected=false onTap
     Icon "{icon}" size=28
     Text.strong "{label}"
 
-define CurrencyInput "label" bind=amount currency="$" hint=""
+define CurrencyInput "label" @amount currency="$" hint=""
   state amount=0
   Column gap=4
     Text.fieldLabel "{label}"
     Row gap=8 middle
       Text.strong "{currency}"
-      Input "" "{hint}" bind=amount type=number grow
+      Input "" "{hint}" @amount type=number grow
     Text.muted "{money(amount, currency, 2)}"
 
 define RefundMeter value=0
@@ -222,7 +222,7 @@ define FileDropzone "label" accept=[] multiple=false onUpload
     Text.muted "or click to browse ({join(accept,", ")})"
 
 // A drawn signature needs a touch surface, so it shows a labelled box.
-define SignaturePad bind=signature h=160 onChange
+define SignaturePad @signature h=160 onChange
   state signature=""
   Box h={h} radius=8 border=1 fill=#FFFFFFFF center middle onTap={signature="signed"; onChange("signed")}
     Text.muted "{signature == "" ? "Signature area" : "Signed"}"

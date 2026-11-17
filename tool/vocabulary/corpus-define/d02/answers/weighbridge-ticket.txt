@@ -44,9 +44,9 @@ App
           Card gap=12
             Text.strong "Vehicle"
             Row gap=8 middle
-              Input "Plate" "KX 4471" bind=plate grow
+              Input "Plate" "KX 4471" @plate grow
               PlateCapture onCapture={plate=result}
-            Select "Product" bind=product items={map(products,p=>p.name)}
+            Select "Product" @product items={map(products,p=>p.name)}
             Text.muted "Price per tonne: {money(find(products,p=>p.name==product).price,"$",2)}"
           Card gap=12
             Row between
@@ -176,6 +176,8 @@ define Barcode "code"
     Text.mono "{code}"
 
 ### Day Log
+state q=""
+state filter=""
 App
   Sidebar
     Brand "Scalehouse" icon="scale"
@@ -186,8 +188,8 @@ App
     Nav
       Heading "Day log" level=1
       Row gap=8
-        Input "Search plate" bind=q w=220
-        Select "Product" bind=filter items=["All","Sand","Crushed gravel","Cement","Topsoil"]
+        Input "Search plate" @q w=220
+        Select "Product" @filter items=["All","Sand","Crushed gravel","Cement","Topsoil"]
     Column pad=24 gap=16
       Grid cols=3 gap=16
         Card gap=4

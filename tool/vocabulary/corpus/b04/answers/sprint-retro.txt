@@ -23,7 +23,7 @@ App
     Nav
       Heading "Sprint 42 retrospective" level=1
       Row gap=8
-        SegmentedButton bind=phase items=["Write","Group","Vote","Discuss"]
+        SegmentedButton @phase items=["Write","Group","Vote","Discuss"]
         Text.strong "{duration(secs)}"
         IconButton "play_arrow" tooltip="Start timer" hidden={running} onTap={running=true}
         IconButton "pause" tooltip="Pause timer" hide={!running} onTap={running=false}
@@ -97,8 +97,8 @@ App
         Text.muted "Phase: {phase}"
         Button "Go to action items" onTap={go action-items}
   Dialog#add "Add a card" "Cards are anonymous until the facilitator reveals them"
-    Select "Column" bind=target items=["well","improve","actions"]
-    Input "Your card" "What should the team hear?" bind=draft multiline
+    Select "Column" @target items=["well","improve","actions"]
+    Input "Your card" "What should the team hear?" @draft multiline
     Button "Post anonymously" onTap={draft!="" ? {cards=append(cards,{"id":nextId,"col":target,"text":draft,"votes":0,"group":0}); nextId=nextId+1; draft=""; close; toast "Card added"} : toast "Write something first"}
   Dialog#energy "Energy check" "How is your energy after this sprint?"
     Row center gap=8
@@ -131,7 +131,7 @@ App
     Nav
       Heading "Action items" level=1
       Row gap=8
-        Select "Owner" bind=filterOwner items=["All","Priya Nair","Marcus Webb","Lena Fischer","Jon Okafor"] w=180
+        Select "Owner" @filterOwner items=["All","Priya Nair","Marcus Webb","Lena Fischer","Jon Okafor"] w=180
         Button "New action" onTap={open newAction}
     Column pad=24 gap=16
       Row gap=16
@@ -153,7 +153,7 @@ App
           Text.strong "" w=40
         each a in filter(actions,x=>filterOwner=="All" || x.owner==filterOwner)
           Row pad=8 middle border-bottom=#FFEEEEEE
-            Checkbox bind=a.done w=40
+            Checkbox @a.done w=40
             Text "{a.title}" grow strike={a.done}
             Row gap=8 w=140 hide=phone
               Avatar "{a.owner}" size=24
@@ -163,9 +163,9 @@ App
       if isEmpty(filter(actions,x=>filterOwner=="All" || x.owner==filterOwner))
         Text.muted "No actions for {filterOwner}." center
   Dialog#newAction "New action item"
-    Input "What needs to happen?" bind=title
-    Select "Owner" bind=owner items=["Priya Nair","Marcus Webb","Lena Fischer","Jon Okafor"]
-    DatePicker "Due date" bind=due
+    Input "What needs to happen?" @title
+    Select "Owner" @owner items=["Priya Nair","Marcus Webb","Lena Fischer","Jon Okafor"]
+    DatePicker "Due date" @due
     Button "Add action" onTap={title!="" && due!="" ? {actions=append(actions,{"id":length(actions)+10,"title":title,"owner":owner,"due":due,"done":false}); title=""; due=""; close; toast "Action added"} : toast "Add a title and a due date"}
   Menu#rowMenu end
     MenuItem "Mark done" icon="check" onTap={actions=updateWhere(actions,a=>a.id==sel,a=>with(a,"done",true))}

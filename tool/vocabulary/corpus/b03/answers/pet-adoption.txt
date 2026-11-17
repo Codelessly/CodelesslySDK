@@ -8,6 +8,7 @@ state passed=[]
 state current=null
 state tab="discover"
 state photoAt=0
+state page=0
 App
   Sidebar
     Brand "Paws & Co" icon="pets"
@@ -27,7 +28,7 @@ App
         each s in ["All","Dog","Cat","Rabbit"]
           ChoiceChip "{s}" selected={species==s} onTap={species=s}
       Text.muted "Swipe left to pass, right to like"
-      Pages bind=page h=480 peek=0.86 items={filter(deck, p=>(species=="All" || p.species==species) && p.age<=maxAge && p.dist<=maxDist && !contains(passed,p.id))}
+      Pages @page h=480 peek=0.86 items={filter(deck, p=>(species=="All" || p.species==species) && p.age<=maxAge && p.dist<=maxDist && !contains(passed,p.id))}
         Card gap=8 animate=scale onSwipeLeft={passed=append(passed,item.id); toast "Passed on {item.name}"} onSwipeRight={favs=contains(favs,item.id) ? favs : append(favs,item.id); toast "Liked {item.name}"} onTap={current=item; photoAt=0; open detail}
           Image "{item.photo}" h=300 radius=12
           Row between
@@ -38,16 +39,16 @@ App
             IconButton "close" tooltip="Pass" onTap={passed=append(passed,item.id); toast "Passed on {item.name}"}
             IconButton "info" tooltip="Details" onTap={current=item; photoAt=0; open detail}
             IconButton "favorite" tooltip="Like" onTap={favs=contains(favs,item.id) ? favs : append(favs,item.id); toast "Liked {item.name}"}
-      Dots bind=page count={length(filter(deck, p=>(species=="All" || p.species==species) && p.age<=maxAge && p.dist<=maxDist && !contains(passed,p.id)))}
+      Dots @page count={length(filter(deck, p=>(species=="All" || p.species==species) && p.age<=maxAge && p.dist<=maxDist && !contains(passed,p.id)))}
       if length(filter(deck, p=>(species=="All" || p.species==species) && p.age<=maxAge && p.dist<=maxDist && !contains(passed,p.id)))==0
         Card gap=8 center
           Text.heading "No more pets match"
           Button.outline "Reset passes" onTap={passed=[]; species="All"; maxAge=15; maxDist=25}
 Sheet#detail "{current.name}"
   Column gap=12
-    Pages bind=photoAt h=220 items={current.photos}
+    Pages @photoAt h=220 items={current.photos}
       Image "{item}" radius=12
-    Dots bind=photoAt count={length(current.photos)}
+    Dots @photoAt count={length(current.photos)}
     Row gap=8
       Badge.primary "{current.age} yrs"
       Badge.neutral "{current.size}"
@@ -72,11 +73,11 @@ Sheet#detail "{current.name}"
 Sheet#filters "Filters"
   Column gap=16
     Text.fieldLabel "Species"
-    SegmentedButton bind=species items=["All","Dog","Cat","Rabbit"]
+    SegmentedButton @species items=["All","Dog","Cat","Rabbit"]
     Text.fieldLabel "Maximum age: {maxAge} years"
-    Slider bind=maxAge min=1 max=15
+    Slider @maxAge min=1 max=15
     Text.fieldLabel "Within {maxDist} km"
-    Slider bind=maxDist min=1 max=50
+    Slider @maxDist min=1 max=50
     Row gap=8
       Button.outline "Reset" onTap={species="All"; maxAge=15; maxDist=25}
       Button "Show pets" onTap={close}
@@ -121,6 +122,9 @@ state ref1Phone=""
 state ref2Name=""
 state ref2Phone=""
 state agree=false
+state fullName=""
+state email=""
+state phone=""
 Page
   Nav
     Brand "Paws & Co" icon="pets"
@@ -136,31 +140,31 @@ Page
       if step==0
         Card gap=12
           Heading "About you" level=3
-          Input "Full name" bind=fullName
-          Input "Email" bind=email type=email
-          Input "Phone" bind=phone type=phone
-          DatePicker "Ideal move-in date" bind=moveIn
+          Input "Full name" @fullName
+          Input "Email" @email type=email
+          Input "Phone" @phone type=phone
+          DatePicker "Ideal move-in date" @moveIn
       if step==1
         Card gap=12
           Heading "Your home" level=3
-          Select "Home type" bind=housing items=["House","Apartment","Condo","Farm"]
-          Toggle "I own my home" bind=own
-          Toggle "Has a yard" bind=yard
-          Toggle "Yard is fenced" bind=fence
+          Select "Home type" @housing items=["House","Apartment","Condo","Farm"]
+          Toggle "I own my home" @own
+          Toggle "Has a yard" @yard
+          Toggle "Yard is fenced" @fence
           Row gap=16
-            Input "Adults" bind=adults type=number grow
-            Input "Children" bind=kids type=number grow
-          Input "Other pets at home" "e.g. one cat, 4 years old" bind=otherPets multiline
+            Input "Adults" @adults type=number grow
+            Input "Children" @kids type=number grow
+          Input "Other pets at home" "e.g. one cat, 4 years old" @otherPets multiline
       if step==2
         Card gap=12
           Heading "References" level=3
           Text.fieldLabel "Reference 1"
-          Input "Name" bind=ref1Name
-          Input "Phone" bind=ref1Phone type=phone
+          Input "Name" @ref1Name
+          Input "Phone" @ref1Phone type=phone
           Text.fieldLabel "Reference 2"
-          Input "Name" bind=ref2Name
-          Input "Phone" bind=ref2Phone type=phone
-          Checkbox "I confirm the details above are true" bind=agree
+          Input "Name" @ref2Name
+          Input "Phone" @ref2Phone type=phone
+          Checkbox "I confirm the details above are true" @agree
       Row between
         Button.outline "Back" hidden={step==0} onTap={step=step-1}
         Spacer grow
@@ -175,6 +179,8 @@ Dialog#done "Application sent" "We will be in touch within two days"
 ### Status
 state stage=1
 state stages=["Applied","Reviewing","Home check","Approved","Adopted"]
+state visitDate=""
+state visitTime=""
 Page
   Nav
     Brand "Paws & Co" icon="pets"
@@ -196,6 +202,6 @@ Page
           Button "Choose a visit time" onTap={open visit}
       Button.outline "Message the shelter" icon="chat" onTap={emit message}
 Dialog#visit "Home visit" "Choose a day"
-  DatePicker "Date" bind=visitDate
-  TimePicker "Time" bind=visitTime
+  DatePicker "Date" @visitDate
+  TimePicker "Time" @visitTime
   Button "Confirm" onTap={emit visit; toast "Visit booked"; close}

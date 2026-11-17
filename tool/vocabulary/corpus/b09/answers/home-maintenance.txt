@@ -3,6 +3,10 @@ project tasks=[{"id":1,"name":"Boiler service","month":9,"every":"12 months","la
 state sel=1
 state year=2026
 state view="year"
+state draftName=""
+state draftEvery=""
+state draftLast=""
+state draftWho=""
 App
   Sidebar
     Brand "Upkeep" icon="home_repair_service"
@@ -20,7 +24,7 @@ App
         Heading "{year}" level=1
         IconButton "chevron_right" tooltip="Next year" onTap={year=year+1}
       Row gap=8
-        SegmentedButton bind=view items=["year","list"]
+        SegmentedButton @view items=["year","list"]
         Button "Add task" icon="add" onTap={open newTask}
     Column pad=24 gap=16
       Row gap=16 top
@@ -67,10 +71,10 @@ App
     each t in tasks
       ListTile "{t.name}" "{t.who}" onTap={sel=t.id; close}
   Dialog#newTask "New task" "Set how often it repeats"
-    Input "Task name" "Service the boiler" bind=draftName
-    Select "Repeats" items=["Monthly","Every 3 months","Every 6 months","Yearly"] bind=draftEvery
-    DatePicker "Last done" bind=draftLast
-    Input "Who to call" bind=draftWho
+    Input "Task name" "Service the boiler" @draftName
+    Select "Repeats" items=["Monthly","Every 3 months","Every 6 months","Yearly"] @draftEvery
+    DatePicker "Last done" @draftLast
+    Input "Who to call" @draftWho
     Button "Add task" onTap={tasks=append(tasks,{"id":length(tasks)+1,"name":draftName,"month":0,"every":draftEvery,"last":draftLast,"due":draftLast,"days":30,"who":draftWho,"phone":"","done":false}); toast "Task added"; close}
 
 ### Autumn checklist
@@ -104,7 +108,7 @@ App
         each it in items
           if area=="All" || it.area==area
             Row between
-              Checkbox "{it.t}" bind=it.done
+              Checkbox "{it.t}" @it.done
               Badge.neutral "{it.area}"
       Button "Book boiler service" icon="phone" onTap={open callSheet}
   Sheet#callSheet "Book a service"
@@ -116,6 +120,7 @@ App
 ### Home plan
 state rooms=[{"id":"kitchen","name":"Kitchen","tasks":["Descale kettle and dishwasher","Replace filter in extractor"]},{"id":"bath","name":"Bathroom","tasks":["Re-seal around bath","Clean extractor fan"]},{"id":"hall","name":"Hallway","tasks":["Test smoke alarm","Check front door seals"]},{"id":"loft","name":"Loft","tasks":["Check insulation","Look for damp"]},{"id":"boiler","name":"Boiler cupboard","tasks":["Annual service","Check pressure gauge"]}]
 state room="kitchen"
+state newTask=""
 App
   Sidebar
     Brand "Upkeep" icon="home_repair_service"
@@ -132,7 +137,7 @@ App
     Column pad=24 gap=16
       Row gap=16 top
         Card grow
-          FloorPlan rooms={rooms} bind=room h=360
+          FloorPlan rooms={rooms} @room h=360
             each r in rooms
               Pin "{length(r.tasks)}" room=r.id onTap={room=r.id}
         Pane w=320 pad=16 gap=12
@@ -145,7 +150,7 @@ App
                 IconButton "check" tooltip="Mark done" onTap={rooms=updateWhere(rooms,x=>x.id==r.id,x=>with(x,"tasks",without(x.tasks,t))); toast "Done"}
             Button.outline "Add task here" icon="add" onTap={open addHere}
   Dialog#addHere "Add a task to this room"
-    Input "Task" bind=newTask
+    Input "Task" @newTask
     Button "Add" onTap={rooms=updateWhere(rooms,x=>x.id==room,x=>with(x,"tasks",append(x.tasks,newTask))); newTask=""; close}
 
 ### Spend and warranties
@@ -154,6 +159,9 @@ state spend=[{"task":"Boiler service","amount":96,"date":"2025-10-04","receipt":
 state warranties=[{"item":"Boiler","ends":"2028-03-15","days":850,"remind":true},{"item":"Dishwasher","ends":"2026-12-20","days":33,"remind":true},{"item":"Washing machine","ends":"2027-05-02","days":166,"remind":false}]
 state contacts=[{"name":"Harlow Heating","role":"Boiler engineer","phone":"020 7946 0112"},{"name":"Dave Okafor","role":"Gutters and roofing","phone":"07700 900314"},{"name":"Sootless Sweeps","role":"Chimney sweep","phone":"020 7946 0777"},{"name":"Priya Nair","role":"Electrician","phone":"07700 900552"}]
 state photo=""
+state rTask=""
+state rAmount=""
+state rPhoto=""
 App
   Sidebar
     Brand "Upkeep" icon="home_repair_service"
@@ -168,7 +176,7 @@ App
       Heading "Spend, warranties and contacts" level=1
       Button "Add receipt" icon="photo_camera" onTap={open receipt}
     Column pad=24 gap=16
-      SegmentedButton bind=tab items=["spend","warranties","contacts"]
+      SegmentedButton @tab items=["spend","warranties","contacts"]
       if tab=="spend"
         Row gap=16 top
           Card grow gap=8
@@ -193,7 +201,7 @@ App
                 Text.muted "Ends {w.ends}"
               Row gap=8
                 Badge.warning "{w.days} days left" visible={w.days<60}
-                FilterChip "Remind me" bind=w.remind
+                FilterChip "Remind me" @w.remind
       if tab=="contacts"
         Card gap=8
           each c in contacts
@@ -201,8 +209,8 @@ App
               IconButton "call" tooltip="Call" onTap={link "tel:{c.phone}"}
               IconButton "content_copy" tooltip="Copy number" onTap={copy c.phone; toast "Number copied"}
   Dialog#receipt "Add a receipt"
-    Select "Task" items=["Boiler service","Gutter clearing","Chimney sweep","Other"] bind=rTask
-    Input "Amount" type=number bind=rAmount
-    ImagePicker "Photograph receipt" bind=rPhoto source="camera"
+    Select "Task" items=["Boiler service","Gutter clearing","Chimney sweep","Other"] @rTask
+    Input "Amount" type=number @rAmount
+    ImagePicker "Photograph receipt" @rPhoto source="camera"
     Button "Save" onTap={spend=append(spend,{"task":rTask,"amount":rAmount,"date":today(),"receipt":rPhoto}); toast "Receipt saved"; close}
   Lightbox#zoom "{photo}" "Receipt"

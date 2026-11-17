@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "Tabs",
-  "doc": "The tabs of a page or a card: labels on a hairline, the open one underlined in the accent, switching what is shown under them. Write Tabs bind=tab tabs=[\"Overview\",\"Activity\",\"Settings\"] with state tab=\"Overview\", then one if tab==\"Overview\" block per tab under it. Any number of tabs: where they do not fit, the row scrolls sideways on one line and brings the open tab into view. For a small switch of two to four options use Segments, for filter pills ChipTabs. Fires onChanged with the label.",
+  "doc": "The tabs of a page or a card: labels on a hairline, the open one underlined in the accent, switching what is shown under them. Write Tabs @tab tabs=[\"Overview\",\"Activity\",\"Settings\"] with state tab=\"Overview\", then one if tab==\"Overview\" block per tab under it. Any number of tabs: where they do not fit, the row scrolls sideways on one line and brings the open tab into view. For a small switch of two to four options use Segments, for filter pills ChipTabs. Fires onChanged with the label.",
   "props": [
    {
     "key": "tabs",

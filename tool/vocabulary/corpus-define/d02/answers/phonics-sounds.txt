@@ -34,7 +34,7 @@ Dialog#sum "Parent corner" "Answer this to continue"
   state b=5
   state answer=""
   Text.heading "What is {a} + {b}?"
-  Input "Your answer" type=number bind=answer
+  Input "Your answer" type=number @answer
   Button "Open" onTap={answer==a+b ? {answer=""; close; go parent} : toast "Not quite, try again"}
 
 ### Basket game
@@ -73,7 +73,7 @@ Dialog#sum "Parent corner" "Answer this to continue"
   state b=5
   state answer=""
   Text.heading "What is {a} + {b}?"
-  Input "Your answer" type=number bind=answer
+  Input "Your answer" type=number @answer
   Button "Open" onTap={answer==a+b ? {answer=""; close; go parent} : toast "Not quite, try again"}
 
 ### Blend
@@ -105,7 +105,7 @@ App
       if merged
         BlendTile letter="{words[w].word}" wide=true animate=pop onTap={emit speak words[w].word}
         Text.success "{words[w].word}"
-      Slider bind=gap min=0 max=40 w=280 onChange={result<=0 ? {merged=true; stars=stars+1; emit speak words[w].word} : {merged=false}}
+      Slider @gap min=0 max=40 w=280 onChange={result<=0 ? {merged=true; stars=stars+1; emit speak words[w].word} : {merged=false}}
       Text.muted "Drag the slider to slide the tiles together"
       Row gap=12
         Button.outline "Again" icon="refresh" onTap={gap=40; merged=false}
@@ -116,7 +116,7 @@ Dialog#sum "Parent corner" "Answer this to continue"
   state b=5
   state answer=""
   Text.heading "What is {a} + {b}?"
-  Input "Your answer" type=number bind=answer
+  Input "Your answer" type=number @answer
   Button "Open" onTap={answer==a+b ? {answer=""; close; go parent} : toast "Not quite, try again"}
 
 ### Parent corner
@@ -148,10 +148,10 @@ App
         Text.muted "Play the Basket game with these sounds to help them stick."
       Card gap=12
         Heading "Settings" level=3
-        Toggle "Sound on" bind=soundOn
+        Toggle "Sound on" @soundOn
         Row between middle
           Text "Daily play limit: {minutes} minutes"
-          Slider bind=minutes min=5 max=60 w=200
+          Slider @minutes min=5 max=60 w=200
         Button "Save" onTap={emit saveSettings; toast "Saved"}
 
 // Sound cannot play here; the waves are drawn bars that pulse while a sound is playing.

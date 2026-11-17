@@ -2,6 +2,7 @@
 state filter="all"
 state activeRoom={"id":1,"title":"Late night indie hackers","host":"Maya Reyes"}
 state rooms=[{"id":1,"title":"Late night indie hackers","host":"Maya Reyes","topic":"tech","speakers":["Maya Reyes","Dev Patel","Lin Zhou","Omar Haddad"],"listeners":212},{"id":2,"title":"Sunday jazz and talk","host":"Ines Duarte","topic":"music","speakers":["Ines Duarte","Tomas Weber"],"listeners":87},{"id":3,"title":"Ask a nurse anything","host":"Grace Okafor","topic":"health","speakers":["Grace Okafor","Sam Whitaker","Priya Nair"],"listeners":341},{"id":4,"title":"Learning Portuguese together","host":"Rui Costa","topic":"language","speakers":["Rui Costa","Ana Lima"],"listeners":45}]
+state q=""
 App
   Sidebar
     Brand "Murmur" icon="graphic_eq"
@@ -15,7 +16,7 @@ App
     Nav
       Heading "Live rooms" level=1
       Row gap=8
-        Input "Search rooms" bind=q w=220
+        Input "Search rooms" @q w=220
         Button "Start a room" icon="mic" onTap={open newRoom}
     Column pad=24 gap=16 scroll
       Row gap=8
@@ -48,8 +49,8 @@ App
 Dialog#newRoom "Start a room" "Pick a title people will want to join"
   state newTitle=""
   state newTopic="tech"
-  Input "Room title" bind=newTitle
-  Select "Topic" items=["tech","music","health","language"] bind=newTopic
+  Input "Room title" @newTitle
+  Select "Topic" items=["tech","music","health","language"] @newTopic
   Button "Go live" onTap={newTitle=="" ? toast "Give your room a title" : rooms=append(rooms,{"id":length(rooms)+10,"title":newTitle,"host":"Sam Patel","topic":newTopic,"speakers":["Sam Patel"],"listeners":0}); close}
 
 ### Room
@@ -125,7 +126,7 @@ Menu#reactMenu above
 
 Dialog#invite "Invite someone" "They get a link to join as a listener"
   state inviteName=""
-  Input "Name or @handle" bind=inviteName
+  Input "Name or @handle" @inviteName
   Row gap=8
     Button "Send invite" onTap={inviteName=="" ? toast "Enter a name" : (toast "Invited {inviteName}"; inviteName=""; close)}
     Button.ghost "Cancel" onTap={close}

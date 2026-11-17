@@ -42,7 +42,7 @@ App
               Row between
                 Box fill={c.color} radius=8 pad=[12,6,12,6]
                   Text.small "{c.party}" color=#FFFFFFFF
-                Checkbox bind=council
+                Checkbox @council
               Text.title "{c.name}"
         Text.caption "{length(council)} of 3 chosen"
       if step==2
@@ -146,7 +146,7 @@ Page
         Icon "print" size=64
         Heading "Printing your ballot" level=1
         Text.muted "Please wait. Do not leave the booth."
-        Progress bind=pct
+        Progress value={pct}
         Text.caption "{round(pct*100,0)}%"
     if done
       Column center gap=16 animate=pop

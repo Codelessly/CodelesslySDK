@@ -19,7 +19,7 @@ Card gap=10
       Icon "close" {"props": {"size": 14, "color": "#FFDC2626"}}
       Text.muted "Change, move or delete anything"
   Text.fieldLabel "WHERE"
-  SegmentedButton items=["folder","drive"] bind=scope
+  SegmentedButton items=["folder","drive"] @scope
   Text.bodySecondary "{scope=="folder" ? "Only Reports / 2026 (214 files)" : "Everything in your drive (about 12,400 files)"}"
   Divider
   if status=="request"

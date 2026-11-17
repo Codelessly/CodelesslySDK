@@ -61,7 +61,7 @@ App
             Text.caption "Dan Whitaker · 9:12"
             Text "Yes, $49.00 goes back to the card ending 4417. You will see it within 3 to 5 business days."
         Card gap=8
-          Input "Reply to Maya" "Write your reply..." bind=reply multiline
+          Input "Reply to Maya" "Write your reply..." @reply multiline
           Row gap=8 end
             Button.outline "Send and close" onTap={emit sendAndClose reply; reply=""}
             Button "Send" onTap={emit send reply; reply=""}

@@ -17,6 +17,11 @@ state slashQuery=""
 state headings=[{"level":1,"text":"Launch notes","line":1},{"level":2,"text":"Timeline","line":10},{"level":2,"text":"Links","line":16}]
 state words=0
 state matches=0
+state linkText=""
+state linkUrl=""
+state tableRows=""
+state tableCols=""
+state tableHeader=false
 every 2s when !saved onTick={saved=true; lastSaved="just now"}
 App
   Sidebar w=240 hide=tablet
@@ -35,7 +40,7 @@ App
   Main
     Nav
       Row gap=8
-        Input bind=title w=220
+        Input @title w=220
         if saved
           Badge.success "Saved {lastSaved}"
         if !saved
@@ -62,18 +67,18 @@ App
       IconButton "format_quote" tooltip="Quote" onTap={doc=prefixLine(doc,"> ")}
     if findOpen
       Row gap=8 pad=[12,8,12,8] fill=#FFF7F7F7
-        Input "Find" bind=query w=200
+        Input "Find" @query w=200
         Text.muted "{matches == 0 ? 'No matches' : (matchIndex+1) + ' of ' + matches}"
         IconButton "keyboard_arrow_up" tooltip="Previous match" onTap={matchIndex=(matchIndex-1+max(1,matches))%max(1,matches)}
         IconButton "keyboard_arrow_down" tooltip="Next match" onTap={matchIndex=(matchIndex+1)%max(1,matches)}
-        Input "Replace with" bind=replacement w=200
+        Input "Replace with" @replacement w=200
         Button.outline "Replace" onTap={doc=replaceNth(doc,query,replacement,matchIndex); saved=false}
         Button.outline "Replace all" onTap={doc=replace(doc,query,replacement); saved=false; toast "Replaced {matches} matches"}
-        Checkbox "Match case" bind=caseSensitive
+        Checkbox "Match case" @caseSensitive
         Spacer grow
         IconButton "close" tooltip="Close find" onTap={findOpen=false}
-    SplitPane bind=split min=0.25 max=0.75 grow
-      CodeEditor bind=doc lang="markdown" lineNumbers find={query} findIndex={matchIndex} caseSensitive={caseSensitive} scrollSync={scrollPos} onScroll={scrollPos=result} onSlash={slashQuery=result; open slashMenu} onChange={saved=false} onMatches={matches=result}
+    SplitPane @split min=0.25 max=0.75 grow
+      CodeEditor @doc lang="markdown" lineNumbers find={query} findIndex={matchIndex} caseSensitive={caseSensitive} scrollSync={scrollPos} onScroll={scrollPos=result} onSlash={slashQuery=result; open slashMenu} onChange={saved=false} onMatches={matches=result}
       if showPreview
         MarkdownPreview source={doc} scrollSync={scrollPos} onScroll={scrollPos=result} onLinkTap={link result}
     Footer
@@ -101,16 +106,16 @@ App
     MenuItem "PDF" icon="picture_as_pdf" onTap={emit exportFile "pdf"; toast "Exported PDF"}
     MenuItem "Copy as rich text" icon="content_copy" onTap={copy doc; toast "Copied"}
   Dialog#linkDialog "Insert link"
-    Input "Text" bind=linkText
-    Input "URL" "https://" bind=linkUrl
+    Input "Text" @linkText
+    Input "URL" "https://" @linkUrl
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Insert" onTap={doc=insertAtCursor(doc,"[" + linkText + "](" + linkUrl + ")"); saved=false; close}
   Dialog#tableDialog "Insert table"
     Row gap=12
-      Input "Rows" type=number bind=tableRows grow
-      Input "Columns" type=number bind=tableCols grow
-    Toggle "Header row" bind=tableHeader
+      Input "Rows" type=number @tableRows grow
+      Input "Columns" type=number @tableCols grow
+    Toggle "Header row" @tableHeader
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Insert table" onTap={doc=insertAtCursor(doc,markdownTable(tableRows,tableCols,tableHeader)); saved=false; close}
@@ -129,13 +134,13 @@ Page
     Row gap=12
       Text.small "{wordCount(doc)} / {wordGoal} words"
       Progress {min(1, wordCount(doc)/wordGoal)} w=120
-      Toggle "Typewriter scroll" bind=typewriter
+      Toggle "Typewriter scroll" @typewriter
       if saved
         Badge.success "Saved"
       if !saved
         Badge.warning "Saving..."
   Section narrow
-    CodeEditor bind=doc lang="markdown" focusMode dimOthers=true typewriter={typewriter} onChange={saved=false} onSlash={open focusSlash}
+    CodeEditor @doc lang="markdown" focusMode dimOthers=true typewriter={typewriter} onChange={saved=false} onSlash={open focusSlash}
   Footer
     Row center gap=16
       Text.small "{ceil(wordCount(doc)/220)} min read"
@@ -161,8 +166,8 @@ App
     Nav
       Heading "Drafts" level=1
       Row gap=8
-        Input "Search drafts" bind=q w=220
-        Select bind=sortBy items=["edited","title","words"]
+        Input "Search drafts" @q w=220
+        Select @sortBy items=["edited","title","words"]
         Button "New draft" icon="add" onTap={drafts=append(drafts,{"id":length(drafts)+1,"title":"Untitled","words":0,"edited":"Just now","pinned":false}); go editor}
     Column pad=24 gap=12 scroll
       each d in sortByDesc(filter(drafts,x=>contains(lower(x.title),lower(q))),x=>x.pinned)

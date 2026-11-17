@@ -1,0 +1,82 @@
+{
+ "widget": {
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Title",
+    "doc": "The main text.",
+    "required": true
+   },
+   {
+    "key": "subtitle",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A second line (empty: none)."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A Material icon name before the text (empty: none)."
+   },
+   {
+    "key": "selected",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "The active tint (the current item)."
+   },
+   {
+    "key": "dense",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "28 px instead of 36 (inspectors, menus)."
+   },
+   {
+    "key": "divider",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "A hairline under the row."
+   },
+   {
+    "key": "mark",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "What to mark in the text (a search query: what fuzzy matched is drawn bold and underlined; empty: nothing)."
+   }
+  ]
+ },
+ "nodes": {
+  "title": {
+   "bind": {
+    "props.runs": "${= matchRuns(props.title, props.mark)}"
+   }
+  },
+  "subtitle": {
+   "bind": {
+    "props.runs": "${= matchRuns(props.subtitle, props.mark)}"
+   }
+  }
+ }
+}

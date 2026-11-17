@@ -11,8 +11,17 @@ import 'calendar.dart';
 import 'kit_pickers.dart';
 import 'tokens.dart';
 
-Map<String, String> _dayMap(api.Json? raw) => switch (raw) {
+Map<String, String> _dayMap(Object? raw) => switch (raw) {
   final Map m => {for (final e in m.entries) '${e.key}': '${e.value}'},
+  // Marks worked out from a list: days (a dot under each), or records with
+  // a day (`date`, `day`) and a text (`label`, `title`, `text`, `mark`).
+  final List l => {
+    for (final e in l)
+      if (e is Map && (e['date'] ?? e['day']) != null)
+        '${e['date'] ?? e['day']}': '${e['label'] ?? e['title'] ?? e['text'] ?? e['mark'] ?? '•'}'
+      else if (e is String && e.isNotEmpty)
+        e: '•',
+  },
   _ => const {},
 };
 
@@ -47,27 +56,33 @@ void inlineCalendarRecipe(NodeBuilder b, Node n, List<RenderBox> chain, {PickerL
     )
     ..symbols = locale
     ..label = n.prop(CalendarProps.label)
+    ..range = n.prop(CalendarProps.range)
     ..direction = n.behaviors.textDirection == api.TextDirection.rtl
         ? TextDirection.rtl
         : TextDirection.ltr
     ..updateRange(
       start: parseDay(n.prop(CalendarProps.start)),
-      end: parseDay(n.prop(CalendarProps.end)),
+      end: n.prop(CalendarProps.range) ? parseDay(n.prop(CalendarProps.end)) : null,
       first: parseDay(n.prop(CalendarProps.firstDate)),
       last: parseDay(n.prop(CalendarProps.lastDate)),
       disabledDates: n.prop(CalendarProps.disabledDates).toSet(),
       dayPrices: _dayMap(n.prop(CalendarProps.dayPrices)),
       marks: _dayMap(n.prop(CalendarProps.marks)),
     )
+    // A range gives {start, end}; one day gives the day (yyyy-MM-dd).
     ..onRangeChanged = b.tree.animates
         ? (start, end) => fireTrigger(
             b,
             'changed',
             event: {
-              'value': {
-                'start': start == null ? '' : isoDay(start),
-                'end': end == null ? '' : isoDay(end),
-              },
+              'value': n.prop(CalendarProps.range)
+                  ? {
+                      'start': start == null ? '' : isoDay(start),
+                      'end': end == null ? '' : isoDay(end),
+                    }
+                  : start == null
+                  ? ''
+                  : isoDay(start),
             },
           )
         : null;

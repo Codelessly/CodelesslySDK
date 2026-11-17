@@ -1,3 +1,4 @@
+state email=""
 Page
   Nav
     Text.strong "Signal & Noise"
@@ -58,7 +59,7 @@ Page
         Card gap=10
           Text.strong "Get new posts by email"
           Text.muted "One engineering essay a month. No noise."
-          Input "Email" hint="you@example.com" bind=email type={email}
+          Input "Email" hint="you@example.com" @email type={email}
           Button "Subscribe" onTap={emit newsletter email; toast "Thanks for subscribing"}
   Section fill=#FFF9FAFB
     Heading "Related articles" level=2

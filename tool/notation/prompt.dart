@@ -2,7 +2,7 @@
 // (package:codelessly_api/notation.dart): the grammar, the words, and, with
 // a design system, its components.
 //
-//   dart run tool/notation/prompt.dart [--design-system <folder>] [--width <canvas width>] [--open [--no-define] [--no-glossary]]
+//   dart run tool/notation/prompt.dart [--design-system <folder>] [--width <canvas width>] [--open [--no-define] [--no-glossary | --glossary=names|signatures]]
 import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
@@ -15,13 +15,20 @@ Future<void> main(List<String> args) async {
   // design system's components are not listed), which asks the model to
   // define every word it invents after its last screen; --no-define leaves
   // that out (the prompt the first corpus was written with). With a design
-  // system the open prompt names its components and defined words on one
-  // line, the glossary (the vocabulary loop's Review 6, D29); --no-glossary
-  // leaves it out (the prompt the self-defining corpora d01 and d02 were
-  // written with).
+  // system the open prompt lists its components and defined words, the
+  // glossary (the vocabulary loop's Review 6, D29): by default one line per
+  // word as a line uses it, its signature (Review 7, D33);
+  // --glossary=names gives their names on one line (the prompt corpus-define
+  // d03 was written with); --no-glossary leaves it out (the prompt the
+  // self-defining corpora d01 and d02 were written with).
   final open = args.contains('--open');
   final define = !args.contains('--no-define');
   final glossary = !args.contains('--no-glossary');
+  final form = [for (final a in args) if (a.startsWith('--glossary=')) a.substring(11)].lastOrNull ?? 'signatures';
+  if (form != 'names' && form != 'signatures') {
+    stderr.writeln('--glossary= takes names or signatures, not $form.');
+    exit(2);
+  }
   final w = args.indexOf('--width');
   final width = w >= 0 && w + 1 < args.length ? double.tryParse(args[w + 1]) ?? 390.0 : 390.0;
   final i = args.indexOf('--design-system');
@@ -54,6 +61,7 @@ Future<void> main(List<String> args) async {
       open: open,
       define: define,
       glossary: glossary,
+      signatures: form == 'signatures',
     ),
   ));
   if (defined.isNotEmpty) {

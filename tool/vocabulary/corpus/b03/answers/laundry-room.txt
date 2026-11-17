@@ -19,7 +19,7 @@ App
     Nav
       Heading "Laundry room" level=1
       Row gap=12
-        Toggle "Notify me when my cycle ends" bind=notify onChange={toast result ? "We will notify you" : "Notifications off"}
+        Toggle "Notify me when my cycle ends" @notify onChange={toast result ? "We will notify you" : "Notifications off"}
         Button.outline "Reserve" icon="schedule" onTap={go reserve}
     Column pad=24 gap=16
       Row gap=8
@@ -59,12 +59,12 @@ App
               Button.ghost "See report" onTap={go report}
   Dialog#start "Start a cycle" "Pick a programme and temperature"
     Text.strong "Machine {sel}"
-    Select "Programme" bind=programme items=["Cottons","Delicates","Quick 15","Heavy duty"]
-    SegmentedButton bind=temp items=["20°","30°","40°","60°"]
+    Select "Programme" @programme items=["Cottons","Delicates","Quick 15","Heavy duty"]
+    SegmentedButton @temp items=["20°","30°","40°","60°"]
     Row between
       Text.muted "Price"
       Text.heading "{money(prices[programme],'$',2)}"
-    Toggle "Notify me when it is done" bind=notify
+    Toggle "Notify me when it is done" @notify
     Row gap=8 end
       Button.ghost "Cancel" onTap={close}
       Button "Pay and start" onTap={machines=updateWhere(machines,x=>x.id==sel,x=>with(with(x,"status","running"),"left",45)); emit startCycle sel; toast "Cycle started on {sel}"; close}
@@ -78,6 +78,7 @@ state machine="W1"
 state slot=""
 state taken=["Tue 18|W1|09:00","Tue 18|W1|09:30","Tue 18|W1|18:00","Tue 18|W2|07:00"]
 state bookings=[{"id":1,"machine":"W2","day":"Tue 18","slot":"19:30","price":3.5},{"id":2,"machine":"D1","day":"Thu 20","slot":"08:00","price":2}]
+state notify=false
 App
   Sidebar
     Brand "Spin Cycle" icon="local_laundry_service"
@@ -90,11 +91,11 @@ App
       Heading "Reserve a machine" level=1
     Column pad=24 gap=16
       Row gap=12 wrap
-        Select "Machine" bind=machine items=["W1","W2","W3","D1","D2","D3"]
-        DatePicker "Day" bind=day
+        Select "Machine" @machine items=["W1","W2","W3","D1","D2","D3"]
+        DatePicker "Day" @day
       Card gap=12
         Text.strong "{machine} on {day}"
-        Timeline bind=slot start="07:00" end="22:00" step=30 taken={filter(taken,t=>startsWith(t,day+"|"+machine))} onSelect={slot=result}
+        Timeline @slot start="07:00" end="22:00" step=30 taken={filter(taken,t=>startsWith(t,day+"|"+machine))} onSelect={slot=result}
         Row gap=16 center
           Badge.neutral "Taken"
           Badge.primary "Your choice"
@@ -105,7 +106,7 @@ App
             Text.muted "A slot is 30 minutes, paid when you start the cycle"
           Button "Reserve" onTap={slot=="" ? toast "Pick a slot first" : open confirm}
   Dialog#confirm "Confirm booking" "Machine {machine}, {day} at {slot}"
-    Toggle "Notify me 10 minutes before" bind=notify
+    Toggle "Notify me 10 minutes before" @notify
     Row gap=8 end
       Button.ghost "Back" onTap={close}
       Button "Confirm" onTap={bookings=append(bookings,{"id":length(bookings)+1,"machine":machine,"day":day,"slot":slot,"price":3}); taken=append(taken,day+"|"+machine+"|"+slot); slot=""; toast "Booked"; close; go my-bookings}
@@ -161,10 +162,10 @@ App
           Button.outline "Back to machines" onTap={go machines}
       if !reported
         Card gap=12
-          Select "Machine" bind=machine items=["W1","W2","W3","W4","D1","D2","D3"]
-          Select "What is wrong?" bind=problem items=["Won't drain","Won't start","Door will not open","Leaking","Not heating","Other"]
-          Input "Details" "Describe what happened" bind=note multiline
-          FilePicker "Add a photo" accept="image/*" bind=photo
+          Select "Machine" @machine items=["W1","W2","W3","W4","D1","D2","D3"]
+          Select "What is wrong?" @problem items=["Won't drain","Won't start","Door will not open","Leaking","Not heating","Other"]
+          Input "Details" "Describe what happened" @note multiline
+          FilePicker "Add a photo" accept="image/*" @photo
           if photo!=""
             Image "{photo}" h=160 radius=8
             Button.ghost "Remove photo" onTap={photo=""}

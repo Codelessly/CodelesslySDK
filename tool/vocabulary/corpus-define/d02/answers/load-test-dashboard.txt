@@ -22,13 +22,13 @@ App
     Column pad=24 gap=16 scroll
       Grid cols=3 gap=16
         Card gap=8
-          Input "Scenario name" bind=name
+          Input "Scenario name" @name
         Card gap=8
-          Input "Target URL" bind=target
+          Input "Target URL" @target
         Card gap=8
           Text.fieldLabel "Fail the run if p99 latency crosses (ms)"
           Row gap=12 middle
-            Slider bind=threshold min=100 max=2000 grow
+            Slider @threshold min=100 max=2000 grow
             Text.strong "{threshold} ms"
       Card gap=12
         Row between middle
@@ -38,7 +38,7 @@ App
           Row gap=8
             Button.outline "Add point" icon="add" onTap={points=append(points,{"min":last(points).min+2,"users":0})}
             Button.ghost "Reset" onTap={points=[{"min":0,"users":0},{"min":2,"users":200},{"min":6,"users":800},{"min":12,"users":800},{"min":16,"users":1500},{"min":20,"users":0}]}
-        RampEditor bind=points h=260 maxUsers=2000 unit="min"
+        RampEditor @points h=260 maxUsers=2000 unit="min"
       Card gap=8
         Text.panelTitle "Stages"
         each p in points
@@ -61,14 +61,14 @@ Dialog#countdown "Start run" "{name}"
       Button "Begin 5 second countdown" icon="timer" onTap={counting=true}
 
 // A draggable line editor: shown as a line chart with a drag handle for each point.
-define RampEditor bind=points maxUsers=2000 unit="min" h=240 onChange
+define RampEditor @points maxUsers=2000 unit="min" h=240 onChange
   Column gap=8
     LineChart values={map(points,p=>p.users)} labels={map(points,p=>p.min)} h={h}
     Row gap=8 between top
       each p in points
         Column grow gap=4 center
           Icon "drag_indicator"
-          Slider bind=p.users min=0 max={maxUsers} drag=ramp(p.min)
+          Slider @p.users min=0 max={maxUsers} drag=ramp(p.min)
           Text.small "{p.users}"
           Text.caption "{p.min} {unit}"
 
@@ -180,8 +180,8 @@ Page
         Heading "Checkout peak, 20 min" level=1
         Text.muted "Completed today at 14:32 against staging.shop.example.com"
         Row gap=8
-          Select bind=runA items=["Run 40 (Sun)","Run 41 (Mon)","Run 42 (today)"]
-          Select bind=runB items=["Run 40 (Sun)","Run 41 (Mon)","Run 42 (today)"]
+          Select @runA items=["Run 40 (Sun)","Run 41 (Mon)","Run 42 (today)"]
+          Select @runB items=["Run 40 (Sun)","Run 41 (Mon)","Run 42 (today)"]
       Seal "{peakB > threshold ? 'FAIL' : 'PASS'}" pass={peakB <= threshold}
   Section tint
     Grid cols=4 gap=16

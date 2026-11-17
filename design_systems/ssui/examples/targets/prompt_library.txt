@@ -4,7 +4,7 @@ Card gap=10
   Row gap=8
     Text.sectionTitle "Prompts" grow
     AddButton "New prompt" onPressed={emit new}
-  FullWidthSearchInput bind=q placeholder="Search prompts"
+  FullWidthSearchInput @q placeholder="Search prompts"
   SelectableListRow "Summarize a thread" subtitle="Three bullets and the open questions" trailing="Used 42x" selected={picked=="a"} onSelected={picked="a"}
   SelectableListRow "Draft a reply" subtitle="Polite, short, with next steps" trailing="Used 18x" selected={picked=="b"} onSelected={picked="b"}
   SelectableListRow "Explain this code" subtitle="prompts/explain.md" subtitleMono=true trailing="Used 9x" selected={picked=="c"} onSelected={picked="c"}

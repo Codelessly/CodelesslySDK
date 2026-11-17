@@ -25,7 +25,7 @@ App
     Nav
       Heading "Round of 16 bracket" level=1
       Row gap=8 middle
-        Select "Follow a team" bind=follow items=["Brazil","France","Argentina","England","Spain","Netherlands","Portugal","Germany","Japan","Morocco","Australia","Senegal","Korea","USA","Switzerland","Croatia"]
+        Select "Follow a team" @follow items=["Brazil","France","Argentina","England","Spain","Netherlands","Portugal","Germany","Japan","Morocco","Australia","Senegal","Korea","USA","Switzerland","Croatia"]
         Button.outline "Clear scores" onTap={r1=map(r1,m=>with(with(m,"sa",""),"sb","")); s2=map(s2,m=>with(with(m,"sa",""),"sb","")); s3=map(s3,m=>with(with(m,"sa",""),"sb","")); s4=map(s4,m=>with(with(m,"sa",""),"sb",""))}
     Column pad=24 gap=16
       Row between middle
@@ -86,7 +86,7 @@ App
   Main
     Nav
       Heading "Group stage" level=1
-      SegmentedButton bind=grp items=["A","B"]
+      SegmentedButton @grp items=["A","B"]
     Column pad=24 gap=16
       Card gap=8
         Text.strong "Group {grp}"
@@ -169,7 +169,7 @@ App
             Avatar "France" size=56
             Text.strong "France"
         Progress {minute/90}
-      SegmentedButton bind=tab items=["events","lineups"]
+      SegmentedButton @tab items=["events","lineups"]
       if tab=="events"
         Card gap=8
           Text.strong "Match events"
@@ -205,8 +205,8 @@ App
     Nav
       Heading "Fixtures by day" level=1
       Row gap=12 middle
-        Toggle "Only {follow}" bind=onlyFollowed
-        Select "Follow" bind=follow items=["Brazil","France","Argentina","England","Spain","Netherlands","Portugal","Germany"]
+        Toggle "Only {follow}" @onlyFollowed
+        Select "Follow" @follow items=["Brazil","France","Argentina","England","Spain","Netherlands","Portugal","Germany"]
     Column pad=24 gap=16
       each d in days
         Card gap=8

@@ -20,7 +20,7 @@ App
     Nav
       Heading "{spot}"
       Row gap=8
-        Select bind=spot items=["Ocean Beach","Linda Mar","Mavericks","Steamer Lane"]
+        Select @spot items=["Ocean Beach","Linda Mar","Mavericks","Steamer Lane"]
         Button.outline "Alerts" onTap={go alerts}
     Column pad=24 gap=16 scroll
       Grid cols=4 gap=16
@@ -66,6 +66,7 @@ state q=""
 state minStars=0
 state selected="Ocean Beach"
 state spots=[{"name":"Ocean Beach","stars":4,"ft":3.5,"wind":"offshore","lat":37.76,"lng":-122.51,"x":0.28,"y":0.35},{"name":"Linda Mar","stars":3,"ft":2.5,"wind":"light","lat":37.59,"lng":-122.50,"x":0.22,"y":0.62},{"name":"Mavericks","stars":5,"ft":12.0,"wind":"offshore","lat":37.49,"lng":-122.50,"x":0.18,"y":0.8},{"name":"Steamer Lane","stars":4,"ft":4.0,"wind":"cross","lat":36.95,"lng":-122.02,"x":0.62,"y":0.9},{"name":"Rockaway","stars":2,"ft":2.0,"wind":"onshore","lat":37.60,"lng":-122.50,"x":0.24,"y":0.56}]
+state myRating=""
 App
   Sidebar
     Brand "Swell Table" icon="waves"
@@ -77,8 +78,8 @@ App
     Nav
       Heading "Spots"
       Row gap=8
-        Input "Search spots" bind=q w=220
-        SegmentedButton bind=view items=["list","map"]
+        Input "Search spots" @q w=220
+        SegmentedButton @view items=["list","map"]
         IconButton "filter_list" tooltip="Filter by rating" onTap={open ratingFilter}
     Column pad=24 gap=16 scroll
       if view=="list"
@@ -92,7 +93,7 @@ App
         if isEmpty(filter(spots, x => x.stars >= minStars))
           Text.muted "No spots at that rating."
       if view=="map"
-        SpotMap spots={spots} bind=selected h=420 onPick={selected=result; open spotSheet}
+        SpotMap spots={spots} @selected h=420 onPick={selected=result; open spotSheet}
         Text.muted "Tap a pin for conditions."
 Sheet#ratingFilter "Minimum rating"
   Row gap=8
@@ -104,7 +105,7 @@ Sheet#spotSheet "{selected}"
   Column gap=12
     Row between
       Text.muted "Rate this spot"
-      StarRating bind=myRating
+      StarRating @myRating
     Row gap=8
       Button "Open today" onTap={spot=selected; go today; close}
       Button.outline "Set an alert" onTap={close; go alerts}
@@ -156,6 +157,7 @@ state minPeriod=10
 state notify=true
 state rules=[{"id":1,"spot":"Ocean Beach","label":"3 to 6 ft, wind under 12 mph","on":true},{"id":2,"spot":"Linda Mar","label":"2 to 4 ft, period over 9 s","on":true}]
 state matches=[{"when":"Wed 7a","spot":"Ocean Beach","ft":5.0,"wind":"6 mph NE"},{"when":"Thu 8a","spot":"Linda Mar","ft":3.5,"wind":"8 mph NE"}]
+state newSpot=""
 App
   Sidebar
     Brand "Swell Table" icon="waves"
@@ -170,8 +172,8 @@ App
     Column pad=24 gap=16 scroll
       Card gap=12
         Text.strong "Your levels"
-        SegmentedButton bind=level items=["Beginner","Intermediate","Advanced"] onChange={minFt=(result=="Beginner" ? 1 : (result=="Intermediate" ? 3 : 5)); maxFt=(result=="Beginner" ? 3 : (result=="Intermediate" ? 6 : 12))}
-        Toggle "Notify me when conditions match" bind=notify
+        SegmentedButton @level items=["Beginner","Intermediate","Advanced"] onChange={minFt=(result=="Beginner" ? 1 : (result=="Intermediate" ? 3 : 5)); maxFt=(result=="Beginner" ? 3 : (result=="Intermediate" ? 6 : 12))}
+        Toggle "Notify me when conditions match" @notify
       Card gap=8
         Text.strong "Matching now"
         each m in matches
@@ -185,16 +187,16 @@ App
               Text.strong "{r.spot}"
               Text.muted "{r.label}"
             Row gap=8 middle
-              Toggle bind=r.on
+              Toggle @r.on
               IconButton "delete" tooltip="Remove rule" onTap={rules=removeWhere(rules, x => x.id==r.id); toast "Rule removed"}
 Dialog#newRule "New alert rule" "Tell me when the surf matches"
-  Select "Spot" bind=newSpot items=["Ocean Beach","Linda Mar","Mavericks","Steamer Lane"]
+  Select "Spot" @newSpot items=["Ocean Beach","Linda Mar","Mavericks","Steamer Lane"]
   Row gap=12
-    Input "Min height (ft)" bind=minFt type=number
-    Input "Max height (ft)" bind=maxFt type=number
-  Slider bind=maxWind min=0 max=30
+    Input "Min height (ft)" @minFt type=number
+    Input "Max height (ft)" @maxFt type=number
+  Slider @maxWind min=0 max=30
   Text.muted "Max wind {maxWind} mph"
-  Slider bind=minPeriod min=6 max=20
+  Slider @minPeriod min=6 max=20
   Text.muted "Min period {minPeriod} s"
   Button "Save rule" onTap={rules=append(rules, {"id": length(rules)+10, "spot": coalesce(newSpot,"Ocean Beach"), "label": "{minFt} to {maxFt} ft, wind under {maxWind} mph", "on": true}); toast "Alert saved"; close}
 
@@ -215,7 +217,7 @@ define WaterTemp value=55 unit="F" trend="steady"
     Text.caption "{trend}"
 
 // A row of star icons; read only or tapped to set the rating.
-define StarRating bind=value max=5 readonly=false
+define StarRating @value max=5 readonly=false
   Row gap=2
     each i in range(max)
       Icon {i < value ? "star" : "star_border"} onTap={readonly ? "" : value=i+1}
@@ -252,7 +254,7 @@ define BestWindow label="Best window" start="" end="" score=80
     Badge.success "{score}"
 
 // A real map is not drawable here: shown as a labelled box with a pin for each spot.
-define SpotMap spots=[] bind=selected h=360 onPick
+define SpotMap spots=[] @selected h=360 onPick
   state selected=""
   Stack h={h} fill=#FFDBEAFE radius=8
     Text.muted "Map of spots" center

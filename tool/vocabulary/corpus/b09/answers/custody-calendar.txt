@@ -11,6 +11,11 @@ state requests=[{"id":1,"day":21,"title":"Swap Fri Nov 21 for Sat Nov 22","reaso
 state hDay=0
 state hPlace=""
 state hTime="3:30 PM"
+state evTitle=""
+state evTime=""
+state chDay=""
+state chWith=""
+state chReason=""
 App
   Sidebar
     Brand "Handoff" icon="swap_horiz"
@@ -52,7 +57,7 @@ App
               Row gap=4 middle
                 Icon "arrow_forward"
                 Text.caption "Swap day"
-            Toggle "School term" bind=term
+            Toggle "School term" @term
           Grid cols=7 gap=4
             Text.caption "Sun" center
             Text.caption "Mon" center
@@ -125,17 +130,17 @@ Dialog#patterns "Choose a pattern" "Fills the calendar from the first of the mon
       Text.strong "Alternating days"
       Text.muted "A swap every day."
 Dialog#handover "Handover place and time" "Day {hDay}"
-  Input "Place" "Maple Street School, front office" bind=hPlace
-  TimePicker "Time" bind=hTime
+  Input "Place" "Maple Street School, front office" @hPlace
+  TimePicker "Time" @hTime
   Button "Save handover" onTap={hPlace=="" ? toast "Add a place" : {handovers=append(handovers,{"day":hDay,"place":hPlace,"time":hTime}); hPlace=""; toast "Handover saved"; close}}
 Dialog#newEvent "Add an event" "For Ava on day {sel}"
-  Input "Title" bind=evTitle
-  TimePicker "Time" bind=evTime
+  Input "Title" @evTitle
+  TimePicker "Time" @evTime
   Button "Add" onTap={events=append(events,{"day":sel,"title":evTitle,"time":evTime}); evTitle=""; close}
 Dialog#change "Request a change" "Sent to Daniel for approval"
-  DatePicker "Day to swap" bind=chDay
-  Select "Swap with" items=["Fri Nov 21","Sat Nov 22","Sun Nov 23"] bind=chWith
-  Input "Reason" "Why do you need this swap?" bind=chReason multiline
+  DatePicker "Day to swap" @chDay
+  Select "Swap with" items=["Fri Nov 21","Sat Nov 22","Sun Nov 23"] @chWith
+  Input "Reason" "Why do you need this swap?" @chReason multiline
   Button "Send request" onTap={chReason=="" ? toast "Add a reason" : {requests=append(requests,{"id":length(requests)+1,"day":21,"title":"Swap {chDay} for {chWith}","reason":chReason,"from":"Maya","status":"pending"}); chReason=""; emit changeRequested; toast "Request sent to Daniel"; close}}
 
 ### Requests
@@ -152,7 +157,7 @@ App
   Main
     Nav
       Heading "Change requests" level=1
-      SegmentedButton items=["all","pending","approved","declined"] bind=filter
+      SegmentedButton items=["all","pending","approved","declined"] @filter
     Column pad=24 gap=12 scroll maxw=720
       each r in filter=="all" ? requests : filter(requests,x=>x.status==filter)
         Card gap=8
@@ -170,7 +175,7 @@ App
       if length(requests)==0
         Text.muted "No requests yet."
 Dialog#decline "Decline this request" "Daniel will see your note"
-  Input "Note" "Optional" bind=note multiline
+  Input "Note" "Optional" @note multiline
   Button.destructive "Decline" onTap={requests=updateWhere(requests,x=>x.id==sel,x=>with(x,"status","declined")); emit decline sel; note=""; toast "Declined"; close}
 
 ### Expenses
@@ -220,9 +225,9 @@ App
             Button.outline "Settle" w=110 hidden={e.settled} onTap={expenses=updateWhere(expenses,x=>x.id==e.id,x=>with(x,"settled",true)); emit settle e.id; toast "Marked settled"}
             Badge.success "Settled" hidden={!e.settled}
 Dialog#addExpense "Add an expense" "Split between both parents"
-  Input "What was it for" bind=what
-  Input "Amount" type=number bind=amount
-  Select "Paid by" items=["Maya","Daniel"] bind=paidBy
-  Slider "Maya's share (%)" bind=split min=0 max=100
+  Input "What was it for" @what
+  Input "Amount" type=number @amount
+  Select "Paid by" items=["Maya","Daniel"] @paidBy
+  Slider "Maya's share (%)" @split min=0 max=100
   Text.caption "Maya {split}% and Daniel {100-split}%"
   Button "Add expense" onTap={what=="" ? toast "Say what it was for" : {expenses=append(expenses,{"id":length(expenses)+1,"what":what,"amount":amount,"paidBy":paidBy,"split":split,"settled":false}); what=""; amount=""; toast "Expense added"; close}}

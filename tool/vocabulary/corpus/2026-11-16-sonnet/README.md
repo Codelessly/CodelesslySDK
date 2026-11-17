@@ -9,7 +9,7 @@ What a model writes when it is taught the notation's grammar and core only, and 
 |---|---|
 | `prompt.txt` | The prompt the answers were written from: an open-vocabulary preface, then the page prompt as it was before the behaviour words were added (grammar, core types, formulas, the page frames and overlays), 18,888 bytes. Today's equivalent is `tool/notation/notation.sh prompt --open --width 1280`. |
 | `briefs/<app>.txt` | The 20 briefs, one per app (the app, its style, and: write every screen under a `### <screen name>` line, starting with `App` or `Page`; overlays after the screen that opens them; every interaction written, not described; output only the notation). They are the briefs of the milestone's sixth prompt set (`docs/projects/2026-11-milestone-1/prompts-dsl-6` in the editor repository), cut down to the app and the style. |
-| `answers/<app>.txt` | Sonnet's answer to each brief: 105 screens, 4,657 lines that start with a word and 1,031 statements (state, if, each…). Nothing was edited here. |
+| `answers/<app>.txt` | Sonnet's answer to each brief: 105 screens, 4,657 lines that start with a word and 1,031 statements (state, if, each…). Nothing was edited here but the binding form: on 2026-11-17 `tool/notation/notation.sh migrate` rewrote `bind=name` to 34's `@name` (JOURNAL.md, How it runs). |
 | `vocabulary.json`, `VOCABULARY.md` | What `tool/notation/notation.sh vocabulary` says of the answers with the aliases in place (codelessly_api's built-in table and `design_systems/cards/vocabulary.json`). |
 | `no-aliases/` | The same with `--no-aliases`: the count before any name was mapped. |
 

@@ -5,7 +5,7 @@ Page
     Brand "Beacon" icon="flare"
     Row gap=12
       HeaderSearchInput "Search the docs"
-      Select bind=version items=["v2.4","v2.3","v2.2"]
+      Select @version items=["v2.4","v2.3","v2.2"]
   Section
     Row gap=32 top
       Column w=220 gap=20

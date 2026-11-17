@@ -57,18 +57,18 @@ App
         Card grow gap=12
           Text.strong "Feel"
           Row gap=32 center
-            Knob "Tempo" bind=tempo min=60 max=180 unit="BPM"
-            Knob "Swing" bind=swing min=0 max=60 unit="%"
+            Knob "Tempo" @tempo min=60 max=180 unit="BPM"
+            Knob "Swing" @swing min=0 max=60 unit="%"
         Card grow gap=12
           Text.strong "Master"
           Row gap=16 middle
             Column grow gap=4
               Text.caption "Volume {vol}%"
-              Slider bind=vol min=0 max=100
+              Slider @vol min=0 max=100
             LevelMeter value={playing ? level : 0}
   Dialog#export "Export loop" "Render the current pattern to a file"
-    Input "File name" bind=exportName
-    Select "Format" items=["WAV","MP3","MIDI"] bind=exportFormat
+    Input "File name" @exportName
+    Select "Format" items=["WAV","MP3","MIDI"] @exportFormat
     SegmentedButton items=["1 bar","2 bars","4 bars"] onChange={exportBars=result=="1 bar" ? 1 : (result=="2 bars" ? 2 : 4)}
     Row end gap=8
       Button.outline "Cancel" onTap={close}
@@ -121,7 +121,7 @@ App
   Main
     Nav
       Heading "Loop library" level=1
-      Input "Search loops" bind=libq w=220
+      Input "Search loops" @libq w=220
     Column pad=24 gap=16 scroll
       if length(filter(saved,s=>contains(lower(s.name),lower(libq))))==0
         Card gap=8
@@ -149,11 +149,11 @@ define StepRow "label" steps=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] step=0 playing=fa
     ChoiceChip "S" selected={solo} onTap={onSolo}
 
 // A knob dragged up and down is drawn as a slider with its figure above (no rotary dial in the core words).
-define Knob "label" bind=value min=0 max=100 unit=""
+define Knob "label" @value min=0 max=100 unit=""
   Column gap=4 center w=140
     Text.caption "{label}"
     Text.strong "{value} {unit}"
-    Slider bind=value min={min} max={max}
+    Slider @value min={min} max={max}
 
 // A level meter of twelve segments that turn amber and red toward the top.
 define LevelMeter value=0 segments=12

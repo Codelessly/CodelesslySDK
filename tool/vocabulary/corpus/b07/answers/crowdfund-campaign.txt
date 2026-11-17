@@ -95,7 +95,7 @@ Page
           ChoiceChip "+$10" selected={extra==10} onTap={extra=10}
           ChoiceChip "+$25" selected={extra==25} onTap={extra=25}
           ChoiceChip "+$50" selected={extra==50} onTap={extra=50}
-          Input "Other" type=number w=100 bind=extra
+          Input "Other" type=number w=100 @extra
         Row end gap=8
           Button.ghost "Clear" onTap={tier=""; extra=0}
           Button "Continue to pledge" onTap={step=0; open pledge}
@@ -129,7 +129,7 @@ Page
       Heading "Comments" level=2
       Badge.neutral "{length(comments)}"
     Card gap=8
-      Input "Ask the maker or leave a comment" multiline bind=newComment
+      Input "Ask the maker or leave a comment" multiline @newComment
       Row end
         Button "Post comment" onTap={trim(newComment)=="" ? toast "Write something first" : {comments=concat([{"id":length(comments)+10,"who":"You","when":"Just now","text":newComment,"likes":0,"replies":[]}],comments); newComment=""}}
     each c in comments
@@ -190,17 +190,17 @@ Dialog#pledge "Back this project" "Step {step+1} of 3"
       Row between
         Text.strong "Total"
         Text.strong "{money(find(tiers,x=>x.id==tier).price+extra+8,"$",2)}"
-      Input "Full name" bind=name
-      Input "Email" "you@example.com" type=email bind=email
+      Input "Full name" @name
+      Input "Email" "you@example.com" type=email @email
       Row end gap=8
         Button.ghost "Cancel" onTap={close}
         Button "Continue" onTap={trim(name)=="" || !contains(email,"@") ? toast "Add your name and a valid email" : step=1}
   if step==1
     Column gap=12
-      Input "Card number" "1234 1234 1234 1234" type=number bind=cardNum
+      Input "Card number" "1234 1234 1234 1234" type=number @cardNum
       Row gap=12
-        Input "Expiry" "MM / YY" grow bind=exp
-        Input "CVC" "123" type=number grow bind=cvc
+        Input "Expiry" "MM / YY" grow @exp
+        Input "CVC" "123" type=number grow @cvc
       Text.caption "You will only be charged if the campaign reaches its goal on Dec 4."
       Row end gap=8
         Button.ghost "Back" onTap={step=0}
@@ -213,9 +213,9 @@ Dialog#pledge "Back this project" "Step {step+1} of 3"
       Row gap=8
         Button.outline "Share" icon="share" onTap={copy "https://kickstand.example/mini"; toast "Link copied"}
         Button "Manage pledge" onTap={close; go manage-pledge}
-Lightbox#shots photos={photos} bind=at
+Lightbox#shots photos={photos} @at
 Dialog#reply "Reply"
-  Input "Your reply" multiline bind=newComment
+  Input "Your reply" multiline @newComment
   Row end gap=8
     Button.ghost "Cancel" onTap={close}
     Button "Send" onTap={trim(newComment)=="" ? toast "Write something first" : {comments=updateWhere(comments,x=>x.id==replyTo,x=>with(x,"replies",append(x.replies,{"who":"You","when":"Just now","text":newComment}))); newComment=""; close}}
@@ -235,6 +235,7 @@ state status="active"
 state pick=""
 state reason=""
 state history=[{"date":"Nov 14","what":"Added $10 to pledge"},{"date":"Oct 2","what":"Pledged $99 for Desk Duo"}]
+state newCard=""
 Page
   Nav sticky
     Brand "Kickstand" icon="laptop_mac"
@@ -302,19 +303,19 @@ Dialog#change "Change reward"
     Button.ghost "Cancel" onTap={close}
     Button "Save" onTap={tier=pick; toast "Reward updated"; close}
 Dialog#amount "Change amount"
-  Input "Extra amount in dollars" type=number bind=extra
-  Slider bind=extra min=0 max=200
+  Input "Extra amount in dollars" type=number @extra
+  Slider @extra min=0 max=200
   Row end gap=8
     Button.ghost "Cancel" onTap={close}
     Button "Save" onTap={extra=max(0,extra); history=concat([{"date":"Today","what":"Changed added amount to ${extra}"}],history); toast "Pledge updated"; close}
 Dialog#address "Shipping address"
-  Input "Street" bind=addr1
-  Input "City and postcode" bind=addr2
+  Input "Street" @addr1
+  Input "City and postcode" @addr2
   Row end gap=8
     Button.ghost "Cancel" onTap={close}
     Button "Save" onTap={address=with(with(address,"line",addr1),"city",addr2); toast "Address saved"; close}
 Dialog#payment "Update card"
-  Input "Card number" "1234 1234 1234 1234" type=number bind=newCard
+  Input "Card number" "1234 1234 1234 1234" type=number @newCard
   Row gap=12
     Input "Expiry" "MM / YY" grow
     Input "CVC" type=number grow
@@ -322,7 +323,7 @@ Dialog#payment "Update card"
     Button.ghost "Cancel" onTap={close}
     Button "Save card" onTap={card="Card ending {slice(newCard,length(newCard)-4,length(newCard))}"; toast "Card updated"; close}
 Dialog#cancel "Cancel your pledge?" "You will not be charged and will lose your reward."
-  Select "Why are you cancelling?" items=["Changed my mind","Found another product","Too expensive","Shipping concerns","Other"] bind=reason
+  Select "Why are you cancelling?" items=["Changed my mind","Found another product","Too expensive","Shipping concerns","Other"] @reason
   Row end gap=8
     Button.ghost "Keep pledge" onTap={close}
     Button.destructive "Cancel pledge" onTap={status="cancelled"; emit pledgeCancelled reason; toast "Pledge cancelled"; close}

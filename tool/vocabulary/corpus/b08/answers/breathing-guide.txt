@@ -16,6 +16,7 @@ state lastDay="2026-11-16"
 state hrBefore=0
 state hrAfter=0
 state hrStage="before"
+state hrNow=""
 every 1s when running onTick={elapsed+1>=total ? {running=false; elapsed=total; streak=streak+1; lastDay=today(); emit bell; open done} : {elapsed=elapsed+1; c=(elapsed+1)%(inhale+hold1+exhale+hold2); scale=(c<inhale) ? c/inhale : (c<inhale+hold1) ? 1 : (c<inhale+hold1+exhale) ? 1-(c-inhale-hold1)/exhale : 0; bg=(c<inhale+hold1) ? #FF1F4D5C : #FF2B3358}}
 App
   Sidebar
@@ -63,7 +64,7 @@ App
   Dialog#hr "Heart rate" "Check your pulse for 15 seconds and multiply by four"
     Column gap=12
       Text.strong "{hrStage=='before' ? 'Before your session' : 'After your session'}"
-      Input "Beats per minute" type=number bind=hrNow
+      Input "Beats per minute" type=number @hrNow
       Row end gap=8
         Button.ghost "Cancel" onTap={close}
         Button "Save" onTap={hrStage=='before' ? {hrBefore=hrNow; toast "Saved your starting rate"; close} : {hrAfter=hrNow; toast "Saved your ending rate"; close}}

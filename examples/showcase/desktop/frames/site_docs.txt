@@ -1,3 +1,4 @@
+state q=""
 Page
   state version="v2.4"
   state page="Quickstart"
@@ -8,8 +9,8 @@ Page
       Icon "settings_input_antenna"
       Text.strong "Beacon"
     Row gap=12 middle
-      SearchBar "Search the docs" bind=q w=320
-      Select bind=version items=["v2.4","v2.3","v2.2"] w=90
+      SearchBar "Search the docs" @q w=320
+      Select @version items=["v2.4","v2.3","v2.2"] w=90
   Section
     Row gap=32 top
       Column w=220 gap=4
@@ -49,7 +50,7 @@ Page
         Callout "Good to know" "Events are batched and sent every 10 seconds by default. Lower flushInterval while developing to see them sooner." tone=accent icon="info"
         Column gap=8
           Heading "Configuration options" level=3
-          TableHeader bind=sort desc={desc} columns=["Name","Type","Default","Description"] keys=["name","type","default","description"] widths=[140,90,90,336]
+          TableHeader @sort desc=@desc columns=["Name","Type","Default","Description"] keys=["name","type","default","description"] widths=[140,90,90,336]
           TableRow cells=["writeKey","string","none","Identifies your project. Required."] widths=[140,90,90,336]
           TableRow cells=["flushInterval","number","10000","Milliseconds between batched sends."] widths=[140,90,90,336]
           TableRow cells=["debug","boolean","false","Logs every event to the console."] widths=[140,90,90,336]

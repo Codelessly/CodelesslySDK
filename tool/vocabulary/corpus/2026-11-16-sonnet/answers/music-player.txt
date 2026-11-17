@@ -28,10 +28,10 @@ App
     Nav
       Heading "Library" level=1
       Row gap=8
-        Input "Search albums, artists, tracks" bind=q w=260 fuzzy icon="search"
-        Select bind=genre items=["All","Folk","Electronic","Rock","Jazz"]
-        Select bind=sort items=["Title","Artist","Year"]
-        SegmentedButton bind=view items=["grid","list"]
+        Input "Search albums, artists, tracks" @q w=260 fuzzy icon="search"
+        Select @genre items=["All","Folk","Electronic","Rock","Jazz"]
+        Select @sort items=["Title","Artist","Year"]
+        SegmentedButton @view items=["grid","list"]
     Column pad=24 gap=16 scroll
       if view=="grid"
         Grid cols=4 gap=24
@@ -60,15 +60,17 @@ App
         IconButton.primary "{playing?'pause':'play_arrow'}" onTap={playing=!playing}
         IconButton "skip_next" onTap={emit next}
         Text.small "{duration(pos)}"
-        Slider grow bind=pos min=0 max={find(tracks,t=>t.id==current).len} step=1 onChange={pos=result} keys="left:-5,right:+5" aria="Seek"
+        Slider grow @pos min=0 max={find(tracks,t=>t.id==current).len} step=1 onChange={pos=result} keys="left:-5,right:+5" aria="Seek"
         Text.small "-{duration(find(tracks,t=>t.id==current).len-pos)}"
         Icon "volume_up"
-        Slider w=100 bind=volume min=0 max=100 keys="up:+5,down:-5" aria="Volume"
+        Slider w=100 @volume min=0 max=100 keys="up:+5,down:-5" aria="Volume"
         IconButton "queue_music" onTap={go queue}
 
 ### Album
 state sel="a1"
 state view="grid"
+state pos=0
+state volume=0
 App
   Sidebar
     Brand "Halftone" icon="album"
@@ -118,10 +120,10 @@ App
         IconButton.primary "{playing?'pause':'play_arrow'}" onTap={playing=!playing}
         IconButton "skip_next" onTap={emit next}
         Text.small "{duration(pos)}"
-        Slider grow bind=pos min=0 max={find(tracks,t=>t.id==current).len} step=1 keys="left:-5,right:+5" aria="Seek"
+        Slider grow @pos min=0 max={find(tracks,t=>t.id==current).len} step=1 keys="left:-5,right:+5" aria="Seek"
         Text.small "-{duration(find(tracks,t=>t.id==current).len-pos)}"
         Icon "volume_up"
-        Slider w=100 bind=volume min=0 max=100 keys="up:+5,down:-5" aria="Volume"
+        Slider w=100 @volume min=0 max=100 keys="up:+5,down:-5" aria="Volume"
         IconButton "queue_music" onTap={go queue}
   Menu#albumMenu end
     MenuItem "Play next" icon="queue_play_next" onTap={queue=concat(map(filter(tracks,t=>t.album==sel),t=>t.id),queue); toast "Playing next"}
@@ -158,7 +160,7 @@ App
           Heading "{find(tracks,t=>t.id==current).title}" level=1
           Text.muted "{find(albums,a=>a.id==find(tracks,t=>t.id==current).album).artist}"
         Column gap=4
-          Slider bind=pos min=0 max={find(tracks,t=>t.id==current).len} step=1 keys="left:-5,right:+5,home:0" aria="Seek"
+          Slider @pos min=0 max={find(tracks,t=>t.id==current).len} step=1 keys="left:-5,right:+5,home:0" aria="Seek"
           Row between
             Text.small "{duration(pos)}"
             Text.small "-{duration(find(tracks,t=>t.id==current).len-pos)}"
@@ -170,13 +172,13 @@ App
           IconButton "{repeat=='one'?'repeat_one':'repeat'}" selected={repeat!="off"} onTap={repeat=repeat=="off"?"all":(repeat=="all"?"one":"off")}
         Row gap=12 middle
           Text.muted "Speed"
-          SegmentedButton bind=speed items=[0.75,1,1.25,1.5]
+          SegmentedButton @speed items=[0.75,1,1.25,1.5]
         Row gap=12 middle
           Icon "volume_down"
-          Slider grow bind=volume min=0 max=100 keys="up:+5,down:-5" aria="Volume"
+          Slider grow @volume min=0 max=100 keys="up:+5,down:-5" aria="Volume"
           Icon "volume_up"
-        Lyrics lines={lyrics[current]} time={pos} bind=pos onSeek={pos=result} h=200 highlight=#FFF5A524
-    Sheet#miniPlayer "" snap=["mini","full"] bind=sheet draggable show=phone
+        Lyrics lines={lyrics[current]} time={pos} @pos onSeek={pos=result} h=200 highlight=#FFF5A524
+    Sheet#miniPlayer "" snap=["mini","full"] @sheet draggable show=phone
       Row gap=12 middle
         AlbumCover hue={find(albums,a=>a.id==find(tracks,t=>t.id==current).album).hue} size=48 radius=10
         Text.strong grow "{find(tracks,t=>t.id==current).title}"
@@ -206,7 +208,7 @@ App
             Text.muted "{find(albums,a=>a.id==find(tracks,t=>t.id==current).album).artist}"
           Text.muted "{duration(find(tracks,t=>t.id==current).len)}"
       Text.caption "NEXT UP · {length(queue)} tracks · {duration(sum(queue,id=>find(tracks,t=>t.id==id).len))}"
-      ReorderableList bind=queue handle="drag_handle" keys="alt+up:up,alt+down:down" onReorder={queue=result}
+      ReorderableList @queue handle="drag_handle" keys="alt+up:up,alt+down:down" onReorder={queue=result}
         each id in queue
           Row gap=12 middle pad=8 swipeLeft={queue=without(queue,id)} onSwipeLeft={queue=without(queue,id)} drag=queue(id) onTap={current=id; pos=0; playing=true}
             Icon "drag_handle" handle
@@ -259,7 +261,7 @@ App
             Column center gap=8 pad=32
               Text.muted "No tracks yet. Add some from an album."
               Button.outline "Browse library" onTap={go library}
-          ReorderableList bind=playlists[selPl].tracks handle="drag_handle" onReorder={playlists=updateWhere(playlists,p=>p.id==selPl,p=>with(p,"tracks",result))}
+          ReorderableList @playlists[selPl].tracks handle="drag_handle" onReorder={playlists=updateWhere(playlists,p=>p.id==selPl,p=>with(p,"tracks",result))}
             each id in find(playlists,p=>p.id==selPl).tracks
               Row gap=12 middle pad=8
                 Icon "drag_handle" handle
@@ -267,12 +269,12 @@ App
                 Text.muted "{duration(find(tracks,t=>t.id==id).len)}"
                 IconButton "close" onTap={playlists=updateWhere(playlists,p=>p.id==selPl,p=>with(p,"tracks",without(p.tracks,id)))}
   Dialog#newPlaylist "New playlist" "Give it a name"
-    Input "Name" bind=newName autofocus
+    Input "Name" @newName autofocus
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Create" disabled={trim(newName)==""} onTap={playlists=append(playlists,{"id":"p"+(length(playlists)+1),"name":trim(newName),"tracks":[]}); newName=""; close}
   Dialog#renamePl "Rename playlist"
-    Input "Name" bind=renameTo autofocus
+    Input "Name" @renameTo autofocus
     Button "Save" onTap={playlists=updateWhere(playlists,p=>p.id==selPl,p=>with(p,"name",renameTo)); close}
   Menu#plMenu end
     MenuItem "Rename" icon="edit" onTap={renameTo=find(playlists,p=>p.id==selPl).name; open renamePl}
@@ -281,6 +283,7 @@ App
 ### Artists
 state sel="a1"
 state artistName="Marlow Vane"
+state q=""
 App
   Sidebar
     Brand "Halftone" icon="album"
@@ -289,7 +292,7 @@ App
   Main
     Nav
       Heading "Artists" level=1
-      Input "Search artists" bind=q icon="search" fuzzy w=240
+      Input "Search artists" @q icon="search" fuzzy w=240
     Column pad=24 gap=24 scroll
       Grid cols=5 gap=24
         each n in unique(map(albums,a=>a.artist))
@@ -340,14 +343,14 @@ App
     Column pad=24 gap=24 maxw=640 scroll
       Card gap=16
         Text.sectionTitle "Playback"
-        Toggle "Gapless playback" bind=gapless
-        Toggle "Normalize volume" bind=normalize
+        Toggle "Gapless playback" @gapless
+        Toggle "Normalize volume" @normalize
         Row between middle
           Text "Crossfade"
           Row gap=8 middle w=260
-            Slider grow bind=crossfade min=0 max=12 step=1
+            Slider grow @crossfade min=0 max=12 step=1
             Text.muted "{crossfade}s"
-        Select "Streaming quality" bind=quality items=["Low","Normal","High","Lossless"]
+        Select "Streaming quality" @quality items=["Low","Normal","High","Lossless"]
       Card gap=16
         Text.sectionTitle "Library"
         Row between middle

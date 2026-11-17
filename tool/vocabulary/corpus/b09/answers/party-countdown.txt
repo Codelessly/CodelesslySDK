@@ -8,6 +8,10 @@ state greetings=[{"id":1,"name":"Maya","text":"Happy 2027!","lane":12},{"id":2,"
 state schedule=[{"id":1,"time":"20:00","title":"Doors open","done":true},{"id":2,"time":"21:30","title":"Dinner is served","done":true},{"id":3,"time":"23:00","title":"Toast with the sparkling wine","done":false},{"id":4,"time":"23:59","title":"Final countdown","done":false}]
 state target="23:59:59"
 state burst=false
+state day=""
+state time=""
+state gname=""
+state gtext=""
 every 1s when running && left>0 onTick={left=left-1}
 every 1s when left==0 && !burst onTick={burst=true; play fanfare}
 every 1s when left>0 && left<=10 && !muted onTick={play tick}
@@ -29,7 +33,7 @@ App
         IconButton "edit_calendar" tooltip="Set the moment" onTap={open setmoment}
         Button.outline "Send a greeting" icon="send" onTap={open greet}
     Column pad=24 gap=16 scroll
-      SegmentedButton bind=look items=["Fireworks","Retro flip","Rocket"]
+      SegmentedButton @look items=["Fireworks","Retro flip","Rocket"]
       Box fill={left>10 && left<=60 ? "#FF7A1F3D" : "#FF0B1026"} radius=24 pad=32 gap=16 animate=fade
         Column center middle gap=12
           if left>60
@@ -58,12 +62,12 @@ App
         Button.outline "Reset to 47:23" icon="restart_alt" onTap={left=2843; burst=false; running=true}
         Button.ghost "Skip to 12 seconds" onTap={left=12}
   Dialog#setmoment "Set the moment" "Pick when the party clock hits zero"
-    DatePicker "Date" bind=day
-    TimePicker "Time" bind=time
+    DatePicker "Date" @day
+    TimePicker "Time" @time
     Button "Start countdown" onTap={target=time; left=secondsUntil(day,time); burst=false; close}
   Dialog#greet "Send a greeting" "It floats across the screen with your name"
-    Input "Your name" "Maya" bind=gname
-    Input "Greeting" "Happy 2027!" bind=gtext multiline
+    Input "Your name" "Maya" @gname
+    Input "Greeting" "Happy 2027!" @gtext multiline
     Button "Send" onTap={trim(gname)!="" && trim(gtext)!="" ? {greetings=append(greetings,{"id":length(greetings)+1,"name":gname,"text":gtext,"lane":random(10,80)}); gtext=""; toast "Sent to the big screen"; close} : toast "Add your name and a greeting"}
 
 ### Schedule
@@ -86,14 +90,14 @@ App
       each s in schedule
         Card
           Row between gap=12
-            Checkbox "{s.time}  {s.title}" bind=s.done
+            Checkbox "{s.time}  {s.title}" @s.done
             if s.done
               Icon "check_circle" color=#FF2E9E5B
             if !s.done
               IconButton "delete" tooltip="Remove" onTap={schedule=removeWhere(schedule,x=>x.id==s.id)}
   Sheet#addmoment "Add a moment"
-    TimePicker "Time" bind=ntime
-    Input "What happens" "Cake and candles" bind=ntitle
+    TimePicker "Time" @ntime
+    Input "What happens" "Cake and candles" @ntitle
     Button "Add" onTap={trim(ntitle)!="" ? {schedule=sortBy(append(schedule,{"id":length(schedule)+1,"time":ntime,"title":ntitle,"done":false}),x=>x.time); ntitle=""; close} : toast "Give the moment a name"}
 
 ### Guest greeting
@@ -109,8 +113,8 @@ Page
     Column gap=16
       Heading "Send a greeting to the big screen" level=1
       Text.muted "It floats across the screen with your name. 47 minutes to midnight."
-      Input "Your name" "Maya" bind=gname
-      Input "Greeting" "Happy 2027!" bind=gtext multiline
+      Input "Your name" "Maya" @gname
+      Input "Greeting" "Happy 2027!" @gtext multiline
       Row gap=8
         Chip "Cheers" onTap={gtext="Cheers, everyone"}
         Chip "Happy New Year" onTap={gtext="Happy New Year"}

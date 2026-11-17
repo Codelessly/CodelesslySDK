@@ -8,6 +8,10 @@ state now=0
 state units=[{"id":"M12","kind":"Medic","state":"free"},{"id":"E7","kind":"Engine","state":"travelling"},{"id":"E3","kind":"Engine","state":"on scene"},{"id":"P41","kind":"Patrol","state":"free"},{"id":"L2","kind":"Ladder","state":"free"}]
 state incidents=[{"id":"INC-4824","pri":1,"type":"Structure fire","address":"212 Alder Wharf","age":42,"unit":"","notes":"Caller reports smoke from second floor."},{"id":"INC-4821","pri":1,"type":"Cardiac arrest","address":"88 Linden Ave, Apt 4B","age":318,"unit":"M12","notes":"Male, 60s, not breathing. CPR in progress by spouse."},{"id":"INC-4819","pri":2,"type":"Vehicle collision","address":"Route 9 at Mill St","age":611,"unit":"P41","notes":"Two cars, one driver trapped."},{"id":"INC-4815","pri":3,"type":"Noise complaint","address":"17 Cobb Court","age":1480,"unit":"","notes":""}]
 state radio=[{"t":"14:32:07","from":"E7","msg":"En route to Alder Wharf"},{"t":"14:31:40","from":"Dispatch","msg":"E7 respond INC-4824"},{"t":"14:29:12","from":"M12","msg":"On scene Linden Ave"}]
+state q=""
+state draftAddr=""
+state draftType=""
+state draftNotes=""
 every 1s onTick={now=now+1}
 App
   Sidebar
@@ -18,13 +22,13 @@ App
     NavItem "Radio log" icon="settings_voice" selected={screen=="radio"} onTap={go radio-log}
     NavItem "Shift notes" icon="edit_note" onTap={go shift-notes}
     Spacer grow
-    Toggle "Alert tone" bind=tone
+    Toggle "Alert tone" @tone
     Text.muted "Dispatcher: J. Okafor"
   Main
     Nav
       Heading "Open incidents" level=1
       Row gap=8
-        Input "Search incidents" bind=q w=220
+        Input "Search incidents" @q w=220
         Button "New incident" icon="add" onTap={open newIncident}
     if showBanner && tone
       Banner "PRIORITY 1: {newP1.type} at {newP1.address}" tone=alert icon="notifications_active" sound="alert-p1" animate=pulse
@@ -48,10 +52,10 @@ App
       Pane w=420 pad=16 gap=12
         each inc in filter(incidents,i=>i.id==sel)
           Heading "{inc.id}" level=3
-          Input "Address" bind=inc.address
-          Select "Type" items=["Cardiac arrest","Structure fire","Vehicle collision","Assault","Noise complaint"] bind=inc.type
-          SegmentedButton bind=inc.pri items=["P1","P2","P3"]
-          Input "Call notes" "Typed during the call" multiline bind=inc.notes
+          Input "Address" @inc.address
+          Select "Type" items=["Cardiac arrest","Structure fire","Vehicle collision","Assault","Noise complaint"] @inc.type
+          SegmentedButton @inc.pri items=["P1","P2","P3"]
+          Input "Call notes" "Typed during the call" multiline @inc.notes
           Row gap=8
             Button "Save" onTap={emit saveIncident inc.id; toast "Saved"}
             Button.outline "Close incident" onTap={incidents=removeWhere(incidents,i=>i.id==inc.id); toast "Closed"}
@@ -61,9 +65,9 @@ App
           each u in filter(units,x=>x.state=="free")
             Chip "{u.id}" icon="local_shipping" drag=unit(u.id)
   Dialog#newIncident "New incident" "Log a call"
-    Input "Address" bind=draftAddr
-    Select "Type" items=["Cardiac arrest","Structure fire","Vehicle collision","Assault","Noise complaint"] bind=draftType
-    Input "Notes" multiline bind=draftNotes
+    Input "Address" @draftAddr
+    Select "Type" items=["Cardiac arrest","Structure fire","Vehicle collision","Assault","Noise complaint"] @draftType
+    Input "Notes" multiline @draftNotes
     Button "Create" onTap={incidents=append(incidents,{"id":"INC-4830","pri":2,"type":draftType,"address":draftAddr,"age":0,"unit":"","notes":draftNotes}); close; toast "Incident created"}
 
 ### Map
@@ -87,7 +91,7 @@ App
           Badge.success "Free"
           Badge.warning "Travelling"
           Badge.error "On scene"
-        SegmentedButton bind=hist items=["all","P1","P2"]
+        SegmentedButton @hist items=["all","P1","P2"]
     Map grow center=[41.82,-71.41] zoom=13
       each inc in incidents
         MapMarker icon="warning" x={inc.x} y={inc.y} label="{inc.id}" color=#FFD32F2F drop=unit onDrop={incidents=updateWhere(incidents,i=>i.id==inc.id,i=>with(i,"unit",result.data)); units=updateWhere(units,u=>u.id==result.data,u=>with(u,"state","travelling")); emit assign result.data; toast "{result.data} assigned to {inc.id}"}
@@ -175,12 +179,12 @@ App
             Text.strong "{r.from}" w=90
             Text "{r.msg}" grow
       Row gap=8
-        Select "From" items=["Dispatch","M12","E7","E3","P41","L2"] bind=caller w=140
-        Input "Transmission" bind=msg grow
+        Select "From" items=["Dispatch","M12","E7","E3","P41","L2"] @caller w=140
+        Input "Transmission" @msg grow
         Button "Log" onTap={msg!="" ? {radio=concat([{"t":formatDate(today(),"HH:mm:ss"),"from":caller,"msg":msg}],radio); msg=""} : toast "Type a transmission"}
       Section#notes
         Heading "Shift notes" level=3
-        Input "Handover notes" "Road closures, equipment out of service, follow-ups" multiline bind=notes
+        Input "Handover notes" "Road closures, equipment out of service, follow-ups" multiline @notes
         Text.caption "Saved automatically for the next shift"
     Footer
       Row between

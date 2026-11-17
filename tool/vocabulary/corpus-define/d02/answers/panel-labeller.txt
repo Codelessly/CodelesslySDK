@@ -51,11 +51,11 @@ App
                 Text "Slot {c.slot} {c.name}: {c.amps} A on {c.wire} AWG"
 Dialog#breaker "Edit breaker" "Set what this breaker protects"
   Column gap=12
-    SegmentedButton bind=edAmps items=[15,20,30,40]
-    Input "Circuit name" "Kitchen counters" bind=edName
-    Input "Room" "Kitchen" bind=edRoom
-    Select "Wire gauge (AWG)" bind=edWire items=["14","12","10","8"]
-    Toggle "Spare (nothing connected)" bind=edSpare
+    SegmentedButton @edAmps items=[15,20,30,40]
+    Input "Circuit name" "Kitchen counters" @edName
+    Input "Room" "Kitchen" @edRoom
+    Select "Wire gauge (AWG)" @edWire items=["14","12","10","8"]
+    Toggle "Spare (nothing connected)" @edSpare
     if edAmps > (edWire == "14" ? 15 : edWire == "12" ? 20 : edWire == "10" ? 30 : 40)
       Row gap=8 middle
         Icon "warning"
@@ -111,7 +111,7 @@ App
     Nav
       Heading "Directory card" level=1
       Row gap=8
-        Toggle "Cut lines" bind=cut
+        Toggle "Cut lines" @cut
         Button "Print" icon="print" onTap={emit print}
     Column pad=24 gap=16 scroll
       Text.muted "Printed at true size, 3.25 in by 5 in. Set the printer to 100 percent, no scaling."

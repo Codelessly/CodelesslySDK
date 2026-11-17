@@ -5,6 +5,10 @@ state sel=""
 state days=[{"i":0,"name":"Mon"},{"i":1,"name":"Tue"},{"i":2,"name":"Wed"},{"i":3,"name":"Thu"},{"i":4,"name":"Fri"},{"i":5,"name":"Sat"},{"i":6,"name":"Sun"}]
 state plan=[{"id":"w7a","week":7,"day":0,"kind":"rest","title":"Rest","km":0,"color":"#FF9E9E9E"},{"id":"w7b","week":7,"day":1,"kind":"intervals","title":"6 x 800 m","km":10,"color":"#FFE5484D"},{"id":"w7c","week":7,"day":2,"kind":"easy","title":"Easy run","km":8,"color":"#FF30A46C"},{"id":"w7d","week":7,"day":3,"kind":"tempo","title":"Tempo 25 min","km":11,"color":"#FFF5A524"},{"id":"w7e","week":7,"day":4,"kind":"easy","title":"Recovery jog","km":6,"color":"#FF30A46C"},{"id":"w7f","week":7,"day":5,"kind":"long","title":"Long run","km":26,"color":"#FF3E63DD"},{"id":"w7g","week":7,"day":6,"kind":"easy","title":"Shake-out","km":5,"color":"#FF30A46C"}]
 state raceDate="2027-02-14"
+state newTitle=""
+state newKind=""
+state newKm=""
+state newDay=""
 App
   Sidebar
     Brand "Fartlek" icon="directions_run"
@@ -58,10 +62,10 @@ App
         Text.strong "All twelve weeks"
         BarChart values=[32,36,40,28,44,48,52,38,56,60,42,30] labels=["1","2","3","4","5","6","7","8","9","10","11","12"] h=140
   Dialog#addWorkout "Add a workout" "Placed on the selected week"
-    Input "Title" bind=newTitle
-    Select "Type" bind=newKind items=["Easy","Tempo","Intervals","Long run"]
-    Input "Distance (km)" type=number bind=newKm
-    Select "Day" bind=newDay items=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+    Input "Title" @newTitle
+    Select "Type" @newKind items=["Easy","Tempo","Intervals","Long run"]
+    Input "Distance (km)" type=number @newKm
+    Select "Day" @newDay items=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
     Button "Add" onTap={plan=append(plan,{"id":"n{length(plan)}","week":week,"day":indexOf(["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],newDay),"kind":lower(newKind),"title":newTitle,"km":newKm,"color":"#FF3E63DD"}); toast "Workout added"; close}
   Drawer#workoutDrawer "Workout" right
     Text.heading "{find(plan,p=>p.id==sel).title}"
@@ -74,6 +78,9 @@ App
 state tab="workout"
 state step=-1
 state steps=[{"name":"Warm-up","min":15,"pace":"6:10/km","h":60,"color":"#FF30A46C"},{"name":"Rep 1","min":4,"pace":"4:15/km","h":140,"color":"#FFE5484D"},{"name":"Jog 1","min":2,"pace":"6:30/km","h":50,"color":"#FF9E9E9E"},{"name":"Rep 2","min":4,"pace":"4:15/km","h":140,"color":"#FFE5484D"},{"name":"Jog 2","min":2,"pace":"6:30/km","h":50,"color":"#FF9E9E9E"},{"name":"Rep 3","min":4,"pace":"4:15/km","h":140,"color":"#FFE5484D"},{"name":"Jog 3","min":2,"pace":"6:30/km","h":50,"color":"#FF9E9E9E"},{"name":"Rep 4","min":4,"pace":"4:10/km","h":150,"color":"#FFE5484D"},{"name":"Cool-down","min":10,"pace":"6:20/km","h":60,"color":"#FF3E63DD"}]
+state cuePace=false
+state cueCount=false
+state cueHr=false
 App
   Sidebar
     Brand "Fartlek" icon="directions_run"
@@ -125,9 +132,9 @@ App
             Text.strong "{s.pace}"
       Card gap=8
         Text.strong "Audio cues"
-        Toggle "Pace alerts" bind=cuePace
-        Toggle "Interval countdown" bind=cueCount
-        Toggle "Heart-rate zone warnings" bind=cueHr
+        Toggle "Pace alerts" @cuePace
+        Toggle "Interval countdown" @cueCount
+        Toggle "Heart-rate zone warnings" @cueHr
   Menu#moveMenu
     MenuItem "Wednesday" icon="event" onTap={toast "Moved to Wednesday"; emit moveWorkout "wed"}
     MenuItem "Thursday" icon="event" onTap={toast "Moved to Thursday"; emit moveWorkout "thu"}
@@ -229,6 +236,6 @@ App
         ListTile "Sleep under 7 h two nights this week" subtitle="Keep Thursday's tempo easy if it happens again." icon="bedtime"
         ListTile "Long run is up 8 percent" subtitle="Within the safe range." icon="trending_up"
   Dialog#logSleep "Log last night" "Feeds your readiness score"
-    Slider "Hours slept" bind=sleep min=3 max=11
-    Slider "Soreness" bind=soreness min=0 max=5
+    Slider "Hours slept" @sleep min=3 max=11
+    Slider "Soreness" @soreness min=0 max=5
     Button "Save" onTap={emit logReadiness; toast "Readiness updated"; close}

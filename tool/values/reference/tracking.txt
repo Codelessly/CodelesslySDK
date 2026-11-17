@@ -7,7 +7,7 @@ ChatCard "Your package" "DHL Express" icon="local_shipping_rounded" status="Stag
   Details rows={[["Item","Nikon Z fc camera body"],["Carrier","DHL Express"],["Tracking no.","JD014600003SE"],["Estimated delivery","Tue 18 Nov · in "+(eta-today)+" days"]]}
   each s in stages
     PlanStep "{s.t}" "{s.d}" index={index} current={2} running={true} last={index==4}
-  InputField#instr "Delivery instructions" "e.g. Leave with a neighbour" bind=instr
+  InputField#instr "Delivery instructions" "e.g. Leave with a neighbour" @instr
   ActionButton#save "Save instructions" enabled={instr!=""} onPressed={saved=instr}
   if saved!=""
     Callout "Instructions saved" "{saved}" tone="good" icon="check_rounded"

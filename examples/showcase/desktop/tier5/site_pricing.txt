@@ -7,7 +7,7 @@ Page
       Text.eyebrow "PRICING"
       Heading "Simple pricing for every stage" level=1 center
       Text.lead "Pick the plan that fits your books today. Change it whenever you grow." center
-      SegmentedButton bind=billing items=["Monthly","Yearly"]
+      SegmentedButton @billing items=["Monthly","Yearly"]
       Text.caption "Yearly billing saves you 20%"
   Section
     Grid cols=3 gap=24

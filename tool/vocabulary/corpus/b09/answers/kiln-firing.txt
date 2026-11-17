@@ -12,6 +12,7 @@ state limit=1260
 state coolSeconds=0
 state lidOpen=false
 state elapsed=25200
+state newName=""
 every 1s when running onTick={elapsed=elapsed+1; temp=temp+0}
 every 1s when phase=="cooling" onTick={coolSeconds=max(0,coolSeconds-1); lidOpen=coolSeconds==0}
 App
@@ -27,7 +28,7 @@ App
     Nav
       Heading "Firing" level=1
       Row gap=8
-        Select bind=preset items={presets} onChange={emit loadPreset result; toast "Plan set to {result}"}
+        Select @preset items={presets} onChange={emit loadPreset result; toast "Plan set to {result}"}
         Button.outline "Save as preset" icon="bookmark_add" onTap={open savePreset}
         if running
           Button.destructive "Stop firing" icon="stop" onTap={open confirmStop}
@@ -72,7 +73,7 @@ App
           Row gap=8
             Chip "Plan"
             Chip "Actual"
-        CurveEditor bind=plan series=[{"name":"Actual","values":actual}] xLabel="Hours" yLabel="C" xmin=0 xmax=16 ymin=0 ymax=1300 snap=5 h=320 onPointChange={emit planChange result; toast "Point moved to {result.t} C at {result.h} h"} onPointTap={sel=result; open pointEdit}
+        CurveEditor @plan series=[{"name":"Actual","values":actual}] xLabel="Hours" yLabel="C" xmin=0 xmax=16 ymin=0 ymax=1300 snap=5 h=320 onPointChange={emit planChange result; toast "Point moved to {result.t} C at {result.h} h"} onPointTap={sel=result; open pointEdit}
         Text.caption "Drag a point to change a ramp or a hold. Tap a point to type its values."
       Card gap=8
         Heading "Segments" level=3
@@ -95,11 +96,11 @@ App
       Button.outline "Keep firing" onTap={close}
       Button.destructive "Stop and cool" onTap={running=false; phase="cooling"; coolSeconds=temp*30; emit stop; close}
   Dialog#savePreset "Save as preset" "Keeps these points for later firings"
-    Input "Preset name" bind=newName
+    Input "Preset name" @newName
     Button "Save" onTap={newName!="" ? {presets=append(presets,newName); preset=newName; emit savePreset newName; toast "Saved {newName}"; close} : toast "Give the preset a name"}
   Dialog#pointEdit "Edit point"
-    Input "Hours" type=number bind=sel.h
-    Input "Temperature (C)" type=number bind=sel.t
+    Input "Hours" type=number @sel.h
+    Input "Temperature (C)" type=number @sel.t
     Row gap=8 end
       Button.outline "Cancel" onTap={close}
       Button "Apply" onTap={plan=updateWhere(plan,p=>p.h==sel.h,p=>sel); close}
@@ -110,6 +111,10 @@ state pieces=[{"id":1,"name":"Tall celadon vase","clay":"Porcelain","glaze":"Cel
 state clayFilter="All"
 state q=""
 state sel=0
+state newName=""
+state newClay=""
+state newGlaze=""
+state newShelf=""
 App
   Sidebar
     Brand "Cone Ten" icon="local_fire_department"
@@ -122,7 +127,7 @@ App
     Nav
       Heading "Kiln load" level=1
       Row gap=8
-        Input "Search pieces" bind=q w=220
+        Input "Search pieces" @q w=220
         Button "Add piece" icon="add" onTap={open addPiece}
     Column pad=24 gap=16 scroll
       Row gap=8 wrap
@@ -156,18 +161,18 @@ App
     MenuItem "Move to top shelf" icon="vertical_align_top" onTap={pieces=updateWhere(pieces,x=>x.id==sel,x=>with(x,"shelf","Top")); toast "Moved"}
     MenuItem "Remove from load" icon="delete" onTap={pieces=removeWhere(pieces,x=>x.id==sel); toast "Removed"}
   Dialog#addPiece "Add piece" "What is going in the kiln"
-    Input "Name" bind=newName
-    Select "Clay" items=["Porcelain","Stoneware","Red earthenware"] bind=newClay
-    Select "Glaze" items=["Celadon green","Tenmoku","Shino white","Unglazed"] bind=newGlaze
-    Select "Shelf" items=["Top","Middle","Bottom"] bind=newShelf
+    Input "Name" @newName
+    Select "Clay" items=["Porcelain","Stoneware","Red earthenware"] @newClay
+    Select "Glaze" items=["Celadon green","Tenmoku","Shino white","Unglazed"] @newGlaze
+    Select "Shelf" items=["Top","Middle","Bottom"] @newShelf
     Row gap=8 end
       Button.outline "Cancel" onTap={close}
       Button "Add" onTap={newName!="" ? {pieces=append(pieces,{"id":length(pieces)+10,"name":newName,"clay":newClay,"glaze":newGlaze,"shelf":newShelf}); newName=""; close} : toast "Name the piece"}
   Dialog#editPiece "Edit piece"
     each p in filter(pieces,x=>x.id==sel)
-      Input "Name" bind=p.name
-      Select "Clay" items=["Porcelain","Stoneware","Red earthenware"] bind=p.clay
-      Select "Glaze" items=["Celadon green","Tenmoku","Shino white","Unglazed"] bind=p.glaze
+      Input "Name" @p.name
+      Select "Clay" items=["Porcelain","Stoneware","Red earthenware"] @p.clay
+      Select "Glaze" items=["Celadon green","Tenmoku","Shino white","Unglazed"] @p.glaze
     Button "Done" onTap={close}
 
 ### Notes
@@ -200,6 +205,6 @@ App
         Text.muted "Nothing logged yet. Note the weather, cone readings and anything unusual."
     Footer
       Row gap=8 middle pad=12
-        Input "Add a note" "Cone 6 bent at the peak..." bind=draft grow
+        Input "Add a note" "Cone 6 bent at the peak..." @draft grow
         IconButton "schedule" tooltip="Stamp with the time" onTap={draft=draft+" ["+formatDate(today(),"MMM d")+"]"}
         Button "Add" icon="send" onTap={draft!="" ? {notes=append(notes,{"id":length(notes)+10,"at":"Now","text":draft}); draft=""; emit noteAdded} : toast "Write something first"}

@@ -106,7 +106,7 @@ App
               Row gap=8
                 Button.outline "+15s" onTap={rest=rest+15; restTotal=restTotal+15}
                 Button.ghost "Skip" onTap={rest=0; resting=false}
-      Column reorder bind=exercises handle=drag_handle onReorder={exercises=result} gap=16
+      Column reorder handle=drag_handle onReorder={exercises=result} gap=16
         each ex in exercises
           Card gap=12 fill=#FF161616 radius=24 key={ex.id}
             Row between middle
@@ -119,7 +119,7 @@ App
                 IconButton "edit_note" onTap={noteOpen=noteOpen==ex.id?-1:ex.id}
                 IconButton "more_vert" onTap={menuEx=ex.id; open exMenu}
             if noteOpen==ex.id
-              Input "Note" "Cues, how it felt" bind=ex.note multiline
+              Input "Note" "Cues, how it felt" @ex.note multiline
             Row gap=8
               Text.caption "SET" w=36
               Text.caption "PREVIOUS" w=90
@@ -132,9 +132,9 @@ App
                   Row gap=8 middle fill={s.done?"#33C6FF00":"#00000000"} radius=16 pad=4 menu=setMenu onMenu={menuEx=ex.id; menuSet=s.id}
                     Text.strong w=36 "{index+1}"
                     Text.muted w=90 opacity=0.5 "{s.prevKg} x {s.prevReps}"
-                    Stepper bind=s.kg step=2.5 holdRepeat grow size=large type=number
-                    Stepper bind=s.reps step=1 holdRepeat grow size=large type=number
-                    Checkbox bind=s.done w=48 color=#FFC6FF00 onChange={resting=result; rest=result?restDefault:0; restTotal=restDefault}
+                    Stepper @s.kg step=2.5 holdRepeat grow size=large type=number
+                    Stepper @s.reps step=1 holdRepeat grow size=large type=number
+                    Checkbox @s.done w=48 color=#FFC6FF00 onChange={resting=result; rest=result?restDefault:0; restTotal=restDefault}
             Button.ghost "Add set" icon="add" onTap={exercises=updateWhere(exercises,e=>e.id==ex.id,e=>with(e,"sets",append(e.sets,{"id":length(e.sets)+ex.id*10+100,"kg":last(e.sets).kg,"reps":last(e.sets).reps,"done":false,"prevKg":0,"prevReps":0})))}
       Button.outline "Add exercise" icon="add" size=large onTap={open addSheet}
   Menu#exMenu
@@ -145,7 +145,7 @@ App
     MenuItem "Delete set" icon="delete" onTap={exercises=updateWhere(exercises,e=>e.id==menuEx,e=>with(e,"sets",removeWhere(e.sets,x=>x.id==menuSet)))}
     MenuItem "Duplicate set" icon="content_copy" onTap={exercises=updateWhere(exercises,e=>e.id==menuEx,e=>with(e,"sets",append(e.sets,with(find(e.sets,x=>x.id==menuSet),"id",menuSet+1000))))}
   Sheet#addSheet "Add exercise"
-    Input "Search" "bench, squat..." bind=addQuery icon="search" fuzzy
+    Input "Search" "bench, squat..." @addQuery icon="search" fuzzy
     Row scroll gap=8
       each g in ["All","Chest","Back","Shoulders","Arms","Legs","Core"]
         ChoiceChip "{g}" selected={addGroup==g} onTap={addGroup=g}
@@ -194,7 +194,7 @@ App
             Badge.success "{r.what}"
       Card fill=#FF161616 radius=24 gap=12
         Text.strong "How was the session?" color=#FFFFFFFF
-        Rating bind=rating count=5 size=40 color=#FFC6FF00
+        Rating @rating count=5 size=40 color=#FFC6FF00
       Button "Save workout" size=large fill=#FFC6FF00 color=#FF0A0A0A radius=20 onTap={history=append(history,{"date":today(),"name":"Push A","rating":rating,"summary":summary,"exercises":exercises}); active=false; exercises=[]; elapsed=0; toast "Workout saved"; go today}
       Button.ghost "Discard" onTap={open discardAsk}
   ConfirmDialog#discardAsk "Discard this workout?" "It will not be saved to your history."
@@ -222,7 +222,7 @@ App
       Heading "History" level=1 color=#FFFFFFFF
     Column pad=24 gap=16 maxw=720
       Card fill=#FF161616 radius=24
-        Calendar bind=day month={month} onMonthChange={month=result} marked={map(history,h=>h.date)} markColor=#FFC6FF00 inline
+        Calendar @day month={month} onMonthChange={month=result} marked={map(history,h=>h.date)} markColor=#FFC6FF00 inline
       Text.strong "{formatDate(day,'EEEE, MMM d')}" color=#FFFFFFFF
       if count(history,h=>h.date==day)==0
         Text.muted "No workout on this day."
@@ -267,7 +267,7 @@ App
       Heading "Exercises" level=1 color=#FFFFFFFF
     Row
       Pane w=320 pad=16 gap=12
-        Input "Search" bind=q icon="search" fuzzy
+        Input "Search" @q icon="search" fuzzy
         Row scroll gap=8
           each g in ["All","Chest","Back","Shoulders","Arms","Legs","Core"]
             ChoiceChip "{g}" selected={group==g} onTap={group=g}
@@ -280,7 +280,7 @@ App
           Text.muted "Pick an exercise to see its progress."
         if picked!=null
           Text "{picked.name}" size=36 weight=800 color=#FFFFFFFF
-          SegmentedButton bind=view items=["chart","table"]
+          SegmentedButton @view items=["chart","table"]
           if view=="chart"
             Card fill=#FF161616 radius=24
               LineChart values={map(picked.best,b=>b.w)} labels={map(picked.best,b=>b.d)} color=#FFC6FF00 h=220
@@ -332,7 +332,7 @@ App
         Row between
           Button.ghost "Back" icon="arrow_back" onTap={editing=null}
         each p in filter(plans,p=>p.id==editing)
-          Input "Plan name" bind=p.name
+          Input "Plan name" @p.name
           Row scroll gap=8
             each d in p.days
               ChoiceChip "{d.name}" selected={dayTab==index} onTap={dayTab=index}
@@ -345,10 +345,10 @@ App
                     Icon "drag_handle" color=#FF777777
                     Text.strong "{it.name}" color=#FFFFFFFF
                   Row gap=8 middle
-                    Stepper bind=it.sets min=1 max=10 step=1 holdRepeat
+                    Stepper @it.sets min=1 max=10 step=1 holdRepeat
                     IconButton "delete" onTap={plans=updateWhere(plans,x=>x.id==p.id,x=>with(x,"days",setAt(x.days,dayTab,with(x.days[dayTab],"items",without(x.days[dayTab].items,it)))))}
           Row gap=8
-            Input "Add exercise" bind=newEx grow fuzzy suggestions={catalogNames}
+            Input "Add exercise" @newEx grow fuzzy suggestions={catalogNames}
             Button "Add" onTap={plans=updateWhere(plans,x=>x.id==p.id,x=>with(x,"days",setAt(x.days,dayTab,with(x.days[dayTab],"items",append(x.days[dayTab].items,{"name":newEx,"sets":3}))))); newEx=""}
   ConfirmDialog#delAsk "Delete this plan?" "This cannot be undone."
     Button.ghost "Cancel" onTap={close}
@@ -381,10 +381,10 @@ App
       Card fill=#FF161616 radius=24 gap=12
         Text.strong "Log weight" color=#FFFFFFFF
         Row gap=8 middle
-          DatePicker "Date" bind=entryDate grow
-          Input "Weight" bind=entryW type=number grow
+          DatePicker "Date" @entryDate grow
+          Input "Weight" @entryW type=number grow
           Button "Add" onTap={weights=sortBy(append(removeWhere(weights,x=>x.d==entryDate),{"d":entryDate,"w":entryW}),x=>x.d); toast "Logged"}
-        Stepper "Goal" bind=goal step=0.5 holdRepeat
+        Stepper "Goal" @goal step=0.5 holdRepeat
       Card fill=#FF161616 radius=24 gap=8
         each x in reverse(weights)
           Row between
@@ -399,6 +399,7 @@ state exercises=[] persist
 state weights=[] persist
 state goal=78 persist
 state plans=[] persist
+state unitIsLb=false
 App
   Sidebar fill=#FF0A0A0A
     Brand "Rep" icon="fitness_center"
@@ -414,10 +415,10 @@ App
       Heading "Settings" level=1 color=#FFFFFFFF
     Column pad=24 gap=16 maxw=720
       Card fill=#FF161616 radius=24 gap=16
-        Toggle "Use pounds" bind=unitIsLb value={unit=="lb"} onChange={unit=result?"lb":"kg"; exercises=map(exercises,e=>with(e,"sets",map(e.sets,s=>with(with(s,"kg",round(s.kg*(result?2.2046:0.4536),1)),"prevKg",round(s.prevKg*(result?2.2046:0.4536),1))))); weights=map(weights,x=>with(x,"w",round(x.w*(result?2.2046:0.4536),1))); goal=round(goal*(result?2.2046:0.4536),1)}
+        Toggle "Use pounds" @unitIsLb value={unit=="lb"} onChange={unit=result?"lb":"kg"; exercises=map(exercises,e=>with(e,"sets",map(e.sets,s=>with(with(s,"kg",round(s.kg*(result?2.2046:0.4536),1)),"prevKg",round(s.prevKg*(result?2.2046:0.4536),1))))); weights=map(weights,x=>with(x,"w",round(x.w*(result?2.2046:0.4536),1))); goal=round(goal*(result?2.2046:0.4536),1)}
         Row between middle
           Column
             Text.strong "Default rest" color=#FFFFFFFF
             Text.muted "{restDefault} seconds"
-          Stepper bind=restDefault min=15 max=300 step=15 holdRepeat
-        SegmentedButton "Theme" bind=theme items=["dark","light","system"]
+          Stepper @restDefault min=15 max=300 step=15 holdRepeat
+        SegmentedButton "Theme" @theme items=["dark","light","system"]

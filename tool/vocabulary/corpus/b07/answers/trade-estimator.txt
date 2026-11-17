@@ -36,7 +36,7 @@ App
           Row gap=16
             Row gap=4
               Text.muted "Markup"
-              Input type=number bind=markup.Rough-in w=70
+              Input type=number @markup.Rough-in w=70
               Text.muted "%"
             Text.strong "Subtotal {money(sum(filter(materials,m=>m.sec=='Rough-in'),m=>m.qty*m.cost)*(1+markup.Rough-in/100),'$',2)}"
         if open1
@@ -49,10 +49,10 @@ App
           each row in materials
             if row.sec=="Rough-in"
               Row gap=8 fill={row.known ? "#00000000" : "#FFFFF0C2"}
-                Input bind=row.code w=90
-                Input bind=row.desc grow
-                Input type=number bind=row.qty w=70
-                Input type=number bind=row.cost w=100
+                Input @row.code w=90
+                Input @row.desc grow
+                Input type=number @row.qty w=70
+                Input type=number @row.cost w=100
                 Text.strong "{money(row.qty*row.cost,'$',2)}" w=100
                 IconButton "delete" tooltip="Remove line" onTap={materials=removeWhere(materials,r=>r.id==row.id)}
       Card gap=8
@@ -63,17 +63,17 @@ App
           Row gap=16
             Row gap=4
               Text.muted "Markup"
-              Input type=number bind=markup.Finish w=70
+              Input type=number @markup.Finish w=70
               Text.muted "%"
             Text.strong "Subtotal {money(sum(filter(materials,m=>m.sec=='Finish'),m=>m.qty*m.cost)*(1+markup.Finish/100),'$',2)}"
         if open2
           each row in materials
             if row.sec=="Finish"
               Row gap=8 fill={row.known ? "#00000000" : "#FFFFE0A3"}
-                Input bind=row.code w=90 hint="no code"
-                Input bind=row.desc grow
-                Input type=number bind=row.qty w=70
-                Input type=number bind=row.cost w=100
+                Input @row.code w=90 hint="no code"
+                Input @row.desc grow
+                Input type=number @row.qty w=70
+                Input type=number @row.cost w=100
                 Text.strong "{money(row.qty*row.cost,'$',2)}" w=100
                 if !row.known
                   Badge.warning "Unmatched"
@@ -83,15 +83,15 @@ App
           Heading "Labour" level=3
           Row gap=4
             Text.muted "Rate $/h"
-            Input type=number bind=rate w=80
+            Input type=number @rate w=80
         Row
           Text.caption "Task" grow
           Text.caption "Hours" w=90
           Text.caption "Cost" w=110
         each row in labour
           Row gap=8
-            Input bind=row.task grow
-            Input type=number bind=row.hours w=90
+            Input @row.task grow
+            Input type=number @row.hours w=90
             Text.strong "{money(row.hours*rate,'$',2)}" w=110
         Button.ghost "Add task" icon="add" onTap={labour=append(labour,{"id":length(labour)+1,"task":"","hours":0})}
       Card gap=8
@@ -113,7 +113,7 @@ App
           Text.muted "Margin on cost"
           Text.success "{fixed((1-(sum(materials,m=>m.qty*m.cost)+sum(labour,l=>l.hours)*rate*0.6)/((sum(materials,m=>m.qty*m.cost*(1+markup[m.sec]/100))+sum(labour,l=>l.hours)*rate)*(1+ohead/100)))*100,1)}%"
   Dialog#paste "Paste a list of items" "One item per line: quantity, then description"
-    Input "Items" bind=pasted multiline h=160
+    Input "Items" @pasted multiline h=160
     Text.muted "Lines that match nothing in your catalogue turn amber."
     Row end gap=8
       Button.outline "Cancel" onTap={close}
@@ -121,6 +121,7 @@ App
 
 ### Client quote
 state showLabour=true
+state clientEmail=""
 Page
   Nav
     Brand "Ruiz Electric" icon="bolt"
@@ -135,7 +136,7 @@ Page
           Heading "Quote 2041" level=1
           Text.muted "Prepared for Mark Kessler, 18 Alder Lane"
         Text.muted "Valid until {formatDate(today(),'MMM d')} plus 30 days"
-      Toggle "Show labour hours" bind=showLabour
+      Toggle "Show labour hours" @showLabour
       Card gap=8
         Heading "Rough-in" level=3
         each row in materials
@@ -165,7 +166,7 @@ Page
   Footer
     Text.muted "Ruiz Electric, licence E-48213"
   Dialog#send "Send quote" "Mark will get a link to this page"
-    Input "Email" "mark@kessler.com" bind=clientEmail type=email
+    Input "Email" "mark@kessler.com" @clientEmail type=email
     Button "Send" onTap={clientEmail=="" ? toast "Add an email" : {emit sendQuote clientEmail; toast "Quote sent"; close}}
 
 ### Compare versions
@@ -185,10 +186,10 @@ App
     Nav
       Heading "Compare versions" level=1
       Row gap=8
-        Select bind=vA items=["Version 1","Version 2","Version 3"] w=140
+        Select @vA items=["Version 1","Version 2","Version 3"] w=140
         Icon "arrow_forward"
-        Select bind=vB items=["Version 2","Version 3","Version 4"] w=140
-        Toggle "Changed only" bind=changedOnly
+        Select @vB items=["Version 2","Version 3","Version 4"] w=140
+        Toggle "Changed only" @changedOnly
     Column pad=24 gap=16 scroll
       Row gap=12
         Card grow gap=4

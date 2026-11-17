@@ -47,16 +47,16 @@ App
             each row in sec.items
               Row gap=8 middle
                 Text.mono "{row.code}" w=90
-                Input "Description" bind=row.desc grow
-                Input "Qty" type=number bind=row.qty w=70
-                Input "Unit cost" type=number bind=row.cost w=100
+                Input "Description" @row.desc grow
+                Input "Qty" type=number @row.qty w=70
+                Input "Unit cost" type=number @row.cost w=100
                 Text.strong "{money(row.qty*row.cost,'$',2)}" w=110
                 IconButton "delete" tooltip="Remove line" onTap={sections=updateWhere(sections,s=>s.id==sec.id,s=>with(s,"items",removeWhere(s.items,r=>r.code==row.code)))}
             Row between middle
               Button.ghost "Add line" icon="add" onTap={sections=updateWhere(sections,s=>s.id==sec.id,s=>with(s,"items",append(s.items,{"code":"NEW","desc":"","qty":1,"cost":0})))}
               Row gap=8 middle
                 Text.fieldLabel "Markup %"
-                Input "Markup" type=number bind=sec.markup w=80
+                Input "Markup" type=number @sec.markup w=80
       Card gap=12
         Text.strong "Totals"
         Grid cols=4 gap=16
@@ -81,7 +81,7 @@ App
             Text.caption "Margin on cost"
             Text "{fixed(((sum(sections,s=>sum(s.items,r=>r.qty*r.cost)*(1+s.markup/100))+sum(labour,l=>l.hours)*labourRate)*(1+overhead/100)-sum(sections,s=>sum(s.items,r=>r.qty*r.cost))-sum(labour,l=>l.hours)*labourRate*0.6)/((sum(sections,s=>sum(s.items,r=>r.qty*r.cost)*(1+s.markup/100))+sum(labour,l=>l.hours)*labourRate)*(1+overhead/100))*100,1)}%" size=32 weight=700
 Dialog#paste "Paste a list of items" "One item per line. Unmatched lines turn amber."
-  Input "Pasted list" multiline bind=pasted h=120
+  Input "Pasted list" multiline @pasted h=120
   Row gap=8
     Button "Match to catalogue" onTap={emit matchPaste pasted; toast "Matched against the price book"}
     Text.muted "{count(staged,x=>!x.match)} unknown of {length(staged)}"
@@ -101,6 +101,7 @@ state labour=[{"task":"Rough-in","hours":24},{"task":"Panel swap","hours":8},{"t
 state labourRate=92
 state overhead=8
 state crew=["Journeyman","Apprentice"]
+state crewPick=""
 App
   Sidebar
     Brand "Joist" icon="electrical_services"
@@ -116,9 +117,9 @@ App
       Card gap=12
         Text.strong "Rate"
         Row gap=16 middle
-          Input "Hourly rate" type=number bind=labourRate w=140
-          Select "Crew" items=crew bind=crewPick w=200
-          Input "Overhead %" type=number bind=overhead w=120
+          Input "Hourly rate" type=number @labourRate w=140
+          Select "Crew" items=crew @crewPick w=200
+          Input "Overhead %" type=number @overhead w=120
       Card gap=8
         Row gap=8 middle
           Text.caption "Task" grow
@@ -127,8 +128,8 @@ App
           Spacer w=40
         each row in labour
           Row gap=8 middle
-            Input "Task" bind=row.task grow
-            Input "Hours" type=number bind=row.hours w=90
+            Input "Task" @row.task grow
+            Input "Hours" type=number @row.hours w=90
             Text.strong "{money(row.hours*labourRate,'$',2)}" w=110
             IconButton "delete" tooltip="Remove task" onTap={labour=removeWhere(labour,l=>l.task==row.task)}
         Divider
@@ -150,7 +151,7 @@ Page
   Nav sticky
     Brand "Joist" icon="electrical_services"
     Row gap=8
-      Toggle "Show line items" bind=showLines
+      Toggle "Show line items" @showLines
       Button.outline "Back to estimate" onTap={go estimate}
       Button "Send to client" icon="send" onTap={open send}
   Section narrow
@@ -184,7 +185,7 @@ Page
         Text "{money(sum(sections,s=>sum(s.items,r=>r.qty*r.cost)*(1+s.markup/100))+labourTotal,'$',2)}" size=32 weight=700
       Text.caption "Work to code, permit and inspection included. Drywall repair by others."
 Dialog#send "Send quote" "Emails a PDF to the client"
-  Input "To" "client@example.com" bind=client
+  Input "To" "client@example.com" @client
   Button "Send" onTap={emit sendQuote; close; toast "Quote sent"}
 
 ### Compare versions
@@ -203,12 +204,12 @@ App
   Main
     Nav
       Heading "Compare versions" level=1
-      Toggle "Changed lines only" bind=onlyChanged
+      Toggle "Changed lines only" @onlyChanged
     Column pad=24 gap=16
       Row gap=16 middle
-        Select "Base" items=versions bind=vA w=220
+        Select "Base" items=versions @vA w=220
         Icon "arrow_forward"
-        Select "Compare to" items=versions bind=vB w=220
+        Select "Compare to" items=versions @vB w=220
         Spacer grow
         Badge.warning "{count(diff,d=>d.qtyA!=d.qtyB || d.costA!=d.costB)} lines changed"
       Card gap=4

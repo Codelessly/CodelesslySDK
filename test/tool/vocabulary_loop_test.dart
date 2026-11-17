@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../tool/notation/vocabulary.dart' show loadVocabulary, screensOf;
 import '../../tool/notation/vocabulary_harvest.dart' show Harvest;
+import '../../tool/notation/vocabulary_words.dart' show CorpusWords, countLine, countOf;
 
 // A page as a model writes it from the open prompt: unknown types (with
 // lines under them, with nothing under them, over the page), parameters,
@@ -22,6 +23,7 @@ const _page = '''
 state q=""
 state n=2 persist
 state stars=4
+state view=""
 Shortcut "ctrl+k" onPress={open palette}
 App
   Sidebar
@@ -31,7 +33,7 @@ App
     Nav
       Heading "Choose your seats"
       Row gap=8
-        Input#find "Find a row" bind=q clearable
+        Input#find "Find a row" @q clearable
         Button.danger "Clear" disabled={n==0} onTap={n=0; haptic}
     Column pad=24 gap=16
       SeatMap#plan "Stalls" rows={seats} chosen={picked} selectable max=8 h=120 fill=#FF111827 radius=12 onChange={n=length(result)}
@@ -41,7 +43,7 @@ App
       Row gap=12 middle
         Text#count "{n} seats"
         Rating value=4.6 readonly
-        Tabs bind=view items=["Plan","List"]
+        Tabs @view items=["Plan","List"]
       ListTile "Row A" subtitle="Two seats left" onTap={vibrate find}
       Progress {n/8}
 QuickSwitcher#palette "Commands"
@@ -89,10 +91,11 @@ void main() {
     // Words Cards defines in the notation (its vocabulary/*.txt) are words we
     // have; what a use gives that its definition does not take is recorded.
     expect(of('definition'), ['Legend', 'Waveform', 'CommandItem']);
-    expect(of('parameter'), ['Legend.string1', 'Waveform.seed']);
+    // Legend "Premium" color=… is a key's entry (Legend#entry, review 7).
+    expect(of('parameter'), ['Waveform.seed']);
     // A universal word (codelessly_api docs/design/21) on a defined word goes on its root;
     // clearable is an Input's own now.
-    expect(of('universal'), contains('Legend.color'));
+    expect(of('universal'), contains('Waveform.color'));
     expect(of('flag'), isEmpty);
     expect(of('verb'), ['Button.haptic', 'ListTile.vibrate']);
     expect(of('variant'), ['Button.Button.danger']);
@@ -149,8 +152,8 @@ void main() {
 
   test('the harvest: a word defined in more than one answer, side by side, with what each leans on and where they disagree', () {
     final h = Harvest(kindOf: (w) => const {'Column', 'Row', 'Text', 'Ring', 'Slider', 'Box'}.contains(w) ? 'core' : 'unknown');
-    h.answer('dj', '### Deck\nApp\n  Knob "Gain"\n\n// A rotary dial.\ndefine Knob "label" bind=value min=0 max=12 color=#FF22D3EE\n  Column gap=4\n    Ring {value/max} w=56 color={color}\n    Text "{label}"\n');
-    h.answer('seq', 'Column\n  Knob "Swing"\ndefine Knob "label" bind=value low=0 max=100 unit=""\n  Column\n    Pip\n    Slider bind=value min={low} max={max}\ndefine Pip\n  Box w=4 h=4\n');
+    h.answer('dj', '### Deck\nApp\n  Knob "Gain"\n\n// A rotary dial.\ndefine Knob "label" @value min=0 max=12 color=#FF22D3EE\n  Column gap=4\n    Ring {value/max} w=56 color={color}\n    Text "{label}"\n');
+    h.answer('seq', 'Column\n  Knob "Swing"\ndefine Knob "label" @value low=0 max=100 unit=""\n  Column\n    Pip\n    Slider @value min={low} max={max}\ndefine Pip\n  Box w=4 h=4\n');
     h.answer('synth', 'Column\n  Knob "Cutoff"\n');
     h.unknown('Knob', 'synth');
     h.unknown('Knob', 'dj');
@@ -169,9 +172,62 @@ void main() {
     expect([for (final w in h.wouldResolve) '${w.word}: ${w.definedIn} / ${w.unknownIn}'], ['Knob: [dj, seq] / [synth]']);
     final md = h.markdown();
     expect(md, contains('### Knob (2 answers)'));
-    expect(md, contains('```\n// A rotary dial.\ndefine Knob "label" bind=value min=0 max=12 color=#FF22D3EE\n  Column gap=4\n'));
+    expect(md, contains('```\n// A rotary dial.\ndefine Knob "label" @value min=0 max=12 color=#FF22D3EE\n  Column gap=4\n'));
     expect(md, contains('| Knob | dj, seq | synth |'));
     expect(((h.toJson()['definedInMoreThanOne'] as List).single as Map)['answers'], 2);
+  });
+
+  test('the count: a primitive stands in, a word a definition never reads is not resolved, the unknown types apart (Review 7, D32)', () {
+    const answer = '''
+### Plan
+state at=""
+App
+  Main
+    Column pad=24
+      FloorPlan2 "Level 2" rooms=["a"] onPick={at=result}
+      GoKey "Go" shortcut="space" onTap={at="go"}
+      Waveform2 seed=3
+
+// A plan that placed items are dragged about on: no line draws one.
+primitive FloorPlan2 "name" rooms=[] onPick
+define GoKey "label" shortcut="" onTap
+  Button "{label}" onTap={onTap}
+''';
+    final corpus = CorpusWords(components: {for (final c in ds.list) c.type});
+    final defined = readPageDefinitions(answer, others: aliases.definitions).words;
+    final reads = {
+      for (final defs in defined.values)
+        for (final d in defs) d.label: definitionReads(d),
+    };
+    expect(reads['GoKey']!.warnings, ['page:12: GoKey names shortcut and never reads it: a use\'s shortcut= does nothing.']);
+    for (final s in screensOf(answer, 'plan')) {
+      final r = api.Catalog.run(
+          catalog,
+          () => parseNotation(s.text,
+              catalog: catalog, options: NotationOptions.fromDesignSystem(ds, width: 1280).open(vocabulary: aliases), definitions: answer));
+      expect(r.issues, isEmpty);
+      expect([for (final u in r.vocabulary) if (u.kind == 'primitive' || u.kind == 'definition' || u.kind == 'type') '${u.kind} ${u.word}'],
+          ['primitive FloorPlan2', 'definition GoKey', 'type Waveform2']);
+      corpus.screen('plan', s.text, r, reads: reads);
+    }
+    String how(String kind, String? on, String word) => corpus.words['$kind ${on ?? ''} $word']!.resolved;
+    expect(how('type', null, 'FloorPlan2'), 'primitive');
+    expect(how('parameter', 'FloorPlan2', 'rooms'), 'primitive');
+    expect(how('type', null, 'GoKey'), 'definition');
+    expect(how('text', 'GoKey', 'text1'), 'definition');
+    expect(how('parameter', 'GoKey', 'shortcut'), 'unread');
+    expect(how('event', 'GoKey', 'onTap'), 'definition');
+    expect(how('type', null, 'Waveform2'), 'unknown');
+    expect(how('parameter', 'Waveform2', 'seed'), 'unknown');
+    final count = countOf(corpus, primitives: 1);
+    expect(count, containsPair('primitivesDeclared', 1));
+    expect(count, containsPair('primitiveUses', 1));
+    // FloorPlan2, its string, rooms and onPick.
+    expect(count['standIn'], 4);
+    expect(count['unread'], 1);
+    expect((count['unknownTypes'], count['unknownOther']), (1, 1));
+    expect(count['resolved'], count['words']! - 4 - 1 - 2);
+    expect(countLine(count), endsWith('stand-in 4 (1 primitives declared, 1 uses), never read 1, unknown 2 (1 types, 1 other words: parameters, texts, flags, events, variants, verbs, functions)'));
   });
 
   test('a corpus file is its screens, each under a ### line; a file without one is one screen', () {
@@ -180,6 +236,15 @@ void main() {
     expect(screens[1].text, 'state n=1\nApp\n  Main');
     final one = screensOf('Column\n  Text "x"\n', 'card');
     expect([for (final s in one) (s.name, s.id)], [('card', 'card')]);
+  });
+
+  test('state and overlays before the first ### line are every screen\'s, not a screen; a page there is still one', () {
+    final screens = screensOf('state recipes=[]\nstate q="" saved\nstate total=sum(recipes,r=>r.n)\nDialog#about "About"\n  Text "x"\n\n### Recipes\nColumn\n  Text "a"\n### Saved\nColumn\n  Text "b"\n', 'file');
+    // `from` stays the file's line of each screen's own first line.
+    expect([for (final s in screens) (s.id, s.from + 3)], [('recipes', 8), ('saved', 11)]);
+    expect(screens[0].text, 'project recipes=[]\nproject q="" saved\nstate total=sum(recipes,r=>r.n)\nColumn\n  Text "a"\nDialog#about "About"\n  Text "x"');
+    final page = screensOf('Column\n  Text "home"\n### Other\nColumn\n', 'file');
+    expect([for (final s in page) s.id], ['file', 'other']);
   });
 
   test('the first corpus is there with the tool\'s output, which says how each word resolved', () {

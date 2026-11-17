@@ -18,8 +18,8 @@ App
     Nav
       Heading "Events" level=1
       Row gap=8
-        SegmentedButton bind=day items=["Saturday","Sunday"]
-        Input "Search events" bind=q w=220
+        SegmentedButton @day items=["Saturday","Sunday"]
+        Input "Search events" @q w=220
     Column pad=24 gap=16
       Card gap=8 fill=#FFFFF4E5
         Row between middle
@@ -174,7 +174,7 @@ App
     MenuItem "Disqualify" icon="block" onTap={reason=""; open dqDialog}
     MenuItem "Clear lane" icon="backspace" onTap={placing=without(placing,sel); dq=without(dq,sel)}
   Dialog#dqDialog "Disqualify lane {sel}" "Choose the infraction and report it to the referee."
-    Select "Reason" bind=reason items=["False start","Early take-off, relay","Stroke infringement","Incomplete turn","One-hand touch","Did not finish","Other"]
+    Select "Reason" @reason items=["False start","Early take-off, relay","Stroke infringement","Incomplete turn","One-hand touch","Did not finish","Other"]
     Input "Notes" "Lane judge and what was seen" multiline
     Row gap=8
       Button.outline "Cancel" grow onTap={close}
@@ -195,7 +195,7 @@ App
   Main
     Nav
       Heading "Medal count" level=1
-      SegmentedButton bind=view items=["Club","Recent"]
+      SegmentedButton @view items=["Club","Recent"]
     Column pad=24 gap=16
       if view=="Club"
         Card gap=12

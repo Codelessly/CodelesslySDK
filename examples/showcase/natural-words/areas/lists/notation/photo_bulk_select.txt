@@ -3,7 +3,7 @@ Column h=fill
   Column grow scroll
     each file in files
       Row between pad=[16,10,16,10]
-        Checkbox "{file.name}" bind=file.sel
+        Checkbox "{file.name}" @file.sel
         Text.muted "{file.size}"
       Divider
   if count(files,f=>f.sel)>0

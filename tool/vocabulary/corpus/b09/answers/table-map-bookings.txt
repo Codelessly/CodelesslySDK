@@ -30,7 +30,7 @@ App
         Row between
           Text.strong "Time of evening"
           Text.heading "{t}:00"
-        Slider bind=t min=17 max=23 step=1
+        Slider @t min=17 max=23 step=1
         Row gap=16
           Badge.neutral "Seated"
           Badge.info "Ordered"
@@ -56,7 +56,7 @@ App
           Card gap=8
             Text.strong "Turn time"
             Row gap=8
-              Slider bind=turnMin min=45 max=120 step=5 grow
+              Slider @turnMin min=45 max=120 step=5 grow
               Text.mono "{turnMin} min"
             Text.muted "Estimated next free table: {first(sortBy(filter(tables,x=>x.state!="free"),x=>x.since)).id}"
   Menu#tableMenu
@@ -66,9 +66,9 @@ App
     MenuItem "Paying" icon="receipt" onTap={tables=updateWhere(tables,x=>x.id==sel,x=>with(x,"state","paying"))}
     MenuItem "Free the table" icon="check_circle" onTap={tables=updateWhere(tables,x=>x.id==sel,x=>with(with(x,"state","free"),"guest","")); toast "{sel} is free"}
   Dialog#walkin "Add a walk-in" "Name, party and how long they wait"
-    Input "Name" bind=walkName
-    Input "Party size" bind=walkParty type=number
-    Select "Quoted wait" bind=walkWait items=[10,15,20,30,45]
+    Input "Name" @walkName
+    Input "Party size" @walkParty type=number
+    Select "Quoted wait" @walkWait items=[10,15,20,30,45]
     if count(tables,x=>x.state=="free" && x.seats>=walkParty)==0
       Text.danger "No free table seats {walkParty}. They will wait."
     Button "Add to waitlist" onTap={walkName=="" ? toast "Enter a name" : {waitlist=append(waitlist,{"id":"w{length(waitlist)+1}","name":walkName,"party":walkParty,"wait":walkWait*60,"texted":false}); walkName=""; close; toast "Added, quoted {walkWait} min"}}
@@ -101,7 +101,7 @@ App
     Nav
       Heading "Reservations"
       Row gap=8
-        Input "Search guests" bind=q w=220
+        Input "Search guests" @q w=220
         Button "New booking" icon="add" onTap={open newbooking}
     Column pad=24 gap=16
       Row gap=8
@@ -128,9 +128,9 @@ App
     MenuItem "Text the guest" icon="sms" onTap={toast "Text sent to {find(bookings,b=>b.id==sel).name}: your table is ready"}
     MenuItem "Cancel booking" icon="delete" onTap={bookings=removeWhere(bookings,b=>b.id==sel); toast "Cancelled"}
   Dialog#newbooking "New booking"
-    Input "Guest name" bind=newName
-    Input "Party size" bind=newParty type=number
-    TimePicker "Time" bind=newTime
+    Input "Guest name" @newName
+    Input "Party size" @newParty type=number
+    TimePicker "Time" @newTime
     Button "Save booking" onTap={newName=="" ? toast "Enter a name" : {bookings=append(bookings,{"id":"b{length(bookings)+1}","name":newName,"party":newParty,"time":19,"phone":"","placed":false}); newName=""; close; toast "Booked"}}
 
 ### Waitlist

@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "ChoiceChips",
-  "doc": "A single choice as a grid of equal chips (time slots, sizes, a finish; not tabs or a filter: those are Tabs, Segments and ChipTabs): ChoiceChips bind=time options=[\"18:00\",\"18:30\"] disabled=[\"18:30\"] keeps the chosen chip's text in your variable; disabled lists the ones that are unavailable (full, sold out); columns sets chips per row. Labels too long for that many columns are not squeezed: the chips are then as wide as their labels and wrap.",
+  "doc": "A single choice as a grid of equal chips (time slots, sizes, a finish; not tabs or a filter: those are Tabs, Segments and ChipTabs): ChoiceChips @time options=[\"18:00\",\"18:30\"] disabled=[\"18:30\"] keeps the chosen chip's text in your variable; disabled lists the ones that are unavailable (full, sold out); columns sets chips per row. Labels too long for that many columns are not squeezed: the chips are then as wide as their labels and wrap.",
   "props": [
    {
     "key": "value",

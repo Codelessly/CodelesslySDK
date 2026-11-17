@@ -1,3 +1,4 @@
+state email=""
 Page
   Nav
     Brand "Signal & Noise" icon="graphic_eq"
@@ -57,7 +58,7 @@ Page
         Card gap=12
           Heading "Get the next post" level=3
           Text.muted "One engineering essay a month. No noise."
-          Input "Email" "you@example.com" bind=email type={email}
+          Input "Email" "you@example.com" @email type={email}
           Button "Subscribe" w=fill onTap={emit subscribe email; toast "You're on the list"}
   Section tint
     Column gap=12

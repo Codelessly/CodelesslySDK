@@ -16,7 +16,7 @@ App
     Nav
       Heading "Usage" level=1
       Row gap=8
-        SegmentedButton bind=range items=["Last 7 days","Last 14 days","Last 30 days"]
+        SegmentedButton @range items=["Last 7 days","Last 14 days","Last 30 days"]
         Button "Submit a reading" onTap={go meter_reading}
     Column pad=24 gap=16 scroll
       Grid cols=2 gap=16
@@ -71,7 +71,7 @@ App
   Main
     Nav
       Heading "Compare tariffs" level=1
-      Select bind=sort items=["Yearly cost","Unit rate","Name"] w=180
+      Select @sort items=["Yearly cost","Unit rate","Name"] w=180
     Column pad=24 gap=16 scroll
       Text.muted "Yearly cost is worked out from the 4,120 kWh you used over the last 12 months."
       Card gap=0
@@ -131,13 +131,13 @@ App
         Text.panelTitle "Electricity meter, serial E10 4471 9"
         Text.muted "Last reading: 48,213 kWh on 1 November"
         Text.fieldLabel "Enter the five black digits"
-        DigitInput bind=digits count=5 type=number
+        DigitInput @digits count=5 type=number
         Text.caption "Ignore any red digit after the decimal point."
       Card gap=12
         Text.panelTitle "Add a photo (optional)"
         if photo == ""
           Button.outline "Take or upload a photo" icon="photo_camera" onTap={photo=pickImage()}
-        ImagePicker bind=photo accept="image/*" label="Photo of your meter"
+        ImagePicker @photo accept="image/*" label="Photo of your meter"
         if photo != ""
           Image "{photo}" h=160
           Button.ghost "Remove photo" onTap={photo=""}
@@ -195,12 +195,12 @@ App
             Text.strong "{money(p.amt,'£',2)}" w=90
             Badge.success "Paid" w=90 visible={p.ok}
   Dialog#ddsetup "Set up direct debit" "We take your bill once a month."
-    Input "Name on the account" bind=holder
+    Input "Name on the account" @holder
     Row gap=8
-      Input "Sort code" "00-00-00" bind=sortcode type=number grow
-      Input "Account number" "8 digits" bind=account type=number grow
-    Select bind=day items=["1st","8th","15th","22nd"] label="Collection day"
-    Checkbox "I am the only person needed to authorise debits" bind=agree
+      Input "Sort code" "00-00-00" @sortcode type=number grow
+      Input "Account number" "8 digits" @account type=number grow
+    Select @day items=["1st","8th","15th","22nd"] label="Collection day"
+    Checkbox "I am the only person needed to authorise debits" @agree
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Confirm" onTap={(agree && holder != "" && length(account)==8) ? {emit setupDirectDebit; toast "Direct debit set up"; close} : toast "Fill in every field"}

@@ -48,27 +48,27 @@ App
               Column gap=4
                 Button.outline "Change" onTap={emit changePicture}
                 Text.caption "JPG or PNG, up to 5 MB"
-            Input "Name" bind=name
-            Input "Username" bind=username
+            Input "Name" @name
+            Input "Username" @username
             Column gap=4
-              Input "Bio" "Tell readers a little about you" bind=bio multiline
+              Input "Bio" "Tell readers a little about you" @bio multiline
               Row end
                 Text.caption "{length(bio)}/160" color={length(bio)>160?"#FFD32F2F":"#FF6B7280"}
             Column gap=4
               Text.fieldLabel "Time zone"
-              Select bind=tz items=["Pacific Time (UTC−8)","Mountain Time (UTC−7)","Central Time (UTC−6)","Eastern Time (UTC−5)","London (UTC+0)","Berlin (UTC+1)","Tokyo (UTC+9)"]
-            ToggleRow "Public profile" "Anyone can find your profile and read your published pieces." bind=pub
+              Select @tz items=["Pacific Time (UTC−8)","Mountain Time (UTC−7)","Central Time (UTC−6)","Eastern Time (UTC−5)","London (UTC+0)","Berlin (UTC+1)","Tokyo (UTC+9)"]
+            ToggleRow "Public profile" "Anyone can find your profile and read your published pieces." @pub
           Card gap=8 pad=24
             Heading "Notifications" level=3
-            ToggleRow "Comments" "Tell me when someone comments on my writing." bind=n1
+            ToggleRow "Comments" "Tell me when someone comments on my writing." @n1
             Divider
-            ToggleRow "Replies" "Tell me when someone replies to my comment." bind=n2
+            ToggleRow "Replies" "Tell me when someone replies to my comment." @n2
             Divider
-            ToggleRow "New followers" "Tell me when a reader follows me." bind=n3
+            ToggleRow "New followers" "Tell me when a reader follows me." @n3
             Divider
-            ToggleRow "Weekly summary" "A Monday email with your word count and readers." bind=n4
+            ToggleRow "Weekly summary" "A Monday email with your word count and readers." @n4
             Divider
-            ToggleRow "Product news" "Occasional updates about new Plume features." bind=n5
+            ToggleRow "Product news" "Occasional updates about new Plume features." @n5
           Box gap=12 pad=24 fill=#FFFFF5F5 radius=12 border=#FFF3B8B8
             Heading "Danger zone" level=3
             Text.muted "Deleting your account removes all your drafts, published pieces and followers. This cannot be undone."

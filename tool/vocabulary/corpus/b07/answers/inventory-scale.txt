@@ -10,6 +10,7 @@ state current={"sku":"STK-100482","name":"Pallet wrap 500mm","site":"Rotterdam D
 state audit=[{"at":"2026-11-16 14:02","who":"M. Vos","what":"Count adjusted 58 to 42","site":"Rotterdam DC"},{"at":"2026-11-14 09:40","who":"System","what":"Reorder suggested, 300 units","site":"Rotterdam DC"},{"at":"2026-11-10 16:15","who":"A. Haddad","what":"Transfer out 120 to Leeds DC","site":"Rotterdam DC"}]
 state labelSize="50x30 mm"
 state labelCopies=1
+state auditFilter=""
 App
   Sidebar
     Brand "Stockroom" icon="warehouse"
@@ -25,7 +26,7 @@ App
     Nav
       Heading "Products" level=1
       Row gap=8
-        Input "Search SKU, name or barcode" bind=q w=260
+        Input "Search SKU, name or barcode" @q w=260
         Button.outline "Print labels" icon="qr_code_2" onTap={open labels}
         Button "New product" onTap={emit newProduct}
     Column pad=24 gap=16
@@ -47,7 +48,7 @@ App
           Text.muted "Selected"
           Text.strong "{length(selected)}" size=28
       Row gap=8 between
-        SegmentedButton bind=band items=["all","low","ok","over"]
+        SegmentedButton @band items=["all","low","ok","over"]
         if length(selected)>0
           Row gap=8
             Text.muted "{length(selected)} selected"
@@ -56,7 +57,7 @@ App
             Button.outline "Print labels" onTap={open labels}
             Button.ghost "Clear" onTap={selected=[]}
       Card grow
-        DataTable source="products" site={site} query={q} band={band} rowKey="sku" frozenCols=1 selectable bind=selected virtual rowHeight=44 h=520 onRowTap={current=result; open details} onSort={emit sortProducts result}
+        DataTable source="products" site={site} query={q} band={band} rowKey="sku" frozenCols=1 selectable @selected virtual rowHeight=44 h=520 onRowTap={current=result; open details} onSort={emit sortProducts result}
           Column "Product" field="name" w=260 sortable
           Column "SKU" field="sku" w=120 sortable
           Column "Site" field="site" w=140
@@ -88,8 +89,8 @@ App
 Sheet#details "{current.name}"
   Text.mono "{current.sku}"
   Row gap=8
-    Select "Site" items=["Rotterdam DC","Leeds DC","Lyon DC","Gdansk DC"] bind=current.site
-    Select "Event" items=["All","Counts","Transfers","Reorders","Adjustments"] bind=auditFilter
+    Select "Site" items=["Rotterdam DC","Leeds DC","Lyon DC","Gdansk DC"] @current.site
+    Select "Event" items=["All","Counts","Transfers","Reorders","Adjustments"] @auditFilter
   Timeline items={audit}
     each a in audit
       TimelineItem "{a.what}" time="{a.at}" subtitle="{a.who}, {a.site}"
@@ -99,8 +100,8 @@ Sheet#details "{current.name}"
 
 Dialog#labels "Print labels" "Preview before sending to the label printer"
   Row gap=8
-    Select "Label size" items=["50x30 mm","70x40 mm","100x50 mm"] bind=labelSize
-    Input "Copies" type=number bind=labelCopies
+    Select "Label size" items=["50x30 mm","70x40 mm","100x50 mm"] @labelSize
+    Input "Copies" type=number @labelCopies
   Card gap=8
     Row gap=16
       Column grow gap=4
@@ -136,11 +137,11 @@ App
       Card gap=12
         Heading "Move stock between sites" level=3
         Row gap=12
-          Select "From" items={sitesList} bind=from grow
+          Select "From" items={sitesList} @from grow
           IconButton "swap_horiz" tooltip="Swap sites" onTap={from=to; to=from}
-          Select "To" items={sitesList} bind=to grow
-        Input "Product SKU or barcode" bind=sku
-        Input "Quantity" type=number bind=qty
+          Select "To" items={sitesList} @to grow
+        Input "Product SKU or barcode" @sku
+        Input "Quantity" type=number @qty
         Row between
           Text.muted "Available at {from}"
           Text.strong "{coalesce(find(stock,s=>s.site==from && s.sku==sku).available,0)}"
@@ -180,7 +181,7 @@ App
     Nav
       Heading "Cycle count" level=1
       Row gap=8
-        Toggle "Count mode" bind=counting
+        Toggle "Count mode" @counting
         Button.outline "Finish count" onTap={open finishCount}
     Column pad=24 gap=16
       Row gap=16 top
@@ -205,7 +206,7 @@ App
                 Badge.primary "{remaining} left"
               Text.muted "{counts[idx].name}"
               Text.mono "{counts[idx].sku}"
-              Input "Counted quantity" type=number bind=counts[idx].counted autofocus
+              Input "Counted quantity" type=number @counts[idx].counted autofocus
               if counts[idx].counted!="" && counts[idx].counted!=counts[idx].expected
                 Text.danger "Expected {counts[idx].expected}, difference {counts[idx].counted-counts[idx].expected}"
               Row gap=8 end
@@ -233,7 +234,7 @@ App
     Nav
       Heading "Reorder suggestions" level=1
       Row gap=8
-        Select "Supplier" items=["All","Packline","Boxwell"] bind=supplierFilter w=180
+        Select "Supplier" items=["All","Packline","Boxwell"] @supplierFilter w=180
         Button "Approve all" onTap={suggestions=map(suggestions,s=>with(s,"status","approved")); emit approveAll; toast "All approved"}
     Column pad=24 gap=16
       Grid cols=3 gap=16
@@ -261,7 +262,7 @@ App
               Text.caption "{s.sku} from {s.supplier}"
             Text "{s.site}" w=130
             Text.danger "{s.onHand}" w=80
-            Input "Qty" type=number bind=s.suggested w=110
+            Input "Qty" type=number @s.suggested w=110
             Row gap=8 w=190
               if s.status=="pending"
                 Button "Approve" onTap={suggestions=updateWhere(suggestions,x=>x.id==s.id,x=>with(x,"status","approved")); emit approveReorder s.id; toast "Approved"}

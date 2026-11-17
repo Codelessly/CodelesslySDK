@@ -107,7 +107,7 @@ App
       Row gap=16
         Card grow gap=12
           Text.caption "Current speed"
-          Gauge bind=speed min=0 max=100 limit=80 unit="km/h"
+          Gauge value={speed} min=0 max=100 limit=80 unit="km/h"
           Text.muted "Time on mountain {duration(secs)}"
         Card grow gap=12
           Text.caption "Today"
@@ -201,6 +201,8 @@ App
 state sel=null
 state friends=[{"id":"f1","name":"Maya Reyes","x":0.32,"y":0.4,"where":"Eagle Chair","status":"On the lift","share":true},{"id":"f2","name":"Tom Becker","x":0.58,"y":0.62,"where":"Aspen Glide","status":"Skiing","share":true},{"id":"f3","name":"Priya Nair","x":0.75,"y":0.28,"where":"Summit Lodge","status":"Lunch break","share":true},{"id":"f4","name":"Jonas Weiss","x":0.2,"y":0.8,"where":"","status":"Sharing off","share":false}]
 state msg=""
+state sharing=false
+state invitePhone=""
 App
   Sidebar
     Brand "Powder Day" icon="downhill_skiing"
@@ -222,7 +224,7 @@ App
           each f in filter(friends,x=>x.share)
             Dot "{f.name}" x={f.x} y={f.y} selected={sel==f.id} onTap={sel=f.id}
         Text.caption "Friends appear while they share their location. You can pause sharing at any time."
-        Toggle "Share my location" bind=sharing
+        Toggle "Share my location" @sharing
       Pane w=320 pad=0 gap=12
         Text.strong "Friends"
         each f in friends
@@ -231,10 +233,10 @@ App
         if sel!=null
           Card gap=8
             Text.strong "{find(friends,x=>x.id==sel).name}"
-            Input "Message" "Meet at the lodge?" bind=msg
+            Input "Message" "Meet at the lodge?" @msg
             Row gap=8
               Button "Send" onTap={emit message {"to":sel,"text":msg}; msg=""; toast "Sent"}
               Button.outline "Navigate to" onTap={emit navigateTo sel; go trail-map}
   Dialog#invite "Invite a friend" "They will see you once they accept"
-    Input "Phone number" type=phone bind=invitePhone
+    Input "Phone number" type=phone @invitePhone
     Button "Send invite" onTap={emit invite invitePhone; toast "Invite sent"; close}

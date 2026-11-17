@@ -56,8 +56,8 @@ Sheet#arrivals "Today's arrivals"
   Button "Close" onTap={close}
 
 Dialog#minibar "Minibar" "Record items taken from a room"
-  Select "Room" bind=selected items=["201","202","203","205","206","207","208","209","210","211"]
-  Select "Item" bind=item items=["Water 500ml","Cola","Beer","Chocolate bar","Mixed nuts","Prosecco split"]
+  Select "Room" @selected items=["201","202","203","205","206","207","208","209","210","211"]
+  Select "Item" @item items=["Water 500ml","Cola","Beer","Chocolate bar","Mixed nuts","Prosecco split"]
   Row gap=8 middle
     Button.outline "-" onTap={qty=max(1,qty-1)}
     Text.strong "{qty}"
@@ -67,8 +67,8 @@ Dialog#minibar "Minibar" "Record items taken from a room"
   Button "Add to bill" onTap={selected=="" ? toast "Choose a room" : {minibar=append(minibar,{"room":selected,"item":item,"qty":qty}); toast "Charged {qty} x {item} to room {selected}"; qty=1; close}}
 
 Dialog#lostprop "Lost property" "Log something found in a room"
-  Input "What was found" bind=lostText hint="Black umbrella"
-  Input "Where" bind=lostPlace hint="Room 208, wardrobe"
+  Input "What was found" @lostText hint="Black umbrella"
+  Input "Where" @lostPlace hint="Room 208, wardrobe"
   Button "Log item" onTap={lostText=="" ? toast "Describe the item" : {lost=append(lost,{"text":lostText,"place":lostPlace,"at":formatDate(today(),"MMM d")}); lostText=""; lostPlace=""; toast "Logged"; close}}
 
 // A drag-and-tap tile of the floor grid, coloured by the state of the room.
@@ -142,7 +142,7 @@ App
       Heading "Inspector's checklist" level=1
       Row gap=8 middle
         Text.muted "Room"
-        Select bind=active items=["203","208","210"]
+        Select @active items=["203","208","210"]
     Column pad=24 gap=16 maxw=720
       Card gap=4
         Row between middle

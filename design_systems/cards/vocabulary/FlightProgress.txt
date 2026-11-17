@@ -1,5 +1,5 @@
-// How far a flight has gone: the two airports at the ends of a bar that fills as bind (0 to 1) grows, or as value= says, with a label under it.
-FlightProgress bind=progress value from to label
+// How far a flight has gone: the two airports at the ends of a bar that fills as the variable bound (@progress, 0 to 1) grows, or as value= says, with a label under it.
+FlightProgress @progress value from to label
   state progress=0
   Column w=fill gap=6
     Row w=fill gap=10 middle

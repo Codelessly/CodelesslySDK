@@ -24,11 +24,11 @@ App
       Row gap=8
         Badge.success "{count(flights,f=>f.status==\"On time\")} on time"
         Badge.warning "{count(flights,f=>f.status==\"Delayed\")} delayed"
-        Toggle "Live" bind=live
+        Toggle "Live" @live
         IconButton "refresh" tooltip="Refresh now" onTap={step=step+1; toast "Board refreshed"}
     Column pad=24 gap=16
       Row between
-        SegmentedButton bind=dir items=["Departures","Arrivals"]
+        SegmentedButton @dir items=["Departures","Arrivals"]
         Row gap=8
           ChoiceChip "All terminals" selected={term=="All"} onTap={term="All"}
           ChoiceChip "T1" selected={term=="T1"} onTap={term="T1"}
@@ -98,7 +98,7 @@ App
   Main
     Nav
       Heading "Runway strip" level=1
-      SegmentedButton bind=window items=["30","60","90"]
+      SegmentedButton @window items=["30","60","90"]
     Column pad=24 gap=16
       Card gap=12
         Text.strong "Next ten movements, in time order"
@@ -135,7 +135,7 @@ App
   Main
     Nav
       Heading "Weather and wind" level=1
-      SegmentedButton bind=unit items=["kt","km/h"]
+      SegmentedButton @unit items=["kt","km/h"]
     Column pad=24 gap=16
       Grid cols=3 gap=16
         Card gap=8

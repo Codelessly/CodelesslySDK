@@ -17,7 +17,7 @@ App
     Nav
       Heading "Guest list" level=1
       Row gap=8
-        Input "Search by name" bind=q w=220
+        Input "Search by name" @q w=220
         Button "Scan" icon="qr_code_scanner" onTap={go scan}
     Column pad=24 gap=16
       if offline

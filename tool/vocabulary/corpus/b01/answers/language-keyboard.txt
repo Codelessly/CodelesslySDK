@@ -56,7 +56,7 @@ App
     Nav
       Heading "Lesson {lessonId}: {find(lessons,l=>l.id==lessonId).name}" level=1
       Row gap=8
-        Toggle "Finger guide" bind=showFingers
+        Toggle "Finger guide" @showFingers
         Button.outline "Restart" icon="restart_alt" onTap={typed=""; running=false; elapsed=0; errors=0}
     Column pad=24 gap=16 scroll
       every 1s when running onTick={elapsed=elapsed+1}
@@ -71,7 +71,7 @@ App
           Text.muted "Time"
           Text "{duration(elapsed)}" size=48 weight=700
       Card gap=12
-        TypingText target={find(lessons,l=>l.id==lessonId).text} bind=typed autofocus size=28 correctColor=#FF2E7D32 wrongColor=#FFC62828 onKeyDown={running=true} onError={errors=errors+1} onComplete={running=false; result={"wpm":round(length(typed)/5/(elapsed/60),0),"acc":round(100*(length(typed)-errors)/length(typed),0)}; open done}
+        TypingText target={find(lessons,l=>l.id==lessonId).text} @typed autofocus size=28 correctColor=#FF2E7D32 wrongColor=#FFC62828 onKeyDown={running=true} onError={errors=errors+1} onComplete={running=false; result={"wpm":round(length(typed)/5/(elapsed/60),0),"acc":round(100*(length(typed)-errors)/length(typed),0)}; open done}
         Progress {length(typed)/length(find(lessons,l=>l.id==lessonId).text)}
       Keyboard layout="qwerty" typed={typed} target={find(lessons,l=>l.id==lessonId).text} highlightNext showFingers={showFingers}
       Row gap=8 center
@@ -107,7 +107,7 @@ App
   Main
     Nav
       Heading "Results" level=1
-      Select "Lesson" bind=chosen items=["All lessons","Lesson 1","Lesson 2","Lesson 3"] w=180
+      Select "Lesson" @chosen items=["All lessons","Lesson 1","Lesson 2","Lesson 3"] w=180
     Column pad=24 gap=16 scroll
       Grid cols=3 gap=16
         Card gap=4

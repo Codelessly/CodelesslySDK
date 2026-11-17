@@ -20,7 +20,7 @@ App
     each t in ["design","writing","risk"]
       NavItem "#{t}" icon="tag" selected={tagFilter==t} onTap={tagFilter=t}
     Spacer grow
-    Toggle "Checkbox mode" bind=taskMode
+    Toggle "Checkbox mode" @taskMode
   Main
     Nav
       Breadcrumb items={concat([{"id":"home","label":"Home"}], map(filter(nodes, n=>contains(find(nodes, x=>x.id==focus).path, n.id)), n=>{"id":n.id,"label":n.text}))} onPick={focus=result}
@@ -46,7 +46,7 @@ App
     MenuItem "Delete" icon="delete" onTap={nodes=removeWhere(nodes, n=>n.id==sel || contains(n.path,sel)); toast "Bullet deleted"}
 
 Dialog#search "Quick search"
-  Input "Jump to a bullet, #tag or day" bind=q autofocus
+  Input "Jump to a bullet, #tag or day" @q autofocus
   Column gap=2
     each hit in take(filter(nodes, n=>q!="" && contains(lower(n.text), lower(q))), 6)
       ListTile "{hit.text}" subtitle="{join(map(filter(nodes, p=>contains(hit.path,p.id)), p=>p.text), ' > ')}" icon="subdirectory_arrow_right" onTap={focus=hit.id; q=""; close}
@@ -57,6 +57,7 @@ Dialog#search "Quick search"
 state days=[{"date":"2026-11-17","label":"Tuesday, Nov 17","items":[{"text":"Standup moved to 10:30","task":false,"done":false},{"text":"Reply to Dana about the pricing page","task":true,"done":false},{"text":"Read the billing migration doc #risk","task":true,"done":true}]},{"date":"2026-11-16","label":"Monday, Nov 16","items":[{"text":"Planning review with the team","task":false,"done":false},{"text":"Send [[Launch plan for Q3]] to Priya","task":true,"done":true}]},{"date":"2026-11-15","label":"Sunday, Nov 15","items":[{"text":"Long walk, idea for a calmer onboarding","task":false,"done":false}]}]
 state picked="2026-11-17"
 state draft=""
+state q=""
 
 App
   Sidebar
@@ -74,7 +75,7 @@ App
     Nav
       Heading "Daily notes" level=1
       Row gap=8
-        DatePicker bind=picked
+        DatePicker @picked
         Button "New day" icon="add" onTap={days=append(days,{"date":picked,"label":formatDate(picked,"EEEE, MMM d"),"items":[]}); toast "Day added"}
     Column pad=24 gap=16 maxw=760 scroll
       each day in filter(days, d=>d.date==picked)
@@ -85,11 +86,11 @@ App
             Row gap=8 middle
               Icon "circle" size=8
               if item.task
-                Checkbox "" bind=item.done
+                Checkbox "" @item.done
               Text "{item.text}" strike={item.task && item.done} grow
           Row gap=8 middle
             Icon "add" size=16
-            Input "Write something" bind=draft grow onSubmit={days=updateWhere(days, d=>d.date==picked, d=>with(d,"items",append(d.items,{"text":draft,"task":false,"done":false}))); draft=""}
+            Input "Write something" @draft grow onSubmit={days=updateWhere(days, d=>d.date==picked, d=>with(d,"items",append(d.items,{"text":draft,"task":false,"done":false}))); draft=""}
         Divider
         Backlinks title="Mentioned today" target="{day.label}" items={filter(nodes, n=>contains(n.text, formatDate(day.date,"MMM d")))} onPick={go outline}
       if length(filter(days, d=>d.date==picked))==0
@@ -98,7 +99,7 @@ App
           Button "Start the page" onTap={days=append(days,{"date":picked,"label":formatDate(picked,"EEEE, MMM d"),"items":[]})}
 
 Dialog#search "Quick search"
-  Input "Jump to a bullet, #tag or day" bind=q autofocus
+  Input "Jump to a bullet, #tag or day" @q autofocus
   Column gap=2
     each hit in take(filter(days, d=>q!="" && contains(lower(d.label), lower(q))), 6)
       ListTile "{hit.label}" icon="event" onTap={picked=hit.date; q=""; close}
@@ -107,6 +108,7 @@ Dialog#search "Quick search"
 state nodes=[{"id":"n3","text":"Finish onboarding flow #design","task":true,"done":false,"path":"Launch plan for Q3 > Product"},{"id":"n6","text":"Draft announcement post #writing","task":true,"done":false,"path":"Launch plan for Q3 > Marketing"},{"id":"n10","text":"Billing migration slips a week #risk","task":false,"done":false,"path":"Launch plan for Q3 > Risks"},{"id":"n11","text":"Colour tokens for dark mode #design","task":true,"done":true,"path":"Design tokens"}]
 state tag="design"
 state showDone=false
+state q=""
 
 Page
   Nav
@@ -124,13 +126,13 @@ Page
         each t in ["design","writing","risk"]
           ChoiceChip "#{t}" selected={tag==t} onTap={tag=t}
         Spacer grow
-        Toggle "Show done" bind=showDone
+        Toggle "Show done" @showDone
       Column gap=8
         each n in filter(nodes, n=>contains(n.text, '#' + tag) && (showDone || !n.done))
           Card gap=4 onTap={emit focusBullet n.id}
             Row gap=8 middle
               if n.task
-                Checkbox "" bind=n.done
+                Checkbox "" @n.done
               Text "{n.text}" strike={n.task && n.done} grow
               IconButton "chevron_right" tooltip="Zoom into this bullet" onTap={emit focusBullet n.id}
             Text.caption "{n.path}"
@@ -139,7 +141,7 @@ Page
     Text.muted "Indent keeps every bullet, tag and link in one outline."
 
 Dialog#search "Quick search"
-  Input "Jump to a bullet, #tag or day" bind=q autofocus
+  Input "Jump to a bullet, #tag or day" @q autofocus
   Column gap=2
     each hit in take(filter(nodes, n=>q!="" && contains(lower(n.text), lower(q))), 6)
       ListTile "{hit.text}" subtitle="{hit.path}" onTap={emit focusBullet hit.id; q=""; close}
@@ -162,7 +164,7 @@ define Bullet text="" depth=0 task=false done=false folded=false hasChildren=fal
       Checkbox "" selected={done} onChange={onCheck}
     if !task
       Icon "circle" size=8 onTap={onZoom}
-    Input "" bind=text grow strike={task && done} onChange={onEdit} onTab={onIndent} onShiftTab={onOutdent} onEnter={onEnter}
+    Input "" @text grow strike={task && done} onChange={onEdit} onTab={onIndent} onShiftTab={onOutdent} onEnter={onEnter}
     IconButton "more_horiz" tooltip="More" onTap={onMore}
 
 define Backlinks "title" target="" items=[] onPick

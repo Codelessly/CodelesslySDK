@@ -25,8 +25,8 @@ App
         Button "Start run" icon="play_arrow" onTap={open countdown}
     Column pad=24 gap=16
       Grid cols=2 gap=16
-        Input "Scenario name" bind=name
-        Input "Target" "https://" bind=target
+        Input "Scenario name" @name
+        Input "Target" "https://" @target
       Card gap=12
         Row between
           Column gap=4
@@ -35,22 +35,22 @@ App
           Row gap=8
             Button.outline "Add point" icon="add" onTap={points=append(points,{"t":max(points)+30,"vus":100})}
             Button.ghost "Remove point" icon="remove" onTap={sel>=0 ? {points=removeAt(points,sel); sel=-1} : toast "Select a point first"}
-        RampEditor bind=points selected=sel xLabel="seconds" yLabel="virtual users" max=1000 h=260 snap=10 onSelect={sel=result} onChange={points=result}
+        RampEditor @points selected=sel xLabel="seconds" yLabel="virtual users" max=1000 h=260 snap=10 onSelect={sel=result} onChange={points=result}
         Row gap=24
           Text.caption "Peak {max(map(points,p=>p.vus),0)} users"
           Text.caption "Length {last(points).t} s"
       Grid cols=3 gap=16
         Card gap=8
           Text.fieldLabel "Fail the run if p95 latency crosses"
-          Slider bind=thresholdMs min=100 max=3000
+          Slider @thresholdMs min=100 max=3000
           Text.strong "{thresholdMs} ms"
         Card gap=8
           Text.fieldLabel "Fail the run if errors exceed"
-          Slider bind=maxErr min=0 max=20
+          Slider @maxErr min=0 max=20
           Text.strong "{maxErr}%"
         Card gap=8
           Text.fieldLabel "Countdown before start"
-          SegmentedButton bind=count items=["5","10","30"]
+          SegmentedButton @count items=["5","10","30"]
           Text.muted "seconds"
   Dialog#countdown "Starting {name}" "Virtual users begin ramping when the count reaches zero."
     Column center gap=12
@@ -129,7 +129,7 @@ App
       Card gap=8
         Row between
           Text.strong "Endpoints, slowest first"
-          SegmentedButton bind=sort items=["p95","rps","err"]
+          SegmentedButton @sort items=["p95","rps","err"]
         Row gap=8
           Text.fieldLabel "Endpoint" grow
           Text.fieldLabel "Req/s" w=80
@@ -169,9 +169,9 @@ App
       Button.outline "Swap" icon="swap_horiz" onTap={runA=runB; runB=runA}
     Column pad=24 gap=16
       Row gap=12 wrap
-        Select "Baseline" bind=runA items={runs}
-        Select "Candidate" bind=runB items={runs}
-        SegmentedButton bind=metric items=["p50","p95","p99","rps","errors"]
+        Select "Baseline" @runA items={runs}
+        Select "Candidate" @runB items={runs}
+        SegmentedButton @metric items=["p50","p95","p99","rps","errors"]
       Card gap=8
         Row between
           Text.strong "{metric} over the run"

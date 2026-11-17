@@ -17,6 +17,9 @@ state newText=""
 state newTitle=""
 state newDesc=""
 state todayStr="2026-11-16"
+state cardTitle=""
+state newItem=""
+state newComment=""
 Shortcut "n" hint="N" description="New card" onPress={colId="backlog"; focus quick-backlog}
 Shortcut "/" hint="/" description="Search" onPress={focus search}
 Shortcut "v" hint="V" description="Switch view" onPress={go list}
@@ -42,16 +45,16 @@ App
     Nav
       Heading "Launch board" level=1
       Row gap=8
-        Input#search "Search cards" hint="Press /" bind=q icon="search" w=220 clearable
-        SegmentedButton items=["Board","List"] bind=view onChange={go lower(result)}
+        Input#search "Search cards" hint="Press /" @q icon="search" w=220 clearable
+        SegmentedButton items=["Board","List"] @view onChange={go lower(result)}
         Button "New card" icon="add" onTap={colId="backlog"; focus quick-backlog}
     Column pad=16 gap=12
       Row gap=8 wrap middle
         Text.caption "Filters" color=#FF6B7280
         each l in labelDefs
           FilterChip "{l.name}" selected={contains(fLabels,l.id)} dot={l.color} onTap={fLabels=contains(fLabels,l.id)?without(fLabels,l.id):append(fLabels,l.id)}
-        Select "Assignee" items=["all","Maya Reyes","Dan Ortiz","Lena Park"] bind=fAssignee w=150
-        Select "Due" items=["any","overdue","this week","none"] bind=fDue w=130
+        Select "Assignee" items=["all","Maya Reyes","Dan Ortiz","Lena Park"] @fAssignee w=150
+        Select "Due" items=["any","overdue","this week","none"] @fDue w=130
         Spacer grow
         Text.muted "{count(cards,c=>!c.archived && (q=='' || contains(lower(c.title),lower(q))) && (length(fLabels)==0 || any(c.labels,x=>contains(fLabels,x))) && (fAssignee=='all' || c.assignee==fAssignee) && (fDue=='any' || (fDue=='overdue' && c.due!='' && c.due<todayStr) || (fDue=='none' && c.due=='')))} cards"
         Button.ghost "Clear filters" hidden={q=='' && length(fLabels)==0 && fAssignee=='all' && fDue=='any'} onTap={q=''; fLabels=[]; fAssignee='all'; fDue='any'}
@@ -90,7 +93,7 @@ App
                       Text.caption "{formatDate(card.due,'MMM d')}" color={card.due<todayStr && card.col!='done' ? "#FFD92D20" : "#FF6B7280"} hidden={card.due==''}
                       Badge.error "Overdue" hidden={card.due=='' || card.due>=todayStr || card.col=='done'}
                     Avatar "{card.assignee}" size=24 hidden={card.assignee==''}
-            Input#quick-{col.id} "" "Add a card, press Enter" bind=newText icon="add" onSubmit={cards=append(cards,{"id":max(100,sum(cards,c=>c.id))+1,"title":newText,"col":col.id,"labels":[],"assignee":"","due":"","desc":"","checklist":[],"comments":[],"archived":false}); newText=""} onKey="escape"={newText=""; blur}
+            Input#quick-{col.id} "" "Add a card, press Enter" @newText icon="add" onSubmit={cards=append(cards,{"id":max(100,sum(cards,c=>c.id))+1,"title":newText,"col":col.id,"labels":[],"assignee":"","due":"","desc":"","checklist":[],"comments":[],"archived":false}); newText=""} onKey="escape"={newText=""; blur}
   Menu#colMenu
     MenuItem "Sort by due date" icon="event" onTap={cards=concat(filter(cards,c=>c.col!=colId),sortBy(filter(cards,c=>c.col==colId),c=>coalesce(c.due,"9999")))}
     MenuItem "Sort by title" icon="sort_by_alpha" onTap={cards=concat(filter(cards,c=>c.col!=colId),sortBy(filter(cards,c=>c.col==colId),c=>c.title))}
@@ -125,7 +128,7 @@ App
         Badge.neutral "Enter"
   Dialog#cardDialog "{find(cards,c=>c.id==openId).title}" w=640 dismissible={!dirty} onDismissBlocked={toast "Save or discard your changes first"}
     Column gap=16
-      Input "Title" bind=cardTitle value={find(cards,c=>c.id==openId).title} onChange={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"title",result))}
+      Input "Title" @cardTitle value={find(cards,c=>c.id==openId).title} onChange={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"title",result))}
       Input "Description" "Add more detail" multiline value={find(cards,c=>c.id==openId).desc} onChange={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"desc",result))}
       Row gap=12
         Column grow gap=4
@@ -151,7 +154,7 @@ App
             IconButton "arrow_upward" size=small hidden={index==0} onTap={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"checklist",moveItem(c.checklist,index,index-1)))}
             IconButton "arrow_downward" size=small hidden={index==length(find(cards,c=>c.id==openId).checklist)-1} onTap={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"checklist",moveItem(c.checklist,index,index+1)))}
             IconButton "close" size=small tooltip="Remove" onTap={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"checklist",removeAt(c.checklist,index)))}
-        Input "" "Add an item" bind=newItem icon="add" onSubmit={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"checklist",append(c.checklist,{"t":newItem,"d":false}))); newItem=""}
+        Input "" "Add an item" @newItem icon="add" onSubmit={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"checklist",append(c.checklist,{"t":newItem,"d":false}))); newItem=""}
       Column gap=8
         Text.fieldLabel "Comments"
         Column gap=8 scroll h=140 followLatest
@@ -162,7 +165,7 @@ App
                 Text.strong "{cm.by}" size=13
                 Text "{cm.t}"
         Row gap=8
-          Input "" "Write a comment" bind=newComment grow onSubmit={cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"comments",append(c.comments,{"by":"Maya Reyes","t":newComment}))); newComment=""}
+          Input "" "Write a comment" @newComment grow onSubmit={cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"comments",append(c.comments,{"by":"Maya Reyes","t":newComment}))); newComment=""}
           Button "Send" onTap={cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"comments",append(c.comments,{"by":"Maya Reyes","t":newComment}))); newComment=""}
       Row between
         Button.destructive "Delete" icon="delete" onTap={open confirmDelete}
@@ -200,14 +203,14 @@ App
     Nav
       Heading "List" level=1
       Row gap=8
-        Input#search "Search cards" hint="Press /" bind=q icon="search" w=220 clearable
+        Input#search "Search cards" hint="Press /" @q icon="search" w=220 clearable
         Button "New card" icon="add" onTap={go board}
     Column pad=16 gap=12
       if length(sel) > 0
         Row gap=8 middle pad=8 radius=8 fill=#FFDCE8FD
           Text.strong "{length(sel)} selected"
           Spacer grow
-          Select "Move to" items=["backlog","todo","progress","review","done"] bind=moveTo w=140
+          Select "Move to" items=["backlog","todo","progress","review","done"] @moveTo w=140
           Button.outline "Move" icon="drive_file_move" onTap={cards=map(cards,c=>contains(sel,c.id)?with(c,"col",moveTo):c); toast "Moved {length(sel)} cards"; sel=[]}
           Button.outline "Archive" icon="inventory_2" onTap={cards=map(cards,c=>contains(sel,c.id)?with(c,"archived",true):c); toast "Archived {length(sel)} cards"; sel=[]}
           Button.ghost "Clear" onTap={sel=[]}
@@ -245,7 +248,7 @@ App
   Main fill=#FFF1F3F6
     Nav
       Heading "Archive" level=1
-      Input "Search archive" bind=q icon="search" w=220 clearable
+      Input "Search archive" @q icon="search" w=220 clearable
     Column pad=16 gap=8
       if count(cards,c=>c.archived) == 0
         Column center middle gap=8 pad=48

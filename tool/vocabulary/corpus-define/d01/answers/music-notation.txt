@@ -37,7 +37,7 @@ App
           Text.success "Correct" center animate=pop
         if flash=="wrong"
           Text.danger "Not quite, that was {deck[i]}" center animate=shake
-      SegmentedButton bind=input items=["keys","names"]
+      SegmentedButton @input items=["keys","names"]
       if input=="keys"
         Card maxw=720
           Keyboard from="C4" octaves=1 flash={flash} onKey={answer=result}
@@ -73,7 +73,7 @@ App
     Column pad=24 gap=16
       Card gap=12
         Text.strong "Tempo"
-        Slider bind=bpm min=40 max=160
+        Slider @bpm min=40 max=160
         Row gap=12 middle
           Metronome bpm={bpm} running={running} beat={beat}
           Text.muted "Beat {beat+1} of 4"
@@ -143,9 +143,9 @@ Dialog#settings "Clef and range" "Applies to the next note"
   state clef="Treble"
   state range="C4-C5"
   state accidentals=false
-  Select "Clef" bind=clef items=["Treble","Bass","Alto"]
-  Select "Range" bind=range items=["C4-C5","C3-C5","C2-C6"]
-  Toggle "Include sharps and flats" bind=accidentals
+  Select "Clef" @clef items=["Treble","Bass","Alto"]
+  Select "Range" @range items=["C4-C5","C3-C5","C2-C6"]
+  Toggle "Include sharps and flats" @accidentals
   Row gap=8 end
     Button.ghost "Cancel" onTap={close}
     Button "Apply" onTap={i=0; streak=0; toast "Settings saved"; close}

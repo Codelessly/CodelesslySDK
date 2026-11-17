@@ -7,6 +7,10 @@ state statuses=["received","approved","refused"]
 state selected=""
 state suggestions=[{"id":"a1","text":"14 Mill Lane, Hartley"},{"id":"a2","text":"14 Mill Road, Fenwick"},{"id":"a3","text":"14 Millbank Close, Hartley"}]
 state apps=[{"id":"24/0312","address":"21 Orchard Row","status":"received","proposal":"Two-storey rear extension","comments":14},{"id":"24/0287","address":"Former Dairy, Mill Lane","status":"approved","proposal":"Conversion to 6 flats","comments":52},{"id":"24/0301","address":"8 Brook Street","status":"refused","proposal":"Loft conversion with dormer","comments":3}]
+state alertAddress=""
+state alertRadius=""
+state alertEmail=""
+state alertFreq=""
 App
   Sidebar
     Brand "Zoned" icon="map"
@@ -19,7 +23,7 @@ App
     Nav
       Heading "Planning map"
       Row gap=8
-        Input "Search by address" bind=q w=280 icon="search"
+        Input "Search by address" @q w=280 icon="search"
         Button.outline "Alerts" icon="notifications" onTap={open alerts}
     Stack
       Map center=[51.512,-0.118] zoom=15 onSelect={selected=result.id}
@@ -34,8 +38,8 @@ App
             ListTile "{s.text}" icon="place" onTap={q=s.text; emit locate s.id}
       Card gap=12 w=260 top right
         Text.panelTitle "Layers"
-        Toggle "Conservation areas" bind=showConservation
-        Toggle "Flood zones" bind=showFlood
+        Toggle "Conservation areas" @showConservation
+        Toggle "Flood zones" @showFlood
         Divider
         Text.fieldLabel "Status"
         FilterChip "Received" selected={contains(statuses,"received")} onTap={statuses=contains(statuses,"received") ? without(statuses,"received") : append(statuses,"received")}
@@ -53,13 +57,13 @@ App
               Text.caption "{a.comments} comments"
               Button "View application" onTap={go application}
   Dialog#alerts "Alert me about new applications" "Within the radius you draw"
-    Input "Postcode or address" bind=alertAddress
+    Input "Postcode or address" @alertAddress
     Map h=220 center=[51.512,-0.118] zoom=14
-      Circle bind=alertRadius center=[51.512,-0.118] draggable
-    Slider bind=alertRadius min=100 max=2000 step=100
+      Circle @alertRadius center=[51.512,-0.118] draggable
+    Slider @alertRadius min=100 max=2000 step=100
     Text.muted "Radius: {alertRadius} m"
-    Input "Email" type=email bind=alertEmail
-    Select "Frequency" items=["Instantly","Daily digest","Weekly"] bind=alertFreq
+    Input "Email" type=email @alertEmail
+    Select "Frequency" items=["Instantly","Daily digest","Weekly"] @alertFreq
     Button "Sign up for alerts" onTap={alertEmail!="" ? emit signUpAlerts; toast "Alerts on for {alertRadius} m"; close : toast "Enter your email"}
 
 ### Application
@@ -68,6 +72,9 @@ state saved=false
 state app={"id":"24/0287","address":"Former Dairy, Mill Lane, Hartley","status":"approved","proposal":"Change of use and conversion of former dairy to six residential flats","deadline":"2024-09-12","comments":52}
 state events=[{"date":"2024-05-02","title":"Application received"},{"date":"2024-05-20","title":"Validated"},{"date":"2024-06-14","title":"Consultation closed"},{"date":"2024-08-30","title":"Approved with conditions"}]
 state docs=[{"name":"Site plan.pdf","size":"2.4 MB"},{"name":"Design and access statement.pdf","size":"1.1 MB"},{"name":"Flood risk assessment.pdf","size":"860 KB"},{"name":"Decision notice.pdf","size":"140 KB"}]
+state commenter=""
+state alertRadius=""
+state alertEmail=""
 Page
   Nav
     Brand "Zoned" icon="map"
@@ -86,7 +93,7 @@ Page
   Section tint
     Row gap=32 top
       Column grow gap=16
-        SegmentedButton bind=tab items=["timeline","documents","comments"]
+        SegmentedButton @tab items=["timeline","documents","comments"]
         if tab=="timeline"
           Timeline items={events}
         if tab=="documents"
@@ -116,15 +123,15 @@ Page
   Dialog#comment "Comment on {app.id}" "Comments are public"
     state stance="against"
     state body=""
-    SegmentedButton bind=stance items=["for","against"]
-    Input "Your comment" bind=body multiline maxLength=1000
+    SegmentedButton @stance items=["for","against"]
+    Input "Your comment" @body multiline maxLength=1000
     Text.caption "{length(body)} / 1000"
-    Input "Name" bind=commenter
+    Input "Name" @commenter
     Button "Submit comment" onTap={length(body)>=10 ? emit comment {"stance":stance,"body":body}; toast "Comment sent"; saved=true; body=""; close : toast "Write at least 10 characters"}
   Dialog#alerts "Alert me about new applications"
     Map h=200 center=[51.512,-0.118] zoom=14
-      Circle bind=alertRadius center=[51.512,-0.118] draggable
-    Slider bind=alertRadius min=100 max=2000 step=100
+      Circle @alertRadius center=[51.512,-0.118] draggable
+    Slider @alertRadius min=100 max=2000 step=100
     Text.muted "Radius: {alertRadius} m"
-    Input "Email" type=email bind=alertEmail
+    Input "Email" type=email @alertEmail
     Button "Sign up" onTap={emit signUpAlerts; toast "Alerts on"; close}

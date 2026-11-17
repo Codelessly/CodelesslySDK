@@ -36,13 +36,13 @@ App
         each d in days
           ChoiceChip "{d}" selected={day==d} onTap={day=d}
         Spacer grow
-        Select bind=zone items=["Living room","Bedroom","Kitchen","Study"]
+        Select @zone items=["Living room","Bedroom","Kitchen","Study"]
         Button.outline "Copy day" icon="content_copy" onTap={copyTo=[]; open copyDialog}
       Card gap=12
         Row between
           Text.strong "{day} in {zone}"
           Text.muted "Drag an edge to resize, double tap to split"
-        TimeBands bind=blocks day={day} zone={zone} min=5 max=30 step=0.5 snap=0.25 labels=["0","3","6","9","12","15","18","21","24"] onResize={blocks=updateWhere(blocks,b=>b.id==result.id,b=>with(with(b,"start",result.start),"end",result.end))} onSplit={blocks=concat(updateWhere(blocks,b=>b.id==result.id,b=>with(b,"end",result.at)),[{"id":max(1,length(blocks)+1),"day":day,"zone":zone,"start":result.at,"end":result.end,"temp":result.temp}])} onSelect={picked=result.id; open blockMenu}
+        TimeBands @blocks day={day} zone={zone} min=5 max=30 step=0.5 snap=0.25 labels=["0","3","6","9","12","15","18","21","24"] onResize={blocks=updateWhere(blocks,b=>b.id==result.id,b=>with(with(b,"start",result.start),"end",result.end))} onSplit={blocks=concat(updateWhere(blocks,b=>b.id==result.id,b=>with(b,"end",result.at)),[{"id":max(1,length(blocks)+1),"day":day,"zone":zone,"start":result.at,"end":result.end,"temp":result.temp}])} onSelect={picked=result.id; open blockMenu}
       Card gap=8
         Text.strong "Blocks"
         each b in filter(blocks,x=>x.day==day && x.zone==zone)
@@ -86,11 +86,11 @@ App
       Row gap=8 middle
         if efficient
           Badge.success "Efficient" icon="eco"
-        SegmentedButton bind=mode items=["Heat","Auto","Off"]
+        SegmentedButton @mode items=["Heat","Auto","Off"]
     Column pad=24 gap=16 center
       Card gap=16 maxw=480
         Column center gap=8
-          Dial bind=target min=10 max=30 step=0.5 unit="°" current={current} size=280 onChange={holdOn=true; toast "Set to {result} degrees"}
+          Dial value={target} min=10 max=30 step=0.5 unit="°" current={current} size=280 onChange={holdOn=true; toast "Set to {result} degrees"}
           Text.muted "Now {current} degrees, heating to {target}"
           Row gap=8 middle
             Icon "eco" hidden={!efficient}
@@ -98,9 +98,9 @@ App
         Divider
         Row between middle
           Column gap=4
-            Toggle "Hold this temperature" bind=holdOn
+            Toggle "Hold this temperature" @holdOn
             Text.muted "Until {holdUntil}, then the schedule resumes" visible={holdOn}
-          TimePicker "Hold until" bind=holdUntil disabled={!holdOn}
+          TimePicker "Hold until" @holdUntil disabled={!holdOn}
         Row gap=8
           Button.outline "Cooler" icon="remove" grow onTap={target=max(10,target-0.5)}
           Button.outline "Warmer" icon="add" grow onTap={target=min(30,target+0.5)}
@@ -152,25 +152,25 @@ App
                   Text.strong "{z.name}"
                   Text.muted "Now {z.temp}, set {z.target}"
               IconButton "more_vert" tooltip="Room options" onTap={sel=z.id; open zoneMenu}
-            Toggle "Heating" bind=z.on
-            Toggle "Follow the schedule" bind=z.follow
-            Slider bind=z.target min=10 max=30 step=0.5 disabled={z.follow || !z.on}
+            Toggle "Heating" @z.on
+            Toggle "Follow the schedule" @z.follow
+            Slider @z.target min=10 max=30 step=0.5 disabled={z.follow || !z.on}
             Sparkline values=[17,17.5,18.2,19,19.2,19.2]
   Menu#zoneMenu
     MenuItem "Edit schedule" icon="edit_calendar" onTap={go schedule}
     MenuItem "Rename" icon="edit" onTap={open renameDialog}
     MenuItem "Turn off" icon="power_settings_new" onTap={zones=updateWhere(zones,z=>z.id==sel,z=>with(z,"on",false)); toast "Zone off"}
   Dialog#renameDialog "Rename room"
-    Input "Name" bind=awayNote
+    Input "Name" @awayNote
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Save" onTap={zones=updateWhere(zones,z=>z.id==sel,z=>with(z,"name",awayNote)); close}
   Sheet#awaySheet "Away mode"
     Text.muted "Holds a low temperature while you are gone and resumes the schedule on your return."
     Row gap=12
-      DatePicker "From" bind=awayFrom grow
-      DatePicker "Back on" bind=awayTo grow
-    Slider "Away temperature: {awayTemp} degrees" bind=awayTemp min=7 max=18
+      DatePicker "From" @awayFrom grow
+      DatePicker "Back on" @awayTo grow
+    Slider "Away temperature: {awayTemp} degrees" @awayTemp min=7 max=18
     Row end gap=8
       if away
         Button.destructive "End away mode" onTap={away=false; toast "Welcome back"; close}

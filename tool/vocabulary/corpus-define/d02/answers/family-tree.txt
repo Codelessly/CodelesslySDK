@@ -21,12 +21,12 @@ App
     Nav
       Heading "Hale family tree" level=1
       Row gap=12
-        Toggle "Focus: direct ancestors" bind=focus
+        Toggle "Focus: direct ancestors" @focus
         IconButton "zoom_out" tooltip="Zoom out" onTap={zoom=max(0.4,zoom-0.2)}
         Text.strong "{round(zoom*100,0)}%"
         IconButton "zoom_in" tooltip="Zoom in" onTap={zoom=min(2,zoom+0.2)}
         IconButton "center_focus_strong" tooltip="Reset view" onTap={zoom=1}
-    PanZoom bind=zoom h=620
+    PanZoom @zoom h=620
       Column gap=48 center
         each g in [0,1,2]
           Row gap=40 center middle
@@ -44,8 +44,8 @@ App
       Text.muted "Emigrated from Enugu in 1971. Letters kept in the blue trunk."
       Button.ghost "Open full notes" onTap={close; go timeline}
 Dialog#addPerson "Add a {addKind}" "Fill in what you know"
-  Input "Full name" bind=newName
-  Input "Born (year)" type=number bind=newBorn
+  Input "Full name" @newName
+  Input "Born (year)" type=number @newBorn
   Row gap=8 end
     Button.outline "Cancel" onTap={newName=""; newBorn=""; close}
     Button "Add" onTap={newName=="" ? toast "A name is needed" : {people=append(people, {"id":"p{length(people)+1}","gen":addKind=="parent" ? find(people, x=>x.id==addTo).gen-1 : addKind=="child" ? find(people, x=>x.id==addTo).gen+1 : find(people, x=>x.id==addTo).gen,"name":newName,"born":newBorn,"died":"","photo":"","notes":false,"anc":[]}); newName=""; newBorn=""; toast "Added"; close}}
@@ -54,6 +54,10 @@ Dialog#addPerson "Add a {addKind}" "Fill in what you know"
 state events=[{"year":1979,"title":"Born in Leeds","icon":"child_care","text":"Maya arrives three weeks early."},{"year":1985,"title":"Starts school","icon":"school","text":"St. Anne's Primary."},{"year":1997,"title":"Moves to Lagos","icon":"flight","text":"A year with her grandmother Ngozi."},{"year":2004,"title":"Graduates","icon":"workspace_premium","text":"BA History, Manchester."},{"year":2011,"title":"Marries Tomas Weber","icon":"favorite","text":"A small ceremony in Hebden Bridge."},{"year":2014,"title":"First child, Ines","icon":"cake","text":"Born at home."}]
 state selYear=0
 state showNotes=true
+state sortOrder=""
+state evYear=""
+state evTitle=""
+state evText=""
 App
   Sidebar
     Brand "Rootwork" icon="park"
@@ -84,12 +88,12 @@ App
         Card grow gap=12
           Row between middle
             Text.strong "Life timeline"
-            SegmentedButton bind=sortOrder items=["Oldest first","Newest first"]
+            SegmentedButton @sortOrder items=["Oldest first","Newest first"]
           Timeline events={sortOrder=="Newest first" ? sortByDesc(events, e=>e.year) : sortBy(events, e=>e.year)} selected={selYear} onPick={selYear=result; toast "Event {result}"}
 Dialog#editLife "Add a life event"
-  Input "Year" type=number bind=evYear
-  Input "Title" bind=evTitle
-  Input "What happened" multiline bind=evText
+  Input "Year" type=number @evYear
+  Input "Title" @evTitle
+  Input "What happened" multiline @evText
   Button "Save" onTap={events=append(events, {"year":evYear,"title":evTitle,"icon":"event","text":evText}); evTitle=""; evText=""; close}
 
 ### Birthplaces
@@ -160,16 +164,16 @@ App
             PageBreak "Page {page+1} ends here"
       Pane w=320 pad=16 gap=12
         Text.strong "Chart settings"
-        Select "Paper" bind=paper items=["A4","Letter","A3"]
-        SegmentedButton bind=orient items=["Portrait","Landscape"]
-        Slider "People per page" bind=perPage min=4 max=16
+        Select "Paper" @paper items=["A4","Letter","A3"]
+        SegmentedButton @orient items=["Portrait","Landscape"]
+        Slider "People per page" @perPage min=4 max=16
         Text.muted "{perPage} people per page, {ceil(length(people)/perPage)} pages"
-        Toggle "Show dates" bind=showDates
-        Toggle "Show photos" bind=showPhotos
+        Toggle "Show dates" @showDates
+        Toggle "Show photos" @showPhotos
         Button.outline "Download PDF" onTap={emit exportPdf; toast "PDF ready"}
 
 // A canvas dragged to pan and pinched to zoom; drawn as a framed box that shows its zoom, the movement itself cannot be drawn.
-define PanZoom bind=zoom h=400
+define PanZoom @zoom h=400
   state zoom=1
   Box h={h} fill=#FFF8FAFC radius=8 border=1
     Text.caption "Canvas, zoom {zoom}"

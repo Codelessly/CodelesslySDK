@@ -6,6 +6,8 @@ state waitlist=[]
 state alerts=[]
 state lessons=[{"id":"l1","day":"Mon","time":"09:00","title":"Flatwork basics","arena":"Indoor","level":"Beginner","coach":"Hannah Cole","spots":3,"fee":25},{"id":"l2","day":"Mon","time":"17:30","title":"Jumping grids","arena":"Outdoor","level":"Intermediate","coach":"Tom Reyes","spots":0,"fee":25},{"id":"l3","day":"Tue","time":"10:00","title":"Dressage seat","arena":"Indoor","level":"Advanced","coach":"Hannah Cole","spots":1,"fee":30},{"id":"l4","day":"Wed","time":"16:00","title":"Trail confidence","arena":"Paddock","level":"Beginner","coach":"Priya Nair","spots":5,"fee":20},{"id":"l5","day":"Thu","time":"18:00","title":"Cross-country schooling","arena":"Outdoor","level":"Intermediate","coach":"Tom Reyes","spots":2,"fee":30},{"id":"l6","day":"Sat","time":"09:30","title":"Junior group lesson","arena":"Indoor","level":"Beginner","coach":"Priya Nair","spots":4,"fee":20}]
 state booked=[]
+state notifyOn=false
+state emailOn=false
 App
   Sidebar
     Brand "Stirrup" icon="pets"
@@ -23,7 +25,7 @@ App
     Nav
       Heading "Lessons this week" level=1
       Row gap=8
-        Select bind=arena items=["All","Indoor","Outdoor","Paddock"]
+        Select @arena items=["All","Indoor","Outdoor","Paddock"]
         IconButton "notifications" tooltip="Spot alerts" onTap={open alertsSheet}
     Column pad=24 gap=16 scroll
       Row gap=8 scroll
@@ -69,8 +71,8 @@ Dialog#bookDialog "Book this lesson" "One lesson is taken from your package."
     Button.outline "Choose a horse" onTap={close; go horses}
     Button "Confirm booking" onTap={booked=append(booked,sel); lessons=updateWhere(lessons,l=>l.id==sel,l=>with(l,"spots",l.spots-1)); toast "Booked. 1 lesson used"; close}
 Dialog#waitDialog "Join the waiting list" "We message you the moment a spot opens."
-  Toggle "Alert me by notification" bind=notifyOn
-  Toggle "Also email me" bind=emailOn
+  Toggle "Alert me by notification" @notifyOn
+  Toggle "Also email me" @emailOn
   Row gap=8 end
     Button.outline "Cancel" onTap={close}
     Button "Join list" onTap={waitlist=append(waitlist,sel); alerts=append(alerts,sel); toast "You are on the waiting list"; close}
@@ -97,7 +99,7 @@ App
       Heading "Choose a horse" level=1
       Row gap=8 middle
         Text.muted "Rider weight (kg)"
-        Input "Weight" bind=riderWeight type=number w=100
+        Input "Weight" @riderWeight type=number w=100
     Column pad=24 gap=16 scroll
       Grid cols=3 gap=16
         each h in horses
@@ -178,7 +180,7 @@ Page
               Text.caption "{note.date}"
           Rating value={note.stars} max=5
         Text "{note.text}"
-      Input "Reply to your coach" bind=reply multiline
+      Input "Reply to your coach" @reply multiline
       Button "Send reply" onTap={reply=="" ? toast "Write a reply first" : {emit replyToCoach reply; reply=""; toast "Reply sent"}}
   Footer
     Text.muted "Stirrup riding school, Hollow Lane Yard"
@@ -226,8 +228,8 @@ App
             Text.strong "Maya Reyes"
             Text.muted "Riding with us since March 2024"
         Text.fieldLabel "Level"
-        SegmentedButton bind=level items=["Beginner","Intermediate","Advanced"]
-        Input "Notes for coaches" bind=notes multiline
+        SegmentedButton @level items=["Beginner","Intermediate","Advanced"]
+        Input "Notes for coaches" @notes multiline
       Card gap=8
         Row between middle
           Text.strong "Ten-lesson package"
@@ -262,9 +264,9 @@ App
   Main
     Nav
       Heading "Yard map" level=1
-      SegmentedButton bind=show items=["All","Arenas","Stables"]
+      SegmentedButton @show items=["All","Arenas","Stables"]
     Column pad=24 gap=16 scroll
-      YardMap bind=spot filter={show} h=380 markers=[{"id":"indoor","label":"Indoor arena","kind":"Arenas","x":0.25,"y":0.3},{"id":"outdoor","label":"Outdoor arena","kind":"Arenas","x":0.7,"y":0.3},{"id":"paddock","label":"Paddock","kind":"Arenas","x":0.5,"y":0.7},{"id":"stables","label":"Stable block","kind":"Stables","x":0.15,"y":0.75},{"id":"tack","label":"Tack room","kind":"Stables","x":0.85,"y":0.75}] onSelect={spot=result}
+      YardMap @spot filter={show} h=380 markers=[{"id":"indoor","label":"Indoor arena","kind":"Arenas","x":0.25,"y":0.3},{"id":"outdoor","label":"Outdoor arena","kind":"Arenas","x":0.7,"y":0.3},{"id":"paddock","label":"Paddock","kind":"Arenas","x":0.5,"y":0.7},{"id":"stables","label":"Stable block","kind":"Stables","x":0.15,"y":0.75},{"id":"tack","label":"Tack room","kind":"Stables","x":0.85,"y":0.75}] onSelect={spot=result}
       if spot!=""
         Card gap=8
           Text.strong "{spot}"
@@ -272,7 +274,7 @@ App
           Button.outline "See lessons" onTap={arena=spot; go week-schedule}
 
 // A map of the yard that draws labelled markers by position (x and y from 0 to 1); shown as a labelled box, as a real map needs a drawing surface.
-define YardMap bind=selected markers=[] filter="All" h=300 onSelect
+define YardMap @selected markers=[] filter="All" h=300 onSelect
   state selected=""
   Stack h={h} fill=#FFDCFCE7 radius=12
     each m in markers

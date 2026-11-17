@@ -23,8 +23,8 @@ App
           Row between
             Text.strong "Sleep stages"
             Text.muted "11:10 pm to 6:40 am"
-          StageChart stages={stages} bind=at
-          Slider bind=at min=0 max=449
+          StageChart stages={stages} @at
+          Slider @at min=0 max=449
           Row between
             Text.strong "{duration(at*60)} after lights out"
             Text.muted "{find(stages,x=>x.t<=at && at<x.t+x.m).s}"
@@ -60,10 +60,10 @@ App
     state lastCup="3:00 pm"
     state screens=true
     state memo=""
-    Select "Caffeine today" items=["none","1 cup","2 cups","3 or more"] bind=caffeine
-    TimePicker "Last cup" bind=lastCup
-    Toggle "Screens in the hour before bed" bind=screens
-    Input "Anything else" multiline bind=memo
+    Select "Caffeine today" items=["none","1 cup","2 cups","3 or more"] @caffeine
+    TimePicker "Last cup" @lastCup
+    Toggle "Screens in the hour before bed" @screens
+    Input "Anything else" multiline @memo
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Save note" onTap={emit saveNote; toast "Note saved"; close}
@@ -72,6 +72,7 @@ App
 state tab="week"
 state picked=-1
 state days=[{"d":"Wed","bed":"11:05 pm","off":-5},{"d":"Thu","bed":"11:30 pm","off":20},{"d":"Fri","bed":"12:40 am","off":90},{"d":"Sat","bed":"1:10 am","off":120},{"d":"Sun","bed":"11:15 pm","off":5},{"d":"Mon","bed":"11:00 pm","off":-10},{"d":"Tue","bed":"11:10 pm","off":0}]
+state range=""
 App
   Sidebar
     Brand "Nightshade" icon="bedtime"
@@ -84,7 +85,7 @@ App
   Main
     Nav
       Heading "Bedtime consistency" level=1
-      SegmentedButton items=["Week","Month"] bind=range
+      SegmentedButton items=["Week","Month"] @range
     Column pad=24 gap=16 scroll
       Card gap=12
         Row between
@@ -114,6 +115,12 @@ state tab="wind"
 state secs=1800
 state running=false
 state warmth=0
+state c1=false
+state c2=false
+state c3=false
+state c4=false
+state lateCaffeine=false
+state lateScreens=false
 every 1s when running onTick={secs=max(0,secs-1); warmth=round((1800-secs)/1800*100,0); running=secs>1}
 App
   Sidebar
@@ -137,15 +144,15 @@ App
           Button.ghost "Reset" onTap={running=false; secs=1800; warmth=0}
       Card gap=8
         Text.strong "Tonight's routine"
-        Checkbox "Phone on the charger across the room" bind=c1
-        Checkbox "Lights low, warm bulbs only" bind=c2
-        Checkbox "No caffeine after 3 pm" bind=c3
-        Checkbox "Stretch for five minutes" bind=c4
+        Checkbox "Phone on the charger across the room" @c1
+        Checkbox "Lights low, warm bulbs only" @c2
+        Checkbox "No caffeine after 3 pm" @c3
+        Checkbox "Stretch for five minutes" @c4
         Progress {count([c1,c2,c3,c4],x=>x)/4}
       Select "Length" items=["15 min","30 min","45 min"] onChange={secs=(result=="15 min" ? 900 : (result=="30 min" ? 1800 : 2700)); running=false}
   Dialog#note "Note for tonight" "Caffeine and screens"
-    Toggle "Had caffeine after 3 pm" bind=lateCaffeine
-    Toggle "Screens in the last hour" bind=lateScreens
+    Toggle "Had caffeine after 3 pm" @lateCaffeine
+    Toggle "Screens in the last hour" @lateScreens
     Button "Save note" onTap={emit saveNote; toast "Note saved"; close}
 
 ### Alarm
@@ -176,18 +183,18 @@ App
       Card gap=8
         Row between
           Text.strong "Sunrise light and soft chime"
-          Toggle bind=gentle
+          Toggle @gentle
         Text.muted "Light builds over the last ten minutes of the window."
   Dialog#alarmWindow "Wake alarm" "Set the time and how long it can look for light sleep"
-    TimePicker "Wake no later than" bind=wake
+    TimePicker "Wake no later than" @wake
     Text.fieldLabel "Wake range: {window} minutes"
-    Slider bind=window min=0 max=45
+    Slider @window min=0 max=45
     Text.caption "Earliest wake {wake} minus {window} minutes"
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Save" onTap={emit saveAlarm; toast "Alarm set"; close}
 
-define StageChart bind=at stages=[] h=140
+define StageChart @at stages=[] h=140
   Row gap=0 bottom
     each st in stages
       Column w={st.m*1.6} h={h} bottom onTap={at=st.t+st.m/2}

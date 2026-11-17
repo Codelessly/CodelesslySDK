@@ -13,6 +13,7 @@ import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/controls/focus.dart' show ControlFocusScope;
 import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabeledControl, firstTextUnder;
+import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide Page, Step; // ignore: deprecated_member_use
 import 'package:flutter/rendering.dart';
@@ -80,6 +81,7 @@ const runtimeCodes = <(String, String, String)>[
   ('interaction_failed', 'error', 'A --tap/--hover/--focus/--type/--scroll/--set/--navigate step could not be applied (no such node, not on screen, covered by another node: the message names it).'),
   ('step_skipped', 'warning', 'A step names a node not shown at this size (hidden by a media rule or a binding, or on another breakpoint\'s canvas): it is skipped at this size, the other steps run and the capture is made. One note per size.'),
   ('tap_no_reaction', 'warning', 'A --tap hit its node, but neither it nor anything around it reacts to a tap (no click reaction, no button or input): nothing happens.'),
+  ('long_press_no_reaction', 'warning', 'A --long-press held its node, but nothing there reacts to a long press: the hold ends as a tap does (its tap reactions run).'),
   ('missing_glyph', 'warning', 'A text has characters its font has no glyph for: they are drawn as empty boxes. Use another character, an icon, or a box with a path.'),
   ('icon_not_drawn', 'warning', 'An icon names no glyph the renderer can draw (an unknown Material icon name, or an object without a type or name).'),
   ('expression_not_evaluated', 'warning', 'A text shows "\${" on screen: an expression that did not evaluate (a formula error, or a binding that replaced the text).'),
@@ -119,6 +121,11 @@ final class RenderReport {
   /// Where the keyboard focus is in each capture that has one (after
   /// `--key Tab`, a `--focus`): the node, and whether its ring shows.
   final List<api.Json> focus = [];
+
+  /// What a screen reader was told, in order: an `announce` action's text
+  /// and a live region's (a toast, a text marked `live`) when it changed,
+  /// each with its politeness and the step after which it was said.
+  final List<api.Json> announcements = [];
   int get errors => diagnostics.where((d) => d['severity'] == 'error').length;
   int get warnings => diagnostics.where((d) => d['severity'] == 'warning').length;
 }
@@ -547,11 +554,15 @@ Future<void> _renderAll(
         recorder.errors.clear();
       }
 
+      // The page shown (the last one navigated to): what a --reload starts
+      // again on, as a browser reloads the address it is at.
+      final pages = _PageObserver();
       Future<void> show() async {
         await tester.pumpWidget(RepaintBoundary(
           key: boundary,
           child: MaterialApp(
             navigatorKey: navigator,
+            navigatorObservers: [pages],
             debugShowCheckedModeBanner: false,
             // The layout's controls take the project's theme, never this one;
             // their font without one is the platform's (Roboto, as on Android
@@ -572,7 +583,26 @@ Future<void> _renderAll(
         collect();
       }
 
+      // What a screen reader is told: an `announce` action's text as it
+      // runs, a live region's as it changes (not as it first shows).
+      final heard = <api.Json>[];
+      var live = <RenderObject, String>{};
+      void hear(String after, {bool baseline = false}) {
+        for (final a in tester.takeAnnouncements()) {
+          heard.add({'text': a.message, 'politeness': a.assertiveness.name, 'source': 'announce', 'after': after});
+        }
+        final now = _liveRegions(binding);
+        if (!baseline) {
+          for (final e in now.entries) {
+            if (live[e.key] != e.value) heard.add({'text': e.value, 'politeness': 'polite', 'source': 'live', 'after': after});
+          }
+        }
+        live = now;
+      }
+
+      tester.takeAnnouncements();
       await show();
+      hear('load', baseline: true);
       if (!controller.isLoaded) {
         issue(RuntimeIssue('render_exception', 'error', 'Screen "$label" did not load: ${controller.error ?? 'timed out'}',
             screen: label, size: sizeName));
@@ -591,6 +621,7 @@ Future<void> _renderAll(
         // not marked saved starts from its declared value).
         if (step.kind == 'reload') {
           final kept = {...storage.getAll()};
+          final at = pages.shown;
           await _removeMouse();
           await tester.pumpWidget(const SizedBox());
           await tester.pump(const Duration(seconds: 1));
@@ -599,13 +630,29 @@ Future<void> _renderAll(
           codelessly.dispose();
           storage = MemoryLocalStorage(kept);
           codelessly = start();
+          // `--theme` is the mode the site starts in, again on a reload
+          // (unless a step stored another, which the app reads back).
+          if (args.theme != null && !kept.containsKey(Codelessly.themeModeStorageKey)) {
+            codelessly.setThemeMode(api.ThemeMode.tryParse(args.theme));
+          }
           controller = CodelesslyWidgetController();
           if (size.width >= 1024) {
             _mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
             await _mouse!.moveTo(const Offset(1, 1));
             await tester.pump();
           }
+          pages.reset();
           await show();
+          // On the page navigated to before, not the one the run began on.
+          if (at != null && controller.isLoaded) {
+            final route = CodelesslyWidget.onGenerateRoute(codelessly)(RouteSettings(name: at.name, arguments: at.arguments));
+            if (route != null) {
+              unawaited(navigator.currentState!.pushReplacement(route));
+              await _settle(tester);
+              collect();
+            }
+          }
+          hear('$step', baseline: true);
           if (!controller.isLoaded) {
             issue(RuntimeIssue('interaction_failed', 'error', '--reload: screen "$label" did not load again: ${controller.error ?? 'timed out'}',
                 screen: label, size: sizeName));
@@ -620,10 +667,15 @@ Future<void> _renderAll(
           // A node hidden at this width, or of another canvas of the screen
           // (another breakpoint's design), is absent here by design: the
           // step is skipped at this size, with a note, not an error.
+          // (A page's or a modal's node: a component's node is named by its
+          // path, and one of a design system's components is no other canvas.)
           final target = step.target.split('/').last.split('#').first;
+          final pages = [for (final d in docs.values) if (!isComponentJson(d)) d];
           final elsewhere = problem.contains('no node "$target"') &&
-              (fileOfNode.containsKey(target) ||
-                  docs.values.any((d) => (api.readMap(d['nodes']) ?? const {}).values.any((n) => api.readMap(n)?['name'] == target)));
+              pages.any((d) {
+                final nodes = api.readMap(d['nodes']) ?? const {};
+                return nodes.containsKey(target) || nodes.values.any((n) => api.readMap(n)?['name'] == target);
+              });
           if (problem.startsWith(_notShownHere)) {
             skipped.add('$step (hidden at this width)');
           } else if (elsewhere) {
@@ -634,6 +686,7 @@ Future<void> _renderAll(
         }
         await _settle(tester);
         collect();
+        hear('$step');
       }
 
       // 5. Full page: the view as tall as the content scrolls.
@@ -779,6 +832,11 @@ Future<void> _renderAll(
           }
         }
       }
+      // What was said, with the capture it led to.
+      hear('the steps, before the capture');
+      for (final h in heard) {
+        report.announcements.add({'image': name, 'screen': label, 'size': sizeName, ...h});
+      }
       // Where the keyboard focus is: the node (a control, a text field, a
       // node with a click reaction), and whether its focus ring shows.
       final focusedBox = _focusedBox();
@@ -795,6 +853,19 @@ Future<void> _renderAll(
           if (scope.layer != null) 'inOverlay': true,
         });
       }
+      // A built-in confirm's button has Flutter's focus, not a control's.
+      final focusedBuiltIn = focusedBox == null ? _focusedBuiltIn(binding) : null;
+      if (focusedBuiltIn != null) {
+        report.focus.add({
+          'image': name,
+          'screen': label,
+          'size': sizeName,
+          'id': focusedBuiltIn.id,
+          'ring': FocusManager.instance.highlightMode == FocusHighlightMode.traditional,
+          if (_paragraphText(focusedBuiltIn.box) case final String text) 'text': text,
+          'inOverlay': true,
+        });
+      }
       if (args.dumpLayout) {
         final boxes = [
           for (final b in _boxes(binding))
@@ -809,6 +880,17 @@ Future<void> _renderAll(
               'h': double.parse(b.size.height.toStringAsFixed(1)),
               // What a text shows, as drawn: a check reads values from it.
               if (_shownText(b) case final String text) 'text': text,
+            },
+          // The built-in confirm's buttons, over the page.
+          for (final b in _builtIns(binding))
+            {
+              'id': b.id,
+              if (identical(b.element, focusedBuiltIn?.element)) 'focused': true,
+              'x': b.box.localToGlobal(ui.Offset.zero).dx.round(),
+              'y': b.box.localToGlobal(ui.Offset.zero).dy.round(),
+              'w': double.parse(b.box.size.width.toStringAsFixed(1)),
+              'h': double.parse(b.box.size.height.toStringAsFixed(1)),
+              if (_paragraphText(b.box) case final String text) 'text': text,
             },
         ];
         File(file.replaceFirst(RegExp(r'\.png$'), '.layout.json'))
@@ -1356,6 +1438,19 @@ Set<RenderObject> _offstage() {
       if (ro != null) out.add(ro);
     }
   }
+  // A route kept out of sight (a menu while the confirm its line asked is
+  // up) is built offstage.
+  void visit(RenderObject o) {
+    if (o is RenderOffstage && o.offstage) {
+      out.add(o);
+      return;
+    }
+    o.visitChildren(visit);
+  }
+
+  for (final view in WidgetsBinding.instance.renderViews) {
+    visit(view);
+  }
   return out;
 }
 
@@ -1402,6 +1497,177 @@ bool _shown(NodeBox b) {
     if (p is NodeBox && !p.drawn) return false;
   }
   return true;
+}
+
+/// Follows the pages a navigator shows (not its dialogs and sheets): [shown]
+/// is the name of the page on top that was navigated to (null: the first).
+class _PageObserver extends NavigatorObserver {
+  final List<RouteSettings> _pages = [];
+
+  RouteSettings? get shown => _pages.lastOrNull;
+
+  void reset() => _pages.clear();
+
+  // A screen navigated to (`/week`); not the entry, a paywall or a
+  // presented layout.
+  bool _isPage(Route<dynamic> r) {
+    final name = r.settings.name;
+    return r is PageRoute && name != null && name != '/' && !name.startsWith('/paywall/') && !name.startsWith('/present/');
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (_isPage(route)) _pages.add(route.settings);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (_isPage(route) && _pages.isNotEmpty) _pages.removeLast();
+  }
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) => didPop(route, previousRoute);
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    if (oldRoute != null) didPop(oldRoute, null);
+    if (newRoute != null) didPush(newRoute, null);
+  }
+}
+
+/// The text of each live region on screen (a toast, a text marked `live`, a
+/// status a control announces), by its render object: what a screen reader
+/// speaks when it changes.
+Map<RenderObject, String> _liveRegions(WidgetsBinding binding) {
+  final out = <RenderObject, String>{};
+  final skip = _offstage();
+  for (final view in binding.renderViews) {
+    for (final o in _descendants(view, skip: skip)) {
+      if (!o.attached || (o is RenderBox && !o.hasSize)) continue;
+      final config = SemanticsConfiguration();
+      try {
+        // ignore: invalid_use_of_protected_member
+        o.describeSemanticsConfiguration(config);
+      } catch (_) {
+        continue;
+      }
+      if (!config.liveRegion) continue;
+      final text = (config.label.trim().isNotEmpty ? config.label : firstTextUnder(o) ?? '').trim();
+      if (text.isNotEmpty) out[o] = text;
+    }
+  }
+  return out;
+}
+
+/// How a step names [b]: its path (a component's node by its call ids), with
+/// `#n` for the n-th copy of a node a list repeats.
+String _stepName(WidgetsBinding binding, NodeBox b) {
+  final path = b.tree.pathOf(b.id, b.instance);
+  final copies = [for (final o in _boxes(binding)) if (o.id == b.id && identical(o.tree, b.tree) && o.tree.pathOf(o.id, o.instance) == path) o];
+  if (copies.length < 2) return path;
+  return '$path#${copies.indexWhere((o) => identical(o, b))}';
+}
+
+/// Whether node box [b] takes a tap itself: a click reaction of its node,
+/// or a control drawn in it that takes input.
+bool _takesTap(NodeBox b) {
+  final n = b.source.node(b.id);
+  if (n != null && n.actions.any((a) => a.trigger.type == api.TriggerType.click)) return true;
+  if (n?.behaviors.reorderHandle ?? false) return true;
+  // Its own drawing only: not the node boxes of its children.
+  var found = false;
+  void visit(RenderObject o) {
+    if (found || (o is NodeBox && !identical(o, b))) return;
+    if ((o is RenderControl && o.enabled && o.takesInput) || o is RenderEditable) {
+      found = true;
+      return;
+    }
+    o.visitChildren(visit);
+  }
+
+  visit(b);
+  return found;
+}
+
+/// The nodes inside [box] that take a tap, shown, outermost only (a button
+/// inside a tappable card is the card's).
+List<NodeBox> _tappableInside(WidgetsBinding binding, NodeBox box) {
+  final inside = [
+    for (final b in _boxes(binding))
+      if (!identical(b, box) && _isInside(b, box) && _shown(b) && _takesTap(b)) b,
+  ];
+  return [for (final b in inside) if (!inside.any((o) => !identical(o, b) && _isInside(b, o))) b];
+}
+
+/// What a step may have meant by [id], which names no node on screen (or one
+/// that takes no tap): the nodes that take a tap inside the node its first
+/// part names (`dates` for `dates/from`), then those whose name is like its
+/// last part (`field` for `textField1`). Empty when none is near.
+List<String> _candidates(WidgetsBinding binding, String id) {
+  final out = <String>[];
+  final segments = id.split('/');
+  for (var cut = segments.length; cut >= 1; cut--) {
+    final prefix = segments.take(cut).join('/');
+    final within = _locate(binding, prefix).box;
+    if (within == null) continue;
+    for (final b in _tappableInside(binding, within)) {
+      final name = _stepName(binding, b);
+      if (!out.contains(name)) out.add(name);
+    }
+    break;
+  }
+  // What is inside the block named is what was meant; else, by name.
+  if (out.isNotEmpty) return out.take(6).toList();
+  final want = segments.last.split('#').first.split('@').first.toLowerCase();
+  if (want.isNotEmpty) {
+    final scored = <(String, int)>[];
+    final seen = <String>{};
+    for (final b in _boxes(binding)) {
+      if (!_shown(b)) continue;
+      final name = b.tree.pathOf(b.id, b.instance);
+      if (!seen.add(name)) continue;
+      // Its id, its name, and (a component's root) the call's id.
+      final words = {b.id.toLowerCase(), (b.node?.name ?? '').toLowerCase(), name.split('/').last.toLowerCase()}..remove('');
+      // A call named the way the notation numbers one (`Segments1` for the
+      // first Segments) is near its component's type.
+      final types = {(b.node?.type ?? '').toLowerCase(), if (b.tree.isInstanceRoot(b.id, b.instance)) (componentInstanceOf(b.instance)?.component ?? '').toLowerCase()}
+        ..remove('');
+      final typed = types.contains(want.replaceFirst(RegExp(r'\d+$'), ''));
+      final d = words.map((w) => _distance(want, w)).fold(1 << 20, math.min);
+      bool within(String a, String b) => a.length >= 3 && b.length >= 3 && (a.contains(b) || b.contains(a));
+      final near = typed || words.any((w) => within(w, want)) || d <= math.max(2, want.length ~/ 3);
+      if (near) scored.add((name, d - (_takesTap(b) ? 2 : 0)));
+    }
+    scored.sort((a, b) => a.$2.compareTo(b.$2));
+    for (final (name, _) in scored) {
+      if (!out.contains(name)) out.add(name);
+    }
+  }
+  return out.take(6).toList();
+}
+
+/// [problem] with the nodes [id] may have meant, when there are any.
+String _withCandidates(WidgetsBinding binding, String id, String problem) {
+  final c = _candidates(binding, id);
+  if (c.isEmpty) return problem;
+  final end = problem.endsWith('.') ? problem.substring(0, problem.length - 1) : problem;
+  return '$end. Perhaps: ${c.join(', ')}.';
+}
+
+/// Levenshtein distance between [a] and [b].
+int _distance(String a, String b) {
+  if (a == b) return 0;
+  if (a.isEmpty) return b.length;
+  if (b.isEmpty) return a.length;
+  var prev = List<int>.generate(b.length + 1, (i) => i);
+  for (var i = 0; i < a.length; i++) {
+    final cur = List<int>.filled(b.length + 1, 0)..[0] = i + 1;
+    for (var j = 0; j < b.length; j++) {
+      cur[j + 1] = math.min(math.min(cur[j] + 1, prev[j + 1] + 1), prev[j] + (a.codeUnitAt(i) == b.codeUnitAt(j) ? 0 : 1));
+    }
+    prev = cur;
+  }
+  return prev[b.length];
 }
 
 /// The canvas a node box is on (its screen, or a modal shown over it).
@@ -1683,7 +1949,16 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         for (final b in within) {
           (byId[b.id] ??= []).add(b);
         }
-        final parts = byId.values.where((l) => l.length > 1).firstOrNull;
+        // Or its parts are numbered nodes that take a tap (a design
+        // system's Segments: cell0, cell1, cell2).
+        final numbered = <String, List<(int, NodeBox)>>{};
+        for (final b in within) {
+          final m = RegExp(r'^(.*?)(\d+)$').firstMatch(b.id);
+          if (m != null && _takesTap(b)) (numbered[m[1]!] ??= []).add((int.parse(m[2]!), b));
+        }
+        final cells = numbered.values.where((l) => l.length > 1).firstOrNull;
+        final parts = byId.values.where((l) => l.length > 1).firstOrNull ??
+            (cells == null ? null : [for (final (_, b) in (cells..sort((a, b) => a.$1.compareTo(b.$1)))) b]);
         if (parts != null) {
           if (n >= parts.length) {
             return (null, '--$verb $target: "$id" has ${parts.length} parts (@0 to @${parts.length - 1}).');
@@ -1702,6 +1977,32 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       return (control!.localToGlobal(rects[n].center), null);
     }
     final box = found.box;
+    // A bottom sheet's drag handle, which is no node of the document:
+    // `<sheet id>/handle` (or `handle` with one sheet open).
+    if (box == null && part == null && (id == 'handle' || id.endsWith('/handle'))) {
+      final handles = find.byKey(const ValueKey('Codelessly sheet drag area')).evaluate().toList();
+      final handle = handles.lastOrNull?.renderObject;
+      if (handle is RenderBox && handle.attached && handle.hasSize) return (handle.localToGlobal(handle.size.center(ui.Offset.zero)), null);
+    }
+    // A list row's swipe action, revealed by a --drag before: by its id or
+    // label (`--tap delete`, `--tap Delete`), or under its row
+    // (`--tap ListRow1#0/delete`).
+    if (box == null && part == null) {
+      final cut = id.lastIndexOf('/');
+      final name = id.substring(cut + 1);
+      final row = cut < 0 ? null : _locate(binding, id.substring(0, cut)).box;
+      final actions = [
+        for (final e in find.byWidgetPredicate((w) => w.key is ValueKey<(String, String, String)>).evaluate())
+          if ((e.widget.key! as ValueKey<(String, String, String)>).value case (final marker, final aid, final label)
+              when marker == 'Codelessly swipe action' && (aid == name || label == name))
+            if (e.renderObject case final RenderBox r when r.attached && r.hasSize && r.size.width > 0)
+              if (row == null || _sharesSwipeRow(r, row)) r,
+      ];
+      if (actions.length == 1) return (actions.single.localToGlobal(actions.single.size.center(ui.Offset.zero)), null);
+      if (actions.length > 1) {
+        return (null, '--$verb $id: ${actions.length} rows show the swipe action "$name": name its row (--$verb <row id>#<n>/$name).');
+      }
+    }
     if (box == null && part == null && !id.contains('/')) {
       // A tab, segment or destination named by its own id (`--tap stay` for
       // the tab {"id": "stay"}): the part of the one control that has it.
@@ -1716,9 +2017,18 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         }
       }
       if (owners.length == 1) return pointAt(owners.single, verb);
+      // A button of the built-in confirm dialog (`confirmOk`, `confirmCancel`).
+      for (final b in _builtIns(binding)) {
+        if (b.id == id) return (b.box.localToGlobal(b.box.size.center(ui.Offset.zero)), null);
+      }
     }
     if (box == null) {
-      return (null, found.problem!.startsWith(_notShownHere) ? '$_notShownHere--$verb $id: ${found.problem!.substring(_notShownHere.length)}.' : '--$verb $id: ${found.problem}.');
+      return (
+        null,
+        found.problem!.startsWith(_notShownHere)
+            ? '$_notShownHere--$verb $id: ${found.problem!.substring(_notShownHere.length)}.'
+            : _withCandidates(binding, id, '--$verb $id: ${found.problem}.'),
+      );
     }
     var at = reachable(box);
     if (at == null) {
@@ -1766,6 +2076,8 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       if (o is RenderRunningTable) return true;
       if (o is NodeBox && control != null) {
         if (o.source.node(o.id)?.actions.isNotEmpty ?? false) return true;
+        // A reorder handle: a press focuses it, for Alt and the arrows.
+        if (o.source.node(o.id)?.behaviors.reorderHandle ?? false) return true;
         control = null;
       }
       if (o is NodeBox) inWidget = false;
@@ -1794,13 +2106,25 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
 
   switch (step.kind) {
     case 'tap':
-      final (at, problem) = await pointAt(step.target, 'tap');
+      var (at, problem) = await pointAt(step.target, 'tap');
       if (at == null) return problem;
       if (!reactsToTap(hitAt(at))) {
-        warn('tap_no_reaction',
-            '--tap ${step.target}: neither the node nor anything around it reacts to a tap (no "click" reaction, button or input), so the tap did nothing. '
-                'Add {"trigger": "click", "actions": [...]} to the node, or tap the node that has it.',
-            step.target.split('#').first.split('@').first);
+        // A block called by its id (`DateRangePicker#dates`, a design
+        // system's component) whose one tappable part is inside it: that
+        // part is meant.
+        final named = step.target.contains('@') ? null : _boxOf(binding, step.target);
+        final inside = named == null ? const <NodeBox>[] : _tappableInside(binding, named);
+        final part = inside.length == 1 ? inside.single : null;
+        final there = part == null ? null : (reachable(part) ?? (await centerInView(part).then((_) => reachable(part))));
+        if (there != null) {
+          at = there;
+        } else {
+          final c = _candidates(binding, step.target);
+          warn('tap_no_reaction',
+              '--tap ${step.target}: neither the node nor anything around it reacts to a tap (no "click" reaction, button or input), so the tap did nothing. '
+                  '${c.isEmpty ? 'Add {"trigger": "click", "actions": [...]} to the node, or tap the node that has it.' : 'Perhaps: ${c.join(', ')}.'}',
+              step.target.split('#').first.split('@').first);
+        }
       }
       await _unfocusFieldOutside(tester, _boxOf(binding, step.target.replaceFirst(RegExp(r'@\d+$'), '')));
       await tester.tapAt(at);
@@ -1852,9 +2176,48 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     case 'long-press':
       // A finger (or a mouse button) held on the node past the long-press
       // time, then lifted: a `longPress` reaction, a context menu on touch.
-      final (at, problem) = await pointAt(step.target, 'long-press');
-      if (at == null) return problem;
-      await _unfocusFieldOutside(tester, _boxOf(binding, step.target));
+      final (point, problem) = await pointAt(step.target, 'long-press');
+      if (point == null) return problem;
+      var at = point;
+      final pressed = _boxOf(binding, step.target);
+      // A control inside the node that acts as a finger lands (a slider
+      // takes its value there) would act too: hold where none is.
+      bool controlUnder(ui.Offset p) {
+        for (final o in hitAt(p)) {
+          if (identical(o, pressed)) return false;
+          if (o is RenderControl && o.enabled && o.takesInput) return true;
+        }
+        return false;
+      }
+
+      if (pressed != null && controlUnder(at)) {
+        final r = _rectOf(pressed).intersect(viewRect());
+        search:
+        for (var j = 0; j < 5; j++) {
+          for (var i = 0; i < 5; i++) {
+            final p = ui.Offset(r.left + r.width * (i + 0.5) / 5, r.top + r.height * (j + 0.5) / 5);
+            if (hitAt(p).contains(pressed) && !controlUnder(p)) {
+              at = p;
+              break search;
+            }
+          }
+        }
+      }
+      // Nothing there reacts to a hold: the tap's reactions run instead, as
+      // on a device, and a capture cannot tell the two apart.
+      final path = hitAt(at);
+      final holds = path.any((o) =>
+          (o is RenderReactions && o.triggers.intersection(const {api.TriggerType.longPress, api.TriggerType.hold}).isNotEmpty) ||
+          (o is RenderSemanticsGestureHandler && o.onLongPress != null) ||
+          (o is RenderControl && o.enabled && o.takesInput) ||
+          o is RenderEditable);
+      if (!holds) {
+        warn('long_press_no_reaction',
+            '--long-press ${step.target}: nothing at the node reacts to a long press (no "longPress" reaction, onLongPress or menu=), so the hold ends as a tap does: '
+                '${reactsToTap(path) ? 'its tap reactions ran' : 'nothing happened'}.',
+            step.target.split('#').first);
+      }
+      await _unfocusFieldOutside(tester, pressed);
       final g = await tester.startGesture(at);
       await tester.pump(const Duration(milliseconds: 700));
       await g.up(timeStamp: const Duration(milliseconds: 700));
@@ -1867,6 +2230,10 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       await _unfocusFieldOutside(tester, _boxOf(binding, step.target));
       final mouse = TestPointer(93, PointerDeviceKind.mouse, 93, kSecondaryMouseButton);
       await tester.sendEventToBinding(mouse.hover(at));
+      // What the pointer coming over it changed (a hover state that shows a
+      // node) is laid out before the press is hit-tested, as a frame comes
+      // between the two on a device.
+      await tester.pump();
       await tester.sendEventToBinding(mouse.down(at));
       await tester.pump(const Duration(milliseconds: 40));
       await tester.sendEventToBinding(mouse.up());
@@ -1931,21 +2298,35 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       return null;
     case 'focus' || 'type':
       final verb = step.kind;
-      var field = fieldIn(step.target);
+      var target = step.target;
+      var field = fieldIn(target);
+      // A field named under its block (`quiz/field` for the one field of the
+      // TypedAnswer `quiz`): the block's one text field.
+      if (field == null && target.contains('/') && _locate(binding, target).box == null) {
+        final block = _locate(binding, target.substring(0, target.lastIndexOf('/'))).box;
+        final fields = block == null ? const <RenderTextField>[] : _descendants(block).whereType<RenderTextField>().toList();
+        if (fields.length == 1) {
+          target = target.substring(0, target.lastIndexOf('/'));
+          field = fieldIn(target);
+        }
+      }
       if (field == null) {
         final found = _locate(binding, step.target);
         if (found.box == null) {
           final p = found.problem!;
-          return p.startsWith(_notShownHere) ? '$_notShownHere--$verb ${step.target}: ${p.substring(_notShownHere.length)}.' : '--$verb ${step.target}: $p.';
+          return p.startsWith(_notShownHere)
+              ? '$_notShownHere--$verb ${step.target}: ${p.substring(_notShownHere.length)}.'
+              : _withCandidates(binding, step.target, '--$verb ${step.target}: $p.');
         }
-        return '--$verb ${step.target}: the node has no text field in it (only a textField, or a node around one, can be focused or typed into).';
+        return _withCandidates(binding, step.target,
+            '--$verb ${step.target}: the node has no text field in it (only a textField, or a node around one, can be focused or typed into).');
       }
-      final box = _locate(binding, step.target, prefer: (b) => fieldOf(b) != null).box!;
+      final box = _locate(binding, target, prefer: (b) => fieldOf(b) != null).box!;
       if (reachable(box) == null) await centerInView(box);
       field.requestFocus();
       await tester.pump();
       if (verb == 'type') {
-        field = fieldIn(step.target);
+        field = fieldIn(target);
         if (field == null) return '--type ${step.target}: the text field went away when it was focused.';
         if (!field.focusNode.hasFocus) field.requestFocus();
         tester.testTextInput.enterText(step.value ?? '');
@@ -2009,12 +2390,20 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       await tester.pump();
       return null;
     case 'key':
-      final parts = step.target.split('+').map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
+      // `ctrl+k`, `?`, `+` and `ctrl++` (the key `+` after its modifiers).
+      final spec = step.target.trim();
+      final plus = spec == '+' || spec.endsWith('++');
+      final parts = [
+        ...(plus ? spec.substring(0, spec.length - 1) : spec).split('+').map((p) => p.trim()).where((p) => p.isNotEmpty),
+        if (plus) '+',
+      ];
       if (parts.isEmpty) return '--key: name a key (ArrowRight, Enter, Escape, Tab, shift+Tab...).';
-      final key = _keyNamed(parts.last);
-      if (key == null) {
-        return '--key ${step.target}: "${parts.last}" is not a key the command knows. Keys: ${_keyNames.keys.join(', ')}, a letter or a digit; modifiers: shift, ctrl, alt, meta.';
+      final named = _keyNamed(parts.last);
+      if (named == null) {
+        return '--key ${step.target}: "${parts.last}" is not a key the command knows. Keys: ${_keyNames.keys.join(', ')}, F1 to F24, '
+            'a letter, a digit or a printable character (/, ?, [...); modifiers: shift, ctrl, alt, meta, mod (ctrl, or meta on a Mac).';
       }
+      final key = named.key;
       final modifiers = <LogicalKeyboardKey>[];
       for (final m in parts.take(parts.length - 1)) {
         final k = switch (m.toLowerCase()) {
@@ -2022,11 +2411,23 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
           'ctrl' || 'control' => LogicalKeyboardKey.controlLeft,
           'alt' || 'option' => LogicalKeyboardKey.altLeft,
           'meta' || 'cmd' || 'command' => LogicalKeyboardKey.metaLeft,
+          // The notation's mod: Command on a Mac, Control elsewhere.
+          'mod' => defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS
+              ? LogicalKeyboardKey.metaLeft
+              : LogicalKeyboardKey.controlLeft,
           _ => null,
         };
-        if (k == null) return '--key ${step.target}: "$m" is not a modifier (shift, ctrl, alt, meta).';
-        modifiers.add(k);
+        if (k == null) return '--key ${step.target}: "$m" is not a modifier (shift, ctrl, alt, meta, mod).';
+        if (!modifiers.contains(k)) modifiers.add(k);
       }
+      // A character typed with Shift on a US keyboard (`?` is Shift+/).
+      if (named.shifted && !modifiers.contains(LogicalKeyboardKey.shiftLeft)) modifiers.insert(0, LogicalKeyboardKey.shiftLeft);
+      final shift = modifiers.contains(LogicalKeyboardKey.shiftLeft);
+      final character = named.character == null
+          ? null
+          : shift && !named.shifted
+              ? named.character!.toUpperCase()
+              : named.character;
       // Enter in a text field connected to the platform's text input is
       // the input's to act on (a field leaves it alone: an IME may be
       // composing): the platform sends the field its action key (Done, Go,
@@ -2051,10 +2452,26 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         await tester.pump();
         return null;
       }
+      // A character key in a focused text field types it, as the device's
+      // keyboard does through the platform's text input (which a key event
+      // alone does not reach in a test): `--key o` writes an o.
+      if (character != null &&
+          modifiers.every((m) => m == LogicalKeyboardKey.shiftLeft) &&
+          typing != null &&
+          typing.attached &&
+          typing.focusNode.hasFocus &&
+          typing.editor.hasConnection) {
+        final v = typing.editor.value;
+        final at = v.selection.isValid ? v.selection : TextSelection.collapsed(offset: v.text.length);
+        tester.testTextInput.updateEditingValue(
+            TextEditingValue(text: v.text.replaceRange(at.start, at.end, character), selection: TextSelection.collapsed(offset: at.start + character.length)));
+        await tester.pump();
+        return null;
+      }
       for (final m in modifiers) {
         await tester.sendKeyDownEvent(m);
       }
-      await tester.sendKeyEvent(key);
+      await tester.sendKeyEvent(key, character: character);
       for (final m in modifiers.reversed) {
         await tester.sendKeyUpEvent(m);
       }
@@ -2062,6 +2479,15 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       return null;
   }
   return 'Unknown step ${step.kind}.';
+}
+
+/// Whether the revealed swipe [action] belongs to the row [row] (or a node
+/// in it): the stack that lays the action under the row holds both.
+bool _sharesSwipeRow(RenderObject action, RenderObject row) {
+  for (RenderObject? p = action.parent; p != null; p = p.parent) {
+    if (p is RenderStack) return _isInside(row, p);
+  }
+  return false;
 }
 
 /// Takes the focus from a text field before a step acts elsewhere (a tap,
@@ -2094,14 +2520,45 @@ const _keyNames = <String, LogicalKeyboardKey>{
   'PageDown': LogicalKeyboardKey.pageDown,
 };
 
+/// The printable characters of a US keyboard: the key that types each, and
+/// whether Shift is held for it (`?` is Shift+/).
+const _characterKeys = <String, (LogicalKeyboardKey, bool)>{
+  '/': (LogicalKeyboardKey.slash, false), '?': (LogicalKeyboardKey.slash, true),
+  '.': (LogicalKeyboardKey.period, false), '>': (LogicalKeyboardKey.period, true),
+  ',': (LogicalKeyboardKey.comma, false), '<': (LogicalKeyboardKey.comma, true),
+  ';': (LogicalKeyboardKey.semicolon, false), ':': (LogicalKeyboardKey.semicolon, true),
+  "'": (LogicalKeyboardKey.quote, false), '"': (LogicalKeyboardKey.quote, true),
+  '[': (LogicalKeyboardKey.bracketLeft, false), '{': (LogicalKeyboardKey.bracketLeft, true),
+  ']': (LogicalKeyboardKey.bracketRight, false), '}': (LogicalKeyboardKey.bracketRight, true),
+  '\\': (LogicalKeyboardKey.backslash, false), '|': (LogicalKeyboardKey.backslash, true),
+  '-': (LogicalKeyboardKey.minus, false), '_': (LogicalKeyboardKey.minus, true),
+  '=': (LogicalKeyboardKey.equal, false), '+': (LogicalKeyboardKey.equal, true),
+  '`': (LogicalKeyboardKey.backquote, false), '~': (LogicalKeyboardKey.backquote, true),
+  '!': (LogicalKeyboardKey.digit1, true), '@': (LogicalKeyboardKey.digit2, true), '#': (LogicalKeyboardKey.digit3, true),
+  r'$': (LogicalKeyboardKey.digit4, true), '%': (LogicalKeyboardKey.digit5, true), '^': (LogicalKeyboardKey.digit6, true),
+  '&': (LogicalKeyboardKey.digit7, true), '*': (LogicalKeyboardKey.digit8, true), '(': (LogicalKeyboardKey.digit9, true),
+  ')': (LogicalKeyboardKey.digit0, true),
+};
+
 /// The key named [name] (as the web's `KeyboardEvent.key`: `ArrowRight`,
-/// `Enter`; any case), a letter or a digit.
-LogicalKeyboardKey? _keyNamed(String name) {
+/// `Enter`, `F2`; any case), a letter, a digit or a printable character:
+/// the key, the character it types (null: none) and whether Shift types it.
+({LogicalKeyboardKey key, String? character, bool shifted})? _keyNamed(String name) {
   for (final e in _keyNames.entries) {
-    if (e.key.toLowerCase() == name.toLowerCase() || (name.toLowerCase() == 'esc' && e.key == 'Escape')) return e.value;
+    if (e.key.toLowerCase() == name.toLowerCase() || (name.toLowerCase() == 'esc' && e.key == 'Escape')) {
+      return (key: e.value, character: e.value == LogicalKeyboardKey.space ? ' ' : null, shifted: false);
+    }
   }
-  if (RegExp(r'^[A-Za-z]$').hasMatch(name)) return LogicalKeyboardKey(LogicalKeyboardKey.keyA.keyId + name.toLowerCase().codeUnitAt(0) - 0x61);
-  if (RegExp(r'^[0-9]$').hasMatch(name)) return LogicalKeyboardKey(LogicalKeyboardKey.digit0.keyId + name.codeUnitAt(0) - 0x30);
+  if (RegExp(r'^[A-Za-z]$').hasMatch(name)) {
+    final c = name.toLowerCase();
+    return (key: LogicalKeyboardKey(LogicalKeyboardKey.keyA.keyId + c.codeUnitAt(0) - 0x61), character: c, shifted: false);
+  }
+  if (RegExp(r'^[0-9]$').hasMatch(name)) {
+    return (key: LogicalKeyboardKey(LogicalKeyboardKey.digit0.keyId + name.codeUnitAt(0) - 0x30), character: name, shifted: false);
+  }
+  final f = RegExp(r'^[Ff]([1-9]|1[0-9]|2[0-4])$').firstMatch(name);
+  if (f != null) return (key: LogicalKeyboardKey(LogicalKeyboardKey.f1.keyId + int.parse(f[1]!) - 1), character: null, shifted: false);
+  if (_characterKeys[name] case (final key, final shifted)) return (key: key, character: name, shifted: shifted);
   return null;
 }
 
@@ -2345,6 +2802,31 @@ List<RuntimeIssue> _check(
       }
     }
     // Text.
+    // A control's own label (a button's "←"): its font may lack a glyph too.
+    if (node.type != 'text' && b.drawn) {
+      final missing = <String>{};
+      void visit(RenderObject o) {
+        if (o is NodeBox && !identical(o, b)) return;
+        if (o is LabeledControl) {
+          for (final l in o.labels) {
+            final cov = coverage(l.fontFamily);
+            if (cov == null) continue;
+            for (final r in l.text.runes) {
+              if (r > 0x20 && r != 0xA0 && !cov.contains(r)) missing.add(String.fromCharCode(r));
+            }
+          }
+        }
+        o.visitChildren(visit);
+      }
+
+      visit(b);
+      if (missing.isNotEmpty) {
+        out.add(RuntimeIssue('missing_glyph', 'warning',
+            'The ${node.type} "${nameOf(b)}" shows ${missing.map((c) => '"$c" (U+${c.runes.first.toRadixString(16).toUpperCase().padLeft(4, '0')})').join(', ')} in its label, which its font has no glyph for: drawn as an empty box. '
+            'Use a character the font has, or an icon (an IconButton, or the button\'s icon).',
+            nodeId: nameOf(b), screen: screen, size: size, file: file));
+      }
+    }
     if (node.type == 'text') {
       final p = _descendants(b).whereType<RenderParagraph>().firstOrNull;
       if (p == null || !p.hasSize) continue;
@@ -2396,6 +2878,58 @@ List<RuntimeIssue> _check(
   return out;
 }
 
+/// The built-in confirm dialog's buttons are the SDK's widgets, not nodes:
+/// steps (`--tap confirmOk`) and the layout name them by these ids.
+const _builtInTargets = {
+  'confirmOk': ValueKey<String>('codelessly-confirm-ok'),
+  'confirmCancel': ValueKey<String>('codelessly-confirm-cancel'),
+};
+
+/// Each built-in target on screen: its id, its element and its box.
+List<({String id, Element element, RenderBox box})> _builtIns(WidgetsBinding binding) {
+  final out = <({String id, Element element, RenderBox box})>[];
+  void visit(Element e) {
+    final key = e.widget.key;
+    for (final t in _builtInTargets.entries) {
+      if (key != t.value) continue;
+      if (e.renderObject case final RenderBox box when box.attached && box.hasSize) out.add((id: t.key, element: e, box: box));
+    }
+    e.visitChildren(visit);
+  }
+
+  binding.rootElement?.visitChildren(visit);
+  return out;
+}
+
+/// The text the first paragraph under [box] draws (a button's label).
+String? _paragraphText(RenderObject box) {
+  String? text;
+  void visit(RenderObject o) {
+    if (text != null) return;
+    if (o is RenderParagraph) {
+      text = o.text.toPlainText();
+    } else {
+      o.visitChildren(visit);
+    }
+  }
+
+  visit(box);
+  return text;
+}
+
+/// The built-in target that has the keyboard focus, if one has.
+({String id, Element element, RenderBox box})? _focusedBuiltIn(WidgetsBinding binding) {
+  final focused = FocusManager.instance.primaryFocus?.context;
+  if (focused == null) return null;
+  for (final b in _builtIns(binding)) {
+    if (identical(focused, b.element)) return b;
+    var inside = false;
+    focused.visitAncestorElements((a) => !(inside = identical(a, b.element)));
+    if (inside) return b;
+  }
+  return null;
+}
+
 /// The node box that holds the keyboard focus (the box around the focused
 /// control or press target); null: nothing has it.
 NodeBox? _focusedBox() {
@@ -2423,6 +2957,7 @@ RenderReport _finish(RenderReport report, RenderArgs args) {
     if (report.downloads.isNotEmpty) 'downloads': report.downloads,
     if (report.clipboard.isNotEmpty) 'clipboard': report.clipboard,
     if (report.focus.isNotEmpty) 'focus': report.focus,
+    if (report.announcements.isNotEmpty) 'announcements': report.announcements,
     'diagnostics': report.diagnostics,
   }));
   return report;
@@ -2457,6 +2992,9 @@ String formatReport(RenderReport report) {
   for (final f in report.focus) {
     b.writeln('focus on ${f['path'] ?? f['id']}${f['text'] == null ? '' : ' ${jsonEncode(f['text'])}'}'
         '${f['ring'] == true ? ' (ring shown)' : ' (no ring)'}${f['inOverlay'] == true ? ', in the open overlay' : ''} [screen ${f['screen']} ${f['size']}]');
+  }
+  for (final a in report.announcements) {
+    b.writeln('${a['source'] == 'live' ? 'live region' : 'announced'} ${jsonEncode(a['text'])} (${a['politeness']}) after ${a['after']} [screen ${a['screen']} ${a['size']}]');
   }
   b.writeln('${report.errors} error(s), ${report.warnings} warning(s).');
   return b.toString();

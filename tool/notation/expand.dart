@@ -13,7 +13,8 @@
 // A page (--width 700 or more) is given the media rules that lay it out on a
 // tablet and a phone; --no-reflow leaves it written for its one width.
 // The variables of the site.json beside --out (or of --site) are the site's:
-// the page uses them by name and declares none of them on its screen.
+// the page uses them by name and declares none of them on its screen; its
+// pages are the screens a bare `go name` names.
 // What the notation could not read is written to stderr, one line each;
 // the exit status is 1 when there is any.
 //
@@ -65,9 +66,14 @@ Future<void> main(List<String> args) async {
   // --site <site.json>, else the site.json beside --out.
   final sitePath = opt('--site') ?? (opt('--out') == null ? null : '${File(opt('--out')!).parent.path}/site.json');
   final projectVariables = <String, Map<String, Object?>>{};
+  // The site's screens (its pages): `go name` names one of them.
+  final screens = <String>[];
   if (sitePath != null && File(sitePath).existsSync()) {
     try {
       final manifest = jsonDecode(File(sitePath).readAsStringSync());
+      for (final p in manifest is Map && manifest['pages'] is List ? manifest['pages'] as List : const []) {
+        if (p is String) screens.add(p.split('/').last.replaceFirst(RegExp(r'\.json$'), ''));
+      }
       // As the manifest's reader takes them: a list of records or an object
       // of name to value, each typed by its value when it names no type.
       final declared = manifest is Map ? manifest['variables'] : null;
@@ -89,7 +95,8 @@ Future<void> main(List<String> args) async {
   final options = (ds == null
           ? NotationOptions(screen: screen, width: width, reflow: !args.contains('--no-reflow'), projectVariables: projectVariables)
           : NotationOptions.fromDesignSystem(ds, screen: screen, width: width, named: args.contains('--named'), nearestColors: args.contains('--nearest-colors'), reflow: !args.contains('--no-reflow'), projectVariables: projectVariables))
-      .open(openVocabulary: open, vocabulary: aliases);
+      .open(openVocabulary: open, vocabulary: aliases)
+      .withScreens(screens);
   final result = Catalog.run(catalog, () => parseNotation(File(file).readAsStringSync(), catalog: catalog, options: options));
   for (final issue in result.issues) {
     stderr.writeln('$file: $issue');

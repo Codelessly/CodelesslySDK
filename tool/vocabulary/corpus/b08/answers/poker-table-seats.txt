@@ -64,7 +64,7 @@ App
       Column gap=8 pad=12
         Row gap=12 middle
           Text.strong "Raise to {money(bet,'$',0)}"
-          Slider bind=bet min=80 max={seats[0].stack} step=20 grow
+          Slider @bet min=80 max={seats[0].stack} step=20 grow
           Button.destructive "All in" onTap={bet=seats[0].stack; emit allin bet}
         Row gap=8
           Button.outline "1/2 pot" onTap={bet=round(pot/2,0)}
@@ -76,7 +76,7 @@ App
             Text "{toCall>0 ? 'Call ' + money(toCall,'$',0) : 'Check'}"
           Button "Raise {money(bet,'$',0)}" grow disabled={turn!="s1"} onTap={pot=pot+bet; emit raise bet; turn="s2"}
 Dialog#rebuy "Rebuy" "Top up your stack to keep playing"
-  Select "Amount" bind=rebuyAmount items=[500,1000,2000]
+  Select "Amount" @rebuyAmount items=[500,1000,2000]
   Text.muted "Your stack: {money(seats[0].stack,'$',0)}"
   Row end gap=8
     Button.ghost "Cancel" onTap={close}
@@ -87,6 +87,8 @@ state hands=[{"n":41,"winner":"Maya Reyes","pot":420,"hand":"Two pair","board":[
 state sel=41
 state step=0
 state playing=false
+state tableFilter=""
+state rebuyAmount=""
 every 1s when playing onTick={step=step+1; step>=length(find(hands,h=>h.n==sel).log) ? playing=false : emit tick}
 App
   Sidebar
@@ -99,7 +101,7 @@ App
     Nav
       Heading "Hand history" level=1
       Row gap=8
-        Select "Table" bind=tableFilter items=["All hands","Won by me","Showdowns"]
+        Select "Table" @tableFilter items=["All hands","Won by me","Showdowns"]
         Button.outline "Rebuy" icon="savings" onTap={open rebuy}
     Column pad=24 gap=16
       Row gap=24 top
@@ -123,7 +125,7 @@ App
                   IconButton "skip_previous" tooltip="Start" onTap={step=0}
                   IconButton "{playing ? 'pause' : 'play_arrow'}" tooltip="Replay" onTap={playing=!playing}
                   IconButton "navigate_next" tooltip="Next action" onTap={step=min(step+1,length(h.log))}
-                  Slider bind=step min=0 max={length(h.log)} grow
+                  Slider @step min=0 max={length(h.log)} grow
                   Text.muted "{step} / {length(h.log)}"
                 Divider
                 each line in take(h.log,step)
@@ -133,7 +135,7 @@ App
                 if step==0
                   Text.muted "Press play to replay this hand action by action."
 Dialog#rebuy "Rebuy" "Top up your stack to keep playing"
-  Select "Amount" bind=rebuyAmount items=[500,1000,2000]
+  Select "Amount" @rebuyAmount items=[500,1000,2000]
   Row end gap=8
     Button.ghost "Cancel" onTap={close}
     Button "Rebuy {money(rebuyAmount,'$',0)}" onTap={emit rebuy rebuyAmount; toast "Stack topped up"; close}

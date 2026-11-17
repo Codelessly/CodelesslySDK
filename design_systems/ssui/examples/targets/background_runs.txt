@@ -12,4 +12,4 @@ Card gap=10
             Text.body "{r.name}"
             Text.caption "{r.at}"
           Button.ghost "{r.state=="running"?"Stop":(r.state=="failed"?"Retry":"Open")}" onTap={emit run_action r.id}
-        Progress bind=r.p visible={r.state=="running"}
+        Progress value={r.p} visible={r.state=="running"}

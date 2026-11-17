@@ -20,8 +20,8 @@ App
     Nav
       Heading "Periodic table"
       Row gap=8
-        Input "Search symbol" "Fe" bind=query w=160
-        Select "Colour by" bind=prop items=["Family","Atomic mass","Melting point","Boiling point","Electronegativity","Discovery year"] w=200
+        Input "Search symbol" "Fe" @query w=160
+        Select "Colour by" @prop items=["Family","Atomic mass","Melting point","Boiling point","Electronegativity","Discovery year"] w=200
         Button.outline "Compare" icon="compare_arrows" onTap={go compare}
         Button "Quiz me" icon="quiz" onTap={go quiz}
     Column pad=24 gap=16
@@ -31,7 +31,7 @@ App
             Text.strong "Temperature"
             Text.muted "Cells show their state at {temp} K ({round(temp-273.15,0)} C)"
           Text.heading "{temp} K"
-        Slider bind=temp min=0 max=6000
+        Slider @temp min=0 max=6000
         Row gap=16
           Badge.info "Solid"
           Badge.warning "Liquid"
@@ -94,11 +94,11 @@ App
       Grid cols=2 gap=16
         Card gap=8
           Text.fieldLabel "Element A"
-          Select "Choose" bind=a items={map(elements,e=>e.name)}
+          Select "Choose" @a items={map(elements,e=>e.name)}
         Card gap=8
           Text.fieldLabel "Element B"
-          Select "Choose" bind=b items={map(elements,e=>e.name)}
-      SegmentedButton bind=mode items=["Properties","Atoms"]
+          Select "Choose" @b items={map(elements,e=>e.name)}
+      SegmentedButton @mode items=["Properties","Atoms"]
       if mode=="Properties"
         Card gap=12
           Row between
@@ -160,14 +160,14 @@ App
         Badge.success "Score {score} / {asked}"
         Button.ghost "Restart" icon="restart_alt" onTap={score=0; asked=0; answer=""; revealed=false; current=elements[floor(random()*length(elements))]}
     Column pad=24 gap=16
-      SegmentedButton bind=difficulty items=["Symbols","Families","Numbers"]
+      SegmentedButton @difficulty items=["Symbols","Families","Numbers"]
       Card gap=12
         Text.muted "Names are hidden. Tap a cell to answer."
         PeriodicTable elements={elements} hideNames=true highlight={current.sym} onSelect={answer=result.name; revealed=true; asked=asked+1; score=result.name==current.name ? score+1 : score}
       Card gap=12
         Text.caption "Find the element"
         Text.heading "{difficulty=="Numbers" ? "Number " + current.n : current.sym}"
-        Input "Or type its name" bind=answer
+        Input "Or type its name" @answer
         Row gap=8
           Button "Check" onTap={revealed=true; asked=asked+1; lower(answer)==lower(current.name) ? score=score+1 : toast "It is {current.name}"}
           Button.outline "Skip" onTap={answer=""; revealed=false; current=elements[floor(random()*length(elements))]}

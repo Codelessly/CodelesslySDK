@@ -36,6 +36,7 @@ class RenderCalendar extends RenderBox implements MouseTrackerAnnotation {
     this.label = 'Choose dates',
     this.direction = TextDirection.ltr,
     this.onRangeChanged,
+    this.range = true,
   }) : _colors = colors, // ignore: prefer_initializing_formals
        _symbols = symbols, // ignore: prefer_initializing_formals
        _today = dayOf(today),
@@ -70,12 +71,20 @@ class RenderCalendar extends RenderBox implements MouseTrackerAnnotation {
   String label;
   TextDirection direction;
   void Function(DateTime?, DateTime?)? onRangeChanged;
+
+  /// Whether the inline grid picks a range (a start, then an end) or one
+  /// day (each pick replaces the last).
+  bool range;
   String get semanticsName =>
-      '$label, ${_value == null
-          ? 'choose check-in'
+      '$label, ${!range
+          ? _value == null
+              ? 'choose a day'
+              : fullDay(_value!, _symbols)
+          : _value == null
+          ? 'choose the start'
           : _rangeEnd == null
-          ? 'check-in ${fullDay(_value!, _symbols)}, choose check-out'
-          : 'check-in ${fullDay(_value!, _symbols)}, check-out ${fullDay(_rangeEnd!, _symbols)}'}';
+          ? 'start ${fullDay(_value!, _symbols)}, choose the end'
+          : 'start ${fullDay(_value!, _symbols)}, end ${fullDay(_rangeEnd!, _symbols)}'}';
 
   /// Width of the grid (SSUI's popover is 236 with 8 of padding).
   static const double gridWidth = 220;
@@ -267,7 +276,7 @@ class RenderCalendar extends RenderBox implements MouseTrackerAnnotation {
     if (inline) {
       // A new pick after a complete range starts again. A range never crosses
       // an unavailable night, including its departure day.
-      if (_value == null || _rangeEnd != null || !d.isAfter(_value!)) {
+      if (!range || _value == null || _rangeEnd != null || !d.isAfter(_value!)) {
         _value = d;
         _rangeEnd = null;
       } else {
@@ -900,9 +909,9 @@ class RenderCalendar extends RenderBox implements MouseTrackerAnnotation {
         final state = !inRange(d)
             ? ', unavailable'
             : sameDay(d, _value)
-            ? ', check-in'
+            ? (inline && range ? ', start' : '')
             : inline && sameDay(d, _rangeEnd)
-            ? ', check-out'
+            ? ', end'
             : '';
         final price = _dayPrices[date] == null ? '' : ', ${_dayPrices[date]}';
         final mark = _marks[date] == null ? '' : ', ${_marks[date]}';

@@ -23,7 +23,7 @@ App
       Icon "wifi" hidden={!online}
       Icon "wifi_off" hidden={online}
       Text.muted "{online ? 'Online' : 'Offline'}"
-    Toggle "Connected" bind=online
+    Toggle "Connected" @online
     Badge.warning "{length(queue)} queued" visible={length(queue)>0}
   Main
     Nav
@@ -47,8 +47,8 @@ App
         Card gap=12
           Heading "Scale" level=3
           Row gap=12 middle
-            Select bind=weighItem items=["Heritage tomatoes","New potatoes","Runner beans"] grow
-            Input "Grams from scale" type=number bind=grams w=160
+            Select @weighItem items=["Heritage tomatoes","New potatoes","Runner beans"] grow
+            Input "Grams from scale" type=number @grams w=160
           Row between
             Text.muted "{money(find(perKilo,p=>p.name==weighItem).price,'$',2)} per kilo"
             Text.strong "{money(grams/1000*find(perKilo,p=>p.name==weighItem).price,'$',2)}"
@@ -70,7 +70,7 @@ App
         Button.ghost "Clear basket" onTap={cart=[]}
   Dialog#cash "Cash payment"
     Text.muted "Due {money(sum(cart,c=>c.price),'$',2)}"
-    Input "Cash handed over" type=number bind=tendered
+    Input "Cash handed over" type=number @tendered
     Row gap=8
       Button.outline "$10" onTap={tendered=10}
       Button.outline "$20" onTap={tendered=20}

@@ -7,7 +7,7 @@ Card gap=16 pad=16
   Text.title "Countdown"
   Row center
     Text "{floor(remaining/60)}:{remaining%60<10?'0':''}{remaining%60}" size=64 weight=700
-  Progress bind={remaining/300}
+  Progress value={remaining/300}
   Row gap=8 center
     Button "Start" visible={!running&&remaining>0} onTap={running=true}
     Button.secondary "Pause" visible={running} onTap={running=false}

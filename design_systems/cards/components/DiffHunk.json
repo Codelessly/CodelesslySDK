@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "DiffHunk",
-  "doc": "One hunk of a diff with its own Keep and Discard buttons: DiffHunk \"Server port\" \"@@ -4,2 +4,2 @@\" bind=h1 start=4 lines=[\"-port: 8080\",\"+port: 9090\",\" host: localhost\"] (a line starts with -, + or a space; numbers count from start) sets your text variable to \"keep\" or \"discard\" (empty until decided).",
+  "doc": "One hunk of a diff with its own Keep and Discard buttons: DiffHunk \"Server port\" \"@@ -4,2 +4,2 @@\" @h1 start=4 lines=[\"-port: 8080\",\"+port: 9090\",\" host: localhost\"] (a line starts with -, + or a space; numbers count from start) sets your text variable to \"keep\" or \"discard\" (empty until decided).",
   "props": [
    {
     "key": "value",

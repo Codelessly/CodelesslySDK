@@ -56,7 +56,7 @@ App
         HoldKey "{locked ? 'Hold to unlock' : 'Hold to lock'}" ms=3000 onHold={locked=!locked; toast locked ? "Child lock off" : "Child lock on"}
 Dialog#defrost "Defrost by weight" "Enter the weight of the food"
   state grams=500
-  Input "Weight in grams" type=number bind=grams
+  Input "Weight in grams" type=number @grams
   Text.muted "About {ceil(grams/100*60)} seconds at 30% power."
   Button "Start defrost" onTap={grams>0 ? {left=ceil(grams/100*60); power=30; note="Defrost {grams} g"; running=true; beeping=false; close} : toast "Enter a weight"}
 

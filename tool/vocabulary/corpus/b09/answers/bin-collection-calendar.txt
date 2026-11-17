@@ -5,6 +5,8 @@ state address="14 Alder Lane, Bristol"
 state days=[{"d":2,"bins":["general"]},{"d":3,"bins":["recycling"]},{"d":9,"bins":["general"]},{"d":10,"bins":["recycling","garden"]},{"d":16,"bins":["general"]},{"d":17,"bins":["recycling","glass"]},{"d":23,"bins":["general"]},{"d":24,"bins":["recycling","garden"]},{"d":30,"bins":["general"]}]
 state holidays=[{"d":25,"note":"Thanksgiving week shift: moved to Fri 27"}]
 state binColors={"general":"#FF4A4A4A","recycling":"#FF2E7D32","garden":"#FF8D6E63","glass":"#FF1E88E5"}
+state addressQuery=""
+state postcode=""
 App
   Sidebar
     Brand "Binday" icon="delete"
@@ -18,7 +20,7 @@ App
     Nav
       Heading "Calendar" level=1
       Row gap=8
-        Input "Search address" "Postcode or street" bind=addressQuery w=240 onChange={emit findRound result}
+        Input "Search address" "Postcode or street" @addressQuery w=240 onChange={emit findRound result}
         Button.outline "Change address" onTap={open address}
     Column pad=24 gap=16 scroll
       Card gap=16
@@ -75,7 +77,7 @@ App
       if isEmpty(filter(days, x=>x.d==selected))
         Text.muted "No collection on {selected} November."
   Dialog#address "Find your round" "We match your address to a collection round."
-    Input "Postcode" "BS1 4DJ" bind=postcode
+    Input "Postcode" "BS1 4DJ" @postcode
     Button "Find round" onTap={emit findRound postcode; address=postcode; toast "Round 3, Wednesday"; close}
 
 ### What goes where
@@ -91,7 +93,7 @@ App
   Main
     Nav
       Heading "What goes where" level=1
-      Input "Search an item" "e.g. pizza box" bind=q w=260
+      Input "Search an item" "e.g. pizza box" @q w=260
     Column pad=24 gap=16 scroll
       if q!=""
         each it in filter(items, x=>contains(lower(x.name), lower(q)))
@@ -156,8 +158,8 @@ App
             ChoiceChip "Recycling" selected={binType=="Recycling"} onTap={binType="Recycling"}
             ChoiceChip "Garden" selected={binType=="Garden"} onTap={binType="Garden"}
             ChoiceChip "Glass" selected={binType=="Glass"} onTap={binType="Glass"}
-          DatePicker "Collection day" bind=when
-          Input "What happened?" "Bin left out by 7 am, not emptied" bind=note multiline
+          DatePicker "Collection day" @when
+          Input "What happened?" "Bin left out by 7 am, not emptied" @note multiline
           Row gap=12 middle
             Button.outline "Add a photo" icon="photo_camera" onTap={emit pickPhoto}
             if photo!=""
@@ -181,12 +183,12 @@ App
     Column pad=24 gap=16 maxw=640 scroll
       Card gap=12
         Text.strong "Your address"
-        Input "Address" bind=address
+        Input "Address" @address
         Button.outline "Find my round" onTap={emit findRound address; toast "Round 3, Wednesday"}
       Card gap=12
         Text.strong "Night-before reminder"
-        Toggle "Remind me the evening before" bind=reminderOn
+        Toggle "Remind me the evening before" @reminderOn
         if reminderOn
-          TimePicker "Reminder time" bind=reminderTime
+          TimePicker "Reminder time" @reminderTime
           Text.muted "You will be reminded at {reminderTime} the night before each collection."
         Button "Save" onTap={emit saveReminder reminderTime; toast "Saved"}

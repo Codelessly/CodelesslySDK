@@ -14,6 +14,7 @@ state chores=[{"id":1,"name":"Feed the cat","pay":1.00,"done":true,"approved":fa
 state log=[{"id":1,"date":"Nov 15","what":"Allowance","amount":10.00},{"id":2,"what":"Recycling chore","date":"Nov 14","amount":1.50},{"id":3,"what":"Comic book","date":"Nov 12","amount":-5.25}]
 state addAmount=0
 state target="save"
+state pinEntry=""
 App
   Sidebar
     Brand "Three Jars" icon="savings"
@@ -51,8 +52,8 @@ App
         Card grow gap=12
           Heading "Allowance day" level=3
           Text.muted "{money(allowance,"$",2)} arrives every {allowanceDay}. Drag the handles to split it."
-          Select "Day" bind=allowanceDay items=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
-          RangeSlider bind=split min=0 max=100 handles=2 labels=["Spend","Save","Give"] colors=[#FF2196F3,#FF4CAF50,#FFE91E63]
+          Select "Day" @allowanceDay items=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
+          RangeSlider @split min=0 max=100 handles=2 labels=["Spend","Save","Give"] colors=[#FF2196F3,#FF4CAF50,#FFE91E63]
           Row between
             Text "Spend {round(allowance*split[0]/100,2)}"
             Text "Save {round(allowance*(split[1]-split[0])/100,2)}"
@@ -71,11 +72,11 @@ App
           if save >= goalCost
             Badge.success "Goal reached!"
   Dialog#addMoney "Add money" "Choose a jar"
-    SegmentedButton bind=target items=["spend","save","give"]
-    Input "Amount" bind=addAmount type=number
+    SegmentedButton @target items=["spend","save","give"]
+    Input "Amount" @addAmount type=number
     Button "Drop it in" onTap={target=="spend" ? spend=spend+addAmount : target=="save" ? save=save+addAmount : give=give+addAmount; log=concat([{"id":length(log)+1,"date":formatDate(today(),"MMM d"),"what":"Added to {target}","amount":addAmount}],log); addAmount=0; close}
   Dialog#pin "Parent lock" "Enter your PIN"
-    PinInput bind=pinEntry length=4
+    PinInput @pinEntry length=4
     Button "Unlock" onTap={pinEntry=="2468" ? locked=false; close; go chores : toast "Wrong PIN"}
 
 ### Chores and wishes
@@ -86,6 +87,8 @@ state spend=12.50
 state chores=[{"id":1,"name":"Feed the cat","pay":1.00,"done":true,"approved":false},{"id":2,"name":"Take out recycling","pay":1.50,"done":true,"approved":true},{"id":3,"name":"Wash dishes","pay":2.00,"done":false,"approved":false},{"id":4,"name":"Tidy bedroom","pay":2.50,"done":true,"approved":false}]
 state wishes=[{"id":1,"name":"LEGO space shuttle","price":34.99,"icon":"rocket"},{"id":2,"name":"Soccer cleats","price":29.00,"icon":"sports_soccer"},{"id":3,"name":"Sticker book","price":6.50,"icon":"menu_book"}]
 state picked=0
+state wishName=""
+state wishPrice=""
 App
   Sidebar
     Brand "Three Jars" icon="savings"
@@ -109,7 +112,7 @@ App
           each c in chores
             ListTile "{c.name}" subtitle="{money(c.pay,"$",2)}" leading="task_alt"
               Row gap=8 middle
-                Toggle bind=c.done
+                Toggle @c.done
                 if c.approved
                   Badge.success "Approved"
                 if !c.approved && c.done
@@ -135,11 +138,11 @@ App
                 Text.muted "{money(w.price-save,"$",2)} more to go"
           Button.outline "Add a wish" icon="add" onTap={open newWish}
   Dialog#pin "Parent lock" "Enter your PIN"
-    PinInput bind=pinEntry length=4
+    PinInput @pinEntry length=4
     Button "Unlock" onTap={pinEntry=="2468" ? locked=false; pinEntry=""; close : toast "Wrong PIN"}
   Dialog#newWish "New wish"
-    Input "What do you want?" bind=wishName
-    Input "Price" bind=wishPrice type=number
+    Input "What do you want?" @wishName
+    Input "Price" @wishPrice type=number
     Button "Add" onTap={wishes=append(wishes,{"id":length(wishes)+10,"name":wishName,"price":wishPrice,"icon":"star"}); close}
 
 ### Bank log
@@ -155,7 +158,7 @@ App
   Main
     Nav
       Heading "Bank log" level=1
-      SegmentedButton bind=filter items=["all","in","out"]
+      SegmentedButton @filter items=["all","in","out"]
     Column pad=24 gap=16 scroll
       Card gap=8
         Row gap=8
@@ -192,7 +195,7 @@ Page
       Row gap=8 center
         each c in coins
           Coin value={c} animate=pop stagger=80
-      Input "Your answer in cents" bind=guess type=number w=240
+      Input "Your answer in cents" @guess type=number w=240
       Row gap=8
         Button "Check" onTap={guess==sum(coins,c=>c) ? score=score+1; msg="Right! {sum(coins,c=>c)} cents"; round=round+1; coins=map(range(6),i=>[1,5,10,25][i%4]) : msg="Not quite, try again"; animate=shake}
         Button.outline "Hint" onTap={toast "Count the quarters first"}

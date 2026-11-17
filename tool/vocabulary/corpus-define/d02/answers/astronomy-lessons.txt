@@ -16,17 +16,17 @@ App
     Nav
       Heading "The solar system"
       Row gap=12
-        Toggle "True distances" bind=trueScale
+        Toggle "True distances" @trueScale
         Button.outline "Glossary" icon="menu_book" onTap={go sky}
     Column pad=24 gap=16
       Card gap=12
         Row between
           Text.strong "Time speed"
           Text.muted "{speed == 0 ? 'Paused' : speed + ' years per second'}"
-        Slider bind=speed min=0 max=10
+        Slider @speed min=0 max=10
         if trueScale
           Text.muted "True scale: the planets are tiny dots, and Saturn is nearly ten times farther out than Earth."
-        SolarSystem planets={planets} speed={speed} trueScale={trueScale} bind=selected h=420
+        SolarSystem planets={planets} speed={speed} trueScale={trueScale} @selected h=420
       if selected == ""
         Text.muted "Tap a planet to zoom in and see its facts."
   Pane w=320 pad=16 gap=12
@@ -56,8 +56,8 @@ App
       Heading "Compare two planets"
     Column pad=24 gap=16
       Row gap=16
-        Select "First planet" items=["Mercury","Venus","Earth","Mars","Jupiter","Saturn"] bind=left grow
-        Select "Second planet" items=["Mercury","Venus","Earth","Mars","Jupiter","Saturn"] bind=right grow
+        Select "First planet" items=["Mercury","Venus","Earth","Mars","Jupiter","Saturn"] @left grow
+        Select "Second planet" items=["Mercury","Venus","Earth","Mars","Jupiter","Saturn"] @right grow
       Card gap=16
         Row center bottom gap=48
           each p in planets
@@ -130,14 +130,14 @@ App
   Main
     Nav
       Heading "Sky tonight"
-      SegmentedButton items=["Tonight","Glossary"] bind=tab
+      SegmentedButton items=["Tonight","Glossary"] @tab
     Column pad=24 gap=16
       if tab == "Tonight" || tab == "tonight"
         Text.muted "What to look for after dark, for 40 degrees north."
         each s in sky
           ListTile "{s.name}" "{s.where}. Best at {s.best}." icon="star" trailing="Rises {s.rises}" onTap={open detail; term=s.name}
       if tab == "Glossary"
-        Input "Search the glossary" bind=term
+        Input "Search the glossary" @term
         Grid cols=2 gap=16
           each g in glossary
             if term == "" || contains(lower(g.word), lower(term))
@@ -154,7 +154,7 @@ App
     Button "Got it" onTap={close}
 
 // A round map of the planets circling a Sun; a real animation is shown as a labelled box
-define SolarSystem planets=[] speed=1 trueScale=false bind=selected h=420 onSelect
+define SolarSystem planets=[] speed=1 trueScale=false @selected h=420 onSelect
   state selected=""
   Stack h={h} fill=#FF0B1026 radius=12
     Box w=40 h=40 radius=20 fill=#FFFBBF24

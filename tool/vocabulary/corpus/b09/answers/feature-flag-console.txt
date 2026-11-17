@@ -7,6 +7,10 @@ state pending={}
 state reason=""
 state approver="Dana Whitfield"
 state sel=""
+state env=""
+state newKey=""
+state newDesc=""
+state newOwner=""
 App
   Sidebar
     Brand "Switchyard" icon="toggle_on"
@@ -15,14 +19,14 @@ App
     NavItem "History" icon="history" onTap={go history}
     NavItem "Test a user" icon="person_search" onTap={go flag-detail}
     Spacer grow
-    Select bind=env items=["Production","Staging","Dev"]
+    Select @env items=["Production","Staging","Dev"]
     Text.muted "Signed in as Maya Reyes"
   Main
     Nav
       Heading "Flags" level=1
       Row gap=8
-        Input "Search flags" bind=q w=220
-        Select bind=ownerFilter items=["All","Priya Nair","Tom Becker","Ana Duarte","Sam Okafor"] w=160
+        Input "Search flags" @q w=220
+        Select @ownerFilter items=["All","Priya Nair","Tom Becker","Ana Duarte","Sam Okafor"] w=160
         FilterChip "Stale only" selected={showStale} onTap={showStale=!showStale}
         Button "New flag" onTap={open newFlag}
     Column pad=24 gap=16
@@ -52,22 +56,22 @@ App
                 if f.stale
                   Badge.warning "Stale"
               Text.muted "{f.desc}"
-            Toggle bind=f.dev w=70
-            Toggle bind=f.staging w=70
+            Toggle @f.dev w=70
+            Toggle @f.staging w=70
             Toggle "" selected={f.prod} w=90 onChange={pending={"id":f.id,"to":result}; reason=""; open prodChange}
             Text "{f.owner}" w=140 hide=phone
             Text.muted "{formatDate(f.changed,"MMM d")}" w=110 hide=phone
   Dialog#prodChange "Change production" "This affects live customers and needs a second person to approve."
     Text.strong "{pending.id}: turn {pending.to ? "on" : "off"} in production"
-    Input "Reason for the change" "Link the ticket or explain why" bind=reason multiline
-    Select "Approver" bind=approver items=["Dana Whitfield","Luis Ortega","Kenji Mori"]
+    Input "Reason for the change" "Link the ticket or explain why" @reason multiline
+    Select "Approver" @approver items=["Dana Whitfield","Luis Ortega","Kenji Mori"]
     Row gap=8 end
       Button.ghost "Cancel" onTap={flags=updateWhere(flags,f=>f.id==pending.id,f=>with(f,"prod",!pending.to)); close}
       Button.destructive "Request approval" onTap={trim(reason)=="" ? toast "A reason is required" : {emit requestProdChange pending; toast "Sent to {approver} for approval"; close}}
   Dialog#newFlag "New flag"
-    Input "Key" "my-new-flag" bind=newKey
-    Input "Description" bind=newDesc
-    Select "Owner" bind=newOwner items=["Priya Nair","Tom Becker","Ana Duarte","Sam Okafor"]
+    Input "Key" "my-new-flag" @newKey
+    Input "Description" @newDesc
+    Select "Owner" @newOwner items=["Priya Nair","Tom Becker","Ana Duarte","Sam Okafor"]
     Button "Create flag" onTap={emit createFlag; toast "Flag created"; close}
   Menu#flagMenu
     MenuItem "Open" icon="open_in_new" onTap={go flag-detail}
@@ -85,6 +89,13 @@ state testId="u_48213"
 state tested=false
 state matched=""
 state pendingRule={}
+state devOn=false
+state stagingOn=false
+state approver=""
+state confirmKey=""
+state ruleName=""
+state ruleGroup=""
+state rulePct=0
 App
   Sidebar
     Brand "Switchyard" icon="toggle_on"
@@ -111,12 +122,12 @@ App
               Column gap=0
                 Text.strong "Development"
                 Text.muted "Changes apply immediately"
-              Toggle bind=devOn
+              Toggle @devOn
             Row between middle
               Column gap=0
                 Text.strong "Staging"
                 Text.muted "Changes apply immediately"
-              Toggle bind=stagingOn
+              Toggle @stagingOn
             Row between middle
               Column gap=0
                 Text.strong "Production"
@@ -139,12 +150,12 @@ App
                   IconButton "delete" tooltip="Remove rule" onTap={rules=removeWhere(rules,x=>x.id==r.id)}
                 Row gap=12 middle
                   Progress {r.pct/100} grow
-                  Slider bind=r.pct min=0 max=100 w=200
+                  Slider @r.pct min=0 max=100 w=200
           Card gap=12 id=tester
             Heading "Test a sample user" level=3
             Text.muted "See which rule a user falls into and what they would get."
             Row gap=8 bottom
-              Input "User id or email" bind=testId grow
+              Input "User id or email" @testId grow
               Button "Run test" onTap={matched=coalesce(first(map(filter(rules,r=>contains(testUser.groups,r.group) || r.group=="country:"+testUser.country || r.group=="all users"),r=>r.id)),""); tested=true}
             if tested
               Box fill=#FFEAF4EA radius=8 pad=12 gap=4
@@ -173,20 +184,20 @@ App
               Text.muted "Status"
               Badge.success "Active"
   Dialog#prodApproval "Change production" "This affects live customers and needs approval."
-    Input "Reason for the change" "Link the ticket or explain why" bind=reason multiline
-    Select "Approver" bind=approver items=["Dana Whitfield","Luis Ortega","Kenji Mori"]
+    Input "Reason for the change" "Link the ticket or explain why" @reason multiline
+    Select "Approver" @approver items=["Dana Whitfield","Luis Ortega","Kenji Mori"]
     Row gap=8 end
       Button.ghost "Cancel" onTap={close}
       Button.destructive "Request approval" onTap={trim(reason)=="" ? toast "A reason is required" : {emit requestProdChange reason; toast "Waiting for approval"; close}}
   Dialog#kill "Kill new-checkout?" "Every user loses the feature within seconds."
-    Input "Type the flag key to confirm" bind=confirmKey
+    Input "Type the flag key to confirm" @confirmKey
     Row gap=8 end
       Button.ghost "Cancel" onTap={close}
       Button.destructive "Kill flag" onTap={confirmKey=="new-checkout" ? {killed=true; flagOn=false; emit killFlag; toast "new-checkout killed"; close} : toast "Key does not match"}
   Dialog#addRule "Add rule"
-    Input "Rule name" bind=ruleName
-    Select "Matches group" bind=ruleGroup items=["employees","beta-program","country:CA","country:US","plan:team","all users"]
-    Slider "Rollout" bind=rulePct min=0 max=100
+    Input "Rule name" @ruleName
+    Select "Matches group" @ruleGroup items=["employees","beta-program","country:CA","country:US","plan:team","all users"]
+    Slider "Rollout" @rulePct min=0 max=100
     Button "Add" onTap={rules=append(rules,{"id":"r"+(length(rules)+1),"name":ruleName,"group":ruleGroup,"pct":rulePct}); close}
 
 ### History
@@ -205,7 +216,7 @@ App
     Nav
       Heading "History: new-checkout" level=1
       Row gap=8
-        Select bind=who items=["All","Priya Nair","Tom Becker","Maya Reyes"] w=160
+        Select @who items=["All","Priya Nair","Tom Becker","Maya Reyes"] w=160
         Button.outline "Export" icon="download" onTap={emit exportHistory}
     Row top
       Column grow pad=24 gap=12 scroll

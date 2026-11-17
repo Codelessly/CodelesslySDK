@@ -54,12 +54,12 @@ Page
               Button.outline "$2" onTap={total=min(total+200, rate*maxMins/60); coins=append(coins,200); play tick}
           Column gap=8
             Text.fieldLabel "Number plate"
-            PlateEntry bind=plate
+            PlateEntry @plate
           Row gap=8
             Button.outline "Clear" grow onTap={total=0; coins=[]}
             Button "Tap card" grow icon="contactless" onTap={total>0 ? stage="card" : toast "Choose a time first"}
             Button "Print ticket" grow onTap={total>0 ? {purchase={"plate":join(plate,""),"mins":mins,"start":"09:12","end":"11:12","paid":total}; minsLeft=mins*60; stage="done"; emit paid total} : toast "Insert coins first"}
-          Switch "Contactless only" bind=contactless
+          Switch "Contactless only" @contactless
         if stage=="card"
           Card gap=12 center
             Icon "contactless" size=64
@@ -80,7 +80,7 @@ Page
               Button "New purchase" onTap={total=0; coins=[]; stage="insert"}
       Row gap=8
         Text.caption "Test free hours"
-        Toggle bind=chargeFree
+        Toggle @chargeFree
 
 define Lcd bay="14A" rate="" minutes=0
   Box fill=#FF0F172A radius=12 pad=16 gap=6
@@ -102,7 +102,7 @@ define CoinCounter coins=[] total=0 onDrop
         Box w=28 h=28 radius=14 fill=#FFFBBF24 center middle animate=slide-up
           Text.small "{c >= 100 ? c/100 : c}"
 
-define PlateEntry bind=plate
+define PlateEntry @plate
   state plate=["A","B","C","1","2","3"]
   Row gap=6 center
     each ch in plate

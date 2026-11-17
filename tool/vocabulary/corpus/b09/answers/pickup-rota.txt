@@ -63,13 +63,13 @@ App
   Dialog#cell "Pickup details" "Cover, swap or ask the school"
     Text.strong "{find(cells,c=>c.id==sel).day} {find(cells,c=>c.id==sel).slot}"
     Text.muted "Children: {find(cells,c=>c.id==sel).kids}"
-    Select "Ask to swap with" bind=to items=["Tom Hale","Priya N.","Grace Okafor","Luis M."]
-    Input "Message" "Can you take this one?" bind=note multiline
+    Select "Ask to swap with" @to items=["Tom Hale","Priya N.","Grace Okafor","Luis M."]
+    Input "Message" "Can you take this one?" @note multiline
     Row gap=8
       Button "Send swap request" onTap={emit swapRequest {"cell":sel,"to":to,"note":note}; toast "Request sent to {to}"; close}
       Button.outline "Late note" onTap={close; open latenote}
   Dialog#latenote "Late note" "Goes to the school office"
-    Input "Message to the school" bind=late multiline
+    Input "Message to the school" @late multiline
     Button "Send to school" icon="send" onTap={emit lateNote late; toast "School office notified"; close}
   Dialog#gatemap "School gate map" "Gate B is for Years 3 to 4"
     Image "https://example.com/elmfield-gate-map.png" h=220
@@ -98,7 +98,7 @@ App
     Nav
       Heading "{month} 2026" level=1
       Row gap=8
-        SegmentedButton bind=month items=["Oct","Nov","Dec"]
+        SegmentedButton @month items=["Oct","Nov","Dec"]
         IconButton "download" tooltip="Export rota"
     Column pad=24 gap=16
       if count(covered,c=>c.n<2)>0
@@ -129,6 +129,7 @@ state tab="incoming"
 state incoming=[{"id":1,"from":"Priya N.","day":"Tue","slot":"Afternoon","note":"Dentist appointment, can you take Noor?","status":"open"},{"id":2,"from":"Luis M.","day":"Fri","slot":"Morning","note":"Early shift, could we trade for Mon?","status":"open"}]
 state sent=[{"id":3,"to":"Tom Hale","day":"Thu","slot":"Morning","note":"Can you cover Leo?","status":"waiting"}]
 state sel=0
+state reply=""
 App
   Sidebar
     Brand "Gate Duty" icon="school"
@@ -139,7 +140,7 @@ App
   Main
     Nav
       Heading "Swap requests" level=1
-      SegmentedButton bind=tab items=["incoming","sent"]
+      SegmentedButton @tab items=["incoming","sent"]
     Column pad=24 gap=12 scroll
       if tab=="incoming"
         each r in incoming
@@ -163,13 +164,14 @@ App
             Text.muted "{r.note}"
             Button.ghost "Withdraw" onTap={sent=removeWhere(sent,x=>x.id==r.id); emit swapWithdraw r.id; toast "Request withdrawn"}
   Dialog#decline "Decline this request?" "Say why, if you like"
-    Input "Reply" "Sorry, I am at work then" bind=reply
+    Input "Reply" "Sorry, I am at work then" @reply
     Button.destructive "Decline" onTap={incoming=updateWhere(incoming,x=>x.id==sel,x=>with(x,"status","declined")); emit swapAnswer {"id":sel,"answer":"declined","reply":reply}; toast "Declined"; close}
 
 ### My code
 state code="48K-27R"
 state name="Grace Okafor"
 state shown=true
+state late=""
 Page
   Nav
     Brand "Gate Duty" icon="school"
@@ -190,5 +192,5 @@ Page
         Button.outline "Copy code" icon="content_copy" onTap={copy code; toast "Code copied"}
         Button "Send late note" icon="edit_note" onTap={open latenote}
   Dialog#latenote "Late note" "Goes to the school office"
-    Input "Message to the school" bind=late multiline
+    Input "Message to the school" @late multiline
     Button "Send to school" icon="send" onTap={emit lateNote late; toast "School office notified"; close}

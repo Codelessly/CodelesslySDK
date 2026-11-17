@@ -3,6 +3,11 @@ state tab="map"
 state sel="s3"
 state stations=[{"id":"s1","name":"Harlow Weir","km":0,"level":1.8,"status":"normal","flow":42},{"id":"s2","name":"Ashby Bridge","km":14,"level":2.9,"status":"watch","flow":88},{"id":"s3","name":"Millford","km":31,"level":4.1,"status":"warning","flow":176},{"id":"s4","name":"Tern Crossing","km":48,"level":3.2,"status":"watch","flow":121},{"id":"s5","name":"Dunmore Lock","km":67,"level":2.1,"status":"normal","flow":64}]
 state peekAt=21600
+state basin=""
+state showNormal=false
+state showRain=false
+state alertLevel=""
+state phone=""
 every 1s when peekAt>0 onTick={peekAt=peekAt-1}
 App
   Sidebar
@@ -16,7 +21,7 @@ App
     Nav
       Heading "River Tarn" level=1
       Row gap=8
-        Select bind=basin items=["Upper Tarn","Lower Tarn"]
+        Select @basin items=["Upper Tarn","Lower Tarn"]
         IconButton "refresh" tooltip="Reload readings" onTap={toast "Readings reloaded"}
     Column pad=24 gap=16 scroll
       Banner.warning "Flood warning: Millford is forecast to reach 4.8 m" icon="warning"
@@ -34,7 +39,7 @@ App
               Badge.success "Normal"
               Badge.warning "Watch"
               Badge.error "Warning"
-          RiverMap h=360 stations={stations} bind=sel levels="level" thresholds={[{"name":"Watch","value":2.5},{"name":"Warning","value":3.5}]} onSelect={sel=result; emit selectStation result}
+          RiverMap h=360 stations={stations} @sel levels="level" thresholds={[{"name":"Watch","value":2.5},{"name":"Warning","value":3.5}]} onSelect={sel=result; emit selectStation result}
           TravelTime from="s3" to="s5" stations={stations} unit="h" speed=4.2
         Column w=320 gap=12
           each s in stations
@@ -45,12 +50,12 @@ App
             Text.muted "A rise at Millford reaches Dunmore Lock in about {round((67-31)/4.2,1)} hours."
             Button.outline "Open station" onTap={go station}
   Sheet#filters "Show on map"
-    Toggle "Gauges at normal level" bind=showNormal
-    Toggle "Rain gauges" bind=showRain
+    Toggle "Gauges at normal level" @showNormal
+    Toggle "Rain gauges" @showRain
     Button "Apply" onTap={close}
   Dialog#alertme "Alert me about Millford" "We will message you when the level crosses your line"
-    Select "Alert at" bind=alertLevel items=["Watch 2.5 m","Warning 3.5 m","Severe 4.5 m"]
-    Input "Phone" type=phone bind=phone
+    Select "Alert at" @alertLevel items=["Watch 2.5 m","Warning 3.5 m","Severe 4.5 m"]
+    Input "Phone" type=phone @phone
     Button "Subscribe" onTap={phone!="" ? emit subscribe alertLevel; toast "Subscribed"; close : toast "Add a phone number"}
 
 ### Station
@@ -58,6 +63,9 @@ state range="7d"
 state photoOpen=false
 state showForecast=true
 state peekAt=21600
+state lvl=""
+state viaSms=false
+state viaMail=false
 every 1s when peekAt>0 onTick={peekAt=peekAt-1}
 state level=[2.4,2.5,2.9,3.1,3.0,3.6,4.1]
 state days=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
@@ -98,8 +106,8 @@ App
         Row between
           Text.strong "Level, last 7 days"
           Row gap=8
-            SegmentedButton bind=range items=["24h","7d","30d"]
-            Toggle "Forecast" bind=showForecast
+            SegmentedButton @range items=["24h","7d","30d"]
+            Toggle "Forecast" @showForecast
         TimeSeries h=280 labels={days} series=[{"name":"Level","values":[2.4,2.5,2.9,3.1,3.0,3.6,4.1]}] forecast={showForecast ? [4.4,4.7,4.8,4.6] : []} forecastStyle=dotted bands=[{"name":"Watch","from":2.5,"to":3.5,"color":"#33FFB300"},{"name":"Warning","from":3.5,"to":4.5,"color":"#33FF6D00"},{"name":"Severe","from":4.5,"to":6,"color":"#33D32F2F"}] unit="m"
       Row gap=16 top
         Card grow gap=12
@@ -112,9 +120,9 @@ App
           Text.muted "From Millford at 4.2 km/h"
   Lightbox#photo "https://cams.streamline.example/millford/bridge-latest.jpg" "Millford road bridge, 14:20"
   Dialog#subscribe "Alerts for Millford" "Choose the level that wakes you"
-    RadioGroup bind=lvl items=["Watch, 2.5 m","Warning, 3.5 m","Severe, 4.5 m"]
-    Toggle "Text message" bind=viaSms
-    Toggle "Email" bind=viaMail
+    RadioGroup @lvl items=["Watch, 2.5 m","Warning, 3.5 m","Severe, 4.5 m"]
+    Toggle "Text message" @viaSms
+    Toggle "Email" @viaMail
     Button "Save" onTap={emit subscribe lvl; toast "Alert saved"; close}
 
 ### Alerts
@@ -147,15 +155,15 @@ App
             Column grow gap=2
               Text.strong "{s.station}"
               Text.muted "{s.level}"
-            Toggle bind=s.on
+            Toggle @s.on
             IconButton "more_vert" tooltip="More" onTap={sel=s.id; open subMenu}
           Row gap=16
-            Checkbox "Text message" bind=s.sms
-            Checkbox "Email" bind=s.mail
+            Checkbox "Text message" @s.sms
+            Checkbox "Email" @s.mail
   Menu#subMenu end
     MenuItem "Send a test" icon="send" onTap={emit testAlert sel; toast "Test sent"}
     MenuItem "Delete" icon="delete" onTap={subs=removeWhere(subs,x=>x.id==sel); toast "Alert deleted"}
   Dialog#newsub "New alert" "Pick a gauge and a level"
-    Select "Station" bind=newStation items=["Harlow Weir","Ashby Bridge","Millford","Tern Crossing","Dunmore Lock"]
-    Select "Level" bind=newLevel items=["Watch 2.5 m","Warning 3.5 m","Severe 4.5 m"]
+    Select "Station" @newStation items=["Harlow Weir","Ashby Bridge","Millford","Tern Crossing","Dunmore Lock"]
+    Select "Level" @newLevel items=["Watch 2.5 m","Warning 3.5 m","Severe 4.5 m"]
     Button "Add alert" onTap={subs=append(subs,{"id":length(subs)+10,"station":newStation,"level":newLevel,"sms":true,"mail":true,"on":true}); toast "Alert added"; close}

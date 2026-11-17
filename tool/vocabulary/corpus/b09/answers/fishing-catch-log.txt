@@ -43,8 +43,8 @@ App
       Row gap=16 top
         Card grow gap=12
           Text.panelTitle "Size"
-          Stepper "Length (in)" bind=length min=0 max=60 step=0.5
-          Stepper "Weight (lb)" bind=weight min=0 max=40 step=0.1
+          Stepper "Length (in)" @length min=0 max=60 step=0.5
+          Stepper "Weight (lb)" @weight min=0 max=40 step=0.1
           if length < find(speciesList, x=>x.name==species).min
             Badge.warning "Under the {find(speciesList, x=>x.name==species).min} in limit: release it"
           Text.muted "Longest keeper in your log: {fixed(max(length, 0),1)} in"
@@ -52,19 +52,19 @@ App
           Text.panelTitle "Photo"
           Stack
             Image "{photo}" h=200 radius=8 fill=#FFE6EEF2
-            RulerOverlay bind=length unit="in" h=200
+            RulerOverlay @length unit="in" h=200
           Row gap=8
             Button.outline "Take photo" icon="photo_camera" onTap={photo=capture camera}
             Button.ghost "Choose from library" icon="photo_library" onTap={photo=pick image}
       Card gap=12
         Text.panelTitle "How you got it"
         Row gap=16 top
-          Select "Bait or lure" bind=bait items=["Green pumpkin worm","Nightcrawler","Rapala minnow","Spinnerbait","PowerBait","Live shiner"] grow
+          Select "Bait or lure" @bait items=["Green pumpkin worm","Nightcrawler","Rapala minnow","Spinnerbait","PowerBait","Live shiner"] grow
           Column grow gap=4
             Text.fieldLabel "Depth: {depth} ft"
-            Slider bind=depth min=1 max=40
-        SegmentedButton bind=released items=["Release","Keep"] onChange={released=(result=="Release")}
-        Input "Notes" "Cloud cover, retrieve speed, structure" bind=notes multiline
+            Slider @depth min=1 max=40
+        SegmentedButton @released items=["Release","Keep"] onChange={released=(result=="Release")}
+        Input "Notes" "Cloud cover, retrieve speed, structure" @notes multiline
       Card gap=12
         Row between
           Text.panelTitle "Spot"
@@ -159,12 +159,12 @@ App
             Text.muted "{b.why}" w=200 hide=phone
             IconButton "notifications" tooltip="Remind me at {b.start}" onTap={toast "Reminder set for {b.start}"}
   Dialog#newSpot "Save this spot" "A pin with today's water temperature"
-    Input "Spot name" bind=naming
+    Input "Spot name" @naming
     Row gap=8 middle
       Icon "thermostat"
       Text "Water temperature"
       Spacer grow
-      Stepper bind=pinTemp min=32 max=90 unit="F"
+      Stepper @pinTemp min=32 max=90 unit="F"
     Row gap=8
       Button.outline "Cancel" onTap={close}
       Button "Save pin" onTap={naming!="" ? {spots=append(spots,{"name":naming,"lat":newPin.lat,"lng":newPin.lng,"temp":pinTemp,"catches":0}); selected=naming; toast "Pinned {naming}"; close} : toast "Give the spot a name"}
@@ -219,7 +219,7 @@ Page
     Column gap=16
       Row between middle
         Heading "Season total" level=3
-        SegmentedButton bind=range items=["Season 2026","Season 2025"]
+        SegmentedButton @range items=["Season 2026","Season 2025"]
       BarChart values={monthly} labels=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"] h=240
       Grid cols=3 gap=16
         Card gap=4

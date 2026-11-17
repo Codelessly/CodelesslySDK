@@ -18,7 +18,7 @@ Column scroll gap=16 pad=16 maxw=720
     Button "Follow" grow onTap={toast "Following Maya"}
     Button.outline "Message" grow onTap={emit message}
   state tab="Posts"
-  SegmentedButton bind=tab items=["Posts","Saved","Tagged"]
+  SegmentedButton @tab items=["Posts","Saved","Tagged"]
   if tab=="Posts"
     Grid cols=3 gap=4
       Image "https://picsum.photos/seed/maya1/300" h=110 radius=4

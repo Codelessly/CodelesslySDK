@@ -96,7 +96,7 @@ App
       ChoiceChip "3 mild" selected={pain==3} onTap={pain=3}
       ChoiceChip "6 strong" selected={pain==6} onTap={pain=6}
       ChoiceChip "9 severe" selected={pain==9} onTap={pain=9}
-    Slider bind=pain min=0 max=10
+    Slider @pain min=0 max=10
     Button "Save" onTap={emit painRated pain; toast "Logged"; close; go progress}
 
 ### Progress

@@ -44,16 +44,16 @@ App
             Text.strong "{money(b.amount,'$',2)}"
             IconButton "delete" tooltip="Remove bill" onTap={bills=removeWhere(bills,x=>x.id==b.id)}
   Dialog#addbill "Add a shared bill" "Who paid, how much, and how it is split"
-    Input "What for" "Internet, groceries" bind=title
+    Input "What for" "Internet, groceries" @title
     Row gap=12
-      Input "Amount" type=number bind=amount grow
-      Select "Paid by" items=["Maya Reyes","Leo Park","Ines Okafor","Sam Patel"] bind=payer grow
-    SegmentedButton items=["Equal","By shares","Who was home"] bind=mode
+      Input "Amount" type=number @amount grow
+      Select "Paid by" items=["Maya Reyes","Leo Park","Ines Okafor","Sam Patel"] @payer grow
+    SegmentedButton items=["Equal","By shares","Who was home"] @mode
     if mode=="By shares"
       each n in ["Maya Reyes","Leo Park","Ines Okafor","Sam Patel"]
         Row gap=12 middle
           Text w=100 "{n}"
-          Slider bind=shares[n] min=0 max=5 step=1 grow
+          Slider @shares[n] min=0 max=5 step=1 grow
           Text.strong "{shares[n]}"
     if mode=="Who was home"
       Text.muted "Tick the days each person was home this week"
@@ -65,7 +65,7 @@ App
         Row gap=4 middle
           Text w=100 "{n}"
           each t in home[n]
-            Checkbox bind=t w=32
+            Checkbox @t w=32
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Save bill" onTap={amount>0 && title!="" ? {bills=append(bills,{"id":length(bills)+10,"title":title,"payer":payer,"amount":amount,"split":lower(mode)}); toast "Bill added"; close} : toast "Add a name and an amount"}
@@ -110,7 +110,7 @@ App
           Row between
             Heading "{month}" level=3
             Text.muted "{money(sum(recurring,r=>r.amount),'$',2)} a month"
-          Calendar month="2026-11" marked={map(recurring,r=>r.day)} bind=picked onSelect={picked=result.day}
+          Calendar month="2026-11" marked={map(recurring,r=>r.day)} @picked onSelect={picked=result.day}
         Column w=320 gap=12
           Card gap=8
             Heading "Day {picked}" level=3
@@ -127,9 +127,9 @@ App
                 Text.strong "{money(r.amount,'$',2)}"
                 IconButton "close" tooltip="Stop repeating" onTap={recurring=removeWhere(recurring,x=>x.id==r.id)}
   Dialog#newbill "New recurring bill"
-    Input "Bill" bind=newTitle
-    Input "Amount" type=number bind=newAmount
-    Slider bind=newDay min=1 max=28 step=1
+    Input "Bill" @newTitle
+    Input "Amount" type=number @newAmount
+    Slider @newDay min=1 max=28 step=1
     Text.muted "Repeats on day {newDay} of every month"
     Button "Add" onTap={newTitle!="" ? {recurring=append(recurring,{"id":length(recurring)+10,"title":newTitle,"day":newDay,"amount":newAmount}); newTitle=""; close} : toast "Name the bill"}
 
@@ -164,7 +164,7 @@ App
                 Column
                   Text.strong "{p}"
                   Text.muted "{jobs[(index+offset)%4]}"
-              Checkbox bind=done[index]
+              Checkbox @done[index]
           Progress {count(done,x=>x)/4}
           Text.muted "{count(done,x=>x)} of 4 done"
           if all(done,x=>x)
@@ -185,7 +185,7 @@ App
   Main
     Nav
       Heading "House and summary" level=1
-      SegmentedButton items=["3 months","6 months"] bind=range
+      SegmentedButton items=["3 months","6 months"] @range
     Column pad=24 gap=16 scroll
       Row gap=24 top
         Card grow gap=12
@@ -193,7 +193,7 @@ App
             Heading "House rules" level=3
             Button.ghost "{editing ? 'Done' : 'Edit'}" icon={editing ? "check" : "edit"} onTap={editing=!editing}
           if editing
-            Input "Rules" multiline bind=rules
+            Input "Rules" multiline @rules
           if !editing
             Text "{rules}"
         Card grow gap=12

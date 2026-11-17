@@ -1,8 +1,8 @@
 // A text field that offers matching suggestions under it as you type: a tap on one fills it and submits (onSubmit: result is the text); Enter submits what is typed.
-Autocomplete "label" bind=draft suggestions=[] w=fill max=5 onSubmit
+Autocomplete "label" @draft suggestions=[] w=fill max=5 onSubmit
   state draft=""
   Column w={w} gap=4
-    Input "{label}" bind=draft onSubmit={onSubmit(draft)}
+    Input "{label}" @draft onSubmit={onSubmit(draft)}
     if draft != "" && count(suggestions, s => contains(lower(s), lower(draft)) && lower(s) != lower(draft)) > 0
       Column w=fill gap=0 radius=10 fill=card border=line
         each s in take(filter(suggestions, s => contains(lower(s), lower(draft)) && lower(s) != lower(draft)), max)

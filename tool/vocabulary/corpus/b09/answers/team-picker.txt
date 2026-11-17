@@ -18,7 +18,7 @@ App
     Nav
       Heading "Players" level=1
       Row gap=8
-        Input "Search players" bind=q w=220
+        Input "Search players" @q w=220
         Button "Add player" icon="person_add" onTap={open addPlayer}
     Column pad=24 gap=16
       Row gap=12
@@ -39,7 +39,7 @@ App
               Text.strong "{p.name}"
             Row gap=16 middle
               Rating value={p.skill} max=5 onChange={players=updateWhere(players,r=>r.id==p.id,r=>with(r,"skill",result))}
-              Input type=number bind=p.skill w=64
+              Input type=number @p.skill w=64
               IconButton "more_vert" tooltip="More" onTap={sel=p.id; open rowMenu}
       if length(players)<4
         Text.danger "You need at least four players to make two teams."
@@ -47,10 +47,10 @@ App
         Button.outline "Coin toss" icon="monetization_on" onTap={go captains}
         Button "Make teams" icon="shuffle" onTap={tab="teams"; go teams}
   Dialog#addPlayer "Add a player" "Give them a rating out of five"
-    Input "Name" bind=newName
+    Input "Name" @newName
     Row gap=12 middle
       Text.fieldLabel "Skill"
-      Rating bind=newSkill max=5
+      Rating @newSkill max=5
     Button "Add to pool" onTap={newName=="" ? toast "Enter a name" : {players=append(players,{"id":"p{length(players)+1}","name":newName,"skill":newSkill}); newName=""; newSkill=3; close}}
   Menu#rowMenu
     MenuItem "Remove from pool" icon="delete" onTap={players=removeWhere(players,r=>r.id==sel); toast "Removed"}
@@ -70,6 +70,7 @@ state pairA=""
 state pairB=""
 state matchName="Thursday five-a-side"
 state saved=[]
+state matchDate=""
 every 150 when spinning onTick={teamA=take(players,length(players)/2); spinLeft=spinLeft-150; spinLeft<=0 ? {spinning=false; toast "Teams set"} : {}}
 App
   Sidebar
@@ -84,7 +85,7 @@ App
     Nav
       Heading "Teams" level=1
       Row gap=8
-        SegmentedButton bind=teamCount items=["2","3","4"]
+        SegmentedButton @teamCount items=["2","3","4"]
         Button "Shuffle" icon="shuffle" onTap={spinning=true; spinLeft=1800; teamA=[]; teamB=[]; emit shuffle teamCount}
         Button.outline "Balance" icon="balance" onTap={emit balance {"together":togethers,"apart":aparts}}
     Column pad=24 gap=16
@@ -136,8 +137,8 @@ App
       Card gap=8
         Text.strong "Lock a pair"
         Row gap=8 middle
-          Select bind=pairA items=map(players,p=>p.name)
-          Select bind=pairB items=map(players,p=>p.name)
+          Select @pairA items=map(players,p=>p.name)
+          Select @pairB items=map(players,p=>p.name)
           Button.outline "Keep together" icon="link" onTap={pairA==pairB || pairA=="" || pairB=="" ? toast "Pick two different players" : {togethers=append(togethers,pairA+" + "+pairB); toast "Locked together"}}
           Button.outline "Keep apart" icon="link_off" onTap={pairA==pairB || pairA=="" || pairB=="" ? toast "Pick two different players" : {aparts=append(aparts,pairA+" / "+pairB); toast "Locked apart"}}
         Row gap=8
@@ -152,8 +153,8 @@ App
           Button.outline "Share image" icon="ios_share" onTap={open shareImg}
           Button "Save for a match" icon="bookmark_add" onTap={open saveMatch}
   Dialog#saveMatch "Save these teams" "Keep them for a match"
-    Input "Match name" bind=matchName
-    DatePicker "Match date" bind=matchDate
+    Input "Match name" @matchName
+    DatePicker "Match date" @matchDate
     Button "Save" onTap={saved=append(saved,{"name":matchName,"date":matchDate,"a":teamA,"b":teamB}); toast "Teams saved"; close}
   Dialog#shareImg "Share image" "A picture of both teams"
     ShareImage title="{matchName}" teams=[{"name":"Team Orange","players":teamA,"total":sum(teamA,p=>p.skill)},{"name":"Team Teal","players":teamB,"total":sum(teamB,p=>p.skill)}] h=260
@@ -199,7 +200,7 @@ App
             Button.outline "Heads wins first pick" onTap={order=[capA,capB]; toast "{capA} picks first"}
         Card gap=12 center
           Text.strong "Pick order"
-          PickWheel items=order bind=turn h=200
+          PickWheel items=order @turn h=200
           Row gap=8
             Button.outline "Spin wheel" icon="casino" onTap={emit spinWheel order}
             Button.outline "Reverse" icon="swap_vert" onTap={order=reverse(order)}

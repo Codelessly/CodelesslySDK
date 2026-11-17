@@ -20,7 +20,7 @@ App
     Nav
       Brand "Nightfall" icon="nightlight"
       Row gap=8
-        Input "Find a planet or star" bind=q w=200
+        Input "Find a planet or star" @q w=200
         IconButton "gps_fixed" tooltip="Point me to it" onTap={target=find(objects,o=>contains(lower(o.name),lower(q))); target==null ? toast "Nothing by that name" : toast "Arrow points to {target.name}"}
         IconButton "layers" tooltip="Layers" onTap={open layers}
         IconButton "satellite_alt" tooltip="Satellite passes" onTap={go passes}
@@ -31,14 +31,14 @@ App
         if target!=null
           Arrow toward={target.id} label="{target.name}" color={night ? #FFFF3B30 : #FFFFD54F}
       Row between
-        Toggle "Turn phone to look around" bind=tilt
+        Toggle "Turn phone to look around" @tilt
         Text.muted "Facing {heading} deg, {altitude} deg up"
       Card gap=8
         Row between
           Text.strong "Time"
           Text.muted "{formatDate(when,"MMM d, HH:mm")}"
-        Slider bind=hour min=0 max=24 onChange={when=with({"v":when},"v",concat("2026-11-17T",hour)).v}
-        Slider bind=dayOfYear min=1 max=365
+        Slider @hour min=0 max=24 onChange={when=with({"v":when},"v",concat("2026-11-17T",hour)).v}
+        Slider @dayOfYear min=1 max=365
         Row gap=8
           Button.outline "Now" onTap={hour=21; dayOfYear=321}
           Button.outline "Tonight 23:00" onTap={hour=23}
@@ -60,11 +60,11 @@ App
         Button.outline "Close" onTap={close}
   Sheet#layers "Layers"
     Column gap=8
-      Toggle "Coordinate grid" bind=showGrid
-      Toggle "Constellation lines" bind=showLines
-      Toggle "Names" bind=showNames
-      Toggle "Deep sky objects" bind=showDeep
-      Toggle "Red night mode" bind=night
+      Toggle "Coordinate grid" @showGrid
+      Toggle "Constellation lines" @showLines
+      Toggle "Names" @showNames
+      Toggle "Deep sky objects" @showDeep
+      Toggle "Red night mode" @night
       Button "Done" onTap={close}
 
 ### Satellite passes

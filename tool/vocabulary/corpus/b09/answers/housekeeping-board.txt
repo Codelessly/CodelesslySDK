@@ -18,7 +18,7 @@ App
     Nav
       Heading "Floor {floor}" level=1
       Row gap=8
-        SegmentedButton bind=floor items=[2,3,4]
+        SegmentedButton @floor items=[2,3,4]
         Button "Today's arrivals" onTap={open arrivals}
     Column pad=24 gap=16 scroll
       Row gap=16
@@ -74,14 +74,14 @@ App
           Badge.warning "Early" visible={a.early}
       Button "Close" onTap={close}
   Dialog#minibar "Minibar" "Record what was used"
-    Select "Room" bind=mbRoom items=["301","302","303","304","305","306","307","308","309","310","311","312"]
-    Select "Item" bind=mbItem items=["Water","Cola","Mixed nuts","Prosecco","Beer"]
-    Input "Quantity" bind=mbQty type=number
+    Select "Room" @mbRoom items=["301","302","303","304","305","306","307","308","309","310","311","312"]
+    Select "Item" @mbItem items=["Water","Cola","Mixed nuts","Prosecco","Beer"]
+    Input "Quantity" @mbQty type=number
     Button "Post charge" onTap={emit minibar {room: mbRoom, item: mbItem, qty: mbQty}; toast "Charge posted to room {mbRoom}"; close}
   Dialog#lost "Lost property" "Log an item found in a room"
-    Input "Room" bind=lpRoom
-    Input "Item" "Black umbrella" bind=lpItem
-    Input "Notes" multiline bind=lpNotes
+    Input "Room" @lpRoom
+    Input "Item" "Black umbrella" @lpItem
+    Input "Notes" multiline @lpNotes
     Button "Log item" onTap={emit lostProperty {room: lpRoom, item: lpItem, notes: lpNotes}; toast "Logged"; close}
 
 state arrivalsList=[{"guest":"Hannah Brooks","room":"301","time":"11:00 AM","early":true},{"guest":"Luis Ortega","room":"306","time":"11:30 AM","early":true},{"guest":"Mei Tanaka","room":"312","time":"12:00 PM","early":true},{"guest":"Oliver Grant","room":"309","time":"2:00 PM","early":false},{"guest":"Sofia Petrov","room":"310","time":"3:30 PM","early":false}]
@@ -148,7 +148,7 @@ App
   Main
     Nav
       Heading "Inspect room {inspRoom}" level=1
-      Select bind=inspRoom items=["303","308","311"] w=140
+      Select @inspRoom items=["303","308","311"] w=140
     Column pad=24 gap=16 scroll
       Card gap=8
         Row between
@@ -156,10 +156,10 @@ App
           Text.muted "{count(checks,c=>c.ok)} of {length(checks)} ticked"
         Progress {count(checks,c=>c.ok)/length(checks)}
         each c in checks
-          Checkbox "{c.label}" bind=c.ok
+          Checkbox "{c.label}" @c.ok
       Card gap=8
         Text.strong "If it fails"
-        Input "What needs doing" multiline bind=failNote
+        Input "What needs doing" multiline @failNote
       Row gap=12
         Button "Pass" icon="check_circle" onTap={all(checks,c=>c.ok) ? (log=append(log,{"room":inspRoom,"result":"pass"}); emit inspect {room: inspRoom, result: "pass"}; toast "Room {inspRoom} inspected"; checks=map(checks,c=>with(c,"ok",false))) : toast "Tick every item before passing"}
         Button.destructive "Fail" icon="cancel" onTap={trim(failNote)=="" ? toast "Say what needs doing" : (log=append(log,{"room":inspRoom,"result":"fail","note":failNote}); emit inspect {room: inspRoom, result: "fail", note: failNote}; toast "Room {inspRoom} sent back to dirty"; failNote="")}

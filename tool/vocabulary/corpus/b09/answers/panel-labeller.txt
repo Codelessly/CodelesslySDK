@@ -4,6 +4,12 @@ state sel=1
 state view="drawing"
 state breakers=[{"id":1,"amps":20,"name":"Kitchen counters","room":"Kitchen","phase":"A","gauge":"12 AWG","spare":false},{"id":2,"amps":15,"name":"Living room lights","room":"Living room","phase":"B","gauge":"14 AWG","spare":false},{"id":3,"amps":30,"name":"Dryer","room":"Laundry","phase":"C","gauge":"10 AWG","spare":false},{"id":4,"amps":20,"name":"Bathroom outlets","room":"Bath","phase":"A","gauge":"14 AWG","spare":false},{"id":5,"amps":15,"name":"Bedroom 1","room":"Bedroom 1","phase":"B","gauge":"14 AWG","spare":false},{"id":6,"amps":40,"name":"Range","room":"Kitchen","phase":"C","gauge":"8 AWG","spare":false},{"id":7,"amps":20,"name":"Garage","room":"Garage","phase":"A","gauge":"12 AWG","spare":false},{"id":8,"amps":15,"name":"","room":"","phase":"B","gauge":"14 AWG","spare":true},{"id":9,"amps":50,"name":"EV charger","room":"Garage","phase":"C","gauge":"6 AWG","spare":false},{"id":10,"amps":15,"name":"Hallway","room":"Hall","phase":"A","gauge":"14 AWG","spare":false},{"id":11,"amps":20,"name":"Dishwasher","room":"Kitchen","phase":"B","gauge":"12 AWG","spare":false},{"id":12,"amps":15,"name":"","room":"","phase":"C","gauge":"14 AWG","spare":true}]
 state wireMax=[{"gauge":"14 AWG","max":15},{"gauge":"12 AWG","max":20},{"gauge":"10 AWG","max":30},{"gauge":"8 AWG","max":40},{"gauge":"6 AWG","max":55}]
+state editAmps=""
+state editName=""
+state editRoom=""
+state editGauge=""
+state editPhase=""
+state editSpare=false
 App
   Sidebar
     Brand "Breakerbook" icon="electrical_services"
@@ -17,14 +23,14 @@ App
     Nav
       Heading "Main panel" level=1
       Row gap=8
-        SegmentedButton bind=view items=["drawing","list"]
+        SegmentedButton @view items=["drawing","list"]
         Button.outline "Spares only" onTap={view="spares"}
         Button "Print directory" onTap={go print-directory}
     Column pad=24 gap=16 scroll
       Row gap=16 top
         Card grow gap=12
           Text.strong "Distribution board"
-          PanelDiagram columns=2 count=12 bind=sel
+          PanelDiagram columns=2 count=12 @sel
             Grid cols=2 gap=8
               each b in breakers
                 Box fill=#FFF4F4F2 radius=8 pad=8 gap=4 onTap={sel=b.id} menu=breakerMenu
@@ -60,12 +66,12 @@ Menu#breakerMenu
   MenuItem "Mark as spare" icon="bookmark" onTap={breakers=updateWhere(breakers,b=>b.id==sel,b=>with(b,"spare",true))}
   MenuItem "Clear label" icon="backspace" onTap={breakers=updateWhere(breakers,b=>b.id==sel,b=>with(with(b,"name",""),"room",""))}
 Dialog#edit "Edit breaker" "Set the rating, circuit name and room"
-  Select "Amperage" bind=editAmps items=[15,20,30,40,50]
-  Input "Circuit name" "e.g. Kitchen counters" bind=editName
-  Input "Room" bind=editRoom
-  Select "Wire gauge" bind=editGauge items=["14 AWG","12 AWG","10 AWG","8 AWG","6 AWG"]
-  Select "Phase" bind=editPhase items=["A","B","C"]
-  Toggle "Spare" bind=editSpare
+  Select "Amperage" @editAmps items=[15,20,30,40,50]
+  Input "Circuit name" "e.g. Kitchen counters" @editName
+  Input "Room" @editRoom
+  Select "Wire gauge" @editGauge items=["14 AWG","12 AWG","10 AWG","8 AWG","6 AWG"]
+  Select "Phase" @editPhase items=["A","B","C"]
+  Toggle "Spare" @editSpare
   Row end gap=8
     Button.ghost "Cancel" onTap={close}
     Button "Save" onTap={breakers=updateWhere(breakers,b=>b.id==sel,b=>with(with(with(with(with(with(b,"amps",editAmps),"name",editName),"room",editRoom),"gauge",editGauge),"phase",editPhase),"spare",editSpare)); toast "Breaker saved"; close}
@@ -80,6 +86,7 @@ Sheet#warnings "Circuit warnings"
 state cutLines=true
 state size="standard"
 state breakers=[{"id":1,"name":"Kitchen counters","room":"Kitchen","spare":false},{"id":2,"name":"Living room lights","room":"Living room","spare":false},{"id":3,"name":"Dryer","room":"Laundry","spare":false},{"id":4,"name":"Bathroom outlets","room":"Bath","spare":false},{"id":5,"name":"Bedroom 1","room":"Bedroom 1","spare":false},{"id":6,"name":"Range","room":"Kitchen","spare":false},{"id":7,"name":"Garage","room":"Garage","spare":false},{"id":8,"name":"","room":"","spare":true},{"id":9,"name":"EV charger","room":"Garage","spare":false},{"id":10,"name":"Hallway","room":"Hall","spare":false},{"id":11,"name":"Dishwasher","room":"Kitchen","spare":false},{"id":12,"name":"","room":"","spare":true}]
+state paper=""
 Page
   Nav sticky
     Brand "Breakerbook" icon="electrical_services"
@@ -93,9 +100,9 @@ Page
       Column w=320 gap=12 sticky
         Heading "Directory card" level=1
         Text.muted "Printed at true size, 100 percent. Cut along the dashed lines and slide the card into the panel door."
-        SegmentedButton bind=size items=["standard","wide"]
-        Toggle "Show cut lines" bind=cutLines
-        Select "Paper" items=["Letter","A4"] bind=paper
+        SegmentedButton @size items=["standard","wide"]
+        Toggle "Show cut lines" @cutLines
+        Select "Paper" items=["Letter","A4"] @paper
         Button "Print at true size" onTap={emit print}
         Button.outline "Download PDF" onTap={emit downloadPdf}
       Column grow gap=12
@@ -129,11 +136,11 @@ App
       Row gap=16 top
         Card grow gap=8
           Text.strong "Real panel"
-          PhotoAnnotator src="https://example.com/panel/real-panel.jpg" bind=hotspot zoom={zoom} h=420 onTap={open zoomPhoto}
-          Slider bind=zoom min=1 max=4
+          PhotoAnnotator src="https://example.com/panel/real-panel.jpg" @hotspot zoom={zoom} h=420 onTap={open zoomPhoto}
+          Slider @zoom min=1 max=4
         Card grow gap=8
           Text.strong "Drawing"
-          PanelDiagram columns=2 count=12 bind=hotspot h=420
+          PanelDiagram columns=2 count=12 @hotspot h=420
           Text.muted "Tap a breaker on either side and the other side lights the same one."
       Card gap=8
         Heading "Breaker {hotspot}" level=3

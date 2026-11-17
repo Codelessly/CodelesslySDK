@@ -30,27 +30,27 @@ App
                 Text.muted "PNG or JPG, at least 256 px square"
                 Row
                   Button.outline "Change" onTap={toast "Choose a picture"}
-            Input "Name" bind=name onChange={dirty=true}
-            Input "Username" bind=username onChange={dirty=true}
+            Input "Name" @name onChange={dirty=true}
+            Input "Username" @username onChange={dirty=true}
             Column gap=4
-              Input "Bio" "Tell readers a little about your writing" multiline bind=bio onChange={dirty=true}
+              Input "Bio" "Tell readers a little about your writing" multiline @bio onChange={dirty=true}
               Row end
                 Text.caption "{length(bio)}/160" color={length(bio)>160?"#FFDC2626":"#FF6B7280"}
             Column gap=4
               Text.fieldLabel "Time zone"
-              Select bind=tz items=["(UTC-08:00) Pacific Time","(UTC-05:00) Eastern Time","(UTC+00:00) London","(UTC+01:00) Berlin","(UTC+05:30) Mumbai","(UTC+09:00) Tokyo"] onChange={dirty=true}
-            ToggleRow "Public profile" "Anyone with the link can read your profile and published pieces." bind=public onChanged={dirty=true}
+              Select @tz items=["(UTC-08:00) Pacific Time","(UTC-05:00) Eastern Time","(UTC+00:00) London","(UTC+01:00) Berlin","(UTC+05:30) Mumbai","(UTC+09:00) Tokyo"] onChange={dirty=true}
+            ToggleRow "Public profile" "Anyone with the link can read your profile and published pieces." @public onChanged={dirty=true}
           Heading "Notifications" level=3
           Card gap=12
-            ToggleRow "Comments" "Tell me when someone comments on a piece I wrote." bind=nComments onChanged={dirty=true}
+            ToggleRow "Comments" "Tell me when someone comments on a piece I wrote." @nComments onChanged={dirty=true}
             Divider
-            ToggleRow "Replies" "Tell me when someone replies to my comment." bind=nReplies onChanged={dirty=true}
+            ToggleRow "Replies" "Tell me when someone replies to my comment." @nReplies onChanged={dirty=true}
             Divider
-            ToggleRow "New followers" "Tell me when a reader starts following me." bind=nFollowers onChanged={dirty=true}
+            ToggleRow "New followers" "Tell me when a reader starts following me." @nFollowers onChanged={dirty=true}
             Divider
-            ToggleRow "Weekly writing summary" "A Monday email with your word count and streak." bind=nSummary onChanged={dirty=true}
+            ToggleRow "Weekly writing summary" "A Monday email with your word count and streak." @nSummary onChanged={dirty=true}
             Divider
-            ToggleRow "Product news" "Occasional updates about new Plume features." bind=nNews onChanged={dirty=true}
+            ToggleRow "Product news" "Occasional updates about new Plume features." @nNews onChanged={dirty=true}
           Heading "Danger zone" level=3
           Box gap=12 pad=16 fill=#FFFEF2F2 radius=8 border=#FFFCA5A5
             Text.strong "Delete account" color=#FFB91C1C

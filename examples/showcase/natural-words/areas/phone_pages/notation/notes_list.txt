@@ -6,7 +6,7 @@ Column h=fill
   Stack grow
     Column scroll gap=16 pad=16
       Text.pageTitle "Notes"
-      Input "Search notes" bind=query
+      Input "Search notes" @query
       Row scroll gap=8
         ChoiceChip "All" selected={filter=="All"} onTap={filter="All"}
         ChoiceChip "Pinned" selected={filter=="Pinned"} onTap={filter="Pinned"}

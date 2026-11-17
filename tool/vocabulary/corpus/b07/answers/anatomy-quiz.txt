@@ -18,17 +18,17 @@ App
     Nav
       Heading "Study" level=1
       Row gap=8
-        SegmentedButton bind=side items=["front","back"]
+        SegmentedButton @side items=["front","back"]
         IconButton "360" tooltip="Rotate the body" onTap={side = side=="front" ? "back" : "front"}
     Column pad=24 gap=16
       Row gap=24 top
         Card grow gap=12
-          BodyModel view={side} depth={depth} bind=part h=480 onSelect={part=result; emit selectPart result}
+          BodyModel view={side} depth={depth} @part h=480 onSelect={part=result; emit selectPart result}
             Callout part={part} line=true
           Row gap=12
             Icon "layers"
             Text.fieldLabel "Skin"
-            Slider bind=depth min=0 max=1 grow
+            Slider @depth min=0 max=1 grow
             Text.fieldLabel "Bone"
           Text.caption "{depth < 0.33 ? 'Skin' : depth < 0.66 ? 'Muscle' : 'Bone'} layer, {side} view"
         Column w=320 gap=12
@@ -70,7 +70,7 @@ App
     Nav
       Heading "Skeleton quiz" level=1
       Row gap=12
-        SegmentedButton bind=mode items=["relaxed","timed"]
+        SegmentedButton @mode items=["relaxed","timed"]
         if mode=="timed"
           Badge.warning "{duration(left)}"
         Button "{running ? 'Pause' : 'Start'}" onTap={running=!running; left = left<=0 ? 60 : left}
@@ -111,14 +111,14 @@ App
   Main
     Nav
       Heading "Parts" level=1
-      Input "Search parts" "Try humerus" bind=q w=240
+      Input "Search parts" "Try humerus" @q w=240
     Column pad=24 gap=12
       Text.fieldLabel "Weak deck: {count(parts,p=>p.weak)} parts"
       each p in filter(parts, x=>contains(lower(x.name), lower(q)))
         ListTile "{p.name}" subtitle="{p.region}" selected={sel==p.name} onTap={sel=p.name; flipped=false}
           Badge.warning "weak" visible={p.weak}
   Pane w=360 pad=16 gap=12
-    Flashcard front="{sel}" back="{find(parts,p=>p.name==sel).say}" bind=flipped
+    Flashcard front="{sel}" back="{find(parts,p=>p.name==sel).say}" @flipped
     Row gap=8
       IconButton "volume_up" tooltip="Hear it" onTap={speak sel}
       Button.outline "Still weak" onTap={parts=updateWhere(parts,p=>p.name==sel,p=>with(p,"weak",true)); toast "Kept in deck"}
@@ -138,7 +138,7 @@ App
   Main
     Nav
       Heading "Progress" level=1
-      SegmentedButton bind=side items=["front","back"]
+      SegmentedButton @side items=["front","back"]
     Column pad=24 gap=16
       Row gap=24 top
         Card grow

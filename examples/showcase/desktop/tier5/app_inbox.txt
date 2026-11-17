@@ -2,6 +2,7 @@ state folder="inbox"
 state open=2
 state reply=""
 state convs=[{"id":1,"name":"Elena Vasquez","initials":"EV","tone":"rose","subject":"Cannot log in after password reset","preview":"I reset my password twice but the link keeps saying it expired.","time":"10:12","unread":true},{"id":2,"name":"Marcus Webb","initials":"MW","tone":"sky","subject":"Refund for a duplicate charge","preview":"Thanks, that would be great. I was billed twice on the 3rd.","time":"9:41","unread":true},{"id":3,"name":"Aiko Tanaka","initials":"AT","tone":"mint","subject":"Export to CSV is missing columns","preview":"The export leaves out the tags column since the last update.","time":"9:05","unread":false},{"id":4,"name":"Daniel Okafor","initials":"DO","tone":"sand","subject":"Add a teammate to our plan","preview":"We hired two people this week and need seats for both of them.","time":"8:47","unread":true},{"id":5,"name":"Sofia Marino","initials":"SM","tone":"lilac","subject":"Invoice needs our VAT number","preview":"Could you reissue invoice 1042 with our VAT ID included?","time":"Yesterday","unread":false},{"id":6,"name":"Liam Foster","initials":"LF","tone":"slate","subject":"Webhook retries not firing","preview":"Our endpoint returned 500 but I see no retry attempts in the log.","time":"Yesterday","unread":false},{"id":7,"name":"Priya Raman","initials":"PR","tone":"rose","subject":"Question about annual billing","preview":"If we switch to annual, does the discount apply to add-ons too?","time":"Mon","unread":false},{"id":8,"name":"Tom Hargreaves","initials":"TH","tone":"mint","subject":"Thank you for the quick fix","preview":"Everything works again. Appreciate the fast turnaround!","time":"Mon","unread":false}]
+state q=""
 App
   Sidebar w=220
     Brand "Relaydesk" icon="support_agent"
@@ -21,7 +22,7 @@ App
       Row between middle
         Heading "Inbox" level=3
         Text.caption "12 open"
-      Input "Search conversations" bind=q
+      Input "Search conversations" @q
     each c in convs
       ConversationRow "{c.name}" subject="{c.subject}" preview="{c.preview}" time="{c.time}" initials="{c.initials}" tone="{c.tone}" unread={c.unread} selected={open==c.id} onPressed={open=c.id}
   Main
@@ -71,7 +72,7 @@ App
           Box fill=#FFF3F4F6 radius=12 pad=12
             Text "Thanks, that would be great. I was billed twice on the 3rd."
     Column pad=[24,16,24,24] gap=12 border-top=#FFE5E7EB
-      Input "Reply to Marcus" "Write your reply…" multiline bind=reply
+      Input "Reply to Marcus" "Write your reply…" multiline @reply
       Row between middle
         Text.caption "Replying to marcus.webb@example.com"
         Row gap=8

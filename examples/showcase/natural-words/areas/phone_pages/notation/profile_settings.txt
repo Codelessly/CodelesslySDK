@@ -34,11 +34,11 @@ Column h=fill
       Card gap=0
         Row gap=12 center pad=[0,8,0,8]
           Icon "dark_mode"
-          Toggle "Dark mode" bind=dark grow
+          Toggle "Dark mode" @dark grow
         Divider
         Row gap=12 center pad=[0,8,0,8]
           Icon "notifications"
-          Toggle "Notifications" bind=notify grow
+          Toggle "Notifications" @notify grow
         Divider
         Row gap=12 center pad=[0,12,0,12] onTap={emit language}
           Icon "language"

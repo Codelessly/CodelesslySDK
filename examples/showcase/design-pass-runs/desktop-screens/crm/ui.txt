@@ -3,20 +3,21 @@ state sel=contacts[1]
 state q=""
 state sort="name"
 state desc=false
+state nav=""
 Row w=1280 h=800 stretch fill=#FFF5F6F8
-  Sidebar bind=nav brand="Northwind CRM" sectionLabel="Workspace" items=["Dashboard","Contacts","Companies","Deals","Reports"] icons=["dashboard","people","business","handshake","bar_chart"] badges=["","8","","5",""]
+  Sidebar @nav brand="Northwind CRM" sectionLabel="Workspace" items=["Dashboard","Contacts","Companies","Deals","Reports"] icons=["dashboard","people","business","handshake","bar_chart"] badges=["","8","","5",""]
   Column grow gap=16 pad=24
     Row gap=12 middle
       Text.pageTitle "Contacts"
       Spacer grow
-      SearchBar "Search contacts, companies…" bind=q
+      SearchBar "Search contacts, companies…" @q
       Button "Add contact" onTap={emit addContact}
     Row gap=8
       Text.muted "{length(contacts)} contacts"
       Text.muted "·"
       Text.muted "Pipeline value {money(sum(contacts,c=>c.value),"$",0)}"
     Card gap=0 pad=0
-      TableHeader bind=sort desc={desc} columns=["Name","Company","Owner","Last contact","Deal value","Stage"] keys=["name","company","owner","last","value","stage"]
+      TableHeader @sort desc=@desc columns=["Name","Company","Owner","Last contact","Deal value","Stage"] keys=["name","company","owner","last","value","stage"]
       each c in filter(contacts,c=>contains(lower(c.name),lower(q))||contains(lower(c.company),lower(q)))
         TableRow cells={[c.name,c.company,c.owner,c.last,money(c.value,"$",0)]} badge={c.stage} onPressed={sel=c}
   Box w=340 fill=#FFFFFFFF pad=20

@@ -64,6 +64,31 @@ PublishLayout _overlay(String id, String title, {Json canvasProps = const {}, Js
       },
     });
 
+/// A sheet whose content scrolls: a title and forty lines, as the notation's
+/// `Sheet stops=[...]` expands (a column as tall as the sheet, scrolling).
+PublishLayout _scrollingSheet() => PublishLayout.fromJson({
+      'schema': 2,
+      'id': 'tall-layout',
+      'roots': ['tall'],
+      'nodes': {
+        'tall': {
+          'type': 'canvas',
+          'name': 'tall',
+          'slots': {'body': 'tall-body'},
+          'layout': {'width': 560, 'height': {'fill': 0}},
+          'decoration': {'fills': [{'color': '#FFFFFFFF'}]},
+        },
+        'tall-body': {
+          'type': 'column',
+          'layout': {'width': {'fill': 0}, 'height': {'fill': 0}, 'padding': 16},
+          'props': {'spacing': 12, 'scrollable': true},
+          'children': ['tall-title', for (var i = 0; i < 40; i++) 'tall-line$i'],
+        },
+        'tall-title': _label('Queue'),
+        for (var i = 0; i < 40; i++) 'tall-line$i': _label('Line $i'),
+      },
+    });
+
 Json _open(String to, String presentation, {Json extra = const {}}) =>
     {'type': 'openModal', 'to': to, 'presentation': presentation, ...extra};
 
@@ -89,7 +114,7 @@ PublishBundle _bundle() {
         'props': {'spacing': 16},
         'children': [
           'openDialog', 'openSheet', 'openSide', 'openPopover', 'openFull', 'openLocked', 'openGuard', 'openMenu', //
-          'openConfirm', 'search', 'openLiveGuard', 'openSnapSheet',
+          'openConfirm', 'search', 'openLiveGuard', 'openSnapSheet', 'openAskMenu', 'openTallSheet',
         ],
       },
       'openDialog': _press('Dialog', [_open('dialog', 'dialog')]),
@@ -101,9 +126,11 @@ PublishBundle _bundle() {
       'openGuard': _press('Guard', [_open('guard', 'dialog')]),
       'openLiveGuard': _press('Live guard', [_open('liveGuard', 'dialog')]),
       'openSnapSheet': _press('Snap sheet', [_open('snap', 'bottomSheet', extra: {'maxHeightFactor': 0.9, 'snapHeights': [0.5, 0.9]})]),
+      'openTallSheet': _press('Tall sheet', [_open('tall', 'bottomSheet', extra: {'maxHeightFactor': 0.9, 'snapHeights': [0.5, 0.9], 'showDragHandle': true})]),
       'openMenu': _press('More', [_open('menu', 'popover', extra: {'anchor': 'trigger'})]),
+      'openAskMenu': _press('Clip', [_open('askMenu', 'popover', extra: {'anchor': 'trigger'})]),
       'openConfirm': _press('Delete', [
-        {'type': 'confirm', 'title': 'Delete it?', 'message': 'This cannot be undone.'},
+        {'type': 'confirm', 'title': 'Delete it?', 'message': 'This cannot be undone.', 'destructive': true},
         {'type': 'setVariable', 'variable': 'answer', 'value': 'yes'},
       ]),
       // Suggestions that open while typing: the field keeps the focus.
@@ -128,6 +155,7 @@ PublishBundle _bundle() {
       first: _press('Type', [{'type': 'setVariable', 'variable': 'name', 'value': 'Jo'}]),
       second: _press('Discard', [{'type': 'setVariable', 'variable': 'name', 'value': ''}, {'type': 'closeModal'}])),
     _overlay('snap', 'Booking details'),
+    _scrollingSheet(),
     _overlay(
       'guard',
       'Unsaved changes',
@@ -145,6 +173,17 @@ PublishBundle _bundle() {
     ),
     // A menu whose first item opens the dialog.
     _overlay('menu', 'Share', first: _press('Invite', [_open('dialog', 'dialog')])),
+    // A menu whose first line asks before it acts, then closes the menu.
+    _overlay('askMenu', 'Clip', variables: [v('cleared', '')], first: _press('Clear all', [
+      {
+        'type': 'confirm',
+        'title': 'Clear every clip?',
+        'actions': [
+          {'type': 'setVariable', 'variable': 'cleared', 'value': 'yes'},
+        ],
+      },
+      {'type': 'closeModal'},
+    ])),
   ];
   return PublishBundle(
     model: PublishModel(
@@ -191,6 +230,35 @@ String _texts(WidgetTester tester) {
     visit(view);
   }
   return out.toString();
+}
+
+/// The texts painted: not those of a route kept offstage.
+String _shownTexts(WidgetTester tester) {
+  final out = StringBuffer();
+  void visit(RenderObject o) {
+    if (o is RenderOffstage && o.offstage) return;
+    if (o is RenderParagraph) out.writeln(o.text.toPlainText());
+    o.visitChildren(visit);
+  }
+
+  for (final view in tester.binding.renderViews) {
+    visit(view);
+  }
+  return out.toString();
+}
+
+/// Where the text [text] shows.
+Offset _textCenter(WidgetTester tester, String text) {
+  RenderParagraph? found;
+  void visit(RenderObject o) {
+    if (o is RenderParagraph && o.text.toPlainText() == text) found = o;
+    o.visitChildren(visit);
+  }
+
+  for (final view in tester.binding.renderViews) {
+    visit(view);
+  }
+  return found!.localToGlobal(found!.size.center(Offset.zero));
 }
 
 /// Taps the text [text] where it shows (in an overlay's screen).
@@ -390,6 +458,34 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('a drag on a sheet\'s scrolling content moves it to its top stop before the content scrolls', (tester) async {
+    final controller = await _show(tester);
+    await tapNode(tester, controller, 'openTallSheet');
+    final handle = find.byKey(const ValueKey('Codelessly sheet drag handle'));
+    final halfTop = tester.getTopLeft(handle).dy;
+    // The handle is drawn 8 px below the sheet's top: half of 800 is 400.
+    expect(halfTop, closeTo(408, 2));
+    // Up from the title: the sheet grows to 90%, the content stays at its start.
+    await tester.dragFrom(_textCenter(tester, 'Queue'), const Offset(0, -300));
+    await settle(tester);
+    expect(tester.getTopLeft(handle).dy, closeTo(88, 2));
+    expect(_textCenter(tester, 'Queue').dy - tester.getTopLeft(handle).dy, lessThan(60));
+    // At the top stop the content scrolls.
+    final line = _textCenter(tester, 'Line 10').dy;
+    await tester.dragFrom(_textCenter(tester, 'Line 10'), const Offset(0, -200));
+    await settle(tester);
+    expect(tester.getTopLeft(handle).dy, closeTo(88, 2));
+    expect(_textCenter(tester, 'Line 10').dy, lessThan(line - 150));
+    // Down: the content scrolls back to its start, then the sheet shrinks.
+    await tester.dragFrom(_textCenter(tester, 'Line 10'), const Offset(0, 600));
+    await settle(tester);
+    expect(tester.getTopLeft(handle).dy, closeTo(408, 2));
+    // A tap on the handle steps to the next stop.
+    await tester.tap(find.byKey(const ValueKey('Codelessly sheet drag area')));
+    await settle(tester);
+    expect(tester.getTopLeft(handle).dy, closeTo(88, 2));
+  });
+
   testWidgets('nested overlays unwind: a menu item opens a dialog, Escape goes back to the item, then to the button', (tester) async {
     await _show(tester);
     final keys = Keyboard(tester);
@@ -503,6 +599,34 @@ void main() {
     await settle(tester);
     expect(keys.topOverlay, isNull);
     handle.dispose();
+  });
+
+  testWidgets('a confirm asked from a menu line: the menu is out of sight while it asks, and closes after', (tester) async {
+    final controller = await _show(tester);
+    final keys = Keyboard(tester);
+    await tapNode(tester, controller, 'openAskMenu');
+    await settle(tester);
+    expect(_shownTexts(tester), contains('Clear all'));
+    await _tapText(tester, 'Clear all');
+    await settle(tester);
+    expect(find.text('Clear every clip?'), findsOneWidget);
+    // Not painted behind the question: its route is offstage.
+    expect(_shownTexts(tester), isNot(contains('Clear all')));
+    // A yes (the focus starts on it), then the line's close.
+    await keys.enter();
+    await settle(tester);
+    expect(find.text('Clear every clip?'), findsNothing);
+    expect(_texts(tester), isNot(contains('Clear all')));
+    expect(keys.topOverlay, isNull);
+    // Canceled: the menu still closes, as its line says.
+    await tapNode(tester, controller, 'openAskMenu');
+    await settle(tester);
+    await _tapText(tester, 'Clear all');
+    await settle(tester);
+    await keys.escape();
+    await settle(tester);
+    expect(_texts(tester), isNot(contains('Clear all')));
+    expect(keys.topOverlay, isNull);
   });
 
   testWidgets('a popover that opens while a field is typed in leaves the focus in the field', (tester) async {

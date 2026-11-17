@@ -16,9 +16,9 @@ App
       Heading "Find a flight" level=1
       Avatar "Dana Kim" size=36
     Column pad=24 gap=16 maxw=720
-      SegmentedButton bind=mode items=["Flight","Route"]
+      SegmentedButton @mode items=["Flight","Route"]
       if mode=="Flight"
-        Input "Flight number" "e.g. BA117" bind=q
+        Input "Flight number" "e.g. BA117" @q
       if mode=="Route"
         Row gap=12
           Input "From" "LHR" grow
@@ -63,7 +63,7 @@ App
         IconButton "arrow_back" tooltip="Back to search" onTap={go search}
         Heading "BA117  London to New York" level=1
       Row gap=8
-        Toggle "Follow" bind=tracking
+        Toggle "Follow" @tracking
         IconButton "more_vert" tooltip="More" onTap={open flightMenu}
     Column pad=24 gap=20 scroll
       Row between middle
@@ -123,7 +123,7 @@ App
   Main
     Nav
       Heading "Departures" level=1
-      Select "Airport" bind=airport items=["LHR","JFK","CDG","FRA"]
+      Select "Airport" @airport items=["LHR","JFK","CDG","FRA"]
     Column pad=24 gap=16
       Row gap=8
         ChoiceChip "All" selected={filter=="All"} onTap={filter="All"}
@@ -169,16 +169,16 @@ App
       Button "Save" onTap={toast "Alerts saved"; go flight}
     Column pad=24 gap=16 maxw=720
       Card gap=4
-        Toggle "Gate changes" bind=gateAlert
-        Toggle "Delays over 15 minutes" bind=delayAlert
-        Toggle "Boarding starts" bind=boardAlert
-        Toggle "Landing" bind=landAlert
-        Toggle "Baggage belt assigned" bind=beltAlert
+        Toggle "Gate changes" @gateAlert
+        Toggle "Delays over 15 minutes" @delayAlert
+        Toggle "Boarding starts" @boardAlert
+        Toggle "Landing" @landAlert
+        Toggle "Baggage belt assigned" @beltAlert
       Card gap=8
         Text.panelTitle "Notify me by"
-        SegmentedButton bind=channel items=["Push","Email","SMS"]
+        SegmentedButton @channel items=["Push","Email","SMS"]
         Text.fieldLabel "Boarding reminder: {minutes} min before"
-        Slider bind=minutes min=10 max=90
+        Slider @minutes min=10 max=90
       Text.muted "You will get {count([gateAlert,delayAlert,boardAlert,landAlert,beltAlert], x=>x)} kinds of alert by {lower(channel)}."
 
 define FlightProgress value=0.5 from="" to="" label=""

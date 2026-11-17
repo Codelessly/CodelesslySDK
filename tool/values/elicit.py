@@ -15,7 +15,7 @@ import glob, json, os, re, subprocess, sys, time, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SDK = os.path.dirname(os.path.dirname(HERE))
-DROP = ('- bind=name keeps', '- What a node does is an event', '  After the text everything is key=value', '- drag=group','- state name=value', '- every 1000', '- if expression', '- each row in rows')
+DROP = ('- @name is the variable itself','- What a node does is an event', '  After the text everything is key=value', '- drag=group','- state name=value', '- every 1000', '- if expression', '- each row in rows')
 
 
 def opt(name, default=None):
@@ -40,7 +40,8 @@ def stripped(prompt, blocks):
             if blocks and m.group(1) not in blocks:
                 continue
             call, doc = line.split(' : ', 1)
-            call = re.sub(r' bind=(\w+)', r' \1', call)
+            call = re.sub(r' @(\w+)', r' \1', call)          # the value a use binds: @value
+            call = re.sub(r' (\w+)=@(?=\s|$)', r' \1', call)  # a further one: direction=@
             call = re.sub(r' (on[A-Z]\w*)', r' \1(event)', call)
             # What the block is, without the examples its description gives in today's notation.
             doc = re.split(r'[:;(]', doc)[0].strip()
@@ -48,7 +49,7 @@ def stripped(prompt, blocks):
         out.append(line)
     text = '\n'.join(out)
     text = re.sub(r' A value that follows the state is an expression in braces:[^\n]*', '', text)
-    text = re.sub(r'\(or Progress bind=done\) ', '', text)
+    text = re.sub(r'\(or Progress \{done\}\) ', '', text)
     text = '\n'.join(l for l in text.split('\n') if 'BEYOND THESE WORDS' not in l and not l.startswith('  The full vocabulary has more') and not l.startswith('  custom drawing and shapes'))
     return text
 

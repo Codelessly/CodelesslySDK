@@ -11,10 +11,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const _card = '''
+state volume=0
+state email=""
+state notify=false
 Column gap=12 pad=16
-  Slider bind=volume
-  Input "Email" bind=email
-  Toggle "Notifications" bind=notify
+  Slider @volume
+  Input "Email" @email
+  Toggle "Notifications" @notify
   Button "Save" onTap={emit save}
 ''';
 

@@ -5,6 +5,8 @@ project sel=""
 project posts=[{"id":"p1","cat":"lost pet","title":"Lost: grey tabby, answers to Biscuit","body":"Slipped out near Alder Street on Sunday evening. Wearing a green collar with a bell.","who":"Maren K.","when":"2h ago","dist":0.4,"tilt":-2,"taken":false,"replies":3},{"id":"p2","cat":"for free","title":"Free: solid oak bookshelf","body":"Moving out. Needs a good home, you collect. Porch pickup after 5pm.","who":"Tomas B.","when":"5h ago","dist":0.9,"tilt":1.5,"taken":false,"replies":6},{"id":"p3","cat":"help wanted","title":"Help: carrying a sofa up two flights","body":"Two strong people for twenty minutes on Saturday morning. Coffee and pastries provided.","who":"Ines D.","when":"yesterday","dist":1.3,"tilt":-1,"taken":false,"replies":2},{"id":"p4","cat":"events","title":"Street cleanup and potluck","body":"Gloves and bags supplied. Meet at the corner of Alder and 4th, 10am Sunday.","who":"Alder St. Association","when":"2 days ago","dist":0.6,"tilt":2,"taken":false,"replies":11},{"id":"p5","cat":"for free","title":"Free: box of moving boxes, flattened","body":"About thirty, various sizes. Leave on the step, take what you need.","who":"Priya S.","when":"3 days ago","dist":2.8,"tilt":-1.5,"taken":true,"replies":4}]
 state q=""
 state view="board"
+state reason=""
+state detail=""
 Page
   Nav sticky
     Brand "Lamppost" icon="light"
@@ -12,7 +14,7 @@ Page
       Link "Board" onTap={go board}
       Link "My posts" onTap={toast "Showing your posts"}
     Row gap=8
-      Input "Search the board" bind=q w=220
+      Input "Search the board" @q w=220
       Button "Pin a notice" icon="push_pin" onTap={go new-post}
   Section fill=#FFC8A064
     Column gap=16
@@ -47,8 +49,8 @@ Page
             Text.muted "Nothing pinned here yet. Try a wider radius."
         Card w=300 gap=12 sticky
           Heading "Nearby radius" level=3
-          Gauge bind=radius min=0 max=10 unit="km"
-          Slider bind=radius min=1 max=10
+          Gauge value={radius} min=0 max=10 unit="km"
+          Slider @radius min=1 max=10
           Text.caption "Only notices from within {radius} km of Alder Street are shown."
           Divider
           Heading "Your area" level=3
@@ -63,8 +65,8 @@ Page
     MenuItem "Reply" icon="reply" onTap={go post-detail}
     MenuItem "Report" icon="flag" onTap={open report}
   Dialog#report "Report this notice" "Tell the moderators what is wrong"
-    Select "Reason" bind=reason items=["Spam","Unsafe request","Wrong category","Offensive","Other"]
-    Input "Details" bind=detail multiline
+    Select "Reason" @reason items=["Spam","Unsafe request","Wrong category","Offensive","Other"]
+    Input "Details" @detail multiline
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button.destructive "Send report" onTap={emit report {id: sel, reason: reason, detail: detail}; toast "Thanks, a moderator will look at it"; close}
@@ -73,6 +75,8 @@ Page
 state reply=""
 state thread=[{"who":"Dev R.","text":"Saw a grey cat by the bins on Alder 3 this morning, will check again at lunch.","when":"1h ago"},{"who":"Maren K.","text":"Thank you! Biscuit is shy, call softly.","when":"1h ago"},{"who":"Lucia P.","text":"Posted it on the school gate group too.","when":"40m ago"}]
 state at=0
+state reason=""
+state detail=""
 Page
   Nav sticky
     Brand "Lamppost" icon="light"
@@ -113,7 +117,7 @@ Page
                 Text "{r.text}"
           Divider
           Row gap=8
-            Input "Write a reply" bind=reply grow
+            Input "Write a reply" @reply grow
             Button "Send" icon="send" onTap={reply!="" ? {thread=append(thread, {"who":"You","text":reply,"when":"now"}); reply=""; toast "Reply sent"} : toast "Write something first"}
       Column w=320 gap=16 sticky
         Card gap=8
@@ -125,10 +129,10 @@ Page
             IconTile "health_and_safety"
             Heading "Safe meeting tip" level=3
           Text.muted "Meet in a public, well lit spot such as the corner shop or the library steps. Bring a friend after dark, and never send money before you see the item."
-  Lightbox#shots photos=["https://images.example.com/biscuit-1.jpg","https://images.example.com/biscuit-2.jpg","https://images.example.com/biscuit-3.jpg"] bind=at
+  Lightbox#shots photos=["https://images.example.com/biscuit-1.jpg","https://images.example.com/biscuit-2.jpg","https://images.example.com/biscuit-3.jpg"] @at
   Dialog#report "Report this notice" "Tell the moderators what is wrong"
-    Select "Reason" bind=reason items=["Spam","Unsafe request","Wrong category","Offensive","Other"]
-    Input "Details" bind=detail multiline
+    Select "Reason" @reason items=["Spam","Unsafe request","Wrong category","Offensive","Other"]
+    Input "Details" @detail multiline
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button.destructive "Send report" onTap={emit report {reason: reason, detail: detail}; toast "Thanks, a moderator will look at it"; close}
@@ -140,6 +144,9 @@ state kind="for free"
 state expiry="7 days"
 state area=2
 state photos=[]
+state eventDate=""
+state eventTime=""
+state replies=false
 App
   Sidebar
     Brand "Lamppost" icon="light"
@@ -162,22 +169,22 @@ App
           ChoiceChip "For free" selected={kind=="for free"} onTap={kind="for free"}
           ChoiceChip "Help wanted" selected={kind=="help wanted"} onTap={kind="help wanted"}
           ChoiceChip "Events" selected={kind=="events"} onTap={kind="events"}
-        Input "Title" "Short and clear" bind=title
-        Input "What do neighbours need to know?" bind=body multiline
+        Input "Title" "Short and clear" @title
+        Input "What do neighbours need to know?" @body multiline
         if kind=="events"
           Row gap=12
-            DatePicker "Date" bind=eventDate
-            TimePicker "Starts" bind=eventTime
+            DatePicker "Date" @eventDate
+            TimePicker "Starts" @eventTime
         Row gap=8
           Button.outline "Add photos" icon="add_a_photo" onTap={emit pickPhotos}
           Text.caption "{length(photos)} added"
       Card gap=12
         Text.fieldLabel "Show it to neighbours within"
         Row gap=16
-          Gauge bind=area min=0 max=10 unit="km"
-          Slider bind=area min=1 max=10 grow
-        Select "Take it down after" bind=expiry items=["1 day","3 days","7 days","14 days","30 days"]
-        Toggle "Allow replies" bind=replies
+          Gauge value={area} min=0 max=10 unit="km"
+          Slider @area min=1 max=10 grow
+        Select "Take it down after" @expiry items=["1 day","3 days","7 days","14 days","30 days"]
+        Toggle "Allow replies" @replies
       Card gap=8 fill=#FFE8F5E9
         Row gap=8
           IconTile "health_and_safety"

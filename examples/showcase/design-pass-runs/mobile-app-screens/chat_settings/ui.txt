@@ -32,9 +32,9 @@ Column scroll w=390 pad=16 gap=16
       Icon "chevron_right"
   Card gap=8
     Text.sectionTitle "Privacy and notifications"
-    Toggle "Notifications" bind=notifications
-    Toggle "Read receipts" bind=receipts
-    Toggle "Last seen" bind=lastSeen
+    Toggle "Notifications" @notifications
+    Toggle "Read receipts" @receipts
+    Toggle "Last seen" @lastSeen
   Card gap=12
     Text.sectionTitle "Storage"
     Row between middle

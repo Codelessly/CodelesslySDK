@@ -78,7 +78,7 @@ App
                 Column center gap=4
                   Image "{last(filter(thumbs,x=>x.t<=scrubPos)).url}" w=180 h=100 radius=8
                   Text.small color=#FFFFFFFF "{duration(scrubPos)}"
-          Slider bind=scrubPos min=0 max={total} onChange={scrubbing=true; pos=scrubPos}
+          Slider @scrubPos min=0 max={total} onChange={scrubbing=true; pos=scrubPos}
           Row between
             Text color=#FFFFFFFF "{duration(pos)}"
             Row gap=12

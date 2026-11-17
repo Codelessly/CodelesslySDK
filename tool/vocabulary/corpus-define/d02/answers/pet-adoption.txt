@@ -8,6 +8,7 @@ state sel={}
 state favs=[]
 state pets=[{"id":1,"name":"Biscuit","species":"Dog","breed":"Beagle mix","age":3,"size":"Medium","miles":4,"photo":"https://images.pawsandco.example/biscuit-1.jpg","photos":["https://images.pawsandco.example/biscuit-1.jpg","https://images.pawsandco.example/biscuit-2.jpg","https://images.pawsandco.example/biscuit-3.jpg"],"energy":0.8,"friendly":0.9,"calm":0.4,"goodWith":["Kids","Dogs"],"bio":"Biscuit loves long walks and will follow you from room to room."},{"id":2,"name":"Miso","species":"Cat","breed":"Domestic shorthair","age":2,"size":"Small","miles":9,"photo":"https://images.pawsandco.example/miso-1.jpg","photos":["https://images.pawsandco.example/miso-1.jpg","https://images.pawsandco.example/miso-2.jpg"],"energy":0.5,"friendly":0.7,"calm":0.8,"goodWith":["Cats","Seniors"],"bio":"A quiet lap cat who purrs the moment you sit down."},{"id":3,"name":"Juniper","species":"Dog","breed":"Labrador","age":7,"size":"Large","miles":18,"photo":"https://images.pawsandco.example/juniper-1.jpg","photos":["https://images.pawsandco.example/juniper-1.jpg","https://images.pawsandco.example/juniper-2.jpg"],"energy":0.4,"friendly":1.0,"calm":0.9,"goodWith":["Kids","Dogs","Cats"],"bio":"A gentle senior looking for a sofa and a slow morning walk."},{"id":4,"name":"Pip","species":"Rabbit","breed":"Holland lop","age":1,"size":"Small","miles":6,"photo":"https://images.pawsandco.example/pip-1.jpg","photos":["https://images.pawsandco.example/pip-1.jpg"],"energy":0.6,"friendly":0.6,"calm":0.7,"goodWith":["Kids"],"bio":"Curious and tidy, Pip is already litter trained."}]
 state deck=[]
+state photoAt=0
 every 1s when false onTick={deck=deck}
 App
   Sidebar
@@ -22,7 +23,7 @@ App
     Nav
       Heading "Discover" level=1
       Row gap=8
-        Select bind=species items=["All","Dog","Cat","Rabbit"]
+        Select @species items=["All","Dog","Cat","Rabbit"]
         Button.outline "Filters" icon="tune" onTap={open filters}
     Column pad=24 gap=16 center
       Row gap=8 wrap
@@ -47,21 +48,21 @@ App
 Sheet#filters "Filters"
   Column gap=16 pad=16
     Text.fieldLabel "Species"
-    SegmentedButton bind=species items=["All","Dog","Cat","Rabbit"]
+    SegmentedButton @species items=["All","Dog","Cat","Rabbit"]
     Text.fieldLabel "Maximum age: {maxAge} years"
-    Slider bind=maxAge min=1 max=15
+    Slider @maxAge min=1 max=15
     Text.fieldLabel "Distance: {distance} miles"
-    Slider bind=distance min=1 max=50
+    Slider @distance min=1 max=50
     Row gap=8
       Button.outline "Reset" onTap={species="All"; maxAge=15; distance=25}
       Button "Show pets" onTap={idx=0; close}
 
 Sheet#detail "{sel.name}"
   Column gap=12 pad=16 scroll
-    Pages bind=photoAt h=220 peek=0.86
+    Pages @photoAt h=220 peek=0.86
       each ph in sel.photos
         Image "{ph}" radius=12
-    Dots bind=photoAt count={length(sel.photos)}
+    Dots @photoAt count={length(sel.photos)}
     Row between
       Text.strong "{sel.breed}"
       Text.muted "{sel.age} yrs - {sel.size}"
@@ -125,6 +126,10 @@ state adults=2
 state kids=0
 state notes=""
 state refs=[{"name":"","phone":""},{"name":"","phone":""}]
+state name=""
+state email=""
+state phone=""
+state dob=""
 Page
   Nav
     Brand "Paws & Co" icon="pets"
@@ -132,28 +137,28 @@ Page
   Section narrow
     Column gap=16
       Heading "Adoption application for Biscuit" level=1
-      Stepper bind=step steps=["About you","Your home","References","Review"]
+      Stepper @step steps=["About you","Your home","References","Review"]
       if step==0
         Card gap=12
-          Input "Full name" bind=name
-          Input "Email" "you@example.com" bind=email type=email
-          Input "Phone" bind=phone type=phone
-          DatePicker "Date of birth" bind=dob
+          Input "Full name" @name
+          Input "Email" "you@example.com" @email type=email
+          Input "Phone" @phone type=phone
+          DatePicker "Date of birth" @dob
       if step==1
         Card gap=12
-          Select "Home type" bind=housing items=["House","Apartment","Condo","Farm"]
-          Toggle "Fenced yard" bind=yard
-          Toggle "Other pets at home" bind=otherPets
+          Select "Home type" @housing items=["House","Apartment","Condo","Farm"]
+          Toggle "Fenced yard" @yard
+          Toggle "Other pets at home" @otherPets
           Row gap=12
-            Input "Adults" bind=adults type=number grow
-            Input "Children" bind=kids type=number grow
-          Input "Anything else we should know?" bind=notes multiline
+            Input "Adults" @adults type=number grow
+            Input "Children" @kids type=number grow
+          Input "Anything else we should know?" @notes multiline
       if step==2
         Card gap=12
           each r in refs
             Text.strong "Reference {index+1}"
-            Input "Name" bind=r.name
-            Input "Phone" bind=r.phone type=phone
+            Input "Name" @r.name
+            Input "Phone" @r.phone type=phone
       if step==3
         Card gap=8
           Text.heading "Review"
@@ -170,6 +175,7 @@ Page
 ### Status
 state stage=1
 state stages=["Applied","Home check","Meet and greet","Approved","Adopted"]
+state msg=""
 Page
   Nav
     Brand "Paws & Co" icon="pets"
@@ -190,7 +196,7 @@ Page
           Button.destructive "Withdraw" onTap={open withdraw}
 
 Dialog#message "Message the shelter"
-  Input "Your message" bind=msg multiline
+  Input "Your message" @msg multiline
   Button "Send" onTap={emit sendMessage msg; toast "Sent"; close}
 
 Dialog#withdraw "Withdraw application?" "Biscuit will be listed again."
@@ -198,7 +204,7 @@ Dialog#withdraw "Withdraw application?" "Biscuit will be listed again."
     Button.outline "Keep it" onTap={close}
     Button.destructive "Withdraw" onTap={emit withdraw; close}
 
-define Stepper bind=step steps=["One","Two"]
+define Stepper @step steps=["One","Two"]
   state step=0
   Row gap=8 middle
     each s in steps

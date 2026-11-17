@@ -16,7 +16,7 @@ App
       Brand "Say Chef" icon="restaurant"
       Row gap=12 middle
         Badge.warning "Noisy kitchen" visible={noisy}
-        Toggle "Hands-free" bind=handsFree
+        Toggle "Hands-free" @handsFree
         IconButton "list_alt" tooltip="Ingredients" onTap={open ingredients}
     Column pad=24 gap=24 center
       if noisy
@@ -63,7 +63,7 @@ App
 Sheet#timerSheet "Set a timer"
   state mins=10
   state tname="Timer"
-  Input "Name" bind=tname
+  Input "Name" @tname
   Row gap=12 middle center
     IconButton "remove" tooltip="Fewer minutes" onTap={mins=max(1,mins-1)}
     Text.strong "{mins} min" size=40
@@ -90,7 +90,7 @@ App
       Button.outline "Read aloud" icon="volume_up" onTap={emit speak join(map(items,i=>i.amount+" "+i.name),", ")}
     Column pad=24 gap=16
       Row gap=8 middle
-        Input "Ask or search" "how much flour" bind=q grow
+        Input "Ask or search" "how much flour" @q grow
         VoiceInput onResult={q=result}
       Text.muted "{count(have,n=>true)} of {length(items)} gathered"
       Progress {length(have)/length(items)}
@@ -118,19 +118,19 @@ App
       Heading "Listening" level=1
     Column pad=24 gap=16
       Card gap=12
-        Toggle "Hands-free mode" bind=handsFree
+        Toggle "Hands-free mode" @handsFree
         Text.muted "Say next, repeat or set a timer without touching the screen."
-        Input "Wake phrase" bind=wake
+        Input "Wake phrase" @wake
         Text.fieldLabel "Microphone sensitivity"
-        Slider bind=sensitivity min=0 max=100
+        Slider @sensitivity min=0 max=100
       Card gap=12
-        Toggle "Warn me when it is too noisy" bind=noiseWarn
-        Toggle "Always show big buttons" bind=bigButtons
+        Toggle "Warn me when it is too noisy" @noiseWarn
+        Toggle "Always show big buttons" @bigButtons
         Text.muted "Big buttons appear on their own when the room gets loud."
       Card gap=12
         Text.strong "Voice"
-        SegmentedButton bind=voice items=["Warm","Clear","Quiet"]
+        SegmentedButton @voice items=["Warm","Clear","Quiet"]
         Text.fieldLabel "Speaking speed"
-        Slider bind=voiceSpeed min=0.5 max=1.5
+        Slider @voiceSpeed min=0.5 max=1.5
         Button.outline "Hear a sample" icon="volume_up" onTap={emit speak "Next, add the flour."}
       Button "Done" size=large onTap={go cooking}

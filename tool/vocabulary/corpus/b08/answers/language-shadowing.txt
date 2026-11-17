@@ -8,6 +8,8 @@ state loopOn=false
 state flash=""
 state goal=7
 state words=[{"w":"Could","weak":false},{"w":"you","weak":false},{"w":"tell","weak":false},{"w":"me","weak":false},{"w":"where","weak":true},{"w":"the","weak":false},{"w":"station","weak":true},{"w":"is","weak":false}]
+state voice=""
+state speed=0.5
 every 400 when playing onTick={pos=pos+1; pos>=length(words) ? {pos=-1; playing=false} : }
 App
   Sidebar
@@ -21,7 +23,7 @@ App
     Nav
       Heading "Practice" level=1
       Row gap=8
-        Toggle "Loop phrase" bind=loopOn
+        Toggle "Loop phrase" @loopOn
         IconButton "tune" tooltip="Settings" onTap={open prefs}
     Column pad=24 gap=16 scroll
       Card gap=12
@@ -68,21 +70,22 @@ App
           Text.strong "Daily goal"
           Text.muted "{goal} of 10 phrases"
         Row gap=16
-          Ring bind=goalShare
+          Ring value={goalShare}
           Progress {goal/10}
   Popover#translate
     Text.strong "{flash}"
     Text.muted "Translation: {flash == 'station' ? 'estacion' : flash == 'where' ? 'donde' : 'traduccion'}"
     Button.ghost "Close" onTap={close}
   Dialog#prefs "Settings" "Voice and speed"
-    Select "Native voice" items=["Emma (US)","Oliver (UK)","Mia (AU)"] bind=voice
-    Slider bind=speed min=0.5 max=1.5
+    Select "Native voice" items=["Emma (US)","Oliver (UK)","Mia (AU)"] @voice
+    Slider @speed min=0.5 max=1.5
     Button "Done" onTap={close}
 
 ### Lessons
 state level="All"
 state lessons=[{"id":1,"title":"At the station","level":"Beginner","done":true},{"id":2,"title":"Ordering coffee","level":"Beginner","done":true},{"id":3,"title":"A job interview","level":"Advanced","done":false},{"id":4,"title":"Booking a hotel","level":"Intermediate","done":false}]
 state sel=1
+state q=""
 App
   Sidebar
     Brand "Echo Lane" icon="graphic_eq"
@@ -93,7 +96,7 @@ App
     Nav
       Heading "Lessons" level=1
       Row gap=8
-        Input "Search lessons" bind=q w=220
+        Input "Search lessons" @q w=220
     Column pad=24 gap=16 scroll
       Row gap=8
         ChoiceChip "All" selected={level=="All"} onTap={level="All"}

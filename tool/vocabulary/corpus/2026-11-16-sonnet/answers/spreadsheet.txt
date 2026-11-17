@@ -46,8 +46,8 @@ App
         Box w=64 pad=[8,4,8,4] radius=4 fill=#FFF4F6F4
           Text.strong "{sel}" center
         Icon "function"
-        Input#formula "" bind=draft grow tooltip="Formula bar (F2 to edit in the grid)" onFocus={editing=true; draft=grid.raw(sel)} onSubmit={undo=append(undo,sheets); redo=[]; grid.commit(sel,draft); grid.focus} onCancel={editing=false; draft=grid.raw(sel); grid.focus}
-      DataGrid#grid cols=26 rows=50 sheet={active} sheets={sheets} bind=sheets selected=sel range=range formulas=true errorMark="#ERR" headers=true frozenHeaders=true colWidths=true grow
+        Input#formula "" @draft grow tooltip="Formula bar (F2 to edit in the grid)" onFocus={editing=true; draft=grid.raw(sel)} onSubmit={undo=append(undo,sheets); redo=[]; grid.commit(sel,draft); grid.focus} onCancel={editing=false; draft=grid.raw(sel); grid.focus}
+      DataGrid#grid cols=26 rows=50 sheet={active} sheets={sheets} @sheets selected=sel range=range formulas=true errorMark="#ERR" headers=true frozenHeaders=true colWidths=true grow
         Shortcut "ArrowUp ArrowDown ArrowLeft ArrowRight" onKey={grid.move(result)}
         Shortcut "Shift+ArrowUp Shift+ArrowDown Shift+ArrowLeft Shift+ArrowRight" onKey={grid.extend(result)}
         Shortcut "Tab" onKey={grid.move("right")}
@@ -74,7 +74,7 @@ App
           Text.caption "Count: {grid.count(range)}"
           Text.caption "Sum: {fixed(grid.sum(range),2)}"
           Text.caption "Average: {grid.count(range)==0 ? "-" : fixed(grid.average(range),2)}"
-      TabBar#tabs items={map(sheets,s=>s.name)} bind=active editable reorderable removable addable fill=#FFF4F6F4 pad=[8,0,8,0] onAdd={undo=append(undo,sheets); redo=[]; sheets=append(sheets,{"name":"Sheet {length(sheets)+1}","widths":{},"cells":{}}); active="Sheet {length(sheets)}"} onRename={undo=append(undo,sheets); redo=[]; sheets=updateWhere(sheets,s=>s.name==result.from,s=>with(s,"name",result.to)); active=result.to} onReorder={undo=append(undo,sheets); redo=[]; sheets=result.items} onRemove={pending=result; open confirmSheet}
+      TabBar#tabs items={map(sheets,s=>s.name)} @active editable reorderable removable addable fill=#FFF4F6F4 pad=[8,0,8,0] onAdd={undo=append(undo,sheets); redo=[]; sheets=append(sheets,{"name":"Sheet {length(sheets)+1}","widths":{},"cells":{}}); active="Sheet {length(sheets)}"} onRename={undo=append(undo,sheets); redo=[]; sheets=updateWhere(sheets,s=>s.name==result.from,s=>with(s,"name",result.to)); active=result.to} onReorder={undo=append(undo,sheets); redo=[]; sheets=result.items} onRemove={pending=result; open confirmSheet}
   Menu#colMenu
     MenuItem "Insert column left" icon="keyboard_double_arrow_left" onTap={undo=append(undo,sheets); redo=[]; grid.insertCol(menuCol,"before")}
     MenuItem "Insert column right" icon="keyboard_double_arrow_right" onTap={undo=append(undo,sheets); redo=[]; grid.insertCol(menuCol,"after")}
@@ -96,7 +96,7 @@ App
     Button.ghost "No fill" onTap={undo=append(undo,sheets); redo=[]; grid.setFormat(range,"f",""); close}
   Popover#find end
     Row gap=8 middle
-      Input "Find" "Text or number" bind=q w=200 autofocus onChange={matches=grid.find(q); hit=0; grid.mark(matches); grid.select(matches[0])} onSubmit={hit=(hit+1)%max(1,length(matches)); grid.select(matches[hit])}
+      Input "Find" "Text or number" @q w=200 autofocus onChange={matches=grid.find(q); hit=0; grid.mark(matches); grid.select(matches[0])} onSubmit={hit=(hit+1)%max(1,length(matches)); grid.select(matches[hit])}
       Text.caption "{length(matches)==0 ? "0 of 0" : (hit+1)+" of "+length(matches)}"
       IconButton "keyboard_arrow_up" tooltip="Previous match (Shift+Enter)" disabled={length(matches)==0} onTap={hit=(hit-1+length(matches))%length(matches); grid.select(matches[hit])}
       IconButton "keyboard_arrow_down" tooltip="Next match (Enter)" disabled={length(matches)==0} onTap={hit=(hit+1)%length(matches); grid.select(matches[hit])}

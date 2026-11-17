@@ -39,13 +39,13 @@ App
   Dialog#picker "Edit color" "Pick a hue, then fine tune"
     Column gap=16
       Row gap=16
-        ColorWheel bind=editHex w=200 h=200 onChange={editH=result.h; editS=result.s; editL=result.l}
+        ColorWheel @editHex w=200 h=200 onChange={editH=result.h; editS=result.s; editL=result.l}
         Column grow gap=8
           Box h=72 radius=12 fill={editHex}
-          Input "Hex" "#264653" bind=editHex
-      Slider "Hue" bind=editH min=0 max=360 onChange={editHex=hsl(editH,editS,editL)}
-      Slider "Saturation" bind=editS min=0 max=100 onChange={editHex=hsl(editH,editS,editL)}
-      Slider "Lightness" bind=editL min=0 max=100 onChange={editHex=hsl(editH,editS,editL)}
+          Input "Hex" "#264653" @editHex
+      Slider "Hue" @editH min=0 max=360 onChange={editHex=hsl(editH,editS,editL)}
+      Slider "Saturation" @editS min=0 max=100 onChange={editHex=hsl(editH,editS,editL)}
+      Slider "Lightness" @editL min=0 max=100 onChange={editHex=hsl(editH,editS,editL)}
       Row end gap=8
         Button.ghost "Cancel" onTap={close}
         Button "Apply" onTap={colors=setAt(colors,editIndex,with(colors[editIndex],"hex",editHex)); toast "Color updated"; close}
@@ -73,17 +73,17 @@ App
       Grid cols=2 gap=16
         Card gap=12
           Text.panelTitle "Foreground"
-          Select "Palette color" items={palette} bind=fg
-          Input "Hex" bind=fg
+          Select "Palette color" items={palette} @fg
+          Input "Hex" @fg
         Card gap=12
           Text.panelTitle "Background"
-          Select "Palette color" items={palette} bind=bg
-          Input "Hex" bind=bg
+          Select "Palette color" items={palette} @bg
+          Input "Hex" @bg
       Card gap=16
         Box fill={bg} radius=12 pad=24 gap=8
           Text "The quick brown fox jumps over the lazy dog" size=28 weight=700 color={fg}
           Text "Small body copy to check readability at 14px." color={fg}
-        ContrastRatio fg={fg} bg={bg} bind=ratio
+        ContrastRatio fg={fg} bg={bg} @ratio
         Text.heading "{fixed(ratio,2)} : 1"
         Row gap=8
           Badge.success "AA normal text" hidden={ratio < 4.5}
@@ -97,7 +97,7 @@ App
       Column#shades gap=12
         Row between
           Heading "Shades" level=3
-          Select "Base color" items={palette} bind=base w=200
+          Select "Base color" items={palette} @base w=200
         Row h=96
           each step in [50,100,200,300,400,500,600,700,800,900]
             Column grow center middle fill={shade(base,step)} onTap={copy shade(base,step); toast "Copied {shade(base,step)}"}
@@ -123,7 +123,7 @@ App
       Row gap=8
         each c in colors
           Box grow h=48 radius=8 fill={c.hex}
-      SegmentedButton items=["CSS","Tailwind","JSON"] bind=format
+      SegmentedButton items=["CSS","Tailwind","JSON"] @format
       if format=="CSS"
         CodeBlock lang="css" text=":root {\n  --charcoal-blue: #264653;\n  --persian-green: #2A9D8F;\n  --saffron: #E9C46A;\n  --sandy-brown: #F4A261;\n  --burnt-sienna: #E76F51;\n}"
       if format=="Tailwind"
@@ -135,6 +135,7 @@ App
 state tab="saved"
 state picked=0
 state saved=[{"id":1,"name":"Coastal Sunset","colors":["#264653","#2A9D8F","#E9C46A","#F4A261","#E76F51"]},{"id":2,"name":"Midnight Orchid","colors":["#10002B","#240046","#5A189A","#9D4EDD","#E0AAFF"]},{"id":3,"name":"Forest Floor","colors":["#283618","#606C38","#FEFAE0","#DDA15E","#BC6C25"]},{"id":4,"name":"Pastel Candy","colors":["#FFADAD","#FFD6A5","#FDFFB6","#CAFFBF","#9BF6FF"]},{"id":5,"name":"Ocean Depth","colors":["#03045E","#0077B6","#00B4D8","#90E0EF","#CAF0F8"]},{"id":6,"name":"Autumn Ember","colors":["#780000","#C1121F","#FDF0D5","#003049","#669BBC"]}]
+state q=""
 App
   Sidebar
     Brand "Swatchbook" icon="palette"
@@ -145,7 +146,7 @@ App
   Main
     Nav
       Heading "Saved palettes" level=1
-      Input "Search palettes" bind=q w=220
+      Input "Search palettes" @q w=220
     Column pad=24 gap=16
       Grid cols=3 gap=16
         each p in saved

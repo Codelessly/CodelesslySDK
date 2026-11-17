@@ -5,6 +5,9 @@ state sel=""
 state plots=[{"id":"P-014","name":"Plot 14","status":"done","dist":0},{"id":"P-015","name":"Plot 15","status":"draft","dist":180},{"id":"P-016","name":"Plot 16","status":"todo","dist":340},{"id":"P-017","name":"Plot 17","status":"todo","dist":520}]
 state queue=[{"id":1,"label":"Plot 14 form","state":"failed"},{"id":2,"label":"Plot 14 photo N","state":"pending"},{"id":3,"label":"Plot 13 form","state":"pending"}]
 state nextId="P-016"
+state fmt=""
+state withPhotos=false
+state onlyDone=false
 App
   Sidebar
     Brand "Transect" icon="grass"
@@ -27,7 +30,7 @@ App
     Column pad=24 gap=16
       Row gap=16 top
         Card grow gap=12
-          PlotMap plots={plots} selected={sel} position="here" bind=sel onSelect={sel=result; open plot}
+          PlotMap plots={plots} selected={sel} position="here" @sel onSelect={sel=result; open plot}
           Row gap=12
             Badge.success "Done"
             Badge.warning "Partly saved"
@@ -53,9 +56,9 @@ App
       Button "Start navigation" onTap={emit navigate nextId; close}
       Button.outline "Cancel" onTap={close}
   Dialog#export "Export day" "Wednesday 17 November"
-    Select "Format" items=["CSV","GeoJSON","Excel"] bind=fmt
-    Toggle "Include photos" bind=withPhotos
-    Toggle "Only completed plots" bind=onlyDone
+    Select "Format" items=["CSV","GeoJSON","Excel"] @fmt
+    Toggle "Include photos" @withPhotos
+    Toggle "Only completed plots" @onlyDone
     Button "Export" onTap={emit export fmt; toast "Export ready"; close}
 
 ### Plot form
@@ -69,6 +72,8 @@ state tide="Low"
 state photos=[{"url":"p14_n.jpg","dir":"N","deg":4},{"url":"p14_e.jpg","dir":"E","deg":91}]
 state species=[{"name":"Spartina alterniflora","n":14},{"name":"Salicornia","n":6},{"name":"Limonium","n":0}]
 state saved="none"
+state at=0
+state newSpecies=""
 App
   Main
     Nav
@@ -88,12 +93,12 @@ App
       Card gap=12
         Text.sectionTitle "Measurements"
         Grid cols=2 gap=12
-          Input "Canopy cover (%)" type=number bind=cover
-          Input "Water depth (cm)" type=number bind=depth
-          Select "Soil" items=["Peat","Clay","Sand","Silt"] bind=soil
-          Select "Tide" items=["Low","Rising","High","Falling"] bind=tide
-        SegmentedButton items=["A","B","C","D"] bind=quad
-        Input "Notes" multiline bind=notes
+          Input "Canopy cover (%)" type=number @cover
+          Input "Water depth (cm)" type=number @depth
+          Select "Soil" items=["Peat","Clay","Sand","Silt"] @soil
+          Select "Tide" items=["Low","Rising","High","Falling"] @tide
+        SegmentedButton items=["A","B","C","D"] @quad
+        Input "Notes" multiline @notes
       Card gap=12
         Text.sectionTitle "Species count"
         each s in species
@@ -118,9 +123,9 @@ App
       Row gap=8
         Button.outline "Save partial" onTap={saved="partial"; toast "Saved, finish later"}
         Button "Complete plot" onTap={cover>0 ? {saved="done"; emit complete; toast "Plot 14 complete"; go map} : toast "Enter the canopy cover first"}
-  Lightbox#shots photos={photos} bind=at
+  Lightbox#shots photos={photos} @at
   Dialog#addSpecies "Add species"
-    Input "Species name" bind=newSpecies
+    Input "Species name" @newSpecies
     Button "Add" onTap={species=append(species,{"name":newSpecies,"n":0}); newSpecies=""; close}
 
 ### Sync queue

@@ -20,6 +20,9 @@ state kindFilter="Any type"
 state dateFilter="Any time"
 state tree=[{"name":"My files","depth":0,"path":["My files"]},{"name":"Documents","depth":1,"path":["My files","Documents"]},{"name":"Projects","depth":2,"path":["My files","Documents","Projects"]},{"name":"Invoices","depth":2,"path":["My files","Documents","Invoices"]},{"name":"Photos","depth":1,"path":["My files","Photos"]},{"name":"Trips","depth":2,"path":["My files","Photos","Trips"]},{"name":"Music","depth":1,"path":["My files","Music"]},{"name":"Shared with me","depth":1,"path":["My files","Shared with me"]}]
 state files=[{"id":"f1","name":"Projects","kind":"folder","size":0,"mod":"Nov 14","age":3,"folder":"Documents"},{"id":"f2","name":"Invoices","kind":"folder","size":0,"mod":"Nov 02","age":15,"folder":"Documents"},{"id":"f3","name":"Q3 Budget.xlsx","kind":"sheet","size":412,"mod":"Nov 12","age":5,"folder":"Documents"},{"id":"f4","name":"Resume 2026.pdf","kind":"pdf","size":186,"mod":"Oct 29","age":19,"folder":"Documents"},{"id":"f5","name":"Meeting notes.docx","kind":"doc","size":64,"mod":"Nov 16","age":1,"folder":"Documents"},{"id":"f6","name":"Logo final.png","kind":"image","size":2310,"mod":"Nov 09","age":8,"folder":"Documents"},{"id":"f7","name":"Product demo.mp4","kind":"video","size":48200,"mod":"Oct 03","age":45,"folder":"Documents"},{"id":"f8","name":"Backup Sept.zip","kind":"archive","size":15800,"mod":"Sep 30","age":48,"folder":"Documents"},{"id":"f9","name":"Lease agreement.pdf","kind":"pdf","size":920,"mod":"Aug 21","age":88,"folder":"Documents"},{"id":"f10","name":"Lisbon 001.jpg","kind":"image","size":3400,"mod":"Jul 14","age":126,"folder":"Trips"},{"id":"f11","name":"Lisbon 002.jpg","kind":"image","size":2980,"mod":"Jul 14","age":126,"folder":"Trips"},{"id":"f12","name":"Roadmap.docx","kind":"doc","size":88,"mod":"Nov 15","age":2,"folder":"Projects"},{"id":"f13","name":"Invoice 1042.pdf","kind":"pdf","size":140,"mod":"Nov 01","age":16,"folder":"Invoices"}]
+state shareLink=""
+state shareEmail=""
+state sharePerm=""
 
 every 400 when uploading onTick={uploads=map(uploads,u=>with(u,"pct",min(100,u.pct+12))); uploading=any(uploads,u=>u.pct<100)}
 
@@ -27,7 +30,7 @@ App
   Sidebar
     Brand "Shelf" icon="folder_open"
     Button "Upload" icon="upload" onTap={open uploadDialog}
-    FolderTree folders={tree} bind=path
+    FolderTree folders={tree} @path
     Spacer grow
     NavItem "Trash" icon="delete" badge="{length(trash)}" onTap={go trash}
     StorageBar used={used} quota={quota}
@@ -35,9 +38,9 @@ App
     Nav
       Breadcrumb crumbs={path} onPick={path=slice(path,0,result+1); sel=[]}
       Row gap=8
-        Input "Search files" bind=q w=220
+        Input "Search files" @q w=220
         IconButton "search" tooltip="Search with filters" onTap={go search}
-        SegmentedButton bind=view items=["list","grid"]
+        SegmentedButton @view items=["list","grid"]
         IconButton "create_new_folder" tooltip="New folder" onTap={files=append(files,{"id":"n{length(files)+1}","name":"Untitled folder","kind":"folder","size":0,"mod":"Today","age":0,"folder":last(path)}); renaming="n{length(files)+1}"}
     Row grow top
       Column grow pad=16 gap=8
@@ -57,26 +60,26 @@ App
             Text.strong "Size" w=90 onTap={sortKey="size"; sortDir=sortDir=="asc" ? "desc" : "asc"}
             Text.strong "Type" w=80 onTap={sortKey="kind"; sortDir=sortDir=="asc" ? "desc" : "asc"}
             Icon "{sortDir=='asc' ? 'arrow_upward' : 'arrow_downward'}" size=16
-          SelectionArea bind=sel onSelect={sel=result}
+          SelectionArea @sel onSelect={sel=result}
             Column scroll
               each f in (sortDir=="asc" ? sortBy(filter(files,x=>x.folder==last(path)),x=>x[sortKey]) : sortByDesc(filter(files,x=>x.folder==last(path)),x=>x[sortKey]))
                 Row#row middle gap=8 pad=[12,8,12,8] radius=6 fill={contains(sel,f.id) ? "#FFDBEAFE" : "#00FFFFFF"} drag=file(f.id) drop=file menu=fileMenu onTap={sel=[f.id]; anchor=index} onCtrlTap={sel=contains(sel,f.id) ? without(sel,f.id) : append(sel,f.id); anchor=index} onShiftTap={sel=map(slice((sortDir=="asc" ? sortBy(filter(files,x=>x.folder==last(path)),x=>x[sortKey]) : sortByDesc(filter(files,x=>x.folder==last(path)),x=>x[sortKey])),min(anchor,index),max(anchor,index)+1),x=>x.id)} onContext={sel=contains(sel,f.id) ? sel : [f.id]} onDoubleTap={f.kind=="folder" ? path=append(path,f.name) : open preview} onDrop={files=updateWhere(files,x=>contains(sel,x.id) || x.id==result.data,x=>with(x,"folder",f.name))}
                   FileIcon kind={f.kind}
                   if renaming == f.id
-                    Input bind=f.name grow autofocus onSubmit={renaming=""}
+                    Input @f.name grow autofocus onSubmit={renaming=""}
                   if renaming != f.id
                     Text f.name grow
                   Text.muted "{f.mod}" w=100
                   Text.muted "{f.kind=='folder' ? '--' : (f.size < 1024 ? f.size + ' KB' : fixed(f.size/1024,1) + ' MB')}" w=90
                   Text.muted "{upper(f.kind)}" w=80
         if view == "grid"
-          SelectionArea bind=sel onSelect={sel=result}
+          SelectionArea @sel onSelect={sel=result}
             Grid cols=5 gap=12 scroll
               each f in (sortDir=="asc" ? sortBy(filter(files,x=>x.folder==last(path)),x=>x[sortKey]) : sortByDesc(filter(files,x=>x.folder==last(path)),x=>x[sortKey]))
                 Card#tile gap=8 center fill={contains(sel,f.id) ? "#FFDBEAFE" : "#FFFFFFFF"} drag=file(f.id) drop=file menu=fileMenu onTap={sel=[f.id]; anchor=index} onCtrlTap={sel=contains(sel,f.id) ? without(sel,f.id) : append(sel,f.id)} onShiftTap={sel=map(slice(files,min(anchor,index),max(anchor,index)+1),x=>x.id)} onContext={sel=contains(sel,f.id) ? sel : [f.id]} onDoubleTap={f.kind=="folder" ? path=append(path,f.name) : open preview} onDrop={files=updateWhere(files,x=>contains(sel,x.id) || x.id==result.data,x=>with(x,"folder",f.name))}
                   FileIcon kind={f.kind} size=48
                   if renaming == f.id
-                    Input bind=f.name autofocus onSubmit={renaming=""}
+                    Input @f.name autofocus onSubmit={renaming=""}
                   if renaming != f.id
                     Text.small f.name center
                   Text.caption "{f.mod}" center
@@ -118,9 +121,9 @@ Dialog#preview "Preview"
     Button "Share" onTap={close; open shareDialog}
 
 Dialog#shareDialog "Share" "Anyone with the link can view"
-  Input "Link" bind=shareLink readonly
-  Input "Invite by email" "name@example.com" bind=shareEmail type=email
-  Select "Permission" bind=sharePerm items=["Can view","Can comment","Can edit"]
+  Input "Link" @shareLink readonly
+  Input "Invite by email" "name@example.com" @shareEmail type=email
+  Select "Permission" @sharePerm items=["Can view","Can comment","Can edit"]
   Row end gap=8
     Button.outline "Copy link" onTap={copy shareLink; toast "Link copied"}
     Button "Send invite" onTap={shareEmail != "" ? toast "Invited {shareEmail}" : toast "Enter an email"; close}
@@ -130,7 +133,7 @@ Dialog#uploadDialog "Upload files" "Choose files to add to {last(path)}"
   Row end gap=8
     Button.outline "Cancel" onTap={close}
 
-define FolderTree bind=path folders=[]
+define FolderTree @path folders=[]
   Column gap=2
     each fo in folders
       NavItem "{fo.name}" icon="folder" selected={last(path) == fo.name} pad=[{fo.depth*16},0,0,0] drop=file onTap={path=fo.path; sel=[]} onDrop={files=updateWhere(files,x=>contains(sel,x.id) || x.id==result.data,x=>with(x,"folder",fo.name)); toast "Moved to {fo.name}"}
@@ -176,7 +179,7 @@ define Snackbar "text" action="" onAction onDismiss
       IconButton "close" tooltip="Dismiss" onTap={onDismiss}
 
 // a rubber-band drag over its children selects the ones it crosses
-define SelectionArea bind=sel onSelect
+define SelectionArea @sel onSelect
   Column grow
     ...
 
@@ -202,11 +205,11 @@ App
   Main
     Nav
       Heading "Search" level=1
-      Input "Search files" bind=q w=320 autofocus
+      Input "Search files" @q w=320 autofocus
     Column pad=24 gap=16
       Row gap=12 wrap
-        Select "Type" bind=kindFilter items=["Any type","folder","pdf","doc","sheet","image","video","archive"]
-        Select "Modified" bind=dateFilter items=["Any time","Today","Past week","Past month"]
+        Select "Type" @kindFilter items=["Any type","folder","pdf","doc","sheet","image","video","archive"]
+        Select "Modified" @dateFilter items=["Any time","Today","Past week","Past month"]
         FilterChip "Images only" selected={kindFilter=="image"} onTap={kindFilter=kindFilter=="image" ? "Any type" : "image"}
         FilterChip "Past week" selected={dateFilter=="Past week"} onTap={dateFilter=dateFilter=="Past week" ? "Any time" : "Past week"}
         Button.ghost "Clear filters" onTap={q=""; kindFilter="Any type"; dateFilter="Any time"}

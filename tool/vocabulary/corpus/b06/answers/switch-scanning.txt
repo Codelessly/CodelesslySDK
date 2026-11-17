@@ -101,6 +101,12 @@ App
       Button "SWITCH" size=large icon="touch_app" holdMs={hold*1000} onHold={kIdx<length(letters) ? {typed=typed+letters[kIdx]; kIdx=0} : {kIdx==length(letters) ? {typed=typed+" "; kIdx=0} : {kIdx==length(letters)+1 ? {typed=slice(typed,0,length(typed)-1); kIdx=0} : {kIdx==length(letters)+2 ? {speech=typed; speak typed; kIdx=0} : {go phrase-scan}}}}}
 
 ### Settings
+state speed=0.5
+state hold=0
+state cue=false
+state cueSound=""
+state backout=false
+state paused=false
 App
   Sidebar
     Brand "Single Switch" icon="touch_app"
@@ -115,21 +121,21 @@ App
       Card gap=12
         Heading "Scan speed" level=3
         Text.muted "How long the highlight rests on each row or tile."
-        Slider bind=speed min=0.5 max=4 step=0.25
+        Slider @speed min=0.5 max=4 step=0.25
         Text.strong "{fixed(speed,2)} seconds per step"
       Card gap=12
         Heading "Hold time" level=3
         Text.muted "How long to hold the switch before it counts as a press. Longer holds ignore tremor."
-        Slider bind=hold min=0 max=2 step=0.1
+        Slider @hold min=0 max=2 step=0.1
         Text.strong "{fixed(hold,1)} seconds"
       Card gap=12
         Heading "Sound cue" level=3
-        Toggle "Tick on every step" bind=cue
-        Select "Cue sound" items=["Soft tick","Click","Spoken row name"] bind=cueSound
+        Toggle "Tick on every step" @cue
+        Select "Cue sound" items=["Soft tick","Click","Spoken row name"] @cueSound
       Card gap=12
         Heading "Back out" level=3
-        Toggle "Offer a back-out step at the end of each pass" bind=backout
+        Toggle "Offer a back-out step at the end of each pass" @backout
       Card gap=12
         Heading "Pause" level=3
-        Toggle "Pause scanning" bind=paused onChange={running=!result}
+        Toggle "Pause scanning" @paused onChange={running=!result}
         Button.outline "Test the speed" onTap={go phrase-scan; running=true}

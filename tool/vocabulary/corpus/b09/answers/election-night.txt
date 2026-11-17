@@ -23,7 +23,7 @@ App
         Text.muted "Reporting"
         Text.strong "{reporting}%"
         Progress {reporting/100} w=160
-        Select bind=party items=["all","LAB","CON","LD","GRN"]
+        Select @party items=["all","LAB","CON","LD","GRN"]
     Column pad=24 gap=16 scroll
       Card gap=8
         Row between
@@ -37,7 +37,7 @@ App
             Row gap=8
               Text.caption "Pale: narrow lead"
               Text.caption "Deep: wide lead"
-          ElectionMap districts={districts} filter={party} shade=margin h=380 bind=sel onSelect={sel=result}
+          ElectionMap districts={districts} filter={party} shade=margin h=380 @sel onSelect={sel=result}
         Column w=320 gap=16
           Card gap=8 center
             Text.muted "Percent reporting"
@@ -69,7 +69,7 @@ App
     Nav
       Heading "Races" level=1
       Row gap=8
-        Input "Search districts" bind=q w=220
+        Input "Search districts" @q w=220
         IconButton "cast" tooltip="Projector mode" onTap={open projector}
     Column pad=24 gap=16 scroll
       Row gap=8
@@ -140,6 +140,9 @@ App
 ### Calls
 state tab="calls"
 state calls=[{"t":"22:04","district":"Ashford North","party":"LAB","kind":"hold"},{"t":"22:31","district":"Corran Heath","party":"CON","kind":"hold"},{"t":"23:12","district":"Eastgate","party":"GRN","kind":"gain"},{"t":"23:47","district":"Dunmere","party":"LD","kind":"gain"},{"t":"00:20","district":"Ashford South","party":"CON","kind":"hold"}]
+state view=""
+state rotate=false
+state hideCursor=false
 Page
   Nav sticky
     Brand "Tallyroom" icon="how_to_vote"
@@ -165,7 +168,7 @@ Page
       Text.strong "Tallyroom"
       Text.muted "Results from returning officers, updated every minute"
   Dialog#projector "Projector mode" "Big type, high contrast, no controls"
-    Select "Show" bind=view items=["Seats bar","Map","Percent reporting"]
-    Toggle "Rotate every 20 seconds" bind=rotate
-    Toggle "Hide cursor" bind=hideCursor
+    Select "Show" @view items=["Seats bar","Map","Percent reporting"]
+    Toggle "Rotate every 20 seconds" @rotate
+    Toggle "Hide cursor" @hideCursor
     Button "Start" icon="cast" onTap={projector=true; fullscreen; close}

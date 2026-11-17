@@ -25,8 +25,8 @@ App
     Nav
       Heading "Overview" level=1
       Row gap=8 center
-        Segments bind=range options=["7d","30d","90d"]
-        Input "Search" bind=q w=220
+        Segments @range options=["7d","30d","90d"]
+        Input "Search" @q w=220
         Button "New order" onTap={emit newOrder}
     Column pad=24 gap=16
       Grid cols=4 gap=16
@@ -46,6 +46,6 @@ App
         Row between center
           Heading "Latest orders" level=3
           Link "View all" onTap={emit viewAll}
-        TableHeader bind=sort desc={desc} columns=["Order","Customer","Total","Date","Status"] keys=["id","customer","total","date","status"]
+        TableHeader @sort desc=@desc columns=["Order","Customer","Total","Date","Status"] keys=["id","customer","total","date","status"]
         each o in orders
           TableRow cells={[o.id,o.customer,money(o.total,"$",2),o.date]} badge={o.status} onPressed={emit openOrder o.id}

@@ -49,5 +49,5 @@ Card w=390 gap=12
   Button.outline "Delivery instructions" onTap={showNote=!showNote}
   if showNote
     Column gap=8
-      Input "Instructions" hint="e.g. Leave with the front desk" bind=note
+      Input "Instructions" hint="e.g. Leave with the front desk" @note
       Button "Save instructions" onTap={emit saveInstructions note; toast "Instructions saved"; showNote=false}

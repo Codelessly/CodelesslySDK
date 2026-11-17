@@ -19,7 +19,7 @@ App
     NavItem "Sensors" icon="sensors" badge="1" onTap={go sensors}
     NavItem "Alerts" icon="notifications" onTap={go alerts}
     Spacer grow
-    Toggle "Night mode" bind=night onChange={emit nightMode result}
+    Toggle "Night mode" @night onChange={emit nightMode result}
     Text.muted "Station RT-01, Leeds"
   Main
     Nav
@@ -82,7 +82,7 @@ App
     NavItem "Sensors" icon="sensors" badge="1" onTap={go sensors}
     NavItem "Alerts" icon="notifications" onTap={go alerts}
     Spacer grow
-    Toggle "Night mode" bind=night
+    Toggle "Night mode" @night
   Main
     Nav
       Heading "History" level=1
@@ -92,7 +92,7 @@ App
       Card gap=12
         Row between
           Text.strong "Temperature"
-          SegmentedButton bind=range items=["day","week","year"]
+          SegmentedButton @range items=["day","week","year"]
         LineChart values={series[range]} labels={labels[range]} h=260
         Row gap=24
           Text.muted "Mean {fixed(sum(series[range],v=>v)/length(series[range]),1)} °C"
@@ -115,7 +115,7 @@ App
     NavItem "Sensors" icon="sensors" badge="1" selected={true}
     NavItem "Alerts" icon="notifications" onTap={go alerts}
     Spacer grow
-    Toggle "Night mode" bind=night
+    Toggle "Night mode" @night
   Main
     Nav
       Heading "Sensor batteries" level=1
@@ -142,6 +142,8 @@ state frostBelow=2
 state gustOn=true
 state gustAbove=60
 state notifyBy="push"
+state alertEmail=""
+state dim=5
 App
   Sidebar
     Brand "Rooftop" icon="cloud"
@@ -150,7 +152,7 @@ App
     NavItem "Sensors" icon="sensors" badge="1" onTap={go sensors}
     NavItem "Alerts" icon="notifications" selected={true}
     Spacer grow
-    Toggle "Night mode" bind=night
+    Toggle "Night mode" @night
   Main
     Nav
       Heading "Alerts and display" level=1
@@ -159,27 +161,27 @@ App
       Card gap=12
         Row between
           Text.strong "Frost alert"
-          Toggle bind=frostOn
+          Toggle @frostOn
         if frostOn
           Text.muted "Warn me when the temperature falls below {frostBelow} °C"
-          Slider bind=frostBelow min=-5 max=6
+          Slider @frostBelow min=-5 max=6
       Card gap=12
         Row between
           Text.strong "Gust alert"
-          Toggle bind=gustOn
+          Toggle @gustOn
         if gustOn
           Text.muted "Warn me when a gust passes {gustAbove} km/h"
-          Slider bind=gustAbove min=20 max=120
+          Slider @gustAbove min=20 max=120
       Card gap=12
         Text.strong "Send alerts by"
-        SegmentedButton bind=notifyBy items=["push","email","off"]
+        SegmentedButton @notifyBy items=["push","email","off"]
         if notifyBy=="email"
-          Input "Email" "you@example.com" type=email bind=alertEmail
+          Input "Email" "you@example.com" type=email @alertEmail
       Card gap=12
         Row between
           Column gap=4
             Text.strong "Night dimming"
             Text.muted "Dims the console and turns the readouts red."
-          Toggle bind=night onChange={emit nightMode result}
+          Toggle @night onChange={emit nightMode result}
         if night
-          Slider "Brightness" bind=dim min=5 max=60
+          Slider "Brightness" @dim min=5 max=60

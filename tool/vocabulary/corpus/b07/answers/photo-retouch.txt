@@ -25,13 +25,13 @@ App
         Heading "Portrait_0412.jpg" level=3
         Text.caption "6000 x 4000 px, edited 2 minutes ago"
       Row gap=8
-        Toggle "Before / after" bind=compare
+        Toggle "Before / after" @compare
         IconButton "layers" tooltip="Layers and history" onTap={go layers}
         Button "Export" icon="ios_share" onTap={open export}
     Column pad=24 gap=16
       Card pad=0
         Stack h=460
-          BeforeAfter before="https://images.example.com/retouch/portrait_0412_original.jpg" after="https://images.example.com/retouch/portrait_0412_edit.jpg" bind=split visible={compare} exposure={exposure} contrast={contrast} warmth={warmth} clarity={clarity}
+          BeforeAfter before="https://images.example.com/retouch/portrait_0412_original.jpg" after="https://images.example.com/retouch/portrait_0412_edit.jpg" @split visible={compare} exposure={exposure} contrast={contrast} warmth={warmth} clarity={clarity}
           Image "https://images.example.com/retouch/portrait_0412_edit.jpg" hidden={compare}
           BrushCursor size={brushSize} feather={brushFeather} visible={tool=="brush"}
           CropOverlay ratio="4:5" onChange={emit cropChange result} visible={tool=="crop"}
@@ -47,12 +47,12 @@ App
               Row between
                 Text.fieldLabel "Size"
                 Text.muted "{brushSize} px"
-              Slider bind=brushSize min=2 max=300
+              Slider @brushSize min=2 max=300
             Column gap=4 w=220
               Row between
                 Text.fieldLabel "Feather"
                 Text.muted "{brushFeather}%"
-              Slider bind=brushFeather min=0 max=100
+              Slider @brushFeather min=0 max=100
         if tool=="heal"
           Text.muted "Click a blemish to heal it, drag to cover a larger area."
         if tool=="crop"
@@ -76,39 +76,39 @@ App
         Row gap=8
           Text.muted "{exposure}"
           IconButton "fiber_manual_record" tooltip="Reset exposure" size=small hidden={exposure==0} onTap={exposure=0}
-      Slider bind=exposure min=-100 max=100
+      Slider @exposure min=-100 max=100
     Column gap=4
       Row between
         Text.fieldLabel "Contrast"
         Row gap=8
           Text.muted "{contrast}"
           IconButton "fiber_manual_record" tooltip="Reset contrast" size=small hidden={contrast==0} onTap={contrast=0}
-      Slider bind=contrast min=-100 max=100
+      Slider @contrast min=-100 max=100
     Column gap=4
       Row between
         Text.fieldLabel "Warmth"
         Row gap=8
           Text.muted "{warmth}"
           IconButton "fiber_manual_record" tooltip="Reset warmth" size=small hidden={warmth==0} onTap={warmth=0}
-      Slider bind=warmth min=-100 max=100
+      Slider @warmth min=-100 max=100
     Column gap=4
       Row between
         Text.fieldLabel "Clarity"
         Row gap=8
           Text.muted "{clarity}"
           IconButton "fiber_manual_record" tooltip="Reset clarity" size=small hidden={clarity==0} onTap={clarity=0}
-      Slider bind=clarity min=-100 max=100
+      Slider @clarity min=-100 max=100
   Dialog#export "Export" "Save the edited photo"
     state format="JPEG"
     state quality=90
     state longEdge="3000"
-    SegmentedButton bind=format items=["JPEG","PNG","WebP"]
-    Select "Long edge" bind=longEdge items=["1080","2048","3000","6000 (original)"]
+    SegmentedButton @format items=["JPEG","PNG","WebP"]
+    Select "Long edge" @longEdge items=["1080","2048","3000","6000 (original)"]
     Column gap=4
       Row between
         Text.fieldLabel "Quality"
         Text.muted "{quality}"
-      Slider bind=quality min=10 max=100
+      Slider @quality min=10 max=100
     Text.caption "Estimated file size: {fixed(quality*0.05,1)} MB"
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
@@ -135,7 +135,7 @@ App
               Image "https://images.example.com/retouch/thumb_{l.id}.jpg" w=48 h=48 radius=6
               Text.strong "{l.name}"
             Row gap=12
-              Slider bind=l.opacity min=0 max=100 w=140
+              Slider @l.opacity min=0 max=100 w=140
               Text.muted "{l.opacity}%" w=44
               IconButton "more_vert" tooltip="Layer menu" onTap={sel=l.id; open layerMenu}
   Pane w=320 pad=16 gap=12

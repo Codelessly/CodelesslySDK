@@ -4,6 +4,7 @@ state level="L450"
 state sel="n3"
 state acked=[]
 state notes=[{"id":"n1","level":"L450","face":"East Drive 12","tag":"blast done","color":"#FFE65100","text":"Blast fired 05:40, 38 holes, one misfire reported. Re-entry after 30 min vent.","by":"Tomas Eriksen"},{"id":"n2","level":"L450","face":"Crosscut 7","tag":"water","color":"#FF1565C0","text":"Seepage at back, sump pump running. Check discharge hose each hour.","by":"Tomas Eriksen"},{"id":"n3","level":"L450","face":"West Drive 4","tag":"loose ground","color":"#FFC62828","text":"Loose ground in the left wall, 2 m from face. Scaled once, rebar bolts needed.","by":"Amara Okafor"},{"id":"n4","level":"L520","face":"Stope 3N","tag":"blast done","color":"#FFE65100","text":"Production blast done, muck pile approx 420 t. Barricade up at entry.","by":"Amara Okafor"},{"id":"n5","level":"L520","face":"Ramp 2","tag":"water","color":"#FF1565C0","text":"Standing water 30 cm at the ramp bend, grader slowed.","by":"Jonas Lindqvist"}]
+state marks=""
 every 1s onTick={clock=clock+1}
 state clock=0
 App
@@ -25,17 +26,17 @@ App
     Column pad=24 gap=16
       Row gap=24 top
         Column grow gap=12
-          SegmentedButton bind=level items=["L450","L520","L600"]
+          SegmentedButton @level items=["L450","L520","L600"]
           Card gap=8
             Row between
               Text.strong "Cross-section, {level}"
               Text.muted "Tap a marker to read its note"
-            TunnelMap levels=["L450","L520","L600"] bind=level h=320 onSelect={sel=result.id}
+            TunnelMap levels=["L450","L520","L600"] @level h=320 onSelect={sel=result.id}
               each n in notes
                 Marker "{n.tag}" at="{n.face}" level={n.level} color={n.color} id={n.id} selected={sel==n.id} onTap={sel=n.id}
           Card gap=8
             Text.strong "Face photo, West Drive 4"
-            PhotoMarkup src="https://example.com/photos/west-drive-4.jpg" h=220 bind=marks onChange={emit marks result} tools=["pen","arrow","circle"]
+            PhotoMarkup src="https://example.com/photos/west-drive-4.jpg" h=220 @marks onChange={emit marks result} tools=["pen","arrow","circle"]
             Row gap=8
               Button.outline "Undo mark" onTap={marks=removeAt(marks,length(marks)-1)}
               Button.outline "Clear" onTap={marks=[]}
@@ -55,7 +56,7 @@ App
               Text.caption "{n.by}"
           if length(filter(notes, x=>x.level==level))==0
             Text.muted "No notes on this level."
-          Progress "{length(acked)} of {length(notes)}" bind=ackShare
+          Progress "{length(acked)} of {length(notes)}" value={ackShare}
           Text.caption "{length(acked)} of {length(notes)} acknowledged"
 state ackShare=0
 
@@ -63,6 +64,7 @@ state ackShare=0
 state filter="all"
 state eq=[{"id":"e1","name":"Jumbo drill DD-07","state":"fit","note":"Serviced 3 days ago","where":"L450 East Drive"},{"id":"e2","name":"LHD loader ST-14","state":"faulty","note":"Hydraulic leak at boom cylinder","where":"L520 Ramp 2"},{"id":"e3","name":"Scaler SC-02","state":"fit","note":"Fuel 80%","where":"L450 West Drive"},{"id":"e4","name":"Haul truck MT-31","state":"parked","note":"Awaiting tyre change","where":"Surface workshop"},{"id":"e5","name":"Bolter RB-05","state":"faulty","note":"Feed chain worn, tag out","where":"L450 West Drive"},{"id":"e6","name":"Sump pump P-12","state":"fit","note":"Running continuously","where":"L450 Crosscut 7"}]
 state selEq=""
+state q=""
 App
   Sidebar
     Brand "Changeover" icon="engineering"
@@ -75,7 +77,7 @@ App
     Nav
       Heading "Equipment" level=1
       Row gap=8
-        Input "Search equipment" bind=q w=220
+        Input "Search equipment" @q w=220
         Button "Sign handover" onTap={go signoff}
     Column pad=24 gap=16
       Row gap=8
@@ -106,7 +108,7 @@ App
   Dialog#eqDetail "Equipment detail" "Change the status before handover"
     Text.strong "{find(eq,x=>x.id==selEq).name}"
     Text.muted "{find(eq,x=>x.id==selEq).where}"
-    Input "Note for incoming crew" multiline bind=eqNote
+    Input "Note for incoming crew" multiline @eqNote
     Row gap=8 end
       Button.outline "Close" onTap={close}
       Button "Save note" onTap={eq=updateWhere(eq,x=>x.id==selEq,x=>with(x,"note",eqNote)); toast "Saved"; close}
@@ -183,8 +185,8 @@ App
         Text.body "Underground not yet out: {length(crewOut)-length(left)}"
       Card gap=12
         Text.strong "Incoming supervisor signature"
-        Input "Full name" bind=signName
-        SignaturePad bind=signature h=140
+        Input "Full name" @signName
+        SignaturePad @signature h=140
         Row gap=8
           Button.outline "Clear" onTap={signature=""}
           Button "Sign handover" onTap={length(acked)==length(notes) && trim(signName)!="" && signature!="" ? signed=true; open done : toast "Acknowledge every note, then name and sign"}

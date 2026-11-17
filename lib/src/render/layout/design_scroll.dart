@@ -13,6 +13,22 @@ import 'package:flutter/physics.dart';
 
 import '../view_scroll.dart' show RenderSticky;
 
+/// A render object around scrolling content that takes a vertical drag
+/// before the content does: a bottom sheet with height stops grows to its
+/// top stop before its content scrolls, and shrinks once the content is
+/// back at its start (as Flutter's DraggableScrollableSheet).
+abstract interface class ScrollDragGate {
+  /// Takes what it wants of a finger's move [dy] (positive: down) and
+  /// returns the rest, for the content to scroll by. [contentAtStart]: the
+  /// content is scrolled to its start.
+  double dragBy(double dy, {required bool contentAtStart});
+
+  /// The finger lifted at [velocity] (pixels a second, positive: down)
+  /// after the gate took some of the drag; true when it settled (the
+  /// content does not coast).
+  bool dragEnd(double velocity);
+}
+
 class RenderDesignScroll extends RenderProxyBox implements MouseTrackerAnnotation {
   RenderDesignScroll({
     required this._axis,
@@ -397,13 +413,58 @@ class RenderDesignScroll extends RenderProxyBox implements MouseTrackerAnnotatio
   int get userScrolls => _userScrolls;
   int _userScrolls = 0;
 
+  /// The resizable sheet this drag is handed to first, and whether it took
+  /// any of it (then the release settles the sheet, and the content does
+  /// not coast).
+  ScrollDragGate? _gate;
+  bool _gated = false;
+
+  /// The [ScrollDragGate] around this scroll view, when it is the outermost
+  /// vertical one inside it (a list inside a sheet's scrolling content
+  /// scrolls on its own).
+  ScrollDragGate? _findGate() {
+    if (_axis != Axis.vertical || _reverse) return null;
+    for (RenderObject? p = parent; p != null; p = p.parent) {
+      if (p is ScrollDragGate) return p as ScrollDragGate;
+      if (p is RenderDesignScroll && p._interactive && p._axis == Axis.vertical && p.maxScrollExtent > 0) return null;
+    }
+    return null;
+  }
+
   void _ensureDrag() {
     if (_drag != null) return;
     final drag = _axis == Axis.vertical ? VerticalDragGestureRecognizer(debugOwner: this) : HorizontalDragGestureRecognizer(debugOwner: this);
-    drag.onStart = (_) { _userScrolls++; _stop(); };
-    drag.onUpdate = (d) { _setPixels(_pixels + (d.primaryDelta ?? 0) * (_reverse ? 1 : -1)); };
-    drag.onEnd = (d) { _fling((d.primaryVelocity ?? 0) * (_reverse ? 1 : -1)); };
-    drag.onCancel = () { onScrollEnd?.call(metrics); };
+    drag.onStart = (_) {
+      _userScrolls++;
+      _stop();
+      _gate = _findGate();
+      _gated = false;
+    };
+    drag.onUpdate = (d) {
+      var delta = d.primaryDelta ?? 0;
+      final gate = _gate;
+      // Up, the gate first; down, the content back to its start first and
+      // what is left past it to the gate.
+      if (gate != null && (delta < 0 || delta > _pixels)) {
+        final mine = delta < 0 ? 0.0 : _pixels;
+        final rest = delta - mine;
+        final left = gate.dragBy(rest, contentAtStart: true);
+        if (left != rest) _gated = true;
+        delta = mine + left;
+      }
+      _setPixels(_pixels + delta * (_reverse ? 1 : -1));
+    };
+    drag.onEnd = (d) {
+      final gate = _gate;
+      _gate = null;
+      if (gate != null && _gated && gate.dragEnd(d.primaryVelocity ?? 0)) return;
+      _fling((d.primaryVelocity ?? 0) * (_reverse ? 1 : -1));
+    };
+    drag.onCancel = () {
+      if (_gated) _gate?.dragEnd(0);
+      _gate = null;
+      onScrollEnd?.call(metrics);
+    };
     _drag = drag;
   }
 

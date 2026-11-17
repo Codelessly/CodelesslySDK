@@ -33,14 +33,14 @@ App
           FilterChip "Animal" selected={contains(cats,"animal")} onTap={cats=contains(cats,"animal") ? without(cats,"animal") : append(cats,"animal")}
           FilterChip "Action" selected={contains(cats,"action")} onTap={cats=contains(cats,"action") ? without(cats,"action") : append(cats,"action")}
         Text.strong "Difficulty"
-        SegmentedButton bind=level items=["Easy","Medium","Hard"]
+        SegmentedButton @level items=["Easy","Medium","Hard"]
         Text.muted "{count(deck,c=>contains(cats,c.cat) && c.d==level)} cards match"
       Card gap=12
         Text.strong "Teams"
         each t in teams
           Row gap=12 middle
             Avatar "{t.name}" size=40
-            Input "Team name" bind=t.name grow
+            Input "Team name" @t.name grow
             Text.strong "{scores[index]}"
         Row gap=8
           Button.outline "Add a team" onTap={teams=append(teams,{"name":"Team " + (length(teams)+1)}); scores=append(scores,0)}
@@ -89,7 +89,7 @@ App
           Ring {left/60} size=160 color=#FFDC2626 animate=pulse
         Text "{left}" size=56 weight=700 color={left<=10 ? "#FFDC2626" : "#FF111827"}
       Text.muted "seconds left"
-      HoldReveal word={pool[idx % length(pool)].word} category={pool[idx % length(pool)].cat} bind=revealed
+      HoldReveal word={pool[idx % length(pool)].word} category={pool[idx % length(pool)].cat} @revealed
       Row gap=12 center
         Button.outline "Pass" icon="skip_next" size=large disabled={!running} onTap={played=append(played,{"word":pool[idx % length(pool)].word,"ok":false}); streak=0; idx=idx+1; revealed=false}
         Button "Got it" icon="check" size=large disabled={!running} onTap={scores=setAt(scores,team,scores[team]+1); streak=streak+1; best=max(best,streak+1); played=append(played,{"word":pool[idx % length(pool)].word,"ok":true}); idx=idx+1; revealed=false; toast "+1 for {teams[team].name}"}
@@ -169,7 +169,7 @@ Page
     Button "Back to setup" onTap={go setup}
 
 // A card that hides its word until the player presses and holds; the hold itself (press and release events) cannot be drawn, so it shows the word on a tap toggle.
-define HoldReveal word="" category="film" bind=revealed
+define HoldReveal word="" category="film" @revealed
   state revealed=false
   Card gap=8 center fill={revealed ? "#FFFEF3C7" : "#FF1F2937"} h=180 onTap={revealed=!revealed}
     Badge.neutral "{upper(category)}"

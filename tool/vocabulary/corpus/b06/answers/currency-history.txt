@@ -37,14 +37,14 @@ App
           Column grow gap=4
             Text.caption "You send"
             Text "{active=="from" ? entry : fixed(entry/rate,2)}" size=44 weight=700
-          Select bind=from items=["USD","EUR","GBP","JPY","CHF","CAD","AUD"] w=110
+          Select @from items=["USD","EUR","GBP","JPY","CHF","CAD","AUD"] w=110
         Row center
           IconButton "swap_vert" tooltip="Swap currencies" onTap={from=to; to=from; rate=round(1/rate,4); active="from"}
         Row gap=12 middle onTap={active="to"}
           Column grow gap=4
             Text.caption "They receive"
             Text "{active=="to" ? entry : fixed(entry*rate,2)}" size=44 weight=700
-          Select bind=to items=["EUR","USD","GBP","JPY","CHF","CAD","AUD"] w=110
+          Select @to items=["EUR","USD","GBP","JPY","CHF","CAD","AUD"] w=110
         Text.muted "1 {from} = {rate} {to}"
       Grid cols=3 gap=8
         Button.outline "1" onTap={entry=entry=="0" ? "1" : entry+"1"}
@@ -75,7 +75,7 @@ App
         Row between
           Text.danger "You lose to the bank"
           Text.danger "{fixed(entry*rate*bankFee/100,2)} {to}"
-        Slider bind=bankFee min=0 max=6
+        Slider @bankFee min=0 max=6
         Text.caption "Drag to try your bank's fee."
 
 ### Rate history
@@ -99,14 +99,14 @@ App
   Main
     Nav
       Heading "{pair}"
-      Select bind=pair items=["USD/EUR","GBP/USD","USD/JPY","EUR/CHF"] w=140
+      Select @pair items=["USD/EUR","GBP/USD","USD/JPY","EUR/CHF"] w=140
     Column pad=24 gap=16 scroll
       Row between middle
         Column gap=2
           Text "{point==null ? last(series[range]) : point.value}" size=40 weight=700
           Text.muted "{point==null ? "Latest" : point.label}"
         Badge.success "+0.34% this {range}"
-      SegmentedButton bind=range items=["1W","1M","3M","1Y"]
+      SegmentedButton @range items=["1W","1M","3M","1Y"]
       Card gap=8
         LineChart values={series[range]} labels={labels[range]} h=260 onScrub={point=result} onRelease={point=null}
         Text.caption "Drag along the line to read the rate on a date."
@@ -128,6 +128,8 @@ App
 state favs=[{"pair":"USD/EUR","rate":0.9234,"change":0.34},{"pair":"GBP/USD","rate":1.2671,"change":-0.12},{"pair":"USD/JPY","rate":151.82,"change":0.58},{"pair":"EUR/CHF","rate":0.9648,"change":-0.07}]
 state sel=""
 state offline=true
+state newFrom=""
+state newTo=""
 App
   Sidebar
     Brand "Rate Room" icon="currency_exchange"
@@ -165,8 +167,8 @@ App
     MenuItem "Remove" icon="delete" onTap={favs=removeWhere(favs,f=>f.pair==sel); toast "Removed {sel}"}
   Dialog#addPair "Add a pair" "Pick two currencies to follow"
     Row gap=8
-      Select "From" bind=newFrom items=["USD","EUR","GBP","JPY","CHF","CAD","AUD"] grow
-      Select "To" bind=newTo items=["EUR","USD","GBP","JPY","CHF","CAD","AUD"] grow
+      Select "From" @newFrom items=["USD","EUR","GBP","JPY","CHF","CAD","AUD"] grow
+      Select "To" @newTo items=["EUR","USD","GBP","JPY","CHF","CAD","AUD"] grow
     Button "Add" onTap={favs=append(favs,{"pair":newFrom + "/" + newTo,"rate":1.0,"change":0}); close; toast "Pair added"}
 
 ### Alerts
@@ -194,12 +196,12 @@ App
     Column pad=24 gap=16 scroll
       Card gap=12
         Heading "New alert" level=3
-        Select "Pair" bind=pairA items=["USD/EUR","GBP/USD","USD/JPY","EUR/CHF"]
-        SegmentedButton bind=direction items=["rises above","falls below"]
-        Input "Target rate" bind=target type=number
+        Select "Pair" @pairA items=["USD/EUR","GBP/USD","USD/JPY","EUR/CHF"]
+        SegmentedButton @direction items=["rises above","falls below"]
+        Input "Target rate" @target type=number
         Text.muted "Now 0.9234. Your target is {fixed(abs(target-0.9234)/0.9234*100,2)}% away."
-        Toggle "Push notification" bind=notify
-        Toggle "Email me" bind=email
+        Toggle "Push notification" @notify
+        Toggle "Email me" @email
         Button "Create alert" onTap={target>0 ? {alerts=append(alerts,{"id":length(alerts)+10,"pair":pairA,"dir":direction,"target":target,"on":true}); toast "Alert set for {pairA}"} : toast "Enter a target rate"}
       Heading "Active alerts" level=3
       if isEmpty(alerts)
@@ -210,5 +212,5 @@ App
             Column grow gap=2
               Text.strong "{a.pair}"
               Text.muted "When it {a.dir} {a.target}"
-            Toggle bind=a.on
+            Toggle @a.on
             IconButton "delete" tooltip="Delete alert" onTap={alerts=removeWhere(alerts,x=>x.id==a.id); toast "Alert deleted"}

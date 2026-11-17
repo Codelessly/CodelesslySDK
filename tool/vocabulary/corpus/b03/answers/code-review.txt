@@ -8,6 +8,7 @@ state reviewers=[{"name":"Priya Nair","state":"approved"},{"name":"Tomas Berg","
 state diff=[{"n":12,"kind":"ctx","code":"  Duration delayFor(int attempt) {","thread":""},{"n":13,"kind":"del","code":"    return Duration(seconds: attempt * 2);","thread":""},{"n":13,"kind":"add","code":"    final ms = base.inMilliseconds * pow(2, attempt);","thread":"t1"},{"n":14,"kind":"add","code":"    return Duration(milliseconds: ms.toInt());","thread":""},{"n":15,"kind":"ctx","code":"  }","thread":""},{"n":16,"kind":"ctx","code":"","thread":""},{"n":17,"kind":"add","code":"  bool shouldRetry(int status) => status >= 500;","thread":"t2"}]
 state threads=[{"id":"t1","author":"Tomas Berg","body":"This grows without limit. Cap it so attempt 20 does not wait for days.","suggest":"    final ms = min(maxDelay.inMilliseconds, base.inMilliseconds * pow(2, attempt));","resolved":false,"draft":"","replies":[{"author":"Ana Souza","body":"Good catch, will add a cap."}]},{"id":"t2","author":"Priya Nair","body":"Should 429 be retried too?","suggest":"","resolved":false,"draft":"","replies":[]}]
 state showResolved=false
+state asSuggestion=false
 every 3s when count(checks,c=>c.status=="running")>0 onTick={checks=updateWhere(checks,c=>c.status=="running",c=>with(c,"status","passed"))}
 App
   Sidebar
@@ -16,7 +17,7 @@ App
     Progress {count(files,f=>contains(viewed,f.path))/length(files)}
     each f in files
       Row gap=8 middle
-        Checkbox bind=f.done selected={contains(viewed,f.path)} onChange={result ? viewed=append(viewed,f.path) : viewed=without(viewed,f.path)}
+        Checkbox @f.done selected={contains(viewed,f.path)} onChange={result ? viewed=append(viewed,f.path) : viewed=without(viewed,f.path)}
         NavItem "{f.path}" selected={current==f.path} onTap={current=f.path}
         Badge.success "+{f.add}"
         Badge.error "-{f.del}"
@@ -33,12 +34,12 @@ App
         Button.outline "Review changes" onTap={open review}
         IconButton "more_vert" tooltip="More" onTap={open prMenu}
     Column pad=24 gap=16
-      Tabs bind=tab items=["Conversation","Files changed","Checks"] onChange={tab=="Conversation" ? go conversation : toast "Showing files"}
+      Tabs @tab items=["Conversation","Files changed","Checks"] onChange={tab=="Conversation" ? go conversation : toast "Showing files"}
       Row gap=16 top
         Column grow gap=12
           Row between
             Text.mono "{current}"
-            Toggle "Show resolved threads" bind=showResolved
+            Toggle "Show resolved threads" @showResolved
           Card gap=0
             each l in diff
               Row gap=12 fill={l.kind=="add" ? #1A2EA043 : l.kind=="del" ? #1AF85149 : #00000000}
@@ -67,7 +68,7 @@ App
                         Column grow
                           Text.strong "{r.author}"
                           Text "{r.body}"
-                    Input "Reply" bind=t.draft
+                    Input "Reply" @t.draft
                     Row gap=8
                       Button "Reply" onTap={t.draft != "" ? threads=updateWhere(threads,x=>x.id==t.id,x=>with(with(x,"replies",append(x.replies,{"author":"Ana Souza","body":x.draft})),"draft","")) : toast "Write a reply first"}
                       Button.ghost "{t.resolved ? "Unresolve" : "Resolve conversation"}" onTap={threads=updateWhere(threads,x=>x.id==t.id,x=>with(x,"resolved",!x.resolved))}
@@ -100,17 +101,17 @@ App
   Dialog#review "Finish your review" "Your comments are posted with it"
     state verdict="comment"
     state summary=""
-    Input "Summary" multiline bind=summary
-    Radio "Comment" bind=verdict value="comment"
-    Radio "Approve" bind=verdict value="approve"
-    Radio "Request changes" bind=verdict value="changes"
+    Input "Summary" multiline @summary
+    Radio "Comment" @verdict value="comment"
+    Radio "Approve" @verdict value="approve"
+    Radio "Request changes" @verdict value="changes"
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Submit review" onTap={emit submitReview {"verdict":verdict,"summary":summary}; toast "Review submitted"; close}
   Dialog#newComment "Add a comment"
     state draftBody=""
-    Input "Comment" multiline bind=draftBody
-    Toggle "Suggest a change" bind=asSuggestion
+    Input "Comment" multiline @draftBody
+    Toggle "Suggest a change" @asSuggestion
     Button "Start thread" onTap={draftBody != "" ? emit newThread draftBody; close : toast "Write a comment first"}
   Menu#prMenu end
     MenuItem "Copy link" icon="link" onTap={copy "https://github.com/lintroller/app/pull/482"; toast "Copied"}
@@ -141,7 +142,7 @@ App
           Text.muted "#482 · ana/backoff-cap into main"
       Button.outline "Back to files" onTap={go files-changed}
     Column pad=24 gap=16 scroll
-      Tabs bind=tab items=["Conversation","Files changed","Checks"] onChange={tab=="Files changed" ? go files-changed : toast "Already here"}
+      Tabs @tab items=["Conversation","Files changed","Checks"] onChange={tab=="Files changed" ? go files-changed : toast "Already here"}
       Row gap=16 top
         Column grow gap=16
           Timeline
@@ -150,7 +151,7 @@ App
                 Text "{e.text}"
           Card gap=8
             Heading "Add a comment" level=3
-            Input "Leave a comment" multiline bind=comment
+            Input "Leave a comment" multiline @comment
             Row end gap=8
               Button.outline "Close with comment" onTap={emit closePr}
               Button "Comment" onTap={comment != "" ? events=append(events,{"id":length(events)+1,"kind":"comment","who":"Ana Souza","text":comment,"when":"Now"}); comment="" : toast "Write a comment first"}
@@ -180,8 +181,8 @@ App
   Dialog#review "Finish your review"
     state verdict="comment"
     state summary=""
-    Input "Summary" multiline bind=summary
-    SegmentedButton bind=verdict items=["Comment","Approve","Request changes"]
+    Input "Summary" multiline @summary
+    SegmentedButton @verdict items=["Comment","Approve","Request changes"]
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Submit review" onTap={emit submitReview {"verdict":verdict,"summary":summary}; events=append(events,{"id":length(events)+1,"kind":"review","who":"Ana Souza","text":"{verdict}: {summary}","when":"Now"}); close}

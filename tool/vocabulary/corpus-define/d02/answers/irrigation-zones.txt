@@ -39,11 +39,11 @@ App
           Card gap=12
             Row between middle
               Text.strong "Rain delay"
-              Toggle bind=rainDelay
+              Toggle @rainDelay
             if rainDelay
               Row gap=12 middle
                 Text.muted "Skip scheduled runs for"
-                Stepper bind=delayDays min=1 max=7 step=1 unit="days"
+                Stepper @delayDays min=1 max=7 step=1 unit="days"
               Text.muted "Next runs resume {delayDays} days from today."
             if !rainDelay
               Text.muted "Schedules run as planned."
@@ -51,7 +51,7 @@ App
           Card gap=12
             Text.strong "Soil moisture"
             Row gap=16 middle
-              MoistureTube bind=moisture
+              MoistureTube @moisture
               Column gap=4
                 Text "{moisture}%" size=32 weight=700
                 Text.muted "Bed sensor, 5 min ago"
@@ -68,10 +68,10 @@ App
               Text.muted "Next run"
               Text.strong "Vegetable beds, 07:00"
   Dialog#manual "Manual run" "Water one zone right now"
-    Select "Zone" bind=sel items=["Front lawn","Vegetable beds","Rose border","Back lawn","Drip hedge","Greenhouse"]
+    Select "Zone" @sel items=["Front lawn","Vegetable beds","Rose border","Back lawn","Drip hedge","Greenhouse"]
     Row between middle
       Text "Run for"
-      Stepper bind=minutes min=5 max=60 step=5 unit="min"
+      Stepper @minutes min=5 max=60 step=5 unit="min"
     Button "Start" onTap={zones=updateWhere(zones,z=>z.id==sel,z=>with(with(z,"running",true),"left",minutes)); toast "Running for {minutes} min"; close}
 
 ### Schedule
@@ -95,7 +95,7 @@ App
             Text.strong "Season adjust"
             Text.muted "Scales every zone's run time"
           Text.strong "{seasonAdjust}%"
-        Slider bind=seasonAdjust min=20 max=200
+        Slider @seasonAdjust min=20 max=200
         Text.muted "Front lawn runs {round(find(zones,z=>z.id==1).dur*seasonAdjust/100,0)} min instead of {find(zones,z=>z.id==1).dur}."
       Row gap=8 scroll
         each z in zones
@@ -106,7 +106,7 @@ App
             Row between middle
               Text.strong "{z.name}"
               Text.muted "{z.start}:00 for {round(z.dur*seasonAdjust/100,0)} min, drag the bar to change the start"
-            DayGrid bind=z.start days=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] on=["Mon","Wed","Fri","Sun"] dur={round(z.dur*seasonAdjust/100,0)} onChange={zones=updateWhere(zones,x=>x.id==z.id,x=>with(x,"start",result))}
+            DayGrid @z.start days=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] on=["Mon","Wed","Fri","Sun"] dur={round(z.dur*seasonAdjust/100,0)} onChange={zones=updateWhere(zones,x=>x.id==z.id,x=>with(x,"start",result))}
       Card gap=8
         Text.strong "All zones"
         each z in zones
@@ -171,13 +171,13 @@ define ZoneTile name="" running=false left=0 fault=false onTap
       Text.muted "Off"
 
 // A tube shaped level gauge that fills from the bottom.
-define MoistureTube bind=level
+define MoistureTube @level
   state level=50
   Box w=44 h=180 radius=22 border=2 clip
     Column end h=fill
       Box h={level*1.8} w=fill fill=#FF3B82F6
 
-define Stepper bind=value min=0 max=100 step=1 unit=""
+define Stepper @value min=0 max=100 step=1 unit=""
   state value=0
   Row gap=8 middle
     IconButton "remove" tooltip="Less" onTap={value=max(min,value-step)}
@@ -185,7 +185,7 @@ define Stepper bind=value min=0 max=100 step=1 unit=""
     IconButton "add" tooltip="More" onTap={value=min(max,value+step)}
 
 // Rows are days, columns are hours from 5 to 12; the bar is dragged onto another hour to move the start.
-define DayGrid bind=start days=[] on=[] dur=20 onChange
+define DayGrid @start days=[] on=[] dur=20 onChange
   state start=6
   Column gap=4
     Row gap=2

@@ -19,8 +19,8 @@ App
     Nav
       Heading "{mode} board" level=1
       Row gap=8
-        SegmentedButton bind=mode items=["Departures","Arrivals"]
-        Select bind=zone2 items=["Tokyo","London","New York","Dubai"]
+        SegmentedButton @mode items=["Departures","Arrivals"]
+        Select @zone2 items=["Tokyo","London","New York","Dubai"]
     Column pad=24 gap=16
       Row gap=8 wrap
         each t in ["All","A","B","C"]
@@ -104,7 +104,7 @@ define WeatherPanel temp=0 condition="" visibility=0 gust=0 windDir=0 windSpeed=
     Box w=120 h=120 radius=60 border=1 center middle
       Text.caption "Wind from {windDir}°"
       Text.strong "{windSpeed} kt"
-    Gauge bind=gust min=0 max=60 limit=40 unit="kt"
+    Gauge value={gust} min=0 max=60 limit=40 unit="kt"
     Row between
       Text.muted "Visibility"
       Text.strong "{visibility} km"
@@ -125,7 +125,7 @@ App
   Main
     Nav
       Heading "Gate occupancy" level=1
-      SegmentedButton bind=gateTerm items=["A","B","C"]
+      SegmentedButton @gateTerm items=["A","B","C"]
     Column pad=24 gap=16
       Grid cols=4 gap=12
         each g in range(8)

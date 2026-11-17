@@ -14,10 +14,10 @@ App
     Row between
       Text.strong "Guests"
       Badge.warning "{count(guests,g=>g.table==\"\")} unseated"
-    SearchBar "Search guests" bind=q
+    SearchBar "Search guests" @q
     Row gap=8
-      Select "Side" items=["All","Bride's family","Groom's family","Friends","Colleagues"] bind=side
-      Select "Diet" items=["Any","None","Vegetarian","Vegan","Gluten-free","Nut allergy"] bind=diet
+      Select "Side" items=["All","Bride's family","Groom's family","Friends","Colleagues"] @side
+      Select "Diet" items=["Any","None","Vegetarian","Vegan","Gluten-free","Nut allergy"] @diet
     Column gap=6 scroll drop=guest onDrop={guests=updateWhere(guests,g=>g.id==result.data,g=>with(g,"table",""))}
       Text.caption "Drag a guest onto a table. Drop one here to unseat."
       each g in filter(guests,x=>(side=="All"||x.side==side)&&(diet=="Any"||x.diet==diet)&&contains(lower(x.name),lower(q)))
@@ -46,8 +46,8 @@ App
     MenuItem "Clear table" icon="person_remove" onTap={guests=updateWhere(guests,g=>g.table==sel,g=>with(g,"table",""))}
     MenuItem "Remove table" icon="delete" onTap={guests=updateWhere(guests,g=>g.table==sel,g=>with(g,"table","")); tables=removeWhere(tables,t=>t.id==sel)}
   Dialog#autoseat "Auto-seat a group" "Seats every unseated guest in the group at one table."
-    Select "Group" items=["Bride's family","Groom's family","Friends","Colleagues"] bind=grp
-    Select "Table" items=map(tables,t=>t.id) bind=target
+    Select "Group" items=["Bride's family","Groom's family","Friends","Colleagues"] @grp
+    Select "Table" items=map(tables,t=>t.id) @target
     Text.muted "{count(guests,g=>g.table==\"\"&&g.side==grp)} unseated guests in this group."
     Button "Seat them" onTap={guests=updateWhere(guests,g=>g.table==""&&g.side==grp,g=>with(g,"table",target)); toast "Group seated"; close}
 

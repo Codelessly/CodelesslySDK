@@ -1,5 +1,5 @@
-// A list of dated entries down a rail: each item a record with a date or time, a title and a note (items=[…]; a text is its title), then the lines written under it; the selected one (its index, kept in bind or shown with selected=) is ringed, and a tap picks one.
-Timeline.vertical#events items=[] bind=at selected onPick
+// A list of dated entries down a rail: each item a record with a date or time, a title and a note (items=[…]; a text is its title), then the lines written under it; the selected one (its index, kept in the variable bound, @at, or shown with selected=) is ringed, and a tap picks one.
+Timeline.vertical#events items=[] @at selected onPick
   state at=-1
   Column w=fill gap=12 pad=[12,0,0,0] border-left=line
     if length(items) > 0
@@ -32,7 +32,7 @@ Timeline#tracks zoom=1 playhead=0 tracks=[] onZoom
       ...
 
 // A route's stops down a rail, with where the vehicle is: the stops named in stops=[…], then each line under it.
-Timeline.vertical#route bind=at position marker="directions_bus" stops=[]
+Timeline.vertical#route @at position marker="directions_bus" stops=[]
   state at=0
   Column w=fill gap=10 pad=[12,0,0,0] border-left=accent
     if position != null

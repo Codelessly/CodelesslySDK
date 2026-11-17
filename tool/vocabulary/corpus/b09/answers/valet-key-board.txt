@@ -17,7 +17,7 @@ App
     Nav
       Heading "Key board" level=1
       Row gap=8
-        Input "Search plate or hook" bind=q w=220
+        Input "Search plate or hook" @q w=220
         Button "New ticket" icon="add" onTap={go new-ticket}
     Column pad=24 gap=16
       Row gap=8
@@ -63,10 +63,10 @@ Page
     Row gap=32 top
       Column grow gap=16
         Heading "New car ticket" level=1
-        Input "Plate" "7ABC123" bind=plate
+        Input "Plate" "7ABC123" @plate
         Row gap=12
-          Select "Colour" bind=colour items=["Silver","Black","White","Red","Blue","Grey","Green"] grow
-          Input "Make and model" bind=make grow
+          Select "Colour" @colour items=["Silver","Black","White","Red","Blue","Grey","Green"] grow
+          Input "Make and model" @make grow
         Text.strong "Photos ({length(photos)} of 4)"
         Grid cols=4 gap=8
           CameraCapture "Front" onCapture={photos=append(photos,result)}
@@ -75,7 +75,7 @@ Page
           CameraCapture "Right" onCapture={photos=append(photos,result)}
         Text.strong "Mark damage"
         Text.muted "Tap the outline where the car is already marked."
-        CarOutline bind=damage h=220 onTap={damage=append(damage,result)}
+        CarOutline @damage h=220 onTap={damage=append(damage,result)}
         Row gap=8
           Text.muted "{length(damage)} marks"
           Spacer grow
@@ -137,8 +137,8 @@ App
       Card gap=8
         Row between
           Heading "Where the car is" level=3
-          SegmentedButton bind=floor items=["A","B","C"]
-        GaragePlan bind=floor highlight="C07" h=240 onTap={emit pickBay result}
+          SegmentedButton @floor items=["A","B","C"]
+        GaragePlan @floor highlight="C07" h=240 onTap={emit pickBay result}
         Text.muted "Bay C07, level {floor}, 40 m from the lobby"
       Card gap=8
         Heading "Tip for the runner" level=3
@@ -146,7 +146,7 @@ App
           ChoiceChip "$5" selected={tip==5} onTap={tip=5}
           ChoiceChip "$10" selected={tip==10} onTap={tip=10}
           ChoiceChip "$20" selected={tip==20} onTap={tip=20}
-          Input "Other" type=number bind=otherTip w=100 onChange={tip=coalesce(result,0)}
+          Input "Other" type=number @otherTip w=100 onChange={tip=coalesce(result,0)}
         Button "Add {money(tip,"$",2)} tip" disabled={tip==0} onTap={emit tip tip; toast "Tip added to the room bill"; tip=0}
       if arrived
         Card gap=8 fill=#FFE7F5EC

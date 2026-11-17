@@ -69,10 +69,10 @@ App
       if section=="personal"
         Card gap=12
           Heading "Personal details" level=3
-          Input "Full name" bind=fullName
-          DatePicker "Date of birth" bind=dob
-          Input "Address" multiline bind=address
-          Input "Phone" type=phone bind=phone
+          Input "Full name" @fullName
+          DatePicker "Date of birth" @dob
+          Input "Address" multiline @address
+          Input "Phone" type=phone @phone
           Row end
             Button "Save section" onTap={fullName!="" ? {doneSections=unique(append(doneSections,"personal")); section="documents"; toast "Personal details saved"} : toast "Enter your name"}
       if section=="documents"
@@ -94,10 +94,10 @@ App
           each m in months
             Row gap=12 middle
               Text.strong "{m.month}" w=60
-              Input "Amount" type=number bind=m.amount grow
+              Input "Amount" type=number @m.amount grow
               IconButton "delete" tooltip="Remove month" onTap={months=removeWhere(months,x=>x.month==m.month)}
           Row gap=8
-            Input "Add amount" type=number bind=newAmount grow
+            Input "Add amount" type=number @newAmount grow
             Button.outline "Add month" onTap={months=append(months,{"month":"M"+(length(months)+1),"amount":newAmount}); newAmount=0}
           Divider
           Row between
@@ -130,7 +130,7 @@ Page
     Column gap=20
       Heading "Book your interview" level=1
       Text.muted "A 30 minute phone call with a caseworker."
-      Calendar bind=day min={today()} disabledDays=["Sat","Sun"]
+      Calendar @day min={today()} disabledDays=["Sat","Sun"]
       if day!=""
         Column gap=8 animate=fade
           Text.strong "Times on {formatDate(day,'MMM d')}"
@@ -165,5 +165,5 @@ Page
           Heading "Message from your caseworker" level=3
           each m in thread
             ChatBubble "{m.text}" sender="{m.from}" time="{m.time}"
-          Input "Reply" bind=reply multiline
+          Input "Reply" @reply multiline
           Button "Send" onTap={reply!="" ? {thread=append(thread,{"from":"You","text":reply,"time":"Now"}); reply=""; toast "Sent"} : toast "Write a message first"}

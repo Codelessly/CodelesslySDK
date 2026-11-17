@@ -9,20 +9,36 @@ class FuzzyMatch {
 
   static final RegExp _words = RegExp(r'[\p{L}\p{N}]+', unicode: true);
 
-  static FuzzyMatch find(String text, String query) {
+  /// How [text] matches [query]: each word of the query matches a word of
+  /// the text (whole, its start, inside it, or spelled within [tolerance]
+  /// letters), or runs across words written together (`adamens` in "Ada
+  /// Mensah"). [tolerance] null is 1 letter for a word of 3 or 4, 2 for a
+  /// longer one; 0 takes no misspelling; a larger one is looser.
+  static FuzzyMatch find(String text, String query, {int? tolerance}) {
     final needle = query.trim().toLowerCase();
     if (needle.isEmpty) return const FuzzyMatch(0, [], '');
     final lower = text.toLowerCase();
     final tokens = _words.allMatches(needle).map((m) => m.group(0)!).toList();
     if (tokens.isEmpty) return const FuzzyMatch(0, [], '');
     final words = _words.allMatches(lower).toList();
+    // The text's words written together, and where each letter of it is in
+    // the text.
+    final joined = StringBuffer();
+    final offsets = <int>[];
+    for (final word in words) {
+      joined.write(word.group(0));
+      for (var i = word.start; i < word.end; i++) {
+        offsets.add(i);
+      }
+    }
+    final compact = joined.toString();
     final selected = <(int, int)>[];
     var score = 0;
     var approximate = false;
     for (final token in tokens) {
-      RegExpMatch? best;
       var bestScore = 0;
-      var span = (0, 0);
+      var spans = <(int, int)>[];
+      final limit = tolerance ?? (token.length < 5 ? 1 : 2);
       for (final word in words) {
         final value = word.group(0)!;
         var candidate = 0;
@@ -36,20 +52,34 @@ class FuzzyMatch {
           candidate = 60;
           final at = value.indexOf(token);
           candidateSpan = (word.start + at, word.start + at + token.length);
-        } else if (token.length >= 3 &&
-            _distanceAtMost(value, token, token.length < 5 ? 1 : 2)) {
+        } else if (token.length >= 3 && limit > 0 && _distanceAtMost(value, token, limit)) {
           candidate = 35;
         }
         if (candidate > bestScore) {
-          best = word;
           bestScore = candidate;
-          span = candidateSpan;
+          spans = [candidateSpan];
         }
       }
-      if (best == null) return const FuzzyMatch(0, [], '');
+      // Across words: the letters typed together, each word's part marked.
+      if (bestScore < 50 && token.length >= 4) {
+        final at = compact.indexOf(token);
+        if (at >= 0) {
+          bestScore = 50;
+          spans = [];
+          for (var i = at; i < at + token.length; i++) {
+            final o = offsets[i];
+            if (spans.isNotEmpty && spans.last.$2 == o) {
+              spans.last = (spans.last.$1, o + 1);
+            } else {
+              spans.add((o, o + 1));
+            }
+          }
+        }
+      }
+      if (bestScore == 0) return const FuzzyMatch(0, [], '');
       approximate |= bestScore == 35;
       score += bestScore;
-      selected.add(span);
+      selected.addAll(spans);
     }
     final phraseAt = lower.indexOf(needle);
     if (phraseAt >= 0) {

@@ -38,7 +38,7 @@ App
       Row gap=16 top
         Card grow gap=12
           Text.panelTitle "Garden"
-          GardenMap bind=selected h=320
+          GardenMap @selected h=320
             each z in zones
               ZoneTile#{z.id} "{z.name}" id={z.id} running={z.running} timeLeft={z.left} selected={selected==z.id} onTap={selected=z.id}
           Row gap=16
@@ -59,23 +59,23 @@ App
                 Text.small "Probe in Vegetable beds, 4 min ago"
           Card gap=12
             Text.panelTitle "Rain delay"
-            Toggle "Pause watering" bind=rainDelay
+            Toggle "Pause watering" @rainDelay
             if rainDelay
               Row between middle
                 Text "Delay for"
-                Stepper bind=delayDays min=1 max=7 step=1 suffix=" days"
+                Stepper @delayDays min=1 max=7 step=1 suffix=" days"
               Text.small "Resumes {formatDate(today(),"MMM d")} plus {delayDays} days"
           Card gap=12
             Text.panelTitle "Manual run"
             Text.muted "{find(zones,z=>z.id==selected).name}"
             Row between middle
-              Stepper bind=minutes min=1 max=60 step=5 suffix=" min"
+              Stepper @minutes min=1 max=60 step=5 suffix=" min"
               Button "Start" icon="play_arrow" onTap={zones=updateWhere(zones,z=>z.id==selected,z=>with(with(z,"running",true),"left",minutes*60)); toast "Running {minutes} min"; emit manualRun selected}
           Card gap=12
             Row between
               Text.panelTitle "Season adjust"
               Text.strong "{season}%"
-            Slider bind=season min=20 max=200 step=5
+            Slider @season min=20 max=200 step=5
             Text.small "All run times scale together. Front lawn would run {round(15*season/100,0)} min."
             Row gap=8
               Button.outline "Reset to 100%" onTap={season=100}
@@ -99,6 +99,12 @@ state zones=[{"id":"front","name":"Front lawn"},{"id":"veg","name":"Vegetable be
 state runs=[{"id":1,"zone":"front","day":"Mon","start":"06:00","mins":15},{"id":2,"zone":"front","day":"Thu","start":"06:00","mins":15},{"id":3,"zone":"veg","day":"Tue","start":"05:30","mins":20},{"id":4,"zone":"veg","day":"Fri","start":"05:30","mins":20},{"id":5,"zone":"hedge","day":"Wed","start":"07:00","mins":8},{"id":6,"zone":"patio","day":"Mon","start":"18:30","mins":5},{"id":7,"zone":"patio","day":"Wed","start":"18:30","mins":5},{"id":8,"zone":"patio","day":"Sat","start":"18:30","mins":5},{"id":9,"zone":"back","day":"Sun","start":"06:30","mins":25}]
 state season=100
 state rainDelay=false
+state editStart=""
+state editMins=""
+state newZone=""
+state newDay=""
+state newStart=""
+state newMins=""
 App
   Sidebar
     Brand "Sprinkle" icon="water_drop"
@@ -111,7 +117,7 @@ App
     Nav
       Heading "Weekly schedule" level=1
       Row gap=8
-        SegmentedButton bind=view items=["Week","Day"]
+        SegmentedButton @view items=["Week","Day"]
         Button "Add run" icon="add" onTap={open addRun}
     Column pad=24 gap=16
       if rainDelay
@@ -133,25 +139,25 @@ App
           Row between
             Text.muted "Scale every run time"
             Text.strong "{season}%"
-          Slider bind=season min=20 max=200 step=5
+          Slider @season min=20 max=200 step=5
           Text.small "Total weekly watering: {sum(runs,r=>round(r.mins*season/100,0))} min"
         Card grow gap=12
           Text.panelTitle "Rain delay"
-          Toggle "Skip runs when it rains" bind=rainDelay
+          Toggle "Skip runs when it rains" @rainDelay
           Text.small "Set the number of days on the Zones screen."
   Dialog#runEdit "Edit run" "Change when and how long"
-    Select "Zone" bind=selected items=["front","veg","hedge","patio","back"]
+    Select "Zone" @selected items=["front","veg","hedge","patio","back"]
     Row gap=12
-      TimePicker "Start" bind=editStart
-      Input "Minutes" type=number bind=editMins
+      TimePicker "Start" @editStart
+      Input "Minutes" type=number @editMins
     Row end gap=8
       Button.destructive "Delete run" onTap={runs=removeWhere(runs,r=>r.zone==selected && r.start==editStart); toast "Run deleted"; close}
       Button "Save" onTap={runs=updateWhere(runs,r=>r.zone==selected && r.start==editStart,r=>with(with(r,"start",editStart),"mins",editMins)); toast "Saved"; close}
   Dialog#addRun "Add a run"
-    Select "Zone" bind=newZone items=["front","veg","hedge","patio","back"]
-    Select "Day" bind=newDay items=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
-    TimePicker "Start" bind=newStart
-    Input "Minutes" type=number bind=newMins
+    Select "Zone" @newZone items=["front","veg","hedge","patio","back"]
+    Select "Day" @newDay items=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+    TimePicker "Start" @newStart
+    Input "Minutes" type=number @newMins
     Button "Add run" onTap={runs=append(runs,{"id":length(runs)+1,"zone":newZone,"day":newDay,"start":newStart,"mins":newMins}); toast "Run added"; close}
 
 ### Water used

@@ -1,19 +1,74 @@
-// Rewrites notation written in the ORIGINAL grammar (the one codelessly_api
-// read up to 32.x: key:value, =name, key:=expression, -> actions) to the
-// grammar of 33.0.0 (key=value, key={expression}, bind=name, onTap={actions}).
+// Rewrites notation to the grammar codelessly_api reads now.
 //
-//   dart run tool/notation/migrate.dart <file.txt> [more files]
-//       [--design-system <folder>]...   the blocks the files call: an event keeps its block's name for it
-//       [--check]                       change nothing; exit 1 when a file would change
-//       [--stdout]                      print the one file instead of rewriting it
-//       [--dart | --markdown]           the files are Dart or Markdown holding notation (string literals;
-//                                       fenced blocks and code spans)
+//   dart run tool/notation/migrate.dart <file or folder>... [options]
+//       --check                         change nothing; list each file that would change, each line
+//                                       that still writes bind= the tool cannot rewrite, and each note of
+//                                       what is left for a hand (a binding of a name the runtime reserves,
+//                                       prose that mentions bind=, bind= built in code, state lines a text
+//                                       that is no page would need); exit 1 when any
+//       --stdout                        print the one file instead of rewriting it
+//       --design-system <folder>        the blocks the files call (repeatable); without it, every design
+//                                       system under the SDK's design_systems/
+//       --site <site.json>              the site whose variables the files read (declared there, so no
+//                                       state line is added for them); without it, the nearest site.json
+//                                       above each file
+//       --notation | --markdown | --dart | --python | --json | --html
+//                                       read every file as that kind (else by its extension: .txt and
+//                                       .notation, .md, .dart, .py, .json, .html; a prompt*.txt or brief*.txt
+//                                       is prose, rewritten line by line with no state line)
+//       --from 32                       the files are older still (the grammar up to 32.x): rewritten to
+//                                       33's first, then to this one's
 //
-// A ONE-OFF TOOL. The parser reads the new grammar only, so this file
-// carries its own copy of how the original grammar split a line into words
-// (the end of this file, copied from the parser as it was). It is here for
-// the sites and files written before 2026-11-16 and is meant to be DELETED
-// once they are migrated; nothing else depends on it.
+// A folder is every file of a known kind under it (hidden folders, build and
+// .dart_tool left out). Each file rewritten says what changed: each line
+// before and after, and each state line added.
+//
+// From 33 to 34 (migrate_bind.dart; the rewrite of a line is codelessly_api's
+// notationBindRewrite, which the parser's message for an old line shows too):
+//
+//   Slider bind=heat min=14 max=24        Slider @heat min=14 max=24
+//   Input "Email" bind={email}            Input "Email" @email
+//   Slider bind=lo bindEnd=hi             Slider @lo @hi
+//   Calendar bind=a bindEnd=b             Calendar @a @b
+//   RangeSlider low=a high=b              RangeSlider @a @b
+//   Column selectable bind=picked         Column selectable selected=@picked
+//   SortMenu bind=sort direction=dir      SortMenu @sort direction=@dir      (a block's variables, from its catalog)
+//   Progress bind=done                    Progress value={done}              (a value shown keeps none)
+//   Text bind=label                       Text "{label}"
+//   Thing bindStart=from                  Thing start=@from                  (a word the notation does not have)
+//   Column selectable reorder bind=xs     Column selectable reorder selected=@xs
+//   Column reorder bind=xs                Column reorder                     (the each's list is what is reordered)
+//   define Stepper "label" bind=value     define Stepper "label" @value
+//   define Bar value=0 bind=value         define Bar @value=0
+//   define Crop bindX=0.5                 define Crop x=@0.5                 (and the definition's bindX is x)
+//   (a variable a rewritten line binds that nothing declares)
+//                                         state heat=14 added at the screen's head (under its ### line, after
+//                                         its state lines, else at the top), with the control's empty value,
+//                                         a defined word's default for it
+//
+// Left as written: a value in braces on any key but bind= (`value={s}`,
+// `lo={lo}`: shown, one way, in 33), a mark already written `@name` (no state
+// line for it either), and a binding of a name the runtime reserves
+// (`bind=theme`: no state line can declare it; said, for a rename by hand).
+//
+// In a Markdown file the fenced blocks of notation (no language, text, txt,
+// notation) are rewritten as pages (state lines only in one whose lines at
+// the margin are all notation); in its prose, only a code span that is a
+// whole notation line (`Slider bind=volume`); any other mention of bind= in
+// prose is left and said. In a Dart or Python file, the string literals: one
+// of several lines as a page when it is one, else as prose (a docstring); one
+// of a single line alone; one that builds bind= (`' bind=$key'`,
+// f"bind={name}") is left and said. In a JSON file, its strings; in an HTML
+// file, its lines. A file of definitions as a design system keeps them (each
+// signature at the margin, its lines under it) gets no state lines.
+//
+// From 32 (the original grammar, --from 32: key:value, =name, key:=expression,
+// -> actions, to 33's key=value, key={expression}, bind=name, onTap={actions})
+// this file carries its own copy of how the original grammar split a line (at
+// its end). It cannot run the old parser, so it cannot check itself: the proof
+// that a rewritten file expands to the same document is
+// tool/notation/expand_all.dart run on the old files with the old packages and
+// on the new with the new, compared with compare_runs.dart.
 //
 //   =name                         bind=name
 //   key:value  key:"text"         key=value  key="text"
@@ -28,40 +83,83 @@
 //   Heading "Why" #why  id:why    Heading "Why" id=why
 //   Text.strong row.name          Text.strong "{row.name}"
 //   List =rows                    each row in rows
-//
-// It cannot run the old parser, so it cannot check itself: the proof that a
-// rewritten file expands to the same document is tool/notation/expand_all.dart
-// run on the old files with the old packages and on the new with the new,
-// compared with compare_runs.dart.
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_api/notation.dart' show notationTypes;
 
+import 'migrate_bind.dart';
+
 Future<void> main(List<String> args) async {
-  final files = <String>[], folders = <String>[];
+  final paths = <String>[], folders = <String>[];
+  String? site, kind, from;
   for (var i = 0; i < args.length; i++) {
-    if (args[i] == '--design-system') {
-      if (i + 1 < args.length) folders.add(args[++i]);
-    } else if (!args[i].startsWith('--')) {
-      files.add(args[i]);
+    final a = args[i];
+    if (a == '--design-system' && i + 1 < args.length) {
+      folders.add(args[++i]);
+    } else if (a == '--site' && i + 1 < args.length) {
+      site = args[++i];
+    } else if (a == '--from' && i + 1 < args.length) {
+      from = args[++i];
+    } else if (const {'--notation', '--markdown', '--dart', '--python', '--json', '--html'}.contains(a)) {
+      kind = a.substring(2);
+    } else if (!a.startsWith('--')) {
+      paths.add(a);
     }
   }
-  if (files.isEmpty) {
-    stderr.writeln('usage: migrate.dart <file.txt> [more files] [--design-system <folder>]... [--check] [--stdout] [--dart | --markdown]');
+  if (paths.isEmpty || (from != null && from != '32')) {
+    stderr.writeln('usage: migrate.dart <file or folder>... [--check] [--stdout] [--design-system <folder>]... [--site <site.json>] '
+        '[--notation | --markdown | --dart | --python | --json | --html] [--from 32]');
     exit(2);
   }
+  final check = args.contains('--check'), print = args.contains('--stdout');
+  // The blocks the files call: the design systems given, else the SDK's.
+  if (folders.isEmpty) {
+    final sdk = File.fromUri(Platform.script).parent.parent.parent;
+    final all = Directory('${sdk.path}/design_systems');
+    if (all.existsSync()) {
+      for (final d in all.listSync()..sort((a, b) => a.path.compareTo(b.path))) {
+        if (d is Directory && File('${d.path}/design_system.json').existsSync()) folders.add(d.path);
+      }
+    }
+  }
+  var catalog = standardCatalog;
   final catalogs = <Catalog>[];
+  // The design systems' definitions (vocabulary/<Word>.txt): what a variable
+  // a use binds to one of their words starts at.
+  final definitions = <String, BindDefinition>{};
+  for (final dir in folders) {
+    final vocabulary = Directory('$dir/vocabulary');
+    if (!vocabulary.existsSync()) continue;
+    for (final f in vocabulary.listSync().whereType<File>().where((f) => f.path.endsWith('.txt')).toList()..sort((a, b) => a.path.compareTo(b.path))) {
+      for (final e in BindDefinition.read(f.readAsStringSync(), definitionFile: true).entries) {
+        definitions.putIfAbsent(e.key, () => e.value);
+      }
+    }
+  }
   for (final dir in folders) {
     final ds = await DesignSystem.load((ref) async {
       final f = File('$dir/$ref');
       return f.existsSync() ? f.readAsStringSync() : null;
     });
+    catalog = ds.catalogOver(catalog);
     catalogs.add(ds.catalogOver(standardCatalog));
   }
-  final check = args.contains('--check'), print = args.contains('--stdout');
-  var changed = 0;
+  final files = <String>[];
+  for (final p in paths) {
+    if (Directory(p).existsSync()) {
+      for (final e in Directory(p).listSync(recursive: true, followLinks: false)) {
+        final parts = e.path.replaceAll(r'\', '/').split('/');
+        if (e is! File || parts.any((s) => s.startsWith('.') && s.length > 1 || s == 'build' || s == 'node_modules')) continue;
+        if (bindKindOf(e.path) != null) files.add(e.path);
+      }
+    } else {
+      files.add(p);
+    }
+  }
+  files.sort();
+  var changed = 0, leftLines = 0, noted = 0;
   for (final path in files) {
     final file = File(path);
     if (!file.existsSync()) {
@@ -76,29 +174,93 @@ Future<void> main(List<String> args) async {
       stderr.writeln('$path: not text');
       continue;
     }
-    final log = <String>[];
-    final migrated = args.contains('--dart')
-        ? migrateDart(text, catalogs, log)
-        : args.contains('--markdown')
-            ? migrateMarkdown(text, catalogs, log)
-            : migrateNotation(text, catalogs: catalogs);
-    if (print) {
-      stdout.write(migrated);
+    // A prompt or a list of briefs kept as .txt is prose that quotes the
+    // notation: its lines are rewritten one by one, with no state line.
+    final prose = RegExp(r'(^|[\\/])(prompt|briefs?)[^\\/]*\.txt$').hasMatch(path);
+    final as = kind ?? (prose ? 'html' : bindKindOf(path));
+    if (as == null) {
+      stderr.writeln('$path: not a kind of file this reads (.txt, .md, .dart, .py, .json, .html): give --notation or another');
       continue;
     }
-    if (migrated == text) continue;
-    changed++;
+    var start = text;
+    final log = <String>[];
+    if (from == '32') {
+      start = switch (as) {
+        'dart' => migrateDart(text, catalogs, log),
+        'markdown' => migrateMarkdown(text, catalogs, log),
+        'notation' => migrateNotation(text, catalogs: catalogs),
+        _ => text,
+      };
+    }
+    // A design system's definitions: design_systems/<name>/vocabulary/<Word>.txt.
+    final segments = File(path).absolute.path.replaceAll(r'\', '/').split('/');
+    final definitionFile = segments.length > 2 && segments[segments.length - 2] == 'vocabulary' && File('${segments.sublist(0, segments.length - 2).join('/')}/design_system.json').existsSync();
+    final m = BindMigration(catalog, declared: _siteVariables(site, path), definitionFile: definitionFile, definitions: definitions);
+    final migrated = m.file(start, as);
+    log.addAll(m.log);
+    final left = BindMigration.left(migrated, as);
+    if (print) {
+      stdout.write(migrated);
+      for (final n in m.notes) {
+        stderr.writeln('$path: $n');
+      }
+      continue;
+    }
+    if (migrated != text) changed++;
+    noted += m.notes.length;
+    // What is left for a hand (a reserved name, prose, bind= built in code,
+    // a text that is no page), in both modes.
+    for (final n in m.notes) {
+      stdout.writeln('$path: $n');
+    }
     if (check) {
-      stderr.writeln('$path: in the original grammar');
-      exitCode = 1;
+      if (migrated != text) stdout.writeln('$path: in the old form (${log.length} change${log.length == 1 ? '' : 's'})');
+      for (final l in left) {
+        stdout.writeln('$path:$l: still writes bind= after the rewrite: ${migrated.split('\n')[l - 1].trim()}');
+      }
+      if (migrated != text || left.isNotEmpty || m.notes.isNotEmpty) exitCode = 1;
     } else {
-      file.writeAsStringSync(migrated);
+      if (migrated != text) file.writeAsStringSync(migrated);
       for (final l in log) {
         stdout.writeln('$path: $l');
       }
+      for (final l in left) {
+        stdout.writeln('$path:$l: still writes bind=, not rewritten: ${migrated.split('\n')[l - 1].trim()}');
+      }
+    }
+    leftLines += left.length;
+  }
+  if (!print) {
+    stderr.writeln('${files.length} files: $changed ${check ? 'to rewrite' : 'rewritten'}${leftLines == 0 ? '' : ', $leftLines lines still writing bind= to look at'}'
+        '${noted == 0 ? '' : ', $noted notes of what is left for a hand'}');
+  }
+}
+
+/// The variables of the site [path] belongs to: [given]'s site.json, else
+/// the nearest one in a folder above it.
+final _sites = <String, Set<String>>{};
+Set<String> _siteVariables(String? given, String path) {
+  File? site = given == null ? null : File(given);
+  if (site == null) {
+    var dir = File(path).absolute.parent;
+    for (var i = 0; i < 6 && site == null; i++) {
+      final f = File('${dir.path}/site.json');
+      if (f.existsSync()) site = f;
+      if (dir.parent.path == dir.path) break;
+      dir = dir.parent;
     }
   }
-  if (!print) stderr.writeln('${files.length} files: $changed ${check ? 'to rewrite' : 'rewritten'}');
+  if (site == null) return const {};
+  return _sites.putIfAbsent(site.path, () {
+    try {
+      final vars = (jsonDecode(site!.readAsStringSync()) as Map)['variables'];
+      if (vars is Map) return {for (final k in vars.keys) '$k'};
+      if (vars is List) return {for (final v in vars) if (v is Map && v['name'] is String) v['name'] as String};
+    } catch (_) {
+      // Not a site's manifest: nothing declared.
+    }
+    return const {};
+  });
 }
 
 final _nodeHead = RegExp(r'^([A-Za-z][A-Za-z0-9]*)((?:\.[A-Za-z][A-Za-z0-9]*)*)(#[A-Za-z_][A-Za-z0-9_]*)?');
@@ -116,6 +278,10 @@ const _pageWords = {
   'Dialog', 'Modal', 'Sheet', 'BottomSheet', 'Drawer', 'Menu', 'Dropdown', 'Popover', 'Popup', 'Lightbox',
 };
 const _soft = {'Gauge', 'Dial', 'Ring', 'Sparkline', 'Avatar', 'Donut', 'DonutChart', 'PieChart', 'Pie', 'AreaChart'};
+
+// ---------------------------------------------------------------------------
+// From the original grammar (32.x) to 33's (--from 32).
+// ---------------------------------------------------------------------------
 
 bool _isNodeLine(String trimmed) =>
     !_lineWords.hasMatch(trimmed) && !_handlerLine.hasMatch(trimmed) && !trimmed.startsWith('->') && !_bareState.hasMatch(trimmed) && _nodeHead.hasMatch(trimmed);

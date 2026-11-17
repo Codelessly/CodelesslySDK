@@ -1,9 +1,11 @@
+state q=""
+state version=""
 Page
   Nav
     Brand "Beacon" icon="flare"
     Row gap=12 middle
-      Input "Search docs" bind=q w=280
-      Select bind=version items=["v2.4","v2.3","v2.2"]
+      Input "Search docs" @q w=280
+      Select @version items=["v2.4","v2.3","v2.2"]
   Section
     Row gap=32 top
       Column w=200 gap=20

@@ -19,7 +19,7 @@ App
     Nav
       Heading "Pipeline"
       Row gap=8
-        Input "Search deals" bind=q w=220
+        Input "Search deals" @q w=220
         Button.outline "Log a call" icon="call" onTap={open calllog}
         Button "New deal" icon="add" onTap={emit newDeal}
     Column pad=24 gap=16
@@ -105,7 +105,7 @@ App
               each tag in tags
                 Chip "{tag}" removable onTap={tags=without(tags,tag)}
             Row gap=8 middle
-              Input "Add a tag" bind=newTag grow
+              Input "Add a tag" @newTag grow
               Button.outline "Add" onTap={newTag=="" ? toast "Type a tag first" : {tags=append(tags,newTag); newTag=""}}
   Dialog#calllog "Log a call" "Priya Nair"
     state outcome=""
@@ -118,21 +118,22 @@ App
         ChoiceChip "Left voicemail" selected={outcome=="voicemail"} onTap={outcome="voicemail"}
         ChoiceChip "No answer" selected={outcome=="none"} onTap={outcome="none"}
         ChoiceChip "Wrong number" selected={outcome=="wrong"} onTap={outcome="wrong"}
-      Input "Notes" "What was discussed" multiline bind=notes
-      Toggle "Schedule a follow-up" bind=followUp
+      Input "Notes" "What was discussed" multiline @notes
+      Toggle "Schedule a follow-up" @followUp
       if followUp
-        DatePicker "Follow-up date" bind=due
+        DatePicker "Follow-up date" @due
       Row end gap=8
         Button.ghost "Cancel" onTap={close}
         Button "Save call" onTap={outcome=="" ? toast "Pick an outcome" : {events=concat([{"kind":"call","title":"Call, " + outcome,"when":"Just now","note":notes}],events); outcome=""; notes=""; toast "Call logged"; close}}
   Dialog#reschedule "Reschedule next action"
-    DatePicker "New due date" bind=due
+    DatePicker "New due date" @due
     Button "Save" onTap={toast "Rescheduled to {due}"; close}
 
 ### Property
 state day=2
 state slot=""
 state viewings=[{"day":2,"time":"10:00","who":"Priya Nair"},{"day":2,"time":"14:30","who":"Marisol Vega"},{"day":4,"time":"11:00","who":"Tom Whitfield"}]
+state who=""
 Page
   Nav sticky
     Brand "Keystone" icon="vpn_key"
@@ -156,7 +157,7 @@ Page
       Column w=320 gap=16
         Card gap=8
           Text.strong "Viewings this week"
-          WeekStrip bind=day marks={map(viewings,v=>v.day)}
+          WeekStrip @day marks={map(viewings,v=>v.day)}
           each v in filter(viewings,v=>v.day==day)
             ListTile "{v.time}, {v.who}" icon="schedule"
           if count(viewings,v=>v.day==day)==0
@@ -168,18 +169,22 @@ Page
           ListTile "Marisol Vega" icon="person"
           ListTile "Tom Whitfield" icon="person"
   Dialog#schedule "Schedule a viewing" "14 Alder Lane"
-    WeekStrip bind=day marks={map(viewings,v=>v.day)}
+    WeekStrip @day marks={map(viewings,v=>v.day)}
     Row gap=8
       ChoiceChip "10:00" selected={slot=="10:00"} onTap={slot="10:00"}
       ChoiceChip "12:00" selected={slot=="12:00"} onTap={slot="12:00"}
       ChoiceChip "14:30" selected={slot=="14:30"} onTap={slot="14:30"}
       ChoiceChip "16:00" selected={slot=="16:00"} onTap={slot="16:00"}
-    Select "Buyer" items=["Priya Nair","Marisol Vega","Tom Whitfield"] bind=who
+    Select "Buyer" items=["Priya Nair","Marisol Vega","Tom Whitfield"] @who
     Button "Confirm viewing" onTap={slot=="" ? toast "Pick a time" : {viewings=append(viewings,{"day":day,"time":slot,"who":who}); slot=""; toast "Viewing booked"; close}}
 
 ### Follow-ups
 state filterMode="today"
 state todos=[{"id":1,"who":"Priya Nair","task":"Send comparable listings","due":"Today","done":false},{"id":2,"who":"Marisol Vega","task":"Confirm Cedar Court viewing","due":"Today","done":false},{"id":3,"who":"Daniel Kim","task":"Chase lender for offer letter","due":"Today","done":true},{"id":4,"who":"Hannah Brooks","task":"Book closing walkthrough","due":"Tomorrow","done":false},{"id":5,"who":"Tom Whitfield","task":"Call back about 220 Harbor St","due":"Tomorrow","done":false}]
+state filterLabel=""
+state newWho=""
+state newTask=""
+state newDue=""
 App
   Sidebar
     Brand "Keystone" icon="vpn_key"
@@ -191,7 +196,7 @@ App
     Nav
       Heading "Follow-ups"
       Row gap=8
-        SegmentedButton items=["Today","Tomorrow","All"] bind=filterLabel
+        SegmentedButton items=["Today","Tomorrow","All"] @filterLabel
         Button "Add follow-up" icon="add" onTap={open addTodo}
     Column pad=24 gap=16 maxw=720
       Row gap=12 middle
@@ -200,7 +205,7 @@ App
       each todo in todos
         Card gap=4
           Row gap=12 middle
-            Checkbox "" bind=todo.done
+            Checkbox "" @todo.done
             Column grow
               Text.strong "{todo.task}" strike={todo.done}
               Text.muted "{todo.who}"
@@ -211,9 +216,9 @@ App
     MenuItem "Snooze to tomorrow" icon="snooze" onTap={todos=updateWhere(todos,t=>t.id==sel,t=>with(t,"due","Tomorrow"))}
     MenuItem "Delete" icon="delete" onTap={todos=removeWhere(todos,t=>t.id==sel); toast "Removed"}
   Dialog#addTodo "New follow-up"
-    Input "Contact" bind=newWho
-    Input "What needs doing" bind=newTask
-    Select "Due" items=["Today","Tomorrow","This week"] bind=newDue
+    Input "Contact" @newWho
+    Input "What needs doing" @newTask
+    Select "Due" items=["Today","Tomorrow","This week"] @newDue
     Button "Add" onTap={newTask=="" ? toast "Describe the task" : {todos=append(todos,{"id":length(todos)+10,"who":newWho,"task":newTask,"due":newDue,"done":false}); newTask=""; close}}
 
 define Timeline items=[]
@@ -231,7 +236,7 @@ define TimelineEvent "title" kind="call" when="" note=""
       Text.muted "{note}"
 
 // a week strip of seven day buttons with a dot under days that have something booked
-define WeekStrip bind=day marks=[] labels=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"] onPick
+define WeekStrip @day marks=[] labels=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"] onPick
   Row gap=4 between
     each label in labels
       Column center gap=2 grow onTap={day=index; onPick(index)}

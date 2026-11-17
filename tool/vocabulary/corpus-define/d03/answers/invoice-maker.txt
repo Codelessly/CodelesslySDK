@@ -16,7 +16,7 @@ App
     Nav
       Heading "Invoices" level=1
       Row gap=8
-        Input "Search invoices" bind=q w=220
+        Input "Search invoices" @q w=220
         Button "New invoice" icon="add" onTap={go invoice-editor}
     Column pad=24 gap=16
       Grid cols=3 gap=16
@@ -90,11 +90,11 @@ App
     Column pad=24 gap=16 scroll
       Card gap=12
         Heading "Details" level=3
-        Combobox "Client" items={map(clients,c=>c.name)} bind=client addable="Add new client" onAdd={open newClient}
+        Combobox "Client" items={map(clients,c=>c.name)} @client addable="Add new client" onAdd={open newClient}
         Grid cols=3 gap=12
-          Input "Invoice number" bind=number
-          DatePicker "Issued" bind=issued
-          DatePicker "Due" bind=due
+          Input "Invoice number" @number
+          DatePicker "Issued" @issued
+          DatePicker "Due" @due
       Card gap=12
         Row between middle
           Heading "Line items" level=3
@@ -107,14 +107,14 @@ App
           Text.caption "Tax %" w=64
           Text.caption "Amount" w=90
           Spacer w=40
-        ReorderableList bind=lines
+        ReorderableList @lines
           each line in lines
             Row gap=8 middle
               Icon "drag_indicator"
-              Input "Description" hint="What was delivered" bind=line.desc grow
-              Input "Qty" type=number bind=line.qty w=60
-              Input "Rate" type=number bind=line.rate w=90
-              Input "Tax %" type=number bind=line.tax w=64
+              Input "Description" hint="What was delivered" @line.desc grow
+              Input "Qty" type=number @line.qty w=60
+              Input "Rate" type=number @line.rate w=90
+              Input "Tax %" type=number @line.tax w=64
               Text.strong "{money(line.qty*line.rate,'$',2)}" w=90
               IconButton "delete" tooltip="Remove line" onTap={lines=removeWhere(lines,l=>l.id==line.id)}
         if length(lines)==0
@@ -122,20 +122,20 @@ App
       Card gap=12
         Heading "Discount" level=3
         Row gap=12 middle
-          SegmentedButton bind=discType items=["%","$"]
-          Input "Discount" type=number bind=disc w=120
+          SegmentedButton @discType items=["%","$"]
+          Input "Discount" type=number @disc w=120
         InvoiceTotals lines={lines} discType={discType} disc={disc}
       Card gap=8
         Heading "Notes" level=3
-        Input "Notes" multiline bind=notes
+        Input "Notes" multiline @notes
       Card gap=16
         Row between middle
           Heading "Preview" level=3
           Text.muted "Updates as you type"
         PaperInvoice number={number} client={client} issued={issued} due={due} lines={lines} discType={discType} disc={disc} notes={notes} status={status}
 Dialog#newClient "Add a client" "They will appear in the client list."
-  Input "Client name" bind=newName
-  Input "Email" type=email bind=newEmail
+  Input "Client name" @newName
+  Input "Email" type=email @newEmail
   Row end gap=8
     Button.outline "Cancel" onTap={close}
     Button "Add client" onTap={trim(newName)=="" ? toast "Enter a name" : {clients=append(clients,{"name":newName,"email":newEmail}); client=newName; newName=""; newEmail=""; close; toast "Client added"}}

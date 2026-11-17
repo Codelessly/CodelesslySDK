@@ -15,7 +15,7 @@ Page
     Column center gap=16
       Heading "Simple pricing for every stage" level=1
       Text.muted "Accounting software that grows with you. Cancel anytime." center
-      SegmentedButton bind=billing items=["Monthly","Yearly"]
+      SegmentedButton @billing items=["Monthly","Yearly"]
       Text.caption "Yearly billing saves 20%" color=#FF16A34A
   Section
     Grid cols=3 gap=24

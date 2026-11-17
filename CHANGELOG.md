@@ -9,6 +9,63 @@
 
 - **The strict validator is gone** (codelessly_api no longer has `package:codelessly_api/validate.dart`): `tool/codelessly validate`, `render.sh --validate-only` and the MCP server's `codelessly_validate` are removed, and a render reports only what it meets while rendering.
 
+## 34.0.0
+
+Needs codelessly_api 34.0.0.
+
+### Breaking
+
+- **The compact notation binds a variable with `@`, and codelessly_api reads only that** (its
+  docs/design/13-compact-notation.md, section 3.1): `Slider @heat min=14 max=24` (bare, the control's value;
+  `value=@heat` the same), `Column selectable selected=@picked`, `SortMenu @sort direction=@dir` (a block's
+  further variable), `Slider @low @high` and `Calendar @arrival @departure` (a range), where 33 wrote `bind=heat`,
+  `bind=picked`, `direction=dir`, `bind=low bindEnd=high`. On what only shows a value, 33's `bind={done/total}` is
+  `value={done/total}`. A bound variable is declared: by a `state` line, a site's variable, a loop's item or a
+  definition's parameter. `bind=`, `bind={…}` and `bindEnd=` are not read: each line that writes them is one issue
+  that shows the line in the new form.
+  **To migrate: `tool/notation/notation.sh migrate <file or folder>...`** (`--design-system <folder>` for the
+  blocks the files call, else every design system here; `--site <site.json>` for a site's variables; `--check` to
+  list what is left; `--from 32` for a file written before 33.0.0). It rewrites notation files and the notation
+  in Markdown, Dart, Python, JSON and HTML, adds a `state` line at a screen's head for each variable it binds and
+  nothing declares, and prints each line it changed. It cannot rewrite `bind=` assembled in code (a Python
+  f-string, a Dart interpolation): `--check` names those lines, to rewrite by hand.
+- **The showcase's sortable tables bind their header's direction** (`TableHeader @sort desc=@desc` in
+  `examples/showcase/cards/dashboard`, `data_table`, `table_wide` and the desktop pages with a `TableHeader`): a
+  second tap on a header flips `desc`, as the block's own documentation asks. 33 read `desc={desc}` as a value
+  shown, and `migrate` leaves a value in braces as written.
+- Everything in this repository written in the notation is rewritten with it: the examples (the showcase's cards,
+  recorded answers and desktop pages, the playground's samples, the prompt app's screens and its bundle of Skip),
+  `tool/values`, the benchmark's generated notation, the README and the docs; the showcase's site
+  (`examples/showcase/site`) is expanded again. Changelog entries of earlier releases keep the form they were
+  written in.
+
+### Added
+
+- **The built-in confirm dialog** shows a detail, its buttons' words and a destructive yes; its buttons are
+  `confirmOk` and `confirmCancel` to the render tool, focus starts on the yes (on Cancel when it is destructive),
+  and a menu that opened it stays out of sight behind it.
+- **Cards**: `mark=` on `ListRow`, `ConversationRow`, `PostCard` and `CommandPalette` highlights what a search
+  matched; `Banner` takes `live`; `InfiniteList` takes `hasMore`; the `Composer` sends on Enter and takes a new
+  line on Shift+Enter.
+- **The vocabulary tool** (`tool/notation/notation.sh vocabulary`) counts resolved, stand-in, never read and
+  unknown words apart, lists the definitions that do less than they say, and `prompt --open` prints the glossary
+  with signatures (`--glossary=names` for names alone).
+- **The render tool** logs what `announce` and live regions said; a step whose node is not found names the nodes
+  it may have meant; a tap on a block goes to its one tappable part; `--key` takes any printable character,
+  F1 to F24 and `mod`; a sheet's handle is `<sheet id>/handle`; `--reload` restarts on the page shown, in the
+  mode `--theme` gave.
+
+### Fixed
+
+- A bottom sheet with stops moves to its next stop when dragged anywhere, and its content scrolls at the top stop.
+- `SwipeAction … removes` removes its row, and its revealed action takes a tap.
+- A range slider's thumbs are Tab stops of their own with a focus ring, and an arrow between whole-number ends
+  steps by at least 1.
+- A press on a reorder handle focuses it, so Alt and the arrows move its row after a tap.
+- Cards' `CanvasShell` hugs its content where nothing limits its height; `Rating` no longer warns of a bound
+  root placement; `Segments` fits its labels at 390; a `TimePicker` reads a whole number as minutes since
+  midnight.
+
 ## 33.1.1
 
 Needs codelessly_api 33.1.1.

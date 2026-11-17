@@ -3,6 +3,10 @@ state stages=["Lead","Contacted","Viewing","Offer","Closed"]
 state deals=[{"id":1,"name":"14 Alder Lane","client":"Maya Reyes","value":485000,"stage":"Lead"},{"id":2,"name":"Harbor View Condo 5B","client":"Tom Okafor","value":612000,"stage":"Contacted"},{"id":3,"name":"22 Birch Court","client":"Priya Nair","value":379000,"stage":"Viewing"},{"id":4,"name":"9 Mill Street","client":"Daniel Cho","value":725000,"stage":"Offer"},{"id":5,"name":"Lakeside Cottage","client":"Elena Rossi","value":540000,"stage":"Contacted"},{"id":6,"name":"3 Orchard Way","client":"Sam Whitaker","value":298000,"stage":"Closed"}]
 state q=""
 state minValue=0
+state newName=""
+state newClient=""
+state newValue=""
+state newStage=""
 App
   Sidebar
     Brand "Keystone" icon="key"
@@ -18,8 +22,8 @@ App
     Nav
       Heading "Pipeline" level=1
       Row gap=8
-        Input "Search deals" bind=q w=220
-        Select bind=minValue items=["Any value","Over 300k","Over 500k"] onChange={minValue=result=="Over 500k"?500000:(result=="Over 300k"?300000:0)}
+        Input "Search deals" @q w=220
+        Select @minValue items=["Any value","Over 300k","Over 500k"] onChange={minValue=result=="Over 500k"?500000:(result=="Over 300k"?300000:0)}
         Button "New deal" icon="add" onTap={open newDeal}
     Column pad=24 gap=16
       Row gap=16 top scroll
@@ -39,10 +43,10 @@ App
                     Text.muted "{deal.client}"
                   Text.strong "{money(deal.value,'$',0)}"
   Dialog#newDeal "New deal" "Add a property and a client to the pipeline"
-    Input "Property address" bind=newName
-    Input "Client" bind=newClient
-    Input "Asking price" bind=newValue type=number
-    Select bind=newStage items=["Lead","Contacted","Viewing","Offer","Closed"]
+    Input "Property address" @newName
+    Input "Client" @newClient
+    Input "Asking price" @newValue type=number
+    Select @newStage items=["Lead","Contacted","Viewing","Offer","Closed"]
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Add deal" onTap={deals=append(deals,{"id":length(deals)+1,"name":newName,"client":newClient,"value":newValue,"stage":coalesce(newStage,"Lead")}); toast "Deal added"; close}
@@ -79,8 +83,8 @@ App
           Card gap=8
             Heading "Next action" level=3
             Row gap=12 middle
-              Input bind=nextAction w=360
-              DatePicker bind=dueDate
+              Input @nextAction w=360
+              DatePicker @dueDate
               Button.outline "Done" onTap={nextAction=""; toast "Marked done"}
             if dueDate < today()
               Text.danger "Overdue"
@@ -104,7 +108,7 @@ App
               each t in tags
                 Chip "{t}" onDelete={tags=without(tags,t)}
             Row gap=8
-              Input "Add a tag" bind=newTag
+              Input "Add a tag" @newTag
               Button.outline "Add" onTap={tags=append(tags,newTag); newTag=""}
   Dialog#callLog "Log a call" "What happened on the call with Maya?"
     Row gap=8
@@ -112,7 +116,7 @@ App
       ChoiceChip "Voicemail" selected={outcome=="Voicemail"} onTap={outcome="Voicemail"}
       ChoiceChip "No answer" selected={outcome=="No answer"} onTap={outcome="No answer"}
       ChoiceChip "Wrong number" selected={outcome=="Wrong number"} onTap={outcome="Wrong number"}
-    Input "Notes" bind=callNote multiline
+    Input "Notes" @callNote multiline
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Save call" onTap={events=append(events,{"id":length(events)+1,"kind":"call","title":"Call: {outcome}","note":callNote,"when":formatDate(today(),"MMM d")}); outcome=""; callNote=""; toast "Call logged"; close}
@@ -144,7 +148,7 @@ App
             Text.muted "3 bed, 2 bath, 1,840 sq ft. Built 1998, renovated kitchen."
           Card gap=12
             Heading "Viewings this week" level=3
-            WeekStrip bind=day start="2026-11-16"
+            WeekStrip @day start="2026-11-16"
             if isEmpty(filter(viewings,v=>v.day==day))
               Text.muted "No viewings booked for this day."
             each v in sortBy(filter(viewings,v=>v.day==day),v=>v.time)
@@ -160,8 +164,8 @@ App
               Avatar "Tom Okafor" size=32
               Text "Tom Okafor"
   Dialog#schedule "Schedule viewing" "Pick a time and who is coming"
-    Input "Visitor" bind=newWho
-    TimePicker bind=newTime
+    Input "Visitor" @newWho
+    TimePicker @newTime
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Book" onTap={viewings=append(viewings,{"id":length(viewings)+1,"day":day,"time":newTime,"who":newWho}); newWho=""; toast "Viewing booked"; close}
@@ -188,12 +192,12 @@ App
         ChoiceChip "Tomorrow" selected={filter=="Tomorrow"} onTap={filter="Tomorrow"}
         ChoiceChip "This week" selected={filter=="This week"} onTap={filter="This week"}
       Row gap=8
-        Input "Add a follow-up" bind=newTask grow
+        Input "Add a follow-up" @newTask grow
         Button "Add" onTap={tasks=append(tasks,{"id":length(tasks)+1,"title":newTask,"who":"","due":filter,"done":false}); newTask=""}
       Card gap=8
         each t in filter(tasks,x=>x.due==filter)
           Row between middle
-            Checkbox "{t.title}" bind=t.done
+            Checkbox "{t.title}" @t.done
             Row gap=8 middle
               Text.muted "{t.who}"
               IconButton "delete" tooltip="Remove" onTap={tasks=removeWhere(tasks,x=>x.id==t.id)}

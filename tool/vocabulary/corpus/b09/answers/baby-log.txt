@@ -10,6 +10,9 @@ state side="Left"
 state ml=90
 state nappy="Wet"
 state sharedWith="Jonas"
+state nappyTime=""
+state med=""
+state dose=""
 every 1s when sleeping onTick={napSecs=napSecs+1}
 every 1s when feedRunning onTick={feedSecs=feedSecs+1}
 App
@@ -87,7 +90,7 @@ App
             Text.caption "Milk"
             Text.strong "{sum(feeds,f=>coalesce(f.ml,0))} ml"
 Dialog#feed "Log a feed"
-  SegmentedButton bind=feedMode items=["Breast","Bottle"]
+  SegmentedButton @feedMode items=["Breast","Bottle"]
   if feedMode=="Breast"
     Row gap=8
       ChoiceChip "Left" selected={side=="Left"} onTap={side="Left"}
@@ -98,20 +101,20 @@ Dialog#feed "Log a feed"
       Button.outline "Reset" onTap={feedRunning=false; feedSecs=0}
   if feedMode=="Bottle"
     Text.fieldLabel "Amount"
-    Slider bind=ml min=10 max=240
+    Slider @ml min=10 max=240
     Text.strong "{ml} ml"
-    Input "Or type millilitres" type=number bind=ml
+    Input "Or type millilitres" type=number @ml
   Button "Save feed" onTap={feeds=append(feeds,{"id":length(feeds)+1,"kind":"feed","time":"now","mins":round(feedSecs/60,0),"side":side,"ml":feedMode=="Bottle"?ml:0}); feedRunning=false; feedSecs=0; toast "Feed saved"; close}
 Dialog#nappy "Log a nappy"
   Row gap=8 center
     ChoiceChip "Wet" selected={nappy=="Wet"} onTap={nappy="Wet"}
     ChoiceChip "Dirty" selected={nappy=="Dirty"} onTap={nappy="Dirty"}
     ChoiceChip "Both" selected={nappy=="Both"} onTap={nappy="Both"}
-  TimePicker "Time" bind=nappyTime
+  TimePicker "Time" @nappyTime
   Button "Save nappy" onTap={feeds=append(feeds,{"id":length(feeds)+1,"kind":"nappy","time":"now","what":nappy}); toast "Nappy saved"; close}
 Dialog#medicine "Log medicine"
-  Select "Medicine" items=["Vitamin D drops","Paracetamol infant","Gripe water"] bind=med
-  Input "Dose" "e.g. 1 ml" bind=dose
+  Select "Medicine" items=["Vitamin D drops","Paracetamol infant","Gripe water"] @med
+  Input "Dose" "e.g. 1 ml" @dose
   Button "Save" onTap={feeds=append(feeds,{"id":length(feeds)+1,"kind":"medicine","time":"now","name":med}); toast "Medicine saved"; close}
 Menu#rowMenu
   MenuItem "Edit" icon="edit" onTap={toast "Editing"}
@@ -136,7 +139,7 @@ App
   Main
     Nav
       Heading "Patterns, last 14 days" level=1
-      SegmentedButton bind=metric items=["Sleep","Feeds","Nappies"]
+      SegmentedButton @metric items=["Sleep","Feeds","Nappies"]
     Column pad=24 gap=16 scroll
       Card gap=12
         Text.panelTitle "{metric} per day"
@@ -185,7 +188,7 @@ App
       Heading "Growth" level=1
       Button "Add measurement" icon="add" onTap={open growthEntry}
     Column pad=24 gap=16 scroll
-      SegmentedButton bind=metric items=["Weight","Length"]
+      SegmentedButton @metric items=["Weight","Length"]
       Card gap=12
         Text.panelTitle "{metric} against WHO bands"
         GrowthChart values={map(entries,e=>metric=="Weight"?e.kg:e.cm)} labels={map(entries,e=>e.date)} bands=[3,15,50,85,97] unit={metric=="Weight"?"kg":"cm"} sex="girl" h=280
@@ -196,9 +199,9 @@ App
           ListTile "{e.date}" subtitle="{e.kg} kg, {e.cm} cm"
             IconButton "delete" tooltip="Delete" onTap={entries=removeWhere(entries,x=>x.id==e.id)}
 Dialog#growthEntry "New measurement"
-  DatePicker "Date" bind=measured
-  Input "Weight (kg)" type=number bind=kg
-  Input "Length (cm)" type=number bind=cm
+  DatePicker "Date" @measured
+  Input "Weight (kg)" type=number @kg
+  Input "Length (cm)" type=number @cm
   Button "Save" onTap={entries=append(entries,{"id":length(entries)+1,"date":formatDate(measured,"MMM d"),"kg":kg,"cm":cm}); toast "Measurement saved"; close}
 
 ### Sharing
@@ -224,12 +227,12 @@ App
         each p in people
           ListTile "{p.name}" subtitle="{p.role}, {p.email}"
             Row gap=8 middle
-              Toggle "Alerts" bind=p.alerts
+              Toggle "Alerts" @p.alerts
               IconButton "person_remove" tooltip="Remove" onTap={people=removeWhere(people,x=>x.email==p.email); toast "Removed {p.name}"}
       Card gap=8
-        Toggle "Evening summary at 20:00" bind=digest
+        Toggle "Evening summary at 20:00" @digest
         Button.outline "Copy invite link" icon="link" onTap={copy "https://milkandmoon.app/join/noa-4f9k"; toast "Link copied"}
 Dialog#invite "Invite someone"
-  Input "Email" "name@example.com" type=email bind=inviteEmail
-  Select "Role" items=["Parent","Grandparent","Caregiver"] bind=inviteRole
+  Input "Email" "name@example.com" type=email @inviteEmail
+  Select "Role" items=["Parent","Grandparent","Caregiver"] @inviteRole
   Button "Send invite" onTap={people=append(people,{"name":inviteEmail,"role":inviteRole,"email":inviteEmail,"alerts":true}); inviteEmail=""; toast "Invite sent"; close}

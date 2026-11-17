@@ -21,16 +21,16 @@ App
     Text.caption "LAYERS"
     each l in layers
       Column gap=4
-        Checkbox "{l.name}" bind=l.on
+        Checkbox "{l.name}" @l.on
         if l.on
-          Slider bind=l.opacity min=0 max=100
+          Slider @l.opacity min=0 max=100
     Spacer grow
     Text.muted "Zoom {zoom}x"
   Main
     Nav
       Heading "World" level=1
       Row gap=8
-        Input "Search places" bind=q w=240
+        Input "Search places" @q w=240
         Button.outline "Measure" icon="straighten" onTap={measuring=!measuring; points=[]}
         Button.outline "Bookmark" icon="bookmark_add" onTap={bookmarks=append(bookmarks,{"id":"b{length(bookmarks)+1}","name":place.name,"lat":0,"lng":0,"zoom":zoom}); toast "Bookmarked {place.name}"}
         IconButton "zoom_in" tooltip="Zoom in" onTap={zoom=min(18,zoom+1)}
@@ -38,7 +38,7 @@ App
     Row grow
       Stack grow
         if compare
-          MapCompare bind=split left={compareA} right={compareB} layers={layers} zoom={zoom} onZoom={zoom=result}
+          MapCompare @split left={compareA} right={compareB} layers={layers} zoom={zoom} onZoom={zoom=result}
         if !compare
           MapView zoom={zoom} layers={layers} labelsBySize measuring={measuring} onZoom={zoom=result} onPlaceTap={place=result; open placeCard} onMeasure={points=result}
         if measuring
@@ -77,6 +77,7 @@ App
 state tab="marks"
 state sel=""
 state bookmarks=[{"id":"b1","name":"Lisbon","lat":38.72,"lng":-9.14,"zoom":9},{"id":"b2","name":"Lake Titicaca","lat":-15.84,"lng":-69.37,"zoom":8},{"id":"b3","name":"Kathmandu","lat":27.71,"lng":85.32,"zoom":10}]
+state newName=""
 App
   Sidebar
     Brand "Gazetteer" icon="public"
@@ -97,7 +98,7 @@ App
     MenuItem "Rename" icon="edit" onTap={open rename}
     MenuItem "Remove" icon="delete" onTap={bookmarks=removeWhere(bookmarks,x=>x.id==sel)}
   Dialog#rename "Rename bookmark"
-    Input "Name" bind=newName
+    Input "Name" @newName
     Button "Save" onTap={bookmarks=updateWhere(bookmarks,x=>x.id==sel,x=>with(x,"name",newName)); close}
   Dialog#confirmClear "Remove all bookmarks?"
     Row gap=8 end

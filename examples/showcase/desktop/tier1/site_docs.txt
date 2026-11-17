@@ -1,12 +1,14 @@
+state q=""
+state version=""
 Page
   Nav
     Row gap=8 middle
       Icon "sensors"
       Text.strong "Beacon"
       Text.muted "Docs"
-    SearchBar "Search the docs" bind=q w=320
+    SearchBar "Search the docs" @q w=320
     Row gap=12 middle
-      Select bind=version items=["v2.4","v2.3","v2.2"]
+      Select @version items=["v2.4","v2.3","v2.2"]
       Link "GitHub" href="https://github.com"
   Section
     Row gap=32 top

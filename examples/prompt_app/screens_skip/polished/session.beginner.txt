@@ -4,7 +4,7 @@ Screen
     Text.eyebrow "{phase==\"work\" ? \"Jump\" : \"Rest\"}" color=onPrimary
     Text.display "{left}" size=120 weight=700 color=onPrimary
     Text "{phase==\"work\" ? \"Jump for \" + today.work + \" seconds, then rest.\" : \"Catch your breath. Next round starts soon.\"}" color=onPrimary
-    Progress bind=frac
+    Progress value={frac}
     Text.strong "Round {round} of {today.rounds}" color=onPrimary
   Card gap=12
     Row between middle

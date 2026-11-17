@@ -7,7 +7,7 @@ ChatCard "Your grocery order" "{sum(items,i=>i.qty)} items · arrives today, 6 t
   if decided==""
     each i in filter(items,x=>x.qty>0)
       CartLine#line "{i.name}" "{i.note} · {money(i.price,"$",2)} each" price="{money(i.price*i.qty,"$",2)}" qty={i.qty} kind="{i.kind}" onChanged={items=updateWhere(items,x=>x.id==i.id,x=>with(x,"qty",result))}
-    InputField#promo "Promo code" "Try SAVE10" bind=code icon="sell_rounded" success={off>0?"SAVE10 applied: 10% off":""}
+    InputField#promo "Promo code" "Try SAVE10" @code icon="sell_rounded" success={off>0?"SAVE10 applied: 10% off":""}
     Details rows={[["Subtotal",money(sub,"$",2)],["Promo SAVE10",off>0?"-"+money(off,"$",2):""],["Delivery","$4.99"]]}
     TotalBar#confirm "Total" amount="{money(sub-off+4.99,"$",2)}" cta="Confirm order" enabled={sub>0} onPressed={decided="Confirmed"; emit order_decision "confirm"}
     ActionButton#cancel "Cancel order" tone="quiet" onPressed={decided="Cancelled"; emit order_decision "cancel"}

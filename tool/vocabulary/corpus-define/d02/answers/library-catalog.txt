@@ -22,7 +22,7 @@ App
     Nav
       Heading "Find a book" level=1
       Row gap=8
-        Input "Search title, author or ISBN" bind=q w=280
+        Input "Search title, author or ISBN" @q w=280
         IconButton "tune" tooltip="Filters" onTap={open filters}
     Row pad=24 gap=24 top
       Column grow gap=16
@@ -31,10 +31,10 @@ App
           FilterChip "E-book" selected={contains(formats,"E-book")} onTap={formats=contains(formats,"E-book") ? without(formats,"E-book") : append(formats,"E-book")}
           FilterChip "Audiobook" selected={contains(formats,"Audiobook")} onTap={formats=contains(formats,"Audiobook") ? without(formats,"Audiobook") : append(formats,"Audiobook")}
           Spacer grow
-          Select bind=sort items=["Relevance","Title","Newest","Most available"] w=170
+          Select @sort items=["Relevance","Title","Newest","Most available"] w=170
         Row gap=16
-          Toggle "Available now" bind=onlyAvailable
-          Select bind=lang items=["Any language","English","Spanish","French"] w=170
+          Toggle "Available now" @onlyAvailable
+          Select @lang items=["Any language","English","Spanish","French"] w=170
         Text.muted "{count(books, b => (length(formats)==0 || contains(formats,b.format)) && (lang==\"Any language\" || b.lang==lang) && (!onlyAvailable || b.avail>0) && (q==\"\" || contains(lower(b.title),lower(q)) || contains(lower(b.author),lower(q))))} results"
         each b in books
           if (length(formats)==0 || contains(formats,b.format)) && (lang=="Any language" || b.lang==lang) && (!onlyAvailable || b.avail>0) && (q=="" || contains(lower(b.title),lower(q)) || contains(lower(b.author),lower(q)))
@@ -57,8 +57,8 @@ App
       Checkbox "Book" onChange={formats=result ? append(formats,"Book") : without(formats,"Book")}
       Checkbox "E-book" onChange={formats=result ? append(formats,"E-book") : without(formats,"E-book")}
       Checkbox "Audiobook" onChange={formats=result ? append(formats,"Audiobook") : without(formats,"Audiobook")}
-    Select "Language" bind=lang items=["Any language","English","Spanish","French"]
-    Toggle "Available now" bind=onlyAvailable
+    Select "Language" @lang items=["Any language","English","Spanish","French"]
+    Toggle "Available now" @onlyAvailable
     Row gap=8 end
       Button.ghost "Reset" onTap={formats=[]; lang="Any language"; onlyAvailable=false}
       Button "Show results" onTap={close}
@@ -135,8 +135,8 @@ App
           Text.muted "Copies are on the shelf, so you would be first in line." visible={!hold}
           Text.success "Hold placed. Pickup at {pickup} within 7 days of notice." visible={hold}
   Dialog#holdDialog "Place a hold" "The Overstory by Richard Powers"
-    Select "Pickup branch" bind=pickup items=["Central Library","Riverside Branch","Eastgate Branch","Hillcrest Branch"]
-    SegmentedButton bind=fmtPick items=["Book","E-book"]
+    Select "Pickup branch" @pickup items=["Central Library","Riverside Branch","Eastgate Branch","Hillcrest Branch"]
+    SegmentedButton @fmtPick items=["Book","E-book"]
     Text.muted "Queue position: 1 of 1. We will email you when it is ready."
     Row gap=8 end
       Button.ghost "Cancel" onTap={close}
@@ -249,7 +249,7 @@ App
       Row gap=16 middle
         IconButton "chevron_left" tooltip="Previous page" onTap={page=max(1,page-1)}
         Column grow gap=4
-          Slider bind=page min=1 max=502
+          Slider @page min=1 max=502
           Text.muted "Page {page} of {total}, {round(page/total*100,0)}% read"
         IconButton "chevron_right" tooltip="Next page" onTap={page=min(total,page+1)}
   Popover#textMenu
@@ -258,4 +258,4 @@ App
         IconButton "text_decrease" tooltip="Smaller" onTap={fontSize=max(12,fontSize-2)}
         Text.strong "{fontSize} pt"
         IconButton "text_increase" tooltip="Larger" onTap={fontSize=min(32,fontSize+2)}
-      SegmentedButton bind=theme items=["Light","Sepia","Dark"]
+      SegmentedButton @theme items=["Light","Sepia","Dark"]

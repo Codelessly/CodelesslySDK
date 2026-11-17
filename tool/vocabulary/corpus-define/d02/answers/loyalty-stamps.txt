@@ -31,11 +31,11 @@ App
               Text.strong "{c.shop} card expires in {c.days} days"
               Spacer grow
               Badge.warning "{c.expires}"
-      CardStack bind=at count={length(cards)}
+      CardStack @at count={length(cards)}
         each c in cards
           StampCard shop="{c.shop}" stamps={c.stamps} total={c.total} color={c.color} reward="{c.reward}" onRedeem={at=index; secs=120; redeeming=true; open redeem}
       Row center gap=8
-        Dots bind=at count={length(cards)}
+        Dots @at count={length(cards)}
       Card gap=8
         Text.strong "Next free stamp"
         Text.muted "{cards[at].shop}: {cards[at].total - cards[at].stamps} more stamps until {cards[at].reward}."
@@ -83,7 +83,7 @@ App
   Main
     Nav
       Heading "Shop finder"
-      Input "Search shops" bind=q w=220
+      Input "Search shops" @q w=220
     Row gap=0 top grow
       Pane w=320 pad=16 gap=12
         each s in shops
@@ -91,7 +91,7 @@ App
             ListTile "{s.name}" "{s.street} · {s.dist}" selected={pick==s.id} onTap={pick=s.id}
               Badge.neutral "{s.stamps}"
       Column grow pad=16 gap=12
-        MapView h=420 pins={map(shops,s=>{"id":s.id,"label":s.name,"lat":s.lat,"lng":s.lng})} bind=pick
+        MapView h=420 pins={map(shops,s=>{"id":s.id,"label":s.name,"lat":s.lat,"lng":s.lng})} @pick
         Card gap=8
           Text.strong "{find(shops,s=>s.id==pick).name}"
           Text.muted "{find(shops,s=>s.id==pick).street}"
@@ -149,9 +149,9 @@ define StampGrid filled=0 total=10 cols=5
         Box w=44 h=44 radius=22 border=1
 
 // A stack of cards flicked through; shows the one at the page index.
-define CardStack bind=at count=0
+define CardStack @at count=0
   state at=0
-  Pages bind=at h=260 peek=0.9
+  Pages @at h=260 peek=0.9
     ...
 
 define Banner "title" "text" icon="info" onDismiss
@@ -179,11 +179,11 @@ define Barcode value="" h=96
 define SlideToConfirm "label" onConfirm
   state pos=0
   Stack h=48 radius=24 fill=#FFE5E7EB
-    Slider bind=pos min=0 max=100 onChange={pos >= 95 ? onConfirm : toast "Keep sliding"}
+    Slider @pos min=0 max=100 onChange={pos >= 95 ? onConfirm : toast "Keep sliding"}
     Text.muted "{label}" center
 
 // Shows a labelled box because a real map is not available.
-define MapView h=320 pins=[] bind=pick
+define MapView h=320 pins=[] @pick
   state pick=""
   Stack h={h} radius=12 fill=#FFD1E7DD
     Text.muted "Map" center

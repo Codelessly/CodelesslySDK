@@ -29,9 +29,9 @@ App
         Button "{running ? 'Pause' : 'Run'}" icon="{running ? 'pause' : 'play_arrow'}" onTap={running=!running}
     Column pad=24 gap=16
       Row gap=16 top
-        Input "Centre (MHz)" bind=centreText type=number w=160 onChange={centre=result}
-        Input "Span (MHz)" bind=spanText type=number w=160 onChange={span=max(0.01,result)}
-        Input "Limit (dBm)" bind=limit type=number w=160
+        Input "Centre (MHz)" @centreText type=number w=160 onChange={centre=result}
+        Input "Span (MHz)" @spanText type=number w=160 onChange={span=max(0.01,result)}
+        Input "Limit (dBm)" @limit type=number w=160
         Spacer grow
         Column gap=2
           Text.caption "Marker"
@@ -106,8 +106,8 @@ App
     Nav
       Heading "Signals" level=1
       Row gap=8
-        Input "Search" bind=q w=220
-        Select bind=band items=["All","Over limit","Under limit"] w=150
+        Input "Search" @q w=220
+        Select @band items=["All","Over limit","Under limit"] w=150
     Column pad=24 gap=16
       Card gap=8
         Row gap=8
@@ -131,7 +131,7 @@ Menu#signalMenu end
   MenuItem "Delete" icon="delete" onTap={signals=removeWhere(signals, x => x.freq == sel)}
 Dialog#renameSignal "Rename signal" "Give it a name you will recognise"
   state newName=""
-  Input "Name" bind=newName
+  Input "Name" @newName
   Button "Save" onTap={signals=updateWhere(signals, x => x.freq == sel, x => with(x,"name",newName)); toast "Renamed"; close}
 
 ### Settings
@@ -140,6 +140,8 @@ state avg=4
 state hold=true
 state gain=30
 state sweepMs=500
+state limit=""
+state ref=""
 App
   Sidebar
     Brand "Bandscape" icon="graphic_eq"
@@ -153,24 +155,24 @@ App
     Column pad=24 gap=16 maxw=720
       Card gap=12
         Text.strong "Measurement"
-        Select "Resolution bandwidth" bind=rbw items=["100 Hz","1 kHz","10 kHz","100 kHz"]
+        Select "Resolution bandwidth" @rbw items=["100 Hz","1 kHz","10 kHz","100 kHz"]
         Row gap=8 middle
           Text "Averaging" w=120
-          Slider bind=avg min=1 max=16 grow
+          Slider @avg min=1 max=16 grow
           Text.mono "{avg}"
         Row gap=8 middle
           Text "Tuner gain" w=120
-          Slider bind=gain min=0 max=50 grow
+          Slider @gain min=0 max=50 grow
           Text.mono "{gain} dB"
         Row gap=8 middle
           Text "Sweep every" w=120
-          Slider bind=sweepMs min=100 max=2000 grow
+          Slider @sweepMs min=100 max=2000 grow
           Text.mono "{sweepMs} ms"
       Card gap=12
         Text.strong "Display"
-        Toggle "Peak hold line" bind=hold
-        Input "Limit line (dBm)" bind=limit type=number
-        Input "Reference level (dBm)" bind=ref type=number
+        Toggle "Peak hold line" @hold
+        Input "Limit line (dBm)" @limit type=number
+        Input "Reference level (dBm)" @ref type=number
         Text.muted "The trace turns red wherever it crosses the limit line."
       Card gap=8
         Text.strong "Data"

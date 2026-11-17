@@ -31,7 +31,7 @@ App
         if whisper
           WhisperIndicator "Dana Okafor" "Supervisor is coaching you"
         CallTimer seconds={seconds} label={status}
-        SegmentedButton bind=status items=["Ready","On a call","Wrap-up","Break"] onChange={seconds=0; result=="Break" ? toast "Break started, queue paused" : toast "Status: {result}"}
+        SegmentedButton @status items=["Ready","On a call","Wrap-up","Break"] onChange={seconds=0; result=="Break" ? toast "Break started, queue paused" : toast "Status: {result}"}
     Column pad=24 gap=16 scroll
       if incoming && !onCall
         Card gap=12 animate=slide-up
@@ -75,10 +75,10 @@ App
                 Text.muted "{count(steps,s=>s.done)} of {length(steps)} steps"
               Progress {count(steps,s=>s.done)/length(steps)}
               each step in steps
-                Checkbox "{step.text}" bind=step.done
+                Checkbox "{step.text}" @step.done
             Card gap=8
               Text.strong "Notes"
-              Input "Call notes" "Fault reported, symptoms, what was tried" bind=notes multiline
+              Input "Call notes" "Fault reported, symptoms, what was tried" @notes multiline
               Row between
                 Text.caption "{length(notes)} characters, saved to the case"
                 Button.outline "Insert reference" onTap={notes=notes+" [Ref AC-884213] "}
@@ -110,7 +110,7 @@ App
             StatTile "CSAT" "94%"
             StatTile "Adherence" "97%"
   Dialog#transfer "Transfer call" "Pick a team, the customer stays on hold while it rings"
-    Input "Search directory" bind=q
+    Input "Search directory" @q
     Column gap=4
       each d in filter(directory,x=>contains(lower(x.name),lower(q)))
         ListTile "{d.name}" subtitle="Ext {d.ext}, {d.free} agents free" onTap={target=d.name}
@@ -128,6 +128,7 @@ state when=""
 state seconds=0
 state wrapNote=""
 state codes=[{"id":"fault-fixed","label":"Fault fixed on call","icon":"build"},{"id":"visit","label":"Engineer visit booked","icon":"event"},{"id":"billing","label":"Billing adjustment","icon":"payments"},{"id":"upgrade","label":"Upgrade offered","icon":"trending_up"},{"id":"complaint","label":"Complaint logged","icon":"report"},{"id":"nofault","label":"No fault found","icon":"check_circle"}]
+state whenTime=""
 every 1s onTick={seconds=seconds+1}
 App
   Sidebar
@@ -156,13 +157,13 @@ App
               Text.strong "{c.label}"
       Card gap=12
         Text.strong "Outcome"
-        SegmentedButton bind=outcome items=["Resolved","Follow-up","Escalated"]
-        Toggle "Schedule a callback" bind=callback
+        SegmentedButton @outcome items=["Resolved","Follow-up","Escalated"]
+        Toggle "Schedule a callback" @callback
         if callback
           Row gap=12
-            DatePicker "Callback date" bind=when
-            TimePicker "Time" bind=whenTime
-        Input "Summary for the next agent" bind=wrapNote multiline
+            DatePicker "Callback date" @when
+            TimePicker "Time" @whenTime
+        Input "Summary for the next agent" @wrapNote multiline
       Row end gap=8
         Button.outline "Back to the call" onTap={go desk}
         Button "Submit and go Ready" onTap={code=="" ? toast "Choose a wrap-up code" : {emit wrapped {"code":code,"outcome":outcome,"note":wrapNote}; toast "Wrap-up saved, you are Ready"; go desk}}
@@ -183,8 +184,8 @@ App
     Nav
       Heading "Queue and stats" level=1
       Row gap=8 middle
-        Select bind=skill items=["All queues","Billing","Technical","Retention"]
-        SegmentedButton bind=tab items=["Today","This week"]
+        Select @skill items=["All queues","Billing","Technical","Retention"]
+        SegmentedButton @tab items=["Today","This week"]
     Column pad=24 gap=16 scroll
       Grid cols=4 gap=16
         Card gap=4

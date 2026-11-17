@@ -2,6 +2,8 @@
 state tab="score"
 state bar=1
 state marks=[{"letter":"A","bar":1},{"letter":"B","bar":17},{"letter":"C","bar":33},{"letter":"D","bar":49},{"letter":"E","bar":65},{"letter":"F","bar":81}]
+state newLetter=""
+state newBar=""
 App
   Sidebar
     Brand "Rehearsal" icon="music_note"
@@ -20,7 +22,7 @@ App
     Column pad=24 gap=16
       Card gap=12
         Text.strong "Letters A to F"
-        RehearsalStrip marks={marks} bars=96 bind=bar onJump={toast "Jumped to bar {result}"}
+        RehearsalStrip marks={marks} bars=96 @bar onJump={toast "Jumped to bar {result}"}
       Card gap=8
         Text.strong "Where you are"
         Row gap=16
@@ -33,11 +35,11 @@ App
         each cut in cuts
           Row between
             Text "{cut.part}: bars {cut.from} to {cut.to}"
-            Toggle "Cut" bind=cut.on
+            Toggle "Cut" @cut.on
 state cuts=[{"part":"Horn 2","from":21,"to":28,"on":true},{"part":"Tuba","from":49,"to":52,"on":false},{"part":"Timpani","from":65,"to":72,"on":true}]
 Dialog#addMark "Add rehearsal mark" "Pick the bar"
-  Input "Letter" bind=newLetter
-  Input "Bar" type=number bind=newBar
+  Input "Letter" @newLetter
+  Input "Bar" type=number @newBar
   Button "Save" onTap={marks=append(marks, {"letter":newLetter,"bar":newBar}); close}
 
 ### Take
@@ -59,7 +61,7 @@ App
       Text.muted "{duration(t)} of 0:30"
     Column pad=24 gap=16
       Card gap=12
-        Waveform peaks={peaks} marks={dropped} bind=t h=120
+        Waveform peaks={peaks} marks={dropped} @t h=120
         Row gap=8 middle
           Button.outline "Back 5s" onTap={t=max(0,t-5)}
           Button "{playing ? 'Pause' : 'Play'}" onTap={playing=!playing}
@@ -83,6 +85,9 @@ state section="all"
 state bar=1
 state notes=[{"id":1,"section":"strings","bar":9,"text":"Violins: lift the bow before B"},{"id":2,"section":"brass","bar":17,"text":"Trumpets enter softer, mp"},{"id":3,"section":"percussion","bar":33,"text":"Timpani: dry stick, no ring"},{"id":4,"section":"strings","bar":41,"text":"Cellos: shift on the bar line"},{"id":5,"section":"brass","bar":49,"text":"Horns: breathe after bar 52"},{"id":6,"section":"percussion","bar":65,"text":"Cymbal: choke on beat 4"}]
 state sel=0
+state nbar=""
+state nsec=""
+state ntext=""
 App
   Sidebar
     Brand "Rehearsal" icon="music_note"
@@ -112,9 +117,9 @@ Menu#noteMenu end
   MenuItem "Delete" icon="delete" onTap={notes=removeWhere(notes, x => x.id==sel)}
   MenuItem "Copy" icon="content_copy" onTap={copy sel; toast "Copied"}
 Dialog#newNote "New note" "Pin it to a bar"
-  Input "Bar" type=number bind=nbar
-  Select "Section" items=["strings","brass","percussion"] bind=nsec
-  Input "Note" multiline bind=ntext
+  Input "Bar" type=number @nbar
+  Select "Section" items=["strings","brass","percussion"] @nsec
+  Input "Note" multiline @ntext
   Button "Pin" onTap={notes=append(notes, {"id":length(notes)+1,"section":nsec,"bar":nbar,"text":ntext}); close}
 
 ### Run-through
@@ -161,7 +166,7 @@ App
         TempoCurve points={rit} ritardando={[{"from":49,"to":72,"label":"rit."}]} h=180
 
 // A waveform with marks along it; the audio itself is shown as bars.
-define Waveform peaks=[] marks=[] bind=t h=120 onSeek
+define Waveform peaks=[] marks=[] @t h=120 onSeek
   state t=0
   Stack h={h}
     Row gap=2 middle h={h}
@@ -171,7 +176,7 @@ define Waveform peaks=[] marks=[] bind=t h=120 onSeek
       Box w=2 h={h} fill=#FFDC2626 x={m.t*10}
     Box w=2 h={h} fill=#FF111827 x={t*10}
 
-define RehearsalStrip marks=[] bars=96 bind=bar onJump
+define RehearsalStrip marks=[] bars=96 @bar onJump
   state bar=1
   Column gap=6
     Row scroll gap=0

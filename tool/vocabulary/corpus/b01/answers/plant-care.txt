@@ -3,6 +3,8 @@ state tab="plants"
 state sel=""
 state plants=[{"id":"p1","name":"Monstera","species":"Monstera deliciosa","photo":"https://images.fernwise.app/monstera.jpg","water":0.35},{"id":"p2","name":"Fiddle Leaf Fig","species":"Ficus lyrata","photo":"https://images.fernwise.app/fig.jpg","water":0.8},{"id":"p3","name":"Snake Plant","species":"Dracaena trifasciata","photo":"https://images.fernwise.app/snake.jpg","water":0.6},{"id":"p4","name":"Pothos","species":"Epipremnum aureum","photo":"https://images.fernwise.app/pothos.jpg","water":0.15},{"id":"p5","name":"Calathea","species":"Goeppertia orbifolia","photo":"https://images.fernwise.app/calathea.jpg","water":0.5},{"id":"p6","name":"Aloe","species":"Aloe vera","photo":"https://images.fernwise.app/aloe.jpg","water":0.9}]
 state q=""
+state newName=""
+state room=""
 App
   Sidebar
     Brand "Fernwise" icon="eco"
@@ -17,7 +19,7 @@ App
     Nav
       Heading "My plants" level=1
       Row gap=8
-        Input "Search plants" bind=q w=220
+        Input "Search plants" @q w=220
         Button "Add plant" icon="add" onTap={open addPlant}
     Column pad=24 gap=16 scroll
       Grid cols=3 gap=16
@@ -34,8 +36,8 @@ App
                   Text.caption "{round(p.water*100,0)}%"
               Progress {p.water}
   Dialog#addPlant "Add a plant" "Name it and pick where it lives"
-    Input "Name" bind=newName
-    Select "Room" items=["Living room","Bedroom","Kitchen","Office"] bind=room
+    Input "Name" @newName
+    Select "Room" items=["Living room","Bedroom","Kitchen","Office"] @room
     Button "Identify from photo" onTap={close; go identify}
 
 ### Plant
@@ -46,6 +48,8 @@ state growth=[{"date":"Aug 2","url":"https://images.fernwise.app/monstera-aug.jp
 state ml=250
 state note=""
 state watered=false
+state remind=false
+state wdate=""
 App
   Sidebar
     Brand "Fernwise" icon="eco"
@@ -78,7 +82,7 @@ App
               Chip "Fri"
               Chip "Sat"
               ChoiceChip "Sun"
-            Toggle "Remind me at 9:00" bind=remind
+            Toggle "Remind me at 9:00" @remind
           Grid cols=3 gap=12
             Card center gap=4
               Gauge 70 min=0 max=100 unit="% light"
@@ -102,9 +106,9 @@ App
         each w in waterLog
           ListTile "{formatDate(w.date,'MMM d')}" "{w.note}" icon="water_drop" trailing="{w.ml} ml"
   Dialog#logWater "Log a watering" "How much did {sel} get?"
-    Slider bind=ml min=50 max=500 label="Amount (ml)"
-    Input "Note" bind=note
-    DatePicker "Date" bind=wdate
+    Slider @ml min=50 max=500 label="Amount (ml)"
+    Input "Note" @note
+    DatePicker "Date" @wdate
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Save" onTap={waterLog=concat([{"date":today(),"ml":ml,"note":note}],waterLog); note=""; toast "Watering logged"; close}

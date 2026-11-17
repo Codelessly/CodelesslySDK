@@ -50,15 +50,15 @@ App
           Card gap=12
             Text.strong "Apply to {length(selected)==0 ? 'all photos' : length(selected) + ' selected'}"
             Row gap=12 middle
-              Select "Size" items=["4x6","5x7","8x10","11x14"] bind=bulkSize
-              Select "Paper" items=["Glossy","Matte","Lustre","Metallic"] bind=bulkPaper
+              Select "Size" items=["4x6","5x7","8x10","11x14"] @bulkSize
+              Select "Paper" items=["Glossy","Matte","Lustre","Metallic"] @bulkPaper
               Button.secondary "Apply" onTap={photos=map(photos,p=>(length(selected)==0 || contains(selected,p.id)) ? with(with(p,"size",bulkSize),"paper",bulkPaper) : p); toast "Applied"}
           Grid cols=3 gap=16
             each photo in photos
               Card gap=8
                 Stack
                   Image "{photo.url}" h=140 radius=6
-                  Checkbox bind=photo.picked onChange={selected=result ? append(selected,photo.id) : without(selected,photo.id)}
+                  Checkbox @photo.picked onChange={selected=result ? append(selected,photo.id) : without(selected,photo.id)}
                   if photo.lowres
                     Badge.warning "Low resolution" icon="warning"
                 Text.strong "{photo.name}"
@@ -70,10 +70,10 @@ App
                   if photo.lowres
                     Text.danger "May look soft at {photo.size}. Try a smaller size or upload a larger file."
                   Row gap=8
-                    Select "Size" items=["4x6","5x7","8x10","11x14"] bind=photo.size
-                    Select "Paper" items=["Glossy","Matte","Lustre","Metallic"] bind=photo.paper
+                    Select "Size" items=["4x6","5x7","8x10","11x14"] @photo.size
+                    Select "Paper" items=["Glossy","Matte","Lustre","Metallic"] @photo.paper
                   Row between middle
-                    Stepper bind=photo.qty min=1 max=99
+                    Stepper @photo.qty min=1 max=99
                     Text.strong "{money((sizePrices[photo.size]+paperExtra[photo.paper])*photo.qty,'$',2)}"
                   Row gap=8
                     Button.outline "Crop" icon="crop" onTap={cropId=photo.id; open crop}
@@ -98,18 +98,18 @@ App
           Button "Checkout" onTap={go checkout}
 
 Dialog#crop "Crop photo" "Drag the frame, zoom to fit"
-  CropFrame src="{find(photos,p=>p.id==cropId).url}" ratio={cropRatio} zoom={cropZoom} bindX=cropX bindY=cropY
-  SegmentedButton items=["2:3","3:2","4:5","1:1"] bind=cropRatio
+  CropFrame src="{find(photos,p=>p.id==cropId).url}" ratio={cropRatio} zoom={cropZoom} x=@cropX y=@cropY
+  SegmentedButton items=["2:3","3:2","4:5","1:1"] @cropRatio
   Row gap=12 middle
     Icon "zoom_out"
-    Slider bind=cropZoom min=1 max=4 grow
+    Slider @cropZoom min=1 max=4 grow
     Icon "zoom_in"
   Row end gap=8
     Button.outline "Reset" onTap={cropZoom=1; cropX=0.5; cropY=0.5}
     Button "Apply crop" onTap={emit crop {"id":cropId,"ratio":cropRatio,"zoom":cropZoom,"x":cropX,"y":cropY}; toast "Crop saved"; close}
 
 // shows a framed picture with a ratio frame; the frame drags and the zoom scales the picture, drawn here as a stack with sliders for the offset
-define CropFrame src="" ratio="3:2" zoom=1 bindX=0.5 bindY=0.5
+define CropFrame src="" ratio="3:2" zoom=1 x=@0.5 y=@0.5
   state fx=0.5
   state fy=0.5
   Column gap=8
@@ -118,12 +118,12 @@ define CropFrame src="" ratio="3:2" zoom=1 bindX=0.5 bindY=0.5
       Box w={ratio=="1:1" ? 200 : 240} h={ratio=="2:3" ? 260 : 170} border=2 drag=frame(1)
     Row gap=8 middle
       Text.caption "Left to right"
-      Slider bind=fx min=0 max=1 grow onChange={bindX=result}
+      Slider @fx min=0 max=1 grow onChange={x=result}
     Row gap=8 middle
       Text.caption "Top to bottom"
-      Slider bind=fy min=0 max=1 grow onChange={bindY=result}
+      Slider @fy min=0 max=1 grow onChange={y=result}
 
-define Stepper bind=value min=0 max=99 onChange
+define Stepper @value min=0 max=99 onChange
   Row gap=4 middle
     IconButton "remove" tooltip="Fewer" onTap={value=max(min,value-1); onChange(value)}
     Text.strong "{value}" w=32 center
@@ -164,23 +164,23 @@ Page
       Column grow gap=16
         Card gap=12
           Heading "How do you want them?" level=3
-          SegmentedButton items=["delivery","pickup"] bind=fulfil
+          SegmentedButton items=["delivery","pickup"] @fulfil
           if fulfil=="delivery"
-            Input "Full name" bind=addr.name
-            Input "Street address" bind=addr.line1
+            Input "Full name" @addr.name
+            Input "Street address" @addr.line1
             Row gap=12
-              Input "City" bind=addr.city grow
-              Input "ZIP" bind=addr.zip w=120
-            Input "Phone" type=phone bind=addr.phone
-            Radio "Standard, 4 to 6 days, $4.50" value="standard" bind=speed
-            Radio "Express, 2 days, $12.00" value="express" bind=speed
+              Input "City" @addr.city grow
+              Input "ZIP" @addr.zip w=120
+            Input "Phone" type=phone @addr.phone
+            Radio "Standard, 4 to 6 days, $4.50" value="standard" @speed
+            Radio "Express, 2 days, $12.00" value="express" @speed
           if fulfil=="pickup"
-            Select "Pickup store" items=["Downtown, 214 Market St","Eastside, 9 Burnside Ave","Airport Road, 77 Mill Rd"] bind=pickup
+            Select "Pickup store" items=["Downtown, 214 Market St","Eastside, 9 Burnside Ave","Airport Road, 77 Mill Rd"] @pickup
             Text.muted "Ready in 2 hours, free. Bring your order number."
         Card gap=12
           Heading "Promo code" level=3
           Row gap=8
-            Input "Code" bind=promo grow
+            Input "Code" @promo grow
             Button.secondary "Apply" onTap={promo=="PRINT10" ? promoOk=true : toast "That code is not valid"}
           if promoOk
             Text.success "PRINT10 applied: 10% off"
@@ -231,6 +231,8 @@ define Timeline steps=[] current=0
 state orderNo="PR-48213"
 state status=2
 state events=[{"title":"Order received","when":"Mon 9:12 am","note":"We have your 6 prints"},{"title":"Printing","when":"Mon 2:40 pm","note":"On Glossy and Matte paper"},{"title":"Packed and handed to carrier","when":"Tue 8:05 am","note":"Tracking 1Z 48A 920"},{"title":"Out for delivery","when":"","note":""},{"title":"Delivered","when":"","note":""}]
+state issue=""
+state details=""
 
 Page
   Nav
@@ -268,6 +270,6 @@ Page
   Footer
     Text.muted "Pressroom"
   Dialog#report "Report a problem" "Tell us what happened"
-    Select "What went wrong" items=["Damaged in transit","Colors look off","Wrong size","Missing prints"] bind=issue
-    Input "Details" multiline bind=details
+    Select "What went wrong" items=["Damaged in transit","Colors look off","Wrong size","Missing prints"] @issue
+    Input "Details" multiline @details
     Button "Send" onTap={emit reportProblem {"order":orderNo,"issue":issue,"details":details}; toast "Thanks, we will reprint"; close}

@@ -62,9 +62,9 @@ App
       Text.muted "Fade {fading ? round(progress*100,0) : 0}%"
 
 Dialog#record "Record current look" "Stores the levels as a new cue"
-  Input "After cue" bind=afterNum type=number
-  Input "Cue number" "e.g. 3.5" bind=newNum type=number
-  Input "Name" "e.g. Lead special" bind=newName
+  Input "After cue" @afterNum type=number
+  Input "Cue number" "e.g. 3.5" @newNum type=number
+  Input "Name" "e.g. Lead special" @newName
   Row gap=8 end
     Button.ghost "Cancel" onTap={close}
     Button "Record" onTap={newName=="" ? toast "Give the cue a name" : {cues=sortBy(append(cues,{"num":newNum,"name":newName,"fade":3,"wait":0}),c=>c.num); newName=""; toast "Recorded cue {newNum}"; close}}
@@ -106,22 +106,22 @@ App
         Text.strong "Channel faders"
         Row gap=16 center
           each lv in levels
-            Fader "{lv.name}" bind=lv.v number={lv.ch} dark={blackout}
+            Fader "{lv.name}" @lv.v number={lv.ch} dark={blackout}
       Card gap=12
         Text.strong "Colour mix"
         Row gap=24 top
           Column grow gap=8
             Row gap=8 middle
               Text "Red" w=60
-              Slider bind=red min=0 max=255
+              Slider @red min=0 max=255
               Text.mono "{round(red,0)}" w=40
             Row gap=8 middle
               Text "Green" w=60
-              Slider bind=green min=0 max=255
+              Slider @green min=0 max=255
               Text.mono "{round(green,0)}" w=40
             Row gap=8 middle
               Text "Blue" w=60
-              Slider bind=blue min=0 max=255
+              Slider @blue min=0 max=255
               Text.mono "{round(blue,0)}" w=40
           Column gap=8 center
             Box w=140 h=100 radius=8 fill={"#FF" + upper(hex(red)) + upper(hex(green)) + upper(hex(blue))}
@@ -129,14 +129,14 @@ App
             Button.outline "Apply to group" onTap={emit applyColour; toast "Colour sent to picked lamps"}
 
 // A vertical fader: a column of ten tappable steps with a typed level under it
-define Fader "label" bind=v number=1 dark=false
+define Fader "label" @v number=1 dark=false
   state v=0
   Column gap=6 center w=88
     Text.caption "{number}"
     Column gap=1
       each i in range(10)
         Box w=44 h=14 radius=2 fill={dark ? "#FF1F2937" : (10-i)*10<=v ? "#FFF59E0B" : "#FF374151"} onTap={v=(10-i)*10}
-    Input "" bind=v type=number w=70
+    Input "" @v type=number w=70
     Text.small "{label}"
 
 ### Stage Plan
@@ -146,6 +146,7 @@ state lamps=[{"id":"FOH1","name":"FOH 1","kind":"profile"},{"id":"FOH2","name":"
 state red=255
 state green=170
 state blue=90
+state groupName=""
 App
   Sidebar
     Brand "Followspot" icon="highlight"
@@ -164,7 +165,7 @@ App
     Row pad=24 gap=16 top
       Card grow gap=12
         Text.strong "Plan, audience at the bottom"
-        StagePlan lamps={lamps} bind=picked
+        StagePlan lamps={lamps} @picked
       Column w=320 gap=16
         Card gap=8
           Text.strong "Picked group"
@@ -175,20 +176,20 @@ App
           Button "Save as group" disabled={isEmpty(picked)} onTap={open saveGroup}
         Card gap=8
           Text.strong "Colour for the group"
-          Slider bind=red min=0 max=255
-          Slider bind=green min=0 max=255
-          Slider bind=blue min=0 max=255
+          Slider @red min=0 max=255
+          Slider @green min=0 max=255
+          Slider @blue min=0 max=255
           Box h=48 radius=8 fill={"#FF" + upper(hex(red)) + upper(hex(green)) + upper(hex(blue))}
           Button "Apply colour" disabled={isEmpty(picked)} onTap={emit applyColour {"lamps":picked,"r":red,"g":green,"b":blue}; toast "Colour sent to {length(picked)} lamps"}
 
 Dialog#saveGroup "Save group" "Name this set of lamps"
-  Input "Group name" bind=groupName
+  Input "Group name" @groupName
   Row gap=8 end
     Button.ghost "Cancel" onTap={close}
     Button "Save" onTap={emit saveGroup {"name":groupName,"lamps":picked}; toast "Group saved"; close}
 
 // A top-down stage plan; each lamp is a tappable dot that joins or leaves the picked list
-define StagePlan lamps=[] bind=picked
+define StagePlan lamps=[] @picked
   state picked=[]
   Column gap=12 pad=12 fill=#FF111827 radius=8
     Grid cols=4 gap=16

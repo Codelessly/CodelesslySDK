@@ -38,15 +38,15 @@ App
       Heading "Find your booking" level=1
       Text.muted "Step 1 of 4"
     Column pad=32 gap=24 scroll
-      SegmentedButton bind=method items=["Scan passport","Type booking code"] size=large onChange={idle=0}
+      SegmentedButton @method items=["Scan passport","Type booking code"] size=large onChange={idle=0}
       if method=="scan"
         PassportScanner scanning={scanning} onScan={scanning=true; idle=0}
       if method=="code"
         Row gap=32 top
           Column grow gap=16
-            Input "Booking code" bind=code size=large readonly
+            Input "Booking code" @code size=large readonly
             Text.muted "Six letters and numbers, found on your confirmation email"
-          KeyPad bind=code maxLength=6 onKey={idle=0}
+          KeyPad @code maxLength=6 onKey={idle=0}
       if found
         FlightCard airline="Northwind Air" flight="NW 482" from="JFK" to="LHR" depart="18:40" gate="B22" boarding="18:00" passenger="Maya Reyes" animate=slide-up
         Row gap=16
@@ -89,11 +89,11 @@ App
           Row gap=6
             Box w=20 h=20 radius=4 fill=#FFF59E0B
             Text.small "Extra legroom +$35"
-        SeatMap rows=14 layout="3-3" taken={taken} extraLegroom={legroom} bind=seat onSelect={idle=0}
+        SeatMap rows=14 layout="3-3" taken={taken} extraLegroom={legroom} @seat onSelect={idle=0}
       Column w=320 gap=16
         Card gap=12
           Heading "Checked bags" level=3
-          Stepper bind=bags min=0 max=4 label="Bags" onChange={idle=0}
+          Stepper @bags min=0 max=4 label="Bags" onChange={idle=0}
           Text.muted "First bag $0, second $40, then $75 each. Up to 23 kg per bag."
           Divider
           Row between
@@ -129,7 +129,7 @@ App
       if !printed
         Text.heading "Printing your boarding pass..."
         PrinterSlot progress={progress}
-        Progress bind=progress
+        Progress value={progress}
       if printed
         Icon "check_circle" size=72 color=#FF16A34A animate=pop
         Text.heading "All set, Maya. Take your boarding pass below"
@@ -155,7 +155,7 @@ define PassportScanner scanning=false onScan
       Text "{scanning ? \"Reading passport...\" : \"Place your passport photo page on the glass\"}" color=#FFFFFFFF center
     Button "Scan passport" size=large h=80 w=480 onTap={onScan}
 
-define KeyPad bind=value maxLength=6 onKey
+define KeyPad @value maxLength=6 onKey
   state value=""
   Grid cols=10 gap=8 maxw=900
     each k in ["Q","W","E","R","T","Y","U","I","O","P","A","S","D","F","G","H","J","K","L","7","Z","X","C","V","B","N","M","8","9","0","1","2","3","4","5","6"]
@@ -181,7 +181,7 @@ define FlightCard airline="" flight="" from="" to="" depart="" gate="" boarding=
       Text "Departs {depart}"
       Text "Gate {gate}, boarding {boarding}"
 
-define SeatMap rows=10 layout="3-3" taken=[] extraLegroom=[] bind=seat onSelect
+define SeatMap rows=10 layout="3-3" taken=[] extraLegroom=[] @seat onSelect
   state seat=""
   Column gap=6 scroll h=520
     each r in range(rows)
@@ -190,7 +190,7 @@ define SeatMap rows=10 layout="3-3" taken=[] extraLegroom=[] bind=seat onSelect
           Box w=56 h=56 radius=8 center middle fill={contains(taken,concat(r+1,c)) ? "#FF9CA3AF" : (contains(extraLegroom,concat(r+1,c)) ? "#FFF59E0B" : "#FFFFFFFF")} border={seat==concat(r+1,c) ? 4 : 1} onTap={contains(taken,concat(r+1,c)) ? toast "Seat taken" : {seat=concat(r+1,c); onSelect(seat)}}
             Text.small "{r+1}{c}"
 
-define Stepper bind=value min=0 max=10 label="" onChange
+define Stepper @value min=0 max=10 label="" onChange
   state value=0
   Row gap=16 middle
     Text.strong "{label}"

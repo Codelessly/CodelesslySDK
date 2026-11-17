@@ -46,7 +46,7 @@ App
     Nav
       Heading "Series lamp circuit"
       Row gap=8
-        SegmentedButton bind=tool items=["select","wire","probe"]
+        SegmentedButton @tool items=["select","wire","probe"]
         IconButton "undo" tooltip="Undo"
         IconButton "delete_sweep" tooltip="Clear bench" onTap={parts=[]; wires=[]; sel=""}
         Button "{running ? 'Pause' : 'Run'}" icon="{running ? 'pause' : 'play_arrow'}" onTap={running=!running}
@@ -59,7 +59,7 @@ App
               Badge.success "{fixed(current*1000,0)} mA"
               if tool=="probe"
                 Badge.info "Probe: {probeAt=="" ? 'tap a point' : fixed(probeVolts,2) + ' V'}"
-          CircuitCanvas bind=parts wires=wires cols=12 rows=8 running={running} tool={tool} h=420 drop=part onDrop={parts=append(parts,{"id":concat("p",length(parts)),"kind":result.data,"label":result.data,"value":10,"unit":"","x":result.x,"y":result.y})} onWire={wires=append(wires,result)} onProbe={probeAt=result.node; probeVolts=result.volts} onPartTap={sel=result.id; open partSheet} onSwitch={emit switchToggled result.id; toast result.on ? "Circuit closed" : "Circuit open"} onShort={shorted=true; running=false; open shortCircuit}
+          CircuitCanvas @parts wires=wires cols=12 rows=8 running={running} tool={tool} h=420 drop=part onDrop={parts=append(parts,{"id":concat("p",length(parts)),"kind":result.data,"label":result.data,"value":10,"unit":"","x":result.x,"y":result.y})} onWire={wires=append(wires,result)} onProbe={probeAt=result.node; probeVolts=result.volts} onPartTap={sel=result.id; open partSheet} onSwitch={emit switchToggled result.id; toast result.on ? "Circuit closed" : "Circuit open"} onShort={shorted=true; running=false; open shortCircuit}
           each p in parts
             if p.kind=="lamp"
               Row gap=12 middle
@@ -88,7 +88,7 @@ App
   Sheet#partSheet "Edit part"
     each p in filter(parts,x=>x.id==sel)
       Column gap=12
-        Input "Label" bind=p.label
+        Input "Label" @p.label
         Row between middle
           Text.strong "Value ({p.unit})"
           Row gap=8 middle
@@ -96,7 +96,7 @@ App
             Text.strong "{p.value}"
             IconButton "add" tooltip="Increase" onTap={parts=updateWhere(parts,x=>x.id==sel,x=>with(x,"value",x.value+1))}
         if p.kind=="switch"
-          Toggle "Closed" bind=p.value
+          Toggle "Closed" @p.value
         Row gap=8
           Button.destructive "Remove part" onTap={parts=removeWhere(parts,x=>x.id==sel); wires=removeWhere(wires,w=>w.from==sel||w.to==sel); close}
           Spacer grow
@@ -125,7 +125,7 @@ App
     Nav
       Heading "Voltage over time"
       Row gap=8
-        Select bind=window items=["5 s","10 s","30 s"]
+        Select @window items=["5 s","10 s","30 s"]
         Button "{paused ? 'Resume' : 'Pause'}" icon="{paused ? 'play_arrow' : 'pause'}" onTap={paused=!paused}
         Button.outline "Export CSV" icon="download" onTap={emit exportCsv; toast "Exported scope.csv"}
     Column pad=24 gap=16

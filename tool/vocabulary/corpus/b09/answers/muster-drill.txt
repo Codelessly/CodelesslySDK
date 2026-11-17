@@ -43,7 +43,7 @@ App
         Card grow gap=12
           Row between
             Heading "Deck plan" level=3
-            SegmentedButton bind=station items=["all","A","B","C"]
+            SegmentedButton @station items=["all","A","B","C"]
           DeckPlan deck="Deck 7" station={station} stations=[{"id":"A","color":"#FFE53935","name":"Station A, Promenade"},{"id":"B","color":"#FF1E88E5","name":"Station B, Atrium"},{"id":"C","color":"#FF43A047","name":"Station C, Sun deck"}] h=260
           Row gap=16
             Row gap=6
@@ -104,8 +104,8 @@ App
     Nav
       Heading "Call list" level=1
       Row gap=8
-        Input "Search name or cabin" bind=q w=240
-        Select bind=deckFilter items=["All","Deck 5","Deck 6","Deck 7","Deck 8","Deck 9"]
+        Input "Search name or cabin" @q w=240
+        Select @deckFilter items=["All","Deck 5","Deck 6","Deck 7","Deck 8","Deck 9"]
     Column pad=24 gap=12 scroll
       Text.muted "Unaccounted passengers, called from the bridge. Tap a name for cabin steward details."
       Row gap=12

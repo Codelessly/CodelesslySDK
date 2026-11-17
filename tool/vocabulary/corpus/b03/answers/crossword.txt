@@ -33,7 +33,7 @@ App
           Icon "timer"
           Text.mono "{floor(secs/60)}:{secs%60<10 ? '0' : ''}{secs%60}"
         IconButton "pause" tooltip="Pause" onTap={running=!running}
-        Toggle "Pencil" bind=pencilOn
+        Toggle "Pencil" @pencilOn
         Button.outline "Check" icon="spellcheck" menu=checkMenu onTap={open checkMenu}
         Button.outline "Reveal" icon="visibility" onTap={open revealMenu}
         Button.ghost "Clear" onTap={open confirmClear}

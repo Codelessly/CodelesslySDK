@@ -41,16 +41,16 @@ App
               Row gap=4
                 each w in row.who
                   Avatar "{find(people,p=>p.id==w).name}" size=24
-              Input type=number bind=row.price w=90
+              Input type=number @row.price w=90
               IconButton "delete" tooltip="Remove item" onTap={items=removeWhere(items,i=>i.id==row.id)}
         Row gap=8
-          Input "Add an item" bind=newName grow
+          Input "Add an item" @newName grow
           Button.outline "Add" onTap={newName!="" ? items=append(items,{"id":length(items)+10,"name":newName,"price":0,"who":[]}); newName="" : toast "Name the item"}
       Row between
         Text.muted "Subtotal"
         Text.strong "{money(sum(items,i=>i.price),"$",2)}"
   Dialog#addPerson "Add a person" "They will appear at the top"
-    Input "Name" bind=newName
+    Input "Name" @newName
     Button "Add" onTap={newName!="" ? people=append(people,{"id":length(people)+1,"name":newName}); newName=""; close : toast "Enter a name"}
 
 ### Tip and tax
@@ -75,11 +75,11 @@ Page
           ChoiceChip "18%" selected={tipPct==18 && customTip==""} onTap={tipPct=18; customTip=""}
           ChoiceChip "20%" selected={tipPct==20 && customTip==""} onTap={tipPct=20; customTip=""}
           ChoiceChip "25%" selected={tipPct==25 && customTip==""} onTap={tipPct=25; customTip=""}
-        Input "Custom tip %" "e.g. 22" type=number bind=customTip onChange={customTip!="" ? tipPct=customTip : tipPct=tipPct}
-        Slider bind=tipPct min=0 max=40
+        Input "Custom tip %" "e.g. 22" type=number @customTip onChange={customTip!="" ? tipPct=customTip : tipPct=tipPct}
+        Slider @tipPct min=0 max=40
       Card gap=12
         Text.strong "Tax"
-        Input "Tax on the receipt" type=number bind=tax
+        Input "Tax on the receipt" type=number @tax
         Text.muted "Tax is shared in proportion to what each person ordered."
       Card gap=8
         Row between
@@ -104,6 +104,7 @@ state tipPct=18
 state tax=5.4
 state who=1
 state settled=false
+state message=""
 App
   Sidebar
     Brand "Halves" icon="call_split"
@@ -134,7 +135,7 @@ App
         Button.outline "Reset" onTap={settled=false}
         Button "Mark all settled" onTap={settled=true; toast "All settled up"}
   Dialog#request "Pay request" "Edit it before you send"
-    Input "Message" multiline bind=message
+    Input "Message" multiline @message
     Text.muted "Hi {find(people,p=>p.id==who).name}, your share of dinner at Lupa is {money(sum(items,i=>contains(i.who,who) ? i.price/length(i.who) : 0)*(1+(tax+sum(items,i=>i.price)*tipPct/100)/sum(items,i=>i.price)),"$",2)} including tax and a {tipPct}% tip. Thanks!"
     Row gap=8
       Button.outline "Copy" icon="content_copy" onTap={copy message; toast "Copied"}

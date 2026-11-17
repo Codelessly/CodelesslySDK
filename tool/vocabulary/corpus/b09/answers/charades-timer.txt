@@ -37,8 +37,8 @@ App
             ChoiceChip "Animal" selected={category=="Animal"} onTap={category="Animal"}
             ChoiceChip "Action" selected={category=="Action"} onTap={category="Action"}
           Text.sectionTitle "Difficulty"
-          SegmentedButton bind=difficulty items=["Easy","Medium","Hard"]
-          Toggle "Tilt to score" bind=tilt
+          SegmentedButton @difficulty items=["Easy","Medium","Hard"]
+          Toggle "Tilt to score" @tilt
         Card gap=12
           Text.sectionTitle "Scoreboard"
           Row between

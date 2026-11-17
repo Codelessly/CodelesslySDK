@@ -6,7 +6,7 @@ Column scroll gap=20 pad=32
       Text.title "Dashboard"
       Text.muted "Store overview"
     Row gap=12 middle
-      SegmentedButton bind=range items=["Day","Week","Month"]
+      SegmentedButton @range items=["Day","Week","Month"]
       Button "Export" onTap={emit export}
   Grid cols=4 gap=16
     Card gap=4

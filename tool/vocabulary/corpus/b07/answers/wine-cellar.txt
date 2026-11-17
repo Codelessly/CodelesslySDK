@@ -81,13 +81,15 @@ App
       Button.destructive "Drink it" onTap={bottles=removeWhere(bottles,b=>b.id==sel); toast "Enjoy"; close}
   Dialog#note "Tasting note"
     Column gap=12
-      Rating bind=rating max=5
-      Input "Note" "Dark cherry, cedar, long finish" bind=noteText multiline
+      Rating @rating max=5
+      Input "Note" "Dark cherry, cedar, long finish" @noteText multiline
       Button "Save note" onTap={notes=append(notes,{"id":sel,"stars":rating,"text":noteText}); rating=0; noteText=""; toast "Note saved"; close}
 
 ### Drink soon
 state sel=0
 state bottles=[{"id":1,"slot":0,"name":"Chateau Margaux 2015","region":"Bordeaux","kind":"red","price":640,"from":2024,"to":2040,"peak":2032},{"id":3,"slot":3,"name":"Chablis Grand Cru 2019","region":"Burgundy","kind":"white","price":85,"from":2023,"to":2027,"peak":2025},{"id":4,"slot":4,"name":"Sancerre Rose 2023","region":"Loire","kind":"rose","price":28,"from":2025,"to":2026,"peak":2026},{"id":5,"slot":7,"name":"Rioja Reserva 2017","region":"Rioja","kind":"red","price":42,"from":2022,"to":2026,"peak":2025},{"id":7,"slot":10,"name":"Cotes de Provence Rose 2023","region":"Provence","kind":"rose","price":22,"from":2025,"to":2026,"peak":2026}]
+state stars=0
+state text=""
 App
   Sidebar
     Brand "Cask" icon="wine_bar"
@@ -113,8 +115,8 @@ App
             Button "Tasting note" icon="star" onTap={sel=b.id; open note}
   Dialog#note "Tasting note"
     Column gap=12
-      Rating bind=stars max=5
-      Input "Note" "How did it drink?" bind=text multiline
+      Rating @stars max=5
+      Input "Note" "How did it drink?" @text multiline
       Button "Save" onTap={toast "Note saved"; close}
 
 ### By region
@@ -130,7 +132,7 @@ App
   Main
     Nav
       Heading "By region" level=1
-      SegmentedButton bind=order items=["Region","Price","Name"]
+      SegmentedButton @order items=["Region","Price","Name"]
     Column pad=24 gap=16
       Grid cols=3 gap=16
         Card gap=4

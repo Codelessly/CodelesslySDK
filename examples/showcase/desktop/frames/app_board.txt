@@ -15,7 +15,7 @@ App
           Avatar "Ana Silva" size=32
           Avatar "Sam Patel" size=32
       Row gap=8 center
-        Input "Filter tasks" bind=q w=220
+        Input "Filter tasks" @q w=220
         Button "New task" icon="add" onTap={emit newTask}
     Row gap=16 pad=16 top grow
       Column grow gap=10 drop=task onDrop={tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","backlog"))}
@@ -112,7 +112,7 @@ App
         Avatar "{find(tasks,x=>x.id==sel).who}" size=28
       Text.strong "Description"
       Text.bodySecondary "{find(tasks,x=>x.id==sel).desc}"
-      Checklist "Checklist" bind=checked items=["Write the first draft","Get design feedback","Update the staging site","Final sign-off"]
+      Checklist "Checklist" @checked items=["Write the first draft","Get design feedback","Update the staging site","Final sign-off"]
       Text.strong "Activity"
       Column gap=10 scroll
         each a in activity

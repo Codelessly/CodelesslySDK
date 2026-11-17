@@ -20,13 +20,13 @@ App
     NavItem "Satellite passes" icon="satellite_alt" badge="4" onTap={go passes}
     NavItem "Tonight" icon="event_note" onTap={go tonight}
     Spacer grow
-    Toggle "Red night mode" bind=night
+    Toggle "Red night mode" @night
     Text.muted "Berlin, 52.52 N 13.40 E"
   Main
     Nav
       Heading "Sky tonight"
       Row gap=8
-        Input "Find a planet or star" "Sirius, Jupiter..." bind=query w=240 onChange={target=""}
+        Input "Find a planet or star" "Sirius, Jupiter..." @query w=240 onChange={target=""}
         Button "Point" icon="near_me" onTap={find(stars,s=>lower(s.name)==lower(trim(query))) != null ? target=find(stars,s=>lower(s.name)==lower(trim(query))).id : toast "No object called {query}"}
         IconButton "layers" tooltip="Layers" onTap={open layers}
         IconButton "explore" tooltip="Follow the phone's compass" onTap={compass=!compass; toast compass ? "Turn the phone to move the sky" : "Compass off"}
@@ -42,7 +42,7 @@ App
         Row between middle
           Text.strong "Time"
           Text.muted "{offsetMin >= 0 ? '+' : ''}{round(offsetMin/60,1)} h, {formatDate(today(),'MMM d')} {dayShift != 0 ? '(' + dayShift + ' d)' : ''}"
-        TimeScrubber bind=offsetMin min=-720 max=720 step=10 label="Hours from now"
+        TimeScrubber @offsetMin min=-720 max=720 step=10 label="Hours from now"
         Row gap=8
           Button.outline "Now" onTap={offsetMin=0; dayShift=0}
           Button.outline "-1 day" onTap={dayShift=dayShift-1}
@@ -55,10 +55,10 @@ App
       ListTile "{s.name}" "{s.con}, mag {s.mag}" onTap={picked=s.id; open objcard}
         Badge.neutral "{s.alt} deg"
 Sheet#layers "Layers"
-  Toggle "Coordinate grid" bind=showGrid
-  Toggle "Object names" bind=showNames
-  Toggle "Deep sky (clusters, nebulae, galaxies)" bind=showDeep
-  Toggle "Red night mode" bind=night
+  Toggle "Coordinate grid" @showGrid
+  Toggle "Object names" @showNames
+  Toggle "Deep sky (clusters, nebulae, galaxies)" @showDeep
+  Toggle "Red night mode" @night
   Button "Done" onTap={close}
 Sheet#objcard "{find(stars,s=>s.id==picked).name}"
   Column gap=12
@@ -91,19 +91,19 @@ App
     NavItem "Satellite passes" icon="satellite_alt" badge="{count(passes,p=>p.maxAlt>=minAlt)}" selected={true}
     NavItem "Tonight" icon="event_note" onTap={go tonight}
     Spacer grow
-    Toggle "Red night mode" bind=night
+    Toggle "Red night mode" @night
   Main
     Nav
       Heading "Satellite passes"
       Row gap=8
-        SegmentedButton bind=kind items=["all","station","telescope"]
+        SegmentedButton @kind items=["all","station","telescope"]
         IconButton "notifications" tooltip="Alert me before each watched pass" onTap={toast "Alerts set for {count(passes,p=>p.watch)} passes"}
     Column pad=24 gap=16
       Card gap=8
         Row between middle
           Text.strong "Minimum height"
           Text.muted "{minAlt} degrees"
-        Slider bind=minAlt min=0 max=80
+        Slider @minAlt min=0 max=80
       each p in filter(passes,x=>x.maxAlt>=minAlt && (kind=="all" || x.kind==kind))
         Card gap=8 onTap={sel=p.id; open pass}
           Row between middle
@@ -117,7 +117,7 @@ App
               Text.caption "mag {p.mag}"
           Row between middle
             Sparkline values=[0,p.maxAlt/2,p.maxAlt,p.maxAlt/2,0] h=32 w=120
-            Toggle "Watch" bind=p.watch
+            Toggle "Watch" @p.watch
       if count(passes,p=>p.maxAlt>=minAlt && (kind=="all" || p.kind==kind)) == 0
         Card gap=4
           Text.strong "No passes match"
@@ -147,7 +147,7 @@ App
     NavItem "Satellite passes" icon="satellite_alt" onTap={go passes}
     NavItem "Tonight" icon="event_note" selected={true}
     Spacer grow
-    Toggle "Red night mode" bind=night
+    Toggle "Red night mode" @night
   Main
     Nav
       Heading "Tonight in Berlin"
@@ -160,7 +160,7 @@ App
           Progress 0.34
         Card gap=4
           Text.caption "Darkness"
-          Gauge bind=bortle min=1 max=9 limit=6 unit="Bortle"
+          Gauge value={bortle} min=1 max=9 limit=6 unit="Bortle"
         Card gap=4
           Text.caption "Clouds by hour"
           BarChart values=[10,20,45,60,30,15] labels=["20","22","00","02","04","06"] h=100
@@ -190,7 +190,7 @@ define SkyDisc stars=[] lines=[] azimuth=0 altitude=0 grid=true names=true deep=
         Text.caption "Deep sky on" color={night ? "#FFFF4D4D" : "#FFCBD5E1"}
       Text.caption "{length(lines)} constellation lines" color={night ? "#FFFF4D4D" : "#FFCBD5E1"}
 
-define TimeScrubber bind=value min=-720 max=720 step=10 label="" onChange
+define TimeScrubber @value min=-720 max=720 step=10 label="" onChange
   Column gap=4
     Text.caption "{label}"
-    Slider bind=value min={min} max={max} step={step} onChange={onChange}
+    Slider @value min={min} max={max} step={step} onChange={onChange}

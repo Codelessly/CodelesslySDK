@@ -32,7 +32,7 @@ App
           LanguageFlag "en"
           Text.caption "4 members"
       Row gap=8
-        Select bind=myLang items=["en","pt","ja","es"]
+        Select @myLang items=["en","pt","ja","es"]
         IconButton "menu_book" tooltip="Glossary" onTap={go glossary}
         IconButton "more_vert" tooltip="More" onTap={open threadMenu}
     Column pad=24 gap=12 scroll
@@ -80,7 +80,7 @@ App
             IconButton "close" tooltip="Cancel reply" onTap={replyTo=null}
         Row gap=8 middle
           IconButton "mic" tooltip="Record a voice note" onTap={emit recordVoice}
-          Input "Message" "Write in English, they read it in their language" bind=draft grow
+          Input "Message" "Write in English, they read it in their language" @draft grow
           IconButton "translate" tooltip="Preview translation" onTap={open preview}
           Button "Send" onTap={draft!="" ? {emit send draft; draft=""; replyTo=null} : toast "Write something first"}
   Sheet#reactions "React"
@@ -128,7 +128,7 @@ App
     Nav
       Heading "Glossary" level=1
       Row gap=8
-        Input "Search terms" bind=q w=220
+        Input "Search terms" @q w=220
         Button "Add term" icon="add" onTap={open addTerm}
     Column pad=24 gap=16
       Text.muted "Names and words on this list are never translated. Everyone sees them exactly as written."
@@ -150,8 +150,8 @@ App
           Column center pad=32
             Text.muted "No terms match \"{q}\""
   Dialog#addTerm "Add a term" "It will stay untranslated in every language"
-    Input "Term" bind=newTerm
-    Input "Note" "Client, person, product" bind=newNote
+    Input "Term" @newTerm
+    Input "Note" "Client, person, product" @newNote
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Add" onTap={trim(newTerm)!="" ? {glossary=append(glossary,{"term":trim(newTerm),"note":newNote,"langs":["pt","ja","es"]}); newTerm=""; newNote=""; toast "Added to glossary"; close} : toast "Enter a term"}

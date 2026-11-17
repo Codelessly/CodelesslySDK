@@ -37,7 +37,7 @@ App
     MenuItem "Move to top" icon="vertical_align_top" onTap={queue=concat([find(queue,s=>s.id==pick)],without(queue,find(queue,s=>s.id==pick)))}
     MenuItem "Remove" icon="delete" onTap={queue=removeWhere(queue,s=>s.id==pick); toast "Removed from queue"}
   Dialog#addme "Add yourself" "Type your name and pick a song from the songbook"
-    Input "Your name" bind=newName
+    Input "Your name" @newName
     Button "Join the queue" onTap={newName!="" ? {queue=append(queue,{"id":length(queue)+10,"title":"Pick a song","artist":"","singer":newName}); newName=""; toast "You are in the queue"; close} : toast "Type your name first"}
 
 ### Songbook
@@ -54,7 +54,7 @@ App
   Main
     Nav
       Heading "Songbook" level=1
-      Input "Search title or artist" bind=q w=260
+      Input "Search title or artist" @q w=260
     Row gap=0 top
       Column grow pad=24 gap=8
         each s in filter(songs,x=>contains(lower(x.title),lower(q))||contains(lower(x.artist),lower(q)))
@@ -70,7 +70,7 @@ App
           IconButton "remove" tooltip="Down a semitone" onTap={keyShift=clamp(keyShift-1,-6,6)}
           Text.strong "{keyShift>0 ? '+' : ''}{keyShift}"
           IconButton "add" tooltip="Up a semitone" onTap={keyShift=clamp(keyShift+1,-6,6)}
-        Slider bind=keyShift min=-6 max=6
+        Slider @keyShift min=-6 max=6
         Button.outline "Preview in new key" icon="volume_up" onTap={emit previewKey keyShift}
         Button "Add to queue" icon="playlist_add" onTap={emit queueSong selected.title; toast "Added to the queue"; go queue}
 
@@ -93,7 +93,7 @@ Page
       Link "Queue" onTap={go queue}
       Link "Songbook" onTap={go songbook}
     Row gap=8
-      Toggle "Duet" bind=duet
+      Toggle "Duet" @duet
       Button.outline "Skip" icon="skip_next" onTap={votes=votes+1; votes>=needed ? {toast "Skipped"; go queue} : toast "Skip vote {votes} of {needed}"}
   Section center
     Column gap=4 center

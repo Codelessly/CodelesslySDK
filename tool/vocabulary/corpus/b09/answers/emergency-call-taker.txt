@@ -44,7 +44,7 @@ App
             Badge.info "Accuracy {accuracy} m"
           Map lat=40.7291 lng=-73.9965 zoom=17 h=240 accuracy={accuracy} marker="Caller"
           Row gap=8
-            Input "Address" bind=address grow
+            Input "Address" @address grow
             Button.outline "Verify" icon="pin_drop" onTap={toast "Address verified"; timeline=append(timeline,{"t":elapsed,"who":"Call taker","text":"Address verified: {address}"})}
         Card gap=12
           Row between
@@ -86,7 +86,7 @@ App
             Button.outline "Traffic" icon="car_crash" h=72 selected={incType=="Traffic"} onTap={incType="Traffic"}
         Card gap=8
           Text.panelTitle "Notes"
-          Input "Notes" "Add details for responders" bind=notes multiline
+          Input "Notes" "Add details for responders" @notes multiline
           Row end
             Button.secondary "Add to timeline" onTap={notes!="" ? {timeline=append(timeline,{"t":elapsed,"who":"Note","text":notes}); notes=""} : toast "Write a note first"}
       Pane w=340 pad=16 gap=12
@@ -126,7 +126,7 @@ App
     Nav
       Heading "Units near 2214 Alder Street" level=1
       Row gap=8
-        Select bind=filterKind items=["All","Ambulance","Fire","Police"]
+        Select @filterKind items=["All","Ambulance","Fire","Police"]
     Column pad=24 gap=16
       Map lat=40.7291 lng=-73.9965 zoom=14 h=260 accuracy=35 marker="Caller" markers={map(units,u=>{"label":u.name,"status":u.status})}
       Card gap=0
@@ -167,7 +167,7 @@ App
   Main
     Nav
       Heading "Call log" level=1
-      Input "Search calls" bind=query w=240
+      Input "Search calls" @query w=240
     Column pad=24 gap=12
       Card gap=0
         Row pad=8 gap=8

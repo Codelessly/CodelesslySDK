@@ -8,6 +8,7 @@ state favs=["b2","b5"]
 state voice="Luna"
 state tonight=null
 state books=[{"id":"b1","title":"The Sleepy Fox","author":"Mira Bell","age":"3-5","min":6,"mood":"calm","cover":"https://covers.example.com/sleepy-fox.jpg"},{"id":"b2","title":"Moon Over Marshmallow Hill","author":"Theo Park","age":"3-5","min":9,"mood":"calm","cover":"https://covers.example.com/marshmallow-hill.jpg"},{"id":"b3","title":"Captain Pip and the Giggling Whale","author":"Ana Ruiz","age":"6-8","min":12,"mood":"funny","cover":"https://covers.example.com/captain-pip.jpg"},{"id":"b4","title":"The Lantern Trail","author":"Jonas Weir","age":"6-8","min":18,"mood":"adventure","cover":"https://covers.example.com/lantern-trail.jpg"},{"id":"b5","title":"Penny the Pajama Dragon","author":"Sofia Lindqvist","age":"3-5","min":7,"mood":"funny","cover":"https://covers.example.com/pajama-dragon.jpg"},{"id":"b6","title":"Across the Starlight Sea","author":"Omar Haddad","age":"9-12","min":25,"mood":"adventure","cover":"https://covers.example.com/starlight-sea.jpg"}]
+state page=0
 App
   Sidebar
     Brand "Bedtime Shelf" icon="bedtime"
@@ -42,7 +43,7 @@ App
               Badge.neutral "{b.mood}"
               IconButton "{contains(favs,b.id) ? 'favorite' : 'favorite_border'}" tooltip="Favourite" onTap={favs=contains(favs,b.id) ? without(favs,b.id) : append(favs,b.id)}
       Text.sectionTitle "Because you liked calm stories"
-      Pages bind=page h=240 peek=0.86
+      Pages @page h=240 peek=0.86
         each b in filter(books, x=>x.mood=="calm")
           Card gap=8
             Row gap=16
@@ -53,7 +54,7 @@ App
                 Text.caption "{b.min} minutes · ages {b.age}"
                 Spacer grow
                 Button "Read tonight" icon="play_arrow" onTap={sel=b.id; go player}
-      Dots bind=page count=2
+      Dots @page count=2
   Sheet#filters "Filters"
     Column gap=16
       Text.sectionTitle "Age"
@@ -68,7 +69,7 @@ App
           Image "https://tiles.example.com/age-older.jpg" h=96 radius=12
           Text.strong "9-12" color=#FFFFFFFF center
       Text.sectionTitle "Length: {maxMin} minutes"
-      Slider bind=maxMin min=5 max=30
+      Slider @maxMin min=5 max=30
       Text.sectionTitle "Mood"
       Grid cols=3 gap=12
         Box gap=4 radius=16 pad=8 fill={mood=="calm" ? "#FF3B3F73" : "#FF1B1E3C"} onTap={mood="calm"}
@@ -94,7 +95,7 @@ App
         ChoiceChip "15" selected={timer==15} onTap={timer=15}
         ChoiceChip "30" selected={timer==30} onTap={timer=30}
         ChoiceChip "45" selected={timer==45} onTap={timer=45}
-      Slider bind=timer min=5 max=60
+      Slider @timer min=5 max=60
       Button "Set timer" onTap={emit setTimer timer; toast "Sleep timer set for {timer} minutes"; close}
   Dialog#tonightDialog "Story of the night" "Picked at random, just for tonight"
     Column gap=12 center
@@ -134,7 +135,7 @@ App
       Row gap=10 center wrap pad=16
         each w in words
           Text "{w}" size=34 weight={index==cur ? 800 : 500} color={index==cur ? "#FFFFD54F" : (index<cur ? "#FF6E7699" : "#FFE8EAF6")} animate={index==cur ? "pulse" : "fade"}
-      Slider bind=cur min=0 max={length(words)}
+      Slider @cur min=0 max={length(words)}
       Row between
         Text.caption "{cur} of {length(words)} words" color=#FFB0B8D0
         Text.caption "{round(cur/length(words)*100,0)}%" color=#FFB0B8D0
@@ -144,7 +145,7 @@ App
         IconButton "forward_10" tooltip="Forward" color=#FFFFFFFF onTap={cur=min(length(words),cur+10)}
     Footer
       Row between pad=8
-        Toggle "Lullaby mode" bind=lullaby onChange={emit lullaby result}
+        Toggle "Lullaby mode" @lullaby onChange={emit lullaby result}
         Button.outline "Voice: {voice}" icon="record_voice_over" onTap={open voiceMenu}
         Button.outline "Timer" icon="timer" onTap={open timerPop}
   Menu#voiceMenu above
@@ -198,5 +199,5 @@ App
     Column pad=24 gap=12 scroll
       each h in history
         ListTile "{h.title}" subtitle="{h.when}" leading="menu_book"
-          Rating bind=h.stars max=5
+          Rating @h.stars max=5
           Button.ghost "Read again" onTap={sel=h.id; go player}

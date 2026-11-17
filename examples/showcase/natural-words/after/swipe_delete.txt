@@ -5,14 +5,14 @@ Card gap=12
     Text.title "To-do"
     Badge.neutral "{count(todos,t=>!t.done)} left"
   Row gap=8 middle
-    Input "New task" "Add a task" bind=newTask grow
+    Input "New task" "Add a task" @newTask grow
     Button "Add" onTap={todos=append(todos,{"id":length(todos)+sum(todos,t=>t.id)+1,"title":newTask,"done":false}); newTask=""}
   Divider
   if isEmpty(todos)
     Text.muted "Nothing to do. Swipe a row left to delete it."
   each todo in todos
     Row gap=8 middle onSwipeLeft={todos=removeWhere(todos,t=>t.id==todo.id); toast "Deleted"}
-      Checkbox bind=todo.done
+      Checkbox @todo.done
       Text "{todo.title}" grow
       Icon "chevron_left"
   Text.caption "Swipe a row left to delete it"

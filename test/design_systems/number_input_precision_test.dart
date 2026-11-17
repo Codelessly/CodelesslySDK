@@ -13,7 +13,7 @@ const _page = '''
 state amount=0
 Page
   Section
-    NumberInput#amt bind=amount step=0.01 showStepper=true label="Amount"
+    NumberInput#amt @amount step=0.01 showStepper=true label="Amount"
     Text#shown "Amount {money(amount,"\$",2)} raw {amount}"
     Button#save "Save"
 ''';

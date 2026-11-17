@@ -41,7 +41,7 @@ App
                 Piece "{p}" size=18
           Box radius=8 pad=[12,6,12,6] fill={blackClock<10 ? "#FFB3261E" : "#FF262421"} animate={blackClock<10 && turn=="black" ? "pulse" : ""}
             Text.mono "{duration(blackClock)}" size=22 color=#FFFFFFFF
-        Chessboard bind=fen orientation=white selected={selected} lastMove={ply>1 ? "d4d5" : ""} check={ply%2==0 ? "" : ""} showLegal=true onSelect={selected=result} onMove={emit move result; pending=with(with(pending,"from",result.from),"to",result.to)} onPromote={open promote}
+        Chessboard @fen orientation=white selected={selected} lastMove={ply>1 ? "d4d5" : ""} check={ply%2==0 ? "" : ""} showLegal=true onSelect={selected=result} onMove={emit move result; pending=with(with(pending,"from",result.from),"to",result.to)} onPromote={open promote}
         Row between middle
           Row gap=8 middle
             Avatar "Marta Kovac" size=32
@@ -102,7 +102,7 @@ App
     Nav
       Heading "Your games" level=1
       Row gap=8
-        SegmentedButton bind=result items=["all","Won","Lost","Drew"]
+        SegmentedButton @result items=["all","Won","Lost","Drew"]
     Column pad=24 gap=16
       Card gap=8
         each g in filter(games,x=>result=="all" || x.result==result)

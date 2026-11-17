@@ -4,6 +4,8 @@ state url=""
 state busy=false
 state done=false
 state recent=[{"title":"Brown Butter Gnocchi","site":"seriouseats.com","time":"35 min"},{"title":"Miso Roasted Carrots","site":"bonappetit.com","time":"40 min"},{"title":"Lemon Ricotta Pancakes","site":"smittenkitchen.com","time":"25 min"}]
+state fixAmount=""
+state fixName=""
 every 1200 when busy onTick={busy=false; done=true}
 App
   Sidebar
@@ -22,7 +24,7 @@ App
       Card gap=12
         Text.strong "Paste a web address"
         Row gap=8
-          Input "Recipe link" "https://" bind=url grow type=url
+          Input "Recipe link" "https://" @url grow type=url
           Button "Clip it" icon="auto_fix_high" onTap={url=="" ? toast "Paste a link first" : busy=true; done=false}
         if busy
           Row gap=8 middle
@@ -61,8 +63,8 @@ App
       each r in recent
         ListTile "{r.title}" subtitle="{r.site} - {r.time}" icon="receipt_long" onTap={go recipe}
   Sheet#fixLine "Fix this line" "We were not sure about this one"
-    Input "Amount" bind=fixAmount "1/4 cup"
-    Input "Ingredient" bind=fixName "sage leaves"
+    Input "Amount" @fixAmount "1/4 cup"
+    Input "Ingredient" @fixName "sage leaves"
     Row gap=8 end
       Button.outline "Cancel" onTap={close}
       Button "Looks right" onTap={toast "Line fixed"; close}
@@ -76,6 +78,9 @@ state picked=[]
 state ings=[{"id":1,"qty":1,"unit":"lb","grams":454,"name":"potato gnocchi","guess":false},{"id":2,"qty":4,"unit":"tbsp","grams":57,"name":"unsalted butter","guess":false},{"id":3,"qty":0.25,"unit":"cup","grams":6,"name":"sage leaves","guess":true},{"id":4,"qty":0.5,"unit":"cup","grams":50,"name":"grated Parmesan","guess":true},{"id":5,"qty":1,"unit":"tsp","grams":6,"name":"kosher salt","guess":false}]
 state steps=["Bring a large pot of salted water to a boil.","Melt the butter in a wide skillet over medium heat until it foams and smells nutty, about 4 minutes.","Add the sage and fry until crisp, about 1 minute.","Boil the gnocchi until they float, then lift them into the skillet.","Toss with Parmesan and serve at once."]
 state fixId=0
+state unitMode=""
+state fixAmount=""
+state fixName=""
 App
   Sidebar
     Brand "Clip a Dish" icon="restaurant_menu"
@@ -107,14 +112,14 @@ App
             IconButton "add" tooltip="More" onTap={servings=servings+1}
           Row gap=8 middle
             Text.strong "Units"
-            SegmentedButton items=["Cups","Metric"] bind=unitMode onChange={metric=(result=="Metric")}
+            SegmentedButton items=["Cups","Metric"] @unitMode onChange={metric=(result=="Metric")}
       Card gap=8
         Row between
           Heading "Ingredients" level=3
           Button.outline "Add all to grocery list" icon="add_shopping_cart" onTap={picked=map(ings,i=>i.id); emit groceryAdd; toast "6 items added to grocery list"}
         each i in ings
           Row gap=8 middle
-            Checkbox bind=i.have
+            Checkbox @i.have
             Text.strong "{metric ? fixed(i.grams * servings / base, 0) + ' g' : fraction(i.qty * servings / base) + ' ' + i.unit}" w=90
             Text "{i.name}" grow
             if i.guess
@@ -127,8 +132,8 @@ App
             Text.strong "{index+1}." w=28
             Text "{s}" grow
   Sheet#fixLine "Fix this line" "Tap-to-correct a guessed part"
-    Input "Amount" bind=fixAmount
-    Input "Ingredient" bind=fixName
+    Input "Amount" @fixAmount
+    Input "Ingredient" @fixName
     Row gap=8 end
       Button.outline "Cancel" onTap={close}
       Button "Save fix" onTap={ings=updateWhere(ings,x=>x.id==fixId,x=>with(x,"guess",false)); toast "Fixed"; close}
@@ -151,10 +156,10 @@ Page
   Section center
     Column gap=24 center
       Progress "{(step+1)/length(steps)}"
-      Pages bind=step h=260
+      Pages @step h=260
         each s in steps
           Text "{s}" size=40 weight=700 center
-      Dots bind=step count=5
+      Dots @step count=5
       if timer>0
         Text "{duration(timer)}" size=64 weight=700
       Row gap=8 center
@@ -179,6 +184,7 @@ state recipes=[{"id":1,"title":"Brown Butter Gnocchi","time":"35 min","tags":["p
 state tags=["all","pasta","weeknight","vegetarian","breakfast","dinner","side"]
 state sel=0
 state grocery=[{"name":"potato gnocchi","amount":"1 lb","got":false},{"name":"unsalted butter","amount":"4 tbsp","got":false},{"name":"sage leaves","amount":"1/4 cup","got":true}]
+state newTag=""
 App
   Sidebar
     Brand "Clip a Dish" icon="restaurant_menu"
@@ -190,7 +196,7 @@ App
     Nav
       Heading "Collection" level=1
       Row gap=8
-        Input "Search recipes" bind=q w=220
+        Input "Search recipes" @q w=220
         Button "Import" icon="add" onTap={go import}
     Column pad=24 gap=16
       Row gap=8 scroll
@@ -217,11 +223,11 @@ App
     MenuItem "Add to grocery list" icon="add_shopping_cart" onTap={emit groceryAdd sel; toast "Added to grocery list"}
     MenuItem "Delete" icon="delete" onTap={recipes=removeWhere(recipes,x=>x.id==sel); toast "Recipe removed"}
   Dialog#tagDialog "Add a tag" "Tags help you find it later"
-    Input "Tag" bind=newTag
+    Input "Tag" @newTag
     Button "Add" onTap={newTag=="" ? toast "Type a tag" : {recipes=updateWhere(recipes,x=>x.id==sel,x=>with(x,"tags",append(x.tags,newTag))); tags=unique(append(tags,newTag)); newTag=""; close}}
   Drawer#groceryList "Grocery list" right
     each g in grocery
       Row gap=8 middle
-        Checkbox bind=g.got
+        Checkbox @g.got
         Text "{g.amount} {g.name}" grow strike={g.got}
     Button.outline "Clear checked" onTap={grocery=removeWhere(grocery,g=>g.got)}

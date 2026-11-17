@@ -13,6 +13,10 @@ state buffer=0
 state logs=[{"id":"l1","time":"14:32:08.114","level":"error","service":"checkout","message":"Payment gateway timeout after 3000ms","fields":[{"k":"service","v":"checkout"},{"k":"status","v":"504"},{"k":"trace_id","v":"a91f33c0"},{"k":"region","v":"us-east-1"}]},{"id":"l2","time":"14:32:07.902","level":"warn","service":"cart","message":"Retrying inventory lookup (attempt 2)","fields":[{"k":"service","v":"cart"},{"k":"status","v":"200"},{"k":"trace_id","v":"b72c10de"},{"k":"region","v":"us-east-1"}]},{"id":"l3","time":"14:32:07.455","level":"info","service":"auth","message":"Session refreshed for user 48213","fields":[{"k":"service","v":"auth"},{"k":"status","v":"200"},{"k":"user_id","v":"48213"},{"k":"region","v":"eu-west-1"}]},{"id":"l4","time":"14:32:06.980","level":"error","service":"checkout","message":"Card declined: insufficient_funds","fields":[{"k":"service","v":"checkout"},{"k":"status","v":"502"},{"k":"trace_id","v":"c3380aa1"},{"k":"region","v":"us-west-2"}]}]
 state fieldList=[{"name":"service","top":[{"v":"checkout","n":412},{"v":"cart","n":188},{"v":"auth","n":97}]},{"name":"status","top":[{"v":"504","n":260},{"v":"502","n":152},{"v":"500","n":40}]},{"name":"region","top":[{"v":"us-east-1","n":301},{"v":"us-west-2","n":214},{"v":"eu-west-1","n":98}]}]
 state saved=[{"id":"s1","name":"Checkout 5xx","query":"service:checkout status>=500"},{"id":"s2","name":"Slow auth","query":"service:auth duration>1000"}]
+state fromTime=""
+state toTime=""
+state shareLink=""
+state shareRange=false
 every 2s when live && !paused onTick={buffer=buffer+3}
 App
   Sidebar
@@ -29,7 +33,7 @@ App
         Button.outline "Share" icon="share" onTap={open share}
     Column pad=24 gap=16
       Row gap=8
-        QueryInput bind=query grow hint="field:value AND level:error" onSubmit={emit search query}
+        QueryInput @query grow hint="field:value AND level:error" onSubmit={emit search query}
         Button "Time range: {range}" icon="schedule" onTap={open rangePicker}
         Button "Search" onTap={emit search query}
       Row gap=8 wrap
@@ -64,7 +68,7 @@ App
             Row gap=8
               if buffer>0
                 Badge.info "{buffer} new"
-              Toggle "Live tail" bind=live
+              Toggle "Live tail" @live
               IconButton paused ? "play_arrow" : "pause" tooltip={paused ? "Resume" : "Pause"} hidden={!live} onTap={paused=!paused; buffer=paused ? buffer : 0}
           each row in logs
             Card gap=8 menu=rowMenu
@@ -96,21 +100,22 @@ App
       ChoiceChip "Last 7 days" selected={range=="Last 7 days"} onTap={range="Last 7 days"; close}
     Divider
     Row gap=8
-      DatePicker "From" bind=from grow
-      TimePicker "At" bind=fromTime grow
+      DatePicker "From" @from grow
+      TimePicker "At" @fromTime grow
     Row gap=8
-      DatePicker "To" bind=to grow
-      TimePicker "At" bind=toTime grow
+      DatePicker "To" @to grow
+      TimePicker "At" @toTime grow
     Button "Apply range" onTap={range="{from} to {to}"; close}
   Dialog#share "Share this search" "Anyone in your workspace with the link can open it"
-    Input "Link" bind=shareLink
-    Toggle "Include time range" bind=shareRange
+    Input "Link" @shareLink
+    Toggle "Include time range" @shareRange
     Button "Copy link" icon="link" onTap={copy "https://needle.app/s/7fk2q?q={query}"; toast "Link copied"; close}
 
 ### Saved searches
 state selected="s1"
 state q=""
 state saved=[{"id":"s1","name":"Checkout 5xx","query":"service:checkout status>=500","owner":"Dana"},{"id":"s2","name":"Slow auth","query":"service:auth duration>1000","owner":"Ravi"},{"id":"s3","name":"Cart retries","query":"service:cart message:\"Retrying\"","owner":"Dana"}]
+state newName=""
 App
   Sidebar
     Brand "Needle" icon="manage_search"
@@ -121,7 +126,7 @@ App
   Main
     Nav
       Heading "Saved searches"
-      Input "Filter saved searches" bind=q w=220
+      Input "Filter saved searches" @q w=220
     Column pad=24 gap=12
       each s in filter(saved,x=>contains(lower(x.name),lower(q)))
         Card gap=8 menu=savedMenu onTap={selected=s.id}
@@ -138,5 +143,5 @@ App
     MenuItem "Copy share link" icon="link" onTap={copy "https://needle.app/s/{sel}"; toast "Link copied"}
     MenuItem "Delete" icon="delete" onTap={saved=removeWhere(saved,x=>x.id==sel); toast "Deleted"}
   Dialog#renameSaved "Rename saved search"
-    Input "Name" bind=newName
+    Input "Name" @newName
     Button "Save" onTap={saved=updateWhere(saved,x=>x.id==sel,x=>with(x,"name",newName)); close}

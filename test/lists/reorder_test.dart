@@ -173,6 +173,26 @@ void main() {
       expect(order(), ['s1', 's0', 's2', 's3', 's4']);
     });
 
+    testWidgets('a tap on a kit handle focuses it with no ring, and Alt and an arrow then move its row', (tester) async {
+      await pumpList(tester, {'apply': 'variable', 'keyboard': true},
+        rowExtra: {'type': 'row', 'children': ['label', 'grip'], 'props': <String, Object?>{}},
+        extra: {
+          'label': {'type': 'text', 'layout': {'width': 250, 'height': 50}, 'props': {'text': r'${item.id}'}},
+          'grip': {'type': 'iconButton', 'layout': {'width': 44, 'height': 44},
+            'props': {'icon': 'drag_indicator'}, 'tooltip': 'Reorder', 'reorderHandle': true},
+        });
+      final keys = Keyboard(tester);
+      await tester.tapAt(s.center('grip', instance: ProvidedItem('row', null, 'list', ('id', 's1'))));
+      await tester.pumpAndSettle();
+      expect(keys.focusedId, 'grip');
+      expect(keys.ringShown, isFalse);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+      await tester.pumpAndSettle();
+      expect(order(), ['s0', 's2', 's1', 's3', 's4']);
+    });
+
     testWidgets('leaves an item in place when its condition refuses the move', (tester) async {
       await pumpList(tester, {'start': 'press', 'apply': 'variable', 'canReorderIf': r'${= !item.locked}'});
       final listeners =
