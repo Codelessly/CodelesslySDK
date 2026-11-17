@@ -17,7 +17,8 @@ import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabeledControl
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide Page, Step; // ignore: deprecated_member_use
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart' show FontLoader, LogicalKeyboardKey, MethodCall, SystemChannels;
+import 'package:flutter/services.dart'
+    show FontLoader, LogicalKeyboardKey, MethodCall, SystemChannels, TextEditingValue, TextInputAction, TextSelection;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk/src/runtime/gestures/drag_and_drop.dart' show RenderDragSource;
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
@@ -2119,6 +2120,30 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         };
         if (k == null) return '--key ${step.target}: "$m" is not a modifier (shift, ctrl, alt, meta).';
         modifiers.add(k);
+      }
+      // Enter in a text field connected to the platform's text input is
+      // the input's to act on (a field leaves it alone: an IME may be
+      // composing): the platform sends the field its action key (Done, Go,
+      // Search: the field's `submitted` reactions) or types the new line.
+      // The test's text input does neither by itself, so the step does.
+      final typing = RenderTextField.focused;
+      if (modifiers.every((m) => m == LogicalKeyboardKey.shiftLeft) &&
+          (key == LogicalKeyboardKey.enter || key == LogicalKeyboardKey.numpadEnter) &&
+          typing != null &&
+          typing.attached &&
+          typing.focusNode.hasFocus &&
+          typing.editor.hasConnection) {
+        final action = typing.editor.inputAction ?? (typing.config.oneLine ? TextInputAction.done : TextInputAction.newline);
+        if (!typing.config.oneLine && (action == TextInputAction.newline || modifiers.isNotEmpty)) {
+          final v = typing.editor.value;
+          final at = v.selection.isValid ? v.selection : TextSelection.collapsed(offset: v.text.length);
+          final text = v.text.replaceRange(at.start, at.end, String.fromCharCode(10));
+          tester.testTextInput.updateEditingValue(TextEditingValue(text: text, selection: TextSelection.collapsed(offset: at.start + 1)));
+        } else {
+          await tester.testTextInput.receiveAction(action);
+        }
+        await tester.pump();
+        return null;
       }
       for (final m in modifiers) {
         await tester.sendKeyDownEvent(m);

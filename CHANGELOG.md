@@ -148,6 +148,11 @@
   own "close the menu" ran afterwards. Opening a modal that is not a popover from inside a popover now closes the
   popover first, and the chain's following `closeModal` (the menu's) closes nothing else. A popover opened from a
   popover (a submenu) keeps it.
+- The render command's `--key Enter` in a focused text field did nothing (`TextInput … onSubmitted={…}` never ran
+  after `--type`): a field connected to the platform's text input leaves Enter to it, and the test harness's text
+  input sent nothing. The blocks wire `onSubmitted` correctly and a device submits. The step now does what the
+  platform does: it sends a one-line field its action key (its `submitted` reactions run) and types the new line
+  into a multi-line one.
 
 ## 32.0.0
 
