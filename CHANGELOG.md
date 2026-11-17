@@ -15,6 +15,13 @@ Needs codelessly_api from master (after 33.0.0).
 - **`notation.sh vocabulary`: overlays opened and never written** (Review 3, D17): codelessly_api now opens a
   placeholder sheet for them with the open vocabulary; the report counts them (`overlays` in `vocabulary.json`, a
   section in `VOCABULARY.md`, and the summary line) instead of as grammar issues.
+- **`notation.sh vocabulary` harvests definitions** (Reviews 3 and 4, D15 and D22; `tool/notation/vocabulary_harvest.dart`):
+  `VOCABULARY.md` gains "Words defined in more than one answer": for each such word, by how many answers defined it,
+  every definition's signature and body side by side as fenced blocks, with which core words, components, universal
+  words (review 2's list) and other definitions each body uses, and a note where the signatures disagree (different
+  strings, a parameter some answers name and others do not, a parameter that may be one under two names: the same
+  default, never in the same answer). Then "Words one answer defined that others used without a definition".
+  `vocabulary.json` has both as `harvest` (`definedInMoreThanOne`, `wouldResolve`).
 - `notation.sh vocabulary`: `go decks_and_mixer` reaches the screen `### Decks and Mixer` (its id is
   `decks-and-mixer`); it did not validate.
 

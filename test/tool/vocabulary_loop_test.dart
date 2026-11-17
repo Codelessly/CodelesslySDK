@@ -13,6 +13,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../tool/notation/vocabulary.dart' show loadVocabulary, screensOf;
+import '../../tool/notation/vocabulary_harvest.dart' show Harvest;
 
 // A page as a model writes it from the open prompt: unknown types (with
 // lines under them, with nothing under them, over the page), parameters,
@@ -143,6 +144,33 @@ void main() {
     expect(rect('plan').contains(rect('under').center), isTrue);
     expect(rect('count').top, greaterThanOrEqualTo(rect('plan').bottom));
     expect(session.node('palette')?.type, 'canvas');
+  });
+
+  test('the harvest: a word defined in more than one answer, side by side, with what each leans on and where they disagree', () {
+    final h = Harvest(kindOf: (w) => const {'Column', 'Row', 'Text', 'Ring', 'Slider', 'Box'}.contains(w) ? 'core' : 'unknown');
+    h.answer('dj', '### Deck\nApp\n  Knob "Gain"\n\n// A rotary dial.\ndefine Knob "label" bind=value min=0 max=12 color=#FF22D3EE\n  Column gap=4\n    Ring {value/max} w=56 color={color}\n    Text "{label}"\n');
+    h.answer('seq', 'Column\n  Knob "Swing"\ndefine Knob "label" bind=value low=0 max=100 unit=""\n  Column\n    Pip\n    Slider bind=value min={low} max={max}\ndefine Pip\n  Box w=4 h=4\n');
+    h.answer('synth', 'Column\n  Knob "Cutoff"\n');
+    h.unknown('Knob', 'synth');
+    h.unknown('Knob', 'dj');
+    final words = h.words;
+    expect(words.map((e) => e.key), ['Knob']);
+    final defs = words.single.value;
+    expect(defs.map((d) => d.file), ['dj', 'seq']);
+    expect(defs.first.definition.doc, 'A rotary dial.');
+    expect(defs.first.uses, {'core': {'Column', 'Ring', 'Text'}, 'universal': {'color'}});
+    expect(defs.last.uses, {'core': {'Column', 'Slider'}, 'defined': {'Pip'}});
+    expect(Harvest.disagreements(defs), [
+      'named by some answers only: color (1), low (1), min (1), unit (1)',
+      'maybe one parameter under two names: low / min (both default 0)',
+    ]);
+    // A definition one answer wrote resolves the word another used with none.
+    expect([for (final w in h.wouldResolve) '${w.word}: ${w.definedIn} / ${w.unknownIn}'], ['Knob: [dj, seq] / [synth]']);
+    final md = h.markdown();
+    expect(md, contains('### Knob (2 answers)'));
+    expect(md, contains('```\n// A rotary dial.\ndefine Knob "label" bind=value min=0 max=12 color=#FF22D3EE\n  Column gap=4\n'));
+    expect(md, contains('| Knob | dj, seq | synth |'));
+    expect(((h.toJson()['definedInMoreThanOne'] as List).single as Map)['answers'], 2);
   });
 
   test('a corpus file is its screens, each under a ### line; a file without one is one screen', () {

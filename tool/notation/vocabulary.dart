@@ -31,6 +31,7 @@ import 'package:codelessly_api/notation.dart';
 import 'package:codelessly_api/validate.dart';
 import 'package:codelessly_sdk/src/runtime/expressions/formula.dart' show FormulaEvaluator;
 
+import 'vocabulary_harvest.dart';
 import 'vocabulary_words.dart';
 
 /// The aliases of the design system at [dir] (its vocabulary.json) over the
@@ -239,6 +240,19 @@ Future<void> main(List<String> args) async {
   final theme = ThemeTokens.fromJson(ds.manifest.theme.toJson());
 
   final types = <String, _Word>{};
+  // What a first word of a definition's line is outside it: core, a
+  // component, a word the design system defines, or nobody's.
+  final kinds = <String, String>{};
+  final closed = NotationOptions.fromDesignSystem(ds, width: width).open(openVocabulary: false, vocabulary: table);
+  final harvest = Harvest(
+    kindOf: (w) => kinds[w] ??= table.definitions.containsKey(w)
+        ? 'defined'
+        : components.contains(w) && !notationTypes.containsKey(w)
+            ? 'component'
+            : Catalog.run(catalog, () => parseNotation('Column\n  $w', catalog: catalog, options: closed)).issues.any((i) => i.message.startsWith('No node type'))
+                ? 'unknown'
+                : 'core',
+  );
   final others = <String, Map<String, _Word>>{'parameter': {}, 'flag': {}, 'event': {}, 'verb': {}, 'variant': {}, 'missing': {}, 'children': {}, 'function': {}, 'alias': {}, 'overlay': {}};
   final issueShapes = <String, ({int count, Set<String> files, List<String> examples})>{};
   final invalidShapes = <String, ({int count, Set<String> files, List<String> examples})>{};
@@ -249,6 +263,7 @@ Future<void> main(List<String> args) async {
   for (final file in files) {
     final name = file.uri.pathSegments.last.replaceFirst(RegExp(r'\.txt$'), '');
     final whole = file.readAsStringSync();
+    harvest.answer(name, whole);
     final screens = screensOf(whole, name);
     final count = {'core': 0, 'component': 0, 'alias': 0, 'definition': 0, 'unknown': 0};
     var issues = 0, invalid = 0, standIns = 0, lines = 0;
@@ -511,6 +526,11 @@ Future<void> main(List<String> args) async {
   }
 
   final typeWords = _sorted(types.values);
+  for (final w in typeWords.where((w) => w.resolved == 'unknown')) {
+    for (final f in w.files) {
+      harvest.unknown(w.word, f);
+    }
+  }
   final unknownTypes = typeWords.where((w) => w.resolved == 'unknown').toList();
   // Words that share a part of their name may be one word under several names.
   final byStem = <String, List<_Word>>{};
@@ -548,6 +568,7 @@ Future<void> main(List<String> args) async {
       switch (k) { 'alias' => 'aliases', 'missing' => 'missing', 'children' => 'children', _ => '${k}s' }: [for (final w in _sorted(others[k]!.values)) w.toJson()],
     'summary': corpus.summary(),
     'words': [for (final w in corpus.sorted()) w.toJson()],
+    'harvest': harvest.toJson(),
     'synonyms': [
       for (final e in synonyms) {'stem': e.key, 'words': [for (final w in _sorted(e.value)) w.word]},
     ],
@@ -611,6 +632,7 @@ Future<void> main(List<String> args) async {
   for (final e in synonyms) {
     md.writeln('- **${e.key}**: ${_sorted(e.value).map((w) => '${w.word} (${w.files.length})').join(', ')}');
   }
+  md.write(harvest.markdown());
   void section(String title, String note, Iterable<_Word> words, {bool withOn = true, bool target = false}) {
     md
       ..writeln()
@@ -702,6 +724,7 @@ Future<void> main(List<String> args) async {
       '$allWords words, $resolvedWords resolved; '
       '${unknownTypes.length} unknown words; ${shapes.fold<int>(0, (n, e) => n + e.value.count)} grammar issues; '
       '${others['overlay']!.values.fold<int>(0, (n, w) => n + w.uses)} overlays opened and never written; '
+      '${harvest.words.length} words defined in more than one answer; '
       '${perFile.fold<int>(0, (n, f) => n + (f['invalid']! as int))} validation errors.');
   stdout.writeln('${outDir.path}/vocabulary.json, ${outDir.path}/VOCABULARY.md');
 }
