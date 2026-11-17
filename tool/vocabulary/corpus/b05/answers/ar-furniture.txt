@@ -1,0 +1,252 @@
+### Product
+state screen="product"
+state colour="Oat"
+state material="Boucle"
+state yaw=30
+state pitch=10
+state showDims=true
+state cart=[]
+state qty=1
+state wish=false
+
+App
+  Sidebar
+    Brand "Placewell" icon="chair"
+    NavItem "Shop" icon="storefront" selected={screen=="product"} onTap={go product}
+    NavItem "View in room" icon="view_in_ar" onTap={go room}
+    NavItem "Room planner" icon="grid_view" onTap={go planner}
+    NavItem "Cart" icon="shopping_bag" badge="{length(cart)}" onTap={go cart}
+    Spacer grow
+    Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Alder 3-seat sofa"
+      Row gap=8
+        IconButton "favorite" tooltip="Save for later" onTap={wish=!wish; toast wish ? "Removed from saved" : "Saved"}
+        Button "View in your room" icon="view_in_ar" onTap={go room}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Column grow gap=12
+          Card gap=8
+            Viewer3D#sofa model="alder-sofa.glb" bind=yaw pitch=pitch color={colour} material={material} h=380 onRotate={yaw=result.yaw; pitch=result.pitch}
+            if showDims
+              Dimensions for=sofa width="218 cm" height="82 cm" depth="94 cm"
+            Row between
+              Text.muted "Drag to rotate, pinch to zoom"
+              Row gap=8
+                IconButton "rotate_left" tooltip="Turn left" onTap={yaw=yaw-45}
+                IconButton "rotate_right" tooltip="Turn right" onTap={yaw=yaw+45}
+                IconButton "restart_alt" tooltip="Reset view" onTap={yaw=30; pitch=10}
+          Row between
+            Toggle "Show dimensions" bind=showDims
+            Slider bind=yaw min=0 max=360 w=200
+        Column w=320 gap=16
+          Column gap=4
+            Text.heading "Alder 3-seat sofa"
+            Row gap=8
+              Rating value=4.6 count=212
+              Text.muted "4.6 (212 reviews)"
+            Text.title "{money(1490 * qty, "$", 0)}"
+          Column gap=8
+            Text.fieldLabel "Colour: {colour}"
+            SwatchPicker bind=colour items=[{"name":"Oat","color":"#FFD9CBB3"},{"name":"Moss","color":"#FF6B7A58"},{"name":"Ink","color":"#FF2B3240"},{"name":"Clay","color":"#FFB5654A"}]
+          Column gap=8
+            Text.fieldLabel "Material: {material}"
+            SegmentedButton bind=material items=["Boucle","Linen","Velvet"]
+            Text.muted "Linen and velvet add {material=="Boucle" ? "$0" : "$120"}"
+          Row gap=8
+            Button.outline "-" onTap={qty=max(1,qty-1)}
+            Text.strong "{qty}"
+            Button.outline "+" onTap={qty=qty+1}
+            Spacer grow
+          Button "Add to cart" icon="add_shopping_cart" onTap={cart=append(cart,{"id":concat([colour],[material]),"name":"Alder 3-seat sofa","colour":colour,"material":material,"qty":qty,"price":1490 + (material=="Boucle" ? 0 : 120)}); qty=1; toast "Added to cart"}
+          Divider
+          Accordion "Details"
+            Text.muted "Solid alder frame, removable covers, 10-year frame guarantee."
+          Accordion "Delivery"
+            Text.muted "Free delivery in 2 to 3 weeks. White glove assembly available."
+
+### View in room
+state placed=true
+state ox=0
+state oy=0
+state rot=0
+state scale=1
+state shots=[]
+state flash=false
+
+App
+  Sidebar
+    Brand "Placewell" icon="chair"
+    NavItem "Shop" icon="storefront" onTap={go product}
+    NavItem "View in room" icon="view_in_ar" selected={true}
+    NavItem "Room planner" icon="grid_view" onTap={go planner}
+    NavItem "Cart" icon="shopping_bag" badge="{length(cart)}" onTap={go cart}
+  Main
+    Nav
+      Heading "View in room"
+      Row gap=8
+        Button.outline "Planner" icon="grid_view" onTap={go planner}
+        Button "Add to cart" onTap={cart=append(cart,{"id":"alder-room","name":"Alder 3-seat sofa","colour":colour,"material":material,"qty":1,"price":1490}); toast "Added to cart"}
+    Column pad=24 gap=16
+      Stack h=480 radius=16
+        CameraFrame facing=back onReady={toast "Move your phone slowly to find the floor"} onError={toast "Camera unavailable"}
+        if placed
+          PlacementRing x={ox} y={oy} rotation={rot} scale={scale} onMove={ox=result.x; oy=result.y}
+            Viewer3D model="alder-sofa.glb" color={colour} material={material} fixed
+          MoveHandle x={ox} y={oy} onDrag={ox=result.x; oy=result.y}
+          RotateHandle angle={rot} onDrag={rot=result.angle}
+          Badge.neutral "{rot} deg"
+        if !placed
+          Text center "Tap the floor to place the sofa"
+        if flash
+          Box fill=#FFFFFFFF animate=fade duration=200
+      Row between
+        Row gap=8
+          IconButton "refresh" tooltip="Reset placement" onTap={ox=0; oy=0; rot=0; scale=1; placed=true}
+          IconButton "delete" tooltip="Remove" onTap={placed=false}
+        IconButton.primary "photo_camera" tooltip="Take snapshot" size=large onTap={flash=true; shots=append(shots,{"id":length(shots)+1,"label":"Living room {length(shots)+1}"}); toast "Snapshot saved"}
+        Row gap=8
+          IconButton "rotate_left" tooltip="Rotate left" onTap={rot=rot-15}
+          IconButton "rotate_right" tooltip="Rotate right" onTap={rot=rot+15}
+      Row gap=16
+        Column grow gap=4
+          Text.fieldLabel "Size"
+          Slider bind=scale min=0.8 max=1.2
+        Column grow gap=4
+          Text.fieldLabel "Rotation"
+          Slider bind=rot min=0 max=360
+      if length(shots) > 0
+        Text.strong "Snapshots"
+        Row scroll gap=8
+          each s in shots
+            Card gap=4
+              Icon "image"
+              Text.small "{s.label}"
+              Button.ghost "Share" onTap={emit shareSnapshot s.id}
+
+### Room planner
+state sel="sofa"
+state items=[{"id":"sofa","name":"Alder sofa","x":80,"y":60,"w":218,"d":94,"rot":0},{"id":"table","name":"Coffee table","x":120,"y":200,"w":110,"d":60,"rot":0},{"id":"shelf","name":"Shelf","x":340,"y":20,"w":90,"d":35,"rot":90}]
+state roomW=480
+state roomD=360
+state snap=true
+
+App
+  Sidebar
+    Brand "Placewell" icon="chair"
+    NavItem "Shop" icon="storefront" onTap={go product}
+    NavItem "View in room" icon="view_in_ar" onTap={go room}
+    NavItem "Room planner" icon="grid_view" selected={true}
+    NavItem "Cart" icon="shopping_bag" badge="{length(cart)}" onTap={go cart}
+  Main
+    Nav
+      Heading "Living room"
+      Row gap=8
+        Toggle "Snap to walls" bind=snap
+        Button.outline "Edit walls" icon="edit" onTap={open walls}
+    Row gap=0 top
+      Column grow pad=24 gap=12
+        Card gap=8
+          RoomPlan w={roomW} d={roomD} unit="cm" grid=20 snap={snap}
+            Wall side=top length={roomW}
+            Wall side=left length={roomD}
+            Wall side=right length={roomD}
+            Wall side=bottom length={roomW} door=true opening=90
+            each it in items
+              PlanItem#{it.id} "{it.name}" x={it.x} y={it.y} w={it.w} d={it.d} rotation={it.rot} selected={sel==it.id} drag=plan(it.id) onTap={sel=it.id} onMove={items=updateWhere(items,i=>i.id==it.id,i=>with(with(i,"x",result.x),"y",result.y))}
+          Row between
+            Text.muted "{roomW / 100} m by {roomD / 100} m"
+            Text.muted "Drag items to move them"
+        Row gap=8
+          Button.outline "Add item" icon="add" onTap={open addItem}
+          Button.outline "Undo" icon="undo" onTap={emit undo}
+      Pane w=320 pad=16 gap=12
+        Text.panelTitle "Selected"
+        each it in filter(items,i=>i.id==sel)
+          Column gap=12
+            Text.strong "{it.name}"
+            Text.muted "{it.w} x {it.d} cm"
+            Text.fieldLabel "Rotation"
+            Slider min=0 max=360 value={it.rot} onChange={items=updateWhere(items,i=>i.id==it.id,i=>with(i,"rot",result))}
+            Row gap=8
+              Button.outline "Rotate 90" icon="rotate_90_degrees_cw" onTap={items=updateWhere(items,i=>i.id==it.id,i=>with(i,"rot",(i.rot+90) % 360))}
+              Button.destructive "Remove" onTap={items=removeWhere(items,i=>i.id==it.id); sel=""}
+        Divider
+        Text.strong "Fits?"
+        if any(items,i=>i.x < 0 || i.y < 0 || i.x + i.w > roomW || i.y + i.d > roomD)
+          Badge.warning "An item sticks out of the room"
+        if !any(items,i=>i.x < 0 || i.y < 0 || i.x + i.w > roomW || i.y + i.d > roomD)
+          Badge.success "Everything fits"
+        Button "View selected in room" icon="view_in_ar" onTap={go room}
+  Dialog#addItem "Add an item" "Pick something to place"
+    Grid cols=2 gap=8
+      Card onTap={items=append(items,{"id":"chair{length(items)}","name":"Armchair","x":200,"y":150,"w":80,"d":80,"rot":0}); close}
+        Icon "chair"
+        Text.small "Armchair"
+      Card onTap={items=append(items,{"id":"rug{length(items)}","name":"Rug","x":100,"y":100,"w":200,"d":140,"rot":0}); close}
+        Icon "texture"
+        Text.small "Rug"
+  Dialog#walls "Room size"
+    Input "Width (cm)" type=number bind=roomW
+    Input "Depth (cm)" type=number bind=roomD
+    Button "Done" onTap={close}
+
+### Cart
+state promo=""
+state promoOk=false
+
+App
+  Sidebar
+    Brand "Placewell" icon="chair"
+    NavItem "Shop" icon="storefront" onTap={go product}
+    NavItem "View in room" icon="view_in_ar" onTap={go room}
+    NavItem "Room planner" icon="grid_view" onTap={go planner}
+    NavItem "Cart" icon="shopping_bag" badge="{length(cart)}" selected={true}
+  Main
+    Nav
+      Heading "Cart"
+      Button.ghost "Keep shopping" onTap={go product}
+    Column pad=24 gap=16
+      if length(cart) == 0
+        Card gap=12 center
+          Icon "shopping_bag"
+          Text.title "Your cart is empty"
+          Button "Browse furniture" onTap={go product}
+      if length(cart) > 0
+        Row gap=24 top
+          Column grow gap=12
+            each line in cart
+              Card gap=8
+                Row gap=12 middle
+                  Viewer3D model="alder-sofa.glb" color={line.colour} material={line.material} fixed w=96 h=72
+                  Column grow gap=2
+                    Text.strong "{line.name}"
+                    Text.muted "{line.colour}, {line.material}"
+                  Row gap=8 middle
+                    IconButton "remove" tooltip="Fewer" onTap={cart=updateWhere(cart,c=>c.id==line.id,c=>with(c,"qty",max(1,c.qty-1)))}
+                    Text.strong "{line.qty}"
+                    IconButton "add" tooltip="More" onTap={cart=updateWhere(cart,c=>c.id==line.id,c=>with(c,"qty",c.qty+1))}
+                  Text.strong w=90 "{money(line.price * line.qty, "$", 0)}"
+                  IconButton "delete" tooltip="Remove" onTap={cart=removeWhere(cart,c=>c.id==line.id)}
+          Column w=320 gap=12
+            Card gap=12
+              Text.panelTitle "Summary"
+              Row between
+                Text.muted "Subtotal"
+                Text "{money(sum(cart,c=>c.price * c.qty), "$", 0)}"
+              Row between
+                Text.muted "Delivery"
+                Text "Free"
+              if promoOk
+                Row between
+                  Text.muted "Promo"
+                  Text.success "-10%"
+              Divider
+              Row between
+                Text.strong "Total"
+                Text.strong "{money(sum(cart,c=>c.price * c.qty) * (promoOk ? 0.9 : 1), "$", 0)}"
+              Row gap=8
+                Input "Promo code" bind=promo grow
+                Button.outline "Apply" onTap={promo=="PLACE10" ? promoOk=true : toast "Code not valid"}
+              Button "Checkout" size=large onTap={emit checkout}

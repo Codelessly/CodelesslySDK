@@ -1,0 +1,201 @@
+### Dice Tray
+state tab="tray"
+state pool=[]
+state results=[]
+state rolling=false
+state mod=0
+state mode="normal"
+state formula=""
+state history=[{"label":"Longsword attack","expr":"1d20+5","total":19,"detail":"14 + 5","time":"20:41"},{"label":"Fireball","expr":"8d6","total":28,"detail":"3 6 4 5 2 1 5 2","time":"20:38"},{"label":"Stealth","expr":"1d20+7","total":11,"detail":"4 + 7","time":"20:33"}]
+state saved=[{"name":"Longsword","expr":"1d20+5"},{"name":"Sneak attack","expr":"3d6"},{"name":"Fireball","expr":"8d6"},{"name":"Healing word","expr":"1d4+4"}]
+state newName=""
+App
+  Sidebar
+    Brand "Critical" icon="casino"
+    NavItem "Dice tray" icon="casino" selected={tab=="tray"} onTap={tab="tray"}
+    NavItem "Initiative" icon="swords" onTap={go initiative}
+    NavItem "Party health" icon="favorite" onTap={go party}
+    Spacer grow
+    Text.muted "Session: Tomb of Ashes"
+  Main
+    Nav
+      Heading "Dice tray" level=1
+      Row gap=8
+        Button.outline "Clear pool" icon="delete" onTap={pool=[]; results=[]}
+        Button.outline "Save roll" icon="bookmark" onTap={open saveRoll}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Text.strong "Add dice"
+        Row gap=8
+          Button.outline "d4" onTap={pool=append(pool,{"sides":4})}
+          Button.outline "d6" onTap={pool=append(pool,{"sides":6})}
+          Button.outline "d8" onTap={pool=append(pool,{"sides":8})}
+          Button.outline "d10" onTap={pool=append(pool,{"sides":10})}
+          Button.outline "d12" onTap={pool=append(pool,{"sides":12})}
+          Button.outline "d20" onTap={pool=append(pool,{"sides":20})}
+          Button.outline "d100" onTap={pool=append(pool,{"sides":100})}
+        Row gap=16 middle
+          Text.muted "Modifier"
+          Row gap=8 middle
+            IconButton "remove" tooltip="Minus one" onTap={mod=mod-1}
+            Text.strong "{mod>=0 ? '+' : ''}{mod}"
+            IconButton "add" tooltip="Plus one" onTap={mod=mod+1}
+          Spacer grow
+          SegmentedButton bind=mode items=["Normal","Advantage","Disadvantage"]
+      Card gap=12
+        Row between middle
+          Text.strong "Pool"
+          Text.muted "{length(pool)} dice"
+        if isEmpty(pool)
+          Text.muted "Tap a die above to add it to the pool."
+        Row gap=8 scroll
+          each d in pool
+            Chip "d{d.sides}" onTap={pool=removeAt(pool,index)}
+        Row gap=8 middle
+          Input "Formula" "2d6+3" bind=formula grow
+          Button.secondary "Roll formula" icon="play_arrow" onTap={rolling=true; results=roll(formula,mode); history=concat([{"label":formula,"expr":formula,"total":sum(results,r=>r.value)+mod,"detail":join(map(results,r=>r.value)," "),"time":formatDate(today(),"HH:mm")}],history); rolling=false}
+        Button "Roll pool" size=large icon="casino" onTap={rolling=true; results=roll(pool,mode); history=concat([{"label":"Pool","expr":join(map(pool,d=>"d"+d.sides),"+"),"total":sum(results,r=>r.value)+mod,"detail":join(map(results,r=>r.value)," "),"time":formatDate(today(),"HH:mm")}],history); rolling=false}
+      Card gap=12
+        Row between middle
+          Text.strong "Result"
+          if length(results)>0
+            Text.muted "{mode}"
+        if length(results)>0
+          Row gap=12 center middle
+            each r in results
+              Box fill=#FF1F2937 radius=12 pad=16 animate=shake duration=500
+                Text "{r.value}" size=32 weight=700 color={r.value==max(results) ? #FF4ADE80 : (r.value==min(results) ? #FFF87171 : #FFFFFFFF)}
+                Text.caption "d{r.sides}" color=#FF9CA3AF
+          Row gap=8 center
+            Badge.success "Highest {max(map(results,r=>r.value))}"
+            Badge.danger "Lowest {min(map(results,r=>r.value))}"
+          Column center gap=4
+            Text "{sum(results,r=>r.value)+mod}" size=64 weight=700
+            Text.muted "{sum(results,r=>r.value)} {mod>=0 ? '+' : '-'} {abs(mod)}"
+        if length(results)==0
+          Text.muted "Roll to see the dice here."
+      Card gap=12
+        Text.strong "Saved rolls"
+        Row gap=8 scroll
+          each s in saved
+            Button.tonal "{s.name}  {s.expr}" onTap={formula=s.expr; results=roll(s.expr,mode); history=concat([{"label":s.name,"expr":s.expr,"total":sum(results,r=>r.value)+mod,"detail":join(map(results,r=>r.value)," "),"time":formatDate(today(),"HH:mm")}],history)}
+
+    Footer
+      Row between middle
+        Text.muted "Last: {length(history)>0 ? history[0].label : 'nothing yet'}"
+        Text.strong "{length(history)>0 ? history[0].total : ''}"
+  Pane w=320 pad=16 gap=12
+    Row between middle
+      Text.strong "History"
+      Button.ghost "Clear" onTap={history=[]}
+    Column gap=8 scroll
+      each h in history
+        ListTile "{h.label}" "{h.expr}  ({h.detail})" trailing="{h.total}" onTap={formula=h.expr}
+          Text.caption "{h.time}"
+Dialog#saveRoll "Save this roll" "Name it to get a button"
+  Input "Name" "Longsword" bind=newName
+  Text.muted "Formula: {formula}"
+  Row end gap=8
+    Button.outline "Cancel" onTap={close}
+    Button "Save" onTap={newName!="" ? {saved=append(saved,{"name":newName,"expr":formula}); newName=""; close} : toast "Give it a name"}
+
+### Initiative
+state order=[{"id":1,"name":"Kira Voss","init":19,"hp":34,"max":34,"kind":"pc"},{"id":2,"name":"Goblin Boss","init":16,"hp":9,"max":21,"kind":"foe"},{"id":3,"name":"Brother Tal","init":14,"hp":22,"max":28,"kind":"pc"},{"id":4,"name":"Mirelle","init":11,"hp":7,"max":24,"kind":"pc"},{"id":5,"name":"Goblin Archer","init":8,"hp":0,"max":7,"kind":"foe"}]
+state turn=0
+state round=1
+state sel=0
+state dmg=5
+App
+  Sidebar
+    Brand "Critical" icon="casino"
+    NavItem "Dice tray" icon="casino" onTap={go dice-tray}
+    NavItem "Initiative" icon="swords" selected={true}
+    NavItem "Party health" icon="favorite" onTap={go party}
+    Spacer grow
+    Text.muted "Round {round}"
+  Main
+    Nav
+      Heading "Initiative" level=1
+      Row gap=8
+        Badge.primary "Round {round}"
+        Button.outline "Sort" icon="sort" onTap={order=sortByDesc(order,c=>c.init)}
+        Button "Add combatant" icon="person_add" onTap={open addCombatant}
+    Column pad=24 gap=12 scroll
+      Card gap=4
+        Text.muted "Current turn"
+        Text "{order[turn].name}" size=32 weight=700
+      each c in order
+        Card gap=8 drag=init(c.id) drop=init onDrop={order=sortByDesc(updateWhere(order,x=>x.id==result.data,x=>with(x,"init",c.init+0.5)),x=>x.init)} menu=combatantMenu
+          Row gap=12 middle
+            Icon "play_arrow" hidden={index!=turn}
+            Avatar "{c.name}" size=40
+            Column grow gap=4
+              Row between
+                Text.strong "{c.name}"
+                Row gap=8 middle
+                  Badge.neutral "Init {c.init}"
+                  IconButton "more_vert" tooltip="Actions" onTap={sel=c.id; open combatantMenu}
+              Progress {c.hp/c.max}
+              Text.caption "{c.hp} / {c.max} HP {c.hp==0 ? ' - down' : ''}"
+    Footer
+      Row between middle
+        Button.outline "Previous" icon="chevron_left" onTap={turn=turn==0 ? length(order)-1 : turn-1}
+        Text.strong "{order[turn].name}'s turn"
+        Button "Next turn" icon="chevron_right" onTap={turn=turn+1>=length(order) ? 0 : turn+1; round=turn+1>=length(order) ? round+1 : round}
+  Pane w=320 pad=16 gap=12
+    Text.strong "Damage and healing"
+    Input "Amount" type=number bind=dmg
+    Row gap=8
+      Button.destructive "Damage" grow onTap={order=updateWhere(order,c=>c.id==sel,c=>with(c,"hp",max(0,c.hp-dmg)))}
+      Button.secondary "Heal" grow onTap={order=updateWhere(order,c=>c.id==sel,c=>with(c,"hp",min(c.max,c.hp+dmg)))}
+    Text.muted "Select a combatant with the menu, then apply."
+    Divider
+    Text.strong "Order"
+    each c in order
+      Text "{index+1}. {c.name}" strike={c.hp==0}
+Menu#combatantMenu
+  MenuItem "Set as current turn" icon="play_arrow" onTap={turn=indexOf(map(order,c=>c.id),sel)}
+  MenuItem "Select for damage" icon="bolt" onTap={toast "Selected"}
+  MenuItem "Remove" icon="delete" onTap={order=removeWhere(order,c=>c.id==sel)}
+Dialog#addCombatant "Add combatant" "Roll or type their initiative"
+  Input "Name" bind=newName
+  Input "Initiative" type=number bind=newInit
+  Input "Max HP" type=number bind=newHp
+  Button "Add" onTap={order=sortByDesc(append(order,{"id":length(order)+10,"name":newName,"init":newInit,"hp":newHp,"max":newHp,"kind":"foe"}),c=>c.init); close}
+
+### Party health
+state party=[{"name":"Kira Voss","cls":"Fighter 5","hp":34,"max":34,"ac":18},{"name":"Brother Tal","cls":"Cleric 5","hp":22,"max":28,"ac":16},{"name":"Mirelle","cls":"Rogue 5","hp":7,"max":24,"ac":15},{"name":"Orin Ashgrove","cls":"Wizard 5","hp":19,"max":19,"ac":12}]
+state who=0
+App
+  Sidebar
+    Brand "Critical" icon="casino"
+    NavItem "Dice tray" icon="casino" onTap={go dice-tray}
+    NavItem "Initiative" icon="swords" onTap={go initiative}
+    NavItem "Party health" icon="favorite" selected={true}
+    Spacer grow
+    Text.muted "{count(party,p=>p.hp>0)} of {length(party)} standing"
+  Main
+    Nav
+      Heading "Party health" level=1
+      Button.outline "Long rest" icon="hotel" onTap={party=map(party,p=>with(p,"hp",p.max)); toast "Party restored"}
+    Column pad=24 gap=16 scroll
+      Grid cols=2 gap=16
+        each p in party
+          Card gap=12
+            Row between middle
+              Row gap=12 middle
+                Avatar "{p.name}" size=40
+                Column gap=2
+                  Text.strong "{p.name}"
+                  Text.muted "{p.cls}"
+              Badge.neutral "AC {p.ac}"
+            Progress {p.hp/p.max}
+            Row between middle
+              Text.strong "{p.hp} / {p.max} HP"
+              Row gap=4
+                IconButton "remove" tooltip="Lose 1 HP" onTap={party=updateWhere(party,x=>x.name==p.name,x=>with(x,"hp",max(0,x.hp-1)))}
+                IconButton "add" tooltip="Gain 1 HP" onTap={party=updateWhere(party,x=>x.name==p.name,x=>with(x,"hp",min(x.max,x.hp+1)))}
+                Button.ghost "Roll d20" onTap={go dice-tray}
+      Card gap=8
+        Text.strong "Hit points at a glance"
+        BarChart values={map(party,p=>p.hp)} labels={map(party,p=>p.name)} h=180
