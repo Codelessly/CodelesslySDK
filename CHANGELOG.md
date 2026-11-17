@@ -1,5 +1,15 @@
 ## Unreleased
 
+### Changed
+
+- **A list beside its detail, written once in the notation, works on a phone** (codelessly_api's notation, design
+  note 13 section 14.4): the list fills the screen, a tap on a row (Enter or Space on it) shows the detail with a
+  back button at its top left, and the back button, Escape and the system back show the list again where it was
+  left; the detail fades and slides in. `test/notation/list_detail_test.dart` drives it by pointer and keyboard in
+  a session and the system back in a published app; a desktop keeps both side by side. The showcase inbox
+  (`examples/showcase/desktop/tier5/app_inbox.txt`) is a list and its detail at 390; the ten showcase pages draw
+  as before at 1440x900.
+
 ### Fixed
 
 - **A control's label is centered on its glyphs** by the font's own ascent and descent from the baseline. A style with
