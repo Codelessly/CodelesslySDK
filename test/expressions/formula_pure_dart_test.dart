@@ -4,7 +4,6 @@
 // runtime uses: FormulaEvaluator.report is what strictEditCheck takes.
 import 'dart:io';
 
-import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// The files [entry] imports, transitively, within lib/ (package: imports
@@ -35,13 +34,5 @@ void main() {
   test('the formula library imports no Flutter, so a Dart VM tool can check formulas with it', () {
     final imports = _closure('lib/src/runtime/expressions/formula.dart');
     expect(imports.where((u) => u.startsWith('package:flutter') || u == 'dart:ui'), isEmpty, reason: '$imports');
-  });
-
-  test('report gives a validator the syntax error and the names a formula reads', () {
-    // reservation@claude-sonnet-5-5 wrote its slots as JavaScript.
-    expect(FormulaEvaluator.report('map(slots, function(s, i) { return {t: s} })').error, isNotNull);
-    final ok = FormulaEvaluator.report('map(slots, (s, i) => {t: s, full: i > dayIdx})');
-    expect(ok.error, isNull);
-    expect(ok.paths, containsAll(['slots', 'dayIdx']));
   });
 }

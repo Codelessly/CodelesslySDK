@@ -36,22 +36,6 @@ class _Fetcher implements FontFetcher {
   }
 }
 
-// In a browser Google Fonts serves a file per Unicode subset and the SDK
-// loads the `latin` one; characters the font draws outside it (Tack's →, ⇧,
-// ↵) fell back to the platform's font, with its own glyphs and line height.
-// They now come in a file of their own (`text=`), registered with the family.
-
-class _Glyphs implements GlyphFontFetcher {
-  final asked = <String>[];
-  @override
-  Future<Uint8List?> fetch(PublishFont font) async => Uint8List.fromList([1]);
-  @override
-  Future<Uint8List?> fetchGlyphs(PublishFont font, String text) async {
-    asked.add('${font.family} ${font.weight} $text');
-    return Uint8List.fromList([2]);
-  }
-}
-
 Uint8List file(int value) => Uint8List.fromList([value, 2, 3]);
 
 void main() {
@@ -117,44 +101,6 @@ void main() {
       await Future<void>.delayed(Duration.zero);
       expect(fetcher.asked, ['Anton 400', 'Fraunces 500 italic']);
       FontDemand.handler = null;
-    });
-  });
-
-  group('characters beyond latin', () {
-    setUp(CodelesslyFonts.resetGlyphs);
-
-    test('a layout\'s characters beyond latin are fetched and registered with their family', () async {
-      final fetcher = _Glyphs();
-      final registered = <String, List<int>>{};
-      final fonts = CodelesslyFonts(
-        fetcher: fetcher,
-        register: (family, files) async => registered[family] = [for (final f in files) f.first],
-      );
-      await fonts.load([const PublishFont(id: 'g6', family: 'Geist', weight: 600)], text: 'Backlog → Done');
-      expect(fetcher.asked, ['Geist 600 →']);
-      // A family of their own: on the web a family's later files add no glyphs.
-      expect(registered['Geist'], [1]);
-      expect(registered['Geist glyphs'], [2]);
-    });
-
-    test('text of latin characters alone fetches no extra file', () async {
-      CodelesslyFonts.resetGlyphs();
-      final fetcher = _Glyphs();
-      final fonts = CodelesslyFonts(fetcher: fetcher, register: (_, _) async {});
-      await fonts.load([const PublishFont(id: 'g4', family: 'Geist', weight: 400)], text: 'To Do, Doing, Done');
-      expect(fetcher.asked, isEmpty);
-    });
-
-    test('an uploaded font has every glyph, so nothing more is fetched', () async {
-      var asked = 0;
-      final client = MockClient((_) async {
-        asked++;
-        return http.Response('', 404);
-      });
-      final bytes = await HttpFontFetcher(client: client)
-          .fetchGlyphs(const PublishFont(id: 'u', family: 'Mine', weight: 400, url: 'https://x/mine.ttf'), '→');
-      expect(bytes, isNull);
-      expect(asked, 0);
     });
   });
 

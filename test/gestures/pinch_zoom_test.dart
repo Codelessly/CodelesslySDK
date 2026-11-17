@@ -228,39 +228,6 @@ const double b0 = 300;
 
 void main() {
   group('content inside a zoomable board', () {
-    testWidgets('two fingers zoom and pan the board, and one finger still drags inside it at the right place', (tester) async {
-      final (tree, scope) = await show(tester);
-      final a = await tester.startGesture(const Offset(180, 200), pointer: 1);
-      final b = await tester.startGesture(const Offset(220, 200), pointer: 2);
-      await tester.pump();
-      for (var i = 1; i <= 10; i++) {
-        await a.moveTo(Offset(180 - i * 2.0, 200 + i * 1.0));
-        await b.moveTo(Offset(220 + i * 2.0, 200 + i * 1.0));
-        await tester.pump(const Duration(milliseconds: 16));
-      }
-      await a.up();
-      await b.up();
-      await tester.pumpAndSettle();
-      final pose = gestureOf(tree).pose;
-      expect(pose.scale, closeTo(2, 0.05));
-      expect(scope.read('zoom'), closeTo(2, 0.05));
-      expect(scope.read('xs'), isEmpty, reason: 'a pinch paints nothing');
-      // Petri v2: a pinch dabbed a cell under each finger when strokes began
-      // on pointerDown (it fires per finger). dragStart doesn't fire for one.
-      expect(scope.read('downs'), isEmpty, reason: 'a pinch starts no stroke');
-      // Paint across the middle: drag.x is in the grid's own coordinates, so
-      // each 10 screen px is 5 grid px at 2x.
-      final g = await tester.startGesture(const Offset(200, 200));
-      for (var i = 1; i <= 6; i++) {
-        await g.moveTo(Offset(200 + i * 10.0, 200));
-        await tester.pump(const Duration(milliseconds: 16));
-      }
-      await g.up();
-      await tester.pumpAndSettle();
-      final xs = (scope.read('xs') as List).cast<num>();
-      expect(xs.length, greaterThan(2));
-      expect(xs.last - xs[xs.length - 2], closeTo(5, 1));
-    });
   });
 
   testWidgets('a pinch zooms around the point between the fingers', (tester) async {

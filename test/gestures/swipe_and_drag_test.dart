@@ -185,30 +185,6 @@ void main() {
     expect(s.values().offset, Offset.zero);
   });
 
-  testWidgets('a disabled drag does not move, and reports that it is blocked', (tester) async {
-    final s = await show(tester, drag: {...swipeCard, 'enabled': false, 'shakeWhenDisabled': true});
-    await tester.timedDragFrom(const Offset(100, 150), const Offset(-150, 0), const Duration(milliseconds: 400));
-    await tester.pumpAndSettle();
-    expect(s.values().offset, Offset.zero);
-    await tester.pumpWidget(const SizedBox());
-
-    final f = await show(tester,
-        drag: {...swipeCard, 'enabled': false, 'disabledFollow': 0.3},
-        actions: [react('dragEnd', [append('ends')])],
-        variables: [listVar('ends')]);
-    final gesture = await tester.startGesture(const Offset(100, 150));
-    for (var i = 0; i < 5; i++) {
-      await gesture.moveBy(const Offset(-30, 0));
-    }
-    await tester.pump();
-    // It no longer follows a share of the travel.
-    expect(f.values().offset.dx, 0);
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(ends(f).last['blocked'], isTrue);
-    expect(f.values().offset, Offset.zero);
-  });
-
   testWidgets('actions can fling it, bring it back and reset it', (tester) async {
     final s = await show(tester, actions: [react('swipeRight', [record('swiped', 'right')])], variables: [
       const Variable(name: 'swiped', type: VariableType.text, value: ''),

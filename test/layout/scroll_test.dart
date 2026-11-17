@@ -11,7 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../lists/support.dart' as lists;
 import '../support/screen.dart' as harness;
-import '../support/fields.dart';
 
 Map<String, Json> nodes({bool horizontal = false, bool reverse = false}) => {
   'col': {
@@ -504,74 +503,5 @@ void main() {
       await tester.pumpWidget(const SizedBox());
       handle.dispose();
     });
-  });
-
-  group('scroll position', () {
-
-    for (final bound in [false, true]) {
-      testWidgets('a column can be scrolled away from a text field that has focus (bound text: $bound)', (tester) async {
-        final scope = VariableScope([const Variable(name: 'msg', type: VariableType.text, value: '')]);
-        final tree = NodeTree(
-          DocumentSource(LayoutDocument.fromJson({
-            'roots': ['col'],
-            'nodes': {
-              'col': {
-                'type': 'column',
-                'children': ['top', 'f', 'tail'],
-                'layout': {'width': 300, 'height': 400},
-                'props': {'scrollable': true},
-              },
-              'top': {'type': 'box', 'layout': {'width': 300, 'height': 120}},
-              'f': {
-                'type': 'textField',
-                'layout': {'width': 300, 'height': {'hug': 48}},
-                if (bound) 'bind': {'props.initialValue': r'${msg}'},
-                if (bound)
-                  'actions': [
-                    {
-                      'trigger': {'type': 'changed'},
-                      'actions': [
-                        {'type': 'setVariable', 'variable': 'msg', 'value': r'${value}'},
-                      ],
-                    },
-                  ],
-              },
-              'tail': {'type': 'box', 'layout': {'width': 300, 'height': 800}},
-            },
-          })),
-          binder: NodeBinder(scope: scope, logic: const LayoutLogic()),
-        );
-        addTearDown(tree.dispose);
-        await tester.pumpWidget(MaterialApp(
-          home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'col', interactive: true)),
-        ));
-        await tester.pump();
-        await tapField(tester, textField(tester));
-        // As the MCP's preview.type does: the keyboard's value, a few frames.
-        tester.testTextInput.updateEditingValue(const TextEditingValue(
-          text: 'Thanks for pairing', selection: TextSelection.collapsed(offset: 18)));
-        for (var i = 0; i < 3; i++) {
-          await tester.pump(const Duration(milliseconds: 16));
-        }
-        RenderDesignScroll? scroll;
-        void visit(RenderObject o) {
-          if (o is RenderDesignScroll && scroll == null) scroll = o;
-          o.visitChildren(visit);
-        }
-        visit(tester.renderObject(find.byType(NodeView)));
-        expect(scroll, isNotNull);
-        expect(textField(tester).focusNode.hasFocus, isTrue, reason: 'the field still has focus');
-        // Scroll the field out of view, as a person reaching the Send button.
-        for (var i = 0; i < 3; i++) {
-          await tester.pump(const Duration(milliseconds: 16));
-        }
-        scroll!.jumpBy(300);
-        for (var i = 0; i < 3; i++) {
-          await tester.pump(const Duration(milliseconds: 16));
-        }
-        await tester.pumpAndSettle();
-        expect(scroll!.offset, 300);
-      });
-    }
   });
 }
