@@ -12,8 +12,11 @@ import 'vocabulary.dart' show loadDefinitionTexts;
 
 Future<void> main(List<String> args) async {
   // --open: the open-vocabulary prompt (the grammar and the core only; a
-  // design system's components are not listed).
+  // design system's components are not listed), which asks the model to
+  // define every word it invents after its last screen; --no-define leaves
+  // that out (the prompt the first corpus was written with).
   final open = args.contains('--open');
+  final define = !args.contains('--no-define');
   final w = args.indexOf('--width');
   final width = w >= 0 && w + 1 < args.length ? double.tryParse(args[w + 1]) ?? 390.0 : 390.0;
   final i = args.indexOf('--design-system');
@@ -43,6 +46,7 @@ Future<void> main(List<String> args) async {
       options: ds == null ? NotationOptions(width: width) : NotationOptions.fromDesignSystem(ds, width: width),
       designSystem: ds,
       open: open,
+      define: define,
     ),
   ));
   if (defined.isNotEmpty) {

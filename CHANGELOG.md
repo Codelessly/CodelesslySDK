@@ -9,6 +9,9 @@ Needs codelessly_api from master (after 33.0.0).
   `### screen`, with codelessly_api's `parseNotation(…, definitions:)`; what is wrong in one is said once, on the
   screen that holds it. `tool/vocabulary/hoist.py`, the stopgap that copied them to the head of each screen, is
   removed. `notation.sh expand` reads a file's definitions wherever they are written.
+- **`notation.sh prompt --open` asks for every invented word to be defined** after the last screen (Review 4, D19;
+  codelessly_api's `notationDefinePreface`), so `batch.sh prepare` writes self-defining batches. `--no-define`
+  gives the prompt the first corpus was written with, identical to `corpus/b09/prompt.txt`.
 
 ## 33.0.0
 
