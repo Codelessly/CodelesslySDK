@@ -1,0 +1,190 @@
+### Outline
+state nodes=[{"id":"n1","parent":"","text":"Q4 planning","done":false,"folded":false,"task":false},{"id":"n2","parent":"n1","text":"Hiring plan #hiring","done":false,"folded":false,"task":false},{"id":"n3","parent":"n2","text":"Open two backend roles","done":false,"folded":false,"task":true},{"id":"n4","parent":"n2","text":"Review intern pipeline with [[Mara Okafor]]","done":true,"folded":false,"task":true},{"id":"n5","parent":"n1","text":"Launch checklist #launch","done":false,"folded":true,"task":false},{"id":"n6","parent":"n5","text":"Freeze copy on Nov 3","done":false,"folded":false,"task":true},{"id":"n7","parent":"","text":"Reading list","done":false,"folded":false,"task":false},{"id":"n8","parent":"n7","text":"A Pattern Language, chapter on thresholds","done":false,"folded":false,"task":false}]
+state focus=""
+state tasksMode=false
+state hideDone=false
+state tag=""
+state sel=""
+state note="Q4 planning"
+App
+  Sidebar
+    Brand "Indent" icon="format_list_bulleted"
+    NavItem "Home" icon="home" selected={focus==""} onTap={focus=""; go outline}
+    NavItem "Daily notes" icon="today" onTap={go daily-notes}
+    NavItem "Search" icon="search" onTap={open search}
+    Divider
+    Text.caption "Tags"
+    NavItem "#hiring" icon="tag" badge="3" selected={tag=="hiring"} onTap={tag="hiring"; go tag-page}
+    NavItem "#launch" icon="tag" badge="5" selected={tag=="launch"} onTap={tag="launch"; go tag-page}
+    NavItem "#reading" icon="tag" badge="2" onTap={tag="reading"; go tag-page}
+    Spacer grow
+    Text.muted "1,284 bullets"
+  Main
+    Nav
+      Row gap=4 middle
+        Link "Home" onTap={focus=""}
+        Icon "chevron_right"
+        Link "Q4 planning" visible={focus!=""} onTap={focus="n1"}
+        Icon "chevron_right" visible={focus=="n2"}
+        Text.strong "{coalesce(find(nodes,x=>x.id==focus).text,'Home')}"
+      Row gap=8
+        IconButton "search" tooltip="Quick search (Ctrl+K)" onTap={open search}
+        Toggle "Tasks" bind=tasksMode
+        IconButton "more_horiz" tooltip="Page options" onTap={open pageMenu}
+    Column pad=24 gap=16 maxw=720
+      Text.pageTitle "{focus=='' ? 'Home' : find(nodes,x=>x.id==focus).text}"
+      Row gap=8
+        Chip "Expand all" onTap={fold all false}
+        Chip "Collapse all" onTap={fold all true}
+        FilterChip "Hide completed" selected={hideDone} onTap={hideDone=!hideDone}
+      Outline bind=nodes focus={focus} tasks={tasksMode} hideDone={hideDone} placeholder="Type to add a bullet" onFocusNode={focus=result.id} onEdit={nodes=updateWhere(nodes,x=>x.id==result.id,x=>with(x,"text",result.text))} onEnter={addAfter result.id} onIndent={indent result.id} onOutdent={outdent result.id} onFold={nodes=updateWhere(nodes,x=>x.id==result.id,x=>with(x,"folded",!x.folded))} onToggleDone={nodes=updateWhere(nodes,x=>x.id==result.id,x=>with(x,"done",!x.done))} onMove={move result.id result.to} onTagTap={tag=result.tag; go tag-page} onLinkTap={focus=result.id} onContext={sel=result.id; open bulletMenu} menu=bulletMenu
+      Divider
+      Text.sectionTitle "Linked references"
+      Text.muted "Bullets that mention this page."
+      each ref in filter(nodes,x=>contains(x.text,"[[Mara Okafor]]"))
+        Card gap=4 onTap={focus=ref.id}
+          Text.caption "Q4 planning / Hiring plan"
+          Text "{ref.text}"
+  Menu#bulletMenu
+    MenuItem "Focus on this bullet" icon="my_location" onTap={focus=sel}
+    MenuItem "Make a task" icon="check_box" onTap={nodes=updateWhere(nodes,x=>x.id==sel,x=>with(x,"task",!x.task))}
+    MenuItem "Indent" icon="format_indent_increase" onTap={indent sel}
+    MenuItem "Outdent" icon="format_indent_decrease" onTap={outdent sel}
+    MenuItem "Copy link" icon="link" onTap={copy "indent://{sel}"; toast "Link copied"}
+    MenuItem "Delete" icon="delete" onTap={nodes=removeWhere(nodes,x=>x.id==sel); toast "Bullet deleted"}
+  Menu#pageMenu end
+    MenuItem "Export as Markdown" icon="download" onTap={emit export}
+    MenuItem "Copy page link" icon="link" onTap={copy "indent://{focus}"; toast "Copied"}
+  Dialog#search "Quick search" "Jump to any bullet, page or tag"
+    Input "Search" "Type to search" bind=q autofocus
+    Column gap=4
+      each hit in take(filter(nodes,x=>contains(lower(x.text),lower(q))),8)
+        ListTile "{hit.text}" onTap={focus=hit.id; close}
+    Text.muted "Ctrl+K opens this from anywhere"
+
+### Focused bullet
+state nodes=[{"id":"n2","parent":"n1","text":"Hiring plan #hiring","folded":false},{"id":"n3","parent":"n2","text":"Open two backend roles","done":false,"task":true},{"id":"n4","parent":"n2","text":"Review intern pipeline with [[Mara Okafor]]","done":true,"task":true},{"id":"n9","parent":"n2","text":"Agree budget with finance","done":false,"task":true}]
+state focus="n2"
+state dragging=""
+App
+  Sidebar
+    Brand "Indent" icon="format_list_bulleted"
+    NavItem "Home" icon="home" onTap={go outline}
+    NavItem "Daily notes" icon="today" onTap={go daily-notes}
+    NavItem "Search" icon="search" onTap={open find}
+  Main
+    Nav
+      Row gap=4 middle
+        Link "Home" onTap={go outline}
+        Icon "chevron_right"
+        Link "Q4 planning" onTap={focus="n1"}
+        Icon "chevron_right"
+        Text.strong "Hiring plan"
+      Row gap=8
+        IconButton "arrow_upward" tooltip="Zoom out one level" onTap={focus="n1"}
+    Column pad=24 gap=16 maxw=720
+      Row gap=8 middle
+        Icon "radio_button_checked"
+        Text.pageTitle "Hiring plan"
+        Badge.info "#hiring"
+      Text.muted "3 bullets, 2 of 3 done"
+      Progress 0.66
+      each n in filter(nodes,x=>x.parent=="n2")
+        Row gap=8 middle drag=bullet(n.id) drop=bullet onDrop={move result.data n.id}
+          Icon "drag_indicator" tooltip="Drag to move with its children"
+          Checkbox bind=n.done
+          Input bind=n.text onEnter={addAfter n.id} onTab={indent n.id} onShiftTab={outdent n.id}
+          IconButton "more_vert" onTap={sel=n.id; open rowMenu}
+      Button.ghost "Add a bullet" icon="add" onTap={addChild focus}
+      Divider
+      Text.sectionTitle "Backlinks"
+      Accordion "Linked references (2)"
+        Card gap=4
+          Text.caption "Daily notes / Nov 12"
+          Text "Prep for the hiring plan review"
+        Card gap=4
+          Text.caption "Reading list"
+          Text "Interview guide worth rereading before hiring"
+      Accordion "Unlinked references (1)"
+        Text.muted "Team offsite agenda mentions hiring plan"
+  Menu#rowMenu
+    MenuItem "Focus" icon="my_location" onTap={focus=sel}
+    MenuItem "Indent" icon="format_indent_increase" onTap={indent sel}
+    MenuItem "Outdent" icon="format_indent_decrease" onTap={outdent sel}
+    MenuItem "Delete" icon="delete" onTap={nodes=removeWhere(nodes,x=>x.id==sel)}
+  Dialog#find "Quick search"
+    Input "Search" bind=q autofocus
+    Button "Close" onTap={close}
+
+### Daily notes
+state day=today()
+state entries=[{"date":"2026-11-17","items":[{"text":"Standup moved to 10:15","task":false,"done":false},{"text":"Send offer letter to Priya","task":true,"done":false},{"text":"Book venue for offsite #launch","task":true,"done":true}]},{"date":"2026-11-16","items":[{"text":"Read thresholds chapter, see [[Reading list]]","task":false,"done":false},{"text":"Call with [[Mara Okafor]] about interns","task":false,"done":false}]}]
+state tag=""
+App
+  Sidebar
+    Brand "Indent" icon="format_list_bulleted"
+    NavItem "Home" icon="home" onTap={go outline}
+    NavItem "Daily notes" icon="today" selected={true}
+    NavItem "Search" icon="search" onTap={open jump}
+    Spacer grow
+    DatePicker "Jump to date" bind=day
+  Main
+    Nav
+      Heading "Daily notes"
+      Row gap=8
+        IconButton "chevron_left" tooltip="Previous day" onTap={day=addDays(day,-1)}
+        Button.outline "Today" onTap={day=today()}
+        IconButton "chevron_right" tooltip="Next day" onTap={day=addDays(day,1)}
+    Column pad=24 gap=16 maxw=720 scroll
+      each e in entries
+        Card gap=8
+          Row between
+            Text.heading "{formatDate(e.date,'EEEE, MMM d')}"
+            Badge.primary "Today" visible={e.date==formatDate(day,'yyyy-MM-dd')}
+          each it in e.items
+            Row gap=8 middle
+              Checkbox bind=it.done visible={it.task}
+              Icon "circle" size=8 visible={!it.task}
+              Input bind=it.text onTab={indent it} onShiftTab={outdent it}
+          Button.ghost "Add a bullet" icon="add" onTap={entries=updateWhere(entries,x=>x.date==e.date,x=>with(x,"items",append(x.items,{"text":"","task":false,"done":false})))}
+      Text.sectionTitle "Unfinished tasks"
+      Card gap=4
+        each t in filter(first(entries).items,x=>x.task&&!x.done)
+          Row gap=8
+            Checkbox bind=t.done
+            Text "{t.text}"
+  Dialog#jump "Quick search" "Jump to a day, page or tag"
+    Input "Search" bind=q autofocus
+    ListTile "Hiring plan" onTap={go focused-bullet; close}
+    ListTile "Q4 planning" onTap={go outline; close}
+
+### Tag page
+state tag="hiring"
+state nodes=[{"id":"n2","text":"Hiring plan #hiring","path":"Q4 planning"},{"id":"n10","text":"Agree interview loop #hiring","path":"Daily notes / Nov 9"},{"id":"n11","text":"Reference checks for Priya #hiring","path":"Daily notes / Nov 14"}]
+Page
+  Nav sticky
+    Brand "Indent" icon="format_list_bulleted"
+    Row gap=4
+      Link "Home" onTap={go outline}
+      Link "Daily notes" onTap={go daily-notes}
+    Button "Search" icon="search" onTap={open jump}
+  Section narrow
+    Column gap=12
+      Row gap=8 middle
+        Icon "tag"
+        Heading "#{tag}" level=1
+      Text.muted "{length(nodes)} bullets carry this tag."
+      each n in nodes
+        Card gap=4 onTap={go focused-bullet}
+          Text.caption "{n.path}"
+          Text "{n.text}"
+      Text.sectionTitle "Related tags"
+      Row gap=8
+        Chip "#launch" onTap={tag="launch"}
+        Chip "#interns" onTap={tag="interns"}
+        Chip "#budget" onTap={tag="budget"}
+  Footer
+    Text.muted "Indent"
+  Dialog#jump "Quick search"
+    Input "Search" bind=q autofocus
+    ListTile "Q4 planning" onTap={go outline; close}

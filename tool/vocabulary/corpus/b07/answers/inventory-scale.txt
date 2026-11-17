@@ -1,0 +1,270 @@
+### Products
+state tab="products"
+state site="All sites"
+state sites=["All sites","Rotterdam DC","Leeds DC","Lyon DC","Gdansk DC"]
+state siteTotals=[{"site":"Rotterdam DC","units":184200,"skus":12480,"low":212},{"site":"Leeds DC","units":132900,"skus":9870,"low":148},{"site":"Lyon DC","units":96400,"skus":8110,"low":97},{"site":"Gdansk DC","units":71300,"skus":6420,"low":64}]
+state q=""
+state band="all"
+state selected=[]
+state current={"sku":"STK-100482","name":"Pallet wrap 500mm","site":"Rotterdam DC","onHand":42,"min":60,"max":400}
+state audit=[{"at":"2026-11-16 14:02","who":"M. Vos","what":"Count adjusted 58 to 42","site":"Rotterdam DC"},{"at":"2026-11-14 09:40","who":"System","what":"Reorder suggested, 300 units","site":"Rotterdam DC"},{"at":"2026-11-10 16:15","who":"A. Haddad","what":"Transfer out 120 to Leeds DC","site":"Rotterdam DC"}]
+state labelSize="50x30 mm"
+state labelCopies=1
+App
+  Sidebar
+    Brand "Stockroom" icon="warehouse"
+    NavItem "Products" icon="inventory_2" selected={tab=="products"} onTap={tab="products"}
+    NavItem "Transfers" icon="swap_horiz" onTap={go transfers}
+    NavItem "Cycle count" icon="fact_check" onTap={go cycle-count}
+    NavItem "Reorder" icon="shopping_cart_checkout" badge="23" onTap={go reorder}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Maya Reyes" size=32
+      Text.muted "Maya Reyes"
+  Main
+    Nav
+      Heading "Products" level=1
+      Row gap=8
+        Input "Search SKU, name or barcode" bind=q w=260
+        Button.outline "Print labels" icon="qr_code_2" onTap={open labels}
+        Button "New product" onTap={emit newProduct}
+    Column pad=24 gap=16
+      Row gap=8 scroll
+        ChoiceChip "All sites" selected={site=="All sites"} onTap={site="All sites"}
+        each s in siteTotals
+          ChoiceChip "{s.site}" selected={site==s.site} onTap={site=s.site}
+      Grid cols=4 gap=16
+        Card gap=4
+          Text.muted "Units on hand"
+          Text.strong "{site=="All sites" ? sum(siteTotals,s=>s.units) : sum(filter(siteTotals,s=>s.site==site),s=>s.units)}" size=28
+        Card gap=4
+          Text.muted "Products"
+          Text.strong "{site=="All sites" ? sum(siteTotals,s=>s.skus) : sum(filter(siteTotals,s=>s.site==site),s=>s.skus)}" size=28
+        Card gap=4
+          Text.muted "Low stock"
+          Text.danger "{site=="All sites" ? sum(siteTotals,s=>s.low) : sum(filter(siteTotals,s=>s.site==site),s=>s.low)}" size=28
+        Card gap=4
+          Text.muted "Selected"
+          Text.strong "{length(selected)}" size=28
+      Row gap=8 between
+        SegmentedButton bind=band items=["all","low","ok","over"]
+        if length(selected)>0
+          Row gap=8
+            Text.muted "{length(selected)} selected"
+            Button.outline "Transfer" onTap={emit transferSelected selected; go transfers}
+            Button.outline "Add to reorder" onTap={emit reorderSelected selected; toast "Added to reorder"}
+            Button.outline "Print labels" onTap={open labels}
+            Button.ghost "Clear" onTap={selected=[]}
+      Card grow
+        DataTable source="products" site={site} query={q} band={band} rowKey="sku" frozenCols=1 selectable bind=selected virtual rowHeight=44 h=520 onRowTap={current=result; open details} onSort={emit sortProducts result}
+          Column "Product" field="name" w=260 sortable
+          Column "SKU" field="sku" w=120 sortable
+          Column "Site" field="site" w=140
+          Column "Aisle" field="aisle" w=80
+          Column "On hand" field="onHand" w=140 sortable align=right cell=band low={onHand<min} over={onHand>max} lowFill=#FFFDE8E8 overFill=#FFFFF1D6 okFill=#FFE6F4EA
+          Column "Min" field="min" w=80 align=right
+          Column "Max" field="max" w=80 align=right
+          Column "Unit cost" field="cost" w=110 align=right format="money"
+          Column "Updated" field="updated" w=120 format="date"
+  Pane w=320 pad=16 gap=12
+    Heading "{current.name}" level=3
+    Text.mono "{current.sku}"
+    Badge.warning "Below minimum" visible={current.onHand<current.min}
+    Badge.success "In range" visible={current.onHand>=current.min && current.onHand<=current.max}
+    Badge.info "Over maximum" visible={current.onHand>current.max}
+    Progress {clamp(current.onHand/current.max,0,1)}
+    Row between
+      Text.muted "On hand"
+      Text.strong "{current.onHand} of {current.max}"
+    Divider
+    Text.strong "Audit trail"
+    Column gap=8 scroll
+      each a in audit
+        Column gap=2
+          Text.small "{a.what}"
+          Text.caption "{a.at} by {a.who}"
+    Button.outline "Open full audit trail" onTap={open details}
+
+Sheet#details "{current.name}"
+  Text.mono "{current.sku}"
+  Row gap=8
+    Select "Site" items=["Rotterdam DC","Leeds DC","Lyon DC","Gdansk DC"] bind=current.site
+    Select "Event" items=["All","Counts","Transfers","Reorders","Adjustments"] bind=auditFilter
+  Timeline items={audit}
+    each a in audit
+      TimelineItem "{a.what}" time="{a.at}" subtitle="{a.who}, {a.site}"
+  Row end gap=8
+    Button.outline "Export CSV" onTap={emit exportAudit current.sku}
+    Button "Close" onTap={close}
+
+Dialog#labels "Print labels" "Preview before sending to the label printer"
+  Row gap=8
+    Select "Label size" items=["50x30 mm","70x40 mm","100x50 mm"] bind=labelSize
+    Input "Copies" type=number bind=labelCopies
+  Card gap=8
+    Row gap=16
+      Column grow gap=4
+        Text.strong "{current.name}"
+        Text.mono "{current.sku}"
+        Text.caption "Aisle 14, bay C"
+      Barcode "{current.sku}" format="code128" h=64
+  Text.muted "{length(selected)>0 ? length(selected) : 1} labels x {labelCopies}"
+  Row end gap=8
+    Button.outline "Cancel" onTap={close}
+    Button "Print" icon="print" onTap={emit printLabels {"items":selected,"size":labelSize,"copies":labelCopies}; toast "Sent to printer"; close}
+
+### Transfers
+state from="Rotterdam DC"
+state to="Leeds DC"
+state sku="STK-100482"
+state qty=0
+state sitesList=["Rotterdam DC","Leeds DC","Lyon DC","Gdansk DC"]
+state stock=[{"site":"Rotterdam DC","sku":"STK-100482","available":42,"reserved":6},{"site":"Leeds DC","sku":"STK-100482","available":18,"reserved":0},{"site":"Lyon DC","sku":"STK-100482","available":75,"reserved":10},{"site":"Gdansk DC","sku":"STK-100482","available":0,"reserved":0}]
+state pending=[{"id":"TR-2291","sku":"STK-100311","qty":120,"from":"Rotterdam DC","to":"Leeds DC","status":"In transit"},{"id":"TR-2290","sku":"STK-100877","qty":36,"from":"Lyon DC","to":"Gdansk DC","status":"Picked"}]
+App
+  Sidebar
+    Brand "Stockroom" icon="warehouse"
+    NavItem "Products" icon="inventory_2" onTap={go products}
+    NavItem "Transfers" icon="swap_horiz" selected onTap={go transfers}
+    NavItem "Cycle count" icon="fact_check" onTap={go cycle-count}
+    NavItem "Reorder" icon="shopping_cart_checkout" badge="23" onTap={go reorder}
+  Main
+    Nav
+      Heading "Transfers" level=1
+      Button.outline "History" onTap={emit transferHistory}
+    Column pad=24 gap=16 maxw=720
+      Card gap=12
+        Heading "Move stock between sites" level=3
+        Row gap=12
+          Select "From" items={sitesList} bind=from grow
+          IconButton "swap_horiz" tooltip="Swap sites" onTap={from=to; to=from}
+          Select "To" items={sitesList} bind=to grow
+        Input "Product SKU or barcode" bind=sku
+        Input "Quantity" type=number bind=qty
+        Row between
+          Text.muted "Available at {from}"
+          Text.strong "{coalesce(find(stock,s=>s.site==from && s.sku==sku).available,0)}"
+        Row between
+          Text.muted "Reserved"
+          Text.strong "{coalesce(find(stock,s=>s.site==from && s.sku==sku).reserved,0)}"
+        if from==to
+          Text.danger "Choose two different sites."
+        if qty>coalesce(find(stock,s=>s.site==from && s.sku==sku).available,0)
+          Text.danger "Only {coalesce(find(stock,s=>s.site==from && s.sku==sku).available,0)} available at {from}."
+        if qty>0 && qty<=coalesce(find(stock,s=>s.site==from && s.sku==sku).available,0) && from!=to
+          Text.success "{from} will keep {find(stock,s=>s.site==from && s.sku==sku).available-qty} after this transfer."
+        Row end gap=8
+          Button.outline "Reset" onTap={qty=0}
+          Button "Create transfer" onTap={qty>0 && qty<=coalesce(find(stock,s=>s.site==from && s.sku==sku).available,0) && from!=to ? {pending=append(pending,{"id":"TR-2292","sku":sku,"qty":qty,"from":from,"to":to,"status":"Picked"}); emit createTransfer {"sku":sku,"qty":qty,"from":from,"to":to}; toast "Transfer created"; qty=0} : toast "Check sites and quantity"}
+      Card gap=8
+        Text.strong "Open transfers"
+        each t in pending
+          ListTile "{t.id}: {t.qty} x {t.sku}" subtitle="{t.from} to {t.to}"
+            Badge.info "{t.status}"
+
+### Cycle count
+state aisles=[{"aisle":"A01","total":86,"counted":86},{"aisle":"A02","total":92,"counted":61},{"aisle":"A03","total":74,"counted":0},{"aisle":"A04","total":101,"counted":0}]
+state aisle="A02"
+state counting=false
+state remaining=31
+state counts=[{"sku":"STK-100482","name":"Pallet wrap 500mm","expected":42,"counted":""},{"sku":"STK-100483","name":"Stretch film 20 mic","expected":88,"counted":""},{"sku":"STK-100490","name":"Carton 40x30x30","expected":240,"counted":""}]
+state idx=0
+App
+  Sidebar
+    Brand "Stockroom" icon="warehouse"
+    NavItem "Products" icon="inventory_2" onTap={go products}
+    NavItem "Transfers" icon="swap_horiz" onTap={go transfers}
+    NavItem "Cycle count" icon="fact_check" selected onTap={go cycle-count}
+    NavItem "Reorder" icon="shopping_cart_checkout" badge="23" onTap={go reorder}
+  Main
+    Nav
+      Heading "Cycle count" level=1
+      Row gap=8
+        Toggle "Count mode" bind=counting
+        Button.outline "Finish count" onTap={open finishCount}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Column w=280 gap=8
+          Text.strong "Aisles"
+          each a in aisles
+            Card gap=6 onTap={aisle=a.aisle; idx=0; remaining=a.total-a.counted}
+              Row between
+                Text.strong "{a.aisle}"
+                Text.muted "{a.counted} of {a.total}"
+              Progress {a.counted/a.total}
+        Column grow gap=12
+          if !counting
+            Card gap=8 center
+              Icon "fact_check" size=40
+              Text.strong "Start counting aisle {aisle}"
+              Button "Start" onTap={counting=true}
+          if counting
+            Card gap=12
+              Row between
+                Text.strong "Aisle {aisle}"
+                Badge.primary "{remaining} left"
+              Text.muted "{counts[idx].name}"
+              Text.mono "{counts[idx].sku}"
+              Input "Counted quantity" type=number bind=counts[idx].counted autofocus
+              if counts[idx].counted!="" && counts[idx].counted!=counts[idx].expected
+                Text.danger "Expected {counts[idx].expected}, difference {counts[idx].counted-counts[idx].expected}"
+              Row gap=8 end
+                Button.outline "Skip" onTap={idx=min(idx+1,length(counts)-1)}
+                Button "Confirm" onTap={counts[idx].counted!="" ? {remaining=max(0,remaining-1); emit countConfirmed counts[idx]; idx=min(idx+1,length(counts)-1)} : toast "Enter a quantity"}
+            Progress {1-remaining/max(1,find(aisles,a=>a.aisle==aisle).total-find(aisles,a=>a.aisle==aisle).counted+remaining)}
+
+Dialog#finishCount "Finish count" "Variances are posted to the audit trail"
+  Text "{count(counts,c=>c.counted!="" && c.counted!=c.expected)} variances in aisle {aisle}."
+  Row end gap=8
+    Button.outline "Keep counting" onTap={close}
+    Button "Post variances" onTap={emit postCount {"aisle":aisle,"counts":counts}; counting=false; toast "Count posted"; close}
+
+### Reorder
+state suggestions=[{"id":1,"sku":"STK-100482","name":"Pallet wrap 500mm","site":"Rotterdam DC","onHand":42,"min":60,"suggested":300,"supplier":"Packline","cost":4.2,"status":"pending"},{"id":2,"sku":"STK-100483","name":"Stretch film 20 mic","site":"Leeds DC","onHand":12,"min":50,"suggested":200,"supplier":"Packline","cost":6.8,"status":"pending"},{"id":3,"sku":"STK-100490","name":"Carton 40x30x30","site":"Lyon DC","onHand":30,"min":120,"suggested":600,"supplier":"Boxwell","cost":0.9,"status":"pending"}]
+state supplierFilter="All"
+App
+  Sidebar
+    Brand "Stockroom" icon="warehouse"
+    NavItem "Products" icon="inventory_2" onTap={go products}
+    NavItem "Transfers" icon="swap_horiz" onTap={go transfers}
+    NavItem "Cycle count" icon="fact_check" onTap={go cycle-count}
+    NavItem "Reorder" icon="shopping_cart_checkout" badge="{count(suggestions,s=>s.status=="pending")}" selected onTap={go reorder}
+  Main
+    Nav
+      Heading "Reorder suggestions" level=1
+      Row gap=8
+        Select "Supplier" items=["All","Packline","Boxwell"] bind=supplierFilter w=180
+        Button "Approve all" onTap={suggestions=map(suggestions,s=>with(s,"status","approved")); emit approveAll; toast "All approved"}
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Pending"
+          Text.strong "{count(suggestions,s=>s.status=="pending")}" size=28
+        Card gap=4
+          Text.muted "Approved"
+          Text.strong "{count(suggestions,s=>s.status=="approved")}" size=28
+        Card gap=4
+          Text.muted "Order value"
+          Text.strong "{money(sum(suggestions,s=>s.suggested*s.cost),"EUR ",2)}" size=28
+      Card gap=8
+        Row gap=8
+          Text.muted "Product" grow
+          Text.muted "Site" w=130
+          Text.muted "On hand" w=80
+          Text.muted "Order qty" w=110
+          Text.muted "" w=190
+        Divider
+        each s in suggestions
+          Row gap=8 middle
+            Column grow gap=2
+              Text.strong "{s.name}"
+              Text.caption "{s.sku} from {s.supplier}"
+            Text "{s.site}" w=130
+            Text.danger "{s.onHand}" w=80
+            Input "Qty" type=number bind=s.suggested w=110
+            Row gap=8 w=190
+              if s.status=="pending"
+                Button "Approve" onTap={suggestions=updateWhere(suggestions,x=>x.id==s.id,x=>with(x,"status","approved")); emit approveReorder s.id; toast "Approved"}
+                Button.ghost "Dismiss" onTap={suggestions=removeWhere(suggestions,x=>x.id==s.id)}
+              if s.status=="approved"
+                Badge.success "Approved"

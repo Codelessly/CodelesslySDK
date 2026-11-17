@@ -1,0 +1,248 @@
+### Till
+project ticket=[]
+project held=[]
+project table="Takeaway"
+project disc=0
+state nav="till"
+state cat="Coffee"
+state pending={}
+state size="Regular"
+state milk="Whole"
+state nextId=104
+state cashIn=0
+state cardIn=0
+state products=[{"id":"esp","name":"Espresso","cat":"Coffee","price":3.0,"mods":true},{"id":"lat","name":"Flat White","cat":"Coffee","price":4.5,"mods":true},{"id":"cap","name":"Cappuccino","cat":"Coffee","price":4.5,"mods":true},{"id":"mch","name":"Mocha","cat":"Coffee","price":5.0,"mods":true},{"id":"chai","name":"Chai Latte","cat":"Tea","price":4.75,"mods":true},{"id":"earl","name":"Earl Grey","cat":"Tea","price":3.5,"mods":false},{"id":"mint","name":"Peppermint Tea","cat":"Tea","price":3.5,"mods":false},{"id":"crs","name":"Butter Croissant","cat":"Food","price":3.75,"mods":false},{"id":"avo","name":"Avocado Toast","cat":"Food","price":9.5,"mods":false},{"id":"bag","name":"Bagel and Cream Cheese","cat":"Food","price":5.25,"mods":false},{"id":"mfn","name":"Blueberry Muffin","cat":"Bakery","price":3.95,"mods":false},{"id":"brw","name":"Brownie","cat":"Bakery","price":3.5,"mods":false},{"id":"cke","name":"Oat Cookie","cat":"Bakery","price":2.75,"mods":false}]
+App
+  Sidebar
+    Brand "Tillpoint" icon="point_of_sale"
+    NavItem "Till" icon="local_cafe" selected={nav=="till"} onTap={go till}
+    NavItem "Parked sales" icon="pause_circle" badge="{length(held)}" onTap={go parked-sales}
+    NavItem "End of day" icon="calculate" onTap={go end-of-day}
+    Spacer grow
+    Text.muted "Till 1, Maya R."
+  Main
+    Nav
+      Heading "Till" level=1
+      Row gap=8
+        Select "Table" bind=table items=["Takeaway","Table 1","Table 2","Table 3","Table 4","Table 5","Table 6","Bar 1","Bar 2"] w=160
+        Button.outline "Hold ticket" icon="pause" onTap={length(ticket)>0 ? {held=append(held,{"id":nextId,"table":table,"lines":ticket,"disc":disc,"total":sum(ticket,l=>l.price*l.qty)*(1-disc/100)*1.08}); nextId=nextId+1; ticket=[]; disc=0; table="Takeaway"; toast "Ticket parked"} : toast "Nothing to hold"}
+    Row top
+      Column grow gap=12 pad=16
+        Row gap=8 scroll
+          ChoiceChip "Coffee" selected={cat=="Coffee"} onTap={cat="Coffee"}
+          ChoiceChip "Tea" selected={cat=="Tea"} onTap={cat="Tea"}
+          ChoiceChip "Food" selected={cat=="Food"} onTap={cat="Food"}
+          ChoiceChip "Bakery" selected={cat=="Bakery"} onTap={cat="Bakery"}
+        Grid cols=3 gap=12
+          each p in filter(products,x=>x.cat==cat)
+            Card gap=4 onTap={p.mods ? {pending=p; size="Regular"; milk="Whole"; open mods} : {any(ticket,l=>l.sku==p.id) ? ticket=updateWhere(ticket,l=>l.sku==p.id,l=>with(l,"qty",l.qty+1)) : ticket=append(ticket,{"sku":p.id,"name":p.name,"note":"","price":p.price,"qty":1})}}
+              Text.strong "{p.name}"
+              Text.muted "{money(p.price,"$",2)}"
+        if length(held)>0
+          Column gap=8
+            Text.caption "PARKED SALES"
+            Row gap=8 scroll
+              each h in held
+                Chip "{h.table}, {length(h.lines)} items, {money(h.total,"$",2)}" onTap={ticket=h.lines; table=h.table; disc=h.disc; held=without(held,h)}
+      Pane w=360 pad=16 gap=12
+        Row between
+          Text.panelTitle "Ticket"
+          Badge.info "{table}"
+        if length(ticket)==0
+          Text.muted "Tap a product to start a ticket."
+        Column gap=8 grow scroll
+          each l in ticket
+            Row gap=8 middle
+              Column grow
+                Text.strong "{l.name}"
+                if l.note!=""
+                  Text.caption "{l.note}"
+              IconButton "remove" tooltip="Less" onTap={l.qty>1 ? ticket=updateWhere(ticket,x=>x.sku==l.sku&&x.note==l.note,x=>with(x,"qty",x.qty-1)) : ticket=removeWhere(ticket,x=>x.sku==l.sku&&x.note==l.note)}
+              Text.strong "{l.qty}"
+              IconButton "add" tooltip="More" onTap={ticket=updateWhere(ticket,x=>x.sku==l.sku&&x.note==l.note,x=>with(x,"qty",x.qty+1))}
+              Text w=64 right "{money(l.price*l.qty,"$",2)}"
+        Divider
+        Row between
+          Text.muted "Subtotal"
+          Text "{money(sum(ticket,l=>l.price*l.qty),"$",2)}"
+        if disc>0
+          Row between
+            Text.success "Discount {disc}%"
+            Text.success "-{money(sum(ticket,l=>l.price*l.qty)*disc/100,"$",2)}"
+        Row between
+          Text.muted "Tax 8%"
+          Text "{money(sum(ticket,l=>l.price*l.qty)*(1-disc/100)*0.08,"$",2)}"
+        Row between
+          Text.strong "Total"
+          Text "{money(sum(ticket,l=>l.price*l.qty)*(1-disc/100)*1.08,"$",2)}" size=40 weight=700
+        Row gap=8
+          Button.outline "Discount" icon="percent" grow onTap={open discount}
+          Button.destructive "Clear" onTap={ticket=[]; disc=0}
+        Button "Pay" size=large icon="payments" onTap={length(ticket)>0 ? {cashIn=0; cardIn=0; open pay} : toast "Ticket is empty"}
+Dialog#mods "{pending.name}" "Choose size and milk"
+  Text.fieldLabel "Size"
+  Row gap=8
+    ChoiceChip "Small" selected={size=="Small"} onTap={size="Small"}
+    ChoiceChip "Regular" selected={size=="Regular"} onTap={size="Regular"}
+    ChoiceChip "Large (+$0.80)" selected={size=="Large"} onTap={size="Large"}
+  Text.fieldLabel "Milk"
+  Row gap=8 wrap
+    ChoiceChip "Whole" selected={milk=="Whole"} onTap={milk="Whole"}
+    ChoiceChip "Skim" selected={milk=="Skim"} onTap={milk="Skim"}
+    ChoiceChip "Oat (+$0.60)" selected={milk=="Oat"} onTap={milk="Oat"}
+    ChoiceChip "Almond (+$0.60)" selected={milk=="Almond"} onTap={milk="Almond"}
+    ChoiceChip "Soy" selected={milk=="Soy"} onTap={milk="Soy"}
+  Button "Add to ticket" onTap={ticket=append(ticket,{"sku":pending.id,"name":pending.name,"note":"{size}, {milk} milk","price":pending.price+(size=="Large"?0.8:0)+(milk=="Oat"||milk=="Almond"?0.6:0),"qty":1}); close}
+Sheet#discount "Discount"
+  Text.muted "Percent off the whole ticket"
+  Row gap=8
+    ChoiceChip "None" selected={disc==0} onTap={disc=0; close}
+    ChoiceChip "5%" selected={disc==5} onTap={disc=5; close}
+    ChoiceChip "10%" selected={disc==10} onTap={disc=10; close}
+    ChoiceChip "15%" selected={disc==15} onTap={disc=15; close}
+    ChoiceChip "20%" selected={disc==20} onTap={disc=20; close}
+  Input "Custom percent" type=number bind=disc
+  Button "Apply" onTap={disc=clamp(disc,0,100); close}
+Dialog#pay "Payment" "Split between cash and card"
+  Text.caption "AMOUNT DUE"
+  Text "{money(sum(ticket,l=>l.price*l.qty)*(1-disc/100)*1.08,"$",2)}" size=56 weight=700
+  Input "Cash received" type=number bind=cashIn
+  Row gap=8 wrap
+    Button.outline "$5" onTap={cashIn=cashIn+5}
+    Button.outline "$10" onTap={cashIn=cashIn+10}
+    Button.outline "$20" onTap={cashIn=cashIn+20}
+    Button.outline "$50" onTap={cashIn=cashIn+50}
+    Button.outline "Exact" onTap={cashIn=round(sum(ticket,l=>l.price*l.qty)*(1-disc/100)*1.08,2)}
+  Input "Card amount" type=number bind=cardIn
+  Button.secondary "Rest on card" onTap={cardIn=max(0,round(sum(ticket,l=>l.price*l.qty)*(1-disc/100)*1.08-cashIn,2))}
+  Divider
+  Row between
+    Text.strong "Change due"
+    Text.success "{money(max(0,cashIn+cardIn-sum(ticket,l=>l.price*l.qty)*(1-disc/100)*1.08),"$",2)}" size=32 weight=700
+  Row between
+    Text.muted "Still to pay"
+    Text.danger "{money(max(0,sum(ticket,l=>l.price*l.qty)*(1-disc/100)*1.08-cashIn-cardIn),"$",2)}"
+  Button "Complete sale" onTap={cashIn+cardIn+0.005>=sum(ticket,l=>l.price*l.qty)*(1-disc/100)*1.08 ? {emit sale {"table":table,"cash":cashIn,"card":cardIn}; ticket=[]; disc=0; table="Takeaway"; close; toast "Sale complete"} : toast "Payment is short"}
+
+### Parked sales
+project ticket=[]
+project held=[]
+project table="Takeaway"
+project disc=0
+state sel=0
+App
+  Sidebar
+    Brand "Tillpoint" icon="point_of_sale"
+    NavItem "Till" icon="local_cafe" onTap={go till}
+    NavItem "Parked sales" icon="pause_circle" badge="{length(held)}" selected={true}
+    NavItem "End of day" icon="calculate" onTap={go end-of-day}
+    Spacer grow
+    Text.muted "Till 1, Maya R."
+  Main
+    Nav
+      Heading "Parked sales" level=1
+      Row gap=8
+        Badge.warning "{length(held)} parked"
+        Button.destructive "Void all" onTap={held=[]; toast "All parked sales voided"}
+    Column pad=24 gap=16
+      if length(held)==0
+        Card gap=8
+          Text.strong "Nothing parked"
+          Text.muted "Tickets you hold at the till wait here."
+          Button.outline "Back to till" onTap={go till}
+      Grid cols=2 gap=16
+        each h in held
+          Card gap=8
+            Row between
+              Text.heading "{h.table}"
+              Text.strong "{money(h.total,"$",2)}"
+            Text.muted "{length(h.lines)} lines, {sum(h.lines,l=>l.qty)} items"
+            Column gap=2
+              each l in take(h.lines,4)
+                Row between
+                  Text.small "{l.qty} x {l.name}"
+                  Text.small "{money(l.price*l.qty,"$",2)}"
+            Row gap=8
+              Button "Recall" icon="restore" grow onTap={length(ticket)>0 ? toast "Hold or finish the current ticket first" : {ticket=h.lines; table=h.table; disc=h.disc; held=without(held,h); go till}}
+              IconButton "more_vert" tooltip="More" onTap={sel=h.id; open heldMenu}
+  Menu#heldMenu end
+    MenuItem "Move to Table 1" icon="table_restaurant" onTap={held=updateWhere(held,x=>x.id==sel,x=>with(x,"table","Table 1"))}
+    MenuItem "Move to Takeaway" icon="takeout_dining" onTap={held=updateWhere(held,x=>x.id==sel,x=>with(x,"table","Takeaway"))}
+    MenuItem "Void ticket" icon="delete" onTap={held=removeWhere(held,x=>x.id==sel); toast "Ticket voided"}
+
+### End of day
+state nav="eod"
+state floatAmt=150
+state cashSales=412.5
+state cardSales=968.25
+state denoms=[{"label":"$100 notes","value":100,"count":0},{"label":"$50 notes","value":50,"count":2},{"label":"$20 notes","value":20,"count":9},{"label":"$10 notes","value":10,"count":6},{"label":"$5 notes","value":5,"count":8},{"label":"$1 coins","value":1,"count":24},{"label":"25c coins","value":0.25,"count":38},{"label":"10c coins","value":0.1,"count":41},{"label":"5c coins","value":0.05,"count":30}]
+state counted=false
+App
+  Sidebar
+    Brand "Tillpoint" icon="point_of_sale"
+    NavItem "Till" icon="local_cafe" onTap={go till}
+    NavItem "Parked sales" icon="pause_circle" onTap={go parked-sales}
+    NavItem "End of day" icon="calculate" selected={nav=="eod"}
+    Spacer grow
+    Text.muted "Till 1, Maya R."
+  Main
+    Nav
+      Heading "End of day cash count" level=1
+      Row gap=8
+        Button.outline "Reset counts" onTap={denoms=map(denoms,d=>with(d,"count",0)); counted=false}
+        Button "Close the till" icon="lock" onTap={counted ? open confirmClose : toast "Count the drawer first"}
+    Row top
+      Column grow gap=16 pad=24
+        Card gap=8
+          Text.panelTitle "Count the drawer"
+          each d in denoms
+            Row gap=12 middle
+              Text grow "{d.label}"
+              Input "Count" type=number bind=d.count w=90
+              Text w=90 right "{money(d.value*d.count,"$",2)}"
+        Button.secondary "Compare with expected" onTap={counted=true}
+      Pane w=340 pad=16 gap=12
+        Text.panelTitle "Expected in drawer"
+        Row between
+          Text.muted "Opening float"
+          Text "{money(floatAmt,"$",2)}"
+        Row between
+          Text.muted "Cash sales"
+          Text "{money(cashSales,"$",2)}"
+        Row between
+          Text.strong "Expected"
+          Text.strong "{money(floatAmt+cashSales,"$",2)}"
+        Divider
+        Row between
+          Text.strong "Counted"
+          Text.strong "{money(sum(denoms,d=>d.value*d.count),"$",2)}"
+        if counted
+          Row between
+            Text.strong "Difference"
+            Text "{money(sum(denoms,d=>d.value*d.count)-floatAmt-cashSales,"$",2)}" size=32 weight=700 color={abs(sum(denoms,d=>d.value*d.count)-floatAmt-cashSales)<0.005 ? "#FF2E7D32" : "#FFC62828"}
+          if abs(sum(denoms,d=>d.value*d.count)-floatAmt-cashSales)<0.005
+            Badge.success "Balanced"
+          if sum(denoms,d=>d.value*d.count)-floatAmt-cashSales>=0.005
+            Badge.warning "Over"
+          if sum(denoms,d=>d.value*d.count)-floatAmt-cashSales<=-0.005
+            Badge.error "Short"
+        Divider
+        Text.caption "CARD SALES"
+        Row between
+          Text.muted "Card total"
+          Text "{money(cardSales,"$",2)}"
+        Row between
+          Text.muted "Day total"
+          Text.strong "{money(cardSales+cashSales,"$",2)}"
+        Text.caption "Leave in drawer for tomorrow"
+        Input "Next day float" type=number bind=floatAmt
+Dialog#confirmClose "Close the till?" "The counts are saved with the day's report."
+  Row between
+    Text.muted "Counted"
+    Text.strong "{money(sum(denoms,d=>d.value*d.count),"$",2)}"
+  Row between
+    Text.muted "Difference"
+    Text.strong "{money(sum(denoms,d=>d.value*d.count)-floatAmt-cashSales,"$",2)}"
+  Row gap=8
+    Button.outline "Cancel" grow onTap={close}
+    Button "Close till" grow onTap={emit closeTill {"counted":sum(denoms,d=>d.value*d.count)}; close; toast "Till closed"}

@@ -1,0 +1,136 @@
+### Puzzle
+state theme="Lighthouse Coast"
+state words=[{"w":"LANTERN","found":false,"cells":[]},{"w":"TIDE","found":false,"cells":[]},{"w":"ANCHOR","found":false,"cells":[]},{"w":"GULL","found":false,"cells":[]},{"w":"KEEPER","found":false,"cells":[]},{"w":"BEACON","found":false,"cells":[]},{"w":"HARBOUR","found":false,"cells":[]},{"w":"SAIL","found":false,"cells":[]}]
+state letters=["L","A","N","T","E","R","N","K","H","S","T","I","D","E","G","U","L","L","A","B","A","N","C","H","O","R","E","E","I","O","H","A","R","B","O","U","R","P","L","N","B","E","A","C","O","N","E","R","S","E","C","S","A","I","L","T","I","D","E","W","K","E","E","P","E","R","O","N","A","R","B","D","G","U","L","L","T","I","D","E","L","A","N","T","E","R","N","S","A","I","L","H","A","R","B","O","U","R","K","E"]
+state seconds=0
+state running=true
+state hintCell=-1
+state hints=3
+state mode="puzzle"
+state sel={"from":-1,"to":-1}
+state flash=""
+state days=[1,2,3,5,6,8,9,10,12,13,14,15]
+every 1s when running onTick={seconds=seconds+1}
+App
+  Sidebar
+    Brand "Hidden Harbour" icon="sailing"
+    NavItem "Today's puzzle" icon="grid_view" selected={mode=="puzzle"} onTap={mode="puzzle"}
+    NavItem "Daily calendar" icon="calendar_month" selected={mode=="calendar"} onTap={go calendar}
+    NavItem "Themes" icon="palette" selected={mode=="themes"} onTap={go themes}
+    NavItem "Settings" icon="settings" onTap={open settings}
+    Spacer grow
+    Card gap=4
+      Text.caption "Streak"
+      Row gap=8
+        Icon "sailing"
+        Text.strong "12 days"
+  Main
+    Nav
+      Column gap=0
+        Heading "{theme}" level=1
+        Text.muted "Puzzle for 15 November, 10 by 10"
+      Row gap=12
+        Row gap=4
+          Icon "timer"
+          Text.mono "{formatTime(seconds)}"
+        IconButton "{running ? 'pause' : 'play_arrow'}" tooltip="Pause or resume" onTap={running=!running}
+        Button.outline "Hint ({hints})" icon="lightbulb" onTap={hints>0 ? {hintCell=indexOf(letters,first(filter(words,x=>!x.found)).w[0]); hints=hints-1; toast "First letter circled"} : toast "No hints left"}
+        Button.ghost "Restart" icon="restart_alt" onTap={words=map(words,x=>with(with(x,"found",false),"cells",[])); seconds=0; hintCell=-1; running=true}
+    Column pad=24 gap=16
+      Progress {count(words,x=>x.found)/length(words)}
+      Row gap=24 top
+        Card grow gap=12
+          Stack
+            Image "https://images.example.com/hidden-harbour/{lower(replace(theme,' ','-'))}.jpg" h=120 radius=12
+            Box fill=#99000000 pad=12 radius=12
+              Text "{theme}" color=#FFFFFFFF weight=700 size=20
+          WordSearchGrid#grid cols=10 letters={letters} snap=8 foundCells={flatten(map(words,x=>x.cells))} hintCell={hintCell} foundColors=["#FF2A9D8F","#FFE76F51","#FF457B9D","#FFF4A261","#FF8E7DBE","#FF6A994E","#FFD62828","#FF219EBC"] onSelect={sel=result; flash=join(map(result.cells,i=>letters[i]),"")} onRelease={find(words,x=>!x.found && (x.w==flash || x.w==join(reverse(map(result.cells,i=>letters[i])),""))) != null ? {words=updateWhere(words,x=>x.w==flash || x.w==join(reverse(map(result.cells,i=>letters[i])),""),x=>with(with(x,"found",true),"cells",result.cells)); hintCell=-1; toast "Found it"} : {}}
+          Row between
+            Text.muted "Selecting: {flash}"
+            Text.muted "{count(words,x=>x.found)} of {length(words)} found"
+        Card w=280 gap=8
+          Heading "Words to find" level=3
+          each x in words
+            Row between
+              Text "{x.w}" strike={x.found} color={x.found ? '#FF8A8A8A' : '#FF1B1B1B'}
+              if x.found
+                Icon "check_circle"
+      if count(words,x=>x.found)==length(words)
+        Button "Finished in {formatTime(seconds)}" onTap={open win}
+  Dialog#win "Harbour cleared" "All eight words found"
+    Column center gap=12
+      Icon "sailing" size=48
+      Text.strong "Time {formatTime(seconds)}"
+      Text.muted "Today's sail is added to your calendar."
+      Row gap=8
+        Button.outline "Share" icon="share" onTap={emit share seconds}
+        Button "Next puzzle" onTap={days=append(days,15); close; go calendar}
+
+### Daily calendar
+state month="November 2026"
+state days=[1,2,3,5,6,8,9,10,12,13,14,15]
+state picked=16
+App
+  Sidebar
+    Brand "Hidden Harbour" icon="sailing"
+    NavItem "Today's puzzle" icon="grid_view" onTap={go puzzle}
+    NavItem "Daily calendar" icon="calendar_month" selected onTap={go calendar}
+    NavItem "Themes" icon="palette" onTap={go themes}
+    Spacer grow
+  Main
+    Nav
+      Heading "Daily puzzles" level=1
+      Row gap=8
+        IconButton "chevron_left" tooltip="Previous month" onTap={emit prevMonth}
+        Text.strong "{month}"
+        IconButton "chevron_right" tooltip="Next month" onTap={emit nextMonth}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Card grow gap=12
+          Grid cols=7 gap=8
+            each d in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+              Text.caption "{d}" center
+          Grid cols=7 gap=8
+            each n in range(30)
+              Box pad=8 radius=8 gap=4 center border-bottom=#FFE0E0E0 onTap={picked=n+1; open day}
+                Text "{n+1}" center weight={picked==n+1 ? 700 : 400}
+                if contains(days,n+1)
+                  Icon "sailing" color=#FF2A9D8F
+        Card w=280 gap=8
+          Heading "This month" level=3
+          Text.strong "{length(days)} of 15 sails"
+          Progress {length(days)/15}
+          Text.muted "Longest streak 6 days"
+  Dialog#day "{picked} November"
+    Column gap=12
+      if contains(days,picked)
+        Row gap=8
+          Icon "sailing"
+          Text "Completed"
+      if !contains(days,picked)
+        Text.muted "Not played yet."
+      Button "Open puzzle" onTap={close; go puzzle}
+
+### Themes
+state theme="Lighthouse Coast"
+state themes=[{"name":"Lighthouse Coast","pic":"lighthouse-coast","words":8,"done":true},{"name":"Fishing Village","pic":"fishing-village","words":10,"done":false},{"name":"Sea Birds","pic":"sea-birds","words":9,"done":false},{"name":"Old Maps","pic":"old-maps","words":12,"done":false}]
+Page
+  Nav
+    Brand "Hidden Harbour" icon="sailing"
+    Row gap=4
+      Link "Today" onTap={go puzzle}
+      Link "Calendar" onTap={go calendar}
+      Link "Themes"
+  Section
+    Column gap=8
+      Heading "Pick a theme" level=1
+      Text.muted "Each puzzle has a picture and words from its coast."
+    Grid cols=2 gap=24
+      each t in themes
+        Card gap=12 onTap={theme=t.name; go puzzle}
+          Image "https://images.example.com/hidden-harbour/{t.pic}.jpg" h=160 radius=12
+          Row between
+            Heading "{t.name}" level=3
+            if t.done
+              Badge.success "Cleared"
+          Text.muted "{t.words} words"

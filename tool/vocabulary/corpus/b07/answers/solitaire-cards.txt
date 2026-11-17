@@ -1,0 +1,87 @@
+### Tableau
+state ranks=["A","2","3","4","5","6","7","8","9","10","J","Q","K"]
+state sym={"S":"♠","H":"♥","D":"♦","C":"♣"}
+state cols=[[{"id":"QS","r":12,"s":"S","up":true}],[{"id":"4D","r":4,"s":"D","up":false},{"id":"8C","r":8,"s":"C","up":true}],[{"id":"10H","r":10,"s":"H","up":false},{"id":"2S","r":2,"s":"S","up":false},{"id":"JD","r":11,"s":"D","up":true}],[{"id":"6C","r":6,"s":"C","up":false},{"id":"KH","r":13,"s":"H","up":false},{"id":"5D","r":5,"s":"D","up":false},{"id":"3H","r":3,"s":"H","up":true}],[{"id":"AD","r":1,"s":"D","up":false},{"id":"9S","r":9,"s":"S","up":false},{"id":"7H","r":7,"s":"H","up":false},{"id":"QC","r":12,"s":"C","up":false},{"id":"6D","r":6,"s":"D","up":true}],[{"id":"2C","r":2,"s":"C","up":false},{"id":"10S","r":10,"s":"S","up":false},{"id":"4H","r":4,"s":"H","up":false},{"id":"KC","r":13,"s":"C","up":false},{"id":"8D","r":8,"s":"D","up":false},{"id":"5S","r":5,"s":"S","up":true}],[{"id":"JH","r":11,"s":"H","up":false},{"id":"3D","r":3,"s":"D","up":false},{"id":"9C","r":9,"s":"C","up":false},{"id":"AH","r":1,"s":"H","up":false},{"id":"7S","r":7,"s":"S","up":false},{"id":"2H","r":2,"s":"H","up":false},{"id":"4C","r":4,"s":"C","up":true}]]
+state stock=[{"id":"AS","r":1,"s":"S","up":true},{"id":"3S","r":3,"s":"S","up":true},{"id":"4S","r":4,"s":"S","up":true},{"id":"6S","r":6,"s":"S","up":true},{"id":"8S","r":8,"s":"S","up":true},{"id":"JS","r":11,"s":"S","up":true},{"id":"KS","r":13,"s":"S","up":true},{"id":"5H","r":5,"s":"H","up":true},{"id":"6H","r":6,"s":"H","up":true},{"id":"8H","r":8,"s":"H","up":true},{"id":"9H","r":9,"s":"H","up":true},{"id":"QH","r":12,"s":"H","up":true},{"id":"2D","r":2,"s":"D","up":true},{"id":"7D","r":7,"s":"D","up":true},{"id":"9D","r":9,"s":"D","up":true},{"id":"10D","r":10,"s":"D","up":true},{"id":"QD","r":12,"s":"D","up":true},{"id":"KD","r":13,"s":"D","up":true},{"id":"AC","r":1,"s":"C","up":true},{"id":"3C","r":3,"s":"C","up":true},{"id":"5C","r":5,"s":"C","up":true},{"id":"7C","r":7,"s":"C","up":true},{"id":"10C","r":10,"s":"C","up":true},{"id":"JC","r":11,"s":"C","up":true}]
+state waste=[]
+state found=[[],[],[],[]]
+state moves=0
+state history=[]
+state drag={"id":"","r":0,"s":"S"}
+state from=0
+state pos=0
+state ok=false
+App
+  Main
+    Nav
+      Brand "Tableau" icon="style"
+      Row gap=8
+        Text.muted "Moves {moves}"
+        Button.outline "Undo" icon="undo" disabled={isEmpty(history)} onTap={cols=last(history).cols; stock=last(history).stock; waste=last(history).waste; found=last(history).found; history=removeAt(history,length(history)-1); moves=moves+1}
+        Button.ghost "New deal" icon="refresh" onTap={emit newDeal}
+        IconButton "help_outline" tooltip="How to play" onTap={go rules}
+        IconButton "bar_chart" tooltip="Your stats" onTap={go stats}
+    Column pad=16 gap=24 maxw=900
+      Row between top
+        Row gap=12
+          Box w=72 h=100 radius=8 border=#FF4CAF50 onTap={stock=isEmpty(stock) ? reverse(waste) : slice(stock,3,length(stock)); waste=isEmpty(stock) ? [] : concat(waste,take(stock,3)); history=append(history,{"cols":cols,"stock":stock,"waste":waste,"found":found}); moves=moves+1}
+            if isEmpty(stock)
+              Icon "replay" center middle
+            if !isEmpty(stock)
+              Card.back "{length(stock)}"
+          Box w=72 h=100 radius=8
+            if !isEmpty(waste)
+              Card.face "{ranks[last(waste).r-1]}{sym[last(waste).s]}" suit={last(waste).s} drag=run(last(waste).id) ghost=true onDragStart={drag=last(waste)} onDragEnd={drag={"id":"","r":0,"s":"S"}} onDoubleTap={ok=length(found[indexOf(["S","H","D","C"],last(waste).s)])==last(waste).r-1; ok ? {history=append(history,{"cols":cols,"stock":stock,"waste":waste,"found":found}); found=setAt(found,indexOf(["S","H","D","C"],last(waste).s),append(found[indexOf(["S","H","D","C"],last(waste).s)],last(waste))); waste=removeAt(waste,length(waste)-1); moves=moves+1; sum(found,f=>length(f))==52 ? go won : } : shake}
+        Row gap=12
+          each suit in ["S","H","D","C"]
+            Box w=72 h=100 radius=8 border=#FF9E9E9E glow={drag.id!="" && drag.s==suit && length(found[index])==drag.r-1} drop=run onDrop={from=indexOf(map(cols,c=>any(c,x=>x.id==result.data)),true); pos=indexOf(map(cols[from],x=>x.id),result.data); ok=pos==length(cols[from])-1 && cols[from][pos].s==suit && length(found[index])==cols[from][pos].r-1; ok ? {history=append(history,{"cols":cols,"stock":stock,"waste":waste,"found":found}); found=setAt(found,index,append(found[index],cols[from][pos])); cols=map(setAt(cols,from,removeAt(cols[from],pos)),c=>isEmpty(c) ? c : setAt(c,length(c)-1,with(last(c),"up",true))); moves=moves+1; sum(found,f=>length(f))==52 ? go won : } : toast "Not there"}
+              if isEmpty(found[index])
+                Text.muted "{sym[suit]}" size=32 center
+              if !isEmpty(found[index])
+                Card.face "{ranks[last(found[index]).r-1]}{sym[suit]}" suit={suit}
+      Row gap=8 top
+        each col in cols
+          Column grow overlap=44 minh=300 radius=8 glow={drag.id!="" && (isEmpty(col) ? drag.r==13 : (last(col).up && last(col).r==drag.r+1 && contains("HD",last(col).s)!=contains("HD",drag.s)))} drop=run onDrop={from=indexOf(map(cols,c=>any(c,x=>x.id==result.data)),true); pos=indexOf(map(cols[from],x=>x.id),result.data); ok=isEmpty(cols[index]) ? cols[from][pos].r==13 : (last(cols[index]).r==cols[from][pos].r+1 && contains("HD",last(cols[index]).s)!=contains("HD",cols[from][pos].s)); ok && from!=index ? {history=append(history,{"cols":cols,"stock":stock,"waste":waste,"found":found}); cols=setAt(setAt(cols,index,concat(cols[index],slice(cols[from],pos,length(cols[from])))),from,take(cols[from],pos)); cols=map(cols,c=>isEmpty(c) ? c : setAt(c,length(c)-1,with(last(c),"up",true))); moves=moves+1} : toast "Not a legal move"}
+            if isEmpty(col)
+              Box h=100 radius=8 border=#FF9E9E9E
+            each card in col
+              if card.up
+                Card.face "{ranks[card.r-1]}{sym[card.s]}" suit={card.s} drag=run(card.id) ghost=true onDragStart={drag=card} onDragEnd={drag={"id":"","r":0,"s":"S"}} onDoubleTap={ok=last(col).id==card.id && length(found[indexOf(["S","H","D","C"],card.s)])==card.r-1; ok ? {history=append(history,{"cols":cols,"stock":stock,"waste":waste,"found":found}); found=setAt(found,indexOf(["S","H","D","C"],card.s),append(found[indexOf(["S","H","D","C"],card.s)],card)); cols=map(setAt(cols,index,removeAt(col,length(col)-1)),c=>isEmpty(c) ? c : setAt(c,length(c)-1,with(last(c),"up",true))); moves=moves+1; sum(found,f=>length(f))==52 ? go won : } : shake}
+              if !card.up
+                Card.back ""
+    Footer
+      Row between
+        Text.muted "Drag a card or a run between columns. Double tap sends a card home."
+        Text.muted "{sum(found,f=>length(f))} of 52 home"
+
+### You won
+Page
+  Section center
+    CardCascade cards={found} animate=fade
+    Heading "You cleared the table" level=1 animate=pop
+    Text.muted "Finished in {moves} moves."
+    Row gap=12
+      Button "Deal again" size=large onTap={emit newDeal; go tableau}
+      Button.outline "Your stats" size=large onTap={go stats}
+
+### Stats
+state results=[{"day":"Mon","moves":128,"won":true},{"day":"Tue","moves":0,"won":false},{"day":"Wed","moves":104,"won":true},{"day":"Thu","moves":141,"won":true},{"day":"Fri","moves":0,"won":false}]
+App
+  Main
+    Nav
+      Heading "Your stats" level=1
+      Button.outline "Back to the table" onTap={go tableau}
+    Column pad=24 gap=16 maxw=720
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Games won"
+          Text.strong "{count(results,r=>r.won)}" size=32
+        Card gap=4
+          Text.muted "Best"
+          Text.strong "{min(sum(filter(results,r=>r.won),r=>r.moves),999)} moves" size=32
+        Card gap=4
+          Text.muted "Win rate"
+          Text.strong "{round(count(results,r=>r.won)/length(results)*100,0)}%" size=32
+      Card gap=12
+        Text.strong "Moves per won game"
+        BarChart values={map(filter(results,r=>r.won),r=>r.moves)} labels={map(filter(results,r=>r.won),r=>r.day)} h=200

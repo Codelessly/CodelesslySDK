@@ -1,0 +1,201 @@
+### Browse
+state schema="public"
+state table="orders"
+state sel="orders"
+state expanded=["public","billing"]
+state sortCol="created_at"
+state sortDir="desc"
+state filters=[{"col":"status","op":"=","value":"shipped"},{"col":"total","op":">","value":"100"}]
+state filtersOn=true
+state rows=[{"id":10482,"customer":"Ada Lovelace","status":"shipped","total":184.50,"created_at":"2026-11-14"},{"id":10481,"customer":"Grace Hopper","status":"pending","total":62.00,"created_at":"2026-11-14"},{"id":10480,"customer":"Alan Turing","status":"shipped","total":310.25,"created_at":"2026-11-13"},{"id":10479,"customer":"Edsger Dijkstra","status":"refunded","total":45.90,"created_at":"2026-11-12"},{"id":10478,"customer":"Barbara Liskov","status":"shipped","total":129.00,"created_at":"2026-11-12"}]
+state changes=[]
+state colWidths={"id":80,"customer":200,"status":120,"total":110,"created_at":140}
+state exportFmt="CSV"
+state exportScope="Filtered rows"
+state rowSel=0
+App
+  Sidebar w=280
+    Brand "Tablescope" icon="storage"
+    Select "Connection" items=["prod-replica (pg 15)","staging (pg 15)","local (sqlite)"] bind=conn
+    Input "Filter tables" bind=treeQ
+    Column scroll grow gap=2
+      Tree bind=sel expanded=expanded onToggle={expanded=result}
+        TreeNode#public "public" icon="folder" badge="14"
+          TreeNode#orders "orders" icon="table_rows" badge="48,210" onTap={table="orders"; schema="public"}
+          TreeNode#customers "customers" icon="table_rows" badge="9,884" onTap={table="customers"; schema="public"}
+          TreeNode#products "products" icon="table_rows" badge="612" onTap={table="products"; schema="public"}
+          TreeNode#order_items "order_items" icon="table_rows" badge="131,070" onTap={table="order_items"; schema="public"}
+        TreeNode#billing "billing" icon="folder" badge="5"
+          TreeNode#invoices "invoices" icon="table_rows" badge="21,447" onTap={table="invoices"; schema="billing"}
+          TreeNode#payments "payments" icon="table_rows" badge="22,003" onTap={table="payments"; schema="billing"}
+        TreeNode#audit "audit" icon="folder" badge="2"
+    Divider
+    NavItem "Query editor" icon="terminal" onTap={go query}
+    NavItem "Relationships" icon="account_tree" onTap={go relationships}
+  Main
+    Nav
+      Row gap=8
+        Heading "{schema}.{table}" level=1
+        Badge.neutral "48,210 rows"
+      Row gap=8
+        Button.outline "Filters" icon="filter_alt" onTap={open filters}
+        Button.outline "Export" icon="download" onTap={open export}
+        IconButton "refresh" tooltip="Reload table" onTap={emit reload table}
+    Column pad=24 gap=12 grow
+      if filtersOn
+        Row gap=8 wrap
+          each f in filters
+            Chip "{f.col} {f.op} {f.value}" onDelete={filters=removeAt(filters,index)}
+          Button.ghost "Clear" onTap={filters=[]}
+      DataGrid rows={sortDir=="asc" ? sortBy(rows,r=>r[sortCol]) : sortByDesc(rows,r=>r[sortCol])} sortCol={sortCol} sortDir={sortDir} resizable stickyHeader selectable bind=rowSel menu=rowMenu
+        Column#id "id" w={colWidths.id} type=number
+        Column#customer "customer" w={colWidths.customer} editable
+        Column#status "status" w={colWidths.status} editable editor=select items=["pending","shipped","refunded"]
+        Column#total "total" w={colWidths.total} type=number editable format="money"
+        Column#created_at "created_at" w={colWidths.created_at} type=date
+        onSort={sortCol=result.col; sortDir=result.dir}
+        onResize={colWidths=with(colWidths,result.col,result.width)}
+        onCellEdit={changes=append(removeWhere(changes,c=>c.id==result.id && c.col==result.col),result); rows=updateWhere(rows,r=>r.id==result.id,r=>with(r,result.col,result.value))}
+        changed={changes}
+      Row between
+        Text.muted "Showing 1-5 of 48,210"
+        Row gap=8
+          IconButton "chevron_left" tooltip="Previous page"
+          Text.muted "Page 1 of 9,642"
+          IconButton "chevron_right" tooltip="Next page"
+    Footer
+      Row between pad=12 fill=#FFFFF4D6 border-top=#FFE0B94A
+        Row gap=8
+          Icon "edit_note"
+          Text.strong "{length(changes)} uncommitted {length(changes)==1 ? 'change' : 'changes'}"
+          Text.muted "in {schema}.{table}"
+        Row gap=8
+          Button.ghost "Review SQL" onTap={open review}
+          Button.outline "Discard" onTap={changes=[]; toast "Changes discarded"}
+          Button "Commit {length(changes)}" onTap={length(changes)>0 ? {emit commit changes; changes=[]; toast "Changes committed"} : toast "Nothing to commit"}
+  Menu#rowMenu
+    MenuItem "Copy row as JSON" icon="content_copy" onTap={copy rows[rowSel]}
+    MenuItem "Duplicate row" icon="difference" onTap={emit duplicateRow rowSel}
+    MenuItem "Delete row" icon="delete" onTap={rows=removeAt(rows,rowSel); toast "Row deleted"}
+  Sheet#filters "Filter rows"
+    Column gap=12
+      each f in filters
+        Row gap=8
+          Select "Column" items=["id","customer","status","total","created_at"] bind=f.col grow
+          Select "Operator" items=["=","!=",">","<","contains","is null"] bind=f.op w=140
+          Input "Value" bind=f.value grow
+          IconButton "close" tooltip="Remove condition" onTap={filters=removeAt(filters,index)}
+      Row between
+        Button.outline "Add condition" icon="add" onTap={filters=append(filters,{"col":"id","op":"=","value":""})}
+        Row gap=8
+          Button.ghost "Reset" onTap={filters=[]}
+          Button "Apply" onTap={filtersOn=true; emit applyFilters filters; close}
+  Dialog#export "Export table" "Choose what to export and in which format"
+    SegmentedButton items=["CSV","JSON","SQL","Excel"] bind=exportFmt
+    Select "Rows" items=["Filtered rows","All rows","Selected rows"] bind=exportScope
+    Toggle "Include column headers" bind=headers
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Export {exportFmt}" icon="download" onTap={emit export {"format":exportFmt,"scope":exportScope}; toast "Export started"; close}
+  Dialog#review "Pending SQL" "Statements that will run on commit"
+    each c in changes
+      Text.mono "UPDATE {schema}.{table} SET {c.col} = '{c.value}' WHERE id = {c.id};"
+    Row end gap=8
+      Button.ghost "Close" onTap={close}
+
+### Query
+state sql="SELECT c.name, COUNT(o.id) AS orders, SUM(o.total) AS revenue\nFROM customers c\nJOIN orders o ON o.customer_id = c.id\nWHERE o.status = 'shipped'\nGROUP BY c.name\nORDER BY revenue DESC\nLIMIT 100;"
+state result=[{"name":"Ada Lovelace","orders":14,"revenue":2840.50},{"name":"Alan Turing","orders":11,"revenue":2310.25},{"name":"Grace Hopper","orders":9,"revenue":1788.00},{"name":"Barbara Liskov","orders":7,"revenue":1204.75}]
+state ran=true
+state elapsed=42
+state running=false
+state history=["SELECT * FROM orders LIMIT 50;","SELECT status, COUNT(*) FROM orders GROUP BY status;"]
+App
+  Sidebar w=280
+    Brand "Tablescope" icon="storage"
+    NavItem "Browse tables" icon="table_rows" onTap={go browse}
+    NavItem "Query editor" icon="terminal" selected={true}
+    NavItem "Relationships" icon="account_tree" onTap={go relationships}
+    Divider
+    Text.fieldLabel "History"
+    each h in history
+      Text.muted "{h}" onTap={sql=h}
+  Main
+    Nav
+      Heading "Query editor" level=1
+      Row gap=8
+        Select items=["prod-replica","staging","local"] bind=conn
+        Button "Run" icon="play_arrow" onTap={running=true; ran=true; elapsed=42; history=take(append([sql],history),10); emit runQuery sql; running=false}
+        Button.outline "Export results" icon="download" onTap={open exportResults}
+    Column pad=24 gap=12 grow
+      CodeEditor bind=sql language="sql" h=220 lineNumbers onRun={emit runQuery sql; ran=true}
+      if ran
+        Row between
+          Row gap=8
+            Badge.success "Success"
+            Text.muted "{length(result)} rows in {elapsed} ms"
+          Button.ghost "Explain" icon="analytics" onTap={emit explain sql}
+        DataGrid rows={result} resizable stickyHeader
+          Column#name "name"
+          Column#orders "orders" type=number
+          Column#revenue "revenue" type=number format="money"
+      if !ran
+        Text.muted "Run a query to see results."
+  Dialog#exportResults "Export results"
+    SegmentedButton items=["CSV","JSON","SQL"] bind=resultFmt
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Export" onTap={emit exportResults resultFmt; toast "Results exported"; close}
+
+### Relationships
+state focus="orders"
+state zoom=1
+App
+  Sidebar w=280
+    Brand "Tablescope" icon="storage"
+    NavItem "Browse tables" icon="table_rows" onTap={go browse}
+    NavItem "Query editor" icon="terminal" onTap={go query}
+    NavItem "Relationships" icon="account_tree" selected={true}
+    Divider
+    Select "Schema" items=["public","billing","audit"] bind=schema
+    Toggle "Show column types" bind=showTypes
+  Main
+    Nav
+      Heading "Relationships: public" level=1
+      Row gap=8
+        IconButton "zoom_out" tooltip="Zoom out" onTap={zoom=max(0.5,zoom-0.25)}
+        Text.muted "{round(zoom*100,0)}%"
+        IconButton "zoom_in" tooltip="Zoom in" onTap={zoom=min(2,zoom+0.25)}
+        Button.outline "Export diagram" icon="download" onTap={emit exportDiagram}
+    Row grow
+      ERDiagram grow zoom={zoom} bind=focus
+        EntityBox#customers "customers" x=40 y=40
+          Field "id" type="uuid" key=primary
+          Field "name" type="text"
+          Field "email" type="text"
+        EntityBox#orders "orders" x=360 y=40
+          Field "id" type="bigint" key=primary
+          Field "customer_id" type="uuid" key=foreign
+          Field "status" type="text"
+          Field "total" type="numeric"
+        EntityBox#order_items "order_items" x=680 y=40
+          Field "id" type="bigint" key=primary
+          Field "order_id" type="bigint" key=foreign
+          Field "product_id" type="uuid" key=foreign
+          Field "qty" type="int"
+        EntityBox#products "products" x=680 y=300
+          Field "id" type="uuid" key=primary
+          Field "title" type="text"
+          Field "price" type="numeric"
+        Relation from="orders.customer_id" to="customers.id" label="many to one"
+        Relation from="order_items.order_id" to="orders.id" label="many to one"
+        Relation from="order_items.product_id" to="products.id" label="many to one"
+      Pane w=320 pad=16 gap=12
+        Heading "{focus}" level=3
+        Text.muted "Selected table"
+        Divider
+        Text.strong "References"
+        Text.muted "customers (customer_id)"
+        Text.strong "Referenced by"
+        Text.muted "order_items (order_id)"
+        Button.outline "Open table" icon="table_rows" onTap={table=focus; go browse}
