@@ -1,0 +1,130 @@
+### Map
+state tab="map"
+state q=""
+state showConservation=true
+state showFlood=false
+state statuses=["received","approved","refused"]
+state selected=""
+state suggestions=[{"id":"a1","text":"14 Mill Lane, Hartley"},{"id":"a2","text":"14 Mill Road, Fenwick"},{"id":"a3","text":"14 Millbank Close, Hartley"}]
+state apps=[{"id":"24/0312","address":"21 Orchard Row","status":"received","proposal":"Two-storey rear extension","comments":14},{"id":"24/0287","address":"Former Dairy, Mill Lane","status":"approved","proposal":"Conversion to 6 flats","comments":52},{"id":"24/0301","address":"8 Brook Street","status":"refused","proposal":"Loft conversion with dormer","comments":3}]
+App
+  Sidebar
+    Brand "Zoned" icon="map"
+    NavItem "Map" icon="map" selected={tab=="map"} onTap={tab="map"}
+    NavItem "Applications" icon="description" badge="3" selected={tab=="list"} onTap={tab="list"}
+    NavItem "My alerts" icon="notifications" onTap={open alerts}
+    Spacer grow
+    Text.muted "Hartley District Council"
+  Main
+    Nav
+      Heading "Planning map"
+      Row gap=8
+        Input "Search by address" bind=q w=280 icon="search"
+        Button.outline "Alerts" icon="notifications" onTap={open alerts}
+    Stack
+      Map center=[51.512,-0.118] zoom=15 onSelect={selected=result.id}
+        Polygon each=apps status={app.status} onTap={selected=app.id}
+        if showConservation
+          Layer "Conservation areas" kind=conservation fill=#33388E3C
+        if showFlood
+          Layer "Flood zones" kind=flood fill=#332196F3
+      if q!=""
+        Card gap=4 w=320 top left
+          each s in filter(suggestions,s=>contains(lower(s.text),lower(q)))
+            ListTile "{s.text}" icon="place" onTap={q=s.text; emit locate s.id}
+      Card gap=12 w=260 top right
+        Text.panelTitle "Layers"
+        Toggle "Conservation areas" bind=showConservation
+        Toggle "Flood zones" bind=showFlood
+        Divider
+        Text.fieldLabel "Status"
+        FilterChip "Received" selected={contains(statuses,"received")} onTap={statuses=contains(statuses,"received") ? without(statuses,"received") : append(statuses,"received")}
+        FilterChip "Approved" selected={contains(statuses,"approved")} onTap={statuses=contains(statuses,"approved") ? without(statuses,"approved") : append(statuses,"approved")}
+        FilterChip "Refused" selected={contains(statuses,"refused")} onTap={statuses=contains(statuses,"refused") ? without(statuses,"refused") : append(statuses,"refused")}
+      if selected!=""
+        Card gap=8 w=340 bottom left
+          each a in filter(apps,a=>a.id==selected)
+            Row between
+              Text.strong "{a.id}"
+              Badge.info "{a.status}"
+            Text "{a.address}"
+            Text.muted "{a.proposal}"
+            Row between
+              Text.caption "{a.comments} comments"
+              Button "View application" onTap={go application}
+  Dialog#alerts "Alert me about new applications" "Within the radius you draw"
+    Input "Postcode or address" bind=alertAddress
+    Map h=220 center=[51.512,-0.118] zoom=14
+      Circle bind=alertRadius center=[51.512,-0.118] draggable
+    Slider bind=alertRadius min=100 max=2000 step=100
+    Text.muted "Radius: {alertRadius} m"
+    Input "Email" type=email bind=alertEmail
+    Select "Frequency" items=["Instantly","Daily digest","Weekly"] bind=alertFreq
+    Button "Sign up for alerts" onTap={alertEmail!="" ? emit signUpAlerts; toast "Alerts on for {alertRadius} m"; close : toast "Enter your email"}
+
+### Application
+state tab="timeline"
+state saved=false
+state app={"id":"24/0287","address":"Former Dairy, Mill Lane, Hartley","status":"approved","proposal":"Change of use and conversion of former dairy to six residential flats","deadline":"2024-09-12","comments":52}
+state events=[{"date":"2024-05-02","title":"Application received"},{"date":"2024-05-20","title":"Validated"},{"date":"2024-06-14","title":"Consultation closed"},{"date":"2024-08-30","title":"Approved with conditions"}]
+state docs=[{"name":"Site plan.pdf","size":"2.4 MB"},{"name":"Design and access statement.pdf","size":"1.1 MB"},{"name":"Flood risk assessment.pdf","size":"860 KB"},{"name":"Decision notice.pdf","size":"140 KB"}]
+Page
+  Nav
+    Brand "Zoned" icon="map"
+    Row gap=4
+      Link "Map" onTap={go map}
+      Link "Applications"
+      Link "Alerts" onTap={open alerts}
+    Button "Comment" onTap={open comment}
+  Section
+    Column gap=8
+      Row gap=8
+        Badge.success "Approved"
+        Text.muted "Ref {app.id}"
+      Heading "{app.address}" level=1
+      Text.muted "{app.proposal}"
+  Section tint
+    Row gap=32 top
+      Column grow gap=16
+        SegmentedButton bind=tab items=["timeline","documents","comments"]
+        if tab=="timeline"
+          Timeline items={events}
+        if tab=="documents"
+          Card gap=4
+            each d in docs
+              ListTile "{d.name}" "{d.size}" icon="picture_as_pdf" onTap={emit download d.name}
+        if tab=="comments"
+          Text.muted "{app.comments} comments: 38 against, 14 for"
+          Progress 0.27
+      Column w=320 sticky gap=12
+        Card gap=8
+          Text.fieldLabel "Decision deadline"
+          Text.heading "{formatDate(app.deadline,"MMM d, yyyy")}"
+          Countdown to={app.deadline}
+        Card gap=8
+          Text.fieldLabel "Comments"
+          Text "{app.comments}" size=40 weight=700
+          Button "Leave a comment" onTap={open comment}
+        Card gap=8
+          Map h=160 center=[51.512,-0.118] zoom=17
+            Polygon status={app.status}
+          Button.outline "Alert me nearby" icon="notifications" onTap={open alerts}
+  Footer
+    Row between
+      Text.strong "Zoned"
+      Text.muted "Data from Hartley District Council"
+  Dialog#comment "Comment on {app.id}" "Comments are public"
+    state stance="against"
+    state body=""
+    SegmentedButton bind=stance items=["for","against"]
+    Input "Your comment" bind=body multiline maxLength=1000
+    Text.caption "{length(body)} / 1000"
+    Input "Name" bind=commenter
+    Button "Submit comment" onTap={length(body)>=10 ? emit comment {"stance":stance,"body":body}; toast "Comment sent"; saved=true; body=""; close : toast "Write at least 10 characters"}
+  Dialog#alerts "Alert me about new applications"
+    Map h=200 center=[51.512,-0.118] zoom=14
+      Circle bind=alertRadius center=[51.512,-0.118] draggable
+    Slider bind=alertRadius min=100 max=2000 step=100
+    Text.muted "Radius: {alertRadius} m"
+    Input "Email" type=email bind=alertEmail
+    Button "Sign up" onTap={emit signUpAlerts; toast "Alerts on"; close}

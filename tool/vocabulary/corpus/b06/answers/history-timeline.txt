@@ -1,0 +1,140 @@
+### Timeline
+state screen="timeline"
+state themes=["War","Science","Art","Politics"]
+state active=["War","Science","Art","Politics"]
+state zoom=1
+state sel={"id":"e3","title":"Printing press","date":"1450","theme":"Science","text":"Gutenberg's movable type makes books cheap and spreads ideas across Europe.","img":"https://images.example.com/epoch/press.jpg","place":"Mainz, Germany","lat":49.99,"lng":8.27}
+state events=[{"id":"e1","title":"Fall of Rome","date":"476","year":476,"theme":"Politics"},{"id":"e2","title":"Magna Carta","date":"1215","year":1215,"theme":"Politics"},{"id":"e3","title":"Printing press","date":"1450","year":1450,"theme":"Science"},{"id":"e4","title":"Mona Lisa painted","date":"1503","year":1503,"theme":"Art"},{"id":"e5","title":"Battle of Waterloo","date":"1815","year":1815,"theme":"War"},{"id":"e6","title":"Moon landing","date":"1969","year":1969,"theme":"Science"}]
+App
+  Sidebar
+    Brand "Epoch" icon="hourglass_top"
+    NavItem "Timeline" icon="timeline" selected={screen=="timeline"} onTap={go timeline}
+    NavItem "Compare regions" icon="compare_arrows" selected={screen=="compare"} onTap={go compare}
+    NavItem "Quiz" icon="quiz" badge="3" selected={screen=="quiz"} onTap={go quiz}
+    Spacer grow
+    Text.muted "Streak: 5 days"
+  Main
+    Nav
+      Heading "Timeline" level=1
+      Row gap=8
+        IconButton "zoom_out" tooltip="Zoom out" onTap={zoom=max(1,zoom-1)}
+        Text.strong "{zoom == 1 ? 'Millennia' : zoom == 2 ? 'Centuries' : zoom == 3 ? 'Decades' : 'Years'}"
+        IconButton "zoom_in" tooltip="Zoom in" onTap={zoom=min(4,zoom+1)}
+        Button.outline "Map" icon="map" onTap={open eventmap}
+    Column pad=24 gap=16
+      Row gap=8
+        each t in themes
+          FilterChip "{t}" selected={contains(active,t)} onTap={contains(active,t) ? active=without(active,t) : active=append(active,t)}
+      Card gap=8
+        Timeline#line bind=zoom from=-3000 to=2025 drag zoom cluster=true h=220 events={filter(events,e=>contains(active,e.theme))} onSelect={sel=result; open details}
+          Text.caption "Drag to move, pinch or scroll to zoom"
+      Card gap=12
+        Row gap=16 top
+          Image "{sel.img}" w=200 h=130 radius=8
+          Column grow gap=6
+            Row between
+              Text.heading "{sel.title}"
+              Badge.info "{sel.theme}"
+            Text.muted "{sel.date}"
+            Text "{sel.text}"
+            Row gap=8
+              Button.outline "Where" icon="place" onTap={open eventmap}
+              Button.ghost "Copy link" icon="link" onTap={copy "https://epoch.example.com/e/{sel.id}"; toast "Link copied"}
+  Dialog#eventmap "Where it happened" "{sel.title}, {sel.date}"
+    Map lat={sel.lat} lng={sel.lng} zoom=5 h=260
+      Marker lat={sel.lat} lng={sel.lng} title="{sel.place}"
+    Text.muted "{sel.place}"
+    Button "Close" onTap={close}
+  Sheet#details "{sel.title}"
+    Image "{sel.img}" h=160 radius=8
+    Text.muted "{sel.date} · {sel.theme}"
+    Text "{sel.text}"
+    Button "Show on map" onTap={close; open eventmap}
+
+### Compare regions
+state screen="compare"
+state left="Europe"
+state right="East Asia"
+state zoom=2
+state regions=["Europe","East Asia","South Asia","Africa","Americas","Middle East"]
+state laneA=[{"id":"a1","title":"Charlemagne crowned","date":"800","year":800},{"id":"a2","title":"Black Death","date":"1347","year":1347},{"id":"a3","title":"Renaissance begins","date":"1400","year":1400}]
+state laneB=[{"id":"b1","title":"Tang dynasty peak","date":"750","year":750},{"id":"b2","title":"Song paper money","date":"1000","year":1000},{"id":"b3","title":"Ming voyages","date":"1405","year":1405}]
+state picked=null
+App
+  Sidebar
+    Brand "Epoch" icon="hourglass_top"
+    NavItem "Timeline" icon="timeline" selected={screen=="timeline"} onTap={go timeline}
+    NavItem "Compare regions" icon="compare_arrows" selected={screen=="compare"} onTap={go compare}
+    NavItem "Quiz" icon="quiz" badge="3" selected={screen=="quiz"} onTap={go quiz}
+  Main
+    Nav
+      Heading "Compare regions" level=1
+      Row gap=8
+        Select bind=left items={regions} w=160
+        Icon "compare_arrows"
+        Select bind=right items={regions} w=160
+    Column pad=24 gap=16
+      Card gap=12
+        Timeline bind=zoom from=0 to=1600 drag zoom cluster=true h=300
+          Lane "{left}" events={laneA} onSelect={picked=result; open eventcard}
+          Lane "{right}" events={laneB} onSelect={picked=result; open eventcard}
+      Row gap=16
+        Card grow gap=4
+          Text.strong "{left}"
+          Text.muted "{length(laneA)} events in view"
+        Card grow gap=4
+          Text.strong "{right}"
+          Text.muted "{length(laneB)} events in view"
+  Popover#eventcard
+    Card gap=8
+      Image "https://images.example.com/epoch/{picked.id}.jpg" h=120 radius=8
+      Text.strong "{picked.title}"
+      Text.muted "{picked.date}"
+      Button.ghost "Open on timeline" onTap={close; go timeline}
+
+### Quiz
+state screen="quiz"
+state round=0
+state score=0
+state checked=false
+state rounds=[{"prompt":"Put these in order, earliest first","cards":[{"id":"q1","title":"Magna Carta","year":1215},{"id":"q2","title":"Printing press","year":1450},{"id":"q3","title":"Battle of Waterloo","year":1815},{"id":"q4","title":"Moon landing","year":1969}]},{"prompt":"Now these","cards":[{"id":"q5","title":"Fall of Rome","year":476},{"id":"q6","title":"Black Death","year":1347},{"id":"q7","title":"Mona Lisa painted","year":1503}]}]
+state order=[]
+state tray=[{"id":"q3","title":"Battle of Waterloo","year":1815},{"id":"q1","title":"Magna Carta","year":1215},{"id":"q4","title":"Moon landing","year":1969},{"id":"q2","title":"Printing press","year":1450}]
+App
+  Sidebar
+    Brand "Epoch" icon="hourglass_top"
+    NavItem "Timeline" icon="timeline" selected={screen=="timeline"} onTap={go timeline}
+    NavItem "Compare regions" icon="compare_arrows" selected={screen=="compare"} onTap={go compare}
+    NavItem "Quiz" icon="quiz" selected={screen=="quiz"} onTap={go quiz}
+  Main
+    Nav
+      Heading "Quiz" level=1
+      Row gap=12
+        Text.muted "Round {round+1} of {length(rounds)}"
+        Badge.success "Score {score}"
+    Column pad=24 gap=16
+      Progress {round / length(rounds)}
+      Text.heading "{rounds[round].prompt}"
+      Text.caption "Drag the cards into the slots below"
+      Row gap=12 scroll
+        each c in tray
+          Card drag=card(c.id) w=180 gap=4
+            Text.strong "{c.title}"
+            Text.muted "{checked ? c.year : '?'}"
+      Column gap=8 drop=card onDrop={order=append(order,result.data); tray=removeWhere(tray,c=>c.id==result.data)}
+        Text.fieldLabel "Your order"
+        each id in order
+          ListTile "{index+1}. {find(rounds[round].cards,c=>c.id==id).title}" icon={checked ? (id == sortBy(rounds[round].cards,c=>c.year)[index].id ? "check_circle" : "cancel") : "drag_indicator"}
+        if isEmpty(order)
+          Text.muted "Drop the first card here"
+      Row gap=8
+        Button.outline "Reset" onTap={order=[]; checked=false; tray=rounds[round].cards}
+        Button "Check order" onTap={checked=true; score=score+count(order,id=>id==sortBy(rounds[round].cards,c=>c.year)[indexOf(order,id)].id)}
+        Spacer grow
+        if checked
+          Button "Next round" onTap={round<length(rounds)-1 ? {round=round+1; order=[]; checked=false; tray=rounds[round+1].cards} : open done}
+  Dialog#done "Quiz complete" "You scored {score}"
+    Text "Nice work. Come back tomorrow for a new set."
+    Row gap=8
+      Button.outline "Review timeline" onTap={close; go timeline}
+      Button "Play again" onTap={round=0; score=0; order=[]; checked=false; tray=rounds[0].cards; close}

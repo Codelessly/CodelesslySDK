@@ -1,0 +1,167 @@
+### Compare
+state ignoreSpace=false
+state ignoreCase=false
+state showMerged=true
+state current="c1"
+state changes=[{"id":"c1","kind":"changed","para":"2.1","title":"Payment term shortened","status":"pending","left":"Payment is due within 45 days of the invoice date.","right":"Payment is due within 30 days of the invoice date."},{"id":"c2","kind":"added","para":"3.4","title":"Late fee clause added","status":"pending","left":"","right":"A late fee of 1.5% per month applies to overdue balances."},{"id":"c3","kind":"removed","para":"4.2","title":"Exclusivity clause removed","status":"pending","left":"The Supplier shall not provide the Services to competitors in the region.","right":""},{"id":"c4","kind":"moved","para":"5.1","title":"Confidentiality moved from 7 to 5","status":"pending","left":"Each party shall keep the other's confidential information secret.","right":"Each party shall keep the other's confidential information secret."},{"id":"c5","kind":"changed","para":"6.3","title":"Governing law changed","status":"accepted","left":"This agreement is governed by the laws of New York.","right":"This agreement is governed by the laws of Delaware."},{"id":"c6","kind":"changed","para":"8.1","title":"Notice period extended","status":"rejected","left":"Either party may terminate with 30 days notice.","right":"Either party may terminate with 60 days notice."}]
+App
+  Sidebar
+    Brand "Twin Pages" icon="difference"
+    NavItem "Compare" icon="compare" selected={true}
+    NavItem "Summary" icon="summarize" badge="{length(changes)}" onTap={go summary}
+    NavItem "History" icon="history" onTap={go history}
+    Spacer grow
+    Text.muted "Master Services Agreement"
+    Text.caption "v3 draft vs v2 signed"
+  Main
+    Nav
+      Heading "Master Services Agreement" level=1
+      Row gap=8
+        Toggle "Ignore spacing" bind=ignoreSpace
+        Toggle "Ignore case" bind=ignoreCase
+        Toggle "Merged column" bind=showMerged
+        Button.outline "Summary" icon="summarize" onTap={open summary}
+        Button "Export merged" icon="download" onTap={emit exportMerged; toast "Merged document exported"}
+    Row grow gap=0
+      Column grow gap=8 pad=16
+        Row gap=16
+          Column grow
+            Text.strong "v2 signed (Jan 12)"
+          Column grow
+            Text.strong "v3 draft (Mar 4)"
+          if showMerged
+            Column grow
+              Text.strong "Merged result"
+        DiffView left="v2 signed" right="v3 draft" changes={changes} ignoreSpace={ignoreSpace} ignoreCase={ignoreCase} syncScroll gutter=lines merged={showMerged} selected={current} addedColor=#FF2E7D32 removedColor=#FFC62828 movedColor=#FF6A1B9A movedMark="arrow_right_alt" onSelect={current=result}
+      Pane w=320 border-left=#FFE0E0E0
+        Text.panelTitle "Changes"
+        Row gap=8
+          Badge.neutral "{length(changes)} total"
+          Badge.success "{count(changes,x=>x.kind=='added')} added"
+          Badge.error "{count(changes,x=>x.kind=='removed')} removed"
+          Badge.info "{count(changes,x=>x.kind=='moved')} moved"
+        Row gap=8
+          Text.muted "{count(changes,x=>x.status=='pending')} pending"
+          Spacer grow
+          Button.ghost "Accept all" onTap={changes=map(changes,x=>x.status=='pending' ? with(x,"status","accepted") : x); toast "All pending changes accepted"}
+        Divider
+        Column scroll gap=8
+          each c in changes
+            Card gap=8 border-left={c.id==current ? "#FF1565C0" : "#FFE0E0E0"} onTap={current=c.id; scroll "p{c.para}"}
+              Row between
+                Row gap=8
+                  Icon "{c.kind=='added' ? 'add_circle' : c.kind=='removed' ? 'remove_circle' : c.kind=='moved' ? 'arrow_right_alt' : 'edit'}"
+                  Text.strong "{c.para}"
+                Badge.neutral "{c.status}"
+              Text "{c.title}"
+              if c.status=="pending"
+                Row gap=8
+                  Button.outline "Accept" icon="check" onTap={changes=updateWhere(changes,x=>x.id==c.id,x=>with(x,"status","accepted"))}
+                  Button.ghost "Reject" icon="close" onTap={changes=updateWhere(changes,x=>x.id==c.id,x=>with(x,"status","rejected"))}
+              if c.status!="pending"
+                Button.ghost "Undo" icon="undo" onTap={changes=updateWhere(changes,x=>x.id==c.id,x=>with(x,"status","pending"))}
+  Dialog#summary "Summary of changes" "v2 signed compared with v3 draft"
+    Grid cols=4 gap=12
+      Card
+        Text.muted "Changed"
+        Text "{count(changes,x=>x.kind=='changed')}" size=32 weight=700
+      Card
+        Text.muted "Added"
+        Text "{count(changes,x=>x.kind=='added')}" size=32 weight=700 color=#FF2E7D32
+      Card
+        Text.muted "Removed"
+        Text "{count(changes,x=>x.kind=='removed')}" size=32 weight=700 color=#FFC62828
+      Card
+        Text.muted "Moved"
+        Text "{count(changes,x=>x.kind=='moved')}" size=32 weight=700 color=#FF6A1B9A
+    Progress {count(changes,x=>x.status!='pending')/length(changes)}
+    Text.muted "{count(changes,x=>x.status!='pending')} of {length(changes)} changes reviewed"
+    Row gap=8 end
+      Button.outline "Close" onTap={close}
+      Button "Review pending" onTap={current=first(filter(changes,x=>x.status=='pending')).id; close}
+
+### Summary
+state filterKind="all"
+state changes=[{"id":"c1","kind":"changed","para":"2.1","title":"Payment term shortened","status":"pending","note":"45 days to 30 days"},{"id":"c2","kind":"added","para":"3.4","title":"Late fee clause added","status":"pending","note":"1.5% per month"},{"id":"c3","kind":"removed","para":"4.2","title":"Exclusivity clause removed","status":"pending","note":"Regional exclusivity dropped"},{"id":"c4","kind":"moved","para":"5.1","title":"Confidentiality moved from 7 to 5","status":"pending","note":"No wording change"},{"id":"c5","kind":"changed","para":"6.3","title":"Governing law changed","status":"accepted","note":"New York to Delaware"},{"id":"c6","kind":"changed","para":"8.1","title":"Notice period extended","status":"rejected","note":"30 days to 60 days"}]
+App
+  Sidebar
+    Brand "Twin Pages" icon="difference"
+    NavItem "Compare" icon="compare" onTap={go compare}
+    NavItem "Summary" icon="summarize" badge="{length(changes)}" selected={true}
+    NavItem "History" icon="history" onTap={go history}
+  Main
+    Nav
+      Heading "Summary of changes" level=1
+      Row gap=8
+        Button.outline "Copy as text" icon="content_copy" onTap={copy "Summary of changes"; toast "Copied"}
+        Button "Back to compare" onTap={go compare}
+    Column pad=24 gap=16 scroll
+      Grid cols=4 gap=16
+        Card
+          Text.muted "Total changes"
+          Text "{length(changes)}" size=40 weight=700
+        Card
+          Text.muted "Accepted"
+          Text "{count(changes,x=>x.status=='accepted')}" size=40 weight=700 color=#FF2E7D32
+        Card
+          Text.muted "Rejected"
+          Text "{count(changes,x=>x.status=='rejected')}" size=40 weight=700 color=#FFC62828
+        Card
+          Text.muted "Pending"
+          Text "{count(changes,x=>x.status=='pending')}" size=40 weight=700
+      Row gap=16 top
+        Card grow gap=12
+          Text.panelTitle "Changes by kind"
+          Donut values=[2,1,1,1] labels=["Changed","Added","Removed","Moved"]
+        Card grow gap=12
+          Text.panelTitle "Words changed by section"
+          BarChart values=[14,22,18,0,9,11] labels=["2.1","3.4","4.2","5.1","6.3","8.1"] h=200
+      Row gap=8
+        SegmentedButton bind=filterKind items=["all","changed","added","removed"]
+        Spacer grow
+        Text.muted "Showing {filterKind == 'all' ? length(changes) : count(changes,x=>x.kind==filterKind)} changes"
+      Card gap=0
+        Row gap=12 pad=8 border-bottom=#FFE0E0E0
+          Text.strong "Section" w=80
+          Text.strong "Change" grow
+          Text.strong "Kind" w=90 hide=phone
+          Text.strong "Status" w=90
+        each c in changes
+          if filterKind=="all" || c.kind==filterKind
+            Row gap=12 pad=8 border-bottom=#FFF0F0F0 onTap={go compare}
+              Text "{c.para}" w=80
+              Column grow
+                Text.strong "{c.title}"
+                Text.muted "{c.note}"
+              Badge.neutral "{c.kind}" w=90 hide=phone
+              Badge.neutral "{c.status}" w=90
+
+### History
+state versions=[{"id":"v3","name":"v3 draft","date":"Mar 4","author":"Priya Nair","changes":6},{"id":"v2","name":"v2 signed","date":"Jan 12","author":"Tom Becker","changes":0},{"id":"v1","name":"v1 first draft","date":"Nov 28","author":"Tom Becker","changes":14}]
+state leftV="v2"
+state rightV="v3"
+App
+  Sidebar
+    Brand "Twin Pages" icon="difference"
+    NavItem "Compare" icon="compare" onTap={go compare}
+    NavItem "Summary" icon="summarize" onTap={go summary}
+    NavItem "History" icon="history" selected={true}
+  Main
+    Nav
+      Heading "Version history" level=1
+      Button "Compare selected" icon="compare" onTap={emit compare {"left":leftV,"right":rightV}; go compare}
+    Column pad=24 gap=16
+      Row gap=12
+        Select "Left document" bind=leftV items=["v1","v2","v3"] w=200
+        Select "Right document" bind=rightV items=["v1","v2","v3"] w=200
+      Card gap=0
+        each v in versions
+          ListTile "{v.name}" "{v.author}, {v.date}, {v.changes} changes from the previous version" icon="description" selected={v.id==leftV || v.id==rightV}
+            Row gap=8
+              Button.outline "As left" onTap={leftV=v.id}
+              Button.outline "As right" onTap={rightV=v.id}
+              IconButton "more_vert" tooltip="More" onTap={sel=v.id; open versionMenu}
+  Menu#versionMenu end
+    MenuItem "Open" icon="open_in_new" onTap={emit openVersion sel; go compare}
+    MenuItem "Download" icon="download" onTap={emit downloadVersion sel}
+    MenuItem "Restore" icon="restore" onTap={emit restoreVersion sel; toast "Version restored"}

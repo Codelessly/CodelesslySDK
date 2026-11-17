@@ -1,0 +1,3 @@
+App: Twin Pages, a document comparison tool. Two documents side by side scrolling together with changed paragraphs tinted and connected by lines in the gutter; added text in green, removed in red, moved paragraphs marked with an arrow and a different colour; a change list on the right with counts that jumps to each; an accept or reject on each change that updates a merged third column; a filter to ignore spacing and case; a summary of changes.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

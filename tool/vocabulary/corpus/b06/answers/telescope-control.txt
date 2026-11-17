@@ -1,0 +1,217 @@
+### Sky
+state tab="sky"
+state targets=[{"id":"m31","name":"M31 Andromeda Galaxy","ra":10.7,"dec":41.3,"alt":62},{"id":"m42","name":"M42 Orion Nebula","ra":83.8,"dec":-5.4,"alt":48},{"id":"m45","name":"M45 Pleiades","ra":56.8,"dec":24.1,"alt":55},{"id":"m13","name":"M13 Hercules Cluster","ra":250.4,"dec":36.5,"alt":33}]
+state target="m31"
+state ra=10.7
+state dec=41.3
+state slewing=false
+state rate="Guide"
+state tracking=true
+state focus=5120
+state heater=40
+every 100 when slewing onTick={ra=ra+(find(targets,t=>t.id==target).ra-ra)*0.2; dec=dec+(find(targets,t=>t.id==target).dec-dec)*0.2; slewing=abs(find(targets,t=>t.id==target).ra-ra)>0.05 ? true : false}
+App
+  Sidebar
+    Brand "Astrolabe Remote" icon="travel_explore"
+    NavItem "Sky" icon="public" selected={tab=="sky"} onTap={tab="sky"; go sky}
+    NavItem "Imaging" icon="photo_camera" selected={tab=="imaging"} onTap={tab="imaging"; go imaging}
+    NavItem "Alignment" icon="my_location" selected={tab=="align"} onTap={tab="align"; go alignment}
+    NavItem "Night plan" icon="event_note" badge="{length(targets)}" selected={tab=="plan"} onTap={tab="plan"; go night-plan}
+    Spacer grow
+    Row gap=8 middle
+      Icon "wifi"
+      Text.muted "Mount connected"
+  Main
+    Nav
+      Heading "Sky" level=1
+      Row gap=8 middle
+        Badge.success "Tracking" visible={tracking && !slewing}
+        Badge.warning "Slewing" visible={slewing} animate=pulse
+        Button.outline "Park" onTap={tracking=false; toast "Mount parked"}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Card grow gap=12
+          Row between
+            Text.strong "Sky view, 22:40 local"
+            Text.mono "RA {fixed(ra,2)}  Dec {fixed(dec,2)}"
+          Stack h=360
+            SkyChart targets={targets} selected={target} pointingRa={ra} pointingDec={dec} onSelect={target=result}
+            Icon "add" animate=spin duration=1200 visible={slewing}
+          Row between
+            Text.muted "Target: {find(targets,t=>t.id==target).name}"
+            Text.muted "Altitude {find(targets,t=>t.id==target).alt} deg"
+        Column w=320 gap=16
+          Card gap=12
+            Text.strong "Go to"
+            Select "Target" items=["M31 Andromeda Galaxy","M42 Orion Nebula","M45 Pleiades","M13 Hercules Cluster"] onChange={target=find(targets,t=>t.name==result).id}
+            Button "Go to target" icon="gps_fixed" w=fill onTap={slewing ? toast "Already slewing" : {slewing=true; tracking=true}}
+            if slewing
+              Progress animate=shimmer
+              Text.caption "Slewing to {find(targets,t=>t.id==target).name}"
+            Button.destructive "Stop slew" visible={slewing} onTap={slewing=false; toast "Slew stopped"}
+          Card gap=12
+            Text.strong "Nudge"
+            SegmentedButton bind=rate items=["Guide","Center","Find","Slew"]
+            Grid cols=3 gap=8
+              Spacer
+              IconButton "keyboard_arrow_up" tooltip="North" onTap={dec=dec+(rate=="Guide" ? 0.01 : rate=="Center" ? 0.1 : rate=="Find" ? 0.5 : 2)}
+              Spacer
+              IconButton "keyboard_arrow_left" tooltip="East" onTap={ra=ra-(rate=="Guide" ? 0.01 : rate=="Center" ? 0.1 : rate=="Find" ? 0.5 : 2)}
+              IconButton "stop_circle" tooltip="Stop" onTap={slewing=false}
+              IconButton "keyboard_arrow_right" tooltip="West" onTap={ra=ra+(rate=="Guide" ? 0.01 : rate=="Center" ? 0.1 : rate=="Find" ? 0.5 : 2)}
+              Spacer
+              IconButton "keyboard_arrow_down" tooltip="South" onTap={dec=dec-(rate=="Guide" ? 0.01 : rate=="Center" ? 0.1 : rate=="Find" ? 0.5 : 2)}
+              Spacer
+          Card gap=8
+            Row between
+              Text.strong "Focus"
+              Text.mono "{round(focus,0)} steps"
+            Slider bind=focus min=0 max=10000
+            Row gap=8
+              Button.outline "Coarse -" onTap={focus=max(0,focus-100)}
+              Button.outline "Fine +" onTap={focus=min(10000,focus+10)}
+          Card gap=8
+            Row between
+              Text.strong "Dew heater"
+              Text.mono "{heater}%"
+            Slider bind=heater min=0 max=100
+            Text.caption "Dew point 4.1 C, optics 5.3 C"
+
+### Imaging
+state tab="imaging"
+state frames=30
+state exposure=120
+state gain=100
+state binning="1x1"
+state filter="L"
+state captured=0
+state stacked=0
+state running=false
+state live=true
+every 1s when running onTick={captured=captured+1; stacked=stacked+1; running=captured<frames}
+App
+  Sidebar
+    Brand "Astrolabe Remote" icon="travel_explore"
+    NavItem "Sky" icon="public" selected={tab=="sky"} onTap={tab="sky"; go sky}
+    NavItem "Imaging" icon="photo_camera" selected={tab=="imaging"} onTap={tab="imaging"}
+    NavItem "Alignment" icon="my_location" selected={tab=="align"} onTap={tab="align"; go alignment}
+    NavItem "Night plan" icon="event_note" selected={tab=="plan"} onTap={tab="plan"; go night-plan}
+    Spacer grow
+    Text.muted "Camera cooled to -10 C"
+  Main
+    Nav
+      Heading "Imaging" level=1
+      Row gap=8
+        Badge.info "{captured} of {frames} frames"
+        Button.outline "Reset stack" onTap={captured=0; stacked=0; running=false; toast "Stack cleared"}
+    Column pad=24 gap=16
+      Row gap=16 top
+        Card grow gap=12
+          Row between
+            Text.strong "Live image, M31"
+            Text.muted "{stacked} stacked, {duration(stacked*exposure)} integration"
+          LiveImage src="https://astrolabe.local/live/current.jpg" sharpness={clamp(stacked/frames,0.05,1)} stretch={true} h=380
+          Progress bind=progress value={captured/frames}
+          Row between
+            Text.caption "Signal to noise {fixed(sqrt(stacked+1),1)}"
+            Text.caption "Frame {captured} of {frames}"
+          Row gap=8
+            Button "Start sequence" icon="play_arrow" visible={!running} onTap={captured=0; stacked=0; running=true}
+            Button.destructive "Abort" icon="stop" visible={running} onTap={running=false; toast "Sequence aborted"}
+            Button.outline "Save stack" icon="download" visible={stacked>0} onTap={emit saveStack stacked}
+        Column w=320 gap=16
+          Card gap=12
+            Text.strong "Exposure"
+            Input "Exposure (seconds)" type=number bind=exposure
+            Input "Number of frames" type=number bind=frames
+            Slider bind=gain min=0 max=300
+            Text.caption "Gain {gain}"
+            Select "Binning" items=["1x1","2x2","3x3"] bind=binning
+            SegmentedButton bind=filter items=["L","R","G","B"]
+            Text.muted "Total {duration(frames*exposure)}"
+          Card gap=8
+            Text.strong "Sequence"
+            Progress {captured/frames}
+            Text.caption "{round(captured/frames*100,0)}% complete"
+          Card gap=8
+            Text.strong "Histogram"
+            BarChart values=[2,5,14,30,22,9,3] labels=["0","1","2","3","4","5","6"] h=100
+
+### Alignment
+state tab="align"
+state step=0
+state stars=[{"name":"Vega","done":false,"err":0},{"name":"Arcturus","done":false,"err":0},{"name":"Capella","done":false,"err":0}]
+state centered=false
+App
+  Sidebar
+    Brand "Astrolabe Remote" icon="travel_explore"
+    NavItem "Sky" icon="public" selected={tab=="sky"} onTap={tab="sky"; go sky}
+    NavItem "Imaging" icon="photo_camera" selected={tab=="imaging"} onTap={tab="imaging"; go imaging}
+    NavItem "Alignment" icon="my_location" selected={tab=="align"} onTap={tab="align"}
+    NavItem "Night plan" icon="event_note" selected={tab=="plan"} onTap={tab="plan"; go night-plan}
+  Main
+    Nav
+      Heading "Three star alignment" level=1
+      Text.muted "Step {min(step+1,3)} of 3"
+    Column pad=24 gap=16 maxw=720
+      Stepper bind=step steps=["Vega","Arcturus","Capella"]
+      each s in stars
+        Card gap=8
+          Row between middle
+            Row gap=8 middle
+              Icon "check_circle" visible={s.done}
+              Icon "radio_button_unchecked" visible={!s.done}
+              Text.strong "{s.name}"
+            if s.done
+              Badge.success "Error {s.err} arcmin"
+            if !s.done
+              Badge.neutral "Waiting"
+      if step<3
+        Card gap=12
+          Text.strong "Slew to {stars[step].name}"
+          Text.muted "Center the star in the crosshair, then confirm."
+          Row gap=8
+            Button.outline "Slew to star" icon="gps_fixed" onTap={toast "Slewing to {stars[step].name}"}
+            Toggle "Star is centered" bind=centered
+          Button "Confirm star" disabled={!centered} onTap={stars=setAt(stars,step,with(with(stars[step],"done",true),"err",round(abs(2.4-step*0.7),1))); step=step+1; centered=false}
+      if step==3
+        Card gap=8
+          Text.success "Alignment complete"
+          Text.muted "Mean error {round(sum(stars,s=>s.err)/3,1)} arcmin"
+          Row gap=8
+            Button "Go to sky" onTap={go sky}
+            Button.outline "Redo alignment" onTap={step=0; stars=map(stars,s=>with(with(s,"done",false),"err",0))}
+
+### Night plan
+state tab="plan"
+state plan=[{"id":"m31","name":"M31 Andromeda Galaxy","alt":62,"start":"22:10","frames":40},{"id":"m45","name":"M45 Pleiades","alt":55,"start":"23:00","frames":30},{"id":"m42","name":"M42 Orion Nebula","alt":48,"start":"00:20","frames":60},{"id":"m13","name":"M13 Hercules Cluster","alt":33,"start":"02:15","frames":25}]
+state sel=""
+App
+  Sidebar
+    Brand "Astrolabe Remote" icon="travel_explore"
+    NavItem "Sky" icon="public" selected={tab=="sky"} onTap={tab="sky"; go sky}
+    NavItem "Imaging" icon="photo_camera" selected={tab=="imaging"} onTap={tab="imaging"; go imaging}
+    NavItem "Alignment" icon="my_location" selected={tab=="align"} onTap={tab="align"; go alignment}
+    NavItem "Night plan" icon="event_note" selected={tab=="plan"} onTap={tab="plan"}
+  Main
+    Nav
+      Heading "Night plan" level=1
+      Button "Add target" icon="add" onTap={open addTarget}
+    Column pad=24 gap=16
+      Text.muted "Ordered by altitude, highest first"
+      Card gap=0
+        each t in sortByDesc(plan,p=>p.alt)
+          ListTile "{t.name}" subtitle="Starts {t.start}, {t.frames} frames" menu=rowMenu
+            Badge.info "{t.alt} deg"
+            IconButton "more_vert" tooltip="Options" onTap={sel=t.id; open rowMenu}
+      Card gap=8
+        Text.strong "Altitude tonight"
+        AreaChart labels=["22h","00h","02h","04h"] series=[{"name":"M31","values":[62,70,64,50]},{"name":"M42","values":[30,48,52,40]}] h=180
+  Menu#rowMenu end
+    MenuItem "Go to now" icon="gps_fixed" onTap={emit goto sel; go sky}
+    MenuItem "Move up" icon="arrow_upward" onTap={plan=updateWhere(plan,p=>p.id==sel,p=>with(p,"alt",p.alt+10))}
+    MenuItem "Remove" icon="delete" onTap={plan=removeWhere(plan,p=>p.id==sel)}
+  Dialog#addTarget "Add target" "Pick an object for tonight"
+    Input "Name" bind=newName
+    Input "Frames" type=number bind=newFrames
+    Button "Add" onTap={newName=="" ? toast "Enter a name" : {plan=append(plan,{"id":lower(newName),"name":newName,"alt":40,"start":"03:00","frames":newFrames}); newName=""; close}}

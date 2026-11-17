@@ -1,0 +1,3 @@
+App: Epoch, a history explorer. A long horizontal timeline you drag and zoom from millennia down to years, with events as cards clustering into a count when far out and opening when close; two parallel lanes of regions to compare; a card with a picture, a date and a short text; a filter of themes as coloured chips; a map button showing where an event happened; a quiz that asks you to put cards in order.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.
