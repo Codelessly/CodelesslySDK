@@ -311,6 +311,17 @@ a core good enough that definitions come out short and right.
 - D23. The corpus goal is met (5,199 words). No more answers are written for size. The next batch, when the
   fixes above are merged, is the 313 briefs again in self-defining mode, as the corpus of definitions.
 
+**Addendum: universal words merged (D6 to D9).** One table (`notationUniversal`, design note 21), applied
+once where a line is read and inherited by definitions: `color`, `size`, `icon`, `disabled`, `readonly`,
+`required`, `tooltip`; `reorder` with `onReorder`; `selectable` with `onSelect` and the selection kept in a list
+variable (tap, Ctrl, Shift, arrows, Ctrl+A, announced; built on our own reactions, no Material widget);
+`removable` with `onRemove`; `Input`'s words (`clearable`, `maxlength`, `caps`, `autogrow`, `prefix`, `suffix`…);
+a bare number where the text goes. On the 313 answers: resolved **31.5% to 40.5%** (462 words now resolve as
+universal), with no new grammar issue beyond the 8 `Input fuzzy` lines it now explains. The count is 5,154:
+some flags that were counted twice are one word now. On the first 40 answers with all definitions: 68.4%.
+What it left unknown and is not universal: `bind` and `items` on types we do not have, `labels`, `max`,
+`from`/`to`, which a definition gives.
+
 **To check at review 5.** With D19 to D21 merged: grammar issues per 1,000 lines on self-defining answers
 (expect under 10), the share of definitions that validate, and for the ten most defined words whether the
 definitions agree enough to promote one.

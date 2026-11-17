@@ -372,6 +372,9 @@ Future<void> main(List<String> args) async {
           definedAt[u.line] = u;
           continue;
         }
+        // A universal word read (codelessly_api docs/design/21): counted with
+        // every word (vocabulary_words.dart), not a word we lack.
+        if (u.kind == 'universal') continue;
         if (u.kind == 'type') {
           unknownAt.add(u.line);
           standIns++;

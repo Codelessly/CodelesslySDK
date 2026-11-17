@@ -1,0 +1,71 @@
+// The universal words (codelessly_api docs/design/21-universal-words.md) on several kinds of line: color on a
+// container, a text, an icon and controls; size as a step of the scale; icon on a chip and a tile; disabled on a
+// card; readonly, required and clearable on fields; a list chosen from (selectable), one reordered with no handle
+// (reorder), removable chips and rows; a bare number where the text goes.
+// tool/notation/notation.sh expand universal.txt --design-system design_systems/cards --named --id universal --width 1280 --open --out <site>/universal.json
+// tool/render/render.sh <site>/universal.json --design-system design_systems/cards --out <dir> --sizes 1440x900,834x1112,390x844 --theme light (and dark)
+state tasks=[{"id":"t1","name":"Write the brief","due":"Mon"},{"id":"t2","name":"Review the answers","due":"Tue"},{"id":"t3","name":"Count the words","due":"Wed"},{"id":"t4","name":"Publish the journal","due":"Fri"}]
+state picked=["t2","t3"]
+state steps=["Draft","Review","Ship"]
+state tags=["urgent","design","copy"]
+state q=""
+state name=""
+state notify=true
+state level=40
+state said=""
+Page
+  Section
+    Heading "Universal words" level=1
+    Text.muted "One meaning on every line: a colour, a size, an icon, selected, disabled, a list chosen from and reordered."
+    Row gap=24 top
+      Card grow gap=12
+        Text.title "Colour and size"
+        Row gap=8 middle color=#FFB91C1C
+          Icon "warning" size=small
+          Text "A row's colour inks what is in it"
+        Text "A large text" size=large color=#FF2563EB
+        Row gap=12 middle
+          Toggle bind=notify color=#FF16A34A
+          Slider bind=level color=#FF9333EA
+          Button "Save" color=#FF16A34A size=small
+          Button.outline "Later" color=#FF2563EB size=small
+        Row gap=8 middle
+          Badge 3
+          Ring 0.6 size=small
+          Progress 0.4 size=small grow
+      Card grow gap=12
+        Text.title "Icons and chips"
+        Row gap=8 wrap
+          each t in tags
+            Chip "{t}" icon="sell" color=#FF2563EB onDelete={tags=without(tags,t)}
+        ListTile "Inbox" "4 new" icon="inbox"
+        Row gap=8 middle pad=8 border=#FFE5E7EB radius=8 removable onRemove={said="Row removed"}
+          Icon "description"
+          Text "A row with an x at its end" grow
+    Row gap=24 top
+      Card grow gap=12
+        Text.title "Fields"
+        Input "Name" bind=name required clearable
+        Input "Search" bind=q icon="search" clearable
+        Input "Code" bind=code maxlength=6 caps center
+        Input "Locked" value="Read only" readonly
+      Card grow gap=12 disabled
+        Text.title "A disabled card"
+        Text.muted "Nothing in it takes a tap."
+        Button "Not now" onTap={said="tapped"}
+    Row gap=24 top
+      Card grow gap=8
+        Text.title "Choose rows (tap, Ctrl, Shift, Ctrl A)"
+        Text.muted "{length(picked)} chosen{said == "" ? "" : " · " + said}"
+        Column gap=4 selectable bind=picked onSelect={said="selection changed"}
+          each t in tasks
+            Row gap=8 pad=8 radius=6 middle
+              Text "{t.name}" grow
+              Text.muted "{t.due}"
+      Card grow gap=8
+        Text.title "Reorder (long press, or Alt and the arrows)"
+        Column gap=4 reorder onReorder={said="now first: " + result[0]}
+          each s in steps
+            Row gap=8 pad=8 radius=6 middle border=#FFE5E7EB
+              Icon "drag_indicator" size=small
+              Text "{s}"
