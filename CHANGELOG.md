@@ -153,6 +153,11 @@
   input sent nothing. The blocks wire `onSubmitted` correctly and a device submits. The step now does what the
   platform does: it sends a one-line field its action key (its `submitted` reactions run) and types the new line
   into a multi-line one.
+- Cards: `SortMenu bind=sort options=[…]` drew an open panel of options on first paint, over what was beside it:
+  SSUI's SortMenu is the body of a menu, not a control. Under Cards it is a closed control, 36 tall: the page's
+  dropdown showing the choice (its menu opens on a tap, Enter or Space; the arrows and Enter choose) and the arrow
+  button that flips the direction beside it. A repair in `design_systems/cards/tool/repairs.py`, so a rebuild keeps
+  it.
 
 ## 32.0.0
 

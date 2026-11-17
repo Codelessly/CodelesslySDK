@@ -5,7 +5,8 @@ build.py writes every component it copies from SSUI (rebranded) and every block 
 made to one of those files by hand, or by an agent fixing a block on a real page, would be lost at the next
 build. This module holds such changes and build.py applies them last:
 
-1. Repairs written here as code (REPAIRS): the menu, which SSUI drew for a dense editor.
+1. Repairs written here as code (REPAIRS): the menu, which SSUI drew for a dense editor; the sort menu, which
+   SSUI drew as an open panel.
 2. Recorded patches, one file per component in tool/repairs/<Name>.json: a JSON merge patch (maps merge, null
    removes a key, anything else replaces) over what the build generates.
 
@@ -83,7 +84,54 @@ def _menu_item(doc):
     return doc
 
 
-REPAIRS = {'MenuPopover': _menu_popover, 'MenuItem': _menu_item}
+def _sort_menu(doc):
+    """SSUI's SortMenu is the body of a menu: an open panel of options, meant to be put in a popover. Written on
+    a page (`SortMenu bind=sort options=[...]`) it drew that panel open, over what is beside it. Under Cards it
+    is a closed control: a dropdown showing the choice (its menu opens on a tap, as a Select's does) and, beside
+    it, the arrow that flips the direction."""
+    n = doc['nodes']
+    if doc['roots'] == ['sort']:
+        return doc
+    flip, arrow = n['flip'], n['arrow']
+    flip.pop('bind', None)
+    flip['layout'] = {'width': 28, 'height': 28}
+    flip['decoration'] = {'radius': 9}
+    arrow['props']['size'] = 15
+    arrow['layout'] = {'width': 15, 'height': 15}
+    doc['roots'] = ['sort']
+    doc['nodes'] = {
+        'sort': {
+            'type': 'row',
+            'children': ['choice', 'flip'],
+            'props': {'crossAxisAlignment': 'center', 'spacing': 4},
+            'layout': {'width': {'hug': 216}, 'height': {'hug': 36}},
+        },
+        # The page's own dropdown (what `Select` is on a page): the theme's field, its menu on a tap.
+        'choice': {
+            'type': 'dropdown',
+            'layout': {'width': 184, 'height': 36},
+            'props': {'style': 'inputText', 'hint': 'Sort by'},
+            'bind': {'props.items': '${props.options}', 'props.value': '${props.value}'},
+            'actions': [{
+                'trigger': {'type': 'changed'},
+                'actions': [
+                    {'type': 'setVariable', 'variable': 'props.value', 'value': '${result}'},
+                    {'type': 'componentEvent', 'event': 'onChanged', 'value': '${result}'},
+                ],
+            }],
+        },
+        'flip': flip,
+        'arrow': arrow,
+    }
+    doc['widget']['doc'] = ('A closed control that picks what a list is sorted by (a dropdown: its menu opens on a tap) and which way '
+                            '(the arrow beside it). The choice and the direction (asc or desc) are kept in your variables. '
+                            'Fires onChanged and onDirectionChanged.')
+    for preview in doc.get('previews', []):
+        preview['size'] = [216, 36]
+    return doc
+
+
+REPAIRS = {'MenuPopover': _menu_popover, 'MenuItem': _menu_item, 'SortMenu': _sort_menu}
 
 # A removed key in a recorded patch. JSON null cannot say it: a document may hold a null of its own.
 REMOVED = {'$removed': True}
