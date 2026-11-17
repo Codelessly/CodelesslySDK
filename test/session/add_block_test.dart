@@ -32,8 +32,8 @@ String _texts(WidgetTester tester) {
 }
 
 const _card = '''
-ChatCard "Team lunch poll" "Where on Friday?" icon:"poll" status:"Closed"
-  PollResults options:["Ramen bar","Taco truck","Pizza place"] votes:{[9,6,5]} choice:{"Taco truck"} note:"Votes are anonymous"
+ChatCard "Team lunch poll" "Where on Friday?" icon="poll" status="Closed"
+  PollResults options=["Ramen bar","Taco truck","Pizza place"] votes={[9,6,5]} choice={"Taco truck"} note="Votes are anonymous"
 ''';
 
 void main() {

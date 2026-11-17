@@ -33,17 +33,17 @@ const _page = '''
 state sort="Newest"
 Page
   Section
-    Row gap:12 middle
-      Button.outline#sortBtn "Sort" icon:"sort" -> open sortMenu
+    Row gap=12 middle
+      Button.outline#sortBtn "Sort" icon="sort" onTap={open sortMenu}
       Text#sorted "Sorted by {sort}"
       Button#other "Other"
 
 Menu#sortMenu
-  MenuItem#byNewest "Newest" icon:"schedule" -> sort="Newest"
-  MenuItem#byPrice "Price" icon:"sell" -> sort="Price"
-  MenuItem#byName "Name" enabled:false -> sort="Name"
-  MenuItem#byRating "Rating" -> sort="Rating"
-  MenuItem#byPopular "Popular" -> sort="Popular"
+  MenuItem#byNewest "Newest" icon="schedule" onTap={sort="Newest"}
+  MenuItem#byPrice "Price" icon="sell" onTap={sort="Price"}
+  MenuItem#byName "Name" enabled=false onTap={sort="Name"}
+  MenuItem#byRating "Rating" onTap={sort="Rating"}
+  MenuItem#byPopular "Popular" onTap={sort="Popular"}
 ''';
 
 String _texts(WidgetTester tester) {

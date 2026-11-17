@@ -33,10 +33,10 @@ String _texts(WidgetTester tester) {
 }
 
 const _card = '''
-ChatCard "Delete 214 old files?" "Shared drive cleanup" icon:"delete_rounded" status:"Awaiting you"
+ChatCard "Delete 214 old files?" "Shared drive cleanup" icon="delete_rounded" status="Awaiting you"
   Paragraph "Nothing is removed until you approve."
-  Details rows:[["Folder","Archive / 2019"],["Files","214"]]
-  ActionButton "Approve deletion" tone:"danger" -> emit decision "approve"
+  Details rows=[["Folder","Archive / 2019"],["Files","214"]]
+  ActionButton "Approve deletion" tone="danger" onPressed={emit decision "approve"}
 ''';
 
 void main() {

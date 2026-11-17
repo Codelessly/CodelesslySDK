@@ -19,7 +19,7 @@ Future<api.DesignSystem> _load(String id) async {
 }
 
 const _card = '''
-Card gap:8
+Card gap=8
   Text.title "Billing"
   Text.muted "Next invoice on the 1st"
   Badge.success "Paid"

@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "PollResults",
-  "doc": "A poll's results after the vote: PollResults options:[\"A\",\"B\"] votes:[12,7] choice:\"A\" note:\"votes are anonymous\" draws one row per option with its share as a bar and a percentage, the leader in the accent, the voter's choice marked, and the total votes at the foot.",
+  "doc": "A poll's results after the vote: PollResults options=[\"A\",\"B\"] votes=[12,7] choice=\"A\" note=\"votes are anonymous\" draws one row per option with its share as a bar and a percentage, the leader in the accent, the voter's choice marked, and the total votes at the foot.",
   "props": [
    {
     "key": "options",

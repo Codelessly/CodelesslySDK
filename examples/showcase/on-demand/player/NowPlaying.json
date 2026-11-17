@@ -4,7 +4,7 @@
  "roots": ["wrap"],
  "widget": {
   "type": "NowPlaying",
-  "doc": "A music player with drawn album art: NowPlaying bind:playing title:\"Midnight City\" artist:\"M83\" kind:\"vinyl\" tone:\"lilac\" elapsed:{t} length:243 -> i=result==\"next\"?i+1:i-1 (the center button flips your playing variable; onSkip reports \"previous\" or \"next\"; advance elapsed yourself with an every 1s when playing line).",
+  "doc": "A music player with drawn album art: NowPlaying bind=playing title=\"Midnight City\" artist=\"M83\" kind=\"vinyl\" tone=\"lilac\" elapsed={t} length=243 onTap={i=result==\"next\"?i+1:i-1} (the center button flips your playing variable; onSkip reports \"previous\" or \"next\"; advance elapsed yourself with an every 1s when playing line).",
   "props": [
    {"key": "playing", "type": {"kind": "variable", "of": {"kind": "boolean", "flutter": "bool"}}, "default": false, "doc": "The name of your true/false variable: the center button flips it between play and pause."},
    {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Midnight City", "doc": "The track.", "required": true},

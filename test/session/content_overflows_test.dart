@@ -20,13 +20,13 @@ Future<List<String>> _shown(WidgetTester tester, String notation, {double width 
 
 void main() {
   testWidgets('fixed cells wider than the row are reported, with by how much', (tester) async {
-    final found = await _shown(tester, 'Column\n  Row gap:8\n    Box w:140 h:40 fill:#FF111827\n    Box w:140 h:40 fill:#FF111827\n    Box w:140 h:40 fill:#FF111827\n');
+    final found = await _shown(tester, 'Column\n  Row gap=8\n    Box w=140 h=40 fill=#FF111827\n    Box w=140 h=40 fill=#FF111827\n    Box w=140 h=40 fill=#FF111827\n');
     expect(found, isNotEmpty);
     expect(found.join('\n'), contains('past the right edge'));
   });
 
   testWidgets('a row that fits, and a row that scrolls sideways, are not', (tester) async {
-    expect(await _shown(tester, 'Column\n  Row gap:8\n    Box w:80 h:40 fill:#FF111827\n    Box w:80 h:40 fill:#FF111827\n'), isEmpty);
-    expect(await _shown(tester, 'Column\n  Row scroll gap:8\n    Box w:140 h:40 fill:#FF111827\n    Box w:140 h:40 fill:#FF111827\n    Box w:140 h:40 fill:#FF111827\n'), isEmpty);
+    expect(await _shown(tester, 'Column\n  Row gap=8\n    Box w=80 h=40 fill=#FF111827\n    Box w=80 h=40 fill=#FF111827\n'), isEmpty);
+    expect(await _shown(tester, 'Column\n  Row scroll gap=8\n    Box w=140 h=40 fill=#FF111827\n    Box w=140 h=40 fill=#FF111827\n    Box w=140 h=40 fill=#FF111827\n'), isEmpty);
   });
 }

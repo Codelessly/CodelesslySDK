@@ -237,20 +237,21 @@ A layout is data, so an agent can write one. Five things in this repository are 
 
   ```
   state seats=2
-  Column gap:12 pad:16
-    StatusBadge "Active" tone:success
-    Stepper bind:seats min:1 max:9
-    Panel "Billing" subtitle:"Plan and invoices"
+  Column gap=12 pad=16
+    StatusBadge "Active" tone=success
+    Stepper bind=seats min=1 max=9
+    Panel "Billing" subtitle="Plan and invoices"
       Text.muted "You have {seats} seats."
-    TrialBanner "7 days left in your trial" -> emit upgrade
+    TrialBanner "7 days left in your trial" onUpgrade={emit upgrade}
   ```
 
   `tool/notation/notation.sh expand <file.txt> --design-system design_systems/ssui` turns that into a layout
   document, and says on the line what a component does not take; `tool/notation/notation.sh prompt` prints what a
-  model is told to write it. A colon gives a node a value (`min:1`), braces hold a value worked out from the state
-  (`visible:{seats > 2}`, `"{seats} seats"`), `bind:name` keeps a control's value in a variable, `=` sets a
-  variable (`state seats=2`, `-> seats=seats+1`) and `->` is what a node does. A file written before 2026-11-16
-  (`=seats`, `visible:=seats>2`) is rewritten with `tool/notation/notation.sh format <file.txt>`. The script uses the codelessly_api checked out beside this repository
+  model is told to write it. Everything after a node's text is `key=value`; a value worked out from the state is
+  in braces (`visible={seats > 2}`, `"{seats} seats"`); `bind=name` keeps a control's value in a variable; what a
+  node does is an event with its actions in braces (`onTap={seats=seats+1}`). A file written before 33.0.0
+  (`min:1`, `=seats`, `-> emit upgrade`) is rewritten with `tool/notation/notation.sh migrate <file.txt>`. The
+  script uses the codelessly_api checked out beside this repository
   (`../CodelesslyAPI`, its master branch): the notation is newer than the published package.
 - **A render tool** ([`tool/render`](https://github.com/Codelessly/CodelesslySDK/tree/master/tool/render)). It
   validates a document, draws it at the sizes asked for, and drives it (`--tap`, `--type`, `--drag`, `--scroll`), so

@@ -11,11 +11,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const _card = '''
-Column gap:12 pad:16
-  Slider bind:volume
-  Input "Email" bind:email
-  Toggle "Notifications" bind:notify
-  Button "Save" -> emit save
+Column gap=12 pad=16
+  Slider bind=volume
+  Input "Email" bind=email
+  Toggle "Notifications" bind=notify
+  Button "Save" onTap={emit save}
 ''';
 
 List<T> _all<T extends RenderObject>(WidgetTester tester) {
