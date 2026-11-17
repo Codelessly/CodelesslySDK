@@ -4,6 +4,10 @@ Needs codelessly_api from its master branch (universal words, docs/design/21-uni
 
 ### Added
 
+- **The vocabulary tool lists the named words used in a shape we do not take** (Review 6, D30): a section of
+  `VOCABULARY.md` ranks, by answers, the parameters, flags, events and variants answers gave a component of the
+  design system or a word it defines that it does not take (the glossary's bug list); the sections that were
+  "on words we have" are now "on core words".
 - **Cards' words take the shapes the self-defining answers agreed on** (the vocabulary loop's Review 5, D25;
   codelessly_api docs/design/20-defined-words.md section 10). From the harvest of `corpus-define/d01` and `d02`
   (111 answers), where three or more answers defined a word, or a word Cards already had: `Timeline` is first a

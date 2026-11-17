@@ -651,9 +651,27 @@ Future<void> main(List<String> args) async {
   }
 
   section('Aliases used', 'Names read as a word we have (the alias table).', _sorted(others['alias']!.values), target: true);
-  section('Parameters we do not have, on words we have', 'Left out of the document.', _sorted(others['parameter']!.values));
-  section('Flags we do not have, on words we have', 'Left out of the document.', _sorted(others['flag']!.values));
-  section('Events we do not have, on words we have', 'Their actions are read; the event is left out.', _sorted(others['event']!.values));
+  // A named word (a component of the design system, or a word it defines in
+  // the notation) given what it does not take is a shape we refuse: with the
+  // glossary in the open prompt (the vocabulary loop's Review 6, D30) that
+  // list is the glossary's bug list, apart from the core's.
+  bool named(_Word w) => w.on != null && (table.definitions.containsKey(w.on) || (components.contains(w.on) && !notationTypes.containsKey(w.on)));
+  final refused = _sorted([for (final k in const ['parameter', 'flag', 'event', 'variant']) ...others[k]!.values.where(named)]);
+  md
+    ..writeln()
+    ..writeln('## Named words used in a shape we do not take')
+    ..writeln()
+    ..writeln('A component of ${ds.name} or a word it defines, given a parameter, flag, event or variant it does not take (left out; an event\'s actions are read), '
+        'most answers first. These are signatures to widen or aliases to add: the shape writers expect behind a name.')
+    ..writeln()
+    ..writeln('| files | uses | on | how | kind | word | an example |')
+    ..writeln('|---|---|---|---|---|---|---|');
+  for (final w in refused) {
+    md.writeln('| ${w.files.length} | ${w.uses} | ${w.on} | ${table.definitions.containsKey(w.on) ? 'definition' : 'component'} | ${w.kind} | ${w.word} | ${w.examples.isEmpty ? '' : code(w.examples.first)} |');
+  }
+  section('Parameters we do not have, on core words', 'Left out of the document.', _sorted(others['parameter']!.values.where((w) => !named(w))));
+  section('Flags we do not have, on core words', 'Left out of the document.', _sorted(others['flag']!.values.where((w) => !named(w))));
+  section('Events we do not have, on core words', 'Their actions are read; the event is left out.', _sorted(others['event']!.values.where((w) => !named(w))));
   section('Action verbs we do not have', 'Left out of the event they are in.', _sorted(others['verb']!.values), withOn: false);
   section('Formula functions we do not have', 'Counted where a formula that calls one does not parse (once per formula): the value it gives is empty.', _sorted(others['function']!.values), withOn: false);
   section('Variants we do not have', 'The plain type is drawn.', _sorted(others['variant']!.values), withOn: false);
