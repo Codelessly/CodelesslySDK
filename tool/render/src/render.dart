@@ -22,6 +22,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk/src/runtime/gestures/drag_and_drop.dart' show RenderDragSource;
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
 import 'package:codelessly_sdk/src/render/controls/buttons.dart' show RenderButton;
+import 'package:codelessly_sdk/src/render/controls/calendar.dart' show RenderCalendar;
 import 'package:codelessly_sdk/src/render/controls/kit.dart' show RenderControl;
 import 'package:codelessly_sdk/src/render/controls/kit_bars.dart' show RenderItemBar;
 import 'package:codelessly_sdk/src/render/controls/segmented.dart' show RenderSegmentedButton;
@@ -1634,6 +1635,24 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
 
   // Where to put the pointer for [id], or the problem.
   Future<(ui.Offset?, String?)> pointAt(String target, String verb) async {
+    // An inline calendar has one node but many dates: name the ISO day.
+    final datePart = RegExp(r'^(.*)@(\d{4}-\d{2}-\d{2})$').firstMatch(target);
+    if (datePart != null) {
+      final id = datePart[1]!, day = DateTime.tryParse(datePart[2]!);
+      final found = _locate(binding, id);
+      if (found.box == null) return (null, '--$verb $target: ${found.problem}.');
+      RenderCalendar? calendar;
+      void visit(RenderObject o) {
+        if (o is RenderCalendar && o.inline) calendar = o;
+        if (calendar == null) o.visitChildren(visit);
+      }
+      visit(found.box!);
+      if (calendar == null || day == null) return (null, '--$verb $target: "$id" is not an inline calendar date.');
+      await centerInView(found.box!);
+      final cell = calendar!.cellOf(day);
+      if (cell == null) return (null, '--$verb $target: ${datePart[2]} is not in the month shown by "$id".');
+      return (calendar!.localToGlobal(calendar!.cellRect(cell).center), null);
+    }
     // `<id>@<n>`: the n-th part (from 0) of a control with several: a
     // segment, a tab, a navigation destination.
     final part = RegExp(r'^(.*)@(\d+)$').firstMatch(target);
@@ -1742,6 +1761,7 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         control = o;
         if (o is! RenderButton && o is! RenderListTile) return true;
       }
+      if (o is RenderCalendar && o.inline) return true;
       if (o is NodeBox && control != null) {
         if (o.source.node(o.id)?.actions.isNotEmpty ?? false) return true;
         control = null;
