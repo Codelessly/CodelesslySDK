@@ -28,6 +28,8 @@ Future<(NodeTree, RecordedInteractions, RenderCalendar)> _show(
   double width = 800,
   bool dark = false,
   bool rtl = false,
+  bool range = true,
+  Object? marks,
 }) async {
   tester.view.physicalSize = Size(width, 900);
   tester.view.devicePixelRatio = 1;
@@ -40,7 +42,8 @@ Future<(NodeTree, RecordedInteractions, RenderCalendar)> _show(
         'label': 'Choose your nights',
         'disabledDates': ['2026-11-21'],
         'dayPrices': {'2026-11-20': '£225', '2026-11-22': '£245'},
-        'marks': {'2026-11-24': 'Sold'},
+        'marks': marks ?? {'2026-11-24': 'Sold'},
+        if (!range) 'range': false,
       }, rtl ? {'textDirection': 'rtl'} : const {}),
     },
     width: width,
@@ -102,11 +105,38 @@ void main() {
           .toStringDeep();
       expect(semantics, contains('£225'));
       expect(semantics, contains('unavailable'));
-      expect(semantics, contains('check-out'));
+      expect(semantics, contains(', end'));
+      expect(calendar.semanticsName, contains('start'));
+      expect(semantics, isNot(contains('check-')));
       expect(tree.boxOf('stay'), isNotNull);
       handle.dispose();
     },
   );
+
+  testWidgets('range false: each pick is the one day, and nothing speaks of a start or an end', (tester) async {
+    final (_, recorded, calendar) = await _show(tester, width: 390, range: false);
+    expect(calendar.range, isFalse);
+    await tester.tapAt(_day(calendar, 22));
+    await tester.pump();
+    await tester.tapAt(_day(calendar, 23));
+    await tester.pump();
+    expect(isoDay(calendar.value!), '2026-11-23');
+    expect(calendar.rangeEnd, isNull);
+    expect(recorded.fired, ['stay changed', 'stay changed']);
+    expect(calendar.semanticsName, allOf(contains('Choose your nights'), isNot(contains('start')), isNot(contains(' end'))));
+  });
+
+  testWidgets('marks worked out as a list: a day gets a dot, a record its label', (tester) async {
+    final handle = tester.ensureSemantics();
+    await _show(tester, marks: [
+      '2026-11-25',
+      {'date': '2026-11-26', 'title': 'Dentist'},
+    ]);
+    final semantics = tester.getSemantics(find.byType(NodeView)).toStringDeep();
+    expect(semantics, contains('Dentist'));
+    expect(semantics, contains('•'));
+    handle.dispose();
+  });
 
   testWidgets(
     'one Tab reaches the calendar; arrows, Home, End and Space pick on a phone in dark mode',

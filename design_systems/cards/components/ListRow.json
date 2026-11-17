@@ -62,6 +62,15 @@
     },
     "default": true,
     "doc": "A hairline under the row."
+   },
+   {
+    "key": "mark",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "What to mark in the text (a search query: what fuzzy matched is drawn bold and underlined; empty: nothing)."
    }
   ],
   "events": [
@@ -250,6 +259,9 @@
     "height": {
      "hug": 19
     }
+   },
+   "bind": {
+    "props.runs": "${= matchRuns(props.title, props.mark)}"
    }
   },
   "subtitle": {
@@ -269,7 +281,8 @@
     }
    },
    "bind": {
-    "visible": "${= props.subtitle != ''}"
+    "visible": "${= props.subtitle != ''}",
+    "props.runs": "${= matchRuns(props.subtitle, props.mark)}"
    }
   },
   "trailing": {

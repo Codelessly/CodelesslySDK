@@ -220,8 +220,13 @@ Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request, {do
 
   final barrierColor = color('barrierColor');
   final layout = confirmLayoutOf(action, bound);
-  final presentation = resolvePresentation(action.presentation, MediaQuery.maybeSizeOf(context)?.width,
-      sheetBelowWidth: sheetBelowWidth ?? defaultSheetBelowWidth(api.Breakpoints.defaults));
+  final screenWidth = MediaQuery.maybeSizeOf(context)?.width;
+  final phoneBelow = sheetBelowWidth ?? defaultSheetBelowWidth(api.Breakpoints.defaults);
+  final presentation = resolvePresentation(action.presentation, screenWidth, sheetBelowWidth: phoneBelow);
+  // The buttons as a dialog's ends in the notation: on a phone they share
+  // its width equally, unless the look places them itself.
+  final phone = screenWidth != null && screenWidth < phoneBelow;
+  final placed = const ['expandButtons', 'stackButtons', 'buttonsAlignment'].any(action.style.containsKey);
   // Named by its title; Escape answers no unless the action blocks it.
   Widget buildDialog(BuildContext context) => ModalFocus(
       dismissible: action.barrierDismissible,
@@ -270,7 +275,7 @@ Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request, {do
           iconDiscSize: look.numberOr('iconDiscSize', 52),
           iconDiscBorder: side('iconDiscBorder', 'iconDiscBorderColor'),
           centered: look.flag('centered'),
-          expandButtons: look.flag('expandButtons'),
+          expandButtons: look.flag('expandButtons') || (phone && !placed),
           buttonsAlignment: switch (action.style['buttonsAlignment']) {
             'start' => MainAxisAlignment.start,
             'center' => MainAxisAlignment.center,
@@ -470,7 +475,9 @@ class ThemedConfirmDialog extends StatelessWidget {
     final onCancel = cancelTextColor ?? buttonStyle?.color?.flutter ?? onSurface;
     // A set height is the buttons' height exactly, not just their least.
     final buttonSize = Size(buttonMinWidth, buttonHeight ?? 44);
-    final buttonMaxSize = buttonHeight == null ? null : Size(double.infinity, buttonHeight!);
+    // Side by side at the end a button is no wider than a dialog's end
+    // buttons in the notation (240): a long label wraps.
+    final buttonMaxSize = Size(expandButtons || stackButtons ? double.infinity : 240, buttonHeight ?? double.infinity);
     final buttonPadding = this.buttonPadding ?? const EdgeInsets.symmetric(horizontal: 18);
     final dialogSide = border ?? theme.border;
     final dialogShadows = shadows ?? theme.shadows;
@@ -490,9 +497,12 @@ class ThemedConfirmDialog extends StatelessWidget {
             stops: confirmGradient.length == 3 ? const [0, 0.5, 1] : null,
           );
 
+    // The focus starts on the yes, so Enter answers what was asked; on a
+    // destructive one it starts on Cancel, so Enter does no harm. Enter and
+    // Space press the focused button, Tab moves between them, Escape cancels.
     final cancel = TextButton(
       key: const ValueKey('codelessly-confirm-cancel'),
-      autofocus: true,
+      autofocus: destructive,
       onPressed: () => Navigator.of(context).pop(false),
       style: TextButton.styleFrom(
         foregroundColor: onCancel,
@@ -510,6 +520,7 @@ class ThemedConfirmDialog extends StatelessWidget {
     );
     final confirm = FilledButton(
       key: const ValueKey('codelessly-confirm-ok'),
+      autofocus: !destructive,
       onPressed: () => Navigator.of(context).pop(true),
       style: FilledButton.styleFrom(
         backgroundColor: gradient == null ? confirmFill : Colors.transparent,

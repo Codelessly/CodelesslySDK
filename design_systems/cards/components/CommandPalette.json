@@ -107,6 +107,15 @@
     },
     "default": "No results found",
     "doc": "Shown when nothing matches."
+   },
+   {
+    "key": "mark",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "What to mark in the text (a search query: what fuzzy matched is drawn bold and underlined; empty: nothing)."
    }
   ],
   "events": [
@@ -442,6 +451,9 @@
     "height": {
      "hug": 20
     }
+   },
+   "bind": {
+    "props.runs": "${= matchRuns(item, props.mark)}"
    }
   },
   "chip": {

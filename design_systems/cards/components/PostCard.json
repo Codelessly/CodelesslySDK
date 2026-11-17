@@ -13,7 +13,8 @@
    {"key": "excerpt", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "One line of what it is about (empty: none)."},
    {"key": "author", "type": {"kind": "string", "flutter": "String"}, "default": "Priya Raman", "doc": "The author's name.", "required": true},
    {"key": "initials", "type": {"kind": "string", "flutter": "String"}, "default": "PR", "doc": "The author's initials, in the round plate."},
-   {"key": "meta", "type": {"kind": "string", "flutter": "String"}, "default": "Mar 12, 2025 · 9 min read", "doc": "The date and reading time, under the name."}
+   {"key": "meta", "type": {"kind": "string", "flutter": "String"}, "default": "Mar 12, 2025 · 9 min read", "doc": "The date and reading time, under the name."},
+   {"key": "mark", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "What to mark in the title and the excerpt (a search query: what fuzzy matched is drawn bold and underlined; empty: nothing)."}
   ],
   "events": [
    {"key": "onPressed", "doc": "The tile was tapped; the value is the title."}
@@ -117,14 +118,15 @@
   "title": {
    "type": "text",
    "props": {"text": "${props.title}", "style": "heading3Wide", "maxLines": 2, "overflow": "ellipsis"},
-   "layout": {"width": {"fill": 0}, "height": 54, "padding": [0, 2, 0, 0]}
+   "layout": {"width": {"fill": 0}, "height": 54, "padding": [0, 2, 0, 0]},
+   "bind": {"props.runs": "${= matchRuns(props.title, props.mark)}"}
   },
   "excerpt": {
    "type": "text",
    "media": [{"maxWidth": 699, "patch": {"props": {"maxLines": 2}}}],
    "props": {"text": "${props.excerpt}", "style": "mutedWide", "maxLines": 1, "overflow": "ellipsis"},
    "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
-   "bind": {"visible": "${= props.excerpt != ''}"}
+   "bind": {"visible": "${= props.excerpt != ''}", "props.runs": "${= matchRuns(props.excerpt, props.mark)}"}
   },
   "rule": {
    "type": "box",

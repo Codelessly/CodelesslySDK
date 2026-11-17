@@ -891,6 +891,19 @@ Future<void> _renderAll(
           if (scope.layer != null) 'inOverlay': true,
         });
       }
+      // A built-in confirm's button has Flutter's focus, not a control's.
+      final focusedBuiltIn = focusedBox == null ? _focusedBuiltIn(binding) : null;
+      if (focusedBuiltIn != null) {
+        report.focus.add({
+          'image': name,
+          'screen': label,
+          'size': sizeName,
+          'id': focusedBuiltIn.id,
+          'ring': FocusManager.instance.highlightMode == FocusHighlightMode.traditional,
+          if (_paragraphText(focusedBuiltIn.box) case final String text) 'text': text,
+          'inOverlay': true,
+        });
+      }
       if (args.dumpLayout) {
         final boxes = [
           for (final b in _boxes(binding))
@@ -905,6 +918,17 @@ Future<void> _renderAll(
               'h': double.parse(b.size.height.toStringAsFixed(1)),
               // What a text shows, as drawn: a check reads values from it.
               if (_shownText(b) case final String text) 'text': text,
+            },
+          // The built-in confirm's buttons, over the page.
+          for (final b in _builtIns(binding))
+            {
+              'id': b.id,
+              if (identical(b.element, focusedBuiltIn?.element)) 'focused': true,
+              'x': b.box.localToGlobal(ui.Offset.zero).dx.round(),
+              'y': b.box.localToGlobal(ui.Offset.zero).dy.round(),
+              'w': double.parse(b.box.size.width.toStringAsFixed(1)),
+              'h': double.parse(b.box.size.height.toStringAsFixed(1)),
+              if (_paragraphText(b.box) case final String text) 'text': text,
             },
         ];
         File(file.replaceFirst(RegExp(r'\.png$'), '.layout.json'))
@@ -1452,6 +1476,19 @@ Set<RenderObject> _offstage() {
       if (ro != null) out.add(ro);
     }
   }
+  // A route kept out of sight (a menu while the confirm its line asked is
+  // up) is built offstage.
+  void visit(RenderObject o) {
+    if (o is RenderOffstage && o.offstage) {
+      out.add(o);
+      return;
+    }
+    o.visitChildren(visit);
+  }
+
+  for (final view in WidgetsBinding.instance.renderViews) {
+    visit(view);
+  }
   return out;
 }
 
@@ -1812,6 +1849,10 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         }
       }
       if (owners.length == 1) return pointAt(owners.single, verb);
+      // A button of the built-in confirm dialog (`confirmOk`, `confirmCancel`).
+      for (final b in _builtIns(binding)) {
+        if (b.id == id) return (b.box.localToGlobal(b.box.size.center(ui.Offset.zero)), null);
+      }
     }
     if (box == null) {
       return (null, found.problem!.startsWith(_notShownHere) ? '$_notShownHere--$verb $id: ${found.problem!.substring(_notShownHere.length)}.' : '--$verb $id: ${found.problem}.');
@@ -2490,6 +2531,58 @@ List<RuntimeIssue> _check(
     }
   }
   return out;
+}
+
+/// The built-in confirm dialog's buttons are the SDK's widgets, not nodes:
+/// steps (`--tap confirmOk`) and the layout name them by these ids.
+const _builtInTargets = {
+  'confirmOk': ValueKey<String>('codelessly-confirm-ok'),
+  'confirmCancel': ValueKey<String>('codelessly-confirm-cancel'),
+};
+
+/// Each built-in target on screen: its id, its element and its box.
+List<({String id, Element element, RenderBox box})> _builtIns(WidgetsBinding binding) {
+  final out = <({String id, Element element, RenderBox box})>[];
+  void visit(Element e) {
+    final key = e.widget.key;
+    for (final t in _builtInTargets.entries) {
+      if (key != t.value) continue;
+      if (e.renderObject case final RenderBox box when box.attached && box.hasSize) out.add((id: t.key, element: e, box: box));
+    }
+    e.visitChildren(visit);
+  }
+
+  binding.rootElement?.visitChildren(visit);
+  return out;
+}
+
+/// The text the first paragraph under [box] draws (a button's label).
+String? _paragraphText(RenderObject box) {
+  String? text;
+  void visit(RenderObject o) {
+    if (text != null) return;
+    if (o is RenderParagraph) {
+      text = o.text.toPlainText();
+    } else {
+      o.visitChildren(visit);
+    }
+  }
+
+  visit(box);
+  return text;
+}
+
+/// The built-in target that has the keyboard focus, if one has.
+({String id, Element element, RenderBox box})? _focusedBuiltIn(WidgetsBinding binding) {
+  final focused = FocusManager.instance.primaryFocus?.context;
+  if (focused == null) return null;
+  for (final b in _builtIns(binding)) {
+    if (identical(focused, b.element)) return b;
+    var inside = false;
+    focused.visitAncestorElements((a) => !(inside = identical(a, b.element)));
+    if (inside) return b;
+  }
+  return null;
 }
 
 /// The node box that holds the keyboard focus (the box around the focused
