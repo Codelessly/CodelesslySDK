@@ -11,7 +11,7 @@
 #   tool/codelessly outline <out dir> <doc | site> what a render drew, as text: boxes, texts, problems per node
 #   tool/codelessly states <states.json>           every state of a site rendered, compared, summarized
 #   tool/codelessly sheet <png | dir>... --out <png> many captures on one labelled image
-#   tool/codelessly notation prompt|expand|apply   the compact authoring notation (tool/notation)
+#   tool/codelessly notation prompt|expand|print|apply   the compact authoring notation (tool/notation)
 #   tool/codelessly replay <stream.jsonl> --out <dir>   a recorded ui_apply stream, replayed (tool/stream)
 #   tool/codelessly serve [--stop|--status]        keep the renderer running: renders take ~1 s instead of ~6 s
 #   tool/codelessly mcp                            all of the above as an MCP server (stdio), for any agent
