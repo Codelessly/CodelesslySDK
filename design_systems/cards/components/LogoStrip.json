@@ -4,7 +4,7 @@
  "roots": ["band"],
  "widget": {
   "type": "LogoStrip",
-  "doc": "A band of up to eight customer wordmarks under a hero, written directly under Page: LogoStrip \"Trusted by independent hotels\" names:[\"Harbor House\",\"The Larkspur\"] icons:[\"anchor_rounded\",\"local_florist_rounded\"] (icons optional, one Material icon per name; empty: names alone), evenly spread and wrapping when the window is narrow.",
+  "doc": "A band of up to eight customer wordmarks under a hero, written directly under Page: LogoStrip \"Trusted by independent hotels\" names=[\"Harbor House\",\"The Larkspur\"] icons=[\"anchor_rounded\",\"local_florist_rounded\"] (icons optional, one Material icon per name; empty: names alone), evenly spread and wrapping when the window is narrow.",
   "props": [
    {"key": "label", "type": {"kind": "string", "flutter": "String"}, "default": "Trusted by teams everywhere", "doc": "The small line over the names (empty: none)."},
    {"key": "names", "type": {"kind": "list", "flutter": "List<String>", "item": {"kind": "string", "flutter": "String"}}, "default": ["Northwind", "Acme", "Globex", "Initech", "Umbrella"], "doc": "The customers, one wordmark each (the first eight are shown).", "required": true},

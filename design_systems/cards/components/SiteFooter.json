@@ -4,7 +4,7 @@
  "roots": ["band"],
  "widget": {
   "type": "SiteFooter",
-  "doc": "A website's closing band written directly under Page: SiteFooter brand:\"Tidewater\" tagline:\"…\" headings:[\"Product\",\"Company\"] links:[[\"Features\",\"Pricing\"],[\"About\",\"Careers\"]] legal:\"© 2026 Tidewater\" small:[\"Privacy\",\"Terms\"] -> page=result; it shows up to four columns and four small links, wraps them when narrow, and onNavigate gives the tapped link's name.",
+  "doc": "A website's closing band written directly under Page: SiteFooter brand=\"Tidewater\" tagline=\"…\" headings=[\"Product\",\"Company\"] links=[[\"Features\",\"Pricing\"],[\"About\",\"Careers\"]] legal=\"© 2026 Tidewater\" small=[\"Privacy\",\"Terms\"] onNavigate={page=result}; it shows up to four columns and four small links, wraps them when narrow, and onNavigate gives the tapped link's name.",
   "props": [
    {"key": "brand", "type": {"kind": "string", "flutter": "String"}, "default": "Tidewater", "doc": "The product's name.", "required": true},
    {"key": "tagline", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "One line under the name (empty: none)."},

@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "TotalBar",
-  "doc": "The card's closing bar on dark: a label over a large amount (a total, a count, a chosen time) with a note, and one cta button at the right that fires onPressed; enabled:{condition} dims and blocks the button.",
+  "doc": "The card's closing bar on dark: a label over a large amount (a total, a count, a chosen time) with a note, and one cta button at the right that fires onPressed; enabled={condition} dims and blocks the button.",
   "props": [
    {
     "key": "label",

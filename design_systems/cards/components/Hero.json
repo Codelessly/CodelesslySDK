@@ -4,7 +4,7 @@
  "roots": ["band"],
  "widget": {
   "type": "Hero",
-  "doc": "The opening band of a landing page, written directly under Page: Hero eyebrow:\"New: …\" title:\"…\" text:\"…\" primary:\"Start free\" secondary:\"Book a demo\" note:\"No credit card needed\" kind:\"harbor\" tone:\"day\" -> onPrimary; align defaults to \"split\" (the drawn picture beside the text, under it on a narrow window), \"center\" centers everything with no picture, and empty texts hide their parts.",
+  "doc": "The opening band of a landing page, written directly under Page: Hero eyebrow=\"New: …\" title=\"…\" text=\"…\" primary=\"Start free\" secondary=\"Book a demo\" note=\"No credit card needed\" kind=\"harbor\" tone=\"day\" onPrimary={…}; align defaults to \"split\" (the drawn picture beside the text, under it on a narrow window), \"center\" centers everything with no picture, and empty texts hide their parts.",
   "props": [
    {"key": "eyebrow", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "A short line in the pill over the headline (empty: none)."},
    {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Fill every room, without the spreadsheets", "doc": "The headline.", "required": true},

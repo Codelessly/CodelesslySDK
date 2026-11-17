@@ -4,7 +4,7 @@
  "roots": ["wrap"],
  "widget": {
   "type": "ArticleHeader",
-  "doc": "The head of a blog article, as wide as its reading column: ArticleHeader category:\"Infrastructure\" title:\"…\" summary:\"…\" author:\"Priya Raman\" role:\"Staff Engineer\" initials:\"PR\" date:\"Nov 12, 2026\" readTime:\"9 min read\" (empty texts hide their parts; no initials shows a person icon; rule:false drops the closing hairline).",
+  "doc": "The head of a blog article, as wide as its reading column: ArticleHeader category=\"Infrastructure\" title=\"…\" summary=\"…\" author=\"Priya Raman\" role=\"Staff Engineer\" initials=\"PR\" date=\"Nov 12, 2026\" readTime=\"9 min read\" (empty texts hide their parts; no initials shows a person icon; rule=false drops the closing hairline).",
   "props": [
    {"key": "category", "type": {"kind": "string", "flutter": "String"}, "default": "Engineering", "doc": "The category, shown in caps in an accent pill (empty: none)."},
    {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Article title", "doc": "The headline.", "required": true},

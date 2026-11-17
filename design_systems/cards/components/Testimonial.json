@@ -4,7 +4,7 @@
  "roots": ["panel"],
  "widget": {
   "type": "Testimonial",
-  "doc": "One customer quote as a page panel: Testimonial quote:\"…\" name:\"Elena Vasquez\" role:\"Owner, The Larkspur\" initials:\"EV\" rating:5 (0: no stars) align:\"center\" (default) or \"start\" for a grid of quotes; with no initials the round mark shows a person icon.",
+  "doc": "One customer quote as a page panel: Testimonial quote=\"…\" name=\"Elena Vasquez\" role=\"Owner, The Larkspur\" initials=\"EV\" rating=5 (0: no stars) align=\"center\" (default) or \"start\" for a grid of quotes; with no initials the round mark shows a person icon.",
   "props": [
    {"key": "quote", "type": {"kind": "string", "flutter": "String"}, "default": "It changed how we run the front desk.", "doc": "The words, without quotation marks.", "required": true},
    {"key": "name", "type": {"kind": "string", "flutter": "String"}, "default": "Elena Vasquez", "doc": "Who said it.", "required": true},

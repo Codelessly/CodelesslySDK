@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "Carousel",
-  "doc": "A real carousel of products: Carousel bind:i items:{shoes} slides one ProductTile per record (name, detail, price, rating, kind, tone) sideways by swipe, showing the edge of the next (peek), and keeps the position (from 0) in your number variable; dots, arrows, counter (\"2 of 6\") and thumbs are switches; a tap on an item fires onPressed with its position (-> open=true), and Pager or PageDots on the same variable drive it too.",
+  "doc": "A real carousel of products: Carousel bind=i items={shoes} slides one ProductTile per record (name, detail, price, rating, kind, tone) sideways by swipe, showing the edge of the next (peek), and keeps the position (from 0) in your number variable; dots, arrows, counter (\"2 of 6\") and thumbs are switches; a tap on an item fires onPressed with its position (-> open=true), and Pager or PageDots on the same variable drive it too.",
   "props": [
    {
     "key": "value",

@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "FlightOption",
-  "doc": "One flight as a selectable option: the airline name, depart and arrive times over origin and destination, the duration and stops on a drawn path, the price, a tag (Cheapest, Best time); selected:{pick==f.id} marks it and a tap fires onPressed (-> pick=f.id).",
+  "doc": "One flight as a selectable option: the airline name, depart and arrive times over origin and destination, the duration and stops on a drawn path, the price, a tag (Cheapest, Best time); selected={pick==f.id} marks it and a tap fires onPressed (-> pick=f.id).",
   "props": [
    {
     "key": "name",

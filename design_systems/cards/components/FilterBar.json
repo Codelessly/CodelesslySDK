@@ -4,7 +4,7 @@
  "roots": ["wrap"],
  "widget": {
   "type": "FilterBar",
-  "doc": "The toolbar over a page's table: FilterBar bind:q placeholder:\"Search name or company\" filters:{[{\"label\":\"Status\",\"value\":\"All\"}]} count:\"248 customers\" action:\"Export\" -> onFilter (result: the tapped filter's label) keeps the typed text in your variable and also fires onSearch (the text) and onAction; a filter whose value does not start with All or Any shows as active in the accent.",
+  "doc": "The toolbar over a page's table: FilterBar bind=q placeholder=\"Search name or company\" filters={[{\"label\":\"Status\",\"value\":\"All\"}]} count=\"248 customers\" action=\"Export\" onFilter={…} (result: the tapped filter's label) keeps the typed text in your variable and also fires onSearch (the text) and onAction; a filter whose value does not start with All or Any shows as active in the accent.",
   "props": [
    {"key": "query", "type": {"kind": "variable", "of": {"kind": "string", "flutter": "String"}}, "default": "", "doc": "The name of your text variable: it holds what is typed."},
    {"key": "placeholder", "type": {"kind": "string", "flutter": "String"}, "default": "Search", "doc": "The search field's hint."},

@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "InputField",
-  "doc": "A labeled text field that keeps what is typed in your variable: InputField \"Email\" \"you@example.com\" bind:email; obscure:true masks a password, lines:6 makes a multi-line box, icon:\"search_rounded\" a search field, error:{cond?\"message\":\"\"} shows a red message under it, success a green one.",
+  "doc": "A labeled text field that keeps what is typed in your variable: InputField \"Email\" \"you@example.com\" bind=email; obscure=true masks a password, lines=6 makes a multi-line box, icon=\"search_rounded\" a search field, error={cond?\"message\":\"\"} shows a red message under it, success a green one.",
   "props": [
    {
     "key": "value",
@@ -92,7 +92,10 @@
    },
    {
     "key": "obscure",
-    "type": {"kind": "boolean", "flutter": "bool"},
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
     "default": false,
     "doc": "Mask the characters of a one-line password field."
    }
@@ -279,8 +282,8 @@
     "props.initialValue": "${props.value}",
     "props.decoration.hintText": "${props.placeholder}",
     "props.keyboardType": "${props.keyboard}",
-    "props.obscureText": "${props.obscure}",
-    "visible": "${= props.lines <= 1}"
+    "visible": "${= props.lines <= 1}",
+    "props.obscureText": "${props.obscure}"
    },
    "actions": [
     {

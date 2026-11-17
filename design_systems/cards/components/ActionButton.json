@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "ActionButton",
-  "doc": "A full-width button that fires onPressed: tone is primary (one per card), quiet, danger, good or dark; enabled:{condition} dims and blocks it; put two in a Row gap:10 for a pair such as Cancel and Confirm.",
+  "doc": "A full-width button that fires onPressed: tone is primary (one per card), quiet, danger, good or dark; enabled={condition} dims and blocks it; put two in a Row gap=10 for a pair such as Cancel and Confirm.",
   "props": [
    {
     "key": "label",

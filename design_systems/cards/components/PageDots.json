@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "PageDots",
-  "doc": "Pagination dots for Pages, a Carousel or any paged content: PageDots bind:page count:{length(items)} draws one dot per page, the current one long and in the accent, and a tap on a dot sets your variable to that page (from 0).",
+  "doc": "Pagination dots for Pages, a Carousel or any paged content: PageDots bind=page count={length(items)} draws one dot per page, the current one long and in the accent, and a tap on a dot sets your variable to that page (from 0).",
   "props": [
    {
     "key": "value",

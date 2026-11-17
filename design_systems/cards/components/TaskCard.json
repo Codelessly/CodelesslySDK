@@ -4,7 +4,7 @@
  "roots": ["tile"],
  "widget": {
   "type": "TaskCard",
-  "doc": "One task on a board, as wide as its column: TaskCard title:\"Build the new homepage hero\" label:\"Frontend\" tone:\"info\" code:\"LNS-106\" due:\"Nov 27\" dueTone:\"soon\" comments:6 assignee:\"SO\" avatarTone:\"warn\" selected:{sel==t.id} -> sel=t.id (tone: accent, good, warn, bad, info, neutral or lilac, default accent; dueTone: empty, soon, late or done; avatarTone: accent, good, warn, bad, info or purple).",
+  "doc": "One task on a board, as wide as its column: TaskCard title=\"Build the new homepage hero\" label=\"Frontend\" tone=\"info\" code=\"LNS-106\" due=\"Nov 27\" dueTone=\"soon\" comments=6 assignee=\"SO\" avatarTone=\"warn\" selected={sel==t.id} onPressed={sel=t.id} (tone: accent, good, warn, bad, info, neutral or lilac, default accent; dueTone: empty, soon, late or done; avatarTone: accent, good, warn, bad, info or purple).",
   "props": [
    {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Build the new homepage hero", "doc": "The task, two lines at most.", "required": true},
    {"key": "label", "type": {"kind": "string", "flutter": "String"}, "default": "Frontend", "doc": "The label chip's text (empty: none)."},

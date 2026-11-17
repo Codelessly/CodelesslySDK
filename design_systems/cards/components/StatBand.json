@@ -4,7 +4,7 @@
  "roots": ["tile"],
  "widget": {
   "type": "StatBand",
-  "doc": "Three or four headline figures in one tile as wide as its section: StatBand values:[\"4,200\",\"31%\",\"2 min\"] labels:[\"hotels\",\"more direct bookings\",\"setup\"] notes:[...] (notes optional, one per value; up to four shown; wraps to two across when narrow).",
+  "doc": "Three or four headline figures in one tile as wide as its section: StatBand values=[\"4,200\",\"31%\",\"2 min\"] labels=[\"hotels\",\"more direct bookings\",\"setup\"] notes=[...] (notes optional, one per value; up to four shown; wraps to two across when narrow).",
   "props": [
    {"key": "values", "type": {"kind": "list", "flutter": "List<String>", "item": {"kind": "string", "flutter": "String"}}, "default": ["4,200", "31%", "2 min"], "doc": "The figures, as text, one cell each (three or four; a fifth is not shown).", "required": true},
    {"key": "labels", "type": {"kind": "list", "flutter": "List<String>", "item": {"kind": "string", "flutter": "String"}}, "default": ["hotels", "more direct bookings", "setup"], "doc": "What each figure counts, under it.", "required": true},

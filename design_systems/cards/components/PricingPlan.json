@@ -4,7 +4,7 @@
  "roots": ["tile"],
  "widget": {
   "type": "PricingPlan",
-  "doc": "One plan of a pricing page as a tile in a Grid cols:3 gap:24: PricingPlan name:\"Team\" price:\"$29\" period:\"/mo\" note:\"For growing teams\" features:[...] cta:\"Start free trial\" featured:true badge:\"Most popular\" -> chosen=result (onChoose reports the name; period defaults to /mo).",
+  "doc": "One plan of a pricing page as a tile in a Grid cols=3 gap=24: PricingPlan name=\"Team\" price=\"$29\" period=\"/mo\" note=\"For growing teams\" features=[...] cta=\"Start free trial\" featured=true badge=\"Most popular\" onChoose={chosen=result} (onChoose reports the name; period defaults to /mo).",
   "props": [
    {"key": "name", "type": {"kind": "string", "flutter": "String"}, "default": "Team", "doc": "The plan's name.", "required": true},
    {"key": "price", "type": {"kind": "string", "flutter": "String"}, "default": "$29", "doc": "The price as text, currency included.", "required": true},

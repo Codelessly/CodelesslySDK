@@ -1,6 +1,6 @@
 {
  "widget": {
-  "doc": "Paging for a list or for pages of content: \"Page 1 of 3\" with previous and next buttons; Pager bind:page count:{ceil(length(rows)/5)} keeps the page (from 0) in your number variable, so show slice(rows,page*5,page*5+5), or give it the variable of Pages or a Carousel to turn their pages. A count of zero hides the pager."
+  "doc": "Paging for a list or for pages of content: \"Page 1 of 3\" with previous and next buttons; Pager bind=page count={ceil(length(rows)/5)} keeps the page (from 0) in your number variable, so show slice(rows,page*5,page*5+5), or give it the variable of Pages or a Carousel to turn their pages. A count of zero hides the pager."
  },
  "nodes": {
   "bar": {

@@ -4,7 +4,7 @@
  "roots": ["wrap"],
  "widget": {
   "type": "ConversationRow",
-  "doc": "One conversation in an inbox pane: ConversationRow \"Priya Raman\" subject:\"…\" preview:\"…\" time:\"10:05\" initials:\"PR\" tone:\"rose\" unread:{c.unread} selected:{open==c.id} -> open=c.id (tone is sand, rose, mint, sky, lilac or slate, default sky; initials default to the name's first letter).",
+  "doc": "One conversation in an inbox pane: ConversationRow \"Priya Raman\" subject=\"…\" preview=\"…\" time=\"10:05\" initials=\"PR\" tone=\"rose\" unread={c.unread} selected={open==c.id} onPressed={open=c.id} (tone is sand, rose, mint, sky, lilac or slate, default sky; initials default to the name's first letter).",
   "props": [
    {"key": "name", "type": {"kind": "string", "flutter": "String"}, "default": "Priya Raman", "doc": "The customer's name.", "required": true},
    {"key": "subject", "type": {"kind": "string", "flutter": "String"}, "default": "Charged twice for the March invoice", "doc": "The conversation's subject."},

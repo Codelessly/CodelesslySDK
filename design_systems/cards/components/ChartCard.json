@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "ChartCard",
-  "doc": "A designed chart in its own tile: kind:\"line\" draws values as an area line (a trend), kind:\"bars\" one rounded bar per value with its number (a breakdown); the title, a headline value, a delta chip and labels (one per value) complete it; never use BarChart or LineChart in a card.",
+  "doc": "A designed chart in its own tile: kind=\"line\" draws values as an area line (a trend), kind=\"bars\" one rounded bar per value with its number (a breakdown); the title, a headline value, a delta chip and labels (one per value) complete it; never use BarChart or LineChart in a card.",
   "props": [
    {
     "key": "title",

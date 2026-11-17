@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "HeroSession",
-  "doc": "The screen's one focal point: today's session on the brand gradient with the jumper illustration, minutes as a chip, the detail sentence and one big cta button that fires onPressed; audience:\"kid\" draws the child.",
+  "doc": "The screen's one focal point: today's session on the brand gradient with the jumper illustration, minutes as a chip, the detail sentence and one big cta button that fires onPressed; audience=\"kid\" draws the child.",
   "props": [
    {
     "key": "title",

@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "WideScroll",
-  "doc": "A frame that scrolls sideways for content wider than the card (a table with many columns): write WideScroll width:640 and the wide blocks indented under it (TableHeader, each row, TableRow) are laid out that wide and scroll together; its edges fade where there is more to scroll to (fade:false turns that off).",
+  "doc": "A frame that scrolls sideways for content wider than the card (a table with many columns): write WideScroll width=640 and the wide blocks indented under it (TableHeader, each row, TableRow) are laid out that wide and scroll together; its edges fade where there is more to scroll to (fade=false turns that off).",
   "props": [
    {
     "key": "width",

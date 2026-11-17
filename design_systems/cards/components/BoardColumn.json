@@ -4,7 +4,7 @@
  "roots": ["col"],
  "widget": {
   "type": "BoardColumn",
-  "doc": "One kanban column: BoardColumn \"In progress\" count:3 tone:\"accent\" limit:4 -> onAdd with its task cards indented under it, in a Row stretch so it runs the board's height (tone neutral, accent, warn or good colors the dot; limit 0 means none, otherwise the count reads count/limit and turns warning-colored when reached; 280 wide by default, w:fill to take its place; a count of 0 shows emptyText).",
+  "doc": "One kanban column: BoardColumn \"In progress\" count=3 tone=\"accent\" limit=4 onAdd={…} with its task cards indented under it, in a Row stretch so it runs the board's height (tone neutral, accent, warn or good colors the dot; limit 0 means none, otherwise the count reads count/limit and turns warning-colored when reached; 280 wide by default, w=fill to take its place; a count of 0 shows emptyText).",
   "children": "list",
   "props": [
    {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Backlog", "doc": "The column's name.", "required": true},
