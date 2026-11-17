@@ -113,6 +113,57 @@ void main() {
     expect(await label(tester, const [Step('right-click', 'context')]), contains('pressed secondary,'));
   });
 
+  testWidgets('a sheet with stops: --drag on it and --tap <sheet>/handle move it to the next stop', (tester) async {
+    final doc = {
+      'schema': 3,
+      'roots': ['page', 'sheet'],
+      'nodes': {
+        'page': {
+          'type': 'canvas',
+          'slots': {'body': 'open'},
+          'layout': {'width': 390, 'height': 600},
+          'decoration': {'fills': [{'color': '#FFFFFFFF'}]},
+        },
+        'open': {
+          ..._pad('open', [
+            {
+              'trigger': {'type': 'click'},
+              'actions': [
+                {'type': 'openModal', 'to': 'sheet', 'presentation': 'bottomSheet', 'showDragHandle': true, 'maxHeightFactor': 0.9, 'snapHeights': [0.5, 0.9]},
+              ],
+            },
+          ]),
+        },
+        'sheet': {
+          'type': 'canvas',
+          'slots': {'body': 'list'},
+          'layout': {'width': 390, 'height': {'fill': 0}},
+          'decoration': {'fills': [{'color': '#FFFFFFFF'}]},
+        },
+        'list': {
+          'type': 'column',
+          'layout': {'width': {'fill': 0}, 'height': {'fill': 0}},
+          'props': {'scrollable': true, 'spacing': 8},
+          'children': [for (var i = 0; i < 30; i++) 'row$i'],
+        },
+        for (var i = 0; i < 30; i++) 'row$i': _pad('row$i', const []),
+      },
+    };
+    Future<num> sheetTop(List<Step> steps) async {
+      final file = File('${out.path}/page.json')..writeAsStringSync(jsonEncode(doc));
+      final report = await runRender(tester,
+          RenderArgs(inputs: [file.path], out: '${out.path}/o', sizes: const [Size(390, 600)], steps: [const Step('tap', 'open'), ...steps], dumpLayout: true));
+      expect(report.diagnostics.where((d) => d['severity'] == 'error'), isEmpty, reason: '${report.diagnostics}');
+      final boxes = jsonDecode(File('${out.path}/o/page@390x600.layout.json').readAsStringSync()) as List;
+      return boxes.cast<Map>().firstWhere((b) => b['id'] == 'sheet')['y'] as num;
+    }
+
+    expect(await sheetTop(const []), closeTo(300, 1));
+    expect(await sheetTop(const [Step('drag', 'sheet', '0,-200')]), closeTo(60, 1));
+    expect(await sheetTop(const [Step('tap', 'sheet/handle')]), closeTo(60, 1));
+    expect(await sheetTop(const [Step('key', 'alt+ArrowUp')]), closeTo(60, 1));
+  });
+
   testWidgets('--reload keeps what is marked saved and starts everything else over', (tester) async {
     const taps = [Step('tap', 'count'), Step('tap', 'count')];
     expect(await label(tester, taps), endsWith('kept 2, lost 2'));

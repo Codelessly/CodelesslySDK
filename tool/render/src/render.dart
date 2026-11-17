@@ -1798,6 +1798,13 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       return (control!.localToGlobal(rects[n].center), null);
     }
     final box = found.box;
+    // A bottom sheet's drag handle, which is no node of the document:
+    // `<sheet id>/handle` (or `handle` with one sheet open).
+    if (box == null && part == null && (id == 'handle' || id.endsWith('/handle'))) {
+      final handles = find.byKey(const ValueKey('Codelessly sheet drag area')).evaluate().toList();
+      final handle = handles.lastOrNull?.renderObject;
+      if (handle is RenderBox && handle.attached && handle.hasSize) return (handle.localToGlobal(handle.size.center(ui.Offset.zero)), null);
+    }
     if (box == null && part == null && !id.contains('/')) {
       // A tab, segment or destination named by its own id (`--tap stay` for
       // the tab {"id": "stay"}): the part of the one control that has it.
