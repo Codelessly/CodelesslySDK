@@ -1,28 +1,30 @@
 ## Unreleased
 
-### Breaking
+### Breaking (33.0.0)
 
-- **The notation's grammar has one rule per role** (codelessly_api, docs/design/15-notation-grammar-audit.md):
-  `Input "Email" bind:email` where it was `=email`, `selected:{tab == "a"}` where it was `selected:=tab=="a"`, a
-  block's other events on its own line in braces (`SiteNav … -> go {lower(result)} onCta:{go signup}`) where they
-  were lines under it, `onSwipeLeft:{…}` for `swipe:left -> …`, `go {expression}` for a page worked out. A file
-  in the old spellings is still drawn, and `tool/notation/notation.sh expand` names each old spelling once and
-  exits 1. **To migrate: `tool/notation/notation.sh format <file.txt> [--design-system <folder>]`**, which rewrites
-  a file in place and leaves alone, and names, any file whose document would change.
-- Everything in this repository written in the notation is rewritten: 440 files, 339 of them changed (the showcase's recorded answers,
+- **The compact notation has a new grammar, and codelessly_api reads only it** (its docs/design/17 and 18):
+  `Column gap=12`, `Input "Email" bind=email`, `selected={tab == "a"}`, `Button "Save" onTap={saved=true; toast
+  "Saved"}`, `SiteNav … onNavigate={go {lower(result)}} onCta={go signup}`, where it was `gap:12`, `=email`,
+  `selected:=tab=="a"`, `-> saved=true; toast "Saved"` and `onCta: go signup` on a line of its own. A file in the
+  old grammar does not expand: each old line is an error that says what to write.
+  **To migrate: `tool/notation/notation.sh migrate <file.txt> --design-system <folder>`** (also `--markdown`,
+  `--dart` for notation inside those files; `--check`). It is a one-off tool with its own copy of how the old
+  grammar split a line, to be deleted once the sites written before 2026-11-16 are migrated.
+- Everything in this repository written in the notation is rewritten: 434 files (the showcase's recorded answers,
   the playground's samples, SSUI's targets, the prompt app's screens, `tool/values/reference`), the design systems'
-  patterns and the lines their components are taught by, the README and the tests. Every rewritten file expands
-  to the document it expanded to before (880 expansions, as a card and as a page with Cards, compared to the
-  byte). The recorded answers as the models wrote them are in this repository's history at `d2ac20bb`. Answers
-  written with no vocabulary (`examples/showcase/natural-words/**/natural`, the `elicit` streams) and the recorded
-  `.jsonl` streams are evidence of what was written and are left as they were.
+  patterns, the line each component is taught by (Cards' through its generator), the prompt app's bundle of Skip,
+  the README and the tests. Each rewritten file expands to the document master's parser gave for the file as it
+  was: 868 expansions (as a card, and as a page with Cards) compared to the byte, and the same for the 217 pages
+  of the twenty sites with Cards. The recorded answers as the models wrote them are in this repository's history
+  (the parent of this change). Answers written with no vocabulary (`examples/showcase/natural-words/**/natural`,
+  the `elicit` streams), recorded prompts and the recorded `.jsonl` streams are evidence of what was written and
+  are left as they were: they no longer expand.
 
 ### Added
 
-- **`tool/notation/format.dart`** (`notation.sh format`), and `tool/notation/expand_all.dart` with
-  `compare_runs.dart`: many files expanded at once and two such runs compared, for proving that a change to the
-  parser or a rewrite of the files leaves the documents as they were.
-
+- **`tool/notation/expand_all.dart`** with `compare_runs.dart`: many files expanded at once, as a card and as a
+  page with Cards, and two such runs compared to the byte: the proof that a change to the parser, or a rewrite of
+  the files, leaves the documents as they were.
 - **The keyboard on plain nodes**: a node with a `click` reaction is a Tab stop. It shows the theme's focus ring
   (`focusBorder`, the node's corner radius) when the keyboard brings the focus, never for a pointer; Enter and Space
   run its click; its `focused` state applies; a screen reader gets one focusable button named by its text or

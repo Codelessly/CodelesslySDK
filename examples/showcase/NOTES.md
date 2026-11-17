@@ -205,11 +205,12 @@ All 17 beat the plain versions clearly; where they still fall short:
 - Map tiles or a generated street drawing placed under real pin coordinates; airline and brand marks.
 - A licensed display face, and motion assets (a short loop for the weather glyphs, the receipt's confetti).
 
-## The notation's grammar, 2026-11-16
+## The notation's grammar, 33.0.0 (2026-11-16)
 
-The recorded answers in this folder were rewritten to the notation's grammar of one rule per role with
-`tool/notation/notation.sh format` (`=name` to `bind:name`, `key:=expression` to `key:{expression}`, and the rest
-of codelessly_api's docs/design/16-notation-grammar-migration.md), so that they expand with nothing said. Each
-expands to the document it expanded to before. They are no longer, to the letter, what the models wrote: those
-texts are in the history at `d2ac20bb`. The answers written with no vocabulary (`natural-words/**/natural`) were
-not touched: they are the evidence of what a model writes by itself, and what the grammar was chosen from.
+The recorded answers in this folder were written by models under the prompt of the grammar before 33.0.0
+(`gap:12`, `=email`, `selected:=…`, `-> action`). The parser reads only the new grammar, so they were rewritten
+to it with `tool/notation/notation.sh migrate` (`gap=12`, `bind=email`, `selected={…}`, `onTap={action}`; the
+rest is in codelessly_api's docs/design/18-notation-grammar-migration.md). Each expands to the document it
+expanded to before. They are no longer, to the letter, what the models wrote: those texts are in the history, at
+the parent of the change that rewrote them. The answers written with no vocabulary (`natural-words/**/natural`)
+were not touched: they are the evidence of what a model writes by itself, and they no longer expand.
