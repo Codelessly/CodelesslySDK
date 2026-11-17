@@ -24,8 +24,6 @@ const _alone = {
   'test/app/fonts_test.dart',
   // The Firestore platform mock is installed once per process.
   'test/services/firebase_test.dart',
-  // Compares pixels drawn with fonts another file may have registered.
-  'test/migration/special_fields_test.dart',
 };
 
 const _out = 'build/test_shards';

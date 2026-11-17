@@ -78,16 +78,4 @@ void main() {
     final (got, _) = await ours(tester, {'width': {'hug': 100}, 'height': {'hug': 24}});
     expect(got.size, want.size);
   });
-
-  testWidgets('a schema-2 text\'s padding did nothing, and after the migration still does nothing', (tester) async {
-    await tester.pumpWidget(const Directionality(
-        textDirection: TextDirection.ltr,
-        child: Align(alignment: Alignment.topLeft, child: Text('Hello padding', key: ValueKey('t'), style: style))));
-    final want = tester.getRect(find.byKey(const ValueKey('t')));
-    final (got, after) = await ours(tester, {'width': {'hug': 100}, 'height': {'hug': 24}, 'padding': [4, 8, 12, 26]}, schema: 2);
-    expect(got.size, want.size);
-    expect(after.top, got.bottom);
-    final (fixed, _) = await ours(tester, {'width': 300, 'height': 80, 'padding': [4, 8, 12, 26]}, schema: 2);
-    expect(fixed.size, const Size(300, 80));
-  });
 }

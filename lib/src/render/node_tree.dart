@@ -3,8 +3,7 @@
 // Each node is one [NodeBox]. Its chain of render objects is, layer by layer,
 // outer decorations, the shell's size, decoration and clip, padding, then the
 // content, configured directly. The layout render objects are in
-// render/layout. Parity: test/parity_test.dart compares every node's rect
-// with stored goldens of real projects.
+// render/layout.
 import 'dart:async';
 import 'dart:math' as math;
 

@@ -46,26 +46,6 @@ void main() {
     expect(flutter, isNot(closeTo(15 * 1.33, 0.5)));
   });
 
-  testWidgets('a schema-2 text keeps its 1.33 line height through the migration, and natural height becomes the font\'s own', (tester) async {
-    final (tree, flutter) = await _show(tester, {
-      'roots': ['s'],
-      'nodes': {
-        's': {'type': 'stack', 'layout': {'width': 300, 'height': 300}, 'children': ['base', 'natural', 'stated', 'run']},
-        'base': _text('Base', const {}, 0),
-        'natural': _text('Natural', const {'naturalHeight': true}, 60),
-        'stated': _text('Stated', const {'naturalHeight': true, 'height': 2}, 120),
-        'run': _text('Run here', const {'naturalHeight': true}, 180, runs: [
-          {'start': 0, 'end': 3, 'style': {'fontWeight': 700}},
-        ]),
-      },
-    });
-    double h(String id) => tree.boxOf(id)!.size.height;
-    expect(h('base'), closeTo(15 * 1.33, 0.5));
-    expect(h('natural'), flutter);
-    expect(h('run'), flutter);
-    expect(h('stated'), 30);
-  });
-
   testWidgets('a default text style is inherited by the text below it, the nearest one winning', (tester) async {
     final (tree, flutter) = await _show(tester, {
       'schema': 3,

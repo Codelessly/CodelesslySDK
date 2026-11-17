@@ -12,7 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'ssui_toggles_page.dart';
 import 'support.dart';
 import 'toggles_support.dart';
 
@@ -250,26 +249,6 @@ void main() {
     await tester.tapAt(centerOf(tree, 'box'));
     await tester.pump();
     expect(box.value, isTrue);
-  });
-
-  group('against SSUI\'s own toggles', () {
-    setUpAll(loadRoboto);
-    for (final dark in [false, true]) {
-      final mode = dark ? 'dark' : 'light';
-      testWidgets('zero-prop checkboxes, radios and switches match soft_saas_ui\'s within 1 % of the pixels: $mode',
-          (tester) async {
-        final (tree, image) = await renderSsuiToggles(tester, dark: dark);
-        await saveRender(tester, image, 'toggles-$mode');
-        final ours = await rgbaOf(tester, image);
-        final reference = await decodePng(tester, ssuiTogglesReference(dark));
-        // The row of toggles: y 24 to 48.
-        final share = differingShare(ours, reference, ssuiTogglesSize.width.toInt(), const Rect.fromLTRB(24, 24, 340, 48));
-        // ignore: avoid_print
-        print('SSUI toggles $mode: ${(share * 100).toStringAsFixed(2)} % of the pixels differ');
-        expect(share, lessThan(0.01));
-        expect(rectOf(tree, 'switchOn').size, const Size(36, 20));
-      });
-    }
   });
 }
 

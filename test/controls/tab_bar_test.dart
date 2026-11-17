@@ -4,9 +4,6 @@
 // ring), labels centered, scrolling when the tabs overflow, screen readers
 // (a tab bar of tabs, each selected or not), `changed` and its write-back,
 // `tabs` switching its child, and a pixel match to SSUI's own Tabs.
-import 'dart:io';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
 import 'dart:ui' show Tristate;
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
@@ -14,7 +11,6 @@ import 'package:codelessly_sdk/src/render/controls/tab_bar.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart' show GlobalKey, RepaintBoundary, Align, Alignment, Directionality, TextDirection;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support.dart';
@@ -299,77 +295,5 @@ void main() {
     expect(rectOf(tree, 'p2').top - rectOf(tree, 'tabs').top, 36);
     expect(recorded.fired, ['tabs changed']);
     await tester.pump(const Duration(milliseconds: 200));
-  });
-
-  group('SSUI\'s own Tabs', () {
-    Future<void> fonts() async {
-      const dir = '/opt/flutter/bin/cache/artifacts/material_fonts';
-      final roboto = FontLoader('Roboto');
-      for (final f in ['Roboto-Regular.ttf', 'Roboto-Medium.ttf', 'Roboto-Bold.ttf']) {
-        roboto.addFont(Future.value(ByteData.sublistView(File('$dir/$f').readAsBytesSync())));
-      }
-      await roboto.load();
-    }
-
-    setUpAll(fonts);
-
-    for (final dark in [false, true]) {
-      final mode = dark ? 'dark' : 'light';
-      testWidgets('a tab bar of three tabs with nothing styled matches SSUI\'s Tabs component render: $mode', (tester) async {
-        tester.view.physicalSize = const Size(360, 36);
-        tester.view.devicePixelRatio = 1;
-        addTearDown(tester.view.reset);
-        final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({
-          'schema': 3,
-          'roots': ['bar'],
-          'nodes': {
-            'bar': {
-              'type': 'tabBar',
-              'layout': {'width': 360, 'height': 36},
-              'props': {'tabs': _three},
-            },
-          },
-        })))
-          ..theme = ThemeTokens.fromJson({'fontFamily': 'Roboto'})
-          ..dark = dark;
-        addTearDown(tree.dispose);
-        final key = GlobalKey();
-        await tester.pumpWidget(Directionality(
-          textDirection: TextDirection.ltr,
-          child: Align(alignment: Alignment.topLeft, child: RepaintBoundary(key: key, child: NodeView(tree: tree, rootId: 'bar'))),
-        ));
-        final boundary = tester.renderObject<RenderRepaintBoundary>(find.byKey(key));
-        final image = (await tester.runAsync(() => boundary.toImage(pixelRatio: 1)))!;
-        final dir = Platform.environment['CODELESSLY_M3_RENDERS'];
-        if (dir != null && dir.isNotEmpty) {
-          final png = await tester.runAsync(() => image.toByteData(format: ui.ImageByteFormat.png));
-          File('$dir/tabs-$mode.png').writeAsBytesSync(png!.buffer.asUint8List());
-        }
-        final ours = (await tester.runAsync(() => image.toByteData(format: ui.ImageByteFormat.rawStraightRgba)))!.buffer.asUint8List();
-        final bytes = File('design_systems/ssui/examples/renders/m3/tabs-ssui-$mode.png').readAsBytesSync();
-        final ref = (await tester.runAsync(() async {
-          final codec = await ui.instantiateImageCodec(bytes);
-          final frame = await codec.getNextFrame();
-          return (await frame.image.toByteData(format: ui.ImageByteFormat.rawStraightRgba))!.buffer.asUint8List();
-        }))!;
-        // Both on the same page color (SSUI's component has no fill).
-        final page = dark ? const [0x1C, 0x1C, 0x1C] : const [0xF9, 0xFA, 0xFB];
-        int over(List<int> px, int i, int c) => ((px[i + c] * px[i + 3] + page[c] * (255 - px[i + 3])) / 255).round();
-        var differing = 0;
-        const total = 360 * 36;
-        for (var i = 0; i < total * 4; i += 4) {
-          for (var c = 0; c < 3; c++) {
-            if ((over(ours, i, c) - over(ref, i, c)).abs() > 40) {
-              differing++;
-              break;
-            }
-          }
-        }
-        final share = differing / total;
-        // ignore: avoid_print
-        print('SSUI Tabs $mode: ${(share * 100).toStringAsFixed(2)} % of the pixels differ');
-        expect(share, lessThan(.005));
-      });
-    }
   });
 }

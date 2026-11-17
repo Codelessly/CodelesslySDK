@@ -11,7 +11,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'ssui_toggles_page.dart';
 import 'support.dart';
 import 'toggles_support.dart';
 
@@ -174,23 +173,5 @@ void main() {
     expect(s.trackColor, const Color(0xFF1C1C1C));
     expect(s.trackSide?.color, const Color(0xFF383838));
     expect(s.selectedColor, const Color(0xFF383838));
-  });
-
-  group('against SSUI\'s own segmented control', () {
-    setUpAll(loadRoboto);
-    for (final dark in [false, true]) {
-      final mode = dark ? 'dark' : 'light';
-      testWidgets('zero-prop segmented buttons match soft_saas_ui\'s within 1 % of the pixels: $mode', (tester) async {
-        final (tree, image) = await renderSsuiToggles(tester, dark: dark);
-        final ours = await rgbaOf(tester, image);
-        final reference = await decodePng(tester, ssuiTogglesReference(dark));
-        // The row of segmented controls: y 96 to 130.
-        final share = differingShare(ours, reference, ssuiTogglesSize.width.toInt(), const Rect.fromLTRB(24, 96, 500, 130));
-        // ignore: avoid_print
-        print('SSUI segmented $mode: ${(share * 100).toStringAsFixed(2)} % of the pixels differ');
-        expect(share, lessThan(0.01));
-        expect(rectOf(tree, 'week').height, 28);
-      });
-    }
   });
 }

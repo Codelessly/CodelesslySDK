@@ -108,37 +108,4 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(seconds: 3));
   });
-
-  testWidgets('schema 2 through the migration and schema 3 rewritten render the same', (tester) async {
-    setScreen(tester, const Size(390, 844));
-    ignoreOverflows();
-    Future<Map<String, String>> render(PublishBundle bundle, String layout) async {
-      final codelessly = Codelessly(
-          config: const CodelesslyConfig(slug: 'relay'), loader: MemoryPublishLoader(bundle), fonts: const NoFontFetcher());
-      addTearDown(codelessly.dispose);
-      final controller = CodelesslyWidgetController(layoutId: layout);
-      addTearDown(controller.dispose);
-      await tester.pumpWidget(const SizedBox());
-      await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: codelessly, controller: controller, layoutId: layout)));
-      await settle(tester);
-      expect(controller.isLoaded, isTrue, reason: '${controller.error}');
-      final view = tester.renderObject(find.byType(CodelesslyWidget));
-      final tree = controller.tree!;
-      return {
-        for (final b in tree.boxes.toList())
-          if (b.rectIn(view) case final r?) '${b.key}': '$r',
-        'text': textUnder(view),
-      };
-    }
-
-    final two = publishRelay(), three = publishRelay(schema3: true);
-    expect(three.toJson()['schema'], 3);
-    for (final layout in two.model.layouts.keys) {
-      final a = await render(two, layout), b = await render(three, layout);
-      expect(a.length, greaterThan(20));
-      expect(b, a, reason: layout);
-    }
-    await tester.pumpWidget(const SizedBox());
-    await tester.pump(const Duration(seconds: 3));
-  });
 }

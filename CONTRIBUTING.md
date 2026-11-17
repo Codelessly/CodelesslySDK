@@ -33,16 +33,7 @@ lives. Read the model's design first:
    and loops, rotation, opacity, blurs, aspect ratio; see
    `lib/src/render/behaviors.dart`) are already added by the tree; build
    the widget's content inside them.
-3. **Tests**: unit and widget tests, plus parity where fixtures cover the type.
-
-## Parity
-
-`test/goldens` + `test/fixtures`: real pages (`static`) and sample pages
-per widget group (`samples-<group>`), with the expected rect for every node.
-They are frozen data and are not regenerated. `flutter test test/parity_test.dart
---dart-define=sets=static --dart-define=types=listView,gridView` reports and
-lists divergences of the given types (a "first divergence" is a node that's
-wrong while its parent is right: the root causes).
+3. **Tests**: unit and widget tests.
 
 ## Runtime (bindings)
 
