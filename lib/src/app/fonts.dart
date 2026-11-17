@@ -362,7 +362,10 @@ class FontRegistrationCache {
           .where((entry) => listEquals(entry.bytes, bytes))
           .firstOrNull;
       if (existing != null) {
-        pending.add(existing.loaded);
+        // A registration that finished is not waited for again: its future
+        // may belong to a zone that no longer runs (a test before this one,
+        // the render server's last request), and would never answer here.
+        if (!existing.registered) pending.add(existing.loaded);
       } else if (!fresh.any((other) => listEquals(other, bytes))) {
         fresh.add(bytes);
       }
@@ -376,10 +379,16 @@ class FontRegistrationCache {
         known.removeWhere((entry) => identical(entry.loaded, done));
         Error.throwWithStackTrace(error, stack);
       });
-      known.addAll([
+      final entries = [
         for (final bytes in fresh)
           _RegisteredFont(Uint8List.fromList(bytes), done),
-      ]);
+      ];
+      known.addAll(entries);
+      unawaited(done.then((_) {
+        for (final entry in entries) {
+          entry.registered = true;
+        }
+      }, onError: (Object _) {}));
       pending.add(done);
     }
     await Future.wait(pending);
@@ -387,7 +396,10 @@ class FontRegistrationCache {
 }
 
 class _RegisteredFont {
-  const _RegisteredFont(this.bytes, this.loaded);
+  _RegisteredFont(this.bytes, this.loaded);
   final Uint8List bytes;
   final Future<void> loaded;
+
+  /// Whether [loaded] has completed: the engine has the file.
+  bool registered = false;
 }
