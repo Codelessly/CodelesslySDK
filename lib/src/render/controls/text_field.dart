@@ -211,6 +211,8 @@ class TextFieldConfig {
   late final double cursorWidth;
   late final Radius cursorRadius;
   late final int? maxLength, maxLines, minLines;
+  late final int otpLength;
+  late final bool otpDigitsOnly;
   late final bool expands, oneLine;
   late final ui.BoxHeightStyle selectionHeightStyle;
   late final ui.BoxWidthStyle selectionWidthStyle;
@@ -282,7 +284,9 @@ class TextFieldConfig {
       api.TextAlignVertical.center => TextAlignVertical.center,
       api.TextAlignVertical.bottom => TextAlignVertical.bottom,
     };
-    c.keyboardType = switch (n.prop(TextFieldProps.keyboardType)) {
+    c.keyboardType = n.prop(TextFieldProps.otpLength) > 0 && n.prop(TextFieldProps.otpDigitsOnly)
+        ? const TextInputType.numberWithOptions()
+        : switch (n.prop(TextFieldProps.keyboardType)) {
       api.TextInputType.number => TextInputType.numberWithOptions(
           decimal: n.prop(TextFieldProps.keyboardDecimal), signed: n.prop(TextFieldProps.keyboardSigned)),
       api.TextInputType.text => c.oneLine ? TextInputType.text : TextInputType.multiline,
@@ -318,7 +322,9 @@ class TextFieldConfig {
     // SSUI's caret is 1.5 wide with round ends; a node's own width wins.
     c.cursorWidth = n.props.has(TextFieldProps.cursorWidth) ? n.prop(TextFieldProps.cursorWidth) : 1.5;
     c.cursorRadius = Radius.circular(n.prop(TextFieldProps.cursorRadius) ?? 1);
-    c.maxLength = n.prop(TextFieldProps.maxLength);
+    c.otpLength = n.prop(TextFieldProps.otpLength);
+    c.otpDigitsOnly = n.prop(TextFieldProps.otpDigitsOnly);
+    c.maxLength = c.otpLength > 0 ? c.otpLength : n.prop(TextFieldProps.maxLength);
     c.selectionHeightStyle = ui.BoxHeightStyle.values.byName(n.prop(TextFieldProps.selectionHeightStyle).name);
     c.selectionWidthStyle = ui.BoxWidthStyle.values.byName(n.prop(TextFieldProps.selectionWidthStyle).name);
     c.autofillHints = n.prop(TextFieldProps.autofillHints);
@@ -326,6 +332,7 @@ class TextFieldConfig {
     c.focusRingColor = n.prop(TextFieldProps.focusRingColor)?.flutter;
     c.formatters = [
       if (n.prop(TextFieldProps.textCapitalization) == api.TextCapitalization.characters) const _UpperCaseFormatter(),
+      if (c.otpLength > 0 && c.otpDigitsOnly) FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
       ?_formatter(n.prop(TextFieldProps.inputFormatter)),
     ];
     c.hugWidth = hFit == SizeFit.hug && n.layout.width.value > 0 ? n.layout.width.value : kFieldHugWidth;
@@ -621,7 +628,7 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
         errorOverride: _error,
         // A field with a limit shows how much of it is used (as a Flutter
         // TextField with maxLength does), unless the design wrote a counter.
-        counterFallback: (c.maxLength ?? 0) > 0 ? '${editor.text.runes.length}/${c.maxLength}' : null,
+        counterFallback: c.otpLength == 0 && (c.maxLength ?? 0) > 0 ? '${editor.text.runes.length}/${c.maxLength}' : null,
         focusRingWidth: c.focusRingWidth,
         focusRingColor: c.focusRingColor,
         text: _interactive ? null : fieldPreviewText);
@@ -896,7 +903,44 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
 
   @override
   void paintContent(PaintingContext context, Offset offset) {
+    if (config.otpLength > 0) {
+      _paintOtp(context.canvas, offset);
+      return;
+    }
     context.paintChild(_editable, offset + (_editable.parentData! as BoxParentData).offset);
+  }
+
+  /// One editor and one semantics node, painted as a row of slots. The
+  /// editor still handles IME, paste, deletion and cursor movement.
+  void _paintOtp(Canvas canvas, Offset offset) {
+    final c = config;
+    final count = c.otpLength;
+    final gap = count > 8 ? 4.0 : 8.0;
+    final slot = ((boxRect.width - gap * (count - 1)) / count).clamp(0.0, 48.0).toDouble();
+    final used = slot * count + gap * (count - 1);
+    final left = boxRect.left + (boxRect.width - used) / 2;
+    final top = boxRect.top + (boxRect.height - 48) / 2;
+    final chars = editor.text.runes.map(String.fromCharCode).toList();
+    final active = editor.selection.isValid ? editor.selection.extentOffset.clamp(0, count - 1) : chars.length.clamp(0, count - 1);
+    for (var i = 0; i < count; i++) {
+      final visual = textDirection == TextDirection.rtl ? count - 1 - i : i;
+      final rect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(left + visual * (slot + gap), top, slot, 48).shift(offset),
+        const Radius.circular(10),
+      );
+      canvas.drawRRect(rect, Paint()..color = c.tokens.surface);
+      canvas.drawRRect(rect, Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = focusNode.showsHighlight && i == active ? 2 : 1
+        ..color = focusNode.showsHighlight && i == active ? c.tokens.primary : c.tokens.primaryBorder);
+      if (i >= chars.length) continue;
+      final glyph = TextPainter(
+        text: TextSpan(text: c.obscureText ? c.obscuringCharacter : chars[i], style: c.valueStyle),
+        textDirection: textDirection,
+      )..layout(maxWidth: slot);
+      glyph.paint(canvas, Offset(rect.outerRect.center.dx - glyph.width / 2, rect.outerRect.center.dy - glyph.height / 2));
+      glyph.dispose();
+    }
   }
 
   @override
@@ -987,6 +1031,10 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
       config
         ..maxValueLength = c.maxLength
         ..currentValueLength = v.text.length;
+    }
+    if (c.otpLength > 0) {
+      final detail = '${c.otpLength} ${c.otpDigitsOnly ? 'digit' : 'character'} code';
+      config.hint = config.hint.isEmpty ? detail : '${config.hint}. $detail';
     }
     if (!_interactive || !enabled) return;
     if (v.selection.isValid) config.textSelection = v.selection;

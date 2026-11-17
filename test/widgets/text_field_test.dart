@@ -1,4 +1,6 @@
 
+import 'dart:ui' show Tristate;
+
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/codelessly_api.dart' show LayoutDocument;
 import 'package:codelessly_sdk/codelessly_sdk.dart' hide captureImage;
@@ -9,11 +11,13 @@ import 'package:codelessly_sdk/src/render/controls/text_field.dart';
 import 'package:codelessly_sdk/src/render/controls/tokens.dart' show ControlTokens;
 import 'package:flutter/material.dart' hide Node;
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../controls/toggles_support.dart';
 import '../lists/support.dart' as lists;
 import '../support/fields.dart';
+import '../support/keyboard.dart';
 import '../support/screen.dart' as harness;
 
 LayoutDocument _doc(Map<String, Object?> nodes) => LayoutDocument.fromJson({
@@ -76,6 +80,60 @@ Iterable<RenderObject> _below(RenderObject r) sync* {
 }
 
 void main() {
+  testWidgets('one-time-code slots follow RTL while the logical value stays in typing order', (tester) async {
+    final (tree, _) = await _show(tester, DocumentSource(_doc({
+      'code': {
+        'type': 'textField',
+        'textDirection': 'rtl',
+        'layout': {'width': 320, 'height': 64},
+        'props': {'otpLength': 4, 'initialValue': 'AB', 'decoration': {'labelText': 'Code'}},
+      },
+    })));
+    addTearDown(tree.dispose);
+    final field = textField(tester);
+    expect(field.textDirection, TextDirection.rtl);
+    expect(field.editor.text, 'AB');
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('one-time code is one editable and semantic field for pointer, paste and keyboard', (tester) async {
+    final semantics = tester.ensureSemantics();
+    await show(tester, {
+      'type': 'textField',
+      'layout': {'width': 320, 'height': 64},
+      'props': {
+        'otpLength': 6,
+        'otpDigitsOnly': true,
+        'decoration': {'labelText': 'Verification code'},
+      },
+    }, []);
+    final field = textField(tester);
+    expect(textFields(tester), hasLength(1));
+    final keys = Keyboard(tester);
+    expect(keys.stopIds(field), ['f']);
+    await tapField(tester, field);
+    expect(field.focusNode.hasFocus, isTrue);
+    tester.testTextInput.enterText('12a345678');
+    await tester.pump();
+    expect(field.editor.text, '123456');
+    final data = field.debugSemantics!.getSemanticsData();
+    expect(data.flagsCollection.isTextField, isTrue);
+    expect(data.flagsCollection.isFocused, Tristate.isTrue);
+    expect(data.label, 'Verification code');
+    expect(data.value, '123456');
+    expect(data.maxValueLength, 6);
+    expect(data.hint, contains('6 digit code'));
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    expect(field.editor.text, '12345');
+    expect(field.focusNode.showsHighlight, isFalse, reason: 'a pointer focus has no keyboard-only ring');
+    field.focusNode.unfocus();
+    await keys.tab();
+    expect(keys.focusedId, 'f');
+    expect(keys.ringShown, isTrue);
+    semantics.dispose();
+  });
+
   testWidgets('a fixed-height field shows its focused border when focused', (tester) async {
     final doc = LayoutDocument.fromJson({
       'roots': ['p'],
