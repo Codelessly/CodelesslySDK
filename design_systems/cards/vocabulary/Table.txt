@@ -1,0 +1,30 @@
+// A table of rows written as lists, under a header of column names.
+Table#lists columns=[] rows=[] dense=false
+  Column w=fill gap=0 radius=10 border=line
+    Row w=fill gap=12 pad=[12,8,12,8] fill=tile
+      each heading in columns
+        Text.caption "{heading}" grow
+    each row in rows
+      Column w=fill gap=0
+        Divider
+        Row w=fill gap=12 pad={dense ? [12,6,12,6] : [12,10,12,10]}
+          each cell in row
+            Text "{cell}" grow
+
+// A table of records: a column for each of their fields, named by the first record's.
+Table#records rows=[] dense=false onRowTap
+  Column w=fill gap=0 radius=10 border=line
+    Row w=fill gap=12 pad=[12,8,12,8] fill=tile
+      each heading in keys(first(rows))
+        Text.caption "{heading}" grow
+    each row in rows
+      Column w=fill gap=0 onTap={onRowTap(row)}
+        Divider
+        Row w=fill gap=12 pad={dense ? [12,6,12,6] : [12,10,12,10]}
+          each cell in values(row)
+            Text "{cell}" grow
+
+// A table whose rows are the lines under it.
+Table#rows dense=false
+  Column w=fill gap=0 radius=10 border=line pad=[12,4,12,4]
+    ...

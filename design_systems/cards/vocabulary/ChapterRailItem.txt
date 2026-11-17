@@ -1,0 +1,5 @@
+// One chapter of a rail: its name; a tap goes to it.
+ChapterRailItem "label" onTap
+  Row gap=8 pad=[8,4,8,4] radius=6 middle onTap={onTap}
+    Box w=6 h=6 radius=999 fill=accent
+    Text.caption "{label}"

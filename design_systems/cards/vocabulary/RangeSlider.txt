@@ -1,0 +1,11 @@
+// A slider with two thumbs keeping one list variable [low, high].
+RangeSlider bind=range min=0 max=100 step=1 labels=false
+  state range=[0, 100]
+  state low=min
+  state high=max
+  Column w=fill gap=4
+    Slider bind=low bindEnd=high min={min} max={max} step={step} onChange={range=[low, high]}
+    if labels
+      Row between
+        Text.caption "{low}"
+        Text.caption "{high}"

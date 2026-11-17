@@ -1,0 +1,3 @@
+// A round marker of one item of a set: larger when it is the current one, faint once read.
+Dot color="#FF2563EB" active=false read=false onTap
+  Box w={active ? 12 : 8} h={active ? 12 : 8} radius=999 fill={read ? alpha(color, 0.4) : color} onTap={onTap}

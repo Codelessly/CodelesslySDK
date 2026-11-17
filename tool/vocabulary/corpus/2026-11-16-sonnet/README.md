@@ -28,13 +28,18 @@ tool/notation/notation.sh vocabulary tool/vocabulary/corpus/2026-11-16-sonnet
 tool/notation/notation.sh vocabulary tool/vocabulary/corpus/2026-11-16-sonnet --no-aliases --out tool/vocabulary/corpus/2026-11-16-sonnet/no-aliases
 ```
 
-and, to look at the pages (each app becomes a site folder; a stand-in is a plain column, so an unknown word that has
-no text and nothing under it shows as empty room):
+and, to look at the pages (each app becomes a site folder; a stand-in is a plain column, and one with no text and
+nothing under it is a dashed box with its word, since 2026-11-17):
 
 ```
 tool/notation/notation.sh vocabulary tool/vocabulary/corpus/2026-11-16-sonnet --out /tmp/vocab --sites /tmp/vocab/sites
 tool/render/render.sh /tmp/vocab/sites/seat-booking --out /tmp/vocab/renders/seat-booking --sizes 1440x900,390x844 --full-page
 ```
+
+Since 2026-11-17 the tool records every word an answer used, known or not, and reads the words Cards defines in the
+notation (`design_systems/cards/vocabulary/`; `--no-definitions` reads none); `tool/vocabulary/count.py
+<vocabulary.json> [<earlier>]` gives the size. The files here were written before: they hold every type, and only
+the other words that did not resolve (count.py reads them so).
 
 ## What it said (2026-11-16)
 

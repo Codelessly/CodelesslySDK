@@ -1,0 +1,11 @@
+// One command of a palette: its icon, name, a hint under it and its shortcut.
+CommandItem "title" icon hint shortcut onTap
+  Row gap=10 pad=[10,8,10,8] radius=8 middle onTap={onTap}
+    if icon != null
+      Icon "{icon == null ? "circle" : icon}" size=18 color=inkSoft
+    Column grow gap=1
+      Text "{title}"
+      if hint != null
+        Text.caption "{hint}"
+    if shortcut != null
+      Kbd "{shortcut}"

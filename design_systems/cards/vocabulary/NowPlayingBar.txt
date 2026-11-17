@@ -1,0 +1,4 @@
+// The bar of what is playing, at the foot of a player: the lines under it.
+NowPlayingBar
+  Column w=fill pad=[12,8,12,8] border-top=line
+    ...

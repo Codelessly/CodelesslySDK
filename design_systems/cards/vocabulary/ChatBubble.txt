@@ -1,0 +1,12 @@
+// One message of a chat: at the right in the accent's tint when mine; the sender over it unless grouped with the one before.
+ChatBubble mine=false sender time grouped=false
+  Row w=fill top
+    if mine
+      Spacer grow
+    Column gap=2 maxw=480
+      if !grouped && !mine && sender != null
+        Text.caption "{sender}"
+      Column gap=4 pad=[12,8,12,8] radius=14 fill={mine ? "#FFDBEAFE" : "#FFFFFFFF"} border={mine ? "#00000000" : "#FFE5E7EB"}
+        ...
+      if time != null
+        Text.caption "{time}"

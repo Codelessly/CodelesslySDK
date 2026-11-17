@@ -6,6 +6,9 @@
 import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:codelessly_api/notation.dart' show NotationVocabulary, definitionLines, readDefinitions;
+
+import 'vocabulary.dart' show loadDefinitionTexts;
 
 Future<void> main(List<String> args) async {
   // --open: the open-vocabulary prompt (the grammar and the core only; a
@@ -28,6 +31,11 @@ Future<void> main(List<String> args) async {
     }
   }
   final catalog = ds?.catalogOver(standardCatalog) ?? standardCatalog;
+  // The words the design system defines in the notation (its
+  // vocabulary/*.txt): the taught prompt lists their signatures, as it lists
+  // components; the open prompt does not (a definition gives a meaning to
+  // the word a model writes unprompted).
+  final defined = i >= 0 && i + 1 < args.length && !open ? definitionLines(NotationVocabulary(definitions: readDefinitions(loadDefinitionTexts(args[i + 1])).words)) : const <String>[];
   stdout.writeln(Catalog.run(
     catalog,
     () => notationPrompt(
@@ -37,4 +45,11 @@ Future<void> main(List<String> args) async {
       open: open,
     ),
   ));
+  if (defined.isNotEmpty) {
+    stdout
+      ..writeln()
+      ..writeln('WORDS (${ds?.name ?? 'defined'}: written like a component; each stands for plain lines)')
+      ..writeln('  Written like any node: Name "text" key=value onEvent={actions}; the values shown are the defaults. One with (children) takes lines indented under it; (children: Front: Back) takes them under a Front and a Back line.')
+      ..writeAll(defined.map((l) => '  $l\n'));
+  }
 }

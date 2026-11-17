@@ -1,0 +1,5 @@
+// A short message in a dark pill, shown while visible holds.
+Toast "message" icon="info"
+  Row gap=8 pad=[14,10,14,10] radius=12 fill=#FF1F2937 middle
+    Icon "{icon}" size=18 color=#FFFFFFFF
+    Text "{message}" color=#FFFFFFFF

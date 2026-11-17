@@ -1,0 +1,5 @@
+// A titled group of the lines under it (a section of a menu or a palette).
+Group "title"
+  Column gap=2
+    Text.caption "{title}"
+    ...

@@ -1,0 +1,4 @@
+// An icon button that stays pressed while it is on.
+ToggleButton "icon" selected=false onTap
+  Row w=36 h=36 radius=10 center middle fill={selected ? "#FFDBEAFE" : "#00000000"} onTap={onTap}
+    Icon "{icon == null ? "circle" : icon}" size=20 color={selected ? "#FF2563EB" : "#FF6B7280"}

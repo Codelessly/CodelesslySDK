@@ -1,0 +1,9 @@
+// One stop of a route: a dot (filled once passed, ringed where the vehicle is), its name and a note.
+TimelineStop "name" "detail" passed=false current=false onTap
+  Row w=fill gap=10 top onTap={onTap}
+    Box w=12 h=12 radius=999 fill={passed ? "#FF2563EB" : "#FFFFFFFF"} border={current ? "#FF2563EB" : "#FFCBD5E1"}
+    Column grow gap=2
+      Text.strong "{name}" color={current ? "#FF2563EB" : "#FF111827"}
+      if detail != null
+        Text.caption "{detail}"
+      ...

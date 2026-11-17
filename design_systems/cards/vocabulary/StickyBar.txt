@@ -1,0 +1,4 @@
+// A bar kept at the foot of the screen while it scrolls: the lines under it.
+StickyBar
+  Column w=fill pad=[12,8,12,8] sticky
+    ...

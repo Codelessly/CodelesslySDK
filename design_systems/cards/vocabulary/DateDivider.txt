@@ -1,0 +1,6 @@
+// A day's name between the messages of a chat, ruled at both sides.
+DateDivider "label"
+  Row w=fill gap=10 middle pad=[0,6,0,6]
+    Divider grow
+    Text.caption "{label}"
+    Divider grow

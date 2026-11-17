@@ -1,0 +1,15 @@
+// A countdown of seconds as a ring with the seconds left in it; onEnd runs once when it reaches 0.
+Countdown#seconds value=0 total=60 size=56 onEnd
+  state ended=false
+  every 1s when value <= 0 && !ended onTick={ended=true; onEnd}
+  Stack w={size} h={size} center middle
+    Ring {value / max(1, total)} w={size} h={size}
+    Text.strong "{value}"
+
+// The time something next happens, under its label.
+Countdown#clock "label" until color
+  Column gap=2
+    Text.caption "{label}" color={color}
+    Row gap=6 middle
+      Icon "schedule" size=16 color={color}
+      Text.strong "{until}" color={color}

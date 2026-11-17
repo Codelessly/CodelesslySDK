@@ -1,0 +1,3 @@
+// A round sample of one colour; ringed when it is the chosen one.
+ColorSwatch "color" selected=false size=28 onTap
+  Box w={size} h={size} radius=999 fill={color} border={selected ? "#FF111827" : "#1F000000"} onTap={onTap}

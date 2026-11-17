@@ -1,0 +1,5 @@
+// A quoted message inside another: who wrote it, and a line of it, ruled at the side.
+QuoteBlock "from" "text"
+  Column gap=2 pad=[10,6,10,6] radius=6 fill=tile border-left=accent
+    Text.caption "{from}"
+    Text.muted "{text}"

@@ -1,0 +1,6 @@
+// A sentence of an article set large between its paragraphs, with who said it.
+PullQuote "quote" cite
+  Column gap=6 pad=[16,8,16,8] border-left=accent
+    Text "{quote}" size=22 weight=600
+    if cite != null
+      Text.caption "{cite}"

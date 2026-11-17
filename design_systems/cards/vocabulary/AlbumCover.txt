@@ -1,0 +1,5 @@
+// An album's cover: a square in a colour from its hue (0 to 360), its title in the corner; ringed while it plays.
+AlbumCover hue=200 title size=160 glow=false
+  Column w={size} h={size} radius=12 pad=10 bottom fill={mix("#FF0EA5E9", "#FFF43F5E", hue / 360)} border={glow ? "#FFFDE68A" : "#00000000"}
+    if title != null
+      Text.strong "{title}" color=#FFFFFFFF

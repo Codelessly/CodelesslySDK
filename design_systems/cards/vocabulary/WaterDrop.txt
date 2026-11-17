@@ -1,0 +1,4 @@
+// How full something is, as a rounded drop filled from the bottom (value from 0 to 1).
+WaterDrop value=0.5 size=40
+  Column w={size} h={size * 1.2} radius=999 fill=#FFE0F2FE border=#FF7DD3FC bottom
+    Box w=fill h={size * 1.2 * max(0, min(1, value))} radius=999 fill=#FF38BDF8

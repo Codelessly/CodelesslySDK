@@ -1,0 +1,6 @@
+// A bar over a list while some of it is chosen: how many, the actions written under it, and a clear button.
+SelectionBar "label" onClear
+  Row w=fill gap=8 pad=[12,8,12,8] radius=12 fill=accentTint middle
+    IconButton "close" onTap={onClear}
+    Text.strong "{label}" grow
+    ...

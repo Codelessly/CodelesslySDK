@@ -1,0 +1,4 @@
+// A key or a shortcut as it is printed on a key cap.
+Kbd "keys"
+  Row pad=[6,2,6,2] radius=5 fill=tile border=lineStrong
+    Text.mono "{keys}"

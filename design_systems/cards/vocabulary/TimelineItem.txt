@@ -1,0 +1,12 @@
+// One event of a timeline: a dot on the rail, its title and when, and the lines under it.
+TimelineItem "title" "detail" time icon="circle"
+  Row w=fill gap=10 top
+    Icon "{icon}" size=12 color=accent
+    Column grow gap=4
+      Row gap=8 middle
+        Text.strong "{title}"
+        if time != null
+          Text.caption "{time}"
+      if detail != null
+        Text.muted "{detail}"
+      ...

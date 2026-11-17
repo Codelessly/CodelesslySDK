@@ -1,0 +1,5 @@
+// A grid of days, each shaded by its value (a habit's year): values is a list of numbers, cols the cells of a row.
+Heatmap values=[] cols=7 onTapCell
+  Grid cols={cols} gap=3
+    each value in values
+      Box h=12 radius=3 fill={value > 0 ? "#FF16A34A" : "#FFE5E7EB"} onTap={onTapCell(value)}

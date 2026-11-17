@@ -1,0 +1,7 @@
+// Where a chat's message is written: a field, an attach button and a send button (onSend: result is the text).
+Composer bind=draft hint="Write a message" onSend
+  state draft=""
+  Row w=fill gap=8 pad=[12,8,12,8] middle border-top=line
+    IconButton "attach_file"
+    Input bind=draft hint={hint} grow onSubmit={onSend(draft); draft=""}
+    IconButton "send" onTap={onSend(draft); draft=""}

@@ -1,0 +1,4 @@
+// The chapters of a long page down its side: the lines under it, one per chapter.
+ChapterRail
+  Column gap=2 pad=[8,8,8,8]
+    ...

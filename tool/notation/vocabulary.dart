@@ -6,14 +6,19 @@
 //
 //   dart run tool/notation/vocabulary.dart <folder or files>
 //       [--design-system <folder>] [--aliases <file.json>] [--no-aliases]
-//       [--width <canvas width>] [--out <dir>] [--sites <dir>]
+//       [--width <canvas width>] [--out <dir>] [--sites <dir>] [--no-definitions]
 //
 // A corpus file may hold several screens, each under a `### name` line; a
 // file without one is a single screen. A folder is read for its *.txt (and
 // those of its answers/ folder). The design system is design_systems/cards
 // unless named; its vocabulary.json (aliases) is read over the built-in
 // table, then --aliases over both; --no-aliases reads none (the count before
-// any alias). It writes <out>/vocabulary.json and <out>/VOCABULARY.md (<out>:
+// any alias). The words the design system defines in the notation (its
+// vocabulary/*.txt, codelessly_api docs/design/20-defined-words.md) are read
+// as words we have; --no-definitions reads none. Every word an answer used is
+// recorded with how it resolved (vocabulary_words.dart), known or not, in
+// `words` and the summary; the other sections rank what is unknown.
+// It writes <out>/vocabulary.json and <out>/VOCABULARY.md (<out>:
 // the folder given, or the first file's). With --sites it also writes, for
 // each file, <sites>/<file>/<screen>.json and a site.json, ready for
 // tool/render/render.sh.
@@ -25,10 +30,23 @@ import 'package:codelessly_api/notation.dart';
 import 'package:codelessly_api/validate.dart';
 import 'package:codelessly_sdk/src/runtime/expressions/formula.dart' show FormulaEvaluator;
 
+import 'vocabulary_words.dart';
+
 /// The aliases of the design system at [dir] (its vocabulary.json) over the
-/// built-in table, then those of [file] over both.
-NotationVocabulary loadVocabulary({String? dir, String? file, bool builtIn = true}) {
+/// built-in table, then those of [file] over both; and, with [definitions],
+/// the words the design system defines in the notation (its vocabulary/*.txt,
+/// codelessly_api docs/design/20-defined-words.md). What a definition gets
+/// wrong is said on stderr.
+NotationVocabulary loadVocabulary({String? dir, String? file, bool builtIn = true, bool definitions = true}) {
   var table = builtIn ? NotationVocabulary.core : NotationVocabulary.none;
+  final texts = definitions && dir != null ? loadDefinitionTexts(dir) : const <String, String>{};
+  if (texts.isNotEmpty) {
+    final read = readDefinitions(texts);
+    for (final p in read.problems) {
+      stderr.writeln('$dir/vocabulary/$p');
+    }
+    table = table.merge(NotationVocabulary(definitions: read.words));
+  }
   for (final path in [if (dir != null) '$dir/vocabulary.json', ?file]) {
     final f = File(path);
     if (!f.existsSync()) {
@@ -39,6 +57,15 @@ NotationVocabulary loadVocabulary({String? dir, String? file, bool builtIn = tru
     if (json is Map) table = table.merge(NotationVocabulary.fromJson(json.cast<String, Object?>()));
   }
   return table;
+}
+
+/// The texts of the words the design system at [dir] defines in the
+/// notation: its vocabulary/*.txt, by file name.
+Map<String, String> loadDefinitionTexts(String dir) {
+  final folder = Directory('$dir/vocabulary');
+  if (!folder.existsSync()) return const {};
+  final files = folder.listSync().whereType<File>().where((f) => f.path.endsWith('.txt')).toList()..sort((a, b) => a.path.compareTo(b.path));
+  return {for (final f in files) f.uri.pathSegments.last: f.readAsStringSync()};
 }
 
 /// The screens of [text]: each `### name` line starts one; a text without
@@ -204,9 +231,10 @@ Future<void> main(List<String> args) async {
   final outDir = Directory(opt('--out') ?? (FileSystemEntity.isDirectorySync(first) ? first : File(first).parent.path))..createSync(recursive: true);
   final sites = opt('--sites');
   final width = double.tryParse(opt('--width') ?? '') ?? 1280;
-  final table = loadVocabulary(dir: dsDir, file: opt('--aliases'), builtIn: !args.contains('--no-aliases'));
+  final table = loadVocabulary(dir: dsDir, file: opt('--aliases'), builtIn: !args.contains('--no-aliases'), definitions: !args.contains('--no-definitions'));
   final catalog = ds.catalogOver(standardCatalog);
   final components = {for (final c in ds.list) c.type};
+  final corpus = CorpusWords(components: components);
   final theme = ThemeTokens.fromJson(ds.manifest.theme.toJson());
 
   final types = <String, _Word>{};
@@ -214,13 +242,13 @@ Future<void> main(List<String> args) async {
   final issueShapes = <String, ({int count, Set<String> files, List<String> examples})>{};
   final invalidShapes = <String, ({int count, Set<String> files, List<String> examples})>{};
   final perFile = <Map<String, Object?>>[];
-  final total = {'core': 0, 'component': 0, 'alias': 0, 'unknown': 0};
+  final total = {'core': 0, 'component': 0, 'alias': 0, 'definition': 0, 'unknown': 0};
   var screenCount = 0, statementLines = 0;
 
   for (final file in files) {
     final name = file.uri.pathSegments.last.replaceFirst(RegExp(r'\.txt$'), '');
     final screens = screensOf(file.readAsStringSync(), name);
-    final count = {'core': 0, 'component': 0, 'alias': 0, 'unknown': 0};
+    final count = {'core': 0, 'component': 0, 'alias': 0, 'definition': 0, 'unknown': 0};
     var issues = 0, invalid = 0, standIns = 0, lines = 0;
     final pages = <String>[];
     final written = <String, Map<String, Object?>>{};
@@ -317,9 +345,14 @@ Future<void> main(List<String> args) async {
         issueShapes[shape] = (count: at.count + 1, files: at.files..add(name), examples: at.examples);
       }
 
+      corpus.screen(name, screen.text, result);
       // Every use recorded, by its line.
-      final unknownAt = <int>{}, aliasAt = <int, VocabularyUse>{};
+      final unknownAt = <int>{}, aliasAt = <int, VocabularyUse>{}, definedAt = <int, VocabularyUse>{};
       for (final u in result.vocabulary) {
+        if (u.kind == 'definition') {
+          definedAt[u.line] = u;
+          continue;
+        }
         if (u.kind == 'type') {
           unknownAt.add(u.line);
           standIns++;
@@ -372,6 +405,8 @@ Future<void> main(List<String> args) async {
         final String how;
         if (unknownAt.contains(i + 1)) {
           how = 'unknown';
+        } else if (definedAt.containsKey(i + 1)) {
+          how = 'definition';
         } else if (alias != null) {
           how = 'alias';
         } else if (components.contains(parts.word) && !notationTypes.containsKey(parts.word)) {
@@ -385,6 +420,7 @@ Future<void> main(List<String> args) async {
         final w = types.putIfAbsent('${parts.word} $how', () => _Word(parts.word, 'type'));
         w.resolved = how;
         if (alias != null) w.to = alias.of == 'line' ? alias.to!.split(RegExp(r'[ #]')).first : alias.to;
+        if (definedAt[i + 1] case final d?) w.to = {...?w.to?.split(', '), d.to!}.join(', ');
         w.files.add(name);
         w.uses++;
         w.example(line);
@@ -503,12 +539,17 @@ Future<void> main(List<String> args) async {
     'types': [for (final w in typeWords) w.toJson()],
     for (final k in const ['parameter', 'flag', 'event', 'verb', 'function', 'variant', 'missing', 'children', 'alias'])
       switch (k) { 'alias' => 'aliases', 'missing' => 'missing', 'children' => 'children', _ => '${k}s' }: [for (final w in _sorted(others[k]!.values)) w.toJson()],
+    'summary': corpus.summary(),
+    'words': [for (final w in corpus.sorted()) w.toJson()],
     'synonyms': [
       for (final e in synonyms) {'stem': e.key, 'words': [for (final w in _sorted(e.value)) w.word]},
     ],
   };
   File('${outDir.path}/vocabulary.json').writeAsStringSync('${const JsonEncoder.withIndent(' ').convert(json)}\n');
 
+  final summary = corpus.summary();
+  final allWords = corpus.words.length;
+  final resolvedWords = allWords - summary.values.fold<int>(0, (a, m) => a + m['unknown']!);
   String pct(int n) => nodeLines == 0 ? '0%' : '${(100 * n / nodeLines).toStringAsFixed(1)}%';
   String code(String s) => '`${s.replaceAll('`', "'").replaceAll('|', r'\|')}`';
   String top(Map<String, int> m, [int n = 8]) => _ranked(m).entries.take(n).map((e) => e.value > 1 ? '${e.key} ×${e.value}' : e.key).join(', ');
@@ -520,15 +561,30 @@ Future<void> main(List<String> args) async {
     ..writeln('${files.length} files, $screenCount screens, expanded ${width.round()} wide with ${ds.name}; aliases: ${json['aliasTable']}.')
     ..writeln()
     ..writeln('$nodeLines lines start with a word: ${total['core']} a core word (${pct(total['core']!)}), ${total['component']} a ${ds.name} component (${pct(total['component']!)}), '
-        '${total['alias']} an alias of a word we have (${pct(total['alias']!)}), ${total['unknown']} a word we do not have (${pct(total['unknown']!)}), which stands in. '
+        '${total['alias']} an alias of a word we have (${pct(total['alias']!)}), ${total['definition']} a word defined in the notation (${pct(total['definition']!)}), '
+        '${total['unknown']} a word we do not have (${pct(total['unknown']!)}), which stands in. '
         '$statementLines more are statements (state, if, each, key, every).')
+    ..writeln()
+    ..writeln('## Every word used, by kind and how it resolved')
+    ..writeln()
+    ..writeln('Distinct words, each once (a text, parameter, flag, event or variant once per type it is on; `vocabulary_words.dart` says how each kind is read). '
+        'Resolved: ${resolvedWords} of ${allWords} (${allWords == 0 ? 0 : (100 * resolvedWords / allWords).toStringAsFixed(1)}%).')
+    ..writeln()
+    ..writeln('| kind | words | ${wordResolutions.join(' | ')} |')
+    ..writeln('|---|---|${wordResolutions.map((_) => '---|').join()}');
+  for (final k in wordKinds) {
+    final row = summary[k]!;
+    md.writeln('| $k | ${row.values.fold<int>(0, (a, b) => a + b)} | ${wordResolutions.map((r) => row[r]).join(' | ')} |');
+  }
+  md
+    ..writeln('| all | $allWords | ${wordResolutions.map((r) => summary.values.fold<int>(0, (a, m) => a + m[r]!)).join(' | ')} |')
     ..writeln()
     ..writeln('## By file')
     ..writeln()
-    ..writeln('| file | screens | lines | core | component | alias | unknown | grammar issues | does not validate |')
-    ..writeln('|---|---|---|---|---|---|---|---|---|');
+    ..writeln('| file | screens | lines | core | component | alias | definition | unknown | grammar issues | does not validate |')
+    ..writeln('|---|---|---|---|---|---|---|---|---|---|');
   for (final f in perFile) {
-    md.writeln('| ${f['file']} | ${f['screens']} | ${f['lines']} | ${f['core']} | ${f['component']} | ${f['alias']} | ${f['unknown']} | ${f['issues']} | ${f['invalid']} |');
+    md.writeln('| ${f['file']} | ${f['screens']} | ${f['lines']} | ${f['core']} | ${f['component']} | ${f['alias']} | ${f['definition']} | ${f['unknown']} | ${f['issues']} | ${f['invalid']} |');
   }
   md
     ..writeln()
@@ -580,6 +636,34 @@ Future<void> main(List<String> args) async {
   for (final w in typeWords.where((w) => w.resolved != 'unknown')) {
     md.writeln('| ${w.files.length} | ${w.uses} | ${w.word} | ${w.resolved}${w.to == null ? '' : ' → ${w.to}'} | ${top(w.parameters)} | ${top(w.flags, 5)} | ${top(w.events, 5)} |');
   }
+  // What each word we have was given, from every use: the parameters,
+  // flags and events written on it with how many uses, those it does not
+  // take marked ✗; for a component and a defined word, what it takes that no
+  // answer wrote.
+  final givenOn = <String, List<CorpusWord>>{};
+  for (final w in corpus.words.values) {
+    if (w.on != null && w.kind != 'variant' && w.kind != 'text') givenOn.putIfAbsent(w.on!, () => []).add(w);
+  }
+  final takes = <String, Set<String>>{
+    for (final c in ds.list) c.type: {for (final p in c.spec.props) p.key, for (final e in c.spec.events) e.key},
+    for (final e in table.definitions.entries) e.key: {for (final d in e.value) ...[...d.parameters.keys, ...d.events, ...d.strings, if (d.bind != null) 'bind']},
+  };
+  md
+    ..writeln()
+    ..writeln('## What each word we have was given')
+    ..writeln()
+    ..writeln('Every parameter, flag and event written on a type the notation reads (core, component, alias or definition), with its uses; ✗: one it does not take (left out). '
+        'For a component or a defined word, what it takes that no answer wrote.')
+    ..writeln()
+    ..writeln('| uses | type | how | given | never given |')
+    ..writeln('|---|---|---|---|---|');
+  for (final t in corpus.sorted().where((w) => w.kind == 'type' && w.resolved != 'unknown')) {
+    final on = (givenOn[t.word] ?? <CorpusWord>[])..sort((a, b) => b.uses - a.uses);
+    final written = {for (final w in on) w.word};
+    final never = [for (final k in (t.resolved == 'component' || t.resolved == 'definition' ? takes[t.word] : null) ?? const <String>{}) if (!written.contains(k)) k]..sort();
+    md.writeln('| ${t.uses} | ${t.word} | ${t.resolved}${t.to.isEmpty ? '' : ' → ${t.to.join(', ')}'} | '
+        '${on.map((w) => '${w.word}${w.resolved == 'unknown' ? ' ✗' : ''}${w.uses > 1 ? ' ×${w.uses}' : ''}').join(', ')} | ${never.join(', ')} |');
+  }
   md
     ..writeln()
     ..writeln('## Grammar issues')
@@ -604,7 +688,8 @@ Future<void> main(List<String> args) async {
   }
   File('${outDir.path}/VOCABULARY.md').writeAsStringSync(md.toString());
 
-  stdout.writeln('${files.length} files, $screenCount screens, $nodeLines node lines: core ${total['core']}, component ${total['component']}, alias ${total['alias']}, unknown ${total['unknown']}; '
+  stdout.writeln('${files.length} files, $screenCount screens, $nodeLines node lines: core ${total['core']}, component ${total['component']}, alias ${total['alias']}, definition ${total['definition']}, unknown ${total['unknown']}; '
+      '$allWords words, $resolvedWords resolved; '
       '${unknownTypes.length} unknown words; ${shapes.fold<int>(0, (n, e) => n + e.value.count)} grammar issues; '
       '${perFile.fold<int>(0, (n, f) => n + (f['invalid']! as int))} validation errors.');
   stdout.writeln('${outDir.path}/vocabulary.json, ${outDir.path}/VOCABULARY.md');

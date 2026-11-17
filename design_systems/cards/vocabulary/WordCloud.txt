@@ -1,0 +1,5 @@
+// Words sized by how often they were given: each a record with text and count, or a plain word.
+WordCloud words=[] h=200
+  Row w=fill gap=12 pad=12 center middle wrap
+    each word in words
+      Text "{coalesce(word.text, word)}" size={14 + min(28, coalesce(word.count, 1) * 3)} color=accent

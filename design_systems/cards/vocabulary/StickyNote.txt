@@ -1,0 +1,6 @@
+// A note stuck on a board: a tinted square with its text, outlined in the accent when chosen.
+StickyNote "text" fill=#FFFDE68A w=180 h=140 selected=false editing=false onSelect onDoubleTap
+  Column w={w} h={h} pad=14 gap=6 fill={fill} radius=6 border={selected ? "#FF2563EB" : "#1A000000"} onTap={onSelect} onDoubleTap={onDoubleTap}
+    Text "{text}"
+    if editing
+      Text.caption "Editing"

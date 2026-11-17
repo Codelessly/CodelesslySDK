@@ -1,0 +1,4 @@
+// A poster for a show: a tinted panel with its title set at the foot (the tint picked by seed).
+Poster title seed w=160 h=220 radius=8
+  Column w={w} h={h} radius={radius} pad=14 bottom fill={["#FF7C2D12","#FF1E3A8A","#FF3F6212","#FF6B21A8","#FF9F1239"][length(text(seed)) % 5]}
+    Text.strong "{title}" color=#FFFFFFFF size=18

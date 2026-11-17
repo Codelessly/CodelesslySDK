@@ -1,0 +1,6 @@
+// A small rounded button floating over a list (New messages).
+Pill "label" icon
+  Row gap=6 pad=[12,6,12,6] radius=999 fill=accent middle center
+    if icon != null
+      Icon "{icon == null ? "circle" : icon}" size=16 color=#FFFFFFFF
+    Text.strong "{label}" color=#FFFFFFFF

@@ -1,0 +1,6 @@
+// A picture (the lines under it) with its caption under it.
+Figure caption
+  Column w=fill gap=6
+    ...
+    if caption != null
+      Text.caption "{caption}"

@@ -1,0 +1,10 @@
+// One step of a story told as the page scrolls: the lines under it, at least minh tall.
+Step#story minh=480 onActive
+  Column w=fill h={minh} gap=12 middle onTap={onActive}
+    ...
+
+// One step of a progress: its icon and its name.
+Step#progress "label" icon="circle" done=false
+  Row gap=10 middle
+    Icon "{icon}" size=20 color={done ? "#FF16A34A" : "#FF6B7280"}
+    Text "{label}"

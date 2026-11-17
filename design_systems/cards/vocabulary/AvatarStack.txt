@@ -1,0 +1,7 @@
+// Several people as round avatars side by side, and +n for the rest.
+AvatarStack names=[] max=4 size=28
+  Row gap=4 middle
+    each name in take(names, max)
+      Avatar "{name}" size={size}
+    if length(names) > max
+      Text.caption "+{length(names) - max}"

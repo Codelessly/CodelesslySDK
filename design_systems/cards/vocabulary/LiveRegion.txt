@@ -1,0 +1,3 @@
+// A line of text that says what changed.
+LiveRegion "text"
+  Text.muted "{text}"

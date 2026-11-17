@@ -1,0 +1,7 @@
+// A row of a list swiped to act on it (left and right), with the action named at its end.
+SwipeRow action actionColor=bad onSwipeLeft onSwipeRight
+  Row w=fill gap=8 middle onSwipeLeft={onSwipeLeft} onSwipeRight={onSwipeRight}
+    Column grow
+      ...
+    if action != null
+      Text.caption "{action}" color={actionColor}

@@ -86,8 +86,11 @@ void main() {
             options: ValidateOptions(theme: api.ThemeTokens.fromJson(ds.manifest.theme.toJson()), components: ds.components))).where((d) => d.severity == Severity.error);
     expect(invalid.map((d) => '${d.code.name} ${d.path}: ${d.message}'), isEmpty);
     List<String> of(String kind) => [for (final u in r.vocabulary) if (u.kind == kind) '${u.on == null ? '' : '${u.on}.'}${u.word}'];
-    expect(of('type'), ['SeatMap', 'Legend', 'Waveform', 'QuickSwitcher', 'CommandItem']);
-    expect(of('parameter'), isEmpty);
+    expect(of('type'), ['SeatMap', 'Waveform', 'QuickSwitcher']);
+    // Words Cards defines in the notation (its vocabulary/*.txt) are words we
+    // have; what a use gives that its definition does not take is recorded.
+    expect(of('definition'), ['Legend', 'CommandItem']);
+    expect(of('parameter'), ['Legend.string1', 'Legend.color']);
     expect(of('flag'), ['Input.clearable']);
     expect(of('verb'), ['Button.haptic', 'ListTile.focus']);
     expect(of('variant'), ['Button.Button.danger']);
