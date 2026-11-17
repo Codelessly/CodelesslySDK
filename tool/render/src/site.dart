@@ -47,7 +47,9 @@ typedef Input = ({String name, String path, String text});
         final dsm = DesignSystemManifest.fromJson(ds);
         m = {
           ...m,
-          'theme': dsm.theme.mergedWith(ThemeTokens.fromJson(m['theme'])).toJson(),
+          // The site's theme over its tokens, with what they make from their
+          // accent made from the site's (ThemeTokens.withSiteTheme).
+          'theme': dsm.theme.withSiteTheme(ThemeTokens.fromJson(m['theme'])).toJson(),
           'fonts': [
             for (final f in dsm.fonts)
               FontFamily(family: f.family, fonts: [

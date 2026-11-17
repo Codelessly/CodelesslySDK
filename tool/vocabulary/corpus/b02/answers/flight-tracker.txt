@@ -1,0 +1,209 @@
+### Search
+state tab="search"
+state q=""
+state mode="Flight"
+state recent=[{"id":"UA512","route":"SFO to JFK","status":"En route"},{"id":"DL88","route":"ATL to LHR","status":"Delayed"},{"id":"BA286","route":"LHR to SFO","status":"Landed"},{"id":"AA100","route":"JFK to LAX","status":"Scheduled"}]
+state sel=""
+App
+  Sidebar
+    Brand "Contrail" icon="flight"
+    NavItem "Search" icon="search" selected={tab=="search"} onTap={tab="search"; go search}
+    NavItem "My flight" icon="flight_takeoff" selected={tab=="flight"} onTap={tab="flight"; go flight}
+    NavItem "Departures" icon="departure_board" selected={tab=="board"} onTap={tab="board"; go board}
+    NavItem "Alerts" icon="notifications" badge="2" selected={tab=="alerts"} onTap={tab="alerts"; go alerts}
+    Spacer grow
+    Text.muted "Signed in as Dana Okafor"
+  Main
+    Nav
+      Heading "Track a flight" level=1
+      Row gap=8
+        IconButton "history" tooltip="Recent searches" onTap={open recentMenu}
+    Column pad=24 gap=16 maxw=720
+      SegmentedButton bind=mode items=["Flight","Route"]
+      if mode=="Flight"
+        Row gap=8
+          Input "Flight number" "e.g. UA512" bind=q grow
+          Button "Track" onTap={go flight}
+      if mode=="Route"
+        Row gap=8
+          Input "From" "SFO" bind=from grow
+          IconButton "swap_horiz" tooltip="Swap airports" onTap={tmp=from; from=to; to=tmp}
+          Input "To" "JFK" bind=to grow
+          Button "Find flights" onTap={emit searchRoute {"from":from,"to":to}}
+      Text.sectionTitle "Recent"
+      each f in recent
+        ListTile "{f.id}  {f.route}" onTap={sel=f.id; go flight}
+          Badge.info "{f.status}" visible={f.status=="En route"}
+          Badge.warning "{f.status}" visible={f.status=="Delayed"}
+          Badge.success "{f.status}" visible={f.status=="Landed"}
+          Badge.neutral "{f.status}" visible={f.status=="Scheduled"}
+  Menu#recentMenu end
+    MenuItem "Clear recent" icon="delete" onTap={recent=[]}
+    MenuItem "Alert settings" icon="notifications" onTap={go alerts}
+
+### Flight
+state progress=0.62
+state delayed=true
+state gate="B14"
+state terminal="2"
+state belt="7"
+state gateChanged=true
+state terminalChanged=false
+state beltChanged=true
+state following=false
+App
+  Sidebar
+    Brand "Contrail" icon="flight"
+    NavItem "Search" icon="search" onTap={go search}
+    NavItem "My flight" icon="flight_takeoff" selected={true} onTap={go flight}
+    NavItem "Departures" icon="departure_board" onTap={go board}
+    NavItem "Alerts" icon="notifications" badge="2" onTap={go alerts}
+  Main
+    Nav
+      Row gap=12
+        IconButton "arrow_back" tooltip="Back" onTap={go search}
+        Heading "UA512  San Francisco to New York" level=1
+      Row gap=8
+        Badge.warning "Delayed 35 min"
+        Button.outline "Follow flight" onTap={following=true; toast "Following UA512"} visible={!following}
+        Button.secondary "Following" onTap={following=false} visible={following}
+        IconButton "more_vert" tooltip="More" onTap={open flightMenu}
+    Column pad=24 gap=16 scroll
+      Card gap=16
+        Row between
+          Column gap=4
+            Text.caption "SFO  San Francisco"
+            Text "08:05" strike color=#FF8A8A8A size=24
+            Text "08:40" size=56 weight=700
+            Text.muted "Departed, Sat 14 Nov"
+          Column gap=4 end
+            Text.caption "JFK  New York"
+            Text "16:35" strike color=#FF8A8A8A size=24
+            Text "17:10" size=56 weight=700
+            Text.muted "Arrives in {duration(9000)}"
+        FlightProgress bind=progress from="SFO" to="JFK" label="{round(progress*100,0)}% of 2,586 mi"
+      Row gap=8
+        if gateChanged
+          Chip "Gate {gate}" icon="meeting_room" animate=pulse duration=800
+        if !gateChanged
+          Chip "Gate {gate}" icon="meeting_room"
+        if terminalChanged
+          Chip "Terminal {terminal}" icon="domain" animate=pulse duration=800
+        if !terminalChanged
+          Chip "Terminal {terminal}" icon="domain"
+        if beltChanged
+          Chip "Belt {belt}" icon="luggage" animate=pulse duration=800
+        if !beltChanged
+          Chip "Belt {belt}" icon="luggage"
+        Spacer grow
+        Button.ghost "Mark seen" onTap={gateChanged=false; terminalChanged=false; beltChanged=false}
+      Row gap=16 top
+        Card grow gap=8
+          Text.panelTitle "Route"
+          FlightMap h=280 from="SFO" to="JFK" progress={progress} arc=true
+        Column w=320 gap=16
+          Card gap=8
+            Text.panelTitle "Details"
+            Row between
+              Text.muted "Aircraft"
+              Text.strong "Boeing 787-9"
+            Row between
+              Text.muted "Altitude"
+              Text.strong "37,000 ft"
+            Row between
+              Text.muted "Ground speed"
+              Text.strong "512 mph"
+            Row between
+              Text.muted "Reason for delay"
+              Text.strong "Late inbound aircraft"
+          Card gap=8
+            Text.panelTitle "Altitude"
+            Sparkline values=[0,8,22,35,37,37,37,36] h=48
+  Menu#flightMenu end
+    MenuItem "Share flight" icon="share" onTap={copy "https://contrail.app/f/UA512"; toast "Link copied"}
+    MenuItem "Add to calendar" icon="event" onTap={emit addCalendar "UA512"}
+    MenuItem "Alert settings" icon="notifications" onTap={go alerts}
+
+### Departures
+state airport="SFO"
+state filter="All"
+state board=[{"time":"08:40","flight":"UA512","to":"New York JFK","gate":"B14","status":"Departed"},{"time":"09:15","flight":"AS330","to":"Seattle SEA","gate":"C3","status":"Boarding"},{"time":"09:50","flight":"DL1204","to":"Atlanta ATL","gate":"D9","status":"On time"},{"time":"10:20","flight":"BA284","to":"London LHR","gate":"G12","status":"Delayed"},{"time":"11:05","flight":"JL001","to":"Tokyo HND","gate":"A7","status":"On time"},{"time":"11:40","flight":"AA177","to":"Dallas DFW","gate":"E2","status":"Cancelled"}]
+state sel=""
+App
+  Sidebar
+    Brand "Contrail" icon="flight"
+    NavItem "Search" icon="search" onTap={go search}
+    NavItem "My flight" icon="flight_takeoff" onTap={go flight}
+    NavItem "Departures" icon="departure_board" selected={true} onTap={go board}
+    NavItem "Alerts" icon="notifications" badge="2" onTap={go alerts}
+  Main
+    Nav
+      Heading "Departures" level=1
+      Row gap=8
+        Select bind=airport items=["SFO","JFK","LHR","ATL"]
+        Input "Filter" bind=search w=200
+    Column pad=24 gap=16
+      Row gap=8
+        ChoiceChip "All" selected={filter=="All"} onTap={filter="All"}
+        ChoiceChip "Delayed" selected={filter=="Delayed"} onTap={filter="Delayed"}
+        ChoiceChip "Boarding" selected={filter=="Boarding"} onTap={filter="Boarding"}
+      Card gap=0
+        Row pad=8 border-bottom=#FFDDDDDD
+          Text.caption "Time" w=70
+          Text.caption "Flight" w=90
+          Text.caption "Destination" grow
+          Text.caption "Gate" w=60 hide=phone
+          Text.caption "Status" w=110
+        each b in filter=="All" ? board : filter(board,x=>x.status==filter)
+          Row pad=8 middle onTap={sel=b.flight; open dep}
+            Text.strong "{b.time}" w=70
+            Text "{b.flight}" w=90
+            Text "{b.to}" grow
+            Text "{b.gate}" w=60 hide=phone
+            Badge.success "{b.status}" w=110 visible={b.status=="On time"||b.status=="Departed"}
+            Badge.info "{b.status}" w=110 visible={b.status=="Boarding"}
+            Badge.warning "{b.status}" w=110 visible={b.status=="Delayed"}
+            Badge.error "{b.status}" w=110 visible={b.status=="Cancelled"}
+  Sheet#dep "Flight {sel}"
+    Text "Open the flight page to see the live map and times."
+    Row gap=8
+      Button "Track this flight" onTap={close; go flight}
+      Button.outline "Alert me" onTap={emit alertOn sel; toast "Alert set for {sel}"; close}
+
+### Alerts
+state alerts={"gate":true,"delay":true,"cancel":true,"landing":false,"belt":true}
+state quiet=false
+state minDelay=15
+App
+  Sidebar
+    Brand "Contrail" icon="flight"
+    NavItem "Search" icon="search" onTap={go search}
+    NavItem "My flight" icon="flight_takeoff" onTap={go flight}
+    NavItem "Departures" icon="departure_board" onTap={go board}
+    NavItem "Alerts" icon="notifications" badge="2" selected={true} onTap={go alerts}
+  Main
+    Nav
+      Heading "Alerts" level=1
+      Button "Save" onTap={emit saveAlerts alerts; toast "Alerts saved"}
+    Column pad=24 gap=16 maxw=720
+      Card gap=12
+        Text.panelTitle "Tell me when"
+        Toggle "Gate or terminal changes" bind=alerts.gate
+        Toggle "Delays" bind=alerts.delay
+        Toggle "Cancellations" bind=alerts.cancel
+        Toggle "Baggage belt is assigned" bind=alerts.belt
+        Toggle "The plane lands" bind=alerts.landing
+      Card gap=12
+        Text.panelTitle "Delays"
+        Text.muted "Only alert me when a delay is longer than {minDelay} min"
+        Slider bind=minDelay min=0 max=120
+      Card gap=12
+        Toggle "Quiet hours" bind=quiet
+        if quiet
+          Row gap=8
+            TimePicker "From" bind=quietFrom
+            TimePicker "To" bind=quietTo
+      Card gap=8
+        Text.panelTitle "Recent alerts"
+        ListTile "UA512 gate changed to B14" icon="meeting_room"
+        ListTile "UA512 delayed 35 min" icon="schedule"

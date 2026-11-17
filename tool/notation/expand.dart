@@ -28,6 +28,7 @@ import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_api/notation.dart';
+import 'package:codelessly_api/validate.dart' show validateSiteVariables;
 
 import 'vocabulary.dart' show loadVocabulary;
 
@@ -65,8 +66,14 @@ Future<void> main(List<String> args) async {
   if (sitePath != null && File(sitePath).existsSync()) {
     try {
       final manifest = jsonDecode(File(sitePath).readAsStringSync());
-      for (final v in (manifest is Map ? manifest['variables'] : null) as List? ?? const []) {
-        if (v is Map && v['name'] is String) projectVariables[v['name'] as String] = v.cast<String, Object?>();
+      // As the manifest's reader takes them: a list of records or an object
+      // of name to value, each typed by its value when it names no type.
+      final declared = manifest is Map ? manifest['variables'] : null;
+      for (final v in Variable.declarationsFromJson(declared)) {
+        projectVariables[v.name] = {'type': v.type.name, ...v.toJson()};
+      }
+      for (final d in validateSiteVariables(declared)) {
+        stderr.writeln('$sitePath: ${d.path}: ${d.message}');
       }
     } on FormatException catch (e) {
       stderr.writeln('$sitePath is not JSON (${e.message}): its variables were not read.');

@@ -45,7 +45,21 @@ typedef ScreenBuilder = Widget? Function(String destination, Json params);
 ///
 /// [context] gives the context the actions run near (a NodeView's, a
 /// screen's); it's read when an action runs, so it can be any later one.
-class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi {
+class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, PopoverUi {
+  @override
+  bool get popoverOnTop {
+    final c = _context;
+    final navigator = c == null ? null : Navigator.maybeOf(c);
+    if (navigator == null) return false;
+    Route<dynamic>? top;
+    navigator.popUntil((r) {
+      top = r;
+      return true;
+    });
+    final route = top;
+    return route is PopupRoute && route.settings.name == popoverRouteName && route.isActive;
+  }
+
   NavigatorActionUi({required this.context, this.route, this.modal, this.sheetModal, this.files, this.breakpoints});
 
   final BuildContext? Function() context;
@@ -160,7 +174,8 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi {
           reserve: action.anchorReserve,
           arrow: action.popoverArrow,
           barrierDismissible: action.barrierDismissible,
-          barrierColor: action.barrierColor);
+          barrierColor: action.barrierColor,
+          popover: action.presentation == ModalPresentation.popover);
     }
     return showScreenModal(c, modalContent,
 
@@ -416,9 +431,73 @@ Future<Object?> showScreenModal(
     useRootNavigator: false,
     barrierDismissible: barrierDismissible,
     barrierColor: scrim,
-    builder: (_) => Align(alignment: alignment, child: Material(type: MaterialType.transparency, child: content)),
+    builder: (_) => Align(alignment: alignment, child: Material(type: MaterialType.transparency, child: _TallDialogScroll(child: content))),
   );
 }
+
+/// A dialog taller than the screen leaves it room to scroll: its screen is
+/// laid out at the height it asks for and scrolled inside the window (it ran
+/// off a phone's screen, its buttons out of reach). A dialog that fits, or
+/// one sized to the window, is laid out as before.
+class _TallDialogScroll extends StatelessWidget {
+  const _TallDialogScroll({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) {
+          if (!constraints.hasBoundedHeight) return child;
+          return _IntrinsicOverflow(
+            maxHeight: constraints.maxHeight,
+            fits: child,
+            scrolls: (child) => SingleChildScrollView(primary: false, child: child),
+          );
+        },
+      );
+}
+
+/// Shows [fits] as it is when its content's own height is within
+/// [maxHeight], else wrapped by [scrolls].
+class _IntrinsicOverflow extends StatefulWidget {
+  const _IntrinsicOverflow({required this.maxHeight, required this.fits, required this.scrolls});
+
+  final double maxHeight;
+  final Widget fits;
+  final Widget Function(Widget child) scrolls;
+
+  @override
+  State<_IntrinsicOverflow> createState() => _IntrinsicOverflowState();
+}
+
+class _IntrinsicOverflowState extends State<_IntrinsicOverflow> {
+  final _key = GlobalKey();
+  bool _tall = false;
+
+  void _measure() {
+    final box = _key.currentContext?.findRenderObject();
+    if (box is! RenderBox || !box.hasSize || !mounted) return;
+    double needs;
+    try {
+      needs = box.getMaxIntrinsicHeight(box.size.width);
+    } catch (_) {
+      return;
+    }
+    final tall = needs.isFinite && needs > widget.maxHeight + .5;
+    if (tall != _tall) setState(() => _tall = tall);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
+    final child = KeyedSubtree(key: _key, child: widget.fits);
+    return _tall ? widget.scrolls(child) : child;
+  }
+}
+
+/// The name of the route a popover (a menu, a picker by its trigger) is
+/// shown in ([PopoverUi.popoverOnTop]).
+const String popoverRouteName = 'codelessly.popover';
 
 /// Shows [content] as a popover by [anchor] (a global rect: the node that
 /// opened it, or the pointer as an empty rect) at [placement], [gap] away
@@ -438,6 +517,7 @@ Future<Object?> showAnchoredModal(
   bool arrow = false,
   bool barrierDismissible = true,
   api.Color? barrierColor,
+  bool popover = false,
 }) {
   final navigator = Navigator.of(context);
   final overlay = navigator.overlay?.context.findRenderObject();
@@ -453,6 +533,7 @@ Future<Object?> showAnchoredModal(
     barrierDismissible: barrierDismissible,
     barrierColor: barrierColor == null ? Colors.transparent : Color(barrierColor.value),
     useSafeArea: false,
+    routeSettings: popover ? const RouteSettings(name: popoverRouteName) : null,
     builder: (_) => CustomSingleChildLayout(
       delegate: layout,
       child: Material(

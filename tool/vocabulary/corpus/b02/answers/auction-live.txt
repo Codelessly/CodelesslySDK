@@ -1,0 +1,171 @@
+### Lot
+state tab="lots"
+state photoAt=0
+state bid=4200
+state myMax=0
+state maxInput=""
+state leader="you"
+state secs=312
+state bidder="you"
+state watch=[2]
+state bids=[{"id":10,"who":"m***a","amt":4200,"at":"14:02:11"},{"id":9,"who":"k***o","amt":4100,"at":"14:01:47"},{"id":8,"who":"you","amt":4000,"at":"14:01:20"},{"id":7,"who":"t***r","amt":3900,"at":"14:00:52"},{"id":6,"who":"m***a","amt":3800,"at":"14:00:31"}]
+state photos=[{"url":"https://img.gavel.example/lot-1884/front.jpg","caption":"Front, 1962 Omega Seamaster 300"},{"url":"https://img.gavel.example/lot-1884/caseback.jpg","caption":"Caseback"},{"url":"https://img.gavel.example/lot-1884/dial.jpg","caption":"Dial detail"},{"url":"https://img.gavel.example/lot-1884/box.jpg","caption":"Box and papers"}]
+every 1s when secs>0 onTick={secs=secs-1}
+App
+  Sidebar
+    Brand "Gavel" icon="gavel"
+    NavItem "Live lot" icon="timer" selected={tab=="lot"} onTap={tab="lot"}
+    NavItem "All lots" icon="list" selected={tab=="lots"} onTap={go lots}
+    NavItem "Watchlist" icon="bookmark" badge="{length(watch)}" onTap={go watchlist}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Jonas Weber" size=32
+      Text.muted "Jonas Weber"
+  Main
+    Nav
+      Heading "Lot 1884, Omega Seamaster 300" level=1
+      Row gap=8
+        IconButton "bookmark" tooltip="Watch this lot" onTap={watch=contains(watch,1884)?without(watch,1884):append(watch,1884); toast "Watchlist updated"}
+        IconButton "share" tooltip="Share" onTap={open shareLot}
+    Column pad=24 gap=16 scroll
+      if leader=="you"
+        Card gap=4 fill=#FFE6F4EA animate=fade
+          Row gap=8 middle
+            Icon "emoji_events"
+            Text.strong "You are the high bidder"
+      if leader!="you"
+        Card gap=4 fill=#FFFCE8E6 animate=shake
+          Row gap=8 middle
+            Icon "warning"
+            Text.strong "You have been outbid by {leader}"
+            Spacer grow
+            Button "Bid again" onTap={bid=bid+100; leader="you"; bids=concat([{"id":length(bids)+10,"who":"you","amt":bid+100,"at":"now"}],bids); emit placeBid bid+100}
+      Row gap=24 top
+        Column grow gap=12
+          Pages bind=photoAt h=320 items=photos
+            Image "{item.url}" onTap={open zoom}
+          Dots bind=photoAt count={length(photos)}
+          Row scroll gap=8
+            each p in photos
+              Image "{p.url}" w=72 h=72 radius=8 onTap={photoAt=index}
+          Text.muted "{photos[photoAt].caption}"
+          Heading "About this lot" level=3
+          Text.muted "Reference 14755, original 1962 case, replaced crown, matching bracelet. Serviced 2024, running within 6 seconds a day. Condition report available."
+        Column w=320 gap=12
+          Card gap=8
+            Text.caption "CURRENT BID"
+            Text "{money(bid,"$",0)}" size=48 weight=700
+            Text.muted "{length(bids)} bids, reserve met"
+            Row gap=8 middle
+              Icon "schedule"
+              Text.strong "{duration(secs)}"
+              Spacer grow
+              Badge.warning "Extends on late bids" hidden={secs>60}
+            Progress {secs/600}
+          Card gap=8
+            Text.strong "Quick bid"
+            Row gap=8
+              Button.outline "{money(bid+100,"$",0)}" grow onTap={bid=bid+100; leader="you"; secs=secs<30?secs+30:secs; bids=concat([{"id":length(bids)+10,"who":"you","amt":bid+100,"at":"now"}],bids); emit placeBid bid+100}
+              Button.outline "{money(bid+250,"$",0)}" grow onTap={bid=bid+250; leader="you"; secs=secs<30?secs+30:secs; bids=concat([{"id":length(bids)+10,"who":"you","amt":bid+250,"at":"now"}],bids); emit placeBid bid+250}
+              Button.outline "{money(bid+500,"$",0)}" grow onTap={bid=bid+500; leader="you"; secs=secs<30?secs+30:secs; bids=concat([{"id":length(bids)+10,"who":"you","amt":bid+500,"at":"now"}],bids); emit placeBid bid+500}
+          Card gap=8
+            Text.strong "Maximum bid"
+            Text.muted "We bid for you in steps up to this amount."
+            Input "Your maximum" "5000" bind=maxInput type=number
+            if myMax>0
+              Badge.success "Max bid set at {money(myMax,"$",0)}"
+            Button "Review max bid" disabled={maxInput==""||maxInput<=bid} onTap={open confirmMax}
+          Card gap=8
+            Row between
+              Text.strong "Bid ladder"
+              Badge.info "Live"
+            each b in take(bids,10)
+              Row between animate=slide-up
+                Text.strong "{money(b.amt,"$",0)}"
+                Text.muted "{b.who}"
+                Text.caption "{b.at}"
+  Dialog#confirmMax "Confirm maximum bid" "You agree to pay up to this amount if you win."
+    Text "Maximum: {money(maxInput,"$",0)}"
+    Text.muted "Current bid {money(bid,"$",0)}. We raise you only as far as needed."
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button "Confirm max bid" onTap={myMax=maxInput; leader="you"; emit setMaxBid maxInput; toast "Max bid set"; close}
+  Menu#shareLot end
+    MenuItem "Copy link" icon="link" onTap={copy "https://gavel.example/lot/1884"; toast "Link copied"}
+    MenuItem "Send to a friend" icon="send" onTap={emit shareLot}
+  Lightbox#zoom photos={photos} bind=photoAt
+
+### All lots
+state filter="all"
+state q=""
+state watch=[2]
+state lots=[{"id":1884,"name":"1962 Omega Seamaster 300","bid":4200,"left":312,"total":600,"cat":"Watches"},{"id":1885,"name":"Leica M3 with 50mm Summicron","bid":1850,"left":1480,"total":3600,"cat":"Cameras"},{"id":1886,"name":"Eames lounge chair, 1970s","bid":2900,"left":95,"total":3600,"cat":"Furniture"},{"id":1887,"name":"Fender Jazzmaster 1965","bid":7600,"left":2860,"total":3600,"cat":"Music"},{"id":1888,"name":"Persian Tabriz rug 3x4 m","bid":1300,"left":40,"total":3600,"cat":"Rugs"}]
+every 1s onTick={lots=map(lots,l=>with(l,"left",max(0,l.left-1)))}
+App
+  Sidebar
+    Brand "Gavel" icon="gavel"
+    NavItem "Live lot" icon="timer" onTap={go lot}
+    NavItem "All lots" icon="list" selected onTap={go lots}
+    NavItem "Watchlist" icon="bookmark" badge="{length(watch)}" onTap={go watchlist}
+    Spacer grow
+    Text.muted "Jonas Weber"
+  Main
+    Nav
+      Heading "Lots ending soon" level=1
+      Row gap=8
+        Input "Search lots" bind=q w=220
+        Button.outline "Filters" icon="tune" onTap={open filters}
+    Column pad=24 gap=12 scroll
+      each l in sortBy(filter(lots,x=>(filter=="all"||x.cat==filter)&&contains(lower(x.name),lower(q))),x=>x.left)
+        Card gap=8 onTap={go lot}
+          Row gap=16 middle
+            Image "https://img.gavel.example/lot-{l.id}/thumb.jpg" w=72 h=72 radius=8
+            Column grow gap=4
+              Text.strong "{l.name}"
+              Text.muted "Lot {l.id}, {l.cat}"
+            Column gap=4 end
+              Text.strong "{money(l.bid,"$",0)}"
+              Text.small "{duration(l.left)} left"
+            IconButton "bookmark" tooltip="Watch" onTap={watch=contains(watch,l.id)?without(watch,l.id):append(watch,l.id)}
+          Progress {l.left/l.total}
+  Sheet#filters "Filters"
+    Row gap=8
+      ChoiceChip "All" selected={filter=="all"} onTap={filter="all"}
+      ChoiceChip "Watches" selected={filter=="Watches"} onTap={filter="Watches"}
+      ChoiceChip "Cameras" selected={filter=="Cameras"} onTap={filter="Cameras"}
+      ChoiceChip "Music" selected={filter=="Music"} onTap={filter="Music"}
+    Button "Done" onTap={close}
+
+### Watchlist
+state watch=[1884,1887]
+state lots=[{"id":1884,"name":"1962 Omega Seamaster 300","bid":4200,"left":312,"status":"winning"},{"id":1887,"name":"Fender Jazzmaster 1965","bid":7600,"left":2860,"status":"outbid"},{"id":1885,"name":"Leica M3 with 50mm Summicron","bid":1850,"left":1480,"status":"watching"}]
+every 1s onTick={lots=map(lots,l=>with(l,"left",max(0,l.left-1)))}
+App
+  Sidebar
+    Brand "Gavel" icon="gavel"
+    NavItem "Live lot" icon="timer" onTap={go lot}
+    NavItem "All lots" icon="list" onTap={go lots}
+    NavItem "Watchlist" icon="bookmark" selected badge="{length(watch)}"
+    Spacer grow
+    Text.muted "Jonas Weber"
+  Main
+    Nav
+      Heading "Watchlist" level=1
+    Column pad=24 gap=12 scroll
+      if length(watch)==0
+        Text.muted "Nothing watched yet. Tap the bookmark on any lot."
+      each l in filter(lots,x=>contains(watch,x.id))
+        Card gap=8
+          Row gap=16 middle
+            Column grow gap=4
+              Text.strong "{l.name}"
+              Text.muted "{money(l.bid,"$",0)}, {duration(l.left)} left"
+            if l.status=="winning"
+              Badge.success "Winning"
+            if l.status=="outbid"
+              Badge.error "Outbid"
+            if l.status=="watching"
+              Badge.neutral "Watching"
+            Button.outline "Open" onTap={go lot}
+            IconButton "close" tooltip="Remove" onTap={watch=without(watch,l.id); toast "Removed"}
+          Progress {l.left/3600}

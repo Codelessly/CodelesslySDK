@@ -1,0 +1,145 @@
+### Board
+state tool="select"
+state zoom=1
+state pan=[0,0]
+state items=[{"id":"n1","kind":"note","x":120,"y":90,"w":180,"h":140,"color":"#FFFFE082","text":"Kickoff goals"},{"id":"n2","kind":"note","x":380,"y":90,"w":180,"h":140,"color":"#FFA5D6A7","text":"Ship beta by June"},{"id":"s1","kind":"rect","x":260,"y":320,"w":200,"h":110,"color":"#FF90CAF9","text":"Launch"},{"id":"a1","kind":"arrow","from":"n1","to":"s1","color":"#FF455A64","text":""}]
+state selected=[]
+state history=[]
+state future=[]
+state members=[{"name":"Maya Reyes","color":"#FFE53935","x":300,"y":200},{"name":"Tomas Berg","color":"#FF1E88E5","x":520,"y":340},{"name":"Priya Nair","color":"#FF43A047","x":150,"y":380}]
+state editing=""
+state groupCount=0
+App
+  Sidebar
+    Brand "Chalk" icon="draw"
+    NavItem "Boards" icon="dashboard" onTap={go boards}
+    NavItem "Sprint retro" icon="gesture" selected={true}
+    NavItem "Version history" icon="history" onTap={go history}
+    Spacer grow
+    Text.caption "Signed in as Ana Silva"
+  Main
+    Nav
+      Heading "Sprint retro"
+      Row gap=8
+        Row gap=0
+          each m in members
+            Avatar "{m.name}" size=28
+        IconButton "undo" tooltip="Undo" disabled={isEmpty(history)} onTap={future=append(future,items); items=last(history); history=removeAt(history,length(history)-1); selected=[]}
+        IconButton "redo" tooltip="Redo" disabled={isEmpty(future)} onTap={history=append(history,items); items=last(future); future=removeAt(future,length(future)-1); selected=[]}
+        Button "Share" icon="share" onTap={open share}
+    Row grow
+      Column w=64 pad=8 gap=4 center
+        IconButton "near_me" tooltip="Select" selected={tool=="select"} onTap={tool="select"}
+        IconButton "sticky_note_2" tooltip="Sticky note" selected={tool=="note"} onTap={tool="note"}
+        IconButton "crop_square" tooltip="Rectangle" selected={tool=="rect"} onTap={tool="rect"}
+        IconButton "circle" tooltip="Ellipse" selected={tool=="ellipse"} onTap={tool="ellipse"}
+        IconButton "arrow_right_alt" tooltip="Arrow" selected={tool=="arrow"} onTap={tool="arrow"}
+        IconButton "title" tooltip="Text" selected={tool=="text"} onTap={tool="text"}
+        Divider
+        IconButton "back_hand" tooltip="Pan" selected={tool=="pan"} onTap={tool="pan"}
+      Stack grow
+        Canvas#board bind=pan zoom={zoom} tool={tool} grid snap=8 minZoom=0.1 maxZoom=4 onZoom={zoom=result} onPlace={history=append(history,items); future=[]; items=append(items,{"id":concat("i",length(items)),"kind":tool,"x":result.x,"y":result.y,"w":180,"h":140,"color":"#FFFFE082","text":""}); selected=[]; tool="select"} onSelectBox={selected=result.ids} onClear={selected=[]; editing=""} onContextMenu={open canvasMenu}
+          each it in items
+            if it.kind=="note"
+              StickyNote "{it.text}" x={it.x} y={it.y} w={it.w} h={it.h} fill={it.color} selected={contains(selected,it.id)} editing={editing==it.id} resizable handles=8 drag onSelect={selected=result.shift ? append(selected,it.id) : [it.id]} onMove={history=append(history,items); future=[]; items=updateWhere(items,r=>contains(selected,r.id),r=>with(with(r,"x",r.x+result.dx),"y",r.y+result.dy))} onResize={history=append(history,items); future=[]; items=updateWhere(items,r=>r.id==it.id,r=>with(with(with(with(r,"x",result.x),"y",result.y),"w",result.w),"h",result.h))} onDoubleTap={editing=it.id} onEdit={items=updateWhere(items,r=>r.id==it.id,r=>with(r,"text",result)); editing=""}
+            if it.kind=="rect" || it.kind=="ellipse"
+              Shape "{it.text}" kind={it.kind} x={it.x} y={it.y} w={it.w} h={it.h} fill={it.color} selected={contains(selected,it.id)} editing={editing==it.id} resizable handles=8 drag onSelect={selected=result.shift ? append(selected,it.id) : [it.id]} onMove={history=append(history,items); future=[]; items=updateWhere(items,r=>contains(selected,r.id),r=>with(with(r,"x",r.x+result.dx),"y",r.y+result.dy))} onResize={history=append(history,items); future=[]; items=updateWhere(items,r=>r.id==it.id,r=>with(with(with(with(r,"x",result.x),"y",result.y),"w",result.w),"h",result.h))} onDoubleTap={editing=it.id} onEdit={items=updateWhere(items,r=>r.id==it.id,r=>with(r,"text",result)); editing=""}
+            if it.kind=="arrow"
+              Arrow from={it.from} to={it.to} color={it.color} selected={contains(selected,it.id)} onSelect={selected=[it.id]}
+          each m in members
+            Cursor "{m.name}" x={m.x} y={m.y} color={m.color}
+          if !isEmpty(selected)
+            SelectionToolbar for={selected}
+              ColorSwatch "#FFFFE082" onTap={history=append(history,items); items=updateWhere(items,r=>contains(selected,r.id),r=>with(r,"color","#FFFFE082"))}
+              ColorSwatch "#FFA5D6A7" onTap={history=append(history,items); items=updateWhere(items,r=>contains(selected,r.id),r=>with(r,"color","#FFA5D6A7"))}
+              ColorSwatch "#FF90CAF9" onTap={history=append(history,items); items=updateWhere(items,r=>contains(selected,r.id),r=>with(r,"color","#FF90CAF9"))}
+              ColorSwatch "#FFF48FB1" onTap={history=append(history,items); items=updateWhere(items,r=>contains(selected,r.id),r=>with(r,"color","#FFF48FB1"))}
+              Divider
+              IconButton "group_work" tooltip="Group" disabled={length(selected)<2} onTap={groupCount=groupCount+1; history=append(history,items); items=updateWhere(items,r=>contains(selected,r.id),r=>with(r,"group",groupCount))}
+              IconButton "layers_clear" tooltip="Ungroup" onTap={history=append(history,items); items=updateWhere(items,r=>contains(selected,r.id),r=>with(r,"group",0))}
+              IconButton "delete" tooltip="Delete" onTap={history=append(history,items); future=[]; items=removeWhere(items,r=>contains(selected,r.id)); selected=[]}
+        Minimap for=board items={items} cursors={members} right bottom w=180 h=120 onTap={pan=result}
+        Card bottom left pad=4
+          Row gap=4
+            IconButton "remove" tooltip="Zoom out" onTap={zoom=clamp(zoom-0.1,0.1,4)}
+            Text.strong "{round(zoom*100,0)}%" w=56 center
+            IconButton "add" tooltip="Zoom in" onTap={zoom=clamp(zoom+0.1,0.1,4)}
+            IconButton "fit_screen" tooltip="Fit to screen" onTap={zoom=1; pan=[0,0]; emit fitBoard}
+  Dialog#share "Share Sprint retro" "Anyone with the link can view"
+    Input "Invite by email" "name@company.com" bind=inviteEmail
+    Select "Permission" items=["Can edit","Can comment","Can view"] bind=perm
+    Row gap=8
+      Button.outline "Copy link" onTap={copy "https://chalk.app/b/sprint-retro"; toast "Link copied"}
+      Button "Send invite" onTap={emit invite inviteEmail; toast "Invite sent"; close}
+  Menu#canvasMenu
+    MenuItem "Paste" icon="content_paste" onTap={paste}
+    MenuItem "Select all" icon="select_all" onTap={selected=map(items,r=>r.id)}
+    MenuItem "Fit to screen" icon="fit_screen" onTap={zoom=1; pan=[0,0]}
+
+### Boards
+state q=""
+state filter="all"
+state boards=[{"id":"b1","name":"Sprint retro","owner":"Ana Silva","edited":"2 min ago","people":4,"starred":true},{"id":"b2","name":"Q3 roadmap","owner":"Maya Reyes","edited":"Yesterday","people":7,"starred":false},{"id":"b3","name":"Onboarding flow","owner":"Tomas Berg","edited":"Mar 12","people":3,"starred":false}]
+state sel=""
+Page
+  Nav sticky
+    Brand "Chalk" icon="draw"
+    Row gap=4
+      Link "Boards"
+      Link "Templates"
+      Link "Trash"
+    Button "New board" onTap={open newBoard}
+  Section
+    Column gap=16
+      Heading "Your boards" level=1
+      Row gap=12 between
+        Input "Search boards" bind=q w=280
+        Row gap=8
+          FilterChip "All" selected={filter=="all"} onTap={filter="all"}
+          FilterChip "Starred" selected={filter=="starred"} onTap={filter="starred"}
+          FilterChip "Shared with me" selected={filter=="shared"} onTap={filter="shared"}
+      Grid cols=3 gap=24
+        each b in filter(boards,x=>contains(lower(x.name),lower(q)) && (filter!="starred" || x.starred))
+          Card gap=8 onTap={go board} menu=boardMenu
+            BoardThumbnail board={b.id} h=140
+            Row between
+              Text.strong "{b.name}"
+              IconButton "more_vert" tooltip="More" onTap={sel=b.id; open boardMenu}
+            Row gap=8
+              Text.muted "{b.owner} - {b.edited}"
+              Spacer grow
+              Badge.neutral "{b.people} people"
+  Dialog#newBoard "New board"
+    Input "Board name" bind=newName
+    Select "Template" items=["Blank","Retrospective","Brainstorm","Flowchart"] bind=template
+    Button "Create" onTap={boards=append(boards,{"id":concat("b",length(boards)),"name":newName,"owner":"Ana Silva","edited":"Just now","people":1,"starred":false}); close; go board}
+  Menu#boardMenu
+    MenuItem "Star" icon="star" onTap={boards=updateWhere(boards,x=>x.id==sel,x=>with(x,"starred",!x.starred))}
+    MenuItem "Duplicate" icon="content_copy" onTap={toast "Duplicated"}
+    MenuItem "Delete" icon="delete" onTap={boards=removeWhere(boards,x=>x.id==sel)}
+
+### Version history
+state version=0
+state versions=[{"label":"Today, 10:42","by":"Maya Reyes","changes":12},{"label":"Today, 09:15","by":"Tomas Berg","changes":5},{"label":"Yesterday, 17:30","by":"Ana Silva","changes":21}]
+App
+  Sidebar
+    Brand "Chalk" icon="draw"
+    NavItem "Boards" icon="dashboard" onTap={go boards}
+    NavItem "Sprint retro" icon="gesture" onTap={go board}
+    NavItem "Version history" icon="history" selected={true}
+    Spacer grow
+  Main
+    Nav
+      Heading "Version history"
+      Button "Restore this version" onTap={open restore}
+    Row grow top
+      Canvas grow readonly zoom=0.5
+        BoardThumbnail board="b1" version={version}
+      Pane w=320 pad=16 gap=12
+        Text.panelTitle "Versions"
+        each v in versions
+          ListTile "{v.label}" subtitle="{v.by} - {v.changes} changes" selected={version==index} onTap={version=index}
+  Dialog#restore "Restore this version?" "The current board is saved as a new version first."
+    Row gap=8 end
+      Button.outline "Cancel" onTap={close}
+      Button "Restore" onTap={emit restore version; toast "Version restored"; close; go board}

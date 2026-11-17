@@ -1,0 +1,121 @@
+### Budget
+state tab="budget"
+state m=0
+state months=["September 2026","October 2026","November 2026"]
+state income=[4200,4200,4350]
+state groups=["Housing","Food","Lifestyle"]
+state cats=[{"name":"Rent","group":"Housing","assigned":1450,"spent":1450},{"name":"Utilities","group":"Housing","assigned":180,"spent":212},{"name":"Groceries","group":"Food","assigned":520,"spent":341},{"name":"Eating out","group":"Food","assigned":160,"spent":158},{"name":"Fun money","group":"Lifestyle","assigned":200,"spent":64},{"name":"Gym","group":"Lifestyle","assigned":45,"spent":45}]
+state fromCat="Groceries"
+state toCat="Utilities"
+state amount=0
+state ageOfMoney=34
+App
+  Sidebar
+    Brand "Envelope" icon="mail"
+    NavItem "Budget" icon="account_balance_wallet" selected={tab=="budget"} onTap={tab="budget"}
+    NavItem "Goals" icon="flag" selected={tab=="goals"} onTap={go goals}
+    Spacer grow
+    Card gap=4
+      Text.caption "Age of money"
+      Text "{ageOfMoney} days" size=28 weight=700
+      Text.muted "Money you spend is {ageOfMoney} days old"
+  Main
+    Nav
+      Row gap=8
+        IconButton "chevron_left" tooltip="Previous month" onTap={m=max(0,m-1)}
+        Heading "{months[m]}"
+        IconButton "chevron_right" tooltip="Next month" onTap={m=min(length(months)-1,m+1)}
+      Row gap=8
+        Button.outline "Move money" icon="swap_horiz" onTap={open move}
+        Button "Add category" onTap={emit addCategory}
+    Column pad=24 gap=16
+      Card gap=4
+        Text.caption "Money to assign"
+        Text "{money(income[m]-sum(cats,c=>c.assigned),"$",2)}" size=40 weight=700 color={income[m]-sum(cats,c=>c.assigned)<0?"#FFD32F2F":"#FF2E7D32"}
+        if income[m]-sum(cats,c=>c.assigned)<0
+          Text.danger "You have assigned more than you have. Move money out of a category."
+        if income[m]-sum(cats,c=>c.assigned)==0
+          Text.success "Every dollar has a job."
+      Row gap=12 pad=[16,0,16,0]
+        Text.caption "Category" grow
+        Text.caption "Assigned" w=110
+        Text.caption "Spent" w=90
+        Text.caption "Available" w=110
+      each g in groups
+        Accordion "{g}  -  {money(sum(filter(cats,c=>c.group==g),c=>c.assigned-c.spent),"$",2)} available"
+          each row in filter(cats,c=>c.group==g)
+            Row gap=12 middle
+              Text.strong "{row.name}" grow
+              Input "Assigned" type=number w=110 bind=row.assigned
+              Text.muted "{money(row.spent,"$",2)}" w=90
+              if row.assigned-row.spent<0
+                Badge.error "{money(row.assigned-row.spent,"$",2)}" w=110
+              if row.assigned-row.spent==0
+                Badge.neutral "{money(row.assigned-row.spent,"$",2)}" w=110
+              if row.assigned-row.spent>0
+                Badge.success "{money(row.assigned-row.spent,"$",2)}" w=110
+  Dialog#move "Move money" "Take money from one category and give it to another"
+    Select "From" bind=fromCat items={map(cats,c=>c.name)}
+    Text.muted "Available: {money(find(cats,c=>c.name==fromCat).assigned-find(cats,c=>c.name==fromCat).spent,"$",2)}"
+    Select "To" bind=toCat items={map(cats,c=>c.name)}
+    Input "Amount" type=number bind=amount
+    if fromCat==toCat
+      Text.danger "Pick two different categories."
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={amount=0; close}
+      Button "Move" onTap={cats=updateWhere(updateWhere(cats,c=>c.name==fromCat,c=>with(c,"assigned",c.assigned-amount)),c=>c.name==toCat,c=>with(c,"assigned",c.assigned+amount)); toast "Moved {money(amount,"$",2)} from {fromCat} to {toCat}"; amount=0; close}
+
+### Goals
+state goals=[{"name":"Emergency fund","target":6000,"saved":3850,"due":"2027-03-31"},{"name":"Lisbon trip","target":2400,"saved":900,"due":"2027-06-15"},{"name":"New laptop","target":1800,"saved":1650,"due":"2026-12-20"}]
+state gname=""
+state gtarget=0
+state gdue=""
+state contribute=0
+state sel=0
+App
+  Sidebar
+    Brand "Envelope" icon="mail"
+    NavItem "Budget" icon="account_balance_wallet" onTap={go budget}
+    NavItem "Goals" icon="flag" selected={true}
+    Spacer grow
+    Card gap=4
+      Text.caption "Age of money"
+      Text "{ageOfMoney} days" size=28 weight=700
+  Main
+    Nav
+      Heading "Goals"
+      Button "New goal" icon="add" onTap={open newGoal}
+    Column pad=24 gap=16
+      Card gap=4
+        Text.caption "Saved toward goals"
+        Text "{money(sum(goals,g=>g.saved),"$",2)} of {money(sum(goals,g=>g.target),"$",2)}" size=32 weight=700
+        Progress {sum(goals,g=>g.saved)/sum(goals,g=>g.target)}
+      Grid cols=3 gap=16
+        each goal in goals
+          Card gap=8
+            Row between
+              Heading "{goal.name}" level=3
+              IconButton "more_vert" tooltip="Goal options" onTap={sel=index; open goalMenu}
+            Progress {goal.saved/goal.target}
+            Text.muted "{money(goal.saved,"$",2)} of {money(goal.target,"$",2)}"
+            Row gap=8
+              Icon "event"
+              Text.small "Target date {formatDate(goal.due,"MMM d, yyyy")}"
+            Text.small "Save {money(max(0,goal.target-goal.saved)/max(1,ceil(duration(0)+6)),"$",2)} a month to get there"
+            Button.outline "Add money" onTap={sel=index; open contribute}
+  Menu#goalMenu end
+    MenuItem "Add money" icon="add" onTap={open contribute}
+    MenuItem "Edit target date" icon="edit_calendar" onTap={open newGoal}
+    MenuItem "Delete goal" icon="delete" onTap={goals=removeAt(goals,sel)}
+  Dialog#contribute "Add money to {goals[sel].name}"
+    Input "Amount" type=number bind=contribute
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button "Add" onTap={goals=updateWhere(goals,g=>g.name==goals[sel].name,g=>with(g,"saved",min(g.target,g.saved+contribute))); toast "Added to {goals[sel].name}"; contribute=0; close}
+  Dialog#newGoal "New goal" "What are you saving for?"
+    Input "Name" bind=gname
+    Input "Target amount" type=number bind=gtarget
+    DatePicker "Target date" bind=gdue
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button "Create goal" onTap={goals=append(goals,{"name":gname,"target":gtarget,"saved":0,"due":gdue}); gname=""; gtarget=0; gdue=""; close}

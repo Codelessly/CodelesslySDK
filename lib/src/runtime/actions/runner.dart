@@ -18,7 +18,8 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart' show debugPrint;
 
-import 'package:codelessly_api/core.dart' show ActionDef, Catalog, ComponentEventAction, Json, Node, Reaction, TriggerType, UnknownAction;
+import 'package:codelessly_api/core.dart'
+    show ActionDef, Catalog, CloseModalAction, ComponentEventAction, Json, ModalPresentation, Node, OpenModalAction, Reaction, TriggerType, UnknownAction;
 
 import '../contracts.dart';
 import '../expressions/engine.dart';
@@ -452,12 +453,28 @@ class _Registry {
 /// ones awaited. Throws (stopping the chain) when a blocking one fails or
 /// the chain is canceled.
 Future<void> runActions(List<ActionDef> actions, ActionRun run) async {
-  for (final declared in actions) {
+  for (var i = 0; i < actions.length; i++) {
+    final declared = actions[i];
     if (run.isCanceled) throw const ActionsCanceled();
     // An action decoded with a smaller catalog than the runner's (a layout
     // decoded with the core alone) is typed now.
     final a = run._registry.catalog.upgrade(declared);
     if (!a.enabled) continue;
+    // A menu item that opens a dialog (a sheet, a screen) and then closes
+    // its menu: opening waits for the dialog, so the menu would stay drawn
+    // under the dialog's scrim until the dialog closed. The menu closes
+    // first. A chain that only opens (no close after it) keeps its popover
+    // under what it opens, and Escape goes back to it.
+    if (a is OpenModalAction && a.presentation != ModalPresentation.popover && !a.hoverCard && !a.nonBlocking && a.when == null && i + 1 < actions.length) {
+      final next = run._registry.catalog.upgrade(actions[i + 1]);
+      final ui = run.host.ui;
+      if (next is CloseModalAction && next.enabled && next.when == null && next.result == null && ui is PopoverUi && (ui as PopoverUi).popoverOnTop) {
+        await _perform(next, run);
+        await _perform(a, run);
+        i++;
+        continue;
+      }
+    }
     // A type this SDK doesn't know runs only when the app (or a feature)
     // gave a handler for it; otherwise it's skipped.
     if (a is UnknownAction && run._registry.handler(a.type) == null) continue;

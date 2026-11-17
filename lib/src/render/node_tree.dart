@@ -1384,8 +1384,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     // hit tests after frames: there's nothing drawn to hit. (Hit testing it
     // threw in debug builds, inside the mouse tracker, which then refused
     // every later pointer event.)
-    final c = child;
-    if (c != null && !c.hasSize) return false;
+    // The same for a layer put into the middle of the chain between frames
+    // (a state's opacity on a card as its drag starts, with the next pointer
+    // event arriving before the frame that lays it out).
+    if (!_chainLaidOut()) return false;
     // A dragged node is hit where it is drawn, outside its layout box.
     if (child case final RenderBox drag when drag is HitTestedWhereDrawn) {
       if (!drag.hitTest(result, position: position)) return false;
@@ -1400,6 +1402,18 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     final outside = outsideHitTest;
     if (outside != null && hasSize && !size.contains(position)) return outside(result, position);
     return super.hitTest(result, position: position);
+  }
+
+  /// Whether every layer of this node's own, down to its content, has been
+  /// laid out.
+  bool _chainLaidOut() {
+    final end = contentBox;
+    for (RenderObject? at = child; at is RenderBox;) {
+      if (!at.hasSize) return false;
+      if (identical(at, end)) break;
+      at = at is RenderObjectWithChildMixin<RenderBox> ? (at as RenderObjectWithChildMixin<RenderBox>).child : null;
+    }
+    return true;
   }
 
   /// Whether a layer of this node's own (down to its content) draws it at

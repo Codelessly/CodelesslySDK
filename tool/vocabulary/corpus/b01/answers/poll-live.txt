@@ -1,0 +1,142 @@
+### Presenter
+state qi=0
+state running=true
+state left=45
+state code="KQTMR"
+state questions=[{"id":"q1","kind":"choice","title":"Which Flutter state tool do you reach for first?","options":["Provider","Riverpod","Bloc","setState"],"votes":[18,31,12,9]},{"id":"q2","kind":"words","title":"One word for how you feel about code review","options":[],"votes":[]},{"id":"q3","kind":"rating","title":"How was today's talk?","options":[],"votes":[1,2,6,14,22]}]
+state viewers=64
+every 1s when running onTick={left=max(0,left-1); running=left>1}
+App
+  Sidebar
+    Brand "Showhands" icon="front_hand"
+    Text.caption "QUESTIONS"
+    each q in questions
+      NavItem "{q.title}" icon="poll" selected={questions[qi].id==q.id} onTap={qi=indexOf(questions,q); left=45; running=true}
+    Spacer grow
+    Button.outline "New question" icon="add" onTap={open newq}
+    Row gap=8 middle
+      Avatar "Dana Whitfield" size=32
+      Text.muted "Dana Whitfield"
+  Main
+    Nav
+      Heading "Question {qi+1} of {length(questions)}" level=1
+      Row gap=8 middle
+        Badge.success "{viewers} connected"
+        Countdown value={left} total=45 onEnd={running=false; emit closePoll questions[qi].id}
+        Button.outline "Previous" icon="chevron_left" onTap={qi=max(0,qi-1); left=45; running=true}
+        Button "Next" icon="chevron_right" onTap={qi=min(length(questions)-1,qi+1); left=45; running=true}
+    Row pad=24 gap=24 top
+      Column grow gap=16
+        Card gap=16
+          Text.heading "{questions[qi].title}"
+          Text.muted "{sum(questions[qi].votes,v=>v)} votes so far"
+          if questions[qi].kind=="choice"
+            each o in questions[qi].options
+              Column gap=4
+                Row between
+                  Text.strong "{o}"
+                  Text.strong "{questions[qi].votes[index]}  ({round(100*questions[qi].votes[index]/max(1,sum(questions[qi].votes,v=>v)),0)}%)"
+                Progress {questions[qi].votes[index]/max(1,max(questions[qi].votes[0],max(questions[qi].votes[1],max(questions[qi].votes[2],questions[qi].votes[3]))))} animate=grow
+          if questions[qi].kind=="words"
+            WordCloud words={words} h=260 animate=fade
+          if questions[qi].kind=="rating"
+            BarChart values={questions[qi].votes} labels=["1","2","3","4","5"] h=220
+            Text.heading "Average {fixed(sum(range(5),i=>(i+1)*questions[qi].votes[i])/max(1,sum(questions[qi].votes,v=>v)),1)} / 5"
+        Row gap=8
+          Button.destructive "Close voting" icon="stop" onTap={running=false; left=0; emit closePoll questions[qi].id}
+          Button.outline "Reopen" icon="replay" hidden={running} onTap={running=true; left=45; emit reopenPoll questions[qi].id}
+          Button.outline "Reset votes" icon="restart_alt" onTap={emit resetVotes questions[qi].id; toast "Votes cleared"}
+      Pane w=320 pad=16 gap=12
+        Card gap=12 center
+          Text.panelTitle "Join at showhands.app"
+          QRCode "https://showhands.app/{code}" size=200
+          Text "Code" center
+          Text.mono "{code}" size=40 weight=700 center
+          Button.outline "Copy join link" icon="content_copy" onTap={copy "https://showhands.app/{code}"; toast "Link copied"}
+        Card gap=8
+          Text.strong "Time left"
+          Text "{left}s" size=48 weight=700
+          Progress {left/45}
+  Dialog#newq "New question" "Choice, word cloud or rating"
+    Input "Question" bind=draftTitle
+    SegmentedButton bind=draftKind items=["Choice","Words","Rating"]
+    Button "Add" onTap={questions=append(questions,{"id":"q{length(questions)+1}","kind":lower(draftKind),"title":draftTitle,"options":[],"votes":[]}); close}
+
+### Audience join
+state code=""
+state phase="join"
+Page
+  Column pad=24 gap=24 center middle maxw=420 animate=fade
+    Icon "front_hand" size=56
+    Heading "Showhands" level=1
+    Text.muted "Enter the five-letter code on the screen" center
+    Input "Join code" "KQTMR" bind=code maxlength=5 caps center
+    Button "Join" size=large w=fill onTap={code=upper(trim(code)); phase=length(code)==5?"vote":"join"; emit join code}
+    if length(code)>0 && length(code)<5
+      Text.danger "Codes have five letters" center
+    Text.caption "No account needed" center
+    Button.ghost "Scan the QR instead" icon="qr_code_scanner" onTap={emit scanQr}
+
+### Audience vote
+state choice=-1
+state submitted=false
+state closed=false
+state options=["Provider","Riverpod","Bloc","setState"]
+state results=[18,31,12,9]
+Page
+  Column pad=20 gap=16 maxw=420
+    Row between middle
+      Badge.neutral "KQTMR"
+      Badge.success "Live"
+    if !submitted && !closed
+      Text.heading "Which Flutter state tool do you reach for first?"
+      each o in options
+        Card onTap={choice=index; submitted=true; emit vote index} animate=slide-up stagger=60
+          Row gap=12 middle
+            Icon "radio_button_unchecked"
+            Text.strong "{o}"
+      Text.muted "One tap, and your vote counts" center
+    if submitted && !closed
+      Column gap=12 center middle animate=pulse
+        Icon "check_circle" size=64 color=#FF2E9E5B
+        Text.heading "Vote in: {options[choice]}" center
+        Text.muted "Waiting for the presenter to close voting" center
+        Progress animate=shimmer
+        Button.outline "Change my vote" onTap={submitted=false}
+    if closed
+      Text.heading "Results"
+      each o in options
+        Column gap=4
+          Row between
+            Text.strong "{o}"
+            Text "{results[index]}"
+          Progress {results[index]/max(1,sum(results,v=>v))}
+      Text.muted "You voted {options[choice]}" center
+    Button.ghost "See the results (demo)" hide=phone onTap={closed=true}
+  Announce "Voting closed" when={closed}
+
+### Audience word cloud and rating
+state word=""
+state sent=[]
+state stars=0
+state emoji=["😠","🙁","😐","🙂","🤩"]
+Page
+  Column pad=20 gap=24 maxw=420
+    Card gap=12
+      Text.heading "One word for how you feel about code review"
+      Input "Your word" "e.g. necessary" bind=word maxlength=20
+      Row gap=8
+        Button "Send" grow onTap={sent=append(sent,lower(trim(word))); emit word lower(trim(word)); word=""; toast "Sent"} disabled={length(trim(word))==0}
+      if length(sent)>0
+        Text.caption "You sent {length(sent)} of 3"
+        Row gap=8 wrap
+          each w in sent
+            Chip "{w}" onDelete={sent=without(sent,w)}
+    Card gap=12
+      Text.heading "How was today's talk?"
+      Row between
+        each e in emoji
+          Text "{e}" size={stars==index+1?48:32} onTap={stars=index+1} animate=pop
+      Rating bind=stars max=5
+      Text.muted "{stars==0?'Tap a face':'You gave '+stars+' of 5'}" center
+      Button "Submit rating" disabled={stars==0} onTap={emit rate stars; toast "Thanks!"}

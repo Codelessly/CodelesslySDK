@@ -31,6 +31,30 @@ Every SSUI name (`primaryText`, `primaryBorder`, `subtleFill`, …) is present w
 so the 159 SSUI controls render as SSUI's. `themes/light.json` and `themes/dark.json` are the two sets as theme
 overrides; the render tool's `--theme dark` shows the dark set.
 
+## A site's own accent, fonts and mode
+
+A site made with Cards changes its look in its `site.json`, inside `"theme"` (a key written beside `"theme"`, at
+the top of the file, is not read: the render command says so, `site_key_ignored`):
+
+```json
+{"schema": 3, "pages": ["home.json"], "designSystem": "../design_systems/cards",
+ "theme": {"primary": "#FFB45309", "mode": "dark", "fontFamily": "Lora"},
+ "fonts": [{"family": "Lora", "fonts": [{"asset": "fonts/Lora-Regular.ttf"}, {"asset": "fonts/Lora-Bold.ttf", "weight": 700}]}]}
+```
+
+- **The accent.** `"primary"` (or `"colors": {"accent": ...}`) is enough. Everything Cards makes from its blue
+  follows it, in light and in dark: `accent`, the selected row's `activeTint`, `primaryTint` and its border, the
+  focus ring, `accentGlow`, the `info` color and its tints (an info `Banner`), and the shades `accentDeep` and
+  `accentBright` (the site's hue at Cards' lightness). The dark accent is the site's, a little lighter; write
+  `"dark": {"primary": ...}` to choose it. A color the site names itself, light or under `"dark"`, is the site's.
+  `accentTint` and `accentLine` are neutrals and stay.
+- **The fonts.** `"fontFamily"` puts every text style Cards writes in Inter into the site's family (declare the
+  files under `"fonts"`, beside `site.json`). The display styles (Inter Display: `cardTitle`, `title`, `numberHero`, `numberLarge`, `number`, `numberSmall`, `gaugeValue`, and on a page `titleWide`, `heading1Wide`, `heading2Wide`, `heading3Wide`) and the code styles (JetBrains Mono: `code`, `mono`) are
+  changed one by one: `"textStyles": {"numberHero": {"fontFamily": "Fraunces"}}`. There is no one key for the
+  display family.
+- **Dark by default.** `"mode": "dark"` (`light`, `dark` or `system`, the default: the device's). The render
+  command's `--theme` and a `setThemeMode` action change it over that.
+
 ## Tabs, switches and pills
 
 Three kinds, each with one job, all built in `tool/blocks.py` from the same parts. `Tabs` is a page's (or a card's)

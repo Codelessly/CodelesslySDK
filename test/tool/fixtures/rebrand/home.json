@@ -1,0 +1,14 @@
+{
+  "schema": 3,
+  "id": "home",
+  "roots": ["home"],
+  "nodes": {
+    "home": {"type": "canvas", "slots": {"body": "col"}, "layout": {"width": 400, "height": 400}, "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "col": {"type": "column", "children": ["primary", "accent", "active", "info", "ink"], "layout": {"width": {"fill": 400}, "height": {"fill": 400}}},
+    "primary": {"type": "box", "layout": {"width": {"fill": 400}, "height": 60}, "decoration": {"fills": [{"color": "primary"}]}},
+    "accent": {"type": "box", "layout": {"width": {"fill": 400}, "height": 60}, "decoration": {"fills": [{"color": "accent"}]}},
+    "active": {"type": "box", "layout": {"width": {"fill": 400}, "height": 60}, "decoration": {"fills": [{"color": "activeTint"}]}},
+    "info": {"type": "box", "layout": {"width": {"fill": 400}, "height": 60}, "decoration": {"fills": [{"color": "info"}]}},
+    "ink": {"type": "box", "layout": {"width": {"fill": 400}, "height": 60}, "decoration": {"fills": [{"color": "ink"}]}}
+  }
+}

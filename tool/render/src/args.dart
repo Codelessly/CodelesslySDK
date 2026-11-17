@@ -5,7 +5,8 @@ import 'dart:ui' show Size;
 final class Step {
   const Step(this.kind, this.target, [this.value]);
 
-  /// tap, hover, focus, unfocus, key, type, set, scroll, drag, navigate or wait.
+  /// tap, double-tap, long-press, right-click, hover, focus, unfocus, key,
+  /// type, set, scroll, drag, wheel, pinch, navigate, reload or wait.
   final String kind;
   final String target;
   final String? value;
@@ -151,11 +152,19 @@ Options:
   --navigate <screen>     Push a screen: a canvas id, a screen name or a URL path,
                           with a query string for its params (speaker?id=ada,
                           /project?id=7): the screen reads them as \${route.id}.
-  --drag <nodeId>=<dx>,<dy>   Press on the node, move by dx, dy and release (a
-                          reorder handle, a slider, a draggable card).
+  --drag <nodeId>=<dx>,<dy>   Press on the node, move by dx, dy in a fifth of a
+                          second and release (a reorder handle, a slider, a
+                          draggable card, a swipe: --drag row=-140,0).
   --drag <nodeId>=<nodeId>    Drag the node onto another node (a drop target).
   --double-tap <nodeId>   Tap the node twice in quick succession (a double tap, a
                           double click: a photo's zoom).
+  --long-press <nodeId>   Hold a finger on the node, then lift (a longPress
+                          reaction, a context menu on touch).
+  --right-click <nodeId>  Click the node with a mouse's secondary button (a
+                          secondaryClick reaction, a context menu).
+  --reload                Close the app and start it again on the same screen
+                          with what it kept on the device: a variable marked
+                          saved keeps its value, every other starts over.
   --wheel <nodeId>=<dy>   Turn a mouse wheel over the node by dy pixels (negative:
                           away from the user); =ctrl+<dy> with Control held.
   --pinch <nodeId>=<scale>    Two fingers on the node, spread to <scale> times as far
@@ -197,7 +206,7 @@ the fonts site.json declares ("fonts", files beside it: no --fonts needed) and
 the images its documents name by a path relative to the site (images/a.jpg).
 Steps name nodes inside components by path: --tap plans/card1/cta (the call
 ids from the page down, then the node's id; <segment>#<n> picks a list copy).
-Steps (--tap, --double-tap, --hover, --focus, --unfocus, --key, --type, --set, --scroll, --drag, --wheel, --pinch, --navigate, --wait) run in the order given.
+Steps (--tap, --double-tap, --long-press, --right-click, --hover, --focus, --unfocus, --key, --type, --set, --scroll, --drag, --wheel, --pinch, --navigate, --reload, --wait) run in the order given.
 ''';
 
 /// Parses [argv]; throws a [FormatException] with a message for bad input.
@@ -275,7 +284,9 @@ RenderArgs parseArgs(List<String> argv) {
         if (now == null) throw FormatException('--now takes an ISO 8601 time (2026-11-13T09:00:00Z), got "$v".');
       case '--unfocus':
         steps.add(const Step('unfocus', ''));
-      case '--tap' || '--double-tap' || '--hover' || '--focus' || '--navigate' || '--wait' || '--key':
+      case '--reload':
+        steps.add(const Step('reload', ''));
+      case '--tap' || '--double-tap' || '--long-press' || '--right-click' || '--hover' || '--focus' || '--navigate' || '--wait' || '--key':
         steps.add(Step(a.substring(2), next(i++, a)));
       case '--set' || '--scroll' || '--type' || '--drag' || '--wheel' || '--pinch':
         final v = next(i++, a);

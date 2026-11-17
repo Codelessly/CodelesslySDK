@@ -1,0 +1,256 @@
+### Invoices
+project invoices=[{"id":"INV-1041","client":"Northwind Studio","issued":"2026-10-02","due":"2026-10-16","status":"overdue","total":2400},{"id":"INV-1042","client":"Harbor Coffee Co.","issued":"2026-10-20","due":"2026-11-19","status":"sent","total":1180.5},{"id":"INV-1043","client":"Alder & Finch","issued":"2026-11-01","due":"2026-11-30","status":"sent","total":3200},{"id":"INV-1044","client":"Tidewater Hotel","issued":"2026-09-14","due":"2026-09-28","status":"paid","total":5400},{"id":"INV-1045","client":"Maya Reyes","issued":"2026-11-10","due":"2026-12-10","status":"draft","total":640}] saved
+project editing="INV-1045"
+state filter="all"
+state q=""
+state sel=""
+App
+  Sidebar
+    Brand "Ledger Lane" icon="receipt_long"
+    NavItem "Invoices" icon="description" badge="{length(invoices)}" selected={true}
+    NavItem "Clients" icon="people"
+    NavItem "Reports" icon="insights"
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Dana Whitlock" size=32
+      Text.muted "Dana Whitlock"
+  Main
+    Nav
+      Heading "Invoices" level=1
+      Row gap=8
+        Input "Search invoices" bind=q w=220
+        Button "New invoice" icon="add" onTap={editing="new"; go editor}
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "Outstanding"
+          Text.heading "{money(sum(filter(invoices,i=>i.status=='sent'||i.status=='overdue'),i=>i.total),'$',2)}"
+        Card gap=4
+          Text.muted "Overdue"
+          Text.heading "{money(sum(filter(invoices,i=>i.status=='overdue'),i=>i.total),'$',2)}" color=#FFC62828
+        Card gap=4
+          Text.muted "Paid this year"
+          Text.heading "{money(sum(filter(invoices,i=>i.status=='paid'),i=>i.total),'$',2)}"
+      Row gap=8
+        ChoiceChip "All" selected={filter=="all"} onTap={filter="all"}
+        ChoiceChip "Draft" selected={filter=="draft"} onTap={filter="draft"}
+        ChoiceChip "Sent" selected={filter=="sent"} onTap={filter="sent"}
+        ChoiceChip "Overdue" selected={filter=="overdue"} onTap={filter="overdue"}
+        ChoiceChip "Paid" selected={filter=="paid"} onTap={filter="paid"}
+      Card gap=0 pad=0
+        Row pad=12 border-bottom=#FFE0E0E0
+          Text.muted "Invoice" w=100
+          Text.muted "Client" grow
+          Text.muted "Due" w=110 hide=phone
+          Text.muted "Status" w=90
+          Text.muted "Amount" w=100
+          Spacer w=40
+        each inv in filter(invoices,i=>(filter=="all"||i.status==filter)&&(q==""||contains(lower(i.client),lower(q))||contains(lower(i.id),lower(q))))
+          Row pad=12 middle border-bottom=#FFF0F0F0 onTap={editing=inv.id; go editor}
+            Text.strong "{inv.id}" w=100
+            Text "{inv.client}" grow
+            Text.muted "{formatDate(inv.due,'MMM d, yyyy')}" w=110 hide=phone
+            Badge.success "Paid" w=90 visible={inv.status=="paid"}
+            Badge.info "Sent" w=90 visible={inv.status=="sent"}
+            Badge.error "Overdue" w=90 visible={inv.status=="overdue"}
+            Badge.neutral "Draft" w=90 visible={inv.status=="draft"}
+            Text.strong "{money(inv.total,'$',2)}" w=100
+            IconButton "more_vert" tooltip="Actions" onTap={sel=inv.id; open rowMenu}
+        if length(filter(invoices,i=>filter=="all"||i.status==filter))==0
+          Column center pad=32 gap=8
+            Icon "inbox"
+            Text.muted "No {filter} invoices"
+  Menu#rowMenu end
+    MenuItem "Open" icon="edit" onTap={editing=sel; go editor}
+    MenuItem "Mark as sent" icon="send" onTap={invoices=updateWhere(invoices,i=>i.id==sel,i=>with(i,"status","sent")); toast "Marked as sent"}
+    MenuItem "Mark as paid" icon="paid" onTap={invoices=updateWhere(invoices,i=>i.id==sel,i=>with(i,"status","paid")); toast "Marked as paid"}
+    MenuItem "Mark as overdue" icon="warning" onTap={invoices=updateWhere(invoices,i=>i.id==sel,i=>with(i,"status","overdue")); toast "Marked as overdue"}
+    MenuItem "Delete" icon="delete" onTap={invoices=removeWhere(invoices,i=>i.id==sel); toast "Invoice deleted"}
+
+### Editor
+project invoices=[] saved
+project editing="new"
+state client=""
+state clientEmail=""
+state clientQ=""
+state clients=[{"name":"Northwind Studio","email":"ap@northwind.studio"},{"name":"Harbor Coffee Co.","email":"billing@harborcoffee.com"},{"name":"Alder & Finch","email":"accounts@alderfinch.co"},{"name":"Tidewater Hotel","email":"finance@tidewater.example"},{"name":"Maya Reyes","email":"maya@reyes.design"}]
+state newName=""
+state newEmail=""
+state number="INV-1045"
+state issued="2026-11-10"
+state due="2026-12-10"
+state status="draft"
+state items=[{"id":1,"desc":"Brand identity workshop","qty":2,"rate":450,"tax":10},{"id":2,"desc":"Logo design, three concepts","qty":1,"rate":900,"tax":10},{"id":3,"desc":"Style guide (PDF)","qty":1,"rate":320,"tax":0}]
+state nextId=4
+state discountMode="percent"
+state discount=10
+state notes="Payment due within 30 days. Thank you for your business."
+state tab="edit"
+App
+  Sidebar
+    Brand "Ledger Lane" icon="receipt_long"
+    NavItem "Invoices" icon="description" onTap={go invoices}
+    NavItem "Clients" icon="people"
+    NavItem "Reports" icon="insights"
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Back to invoices" onTap={go invoices}
+        Heading "{number}" level=1
+        Badge.neutral "Draft" visible={status=="draft"}
+        Badge.info "Sent" visible={status=="sent"}
+        Badge.success "Paid" visible={status=="paid"}
+        Badge.error "Overdue" visible={status=="overdue"}
+      Row gap=8
+        Button.outline "Mark sent" icon="send" onTap={status="sent"; toast "Marked as sent"}
+        Button.outline "Mark paid" icon="paid" onTap={status="paid"; toast "Marked as paid"}
+        Button.outline "Mark overdue" icon="warning" hide=tablet onTap={status="overdue"}
+        Button "Save" onTap={invoices=append(without(invoices,find(invoices,i=>i.id==number)),{"id":number,"client":client,"issued":issued,"due":due,"status":status,"total":sum(items,l=>l.qty*l.rate)-(discountMode=="percent"?sum(items,l=>l.qty*l.rate)*discount/100:discount)+sum(items,l=>l.qty*l.rate*l.tax/100)}); toast "Invoice saved"; go invoices}
+    Column pad=24 gap=16 scroll
+      SegmentedButton bind=tab items=["edit","preview"] show=tablet
+      Row gap=24 top
+        Column grow gap=16 hide={tab=="preview"&&false}
+          Card gap=12
+            Text.panelTitle "Client"
+            Row gap=8 middle
+              Input "Search clients" "Type a name" bind=clientQ grow
+              Button.outline "Add new" icon="person_add" onTap={open newClient}
+            each c in filter(clients,c=>clientQ!=""&&contains(lower(c.name),lower(clientQ)))
+              ListTile "{c.name}" subtitle="{c.email}" onTap={client=c.name; clientEmail=c.email; clientQ=""}
+            if client!=""
+              Row gap=8 middle
+                Avatar "{client}" size=32
+                Column gap=0
+                  Text.strong "{client}"
+                  Text.muted "{clientEmail}"
+          Card gap=12
+            Text.panelTitle "Details"
+            Grid cols=3 gap=12
+              Input "Invoice number" bind=number
+              DatePicker "Issued" bind=issued
+              DatePicker "Due" bind=due
+          Card gap=12
+            Row between middle
+              Text.panelTitle "Line items"
+              Button.outline "Add line" icon="add" onTap={items=append(items,{"id":nextId,"desc":"","qty":1,"rate":0,"tax":0}); nextId=nextId+1}
+            each l in items
+              Row gap=8 middle top
+                Column gap=0
+                  IconButton "keyboard_arrow_up" tooltip="Move up" onTap={items=index>0?setAt(setAt(items,index,items[index-1]),index-1,items[index]):items}
+                  IconButton "keyboard_arrow_down" tooltip="Move down" onTap={items=index<length(items)-1?setAt(setAt(items,index,items[index+1]),index+1,items[index]):items}
+                Input "Description" bind=l.desc grow
+                Input "Qty" bind=l.qty type=number w=70
+                Input "Rate" bind=l.rate type=number w=100
+                Input "Tax %" bind=l.tax type=number w=70
+                Text.strong "{money(l.qty*l.rate,'$',2)}" w=90
+                IconButton "delete" tooltip="Remove line" onTap={items=removeWhere(items,x=>x.id==l.id)}
+            if length(items)==0
+              Text.muted "No line items yet. Add one to begin."
+            Divider
+            Row gap=12 middle
+              Text "Discount"
+              SegmentedButton bind=discountMode items=["percent","amount"]
+              Input "Discount" bind=discount type=number w=100
+            Column gap=4 end
+              Row between
+                Text.muted "Subtotal"
+                Text "{money(sum(items,l=>l.qty*l.rate),'$',2)}"
+              Row between
+                Text.muted "Discount"
+                Text "-{money(discountMode=='percent'?sum(items,l=>l.qty*l.rate)*discount/100:discount,'$',2)}"
+              Row between
+                Text.muted "Tax"
+                Text "{money(sum(items,l=>l.qty*l.rate*l.tax/100),'$',2)}"
+              Divider
+              Row between
+                Text.heading "Total"
+                Text.heading "{money(sum(items,l=>l.qty*l.rate)-(discountMode=='percent'?sum(items,l=>l.qty*l.rate)*discount/100:discount)+sum(items,l=>l.qty*l.rate*l.tax/100),'$',2)}"
+          Card gap=8
+            Input "Notes" bind=notes multiline
+        Column w=420 gap=12 hide={tab=="edit"&&false}
+          Text.panelTitle "Preview"
+          Box fill=#FFFFFFFF radius=4 pad=32 gap=20 border-top=#FFDDDDDD
+            Row between top
+              Column gap=2
+                Text "Ledger Lane Studio" color=#FF111111 weight=700 size=18
+                Text "Dana Whitlock, 14 Mill Street" color=#FF666666 size=12
+              Column gap=2 end
+                Text "INVOICE" color=#FF111111 weight=700 size=22
+                Text "{number}" color=#FF666666 size=12
+            Row between
+              Column gap=2
+                Text "Billed to" color=#FF888888 size=11
+                Text "{coalesce(client,'No client chosen')}" color=#FF111111 weight=600
+                Text "{clientEmail}" color=#FF666666 size=12
+              Column gap=2 end
+                Text "Issued {formatDate(issued,'MMM d, yyyy')}" color=#FF666666 size=12
+                Text "Due {formatDate(due,'MMM d, yyyy')}" color=#FF666666 size=12
+            Divider
+            each l in items
+              Row between top
+                Column grow gap=0
+                  Text "{l.desc}" color=#FF111111 size=13
+                  Text "{l.qty} x {money(l.rate,'$',2)}  tax {l.tax}%" color=#FF888888 size=11
+                Text "{money(l.qty*l.rate,'$',2)}" color=#FF111111 size=13
+            Divider
+            Column gap=4
+              Row between
+                Text "Subtotal" color=#FF666666 size=12
+                Text "{money(sum(items,l=>l.qty*l.rate),'$',2)}" color=#FF111111 size=12
+              Row between
+                Text "Discount" color=#FF666666 size=12
+                Text "-{money(discountMode=='percent'?sum(items,l=>l.qty*l.rate)*discount/100:discount,'$',2)}" color=#FF111111 size=12
+              Row between
+                Text "Tax" color=#FF666666 size=12
+                Text "{money(sum(items,l=>l.qty*l.rate*l.tax/100),'$',2)}" color=#FF111111 size=12
+              Row between
+                Text "Total due" color=#FF111111 weight=700 size=16
+                Text "{money(sum(items,l=>l.qty*l.rate)-(discountMode=='percent'?sum(items,l=>l.qty*l.rate)*discount/100:discount)+sum(items,l=>l.qty*l.rate*l.tax/100),'$',2)}" color=#FF111111 weight=700 size=16
+            Text "{notes}" color=#FF666666 size=11
+            Text "PAID" color=#FF2E7D32 weight=700 size=28 visible={status=="paid"} animate=pop
+            Text "OVERDUE" color=#FFC62828 weight=700 size=28 visible={status=="overdue"} animate=pop
+  Dialog#newClient "Add a client" "They are saved to your client list"
+    Input "Name" bind=newName
+    Input "Email" bind=newEmail type=email
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Add client" onTap={clients=append(clients,{"name":newName,"email":newEmail}); client=newName; clientEmail=newEmail; newName=""; newEmail=""; toast "Client added"; close}
+
+### Overdue Summary
+project invoices=[] saved
+state sel=""
+Page
+  Nav sticky
+    Brand "Ledger Lane" icon="receipt_long"
+    Row gap=4
+      Link "Invoices" onTap={go invoices}
+      Link "Outstanding"
+    Button "New invoice" onTap={go editor}
+  Section
+    Column gap=16
+      Heading "Outstanding balance" level=1
+      Text.muted "Everything sent or overdue, and what is still owed."
+      Grid cols=2 gap=24
+        Card gap=8
+          Text.muted "Total outstanding"
+          Text "{money(sum(filter(invoices,i=>i.status=='sent'||i.status=='overdue'),i=>i.total),'$',2)}" size=40 weight=700
+        Card gap=8
+          Text.muted "Overdue"
+          Text "{money(sum(filter(invoices,i=>i.status=='overdue'),i=>i.total),'$',2)}" size=40 weight=700 color=#FFC62828
+      Card gap=8
+        Text.panelTitle "Awaiting payment"
+        each inv in filter(invoices,i=>i.status=='sent'||i.status=='overdue')
+          Row between middle
+            Column gap=0 grow
+              Text.strong "{inv.client}"
+              Text.muted "{inv.id}, due {formatDate(inv.due,'MMM d')}"
+            Badge.error "Overdue" visible={inv.status=="overdue"}
+            Badge.info "Sent" visible={inv.status=="sent"}
+            Text.strong "{money(inv.total,'$',2)}" w=100
+            Button.outline "Mark paid" onTap={invoices=updateWhere(invoices,i=>i.id==inv.id,i=>with(i,"status","paid")); toast "Marked as paid"}
+        if count(invoices,i=>i.status=='sent'||i.status=='overdue')==0
+          Text.muted "Nothing outstanding. Everyone has paid."
+  Footer
+    Row between
+      Text.strong "Ledger Lane"
+      Text.muted "Invoices for freelancers"

@@ -1,0 +1,3 @@
+{"schema": 3, "pages": ["home.json"], "designSystem": "../../../../design_systems/cards",
+ "primary": "#FFB45309",
+ "theme": {"primary": "#FFB45309", "colors": {"accent": "#FFB45309"}}}

@@ -46,6 +46,15 @@ abstract interface class HoverCardUi {
   void hoverAnchorExit(Rect anchor);
 }
 
+/// Optional: whether what is open on top is a popover (a menu, a picker by
+/// its trigger). A chain that opens a dialog and then closes its menu
+/// (`MenuItem "Delete" onTap={open confirmDelete}`) closes the menu first
+/// where the UI can say so; kept separate from ActionUi so an app's own UI
+/// needs nothing new.
+abstract interface class PopoverUi {
+  bool get popoverOnTop;
+}
+
 /// The UI effects of actions, implemented by the app shell.
 abstract interface class ActionUi {
   /// Moves between screens as [action] says ([NavigateAction.mode]), with

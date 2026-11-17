@@ -1,0 +1,3 @@
+App: Stave, a sight-reading trainer. A staff with a note to name, answer by tapping a piano keyboard or note-name buttons, right and wrong flashes, a streak; clef and range settings; a rhythm mode where you tap along to a metronome with early and late marks; a session summary with slowest notes.
+
+Write two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.

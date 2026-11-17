@@ -1,0 +1,219 @@
+### History
+state branch="feature/diff-view"
+state sel="c1"
+state filter=""
+state pushing=false
+state pushProgress=0
+state pulling=false
+state branches=[{"name":"main","ahead":0,"behind":3},{"name":"feature/diff-view","ahead":4,"behind":1},{"name":"fix/conflict-markers","ahead":2,"behind":0},{"name":"release/1.4","ahead":0,"behind":0}]
+state commits=[{"id":"c1","hash":"a41f9c2","msg":"Add side-by-side diff renderer","author":"Maya Reyes","lane":0,"color":"#FF2F80ED","when":"2h ago","files":[{"path":"lib/diff/side_by_side.dart","added":128,"removed":4},{"path":"lib/diff/line_numbers.dart","added":36,"removed":0},{"path":"test/diff_test.dart","added":54,"removed":2}]},{"id":"c2","hash":"9be07d1","msg":"Merge branch 'main' into feature/diff-view","author":"Ravi Shah","lane":1,"color":"#FF27AE60","when":"5h ago","files":[{"path":"pubspec.yaml","added":3,"removed":3}]},{"id":"c3","hash":"3d5a8e0","msg":"Fix hunk header parsing for renames","author":"Ravi Shah","lane":1,"color":"#FF27AE60","when":"yesterday","files":[{"path":"lib/diff/parser.dart","added":17,"removed":9}]},{"id":"c4","hash":"71c2b44","msg":"Inline diff mode","author":"Maya Reyes","lane":0,"color":"#FF2F80ED","when":"yesterday","files":[{"path":"lib/diff/inline.dart","added":88,"removed":0},{"path":"lib/diff/view.dart","added":12,"removed":5}]},{"id":"c5","hash":"e02b6f3","msg":"Initial commit graph","author":"Lena Novak","lane":2,"color":"#FFF2994A","when":"3 days ago","files":[{"path":"lib/graph/lanes.dart","added":210,"removed":0}]}]
+every 100ms when pushing onTick={pushProgress=min(1,pushProgress+0.05); pushing=pushProgress<1}
+every 1500ms when pulling onTick={pulling=false; toast "Pulled 1 commit"}
+App
+  Sidebar
+    Brand "Twig" icon="account_tree"
+    Text.caption "BRANCHES"
+    Input "Filter branches" bind=filter
+    each b in branches
+      if contains(lower(b.name),lower(filter))
+        NavItem "{b.name}" icon="call_split" selected={branch==b.name} onTap={branch=b.name}
+          Row gap=4
+            if b.ahead > 0
+              Badge.success "↑{b.ahead}"
+            if b.behind > 0
+              Badge.warning "↓{b.behind}"
+    Spacer grow
+    Button.outline "New branch" icon="add" onTap={open newBranch}
+    NavItem "Changes" icon="edit_note" badge="3" onTap={go changes}
+    NavItem "Conflicts" icon="merge_type" badge="2" onTap={go conflicts}
+  Main
+    Nav
+      Row gap=8
+        Heading "{branch}" level=1
+        Badge.info "origin/{branch}"
+      Row gap=8
+        Button.outline "Pull" icon="download" onTap={pulling=true}
+        Button "Push" icon="upload" onTap={pushProgress=0; pushing=true}
+    if pushing
+      Row gap=12 pad=[24,8,24,8]
+        Text.small "Pushing to origin..."
+        Progress bind=pushProgress grow
+        Text.small "{round(pushProgress*100,0)}%"
+    if pulling
+      Row gap=12 pad=[24,8,24,8]
+        Text.small "Pulling from origin..."
+        Progress grow indeterminate
+    Column pad=24 gap=8 scroll
+      CommitGraph commits={commits} selected={sel} onSelect={sel=result}
+        each c in commits
+          Row gap=12 middle selected={sel==c.id} onTap={sel=c.id}
+            GraphNode lane={c.lane} color={c.color} merge={startsWith(c.msg,"Merge")}
+            Avatar "{c.author}" size=28
+            Column grow
+              Text.strong "{c.msg}"
+              Text.caption "{c.author} · {c.when}"
+            Text.mono "{c.hash}"
+  Pane w=360 pad=16 gap=12
+    each c in commits
+      if sel==c.id
+        Heading "{c.msg}" level=3
+        Row gap=8 middle
+          Avatar "{c.author}" size=24
+          Text.muted "{c.author} · {c.hash}"
+        Divider
+        Text.sectionTitle "{length(c.files)} files changed"
+        Row gap=8
+          Text.success "+{sum(c.files,f=>f.added)}"
+          Text.danger "-{sum(c.files,f=>f.removed)}"
+        each f in c.files
+          ListTile "{f.path}" onTap={go diff}
+            Row gap=6
+              Text.success "+{f.added}"
+              Text.danger "-{f.removed}"
+        Row gap=8
+          Button.outline "Cherry-pick" icon="content_copy" onTap={emit cherryPick c.id; toast "Cherry-picked {c.hash}"}
+          Button.outline "Revert" icon="undo" onTap={emit revert c.id}
+  Dialog#newBranch "New branch" "From {branch}"
+    Input "Branch name" bind=newName
+    Button "Create" onTap={emit createBranch newName; close}
+
+### Diff
+state mode="Side by side"
+state staged=[]
+state file="lib/diff/side_by_side.dart"
+state hunks=[{"id":"h1","header":"@@ -12,7 +12,9 @@ class DiffView","lines":[{"l":12,"r":12,"t":"ctx","text":"  final List<Hunk> hunks;"},{"l":13,"r":null,"t":"del","text":"  final bool inline;"},{"l":null,"r":13,"t":"add","text":"  final DiffMode mode;"},{"l":null,"r":14,"t":"add","text":"  final bool showLineNumbers;"},{"l":14,"r":15,"t":"ctx","text":"  const DiffView(this.hunks);"}]},{"id":"h2","header":"@@ -48,6 +50,12 @@ Widget build","lines":[{"l":48,"r":50,"t":"ctx","text":"    return Row("},{"l":49,"r":null,"t":"del","text":"      children: [left, right],"},{"l":null,"r":51,"t":"add","text":"      children: ["},{"l":null,"r":52,"t":"add","text":"        Expanded(child: left),"},{"l":null,"r":53,"t":"add","text":"        Expanded(child: right),"},{"l":null,"r":54,"t":"add","text":"      ],"},{"l":50,"r":55,"t":"ctx","text":"    );"}]}]
+App
+  Sidebar
+    Brand "Twig" icon="account_tree"
+    Text.caption "FILES"
+    NavItem "lib/diff/side_by_side.dart" icon="description" badge="+128 -4" selected={file=="lib/diff/side_by_side.dart"} onTap={file="lib/diff/side_by_side.dart"}
+    NavItem "lib/diff/line_numbers.dart" icon="description" badge="+36" selected={file=="lib/diff/line_numbers.dart"} onTap={file="lib/diff/line_numbers.dart"}
+    NavItem "test/diff_test.dart" icon="description" badge="+54 -2" selected={file=="test/diff_test.dart"} onTap={file="test/diff_test.dart"}
+    Spacer grow
+    NavItem "History" icon="history" onTap={go history}
+  Main
+    Nav
+      Heading "{file}" level=3
+      Row gap=8
+        SegmentedButton bind=mode items=["Side by side","Inline"]
+        Button.outline "Stage all hunks" onTap={staged=map(hunks,h=>h.id)}
+        Button "Commit..." icon="check" onTap={go commit}
+    Column pad=24 gap=16 scroll
+      each hunk in hunks
+        Card gap=0 pad=0
+          Row between middle pad=[12,8,12,8] fill=#FFF3F4F6
+            Text.mono "{hunk.header}"
+            if contains(staged,hunk.id)
+              Row gap=8
+                Badge.success "Staged"
+                Button.ghost "Unstage" onTap={staged=without(staged,hunk.id)}
+            else
+              Button.outline "Stage this hunk" icon="add" onTap={staged=append(staged,hunk.id); toast "Hunk staged"}
+          if mode=="Side by side"
+            Row
+              Column grow
+                each ln in hunk.lines
+                  if ln.t!="add"
+                    Row gap=8 fill={ln.t=="del" ? "#FFFFE4E4" : "#00FFFFFF"}
+                      Text.mono "{ln.l}" w=40 color=#FF888888
+                      Text.mono "{ln.text}"
+              Column grow border-left=#FFDDDDDD
+                each ln in hunk.lines
+                  if ln.t!="del"
+                    Row gap=8 fill={ln.t=="add" ? "#FFE3F7E8" : "#00FFFFFF"}
+                      Text.mono "{ln.r}" w=40 color=#FF888888
+                      Text.mono "{ln.text}"
+          else
+            Column
+              each ln in hunk.lines
+                Row gap=8 fill={ln.t=="add" ? "#FFE3F7E8" : (ln.t=="del" ? "#FFFFE4E4" : "#00FFFFFF")}
+                  Text.mono "{coalesce(ln.l,"")}" w=40 color=#FF888888
+                  Text.mono "{coalesce(ln.r,"")}" w=40 color=#FF888888
+                  Text.mono "{ln.t=="add" ? "+" : (ln.t=="del" ? "-" : " ")} {ln.text}"
+
+### Commit
+state summary=""
+state body=""
+state amend=false
+state staged=[{"path":"lib/diff/side_by_side.dart","added":128,"removed":4},{"path":"lib/diff/line_numbers.dart","added":36,"removed":0}]
+state unstaged=[{"path":"test/diff_test.dart","added":54,"removed":2}]
+App
+  Sidebar
+    Brand "Twig" icon="account_tree"
+    NavItem "History" icon="history" onTap={go history}
+    NavItem "Diff" icon="difference" onTap={go diff}
+    NavItem "Commit" icon="check_circle" selected={true}
+    NavItem "Conflicts" icon="merge_type" badge="2" onTap={go conflicts}
+  Main
+    Nav
+      Heading "Commit to feature/diff-view" level=1
+    Row pad=24 gap=24 top
+      Column grow gap=12
+        Text.sectionTitle "Staged ({length(staged)})"
+        each f in staged
+          ListTile "{f.path}"
+            Row gap=8
+              Text.success "+{f.added}"
+              Text.danger "-{f.removed}"
+              IconButton "remove" tooltip="Unstage" onTap={unstaged=append(unstaged,f); staged=without(staged,f)}
+        Text.sectionTitle "Unstaged ({length(unstaged)})"
+        each f in unstaged
+          ListTile "{f.path}"
+            Row gap=8
+              Text.success "+{f.added}"
+              Text.danger "-{f.removed}"
+              IconButton "add" tooltip="Stage" onTap={staged=append(staged,f); unstaged=without(unstaged,f)}
+      Card grow gap=12
+        Input "Summary" "Short description of the change" bind=summary
+        Row between
+          if length(summary) > 72
+            Text.danger "Summary is too long"
+          else
+            Text.muted "Keep the summary under 72 characters"
+          Text.small "{length(summary)}/72" color={length(summary) > 72 ? "#FFD32F2F" : "#FF666666"}
+        Input "Description" multiline bind=body
+        Checkbox "Amend previous commit" bind=amend
+        Row end gap=8
+          Button.outline "Cancel" onTap={go history}
+          Button "{amend ? "Amend commit" : "Commit"}" disabled={length(summary)==0 || length(summary)>72 || length(staged)==0} onTap={emit commit summary; toast "Committed"; summary=""; body=""; go history}
+
+### Conflicts
+state blocks=[{"id":"b1","left":["import 'package:twig/diff.dart';","import 'package:twig/graph.dart';"],"right":["import 'package:twig/diff/view.dart';"],"chosen":""},{"id":"b2","left":["const maxLanes = 8;"],"right":["const maxLanes = 12;"],"chosen":""},{"id":"b3","left":["  return lanes.where((l) => l.active);"],"right":["  return lanes.where((l) => !l.merged);"],"chosen":""}]
+state conflictFile="lib/graph/lanes.dart"
+App
+  Sidebar
+    Brand "Twig" icon="account_tree"
+    Text.caption "CONFLICTED FILES"
+    NavItem "lib/graph/lanes.dart" icon="warning" badge="{count(blocks,b=>b.chosen=="")}" selected={conflictFile=="lib/graph/lanes.dart"} onTap={conflictFile="lib/graph/lanes.dart"}
+    NavItem "pubspec.yaml" icon="warning" badge="1" onTap={conflictFile="pubspec.yaml"}
+    Spacer grow
+    NavItem "History" icon="history" onTap={go history}
+  Main
+    Nav
+      Column
+        Heading "{conflictFile}" level=3
+        Text.muted "Merging main into feature/diff-view"
+      Row gap=8
+        Button.outline "Take all ours" onTap={blocks=map(blocks,b=>with(b,"chosen","left"))}
+        Button.outline "Take all theirs" onTap={blocks=map(blocks,b=>with(b,"chosen","right"))}
+        Button "Mark resolved" disabled={count(blocks,b=>b.chosen=="")>0} onTap={emit resolved conflictFile; toast "Marked resolved"; go history}
+    Column pad=24 gap=16 scroll
+      Progress {(count(blocks,b=>b.chosen!=""))/length(blocks)}
+      Text.small "{count(blocks,b=>b.chosen!="")} of {length(blocks)} blocks resolved"
+      each block in blocks
+        Card gap=8 pad=0
+          Row between middle pad=[12,8,12,8] fill=#FFF3F4F6
+            Text.strong "Conflict {index+1}"
+            if block.chosen!=""
+              Badge.success "Took {block.chosen=="left" ? "ours" : "theirs"}"
+          Row top
+            Column grow pad=12 gap=8 fill={block.chosen=="left" ? "#FFE3F7E8" : "#00FFFFFF"}
+              Text.caption "Ours (feature/diff-view)"
+              each ln in block.left
+                Text.mono "{ln}"
+              Button.outline "Take left" icon="arrow_forward" onTap={blocks=updateWhere(blocks,b=>b.id==block.id,b=>with(b,"chosen","left"))}
+            Column grow pad=12 gap=8 border-left=#FFDDDDDD fill={block.chosen=="right" ? "#FFE3F7E8" : "#00FFFFFF"}
+              Text.caption "Theirs (main)"
+              each ln in block.right
+                Text.mono "{ln}"
+              Button.outline "Take right" icon="arrow_back" onTap={blocks=updateWhere(blocks,b=>b.id==block.id,b=>with(b,"chosen","right"))}
