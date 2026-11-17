@@ -431,8 +431,68 @@ Future<Object?> showScreenModal(
     useRootNavigator: false,
     barrierDismissible: barrierDismissible,
     barrierColor: scrim,
-    builder: (_) => Align(alignment: alignment, child: Material(type: MaterialType.transparency, child: content)),
+    builder: (_) => Align(alignment: alignment, child: Material(type: MaterialType.transparency, child: _TallDialogScroll(child: content))),
   );
+}
+
+/// A dialog taller than the screen leaves it room to scroll: its screen is
+/// laid out at the height it asks for and scrolled inside the window (it ran
+/// off a phone's screen, its buttons out of reach). A dialog that fits, or
+/// one sized to the window, is laid out as before.
+class _TallDialogScroll extends StatelessWidget {
+  const _TallDialogScroll({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) {
+          if (!constraints.hasBoundedHeight) return child;
+          return _IntrinsicOverflow(
+            maxHeight: constraints.maxHeight,
+            fits: child,
+            scrolls: (child) => SingleChildScrollView(primary: false, child: child),
+          );
+        },
+      );
+}
+
+/// Shows [fits] as it is when its content's own height is within
+/// [maxHeight], else wrapped by [scrolls].
+class _IntrinsicOverflow extends StatefulWidget {
+  const _IntrinsicOverflow({required this.maxHeight, required this.fits, required this.scrolls});
+
+  final double maxHeight;
+  final Widget fits;
+  final Widget Function(Widget child) scrolls;
+
+  @override
+  State<_IntrinsicOverflow> createState() => _IntrinsicOverflowState();
+}
+
+class _IntrinsicOverflowState extends State<_IntrinsicOverflow> {
+  final _key = GlobalKey();
+  bool _tall = false;
+
+  void _measure() {
+    final box = _key.currentContext?.findRenderObject();
+    if (box is! RenderBox || !box.hasSize || !mounted) return;
+    double needs;
+    try {
+      needs = box.getMaxIntrinsicHeight(box.size.width);
+    } catch (_) {
+      return;
+    }
+    final tall = needs.isFinite && needs > widget.maxHeight + .5;
+    if (tall != _tall) setState(() => _tall = tall);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
+    final child = KeyedSubtree(key: _key, child: widget.fits);
+    return _tall ? widget.scrolls(child) : child;
+  }
 }
 
 /// The name of the route a popover (a menu, a picker by its trigger) is

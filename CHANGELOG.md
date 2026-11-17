@@ -171,6 +171,10 @@
   mono styles one by one) and dark as its default (`"mode": "dark"`).
 - Cards: `ReorderableList addable=false` is a fixed set of items whose order alone changes: it hid the + of the
   header and still drew the x that removes each row. The x goes with the +.
+- A dialog whose content is taller than the window (a long `Dialog` body on a phone) ran off the screen, its last
+  buttons out of reach, with a flex overflow: it is now laid out at the height it asks for and scrolls inside the
+  window (a drag, a wheel; a step that taps one of its nodes brings the node into view). A dialog that fits is laid
+  out as before.
 
 ## 32.0.0
 
