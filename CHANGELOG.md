@@ -1,3 +1,20 @@
+## Unreleased
+
+Text input: the pass after round 11, where the notation's text inputs drew worse than the web baseline's
+([docs/research/text-input-round-11.md](docs/research/text-input-round-11.md)). With the codelessly_api of the same
+pass (a composer in a row of buttons, a field among icon buttons, `fill`/`border`/`radius` on an `Input`).
+
+### Behaviour changes (read before upgrading)
+
+- **A multi-line field with an action of its own** (`textInputAction` `send`, `done`…) takes Enter itself, also
+  while the platform's text input is connected: Enter is the action, Shift+Enter a new line (while an IME composes,
+  Enter stays the IME's). Connected, Enter went to the platform, which sent the action on Enter and Shift+Enter alike
+  (desktop) or typed a new line on both (web). A text area (no action, or `newline`) is as it was.
+- **Sending from a multi-line field keeps the focus** (`send`), ready for the next message, as a chat's composer
+  does; the other actions let it go as before.
+- **A field with no border keeps its border's radius for its fill** (`border: {type: none, borderRadius: 20}`, a
+  filled pill): the fill took the control step's radius.
+
 ## 36.0.0
 
 Needs codelessly_api 36.0.0.

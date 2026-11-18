@@ -748,6 +748,9 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
         focusNode.scope?.next();
       case TextInputAction.previous:
         focusNode.scope?.next(backward: true);
+      // A composer keeps the focus for the next message (a chat's send).
+      case TextInputAction.send when !config.oneLine:
+        break;
       default:
         focusNode.unfocus();
     }
