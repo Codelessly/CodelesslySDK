@@ -103,25 +103,157 @@ void main() {
     expect(jsonEncode(r.document), jsonEncode(plain.document));
   });
 
-  test("two pages' overlays of one id are said (they are one screen of the site)", () async {
-    _write('pages/board.txt', '''Column
-  Button "Menu" onTap={open nav}
-Drawer#nav
-  Text "board"
-''');
-    _write('pages/archive.txt', '''Column
-  Button "Menu" onTap={open nav}
-Drawer#nav
-  Text "archive"
-''');
-    final site = await NotationSite.load(findSiteManifest(file: '${_root.path}/pages/board.txt')!);
-    final expander = NotationExpander(site: site, settings: _settings());
-    final canvasOf = <String, (String, String)>{};
-    final clashes = [
-      for (final page in ['archive', 'board'])
-        ...canvasClashes(canvasOf, page, expander.expand(File('${_root.path}/pages/$page.txt').readAsStringSync(), path: '$page.txt', screen: page)),
-    ];
-    expect(clashes.single, allOf(contains('the overlay "nav" has the id of an overlay of archive'), contains('#navBoard')));
+  group("two pages' overlays of one id", () {
+    // The site expanded whole: each page's document by name, the
+    // components' by type, and what was said.
+    Future<({Map<String, Json> pages, Map<String, Json> components, List<({String path, String message})> issues, OverlayScoping scoping})> expandAll() async {
+      final site = await NotationSite.load(findSiteManifest(file: '${_root.path}/pages/home.txt')!);
+      final r = expandSitePages(NotationExpander(site: site, settings: _settings()), site);
+      for (final res in [...r.results, ...r.componentResults.values]) {
+        expect(res.issues, isEmpty);
+      }
+      return (
+        pages: {for (final p in r.pages) p.name: p.document},
+        components: {for (final c in r.components) c.type: c.document},
+        issues: r.scoping.issues,
+        scoping: r.scoping,
+      );
+    }
+
+    Map<String, Object?> nodesOf(Json d) => (d['nodes'] as Map).cast<String, Object?>();
+    // Every action of [d] of [type], wherever it is.
+    List<Map> actionsOf(Object? d, String type) => [
+          if (d is Map && d['type'] == type) d,
+          if (d is Map) for (final v in d.values) ...actionsOf(v, type),
+          if (d is List) for (final v in d) ...actionsOf(v, type),
+        ];
+
+    void page(String name, String text) => _write('pages/$name.txt', 'Column\n  Button "Menu" onTap={open nav}\nDrawer#nav\n  Text "$text"\n');
+
+    test('drawn differently: each page has its own, opened by that page', () async {
+      page('board', 'board');
+      page('archive', 'archive');
+      final r = await expandAll();
+      expect(r.issues, isEmpty);
+      expect(r.scoping.renamed, {
+        'nav': {'archive': 'nav--archive', 'board': 'nav--board'},
+      });
+      for (final p in ['board', 'archive']) {
+        final d = r.pages[p]!;
+        expect(d['roots'], [p, 'nav--$p']);
+        final canvas = nodesOf(d)['nav--$p']! as Map;
+        // The id as written stays its name: what a render step may name.
+        expect(canvas['name'], 'nav');
+        expect(writtenOverlayId('nav--$p', p, canvas.cast()), 'nav');
+        expect(nodesOf(d).containsKey('nav'), isFalse);
+        expect([for (final a in actionsOf(d['nodes'], 'openModal')) a['to']], ['nav--$p']);
+        expect(jsonEncode(canvas), isNot(contains(p == 'board' ? 'archive' : '"board"')));
+      }
+    });
+
+    test('drawn the same: one shared overlay, as written', () async {
+      page('board', 'menu');
+      page('archive', 'menu');
+      final r = await expandAll();
+      expect(r.issues, isEmpty);
+      expect(r.scoping.renamed, isEmpty);
+      for (final p in ['board', 'archive']) {
+        expect(r.pages[p]!['roots'], [p, 'nav']);
+        expect([for (final a in actionsOf(r.pages[p]!['nodes'], 'openModal')) a['to']], ['nav']);
+      }
+    });
+
+    test('the same lines below more lines on one page (other generated ids): one shared overlay', () async {
+      _write('pages/board.txt', 'Column\n  Text "a"\n  Row\n    Text "b"\n  Button "Menu" onTap={open nav}\nDrawer#nav\n  Column\n    Text "menu"\n');
+      _write('pages/archive.txt', 'Column\n  Button "Menu" onTap={open nav}\nDrawer#nav\n  Column\n    Text "menu"\n');
+      final r = await expandAll();
+      expect(r.issues, isEmpty);
+      expect(r.scoping.renamed, isEmpty);
+    });
+
+    test('an overlay drawn the same that opens a per-page one is per page too', () async {
+      for (final p in ['board', 'archive']) {
+        _write('pages/$p.txt', 'Column\n  Button "Keys" onTap={open keys}\nDialog#keys "Keys"\n  Button "Menu" onTap={open nav}\nDrawer#nav\n  Text "$p"\n');
+      }
+      final r = await expandAll();
+      expect(r.issues, isEmpty);
+      expect(r.scoping.renamed.keys.toSet(), {'nav', 'keys'});
+      expect({for (final a in actionsOf(r.pages['board']!['nodes'], 'openModal')) a['to']}, {'keys--board', 'nav--board'});
+    });
+
+    test('on one page only: as written', () async {
+      page('board', 'board');
+      final r = await expandAll();
+      expect(r.issues, isEmpty);
+      expect(r.pages['board']!['roots'], ['board', 'nav']);
+    });
+
+    test("a component's open opens the calling page's own (through a component that calls it too)", () async {
+      _write('components/NavButton.txt', 'component NavButton "Opens the navigation."\nButton#nb "Menu" onTap={open nav}\n');
+      _write('components/MenuStrip.txt', 'component MenuStrip "The bar."\nRow#tb\n  NavButton\n');
+      for (final p in ['board', 'archive']) {
+        _write('pages/$p.txt', 'Column\n  NavButton\n  MenuStrip\nDrawer#nav\n  Text "$p"\n');
+      }
+      final r = await expandAll();
+      expect(r.issues, isEmpty);
+      // The component's open is an event of it, the action its value.
+      final events = actionsOf(r.components['NavButton']!['nodes'], 'componentEvent');
+      expect(events.single['event'], 'open--nav');
+      expect((events.single['value'] as Map)['to'], 'nav');
+      // No open is left but that value.
+      expect(actionsOf(r.components['NavButton']!['nodes'], 'openModal').single, same(events.single['value']));
+      // MenuStrip's call of NavButton passes it on.
+      final passed = actionsOf(r.components['MenuStrip']!['nodes'], 'componentEvent');
+      expect(passed.single, {'type': 'componentEvent', 'event': 'open--nav', 'value': r'${result}'});
+      // Each page's calls open that page's own.
+      for (final p in ['board', 'archive']) {
+        final calls = [for (final n in nodesOf(r.pages[p]!).values) if (n is Map && (n['type'] == 'NavButton' || n['type'] == 'MenuStrip')) n];
+        expect(calls, hasLength(2));
+        for (final c in calls) {
+          final reaction = (c['actions'] as List).cast<Map>().singleWhere((a) => (a['trigger'] as Map)['event'] == 'open--nav');
+          expect((reaction['actions'] as List).single, containsPair('to', 'nav--$p'));
+          expect((reaction['actions'] as List).single, containsPair('type', 'openModal'));
+        }
+      }
+      // print gives back what was written: the page's own overlay as `nav`,
+      // the component's open as an open.
+      for (final p in ['board', 'archive']) {
+        final site = await NotationSite.load(findSiteManifest(file: '${_root.path}/pages/$p.txt')!);
+        final alone = NotationExpander(site: site, settings: _settings()).expand(File('${_root.path}/pages/$p.txt').readAsStringSync(), path: '$p.txt', screen: p);
+        expect(jsonEncode(unscopeOverlays(r.pages[p]!)), jsonEncode(alone.document));
+      }
+      final site = await NotationSite.load(findSiteManifest(file: '${_root.path}/pages/board.txt')!);
+      final nb = NotationExpander(site: site, settings: _settings()).expand(site.sources['NavButton']!.text, path: 'NavButton.txt', screen: 'screen');
+      expect(jsonEncode(unscopeOverlays(r.components['NavButton']!)), jsonEncode(nb.document));
+    });
+
+    test('a page that calls such a component and has no overlay of that id is said', () async {
+      _write('components/NavButton.txt', 'component NavButton "Opens the navigation."\nButton#nb "Menu" onTap={open nav}\n');
+      for (final p in ['board', 'archive']) {
+        _write('pages/$p.txt', 'Column\n  NavButton\nDrawer#nav\n  Text "$p"\n');
+      }
+      _write('pages/list.txt', 'Column\n  NavButton\n');
+      final r = await expandAll();
+      expect(r.issues.single.path, endsWith('list.txt'));
+      expect(r.issues.single.message,
+          allOf(contains('the component NavButton'), contains('"nav"'), contains('archive and board'), contains('Write an overlay #nav on the page list')));
+    });
+
+    test('a page whose name is the id an overlay would be given is said, and that overlay left as written', () async {
+      page('board', 'board');
+      page('archive', 'archive');
+      _write('pages/nav--board.txt', 'Column\n  Text "x"\n');
+      final r = await expandAll();
+      expect(r.issues.single.message, allOf(contains('"nav--board"'), contains('is the id of a page')));
+      expect(r.pages['board']!['roots'], ['board', 'nav']);
+      expect(r.pages['archive']!['roots'], ['archive', 'nav--archive']);
+    });
+
+    test("an overlay with a page's id is said", () async {
+      _write('pages/board.txt', 'Column\n  Button "Go" onTap={open home}\nDialog#home "Home"\n  Text "x"\n');
+      final r = await expandAll();
+      expect(r.issues.single.message, contains('the overlay "home" has the id of the page home'));
+    });
   });
 
   test("a component's key lines are the page's that calls it", () async {

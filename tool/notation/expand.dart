@@ -31,7 +31,10 @@
 // pages/*.txt to site/<name>.json (or the page site.json lists by that
 // name) with its file name as the canvas id, each page --width wide
 // (default 1440). It says one line per file and every issue, and exits 1
-// when there is any.
+// when there is any. An overlay two pages write with one id (`Drawer#nav`)
+// and draw differently is made each page's own (`nav--board`, what names it
+// on that page following, a component's `open nav` opening the calling
+// page's): site_overlays.dart says how.
 //
 // What the notation could not read is written to stderr, one line each;
 // the exit status is 1 when there is any.
@@ -135,11 +138,27 @@ Future<void> main(List<String> args) async {
   final width = double.tryParse(opt('--width') ?? '') ?? (pageName != null ? 1440 : 390);
   final expander = NotationExpander(site: site, designSystem: ds, settings: settings(width));
   final result = expander.expand(File(file).readAsStringSync(), path: file, screen: opt('--id') ?? pageName ?? 'screen');
+  // A page's overlays as the whole site's expansion gives them: one two
+  // pages write with one id and draw differently is the page's own
+  // (site_overlays.dart), which only the other pages can say.
+  var document = result.document;
+  final more = <String>[];
+  if (page != null && opt('--id') == null) {
+    final whole = expandSitePages(NotationExpander(site: site, designSystem: ds, settings: settings(width)), site!);
+    final i = whole.pages.indexWhere((p) => canonical(p.path) == canonical(page));
+    if (i >= 0) document = whole.pages[i].document;
+    for (final s in whole.scoping.issues) {
+      if (canonical(s.path) == canonical(page)) more.add(s.message);
+    }
+  }
   for (final (type, r) in expander.failedComponents) {
     stderr.writeln('${site!.sources[type]!.path}: the component $type does not expand cleanly (${r.issues.length} issue${r.issues.length == 1 ? '' : 's'}; first: ${r.issues.first}): expand it alone to see them all.');
   }
   for (final issue in result.issues) {
     stderr.writeln('$file: $issue');
+  }
+  for (final m in more) {
+    stderr.writeln('$file: $m');
   }
   if (site == null && ds == null && result.issues.any((i) => RegExp(r'^No node type "[A-Z]').hasMatch(i.message))) {
     stderr.writeln('$file: no site.json was found beside this file or above it, so no site\'s components are known: '
@@ -152,7 +171,7 @@ Future<void> main(List<String> args) async {
       stderr.writeln('$file: vocabulary: $u');
     }
   }
-  final json = const JsonEncoder.withIndent(' ').convert(result.document);
+  final json = const JsonEncoder.withIndent(' ').convert(document);
   if (opt('--out') case final out?) {
     // A folder that is not there yet is made (it was a stack trace).
     File(out)
@@ -161,7 +180,7 @@ Future<void> main(List<String> args) async {
   } else {
     stdout.writeln(json);
   }
-  if (result.issues.isNotEmpty) exitCode = 1;
+  if (result.issues.isNotEmpty || more.isNotEmpty) exitCode = 1;
 }
 
 /// Expands every notation component and page of [site]; the exit status.
@@ -175,14 +194,18 @@ int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings) {
     return p.startsWith('$home/') ? p.substring(home.length + 1) : p;
   }
 
-  void report(String source, String out, NotationResult r) {
+  void report(String source, String out, NotationResult r, Json document, List<String> more) {
     File(out).parent.createSync(recursive: true);
-    File(out).writeAsStringSync(encoder.convert(r.document));
-    stdout.writeln('${rel(source)} -> ${rel(out)}${r.issues.isEmpty ? '' : ' (${r.issues.length} issue${r.issues.length == 1 ? '' : 's'})'}');
+    File(out).writeAsStringSync(encoder.convert(document));
+    final n = r.issues.length + more.length;
+    stdout.writeln('${rel(source)} -> ${rel(out)}${n == 0 ? '' : ' ($n issue${n == 1 ? '' : 's'})'}');
     for (final i in r.issues) {
       stderr.writeln('${rel(source)}: $i');
     }
-    issues += r.issues.length;
+    for (final m in more) {
+      stderr.writeln('${rel(source)}: $m');
+    }
+    issues += n;
   }
 
   final cycles = <List<String>>[];
@@ -192,29 +215,34 @@ int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings) {
     issues++;
   }
   final listed = site.componentRefs;
-  for (final src in order) {
-    final r = expander.expand(src.text, path: src.path, screen: 'screen');
-    report(src.path, site.componentOut(src.type), r);
-    if (readStrings(site.manifest['components']).isNotEmpty && !listed.containsKey(src.type)) {
-      stderr.writeln('${rel(src.path)}: site.json\'s components do not list ${src.type}: add "components/${src.type}.json" there, or the site does not have it.');
+  final expanded = expandSitePages(expander, site, order: order);
+  // Overlays two pages write with one id and draw differently are each
+  // page's own (site_overlays.dart): before, one page's was every page's
+  // (the board's drawer showed the archive page's sidebar: test 9, kanban
+  // 9), with no word.
+  final said = <String, List<String>>{};
+  for (final i in expanded.scoping.issues) {
+    said.putIfAbsent(File(i.path).absolute.path, () => []).add(i.message);
+  }
+  List<String> about(String path) => said.remove(File(path).absolute.path) ?? const [];
+  for (final c in expanded.components) {
+    report(c.path, site.componentOut(c.type), expanded.componentResults[c.type]!, c.document, about(c.path));
+    if (readStrings(site.manifest['components']).isNotEmpty && !listed.containsKey(c.type)) {
+      stderr.writeln('${rel(c.path)}: site.json\'s components do not list ${c.type}: add "components/${c.type}.json" there, or the site does not have it.');
       issues++;
     }
   }
-  // The canvases of the site's pages by id, and the page each is from: an
-  // overlay is a screen of the whole site, so two pages' `Drawer#nav` were
-  // one (the board's drawer showed the archive page's sidebar: test 9,
-  // kanban 9), with no word.
-  final canvasOf = <String, (String, String)>{};
-  for (final page in site.pageSources) {
-    final name = File(page).uri.pathSegments.last.replaceFirst(RegExp(r'\.txt$'), '');
-    final r = expander.expand(File(page).readAsStringSync(), path: page, screen: name);
-    report(page, site.pageOut(page), r);
-    for (final clash in canvasClashes(canvasOf, name, r)) {
-      stderr.writeln('${rel(page)}: $clash');
+  for (final (i, p) in expanded.pages.indexed) {
+    report(p.path, site.pageOut(p.path), expanded.results[i], p.document, about(p.path));
+    if (!site.screens.contains(p.name)) {
+      stderr.writeln('${rel(p.path)}: site.json\'s pages do not list ${p.name}: add "${p.name}.json" there, or the site does not have it.');
       issues++;
     }
-    if (!site.screens.contains(name)) {
-      stderr.writeln('${rel(page)}: site.json\'s pages do not list $name: add "$name.json" there, or the site does not have it.');
+  }
+  // What is about a file not written here (a JSON component).
+  for (final e in said.entries) {
+    for (final m in e.value) {
+      stderr.writeln('${rel(e.key)}: $m');
       issues++;
     }
   }

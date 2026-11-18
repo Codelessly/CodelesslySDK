@@ -24,6 +24,10 @@ import 'dart:io';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_api/notation.dart';
 
+import 'site_overlays.dart';
+
+export 'site_overlays.dart';
+
 /// The `site.json` a notation [file] belongs to: [site] (a manifest, or a
 /// folder holding one as `site.json` or `site/site.json`), else the one
 /// beside [out], else the first beside [file] or up to two folders above it.
@@ -393,35 +397,41 @@ final class NotationExpander {
   }
 }
 
-/// What is wrong with the canvases of page [name] (its expansion [r]) given
-/// [canvasOf], the canvases of the pages before it by id with what each
-/// draws (added to): a page and its overlays are screens of the whole site,
-/// so an id two pages give a canvas makes one screen of the two (test 9,
-/// kanban 9: the board's `Drawer#nav` showed the archive page's sidebar,
-/// with no word). Overlays that draw the same on every page (one shortcuts
-/// dialog written on each) are one screen as meant.
-List<String> canvasClashes(Map<String, (String, String)> canvasOf, String name, NotationResult r) {
-  final nodes = readMap(r.document['nodes']) ?? const {};
-  String drawn(String id) {
-    final out = <String, Object?>{};
-    void walk(String k) {
-      final n = readMap(nodes[k]);
-      if (n == null || out.containsKey(k)) return;
-      out[k] = n;
-      for (final c in [...readStrings(n['children']), ...?readMap(n['slots'])?.values.whereType<String>()]) {
-        walk(c);
-      }
-    }
+/// The name of the page in notation file [path]: its file name, its canvas
+/// id.
+String pageNameOf(String path) => File(path).uri.pathSegments.last.replaceFirst(RegExp(r'\.txt$'), '');
 
-    walk(id);
-    return jsonEncode(out);
+/// [site] expanded whole by [expander]: its notation components ([order],
+/// else [NotationSite.ordered]) and its pages, each document as it is
+/// written, with each overlay two pages write with one id and draw
+/// differently made the page's own (site_overlays.dart: [scopeOverlays]),
+/// and what that could not do.
+({
+  List<ScopedComponent> components,
+  Map<String, NotationResult> componentResults,
+  List<ScopedPage> pages,
+  List<NotationResult> results,
+  OverlayScoping scoping,
+}) expandSitePages(NotationExpander expander, NotationSite site, {List<ComponentSource>? order}) {
+  Json copy(Json d) => jsonDecode(jsonEncode(d)) as Json;
+  final components = <ScopedComponent>[];
+  final componentResults = <String, NotationResult>{};
+  for (final src in order ?? site.ordered()) {
+    final r = expander.expand(src.text, path: src.path, screen: 'screen');
+    componentResults[src.type] = r;
+    components.add((type: src.type, path: src.path, document: copy(r.document)));
   }
-
-  return [
-    for (final id in readStrings(r.document['roots']))
-      if (canvasOf.putIfAbsent(id, () => (name, drawn(id))) case (final other, final was) when other != name && (id == name || was != drawn(id)))
-        '${id != name ? 'the overlay' : 'the page'} "$id" has the id of ${other == id ? 'the page' : 'an overlay of'} $other, which draws otherwise: '
-            'a page and its overlays are screens of the whole site, so the two are one and only one of them is shown. '
-            '${id != name ? 'Give this one an id of its own (#$id${name[0].toUpperCase()}${name.substring(1).replaceAll(RegExp(r'[^A-Za-z0-9]'), '')}) and open it by that.' : 'Rename the overlay on $other.'}',
-  ];
+  final pages = <ScopedPage>[];
+  final results = <NotationResult>[];
+  for (final page in site.pageSources) {
+    final name = pageNameOf(page);
+    final r = expander.expand(File(page).readAsStringSync(), path: page, screen: name);
+    results.add(r);
+    pages.add((name: name, path: page, document: copy(r.document)));
+  }
+  final scoping = scopeOverlays(pages, components, otherComponents: {
+    for (final e in site.expanded.entries)
+      if (!site.sources.containsKey(e.key)) e.key: (path: site.componentOut(e.key), document: e.value.toJson()),
+  });
+  return (components: components, componentResults: componentResults, pages: pages, results: results, scoping: scoping);
 }
