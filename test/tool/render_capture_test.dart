@@ -250,6 +250,12 @@ void main() {
     expect(notWritten.first['message'], contains('listed in site.json, file not written yet'));
   });
 
+  testWidgets('a page listed without its extension is its .json file: no warning when that is written (round 11b)', (tester) async {
+    final report = await runRender(tester, RenderArgs(inputs: ['test/tool/fixtures/unwritten_bare'], out: out.path, sizes: const [Size(390, 844)]));
+    final notWritten = report.diagnostics.where((d) => d['code'] == 'page_not_written').toList();
+    expect(notWritten.map((d) => d['file']), ['about'], reason: '${report.diagnostics}');
+  });
+
   testWidgets('a navigate whose "to" is built by a binding goes to the screen it names', (tester) async {
     final report = await runRender(tester, RenderArgs(inputs: ['test/tool/fixtures/navexpr'], out: out.path, screens: const ['home'],
         // The wait: in a process that rendered before, loading the screen
