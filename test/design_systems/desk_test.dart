@@ -65,4 +65,16 @@ void main() {
     final text = nodes.firstWhere((n) => n['type'] == 'text');
     expect(((text['layout'] as Map)['width'] as Map).containsKey('hug'), isTrue);
   });
+
+  test("its looks a writer met: an avatar group's avatars show both initials; chips are no pills; its Dialog pins an Actions band", () async {
+    final desk = await _load([]);
+    final group = desk.components['AvatarGroup']!;
+    final slot = jsonEncode(group.toJson()['nodes']);
+    // Each avatar takes 7/8 of its size before the next covers it (it was 0.7: the second initial was hidden at 24).
+    expect(slot, contains('props.size * 0.875'));
+    final manifest = (jsonDecode(File('$_dir/design_system.json').readAsStringSync()) as Map).cast<String, Object?>();
+    expect(((manifest['theme'] as Map)['radii'] as Map)['chip'], 6);
+    final dialog = desk.components['Dialog']!;
+    expect(dialog.widget!.slots, contains('actions'));
+  });
 }

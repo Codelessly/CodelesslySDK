@@ -37,6 +37,11 @@ Read [DESIGN.md](DESIGN.md) before writing a screen: it says how a desktop app i
 - **Tones**: `neutral`, `info`, `success`, `warning`, `danger` (status), and the label hues `violet`, `pink`,
   `teal`, `amber`, `sky`, `green`, `red`, `slate`, each with a tint, an ink and a dot (`violetTint`, `violetInk`,
   `violetDot`).
+- **Another accent**: name one token, `primary`, in site.json's `theme` (`"theme": {"primary": "#FF0D9488"}`), and
+  `dark.primary` if the dark one should not be made from it. Everything Desk makes from its indigo follows, light
+  and dark: `accent`, `accentHover`, `accentText`, `accentTint`, `accentTintBorder`, the focus border and ring of
+  every Input and SearchField, `selection`, `selectedRow`, `activeTint`, `primaryTint`, `iconTile`, `chart1`, the
+  info tone. Name one of them yourself only to give it another value. Never restyle a part by hand to re-accent it.
 
 ## Its words
 
@@ -51,7 +56,7 @@ The notation's own words, in Desk's look:
 | `Footer` (in a Sidebar) | Pinned at the sidebar's foot over a rule. |
 | `Button`, `.outline`, `.ghost`, `.destructive`, `.secondary` | 34 high, 13/500; primary is the accent; outline is the white secondary; `size=small` 32; `loading=true`; `enabled=false`. |
 | `IconButton "archive" tooltip="Archive (E)"` | 30 square, 16 outline glyph in the secondary ink, the hover fill. |
-| `Input`, `Select`, `NumberInput`, `DateTimeInput`, `Checkbox`, `Radio`, `Toggle`, `SegmentedButton`, `Slider`, `Progress` | Controls at the control height with Desk's lines and accent. |
+| `Input`, `Select`, `NumberInput`, `DateTimeInput`, `Checkbox`, `Radio`, `Toggle`, `SegmentedButton`, `Slider`, `Progress` | Controls at the control height with Desk's lines and accent (a chosen segment, like a chosen `ChoiceChip` or `FilterChip`, is filled with the accent; chips are rounded rectangles of 6, not pills). |
 | `Table r in rows columns=[…] sort=@k select=@chosen` | A bordered table, a header band on the chrome, 44 rows (`compact` 36), the accent's tint on chosen rows. |
 | `Card`, `Badge.success "Paid"` | A white card with a hairline and radius 8; a soft badge. |
 | `Dialog#id "Title" "note" overline="…" w=560` | Desk's dialog frame: a title bar over a rule, a close button, the body padded 24. End it with `Actions`. |
@@ -66,7 +71,7 @@ Desk's own words (components):
 | `Account "Jamie Park" "jamie@…"` | The signed-in person: avatar, name, a line under it; for a sidebar's foot or a top bar. |
 | `PageHeader "Members" "note" overline="…"` + action lines | A page's head: title 24/700, a line under it, its actions at the end. |
 | `Breadcrumb items=["Workspace","Members"]` | Where the page is, in a top bar. |
-| `Tabs @view tabs=[…] icons=[…] counts=[…]` | Views of a page: labels over a rule, an accent line under the current one. |
+| `Tabs @view tabs=[…] icons=[…] counts=[…]` | Views of a page: labels over a rule, the current one in the accent with an accent line under it. |
 | `Toolbar` + lines (`band`) | A 48 bar of icon buttons over a rule; `Spacer` pushes to the end; `Separator` parts groups. |
 | `Separator` | A vertical hairline between toolbar groups. |
 | `SearchField @q hint="Search mail" shortcut="/"` | A search field with an outline icon, a key cap, a clear button. |
@@ -84,6 +89,7 @@ Desk's own words (components):
 | `ListRow "Maya Chen" "Subject" preview="…" meta="10:42 AM" unread selected` | A row of a list pane (mail, feed): two or three lines, the time, unread dot, selected bar. |
 | `ListGroup "Today"` | The label over a group of a list's rows. |
 | `BulkBar count={n} onClear={…}` + action lines | What acts on the chosen rows; show it while something is chosen. |
+| `SaveBar message="3 permissions changed" onSave={…} onDiscard={…}` | Unsaved changes: a warning dot, the message, Discard and Save; in a `Footer` of Main, `visible={dirty}`. |
 | `Pager @page pages=5 summary="1–10 of 50"` | A table's foot: what is shown, previous and next. |
 | `BoardColumn "In progress" count=3 limit=2 hue="sky"` + cards | A column of a board: its head, its cards, Add a card. |
 | `TaskCard key="STK-124" title="…" labels=[…] due="Nov 19" assignee="…"` | A card on a board, with its meta row. |

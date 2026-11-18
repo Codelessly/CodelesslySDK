@@ -1,0 +1,204 @@
+{
+ "schema": 3,
+ "id": "SaveBar",
+ "roots": [
+  "saveBar"
+ ],
+ "widget": {
+  "type": "SaveBar",
+  "doc": "What a page with unsaved changes shows at its foot (a settings form, a permission matrix): a warning dot, what is unsaved, Discard and Save at the end, on the raised surface with a strong hairline and a shadow. Write it in a Footer of Main and show it while something is unsaved (visible={dirty}).",
+  "props": [
+   {
+    "key": "message",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "You have unsaved changes.",
+    "doc": "What is unsaved (3 permissions changed)."
+   },
+   {
+    "key": "saveLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Save changes",
+    "doc": "The save button's label."
+   },
+   {
+    "key": "discardLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Discard",
+    "doc": "The discard button's label."
+   },
+   {
+    "key": "saving",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "While it saves: the save button is off."
+   }
+  ],
+  "events": [
+   {
+    "key": "onSave"
+   },
+   {
+    "key": "onDiscard"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    720,
+    56
+   ],
+   "props": {
+    "message": "3 permissions changed for Editors."
+   }
+  }
+ ],
+ "nodes": {
+  "saveBar": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     16,
+     10,
+     10,
+     10
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 10,
+    "fills": [
+     {
+      "color": "raisedBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "lineStrong"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.effects": "${theme.shadows.level3}"
+   },
+   "children": [
+    "saveDot",
+    "saveMessage",
+    "saveDiscard",
+    "saveSave"
+   ]
+  },
+  "saveDot": {
+   "type": "box",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "decoration": {
+    "radius": 4,
+    "fills": [
+     {
+      "color": "warningDot"
+     }
+    ]
+   }
+  },
+  "saveMessage": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.message}",
+    "style": {
+     "from": "body",
+     "fontSize": 13,
+     "fontWeight": 500,
+     "color": "ink"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "saveDiscard": {
+   "type": "textButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.label": "${props.discardLabel}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onDiscard"
+      }
+     ]
+    }
+   ]
+  },
+  "saveSave": {
+   "type": "filledButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.enabled": "${= !props.saving}",
+    "props.label": "${props.saveLabel}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSave"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

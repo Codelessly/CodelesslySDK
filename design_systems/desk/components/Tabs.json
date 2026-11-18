@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "Tabs",
-  "doc": "Views of one page (Board, List, Archive): labels 13/500 in a row over a rule, the current one in the ink with a 2 px accent line under it; an outline icon before each when `icons` gives them. The current label is kept in your variable.",
+  "doc": "Views of one page (Board, List, Archive): labels 13/500 in a row over a rule, the current one in the accent with a 2 px accent line under it; an outline icon before each when `icons` gives them. The current label is kept in your variable.",
   "props": [
    {
     "key": "tabs",
@@ -199,13 +199,13 @@
     "selected": {
      "tabGlyph": {
       "props": {
-       "color": "ink"
+       "color": "accentText"
       }
      },
      "tabLabel": {
       "props": {
        "style": {
-        "color": "ink"
+        "color": "accentText"
        }
       }
      },

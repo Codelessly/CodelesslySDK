@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "AvatarGroup",
-  "doc": "People together (a card's assignees, a team): avatars overlapping by a third, each ringed in the surface, and +N for the rest.",
+  "doc": "People together (a card's assignees, a team): avatars overlapping by an eighth (every initial shows), each ringed in the surface, and +N for the rest.",
   "props": [
    {
     "key": "names",
@@ -79,7 +79,7 @@
     "spacing": 0
    },
    "bind": {
-    "layout.padding": "${= [0, 0, round(props.size * 0.3) + 4, 0]}"
+    "layout.padding": "${= [0, 0, round(props.size * 0.125) + 4, 0]}"
    },
    "children": [
     "listView1",
@@ -136,7 +136,7 @@
     "clip": "none"
    },
    "bind": {
-    "layout.width": "${= round(props.size * 0.7)}",
+    "layout.width": "${= round(props.size * 0.875)}",
     "layout.height": "${= props.size + 4}"
    },
    "children": [

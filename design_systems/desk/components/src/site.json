@@ -29,6 +29,7 @@
   "../PaneHeader.json",
   "../Panel.json",
   "../Property.json",
+  "../SaveBar.json",
   "../SearchField.json",
   "../Separator.json",
   "../SideButton.json",

@@ -24,3 +24,4 @@ Column gap=20 pad=32 h=fill scroll fill=window
       TaskCard key="STK-126" title="Fix duplicate billing emails" labels=[{"label":"Bug","hue":"red"}] due="Nov 15" overdue assignee="Sam Rao" selected
     BoardColumn "Done" count=1 hue="green" w=300
       TaskCard title="A card with no key or labels" assignee="Jules Martin"
+  SaveBar message="3 permissions changed for Editors." w=720

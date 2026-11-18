@@ -232,7 +232,7 @@ SPACING = {"0.5": 2, "1": 4, "1.5": 6, "2": 8, "3": 12, "4": 16, "5": 20, "6": 2
            "card": 16, "tile": 12, "cardGap": 8, "badge": 8, "gutter": 32, "section": 64, "page": 32, "pane": 20, "bar": 12}
 
 RADII = {"inner": 4, "control": 6, "controlXs": 4, "controlCompact": 6, "controlSmall": 6, "controlMedium": 6, "controlLarge": 7,
-         "tag": 4, "badge": 999, "chip": 999, "card": 8, "tile": 8, "panel": 10, "menu": 8, "popup": 10, "dialog": 12,
+         "tag": 4, "badge": 999, "chip": 6, "card": 8, "tile": 8, "panel": 10, "menu": 8, "popup": 10, "dialog": 12,
          "sheet": 14, "progress": 999, "bar": 3, "avatar": 999, "full": 9999}
 
 SIZES = {"xs": 24, "compact": 30, "small": 32, "medium": 34, "large": 40, "iconOnlyCompact": 16, "iconOnlySmall": 16, "iconOnlyMedium": 18,

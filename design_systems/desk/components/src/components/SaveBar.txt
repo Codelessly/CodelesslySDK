@@ -1,0 +1,13 @@
+component SaveBar "What a page with unsaved changes shows at its foot (a settings form, a permission matrix): a warning dot, what is unsaved, Discard and Save at the end, on the raised surface with a strong hairline and a shadow. Write it in a Footer of Main and show it while something is unsaved (visible={dirty})."
+  param message="You have unsaved changes." doc="What is unsaved (3 permissions changed)."
+  param saveLabel="Save changes" doc="The save button's label."
+  param discardLabel="Discard" doc="The discard button's label."
+  param saving:bool=false doc="While it saves: the save button is off."
+  event onSave
+  event onDiscard
+  preview "Default" 720x56 message="3 permissions changed for Editors."
+Row#saveBar gap=12 middle pad=[16,10,10,10] w=fill radius=10 fill=raisedBackground border=lineStrong effects={theme.shadows.level3}
+  box#saveDot w=8 h=8 radius=4 fill=warningDot
+  Text#saveMessage "{props.message}" size=13 weight=500 color=ink grow maxLines=1 overflow=ellipsis
+  Button.ghost#saveDiscard "{props.discardLabel}" size=small onTap={emit onDiscard}
+  Button#saveSave "{props.saveLabel}" size=small enabled={!props.saving} onTap={emit onSave}
