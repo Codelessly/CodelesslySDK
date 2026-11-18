@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "BulkBar",
-  "doc": "What acts on the rows chosen in a table or a list: the count in the accent ink on the accent tint, Clear, and its lines under it (the actions: outline buttons, a destructive one last) at the end. Show it while something is chosen.",
+  "doc": "What acts on the rows chosen in a table or a list: the count in the accent ink on the accent tint, Clear, and its lines under it (the actions: outline buttons, a destructive one last) at the end; on a phone the actions go on a line under the count. Show it while something is chosen.",
   "children": "list",
   "props": [
    {
@@ -79,6 +79,28 @@
      }
     ]
    },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 8
+      },
+      "layout": {
+       "padding": [
+        12,
+        6,
+        8,
+        8
+       ],
+       "height": {
+        "hug": 44
+       }
+      }
+     }
+    }
+   ],
    "children": [
     "bulkGlyph",
     "bulkCount",
@@ -157,7 +179,15 @@
     "width": {
      "fill": 0
     }
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
   },
   "bulkActions": {
    "type": "row",
@@ -173,6 +203,17 @@
     "spacing": 8,
     "crossAxisAlignment": "center"
    },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 8
+      }
+     }
+    }
+   ],
    "children": [
     "bulkSlot"
    ]

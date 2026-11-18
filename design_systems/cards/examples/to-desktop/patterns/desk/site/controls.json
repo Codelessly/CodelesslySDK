@@ -1,0 +1,385 @@
+{
+ "schema": 3,
+ "roots": [
+  "controls"
+ ],
+ "nodes": {
+  "controls": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 1440.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "surface"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 32,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "Panel1",
+    "Panel2"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "Panel1": {
+   "type": "Panel",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Sign-ups",
+    "note": "1,340 in all"
+   },
+   "children": [
+    "barChart1"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 360,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "barChart1": {
+   "type": "barChart",
+   "layout": {
+    "height": 200,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "values": [
+     540,
+     372,
+     218
+    ],
+    "labels": [
+     "Organic",
+     "Paid",
+     "Referral"
+    ],
+    "color": "primary",
+    "barRadius": 3,
+    "barGap": 12,
+    "labelFontFamily": "Inter",
+    "labelFontSize": 11,
+    "labelColor": "secondaryText",
+    "gridColor": "primaryBorder"
+   }
+  },
+  "Panel2": {
+   "type": "Panel",
+   "layout": {
+    "width": 440,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Your booking"
+   },
+   "children": [
+    "Field1",
+    "Field2",
+    "checkbox1",
+    "checkbox2"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 280,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "Field1": {
+   "type": "Field",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Party size"
+   },
+   "children": [
+    "textField1"
+   ]
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": 120,
+    "height": 34.0
+   },
+   "props": {
+    "min": 1,
+    "max": 8,
+    "keyboardType": "number",
+    "steppers": true,
+    "textAlign": "center"
+   },
+   "bind": {
+    "props.initialValue": "${party}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "party",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "Field2": {
+   "type": "Field",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Delivery"
+   },
+   "children": [
+    "radio1",
+    "radio2"
+   ]
+  },
+  "radio1": {
+   "type": "radio",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Standard, 3 to 5 days",
+    "value": "Standard"
+   },
+   "bind": {
+    "props.groupValue": "${ship}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "ship",
+       "value": "Standard"
+      }
+     ]
+    }
+   ]
+  },
+  "radio2": {
+   "type": "radio",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Express, next day",
+    "value": "Express"
+   },
+   "bind": {
+    "props.groupValue": "${ship}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "ship",
+       "value": "Express"
+      }
+     ]
+    }
+   ]
+  },
+  "checkbox1": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Passport"
+   },
+   "bind": {
+    "props.value": "${passport}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "passport",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "checkbox2": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Tickets"
+   },
+   "bind": {
+    "props.value": "${tickets}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tickets",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "controls": [
+   {
+    "name": "party",
+    "type": "integer",
+    "value": 2
+   },
+   {
+    "name": "ship",
+    "type": "text",
+    "value": "Standard"
+   },
+   {
+    "name": "passport",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "tickets",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

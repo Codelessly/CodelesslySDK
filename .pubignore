@@ -28,3 +28,4 @@ PUBLISHING.md
 /example/.metadata
 # Desk's example pictures (10 MB): read on GitHub.
 /design_systems/desk/examples/**/*.png
+/design_systems/cards/examples/**/*.png

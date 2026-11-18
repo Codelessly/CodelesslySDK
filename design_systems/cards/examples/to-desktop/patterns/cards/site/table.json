@@ -1,0 +1,274 @@
+{
+ "schema": 3,
+ "roots": [
+  "table"
+ ],
+ "nodes": {
+  "table": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "height": {
+     "fill": 0
+    },
+    "padding": 12,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "pageFill"
+     }
+    ]
+   },
+   "children": [
+    "ChatCard1"
+   ]
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Invoices",
+    "subtitle": "2 shown",
+    "icon": "receipt_long_rounded"
+   },
+   "children": [
+    "InputField1",
+    "Segments1",
+    "TableHeader1",
+    "listView1",
+    "Pager1"
+   ]
+  },
+  "InputField1": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "placeholder": "Search customer",
+    "icon": "search_rounded",
+    "value": "q"
+   }
+  },
+  "Segments1": {
+   "type": "Segments",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "status",
+    "options": [
+     "All",
+     "Paid",
+     "Overdue"
+    ]
+   }
+  },
+  "TableHeader1": {
+   "type": "TableHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "value": "sort",
+    "desc": "desc",
+    "columns": [
+     "No.",
+     "Customer",
+     "Amount"
+    ],
+    "keys": [
+     "id",
+     "customer",
+     "amount"
+    ],
+    "selectable": true
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${rows}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "TableRow1"
+   ]
+  },
+  "TableRow1": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "selectable": true
+   },
+   "bind": {
+    "props.cells": "${= [item.id,item.customer,item.amount]}",
+    "props.badge": "${item.status}",
+    "props.checked": "${= contains(sel,item.id)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= contains(sel,item.id)?without(sel,item.id):append(sel,item.id)}"
+      }
+     ]
+    }
+   ]
+  },
+  "Pager1": {
+   "type": "Pager",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "page",
+    "count": 1
+   }
+  }
+ },
+ "variables": {
+  "table": [
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "status",
+    "type": "text",
+    "value": "All"
+   },
+   {
+    "name": "sort",
+    "type": "text",
+    "value": "date"
+   },
+   {
+    "name": "desc",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "sel",
+    "type": "list",
+    "value": []
+   },
+   {
+    "name": "page",
+    "type": "decimal",
+    "value": 0
+   },
+   {
+    "name": "rows",
+    "type": "list",
+    "value": [
+     {
+      "id": "#1001",
+      "customer": "Acme Corp",
+      "amount": "$1,200",
+      "status": "Paid"
+     },
+     {
+      "id": "#1003",
+      "customer": "Initech",
+      "amount": "$430",
+      "status": "Overdue"
+     }
+    ]
+   }
+  ]
+ }
+}

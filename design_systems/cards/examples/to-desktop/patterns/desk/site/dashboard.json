@@ -1,0 +1,667 @@
+{
+ "schema": 3,
+ "roots": [
+  "dashboard",
+  "dashboard_sidebar"
+ ],
+ "nodes": {
+  "dashboard": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 1440.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "surface"
+     }
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column1",
+    "column2"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": 240,
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     12,
+     16,
+     12,
+     12
+    ]
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "sidebar"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": 64
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
+   "children": [
+    "Brand1",
+    "NavItem1"
+   ]
+  },
+  "Brand1": {
+   "type": "Brand",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Northwind",
+    "note": "Analytics",
+    "icon": "insights_outlined"
+   }
+  },
+  "NavItem1": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Performance",
+    "icon": "insights_outlined",
+    "selected": true
+   }
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row2",
+    "divider1",
+    "column3"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     24,
+     14,
+     24,
+     14
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center",
+    "spacing": 24
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ]
+   },
+   "children": [
+    "iconButton1",
+    "Breadcrumb1"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "spacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "menu_outlined"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "dashboard_sidebar",
+       "presentation": "dialog",
+       "cover": true
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "Breadcrumb1": {
+   "type": "Breadcrumb",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "items": [
+     "Analytics",
+     "Product performance"
+    ]
+   }
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     32,
+     28,
+     32,
+     32
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 20,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "PageHeader1",
+    "grid1"
+   ]
+  },
+  "PageHeader1": {
+   "type": "PageHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Product performance",
+    "note": "November so far"
+   },
+   "children": [
+    "Status1",
+    "segmentedButton1"
+   ]
+  },
+  "Status1": {
+   "type": "Status",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Live",
+    "tone": "success",
+    "pill": true
+   }
+  },
+  "segmentedButton1": {
+   "type": "segmentedButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "segments": [
+     {
+      "value": "7 days",
+      "label": "7 days"
+     },
+     {
+      "value": "30 days",
+      "label": "30 days"
+     },
+     {
+      "value": "90 days",
+      "label": "90 days"
+     }
+    ]
+   },
+   "bind": {
+    "props.selected": "${= [range]}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "range",
+       "value": "${result[0]}"
+      }
+     ]
+    }
+   ]
+  },
+  "grid1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "grid1Row1"
+   ]
+  },
+  "grid1Row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "Stat1",
+    "Stat2",
+    "spacer1",
+    "spacer2"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "Stat1": {
+   "type": "Stat",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Revenue",
+    "text": "$78.9k",
+    "delta": "+8.5%"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "basis": 260
+      }
+     }
+    }
+   ]
+  },
+  "Stat2": {
+   "type": "Stat",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Churn",
+    "text": "3.1%",
+    "delta": "+0.4%",
+    "tone": "warning"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "basis": 260
+      }
+     }
+    }
+   ]
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "basis": 260
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "spacer2": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "basis": 260
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "dashboard_sidebar": {
+   "type": "canvas",
+   "name": "dashboard_sidebar",
+   "slots": {
+    "body": "row3"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ]
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column4",
+    "column5"
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "width": 300,
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     12,
+     16,
+     12,
+     12
+    ]
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "sidebar"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "children": [
+    "Brand2",
+    "NavItem2"
+   ]
+  },
+  "Brand2": {
+   "type": "Brand",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Northwind",
+    "note": "Analytics",
+    "icon": "insights_outlined"
+   }
+  },
+  "NavItem2": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Performance",
+    "icon": "insights_outlined",
+    "selected": true
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "page_variables": [
+   {
+    "name": "range",
+    "type": "text",
+    "value": "30 days"
+   }
+  ]
+ }
+}

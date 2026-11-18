@@ -1,0 +1,171 @@
+{
+ "schema": 3,
+ "roots": [
+  "list"
+ ],
+ "nodes": {
+  "list": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "height": {
+     "fill": 0
+    },
+    "padding": 12,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "pageFill"
+     }
+    ]
+   },
+   "children": [
+    "ChatCard1"
+   ]
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Inbox",
+    "subtitle": "2 unread",
+    "icon": "inbox_rounded"
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${mails}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "ConversationRow1"
+   ]
+  },
+  "ConversationRow1": {
+   "type": "ConversationRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "unread": true
+   },
+   "bind": {
+    "props.name": "${item.from}",
+    "props.subject": "${item.subject}",
+    "props.time": "${item.time}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "openId",
+       "value": "${= item.id}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "list": [
+   {
+    "name": "openId",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "mails",
+    "type": "list",
+    "value": [
+     {
+      "id": "a",
+      "from": "Maya Chen",
+      "subject": "Studio visit",
+      "time": "10:42"
+     },
+     {
+      "id": "b",
+      "from": "Nora Patel",
+      "subject": "Invoice",
+      "time": "9:18"
+     }
+    ]
+   }
+  ]
+ }
+}

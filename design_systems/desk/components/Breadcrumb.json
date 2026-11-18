@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "Breadcrumb",
-  "doc": "Where a page is: its ancestors in the secondary ink (each a link), chevrons between, the last in the ink 500. Fires onNavigate with the step's label.",
+  "doc": "Where a page is: its ancestors in the secondary ink (each a link), chevrons between, the last in the ink 500; narrower than a desktop, the last step alone. Fires onNavigate with the step's label.",
   "props": [
    {
     "key": "items",
@@ -125,6 +125,9 @@
     "spacing": 6,
     "crossAxisAlignment": "center"
    },
+   "bind": {
+    "visible": "${= index == length(props.items) - 1 || screen.width >= 1024}"
+   },
    "children": [
     "crumbSep",
     "crumbText"
@@ -146,7 +149,7 @@
     "color": "ink4"
    },
    "bind": {
-    "visible": "${= index > 0}"
+    "visible": "${= index > 0 && screen.width >= 1024}"
    }
   },
   "crumbText": {

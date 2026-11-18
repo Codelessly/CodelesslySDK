@@ -1,0 +1,200 @@
+{
+ "schema": 3,
+ "roots": [
+  "decision"
+ ],
+ "nodes": {
+  "decision": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "height": {
+     "fill": 0
+    },
+    "padding": 12,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "pageFill"
+     }
+    ]
+   },
+   "children": [
+    "ChatCard1"
+   ]
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Delete 214 old files?",
+    "icon": "delete_sweep_rounded",
+    "tone": "danger"
+   },
+   "children": [
+    "Details1",
+    "Callout1",
+    "row1"
+   ]
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "rows": [
+     [
+      "Folder",
+      "Shared Drive / Archive"
+     ],
+     [
+      "Files",
+      "214"
+     ]
+    ]
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "This cannot be undone",
+    "message": "Deleted files skip the trash.",
+    "tone": "danger",
+    "icon": "warning_rounded"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Deny",
+    "tone": "quiet"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "decision",
+       "value": "Denied"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "flex": 2,
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Approve deletion",
+    "tone": "danger"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "decision",
+       "value": "Approved"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "decision": [
+   {
+    "name": "decision",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

@@ -1006,6 +1006,16 @@
     {
      "maxWidth": 699,
      "patch": {
+      "layout": {
+       "height": {
+        "hug": 44
+       }
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
       "visible": false,
       "bind": {
        "visible": null
@@ -1324,6 +1334,17 @@
      ]
     }
    ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
    "children": [
     "text3",
     "icon3",
@@ -1401,6 +1422,17 @@
     "spacing": 4,
     "crossAxisAlignment": "center"
    },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
    "children": [
     "text4"
    ]
@@ -1450,6 +1482,17 @@
        "value": "${= (sortKey == \"status\" ? \"-status\" : \"status\")}"
       }
      ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
     }
    ],
    "children": [
@@ -1904,6 +1947,17 @@
     "spacing": 8,
     "crossAxisAlignment": "center"
    },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
    "children": [
     "text9"
    ]
@@ -1938,6 +1992,17 @@
     "spacing": 8,
     "crossAxisAlignment": "center"
    },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
    "children": [
     "row17"
    ]
@@ -2029,6 +2094,17 @@
     "spacing": 8,
     "crossAxisAlignment": "center"
    },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
    "children": [
     "Status1"
    ]
@@ -2345,6 +2421,18 @@
        "value": "${= []}"
       }
      ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "height": {
+        "hug": 44
+       }
+      }
+     }
     }
    ],
    "children": [

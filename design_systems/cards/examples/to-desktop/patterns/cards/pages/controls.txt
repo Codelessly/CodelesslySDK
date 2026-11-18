@@ -1,0 +1,9 @@
+state party=2
+state ship="Standard"
+state done=[]
+Column h=fill scroll pad=12 fill=page
+  ChatCard "Your booking" icon="event_rounded"
+    ChartCard "Sign-ups" value="1,340" values=[540,372,218] labels=["Organic","Paid","Referral"] kind="bars"
+    Counter "Party size" @party min=1 max=8
+    OptionList "Delivery" @ship options=["Standard","Express"] details=["3 to 5 days","Next day"]
+    Checklist "Before you go" @done items=["Passport","Tickets"]

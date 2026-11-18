@@ -18,7 +18,8 @@ grammar, README.md for the words.
    a `Panel`. Do not paint grey boxes to group things.
 5. **Every list or table has its empty state** (`Empty`, or a Table's `empty=`) and every icon-only button a
    `tooltip` naming its key.
-6. **Write the desktop page first**, then read TO-MOBILE.md and add the few rules it asks for.
+6. **Write the desktop page first**, then read TO-MOBILE.md: most of it happens by itself; add the few rules that
+   choose what a phone shows.
 
 ## 2. The window
 
@@ -36,8 +37,9 @@ App
     PaneHeader "Member" onClose={openId=""}
 ```
 
-- **Sidebar**: 240 wide on the chrome's fill, always. Write `tablet.w=64 hide=phone`: Desk folds every sidebar
-  word to its icon on a tablet (a rail) and the phone opens the sidebar as a drawer from a menu button.
+- **Sidebar**: 240 wide on the chrome's fill, always. On a tablet it is a rail of 64 (Desk folds every sidebar
+  word to its icon) and the phone opens it as a drawer from a menu button, written or not: `tablet.w=64
+  hide=phone` says the same.
 - **Main**: write a `Nav` as its first line when the page has a top bar (breadcrumb, search, account). The bar is
   48 high with a rule under it. A list-and-detail app (mail) writes the list as `Main w=380` and the detail as a
   `Pane` with no width.

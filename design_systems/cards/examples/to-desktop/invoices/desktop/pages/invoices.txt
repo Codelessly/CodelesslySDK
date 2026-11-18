@@ -1,0 +1,37 @@
+state status="All"
+state q=""
+state sort="date"
+state sel=["#1003","#1006"]
+state page=1
+state invoices=[{"id":"#1001","customer":"Acme Corp","date":"May 02","amount":1200,"status":"Paid"},{"id":"#1002","customer":"Globex","date":"May 05","amount":860,"status":"Due"},{"id":"#1003","customer":"Initech","date":"May 09","amount":430,"status":"Overdue"},{"id":"#1004","customer":"Umbrella","date":"May 12","amount":2250,"status":"Paid"},{"id":"#1005","customer":"Hooli","date":"May 15","amount":975,"status":"Due"},{"id":"#1006","customer":"Stark Ltd","date":"May 16","amount":3100,"status":"Overdue"},{"id":"#1007","customer":"Wayne Co","date":"May 18","amount":640,"status":"Paid"},{"id":"#1008","customer":"Wonka","date":"May 20","amount":1480,"status":"Due"},{"id":"#1009","customer":"Soylent","date":"May 22","amount":300,"status":"Overdue"},{"id":"#1010","customer":"Cyberdyne","date":"May 24","amount":5200,"status":"Paid"},{"id":"#1011","customer":"Tyrell","date":"May 27","amount":760,"status":"Due"},{"id":"#1012","customer":"Aperture","date":"May 29","amount":1890,"status":"Paid"}]
+state shown=filter(invoices,r=>(status=="All"||r.status==status)&&contains(lower(r.customer),lower(q)))
+state rows=slice(shown,(page-1)*10,page*10)
+canvas "Invoices" path="invoices"
+App
+  Sidebar
+    Brand "Ledger" "Billing" icon="receipt_long"
+    NavSection "Billing"
+    NavItem "Invoices" icon="receipt_long" badge="{count(invoices,r=>r.status=="Overdue")}" selected=true
+    NavItem "Customers" icon="group"
+    NavItem "Payments" icon="payments"
+  Main
+    Nav
+      Breadcrumb items=["Billing","Invoices"]
+    Column gap=16 pad=[32,28,32,32]
+      PageHeader "Invoices" "{length(shown)} of 12 shown, {count(invoices,r=>r.status=="Overdue")} overdue"
+        Button.outline "Export" icon="download"
+        Button "New invoice" icon="add"
+      Row gap=8 middle
+        SearchField @q hint="Search customer" w=280 onChanged={page=1}
+        SegmentedButton @status items=["All","Paid","Due","Overdue"]
+        Spacer
+        Text.caption "{length(shown)} invoices"
+      BulkBar count={length(sel)} noun="selected, {money(sum(filter(invoices,r=>contains(sel,r.id)),r=>r.amount),"$",0)}" visible={length(sel) > 0} onClear={sel=[]}
+        Button "Send reminders" icon="send" size=small
+      Table r in rows columns=[{"key":"customer","label":"Customer"},{"key":"id","label":"No.","w":90},{"key":"date","label":"Date","w":110},{"key":"amount","label":"Amount","w":120,"align":"end"},{"key":"status","label":"Status","w":120}] sort=@sort select=@sel empty="No invoices match. Clear the search or the filter."
+        Text.strong "{r.customer}"
+        Text.mono "{r.id}"
+        Text "{r.date}"
+        Text "{money(r.amount,"$",0)}" tabularFigures=true
+        Status "{r.status}" tone="{r.status == 'Paid' ? 'success' : (r.status == 'Due' ? 'warning' : 'danger')}" pill
+      Pager @page pages={ceil(length(shown)/10)} summary="{length(rows)} of {length(shown)} invoices"
