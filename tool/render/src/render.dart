@@ -43,6 +43,7 @@ import 'fonts.dart';
 import 'prepare.dart';
 import 'publish.dart';
 import 'site.dart';
+import '../../notation/formula_check.dart';
 
 /// A problem found while rendering.
 final class RuntimeIssue {
@@ -101,6 +102,7 @@ const runtimeCodes = <(String, String, String)>[
   ('image_failed', 'error', 'An image could not be loaded or decoded: a file named by a path relative to the site that is not there (the message names it), or a bad data: URL.'),
   ('image_network', 'warning', 'An image is on the network: the render command does not fetch it, so it is blank in the screenshot.'),
   ('empty_screen', 'warning', 'The screen drew no node boxes (nothing to show).'),
+  ('formula_invalid', 'warning', 'A formula of a node (a binding, a value, an action) or of a variable does not parse, so it gives nothing where it is used: a list with no rows, a text with no value. The message names the node, the field, the expression and why it does not parse (an unbalanced bracket, a stray word).'),
   ('transparent_background', 'warning', 'At least 2% of a capture has nothing painted behind it: there a reader sees the host\'s background (black in an app with none, the page\'s color in a browser), not the document\'s. Give the screen\'s canvas a fill.'),
   ('set_overwritten', 'warning', 'A reaction (a timer, a load) wrote a variable a --set step set, after the step: the capture shows the --set value. Pin a clock with --now.'),
   ('placeholder_word', 'warning', 'A word the notation, the design system and the site do not have stood in as a placeholder when the page was expanded with an open vocabulary (or, closed, was refused and draws nothing): the message names the word, its kind, its line and the shape it was written in. Define it, or it is recorded for support: read from the vocabulary record `notation.sh expand` saves beside the site (vocabulary.json).'),
@@ -245,6 +247,16 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       if (!File('$i/$p').existsSync()) {
         issue(RuntimeIssue('page_not_written', 'warning', '$p is listed in site.json, file not written yet.', file: p));
       }
+    }
+  }
+  // A formula the engine cannot read gives nothing where it is used (a
+  // list with no rows, a text with no value), with no word at run time
+  // (test 10's kanban board: `sortBy(filter(…))),x=>…)` drew no cards).
+  for (final e in docs.entries) {
+    for (final f in unreadableFormulas(e.value)) {
+      issue(RuntimeIssue('formula_invalid', 'warning',
+          'Node "${f.node}" (${f.field}): the formula does not parse, so it gives nothing: ${f.why}. The expression: ${f.expression}',
+          nodeId: f.node.startsWith('variable ') ? null : f.node, file: e.key));
     }
   }
   // The words that stood in as placeholders when the site's notation was

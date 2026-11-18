@@ -70,6 +70,7 @@ import 'package:codelessly_api/notation.dart';
 
 import 'notation_site.dart';
 import 'vocabulary.dart' show loadVocabulary;
+import 'formula_check.dart';
 import 'vocabulary_record.dart';
 
 const _usage = 'usage: expand.dart <file.txt> [--design-system <folder>] [--named] [--nearest-colors] [--id <canvas id>] [--width <canvas width>] [--no-reflow] '
@@ -187,6 +188,10 @@ Future<void> main(List<String> args) async {
     stderr.writeln('${site!.sources[type]!.path}: the component $type does not expand cleanly (${r.issues.length} issue${r.issues.length == 1 ? '' : 's'}; first: ${r.issues.first}): expand it alone to see them all.');
   }
   final text = File(file).readAsStringSync();
+  // A formula the engine cannot parse gives nothing: said where it was
+  // written (formula_check.dart), unless an issue of its line said it.
+  more.addAll(formulaNotes(document, {file: text, for (final e in site?.definitionFiles.entries ?? const <MapEntry<String, String>>[]) e.key: e.value},
+      said: {for (final i in result.issues) '$file:${i.line}'}));
   for (final i in result.issues) {
     stderr.writeln('$file: line ${i.line}:${i.column}: ${site?.placeDefinitionLine(i.message, text) ?? i.message}');
   }
@@ -273,6 +278,13 @@ int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings,
 
   void report(String source, String out, NotationResult r, Json document, List<String> more) {
     final text = File(source).readAsStringSync();
+    // A formula the engine cannot parse gives nothing: said where it was
+    // written (formula_check.dart), unless an issue of its line said it.
+    more = [
+      ...more,
+      ...formulaNotes(document, {rel(source): text, for (final e in site.definitionFiles.entries) rel(e.key): e.value},
+          said: {for (final i in r.issues) '${rel(source)}:${i.line}'}),
+    ];
     final notes = [...vocabularyNotes(r, site: site), if (componentTypeOf(text) == null) ?pageHeadingsNote(text)];
     final type = componentTypeOf(text);
     snap.file(recordPath(source, site.home), text, r, notes: notes, extra: site.definitionText, page: type ?? pageNameOf(source));
