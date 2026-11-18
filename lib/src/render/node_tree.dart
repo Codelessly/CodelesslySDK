@@ -2786,6 +2786,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
       final fit = horizontal ? n.hFit : n.vFit;
       final c = n.layout.constraints;
       final expands = fit == SizeFit.fill && (horizontal ? c.maxWidth : c.maxHeight) == null;
+      // A fill with the most it gets (`Column w=fill maxw=730`): the room
+      // there is, up to that; its design extent (0, it fills) would make it
+      // nothing wide (a headline one letter per line, round 11).
+      final capped = fit == SizeFit.fill && !expands;
       final wraps = fit == SizeFit.hug;
       final isScrollAxis = scrollAxis != null && (scrollAxis == Axis.horizontal) == horizontal;
       final start = pos.start ?? pos.relative ?? (pos.end != null ? parentExtent - pos.end! - extent : 0.0);
@@ -2795,7 +2799,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
             start: start,
             extent: extent,
             parentExtent: parentExtent,
-            size: wraps || expands ? null : extent,
+            size: wraps || expands || capped ? null : extent,
             alignment: alignment,
             clamp: !isScrollAxis,
             expands: expands,

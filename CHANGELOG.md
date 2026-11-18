@@ -6,6 +6,14 @@
   beside the App or Page at the top of a page) is said as drawing nothing and taking no room, with no node; a
   primitive wrapped round lines as those lines with no box.
 
+### Fixed
+
+- **A list's copies an `if` hides take no gap**: the gaps are between the copies that show (a board's lanes, each
+  showing its own of the board's cards, started each lane lower than the one before: a staircase).
+- **A fill with the most it gets, in a stack** (`Column w=fill maxw=730`) is as wide as the stack up to that: it was
+  nothing wide (a headline one letter per line).
+- **A ring (`circularProgressIndicator`) that fills its place** is a circle of its shortest side: it drew nothing.
+
 ## 36.0.0
 
 Needs codelessly_api 36.0.0.

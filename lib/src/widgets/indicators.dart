@@ -102,6 +102,18 @@ void _circularProgressIndicator(NodeBuilder b, Node n, List<RenderBox> chain) {
     if (l.padding != api.EdgeInsets.zero) {
       chain.add(b.obtain<RenderPadding>('spinnerPadding', () => RenderPadding(padding: EdgeInsets.zero))..padding = l.padding.flutter);
     }
+  } else if (l.width.fit == SizeFit.fill || l.height.fit == SizeFit.fill) {
+    // Filling its place (`Ring … w=fill h=fill` in a stack): a square of
+    // the shortest side it is given, centered. Its design size is nothing
+    // there, and it drew nothing (round 11).
+    final most = BoxConstraints(
+      maxWidth: l.width.fit == SizeFit.fill ? double.infinity : (l.width.value - l.padding.horizontal).clamp(0, double.infinity),
+      maxHeight: l.height.fit == SizeFit.fill ? double.infinity : (l.height.value - l.padding.vertical).clamp(0, double.infinity),
+    );
+    chain.add(b.obtain<RenderPositionedBox>(
+        'spinnerCenter', () => RenderPositionedBox(alignment: Alignment.center, textDirection: TextDirection.ltr)));
+    chain.add(b.obtain<RenderConstrainedBox>('spinnerMost', () => RenderConstrainedBox(additionalConstraints: most))..additionalConstraints = most);
+    chain.add(b.obtain<RenderAspectRatio>('spinnerRound', () => RenderAspectRatio(aspectRatio: 1)));
   } else {
     // As it always laid out: a square of its design size (less padding),
     // centered in what its parent gives it.
