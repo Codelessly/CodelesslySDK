@@ -1,3 +1,53 @@
+## 36.0.0
+
+Needs codelessly_api 36.0.0.
+
+### Behaviour changes (read before upgrading)
+
+- **Tabs, segmented buttons and chips** take the theme's accent with nothing styled and are rounded rectangles at
+  the control radius, not grey pills: the chosen one is the accent with the on-accent ink, the others the theme's
+  ink at 6% (10% in the dark). A chip chosen from shows no check mark unless written.
+- **Tab follows the order of the tree** (the document's lines), not the position on screen.
+- **Custom paint**: a node's painter is drawn over the node's own fill and border and under its children; a filled
+  node hid its painter whole.
+- **A Splitter** is as long as the panes it divides and an 8 px hairline in a desktop window.
+- **A text beside a Spacer keeps its own width**; a list is as thick as its thickest item; copies of an `each`
+  across a row sit where the row says (they were centered).
+- **A node that reacts only to the secondary button** takes no part in a primary press.
+- **Render tool, output names**: diagnostics are `diagnostics[-screens][@sizes][-label].json`; a capture after
+  `--navigate` is named after the screen it shows; `--outline` lists this run's files only. A full-page capture with
+  a dialog, drawer or menu open is the window as it shows.
+- **Notation tools**: `expand` saves a vocabulary record in the site's folder (`vocabulary.json`, `VOCABULARY.md`;
+  `--no-record` for none); a components file that cannot be loaded and a formula that cannot be parsed fail the
+  expand; a built-in word wins over a site's definition of its name.
+
+### Added
+
+- **Desk** (`design_systems/desk`): a desktop design system, written clean room: a theme (zinc neutrals, an indigo
+  accent, Inter 13), 36 components, its guides (`README.md`, `DESIGN.md`, `TO-MOBILE.md`), galleries and three
+  reference screens. A site re-accents it by naming `primary` alone.
+- **The vocabulary loop**: `tool/codelessly validate` (and the MCP tool `codelessly_validate`) gives a site's
+  issues and placeholder words as JSON; render reports each placeholder (`placeholder_word`) and a formula the
+  engine cannot parse (`formula_invalid`) or that fails (`formula_failed`); `notation.sh vocabulary` harvests the
+  records of many runs.
+- **Sites in notation**: `expand <site folder>` writes the whole site (its pages, components, variables and
+  theme); `site.json` lists pages by name or as records; a `designSystem` may be an absolute path.
+- **Render driver**: `--state <label> <steps>` captures several states in one run; steps hold modifier keys
+  (`--tap shift+row`); `--drag id=dx,dy,hold`; `--focus` on any focusable node; `#n` counts the copies shown; a
+  component's node by the end of its path (`joinSeason/action`); named parts of built-in controls (`@increment`,
+  `@decrement`, `@thumb`, `@option:<label>`); `--scroll x,y`.
+- **Controls**: `semanticLabel` on a checkbox, switch, radio and slider; a field's own label takes the theme's
+  `fieldLabel`.
+
+### Fixed
+
+- A list's item template is read at the screen's size (wrapped copies were 0 tall); the children slot shows a
+  `slots.children` it is given; a nested list's parent tells its readers when the outer item changes.
+- A grid whose rows hug measures an item with no intrinsic size by its laid-out length (it threw).
+- `close; close` closes the overlay and the one under it; a tooltip's `${…}` is filled from its scope; `key j` does
+  not fire on Shift+J; focus reaches a field inside a component.
+- A list reordered by the keyboard with no Handle moves its row by Alt and the arrows.
+
 ## 35.0.1
 
 Needs codelessly_api 35.0.0.
