@@ -27,6 +27,9 @@ Needs codelessly_api's fixes-36-1 (its Unreleased entry).
 
 ### Fixed
 
+- **A paint `paragraph` with `textAlign` and `maxWidth`** is aligned across its `maxWidth`, as a text box of that
+  width is: laid out to its words' width alone, `textAlign=center` had nothing to centre in (round 11b,
+  property-listings: the map's price pins sat at the left of their pills).
 - **Render command, a page listed without its extension** (`"pages": ["month", "week"]`, which site.md allows and
   the site loads as `month.json`): no `page_not_written` warning when that file is there (round 11b: calendar-app,
   clip-editor, admin-console had one for every page of a site that drew them all).

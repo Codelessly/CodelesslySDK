@@ -500,7 +500,13 @@ class _Compiler {
         textAlign: align,
         textDirection: TextDirection.ltr,
         maxLines: t.maxLines,
-      )..layout(maxWidth: maxWidth(s) ?? double.infinity);
+      );
+      // An aligned paragraph is aligned across its maxWidth (as a box of that
+      // width is): laid out to its words' width alone, `textAlign=center` had
+      // nothing to center in (round 11b, property-listings: the map's price
+      // pins sat at the pill's left).
+      final most = maxWidth(s);
+      painter.layout(minWidth: most != null && most.isFinite && align != TextAlign.left && align != TextAlign.start ? most : 0, maxWidth: most ?? double.infinity);
       final size = painter.size;
       final anchor = t.anchor;
       final p = (at(s) ?? Offset.zero) - Offset((anchor.x + 1) / 2 * size.width, (anchor.y + 1) / 2 * size.height);
