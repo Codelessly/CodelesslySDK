@@ -367,6 +367,7 @@ final class NotationExpander {
                 reflow: settings.reflow,
                 projectVariables: variables,
                 components: merged == null ? const {} : NotationOptions.fromDesignSystem(merged).components,
+                componentScreenActions: merged == null ? const {} : NotationOptions.fromDesignSystem(merged).componentScreenActions,
               )
             : NotationOptions.fromDesignSystem(merged,
                 screen: screen, width: settings.width, named: named, nearestColors: settings.nearestColors, reflow: settings.reflow, projectVariables: variables))
