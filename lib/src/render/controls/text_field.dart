@@ -82,6 +82,15 @@ void textFieldRecipe(NodeBuilder b, Node n, List<RenderBox> chain, {TextFieldSer
   final interactive = b.tree.animates;
   final states = b.tree.statesOf(b.id, instance: b.instance);
   final patched = n.behaviors.states.patches.keys.toSet();
+  // The boxes around it with a focused look of their own (a composer's
+  // frame, `focused.border=…`): focused while the field is, as CSS's
+  // :focus-within (the `focused` state is "the node, or an input in it").
+  final around = interactive
+      ? [
+          for (String? at = b.source.parentOf(b.id); at != null; at = b.source.parentOf(at))
+            if (b.source.node(at)?.behaviors.states.patches.containsKey(api.WidgetState.focused) ?? false) at,
+        ]
+      : const <String>[];
   final tokens = ControlTokens.of(b);
   final box = b.obtain<RenderTextField>('textField', RenderTextField.new);
   box
@@ -92,9 +101,14 @@ void textFieldRecipe(NodeBuilder b, Node n, List<RenderBox> chain, {TextFieldSer
     ..config = TextFieldConfig.of(n, tokens, inherited: b.slot.textDefault, interactive: interactive)
     ..autofillGroup = interactive ? FieldAutofillGroup.of(b) : null
     ..validation = interactive ? _validation(b, n) : null
-    ..onStateChanged = interactive && patched.isNotEmpty
+    ..onStateChanged = interactive && (patched.isNotEmpty || around.isNotEmpty)
         ? (s, on) {
             if (patched.contains(s)) b.tree.setState(b.id, s, on, instance: b.instance);
+            if (s == api.WidgetState.focused) {
+              for (final a in around) {
+                b.tree.setState(a, s, on, instance: b.instance);
+              }
+            }
           }
         : null
     ..onEvent = interactive

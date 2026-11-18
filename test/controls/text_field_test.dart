@@ -535,6 +535,55 @@ void main() {
       expect(f.focusNode.hasFocus, isTrue);
     });
 
+    testWidgets('a box around the field with a focused look is focused while the field is (a composer\'s frame, :focus-within)',
+        (tester) async {
+      final (tree, _) = runningTree({
+        'schema': 3,
+        'id': 'doc',
+        'roots': ['col'],
+        'nodes': {
+          'col': {
+            'type': 'column',
+            'layout': {'width': 400, 'height': 300},
+            'children': ['frame', 'other'],
+          },
+          'frame': {
+            'type': 'row',
+            'layout': {'width': {'fill': 0}, 'height': {'hug': 0}, 'padding': 7},
+            'decoration': {
+              'radius': 12,
+              'strokes': [
+                {'color': '#FFDDD6E3'},
+              ],
+            },
+            'states': {
+              'focused': {
+                'frame': {
+                  'decoration': {
+                    'strokes': [
+                      {'color': '#FF7750B9'},
+                    ],
+                  },
+                },
+              },
+            },
+            'children': ['draft'],
+          },
+          'draft': hugging('textField', {'minLines': 1, 'maxLines': 6}),
+          'other': hugging('textField'),
+        },
+      });
+      addTearDown(tree.dispose);
+      await tester.pumpWidget(NodeView(tree: tree, rootId: 'col', interactive: true));
+      expect(tree.statesOf('frame'), isNot(contains(api.WidgetState.focused)));
+      await _focus(tester, tree, 'draft');
+      await tester.pump();
+      expect(tree.statesOf('frame'), contains(api.WidgetState.focused));
+      await _focus(tester, tree, 'other');
+      await tester.pump();
+      expect(tree.statesOf('frame'), isNot(contains(api.WidgetState.focused)));
+    });
+
     testWidgets('a text area (multi-line, no action) leaves Enter to the platform, which types the new line', (tester) async {
       final (tree, recorded) = await _show(tester, {'note': hugging('textField', {'minLines': 3, 'maxLines': 6})});
       await _focus(tester, tree, 'note');

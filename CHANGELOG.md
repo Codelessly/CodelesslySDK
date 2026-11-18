@@ -12,6 +12,9 @@ pass (a composer in a row of buttons, a field among icon buttons, `fill`/`border
   (desktop) or typed a new line on both (web). A text area (no action, or `newline`) is as it was.
 - **Sending from a multi-line field keeps the focus** (`send`), ready for the next message, as a chat's composer
   does; the other actions let it go as before.
+- **A box around a text field with a focused look of its own** (`focused.border=…`) is focused while the field
+  has the focus, as CSS's `:focus-within` (the `focused` state is "the node, or an input in it"): a composer's frame
+  rings as the web's does. It was focused only when it took the focus itself.
 - **A field with no border keeps its border's radius for its fill** (`border: {type: none, borderRadius: 20}`, a
   filled pill): the fill took the control step's radius.
 
