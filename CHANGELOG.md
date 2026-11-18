@@ -4,6 +4,13 @@ Needs codelessly_api's fixes-36-1 (its Unreleased entry).
 
 ### Behaviour changes
 
+- **A date or time picker whose decoration names only its fill, border and corners keeps its calendar (clock)
+  and chevron** (round 11b: `DatePicker … fill=… border=… radius=10`): any decoration took them away, as a
+  decoration that draws the field itself. A decoration that names icons, padding or anything else is as it was.
+  A decoration's border with no corners takes the control radius (it was square).
+- **A dropdown with no frame of its own (`underline: false`) has its value in the middle of its box**, level
+  with the chevron, as Flutter's DropdownButton; it sat at the box's top (round 11b: a Select framed by its
+  node's box, 36 high).
 - **What is under an open overlay takes no key**: a page's `key` lines and a node's `onKeyDown` (an `App`'s) wait
   while a dialog, a sheet, a drawer or a menu is open over the page; the overlay's own keys run (round 10, R13: a
   page's Enter ran while a chooser was open). It is what the overlays' contract says ("Tab and Shift+Tab stay

@@ -410,6 +410,10 @@ class RenderDropdown extends RenderFieldFrame {
     final s = spec;
     final i = selectedIndex;
     decoration = s.decorationFor(selected: i != null);
+    // With no frame of its own (`underline: false`: the node's box is its
+    // frame), its value sits level with the chevron, in the middle of the
+    // box, as Flutter's DropdownButton's; it sat at the box's top.
+    alignVertical = s.underline ? null : TextAlignVertical.center;
     _menu
       ..look = s.menu
       ..items = [
