@@ -29,6 +29,7 @@ const openSiteNote = 'THE SITE (site.json)\n'
     '"textStyles": {"body": {"fontSize": 15, "color": "ink"}, "title": {"fontSize": 28, "fontWeight": 600}}, '
     '"spacing": {"md": 16}, "radii": {"card": 10}, "dark": {"colors": {"ink": "#FFE8EDE9", "paper": "#FF141815"}}}}\n'
     "Every page reads the variables by name (persist keeps one on the device) and the theme's names (color=ink, style=title); "
+    'the theme\'s "fontFamily": "Georgia" is the font of every text ("titleFontFamily" the headings\', a text style\'s "fontFamily" its own); '
     'pages/<name>.txt expands to the page <name>.json. The whole manifest: docs/reference/notation/site.md.';
 
 Future<void> main(List<String> args) async {

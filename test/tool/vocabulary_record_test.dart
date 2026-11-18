@@ -353,4 +353,18 @@ void main() {
     expect(formatReport(report), contains(RegExp(r'; 2 placeholder words \((Masthead, MiniMonth|MiniMonth, Masthead)\)\.')));
     expect(outlineText(out, [site.dir]), contains('[placeholder: Masthead]'));
   });
+
+  testWidgets('render: a behaviour with no picture beside the Page is said, and drawn as nothing (round 11)', (tester) async {
+    _write('pages/about.txt', 'primitive Clock onTick\nClock onTick={n=1}\nPage\n  Section\n    Text "Hi"\n');
+    late NotationSite site;
+    await tester.runAsync(() async {
+      (site, _) = await _expand(time: DateTime.utc(2026, 11, 18, 9), write: true);
+    });
+    final out = '${_root.path}/out';
+    final report = await runRender(tester, RenderArgs(inputs: [site.dir], out: out, sizes: const [Size(1440, 900)], screens: const ['about'], dumpLayout: true));
+    final clock = report.diagnostics.firstWhere((d) => d['code'] == 'placeholder_word' && (d['message'] as String).startsWith('"Clock"'));
+    expect(clock['nodeId'], isNull);
+    expect(clock['message'], contains('it draws nothing and takes no room'));
+    expect(outlineText(out, [site.dir]), isNot(contains('Clock')));
+  });
 }

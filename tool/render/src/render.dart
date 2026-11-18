@@ -275,14 +275,24 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     for (final p in sitePlaceholders(i)) {
       final page = '${p['page'] ?? ''}';
       final refused = p['kind'] == 'refused';
+      // What the expand made of it: nothing (a behaviour with no picture, or
+      // a word beside the frame at the top of the page), the lines under it
+      // with no box round them, or the labelled box.
+      final node = [
+        for (final e in docs.entries)
+          if (page.isEmpty || e.key.split('/').last.replaceAll('.json', '') == page)
+            if (api.readMap(e.value['nodes'])?[p['node']] case final Map n) n,
+      ].firstOrNull;
+      final silent = p['node'] is String && node == null;
+      final bare = node != null && p['kind'] == 'primitive' && node['decoration'] == null;
       issue(RuntimeIssue(
         'placeholder_word',
         'warning',
         '"${p['word']}" (${refused ? 'type, refused' : p['kind']}) at ${p['file']}:${p['line']}'
             '${p['signature'] == null ? '' : ', written `${p['signature']}`'}: '
-            '${refused ? 'a word the notation does not have, refused: nothing is drawn for it' : p['kind'] == 'primitive' ? 'declared a primitive: a labelled box stands in for it' : p['kind'] == 'overlay' ? 'opened and never written: a placeholder sheet opens' : 'a word the notation, the design system and the site do not have: a placeholder stands in for it'}. '
+            '${refused ? 'a word the notation does not have, refused: nothing is drawn for it' : silent ? '${p['kind'] == 'primitive' ? 'declared a primitive' : 'a word the notation, the design system and the site do not have'}, with nothing to draw (a behaviour with no picture, or a line beside the App or Page at the top of the page): it draws nothing and takes no room' : bare ? 'declared a primitive: the lines under it are drawn, with no box round them' : p['kind'] == 'primitive' ? 'declared a primitive: a labelled box stands in for it' : p['kind'] == 'overlay' ? 'opened and never written: a placeholder sheet opens' : 'a word the notation, the design system and the site do not have: a placeholder stands in for it'}. '
             'Define it, or it is recorded for support (${p['record']}).',
-        nodeId: p['node'] as String?,
+        nodeId: silent ? null : p['node'] as String?,
         screen: page.isEmpty ? null : page,
         file: '${p['file']}',
       ));

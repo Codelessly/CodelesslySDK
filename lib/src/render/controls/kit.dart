@@ -23,6 +23,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show Ticker;
 import 'package:flutter/services.dart';
 
+import '../convert.dart' show FontDemand;
 import 'focus.dart';
 import 'overlay.dart' show tooltipFocusChanged;
 import 'root.dart';
@@ -492,8 +493,18 @@ class ControlLabel {
 
   String get text => _text;
 
+  /// The style it draws in, its fallback included.
+  @visibleForTesting
+  TextStyle? get debugStyle => _style;
+
   /// Sets what it shows; true when its layout changed.
   bool update(String text, TextStyle style, {TextAlign align = TextAlign.center}) {
+    // The symbols its font lacks (← → ↗ ⌘) from the fallback every text
+    // style has: a control's label drew them as missing-glyph boxes where a
+    // text beside it drew them (round 11).
+    if (FontDemand.fallbackOf(style.fontFamily, style.fontFamilyFallback ?? const <String>[]) case final more? when !listEquals(more, style.fontFamilyFallback)) {
+      style = style.copyWith(fontFamilyFallback: more);
+    }
     if (text == _text && style == _style && align == _align) return false;
     _text = text;
     _style = style;

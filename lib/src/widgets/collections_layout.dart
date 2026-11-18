@@ -543,6 +543,15 @@ class RenderListItems extends RenderCollection {
       }
     }
 
+    // An item with no length (one an `if` hides: a lane's cards are the
+    // board's cards, each shown in its own lane) takes no gap either: the
+    // gaps are between the items that show (round 11, the kanban lanes'
+    // staircase).
+    if (gap > 0) {
+      final shown = advances.where((a) => a > 0).length;
+      used = advances.fold<double>(0, (a, b) => a + b) + gap * math.max(0, shown - 1);
+    }
+
     final items = children;
     var contentCross = 0.0;
     for (final it in items) {
@@ -622,12 +631,15 @@ class RenderListItems extends RenderCollection {
     var at = 0.0;
     var slotLogical = 0.0;
     _dividers.clear();
+    var placed = false;
     for (var k = 0; k < order.length; k++) {
       final i = order[k];
-      if (k > 0) {
+      final shows = advances[i] > 0 || gap <= 0 || i == slotBefore;
+      if (placed && shows) {
         _addDivider(at, dividerCross, mainSize, gapBefore: true);
         at += gap;
       }
+      if (shows) placed = true;
       // The slot sits where item [slotBefore] was, pushing it (and the
       // items after it) on.
       if (i == slotBefore) {
@@ -725,7 +737,7 @@ class RenderListItems extends RenderCollection {
               ? (max ? c.getMaxIntrinsicHeight(cross) : c.getMinIntrinsicHeight(cross))
               : (max ? c.getMaxIntrinsicWidth(cross) : c.getMinIntrinsicWidth(cross)));
       total += e;
-      n++;
+      if (e > 0 || gap <= 0) n++;
     }
     if (n > 1) total += gap * (n - 1) - (itemCount != null ? overlap * (n - 1) : 0);
     return math.max(0, total) + _padMain;

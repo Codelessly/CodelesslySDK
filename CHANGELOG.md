@@ -65,6 +65,32 @@ pass (a composer in a row of buttons, a field among icon buttons, `fill`/`border
   rings as the web's does. It was focused only when it took the focus itself.
 - **A field with no border keeps its border's radius for its fill** (`border: {type: none, borderRadius: 20}`, a
   filled pill): the fill took the control step's radius.
+### Behaviour changes (read before upgrading)
+
+- **Render, placeholder_word**: a stand-in the expand drew as nothing (a behaviour with no picture, or a line
+  beside the App or Page at the top of a page) is said as drawing nothing and taking no room, with no node; a
+  primitive wrapped round lines as those lines with no box.
+- **Render tool: a family no file provides falls back by its class**: a serif (Georgia, Playfair Display, Noto
+  Serif…) to the first serif the system has (Georgia, Times New Roman, Garamond, Book Antiqua; DejaVu or Liberation
+  Serif on Linux), a slab (Roboto Slab) to a slab (Rockwell) else a serif, a script to a script (Brush Script, Freestyle
+  Script) else a serif, a named mono (IBM Plex Mono) to Roboto Mono; it was Roboto for all. The `font_fallback`
+  warning says which face drew it. The faces are the machine's, so pictures can differ between machines where a site
+  names a family it does not ship.
+- **`notation.sh prompt --open`, the site note** says how a theme names its font: `"fontFamily"` (and
+  `"titleFontFamily"`, a text style's own `"fontFamily"`).
+
+### Fixed
+
+- **A list's copies an `if` hides take no gap**: the gaps are between the copies that show (a board's lanes, each
+  showing its own of the board's cards, started each lane lower than the one before: a staircase).
+- **A fill with the most it gets, in a stack** (`Column w=fill maxw=730`) is as wide as the stack up to that: it was
+  nothing wide (a headline one letter per line).
+- **A ring (`circularProgressIndicator`) that fills its place** is a circle of its shortest side: it drew nothing.
+- **An accordion draws every child after its header**, in order: it drew only the first (a docs sidebar's group
+  showed one link of three).
+- **A control's label falls back for the symbols its font lacks** (← → ↗ ⌘), as every text does: in the render
+  tool's pictures a button's or a chip's arrows drew as missing-glyph boxes. (Emoji draw from the system symbol font
+  where it has them, in one colour: the tool has no colour emoji font on Windows.)
 
 ## 36.0.0
 
