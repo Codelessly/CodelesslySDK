@@ -135,6 +135,9 @@ Options:
                           get -<mode> in their names. Steps may toggle it.
   --tap <nodeId>          Tap the node (where it shows on screen). <nodeId>#<n>
                           picks the n-th copy (0-based) of a node a list repeats.
+                          shift+<nodeId> (ctrl+, alt+, meta+, mod+) holds keys
+                          through it: a Shift-click. Also on --drag, --hover,
+                          --double-tap, --long-press, --right-click.
   --hover <nodeId>        Move a mouse over the node.
   --focus <nodeId>        Focus a text field (or the field inside the node).
   --type <nodeId>=<text>  Focus a text field and type text into it, as a user

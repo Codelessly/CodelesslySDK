@@ -672,9 +672,25 @@ Future<void> _renderAll(
           }
           continue;
         }
-        final problem = await _apply(tester, step, controller, navigator, codelessly, screens: _screenList(published, docs),
-            warn: (code, message, nodeId) => issue(RuntimeIssue(code, 'warning', message,
-                nodeId: nodeId, screen: label, size: sizeName, file: nodeId == null ? null : fileOfNode[nodeId])));
+        // `--tap shift+row#2`, `--drag alt+clip=40,0`: the step with those
+        // keys held, as a user Shift-clicks (a click's result.shift reads it).
+        final (held, plain) = _heldKeys(step);
+        for (final k in held) {
+          await tester.sendKeyDownEvent(k);
+        }
+        final String? problem;
+        try {
+          problem = await _apply(tester, plain, controller, navigator, codelessly, screens: _screenList(published, docs),
+              warn: (code, message, nodeId) => issue(RuntimeIssue(code, 'warning', message,
+                  nodeId: nodeId, screen: label, size: sizeName, file: nodeId == null ? null : fileOfNode[nodeId])));
+        } finally {
+          // Held until what the step started has run (a button's tap
+          // reaction reads the keys as it fires, a frame on).
+          if (held.isNotEmpty) await _settle(tester);
+          for (final k in held.reversed) {
+            await tester.sendKeyUpEvent(k);
+          }
+        }
         if (problem != null) {
           // A node hidden at this width, or of another canvas of the screen
           // (another breakpoint's design), is absent here by design: the
@@ -1856,6 +1872,30 @@ ui.Rect _rectOf(RenderBox b) {
   final o = b.localToGlobal(ui.Offset.zero);
   return o & b.size;
 }
+
+/// The modifier keys a pointer step holds (`shift+`, `ctrl+`, `alt+`,
+/// `meta+`/`cmd+`, `mod+`: Control, Command on a Mac, before its target) and
+/// the step without them. A key step names its own (`--key shift+Tab`).
+(List<LogicalKeyboardKey>, Step) _heldKeys(Step step) {
+  if (!_pointerSteps.contains(step.kind)) return (const [], step);
+  final keys = <LogicalKeyboardKey>[];
+  var target = step.target;
+  while (true) {
+    final m = RegExp(r'^(shift|ctrl|control|alt|option|meta|cmd|command|mod)\+(?=.)', caseSensitive: false).firstMatch(target);
+    if (m == null) break;
+    keys.add(switch (m[1]!.toLowerCase()) {
+      'shift' => LogicalKeyboardKey.shiftLeft,
+      'alt' || 'option' => LogicalKeyboardKey.altLeft,
+      'meta' || 'cmd' || 'command' => LogicalKeyboardKey.metaLeft,
+      'mod' => defaultTargetPlatform == TargetPlatform.macOS ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
+      _ => LogicalKeyboardKey.controlLeft,
+    });
+    target = target.substring(m.end);
+  }
+  return (keys, keys.isEmpty ? step : Step(step.kind, target, step.value));
+}
+
+const _pointerSteps = {'tap', 'double-tap', 'long-press', 'right-click', 'hover', 'drag'};
 
 Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetController controller,
     GlobalKey<NavigatorState> navigator, Codelessly codelessly,

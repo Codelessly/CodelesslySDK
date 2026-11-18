@@ -906,7 +906,10 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
         'y': local.dy,
         'globalX': global.dx,
         'globalY': global.dy,
+        // Control or Command (the platform's modifier for "add to"), and
+        // Control alone: a writer reaches for result.ctrl.
         'meta': keys.isMetaPressed || keys.isControlPressed,
+        'ctrl': keys.isControlPressed,
         'shift': keys.isShiftPressed,
         'alt': keys.isAltPressed,
       },
