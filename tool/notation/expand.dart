@@ -126,9 +126,15 @@ Future<void> main(List<String> args) async {
   }
 
   final file = target;
-  final width = double.tryParse(opt('--width') ?? '') ?? 390;
+  // One page of a site is expanded as the whole site's expansion expands it:
+  // its canvas named after its file and 1440 wide (alone it was `screen` at
+  // 390, which the site's render then did not find: test 9, mail).
+  String canonical(String p) => File(p).absolute.path.replaceAll(r'\', '/').toLowerCase();
+  final page = site == null ? null : site.pageSources.where((p) => canonical(p) == canonical(file)).firstOrNull;
+  final pageName = page == null ? null : File(page).uri.pathSegments.last.replaceFirst(RegExp(r'\.txt$'), '');
+  final width = double.tryParse(opt('--width') ?? '') ?? (pageName != null ? 1440 : 390);
   final expander = NotationExpander(site: site, designSystem: ds, settings: settings(width));
-  final result = expander.expand(File(file).readAsStringSync(), path: file, screen: opt('--id') ?? 'screen');
+  final result = expander.expand(File(file).readAsStringSync(), path: file, screen: opt('--id') ?? pageName ?? 'screen');
   for (final (type, r) in expander.failedComponents) {
     stderr.writeln('${site!.sources[type]!.path}: the component $type does not expand cleanly (${r.issues.length} issue${r.issues.length == 1 ? '' : 's'}; first: ${r.issues.first}): expand it alone to see them all.');
   }
@@ -148,7 +154,10 @@ Future<void> main(List<String> args) async {
   }
   final json = const JsonEncoder.withIndent(' ').convert(result.document);
   if (opt('--out') case final out?) {
-    File(out).writeAsStringSync(json);
+    // A folder that is not there yet is made (it was a stack trace).
+    File(out)
+      ..parent.createSync(recursive: true)
+      ..writeAsStringSync(json);
   } else {
     stdout.writeln(json);
   }
