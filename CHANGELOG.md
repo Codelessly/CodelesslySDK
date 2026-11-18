@@ -11,6 +11,8 @@
   Script) else a serif, a named mono (IBM Plex Mono) to Roboto Mono; it was Roboto for all. The `font_fallback`
   warning says which face drew it. The faces are the machine's, so pictures can differ between machines where a site
   names a family it does not ship.
+- **`notation.sh prompt --open`, the site note** says how a theme names its font: `"fontFamily"` (and
+  `"titleFontFamily"`, a text style's own `"fontFamily"`).
 
 ### Fixed
 
