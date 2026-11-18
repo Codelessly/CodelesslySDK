@@ -47,4 +47,16 @@ void main() {
     final args = parseArgs(['doc.json', '--out', 'o', '--tap', 'shift+row#2', '--drag', 'alt+clip=40,0']);
     expect(args.steps.map((s) => '$s'), ['--tap shift+row#2', '--drag alt+clip=40,0']);
   });
+
+  test('--state: one run per state, each with the common arguments, its label and its own steps', () {
+    expect(stateRuns(['doc.json', '--out', 'o']), [
+      ['doc.json', '--out', 'o'],
+    ]);
+    expect(stateRuns(['doc.json', '--out', 'o', '--state', 'empty', '--state', 'added', '--tap', 'add']), [
+      ['doc.json', '--out', 'o', '--label', 'empty'],
+      ['doc.json', '--out', 'o', '--label', 'added', '--tap', 'add'],
+    ]);
+    expect(() => stateRuns(['d', '--state', 'a', '--state', 'a']), throwsFormatException);
+    expect(() => stateRuns(['d', '--label', 'x', '--state', 'a']), throwsFormatException);
+  });
 }

@@ -190,6 +190,10 @@ Options:
                           https://cdn.example.com/art/=assets/art. Repeatable.
   --label <text>          Append -<text> to the PNG names (state screenshots);
                           diagnostics go to diagnostics-<text>.json.
+  --state <label> <steps> One run, several states: each --state starts a state
+                          named <label> (as --label) with the steps after it,
+                          from a fresh start; what comes before the first
+                          --state is every state's. One Flutter start for all.
   --dump-layout           Also write <png>.layout.json: every node's box (x, y, w, h) and the text it shows.
   --component <Type>      Render one component of the site alone: once per preview
                           (at its size), or with --props at each size.
@@ -319,4 +323,28 @@ RenderArgs parseArgs(List<String> argv) {
     now: now,
     imageMap: imageMap,
   );
+}
+
+/// The runs [argv] asks for: itself, or with `--state <label>` one run per
+/// state (what comes before the first `--state` is every state's, then
+/// `--label <label>` and the state's own arguments).
+List<List<String>> stateRuns(List<String> argv) {
+  final first = argv.indexOf('--state');
+  if (first < 0) return [argv];
+  final common = argv.sublist(0, first);
+  if (common.contains('--label')) throw const FormatException('--label and --state do not go together: each state is labelled by its name.');
+  final runs = <List<String>>[];
+  final labels = <String>{};
+  for (var i = first; i < argv.length;) {
+    if (i + 1 >= argv.length || argv[i + 1].startsWith('--')) throw const FormatException('--state needs a name: --state <label> <steps>.');
+    final label = argv[i + 1];
+    if (!labels.add(label)) throw FormatException('Two states are named "$label": each needs its own name.');
+    var end = i + 2;
+    while (end < argv.length && argv[end] != '--state') {
+      end++;
+    }
+    runs.add([...common, '--label', label, ...argv.sublist(i + 2, end)]);
+    i = end;
+  }
+  return runs;
 }

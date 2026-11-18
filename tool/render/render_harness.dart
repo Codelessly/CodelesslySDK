@@ -34,17 +34,38 @@ Future<void> _renderOne(WidgetTester tester, String argsFile) async {
   final lines = File(argsFile).readAsLinesSync();
   final status = File('$argsFile.status');
   if (lines.contains('--sheet')) return _sheetOne(tester, lines, argsFile);
-  final RenderArgs args;
+  // `--state <label> <steps…>`, again for each state: one run (one start of
+  // Flutter, one compile) captures every state, each from a fresh start
+  // with its own steps, as a run with `--label <label>` and those steps
+  // would. What comes before the first `--state` is every state's.
+  final List<List<String>> runs;
   try {
-    args = parseArgs(lines);
+    runs = stateRuns(lines);
   } on FormatException catch (e) {
     File('$argsFile.report').writeAsStringSync('${e.message}\n');
     status.writeAsStringSync('2');
     return;
   }
-  final report = await runRender(tester, args);
-  File('$argsFile.report').writeAsStringSync(formatReport(report));
-  status.writeAsStringSync(report.errors > 0 ? '1' : '0');
+  final reports = StringBuffer();
+  var worst = 0;
+  for (final run in runs) {
+    final RenderArgs args;
+    try {
+      args = parseArgs(run);
+    } on FormatException catch (e) {
+      File('$argsFile.report').writeAsStringSync('$reports${e.message}\n');
+      status.writeAsStringSync('2');
+      return;
+    }
+    final report = await runRender(tester, args);
+    if (runs.length > 1) reports.writeln('== state ${args.label}');
+    reports.write(formatReport(report));
+    if (report.errors > 0) worst = 1;
+    // What a state left for the test to find is that state's.
+    tester.takeException();
+  }
+  File('$argsFile.report').writeAsStringSync('$reports');
+  status.writeAsStringSync('$worst');
 }
 
 /// A contact sheet job (`render.sh --sheet <file.png> --out <dir> [--sheet-height n] [--sheet-columns n]
