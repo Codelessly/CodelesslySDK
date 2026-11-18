@@ -14,6 +14,7 @@ tabs, filter bar, board, card dialog), each at 1440x900, 834x1112 and 390x844.
 |---|---|---|---|
 | Sidebar, 240 | a rail, 64: icons with tooltips, group labels become rules | gone; a menu button in the top bar opens it as a drawer | you write `Sidebar tablet.w=64 hide=phone`; Desk folds Brand, SideButton, NavSection, NavItem, Account; the expander makes the drawer and its button |
 | Sidebar, written with no rule | gone (menu button) | gone (menu button, drawer) | the expander |
+| Sidebar, your own drawer | as you write it | your `Drawer#nav` and your `IconButton "menu" show=phone onTap={open nav}` | you: a page that writes a `Drawer` line, or `App keep`, gets no drawer and no button from the expander |
 | List pane + detail pane (mail) | both, the list 320 | one pane at a time: the list; a tap opens the detail full screen with a back button | you: `Main w=380 tablet.w=320 phone.w=fill phone.visible={!reading}`, `Pane phone.w=fill phone.visible={reading}`, `IconButton "arrow_back" show=phone onTap={reading=false}` |
 | Inspector pane | hidden | hidden, or a full-screen page as the detail above | you: `Pane w=340 hide=tablet` (or the detail pattern) |
 | Top bar (`Nav` in Main) | as is | the menu button at its start; secondary parts hidden | the expander adds the button; you write `hide=phone` on a breadcrumb or an account |
@@ -29,6 +30,16 @@ tabs, filter bar, board, card dialog), each at 1440x900, 834x1112 and 390x844.
 | Dialog | as is | 16 from the screen's edges, the body scrolls, the Actions band at its end | Desk (the scroll), the expander (the insets) |
 | Menu, popover | as is | as is, by what opened it | the expander |
 | Reading width (`maxw=820`) | the pane's width, padded 24 | the screen, padded 16 | you: `tablet.pad=… phone.pad=…` |
+
+## The drawer the expander makes
+
+An `App` whose first pane is a `Sidebar` and that has a `Main` gets, from the expander, a menu button at the start
+of Main's top bar (or a slim bar of its own when Main has none) shown where the sidebar is not, and a drawer that
+repeats the Sidebar's lines. It does so whatever rules the Sidebar line has: with `hide=phone` written or not, a
+phone has no room for the sidebar. The drawer takes the Sidebar's look but none of its rules for one width
+(`tablet.w=64`, `hide=phone` are the rail's), and an item in it that opens a dialog closes the drawer first. To have
+none of this, write your own `Drawer` line on the page, or `App keep` (the window is then as you lay it out at
+every width), or make the reading pane a `Pane` and write no `Main`.
 
 ## The rules, as you write them
 
