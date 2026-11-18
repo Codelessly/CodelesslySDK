@@ -67,7 +67,9 @@ class FieldBorder {
         ? BorderSide.none
         : BorderSide(color: s.color?.flutter ?? const Color(0xFF000000), width: s.width);
     return switch (b.type) {
-      api.InputBorderType.none => none,
+      // No line, its corners kept: they round the field's fill.
+      api.InputBorderType.none =>
+        b.fields.has(api.InputBorderFields.borderRadius) ? FieldBorder(FieldBorderKind.none, BorderSide.none, b.borderRadius.flutter) : none,
       api.InputBorderType.outline => FieldBorder(
         FieldBorderKind.outline,
         side,

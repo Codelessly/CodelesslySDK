@@ -663,7 +663,14 @@ class FieldEditor with TextInputClient, TextSelectionDelegate implements Autofil
       case LogicalKeyboardKey.numpadEnter:
         // Connected, the platform's text input types the new line or sends
         // the action key (an IME may be composing with Enter).
-        if (hasConnection && !primary) return ControlKeyResult.passThrough;
+        // A multi-line field with an action of its own (a composer's send)
+        // takes Enter itself, connected or not: Enter is the action and
+        // Shift+Enter a new line, as a chat's composer does (a platform's
+        // text input sent the action on both, or typed a new line on both).
+        // While an IME composes, Enter is the IME's.
+        final sends = multiline && inputAction != null && inputAction != TextInputAction.newline && inputAction != TextInputAction.none;
+        final composing = _value.composing.isValid && !_value.composing.isCollapsed;
+        if (hasConnection && !primary && !(sends && !composing)) return ControlKeyResult.passThrough;
         if (multiline && (inputAction == null || inputAction == TextInputAction.newline || shift)) {
           if (!readOnly) _replaceSelection('\n');
         } else {

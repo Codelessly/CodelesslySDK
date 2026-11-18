@@ -195,6 +195,23 @@ void main() {
       expect(f.contentRect.center.dy, closeTo(14, .01));
     });
 
+    testWidgets('a pill: no border, its own fill rounded by the border\'s radius (fill=… border=none radius=20)', (tester) async {
+      final f = await _frame(
+          tester,
+          _decoration({
+            'filled': true,
+            'fillColor': '#FFF3F4F6',
+            'border': {'type': 'none', 'borderRadius': 20},
+          }));
+      expect(f.currentBorder.kind, FieldBorderKind.none);
+      expect(f.fillNow, const Color(0xFFF3F4F6));
+      expect(f.boxShape.tlRadiusX, 20, reason: 'the border\'s radius, not the step\'s 7');
+      // Bare: no border and no fill.
+      final bare = await _frame(tester, _decoration({'filled': false, 'border': {'type': 'none'}}));
+      expect(bare.currentBorder.kind, FieldBorderKind.none);
+      expect(bare.fillNow, isNull);
+    });
+
     testWidgets('its label sits above the box, never inside it, in SSUI\'s field label', (tester) async {
       final f = await _frame(tester, _decoration({'labelText': 'Email', 'hintText': 'name@company.com'}));
       expect(f.labelRect.bottom + kFieldLabelGap, closeTo(f.boxRect.top, .01));
@@ -489,6 +506,90 @@ void main() {
       await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pump();
       expect(recorded.fired.where((e) => e == 'name submitted'), hasLength(2));
+    });
+
+    testWidgets('a composer (multi-line, action send) takes Enter itself: Enter sends and keeps the focus, Shift+Enter breaks the line',
+        (tester) async {
+      final (tree, recorded) = await _show(tester, {
+        'draft': hugging('textField', {'minLines': 1, 'maxLines': 6, 'textInputAction': 'send'}),
+      });
+      final f = await _focus(tester, tree, 'draft');
+      tester.testTextInput.enterText('hello');
+      await tester.pump();
+      final height = f.size.height;
+      // Connected to the platform's text input, the field still takes the key.
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      final newline = await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.pump();
+      expect(newline, isTrue);
+      expect(f.editor.text, 'hello\n');
+      expect(recorded.fired, isNot(contains('draft submitted')));
+      // It grew by a line.
+      expect(f.size.height, greaterThan(height));
+      final sent = await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(sent, isTrue);
+      expect(recorded.fired.where((e) => e == 'draft submitted'), hasLength(1));
+      expect(f.editor.text, 'hello\n');
+      expect(f.focusNode.hasFocus, isTrue);
+    });
+
+    testWidgets('a box around the field with a focused look is focused while the field is (a composer\'s frame, :focus-within)',
+        (tester) async {
+      final (tree, _) = runningTree({
+        'schema': 3,
+        'id': 'doc',
+        'roots': ['col'],
+        'nodes': {
+          'col': {
+            'type': 'column',
+            'layout': {'width': 400, 'height': 300},
+            'children': ['frame', 'other'],
+          },
+          'frame': {
+            'type': 'row',
+            'layout': {'width': {'fill': 0}, 'height': {'hug': 0}, 'padding': 7},
+            'decoration': {
+              'radius': 12,
+              'strokes': [
+                {'color': '#FFDDD6E3'},
+              ],
+            },
+            'states': {
+              'focused': {
+                'frame': {
+                  'decoration': {
+                    'strokes': [
+                      {'color': '#FF7750B9'},
+                    ],
+                  },
+                },
+              },
+            },
+            'children': ['draft'],
+          },
+          'draft': hugging('textField', {'minLines': 1, 'maxLines': 6}),
+          'other': hugging('textField'),
+        },
+      });
+      addTearDown(tree.dispose);
+      await tester.pumpWidget(NodeView(tree: tree, rootId: 'col', interactive: true));
+      expect(tree.statesOf('frame'), isNot(contains(api.WidgetState.focused)));
+      await _focus(tester, tree, 'draft');
+      await tester.pump();
+      expect(tree.statesOf('frame'), contains(api.WidgetState.focused));
+      await _focus(tester, tree, 'other');
+      await tester.pump();
+      expect(tree.statesOf('frame'), isNot(contains(api.WidgetState.focused)));
+    });
+
+    testWidgets('a text area (multi-line, no action) leaves Enter to the platform, which types the new line', (tester) async {
+      final (tree, recorded) = await _show(tester, {'note': hugging('textField', {'minLines': 3, 'maxLines': 6})});
+      await _focus(tester, tree, 'note');
+      expect(await tester.sendKeyEvent(LogicalKeyboardKey.enter), isFalse);
+      await tester.pump();
+      expect(recorded.fired, isNot(contains('note submitted')));
     });
 
     testWidgets('textInputAction next moves the focus to the next control', (tester) async {
