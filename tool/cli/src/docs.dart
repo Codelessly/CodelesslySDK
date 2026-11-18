@@ -161,6 +161,30 @@ class Reference {
         scored[key] = (score: score, kind: kind, label: label, file: file, anchor: anchor);
       }
     }
+    // No name, topic or need has the words: the sections whose text does (a
+    // key or a word of the notation said only in a table or an example).
+    if (scored.isEmpty) {
+      final marker = RegExp(r'^<a id="([^"]+)"></a>$');
+      for (final file in {...anchors.values}) {
+        String? anchor;
+        for (final line in lines(file)) {
+          final m = marker.firstMatch(line.trim());
+          if (m != null) {
+            anchor = m[1];
+            continue;
+          }
+          if (anchor == null) continue;
+          final hay = line.toLowerCase();
+          final hits = terms.where(hay.contains).length;
+          if (hits == 0) continue;
+          final key = '$file#$anchor';
+          final before = scored[key];
+          // Every term on one line counts most; then how many lines say them.
+          final score = (before?.score ?? 0) + (hits == terms.length ? 1.0 : 0.2 * hits);
+          scored[key] = (score: score, kind: 'text', label: anchor.replaceAll('-', ' '), file: file, anchor: anchor);
+        }
+      }
+    }
     final ranked = scored.values.toList()..sort((a, b) => b.score.compareTo(a.score));
     return ranked.take(limit).toList();
   }
