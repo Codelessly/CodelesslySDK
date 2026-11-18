@@ -47,7 +47,7 @@ Page
         Card gap=12
           Heading "Subscribe to updates" level=3
           Text.muted "Get release notes in your inbox. No spam."
-          Input "Email" "you@example.com" bind=email type={email}
+          Input "Email" "you@example.com" @email type={email}
           Button "Subscribe" w=fill onTap={emit subscribe email; toast "Thanks, you are subscribed"}
         Card gap=12
           Heading "Latest versions" level=3

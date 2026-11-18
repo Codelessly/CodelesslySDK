@@ -16,7 +16,7 @@ App
     NavItem "Match" icon="sports_soccer" onTap={go match}
     Spacer grow
     Text.muted "Following"
-    Select bind=followed items=["Brazil","Japan","France","Morocco","Argentina","Australia","England","Senegal","Spain","USA","Portugal","Korea","Germany","Mexico","Netherlands","Croatia"]
+    Select @followed items=["Brazil","Japan","France","Morocco","Argentina","Australia","England","Senegal","Spain","USA","Portugal","Korea","Germany","Mexico","Netherlands","Croatia"]
   Main
     Nav
       Heading "World Cup knockout stage"
@@ -50,8 +50,8 @@ App
               Text.strong "Champion: {w[14]}"
 Dialog#score "Enter score" "Extra time and penalties count as the final score"
   Row gap=12
-    Input "Home" bind=da type=number
-    Input "Away" bind=db type=number
+    Input "Home" @da type=number
+    Input "Away" @db type=number
   Row end gap=8
     Button.ghost "Cancel" onTap={close}
     Button "Save" onTap={da == "" || db == "" || da == db ? toast "Enter a score with a winner" : {sc=setAt(sc,sel,{"sa":da,"sb":db}); w=setAt(w,sel,da > db ? (sel<8 ? teams[sel*2] : (sel<12 ? w[(sel-8)*2] : (sel<14 ? w[8+(sel-12)*2] : w[12]))) : (sel<8 ? teams[sel*2+1] : (sel<12 ? w[(sel-8)*2+1] : (sel<14 ? w[9+(sel-12)*2] : w[13])))); close}}
@@ -87,7 +87,7 @@ App
   Main
     Nav
       Heading "Group stage"
-      SegmentedButton bind=group items=["A","B"]
+      SegmentedButton @group items=["A","B"]
     Column pad=24 gap=16 scroll
       Card gap=8
         Text.strong "Group {group}"
@@ -160,7 +160,7 @@ App
           Button.outline "Home goal" onTap={home=home+1; events=append(events,{"min":minute,"team":"home","kind":"goal","who":"Brazil"})}
           Button.outline "Away goal" onTap={away=away+1; events=append(events,{"min":minute,"team":"away","kind":"goal","who":"Japan"})}
           Button.ghost "{running ? "Pause" : "Resume"}" onTap={running=!running}
-      SegmentedButton bind=tab items=["events","lineups"]
+      SegmentedButton @tab items=["events","lineups"]
       if tab=="events"
         Card gap=8
           Text.strong "Match events"

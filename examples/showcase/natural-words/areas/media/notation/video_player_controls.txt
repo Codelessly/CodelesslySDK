@@ -16,13 +16,13 @@ Card gap=0 pad=0 maxw=640
       Text.title "Intro to Sourdough - Episode 2"
       Text.caption "14:32"
     Stack
-      Progress bind=buffered
-      Slider bind=pos min=0 max=872
+      Progress value={buffered}
+      Slider @pos min=0 max=872
     Row gap=8 center
       IconButton "{playing?'pause':'play_arrow'}" onTap={playing=!playing}
       Text.small "{duration(pos)} / {duration(872)}"
       Spacer grow
       IconButton "{volume==0?'volume_off':'volume_up'}" onTap={volume=volume==0?70:0}
-      Slider bind=volume min=0 max=100 w=90
+      Slider @volume min=0 max=100 w=90
       IconButton "{cc?'closed_caption':'closed_caption_off'}" onTap={cc=!cc}
       IconButton "{full?'fullscreen_exit':'fullscreen'}" onTap={full=!full; emit fullscreen full}

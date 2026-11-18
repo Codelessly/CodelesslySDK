@@ -8,6 +8,7 @@ state coolLeft=14400
 state running=true
 state limit=1240
 state selPoint=3
+state pointTemp=20
 every 1s when status=="cooling"
   onTick={coolLeft=max(0,coolLeft-1)}
 every 5s when running
@@ -24,7 +25,7 @@ App
     Nav
       Heading "Glaze firing" level=1
       Row gap=8
-        Select bind=preset items=["Bisque cone 04","Glaze cone 6","Crystalline cone 10"] onChange={points=result=="Bisque cone 04" ? [{"h":0,"t":20},{"h":4,"t":600},{"h":8,"t":1060},{"h":9,"t":1060}] : (result=="Crystalline cone 10" ? [{"h":0,"t":20},{"h":4,"t":900},{"h":7,"t":1280},{"h":9,"t":1280},{"h":10,"t":1100},{"h":14,"t":1100}] : [{"h":0,"t":20},{"h":3,"t":600},{"h":6,"t":1000},{"h":8,"t":1222},{"h":8.25,"t":1222},{"h":12,"t":700}]); toast "Preset loaded"}
+        Select @preset items=["Bisque cone 04","Glaze cone 6","Crystalline cone 10"] onChange={points=result=="Bisque cone 04" ? [{"h":0,"t":20},{"h":4,"t":600},{"h":8,"t":1060},{"h":9,"t":1060}] : (result=="Crystalline cone 10" ? [{"h":0,"t":20},{"h":4,"t":900},{"h":7,"t":1280},{"h":9,"t":1280},{"h":10,"t":1100},{"h":14,"t":1100}] : [{"h":0,"t":20},{"h":3,"t":600},{"h":6,"t":1000},{"h":8,"t":1222},{"h":8.25,"t":1222},{"h":12,"t":700}]); toast "Preset loaded"}
         Button "Start firing" onTap={running=true; status="climbing"; emit startFiring preset}
     Column pad=24 gap=16
       if max(map(points,p=>p.t))>limit
@@ -56,12 +57,12 @@ App
           Row gap=8
             Chip "plan"
             Chip "actual"
-        CurveEditor bind=points actual=actual h=280 unit="C" selected=selPoint onSelect={selPoint=result}
+        CurveEditor @points actual=actual h=280 unit="C" selected=selPoint onSelect={selPoint=result}
         if selPoint>=0
           Row gap=12 middle
             Text.strong "Point {selPoint+1}"
             Text.muted "hour {points[selPoint].h}"
-            Slider bind=pointTemp min=20 max=1300
+            Slider @pointTemp min=20 max=1300
             Button.outline "Set {points[selPoint].t} C" onTap={points=setAt(points,selPoint,with(points[selPoint],"t",clamp(points[selPoint].t+10,20,1300)))}
             Button.ghost "Remove" onTap={points=removeAt(points,selPoint); selPoint=0}
         Row gap=8
@@ -72,6 +73,8 @@ App
 state pieces=[{"id":1,"name":"Tall vase","clay":"Stoneware","glaze":"Celadon","shelf":2},{"id":2,"name":"Dinner plates (4)","clay":"Porcelain","glaze":"Satin white","shelf":1},{"id":3,"name":"Mugs (6)","clay":"Stoneware","glaze":"Tenmoku","shelf":1}]
 state clay="Stoneware"
 state sel=0
+state newName=""
+state newGlaze=""
 App
   Sidebar
     Brand "Cone Ten" icon="local_fire_department"
@@ -102,9 +105,9 @@ App
     MenuItem "Move to top shelf" icon="vertical_align_top" onTap={pieces=updateWhere(pieces,p=>p.id==sel,p=>with(p,"shelf",1))}
     MenuItem "Remove" icon="delete" onTap={pieces=removeWhere(pieces,p=>p.id==sel); toast "Removed"}
   Dialog#addPiece "Add a piece" "It goes on the next free spot"
-    Input "Name" bind=newName
-    Select bind=clay items=["Stoneware","Porcelain","Earthenware","Raku"]
-    Input "Glaze" bind=newGlaze
+    Input "Name" @newName
+    Select @clay items=["Stoneware","Porcelain","Earthenware","Raku"]
+    Input "Glaze" @newGlaze
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Add" onTap={newName!="" ? {pieces=append(pieces,{"id":length(pieces)+10,"name":newName,"clay":clay,"glaze":newGlaze,"shelf":1}); newName=""; newGlaze=""; close} : toast "Give the piece a name"}
@@ -123,7 +126,7 @@ App
       Heading "Firing notes" level=1
     Column pad=24 gap=16
       Card gap=8
-        Input "New note" "What did you see?" bind=draft multiline
+        Input "New note" "What did you see?" @draft multiline
         Row end
           Button "Add note" onTap={draft!="" ? {notes=prepend(notes,draft); draft=""; toast "Note saved"} : toast "Write something first"}
       each n in reverse(notes)
@@ -134,7 +137,7 @@ App
           Text "{n.text}"
 
 // A draggable temperature curve cannot be drawn on a canvas here; it shows the plan as a line, the real firing as a second line, and each point as a tappable chip.
-define CurveEditor bind=points actual=[] h=240 unit="C" selected=0 onSelect
+define CurveEditor @points actual=[] h=240 unit="C" selected=0 onSelect
   Column gap=8
     LineChart labels={map(points,p=>p.h)} series=[{"name":"Plan","values":map(points,p=>p.t)},{"name":"Actual","values":actual}] h={h}
     Row scroll gap=8

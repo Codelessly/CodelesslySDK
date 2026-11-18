@@ -69,6 +69,15 @@
     },
     "default": false,
     "doc": "An x that fires onDismiss."
+   },
+   {
+    "key": "live",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Its title and message are read out by a screen reader when they change (a status that updates)."
    }
   ],
   "events": [
@@ -202,7 +211,8 @@
     }
    },
    "bind": {
-    "visible": "${= props.title != ''}"
+    "visible": "${= props.title != ''}",
+    "props.live": "${props.live}"
    }
   },
   "message": {
@@ -221,6 +231,9 @@
     "height": {
      "hug": 19
     }
+   },
+   "bind": {
+    "props.live": "${props.live}"
    }
   },
   "actions": {

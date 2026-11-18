@@ -1,3 +1,4 @@
+state section=""
 Column scroll was not needed; the window is a Row of sidebar and content.
 
 state query=""
@@ -10,7 +11,7 @@ state picked=[2,4,5]
 state rows=[{"id":1,"name":"Maya Reyes","company":"Northwind Traders","status":"Active","plan":"Business","mrr":1200,"seen":"2 hours ago","mine":true},{"id":2,"name":"Daniel Okafor","company":"Brightside Dental","status":"Active","plan":"Pro","mrr":480,"seen":"Today","mine":false},{"id":3,"name":"Priya Nair","company":"Lumen Studio","status":"Trial","plan":"Pro","mrr":0,"seen":"Yesterday","mine":true},{"id":4,"name":"Tomas Berg","company":"Fjord Logistics","status":"Churned","plan":"Starter","mrr":0,"seen":"3 weeks ago","mine":false},{"id":5,"name":"Chloe Martin","company":"Atelier Martin","status":"Active","plan":"Starter","mrr":79,"seen":"5 hours ago","mine":true},{"id":6,"name":"Kenji Watanabe","company":"Harbor Coffee Co.","status":"Trial","plan":"Business","mrr":0,"seen":"2 days ago","mine":false},{"id":7,"name":"Sofia Alvarez","company":"Verde Landscaping","status":"Active","plan":"Pro","mrr":480,"seen":"Today","mine":true},{"id":8,"name":"Liam O'Connor","company":"Copperline Plumbing","status":"Churned","plan":"Pro","mrr":0,"seen":"2 months ago","mine":false},{"id":9,"name":"Amara Diallo","company":"Sahel Textiles","status":"Active","plan":"Business","mrr":1650,"seen":"Yesterday","mine":false},{"id":10,"name":"Erik Lindqvist","company":"Nordic Bikes","status":"Trial","plan":"Starter","mrr":0,"seen":"4 days ago","mine":true}]
 
 Row h=fill
-  Sidebar bind=section brand="Fieldbook" sectionLabel="Workspace" items=["Dashboard","Customers","Deals","Tasks","Reports"] icons=["dashboard","people","handshake","check_circle","bar_chart"] badges=["","248","12","5",""] w=240
+  Sidebar @section brand="Fieldbook" sectionLabel="Workspace" items=["Dashboard","Customers","Deals","Tasks","Reports"] icons=["dashboard","people","handshake","check_circle","bar_chart"] badges=["","248","12","5",""] w=240
   Column grow gap=16 pad=24 fill=#FFF6F7F9
     Row between center
       Row gap=12 center
@@ -20,10 +21,10 @@ Row h=fill
         Button.outline "Import" onTap={emit import}
         Button "Add customer" onTap={emit add}
     Row gap=12 center
-      SearchBar "Search customers" bind=query w=320
-      Select bind=status items=["All","Active","Trial","Churned"] w=140
+      SearchBar "Search customers" @query w=320
+      Select @status items=["All","Active","Trial","Churned"] w=140
       Spacer grow
-      SegmentedControl bind=view options=["All","Mine"]
+      SegmentedControl @view options=["All","Mine"]
     if length(picked)>0
       Row between center pad=[16,10,16,10] fill=#FFE8F0FE radius=8
         Text.strong "{length(picked)} selected"

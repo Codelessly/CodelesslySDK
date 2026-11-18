@@ -6,7 +6,7 @@
   ],
   "widget": {
     "type": "BeforeAfter",
-    "doc": "A draggable before/after image wipe with two drawn Media scenes: BeforeAfter bind=position kind=\"skyline\" before=\"dawn\" after=\"dusk\" height=500. The slider changes the visible share continuously.",
+    "doc": "A draggable before/after image wipe with two drawn Media scenes: BeforeAfter @position kind=\"skyline\" before=\"dawn\" after=\"dusk\" height=500. The slider changes the visible share continuously.",
     "props": [
       {
         "key": "value",

@@ -154,8 +154,16 @@
    },
    "bind": {
     "props.options": "${slots}",
-    "props.disabled": "${= (filter(slots,s=>(indexOf(slots,s)+indexOf(days,day)*2+(party>4?1:0))%3==0||(party>6&&indexOf(slots,s)>4)))}",
+    "disabled": "${= (filter(slots,s=>(indexOf(slots,s)+indexOf(days,day)*2+(party>4?1:0))%3==0||(party>6&&indexOf(slots,s)>4)))}",
     "visible": "${= !booked}"
+   },
+   "states": {
+    "disabled": {
+     "slots": {
+      "opacity": 0.5,
+      "ignorePointer": true
+     }
+    }
    }
   },
   "confirm": {
@@ -228,7 +236,7 @@
    },
    {
     "name": "party",
-    "type": "integer",
+    "type": "decimal",
     "value": 2
    },
    {

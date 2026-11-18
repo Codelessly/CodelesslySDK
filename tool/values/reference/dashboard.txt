@@ -5,7 +5,7 @@ state periods=[{"name":"7 days","revenue":"$18.4k","revenueD":"+4.1%","signups":
 state d=find(periods,p=>p.name==range)
 state plans=[{"plan":"Pro","subs":1340,"revenue":38900,"churn":2.1},{"plan":"Team","subs":412,"revenue":24700,"churn":1.4},{"plan":"Starter","subs":2980,"revenue":8900,"churn":5.2},{"plan":"Business","subs":96,"revenue":4800,"churn":0.9},{"plan":"Student","subs":640,"revenue":1600,"churn":6.8}]
 ChatCard "Product performance" "November so far" icon="insights_rounded" status="Live" tone="good"
-  Segments#range bind=range options=["7 days","30 days","90 days"]
+  Segments#range @range options=["7 days","30 days","90 days"]
   Grid cols=2 gap=10
     StatTile "Revenue" value="{d.revenue}" delta="{d.revenueD}" icon="payments_rounded"
     StatTile "Sign-ups" value="{d.signups}" delta="{d.signupsD}" icon="person_add_rounded"
@@ -14,6 +14,6 @@ ChatCard "Product performance" "November so far" icon="insights_rounded" status=
   ChartCard "Revenue" value="{d.revenue}" delta="{d.revenueD}" values={d.trend} labels={d.days} kind="line"
   ChartCard "Sign-ups by channel" value="{d.signups}" values={d.channels} labels=["Organic","Paid","Referral","Social","Email"] kind="bars"
   SectionLabel "Top plans" "Tap a column to sort"
-  TableHeader#head bind=sort desc={desc} columns=["Plan","Subs","Revenue","Churn"] keys=["plan","subs","revenue","churn"]
+  TableHeader#head @sort desc=@desc columns=["Plan","Subs","Revenue","Churn"] keys=["plan","subs","revenue","churn"]
   each p in desc?sortByDesc(plans,sort):sortBy(plans,sort)
     TableRow cells={[p.plan,thousands(p.subs),money(p.revenue,"$",0),p.churn+"%"]}

@@ -1,5 +1,5 @@
-// Where one is in named steps (the number control is Cards' Stepper component, the word's first meaning): each step numbered, done ones checked (done=[…] or before the current), the current one lit; a tap picks one. bind keeps the current step's index; current= shows one without keeping it.
-Stepper#steps steps=[] bind=step current done=[] orientation="horizontal" onPick
+// Where one is in named steps (the number control is Cards' Stepper component, the word's first meaning): each step numbered, done ones checked (done=[…] or before the current), the current one lit; a tap picks one. The variable bound (@step) keeps the current step's index; current= shows one without keeping it.
+Stepper#steps steps=[] @step current done=[] orientation="horizontal" onPick
   state step=0
   Column w=fill gap=4
     if orientation == "vertical"

@@ -19,7 +19,7 @@ App
   Pane w=340 gap=0 border-right=#FFE5E7EB
     Column pad=12 gap=8
       Heading "Inbox" level=3
-      Input "Search conversations" bind=q
+      Input "Search conversations" @q
     Divider
     Column scroll gap=0
       each c in convs
@@ -69,7 +69,7 @@ App
           Box fill=#FFF3F4F6 radius=12 pad=12
             Text "Thanks, I attached photos of the dent on the lid and the label."
       Card gap=12
-        Input "Reply to Tomás" "Write your reply…" bind=reply multiline
+        Input "Reply to Tomás" "Write your reply…" @reply multiline
         Row end gap=8
           Button.outline "Send and close" onTap={emit sendClose reply; reply=""; toast "Sent and closed"}
           Button "Send" onTap={emit send reply; reply=""; toast "Reply sent"}

@@ -9,7 +9,7 @@ Column w=390 h=fill
         Text.muted "Total balance"
         Row gap=8 middle
           Text.small "Hide"
-          Toggle bind=hidden
+          Toggle @hidden
       Text.pageTitle "{hidden ? '$ ••••••' : money(sum(accounts,a=>a.balance),'$',2)}" size=38 weight=700
       Text.success "+$320.40 this month"
     Row scroll gap=12

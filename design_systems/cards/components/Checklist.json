@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "Checklist",
-  "doc": "A titled list of things to tick off: Checklist \"Book ahead\" bind=booked items=[\"Dinner in Gion\",\"Tea ceremony\"] keeps the ticked items in your list variable, so what is left is length(items)-length(booked); it shows its own count.",
+  "doc": "A titled list of things to tick off: Checklist \"Book ahead\" @booked items=[\"Dinner in Gion\",\"Tea ceremony\"] keeps the ticked items in your list variable, so what is left is length(items)-length(booked); it shows its own count.",
   "props": [
    {
     "key": "value",

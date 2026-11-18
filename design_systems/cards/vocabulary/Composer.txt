@@ -1,7 +1,7 @@
-// Where a chat's message is written: a field, an attach button and a send button (onSend: result is the text).
-Composer bind=draft hint="Write a message" onSend
+// Where a chat's message is written: a field, an attach button and a send button (onSend: result is the text). Enter sends; Shift+Enter starts a new line.
+Composer @draft hint="Write a message" onSend
   state draft=""
   Row w=fill gap=8 pad=[12,8,12,8] middle border-top=line
     IconButton "attach_file"
-    Input bind=draft hint={hint} grow onSubmit={onSend(draft); draft=""}
+    Input @draft hint={hint} grow lines=4 onSubmit={onSend(draft); draft=""} {"props": {"textInputAction": "send"}}
     IconButton "send" onTap={onSend(draft); draft=""}

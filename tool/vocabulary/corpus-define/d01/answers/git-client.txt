@@ -41,7 +41,7 @@ App
         each f in files
           FileRow "{f.name}" status={f.status} add={f.add} del={f.del} onTap={go changes}
 Dialog#pushing "Pushing to origin/main" "3 commits, 14 objects"
-  Progress bind=progress
+  Progress value={progress}
   Text.muted "{round(progress*100,0)}% - compressing and writing objects"
   Button.outline "Cancel" onTap={pushing=false; close}
 
@@ -60,7 +60,7 @@ App
       Column
         Heading "Changes" level=1
         Text.muted "{length(unstaged)} unstaged, {length(staged)} staged"
-      SegmentedButton bind=mode items=["split","inline"]
+      SegmentedButton @mode items=["split","inline"]
     Row top
       Pane w=300 pad=12 gap=8
         Row between
@@ -95,8 +95,8 @@ App
         Row between middle
           Text.strong "Commit to main"
           Text.caption color={length(summary)>72 ? "#FFDC2626" : "#FF6B7280"} "{length(summary)}/72"
-        Input "Summary" bind=summary
-        Input "Description" bind=body multiline
+        Input "Summary" @summary
+        Input "Description" @body multiline
         Row between middle
           Text.muted "{length(staged)} staged files"
           Button "Commit" disabled={length(summary)==0 || length(summary)>72 || length(staged)==0} onTap={toast "Committed {summary}"; summary=""; body=""; staged=[]}

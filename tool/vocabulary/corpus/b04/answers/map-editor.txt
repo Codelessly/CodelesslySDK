@@ -17,7 +17,7 @@ App
     Text.caption "LAYERS"
     each l in layers
       Row between middle
-        Toggle "{l.name}" bind=l.on
+        Toggle "{l.name}" @l.on
         Badge.neutral "{l.count}"
     Divider
     Text.caption "FEATURES"
@@ -29,12 +29,12 @@ App
     Nav
       Heading "Harbor Survey 2026" level=1
       Row gap=12 middle
-        SegmentedButton bind=tool items=["select","marker","line","area"]
+        SegmentedButton @tool items=["select","marker","line","area"]
         Button.outline "Measure" icon="straighten" onTap={tool="measure"; measuring=[]}
-        Toggle "Snap" bind=snap
+        Toggle "Snap" @snap
         IconButton "undo" tooltip="Undo" onTap={emit undo}
         IconButton "redo" tooltip="Redo" onTap={emit redo}
-    MapCanvas bind=features layers={layers} tool={tool} snap={snap} selected={sel} zoom={zoom} grow
+    MapCanvas @features layers={layers} tool={tool} snap={snap} selected={sel} zoom={zoom} grow
       onCursor={lat=result.lat; lng=result.lng}
       onSelect={sel=result.id}
       onAdd={features=append(features,result)}
@@ -59,18 +59,18 @@ App
       Text.muted "Select a feature on the map to edit it."
     if sel!=""
       each f in filter(features,x=>x.id==sel)
-        Input "Name" bind=f.name
-        Input "Notes" bind=f.note multiline
-        Select "Layer" bind=f.layer items=["parcels","trails","sites","water"]
+        Input "Name" @f.name
+        Input "Notes" @f.note multiline
+        Select "Layer" @f.layer items=["parcels","trails","sites","water"]
         Divider
         Text.fieldLabel "Stroke"
         Row gap=8
-          ColorPicker bind=f.stroke
-          Slider bind=f.width min=1 max=12
+          ColorPicker @f.stroke
+          Slider @f.width min=1 max=12
         Text.fieldLabel "Fill"
-        ColorPicker bind=f.fill
+        ColorPicker @f.fill
         Text.fieldLabel "Icon"
-        IconPicker bind=f.icon items=["place","flag","hiking","water_drop","home","warning"]
+        IconPicker @f.icon items=["place","flag","hiking","water_drop","home","warning"]
         Divider
         Text.muted "{length(f.coords)} vertices. Drag a vertex on the map to reshape."
         Row gap=8
@@ -110,17 +110,17 @@ Page
           Text.muted "GeoJSON, KML, Shapefile (zip) or CSV with coordinates."
           FileDrop "Drop a file here" accept=[".geojson",".kml",".zip",".csv"] onPick={fileName=result.name}
           Text "Selected: {fileName}"
-          Select "Target layer" bind=targetLayer items=["parcels","trails","sites","water"]
-          Toggle "First row is a header" bind=skipHeader
+          Select "Target layer" @targetLayer items=["parcels","trails","sites","water"]
+          Toggle "First row is a header" @skipHeader
           Row end
             Button "Next" onTap={step=2}
       if step==2
         Card gap=12
           Text.strong "Match columns to fields"
-          Select "Feature name" bind=mapName items={columns}
-          Select "Latitude" bind=mapLat items={columns}
-          Select "Longitude" bind=mapLng items={columns}
-          Select "Layer / category" bind=mapLayer items={columns}
+          Select "Feature name" @mapName items={columns}
+          Select "Latitude" @mapLat items={columns}
+          Select "Longitude" @mapLng items={columns}
+          Select "Layer / category" @mapLayer items={columns}
           Text.caption "Preview"
           Row scroll
             Table rows={preview} columns={columns}
@@ -152,8 +152,8 @@ App
     Nav
       Heading "Features" level=1
       Row gap=8
-        Input "Search" bind=q w=220
-        Select "Layer" bind=layerFilter items=["all","parcels","trails","sites","water"]
+        Input "Search" @q w=220
+        Select "Layer" @layerFilter items=["all","parcels","trails","sites","water"]
         Button.outline "Export GeoJSON" icon="download" onTap={emit export}
     Column pad=24 gap=16
       Card gap=8

@@ -22,7 +22,7 @@ App
     Nav
       Heading "Weekend sign-up sheet" level=1
       Row gap=8
-        Select bind=remind items=["None","1 hour before","1 day before","Both"] tooltip="Reminder before a shift"
+        Select @remind items=["None","1 hour before","1 day before","Both"] tooltip="Reminder before a shift"
         Button.outline "My shifts" icon="checklist" onTap={tab="mine"}
     Column pad=24 gap=16
       Row gap=16 middle
@@ -51,8 +51,8 @@ App
                 Badge.success "{s.need-length(s.names)} open"
   Dialog#join "Add your name" "Tell the organiser anything useful"
     Text.strong "{find(shifts,x=>x.id==pick).role}, {find(shifts,x=>x.id==pick).day}"
-    Input "Your name" bind=me
-    Input "Note" "Allergies, can drive, bringing a friend" bind=note multiline
+    Input "Your name" @me
+    Input "Note" "Allergies, can drive, bringing a friend" @note multiline
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Sign me up" onTap={isEmpty(trim(me)) ? toast "Add your name" : {shifts=updateWhere(shifts,x=>x.id==pick,x=>with(x,"names",append(x.names,me))); mine=append(mine,{"id":pick,"day":find(shifts,x=>x.id==pick).day,"time":find(shifts,x=>x.id==pick).time,"role":find(shifts,x=>x.id==pick).role,"note":note}); toast "You are in. Reminder: {remind}"; close}}
@@ -87,9 +87,9 @@ Page
           Column gap=2
             Text.strong "Reminder before each shift"
             Text.muted "We message you {remind}"
-          Toggle bind=remindOn
+          Toggle @remindOn
         if remindOn
-          Select "Remind me" bind=remind items=["1 hour before","3 hours before","1 day before"]
+          Select "Remind me" @remind items=["1 hour before","3 hours before","1 day before"]
       if isEmpty(mine)
         EmptyState "No shifts yet" "Pick one on the sign-up sheet" icon="event_busy"
       each m in mine
@@ -176,21 +176,21 @@ App
     MenuItem "Message this shift" icon="mail" onTap={open message}
     MenuItem "Delete shift" icon="delete" onTap={shifts=removeWhere(shifts,x=>x.id==sel); toast "Shift deleted"}
   Dialog#addshifts "Add shifts" "Copy a whole day, or add a single shift"
-    Select "Copy shifts from" bind=copyDay items=["Fri 14","Sat 15","Sun 16"]
-    Input "New day" bind=newDay
+    Select "Copy shifts from" @copyDay items=["Fri 14","Sat 15","Sun 16"]
+    Input "New day" @newDay
     Text.muted "{count(shifts,x=>x.day==copyDay)} shifts will be copied to {newDay}"
     Divider
-    Input "Role" bind=newRole
-    Input "Time" bind=newTime
-    Input "Volunteers needed" bind=newCount type=number
+    Input "Role" @newRole
+    Input "Time" @newTime
+    Input "Volunteers needed" @newCount type=number
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button.outline "Copy day" onTap={shifts=concat(shifts,map(filter(shifts,x=>x.day==copyDay),x=>with(with(with(x,"id",concat(x.id,newDay)),"day",newDay),"names",[]))); toast "Day copied"; close}
       Button "Add shift" onTap={shifts=append(shifts,{"id":concat("n",newDay),"day":newDay,"time":newTime,"role":newRole,"need":newCount,"names":[],"wait":[]}); toast "Shift added"; close}
   Dialog#message "Message all volunteers" "Goes to everyone signed up"
-    Select "Template" bind=template items=["Custom","Reminder","Thank you","We need more people"] onChange={template=="Reminder" ? {subject="See you this weekend"; body="Hi all, a reminder that your shift starts soon. Please arrive ten minutes early."} : template=="Thank you" ? {subject="Thank you"; body="Thank you for giving your time. It made a real difference."} : template=="We need more people" ? {subject="Can you bring a friend?"; body="We still have {sum(shifts,x=>max(0,x.need-length(x.names)))} open spots. Please share the sheet."} : {subject=""; body=""}}
-    Input "Subject" bind=subject
-    Input "Message" bind=body multiline
+    Select "Template" @template items=["Custom","Reminder","Thank you","We need more people"] onChange={template=="Reminder" ? {subject="See you this weekend"; body="Hi all, a reminder that your shift starts soon. Please arrive ten minutes early."} : template=="Thank you" ? {subject="Thank you"; body="Thank you for giving your time. It made a real difference."} : template=="We need more people" ? {subject="Can you bring a friend?"; body="We still have {sum(shifts,x=>max(0,x.need-length(x.names)))} open spots. Please share the sheet."} : {subject=""; body=""}}
+    Input "Subject" @subject
+    Input "Message" @body multiline
     Text.muted "To: {sum(shifts,x=>length(x.names))} volunteers"
     Row end gap=8
       Button.ghost "Cancel" onTap={close}

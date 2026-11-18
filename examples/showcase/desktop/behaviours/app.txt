@@ -1,5 +1,6 @@
 // An app whose Sidebar opens as a drawer on a phone: render at 390x844 with --tap iconButton1.
 state tab="orders"
+state q=""
 App
   Sidebar
     Brand "Harbor" icon="anchor"
@@ -12,7 +13,7 @@ App
     Nav
       Heading "{tab}" level=1
       Row gap=8
-        Input "Search" bind=q w=220
+        Input "Search" @q w=220
         Button "New order" onTap={emit newOrder}
     Column pad=24 gap=16
       Card gap=8

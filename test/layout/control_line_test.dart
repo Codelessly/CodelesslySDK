@@ -34,25 +34,25 @@ typedef Case = ({String name, List<String> lines, Rect Function(WidgetTester) co
 Rect _node(WidgetTester t, String id) => rectOf(t, id);
 
 final List<Case> fields = [
-  (name: 'a labelled field', lines: ['Input#f "Label" bind=v grow'], control: (t) => fieldBoxOf(t, 'f'), designSystem: null),
-  (name: 'a field with a hint only', lines: ['Input#f hint="Type here" bind=v grow'], control: (t) => fieldBoxOf(t, 'f'), designSystem: null),
+  (name: 'a labelled field', lines: ['Input#f "Label" @v grow'], control: (t) => fieldBoxOf(t, 'f'), designSystem: null),
+  (name: 'a field with a hint only', lines: ['Input#f hint="Type here" @v grow'], control: (t) => fieldBoxOf(t, 'f'), designSystem: null),
   (
     name: 'a field with a helper',
-    lines: ['Input#f "Label" helper="Shown under the field" bind=v grow'],
+    lines: ['Input#f "Label" helper="Shown under the field" @v grow'],
     control: (t) => fieldBoxOf(t, 'f'),
     designSystem: null,
   ),
-  (name: 'a field showing an error', lines: ['Input#f "Label" error="Required" bind=v grow'], control: (t) => fieldBoxOf(t, 'f'), designSystem: null),
+  (name: 'a field showing an error', lines: ['Input#f "Label" error="Required" @v grow'], control: (t) => fieldBoxOf(t, 'f'), designSystem: null),
   (
     name: 'a dropdown with a label (a column of the label and the dropdown)',
-    lines: ['Column#f gap=6 grow', '  Text "Size"', '  Select#fs "Choose" items=["S","M","L"] bind=v'],
+    lines: ['Column#f gap=6 grow', '  Text "Size"', '  Select#fs "Choose" items=["S","M","L"] @v'],
     control: (t) => fieldBoxOf(t, 'fs'),
     designSystem: null,
   ),
-  (name: 'a multi-line field', lines: ['Input#f "Notes" lines=3 bind=v grow'], control: (t) => fieldBoxOf(t, 'f'), designSystem: null),
+  (name: 'a multi-line field', lines: ['Input#f "Notes" lines=3 @v grow'], control: (t) => fieldBoxOf(t, 'f'), designSystem: null),
   (
     name: "Cards' InputField",
-    lines: ['InputField#f label="Email" placeholder="you@example.com" bind=v'],
+    lines: ['InputField#f label="Email" placeholder="you@example.com" @v'],
     control: (t) => _node(t, 'f/box'),
     designSystem: 'design_systems/cards',
   ),
@@ -69,12 +69,12 @@ final List<Case> partners = [
   (name: 'an outlined button', lines: ['Button.outline#p "Add"'], control: (t) => _node(t, 'p'), designSystem: null),
   (name: 'an icon button', lines: ['IconButton#p "add"'], control: (t) => _node(t, 'p'), designSystem: null),
   (name: 'a text', lines: ['Text#p "Total"'], control: (t) => _node(t, 'p'), designSystem: null),
-  (name: 'a checkbox', lines: ['Checkbox#p bind=c'], control: (t) => _node(t, 'p'), designSystem: null),
-  (name: 'a switch', lines: ['Switch#p bind=s'], control: (t) => _node(t, 'p'), designSystem: null),
-  (name: 'another labelled field', lines: ['Input#p "Other" bind=w grow'], control: (t) => fieldBoxOf(t, 'p'), designSystem: null),
+  (name: 'a checkbox', lines: ['Checkbox#p @c'], control: (t) => _node(t, 'p'), designSystem: null),
+  (name: 'a switch', lines: ['Switch#p @s'], control: (t) => _node(t, 'p'), designSystem: null),
+  (name: 'another labelled field', lines: ['Input#p "Other" @w grow'], control: (t) => fieldBoxOf(t, 'p'), designSystem: null),
   (
     name: 'a nested row of a labelled field and a button',
-    lines: ['Row#p gap=4', '  Input#p1 "Nested" bind=w', '  Button#p2 "Go"'],
+    lines: ['Row#p gap=4', '  Input#p1 "Nested" @w', '  Button#p2 "Go"'],
     control: (t) => fieldBoxOf(t, 'p1'),
     designSystem: null,
   ),
@@ -82,7 +82,12 @@ final List<Case> partners = [
 
 const aligns = ['', 'middle', 'top', 'bottom', 'stretch'];
 
+// The variables the lines bind (v, w: a field's text; c, s: a checkbox, a switch).
 String _page(Case field, Case partner, String align, bool wrap) => [
+      'state v=""',
+      'state w=""',
+      'state c=false',
+      'state s=false',
       'Card gap=10',
       '  Row#row gap=8${align.isEmpty ? '' : ' $align'}${wrap ? ' wrap' : ''}',
       for (final l in field.lines) '    $l',

@@ -1,7 +1,7 @@
 state tab="Active"
 Column gap=16 pad=16 scroll
   Text.pageTitle "Orders"
-  SegmentedButton bind=tab items=["Active","Completed"]
+  SegmentedButton @tab items=["Active","Completed"]
   if tab=="Active"
     Column gap=12
       Card gap=8

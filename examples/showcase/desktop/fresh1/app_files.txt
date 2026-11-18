@@ -23,8 +23,8 @@ App
     Nav
       Breadcrumb items=["All files","Design","Brand refresh"]
       Row gap=12 middle
-        Input "Search files" bind=q w=240
-        SegmentedButton bind=view items=["List","Grid"]
+        Input "Search files" @q w=240
+        SegmentedButton @view items=["List","Grid"]
     Column pad=24 gap=20 scroll
       Column gap=12
         Text.eyebrow "FOLDERS"
@@ -65,7 +65,7 @@ App
               Button.destructive "Delete" icon="delete" onTap={files=removeWhere(files,f=>f.sel)}
         Card pad=0 gap=0
           Row pad=[20,12,20,12] gap=16 middle
-            Checkbox bind=allSel w=24 onChange={files=map(files,f=>with(f,"sel",allSel))}
+            Checkbox @allSel w=24 onChange={files=map(files,f=>with(f,"sel",allSel))}
             Spacer w=24
             Text.columnHead "Name" grow
             Text.columnHead "Owner" w=160
@@ -73,7 +73,7 @@ App
             Text.columnHead "Size" w=80 right
           each row in files
             Row pad=[20,0,20,0] gap=16 h=52 middle border-top=#FFE5E7EB fill={row.sel?"#142563EB":"#00FFFFFF"} onTap={last=row.id}
-              Checkbox bind=row.sel w=24 onChange={last=row.id}
+              Checkbox @row.sel w=24 onChange={last=row.id}
               Icon "{row.icon}" size=22 w=24 color=#FF6B7280
               Text.strong "{row.name}" grow
               Row gap=8 middle w=160

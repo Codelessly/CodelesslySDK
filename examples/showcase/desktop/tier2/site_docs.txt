@@ -1,11 +1,12 @@
+state q=""
 Page
   Nav
     Row gap=16 middle
       IconTile "sensors"
       Text.strong "Beacon"
     Row gap=12 middle
-      SearchBar "Search docs" bind=q w=280
-      Select bind=version items=["v2.4","v2.3","v2.2"] w=100
+      SearchBar "Search docs" @q w=280
+      Select @version items=["v2.4","v2.3","v2.2"] w=100
   state page="Quickstart"
   state version="v2.4"
   Row top gap=32 pad=[24,24,24,24]

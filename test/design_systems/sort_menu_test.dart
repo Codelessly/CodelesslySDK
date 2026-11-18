@@ -13,7 +13,7 @@ Page
   Section
     Row between
       Heading "Notes"
-      SortMenu#sorter bind=sort options=["Edited","Created","Title"]
+      SortMenu#sorter @sort options=["Edited","Created","Title"]
     Text#picked "Sorted by {sort}"
 ''';
 

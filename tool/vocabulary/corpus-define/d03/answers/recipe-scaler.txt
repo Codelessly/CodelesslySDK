@@ -19,7 +19,7 @@ App
       Grid cols=3 gap=16
         Card gap=8
           Text.fieldLabel "Total dough weight (g)"
-          Input "Grams" type=number bind=total
+          Input "Grams" type=number @total
         StatCard "Hydration" "{fixed(sum(filter(rows,r=>r.kind=='liquid'),r=>r.pct)/sum(filter(rows,r=>r.kind=='flour'),r=>r.pct)*100,1)}%"
         StatCard "Flour in the loaf" "{round(total/sum(rows,r=>r.pct)*sum(filter(rows,r=>r.kind=='flour'),r=>r.pct),0)} g"
       Card gap=8
@@ -31,8 +31,8 @@ App
         Divider
         each row in rows
           Row gap=8 middle
-            Input bind=row.name grow
-            Input type=number bind=row.pct w=110
+            Input @row.name grow
+            Input type=number @row.pct w=110
             Text.strong "{round(total/sum(rows,r=>r.pct)*row.pct,0)} g" w=90
             IconButton "delete" tooltip="Remove" onTap={rows=removeWhere(rows,r=>r.id==row.id)}
         Divider
@@ -46,9 +46,9 @@ Dialog#addrow "Add ingredient"
   state newName=""
   state newPct=0
   state newKind="other"
-  Input "Name" bind=newName
-  Input "Baker's percentage" type=number bind=newPct
-  Select "Kind" items=["flour","liquid","other"] bind=newKind
+  Input "Name" @newName
+  Input "Baker's percentage" type=number @newPct
+  Select "Kind" items=["flour","liquid","other"] @newKind
   Button "Add" onTap={newName=="" ? toast "Name the ingredient" : {rows=append(rows,{"id":length(rows)+100+newPct,"name":newName,"pct":newPct,"kind":newKind}); newName=""; newPct=0; close}}
 
 ### Timeline
@@ -73,7 +73,7 @@ App
     Column pad=24 gap=16
       Card gap=12
         Row between middle
-          SegmentedButton items=["Start at","Finish at"] bind=mode
+          SegmentedButton items=["Start at","Finish at"] @mode
           Row gap=8 middle
             IconButton "remove" tooltip="15 minutes earlier" onTap={anchor=anchor-15}
             Clock m={anchor} size=28
@@ -97,7 +97,7 @@ App
             Column grow gap=2
               Text.strong "{s.name}"
               Progress {sum(slice(steps,0,index),x=>x.mins)/sum(steps,x=>x.mins)}
-            Input type=number bind=s.mins w=80
+            Input type=number @s.mins w=80
             Text.muted "min"
             IconButton "timer" tooltip="Start a timer" onTap={timers=append(timers,{"id":nextId,"label":s.name,"left":s.mins*60,"total":s.mins*60,"running":true}); nextId=nextId+1; toast "Timer started"}
             IconButton "arrow_upward" tooltip="Move up" onTap={index==0 ? toast "Already first" : steps=setAt(setAt(steps,index-1,s),index,steps[index-1])}
@@ -105,8 +105,8 @@ App
 Dialog#addstep "Add a step"
   state stepName=""
   state stepMins=30
-  Input "Step" bind=stepName
-  Input "Minutes" type=number bind=stepMins
+  Input "Step" @stepName
+  Input "Minutes" type=number @stepMins
   Button "Add" onTap={stepName=="" ? toast "Name the step" : {steps=append(steps,{"id":length(steps)+100+stepMins,"name":stepName,"mins":stepMins}); stepName=""; close}}
 
 ### Timers
@@ -148,8 +148,8 @@ App
 Dialog#newtimer "New timer"
   state label=""
   state minutes=10
-  Input "Label" bind=label
-  Input "Minutes" type=number bind=minutes
+  Input "Label" @label
+  Input "Minutes" type=number @minutes
   Button "Start" onTap={label=="" ? toast "Label the timer" : {timers=append(timers,{"id":nextId,"label":label,"left":minutes*60,"total":minutes*60,"running":true}); nextId=nextId+1; label=""; close}}
 
 define Clock m=0 size=16

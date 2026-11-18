@@ -802,7 +802,7 @@ def tap_pad():
         P('label', STRING, 'Jumps', 'What is counted, small caps over the number.'),
         P('hint', STRING, 'Tap', 'The word on the round target.'),
     ]
-    return component('TapPad', "The jump counter as one enormous tap target: write TapPad bind=count and every tap anywhere on it adds 1 to your count variable, shown in display type; its two quiet chips take 1 off or add 10 (onChanged fires with the new count).",
+    return component('TapPad', "The jump counter as one enormous tap target: write TapPad @count and every tap anywhere on it adds 1 to your count variable, shown in display type; its two quiet chips take 1 off or add 10 (onChanged fires with the new count).",
                      props, nodes, 'pad', events=[('onChanged', 'The count changed; the value is the new count.')],
                      previews=[{'name': 'Counting', 'size': [350, PAD_H], 'props': {}}])
 
@@ -835,7 +835,7 @@ def session_controls():
         P('resume', STRING, 'Resume', "The big button's label while paused."),
         P('finish', STRING, 'Finish', "The quiet button's label."),
     ]
-    return component('SessionControls', "The session's control bar: write SessionControls bind=paused and its big button pauses and resumes by toggling your paused variable itself, while the quiet Finish button fires onPressed (write -> for what finishing does).",
+    return component('SessionControls', "The session's control bar: write SessionControls @paused and its big button pauses and resumes by toggling your paused variable itself, while the quiet Finish button fires onPressed (write -> for what finishing does).",
                      props, nodes, 'controls', events=[('onPressed', 'Finish was tapped.')],
                      previews=[{'name': 'Running', 'size': [350, 64], 'props': {}}])
 

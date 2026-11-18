@@ -22,7 +22,7 @@ App
     Nav
       Heading "Day 4 - Tuesday, Oct 14" level=1
       Row gap=8
-        SegmentedButton bind=filter items=["all","waiting","shot"]
+        SegmentedButton @filter items=["all","waiting","shot"]
         Button.outline "Call sheet" icon="assignment" onTap={go call-sheet}
         Button "Add shot" icon="add" onTap={shots=append(shots,{"id":"n{length(shots)+1}","num":"{16+length(shots)-6}","scene":"New set-up","frame":"medium","lens":"35mm","move":"Static","mins":30,"status":"waiting","takes":[],"circled":0,"note":"","photo":""}); toast "Shot added"}
     Column pad=24 gap=12
@@ -70,7 +70,7 @@ App
                   Text.muted "Takes {join(shot.takes,", ")}, circled {shot.circled}"
               Text "{shot.lens}" w=56 hide=tablet
               Text "{shot.move}" w=80 hide=tablet
-              Input bind=shot.mins type=number w=64
+              Input @shot.mins type=number w=64
               Badge.success "Shot" w=110 hidden={shot.status!="shot"}
               Badge.neutral "Waiting" w=110 hidden={shot.status!="waiting"}
               Icon "drag_indicator"
@@ -114,7 +114,7 @@ App
     Nav
       Heading "Storyboard" level=1
       Row gap=8
-        SegmentedButton bind=cols items=[2,3,4]
+        SegmentedButton @cols items=[2,3,4]
         Button "Add panel" icon="add" onTap={shots=append(shots,{"id":"p{length(shots)+1}","num":"new","frame":"medium","caption":"","lens":"35mm"}); toast "Panel added"}
     Column pad=24 gap=16
       Text.muted "Drag a panel to reorder. Captions are saved as you type."
@@ -126,9 +126,9 @@ App
             Row between
               Text.strong "Shot {p.num}"
               Badge.neutral "{p.lens}"
-            Input "Caption" bind=p.caption multiline
+            Input "Caption" @p.caption multiline
             Row gap=8
-              Select bind=p.frame items=["wide","medium","close"]
+              Select @p.frame items=["wide","medium","close"]
               IconButton "delete" tooltip="Remove panel" onTap={shots=removeWhere(shots,s=>s.id==p.id)}
   Menu#panelMenu
     MenuItem "Duplicate panel" icon="content_copy" onTap={toast "Duplicated"}
@@ -139,6 +139,7 @@ state callTime=420
 state crew=[{"role":"Director","name":"Priya Nair","call":"06:30"},{"role":"DP","name":"Tomas Weiss","call":"06:30"},{"role":"1st AD","name":"Jonah Brooks","call":"06:00"},{"role":"Gaffer","name":"Lena Ortiz","call":"06:00"}]
 state cast=[{"role":"Mara","name":"Ines Calloway","call":"07:00"},{"role":"Eli","name":"Devon Park","call":"09:30"}]
 state shots=[{"num":"12A","scene":"INT. DINER - Mara enters","mins":35},{"num":"12B","scene":"INT. DINER - Mara at counter","mins":50},{"num":"12C","scene":"INT. DINER - Waiter reaction","mins":25},{"num":"13","scene":"EXT. PARKING LOT - Car arrives","mins":60},{"num":"14","scene":"EXT. ROOFTOP - Final look","mins":90},{"num":"15","scene":"EXT. ROOFTOP - Skyline insert","mins":30}]
+state withBoard=false
 Page
   Nav
     Brand "Slate" icon="movie"
@@ -183,5 +184,5 @@ Page
     Text.muted "Slate - Day 4 call sheet"
   Dialog#send "Send call sheet" "Crew get it by email and text"
     Input "Message" "Parking is behind the diner" multiline
-    Toggle "Include storyboard" bind=withBoard
+    Toggle "Include storyboard" @withBoard
     Button "Send" onTap={emit sendCallSheet; toast "Sent to 6 people"; close}

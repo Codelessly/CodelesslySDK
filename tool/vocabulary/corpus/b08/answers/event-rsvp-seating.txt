@@ -4,6 +4,12 @@ state guests=1
 state guestList=[{"name":"","meal":"Chicken"}]
 state seats=[]
 state sent=false
+state notes=""
+state remindEmail=""
+state declineNote=""
+state wlName=""
+state wlEmail=""
+state wlSeats=0
 Page
   Nav
     Brand "Placecard" icon="event_seat"
@@ -35,26 +41,26 @@ Page
   Section#reply
     Column gap=16
       Heading "Will you join us?" level=1
-      SegmentedButton bind=reply items=["Yes","Maybe","No"]
+      SegmentedButton @reply items=["Yes","Maybe","No"]
       if reply=="Yes"
         Card gap=12
           Heading "Your party" level=3
           Row gap=12
             Text.strong "Guests"
-            Stepper bind=guests min=1 max=6 onChange={guestList=map(range(result),i=>coalesce(guestList[i],{"name":"","meal":"Chicken"}))}
+            Stepper @guests min=1 max=6 onChange={guestList=map(range(result),i=>coalesce(guestList[i],{"name":"","meal":"Chicken"}))}
           each g in guestList
             Row gap=12 top
-              Input "Guest {index+1} name" bind=g.name grow
-              Select bind=g.meal items=["Chicken","Salmon","Vegetarian","Vegan"] w=180
-          Input "Allergies or notes" bind=notes multiline
+              Input "Guest {index+1} name" @g.name grow
+              Select @g.meal items=["Chicken","Salmon","Vegetarian","Vegan"] w=180
+          Input "Allergies or notes" @notes multiline
       if reply=="Maybe"
         Card gap=8
           Text "No problem. We will remind you a week before the deadline."
-          Input "Email for the reminder" type=email bind=remindEmail
+          Input "Email for the reminder" type=email @remindEmail
       if reply=="No"
         Card gap=8
           Text "We will miss you. Leave a note for the couple?"
-          Input "Message" bind=declineNote multiline
+          Input "Message" @declineNote multiline
       Row gap=12
         Button "Send reply" disabled={reply==""} onTap={sent=true; emit rsvp reply; toast "Reply sent, thank you!"}
         if reply=="Yes"
@@ -75,9 +81,9 @@ Page
       Button.outline "Apple Calendar" icon="event" onTap={calendar ics; close}
       Button.outline "Outlook" icon="event" onTap={calendar outlook; close}
   Dialog#waitlist "Join the wait list" "We will email you if a seat opens"
-    Input "Name" bind=wlName
-    Input "Email" type=email bind=wlEmail
-    Stepper "Seats needed" bind=wlSeats min=1 max=4
+    Input "Name" @wlName
+    Input "Email" type=email @wlEmail
+    Stepper "Seats needed" @wlSeats min=1 max=4
     Button "Join" onTap={emit waitlistJoin; toast "You are on the list"; close}
 
 ### Seating
@@ -85,6 +91,8 @@ state seats=[]
 state party=3
 state table="all"
 state taken=["A1","A2","B4","C3","C4","D2","E5","E6"]
+state wlName=""
+state wlEmail=""
 Page
   Nav
     Brand "Placecard" icon="event_seat"
@@ -115,13 +123,13 @@ Page
               Icon "circle" color=#FF374151
               Text.caption "Taken"
         Card
-          SeatMap bind=seats taken={taken} hold={party} filter={table} rows=6 cols=8 tables=6 h=420 onSelect={toast "Seats held together"} onConflict={toast "Not enough free seats side by side"}
+          SeatMap @seats taken={taken} hold={party} filter={table} rows=6 cols=8 tables=6 h=420 onSelect={toast "Seats held together"} onConflict={toast "Not enough free seats side by side"}
       Column w=320 gap=12
         Card gap=12
           Heading "Your party" level=3
           Row between
             Text "Guests"
-            Stepper bind=party min=1 max=6 onChange={seats=[]}
+            Stepper @party min=1 max=6 onChange={seats=[]}
           Divider
           if length(seats)==0
             Text.muted "No seats held yet."
@@ -143,8 +151,8 @@ Page
       Button.outline "Back" onTap={close}
       Button "Confirm" onTap={emit seatsConfirmed seats; toast "Seats confirmed"; close}
   Sheet#waitlist2 "Wait list"
-    Input "Name" bind=wlName
-    Input "Email" type=email bind=wlEmail
+    Input "Name" @wlName
+    Input "Email" type=email @wlEmail
     Button "Join" onTap={emit waitlistJoin; toast "You are on the list"; close}
 
 ### Host dashboard
@@ -153,6 +161,8 @@ state filter="all"
 state sel=""
 state replies=[{"id":1,"name":"Priya Nair","answer":"Yes","guests":2,"table":"A"},{"id":2,"name":"Tomas Weber","answer":"Yes","guests":1,"table":"B"},{"id":3,"name":"Greta Olsen","answer":"Maybe","guests":2,"table":""},{"id":4,"name":"Diego Ramos","answer":"No","guests":0,"table":""},{"id":5,"name":"Aiko Tanaka","answer":"Yes","guests":3,"table":"C"},{"id":6,"name":"Leo Martin","answer":"","guests":0,"table":""}]
 state waitlist=[{"name":"Hana Sato","seats":2},{"name":"Omar Khalil","seats":1}]
+state channel=""
+state reminderText=""
 App
   Sidebar
     Brand "Placecard" icon="event_seat"
@@ -216,8 +226,8 @@ App
     MenuItem "Mark as Yes" icon="check" onTap={replies=updateWhere(replies,r=>r.id==sel,r=>with(r,"answer","Yes"))}
     MenuItem "Remove" icon="delete" onTap={replies=removeWhere(replies,r=>r.id==sel)}
   Dialog#remind "Send a reminder" "To the {count(replies,r=>r.answer==\"\"||r.answer==\"Maybe\")} guests who have not decided"
-    Select "Send by" items=["Email","Text message"] bind=channel
-    Input "Message" bind=reminderText multiline
+    Select "Send by" items=["Email","Text message"] @channel
+    Input "Message" @reminderText multiline
     Row gap=8 end
       Button.outline "Cancel" onTap={close}
       Button "Send" onTap={emit sendReminder channel reminderText; toast "Reminders sent"; close}

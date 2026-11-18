@@ -26,7 +26,7 @@ App
           Row between middle
             Text.strong "Time of evening"
             Text.muted "{count(tables,x=>find(res,r=>r.table==x.id && r.time<=t && t<r.time+45+r.party*10)!=null)} of {length(tables)} tables taken"
-          Slider bind=t min=0 max=300 step=15
+          Slider @t min=0 max=300 step=15
           Row between
             Text.caption "5:00 pm"
             Text.caption "10:00 pm"
@@ -70,20 +70,23 @@ App
     MenuItem "Mark paying" icon="payments" onTap={tables=updateWhere(tables,x=>x.id==sel,x=>with(x,"status","paying"))}
     MenuItem "Clear booking" icon="clear" onTap={res=updateWhere(res,r=>r.table==sel,r=>with(r,"table",""))}
 Dialog#walkin "Add a walk-in" "Quick name and a wait quote"
-  Input "Name" "Guest name" bind=wname
+  Input "Name" "Guest name" @wname
   Row gap=8 middle
     Text.strong "Party"
     Button.outline "-" onTap={wparty=max(1,wparty-1)}
     Text.strong "{wparty}"
     Button.outline "+" onTap={wparty=min(12,wparty+1)}
-  Select "Quoted wait" items=["5","10","15","20","30","45"] bind=wquote
+  Select "Quoted wait" items=["5","10","15","20","30","45"] @wquote
   Button "Add to waitlist" onTap={trim(wname)=="" ? toast "Enter a name" : {walkins=append(walkins,{"id":"w{tick}","name":wname,"party":wparty,"added":tick,"quote":wquote,"phone":""}); toast "{wname} added"; close}}
 Dialog#textguest "Text a guest" "Sent by SMS"
   Text.muted "To {who}"
-  Input "Message" bind=msg multiline
+  Input "Message" @msg multiline
   Button "Send text" onTap={emit sendText {"to":who,"body":msg}; toast "Text sent to {who}"; close}
 
 ### Waitlist
+state wname=""
+state wquote=""
+state msg=""
 App
   AppRail tab="waitlist"
   Main
@@ -127,17 +130,17 @@ App
               Text.strong "{tb.id}"
               Text.muted "{tb.seats} seats"
 Dialog#walkin "Add a walk-in" "Quick name and a wait quote"
-  Input "Name" "Guest name" bind=wname
+  Input "Name" "Guest name" @wname
   Row gap=8 middle
     Text.strong "Party"
     Button.outline "-" onTap={wparty=max(1,wparty-1)}
     Text.strong "{wparty}"
     Button.outline "+" onTap={wparty=min(12,wparty+1)}
-  Select "Quoted wait" items=["5","10","15","20","30","45"] bind=wquote
+  Select "Quoted wait" items=["5","10","15","20","30","45"] @wquote
   Button "Add to waitlist" onTap={trim(wname)=="" ? toast "Enter a name" : {walkins=append(walkins,{"id":"w{tick}","name":wname,"party":wparty,"added":tick,"quote":wquote,"phone":""}); toast "{wname} added"; close}}
 Dialog#textguest "Text a guest" "Sent by SMS"
   Text.muted "To {who}"
-  Input "Message" bind=msg multiline
+  Input "Message" @msg multiline
   Button "Send text" onTap={emit sendText {"to":who,"body":msg}; toast "Text sent to {who}"; close}
 
 ### Tonight

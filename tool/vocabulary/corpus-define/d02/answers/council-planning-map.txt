@@ -17,7 +17,7 @@ App
     Nav
       Heading "Planning map" level=1
       Row gap=8
-        Input "Search by address" bind=q w=260
+        Input "Search by address" @q w=260
         Button.outline "Alert me" onTap={open alerts}
     Row gap=0
       Column grow gap=0
@@ -55,12 +55,12 @@ App
     state radius=500
     state email=""
     state alertsOn=true
-    Input "Email" "you@example.com" bind=email type=email
-    Input "Centre address" bind=q
+    Input "Email" "you@example.com" @email type=email
+    Input "Centre address" @q
     Text.fieldLabel "Radius: {radius} m"
-    Slider bind=radius min=100 max=2000
+    Slider @radius min=100 max=2000
     RadiusPreview radius={radius}
-    Toggle "Include decisions as well as new applications" bind=alertsOn
+    Toggle "Include decisions as well as new applications" @alertsOn
     Button "Start alerts" onTap={email == "" ? toast "Enter your email" : (emit subscribe {"email":email,"radius":radius}; toast "Alerts on within {radius} m"; close)}
 
 ### Application
@@ -102,7 +102,7 @@ Page
   Section tint
     Row gap=32 top
       Column grow gap=16
-        SegmentedButton bind=tab items=["details","documents"]
+        SegmentedButton @tab items=["details","documents"]
         if tab == "details"
           Heading "Timeline" level=3
           Timeline items={events}
@@ -128,7 +128,7 @@ Page
     Row gap=8
       ChoiceChip "Support" icon="thumb_up" selected={vote=="for"} onTap={vote="for"}
       ChoiceChip "Object" icon="thumb_down" selected={vote=="against"} onTap={vote="against"}
-    Input "Your comment" multiline bind=comment maxLength=1000
+    Input "Your comment" multiline @comment maxLength=1000
     Row between
       Text.caption "{length(comment)} / 1000"
       Text.danger "Too long" hidden={length(comment) <= 1000}

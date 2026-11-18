@@ -21,7 +21,7 @@ App
       Grid cols=3 gap=16
         Card gap=8
           Text.muted "Total dough weight (g)"
-          Input "Grams" type=number bind=total
+          Input "Grams" type=number @total
           Text.caption "Every row below rescales from this"
         Card gap=8
           Text.muted "Hydration"
@@ -41,9 +41,9 @@ App
         Divider
         each row in rows
           Row gap=12 middle
-            Input "Name" bind=row.name grow
-            Select bind=row.kind items=["flour","water","other"] w=110
-            Input "%" type=number bind=row.pct w=100
+            Input "Name" @row.name grow
+            Select @row.kind items=["flour","water","other"] w=110
+            Input "%" type=number @row.pct w=100
             Text.strong "{round(total/(sum(rows,r=>r.pct)/100)*row.pct/100,0)} g" w=90
             IconButton "delete" tooltip="Remove row" onTap={rows=removeWhere(rows,r=>r.id==row.id)}
         Row between
@@ -73,9 +73,9 @@ App
       Button "Start timers" onTap={emit startTimers steps; go timers}
     Column pad=24 gap=16 scroll
       Card gap=12
-        SegmentedButton bind=mode items=["Start at","Finish by"]
+        SegmentedButton @mode items=["Start at","Finish by"]
         Row gap=16 middle
-          TimePicker "{mode=='Finish by' ? 'Finish by' : 'Start at'}" bind=anchor
+          TimePicker "{mode=='Finish by' ? 'Finish by' : 'Start at'}" @anchor
           Column gap=2
             Text.muted "Total time"
             Text.strong "{floor(sum(steps,s=>s.mins)/60)} h {sum(steps,s=>s.mins)%60} min"
@@ -84,7 +84,7 @@ App
             Text "{mode=='Finish by' ? floor(((anchor-sum(steps,s=>s.mins)+2880)%1440)/60) : floor(((anchor+sum(steps,s=>s.mins))%1440)/60)}:{mode=='Finish by' ? (((anchor-sum(steps,s=>s.mins)+2880)%1440)%60<10 ? '0' : '') + (((anchor-sum(steps,s=>s.mins)+2880)%1440)%60) : (((anchor+sum(steps,s=>s.mins))%1440)%60<10 ? '0' : '') + (((anchor+sum(steps,s=>s.mins))%1440)%60)}" size=32 weight=700
       Card gap=8
         Text.strong "Steps"
-        Timeline items={steps} bind=sel onSelect={sel=result}
+        Timeline items={steps} @sel onSelect={sel=result}
         Divider
         each step in steps
           Row gap=12 middle
@@ -125,7 +125,7 @@ App
     Nav
       Heading "Timers" level=1
       Row gap=8
-        Toggle "Running" bind=running
+        Toggle "Running" @running
         Button "New timer" onTap={open newTimer}
     Column pad=24 gap=16 scroll
       if count(timers,t=>t.done)>0
@@ -149,14 +149,14 @@ App
       if isEmpty(timers)
         Text.muted "No timers yet. Start one from the schedule."
   Dialog#newTimer "New timer" "Rings when the time is up"
-    Input "What for" "Fold 3" bind=label
-    Slider bind=minutes min=1 max=240
+    Input "What for" "Fold 3" @label
+    Slider @minutes min=1 max=240
     Text.muted "{minutes} minutes"
     Row gap=8 end
       Button.outline "Cancel" onTap={close}
       Button "Start" onTap={timers=append(timers,{"id":nextId,"name":coalesce(label,"Timer"),"left":minutes*60,"total":minutes*60,"done":false}); nextId=nextId+1; label=""; close}
 
-define Timeline items=[] bind=selected onSelect
+define Timeline items=[] @selected onSelect
   state selected=-1
   Row gap=0 middle scroll
     each item in items

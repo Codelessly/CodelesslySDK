@@ -10,6 +10,10 @@ state guests=[{"id":1,"name":"Eleanor Whitfield","side":"Bride","diet":"Vegetari
 state tables=[{"id":1,"name":"Table 1","shape":"round","seats":8},{"id":2,"name":"Table 2","shape":"round","seats":8},{"id":3,"name":"Head table","shape":"long","seats":12},{"id":4,"name":"Table 4","shape":"round","seats":6}]
 state apart=[{"a":4,"b":10,"why":"Daniel and Greg: business dispute"},{"a":2,"b":6,"why":"Robert and Tom: not speaking"}]
 state autoGroup="Whitfield family"
+state otherName=""
+state newName=""
+state newShape=""
+state newSeats=""
 App
   Sidebar
     Brand "Tablecloth" icon="table_restaurant"
@@ -20,12 +24,12 @@ App
     Text.muted "Eleanor and James, 14 June"
   Pane w=320 pad=16 gap=12
     Heading "Guests" level=3
-    Input "Search guests" bind=q
+    Input "Search guests" @q
     Row gap=8 scroll
       FilterChip "All" selected={side=="All"} onTap={side="All"}
       FilterChip "Bride" selected={side=="Bride"} onTap={side="Bride"}
       FilterChip "Groom" selected={side=="Groom"} onTap={side="Groom"}
-    Select "Dietary" items=["All","Vegetarian","Vegan","Gluten-free","Halal","Nut allergy"] bind=diet
+    Select "Dietary" items=["All","Vegetarian","Vegan","Gluten-free","Halal","Nut allergy"] @diet
     Row between
       Badge.warning "{count(guests,g=>g.table==0)} unseated"
       Button.outline "Auto-seat group" onTap={open autoseat}
@@ -84,7 +88,7 @@ App
     MenuItem "Clear table" icon="clear_all" onTap={guests=updateWhere(guests,g=>g.table==selTable,g=>with(g,"table",0)); toast "Table cleared"}
     MenuItem "Remove table" icon="delete" onTap={guests=updateWhere(guests,g=>g.table==selTable,g=>with(g,"table",0)); tables=removeWhere(tables,t=>t.id==selTable); toast "Table removed"}
   Dialog#autoseat "Auto-seat a group" "Seats everyone in the group together, at the table with the most room."
-    Select "Group" items=["Whitfield family","College friends","Work","Neighbours"] bind=autoGroup
+    Select "Group" items=["Whitfield family","College friends","Work","Neighbours"] @autoGroup
     Text.muted "{count(guests,g=>g.group==autoGroup && g.table==0)} unseated guests in this group"
     Row gap=8 end
       Button.outline "Cancel" onTap={close}
@@ -102,15 +106,19 @@ App
           Button.outline "Unseat {find(guests,g=>g.id==p.b).name}" onTap={guests=updateWhere(guests,g=>g.id==p.b,g=>with(g,"table",0))}
           Button.ghost "Remove rule" onTap={apart=removeWhere(apart,x=>x.a==p.a && x.b==p.b)}
   Dialog#keepApart "Keep apart" "Choose a guest who must not share a table with this one."
-    Select "Other guest" items={map(filter(guests,g=>g.id!=sel),g=>g.name)} bind=otherName
+    Select "Other guest" items={map(filter(guests,g=>g.id!=sel),g=>g.name)} @otherName
     Button "Add rule" onTap={apart=append(apart,{"a":sel,"b":find(guests,g=>g.name==otherName).id,"why":"Kept apart by request"}); toast "Rule added"; close}
   Dialog#newTable "Add a table"
-    Input "Name" bind=newName
-    SegmentedButton items=["round","long"] bind=newShape
-    Input "Seats" type=number bind=newSeats
+    Input "Name" @newName
+    SegmentedButton items=["round","long"] @newShape
+    Input "Seats" type=number @newSeats
     Button "Add table" onTap={tables=append(tables,{"id":length(tables)+1,"name":newName,"shape":newShape,"seats":newSeats}); close}
 
 ### Guest list
+state q=""
+state gName=""
+state gSide=""
+state gDiet=""
 App
   Sidebar
     Brand "Tablecloth" icon="table_restaurant"
@@ -121,7 +129,7 @@ App
     Nav
       Heading "Guest list" level=1
       Row gap=8
-        Input "Search" bind=q w=220
+        Input "Search" @q w=220
         Button "Add guest" icon="person_add" onTap={open addGuest}
     Column pad=24 gap=16
       Grid cols=3 gap=16
@@ -150,9 +158,9 @@ App
             Text.muted "{g.diet}" w=110
             Text "{g.table==0 ? "Unseated" : find(tables,t=>t.id==g.table).name}" w=90
   Dialog#addGuest "Add a guest"
-    Input "Full name" bind=gName
-    SegmentedButton items=["Bride","Groom"] bind=gSide
-    Select "Dietary" items=["None","Vegetarian","Vegan","Gluten-free","Halal","Nut allergy"] bind=gDiet
+    Input "Full name" @gName
+    SegmentedButton items=["Bride","Groom"] @gSide
+    Select "Dietary" items=["None","Vegetarian","Vegan","Gluten-free","Halal","Nut allergy"] @gDiet
     Button "Add guest" onTap={guests=append(guests,{"id":length(guests)+1,"name":gName,"side":gSide,"diet":gDiet,"table":0,"group":"Other"}); toast "Guest added"; close}
 
 ### Print view

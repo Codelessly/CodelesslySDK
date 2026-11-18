@@ -18,7 +18,7 @@ App
     Nav
       Heading "Kitchen" level=1
       Row gap=8
-        SegmentedButton bind=station items=["grill","fry","cold"] size=large
+        SegmentedButton @station items=["grill","fry","cold"] size=large
         Button.outline "Recall last" size=large icon="undo" hotkey="r" onTap={length(bumped)>0 ? {tickets=append(tickets,last(bumped)); bumped=removeAt(bumped,length(bumped)-1)} : toast "Nothing to recall"}
         IconButton "volume_up" tooltip="Mute chime"
     if rush
@@ -69,7 +69,7 @@ App
   Main
     Nav
       Heading "All-day counts" level=1
-      SegmentedButton bind=station items=["all","grill","fry","cold"] size=large
+      SegmentedButton @station items=["all","grill","fry","cold"] size=large
     Column pad=24 gap=16
       Row gap=24
         Card grow gap=4

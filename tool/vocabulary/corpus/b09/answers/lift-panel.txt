@@ -69,11 +69,11 @@ App
         Button.destructive "Alarm" icon="notifications_active" onTap={alarm=true; emit alarm; open alarmSheet}
       Row gap=12 center
         Text.caption "Load"
-        Slider bind=load min=0 max=900 w=200
+        Slider @load min=0 max=900 w=200
         Text.small "{load} kg"
       Row gap=8 center
-        Toggle "Fire mode (test)" bind=fire onChange={result ? {queue=[]; emit speak "Fire. Please exit"} : {}}
-        Toggle "Key card inserted" bind=cardOk
+        Toggle "Fire mode (test)" @fire onChange={result ? {queue=[]; emit speak "Fire. Please exit"} : {}}
+        Toggle "Key card inserted" @cardOk
   Dialog#card "Key card needed" "Floor {pendingFloor} is restricted"
     Row gap=12 middle
       IconTile "vpn_key"
@@ -97,13 +97,13 @@ App
       Heading "Floors" level=3
       Text.muted "Now at floor {current}"
     Column pad=24 gap=16
-      Pages bind=slide h=360
+      Pages @slide h=360
         each a in ads
           Box fill={a.color} radius=16 pad=32 gap=16 center middle animate=fade
             Icon "{a.icon}" size=64 color=#FFFFFFFF
             Text "{a.title}" size=28 weight=700 color=#FFFFFFFF center
             Text "{a.body}" color=#FFFFFFFF center
-      Dots bind=slide count=3
+      Dots @slide count=3
       Row between middle
         Text.muted "{formatDate(today(),'MMM d')}"
         Button "Touch to use the lift" icon="touch_app" onTap={idle=0; go panel}
@@ -112,6 +112,8 @@ App
 state tab="floors"
 state serviceCode=""
 state unlocked=false
+state maxLoad=300
+state exitFloor=""
 App
   Sidebar
     Brand "Floors" icon="elevator"
@@ -128,7 +130,7 @@ App
       if !unlocked
         Card gap=12
           Text.strong "Enter the service code"
-          Input "Code" bind=serviceCode type=number password
+          Input "Code" @serviceCode type=number password
           Button "Unlock" onTap={serviceCode=="4821" ? {unlocked=true; serviceCode=""} : toast "Wrong code"}
       if unlocked
         if tab=="floors"
@@ -136,16 +138,16 @@ App
             each f in floors
               Row between middle
                 Text.strong "{f.n}  {f.label}"
-                Toggle "Key card" bind=f.card
+                Toggle "Key card" @f.card
         if tab=="ads"
           Card gap=8
             each a in ads
-              Input "Title" bind=a.title
-              Input "Text" bind=a.body multiline
+              Input "Title" @a.title
+              Input "Text" @a.body multiline
         if tab=="load"
           Card gap=12
             Text.strong "Maximum load"
-            Slider bind=maxLoad min=300 max=1000
+            Slider @maxLoad min=300 max=1000
             Text.muted "{maxLoad} kg, about {floor(maxLoad/75)} people"
-            Input "Exit floor in fire mode" bind=exitFloor type=number
+            Input "Exit floor in fire mode" @exitFloor type=number
             Button "Save" onTap={emit saveService; toast "Saved"}

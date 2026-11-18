@@ -31,16 +31,16 @@ App fill=#FFFBF3
   Main
     Nav
       Heading "Recipes" level=1 font=serif color=#FF4F7A3A
-      Input "Search names or ingredients" bind=q icon="search" clearable w=280
+      Input "Search names or ingredients" @q icon="search" clearable w=280
     Column pad=24 gap=16 scroll
       Row gap=8
         each m in ["All","Breakfast","Lunch","Dinner"]
           ChoiceChip "{m}" selected={meal==m} onTap={meal=m}
       Row gap=16 middle
-        Select "Diet" items=["Any","Vegetarian","Vegan"] bind=diet w=180
+        Select "Diet" items=["Any","Vegetarian","Vegan"] @diet w=180
         Column grow
           Text.small "Ready in up to {maxMins} min"
-          Slider bind=maxMins min=10 max=90 step=5
+          Slider @maxMins min=10 max=90 step=5
         Button.ghost "Reset" onTap={q=""; meal="All"; diet="Any"; maxMins=90}
       Text.muted "{length(shown)} of {length(recipes)} recipes"
       if length(shown)==0
@@ -146,8 +146,8 @@ App fill=#FFFBF3
               if s.s>0
                 Badge.info "{duration(s.s)}"
   Sheet#plan "Add to your week"
-    SegmentedButton items=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] bind=pday
-    SegmentedButton items=["Breakfast","Lunch","Dinner"] bind=pmeal
+    SegmentedButton items=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] @pday
+    SegmentedButton items=["Breakfast","Lunch","Dinner"] @pmeal
     Text.muted "Replaces anything already in that slot."
     Button "Add to {pday} {lower(pmeal)}" onTap={week=append(removeWhere(week,w=>w.day==indexOf(days,pday)&&w.meal==indexOf(meals,pmeal)),{"day":indexOf(days,pday),"meal":indexOf(meals,pmeal),"rid":cur.id}); toast "Planned for {pday}"; close}
 
@@ -155,6 +155,7 @@ App fill=#FFFBF3
 state left=0
 state running=false
 state ended=false
+state step=0
 every 1s when running&&left>0 onTick={left=left-1}
 when left==0&&running onTrue={running=false; ended=true; announce "Timer finished: {cur.steps[step].t}"; sound "chime"; toast "Time is up"}
 Shortcut "ArrowRight" onPress={step=min(length(cur.steps)-1,step+1)}
@@ -173,10 +174,10 @@ App fill=#FFFBF3
       Row gap=12 middle
         Text.strong "Step {step+1} of {length(cur.steps)}"
         Progress {(step+1)/length(cur.steps)} grow
-      Pages bind=step items=cur.steps h=260 onPage={left=cur.steps[step].s; running=false; ended=false}
+      Pages @step items=cur.steps h=260 onPage={left=cur.steps[step].s; running=false; ended=false}
         Column center middle pad=24
           Text "{item.t}" size=34 center font=serif
-      Dots bind=step count={length(cur.steps)}
+      Dots @step count={length(cur.steps)}
       if cur.steps[step].s>0
         Card gap=12 radius=24 center
           Stack center middle
@@ -206,6 +207,8 @@ state sel=0
 state pickTo=0
 computed placed={map(range(21),k=>find(week,w=>w.day==k%7&&w.meal==floor(k/7)))}
 computed picks={filter(recipes,x=>trim(find)==""||contains(lower(x.name),lower(trim(find))))}
+state pday=""
+state pmeal=""
 App fill=#FFFBF3
   Sidebar fill=#FFF3E2
     Brand "Mise" icon="skillet" font=serif color=#FF4F7A3A
@@ -215,7 +218,7 @@ App fill=#FFFBF3
     NavItem "Favourites" icon="favorite" onTap={go favourites}
   Pane w=300 pad=16 gap=12 fill=#FFFFFFFF hide=phone
     Heading "Drag into the week" level=3 font=serif
-    Input "Find a recipe" bind=find icon="search"
+    Input "Find a recipe" @find icon="search"
     ListView gap=8 scroll
       each r in picks
         Row gap=8 middle drag=meal({"rid":r.id,"from":-1}) radius=12 pad=8 fill=#FFF3E2
@@ -287,8 +290,8 @@ App fill=#FFFBF3
     MenuItem "Remove" icon="delete" onTap={week=removeWhere(week,w=>w.day==sel%7&&w.meal==floor(sel/7)); toast "Removed from your week"}
   Sheet#slotPick "Choose a slot"
     Text.muted "Pick the day and meal for this recipe."
-    SegmentedButton items=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] bind=pday
-    SegmentedButton items=["Breakfast","Lunch","Dinner"] bind=pmeal
+    SegmentedButton items=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] @pday
+    SegmentedButton items=["Breakfast","Lunch","Dinner"] @pmeal
     Button "Add to week" onTap={week=append(removeWhere(week,w=>w.day==indexOf(days,pday)&&w.meal==indexOf(meals,pmeal)),{"day":indexOf(days,pday),"meal":indexOf(meals,pmeal),"rid":sel}); close}
   Dialog#confirmWeek "Clear the whole week?" "All 21 slots will be emptied."
     Row gap=8 end
@@ -319,8 +322,8 @@ App fill=#FFFBF3
       Text.muted "{count(items,x=>!contains(ticked,x.n))} to buy, merged from {length(week)} planned meals"
       Progress {length(items)==0?0:count(items,x=>contains(ticked,x.n))/length(items)}
       Row gap=8 middle
-        Input "Add an item" bind=newItem grow onSubmit={extra=trim(newItem)==""?extra:append(extra,{"n":trim(newItem),"q":1,"u":"","a":newAisle}); newItem=""}
-        Select items=aisles bind=newAisle w=140
+        Input "Add an item" @newItem grow onSubmit={extra=trim(newItem)==""?extra:append(extra,{"n":trim(newItem),"q":1,"u":"","a":newAisle}); newItem=""}
+        Select items=aisles @newAisle w=140
         Button "Add" icon="add" disabled={trim(newItem)==""} onTap={extra=append(extra,{"n":trim(newItem),"q":1,"u":"","a":newAisle}); newItem=""}
       if length(items)==0
         Column center gap=8 pad=48
@@ -398,34 +401,34 @@ App fill=#FFFBF3
         Button "Save recipe" icon="check" onTap={tried=true; recipes=valid?append(recipes,{"id":length(recipes)+1,"name":trim(nName),"kind":"bowl","meal":nMeal,"diet":nDiet,"mins":nMins,"lvl":"Easy","rate":0,"serv":nServ,"kcal":0,"pro":0,"carb":0,"fat":0,"ing":filter(nIng,x=>trim(x.n)!=""),"steps":map(filter(nSteps,x=>trim(x.t)!=""),x=>with(x,"s",x.m*60))}):recipes; toast valid?"Recipe added":"Please fix the highlighted fields"; nName=valid?"":nName; go {valid?"recipes":"add-recipe"}}
     Column pad=24 gap=16 scroll maxw=720
       Card gap=12 radius=16
-        Input "Recipe name" "Grandma's apple cake" bind=nName required error={tried&&length(trim(nName))<3?"Give it a name of at least 3 letters":""}
+        Input "Recipe name" "Grandma's apple cake" @nName required error={tried&&length(trim(nName))<3?"Give it a name of at least 3 letters":""}
         Row gap=12
-          Select "Meal" items=["Breakfast","Lunch","Dinner"] bind=nMeal grow
-          Select "Diet" items=["Any","Vegetarian","Vegan"] bind=nDiet grow
+          Select "Meal" items=["Breakfast","Lunch","Dinner"] @nMeal grow
+          Select "Diet" items=["Any","Vegetarian","Vegan"] @nDiet grow
         Row gap=12
-          Input "Minutes" type=number bind=nMins grow error={tried&&nMins<=0?"Must be more than 0":""}
-          Input "Servings" type=number bind=nServ grow error={tried&&nServ<=0?"Must be more than 0":""}
+          Input "Minutes" type=number @nMins grow error={tried&&nMins<=0?"Must be more than 0":""}
+          Input "Servings" type=number @nServ grow error={tried&&nServ<=0?"Must be more than 0":""}
       Card gap=12 radius=16
         Heading "Ingredients" level=3 font=serif
-        ReorderList bind=nIng handle
+        ReorderList @nIng handle
           each row in nIng
             Row gap=8 middle
               Icon "drag_handle"
-              Input "Qty" type=number bind=row.q w=80
-              Select items=["g","kg","ml","litre","tsp","tbsp","slices","cloves","handful",""] bind=row.u w=110
-              Input "Ingredient" bind=row.n grow error={tried&&trim(row.n)==""&&index==0?"Add at least one ingredient":""}
-              Select items=["Produce","Dairy","Meat","Bakery","Pantry","Other"] bind=row.a w=120
+              Input "Qty" type=number @row.q w=80
+              Select items=["g","kg","ml","litre","tsp","tbsp","slices","cloves","handful",""] @row.u w=110
+              Input "Ingredient" @row.n grow error={tried&&trim(row.n)==""&&index==0?"Add at least one ingredient":""}
+              Select items=["Produce","Dairy","Meat","Bakery","Pantry","Other"] @row.a w=120
               IconButton "delete" disabled={length(nIng)==1} onTap={nIng=removeAt(nIng,index)}
         Button.outline "Add ingredient" icon="add" onTap={nIng=append(nIng,{"q":"","u":"g","n":"","a":"Pantry"})}
       Card gap=12 radius=16
         Heading "Steps" level=3 font=serif
-        ReorderList bind=nSteps handle
+        ReorderList @nSteps handle
           each row in nSteps
             Row gap=8 top
               Icon "drag_handle"
               Text.strong "{index+1}."
-              Input "Describe this step" multiline bind=row.t grow error={tried&&trim(row.t)==""&&index==0?"Add at least one step":""}
-              Input "Timer min" type=number bind=row.m w=90
+              Input "Describe this step" multiline @row.t grow error={tried&&trim(row.t)==""&&index==0?"Add at least one step":""}
+              Input "Timer min" type=number @row.m w=90
               IconButton "delete" disabled={length(nSteps)==1} onTap={nSteps=removeAt(nSteps,index)}
         Button.outline "Add step" icon="add" onTap={nSteps=append(nSteps,{"t":"","m":0})}
       if tried&&!valid

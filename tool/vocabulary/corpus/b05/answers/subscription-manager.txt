@@ -23,7 +23,7 @@ App
     Nav
       Heading "Subscriptions" level=1
       Row gap=8
-        Input "Search" bind=q w=220
+        Input "Search" @q w=220
         Button "Add subscription" icon="add" onTap={open add}
     Column pad=24 gap=16
       if any(subs,s=>s.trial)
@@ -42,7 +42,7 @@ App
           Text.muted "{yearly ? 'Yearly total' : 'Monthly total'}"
           Row gap=8 middle
             Text.muted "Monthly"
-            Toggle bind=yearly
+            Toggle @yearly
             Text.muted "Yearly"
         Text "{money(yearly ? sum(subs,s=>s.price)*12 : sum(subs,s=>s.price),'$',2)}" size=48 weight=700
         Text.muted "across {length(subs)} subscriptions, next payment in {min(first(sortBy(subs,s=>s.left)).left,99)} days"
@@ -72,13 +72,13 @@ Dialog#add "Add subscription" "Pick from the catalogue or enter it by hand"
     each c in catalog
       ChoiceChip "{c.name}" selected={newName==c.name} onTap={newName=c.name; newPrice="{c.price}"}
   Divider
-  Input "Name" bind=newName
-  Input "Price" bind=newPrice type=number
-  Select "Billing cycle" bind=newCycle items=["Weekly","Monthly","Quarterly","Yearly"]
-  DatePicker "First bill" bind=newFirst
-  Toggle "Remind me" bind=newRemindOn
+  Input "Name" @newName
+  Input "Price" @newPrice type=number
+  Select "Billing cycle" @newCycle items=["Weekly","Monthly","Quarterly","Yearly"]
+  DatePicker "First bill" @newFirst
+  Toggle "Remind me" @newRemindOn
   if newRemindOn
-    Select "Reminder" bind=newRemind items=["1 day before","3 days before","1 week before"]
+    Select "Reminder" @newRemind items=["1 day before","3 days before","1 week before"]
   Row end gap=8
     Button.ghost "Cancel" onTap={close}
     Button "Add" onTap={newName!="" && newPrice!="" ? {subs=append(subs,{"id":length(subs)+10,"name":newName,"price":newPrice*1,"cat":"Other","color":"#FF6B7280","left":10,"cycle":newCycle,"trial":false}); toast "Added {newName}"; newName=""; newPrice=""; close} : toast "Enter a name and a price"}
@@ -181,7 +181,7 @@ App
       Heading "Insights" level=1
       Row gap=8 middle
         Text.muted "Monthly"
-        Toggle bind=yearly
+        Toggle @yearly
         Text.muted "Yearly"
     Column pad=24 gap=16
       Grid cols=2 gap=16

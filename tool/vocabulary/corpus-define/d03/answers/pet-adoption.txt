@@ -44,10 +44,10 @@ App
 Sheet#detail "Pet details"
   each pet in filter(pets, p => p.id==selected)
     Column gap=12 pad=16
-      Pages bind=photoAt h=220 peek=0.9
+      Pages @photoAt h=220 peek=0.9
         each photo in pet.photos
           Image "{photo}" radius=12
-      Dots bind=photoAt count={length(pet.photos)}
+      Dots @photoAt count={length(pet.photos)}
       Row between
         Heading "{pet.name}" level=3
         Badge.primary "{pet.species}"
@@ -74,9 +74,9 @@ Sheet#filters "Filters"
       ChoiceChip "Cat" selected={species=="Cat"} onTap={species="Cat"}
       ChoiceChip "Rabbit" selected={species=="Rabbit"} onTap={species="Rabbit"}
     Text.fieldLabel "Maximum age: {maxAge} years"
-    Slider bind=maxAge min=1 max=15
+    Slider @maxAge min=1 max=15
     Text.fieldLabel "Distance: within {maxDist} miles"
-    Slider bind=maxDist min=1 max=50
+    Slider @maxDist min=1 max=50
     Row gap=8
       Button.outline "Reset" onTap={species="All"; maxAge=15; maxDist=25}
       Button "Show pets" onTap={close}
@@ -113,7 +113,7 @@ App
   Main
     Nav
       Heading "Favourites" level=1
-      Select bind=sortBy items=["Name","Age","Distance"] w=160
+      Select @sortBy items=["Name","Age","Distance"] w=160
     Column pad=24 gap=16
       if length(favs)==0
         EmptyState "No favourites yet" "Swipe right on a pet to save it here." icon="favorite_border"
@@ -160,37 +160,37 @@ App
       Heading "Adoption application" level=1
       Text.muted "Step {step+1} of 4"
     Column pad=24 gap=16 maxw=640
-      StepIndicator bind=step items=["About you","Your home","References","Review"]
+      StepIndicator @step items=["About you","Your home","References","Review"]
       Progress {(step+1)/4}
       if step==0
         Card gap=12
           Heading "About you" level=3
-          Input "Full name" bind=fullName
-          Input "Email" "you@example.com" bind=email type=email
-          Input "Phone" bind=phone type=phone
+          Input "Full name" @fullName
+          Input "Email" "you@example.com" @email type=email
+          Input "Phone" @phone type=phone
       if step==1
         Card gap=12
           Heading "Your home" level=3
           Text.fieldLabel "Home type"
-          SegmentedButton bind=homeType items=["House","Apartment","Condo"]
+          SegmentedButton @homeType items=["House","Apartment","Condo"]
           Text.fieldLabel "Do you own or rent?"
-          SegmentedButton bind=ownRent items=["Own","Rent"]
-          Toggle "Yard" bind=yard
+          SegmentedButton @ownRent items=["Own","Rent"]
+          Toggle "Yard" @yard
           if yard
-            Toggle "Fenced yard" bind=fenced
-          Input "People in household" bind=household type=number
-          Toggle "Children under 12 at home" bind=kids
-          Input "Other pets (species and age)" bind=otherPets multiline
+            Toggle "Fenced yard" @fenced
+          Input "People in household" @household type=number
+          Toggle "Children under 12 at home" @kids
+          Input "Other pets (species and age)" @otherPets multiline
           Text.fieldLabel "Hours the pet would be alone: {hoursAlone}"
-          Slider bind=hoursAlone min=0 max=12
+          Slider @hoursAlone min=0 max=12
       if step==2
         Card gap=12
           Heading "Two references" level=3
           each r in refs
             Row gap=8 top
-              Input "Name" bind=r.name grow
-              Input "Relationship" bind=r.relation grow
-              Input "Phone" bind=r.phone type=phone grow
+              Input "Name" @r.name grow
+              Input "Relationship" @r.relation grow
+              Input "Phone" @r.phone type=phone grow
               IconButton "delete" tooltip="Remove" onTap={refs=removeAt(refs,index)}
           Button.outline "Add reference" icon="add" visible={length(refs)<3} onTap={refs=append(refs,{"name":"","relation":"","phone":""})}
       if step==3
@@ -199,7 +199,7 @@ App
           Text "{fullName}, {email}, {phone}"
           Text "{homeType} ({ownRent}), household of {household}, {yard ? (fenced ? 'fenced yard' : 'unfenced yard') : 'no yard'}"
           Text "{length(refs)} references"
-          Checkbox "I confirm the details above are true" bind=agree
+          Checkbox "I confirm the details above are true" @agree
       Row between
         Button.outline "Back" visible={step>0} onTap={step=step-1}
         Spacer grow

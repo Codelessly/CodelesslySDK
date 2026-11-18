@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "MapPanel",
-  "doc": "A drawn map (an illustration: blocks, streets, a park, water, a dot for you) with numbered pins: MapPanel bind=pick count=5 shows pins 1 to 5 and keeps the tapped pin's number in your variable (0: none), the same variable the PlaceRow lines use.",
+  "doc": "A drawn map (an illustration: blocks, streets, a park, water, a dot for you) with numbered pins: MapPanel @pick count=5 shows pins 1 to 5 and keeps the tapped pin's number in your variable (0: none), the same variable the PlaceRow lines use.",
   "props": [
    {
     "key": "value",

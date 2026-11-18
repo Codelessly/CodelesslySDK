@@ -14,6 +14,8 @@ state axles=[{"name":"Steer","kg":6800,"limit":7500},{"name":"Drive","kg":11900,
 state gvmLimit=40000
 state tickets=[]
 state lastTicket=null
+state permitNo=""
+state permitBy=""
 every 150 when !locked onTick={t=t+1; locked=t>=12}
 App
   Sidebar
@@ -47,9 +49,9 @@ App
         Card grow gap=12
           Text.panelTitle "Truck"
           Row gap=8
-            Input "Plate" "e.g. KX 4821" bind=plate grow
+            Input "Plate" "e.g. KX 4821" @plate grow
             IconButton "photo_camera" tooltip="Capture plate" onTap={open plateCam}
-          Select "Product" bind=product items={map(products,p=>p.name)}
+          Select "Product" @product items={map(products,p=>p.name)}
           Text.muted "Price per tonne: {money(find(products,p=>p.name==product).price,"$",2)}"
           Button "Start ticket" onTap={plate=="" ? toast "Enter a plate" : (current=plate; firstWeigh=0; secondWeigh=0; t=0; locked=false; toast "Ticket opened for {plate}")}
       Row gap=16
@@ -93,8 +95,8 @@ App
     Camera facing=back onCapture={plate=result.text; close; toast "Read {result.text}"}
     Button.outline "Cancel" onTap={close}
   Dialog#permit "Overweight permit" "Record the permit that allows this load"
-    Input "Permit number" bind=permitNo
-    Input "Issued by" bind=permitBy
+    Input "Permit number" @permitNo
+    Input "Issued by" @permitBy
     Button "Allow load" onTap={permitNo=="" ? toast "Permit number required" : (toast "Permit {permitNo} recorded"; close)}
 
 ### Queue
@@ -102,6 +104,10 @@ state qfilter="all"
 state qsearch=""
 state sel=""
 state queue=[{"id":"q1","plate":"KX 4821","driver":"Ola Brandt","firm":"Brandt Haulage","product":"Crushed granite 20mm","state":"waiting","eta":4},{"id":"q2","plate":"LM 3307","driver":"Priya Nair","firm":"Nair Aggregates","product":"Washed sand","state":"waiting","eta":9},{"id":"q3","plate":"TR 9952","driver":"Jon Weiss","firm":"Weiss & Sons","product":"Road base","state":"waiting","eta":15},{"id":"q4","plate":"HB 1180","driver":"Mina Okafor","firm":"Okafor Bulk","product":"Cement, bulk","state":"on scale","eta":0}]
+state newPlate=""
+state newDriver=""
+state newFirm=""
+state newProduct=""
 App
   Sidebar
     Brand "Scalehouse" icon="scale"
@@ -114,7 +120,7 @@ App
     Nav
       Heading "Queue" level=1
       Row gap=8
-        Input "Search plate or driver" bind=qsearch w=220
+        Input "Search plate or driver" @qsearch w=220
         Button "Add truck" onTap={open addTruck}
     Column pad=24 gap=16 scroll
       Row gap=8
@@ -144,10 +150,10 @@ App
     MenuItem "Move to front" icon="arrow_upward" onTap={queue=concat(filter(queue,x=>x.id==sel),filter(queue,x=>x.id!=sel))}
     MenuItem "Remove" icon="delete" onTap={queue=removeWhere(queue,x=>x.id==sel); toast "Removed from queue"}
   Dialog#addTruck "Add truck" "Put a truck in the queue"
-    Input "Plate" bind=newPlate
-    Input "Driver" bind=newDriver
-    Input "Firm" bind=newFirm
-    Select "Product" bind=newProduct items=["Crushed granite 20mm","Washed sand","Road base","Cement, bulk"]
+    Input "Plate" @newPlate
+    Input "Driver" @newDriver
+    Input "Firm" @newFirm
+    Select "Product" @newProduct items=["Crushed granite 20mm","Washed sand","Road base","Cement, bulk"]
     Button "Add to queue" onTap={newPlate=="" ? toast "Plate required" : (queue=append(queue,{"id":"n" + length(queue),"plate":newPlate,"driver":newDriver,"firm":newFirm,"product":newProduct,"state":"waiting","eta":20}); newPlate=""; newDriver=""; newFirm=""; close)}
 
 ### Ticket
@@ -200,7 +206,7 @@ Page
         Text.muted "At {money(lastTicket.price,"$",2)} per tonne"
         Text.strong "{money(lastTicket.amount,"$",2)}"
       Row gap=8 end
-        Stepper "Copies" bind=copies min=1 max=4
+        Stepper "Copies" @copies min=1 max=4
         Button.outline "Copy code" icon="content_copy" onTap={copy lastTicket.code; toast "Code copied"}
         Button "Print" icon="print" onTap={emit print lastTicket; toast "Printing {copies} copies"}
         Button.ghost "Next truck" onTap={go weigh-desk}
@@ -208,6 +214,7 @@ Page
 ### Tickets
 state tickets=[{"code":"WB-1038","plate":"MD 7741","product":"Washed sand","net":24100,"amount":337.4,"hour":8},{"code":"WB-1039","plate":"PC 2290","product":"Road base","net":27650,"amount":324.89,"hour":9},{"code":"WB-1040","plate":"JT 5518","product":"Cement, bulk","net":18400,"amount":1766.4,"hour":10},{"code":"WB-1041","plate":"LM 3307","product":"Washed sand","net":23800,"amount":333.2,"hour":11},{"code":"WB-1042","plate":"KX 4821","product":"Crushed granite 20mm","net":26320,"amount":486.92,"hour":14}]
 state q=""
+state day=""
 App
   Sidebar
     Brand "Scalehouse" icon="scale"
@@ -220,7 +227,7 @@ App
     Nav
       Heading "Day's tickets" level=1
       Row gap=8
-        DatePicker "Day" bind=day w=160
+        DatePicker "Day" @day w=160
         Button.outline "Export CSV" icon="download" onTap={emit exportDay}
     Column pad=24 gap=16 scroll
       Grid cols=3 gap=16
@@ -236,7 +243,7 @@ App
       Card gap=8
         Text.panelTitle "Net tonnes by hour"
         BarChart values={map(tickets,t=>t.net/1000)} labels={map(tickets,t=>t.hour + ":00")} h=180
-      Input "Search plate or code" bind=q
+      Input "Search plate or code" @q
       Card gap=0
         Row pad=12 gap=12 border-bottom=#FFE0E0E0
           Text.strong "Code" w=90

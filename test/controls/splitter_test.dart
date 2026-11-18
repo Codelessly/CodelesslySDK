@@ -13,7 +13,7 @@ Page
     Row
       Column w={paneWidth} clip visible={paneWidth>0}
         Text "Map"
-      Splitter#splitGrip bind=paneWidth min=0 max=700 step=20 collapseAt=48 label="Resize map and stations"
+      Splitter#splitGrip @paneWidth min=0 max=700 step=20 collapseAt=48 label="Resize map and stations"
       Column grow
         Text "Stations"
 ''';
@@ -168,7 +168,7 @@ Page
     Column
       Column h={paneHeight}
         Text "Map"
-      Splitter#splitGrip bind=paneHeight orientation=vertical min=0 max=500 step=20 label="Resize map height" w=fill
+      Splitter#splitGrip @paneHeight orientation=vertical min=0 max=500 step=20 label="Resize map height" w=fill
       Column
         Text "Stations"
 ''',

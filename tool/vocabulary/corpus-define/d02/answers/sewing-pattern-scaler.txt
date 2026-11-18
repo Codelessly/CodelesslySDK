@@ -19,7 +19,7 @@ App
     Nav
       Heading "Cloth layout" level=1
       Row gap=8
-        Select bind=size items=["XS","S","M","L","XL"]
+        Select @size items=["XS","S","M","L","XL"]
         Button.outline "Help" onTap={open help}
         Button "Print pattern" onTap={go print}
     Row gap=16 pad=24 top
@@ -29,7 +29,7 @@ App
             Text.strong "Fabric {fabricW} cm wide"
             Row gap=8
               Text.muted "Snap to edges"
-              Toggle bind=snap
+              Toggle @snap
           ClothCanvas pieces={pieces} width={fabricW} scale={find(sizes,s=>s.name==size).k} seam={seam} snap={snap} selected={sel} h=420 onSelect={sel=result} onMove={pieces=updateWhere(pieces,p=>p.id==sel,p=>with(with(p,"x",result.x),"y",result.y))}
           Row gap=8 middle
             Text.caption "Selected: {find(pieces,p=>p.id==sel).name}"
@@ -50,12 +50,12 @@ App
           Text.caption "Includes a 15 percent margin for the grain and waste."
         Card gap=12
           Text.strong "Seam allowance"
-          Slider bind=seam min=0.5 max=3 step=0.5
+          Slider @seam min=0.5 max=3 step=0.5
           Text.muted "{seam} cm, shown as a dashed line"
         Card gap=12
           Text.strong "Fabric width"
-          SegmentedButton bind=fabricW items=["90","112","140","150"]
-          Input "Custom width (cm)" type=number bind=fabricW
+          SegmentedButton @fabricW items=["90","112","140","150"]
+          Input "Custom width (cm)" type=number @fabricW
         Card gap=8
           Text.strong "Legend"
           Row gap=8 middle
@@ -89,7 +89,7 @@ App
   Main
     Nav
       Heading "Sizes" level=1
-      SegmentedButton bind=unit items=["cm","in"]
+      SegmentedButton @unit items=["cm","in"]
     Row gap=16 pad=24 top
       Column grow gap=16
         Card gap=12
@@ -121,7 +121,7 @@ App
               Text "{fixed(s.hip*(unit=="in"?0.3937:1),0)}" grow
         Card gap=8
           Text.strong "Seam allowance"
-          Slider bind=seam min=0.5 max=3 step=0.5
+          Slider @seam min=0.5 max=3 step=0.5
           Text.muted "{seam} cm all round"
 
 // draws one pattern piece as an outline sized to w and h, a dashed line seam cm outside it, a grain line arrow and notch marks along the edge at the given shares. Shapes cannot be drawn from the core words, so it is a labelled box.
@@ -165,17 +165,17 @@ App
       Pane w=320 pad=16 gap=16
         Card gap=12
           Text.strong "Paper"
-          SegmentedButton bind=paper items=["A4","Letter"]
+          SegmentedButton @paper items=["A4","Letter"]
           Text.fieldLabel "Pages across"
-          Slider bind=cols min=1 max=4 step=1
+          Slider @cols min=1 max=4 step=1
           Text.fieldLabel "Pages down"
-          Slider bind=rows min=1 max=4 step=1
+          Slider @rows min=1 max=4 step=1
           Text.fieldLabel "Overlap {tileOverlap} cm"
-          Slider bind=tileOverlap min=0 max=2 step=0.5
+          Slider @tileOverlap min=0 max=2 step=0.5
         Card gap=8
           Row between
             Text.strong "Registration squares"
-            Toggle bind=showReg
+            Toggle @showReg
           Text.caption "A 2 cm square in each corner marks where neighbouring pages meet."
           Row gap=8 middle
             Icon "crop_square"

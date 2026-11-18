@@ -48,7 +48,7 @@ Page
             IconButton "chevron_left" onTap={month="November 2026"}
             Text.strong "{month}"
             IconButton "chevron_right" onTap={month="January 2027"}
-          Calendar bind=selDay month={month} marked={unique(concat(shows[0].days,concat(shows[1].days,shows[2].days)))} markColor=#FFD4A64A onSelect={selDay=result}
+          Calendar @selDay month={month} marked={unique(concat(shows[0].days,concat(shows[1].days,shows[2].days)))} markColor=#FFD4A64A onSelect={selDay=result}
         Column w=320 gap=12
           Heading "Fri {selDay} December" level=3
           if count(perfs,p=>p.day==selDay)==0
@@ -67,6 +67,7 @@ state perfId="p1"
 state ratings=[{"stars":5,"n":62},{"stars":4,"n":28},{"stars":3,"n":9},{"stars":2,"n":3},{"stars":1,"n":1}]
 state cast=[{"name":"Imogen Hale","role":"Hamlet"},{"name":"Dev Rao","role":"Claudius"},{"name":"Marguerite Obi","role":"Gertrude"},{"name":"Tom Whitlock","role":"Polonius"}]
 state reviews=[{"who":"The Evening Standard","stars":5,"text":"A Hamlet that finally lets the silences speak."},{"who":"Stagewise","stars":4,"text":"Hale is magnetic; the second half drags a little."}]
+state waitEmail=""
 Page
   Nav sticky fill=#FF120712
     Brand "Proscenium" icon="theater_comedy" color=#FFD4A64A
@@ -89,7 +90,7 @@ Page
           Chip "Dim lighting"
   Section tint
     Column gap=16
-      SegmentedButton bind=tab items=["about","cast","reviews"]
+      SegmentedButton @tab items=["about","cast","reviews"]
       if tab=="about"
         Text "Directed by Sofia Marchetti. Music by Lena Ode. Designed by Julian Frost. Recommended for ages 12 and over; haze and strobe are used in Act Two."
       if tab=="cast"
@@ -137,7 +138,7 @@ Page
       Card fill=#FF3A1128 gap=8
         Text.strong "Sold out? We release returns every Tuesday at noon."
   Dialog#waitlist "Waiting list" "We will email you if seats are returned."
-    Input "Email" type=email bind=waitEmail
+    Input "Email" type=email @waitEmail
     Button "Notify me" onTap={emit waitlist waitEmail; toast "You are on the list"; close}
 
 ### Seats
@@ -181,13 +182,13 @@ App
           Row between middle gap=12
             Row gap=8 middle
               Text.strong "Seats together"
-              Stepper bind=count min=1 max=8
+              Stepper @count min=1 max=8
               Button.secondary "Best available" icon="auto_awesome" onTap={chosen=bestAvailable(plan,count,taken)}
             Row gap=8
               IconButton "remove" onTap={zoom=clamp(zoom-0.25,1,3)} show=phone
               IconButton "add" onTap={zoom=clamp(zoom+0.25,1,3)} show=phone
           Card fill=#FF0B050C pad=12
-            SeatMap#plan data={plan} chosen={chosen} bind=chosen max=8 curve=true stage="top" legend=true bandColors=true freeColor=#FF3B2547 takenColor=#FF1B1220 chosenColor=#FFFFE08A accessibleIcon="accessible" keyboard=true zoom={zoom} pan={pan} pinchZoom=true panEnabled=true minZoom=1 maxZoom=3 announce="Row {seat.row}, seat {seat.number}, {seat.band.name}, {money(seat.price,'$',2)}, {seat.state}" onHover={hover=result} onFocus={focus=result} onChange={chosen=result; holdOn=true; holdLeft=holdOn ? holdLeft : 600; basket=map(result,s=>with(s,"concession","Adult")); holdEnds=today()} onLimit={toast "You can choose up to eight seats"} onZoom={zoom=result.zoom; pan=result.pan}
+            SeatMap#plan data={plan} chosen={chosen} @chosen max=8 curve=true stage="top" legend=true bandColors=true freeColor=#FF3B2547 takenColor=#FF1B1220 chosenColor=#FFFFE08A accessibleIcon="accessible" keyboard=true zoom={zoom} pan={pan} pinchZoom=true panEnabled=true minZoom=1 maxZoom=3 announce="Row {seat.row}, seat {seat.number}, {seat.band.name}, {money(seat.price,'$',2)}, {seat.state}" onHover={hover=result} onFocus={focus=result} onChange={chosen=result; holdOn=true; holdLeft=holdOn ? holdLeft : 600; basket=map(result,s=>with(s,"concession","Adult")); holdEnds=today()} onLimit={toast "You can choose up to eight seats"} onZoom={zoom=result.zoom; pan=result.pan}
           Row gap=12 wrap
             each b in plan.bands
               Row gap=4 middle
@@ -219,7 +220,7 @@ App
                   Text.strong "Row {b.row}, seat {b.number}"
                   Text.muted "{b.band.name}"
                 IconButton "close" onTap={chosen=removeWhere(chosen,s=>s.id==b.id); basket=removeWhere(basket,s=>s.id==b.id)}
-              Select "Concession" items=["Adult","Child","Student","Senior"] bind=b.concession
+              Select "Concession" items=["Adult","Child","Student","Senior"] @b.concession
               Text.strong "{money(b.concession=='Adult' ? b.price : b.price*0.75,'$',2)}"
           Divider
           Row between
@@ -229,7 +230,7 @@ App
       Sheet#basketSheet "Your seats" show=phone
         each b in basket
           ListTile "Row {b.row}, seat {b.number}" subtitle="{b.band.name}"
-            Select items=["Adult","Child","Student","Senior"] bind=b.concession
+            Select items=["Adult","Child","Student","Senior"] @b.concession
         Row between
           Text.strong "Total"
           Text.strong "{money(sum(basket,b=>b.concession=='Adult' ? b.price : b.price*0.75),'$',2)}"
@@ -252,6 +253,7 @@ state agree=false
 state basket=[]
 project basket=[]
 project holdLeft=0
+state method=""
 every 1s when holdLeft>0 onTick={holdLeft=holdLeft-1}
 App
   Sidebar w=240 hide=phone fill=#FF120712
@@ -269,16 +271,16 @@ App
           if step==1
             Card gap=12
               Heading "Your details" level=3
-              Input "Full name" bind=name required minLength=2 error="Enter your full name"
-              Input "Email" bind=email type=email required pattern="email" error="Enter a valid email"
-              Input "Phone" bind=phone type=phone hint="Optional, for changes to the performance"
-              Checkbox "I accept the booking terms" bind=agree
+              Input "Full name" @name required minLength=2 error="Enter your full name"
+              Input "Email" @email type=email required pattern="email" error="Enter a valid email"
+              Input "Phone" @phone type=phone hint="Optional, for changes to the performance"
+              Checkbox "I accept the booking terms" @agree
               Button "Send me a code" disabled={!(length(trim(name))>1 && contains(email,'@') && agree)} onTap={codeSent=true; step=2; toast "Code sent to {email}"}
           if step==2
             Card gap=12
               Heading "Enter the six-digit code" level=3
               Text.muted "Sent to {email}"
-              CodeInput bind=code length=6 autoAdvance=true onComplete={step=3}
+              CodeInput @code length=6 autoAdvance=true onComplete={step=3}
               Row gap=12
                 Button.ghost "Resend code" onTap={toast "A new code is on its way"}
                 Button.ghost "Change email" onTap={step=1}
@@ -286,7 +288,7 @@ App
             Card gap=12
               Heading "Payment" level=3
               Text.muted "You will be taken to our payment partner. Nothing is charged until you confirm."
-              Select "Pay with" items=["Card","Apple Pay","Gift voucher"] bind=method
+              Select "Pay with" items=["Card","Apple Pay","Gift voucher"] @method
               Button "Confirm and pay {money(sum(basket,b=>b.price),'$',2)}" onTap={emit confirmOrder; go tickets}
         Card w=320 gap=8 fill=#FF2A0F2E
           Heading "Summary" level=3
@@ -344,7 +346,7 @@ Page
       Badge.error "Sold out"
       Text.muted "Every seat has gone. Returned seats are released on Tuesdays at noon and we will tell you first."
       if !joined
-        Input "Email" type=email bind=joinEmail
+        Input "Email" type=email @joinEmail
         Button "Join the waiting list" onTap={joined=true; emit waitlist joinEmail; toast "You are on the list"}
       if joined
         Text.success "You are on the list for this performance."

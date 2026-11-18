@@ -24,7 +24,7 @@ App
       Heading "Deck plan" level=1
       Row gap=12
         Badge.info "Departs in {duration(seconds)}"
-        SegmentedButton items=["lower","upper"] bind=deck
+        SegmentedButton items=["lower","upper"] @deck
         Button "Add vehicle" onTap={open addVehicle}
     Column pad=24 gap=16 scroll
       if abs(sum(filter(lanes,l=>l.id=="L1"||l.id=="U1"),l=>sum(l.vehicles,v=>v.weight))-sum(filter(lanes,l=>l.id=="L4"||l.id=="U2"),l=>sum(l.vehicles,v=>v.weight)))>15
@@ -49,7 +49,7 @@ App
             Row between
               Text.strong "{upper(deck)} DECK, seen from above"
               Text.muted "Bow at the top"
-            DeckPlan bind=deck
+            DeckPlan @deck
               each lane in lanes
                 if lane.deck==deck
                   Column gap=4
@@ -88,11 +88,11 @@ App
           Text.muted "Total on board: {fixed(sum(lanes,l=>sum(l.vehicles,v=>v.weight)),1)} t"
           Text.muted "Vehicles: {sum(lanes,l=>length(l.vehicles))}"
   Dialog#addVehicle "Add a vehicle" "Type the plate and the length as the driver gives them"
-    Input "Plate" "HX21 KLP" bind=plate
-    Select "Type" items=["Car","Van","Lorry","Motorbike","Coach"] bind=vtype
+    Input "Plate" "HX21 KLP" @plate
+    Select "Type" items=["Car","Van","Lorry","Motorbike","Coach"] @vtype
     Row gap=12
-      Input "Length (m)" type=number bind=vlen grow
-      Input "Weight (t)" type=number bind=vweight grow
+      Input "Length (m)" type=number @vlen grow
+      Input "Weight (t)" type=number @vweight grow
     Button "Add to queue" onTap={trim(plate)=="" ? toast "Enter a plate" : queue=append(queue,{"id":concat([],[plate])[0],"plate":upper(plate),"type":vtype,"len":vlen,"weight":vweight,"dest":"Dublin"});plate="";close}
   Menu#vehicleMenu
     MenuItem "Send back to queue" icon="undo" onTap={queue=append(queue,first(filter(concat([],flatten(lanes)),v=>v.id==sel)));lanes=map(lanes,l=>with(l,"vehicles",removeWhere(l.vehicles,v=>v.id==sel)))}
@@ -176,9 +176,9 @@ App
         BarChart values={map(lanes,l=>sum(l.vehicles,v=>v.weight))} labels={map(lanes,l=>l.name)} h=200
       Card gap=8
         Text.strong "Before the deck closes"
-        Checkbox "Lights off and handbrakes on" bind=checks.lights
-        Checkbox "Wheel chocks under lorries" bind=checks.chocks
-        Checkbox "Lashings checked on the upper deck" bind=checks.lashings
-        Checkbox "Bow ramp raised" bind=checks.ramp
+        Checkbox "Lights off and handbrakes on" @checks.lights
+        Checkbox "Wheel chocks under lorries" @checks.chocks
+        Checkbox "Lashings checked on the upper deck" @checks.lashings
+        Checkbox "Bow ramp raised" @checks.ramp
         if length(queue)>0
           Text.danger "{length(queue)} vehicles are not yet on a lane."

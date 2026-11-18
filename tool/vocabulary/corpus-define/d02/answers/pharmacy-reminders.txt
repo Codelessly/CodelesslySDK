@@ -4,6 +4,9 @@ state nowMins=600
 state doses=[{"id":1,"name":"Metformin","detail":"500 mg tablet, with breakfast","time":"8:00 AM","mins":480,"part":"Morning","status":"due"},{"id":2,"name":"Lisinopril","detail":"10 mg tablet","time":"8:00 AM","mins":480,"part":"Morning","status":"taken"},{"id":3,"name":"Vitamin D3","detail":"2000 IU softgel","time":"9:30 AM","mins":570,"part":"Morning","status":"due"},{"id":4,"name":"Metformin","detail":"500 mg tablet, with dinner","time":"6:00 PM","mins":1080,"part":"Evening","status":"due"},{"id":5,"name":"Atorvastatin","detail":"20 mg tablet","time":"9:00 PM","mins":1260,"part":"Evening","status":"due"}]
 state caregiver=true
 state warnShown=true
+state newName=""
+state newStrength=""
+state newForm=""
 App
   Sidebar
     Brand "Dosewell" icon="medication"
@@ -11,7 +14,7 @@ App
     NavItem "Medicines" icon="medication_liquid" selected={tab=="medicines"} onTap={go medicines}
     NavItem "Month" icon="calendar_month" selected={tab=="month"} onTap={go month}
     Spacer grow
-    Toggle "Share with caregiver" bind=caregiver onChange={toast result ? "Maria Alvarez can now see your doses" : "Sharing turned off"}
+    Toggle "Share with caregiver" @caregiver onChange={toast result ? "Maria Alvarez can now see your doses" : "Sharing turned off"}
     Text.muted "Signed in as Jordan Ellis"
   Main
     Nav
@@ -43,10 +46,10 @@ Dialog#interaction "Interaction warning" "Lisinopril with potassium"
     Button.outline "Dismiss" onTap={warnShown=false; close}
     Button "Call pharmacy" onTap={link tel:+15555550142; close}
 Dialog#addMed "Add a medicine"
-  Input "Name" "Metformin" bind=newName
+  Input "Name" "Metformin" @newName
   Row gap=8
-    Input "Strength" "500 mg" bind=newStrength grow
-    Select "Form" items=["Tablet","Capsule","Liquid","Injection","Patch"] bind=newForm grow
+    Input "Strength" "500 mg" @newStrength grow
+    Select "Form" items=["Tablet","Capsule","Liquid","Injection","Patch"] @newForm grow
   Button "Save" onTap={emit addMedicine; toast "Medicine added"; close}
 
 ### Medicines
@@ -56,6 +59,8 @@ state mode="Set times"
 state hours=8
 state days=["Mon","Wed","Fri"]
 state caregiver=true
+state t1=""
+state t2=""
 App
   Sidebar
     Brand "Dosewell" icon="medication"
@@ -80,21 +85,21 @@ App
           Text.muted "{m.strength} {m.form}"
           Refill left={m.left} total={m.total} perDay={m.perDay} onRefill={toast "Refill requested for {m.name}"}
           Text.fieldLabel "Schedule"
-          SegmentedButton bind=mode items=["Every n hours","Set times","Days of week"]
+          SegmentedButton @mode items=["Every n hours","Set times","Days of week"]
           if mode=="Every n hours"
             Row gap=8 middle
               Text "Every"
-              Input bind=hours type=number w=80
+              Input @hours type=number w=80
               Text "hours"
           if mode=="Set times"
             Row gap=8
-              TimePicker "First dose" bind=t1 grow
-              TimePicker "Second dose" bind=t2 grow
+              TimePicker "First dose" @t1 grow
+              TimePicker "Second dose" @t2 grow
           if mode=="Days of week"
             Row gap=6
               each dd in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
                 FilterChip "{dd}" selected={contains(days,dd)} onTap={days=contains(days,dd) ? without(days,dd) : append(days,dd)}
-          Toggle "Share with caregiver" bind=caregiver
+          Toggle "Share with caregiver" @caregiver
           Button "Save schedule" onTap={toast "Schedule saved"}
 Menu#medMenu
   MenuItem "Edit" icon="edit" onTap={toast "Editing"}
@@ -130,7 +135,7 @@ App
           Text.muted "Adherence"
           Text "{round(100*count(month,x=>x.s==\"taken\")/length(month),0)}%" size=32 weight=700
       Card gap=12
-        MonthCalendar days={month} bind=day firstWeekday="Sun" onPick={day=result}
+        MonthCalendar days={month} @day firstWeekday="Sun" onPick={day=result}
         Row gap=16
           Row gap=6 middle
             Box w=12 h=12 radius=6 fill=#FF16A34A
@@ -147,7 +152,7 @@ App
           Badge.neutral "{d.s}"
 
 // MonthCalendar draws a month as a grid of day cells coloured by status.
-define MonthCalendar days=[] bind=day firstWeekday="Mon" onPick
+define MonthCalendar days=[] @day firstWeekday="Mon" onPick
   state day=1
   Column gap=8
     Grid cols=7 gap=6

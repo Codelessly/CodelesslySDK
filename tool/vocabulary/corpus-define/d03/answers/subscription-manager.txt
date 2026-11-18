@@ -10,6 +10,7 @@ state first=""
 state remind="3 days before"
 state subs=[{"id":1,"name":"Netflix","cat":"Streaming","price":15.49,"cycle":"Monthly","color":"#FFDC2626","days":3,"trial":false,"rise":false},{"id":2,"name":"Spotify","cat":"Streaming","price":11.99,"cycle":"Monthly","color":"#FF16A34A","days":6,"trial":false,"rise":true},{"id":3,"name":"Notion","cat":"Work","price":96,"cycle":"Yearly","color":"#FF111827","days":2,"trial":true,"rise":false},{"id":4,"name":"iCloud+","cat":"Storage","price":2.99,"cycle":"Monthly","color":"#FF2563EB","days":11,"trial":false,"rise":false},{"id":5,"name":"Adobe Creative Cloud","cat":"Work","price":59.99,"cycle":"Monthly","color":"#FFB91C1C","days":14,"trial":false,"rise":true},{"id":6,"name":"Gym Membership","cat":"Health","price":39,"cycle":"Monthly","color":"#FFEA580C","days":19,"trial":false,"rise":false}]
 state monthly=sum(subs,s=>s.cycle=="Yearly" ? s.price/12 : s.price)
+state q=""
 App
   Sidebar
     Brand "Recurring" icon="autorenew"
@@ -23,7 +24,7 @@ App
     Nav
       Heading "Subscriptions" level=1
       Row gap=8
-        SearchBar "Search subscriptions" bind=q w=220
+        SearchBar "Search subscriptions" @q w=220
         Button "Add subscription" icon="add" onTap={open add}
     Column pad=24 gap=16 scroll
       if any(subs,s=>s.trial && s.days<=3)
@@ -34,7 +35,7 @@ App
             Text.muted "{yearly ? 'Per year' : 'Per month'}"
             Row gap=8 middle
               Text.small "Monthly"
-              Switch bind=yearly
+              Switch @yearly
               Text.small "Yearly"
           Text "{money(yearly ? monthly*12 : monthly, '$', 2)}" size=44 weight=700
           Text.muted "across {length(subs)} subscriptions"
@@ -49,7 +50,7 @@ App
       Card gap=12
         Row between middle
           Text.strong "By next payment date"
-          SegmentedButton bind=sort items=["date","price"]
+          SegmentedButton @sort items=["date","price"]
         each s in (sort=="date" ? sortBy(subs,x=>x.days) : sortByDesc(subs,x=>x.price))
           Row gap=12 middle border-bottom=#FFE5E7EB pad=[0,8,0,8]
             LogoMark "{s.name}" color={s.color}
@@ -85,11 +86,11 @@ App
       Chip "Disney+" onTap={name="Disney+"; price="13.99"}
       Chip "YouTube Premium" onTap={name="YouTube Premium"; price="13.99"}
       Chip "Dropbox" onTap={name="Dropbox"; price="11.99"}
-    Input "Name" bind=name
-    Input "Price" bind=price type=number
-    Select "Billing cycle" bind=cycle items=["Weekly","Monthly","Quarterly","Yearly"]
-    DatePicker "First bill" bind=first
-    Select "Remind me" bind=remind items=["Never","1 day before","3 days before","1 week before"]
+    Input "Name" @name
+    Input "Price" @price type=number
+    Select "Billing cycle" @cycle items=["Weekly","Monthly","Quarterly","Yearly"]
+    DatePicker "First bill" @first
+    Select "Remind me" @remind items=["Never","1 day before","3 days before","1 week before"]
     Button "Add subscription" onTap={name!="" && price!="" ? {subs=append(subs,{"id":length(subs)+10,"name":name,"cat":"Other","price":price+0,"cycle":cycle,"color":"#FF7C3AED","days":7,"trial":false,"rise":false}); name=""; price=""; toast "Subscription added"; close} : toast "Enter a name and a price"}
 
 ### Calendar and insights
@@ -142,7 +143,7 @@ Page
       Card gap=12
         if step==0
           Text.strong "Why are you leaving?"
-          Select "Reason" bind=reason items=["Too expensive","Not using it","Switching to another app","Just testing"]
+          Select "Reason" @reason items=["Too expensive","Not using it","Switching to another app","Just testing"]
           Text.muted "Your answer stays on your device."
         if step==1
           Text.strong "Open Settings"

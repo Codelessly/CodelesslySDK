@@ -13,6 +13,7 @@ state q=""
 state sort="Recommended"
 state openNow=false
 state price=[0,50]
+state address=""
 Page
   Nav sticky
     Brand "Tiffin" icon="ramen_dining" color=#FFE5391F
@@ -25,8 +26,8 @@ Page
     Column gap=20
       Heading "Hungry? Dinner is 25 minutes away." level=1
       Row gap=12
-        Input "Deliver to" "Street, number" bind=address icon="location_on" grow
-        Input "Search dishes or restaurants" bind=q icon="search" grow
+        Input "Deliver to" "Street, number" @address icon="location_on" grow
+        Input "Search dishes or restaurants" @q icon="search" grow
         Button.outline "Filters" icon="tune" onTap={open filters}
       Row scroll gap=8
         each c in cuisines
@@ -74,10 +75,10 @@ Page
 Sheet#filters "Filters"
   Column gap=16
     Text.fieldLabel "Price per person: {money(price[0],'$',0)} to {money(price[1],'$',0)}"
-    RangeSlider bind=price min=0 max=50 step=2
+    RangeSlider @price min=0 max=50 step=2
     Text.fieldLabel "Sort by"
-    Select bind=sort items=["Recommended","Rating","Fastest","Delivery fee"]
-    Toggle "Open now" bind=openNow
+    Select @sort items=["Recommended","Rating","Fastest","Delivery fee"]
+    Toggle "Open now" @openNow
     Row gap=8
       Button.outline "Reset" grow onTap={price=[0,50]; sort="Recommended"; openNow=false}
       Button "Show results" grow onTap={close}
@@ -108,7 +109,7 @@ Sheet#basket "Your basket" stops=[0.6,0.92]
           Text.strong "{money(l.unit*l.qty,'$',2)}" w=70
       Divider
       Row gap=8 middle
-        Input "Promo code" "TIFFIN10" bind=promo grow
+        Input "Promo code" "TIFFIN10" @promo grow
         Button.outline "Apply" onTap={promoState=upper(trim(promo))=="TIFFIN10"?"ok":"bad"}
       if promoState=="ok"
         Badge.success "TIFFIN10 applied: 10% off"
@@ -155,7 +156,7 @@ Page
     Column pad=16 gap=4 shrinkable
       Heading "{find(restaurants,r=>r.id==rid).name}" level=1 color=#FFFFFFFF
       Text "{find(restaurants,r=>r.id==rid).cuisine} · ★ {find(restaurants,r=>r.id==rid).rating} · {find(restaurants,r=>r.id==rid).eta} min · {money(find(restaurants,r=>r.id==rid).fee,'$',2)} delivery" color=#FFFFFFFF hideOnCollapse
-  ScrollTabs#cats bind=cat items={unique(map(filter(menu,d=>d.rid==rid),d=>d.cat))} target="menu-{item}" sticky spy fill=#FFFFFAF0
+  ScrollTabs#cats @cat items={unique(map(filter(menu,d=>d.rid==rid),d=>d.cat))} target="menu-{item}" sticky spy fill=#FFFFFAF0
   Section
     Column gap=24
       each c in unique(map(filter(menu,d=>d.rid==rid),d=>d.cat))
@@ -193,7 +194,7 @@ Sheet#dish "{cur.name}" "{cur.desc}" stops=[0.6,0.95] dialog=desktop
       Text.heading "Extras (optional)"
       each e in cur.extras
         Checkbox "{e.name}  +{money(e.price,'$',2)}" checked={contains(ex,e.name)} onChange={ex=contains(ex,e.name)?without(ex,e.name):append(ex,e.name)}
-    Input "Note for the kitchen" "No coriander, please" bind=note multiline
+    Input "Note for the kitchen" "No coriander, please" @note multiline
     Row between middle
       Text.heading "Quantity"
       Row gap=12 middle
@@ -219,18 +220,18 @@ Page
       Heading "Checkout" level=1
       Card gap=12 radius=24
         Heading "Delivery address" level=3
-        Input "Address" bind=address icon="location_on"
-        Input "Door code or note for the courier" bind=door
+        Input "Address" @address icon="location_on"
+        Input "Door code or note for the courier" @door
       Card gap=12 radius=24
         Heading "Delivery time" level=3
         Row gap=8
           ChoiceChip "ASAP · 25 min" selected={when=="ASAP"} onTap={when="ASAP"}
           ChoiceChip "Schedule" selected={when=="Later"} onTap={when="Later"}
         if when=="Later"
-          TimePicker "Arrive at" bind=slot
+          TimePicker "Arrive at" @slot
       Card gap=12 radius=24
         Heading "Payment" level=3
-        Select bind=pay items=["Visa ending 4242","Apple Pay","Cash on delivery"]
+        Select @pay items=["Visa ending 4242","Apple Pay","Cash on delivery"]
       Card gap=8 radius=24
         Heading "Order summary" level=3
         each l in cart
@@ -265,7 +266,7 @@ Page
       Card radius=24 gap=0
         Map style=drawn h=260 route=[[0.1,0.8],[0.3,0.6],[0.55,0.55],[0.8,0.25]] courier={step/3} start="Saffron & Salt" end="You"
       Card radius=24 gap=12
-        Stepper bind=step
+        Stepper @step
           Step "Order confirmed" icon="receipt_long"
           Step "Preparing your food" icon="skillet"
           Step "Courier on the way" icon="delivery_dining"

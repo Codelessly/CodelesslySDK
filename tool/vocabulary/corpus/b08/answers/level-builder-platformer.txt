@@ -38,7 +38,7 @@ App
       Row gap=8
         IconButton "undo" tooltip="Undo" disabled={length(history)==0} onTap={length(history)>0 ? {future=append(future,tiles); tiles=last(history); history=removeAt(history,length(history)-1)} : toast "Nothing to undo"}
         IconButton "redo" tooltip="Redo" disabled={length(future)==0} onTap={length(future)>0 ? {history=append(history,tiles); tiles=last(future); future=removeAt(future,length(future)-1)} : toast "Nothing to redo"}
-        SegmentedButton bind=mode items=["paint","erase","rect"]
+        SegmentedButton @mode items=["paint","erase","rect"]
         Button.outline "Play-test" icon="play_arrow" hide=phone onTap={playing=true}
         Button "Publish" icon="publish" onTap={checked=false; open publish}
     Column pad=24 gap=16
@@ -57,7 +57,7 @@ App
               IconButton "remove" tooltip="Zoom out" onTap={zoom=max(0.5,zoom-0.25)}
               Text.small "{round(zoom*100,0)}%"
               IconButton "add" tooltip="Zoom in" onTap={zoom=min(2,zoom+0.25)}
-          TileGrid bind=tiles cols=120 rows=14 size=32 zoom={zoom} scroll=horizontal tool={tool} mode={mode} h=460 onPaintStart={history=append(history,tiles); future=[]} onChange={canFinish=any(result,t=>t.t=="start") && any(result,t=>t.t=="goal")}
+          TileGrid @tiles cols=120 rows=14 size=32 zoom={zoom} scroll=horizontal tool={tool} mode={mode} h=460 onPaintStart={history=append(history,tiles); future=[]} onChange={canFinish=any(result,t=>t.t=="start") && any(result,t=>t.t=="goal")}
           Row gap=8 between
             Text.muted "Drag to paint. Erase removes tiles. Rect fills a rectangle."
             Row gap=8
@@ -100,6 +100,7 @@ state tags=["lava","vertical"]
 state lives=3
 state timeLimit=180
 state allowSpin=true
+state newTag=""
 App
   Sidebar
     Brand "Blockyard" icon="grid_view"
@@ -114,10 +115,10 @@ App
         Button "Save" icon="save" onTap={emit saveDetails; toast "Details saved"}
     Column pad=24 gap=16 maxw=720
       Card gap=16
-        Input "Level name" "Name your level" bind=levelName
+        Input "Level name" "Name your level" @levelName
         Text.fieldLabel "Difficulty"
-        SegmentedButton bind=difficulty items=["Easy","Medium","Hard","Brutal"]
-        Input "Description" "What makes this level fun?" bind=description multiline
+        SegmentedButton @difficulty items=["Easy","Medium","Hard","Brutal"]
+        Input "Description" "What makes this level fun?" @description multiline
         Text.fieldLabel "Tags"
         Row gap=8
           each tag in tags
@@ -128,11 +129,11 @@ App
         Row gap=16
           Column grow gap=4
             Text.fieldLabel "Lives: {lives}"
-            Slider bind=lives min=1 max=9
+            Slider @lives min=1 max=9
           Column grow gap=4
             Text.fieldLabel "Time limit: {duration(timeLimit)}"
-            Slider bind=timeLimit min=30 max=600
-        Toggle "Allow wall-slide" bind=allowSpin
+            Slider @timeLimit min=30 max=600
+        Toggle "Allow wall-slide" @allowSpin
       Card gap=8
         Text.strong "Preview"
         Row gap=8
@@ -140,7 +141,7 @@ App
           Text "{levelName}"
         Text.muted "{lives} lives, {duration(timeLimit)}"
   Dialog#addTag "Add a tag"
-    Input "Tag" bind=newTag
+    Input "Tag" @newTag
     Button "Add" onTap={newTag!="" ? {tags=append(tags,trim(lower(newTag))); newTag=""; close} : toast "Type a tag"}
 
 ### My levels
@@ -158,7 +159,7 @@ App
     Nav
       Heading "My levels" level=1
       Row gap=8
-        Input "Search" bind=q w=220
+        Input "Search" @q w=220
         Button "New level" icon="add" onTap={emit newLevel; go editor}
     Column pad=24 gap=16
       Row gap=8

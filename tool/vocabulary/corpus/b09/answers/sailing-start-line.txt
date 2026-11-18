@@ -104,19 +104,19 @@ App
           Card gap=12
             Text.strong "Favoured end"
             Row gap=12 middle
-              Compass bind=wind arrow="favoured" size=96
+              Compass @wind arrow="favoured" size=96
               Column gap=4
                 Text.strong "{wind - (lineBearing-90) > 0 ? "Pin end" : "Committee boat end"}"
                 Text.muted "Bias {abs(round(wind-(lineBearing-90),0))} degrees"
-            Slider "Wind direction" bind=wind min=0 max=359
+            Slider "Wind direction" @wind min=0 max=359
             Text.caption "Wind from {wind} degrees"
           Card gap=8
             Text.muted "Time to burn"
             Text "{duration(max(0,secs-dist/speed))}" size=40 weight=700
             Text.caption "Gun in {duration(secs)}"
   Dialog#settings "Line settings" "Used for bias and distance"
-    Input "Line bearing, degrees" bind=lineBearing type=number
-    Input "Boat speed, m/s" bind=speed type=number
+    Input "Line bearing, degrees" @lineBearing type=number
+    Input "Boat speed, m/s" @speed type=number
     Button "Done" onTap={close}
 
 ### Track
@@ -137,7 +137,7 @@ App
     Nav
       Heading "Track" level=1
       Row gap=8
-        Toggle "Recording" bind=recording onChange={emit recording result}
+        Toggle "Recording" @recording onChange={emit recording result}
         Button.outline "Export GPX" icon="download" onTap={emit exportGpx recorded[sel].name}
     Column pad=24 gap=16 scroll
       Row gap=16 top

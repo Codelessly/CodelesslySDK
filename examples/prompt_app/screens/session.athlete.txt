@@ -13,7 +13,7 @@ Column scroll gap=12 pad=16
     Text.heading1 "{round}/{today.rounds}"
     Text.caption "{phase=='work'?'WORK':'REST'} · seconds left"
     Text.heading1 "{left}"
-    Progress bind={0} value={left/(phase=="work"?today.work:today.rest)}
+    Progress value={left/(phase=="work"?today.work:today.rest)}
   Row gap=8
     InlineStat "{today.work}s work"
     InlineStat "{today.rest}s rest"

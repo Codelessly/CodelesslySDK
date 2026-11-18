@@ -34,7 +34,7 @@ App
               MapPin "{m.kind}" x={m.x} y={m.y} color={m.severity==3 ? "#FFD32F2F" : m.severity==2 ? "#FFF9A825" : "#FF2E7D32"} onTap={draft=with(with(draft,"x",m.x),"y",m.y); kind=m.kind; severity=m.severity; note=m.note; open markDialog}
           Row between
             IconButton "chevron_left" tooltip="Previous photo" onTap={at=max(0,at-1)}
-            Dots bind=at count={length(photos)}
+            Dots @at count={length(photos)}
             IconButton "chevron_right" tooltip="Next photo" onTap={at=min(length(photos)-1,at+1)}
           Text.muted "Tap the picture where the problem is, then choose its type and severity."
         Column w=320 gap=12
@@ -63,14 +63,14 @@ App
               ListTile "{m.kind}" subtitle="{m.note}" onTap={draft=with(with(draft,"x",m.x),"y",m.y); kind=m.kind; severity=m.severity; note=m.note; open markDialog}
                 Badge.neutral "Level {m.severity}"
   Dialog#markDialog "Mark an issue" "Placed at {round(draft.x*100,0)}% across, {round(draft.y*100,0)}% down"
-    SegmentedButton bind=kind items=["Kerb","Ramp","Crossing","Blocked path"]
+    SegmentedButton @kind items=["Kerb","Ramp","Crossing","Blocked path"]
     Text.fieldLabel "Severity"
-    SegmentedButton bind=severity items=[1,2,3]
+    SegmentedButton @severity items=[1,2,3]
     Text.caption "1 passable with care, 2 hard for a wheelchair, 3 impassable"
-    Input "Note" "What did you see?" bind=note multiline
-    Input "Measurement" "Height or width in mm" bind=width type=number
+    Input "Note" "What did you see?" @note multiline
+    Input "Measurement" "Height or width in mm" @width type=number
     Row gap=12 middle
-      PhotoPicker "Photo of tape measure" bind=tape accept="image" capture=true
+      PhotoPicker "Photo of tape measure" @tape accept="image" capture=true
       if tape!=""
         Image "{tape}" w=96 h=72 radius=8
     Row end gap=8
@@ -94,7 +94,7 @@ App
     Nav
       Heading "Review queue" level=1
       Row gap=8
-        Select bind=filterKind items=["All","Kerb","Ramp","Crossing","Blocked path"] w=180
+        Select @filterKind items=["All","Kerb","Ramp","Crossing","Blocked path"] w=180
         Button.outline "Confirm all level 1" onTap={marks=updateWhere(marks,m=>m.status=="pending" && m.severity==1,m=>with(with(m,"status","confirmed"),"reviewer",reviewer)); toast "Level 1 marks confirmed"}
     Row top
       Column grow pad=24 gap=12 scroll
@@ -136,7 +136,7 @@ App
     MenuItem "Reject" icon="close" onTap={open rejectDialog}
   Dialog#rejectDialog "Reject this mark" "Tell the surveyor why"
     state reason=""
-    Select "Reason" bind=reason items=["Not an access issue","Wrong place","Photo unclear","Duplicate"]
+    Select "Reason" @reason items=["Not an access issue","Wrong place","Photo unclear","Duplicate"]
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button.destructive "Reject mark" onTap={reason=="" ? toast "Choose a reason" : {marks=updateWhere(marks,m=>m.id==sel,m=>with(with(m,"status","rejected"),"reason",reason)); toast "Rejected"; close}}
@@ -163,11 +163,11 @@ App
     Column pad=24 gap=16 maxw=720 scroll
       Card gap=12
         Text.strong "What goes in"
-        Select "Council" bind=council items=["Northfield City Council","Eastbank Borough Council"]
-        SegmentedButton bind=scope items=["Confirmed only","All marks"]
-        Select "Format" bind=format items=["PDF report","CSV of marks","GeoJSON for the map"]
-        Toggle "Include photos and tape measurements" bind=includePhotos
-        Toggle "Include street score by stretch" bind=includeScore
+        Select "Council" @council items=["Northfield City Council","Eastbank Borough Council"]
+        SegmentedButton @scope items=["Confirmed only","All marks"]
+        Select "Format" @format items=["PDF report","CSV of marks","GeoJSON for the map"]
+        Toggle "Include photos and tape measurements" @includePhotos
+        Toggle "Include street score by stretch" @includeScore
       Card gap=8
         Text.strong "Summary"
         Row between

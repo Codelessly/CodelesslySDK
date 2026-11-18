@@ -21,8 +21,8 @@ App
     Nav
       Heading "Overview" level=1
       Row gap=12 middle
-        SegmentedButton bind=range items=["7d","30d","90d"]
-        Input "Search" bind=q w=220
+        SegmentedButton @range items=["7d","30d","90d"]
+        Input "Search" @q w=220
         Button "New order" onTap={emit newOrder}
     Column pad=24 gap=20 scroll
       Grid cols=4 gap=16

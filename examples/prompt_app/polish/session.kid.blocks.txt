@@ -15,8 +15,8 @@ Screen
     StatTrio values={[today.rounds,today.work+" s",today.rest+" s"]} labels=["Rounds","Jump","Breathe"] icons=["repeat_rounded","bolt_rounded","favorite_rounded"]
     BigButton#start "Let's jump!" onPressed={phase="set"}
   if phase=="set"||phase=="work"||phase=="rest"
-    TapPad#pad bind=count label="Your jumps" hint="Tap!"
-    SessionControls#controls bind=paused finish="All done" onPressed={phase="done"}
+    TapPad#pad @count label="Your jumps" hint="Tap!"
+    SessionControls#controls @paused finish="All done" onPressed={phase="done"}
   if phase=="done"
     SessionSummary "You did it!" "{streak+1} days in a row. High five!" eyebrow="{saved?'Saved':'Saving'}" jumps={count} best={max(map(sessions,s=>s.jumps))} rounds={round} of={today.rounds} seconds={elapsed} streak={streak+1} streakLabel="days in a row" audience="kid"
     BigButton#done "Yay, done!" icon="check_rounded" onPressed={emit open_home}

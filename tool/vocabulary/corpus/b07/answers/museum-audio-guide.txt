@@ -4,6 +4,7 @@ state floor="Ground"
 state filters=[]
 state code=""
 state stops=[{"n":12,"title":"Winged Victory cast","room":"Hall of Casts"},{"n":14,"title":"The Amber Room panel","room":"Baltic Gallery"},{"n":21,"title":"Sunflower fragments","room":"Garden Room"},{"n":27,"title":"Tide clock","room":"Maritime Wing"}]
+state lang=""
 App
   Sidebar
     Brand "Wanderlust Wing" icon="headphones"
@@ -16,11 +17,11 @@ App
     Nav
       Heading "Floor plan" level=1
       Row gap=8
-        SegmentedButton bind=floor items=["Ground","First","Second"]
+        SegmentedButton @floor items=["Ground","First","Second"]
         IconButton "qr_code_scanner" tooltip="Scan a label" onTap={open scan}
     Column pad=24 gap=16 scroll
       Row gap=12
-        Input "Stop number" "e.g. 14" bind=code type=number grow
+        Input "Stop number" "e.g. 14" @code type=number grow
         Button "Play" onTap={isEmpty(find(stops,s=>s.n==code)) ? toast "No stop with that number" : {stop=code; go stop}}
       Row gap=8
         FilterChip "Cafe" icon="local_cafe" selected={contains(filters,"cafe")} onTap={filters=contains(filters,"cafe") ? without(filters,"cafe") : append(filters,"cafe")}
@@ -55,7 +56,7 @@ App
     Scanner onScan={stop=result; close; go stop}
     Button.ghost "Type the number instead" onTap={close}
   Dialog#language "Language"
-    Radio bind=lang items=["English","Francais","Deutsch","Espanol","Italiano","Japanese"]
+    Radio @lang items=["English","Francais","Deutsch","Espanol","Italiano","Japanese"]
     Button "Done" onTap={close}
 
 ### Now playing
@@ -93,10 +94,10 @@ App
         Transcript lines={transcript} position={pos} onSeek={pos=result}
       Row gap=12 middle
         Text.fieldLabel "Speed"
-        SegmentedButton bind=speed items=["0.75x","1x","1.5x","2x"]
+        SegmentedButton @speed items=["0.75x","1x","1.5x","2x"]
     Footer
       Column gap=4 pad=12
-        Slider bind=pos min=0 max=240
+        Slider @pos min=0 max=240
         Row between middle
           Text.caption "{duration(pos)}"
           Row gap=8 middle
@@ -153,6 +154,7 @@ App
 state email=""
 state note=""
 state sent=false
+state withText=false
 App
   Sidebar
     Brand "Wanderlust Wing" icon="headphones"
@@ -178,7 +180,7 @@ App
       if sent
         Text.success "Sent to {email}. Enjoy the rest of your visit."
   Dialog#email "Email my favourites" "We send one email and keep no list"
-    Input "Your email" "you@example.com" bind=email type=email
-    Input "Add a note" bind=note multiline
-    Checkbox "Include transcripts" bind=withText
+    Input "Your email" "you@example.com" @email type=email
+    Input "Add a note" @note multiline
+    Checkbox "Include transcripts" @withText
     Button "Send" onTap={contains(email,"@") ? {emit sendBag {"email":email,"note":note,"stops":favs}; sent=true; close; toast "Bag on its way"} : toast "Enter a valid email"}

@@ -1,4 +1,5 @@
 state tab=0
+state query=""
 Column h=fill
   Column grow scroll pad=16 gap=16
     if tab==0
@@ -34,7 +35,7 @@ Column h=fill
           Text.muted "$59"
     if tab==1
       Text.pageTitle "Search"
-      Input "Search products" "Shoes, jackets, bags…" bind=query
+      Input "Search products" "Shoes, jackets, bags…" @query
       Text.sectionTitle "Trending searches"
       Row gap=8
         Chip "Sneakers"

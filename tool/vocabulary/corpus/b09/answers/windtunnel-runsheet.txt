@@ -42,7 +42,7 @@ App
             Text.fieldLabel "Status" w=90
           each r in runs
             Row gap=8 pad=[8,8,8,8] middle fill={r.id==cur ? "#FFE3F0FF" : "#00000000"} radius=6
-              Checkbox bind=r.done w=50
+              Checkbox @r.done w=50
               Text.strong "{r.id}" w=50
               Text "{r.speed} m/s" w=90
               Text "{r.angle}°" w=90
@@ -57,17 +57,17 @@ App
           Card gap=12
             Text.strong "Model angle"
             Row between middle
-              Stepper bind=angle min=-4 max=16 step=2 unit="°"
+              Stepper @angle min=-4 max=16 step=2 unit="°"
               Text.heading "{angle}°"
             if any(runs,r=>r.angle==angle && r.speed==speed && r.done)
               Row gap=8 middle
                 Icon "warning" color=#FFB26A00
                 Text.small "Repeat run: {angle}° at {speed} m/s is already done"
-            Select "Tunnel speed" items=["30","40","50"] bind=speed
+            Select "Tunnel speed" items=["30","40","50"] @speed
             Button "Add run" onTap={runs=append(runs,{"id":length(runs)+1,"speed":speed,"angle":angle,"flap":"0°","done":false}); toast "Run added"}
           Card gap=8
             Text.strong "Notes for run {cur}"
-            Input "Note" "What did you see?" multiline bind=noteDraft
+            Input "Note" "What did you see?" multiline @noteDraft
             Button.outline "Save note" onTap={notes=with(notes,cur,noteDraft); noteDraft=""; toast "Note saved"}
             if notes[cur]
               Text.muted "{notes[cur]}"
@@ -99,13 +99,13 @@ App
       Grid cols=3 gap=16
         Card gap=8 center
           Text.strong "Lift"
-          Gauge bind=lift min=0 max=10 limit=8 unit="N"
+          Gauge value={lift} min=0 max=10 limit=8 unit="N"
         Card gap=8 center
           Text.strong "Drag"
-          Gauge bind=drag min=0 max=2 limit=1.5 unit="N"
+          Gauge value={drag} min=0 max=2 limit=1.5 unit="N"
         Card gap=8 center
           Text.strong "Side force"
-          Gauge bind=side min=-1 max=1 limit=0.8 unit="N"
+          Gauge value={side} min=-1 max=1 limit=0.8 unit="N"
       Card gap=8
         Row between
           Text.strong "Drag polar"
@@ -120,6 +120,7 @@ App
     Button "Resume tunnel" onTap={paused=false; close}
 
 ### Speed ramp
+state speed=0
 App
   Sidebar
     Brand "Gustbook" icon="air"
@@ -138,7 +139,7 @@ App
           Text.strong "Speed over time (m/s)"
           Text.heading "{last(ramp)} m/s"
         AreaChart values={ramp} labels=["0s","10s","20s","30s","40s","50s","60s"] h=240
-        Slider "Target speed" bind=speed min=0 max=50
+        Slider "Target speed" @speed min=0 max=50
         Row gap=8
           Button.outline "Hold" onTap={emit rampHold}
           Button.destructive "Stop tunnel" icon="stop" onTap={emit tunnelStop; toast "Tunnel stopping"}

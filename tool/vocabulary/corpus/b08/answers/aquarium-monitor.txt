@@ -26,20 +26,20 @@ App
       Grid cols=3 gap=16
         Card gap=8 center
           Text.panelTitle "Temperature"
-          Gauge bind=temp min=22 max=30 safe=[24.5,26.5] needle unit="°C"
+          Gauge value={temp} min=22 max=30 safe=[24.5,26.5] needle unit="°C"
           Text.muted "Safe 24.5 to 26.5"
         Card gap=8 center
           Text.panelTitle "Salinity"
-          Gauge bind=salinity min=1.018 max=1.032 safe=[1.024,1.027] needle unit="sg"
+          Gauge value={salinity} min=1.018 max=1.032 safe=[1.024,1.027] needle unit="sg"
           Text.muted "Safe 1.024 to 1.027"
         Card gap=8 center
           Text.panelTitle "pH"
-          Gauge bind=ph min=7.6 max=8.6 safe=[8.0,8.3] needle
+          Gauge value={ph} min=7.6 max=8.6 safe=[8.0,8.3] needle
           Text.muted "Safe 8.0 to 8.3"
       Card gap=12
         Row between
           Text.panelTitle "Probe history"
-          SegmentedButton bind=range items=["Day","Week","Month"]
+          SegmentedButton @range items=["Day","Week","Month"]
         LineChart labels=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] series=[{"name":"Temperature","values":[25.6,25.8,26.1,25.7,25.5,25.9,25.8]},{"name":"pH","values":[8.1,8.1,8.2,8.0,8.1,8.1,8.1]}] h=220
       Card gap=12
         Row between
@@ -89,9 +89,9 @@ App
           Text.muted "Sunrise {sunrise}, sunset {sunset}, peak {peak}%"
         DayCurve h=200 sunrise=sunrise sunset=sunset peak=peak draggable onChange={sunrise=result.sunrise; sunset=result.sunset; peak=result.peak}
         Row gap=12
-          TimePicker "Sunrise" bind=sunrise
-          TimePicker "Sunset" bind=sunset
-          Slider bind=peak min=10 max=100
+          TimePicker "Sunrise" @sunrise
+          TimePicker "Sunset" @sunset
+          Slider @peak min=10 max=100
         Button "Save schedule" onTap={emit saveLights {"sunrise":sunrise,"sunset":sunset,"peak":peak}; toast "Light schedule saved"}
       Text.sectionTitle "Dosing pumps"
       each p in pumps
@@ -100,7 +100,7 @@ App
             Column gap=4
               Text.strong "{p.name}"
               Text.muted "{p.ml} ml per dose at {join(p.times,', ')}"
-            Toggle bind=p.on
+            Toggle @p.on
           Row between
             Text.caption "Reservoir {p.left} ml"
             Progress {p.left/1000}
@@ -113,12 +113,12 @@ App
       each t in find(pumps,x=>x.id==sel).times
         Chip "{t}" onTap={pumps=updateWhere(pumps,x=>x.id==sel,x=>with(x,"times",without(x.times,t)))}
     Row gap=8
-      TimePicker "Add time" bind=newTime grow
+      TimePicker "Add time" @newTime grow
       Button "Add" onTap={newTime!="" ? {pumps=updateWhere(pumps,x=>x.id==sel,x=>with(x,"times",append(x.times,newTime))); newTime=""} : toast "Pick a time"}
     Button "Done" onTap={emit savePump find(pumps,x=>x.id==sel); close}
   Dialog#dose "Manual dose" "Adds to the tank now"
     Text.strong "{find(pumps,x=>x.id==sel).name}"
-    Input "Amount in ml" type=number bind=manual
+    Input "Amount in ml" type=number @manual
     Row gap=8 end
       Button.ghost "Cancel" onTap={close}
       Button "Dose now" onTap={manual>0 ? {emit dose {"pump":sel,"ml":manual}; pumps=updateWhere(pumps,x=>x.id==sel,x=>with(x,"left",x.left-manual)); toast "Dosed {manual} ml"; close} : toast "Enter an amount"}
@@ -143,7 +143,7 @@ App
     Nav
       Heading "Livestock" level=1
       Row gap=8
-        Input "Search" bind=q w=220
+        Input "Search" @q w=220
         Button "Add animal" icon="add" onTap={fname=""; fcount=1; open addAnimal}
     Column pad=24 gap=12 scroll
       Text.muted "{sum(animals,a=>a.count)} animals in {length(animals)} species"
@@ -161,10 +161,10 @@ App
     MenuItem "Add one" icon="add" onTap={animals=updateWhere(animals,x=>x.id==sel,x=>with(x,"count",x.count+1))}
     MenuItem "Remove one" icon="remove" onTap={animals=updateWhere(animals,x=>x.id==sel,x=>with(x,"count",max(1,x.count-1)))}
     MenuItem "Delete" icon="delete" onTap={animals=removeWhere(animals,x=>x.id==sel); toast "Removed"}
-  Lightbox#shots photos={map(animals,a=>({"url":a.photo,"caption":a.name}))} bind=at
+  Lightbox#shots photos={map(animals,a=>({"url":a.photo,"caption":a.name}))} @at
   Dialog#addAnimal "Add animal"
-    Input "Name" bind=fname
-    Input "Count" type=number bind=fcount
+    Input "Name" @fname
+    Input "Count" type=number @fcount
     Button "Add" onTap={fname!="" ? {animals=append(animals,{"id":length(animals)+10,"name":fname,"count":fcount,"added":today(),"photo":"","note":""}); close; toast "Added"} : toast "Give it a name"}
 
 ### Tests and alarms
@@ -176,6 +176,10 @@ state tno3=5
 state alarms=[{"id":1,"name":"Temperature high","rule":"above 27.0 C","on":true},{"id":2,"name":"Temperature low","rule":"below 24.0 C","on":true},{"id":3,"name":"pH out of band","rule":"outside 7.9 to 8.4","on":false}]
 state phone="+1 555 0142"
 state sms=true
+state aname=""
+state aprobe=""
+state ahigh=""
+state alow=""
 App
   Sidebar
     Brand "Reefkeeper" icon="waves"
@@ -192,10 +196,10 @@ App
       Card gap=12
         Text.panelTitle "Log a test"
         Grid cols=4 gap=12
-          Input "pH" type=number bind=tph
-          Input "KH (dKH)" type=number bind=tkh
-          Input "Calcium (ppm)" type=number bind=tca
-          Input "Nitrate (ppm)" type=number bind=tno3
+          Input "pH" type=number @tph
+          Input "KH (dKH)" type=number @tkh
+          Input "Calcium (ppm)" type=number @tca
+          Input "Nitrate (ppm)" type=number @tno3
         Button "Save test" onTap={log=append(log,{"date":today(),"ph":tph,"kh":tkh,"ca":tca,"nitrate":tno3}); emit testLogged; toast "Test saved"}
       Card gap=12
         Text.panelTitle "Recent tests"
@@ -204,20 +208,20 @@ App
       Card gap=12
         Row between
           Text.panelTitle "Alarms by text"
-          Toggle "Send texts" bind=sms
-        Input "Phone" type=phone bind=phone
+          Toggle "Send texts" @sms
+        Input "Phone" type=phone @phone
         each al in alarms
           Row between middle
             Column gap=2
               Text.strong "{al.name}"
               Text.muted "{al.rule}"
-            Toggle bind=al.on
+            Toggle @al.on
         Row gap=8
           Button.outline "Send test text" onTap={emit testSms phone; toast "Text sent to {phone}"}
           Button.outline "Add alarm" onTap={open newAlarm}
   Dialog#newAlarm "New alarm"
-    Input "Name" bind=aname
-    Select "Probe" items=["Temperature","Salinity","pH"] bind=aprobe
-    Input "Above" type=number bind=ahigh
-    Input "Below" type=number bind=alow
+    Input "Name" @aname
+    Select "Probe" items=["Temperature","Salinity","pH"] @aprobe
+    Input "Above" type=number @ahigh
+    Input "Below" type=number @alow
     Button "Create" onTap={aname!="" ? {alarms=append(alarms,{"id":length(alarms)+10,"name":aname,"rule":"{aprobe} outside {alow} to {ahigh}","on":true}); close} : toast "Name the alarm"}

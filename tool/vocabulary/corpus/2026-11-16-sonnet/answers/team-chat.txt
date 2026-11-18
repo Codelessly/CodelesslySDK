@@ -7,6 +7,7 @@ state convos=[{"id":"c1","name":"design-crit","kind":"channel","unread":3,"last"
 state people=[{"id":"p1","name":"Maya Reyes","role":"Design"},{"id":"p2","name":"Jonas Weber","role":"Engineering"},{"id":"p3","name":"Priya Nair","role":"Product"},{"id":"p4","name":"Tom Okafor","role":"Engineering"},{"id":"p5","name":"Ana Costa","role":"Marketing"}]
 state picked=[]
 state pickQ=""
+state sel=false
 Shortcut "ctrl+k" onPress={focus search}
 Shortcut "alt+down" onPress={active=nextId(convos,active)}
 Shortcut "alt+up" onPress={active=prevId(convos,active)}
@@ -18,7 +19,7 @@ App
         IconButton "edit_square" onTap={open newConvo}
         IconButton "settings" onTap={go settings}
     Column pad=[16,0,16,8]
-      FuzzySearch#search "Search conversations" bind=q items={convos} keys=["name","last"] onResults={hits=result}
+      FuzzySearch#search "Search conversations" @q items={convos} keys=["name","last"] onResults={hits=result}
     Column scroll grow
       Text.caption "CHANNELS AND PEOPLE" pad=[16,8,16,4]
       each c in convos
@@ -40,7 +41,7 @@ App
       Text.muted "Choose a channel or start a new message."
       Button "New conversation" onTap={open newConvo}
 Dialog#newConvo "New conversation" "Pick one or more people"
-  Input "Search people" bind=pickQ
+  Input "Search people" @pickQ
   Column gap=4 h=240 scroll
     each p in filter(people,x=>contains(lower(x.name),lower(pickQ)))
       ListTile onTap={picked=contains(picked,p.id)?without(picked,p.id):append(picked,p.id)}
@@ -48,7 +49,7 @@ Dialog#newConvo "New conversation" "Pick one or more people"
         Column grow
           Text.strong "{p.name}"
           Text.caption "{p.role}"
-        Checkbox bind=sel onChange={picked=result?append(picked,p.id):without(picked,p.id)}
+        Checkbox @sel onChange={picked=result?append(picked,p.id):without(picked,p.id)}
   Row between
     Text.muted "{length(picked)} selected"
     Row gap=8
@@ -63,6 +64,7 @@ state photos=[]
 state typing="Priya is typing"
 state showDetails=false
 state replyId=""
+state following=""
 Shortcut "alt+down" onPress={emit nextConversation}
 Shortcut "alt+up" onPress={emit prevConversation}
 App
@@ -82,7 +84,7 @@ App
         IconButton "search"
         IconButton "info" onTap={showDetails=!showDetails; open detailsSheet}
     Stack grow
-      FollowScroll#thread bind=following onFollowChange={showNew=!result} newestOnAppend=true
+      FollowScroll#thread @following onFollowChange={showNew=!result} newestOnAppend=true
         Column gap=4 pad=16
           each m in msgs
             if index==0 || msgs[index-1].day!=m.day
@@ -118,7 +120,7 @@ Popover#emoji
   Grid cols=6 gap=4
     each e in ["👍","❤️","😂","🎉","🔥","👀"]
       IconButton "{e}" onTap={msgs=updateWhere(msgs,x=>x.id==sel,x=>with(x,"reactions",any(x.reactions,y=>y.e==e)?updateWhere(x.reactions,y=>y.e==e,y=>with(with(y,"n",y.n+1),"me",true)):append(x.reactions,{"e":e,"n":1,"me":true}))); close}
-Lightbox#shots photos={photos} bind=at
+Lightbox#shots photos={photos} @at
 
 ### Composer
 state draft=""
@@ -140,7 +142,7 @@ App
             Chip "{a}" onDelete={attachments=without(attachments,a)}
       Row gap=8 bottom
         IconButton "attach_file" onTap={open attachMenu}
-        Input "Message design-crit" bind=draft multiline autogrow maxLines=5 grow onSubmit={send} submitKey=enter newlineKey=shift+enter
+        Input "Message design-crit" @draft multiline autogrow maxLines=5 grow onSubmit={send} submitKey=enter newlineKey=shift+enter
         IconButton "mood" onTap={open emojiPicker}
         IconButton "send" disabled={trim(draft)=="" && length(attachments)==0} onTap={msgs=append(msgs,{"id":"m{length(msgs)+9}","from":"You","mine":true,"day":"Today","time":"now","text":draft,"pics":attachments,"reactions":[],"replyTo":replyId}); draft=""; attachments=[]; replyId=""}
 Shortcut "enter" when trim(draft)!="" onPress={msgs=append(msgs,{"id":"m{length(msgs)+9}","from":"You","mine":true,"day":"Today","time":"now","text":draft,"pics":attachments,"reactions":[],"replyTo":replyId}); draft=""; attachments=[]; replyId=""}
@@ -175,8 +177,8 @@ App
       Text.strong "design-crit"
       Text.muted "Critique for work in progress"
     Divider
-    Toggle "Mute notifications" bind=mute
-    Toggle "Pin conversation" bind=pin
+    Toggle "Mute notifications" @mute
+    Toggle "Pin conversation" @pin
     Divider
     Text.sectionTitle "Members ({length(members)})"
     each m in members
@@ -192,8 +194,8 @@ App
         Image "{p}" radius=8 onTap={at=index; open zoomShots}
 Sheet#detailsSheet "Details" show=phone stops=[0.5,1.0] snap=true
   Column gap=16
-    Toggle "Mute notifications" bind=mute
-    Toggle "Pin conversation" bind=pin
+    Toggle "Mute notifications" @mute
+    Toggle "Pin conversation" @pin
     Text.sectionTitle "Members ({length(members)})"
     each m in members
       ListTile
@@ -205,7 +207,7 @@ Sheet#detailsSheet "Details" show=phone stops=[0.5,1.0] snap=true
     Grid cols=3 gap=4
       each p in shared
         Image "{p}" radius=8 onTap={at=index; open zoomShots}
-Lightbox#zoomShots photos={shared} bind=at
+Lightbox#zoomShots photos={shared} @at
 
 ### Settings
 state tab="profile"
@@ -232,15 +234,15 @@ App
           Row gap=16
             Avatar "{name}" size=64
             Button.outline "Change photo" onTap={pickFile image}
-          Input "Display name" bind=name
-          Input "Status" bind=status
+          Input "Display name" @name
+          Input "Status" @status
           Button "Save profile" onTap={emit saveProfile; toast "Profile saved"}
       if tab=="notify"
         Card gap=12
-          Toggle "All messages" bind=notifyAll
-          Toggle "Mentions and replies only" bind=notifyMentions
-          Toggle "Play a sound" bind=sound
+          Toggle "All messages" @notifyAll
+          Toggle "Mentions and replies only" @notifyMentions
+          Toggle "Play a sound" @sound
       if tab=="theme"
         Card gap=12
           Text.strong "Theme"
-          SegmentedButton bind=theme items=["Light","Dark","System"] onChange={emit setTheme result}
+          SegmentedButton @theme items=["Light","Dark","System"] onChange={emit setTheme result}

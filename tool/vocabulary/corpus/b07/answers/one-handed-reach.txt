@@ -23,7 +23,7 @@ App scale={scale/100} onEdgeSwipeRight={go reach} onEdgeSwipeLeft={go note}
         IconButton "map" tooltip="Reach map" onTap={go reach}
         IconButton "tune" tooltip="Screen size" onTap={go scaling}
   Sheet#searchSheet
-    Input "Search notes" bind=q
+    Input "Search notes" @q
     Row gap=8
       Button.outline "Clear" onTap={q=""}
       Button "Done" onTap={close}
@@ -39,8 +39,8 @@ App onEdgeSwipeRight={go notes} onEdgeSwipeLeft={go reach}
   Main
     Column pad=16 gap=12 scroll
       Text.caption "Edited today, 9:41"
-      Input "Title" bind=title
-      Input "Note" multiline bind=text h=360
+      Input "Title" @title
+      Input "Note" multiline @text h=360
     FloatingActions side={hand} bottom
       IconButton "check" tooltip="Save" onTap={saved=true; toast "Saved"}
       IconButton "format_list_bulleted" tooltip="Checklist" onTap={text=text + "\n- "}
@@ -50,7 +50,7 @@ App onEdgeSwipeRight={go notes} onEdgeSwipeLeft={go reach}
     Footer
       Row between pad=8
         IconButton "arrow_back" tooltip="Back" onTap={go notes}
-        Segmented bind=hand items=["left","right"]
+        Segmented @hand items=["left","right"]
         IconButton "arrow_forward" tooltip="Forward" onTap={go reach}
   Dialog#confirmDelete "Delete this note?" "It cannot be recovered."
     Row end gap=8
@@ -64,7 +64,7 @@ App onEdgeSwipeRight={go note} onEdgeSwipeLeft={go scaling}
   Main
     Nav
       Heading "Reach map"
-      SegmentedButton bind=hand items=["left","right"]
+      SegmentedButton @hand items=["left","right"]
     Column pad=16 gap=16 scroll
       Text.muted "Green is easy, amber a stretch, red needs a second hand."
       ReachMap hand={hand} device={size} h=420
@@ -72,7 +72,7 @@ App onEdgeSwipeRight={go note} onEdgeSwipeLeft={go scaling}
         Badge.success "Easy"
         Badge.warning "Stretch"
         Badge.error "Hard"
-      Select "Phone size" bind=size items=["small","medium","large"]
+      Select "Phone size" @size items=["small","medium","large"]
       Card gap=8
         Text.strong "Where things sit"
         Text.muted "New note, search and sort live in the bottom bar, inside the easy zone."
@@ -99,11 +99,11 @@ App onEdgeSwipeRight={go reach} onEdgeSwipeLeft={go notes}
       Row between
         Text.strong "Scale"
         Text.strong "{scale}%"
-      Slider bind=scale min=70 max=100 step=5
+      Slider @scale min=70 max=100 step=5
       Row gap=8
         Button.outline "Reset" onTap={scale=100}
         Button.outline "One-handed 80%" onTap={scale=80}
-      Select "Floating buttons" bind=hand items=["left","right"]
+      Select "Floating buttons" @hand items=["left","right"]
     Footer
       Row between pad=8
         IconButton "arrow_back" tooltip="Back" onTap={go reach}

@@ -13,6 +13,7 @@ state name=""
 state notify=true
 state level=40
 state said=""
+state code=""
 Page
   Section
     Heading "Universal words" level=1
@@ -25,8 +26,8 @@ Page
           Text "A row's colour inks what is in it"
         Text "A large text" size=large color=#FF2563EB
         Row gap=12 middle
-          Toggle bind=notify color=#FF16A34A
-          Slider bind=level color=#FF9333EA
+          Toggle @notify color=#FF16A34A
+          Slider @level color=#FF9333EA
           Button "Save" color=#FF16A34A size=small
           Button.outline "Later" color=#FF2563EB size=small
         Row gap=8 middle
@@ -45,9 +46,9 @@ Page
     Row gap=24 top
       Card grow gap=12
         Text.title "Fields"
-        Input "Name" bind=name required clearable
-        Input "Search" bind=q icon="search" clearable
-        Input "Code" bind=code maxlength=6 caps center
+        Input "Name" @name required clearable
+        Input "Search" @q icon="search" clearable
+        Input "Code" @code maxlength=6 caps center
         Input "Locked" value="Read only" readonly
       Card grow gap=12 disabled
         Text.title "A disabled card"
@@ -57,7 +58,7 @@ Page
       Card grow gap=8
         Text.title "Choose rows (tap, Ctrl, Shift, Ctrl A)"
         Text.muted "{length(picked)} chosen{said == "" ? "" : " · " + said}"
-        Column gap=4 selectable bind=picked onSelect={said="selection changed"}
+        Column gap=4 selectable selected=@picked onSelect={said="selection changed"}
           each t in tasks
             Row gap=8 pad=8 radius=6 middle
               Text "{t.name}" grow

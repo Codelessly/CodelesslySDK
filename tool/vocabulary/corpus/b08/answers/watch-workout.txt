@@ -35,14 +35,14 @@ every 3s when lapBanner onTick={lapBanner=false; pulse=false; lapCount=floor(dis
 App
   Main
     Stack center middle
-      Pages bind=page h=fill
+      Pages @page h=fill
         Column center middle gap=4
           Text.caption "ELAPSED"
           Text "{duration(elapsed)}" size=48 weight=700
           Text.muted "Outdoor Run"
         Column center middle gap=4
           Stack center middle
-            Gauge bind=hr min=60 max=200 limit=175 unit="bpm"
+            Gauge value={hr} min=60 max=200 limit=175 unit="bpm"
             Ring {clamp((hr-60)/140,0,1)}
           Text.strong "{find(zones,z=>hr<=z.max).name}" color={find(zones,z=>hr<=z.max).color}
           Text.caption "Zone {indexOf(zones,find(zones,z=>hr<=z.max))+1} of 5"
@@ -61,7 +61,7 @@ App
           Text.caption "LAPS"
           Text "{lapCount}" size=48 weight=700
           Text.muted "Last lap 5:41"
-      Dots bind=page count=4
+      Dots @page count=4
       if lapBanner
         Box fill=#FF1B5E20 radius=16 pad=12 animate=slide-up
           Column center gap=2
@@ -128,7 +128,7 @@ App
         Column center
           Text.caption "AVG HR"
           Text.heading "153"
-      SegmentedButton bind=tab items=["route","splits","zones"]
+      SegmentedButton @tab items=["route","splits","zones"]
       if tab=="route"
         RouteMap points=[[0,0],[2,1],[4,1],[5,3],[7,4],[9,3],[10,5]] h=140
       if tab=="splits"

@@ -13,7 +13,7 @@ App
     Nav
       Brand "{strings[lang].title}" icon="museum"
       Row gap=8
-        SegmentedButton bind=lang items=["en","fr","de"] onChange={idle=0}
+        SegmentedButton @lang items=["en","fr","de"] onChange={idle=0}
         Button.outline "{strings[lang].reset}" icon="restart_alt" onTap={century=[1400,1900]; selected=null; idle=0}
     Column pad=0 gap=0 grow
       Text.muted "{strings[lang].hint}" center
@@ -30,7 +30,7 @@ App
             Text.strong "{century[0]}"
             Text.caption "{count(works, x=>x.year>=century[0] && x.year<=century[1])} works"
             Text.strong "{century[1]}"
-          RangeSlider bind=century min=1400 max=1900 step=100 ticks=5 labels=["15th","16th","17th","18th","19th"] onChange={idle=0}
+          RangeSlider @century min=1400 max=1900 step=100 ticks=5 labels=["15th","16th","17th","18th","19th"] onChange={idle=0}
   Sheet#work "{selected.title}" "{selected.artist}, {selected.year}"
     Button "Open details" onTap={close; go artwork}
 
@@ -39,6 +39,7 @@ state hotspot=null
 state at=0
 state hotspots=[{"id":"h1","x":0.32,"y":0.41,"label":"Light from the window","text":"Vermeer lets daylight enter from the left and models the maid's arm with it."},{"id":"h2","x":0.58,"y":0.66,"label":"The milk","text":"A thin stream, painted in a single unbroken stroke of cream white."},{"id":"h3","x":0.78,"y":0.22,"label":"The wall","text":"A nail and its shadow remain; the artist kept a correction visible."}]
 state related=[{"id":"w6","title":"Girl with a Pearl Earring","thumb":"https://img.museum.example/w6_t.jpg"},{"id":"w3","title":"The Night Watch","thumb":"https://img.museum.example/w3_t.jpg"},{"id":"w4","title":"Primavera","thumb":"https://img.museum.example/w4_t.jpg"}]
+state lang=""
 every 1s onTick={idle=idle+1; idle>=90 ? {selected=null; idle=0; go gallery-wall} : }
 App
   Main
@@ -46,7 +47,7 @@ App
       IconButton "arrow_back" tooltip="Back to the wall" onTap={idle=0; go gallery-wall}
       Heading "{selected.title}" level=1
       Row gap=8
-        SegmentedButton bind=lang items=["en","fr","de"] onChange={idle=0}
+        SegmentedButton @lang items=["en","fr","de"] onChange={idle=0}
         Button "Save to my circle" icon="bookmark" onTap={circles=updateWhere(circles,c=>c.id==circle,c=>with(c,"saved",append(c.saved,selected.id))); toast "Saved"; idle=0}
     Column pad=24 gap=16
       Row gap=24 top

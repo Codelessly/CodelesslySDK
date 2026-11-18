@@ -40,7 +40,7 @@ App
           Text.strong "Part cut list"
           each p in parts
             ListTile "{p.name}" subtitle={p.cut ? "cut from bar 49 to 56" : "full"}
-              Toggle "Cut" bind=p.cut
+              Toggle "Cut" @p.cut
           Row between
             Text.muted "{count(parts,p=>p.cut)} parts cut"
             Button.outline "Print cuts" onTap={emit printCuts; toast "Sent to printer"}
@@ -114,15 +114,15 @@ App
         Card gap=4
           Row between
             Row gap=12
-              Checkbox bind=n.done
+              Checkbox @n.done
               Badge.info "Bar {n.bar}"
               Badge.neutral "{n.section}"
             IconButton "more_vert" tooltip="Note actions" onTap={sel=n.id; open noteMenu}
           Text "{n.text}" strike={n.done}
   Dialog#newNote "New note" "Pin it to a bar"
-    Input "Bar" bind=draftBar type=number
-    Select "Section" bind=draftSection items=["strings","brass","percussion"]
-    Input "Note" bind=draft multiline
+    Input "Bar" @draftBar type=number
+    Select "Section" @draftSection items=["strings","brass","percussion"]
+    Input "Note" @draft multiline
     Button "Add note" onTap={draft=="" ? toast "Write the note first" : {notes=append(notes,{"id":length(notes)+1,"bar":draftBar,"section":draftSection,"text":draft,"done":false}); draft=""; close}}
   Menu#noteMenu end
     MenuItem "Jump to bar" icon="my_location" onTap={emit jumpToBar sel; go score}

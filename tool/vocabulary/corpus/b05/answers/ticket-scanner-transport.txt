@@ -25,13 +25,13 @@ App
     Column pad=24 gap=16 scroll
       Card gap=12
         Row gap=12 bottom
-          Input "From" bind=from grow
+          Input "From" @from grow
           IconButton "swap_horiz" tooltip="Swap stations" onTap={from=to; to=from}
-          Input "To" bind=to grow
+          Input "To" @to grow
         Row gap=12 bottom
-          DatePicker "Date" bind=date grow
-          TimePicker "Leave after" bind=time grow
-          Select "Railcard" bind=railcard items=["None","16-25 Railcard","Senior Railcard","Two Together","Family & Friends"] grow
+          DatePicker "Date" @date grow
+          TimePicker "Leave after" @time grow
+          Select "Railcard" @railcard items=["None","16-25 Railcard","Senior Railcard","Two Together","Family & Friends"] grow
         Row between
           Row gap=8
             IconButton "remove" tooltip="Fewer adults" onTap={adults=max(1,adults-1)}
@@ -40,7 +40,7 @@ App
           Button "Search trains" icon="search" onTap={sel=-1; toast "Showing trains for {date}"}
       Row between
         Text.heading "{from} to {to}"
-        SegmentedButton bind=sort items=["best","cheapest","fastest"]
+        SegmentedButton @sort items=["best","cheapest","fastest"]
       Row gap=8
         Button.outline "Earlier" icon="keyboard_arrow_up" onTap={time="07:30"; toast "Showing earlier trains"}
       each j in sortBy(journeys, x => sort=="cheapest" ? x.price : (sort=="fastest" ? x.dur : x.dep))
@@ -69,11 +69,11 @@ App
         Button.outline "Later" icon="keyboard_arrow_down" onTap={time="11:30"; toast "Showing later trains"}
   Sheet#railcards "Railcards"
     Text.muted "A railcard takes a third off most fares."
-    Radio "None" bind=railcard
-    Radio "16-25 Railcard" bind=railcard
-    Radio "Senior Railcard" bind=railcard
-    Radio "Two Together" bind=railcard
-    Radio "Family & Friends" bind=railcard
+    Radio "None" @railcard
+    Radio "16-25 Railcard" @railcard
+    Radio "Senior Railcard" @railcard
+    Radio "Two Together" @railcard
+    Radio "Family & Friends" @railcard
     Button "Apply" onTap={close}
   Dialog#buy "Confirm purchase" "Anytime Single, 1 adult"
     Text.strong "{from} to {to}"
@@ -110,7 +110,7 @@ App
         FilterChip "Quiet coach" selected={contains(prefs,"Quiet coach")} onTap={prefs=contains(prefs,"Quiet coach") ? without(prefs,"Quiet coach") : append(prefs,"Quiet coach")}
       Card gap=12
         Text.strong "Coach {coaches[coach]}"
-        SeatMap cols=4 rows=8 aisle=2 taken={taken} bind=seat
+        SeatMap cols=4 rows=8 aisle=2 taken={taken} @seat
         Row gap=16
           Row gap=4
             Icon "event_seat"
@@ -220,15 +220,15 @@ App
       if step==1
         Card gap=12
           Text.heading "Why are you claiming?"
-          Radio "Train cancelled" bind=reason
-          Radio "Delayed 30 minutes or more" bind=reason
-          Radio "Change of plans" bind=reason
+          Radio "Train cancelled" @reason
+          Radio "Delayed 30 minutes or more" @reason
+          Radio "Change of plans" @reason
           Button "Continue" onTap={step=2}
       if step==2
         Card gap=12
           Text.heading "Where should we send it?"
-          Radio "Original card" bind=method
-          Radio "Platform 9 credit" bind=method
+          Radio "Original card" @method
+          Radio "Platform 9 credit" @method
           Row between
             Text.muted "Ticket price"
             Text "£58.50"

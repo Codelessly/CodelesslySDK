@@ -16,6 +16,6 @@ Card gap=12
             Text.strong "{p.name}"
             Text.caption "{p.weight}%"
           Text.mono "{p.score}" color={p.score>=80?"#FF16A34A":(p.score>=60?"#FFEA580C":"#FFDC2626")}
-        Progress bind={p.score/100} {"props": {"color": "${= p.score>=80?'#FF16A34A':(p.score>=60?'#FFEA580C':'#FFDC2626')}"}}
+        Progress value={p.score/100} {"props": {"color": "${= p.score>=80?'#FF16A34A':(p.score>=60?'#FFEA580C':'#FFDC2626')}"}}
         Text.caption "{p.note}" visible={open==p.name}
   Text.caption "Tap an area for the reason."

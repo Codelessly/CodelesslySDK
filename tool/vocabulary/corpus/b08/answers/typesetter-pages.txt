@@ -8,6 +8,12 @@ state frames=[{"id":"f1","page":2,"title":"Intro column","style":"Body","words":
 state styles=[{"name":"Headline","font":"Canela Bold","size":38,"lead":42,"uses":6},{"name":"Body","font":"Source Serif","size":10,"lead":14,"uses":58},{"name":"Caption","font":"Inter","size":8,"lead":10,"uses":21}]
 state fit="fill"
 state zoom=100
+state frameStyle=""
+state frameX=""
+state frameY=""
+state range=""
+state marks=false
+state proofGuides=false
 App
   Sidebar
     Brand "Folio" icon="menu_book"
@@ -24,7 +30,7 @@ App
     Nav
       Heading "Spread {at}-{at+1}" level=3
       Row gap=8
-        SegmentedButton bind=view items=["spread","single"]
+        SegmentedButton @view items=["spread","single"]
         IconButton "zoom_out" tooltip="Zoom out" onTap={zoom=max(25,zoom-25)}
         Text.strong "{zoom}%"
         IconButton "zoom_in" tooltip="Zoom in" onTap={zoom=min(400,zoom+25)}
@@ -53,10 +59,10 @@ App
               Button.outline "Stretch" onTap={fit="stretch"}
             Text.muted "Fit mode: {fit}"
           if sel!="img1"
-            Select "Paragraph style" items=["Headline","Body","Caption"] bind=frameStyle onChange={emit setStyle {"frame":sel,"style":result}}
+            Select "Paragraph style" items=["Headline","Body","Caption"] @frameStyle onChange={emit setStyle {"frame":sel,"style":result}}
             Row gap=8
-              Input "X" type=number bind=frameX
-              Input "Y" type=number bind=frameY
+              Input "X" type=number @frameX
+              Input "Y" type=number @frameY
             if frames[0].words>frames[0].capacity
               Box fill=#FFFDECEC radius=8 pad=12 gap=8
                 Row gap=8
@@ -89,9 +95,9 @@ App
     MenuItem "Unlink" icon="link_off" onTap={emit unlinkFrame sel}
     MenuItem "Delete frame" icon="delete" onTap={emit deleteFrame sel}
   Dialog#proof "Export proof" "A low-resolution PDF for review"
-    Select "Pages" items=["All 6","Current spread","Range"] bind=range
-    Toggle "Include crop marks" bind=marks
-    Toggle "Show guides" bind=proofGuides
+    Select "Pages" items=["All 6","Current spread","Range"] @range
+    Toggle "Include crop marks" @marks
+    Toggle "Show guides" @proofGuides
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Export" onTap={emit exportProof {"range":range,"marks":marks}; toast "Proof exported"; close}
@@ -99,6 +105,13 @@ App
 ### Styles
 state selStyle="Body"
 state styles=[{"name":"Headline","font":"Canela Bold","size":38,"lead":42,"track":0,"uses":6},{"name":"Body","font":"Source Serif","size":10,"lead":14,"track":10,"uses":58},{"name":"Caption","font":"Inter","size":8,"lead":10,"track":20,"uses":21}]
+state size=""
+state lead=""
+state track=-50
+state align=""
+state hyphen=false
+state newName=""
+state basedOn=""
 App
   Sidebar
     Brand "Folio" icon="menu_book"
@@ -125,20 +138,20 @@ App
               Text.muted "{s.font} {s.size}/{s.lead}"
         Pane w=320 pad=16 gap=12
           Text.panelTitle "{selStyle}"
-          Select "Font" items=["Canela Bold","Source Serif","Inter"] bind=styles[0].font
+          Select "Font" items=["Canela Bold","Source Serif","Inter"] @styles[0].font
           Row gap=8
-            Input "Size" type=number bind=size
-            Input "Leading" type=number bind=lead
-          Slider "Tracking" bind=track min=-50 max=100
-          SegmentedButton bind=align items=["Left","Center","Right","Justify"]
-          Toggle "Hyphenate" bind=hyphen
+            Input "Size" type=number @size
+            Input "Leading" type=number @lead
+          Slider "Tracking" @track min=-50 max=100
+          SegmentedButton @align items=["Left","Center","Right","Justify"]
+          Toggle "Hyphenate" @hyphen
           Divider
           Text.fieldLabel "Preview"
           Box fill=#FFF7F5F0 radius=8 pad=12
             Text.body "Fishing boats idle against their moorings." size={size} onTap={toast "Preview"}
   Dialog#newStyle "New paragraph style"
-    Input "Name" bind=newName
-    Select "Based on" items=["Headline","Body","Caption"] bind=basedOn
+    Input "Name" @newName
+    Select "Based on" items=["Headline","Body","Caption"] @basedOn
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Create" onTap={newName=="" ? toast "Name the style" : {emit createStyle {"name":newName,"basedOn":basedOn}; close}}
@@ -147,6 +160,10 @@ App
 state masterPage="A-Master"
 state numPos="outside"
 state numStyle="Caption"
+state numFormat=""
+state runningHead=""
+state skipFirst=false
+state applyTo=""
 App
   Sidebar
     Brand "Folio" icon="menu_book"
@@ -172,13 +189,13 @@ App
             PageNumber master="A-Master" position="bottom-right" format="1" style={numStyle}
         Pane w=320 pad=16 gap=12
           Text.panelTitle "Page numbers"
-          SegmentedButton bind=numPos items=["outside","center","inside"]
-          Select "Number style" items=["Caption","Body"] bind=numStyle
-          Select "Format" items=["1, 2, 3","i, ii, iii","01, 02, 03"] bind=numFormat
-          Input "Running head" bind=runningHead
-          Toggle "Skip on first page" bind=skipFirst
+          SegmentedButton @numPos items=["outside","center","inside"]
+          Select "Number style" items=["Caption","Body"] @numStyle
+          Select "Format" items=["1, 2, 3","i, ii, iii","01, 02, 03"] @numFormat
+          Input "Running head" @runningHead
+          Toggle "Skip on first page" @skipFirst
   Dialog#applyMaster "Apply master" "Choose the pages that use A-Master"
-    Select "Pages" items=["All pages","Odd pages","Even pages","Range"] bind=applyTo
+    Select "Pages" items=["All pages","Odd pages","Even pages","Range"] @applyTo
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Apply" onTap={emit applyMaster applyTo; toast "Master applied"; close}
@@ -186,6 +203,7 @@ App
 ### Preflight
 state warnings=[{"id":"w1","level":"error","page":2,"text":"Text frame overflows: Intro column","fixed":false},{"id":"w2","level":"warning","page":3,"text":"Image at 142 ppi, below 300 ppi","fixed":false},{"id":"w3","level":"warning","page":5,"text":"Missing font: Canela Light","fixed":false}]
 state filter="all"
+state marks=false
 App
   Sidebar
     Brand "Folio" icon="menu_book"
@@ -217,7 +235,7 @@ App
             Icon "check_circle" color=#FF2E7D32
             Text.success "No problems found"
   Dialog#proof "Export proof" "A low-resolution PDF for review"
-    Toggle "Include crop marks" bind=marks
+    Toggle "Include crop marks" @marks
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Export" onTap={emit exportProof; toast "Proof exported"; close}

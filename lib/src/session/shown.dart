@@ -20,6 +20,8 @@
 //
 // The text checks are shared with the render command (tool/render), which
 // reports the same codes for a site.
+import 'dart:convert' show jsonEncode;
+
 import 'package:codelessly_api/core.dart';
 import 'package:flutter/rendering.dart';
 
@@ -148,6 +150,16 @@ List<EditDiagnostic> shownDiagnostics(RenderObject root, LayoutDocument document
   var showing = 0;
   // Per component call (outermost instance root): whether anything in it shows.
   final calls = <String, ({NodeBox box, int showing})>{};
+  // The document as written (its texts and its data), to tell a word that
+  // was written from one a formula gave.
+  String? source;
+  bool written(String text) {
+    final m = _brokenValue.firstMatch(text);
+    if (m == null) return false;
+    final around = text.substring(m.start < 6 ? 0 : m.start - 6, m.end + 6 > text.length ? text.length : m.end + 6);
+    final asJson = jsonEncode(around);
+    return (source ??= jsonEncode(document.toJson())).contains(asJson.substring(1, asJson.length - 1));
+  }
   String nameOf(NodeBox b) => componentInstanceOf(b.instance) != null ? b.tree.pathOf(b.id, b.instance) : b.id;
 
   // The topmost call an instance root belongs to (its document's call).
@@ -160,7 +172,15 @@ List<EditDiagnostic> shownDiagnostics(RenderObject root, LayoutDocument document
     return top!.call;
   }
 
-  void visit(RenderObject o, bool shown, NodeBox? box) {
+  // [within]: the calls whose boxes are above (a call that only wraps what
+  // is put in its slot, a scroller, shows what its slot shows).
+  void visit(RenderObject o, bool shown, NodeBox? box, List<String> within) {
+    void credit(NodeBox by, String? own) {
+      for (final c in {...within, ?own}) {
+        calls[c] = (box: calls[c]?.box ?? by, showing: (calls[c]?.showing ?? 0) + 1);
+      }
+    }
+
     if (o is NodeBox) {
       final n = o.node;
       final laid = o.hasSize && o.size.width > 0.5 && o.size.height > 0.5;
@@ -180,21 +200,24 @@ List<EditDiagnostic> shownDiagnostics(RenderObject root, LayoutDocument document
         // The view shows a leaf that is content (or a painted leaf); a
         // component shows any box it paints (a checkbox's box, a track).
         if (leaf && (!_quiet.contains(n.type) || _paints(n))) showing++;
-        final call = callOf(o);
-        if (call != null && ((leaf && !_quiet.contains(n.type)) || _paints(n))) {
-          calls[call] = (box: calls[call]?.box ?? o, showing: (calls[call]?.showing ?? 0) + 1);
-        }
+        if ((leaf && !_quiet.contains(n.type)) || _paints(n)) credit(o, callOf(o));
       }
       final call = callOf(o);
       if (call != null && shown && o.tree.isInstanceRoot(o.id, o.instance)) calls.putIfAbsent(call, () => (box: o, showing: 0));
+      if (call != null && !within.contains(call)) within = [...within, call];
     }
     if (o is RenderParagraph && shown && box != null) {
-      final issues = paragraphIssues(o, nameOf(box), noColor: 'nothing of it may show');
+      final issues = [
+        for (final i in paragraphIssues(o, nameOf(box), noColor: 'nothing of it may show'))
+          // Words the UI's own text or data has ("null check failed", a
+          // template's "{name}") are what was written, not a value that
+          // failed.
+          if (i.code != 'value_not_computed' || !written(o.text.toPlainText())) i,
+      ];
       final text = o.text.toPlainText().trim();
       if (text.isNotEmpty && !issues.any((i) => i.code == EditCodes.textNoColor.name)) {
         showing++;
-        final call = callOf(box);
-        if (call != null) calls[call] = (box: calls[call]?.box ?? box, showing: (calls[call]?.showing ?? 0) + 1);
+        credit(box, callOf(box));
       }
       // A component's own texts are its definition's: reported on the call.
       if (componentInstanceOf(box.instance) == null) {
@@ -204,10 +227,10 @@ List<EditDiagnostic> shownDiagnostics(RenderObject root, LayoutDocument document
         }
       }
     }
-    o.visitChildren((c) => visit(c, shown, box));
+    o.visitChildren((c) => visit(c, shown, box, within));
   }
 
-  visit(root, true, null);
+  visit(root, true, null, const []);
 
   // The view itself.
   final c = canvasBox;
@@ -273,10 +296,13 @@ List<EditDiagnostic> shownDiagnostics(RenderObject root, LayoutDocument document
 const _quiet = {'canvas', 'box', 'spacer', 'column', 'row', 'stack', 'wrap', 'listView', 'gridView', 'pageView', 'tableView', 'container', 'divider'};
 
 /// Whether [n] paints a visible fill or stroke (a progress bar's track, a
-/// checkbox's box): a leaf that shows.
+/// checkbox's box), or draws with its own painter (a drawn picture, a
+/// sparkline): a leaf that shows.
 bool _paints(Node n) =>
     n.type != CanvasProps.spec.type &&
-    [...n.decoration.fills, ...n.decoration.strokes].any((p) => p.visible && p.opacity > 0 && (p.color?.alpha ?? 255) > 0);
+    ([...n.decoration.fills, ...n.decoration.strokes].any((p) => p.visible && p.opacity > 0 && (p.color?.alpha ?? 255) > 0) ||
+        (n.behaviors.customPaint?.painter.isNotEmpty ?? false) ||
+        (n.behaviors.customPaint?.foregroundPainter.isNotEmpty ?? false));
 
 const _repeaters = {'listView', 'gridView', 'pageView', 'tableView'};
 
@@ -312,7 +338,7 @@ void _checkNode(NodeBox b, Node n, LayoutDocument document, void Function(EditCo
   }
   final written = b.source.node(b.id);
   if (written == null) return;
-  _checkTextValues(b.id, n, written, report, nodePath);
+  _checkTextValues(b, n, written, report, nodePath);
   _checkLabel(b.id, n, written, report, nodePath);
   if (_repeaters.contains(n.type)) _checkList(b, n, written, document, report, nodePath);
 }
@@ -320,8 +346,9 @@ void _checkNode(NodeBox b, Node n, LayoutDocument document, void Function(EditCo
 /// A text written with values in it (`Total: ${money(total)}`) one of which
 /// came out as nothing: the text shows a gap where a number should be. A
 /// value that chooses (`cond ? "…" : ""`) may be empty on purpose.
-void _checkTextValues(String id, Node shown, Node written, void Function(EditCode, String, String, {String? nodeId, bool? error}) report,
+void _checkTextValues(NodeBox b, Node shown, Node written, void Function(EditCode, String, String, {String? nodeId, bool? error}) report,
     String Function(String, [String?]) nodePath) {
+  final id = b.id;
   if (shown.type != 'text') return;
   final w = readMap(written.toJson()['props'])?['text'] ?? readMap(written.toJson()['bind'])?['props.text'];
   final value = readMap(shown.toJson()['props'])?['text'];
@@ -329,6 +356,9 @@ void _checkTextValues(String id, Node shown, Node written, void Function(EditCod
   // The written text as literal parts and expressions (braces balanced).
   final pattern = StringBuffer('^');
   final expressions = <String>[];
+  // Expressions with no text between them and the next: which of the two
+  // gave what shows cannot be told.
+  final abuts = <int>{};
   var i = 0;
   while (i < w.length) {
     final at = w.indexOf(r'${', i);
@@ -343,6 +373,7 @@ void _checkTextValues(String id, Node shown, Node written, void Function(EditCod
       if (w[j] == '}' && --depth == 0) break;
     }
     if (j >= w.length) return;
+    if (at == i && expressions.isNotEmpty) abuts.addAll([expressions.length - 1, expressions.length]);
     expressions.add(w.substring(at + 2, j));
     pattern.write('([\\s\\S]*?)');
     i = j + 1;
@@ -353,6 +384,15 @@ void _checkTextValues(String id, Node shown, Node written, void Function(EditCod
   for (var k = 0; k < expressions.length; k++) {
     final e = expressions[k];
     if ((m[k + 1] ?? '').trim().isNotEmpty || e.contains('?') || e.contains('coalesce') || e.contains('""') || e.contains("''")) continue;
+    if (abuts.contains(k)) continue;
+    // An empty text is a value (nothing picked yet, a field the data
+    // leaves empty); nothing at all is a name or a formula that failed.
+    final values = b.tree.bindings?.valuesFor(b.source, b.id, b.instance);
+    if (values is ExpressionValues) {
+      try {
+        if (values.evaluate('\${$e}') is String) continue;
+      } catch (_) {}
+    }
     report(const EditCode('value_not_computed', ''), nodePath(id, 'props/text'),
         'Text "$id" shows "${value.length > 40 ? '${value.substring(0, 40)}...' : value}": "${e.replaceFirst(RegExp(r'^=\s*'), '')}" gave nothing, so there is a '
         'gap where its value should be. Check the names it reads (a field the data does not have, a variable not declared) and '

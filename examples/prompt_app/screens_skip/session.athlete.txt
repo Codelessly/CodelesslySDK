@@ -1,3 +1,5 @@
+state count=0
+state paused=false
 Screen
   if phase=="ready"
     SessionBar "{today.name}" "{today.rounds} x {today.work}s / {today.rest}s" onPressed={emit open_home}
@@ -23,8 +25,8 @@ Screen
     SessionBar "{today.name}" "Round {round<1?1:round}/{today.rounds} · {elapsed}s" onPressed={phase="done"}
     SessionDial "{count} jumps" left={left} phase={phase} round={round<1?1:round} rounds={today.rounds} work={today.work} rest={today.rest} paused={paused}
     if phase=="work"
-      TapPad "Jumps" bind=count
-    SessionControls bind=paused onPressed={phase="done"}
+      TapPad "Jumps" @count
+    SessionControls @paused onPressed={phase="done"}
   if phase=="done"
     SessionSummary "{today.rounds} x {today.work}s / {today.rest}s" jumps={count} best={sessions[0].best} rounds={round} of={today.rounds} seconds={elapsed} streak={streak}
     BigButton "History" icon="bar_chart" onPressed={emit open_history}

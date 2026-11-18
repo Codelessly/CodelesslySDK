@@ -14,6 +14,10 @@ state activeStop="s2"
 state strokeW=2
 state strokeColor="#FF2B1B14"
 state opacity=100
+state stopColor=""
+state fillColor=""
+state cap=""
+state join=""
 App
   Sidebar
     Brand "Bezier Barn" icon="draw"
@@ -44,10 +48,10 @@ App
         Heading "barn-poster.bez" level=1
         Badge.neutral "Saved"
       Row gap=8
-        Toggle "Snap to points" bind=snap
-        Toggle "Rulers" bind=showRulers
+        Toggle "Snap to points" @snap
+        Toggle "Rulers" @showRulers
         IconButton "remove" tooltip="Zoom out" onTap={zoom=max(10,zoom-25)}
-        Select bind=zoom items=[25,50,100,150,200,400] w=100
+        Select @zoom items=[25,50,100,150,200,400] w=100
         IconButton "add" tooltip="Zoom in" onTap={zoom=min(800,zoom+25)}
         Button.outline "Zoom to fit" onTap={zoom=fitZoom()}
         Button "Export" onTap={go export}
@@ -87,24 +91,24 @@ App
           Button.outline "Distribute vertically" grow onTap={emit distribute "v"}
     Card gap=12
       Text.panelTitle "Fill"
-      SegmentedButton bind=fillKind items=["solid","linear","radial"]
+      SegmentedButton @fillKind items=["solid","linear","radial"]
       if fillKind!="solid"
         GradientBar stops={stops} selected={activeStop} onSelect={activeStop=result} onStopMove={stops=updateWhere(stops,s=>s.id==result.id,s=>with(s,"pos",clamp(result.pos,0,1)))} onStopAdd={stops=append(stops,{"id":"s"+(length(stops)+1),"pos":result.pos,"color":result.color})} onStopRemove={stops=removeWhere(stops,s=>s.id==result.id)}
         Row gap=8
-          ColorPicker bind=stopColor value={find(stops,s=>s.id==activeStop).color} onChange={stops=updateWhere(stops,s=>s.id==activeStop,s=>with(s,"color",result))}
+          ColorPicker @stopColor value={find(stops,s=>s.id==activeStop).color} onChange={stops=updateWhere(stops,s=>s.id==activeStop,s=>with(s,"color",result))}
           Input "Position" type=number value={round(find(stops,s=>s.id==activeStop).pos*100,0)} onChange={stops=updateWhere(stops,s=>s.id==activeStop,s=>with(s,"pos",clamp(result/100,0,1)))} w=90
           Text.muted "%"
         Button.ghost "Reverse stops" onTap={stops=map(stops,s=>with(s,"pos",1-s.pos))}
       if fillKind=="solid"
-        ColorPicker bind=fillColor
+        ColorPicker @fillColor
     Card gap=12
       Text.panelTitle "Stroke"
       Row gap=8
-        ColorPicker bind=strokeColor
-        Input "Width" type=number bind=strokeW w=90
-      Select "Cap" bind=cap items=["Butt","Round","Square"]
-      Select "Join" bind=join items=["Miter","Round","Bevel"]
-      Slider bind=opacity min=0 max=100
+        ColorPicker @strokeColor
+        Input "Width" type=number @strokeW w=90
+      Select "Cap" @cap items=["Butt","Round","Square"]
+      Select "Join" @join items=["Miter","Round","Bevel"]
+      Slider @opacity min=0 max=100
       Text.muted "Opacity {opacity}%"
     Card gap=8
       Text.panelTitle "Point"
@@ -137,11 +141,11 @@ Page
       Column grow gap=16
         Heading "Export artwork" level=1
         Text.muted "Choose a format and size, then download your drawing."
-        Input "File name" bind=name
-        SegmentedButton bind=format items=["SVG","PNG","PDF"]
+        Input "File name" @name
+        SegmentedButton @format items=["SVG","PNG","PDF"]
         if format=="PNG"
-          Select "Scale" bind=scale items=[1,2,3,4]
-        Toggle "Only selected layers" bind=onlySelection
+          Select "Scale" @scale items=[1,2,3,4]
+        Toggle "Only selected layers" @onlySelection
         Row gap=12
           Button "Download {name}.{lower(format)}" onTap={emit export {"format":format,"scale":scale,"selection":onlySelection}; toast "Exported"}
           Button.outline "Copy as SVG" onTap={copy "svg"; toast "Copied"}
@@ -167,10 +171,10 @@ App
     Column pad=24 gap=16 maxw=720
       Card gap=12
         Text.panelTitle "Snapping"
-        Slider bind=snapDistance min=1 max=24
+        Slider @snapDistance min=1 max=24
         Text.muted "Snap within {snapDistance} px of a point or guide"
-        Toggle "Show guides" bind=showGuides
+        Toggle "Show guides" @showGuides
       Card gap=12
         Text.panelTitle "Rulers"
-        Select "Units" bind=rulerUnit items=["px","pt","mm","in"]
-        ColorPicker "Guide color" bind=guideColor
+        Select "Units" @rulerUnit items=["px","pt","mm","in"]
+        ColorPicker "Guide color" @guideColor

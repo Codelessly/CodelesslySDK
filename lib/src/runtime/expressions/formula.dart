@@ -701,27 +701,27 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'fuzzy',
-      'fuzzy(list, query, item => text)',
-      'fuzzy(episodes, q, e => e.title)',
+      'fuzzy(list, query, item => text, tolerance, "keep")',
+      'fuzzy(episodes, q, e => e.title) (best first; fuzzy(people, q, p => p.name, 3, "keep"): 3 letters off per word, in list order)',
     ),
     FormulaFunctionDoc(
       'fuzzyScore',
-      'fuzzyScore(text, query)',
+      'fuzzyScore(text, query, tolerance)',
       'fuzzyScore(title, q) → 100',
     ),
     FormulaFunctionDoc(
       'matchRanges',
-      'matchRanges(text, query)',
+      'matchRanges(text, query, tolerance)',
       'matchRanges(title, q) → [[0, 5]]',
     ),
     FormulaFunctionDoc(
       'matchRuns',
-      'matchRuns(text, query)',
+      'matchRuns(text, query, tolerance)',
       'matchRuns(title, q) → text runs',
     ),
     FormulaFunctionDoc(
       'matchReason',
-      'matchReason(text, query)',
+      'matchReason(text, query, tolerance)',
       'matchReason(title, q) → Exact phrase',
     ),
     FormulaFunctionDoc(
@@ -2893,47 +2893,66 @@ Map<String, Object?> _toMap(List<Object?> args) {
   return map;
 }
 
+/// fuzzy's options after its text, in either order: a number (the letters a
+/// word may be misspelled by) and "keep" (the list's own order).
+(int?, bool) _fuzzyOptions(List<Object?> options) {
+  int? tolerance;
+  var keep = false;
+  for (final o in options) {
+    if (o == null) continue;
+    final n = o is num ? o : num.tryParse(FormulaEvaluator.stringify(o).trim());
+    if (n != null) {
+      tolerance = n.round().clamp(0, 10);
+    } else if (const {'keep', 'order', 'listed'}.contains(FormulaEvaluator.stringify(o).trim().toLowerCase())) {
+      keep = true;
+    }
+  }
+  return (tolerance, keep);
+}
+
+/// The match of `(text, query, tolerance)`.
+FuzzyMatch _fuzzyFind(List<Object?> a) => FuzzyMatch.find(
+      FormulaEvaluator.stringify(_arg(a, 0)),
+      FormulaEvaluator.stringify(_arg(a, 1)),
+      tolerance: _fuzzyOptions([_arg(a, 2)]).$1,
+    );
+
 final Map<String, _Function> _functions = {
+  // fuzzy(list, query, item => text, tolerance, "keep"): the elements that
+  // match, best first; a number after the text is the letters a word may be
+  // misspelled by (FuzzyMatch.find), "keep" keeps the list's own order.
   'fuzzy': (a) {
     final source = _arg(a, 0);
     if (source is! Iterable) return <Object?>[];
     final query = FormulaEvaluator.stringify(_arg(a, 1));
     if (query.trim().isEmpty) return source.toList();
+    final (tolerance, keep) = _fuzzyOptions([_arg(a, 3), _arg(a, 4)]);
     final ranked = source.indexed
         .map((entry) {
           final text = FormulaEvaluator.stringify(
             _select(entry.$2, _arg(a, 2), entry.$1),
           );
-          return (entry.$1, entry.$2, FuzzyMatch.find(text, query).score);
+          return (entry.$1, entry.$2, FuzzyMatch.find(text, query, tolerance: tolerance).score);
         })
         .where((entry) => entry.$3 > 0)
         .toList();
-    ranked.sort((x, y) {
-      final byScore = y.$3.compareTo(x.$3);
-      return byScore != 0 ? byScore : x.$1.compareTo(y.$1);
-    });
+    if (!keep) {
+      ranked.sort((x, y) {
+        final byScore = y.$3.compareTo(x.$3);
+        return byScore != 0 ? byScore : x.$1.compareTo(y.$1);
+      });
+    }
     return ranked.map((entry) => entry.$2).toList();
   },
-  'fuzzyScore': (a) => FuzzyMatch.find(
-    FormulaEvaluator.stringify(_arg(a, 0)),
-    FormulaEvaluator.stringify(_arg(a, 1)),
-  ).score,
-  'matchReason': (a) => FuzzyMatch.find(
-    FormulaEvaluator.stringify(_arg(a, 0)),
-    FormulaEvaluator.stringify(_arg(a, 1)),
-  ).reason,
+  // (text, query, tolerance): as fuzzy reads them.
+  'fuzzyScore': (a) => _fuzzyFind(a).score,
+  'matchReason': (a) => _fuzzyFind(a).reason,
   'matchRanges': (a) => [
-    for (final span in FuzzyMatch.find(
-      FormulaEvaluator.stringify(_arg(a, 0)),
-      FormulaEvaluator.stringify(_arg(a, 1)),
-    ).ranges)
+    for (final span in _fuzzyFind(a).ranges)
       [span.$1, span.$2],
   ],
   'matchRuns': (a) => [
-    for (final span in FuzzyMatch.find(
-      FormulaEvaluator.stringify(_arg(a, 0)),
-      FormulaEvaluator.stringify(_arg(a, 1)),
-    ).ranges)
+    for (final span in _fuzzyFind(a).ranges)
       {
         'start': span.$1,
         'end': span.$2,

@@ -107,6 +107,8 @@ state program="hills"
 state profile=[2,3,5,6,8,6,4,3,5,7,9,6,3,2]
 state selectedBar=0
 state mins=30
+state segLevel=0
+state warm=""
 App
   Sidebar
     Brand "Stride" icon="directions_run"
@@ -149,7 +151,7 @@ App
           Text.caption "Segment {selectedBar+1}: {profile[selectedBar]}% incline"
           Row gap=12 middle
             IconButton "remove" tooltip="Lower segment" onTap={profile=setAt(profile,selectedBar,max(0,profile[selectedBar]-1))}
-            Slider min=0 max=15 bind=segLevel onChange={profile=setAt(profile,selectedBar,round(result,0))} grow
+            Slider min=0 max=15 @segLevel onChange={profile=setAt(profile,selectedBar,round(result,0))} grow
             IconButton "add" tooltip="Raise segment" onTap={profile=setAt(profile,selectedBar,min(15,profile[selectedBar]+1))}
           Row gap=8
             Button.outline "Add segment" icon="add" onTap={profile=append(profile,profile[length(profile)-1])}
@@ -160,10 +162,10 @@ App
       Row gap=16
         Column grow gap=8
           Text.fieldLabel "Length"
-          Slider bind=mins min=10 max=60
+          Slider @mins min=10 max=60
         Column grow gap=8
           Text.fieldLabel "Warm-up"
-          SegmentedButton items=["None","3 min","5 min"] bind=warm
+          SegmentedButton items=["None","3 min","5 min"] @warm
 
 ### Workout
 state elapsed=0

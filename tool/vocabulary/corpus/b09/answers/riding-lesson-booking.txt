@@ -7,6 +7,8 @@ state lessons=[{"id":"l1","day":"Mon","time":"17:00","arena":"Indoor","title":"F
 state booked=["l1"]
 state alerts=true
 state waitlist=[]
+state weekOf=""
+state alertBy=""
 App
   Sidebar
     Brand "Stirrup" icon="pets"
@@ -23,12 +25,12 @@ App
     Nav
       Heading "Lessons this week" level=1
       Row gap=8
-        DatePicker bind=weekOf w=160
+        DatePicker @weekOf w=160
         Button.outline "Alerts" icon="notifications" onTap={open alertsPopover}
     Column pad=24 gap=16
       Row gap=12 wrap
-        Select "Arena" bind=arena items=["All","Indoor","Outdoor","Paddock"] w=160
-        Select "Level" bind=level items=["All","Beginner","Intermediate","Advanced"] w=180
+        Select "Arena" @arena items=["All","Indoor","Outdoor","Paddock"] w=160
+        Select "Level" @level items=["All","Beginner","Intermediate","Advanced"] w=180
         Spacer grow
         Text.muted "{count(lessons,l=>(arena=="All"||l.arena==arena)&&(level=="All"||l.level==level))} lessons"
       Card gap=0
@@ -60,8 +62,8 @@ App
               Text "{w}"
               Button.ghost "Leave" onTap={waitlist=without(waitlist,w); toast "Removed from waiting list"}
   Dialog#joinWait "Join the waiting list" "We will tell you the moment a spot opens."
-    Toggle "Alert me when a spot opens" bind=alerts
-    Select "Alert by" bind=alertBy items=["Push notification","Email","SMS"]
+    Toggle "Alert me when a spot opens" @alerts
+    Select "Alert by" @alertBy items=["Push notification","Email","SMS"]
     Row end gap=8
       Button.ghost "Not now" onTap={close}
       Button "Join" onTap={waitlist=append(waitlist,find(lessons,x=>x.id==sel).title); close; toast "You are on the waiting list"}
@@ -77,7 +79,7 @@ App
   Popover#alertsPopover
     Column gap=8 pad=8
       Text.strong "Spot alerts"
-      Toggle "Alert me when a spot opens" bind=alerts
+      Toggle "Alert me when a spot opens" @alerts
       Text.muted "Applies to every lesson on your waiting lists."
 
 ### Horses
@@ -86,6 +88,7 @@ state riderWeight=68
 state filterCalm=false
 state horses=[{"id":"h1","name":"Biscuit","photo":"https://images.stirrup.app/horses/biscuit.jpg","hands":13.2,"calm":5,"limit":60,"breed":"Welsh Pony"},{"id":"h2","name":"Orion","photo":"https://images.stirrup.app/horses/orion.jpg","hands":16.1,"calm":3,"limit":95,"breed":"Irish Sport Horse"},{"id":"h3","name":"Juniper","photo":"https://images.stirrup.app/horses/juniper.jpg","hands":15.0,"calm":4,"limit":80,"breed":"Cob"},{"id":"h4","name":"Tempest","photo":"https://images.stirrup.app/horses/tempest.jpg","hands":16.3,"calm":2,"limit":90,"breed":"Thoroughbred"}]
 state pick=""
+state q=""
 App
   Sidebar
     Brand "Stirrup" icon="pets"
@@ -98,12 +101,12 @@ App
     Nav
       Heading "Choose a horse" level=1
       Row gap=8
-        Input "Search" bind=q w=200
+        Input "Search" @q w=200
         FilterChip "Calm only" selected={filterCalm} onTap={filterCalm=!filterCalm}
     Column pad=24 gap=16
       Row gap=12 middle
         Text.muted "Your weight with tack"
-        Slider bind=riderWeight min=40 max=110 w=240
+        Slider @riderWeight min=40 max=110 w=240
         Text.strong "{riderWeight} kg"
       Card gap=0
         each h in filter(horses,x=>(!filterCalm||x.calm>=4)&&(isEmpty(q)||contains(lower(x.name),lower(q))))
@@ -139,6 +142,8 @@ state fav=false
 state rating=0
 state note=""
 state fee=30
+state alerts=false
+state alertBy=""
 Page
   Nav sticky
     Brand "Stirrup" icon="pets"
@@ -188,8 +193,8 @@ Page
           Chip "Heels down"
           Chip "Look up"
       Heading "How did it go for you?" level=3
-      Rating bind=rating max=5
-      Input "Your note for Hannah" multiline bind=note
+      Rating @rating max=5
+      Input "Your note for Hannah" multiline @note
       Button "Send note" onTap={note=="" ? toast "Write a short note first" : {emit sendNote note; note=""; toast "Note sent to Hannah"}}
   Footer
     Row between
@@ -205,8 +210,8 @@ Page
       Button.ghost "Keep it" onTap={close}
       Button.destructive "Cancel lesson" onTap={emit cancel; close; toast "Lesson cancelled"}
   Sheet#waitlist "Waiting list"
-    Toggle "Alert me when a spot opens" bind=alerts
-    Select "Alert by" bind=alertBy items=["Push notification","Email","SMS"]
+    Toggle "Alert me when a spot opens" @alerts
+    Select "Alert by" @alertBy items=["Push notification","Email","SMS"]
     Button "Join waiting list" onTap={emit joinWaitlist; close; toast "You are on the list"}
 
 ### Package
@@ -254,7 +259,7 @@ App
       if tab=="map"
         Card gap=12
           Text.strong "Yard map"
-          YardMap zones=["Indoor arena","Outdoor arena","Paddock","Stables","Tack room","Car park"] bind=zone onSelect={zone=result}
+          YardMap zones=["Indoor arena","Outdoor arena","Paddock","Stables","Tack room","Car park"] @zone onSelect={zone=result}
           if zone!=""
             Row between middle
               Text "{zone}"
@@ -266,9 +271,9 @@ App
             Column gap=2
               Text.strong "Maya Reyes"
               Text.muted "Riding with us since March 2025"
-          Select "Level" bind=level items=["Beginner","Intermediate","Advanced"]
+          Select "Level" @level items=["Beginner","Intermediate","Advanced"]
           Row gap=12
-            Input "Height (cm)" type=number bind=height grow
-            Input "Weight with tack (kg)" type=number bind=riderWeight grow
-          Input "Notes for coaches" multiline bind=notes
+            Input "Height (cm)" type=number @height grow
+            Input "Weight with tack (kg)" type=number @riderWeight grow
+          Input "Notes for coaches" multiline @notes
           Button "Save profile" onTap={emit saveProfile; toast "Profile saved"}

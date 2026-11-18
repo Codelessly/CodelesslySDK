@@ -29,10 +29,10 @@ App
     Nav
       Heading "Issue 1: Midnight on Gutter Street" level=3
       Row gap=8 middle
-        SegmentedButton bind=tool items=["select","draw","cut","bubble"]
-        Toggle "Bleed and safe area" bind=showBleed
-        Toggle "Reading order" bind=showOrder
-        Toggle "Snap to gutter" bind=snap
+        SegmentedButton @tool items=["select","draw","cut","bubble"]
+        Toggle "Bleed and safe area" @showBleed
+        Toggle "Reading order" @showOrder
+        Toggle "Snap to gutter" @snap
         Button "Export" icon="download" onTap={open exportSheet}
     Row grow top
       Column grow gap=12 pad=24 center
@@ -80,9 +80,9 @@ App
 
 Sheet#exportSheet "Export"
   Text.muted "Choose what to send out of the editor."
-  SegmentedButton bind=exportKind items=["PDF","PNG","CBZ"]
-  SegmentedButton bind=exportScope items=["all","current","spread"]
-  Toggle "Include bleed" bind=showBleed
+  SegmentedButton @exportKind items=["PDF","PNG","CBZ"]
+  SegmentedButton @exportScope items=["all","current","spread"]
+  Toggle "Include bleed" @showBleed
   Row gap=8
     Button.outline "Cancel" onTap={close}
     Button "Export {exportKind}" onTap={emit exportSet {"kind":exportKind,"scope":exportScope,"bleed":showBleed}; toast "Export started"; close}
@@ -105,7 +105,7 @@ App
     Nav
       Heading "Page turn preview" level=3
       Row gap=8 middle
-        Toggle "Safe area" bind=showSafe
+        Toggle "Safe area" @showSafe
         Button.outline "Back to editor" onTap={go page-editor}
     Column pad=24 gap=16 center grow
       Row gap=4 middle center
@@ -141,11 +141,11 @@ Page
     Heading "Export a set" level=1
     Text.muted "Send selected pages to print or screen."
     Card gap=12
-      Input "File name" bind=name
-      SegmentedButton bind=exportKind items=["PDF","PNG","CBZ"]
-      Select "Resolution" bind=dpi items=[150,300,600]
-      Toggle "Include bleed" bind=bleed
-      Toggle "Crop marks" bind=marks
+      Input "File name" @name
+      SegmentedButton @exportKind items=["PDF","PNG","CBZ"]
+      Select "Resolution" @dpi items=[150,300,600]
+      Toggle "Include bleed" @bleed
+      Toggle "Crop marks" @marks
     Card gap=8
       Text.strong "Pages in the set"
       each pid in ["p1","p2","p3"]

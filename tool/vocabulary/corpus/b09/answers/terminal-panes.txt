@@ -14,6 +14,7 @@ state msg=""
 state copyMode=false
 state cursor=0
 state anchor=-1
+state newName=""
 every 1s onTick={clock=clock}
 every 4s onTick={panes=updateWhere(panes,p=>p.id==2,p=>with(p,"lines",append(slice(p.lines,max(0,length(p.lines)-7),length(p.lines)),"[tick] GET /health 200 1ms")))}
 App
@@ -76,14 +77,14 @@ App
             Chip ":  command" onTap={cmdOpen=true; prefix=false}
             Chip "s  sessions" onTap={prefix=false; open sessions}
           Row gap=8
-            Input ":" "resize-pane -R 10" bind=cmd onSubmit={msg=cmd; cmd=""; prefix=false}
+            Input ":" "resize-pane -R 10" @cmd onSubmit={msg=cmd; cmd=""; prefix=false}
             Button "Run" onTap={msg="ran: {cmd}"; cmd=""; prefix=false}
             Button.ghost "Cancel" onTap={prefix=false; cmd=""}
       if cmdOpen
         Card gap=8
           Row gap=8 middle
             Badge.info "COMMAND"
-            Input ":" "swap-pane -s 1 -t 2" bind=cmd grow onSubmit={msg="ran: {cmd}"; cmd=""; cmdOpen=false}
+            Input ":" "swap-pane -s 1 -t 2" @cmd grow onSubmit={msg="ran: {cmd}"; cmd=""; cmdOpen=false}
           Row gap=8
             Button.outline "resize-pane -L 5" onTap={cmd="resize-pane -L 5"}
             Button.outline "resize-pane -R 5" onTap={cmd="resize-pane -R 5"}
@@ -118,7 +119,7 @@ App
       ListTile "{s.name}" subtitle="{s.windows} windows" selected={session==s.name} onTap={session=s.name; msg="switched to {s.name}"; close}
         Badge.success "attached" visible={session==s.name}
     Row gap=8
-      Input "New session" "name" bind=newName grow
+      Input "New session" "name" @newName grow
       Button "Create" onTap={session=newName; msg="new session {newName}"; close}
 
 ### Zoomed pane
@@ -172,7 +173,7 @@ App
     Nav
       Heading "Sessions" level=1
       Row gap=8
-        Input "Filter" bind=q w=220
+        Input "Filter" @q w=220
         Button "New session" icon="add" onTap={open newSession}
     Column pad=24 gap=12
       each s in filter(sessions,x=>contains(lower(x.name),lower(q)))
@@ -195,10 +196,10 @@ App
     MenuItem "Detach others" icon="link_off" onTap={toast "Detached other clients from {sel}"}
     MenuItem "Kill session" icon="delete" onTap={sessions=removeWhere(sessions,x=>x.name==sel); toast "Killed {sel}"}
   Dialog#newSession "New session" "Starts with one window and one pane"
-    Input "Name" "build" bind=newName
+    Input "Name" "build" @newName
     Button "Create" onTap={newName!="" ? {sessions=append(sessions,{"name":newName,"windows":1,"created":"Now","attached":false,"panes":1}); current=newName; newName=""; close} : toast "Name the session"}
   Dialog#rename "Rename session"
-    Input "Name" bind=renaming
+    Input "Name" @renaming
     Button "Save" onTap={sessions=updateWhere(sessions,x=>x.name==sel,x=>with(x,"name",renaming)); close}
 
 ### Copy mode
@@ -215,7 +216,7 @@ App
         Text.strong "pane 2: zsh"
         Text.muted "line {cursor+1} of {length(lines)}"
       Row gap=8
-        Input "Search" "/pattern" bind=search w=200 onSubmit={cursor=coalesce(indexOf(lines,find(lines,l=>contains(l,search))),cursor)}
+        Input "Search" "/pattern" @search w=200 onSubmit={cursor=coalesce(indexOf(lines,find(lines,l=>contains(l,search))),cursor)}
         Button.outline "Quit (q)" onTap={go workspace}
     Column pad=12 gap=8 grow
       Box grow fill=#FF14161B radius=4 pad=8

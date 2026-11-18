@@ -12,6 +12,11 @@ state layerSel="l1"
 state keys=[{"id":"k1","prop":"Position X","t":0,"v":40},{"id":"k2","prop":"Position X","t":8,"v":220},{"id":"k3","prop":"Position X","t":20,"v":120},{"id":"k4","prop":"Scale","t":2,"v":1},{"id":"k5","prop":"Scale","t":14,"v":1.6},{"id":"k6","prop":"Opacity","t":0,"v":0},{"id":"k7","prop":"Opacity","t":6,"v":100}]
 state clip=null
 state layers=[{"id":"l1","name":"Hero circle","visible":true,"locked":false},{"id":"l2","name":"Shadow","visible":true,"locked":false},{"id":"l3","name":"Background grid","visible":true,"locked":true}]
+state curve=""
+state preset=""
+state kfT=""
+state kfV=""
+state exportKind=""
 every 1s when playing onTick={time = time >= (loopOn ? loopEnd : 24) ? (loopOn ? loopStart : 0) : time + (speed == "0.5x" ? 0.5 : speed == "2x" ? 2 : 1)}
 App
   Sidebar
@@ -27,9 +32,9 @@ App
       Row gap=8 middle
         IconButton "skip_previous" tooltip="Back to start" onTap={time = loopOn ? loopStart : 0}
         IconButton {playing ? "pause" : "play_arrow"} tooltip="Play or pause" onTap={playing = !playing}
-        SegmentedButton items=["0.5x","1x","2x"] bind=speed
-        Toggle "Loop" bind=loopOn
-        Toggle "Onion skin" bind=onion
+        SegmentedButton items=["0.5x","1x","2x"] @speed
+        Toggle "Loop" @loopOn
+        Toggle "Onion skin" @onion
         Button "Export" icon="movie" onTap={open export}
     Column pad=24 gap=16 scroll
       Row gap=16 top
@@ -45,11 +50,11 @@ App
           Text.muted "Onion skin shows the two previous frames as ghosts."
         Pane w=320 pad=16 gap=12
           Text.strong "Curve: {sel == "" ? "no keyframe" : find(keys, k => k.id == sel).prop}"
-          CurveEditor bind=curve h=200 onChange={toast "Easing updated"}
-          Select "Preset" items=["Linear","Ease in","Ease out","Ease in out","Bounce"] bind=preset
+          CurveEditor @curve h=200 onChange={toast "Easing updated"}
+          Select "Preset" items=["Linear","Ease in","Ease out","Ease in out","Bounce"] @preset
           Row gap=8
-            Input "Frame" type=number bind=kfT w=90
-            Input "Value" type=number bind=kfV grow
+            Input "Frame" type=number @kfT w=90
+            Input "Value" type=number @kfV grow
           Button.outline "Apply to keyframe" onTap={keys = updateWhere(keys, k => k.id == sel, k => with(with(k, "t", kfT), "v", kfV)); toast "Keyframe updated"}
       Card gap=8
         Row between
@@ -60,13 +65,13 @@ App
             Button.destructive "Delete keyframe" icon="delete" onTap={keys = removeWhere(keys, k => k.id == sel); sel = ""}
         Row gap=8 middle
           Text.caption "Playhead" w=100
-          Slider bind=time min=0 max=24 grow
+          Slider @time min=0 max=24 grow
         Row gap=8 middle
           Text.caption "Loop region" w=100
-          Input "In" type=number bind=loopStart w=80
-          Input "Out" type=number bind=loopEnd w=80
+          Input "In" type=number @loopStart w=80
+          Input "Out" type=number @loopEnd w=80
           Text.muted "frames {loopStart} to {loopEnd}"
-        Ruler duration=24 loopStart={loopStart} loopEnd={loopEnd} bind=time
+        Ruler duration=24 loopStart={loopStart} loopEnd={loopEnd} @time
         each prop in ["Position X","Scale","Opacity"]
           Row gap=8 middle
             Text.small "{prop}" w=100
@@ -77,8 +82,8 @@ App
                     Icon "diamond" size=18 color={sel == k.id ? "#FFF59E0B" : "#FF9CA3AF"} drag=key(k.id) onTap={sel = k.id; kfT = k.t; kfV = k.v}
   Dialog#export "Export animation" "Choose how Bounce intro is rendered"
     Column gap=12
-      SegmentedButton items=["Video","Loop (GIF)"] bind=exportKind
-      Input "Frame rate" type=number bind=fps hint="30"
+      SegmentedButton items=["Video","Loop (GIF)"] @exportKind
+      Input "Frame rate" type=number @fps hint="30"
       Text.muted "{length(keys)} keyframes, 24 frames, {fixed(24/fps,2)} s at {fps} fps"
       Row gap=8 end
         Button.outline "Cancel" onTap={close}
@@ -96,7 +101,7 @@ App
   Main
     Nav
       Heading "Layers" level=1
-      Input "Search layers" bind=q w=220
+      Input "Search layers" @q w=220
     Column pad=24 gap=12
       Card gap=4
         each l in filter(layers, l => contains(lower(l.name), lower(q)))
@@ -114,20 +119,20 @@ App
     MenuItem "Delete" icon="delete" onTap={layers = removeWhere(layers, x => x.id == sel)}
 
 // A curve editor with draggable bezier handles needs a canvas; this draws the curve as a LineChart of the preset and shows the handle values as two sliders.
-define CurveEditor bind=curve h=200 onChange
+define CurveEditor @curve h=200 onChange
   state c1=0.25
   state c2=0.75
   Column gap=8
     LineChart values={map(range(11), i => 3*(1-i/10)*(1-i/10)*(i/10)*c1 + 3*(1-i/10)*(i/10)*(i/10)*c2 + (i/10)*(i/10)*(i/10))} h={h}
     Row gap=8 middle
       Text.caption "Handle 1" w=60
-      Slider bind=c1 min=0 max=1 grow onChange={onChange}
+      Slider @c1 min=0 max=1 grow onChange={onChange}
     Row gap=8 middle
       Text.caption "Handle 2" w=60
-      Slider bind=c2 min=0 max=1 grow onChange={onChange}
+      Slider @c2 min=0 max=1 grow onChange={onChange}
 
 // A time ruler with ticks every frame and the loop region shaded; scrubbing is a slider under it, drawn as a labelled strip.
-define Ruler duration=24 loopStart=0 loopEnd=24 bind=time
+define Ruler duration=24 loopStart=0 loopEnd=24 @time
   Row gap=8 middle
     Text.caption "Frames" w=100
     Row grow gap=0

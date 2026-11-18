@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/internals.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // Toasts and the confirm dialog (the action's `look`, bound colors and sizes, the button's actions,
@@ -300,6 +301,93 @@ void main() {
         expect(tester.widget<Text>(find.text('Reset?')).textAlign, TextAlign.center);
         await tester.tap(cancel);
         await tester.pumpAndSettle();
+      });
+
+      testWidgets('on a phone its buttons share the width; with room they sit at the end, each at most 240 wide', (tester) async {
+        for (final (size, label, shared) in [
+          (const Size(390, 844), 'Archive', true),
+          (const Size(1440, 900), 'Archive', false),
+          (const Size(1440, 900), 'Archive these three conversations and every reply to them now', false),
+        ]) {
+          final h = Host([v('out', '')]);
+          await h.pump(tester, size: size);
+          unawaited(h.run([
+            {'type': 'confirm', 'title': 'Archive the whole thread?', 'confirmLabel': label},
+          ]));
+          await tester.pumpAndSettle();
+          final ok = tester.getRect(find.byKey(const ValueKey('codelessly-confirm-ok')));
+          final cancel = tester.getRect(find.byKey(const ValueKey('codelessly-confirm-cancel')));
+          final title = tester.getRect(find.text('Archive the whole thread?'));
+          if (shared) {
+            expect(ok.width, closeTo(cancel.width, 0.5), reason: '$size');
+            expect(cancel.left, closeTo(title.left, 0.5), reason: 'from edge to edge');
+          } else if (label.length < 20) {
+            // Side by side at the end, as wide as their words.
+            expect(ok.top, closeTo(cancel.top, 0.5));
+            expect(cancel.right, lessThanOrEqualTo(ok.left));
+            expect(ok.right, greaterThanOrEqualTo(title.right - 0.5));
+            expect(cancel.left, greaterThan(title.left + 40));
+            expect(ok.width, lessThan(240));
+          } else {
+            // A long word wraps in a button no wider than 240.
+            expect(ok.width, 240);
+          }
+          await tester.tap(find.byKey(const ValueKey('codelessly-confirm-cancel')));
+          await tester.pumpAndSettle();
+        }
+      });
+
+      testWidgets('the focus starts on the yes (on Cancel when it is destructive); Enter presses it, Tab moves, Escape cancels', (tester) async {
+        final h = Host([v('out', '')]);
+        await h.pump(tester, size: const Size(1440, 900));
+        List<Json> ask({bool danger = false}) => [
+              {
+                'type': 'confirm',
+                'title': 'Save?',
+                if (danger) 'destructive': true,
+                'actions': [
+                  {'type': 'setVariable', 'variable': 'out', 'value': 'yes'},
+                ],
+                'cancelActions': [
+                  {'type': 'setVariable', 'variable': 'out', 'value': 'no'},
+                ],
+              },
+            ];
+        bool focused(String key) {
+          final button = find.byKey(ValueKey(key));
+          return Focus.of(tester.element(find.descendant(of: button, matching: find.byType(Text)).first)).hasFocus;
+        }
+
+        Future<void> press(LogicalKeyboardKey key) async {
+          await tester.sendKeyEvent(key);
+          await tester.pumpAndSettle();
+        }
+
+        unawaited(h.run(ask()));
+        await tester.pumpAndSettle();
+        expect(focused('codelessly-confirm-ok'), isTrue);
+        await press(LogicalKeyboardKey.enter);
+        expect(h['out'], 'yes');
+        expect(find.text('Save?'), findsNothing);
+
+        unawaited(h.run(ask(danger: true)));
+        await tester.pumpAndSettle();
+        expect(focused('codelessly-confirm-cancel'), isTrue);
+        await press(LogicalKeyboardKey.enter);
+        expect(h['out'], 'no');
+
+        unawaited(h.run(ask(danger: true)));
+        await tester.pumpAndSettle();
+        await press(LogicalKeyboardKey.tab);
+        expect(focused('codelessly-confirm-ok'), isTrue);
+        await press(LogicalKeyboardKey.enter);
+        expect(h['out'], 'yes');
+
+        unawaited(h.run(ask()));
+        await tester.pumpAndSettle();
+        await press(LogicalKeyboardKey.escape);
+        expect(h['out'], 'no');
+        expect(find.text('Save?'), findsNothing);
       });
 
       testWidgets('can show as a bottom sheet', (tester) async {

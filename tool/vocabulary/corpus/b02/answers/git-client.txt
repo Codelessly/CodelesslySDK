@@ -7,13 +7,14 @@ state pushProgress=0
 state pulling=false
 state branches=[{"name":"main","ahead":0,"behind":3},{"name":"feature/diff-view","ahead":4,"behind":1},{"name":"fix/conflict-markers","ahead":2,"behind":0},{"name":"release/1.4","ahead":0,"behind":0}]
 state commits=[{"id":"c1","hash":"a41f9c2","msg":"Add side-by-side diff renderer","author":"Maya Reyes","lane":0,"color":"#FF2F80ED","when":"2h ago","files":[{"path":"lib/diff/side_by_side.dart","added":128,"removed":4},{"path":"lib/diff/line_numbers.dart","added":36,"removed":0},{"path":"test/diff_test.dart","added":54,"removed":2}]},{"id":"c2","hash":"9be07d1","msg":"Merge branch 'main' into feature/diff-view","author":"Ravi Shah","lane":1,"color":"#FF27AE60","when":"5h ago","files":[{"path":"pubspec.yaml","added":3,"removed":3}]},{"id":"c3","hash":"3d5a8e0","msg":"Fix hunk header parsing for renames","author":"Ravi Shah","lane":1,"color":"#FF27AE60","when":"yesterday","files":[{"path":"lib/diff/parser.dart","added":17,"removed":9}]},{"id":"c4","hash":"71c2b44","msg":"Inline diff mode","author":"Maya Reyes","lane":0,"color":"#FF2F80ED","when":"yesterday","files":[{"path":"lib/diff/inline.dart","added":88,"removed":0},{"path":"lib/diff/view.dart","added":12,"removed":5}]},{"id":"c5","hash":"e02b6f3","msg":"Initial commit graph","author":"Lena Novak","lane":2,"color":"#FFF2994A","when":"3 days ago","files":[{"path":"lib/graph/lanes.dart","added":210,"removed":0}]}]
+state newName=""
 every 100ms when pushing onTick={pushProgress=min(1,pushProgress+0.05); pushing=pushProgress<1}
 every 1500ms when pulling onTick={pulling=false; toast "Pulled 1 commit"}
 App
   Sidebar
     Brand "Twig" icon="account_tree"
     Text.caption "BRANCHES"
-    Input "Filter branches" bind=filter
+    Input "Filter branches" @filter
     each b in branches
       if contains(lower(b.name),lower(filter))
         NavItem "{b.name}" icon="call_split" selected={branch==b.name} onTap={branch=b.name}
@@ -37,7 +38,7 @@ App
     if pushing
       Row gap=12 pad=[24,8,24,8]
         Text.small "Pushing to origin..."
-        Progress bind=pushProgress grow
+        Progress value={pushProgress} grow
         Text.small "{round(pushProgress*100,0)}%"
     if pulling
       Row gap=12 pad=[24,8,24,8]
@@ -74,7 +75,7 @@ App
           Button.outline "Cherry-pick" icon="content_copy" onTap={emit cherryPick c.id; toast "Cherry-picked {c.hash}"}
           Button.outline "Revert" icon="undo" onTap={emit revert c.id}
   Dialog#newBranch "New branch" "From {branch}"
-    Input "Branch name" bind=newName
+    Input "Branch name" @newName
     Button "Create" onTap={emit createBranch newName; close}
 
 ### Diff
@@ -95,7 +96,7 @@ App
     Nav
       Heading "{file}" level=3
       Row gap=8
-        SegmentedButton bind=mode items=["Side by side","Inline"]
+        SegmentedButton @mode items=["Side by side","Inline"]
         Button.outline "Stage all hunks" onTap={staged=map(hunks,h=>h.id)}
         Button "Commit..." icon="check" onTap={go commit}
     Column pad=24 gap=16 scroll
@@ -164,15 +165,15 @@ App
               Text.danger "-{f.removed}"
               IconButton "add" tooltip="Stage" onTap={staged=append(staged,f); unstaged=without(unstaged,f)}
       Card grow gap=12
-        Input "Summary" "Short description of the change" bind=summary
+        Input "Summary" "Short description of the change" @summary
         Row between
           if length(summary) > 72
             Text.danger "Summary is too long"
           else
             Text.muted "Keep the summary under 72 characters"
           Text.small "{length(summary)}/72" color={length(summary) > 72 ? "#FFD32F2F" : "#FF666666"}
-        Input "Description" multiline bind=body
-        Checkbox "Amend previous commit" bind=amend
+        Input "Description" multiline @body
+        Checkbox "Amend previous commit" @amend
         Row end gap=8
           Button.outline "Cancel" onTap={go history}
           Button "{amend ? "Amend commit" : "Commit"}" disabled={length(summary)==0 || length(summary)>72 || length(staged)==0} onTap={emit commit summary; toast "Committed"; summary=""; body=""; go history}

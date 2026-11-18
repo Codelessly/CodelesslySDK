@@ -44,12 +44,12 @@ App
               Icon "work"
               Text.strong "Yes"
               Text.muted "I received a W-2"
-              Radio "Yes" bind=hasJob value="yes"
+              Radio "Yes" @hasJob value="yes"
             Card grow gap=8 animate=scale onTap={hasJob="no"}
               Icon "block"
               Text.strong "No"
               Text.muted "No wages this year"
-              Radio "No" bind=hasJob value="no"
+              Radio "No" @hasJob value="no"
           Accordion "Why do we ask this?"
             Text.muted "Wages are the biggest part of most returns. If you had a job, your employer sent you a W-2 form by the end of January."
         if qIndex==1
@@ -58,26 +58,26 @@ App
             Card grow gap=8 onTap={dependents="yes"}
               Icon "family_restroom"
               Text.strong "Yes"
-              Radio "Yes" bind=dependents value="yes"
+              Radio "Yes" @dependents value="yes"
             Card grow gap=8 onTap={dependents="no"}
               Icon "person"
               Text.strong "No"
-              Radio "No" bind=dependents value="no"
+              Radio "No" @dependents value="no"
           Accordion "Who counts as a dependent?"
             Text.muted "A child or relative who lived with you more than half the year and whose support you mostly provided."
-          Select "Filing status" bind=filing items=["Single","Married filing jointly","Head of household"]
+          Select "Filing status" @filing items=["Single","Married filing jointly","Head of household"]
         Row between
           Button.ghost "Back" onTap={qIndex=max(0,qIndex-1)}
           Button "Continue" onTap={hasJob=="" ? toast "Pick yes or no" : (qIndex==0 ? qIndex=1 : (done=setAt(done,0,true); section=2; qIndex=0))}
       if section==2
         Text.title "What did you earn?"
-        Input "Wages from your W-2" bind=wages type=number prefix="$"
+        Input "Wages from your W-2" @wages type=number prefix="$"
         Accordion "Where do I find this?"
           Text.muted "Box 1 of your W-2. It already leaves out your pre-tax retirement contributions."
-        Input "Federal tax withheld" bind=withheld type=number prefix="$"
+        Input "Federal tax withheld" @withheld type=number prefix="$"
         Accordion "What is withholding?"
           Text.muted "Tax your employer sent to the IRS for you during the year. It is Box 2 of your W-2."
-        Input "Bank interest" bind=interest type=number prefix="$" hint="From any 1099-INT"
+        Input "Bank interest" @interest type=number prefix="$" hint="From any 1099-INT"
         Card gap=4
           Text.caption "Total income"
           Text.heading2 "{money(wages+interest,'$',2)}"
@@ -90,13 +90,13 @@ App
           Card grow gap=8 onTap={deduction=13850}
             Text.strong "Standard"
             Text.heading2 "$13,850"
-            Radio "Standard" bind=deduction value=13850
+            Radio "Standard" @deduction value=13850
           Card grow gap=8 onTap={deduction=0}
             Text.strong "Itemized"
             Text.muted "Enter your own list"
-            Radio "Itemized" bind=deduction value=0
+            Radio "Itemized" @deduction value=0
         if deduction==0
-          Input "Total itemized deductions" bind=deduction type=number prefix="$"
+          Input "Total itemized deductions" @deduction type=number prefix="$"
         Accordion "Which one should I choose?"
           Text.muted "Most people with simple returns do better with the standard deduction."
         Row between
@@ -110,6 +110,9 @@ state docs=[{"id":1,"name":"W-2_Acme.pdf","kind":"W-2","field":"Wages","amount":
 state sel=0
 state wages=48500
 state interest=120
+state kind=""
+state field=""
+state amount=""
 App
   Sidebar
     Brand "Returnly" icon="receipt_long"
@@ -145,9 +148,9 @@ App
         Text.caption "Fields filled from documents"
         Text.body "Wages {money(wages,'$',2)}, bank interest {money(interest,'$',2)}"
 Dialog#match "Match this document" "Choose where it belongs"
-  Select "Form type" bind=kind items=["W-2","1099-INT","1099-NEC","1098"]
-  Select "Field" bind=field items=["Wages","Bank interest","Self-employment income","Mortgage interest"]
-  Input "Amount" bind=amount type=number prefix="$"
+  Select "Form type" @kind items=["W-2","1099-INT","1099-NEC","1098"]
+  Select "Field" @field items=["Wages","Bank interest","Self-employment income","Mortgage interest"]
+  Input "Amount" @amount type=number prefix="$"
   Button "Save match" onTap={docs=updateWhere(docs,x=>x.id==sel,x=>with(with(with(with(x,"kind",kind),"field",field),"amount",amount),"matched",true)); close; toast "Matched"}
 
 ### Review
@@ -186,7 +189,7 @@ App
           Text.muted "Wages"
           Row gap=8 middle
             if editing=="wages"
-              Input "Wages" bind=wages type=number prefix="$" w=140
+              Input "Wages" @wages type=number prefix="$" w=140
               IconButton "check" tooltip="Done" onTap={editing=""}
             if editing!="wages"
               Text.strong "{money(wages,'$',2)}"
@@ -195,7 +198,7 @@ App
           Text.muted "Tax withheld"
           Row gap=8 middle
             if editing=="withheld"
-              Input "Withheld" bind=withheld type=number prefix="$" w=140
+              Input "Withheld" @withheld type=number prefix="$" w=140
               IconButton "check" tooltip="Done" onTap={editing=""}
             if editing!="withheld"
               Text.strong "{money(withheld,'$',2)}"
@@ -204,7 +207,7 @@ App
           Text.muted "Bank interest"
           Row gap=8 middle
             if editing=="interest"
-              Input "Interest" bind=interest type=number prefix="$" w=140
+              Input "Interest" @interest type=number prefix="$" w=140
               IconButton "check" tooltip="Done" onTap={editing=""}
             if editing!="interest"
               Text.strong "{money(interest,'$',2)}"
@@ -213,12 +216,12 @@ App
           Text.muted "Deduction"
           Row gap=8 middle
             if editing=="deduction"
-              Input "Deduction" bind=deduction type=number prefix="$" w=140
+              Input "Deduction" @deduction type=number prefix="$" w=140
               IconButton "check" tooltip="Done" onTap={editing=""}
             if editing!="deduction"
               Text.strong "{money(deduction,'$',2)}"
               IconButton "edit" tooltip="Edit deduction" onTap={editing="deduction"}
-      Checkbox "I confirm these answers are true and complete" bind=agree
+      Checkbox "I confirm these answers are true and complete" @agree
 
 ### Sign
 state sig=""
@@ -243,7 +246,7 @@ App
         Text.muted "I declare that I have examined this return and, to the best of my knowledge, it is true, correct and complete."
         Text.strong "Refund: {money(abs(round(withheld - max(0,wages+interest-deduction)*0.12,0)),'$',0)}"
       Text.fieldLabel "Draw your signature"
-      SignaturePad bind=sig h=160 onChange={signed=sig!=""}
+      SignaturePad @sig h=160 onChange={signed=sig!=""}
       Row between
         Button.ghost "Clear" onTap={sig=""; signed=false}
         Text.muted "{formatDate(today(),'MMM d, yyyy')}"

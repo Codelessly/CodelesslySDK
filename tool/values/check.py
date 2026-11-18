@@ -88,7 +88,9 @@ def resolve(step, doc):
         found = [k for k, n in nodes.items() if n['type'] in CHOOSERS]
         if found:
             k = found[min(step.get('nth', 0), len(found) - 1)]
-            return f"{k}/{CHOOSERS[nodes[k]['type']]}#{step['choose']}"
+            # Segments has a cell of its own per option (cell0, cell1…); the others repeat one (opt#0, opt#1…).
+            sep = '' if nodes[k]['type'] == 'Segments' else '#'
+            return f"{k}/{CHOOSERS[nodes[k]['type']]}{sep}{step['choose']}"
         radios = [k for k, n in nodes.items() if n['type'] in ('radio', 'choiceChip', 'listTile')]
         return radios[step['choose']] if len(radios) > step['choose'] else None
     if 'press' in step:

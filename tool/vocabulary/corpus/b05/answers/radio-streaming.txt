@@ -6,6 +6,8 @@ state country="All"
 state genre="All"
 state q=""
 state stations=[{"id":"s1","name":"KEXP 90.3","city":"Seattle","country":"USA","genre":"Indie","song":"Khruangbin - Time (You and I)","bitrate":128,"live":true},{"id":"s2","name":"FIP","city":"Paris","country":"France","genre":"Eclectic","song":"Nina Simone - Sinnerman","bitrate":192,"live":true},{"id":"s3","name":"Radio Paradise","city":"Paradise","country":"USA","genre":"Rock","song":"Fleet Foxes - Mykonos","bitrate":320,"live":true},{"id":"s4","name":"NTS 1","city":"London","country":"UK","genre":"Electronic","song":"Floating Points - Last Bloom","bitrate":128,"live":true},{"id":"s5","name":"Jazz24","city":"Seattle","country":"USA","genre":"Jazz","song":"Kamasi Washington - Truth","bitrate":128,"live":true},{"id":"s6","name":"Radio Swiss Classic","city":"Bern","country":"Switzerland","genre":"Classical","song":"Debussy - Clair de lune","bitrate":128,"live":true}]
+state quality=""
+state liveOnly=false
 App
   Sidebar
     Brand "Longwave" icon="radio"
@@ -20,7 +22,7 @@ App
     Nav
       Heading "Stations" level=1
       Row gap=8
-        Input "Search stations" bind=q w=220
+        Input "Search stations" @q w=220
         IconButton "tune" tooltip="Filters" onTap={open filters}
     Column pad=24 gap=16 scroll
       Row gap=8 scroll
@@ -32,7 +34,7 @@ App
         FilterChip "Rock" selected={genre=="Rock"} onTap={genre="Rock"}
         FilterChip "Eclectic" selected={genre=="Eclectic"} onTap={genre="Eclectic"}
       Row gap=12
-        Select bind=country items=["All","USA","UK","France","Switzerland"]
+        Select @country items=["All","USA","UK","France","Switzerland"]
         Text.muted "{count(stations, s=>(country=="All" || s.country==country) && (genre=="All" || s.genre==genre))} stations"
       each s in filter(stations, s=>(country=="All" || s.country==country) && (genre=="All" || s.genre==genre) && contains(lower(s.name), lower(q)))
         ListTile onTap={nowStation=s; playing=true; go now-playing} menu=stationMenu
@@ -57,8 +59,8 @@ App
           IconButton "open_in_full" tooltip="Open player" onTap={go now-playing}
 Sheet#filters "Filters"
   Text.fieldLabel "Minimum quality"
-  SegmentedButton bind=quality items=["Any","128","192","320"]
-  Toggle "Only stations that are live now" bind=liveOnly
+  SegmentedButton @quality items=["Any","128","192","320"]
+  Toggle "Only stations that are live now" @liveOnly
   Button "Apply" onTap={close}
 Menu#stationMenu
   MenuItem "Play" icon="play_arrow" onTap={nowStation=find(stations, s=>s.id==sel); playing=true; go now-playing}
@@ -103,7 +105,7 @@ App
           Text.strong "{nowStation.song}"
       if buffering
         Column gap=4
-          Progress bind=level
+          Progress value={level}
           Text.caption "Buffering, reconnecting to the stream"
       Card gap=8
         Spectrum values={spectrum} bars=12 h=96
@@ -113,7 +115,7 @@ App
         IconButton "skip_next" tooltip="Next station" onTap={toast "Next station"}
       Row gap=12 middle
         Icon "volume_down"
-        Slider bind=volume min=0 max=100 grow
+        Slider @volume min=0 max=100 grow
         Icon "volume_up"
       Row gap=8
         Button.outline "Save this song" icon="favorite_border" onTap={saved=append(saved,{"title":nowStation.song,"station":nowStation.name,"at":"now"}); toast "Saved to your songs"}
@@ -125,7 +127,7 @@ App
           Text.mono "{duration(sleepLeft)}"
         Button.tertiary "Cancel timer" onTap={sleepLeft=0; sleepMinutes=0}
 Sheet#sleep "Sleep timer"
-  Wheel bind=sleepMinutes items=[0,5,10,15,30,45,60,90] unit="min" h=160
+  Wheel @sleepMinutes items=[0,5,10,15,30,45,60,90] unit="min" h=160
   Row gap=8
     Button.outline "Cancel" onTap={close}
     Button "Start" onTap={sleepLeft=sleepMinutes*60; toast "Stopping in {sleepMinutes} min"; close}
@@ -139,7 +141,7 @@ Dialog#eq "Equalizer" "Ten bands, 32 Hz to 16 kHz"
   Row gap=4 center
     each b in bands
       Column center gap=4
-        Slider bind=bands[index] min=-12 max=12 vertical h=140
+        Slider @bands[index] min=-12 max=12 vertical h=140
         Text.caption "{['32','64','125','250','500','1k','2k','4k','8k','16k'][index]}"
   Row between
     Button.ghost "Reset" onTap={preset="Flat"; bands=[0,0,0,0,0,0,0,0,0,0]}
@@ -159,7 +161,7 @@ App
   Main
     Nav
       Heading "Recently played" level=1
-      SegmentedButton bind=view items=["All","Saved"]
+      SegmentedButton @view items=["All","Saved"]
     Column pad=24 gap=12 scroll
       each r in filter(recent, r=>view=="All" || r.saved)
         ListTile
@@ -193,21 +195,21 @@ App
   Main
     Nav
       Heading "Alarm" level=1
-      Toggle "Alarm on" bind=alarmOn
+      Toggle "Alarm on" @alarmOn
     Column pad=24 gap=16 maxw=560
       Card gap=16
         Text.fieldLabel "Wake at"
-        TimePicker bind=alarmTime
+        TimePicker @alarmTime
         Text.fieldLabel "Repeat"
         Row gap=8 scroll
           each d in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
             FilterChip "{d}" selected={contains(days,d)} onTap={days=contains(days,d) ? without(days,d) : append(days,d)}
         Text.fieldLabel "Wake to station"
-        Select bind=alarmStation items=["KEXP 90.3","FIP","Radio Paradise","NTS 1","Jazz24","Radio Swiss Classic"]
-        Toggle "Fade in slowly" bind=ramp
+        Select @alarmStation items=["KEXP 90.3","FIP","Radio Paradise","NTS 1","Jazz24","Radio Swiss Classic"]
+        Toggle "Fade in slowly" @ramp
         Row gap=12 middle
           Icon "volume_up"
-          Slider bind=alarmVolume min=0 max=100 grow
+          Slider @alarmVolume min=0 max=100 grow
         Text.muted "Rings {join(days,', ')} at {alarmTime} to {alarmStation}, volume {alarmVolume}%."
         Row gap=8
           Button.outline "Test now" onTap={nowStation=find(stations, s=>s.name==alarmStation); playing=true; go now-playing}

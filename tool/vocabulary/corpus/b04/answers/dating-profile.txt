@@ -40,19 +40,19 @@ App
               IconButton "close" tooltip="Remove photo" onTap={photos=removeWhere(photos,x=>x.id==p.id)}
       Card gap=12
         Text.strong "About you"
-        Input "First name" bind=name
-        Input "Bio" "A line or two about you" bind=bio multiline
+        Input "First name" @name
+        Input "Bio" "A line or two about you" @bio multiline
         Text.caption "{length(bio)} / 300"
       Card gap=12
         Text.strong "Height"
-        WheelPicker bind=heightCm min=140 max=220 unit="cm"
+        WheelPicker @heightCm min=140 max=220 unit="cm"
         Text.muted "{heightCm} cm"
       Card gap=12
         Text.strong "Who you want to meet"
         Text "Within {maxDistance} km"
-        Slider bind=maxDistance min=1 max=150
+        Slider @maxDistance min=1 max=150
         Text "Ages {ageRange[0]} to {ageRange[1]}"
-        RangeSlider bind=ageRange min=18 max=80
+        RangeSlider @ageRange min=18 max=80
       Card gap=8
         Row between
           Text.strong "Completeness"
@@ -97,7 +97,7 @@ App
     each p in prompts
       ListTile "{p}" icon="chevron_right" onTap={pick=p; draft=""; close; open answerSheet}
   Sheet#answerSheet "{pick}"
-    Input "Your answer" bind=draft multiline maxLength=140
+    Input "Your answer" @draft multiline maxLength=140
     Row between
       Text.caption "{length(draft)} / 140"
       Button "Save answer" disabled={trim(draft)=="" || length(draft)>140} onTap={answers=append(removeWhere(answers,x=>x.q==pick),{"q":pick,"a":draft}); close; toast "Prompt saved"}
@@ -129,7 +129,7 @@ App
           if isEmpty(interests)
             Text.muted "Nothing yet"
       Card gap=12
-        Input "Search interests" bind=q
+        Input "Search interests" @q
         Row gap=8 wrap
           each i in filter(all,x=>contains(lower(x),lower(q)))
             FilterChip "{i}" selected={contains(interests,i)} onTap={contains(interests,i) ? interests=without(interests,i) : (length(interests)<5 ? interests=append(interests,i) : toast "Up to five interests")}
@@ -156,9 +156,9 @@ App
       Text.muted "This is how others see you"
     Column pad=24 gap=16 center
       Card gap=12 maxw=420
-        Pages bind=page h=420 items=photos
+        Pages @page h=420 items=photos
           Image "{item.url}" radius=12
-        Dots bind=page count={length(photos)}
+        Dots @page count={length(photos)}
         Row between
           Text.heading "{name}, 29"
           Badge.success "Active now"

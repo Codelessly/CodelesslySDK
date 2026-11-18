@@ -28,7 +28,7 @@ App
       Row gap=8 middle
         Text.mono "{duration(secs)}"
         IconButton "{running ? 'pause' : 'play_arrow'}" tooltip="Pause or resume" onTap={running=!running}
-        Toggle "Pencil" bind=pencil
+        Toggle "Pencil" @pencil
         Button.outline "Check" icon="spellcheck" onTap={open checkMenu}
         Button.outline "Reveal" icon="visibility" onTap={open revealMenu}
     Row gap=16 pad=24 top
@@ -112,7 +112,7 @@ App
   Main
     Nav
       Heading "Archive" level=1
-      SegmentedButton items=["All","Easy","Medium","Hard"] bind=filter_level
+      SegmentedButton items=["All","Easy","Medium","Hard"] @filter_level
     Column pad=24 gap=16
       Grid cols=3 gap=16
         each p in [{"d":"Mon","t":"Easy Street","lvl":"Easy","best":"04:12"},{"d":"Wed","t":"Mid-week Mix","lvl":"Medium","best":"09:48"},{"d":"Fri","t":"Barbed Wire","lvl":"Hard","best":""}]

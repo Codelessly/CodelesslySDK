@@ -42,9 +42,9 @@ state draft={"on":false,"title":"x"}
 state rows=[{"id":1,"name":"A","done":false},{"id":2,"name":"B","done":false}]
 Page
   Section
-    ToggleRow "Draft" bind=draft.on
+    ToggleRow "Draft" @draft.on
     each r in rows
-      ToggleRow "{r.name}" bind=r.done
+      ToggleRow "{r.name}" @r.done
 '''));
     await tester.pump(const Duration(milliseconds: 600));
     expect(session.notationIssues, isEmpty);

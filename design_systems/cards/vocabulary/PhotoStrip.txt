@@ -1,5 +1,5 @@
 // A row of pictures a person has added (a url each, or a record with url), with a remove button on each and an add tile while there is room.
-PhotoStrip bind=photos max=6 size=72 onAdd onRemove
+PhotoStrip @photos max=6 size=72 onAdd onRemove
   state photos=[]
   Row w=fill gap=8 scroll middle
     each p in photos

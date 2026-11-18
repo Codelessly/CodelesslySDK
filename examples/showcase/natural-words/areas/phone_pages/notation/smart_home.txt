@@ -26,38 +26,38 @@ Column h=fill maxw=720
       Card gap=8
         Row between center
           Icon "lightbulb"
-          Toggle "" bind=light
+          Toggle "" @light
         Text.strong "Ceiling Light"
         Text.caption "{light ? brightness + '% brightness' : 'Off'}"
-        Slider bind=brightness min=0 max=100 visible={light}
+        Slider @brightness min=0 max=100 visible={light}
       Card gap=8
         Row between center
           Icon "tv"
-          Toggle "" bind=tv
+          Toggle "" @tv
         Text.strong "Smart TV"
         Text.caption "{tv ? 'On' : 'Off'}"
       Card gap=8
         Row between center
           Icon "air"
-          Toggle "" bind=purifier
+          Toggle "" @purifier
         Text.strong "Air Purifier"
         Text.caption "{purifier ? 'On' : 'Off'}"
       Card gap=8
         Row between center
           Icon "thermostat"
-          Toggle "" bind=heat
+          Toggle "" @heat
         Text.strong "Thermostat"
         Text.caption "{heat ? '21.5°C' : 'Off'}"
       Card gap=8
         Row between center
           Icon "{locked ? 'lock' : 'lock_open'}"
-          Toggle "" bind=locked
+          Toggle "" @locked
         Text.strong "Door Lock"
         Text.caption "{locked ? 'Locked' : 'Unlocked'}"
       Card gap=8
         Row between center
           Icon "speaker"
-          Toggle "" bind=playing
+          Toggle "" @playing
         Text.strong "Speaker"
         Text.caption "{playing ? 'Playing' : 'Paused'}"
     Card gap=12

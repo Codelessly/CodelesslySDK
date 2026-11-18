@@ -16,7 +16,7 @@ Page
       Link "Decor"
       Link "Sale"
     Row gap=12 middle
-      Input "Search" "Search the store" bind=q w=240
+      Input "Search" "Search the store" @q w=240
       Row gap=8 middle
         IconButton "shopping_bag_outlined" onTap={emit openCart}
         Badge.primary "{cart}"
@@ -68,7 +68,7 @@ Page
               ChoiceChip "Sand" selected={finish=="Sand"} onTap={finish="Sand"}
           Column gap=8
             Text.fieldLabel "Quantity"
-            Stepper "Quantity" bind=qty min=1 max=10
+            Stepper "Quantity" @qty min=1 max=10
           Row gap=12
             Button "Add to cart" size=large grow onTap={cart=cart+qty; toast "Added to cart"}
             Button.outline "Buy now" size=large grow onTap={emit buyNow}
@@ -86,7 +86,7 @@ Page
                 Text.muted "Not right for your desk? Send it back, free of charge."
   Section tint
     Column gap=24
-      TabToggle bind=tab options=["Description","Specifications","Reviews"]
+      TabToggle @tab options=["Description","Specifications","Reviews"]
       if tab=="Description"
         Column gap=12 maxw=720
           Heading "Light that moves with you" level=3

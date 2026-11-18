@@ -54,6 +54,7 @@ state sortKey="delay"
 state sortDesc=true
 state lateOnly=false
 state fleet=[{"id":"4012","line":"T4","driver":"M. Okafor","crowd":2,"delay":3,"status":"Running"},{"id":"4018","line":"T4","driver":"S. Lindqvist","crowd":1,"delay":0,"status":"Running"},{"id":"1103","line":"T1","driver":"R. Petrov","crowd":3,"delay":7,"status":"Held at Old Mill"},{"id":"1107","line":"T1","driver":"A. Haddad","crowd":2,"delay":0,"status":"Running"},{"id":"7021","line":"T7","driver":"J. Whitfield","crowd":1,"delay":1,"status":"Running"},{"id":"7025","line":"T7","driver":"L. Moreau","crowd":2,"delay":5,"status":"Signal fault"}]
+state q=""
 App
   Sidebar
     Brand "Liveline" icon="tram"
@@ -66,8 +67,8 @@ App
     Nav
       Heading "Fleet" level=1
       Row gap=8
-        Input "Search tram or driver" bind=q w=220
-        Toggle "Late only" bind=lateOnly
+        Input "Search tram or driver" @q w=220
+        Toggle "Late only" @lateOnly
         Button.outline "Export" onTap={toast "Exported 6 trams"}
     Column pad=24 gap=16
       Card gap=0
@@ -96,6 +97,8 @@ state to="Docklands"
 state reason="Track works"
 state closed=false
 state alternatives=[{"name":"Bus replacement B4","detail":"Every 6 min, adds 9 min","mode":"directions_bus"},{"name":"Reroute via T1 at Canal Street","detail":"Every 8 min, adds 4 min","mode":"tram"},{"name":"Walk to Harbour Gate","detail":"11 min on foot","mode":"directions_walk"}]
+state startDate=""
+state startTime=""
 App
   Sidebar
     Brand "Liveline" icon="tram"
@@ -114,14 +117,14 @@ App
       Row gap=24 top
         Card grow gap=12
           Text.title "Close a stretch"
-          Select "Line" items=["T1","T4","T7"] bind=line
+          Select "Line" items=["T1","T4","T7"] @line
           Row gap=12
-            Select "From" items={stopsList} bind=from grow
-            Select "To" items={stopsList} bind=to grow
-          Select "Reason" items=["Track works","Signal fault","Accident","Event"] bind=reason
+            Select "From" items={stopsList} @from grow
+            Select "To" items={stopsList} @to grow
+          Select "Reason" items=["Track works","Signal fault","Accident","Event"] @reason
           Row gap=12
-            DatePicker "Starts" bind=startDate grow
-            TimePicker "At" bind=startTime grow
+            DatePicker "Starts" @startDate grow
+            TimePicker "At" @startTime grow
           Button.secondary "Preview closure" onTap={closed=true}
         Card grow gap=12
           Text.title "Affected stretch"

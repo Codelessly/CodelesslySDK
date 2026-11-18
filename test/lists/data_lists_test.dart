@@ -391,6 +391,50 @@ void main() {
     expect(rows(tester), ['P0', 'P2']);
   });
 
+  testWidgets('a list that hugs its rows takes a swiped row out and shows its undo bar under them', (tester) async {
+    final s = await lists.show(
+      tester,
+      screen(
+        extraList: {
+          'layout': {'width': 300, 'height': {'hug': 0}},
+          'props': {
+            'scrollable': false,
+            'swipeActions': {
+              'endActions': [
+                {'id': 'remove', 'label': 'Remove', 'removes': true},
+              ],
+              'apply': 'variable',
+              'undoMs': 1000,
+            },
+          },
+        },
+      ),
+      variables: [lists.v('people', people(3), VariableType.list)],
+    );
+    await tester.pumpAndSettle();
+    await tester.dragFrom(s.center('row', instance: const ProvidedItem('row', null, 'list', 1)), const Offset(-250, 0));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(rows(tester), ['P0', 'P2']);
+    // The bar is below the last row, not over it.
+    final last = s.center('row', instance: const ProvidedItem('row', null, 'list', 2));
+    expect(tester.getTopLeft(find.text('Undo')).dy, greaterThan(last.dy + 20));
+    // A revealed action is found by its id and label.
+    await tester.pump(const Duration(milliseconds: 1100));
+    await tester.pumpAndSettle();
+    expect((s['people'] as List).length, 2);
+    await tester.dragFrom(s.center('row', instance: const ProvidedItem('row', null, 'list', 0)), const Offset(-60, 0));
+    await tester.pumpAndSettle();
+    final action = find.byKey(const ValueKey(('Codelessly swipe action', 'remove', 'Remove')));
+    expect(action, findsOneWidget);
+    await tester.tap(action);
+    await tester.pumpAndSettle();
+    expect(rows(tester), ['P2']);
+    await tester.pump(const Duration(milliseconds: 1100));
+    await tester.pumpAndSettle();
+    expect((s['people'] as List).length, 1);
+  });
+
   testWidgets('on the design canvas a data list stays at rest', (tester) async {
     await lists.show(tester, screen(pagination: {'name': 'contacts', 'pageSize': 10}),
         variables: [lists.v('people', people(25), VariableType.list)], interactive: false);

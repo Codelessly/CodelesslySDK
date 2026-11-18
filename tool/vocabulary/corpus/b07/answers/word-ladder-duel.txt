@@ -3,6 +3,7 @@ state room="TIDE-4F7"
 state meReady=false
 state themReady=true
 state players=[{"name":"You","ready":false},{"name":"Noor Haddad","ready":true}]
+state difficulty=""
 Page
   Nav
     Brand "Rungs" icon="stairs"
@@ -26,7 +27,7 @@ Page
           Row gap=12 middle
             Avatar "You" size=40
             Text "You"
-          Checkbox "Ready" bind=meReady
+          Checkbox "Ready" @meReady
         Divider
         Row between middle
           Row gap=12 middle
@@ -38,7 +39,7 @@ Page
             Badge.neutral "Choosing..."
       Row gap=12 middle
         Text.muted "Round 1 of 3"
-        Select bind=difficulty items=["Four letters","Five letters"]
+        Select @difficulty items=["Four letters","Five letters"]
       if meReady && themReady
         Text.success "Both ready. Starting in 3..." animate=pulse
         Button "Start duel" size=large onTap={go game}
@@ -85,7 +86,7 @@ App
           if bad
             Text.danger "Not a word one letter away" animate=shake duration=400
           Row gap=8 middle
-            Input "Next word" "one letter changed" bind=guess maxlength=4 autofocus onSubmit={any(links,l=>(l.a==last(rungs) && l.b==upper(guess)) || (l.b==last(rungs) && l.a==upper(guess))) && !contains(rungs,upper(guess)) ? {bad=false; rungs=append(rungs,upper(guess)); guess=""; upper(guess)==end ? {running=false; go results} : {}} : {bad=true; guess=""}}
+            Input "Next word" "one letter changed" @guess maxlength=4 autofocus onSubmit={any(links,l=>(l.a==last(rungs) && l.b==upper(guess)) || (l.b==last(rungs) && l.a==upper(guess))) && !contains(rungs,upper(guess)) ? {bad=false; rungs=append(rungs,upper(guess)); guess=""; upper(guess)==end ? {running=false; go results} : {}} : {bad=true; guess=""}}
             Button "Climb" icon="arrow_upward" onTap={any(links,l=>(l.a==last(rungs) && l.b==upper(guess)) || (l.b==last(rungs) && l.a==upper(guess))) && !contains(rungs,upper(guess)) ? {bad=false; rungs=append(rungs,upper(guess)); guess=""; upper(guess)==end ? {running=false; go results} : {}} : {bad=true; guess=""}}
           Row middle gap=8
             Badge.success "GOAL"

@@ -22,9 +22,9 @@ App
     Nav
       Heading "Company timeline" level=1
       Row gap=8
-        Input "Go to year" "1999 to 2025" type=number bind=year w=140
+        Input "Go to year" "1999 to 2025" type=number @year w=140
         Button.outline "Go" onTap={scroll year}
-        SegmentedButton bind=zoom items=["decade","5 years","year"]
+        SegmentedButton @zoom items=["decade","5 years","year"]
         Button "Play" icon="play_arrow" onTap={playing=true; go play}
     Column pad=24 gap=16
       Row gap=8 wrap
@@ -89,7 +89,7 @@ App
       Timeline from=2009 to=2025 center={events[step].year}
         each e in events
           TimelineEvent year={e.year} selected={index == step} onTap={step=index; playing=false}
-      Dots bind=step count={length(events)}
+      Dots @step count={length(events)}
     Footer
       Row between
         Text.muted "Stepping every 3 seconds"

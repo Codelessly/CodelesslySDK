@@ -10,7 +10,9 @@
 // end), except on a ruler, whose pointer travels the whole width. Drag and
 // tap set the value (snapped to `divisions`, kept within `selectableMin` /
 // `selectableMax`); the keys move it: arrows a step (a division, else 1 %
-// of the range), Page Up / Page Down ten steps, Home / End the ends. Every
+// of the range), Page Up / Page Down ten steps, Home / End the ends. A
+// range (`rangeEnd`) is two Tab stops, its lower and its upper thumb (Space
+// and Enter switch too), the keyboard's ring round the one the keys move. Every
 // track, thumb, tick, value indicator and color prop of the old island
 // applies; the node's `customPaint` is drawn between the parts as before
 // (render/custom_paint.dart: `painter` over the track, `foregroundPainter`
@@ -85,6 +87,19 @@ String? sliderLabel(Node n, double value) {
 class RenderSlider extends RenderControl {
   RenderSlider() {
     focusNode.onKey = _key;
+    // A range's two thumbs are two Tab stops: Tab comes onto the lower one,
+    // Shift+Tab (from after it) onto the upper one.
+    final focusChanged = focusNode.onFocusChange;
+    focusNode.onFocusChange = (on) {
+      if (on && isRange) _highActive = HardwareKeyboard.instance.isShiftPressed;
+      focusChanged?.call(on);
+    };
+    // Named with the thumb the keys move ("Price, upper thumb").
+    final named = focusNode.label;
+    focusNode.label = () {
+      final name = named?.call();
+      return isRange && name != null ? '$name, ${_highActive ? 'upper' : 'lower'} thumb' : name;
+    };
     _tapper = TapGestureRecognizer(debugOwner: this)
       ..onTapDown = ((d) => _start(d.localPosition))
       ..onTapUp = ((_) => _end())
@@ -282,16 +297,31 @@ class RenderSlider extends RenderControl {
 
   // --- keyboard ------------------------------------------------------------------------
 
-  /// A key step: a division, else 1 % of the range.
+  /// A key step: a division, else 1 % of the range, and at least 1 between
+  /// whole-number ends ten or more apart (a web range input's step): 16 to
+  /// 30 moves by 1, not by a 0.14 a rounded label never shows; 0 to 1 by
+  /// 0.01.
   double get step {
     final d = divisions, range = max - min;
-    return d != null ? range / d : range / 100;
+    if (d != null) return range / d;
+    final whole = min == min.roundToDouble() && max == max.roundToDouble();
+    return whole && range >= 10 ? math.max(1.0, range / 100) : range / 100;
   }
 
   bool _key(KeyEvent event) {
     if (!_interactive || !enabled || _readOnly) return false;
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) return false;
     final k = event.logicalKey;
+    // Tab from the lower thumb goes to the upper one, Shift+Tab back; past
+    // them the focus leaves the slider.
+    if (isRange && k == LogicalKeyboardKey.tab && event is KeyDownEvent) {
+      final back = HardwareKeyboard.instance.isShiftPressed;
+      if (back != _highActive) return false;
+      _highActive = !back;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+      return true;
+    }
     if (isRange && (k == LogicalKeyboardKey.space || k == LogicalKeyboardKey.enter)) {
       _highActive = !_highActive;
       markNeedsPaint();
@@ -466,6 +496,12 @@ class RenderSlider extends RenderControl {
     customPaint?.drawFor(this, canvas, Offset.zero, frame, locals, foreground: false);
     if (!_stars) _paintThumb(canvas, thumb, active: !_highActive);
     if (isRange && !_stars) _paintThumb(canvas, highThumbCenter, active: _highActive);
+    // The keyboard's ring round the thumb the keys move.
+    if (isRange && !_stars && focusHighlight && node.prop(SliderProps.showThumb)) {
+      final c = _highActive ? highThumbCenter : thumb;
+      final r = math.max(thumbSize.width, thumbSize.height) / 2 + 4;
+      paintFocusRing(canvas, RRect.fromRectAndRadius(Rect.fromCircle(center: c, radius: r), Radius.circular(r)), _tokens.primary, width: 2);
+    }
     customPaint?.drawFor(this, canvas, Offset.zero, frame, locals, foreground: true);
     canvas.restore();
   }
@@ -790,7 +826,7 @@ class RenderSlider extends RenderControl {
       ..hint = _readOnly
           ? 'Read only'
           : isRange
-              ? 'Press Space to switch between the lower and upper thumbs'
+              ? 'Tab or Space moves between the lower and upper thumbs'
               : ''
       ..value = isRange
           ? '${value.round()} to ${rangeEnd.round()}; ${_highActive ? 'upper' : 'lower'} thumb'

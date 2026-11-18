@@ -15,7 +15,7 @@ Card w=390 gap=16
     if step<4
       Badge.info "Step {step} of 3"
   if step<4
-    Progress bind={step/3}
+    Progress value={step/3}
   if step==1
     Text.heading "My cart"
     each it in items
@@ -35,23 +35,23 @@ Card w=390 gap=16
   if step==2
     Text.heading "Shipping"
     Column gap=4
-      Input "Full name" bind=name
+      Input "Full name" @name
       if tried && length(trim(name))<2
         Text.danger "Please enter your full name"
     Column gap=4
-      Input "Address" bind=address
+      Input "Address" @address
       if tried && length(trim(address))<5
         Text.danger "Please enter your street address"
     Column gap=4
-      Input "City" bind=city
+      Input "City" @city
       if tried && length(trim(city))<2
         Text.danger "Please enter your city"
     Column gap=4
-      Input "Postcode" bind=postcode
+      Input "Postcode" @postcode
       if tried && length(trim(postcode))<4
         Text.danger "Postcode must be at least 4 characters"
     Column gap=4
-      Input "Email" "you@example.com" bind=email
+      Input "Email" "you@example.com" @email
       if tried && !(contains(email,"@") && contains(email,"."))
         Text.danger "Enter a valid email address"
       if !tried

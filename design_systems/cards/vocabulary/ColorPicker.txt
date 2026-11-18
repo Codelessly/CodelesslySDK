@@ -1,5 +1,5 @@
 // A row of colour swatches; the chosen one is ringed, and a tap chooses it (onPick: result is the colour).
-ColorPicker bind=color swatches=["#FF111827","#FFDC2626","#FFF59E0B","#FF16A34A","#FF2563EB","#FF7C3AED"] size=28 onPick
+ColorPicker @color swatches=["#FF111827","#FFDC2626","#FFF59E0B","#FF16A34A","#FF2563EB","#FF7C3AED"] size=28 onPick
   state color=""
   Row gap=8 middle wrap
     each swatch in swatches

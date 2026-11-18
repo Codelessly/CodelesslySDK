@@ -83,13 +83,13 @@ App
           VitalsTrend values={temp} labels={times} low=36.1 high=38.0 h=160
 Dialog#obs "Record observation set" "Entered at the bedside; the score is worked out for you"
   Grid cols=2 gap=12
-    Input "Heart rate (bpm)" type=number bind=nHr
-    Input "SpO2 (%)" type=number bind=nSpo2
-    Input "Systolic BP (mmHg)" type=number bind=nSbp
-    Input "Resp. rate (/min)" type=number bind=nRr
-    Input "Temperature (C)" type=number bind=nTemp
-    Select "Consciousness" items=["Alert","Voice","Pain","Unresponsive"] bind=nAvpu
-  Toggle "On supplemental oxygen" bind=nO2
+    Input "Heart rate (bpm)" type=number @nHr
+    Input "SpO2 (%)" type=number @nSpo2
+    Input "Systolic BP (mmHg)" type=number @nSbp
+    Input "Resp. rate (/min)" type=number @nRr
+    Input "Temperature (C)" type=number @nTemp
+    Select "Consciousness" items=["Alert","Voice","Pain","Unresponsive"] @nAvpu
+  Toggle "On supplemental oxygen" @nO2
   Divider
   Row between middle
     Text.muted "Score if saved"
@@ -165,7 +165,7 @@ Dialog#give "Administer medication" "Check the patient's wristband and allergies
     Button.outline "Withhold" onTap={open withhold}
     Button "Mark given" onTap={meds=updateWhere(meds, m => m.id==sel, m => with(m, "slots", map(m.slots, s => s.t==selT ? with(s, "s", "given") : s))); emit marGiven sel; toast "Recorded as given"; close}
 Dialog#withhold "Withhold dose" "A reason is required"
-  Select "Reason" items=["Patient asleep","Patient refused","Nil by mouth","Awaiting doctor review"] bind=reason
+  Select "Reason" items=["Patient asleep","Patient refused","Nil by mouth","Awaiting doctor review"] @reason
   Button "Confirm" onTap={meds=updateWhere(meds, m => m.id==sel, m => with(m, "slots", map(m.slots, s => s.t==selT ? with(s, "s", "missed") : s))); emit marWithheld reason; toast "Withheld: {reason}"; close}
 
 ### Orders and notes
@@ -192,7 +192,7 @@ App
       Row gap=8 middle
         Badge.error "NEWS2 7"
         Badge.danger "Penicillin: anaphylaxis"
-        SegmentedButton items=["orders","notes","handover"] bind=view
+        SegmentedButton items=["orders","notes","handover"] @view
     Column pad=24 gap=16
       if view=="orders"
         Row gap=8 middle
@@ -214,7 +214,7 @@ App
               Button.ghost "Complete" w=100 hidden={o.status=="Resulted"} onTap={orders=updateWhere(orders, x => x.id==o.id, x => with(x, "status", "Resulted")); toast "Order completed"}
       if view=="notes"
         Card gap=8
-          Input "Add a note" bind=draft multiline
+          Input "Add a note" @draft multiline
           Row end
             Button "Save note" onTap={trim(draft)=="" ? toast "Write something first" : (notes=concat([{"date":"18 Nov now","author":"Dana Whitfield, RN","text":draft}], notes); draft=""; toast "Note saved")}
         each n in notes
@@ -230,7 +230,7 @@ App
           Row between middle
             Text.strong "Handover summary, day to night"
             Badge.error "NEWS2 7"
-          Input "Summary" bind=hand multiline
+          Input "Summary" @hand multiline
           Grid cols=3 gap=12
             Column gap=4
               Text.caption "Watch for"

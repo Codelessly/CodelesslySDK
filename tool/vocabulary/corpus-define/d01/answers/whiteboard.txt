@@ -11,6 +11,7 @@ state future=[]
 state color="#FFFDE68A"
 state peers=[{"name":"Maya Reyes","color":"#FFDC2626","x":300,"y":180},{"name":"Dev Patel","color":"#FF2563EB","x":640,"y":300},{"name":"Lena Fischer","color":"#FF16A34A","x":200,"y":420}]
 state boardName="Q3 roadmap workshop"
+state inviteEmail=""
 App
   Main
     Nav
@@ -72,7 +73,7 @@ App
     MenuItem "Select all" icon="select_all" onTap={selected=map(items,i=>i.id)}
     MenuItem "Reset view" icon="center_focus_strong" onTap={zoom=1; panX=0; panY=0}
   Dialog#share "Share this board" "Anyone with the link can view; invited people can edit"
-    Input "Invite by email" "name@company.com" bind=inviteEmail
+    Input "Invite by email" "name@company.com" @inviteEmail
     Row gap=8
       Button "Send invite" onTap={emit invite inviteEmail; toast "Invite sent"; close}
       Button.outline "Copy link" onTap={copy "https://chalk.app/b/q3-roadmap"; toast "Link copied"}
@@ -92,7 +93,7 @@ App
     Nav
       Heading "All boards" level=1
       Row gap=8
-        Input "Search boards" bind=q w=220
+        Input "Search boards" @q w=220
         Button "New board" icon="add" onTap={go board}
     Column pad=24 gap=16
       Grid cols=3 gap=16
@@ -114,7 +115,7 @@ define Canvas zoom=1 panX=0 panY=0 grid onPan onZoom onBoxSelect onTap onPlace
 define Item x=0 y=0 w=180 h=140 kind="note" fill=#FFFDE68A text="" selected=false editing=false onTap onDoubleTap onEdit onMove onMoveStart onResize
   Column w={w} h={h} pad=12 fill={fill} radius={kind=="ellipse" ? h/2 : 4} border={selected ? "#FF2563EB" : "#00000000"} onTap={onTap} onDoubleTap={onDoubleTap}
     if editing
-      Input "" bind=text multiline onChange={onEdit(result)}
+      Input "" @text multiline onChange={onEdit(result)}
     if !editing
       Text "{text}"
     if selected

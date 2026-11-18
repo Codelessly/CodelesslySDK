@@ -2,6 +2,7 @@ state status="ask"
 state region=""
 state size="small"
 state backups=true
+state name=""
 Card gap=10
   Row gap=10 top
     Box w=30 h=30 radius=7 fill=#1A2563EB center middle
@@ -11,15 +12,15 @@ Card gap=10
       Text.bodySecondary "create_database is paused until you answer"
   if status=="ask"
     Column gap=10
-      Input "Name" hint="orders-prod" bind=name
+      Input "Name" hint="orders-prod" @name
       Column gap=6
         Text.fieldLabel "Region"
-        Select "Choose a region" items=["eu-west-1","us-east-1","ap-southeast-2"] bind=region
+        Select "Choose a region" items=["eu-west-1","us-east-1","ap-southeast-2"] @region
       Column gap=6
         Text.fieldLabel "Size"
-        SegmentedButton items=["small","medium","large"] bind=size
+        SegmentedButton items=["small","medium","large"] @size
         Text.caption "{size=="small" ? "2 vCPU, 4 GB, about $38 a month" : size=="medium" ? "4 vCPU, 16 GB, about $145 a month" : "8 vCPU, 32 GB, about $290 a month"}"
-      Checkbox "Daily backups, kept 14 days" bind=backups
+      Checkbox "Daily backups, kept 14 days" @backups
     Divider
     Row between
       Text.caption "{(name!=""?1:0)+(region!=""?1:0)+1} of 3 answered"

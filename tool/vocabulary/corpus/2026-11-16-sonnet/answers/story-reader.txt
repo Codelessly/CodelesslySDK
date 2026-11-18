@@ -18,6 +18,7 @@ state speed="1x"
 state q=""
 state savedMenuId=0
 state emoji=["heart","clap","wow","sad","angry"]
+state view=""
 every 1s when listenOn onTick={listenPos=min(1,listenPos+0.01*(speed=="2x"?2:speed=="1.5x"?1.5:1))}
 App
   Sidebar w=200
@@ -38,7 +39,7 @@ App
         IconButton "search" onTap={go search}
         IconButton "tune" onTap={go settings}
     Stack grow
-      Pages bind=page axis=vertical items={filter=="All" ? stories : filter(stories,s=>s.section==filter)} snap=settle wheel=true keys=arrows onPageChange={current=result; read=unique(append(read,result))} pause={held}
+      Pages @page axis=vertical items={filter=="All" ? stories : filter(stories,s=>s.section==filter)} snap=settle wheel=true keys=arrows onPageChange={current=result; read=unique(append(read,result))} pause={held}
         Stack fill={item.color} menu=reactMenu onLongPress={pickedId=item.id; pressX=result.x; pressY=result.y; open reactMenu} onHold={held=true} onRelease={held=false} onSwipeUp={pickedId=item.id; sheetStop="half"; open story} onKey={Enter: pickedId=item.id; sheetStop="half"; open story}
           Scene "{item.scene}" color=#33FFF4E0 animate=slide-up duration=700
           Column pad=48 gap=16 bottom
@@ -69,10 +70,10 @@ App
         IconButton "{listenOn ? 'pause' : 'play_arrow'}" onTap={listenOn=!listenOn}
         Column grow gap=2
           Text "{find(stories,s=>s.id==current).head}" color=#FFFFF4E0 size=13 maxLines=1
-          Slider bind=listenPos min=0 max=1 onScrub={listenPos=result}
+          Slider @listenPos min=0 max=1 onScrub={listenPos=result}
         Text "{duration(round(listenPos*find(stories,s=>s.id==current).mins*60,0))}" color=#FFF2E6CC size=12
-        SegmentedButton items=["1x","1.5x","2x"] bind=speed
-Sheet#story "" stops=["half","full"] bind=sheetStop initial="half" dismiss=drag,escape returnTo=card
+        SegmentedButton items=["1x","1.5x","2x"] @speed
+Sheet#story "" stops=["half","full"] @sheetStop initial="half" dismiss=drag,escape returnTo=card
   Column gap=12 pad=24 scroll={sheetStop=="full"}
     Row between
       Badge.primary "{find(stories,s=>s.id==pickedId).section}"
@@ -95,7 +96,7 @@ Sheet#story "" stops=["half","full"] bind=sheetStop initial="half" dismiss=drag,
         Scene "{find(stories,s=>s.id==pickedId).scene}" h=160 fill={find(stories,s=>s.id==pickedId).color}
       Text "Analysts caution that the full effect will take months to show. Still, the early numbers point one way, and several experts now describe the change as lasting rather than temporary." font="serif" size={settings.textSize}
       Heading "By the numbers" level=3
-      Tabs items=["Chart","Table"] bind=view
+      Tabs items=["Chart","Table"] @view
         BarChart values=[12,18,15,22,19] labels=["Mon","Tue","Wed","Thu","Fri"] h=180 hidden={view=="Table"}
         Table hidden={view!="Table"} columns=["Day","Value"] rows=[["Mon",12],["Tue",18],["Wed",15],["Thu",22],["Fri",19]]
       Heading "Related stories" level=3
@@ -139,6 +140,7 @@ Menu#savedMenu end
   MenuItem "Remove" icon="delete" onTap={saved=without(saved,savedMenuId); toast "Removed"}
 
 ### Search
+state q=""
 App
   Sidebar w=200
     Brand "Dispatch" icon="newspaper"
@@ -148,7 +150,7 @@ App
     NavItem "Settings" icon="tune" onTap={go settings}
   Main
     Nav
-      Input "Search stories" "Try 'chip' or 'ports'" bind=q fuzzy=true autofocus icon="search" w=420
+      Input "Search stories" "Try 'chip' or 'ports'" @q fuzzy=true autofocus icon="search" w=420
     Column pad=24 gap=16
       if q==""
         Text.muted "Search headlines and summaries across all eight sections."
@@ -164,11 +166,13 @@ App
           Text.muted "No stories match '{q}'."
 
 ### Listen
+state listenPos=0
+state speed=""
 Sheet#listen "Listen" stops=["half"] dismiss=drag,escape
   Column gap=16 pad=24
     Text.heading "{find(stories,s=>s.id==current).head}"
     Text.muted "{find(stories,s=>s.id==current).section} · read aloud"
-    Slider bind=listenPos min=0 max=1 onScrub={listenPos=result}
+    Slider @listenPos min=0 max=1 onScrub={listenPos=result}
     Row between
       Text.caption "{duration(round(listenPos*find(stories,s=>s.id==current).mins*60,0))}"
       Text.caption "{duration(find(stories,s=>s.id==current).mins*60)}"
@@ -176,7 +180,7 @@ Sheet#listen "Listen" stops=["half"] dismiss=drag,escape
       IconButton "replay_10" onTap={listenPos=max(0,listenPos-0.05)}
       IconButton "{listenOn ? 'pause_circle' : 'play_circle'}" size=56 onTap={listenOn=!listenOn}
       IconButton "forward_10" onTap={listenPos=min(1,listenPos+0.05)}
-    SegmentedButton items=["1x","1.5x","2x"] bind=speed
+    SegmentedButton items=["1x","1.5x","2x"] @speed
 
 ### Settings
 App
@@ -193,17 +197,17 @@ App
       Card gap=8
         Heading "Sections" level=3
         Text.muted "Choose which sections appear, and drag the handle to reorder."
-        ReorderList bind=settings.sections handle="drag_handle" onReorder={settings=with(settings,"sections",result)}
+        ReorderList @settings.sections handle="drag_handle" onReorder={settings=with(settings,"sections",result)}
           each sec in settings.sections
             ListTile "{sec}"
-              Toggle bind=sectionOn.{sec} onChange={settings=with(settings,"sections",result?append(settings.sections,sec):without(settings.sections,sec))}
+              Toggle @sectionOn.{sec} onChange={settings=with(settings,"sections",result?append(settings.sections,sec):without(settings.sections,sec))}
       Card gap=12
         Heading "Text size" level=3
-        Slider bind=settings.textSize min=14 max=28 onChange={settings=with(settings,"textSize",result)}
+        Slider @settings.textSize min=14 max=28 onChange={settings=with(settings,"textSize",result)}
         Text "A calm reading serif at {settings.textSize} points shows here at once, the same size the story uses." font="serif" size={settings.textSize}
       Card gap=8
         Heading "Motion and theme" level=3
-        Toggle "Reduce motion" bind=settings.reduceMotion onChange={settings=with(settings,"reduceMotion",result)}
+        Toggle "Reduce motion" @settings.reduceMotion onChange={settings=with(settings,"reduceMotion",result)}
         Text.muted "Turns off the arrivals and settling on the stack."
-        SegmentedButton items=["Light","Dark","System"] bind=settings.theme onChange={settings=with(settings,"theme",result)}
+        SegmentedButton items=["Light","Dark","System"] @settings.theme onChange={settings=with(settings,"theme",result)}
       Button.outline "Reset reading history" onTap={read=[]; reactions={}; toast "History cleared"}

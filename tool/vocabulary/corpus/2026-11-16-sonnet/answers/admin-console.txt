@@ -20,6 +20,7 @@ state members=[{"id":"m1","name":"Ada Lindqvist","email":"ada@tenant.io","role":
 state sessions=[{"id":"s1","device":"MacBook Pro, Chrome","where":"Oslo, NO","when":"Active now"},{"id":"s2","device":"iPhone 15, App","where":"Oslo, NO","when":"2 h ago"},{"id":"s3","device":"Windows, Edge","where":"Bergen, NO","when":"5 days ago"}]
 state activity=[{"id":"a1","text":"Changed role to Admin","when":"Mon"},{"id":"a2","text":"Added to Platform","when":"Mon"},{"id":"a3","text":"Signed in from a new device","when":"Last week"}]
 state all=["Platform","Security","Design","Data","Finance","Support"]
+state panelRole=""
 Shortcut keys="/" onPress={focus search}
 Shortcut keys="ctrl+a" onPress={selected=map(filter(members,m=>true),m=>m.id)}
 Shortcut keys="escape" onPress={selected=[]; panelId=""}
@@ -42,14 +43,14 @@ App
     Nav
       Heading "Members" level=1
       Row gap=8
-        Input#search "Search members" "Name or email" bind=q w=240 icon="search" fuzzy
+        Input#search "Search members" "Name or email" @q w=240 icon="search" fuzzy
         Button "Invite" icon="person_add" onTap={open invite}
         Text.caption "Ctrl+I" hide=tablet
     Row grow
       Column grow gap=12 pad=24 scroll
         Row gap=8 wrap
-          Select "Role" bind=roleFilter items=["All roles","Owner","Admin","Member","Billing","Viewer"]
-          Select "Status" bind=statusFilter items=["All statuses","Active","Invited","Deactivated"]
+          Select "Role" @roleFilter items=["All roles","Owner","Admin","Member","Billing","Viewer"]
+          Select "Status" @statusFilter items=["All statuses","Active","Invited","Deactivated"]
           Spacer grow
           Text.muted "{length(filter(members,m=>(roleFilter=='All roles'||m.role==roleFilter)&&(statusFilter=='All statuses'||m.status==statusFilter)&&fuzzy(m.name+' '+m.email,q)))} of 50 members"
         if length(selected)>0
@@ -57,11 +58,11 @@ App
             Row between middle gap=12
               Text.strong "{length(selected)} selected"
               Row gap=8 wrap
-                Select "Change role" bind=bulkRole items=["Owner","Admin","Member","Billing","Viewer"] onChange={members=updateWhere(members,m=>contains(selected,m.id),m=>with(m,"role",result)); announce "Role changed to {result} for {length(selected)} members"; toast "Role changed for {length(selected)} members"}
+                Select "Change role" @bulkRole items=["Owner","Admin","Member","Billing","Viewer"] onChange={members=updateWhere(members,m=>contains(selected,m.id),m=>with(m,"role",result)); announce "Role changed to {result} for {length(selected)} members"; toast "Role changed for {length(selected)} members"}
                 Button.outline "Add to team" icon="group_add" onTap={open bulkTeam}
                 Button.destructive "Deactivate" onTap={open confirmDeactivate}
                 Button.ghost "Clear" onTap={selected=[]}
-        Table rows={sortDir=="asc"?sortBy(filter(members,m=>(roleFilter=="All roles"||m.role==roleFilter)&&(statusFilter=="All statuses"||m.status==statusFilter)&&fuzzy(m.name+" "+m.email,q)),m=>m[sortKey]):sortByDesc(filter(members,m=>(roleFilter=="All roles"||m.role==roleFilter)&&(statusFilter=="All statuses"||m.status==statusFilter)&&fuzzy(m.name+" "+m.email,q)),m=>m[sortKey])} dense sticky-header selectable multi bind=selected onRowTap={panelId=result.id} onSelect={selected=result.ids} rowKey=id
+        Table rows={sortDir=="asc"?sortBy(filter(members,m=>(roleFilter=="All roles"||m.role==roleFilter)&&(statusFilter=="All statuses"||m.status==statusFilter)&&fuzzy(m.name+" "+m.email,q)),m=>m[sortKey]):sortByDesc(filter(members,m=>(roleFilter=="All roles"||m.role==roleFilter)&&(statusFilter=="All statuses"||m.status==statusFilter)&&fuzzy(m.name+" "+m.email,q)),m=>m[sortKey])} dense sticky-header selectable multi selected=@selected onRowTap={panelId=result.id} onSelect={selected=result.ids} rowKey=id
           Column "Name" key=name sortable w=200 onSort={sortKey="name"; sortDir=sortDir=="asc"?"desc":"asc"}
           Column "Email" key=email sortable w=220 onSort={sortKey="email"; sortDir=sortDir=="asc"?"desc":"asc"}
           Column "Role" key=role sortable w=100 onSort={sortKey="role"; sortDir=sortDir=="asc"?"desc":"asc"}
@@ -70,7 +71,7 @@ App
           Column "Status" key=status sortable w=110 onSort={sortKey="status"; sortDir=sortDir=="asc"?"desc":"asc"}
           Column "" w=48
       if panelId!=""
-        Splitter bind=panelW min=300 max=560 side=right label="Resize member panel"
+        Splitter @panelW min=300 max=560 side=right label="Resize member panel"
         Pane w={panelW} pad=16 gap=12 scroll
           Row between middle
             Heading "Member" level=3
@@ -80,7 +81,7 @@ App
             Column gap=2
               Text.strong "{find(members,m=>m.id==panelId).name}"
               Text.muted "{find(members,m=>m.id==panelId).email}"
-          Select "Role" bind=panelRole items=["Owner","Admin","Member","Billing","Viewer"] onChange={members=updateWhere(members,m=>m.id==panelId,m=>with(m,"role",result)); announce "Role saved"; toast "Role saved"}
+          Select "Role" @panelRole items=["Owner","Admin","Member","Billing","Viewer"] onChange={members=updateWhere(members,m=>m.id==panelId,m=>with(m,"role",result)); announce "Role saved"; toast "Role saved"}
           Text.sectionTitle "Teams"
           each t in all
             Checkbox "{t}" checked={contains(find(members,m=>m.id==panelId).teams,t)} onChange={members=updateWhere(members,m=>m.id==panelId,m=>with(m,"teams",result?append(m.teams,t):without(m.teams,t)))}
@@ -99,8 +100,8 @@ App
               Text "{a.text}"
               Text.caption "{a.when}"
   Dialog#invite "Invite members" "Separate emails with a comma or Enter"
-    ChipInput "Emails" bind=invites draft=inviteDraft separators=[",",";"," "] validate="email" hint="name@company.com" onInvalid={announce "Not a valid email"}
-    Select "Role" bind=inviteRole items=["Admin","Member","Billing","Viewer"]
+    ChipInput "Emails" @invites draft=inviteDraft separators=[",",";"," "] validate="email" hint="name@company.com" onInvalid={announce "Not a valid email"}
+    Select "Role" @inviteRole items=["Admin","Member","Billing","Viewer"]
     Row end gap=8
       Button.ghost "Cancel" onTap={invites=[]; close}
       Button "Send {length(invites)} invites" disabled={length(invites)==0||any(invites,i=>!i.valid)} onTap={emit invite {"emails":invites,"role":inviteRole}; toast "{length(invites)} invitations sent"; announce "Invitations sent"; invites=[]; close}
@@ -109,7 +110,7 @@ App
       Button.ghost "Cancel" onTap={close}
       Button.destructive "Deactivate {length(selected)}" onTap={members=updateWhere(members,m=>contains(selected,m.id),m=>with(m,"status","Deactivated")); announce "{length(selected)} members deactivated"; toast "{length(selected)} members deactivated"; selected=[]; close}
   Dialog#bulkTeam "Add {length(selected)} members to a team"
-    Select "Team" bind=bulkTeam items=["Platform","Security","Design","Data","Finance","Support"]
+    Select "Team" @bulkTeam items=["Platform","Security","Design","Data","Finance","Support"]
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Add" onTap={members=updateWhere(members,m=>contains(selected,m.id),m=>with(m,"teams",unique(append(m.teams,bulkTeam)))); toast "Added to {bulkTeam}"; announce "Added to {bulkTeam}"; close}
@@ -151,7 +152,7 @@ App
               each r in roles
                 Column w=96 center gap=4
                   Text.strong "{r}"
-                  Checkbox bind=colAll[r] tristate checked={all(perms,p=>grid[p][r])} aria-label="Select all for {r}" onChange={grid=with(grid,"all",grid); dirty=true; announce "{r}: all permissions {result?'on':'off'}"}
+                  Checkbox @colAll[r] tristate checked={all(perms,p=>grid[p][r])} aria-label="Select all for {r}" onChange={grid=with(grid,"all",grid); dirty=true; announce "{r}: all permissions {result?'on':'off'}"}
             each p in perms
               Row middle
                 Row w=200 gap=8 middle
@@ -178,6 +179,7 @@ state left="t1"
 state right="t2"
 state picked=""
 state pickedFrom=""
+state newName=""
 App
   Sidebar
     Brand "Tenant" icon="hub"
@@ -205,17 +207,17 @@ App
         Text.caption "Mouse: drag a member to the other list. Keyboard: Tab to a member, Space to pick up, arrow keys to reorder, Left or Right arrow to move to the other team, Space to drop, Esc to cancel."
         Row gap=16 top
           Column grow gap=8
-            Select "Team" bind=left items={map(teams,t=>t.id)} labels={map(teams,t=>t.name)}
+            Select "Team" @left items={map(teams,t=>t.id)} labels={map(teams,t=>t.name)}
             SortableList#listL items={find(teams,t=>t.id==left).members} group="roster" drop=roster keyboard onReorder={teams=updateWhere(teams,t=>t.id==left,t=>with(t,"members",result)); announce "Moved to position {result.index+1}"} onDrop={teams=updateWhere(updateWhere(teams,t=>t.id==right,t=>with(t,"members",without(t.members,result.data))),t=>t.id==left,t=>with(t,"members",unique(append(t.members,result.data)))); announce "{result.data} moved to {find(teams,t=>t.id==left).name}"} onKeyMoveSide={teams=updateWhere(updateWhere(teams,t=>t.id==left,t=>with(t,"members",without(t.members,result.item))),t=>t.id==right,t=>with(t,"members",append(t.members,result.item))); announce "{result.item} moved to {find(teams,t=>t.id==right).name}"}
               each m in find(teams,t=>t.id==left).members
                 ListTile "{m}" icon="drag_indicator" drag=roster(m) aria-label="{m}, position {index+1} of {length(find(teams,t=>t.id==left).members)}"
           Column grow gap=8
-            Select "Team" bind=right items={map(teams,t=>t.id)} labels={map(teams,t=>t.name)}
+            Select "Team" @right items={map(teams,t=>t.id)} labels={map(teams,t=>t.name)}
             SortableList#listR items={find(teams,t=>t.id==right).members} group="roster" drop=roster keyboard onReorder={teams=updateWhere(teams,t=>t.id==right,t=>with(t,"members",result)); announce "Moved to position {result.index+1}"} onDrop={teams=updateWhere(updateWhere(teams,t=>t.id==left,t=>with(t,"members",without(t.members,result.data))),t=>t.id==right,t=>with(t,"members",unique(append(t.members,result.data)))); announce "{result.data} moved to {find(teams,t=>t.id==right).name}"} onKeyMoveSide={teams=updateWhere(updateWhere(teams,t=>t.id==right,t=>with(t,"members",without(t.members,result.item))),t=>t.id==left,t=>with(t,"members",append(t.members,result.item))); announce "{result.item} moved to {find(teams,t=>t.id==left).name}"}
               each m in find(teams,t=>t.id==right).members
                 ListTile "{m}" icon="drag_indicator" drag=roster(m) aria-label="{m}, position {index+1} of {length(find(teams,t=>t.id==right).members)}"
   Dialog#newTeam "New team"
-    Input "Team name" bind=newName
+    Input "Team name" @newName
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Create" onTap={teams=append(teams,{"id":"t"+(length(teams)+1),"name":newName,"members":[]}); toast "Team created"; close}
@@ -243,8 +245,8 @@ App
       Button.outline "Export" icon="download" onTap={open exportMenu}
     Column pad=24 gap=12
       Row gap=8 wrap
-        Select "Actor" bind=actor items=["Anyone","Ada Lindqvist","Ben Okafor","Elena Rossi"]
-        Select "Action" bind=action items=["Any action","role.change","billing.plan","key.create","member.invite","sso.update"]
+        Select "Actor" @actor items=["Anyone","Ada Lindqvist","Ben Okafor","Elena Rossi"]
+        Select "Action" @action items=["Any action","role.change","billing.plan","key.create","member.invite","sso.update"]
         Button.outline "{range.from==''?'Pick dates':range.from+' to '+range.to}" icon="date_range" onTap={open dates}
         Button.ghost "Reset" onTap={actor="Anyone"; action="Any action"; range={"from":"","to":""}}
       InfiniteList items={filter(entries,e=>(actor=="Anyone"||e.actor==actor)&&(action=="Any action"||e.action==action))} loading={loading} onLoadMore={loading=true; emit loadMoreAudit}
@@ -264,7 +266,7 @@ App
       if loading
         Progress indeterminate
   Popover#dates
-    Calendar mode=range bind=range onChange={announce "Range {result.from} to {result.to}"}
+    Calendar mode=range @range onChange={announce "Range {result.from} to {result.to}"}
     Row end gap=8
       Button.ghost "Clear" onTap={range={"from":"","to":""}; close}
       Button "Apply" onTap={close}
@@ -310,7 +312,7 @@ App
         Text.sectionTitle "Seats"
         Row gap=12 middle
           IconButton "remove" tooltip="Remove a seat" onTap={seats=max(1,seats-1); announce "{seats} seats"}
-          Input type=number bind=seats w=80
+          Input type=number @seats w=80
           IconButton "add" tooltip="Add a seat" onTap={seats=seats+1; announce "{seats} seats"}
           Spacer grow
           Text.strong "{money(seats*find(plans,p=>p.name==plan).price,'$',2)} per month" live=polite
@@ -364,8 +366,8 @@ App
             IconButton "content_copy" tooltip="Copy key" onTap={copy k.secret; toast "Key copied"; announce "Key copied"}
             IconButton "delete" tooltip="Revoke key" danger onTap={revoking=k.id; open confirmRevoke}
   Dialog#createKey "Create API key"
-    Input "Name" bind=newName
-    Select "Scope" bind=newScope items=["Read","Read and write","Admin"]
+    Input "Name" @newName
+    Select "Scope" @newScope items=["Read","Read and write","Admin"]
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Create" disabled={trim(newName)==""} onTap={fresh="tk_live_"+randomHex(20); keys=append(keys,{"id":"k"+(length(keys)+1),"name":newName,"prefix":slice(fresh,0,12),"secret":fresh,"created":"Today","used":"Never"}); close; open showKey; announce "Key created"}
@@ -402,9 +404,9 @@ App
         Toggle "Single sign-on" checked={sso} onChange={result?open ssoCode:sso=false}
         Text.muted "Members sign in through your identity provider."
       Card gap=12
-        Select "Session length" bind=sessionLen items=["1 hour","8 hours","1 day","7 days","30 days"] onChange={toast "Session length set to {result}"; announce "Session length saved"}
+        Select "Session length" @sessionLen items=["1 hour","8 hours","1 day","7 days","30 days"] onChange={toast "Session length set to {result}"; announce "Session length saved"}
   Dialog#ssoCode "Enter your verification code" "Six digits from your authenticator app"
-    CodeInput length=6 bind=code autofocus onComplete={code==["1","2","3","4","5","6"]?sso=true:codeError="That code is not right"; announce sso?"Single sign-on enabled":"Code rejected"; sso?close:null}
+    CodeInput length=6 @code autofocus onComplete={code==["1","2","3","4","5","6"]?sso=true:codeError="That code is not right"; announce sso?"Single sign-on enabled":"Code rejected"; sso?close:null}
     if codeError!=""
       Text.danger "{codeError}"
     Row end gap=8

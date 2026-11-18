@@ -24,13 +24,18 @@ import 'package:flutter/scheduler.dart';
 
 /// The screen in the compact notation.
 String notationOf(int groups) {
-  final b = StringBuffer('Column gap=16 pad=16\n  Text.sectionTitle "Tick {data.tick}"\n');
+  final b = StringBuffer();
+  // The variables the controls bind, declared at the top.
+  for (var i = 0; i < groups; i++) {
+    b.write('state on$i=false\nstate level$i=0\nstate name$i=""\n');
+  }
+  b.write('Column gap=16 pad=16\n  Text.sectionTitle "Tick {data.tick}"\n');
   for (var i = 0; i < groups; i++) {
     b.write('  Column gap=8\n'
         '    Text.sectionTitle "Section $i"\n'
-        '    Toggle "Enabled" bind=on$i\n'
-        '    Slider bind=level$i min=0 max=100\n'
-        '    Input "Name" bind=name$i\n'
+        '    Toggle "Enabled" @on$i\n'
+        '    Slider @level$i min=0 max=100\n'
+        '    Input "Name" @name$i\n'
         '    Button "Save"\n');
   }
   return b.toString();

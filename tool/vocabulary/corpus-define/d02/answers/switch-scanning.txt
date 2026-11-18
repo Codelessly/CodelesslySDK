@@ -110,22 +110,22 @@ App
         Text.muted "How long the highlight stays on each row or tile."
         Row gap=12
           Text.small "Faster"
-          Slider bind=speed min=400 max=3000 step=100 grow
+          Slider @speed min=400 max=3000 step=100 grow
           Text.small "Slower"
         Text.strong "{fixed(speed/1000,1)} seconds per step"
       Card gap=12
         Heading "Hold time" level=3
         Text.muted "How long the switch must be held before a press counts. Raise it to ignore accidental touches."
-        Slider bind=hold min=0 max=1500 step=50
+        Slider @hold min=0 max=1500 step=50
         Text.strong "{hold} ms"
       Card gap=12
         Heading "Sound cue" level=3
         Text.muted "A sound as the highlight moves."
-        SegmentedButton bind=cue items=["Off","Click","Tone","Voice"]
+        SegmentedButton @cue items=["Off","Click","Tone","Voice"]
         Button.outline "Hear it" icon="volume_up" onTap={cue!="Off" ? emit cue cue : toast "Sound cue is off"}
       Card gap=12
         Heading "Back-out" level=3
-        Toggle "Offer a back-out option at the end of each pass" bind=backout
+        Toggle "Offer a back-out option at the end of each pass" @backout
         Text.muted "At the end of the rows you can rest; at the end of a row you can return to the rows."
         Button.ghost "Try scanning" icon="play_arrow" onTap={go phrase-board}
 

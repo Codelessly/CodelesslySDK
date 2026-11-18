@@ -43,23 +43,23 @@ App
           Button.outline "Change" onTap={emit changePhoto; dirty=true}
         Row gap=16
           Column grow
-            Input "Name" bind=name onChange={dirty=true}
+            Input "Name" @name onChange={dirty=true}
           Column grow
-            Input "Username" "yourname" bind=username onChange={dirty=true}
-        Input "Bio" "Tell readers about yourself" bind=bio multiline onChange={dirty=true}
+            Input "Username" "yourname" @username onChange={dirty=true}
+        Input "Bio" "Tell readers about yourself" @bio multiline onChange={dirty=true}
         Row between
           Text.muted "Shown on your public profile."
           Text.caption "{length(bio)}/160" color={length(bio)>160?"#FFDC2626":"#FF6B7280"}
         Text.fieldLabel "Time zone"
-        Select bind=tz items=["(GMT-08:00) Los Angeles","(GMT-05:00) New York","(GMT+00:00) London","(GMT+01:00) Paris","(GMT+05:30) Mumbai","(GMT+09:00) Tokyo"] onChange={dirty=true}
-        ToggleRow "Public profile" "Anyone can see your profile and published pieces." bind=isPublic onChanged={dirty=true}
+        Select @tz items=["(GMT-08:00) Los Angeles","(GMT-05:00) New York","(GMT+00:00) London","(GMT+01:00) Paris","(GMT+05:30) Mumbai","(GMT+09:00) Tokyo"] onChange={dirty=true}
+        ToggleRow "Public profile" "Anyone can see your profile and published pieces." @isPublic onChanged={dirty=true}
       Card gap=8
         SectionHeader "Notifications"
-        ToggleRow "Comments" "When someone comments on your drafts or posts." bind=nComments onChanged={dirty=true}
-        ToggleRow "Mentions" "When a collaborator mentions you in a document." bind=nMentions onChanged={dirty=true}
-        ToggleRow "Weekly summary" "A Monday email with your words written and reads." bind=nWeekly onChanged={dirty=true}
-        ToggleRow "Product news" "New features and tips for writing in Plume." bind=nProduct onChanged={dirty=true}
-        ToggleRow "Security alerts" "Sign-ins from new devices and password changes." bind=nSecurity onChanged={dirty=true}
+        ToggleRow "Comments" "When someone comments on your drafts or posts." @nComments onChanged={dirty=true}
+        ToggleRow "Mentions" "When a collaborator mentions you in a document." @nMentions onChanged={dirty=true}
+        ToggleRow "Weekly summary" "A Monday email with your words written and reads." @nWeekly onChanged={dirty=true}
+        ToggleRow "Product news" "New features and tips for writing in Plume." @nProduct onChanged={dirty=true}
+        ToggleRow "Security alerts" "Sign-ins from new devices and password changes." @nSecurity onChanged={dirty=true}
       Card gap=12 border="#FFFCA5A5"
         Text.strong "Danger zone" color=#FFDC2626
         Row between middle

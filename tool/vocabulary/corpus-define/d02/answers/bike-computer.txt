@@ -18,7 +18,7 @@ App
     NavItem "Route" icon="route" onTap={go route}
     NavItem "Summary" icon="insights" onTap={go summary}
     Spacer grow
-    Toggle "Auto pause" bind=autoPause
+    Toggle "Auto pause" @autoPause
   Main
     Nav
       Heading "Morning loop" level=1
@@ -82,7 +82,7 @@ App
           ListTile "{s.name}" "{s.kind}"
             Row gap=12 middle
               SignalBars level={s.bars} max=4
-              Toggle bind=s.on
+              Toggle @s.on
 
 ### Route and Climb
 state tab="route"
@@ -101,7 +101,7 @@ App
   Main
     Nav
       Heading "Route" level=1
-      SegmentedButton items=["Map","Climb"] bind=tab
+      SegmentedButton items=["Map","Climb"] @tab
     Column pad=24 gap=16
       if distToTurn<=200
         Card fill=#FFFEF3C7 gap=4 animate=pulse

@@ -1,6 +1,6 @@
-// Where a photo is added: a framed area with a camera icon and its label; a tap runs onPick; once bind holds a photo it says so.
+// Where a photo is added: a framed area with a camera icon and its label; a tap runs onPick; once the variable bound (@photo) holds a photo it says so.
 // It opens no camera or file picker: there is no capture primitive yet (the vocabulary loop's D18); the page's onPick sets the photo.
-PhotoPicker "label" bind=photo onPick
+PhotoPicker "label" @photo onPick
   state photo=""
   Column w=fill pad=16 gap=4 radius=8 border=#FFCBD5E1 fill=#FFF9FAFB center middle onTap={onPick}
     Icon "photo_camera" size=24 color=#FF6B7280

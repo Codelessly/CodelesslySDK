@@ -47,7 +47,7 @@ App
         Progress {count(tasks,t=>t.done)/length(tasks)}
         each t in tasks
           Row gap=12 middle
-            Checkbox "{t.name}" bind=t.done onChange={tasks=updateWhere(tasks,x=>x.id==t.id,x=>with(with(x,"done",result),"by",result ? me : ""))}
+            Checkbox "{t.name}" @t.done onChange={tasks=updateWhere(tasks,x=>x.id==t.id,x=>with(with(x,"done",result),"by",result ? me : ""))}
             Spacer grow
             Text.muted "{t.time}"
             if t.done
@@ -69,7 +69,7 @@ App
           Row between
             Text.strong "Pain"
             Text.strong "{pain} / 10"
-          Slider bind=pain min=0 max=10 step=1
+          Slider @pain min=0 max=10 step=1
           Row between
             Text.caption "No pain"
             Text.caption "Worst pain"
@@ -77,9 +77,9 @@ App
             Text.danger "High pain: tell the nurse in charge."
       Card gap=12
         Text.strong "Note for the next carer"
-        Input "Note" "What should the next carer know?" bind=note multiline
+        Input "Note" "What should the next carer know?" @note multiline
         Row between middle
-          Toggle "Mark for next carer" bind=flagged
+          Toggle "Mark for next carer" @flagged
           Button "Save note" onTap={note=="" ? toast "Write a note first" : {savedNotes=append(savedNotes,{"by":me,"time":"10:15","text":note,"flagged":flagged}); note=""; flagged=false; toast "Note saved"}}
         Divider
         each n in reverse(savedNotes)
@@ -95,6 +95,8 @@ App
 state meds=[{"id":1,"name":"Metformin 500 mg","dose":"1 tablet","due":"08:00","given":"08:05","by":"Joy Okafor"},{"id":2,"name":"Insulin glargine","dose":"14 units","due":"09:00","given":"","by":""},{"id":3,"name":"Amlodipine 5 mg","dose":"1 tablet","due":"09:00","given":"","by":""},{"id":4,"name":"Paracetamol 500 mg","dose":"2 tablets","due":"13:00","given":"","by":""}]
 state pick=0
 state me="Joy Okafor"
+state reason=""
+state reasonNote=""
 App
   Sidebar
     Brand "Passing On" icon="volunteer_activism"
@@ -130,8 +132,8 @@ App
               IconButton "more_vert" tooltip="Not given" onTap={pick=m.id; open skip}
       Text.caption "Press and hold the button for one second to confirm a dose."
   Dialog#skip "Dose not given" "Say why, so the next carer and the nurse know."
-    Select "Reason" items=["Refused","Asleep","Nil by mouth","Out of stock","Other"] bind=reason
-    Input "Details" bind=reasonNote multiline
+    Select "Reason" items=["Refused","Asleep","Nil by mouth","Out of stock","Other"] @reason
+    Input "Details" @reasonNote multiline
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Save reason" onTap={meds=updateWhere(meds,x=>x.id==pick,x=>with(with(x,"given","not given"),"by",me)); toast "Reason saved"; close}
@@ -183,14 +185,16 @@ App
             Button.outline "Call" icon="call" onTap={emit call c.phone; called=append(called,c.id); toast "Calling {c.name}"}
       Card gap=12
         Text.strong "What happened"
-        Input "Describe the fall" bind=noteFall multiline
+        Input "Describe the fall" @noteFall multiline
         Row between middle
-          Toggle "Doctor has seen her" bind=seen
+          Toggle "Doctor has seen her" @seen
           Button "Log incident" onTap={noteFall=="" ? toast "Describe the fall first" : {emit logFall noteFall; toast "Incident logged"; go shift-note}}
 
 ### Visit log
 state visits=[{"id":1,"who":"Joy Okafor","role":"Carer","in":"07:30","out":"15:30"},{"id":2,"who":"Dr Haddad","role":"GP","in":"10:55","out":"11:20"},{"id":3,"who":"Claire Ellis","role":"Family","in":"13:00","out":""}]
 state who="Joy Okafor"
+state role=""
+state arrivedAt=""
 App
   Sidebar
     Brand "Passing On" icon="volunteer_activism"
@@ -226,9 +230,9 @@ App
             if v.out==""
               Button.outline "Log leave" onTap={visits=updateWhere(visits,x=>x.id==v.id,x=>with(x,"out","14:05")); toast "{v.who} left at 14:05"}
   Dialog#arrive "Log arrival" "Who is arriving?"
-    Input "Name" bind=who
-    Select "Role" items=["Carer","GP","Nurse","Family","Other"] bind=role
-    TimePicker "Arrived at" bind=arrivedAt
+    Input "Name" @who
+    Select "Role" items=["Carer","GP","Nurse","Family","Other"] @role
+    TimePicker "Arrived at" @arrivedAt
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Save" onTap={visits=append(visits,{"id":length(visits)+1,"who":who,"role":role,"in":arrivedAt,"out":""}); toast "Arrival logged"; close}

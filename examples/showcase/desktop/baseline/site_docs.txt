@@ -5,8 +5,8 @@ Column w=1280 h=fill
       Text.heading3 "Beacon"
       Badge.neutral "SDK"
     Box w=360
-      SearchBar "Search the docs" bind=q
-    Select bind=version items=["v2.4","v2.3","v2.2"] w=100
+      SearchBar "Search the docs" @q
+    Select @version items=["v2.4","v2.3","v2.2"] w=100
   Divider
   Row top grow
     Column w=240 pad=[16,24,16,24] gap=4 fill=#FFF8FAFC scroll

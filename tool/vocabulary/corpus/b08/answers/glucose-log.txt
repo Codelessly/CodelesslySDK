@@ -5,6 +5,7 @@ state ctx="Before meal"
 state units="0"
 state entry=""
 state readings=[{"id":1,"time":"6:45 AM","mg":96,"ctx":"Fasting","units":0},{"id":2,"time":"8:10 AM","mg":142,"ctx":"After meal","units":4},{"id":3,"time":"11:30 AM","mg":118,"ctx":"Before meal","units":0},{"id":4,"time":"1:20 PM","mg":184,"ctx":"After meal","units":6},{"id":5,"time":"3:40 PM","mg":132,"ctx":"Random","units":0},{"id":6,"time":"6:15 PM","mg":68,"ctx":"Before meal","units":0}]
+state when=""
 App
   Sidebar
     Brand "Sugarcube" icon="water_drop"
@@ -49,7 +50,7 @@ App
       Card gap=12
         Row between
           Text.strong "Readings"
-          SegmentedButton bind=range items=["Day","Week"]
+          SegmentedButton @range items=["Day","Week"]
         ScatterChart values=[96,142,118,184,132,68] labels=["6:45","8:10","11:30","1:20","3:40","6:15"] connect=true band=[70,180] bandColor=#3366BB6A min=40 max=240 unit="mg/dL" h=240
         Row gap=16
           Text.caption "Meals"
@@ -70,7 +71,7 @@ App
     Column gap=12
       Text "{entry == "" ? "---" : entry}" size=56 weight=700 center
       Text.muted "mg/dL" center
-      NumberPad bind=entry max=3 onSubmit={open addDetails}
+      NumberPad @entry max=3 onSubmit={open addDetails}
       Button "Next" onTap={entry != "" ? open addDetails : toast "Enter a number"}
   Sheet#addDetails "Context"
     Column gap=12
@@ -85,7 +86,7 @@ App
         IconButton "remove" tooltip="Fewer units" onTap={units=max(0,units-1)}
         Text.strong "{units} u" size=24
         IconButton "add" tooltip="More units" onTap={units=units+1}
-      TimePicker "Time" bind=when
+      TimePicker "Time" @when
       Button "Save reading" onTap={readings=append(readings,{"id":length(readings)+1,"time":formatDate(today(),"h:mm a"),"mg":entry,"ctx":ctx,"units":units}); entry=""; units=0; emit saveReading; toast "Reading saved"; close}
 
 ### Insights
@@ -143,6 +144,8 @@ state high=180
 state urgentLow=54
 state quiet=false
 state recent=[{"id":1,"kind":"Low","mg":68,"time":"Today, 6:15 PM"},{"id":2,"kind":"High","mg":188,"time":"Wed, 3:10 PM"},{"id":3,"kind":"Low","mg":66,"time":"Wed, 5:55 PM"}]
+state quietFrom=""
+state quietUntil=""
 App
   Sidebar
     Brand "Sugarcube" icon="water_drop"
@@ -158,29 +161,29 @@ App
       Button "Save thresholds" onTap={emit saveAlerts; toast "Alerts saved"}
     Column pad=24 gap=16 scroll
       Card gap=12
-        Toggle "Alert me when low" bind=lowOn
+        Toggle "Alert me when low" @lowOn
         if lowOn
           Row gap=12 middle
             Text "Below" w=70
-            Slider bind=low min=50 max=90 grow
+            Slider @low min=50 max=90 grow
             Text.strong "{low} mg/dL" w=100
         Divider
-        Toggle "Alert me when high" bind=highOn
+        Toggle "Alert me when high" @highOn
         if highOn
           Row gap=12 middle
             Text "Above" w=70
-            Slider bind=high min=140 max=300 grow
+            Slider @high min=140 max=300 grow
             Text.strong "{high} mg/dL" w=100
         Divider
         Row gap=12 middle
           Text "Urgent low" w=100
-          Slider bind=urgentLow min=40 max=60 grow
+          Slider @urgentLow min=40 max=60 grow
           Text.strong "{urgentLow} mg/dL" w=100
-        Toggle "Quiet hours, 10 PM to 6 AM" bind=quiet
+        Toggle "Quiet hours, 10 PM to 6 AM" @quiet
         if quiet
           Row gap=12
-            TimePicker "From" bind=quietFrom
-            TimePicker "Until" bind=quietUntil
+            TimePicker "From" @quietFrom
+            TimePicker "Until" @quietUntil
       Card gap=8
         Text.strong "Recent alerts"
         each a in recent
@@ -195,6 +198,8 @@ state format="PDF"
 state incMeals=true
 state incInsulin=true
 state clinic=""
+state from=""
+state to=""
 App
   Sidebar
     Brand "Sugarcube" icon="water_drop"
@@ -209,15 +214,15 @@ App
       Heading "Export for the clinic" level=1
     Column pad=24 gap=16 maxw=720
       Card gap=12
-        Select "Period" bind=period items=["Last 7 days","Last 14 days","Last 30 days","Last 90 days","Custom"]
+        Select "Period" @period items=["Last 7 days","Last 14 days","Last 30 days","Last 90 days","Custom"]
         if period=="Custom"
           Row gap=12
-            DatePicker "From" bind=from
-            DatePicker "To" bind=to
-        SegmentedButton bind=format items=["PDF","CSV"]
-        Checkbox "Include meal context" bind=incMeals
-        Checkbox "Include insulin units" bind=incInsulin
-        Input "Clinic email" "clinic@example.com" bind=clinic type=email
+            DatePicker "From" @from
+            DatePicker "To" @to
+        SegmentedButton @format items=["PDF","CSV"]
+        Checkbox "Include meal context" @incMeals
+        Checkbox "Include insulin units" @incInsulin
+        Input "Clinic email" "clinic@example.com" @clinic type=email
       Card gap=4
         Text.strong "Summary in this report"
         Text.muted "Average 128 mg/dL, time in range 74%, 3 lows, 5 highs, 186 readings."

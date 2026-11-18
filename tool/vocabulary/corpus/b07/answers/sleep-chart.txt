@@ -30,7 +30,7 @@ App
           Row between
             Text.strong "Sleep stages"
             Text.muted "7h 42m in bed 23:10 to 06:52"
-          StageChart stages={stages} bands=["awake","light","deep","dream"} bind=at onScrub={at=result} h=220
+          StageChart stages={stages} bands=["awake","light","deep","dream"} @at onScrub={at=result} h=220
           Text.muted "Scrub across the chart to read the time and stage."
           Row gap=24
             Column
@@ -62,16 +62,16 @@ App
       Row gap=16
         Card grow gap=8
           Text.strong "Before bed"
-          Toggle "Caffeine after 2 pm" bind=caffeine
-          Toggle "Screens in the last hour" bind=screens
+          Toggle "Caffeine after 2 pm" @caffeine
+          Toggle "Screens in the last hour" @screens
           if caffeine || screens
             Text.muted "Noted. We will compare this with your deep sleep."
           Button.outline "Add a note" onTap={open notes}
   Sheet#notes "Evening note"
     Text.muted "What might have changed your night?"
-    Toggle "Coffee or tea after 2 pm" bind=caffeine
-    Toggle "Screens in the last hour" bind=screens
-    Input "Note" "Late espresso, phone in bed" bind=note multiline
+    Toggle "Coffee or tea after 2 pm" @caffeine
+    Toggle "Screens in the last hour" @screens
+    Input "Note" "Late espresso, phone in bed" @note multiline
     Button "Save note" onTap={emit saveNote note; toast "Note saved"; close}
 
 ### Week
@@ -88,7 +88,7 @@ App
   Main
     Nav
       Heading "Bedtime consistency" level=1
-      SegmentedButton items=["7d","30d"] bind=range
+      SegmentedButton items=["7d","30d"] @range
     Column pad=24 gap=16 scroll
       Card gap=12
         Row between
@@ -132,9 +132,9 @@ Page
           Text.muted "until lights out"
       Card gap=12
         Text.strong "Screen colour"
-        ColorTemperature bind=warmth min=1800 max=4000 unit="K"
+        ColorTemperature @warmth min=1800 max=4000 unit="K"
         Text.fieldLabel "Brightness"
-        Slider bind=dim min=0 max=1
+        Slider @dim min=0 max=1
         Row gap=8
           Text.muted "Warm"
           Spacer grow
@@ -160,6 +160,7 @@ state enabled=true
 state sound="Morning tide"
 state smart=true
 state days=["Mon","Tue","Wed","Thu","Fri"]
+state volume=0
 App
   Sidebar
     Brand "Nightshade" icon="bedtime"
@@ -170,16 +171,16 @@ App
   Main
     Nav
       Heading "Alarm" level=1
-      Toggle "On" bind=enabled
+      Toggle "On" @enabled
     Column pad=24 gap=16 maxw=720
       Card gap=12
         Text.strong "Gentle wake window"
         Text.muted "We wake you in the lightest sleep between these times."
         Row gap=16
-          TimePicker "Earliest" bind=wakeFrom
-          TimePicker "Latest" bind=wakeTo
+          TimePicker "Earliest" @wakeFrom
+          TimePicker "Latest" @wakeTo
         Text.caption "Window: {wakeFrom} to {wakeTo}"
-        Toggle "Wake in light sleep" bind=smart
+        Toggle "Wake in light sleep" @smart
       Card gap=12
         Text.strong "Repeat"
         Row gap=8
@@ -187,8 +188,8 @@ App
             FilterChip "{d}" selected={contains(days,d)} onTap={days=contains(days,d) ? without(days,d) : append(days,d)}
       Card gap=12
         Text.strong "Sound"
-        Select "Tone" items=["Morning tide","Soft chime","Birdsong","Low hum"] bind=sound
-        Slider bind=volume min=0 max=100
+        Select "Tone" items=["Morning tide","Soft chime","Birdsong","Low hum"] @sound
+        Slider @volume min=0 max=100
         Button.outline "Preview" icon="play_arrow" onTap={emit previewAlarm sound}
       Row gap=12
         Button "Save alarm" onTap={emit saveAlarm; toast "Alarm set for {wakeFrom} to {wakeTo}"}

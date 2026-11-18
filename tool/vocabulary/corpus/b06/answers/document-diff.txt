@@ -17,9 +17,9 @@ App
     Nav
       Heading "Master Services Agreement" level=1
       Row gap=8
-        Toggle "Ignore spacing" bind=ignoreSpace
-        Toggle "Ignore case" bind=ignoreCase
-        Toggle "Merged column" bind=showMerged
+        Toggle "Ignore spacing" @ignoreSpace
+        Toggle "Ignore case" @ignoreCase
+        Toggle "Merged column" @showMerged
         Button.outline "Summary" icon="summarize" onTap={open summary}
         Button "Export merged" icon="download" onTap={emit exportMerged; toast "Merged document exported"}
     Row grow gap=0
@@ -117,7 +117,7 @@ App
           Text.panelTitle "Words changed by section"
           BarChart values=[14,22,18,0,9,11] labels=["2.1","3.4","4.2","5.1","6.3","8.1"] h=200
       Row gap=8
-        SegmentedButton bind=filterKind items=["all","changed","added","removed"]
+        SegmentedButton @filterKind items=["all","changed","added","removed"]
         Spacer grow
         Text.muted "Showing {filterKind == 'all' ? length(changes) : count(changes,x=>x.kind==filterKind)} changes"
       Card gap=0
@@ -152,8 +152,8 @@ App
       Button "Compare selected" icon="compare" onTap={emit compare {"left":leftV,"right":rightV}; go compare}
     Column pad=24 gap=16
       Row gap=12
-        Select "Left document" bind=leftV items=["v1","v2","v3"] w=200
-        Select "Right document" bind=rightV items=["v1","v2","v3"] w=200
+        Select "Left document" @leftV items=["v1","v2","v3"] w=200
+        Select "Right document" @rightV items=["v1","v2","v3"] w=200
       Card gap=0
         each v in versions
           ListTile "{v.name}" "{v.author}, {v.date}, {v.changes} changes from the previous version" icon="description" selected={v.id==leftV || v.id==rightV}

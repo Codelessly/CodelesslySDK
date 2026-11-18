@@ -9,6 +9,9 @@ state clips=[{"id":"c1","track":"V1","name":"Harbor sunrise","start":0,"len":240
 state transitions=[{"id":"t1","at":240,"kind":"Cross dissolve"}]
 state tracks=["V2","V1","A1"]
 state mute=[]
+state clipVol=0
+state preset=""
+state outName=""
 every 1s when playing onTick={frame=frame+30>total ? total : frame+30; playing=frame+30<total}
 App
   Sidebar
@@ -45,14 +48,14 @@ App
             Text.heading3 "{find(clips,c=>c.id==sel).name}"
             Text.caption "Track {find(clips,c=>c.id==sel).track}, starts at frame {find(clips,c=>c.id==sel).start}, {find(clips,c=>c.id==sel).len} frames"
             if find(clips,c=>c.id==sel).track=="A1"
-              Slider "Volume" min=0 max=1.5 bind=clipVol onChange={clips=updateWhere(clips,c=>c.id==sel,c=>with(c,"vol",result))}
+              Slider "Volume" min=0 max=1.5 @clipVol onChange={clips=updateWhere(clips,c=>c.id==sel,c=>with(c,"vol",result))}
             Button.destructive "Delete clip" onTap={clips=removeWhere(clips,c=>c.id==sel);sel=""}
       Card gap=12
         Row between middle
           Text.strong "Timeline"
           Row gap=8 middle
             Icon "zoom_out"
-            Slider bind=zoom min=10 max=120 w=160
+            Slider @zoom min=10 max=120 w=160
             Icon "zoom_in"
             Text.caption "{zoom}px/s"
         Timeline zoom={zoom} playhead={frame} total={total} onSeek={frame=result} h=300
@@ -77,9 +80,9 @@ App
     state progress=0
     state rendering=false
     every 1s when rendering onTick={progress=min(1,progress+0.05);rendering=progress<1}
-    Select "Preset" items=["YouTube 1080p","Instagram 1080x1350","ProRes 422","H.265 4K"] bind=preset
-    Input "File name" bind=outName
-    Progress bind=progress
+    Select "Preset" items=["YouTube 1080p","Instagram 1080x1350","ProRes 422","H.265 4K"] @preset
+    Input "File name" @outName
+    Progress value={progress}
     Row between
       Text.muted "{round(progress*100,0)}% done"
       Text.muted "About {duration(round((1-progress)*95,0))} left"
@@ -92,6 +95,7 @@ state tab="media"
 state filter="All"
 state selected=""
 state media=[{"id":"m1","name":"Harbor sunrise.mp4","kind":"Video","dur":8,"size":"412 MB","thumb":"https://picsum.photos/seed/harbor/320/180"},{"id":"m2","name":"Market walk.mp4","kind":"Video","dur":12,"size":"640 MB","thumb":"https://picsum.photos/seed/market/320/180"},{"id":"m3","name":"Ferry crossing.mp4","kind":"Video","dur":14,"size":"705 MB","thumb":"https://picsum.photos/seed/ferry/320/180"},{"id":"m4","name":"Ambient sea.wav","kind":"Audio","dur":20,"size":"34 MB","thumb":""},{"id":"m5","name":"Interview Maya.wav","kind":"Audio","dur":14,"size":"24 MB","thumb":""},{"id":"m6","name":"Logo sting.png","kind":"Image","dur":5,"size":"1 MB","thumb":"https://picsum.photos/seed/logo/320/180"}]
+state q=""
 App
   Sidebar
     Brand "Cutroom" icon="movie_edit"
@@ -102,7 +106,7 @@ App
     Nav
       Heading "Media bin"
       Row gap=8
-        Input "Search" bind=q w=220
+        Input "Search" @q w=220
         Button "Import" icon="upload" onTap={emit importMedia}
     Column pad=24 gap=16 scroll
       Row gap=8 scroll
@@ -132,6 +136,9 @@ state preset="YouTube 1080p"
 state progress=0.42
 state rendering=true
 state queue=[{"name":"Harbor Days v3","preset":"YouTube 1080p","status":"Rendering","progress":0.42},{"name":"Harbor Days v2","preset":"H.265 4K","status":"Done","progress":1},{"name":"Teaser cut","preset":"Instagram 1080x1350","status":"Done","progress":1}]
+state fps=""
+state quality=1
+state withAudio=false
 every 1s when rendering onTick={progress=min(1,progress+0.03);rendering=progress<1}
 App
   Sidebar
@@ -148,7 +155,7 @@ App
         Row between middle
           Text.heading3 "Harbor Days v3"
           Badge.info "{rendering ? 'Rendering' : 'Finished'}"
-        Progress bind=progress
+        Progress value={progress}
         Row between
           Text.muted "{round(progress*100,0)}% of 1,800 frames"
           Text.muted "Estimated time left: {duration(round((1-progress)*110,0))}"
@@ -163,13 +170,13 @@ App
               Text.strong "{q.name}"
               Text.caption "{q.preset}"
             Row gap=12 middle
-              Progress 0.5 bind=q.progress w=140
+              Progress 0.5 value={q.progress} w=140
               Badge.success "{q.status}"
   Dialog#settings "Render settings" "Choose how the movie is encoded"
-    Select "Preset" items=["YouTube 1080p","Instagram 1080x1350","ProRes 422","H.265 4K"] bind=preset
-    Select "Frame rate" items=["24","30","60"] bind=fps
-    Slider "Quality" bind=quality min=1 max=100
-    Toggle "Include audio" bind=withAudio
+    Select "Preset" items=["YouTube 1080p","Instagram 1080x1350","ProRes 422","H.265 4K"] @preset
+    Select "Frame rate" items=["24","30","60"] @fps
+    Slider "Quality" @quality min=1 max=100
+    Toggle "Include audio" @withAudio
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Add to queue" onTap={queue=append(queue,{"name":"Harbor Days v3","preset":preset,"status":"Queued","progress":0});close;toast "Queued"}

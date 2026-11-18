@@ -8,7 +8,7 @@ Card w=390 gap=16
   Row between middle
     Text.heading "Laptop finder"
     Text.muted "Step {min(step,3)} of 3"
-  Progress bind={step/3} visible={step<=3}
+  Progress value={step/3} visible={step<=3}
   if step==1
     Text.strong "What will you mostly use it for?"
     Column gap=8
@@ -49,7 +49,7 @@ Card w=390 gap=16
   if step==3
     Text.strong "What is your budget?"
     Text.heading "{money(budget,'$',0)}"
-    Slider bind=budget min=400 max=3000
+    Slider @budget min=400 max=3000
     Row between
       Text.caption "$400"
       Text.caption "$3,000"

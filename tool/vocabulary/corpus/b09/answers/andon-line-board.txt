@@ -99,7 +99,7 @@ App
     Nav
       Heading "Call log" level=1
       Row gap=8
-        Select bind=who items=["All","Open","Closed"] w=140
+        Select @who items=["All","Open","Closed"] w=140
         Button.outline "Export" onTap={emit exportLog; toast "Log exported"}
     Column pad=24 gap=16
       Grid cols=3 gap=16
@@ -149,14 +149,14 @@ App
     Column pad=24 gap=16 maxw=720
       Card gap=12
         Heading "Shift clock" level=3
-        TimePicker "Shift start" bind=shiftStart
+        TimePicker "Shift start" @shiftStart
         Text.fieldLabel "Shift length in hours: {takt/3600}"
-        Slider bind=takt min=21600 max=43200
+        Slider @takt min=21600 max=43200
       Card gap=12
         Heading "Targets" level=3
-        Input "Parts per station" bind=target type=number
+        Input "Parts per station" @target type=number
         Text.muted "Takt time per part: {fixed(takt/target,1)} seconds"
       Card gap=12
         Heading "Alerts" level=3
-        Toggle "Sound a horn when a station stops" bind=sound
-        Input "Escalate a stop after (minutes)" bind=alertMins type=number
+        Toggle "Sound a horn when a station stops" @sound
+        Input "Escalate a stop after (minutes)" @alertMins type=number

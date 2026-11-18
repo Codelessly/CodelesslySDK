@@ -26,12 +26,12 @@ App
       Stack center middle w=360 h=360
         Box fill=#FF1B1410 radius=180 w=360 h=360
         if !brewing
-          Dial bind=at count={length(drinks)} w=340 h=340 onTurn={step=="drink" ? at=(at+result+length(drinks))%length(drinks) : step=="size" ? size=clamp(size+result,0,2) : step=="strength" ? strength=clamp(strength+result,0,3) : milk=milks[clamp(indexOf(milks,milk)+result,0,3)]} onPress={step=="drink" ? step="size" : step=="size" ? step="strength" : step=="strength" ? step="milk" : {brewing=true; progress=0}}
+          Dial value={at} count={length(drinks)} w=340 h=340 onTurn={step=="drink" ? at=(at+result+length(drinks))%length(drinks) : step=="size" ? size=clamp(size+result,0,2) : step=="strength" ? strength=clamp(strength+result,0,3) : milk=milks[clamp(indexOf(milks,milk)+result,0,3)]} onPress={step=="drink" ? step="size" : step=="size" ? step="strength" : step=="strength" ? step="milk" : {brewing=true; progress=0}}
             each d in drinks
               Icon "{d.icon}" selected={index==at}
         Column center middle gap=4
           if brewing
-            Ring bind=progress size=200
+            Ring value={progress} size=200
             Text "{phase}" color=#FFF5E6D3 size=20
             Text.caption "{round(progress*100,0)}%" color=#FFC9B79C
           if !brewing && step=="drink"

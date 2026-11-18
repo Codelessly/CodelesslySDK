@@ -20,7 +20,7 @@ App
     NavItem "Gallery" icon="photo_library" badge="{length(words)}" onTap={go gallery}
     Spacer grow
     Text.caption "Pen thickness"
-    Slider bind=thickness min=2 max=16
+    Slider @thickness min=2 max=16
     Row gap=8 middle
       Icon "edit"
       Text.muted "{thickness} pt"
@@ -28,7 +28,7 @@ App
     Nav
       Heading "Trace the letter" level=1
       Row gap=8
-        SegmentedButton bind=mode items=["letter","word"]
+        SegmentedButton @mode items=["letter","word"]
         Button.outline "Show me how" icon="play_arrow" onTap={playing=true; strokesDone=0}
         Button.ghost "Clear" icon="refresh" onTap={strokesDone=0; wrong=false}
     Column pad=24 gap=16
@@ -51,8 +51,8 @@ App
         Column w=280 gap=12
           Card gap=8
             Text.strong "Guides"
-            Toggle "Dotted guide" bind=showGuide
-            Toggle "Numbered start dot" bind=showGuide
+            Toggle "Dotted guide" @showGuide
+            Toggle "Numbered start dot" @showGuide
           Card gap=8
             Text.strong "Stroke order"
             Text.muted "Watch the pen move, then try it yourself."
@@ -81,12 +81,12 @@ App
     NavItem "Gallery" icon="photo_library" onTap={go gallery}
     Spacer grow
     Text.caption "Pen thickness"
-    Slider bind=thickness min=2 max=16
+    Slider @thickness min=2 max=16
   Main
     Nav
       Heading "Practice lines" level=1
       Row gap=8
-        Select bind=sentence items=["a cat sat","the sun","big bee","my dog"]
+        Select @sentence items=["a cat sat","the sun","big bee","my dog"]
         Button "Save word" icon="check" onTap={emit saveWord sentence; toast "Saved to your gallery"}
     Column pad=24 gap=16
       Card gap=12
@@ -147,4 +147,4 @@ App
     MenuItem "Trace again" icon="replay" onTap={go lines}
     MenuItem "Share" icon="share" onTap={emit share sel}
     MenuItem "Delete" icon="delete" onTap={words=removeWhere(words,w=>w.id==sel)}
-  Lightbox#zoom photos={map(words,w=>w.img)} bind=selected
+  Lightbox#zoom photos={map(words,w=>w.img)} @selected

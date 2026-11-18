@@ -38,8 +38,8 @@ Screen
 The page owns the clock and the state; the blocks draw what they are given. `phase` goes ready, set (a count-in
 from 3), work, rest, work ... done. Three rules make the lines short:
 
-- A block with `bind=name` shares that page variable and changes it itself: `TapPad bind=count` adds 1 on every tap (its
-  chips take 1 off or add 10), `SessionControls bind=paused` toggles pause. Neither needs an action.
+- A block with `@name` shares that page variable and changes it itself: `TapPad @count` adds 1 on every tap (its
+  chips take 1 off or add 10), `SessionControls @paused` toggles pause. Neither needs an action.
 - `onPressed={…}` (or `onTap={…}`) wires a block's one event: Finish on `SessionControls`, the close button on `SessionBar`, the tap on
   `BigButton`. A block never has two events to wire; a second action is a second block (two `BigButton` lines).
 - States are `if` lines around blocks, not parameters: ready shows a Start button, running shows the pad and the
@@ -62,8 +62,8 @@ Screen
   if phase=="ready"
     BigButton "Start, {today.minutes} minutes" onPressed={phase="set"}
   if phase=="set"||phase=="work"||phase=="rest"
-    TapPad bind=count
-    SessionControls bind=paused onPressed={phase="done"}
+    TapPad @count
+    SessionControls @paused onPressed={phase="done"}
   if phase=="done"
     SessionSummary "Session complete" "That makes {streak+1} in a row." jumps={count} best={max(map(sessions,s=>s.jumps))} rounds={round} of={today.rounds} seconds={elapsed} streak={streak+1}
     BigButton "Back to today" icon="check_rounded" onPressed={emit open_home}

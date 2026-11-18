@@ -31,10 +31,10 @@ App
         Row between
           Text.strong "Waveform"
           Row gap=8
-            SegmentedButton bind=speed items=["0.5x","1x"]
-            Toggle "Loop section" bind=loopOn
-        Waveform src="midnight-sun.mp3" bind=pos markers={marks} loop={loopOn ? [loopFrom,loopTo] : []} h=140 onSeek={pos=result} onTapMark={marks=append(marks,result)}
-        CountRuler eights=8 bpm={bpm} bind=pos marks={marks} loopFrom={loopFrom} loopTo={loopTo} onSelectRange={loopFrom=result[0]; loopTo=result[1]; loopOn=true}
+            SegmentedButton @speed items=["0.5x","1x"]
+            Toggle "Loop section" @loopOn
+        Waveform src="midnight-sun.mp3" @pos markers={marks} loop={loopOn ? [loopFrom,loopTo] : []} h=140 onSeek={pos=result} onTapMark={marks=append(marks,result)}
+        CountRuler eights=8 bpm={bpm} @pos marks={marks} loopFrom={loopFrom} loopTo={loopTo} onSelectRange={loopFrom=result[0]; loopTo=result[1]; loopOn=true}
         Row between
           Row gap=8
             IconButton "skip_previous" tooltip="Back to the start" onTap={pos=0}
@@ -52,7 +52,7 @@ App
         Card gap=8
           Text.muted "Tempo"
           Row gap=8 middle
-            Input type=number bind=bpm w=80
+            Input type=number @bpm w=80
             Text.muted "bpm"
       Card gap=8
         Text.strong "Count blocks"
@@ -67,6 +67,9 @@ state playing=false
 state pos=0
 state dancers=[{"id":"A","name":"Maya","x":20,"y":30},{"id":"B","name":"Jonas","x":40,"y":30},{"id":"C","name":"Priya","x":60,"y":30},{"id":"D","name":"Theo","x":80,"y":30},{"id":"E","name":"Lena","x":30,"y":70},{"id":"F","name":"Omar","x":70,"y":70}]
 state formations=[{"block":1,"dots":[]},{"block":2,"dots":[]},{"block":3,"dots":[]},{"block":4,"dots":[]}]
+state speed=""
+state px=""
+state py=""
 App
   Sidebar
     Brand "Eightcount" icon="graphic_eq"
@@ -88,13 +91,13 @@ App
           each b in [1,2,3,4]
             ChoiceChip "Block {b}" selected={block==b} onTap={block=b; playing=false}
         Card gap=8
-          Stage view="top" grid=10 w=fill h=360 dancers={dancers} bind=pos playing={playing} blocks={formations} glide=900 onDragDancer={dancers=updateWhere(dancers,d=>d.id==result.id,d=>with(with(d,"x",result.x),"y",result.y))} onSelect={sel=result.id} onGlideEnd={playing=false}
+          Stage view="top" grid=10 w=fill h=360 dancers={dancers} @pos playing={playing} blocks={formations} glide=900 onDragDancer={dancers=updateWhere(dancers,d=>d.id==result.id,d=>with(with(d,"x",result.x),"y",result.y))} onSelect={sel=result.id} onGlideEnd={playing=false}
             Text.caption "Audience"
         Row between
           Text.muted "Block {block} of 4, eights {(block-1)*2+1} to {block*2}"
           Row gap=8
             Text.muted "Speed"
-            SegmentedButton bind=speed items=["0.5x","1x"]
+            SegmentedButton @speed items=["0.5x","1x"]
       Pane w=320 pad=16 gap=12
         Text.panelTitle "Dancers"
         each d in dancers
@@ -105,8 +108,8 @@ App
         if sel!=""
           Text.strong "{find(dancers,d=>d.id==sel).name}"
           Row gap=8
-            Input "Across" type=number bind=px
-            Input "Depth" type=number bind=py
+            Input "Across" type=number @px
+            Input "Depth" type=number @py
           Button.outline "Nudge to grid" onTap={dancers=updateWhere(dancers,d=>d.id==sel,d=>with(with(d,"x",round(d.x/10,0)*10),"y",round(d.y/10,0)*10))}
         if sel==""
           Text.muted "Tap a dot on the stage to select a dancer, drag it to move."
@@ -119,6 +122,9 @@ state count=1
 state notes=[{"count":1,"text":"Heads down, hold for the drop","sticker":"star"},{"count":5,"text":"Maya cues the spin","sticker":"bolt"}]
 state draft=""
 state sticker="star"
+state newName=""
+state newWho=""
+state newFrom=""
 App
   Sidebar
     Brand "Eightcount" icon="graphic_eq"
@@ -154,9 +160,9 @@ App
       Pane w=320 pad=16 gap=12
         Text.panelTitle "Notes by count"
         Row gap=8
-          Select "Count" bind=count items=[1,2,3,4,5,6,7,8]
-          Select "Sticker" bind=sticker items=["star","bolt","favorite","warning"]
-        Input "Note" "What happens on this count" bind=draft multiline
+          Select "Count" @count items=[1,2,3,4,5,6,7,8]
+          Select "Sticker" @sticker items=["star","bolt","favorite","warning"]
+        Input "Note" "What happens on this count" @draft multiline
         Button "Add note" onTap={draft=="" ? toast "Write a note first" : {notes=append(notes,{"count":count,"text":draft,"sticker":sticker}); draft=""}}
         Divider
         each n in sortBy(notes,n=>n.count)
@@ -169,10 +175,10 @@ App
     MenuItem "Duplicate" icon="content_copy" onTap={moves=append(moves,with(find(moves,m=>m.id==picked),"id",length(moves)+1))}
     MenuItem "Delete" icon="delete" onTap={moves=removeWhere(moves,m=>m.id==picked)}
   Dialog#renameMove "Rename move"
-    Input "Name" bind=newName
+    Input "Name" @newName
     Button "Save" onTap={moves=updateWhere(moves,m=>m.id==picked,m=>with(m,"name",newName)); close}
   Dialog#addMove "Add a move" "It lands in the first lane at the chosen count"
-    Input "Move name" "Body roll" bind=newName
-    Select "Dancer" bind=newWho items=["A","B","C"]
-    Select "From count" bind=newFrom items=[1,2,3,4,5,6,7,8]
+    Input "Move name" "Body roll" @newName
+    Select "Dancer" @newWho items=["A","B","C"]
+    Select "From count" @newFrom items=[1,2,3,4,5,6,7,8]
     Button "Add" onTap={moves=append(moves,{"id":length(moves)+1,"who":newWho,"name":newName,"from":newFrom,"to":newFrom+1}); close}

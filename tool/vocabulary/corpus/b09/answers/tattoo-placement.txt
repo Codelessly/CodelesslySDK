@@ -10,6 +10,7 @@ state py=0.4
 state baseCm=12
 state design={"name":"Koi and waves","url":"https://cdn.inkplace.app/designs/koi-waves.png"}
 state placements=[{"id":1,"name":"Left forearm, koi","side":"front","px":0.28,"py":0.46,"scale":0.9,"angle":-20,"cm":10.8},{"id":2,"name":"Right shoulder blade","side":"back","px":0.68,"py":0.2,"scale":1.4,"angle":15,"cm":16.8}]
+state newName=""
 App
   Sidebar
     Brand "Inkplace" icon="draw"
@@ -22,7 +23,7 @@ App
     Nav
       Heading "Place your design" level=1
       Row gap=8
-        SegmentedButton bind=side items=["front","back"]
+        SegmentedButton @side items=["front","back"]
         Button.outline "Save placement" icon="bookmark_add" onTap={open savePlacement}
     Column pad=24 gap=16
       Row gap=24 top
@@ -47,10 +48,10 @@ App
               ChoiceChip "Deep" selected={skin=="deep"} onTap={skin="deep"}
           Card gap=12
             Text.strong "Fade in ten years"
-            Slider bind=fade min=0 max=100
+            Slider @fade min=0 max=100
             Text.muted "Lines at {100-fade}% of today's contrast"
           Card gap=12
-            Toggle "Stencil mode" bind=stencil
+            Toggle "Stencil mode" @stencil
             Text.muted "Shows the black outline only, as the artist transfers it."
           Card gap=8
             Text.strong "Design"
@@ -60,7 +61,7 @@ App
                 Text "{design.name}"
                 Button.ghost "Change" onTap={open pickDesign}
   Sheet#savePlacement "Save this placement"
-    Input "Name" "Left calf, koi" bind=newName
+    Input "Name" "Left calf, koi" @newName
     Text.muted "{side}, {fixed(baseCm*scale,1)} cm wide"
     Button "Save" onTap={placements=append(placements,{"id":length(placements)+1,"name":coalesce(newName,"Untitled placement"),"side":side,"px":px,"py":py,"scale":scale,"angle":angle,"cm":round(baseCm*scale,1)}); newName=""; toast "Placement saved"; close}
   Dialog#pickDesign "Choose a design"
@@ -142,10 +143,10 @@ App
       if step==1
         Card gap=12
           Text.strong "Session length"
-          Slider bind=sessionHours min=1 max=8
+          Slider @sessionHours min=1 max=8
           Text "{sessionHours} hours with {artist}"
-          DatePicker "Preferred date" bind=sessionDate
-          Input "Notes for the artist" bind=notes multiline
+          DatePicker "Preferred date" @sessionDate
+          Input "Notes for the artist" @notes multiline
           Row gap=8
             Button.outline "Back" onTap={step=0}
             Button "Next" onTap={sessionDate=="" ? toast "Pick a date" : step=2}
@@ -165,7 +166,7 @@ App
             Text "Deposit due now"
             Text.strong "{money(sessionHours*find(artists,a=>a.name==artist).rate*0.2,"$",2)}"
           Text.muted "The deposit is 20% of the estimate. It is taken off your final bill and is non-refundable within 48 hours of the session."
-          Checkbox "I understand the deposit terms" bind=deposit
+          Checkbox "I understand the deposit terms" @deposit
           Row gap=8
             Button.outline "Back" onTap={step=1}
             Button "Confirm booking" onTap={deposit ? open booked : toast "Accept the deposit terms first"}

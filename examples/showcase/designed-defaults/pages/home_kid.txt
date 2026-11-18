@@ -21,7 +21,7 @@ Column scroll gap=16 pad=16
   Card gap=8
     Text.sectionTitle "This week"
     Text.heading1 "{sessionsThisWeek} of {weeklyGoal}"
-    Progress bind={sessionsThisWeek/weeklyGoal}
+    Progress value={sessionsThisWeek/weeklyGoal}
     Text.bodySecondary "{weeklyGoal-sessionsThisWeek} more to win the week!"
   Card gap=8
     Row gap=8 middle

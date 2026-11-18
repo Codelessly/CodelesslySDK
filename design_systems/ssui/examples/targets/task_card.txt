@@ -13,7 +13,7 @@ Card gap=10
     Row between
       Text.bodySecondary "Rows copied"
       Text.mono "1,284,000 / 2,100,000"
-    Progress bind={status=="done"?1:0.61}
+    Progress value={status=="done"?1:0.61}
     Row between
       Text.caption "{status=="done"?"Finished in 3 min 12 s":(status=="canceled"?"Stopped at 61 %; nothing was changed":"About 1 min left")}"
       Text.caption "6,900 rows / s" visible={status=="running"}

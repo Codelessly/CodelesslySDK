@@ -4,6 +4,7 @@ state qty=1
 state tab="Description"
 state cart=2
 state q=""
+state sort=""
 
 Page
   Nav
@@ -15,7 +16,7 @@ Page
       Link "Decor"
       Link "Sale"
     Row gap=12
-      Input "Search" "Search products" bind=q w=240
+      Input "Search" "Search products" @q w=240
       Button.outline "Cart · {cart}" icon="shopping_cart" onTap={emit openCart}
   Section
     Column gap=32
@@ -87,7 +88,7 @@ Page
                 Text.muted "Covers the LED driver, switch and finish."
   Section
     Column gap=24
-      TabToggle bind=tab options=["Description","Specifications","Reviews"]
+      TabToggle @tab options=["Description","Specifications","Reviews"]
       if tab=="Description"
         Column gap=12
           Heading "Light, shaped" level=3
@@ -95,7 +96,7 @@ Page
           Text "Every lamp is hand-finished in small batches. The brass develops a gentle patina, the graphite has a matte powder coat, and the sand finish is soft to the touch."
       if tab=="Specifications"
         Column gap=0
-          TableHeader bind=sort columns=["Specification","Detail"] keys=["spec","detail"]
+          TableHeader @sort columns=["Specification","Detail"] keys=["spec","detail"]
           TableRow cells=["Height","46 cm (adjustable)"]
           TableRow cells=["Base diameter","16 cm"]
           TableRow cells=["Materials","Solid brass, steel, silicone"]

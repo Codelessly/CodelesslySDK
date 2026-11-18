@@ -1,9 +1,9 @@
-// A choice from a long list by searching it: type to see the best matches (name, a line under it and a small picture, each by the key named), a tap chooses one; bind holds the chosen name.
-SearchSelect "label" bind=picked items=[] labelKey="name" subtitleKey imageKey hint
+// A choice from a long list by searching it: type to see the best matches (name, a line under it and a small picture, each by the key named), a tap chooses one; the variable bound (@picked) holds the chosen name.
+SearchSelect "label" @picked items=[] labelKey="name" subtitleKey imageKey hint
   state picked=""
   state query=""
   Column w=fill gap=4
-    Input "{label}" "{hint}" icon="search" bind=query
+    Input "{label}" "{hint}" icon="search" @query
     if query != "" && query != picked
       Column w=fill gap=0 radius=10 fill=card border=line
         each item in take(fuzzy(items, query, x => x[labelKey]), 6)

@@ -3,6 +3,10 @@ state room="All"
 state q=""
 state sel=""
 state devices=[{"id":"d1","name":"core-sw-01","room":"Server room","kind":"switch","status":"up","ms":2},{"id":"d2","name":"edge-rtr-01","room":"Server room","kind":"router","status":"up","ms":9},{"id":"d3","name":"nas-archive","room":"Server room","kind":"storage","status":"warn","ms":48},{"id":"d4","name":"ap-lobby","room":"Lobby","kind":"wifi","status":"up","ms":6},{"id":"d5","name":"cam-entrance","room":"Lobby","kind":"camera","status":"down","ms":0},{"id":"d6","name":"ap-open-office","room":"Floor 2","kind":"wifi","status":"up","ms":11},{"id":"d7","name":"printer-2f","room":"Floor 2","kind":"print","status":"warn","ms":120},{"id":"d8","name":"sw-floor2","room":"Floor 2","kind":"switch","status":"up","ms":3}]
+state maintDate=""
+state maintFrom=""
+state maintTo=""
+state maintRoom=""
 App
   Sidebar
     Brand "Pingdom Hall" icon="monitor_heart"
@@ -15,8 +19,8 @@ App
     Nav
       Heading "Devices" level=1
       Row gap=8
-        Input "Search devices" bind=q w=220
-        Select bind=room items=["All","Server room","Lobby","Floor 2"]
+        Input "Search devices" @q w=220
+        Select @room items=["All","Server room","Lobby","Floor 2"]
         Button.outline "Maintenance window" icon="event" onTap={open maint}
     Column pad=24 gap=16
       Row gap=16
@@ -52,11 +56,11 @@ App
     MenuItem "Acknowledge" icon="check" onTap={toast "Acknowledged"; emit acknowledge sel}
     MenuItem "Copy IP address" icon="content_copy" onTap={copy "10.0.4.17"; toast "Copied"}
   Dialog#maint "Maintenance window" "Alerts are paused for the devices you pick"
-    Calendar bind=maintDate
+    Calendar @maintDate
     Row gap=8
-      TimePicker "From" bind=maintFrom
-      TimePicker "To" bind=maintTo
-    Select "Applies to" bind=maintRoom items=["Server room","Lobby","Floor 2","All devices"]
+      TimePicker "From" @maintFrom
+      TimePicker "To" @maintTo
+    Select "Applies to" @maintRoom items=["Server room","Lobby","Floor 2","All devices"]
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Schedule" onTap={emit scheduleMaintenance {"date":maintDate,"from":maintFrom,"to":maintTo,"room":maintRoom}; toast "Maintenance scheduled"; close}
@@ -64,6 +68,7 @@ App
 ### Topology
 state hovered=""
 state links=[{"a":"edge-rtr-01","b":"core-sw-01","mbps":940,"status":"up"},{"a":"core-sw-01","b":"sw-floor2","mbps":420,"status":"up"},{"a":"core-sw-01","b":"sw-lobby","mbps":180,"status":"up"},{"a":"core-sw-01","b":"nas-archive","mbps":610,"status":"warn"},{"a":"sw-lobby","b":"cam-entrance","mbps":0,"status":"down"},{"a":"sw-floor2","b":"ap-open-office","mbps":95,"status":"up"}]
+state metric=""
 App
   Sidebar
     Brand "Pingdom Hall" icon="monitor_heart"
@@ -74,11 +79,11 @@ App
     Nav
       Heading "Topology" level=1
       Row gap=8
-        SegmentedButton bind=metric items=["Traffic","Latency"]
+        SegmentedButton @metric items=["Traffic","Latency"]
         Button.outline "Fit to screen" icon="fit_screen" onTap={emit fitTopology}
     Column pad=24 gap=16
       Card
-        Topology bind=hovered h=420
+        Topology @hovered h=420
           TopologyNode "edge-rtr-01" kind="router" x=50 y=8 status="up"
           TopologyNode "core-sw-01" kind="switch" x=50 y=38 status="up"
           TopologyNode "sw-floor2" kind="switch" x=22 y=68 status="up"
@@ -146,7 +151,7 @@ App
         Row between
           Text.strong "Latency"
           Row gap=8
-            SegmentedButton bind=range items=["5 min","1 h","24 h"]
+            SegmentedButton @range items=["5 min","1 h","24 h"]
             IconButton "{running ? \"pause\" : \"play_arrow\"}" tooltip="Pause live view" onTap={running=!running}
         LiveChart values={live} unit="ms" limit=40 h=220 scroll
       Card gap=12
@@ -179,6 +184,10 @@ state tab="rules"
 state rules=[{"id":"r1","name":"High latency","metric":"latency","op":">","threshold":40,"unit":"ms","notify":["Network team","On-call"],"on":true},{"id":"r2","name":"Packet loss","metric":"loss","op":">","threshold":2,"unit":"%","notify":["On-call"],"on":true},{"id":"r3","name":"Device down","metric":"status","op":"==","threshold":0,"unit":"","notify":["Network team","Facilities"],"on":true}]
 state incidents=[{"id":"i1","at":"14:02","title":"cam-entrance is down","sev":"error","ack":false,"by":""},{"id":"i2","at":"13:58","title":"nas-archive latency above 40 ms","sev":"warn","ack":true,"by":"Dana"},{"id":"i3","at":"11:20","title":"printer-2f packet loss 4%","sev":"warn","ack":true,"by":"Sam"},{"id":"i4","at":"09:05","title":"sw-lobby restarted","sev":"info","ack":true,"by":"Dana"}]
 state editing={"id":"","name":"","metric":"latency","op":">","threshold":40,"notify":[]}
+state maintDate=""
+state maintFrom=""
+state maintTo=""
+state maintRoom=""
 App
   Sidebar
     Brand "Pingdom Hall" icon="monitor_heart"
@@ -207,7 +216,7 @@ App
               Text.strong "{r.name}" grow
               Text.mono "{r.metric} {r.op} {r.threshold}{r.unit}" w=140
               Text.muted "{join(r.notify,\", \")}" w=180
-              Toggle bind=r.on w=60
+              Toggle @r.on w=60
               IconButton "edit" tooltip="Edit rule" onTap={editing=r; open rule}
       if tab=="incidents"
         Card gap=12
@@ -222,11 +231,11 @@ App
                     Button "Acknowledge" onTap={incidents=updateWhere(incidents,x=>x.id==i.id,x=>with(with(x,"ack",true),"by","You")); toast "Acknowledged"}
                     Button.outline "Silence 1 hour" onTap={emit silence {"incident":i.id,"minutes":60}; toast "Silenced for 1 hour"}
   Dialog#rule "Alert rule" "Choose a condition and who hears about it"
-    Input "Name" bind=editing.name
+    Input "Name" @editing.name
     Row gap=8
-      Select "Metric" bind=editing.metric items=["latency","loss","status"] grow
-      Select "Is" bind=editing.op items=[">","<","=="] w=90
-      Input "Threshold" bind=editing.threshold type=number w=110
+      Select "Metric" @editing.metric items=["latency","loss","status"] grow
+      Select "Is" @editing.op items=[">","<","=="] w=90
+      Input "Threshold" @editing.threshold type=number w=110
     Text.fieldLabel "Notify"
     Row gap=8
       FilterChip "Network team" selected={contains(editing.notify,"Network team")} onTap={editing=with(editing,"notify",contains(editing.notify,"Network team") ? without(editing.notify,"Network team") : append(editing.notify,"Network team"))}
@@ -236,11 +245,11 @@ App
       Button.ghost "Cancel" onTap={close}
       Button "Save rule" onTap={editing.name=="" ? toast "Name the rule" : {rules=editing.id=="" ? append(rules,with(editing,"id","r"+(length(rules)+1))) : updateWhere(rules,r=>r.id==editing.id,r=>editing); toast "Rule saved"; close}}
   Dialog#maint "Maintenance window" "Alerts are paused for the devices you pick"
-    Calendar bind=maintDate
+    Calendar @maintDate
     Row gap=8
-      TimePicker "From" bind=maintFrom
-      TimePicker "To" bind=maintTo
-    Select "Applies to" bind=maintRoom items=["Server room","Lobby","Floor 2","All devices"]
+      TimePicker "From" @maintFrom
+      TimePicker "To" @maintTo
+    Select "Applies to" @maintRoom items=["Server room","Lobby","Floor 2","All devices"]
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Schedule" onTap={emit scheduleMaintenance {"date":maintDate,"from":maintFrom,"to":maintTo,"room":maintRoom}; toast "Maintenance scheduled"; close}

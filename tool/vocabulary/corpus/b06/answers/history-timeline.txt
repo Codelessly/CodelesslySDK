@@ -26,7 +26,7 @@ App
         each t in themes
           FilterChip "{t}" selected={contains(active,t)} onTap={contains(active,t) ? active=without(active,t) : active=append(active,t)}
       Card gap=8
-        Timeline#line bind=zoom from=-3000 to=2025 drag zoom cluster=true h=220 events={filter(events,e=>contains(active,e.theme))} onSelect={sel=result; open details}
+        Timeline#line @zoom from=-3000 to=2025 drag zoom cluster=true h=220 events={filter(events,e=>contains(active,e.theme))} onSelect={sel=result; open details}
           Text.caption "Drag to move, pinch or scroll to zoom"
       Card gap=12
         Row gap=16 top
@@ -70,12 +70,12 @@ App
     Nav
       Heading "Compare regions" level=1
       Row gap=8
-        Select bind=left items={regions} w=160
+        Select @left items={regions} w=160
         Icon "compare_arrows"
-        Select bind=right items={regions} w=160
+        Select @right items={regions} w=160
     Column pad=24 gap=16
       Card gap=12
-        Timeline bind=zoom from=0 to=1600 drag zoom cluster=true h=300
+        Timeline @zoom from=0 to=1600 drag zoom cluster=true h=300
           Lane "{left}" events={laneA} onSelect={picked=result; open eventcard}
           Lane "{right}" events={laneB} onSelect={picked=result; open eventcard}
       Row gap=16

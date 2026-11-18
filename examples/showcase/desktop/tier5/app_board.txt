@@ -16,7 +16,7 @@ App
         Avatar "Tara Lee" size=32
         Avatar "Omar Haddad" size=32
       Row gap=8 middle
-        Input "Filter tasks" bind=q w=220
+        Input "Filter tasks" @q w=220
         Button "New task" icon="add" onTap={tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"Backlog","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1}
     Column pad=24 gap=16 scroll
       Row gap=12 stretch
@@ -72,7 +72,7 @@ App
       Column gap=6
         Text.fieldLabel "Description"
         Text.muted "{find(tasks,x=>x.id==sel).desc}"
-      Checklist "Checklist" bind=done items=["Outline the approach","Draft the first version","Get feedback from the team","Publish to staging"]
+      Checklist "Checklist" @done items=["Outline the approach","Draft the first version","Get feedback from the team","Publish to staging"]
       Column gap=10
         Text.fieldLabel "Activity"
         Row gap=10 top

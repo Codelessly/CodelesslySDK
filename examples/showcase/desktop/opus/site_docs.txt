@@ -10,9 +10,9 @@ Page
       Icon "cell_tower" color=#FF4F46E5
       Text.strong "Beacon" size=18
       Badge.neutral "SDK"
-    HeaderSearchInput "Search the docs…" bind=q
+    HeaderSearchInput "Search the docs…" @q
     Row gap=12 middle
-      Select bind=version items=["v2.4","v2.3","v2.2","v1.9"] w=110
+      Select @version items=["v2.4","v2.3","v2.2","v1.9"] w=110
       Link "GitHub" href="https://github.com"
       Button "Dashboard" onTap={emit dashboard}
   Section
@@ -51,7 +51,7 @@ Page
         Callout "Find your project key" "Your API key lives under Settings → Project in the Beacon dashboard. Keep it in an environment variable, never in source control." tone=accent icon="info"
         Heading "Client options" level=3
         Card gap=0 pad=0
-          TableHeader bind=sort desc={desc} columns=["Name","Type","Default","Description"] keys=["name","type","def","desc"] widths=[160,100,110,420]
+          TableHeader @sort desc=@desc columns=["Name","Type","Default","Description"] keys=["name","type","def","desc"] widths=[160,100,110,420]
           each o in (desc?sortByDesc(options,x=>sort=="type"?x.type:sort=="def"?x.def:sort=="desc"?x.desc:x.name):sortBy(options,x=>sort=="type"?x.type:sort=="def"?x.def:sort=="desc"?x.desc:x.name))
             TableRow cells={[o.name,o.type,o.def,o.desc]} widths=[160,100,110,420]
         Divider

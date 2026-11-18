@@ -1,5 +1,8 @@
+state section=""
+state range=""
+state q=""
 Row h=fill
-  Sidebar bind=section brand="Harbor" sectionLabel="Workspace" items=["Overview","Orders","Inventory","Customers","Reports","Settings"] icons=["dashboard","receipt_long","inventory_2","group","bar_chart","settings"] w=240
+  Sidebar @section brand="Harbor" sectionLabel="Workspace" items=["Overview","Orders","Inventory","Customers","Reports","Settings"] icons=["dashboard","receipt_long","inventory_2","group","bar_chart","settings"] w=240
     Divider
     Row gap=10 pad=12 middle
       Avatar "Maya Reyes" size=36
@@ -10,8 +13,8 @@ Row h=fill
     Row between middle
       Text.pageTitle "Overview"
       Row gap=12 middle
-        Segments bind=range options=["7d","30d","90d"]
-        SearchBar "Search orders, customers" bind=q w=260
+        Segments @range options=["7d","30d","90d"]
+        SearchBar "Search orders, customers" @q w=260
         Button "New order" icon="add" onTap={emit newOrder}
     Grid cols=4 gap=12
       StatTile "Revenue" "vs previous period" value="$128,400" delta="+8.2%" icon="payments"

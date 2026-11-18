@@ -5,6 +5,9 @@ state locked=false
 state hours=""
 state truck="FLT-07"
 state tab="walk"
+state fault=""
+state faultNote=""
+state defectPhoto=""
 App
   Sidebar
     Brand "Prestart" icon="forklift"
@@ -52,10 +55,10 @@ App
               ListTile "{s.name}" icon={s.status=="ok" ? "check_circle" : (s.status=="defect" ? "error" : "radio_button_unchecked")} onTap={sel=s.id}
   Sheet#defect "Report a defect"
     Text.strong "{find(spots,s=>s.id==sel).name}"
-    Select "What is wrong" items=["Damaged","Leaking","Worn","Not working","Missing"] bind=fault
-    Input "Notes" "e.g. left fork tip bent about 2 cm" multiline bind=faultNote
+    Select "What is wrong" items=["Damaged","Leaking","Worn","Not working","Missing"] @fault
+    Input "Notes" "e.g. left fork tip bent about 2 cm" multiline @faultNote
     Text.fieldLabel "Photo of the defect (required)"
-    PhotoPicker "Take photo" bind=defectPhoto source="camera"
+    PhotoPicker "Take photo" @defectPhoto source="camera"
     Row gap=8
       Button.ghost "Cancel" onTap={spots=updateWhere(spots,s=>s.id==sel,s=>with(s,"status","unchecked")); close}
       Spacer grow
@@ -99,12 +102,12 @@ App
         Card gap=12
           Text.strong "Hours meter"
           Text.muted "Read the meter on the dash and type it in."
-          Input "Hours" "e.g. 4821.5" type=number bind=hours
+          Input "Hours" "e.g. 4821.5" type=number @hours
           Text.danger "Hours must be more than the last reading of 4,812.0" hidden={isEmpty(hours) || hours>4812}
         Card gap=12
           Text.strong "Operator licence"
           Text.muted "Hold the card flat in front of the camera."
-          CardScanner "Scan licence" kind="licence" bind=licence onScan={licenceOk=true; toast "Licence read"}
+          CardScanner "Scan licence" kind="licence" @licence onScan={licenceOk=true; toast "Licence read"}
           if licenceOk
             ListTile "{licence.name}" subtitle="No. {licence.number}, expires {licence.expires}" icon="verified"
             Badge.success "Valid"
@@ -118,6 +121,7 @@ state running=false
 state handbrake=""
 state lift=""
 state tab="test"
+state signature=""
 every 1s when running onTick={secs=secs+1; secs>=30 ? running=false : }
 App
   Sidebar
@@ -141,15 +145,15 @@ App
             Button.outline "Reset" onTap={running=false; secs=0}
         Card gap=16
           Text.strong "Results"
-          SegmentedButton "Handbrake holds on the ramp" items=["Pass","Fail"] bind=handbrake
-          SegmentedButton "Forks hold with no drift" items=["Pass","Fail"] bind=lift
+          SegmentedButton "Handbrake holds on the ramp" items=["Pass","Fail"] @handbrake
+          SegmentedButton "Forks hold with no drift" items=["Pass","Fail"] @lift
           Text.success "Both tests passed" hidden={handbrake!="Pass" || lift!="Pass"}
           Text.danger "A failed test tags the truck do not use" hidden={handbrake!="Fail" && lift!="Fail"}
       Row gap=8
         Spacer grow
         Button "Sign and save check" onTap={isEmpty(handbrake) || isEmpty(lift) ? toast "Record both results" : (handbrake=="Fail" || lift=="Fail" ? go lockout : open sign)}
   Dialog#sign "Sign this check" "Operator Dale Whitcombe, FLT-07"
-    SignaturePad "Sign here" bind=signature
+    SignaturePad "Sign here" @signature
     Row gap=8
       Button.ghost "Cancel" onTap={close}
       Spacer grow
@@ -170,7 +174,7 @@ App
     Nav
       Heading "Signed checks" level=1
       Row gap=8
-        Input "Search truck or operator" bind=q w=240
+        Input "Search truck or operator" @q w=240
         IconButton "download" tooltip="Export list" onTap={emit exportChecks}
     Column pad=24 gap=16
       Card gap=8

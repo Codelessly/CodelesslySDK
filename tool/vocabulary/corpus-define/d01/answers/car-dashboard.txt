@@ -20,7 +20,7 @@ App
     NavItem "Media" icon="music_note" onTap={go media}
     NavItem "Camera" icon="videocam" onTap={go camera}
     Spacer grow
-    Toggle "Night mode" bind=night
+    Toggle "Night mode" @night
     Text.muted "Mode: {upper(mode)}"
   Main
     Nav
@@ -43,7 +43,7 @@ App
           Column grow center gap=4
             Text "{round(speed,0)}" size=96 weight=700 color={night ? "#FF9CA3AF" : "#FFFFFFFF"}
             Text "km/h" color={night ? "#FF6B7280" : "#FFD1D5DB"}
-          Gauge bind=speed min=0 max=180 limit=120 unit="km/h"
+          Gauge value={speed} min=0 max=180 limit=120 unit="km/h"
           Column grow center gap=4
             Text "{speed==0 ? "P" : (speed<20 ? "1" : (speed<45 ? "2" : (speed<75 ? "3" : "4")))}" size=72 weight=700 color={night ? "#FF9CA3AF" : "#FFFFFFFF"}
             Text "Gear" color={night ? "#FF6B7280" : "#FFD1D5DB"}
@@ -52,7 +52,7 @@ App
             Row between
               Text "Range" color={night ? "#FF9CA3AF" : "#FFFFFFFF"}
               Text.strong "{range} km" color={night ? "#FF9CA3AF" : "#FFFFFFFF"}
-            Progress bind=fuel
+            Progress value={fuel}
           Button.outline "Warnings test" onTap={belt=!belt; engine=!engine; doors=!doors}
       Grid cols=3 gap=16
         Card gap=4
@@ -86,7 +86,7 @@ App
     NavItem "Media" icon="music_note" onTap={go media}
     NavItem "Camera" icon="videocam" onTap={go camera}
     Spacer grow
-    Toggle "Night mode" bind=night
+    Toggle "Night mode" @night
   Main
     Nav
       Heading "Navigation" level=1
@@ -136,7 +136,7 @@ App
     NavItem "Media" icon="music_note" selected={true} onTap={go media}
     NavItem "Camera" icon="videocam" onTap={go camera}
     Spacer grow
-    Toggle "Night mode" bind=night
+    Toggle "Night mode" @night
   Main
     Nav
       Heading "Media" level=1
@@ -151,7 +151,7 @@ App
           Column grow gap=2
             Text "{tracks[at].title}" size=32 weight=700 color={night ? "#FF9CA3AF" : "#FFFFFFFF"}
             Text "{tracks[at].artist}" color={night ? "#FF6B7280" : "#FFD1D5DB"}
-        Slider bind=pos min=0 max={tracks[at].len}
+        Slider @pos min=0 max={tracks[at].len}
         Row between
           Text.muted "{duration(pos)}"
           Text.muted "{duration(tracks[at].len)}"
@@ -165,7 +165,7 @@ App
       Card gap=8
         Row gap=12 middle
           Icon "volume_up"
-          Slider bind=vol min=0 max=100
+          Slider @vol min=0 max=100
           Text.strong "{vol}"
   Drawer#queue "Up next" right
     each t in tracks
@@ -187,7 +187,7 @@ App
     NavItem "Media" icon="music_note" onTap={go media}
     NavItem "Camera" icon="videocam" selected={true} onTap={go camera}
     Spacer grow
-    Toggle "Night mode" bind=night
+    Toggle "Night mode" @night
   Main
     Nav
       Heading "Reversing camera" level=1
@@ -205,8 +205,8 @@ App
       Card gap=8
         Row between
           Text.strong "Steering guide"
-          Toggle "Guide lines" bind=guides
-        Slider bind=steer min=-30 max=30
+          Toggle "Guide lines" @guides
+        Slider @steer min=-30 max=30
         Row gap=8
           Button.outline "Reset" onTap={steer=0; dist=1.6}
           Button.outline "Night view" onTap={night=!night}

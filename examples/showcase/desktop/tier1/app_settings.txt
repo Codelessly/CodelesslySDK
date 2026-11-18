@@ -42,26 +42,26 @@ App
               Column gap=4
                 Button.outline "Change" onTap={emit changePicture; dirty=true}
                 Text.caption "JPG or PNG, up to 4 MB"
-            Input "Name" bind=name onChange={dirty=true}
-            Input "Username" bind=username onChange={dirty=true}
+            Input "Name" @name onChange={dirty=true}
+            Input "Username" @username onChange={dirty=true}
             Column gap=4
-              Input "Bio" "Tell readers a little about your writing" bind=bio multiline onChange={dirty=true}
+              Input "Bio" "Tell readers a little about your writing" @bio multiline onChange={dirty=true}
               Row end
                 Text.caption "{length(bio)}/160" color={length(bio)>160?"#FFB3261E":"#FF6B6B6B"}
             Field "Time zone"
-              Select bind=tz items=["(UTC-08:00) Pacific Time","(UTC-07:00) Mountain Time","(UTC-06:00) Central Time","(UTC-05:00) Eastern Time","(UTC+00:00) London","(UTC+01:00) Central European Time","(UTC+05:30) India Standard Time","(UTC+09:00) Tokyo"] onChange={dirty=true}
-            ToggleRow "Public profile" "Anyone with the link can read your profile and published pieces." bind=public onChanged={dirty=true}
+              Select @tz items=["(UTC-08:00) Pacific Time","(UTC-07:00) Mountain Time","(UTC-06:00) Central Time","(UTC-05:00) Eastern Time","(UTC+00:00) London","(UTC+01:00) Central European Time","(UTC+05:30) India Standard Time","(UTC+09:00) Tokyo"] onChange={dirty=true}
+            ToggleRow "Public profile" "Anyone with the link can read your profile and published pieces." @public onChanged={dirty=true}
           Card gap=12
             Heading "Notifications" level=3
-            ToggleRow "Draft reminders" "A nudge when a draft has been untouched for three days." bind=nDrafts onChanged={dirty=true}
+            ToggleRow "Draft reminders" "A nudge when a draft has been untouched for three days." @nDrafts onChanged={dirty=true}
             Divider
-            ToggleRow "Comments and replies" "Email me when someone responds to your writing." bind=nComments onChanged={dirty=true}
+            ToggleRow "Comments and replies" "Email me when someone responds to your writing." @nComments onChanged={dirty=true}
             Divider
-            ToggleRow "Weekly digest" "A Sunday summary of your words written and reads." bind=nWeekly onChanged={dirty=true}
+            ToggleRow "Weekly digest" "A Sunday summary of your words written and reads." @nWeekly onChanged={dirty=true}
             Divider
-            ToggleRow "Writing goals" "Progress updates and streak milestones." bind=nGoals onChanged={dirty=true}
+            ToggleRow "Writing goals" "Progress updates and streak milestones." @nGoals onChanged={dirty=true}
             Divider
-            ToggleRow "Product news" "New features, tips and occasional announcements." bind=nProduct onChanged={dirty=true}
+            ToggleRow "Product news" "New features, tips and occasional announcements." @nProduct onChanged={dirty=true}
           Box gap=12 pad=16 radius=8 fill=#FFFEF3F2 border=#FFF5C2BE
             Heading "Danger zone" level=3
             Text.muted "Deleting your account permanently removes your drafts, published pieces and followers. This cannot be undone."
@@ -70,7 +70,7 @@ App
                 Button.destructive "Delete account" onTap={confirming=true}
             if confirming
               Callout "Are you sure?" "Type DELETE to confirm. Your account and all of its writing will be erased." tone=danger icon="warning"
-              Input "Confirmation" "DELETE" bind=confirmText
+              Input "Confirmation" "DELETE" @confirmText
               Row gap=10
                 ActionButton "Cancel" tone=quiet w=140 onPressed={confirming=false; confirmText=""}
                 ActionButton "Permanently delete" tone=danger w=200 enabled={confirmText=="DELETE"} onPressed={emit deleteAccount; confirming=false; confirmText=""; toast "Account deletion requested"}

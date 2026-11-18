@@ -14,6 +14,10 @@ state typedLength=""
 state zoom=100
 state library=["Sofa 3-seat","Armchair","Dining table","Bed double","Wardrobe","Desk","Bathtub","Toilet","Basin","Kitchen unit"]
 state q=""
+state paper=""
+state scale=""
+state withDims=false
+state withFurniture=false
 App
   Sidebar
     Brand "Plan View" icon="architecture"
@@ -32,7 +36,7 @@ App
         Text.small "Window"
     Divider
     Text.caption "Furniture"
-    Input "Search furniture" bind=q
+    Input "Search furniture" @q
     Column scroll gap=4
       each item in library
         if q=="" || contains(lower(item),lower(q))
@@ -44,14 +48,14 @@ App
     Nav
       Heading "Ground floor, 14 Alder Lane" level=3
       Row gap=8
-        SegmentedButton items=["m","ft"] bind=units
-        Toggle "Snap" bind=snap
+        SegmentedButton items=["m","ft"] @units
+        Toggle "Snap" @snap
         IconButton "zoom_out" tooltip="Zoom out" onTap={zoom=max(25,zoom-25)}
         Text.strong "{zoom}%"
         IconButton "zoom_in" tooltip="Zoom in" onTap={zoom=min(400,zoom+25)}
         Button "Export PDF" icon="picture_as_pdf" onTap={open export}
     Column pad=0 gap=0
-      FloorCanvas#canvas tool={tool} units={units} grid=0.5 snap={snap} zoom={zoom} walls={walls} openings={openings} rooms={rooms} furniture={furniture} dimensions={dims} layers={layers} drop=door,window,furniture bind=selected showLengths=true rotateHandle=true onWallAdd={walls=append(walls,result)} onWallLength={selected=result.id; typedLength=fixed(result.length,2); open wallLength} onOpeningDrop={openings=append(openings,result)} onFurnitureDrop={furniture=append(furniture,result)} onRotate={furniture=updateWhere(furniture,f=>f.id==result.id,f=>with(f,"angle",result.angle))} onDimension={dims=append(dims,result)} onRoomFill={rooms=append(rooms,result); selected=result.id} onSelect={selected=result.id} onDrop={toast "Dropped {result.data}"}
+      FloorCanvas#canvas tool={tool} units={units} grid=0.5 snap={snap} zoom={zoom} walls={walls} openings={openings} rooms={rooms} furniture={furniture} dimensions={dims} layers={layers} drop=door,window,furniture @selected showLengths=true rotateHandle=true onWallAdd={walls=append(walls,result)} onWallLength={selected=result.id; typedLength=fixed(result.length,2); open wallLength} onOpeningDrop={openings=append(openings,result)} onFurnitureDrop={furniture=append(furniture,result)} onRotate={furniture=updateWhere(furniture,f=>f.id==result.id,f=>with(f,"angle",result.angle))} onDimension={dims=append(dims,result)} onRoomFill={rooms=append(rooms,result); selected=result.id} onSelect={selected=result.id} onDrop={toast "Dropped {result.data}"}
       Row between pad=12
         Row gap=8
           Box w=120 h=4 fill=#FF263238
@@ -64,23 +68,23 @@ App
       if selected!=""
         Card gap=8
           Text.strong "{selected}"
-          Input "Length ({units})" type=number bind=typedLength
+          Input "Length ({units})" type=number @typedLength
           Button "Apply" onTap={walls=updateWhere(walls,w=>w.id==selected,w=>with(w,"length",typedLength)); toast "Length set"}
           Button.destructive "Delete" onTap={walls=removeWhere(walls,w=>w.id==selected); selected=""}
       Heading "Rooms" level=3
       each r in rooms
         Card gap=8
-          Input "Name" bind=r.name
+          Input "Name" @r.name
           Row between
             Text.muted "Area"
             Text.strong "{units=="m" ? fixed(r.area,1) + " m²" : fixed(r.area*10.764,0) + " ft²"}"
       Heading "Layers" level=3
       each l in layers
         Row between
-          Toggle "{l.name}" bind=l.visible
+          Toggle "{l.name}" @l.visible
           IconButton "{l.locked ? "lock" : "lock_open"}" tooltip="Lock" onTap={layers=updateWhere(layers,x=>x.id==l.id,x=>with(x,"locked",!x.locked))}
   Dialog#wallLength "Set wall length" "Type the exact length"
-    Input "Length ({units})" type=number bind=typedLength
+    Input "Length ({units})" type=number @typedLength
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Set" onTap={walls=updateWhere(walls,w=>w.id==selected,w=>with(w,"length",typedLength)); close}
@@ -90,14 +94,14 @@ App
         Row gap=8
           Radio "{l.name}" onTap={activeLayer=l.id} selected={activeLayer==l.id}
         Row gap=8
-          Toggle "Visible" bind=l.visible
-          Toggle "Locked" bind=l.locked
+          Toggle "Visible" @l.visible
+          Toggle "Locked" @l.locked
     Button "Done" onTap={close}
   Dialog#export "Export as PDF" "Print-ready drawing with scale bar"
-    Select "Paper" items=["A4","A3","A2"] bind=paper
-    Select "Scale" items=["1:50","1:100","1:200"] bind=scale
-    Toggle "Include dimensions" bind=withDims
-    Toggle "Include furniture" bind=withFurniture
+    Select "Paper" items=["A4","A3","A2"] @paper
+    Select "Scale" items=["1:50","1:100","1:200"] @scale
+    Toggle "Include dimensions" @withDims
+    Toggle "Include furniture" @withFurniture
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Export" icon="download" onTap={emit exportPdf {"paper":paper,"scale":scale}; toast "PDF exported"; close}
@@ -117,7 +121,7 @@ App
     Nav
       Heading "Rooms" level=1
       Row gap=8
-        SegmentedButton items=["m","ft"] bind=units
+        SegmentedButton items=["m","ft"] @units
         Button "Export PDF" onTap={open exportRooms}
     Column pad=24 gap=16
       Grid cols=3 gap=16
@@ -138,7 +142,7 @@ App
           Text.caption "" w=40
         each r in rooms
           Row middle pad=8
-            Input "Name" bind=r.name grow
+            Input "Name" @r.name grow
             Text.muted "{r.floor}" w=100
             Text.strong "{units=="m" ? fixed(r.area,1) + " m²" : fixed(r.area*10.764,0) + " ft²"}" w=100
             IconButton "more_vert" tooltip="More" onTap={sel=r.id; open roomMenu}
@@ -178,10 +182,10 @@ App
     Nav
       Heading "{layer=="electrics" ? "Electrics" : "Plumbing"}" level=1
       Row gap=8
-        SegmentedButton items=["m","ft"] bind=units
+        SegmentedButton items=["m","ft"] @units
         Button.outline "Clear layer" onTap={symbols=removeWhere(symbols,s=>s.layer==layer)}
     Column pad=24 gap=16
-      FloorCanvas tool="symbol" units={units} grid=0.5 dimmed={true} activeLayer={layer} symbols={symbols} drop=symbol bind=selected onSymbolDrop={symbols=append(symbols,with(result,"layer",layer))} onSelect={selected=result.id} onContextMenu={selected=result.id; open symMenu} menu=symMenu
+      FloorCanvas tool="symbol" units={units} grid=0.5 dimmed={true} activeLayer={layer} symbols={symbols} drop=symbol @selected onSymbolDrop={symbols=append(symbols,with(result,"layer",layer))} onSelect={selected=result.id} onContextMenu={selected=result.id; open symMenu} menu=symMenu
       Row between
         Text.caption "{count(symbols,s=>s.layer==layer)} symbols on this layer"
         Row gap=8

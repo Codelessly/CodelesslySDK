@@ -18,7 +18,7 @@ App
     Nav
       Heading "League table" level=1
       Row gap=8
-        Select bind=season items=["2025/26","2024/25","2023/24","2022/23"] w=140
+        Select @season items=["2025/26","2024/25","2023/24","2022/23"] w=140
         Button.outline "Season replay" icon="replay" onTap={open replay}
     Column pad=24 gap=16 scroll
       Row gap=12
@@ -49,7 +49,7 @@ App
         BarChart values={map(sortByDesc(map(teams,x=>with(x,"pts",sum(take(x.weekly,wk),y=>y))),r=>r.pts),r=>r.pts)} labels={map(sortByDesc(map(teams,x=>with(x,"pts",sum(take(x.weekly,wk),y=>y))),r=>r.pts),r=>r.name)} h=180
   Dialog#replay "Season replay" "Watch the table change week by week"
     Text.muted "Week {wk} of 8"
-    Slider bind=wk min=1 max=8 step=1
+    Slider @wk min=1 max=8 step=1
     Row gap=8
       Button "Play" icon="play_arrow" onTap={wk=1; playing=true}
       Button.outline "Pause" icon="pause" onTap={playing=false}
@@ -103,7 +103,7 @@ App
             Badge.error "L" hidden={r.res!="L"}
             Badge.neutral "D" hidden={r.res!="D"}
   Sheet#compare "Head to head"
-    Select bind=rival items=["Northgate United","Redfield Rovers","Ashford Athletic","Kingsbridge","Lowmoor Town"]
+    Select @rival items=["Northgate United","Redfield Rovers","Ashford Athletic","Kingsbridge","Lowmoor Town"]
     Row gap=0 middle
       Column grow center gap=4
         Text.strong "Harbour City"
@@ -134,9 +134,9 @@ App
   Main
     Nav
       Heading "All-time records" level=1
-      Input "Search by name" bind=q w=240 icon="search"
+      Input "Search by name" @q w=240 icon="search"
     Column pad=24 gap=16 scroll
-      SegmentedButton bind=kind items=["Titles","Goals","Appearances"]
+      SegmentedButton @kind items=["Titles","Goals","Appearances"]
       Card gap=4
         Text.strong "{kind}"
         each r in sortByDesc(filter(records,x=>x.kind==kind && contains(lower(x.name),lower(q))),x=>x.value)
@@ -166,7 +166,7 @@ App
     Column pad=24 gap=16 scroll
       Row gap=16 top
         Card grow gap=8
-          Calendar bind=day marks={unique(map(fixtures,f=>f.date))}
+          Calendar @day marks={unique(map(fixtures,f=>f.date))}
         Card grow gap=8
           Text.strong "{formatDate(day,'MMM d')}"
           each f in filter(fixtures,x=>x.date==day)

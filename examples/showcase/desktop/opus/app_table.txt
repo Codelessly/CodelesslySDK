@@ -33,10 +33,10 @@ App
         Button "Add customer" onTap={emit addCustomer}
     Column pad=24 gap=16
       Row gap=12 middle
-        Input "Search" "Name or company" bind=q w=280
-        Select bind=status items=["All","Active","Trial","Churned"] w=160
+        Input "Search" "Name or company" @q w=280
+        Select @status items=["All","Active","Trial","Churned"] w=160
         Spacer grow
-        SegmentedButton bind=segment items=["All","SMB","Mid-market","Enterprise"]
+        SegmentedButton @segment items=["All","SMB","Mid-market","Enterprise"]
       if length(picked)>0
         Box fill=#FF1F2937 radius=8 pad=[16,10,16,10] animate=slide-up
           Row gap=12 middle

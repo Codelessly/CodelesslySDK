@@ -10,6 +10,9 @@ state mood="Okay"
 state sleepHours=6.5
 state sleepQuality="Restless"
 state saved=false
+state exportRange=""
+state exportFormat=""
+state exportExtras=false
 App
   Sidebar
     Brand "Daybook Health" icon="healing"
@@ -29,9 +32,9 @@ App
       Grid cols=2 gap=16
         Card gap=12
           Text.strong "Where does it hurt?"
-          SegmentedButton bind=kind items=["pain","itch","ache"]
+          SegmentedButton @kind items=["pain","itch","ache"]
           Stack center middle
-            BodyMap view="front" bind=spots mode={kind} onTapSpot={picked=result.area; spots=append(spots,{"area":result.area,"kind":kind,"sev":severity})} h=360
+            BodyMap view="front" @spots mode={kind} onTapSpot={picked=result.area; spots=append(spots,{"area":result.area,"kind":kind,"sev":severity})} h=360
           Text.muted "Tap a spot on the outline to mark it as {kind}."
           if picked!=""
             Text.small "Last marked: {picked}"
@@ -47,7 +50,7 @@ App
             Row between
               Text.strong "How bad is it?"
               Text.strong "{severity} of 10"
-            Slider bind=severity min=0 max=10 step=1 faces
+            Slider @severity min=0 max=10 step=1 faces
             Row between
               Icon "sentiment_very_satisfied"
               Icon "sentiment_neutral"
@@ -70,15 +73,15 @@ App
                 ChoiceChip "Good" selected={mood=="Good"} onTap={mood="Good"}
             Row middle gap=12
               Text.strong "Sleep" w=60
-              Input "Hours" type=number bind=sleepHours w=90
-              Select bind=sleepQuality items=["Deep","Okay","Restless","Barely slept"] grow
+              Input "Hours" type=number @sleepHours w=90
+              Select @sleepQuality items=["Deep","Okay","Restless","Barely slept"] grow
           if saved
             Text.success "Saved. Today is logged."
 
   Dialog#export "Export your diary" "Choose what goes into the file"
-    SegmentedButton bind=exportRange items=["2 weeks","Month","All"]
-    Select "Format" bind=exportFormat items=["PDF","CSV","Plain text"]
-    Toggle "Include food and triggers" bind=exportExtras
+    SegmentedButton @exportRange items=["2 weeks","Month","All"]
+    Select "Format" @exportFormat items=["PDF","CSV","Plain text"]
+    Toggle "Include food and triggers" @exportExtras
     Row end gap=8
       Button.outline "Copy as text" onTap={copy summary; toast "Copied"}
       Button "Download" onTap={emit export {"range":exportRange,"format":exportFormat,"extras":exportExtras}; toast "Preparing file"; close}
@@ -155,7 +158,7 @@ App
   Main
     Nav
       Heading "Patterns" level=1
-      SegmentedButton bind=range items=["14 days","30 days","90 days"]
+      SegmentedButton @range items=["14 days","30 days","90 days"]
     Column scroll pad=24 gap=16
       Card gap=12
         Text.strong "Share of bad days with each trigger"
@@ -184,6 +187,7 @@ state includeFood=true
 state includeSleep=true
 state extra=""
 state sent=false
+state note=""
 App
   Sidebar
     Brand "Daybook Health" icon="healing"
@@ -203,9 +207,9 @@ App
       Grid cols=2 gap=16
         Card gap=12
           Text.strong "Built from the last two weeks"
-          Toggle "Include food and triggers" bind=includeFood
-          Toggle "Include sleep and mood" bind=includeSleep
-          Input "Anything to add" "Questions, new medicines, what worries you" bind=extra multiline
+          Toggle "Include food and triggers" @includeFood
+          Toggle "Include sleep and mood" @includeSleep
+          Input "Anything to add" "Questions, new medicines, what worries you" @extra multiline
           Divider
           Text.strong "Bad days"
           each d in days
@@ -213,7 +217,7 @@ App
               Badge.danger "{d.sev}"
         Card gap=12
           Text.strong "Your note"
-          Input "Note" bind=note multiline h=360 value="Over the last 14 days I logged {length(days)} bad days (severity 6 or more), mostly in my lower back and left knee. Average severity on those days was {fixed(sum(days,d=>d.sev)/length(days),1)} of 10.{includeFood ? ' Stress and poor sleep came up most often, and alcohol twice.' : ''}{includeSleep ? ' I slept about 6.5 hours a night and my mood was mostly okay to low.' : ''} {extra}"
+          Input "Note" @note multiline h=360 value="Over the last 14 days I logged {length(days)} bad days (severity 6 or more), mostly in my lower back and left knee. Average severity on those days was {fixed(sum(days,d=>d.sev)/length(days),1)} of 10.{includeFood ? ' Stress and poor sleep came up most often, and alcohol twice.' : ''}{includeSleep ? ' I slept about 6.5 hours a night and my mood was mostly okay to low.' : ''} {extra}"
           Row end gap=8
             Button.outline "Edit later" onTap={toast "Draft kept"}
             Button "Send to my doctor" onTap={sent=true; emit sendNote note; toast "Note sent"}

@@ -36,7 +36,7 @@ App
               Row gap=8 middle
                 Icon "warning"
                 Text.strong "{c.shop}: {c.goal - c.stamps} stamps left, expires {formatDate(c.expires,"MMM d")}"
-      Pages bind=page h=380 peek=0.86
+      Pages @page h=380 peek=0.86
         each c in cards
           Card gap=12 fill={c.color}
             Row between middle
@@ -61,7 +61,7 @@ App
             if c.stamps < c.goal
               Text.caption "Expires {formatDate(c.expires,"MMM d, yyyy")}" color=#FFFFFFFF
       Row center
-        Dots bind=page count={length(cards)}
+        Dots @page count={length(cards)}
   Dialog#scan "Scan the code at the till" "Hold your phone steady over the QR code"
     Column center gap=16
       Camera "Point at the shop's code" h=220 onScan={cards=updateWhere(cards,c=>c.id==cards[page].id,c=>with(c,"stamps",min(c.goal,c.stamps+(doubleDay?2:1)))); history=concat([{"shop":cards[page].shop,"date":formatDate(today(),"yyyy-MM-dd"),"stamps":doubleDay?2:1}],history); justStamped=true; scanning=false; toast "Stamp added to {cards[page].shop}"; close}
@@ -94,7 +94,7 @@ App
         Text.muted "10 of 10 stamps collected"
       if !redeemed
         Text.muted "Slide to show your barcode to the cashier. It stays valid for one minute."
-        Slider bind=slid min=0 max=100 onChange={result>=100 ? sec=60 : slid=0}
+        Slider @slid min=0 max=100 onChange={result>=100 ? sec=60 : slid=0}
         Text.caption center "Slide all the way to the right to reveal"
         if slid>=100
           Card gap=12 center animate=scale
@@ -127,7 +127,7 @@ App
   Main
     Nav
       Heading "Find shops" level=1
-      Input "Search shops" bind=q w=220
+      Input "Search shops" @q w=220
     Column pad=24 gap=16
       Map h=320 center={[40.7420,-73.9910]} zoom=15 markers={map(filter(shops,s=>contains(lower(s.name),lower(q))),s=>{"id":s.id,"lat":s.lat,"lng":s.lng,"label":s.name})} onMarkerTap={sel=result.id; open shop}
       Text.sectionTitle "Nearby"
@@ -158,7 +158,7 @@ App
   Main
     Nav
       Heading "Visits" level=1
-      SegmentedButton bind=filter items=["all","stamp","reward"]
+      SegmentedButton @filter items=["all","stamp","reward"]
     Column pad=24 gap=16
       Card gap=8
         Text.strong "This month"

@@ -87,16 +87,16 @@ App
     MenuItem "Request refill" icon="local_pharmacy" onTap={meds=updateWhere(meds, x => x.id == sel, x => with(x, "left", x.left + 30)); toast "Refill requested"}
     MenuItem "Remove" icon="delete" onTap={meds=removeWhere(meds, x => x.id == sel); toast "Medicine removed"}
   Dialog#addMed "Add medicine" "Strength, form and when to take it"
-    Input "Name" "e.g. Sertraline" bind=newName
+    Input "Name" "e.g. Sertraline" @newName
     Row gap=8
-      Input "Strength" "50 mg" bind=newStrength grow
-      Select "Form" items=["Tablet","Capsule","Liquid","Softgel","Inhaler","Injection"] bind=newForm grow
+      Input "Strength" "50 mg" @newStrength grow
+      Select "Form" items=["Tablet","Capsule","Liquid","Softgel","Inhaler","Injection"] @newForm grow
     Text.fieldLabel "Schedule"
-    SegmentedButton items=["Every n hours","Set times","Days of week"] bind=mode
+    SegmentedButton items=["Every n hours","Set times","Days of week"] @mode
     if mode == "Every n hours"
       Row gap=8 middle
         Text "Every"
-        Input "Hours" type=number bind=every w=80
+        Input "Hours" type=number @every w=80
         Text "hours"
     if mode == "Set times"
       Column gap=8
@@ -104,13 +104,13 @@ App
           each t in setTimes
             Chip "{t}" onRemove={setTimes=without(setTimes, t)}
         Row gap=8
-          TimePicker "Time" bind=newTime grow
+          TimePicker "Time" @newTime grow
           Button.outline "Add time" onTap={newTime != "" ? setTimes=append(setTimes, newTime) : toast "Pick a time first"}
     if mode == "Days of week"
       Row gap=8 wrap
         each d in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
           FilterChip "{d}" selected={contains(days, d)} onTap={days=contains(days, d) ? without(days, d) : append(days, d)}
-    Input "Pills in this bottle" type=number bind=pills
+    Input "Pills in this bottle" type=number @pills
     Row gap=8 end
       Button.outline "Cancel" onTap={close}
       Button "Save" onTap={newName == "" ? toast "Enter a name" : {meds=append(meds, {"id": length(meds) + 10, "name": newName, "strength": newStrength, "form": newForm, "schedule": mode == "Every n hours" ? "Every {every} hours" : (mode == "Set times" ? join(setTimes, ", ") : join(days, ", ")), "left": pills, "perDay": 1}); newName=""; newStrength=""; toast "Medicine added"; close}}
@@ -147,7 +147,7 @@ App
             Text.muted "Missed"
             Text.danger "{count(log, d => d.state == 'missed')} days" size=28
         Card gap=12
-          MonthCalendar "{monthNames[monthIdx]} 2026" days={log} lead={0} bind=picked
+          MonthCalendar "{monthNames[monthIdx]} 2026" days={log} lead={0} @picked
       Pane w=320 gap=12
         Text.sectionTitle "Details"
         if picked == 0
@@ -176,7 +176,7 @@ App
       Heading "Caregiver sharing" level=1
     Column pad=24 gap=16 maxw=720 scroll
       Card gap=12
-        Toggle "Share my doses with a caregiver" bind=share
+        Toggle "Share my doses with a caregiver" @share
         Text.muted "Caregivers see which doses you took, skipped or missed. They never see notes."
       if share
         Card gap=12
@@ -184,14 +184,14 @@ App
           each p in who
             ListTile "{p.name}" "{p.rel}"
               Row gap=8 middle
-                Toggle "Late alerts" bind=p.alerts
+                Toggle "Late alerts" @p.alerts
                 IconButton "close" tooltip="Remove" onTap={who=removeWhere(who, x => x.name == p.name); toast "Access removed"}
           Row gap=8
-            Input "Invite by email" "name@example.com" bind=inviteEmail type=email grow
+            Input "Invite by email" "name@example.com" @inviteEmail type=email grow
             Button "Invite" onTap={inviteEmail == "" ? toast "Enter an email" : {who=append(who, {"name": inviteEmail, "rel": "Invited", "alerts": true}); inviteEmail=""; toast "Invitation sent"}}
         Card gap=12
           Text.strong "Alert a caregiver when a dose is late by"
-          Select "Late after" items=["15 minutes","30 minutes","1 hour","2 hours"] bind=lateAfter
+          Select "Late after" items=["15 minutes","30 minutes","1 hour","2 hours"] @lateAfter
       if !share
         EmptyState "Sharing is off" "Turn it on to let family or your care team follow your doses." icon="lock"
 
@@ -227,7 +227,7 @@ define DoseCard "med" strength="" form="" time="" status="due" late=false onTake
         Button.outline "Snooze" icon="snooze" onTap={onSnooze}
         Button.ghost "Skip" onTap={onSkip}
 
-define MonthCalendar "title" days=[] lead=0 bind=picked onPick
+define MonthCalendar "title" days=[] lead=0 @picked onPick
   state picked=0
   Column gap=8
     Text.strong "{title}"

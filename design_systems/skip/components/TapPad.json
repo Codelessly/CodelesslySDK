@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "TapPad",
-  "doc": "The jump counter as one enormous tap target: write TapPad bind=count and every tap anywhere on it adds 1 to your count variable, shown in display type; its two quiet chips take 1 off or add 10 (onChanged fires with the new count).",
+  "doc": "The jump counter as one enormous tap target: write TapPad @count and every tap anywhere on it adds 1 to your count variable, shown in display type; its two quiet chips take 1 off or add 10 (onChanged fires with the new count).",
   "props": [
    {
     "key": "count",

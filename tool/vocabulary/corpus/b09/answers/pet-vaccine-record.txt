@@ -7,6 +7,13 @@ state weights=[14.2,15.8,16.9,17.6,18.1,18.4]
 state weightLabels=["Jun","Jul","Aug","Sep","Oct","Nov"]
 state weightNew=""
 state sel=0
+state remindEmail=false
+state newName=""
+state newGiven=""
+state newDue=""
+state petName=""
+state petKind=""
+state petChip=""
 App
   Sidebar
     Brand "Tailbook" icon="pets"
@@ -68,9 +75,9 @@ App
           Heading "Reminder" level=3
           Text.muted "Get a notification this many days before a vaccine is due."
           Row gap=12 middle
-            Slider bind=remindDays min=1 max=60
+            Slider @remindDays min=1 max=60
             Text.strong "{remindDays} days"
-          Toggle "Remind by email too" bind=remindEmail
+          Toggle "Remind by email too" @remindEmail
           Button "Save reminder" onTap={emit setReminder remindDays; toast "Reminder set for {remindDays} days before"}
         Card grow gap=12
           Row between
@@ -78,17 +85,17 @@ App
             Text.muted "{last(weights)} kg now"
           LineChart values={weights} labels={weightLabels} h=180
           Row gap=8
-            Input "New weight (kg)" bind=weightNew type=number
+            Input "New weight (kg)" @weightNew type=number
             Button.outline "Add" onTap={weightNew!="" ? {weights=append(weights,weightNew); weightLabels=append(weightLabels,"Now"); weightNew=""; toast "Weight logged"} : toast "Enter a weight"}
   Dialog#addVaccine "Log a vaccine" "Add a dose to the record"
-    Select "Vaccine" bind=newName items=["Rabies","DHPP booster","Leptospirosis","Bordetella","Lyme"]
-    DatePicker "Date given" bind=newGiven
-    DatePicker "Next due" bind=newDue
+    Select "Vaccine" @newName items=["Rabies","DHPP booster","Leptospirosis","Bordetella","Lyme"]
+    DatePicker "Date given" @newGiven
+    DatePicker "Next due" @newDue
     Button "Save" onTap={newName!="" ? {vaccines=append(vaccines,{"id":length(vaccines)+1,"name":newName,"given":formatDate(newGiven,"MMM d, yyyy"),"due":formatDate(newDue,"MMM d, yyyy"),"days":365}); toast "Vaccine logged"; close} : toast "Choose a vaccine"}
   Dialog#addPet "Add a pet"
-    Input "Name" bind=petName
-    Select "Species" bind=petKind items=["Dog","Cat","Rabbit","Other"]
-    Input "Microchip number" bind=petChip
+    Input "Name" @petName
+    Select "Species" @petKind items=["Dog","Cat","Rabbit","Other"]
+    Input "Microchip number" @petChip
     Button "Add pet" onTap={emit addPet petName; close}
   Menu#vaccineMenu
     MenuItem "Mark as given today" icon="check" onTap={vaccines=updateWhere(vaccines,x=>x.id==sel,x=>with(with(x,"given",formatDate(today(),"MMM d, yyyy")),"days",365)); toast "Marked as given"}
@@ -101,6 +108,9 @@ state photo=""
 state at=0
 state course={"name":"Ear drops, Otomax","total":20,"left":14,"perDay":2}
 state noteDraft=""
+state visitDate=""
+state visitReason=""
+state visitCost=""
 App
   Sidebar
     Brand "Tailbook" icon="pets"
@@ -144,10 +154,10 @@ App
             if course.left<=3
               Badge.warning "Nearly out: ask for a refill"
   Dialog#addVisit "Add a vet visit"
-    DatePicker "Date" bind=visitDate
-    Input "Reason" bind=visitReason
-    Input "Notes" bind=noteDraft multiline
-    Input "Cost" bind=visitCost type=number
+    DatePicker "Date" @visitDate
+    Input "Reason" @visitReason
+    Input "Notes" @noteDraft multiline
+    Input "Cost" @visitCost type=number
     Button.outline "Attach receipt photo" icon="photo_camera" onTap={emit pickReceipt}
     Button "Save visit" onTap={visitReason!="" ? {visits=append(visits,{"id":length(visits)+1,"date":formatDate(visitDate,"MMM d, yyyy"),"vet":"Elm Street Vets","reason":visitReason,"note":noteDraft,"receipt":"","cost":visitCost}); noteDraft=""; toast "Visit saved"; close} : toast "Add a reason"}
   Lightbox#zoom "{photo}" "Receipt"
@@ -166,7 +176,7 @@ App
   Main
     Nav
       Heading "Travel certificate" level=1
-      Select bind=trip items=["Spain, 14 Jan 2027","France, 3 Mar 2027"]
+      Select @trip items=["Spain, 14 Jan 2027","France, 3 Mar 2027"]
     Column pad=24 gap=16 scroll
       Card gap=12
         Row between middle
@@ -181,7 +191,7 @@ App
       Card gap=4
         each c in checklist
           Row gap=12 middle
-            Checkbox bind=c.done
+            Checkbox @c.done
             Column grow gap=2
               Text.strong "{c.step}" strike={c.done}
               Text.muted "{c.note}"
@@ -196,6 +206,7 @@ App
 ### Share
 state sections=["Pet details","Vaccines","Vet visits","Weight"]
 state include=["Pet details","Vaccines"]
+state shareTo=""
 Page
   Nav
     Brand "Tailbook" icon="pets"
@@ -225,5 +236,5 @@ Page
       if contains(include,"Weight")
         LineChart values=[14.2,15.8,16.9,17.6,18.1,18.4] labels=["Jun","Jul","Aug","Sep","Oct","Nov"] h=120
   Dialog#emailShare "Email the record"
-    Input "To" bind=shareTo type=email
+    Input "To" @shareTo type=email
     Button "Send" onTap={shareTo!="" ? {emit emailRecord shareTo; toast "Sent"; close} : toast "Enter an address"}

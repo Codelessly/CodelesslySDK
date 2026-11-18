@@ -27,7 +27,7 @@ App
       Grid cols=3 gap=16
         Card gap=8
           Text.fieldLabel "Total dough weight (g)"
-          Input bind=total type=number
+          Input @total type=number
           Row gap=8
             Button.outline "-100" onTap={total=max(100,total-100)}
             Button.outline "+100" onTap={total=total+100}
@@ -51,9 +51,9 @@ App
         Divider
         each row in rows
           Row gap=12 middle
-            Input bind=row.name grow
-            Select bind=row.kind items=["flour","liquid","other"] w=120
-            Input bind=row.pct type=number w=110
+            Input @row.name grow
+            Select @row.kind items=["flour","liquid","other"] w=120
+            Input @row.pct type=number w=110
             Text.strong "{round(row.pct/sum(rows,r=>r.pct)*total,1)}" w=110
             IconButton "delete" tooltip="Remove" w=48 onTap={rows=removeWhere(rows,r=>r.id==row.id)}
         Divider
@@ -62,13 +62,16 @@ App
           Text.strong "{sum(rows,r=>r.pct)}%" w=110
           Text.strong "{total}" w=110
   Dialog#addIngredient "Add ingredient" "Percent is relative to total flour"
-    Input "Name" bind=newName
-    Select "Type" bind=newKind items=["flour","liquid","other"]
-    Input "Baker's %" bind=newPct type=number
+    Input "Name" @newName
+    Select "Type" @newKind items=["flour","liquid","other"]
+    Input "Baker's %" @newPct type=number
     Button "Add" onTap={rows=append(rows,{"id":length(rows)+100,"name":newName,"kind":newKind,"pct":newPct}); newName=""; newPct=0; close}
 
 ### Schedule
 state startMode="start"
+state mode=""
+state ah=""
+state am=""
 App
   Sidebar
     Brand "Crumb" icon="bakery_dining"
@@ -85,11 +88,11 @@ App
       Card gap=12
         Row between middle
           Text.strong "Plan around"
-          SegmentedButton bind=mode items=["start","finish"]
+          SegmentedButton @mode items=["start","finish"]
         Row gap=12 middle
           Text "{mode==\"start\"?\"Start at\":\"Finish at\"}"
-          Input "Hour" bind=ah type=number w=90
-          Input "Min" bind=am type=number w=90
+          Input "Hour" @ah type=number w=90
+          Input "Min" @am type=number w=90
           Spacer grow
           Column
             Text.fieldLabel "Total time"
@@ -111,7 +114,7 @@ App
                 Text.muted "at +{sum(take(steps,index),s=>s.mins)} min"
                 Spacer grow
                 IconButton "remove" tooltip="Shorter" onTap={steps=updateWhere(steps,s=>s.id==step.id,s=>with(s,"mins",max(5,s.mins-5)))}
-                Input bind=step.mins type=number w=80
+                Input @step.mins type=number w=80
                 IconButton "add" tooltip="Longer" onTap={steps=updateWhere(steps,s=>s.id==step.id,s=>with(s,"mins",s.mins+5))}
         Row gap=8
           Button.outline "Add step" icon="add" onTap={steps=append(steps,{"id":length(steps)+100,"name":"Rest","mins":15})}

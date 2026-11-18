@@ -5,11 +5,18 @@ state zoom=1
 state nextId=20
 state dragging=""
 state nodes=[{"id":"n1","parent":"","text":"Launch plan","color":"#FF6750A4","icon":"rocket_launch","collapsed":false},{"id":"n2","parent":"n1","text":"Audience","color":"#FF1E88E5","icon":"groups","collapsed":false},{"id":"n3","parent":"n1","text":"Channels","color":"#FF43A047","icon":"campaign","collapsed":false},{"id":"n4","parent":"n1","text":"Budget","color":"#FFFB8C00","icon":"payments","collapsed":false},{"id":"n5","parent":"n1","text":"Timeline","color":"#FFE53935","icon":"event","collapsed":true},{"id":"n6","parent":"n2","text":"Indie developers","color":"#FF1E88E5","icon":"code","collapsed":false},{"id":"n7","parent":"n2","text":"Design teams","color":"#FF1E88E5","icon":"palette","collapsed":false},{"id":"n8","parent":"n3","text":"Newsletter","color":"#FF43A047","icon":"mail","collapsed":false},{"id":"n9","parent":"n3","text":"Product Hunt","color":"#FF43A047","icon":"trending_up","collapsed":false},{"id":"n10","parent":"n3","text":"Conference talk","color":"#FF43A047","icon":"mic","collapsed":false},{"id":"n11","parent":"n4","text":"Ads $4,000","color":"#FFFB8C00","icon":"ads_click","collapsed":false},{"id":"n12","parent":"n4","text":"Swag $1,200","color":"#FFFB8C00","icon":"redeem","collapsed":false},{"id":"n13","parent":"n5","text":"Beta in March","color":"#FFE53935","icon":"flag","collapsed":false},{"id":"n14","parent":"n5","text":"Public launch in May","color":"#FFE53935","icon":"flag","collapsed":false},{"id":"n15","parent":"n5","text":"Retro in June","color":"#FFE53935","icon":"history","collapsed":false}]
+state editText=""
+state editIcon=""
+state editImage=""
+state exportFormat=""
+state exportScale=1
+state exportTransparent=false
+state exportCollapsed=false
 App
   Main
     Nav
       Brand "Branchout" icon="account_tree"
-      SegmentedButton bind=mode items=["Map","Outline"] onChange={result=="Outline" ? go outline : go canvas}
+      SegmentedButton @mode items=["Map","Outline"] onChange={result=="Outline" ? go outline : go canvas}
       Row gap=8
         IconButton "undo" tooltip="Undo" onTap={undo}
         IconButton "redo" tooltip="Redo" onTap={redo}
@@ -19,7 +26,7 @@ App
         IconButton "center_focus_strong" tooltip="Fit to screen" onTap={zoom=1; emit fitView}
         Button "Export" icon="image" onTap={open export}
     Stack
-      MindMap#map bind=sel nodes={nodes} zoom={zoom} pan zoomable curve=bezier onZoom={zoom=result} onNodeDrag={dragging=result.id} onNodeDrop={nodes=updateWhere(nodes,n=>n.id==result.id,n=>with(n,"parent",result.target))} onCanvasTap={sel=""}
+      MindMap#map @sel nodes={nodes} zoom={zoom} pan zoomable curve=bezier onZoom={zoom=result} onNodeDrag={dragging=result.id} onNodeDrop={nodes=updateWhere(nodes,n=>n.id==result.id,n=>with(n,"parent",result.target))} onCanvasTap={sel=""}
         each n in filter(nodes,x=>x.parent=="")
           MindNode#{n.id} "{n.text}" icon="{n.icon}" fill={n.color} root selected={sel==n.id} drag=branch(n.id) drop=branch onDrop={nodes=updateWhere(nodes,x=>x.id==result.data,x=>with(x,"parent",n.id))} onKeyTab={nodes=append(nodes,{"id":"n{nextId}","parent":n.id,"text":"New idea","color":n.color,"icon":"lightbulb","collapsed":false}); sel="n{nextId}"; nextId=nextId+1; focus rename} onTap={sel=n.id} onDoubleTap={open nodeEdit} menu=nodeMenu
             IconButton "add" tooltip="Add child" showOnHover onTap={nodes=append(nodes,{"id":"n{nextId}","parent":n.id,"text":"New idea","color":n.color,"icon":"lightbulb","collapsed":false}); sel="n{nextId}"; nextId=nextId+1; focus rename}
@@ -39,21 +46,21 @@ App
     MenuItem "Add image" icon="add_photo_alternate" onTap={open nodeEdit}
     MenuItem "Delete branch" icon="delete" onTap={nodes=removeWhere(nodes,n=>n.id==sel||n.parent==sel); sel=""; toast "Branch deleted"}
   Dialog#nodeEdit "Edit idea" "Change the text, icon, colour or picture of this node"
-    Input "Text" bind=editText
-    Select "Icon" bind=editIcon items=["lightbulb","rocket_launch","groups","campaign","payments","event","code","palette","mail","flag"]
+    Input "Text" @editText
+    Select "Icon" @editIcon items=["lightbulb","rocket_launch","groups","campaign","payments","event","code","palette","mail","flag"]
     Row gap=8
       Button.outline "#6750A4" onTap={editColor="#FF6750A4"}
       Button.outline "#1E88E5" onTap={editColor="#FF1E88E5"}
       Button.outline "#43A047" onTap={editColor="#FF43A047"}
       Button.outline "#FB8C00" onTap={editColor="#FFFB8C00"}
       Button.outline "#E53935" onTap={editColor="#FFE53935"}
-    FileDrop "Drop a picture here" accept="image" bind=editImage
+    FileDrop "Drop a picture here" accept="image" @editImage
     Button "Save" onTap={nodes=updateWhere(nodes,n=>n.id==sel,n=>with(with(with(n,"text",editText),"icon",editIcon),"color",editColor)); close}
   Dialog#export "Export image" "Save the whole map as a picture"
-    SegmentedButton bind=exportFormat items=["PNG","SVG","PDF"]
-    Slider "Scale" bind=exportScale min=1 max=4
-    Toggle "Transparent background" bind=exportTransparent
-    Toggle "Include collapsed branches" bind=exportCollapsed
+    SegmentedButton @exportFormat items=["PNG","SVG","PDF"]
+    Slider "Scale" @exportScale min=1 max=4
+    Toggle "Transparent background" @exportTransparent
+    Toggle "Include collapsed branches" @exportCollapsed
     Row end gap=8
       Button.outline "Cancel" onTap={close}
       Button "Download" icon="download" onTap={emit exportImage {"format":exportFormat,"scale":exportScale,"transparent":exportTransparent}; toast "Image saved"; close}
@@ -62,18 +69,19 @@ App
 state sel="n1"
 state nextId=20
 state filterText=""
+state mode=""
 App
   Main
     Nav
       Brand "Branchout" icon="account_tree"
-      SegmentedButton bind=mode items=["Map","Outline"] onChange={result=="Map" ? go canvas : go outline}
+      SegmentedButton @mode items=["Map","Outline"] onChange={result=="Map" ? go canvas : go outline}
       Row gap=8
-        Input "Search ideas" bind=filterText w=220
+        Input "Search ideas" @filterText w=220
         Button "Export" icon="image" onTap={open export}
     Column pad=24 gap=4 scroll maxw=720
       Heading "Launch plan" level=1
       Text.muted "The same map as an indented list. Tab indents, Shift+Tab outdents, Enter adds a line below."
-      Tree bind=sel items={nodes} parentKey="parent" labelKey="text" iconKey="icon" collapsedKey="collapsed" filter={filterText} reorder
+      Tree @sel items={nodes} parentKey="parent" labelKey="text" iconKey="icon" collapsedKey="collapsed" filter={filterText} reorder
         each n in nodes
           TreeItem "{n.text}" icon="{n.icon}" count={count(nodes,x=>x.parent==n.id)} collapsed={n.collapsed} selected={sel==n.id} drag=branch(n.id) drop=branch onDrop={nodes=updateWhere(nodes,x=>x.id==result.data,x=>with(x,"parent",n.id))} onToggle={nodes=updateWhere(nodes,x=>x.id==n.id,x=>with(x,"collapsed",!x.collapsed))} onTap={sel=n.id} onKeyTab={nodes=updateWhere(nodes,x=>x.id==n.id,x=>with(x,"parent",n.parent))} onKeyEnter={nodes=append(nodes,{"id":"n{nextId}","parent":n.parent,"text":"","color":n.color,"icon":"lightbulb","collapsed":false}); sel="n{nextId}"; nextId=nextId+1; focus rename} onChange={nodes=updateWhere(nodes,x=>x.id==n.id,x=>with(x,"text",result))}
       Row gap=8
@@ -96,6 +104,8 @@ App
 state maps=[{"id":"m1","title":"Launch plan","ideas":15,"edited":"2026-11-14"},{"id":"m2","title":"Thesis outline","ideas":42,"edited":"2026-11-09"},{"id":"m3","title":"Kitchen renovation","ideas":23,"edited":"2026-10-30"},{"id":"m4","title":"Reading list","ideas":31,"edited":"2026-10-12"}]
 state q=""
 state view="grid"
+state newTitle=""
+state template=""
 Page
   Nav
     Brand "Branchout" icon="account_tree"
@@ -108,8 +118,8 @@ Page
     Column gap=16
       Heading "My maps" level=1
       Row between
-        Input "Search maps" bind=q w=280
-        SegmentedButton bind=view items=["grid","list"]
+        Input "Search maps" @q w=280
+        SegmentedButton @view items=["grid","list"]
       Grid cols=3 gap=24
         each m in filter(maps,x=>contains(lower(x.title),lower(q)))
           Card gap=8 onTap={go canvas}
@@ -125,8 +135,8 @@ Page
   Footer
     Text.muted "Branchout"
   Dialog#newMap "New map" "Start from the central idea"
-    Input "Central idea" "What is this about?" bind=newTitle
-    Select "Template" bind=template items=["Blank","Brainstorm","Project plan","Study notes"]
+    Input "Central idea" "What is this about?" @newTitle
+    Select "Template" @template items=["Blank","Brainstorm","Project plan","Study notes"]
     Button "Create" onTap={maps=append(maps,{"id":"m{length(maps)+1}","title":newTitle,"ideas":1,"edited":today()}); close; go canvas}
   Dialog#shortcuts "Keyboard shortcuts"
     Row between

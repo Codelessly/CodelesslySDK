@@ -4,7 +4,7 @@ Column h=fill
       Text.pageTitle "Wallet"
       IconButton "qr_code_scanner" onTap={emit scan}
     Column gap=8
-      Pages bind=page h=170 peek=0.88
+      Pages @page h=170 peek=0.88
         each c in cards
           Box fill={c.fill} radius=16 pad=16 gap=6 w=fill
             Row between
@@ -15,7 +15,7 @@ Column h=fill
             Text "Balance" color=#B3FFFFFF size=12
             Text "{c.balance}" color=#FFFFFFFF size=28 weight=700
       Row center
-        Dots bind=page count=3
+        Dots @page count=3
     Row between
       Column center gap=4
         IconButton "send" onTap={emit send}

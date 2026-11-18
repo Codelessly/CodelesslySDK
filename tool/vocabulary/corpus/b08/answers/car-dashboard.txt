@@ -29,7 +29,7 @@ App
       Row gap=24 middle
         Column grow center gap=8
           Stack center middle
-            Gauge bind=speed min=0 max=180 limit=130 unit="km/h"
+            Gauge value={speed} min=0 max=180 limit=130 unit="km/h"
             Column center gap=0
               Text "{speed}" size=96 weight=700 color={night ? "#FF8A8F98" : "#FFFFFFFF"} center
               Text.muted "km/h" center
@@ -42,13 +42,13 @@ App
               Text.strong "Range"
               Icon "local_gas_station"
             Text "{range} km" size=40 weight=700
-            Progress bind=fuel
+            Progress value={fuel}
             Text.muted "{round(fuel*100,0)}% fuel"
           Card gap=8
             Row between
               Text.strong "Battery"
               Icon "battery_charging_full"
-            Progress bind=battery
+            Progress value={battery}
             Text.muted "{round(battery*100,0)}%"
           Card gap=4
             Row between
@@ -151,7 +151,7 @@ App
           Icon "skip_next" size=64
           Text.muted "Next"
       Column gap=4
-        Slider bind=pos min=0 max={tracks[trackIndex].len}
+        Slider @pos min=0 max={tracks[trackIndex].len}
         Row between
           Text.muted "{duration(pos)}"
           Text.muted "{duration(tracks[trackIndex].len)}"
@@ -159,7 +159,7 @@ App
         IconButton "volume_down" tooltip="Volume down" onTap={volume=max(0,volume-10)}
         IconButton "{playing ? "pause" : "play_arrow"}" tooltip="Play or pause" onTap={playing=!playing}
         IconButton "volume_up" tooltip="Volume up" onTap={volume=min(100,volume+10)}
-      Slider bind=volume min=0 max=100
+      Slider @volume min=0 max=100
       Row gap=12 center
         Button.ghost "Drive" onTap={go drive}
         Button.ghost "Map" onTap={go map}
@@ -172,6 +172,7 @@ state distance=1.8
 state sensorLeft=0.9
 state sensorRight=0.4
 state blink=true
+state guides=false
 every 400 onTick={blink=!blink}
 every 1s onTick={distance=max(0.2,distance-0.1)}
 App
@@ -193,6 +194,6 @@ App
         Icon "warning" size=48 color={sensorLeft<0.5 && blink ? "#FFFF4D4D" : "#FF4DFF9A"}
         Icon "warning" size=48 color={sensorRight<0.5 && blink ? "#FFFF4D4D" : "#FF4DFF9A"}
     Row gap=12 pad=16 center
-      Switch "Guide lines" bind=guides
+      Switch "Guide lines" @guides
       Button.outline "Zoom" onTap={emit zoomCamera}
       Button "Done" onTap={gear="D"; go drive}

@@ -89,6 +89,7 @@ void main() {
     const page = '''
 state notes=[{"text":"Buy milk","color":"#FFFDE68A"},{"text":"Call Ada","color":"#FFFFE4E6"}]
 state left=30
+state range=[0, 100]
 Column pad=24 gap=16
   Row gap=12
     each n in notes
@@ -105,7 +106,7 @@ Column pad=24 gap=16
     TimelineItem "Repotted" time="2 weeks"
   Countdown value={left} total=60
   ColorPicker onPick={toast "{result}"}
-  RangeSlider bind=range min=0 max=100 labels
+  RangeSlider @range min=0 max=100 labels
   AttachmentTile "report.pdf" subtitle="2 MB" onDownload={toast "saved"}
   QuoteBlock "Ada" "See you at six"
   Kbd "Ctrl K"

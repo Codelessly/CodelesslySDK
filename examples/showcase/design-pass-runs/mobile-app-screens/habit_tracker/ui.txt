@@ -42,7 +42,7 @@ Column scroll gap=16 pad=16 w=390
           Row gap=4 middle
             Icon "local_fire_department" size=14
             Text.caption "{h.streak} day streak"
-        Checkbox bind=h.done
+        Checkbox @h.done
       Divider
   Card gap=12
     Row between middle

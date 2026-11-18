@@ -36,7 +36,7 @@ App
               Text.muted "Incident commander"
           Badge.warning "{upper(status)}" visible={status!="resolved"}
           Badge.success "RESOLVED" visible={status=="resolved"}
-        SegmentedButton bind=status items=["investigating","identified","mitigating","resolved"]
+        SegmentedButton @status items=["investigating","identified","mitigating","resolved"]
         Row gap=8
           Button.outline "Advance status" disabled={status=="resolved"} onTap={status=status=="investigating" ? "identified" : status=="identified" ? "mitigating" : "resolved"; toast "Status updated"}
           Button.ghost "Reopen" visible={status=="resolved"} onTap={status="investigating"}
@@ -69,8 +69,8 @@ App
                 Badge.neutral "{e.type}"
               Text "{e.text}"
   Dialog#addEvent "Add event" "Appears on the timeline for everyone"
-    SegmentedButton bind=kind items=["alert","action","decision"]
-    Input "What happened" bind=note multiline
+    SegmentedButton @kind items=["alert","action","decision"]
+    Input "What happened" @note multiline
     Button "Post to timeline" onTap={note!="" ? events=append(events,{"id":length(events)+1,"t":"14:40","who":"Dana Ortiz","type":kind,"text":note}); note=""; close : toast "Describe the event first"}
   Sheet#page "Page someone"
     Text.muted "Paged so far"
@@ -101,8 +101,8 @@ App
       Row gap=16 top
         Card grow gap=12
           Text.strong "Draft"
-          SegmentedButton bind=audience items=["Customers","Internal","Executives"]
-          Input "Message" bind=draft multiline
+          SegmentedButton @audience items=["Customers","Internal","Executives"]
+          Input "Message" @draft multiline
           Text.caption "{length(draft)} of 280"
           Row gap=8
             Button.outline "Preview" onTap={preview=!preview}
@@ -142,15 +142,15 @@ App
       Card gap=8
         each t in tasks
           Row between
-            Checkbox "{t.text}" bind=t.done
+            Checkbox "{t.text}" @t.done
             Row gap=8
               Avatar "{t.owner}" size=28
               Text.muted "{t.owner}"
               IconButton "delete" tooltip="Remove" onTap={tasks=removeWhere(tasks,x=>x.id==t.id)}
       Card gap=12
         Text.strong "New follow-up"
-        Input "Task" bind=newText
-        Select "Owner" bind=newOwner items=["Dana Ortiz","Priya Nair","Marcus Webb","Lena Fischer"]
+        Input "Task" @newText
+        Select "Owner" @newOwner items=["Dana Ortiz","Priya Nair","Marcus Webb","Lena Fischer"]
         Button "Add" onTap={newText!="" ? tasks=append(tasks,{"id":length(tasks)+10,"text":newText,"owner":newOwner,"done":false}); newText="" : toast "Write the task first"}
       Card gap=8
         Text.strong "Summary"

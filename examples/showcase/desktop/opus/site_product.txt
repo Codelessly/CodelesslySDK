@@ -16,7 +16,7 @@ Page
       Link "Desk"
       Link "Journal"
     Row gap=12 middle
-      SearchBar "Search the store" bind=q w=260
+      SearchBar "Search the store" @q w=260
       NotificationBadge count={cart}
         IconButton "shopping_bag" onTap={emit openCart}
   Section
@@ -59,7 +59,7 @@ Page
               ChoiceChip "Brass" selected={finish=="Brass"} onTap={finish="Brass"}
               ChoiceChip "Graphite" selected={finish=="Graphite"} onTap={finish="Graphite"}
               ChoiceChip "Sand" selected={finish=="Sand"} onTap={finish="Sand"}
-          Stepper "Quantity" bind=qty min=1 max=10
+          Stepper "Quantity" @qty min=1 max=10
           Row gap=12
             Button "Add to cart" grow onTap={cart=cart+qty; toast "Added {qty} × Arc One ({finish}) to cart"}
             Button.outline "Buy now" grow onTap={emit buyNow}
@@ -77,7 +77,7 @@ Page
                 Text.muted "Changed your mind? Send it back, no questions asked."
   Section
     Column gap=20
-      SegmentedControl bind=tab options=["Description","Specifications","Reviews"]
+      SegmentedControl @tab options=["Description","Specifications","Reviews"]
       if tab=="Description"
         Column gap=12 maxw=760
           Heading "Designed for focus" level=3

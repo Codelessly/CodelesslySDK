@@ -9,7 +9,8 @@
 //       [--width <canvas width>] [--out <dir>] [--sites <dir>] [--no-definitions]
 //
 // A corpus file may hold several screens, each under a `### name` line; a
-// file without one is a single screen. A folder is read for its *.txt (and
+// file without one is a single screen; state and overlays before the first
+// heading belong to every screen. A folder is read for its *.txt (and
 // those of its answers/ folder). The design system is design_systems/cards
 // unless named; its vocabulary.json (aliases) is read over the built-in
 // table, then --aliases over both; --no-aliases reads none (the count before
@@ -69,8 +70,10 @@ Map<String, String> loadDefinitionTexts(String dir) {
 }
 
 /// The screens of [text]: each `### name` line starts one; a text without
-/// one is a single screen called [fallback]. `from` is the 1-based line of
-/// the screen's first line in the file.
+/// one is a single screen called [fallback]. State and overlays written
+/// before the first heading are every screen's, not a screen of their own.
+/// `from` is the 1-based line in the file of the screen's first line (its
+/// text's first line less the app's lines put before it).
 List<({String name, String id, String text, int from})> screensOf(String text, String fallback) {
   final lines = const LineSplitter().convert(text);
   final out = <({String name, String id, String text, int from})>[];
@@ -88,7 +91,28 @@ List<({String name, String id, String text, int from})> screensOf(String text, S
   String? name;
   var from = 1;
   final body = <String>[];
+  // What is written before the first heading when it is only state and
+  // overlays (no line of a page) is the app's, not a screen: its statements
+  // come before each screen's lines (`state x=0` as `project x=0`, a value
+  // every screen shares), its overlays after them.
+  var before = <String>[], after = <String>[];
   void close() {
+    if (name == null && body.isNotEmpty && lines.any(_heading.hasMatch) && _appOnly(body)) {
+      var overlay = false;
+      for (final l in body) {
+        if (l.trim().isEmpty || l.trimLeft().startsWith('//')) continue;
+        if (!l.startsWith(' ')) overlay = !RegExp(r'^(state|project|computed|key|every)\s').hasMatch(l);
+        if (overlay) {
+          after.add(l);
+        } else if (RegExp(r'^state\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+?)(\s+saved)?\s*$').firstMatch(l) case final m? when _json(m[2]!)) {
+          before.add('project ${m[1]}=${m[2]}${m[3] ?? ''}');
+        } else {
+          before.add(l);
+        }
+      }
+      body.clear();
+      return;
+    }
     if (body.any((l) => l.trim().isNotEmpty)) {
       final n = name ?? fallback;
       out.add((name: n, id: slug(n), text: body.join('\n'), from: from));
@@ -97,7 +121,7 @@ List<({String name, String id, String text, int from})> screensOf(String text, S
   }
 
   for (var i = 0; i < lines.length; i++) {
-    final m = RegExp(r'^###\s+(.+?)\s*$').firstMatch(lines[i]);
+    final m = _heading.firstMatch(lines[i]);
     if (m != null) {
       close();
       name = m[1];
@@ -107,7 +131,41 @@ List<({String name, String id, String text, int from})> screensOf(String text, S
     }
   }
   close();
-  return out;
+  if (before.isEmpty && after.isEmpty) return out;
+  // `from` stays the file's line of each screen's own first line.
+  return [
+    for (final s in out) (name: s.name, id: s.id, text: [...before, s.text, ...after].join('\n'), from: s.from - before.length),
+  ];
+}
+
+final _heading = RegExp(r'^###\s+(.+?)\s*$');
+
+/// Whether [lines] (what comes before a text's first heading) hold no line
+/// of a page: only state, shortcuts, timers, comments and overlays
+/// (`Dialog#id` at the margin, with what is under it).
+bool _appOnly(List<String> lines) {
+  var inOverlay = false;
+  for (final l in lines) {
+    if (l.trim().isEmpty || l.trimLeft().startsWith('//')) continue;
+    if (l.startsWith(' ')) {
+      if (!inOverlay) return false;
+      continue;
+    }
+    inOverlay = RegExp(r'^(Dialog|Modal|Sheet|BottomSheet|Drawer|Menu|Dropdown|Popover|Popup|Lightbox|ConfirmDialog)#').hasMatch(l);
+    if (inOverlay) continue;
+    if (!RegExp(r'^(state|project|computed|key|every)\s').hasMatch(l)) return false;
+  }
+  return true;
+}
+
+/// Whether [value] is a JSON value (a state's literal start).
+bool _json(String value) {
+  try {
+    jsonDecode(value);
+    return true;
+  } on FormatException {
+    return false;
+  }
 }
 
 class _Word {
@@ -253,15 +311,40 @@ Future<void> main(List<String> args) async {
   final others = <String, Map<String, _Word>>{'parameter': {}, 'flag': {}, 'event': {}, 'verb': {}, 'variant': {}, 'missing': {}, 'children': {}, 'alias': {}, 'overlay': {}};
   final issueShapes = <String, ({int count, Set<String> files, List<String> examples})>{};
   final perFile = <Map<String, Object?>>[];
-  final total = {'core': 0, 'component': 0, 'alias': 0, 'definition': 0, 'unknown': 0};
+  final total = {'core': 0, 'component': 0, 'alias': 0, 'definition': 0, 'primitive': 0, 'unknown': 0};
   var screenCount = 0, statementLines = 0;
+  // What each definition leaves unused and reads from outside (codelessly_api
+  // docs/design/20 section 12), by its label: the design system's, and each
+  // answer's own over them. A use's word its definition never reads is
+  // counted `unread` (vocabulary_words.dart); an answer's definitions are
+  // warned on, and its primitives listed.
+  final ours = {
+    for (final defs in table.definitions.values)
+      for (final d in defs) d.label: definitionReads(d),
+  };
+  final hollow = <({String file, DefinitionReads reads})>[];
+  final primitives = <({String file, NotationDefinition definition})>[];
+  var answerDefinitions = 0;
 
   for (final file in files) {
     final name = file.uri.pathSegments.last.replaceFirst(RegExp(r'\.txt$'), '');
     final whole = file.readAsStringSync();
     harvest.answer(name, whole);
+    final defined = readPageDefinitions(whole, others: table.definitions).words;
+    final reads = {...ours};
+    for (final defs in defined.values) {
+      for (final d in defs) {
+        final r = reads[d.label] = definitionReads(d);
+        if (!r.isEmpty) hollow.add((file: name, reads: r));
+        if (d.primitive) {
+          primitives.add((file: name, definition: d));
+        } else {
+          answerDefinitions++;
+        }
+      }
+    }
     final screens = screensOf(whole, name);
-    final count = {'core': 0, 'component': 0, 'alias': 0, 'definition': 0, 'unknown': 0};
+    final count = {'core': 0, 'component': 0, 'alias': 0, 'definition': 0, 'primitive': 0, 'unknown': 0};
     var issues = 0, standIns = 0, lines = 0;
     final pages = <String>[];
     final written = <String, Map<String, Object?>>{};
@@ -271,7 +354,10 @@ Future<void> main(List<String> args) async {
     var shared = <String, Map<String, Object?>>{};
 
     NotationResult? expand(({String name, String id, String text, int from}) screen) {
-      final options = NotationOptions.fromDesignSystem(ds, width: width, screen: screen.id, projectVariables: shared).open(vocabulary: table);
+      // `go recipes` is the screen called Recipes, even beside a list called recipes.
+      final options = NotationOptions.fromDesignSystem(ds, width: width, screen: screen.id, projectVariables: shared)
+          .open(vocabulary: table)
+          .withScreens([for (final s in screens) s.id]);
       try {
         // A word the answer defines anywhere (models write the definitions
         // after the last screen) holds for every one of its screens.
@@ -360,11 +446,11 @@ Future<void> main(List<String> args) async {
         issueShapes[shape] = (count: at.count + 1, files: at.files..add(name), examples: at.examples);
       }
 
-      corpus.screen(name, screen.text, result);
+      corpus.screen(name, screen.text, result, reads: reads);
       // Every use recorded, by its line.
       final unknownAt = <int>{}, aliasAt = <int, VocabularyUse>{}, definedAt = <int, VocabularyUse>{};
       for (final u in result.vocabulary) {
-        if (u.kind == 'definition') {
+        if (u.kind == 'definition' || u.kind == 'primitive') {
           definedAt[u.line] = u;
           continue;
         }
@@ -423,8 +509,8 @@ Future<void> main(List<String> args) async {
         final String how;
         if (unknownAt.contains(i + 1)) {
           how = 'unknown';
-        } else if (definedAt.containsKey(i + 1)) {
-          how = 'definition';
+        } else if (definedAt[i + 1] case final d?) {
+          how = d.kind;
         } else if (alias != null) {
           how = 'alias';
         } else if (components.contains(parts.word) && !notationTypes.containsKey(parts.word)) {
@@ -453,15 +539,8 @@ Future<void> main(List<String> args) async {
     }
     // A page named by part of its name (go cook: "Cook mode"; go add-recipe:
     // "Add a recipe") is that page.
-    String page(String to) {
-      if (pages.contains(to)) return to;
-      // `go decks_and_mixer`: a screen's id here is its name with hyphens.
-      final t = to.replaceAll('_', '-').toLowerCase();
-      if (pages.contains(t)) return t;
-      final words = t.split('-');
-      final near = pages.where((p) => p.startsWith('$t-') || words.every(p.split('-').contains)).toList();
-      return near.length == 1 ? near.first : to;
-    }
+    // `go decks_and_mixer`: a screen's id here is its name with hyphens.
+    String page(String to) => notationScreen(to, pages) ?? to;
 
     void walk(Object? v) {
       if (v is Map) {
@@ -533,6 +612,22 @@ Future<void> main(List<String> args) async {
     for (final k in const ['parameter', 'flag', 'event', 'verb', 'variant', 'missing', 'children', 'alias', 'overlay'])
       switch (k) { 'alias' => 'aliases', 'missing' => 'missing', 'children' => 'children', _ => '${k}s' }: [for (final w in _sorted(others[k]!.values)) w.toJson()],
     'summary': corpus.summary(),
+    'count': countOf(corpus, primitives: primitives.length),
+    'definitionWarnings': [
+      for (final h in hollow)
+        {
+          'file': h.file,
+          'word': h.reads.definition.label,
+          'line': h.reads.definition.line,
+          if (h.reads.unread.isNotEmpty) 'unread': h.reads.unread,
+          if (h.reads.unfired.isNotEmpty) 'unfired': h.reads.unfired,
+          if (h.reads.outside.isNotEmpty) 'outside': h.reads.outside,
+          'warnings': h.reads.warnings,
+        },
+    ],
+    'primitives': [
+      for (final p in primitives) {'file': p.file, 'word': p.definition.label, 'signature': p.definition.signature, if (p.definition.doc.isNotEmpty) 'doc': p.definition.doc},
+    ],
     'words': [for (final w in corpus.sorted()) w.toJson()],
     'harvest': harvest.toJson(),
     'synonyms': [
@@ -543,7 +638,7 @@ Future<void> main(List<String> args) async {
 
   final summary = corpus.summary();
   final allWords = corpus.words.length;
-  final resolvedWords = allWords - summary.values.fold<int>(0, (a, m) => a + m['unknown']!);
+  final counted = json['count']! as Map<String, int>;
   String pct(int n) => nodeLines == 0 ? '0%' : '${(100 * n / nodeLines).toStringAsFixed(1)}%';
   String code(String s) => '`${s.replaceAll('`', "'").replaceAll('|', r'\|')}`';
   String top(Map<String, int> m, [int n = 8]) => _ranked(m).entries.take(n).map((e) => e.value > 1 ? '${e.key} ×${e.value}' : e.key).join(', ');
@@ -556,13 +651,17 @@ Future<void> main(List<String> args) async {
     ..writeln()
     ..writeln('$nodeLines lines start with a word: ${total['core']} a core word (${pct(total['core']!)}), ${total['component']} a ${ds.name} component (${pct(total['component']!)}), '
         '${total['alias']} an alias of a word we have (${pct(total['alias']!)}), ${total['definition']} a word defined in the notation (${pct(total['definition']!)}), '
-        '${total['unknown']} a word we do not have (${pct(total['unknown']!)}), which stands in. '
+        '${total['primitive']} a primitive the answer declared (${pct(total['primitive']!)}), '
+        '${total['unknown']} a word we do not have (${pct(total['unknown']!)}); both stand in. '
         '$statementLines more are statements (state, if, each, key, every).')
     ..writeln()
     ..writeln('## Every word used, by kind and how it resolved')
     ..writeln()
     ..writeln('Distinct words, each once (a text, parameter, flag, event or variant once per type it is on; `vocabulary_words.dart` says how each kind is read). '
-        'Resolved: ${resolvedWords} of ${allWords} (${allWords == 0 ? 0 : (100 * resolvedWords / allWords).toStringAsFixed(1)}%).')
+        'Resolved is core, component, alias, definition and universal; a primitive and what its uses were given stand in; '
+        'unread is a word a definition names and its lines never read or fire.')
+    ..writeln()
+    ..writeln('**${countLine(counted)}.**')
     ..writeln()
     ..writeln('| kind | words | ${wordResolutions.join(' | ')} |')
     ..writeln('|---|---|${wordResolutions.map((_) => '---|').join()}');
@@ -575,10 +674,37 @@ Future<void> main(List<String> args) async {
     ..writeln()
     ..writeln('## By file')
     ..writeln()
-    ..writeln('| file | screens | lines | core | component | alias | definition | unknown | grammar issues |')
-    ..writeln('|---|---|---|---|---|---|---|---|---|');
+    ..writeln('| file | screens | lines | core | component | alias | definition | primitive | unknown | grammar issues |')
+    ..writeln('|---|---|---|---|---|---|---|---|---|---|');
   for (final f in perFile) {
-    md.writeln('| ${f['file']} | ${f['screens']} | ${f['lines']} | ${f['core']} | ${f['component']} | ${f['alias']} | ${f['definition']} | ${f['unknown']} | ${f['issues']} |');
+    md.writeln('| ${f['file']} | ${f['screens']} | ${f['lines']} | ${f['core']} | ${f['component']} | ${f['alias']} | ${f['definition']} | ${f['primitive']} | ${f['unknown']} | ${f['issues']} |');
+  }
+  md
+    ..writeln()
+    ..writeln('## Definitions that do less than they say')
+    ..writeln()
+    ..writeln('An answer\'s definitions whose signature names a string, parameter or event their lines never read or fire (a use\'s value for it does nothing), '
+        'or whose lines read a name that is neither theirs nor declared in them (a variable of the page they were written for). '
+        '${hollow.length} of $answerDefinitions definitions; ${ds.name}\'s own: ${ours.values.where((r) => !r.isEmpty).length}.')
+    ..writeln()
+    ..writeln('| file | word | never read | never run | reads from outside |')
+    ..writeln('|---|---|---|---|---|');
+  for (final h in hollow) {
+    md.writeln('| ${h.file} | ${h.reads.definition.label} | ${h.reads.unread.join(', ')} | ${h.reads.unfired.join(', ')} | ${h.reads.outside.join(', ')} |');
+  }
+  for (final r in ours.values.where((r) => !r.isEmpty)) {
+    md.writeln('| ${ds.name} | ${r.definition.label} | ${r.unread.join(', ')} | ${r.unfired.join(', ')} | ${r.outside.join(', ')} |');
+  }
+  md
+    ..writeln()
+    ..writeln('## Primitives declared')
+    ..writeln()
+    ..writeln('What no line can express, as the answers declared it (`primitive Word …`): the list to build.')
+    ..writeln()
+    ..writeln('| file | signature | what it is |')
+    ..writeln('|---|---|---|');
+  for (final p in primitives) {
+    md.writeln('| ${p.file} | ${code(p.definition.signature)} | ${p.definition.doc.replaceAll('|', r'\|')} |');
   }
   md
     ..writeln()
@@ -661,7 +787,7 @@ Future<void> main(List<String> args) async {
   }
   final takes = <String, Set<String>>{
     for (final c in ds.list) c.type: {for (final p in c.spec.props) p.key, for (final e in c.spec.events) e.key},
-    for (final e in table.definitions.entries) e.key: {for (final d in e.value) ...[...d.parameters.keys, ...d.events, ...d.strings, if (d.bind != null) 'bind']},
+    for (final e in table.definitions.entries) e.key: {for (final d in e.value) ...[...d.parameters.keys, ...d.events, ...d.strings, if (d.bind != null) '@']},
   };
   md
     ..writeln()
@@ -692,9 +818,9 @@ Future<void> main(List<String> args) async {
   }
   File('${outDir.path}/VOCABULARY.md').writeAsStringSync(md.toString());
 
-  stdout.writeln('${files.length} files, $screenCount screens, $nodeLines node lines: core ${total['core']}, component ${total['component']}, alias ${total['alias']}, definition ${total['definition']}, unknown ${total['unknown']}; '
-      '$allWords words, $resolvedWords resolved; '
-      '${unknownTypes.length} unknown words; ${shapes.fold<int>(0, (n, e) => n + e.value.count)} grammar issues; '
+  stdout.writeln('${files.length} files, $screenCount screens, $nodeLines node lines: core ${total['core']}, component ${total['component']}, alias ${total['alias']}, definition ${total['definition']}, primitive ${total['primitive']}, unknown ${total['unknown']}; '
+      '${countLine(counted)}; '
+      '${hollow.length} definitions that do less than they say; ${shapes.fold<int>(0, (n, e) => n + e.value.count)} grammar issues; '
       '${others['overlay']!.values.fold<int>(0, (n, w) => n + w.uses)} overlays opened and never written; '
       '${harvest.words.length} words defined in more than one answer.');
   stdout.writeln('${outDir.path}/vocabulary.json, ${outDir.path}/VOCABULARY.md');

@@ -5,6 +5,12 @@ project accounts=[{"name":"Checking","bal":4820.5},{"name":"Savings","bal":12400
 project cur="$" saved
 project mode="" saved
 state tab="home"
+state amt=0
+state kind=""
+state acct=""
+state date=""
+state note=""
+state repeat=false
 App
   Sidebar fill=#FFFFFFFF
     Brand "Ledgerly" icon="account_balance_wallet"
@@ -45,28 +51,28 @@ App
 
 Sheet#addSheet "Add transaction" show=phone stops=[0.5,0.95]
   Column gap=12
-    Stepper "Amount" bind=amt step=1 min=0 holdRepeat prefix={cur}
-    SegmentedButton bind=kind items=["Expense","Income"]
+    Stepper "Amount" @amt step=1 min=0 holdRepeat prefix={cur}
+    SegmentedButton @kind items=["Expense","Income"]
     Row scroll gap=8
       each c in ["Food","Housing","Transport","Fun","Health"]
         ChoiceChip "{c}" selected={cat==c} onTap={cat=c}
-    Select "Account" bind=acct items=["Checking","Savings","Card"]
-    DatePicker "Date" bind=date
-    Input "Note" bind=note multiline
-    Toggle "Repeat monthly" bind=repeat
+    Select "Account" @acct items=["Checking","Savings","Card"]
+    DatePicker "Date" @date
+    Input "Note" @note multiline
+    Toggle "Repeat monthly" @repeat
     Button "Save" disabled={amt<=0} onTap={tx=append(tx,{"id":length(tx)+1,"day":date,"merchant":coalesce(note,cat),"cat":cat,"acct":acct,"amt":kind=="Income"?amt:-amt}); amt=0; toast "Transaction saved"; announce "Transaction saved"; close}
 
 Dialog#addDialog "Add transaction" hide=phone
   Column gap=12
-    Stepper "Amount" bind=amt step=1 min=0 holdRepeat prefix={cur}
-    SegmentedButton bind=kind items=["Expense","Income"]
+    Stepper "Amount" @amt step=1 min=0 holdRepeat prefix={cur}
+    SegmentedButton @kind items=["Expense","Income"]
     Row wrap gap=8
       each c in ["Food","Housing","Transport","Fun","Health"]
         ChoiceChip "{c}" selected={cat==c} onTap={cat=c}
-    Select "Account" bind=acct items=["Checking","Savings","Card"]
-    DatePicker "Date" bind=date
-    Input "Note" bind=note multiline
-    Toggle "Repeat monthly" bind=repeat
+    Select "Account" @acct items=["Checking","Savings","Card"]
+    DatePicker "Date" @date
+    Input "Note" @note multiline
+    Toggle "Repeat monthly" @repeat
     Button "Save" disabled={amt<=0} onTap={tx=append(tx,{"id":length(tx)+1,"day":date,"merchant":coalesce(note,cat),"cat":cat,"acct":acct,"amt":kind=="Income"?amt:-amt}); amt=0; toast "Transaction saved"; announce "Transaction saved"; close}
 
 ### Transactions
@@ -78,6 +84,12 @@ state acctF="All"
 state range=[0,2000]
 state picked=[]
 state sel=0
+state amt=0
+state kind=""
+state acct=""
+state date=""
+state note=""
+state repeat=false
 App
   Sidebar
     Brand "Ledgerly" icon="account_balance_wallet"
@@ -91,7 +103,7 @@ App
     Nav
       Heading "Transactions" level=1
       Row gap=8
-        Input "Search" bind=q w=220 icon="search" forgiving
+        Input "Search" @q w=220 icon="search" forgiving
         Button.outline "Filters" icon="tune" show=phone onTap={open filterSheet}
         Button "Add" icon="add" onTap={open addSheet}
     Column pad=24 gap=16 scroll
@@ -99,12 +111,12 @@ App
         Row gap=8 wrap
           each c in ["Food","Housing","Transport","Fun","Health","Income"]
             FilterChip "{c}" selected={contains(cats,c)} onTap={cats=contains(cats,c)?without(cats,c):append(cats,c)}
-          Select "Account" bind=acctF items=["All","Checking","Savings","Card"] w=160
+          Select "Account" @acctF items=["All","Checking","Savings","Card"] w=160
         Column gap=4
           Row between
             Text.fieldLabel "Amount"
             Text.strong "{money(range[0],cur,0)} to {money(range[1],cur,0)}"
-          RangeSlider bind=range min=0 max=2000 step=10 labels=true
+          RangeSlider @range min=0 max=2000 step=10 labels=true
       if length(picked)>0
         Card gap=8 fill=#FFE8F3EC
           Row between
@@ -118,7 +130,7 @@ App
           each t in filter(tx,x=>x.day==d && (length(cats)==0 || contains(cats,x.cat)) && (acctF=="All" || x.acct==acctF) && abs(x.amt)>=range[0] && abs(x.amt)<=range[1] && contains(lower(x.merchant+" "+x.cat),lower(q)))
             SwipeAction onSwipeRight={sel=t.id; open catMenu} onSwipeLeft={sel=t.id; open confirmDel} rightLabel="Category" leftLabel="Delete" leftColor=#FFC0452F
               Row middle gap=12 pad=12 menu=rowMenu onLongPress={sel=t.id; picked=append(picked,t.id)}
-                Checkbox bind=picked value={t.id} show={length(picked)>0}
+                Checkbox @picked value={t.id} show={length(picked)>0}
                 Avatar "{t.cat}" size=36
                 Column grow
                   Text.strong "{t.merchant}"
@@ -149,35 +161,35 @@ Sheet#filterSheet "Filters"
     Row wrap gap=8
       each c in ["Food","Housing","Transport","Fun","Health","Income"]
         FilterChip "{c}" selected={contains(cats,c)} onTap={cats=contains(cats,c)?without(cats,c):append(cats,c)}
-    Select "Account" bind=acctF items=["All","Checking","Savings","Card"]
+    Select "Account" @acctF items=["All","Checking","Savings","Card"]
     Text.strong "{money(range[0],cur,0)} to {money(range[1],cur,0)}"
-    RangeSlider bind=range min=0 max=2000 step=10
+    RangeSlider @range min=0 max=2000 step=10
     Button "Done" onTap={close}
 
 Sheet#addSheet "Add transaction" show=phone stops=[0.5,0.95]
   Column gap=12
-    Stepper "Amount" bind=amt step=1 min=0 holdRepeat prefix={cur}
-    SegmentedButton bind=kind items=["Expense","Income"]
+    Stepper "Amount" @amt step=1 min=0 holdRepeat prefix={cur}
+    SegmentedButton @kind items=["Expense","Income"]
     Row scroll gap=8
       each c in ["Food","Housing","Transport","Fun","Health"]
         ChoiceChip "{c}" selected={cat==c} onTap={cat=c}
-    Select "Account" bind=acct items=["Checking","Savings","Card"]
-    DatePicker "Date" bind=date
-    Input "Note" bind=note multiline
-    Toggle "Repeat monthly" bind=repeat
+    Select "Account" @acct items=["Checking","Savings","Card"]
+    DatePicker "Date" @date
+    Input "Note" @note multiline
+    Toggle "Repeat monthly" @repeat
     Button "Save" disabled={amt<=0} onTap={tx=append(tx,{"id":length(tx)+1,"day":date,"merchant":coalesce(note,cat),"cat":cat,"acct":acct,"amt":kind=="Income"?amt:-amt}); amt=0; announce "Transaction saved"; close}
 
 Dialog#addDialog "Add transaction" hide=phone
   Column gap=12
-    Stepper "Amount" bind=amt step=1 min=0 holdRepeat prefix={cur}
-    SegmentedButton bind=kind items=["Expense","Income"]
+    Stepper "Amount" @amt step=1 min=0 holdRepeat prefix={cur}
+    SegmentedButton @kind items=["Expense","Income"]
     Row wrap gap=8
       each c in ["Food","Housing","Transport","Fun","Health"]
         ChoiceChip "{c}" selected={cat==c} onTap={cat=c}
-    Select "Account" bind=acct items=["Checking","Savings","Card"]
-    DatePicker "Date" bind=date
-    Input "Note" bind=note multiline
-    Toggle "Repeat monthly" bind=repeat
+    Select "Account" @acct items=["Checking","Savings","Card"]
+    DatePicker "Date" @date
+    Input "Note" @note multiline
+    Toggle "Repeat monthly" @repeat
     Button "Save" disabled={amt<=0} onTap={tx=append(tx,{"id":length(tx)+1,"day":date,"merchant":coalesce(note,cat),"cat":cat,"acct":acct,"amt":kind=="Income"?amt:-amt}); amt=0; announce "Transaction saved"; close}
 
 ### Budgets
@@ -213,7 +225,7 @@ App
             Row gap=4
               Icon "warning" color=#FFC0452F
               Text.danger "{round(b.spent/b.limit*100,0)}% used, {money(b.limit-b.spent,cur,0)} left"
-          Slider bind=b.limit min=0 max=2000 step=10 label="Limit"
+          Slider @b.limit min=0 max=2000 step=10 label="Limit"
 
 ### Goals
 project cur="$" saved
@@ -237,7 +249,7 @@ App
             Text.heading "{g.name}"
             Text.strong "{money(g.saved,cur,0)} of {money(g.target,cur,0)}"
           Progress {g.saved/g.target} rounded
-          Slider bind=g.monthly min=0 max=1000 step=25 label="Monthly: {money(g.monthly,cur,0)}"
+          Slider @g.monthly min=0 max=1000 step=25 label="Monthly: {money(g.monthly,cur,0)}"
           Text.muted "Projected: {g.monthly>0?formatDate(addMonths(today(),ceil((g.target-g.saved)/g.monthly)),"MMM yyyy"):"never at this rate"}"
 
 ### Categories
@@ -257,12 +269,12 @@ App
       Heading "Categories" level=1
     Column pad=24 gap=16 scroll
       Card gap=0
-        ReorderableList bind=cats handle="drag_handle"
+        ReorderableList @cats handle="drag_handle"
           each c in cats
             Row middle gap=12 pad=8
               Icon "drag_handle" reorderHandle
               Box w=24 h=24 radius=12 fill={c.color} onTap={pickIdx=index; open colorPick}
-              Input "Name" bind=c.name grow
+              Input "Name" @c.name grow
 
 Popover#colorPick
   Row gap=8 wrap
@@ -286,6 +298,6 @@ App
       Heading "Settings" level=1
     Column pad=24 gap=16 maxw=480
       Card gap=12
-        Select "Currency" bind=cur items=["$","€","£","¥"]
-        Select "First day of the month" bind=firstDay items=[1,5,15,25]
+        Select "Currency" @cur items=["$","€","£","¥"]
+        Select "First day of the month" @firstDay items=[1,5,15,25]
         Text.muted "Your month runs from day {firstDay}."

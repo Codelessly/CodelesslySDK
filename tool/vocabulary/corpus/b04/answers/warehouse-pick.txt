@@ -66,7 +66,7 @@ App
             Badge.warning "Short" visible={p.status=="short"}
             Badge.neutral "Open" visible={p.status=="open"}
   Dialog#scan "Scan to verify" "Scan the label on the shelf or the item"
-    Input "Scanned code" "SKU or barcode" bind=scanned
+    Input "Scanned code" "SKU or barcode" @scanned
     Row gap=8
       Button.outline "Cancel" onTap={scanned=""; close}
       Button "Check" grow onTap={scanned==picks[cur].sku ? {close; toast "Matched {picks[cur].sku}"; scanned=""} : {close; open mismatch}}
@@ -84,7 +84,7 @@ App
       IconButton "remove" tooltip="One fewer" onTap={shortQty=max(0,shortQty-1)}
       Text.strong "{shortQty} found" size=24
       IconButton "add" tooltip="One more" onTap={shortQty=min(picks[cur].qty-1,shortQty+1)}
-    Select "Reason" items=["Bin empty","Damaged","Wrong item in bin","Can't reach","Other"] bind=reason
+    Select "Reason" items=["Bin empty","Damaged","Wrong item in bin","Can't reach","Other"] @reason
     Row gap=8
       Button.outline "Cancel" onTap={close}
       Button "Save short pick" grow onTap={reason!="" ? {picks=updateWhere(picks,p=>p.id==picks[cur].id,p=>with(with(p,"got",shortQty),"status","short")); emit shortPick {"id":picks[cur].id,"reason":reason}; cur=min(cur+1,length(picks)-1); reason=""; close; toast "Short pick recorded"} : toast "Choose a reason"}
@@ -104,7 +104,7 @@ App
     Nav
       Heading "Aisle map" level=1
       Row gap=8
-        SegmentedButton items=["A","B","C","D"] bind=aisle
+        SegmentedButton items=["A","B","C","D"] @aisle
         Button "Back to list" onTap={go pick-list}
     Column pad=24 gap=16 scroll
       Row gap=16 top
@@ -133,6 +133,7 @@ state totes=[{"id":"T1","orders":"47990","lines":2,"state":"filling"},{"id":"T2"
 state sel=""
 state secs=272
 state running=true
+state pickOrder=""
 every 1s when running onTick={secs=max(0,secs-1)}
 App
   Sidebar
@@ -166,5 +167,5 @@ App
             Button.outline "Assign" onTap={sel=t.id; open assign}
   Sheet#assign "Assign tote {sel}"
     Text.muted "Choose the order this tote will carry."
-    Select "Order" items=["47990","48213"] bind=pickOrder
+    Select "Order" items=["47990","48213"] @pickOrder
     Button "Assign" onTap={totes=updateWhere(totes,t=>t.id==sel,t=>with(with(t,"orders",pickOrder),"state","empty")); emit assignTote {"tote":sel,"order":pickOrder}; close; toast "Tote {sel} assigned"}

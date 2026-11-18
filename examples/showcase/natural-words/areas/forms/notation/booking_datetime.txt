@@ -7,7 +7,7 @@ Column gap=16 pad=16
     state slot="7:00 PM"
     state party=4
     Text.fieldLabel "Date"
-    DatePicker bind=date
+    DatePicker @date
     Text.fieldLabel "Time"
     Row scroll gap=8
       ChoiceChip "6:00 PM" selected={slot=="6:00 PM"} onTap={slot="6:00 PM"}

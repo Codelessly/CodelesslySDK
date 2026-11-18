@@ -13,13 +13,16 @@ state colWidths={"id":80,"customer":200,"status":120,"total":110,"created_at":14
 state exportFmt="CSV"
 state exportScope="Filtered rows"
 state rowSel=0
+state conn=""
+state treeQ=""
+state headers=false
 App
   Sidebar w=280
     Brand "Tablescope" icon="storage"
-    Select "Connection" items=["prod-replica (pg 15)","staging (pg 15)","local (sqlite)"] bind=conn
-    Input "Filter tables" bind=treeQ
+    Select "Connection" items=["prod-replica (pg 15)","staging (pg 15)","local (sqlite)"] @conn
+    Input "Filter tables" @treeQ
     Column scroll grow gap=2
-      Tree bind=sel expanded=expanded onToggle={expanded=result}
+      Tree @sel expanded=expanded onToggle={expanded=result}
         TreeNode#public "public" icon="folder" badge="14"
           TreeNode#orders "orders" icon="table_rows" badge="48,210" onTap={table="orders"; schema="public"}
           TreeNode#customers "customers" icon="table_rows" badge="9,884" onTap={table="customers"; schema="public"}
@@ -47,7 +50,7 @@ App
           each f in filters
             Chip "{f.col} {f.op} {f.value}" onDelete={filters=removeAt(filters,index)}
           Button.ghost "Clear" onTap={filters=[]}
-      DataGrid rows={sortDir=="asc" ? sortBy(rows,r=>r[sortCol]) : sortByDesc(rows,r=>r[sortCol])} sortCol={sortCol} sortDir={sortDir} resizable stickyHeader selectable bind=rowSel menu=rowMenu
+      DataGrid rows={sortDir=="asc" ? sortBy(rows,r=>r[sortCol]) : sortByDesc(rows,r=>r[sortCol])} sortCol={sortCol} sortDir={sortDir} resizable stickyHeader selectable selected=@rowSel menu=rowMenu
         Column#id "id" w={colWidths.id} type=number
         Column#customer "customer" w={colWidths.customer} editable
         Column#status "status" w={colWidths.status} editable editor=select items=["pending","shipped","refunded"]
@@ -81,9 +84,9 @@ App
     Column gap=12
       each f in filters
         Row gap=8
-          Select "Column" items=["id","customer","status","total","created_at"] bind=f.col grow
-          Select "Operator" items=["=","!=",">","<","contains","is null"] bind=f.op w=140
-          Input "Value" bind=f.value grow
+          Select "Column" items=["id","customer","status","total","created_at"] @f.col grow
+          Select "Operator" items=["=","!=",">","<","contains","is null"] @f.op w=140
+          Input "Value" @f.value grow
           IconButton "close" tooltip="Remove condition" onTap={filters=removeAt(filters,index)}
       Row between
         Button.outline "Add condition" icon="add" onTap={filters=append(filters,{"col":"id","op":"=","value":""})}
@@ -91,9 +94,9 @@ App
           Button.ghost "Reset" onTap={filters=[]}
           Button "Apply" onTap={filtersOn=true; emit applyFilters filters; close}
   Dialog#export "Export table" "Choose what to export and in which format"
-    SegmentedButton items=["CSV","JSON","SQL","Excel"] bind=exportFmt
-    Select "Rows" items=["Filtered rows","All rows","Selected rows"] bind=exportScope
-    Toggle "Include column headers" bind=headers
+    SegmentedButton items=["CSV","JSON","SQL","Excel"] @exportFmt
+    Select "Rows" items=["Filtered rows","All rows","Selected rows"] @exportScope
+    Toggle "Include column headers" @headers
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Export {exportFmt}" icon="download" onTap={emit export {"format":exportFmt,"scope":exportScope}; toast "Export started"; close}
@@ -110,6 +113,8 @@ state ran=true
 state elapsed=42
 state running=false
 state history=["SELECT * FROM orders LIMIT 50;","SELECT status, COUNT(*) FROM orders GROUP BY status;"]
+state conn=""
+state resultFmt=""
 App
   Sidebar w=280
     Brand "Tablescope" icon="storage"
@@ -124,11 +129,11 @@ App
     Nav
       Heading "Query editor" level=1
       Row gap=8
-        Select items=["prod-replica","staging","local"] bind=conn
+        Select items=["prod-replica","staging","local"] @conn
         Button "Run" icon="play_arrow" onTap={running=true; ran=true; elapsed=42; history=take(append([sql],history),10); emit runQuery sql; running=false}
         Button.outline "Export results" icon="download" onTap={open exportResults}
     Column pad=24 gap=12 grow
-      CodeEditor bind=sql language="sql" h=220 lineNumbers onRun={emit runQuery sql; ran=true}
+      CodeEditor @sql language="sql" h=220 lineNumbers onRun={emit runQuery sql; ran=true}
       if ran
         Row between
           Row gap=8
@@ -142,7 +147,7 @@ App
       if !ran
         Text.muted "Run a query to see results."
   Dialog#exportResults "Export results"
-    SegmentedButton items=["CSV","JSON","SQL"] bind=resultFmt
+    SegmentedButton items=["CSV","JSON","SQL"] @resultFmt
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Export" onTap={emit exportResults resultFmt; toast "Results exported"; close}
@@ -150,6 +155,8 @@ App
 ### Relationships
 state focus="orders"
 state zoom=1
+state schema=""
+state showTypes=false
 App
   Sidebar w=280
     Brand "Tablescope" icon="storage"
@@ -157,8 +164,8 @@ App
     NavItem "Query editor" icon="terminal" onTap={go query}
     NavItem "Relationships" icon="account_tree" selected={true}
     Divider
-    Select "Schema" items=["public","billing","audit"] bind=schema
-    Toggle "Show column types" bind=showTypes
+    Select "Schema" items=["public","billing","audit"] @schema
+    Toggle "Show column types" @showTypes
   Main
     Nav
       Heading "Relationships: public" level=1
@@ -168,7 +175,7 @@ App
         IconButton "zoom_in" tooltip="Zoom in" onTap={zoom=min(2,zoom+0.25)}
         Button.outline "Export diagram" icon="download" onTap={emit exportDiagram}
     Row grow
-      ERDiagram grow zoom={zoom} bind=focus
+      ERDiagram grow zoom={zoom} @focus
         EntityBox#customers "customers" x=40 y=40
           Field "id" type="uuid" key=primary
           Field "name" type="text"

@@ -18,7 +18,7 @@ Page
     Column center gap=16
       Heading "Simple pricing for every stage" level=1
       Text.muted "Start free for 14 days. No credit card required." center
-      Segments bind=period options=["Monthly","Yearly"]
+      Segments @period options=["Monthly","Yearly"]
       Text.success "Save 20% with yearly billing" center
   Section
     Grid cols=3 gap=24

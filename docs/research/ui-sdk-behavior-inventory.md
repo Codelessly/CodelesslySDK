@@ -295,7 +295,7 @@ Priority: **H** common on real pages or blocks keyboard/screen-reader use; **M**
 | C4 | Avatar | image with a fallback | HAVE | notation `Avatar "Maya Reyes"` / `src:`. | - |
 | C5 | Button | run an action | HAVE | kit buttons: focus, Enter/Space, `isButton` (`ctl/buttons.dart:732`). | - |
 | C6 | Calendar | pick dates from a month grid | PARTIAL | The month grid exists inside `datePicker` with full keys (`ctl/calendar.dart`). Not available as an inline node; no range selection; Cards `DayPicker` is a strip of days. | M |
-| C7 | Carousel | page through slides | HAVE | `pageView`; notation `Pages bind=page peek=` + `Dots`; Cards `Carousel`, `PageDots`. Arrow keys, loop, autoplay pause on hover: not checked. | - |
+| C7 | Carousel | page through slides | HAVE | `pageView`; notation `Pages @page peek=` + `Dots`; Cards `Carousel`, `PageDots`. Arrow keys, loop, autoplay pause on hover: not checked. | - |
 | C8 | Checkbox (+ group) | independent options | HAVE | kit toggle, `isChecked` (`ctl/toggles.dart:622-637`). Mixed state: not checked. | - |
 | C9 | Collapsible | show and hide one section | HAVE | as C1; Cards `TextExpandable`, `Disclosure`. | - |
 | C10 | Color Picker | pick a color | PARTIAL | Cards `ColorInput` is a hex field with a swatch. No area, hue or alpha picker (their `createArea`). | L |

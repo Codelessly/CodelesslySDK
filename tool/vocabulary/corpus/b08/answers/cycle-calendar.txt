@@ -10,6 +10,11 @@ state symptoms=[]
 state mood=""
 state cycleDay=15
 state phase="Fertile window"
+state note=""
+state codeEntry=""
+state incSymptoms=false
+state incMood=false
+state doctorEmail=""
 App
   Sidebar
     Brand "Moonmark" icon="brightness_3"
@@ -84,20 +89,20 @@ App
       ChoiceChip "Tired" icon="bedtime" selected={mood=="Tired"} onTap={mood="Tired"}
       ChoiceChip "Low" icon="sentiment_dissatisfied" selected={mood=="Low"} onTap={mood="Low"}
       ChoiceChip "Irritable" icon="sentiment_very_dissatisfied" selected={mood=="Irritable"} onTap={mood="Irritable"}
-    Input "Note" "Anything else" multiline bind=note
+    Input "Note" "Anything else" multiline @note
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Save" onTap={logs=append(removeWhere(logs,l=>l.day==sel),{"day":sel,"flow":flow,"symptoms":symptoms,"mood":mood}); periodDays=flow!="" && !contains(periodDays,sel) ? append(periodDays,sel) : periodDays; toast "Saved for Nov {sel}"; close}
   Dialog#lock "Private lock" "Enter your 4-digit code to unlock"
-    Input "Code" password type=number bind=codeEntry
+    Input "Code" password type=number @codeEntry
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Unlock" onTap={codeEntry==code ? close : toast "Wrong code"}
   Dialog#report "Share with your doctor" "A summary of the last 12 months"
     Text.body "Includes cycle lengths, average {avgLen} days, period length, logged symptoms and mood."
-    Toggle "Include symptoms" bind=incSymptoms
-    Toggle "Include mood" bind=incMood
-    Input "Doctor's email" bind=doctorEmail type=email
+    Toggle "Include symptoms" @incSymptoms
+    Toggle "Include mood" @incMood
+    Input "Doctor's email" @doctorEmail type=email
     Row end gap=8
       Button.outline "Download PDF" icon="download" onTap={emit downloadReport; close}
       Button "Send" icon="send" onTap={doctorEmail!="" ? emit shareReport doctorEmail; toast "Report sent"; close : toast "Add an email"}
@@ -106,6 +111,9 @@ App
 state tab="insights"
 state lengths=[28,29,27,30,28,26,28,29,31,28,27,28]
 state avgLen=28
+state incSymptoms=false
+state incMood=false
+state doctorEmail=""
 App
   Sidebar
     Brand "Moonmark" icon="brightness_3"
@@ -132,9 +140,9 @@ App
         BarChart values={lengths} labels=["Dec","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov"] h=240 average={avgLen}
         Text.muted "The line shows your average of {avgLen} days."
   Dialog#report "Share with your doctor" "A summary of the last 12 months"
-    Toggle "Include symptoms" bind=incSymptoms
-    Toggle "Include mood" bind=incMood
-    Input "Doctor's email" bind=doctorEmail type=email
+    Toggle "Include symptoms" @incSymptoms
+    Toggle "Include mood" @incMood
+    Input "Doctor's email" @doctorEmail type=email
     Row end gap=8
       Button.outline "Download PDF" icon="download" onTap={emit downloadReport; close}
       Button "Send" icon="send" onTap={emit shareReport doctorEmail; toast "Report sent"; close}
@@ -147,6 +155,9 @@ state remindAt="09:00"
 state lockOn=true
 state code="2468"
 state newCode=""
+state incSymptoms=false
+state incMood=false
+state doctorEmail=""
 App
   Sidebar
     Brand "Moonmark" icon="brightness_3"
@@ -159,13 +170,13 @@ App
     Column pad=24 gap=16 maxw=640
       Card gap=12
         Text.strong "Reminder"
-        Toggle "Remind me before my period" bind=remind
+        Toggle "Remind me before my period" @remind
         if remind
-          Select "Days before" items=["1","2","3","5"] bind=remindDays
-          TimePicker "Time" bind=remindAt
+          Select "Days before" items=["1","2","3","5"] @remindDays
+          TimePicker "Time" @remindAt
       Card gap=12
         Text.strong "Private lock"
-        Toggle "Ask for a code when opening Moonmark" bind=lockOn
+        Toggle "Ask for a code when opening Moonmark" @lockOn
         if lockOn
           Button.outline "Change code" icon="pin" onTap={open setCode}
       Card gap=12
@@ -173,14 +184,14 @@ App
         Text.muted "Share a summary of your cycles, symptoms and mood."
         Button.outline "Prepare report" icon="medical_services" onTap={open report}
   Dialog#setCode "New code" "Choose four digits"
-    Input "Code" password type=number bind=newCode
+    Input "Code" password type=number @newCode
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Save" onTap={length(newCode)==4 ? code=newCode; toast "Code changed"; close : toast "Use four digits"}
   Dialog#report "Share with your doctor" "A summary of the last 12 months"
-    Toggle "Include symptoms" bind=incSymptoms
-    Toggle "Include mood" bind=incMood
-    Input "Doctor's email" bind=doctorEmail type=email
+    Toggle "Include symptoms" @incSymptoms
+    Toggle "Include mood" @incMood
+    Input "Doctor's email" @doctorEmail type=email
     Row end gap=8
       Button.outline "Download PDF" icon="download" onTap={emit downloadReport; close}
       Button "Send" icon="send" onTap={emit shareReport doctorEmail; toast "Report sent"; close}

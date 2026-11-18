@@ -26,7 +26,7 @@ App
     Nav
       Heading "Ball on a ramp" level=1
       Row gap=8
-        Toggle "Slow motion" bind=slow
+        Toggle "Slow motion" @slow
         Button.outline "Reset" icon="restart_alt" onTap={running=false; elapsed=0; speeds=[]; times=[]; trail=[]; toast "Reset"}
         Button "Launch" icon="play_arrow" onTap={running=true; elapsed=0; speeds=[]; times=[]; trail=[]}
     Row gap=16 pad=24 top
@@ -54,14 +54,14 @@ App
         Card gap=12
           Text.strong "Set up the ramp"
           Text.fieldLabel "Angle: {angle} degrees"
-          Slider bind=angle min=5 max=60
+          Slider @angle min=5 max=60
           Text.fieldLabel "Friction: {fixed(friction,2)}"
-          Slider bind=friction min=0 max=1
+          Slider @friction min=0 max=1
           Text.fieldLabel "Mass: {mass} kg"
-          Slider bind=mass min=1 max=10
+          Slider @mass min=1 max=10
         Card gap=12
           Text.strong "Notebook entry"
-          Input "Observation" "What did you notice?" bind=note multiline
+          Input "Observation" "What did you notice?" @note multiline
           Button "Save with these numbers" icon="bookmark_add" onTap={notebook=append(notebook,{"note":note,"angle":angle,"friction":friction,"mass":mass,"time":elapsed,"top":max(0,last(speeds)),"date":today()}); note=""; toast "Saved to notebook"}
 
 ### Challenge
@@ -100,17 +100,17 @@ App
       Grid cols=3 gap=16
         Card gap=8
           Text.fieldLabel "Angle: {angle} degrees"
-          Slider bind=angle min=5 max=60
+          Slider @angle min=5 max=60
         Card gap=8
           Text.fieldLabel "Friction: {fixed(friction,2)}"
-          Slider bind=friction min=0 max=1
+          Slider @friction min=0 max=1
         Card gap=8
           Text.fieldLabel "Mass: {mass} kg"
-          Slider bind=mass min=1 max=10
+          Slider @mass min=1 max=10
       Row gap=8
         Button "Launch" icon="play_arrow" onTap={emit launch chal}
         Button.outline "Reset" icon="restart_alt" onTap={landed=null; hit=false}
-        Toggle "Slow motion" bind=slow
+        Toggle "Slow motion" @slow
 
 ### Predictions
 state angle=40
@@ -171,7 +171,7 @@ App
   Main
     Nav
       Heading "Notebook" level=1
-      Input "Search" bind=q w=220
+      Input "Search" @q w=220
     Column pad=24 gap=12
       if isEmpty(notebook)
         Text.muted "No entries yet. Save one from the ramp."

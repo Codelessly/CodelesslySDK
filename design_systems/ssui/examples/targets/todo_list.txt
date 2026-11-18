@@ -10,5 +10,5 @@ Card gap=10
         Checkbox checked={i.done}
         Text "{i.text}" grow color={i.done?"#FF9CA3AF":"#FF111827"} {"bind": {"props.style.decoration": "${= item.done ? 'lineThrough' : 'none'}"}}
   Row gap=8
-    Input "Add a step" bind=draft grow
+    Input "Add a step" @draft grow
     Button.outline "Add" enabled={draft!=""} onTap={items=append(items,{"id":draft,"text":draft,"done":false}); draft=""}

@@ -2,8 +2,9 @@
 # The vocabulary loop's two mechanical steps (JOURNAL.md says how the loop runs). From the SDK folder:
 #
 #   tool/vocabulary/batch.sh prepare <batch> <briefs file> <awk condition>   e.g. prepare b08 tool/vocabulary/briefs-2.txt 'NR>60'
-#       writes corpus/<batch>/prompt.txt (the open prompt as it is today) and one briefs/<slug>.txt per chosen
-#       line, and prints the slugs as a JSON list for the writers.
+#       writes corpus/<batch>/prompt.txt (the open prompt as it is today, with Cards' glossary: each word's
+#       signature; GLOSSARY=names for their names only) and one briefs/<slug>.txt per chosen line, and prints
+#       the slugs as a JSON list for the writers.
 #   tool/vocabulary/batch.sh count <out folder> [<earlier vocabulary.json>]
 #       expands every answer of every batch with today's parser, aliases and definitions, and prints the size.
 set -e
@@ -11,7 +12,7 @@ py="${PYTHON:-/c/Users/searc/AppData/Local/Programs/Python/Python314/python.exe}
 case "$1" in
   prepare)
     b="tool/vocabulary/corpus/$2"; mkdir -p "$b/answers" "$b/briefs"
-    tool/notation/notation.sh prompt --open --width 1280 > "$b/prompt.txt" 2>/dev/null
+    tool/notation/notation.sh prompt --open --width 1280 --design-system design_systems/cards ${GLOSSARY:+--glossary=$GLOSSARY} > "$b/prompt.txt" 2>/dev/null
     grep -v '^#' "$3" | awk "$4" | while IFS='|' read -r slug brief; do
       slug=$(echo $slug | tr -d ' ')
       printf 'App: %s\n\nWrite two to four screens of this app, each under a line `### <screen name>`, starting with App (an app window) or Page (a page that scrolls). Overlays (dialogs, sheets, menus) go after the screen that opens them. Realistic content. Every interaction in the brief is written, not described. Output only the notation.\n' "$(echo "$brief" | sed 's/^ //')" > "$b/briefs/$slug.txt"

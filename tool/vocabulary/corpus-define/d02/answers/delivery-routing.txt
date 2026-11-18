@@ -4,6 +4,7 @@ state clock=850
 state current="s1"
 state view="list"
 state failed=[]
+state failNote=""
 every 60s onTick={clock=clock+1}
 project mins=11
 App
@@ -19,7 +20,7 @@ App
       Heading "Today's route" level=1
       Row gap=8
         Badge.info "{count(stops,s=>s.status=='pending')} left"
-        SegmentedButton bind=view items=["list","map"]
+        SegmentedButton @view items=["list","map"]
     Column pad=24 gap=16
       Card gap=4
         Row between
@@ -29,7 +30,7 @@ App
           Column gap=2 end
             Text.caption "Parcels left"
             Text.heading "{sum(filter(stops,s=>s.status=='pending'),s=>s.parcels)}"
-        Progress "{count(stops,s=>s.status!='pending')}" bind=share
+        Progress "{count(stops,s=>s.status!='pending')}" value={share}
       Row gap=16 top
         Column grow gap=8
           Text.sectionTitle "Stops in order (drag to reorder)"
@@ -71,7 +72,7 @@ App
       ChoiceChip "Customer refused" selected={reason=="Customer refused"} onTap={reason="Customer refused"}
       ChoiceChip "Access blocked" selected={reason=="Access blocked"} onTap={reason="Access blocked"}
       ChoiceChip "Parcel damaged" selected={reason=="Parcel damaged"} onTap={reason="Parcel damaged"}
-      Input "Note for dispatch" multiline bind=failNote
+      Input "Note for dispatch" multiline @failNote
       Button "Record failed delivery" onTap={reason=="" ? toast "Pick a reason" : {stops=updateWhere(stops,x=>x.id==current,x=>with(x,"status","failed")); failed=append(failed,{"id":current,"reason":reason}); emit failedDelivery current; close}}
 
 ### Proof
@@ -91,22 +92,22 @@ Page
     Column gap=16
       Heading "Proof of delivery" level=1
       Text.muted "Harlow Bakery, 14 Mill Lane. 2 parcels."
-      SegmentedButton bind=method items=["photo","signature","code"]
+      SegmentedButton @method items=["photo","signature","code"]
       if method=="photo"
         Card gap=8
           Text.strong "Photo of the parcel at the door"
-          CameraCapture bind=photo h=240
+          CameraCapture @photo h=240
           if photo!=""
             Badge.success "Photo attached"
       if method=="signature"
         Card gap=8
           Text.strong "Recipient signs below"
-          SignaturePad bind=sig h=180
+          SignaturePad @sig h=180
           Button.ghost "Clear" onTap={sig=""}
       if method=="code"
         Card gap=8
           Text.strong "Ask the customer for the 4-digit code"
-          Input "Delivery code" type=number bind=code
+          Input "Delivery code" type=number @code
           if code!="" && length(code)==4 && code!=expected
             Text.danger "That code does not match."
       Row gap=8
@@ -164,14 +165,14 @@ define RouteMap stops=[] current="" onPin
             Divider w=24
 
 // A camera is not available: shown as a labelled box that sets a placeholder photo name.
-define CameraCapture bind=photo h=200
+define CameraCapture @photo h=200
   state photo=""
   Box h={h} fill=#FF111827 radius=8 center middle gap=8 onTap={photo="parcel-photo.jpg"}
     Icon "photo_camera"
     Text "{photo == '' ? 'Tap to take a photo' : photo}" color=#FFFFFFFF
 
 // A drawing surface is not available: shown as a labelled box that stores a placeholder signature.
-define SignaturePad bind=sig h=160
+define SignaturePad @sig h=160
   state sig=""
   Box h={h} fill=#FFFFFFFF border=1 radius=8 center middle onTap={sig="signed"}
     Text.muted "{sig == '' ? 'Sign here' : 'Signature captured'}"

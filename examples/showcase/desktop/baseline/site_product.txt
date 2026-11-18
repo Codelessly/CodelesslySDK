@@ -59,7 +59,7 @@ Column maxw=1280 w=fill scroll
           ChoiceChip "Brass" selected={finish=="Brass"} onTap={finish="Brass"}
           ChoiceChip "Graphite" selected={finish=="Graphite"} onTap={finish="Graphite"}
           ChoiceChip "Sand" selected={finish=="Sand"} onTap={finish="Sand"}
-      Stepper "Quantity" bind=qty min=1 max=10
+      Stepper "Quantity" @qty min=1 max=10
       Row gap=12
         Button "Add to cart" grow onTap={cart=cart+qty; toast "Added {qty} to cart"}
         Button.outline "Buy now" grow onTap={emit buyNow {"finish":finish}}
@@ -76,7 +76,7 @@ Column maxw=1280 w=fill scroll
             Text.strong "30-day free returns"
             Text.muted "Not right for your desk? Send it back, no questions asked."
   Column gap=20 pad=[32,32,32,32]
-    TabToggle bind=tab options=["Description","Specifications","Reviews"]
+    TabToggle @tab options=["Description","Specifications","Reviews"]
     if tab=="Description"
       Column gap=12 maxw=760
         Text.heading3 "Light that moves with you"

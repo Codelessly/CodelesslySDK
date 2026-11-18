@@ -12,6 +12,7 @@ state newBatter="Meera Joshi"
 state target=186
 state batters=[{"name":"Priya Nair","runs":52,"balls":38,"fours":6,"sixes":1,"on":true},{"name":"Asha Verma","runs":31,"balls":27,"fours":3,"sixes":0,"on":false}]
 state bowler={"name":"R. Kulkarni","overs":"3.5","maidens":0,"runs":29,"wkts":1}
+state fielder=""
 App
   Sidebar
     Brand "Over by Over" icon="sports_cricket"
@@ -82,14 +83,14 @@ App
           Text.caption "Priya Nair 32"
           Text.caption "Asha Verma 31"
   Dialog#wicket "Wicket" "How was the batter out?"
-    Select "How out" bind=howOut items=["Bowled","Caught","LBW","Run out","Stumped","Hit wicket"]
+    Select "How out" @howOut items=["Bowled","Caught","LBW","Run out","Stumped","Hit wicket"]
     Text.fieldLabel "Who is out"
     Row gap=8
       ChoiceChip "Priya Nair" selected={who=="Priya Nair"} onTap={who="Priya Nair"}
       ChoiceChip "Asha Verma" selected={who=="Asha Verma"} onTap={who="Asha Verma"}
     if howOut=="Caught" || howOut=="Run out" || howOut=="Stumped"
-      Select "Fielder" bind=fielder items=["Dev Rao","Kiran Shah","Sana Iqbal","Tara Menon"]
-    Select "Next batter" bind=newBatter items=["Meera Joshi","Lata Kulkarni","Zoya Khan"]
+      Select "Fielder" @fielder items=["Dev Rao","Kiran Shah","Sana Iqbal","Tara Menon"]
+    Select "Next batter" @newBatter items=["Meera Joshi","Lata Kulkarni","Zoya Khan"]
     Button.destructive "Confirm wicket" onTap={wickets=wickets+1; log=append(log,{"r":"W","k":"wicket"}); over=append(over,{"r":"W","k":"wicket"}); toast "{who} {lower(howOut)}, {newBatter} in"; close}
   Dialog#share "Share scorecard" "Sent as a picture"
     Card gap=4

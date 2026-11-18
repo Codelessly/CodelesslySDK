@@ -16,6 +16,8 @@ state roll=0
 state pitch=0
 state gimbal=-20
 state shots=12
+state left=""
+state right=""
 every 1s when flying onTick={battery=max(0,battery-1); distance=distance+speed}
 every 1s when recording onTick={recSeconds=recSeconds+1}
 every 1s when returning onTick={homeCount>0 ? homeCount=homeCount-1 : {returning=false; flying=false; height=0; speed=0; toast "Landed at home point"}}
@@ -31,7 +33,7 @@ App
             Text.strong "Updraft  Mavic Air" color=#FFFFFFFF
             Text.small "{flying ? 'In flight' : 'Ready to fly'}  GPS 18 satellites" color=#FFD0D8E0
         Row gap=16 middle
-          SignalBars bind=signal max=5 label="Link"
+          SignalBars @signal max=5 label="Link"
           Row gap=4 middle
             Icon "battery_5_bar"
             Text.strong "{battery}%" color={battery<=20 ? #FFFF5252 : #FFFFFFFF}
@@ -54,7 +56,7 @@ App
         Box fill=#99000000 radius=12 pad=8
           Column gap=8 center
             Text.small "{gimbal}°" color=#FFFFFFFF
-            Slider bind=gimbal min=-90 max=0 vertical h=120
+            Slider @gimbal min=-90 max=0 vertical h=120
         Row gap=8 middle
           if recording
             Icon "fiber_manual_record" color=#FFFF1744 animate=pulse duration=1000
@@ -64,7 +66,7 @@ App
       Row bottom between pad=24
         Column gap=8 center
           Text.small "Altitude / Yaw" color=#FFFFFFFF
-          JoystickPad bind=left size=140 springBack onMove={throttle=result.y; yaw=result.x; flying ? {height=clamp(height+result.y*0.5,0,120)} : {}}
+          JoystickPad @left size=140 springBack onMove={throttle=result.y; yaw=result.x; flying ? {height=clamp(height+result.y*0.5,0,120)} : {}}
         Column gap=12 center bottom
           if !flying
             SlideToConfirm "Slide to take off" onConfirm={flying=true; height=2; speed=0; toast "Taking off"} w=280
@@ -79,7 +81,7 @@ App
             MapZone "No-fly zone" shape=circle center={[37.7762,-122.4172]} radius=180 fill=#55FF1744 border=#FFFF1744
         Column gap=8 center
           Text.small "Forward / Roll" color=#FFFFFFFF
-          JoystickPad bind=right size=140 springBack onMove={pitch=result.y; roll=result.x; speed=flying ? abs(result.y)*12 : 0}
+          JoystickPad @right size=140 springBack onMove={pitch=result.y; roll=result.x; speed=flying ? abs(result.y)*12 : 0}
   Dialog#returnHome "Return to home?" "The drone will climb to 60 m and fly back to the home point."
     Text.muted "Home point is 412 m away. Estimated 1 min 40 s. Battery on arrival about {max(0,battery-9)}%."
     Row gap=8 end
@@ -105,8 +107,8 @@ App
         IconButton "arrow_back" tooltip="Back to flight" onTap={go fly}
         Heading "Flight map" level=1
       Row gap=8
-        SegmentedButton bind=layer items=["Satellite","Street"]
-        Toggle "Follow drone" bind=follow
+        SegmentedButton @layer items=["Satellite","Street"]
+        Toggle "Follow drone" @follow
     Stack
       Map h=fill center={[37.7749,-122.4194]} zoom=15 layer={lower(layer)} follow={follow}
         MapMarker "Drone" icon="navigation" at={[37.7752,-122.4189]} rotate=40
@@ -146,18 +148,18 @@ App
       Card gap=12
         Heading "Flight limits" level=3
         Text.fieldLabel "Max height: {maxHeight} m"
-        Slider bind=maxHeight min=10 max=500
+        Slider @maxHeight min=10 max=500
         Text.fieldLabel "Max distance: {maxDistance} m"
-        Slider bind=maxDistance min=100 max=5000
-        Toggle "Beginner mode" bind=beginner
+        Slider @maxDistance min=100 max=5000
+        Toggle "Beginner mode" @beginner
       Card gap=12
         Heading "Return to home" level=3
         Text.fieldLabel "Return height: {rthHeight} m"
-        Slider bind=rthHeight min=20 max=200
+        Slider @rthHeight min=20 max=200
         Text.fieldLabel "Auto return at battery: {rthBattery}%"
-        Slider bind=rthBattery min=10 max=40
+        Slider @rthBattery min=10 max=40
       Card gap=12
         Heading "Camera" level=3
-        Select "Video resolution" bind=resolution items=["1080 60","4K 30","4K 60"]
-        SegmentedButton bind=units items=["Metric","Imperial"]
+        Select "Video resolution" @resolution items=["1080 60","4K 30","4K 60"]
+        SegmentedButton @units items=["Metric","Imperial"]
       Button "Save" onTap={emit saveSettings; toast "Settings saved"; go fly}

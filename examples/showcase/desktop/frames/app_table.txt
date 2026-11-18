@@ -32,13 +32,13 @@ App
     Column pad=24 gap=16
       Row gap=12 center between
         Row gap=12 center
-          Input "Search customers" bind=q w=260
+          Input "Search customers" @q w=260
           Row gap=6
             ChoiceChip "All" selected={status=="All"} onTap={status="All"}
             ChoiceChip "Active" selected={status=="Active"} onTap={status="Active"}
             ChoiceChip "Trial" selected={status=="Trial"} onTap={status="Trial"}
             ChoiceChip "Churned" selected={status=="Churned"} onTap={status="Churned"}
-        Segments bind=scope options=["Everyone","My accounts"]
+        Segments @scope options=["Everyone","My accounts"]
       if length(picked)>0
         Box fill=#FFEEF2FF radius=8 pad=[16,10,16,10]
           Row gap=12 center

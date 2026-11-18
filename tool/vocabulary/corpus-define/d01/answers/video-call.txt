@@ -7,6 +7,8 @@ state speaker="MacBook Pro Speakers"
 state level=0
 state testing=false
 state name="Priya Raman"
+state mirror=false
+state noise=false
 every 200 when testing onTick={level=(level*7+13)%100}
 Page
   Nav
@@ -25,21 +27,21 @@ Page
       Column w=320 gap=14
         Heading "Weekly design sync" level=2
         Text.muted "Started by Marcus Bell. 4 people are in the call."
-        Input "Your name" bind=name
-        Select "Microphone" bind=mic items=["MacBook Pro Microphone","AirPods Pro","Jabra Speak 510"]
-        Select "Camera" bind=cam items=["FaceTime HD Camera","Logitech C920"]
-        Select "Speaker" bind=speaker items=["MacBook Pro Speakers","AirPods Pro","Jabra Speak 510"]
+        Input "Your name" @name
+        Select "Microphone" @mic items=["MacBook Pro Microphone","AirPods Pro","Jabra Speak 510"]
+        Select "Camera" @cam items=["FaceTime HD Camera","Logitech C920"]
+        Select "Speaker" @speaker items=["MacBook Pro Speakers","AirPods Pro","Jabra Speak 510"]
         Card gap=8
           Row between
             Text.strong "Test your microphone"
             Button.outline "{testing ? 'Stop' : 'Test'}" onTap={testing=!testing; level=0}
-          MicMeter bind=level
+          MicMeter @level
           Text.caption "Say something. The bar should move."
         Button "Join now" size=large onTap={go call}
         Button.outline "Join with camera off" onTap={camOn=false; go call}
   Dialog#prejoinSettings "Settings"
-    Toggle "Mirror my video" bind=mirror
-    Toggle "Noise suppression" bind=noise
+    Toggle "Mirror my video" @mirror
+    Toggle "Noise suppression" @noise
     Button "Done" onTap={close}
 
 ### Call
@@ -84,14 +86,14 @@ App
   if showPanel
     Pane w=320 pad=16 gap=12
       Row between
-        SegmentedButton bind=panel items=["chat","people"]
+        SegmentedButton @panel items=["chat","people"]
         IconButton "close" tooltip="Close panel" onTap={showPanel=false}
       if panel=="chat"
         Column grow scroll gap=10
           each m in msgs
             ChatBubble "{m.text}" sender="{m.who}" time="{m.time}" mine={m.who=="Priya Raman"}
         Row gap=8
-          Input "Message" bind=draft grow
+          Input "Message" @draft grow
           IconButton "send" tooltip="Send" onTap={draft=="" ? : {msgs=append(msgs,{"id":length(msgs)+1,"who":"Priya Raman","text":draft,"time":"10:07"}); draft=""}}
       if panel=="people"
         Column grow scroll gap=4
@@ -155,7 +157,7 @@ define VideoTile "name" speaking=false muted=false cam=true h=160 w=fill onTap
           Icon "mic_off" size=16 color=#FFF87171
 
 // A level meter: a bar filling with the level from 0 to 100.
-define MicMeter bind=level
+define MicMeter @level
   state level=0
   Progress {level/100}
 

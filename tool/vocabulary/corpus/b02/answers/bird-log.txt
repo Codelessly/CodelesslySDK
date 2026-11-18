@@ -30,7 +30,7 @@ App
     Column pad=24 gap=16 maxw=720 scroll
       Card gap=12
         Text.panelTitle "Species"
-        SearchSelect "Search species" bind=species items={speciesList} labelKey="name" subtitleKey="latin" imageKey="photo" hint="Try cardinal or chickadee"
+        SearchSelect "Search species" @species items={speciesList} labelKey="name" subtitleKey="latin" imageKey="photo" hint="Try cardinal or chickadee"
         if species!=""
           Row gap=12 middle
             Avatar src={find(speciesList,s=>s.name==species).photo} size=56
@@ -40,19 +40,19 @@ App
       Card gap=12
         Text.panelTitle "How many?"
         Row gap=12 middle
-          Stepper bind=count min=1 max=999
+          Stepper @count min=1 max=999
           Text.muted "{count == 1 ? 'individual' : 'individuals'}"
       Card gap=12
         Text.panelTitle "Where"
-        MapPicker bind=pin h=220 zoom=14 marker="pin" onChange={place="Near {fixed(result.lat,3)}, {fixed(result.lng,3)}"}
+        MapPicker @pin h=220 zoom=14 marker="pin" onChange={place="Near {fixed(result.lat,3)}, {fixed(result.lng,3)}"}
         Row gap=8 middle
           Icon "place"
           Text.muted "{place}"
       Card gap=12
         Text.panelTitle "When"
         Row gap=12
-          DatePicker "Date" bind=seenOn grow
-          TimePicker "Time" bind=seenAt grow
+          DatePicker "Date" @seenOn grow
+          TimePicker "Time" @seenAt grow
       Card gap=12
         Text.panelTitle "Weather"
         Row gap=8
@@ -63,12 +63,12 @@ App
           FilterChip "Fog" icon="foggy" selected={contains(weather,"Fog")} onTap={weather=contains(weather,"Fog")?without(weather,"Fog"):append(weather,"Fog")}
       Card gap=12
         Text.panelTitle "Notes"
-        Input "Notes" "Behaviour, plumage, song, habitat" bind=notes multiline
+        Input "Notes" "Behaviour, plumage, song, habitat" @notes multiline
       Card gap=12
         Row between middle
           Text.panelTitle "Photos"
           Text.caption "{length(photos)} of 6"
-        PhotoStrip bind=photos max=6 onAdd={emit pickPhoto} onRemove={photos=removeAt(photos,result.index)}
+        PhotoStrip @photos max=6 onAdd={emit pickPhoto} onRemove={photos=removeAt(photos,result.index)}
 
 ### Life list
 state q=""
@@ -90,8 +90,8 @@ App
     Nav
       Heading "Life list" level=1
       Row gap=8
-        Input "Search species" bind=q w=220
-        Select bind=sort items=["recent","most seen","A to Z"]
+        Input "Search species" @q w=220
+        Select @sort items=["recent","most seen","A to Z"]
         Button "Log sighting" icon="add" onTap={go log-a-sighting}
     Column pad=24 gap=16 scroll
       Grid cols=3 gap=16
@@ -156,7 +156,7 @@ Page
             Text.panelTitle "Checklist"
             Text.caption "{length(packed)} of {length(gear)} packed"
           Progress {length(packed)/length(gear)}
-          SegmentedButton bind=tab items=["gear","targets"]
+          SegmentedButton @tab items=["gear","targets"]
           if tab=="gear"
             each g in gear
               Checkbox "{g.label}" selected={contains(packed,g.id)} onChange={packed=contains(packed,g.id)?without(packed,g.id):append(packed,g.id)}
@@ -206,11 +206,11 @@ Page
         Text "A russet songbird of deep, damp woods, famous for a flute-like song with two voices at once."
         Row gap=12 middle
           IconButton "{playing?'pause':'play_arrow'}" tooltip="Song" onTap={playing=!playing; emit playSong "wood-thrush"}
-          AudioPlayer src="https://audio.feather.app/wood-thrush-song.mp3" bind=playing
+          AudioPlayer src="https://audio.feather.app/wood-thrush-song.mp3" @playing
           Text.caption "Song, 0:24"
   Section tint
     Column gap=16
-      SegmentedButton bind=tab items=["range","season"]
+      SegmentedButton @tab items=["range","season"]
       if tab=="range"
         Card gap=12
           Text.panelTitle "Range"

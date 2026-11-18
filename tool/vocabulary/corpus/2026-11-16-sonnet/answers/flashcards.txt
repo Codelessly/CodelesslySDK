@@ -42,7 +42,7 @@ App
                 Badge.success "All caught up"
               Button "Study" size=small fill=#FFFACC15 color=#FF4C1D95 onTap={sel=d.id; go study}
   Dialog#newDeck "New deck" "Give it a name you will recognise"
-    Input "Deck name" "Spanish Basics" bind=newTitle
+    Input "Deck name" "Spanish Basics" @newTitle
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Create deck" onTap={decks=append(decks,{"id":length(decks)+10,"title":newTitle,"count":0,"due":0,"learned":0}); toast "Deck created"; close}
@@ -51,7 +51,7 @@ App
     MenuItem "Reset progress" icon="restart_alt" onTap={open confirmReset}
     MenuItem "Delete" icon="delete" onTap={open confirmDelete}
   Dialog#renameDeck "Rename deck"
-    Input "Deck name" bind=renameTo
+    Input "Deck name" @renameTo
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Save" onTap={decks=updateWhere(decks,d=>d.id==sel,d=>with(d,"title",renameTo)); toast "Renamed"; close}
@@ -103,8 +103,8 @@ App
         Row gap=8 center
           Badge.success "{length(known)} known"
           Badge.warning "{length(again)} again"
-        SwipeCard bind=drag threshold=120 tintRight=#FF86EFAC tintLeft=#FFFCA5A5 follow onSwipeRight={known=append(known,at); history=append(history,at); at=at+1; flipped=false} onSwipeLeft={again=append(again,at); history=append(history,at); at=at+1; flipped=false}
-          FlipCard bind=flipped duration=450 onTap={flipped=!flipped} h=340 radius=40
+        SwipeCard @drag threshold=120 tintRight=#FF86EFAC tintLeft=#FFFCA5A5 follow onSwipeRight={known=append(known,at); history=append(history,at); at=at+1; flipped=false} onSwipeLeft={again=append(again,at); history=append(history,at); at=at+1; flipped=false}
+          FlipCard @flipped duration=450 onTap={flipped=!flipped} h=340 radius=40
             Front fill=#FF6D28D9
               Column center middle gap=12 pad=32
                 Text.caption "TAP OR PRESS SPACE TO FLIP" color=#FFFDE68A
@@ -177,7 +177,7 @@ App
           Card gap=16 radius=40 center pad=32
             Text.caption "TYPE THE SPANISH WORD"
             Text "{qs[qi].meaning}" size=40 weight=800 color=#FF4C1D95
-            TypedAnswer "Your answer" bind=answer answer={qs[qi].word} tolerance=1 showDiff autofocus onResult={verdict=result.correct?"right":"wrong"; score=score+(result.correct?1:0)}
+            TypedAnswer "Your answer" @answer answer={qs[qi].word} tolerance=1 showDiff autofocus onResult={verdict=result.correct?"right":"wrong"; score=score+(result.correct?1:0)}
         if qs[qi].kind=="match"
           Text.title "Match the five pairs" center
           Row gap=24 top
@@ -228,7 +228,7 @@ App
         IconButton "arrow_back" onTap={go decks}
         Heading "Spanish Basics" level=1 color=#FF4C1D95
       Row gap=8
-        Input "Search cards" bind=q w=220 icon="search"
+        Input "Search cards" @q w=220 icon="search"
         Button "Add card" icon="add" onTap={editId=0; fWord=""; fMeaning=""; fExample=""; open cardDialog}
     Column pad=24 gap=16
       if length(picks)>0
@@ -238,7 +238,7 @@ App
             Row gap=8
               Button.outline "Move" icon="drive_file_move" onTap={open moveDialog}
               Button.destructive "Delete" icon="delete" onTap={cards=filter(cards,c=>!contains(picks,c.id)); picks=[]; toast "Cards deleted"}
-      Table rows={filter(cards,c=>contains(lower(c.word),lower(q)) || contains(lower(c.meaning),lower(q)))} sortable selectable bind=picks rowKey=id radius=24
+      Table rows={filter(cards,c=>contains(lower(c.word),lower(q)) || contains(lower(c.meaning),lower(q)))} sortable selectable selected=@picks rowKey=id radius=24
         Column "Word" field=word grow sortable
         Column "Meaning" field=meaning grow sortable
         Column "Example" field=example grow
@@ -246,14 +246,14 @@ App
         Column "" w=60
           IconButton "edit" onTap={editId=row.id; fWord=row.word; fMeaning=row.meaning; fExample=row.example; open cardDialog}
   Dialog#cardDialog "{editId==0 ? 'Add a card' : 'Edit card'}"
-    Input "Word" bind=fWord
-    Input "Meaning" bind=fMeaning
-    Input "Example" multiline bind=fExample
+    Input "Word" @fWord
+    Input "Meaning" @fMeaning
+    Input "Example" multiline @fExample
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Save" disabled={trim(fWord)=="" || trim(fMeaning)==""} onTap={cards=editId==0 ? append(cards,{"id":length(cards)+100,"word":fWord,"meaning":fMeaning,"example":fExample,"due":"Today"}) : updateWhere(cards,c=>c.id==editId,c=>with(with(with(c,"word",fWord),"meaning",fMeaning),"example",fExample)); toast "Saved"; close}
   Dialog#moveDialog "Move to deck"
-    Select "Deck" bind=moveTo items=["Travel Phrases","Food and Cooking","Verbs in the Past"]
+    Select "Deck" @moveTo items=["Travel Phrases","Food and Cooking","Verbs in the Past"]
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Move" onTap={cards=filter(cards,c=>!contains(picks,c.id)); picks=[]; toast "Moved to {moveTo}"; close}
@@ -320,15 +320,15 @@ App
           Column gap=4
             Text.strong "Cards a day"
             Text.muted "How many new cards to learn each day"
-          Stepper bind=perDay min=5 max=100 step=5
+          Stepper @perDay min=5 max=100 step=5
         Divider
         Column gap=8
           Text.strong "Direction"
-          SegmentedButton bind=direction items=["Spanish to English","English to Spanish"]
+          SegmentedButton @direction items=["Spanish to English","English to Spanish"]
         Divider
-        Toggle "Sounds" bind=sounds
+        Toggle "Sounds" @sounds
         Divider
         Column gap=8
           Text.strong "Theme"
-          SegmentedButton bind=theme items=["Light","Dark","Auto"]
+          SegmentedButton @theme items=["Light","Dark","Auto"]
       Button "Save" onTap={toast "Settings saved"}

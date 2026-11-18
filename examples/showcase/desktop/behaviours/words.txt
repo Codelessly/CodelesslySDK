@@ -40,14 +40,14 @@ Page
   Section#orders
     Heading "Orders" level=1
     Row gap=12 middle
-      Input#find "Find a customer" bind=q w=280
+      Input#find "Find a customer" @q w=280
       Text.muted#count "{length(fuzzy(orders,q,x=>x.name))} of {length(orders)} orders" live
       Link#author "About Ada" preview=bio
     each o in fuzzy(orders,q,x=>x.name)
       Row gap=12 middle
         Text#match "{o.name}" mark={q} grow
         Badge "{o.status}"
-    DataTable#ordersTable rows={orders} columns=[{"key":"name","label":"Customer"},{"key":"status","label":"Status"},{"key":"total","label":"Total"}] bind=row h=220 onSort={announce "Sorted by {result.column}"} onRowTap={toast "Row {result.rowIndex + 1}"}
+    DataTable#ordersTable rows={orders} columns=[{"key":"name","label":"Customer"},{"key":"status","label":"Status"},{"key":"total","label":"Total"}] @row h=220 onSort={announce "Sorted by {result.column}"} onRowTap={toast "Row {result.rowIndex + 1}"}
     Row gap=12 middle
       Text.muted "Row chosen: {row}"
       Button.outline#removeBtn "Remove all orders" onTap={confirm "Remove every order?" then {orders=[]; row=-1; announce "Orders removed"}}
@@ -83,22 +83,22 @@ Page
     Heading "Stay"
     Row gap=32 top
       Card gap=12
-        Calendar#stayCal bind=arrival bindEnd=departure disabledDates=["2026-11-24","2026-11-25"] marks={"2026-11-20":"£225","2026-11-21":"£240"} label="Your stay"
+        Calendar#stayCal @arrival @departure disabledDates=["2026-11-24","2026-11-25"] marks={"2026-11-20":"£225","2026-11-21":"£240"} label="Your stay"
         Text.muted "{arrival} to {departure}"
       Column grow gap=16
         Text.strong "Price a night: {round(low,0)} to {round(high,0)}"
-        Slider#price bind=low bindEnd=high min=0 max=300 step=10 label="Price range"
+        Slider#price @low @high min=0 max=300 step=10 label="Price range"
         Row gap=16 middle
-          Input#guests "Guests" bind=qty type=number min=1 max=8 step=1 w=120
-          CodeInput#otp "Booking code" bind=code length=6 digits
+          Input#guests "Guests" @qty type=number min=1 max=8 step=1 w=120
+          CodeInput#otp "Booking code" @code length=6 digits
         Row gap=16 middle
-          Rating "Your rating" bind=stars
+          Rating "Your rating" @stars
           Rating "Guest score" score=4.5 readOnly
     Row h=160
       Column#notesPane w={paneW} pad=12 fill=#FFF3F4F6
         Text.strong "Notes"
-        Input "Draft (kept across reloads)" bind=draft multiline
-      Splitter#grip bind=paneW min=140 max=480 label="Resize notes"
+        Input "Draft (kept across reloads)" @draft multiline
+      Splitter#grip @paneW min=140 max=480 label="Resize notes"
       Column grow pad=12
         Text.muted "The pane on the left is {round(paneW,0)} wide."
   Footer
@@ -107,18 +107,18 @@ Page
       Text.muted "Every word on this page is new in 33.0.0."
 
 Dialog#search "Search orders"
-  Input#searchField "Customer" bind=q
+  Input#searchField "Customer" @q
   Button "Done" onTap={close}
 
 Dialog#edit "Edit profile" guard={name!=""}
-  Input#nameField "Name" bind=name
+  Input#nameField "Name" @name
   Row gap=8 end
     Button.ghost#discard "Discard" onTap={name=""; close}
     Button "Save" onTap={toast "Saved"; name=""; close}
 
 Sheet#filters "Filters" stops=[0.5,0.9]
   Text.muted "Up to {round(high,0)} a night"
-  Slider bind=high min=0 max=300
+  Slider @high min=0 max=300
   Button "Show rooms" onTap={close}
 
 Popover#bio arrow

@@ -67,16 +67,16 @@ App
 Sheet#fail "Record the failure"
   Column gap=12
     Text.muted "{find(checks,c=>c.id==sel).text}"
-    PhotoCapture bind=photoDraft label="Add a photo"
-    Input "Note" "What did you see?" bind=noteDraft multiline
+    PhotoCapture @photoDraft label="Add a photo"
+    Input "Note" "What did you see?" @noteDraft multiline
     Text.fieldLabel "Severity"
-    SegmentedButton items=["Minor","Major","Critical"] bind=sevDraft
+    SegmentedButton items=["Minor","Major","Critical"] @sevDraft
     Row gap=8 end
       Button.outline "Cancel" onTap={checks=updateWhere(checks,c=>c.id==sel && c.note=="",c=>with(c,"answer","")); close}
       Button "Save failure" onTap={noteDraft=="" ? toast "Add a note first" : {checks=updateWhere(checks,c=>c.id==sel,c=>with(with(with(c,"note",noteDraft),"sev",sevDraft),"photo",photoDraft)); toast "Failure recorded"; close}}
 
 // a camera capture, shown as a labelled box
-define PhotoCapture bind=photo label="Add a photo"
+define PhotoCapture @photo label="Add a photo"
   state photo=""
   Box h=120 radius=8 fill=#FFF3F4F6 center middle onTap={photo = photo=="" ? "captured" : ""}
     Column center gap=4
@@ -110,18 +110,18 @@ App
       Text.muted "Type the detector figure at each point. A box turns red beyond its limit."
       Grid cols=2 gap=16
         each row in gas
-          GasReading "{row.label}" bind=row.value limit={row.limit} low={row.id=="g4"} unit={row.id=="g4" ? "% vol" : row.id=="g3" ? "% LEL" : "ppm"}
+          GasReading "{row.label}" @row.value limit={row.limit} low={row.id=="g4"} unit={row.id=="g4" ? "% vol" : row.id=="g3" ? "% LEL" : "ppm"}
       if any(gas,g=>g.id!="g4" && g.value>g.limit)
         Card gap=8 fill=#FFFEE2E2
           Text.strong color=#FFB91C1C "Toxic or flammable gas above limit"
           Text color=#FF7F1D1D "Stop work in the area, alert the control room and log a failure on the round."
           Button.destructive "Call control room" onTap={emit controlRoom; toast "Control room alerted"}
 
-define GasReading "label" bind=value limit=10 low=false unit="ppm"
+define GasReading "label" @value limit=10 low=false unit="ppm"
   state value=0
   Card gap=6 fill={(low ? value<limit : value>limit) ? #FFFEE2E2 : #FFFFFFFF}
     Text.fieldLabel "{label}"
-    Input "Reading ({unit})" type=number bind=value
+    Input "Reading ({unit})" type=number @value
     Row between
       Text.small "Limit {low ? 'below' : 'above'} {limit} {unit}"
       Text.strong color={(low ? value<limit : value>limit) ? #FFDC2626 : #FF16A34A} "{(low ? value<limit : value>limit) ? 'OVER LIMIT' : 'OK'}"
@@ -129,6 +129,7 @@ define GasReading "label" bind=value limit=10 low=false unit="ppm"
 ### Muster
 state phase="idle"
 state seconds=0
+state who=""
 every 1s when phase=="running" onTick={seconds=seconds+1}
 App
   Sidebar
@@ -167,10 +168,12 @@ App
             ListTile "{name}" icon="person_search"
               Button.ghost "Found" onTap={missing=without(missing,name); mustered=min(onboard,mustered+1)}
 Dialog#unaccounted "Unaccounted person" "Enter a name or badge number"
-  Input "Name or badge" bind=who
+  Input "Name or badge" @who
   Button "Add to list" onTap={who=="" ? toast "Enter a name" : {missing=append(missing,who); who=""; close}}
 
 ### Sign-off
+state signer=""
+state comments=""
 App
   Sidebar
     Brand "Derrick Daily" icon="oil_barrel"
@@ -207,8 +210,8 @@ App
                 Text "{area.name}"
                 Button.ghost "Go" onTap={expanded=area.id; go round}
       Card gap=12
-        Input "Full name" bind=signer
-        Input "Comments" multiline bind=comments
+        Input "Full name" @signer
+        Input "Comments" multiline @comments
         Button "Sign off the round" disabled={count(checks,c=>c.answer=="")>0 || trim(signer)==""} onTap={signed=true; emit signoff signer; open done}
 Dialog#done "Round signed off" "Report sent to the OIM"
   Text "Signed by {signer}. {count(checks,c=>c.answer=='Fail')} failures are logged."

@@ -28,7 +28,7 @@ App
     Column pad=24 gap=16 scroll
       Card gap=8
         Row gap=8
-          Input "Add an item" "2 milk, 6 bananas" bind=draft grow onSubmit={addItem draft to items; draft=""}
+          Input "Add an item" "2 milk, 6 bananas" @draft grow onSubmit={addItem draft to items; draft=""}
           Button "Add" onTap={addItem draft to items; draft=""}
         Row scroll gap=8
           each s in suggestions
@@ -39,13 +39,13 @@ App
             Text.sectionTitle "{a}"
             each row in filter(items,i=>i.aisle==a && !i.done)
               ListTile "{row.name}" subtitle="{row.qty} x {money(row.price,"$",2)}" drag=item(row.id) onSwipeLeft={items=removeWhere(items,i=>i.id==row.id); toast "Removed {row.name}"}
-                Checkbox bind=row.done
+                Checkbox @row.done
                 Avatar "{row.by}" size=28
                 IconButton "more_vert" onTap={sel=row.id; open rowMenu}
       Accordion "Done ({count(items,i=>i.done)})"
         each row in filter(items,i=>i.done)
           ListTile "{row.name}" onSwipeLeft={items=removeWhere(items,i=>i.id==row.id)}
-            Checkbox bind=row.done
+            Checkbox @row.done
             Avatar "{row.by}" size=28
   Menu#rowMenu end
     MenuItem "Add one more" icon="add" onTap={items=updateWhere(items,i=>i.id==sel,i=>with(i,"qty",i.qty+1))}
@@ -56,6 +56,7 @@ App
 state tab="recipes"
 state pick=""
 state recipes=[{"id":"r1","name":"Shakshuka","time":30,"ingredients":[{"name":"Eggs","qty":6,"aisle":"Dairy","price":0.4},{"name":"Canned tomatoes","qty":2,"aisle":"Pantry","price":1.6},{"name":"Red pepper","qty":2,"aisle":"Produce","price":1.1}]},{"id":"r2","name":"Banana pancakes","time":20,"ingredients":[{"name":"Bananas","qty":3,"aisle":"Produce","price":0.3},{"name":"Flour","qty":1,"aisle":"Pantry","price":2.4},{"name":"Whole milk","qty":1,"aisle":"Dairy","price":2.8}]}]
+state q=""
 App
   Sidebar
     Brand "Trolley" icon="shopping_cart"
@@ -65,7 +66,7 @@ App
   Main
     Nav
       Heading "Recipes" level=1
-      Input "Search recipes" bind=q w=220
+      Input "Search recipes" @q w=220
     Column pad=24 gap=16 scroll
       Grid cols=2 gap=16
         each r in recipes
@@ -85,6 +86,7 @@ App
 
 ### Shop
 state shop=true
+state awake=false
 App
   Main
     Nav
@@ -92,7 +94,7 @@ App
       Heading "Shopping" level=1
       Row gap=8 middle
         Text "Keep screen on"
-        Toggle bind=awake onChange={awake ? keepAwake on : keepAwake off}
+        Toggle @awake onChange={awake ? keepAwake on : keepAwake off}
     Column pad=24 gap=16 scroll
       Progress {count(items,i=>i.done)/length(items)}
       Text.strong "{count(items,i=>i.done)} of {length(items)} in the trolley" size=28
@@ -103,7 +105,7 @@ App
             Card
               Row between middle
                 Text "{row.qty} x {row.name}" size=40 weight=700
-                Checkbox bind=row.done size=large
+                Checkbox @row.done size=large
     Footer
       Row between middle pad=16
         Text.muted "Estimate" size=24

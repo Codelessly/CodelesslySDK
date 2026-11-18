@@ -121,15 +121,15 @@ App
     Column pad=24 gap=16
       Card gap=12
         Text.strong "Units"
-        SegmentedButton bind=units items=["F","C"]
+        SegmentedButton @units items=["F","C"]
         Text.mono "Display: 70° {units}"
       Card gap=12
         Text.strong "Lock"
-        Toggle "Lock keys automatically" bind=autoLock
+        Toggle "Lock keys automatically" @autoLock
         if autoLock
           Row between
             Text.muted "After {lockAfter} seconds"
-            Slider bind=lockAfter min=10 max=120 w=200
+            Slider @lockAfter min=10 max=120 w=200
         Button.outline "Lock now" onTap={open lockNow}
   Dialog#lockNow "Lock now?" "The display shows a key symbol until MENU is held."
     Row end gap=8

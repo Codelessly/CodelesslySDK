@@ -18,7 +18,7 @@ App
           Avatar "Ana Ortiz" size=32
           Avatar "Lee Chen" size=32
           Avatar "Sam Patel" size=32
-        Input "Filter tasks" bind=q w=220
+        Input "Filter tasks" @q w=220
         Button "New task" onTap={tasks=append(tasks,with(newTask,"id",100+length(tasks)))}
     Row gap=16 pad=24 grow top
       each c in cols
@@ -58,7 +58,7 @@ App
           Text.muted "{sel.who}"
       Text.eyebrow "DESCRIPTION"
       Text "{sel.desc}"
-      Checklist "Checklist" bind=done items=["Draft the first version","Get feedback from the team","Make revisions","Final sign-off"]
+      Checklist "Checklist" @done items=["Draft the first version","Get feedback from the team","Make revisions","Final sign-off"]
       Text.eyebrow "ACTIVITY"
       Column gap=10
         each a in activity

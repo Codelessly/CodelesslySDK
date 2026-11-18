@@ -37,14 +37,14 @@ App
           Row between
             Text.strong "Scanning {rangeFrom} to {rangeTo} nm"
             Text.muted "{round(progress*100,0)}%"
-          Progress bind=progress
+          Progress value={progress}
       Row gap=16 top
         Card grow gap=12
           Row between
             Heading "Intensity by wavelength" level=3
             Text.muted "Cursor {cursor} nm"
           LineChart values={intensity} labels={wavelengths} h=300 cursor={cursor} peaks={peaks} onCursor={cursor=result}
-          Slider bind=cursor min=400 max=800 step=1
+          Slider @cursor min=400 max=800 step=1
           Row gap=24
             Column
               Text.caption "Wavelength"
@@ -57,21 +57,21 @@ App
               Text.strong "{length(peaks)}"
         Card w=300 gap=12
           Heading "Settings" level=3
-          Input "Integration time (ms)" type=number bind=integration
+          Input "Integration time (ms)" type=number @integration
           Row gap=8
             IconButton "remove" tooltip="Shorter" onTap={integration=max(10,integration-10)}
             IconButton "add" tooltip="Longer" onTap={integration=min(5000,integration+10)}
-          Input "Averaging (scans)" type=number bind=averaging
+          Input "Averaging (scans)" type=number @averaging
           Row gap=8
             IconButton "remove" tooltip="Fewer scans" onTap={averaging=max(1,averaging-1)}
             IconButton "add" tooltip="More scans" onTap={averaging=min(64,averaging+1)}
           Text.fieldLabel "Range (nm)"
           Row gap=8
-            Input "From" type=number bind=rangeFrom grow
-            Input "To" type=number bind=rangeTo grow
+            Input "From" type=number @rangeFrom grow
+            Input "To" type=number @rangeTo grow
           Button.tertiary "Reset to defaults" onTap={integration=100; averaging=8; rangeFrom=400; rangeTo=800; toast "Defaults restored"}
   Dialog#export "Export data" "Save the current spectrum as a file"
-    Select "Format" items=["CSV","JSON","SPC"] bind=exportFormat
+    Select "Format" items=["CSV","JSON","SPC"] @exportFormat
     Text.muted "{length(wavelengths)} points, {rangeFrom} to {rangeTo} nm, integration {integration} ms"
     Row end gap=8
       Button.outline "Cancel" onTap={close}
@@ -95,7 +95,7 @@ App
     Nav
       Heading "Sample plate" level=1
       Row gap=8
-        SegmentedButton items=["Absorbance","Fluorescence"] bind=metric
+        SegmentedButton items=["Absorbance","Fluorescence"] @metric
         Button "Combine selected" icon="merge" onTap={length(selected)>1 ? combined=true : toast "Select at least two wells"}
     Column pad=24 gap=16 scroll
       Row gap=16 top
@@ -160,10 +160,10 @@ App
       Card gap=12
         Heading "Pass mark" level=3
         Row gap=16
-          Slider bind=passMark min=80 max=100 grow
+          Slider @passMark min=80 max=100 grow
           Text.strong "{passMark}%"
         Row gap=16 middle
-          Gauge bind=score min=0 max=100 limit={passMark} unit="%"
+          Gauge value={score} min=0 max=100 limit={passMark} unit="%"
           Column gap=4
             Text.strong "Score {score}%"
             if score>=passMark

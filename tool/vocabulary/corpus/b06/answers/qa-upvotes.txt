@@ -20,7 +20,7 @@ Page
       Text.muted "{count(questions,q=>!q.hidden)} questions, {sum(questions,q=>q.votes)} upvotes. Ask anything, upvote what you want answered."
       Card gap=12
         Heading "Ask a question" level=3
-        Input "Your question" "Type your question" bind=draft multiline maxlength=200
+        Input "Your question" "Type your question" @draft multiline maxlength=200
         Row between
           Text.caption "{length(draft)}/200"
           if any(banned,w=>contains(lower(draft),w))
@@ -33,11 +33,11 @@ Page
             each s in filter(questions,q=>!q.hidden && length(draft)>12 && contains(lower(q.text),lower(slice(draft,0,12))))
               ListTile "{s.text}" subtitle="{s.votes} upvotes"
                 Button.outline "Upvote instead" onTap={questions=updateWhere(questions,x=>x.id==s.id,x=>with(x,"votes",x.votes+1)); draft=""; toast "Upvoted the existing question"}
-        Input "Name (optional)" bind=name
+        Input "Name (optional)" @name
         Row end
           Button "Send question" onTap={any(banned,w=>contains(lower(draft),w)) ? toast "Your question contains a banned word" : (length(trim(draft))<5 ? toast "Write at least 5 characters" : {questions=append(questions,{"id":length(questions)+10,"text":trim(draft),"author":coalesce(trim(name),"Anonymous"),"votes":1,"answered":false,"pinned":false,"hidden":false,"mergeInto":0,"merged":0}); draft=""; name=""; toast "Question sent"})}
       Row between
-        SegmentedButton bind=sort items=["top","newest"]
+        SegmentedButton @sort items=["top","newest"]
         Text.muted "Sorted by {sort}"
       Column gap=8
         each q in (sort=="top" ? sortByDesc(filter(questions,x=>!x.hidden),x=>x.votes) : sortByDesc(filter(questions,x=>!x.hidden),x=>x.id))

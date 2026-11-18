@@ -24,10 +24,10 @@ App
       Card gap=12
         Text.strong "Gas readings"
         Grid cols=4 gap=12
-          Input "H2S (ppm)" "limit 10" type=number bind=gas.h2s invalid={gas.h2s>10}
-          Input "CO (ppm)" "limit 35" type=number bind=gas.co invalid={gas.co>35}
-          Input "LEL (%)" "limit 10" type=number bind=gas.lel invalid={gas.lel>10}
-          Input "O2 (%)" "19.5 to 23.5" type=number bind=gas.o2 invalid={gas.o2<19.5 || gas.o2>23.5}
+          Input "H2S (ppm)" "limit 10" type=number @gas.h2s invalid={gas.h2s>10}
+          Input "CO (ppm)" "limit 35" type=number @gas.co invalid={gas.co>35}
+          Input "LEL (%)" "limit 10" type=number @gas.lel invalid={gas.lel>10}
+          Input "O2 (%)" "19.5 to 23.5" type=number @gas.o2 invalid={gas.o2<19.5 || gas.o2>23.5}
         if gas.h2s>10 || gas.co>35 || gas.lel>10 || gas.o2<19.5 || gas.o2>23.5
           Row gap=8
             Icon "warning" color=#FFD32F2F
@@ -47,7 +47,7 @@ App
                 Badge.success "Pass"
               if a.result=="N/A"
                 Badge.neutral "Not applicable"
-          SegmentedButton items=["Pass","Fail","N/A"] bind=a.result onChange={result=="Fail" ? {sel=a.id; open failure} : toast "{a.name} marked {result}"}
+          SegmentedButton items=["Pass","Fail","N/A"] @a.result onChange={result=="Fail" ? {sel=a.id; open failure} : toast "{a.name} marked {result}"}
           if a.result=="Fail"
             Row gap=8
               Text.muted "{a.note}"
@@ -57,8 +57,8 @@ App
     each a in filter(areas,x=>x.id==sel)
       Column gap=12 pad=16
         Text.strong "{a.name}, {a.deck} deck"
-        Select "Severity" items=["Minor","Major","Critical"] bind=a.severity
-        Input "What did you find?" multiline bind=a.note
+        Select "Severity" items=["Minor","Major","Critical"] @a.severity
+        Input "What did you find?" multiline @a.note
         Row gap=12
           Button.outline "Take photo" icon="photo_camera" onTap={emit takePhoto a.id}
           Button.outline "Choose from gallery" icon="image" onTap={emit pickPhoto a.id}
@@ -95,9 +95,9 @@ App
           Text.muted "To do"
     Row pad=24 gap=16 top
       Column grow gap=12
-        SegmentedButton items=["Top","Drill","Main","Cellar"] bind=deck
+        SegmentedButton items=["Top","Drill","Main","Cellar"] @deck
         Card gap=8
-          DeckMap deck={deck} areas={filter(areas,a=>a.deck==deck)} bind=sel h=380
+          DeckMap deck={deck} areas={filter(areas,a=>a.deck==deck)} @sel h=380
           Text.muted "A dot sits at each area on the {deck} deck."
       Pane w=320 pad=16 gap=12
         each a in filter(areas,x=>x.id==sel)
@@ -153,7 +153,7 @@ App
           Text.muted "On board"
           Text "{length(crew)}" size=64 weight=700
       Row gap=12
-        Select "Muster station" items=["Lifeboat A","Lifeboat B","Helideck","Mess hall"] bind=station w=220
+        Select "Muster station" items=["Lifeboat A","Lifeboat B","Helideck","Mess hall"] @station w=220
         Button.outline "Mark everyone present" onTap={crew=map(crew,c=>with(c,"present",true))}
       Card gap=8
         Row gap=8
@@ -167,7 +167,7 @@ App
               Avatar "{c.name}" size=32
               Text "{c.name}"
             Text.muted "{c.role}" w=140
-            Toggle bind=c.present
+            Toggle @c.present
       if count(crew,c=>!c.present)>0
         Card gap=8 fill=#FFFDECEA
           Text.danger "Not yet at {station}: {join(map(filter(crew,c=>!c.present),c=>c.name),", ")}"
@@ -213,8 +213,8 @@ Page
           Text.danger "Locked: {count(areas,a=>a.result==\"\")} areas still to answer."
       if count(areas,a=>a.result=="Fail")>0
         Text.muted "{count(areas,a=>a.result==\"Fail\")} failed checks will go to the HSE lead with this sign-off."
-      Input "Your full name" bind=name disabled={count(areas,a=>a.result=="")>0}
-      Checkbox "I walked every area and the answers are true" bind=declared disabled={count(areas,a=>a.result=="")>0}
+      Input "Your full name" @name disabled={count(areas,a=>a.result=="")>0}
+      Checkbox "I walked every area and the answers are true" @declared disabled={count(areas,a=>a.result=="")>0}
       Button "Sign off round" icon="draw" disabled={count(areas,a=>a.result=="")>0 || trim(name)=="" || !declared} onTap={open confirm}
       if signed
         Row gap=8

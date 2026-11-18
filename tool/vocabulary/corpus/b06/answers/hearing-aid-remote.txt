@@ -34,7 +34,7 @@ App
           EarPicture side="left" level={leftVol}
           Row gap=8
             Icon "volume_down"
-            Slider bind=leftVol min=0 max=100 grow onChange={linked ? rightVol=clamp(result-5,0,100) : toast "Left ear {result}"}
+            Slider @leftVol min=0 max=100 grow onChange={linked ? rightVol=clamp(result-5,0,100) : toast "Left ear {result}"}
             Icon "volume_up"
           Text.muted "Volume {leftVol}"
           if leftBat < 20
@@ -48,19 +48,19 @@ App
           EarPicture side="right" level={rightVol}
           Row gap=8
             Icon "volume_down"
-            Slider bind=rightVol min=0 max=100 grow
+            Slider @rightVol min=0 max=100 grow
             Icon "volume_up"
           Text.muted "Volume {rightVol}"
           if rightBat < 20
             Badge.warning "Charge soon"
-      Toggle "Link both ears" bind=linked
+      Toggle "Link both ears" @linked
       Card gap=8
         Row between
           Text.heading "Balance"
           Text.muted "{balance == 0 ? 'Centered' : (balance < 0 ? 'Left ' + abs(balance) : 'Right ' + balance)}"
         Row gap=8
           Text.strong "L"
-          Slider bind=balance min=-10 max=10 grow
+          Slider @balance min=-10 max=10 grow
           Text.strong "R"
         Button.ghost "Reset to center" onTap={balance=0}
       Text.sectionTitle "Programmes"
@@ -95,7 +95,7 @@ App
           Text.muted "Wind softened"
       Card gap=12
         Text.heading "Noise reduction"
-        SegmentedButton bind=nrLevel items=["Off","Low","Medium","High"] onChange={emit setNoiseReduction result}
+        SegmentedButton @nrLevel items=["Off","Low","Medium","High"] onChange={emit setNoiseReduction result}
         Text.muted "{nrLevel == 0 ? 'Every sound passes through.' : (nrLevel == 1 ? 'Gentle hush on steady noise.' : (nrLevel == 2 ? 'Balanced for most rooms.' : 'Strongest, speech stays clear.'))}"
 
 ### Find my aid
@@ -117,9 +117,9 @@ App
       Row gap=8
         Button.outline "Open map" onTap={emit openMap}
     Column pad=24 gap=20 center
-      SegmentedButton bind=side items=["left","right"]
+      SegmentedButton @side items=["left","right"]
       Card gap=16 center maxw=520
-        Gauge bind=signal min=0 max=100 unit="% signal" h=240
+        Gauge value={signal} min=0 max=100 unit="% signal" h=240
         Text.heading "{signal < 20 ? 'Out of range' : (signal < 50 ? 'Getting warmer' : (signal < 80 ? 'Close' : 'Very close'))}"
         Text.muted "Walk slowly. The {side} aid beeps faster as you get closer."
         Beeper rate={signal} active={finding}
@@ -141,6 +141,7 @@ App
 state sources=[{"id":"tv","name":"Living room TV","kind":"tv","connected":true,"vol":70},{"id":"phone","name":"Ray's phone","kind":"smartphone","connected":false,"vol":50},{"id":"mic","name":"Partner microphone","kind":"mic","connected":false,"vol":60},{"id":"pc","name":"Office laptop","kind":"laptop","connected":false,"vol":40}]
 state active="tv"
 state mixOutside=30
+state newName=""
 App
   Sidebar
     Brand "Whisper" icon="hearing"
@@ -159,13 +160,13 @@ App
           Row gap=8
             if s.connected
               Badge.success "Live"
-            Switch bind=s.connected onChange={active=s.id; emit stream s.id}
+            Switch @s.connected onChange={active=s.id; emit stream s.id}
             IconButton "more_vert" tooltip="More" onTap={sel=s.id; open sourceMenu}
       Card gap=8
         Text.heading "Mix with surroundings"
         Row gap=8
           Text.muted "Source only"
-          Slider bind=mixOutside min=0 max=100 grow
+          Slider @mixOutside min=0 max=100 grow
           Text.muted "Room sound"
         Text.muted "{mixOutside}% of the room is let in."
     Footer
@@ -175,7 +176,7 @@ App
           Text.strong "{find(sources, x=>x.id==active).name}"
         Button.outline "Stop streaming" onTap={sources=map(sources, x=>with(x,"connected",false)); toast "Streaming stopped"}
   Dialog#pair "Pair new device" "Hold the device's pair button until it blinks."
-    Input "Device name" bind=newName
+    Input "Device name" @newName
     Button "Search" onTap={emit pairSearch newName; close}
   Menu#sourceMenu end
     MenuItem "Rename" icon="edit" onTap={emit rename sel}
@@ -197,7 +198,7 @@ App
     Nav
       Heading "Soothing sounds" level=1
       Row gap=8
-        Select bind=timer items=["15 min","30 min","1 hour","All night"]
+        Select @timer items=["15 min","30 min","1 hour","All night"]
         Button "{playing ? 'Pause' : 'Play'}" icon={playing ? "pause" : "play_arrow"} onTap={playing=!playing; emit soothe playing}
     Column pad=24 gap=16 scroll
       Card gap=8
@@ -210,13 +211,13 @@ App
             Row gap=8
               IconTile "{l.icon}"
               Text.strong "{l.name}"
-            Toggle bind=l.on
-          Slider bind=l.vol min=0 max=100 hidden={!l.on}
+            Toggle @l.on
+          Slider @l.vol min=0 max=100 hidden={!l.on}
       Card gap=8
         Text.heading "Tone matching"
         Row gap=8
           Text.muted "Low"
-          Slider bind=pitch min=0 max=100 grow
+          Slider @pitch min=0 max=100 grow
           Text.muted "High"
         Text.muted "Shape the mix to sit under your tinnitus pitch."
       Row gap=8

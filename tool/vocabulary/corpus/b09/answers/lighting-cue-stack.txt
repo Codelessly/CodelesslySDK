@@ -41,7 +41,7 @@ App
             Text.caption "NOW FADING"
             Text.heading "{find(cues,c=>c.id==prevId).name}  to  {find(cues,c=>c.id==live).name}"
           Text.mono "{fixed(fade*find(cues,c=>c.id==live).fade,1)}s / {find(cues,c=>c.id==live).fade}s"
-        Progress bind=fade
+        Progress value={fade}
         Row gap=12 middle
           Button "GO" size=large icon="play_arrow" onTap={prevId=live; live=nextId; nextId=min(7,nextId+1); fade=0; fading=true}
           Button.outline "Back" icon="skip_previous" onTap={nextId=live; live=prevId; prevId=max(1,prevId-1); fade=0; fading=true}
@@ -72,9 +72,9 @@ App
     MenuItem "Fire now" icon="play_arrow" onTap={prevId=live; live=sel; fade=0; fading=true}
     MenuItem "Delete cue" icon="delete" onTap={cues=removeWhere(cues,c=>c.id==sel)}
   Dialog#record "Record current look" "Stores the stage as a new cue"
-    Input "Cue number" "3.7" bind=newNum
-    Input "Name" "Singer special 2" bind=newName
-    Select "Insert after" items=["3 Band intro","3.5 Singer special","4 Full stage warm"] bind=afterId
+    Input "Cue number" "3.7" @newNum
+    Input "Name" "Singer special 2" @newName
+    Select "Insert after" items=["3 Band intro","3.5 Singer special","4 Full stage warm"] @afterId
     Row gap=8 end
       Button.ghost "Cancel" onTap={close}
       Button "Record" onTap={newName=="" ? toast "Name the cue" : {cues=append(cues,{"id":length(cues)+1,"num":newNum,"name":newName,"fade":3,"wait":0}); toast "Cue {newNum} recorded"; newName=""; newNum=""; close}}
@@ -104,8 +104,8 @@ App
         each l in levels
           Card gap=8 center w=120
             Text.mono "{l.ch}"
-            Slider bind=l.v min=0 max=100 vertical h=220
-            Input "Level" type=number bind=l.v w=80
+            Slider @l.v min=0 max=100 vertical h=220
+            Input "Level" type=number @l.v w=80
             Text.caption "{l.name}" center
             Progress {blackout ? 0 : l.v/100}
       Card gap=8
@@ -153,15 +153,15 @@ App
               Text.mono "R{r} G{g} B{b}" color=#FFFFFFFF center
             Row gap=8 middle
               Text.caption "R" w=16
-              Slider bind=r min=0 max=255 grow
+              Slider @r min=0 max=255 grow
               Text.mono "{r}" w=36
             Row gap=8 middle
               Text.caption "G" w=16
-              Slider bind=g min=0 max=255 grow
+              Slider @g min=0 max=255 grow
               Text.mono "{g}" w=36
             Row gap=8 middle
               Text.caption "B" w=16
-              Slider bind=b min=0 max=255 grow
+              Slider @b min=0 max=255 grow
               Text.mono "{b}" w=36
             Button "Apply to {length(picked)} lamps" onTap={isEmpty(picked) ? toast "Pick lamps first" : toast "Colour applied"}
           Card gap=8

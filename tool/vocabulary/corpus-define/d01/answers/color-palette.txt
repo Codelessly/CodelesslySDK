@@ -4,6 +4,9 @@ state sel=1
 state draft="#FF264653"
 state palName="Coastal Sunset"
 state saved=[]
+state hue=0
+state sat=0
+state light=0
 KeyListener key="space" onPress={shuffle colors}
 App
   Sidebar
@@ -15,7 +18,7 @@ App
     Text.muted "Press space to shuffle"
   Main
     Nav
-      Input "Palette name" bind=palName w=220
+      Input "Palette name" @palName w=220
       Row gap=8
         IconButton "shuffle" tooltip="Shuffle unlocked" onTap={shuffle colors}
         Button.outline "Shades" icon="gradient" onTap={go shades}
@@ -33,20 +36,20 @@ App
 
 Sheet#picker "Edit colour"
   Row gap=24 top
-    ColorWheel bind=draft size=220
+    ColorWheel @draft size=220
     Column grow gap=12
       Box h=56 radius=8 fill={draft}
-      HexInput "Hex" bind=draft
-      Slider "Hue" bind=hue min=0 max=360
-      Slider "Saturation" bind=sat min=0 max=100
-      Slider "Lightness" bind=light min=0 max=100
+      HexInput "Hex" @draft
+      Slider "Hue" @hue min=0 max=360
+      Slider "Saturation" @sat min=0 max=100
+      Slider "Lightness" @light min=0 max=100
       Row gap=8 end
         Button.ghost "Cancel" onTap={close}
         Button "Apply" onTap={colors=updateWhere(colors,x=>x.id==sel,x=>with(x,"hex",draft)); close}
 
 Dialog#export "Export palette" "Copy the code for your project"
   state fmt="CSS"
-  SegmentedButton bind=fmt items=["CSS","Tailwind","Swift","JSON"]
+  SegmentedButton @fmt items=["CSS","Tailwind","Swift","JSON"]
   CodeBlock lang={lower(fmt)} code={fmt=="CSS" ? ":root { --c1: " + colors[0].hex + "; --c2: " + colors[1].hex + "; }" : join(map(colors,c=>c.hex),", ")}
   Row gap=8 end
     Button.outline "Close" onTap={close}
@@ -70,10 +73,10 @@ App
       Grid cols=2 gap=16
         Card gap=8
           Text.strong "Text colour"
-          HexInput "Hex" bind=fg onChange={ratio=contrastRatio(fg,bg)}
+          HexInput "Hex" @fg onChange={ratio=contrastRatio(fg,bg)}
         Card gap=8
           Text.strong "Background"
-          HexInput "Hex" bind=bg onChange={ratio=contrastRatio(fg,bg)}
+          HexInput "Hex" @bg onChange={ratio=contrastRatio(fg,bg)}
       Box pad=32 radius=12 fill={bg} gap=8
         Text "Large heading sample" size=32 weight=700 color={fg}
         Text "The quick brown fox jumps over the lazy dog." color={fg}
@@ -113,7 +116,7 @@ App
         Text.strong "Base colour"
         Row gap=12 middle
           Box w=48 h=48 radius=8 fill={base}
-          HexInput "Hex" bind=base
+          HexInput "Hex" @base
       Grid cols=5 gap=12
         each s in steps
           Box h=110 radius=8 fill={shade(base,s)} pad=10 bottom onTap={copy shade(base,s); toast "Copied {shade(base,s)}"} animate=scale stagger=40
@@ -123,6 +126,7 @@ App
 ### Saved
 state saved=[{"name":"Coastal Sunset","colors":["#FF264653","#FF2A9D8F","#FFE9C46A","#FFF4A261","#FFE76F51"]},{"name":"Midnight Orchid","colors":["#FF10002B","#FF3C096C","#FF7B2CBF","#FFC77DFF","#FFE0AAFF"]},{"name":"Forest Floor","colors":["#FF283618","#FF606C38","#FFFEFAE0","#FFDDA15E","#FFBC6C25"]}]
 state sel=0
+state q=""
 App
   Sidebar
     Brand "Swatchbook" icon="palette"
@@ -132,7 +136,7 @@ App
   Main
     Nav
       Heading "Saved palettes" level=1
-      Input "Search" bind=q w=220
+      Input "Search" @q w=220
     Column pad=24 gap=16 scroll
       if isEmpty(saved)
         Text.muted "Nothing saved yet. Press Save on the generator."
@@ -156,15 +160,15 @@ define KeyListener key="space" onPress
     Text.caption "Key: {key}"
 
 // A hue wheel needs a canvas; shown as a labelled round box filled with the colour.
-define ColorWheel bind=color size=200
+define ColorWheel @color size=200
   Box w={size} h={size} radius={size/2} fill={color}
     Text.caption "hue wheel" center
 
-define HexInput "label" bind=value onChange
+define HexInput "label" @value onChange
   state value="#FF000000"
   Row gap=8 middle
     Box w=28 h=28 radius=6 fill={value}
-    Input "{label}" bind=value onChange={onChange}
+    Input "{label}" @value onChange={onChange}
 
 // Syntax highlighting is not drawn; the code is plain monospaced text.
 define CodeBlock lang="css" code=""

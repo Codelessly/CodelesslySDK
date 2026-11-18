@@ -201,7 +201,7 @@
   "plan_progress": [
    {
     "name": "done",
-    "type": "integer",
+    "type": "decimal",
     "value": 0
    },
    {

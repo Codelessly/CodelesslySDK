@@ -58,11 +58,11 @@ App
             Button.outline "Stop" onTap={breakRunning=false}
           Progress {1-breakLeft/2700}
   Sheet#announcePanel "Announcement to speakers"
-    Select "Preset" bind=announce items=["Next stop","Please move down the bus","Mind the step","Service delayed","Bus terminates here"]
+    Select "Preset" @announce items=["Next stop","Please move down the bus","Mind the step","Service delayed","Bus terminates here"]
     Text.muted "Plays through the cabin speakers once."
     Button "Send to speakers" icon="volume_up" onTap={emit announce announce; toast "Sent: {announce}"; close}
   Dialog#handover "Vehicle handover" "Confirm the vehicle you are taking over"
-    Input "Vehicle number" "BX-4471" bind=vehicle
+    Input "Vehicle number" "BX-4471" @vehicle
     Button "Confirm handover" onTap={vehicle!="" ? {emit handover vehicle; toast "Vehicle {vehicle} taken over"; close} : toast "Enter a vehicle number"}
 state breakLeft=2700
 state breakRunning=false
@@ -100,7 +100,7 @@ App
         Row between
           Text.muted "Fare due"
           Text "{money(fares[fare].price*qty,'GBP ',2)}" size=40 weight=700
-        Input "Cash tendered" bind=tendered type=number
+        Input "Cash tendered" @tendered type=number
         Row between
           Text.muted "Change due"
           Text "{tendered >= fares[fare].price*qty ? money(tendered-fares[fare].price*qty,'GBP ',2) : 'Short by ' + money(fares[fare].price*qty-tendered,'GBP ',2)}" size=32 weight=700 color={tendered >= fares[fare].price*qty ? #FF1B7F3B : #FFC62828}
@@ -146,11 +146,11 @@ App
         each i in incidents
           ListTile "{i.kind}" "{i.note}" trailing="{i.time}"
   Dialog#logIncident "{kind}" "Add a short note for the control room"
-    Input "Note" bind=note multiline
+    Input "Note" @note multiline
     Button "Log incident" onTap={incidents=append(incidents,{"kind":kind,"note":coalesce(note,"No note"),"time":formatDate(today(),"HH:mm")}); emit incident kind; note=""; toast "Logged"; close}
   Dialog#defectDialog "Defect report" "Vehicle {vehicle}"
-    Select "Severity" bind=sev items=["Minor","Needs fixing today","Unsafe, withdraw vehicle"]
-    Input "What is wrong" "Offside rear door sensor sticks" bind=defect multiline
+    Select "Severity" @sev items=["Minor","Needs fixing today","Unsafe, withdraw vehicle"]
+    Input "What is wrong" "Offside rear door sensor sticks" @defect multiline
     Button.destructive "Submit defect" onTap={defect!="" ? {emit defect {"severity":sev,"text":defect}; defect=""; toast "Defect sent to the depot"; close} : toast "Describe the defect first"}
 
 ### End of shift

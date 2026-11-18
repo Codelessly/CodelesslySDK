@@ -4,7 +4,7 @@ every 1s when running onTick={remaining=max(0,remaining-1); running=remaining>1}
 Card gap=16 pad=20
   Text.heading "Countdown"
   Text "{duration(remaining)}" size=64 weight=700
-  Progress bind={remaining/300}
+  Progress value={remaining/300}
   Row gap=8 center
     Button "Start" visible={!running} onTap={running=remaining>0}
     Button.secondary "Pause" visible={running} onTap={running=false}

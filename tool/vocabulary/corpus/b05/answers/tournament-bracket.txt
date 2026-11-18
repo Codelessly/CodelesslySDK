@@ -11,7 +11,7 @@ App
     NavItem "Live match" icon="sports_soccer" badge="LIVE" onTap={go match}
     Spacer grow
     Text.caption "Following"
-    Select bind=follow items=["Brazil","Japan","Croatia","Morocco","Spain","Senegal","Netherlands","USA","Argentina","Australia","France","Poland","England","Mexico","Portugal","Switzerland"]
+    Select @follow items=["Brazil","Japan","Croatia","Morocco","Spain","Senegal","Netherlands","USA","Argentina","Australia","France","Poland","England","Mexico","Portugal","Switzerland"]
     Button.ghost "Clear" icon="close" onTap={follow=""}
   Main
     Nav
@@ -32,10 +32,10 @@ App
             Card gap=4 fill={(g.a==follow || g.b==follow) ? "#FFFFF3CD" : "#FFFFFFFF"}
               Row middle gap=8
                 Text.strong "{g.a}" grow strike={g.sb!="" && g.sa!="" && g.sa<g.sb}
-                Input "" type=number w=56 bind=g.sa onChange={m=updateWhere(m,x=>x.id==g.id,y=>with(y,"sa",result)); m=g.sb!="" ? updateWhere(m,x=>x.id==g.next,y=>with(y,g.slot,result>g.sb?g.a:g.b)) : m}
+                Input "" type=number w=56 @g.sa onChange={m=updateWhere(m,x=>x.id==g.id,y=>with(y,"sa",result)); m=g.sb!="" ? updateWhere(m,x=>x.id==g.next,y=>with(y,g.slot,result>g.sb?g.a:g.b)) : m}
               Row middle gap=8
                 Text.strong "{g.b}" grow strike={g.sb!="" && g.sa!="" && g.sb<g.sa}
-                Input "" type=number w=56 bind=g.sb onChange={m=updateWhere(m,x=>x.id==g.id,y=>with(y,"sb",result)); m=g.sa!="" ? updateWhere(m,x=>x.id==g.next,y=>with(y,g.slot,g.sa>result?g.a:g.b)) : m}
+                Input "" type=number w=56 @g.sb onChange={m=updateWhere(m,x=>x.id==g.id,y=>with(y,"sb",result)); m=g.sa!="" ? updateWhere(m,x=>x.id==g.next,y=>with(y,g.slot,g.sa>result?g.a:g.b)) : m}
         BracketLines from=8 to=4 w=48
         Column w=240 gap=16 pad=8 between
           Text.sectionTitle "Quarter-finals"
@@ -43,10 +43,10 @@ App
             Card gap=4 fill={(g.a==follow || g.b==follow) ? "#FFFFF3CD" : "#FFFFFFFF"}
               Row middle gap=8
                 Text.strong "{g.a}" grow
-                Input "" type=number w=56 bind=g.sa onChange={m=updateWhere(m,x=>x.id==g.id,y=>with(y,"sa",result)); m=(g.sb!="" && g.a!="TBD" && g.b!="TBD") ? updateWhere(m,x=>x.id==g.next,y=>with(y,g.slot,result>g.sb?g.a:g.b)) : m}
+                Input "" type=number w=56 @g.sa onChange={m=updateWhere(m,x=>x.id==g.id,y=>with(y,"sa",result)); m=(g.sb!="" && g.a!="TBD" && g.b!="TBD") ? updateWhere(m,x=>x.id==g.next,y=>with(y,g.slot,result>g.sb?g.a:g.b)) : m}
               Row middle gap=8
                 Text.strong "{g.b}" grow
-                Input "" type=number w=56 bind=g.sb onChange={m=updateWhere(m,x=>x.id==g.id,y=>with(y,"sb",result)); m=(g.sa!="" && g.a!="TBD" && g.b!="TBD") ? updateWhere(m,x=>x.id==g.next,y=>with(y,g.slot,g.sa>result?g.a:g.b)) : m}
+                Input "" type=number w=56 @g.sb onChange={m=updateWhere(m,x=>x.id==g.id,y=>with(y,"sb",result)); m=(g.sa!="" && g.a!="TBD" && g.b!="TBD") ? updateWhere(m,x=>x.id==g.next,y=>with(y,g.slot,g.sa>result?g.a:g.b)) : m}
         BracketLines from=4 to=2 w=48
         Column w=240 gap=16 pad=8
           Text.sectionTitle "Semi-finals"
@@ -54,20 +54,20 @@ App
             Card gap=4 fill={(g.a==follow || g.b==follow) ? "#FFFFF3CD" : "#FFFFFFFF"}
               Row middle gap=8
                 Text.strong "{g.a}" grow
-                Input "" type=number w=56 bind=g.sa onChange={m=updateWhere(m,x=>x.id==g.id,y=>with(y,"sa",result)); m=(g.sb!="" && g.a!="TBD" && g.b!="TBD") ? updateWhere(m,x=>x.id==g.next,y=>with(y,g.slot,result>g.sb?g.a:g.b)) : m}
+                Input "" type=number w=56 @g.sa onChange={m=updateWhere(m,x=>x.id==g.id,y=>with(y,"sa",result)); m=(g.sb!="" && g.a!="TBD" && g.b!="TBD") ? updateWhere(m,x=>x.id==g.next,y=>with(y,g.slot,result>g.sb?g.a:g.b)) : m}
               Row middle gap=8
                 Text.strong "{g.b}" grow
-                Input "" type=number w=56 bind=g.sb onChange={m=updateWhere(m,x=>x.id==g.id,y=>with(y,"sb",result)); m=(g.sa!="" && g.a!="TBD" && g.b!="TBD") ? updateWhere(m,x=>x.id==g.next,y=>with(y,g.slot,g.sa>result?g.a:g.b)) : m}
+                Input "" type=number w=56 @g.sb onChange={m=updateWhere(m,x=>x.id==g.id,y=>with(y,"sb",result)); m=(g.sa!="" && g.a!="TBD" && g.b!="TBD") ? updateWhere(m,x=>x.id==g.next,y=>with(y,g.slot,g.sa>result?g.a:g.b)) : m}
         BracketLines from=2 to=1 w=48
         Column w=260 gap=16 pad=8
           Text.sectionTitle "Final"
           Card gap=8
             Row middle gap=8
               Text.strong "{m[14].a}" grow
-              Input "" type=number w=56 bind=m[14].sa
+              Input "" type=number w=56 @m[14].sa
             Row middle gap=8
               Text.strong "{m[14].b}" grow
-              Input "" type=number w=56 bind=m[14].sb
+              Input "" type=number w=56 @m[14].sb
           if m[14].sa!="" && m[14].sb!="" && m[14].a!="TBD" && m[14].b!="TBD"
             Card gap=8 fill=#FF1B5E20 animate=pop
               Icon "emoji_events" color=#FFFFD54F
@@ -87,7 +87,7 @@ App
   Main
     Nav
       Heading "Group stage" level=1
-      SegmentedButton bind=group items=["A","B"]
+      SegmentedButton @group items=["A","B"]
     Column pad=24 gap=16
       Card gap=8
         Text.panelTitle "Group {group}"
@@ -156,7 +156,7 @@ Page
         Button.ghost "Follow Brazil" icon="star" onTap={emit follow "Brazil"; toast "Following Brazil"}
   Section tint
     Column gap=16
-      SegmentedButton bind=tab items=["events","lineups","stats"]
+      SegmentedButton @tab items=["events","lineups","stats"]
       if tab=="events"
         Card gap=0
           Text.panelTitle "Timeline"
@@ -201,7 +201,7 @@ App
     Nav
       Heading "Fixtures" level=1
       Row gap=8 middle
-        Toggle "Only {follow}" bind=onlyFollowed
+        Toggle "Only {follow}" @onlyFollowed
         Button.outline "Add to calendar" icon="event" onTap={emit exportCalendar; toast "Calendar file ready"}
     Column pad=24 gap=16
       Row scroll gap=8

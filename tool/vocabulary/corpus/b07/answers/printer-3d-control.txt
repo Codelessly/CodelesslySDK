@@ -54,7 +54,7 @@ App
             Text.strong "Nozzle"
             Badge.info "Heating" visible={nozzle<nozzleTarget-2}
           Row center
-            Gauge bind=nozzle min=0 max=300 limit={nozzleTarget} unit="C"
+            Gauge value={nozzle} min=0 max=300 limit={nozzleTarget} unit="C"
           Row between middle
             Text.muted "Target"
             Row gap=8 middle
@@ -66,7 +66,7 @@ App
             Text.strong "Bed"
             Badge.success "At target" visible={abs(bed-bedTarget)<=2}
           Row center
-            Gauge bind=bed min=0 max=120 limit={bedTarget} unit="C"
+            Gauge value={bed} min=0 max=120 limit={bedTarget} unit="C"
           Row between middle
             Text.muted "Target"
             Row gap=8 middle
@@ -84,7 +84,7 @@ App
           ModelPreview src="benchy.gcode" layers={layer} total={totalLayers} h=260
           Row gap=12 middle
             Icon "layers"
-            Slider bind=layer min=1 max={totalLayers} onChange={paused=true}
+            Slider @layer min=1 max={totalLayers} onChange={paused=true}
             Button.outline "Live" onTap={layer=floor(progress*totalLayers); paused=false}
         Column w=320 gap=16
           Card gap=8
@@ -97,13 +97,13 @@ App
             Row between
               Text.strong "Filament"
               Text.muted "{filament}% left"
-            Gauge bind=filament min=0 max=100 limit=15 unit="%"
+            Gauge value={filament} min=0 max=100 limit=15 unit="%"
             Text.caption "Polymaker PLA, grey, about 620 g"
       Card gap=8
         Row between middle
           Text.strong "Job progress"
           Text.strong "{round(progress*100,0)}%"
-        Progress bind=progress
+        Progress value={progress}
         Row between
           Text.muted "Time left {duration(remaining)}"
           Text.muted "Done at {formatDate(today(),'MMM d')}, 4:12 PM"
@@ -135,7 +135,7 @@ App
     Column pad=24 gap=16
       Card gap=12
         Text.strong "Step size"
-        SegmentedButton bind=step items=["0.1","1","10","50"]
+        SegmentedButton @step items=["0.1","1","10","50"]
         Text.caption "mm per tap"
       Row gap=16 top
         Card grow gap=12
@@ -191,8 +191,8 @@ App
     Nav
       Heading "Files" level=1
       Row gap=8
-        Input "Search files" bind=q w=220
-        Select bind=sortKey items=["name","mins","grams"]
+        Input "Search files" @q w=220
+        Select @sortKey items=["name","mins","grams"]
         Button "Upload" icon="upload" onTap={emit upload}
     Column pad=24 gap=16
       Card gap=8

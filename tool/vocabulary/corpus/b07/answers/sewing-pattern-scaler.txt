@@ -19,7 +19,7 @@ App
     Nav
       Heading "Willow blouse" level=1
       Row gap=8
-        Select bind=size items=["XS","S","M","L","XL"]
+        Select @size items=["XS","S","M","L","XL"]
         Button.outline "Auto-arrange" icon="auto_fix_high" onTap={emit autoArrange; toast "Pieces arranged"}
         Button "Print pattern" icon="print" onTap={go print}
     Row gap=16 pad=24 top
@@ -27,7 +27,7 @@ App
         Row between
           Text.strong "Cloth {fabricWidth} cm wide"
           Row gap=8
-            Toggle "Snap to edges" bind=snap
+            Toggle "Snap to edges" @snap
             IconButton "rotate_left" tooltip="Rotate 15 degrees left" onTap={pieces=updateWhere(pieces,p=>p.id==sel,p=>with(p,"rot",(p.rot+345)%360))}
             IconButton "rotate_right" tooltip="Rotate 15 degrees right" onTap={pieces=updateWhere(pieces,p=>p.id==sel,p=>with(p,"rot",(p.rot+15)%360))}
         Card
@@ -58,17 +58,17 @@ App
                 Button.outline "Rotate 90" onTap={pieces=updateWhere(pieces,q=>q.id==sel,q=>with(q,"rot",(q.rot+90)%360))}
                 Button.outline "Flip" onTap={pieces=updateWhere(pieces,q=>q.id==sel,q=>with(q,"flip",!q.flip))}
               Text.caption "Rotation {p.rot} degrees"
-              Slider bind=p.rot min=0 max=345 step=15
+              Slider @p.rot min=0 max=345 step=15
         Divider
         Text.panelTitle "Seam allowance"
         Row between
           Text.body "{allowance} cm"
           Text.caption "dashed line on every piece"
-        Slider bind=allowance min=0.5 max=3 step=0.5
+        Slider @allowance min=0.5 max=3 step=0.5
         Divider
         Text.panelTitle "Fabric width"
-        SegmentedButton bind=fabricWidth items=[90,115,140,150]
-        Input "Custom width (cm)" bind=fabricWidth type=number
+        SegmentedButton @fabricWidth items=[90,115,140,150]
+        Input "Custom width (cm)" @fabricWidth type=number
         Button.ghost "Reset layout" icon="restart_alt" onTap={emit resetLayout; toast "Layout reset"}
 
 ### Sizes
@@ -77,6 +77,7 @@ state unit="cm"
 state allowance=1.5
 state measurements=[{"name":"Bust","XS":80,"S":84,"M":88,"L":94,"XL":100},{"name":"Waist","XS":62,"S":66,"M":70,"L":76,"XL":82},{"name":"Hip","XS":86,"S":90,"M":94,"L":100,"XL":106},{"name":"Shoulder","XS":11.5,"S":12,"M":12.5,"L":13,"XL":13.5},{"name":"Sleeve length","XS":58,"S":59,"M":60,"L":61,"XL":62},{"name":"Back length","XS":38,"S":39,"M":40,"L":41,"XL":42}]
 state scaleFor={"XS":0.88,"S":0.94,"M":1,"L":1.07,"XL":1.14}
+state scalePct=88
 App
   Sidebar
     Brand "Seamstress Scale" icon="content_cut"
@@ -89,7 +90,7 @@ App
     Nav
       Heading "Sizes and measurements" level=1
       Row gap=8
-        SegmentedButton bind=unit items=["cm","in"]
+        SegmentedButton @unit items=["cm","in"]
         Button.outline "Export table" icon="download" onTap={emit exportMeasurements}
     Row gap=16 pad=24 top
       Column grow gap=16
@@ -101,7 +102,7 @@ App
             ChoiceChip "M" selected={size=="M"} onTap={size="M"}
             ChoiceChip "L" selected={size=="L"} onTap={size="L"}
             ChoiceChip "XL" selected={size=="XL"} onTap={size="XL"}
-          Slider bind=scalePct min=88 max=114 step=1 onChange={emit scaleCustom result}
+          Slider @scalePct min=88 max=114 step=1 onChange={emit scaleCustom result}
           Text.caption "Pieces drawn at {round(scaleFor[size]*100,0)} percent of the base size"
         Card gap=12
           Text.strong "Pieces at size {size}"
@@ -128,7 +129,7 @@ App
             Text.muted "{unit=="cm" ? fixed(m[size]*scaleFor[size]+4,1) : fixed((m[size]*scaleFor[size]+4)/2.54,1)}" w=70
         Divider
         Text.panelTitle "Seam allowance"
-        Slider bind=allowance min=0.5 max=3 step=0.5
+        Slider @allowance min=0.5 max=3 step=0.5
         Text.caption "{allowance} cm, drawn as a dashed line"
         Button "Apply to layout" onTap={emit applySize size; toast "Size {size} applied"; go layout}
 
@@ -174,16 +175,16 @@ App
             PagePreview paper={paper} page={page+1} pieces={pages[page].pieces} registration={showRegistration} notches={showNotches}
           Row between
             IconButton "chevron_left" tooltip="Previous page" onTap={page=max(0,page-1)}
-            Dots bind=page count=6
+            Dots @page count=6
             IconButton "chevron_right" tooltip="Next page" onTap={page=min(length(pages)-1,page+1)}
       Pane w=320 pad=16 gap=12
         Text.panelTitle "Print settings"
-        Select "Paper" bind=paper items=["A4","US Letter","A0 copy shop"]
+        Select "Paper" @paper items=["A4","US Letter","A0 copy shop"]
         Text.fieldLabel "Overlap between pages"
-        Slider bind=overlap min=0 max=2 step=0.5
+        Slider @overlap min=0 max=2 step=0.5
         Text.caption "{overlap} cm, glued along the dashed edge"
-        Toggle "Registration squares" bind=showRegistration
-        Toggle "Show notches" bind=showNotches
+        Toggle "Registration squares" @showRegistration
+        Toggle "Show notches" @showNotches
         Divider
         Text.panelTitle "Check the scale"
         Row gap=12 middle

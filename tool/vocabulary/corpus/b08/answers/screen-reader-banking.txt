@@ -33,10 +33,10 @@ App
         Heading "Summary" level=2
         Text "Move money between your own accounts. Three fields, then a confirm step."
       Heading "Details" level=2
-      Select "From account" bind=from items={accts} hint="The account the money leaves"
-      Select "To account" bind=to items={accts} hint="The account the money goes to"
-      Input "Amount in dollars" "For example 150.00" bind=amount type=number
-      Input "Note, optional" "A short reminder" bind=note
+      Select "From account" @from items={accts} hint="The account the money leaves"
+      Select "To account" @to items={accts} hint="The account the money goes to"
+      Input "Amount in dollars" "For example 150.00" @amount type=number
+      Input "Note, optional" "A short reminder" @note
       if error!=""
         Text.danger "Error: {error}" live=assertive role=alert
       Button "Review transfer" onTap={from==to ? error="Choose two different accounts." : (amount=="" || amount<=0 ? error="Enter an amount greater than zero." : (error=""; open confirm))}
@@ -73,6 +73,7 @@ App
       Button.outline "Copy activity summary" onTap={copy "Recent activity"; toast "Copied"}
 
 ### Help
+state msg=""
 App
   Main
     Nav
@@ -91,5 +92,5 @@ App
       Accordion "How do I move money?"
         Text "Open Transfer money, fill the three fields, then confirm. Amounts are restated in words."
   Dialog#message "Secure message" "We reply within one business day."
-    Input "Your message" bind=msg multiline
+    Input "Your message" @msg multiline
     Button "Send" onTap={emit helpMessage msg; msg=""; toast "Message sent"; close}

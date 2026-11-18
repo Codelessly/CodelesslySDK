@@ -2,6 +2,8 @@
 state q=""
 state filter="All"
 state plants=[{"id":"p1","name":"Monstera","species":"Monstera deliciosa","photo":"https://images.fernwise.app/plants/monstera.jpg","water":0.7,"room":"Living room"},{"id":"p2","name":"Fiddle Leaf","species":"Ficus lyrata","photo":"https://images.fernwise.app/plants/fiddle.jpg","water":0.25,"room":"Living room"},{"id":"p3","name":"Snake Plant","species":"Dracaena trifasciata","photo":"https://images.fernwise.app/plants/snake.jpg","water":0.9,"room":"Bedroom"},{"id":"p4","name":"Pothos","species":"Epipremnum aureum","photo":"https://images.fernwise.app/plants/pothos.jpg","water":0.4,"room":"Kitchen"},{"id":"p5","name":"Calathea","species":"Calathea orbifolia","photo":"https://images.fernwise.app/plants/calathea.jpg","water":0.15,"room":"Bedroom"},{"id":"p6","name":"Aloe","species":"Aloe vera","photo":"https://images.fernwise.app/plants/aloe.jpg","water":0.55,"room":"Kitchen"}]
+state newName=""
+state newRoom=""
 App
   Sidebar
     Brand "Fernwise" icon="eco"
@@ -14,7 +16,7 @@ App
     Nav
       Heading "My plants" level=1
       Row gap=8
-        Input "Search plants" bind=q w=220
+        Input "Search plants" @q w=220
         Button "Add plant" onTap={open addPlant}
     Column pad=24 gap=16
       Row gap=8
@@ -24,8 +26,8 @@ App
         each p in filter=="All" ? plants : filter(plants,x=>x.room==filter)
           PlantTile "{p.name}" species="{p.species}" photo="{p.photo}" water={p.water} onTap={emit openPlant p.id; go plant}
 Dialog#addPlant "Add a plant" "Name it and pick where it lives"
-  Input "Name" bind=newName
-  Select "Room" items=["Living room","Bedroom","Kitchen"] bind=newRoom
+  Input "Name" @newName
+  Select "Room" items=["Living room","Bedroom","Kitchen"] @newRoom
   Button "Save" onTap={newName=="" ? toast "Give it a name" : plants=append(plants,{"id":"p{length(plants)+1}","name":newName,"species":"Unknown","photo":"","water":1,"room":newRoom}); close}
 
 // Photo tile with a water-drop meter: how full the drop is shows how recently it was watered.
@@ -48,6 +50,10 @@ state tab="Schedule"
 state waterings=[{"date":"Nov 14","note":"300 ml, top watering","by":"Mara"},{"date":"Nov 7","note":"250 ml, let it drain","by":"Mara"},{"date":"Oct 31","note":"300 ml","by":"Jonas"},{"date":"Oct 24","note":"Misted leaves too","by":"Mara"}]
 state growth=[{"date":"Aug 2","url":"https://images.fernwise.app/growth/monstera-aug.jpg","note":"3 leaves"},{"date":"Sep 12","url":"https://images.fernwise.app/growth/monstera-sep.jpg","note":"5 leaves"},{"date":"Oct 20","url":"https://images.fernwise.app/growth/monstera-oct.jpg","note":"New split leaf"}]
 state lastWatered="Nov 14"
+state remind=false
+state remindAt=""
+state amount=50
+state note=""
 App
   Sidebar
     Brand "Fernwise" icon="eco"
@@ -79,7 +85,7 @@ App
             Card center gap=4
               Gauge 58 min=30 max=90 limit=70 unit="% RH"
               Text.caption "Humidity: 50 to 70%"
-      SegmentedButton bind=tab items=["Schedule","Growth","Log"]
+      SegmentedButton @tab items=["Schedule","Growth","Log"]
       if tab=="Schedule"
         Card gap=12
           Text.strong "Watering schedule"
@@ -89,8 +95,8 @@ App
           Row gap=8
             each d in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
               Chip "{d}" selected={d=="Fri"}
-          Toggle "Remind me at 9:00" bind=remind
-          TimePicker "Reminder time" bind=remindAt
+          Toggle "Remind me at 9:00" @remind
+          TimePicker "Reminder time" @remindAt
       if tab=="Growth"
         Card gap=12
           Text.strong "Growth timeline"
@@ -102,9 +108,9 @@ App
           each w in waterings
             ListTile "{w.date}" "{w.note} · {w.by}" icon="water_drop"
 Dialog#logWater "Log a watering" "How much did you give?"
-  Slider bind=amount min=50 max=600
+  Slider @amount min=50 max=600
   Text.muted "{amount} ml"
-  Input "Note" bind=note
+  Input "Note" @note
   Button "Save" onTap={waterings=concat([{"date":formatDate(today(),"MMM d"),"note":"{amount} ml, {note}","by":"Mara"}],waterings); lastWatered=formatDate(today(),"MMM d"); toast "Watering logged"; close}
 Menu#plantMenu end
   MenuItem "Rename" icon="edit" onTap={emit renamePlant}

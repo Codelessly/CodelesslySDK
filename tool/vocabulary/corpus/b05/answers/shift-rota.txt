@@ -11,6 +11,7 @@ state sel=0
 state published=[{"id":1,"person":1,"day":0,"start":7,"end":15,"role":"Barista"}]
 state roleFilter="All"
 state roleColors={"Barista":"#FF8D6E63","Cook":"#FFE57373","Server":"#FF4DB6AC","Manager":"#FF7986CB"}
+state publishNote=""
 App
   Sidebar
     Brand "Rota" icon="calendar_month"
@@ -26,8 +27,8 @@ App
         Heading "{weekLabel}" level=1
         IconButton "chevron_right" tooltip="Next week" onTap={emit nextWeek}
       Row gap=8 middle
-        Select bind=roleFilter items=["All","Barista","Cook","Server","Manager"] w=140
-        Toggle "Copy on drop" bind=copyMode
+        Select @roleFilter items=["All","Barista","Cook","Server","Manager"] w=140
+        Toggle "Copy on drop" @copyMode
         Badge.warning "{count(people,p=>sum(filter(shifts,x=>x.person==p.id),x=>x.end-x.start)>p.max)} over hours"
         Button "Publish" icon="send" onTap={open publish}
     Column pad=24 gap=12
@@ -78,9 +79,9 @@ App
     state newDay="Mon"
     state newStart=9
     state newEnd=17
-    Select "Day" bind=newDay items=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
-    TimePicker "Starts" bind=newStart
-    TimePicker "Ends" bind=newEnd
+    Select "Day" @newDay items=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+    TimePicker "Starts" @newStart
+    TimePicker "Ends" @newEnd
     Button "Add" onTap={newEnd>newStart ? {shifts=append(shifts,{"id":nextId,"person":sel,"day":indexOf(days,newDay),"start":newStart,"end":newEnd,"role":find(people,p=>p.id==sel).role}); nextId=nextId+1; close} : toast "End must be after start"}
   Dialog#publish "Publish this week" "Staff are notified of what changed"
     Text.strong "{abs(length(shifts)-length(published))} shifts differ from the last published week"
@@ -95,7 +96,7 @@ App
           Text "{find(people,p=>p.id==s.person).name}, {days[s.day]}"
     if count(people,p=>sum(filter(shifts,x=>x.person==p.id),x=>x.end-x.start)>p.max)>0
       Badge.warning "Some people are over their weekly hours"
-    Input "Note to staff" multiline bind=publishNote
+    Input "Note to staff" multiline @publishNote
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Publish and notify" onTap={published=shifts; emit publish publishNote; toast "Rota published"; close}
@@ -106,6 +107,9 @@ state me=3
 state openShifts=[{"id":101,"day":"Fri","start":16,"end":23,"role":"Server","offered":2,"claimedBy":""},{"id":102,"day":"Sat","start":7,"end":15,"role":"Barista","offered":0,"claimedBy":""},{"id":103,"day":"Sun","start":10,"end":18,"role":"Cook","offered":1,"claimedBy":""}]
 state sel=0
 state roleFilter="All"
+state pickMaya=false
+state pickDev=false
+state pickTom=false
 App
   Sidebar
     Brand "Rota" icon="calendar_month"
@@ -118,7 +122,7 @@ App
     Nav
       Heading "Open shifts" level=1
       Row gap=8
-        Select bind=roleFilter items=["All","Barista","Cook","Server","Manager"] w=140
+        Select @roleFilter items=["All","Barista","Cook","Server","Manager"] w=140
         Button "Offer a shift" icon="add" onTap={open offer}
     Column pad=24 gap=16
       Grid cols=3 gap=16
@@ -145,15 +149,15 @@ App
     state offStart=9
     state offEnd=17
     state offRole="Server"
-    Select "Day" bind=offDay items=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
-    TimePicker "Starts" bind=offStart
-    TimePicker "Ends" bind=offEnd
-    Select "Role" bind=offRole items=["Barista","Cook","Server","Manager"]
+    Select "Day" @offDay items=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+    TimePicker "Starts" @offStart
+    TimePicker "Ends" @offEnd
+    Select "Role" @offRole items=["Barista","Cook","Server","Manager"]
     Button "Offer" onTap={openShifts=append(openShifts,{"id":length(openShifts)+104,"day":offDay,"start":offStart,"end":offEnd,"role":offRole,"offered":0,"claimedBy":""}); toast "Offered to everyone with that role"; close}
   Sheet#offerTo "Offer to specific people"
-    Checkbox "Maya Reyes" bind=pickMaya
-    Checkbox "Dev Patel" bind=pickDev
-    Checkbox "Tom Okafor" bind=pickTom
+    Checkbox "Maya Reyes" @pickMaya
+    Checkbox "Dev Patel" @pickDev
+    Checkbox "Tom Okafor" @pickTom
     Button "Send offer" onTap={openShifts=updateWhere(openShifts,x=>x.id==sel,x=>with(x,"offered",x.offered+1)); toast "Offer sent"; close}
 
 ### Requests
@@ -174,7 +178,7 @@ App
     Nav
       Heading "Requests" level=1
       Row gap=8
-        SegmentedButton bind=kind items=["All","Time off","Availability"]
+        SegmentedButton @kind items=["All","Time off","Availability"]
     Column pad=24 gap=12
       each r in filter(requests,x=>kind=="All" || x.type==kind)
         Card gap=8
@@ -201,7 +205,7 @@ App
               Button.outline "Decline" onTap={sel=r.id; open decline}
               Button "Approve" onTap={requests=updateWhere(requests,x=>x.id==r.id,x=>with(x,"status","approved")); emit approveRequest r.id; toast "Approved for {r.who}"}
   Dialog#decline "Decline request" "{find(requests,r=>r.id==sel).who} will be told why"
-    Input "Reason" multiline bind=reason
+    Input "Reason" multiline @reason
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button.destructive "Decline" onTap={requests=updateWhere(requests,x=>x.id==sel,x=>with(x,"status","declined")); emit declineRequest reason; reason=""; toast "Declined"; close}

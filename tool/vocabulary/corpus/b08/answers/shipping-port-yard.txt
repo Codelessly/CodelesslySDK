@@ -17,7 +17,7 @@ App
     Nav
       Heading "Yard plan, block A to C" level=1
       Row gap=8
-        Input "Find container" "MSCU4471120" bind=q w=220
+        Input "Find container" "MSCU4471120" @q w=220
         Button "Find" onTap={flash=find(map(stacks,s=>s.id),id=>contains(join(map(filter(stacks,s=>contains(s.codes,upper(trim(q)))),s=>s.id),","),id)); flash==undefined ? toast "No such container" : toast "Flashing stack {flash}"}
         IconButton "filter_alt_off" tooltip="Clear search" onTap={q=""; flash=""}
     Column pad=24 gap=16
@@ -112,7 +112,7 @@ App
     Nav
       Heading "Crane moves" level=1
       Row gap=8
-        Select items=["All","QC1","QC2","QC3"] bind=craneFilter
+        Select items=["All","QC1","QC2","QC3"] @craneFilter
         Button "Send to cranes" onTap={emit dispatch moves; toast "Queue dispatched"}
     Column pad=24 gap=12
       Text.muted "Drag a move to change the order. The crane works from the top."
@@ -140,6 +140,9 @@ state gateIn=[{"plate":"KX 21 BRD","co":"Harlow Haulage","box":"MSCU4471133","le
 state gateOut=[{"plate":"YT 19 FGH","co":"Marsh and Son","box":"EGHU9052263","left":1500},{"plate":"DA 55 KLC","co":"Harlow Haulage","box":"ZIMU5527190","left":60}]
 state q=""
 state sel=""
+state newPlate=""
+state newCo=""
+state newBox=""
 every 1s onTick={gateIn=map(gateIn,t=>with(t,"left",max(0,t.left-1))); gateOut=map(gateOut,t=>with(t,"left",max(0,t.left-1)))}
 App
   Sidebar
@@ -154,11 +157,11 @@ App
     Nav
       Heading "Gate" level=1
       Row gap=8
-        Input "Search plate" bind=q w=200
+        Input "Search plate" @q w=200
         Button "Check in truck" onTap={open checkin}
     Column pad=24 gap=16
       Row gap=12
-        SegmentedButton items=["in","out"] bind=tab
+        SegmentedButton items=["in","out"] @tab
         Text.muted "{tab=="in" ? length(gateIn) : length(gateOut)} trucks"
       Card gap=0
         Row pad=8 border-bottom=#FFDDDDDD
@@ -186,9 +189,9 @@ App
                 Text.strong "{duration(t.left)}" w=90 color={t.left<120?"#FFC62828":"#FF2E7D32"}
                 IconButton "more_vert" tooltip="Truck options" onTap={sel=t.plate; open truckMenu}
   Dialog#checkin "Check in truck" "Record a truck at the gate"
-    Input "Plate" bind=newPlate
-    Input "Haulier" bind=newCo
-    Input "Container code" bind=newBox
+    Input "Plate" @newPlate
+    Input "Haulier" @newCo
+    Input "Container code" @newBox
     Button "Check in" onTap={gateIn=append(gateIn,{"plate":upper(newPlate),"co":newCo,"box":upper(newBox),"left":1800}); emit gateIn newPlate; toast "Truck checked in"; close}
   Menu#truckMenu end
     MenuItem "Extend 10 minutes" icon="timer" onTap={gateIn=updateWhere(gateIn,t=>t.plate==sel,t=>with(t,"left",t.left+600)); gateOut=updateWhere(gateOut,t=>t.plate==sel,t=>with(t,"left",t.left+600))}

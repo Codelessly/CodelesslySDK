@@ -30,7 +30,7 @@ App
       Card gap=12
         Text.sectionTitle "Bag tag"
         Row gap=8
-          Input "Tag number" "10 digits on your baggage receipt" bind=tag grow
+          Input "Tag number" "10 digits on your baggage receipt" @tag grow
           Button.outline "Scan tag" onTap={emit scanTag}
         Text.caption "Flight {flight}, London Heathrow to Denver"
       Card gap=12
@@ -47,21 +47,21 @@ App
             ColorSwatch "{c}" selected={color==index} onTap={color=index}
         Text.muted "{colorNames[color]}"
         Text.sectionTitle "Size"
-        SegmentedButton bind=size items=["Small","Medium","Large"]
+        SegmentedButton @size items=["Small","Medium","Large"]
       Card gap=12
         Text.sectionTitle "Distinguishing marks"
         Row gap=8
           each m in marks
             Chip "{m}" onDelete={marks=without(marks,m)}
         Row gap=8
-          Input "Add a mark" "scratch, sticker, name tag" bind=newMark grow
+          Input "Add a mark" "scratch, sticker, name tag" @newMark grow
           Button.outline "Add" onTap={newMark!="" ? {marks=append(marks,trim(newMark)); newMark=""} : toast "Type a mark first"}
       Card gap=12
         Text.sectionTitle "Items bought because of the delay"
         each it in items
           Row gap=8
-            Input "Item" bind=it.name grow
-            Input "Price" bind=it.price type=number w=100
+            Input "Item" @it.name grow
+            Input "Price" @it.price type=number w=100
             IconButton "delete" tooltip="Remove item" onTap={items=removeWhere(items,x=>x.name==it.name)}
         Button.ghost "Add item" icon="add" onTap={items=append(items,{"name":"","price":0,"age":0})}
         Row between
@@ -104,7 +104,7 @@ App
       Card gap=12
         Row between
           Text.sectionTitle "Route"
-          SegmentedButton bind=filter items=["all","done","upcoming"]
+          SegmentedButton @filter items=["all","done","upcoming"]
         RouteMap stops={map(scans,s=>s.airport)} current=3 h=160
       Card gap=8
         Text.sectionTitle "Scan history"
@@ -128,6 +128,7 @@ state days=["Tue 17 Nov","Wed 18 Nov","Thu 19 Nov"]
 state items=[{"name":"Rain jacket","price":120,"age":1,"cat":"Clothing"},{"name":"Laptop charger","price":45,"age":3,"cat":"Electronics"}]
 state receipts=0
 state ack=false
+state sms=false
 App
   Sidebar
     Brand "Baggage Trail" icon="luggage"
@@ -145,19 +146,19 @@ App
       Grid cols=2 gap=16
         Card gap=12
           Text.sectionTitle "Delivery address"
-          Input "Street" bind=addr
+          Input "Street" @addr
           Row gap=8
-            Input "City" bind=city grow
-            Input "ZIP" bind=zip w=100
-          Input "Notes for the courier" "gate code, concierge" bind=notes multiline
+            Input "City" @city grow
+            Input "ZIP" @zip w=100
+          Input "Notes for the courier" "gate code, concierge" @notes multiline
         Card gap=12
           Text.sectionTitle "Delivery window"
-          DatePicker "Date" bind=day items={days}
+          DatePicker "Date" @day items={days}
           Wrap gap=8
             each t in slots
               ChoiceChip "{t}" selected={slot==t} onTap={slot=t}
           Text.muted "Courier arrives {day}, {slot}"
-          Toggle "Text me 30 minutes before" bind=sms
+          Toggle "Text me 30 minutes before" @sms
       Card gap=12
         Text.sectionTitle "Compensation estimate"
         each it in items
@@ -173,7 +174,7 @@ App
           Button.outline "Attach receipts" icon="upload_file" onTap={receipts=receipts+1; toast "Receipt added"}
           Text.muted "{receipts} attached"
       Card gap=12
-        Checkbox "My address is correct and someone will sign for the bag" bind=ack
+        Checkbox "My address is correct and someone will sign for the bag" @ack
         Button "Confirm delivery" onTap={ack ? {emit confirmDelivery {"addr":addr,"day":day,"slot":slot}; toast "Delivery booked"; open booked} : toast "Please confirm the address"}
   Dialog#booked "Delivery booked" "Your bag will be at {addr} on {day}, {slot}"
     Button "Track my bag" onTap={close; go trace}
@@ -209,7 +210,7 @@ App
     Footer
       Row gap=8 pad=12
         IconButton "attach_file" tooltip="Attach photo" onTap={emit attach}
-        Input "Message" "Write to your agent" bind=msg grow onSubmit={msg!="" ? {log=append(log,{"from":"me","name":"You","text":msg,"at":formatDate(today(),"HH:mm")}); emit sendMessage msg; msg=""} : toast "Type a message"}
+        Input "Message" "Write to your agent" @msg grow onSubmit={msg!="" ? {log=append(log,{"from":"me","name":"You","text":msg,"at":formatDate(today(),"HH:mm")}); emit sendMessage msg; msg=""} : toast "Type a message"}
         Button "Send" icon="send" onTap={msg!="" ? {log=append(log,{"from":"me","name":"You","text":msg,"at":formatDate(today(),"HH:mm")}); emit sendMessage msg; msg=""} : toast "Type a message"}
   Menu#more end
     MenuItem "Email transcript" icon="mail" onTap={emit emailTranscript; toast "Transcript sent"}

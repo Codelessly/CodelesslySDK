@@ -10,6 +10,9 @@ state photos=[{"id":1,"page":1,"url":"https://images.keepsake.app/p/juniper-park
 state stickers=[{"id":1,"page":1,"text":"Mar 14","x":300,"y":20}]
 state firsts=[{"id":1,"what":"First smile","date":"2025-02-03","done":true},{"id":2,"what":"Rolled over","date":"2025-04-19","done":true},{"id":3,"what":"First tooth","date":"2025-07-08","done":true},{"id":4,"what":"Walked alone","date":"","done":false},{"id":5,"what":"First word","date":"","done":false}]
 state milestones=[{"month":"Jan","label":"Born"},{"month":"Mar","label":"First smile"},{"month":"May","label":"Sitting up"},{"month":"Jul","label":"First tooth"},{"month":"Sep","label":"Crawling"},{"month":"Nov","label":"First steps"}]
+state stickerDay=""
+state newWhat=""
+state at=0
 every 1s when recording onTick={seconds=seconds+1}
 App
   Sidebar
@@ -25,7 +28,7 @@ App
   Main
     Nav
       if editingTitle
-        Input "Book title" bind=title w=320 onSubmit={editingTitle=false}
+        Input "Book title" @title w=320 onSubmit={editingTitle=false}
       if !editingTitle
         Heading "{title}" level=1 onTap={editingTitle=true}
       Row gap=8
@@ -41,12 +44,12 @@ App
               Row gap=8
                 IconButton "chevron_left" tooltip="Previous page" onTap={spread=max(0,spread-1)}
                 IconButton "chevron_right" tooltip="Next page" onTap={spread=min(11,spread+1)}
-            PageCurl bind=spread count=12 onSwipeLeft={spread=min(11,spread+1)} onSwipeRight={spread=max(0,spread-1)} h=460 drop=sticker onDrop={stickers=append(stickers,{"id":length(stickers)+1,"page":spread+1,"text":result.data,"x":result.x,"y":result.y})}
+            PageCurl @spread count=12 onSwipeLeft={spread=min(11,spread+1)} onSwipeRight={spread=max(0,spread-1)} h=460 drop=sticker onDrop={stickers=append(stickers,{"id":length(stickers)+1,"page":spread+1,"text":result.data,"x":result.x,"y":result.y})}
               Stack fill=#FFFBF3EA radius=8
                 each p in filter(photos,q=>q.page==spread+1)
                   Card gap=4 x={p.x} y={p.y} rotate={p.tilt} w=200 pad=8 fill=#FFFFFFFF drag=photo(p.id)
                     Image "{p.url}" h=140 radius=2 onTap={open zoom}
-                    Input "Write a caption" bind=p.caption
+                    Input "Write a caption" @p.caption
                 each s in filter(stickers,q=>q.page==spread+1)
                   Badge.warning "{s.text}" x={s.x} y={s.y} rotate=-6 drag=sticker(s.text)
             Row gap=8
@@ -90,8 +93,8 @@ App
           Heading "First times" level=3
           each f in firsts
             ListTile "{f.what}" subtitle="{f.done ? formatDate(f.date,"MMM d, yyyy") : "Not yet"}"
-              Checkbox bind=f.done onChange={firsts=updateWhere(firsts,x=>x.id==f.id,x=>with(x,"date",result ? formatDate(today(),"yyyy-MM-dd") : ""))}
-              DatePicker bind=f.date hide=phone
+              Checkbox @f.done onChange={firsts=updateWhere(firsts,x=>x.id==f.id,x=>with(x,"date",result ? formatDate(today(),"yyyy-MM-dd") : ""))}
+              DatePicker @f.date hide=phone
           Button.outline "Add a first" icon="add" onTap={open newFirst}
       if tab=="today"
         Card gap=12
@@ -103,12 +106,12 @@ App
             Button "Add to a page" onTap={emit pinMemory; toast "Added to page {spread+1}"}
             Button.outline "Share" icon="share" onTap={emit share}
   Dialog#stickerDate "Date sticker"
-    DatePicker "Pick a date" bind=stickerDay
+    DatePicker "Pick a date" @stickerDay
     Button "Place on page" onTap={stickers=append(stickers,{"id":length(stickers)+1,"page":spread+1,"text":formatDate(stickerDay,"MMM d"),"x":40,"y":40}); close}
   Dialog#newFirst "A new first"
-    Input "What happened?" bind=newWhat
+    Input "What happened?" @newWhat
     Button "Add" onTap={firsts=append(firsts,{"id":length(firsts)+1,"what":newWhat,"date":"","done":false}); newWhat=""; close}
-  Lightbox#zoom photos={map(photos,p=>p.url)} bind=at
+  Lightbox#zoom photos={map(photos,p=>p.url)} @at
 
 ### Print book
 state pages=24
@@ -127,10 +130,10 @@ Page
         Text.muted "A lay-flat photo book with every page, caption and sticker as you arranged it."
         Card gap=12
           Text.strong "Pages: {pages}"
-          Slider bind=pages min=20 max=80 step=2
+          Slider @pages min=20 max=80 step=2
           Text.fieldLabel "Cover"
-          SegmentedButton bind=cover items=["soft","hard"]
-          Select "Size" bind=size items=["Square 6 in","Square 8 in","Landscape 11 in"]
+          SegmentedButton @cover items=["soft","hard"]
+          Select "Size" @size items=["Square 6 in","Square 8 in","Landscape 11 in"]
           Row gap=8 middle
             Text "Copies"
             Button.outline "-" onTap={copies=max(1,copies-1)}

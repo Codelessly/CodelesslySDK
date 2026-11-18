@@ -10,7 +10,7 @@ state split=0.5
 state shared=false
 Page
   ScrollProgress h=3 fill=#FFE8782A sticky
-  ChapterRail right bind=chapter hide=phone
+  ChapterRail right @chapter hide=phone
     ChapterRailItem "Opening" id=top onTap={scroll top}
     ChapterRailItem "The ice line" id=c1 onTap={scroll c1}
     ChapterRailItem "A century of warming" id=c2 onTap={scroll c2}
@@ -40,7 +40,7 @@ Page
         Text.caption "Scroll" color=#FFFFFFFF
         Icon "keyboard_arrow_down" color=#FFFFFFFF animate=pulse
   Section#c1
-    Scrolly bind=step stack=phone onEnter={chapter=0}
+    Scrolly @step stack=phone onEnter={chapter=0}
       Sticky w=520 top=96
         Card gap=8
           Text.caption "CHAPTER ONE"
@@ -54,17 +54,17 @@ Page
       Column grow gap=0
         Step index=0 minh=520
           Text "In 1920 the Great Aletsch Glacier reached almost to the valley floor, a river of ice nearly twenty-five kilometres long." size=20 font="Source Serif 4"
-          Footnote 1 bind=note onTap={note=1; open noteCard}
+          Footnote 1 @note onTap={note=1; open noteCard}
         Step index=1 minh=520
           Text "By 1960 the tongue had thinned. Survey stakes drilled each autumn show the surface dropping by a metre in a typical year." size=20 font="Source Serif 4"
-          Footnote 2 bind=note onTap={note=2; open noteCard}
+          Footnote 2 @note onTap={note=2; open noteCard}
         Step index=2 minh=520
           Text "The turn of the century brought the fastest losses on record. The ice line climbed hundreds of metres up the valley wall." size=20 font="Source Serif 4"
         Step index=3 minh=520
           Text "Today the line sits where the orange mark falls. What is left is thinner, steeper and darker with dust." size=20 font="Source Serif 4"
-          Footnote 3 bind=note onTap={note=3; open noteCard}
+          Footnote 3 @note onTap={note=3; open noteCard}
   Section tint#c2
-    Scrolly bind=step stack=phone onEnter={chapter=1}
+    Scrolly @step stack=phone onEnter={chapter=1}
       Sticky w=520 top=96
         Card gap=8
           Text.caption "CHAPTER TWO"
@@ -82,11 +82,11 @@ Page
           Text "Mid century, temperatures wobble. Ice holds on, helped by a few cool decades." size=20 font="Source Serif 4"
         Step index=2 minh=520 onActive={year=1990}
           Text "Then the lines part. Temperature turns up and glacier mass turns down, and they never meet again." size=20 font="Source Serif 4"
-          Footnote 4 bind=note onTap={note=4; open noteCard}
+          Footnote 4 @note onTap={note=4; open noteCard}
         Step index=3 minh=520 onActive={year=2020}
           Text "By 2020 the Alps have warmed nearly two degrees and lost four tenths of the ice they carried in 1900." size=20 font="Source Serif 4"
   Section#c3
-    Scrolly bind=step stack=phone onEnter={chapter=2}
+    Scrolly @step stack=phone onEnter={chapter=2}
       Sticky w=520 top=96
         Card gap=8
           Text.caption "CHAPTER THREE"
@@ -104,11 +104,11 @@ Page
           Text "The Alps hold the best record, and some of the clearest retreat." size=20 font="Source Serif 4"
         Step index=3 minh=480
           Text "The Himalaya feed rivers for nearly two billion people, and their ice is going slower, for now." size=20 font="Source Serif 4"
-          Footnote 5 bind=note onTap={note=5; open noteCard}
+          Footnote 5 @note onTap={note=5; open noteCard}
         Step index=4 minh=480
           Text "At Svalbard the ice meets a sea that is warming faster than almost anywhere." size=20 font="Source Serif 4"
   Section tint#c4
-    Scrolly bind=step stack=phone onEnter={chapter=3}
+    Scrolly @step stack=phone onEnter={chapter=3}
       Sticky w=520 top=96
         Card gap=8
           Text.caption "CHAPTER FOUR"
@@ -126,14 +126,14 @@ Page
           Text "After 2000 it kept climbing, year on year." size=20 font="Source Serif 4"
         Step index=3 minh=480
           Text "The last decade lost ninety-one gigatonnes a year, enough to cover Switzerland in two metres of water." size=20 font="Source Serif 4"
-          Footnote 6 bind=note onTap={note=6; open noteCard}
+          Footnote 6 @note onTap={note=6; open noteCard}
   Section#c5 bleed
-    Scrolly bind=step stack=phone onEnter={chapter=4}
+    Scrolly @step stack=phone onEnter={chapter=4}
       Sticky w=640 top=96
         Card gap=8
           Text.caption "CHAPTER FIVE"
           Heading "One valley, two photographs" level=2
-          CompareSlider bind=split before="https://images.glacierlines.org/rhone-1900.jpg" after="https://images.glacierlines.org/rhone-2023.jpg" beforeLabel="1900" afterLabel="2023" h=380 handleColor=#FFE8782A
+          CompareSlider @split before="https://images.glacierlines.org/rhone-1900.jpg" after="https://images.glacierlines.org/rhone-2023.jpg" beforeLabel="1900" afterLabel="2023" h=380 handleColor=#FFE8782A
           Row between
             Text.caption "Rhone Glacier, Valais. Drag the handle."
             Button.ghost "Table" icon="table_chart" onTap={showTable=setAt(showTable,4,!showTable[4])}
@@ -163,10 +163,10 @@ Page
       Text.caption "AFTER THE STORY"
       Heading "Explore the record" level=2
       Row gap=16 top
-        Select "Region" bind=region items=["Alps","Alaska","Andes","Himalaya","Svalbard"] w=220
+        Select "Region" @region items=["Alps","Alaska","Andes","Himalaya","Svalbard"] w=220
         Column grow gap=4
           Text.fieldLabel "Years {span[0]} to {span[1]}"
-          RangeSlider bind=span min=1900 max=2020 step=5
+          RangeSlider @span min=1900 max=2020 step=5
       LineChart labels=["1900","1930","1960","1990","2020"] series=[{"name":"Ice volume, {region}","values":[100,96,90,78,61]}] range={span} h=320
       Row between
         Text.caption "Showing {region}, {span[0]} to {span[1]}"
