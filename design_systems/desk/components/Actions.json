@@ -1,0 +1,79 @@
+{
+ "schema": 3,
+ "id": "Actions",
+ "roots": [
+  "actions"
+ ],
+ "widget": {
+  "type": "Actions",
+  "doc": "The footer band of a dialog, a sheet or a form: a rule above it, the band's fill, its buttons at the end; a destructive button written first stays at the start (write Spacer after it).",
+  "children": "list"
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    560,
+    64
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "actions": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     24,
+     12,
+     24,
+     12
+    ],
+    "margin": [
+     -24,
+     8,
+     -24,
+     0
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "mainAxisAlignment": "end",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "band"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "children": [
+    "actionsContent"
+   ]
+  },
+  "actionsContent": {
+   "type": "slot",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}

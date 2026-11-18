@@ -1,0 +1,103 @@
+{
+ "schema": 3,
+ "id": "KeyCap",
+ "roots": [
+  "keycap"
+ ],
+ "widget": {
+  "type": "KeyCap",
+  "doc": "A key as it is pressed: a small raised cap in the mono face (/, Ctrl K, ↑). In a button, a tooltip's line, a sidebar item, a hint row.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "K",
+    "required": true,
+    "doc": "The key or keys."
+   },
+   {
+    "key": "onAccent",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "On an accent fill (a primary button): a translucent white cap."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    48,
+    20
+   ],
+   "props": {
+    "label": "Ctrl K"
+   }
+  }
+ ],
+ "nodes": {
+  "keycap": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     5,
+     1,
+     5,
+     1
+    ],
+    "width": {
+     "hug": 0
+    },
+    "height": 20
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 4,
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= props.onAccent ? '#40FFFFFF' : theme.colors.keycapBorder}",
+    "decoration.fills[0].color": "${= props.onAccent ? '#26FFFFFF' : theme.colors.keycap}"
+   },
+   "children": [
+    "keycapText"
+   ]
+  },
+  "keycapText": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.label}",
+    "style": "keycap"
+   },
+   "bind": {
+    "props.style.color": "${= props.onAccent ? '#FFFFFFFF' : theme.colors.keycapInk}"
+   }
+  }
+ }
+}

@@ -1,0 +1,35 @@
+component TaskCard "A card on a board: its key in the mono face, a grip and a menu at the top, the title 13/600, its labels as tags, and a meta row (the due date, red when overdue; the checklist; the comments) with the assignee's avatar at its end. On the card's fill with a hairline; under the pointer the hairline darkens and it lifts. selected: an accent ring."
+  param key="" doc="Its id (STK-124), in the mono face."
+  param title="Card" required doc="What is to be done."
+  param labels:List<Map>=[] doc="Its labels: [{\"label\":\"Design\",\"hue\":\"violet\"}]."
+  param due="" doc="When it is due (Nov 19)."
+  param overdue:bool=false doc="Past its due date: the date in red."
+  param checklist="" doc="Done of the checklist (2/4)."
+  param comments:int=0 doc="How many comments."
+  param assignee="" doc="Who it is assigned to (their name)."
+  param selected:bool=false doc="The open or focused card."
+  event onMenu
+  preview "Default" 280x120 key="STK-124" title="Polish the invite flow" labels=[{"label":"Design","hue":"violet"},{"label":"Product","hue":"green"}] due="Nov 19" checklist="2/4" assignee="Maya Chen"
+Column#card gap=8 pad=[12,10,10,12] w=fill fill=card border={props.selected ? theme.colors.accent : theme.colors.line} radius=8 hovered.border=lineStrong hovered.effects={theme.shadows.level2} effects={theme.shadows.level1}
+  Row#cardTop gap=4 middle w=fill
+    Text#cardKey "{props.key}" style=mono size=11.5 color=ink3 grow visible={props.key != ''}
+    Spacer#cardSpacer visible={props.key == ''}
+    Icon#cardGrip "drag_indicator" size=14 color=ink4
+    Row#cardMore pad=3 radius=4 hovered.fill=hoverOverlay onTap={emit onMenu}
+      Icon#cardMoreGlyph "more_horiz" size=16 color=ink3
+  Text#cardTitle "{props.title}" size=13 weight=600 color=ink height=1.4
+  Row#cardLabels gap=4 wrap visible={length(props.labels) > 0}
+    each l in props.labels
+      Tag#cardLabel "{l.label}" hue="{coalesce(l.hue, 'neutral')}"
+  Row#cardMeta gap=12 middle w=fill pad=[0,2,0,0]
+    Row#cardDue gap=4 middle visible={props.due != ''}
+      Icon#cardDueGlyph "{props.overdue ? 'error_outline' : 'calendar_today'}" size=14 color={props.overdue ? theme.colors.errorInk : theme.colors.ink3}
+      Text#cardDueText "{props.due}" size=12 weight={props.overdue ? 600 : 400} color={props.overdue ? theme.colors.errorInk : theme.colors.ink3}
+    Row#cardCheck gap=4 middle visible={props.checklist != ''}
+      Icon#cardCheckGlyph "checklist" size=14 color=ink3
+      Text#cardCheckText "{props.checklist}" size=12 color=ink3 tabularFigures=true
+    Row#cardComments gap=4 middle visible={props.comments > 0}
+      Icon#cardCommentsGlyph "chat_bubble_outline" size=14 color=ink3
+      Text#cardCommentsText "{props.comments}" size=12 color=ink3
+    Spacer#cardMetaSpacer
+    Avatar#cardAssignee "{props.assignee == '' ? '?' : props.assignee}" size=20 visible={props.assignee != ''}

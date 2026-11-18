@@ -1,0 +1,4 @@
+# Render byproducts: the pictures are kept, the layout dumps and diagnostics are not.
+examples/**/out/*.layout.json
+examples/**/out/diagnostics*.json
+examples/**/out/.site/

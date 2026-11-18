@@ -1,0 +1,316 @@
+{
+ "schema": 3,
+ "id": "Pager",
+ "roots": [
+  "pager"
+ ],
+ "widget": {
+  "type": "Pager",
+  "doc": "The foot of a paged table or list: what is shown (1–10 of 50) at the start, and at the end a previous and a next button around the page of pages. The page (from 1) is kept in your variable.",
+  "props": [
+   {
+    "key": "page",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "integer",
+      "flutter": "int"
+     }
+    },
+    "default": 1,
+    "doc": "The name of your page variable (from 1)."
+   },
+   {
+    "key": "pages",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 1,
+    "required": true,
+    "doc": "How many pages."
+   },
+   {
+    "key": "summary",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "What is shown (1–10 of 50 members)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "integer",
+     "flutter": "int"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    640,
+    48
+   ],
+   "props": {
+    "page": 2,
+    "pages": 5,
+    "summary": "11–20 of 50 members"
+   }
+  }
+ ],
+ "nodes": {
+  "pager": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     16,
+     8,
+     12,
+     8
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "pagerSummary",
+    "pagerOf",
+    "pagerPrev",
+    "pagerNext"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 8
+      }
+     }
+    }
+   ]
+  },
+  "pagerSummary": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.summary}",
+    "style": "caption"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 96,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "pagerOf": {
+   "type": "text",
+   "layout": {
+    "padding": [
+     0,
+     0,
+     6,
+     0
+    ],
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Page ${props.page} of ${props.pages}",
+    "style": "caption"
+   }
+  },
+  "pagerPrev": {
+   "type": "row",
+   "layout": {
+    "padding": 5,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 6,
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ]
+   },
+   "bind": {
+    "opacity": "${= props.page > 1 ? 1 : 0.4}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.page",
+       "value": "${= max(1, props.page - 1)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.page}"
+      }
+     ]
+    }
+   ],
+   "tooltip": "Previous page",
+   "states": {
+    "hovered": {
+     "pagerPrev": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "pagerPrevGlyph"
+   ]
+  },
+  "pagerPrevGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chevron_left_outlined",
+    "size": 16,
+    "color": "ink2"
+   }
+  },
+  "pagerNext": {
+   "type": "row",
+   "layout": {
+    "padding": 5,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 6,
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ]
+   },
+   "bind": {
+    "opacity": "${= props.page < props.pages ? 1 : 0.4}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.page",
+       "value": "${= min(props.pages, props.page + 1)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.page}"
+      }
+     ]
+    }
+   ],
+   "tooltip": "Next page",
+   "states": {
+    "hovered": {
+     "pagerNext": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "pagerNextGlyph"
+   ]
+  },
+  "pagerNextGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chevron_right_outlined",
+    "size": 16,
+    "color": "ink2"
+   }
+  }
+ }
+}

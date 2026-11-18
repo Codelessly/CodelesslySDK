@@ -1,0 +1,1595 @@
+{
+ "schema": 3,
+ "roots": [
+  "parts"
+ ],
+ "nodes": {
+  "parts": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 1440.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "surface"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 32,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 20,
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "window"
+     }
+    ]
+   },
+   "children": [
+    "PageHeader1",
+    "Breadcrumb1",
+    "Tabs1",
+    "row1",
+    "BulkBar1",
+    "row2",
+    "row3",
+    "row4",
+    "Banner1",
+    "Banner2",
+    "row5"
+   ]
+  },
+  "PageHeader1": {
+   "type": "PageHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Members",
+    "note": "Manage workspace access, roles and invitations.",
+    "overline": "Workspace"
+   },
+   "children": [
+    "outlinedButton1",
+    "filledButton1"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Export",
+    "icon": "download_outlined"
+   }
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Invite members",
+    "icon": "add_outlined"
+   }
+  },
+  "Breadcrumb1": {
+   "type": "Breadcrumb",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "items": [
+     "Workspace",
+     "Settings",
+     "Members"
+    ]
+   }
+  },
+  "Tabs1": {
+   "type": "Tabs",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 40.0
+   },
+   "props": {
+    "value": "tab",
+    "tabs": [
+     "Board",
+     "List",
+     "Archive"
+    ],
+    "icons": [
+     "view_kanban",
+     "list",
+     "inventory_2"
+    ],
+    "counts": [
+     "12",
+     "",
+     ""
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "SearchField1",
+    "FilterButton1",
+    "FilterButton2",
+    "FilterButton3",
+    "spacer1",
+    "KeyCap1",
+    "KeyCap2"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 8
+      }
+     }
+    }
+   ]
+  },
+  "SearchField1": {
+   "type": "SearchField",
+   "layout": {
+    "width": 260,
+    "height": 34.0
+   },
+   "props": {
+    "value": "q",
+    "hint": "Search cards…"
+   }
+  },
+  "FilterButton1": {
+   "type": "FilterButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Labels",
+    "icon": "label_outlined"
+   }
+  },
+  "FilterButton2": {
+   "type": "FilterButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Assignee",
+    "icon": "person_outlined",
+    "count": 2
+   }
+  },
+  "FilterButton3": {
+   "type": "FilterButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Due date",
+    "icon": "calendar_today_outlined"
+   }
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 0,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "KeyCap1": {
+   "type": "KeyCap",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   },
+   "props": {
+    "label": "Ctrl K"
+   }
+  },
+  "KeyCap2": {
+   "type": "KeyCap",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   },
+   "props": {
+    "label": "/"
+   }
+  },
+  "BulkBar1": {
+   "type": "BulkBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 44.0
+   },
+   "props": {
+    "count": 3
+   },
+   "children": [
+    "outlinedButton2",
+    "filledButton2"
+   ]
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Change role"
+   }
+  },
+  "filledButton2": {
+   "type": "filledButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "backgroundColor": "#FFDC2626",
+     "foregroundColor": "#FFFFFFFF"
+    },
+    "label": "Deactivate"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Status1",
+    "Status2",
+    "Status3",
+    "Status4",
+    "Status5",
+    "Status6",
+    "Tag1",
+    "Tag2",
+    "Tag3",
+    "Tag4",
+    "Tag5",
+    "Avatar1",
+    "Avatar2",
+    "Avatar3",
+    "AvatarGroup1"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "Status1": {
+   "type": "Status",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Active",
+    "tone": "success"
+   }
+  },
+  "Status2": {
+   "type": "Status",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Invited",
+    "tone": "warning"
+   }
+  },
+  "Status3": {
+   "type": "Status",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Suspended",
+    "tone": "danger"
+   }
+  },
+  "Status4": {
+   "type": "Status",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Inactive"
+   }
+  },
+  "Status5": {
+   "type": "Status",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Active",
+    "tone": "success",
+    "pill": true
+   }
+  },
+  "Status6": {
+   "type": "Status",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Invited",
+    "tone": "warning",
+    "pill": true
+   }
+  },
+  "Tag1": {
+   "type": "Tag",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   },
+   "props": {
+    "label": "Design",
+    "hue": "violet"
+   }
+  },
+  "Tag2": {
+   "type": "Tag",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   },
+   "props": {
+    "label": "Bug",
+    "hue": "red"
+   }
+  },
+  "Tag3": {
+   "type": "Tag",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   },
+   "props": {
+    "label": "Engineering",
+    "hue": "sky"
+   }
+  },
+  "Tag4": {
+   "type": "Tag",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   },
+   "props": {
+    "label": "Platform",
+    "outline": true,
+    "dot": false
+   }
+  },
+  "Tag5": {
+   "type": "Tag",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   },
+   "props": {
+    "label": "ada@x.io",
+    "removable": true
+   }
+  },
+  "Avatar1": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Maya Chen"
+   }
+  },
+  "Avatar2": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Jules Martin",
+    "size": "medium"
+   }
+  },
+  "Avatar3": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Sam Rao",
+    "size": "xs"
+   }
+  },
+  "AvatarGroup1": {
+   "type": "AvatarGroup",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "names": [
+     "Maya Chen",
+     "Jules Martin",
+     "Sam Rao",
+     "Ola Berg"
+    ]
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Stat1",
+    "Stat2",
+    "Stat3",
+    "Stat4"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "Stat1": {
+   "type": "Stat",
+   "layout": {
+    "width": 220,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Total members",
+    "text": "50"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 220,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "Stat2": {
+   "type": "Stat",
+   "layout": {
+    "width": 220,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Active",
+    "text": "43",
+    "delta": "+4",
+    "note": "this month",
+    "tone": "success"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 220,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "Stat3": {
+   "type": "Stat",
+   "layout": {
+    "width": 220,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Invited",
+    "text": "4",
+    "tone": "warning"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 220,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "Stat4": {
+   "type": "Stat",
+   "layout": {
+    "width": 220,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Inactive",
+    "text": "3",
+    "delta": "-1",
+    "tone": "neutral"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 220,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column2",
+    "column3",
+    "column4",
+    "column5"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 16
+      }
+     }
+    }
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": 360,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 8,
+    "clip": "antiAlias"
+   },
+   "children": [
+    "ListRow1",
+    "ListRow2",
+    "ListRow3"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 280,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "ListRow1": {
+   "type": "ListRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Maya Chen",
+    "subtitle": "Studio visit on Thursday",
+    "preview": "Hi Jamie, Thursday at 10:30 works for the studio visit.",
+    "meta": "10:42 AM",
+    "selected": true,
+    "starred": true
+   }
+  },
+  "ListRow2": {
+   "type": "ListRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Nora Patel",
+    "subtitle": "November print invoice",
+    "preview": "Hi Jamie, here is the invoice for the November proofs.",
+    "meta": "9:18 AM",
+    "unread": true,
+    "attachment": true
+   }
+  },
+  "ListRow3": {
+   "type": "ListRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Eli Vargas",
+    "subtitle": "Homepage review notes",
+    "preview": "I left three notes on the homepage draft.",
+    "meta": "8:54 AM",
+    "avatar": "Eli Vargas"
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "TaskCard1",
+    "TaskCard2"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 280,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "TaskCard1": {
+   "type": "TaskCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "key": "STK-124",
+    "title": "Polish the invite flow",
+    "due": "Nov 19",
+    "checklist": "2/4",
+    "assignee": "Maya Chen",
+    "comments": 3
+   },
+   "bind": {
+    "props.labels": "${labels}"
+   }
+  },
+  "TaskCard2": {
+   "type": "TaskCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "key": "STK-126",
+    "title": "Fix duplicate billing emails",
+    "labels": [
+     {
+      "label": "Bug",
+      "hue": "red"
+     }
+    ],
+    "due": "Nov 15",
+    "overdue": true,
+    "assignee": "Sam Rao"
+   }
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "BoardColumn1"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 280,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "BoardColumn1": {
+   "type": "BoardColumn",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "In progress",
+    "count": 3,
+    "limit": 2,
+    "hue": "sky"
+   },
+   "children": [
+    "TaskCard3"
+   ]
+  },
+  "TaskCard3": {
+   "type": "TaskCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "key": "STK-129",
+    "title": "Instrument activation events",
+    "labels": [
+     {
+      "label": "Engineering",
+      "hue": "sky"
+     }
+    ],
+    "due": "Nov 21",
+    "assignee": "Jules Martin"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "width": 340,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "Panel1",
+    "Account1"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 280,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "Panel1": {
+   "type": "Panel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Notifications",
+    "note": "How and when we reach you."
+   },
+   "children": [
+    "Property1",
+    "Property2",
+    "Property3"
+   ]
+  },
+  "Property1": {
+   "type": "Property",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Role",
+    "text": "Admin"
+   }
+  },
+  "Property2": {
+   "type": "Property",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Status"
+   },
+   "children": [
+    "Status7"
+   ]
+  },
+  "Status7": {
+   "type": "Status",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Active",
+    "tone": "success"
+   }
+  },
+  "Property3": {
+   "type": "Property",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Teams"
+   },
+   "children": [
+    "Tag6",
+    "Tag7"
+   ]
+  },
+  "Tag6": {
+   "type": "Tag",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   },
+   "props": {
+    "label": "Platform",
+    "outline": true,
+    "dot": false
+   }
+  },
+  "Tag7": {
+   "type": "Tag",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   },
+   "props": {
+    "label": "Design",
+    "outline": true,
+    "dot": false
+   }
+  },
+  "Account1": {
+   "type": "Account",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Jamie Park",
+    "note": "jamie@northline.design"
+   }
+  },
+  "Banner1": {
+   "type": "Banner",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "message": "You are viewing an archived board.",
+    "lead": "Read only.",
+    "tone": "info"
+   }
+  },
+  "Banner2": {
+   "type": "Banner",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "message": "Your trial ends in 3 days.",
+    "tone": "warning",
+    "dismissible": true
+   },
+   "children": [
+    "outlinedButton3"
+   ]
+  },
+  "outlinedButton3": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Upgrade"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column6",
+    "column7",
+    "column8",
+    "column9"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 16
+      }
+     }
+    }
+   ]
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "width": 380,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "Empty1"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 280,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "Empty1": {
+   "type": "Empty",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "No messages",
+    "note": "Mail you receive shows up here.",
+    "icon": "inbox_outlined"
+   },
+   "children": [
+    "outlinedButton4"
+   ]
+  },
+  "outlinedButton4": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Refresh",
+    "icon": "refresh_outlined"
+   }
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "width": 300,
+    "padding": 16,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "Skeleton1",
+    "Skeleton2"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 280,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "Skeleton1": {
+   "type": "Skeleton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "lines": 2,
+    "avatar": true
+   }
+  },
+  "Skeleton2": {
+   "type": "Skeleton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "lines": 3
+   }
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "width": 380,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "Pager1"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 280,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "Pager1": {
+   "type": "Pager",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "page": "page",
+    "pages": 5,
+    "summary": "11–20 of 50 members"
+   }
+  },
+  "column9": {
+   "type": "column",
+   "layout": {
+    "width": 220,
+    "padding": 4,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "MenuPopover1"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 220,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "MenuPopover1": {
+   "type": "MenuPopover",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "heading": "Move to"
+   },
+   "children": [
+    "MenuItem1",
+    "MenuItem2",
+    "divider1",
+    "MenuItem3"
+   ]
+  },
+  "MenuItem1": {
+   "type": "MenuItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Archive",
+    "icon": "archive_outlined",
+    "shortcut": "E"
+   }
+  },
+  "MenuItem2": {
+   "type": "MenuItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Sort by date",
+    "icon": "sort_outlined",
+    "checked": true
+   }
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "MenuItem3": {
+   "type": "MenuItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Delete",
+    "icon": "delete_outlined",
+    "shortcut": "Del",
+    "danger": true
+   }
+  }
+ },
+ "variables": {
+  "parts": [
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "tab",
+    "type": "text",
+    "value": "Board"
+   },
+   {
+    "name": "page",
+    "type": "integer",
+    "value": 2
+   },
+   {
+    "name": "labels",
+    "type": "list",
+    "value": [
+     {
+      "label": "Design",
+      "hue": "violet"
+     },
+     {
+      "label": "Product",
+      "hue": "green"
+     }
+    ]
+   }
+  ]
+ }
+}

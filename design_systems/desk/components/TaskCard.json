@@ -1,0 +1,764 @@
+{
+ "schema": 3,
+ "id": "TaskCard",
+ "roots": [
+  "card"
+ ],
+ "widget": {
+  "type": "TaskCard",
+  "doc": "A card on a board: its key in the mono face, a grip and a menu at the top, the title 13/600, its labels as tags, and a meta row (the due date, red when overdue; the checklist; the comments) with the assignee's avatar at its end. On the card's fill with a hairline; under the pointer the hairline darkens and it lifts. selected: an accent ring.",
+  "props": [
+   {
+    "key": "key",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Its id (STK-124), in the mono face."
+   },
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Card",
+    "required": true,
+    "doc": "What is to be done."
+   },
+   {
+    "key": "labels",
+    "type": {
+     "kind": "list",
+     "flutter": "List<Map>",
+     "item": {
+      "kind": "json",
+      "flutter": "Map"
+     }
+    },
+    "default": [],
+    "doc": "Its labels: [{\"label\":\"Design\",\"hue\":\"violet\"}]."
+   },
+   {
+    "key": "due",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "When it is due (Nov 19)."
+   },
+   {
+    "key": "overdue",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Past its due date: the date in red."
+   },
+   {
+    "key": "checklist",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Done of the checklist (2/4)."
+   },
+   {
+    "key": "comments",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 0,
+    "doc": "How many comments."
+   },
+   {
+    "key": "assignee",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Who it is assigned to (their name)."
+   },
+   {
+    "key": "selected",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "The open or focused card."
+   }
+  ],
+  "events": [
+   {
+    "key": "onMenu"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    280,
+    120
+   ],
+   "props": {
+    "key": "STK-124",
+    "title": "Polish the invite flow",
+    "labels": [
+     {
+      "label": "Design",
+      "hue": "violet"
+     },
+     {
+      "label": "Product",
+      "hue": "green"
+     }
+    ],
+    "due": "Nov 19",
+    "checklist": "2/4",
+    "assignee": "Maya Chen"
+   }
+  }
+ ],
+ "nodes": {
+  "card": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     12,
+     10,
+     10,
+     12
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= props.selected ? theme.colors.accent : theme.colors.line}",
+    "decoration.effects": "${theme.shadows.level1}"
+   },
+   "states": {
+    "hovered": {
+     "card": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "lineStrong"
+        }
+       ]
+      },
+      "bind": {
+       "decoration.effects": "${theme.shadows.level2}"
+      }
+     }
+    }
+   },
+   "children": [
+    "cardTop",
+    "cardTitle",
+    "cardLabels",
+    "cardMeta"
+   ]
+  },
+  "cardTop": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "cardKey",
+    "cardSpacer",
+    "cardGrip",
+    "cardMore"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 4
+      }
+     }
+    }
+   ]
+  },
+  "cardKey": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.key}",
+    "style": {
+     "from": "mono",
+     "fontSize": 11.5,
+     "color": "ink3"
+    }
+   },
+   "bind": {
+    "visible": "${= props.key != ''}"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 96,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "cardSpacer": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.key == ''}"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 0,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "cardGrip": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "drag_indicator_outlined",
+    "size": 14,
+    "color": "ink4"
+   }
+  },
+  "cardMore": {
+   "type": "row",
+   "layout": {
+    "padding": 3,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 4
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onMenu"
+      }
+     ]
+    }
+   ],
+   "states": {
+    "hovered": {
+     "cardMore": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "cardMoreGlyph"
+   ]
+  },
+  "cardMoreGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "more_horiz_outlined",
+    "size": 16,
+    "color": "ink3"
+   }
+  },
+  "cardTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "from": "body",
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "ink",
+     "height": 1.4
+    }
+   }
+  },
+  "cardLabels": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= length(props.labels) > 0}"
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "scrollDirection": "horizontal",
+    "spacing": 4,
+    "wrap": true,
+    "wrapSpacing": 4,
+    "runSpacing": 4
+   },
+   "bind": {
+    "data": "${props.labels}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "mainAxisAlignment": "center"
+   },
+   "children": [
+    "cardLabel"
+   ]
+  },
+  "cardLabel": {
+   "type": "Tag",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   },
+   "bind": {
+    "props.label": "${item.label}",
+    "props.hue": "${= coalesce(item.hue, 'neutral')}"
+   }
+  },
+  "cardMeta": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     0,
+     2,
+     0,
+     0
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "cardDue",
+    "cardCheck",
+    "cardComments",
+    "cardMetaSpacer",
+    "cardAssignee"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "cardDue": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= props.due != ''}"
+   },
+   "children": [
+    "cardDueGlyph",
+    "cardDueText"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 4
+      }
+     }
+    }
+   ]
+  },
+  "cardDueGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 14
+   },
+   "bind": {
+    "props.color": "${= props.overdue ? theme.colors.errorInk : theme.colors.ink3}",
+    "props.icon": "${= props.overdue ? 'error_outline' : 'calendar_today'}"
+   }
+  },
+  "cardDueText": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.due}",
+    "style": {
+     "from": "body",
+     "fontSize": 12
+    }
+   },
+   "bind": {
+    "props.style.fontWeight": "${= props.overdue ? 600 : 400}",
+    "props.style.color": "${= props.overdue ? theme.colors.errorInk : theme.colors.ink3}"
+   }
+  },
+  "cardCheck": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= props.checklist != ''}"
+   },
+   "children": [
+    "cardCheckGlyph",
+    "cardCheckText"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 4
+      }
+     }
+    }
+   ]
+  },
+  "cardCheckGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "checklist_outlined",
+    "size": 14,
+    "color": "ink3"
+   }
+  },
+  "cardCheckText": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.checklist}",
+    "style": {
+     "from": "body",
+     "fontSize": 12,
+     "color": "ink3",
+     "tabularFigures": true
+    }
+   }
+  },
+  "cardComments": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= props.comments > 0}"
+   },
+   "children": [
+    "cardCommentsGlyph",
+    "cardCommentsText"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 4
+      }
+     }
+    }
+   ]
+  },
+  "cardCommentsGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chat_bubble_outline",
+    "size": 14,
+    "color": "ink3"
+   }
+  },
+  "cardCommentsText": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.comments}",
+    "style": {
+     "from": "body",
+     "fontSize": 12,
+     "color": "ink3"
+    }
+   }
+  },
+  "cardMetaSpacer": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 0,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "cardAssignee": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": "xs"
+   },
+   "bind": {
+    "props.name": "${= props.assignee == '' ? '?' : props.assignee}",
+    "visible": "${= props.assignee != ''}"
+   }
+  }
+ }
+}

@@ -1,0 +1,11 @@
+component Brand "The product's mark and name at the head of a sidebar or the start of a top bar: a 28 accent tile with a white outline glyph, the name 15/700, an optional line under it."
+  param name="App" required doc="The product's name."
+  param note="" doc="A line under the name (the workspace, the person)."
+  param icon="" doc="A Material icon name for the mark."
+  preview "Default" 232x44 name="Northstar" note="Admin console" icon="grid_view"
+Row#brand gap=10 middle pad=[6,4,6,10] w=fill
+  Column#mark w=28 h=28 radius=7 fill=accent center middle visible={props.icon != ''}
+    Icon#markGlyph "{props.icon == '' ? 'circle' : props.icon}" size=16 color=onAccent
+  Column#words gap=0 grow
+    Text#brandName "{props.name}" size=15 weight=700 letterSpacing=-0.2 color=ink maxLines=1 overflow=ellipsis
+    Text#brandNote "{props.note}" style=meta maxLines=1 overflow=ellipsis visible={props.note != ''}

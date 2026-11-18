@@ -1,0 +1,9 @@
+component Breadcrumb "Where a page is: its ancestors in the secondary ink (each a link), chevrons between, the last in the ink 500. Fires onNavigate with the step's label."
+  param items:List<String>=["Workspace","Members"] required doc="The steps, the page last."
+  event onNavigate:String
+  preview "Default" 300x20 items=["Workspace","Settings","Members"]
+Row#crumbs gap=6 middle
+  each step in props.items
+    Row#crumb gap=6 middle
+      Icon#crumbSep "chevron_right" size=14 color=ink4 visible={index > 0}
+      Text#crumbText "{step}" size=13 weight={index == length(props.items) - 1 ? 500 : 400} color={index == length(props.items) - 1 ? theme.colors.ink : theme.colors.ink3} hovered.color=ink onTap={emit onNavigate step}

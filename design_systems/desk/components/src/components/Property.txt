@@ -1,0 +1,9 @@
+component Property "A labelled value in an inspector or a details list: the label 12.5 in the caption ink in a column 112 wide, the value (its text, or the lines under it) beside it; 32 high at least." children=list
+  param label="Field" required doc="What the value is."
+  param text="" doc="The value as text (or write lines under it)."
+  preview "Default" 340x32 label="Role" text="Admin"
+Row#prop gap=12 middle w=fill minHeight=32
+  Text#propLabel "{props.label}" size=12.5 color=ink3 w=112 maxLines=1 overflow=ellipsis
+  Row#propValue gap=6 middle grow
+    Text#propText "{props.text}" size=13 color=ink visible={props.text != ''} maxLines=2 overflow=ellipsis
+    Slot#propSlot

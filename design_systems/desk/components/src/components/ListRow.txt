@@ -1,0 +1,26 @@
+component ListRow "A row of a list pane (a mailbox, a feed, search results): a title, a second line and an optional third in the quiet ink, the time or a figure at its end, an avatar before. unread: a dot in the gutter and the first two lines heavier. selected: the accent tint and a 3 px accent bar at its start. Under the pointer: the hover fill. A rule under it."
+  param title="Title" required doc="The first line (a sender, a name)."
+  param subtitle="" doc="The second line (a subject)."
+  param preview="" doc="A third line, one line long (a snippet)."
+  param meta="" doc="At the end of the first line (a time, a size, a count)."
+  param avatar="" doc="A person's name: their avatar before the lines (empty: none)."
+  param unread:bool=false doc="Not read yet."
+  param selected:bool=false doc="The open one."
+  param starred:bool=false doc="A star after the second line."
+  param attachment:bool=false doc="A paper clip after the second line."
+  preview "Unread" 380x72 title="Nora Patel" subtitle="November print invoice" preview="Hi Jamie, here is the invoice for the November proofs." meta="9:18 AM" unread=true attachment=true
+  preview "Selected" 380x72 title="Maya Chen" subtitle="Studio visit on Thursday" preview="Hi Jamie, Thursday at 10:30 works for the studio visit." meta="10:42 AM" selected=true starred=true
+Stack#row w=fill selected={props.selected} selected.fill=accentTint hovered.fill=hoverOverlay border-bottom=line
+  Row#rowInner gap=10 top pad=[20,12,16,12] w=fill
+    Avatar#rowAvatar "{props.avatar == '' ? '?' : props.avatar}" size=32 visible={props.avatar != ''}
+    Column#rowLines gap=2 grow
+      Row#rowFirst gap=8 middle w=fill
+        Text#rowTitle "{props.title}" size=13 grow maxLines=1 overflow=ellipsis weight={props.unread ? 600 : 500} color=ink
+        Text#rowMeta "{props.meta}" size=12 tabularFigures=true maxLines=1 visible={props.meta != ''} weight={props.unread ? 600 : 400} color={props.unread ? theme.colors.accentText : theme.colors.ink3}
+      Row#rowSecond gap=6 middle w=fill visible={props.subtitle != ''}
+        Text#rowSubtitle "{props.subtitle}" size=13 maxLines=1 overflow=ellipsis weight={props.unread ? 600 : 400} color={props.unread ? theme.colors.ink : theme.colors.ink2}
+        Icon#rowAttach "attach_file" size=14 color=ink3 visible={props.attachment}
+        Icon#rowStar "star" size=14 color=warningDot visible={props.starred}
+      Text#rowPreview "{props.preview}" size=12.5 color=ink3 maxLines=1 overflow=ellipsis visible={props.preview != ''}
+  box#rowDot w=6 h=6 radius=3 x=8 y=18 fill=accent visible={props.unread}
+  box#rowBar w=3 h=fill x=0 fill=accent visible={props.selected}

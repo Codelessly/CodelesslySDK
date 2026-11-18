@@ -1,0 +1,75 @@
+{
+ "schema": 3,
+ "id": "NavSection",
+ "roots": [
+  "section"
+ ],
+ "widget": {
+  "type": "NavSection",
+  "doc": "The label over a group of sidebar items: small spaced capitals in the caption ink, with room above that parts the groups.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Section",
+    "required": true,
+    "doc": "The group's name (written as it reads; shown in capitals)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    232,
+    36
+   ],
+   "props": {
+    "label": "Mailbox"
+   }
+  }
+ ],
+ "nodes": {
+  "section": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     10,
+     18,
+     10,
+     6
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "label"
+   ]
+  },
+  "label": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= upper(props.label)}",
+    "style": "overline"
+   }
+  }
+ }
+}

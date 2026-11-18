@@ -1,0 +1,9 @@
+component Status "A record's state: a 6 px dot in the tone and its label in the secondary ink (in a table, a row's meta). `pill`: on a soft tint with a hairline of its hue (to stand out on a card)."
+  param label="Active" required doc="What it says."
+  param tone:neutral|success|warning|danger|info|accent="neutral" doc="Its hue."
+  param pill:bool=false doc="Drawn as a soft pill."
+  preview "Dot" 90x20 label="Active" tone="success"
+  preview "Pill" 90x22 label="Invited" tone="warning" pill=true
+Row#status gap=6 middle w=hug pad={props.pill ? [8, 2, 9, 2] : [0, 0, 0, 0]} radius=999 fill={props.pill ? get(theme.colors, (props.tone == 'danger' ? 'error' : (props.tone == 'accent' ? 'primary' : props.tone)) + 'Tint') : '#00000000'} border={props.pill ? get(theme.colors, (props.tone == 'danger' ? 'error' : (props.tone == 'accent' ? 'primary' : props.tone)) + 'TintBorder') : '#00000000'}
+  box#statusDot w=6 h=6 radius=3 fill={props.tone == 'accent' ? theme.colors.accent : get(theme.colors, (props.tone == 'danger' ? 'error' : props.tone) + 'Dot')}
+  Text#statusLabel "{props.label}" size=12.5 weight=500 maxLines=1 color={props.pill ? (props.tone == 'accent' ? theme.colors.accentText : get(theme.colors, (props.tone == 'danger' ? 'error' : props.tone) + 'Ink')) : theme.colors.ink2}

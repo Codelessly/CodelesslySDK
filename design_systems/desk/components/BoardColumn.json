@@ -1,0 +1,570 @@
+{
+ "schema": 3,
+ "id": "BoardColumn",
+ "roots": [
+  "boardColumn"
+ ],
+ "widget": {
+  "type": "BoardColumn",
+  "doc": "A column of a board: on the well's fill, radius 10; its head (a dot of its hue, the title 13/600, the count, the work-in-progress limit at the end, amber when over it, and a menu); its cards (the lines under it) 8 apart; an Add a card row at its foot that fires onAdd.",
+  "children": "list",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "To do",
+    "required": true,
+    "doc": "The column's name."
+   },
+   {
+    "key": "count",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 0,
+    "doc": "How many cards are in it."
+   },
+   {
+    "key": "limit",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 0,
+    "doc": "Its work-in-progress limit (0: none)."
+   },
+   {
+    "key": "hue",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "neutral",
+      "violet",
+      "pink",
+      "teal",
+      "amber",
+      "sky",
+      "green",
+      "red",
+      "slate",
+      "accent"
+     ]
+    },
+    "default": "neutral",
+    "doc": "The dot before the title."
+   },
+   {
+    "key": "adds",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "An Add a card row at its foot."
+   }
+  ],
+  "events": [
+   {
+    "key": "onAdd"
+   },
+   {
+    "key": "onMenu"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    300,
+    200
+   ],
+   "props": {
+    "title": "In progress",
+    "count": 3,
+    "limit": 2,
+    "hue": "sky"
+   }
+  }
+ ],
+ "nodes": {
+  "boardColumn": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     8,
+     6,
+     8,
+     8
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "well"
+     }
+    ],
+    "radius": 10,
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= props.limit > 0 && props.count > props.limit ? theme.colors.warningTintBorder : '#00000000'}"
+   },
+   "children": [
+    "columnHead",
+    "columnCards",
+    "columnAdd"
+   ]
+  },
+  "columnHead": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     6,
+     4,
+     2,
+     2
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "columnDot",
+    "columnTitle",
+    "columnCount",
+    "columnSpacer",
+    "columnLimit",
+    "columnMore"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 8
+      }
+     }
+    }
+   ]
+  },
+  "columnDot": {
+   "type": "box",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "decoration": {
+    "radius": 4,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.hue == 'neutral' ? theme.colors.neutralDot : (props.hue == 'accent' ? theme.colors.accent : get(theme.colors, props.hue + 'Dot'))}"
+   }
+  },
+  "columnTitle": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "from": "body",
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "ink"
+    },
+    "maxLines": 1
+   }
+  },
+  "columnCount": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     6,
+     0,
+     6,
+     0
+    ],
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 999,
+    "fills": [
+     {
+      "color": "neutralFill"
+     }
+    ]
+   },
+   "children": [
+    "columnCountText"
+   ]
+  },
+  "columnCountText": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.count}",
+    "style": {
+     "from": "body",
+     "fontSize": 11.5,
+     "fontWeight": 600,
+     "color": "ink2",
+     "tabularFigures": true
+    }
+   }
+  },
+  "columnSpacer": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 0,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "columnLimit": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= props.limit > 0}"
+   },
+   "children": [
+    "columnLimitGlyph",
+    "columnLimitText"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 4
+      }
+     }
+    }
+   ]
+  },
+  "columnLimitGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "warning_amber_outlined",
+    "size": 14,
+    "color": "warningInk"
+   },
+   "bind": {
+    "visible": "${= props.count > props.limit}"
+   }
+  },
+  "columnLimitText": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.count}/${props.limit}",
+    "style": {
+     "from": "body",
+     "fontSize": 12,
+     "tabularFigures": true
+    }
+   },
+   "bind": {
+    "props.style.fontWeight": "${= props.count > props.limit ? 600 : 400}",
+    "props.style.color": "${= props.count > props.limit ? theme.colors.warningInk : theme.colors.ink3}"
+   }
+  },
+  "columnMore": {
+   "type": "row",
+   "layout": {
+    "padding": 4,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 5
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onMenu"
+      }
+     ]
+    }
+   ],
+   "states": {
+    "hovered": {
+     "columnMore": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "columnMoreGlyph"
+   ]
+  },
+  "columnMoreGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "more_horiz_outlined",
+    "size": 16,
+    "color": "ink3"
+   }
+  },
+  "columnCards": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "columnSlot"
+   ]
+  },
+  "columnSlot": {
+   "type": "slot",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "columnAdd": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     8,
+     6,
+     8,
+     6
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 6
+   },
+   "bind": {
+    "visible": "${props.adds}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onAdd"
+      }
+     ]
+    }
+   ],
+   "states": {
+    "hovered": {
+     "columnAdd": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "columnAddGlyph",
+    "columnAddText"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 6
+      }
+     }
+    }
+   ]
+  },
+  "columnAddGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "add_outlined",
+    "size": 16,
+    "color": "ink3"
+   }
+  },
+  "columnAddText": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Add a card",
+    "style": {
+     "from": "body",
+     "fontSize": 13,
+     "color": "ink3"
+    }
+   }
+  }
+ }
+}

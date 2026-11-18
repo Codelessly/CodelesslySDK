@@ -1,0 +1,292 @@
+{
+ "schema": 3,
+ "id": "AvatarGroup",
+ "roots": [
+  "avatars"
+ ],
+ "widget": {
+  "type": "AvatarGroup",
+  "doc": "People together (a card's assignees, a team): avatars overlapping by a third, each ringed in the surface, and +N for the rest.",
+  "props": [
+   {
+    "key": "names",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Maya Chen",
+     "Jules Martin",
+     "Sam Rao"
+    ],
+    "required": true,
+    "doc": "Their names."
+   },
+   {
+    "key": "max",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 3,
+    "doc": "How many are drawn before +N."
+   },
+   {
+    "key": "size",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 24,
+    "doc": "Each avatar's diameter."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    90,
+    24
+   ],
+   "props": {
+    "names": [
+     "Maya Chen",
+     "Jules Martin",
+     "Sam Rao",
+     "Ola Berg"
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "avatars": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "bind": {
+    "layout.padding": "${= [0, 0, round(props.size * 0.3) + 4, 0]}"
+   },
+   "children": [
+    "listView1",
+    "avatarMore"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 8
+      }
+     }
+    }
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "scrollDirection": "horizontal",
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= take(props.names, props.max)}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "mainAxisAlignment": "center"
+   },
+   "children": [
+    "avatarSlot"
+   ]
+  },
+  "avatarSlot": {
+   "type": "stack",
+   "layout": {
+    "width": 0,
+    "height": 0
+   },
+   "decoration": {
+    "clip": "none"
+   },
+   "bind": {
+    "layout.width": "${= round(props.size * 0.7)}",
+    "layout.height": "${= props.size + 4}"
+   },
+   "children": [
+    "avatarRing"
+   ]
+  },
+  "avatarRing": {
+   "type": "stack",
+   "layout": {
+    "x": 0,
+    "y": 0,
+    "width": 0,
+    "height": 0
+   },
+   "decoration": {
+    "radius": 999,
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ]
+   },
+   "bind": {
+    "layout.width": "${= props.size + 4}",
+    "layout.height": "${= props.size + 4}"
+   },
+   "children": [
+    "groupAvatar"
+   ]
+  },
+  "groupAvatar": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "x": {
+     "align": 0
+    },
+    "y": {
+     "align": 0
+    }
+   },
+   "bind": {
+    "props.name": "${item}",
+    "props.size": "${props.size}"
+   }
+  },
+  "avatarMore": {
+   "type": "stack",
+   "layout": {
+    "padding": [
+     2,
+     2,
+     2,
+     2
+    ],
+    "width": {
+     "hug": 0
+    },
+    "height": 0
+   },
+   "decoration": {
+    "radius": 999,
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ]
+   },
+   "bind": {
+    "layout.height": "${= props.size + 4}",
+    "visible": "${= length(props.names) > props.max}"
+   },
+   "children": [
+    "avatarMoreDisc"
+   ]
+  },
+  "avatarMoreDisc": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     7,
+     0,
+     7,
+     0
+    ],
+    "x": {
+     "align": 0
+    },
+    "width": {
+     "hug": 0
+    },
+    "y": {
+     "align": 0
+    },
+    "height": 0
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 999,
+    "fills": [
+     {
+      "color": "subtleFill"
+     }
+    ]
+   },
+   "bind": {
+    "layout.height": "${props.size}"
+   },
+   "children": [
+    "avatarMoreText"
+   ]
+  },
+  "avatarMoreText": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "+${= length(props.names) - props.max}",
+    "style": {
+     "from": "body",
+     "fontSize": 11,
+     "fontWeight": 600,
+     "color": "ink2"
+    }
+   }
+  }
+ }
+}

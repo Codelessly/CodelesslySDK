@@ -1,0 +1,201 @@
+{
+ "schema": 3,
+ "id": "Breadcrumb",
+ "roots": [
+  "crumbs"
+ ],
+ "widget": {
+  "type": "Breadcrumb",
+  "doc": "Where a page is: its ancestors in the secondary ink (each a link), chevrons between, the last in the ink 500. Fires onNavigate with the step's label.",
+  "props": [
+   {
+    "key": "items",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Workspace",
+     "Members"
+    ],
+    "required": true,
+    "doc": "The steps, the page last."
+   }
+  ],
+  "events": [
+   {
+    "key": "onNavigate",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    300,
+    20
+   ],
+   "props": {
+    "items": [
+     "Workspace",
+     "Settings",
+     "Members"
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "crumbs": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "scrollDirection": "horizontal",
+    "spacing": 6
+   },
+   "bind": {
+    "data": "${props.items}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "mainAxisAlignment": "center"
+   },
+   "children": [
+    "crumb"
+   ]
+  },
+  "crumb": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "crumbSep",
+    "crumbText"
+   ]
+  },
+  "crumbSep": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chevron_right_outlined",
+    "size": 14,
+    "color": "ink4"
+   },
+   "bind": {
+    "visible": "${= index > 0}"
+   }
+  },
+  "crumbText": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item}",
+    "style": {
+     "from": "body",
+     "fontSize": 13
+    }
+   },
+   "bind": {
+    "props.style.fontWeight": "${= index == length(props.items) - 1 ? 500 : 400}",
+    "props.style.color": "${= index == length(props.items) - 1 ? theme.colors.ink : theme.colors.ink3}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onNavigate",
+       "value": "${item}"
+      }
+     ]
+    }
+   ],
+   "states": {
+    "hovered": {
+     "crumbText": {
+      "props": {
+       "style": {
+        "color": "ink"
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}

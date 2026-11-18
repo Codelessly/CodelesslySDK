@@ -1,0 +1,13 @@
+component AvatarGroup "People together (a card's assignees, a team): avatars overlapping by a third, each ringed in the surface, and +N for the rest."
+  param names:List<String>=["Maya Chen","Jules Martin","Sam Rao"] required doc="Their names."
+  param max:int=3 doc="How many are drawn before +N."
+  param size:double=24 doc="Each avatar's diameter."
+  preview "Default" 90x24 names=["Maya Chen","Jules Martin","Sam Rao","Ola Berg"]
+Row#avatars middle gap=0 w=hug pad={[0, 0, round(props.size * 0.3) + 4, 0]}
+  each n in take(props.names, props.max)
+    Stack#avatarSlot w={round(props.size * 0.7)} h={props.size + 4} clip=none
+      Stack#avatarRing w={props.size + 4} h={props.size + 4} x=0 y=0 center middle radius=999 fill=primaryBackground
+        Avatar#groupAvatar "{n}" size={props.size}
+  Stack#avatarMore h={props.size + 4} pad=[2,2,2,2] center middle radius=999 fill=primaryBackground visible={length(props.names) > props.max}
+    Row#avatarMoreDisc h={props.size} pad=[7,0,7,0] middle radius=999 fill=subtleFill
+      Text#avatarMoreText "+{length(props.names) - props.max}" size=11 weight=600 color=ink2

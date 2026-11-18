@@ -1,0 +1,15 @@
+component SearchField "A search field at the control height: a leading outline search icon, the text kept in your variable, a key cap at its end (the key that focuses it) or a clear button once something is typed."
+  param value:ValueNotifier<String>="" doc="The name of your text variable."
+  param hint="Search" doc="Shown while empty."
+  param shortcut="/" doc="The key that focuses it, shown as a key cap (empty: none)."
+  event onChanged:String
+  event onSubmitted:String
+  preview "Empty" 320x34 hint="Search mail"
+  preview "Typed" 320x34 value="invoice"
+Row#search gap=8 middle pad=[10,0,6,0] w=fill h=34 fill=primaryBackground border=line radius=6 hovered.border=lineStrong
+  Icon#searchGlyph "search" size=16 color=ink3
+  Input#searchInput w=fill h=32 grow initialValue={props.value} hint={props.hint} decoration={"isDense":true,"isCollapsed":true,"border":{"type":"none"},"hintStyle":"placeholder"} from=inputText textInputAction=search onChange={setVariable variable=props.value value={result}; emit onChanged result} onSubmit={emit onSubmitted result}
+  Row#searchKey pad=[5,1,5,1] radius=4 border=keycapBorder fill=keycap visible={props.shortcut != '' && props.value == ''}
+    Text#searchKeyText "{props.shortcut}" style=keycap
+  Row#searchClear pad=3 radius=4 visible={props.value != ''} hovered.fill=hoverOverlay onTap={setVariable variable=props.value value=""; emit onChanged ""}
+    Icon#searchClearGlyph "close" size=14 color=ink3

@@ -1,0 +1,12 @@
+component PageHeader "The head of a page in an app: the title 24/700 with a line under it in the secondary ink, an optional overline or breadcrumb above, and its lines under it (the page's actions) at the end." children=list
+  param title="Page" required doc="The page's title."
+  param note="" doc="One line under the title: what the page holds, a count."
+  param overline="" doc="A small line over the title (the section, a breadcrumb's last step)."
+  preview "Default" 900x72 title="Members" note="Manage workspace access, roles and invitations."
+Row#pageHead gap=16 middle w=fill
+  Column#pageTitles gap=4 grow
+    Text#pageOverline "{props.overline}" style=metaStrong visible={props.overline != ''}
+    Text#pageTitle "{props.title}" style=pageTitle phone.size=20
+    Text#pageNote "{props.note}" style=muted visible={props.note != ''}
+  Row#pageActions gap=8 middle
+    Slot#pageActionsSlot

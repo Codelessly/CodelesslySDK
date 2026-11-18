@@ -1,0 +1,382 @@
+{
+ "schema": 3,
+ "id": "Tabs",
+ "roots": [
+  "tabsBar"
+ ],
+ "widget": {
+  "type": "Tabs",
+  "doc": "Views of one page (Board, List, Archive): labels 13/500 in a row over a rule, the current one in the ink with a 2 px accent line under it; an outline icon before each when `icons` gives them. The current label is kept in your variable.",
+  "props": [
+   {
+    "key": "tabs",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Overview",
+     "Activity",
+     "Settings"
+    ],
+    "required": true,
+    "doc": "The labels."
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable holding the current tab."
+   },
+   {
+    "key": "icons",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "An icon name per tab (optional)."
+   },
+   {
+    "key": "counts",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "A count per tab (optional; empty text: none)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    420,
+    40
+   ],
+   "props": {
+    "tabs": [
+     "Board",
+     "List",
+     "Archive"
+    ],
+    "value": "Board",
+    "icons": [
+     "view_kanban",
+     "list",
+     "inventory_2"
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "tabsBar": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 40
+   },
+   "props": {
+    "spacing": 20,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "scrollDirection": "horizontal",
+    "spacing": 20
+   },
+   "bind": {
+    "data": "${props.tabs}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "mainAxisAlignment": "center"
+   },
+   "children": [
+    "tab"
+   ]
+  },
+  "tab": {
+   "type": "column",
+   "layout": {
+    "height": 40,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "bind": {
+    "selected": "${= item == props.value}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${item}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${item}"
+      }
+     ]
+    }
+   ],
+   "states": {
+    "selected": {
+     "tabGlyph": {
+      "props": {
+       "color": "ink"
+      }
+     },
+     "tabLabel": {
+      "props": {
+       "style": {
+        "color": "ink"
+       }
+      }
+     },
+     "tabLine": {
+      "visible": true
+     }
+    },
+    "hovered": {
+     "tabGlyph": {
+      "props": {
+       "color": "ink2"
+      }
+     },
+     "tabLabel": {
+      "props": {
+       "style": {
+        "color": "ink2"
+       }
+      }
+     }
+    }
+   },
+   "children": [
+    "tabInner",
+    "tabLine"
+   ]
+  },
+  "tabInner": {
+   "type": "row",
+   "layout": {
+    "flex": 1,
+    "padding": [
+     2,
+     0,
+     2,
+     0
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "tabGlyph",
+    "tabLabel",
+    "tabCount"
+   ]
+  },
+  "tabGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 16,
+    "color": "ink3"
+   },
+   "bind": {
+    "visible": "${= length(props.icons) > index}",
+    "props.icon": "${= get(props.icons, index) + '_outlined'}"
+   }
+  },
+  "tabLabel": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item}",
+    "style": {
+     "from": "body",
+     "fontSize": 13,
+     "fontWeight": 500,
+     "color": "ink3"
+    }
+   }
+  },
+  "tabCount": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     6,
+     0,
+     6,
+     0
+    ],
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 999,
+    "fills": [
+     {
+      "color": "subtleFill"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= length(props.counts) > index && get(props.counts, index) != ''}"
+   },
+   "children": [
+    "tabCountText"
+   ]
+  },
+  "tabCountText": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= get(props.counts, index)}",
+    "style": {
+     "from": "body",
+     "fontSize": 11.5,
+     "fontWeight": 500,
+     "color": "ink3"
+    }
+   }
+  },
+  "tabLine": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 2
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ],
+    "radius": [
+     2,
+     2,
+     0,
+     0
+    ]
+   },
+   "visible": false
+  }
+ }
+}

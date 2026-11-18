@@ -1,0 +1,14 @@
+component Tag "A label on a record (a kanban card's, a team on a member): 20 high, radius 4, a soft tint of its hue with a dot and its ink. `removable`: an x that fires onRemove. `outline`: a hairline and no tint (a quiet tag in a table)."
+  param label="Design" required doc="What it says."
+  param hue:neutral|violet|pink|teal|amber|sky|green|red|slate|accent="neutral" doc="Its hue (a label's colour)."
+  param dot:bool=true doc="A dot of the hue before the label."
+  param outline:bool=false doc="A hairline and the secondary ink, no tint."
+  param removable:bool=false doc="An x at its end."
+  event onRemove:String
+  preview "Default" 80x20 label="Design" hue="violet"
+  preview "Outline" 80x20 label="Platform" outline=true dot=false
+Row#tag gap=5 middle w=hug pad={props.removable ? [7, 0, 3, 0] : [7, 0, 7, 0]} h=20 radius=4 fill={props.outline ? '#00000000' : (props.hue == 'neutral' ? theme.colors.neutralTint : (props.hue == 'accent' ? theme.colors.accentTint : get(theme.colors, props.hue + 'Tint')))} border={props.outline ? theme.colors.line : '#00000000'}
+  box#tagDot w=6 h=6 radius=3 visible={props.dot} fill={props.hue == 'neutral' ? theme.colors.neutralDot : (props.hue == 'accent' ? theme.colors.accent : get(theme.colors, props.hue + 'Dot'))}
+  Text#tagLabel "{props.label}" style=tag maxLines=1 color={props.outline || props.hue == 'neutral' ? theme.colors.ink2 : (props.hue == 'accent' ? theme.colors.accentText : get(theme.colors, props.hue + 'Ink'))}
+  Row#tagX pad=2 radius=3 visible={props.removable} hovered.fill=hoverOverlay onTap={emit onRemove props.label}
+    Icon#tagXGlyph "close" size=12 color=ink3

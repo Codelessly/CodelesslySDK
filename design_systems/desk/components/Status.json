@@ -1,0 +1,166 @@
+{
+ "schema": 3,
+ "id": "Status",
+ "roots": [
+  "status"
+ ],
+ "widget": {
+  "type": "Status",
+  "doc": "A record's state: a 6 px dot in the tone and its label in the secondary ink (in a table, a row's meta). `pill`: on a soft tint with a hairline of its hue (to stand out on a card).",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Active",
+    "required": true,
+    "doc": "What it says."
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "neutral",
+      "success",
+      "warning",
+      "danger",
+      "info",
+      "accent"
+     ]
+    },
+    "default": "neutral",
+    "doc": "Its hue."
+   },
+   {
+    "key": "pill",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Drawn as a soft pill."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Dot",
+   "size": [
+    90,
+    20
+   ],
+   "props": {
+    "label": "Active",
+    "tone": "success"
+   }
+  },
+  {
+   "name": "Pill",
+   "size": [
+    90,
+    22
+   ],
+   "props": {
+    "label": "Invited",
+    "tone": "warning",
+    "pill": true
+   }
+  }
+ ],
+ "nodes": {
+  "status": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 999,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "layout.padding": "${= props.pill ? [8, 2, 9, 2] : [0, 0, 0, 0]}",
+    "decoration.fills[0].color": "${= props.pill ? get(theme.colors, (props.tone == 'danger' ? 'error' : (props.tone == 'accent' ? 'primary' : props.tone)) + 'Tint') : '#00000000'}",
+    "decoration.strokes[0].color": "${= props.pill ? get(theme.colors, (props.tone == 'danger' ? 'error' : (props.tone == 'accent' ? 'primary' : props.tone)) + 'TintBorder') : '#00000000'}"
+   },
+   "children": [
+    "statusDot",
+    "statusLabel"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 6
+      }
+     }
+    }
+   ]
+  },
+  "statusDot": {
+   "type": "box",
+   "layout": {
+    "width": 6,
+    "height": 6
+   },
+   "decoration": {
+    "radius": 3,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.tone == 'accent' ? theme.colors.accent : get(theme.colors, (props.tone == 'danger' ? 'error' : props.tone) + 'Dot')}"
+   }
+  },
+  "statusLabel": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "from": "body",
+     "fontSize": 12.5,
+     "fontWeight": 500
+    },
+    "maxLines": 1
+   },
+   "bind": {
+    "props.style.color": "${= props.pill ? (props.tone == 'accent' ? theme.colors.accentText : get(theme.colors, (props.tone == 'danger' ? 'error' : props.tone) + 'Ink')) : theme.colors.ink2}"
+   }
+  }
+ }
+}

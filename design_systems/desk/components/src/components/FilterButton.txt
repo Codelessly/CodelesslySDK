@@ -1,0 +1,12 @@
+component FilterButton "A filter in a filter bar (Labels, Assignee, Due date): 30 high, a hairline, an outline icon, its label 12.5/500, how many values are picked in a pill and a chevron; with values picked it takes the accent tint. Opens a Menu or a Popover from onTap."
+  param label="Filter" required doc="What it filters by."
+  param icon="" doc="A Material icon name; drawn outlined at 14."
+  param count:int=0 doc="How many values are picked (0: none)."
+  preview "Rest" 120x30 label="Labels" icon="label"
+  preview "Active" 140x30 label="Assignee" icon="person" count=2
+Row#filter gap=6 middle w=hug pad=[10,0,8,0] h=30 radius=6 border={props.count > 0 ? theme.colors.accentTintBorder : theme.colors.line} fill={props.count > 0 ? theme.colors.accentTint : theme.colors.primaryBackground} hovered.border=lineStrong
+  Icon#filterGlyph "{props.icon == '' ? 'filter_list' : props.icon + '_outlined'}" size=14 visible={props.icon != ''} color={props.count > 0 ? theme.colors.accentText : theme.colors.ink3}
+  Text#filterLabel "{props.label}" size=12.5 weight=500 color={props.count > 0 ? theme.colors.accentText : theme.colors.ink2}
+  Row#filterCount pad=[5,0,5,0] radius=999 fill=accent visible={props.count > 0}
+    Text#filterCountText "{props.count}" size=11 weight=600 color=onAccent
+  Icon#filterChevron "expand_more" size=16 color=ink3

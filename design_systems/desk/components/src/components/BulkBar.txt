@@ -1,0 +1,12 @@
+component BulkBar "What acts on the rows chosen in a table or a list: the count in the accent ink on the accent tint, Clear, and its lines under it (the actions: outline buttons, a destructive one last) at the end. Show it while something is chosen." children=list
+  param count:int=0 required doc="How many are chosen."
+  param noun="selected" doc="What follows the count (selected, members selected)."
+  event onClear
+  preview "Default" 900x44 count=3
+Row#bulk gap=8 middle pad=[12,0,8,0] w=fill h=44 radius=8 fill=accentTint border=accentTintBorder
+  Icon#bulkGlyph "check_box" size=16 color=accentText
+  Text#bulkCount "{props.count} {props.noun}" size=13 weight=600 color=accentText
+  Button.ghost#bulkClear "Clear" size=small onTap={emit onClear}
+  box#bulkSpacer h=1 grow
+  Row#bulkActions gap=8 middle
+    Slot#bulkSlot

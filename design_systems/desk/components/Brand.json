@@ -1,0 +1,213 @@
+{
+ "schema": 3,
+ "id": "Brand",
+ "roots": [
+  "brand"
+ ],
+ "widget": {
+  "type": "Brand",
+  "doc": "The product's mark and name at the head of a sidebar or the start of a top bar: a 28 accent tile with a white outline glyph, the name 15/700, an optional line under it.",
+  "props": [
+   {
+    "key": "name",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "App",
+    "required": true,
+    "doc": "The product's name."
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A line under the name (the workspace, the person)."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A Material icon name for the mark."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    232,
+    44
+   ],
+   "props": {
+    "name": "Northstar",
+    "note": "Admin console",
+    "icon": "grid_view"
+   }
+  }
+ ],
+ "nodes": {
+  "brand": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     6,
+     4,
+     6,
+     10
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "mark",
+    "words"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 10
+      }
+     }
+    }
+   ]
+  },
+  "mark": {
+   "type": "column",
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 7,
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= props.icon != ''}"
+   },
+   "children": [
+    "markGlyph"
+   ]
+  },
+  "markGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 16,
+    "color": "onAccent"
+   },
+   "bind": {
+    "props.icon": "${= props.icon == '' ? 'circle' : props.icon}"
+   }
+  },
+  "words": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "brandName",
+    "brandNote"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 96,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "brandName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.name}",
+    "style": {
+     "from": "body",
+     "fontSize": 15,
+     "fontWeight": 700,
+     "letterSpacing": -0.2,
+     "color": "ink"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "brandNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.note}",
+    "style": "meta",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "bind": {
+    "visible": "${= props.note != ''}"
+   }
+  }
+ }
+}

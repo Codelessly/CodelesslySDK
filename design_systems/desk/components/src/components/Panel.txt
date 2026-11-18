@@ -1,0 +1,11 @@
+component Panel "A titled section of a page (a settings group, a chart, a list in a dashboard): the card's fill and hairline, radius 10, a head (title 14/600, a line under it) over a rule, and its lines under it as the body, padded 16, 12 apart." children=list
+  param title="Section" required doc="Its title."
+  param note="" doc="A line under the title."
+  param flush:bool=false doc="No padding round the body (a table or a list that runs to the edges)."
+  preview "Default" 480x160 title="Notifications" note="How and when we reach you."
+Column#panel w=fill fill=card border=line radius=10 clip=antiAlias
+  Column#panelHead gap=2 pad=[16,12,16,12] w=fill border-bottom=line
+    Text#panelTitle "{props.title}" style=panelTitle
+    Text#panelNote "{props.note}" style=caption visible={props.note != ''}
+  Column#panelBody gap=12 w=fill pad={props.flush ? [0, 0, 0, 0] : [16, 16, 16, 16]}
+    Slot#panelSlot

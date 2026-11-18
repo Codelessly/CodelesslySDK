@@ -1,0 +1,16 @@
+component Stat "A figure on a dashboard or over a table: its label in the caption ink, the number 24/600 in tabular figures, a change or a note under it. In a Grid or a Row of them; `band`: no frame of its own (a cell of a stat strip)."
+  param label="Total" required doc="What it counts."
+  param text="0" required doc="The figure (written second: Stat \"Active\" \"43\")."
+  param delta="" doc="The change (+4 this week); green when it starts with +, red with -."
+  param note="" doc="A line under it."
+  param tone:neutral|success|warning|danger|info="neutral" doc="A dot before the label."
+  param band:bool=false doc="No frame (a cell of a strip of stats)."
+  preview "Default" 240x96 label="Active members" text="43" delta="+4" note="this month"
+Column#stat gap=6 pad={props.band ? [20, 14, 20, 14] : [18, 16, 18, 16]} w=fill fill={props.band ? '#00000000' : theme.colors.card} border={props.band ? '#00000000' : theme.colors.line} radius=8
+  Row#statHead gap=6 middle
+    box#statDot w=6 h=6 radius=3 visible={props.tone != 'neutral'} fill={get(theme.colors, (props.tone == 'danger' ? 'error' : props.tone) + 'Dot')}
+    Text#statLabel "{props.label}" size=12.5 weight=500 color=ink3 maxLines=1 overflow=ellipsis
+  Row#statFigures gap=8 bottom
+    Text#statValue "{props.text}" style=number
+    Text#statDelta "{props.delta}" size=12 weight=600 pad=[0,0,0,3] visible={props.delta != ''} color={startsWith(props.delta, '-') ? theme.colors.errorInk : (startsWith(props.delta, '+') ? theme.colors.successInk : theme.colors.ink3)}
+  Text#statNote "{props.note}" style=caption visible={props.note != ''}

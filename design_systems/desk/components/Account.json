@@ -1,0 +1,221 @@
+{
+ "schema": 3,
+ "id": "Account",
+ "roots": [
+  "account"
+ ],
+ "widget": {
+  "type": "Account",
+  "doc": "The signed-in person at a sidebar's foot or in a top bar: their avatar, name 13/500 and a line under it (an email, a role), a chevron for the account menu; the hover fill. Fires onTap as any line does.",
+  "props": [
+   {
+    "key": "name",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Jamie Park",
+    "required": true,
+    "doc": "Their name."
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A line under it (their email or role)."
+   },
+   {
+    "key": "chevron",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "A chevron at its end (it opens a menu)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    232,
+    44
+   ],
+   "props": {
+    "name": "Jamie Park",
+    "note": "jamie@northline.design"
+   }
+  }
+ ],
+ "nodes": {
+  "account": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     8,
+     6,
+     8,
+     6
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 6
+   },
+   "states": {
+    "hovered": {
+     "account": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "accountAvatar",
+    "accountWords",
+    "accountChevron"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 10
+      }
+     }
+    }
+   ]
+  },
+  "accountAvatar": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": "small"
+   },
+   "bind": {
+    "props.name": "${props.name}"
+   }
+  },
+  "accountWords": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "accountName",
+    "accountNote"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 96,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "accountName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.name}",
+    "style": {
+     "from": "body",
+     "fontSize": 13,
+     "fontWeight": 500,
+     "color": "ink"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "accountNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.note}",
+    "style": "meta",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "bind": {
+    "visible": "${= props.note != ''}"
+   }
+  },
+  "accountChevron": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "unfold_more_outlined",
+    "size": 16,
+    "color": "ink4"
+   },
+   "bind": {
+    "visible": "${props.chevron}"
+   }
+  }
+ }
+}

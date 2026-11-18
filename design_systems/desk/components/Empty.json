@@ -1,0 +1,225 @@
+{
+ "schema": 3,
+ "id": "Empty",
+ "roots": [
+  "empty"
+ ],
+ "widget": {
+  "type": "Empty",
+  "doc": "What a list, a table, a pane or a search with nothing in it says: an outline icon at 24 on a soft tile, a 14/600 line, a 13 caption, and its lines under it (one quiet button) under that; centred, 320 wide at most.",
+  "children": "list",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Nothing here",
+    "required": true,
+    "doc": "What is empty, as a person says it."
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Why, or what to do next."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "inbox",
+    "doc": "A Material icon name; drawn outlined."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    360,
+    220
+   ],
+   "props": {
+    "title": "No messages",
+    "note": "Mail you receive shows up here.",
+    "icon": "inbox"
+   }
+  }
+ ],
+ "nodes": {
+  "empty": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     24,
+     40,
+     24,
+     40
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "children": [
+    "emptyTile",
+    "emptyTitle",
+    "emptyNote",
+    "emptyActions"
+   ]
+  },
+  "emptyTile": {
+   "type": "column",
+   "layout": {
+    "width": 44,
+    "height": 44
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 10,
+    "fills": [
+     {
+      "color": "subtleFill"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ]
+   },
+   "children": [
+    "emptyGlyph"
+   ]
+  },
+  "emptyGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 22,
+    "color": "ink3"
+   },
+   "bind": {
+    "props.icon": "${= endsWith(props.icon, '_outlined') || endsWith(props.icon, '_rounded') ? props.icon : props.icon + '_outlined'}"
+   }
+  },
+  "emptyTitle": {
+   "type": "text",
+   "layout": {
+    "padding": [
+     0,
+     14,
+     0,
+     0
+    ],
+    "constraints": {
+     "maxWidth": 320
+    },
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "from": "body",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "color": "ink"
+    },
+    "textAlign": "center"
+   }
+  },
+  "emptyNote": {
+   "type": "text",
+   "layout": {
+    "constraints": {
+     "maxWidth": 320
+    },
+    "padding": [
+     0,
+     4,
+     0,
+     0
+    ],
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.note}",
+    "style": "muted",
+    "textAlign": "center"
+   },
+   "bind": {
+    "visible": "${= props.note != ''}"
+   }
+  },
+  "emptyActions": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     0,
+     16,
+     0,
+     0
+    ],
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "emptySlot"
+   ]
+  },
+  "emptySlot": {
+   "type": "slot",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}

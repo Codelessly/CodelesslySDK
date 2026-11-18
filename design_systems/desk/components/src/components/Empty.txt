@@ -1,0 +1,12 @@
+component Empty "What a list, a table, a pane or a search with nothing in it says: an outline icon at 24 on a soft tile, a 14/600 line, a 13 caption, and its lines under it (one quiet button) under that; centred, 320 wide at most." children=list
+  param title="Nothing here" required doc="What is empty, as a person says it."
+  param note="" doc="Why, or what to do next."
+  param icon="inbox" doc="A Material icon name; drawn outlined."
+  preview "Default" 360x220 title="No messages" note="Mail you receive shows up here." icon="inbox"
+Column#empty gap=0 center middle pad=[24,40,24,40] w=fill
+  Column#emptyTile w=44 h=44 radius=10 center middle fill=subtleFill border=line
+    Icon#emptyGlyph "{endsWith(props.icon, '_outlined') || endsWith(props.icon, '_rounded') ? props.icon : props.icon + '_outlined'}" size=22 color=ink3
+  Text#emptyTitle "{props.title}" size=14 weight=600 color=ink textAlign=center pad=[0,14,0,0] maxw=320
+  Text#emptyNote "{props.note}" style=muted textAlign=center maxw=320 pad=[0,4,0,0] visible={props.note != ''}
+  Row#emptyActions gap=8 center pad=[0,16,0,0]
+    Slot#emptySlot

@@ -1,0 +1,167 @@
+{
+ "schema": 3,
+ "id": "Avatar",
+ "roots": [
+  "avatar"
+ ],
+ "widget": {
+  "type": "Avatar",
+  "doc": "A person: a round mark with their initials (11/600) on a soft tint picked by their name, or their picture. 28 by default; 20 in dense rows, 36 in a header.",
+  "props": [
+   {
+    "key": "name",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Ada Mensah",
+    "required": true,
+    "doc": "Their name: the initials and the tint come from it."
+   },
+   {
+    "key": "size",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 28,
+    "doc": "Its diameter."
+   },
+   {
+    "key": "src",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A picture's URL (empty: the initials)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    28,
+    28
+   ],
+   "props": {
+    "name": "Maya Chen"
+   }
+  },
+  {
+   "name": "Large",
+   "size": [
+    36,
+    36
+   ],
+   "props": {
+    "name": "Jamie Park",
+    "size": 36
+   }
+  }
+ ],
+ "nodes": {
+  "avatar": {
+   "type": "stack",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "children": [
+    "avatarDisc",
+    "avatarInitials",
+    "avatarPicture"
+   ]
+  },
+  "avatarDisc": {
+   "type": "box",
+   "layout": {
+    "x": {
+     "align": 0
+    },
+    "width": 0,
+    "y": {
+     "align": 0
+    },
+    "height": 0
+   },
+   "decoration": {
+    "radius": 999,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "layout.width": "${props.size}",
+    "layout.height": "${props.size}",
+    "decoration.fills[0].color": "${= get(theme.colors, at(['violet','teal','amber','sky','pink','green'], (charCode(props.name + '  ', 0) + charCode(props.name + '  ', 1)) % 6) + 'Tint')}"
+   }
+  },
+  "avatarInitials": {
+   "type": "text",
+   "layout": {
+    "x": {
+     "align": 0
+    },
+    "width": {
+     "hug": 0
+    },
+    "y": {
+     "align": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= upper(left(props.name, 1) + (contains(trim(props.name), ' ') ? left(last(split(trim(props.name), ' ')), 1) : ''))}",
+    "style": {
+     "from": "body",
+     "fontWeight": 600,
+     "letterSpacing": 0.2
+    }
+   },
+   "bind": {
+    "props.style.fontSize": "${= props.size <= 22 ? 9 : (props.size >= 36 ? 13 : 11)}",
+    "props.style.color": "${= get(theme.colors, at(['violet','teal','amber','sky','pink','green'], (charCode(props.name + '  ', 0) + charCode(props.name + '  ', 1)) % 6) + 'Ink')}"
+   }
+  },
+  "avatarPicture": {
+   "type": "box",
+   "layout": {
+    "x": {
+     "align": 0
+    },
+    "width": 0,
+    "y": {
+     "align": 0
+    },
+    "height": 0
+   },
+   "decoration": {
+    "radius": 999,
+    "fills": [
+     {
+      "image": {
+       "url": "",
+       "fit": "cover"
+      }
+     }
+    ]
+   },
+   "bind": {
+    "layout.width": "${props.size}",
+    "layout.height": "${props.size}",
+    "visible": "${= props.src != ''}",
+    "decoration.fills[0].image.url": "${props.src}"
+   }
+  }
+ }
+}

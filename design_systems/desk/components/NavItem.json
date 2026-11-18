@@ -1,0 +1,322 @@
+{
+ "schema": 3,
+ "id": "NavItem",
+ "roots": [
+  "item"
+ ],
+ "widget": {
+  "type": "NavItem",
+  "doc": "A sidebar or menu item: an outline icon, its label, and at its end a count or a key. Selected: the accent tint, the accent ink, a heavier label.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Item",
+    "required": true,
+    "doc": "What it says."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A Material icon name; drawn outlined at 16."
+   },
+   {
+    "key": "selected",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "The chosen item."
+   },
+   {
+    "key": "badge",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A count at its end (a soft pill)."
+   },
+   {
+    "key": "shortcut",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A key at its end (a key cap)."
+   },
+   {
+    "key": "danger",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A destructive item (Delete): red ink."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Selected",
+   "size": [
+    232,
+    32
+   ],
+   "props": {
+    "label": "Inbox",
+    "icon": "inbox",
+    "selected": true,
+    "badge": "4"
+   }
+  },
+  {
+   "name": "Rest",
+   "size": [
+    232,
+    32
+   ],
+   "props": {
+    "label": "Archive",
+    "icon": "archive",
+    "shortcut": "G A"
+   }
+  }
+ ],
+ "nodes": {
+  "item": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     10,
+     0,
+     8,
+     0
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": 32
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 6
+   },
+   "bind": {
+    "selected": "${= props.selected}"
+   },
+   "states": {
+    "selected": {
+     "item": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "accentTint"
+        }
+       ]
+      }
+     }
+    },
+    "hovered": {
+     "item": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "item": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "glyph",
+    "name",
+    "count",
+    "key"
+   ]
+  },
+  "glyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 16
+   },
+   "bind": {
+    "visible": "${= props.icon != ''}",
+    "props.color": "${= props.danger ? theme.colors.errorInk : (props.selected ? theme.colors.accentText : theme.colors.ink3)}",
+    "props.icon": "${= props.icon == '' ? 'circle' : (endsWith(props.icon, '_outlined') || endsWith(props.icon, '_rounded') || endsWith(props.icon, '_sharp') ? props.icon : props.icon + '_outlined')}"
+   }
+  },
+  "name": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "from": "body",
+     "fontSize": 13
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "bind": {
+    "props.style.fontWeight": "${= props.selected ? 600 : 500}",
+    "props.style.color": "${= props.danger ? theme.colors.errorInk : (props.selected ? theme.colors.accentText : theme.colors.ink2)}"
+   }
+  },
+  "count": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     6,
+     1,
+     6,
+     1
+    ],
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 999,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= props.badge != ''}",
+    "decoration.fills[0].color": "${= props.selected ? theme.colors.accentTintBorder : theme.colors.subtleFill}"
+   },
+   "children": [
+    "countText"
+   ]
+  },
+  "countText": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.badge}",
+    "style": {
+     "from": "body",
+     "fontSize": 11.5,
+     "fontWeight": 500,
+     "tabularFigures": true
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.selected ? theme.colors.accentText : theme.colors.ink3}"
+   }
+  },
+  "key": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     5,
+     1,
+     5,
+     1
+    ],
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 4,
+    "strokes": [
+     {
+      "color": "keycapBorder"
+     }
+    ],
+    "fills": [
+     {
+      "color": "keycap"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= props.shortcut != ''}"
+   },
+   "children": [
+    "keyText"
+   ]
+  },
+  "keyText": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.shortcut}",
+    "style": "keycap"
+   }
+  }
+ }
+}

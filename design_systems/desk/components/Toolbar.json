@@ -1,0 +1,84 @@
+{
+ "schema": 3,
+ "id": "Toolbar",
+ "roots": [
+  "toolbar"
+ ],
+ "widget": {
+  "type": "Toolbar",
+  "doc": "A bar of controls across a pane: 48 high, its lines in a row 8 apart, a rule under it. A Spacer pushes what follows to the end; a VerticalDivider parts groups. `band`: on the chrome's fill (a reading pane's actions).",
+  "children": "list",
+  "props": [
+   {
+    "key": "band",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "On the chrome's fill, not the pane's."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    720,
+    48
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "toolbar": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     16,
+     0,
+     16,
+     0
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": 48
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom",
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.band ? theme.colors.chrome : '#00000000'}"
+   },
+   "children": [
+    "toolbarContent"
+   ]
+  },
+  "toolbarContent": {
+   "type": "slot",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}

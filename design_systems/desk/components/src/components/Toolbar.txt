@@ -1,0 +1,5 @@
+component Toolbar "A bar of controls across a pane: 48 high, its lines in a row 8 apart, a rule under it. A Spacer pushes what follows to the end; a VerticalDivider parts groups. `band`: on the chrome's fill (a reading pane's actions)." children=list
+  param band:bool=false doc="On the chrome's fill, not the pane's."
+  preview "Default" 720x48
+Row#toolbar gap=8 middle pad=[16,0,16,0] w=fill h=48 border-bottom=line fill={props.band ? theme.colors.chrome : '#00000000'}
+  Slot#toolbarContent

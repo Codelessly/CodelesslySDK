@@ -1,0 +1,174 @@
+{
+ "schema": 3,
+ "id": "Property",
+ "roots": [
+  "prop"
+ ],
+ "widget": {
+  "type": "Property",
+  "doc": "A labelled value in an inspector or a details list: the label 12.5 in the caption ink in a column 112 wide, the value (its text, or the lines under it) beside it; 32 high at least.",
+  "children": "list",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Field",
+    "required": true,
+    "doc": "What the value is."
+   },
+   {
+    "key": "text",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The value as text (or write lines under it)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    340,
+    32
+   ],
+   "props": {
+    "label": "Role",
+    "text": "Admin"
+   }
+  }
+ ],
+ "nodes": {
+  "prop": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "constraints": {
+     "minHeight": 32
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "propLabel",
+    "propValue"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "propLabel": {
+   "type": "text",
+   "layout": {
+    "width": 112,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "from": "body",
+     "fontSize": 12.5,
+     "color": "ink3"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "propValue": {
+   "type": "row",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "propText",
+    "propSlot"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 96,
+       "flex": 1
+      },
+      "props": {
+       "wrap": true,
+       "runSpacing": 6
+      }
+     }
+    }
+   ]
+  },
+  "propText": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.text}",
+    "style": {
+     "from": "body",
+     "fontSize": 13,
+     "color": "ink"
+    },
+    "maxLines": 2,
+    "overflow": "ellipsis"
+   },
+   "bind": {
+    "visible": "${= props.text != ''}"
+   }
+  },
+  "propSlot": {
+   "type": "slot",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}

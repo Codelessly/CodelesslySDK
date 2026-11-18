@@ -1,0 +1,16 @@
+component NavItem "A sidebar or menu item: an outline icon, its label, and at its end a count or a key. Selected: the accent tint, the accent ink, a heavier label."
+  param label="Item" required doc="What it says."
+  param icon="" doc="A Material icon name; drawn outlined at 16."
+  param selected:bool=false doc="The chosen item."
+  param badge="" doc="A count at its end (a soft pill)."
+  param shortcut="" doc="A key at its end (a key cap)."
+  param danger:bool=false doc="A destructive item (Delete): red ink."
+  preview "Selected" 232x32 label="Inbox" icon="inbox" selected=true badge="4"
+  preview "Rest" 232x32 label="Archive" icon="archive" shortcut="G A"
+Row#item gap=10 middle pad=[10,0,8,0] w=fill h=32 radius=6 selected={props.selected} selected.fill=accentTint hovered.fill=hoverOverlay pressed.fill=pressedOverlay
+  Icon#glyph "{props.icon == '' ? 'circle' : (endsWith(props.icon, '_outlined') || endsWith(props.icon, '_rounded') || endsWith(props.icon, '_sharp') ? props.icon : props.icon + '_outlined')}" size=16 visible={props.icon != ''} color={props.danger ? theme.colors.errorInk : (props.selected ? theme.colors.accentText : theme.colors.ink3)}
+  Text#name "{props.label}" size=13 grow maxLines=1 overflow=ellipsis weight={props.selected ? 600 : 500} color={props.danger ? theme.colors.errorInk : (props.selected ? theme.colors.accentText : theme.colors.ink2)}
+  Row#count pad=[6,1,6,1] radius=999 visible={props.badge != ''} fill={props.selected ? theme.colors.accentTintBorder : theme.colors.subtleFill}
+    Text#countText "{props.badge}" size=11.5 weight=500 tabularFigures=true color={props.selected ? theme.colors.accentText : theme.colors.ink3}
+  Row#key pad=[5,1,5,1] radius=4 border=keycapBorder fill=keycap visible={props.shortcut != ''}
+    Text#keyText "{props.shortcut}" style=keycap

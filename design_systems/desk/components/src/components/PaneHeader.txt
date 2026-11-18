@@ -1,0 +1,15 @@
+component PaneHeader "The head of a side pane or an inspector: an optional avatar, the title 15/600 and a line under it, its lines under it (actions) and a close button at the end that fires onClose; a rule under it." children=list
+  param title="Details" required doc="What the pane shows."
+  param note="" doc="A line under the title."
+  param avatar="" doc="A person's name: their avatar before the title."
+  param closable:bool=true doc="A close button at its end."
+  event onClose
+  preview "Default" 360x60 title="Amara Okafor" note="Admin · joined Mar 2024" avatar="Amara Okafor"
+Row#paneHead gap=12 middle pad=[20,14,12,14] w=fill border-bottom=line
+  Avatar#paneAvatar "{props.avatar == '' ? '?' : props.avatar}" size=36 visible={props.avatar != ''}
+  Column#paneTitles gap=2 grow
+    Text#paneTitle "{props.title}" style=sectionTitle maxLines=1 overflow=ellipsis
+    Text#paneNote "{props.note}" style=caption visible={props.note != ''} maxLines=1 overflow=ellipsis
+  Row#paneActions gap=4 middle
+    Slot#paneSlot
+  IconButton#paneClose "close" w=30 h=30 tooltip="Close (Esc)" visible={props.closable} onTap={emit onClose}

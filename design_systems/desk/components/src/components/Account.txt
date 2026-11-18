@@ -1,0 +1,11 @@
+component Account "The signed-in person at a sidebar's foot or in a top bar: their avatar, name 13/500 and a line under it (an email, a role), a chevron for the account menu; the hover fill. Fires onTap as any line does."
+  param name="Jamie Park" required doc="Their name."
+  param note="" doc="A line under it (their email or role)."
+  param chevron:bool=true doc="A chevron at its end (it opens a menu)."
+  preview "Default" 232x44 name="Jamie Park" note="jamie@northline.design"
+Row#account gap=10 middle pad=[8,6,8,6] w=fill radius=6 hovered.fill=hoverOverlay
+  Avatar#accountAvatar "{props.name}" size=28
+  Column#accountWords gap=0 grow
+    Text#accountName "{props.name}" size=13 weight=500 color=ink maxLines=1 overflow=ellipsis
+    Text#accountNote "{props.note}" style=meta maxLines=1 overflow=ellipsis visible={props.note != ''}
+  Icon#accountChevron "unfold_more" size=16 color=ink4 visible={props.chevron}

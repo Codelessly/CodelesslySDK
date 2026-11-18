@@ -1,0 +1,5 @@
+component NavSection "The label over a group of sidebar items: small spaced capitals in the caption ink, with room above that parts the groups."
+  param label="Section" required doc="The group's name (written as it reads; shown in capitals)."
+  preview "Default" 232x36 label="Mailbox"
+Column#section pad=[10,18,10,6] w=fill
+  Text#label "{upper(props.label)}" style=overline

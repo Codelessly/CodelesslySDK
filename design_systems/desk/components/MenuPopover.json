@@ -1,0 +1,109 @@
+{
+ "schema": 3,
+ "id": "MenuPopover",
+ "roots": [
+  "menuPanel"
+ ],
+ "widget": {
+  "type": "MenuPopover",
+  "doc": "The panel of a menu (what `Menu#id` draws): the raised surface, a hairline, radius 8, the menu shadow, 4 round its items; an optional heading in small capitals. Its children are MenuItem lines (a Divider between groups).",
+  "children": "list",
+  "props": [
+   {
+    "key": "heading",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A small heading over the items (empty: none)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    220,
+    80
+   ],
+   "props": {
+    "heading": "Move to"
+   }
+  }
+ ],
+ "nodes": {
+  "menuPanel": {
+   "type": "column",
+   "layout": {
+    "padding": 4,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 1,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "raisedBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 8,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.effects": "${theme.shadows.level3}"
+   },
+   "children": [
+    "menuHeading",
+    "menuItems"
+   ]
+  },
+  "menuHeading": {
+   "type": "text",
+   "layout": {
+    "padding": [
+     8,
+     6,
+     8,
+     4
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= upper(props.heading)}",
+    "style": "overline"
+   },
+   "bind": {
+    "visible": "${= props.heading != ''}"
+   }
+  },
+  "menuItems": {
+   "type": "slot",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}

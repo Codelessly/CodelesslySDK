@@ -1,0 +1,229 @@
+{
+ "schema": 3,
+ "id": "MenuItem",
+ "roots": [
+  "mi"
+ ],
+ "widget": {
+  "type": "MenuItem",
+  "doc": "A line of a menu or a context menu: an outline icon, its label, a shortcut at its end in the quiet ink, a check when it is the current choice. danger: red ink (Delete).",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Item",
+    "required": true,
+    "doc": "What it does."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A Material icon name; drawn outlined at 16."
+   },
+   {
+    "key": "shortcut",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Its key, shown at its end (Ctrl+E, E, Del)."
+   },
+   {
+    "key": "checked",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "The current choice of a menu that picks one (a sort, a view)."
+   },
+   {
+    "key": "danger",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A destructive item: red ink and a red tint under the pointer."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    220,
+    32
+   ],
+   "props": {
+    "label": "Archive",
+    "icon": "archive",
+    "shortcut": "E"
+   }
+  },
+  {
+   "name": "Danger",
+   "size": [
+    220,
+    32
+   ],
+   "props": {
+    "label": "Delete",
+    "icon": "delete",
+    "shortcut": "Del",
+    "danger": true
+   }
+  }
+ ],
+ "nodes": {
+  "mi": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     8,
+     0,
+     8,
+     0
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": 30
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 5
+   },
+   "states": {
+    "hovered": {
+     "mi": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "#00000000"
+        }
+       ]
+      },
+      "bind": {
+       "decoration.fills[0].color": "${= props.danger ? theme.colors.errorTint : theme.colors.hoverOverlay}"
+      }
+     }
+    },
+    "pressed": {
+     "mi": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "miGlyph",
+    "miLabel",
+    "miKey",
+    "miCheck"
+   ]
+  },
+  "miGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 16
+   },
+   "bind": {
+    "visible": "${= props.icon != ''}",
+    "props.color": "${= props.danger ? theme.colors.errorInk : theme.colors.ink3}",
+    "props.icon": "${= props.icon == '' ? 'circle' : (endsWith(props.icon, '_outlined') || endsWith(props.icon, '_rounded') || endsWith(props.icon, '_sharp') ? props.icon : props.icon + '_outlined')}"
+   }
+  },
+  "miLabel": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "from": "body",
+     "fontSize": 13
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "bind": {
+    "props.style.color": "${= props.danger ? theme.colors.errorInk : theme.colors.ink}"
+   }
+  },
+  "miKey": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.shortcut}",
+    "style": {
+     "from": "body",
+     "fontSize": 12,
+     "color": "ink4"
+    }
+   },
+   "bind": {
+    "visible": "${= props.shortcut != ''}"
+   }
+  },
+  "miCheck": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "check_outlined",
+    "size": 16,
+    "color": "accentText"
+   },
+   "bind": {
+    "visible": "${props.checked}"
+   }
+  }
+ }
+}

@@ -1,0 +1,291 @@
+{
+ "schema": 3,
+ "id": "Dialog",
+ "roots": [
+  "dialog"
+ ],
+ "widget": {
+  "type": "Dialog",
+  "doc": "A dialog's frame (what `Dialog#id \"Title\"` draws): a title bar (an optional overline, the title 16/600, a line under it, a close button of 30), a ruled body padded 24, and its lines under it as the body. End it with an `Actions` line: its buttons sit in a footer band.",
+  "children": "list",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Dialog",
+    "required": true,
+    "doc": "The title."
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A line under the title (what the dialog is for)."
+   },
+   {
+    "key": "overline",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A small line over the title (an id: STK-124)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onClose",
+    "doc": "The close button, Escape or a tap outside."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    560,
+    220
+   ],
+   "props": {
+    "title": "Invite members",
+    "note": "They get an email with a link to join."
+   }
+  }
+ ],
+ "nodes": {
+  "dialog": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "raisedBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 12,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.effects": "${theme.shadows.level4}"
+   },
+   "children": [
+    "dialogHead",
+    "dialogBody"
+   ]
+  },
+  "dialogHead": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     24,
+     18,
+     14,
+     16
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "children": [
+    "dialogTitles",
+    "dialogClose"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "dialogTitles": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "dialogOverline",
+    "dialogTitle",
+    "dialogNote"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 280,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "dialogOverline": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.overline}",
+    "style": {
+     "from": "mono",
+     "fontSize": 11.5,
+     "color": "ink3"
+    }
+   },
+   "bind": {
+    "visible": "${= props.overline != ''}"
+   }
+  },
+  "dialogTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.title}",
+    "style": "dialogTitle"
+   }
+  },
+  "dialogNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.note}",
+    "style": "small"
+   },
+   "bind": {
+    "visible": "${= props.note != ''}"
+   }
+  },
+  "dialogClose": {
+   "type": "iconButton",
+   "layout": {
+    "width": 30,
+    "height": 30
+   },
+   "props": {
+    "icon": "close_outlined"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onClose"
+      }
+     ]
+    }
+   ],
+   "tooltip": "Close (Esc)"
+  },
+  "dialogBody": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     24,
+     20,
+     24,
+     0
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "dialogContent"
+   ]
+  },
+  "dialogContent": {
+   "type": "slot",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}

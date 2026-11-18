@@ -1,0 +1,192 @@
+{
+ "schema": 3,
+ "id": "BulkBar",
+ "roots": [
+  "bulk"
+ ],
+ "widget": {
+  "type": "BulkBar",
+  "doc": "What acts on the rows chosen in a table or a list: the count in the accent ink on the accent tint, Clear, and its lines under it (the actions: outline buttons, a destructive one last) at the end. Show it while something is chosen.",
+  "children": "list",
+  "props": [
+   {
+    "key": "count",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 0,
+    "required": true,
+    "doc": "How many are chosen."
+   },
+   {
+    "key": "noun",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "selected",
+    "doc": "What follows the count (selected, members selected)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onClear"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    900,
+    44
+   ],
+   "props": {
+    "count": 3
+   }
+  }
+ ],
+ "nodes": {
+  "bulk": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     12,
+     0,
+     8,
+     0
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": 44
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "accentTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "accentTintBorder"
+     }
+    ]
+   },
+   "children": [
+    "bulkGlyph",
+    "bulkCount",
+    "bulkClear",
+    "bulkSpacer",
+    "bulkActions"
+   ]
+  },
+  "bulkGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "check_box_outlined",
+    "size": 16,
+    "color": "accentText"
+   }
+  },
+  "bulkCount": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.count} ${props.noun}",
+    "style": {
+     "from": "body",
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "accentText"
+    }
+   }
+  },
+  "bulkClear": {
+   "type": "textButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Clear"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onClear"
+      }
+     ]
+    }
+   ]
+  },
+  "bulkSpacer": {
+   "type": "box",
+   "layout": {
+    "height": 1,
+    "flex": 1,
+    "width": {
+     "fill": 0
+    }
+   }
+  },
+  "bulkActions": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "bulkSlot"
+   ]
+  },
+  "bulkSlot": {
+   "type": "slot",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}

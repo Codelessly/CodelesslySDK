@@ -1,0 +1,13 @@
+component MenuItem "A line of a menu or a context menu: an outline icon, its label, a shortcut at its end in the quiet ink, a check when it is the current choice. danger: red ink (Delete)."
+  param label="Item" required doc="What it does."
+  param icon="" doc="A Material icon name; drawn outlined at 16."
+  param shortcut="" doc="Its key, shown at its end (Ctrl+E, E, Del)."
+  param checked:bool=false doc="The current choice of a menu that picks one (a sort, a view)."
+  param danger:bool=false doc="A destructive item: red ink and a red tint under the pointer."
+  preview "Default" 220x32 label="Archive" icon="archive" shortcut="E"
+  preview "Danger" 220x32 label="Delete" icon="delete" shortcut="Del" danger=true
+Row#mi gap=10 middle pad=[8,0,8,0] w=fill h=30 radius=5 hovered.fill={props.danger ? theme.colors.errorTint : theme.colors.hoverOverlay} pressed.fill=pressedOverlay
+  Icon#miGlyph "{props.icon == '' ? 'circle' : (endsWith(props.icon, '_outlined') || endsWith(props.icon, '_rounded') || endsWith(props.icon, '_sharp') ? props.icon : props.icon + '_outlined')}" size=16 visible={props.icon != ''} color={props.danger ? theme.colors.errorInk : theme.colors.ink3}
+  Text#miLabel "{props.label}" size=13 grow maxLines=1 overflow=ellipsis color={props.danger ? theme.colors.errorInk : theme.colors.ink}
+  Text#miKey "{props.shortcut}" size=12 color=ink4 visible={props.shortcut != ''}
+  Icon#miCheck "check" size=16 color=accentText visible={props.checked}

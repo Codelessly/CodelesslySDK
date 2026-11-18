@@ -1,0 +1,297 @@
+{
+ "schema": 3,
+ "id": "Stat",
+ "roots": [
+  "stat"
+ ],
+ "widget": {
+  "type": "Stat",
+  "doc": "A figure on a dashboard or over a table: its label in the caption ink, the number 24/600 in tabular figures, a change or a note under it. In a Grid or a Row of them; `band`: no frame of its own (a cell of a stat strip).",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Total",
+    "required": true,
+    "doc": "What it counts."
+   },
+   {
+    "key": "text",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "0",
+    "required": true,
+    "doc": "The figure (written second: Stat \"Active\" \"43\")."
+   },
+   {
+    "key": "delta",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The change (+4 this week); green when it starts with +, red with -."
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A line under it."
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "neutral",
+      "success",
+      "warning",
+      "danger",
+      "info"
+     ]
+    },
+    "default": "neutral",
+    "doc": "A dot before the label."
+   },
+   {
+    "key": "band",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "No frame (a cell of a strip of stats)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    240,
+    96
+   ],
+   "props": {
+    "label": "Active members",
+    "text": "43",
+    "delta": "+4",
+    "note": "this month"
+   }
+  }
+ ],
+ "nodes": {
+  "stat": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "bind": {
+    "layout.padding": "${= props.band ? [20, 14, 20, 14] : [18, 16, 18, 16]}",
+    "decoration.fills[0].color": "${= props.band ? '#00000000' : theme.colors.card}",
+    "decoration.strokes[0].color": "${= props.band ? '#00000000' : theme.colors.line}"
+   },
+   "children": [
+    "statHead",
+    "statFigures",
+    "statNote"
+   ]
+  },
+  "statHead": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "statDot",
+    "statLabel"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 6
+      }
+     }
+    }
+   ]
+  },
+  "statDot": {
+   "type": "box",
+   "layout": {
+    "width": 6,
+    "height": 6
+   },
+   "decoration": {
+    "radius": 3,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= props.tone != 'neutral'}",
+    "decoration.fills[0].color": "${= get(theme.colors, (props.tone == 'danger' ? 'error' : props.tone) + 'Dot')}"
+   }
+  },
+  "statLabel": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "from": "body",
+     "fontSize": 12.5,
+     "fontWeight": 500,
+     "color": "ink3"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "statFigures": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "end"
+   },
+   "children": [
+    "statValue",
+    "statDelta"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 8
+      }
+     }
+    }
+   ]
+  },
+  "statValue": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.text}",
+    "style": "number"
+   }
+  },
+  "statDelta": {
+   "type": "text",
+   "layout": {
+    "padding": [
+     0,
+     0,
+     0,
+     3
+    ],
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.delta}",
+    "style": {
+     "from": "body",
+     "fontSize": 12,
+     "fontWeight": 600
+    }
+   },
+   "bind": {
+    "visible": "${= props.delta != ''}",
+    "props.style.color": "${= startsWith(props.delta, '-') ? theme.colors.errorInk : (startsWith(props.delta, '+') ? theme.colors.successInk : theme.colors.ink3)}"
+   }
+  },
+  "statNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.note}",
+    "style": "caption"
+   },
+   "bind": {
+    "visible": "${= props.note != ''}"
+   }
+  }
+ }
+}

@@ -1,0 +1,10 @@
+component Avatar "A person: a round mark with their initials (11/600) on a soft tint picked by their name, or their picture. 28 by default; 20 in dense rows, 36 in a header."
+  param name="Ada Mensah" required doc="Their name: the initials and the tint come from it."
+  param size:double=28 doc="Its diameter."
+  param src="" doc="A picture's URL (empty: the initials)."
+  preview "Default" 28x28 name="Maya Chen"
+  preview "Large" 36x36 name="Jamie Park" size=36
+Stack#avatar w=hug h=hug center middle
+  box#avatarDisc w={props.size} h={props.size} radius=999 fill={get(theme.colors, at(['violet','teal','amber','sky','pink','green'], (charCode(props.name + '  ', 0) + charCode(props.name + '  ', 1)) % 6) + 'Tint')}
+  Text#avatarInitials "{upper(left(props.name, 1) + (contains(trim(props.name), ' ') ? left(last(split(trim(props.name), ' ')), 1) : ''))}" size={props.size <= 22 ? 9 : (props.size >= 36 ? 13 : 11)} weight=600 letterSpacing=0.2 color={get(theme.colors, at(['violet','teal','amber','sky','pink','green'], (charCode(props.name + '  ', 0) + charCode(props.name + '  ', 1)) % 6) + 'Ink')}
+  box#avatarPicture w={props.size} h={props.size} radius=999 visible={props.src != ''} fills=[{"image":{"url":"","fit":"cover"}}] fills[0].image.url={props.src}

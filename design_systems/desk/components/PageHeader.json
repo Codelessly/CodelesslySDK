@@ -1,0 +1,215 @@
+{
+ "schema": 3,
+ "id": "PageHeader",
+ "roots": [
+  "pageHead"
+ ],
+ "widget": {
+  "type": "PageHeader",
+  "doc": "The head of a page in an app: the title 24/700 with a line under it in the secondary ink, an optional overline or breadcrumb above, and its lines under it (the page's actions) at the end.",
+  "children": "list",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Page",
+    "required": true,
+    "doc": "The page's title."
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "One line under the title: what the page holds, a count."
+   },
+   {
+    "key": "overline",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A small line over the title (the section, a breadcrumb's last step)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    900,
+    72
+   ],
+   "props": {
+    "title": "Members",
+    "note": "Manage workspace access, roles and invitations."
+   }
+  }
+ ],
+ "nodes": {
+  "pageHead": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "pageTitles",
+    "pageActions"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "pageTitles": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "pageOverline",
+    "pageTitle",
+    "pageNote"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 280,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "pageOverline": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.overline}",
+    "style": "metaStrong"
+   },
+   "bind": {
+    "visible": "${= props.overline != ''}"
+   }
+  },
+  "pageTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.title}",
+    "style": "pageTitle"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "style": {
+        "from": "pageTitle",
+        "fontSize": 20
+       }
+      }
+     }
+    }
+   ]
+  },
+  "pageNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.note}",
+    "style": "muted"
+   },
+   "bind": {
+    "visible": "${= props.note != ''}"
+   }
+  },
+  "pageActions": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "pageActionsSlot"
+   ]
+  },
+  "pageActionsSlot": {
+   "type": "slot",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}

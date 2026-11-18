@@ -1,0 +1,236 @@
+{
+ "schema": 3,
+ "id": "FilterButton",
+ "roots": [
+  "filter"
+ ],
+ "widget": {
+  "type": "FilterButton",
+  "doc": "A filter in a filter bar (Labels, Assignee, Due date): 30 high, a hairline, an outline icon, its label 12.5/500, how many values are picked in a pill and a chevron; with values picked it takes the accent tint. Opens a Menu or a Popover from onTap.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Filter",
+    "required": true,
+    "doc": "What it filters by."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A Material icon name; drawn outlined at 14."
+   },
+   {
+    "key": "count",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 0,
+    "doc": "How many values are picked (0: none)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Rest",
+   "size": [
+    120,
+    30
+   ],
+   "props": {
+    "label": "Labels",
+    "icon": "label"
+   }
+  },
+  {
+   "name": "Active",
+   "size": [
+    140,
+    30
+   ],
+   "props": {
+    "label": "Assignee",
+    "icon": "person",
+    "count": 2
+   }
+  }
+ ],
+ "nodes": {
+  "filter": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     0,
+     8,
+     0
+    ],
+    "height": 30
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 6,
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= props.count > 0 ? theme.colors.accentTintBorder : theme.colors.line}",
+    "decoration.fills[0].color": "${= props.count > 0 ? theme.colors.accentTint : theme.colors.primaryBackground}"
+   },
+   "states": {
+    "hovered": {
+     "filter": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "lineStrong"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "filterGlyph",
+    "filterLabel",
+    "filterCount",
+    "filterChevron"
+   ]
+  },
+  "filterGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 14
+   },
+   "bind": {
+    "visible": "${= props.icon != ''}",
+    "props.color": "${= props.count > 0 ? theme.colors.accentText : theme.colors.ink3}",
+    "props.icon": "${= props.icon == '' ? 'filter_list' : props.icon + '_outlined'}"
+   }
+  },
+  "filterLabel": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "from": "body",
+     "fontSize": 12.5,
+     "fontWeight": 500
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.count > 0 ? theme.colors.accentText : theme.colors.ink2}"
+   }
+  },
+  "filterCount": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     5,
+     0,
+     5,
+     0
+    ],
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 999,
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= props.count > 0}"
+   },
+   "children": [
+    "filterCountText"
+   ]
+  },
+  "filterCountText": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.count}",
+    "style": {
+     "from": "body",
+     "fontSize": 11,
+     "fontWeight": 600,
+     "color": "onAccent"
+    }
+   }
+  },
+  "filterChevron": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "expand_more_outlined",
+    "size": 16,
+    "color": "ink3"
+   }
+  }
+ }
+}

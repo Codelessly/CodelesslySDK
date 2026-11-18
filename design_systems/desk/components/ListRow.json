@@ -1,0 +1,526 @@
+{
+ "schema": 3,
+ "id": "ListRow",
+ "roots": [
+  "row"
+ ],
+ "widget": {
+  "type": "ListRow",
+  "doc": "A row of a list pane (a mailbox, a feed, search results): a title, a second line and an optional third in the quiet ink, the time or a figure at its end, an avatar before. unread: a dot in the gutter and the first two lines heavier. selected: the accent tint and a 3 px accent bar at its start. Under the pointer: the hover fill. A rule under it.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Title",
+    "required": true,
+    "doc": "The first line (a sender, a name)."
+   },
+   {
+    "key": "subtitle",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The second line (a subject)."
+   },
+   {
+    "key": "preview",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A third line, one line long (a snippet)."
+   },
+   {
+    "key": "meta",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "At the end of the first line (a time, a size, a count)."
+   },
+   {
+    "key": "avatar",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A person's name: their avatar before the lines (empty: none)."
+   },
+   {
+    "key": "unread",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Not read yet."
+   },
+   {
+    "key": "selected",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "The open one."
+   },
+   {
+    "key": "starred",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A star after the second line."
+   },
+   {
+    "key": "attachment",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A paper clip after the second line."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Unread",
+   "size": [
+    380,
+    72
+   ],
+   "props": {
+    "title": "Nora Patel",
+    "subtitle": "November print invoice",
+    "preview": "Hi Jamie, here is the invoice for the November proofs.",
+    "meta": "9:18 AM",
+    "unread": true,
+    "attachment": true
+   }
+  },
+  {
+   "name": "Selected",
+   "size": [
+    380,
+    72
+   ],
+   "props": {
+    "title": "Maya Chen",
+    "subtitle": "Studio visit on Thursday",
+    "preview": "Hi Jamie, Thursday at 10:30 works for the studio visit.",
+    "meta": "10:42 AM",
+    "selected": true,
+    "starred": true
+   }
+  }
+ ],
+ "nodes": {
+  "row": {
+   "type": "stack",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "bind": {
+    "selected": "${= props.selected}"
+   },
+   "states": {
+    "selected": {
+     "row": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "accentTint"
+        }
+       ]
+      }
+     }
+    },
+    "hovered": {
+     "row": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "rowInner",
+    "rowDot",
+    "rowBar"
+   ]
+  },
+  "rowInner": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     20,
+     12,
+     16,
+     12
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "rowAvatar",
+    "rowLines"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 10
+      }
+     }
+    }
+   ]
+  },
+  "rowAvatar": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": "small"
+   },
+   "bind": {
+    "props.name": "${= props.avatar == '' ? '?' : props.avatar}",
+    "visible": "${= props.avatar != ''}"
+   }
+  },
+  "rowLines": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "rowFirst",
+    "rowSecond",
+    "rowPreview"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 280,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "rowFirst": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "rowTitle",
+    "rowMeta"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 8
+      }
+     }
+    }
+   ]
+  },
+  "rowTitle": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "from": "body",
+     "fontSize": 13,
+     "color": "ink"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "bind": {
+    "props.style.fontWeight": "${= props.unread ? 600 : 500}"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 96,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "rowMeta": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.meta}",
+    "style": {
+     "from": "body",
+     "fontSize": 12,
+     "tabularFigures": true
+    },
+    "maxLines": 1
+   },
+   "bind": {
+    "visible": "${= props.meta != ''}",
+    "props.style.fontWeight": "${= props.unread ? 600 : 400}",
+    "props.style.color": "${= props.unread ? theme.colors.accentText : theme.colors.ink3}"
+   }
+  },
+  "rowSecond": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= props.subtitle != ''}"
+   },
+   "children": [
+    "rowSubtitle",
+    "rowAttach",
+    "rowStar"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 6
+      }
+     }
+    }
+   ]
+  },
+  "rowSubtitle": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.subtitle}",
+    "style": {
+     "from": "body",
+     "fontSize": 13
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "bind": {
+    "props.style.fontWeight": "${= props.unread ? 600 : 400}",
+    "props.style.color": "${= props.unread ? theme.colors.ink : theme.colors.ink2}"
+   }
+  },
+  "rowAttach": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "attach_file_outlined",
+    "size": 14,
+    "color": "ink3"
+   },
+   "bind": {
+    "visible": "${props.attachment}"
+   }
+  },
+  "rowStar": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "star_outlined",
+    "size": 14,
+    "color": "warningDot"
+   },
+   "bind": {
+    "visible": "${props.starred}"
+   }
+  },
+  "rowPreview": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.preview}",
+    "style": {
+     "from": "body",
+     "fontSize": 12.5,
+     "color": "ink3"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "bind": {
+    "visible": "${= props.preview != ''}"
+   }
+  },
+  "rowDot": {
+   "type": "box",
+   "layout": {
+    "width": 6,
+    "height": 6,
+    "x": 8,
+    "y": 18
+   },
+   "decoration": {
+    "radius": 3,
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${props.unread}"
+   }
+  },
+  "rowBar": {
+   "type": "box",
+   "layout": {
+    "width": 3,
+    "height": {
+     "fill": 0
+    },
+    "x": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${props.selected}"
+   }
+  }
+ }
+}

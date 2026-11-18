@@ -1,0 +1,249 @@
+{
+ "schema": 3,
+ "id": "Tag",
+ "roots": [
+  "tag"
+ ],
+ "widget": {
+  "type": "Tag",
+  "doc": "A label on a record (a kanban card's, a team on a member): 20 high, radius 4, a soft tint of its hue with a dot and its ink. `removable`: an x that fires onRemove. `outline`: a hairline and no tint (a quiet tag in a table).",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Design",
+    "required": true,
+    "doc": "What it says."
+   },
+   {
+    "key": "hue",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "neutral",
+      "violet",
+      "pink",
+      "teal",
+      "amber",
+      "sky",
+      "green",
+      "red",
+      "slate",
+      "accent"
+     ]
+    },
+    "default": "neutral",
+    "doc": "Its hue (a label's colour)."
+   },
+   {
+    "key": "dot",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "A dot of the hue before the label."
+   },
+   {
+    "key": "outline",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A hairline and the secondary ink, no tint."
+   },
+   {
+    "key": "removable",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "An x at its end."
+   }
+  ],
+  "events": [
+   {
+    "key": "onRemove",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    80,
+    20
+   ],
+   "props": {
+    "label": "Design",
+    "hue": "violet"
+   }
+  },
+  {
+   "name": "Outline",
+   "size": [
+    80,
+    20
+   ],
+   "props": {
+    "label": "Platform",
+    "outline": true,
+    "dot": false
+   }
+  }
+ ],
+ "nodes": {
+  "tag": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20
+   },
+   "props": {
+    "spacing": 5,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 4,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "layout.padding": "${= props.removable ? [7, 0, 3, 0] : [7, 0, 7, 0]}",
+    "decoration.fills[0].color": "${= props.outline ? '#00000000' : (props.hue == 'neutral' ? theme.colors.neutralTint : (props.hue == 'accent' ? theme.colors.accentTint : get(theme.colors, props.hue + 'Tint')))}",
+    "decoration.strokes[0].color": "${= props.outline ? theme.colors.line : '#00000000'}"
+   },
+   "children": [
+    "tagDot",
+    "tagLabel",
+    "tagX"
+   ]
+  },
+  "tagDot": {
+   "type": "box",
+   "layout": {
+    "width": 6,
+    "height": 6
+   },
+   "decoration": {
+    "radius": 3,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${props.dot}",
+    "decoration.fills[0].color": "${= props.hue == 'neutral' ? theme.colors.neutralDot : (props.hue == 'accent' ? theme.colors.accent : get(theme.colors, props.hue + 'Dot'))}"
+   }
+  },
+  "tagLabel": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.label}",
+    "style": "tag",
+    "maxLines": 1
+   },
+   "bind": {
+    "props.style.color": "${= props.outline || props.hue == 'neutral' ? theme.colors.ink2 : (props.hue == 'accent' ? theme.colors.accentText : get(theme.colors, props.hue + 'Ink'))}"
+   }
+  },
+  "tagX": {
+   "type": "row",
+   "layout": {
+    "padding": 2,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 3
+   },
+   "bind": {
+    "visible": "${props.removable}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onRemove",
+       "value": "${props.label}"
+      }
+     ]
+    }
+   ],
+   "states": {
+    "hovered": {
+     "tagX": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "tagXGlyph"
+   ]
+  },
+  "tagXGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "close_outlined",
+    "size": 12,
+    "color": "ink3"
+   }
+  }
+ }
+}

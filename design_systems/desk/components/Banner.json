@@ -1,0 +1,246 @@
+{
+ "schema": 3,
+ "id": "Banner",
+ "roots": [
+  "banner"
+ ],
+ "widget": {
+  "type": "Banner",
+  "doc": "A message across a page or a pane (a plan limit, a failed sync, a read-only view): a soft tint and a hairline of its tone, an outline icon, a title and a line, and its lines under it (an action) at the end. `dismissible`: a close button that fires onClose.",
+  "children": "list",
+  "props": [
+   {
+    "key": "lead",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A short bold lead before the message."
+   },
+   {
+    "key": "message",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Something needs your attention.",
+    "required": true,
+    "doc": "What it says."
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "info",
+      "success",
+      "warning",
+      "danger",
+      "neutral"
+     ]
+    },
+    "default": "info",
+    "doc": "Its hue and icon."
+   },
+   {
+    "key": "dismissible",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A close button at its end."
+   }
+  ],
+  "events": [
+   {
+    "key": "onClose"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Info",
+   "size": [
+    640,
+    48
+   ],
+   "props": {
+    "lead": "Read only.",
+    "message": "You are viewing an archived board.",
+    "tone": "info"
+   }
+  }
+ ],
+ "nodes": {
+  "banner": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     14,
+     10,
+     10,
+     10
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= get(theme.colors, (props.tone == 'danger' ? 'error' : props.tone) + 'Tint')}",
+    "decoration.strokes[0].color": "${= get(theme.colors, (props.tone == 'danger' ? 'error' : props.tone) + 'TintBorder')}"
+   },
+   "children": [
+    "bannerGlyph",
+    "bannerText",
+    "bannerActions",
+    "bannerClose"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 10
+      }
+     }
+    }
+   ]
+  },
+  "bannerGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 16
+   },
+   "bind": {
+    "props.color": "${= get(theme.colors, (props.tone == 'danger' ? 'error' : props.tone) + 'Ink')}",
+    "props.icon": "${= props.tone == 'success' ? 'check_circle_outline' : (props.tone == 'warning' ? 'warning_amber' : (props.tone == 'danger' ? 'error_outline' : 'info_outlined'))}"
+   }
+  },
+  "bannerText": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= props.lead == '' ? props.message : props.lead + ' ' + props.message}",
+    "style": {
+     "from": "body",
+     "fontSize": 13,
+     "color": "ink"
+    }
+   },
+   "bind": {
+    "props.runs": "${= props.lead == '' ? [] : [{\"start\":0,\"end\":length(props.lead),\"style\":{\"fontWeight\":600}}]}"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 96,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "bannerActions": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "bannerSlot"
+   ]
+  },
+  "bannerSlot": {
+   "type": "slot",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "bannerClose": {
+   "type": "iconButton",
+   "layout": {
+    "width": 26,
+    "height": 26
+   },
+   "props": {
+    "icon": "close_outlined"
+   },
+   "bind": {
+    "visible": "${props.dismissible}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onClose"
+      }
+     ]
+    }
+   ],
+   "tooltip": "Dismiss"
+  }
+ }
+}

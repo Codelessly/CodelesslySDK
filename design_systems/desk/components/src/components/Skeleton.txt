@@ -1,0 +1,9 @@
+component Skeleton "Where content is loading: soft bars in the subtle fill that pulse. `lines`: that many text lines (the last shorter); `avatar`: a round mark before them (a list row's)."
+  param lines:int=2 doc="How many lines."
+  param avatar:bool=false doc="A round mark before the lines."
+  preview "Row" 320x40 lines=2 avatar=true
+Row#skeleton gap=12 middle w=fill animate=pulse
+  box#skeletonAvatar w=28 h=28 radius=999 fill=subtleFill visible={props.avatar}
+  Column#skeletonLines gap=8 grow
+    each i in range(props.lines)
+      box#skeletonLine h=10 radius=4 fill=subtleFill w={i == props.lines - 1 && props.lines > 1 ? 160 : {"fill":0}}

@@ -1,0 +1,263 @@
+{
+ "schema": 3,
+ "id": "PaneHeader",
+ "roots": [
+  "paneHead"
+ ],
+ "widget": {
+  "type": "PaneHeader",
+  "doc": "The head of a side pane or an inspector: an optional avatar, the title 15/600 and a line under it, its lines under it (actions) and a close button at the end that fires onClose; a rule under it.",
+  "children": "list",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Details",
+    "required": true,
+    "doc": "What the pane shows."
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A line under the title."
+   },
+   {
+    "key": "avatar",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A person's name: their avatar before the title."
+   },
+   {
+    "key": "closable",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "A close button at its end."
+   }
+  ],
+  "events": [
+   {
+    "key": "onClose"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    360,
+    60
+   ],
+   "props": {
+    "title": "Amara Okafor",
+    "note": "Admin · joined Mar 2024",
+    "avatar": "Amara Okafor"
+   }
+  }
+ ],
+ "nodes": {
+  "paneHead": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     20,
+     14,
+     12,
+     14
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "children": [
+    "paneAvatar",
+    "paneTitles",
+    "paneActions",
+    "paneClose"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "paneAvatar": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": "medium"
+   },
+   "bind": {
+    "props.name": "${= props.avatar == '' ? '?' : props.avatar}",
+    "visible": "${= props.avatar != ''}"
+   }
+  },
+  "paneTitles": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "paneTitle",
+    "paneNote"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 96,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "paneTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.title}",
+    "style": "sectionTitle",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "paneNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.note}",
+    "style": "caption",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "bind": {
+    "visible": "${= props.note != ''}"
+   }
+  },
+  "paneActions": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "paneSlot"
+   ]
+  },
+  "paneSlot": {
+   "type": "slot",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "paneClose": {
+   "type": "iconButton",
+   "layout": {
+    "width": 30,
+    "height": 30
+   },
+   "props": {
+    "icon": "close_outlined"
+   },
+   "bind": {
+    "visible": "${props.closable}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onClose"
+      }
+     ]
+    }
+   ],
+   "tooltip": "Close (Esc)"
+  }
+ }
+}

@@ -1,0 +1,80 @@
+state q=""
+state tab="Board"
+state page=2
+state labels=[{"label":"Design","hue":"violet"},{"label":"Product","hue":"green"}]
+Column gap=20 pad=32 h=fill scroll fill=window
+  PageHeader "Members" "Manage workspace access, roles and invitations." overline="Workspace"
+    Button.outline "Export" icon="download"
+    Button "Invite members" icon="add"
+  Breadcrumb items=["Workspace","Settings","Members"]
+  Tabs @tab tabs=["Board","List","Archive"] icons=["view_kanban","list","inventory_2"] counts=["12","",""]
+  Row gap=8 middle
+    SearchField @q hint="Search cards…" w=260
+    FilterButton "Labels" icon="label"
+    FilterButton "Assignee" icon="person" count=2
+    FilterButton "Due date" icon="calendar_today"
+    Spacer
+    KeyCap "Ctrl K"
+    KeyCap "/"
+  BulkBar count=3
+    Button.outline "Change role" size=small
+    Button.destructive "Deactivate" size=small
+  Row gap=12
+    Status "Active" tone="success"
+    Status "Invited" tone="warning"
+    Status "Suspended" tone="danger"
+    Status "Inactive"
+    Status "Active" tone="success" pill
+    Status "Invited" tone="warning" pill
+    Tag "Design" hue="violet"
+    Tag "Bug" hue="red"
+    Tag "Engineering" hue="sky"
+    Tag "Platform" outline dot=false
+    Tag "ada@x.io" removable
+    Avatar "Maya Chen"
+    Avatar "Jules Martin" size=36
+    Avatar "Sam Rao" size=20
+    AvatarGroup names=["Maya Chen","Jules Martin","Sam Rao","Ola Berg"]
+  Row gap=12
+    Stat "Total members" "50" w=220
+    Stat "Active" "43" delta="+4" note="this month" tone="success" w=220
+    Stat "Invited" "4" tone="warning" w=220
+    Stat "Inactive" "3" delta="-1" tone="neutral" w=220
+  Row gap=16 top
+    Column w=360 border=line radius=8 clip=antiAlias
+      ListRow "Maya Chen" "Studio visit on Thursday" "Hi Jamie, Thursday at 10:30 works for the studio visit." meta="10:42 AM" selected starred
+      ListRow "Nora Patel" "November print invoice" "Hi Jamie, here is the invoice for the November proofs." meta="9:18 AM" unread attachment
+      ListRow "Eli Vargas" "Homepage review notes" "I left three notes on the homepage draft." meta="8:54 AM" avatar="Eli Vargas"
+    Column w=300 gap=8
+      TaskCard key="STK-124" title="Polish the invite flow" labels={labels} due="Nov 19" checklist="2/4" assignee="Maya Chen" comments=3
+      TaskCard key="STK-126" title="Fix duplicate billing emails" labels=[{"label":"Bug","hue":"red"}] due="Nov 15" overdue assignee="Sam Rao"
+    Column w=300
+      BoardColumn "In progress" count=3 limit=2 hue="sky"
+        TaskCard key="STK-129" title="Instrument activation events" labels=[{"label":"Engineering","hue":"sky"}] due="Nov 21" assignee="Jules Martin"
+    Column w=340 gap=12
+      Panel "Notifications" "How and when we reach you."
+        Property "Role" "Admin"
+        Property "Status"
+          Status "Active" tone="success"
+        Property "Teams"
+          Tag "Platform" outline dot=false
+          Tag "Design" outline dot=false
+      Account "Jamie Park" "jamie@northline.design"
+  Banner "You are viewing an archived board." lead="Read only." tone="info"
+  Banner "Your trial ends in 3 days." tone="warning" dismissible
+    Button.outline "Upgrade" size=small
+  Row gap=16 top
+    Column w=380 border=line radius=8
+      Empty "No messages" "Mail you receive shows up here." icon="inbox"
+        Button.outline "Refresh" icon="refresh"
+    Column w=300 gap=16 pad=16 border=line radius=8
+      Skeleton lines=2 avatar
+      Skeleton lines=3
+    Column w=380 border=line radius=8
+      Pager @page pages=5 summary="11–20 of 50 members"
+    Column w=220 pad=4 border=line radius=8
+      MenuPopover heading="Move to"
+        MenuItem "Archive" icon="archive" shortcut="E"
+        MenuItem "Sort by date" icon="sort" checked
+        Divider
+        MenuItem "Delete" icon="delete" shortcut="Del" danger

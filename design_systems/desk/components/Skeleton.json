@@ -1,0 +1,195 @@
+{
+ "schema": 3,
+ "id": "Skeleton",
+ "roots": [
+  "skeleton"
+ ],
+ "widget": {
+  "type": "Skeleton",
+  "doc": "Where content is loading: soft bars in the subtle fill that pulse. `lines`: that many text lines (the last shorter); `avatar`: a round mark before them (a list row's).",
+  "props": [
+   {
+    "key": "lines",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 2,
+    "doc": "How many lines."
+   },
+   {
+    "key": "avatar",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A round mark before the lines."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Row",
+   "size": [
+    320,
+    40
+   ],
+   "props": {
+    "lines": 2,
+    "avatar": true
+   }
+  }
+ ],
+ "nodes": {
+  "skeleton": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "animations": [
+    {
+     "id": "a",
+     "preset": "pulse",
+     "params": {
+      "scaleFrom": 1,
+      "scaleTo": 1.06,
+      "opacityFrom": 1,
+      "opacityTo": 0.7
+     }
+    }
+   ],
+   "children": [
+    "skeletonAvatar",
+    "skeletonLines"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "skeletonAvatar": {
+   "type": "box",
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "radius": 999,
+    "fills": [
+     {
+      "color": "subtleFill"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${props.avatar}"
+   }
+  },
+  "skeletonLines": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "listView1"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 280,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 8
+   },
+   "bind": {
+    "data": "${= range(props.lines)}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "skeletonLine"
+   ]
+  },
+  "skeletonLine": {
+   "type": "box",
+   "layout": {
+    "height": 10,
+    "width": 0
+   },
+   "decoration": {
+    "radius": 4,
+    "fills": [
+     {
+      "color": "subtleFill"
+     }
+    ]
+   },
+   "bind": {
+    "layout.width": "${= item == props.lines - 1 && props.lines > 1 ? 160 : {\"fill\":0}}"
+   }
+  }
+ }
+}

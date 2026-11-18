@@ -1,0 +1,187 @@
+{
+ "schema": 3,
+ "id": "Panel",
+ "roots": [
+  "panel"
+ ],
+ "widget": {
+  "type": "Panel",
+  "doc": "A titled section of a page (a settings group, a chart, a list in a dashboard): the card's fill and hairline, radius 10, a head (title 14/600, a line under it) over a rule, and its lines under it as the body, padded 16, 12 apart.",
+  "children": "list",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Section",
+    "required": true,
+    "doc": "Its title."
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A line under the title."
+   },
+   {
+    "key": "flush",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "No padding round the body (a table or a list that runs to the edges)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    480,
+    160
+   ],
+   "props": {
+    "title": "Notifications",
+    "note": "How and when we reach you."
+   }
+  }
+ ],
+ "nodes": {
+  "panel": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 10,
+    "clip": "antiAlias"
+   },
+   "children": [
+    "panelHead",
+    "panelBody"
+   ]
+  },
+  "panelHead": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     16,
+     12,
+     16,
+     12
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "children": [
+    "panelTitle",
+    "panelNote"
+   ]
+  },
+  "panelTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.title}",
+    "style": "panelTitle"
+   }
+  },
+  "panelNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.note}",
+    "style": "caption"
+   },
+   "bind": {
+    "visible": "${= props.note != ''}"
+   }
+  },
+  "panelBody": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "layout.padding": "${= props.flush ? [0, 0, 0, 0] : [16, 16, 16, 16]}"
+   },
+   "children": [
+    "panelSlot"
+   ]
+  },
+  "panelSlot": {
+   "type": "slot",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}

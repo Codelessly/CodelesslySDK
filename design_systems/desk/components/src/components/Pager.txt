@@ -1,0 +1,13 @@
+component Pager "The foot of a paged table or list: what is shown (1–10 of 50) at the start, and at the end a previous and a next button around the page of pages. The page (from 1) is kept in your variable."
+  param page:ValueNotifier<int>=1 doc="The name of your page variable (from 1)."
+  param pages:int=1 required doc="How many pages."
+  param summary="" doc="What is shown (1–10 of 50 members)."
+  event onChanged:int
+  preview "Default" 640x48 page=2 pages=5 summary="11–20 of 50 members"
+Row#pager gap=8 middle pad=[16,8,12,8] w=fill
+  Text#pagerSummary "{props.summary}" style=caption grow
+  Text#pagerOf "Page {props.page} of {props.pages}" style=caption pad=[0,0,6,0]
+  Row#pagerPrev pad=5 radius=6 border=line hovered.fill=hoverOverlay opacity={props.page > 1 ? 1 : 0.4} tooltip="Previous page" onTap={setVariable variable=props.page value={max(1, props.page - 1)}; emit onChanged props.page}
+    Icon#pagerPrevGlyph "chevron_left" size=16 color=ink2
+  Row#pagerNext pad=5 radius=6 border=line hovered.fill=hoverOverlay opacity={props.page < props.pages ? 1 : 0.4} tooltip="Next page" onTap={setVariable variable=props.page value={min(props.pages, props.page + 1)}; emit onChanged props.page}
+    Icon#pagerNextGlyph "chevron_right" size=16 color=ink2

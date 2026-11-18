@@ -1,0 +1,336 @@
+{
+ "schema": 3,
+ "id": "SearchField",
+ "roots": [
+  "search"
+ ],
+ "widget": {
+  "type": "SearchField",
+  "doc": "A search field at the control height: a leading outline search icon, the text kept in your variable, a key cap at its end (the key that focuses it) or a clear button once something is typed.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable."
+   },
+   {
+    "key": "hint",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Search",
+    "doc": "Shown while empty."
+   },
+   {
+    "key": "shortcut",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "/",
+    "doc": "The key that focuses it, shown as a key cap (empty: none)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   },
+   {
+    "key": "onSubmitted",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Empty",
+   "size": [
+    320,
+    34
+   ],
+   "props": {
+    "hint": "Search mail"
+   }
+  },
+  {
+   "name": "Typed",
+   "size": [
+    320,
+    34
+   ],
+   "props": {
+    "value": "invoice"
+   }
+  }
+ ],
+ "nodes": {
+  "search": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     10,
+     0,
+     6,
+     0
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": 34
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 6
+   },
+   "states": {
+    "hovered": {
+     "search": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "lineStrong"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "searchGlyph",
+    "searchInput",
+    "searchKey",
+    "searchClear"
+   ]
+  },
+  "searchGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "search_outlined",
+    "size": 16,
+    "color": "ink3"
+   }
+  },
+  "searchInput": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32,
+    "flex": 1
+   },
+   "props": {
+    "decoration": {
+     "isDense": true,
+     "isCollapsed": true,
+     "border": {
+      "type": "none"
+     },
+     "hintStyle": "placeholder"
+    },
+    "style": {
+     "from": "inputText"
+    },
+    "textInputAction": "search"
+   },
+   "bind": {
+    "props.initialValue": "${props.value}",
+    "props.decoration.hintText": "${props.hint}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${result}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${result}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "submitted"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSubmitted",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "searchKey": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     5,
+     1,
+     5,
+     1
+    ],
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 4,
+    "strokes": [
+     {
+      "color": "keycapBorder"
+     }
+    ],
+    "fills": [
+     {
+      "color": "keycap"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= props.shortcut != '' && props.value == ''}"
+   },
+   "children": [
+    "searchKeyText"
+   ]
+  },
+  "searchKeyText": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.shortcut}",
+    "style": "keycap"
+   }
+  },
+  "searchClear": {
+   "type": "row",
+   "layout": {
+    "padding": 3,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 4
+   },
+   "bind": {
+    "visible": "${= props.value != ''}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": ""
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": ""
+      }
+     ]
+    }
+   ],
+   "states": {
+    "hovered": {
+     "searchClear": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "searchClearGlyph"
+   ]
+  },
+  "searchClearGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "close_outlined",
+    "size": 14,
+    "color": "ink3"
+   }
+  }
+ }
+}

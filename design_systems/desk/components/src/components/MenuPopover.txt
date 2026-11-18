@@ -1,0 +1,6 @@
+component MenuPopover "The panel of a menu (what `Menu#id` draws): the raised surface, a hairline, radius 8, the menu shadow, 4 round its items; an optional heading in small capitals. Its children are MenuItem lines (a Divider between groups)." children=list
+  param heading="" doc="A small heading over the items (empty: none)."
+  preview "Default" 220x80 heading="Move to"
+Column#menuPanel gap=1 pad=4 w=fill fill=raisedBackground border=line radius=8 clip=antiAlias effects={theme.shadows.level3}
+  Text#menuHeading "{upper(props.heading)}" style=overline pad=[8,6,8,4] visible={props.heading != ''}
+  Slot#menuItems
