@@ -2,9 +2,11 @@
 # The compact notation's tools, runnable from a fresh checkout:
 #
 #   tool/notation/notation.sh prompt [--design-system <folder>] [--width <canvas width>] [--open [--no-define] [--no-glossary | --glossary=names|signatures]]
-#   tool/notation/notation.sh expand <file.txt> [--design-system <folder>] [--named] [--nearest-colors] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--site <site.json or folder>] [--no-site] [--out <file.json>] [--open [--vocabulary <file.json>]] [--aliases <file.json>]
-#   tool/notation/notation.sh expand <site folder> [--width <page width, default 1440>] [--no-reflow] [--design-system <folder>]
+#   tool/notation/notation.sh expand <file.txt> [--design-system <folder>] [--named] [--nearest-colors] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--site <site.json or folder>] [--no-site] [--out <file.json>] [--open] [--vocabulary <file.json> | --no-record] [--aliases <file.json>]
+#   tool/notation/notation.sh expand <site folder> [--width <page width, default 1440>] [--no-reflow] [--design-system <folder>] [--open] [--vocabulary <file.json> | --no-record]
+#   tool/notation/notation.sh validate <site folder | file.txt> [--open] [the options of expand]
 #   tool/notation/notation.sh vocabulary <folder or files> [--design-system <folder>] [--aliases <file.json>] [--no-aliases] [--out <dir>] [--sites <dir>]
+#   tool/notation/notation.sh vocabulary <site folder | vocabulary.json | folder of them>... [--design-system <folder>] [--aliases <file.json>] [--out <dir>]
 #   tool/notation/notation.sh print <document.json> [--design-system <folder>] [--out <file.txt>] [--check]
 #   tool/notation/notation.sh apply <document.json> <ops.json> [--design-system <folder>] [--out <file.json>]
 #   tool/notation/notation.sh migrate <file or folder>... [--check] [--stdout] [--design-system <folder>]... [--site <site.json>] [--notation | --markdown | --dart | --python | --json | --html] [--from 32]
@@ -19,6 +21,35 @@
 # word the notation does not have stand in and records it; vocabulary reads a
 # corpus of answers (tool/vocabulary/corpus/<name>) and writes which words
 # they reached for and how each resolved (vocabulary.json, VOCABULARY.md).
+#
+# The record (docs/design/19 section 15; tool/notation/vocabulary_record.dart):
+# every expand, open or closed, saves every word the files used and how each
+# resolved (core, a component, the site's component, an alias, a definition
+# and whose, a primitive, refused with the issue, unknown: a placeholder),
+# with its kind, the shapes it was written in, its files and lines, a
+# writer's definition's text, and when it was first and last seen. It is
+# kept across expands: a word rewritten since is still there, no longer
+# used. A site's (the folder, or one of its files) is <site folder>/
+# vocabulary.json and VOCABULARY.md (the folder holding pages/ and
+# components/); a file of no site's is <file>.vocabulary.json and
+# <file>.VOCABULARY.md beside it; --vocabulary <file.json> puts it there;
+# --no-record saves none. Each word that stood in as a placeholder is said
+# (`placeholder: Word (type) pages/home.txt:3 (1 use)`, and a total), with
+# --open too, where it does not fail the expand; tool/codelessly render says
+# it again (placeholder_word, read from the record). validate is expand
+# writing nothing: what it would say, as JSON on stdout (issues,
+# placeholders, the words beyond the core that did not resolve or that the
+# writer defined, component files not loaded). vocabulary given site folders
+# (with their drafts/), records, or a folder of them, writes the harvest
+# across runs: every word beyond the core, by runs and apps, its shapes,
+# how it resolved, the writers' definitions, ranked candidates to support.
+#
+# A components/*.txt that starts with `define Name …` (or `primitive`) is the
+# site's definitions, read by every page and component as a define after a
+# page's last line; one that is neither that nor `component Name` is said,
+# as is a second file of one component and a component JSON site.json
+# lists that nothing writes. A page whose first line is `### Name` is read
+# without it.
 #
 # A file in a site's folder (a site.json beside it or up to two folders above
 # it, as site.json or site/site.json; or the one --site names) is expanded
@@ -59,7 +90,8 @@ sdk="$(cd "$(dirname "$0")/../.." && pwd)"
 cmd="${1:-}"
 case "$cmd" in
   prompt|expand|print|apply|migrate|vocabulary) shift ;;
-  *) echo "usage: tool/notation/notation.sh prompt|expand|print|apply|migrate|vocabulary [arguments] (see the head of this file)" >&2; exit 2 ;;
+  validate) shift; set -- "$@" --validate; cmd=expand ;;
+  *) echo "usage: tool/notation/notation.sh prompt|expand|validate|print|apply|migrate|vocabulary [arguments] (see the head of this file)" >&2; exit 2 ;;
 esac
 
 # Flutter's dart, codelessly_api from the checkout beside the SDK (the same

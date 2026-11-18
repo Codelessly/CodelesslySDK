@@ -10,6 +10,16 @@ import 'package:codelessly_api/notation.dart' show NotationVocabulary, definitio
 
 import 'vocabulary.dart' show loadDefinitionTexts;
 
+/// What the open prompt says last: the words written are recorded, and
+/// where (codelessly_api docs/design/19-open-vocabulary.md, section 15).
+const openRecordNote = 'WHAT IS RECORDED\n'
+    'Every expand (tool/notation/notation.sh expand <site folder or file> --open) saves a record of every word you wrote and how it '
+    'resolved: for a site folder <folder>/vocabulary.json and VOCABULARY.md, for a file of no site <file>.vocabulary.json beside it. '
+    'It is kept across expands, so a word you later rewrote is still there; you need do nothing for it. A word that stood in as a '
+    'placeholder is said by expand (placeholder: Word …), by tool/codelessly render (placeholder_word) and by tool/codelessly validate: '
+    'define it, or leave it and it is recorded for support. A components/<Name>.txt is a component (`component Name` first) or '
+    'definitions (`define Name …` first, read by every page).';
+
 Future<void> main(List<String> args) async {
   // --open: the open-vocabulary prompt (the grammar and the core only; a
   // design system's components are not listed), which asks the model to
@@ -64,6 +74,13 @@ Future<void> main(List<String> args) async {
       signatures: form == 'signatures',
     ),
   ));
+  // Where what the writer reached for goes: the record every expand saves
+  // (vocabulary_record.dart). Said after the prompt, which the API writes.
+  if (open) {
+    stdout
+      ..writeln()
+      ..writeln(openRecordNote);
+  }
   if (defined.isNotEmpty) {
     stdout
       ..writeln()
