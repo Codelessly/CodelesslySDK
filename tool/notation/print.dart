@@ -16,6 +16,8 @@ import 'dart:io';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_api/notation.dart';
 
+import 'notation_site.dart';
+
 Future<void> main(List<String> args) async {
   String? opt(String name) {
     final i = args.indexOf(name);
@@ -42,6 +44,20 @@ Future<void> main(List<String> args) async {
       exit(2);
     }
     catalog = ds.catalogOver(standardCatalog);
+  } else if (findSiteManifest(file: files.single) case final manifest?) {
+    // A site's page calls the site's components: their words (a page that
+    // called one printed as one `document {…}` line: test 9, admin 13).
+    final site = await NotationSite.load(manifest);
+    final library = {...?site.designSystem?.components.definitions, ...site.expanded};
+    if (library.isNotEmpty) {
+      catalog = DesignSystem(
+        manifest: DesignSystemManifest.fromJson({
+          'id': 'site',
+          'components': [for (final t in library.keys) DesignSystem.componentRef(t)],
+        }),
+        components: ComponentLibrary(library),
+      ).catalogOver(standardCatalog);
+    }
   }
   final Object? json;
   try {
