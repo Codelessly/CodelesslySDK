@@ -63,9 +63,11 @@ Future<int> renderMain(List<String> argv) async {
     return 2;
   }
   if (outline && !args.contains('--dump-layout')) args.add('--dump-layout');
+  // The outline is of this invocation's captures, not those earlier runs left in --out.
+  final before = snapshotOf(out);
   final code = await runInherited(renderScript, args);
   if (code != 2) {
-    if (outline) stdout.write('\n${outlineText(out, docs)}');
+    if (outline) stdout.write('\n${outlineText(out, docs, fresh: writtenAfter(before))}');
     if (wantSheet) {
       final (_, text) = await sheet([out], '$out/sheet.png');
       stdout.write(text.split('\n').where((l) => l.startsWith('wrote ') || l.startsWith('No PNGs')).map((l) => '$l\n').join());
@@ -86,7 +88,8 @@ Future<int> sheetMain(List<String> argv) async {
 
 const _doc = '''tool/codelessly render <documents> --out <dir> [render options] [--outline] [--sheet]
 
---outline also dumps the layout and prints every capture's outline (each node's box and text with its problems).
+--outline also dumps the layout and prints the outline of every capture this run made (each node's box and text
+with its problems; captures earlier runs left in --out are not listed).
 --sheet writes <out>/sheet.png, every capture of the run on one image. Every other option is the render command's;
 the exit status is its.''';
 

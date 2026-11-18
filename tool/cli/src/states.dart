@@ -101,16 +101,26 @@ Future<int> statesMain(List<String> argv) async {
     final diagFile = File('$sdir/diagnostics-$name.json');
     final merged = <String, List<Object?>>{'images': [], 'comparisons': [], 'diagnostics': []};
     final seen = <String>{};
+    final startedOn = <String, String>{};
+    // The diagnostics files a run writes in the state's folder (named by its label, its --screen and its sizes).
+    List<File> diagnosticsFiles() => [
+          for (final f in Directory(sdir).listSync().whereType<File>())
+            if (RegExp(r'^diagnostics([-@].*)?\.json$').hasMatch(f.uri.pathSegments.last)) f,
+        ];
     for (final (size, extra) in runs) {
-      if (diagFile.existsSync()) diagFile.deleteSync();
+      for (final f in diagnosticsFiles()) {
+        f.deleteSync();
+      }
       final (code, text) = await runCaptured(renderScript, [...stateDocs, '--out', sdir, '--sizes', size, ...args, ...extra]);
       if (code > status) status = code;
       log.write(text);
-      if (diagFile.existsSync()) {
-        // Each run writes the label's file: merge the runs (one per size) into one.
-        final d = jsonDecode(diagFile.readAsStringSync()) as Map;
+      for (final f in diagnosticsFiles()) {
+        // Each run writes its own file: merge the runs (one per size) into one.
+        final d = jsonDecode(f.readAsStringSync()) as Map;
+        f.deleteSync();
         merged['images']!.addAll(d['images'] as List? ?? const []);
         merged['comparisons']!.addAll(d['comparisons'] as List? ?? const []);
+        startedOn.addAll(((d['startedOn'] as Map?) ?? const {}).map((k, v) => MapEntry('$k', '$v')));
         for (final x in d['diagnostics'] as List? ?? const []) {
           if (seen.add(jsonEncode(x))) merged['diagnostics']!.add(x); // a problem met before the first capture repeats in every run
         }
@@ -120,7 +130,8 @@ Future<int> statesMain(List<String> argv) async {
     final hasDiagnostics = merged['images']!.isNotEmpty || allDiags.isNotEmpty;
     if (hasDiagnostics) {
       final errorsAll = allDiags.where((x) => x['severity'] == 'error').length;
-      diagFile.writeAsStringSync(prettyJson({'errors': errorsAll, 'warnings': allDiags.length - errorsAll, ...merged}));
+      diagFile.writeAsStringSync(
+          prettyJson({'errors': errorsAll, 'warnings': allDiags.length - errorsAll, ...merged, if (startedOn.isNotEmpty) 'startedOn': startedOn}));
     }
     File('$sdir/render.log').writeAsStringSync(log.toString());
     final diags = allDiags.where((x) => !ignore.contains(x['code'])).toList();

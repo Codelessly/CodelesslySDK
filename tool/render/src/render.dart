@@ -11,7 +11,7 @@ import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/render/controls/focus.dart' show ControlFocusScope;
+import 'package:codelessly_sdk/src/render/controls/focus.dart' show ControlFocusNode, ControlFocusScope;
 import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabeledControl, firstTextUnder;
 import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/gestures.dart';
@@ -25,6 +25,9 @@ import 'package:codelessly_sdk/src/runtime/actions/wiring.dart' show viewportTri
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
 import 'package:codelessly_sdk/src/render/controls/buttons.dart' show RenderButton;
 import 'package:codelessly_sdk/src/render/controls/calendar.dart' show RenderCalendar;
+import 'package:codelessly_sdk/src/render/controls/dropdown.dart' show RenderDropdown;
+import 'package:codelessly_sdk/src/render/controls/menu.dart' show RenderMenu, RenderMenuRow;
+import 'package:codelessly_sdk/src/render/controls/slider.dart' show RenderSlider;
 import 'package:codelessly_sdk/src/widgets/collections_table.dart' show RenderRunningTable;
 import 'package:codelessly_sdk/src/render/controls/kit.dart' show RenderControl;
 import 'package:codelessly_sdk/src/render/controls/kit_bars.dart' show RenderItemBar;
@@ -132,6 +135,10 @@ final class RenderReport {
   /// and a live region's (a toast, a text marked `live`) when it changed,
   /// each with its politeness and the step after which it was said.
   final List<api.Json> announcements = [];
+
+  /// The screen a capture's run started on, by the capture's file name,
+  /// when the capture is named after another (a screen navigated to).
+  final Map<String, String> startedOn = {};
   int get errors => diagnostics.where((d) => d['severity'] == 'error').length;
   int get warnings => diagnostics.where((d) => d['severity'] == 'warning').length;
 }
@@ -179,7 +186,7 @@ List<({String name, String path, String text})> loadInputs(List<String> inputs) 
     if (type == FileSystemEntityType.directory) {
       files.addAll(Directory(input).listSync().whereType<File>().where((f) {
         final base = f.uri.pathSegments.last;
-        return base.endsWith('.json') && !base.startsWith('_') && !RegExp(r'^diagnostics(-.*)?\.json$').hasMatch(base);
+        return base.endsWith('.json') && !base.startsWith('_') && !RegExp(r'^diagnostics([-@].*)?\.json$').hasMatch(base);
       }).toList()
         ..sort((a, b) => a.path.compareTo(b.path)));
     } else if (type == FileSystemEntityType.file) {
@@ -871,7 +878,16 @@ Future<void> _renderAll(
             'or `--fonts system` for the system\'s fonts).',
             nodeId: fontUsers[m.family.toLowerCase()]?.firstOrNull));
       }
-      final name = '${_fileSafe(label)}@$sizeName${args.theme == null ? '' : '-${args.theme}'}${args.label == null ? '' : '-${_fileSafe(args.label!)}'}.png';
+      // Named after the screen it shows: after a --navigate (or a tap that
+      // navigates) the page navigated to, not the one the run started on.
+      var shown = label;
+      if (pages.shown?.name case final String route when codelessly.publishModel != null) {
+        // ignore: invalid_use_of_visible_for_testing_member
+        final resolved = CodelesslyWidget.resolveScreen(codelessly.publishModel!, route.replaceFirst(RegExp(r'^/+'), ''));
+        if (resolved != null) shown = _screenName(published, docs, resolved.$1);
+      }
+      final name = '${_fileSafe(shown)}@$sizeName${args.theme == null ? '' : '-${args.theme}'}${args.label == null ? '' : '-${_fileSafe(args.label!)}'}.png';
+      if (shown != label) report.startedOn[name] = label;
       final file = '${args.out}/$name';
       final ro = boundary.currentContext!.findRenderObject()! as RenderRepaintBoundary;
       final page = fullPage;
@@ -904,7 +920,7 @@ Future<void> _renderAll(
           issue(RuntimeIssue('compare_failed', 'warning',
               '--compare: no reference for $name in $reference${found.candidates.isEmpty ? '' : ' among ${found.candidates.map((c) => c.split('/').last).join(', ')}'}: '
               'a reference matches when its name is the screen, the state (the --label, else default or none) and the size, exactly; '
-              'name the file, give the state the --label the reference names, or map the names with --compare-map ${label.toLowerCase()}=<reference name>.',
+              'name the file, give the state the --label the reference names, or map the names with --compare-map ${shown.toLowerCase()}=<reference name>.',
               screen: label, size: sizeName));
         } else {
           try {
@@ -957,6 +973,8 @@ Future<void> _renderAll(
               if (identical(b, focusedBox)) 'focused': true,
               if (b.instance != null) 'instance': '${b.instance}',
               if (componentInstanceOf(b.instance) != null) 'path': b.tree.pathOf(b.id, b.instance),
+              // What a step names with `@` (`quantity@increment`).
+              if (_partNames(b) case final parts when parts.isNotEmpty) 'parts': parts,
               'x': _rectOf(b).left.round(),
               'y': _rectOf(b).top.round(),
               'w': double.parse(b.size.width.toStringAsFixed(1)),
@@ -1690,7 +1708,7 @@ Map<RenderObject, String> _liveRegions(WidgetsBinding binding) {
 /// `#n` for the n-th copy of a node a list repeats.
 String _stepName(WidgetsBinding binding, NodeBox b) {
   final path = b.tree.pathOf(b.id, b.instance);
-  final copies = [for (final o in _boxes(binding)) if (o.id == b.id && identical(o.tree, b.tree) && o.tree.pathOf(o.id, o.instance) == path) o];
+  final copies = [for (final o in _boxes(binding)) if (o.id == b.id && identical(o.tree, b.tree) && o.tree.pathOf(o.id, o.instance) == path && (_shown(o) || identical(o, b))) o];
   if (copies.length < 2) return path;
   return '$path#${copies.indexWhere((o) => identical(o, b))}';
 }
@@ -1831,6 +1849,67 @@ String? _canvasNameOf(NodeBox b) {
 /// When two different nodes answer to an id and exactly one of them passes
 /// [prefer] (`--type`: the one with a text field in it), that one is meant.
 ({NodeBox? box, String? problem}) _locate(WidgetsBinding binding, String id, {bool Function(NodeBox)? prefer}) {
+  final exact = _locateExact(binding, id, prefer: prefer);
+  if (exact.box != null || !(exact.problem ?? '').startsWith('no node ') || id.contains('#')) return exact;
+  // A node inside a component instance named without the calls above it
+  // (`joinSeason/action`, `action` for `FieldSeason1/joinSeason/action`):
+  // the node whose full path ends with what was written, when one node on
+  // screen has such a path; several are named by their full paths.
+  final matches = <String, List<NodeBox>>{};
+  for (final b in _boxes(binding)) {
+    if (componentInstanceOf(b.instance) == null) continue;
+    final path = b.tree.pathOf(b.id, b.instance);
+    final plain = path.replaceAll(RegExp(r'#\d+'), '');
+    // A component's root is named by its call (`FieldSeason1/joinSeason`),
+    // or by its call and its own id (`joinSeason/action`).
+    final forms = [plain, if (b.tree.isInstanceRoot(b.id, b.instance)) '$plain/${b.id}'];
+    if (forms.any((f) => f == id || f.endsWith('/$id'))) (matches[plain] ??= []).add(b);
+  }
+  if (matches.isEmpty) return exact;
+  if (matches.length > 1) {
+    return (
+      box: null,
+      problem: 'ambiguous: ${matches.length} nodes on screen have a path ending "$id": ${matches.keys.join(', ')}. Name the one meant by its full path',
+    );
+  }
+  final copies = matches.values.single;
+  final shown = [for (final b in copies) if (_shown(b)) b];
+  if (shown.isEmpty) return (box: null, problem: '$_notShownHere"$id" is hidden here (visible false, or a media rule hides it at this width)');
+  final view = Offset.zero & binding.renderViews.first.size;
+  return (box: shown.where((b) => _rectOf(b).overlaps(view)).firstOrNull ?? shown.last, problem: null);
+}
+
+/// [path] (a component's node by its call ids, `cards#2/cta`) with each
+/// `#n` turned from the n-th copy shown into the n-th copy [tree] made: a
+/// step counts the copies a list shows, not those a condition hides
+/// (`--tap message#9` was the tenth row of the data, hidden or not: test 10,
+/// mail). Unchanged when a copy is not found (the lookup says so).
+String _rawCopies(RenderTree tree, String path) {
+  if (!path.contains('#')) return path;
+  final segments = path.split('/');
+  for (var d = 0; d < segments.length; d++) {
+    final hash = segments[d].lastIndexOf('#');
+    final n = hash < 0 ? null : int.tryParse(segments[d].substring(hash + 1));
+    if (n == null) continue;
+    final name = segments[d].substring(0, hash);
+    final before = segments.take(d).join('/');
+    var seen = -1;
+    for (var k = 0; k < 10000; k++) {
+      final copy = tree.boxAtPath('${before.isEmpty ? '' : '$before/'}$name#$k');
+      if (copy == null) break;
+      if (copy.attached && copy.hasSize && _shown(copy)) seen++;
+      if (seen == n) {
+        segments[d] = '$name#$k';
+        break;
+      }
+    }
+  }
+  return segments.join('/');
+}
+
+/// [_locate] for a node named as it is: by its id or name, its full path,
+/// or segment by segment.
+({NodeBox? box, String? problem}) _locateExact(WidgetsBinding binding, String id, {bool Function(NodeBox)? prefer}) {
   final boxes = _boxes(binding);
   (String, int?) split(String segment) {
     final hash = segment.lastIndexOf('#');
@@ -1849,7 +1928,7 @@ String? _canvasNameOf(NodeBox b) {
       (id.contains('/') || boxes.any((b) => b.id != first && b.tree.isInstanceRoot(b.id, b.instance) && b.tree.pathOf(b.id, b.instance) == first));
   if (byPath) {
     for (final b in boxes) {
-      final found = b.tree.boxAtPath(id);
+      final found = b.tree.boxAtPath(_rawCopies(b.tree, id));
       if (found != null && found.attached && found.hasSize) {
         // A component's node a media rule or a binding hides here (laid out
         // with no size, or not drawn) is skipped at this size, as a page's.
@@ -1897,8 +1976,18 @@ String? _canvasNameOf(NodeBox b) {
           return (box: null, problem: "ambiguous: copies of ${trees.length} different nodes on screen are \"$name\" (a page's and a component's, or two components'). Name the one meant by its path: ${names.take(4).join(' or ')}");
         }
       }
-      if (index >= all.length) return (box: null, problem: '"$upTo": there are ${all.length} copies of "$name" on screen (#0 to #${all.length - 1})');
-      chosen = all[index];
+      // The copies shown: a copy a condition hides (`if` in a list, a
+      // filter) is not counted, as a reader does not see it.
+      final shown = [for (final b in all) if (_shown(b)) b];
+      if (shown.isEmpty) return (box: null, problem: '$_notShownHere"$upTo": no copy of "$name" is shown here (visible false, or a media rule hides them at this width)');
+      if (index >= shown.length) {
+        return (
+          box: null,
+          problem: '"$upTo": ${shown.length == 1 ? 'there is 1 copy' : 'there are ${shown.length} copies'} of "$name" on screen (#0 to #${shown.length - 1})'
+              '${shown.length < all.length ? '; #n counts the copies shown, not the ${all.length - shown.length} hidden' : ''}',
+        );
+      }
+      chosen = shown[index];
     } else {
       // Two different nodes answer to the id (a page's and a component's,
       // a page's and a modal's): say which to write. Copies a list repeats
@@ -2036,6 +2125,10 @@ ui.Rect _rectOf(RenderBox b) {
   return (keys, keys.isEmpty ? step : Step(step.kind, target, step.value));
 }
 
+/// A step target's `@` part (`@2`, `@increment`, `@option:Alaska`,
+/// `@2026-11-23`).
+final _partSuffix = RegExp(r'@(\d+|increment|decrement|thumb|thumb-end|option:.*|\d{4}-\d{2}-\d{2})$');
+
 const _pointerSteps = {'tap', 'double-tap', 'long-press', 'right-click', 'hover', 'drag'};
 
 Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetController controller,
@@ -2106,6 +2199,45 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     }
   }
 
+  // Whether anything along [path] reacts to a tap: a node's tap reaction,
+  // or a widget inside the node hit (a button, an input) that handles taps.
+  bool reactsToTap(List<RenderObject> path) {
+    var inWidget = true;
+    RenderControl? control;
+    for (final o in path) {
+      // A control drawn by the SDK (a button, a switch, a field, a tab bar)
+      // takes the tap itself: it changes its value, opens its menu or
+      // picker, or fires its node's reactions. Only a control that does
+      // nothing on its own (a button, an action chip, a list tile) needs a
+      // reaction on its node.
+      if (o is RenderControl && control == null && o.enabled && o.takesInput) {
+        control = o;
+        if (o is! RenderButton && o is! RenderListTile) return true;
+      }
+      if (o is RenderCalendar && o.inline) return true;
+      // A table sorts from its headers and selects its rows itself; its cell
+      // template is usually a text with no reaction of its own.
+      if (o is RenderRunningTable) return true;
+      if (o is NodeBox && control != null) {
+        if (o.source.node(o.id)?.actions.isNotEmpty ?? false) return true;
+        // A reorder handle: a press focuses it, for Alt and the arrows.
+        if (o.source.node(o.id)?.behaviors.reorderHandle ?? false) return true;
+        control = null;
+      }
+      if (o is NodeBox) inWidget = false;
+      if (o is RenderReactions && o.triggers.intersection(const {
+        api.TriggerType.click, api.TriggerType.doubleTap, api.TriggerType.longPress, api.TriggerType.hold, //
+        api.TriggerType.pointerDown, api.TriggerType.pointerUp, api.TriggerType.secondaryClick,
+      }).isNotEmpty) {
+        return true;
+      }
+      if (inWidget && o is RenderPointerListener && (o.onPointerDown != null || o.onPointerUp != null)) return true;
+      if (inWidget && o is RenderSemanticsGestureHandler && o.onTap != null) return true;
+      if (o is RenderEditable) return true;
+    }
+    return false;
+  }
+
   // Where to put the pointer for [id], or the problem.
   Future<(ui.Offset?, String?)> pointAt(String target, String verb) async {
     // An inline calendar has one node but many dates: name the ISO day.
@@ -2113,7 +2245,9 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     if (datePart != null) {
       final id = datePart[1]!, day = DateTime.tryParse(datePart[2]!);
       final found = _locate(binding, id);
-      if (found.box == null) return (null, '--$verb $target: ${found.problem}.');
+      if (found.box == null) {
+        return (null, found.problem!.startsWith(_notShownHere) ? '$_notShownHere--$verb $target: ${found.problem!.substring(_notShownHere.length)}.' : _withCandidates(binding, id, '--$verb $target: ${found.problem}.'));
+      }
       RenderCalendar? calendar;
       void visit(RenderObject o) {
         if (o is RenderCalendar && o.inline) calendar = o;
@@ -2126,11 +2260,70 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       if (cell == null) return (null, '--$verb $target: ${datePart[2]} is not in the month shown by "$id".');
       return (calendar!.localToGlobal(calendar!.cellRect(cell).center), null);
     }
+    // A built-in control's named part: a number field's minus and plus
+    // (`@decrement`, `@increment`), a slider's thumb (`@thumb`, a range's
+    // upper `@thumb-end`), an option of a dropdown (`@option:Alaska`; the
+    // dropdown is opened first when it is closed).
+    final named = RegExp(r'^(.*)@(increment|decrement|thumb|thumb-end|option:(.+))$').firstMatch(target);
+    if (named != null) {
+      final id = named[1]!, what = named[2]!;
+      final found = _locate(binding, id);
+      if (found.box == null) {
+        return (null, found.problem!.startsWith(_notShownHere) ? '$_notShownHere--$verb $target: ${found.problem!.substring(_notShownHere.length)}.' : _withCandidates(binding, id, '--$verb $target: ${found.problem}.'));
+      }
+      final box = found.box!;
+      final parts = _partNames(box);
+      String none() => '--$verb $target: "$id" has no part "@$what"${parts.isEmpty ? ' (it has no named parts)' : '; its parts: ${parts.join(', ')}'}.';
+      if (what == 'increment' || what == 'decrement') {
+        final field = _firstIn<RenderTextField>(box);
+        if (field == null || !(field.decoration.prefix?.button ?? false)) return (null, none());
+        await centerInView(box);
+        return (field.localToGlobal(field.buttonSlot(prefix: what == 'decrement').center), null);
+      }
+      if (what.startsWith('thumb')) {
+        final slider = _firstIn<RenderSlider>(box);
+        if (slider == null || (what == 'thumb-end' && !slider.isRange)) return (null, none());
+        await centerInView(box);
+        final f = what == 'thumb' ? slider.thumbCenter : slider.highThumbCenter;
+        final vertical = slider.node.prop(api.SliderProps.orientation) == api.Axis.vertical;
+        return (slider.localToGlobal(vertical ? ui.Offset(f.dy, slider.size.height - f.dx) : f), null);
+      }
+      final label = named[3]!.trim();
+      final dropdown = _firstIn<RenderDropdown>(box);
+      var rows = _openMenuRows(binding, label);
+      if (rows.isEmpty && dropdown != null && !dropdown.isOpen) {
+        // Closed: opened as a user does, by a press on it (scrolled into
+        // view first).
+        if (reachable(box) == null) await centerInView(box);
+        final at = reachable(box) ?? _rectOf(box).center;
+        await tester.tapAt(at);
+        await _settle(tester);
+        rows = _openMenuRows(binding, label);
+      }
+      if (rows.isEmpty) {
+        final open = _openMenuRows(binding, null).map((r) => r.item.label).toList();
+        return (
+          null,
+          '--$verb $target: no option "$label" ${open.isEmpty ? 'is shown (no dropdown or menu is open${dropdown == null ? ', and "$id" is no dropdown' : ''})' : 'in the open menu; its options: ${open.take(12).join(', ')}'}.',
+        );
+      }
+      return (rows.last.localToGlobal(rows.last.size.center(ui.Offset.zero)), null);
+    }
     // `<id>@<n>`: the n-th part (from 0) of a control with several: a
     // segment, a tab, a navigation destination.
     final part = RegExp(r'^(.*)@(\d+)$').firstMatch(target);
     final id = part == null ? target : part[1]!;
     final found = _locate(binding, id);
+    // A number field with a minus and a plus: @0 the minus, @1 the field,
+    // @2 the plus, as they are drawn.
+    if (part != null && found.box != null && int.parse(part[2]!) <= 2) {
+      final field = _firstIn<RenderTextField>(found.box!);
+      if (field != null && (field.decoration.prefix?.button ?? false) && _firstIn<RenderItemBar>(found.box!) == null) {
+        final n = int.parse(part[2]!);
+        if (n == 1) return pointAt(id, verb);
+        return pointAt('$id@${n == 0 ? 'decrement' : 'increment'}', verb);
+      }
+    }
     if (part != null && found.box != null) {
       final n = int.parse(part[2]!);
       RenderBox? control;
@@ -2176,7 +2369,15 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         }
       }
       if (control == null) {
-        return (null, '--$verb $target: "$id" has no parts to name with @: that is for a segmented button, a tab bar and a navigation bar. Tap it with --$verb $id.');
+        final names = _partNames(found.box!);
+        return (
+          null,
+          names.isNotEmpty
+              ? '--$verb $target: "$id" has no part @$n; its parts: ${names.join(', ')}.'
+              : '--$verb $target: "$id" has no parts to name with @: @<n> is for a segmented button, a tab bar and a navigation bar; '
+                  'a number field has @decrement and @increment, a slider @thumb, a dropdown @option:<label>, an inline calendar @<yyyy-MM-dd> '
+                  '(--dump-layout lists each node\'s "parts"). Tap it with --$verb $id.',
+        );
       }
       if (n >= rects.length) {
         return (null, '--$verb $target: "$id" has ${rects.length} part${rects.length == 1 ? '' : 's'} (@0 to @${rects.length - 1}).');
@@ -2225,6 +2426,9 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         }
       }
       if (owners.length == 1) return pointAt(owners.single, verb);
+      // An option of the open dropdown or menu by its label (`--tap Alaska`).
+      final rows = _openMenuRows(binding, id);
+      if (rows.isNotEmpty) return (rows.last.localToGlobal(rows.last.size.center(ui.Offset.zero)), null);
       // A button of the built-in confirm dialog (`confirmOk`, `confirmCancel`).
       for (final b in _builtIns(binding)) {
         if (b.id == id) return (b.box.localToGlobal(b.box.size.center(ui.Offset.zero)), null);
@@ -2247,6 +2451,10 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     final r = _rectOf(box).intersect(viewRect());
     if (r.isEmpty) return (null, '--$verb $id: the node is outside the screen and nothing scrolls it into view; scroll to it first (--scroll).');
     final over = hitAt(r.center).whereType<NodeBox>().firstOrNull;
+    // A node drawn for show inside one that takes the press (a Table's
+    // checkbox, `ignorePointer`, in a row that selects): the press lands on
+    // the node around it there, as a click on it does in a browser.
+    if (over != null && _isInside(box, over) && reactsToTap(hitAt(r.center))) return (r.center, null);
     if (over != null && _isInside(box, over)) {
       return (
         null,
@@ -2261,45 +2469,6 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
           : '--$verb $id: the node is covered by "${over.id}" (${over.node?.type}) wherever it shows; nothing was ${verb == 'tap' ? 'tapped' : 'hovered'}. '
               'Scroll it from under what overlays it (--scroll), or tap the covering node if that is what was meant.',
     );
-  }
-
-  // Whether anything along [path] reacts to a tap: a node's tap reaction,
-  // or a widget inside the node hit (a button, an input) that handles taps.
-  bool reactsToTap(List<RenderObject> path) {
-    var inWidget = true;
-    RenderControl? control;
-    for (final o in path) {
-      // A control drawn by the SDK (a button, a switch, a field, a tab bar)
-      // takes the tap itself: it changes its value, opens its menu or
-      // picker, or fires its node's reactions. Only a control that does
-      // nothing on its own (a button, an action chip, a list tile) needs a
-      // reaction on its node.
-      if (o is RenderControl && control == null && o.enabled && o.takesInput) {
-        control = o;
-        if (o is! RenderButton && o is! RenderListTile) return true;
-      }
-      if (o is RenderCalendar && o.inline) return true;
-      // A table sorts from its headers and selects its rows itself; its cell
-      // template is usually a text with no reaction of its own.
-      if (o is RenderRunningTable) return true;
-      if (o is NodeBox && control != null) {
-        if (o.source.node(o.id)?.actions.isNotEmpty ?? false) return true;
-        // A reorder handle: a press focuses it, for Alt and the arrows.
-        if (o.source.node(o.id)?.behaviors.reorderHandle ?? false) return true;
-        control = null;
-      }
-      if (o is NodeBox) inWidget = false;
-      if (o is RenderReactions && o.triggers.intersection(const {
-        api.TriggerType.click, api.TriggerType.doubleTap, api.TriggerType.longPress, api.TriggerType.hold, //
-        api.TriggerType.pointerDown, api.TriggerType.pointerUp, api.TriggerType.secondaryClick,
-      }).isNotEmpty) {
-        return true;
-      }
-      if (inWidget && o is RenderPointerListener && (o.onPointerDown != null || o.onPointerUp != null)) return true;
-      if (inWidget && o is RenderSemanticsGestureHandler && o.onTap != null) return true;
-      if (o is RenderEditable) return true;
-    }
-    return false;
   }
 
   // The text field (a [RenderTextField]) inside node [id].
@@ -2334,7 +2503,7 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
               step.target.split('#').first.split('@').first);
         }
       }
-      await _unfocusFieldOutside(tester, _boxOf(binding, step.target.replaceFirst(RegExp(r'@\d+$'), '')));
+      await _unfocusFieldOutside(tester, _boxOf(binding, step.target.replaceFirst(_partSuffix, '')));
       await tester.tapAt(at);
       return null;
     case 'drag':
@@ -2533,8 +2702,19 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
               ? '$_notShownHere--$verb ${step.target}: ${p.substring(_notShownHere.length)}.'
               : _withCandidates(binding, step.target, '--$verb ${step.target}: $p.');
         }
+        // Not a text field: the keyboard focus goes to the control or press
+        // target in the node (a button, a row with a tap reaction, a reorder
+        // handle, a tab), as Tab would put it there.
+        if (verb == 'focus') {
+          final box = found.box!;
+          final problem = _focusIn(box);
+          if (problem != null) return '--focus ${step.target}: $problem';
+          if (reachable(box) == null) await centerInView(box);
+          await tester.pump();
+          return null;
+        }
         return _withCandidates(binding, step.target,
-            '--$verb ${step.target}: the node has no text field in it (only a textField, or a node around one, can be focused or typed into).');
+            '--$verb ${step.target}: the node has no text field in it (only a textField, or a node around one, can be typed into).');
       }
       final box = _locate(binding, target, prefer: (b) => fieldOf(b) != null).box!;
       if (reachable(box) == null) await centerInView(box);
@@ -2552,29 +2732,57 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       _writeVariable(binding, controller, step.target, _stepValue(step));
       return null;
     case 'scroll':
-      final px = double.tryParse(step.value ?? '');
-      if (px == null) return '--scroll ${step.target}=${step.value}: the amount is not a number.';
-      RenderDesignScroll? scroll;
+      // One offset (along the way the node scrolls), or `x,y` (the
+      // horizontal offset and the vertical one: `--scroll reading=0,650`).
+      final amount = RegExp(r'^\s*(-?\d+(?:\.\d+)?)\s*(?:,\s*(-?\d+(?:\.\d+)?)\s*)?$').firstMatch(step.value ?? '');
+      if (amount == null) {
+        return '--scroll ${step.target}=${step.value}: say how far: one offset in pixels (--scroll ${step.target}=650, along the way it scrolls), '
+            'or x,y (--scroll ${step.target}=0,650).';
+      }
+      final one = amount[2] == null ? double.parse(amount[1]!) : null;
+      final x = amount[2] == null ? null : double.parse(amount[1]!), y = amount[2] == null ? null : double.parse(amount[2]!);
+      // The offset for a scroll view along [axis].
+      double? along(Axis axis) => one ?? (axis == Axis.vertical ? y : x);
       if (step.target == 'screen' || step.target.isEmpty) {
-        scroll = _pageScroll(binding);
-      } else {
-        final found = _locate(binding, step.target);
-        final b = found.box;
-        if (b == null) return '--scroll ${step.target}: ${found.problem}.';
-        scroll = _descendants(b).whereType<RenderDesignScroll>().firstOrNull;
-        if (scroll == null) {
-          // A list or other Flutter scrollable inside the node.
-          final positions = [
-            for (final e in find.byType(Scrollable).evaluate())
-              if ((e.renderObject as RenderBox?) != null && _isInside(e.renderObject!, b)) (e as StatefulElement).state as ScrollableState,
-          ];
-          if (positions.isEmpty) return '--scroll ${step.target}: the node does not scroll (set props.scrollable: true).';
-          positions.first.position.jumpTo(px);
+        final page = _pageScroll(binding);
+        if (page == null) {
+          // A page that fits its window: nothing to scroll, nothing wrong.
+          warn('scroll_nothing',
+              '--scroll ${step.target}=${step.value}: nothing on the screen scrolls (the page fits the window at this size), so the step did nothing.', null);
           return null;
         }
+        page.jumpTo(along(page.axis)!);
+        return null;
       }
-      if (scroll == null) return '--scroll ${step.target}: nothing on the screen scrolls.';
-      scroll.jumpTo(px);
+      final found = _locate(binding, step.target);
+      final b = found.box;
+      if (b == null) {
+        return found.problem!.startsWith(_notShownHere)
+            ? '$_notShownHere--scroll ${step.target}: ${found.problem!.substring(_notShownHere.length)}.'
+            : _withCandidates(binding, step.target, '--scroll ${step.target}: ${found.problem}.');
+      }
+      final scrolls = _descendants(b).whereType<RenderDesignScroll>().toList();
+      if (scrolls.isNotEmpty) {
+        // With x,y: the first that scrolls each way; one offset: the first.
+        final targets = one != null
+            ? [scrolls.first]
+            : [
+                if (scrolls.where((s) => s.axis == Axis.horizontal).firstOrNull case final h? when x != 0 || !scrolls.any((s) => s.axis == Axis.vertical)) h,
+                if (scrolls.where((s) => s.axis == Axis.vertical).firstOrNull case final v?) v,
+              ];
+        for (final s in targets) {
+          s.jumpTo(along(s.axis)!);
+        }
+        return null;
+      }
+      // A list or other Flutter scrollable inside the node.
+      final positions = [
+        for (final e in find.byType(Scrollable).evaluate())
+          if ((e.renderObject as RenderBox?) != null && _isInside(e.renderObject!, b)) (e as StatefulElement).state as ScrollableState,
+      ];
+      if (positions.isEmpty) return '--scroll ${step.target}: the node does not scroll (set props.scrollable: true).';
+      final position = positions.first.position;
+      position.jumpTo(along(axisDirectionToAxis(position.axisDirection))!);
       return null;
     case 'navigate':
       // A URL path (`/project?id=x`), a canvas id or a screen name, with a
@@ -2694,6 +2902,99 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       return null;
   }
   return 'Unknown step ${step.kind}.';
+}
+
+/// The first render object of type [T] in [box] (it or under it).
+T? _firstIn<T>(RenderObject box) {
+  T? found;
+  void visit(RenderObject o) {
+    if (found != null) return;
+    if (o is T) {
+      found = o as T;
+      return;
+    }
+    o.visitChildren(visit);
+  }
+
+  visit(box);
+  return found;
+}
+
+/// The rows of the dropdowns and menus open on screen, in paint order;
+/// with [label], those whose label is it (letter case aside).
+List<RenderMenuRow> _openMenuRows(WidgetsBinding binding, String? label) {
+  final want = label?.trim().toLowerCase();
+  return [
+    for (final view in binding.renderViews)
+      for (final o in _descendants(view, skip: _offstage()))
+        if (o is RenderMenu && o.attached && o.hasSize)
+          for (final r in o.rows)
+            if (r.attached && r.hasSize && !r.size.isEmpty && (want == null || r.item.label.trim().toLowerCase() == want)) r,
+  ];
+}
+
+/// The parts a step names with `@` on the control drawn in node box [b]
+/// (not those of the nodes inside it): what `--dump-layout` lists as
+/// `parts`. Empty when it has none.
+List<String> _partNames(NodeBox b) {
+  RenderObject? control;
+  void visit(RenderObject o) {
+    if (control != null || (o is NodeBox && !identical(o, b))) return;
+    if (o is RenderItemBar || o is RenderSegmentedButton || o is RenderTextField || o is RenderSlider || o is RenderDropdown || (o is RenderCalendar && o.inline)) {
+      control = o;
+      return;
+    }
+    o.visitChildren(visit);
+  }
+
+  visit(b);
+  return switch (control) {
+    final RenderItemBar bar => [for (var i = 0; i < bar.itemRects.length; i++) '@$i'],
+    final RenderSegmentedButton s => [for (var i = 0; i < s.segmentRects.length; i++) '@$i'],
+    final RenderTextField f when f.decoration.prefix?.button ?? false => const ['@decrement', '@increment'],
+    final RenderSlider s => s.isRange ? const ['@thumb', '@thumb-end'] : const ['@thumb'],
+    final RenderDropdown d => [for (final l in d.spec.labels) '@option:$l'],
+    RenderCalendar() => const ['@<yyyy-MM-dd>'],
+    _ => const [],
+  };
+}
+
+/// Puts the keyboard focus on the first control or press target inside
+/// [box] (in Tab's order), with its focus ring, as the keyboard brings it:
+/// null, or why it could not (naming the nearest node that can take it).
+String? _focusIn(NodeBox box) {
+  final scope = RenderControlRoot.of(box)?.focus;
+  if (scope == null) return 'the node is in no screen that takes keys.';
+  final order = scope.order;
+  NodeBox? nodeOf(ControlFocusNode n) {
+    for (RenderObject? p = n.owner; p != null; p = p.parent) {
+      if (p is NodeBox) return p;
+    }
+    return null;
+  }
+
+  for (final n in order) {
+    if (identical(n.owner, box) || _isInside(n.owner, box)) {
+      if (n.requestFocus(highlight: true)) return null;
+    }
+  }
+  // Around it (a row whose label was named), else the nearest on screen.
+  String name(NodeBox b) => b.tree.pathOf(b.id, b.instance);
+  final around = [
+    for (final n in order)
+      if (nodeOf(n) case final NodeBox b when _isInside(box, b) && !identical(b, box)) b,
+  ];
+  final at = _rectOf(box).center;
+  final near = [
+    for (final n in order)
+      if (nodeOf(n) case final NodeBox b) (b, (_rectOf(b).center - at).distance),
+  ]..sort((a, b) => a.$2.compareTo(b.$2));
+  final names = <String>{
+    if (around.isNotEmpty) name(around.last),
+    for (final (b, _) in near.take(3)) name(b),
+  };
+  return 'the node cannot take the keyboard focus: it is no control, text field or node with a tap reaction, and has none inside it'
+      '${names.isEmpty ? ' (nothing on the screen can).' : '. Nearest that can: ${names.join(', ')}.'}';
 }
 
 /// Whether the revealed swipe [action] belongs to the row [row] (or a node
@@ -3161,15 +3462,26 @@ NodeBox? _focusedBox() {
   return null;
 }
 
-/// Where a run's diagnostics go: `diagnostics.json`, or with a label
-/// `diagnostics-<label>.json` (one run per state keeps each state's).
-String diagnosticsFileName(String? label) => label == null ? 'diagnostics.json' : 'diagnostics-${_fileSafe(label)}.json';
+/// Where a run's diagnostics go: `diagnostics.json`, with the screens
+/// [screens] names (`--screen`) and the sizes when they are not the default
+/// ones, as a PNG names them, then the label: `diagnostics-<label>.json`,
+/// `diagnostics-home-<label>.json`, `diagnostics-home@1440x900-<label>.json`,
+/// `diagnostics@390x844.json`. Runs of one label on other screens or at other
+/// sizes keep each its own.
+String diagnosticsFileName(String? label, {List<String> screens = const [], List<ui.Size>? sizes}) {
+  final screen = screens.map(_fileSafe).join('+');
+  final sized = sizes == null || _sameSizes(sizes, RenderArgs.defaultSizes) ? '' : '@${sizes.map((z) => '${z.width.round()}x${z.height.round()}').join('+')}';
+  final where = screen.isEmpty ? sized : '-$screen$sized';
+  return 'diagnostics$where${label == null ? '' : '-${_fileSafe(label)}'}.json';
+}
+
+bool _sameSizes(List<ui.Size> a, List<ui.Size> b) => a.length == b.length && [for (var i = 0; i < a.length; i++) a[i] == b[i]].every((x) => x);
 
 RenderReport _finish(RenderReport report, RenderArgs args) {
   // Errors first, then warnings; each group in document order.
   report.diagnostics.sort((a, b) => (a['severity'] == 'error' ? 0 : 1).compareTo(b['severity'] == 'error' ? 0 : 1));
   Directory(args.out).createSync(recursive: true);
-  File('${args.out}/${diagnosticsFileName(args.label)}').writeAsStringSync(const JsonEncoder.withIndent('  ').convert({
+  File('${args.out}/${diagnosticsFileName(args.label, screens: args.screens, sizes: args.sizes)}').writeAsStringSync(const JsonEncoder.withIndent('  ').convert({
     'errors': report.errors,
     'warnings': report.warnings,
     'images': [for (final i in report.images) i.split('/').last],
@@ -3178,6 +3490,9 @@ RenderReport _finish(RenderReport report, RenderArgs args) {
     if (report.clipboard.isNotEmpty) 'clipboard': report.clipboard,
     if (report.focus.isNotEmpty) 'focus': report.focus,
     if (report.announcements.isNotEmpty) 'announcements': report.announcements,
+    // A capture named after the screen navigated to: the screen its run
+    // started on (what its diagnostics' `screen` says).
+    if (report.startedOn.isNotEmpty) 'startedOn': report.startedOn,
     'diagnostics': report.diagnostics,
   }));
   return report;

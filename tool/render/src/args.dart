@@ -144,7 +144,9 @@ Options:
                           through it: a Shift-click. Also on --drag, --hover,
                           --double-tap, --long-press, --right-click.
   --hover <nodeId>        Move a mouse over the node.
-  --focus <nodeId>        Focus a text field (or the field inside the node).
+  --focus <nodeId>        Put the keyboard focus on the node: a text field (or the
+                          field inside it), else the control or press target in
+                          it (a button, a row with a tap reaction, a handle).
   --type <nodeId>=<text>  Focus a text field and type text into it, as a user
                           would (its changed reactions run; a field bound to a
                           variable through props.initialValue sets it).
@@ -153,7 +155,8 @@ Options:
                           writes it later does not change the capture.
   --now <ISO time>        The time now() returns (2026-11-13T09:00:00Z): clocks
                           and countdowns are the same in every run.
-  --scroll <nodeId|screen>=<px>   Scroll a scrolling node (or the page) to px.
+  --scroll <nodeId|screen>=<px>   Scroll a scrolling node (or the page) to px;
+                          or =x,y (--scroll reading=0,650).
   --navigate <screen>     Push a screen: a canvas id, a screen name or a URL path,
                           with a query string for its params (speaker?id=ada,
                           /project?id=7): the screen reads them as \${route.id}.
@@ -194,7 +197,9 @@ Options:
                           <dir> (the rest of the URL as the path), so they show:
                           https://cdn.example.com/art/=assets/art. Repeatable.
   --label <text>          Append -<text> to the PNG names (state screenshots);
-                          diagnostics go to diagnostics-<text>.json.
+                          diagnostics go to diagnostics-<text>.json (with the
+                          --screen and non-default --sizes before the label:
+                          diagnostics-home@1440x900-<text>.json).
   --state <label> <steps> One run, several states: each --state starts a state
                           named <label> (as --label) with the steps after it,
                           from a fresh start; what comes before the first
