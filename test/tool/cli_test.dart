@@ -178,7 +178,7 @@ void main() {
     expect(answers.keys, [1, 2, 3, 4], reason: 'the notification gets no answer');
     expect((answers[1]!['result'] as Map)['protocolVersion'], '2025-06-18');
     expect([for (final t in ((answers[2]!['result'] as Map)['tools'] as List)) (t as Map)['name']],
-        ['codelessly_docs', 'codelessly_render', 'codelessly_flatten', 'codelessly_states']);
+        ['codelessly_docs', 'codelessly_render', 'codelessly_flatten', 'codelessly_validate', 'codelessly_states']);
     final doc = jsonDecode((((answers[3]!['result'] as Map)['content'] as List).first as Map)['text'] as String) as Map;
     expect(doc['roots'], ['screen']);
     expect((answers[4]!['error'] as Map)['code'], -32601);

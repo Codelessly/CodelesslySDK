@@ -12,6 +12,8 @@
 #   tool/codelessly states <states.json>           every state of a site rendered, compared, summarized
 #   tool/codelessly sheet <png | dir>... --out <png> many captures on one labelled image
 #   tool/codelessly notation prompt|expand|print|apply   the compact authoring notation (tool/notation)
+#   tool/codelessly validate <site folder | file.txt> [--open]   expand, writing nothing: the issues and the words
+#                                                  that stood in as placeholders, as JSON (notation.sh validate)
 #   tool/codelessly replay <stream.jsonl> --out <dir>   a recorded ui_apply stream, replayed (tool/stream)
 #   tool/codelessly serve [--stop|--status]        keep the renderer running: renders take ~1 s instead of ~6 s
 #   tool/codelessly mcp                            all of the above as an MCP server (stdio), for any agent
@@ -50,6 +52,7 @@ run_cli() {
 case "$cmd" in
   docs|flatten|outline|sheet|states|render|mcp) run_cli "$cmd" "$@" ;;
   notation) exec "$sdk/tool/notation/notation.sh" "$@" ;;
+  validate) exec "$sdk/tool/notation/notation.sh" validate "$@" ;;
   replay) exec "$sdk/tool/stream/replay.sh" "$@" ;;
   serve) exec "$sdk/tool/render/serve.sh" "$@" ;;
   doctor)
