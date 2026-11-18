@@ -66,7 +66,7 @@ typedef Input = ({String name, String path, String text});
     }
     if (m != null) manifest = m;
     final listed = SiteManifest.fromJson(m);
-    final pages = listed.pages.isEmpty ? load([input]) : load([for (final p in listed.pages) '$input/$p']);
+    final pages = listed.pages.isEmpty ? load([input]) : load([for (final p in listed.pages) _pageFile(input, p)]);
     out.addAll(pages.where((p) => File(p.path).uri.pathSegments.last != SiteManifest.fileName));
     final components = listed.components.isNotEmpty
         ? [for (final c in listed.components) '$input/$c']
@@ -207,3 +207,10 @@ String _variableType(PropType t) => switch (t.kind) {
       PropKind.object || PropKind.json => 'map',
       _ => 'text',
     };
+
+/// The file of page reference [ref] in site folder [dir]: as written, or
+/// with `.json` when it names none (`"pages": ["home"]`).
+String _pageFile(String dir, String ref) {
+  final path = '$dir/$ref';
+  return File(path).existsSync() || RegExp(r'\.[A-Za-z0-9]+$').hasMatch(ref) ? path : '$path.json';
+}

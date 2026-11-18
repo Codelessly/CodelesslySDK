@@ -94,6 +94,16 @@ void main() {
     expect({for (final n in _nodes(r2).values) (n as Map)['type']}, contains('Footer'));
   });
 
+  test('pages listed by name or as records are those names\' JSON (test 10: one issue a page, extensionless files)', () async {
+    final m = jsonDecode(File('${_root.path}/site/site.json').readAsStringSync()) as Map;
+    _write('site/site.json', jsonEncode({...m, 'pages': ['home', {'id': 'about', 'file': 'about.json'}, {'id': 'faq'}]}));
+    final site = await NotationSite.load('${_root.path}/site/site.json');
+    expect(site.screens, ['home', 'about', 'faq']);
+    expect(site.pageOut('pages/home.txt'), endsWith('/home.json'));
+    expect(site.pageOut('pages/about.txt'), endsWith('/about.json'));
+    expect(site.pageOut('pages/faq.txt'), endsWith('/faq.json'));
+  });
+
   test('outside a site nothing is found, and the expansion is as before', () {
     final alone = Directory.systemTemp.createTempSync('notation_alone');
     addTearDown(() => alone.deleteSync(recursive: true));

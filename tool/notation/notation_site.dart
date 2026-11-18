@@ -93,8 +93,7 @@ final class NotationSite {
 
   /// The ids of its pages (each page reference's file stem).
   late final List<String> screens = [
-    for (final p in readList(manifest['pages']) ?? const [])
-      if (p is String) _stem(p),
+    for (final p in SiteManifest.pageRefs(manifest['pages'])) _stem(p),
   ];
 
   /// The design system the manifest names (`designSystem`), loaded; null
@@ -319,8 +318,10 @@ final class NotationSite {
   /// of the same name, else `<name>.json` in the site's folder.
   String pageOut(String source) {
     final name = _stem(source);
-    final ref = readStrings(manifest['pages']).where((p) => _stem(p) == name).firstOrNull;
-    return '$dir/${ref ?? '$name.json'}';
+    // A page listed by its name alone (`"home"`) or as a record
+    // (`{"id": "home", "file": "home.json"}`) is that name's JSON.
+    final ref = SiteManifest.pageRefs(manifest['pages']).where((p) => _stem(p) == name).firstOrNull;
+    return '$dir/${ref == null ? '$name.json' : RegExp(r'\.[A-Za-z0-9]+$').hasMatch(ref) ? ref : '$ref.json'}';
   }
 
   /// The site's expanded components, from their JSON (the manifest's

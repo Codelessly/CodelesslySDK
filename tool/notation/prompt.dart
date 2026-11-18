@@ -20,6 +20,17 @@ const openRecordNote = 'WHAT IS RECORDED\n'
     'define it, or leave it and it is recorded for support. A components/<Name>.txt is a component (`component Name` first) or '
     'definitions (`define Name …` first, read by every page).';
 
+/// What the open prompt says of the site's manifest: its shape in a few
+/// lines, and the reference page that has the whole of it (test 10: the
+/// manifest's shapes were the most looked-up thing the prompt did not say).
+const openSiteNote = 'THE SITE (site.json)\n'
+    '{"schema": 3, "pages": ["home.json", "cart.json"], "variables": {"cart": [], "favourites": {"value": [], "persist": true}}, '
+    '"theme": {"primary": "#FF2F6B4F", "colors": {"ink": "#FF1F2A24", "paper": "#FFFBF8F2"}, '
+    '"textStyles": {"body": {"fontSize": 15, "color": "ink"}, "title": {"fontSize": 28, "fontWeight": 600}}, '
+    '"spacing": {"md": 16}, "radii": {"card": 10}, "dark": {"colors": {"ink": "#FFE8EDE9", "paper": "#FF141815"}}}}\n'
+    "Every page reads the variables by name (persist keeps one on the device) and the theme's names (color=ink, style=title); "
+    'pages/<name>.txt expands to the page <name>.json. The whole manifest: docs/reference/notation/site.md.';
+
 Future<void> main(List<String> args) async {
   // --open: the open-vocabulary prompt (the grammar and the core only; a
   // design system's components are not listed), which asks the model to
@@ -79,7 +90,9 @@ Future<void> main(List<String> args) async {
   if (open) {
     stdout
       ..writeln()
-      ..writeln(openRecordNote);
+      ..writeln(openRecordNote)
+      ..writeln()
+      ..writeln(openSiteNote);
   }
   if (defined.isNotEmpty) {
     stdout
