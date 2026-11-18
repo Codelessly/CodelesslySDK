@@ -923,10 +923,16 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
   void _ensureRecognizers() {
     if (_tap == null && (_has(TriggerType.click) || _has(TriggerType.secondaryClick))) {
       Json? at;
+      final click = _has(TriggerType.click);
+      // A node that reacts to the secondary button only takes no part in a
+      // primary press: a callback of the primary button makes the
+      // recognizer enter the arena for it, and the innermost one wins, so a
+      // row's right-click menu took the press from the selectable list's
+      // item around it (nothing was chosen).
       _tap = TapGestureRecognizer(debugOwner: this)
-        ..onTapDown = ((d) => at = _where(d.localPosition, d.globalPosition))
-        ..onTapUp = ((_) {})
-        ..onTap = (_has(TriggerType.click)
+        ..onTapDown = (click ? ((d) => at = _where(d.localPosition, d.globalPosition)) : null)
+        ..onTapUp = (click ? ((_) {}) : null)
+        ..onTap = (click
             ? () {
                 if (_repeated) return;
                 // What an overlay this press opens gives the focus back to.

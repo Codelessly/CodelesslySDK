@@ -620,4 +620,37 @@ void main() {
       expect(midiToHz(69), 440);
     });
   });
+
+  testWidgets('a node that reacts to the secondary button or a long press leaves a primary press to the node around it', (tester) async {
+    // A selectable list's item (its click chooses the row) holding a row
+    // with a right-click menu and a long-press menu (mail: no row was chosen).
+    final s = await harness.show(tester, harness.counter(actions: [
+      harness.reaction('click', [harness.add('count')]),
+    ], extraNodes: {
+      'button': {
+        'type': 'column',
+        'layout': {'width': 100, 'height': 40},
+        'children': ['inner'],
+        'actions': [harness.reaction('click', [harness.add('count')])],
+      },
+      'inner': {
+        'type': 'box',
+        'layout': {'width': 100, 'height': 40},
+        'actions': [
+          harness.reaction('secondaryClick', [harness.add('menu')]),
+          harness.reaction('longPress', [harness.add('menu')]),
+        ],
+      },
+    }), variables: [harness.v('count', 0, VariableType.integer), harness.v('menu', 0, VariableType.integer)]);
+    await tester.tapAt(s.center('inner'));
+    await tester.pumpAndSettle();
+    expect(s['count'], 1, reason: 'the outer click');
+    expect(s['menu'], 0);
+    await tester.tapAt(s.center('inner'), buttons: kSecondaryButton);
+    await tester.pumpAndSettle();
+    expect((s['count'], s['menu']), (1, 1), reason: 'the inner right-click');
+    await tester.longPressAt(s.center('inner'));
+    await tester.pumpAndSettle();
+    expect((s['count'], s['menu']), (1, 2), reason: 'the inner long press');
+  });
 }
