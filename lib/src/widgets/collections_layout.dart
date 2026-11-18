@@ -561,6 +561,17 @@ class RenderListItems extends RenderCollection {
       for (final it in items) {
         it.layout(_childConstraints(contentCross, tightCross: contentCross), parentUsesSize: true);
       }
+    } else if (hugsCross) {
+      // An item that fills across, in a list as thick as its thickest item
+      // (a column of code lines inside a sideways scroll): as thick as that
+      // item, not as its own content centered in it.
+      for (final it in items) {
+        final n = it is NodeBox ? it.node : null;
+        final fit = n == null ? null : (axis == Axis.vertical ? n.layout.width.fit : n.layout.height.fit);
+        if (fit == api.SizeFit.fill && RenderCollection.cross(it.size, axis) < contentCross) {
+          it.layout(_childConstraints(contentCross, tightCross: contentCross), parentUsesSize: true);
+        }
+      }
     }
 
     // An open drop slot: room before raw item [before] (after the last
