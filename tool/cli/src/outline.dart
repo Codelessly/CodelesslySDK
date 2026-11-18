@@ -116,6 +116,10 @@ List<String> outlineCapture(List entries, DocumentTree tree, List<Map> diags, {i
       tail = '  "${t.length > 70 ? '${t.substring(0, 70)}...' : t}"';
     }
     if (e['w'] == 0 || e['h'] == 0) tail += '  (empty: draws nothing)';
+    // A word that stood in (the vocabulary record): marked with the word.
+    for (final d in [...?byNode[lid], if (bid != lid) ...?byNode[bid]]) {
+      if (d['code'] == 'placeholder_word') tail += '  [placeholder: ${RegExp(r'^"([^"]+)"').firstMatch('${d['message']}')?[1] ?? '?'}]';
+    }
     // An overlay made the page's own: the id its page wrote, which steps may name.
     if (tree.canvasNames[bid] case final String name when kind == 'canvas' && name.isNotEmpty && bid.startsWith('$name--')) {
       tail += '  (#$name as written on page ${bid.substring(name.length + 2)}: its own, as two pages draw "$name" differently)';
@@ -176,7 +180,7 @@ List<Map> captureDiagnostics(String out, String capture) {
 
 /// The name of the capture a `*.layout.json` file is for.
 String captureOf(String layoutFile) {
-  final n = layoutFile.split('/').last;
+  final n = layoutFile.replaceAll(r'\', '/').split('/').last;
   return n.endsWith('.png.layout.json') ? n.substring(0, n.length - '.png.layout.json'.length) : n.replaceFirst('.layout.json', '');
 }
 

@@ -103,6 +103,7 @@ const runtimeCodes = <(String, String, String)>[
   ('empty_screen', 'warning', 'The screen drew no node boxes (nothing to show).'),
   ('transparent_background', 'warning', 'At least 2% of a capture has nothing painted behind it: there a reader sees the host\'s background (black in an app with none, the page\'s color in a browser), not the document\'s. Give the screen\'s canvas a fill.'),
   ('set_overwritten', 'warning', 'A reaction (a timer, a load) wrote a variable a --set step set, after the step: the capture shows the --set value. Pin a clock with --now.'),
+  ('placeholder_word', 'warning', 'A word the notation, the design system and the site do not have stood in as a placeholder when the page was expanded with an open vocabulary (or, closed, was refused and draws nothing): the message names the word, its kind, its line and the shape it was written in. Define it, or it is recorded for support: read from the vocabulary record `notation.sh expand` saves beside the site (vocabulary.json).'),
   ('component_missing', 'error', 'A call rendered without its component\'s definition (or nested past the depth limit): an empty box of its size. The message names the call by path.'),
 ];
 
@@ -244,6 +245,27 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       if (!File('$i/$p').existsSync()) {
         issue(RuntimeIssue('page_not_written', 'warning', '$p is listed in site.json, file not written yet.', file: p));
       }
+    }
+  }
+  // The words that stood in as placeholders when the site's notation was
+  // expanded (the vocabulary record expand saves beside it): one warning
+  // each, on its node, so a render says what is missing.
+  for (final i in args.inputs) {
+    if (!File('$i/${api.SiteManifest.fileName}').existsSync()) continue;
+    for (final p in sitePlaceholders(i)) {
+      final page = '${p['page'] ?? ''}';
+      final refused = p['kind'] == 'refused';
+      issue(RuntimeIssue(
+        'placeholder_word',
+        'warning',
+        '"${p['word']}" (${refused ? 'type, refused' : p['kind']}) at ${p['file']}:${p['line']}'
+            '${p['signature'] == null ? '' : ', written `${p['signature']}`'}: '
+            '${refused ? 'a word the notation does not have, refused: nothing is drawn for it' : p['kind'] == 'primitive' ? 'declared a primitive: a labelled box stands in for it' : p['kind'] == 'overlay' ? 'opened and never written: a placeholder sheet opens' : 'a word the notation, the design system and the site do not have: a placeholder stands in for it'}. '
+            'Define it, or it is recorded for support (${p['record']}).',
+        nodeId: p['node'] as String?,
+        screen: page.isEmpty ? null : page,
+        file: '${p['file']}',
+      ));
     }
   }
   // The site's theme: its named colors and text styles.
@@ -3140,7 +3162,9 @@ String formatReport(RenderReport report) {
   for (final a in report.announcements) {
     b.writeln('${a['source'] == 'live' ? 'live region' : 'announced'} ${jsonEncode(a['text'])} (${a['politeness']}) after ${a['after']} [screen ${a['screen']} ${a['size']}]');
   }
-  b.writeln('${report.errors} error(s), ${report.warnings} warning(s).');
+  final held = {for (final d in report.diagnostics) if (d['code'] == 'placeholder_word') RegExp(r'^"([^"]+)"').firstMatch('${d['message']}')?[1]};
+  b.writeln('${report.errors} error(s), ${report.warnings} warning(s)'
+      '${held.isEmpty ? '' : '; ${held.length} placeholder word${held.length == 1 ? '' : 's'} (${held.join(', ')})'}.');
   return b.toString();
 }
 
@@ -3231,4 +3255,27 @@ Future<double?> _transparentShare(List<int> png) async {
   } catch (_) {
     return null;
   }
+}
+
+/// The words that stood in as placeholders in the site at [siteDir] (a
+/// folder with site.json), from the vocabulary record `notation.sh expand`
+/// saves beside it (`vocabulary.json` there or in the folder above): each
+/// `{word, kind, file, line, node, page, signature, record}`. Empty when
+/// there is no record.
+List<api.Json> sitePlaceholders(String siteDir) {
+  for (final path in ['$siteDir/vocabulary.json', '${Directory(siteDir).absolute.parent.path}/vocabulary.json']) {
+    final f = File(path);
+    if (!f.existsSync()) continue;
+    try {
+      final j = jsonDecode(f.readAsStringSync());
+      if (j is! Map || j['record'] != 'codelessly notation vocabulary record') continue;
+      return [
+        for (final p in (j['placeholders'] as List?) ?? const [])
+          if (p is Map) {...p.cast<String, Object?>(), 'record': path.replaceAll(r'\', '/')},
+      ];
+    } on FormatException {
+      continue;
+    }
+  }
+  return const [];
 }

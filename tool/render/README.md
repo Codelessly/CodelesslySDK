@@ -185,6 +185,7 @@ error: write the site page by page. The codes:
 | `empty_screen` | warning | The screen drew no nodes. |
 | `transparent_background` | warning | 2% or more of a capture has nothing painted behind it (transparent in the PNG): a reader sees the host's background there (black in an app with none, the page's color in a browser), not the document's. Give the screen's canvas a fill. |
 | `component_missing` | error | A call rendered without its component's definition (or nested more than 32 deep): an empty box of its size. Named by its path. |
+| `placeholder_word` | warning | A word that stood in as a placeholder when the site's notation was expanded (`--open`), or, closed, a type refused: one per use, on its node (the outline marks the node `[placeholder: Word]`), with the word, its kind, its file and line, the shape it was written in and the hint "define it, or it is recorded for support". Read from the vocabulary record `notation.sh expand` saves beside the site (`vocabulary.json`, in the site's folder or the one above), so a site rendered without expanding again still says it; the summary line counts the words. |
 
 `test/tool/render_command_test.dart` checks that these codes are reported for the fixtures in
 `test/tool/fixtures`.
