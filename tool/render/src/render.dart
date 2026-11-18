@@ -11,7 +11,8 @@ import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/render/controls/focus.dart' show ControlFocusScope;
+import 'package:codelessly_sdk/src/render/controls/focus.dart' show ControlFocusNode, ControlFocusScope;
+import 'package:codelessly_sdk/src/render/controls/root.dart' show RenderControlRoot;
 import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabeledControl, firstTextUnder;
 import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/gestures.dart';
@@ -2607,8 +2608,19 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
               ? '$_notShownHere--$verb ${step.target}: ${p.substring(_notShownHere.length)}.'
               : _withCandidates(binding, step.target, '--$verb ${step.target}: $p.');
         }
+        // Not a text field: the keyboard focus goes to the control or press
+        // target in the node (a button, a row with a tap reaction, a reorder
+        // handle, a tab), as Tab would put it there.
+        if (verb == 'focus') {
+          final box = found.box!;
+          final problem = _focusIn(box);
+          if (problem != null) return '--focus ${step.target}: $problem';
+          if (reachable(box) == null) await centerInView(box);
+          await tester.pump();
+          return null;
+        }
         return _withCandidates(binding, step.target,
-            '--$verb ${step.target}: the node has no text field in it (only a textField, or a node around one, can be focused or typed into).');
+            '--$verb ${step.target}: the node has no text field in it (only a textField, or a node around one, can be typed into).');
       }
       final box = _locate(binding, target, prefer: (b) => fieldOf(b) != null).box!;
       if (reachable(box) == null) await centerInView(box);
@@ -2768,6 +2780,44 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       return null;
   }
   return 'Unknown step ${step.kind}.';
+}
+
+/// Puts the keyboard focus on the first control or press target inside
+/// [box] (in Tab's order), with its focus ring, as the keyboard brings it:
+/// null, or why it could not (naming the nearest node that can take it).
+String? _focusIn(NodeBox box) {
+  final scope = RenderControlRoot.of(box)?.focus;
+  if (scope == null) return 'the node is in no screen that takes keys.';
+  final order = scope.order;
+  NodeBox? nodeOf(ControlFocusNode n) {
+    for (RenderObject? p = n.owner; p != null; p = p.parent) {
+      if (p is NodeBox) return p;
+    }
+    return null;
+  }
+
+  for (final n in order) {
+    if (identical(n.owner, box) || _isInside(n.owner, box)) {
+      if (n.requestFocus(highlight: true)) return null;
+    }
+  }
+  // Around it (a row whose label was named), else the nearest on screen.
+  String name(NodeBox b) => b.tree.pathOf(b.id, b.instance);
+  final around = [
+    for (final n in order)
+      if (nodeOf(n) case final NodeBox b when _isInside(box, b) && !identical(b, box)) b,
+  ];
+  final at = _rectOf(box).center;
+  final near = [
+    for (final n in order)
+      if (nodeOf(n) case final NodeBox b) (b, (_rectOf(b).center - at).distance),
+  ]..sort((a, b) => a.$2.compareTo(b.$2));
+  final names = <String>{
+    if (around.isNotEmpty) name(around.last),
+    for (final (b, _) in near.take(3)) name(b),
+  };
+  return 'the node cannot take the keyboard focus: it is no control, text field or node with a tap reaction, and has none inside it'
+      '${names.isEmpty ? ' (nothing on the screen can).' : '. Nearest that can: ${names.join(', ')}.'}';
 }
 
 /// Whether the revealed swipe [action] belongs to the row [row] (or a node

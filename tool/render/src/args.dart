@@ -144,7 +144,9 @@ Options:
                           through it: a Shift-click. Also on --drag, --hover,
                           --double-tap, --long-press, --right-click.
   --hover <nodeId>        Move a mouse over the node.
-  --focus <nodeId>        Focus a text field (or the field inside the node).
+  --focus <nodeId>        Put the keyboard focus on the node: a text field (or the
+                          field inside it), else the control or press target in
+                          it (a button, a row with a tap reaction, a handle).
   --type <nodeId>=<text>  Focus a text field and type text into it, as a user
                           would (its changed reactions run; a field bound to a
                           variable through props.initialValue sets it).
