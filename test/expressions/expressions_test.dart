@@ -130,6 +130,17 @@ void main() {
       expect(e.evaluate(r'${index}', inner), 3);
     });
 
+    test('parent tells its readers when the outer item changes (a matrix over a record\'s fields)', () {
+      final outer = ItemScope(index: 0, item: {'Admin': false}, parent: vars);
+      final inner = ItemScope(index: 0, item: 'Admin', parent: outer);
+      var told = 0;
+      watchName(inner, 'parent')!.addListener(() => told++);
+      expect(e.evaluate(r'${= get(parent.item, item)}', inner), false);
+      outer.update(index: 0, item: {'Admin': true});
+      expect(told, 1);
+      expect(e.evaluate(r'${= get(parent.item, item)}', inner), true);
+    });
+
     test('a nearer value hides a farther one of the same name', () {
       final outer = VariableScope([v('label', 'screen')]);
       final values = ValuesScope({'label': 'route'}, outer);

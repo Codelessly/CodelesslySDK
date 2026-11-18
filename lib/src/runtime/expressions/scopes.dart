@@ -649,6 +649,20 @@ class ItemScope extends NamedScope {
     return null;
   }
 
+  Listenable? _parentWatch;
+
+  /// `parent` changes when the outer item moves or changes: a binding of
+  /// the inner list that reads it (`get(parent.item, item)`, a matrix of
+  /// checkboxes over a record's fields) followed the inner list's own data
+  /// only, so it kept the old value (test 9, admin 2).
+  @override
+  Listenable watch(String name) {
+    if (name != 'parent') return super.watch(name);
+    final outer = _outer();
+    if (outer == null) return super.watch(name);
+    return _parentWatch ??= Listenable.merge([super.watch(name), outer.watch('item'), outer.watch('index'), outer.watch('parent')]);
+  }
+
   /// Moves to [item] at [index] (the data changed).
   void update({required int index, Object? item, bool deferNotifications = false}) {
     // Most items of a big list (a board of cells) are numbers or text that
