@@ -210,9 +210,9 @@ OverlayScoping scopeOverlays(List<ScopedPage> pages, List<ScopedComponent> compo
       out.issues.add((
         path: c.path,
         message: switch (what) {
-          'confirm' => 'the component ${c.type} confirms with the dialog "$id", which pages ${_list(out.renamed[id]!.keys)} each have as their own '
-              '(they draw it differently): a component is one for the whole site, so it cannot name one page\'s. Have it emit an event and '
-              'confirm on each page (onEvent={confirm … dialog=$id}).',
+          'confirm' || 'base' => 'the component ${c.type} ${what == 'confirm' ? 'confirms with the dialog' : 'goes to a page over'} "$id", which pages '
+              '${_list(out.renamed[id]!.keys)} each have as their own (they draw it differently): a component is one for the whole site, so it cannot name '
+              'one page\'s, and this is left as written. Have it emit an event and do this on each page (onEvent={…}).',
           _ => 'the component ${c.type} reads the result of the overlay "$id" (an action after its open reads result), which pages '
               '${_list(out.renamed[id]!.keys)} each have as their own: the page opens it for the component, so the result does not come back. '
               'Have the component emit an event, and open "$id" and act on its result on each page.',
@@ -395,6 +395,7 @@ void _eventize(Json document, Set<String> ids, String Function(Json action) even
         final type = m['type'];
         final names = (type == OpenModalAction.typeName || type == NavigateAction.typeName) && ids.contains(m['to']);
         if (type == ConfirmAction.typeName && ids.contains(m['dialog'])) cannot('confirm', m['dialog']! as String);
+        if (type == NavigateAction.typeName && ids.contains(m['base'])) cannot('base', m['base']! as String);
         if (names) {
           if (type == OpenModalAction.typeName && list.skip(i + 1).any((later) => RegExp(r'\bresult\b').hasMatch(jsonEncode(later)))) {
             cannot('result', m['to']! as String);
