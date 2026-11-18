@@ -93,6 +93,10 @@ final class NodeBindings {
             if (e.key != BindPaths.visible && e.key != BindPaths.data && BindPaths.stateOf(e.key) == null)
               BoundProperty(e.key, e.value),
           ..._imageUrls(n),
+          // A tooltip whose own text holds `${...}` ("Play at ${item.id}"),
+          // filled in from the scope as a text's own text is (in a list copy,
+          // the copy's item), unless the node binds it itself.
+          if (n.behaviors.tooltip.contains(r'${') && !n.bind.containsKey('tooltip')) BoundProperty('tooltip', n.behaviors.tooltip),
         ],
         states = {
           for (final e in n.bind.entries)
