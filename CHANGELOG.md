@@ -1,3 +1,41 @@
+## Unreleased
+
+Needs codelessly_api's fixes-36-1 (its Unreleased entry).
+
+### Behaviour changes
+
+- **What is under an open overlay takes no key**: a page's `key` lines and a node's `onKeyDown` (an `App`'s) wait
+  while a dialog, a sheet, a drawer or a menu is open over the page; the overlay's own keys run (round 10, R13: a
+  page's Enter ran while a chooser was open). It is what the overlays' contract says ("Tab and Shift+Tab stay
+  inside the top overlay; what is under it takes no key"); the page's handlers, which listen to the whole
+  keyboard, did not keep it. A document whose page shortcut was meant to act over its own dialog now acts only
+  when the dialog is closed (write the key under the dialog: `Dialog#id` … `key j onPress={…}`).
+
+### Fixed
+
+- **A toolbar's title beside small texts**: squeezable texts beside a child that fills keep their own width and the
+  filling child takes the room left, whatever order the row's boxes are applied in. A row drawn again at another
+  size (the render tool's second size, a window resized) had the small texts decide before the title was there:
+  they shared the row with it as flexible children, the subject got a third of its room and Close sat mid-bar
+  (support desk, test 11: "in some runs the subject was cut to ~130 px").
+- **Render driver, a menu's line by its text**: `--tap "Leo Marsh"` taps the line of the menu (popover, dialog)
+  open over the page that shows that text first, as an open dropdown's option is tapped by its label; it was "not
+  on screen" for a `MenuItem "{a}"` (support desk, test 11). Two lines that show it are said.
+- **Render driver, a row of a list hidden at this size**: `--tap queue-row#0` where the list is under `hide=phone`
+  is skipped there with the `step_skipped` note, as a node hidden itself is; it was `interaction_failed` (support
+  desk, test 11: every drive had to be split into a desktop run and a phone run).
+- **`scrollTo` from an overlay reaches the page under it**: a Menu's item (a dialog's button) that runs
+  `scrollTo node=threadEnd` scrolls the page to it; it looked only inside the overlay and said `no node "threadEnd"
+  is on screen` (support desk, test 11; round 10, R48). `RenderTree.live` lists the trees showing.
+- **Render driver, `--wait`**: `now()` and `nowMs()` move with the test's clock, as the timers do: a clock or a
+  deadline written from `now()` is that much later after the wait (round 10, R22, 14 runs: a nine-second wait left a
+  countdown at 10:00 while its timer ticked). `--now` still pins it for the whole run. `FormulaClock.source` (and
+  `FormulaTime.source`) let a host that runs time itself give the time formulas read.
+- **Notation tools, a site's components**: an overlay a component writes after its tree (`Drawer#basket … right
+  w=440`, `Sheet#info stops=[0.5,0.9]`) is on every page that calls it, so `open basket` from inside the component
+  shows it at its side, width and stops (round 10, R28). `expand <site folder>` passes the components' overlays to
+  the pages as it passes their key lines.
+
 ## 36.0.0
 
 Needs codelessly_api 36.0.0.

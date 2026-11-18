@@ -11,7 +11,7 @@ import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/render/controls/focus.dart' show ControlFocusNode, ControlFocusScope;
+import 'package:codelessly_sdk/src/render/controls/focus.dart' show ControlFocusLayer, ControlFocusNode, ControlFocusScope;
 import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabeledControl, firstTextUnder;
 import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/gestures.dart';
@@ -468,8 +468,13 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     }
     return null;
   });
-  // `--now`: the time now() returns.
+  // `--now`: the time now() returns. Without it, now() is the test's clock,
+  // which `--wait` (and every settle) moves as it moves the timers: a clock
+  // or a deadline written from now() passes with them (round 10, R22: a
+  // timer ticked through a nine-second wait while now() stood still).
   FormulaClock.pinned = args.now;
+  final testClock = tester.binding.clock;
+  FormulaClock.source = testClock.now;
   // Icons named without a codepoint (a bound name) draw from the font.
   IconSources.codepointOf = (name, style) =>
       codepoints[style == 'filled' ? '${name}_baseline' : '${name}_$style'] ?? codepoints[name];
@@ -498,6 +503,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     FlutterError.onError = previousOnError;
     IconSources.codepointOf = null;
     FormulaClock.pinned = null;
+    FormulaClock.source = null;
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
     _errorDetails.clear();
     _errorLog.clear();
@@ -1960,6 +1966,14 @@ String _rawCopies(RenderTree tree, String path) {
     if (all.isEmpty) all = [for (final b in scope) if (b.node?.name == name) b];
     final upTo = segments.take(i + 1).join('/');
     if (all.isEmpty) {
+      // A node of the page whose box is not built because something around
+      // it is hidden at this size (a list under `hide=phone`: its copies are
+      // not made) is not shown here, as a node hidden itself is: the step is
+      // skipped at this size (support desk, test 11: `--tap queue-row#0` at
+      // 390 was an error while `--tap bulkAssign` was skipped).
+      if (i == 0 && _hiddenAround(boxes, name)) {
+        return (box: null, problem: '$_notShownHere"$name": what holds it is hidden here (visible false, or a media rule hides it at this width)');
+      }
       return (box: null, problem: i == 0 ? 'no node "$name" is on screen' : 'no node "$name" is inside "${segments.take(i).join('/')}"');
     }
     if (index != null) {
@@ -2053,6 +2067,23 @@ String _rawCopies(RenderTree tree, String path) {
     return (box: null, problem: '$_notShownHere"$id" is hidden here (visible false, or a media rule hides it at this width)');
   }
   return (box: chosen, problem: null);
+}
+
+/// Whether node [id] of a tree shown (a page's own node, by its document)
+/// has no box because a node around it is hidden here: an ancestor whose box
+/// is not shown, or is built with nothing in it.
+bool _hiddenAround(List<NodeBox> boxes, String id) {
+  for (final tree in {for (final b in boxes) b.tree}) {
+    final source = tree.sourceOf(null);
+    if (source.node(id) == null) continue;
+    for (String? at = source.parentOf(id); at != null; at = source.parentOf(at)) {
+      final around = [for (final b in boxes) if (identical(b.tree, tree) && b.id == at && componentInstanceOf(b.instance) == null) b];
+      if (around.isEmpty) continue;
+      if (around.every((b) => !_shown(b))) return true;
+      break;
+    }
+  }
+  return false;
 }
 
 /// The page's scroll view: of the vertical ones a user can scroll that have
@@ -2429,6 +2460,14 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       // An option of the open dropdown or menu by its label (`--tap Alaska`).
       final rows = _openMenuRows(binding, id);
       if (rows.isNotEmpty) return (rows.last.localToGlobal(rows.last.size.center(ui.Offset.zero)), null);
+      // A line of a menu (or a popover, a dialog) open over the page by the
+      // text it shows (`--tap "Leo Marsh"` for a `MenuItem "{a}"` under an
+      // each: support desk, test 11): the one line there that is pressed.
+      final lines = _overlayLinesByLabel(binding, id);
+      if (lines.length == 1) return (lines.single.localToGlobal(lines.single.size.center(ui.Offset.zero)), null);
+      if (lines.length > 1) {
+        return (null, '--$verb $id: ${lines.length} lines of the overlay open show "$id": give the one meant an id (MenuItem#id "…").');
+      }
       // A button of the built-in confirm dialog (`confirmOk`, `confirmCancel`).
       for (final b in _builtIns(binding)) {
         if (b.id == id) return (b.box.localToGlobal(b.box.size.center(ui.Offset.zero)), null);
@@ -2931,6 +2970,33 @@ List<RenderMenuRow> _openMenuRows(WidgetsBinding binding, String? label) {
           for (final r in o.rows)
             if (r.attached && r.hasSize && !r.size.isEmpty && (want == null || r.item.label.trim().toLowerCase() == want)) r,
   ];
+}
+
+/// The lines of the overlay that holds the keyboard ([ControlFocusLayer.top]:
+/// a menu, a popover, a dialog open over the page) that are pressed (a click
+/// reaction) and show [label] first (letter case aside), innermost first:
+/// a menu's items by what they say.
+List<NodeBox> _overlayLinesByLabel(WidgetsBinding binding, String label) {
+  final top = ControlFocusLayer.top;
+  if (top == null) return const [];
+  final want = label.trim().toLowerCase();
+  bool onTop(NodeBox b) {
+    for (RenderObject? at = b; at != null; at = at.parent) {
+      if (at is RenderControlRoot) return identical(at.focus.layer, top);
+    }
+    return false;
+  }
+
+  final found = [
+    for (final b in _boxes(binding))
+      if (_shown(b) &&
+          (b.node?.actions.any((r) => r.trigger.type == api.TriggerType.click) ?? false) &&
+          firstTextUnder(b)?.toLowerCase() == want &&
+          onTop(b))
+        b,
+  ];
+  // A pressed line inside another pressed line: the inner one, once.
+  return [for (final b in found) if (!found.any((o) => !identical(o, b) && _isInside(o, b))) b];
 }
 
 /// The parts a step names with `@` on the control drawn in node box [b]
