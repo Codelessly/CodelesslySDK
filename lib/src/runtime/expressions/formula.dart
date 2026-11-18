@@ -1,3 +1,4 @@
+import 'dart:async' show Zone;
 import 'dart:math' as math;
 
 import 'package:intl/date_symbol_data_custom.dart';
@@ -178,15 +179,33 @@ class FormulaEvaluator {
   /// only).
   static void Function()? debugOnEvaluate;
 
+  /// Told of a formula that does not parse or fails as it is worked out,
+  /// while an action runs (`Zone.current[#codelesslyAction]`, the action's
+  /// type): the expression, the action and why. A tool sets it (the render
+  /// command reports `formula_failed`); the formula still gives null. Off
+  /// by default: a binding read before its data is there fails quietly.
+  static void Function(String expression, String action, String why)? onActionFailure;
+
   static Object? evaluate(String expression, FormulaPathResolver resolve) {
     debugOnEvaluate?.call();
     final _Node? node = _parse(expression);
-    if (node == null) return null;
-    try {
-      return node.eval(resolve);
-    } catch (_) {
+    if (node == null) {
+      _failed(expression, 'it does not parse');
       return null;
     }
+    try {
+      return node.eval(resolve);
+    } catch (e) {
+      _failed(expression, '$e');
+      return null;
+    }
+  }
+
+  static void _failed(String expression, String why) {
+    final hook = onActionFailure;
+    if (hook == null) return;
+    final action = Zone.current[#codelesslyAction];
+    if (action is String) hook(expression, action, why);
   }
 
   /// Formats [date] (a DateTime, an ISO string, epoch milliseconds or a

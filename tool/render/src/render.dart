@@ -33,6 +33,7 @@ import 'package:codelessly_sdk/src/render/controls/tile.dart' show RenderListTil
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart' show parseSvgPath;
 import 'package:codelessly_sdk/src/render/paint/svg_fonts.dart' show SvgFonts;
 import 'package:codelessly_sdk/src/render/view_scroll.dart' show RenderSticky;
+import 'package:codelessly_sdk/src/runtime/expressions/formula.dart' show FormulaEvaluator;
 import 'package:codelessly_sdk/src/render/layout/fit_box.dart' show RenderCodelesslyFlex;
 import 'package:codelessly_sdk/src/render/controls/text_field.dart' show RenderTextField, textFieldIn;
 
@@ -78,6 +79,7 @@ const runtimeCodes = <(String, String, String)>[
   ('unknown_screen_arg', 'error', '--screen names no canvas, screen or layout.'),
   ('render_exception', 'error', 'Flutter threw while building, laying out or painting the screen.'),
   ('action_error', 'error', 'An action chain failed (a load reaction, or one an interaction ran).'),
+  ('formula_failed', 'warning', 'A formula an action works out does not parse, or fails as it is worked out (an unknown field or function, a list function given a text): the action got null. The message gives the expression and why.'),
   ('interaction_failed', 'error', 'A --tap/--hover/--focus/--type/--scroll/--set/--navigate step could not be applied (no such node, not on screen, covered by another node: the message names it).'),
   ('step_skipped', 'warning', 'A step names a node not shown at this size (hidden by a media rule or a binding, or on another breakpoint\'s canvas): it is skipped at this size, the other steps run and the capture is made. One note per size.'),
   ('tap_no_reaction', 'warning', 'A --tap hit its node, but neither it nor anything around it reacts to a tap (no click reaction, no button or input): nothing happens.'),
@@ -464,6 +466,10 @@ Future<void> _renderAll(
   final screens = _screens(published, docs, args.screens, (s) => issue(s),
       components: [if (components != null) for (final t in components.types) components[t]!.document.toJson()]);
   final recorder = _Recorder();
+  // A formula an action works out that does not parse or fails (an unknown
+  // field or function, a list function given a text): said, not silent.
+  final formulaFailures = <(String, String, String)>{};
+  FormulaEvaluator.onActionFailure = (expression, action, why) => formulaFailures.add((expression, action, why));
   final binding = tester.binding;
   final exporter = _OutDirExporter(args.out, report);
   for (final screen in screens) {
@@ -552,6 +558,12 @@ Future<void> _renderAll(
               nodeId: node, screen: label, size: sizeName, file: node == null ? null : fileOfNode[node]));
         }
         recorder.errors.clear();
+        for (final (expression, action, why) in formulaFailures) {
+          issue(RuntimeIssue('formula_failed', 'warning',
+              'A formula of a $action action gave nothing: ${_firstLine(why)}. The expression: $expression',
+              screen: label, size: sizeName));
+        }
+        formulaFailures.clear();
       }
 
       // The page shown (the last one navigated to): what a --reload starts
