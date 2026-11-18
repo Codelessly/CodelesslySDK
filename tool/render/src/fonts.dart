@@ -268,6 +268,47 @@ const _robotoMonoDirs = ['bin/cache/dart-sdk/bin/resources/devtools/assets/fonts
 /// them, with no fallback warning.
 const monospaceFamilies = {'monospace', 'mono', 'ui-monospace'};
 
+/// The kind of face a family is, read from its name: what a family no file
+/// provides falls back to (a serif to a serif, a slab to a slab, a script to
+/// a script) rather than to Roboto (round 11: Georgia, Roboto Slab and a
+/// script drew as the sans).
+enum FontClass { sans, serif, slab, mono, script }
+
+/// The class of [family], from the words of its name.
+FontClass fontClassOf(String family) {
+  final f = family.toLowerCase();
+  if (monospaceFamilies.contains(f) || RegExp(r'mono|code|courier|consol|menlo|monaco|typewriter').hasMatch(f)) return FontClass.mono;
+  if (RegExp(r'slab|rockwell|arvo|zilla|bitter|museo slab|courier prime').hasMatch(f)) return FontClass.slab;
+  if (RegExp(r'script|brush|hand|pacifico|dancing|caveat|vibes|satisfy|lobster|cursive|signature|allura|sacramento|kaushan|calligraph').hasMatch(f)) return FontClass.script;
+  if (RegExp(r'sans').hasMatch(f)) return FontClass.sans;
+  if (RegExp(r'serif|georgia|times|garamond|baskerville|bodoni|didot|playfair|merriweather|lora|cormorant|crimson|fraunces|spectral|libre caslon|caslon|cambria|palatino|book antiqua|minion|charter|newsreader|literata|source serif|pt serif|noto serif|dm serif|instrument serif|abril|prata|cardo|alegreya(?! sans)|vollkorn|gelasio|tiempos|domine|eb garamond|old standard|century|bookman|sitka|iowan|athelas|hoefler|recoleta|gt sectra').hasMatch(f)) return FontClass.serif;
+  return FontClass.sans;
+}
+
+/// The system's faces of each class, in the order taken (the first family
+/// with a file): Windows, macOS, then Linux. Read only when a family no file
+/// provides asks for one.
+Map<FontClass, List<String>> classFontFiles() {
+  final win = '${Platform.environment['WINDIR'] ?? 'C:/Windows'}/Fonts';
+  const mac = '/System/Library/Fonts/Supplemental';
+  return {
+    FontClass.serif: [
+      for (final f in const ['georgia.ttf', 'georgiab.ttf', 'georgiai.ttf', 'times.ttf', 'timesbd.ttf', 'timesi.ttf', 'GARA.TTF', 'GARABD.TTF', 'GARAIT.TTF', 'BKANT.TTF', 'ANTQUAB.TTF', 'ANTQUAI.TTF']) '$win/$f',
+      for (final f in const ['Georgia.ttf', 'Georgia Bold.ttf', 'Georgia Italic.ttf', 'Times New Roman.ttf', 'Times New Roman Bold.ttf']) '$mac/$f',
+      for (final f in const ['DejaVuSerif.ttf', 'DejaVuSerif-Bold.ttf', 'DejaVuSerif-Italic.ttf']) '/usr/share/fonts/truetype/dejavu/$f',
+      for (final f in const ['LiberationSerif-Regular.ttf', 'LiberationSerif-Bold.ttf', 'LiberationSerif-Italic.ttf']) '/usr/share/fonts/truetype/liberation/$f',
+    ],
+    FontClass.slab: [
+      for (final f in const ['ROCK.TTF', 'ROCKB.TTF', 'ROCKI.TTF', 'ROCKEB.TTF']) '$win/$f',
+      for (final f in const ['Rockwell.ttc']) '$mac/$f',
+    ],
+    FontClass.script: [
+      for (final f in const ['BRUSHSCI.TTF', 'FREESCPT.TTF', 'MTCORSVA.TTF']) '$win/$f',
+      for (final f in const ['Brush Script.ttf', 'Apple Chancery.ttf']) '$mac/$f',
+    ],
+  };
+}
+
 /// The family a text's symbols the default fonts lack (arrows ← → ↑ ↓, ↵,
 /// ⌘, ✓) fall back to: a symbol font of the system's, registered under
 /// this name. On a device the system's fallback fonts draw them.
@@ -299,9 +340,32 @@ typedef FontMiss = ({String family, int weight, bool italic, String? substitute}
 
 /// Serves [faces] to the SDK, recording what it asked for and didn't get.
 class DirectoryFontFetcher implements FontFetcher {
-  DirectoryFontFetcher(this.faces);
+  DirectoryFontFetcher(this.faces, {Map<FontClass, List<String>>? classFiles}) : _classFiles = classFiles ?? classFontFiles();
 
   final List<FontFace> faces;
+
+  /// The system's faces of each class, read when first needed ([classFontFiles]).
+  final Map<FontClass, List<String>> _classFiles;
+  final Map<FontClass, List<FontFace>> _classFaces = {};
+
+  /// The face of [family]'s class nearest [weight] and [italic]: a serif's
+  /// for a serif no file provides; null for a sans (Roboto is its class)
+  /// and where the system has none (a slab or a script then takes a serif).
+  FontFace? classFace(String family, int weight, bool italic) {
+    final cls = fontClassOf(family);
+    for (final c in [cls, if (cls == FontClass.slab || cls == FontClass.script) FontClass.serif]) {
+      if (c == FontClass.sans || c == FontClass.mono) return null;
+      final faces = _classFaces.putIfAbsent(c, () => scanFonts([for (final p in _classFiles[c] ?? const <String>[]) if (File(p).existsSync()) p]));
+      if (faces.isEmpty) continue;
+      // The first family of the list that has a file, nearest the weight.
+      final first = faces.first.family;
+      final same = [for (final f in faces) if (f.family == first) f];
+      int score(FontFace f) => (f.weight - weight).abs() + (f.italic == italic ? 0 : 1000);
+      same.sort((a, b) => score(a).compareTo(score(b)));
+      return same.first;
+    }
+    return null;
+  }
   final List<FontMiss> misses = [];
 
   /// The face for [family] nearest [weight] and [italic]; null when the
@@ -350,7 +414,10 @@ class DirectoryFontFetcher implements FontFetcher {
     // A family with no file at all is drawn in Roboto (the test
     // environment's own fallback draws boxes, which nobody can review).
     final generic = monospaceFamilies.contains(font.family.toLowerCase()) ? match('Roboto Mono', font.weight, font.italic) : null;
-    final face = match(font.family, font.weight, font.italic) ?? generic ?? match('Roboto', font.weight, font.italic);
+    // A named monospace face no file provides (IBM Plex Mono) is drawn in
+    // Roboto Mono, as `monospace` is, and said.
+    final mono = generic == null && fontClassOf(font.family) == FontClass.mono ? match('Roboto Mono', font.weight, font.italic) : null;
+    final face = match(font.family, font.weight, font.italic) ?? generic ?? mono ?? classFace(font.family, font.weight, font.italic) ?? match('Roboto', font.weight, font.italic);
     if (face == null || (generic == null || !identical(face, generic)) && (face.family.toLowerCase() != font.family.toLowerCase() ||
         face.weight != font.weight || face.italic != font.italic)) {
       final miss = (

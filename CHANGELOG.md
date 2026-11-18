@@ -5,6 +5,12 @@
 - **Render, placeholder_word**: a stand-in the expand drew as nothing (a behaviour with no picture, or a line
   beside the App or Page at the top of a page) is said as drawing nothing and taking no room, with no node; a
   primitive wrapped round lines as those lines with no box.
+- **Render tool: a family no file provides falls back by its class**: a serif (Georgia, Playfair Display, Noto
+  Serif…) to the first serif the system has (Georgia, Times New Roman, Garamond, Book Antiqua; DejaVu or Liberation
+  Serif on Linux), a slab (Roboto Slab) to a slab (Rockwell) else a serif, a script to a script (Brush Script, Freestyle
+  Script) else a serif, a named mono (IBM Plex Mono) to Roboto Mono; it was Roboto for all. The `font_fallback`
+  warning says which face drew it. The faces are the machine's, so pictures can differ between machines where a site
+  names a family it does not ship.
 
 ### Fixed
 
