@@ -13,6 +13,11 @@ Needs codelessly_api's fixes-36-1 (its Unreleased entry).
 
 ### Fixed
 
+- **A toolbar's title beside small texts**: squeezable texts beside a child that fills keep their own width and the
+  filling child takes the room left, whatever order the row's boxes are applied in. A row drawn again at another
+  size (the render tool's second size, a window resized) had the small texts decide before the title was there:
+  they shared the row with it as flexible children, the subject got a third of its room and Close sat mid-bar
+  (support desk, test 11: "in some runs the subject was cut to ~130 px").
 - **Render driver, a menu's line by its text**: `--tap "Leo Marsh"` taps the line of the menu (popover, dialog)
   open over the page that shows that text first, as an open dropdown's option is tapped by its label; it was "not
   on screen" for a `MenuItem "{a}"` (support desk, test 11). Two lines that show it are said.

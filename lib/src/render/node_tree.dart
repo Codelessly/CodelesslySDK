@@ -2740,6 +2740,18 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
           ..grow = grow;
         p?.markNeedsLayout();
       }
+      // A child that fills, applied after the squeezable texts beside it
+      // (the row built again at another size): they decided with it not
+      // there yet, and shared the row with it as flexible children (a
+      // toolbar's subject at a third of its room, "1 of 6" squeezed;
+      // support desk, test 11). They decide again now it is.
+      if (!parentNode.wraps && (isFlexFit(mainFit) || n.type == 'spacer')) {
+        p?.visitChildren((c) {
+          if (c is! NodeBox || identical(c, this)) return;
+          final o = c._node;
+          if (o != null && (isRow ? o.hFit : o.vFit) == SizeFit.hug && o.layout.squeezable) c._applyParentData();
+        });
+      }
     } else if (pd is FreeformParentData && parentNode != null) {
       final placement = placementFor(n, parentNode, scrollAxis: _scrollAxisFor(parentNode));
       if (pd.placement != placement) {
