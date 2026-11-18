@@ -13,6 +13,9 @@ Needs codelessly_api's fixes-36-1 (its Unreleased entry).
 
 ### Fixed
 
+- **`scrollTo` from an overlay reaches the page under it**: a Menu's item (a dialog's button) that runs
+  `scrollTo node=threadEnd` scrolls the page to it; it looked only inside the overlay and said `no node "threadEnd"
+  is on screen` (support desk, test 11; round 10, R48). `RenderTree.live` lists the trees showing.
 - **Render driver, `--wait`**: `now()` and `nowMs()` move with the test's clock, as the timers do: a clock or a
   deadline written from `now()` is that much later after the wait (round 10, R22, 14 runs: a nine-second wait left a
   countdown at 10:00 while its timer ticked). `--now` still pins it for the whole run. `FormulaClock.source` (and

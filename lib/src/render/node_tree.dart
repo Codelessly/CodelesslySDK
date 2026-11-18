@@ -205,6 +205,7 @@ class RenderTree {
       this.imageLoader,
       this.components})
       : islands = _TreeIslands(environment) {
+    _live.add(this);
     components?.addListener(_componentsChanged);
     (islands as _TreeIslands).onEnvironment = () {
       for (final box in _boxes.values.toList()) {
@@ -1057,8 +1058,17 @@ class RenderTree {
     box._releaseSubtree();
   }
 
+  /// The trees not disposed, oldest first: a screen's, and each overlay's
+  /// over it (a menu's, a dialog's).
+  static final List<RenderTree> _live = [];
+
+  /// The trees showing now, the latest first: an action in an overlay that
+  /// names a node of the page under it (a menu's `scrollTo`) finds it there.
+  static Iterable<RenderTree> get live => _live.reversed;
+
   void dispose() {
     _disposed = true;
+    _live.remove(this);
     components?.removeListener(_componentsChanged);
     _fontNotifications?.removeListener(_fontsChanged);
     _afterFonts.clear();

@@ -686,7 +686,20 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
           // No node has that id: the one on screen with that name (a
           // responsive screen's layouts have their own ids, the same names).
           tree.boxesNamed(id).lastOrNull);
-  final box = tree == null ? null : (item.isEmpty ? named() : repeatOf(tree, id, item, instance: run.instance)) ?? named();
+  var box = tree == null ? null : (item.isEmpty ? named() : repeatOf(tree, id, item, instance: run.instance)) ?? named();
+  // Not on this screen: from an overlay (a menu's item, a dialog's button),
+  // the node is the page's under it (support desk, test 11: a Menu's
+  // `scrollTo node=threadEnd` found nothing; round 10, R48).
+  if (tree != null && item.isEmpty && (box == null || !box.attached)) {
+    for (final other in RenderTree.live) {
+      if (identical(other, tree)) continue;
+      final b = other.boxOf(id) ?? other.boxesNamed(id).lastOrNull;
+      if (b != null && b.attached) {
+        box = b;
+        break;
+      }
+    }
+  }
   if (box == null || !box.attached) {
     // Nothing to reveal: said, not skipped silently (the chain goes on).
     if (tree != null) {
