@@ -2,7 +2,8 @@
 # The compact notation's tools, runnable from a fresh checkout:
 #
 #   tool/notation/notation.sh prompt [--design-system <folder>] [--width <canvas width>] [--open [--no-define] [--no-glossary | --glossary=names|signatures]]
-#   tool/notation/notation.sh expand <file.txt> [--design-system <folder>] [--named] [--nearest-colors] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--site <site.json>] [--out <file.json>] [--open [--vocabulary <file.json>]] [--aliases <file.json>]
+#   tool/notation/notation.sh expand <file.txt> [--design-system <folder>] [--named] [--nearest-colors] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--site <site.json or folder>] [--no-site] [--out <file.json>] [--open [--vocabulary <file.json>]] [--aliases <file.json>]
+#   tool/notation/notation.sh expand <site folder> [--width <page width, default 1440>] [--no-reflow] [--design-system <folder>]
 #   tool/notation/notation.sh vocabulary <folder or files> [--design-system <folder>] [--aliases <file.json>] [--no-aliases] [--out <dir>] [--sites <dir>]
 #   tool/notation/notation.sh print <document.json> [--design-system <folder>] [--out <file.txt>] [--check]
 #   tool/notation/notation.sh apply <document.json> <ops.json> [--design-system <folder>] [--out <file.json>]
@@ -18,6 +19,19 @@
 # word the notation does not have stand in and records it; vocabulary reads a
 # corpus of answers (tool/vocabulary/corpus/<name>) and writes which words
 # they reached for and how each resolved (vocabulary.json, VOCABULARY.md).
+#
+# A file in a site's folder (a site.json beside it or up to two folders above
+# it, as site.json or site/site.json; or the one --site names) is expanded
+# with the site: its components are callable by name (those written in the
+# notation, components/*.txt, expanded first in the order they call each
+# other, and the expanded ones site.json lists), its variables are read by
+# name (a page or a component that writes one declares no copy), its theme
+# gives the looks a line does not say. No design_system.json is needed for
+# that. Given the site folder (or its project folder, or its site.json)
+# expand writes the whole site: every components/*.txt, then every
+# pages/*.txt (each to the JSON site.json lists by that name, else
+# site/components/<Name>.json and site/<page>.json, the page's file name its
+# canvas id), one line per file and every issue; exit 1 when there is any.
 #
 # print is expand the other way: a document in the notation, which parses back
 # to the same document (--check does that, and counts the lines whose fields
