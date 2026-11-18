@@ -12,6 +12,7 @@ import 'package:codelessly_api/core.dart' show Json, Node, SizeFit, FlexProps, S
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart' show HardwareKeyboard;
 import 'package:flutter/widgets.dart' show Builder, Directionality, WidgetBuilder;
 
 import 'animations.dart' show RenderAnimations, animatesOpacity;
@@ -123,7 +124,23 @@ abstract interface class NodeInteractions {
 /// Reports trigger [trigger] of the node [b] builds (an island's input
 /// changed, a button was pressed), when its tree has [RenderTree.interactions].
 void fireTrigger(NodeBuilder b, String trigger, {Json event = const {}}) {
-  if (b is NodeBox && b.tree.animates) b.tree.interactions?.fire(b, trigger, event: event);
+  if (b is NodeBox && b.tree.animates) b.tree.interactions?.fire(b, trigger, event: trigger == 'click' && event.isEmpty ? clickKeys() : event);
+}
+
+/// A click's `result` when the control gives none (a button pressed): the
+/// modifier keys held, as a box's tap gives them (`result.shift`,
+/// `result.meta` for Control or Command, `result.ctrl`, `result.alt`), so
+/// a Shift-click on a button reads as one on a row.
+Json clickKeys() {
+  final keys = HardwareKeyboard.instance;
+  return {
+    'result': {
+      'meta': keys.isMetaPressed || keys.isControlPressed,
+      'ctrl': keys.isControlPressed,
+      'shift': keys.isShiftPressed,
+      'alt': keys.isAltPressed,
+    },
+  };
 }
 
 /// [fireTrigger], completing when the chain it starts ends (a swiped card's

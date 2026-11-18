@@ -479,12 +479,14 @@ Future<void> runActions(List<ActionDef> actions, ActionRun run) async {
     // gave a handler for it; otherwise it's skipped.
     if (a is UnknownAction && run._registry.handler(a.type) == null) continue;
     if (a.when case final w? when !run.expressions.test(w, run.scope)) continue;
+    // The action a formula is worked out for (FormulaEvaluator.onActionFailure).
+    Future<void> perform() => runZoned(() => _perform(a, run), zoneValues: {#codelesslyAction: a.type});
     if (a.nonBlocking) {
-      unawaited(_perform(a, run).catchError((Object e, StackTrace s) {
+      unawaited(perform().catchError((Object e, StackTrace s) {
         if (e is! ActionsCanceled) run.host.reportError(e, s, action: a.type);
       }));
     } else {
-      await _perform(a, run);
+      await perform();
     }
   }
 }

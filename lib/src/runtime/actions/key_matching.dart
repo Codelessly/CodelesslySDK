@@ -34,9 +34,12 @@ bool runtimeKeyEventMatches(
   bool alt = false,
 }) {
   // A one-character combo names the character typed: `?` and not `/` when
-  // Shift+/ types `?`, `u` for U too.
+  // Shift+/ types `?`. A letter is its own key with Shift or without: `j`
+  // is not Shift+J (which `shift+j` names), whatever Caps Lock types.
   if (combo != null && combo.key.length == 1 && !meta && !alt && !combo.meta && !combo.alt && typesText(character)) {
-    return KeyCombo.normalizeKey(character!) == combo.key;
+    final typed = KeyCombo.normalizeKey(character!);
+    if (RegExp(r'^[a-z]$').hasMatch(combo.key)) return typed == combo.key && shift == combo.shift;
+    return typed == combo.key;
   }
   return runtimeKeyMatches(combo, label, meta: meta, shift: shift, alt: alt);
 }

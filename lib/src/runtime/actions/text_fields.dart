@@ -39,7 +39,19 @@ class TextFieldHandle {
   /// it or around it, else the first. A field in a kanban column's repeated
   /// quick add is the one of the column whose button was pressed.
   static TextFieldHandle? near(RenderTree tree, String id, Object? instance) {
-    if (instance == null) return of(tree, id);
+    // `filters/search`: the field `search` of the component call `filters`
+    // (a call path, from the page down, as the render tool names it).
+    final slash = id.lastIndexOf('/');
+    if (slash > 0) {
+      final calls = id.substring(0, slash).split('/');
+      final leaf = id.substring(slash + 1);
+      for (final box in tree.boxesOf(leaf)) {
+        final handle = _handles[box];
+        if (handle != null && componentInstanceOf(box.instance)?.call == calls.last) return handle;
+      }
+      return null;
+    }
+    if (instance == null) return of(tree, id) ?? _anyOf(tree, id);
     bool within(Object? inner, Object? outer) {
       for (Object? i = inner; i != null; i = i is ProvidedItem ? i.outer : null) {
         if (i == outer) return true;
@@ -59,6 +71,14 @@ class TextFieldHandle {
       if (related == null && (within(box.instance, instance) || within(instance, box.instance))) related = handle;
     }
     return related ?? sameComponent ?? of(tree, id);
+  }
+
+  /// The field node [id] shows anywhere in [tree], a component instance's
+  /// included (`focus search` from a page, for the search field of a
+  /// component it calls), when exactly one such field is on screen.
+  static TextFieldHandle? _anyOf(RenderTree tree, String id) {
+    final found = [for (final box in tree.boxesOf(id)) ?_handles[box]];
+    return found.length == 1 ? found.single : null;
   }
 
   static void register(NodeBuilder box, TextFieldHandle handle) {

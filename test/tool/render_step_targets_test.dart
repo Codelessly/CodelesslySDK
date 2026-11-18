@@ -147,13 +147,15 @@ void main() {
     nodes['snow'] = {
       'type': 'filledButton',
       'layout': {'width': 120, 'height': 40},
-      'props': {'label': 'Go ☃'},
+      // A character no font has (a private-use point): the snowman this used
+      // is drawn by the system's symbol font, which every style falls back to.
+      'props': {'label': 'Go \u{10FFFD}'},
     };
     final file = File('${out.path}/page.json')..writeAsStringSync(jsonEncode(doc));
     final report = await runRender(tester, RenderArgs(inputs: [file.path], out: '${out.path}/o', sizes: const [Size(390, 700)]));
     final glyph = report.diagnostics.singleWhere((d) => d['code'] == 'missing_glyph');
     expect(glyph['nodeId'], 'snow');
-    expect(glyph['message'], contains('U+2603'));
+    expect(glyph['message'], contains('U+10FFFD'));
   });
 
   testWidgets('a part named under a block that has none names what is in it', (tester) async {

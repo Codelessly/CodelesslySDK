@@ -1,0 +1,152 @@
+{
+ "schema": 3,
+ "roots": [
+  "modifiers"
+ ],
+ "nodes": {
+  "modifiers": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "btn",
+    "row",
+    "log"
+   ]
+  },
+  "btn": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "a"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "log",
+       "value": "${= log + (result.shift ? \"S\" : \"\") + (result.ctrl ? \"C\" : \"\") + (result.alt ? \"A\" : \"\") + \".\"}"
+      }
+     ]
+    }
+   ]
+  },
+  "row": {
+   "type": "row",
+   "layout": {
+    "padding": 10,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "log",
+       "value": "${= log + (result.shift ? \"s\" : \"\") + (result.meta ? \"m\" : \"\") + \",\"}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "row",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "log": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "log=${log}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF111827"
+    }
+   }
+  }
+ },
+ "variables": {
+  "modifiers": [
+   {
+    "name": "log",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

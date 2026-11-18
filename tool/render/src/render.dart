@@ -33,6 +33,7 @@ import 'package:codelessly_sdk/src/render/controls/tile.dart' show RenderListTil
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart' show parseSvgPath;
 import 'package:codelessly_sdk/src/render/paint/svg_fonts.dart' show SvgFonts;
 import 'package:codelessly_sdk/src/render/view_scroll.dart' show RenderSticky;
+import 'package:codelessly_sdk/src/runtime/expressions/formula.dart' show FormulaEvaluator;
 import 'package:codelessly_sdk/src/render/layout/fit_box.dart' show RenderCodelesslyFlex;
 import 'package:codelessly_sdk/src/render/controls/text_field.dart' show RenderTextField, textFieldIn;
 
@@ -78,6 +79,7 @@ const runtimeCodes = <(String, String, String)>[
   ('unknown_screen_arg', 'error', '--screen names no canvas, screen or layout.'),
   ('render_exception', 'error', 'Flutter threw while building, laying out or painting the screen.'),
   ('action_error', 'error', 'An action chain failed (a load reaction, or one an interaction ran).'),
+  ('formula_failed', 'warning', 'A formula an action works out does not parse, or fails as it is worked out (an unknown field or function, a list function given a text): the action got null. The message gives the expression and why.'),
   ('interaction_failed', 'error', 'A --tap/--hover/--focus/--type/--scroll/--set/--navigate step could not be applied (no such node, not on screen, covered by another node: the message names it).'),
   ('step_skipped', 'warning', 'A step names a node not shown at this size (hidden by a media rule or a binding, or on another breakpoint\'s canvas): it is skipped at this size, the other steps run and the capture is made. One note per size.'),
   ('tap_no_reaction', 'warning', 'A --tap hit its node, but neither it nor anything around it reacts to a tap (no click reaction, no button or input): nothing happens.'),
@@ -251,6 +253,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   // 2. Fonts and assets. A font handler left by an earlier run in this
   // process would load into a disposed instance.
   FontDemand.handler = null;
+  FontDemand.symbolFallback = const [];
   _mouse = null;
   final root = flutterRoot ?? Platform.environment['FLUTTER_ROOT'] ?? '';
   unreadFonts.clear();
@@ -272,6 +275,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
         file: api.SiteManifest.fileName));
   }
   final fetcher = DirectoryFontFetcher(faces);
+  final symbolFont = systemSymbolFont();
   await tester.runAsync(() async {
     // The default family and the icon font, registered up front.
     for (final family in const ['Roboto', 'Material Icons']) {
@@ -282,6 +286,13 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
         loader.addFont(Future.value(File(p).readAsBytesSync().buffer.asByteData()));
       }
       await loader.load();
+    }
+    // The symbols the default fonts lack (← → ↑ ↓ ↵ ⌘ ✓), from the system's
+    // symbol font: every style falls back to it, as a device's text does.
+    if (symbolFont case final path?) {
+      final loader = FontLoader(symbolFamily)..addFont(Future.value(File(path).readAsBytesSync().buffer.asByteData()));
+      await loader.load();
+      FontDemand.symbolFallback = const [symbolFamily];
     }
   });
   final codepoints = materialCodepoints(root);
@@ -464,6 +475,10 @@ Future<void> _renderAll(
   final screens = _screens(published, docs, args.screens, (s) => issue(s),
       components: [if (components != null) for (final t in components.types) components[t]!.document.toJson()]);
   final recorder = _Recorder();
+  // A formula an action works out that does not parse or fails (an unknown
+  // field or function, a list function given a text): said, not silent.
+  final formulaFailures = <(String, String, String)>{};
+  FormulaEvaluator.onActionFailure = (expression, action, why) => formulaFailures.add((expression, action, why));
   final binding = tester.binding;
   final exporter = _OutDirExporter(args.out, report);
   for (final screen in screens) {
@@ -552,6 +567,12 @@ Future<void> _renderAll(
               nodeId: node, screen: label, size: sizeName, file: node == null ? null : fileOfNode[node]));
         }
         recorder.errors.clear();
+        for (final (expression, action, why) in formulaFailures) {
+          issue(RuntimeIssue('formula_failed', 'warning',
+              'A formula of a $action action gave nothing: ${_firstLine(why)}. The expression: $expression',
+              screen: label, size: sizeName));
+        }
+        formulaFailures.clear();
       }
 
       // The page shown (the last one navigated to): what a --reload starts
@@ -660,9 +681,25 @@ Future<void> _renderAll(
           }
           continue;
         }
-        final problem = await _apply(tester, step, controller, navigator, codelessly, screens: _screenList(published, docs),
-            warn: (code, message, nodeId) => issue(RuntimeIssue(code, 'warning', message,
-                nodeId: nodeId, screen: label, size: sizeName, file: nodeId == null ? null : fileOfNode[nodeId])));
+        // `--tap shift+row#2`, `--drag alt+clip=40,0`: the step with those
+        // keys held, as a user Shift-clicks (a click's result.shift reads it).
+        final (held, plain) = _heldKeys(step);
+        for (final k in held) {
+          await tester.sendKeyDownEvent(k);
+        }
+        final String? problem;
+        try {
+          problem = await _apply(tester, plain, controller, navigator, codelessly, screens: _screenList(published, docs),
+              warn: (code, message, nodeId) => issue(RuntimeIssue(code, 'warning', message,
+                  nodeId: nodeId, screen: label, size: sizeName, file: nodeId == null ? null : fileOfNode[nodeId])));
+        } finally {
+          // Held until what the step started has run (a button's tap
+          // reaction reads the keys as it fires, a frame on).
+          if (held.isNotEmpty) await _settle(tester);
+          for (final k in held.reversed) {
+            await tester.sendKeyUpEvent(k);
+          }
+        }
         if (problem != null) {
           // A node hidden at this width, or of another canvas of the screen
           // (another breakpoint's design), is absent here by design: the
@@ -1845,6 +1882,30 @@ ui.Rect _rectOf(RenderBox b) {
   return o & b.size;
 }
 
+/// The modifier keys a pointer step holds (`shift+`, `ctrl+`, `alt+`,
+/// `meta+`/`cmd+`, `mod+`: Control, Command on a Mac, before its target) and
+/// the step without them. A key step names its own (`--key shift+Tab`).
+(List<LogicalKeyboardKey>, Step) _heldKeys(Step step) {
+  if (!_pointerSteps.contains(step.kind)) return (const [], step);
+  final keys = <LogicalKeyboardKey>[];
+  var target = step.target;
+  while (true) {
+    final m = RegExp(r'^(shift|ctrl|control|alt|option|meta|cmd|command|mod)\+(?=.)', caseSensitive: false).firstMatch(target);
+    if (m == null) break;
+    keys.add(switch (m[1]!.toLowerCase()) {
+      'shift' => LogicalKeyboardKey.shiftLeft,
+      'alt' || 'option' => LogicalKeyboardKey.altLeft,
+      'meta' || 'cmd' || 'command' => LogicalKeyboardKey.metaLeft,
+      'mod' => defaultTargetPlatform == TargetPlatform.macOS ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
+      _ => LogicalKeyboardKey.controlLeft,
+    });
+    target = target.substring(m.end);
+  }
+  return (keys, keys.isEmpty ? step : Step(step.kind, target, step.value));
+}
+
+const _pointerSteps = {'tap', 'double-tap', 'long-press', 'right-click', 'hover', 'drag'};
+
 Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetController controller,
     GlobalKey<NavigatorState> navigator, Codelessly codelessly,
     {required void Function(String code, String message, String? nodeId) warn, List<String> screens = const []}) async {
@@ -2619,14 +2680,19 @@ List<RuntimeIssue> _check(
   final boxes = _boxes(binding);
   // The glyphs a family has: its regular face's (else Roboto's).
   Set<int>? coverage(String? family) {
-    final fam = (family == null || family.isEmpty) ? 'Roboto' : family;
+    var fam = (family == null || family.isEmpty) ? 'Roboto' : family;
+    if (monospaceFamilies.contains(fam.toLowerCase()) && DirectoryFontFetcher(faces).match(fam, 400, false) == null) fam = 'Roboto Mono';
     // The file the fetcher serves for the family's regular face.
     final face = DirectoryFontFetcher(faces).match(fam, 400, false);
     final used = face != null && face.family.toLowerCase() == fam.toLowerCase()
         ? face
         : faces.where((f) => f.family == 'Roboto' && !f.italic).firstOrNull;
     if (used == null) return null;
-    return _coverage.putIfAbsent(used.path, () => fontCoverage(used.path));
+    final own = _coverage.putIfAbsent(used.path, () => fontCoverage(used.path));
+    // What the symbol font every style falls back to draws.
+    final symbols = FontDemand.symbolFallback.isEmpty ? null : systemSymbolFont();
+    if (symbols == null || own == null) return own;
+    return _coverage.putIfAbsent('${used.path}+$symbols', () => {...own, ...?fontCoverage(symbols)});
   }
   if (boxes.isEmpty) {
     out.add(RuntimeIssue('empty_screen', 'warning', 'Screen "$screen" drew no nodes.', screen: screen, size: size));

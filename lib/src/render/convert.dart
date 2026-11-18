@@ -107,10 +107,19 @@ abstract final class FontDemand {
   /// its glyph family first when [glyphFallback] (every text style built
   /// from a document's, not only a text node's: a field's hint, a chart's
   /// labels, a toast). Null when there are none.
-  static List<String>? fallbackOf(String? family, List<String> fallback) =>
-      glyphFallback && family != null && family.isNotEmpty
-          ? [for (var i = 0; i < glyphBatches; i++) glyphFamily(family, i), ...fallback]
-          : (fallback.isEmpty ? null : fallback);
+  static List<String>? fallbackOf(String? family, List<String> fallback) {
+    final out = glyphFallback && family != null && family.isNotEmpty
+        ? [for (var i = 0; i < glyphBatches; i++) glyphFamily(family, i), ...fallback]
+        : fallback;
+    if (symbolFallback.isEmpty) return out.isEmpty ? null : out;
+    return [...out, ...symbolFallback];
+  }
+
+  /// Families every style falls back to last, for the symbols its own font
+  /// lacks (arrows, ↵, ⌘): where no system fallback fonts are (the render
+  /// command registers a symbol font here). Empty in an app: the platform's
+  /// own fallback draws them.
+  static List<String> symbolFallback = const [];
 
   /// Completes once the fonts asked for so far have loaded (or failed):
   /// what something drawn once, as an SVG's text is, waits for. Installed

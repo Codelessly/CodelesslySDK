@@ -250,8 +250,46 @@ List<FontFace> declaredFonts(List<FontFamily> families, String siteDir, List<Dec
 
 /// The fonts the render command always has: Roboto (the default family of a
 /// Flutter app on Android and on the web, used for text that names no
-/// family) and the MaterialIcons font, both from the Flutter SDK.
-List<FontFace> defaultFonts(String flutterRoot) => scanFonts(['$flutterRoot/bin/cache/artifacts/material_fonts']);
+/// family), the MaterialIcons font and Roboto Mono (what `monospace` and
+/// `Text.mono` draw in), all from the Flutter SDK.
+List<FontFace> defaultFonts(String flutterRoot) => scanFonts([
+      '$flutterRoot/bin/cache/artifacts/material_fonts',
+      for (final dir in _robotoMonoDirs)
+        if (Directory('$flutterRoot/$dir').existsSync()) '$flutterRoot/$dir',
+    ]);
+
+/// Where the Flutter SDK keeps Roboto Mono (DevTools' copy).
+const _robotoMonoDirs = ['bin/cache/dart-sdk/bin/resources/devtools/assets/fonts/Roboto_Mono'];
+
+/// The family names that mean "a monospace face" (CSS's generic family and
+/// the notation's words): drawn in Roboto Mono when nothing else provides
+/// them, with no fallback warning.
+const monospaceFamilies = {'monospace', 'mono', 'ui-monospace'};
+
+/// The family a text's symbols the default fonts lack (arrows ← → ↑ ↓, ↵,
+/// ⌘, ✓) fall back to: a symbol font of the system's, registered under
+/// this name. On a device the system's fallback fonts draw them.
+const symbolFamily = 'Codelessly Symbols';
+
+/// The system's symbol font, when it has one: Segoe UI Symbol (Windows),
+/// Apple Symbols (macOS), DejaVu Sans or Noto Sans Symbols (Linux).
+String? systemSymbolFont() {
+  const candidates = [
+    'C:/Windows/Fonts/seguisym.ttf',
+    '/System/Library/Fonts/Apple Symbols.ttf',
+    '/System/Library/Fonts/Supplemental/Apple Symbols.ttf',
+    '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+    '/usr/share/fonts/TTF/DejaVuSans.ttf',
+    '/usr/share/fonts/dejavu/DejaVuSans.ttf',
+    '/usr/share/fonts/truetype/noto/NotoSansSymbols2-Regular.ttf',
+    '/usr/share/fonts/noto/NotoSansSymbols2-Regular.ttf',
+  ];
+  final windir = Platform.environment['WINDIR'];
+  for (final c in [if (windir != null) '$windir/Fonts/seguisym.ttf', ...candidates]) {
+    if (File(c).existsSync()) return c;
+  }
+  return null;
+}
 
 /// A request for a font no file provides (or only in another weight or
 /// style).
@@ -309,9 +347,10 @@ class DirectoryFontFetcher implements FontFetcher {
     }
     // A family with no file at all is drawn in Roboto (the test
     // environment's own fallback draws boxes, which nobody can review).
-    final face = match(font.family, font.weight, font.italic) ?? match('Roboto', font.weight, font.italic);
-    if (face == null || face.family.toLowerCase() != font.family.toLowerCase() ||
-        face.weight != font.weight || face.italic != font.italic) {
+    final generic = monospaceFamilies.contains(font.family.toLowerCase()) ? match('Roboto Mono', font.weight, font.italic) : null;
+    final face = match(font.family, font.weight, font.italic) ?? generic ?? match('Roboto', font.weight, font.italic);
+    if (face == null || (generic == null || !identical(face, generic)) && (face.family.toLowerCase() != font.family.toLowerCase() ||
+        face.weight != font.weight || face.italic != font.italic)) {
       final miss = (
         family: font.family,
         weight: font.weight,
