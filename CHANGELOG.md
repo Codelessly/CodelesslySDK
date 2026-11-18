@@ -4,6 +4,9 @@ Needs codelessly_api's fixes-36-1 (its Unreleased entry).
 
 ### Behaviour changes
 
+- **A hugging text field whose box has a height of its own** (its decoration's `constraints`, min and max the
+  same: a labelled `Input … h=44` in the notation) draws its text at that box's step of the control scale; it took
+  the compact step's (round 11b).
 - **A date or time picker whose decoration names only its fill, border and corners keeps its calendar (clock)
   and chevron** (round 11b: `DatePicker … fill=… border=… radius=10`): any decoration took them away, as a
   decoration that draws the field itself. A decoration that names icons, padding or anything else is as it was.

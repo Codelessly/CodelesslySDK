@@ -347,6 +347,26 @@ void main() {
   });
 
   group('a text field', () {
+    testWidgets('a label above a box of its own height (its constraints, h=44 in the notation): the box is 44, its text at that step', (tester) async {
+      final (tree, _) = await _show(tester, {
+        'name': {
+          ...hugging('textField', {
+            'decoration': {
+              'labelText': 'Street address',
+              'constraints': {'minHeight': 44, 'maxHeight': 44},
+            },
+          }),
+        },
+        'plain': hugging('textField', {
+          'decoration': {'labelText': 'Name'},
+        }),
+      });
+      final f = _field(tree, 'name');
+      expect(f.boxRect.height, 44);
+      expect(rectOf(tree, 'name').height, greaterThan(44 + 12), reason: 'the label above the box');
+      expect(f.config.valueStyle.fontSize, greaterThan(_field(tree, 'plain').config.valueStyle.fontSize!), reason: 'the 44 step');
+    });
+
     testWidgets('with nothing set it is SSUI\'s field, a render object with no EditableText or Material', (tester) async {
       final (tree, _) = await _show(tester, {'name': hugging('textField')});
       expect(find.byType(EditableText), findsNothing);
