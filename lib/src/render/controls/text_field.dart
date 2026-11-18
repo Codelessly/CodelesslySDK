@@ -10,6 +10,7 @@
 // `validate` action) is reached through [TextFieldServices], which the
 // widgets layer passes to [textFieldRecipe] (render can't import runtime).
 import 'dart:async' show scheduleMicrotask;
+import 'dart:math' as math;
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:codelessly_api/core.dart' as api;
@@ -650,6 +651,9 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
         focusRingWidth: c.focusRingWidth,
         focusRingColor: c.focusRingColor,
         steppers: c.steppers,
+        // A code's slots are its boxes: the field draws no box around them
+        // (six boxes inside a border, cut at its edges).
+        collapsed: c.otpLength > 0,
         text: _interactive ? null : fieldPreviewText);
   }
 
@@ -999,17 +1003,20 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
     final c = config;
     final count = c.otpLength;
     final gap = count > 8 ? 4.0 : 8.0;
-    final slot = ((boxRect.width - gap * (count - 1)) / count).clamp(0.0, 48.0).toDouble();
+    // Each slot as tall as the field (48 at most) and at most that wide, the
+    // row of slots at the field's start: a code field reads as one control.
+    final height = math.min(48.0, math.max(boxRect.height, 32.0));
+    final slot = ((boxRect.width - gap * (count - 1)) / count).clamp(0.0, height).toDouble();
     final used = slot * count + gap * (count - 1);
-    final left = boxRect.left + (boxRect.width - used) / 2;
-    final top = boxRect.top + (boxRect.height - 48) / 2;
+    final left = boxRect.left + (textDirection == TextDirection.rtl ? boxRect.width - used : 0);
+    final top = boxRect.top + (boxRect.height - height) / 2;
     final chars = editor.text.runes.map(String.fromCharCode).toList();
     final active = editor.selection.isValid ? editor.selection.extentOffset.clamp(0, count - 1) : chars.length.clamp(0, count - 1);
     for (var i = 0; i < count; i++) {
       final visual = textDirection == TextDirection.rtl ? count - 1 - i : i;
       final rect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(left + visual * (slot + gap), top, slot, 48).shift(offset),
-        const Radius.circular(10),
+        Rect.fromLTWH(left + visual * (slot + gap), top, slot, height).shift(offset),
+        Radius.circular(c.tokens.radius('control', 7)),
       );
       canvas.drawRRect(rect, Paint()..color = c.tokens.surface);
       canvas.drawRRect(rect, Paint()

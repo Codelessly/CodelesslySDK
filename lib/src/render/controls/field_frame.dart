@@ -342,6 +342,7 @@ class FieldDecoration {
     Color? focusRingColor,
     String Function(String? text)? text,
     bool steppers = false,
+    bool collapsed = false,
   }) {
     final t = text ?? (s) => s ?? '';
     String? error;
@@ -398,7 +399,7 @@ class FieldDecoration {
       errorBorder: FieldBorder.of(d.errorBorder),
       focusedErrorBorder: FieldBorder.of(d.focusedErrorBorder),
       disabledBorder: FieldBorder.of(d.disabledBorder),
-      collapsed: d.isCollapsed,
+      collapsed: collapsed || d.isCollapsed,
       constraints: d.constraints.isEmpty ? null : d.constraints.flutter,
       enabled: d.enabled,
       focusRingWidth: focusRingWidth,
@@ -695,14 +696,22 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl,
   final TextPainter _prefixText = TextPainter(textDirection: TextDirection.ltr, maxLines: 1);
   final TextPainter _suffixText = TextPainter(textDirection: TextDirection.ltr, maxLines: 1);
 
+  /// The label's style now (its own fields over the theme's `fieldLabel`).
+  TextStyle get labelStyle => _labelStyle;
+
   TextStyle get _labelStyle {
     final d = decoration;
+    // The theme's `fieldLabel` (a design system's: Desk's 12.5/500), so a
+    // field's own label is drawn as the labels a form writes beside it (a
+    // Field's) are; else SSUI's 11.5/600.
+    final theme = d.tokens.theme.textStyles['fieldLabel'];
+    final own = theme == null ? null : textStyle(theme);
     final base = TextStyle(
-      fontFamily: d.tokens.fontFamily,
-      fontSize: 11.5,
-      fontWeight: FontWeight.w600,
-      height: 1.3,
-      letterSpacing: 0,
+      fontFamily: own?.fontFamily ?? d.tokens.fontFamily,
+      fontSize: own?.fontSize ?? 11.5,
+      fontWeight: own?.fontWeight ?? FontWeight.w600,
+      height: own?.height ?? 1.3,
+      letterSpacing: own?.letterSpacing ?? 0,
       leadingDistribution: TextLeadingDistribution.even,
       color: d.labelColor,
     );

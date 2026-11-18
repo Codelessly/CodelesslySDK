@@ -727,4 +727,30 @@ void main() {
       expect(f.focusNode.hasFocus, isFalse);
     });
   });
+
+  testWidgets("a field's own label is the theme's fieldLabel (a design system's 12.5/500), as a Field beside it writes its own", (tester) async {
+    final (tree, _) = await _show(tester, {
+      'f': {'type': 'textField', 'layout': {'width': 240, 'height': {'hug': 0}}, 'props': {'decoration': {'labelText': 'Workspace URL'}}},
+    }, theme: {
+      'textStyles': {
+        'fieldLabel': {'fontSize': 12.5, 'fontWeight': 500},
+      },
+    });
+    final style = _field(tree, 'f').labelStyle;
+    expect(style.fontSize, 12.5);
+    expect(style.fontWeight, FontWeight.w500);
+    final (plain, _) = await _show(tester, {
+      'f': {'type': 'textField', 'layout': {'width': 240, 'height': {'hug': 0}}, 'props': {'decoration': {'labelText': 'Code'}}},
+    });
+    expect((_field(plain, 'f').labelStyle.fontSize, _field(plain, 'f').labelStyle.fontWeight), (11.5, FontWeight.w600), reason: "SSUI's");
+  });
+
+  testWidgets("a one-time code field draws its slots alone, each whole inside the field's height, with no box around them", (tester) async {
+    final (tree, _) = await _show(tester, {
+      'f': {'type': 'textField', 'layout': {'width': 300, 'height': 34}, 'props': {'otpLength': 6}},
+    });
+    final f = _field(tree, 'f');
+    expect(f.decoration.collapsed, isTrue);
+    expect(tester.takeException(), isNull);
+  });
 }
