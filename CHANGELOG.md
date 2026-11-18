@@ -23,6 +23,9 @@ Needs codelessly_api's fixes-36-1 (its Unreleased entry).
 
 ### Fixed
 
+- **A switch given one side only** (`Toggle h=44`, a row's height or a touch target) draws SSUI's 36 × 20 track
+  in the middle of its box; the track filled the 36 × 44 box, taller than wide, and drew as a ring (round 11b,
+  smart-home: every toggle on four screens).
 - **A list that keeps its end in view, with a padding of its own** (`ListView … stickToEnd={follow}
   pad=[28,24,28,16]`): the padding wrapped the list's two halves and hid the key its viewport is centred by, and
   Flutter's assertion drew the error box where the messages go (round 11b, team-chat's thread, at every size).

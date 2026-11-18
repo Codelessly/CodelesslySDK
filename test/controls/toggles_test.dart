@@ -47,6 +47,16 @@ void main() {
       expect(sw.thumb.radius, 8, reason: 'a 16 px thumb, 2 px in from the track');
     });
 
+    testWidgets('a switch given a height only (h=44) draws SSUI\'s 36 × 20 track in its middle, not a ring (round 11b)', (tester) async {
+      final (tree, _) = await _show(tester, {
+        'sw': {'type': 'switch', 'layout': {'width': {'hug': 0}, 'height': 44}, 'props': {'value': true}},
+      });
+      final sw = _toggle(tree, 'sw');
+      expect(rectOf(tree, 'sw').size, const Size(36, 44));
+      expect(sw.markRect.size, const Size(36, 20));
+      expect(sw.markRect.center.dy, 22);
+    });
+
     testWidgets('on, each is SSUI\'s primary: a white check, dot and thumb', (tester) async {
       final (tree, _) = await _show(tester, {
         'box': hugging('checkbox', {'value': true}),
