@@ -13,6 +13,12 @@ Needs codelessly_api's fixes-36-1 (its Unreleased entry).
 
 ### Fixed
 
+- **Render driver, a menu's line by its text**: `--tap "Leo Marsh"` taps the line of the menu (popover, dialog)
+  open over the page that shows that text first, as an open dropdown's option is tapped by its label; it was "not
+  on screen" for a `MenuItem "{a}"` (support desk, test 11). Two lines that show it are said.
+- **Render driver, a row of a list hidden at this size**: `--tap queue-row#0` where the list is under `hide=phone`
+  is skipped there with the `step_skipped` note, as a node hidden itself is; it was `interaction_failed` (support
+  desk, test 11: every drive had to be split into a desktop run and a phone run).
 - **`scrollTo` from an overlay reaches the page under it**: a Menu's item (a dialog's button) that runs
   `scrollTo node=threadEnd` scrolls the page to it; it looked only inside the overlay and said `no node "threadEnd"
   is on screen` (support desk, test 11; round 10, R48). `RenderTree.live` lists the trees showing.
