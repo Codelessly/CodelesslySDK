@@ -97,7 +97,7 @@ const runtimeCodes = <(String, String, String)>[
   ('text_no_color', 'warning', 'A text has no color (the engine paints it white: invisible on a light background), or a transparent one. Set props.style.color.'),
   ('font_fallback', 'warning', 'A font family (or weight/style) a text style names is neither declared in site.json\'s "fonts" nor in a --fonts directory: the text is drawn in another font. The message names the family and the nodes that use it.'),
   ('font_missing', 'error', 'A font file site.json\'s "fonts" declares is not there (the path is relative to the site), or is not a font file it can read.'),
-  ('design_system_missing', 'error', 'The design system site.json names ("designSystem": a folder relative to it) has no readable design_system.json.'),
+  ('design_system_missing', 'error', 'The design system site.json names ("designSystem": a folder relative to it, or an absolute path) has no readable design_system.json.'),
   ('image_failed', 'error', 'An image could not be loaded or decoded: a file named by a path relative to the site that is not there (the message names it), or a bad data: URL.'),
   ('image_network', 'warning', 'An image is on the network: the render command does not fetch it, so it is blank in the screenshot.'),
   ('empty_screen', 'warning', 'The screen drew no node boxes (nothing to show).'),

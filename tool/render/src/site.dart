@@ -38,7 +38,7 @@ typedef Input = ({String name, String path, String text});
     // declared with paths from the site's folder.
     final dsRef = readString(m?['designSystem']);
     if (m != null && dsRef != null) {
-      final dsDir = '$input/$dsRef';
+      final dsDir = sitePath(input, dsRef);
       final dsFile = File('$dsDir/${DesignSystemManifest.fileName}');
       final ds = dsFile.existsSync() ? _tryJson(dsFile.readAsStringSync()) : null;
       if (ds == null) {
@@ -79,6 +79,12 @@ typedef Input = ({String name, String path, String text});
   out.addAll(load(plain));
   return (inputs: out, manifest: manifest);
 }
+
+/// The path [ref] names from the folder [dir]: [ref] itself when it is
+/// absolute (`/x`, `C:/x`, `C:\x`, `\\host\x`), else [ref] under [dir]. A
+/// site's `designSystem` and its fonts' files may be written either way.
+String sitePath(String dir, String ref) =>
+    RegExp(r'^(?:[A-Za-z]:[\\/]|[\\/])').hasMatch(ref) ? ref : '$dir/$ref';
 
 /// Design systems a site names that could not be read (the render command
 /// reports them).

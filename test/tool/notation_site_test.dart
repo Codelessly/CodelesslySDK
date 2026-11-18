@@ -13,6 +13,7 @@ import 'package:codelessly_api/notation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../tool/notation/notation_site.dart';
+import '../../tool/render/src/site.dart' show designSystemProblems, loadSite, sitePath;
 
 late Directory _root;
 
@@ -272,5 +273,26 @@ key alt+1 onPress={go home}
     expect(r.issues, isEmpty);
     final screen = _nodes(r)['keys']! as Map;
     expect(jsonEncode(screen['actions']), allOf(contains('"key":"alt+1"'), contains('"to":"home"')));
+  });
+
+  test('a designSystem path may be absolute or relative to site.json (expand and render both load it)', () async {
+    final ds = Directory.systemTemp.createTempSync('notation_site_ds');
+    addTearDown(() => ds.deleteSync(recursive: true));
+    File('${ds.path}/design_system.json').writeAsStringSync(jsonEncode({'id': 'd', 'name': 'D', 'components': []}));
+    final absolute = ds.path.replaceAll(r'\', '/');
+    for (final ref in [absolute, ds.path]) {
+      final m = jsonDecode(File('${_root.path}/site/site.json').readAsStringSync()) as Map;
+      _write('site/site.json', jsonEncode({...m, 'designSystem': ref}));
+      final site = await NotationSite.load('${_root.path}/site/site.json');
+      expect(site.problems, isEmpty, reason: ref);
+      expect(site.designSystem, isNotNull, reason: ref);
+      designSystemProblems.clear();
+      loadSite(['${_root.path}/site'], (_) => const []);
+      expect(designSystemProblems, isEmpty, reason: ref);
+    }
+    expect(sitePath('/a/site', '../ds'), '/a/site/../ds');
+    expect(sitePath('/a/site', 'C:/x/ds'), 'C:/x/ds');
+    expect(sitePath('/a/site', r'C:\x\ds'), r'C:\x\ds');
+    expect(sitePath('/a/site', '/x/ds'), '/x/ds');
   });
 }

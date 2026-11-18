@@ -15,6 +15,8 @@ import 'package:codelessly_api/codelessly_api.dart' show FontFamily, PublishFont
 import 'package:codelessly_sdk/codelessly_sdk.dart' show FontFetcher;
 import 'package:codelessly_sdk/src/app/site_files.dart' show sfntOf;
 
+import 'site.dart' show sitePath;
+
 export 'package:codelessly_sdk/src/app/site_files.dart' show sfntOf;
 
 /// One font file: its family, weight (100–900) and style.
@@ -220,7 +222,7 @@ List<FontFace> declaredFonts(List<FontFamily> families, String siteDir, List<Dec
   final out = <FontFace>[];
   for (final f in families) {
     for (final a in f.fonts) {
-      final file = File('$siteDir/${a.asset}');
+      final file = File(sitePath(siteDir, a.asset));
       if (!file.existsSync()) {
         problems.add((family: f.family, asset: a.asset, reason: 'no file ${file.path}', missing: true));
         continue;

@@ -24,6 +24,7 @@ import 'dart:io';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_api/notation.dart';
 
+import '../render/src/site.dart' show sitePath;
 import 'site_overlays.dart';
 
 export 'site_overlays.dart';
@@ -196,7 +197,7 @@ final class NotationSite {
     }
     final site = NotationSite._(path, manifest, problems);
     if (readString(manifest['designSystem']) case final ref?) {
-      final dsDir = '${site.dir}/$ref';
+      final dsDir = sitePath(site.dir, ref);
       try {
         site.designSystem = await DesignSystem.load((r) async {
           final file = File('$dsDir/$r');
