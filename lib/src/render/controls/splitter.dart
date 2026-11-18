@@ -257,18 +257,26 @@ class RenderSplitter extends RenderControl {
       );
     }
     final center = area.center;
+    // In a window a pointer works (a desktop's, 700 wide and up) the
+    // splitter at rest is the hairline between its panes, as a desktop app's
+    // is: the grip shows while the pointer is on it, it is held or it has
+    // the keyboard's focus. On a phone, where nothing hovers, the grip
+    // always shows (the line is 2 px, a thumb's mark).
+    final grip = gripShown;
+    final desk = _windowWidth >= 700;
+    final line = desk && !grip ? 1.0 : 2.0;
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromCenter(
           center: center,
-          width: vertical ? size.width : 2,
-          height: vertical ? 2 : size.height,
+          width: vertical ? size.width : line,
+          height: vertical ? line : size.height,
         ),
-        const Radius.circular(1),
+        Radius.circular(line / 2),
       ),
       Paint()..color = tokens.primaryBorder,
     );
-    for (final y in [-8.0, 0.0, 8.0]) {
+    for (final y in grip ? const [-8.0, 0.0, 8.0] : const <double>[]) {
       canvas.drawCircle(
         vertical ? center.translate(y, 0) : center.translate(0, y),
         1.5,
@@ -283,6 +291,23 @@ class RenderSplitter extends RenderControl {
         width: 2,
       );
     }
+  }
+
+  /// Whether its grip (three dots) is drawn now: on a phone always; in a
+  /// desktop window while it is hovered, held, dragged or focused.
+  bool get gripShown => _windowWidth < 700 || hovered || pressed || _dragging || focusHighlight;
+
+  /// The width of the window it is drawn in (its root's when there is no
+  /// view above it).
+  double get _windowWidth {
+    RenderObject? at = this;
+    RenderObject? last;
+    while (at != null) {
+      if (at is RenderView) return at.size.width;
+      last = at;
+      at = at.parent;
+    }
+    return last is RenderBox && last.hasSize ? last.size.width : 0;
   }
 
   @override
