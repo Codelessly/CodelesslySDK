@@ -32,11 +32,58 @@ void splitterRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..onChangeEnd = interactive
         ? (v) => fireTrigger(b, 'changeEnd', event: {'value': v})
         : null;
+  box.paneLine = _paneLineBeside(b, n);
   box.enabled = !b.tree
       .statesOf(b.id, instance: b.instance)
       .contains(api.WidgetState.disabled);
   chain.add(box);
 }
+
+/// Whether a pane beside the splitter draws its own line on the side that
+/// faces it (`Column#list border-right=line`, then the Splitter): that line
+/// is the divider, and the splitter draws none of its own at rest (two
+/// lines a few pixels apart read as a broken divider: test 9, mail and
+/// admin).
+bool _paneLineBeside(NodeBuilder b, Node n) {
+  final parent = b.slot.parent;
+  if (parent == null) return false;
+  final ids = parent.children;
+  final i = ids.indexOf(n.id);
+  if (i < 0) return false;
+  final vertical = n.prop(SplitterProps.orientation) == api.Axis.vertical;
+  bool draws(String? id, bool before) {
+    if (id == null) return false;
+    final o = b.source.node(id);
+    if (o == null || !o.visible || o.decoration.strokes.isEmpty) return false;
+    final side = vertical ? (before ? 'bottom' : 'top') : (before ? 'right' : 'left');
+    return _hasSide(o.decoration.strokeSides, side);
+  }
+
+  return draws(i > 0 ? ids[i - 1] : null, true) || draws(i + 1 < ids.length ? ids[i + 1] : null, false);
+}
+
+bool _hasSide(api.StrokeSides s, String side) => switch (s) {
+      api.StrokeSides.all => true,
+      api.StrokeSides.none => false,
+      api.StrokeSides.left => side == 'left',
+      api.StrokeSides.right => side == 'right',
+      api.StrokeSides.top => side == 'top',
+      api.StrokeSides.bottom => side == 'bottom',
+      api.StrokeSides.topBottom => side == 'top' || side == 'bottom',
+      api.StrokeSides.leftRight => side == 'left' || side == 'right',
+      api.StrokeSides.topRight => side == 'top' || side == 'right',
+      api.StrokeSides.bottomRight => side == 'bottom' || side == 'right',
+      api.StrokeSides.bottomLeft => side == 'bottom' || side == 'left',
+      api.StrokeSides.topLeft => side == 'top' || side == 'left',
+      api.StrokeSides.noTop => side != 'top',
+      api.StrokeSides.noRight => side != 'right',
+      api.StrokeSides.noBottom => side != 'bottom',
+      api.StrokeSides.noLeft => side != 'left',
+      api.StrokeSides.start => side == 'left',
+      api.StrokeSides.end => side == 'right',
+      api.StrokeSides.noStart => side != 'left',
+      api.StrokeSides.noEnd => side != 'right',
+    };
 
 class RenderSplitter extends RenderControl {
   RenderSplitter() {
@@ -59,6 +106,7 @@ class RenderSplitter extends RenderControl {
           ..onUpdate = (d) {
             if (!_dragging) return;
             _raw +=
+                _sign *
                 (vertical
                     ? 1
                     : rtl
@@ -84,6 +132,16 @@ class RenderSplitter extends RenderControl {
   double? _bound;
 
   void Function(double)? onChanged, onChangeEnd;
+
+  /// A pane beside it draws the line it divides along: at rest it draws
+  /// none of its own.
+  bool get paneLine => _paneLine;
+  bool _paneLine = false;
+  set paneLine(bool v) {
+    if (v == _paneLine) return;
+    _paneLine = v;
+    markNeedsPaint();
+  }
 
   bool get interactive => _interactive;
   set interactive(bool v) {
@@ -131,6 +189,10 @@ class RenderSplitter extends RenderControl {
       node.prop(SplitterProps.max) < min ? min : node.prop(SplitterProps.max);
   double get step => node.prop(SplitterProps.step);
   double get value => _value.clamp(min, max).toDouble();
+
+  /// -1 when its value is the width of the pane after it (`pane: after`):
+  /// toward the end narrows that pane.
+  double get _sign => node.prop(SplitterProps.pane) == api.SplitterPane.after ? -1 : 1;
 
   void _set(double next, {bool end = false}) {
     final kept = next.clamp(min, max).toDouble();
@@ -197,7 +259,10 @@ class RenderSplitter extends RenderControl {
       _ => null,
     };
     if (delta != null) {
-      _set(value + delta, end: true);
+      // PageUp and PageDown change the value itself; the arrows move the
+      // divider, so they work the other way for the pane after it.
+      final along = key == LogicalKeyboardKey.pageUp || key == LogicalKeyboardKey.pageDown ? 1 : _sign;
+      _set(value + delta * along, end: true);
       return true;
     }
     if (key == LogicalKeyboardKey.home) {
@@ -228,10 +293,17 @@ class RenderSplitter extends RenderControl {
             : SystemMouseCursors.resizeLeftRight
       : MouseCursor.defer;
 
-  Size get _natural => Size(
-    _design.width > 0 ? _design.width : 44,
-    _design.height > 0 ? _design.height : 44,
-  );
+  /// Its size where the document gives none: across its line, a hit
+  /// target of 8 px in a desktop window (the hairline and a grip on hover,
+  /// as a desktop app's divider), 44 px on a phone (a thumb's); along it,
+  /// 44 (a document from the notation makes it as long as its panes).
+  Size get _natural {
+    final across = _windowWidth >= 700 ? 8.0 : 44.0;
+    return Size(
+      _design.width > 0 ? _design.width : (vertical ? 44 : across),
+      _design.height > 0 ? _design.height : (vertical ? across : 44),
+    );
+  }
   @override
   double computeMinIntrinsicWidth(double height) => _natural.width;
   @override
@@ -265,7 +337,7 @@ class RenderSplitter extends RenderControl {
     final grip = gripShown;
     final desk = _windowWidth >= 700;
     final line = desk && !grip ? 1.0 : 2.0;
-    canvas.drawRRect(
+    if (!(desk && !grip && _paneLine)) canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromCenter(
           center: center,
