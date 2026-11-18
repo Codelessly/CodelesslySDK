@@ -563,10 +563,16 @@ class UiSession implements NodeSource {
         final json = n.toJson();
         if ((readMap(json['bind']) ?? const {}).containsKey('visible')) continue;
         final props = readMap(json['props']) ?? const {};
+        final bound = readMap(json['bind']) ?? const {};
+        // A text a value fills is as wide as its value (empty until
+        // something is picked), and a list is as tall as its items:
+        // `value_not_computed` and `list_empty` say when those are wrong.
+        if (n.type == 'text' && ('${props['text'] ?? ''}'.contains(r'${') || bound.containsKey('props.text'))) continue;
+        if (bound.containsKey('data')) continue;
         final hasContent = (n.type == 'text' && '${props['text'] ?? ''}'.trim().isNotEmpty) ||
             n.type == 'icon' ||
             (readList(readMap(json['decoration'])?['fills'])?.isNotEmpty ?? false) ||
-            n.childIds.any((c) => _document[c] != null);
+            n.childIds.any(_alwaysShows);
         if (!hasContent) continue;
         out.add(EditDiagnostic.of(EditCodes.noSize, -1,
             '"$id" (${n.type}) was laid out ${w.toStringAsFixed(0)} × ${h.toStringAsFixed(0)}: nothing of it shows. Give it a '
@@ -575,6 +581,23 @@ class UiSession implements NodeSource {
       }
     }
     return out;
+  }
+
+  /// Whether node [id] shows whatever the state is: not one a condition
+  /// may hide (`if` under an `each`), a text a value fills, a list, or a
+  /// container of only those.
+  bool _alwaysShows(String id, [int depth = 0]) {
+    final n = _document[id];
+    if (n == null || !n.visible || depth > 12) return false;
+    final json = n.toJson();
+    final bound = readMap(json['bind']) ?? const {};
+    if (bound.containsKey('visible') || bound.containsKey('data')) return false;
+    if (n.type == 'text') {
+      final text = '${readMap(json['props'])?['text'] ?? ''}';
+      return text.trim().isNotEmpty && !text.contains(r'${') && !bound.containsKey('props.text');
+    }
+    if (n.childIds.isEmpty) return true;
+    return (readList(readMap(json['decoration'])?['fills'])?.isNotEmpty ?? false) || n.childIds.any((c) => _alwaysShows(c, depth + 1));
   }
 
   /// Undoes the last batch (of [author], when given): its inverse ops,

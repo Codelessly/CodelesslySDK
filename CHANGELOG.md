@@ -1,3 +1,19 @@
+## 35.0.1
+
+Needs codelessly_api 35.0.0.
+
+### Fixed
+
+- **What a view reports of a UI that is right** (`UiSession.shownDiagnostics`), found by running every check over
+  the showcase pages and the vocabulary corpus:
+  - `component_empty` no longer names a block that draws with a painter (Cards' `Media`) or one that only wraps
+    what is put in it (`WideScroll`).
+  - `no_size` no longer names the rows an `if` leaves out under an `each`, a list with no items, or a text whose
+    value is empty.
+  - `value_not_computed` no longer names a value that is an empty text (`"Picked: {sel}"` before anything is
+    picked), a value beside another with no text between them, or words the UI's own text or data has
+    (`"ERROR null check failed"`).
+
 ## 35.0.0
 
 Needs codelessly_api 35.0.0.
