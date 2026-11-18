@@ -554,6 +554,7 @@ final class NotationExpander {
                 projectVariables: variables,
                 components: merged == null ? const {} : NotationOptions.fromDesignSystem(merged).components,
                 componentScreenActions: merged == null ? const {} : NotationOptions.fromDesignSystem(merged).componentScreenActions,
+                componentScreenOverlays: merged == null ? const {} : NotationOptions.fromDesignSystem(merged).componentScreenOverlays,
               )
             : NotationOptions.fromDesignSystem(merged,
                 screen: screen, width: settings.width, named: named, nearestColors: settings.nearestColors, reflow: settings.reflow, projectVariables: variables))

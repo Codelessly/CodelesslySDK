@@ -114,6 +114,27 @@ void main() {
     expect(jsonEncode(r.document), jsonEncode(plain.document));
   });
 
+  test('an overlay a site component writes is on every page that calls it (round 10, R28)', () async {
+    _write('components/Mast.txt', 'component Mast "A top bar with a bag."\nRow#mast gap=8\n  Button#bag "Bag" onTap={open basket}\nDrawer#basket "Your bag" right w=440\n  Text "Items"\n');
+    _write('pages/shop.txt', 'Column\n  Mast\n  Text "Body"\n');
+    final m = jsonDecode(File('${_root.path}/site/site.json').readAsStringSync()) as Map;
+    _write('site/site.json', jsonEncode({...m, 'pages': ['home.json', 'shop.json']}));
+    final site = await NotationSite.load(findSiteManifest(file: '${_root.path}/pages/shop.txt')!);
+    final r = expandSitePages(NotationExpander(site: site, settings: _settings()), site);
+    for (final res in [...r.results, ...r.componentResults.values]) {
+      expect(res.issues, isEmpty);
+    }
+    final shop = r.pages.firstWhere((p) => p.name == 'shop').document;
+    expect(shop['roots'], ['shop', 'basket']);
+    final basket = (shop['nodes'] as Map)['basket'] as Map;
+    expect(basket['type'], 'canvas');
+    final mast = r.components.firstWhere((c) => c.type == 'Mast').document;
+    expect(jsonEncode(mast['nodes']), contains('"to":"basket","presentation":"dialog","cover":true'));
+    // A page that does not call it has none.
+    final home = r.pages.firstWhere((p) => p.name == 'home').document;
+    expect(home['roots'], ['home']);
+  });
+
   group("two pages' overlays of one id", () {
     // The site expanded whole: each page's document by name, the
     // components' by type, and what was said.

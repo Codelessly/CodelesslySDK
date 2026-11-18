@@ -1,3 +1,14 @@
+## Unreleased
+
+Needs codelessly_api's fixes-36-1 (its Unreleased entry).
+
+### Fixed
+
+- **Notation tools, a site's components**: an overlay a component writes after its tree (`Drawer#basket … right
+  w=440`, `Sheet#info stops=[0.5,0.9]`) is on every page that calls it, so `open basket` from inside the component
+  shows it at its side, width and stops (round 10, R28). `expand <site folder>` passes the components' overlays to
+  the pages as it passes their key lines.
+
 ## 36.0.0
 
 Needs codelessly_api 36.0.0.
