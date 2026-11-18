@@ -1569,8 +1569,16 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     _apply();
   }
 
+  /// Node [id] of this node's document, at the screen's size (its media
+  /// rules): a list's item template sizes its copies as they show there
+  /// (a copy as tall as its row on one line is as tall as it is once the
+  /// list wraps on a phone).
   @override
-  Node? nodeOf(String id) => source.node(id);
+  Node? nodeOf(String id) {
+    final n = source.node(id);
+    final r = tree._responsive;
+    return n != null && r != null && n.media.isNotEmpty ? n.atScreen(r.width, r.height, r.breakpoints) : n;
+  }
 
   @override
   T obtain<T extends RenderBox>(String key, T Function() create) => _obtain(key, create);
