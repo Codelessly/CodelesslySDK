@@ -204,7 +204,7 @@ int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings) {
   // overlay is a screen of the whole site, so two pages' `Drawer#nav` were
   // one (the board's drawer showed the archive page's sidebar: test 9,
   // kanban 9), with no word.
-  final canvasOf = <String, String>{};
+  final canvasOf = <String, (String, String)>{};
   for (final page in site.pageSources) {
     final name = File(page).uri.pathSegments.last.replaceFirst(RegExp(r'\.txt$'), '');
     final r = expander.expand(File(page).readAsStringSync(), path: page, screen: name);

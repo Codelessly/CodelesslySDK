@@ -116,7 +116,7 @@ Drawer#nav
 ''');
     final site = await NotationSite.load(findSiteManifest(file: '${_root.path}/pages/board.txt')!);
     final expander = NotationExpander(site: site, settings: _settings());
-    final canvasOf = <String, String>{};
+    final canvasOf = <String, (String, String)>{};
     final clashes = [
       for (final page in ['archive', 'board'])
         ...canvasClashes(canvasOf, page, expander.expand(File('${_root.path}/pages/$page.txt').readAsStringSync(), path: '$page.txt', screen: page)),
