@@ -361,11 +361,14 @@ class RenderTree {
       nodePath(id, instance, rootOf: instance is ComponentInstance ? _rootOf(instance) : null);
 
   /// What a call passes for slot [name] of [instance]: ids in the caller's
-  /// document (its `children`, or `slots[name]`).
+  /// document (its `children`, or `slots[name]`). The `children` slot is the
+  /// call's children, or a `slots.children` it was given instead (a
+  /// component that declares a slot of that name: test 10's single-write
+  /// builds lost whole page bodies to it).
   List<String> _slotContent(ComponentInstance instance, String name) {
     final call = sourceOf(instance.outer).node(instance.call);
     if (call == null) return const [];
-    if (name == api.kChildrenSlot) return call.children;
+    if (name == api.kChildrenSlot && (call.children.isNotEmpty || call.slots[name] == null)) return call.children;
     final id = call.slots[name];
     return id == null ? const [] : [id];
   }

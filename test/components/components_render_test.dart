@@ -158,6 +158,17 @@ void main() {
     expect(s.text('a/empty'), 'nothing');
   });
 
+  testWidgets('the children slot shows a slots.children the call was given (a definition that declares a slot of that name)', (tester) async {
+    final s = await show(
+        tester,
+        page({'a': call('Chip', props: {'label': 'Alpha'}, slots: {'children': 'given'})}, order: ['a'], more: {
+          'given': {'type': 'text', 'props': {'text': 'given'}, 'layout': {'width': {'hug': 40}, 'height': {'hug': 20}}},
+        }),
+        [chip()]);
+    expect(s.text('given'), 'given', reason: 'the content is the caller node, in the slot');
+    expect(s.tree.boxAtPath('a/empty'), isNull, reason: 'the slot\'s own children show only when the call passes nothing');
+  });
+
   testWidgets('the call sizes the root; the root keeps its padding', (tester) async {
     final s = await show(tester, page({'a': call('Chip', layout: {'width': 222, 'height': 60})}), [chip()]);
     final root = s.tree.boxOf('a')!;
