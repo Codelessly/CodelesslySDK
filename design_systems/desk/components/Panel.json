@@ -173,15 +173,7 @@
    ]
   },
   "panelSlot": {
-   "type": "slot",
-   "layout": {
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   }
+   "type": "slot"
   }
  }
 }

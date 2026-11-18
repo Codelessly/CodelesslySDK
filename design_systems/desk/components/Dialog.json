@@ -87,6 +87,7 @@
     "clip": "antiAlias"
    },
    "bind": {
+    "layout.constraints.maxHeight": "${= screen.height - 32}",
     "decoration.effects": "${theme.shadows.level4}"
    },
    "children": [
@@ -125,17 +126,6 @@
    "children": [
     "dialogTitles",
     "dialogClose"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 12
-      }
-     }
-    }
    ]
   },
   "dialogTitles": {
@@ -157,20 +147,6 @@
     "dialogOverline",
     "dialogTitle",
     "dialogNote"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "width": {
-        "fill": 0
-       },
-       "basis": 280,
-       "flex": 1
-      }
-     }
-    }
    ]
   },
   "dialogOverline": {
@@ -265,11 +241,12 @@
      "fill": 0
     },
     "height": {
-     "hug": 0
+     "flexible": 0
     }
    },
    "props": {
     "spacing": 16,
+    "scrollable": true,
     "crossAxisAlignment": "start"
    },
    "children": [
@@ -277,15 +254,7 @@
    ]
   },
   "dialogContent": {
-   "type": "slot",
-   "layout": {
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   }
+   "type": "slot"
   }
  }
 }

@@ -63,7 +63,7 @@
      10
     ],
     "width": {
-     "fill": 0
+     "hug": 0
     },
     "height": {
      "hug": 0
@@ -76,17 +76,6 @@
    "children": [
     "mark",
     "words"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 10
-      }
-     }
-    }
    ]
   },
   "mark": {
@@ -147,23 +136,18 @@
     "spacing": 0,
     "crossAxisAlignment": "start"
    },
+   "media": [
+    {
+     "minWidth": 700,
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ],
    "children": [
     "brandName",
     "brandNote"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "width": {
-        "fill": 0
-       },
-       "basis": 96,
-       "flex": 1
-      }
-     }
-    }
    ]
   },
   "brandName": {

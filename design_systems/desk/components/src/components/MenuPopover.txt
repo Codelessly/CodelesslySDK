@@ -3,4 +3,4 @@ component MenuPopover "The panel of a menu (what `Menu#id` draws): the raised su
   preview "Default" 220x80 heading="Move to"
 Column#menuPanel gap=1 pad=4 w=fill fill=raisedBackground border=line radius=8 clip=antiAlias effects={theme.shadows.level3}
   Text#menuHeading "{upper(props.heading)}" style=overline pad=[8,6,8,4] visible={props.heading != ''}
-  Slot#menuItems
+  Slot#menuItems w=null h=null

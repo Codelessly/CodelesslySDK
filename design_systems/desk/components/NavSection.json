@@ -52,8 +52,25 @@
    "props": {
     "crossAxisAlignment": "start"
    },
+   "media": [
+    {
+     "minWidth": 700,
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "padding": [
+        8,
+        10,
+        8,
+        10
+       ]
+      }
+     }
+    }
+   ],
    "children": [
-    "label"
+    "label",
+    "rule"
    ]
   },
   "label": {
@@ -69,7 +86,42 @@
    "props": {
     "text": "${= upper(props.label)}",
     "style": "overline"
-   }
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "rule": {
+   "type": "box",
+   "layout": {
+    "height": 1,
+    "width": {
+     "fill": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "line"
+     }
+    ]
+   },
+   "visible": false,
+   "media": [
+    {
+     "minWidth": 700,
+     "maxWidth": 1023,
+     "patch": {
+      "visible": true
+     }
+    }
+   ]
   }
  }
 }

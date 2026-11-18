@@ -1,4 +1,6 @@
-component Actions "The footer band of a dialog, a sheet or a form: a rule above it, the band's fill, its buttons at the end; a destructive button written first stays at the start (write Spacer after it)." children=list
+component Actions "The footer band of a dialog (its last line): a rule above it and the band's fill from edge to edge of the dialog, its buttons at the end. A destructive button written first stays at the start (write Spacer after it)." children=list
   preview "Default" 560x64
-Row#actions gap=8 end middle pad=[24,12,24,12] margin=[-24,8,-24,0] w=fill fill=band border-top=line
-  Slot#actionsContent
+Stack#actions w=fill margin=[0,8,0,0] clip=none
+  box#actionsBand x=-24 y=0 w=2400 h=fill fill=band border-top=line
+  Row#actionsRow gap=8 end middle pad=[0,14,0,14] w=fill
+    Slot#actionsContent w=null h=null

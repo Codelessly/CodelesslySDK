@@ -1,0 +1,3928 @@
+{
+ "schema": 3,
+ "roots": [
+  "members",
+  "rowMenu",
+  "invite",
+  "members_sidebar"
+ ],
+ "nodes": {
+  "members": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 1440.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "surface"
+     }
+    ]
+   },
+   "name": "Members",
+   "path": "members"
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column1",
+    "column3",
+    "column11"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": 240,
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     12,
+     16,
+     12,
+     12
+    ]
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "sidebar"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": 64
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
+   "children": [
+    "Brand1",
+    "NavSection1",
+    "NavItem1",
+    "NavItem2",
+    "NavItem3",
+    "NavItem4",
+    "NavSection2",
+    "NavItem5",
+    "NavItem6",
+    "NavItem7",
+    "spacer1",
+    "column2"
+   ]
+  },
+  "Brand1": {
+   "type": "Brand",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Tenant",
+    "note": "Northstar Studio",
+    "icon": "hub_outlined"
+   }
+  },
+  "NavSection1": {
+   "type": "NavSection",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "People & access"
+   }
+  },
+  "NavItem1": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Members",
+    "icon": "group_outlined",
+    "badge": "50"
+   },
+   "bind": {
+    "props.selected": "${= tab == \"members\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "members"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem2": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Roles",
+    "icon": "shield_outlined"
+   },
+   "bind": {
+    "props.selected": "${= tab == \"roles\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "roles"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem3": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Teams",
+    "icon": "workspaces_outlined"
+   },
+   "bind": {
+    "props.selected": "${= tab == \"teams\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "teams"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem4": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Audit log",
+    "icon": "history_outlined"
+   },
+   "bind": {
+    "props.selected": "${= tab == \"audit\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "audit"
+      }
+     ]
+    }
+   ]
+  },
+  "NavSection2": {
+   "type": "NavSection",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Workspace"
+   }
+  },
+  "NavItem5": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Billing",
+    "icon": "credit_card_outlined"
+   },
+   "bind": {
+    "props.selected": "${= tab == \"billing\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "billing"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem6": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "API keys",
+    "icon": "key_outlined"
+   },
+   "bind": {
+    "props.selected": "${= tab == \"keys\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "keys"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem7": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Settings",
+    "icon": "settings_outlined"
+   },
+   "bind": {
+    "props.selected": "${= tab == \"settings\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "settings"
+      }
+     ]
+    }
+   ]
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   }
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     0,
+     8,
+     0,
+     0
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "children": [
+    "NavItem8",
+    "Account1"
+   ]
+  },
+  "NavItem8": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Keyboard shortcuts",
+    "icon": "keyboard_outlined",
+    "shortcut": "?"
+   }
+  },
+  "Account1": {
+   "type": "Account",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Amara Okafor",
+    "note": "Workspace owner"
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column3Scroll",
+    "column10"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     24,
+     14,
+     24,
+     14
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center",
+    "spacing": 24
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ]
+   },
+   "children": [
+    "iconButton1",
+    "Breadcrumb1"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "spacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "menu_outlined"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "members_sidebar",
+       "presentation": "dialog",
+       "cover": true
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "Breadcrumb1": {
+   "type": "Breadcrumb",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "items": [
+     "Workspace",
+     "Members"
+    ]
+   }
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     32,
+     28,
+     32,
+     32
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 20,
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "padding": [
+        24,
+        20,
+        24,
+        24
+       ]
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "padding": [
+        16,
+        16,
+        16,
+        24
+       ]
+      }
+     }
+    }
+   ],
+   "children": [
+    "PageHeader1",
+    "grid1",
+    "row3",
+    "BulkBar1",
+    "column5",
+    "column9",
+    "Pager1"
+   ]
+  },
+  "PageHeader1": {
+   "type": "PageHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Members",
+    "note": "Manage workspace access, roles and invitations."
+   },
+   "children": [
+    "outlinedButton1",
+    "filledButton1"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Export",
+    "icon": "download_outlined"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Invite members",
+    "icon": "add_outlined"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "invite",
+       "presentation": "dialog",
+       "insets": [
+        16,
+        24,
+        16,
+        24
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "grid1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "gridView1"
+   ]
+  },
+  "gridView1": {
+   "type": "gridView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisCount": 4,
+    "mainAxisSpacing": 12,
+    "crossAxisSpacing": 12,
+    "shrinkWrapRows": true,
+    "physics": "never"
+   },
+   "bind": {
+    "data": "${stats}"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "crossAxisCount": 2
+      }
+     }
+    }
+   ],
+   "children": [
+    "gridView1Item"
+   ]
+  },
+  "gridView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "Stat1"
+   ]
+  },
+  "Stat1": {
+   "type": "Stat",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.label": "${item.label}",
+    "props.text": "${item.n}",
+    "props.tone": "${item.tone}",
+    "props.delta": "${item.delta}"
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "SearchField1",
+    "dropdown1",
+    "dropdown2",
+    "spacer2",
+    "text1"
+   ]
+  },
+  "SearchField1": {
+   "type": "SearchField",
+   "layout": {
+    "width": 280,
+    "height": 34.0
+   },
+   "props": {
+    "value": "q",
+    "hint": "Search name or email"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       }
+      }
+     }
+    }
+   ]
+  },
+  "dropdown1": {
+   "type": "dropdown",
+   "layout": {
+    "width": 140,
+    "height": 34.0
+   },
+   "props": {
+    "items": [
+     "All roles",
+     "Owner",
+     "Admin",
+     "Member"
+    ]
+   },
+   "bind": {
+    "props.value": "${role}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "role",
+       "value": "${result}"
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "dropdown2": {
+   "type": "dropdown",
+   "layout": {
+    "width": 150,
+    "height": 34.0
+   },
+   "props": {
+    "items": [
+     "All statuses",
+     "Active",
+     "Invited",
+     "Inactive"
+    ]
+   },
+   "bind": {
+    "props.value": "${status}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "status",
+       "value": "${result}"
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "spacer2": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "${= length(shown)} of ${= length(members)}"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "BulkBar1": {
+   "type": "BulkBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 44.0
+   },
+   "bind": {
+    "props.count": "${= length(chosen)}",
+    "visible": "${= length(chosen) > 0}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onClear"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "chosen",
+       "value": "${= []}"
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
+   "children": [
+    "outlinedButton2",
+    "outlinedButton3",
+    "filledButton2"
+   ]
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Change role",
+    "icon": "badge_outlined"
+   }
+  },
+  "outlinedButton3": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Add to team",
+    "icon": "group_add_outlined"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "filledButton2": {
+   "type": "filledButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "backgroundColor": "#FFDC2626",
+     "foregroundColor": "#FFFFFFFF"
+    },
+    "label": "Deactivate",
+    "icon": "person_off_outlined"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "surface"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 8,
+    "clip": "antiAlias"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
+   "children": [
+    "row4",
+    "column6",
+    "column8"
+   ]
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 40,
+    "padding": [
+     16,
+     0,
+     16,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "band"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "sticky": {
+    "offset": 16
+   },
+   "children": [
+    "row5",
+    "row6",
+    "row7",
+    "row8",
+    "row9",
+    "row10"
+   ]
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": 16,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "checkbox1"
+   ]
+  },
+  "checkbox1": {
+   "type": "checkbox",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "props": {
+    "compact": true,
+    "tristate": true
+   },
+   "bind": {
+    "props.value": "${= length(chosen) > 0 && length(chosen) == length(sortBy(shown, replace(sortKey, '-', ''), startsWith(sortKey, '-') ? 'desc' : 'asc')) ? true : (length(chosen) == 0 ? false : null)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "chosen",
+       "value": "${= (length(chosen) == length(sortBy(shown, replace(sortKey, '-', ''), startsWith(sortKey, '-') ? 'desc' : 'asc')) ? [] : map(sortBy(shown, replace(sortKey, '-', ''), startsWith(sortKey, '-') ? 'desc' : 'asc'), x => coalesce(x.id, x)))}"
+      }
+     ]
+    }
+   ],
+   "tooltip": "Select all"
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sortKey",
+       "value": "${= (sortKey == \"name\" ? \"-name\" : \"name\")}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text2",
+    "icon1",
+    "icon2"
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption",
+     "fontSize": 12,
+     "fontWeight": 600
+    },
+    "text": "Name",
+    "maxLines": 1
+   }
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 14,
+    "color": "#FF2563EB"
+   },
+   "bind": {
+    "visible": "${= replace(sortKey, '-', '') == 'name'}",
+    "props.icon": "${= sortKey == '-name' ? 'arrow_downward' : 'arrow_upward'}"
+   }
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "unfold_more_outlined",
+    "size": 14
+   },
+   "bind": {
+    "visible": "${= replace(sortKey, '-', '') != 'name'}"
+   },
+   "opacity": 0.4
+  },
+  "row7": {
+   "type": "row",
+   "layout": {
+    "width": 90,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sortKey",
+       "value": "${= (sortKey == \"role\" ? \"-role\" : \"role\")}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text3",
+    "icon3",
+    "icon4"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption",
+     "fontSize": 12,
+     "fontWeight": 600
+    },
+    "text": "Role",
+    "maxLines": 1
+   }
+  },
+  "icon3": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 14,
+    "color": "#FF2563EB"
+   },
+   "bind": {
+    "visible": "${= replace(sortKey, '-', '') == 'role'}",
+    "props.icon": "${= sortKey == '-role' ? 'arrow_downward' : 'arrow_upward'}"
+   }
+  },
+  "icon4": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "unfold_more_outlined",
+    "size": 14
+   },
+   "bind": {
+    "visible": "${= replace(sortKey, '-', '') != 'role'}"
+   },
+   "opacity": 0.4
+  },
+  "row8": {
+   "type": "row",
+   "layout": {
+    "width": 170,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text4"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption",
+     "fontSize": 12,
+     "fontWeight": 600
+    },
+    "text": "Teams",
+    "maxLines": 1
+   }
+  },
+  "row9": {
+   "type": "row",
+   "layout": {
+    "width": 100,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sortKey",
+       "value": "${= (sortKey == \"status\" ? \"-status\" : \"status\")}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text5",
+    "icon5",
+    "icon6"
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption",
+     "fontSize": 12,
+     "fontWeight": 600
+    },
+    "text": "Status",
+    "maxLines": 1
+   }
+  },
+  "icon5": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 14,
+    "color": "#FF2563EB"
+   },
+   "bind": {
+    "visible": "${= replace(sortKey, '-', '') == 'status'}",
+    "props.icon": "${= sortKey == '-status' ? 'arrow_downward' : 'arrow_upward'}"
+   }
+  },
+  "icon6": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "unfold_more_outlined",
+    "size": 14
+   },
+   "bind": {
+    "visible": "${= replace(sortKey, '-', '') != 'status'}"
+   },
+   "opacity": 0.4
+  },
+  "row10": {
+   "type": "row",
+   "layout": {
+    "width": 32,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text6"
+   ]
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption",
+     "fontSize": 12,
+     "fontWeight": 600
+    },
+    "text": "",
+    "maxLines": 1
+   }
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "focusGroup": {
+    "axis": "vertical",
+    "wrap": false
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= sortBy(shown, replace(sortKey, '-', ''), startsWith(sortKey, '-') ? 'desc' : 'asc')}"
+   },
+   "children": [
+    "listView1Item"
+   ],
+   "actions": [
+    {
+     "trigger": {
+      "type": "keyDown",
+      "key": "mod+a"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "chosen",
+       "value": "${= map(sortBy(shown, replace(sortKey, '-', ''), startsWith(sortKey, '-') ? 'desc' : 'asc'), x => coalesce(x.id, x))}"
+      },
+      {
+       "type": "announce",
+       "message": "${= length(chosen)} selected"
+      }
+     ]
+    }
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "chosen",
+       "value": "${= (result.shift && chosenAnchor >= 0 ? map(slice(sortBy(shown, replace(sortKey, '-', ''), startsWith(sortKey, '-') ? 'desc' : 'asc'), min(chosenAnchor, index), max(chosenAnchor, index) + 1), x => coalesce(x.id, x)) : (result.meta ? (contains(chosen, coalesce(item.id, item)) ? without(chosen, coalesce(item.id, item)) : append(chosen, coalesce(item.id, item))) : [coalesce(item.id, item)]))}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "chosenAnchor",
+       "value": "${= (result.shift && chosenAnchor >= 0 ? chosenAnchor : index)}"
+      },
+      {
+       "type": "announce",
+       "message": "${= length(chosen)} selected"
+      }
+     ]
+    }
+   ],
+   "bind": {
+    "selected": "${= contains(chosen, coalesce(item.id, item))}"
+   },
+   "states": {
+    "selected": {
+     "listView1Item": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "activeTint"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "row11"
+   ]
+  },
+  "row11": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "constraints": {
+     "minHeight": 44
+    },
+    "padding": [
+     16,
+     6,
+     16,
+     6
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "bind": {
+    "selected": "${= contains(chosen, coalesce(item.id, item))}"
+   },
+   "states": {
+    "hovered": {
+     "row11": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "band"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "row11": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "#FFE9EFFD"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "row12",
+    "row13",
+    "row15",
+    "row16",
+    "row18",
+    "row19"
+   ]
+  },
+  "row12": {
+   "type": "row",
+   "layout": {
+    "width": 16,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "checkbox2"
+   ]
+  },
+  "checkbox2": {
+   "type": "checkbox",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "props": {
+    "compact": true
+   },
+   "bind": {
+    "props.value": "${= contains(chosen, coalesce(item.id, item))}"
+   },
+   "ignorePointer": true,
+   "focusable": false
+  },
+  "row13": {
+   "type": "row",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row14"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "flex": 255.0
+      }
+     }
+    }
+   ]
+  },
+  "row14": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Avatar1",
+    "column7"
+   ]
+  },
+  "Avatar1": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.name": "${item.name}"
+   }
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text7",
+    "text8"
+   ]
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle"
+    },
+    "text": "${item.name}",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "openId",
+       "value": "${= item.id}"
+      }
+     ]
+    }
+   ]
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "${item.email}",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "row15": {
+   "type": "row",
+   "layout": {
+    "width": 90,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text9"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "flex": 90
+      }
+     }
+    }
+   ]
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "${item.role}"
+   }
+  },
+  "row16": {
+   "type": "row",
+   "layout": {
+    "width": 170,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row17"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "flex": 170
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "row17": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "listView2"
+   ]
+  },
+  "listView2": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "scrollDirection": "horizontal",
+    "spacing": 4
+   },
+   "bind": {
+    "data": "${item.teams}"
+   },
+   "children": [
+    "listView2Item"
+   ]
+  },
+  "listView2Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "mainAxisAlignment": "center"
+   },
+   "children": [
+    "Tag1"
+   ]
+  },
+  "Tag1": {
+   "type": "Tag",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   },
+   "props": {
+    "outline": true,
+    "dot": false
+   },
+   "bind": {
+    "props.label": "${item}"
+   }
+  },
+  "row18": {
+   "type": "row",
+   "layout": {
+    "width": 100,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Status1"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "flex": 100
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "Status1": {
+   "type": "Status",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "pill": true
+   },
+   "bind": {
+    "props.label": "${item.status}",
+    "props.tone": "${= item.status == 'Active' ? 'success' : (item.status == 'Invited' ? 'warning' : 'neutral')}"
+   }
+  },
+  "row19": {
+   "type": "row",
+   "layout": {
+    "width": 32,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "iconButton2"
+   ]
+  },
+  "iconButton2": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "more_horiz_outlined"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "openId",
+       "value": "${= item.id}"
+      },
+      {
+       "type": "openModal",
+       "to": "rowMenu",
+       "presentation": "popover",
+       "anchor": "trigger",
+       "placement": "belowStart",
+       "anchorGap": 6
+      }
+     ]
+    }
+   ],
+   "tooltip": "Actions for ${item.name}"
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": 32,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= length(sortBy(shown, replace(sortKey, '-', ''), startsWith(sortKey, '-') ? 'desc' : 'asc')) == 0}"
+   },
+   "children": [
+    "text10"
+   ]
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "No members match. Clear the search or the filters."
+   }
+  },
+  "column9": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 8,
+    "clip": "antiAlias"
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
+   "children": [
+    "listView3"
+   ]
+  },
+  "listView3": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${shown}"
+   },
+   "children": [
+    "listView3Item"
+   ]
+  },
+  "listView3Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "ListRow1"
+   ]
+  },
+  "ListRow1": {
+   "type": "ListRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.title": "${item.name}",
+    "props.subtitle": "${item.email}",
+    "props.meta": "${item.status}",
+    "props.avatar": "${item.name}",
+    "props.selected": "${= contains(chosen, item.id)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "openId",
+       "value": "${= item.id}"
+      }
+     ]
+    }
+   ]
+  },
+  "Pager1": {
+   "type": "Pager",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "page": "page",
+    "pages": 5
+   },
+   "bind": {
+    "props.summary": "1–${= length(shown)} of 50 members"
+   }
+  },
+  "column10": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     24,
+     12,
+     24,
+     12
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "bind": {
+    "visible": "${= length(chosen) > 0}"
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
+   "children": [
+    "BulkBar2"
+   ]
+  },
+  "BulkBar2": {
+   "type": "BulkBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 44.0
+   },
+   "props": {
+    "noun": ""
+   },
+   "bind": {
+    "props.count": "${= length(chosen)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onClear"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "chosen",
+       "value": "${= []}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "filledButton3"
+   ]
+  },
+  "filledButton3": {
+   "type": "filledButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "backgroundColor": "#FFDC2626",
+     "foregroundColor": "#FFFFFFFF"
+    },
+    "label": "Deactivate",
+    "icon": "person_off_outlined"
+   }
+  },
+  "column11": {
+   "type": "column",
+   "layout": {
+    "width": 340,
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "left"
+   },
+   "bind": {
+    "visible": "${= openId != \"\"}"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
+   "children": [
+    "PaneHeader1",
+    "column12",
+    "column14"
+   ]
+  },
+  "PaneHeader1": {
+   "type": "PaneHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Member"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onClose"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "openId",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "column12": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     20,
+     16,
+     20,
+     16
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row20",
+    "Property1",
+    "Property2",
+    "Property3",
+    "Property4",
+    "Property5",
+    "Property6"
+   ]
+  },
+  "row20": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     0,
+     0,
+     0,
+     12
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Avatar2",
+    "column13"
+   ]
+  },
+  "Avatar2": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": "medium"
+   },
+   "bind": {
+    "props.name": "${cur.name}"
+   }
+  },
+  "column13": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text11",
+    "text12"
+   ]
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "heading"
+    },
+    "text": "${cur.name}"
+   }
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "${cur.role} · joined Mar 2024"
+   }
+  },
+  "Property1": {
+   "type": "Property",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Email"
+   },
+   "bind": {
+    "props.text": "${cur.email}"
+   }
+  },
+  "Property2": {
+   "type": "Property",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Role"
+   },
+   "children": [
+    "dropdown3"
+   ]
+  },
+  "dropdown3": {
+   "type": "dropdown",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 34.0
+   },
+   "props": {
+    "items": [
+     "Owner",
+     "Admin",
+     "Member"
+    ]
+   },
+   "bind": {
+    "props.value": "${cur.role}"
+   }
+  },
+  "Property3": {
+   "type": "Property",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Teams"
+   },
+   "children": [
+    "Tag2",
+    "Tag3"
+   ]
+  },
+  "Tag2": {
+   "type": "Tag",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   },
+   "props": {
+    "label": "Platform",
+    "hue": "sky"
+   }
+  },
+  "Tag3": {
+   "type": "Tag",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   },
+   "props": {
+    "label": "Operations",
+    "hue": "amber"
+   }
+  },
+  "Property4": {
+   "type": "Property",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Status"
+   },
+   "children": [
+    "Status2"
+   ]
+  },
+  "Status2": {
+   "type": "Status",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "tone": "success"
+   },
+   "bind": {
+    "props.label": "${cur.status}"
+   }
+  },
+  "Property5": {
+   "type": "Property",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Last active"
+   },
+   "bind": {
+    "props.text": "${cur.last}"
+   }
+  },
+  "Property6": {
+   "type": "Property",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Two-factor",
+    "text": "Enabled"
+   }
+  },
+  "column14": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     20,
+     8,
+     20,
+     16
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "children": [
+    "text13",
+    "text14",
+    "text15",
+    "text16"
+   ]
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "overline"
+    },
+    "text": "RECENT ACTIVITY"
+   }
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "small"
+    },
+    "text": "Changed Elena Voss's role to Admin · 2 days ago"
+   }
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "small"
+    },
+    "text": "Invited Adrian Price · 4 days ago"
+   }
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "small"
+    },
+    "text": "Created the Operations team · last week"
+   }
+  },
+  "column3Scroll": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row2",
+    "divider1",
+    "column4"
+   ]
+  },
+  "rowMenu": {
+   "type": "canvas",
+   "name": "rowMenu",
+   "slots": {
+    "body": "MenuPopover1"
+   },
+   "layout": {
+    "width": 228.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ]
+   }
+  },
+  "MenuPopover1": {
+   "type": "MenuPopover",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "children": [
+    "MenuItem1",
+    "MenuItem2",
+    "MenuItem3",
+    "divider2",
+    "MenuItem4"
+   ]
+  },
+  "MenuItem1": {
+   "type": "MenuItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "View details",
+    "icon": "visibility_outlined"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "MenuItem2": {
+   "type": "MenuItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Change role",
+    "icon": "badge_outlined"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "MenuItem3": {
+   "type": "MenuItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Resend invite",
+    "icon": "send_outlined"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "divider2": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "MenuItem4": {
+   "type": "MenuItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Deactivate",
+    "icon": "person_off_outlined",
+    "danger": true
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "invite": {
+   "type": "canvas",
+   "name": "invite",
+   "slots": {
+    "body": "Dialog1"
+   },
+   "layout": {
+    "width": 520.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ]
+   }
+  },
+  "Dialog1": {
+   "type": "Dialog",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Invite members",
+    "note": "They get an email with a link to join Northstar Studio."
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onClose"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "textField1",
+    "Field1",
+    "Actions1"
+   ]
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Email addresses",
+     "hintText": "name@company.com, another@company.com"
+    },
+    "minLines": 3,
+    "maxLines": 6
+   }
+  },
+  "Field1": {
+   "type": "Field",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Role",
+    "note": "Members see everything; admins also manage people and billing."
+   },
+   "children": [
+    "dropdown4"
+   ]
+  },
+  "dropdown4": {
+   "type": "dropdown",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 34.0
+   },
+   "props": {
+    "items": [
+     "Member",
+     "Admin",
+     "Owner"
+    ],
+    "value": "Member"
+   }
+  },
+  "Actions1": {
+   "type": "Actions",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "children": [
+    "textButton1",
+    "filledButton4"
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Cancel"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton4": {
+   "type": "filledButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Send invites",
+    "icon": "send_outlined"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      },
+      {
+       "type": "showToast",
+       "message": "Invites sent"
+      }
+     ]
+    }
+   ]
+  },
+  "members_sidebar": {
+   "type": "canvas",
+   "name": "members_sidebar",
+   "slots": {
+    "body": "row21"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ]
+   }
+  },
+  "row21": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column15",
+    "column17"
+   ]
+  },
+  "column15": {
+   "type": "column",
+   "layout": {
+    "width": 300,
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     12,
+     16,
+     12,
+     12
+    ]
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "sidebar"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": 64
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
+   "children": [
+    "Brand2",
+    "NavSection3",
+    "NavItem9",
+    "NavItem10",
+    "NavItem11",
+    "NavItem12",
+    "NavSection4",
+    "NavItem13",
+    "NavItem14",
+    "NavItem15",
+    "spacer3",
+    "column16"
+   ]
+  },
+  "Brand2": {
+   "type": "Brand",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Tenant",
+    "note": "Northstar Studio",
+    "icon": "hub_outlined"
+   }
+  },
+  "NavSection3": {
+   "type": "NavSection",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "People & access"
+   }
+  },
+  "NavItem9": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Members",
+    "icon": "group_outlined",
+    "badge": "50"
+   },
+   "bind": {
+    "props.selected": "${= tab == \"members\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "members"
+      },
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem10": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Roles",
+    "icon": "shield_outlined"
+   },
+   "bind": {
+    "props.selected": "${= tab == \"roles\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "roles"
+      },
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem11": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Teams",
+    "icon": "workspaces_outlined"
+   },
+   "bind": {
+    "props.selected": "${= tab == \"teams\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "teams"
+      },
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem12": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Audit log",
+    "icon": "history_outlined"
+   },
+   "bind": {
+    "props.selected": "${= tab == \"audit\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "audit"
+      },
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "NavSection4": {
+   "type": "NavSection",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Workspace"
+   }
+  },
+  "NavItem13": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Billing",
+    "icon": "credit_card_outlined"
+   },
+   "bind": {
+    "props.selected": "${= tab == \"billing\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "billing"
+      },
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem14": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "API keys",
+    "icon": "key_outlined"
+   },
+   "bind": {
+    "props.selected": "${= tab == \"keys\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "keys"
+      },
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem15": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Settings",
+    "icon": "settings_outlined"
+   },
+   "bind": {
+    "props.selected": "${= tab == \"settings\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "settings"
+      },
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "spacer3": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   }
+  },
+  "column16": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     0,
+     8,
+     0,
+     0
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "children": [
+    "NavItem16",
+    "Account2"
+   ]
+  },
+  "NavItem16": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Keyboard shortcuts",
+    "icon": "keyboard_outlined",
+    "shortcut": "?"
+   }
+  },
+  "Account2": {
+   "type": "Account",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Amara Okafor",
+    "note": "Workspace owner"
+   }
+  },
+  "column17": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "page_variables": [
+   {
+    "name": "tab",
+    "type": "text",
+    "value": "members"
+   },
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "role",
+    "type": "text",
+    "value": "All roles"
+   },
+   {
+    "name": "status",
+    "type": "text",
+    "value": "All statuses"
+   },
+   {
+    "name": "sortKey",
+    "type": "text",
+    "value": "name"
+   },
+   {
+    "name": "chosen",
+    "type": "list",
+    "value": [
+     "u2",
+     "u4",
+     "u5"
+    ]
+   },
+   {
+    "name": "openId",
+    "type": "text",
+    "value": "u2"
+   },
+   {
+    "name": "page",
+    "type": "integer",
+    "value": 1
+   },
+   {
+    "name": "stats",
+    "type": "list",
+    "value": [
+     {
+      "label": "Total members",
+      "n": "50",
+      "tone": "neutral",
+      "delta": ""
+     },
+     {
+      "label": "Active",
+      "n": "43",
+      "tone": "success",
+      "delta": "+4"
+     },
+     {
+      "label": "Invited",
+      "n": "4",
+      "tone": "warning",
+      "delta": ""
+     },
+     {
+      "label": "Inactive",
+      "n": "3",
+      "tone": "neutral",
+      "delta": ""
+     }
+    ]
+   },
+   {
+    "name": "members",
+    "type": "list",
+    "value": [
+     {
+      "id": "u1",
+      "name": "Adrian Price",
+      "email": "adrian.price@northstar.studio",
+      "role": "Member",
+      "teams": [
+       "Design"
+      ],
+      "last": "—",
+      "status": "Invited"
+     },
+     {
+      "id": "u2",
+      "name": "Amara Okafor",
+      "email": "amara.okafor@northstar.studio",
+      "role": "Owner",
+      "teams": [
+       "Platform",
+       "Operations"
+      ],
+      "last": "4 min ago",
+      "status": "Active"
+     },
+     {
+      "id": "u3",
+      "name": "Aya Nakamura",
+      "email": "aya.nakamura@northstar.studio",
+      "role": "Admin",
+      "teams": [
+       "Platform"
+      ],
+      "last": "3 days ago",
+      "status": "Active"
+     },
+     {
+      "id": "u4",
+      "name": "Beatriz Lopes",
+      "email": "beatriz.lopes@northstar.studio",
+      "role": "Member",
+      "teams": [
+       "Operations"
+      ],
+      "last": "3 days ago",
+      "status": "Inactive"
+     },
+     {
+      "id": "u5",
+      "name": "Benjamin Park",
+      "email": "benjamin.park@northstar.studio",
+      "role": "Admin",
+      "teams": [
+       "Platform"
+      ],
+      "last": "48 min ago",
+      "status": "Active"
+     },
+     {
+      "id": "u6",
+      "name": "Carmen Ruiz",
+      "email": "carmen.ruiz@northstar.studio",
+      "role": "Member",
+      "teams": [
+       "Design"
+      ],
+      "last": "2 hr ago",
+      "status": "Active"
+     },
+     {
+      "id": "u7",
+      "name": "Chloe Bennett",
+      "email": "chloe.bennett@northstar.studio",
+      "role": "Member",
+      "teams": [
+       "Customer Success"
+      ],
+      "last": "3 days ago",
+      "status": "Active"
+     },
+     {
+      "id": "u8",
+      "name": "Dev Shah",
+      "email": "dev.shah@northstar.studio",
+      "role": "Member",
+      "teams": [
+       "Platform"
+      ],
+      "last": "3 hr ago",
+      "status": "Active"
+     },
+     {
+      "id": "u9",
+      "name": "Dmitri Orlov",
+      "email": "dmitri.orlov@northstar.studio",
+      "role": "Member",
+      "teams": [
+       "Platform"
+      ],
+      "last": "3 days ago",
+      "status": "Active"
+     },
+     {
+      "id": "u10",
+      "name": "Elena Voss",
+      "email": "elena.voss@northstar.studio",
+      "role": "Admin",
+      "teams": [
+       "Design",
+       "Operations"
+      ],
+      "last": "Yesterday",
+      "status": "Active"
+     }
+    ]
+   },
+   {
+    "name": "shown",
+    "type": "list",
+    "formula": "filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))"
+   },
+   {
+    "name": "cur",
+    "type": "map",
+    "formula": "coalesce(find(members, 'id', openId), {})"
+   },
+   {
+    "name": "chosenAnchor",
+    "type": "decimal",
+    "value": -1
+   }
+  ]
+ }
+}

@@ -448,7 +448,7 @@ class RenderButton extends RenderControl implements LabeledControl {
       scale,
       s.padding?.left ?? scale.paddingX,
       s.labelStyle.fontSize ?? scale.fontSize,
-      s.iconSize ?? (iconOnly ? scale.iconOnlySize : scale.iconSize),
+      s.iconSize ?? (iconOnly ? t.iconOnlySizeFor(scale) : scale.iconSize),
       s.spacing ?? scale.gap,
       t.radiusFor(scale),
     );

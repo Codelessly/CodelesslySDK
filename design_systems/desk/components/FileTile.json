@@ -1,0 +1,277 @@
+{
+ "schema": 3,
+ "id": "FileTile",
+ "roots": [
+  "file"
+ ],
+ "widget": {
+  "type": "FileTile",
+  "doc": "A file (an attachment, an upload): a soft tile with an outline file icon, its name 13/500 and size, a download button at its end that fires onDownload; the card's hairline, darker under the pointer.",
+  "props": [
+   {
+    "key": "name",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "notes.txt",
+    "required": true,
+    "doc": "The file's name."
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Its size or kind (164 KB)."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "description",
+    "doc": "A Material icon name for its kind."
+   }
+  ],
+  "events": [
+   {
+    "key": "onDownload"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    280,
+    56
+   ],
+   "props": {
+    "name": "Site walk notes.txt",
+    "note": "164 KB"
+   }
+  }
+ ],
+ "nodes": {
+  "file": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     10,
+     10,
+     8,
+     10
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 8
+   },
+   "states": {
+    "hovered": {
+     "file": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "lineStrong"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "fileTile",
+    "fileWords",
+    "fileGet"
+   ]
+  },
+  "fileTile": {
+   "type": "column",
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 6,
+    "fills": [
+     {
+      "color": "accentTint"
+     }
+    ]
+   },
+   "children": [
+    "fileGlyph"
+   ]
+  },
+  "fileGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 16,
+    "color": "accentText"
+   },
+   "bind": {
+    "props.icon": "${props.icon}_outlined"
+   }
+  },
+  "fileWords": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 1,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "fileName",
+    "fileNote"
+   ]
+  },
+  "fileName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.name}",
+    "style": {
+     "from": "body",
+     "fontSize": 13,
+     "fontWeight": 500,
+     "color": "ink"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "fileNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.note}",
+    "style": "meta"
+   },
+   "bind": {
+    "visible": "${= props.note != ''}"
+   }
+  },
+  "fileGet": {
+   "type": "row",
+   "layout": {
+    "padding": 6,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 6
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onDownload"
+      }
+     ]
+    }
+   ],
+   "tooltip": "Download",
+   "states": {
+    "hovered": {
+     "fileGet": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "fileGetGlyph"
+   ]
+  },
+  "fileGetGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "download_outlined",
+    "size": 16,
+    "color": "ink3"
+   }
+  }
+ }
+}

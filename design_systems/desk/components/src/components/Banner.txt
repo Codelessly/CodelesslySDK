@@ -9,5 +9,5 @@ Row#banner gap=10 middle pad=[14,10,10,10] w=fill radius=8 fill={get(theme.color
   Icon#bannerGlyph "{props.tone == 'success' ? 'check_circle_outline' : (props.tone == 'warning' ? 'warning_amber' : (props.tone == 'danger' ? 'error_outline' : 'info_outlined'))}" size=16 color={get(theme.colors, (props.tone == 'danger' ? 'error' : props.tone) + 'Ink')}
   Text#bannerText "{props.lead == '' ? props.message : props.lead + ' ' + props.message}" size=13 grow color=ink runs={props.lead == '' ? [] : [{"start":0,"end":length(props.lead),"style":{"fontWeight":600}}]}
   Row#bannerActions gap=8 middle
-    Slot#bannerSlot
+    Slot#bannerSlot w=null h=null
   IconButton#bannerClose "close" w=26 h=26 visible={props.dismissible} tooltip="Dismiss" onTap={emit onClose}

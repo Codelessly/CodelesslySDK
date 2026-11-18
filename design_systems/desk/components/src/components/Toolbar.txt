@@ -2,4 +2,4 @@ component Toolbar "A bar of controls across a pane: 48 high, its lines in a row 
   param band:bool=false doc="On the chrome's fill, not the pane's."
   preview "Default" 720x48
 Row#toolbar gap=8 middle pad=[16,0,16,0] w=fill h=48 border-bottom=line fill={props.band ? theme.colors.chrome : '#00000000'}
-  Slot#toolbarContent
+  Slot#toolbarContent w=null h=null

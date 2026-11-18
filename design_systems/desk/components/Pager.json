@@ -90,17 +90,6 @@
     "pagerOf",
     "pagerPrev",
     "pagerNext"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 8
-      }
-     }
-    }
    ]
   },
   "pagerSummary": {
@@ -118,21 +107,7 @@
    "props": {
     "text": "${props.summary}",
     "style": "caption"
-   },
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "width": {
-        "fill": 0
-       },
-       "basis": 96,
-       "flex": 1
-      }
-     }
-    }
-   ]
+   }
   },
   "pagerOf": {
    "type": "text",

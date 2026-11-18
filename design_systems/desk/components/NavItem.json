@@ -117,6 +117,7 @@
    "bind": {
     "selected": "${= props.selected}"
    },
+   "tooltip": "${props.label}",
    "states": {
     "selected": {
      "item": {
@@ -152,6 +153,22 @@
      }
     }
    },
+   "media": [
+    {
+     "minWidth": 700,
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "padding": [
+        12,
+        0,
+        12,
+        0
+       ]
+      }
+     }
+    }
+   ],
    "children": [
     "glyph",
     "name",
@@ -202,7 +219,16 @@
    "bind": {
     "props.style.fontWeight": "${= props.selected ? 600 : 500}",
     "props.style.color": "${= props.danger ? theme.colors.errorInk : (props.selected ? theme.colors.accentText : theme.colors.ink2)}"
-   }
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
   },
   "count": {
    "type": "row",
@@ -235,6 +261,18 @@
     "visible": "${= props.badge != ''}",
     "decoration.fills[0].color": "${= props.selected ? theme.colors.accentTintBorder : theme.colors.subtleFill}"
    },
+   "media": [
+    {
+     "minWidth": 700,
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
    "children": [
     "countText"
    ]
@@ -298,6 +336,18 @@
    "bind": {
     "visible": "${= props.shortcut != ''}"
    },
+   "media": [
+    {
+     "minWidth": 700,
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
    "children": [
     "keyText"
    ]

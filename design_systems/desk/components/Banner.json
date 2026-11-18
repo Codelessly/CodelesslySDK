@@ -117,17 +117,6 @@
     "bannerText",
     "bannerActions",
     "bannerClose"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 10
-      }
-     }
-    }
    ]
   },
   "bannerGlyph": {
@@ -170,21 +159,7 @@
    },
    "bind": {
     "props.runs": "${= props.lead == '' ? [] : [{\"start\":0,\"end\":length(props.lead),\"style\":{\"fontWeight\":600}}]}"
-   },
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "width": {
-        "fill": 0
-       },
-       "basis": 96,
-       "flex": 1
-      }
-     }
-    }
-   ]
+   }
   },
   "bannerActions": {
    "type": "row",
@@ -205,15 +180,7 @@
    ]
   },
   "bannerSlot": {
-   "type": "slot",
-   "layout": {
-    "width": {
-     "hug": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   }
+   "type": "slot"
   },
   "bannerClose": {
    "type": "iconButton",

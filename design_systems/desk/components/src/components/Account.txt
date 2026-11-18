@@ -3,9 +3,9 @@ component Account "The signed-in person at a sidebar's foot or in a top bar: the
   param note="" doc="A line under it (their email or role)."
   param chevron:bool=true doc="A chevron at its end (it opens a menu)."
   preview "Default" 232x44 name="Jamie Park" note="jamie@northline.design"
-Row#account gap=10 middle pad=[8,6,8,6] w=fill radius=6 hovered.fill=hoverOverlay
+Row#account gap=10 min700.tablet.gap=0 middle pad=[8,6,8,6] min700.tablet.pad=[6,6,6,6] w=fill radius=6 hovered.fill=hoverOverlay
   Avatar#accountAvatar "{props.name}" size=28
-  Column#accountWords gap=0 grow
+  Column#accountWords gap=0 grow min700.tablet.visible=false
     Text#accountName "{props.name}" size=13 weight=500 color=ink maxLines=1 overflow=ellipsis
     Text#accountNote "{props.note}" style=meta maxLines=1 overflow=ellipsis visible={props.note != ''}
-  Icon#accountChevron "unfold_more" size=16 color=ink4 visible={props.chevron}
+  Icon#accountChevron "unfold_more" size=16 color=ink4 visible={props.chevron} min700.tablet.visible=false

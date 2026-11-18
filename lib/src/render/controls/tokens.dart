@@ -236,6 +236,12 @@ class ControlTokens {
     return best;
   }
 
+  /// The glyph of an icon-only control at [scale]: the theme's size for that
+  /// step by name (`sizes.iconOnlyCompact`, `iconOnlySmall`...: a desktop
+  /// system draws its toolbar's icons at 16 in a 30 button), else the
+  /// scale's own ([ControlScale.iconOnlySize]).
+  double iconOnlySizeFor(ControlScale scale) => theme.sizes['iconOnly${scale.name[0].toUpperCase()}${scale.name.substring(1)}'] ?? scale.iconOnlySize;
+
   /// The corner radius of a control at [scale]: the document's
   /// `buttonRadius`, else the theme's radius for that step by name
   /// (`radii.controlCompact`, `controlLarge`...: a radius that fits the

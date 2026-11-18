@@ -64,17 +64,6 @@
    "children": [
     "propLabel",
     "propValue"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 12
-      }
-     }
-    }
    ]
   },
   "propLabel": {
@@ -114,24 +103,6 @@
    "children": [
     "propText",
     "propSlot"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "width": {
-        "fill": 0
-       },
-       "basis": 96,
-       "flex": 1
-      },
-      "props": {
-       "wrap": true,
-       "runSpacing": 6
-      }
-     }
-    }
    ]
   },
   "propText": {
@@ -160,15 +131,7 @@
    }
   },
   "propSlot": {
-   "type": "slot",
-   "layout": {
-    "width": {
-     "hug": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   }
+   "type": "slot"
   }
  }
 }

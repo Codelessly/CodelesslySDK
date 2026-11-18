@@ -1,0 +1,58 @@
+{
+ "schema": 3,
+ "id": "Separator",
+ "roots": [
+  "sep"
+ ],
+ "widget": {
+  "type": "Separator",
+  "doc": "A vertical hairline between groups of a toolbar or a row of actions: 1 wide, 20 high, 4 of room each side."
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    9,
+    20
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "sep": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20,
+    "padding": [
+     4,
+     0,
+     4,
+     0
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "sepLine"
+   ]
+  },
+  "sepLine": {
+   "type": "box",
+   "layout": {
+    "width": 1,
+    "height": 20
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "line"
+     }
+    ]
+   }
+  }
+ }
+}

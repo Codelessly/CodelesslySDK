@@ -70,17 +70,6 @@
    "children": [
     "pageTitles",
     "pageActions"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 12
-      }
-     }
-    }
    ]
   },
   "pageTitles": {
@@ -102,20 +91,6 @@
     "pageOverline",
     "pageTitle",
     "pageNote"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "width": {
-        "fill": 0
-       },
-       "basis": 280,
-       "flex": 1
-      }
-     }
-    }
    ]
   },
   "pageOverline": {
@@ -201,15 +176,7 @@
    ]
   },
   "pageActionsSlot": {
-   "type": "slot",
-   "layout": {
-    "width": {
-     "hug": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   }
+   "type": "slot"
   }
  }
 }

@@ -4,12 +4,12 @@ component Dialog "A dialog's frame (what `Dialog#id \"Title\"` draws): a title b
   param overline="" doc="A small line over the title (an id: STK-124)."
   event onClose doc="The close button, Escape or a tap outside."
   preview "Default" 560x220 title="Invite members" note="They get an email with a link to join."
-Column#dialog w=fill fill=raisedBackground border=line radius=12 clip=antiAlias effects={theme.shadows.level4}
+Column#dialog w=fill maxHeight={screen.height - 32} fill=raisedBackground border=line radius=12 clip=antiAlias effects={theme.shadows.level4}
   Row#dialogHead gap=12 top pad=[24,18,14,16] w=fill border-bottom=line
     Column#dialogTitles gap=2 grow
       Text#dialogOverline "{props.overline}" style=mono size=11.5 color=ink3 visible={props.overline != ''}
       Text#dialogTitle "{props.title}" style=dialogTitle
       Text#dialogNote "{props.note}" style=small visible={props.note != ''}
     IconButton#dialogClose "close" tooltip="Close (Esc)" w=30 h=30 onTap={emit onClose}
-  Column#dialogBody gap=16 pad=[24,20,24,0] w=fill
-    Slot#dialogContent
+  Column#dialogBody gap=16 pad=[24,20,24,0] w=fill h={"flexible":0} scroll
+    Slot#dialogContent w=null h=null

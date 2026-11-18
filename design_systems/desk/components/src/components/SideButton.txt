@@ -1,0 +1,10 @@
+component SideButton "The one thing to do at a sidebar's head (Compose, New issue): a primary button as wide as the sidebar, its key at its end; on a rail (a tablet's width) the icon alone."
+  param label="New" required doc="What it does."
+  param icon="add" doc="A Material icon name; drawn outlined."
+  param shortcut="" doc="Its key, as a key cap at its end."
+  preview "Default" 232x36 label="Compose" icon="edit" shortcut="C"
+Row#side gap=8 middle pad=[12,0,8,0] min700.tablet.pad=[12,0,12,0] w=fill h=36 radius=7 fill=accent hovered.fill=accentHover tooltip="{props.label}" margin=[0,4,0,8] effects={theme.shadows.level1}
+  Icon#sideGlyph "{props.icon}_outlined" size=16 color=onAccent
+  Text#sideLabel "{props.label}" size=13 weight=600 color=onAccent grow min700.tablet.visible=false
+  Row#sideKey pad=[5,1,5,1] radius=4 border=#40FFFFFF fill=#26FFFFFF visible={props.shortcut != ''} min700.tablet.visible=false
+    Text#sideKeyText "{props.shortcut}" style=keycap color=onAccent

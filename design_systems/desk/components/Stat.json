@@ -144,17 +144,6 @@
    "children": [
     "statDot",
     "statLabel"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 6
-      }
-     }
-    }
    ]
   },
   "statDot": {
@@ -216,17 +205,6 @@
    "children": [
     "statValue",
     "statDelta"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 8
-      }
-     }
-    }
    ]
   },
   "statValue": {

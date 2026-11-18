@@ -88,21 +88,29 @@
      }
     }
    },
+   "media": [
+    {
+     "minWidth": 700,
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "spacing": 0
+      },
+      "layout": {
+       "padding": [
+        6,
+        6,
+        6,
+        6
+       ]
+      }
+     }
+    }
+   ],
    "children": [
     "accountAvatar",
     "accountWords",
     "accountChevron"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 10
-      }
-     }
-    }
    ]
   },
   "accountAvatar": {
@@ -137,23 +145,18 @@
     "spacing": 0,
     "crossAxisAlignment": "start"
    },
+   "media": [
+    {
+     "minWidth": 700,
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ],
    "children": [
     "accountName",
     "accountNote"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "width": {
-        "fill": 0
-       },
-       "basis": 96,
-       "flex": 1
-      }
-     }
-    }
    ]
   },
   "accountName": {
@@ -215,7 +218,19 @@
    },
    "bind": {
     "visible": "${props.chevron}"
-   }
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
   }
  }
 }

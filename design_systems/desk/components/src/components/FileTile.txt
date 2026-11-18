@@ -1,0 +1,14 @@
+component FileTile "A file (an attachment, an upload): a soft tile with an outline file icon, its name 13/500 and size, a download button at its end that fires onDownload; the card's hairline, darker under the pointer."
+  param name="notes.txt" required doc="The file's name."
+  param note="" doc="Its size or kind (164 KB)."
+  param icon="description" doc="A Material icon name for its kind."
+  event onDownload
+  preview "Default" 280x56 name="Site walk notes.txt" note="164 KB"
+Row#file gap=10 middle pad=[10,10,8,10] w=fill fill=card border=line radius=8 hovered.border=lineStrong
+  Column#fileTile w=32 h=32 radius=6 center middle fill=accentTint
+    Icon#fileGlyph "{props.icon}_outlined" size=16 color=accentText
+  Column#fileWords gap=1 grow
+    Text#fileName "{props.name}" size=13 weight=500 color=ink maxLines=1 overflow=ellipsis
+    Text#fileNote "{props.note}" style=meta visible={props.note != ''}
+  Row#fileGet pad=6 radius=6 hovered.fill=hoverOverlay tooltip="Download" onTap={emit onDownload}
+    Icon#fileGetGlyph "download" size=16 color=ink3

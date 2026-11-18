@@ -1,0 +1,247 @@
+{
+ "schema": 3,
+ "id": "SideButton",
+ "roots": [
+  "side"
+ ],
+ "widget": {
+  "type": "SideButton",
+  "doc": "The one thing to do at a sidebar's head (Compose, New issue): a primary button as wide as the sidebar, its key at its end; on a rail (a tablet's width) the icon alone.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "New",
+    "required": true,
+    "doc": "What it does."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "add",
+    "doc": "A Material icon name; drawn outlined."
+   },
+   {
+    "key": "shortcut",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Its key, as a key cap at its end."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    232,
+    36
+   ],
+   "props": {
+    "label": "Compose",
+    "icon": "edit",
+    "shortcut": "C"
+   }
+  }
+ ],
+ "nodes": {
+  "side": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     12,
+     0,
+     8,
+     0
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": 36,
+    "margin": [
+     0,
+     4,
+     0,
+     8
+    ]
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 7,
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.effects": "${theme.shadows.level1}"
+   },
+   "tooltip": "${props.label}",
+   "states": {
+    "hovered": {
+     "side": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "accentHover"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "padding": [
+        12,
+        0,
+        12,
+        0
+       ]
+      }
+     }
+    }
+   ],
+   "children": [
+    "sideGlyph",
+    "sideLabel",
+    "sideKey"
+   ]
+  },
+  "sideGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 16,
+    "color": "onAccent"
+   },
+   "bind": {
+    "props.icon": "${props.icon}_outlined"
+   }
+  },
+  "sideLabel": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "from": "body",
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "onAccent"
+    }
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "sideKey": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     5,
+     1,
+     5,
+     1
+    ],
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 4,
+    "strokes": [
+     {
+      "color": "#40FFFFFF"
+     }
+    ],
+    "fills": [
+     {
+      "color": "#26FFFFFF"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= props.shortcut != ''}"
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
+   "children": [
+    "sideKeyText"
+   ]
+  },
+  "sideKeyText": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.shortcut}",
+    "style": {
+     "from": "keycap",
+     "color": "onAccent"
+    }
+   }
+  }
+ }
+}

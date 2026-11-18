@@ -1,0 +1,2497 @@
+{
+ "schema": 3,
+ "roots": [
+  "board",
+  "card"
+ ],
+ "nodes": {
+  "board": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 1440.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "surface"
+     }
+    ]
+   },
+   "name": "Board",
+   "path": "board"
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column1"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row2",
+    "divider1",
+    "column2",
+    "row5"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     24,
+     14,
+     24,
+     14
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center",
+    "spacing": 24
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ]
+   },
+   "children": [
+    "row3",
+    "Account1"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "spacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Brand1",
+    "Breadcrumb1"
+   ]
+  },
+  "Brand1": {
+   "type": "Brand",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Stack",
+    "icon": "layers_outlined"
+   }
+  },
+  "Breadcrumb1": {
+   "type": "Breadcrumb",
+   "layout": {
+    "width": 240,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "items": [
+     "Northstar Studio",
+     "Product delivery"
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "Account1": {
+   "type": "Account",
+   "layout": {
+    "width": 200,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Maya Chen",
+    "note": "Product designer"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     32,
+     24,
+     32,
+     16
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "padding": [
+        24,
+        20,
+        24,
+        12
+       ]
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "padding": [
+        16,
+        16,
+        16,
+        8
+       ]
+      }
+     }
+    }
+   ],
+   "children": [
+    "PageHeader1",
+    "Tabs1",
+    "row4",
+    "segmentedButton1"
+   ]
+  },
+  "PageHeader1": {
+   "type": "PageHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Product delivery",
+    "note": "Plan, build, and ship with the product team."
+   },
+   "children": [
+    "filledButton1"
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "New card",
+    "icon": "add_outlined"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "card",
+       "presentation": "dialog",
+       "insets": [
+        16,
+        24,
+        16,
+        24
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "Tabs1": {
+   "type": "Tabs",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 40.0
+   },
+   "props": {
+    "value": "view",
+    "tabs": [
+     "Board",
+     "List",
+     "Archive"
+    ],
+    "icons": [
+     "view_kanban",
+     "list",
+     "inventory_2"
+    ]
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "SearchField1",
+    "FilterButton1",
+    "FilterButton2",
+    "FilterButton3",
+    "spacer1",
+    "text1"
+   ]
+  },
+  "SearchField1": {
+   "type": "SearchField",
+   "layout": {
+    "width": 260,
+    "height": 34.0
+   },
+   "props": {
+    "value": "q",
+    "hint": "Search cards…"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       }
+      }
+     }
+    }
+   ]
+  },
+  "FilterButton1": {
+   "type": "FilterButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Labels",
+    "icon": "label_outlined"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "FilterButton2": {
+   "type": "FilterButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Assignee",
+    "icon": "person_outlined",
+    "count": 1
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "FilterButton3": {
+   "type": "FilterButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Due date",
+    "icon": "calendar_today_outlined"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "${= length(shown)} cards"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "segmentedButton1": {
+   "type": "segmentedButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "segments": [
+     {
+      "value": "Backlog",
+      "label": "Backlog"
+     },
+     {
+      "value": "In progress",
+      "label": "In progress"
+     },
+     {
+      "value": "In review",
+      "label": "In review"
+     },
+     {
+      "value": "Done",
+      "label": "Done"
+     }
+    ]
+   },
+   "bind": {
+    "props.selected": "${= [col]}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "col",
+       "value": "${result[0]}"
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     32,
+     4,
+     32,
+     32
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "padding": [
+        24,
+        4,
+        24,
+        24
+       ]
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "padding": [
+        16,
+        4,
+        16,
+        16
+       ]
+      }
+     }
+    },
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "scrollable": true,
+       "scrollDirection": "horizontal",
+       "edgeFade": 12
+      }
+     }
+    }
+   ],
+   "children": [
+    "BoardColumn1",
+    "BoardColumn2",
+    "BoardColumn3",
+    "BoardColumn4"
+   ]
+  },
+  "BoardColumn1": {
+   "type": "BoardColumn",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Backlog",
+    "hue": "slate"
+   },
+   "bind": {
+    "props.count": "${= length(filter(shown, x => x.col == \"Backlog\"))}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onAdd"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "card",
+       "presentation": "dialog",
+       "insets": [
+        16,
+        24,
+        16,
+        24
+       ]
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": 300
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 358
+      },
+      "bind": {
+       "visible": "${= col == \"Backlog\"}"
+      }
+     }
+    }
+   ],
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= filter(shown, x => x.col == \"Backlog\")}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "TaskCard1"
+   ]
+  },
+  "TaskCard1": {
+   "type": "TaskCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.key": "${item.key}",
+    "props.title": "${item.title}",
+    "props.labels": "${item.labels}",
+    "props.due": "${item.due}",
+    "props.overdue": "${= coalesce(item.late, false)}",
+    "props.checklist": "${= coalesce(item.check, '')}",
+    "props.comments": "${= coalesce(item.comments, 0)}",
+    "props.assignee": "${item.who}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onMenu"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "card",
+       "presentation": "dialog",
+       "insets": [
+        16,
+        24,
+        16,
+        24
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "BoardColumn2": {
+   "type": "BoardColumn",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "In progress",
+    "limit": 2,
+    "hue": "sky"
+   },
+   "bind": {
+    "props.count": "${= length(filter(shown, x => x.col == \"In progress\"))}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onAdd"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "card",
+       "presentation": "dialog",
+       "insets": [
+        16,
+        24,
+        16,
+        24
+       ]
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": 300
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 358
+      },
+      "bind": {
+       "visible": "${= col == \"In progress\"}"
+      }
+     }
+    }
+   ],
+   "children": [
+    "listView2"
+   ]
+  },
+  "listView2": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= filter(shown, x => x.col == \"In progress\")}"
+   },
+   "children": [
+    "listView2Item"
+   ]
+  },
+  "listView2Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "TaskCard2"
+   ]
+  },
+  "TaskCard2": {
+   "type": "TaskCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.key": "${item.key}",
+    "props.title": "${item.title}",
+    "props.labels": "${item.labels}",
+    "props.due": "${item.due}",
+    "props.overdue": "${= coalesce(item.late, false)}",
+    "props.checklist": "${= coalesce(item.check, '')}",
+    "props.comments": "${= coalesce(item.comments, 0)}",
+    "props.assignee": "${item.who}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onMenu"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "card",
+       "presentation": "dialog",
+       "insets": [
+        16,
+        24,
+        16,
+        24
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "BoardColumn3": {
+   "type": "BoardColumn",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "In review",
+    "limit": 3,
+    "hue": "violet"
+   },
+   "bind": {
+    "props.count": "${= length(filter(shown, x => x.col == \"In review\"))}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onAdd"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "card",
+       "presentation": "dialog",
+       "insets": [
+        16,
+        24,
+        16,
+        24
+       ]
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": 300
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 358
+      },
+      "bind": {
+       "visible": "${= col == \"In review\"}"
+      }
+     }
+    }
+   ],
+   "children": [
+    "listView3"
+   ]
+  },
+  "listView3": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= filter(shown, x => x.col == \"In review\")}"
+   },
+   "children": [
+    "listView3Item"
+   ]
+  },
+  "listView3Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "TaskCard3"
+   ]
+  },
+  "TaskCard3": {
+   "type": "TaskCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.key": "${item.key}",
+    "props.title": "${item.title}",
+    "props.labels": "${item.labels}",
+    "props.due": "${item.due}",
+    "props.overdue": "${= coalesce(item.late, false)}",
+    "props.checklist": "${= coalesce(item.check, '')}",
+    "props.comments": "${= coalesce(item.comments, 0)}",
+    "props.assignee": "${item.who}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onMenu"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "card",
+       "presentation": "dialog",
+       "insets": [
+        16,
+        24,
+        16,
+        24
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "BoardColumn4": {
+   "type": "BoardColumn",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Done",
+    "hue": "green"
+   },
+   "bind": {
+    "props.count": "${= length(filter(shown, x => x.col == \"Done\"))}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onAdd"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "card",
+       "presentation": "dialog",
+       "insets": [
+        16,
+        24,
+        16,
+        24
+       ]
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": 300
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 358
+      },
+      "bind": {
+       "visible": "${= col == \"Done\"}"
+      }
+     }
+    }
+   ],
+   "children": [
+    "listView4"
+   ]
+  },
+  "listView4": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= filter(shown, x => x.col == \"Done\")}"
+   },
+   "children": [
+    "listView4Item"
+   ]
+  },
+  "listView4Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "TaskCard4"
+   ]
+  },
+  "TaskCard4": {
+   "type": "TaskCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.key": "${item.key}",
+    "props.title": "${item.title}",
+    "props.labels": "${item.labels}",
+    "props.due": "${item.due}",
+    "props.overdue": "${= coalesce(item.late, false)}",
+    "props.checklist": "${= coalesce(item.check, '')}",
+    "props.comments": "${= coalesce(item.comments, 0)}",
+    "props.assignee": "${item.who}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onMenu"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "card",
+       "presentation": "dialog",
+       "insets": [
+        16,
+        24,
+        16,
+        24
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "card": {
+   "type": "canvas",
+   "name": "card",
+   "slots": {
+    "body": "Dialog1"
+   },
+   "layout": {
+    "width": 780.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.blockBack": "${= title != \"Polish the invite flow\"}"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "backPressed"
+     },
+     "actions": [
+      {
+       "type": "confirm",
+       "title": "Discard your changes?",
+       "confirmLabel": "Discard",
+       "cancelLabel": "Keep editing",
+       "destructive": true,
+       "actions": [
+        {
+         "type": "closeModal"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "Dialog1": {
+   "type": "Dialog",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Card details",
+    "overline": "STK-124"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onClose"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "flex1",
+    "Actions1"
+   ]
+  },
+  "flex1": {
+   "type": "flex",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "direction": "horizontal",
+    "spacing": 24,
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "direction": "vertical"
+      }
+     }
+    }
+   ],
+   "children": [
+    "column3",
+    "column8"
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "textField1",
+    "textField2",
+    "column4",
+    "column5"
+   ]
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "height": 54.0,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Title"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${title}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "title",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "textField2": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Description"
+    },
+    "minLines": 3,
+    "maxLines": 6
+   },
+   "bind": {
+    "props.initialValue": "${desc}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "desc",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row6",
+    "progressBar1",
+    "listView5",
+    "row7"
+   ]
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon1",
+    "text2",
+    "text3"
+   ]
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "checklist_outlined",
+    "size": 16,
+    "color": "ink3"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "panelTitle"
+    },
+    "text": "Checklist"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "${= count(checks, 'done', true)} of ${= length(checks)} complete"
+   }
+  },
+  "progressBar1": {
+   "type": "progressBar",
+   "layout": {
+    "height": 6,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "max": 1,
+    "borderRadius": 999,
+    "color": "primary",
+    "backgroundColor": "track"
+   },
+   "bind": {
+    "props.value": "${= count(checks, 'done', true) / length(checks)}"
+   }
+  },
+  "listView5": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 8
+   },
+   "bind": {
+    "data": "${checks}"
+   },
+   "children": [
+    "listView5Item"
+   ]
+  },
+  "listView5Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "checkbox1"
+   ]
+  },
+  "checkbox1": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.value": "${item.done}",
+    "props.label": "${item.t}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "checks",
+       "value": "${= setAt(checks,index,with(item,\"done\",result))}"
+      }
+     ]
+    }
+   ]
+  },
+  "row7": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "textField3",
+    "outlinedButton1"
+   ]
+  },
+  "textField3": {
+   "type": "textField",
+   "layout": {
+    "flex": 1,
+    "height": 34.0,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "",
+     "hintText": "Add a checklist item…"
+    }
+   }
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Add",
+    "icon": "add_outlined"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row8",
+    "row9",
+    "row10"
+   ]
+  },
+  "row8": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon2",
+    "text4",
+    "text5"
+   ]
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chat_bubble_outline",
+    "size": 16,
+    "color": "ink3"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "panelTitle"
+    },
+    "text": "Comments"
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "2"
+   }
+  },
+  "row9": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "Avatar1",
+    "column6"
+   ]
+  },
+  "Avatar1": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Jules Martin",
+    "size": "xs"
+   }
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text6",
+    "text7"
+   ]
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strong",
+     "fontSize": 12.5
+    },
+    "text": "Jules Martin"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "small"
+    },
+    "text": "Let's keep the invite link available after sending, in case the email gets missed."
+   }
+  },
+  "row10": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "Avatar2",
+    "column7"
+   ]
+  },
+  "Avatar2": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Maya Chen",
+    "size": "xs"
+   }
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text8",
+    "text9"
+   ]
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strong",
+     "fontSize": 12.5
+    },
+    "text": "Maya Chen"
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "small"
+    },
+    "text": "Role copy is updated. I'll check the resend state in the next pass."
+   }
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "width": 240,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       }
+      }
+     }
+    }
+   ],
+   "children": [
+    "text10",
+    "Field1",
+    "Field2",
+    "Field3",
+    "Field4"
+   ]
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "panelTitle"
+    },
+    "text": "Properties"
+   }
+  },
+  "Field1": {
+   "type": "Field",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Status"
+   },
+   "children": [
+    "dropdown1"
+   ]
+  },
+  "dropdown1": {
+   "type": "dropdown",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 34.0
+   },
+   "props": {
+    "items": [
+     "Backlog",
+     "In progress",
+     "In review",
+     "Done"
+    ]
+   },
+   "bind": {
+    "props.value": "${cstatus}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "cstatus",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "Field2": {
+   "type": "Field",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Assignee"
+   },
+   "children": [
+    "dropdown2"
+   ]
+  },
+  "dropdown2": {
+   "type": "dropdown",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 34.0
+   },
+   "props": {
+    "items": [
+     "Maya Chen",
+     "Jules Martin",
+     "Sam Rao",
+     "Nadia Park"
+    ]
+   },
+   "bind": {
+    "props.value": "${assignee}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "assignee",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "Field3": {
+   "type": "Field",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Due date"
+   },
+   "children": [
+    "dateTimeInput1"
+   ]
+  },
+  "dateTimeInput1": {
+   "type": "dateTimeInput",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 34.0
+   },
+   "props": {
+    "value": "2026-11-19"
+   }
+  },
+  "Field4": {
+   "type": "Field",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Labels"
+   },
+   "children": [
+    "row11"
+   ]
+  },
+  "row11": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Tag1",
+    "Tag2"
+   ]
+  },
+  "Tag1": {
+   "type": "Tag",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   },
+   "props": {
+    "label": "Design",
+    "hue": "violet",
+    "removable": true
+   }
+  },
+  "Tag2": {
+   "type": "Tag",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   },
+   "props": {
+    "label": "Product",
+    "hue": "green",
+    "removable": true
+   }
+  },
+  "Actions1": {
+   "type": "Actions",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "children": [
+    "outlinedButton2",
+    "spacer2",
+    "textButton1",
+    "filledButton2"
+   ]
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Delete card",
+    "icon": "delete_outlined",
+    "style": {
+     "foregroundColor": "errorInk"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "confirm",
+       "title": "Delete this card?",
+       "actions": [
+        {
+         "type": "closeModal"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "spacer2": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Cancel"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton2": {
+   "type": "filledButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Save changes"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      },
+      {
+       "type": "showToast",
+       "message": "Card saved"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "page_variables": [
+   {
+    "name": "view",
+    "type": "text",
+    "value": "Board"
+   },
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "col",
+    "type": "text",
+    "value": "In progress"
+   },
+   {
+    "name": "title",
+    "type": "text",
+    "value": "Polish the invite flow"
+   },
+   {
+    "name": "desc",
+    "type": "text",
+    "value": "Make it clear who an invitation is for, what access they'll get, and what happens after it's sent. Cover both first-time invites and resends."
+   },
+   {
+    "name": "cstatus",
+    "type": "text",
+    "value": "In progress"
+   },
+   {
+    "name": "assignee",
+    "type": "text",
+    "value": "Maya Chen"
+   },
+   {
+    "name": "checks",
+    "type": "list",
+    "value": [
+     {
+      "t": "Update the role descriptions",
+      "done": true
+     },
+     {
+      "t": "Add an inline error for duplicate invites",
+      "done": true
+     },
+     {
+      "t": "Review the resend confirmation",
+      "done": false
+     },
+     {
+      "t": "QA the flow on a narrow screen",
+      "done": false
+     }
+    ]
+   },
+   {
+    "name": "cards",
+    "type": "list",
+    "value": [
+     {
+      "key": "STK-128",
+      "title": "Map first-run friction points",
+      "col": "Backlog",
+      "labels": [
+       {
+        "label": "Research",
+        "hue": "amber"
+       }
+      ],
+      "due": "Nov 25",
+      "who": "Nadia Park"
+     },
+     {
+      "key": "STK-131",
+      "title": "Design empty states for activity",
+      "col": "Backlog",
+      "labels": [
+       {
+        "label": "Design",
+        "hue": "violet"
+       }
+      ],
+      "due": "Nov 28",
+      "who": "Maya Chen",
+      "comments": 2
+     },
+     {
+      "key": "STK-135",
+      "title": "Add export for audit events",
+      "col": "Backlog",
+      "labels": [
+       {
+        "label": "Engineering",
+        "hue": "sky"
+       }
+      ],
+      "due": "Dec 1",
+      "who": "Sam Rao"
+     },
+     {
+      "key": "STK-138",
+      "title": "Define workspace roles",
+      "col": "Backlog",
+      "labels": [
+       {
+        "label": "Product",
+        "hue": "green"
+       }
+      ],
+      "due": "Dec 3",
+      "who": "Jules Martin"
+     },
+     {
+      "key": "STK-124",
+      "title": "Polish the invite flow",
+      "col": "In progress",
+      "labels": [
+       {
+        "label": "Design",
+        "hue": "violet"
+       },
+       {
+        "label": "Product",
+        "hue": "green"
+       }
+      ],
+      "due": "Nov 19",
+      "check": "2/4",
+      "who": "Maya Chen",
+      "comments": 3
+     },
+     {
+      "key": "STK-126",
+      "title": "Fix duplicate billing emails",
+      "col": "In progress",
+      "labels": [
+       {
+        "label": "Bug",
+        "hue": "red"
+       },
+       {
+        "label": "Engineering",
+        "hue": "sky"
+       }
+      ],
+      "due": "Nov 15",
+      "late": true,
+      "who": "Sam Rao"
+     },
+     {
+      "key": "STK-129",
+      "title": "Instrument activation events",
+      "col": "In progress",
+      "labels": [
+       {
+        "label": "Engineering",
+        "hue": "sky"
+       }
+      ],
+      "due": "Nov 21",
+      "who": "Jules Martin"
+     },
+     {
+      "key": "STK-121",
+      "title": "Review keyboard onboarding",
+      "col": "In review",
+      "labels": [
+       {
+        "label": "Design",
+        "hue": "violet"
+       }
+      ],
+      "due": "Nov 18",
+      "who": "Nadia Park",
+      "comments": 1
+     },
+     {
+      "key": "STK-123",
+      "title": "Validate plan change copy",
+      "col": "In review",
+      "labels": [
+       {
+        "label": "Product",
+        "hue": "green"
+       }
+      ],
+      "due": "Nov 20",
+      "who": "Jules Martin"
+     },
+     {
+      "key": "STK-114",
+      "title": "Ship workspace switcher",
+      "col": "Done",
+      "labels": [
+       {
+        "label": "Engineering",
+        "hue": "sky"
+       }
+      ],
+      "due": "Nov 12",
+      "check": "3/3",
+      "who": "Sam Rao"
+     },
+     {
+      "key": "STK-117",
+      "title": "Document activation metrics",
+      "col": "Done",
+      "labels": [
+       {
+        "label": "Product",
+        "hue": "green"
+       }
+      ],
+      "due": "Nov 13",
+      "who": "Nadia Park"
+     },
+     {
+      "key": "STK-119",
+      "title": "Refresh account settings icons",
+      "col": "Done",
+      "labels": [
+       {
+        "label": "Design",
+        "hue": "violet"
+       }
+      ],
+      "due": "Nov 14",
+      "who": "Maya Chen"
+     }
+    ]
+   },
+   {
+    "name": "shown",
+    "type": "list",
+    "formula": "filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))"
+   }
+  ]
+ }
+}

@@ -9,4 +9,4 @@ Row#bulk gap=8 middle pad=[12,0,8,0] w=fill h=44 radius=8 fill=accentTint border
   Button.ghost#bulkClear "Clear" size=small onTap={emit onClear}
   box#bulkSpacer h=1 grow
   Row#bulkActions gap=8 middle
-    Slot#bulkSlot
+    Slot#bulkSlot w=null h=null

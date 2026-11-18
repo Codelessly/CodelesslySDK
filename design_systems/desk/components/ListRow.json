@@ -199,17 +199,6 @@
    "children": [
     "rowAvatar",
     "rowLines"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 10
-      }
-     }
-    }
    ]
   },
   "rowAvatar": {
@@ -249,20 +238,6 @@
     "rowFirst",
     "rowSecond",
     "rowPreview"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "width": {
-        "fill": 0
-       },
-       "basis": 280,
-       "flex": 1
-      }
-     }
-    }
    ]
   },
   "rowFirst": {
@@ -282,17 +257,6 @@
    "children": [
     "rowTitle",
     "rowMeta"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 8
-      }
-     }
-    }
    ]
   },
   "rowTitle": {
@@ -319,21 +283,7 @@
    },
    "bind": {
     "props.style.fontWeight": "${= props.unread ? 600 : 500}"
-   },
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "width": {
-        "fill": 0
-       },
-       "basis": 96,
-       "flex": 1
-      }
-     }
-    }
-   ]
+   }
   },
   "rowMeta": {
    "type": "text",
@@ -382,17 +332,6 @@
     "rowSubtitle",
     "rowAttach",
     "rowStar"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 6
-      }
-     }
-    }
    ]
   },
   "rowSubtitle": {

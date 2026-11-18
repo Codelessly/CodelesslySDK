@@ -1,0 +1,103 @@
+state tab="members"
+state q=""
+state role="All roles"
+state status="All statuses"
+state sortKey="name"
+state chosen=["u2","u4","u5"]
+state openId="u2"
+state page=1
+state stats=[{"label":"Total members","n":"50","tone":"neutral","delta":""},{"label":"Active","n":"43","tone":"success","delta":"+4"},{"label":"Invited","n":"4","tone":"warning","delta":""},{"label":"Inactive","n":"3","tone":"neutral","delta":""}]
+state members=[{"id":"u1","name":"Adrian Price","email":"adrian.price@northstar.studio","role":"Member","teams":["Design"],"last":"—","status":"Invited"},{"id":"u2","name":"Amara Okafor","email":"amara.okafor@northstar.studio","role":"Owner","teams":["Platform","Operations"],"last":"4 min ago","status":"Active"},{"id":"u3","name":"Aya Nakamura","email":"aya.nakamura@northstar.studio","role":"Admin","teams":["Platform"],"last":"3 days ago","status":"Active"},{"id":"u4","name":"Beatriz Lopes","email":"beatriz.lopes@northstar.studio","role":"Member","teams":["Operations"],"last":"3 days ago","status":"Inactive"},{"id":"u5","name":"Benjamin Park","email":"benjamin.park@northstar.studio","role":"Admin","teams":["Platform"],"last":"48 min ago","status":"Active"},{"id":"u6","name":"Carmen Ruiz","email":"carmen.ruiz@northstar.studio","role":"Member","teams":["Design"],"last":"2 hr ago","status":"Active"},{"id":"u7","name":"Chloe Bennett","email":"chloe.bennett@northstar.studio","role":"Member","teams":["Customer Success"],"last":"3 days ago","status":"Active"},{"id":"u8","name":"Dev Shah","email":"dev.shah@northstar.studio","role":"Member","teams":["Platform"],"last":"3 hr ago","status":"Active"},{"id":"u9","name":"Dmitri Orlov","email":"dmitri.orlov@northstar.studio","role":"Member","teams":["Platform"],"last":"3 days ago","status":"Active"},{"id":"u10","name":"Elena Voss","email":"elena.voss@northstar.studio","role":"Admin","teams":["Design","Operations"],"last":"Yesterday","status":"Active"}]
+state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}
+state cur:map={coalesce(find(members, 'id', openId), {})}
+canvas "Members" path="members"
+App
+  Sidebar tablet.w=64 hide=phone
+    Brand "Tenant" "Northstar Studio" icon="hub"
+    NavSection "People & access"
+    NavItem "Members" icon="group" badge="50" selected={tab == "members"} onTap={tab="members"}
+    NavItem "Roles" icon="shield" selected={tab == "roles"} onTap={tab="roles"}
+    NavItem "Teams" icon="workspaces" selected={tab == "teams"} onTap={tab="teams"}
+    NavItem "Audit log" icon="history" selected={tab == "audit"} onTap={tab="audit"}
+    NavSection "Workspace"
+    NavItem "Billing" icon="credit_card" selected={tab == "billing"} onTap={tab="billing"}
+    NavItem "API keys" icon="key" selected={tab == "keys"} onTap={tab="keys"}
+    NavItem "Settings" icon="settings" selected={tab == "settings"} onTap={tab="settings"}
+    Footer
+      NavItem "Keyboard shortcuts" icon="keyboard" shortcut="?"
+      Account "Amara Okafor" "Workspace owner"
+  Main
+    Nav
+      Breadcrumb items=["Workspace","Members"]
+    Column gap=20 pad=[32,28,32,32] tablet.pad=[24,20,24,24] phone.pad=[16,16,16,24]
+      PageHeader "Members" "Manage workspace access, roles and invitations."
+        Button.outline "Export" icon="download" hide=phone
+        Button "Invite members" icon="add" onTap={open invite}
+      Grid cols=4 gap=12 phone.cols=2
+        each s in stats
+          Stat "{s.label}" "{s.n}" tone="{s.tone}" delta="{s.delta}"
+      Row gap=8
+        SearchField @q hint="Search name or email" w=280 phone.w=fill
+        Select @role items=["All roles","Owner","Admin","Member"] w=140 hide=phone
+        Select @status items=["All statuses","Active","Invited","Inactive"] w=150 hide=phone
+        Spacer hide=phone
+        Text.caption "{length(shown)} of {length(members)}" hide=phone
+      BulkBar count={length(chosen)} visible={length(chosen) > 0} hide=phone onClear={chosen=[]}
+        Button.outline "Change role" icon="badge" size=small
+        Button.outline "Add to team" icon="group_add" size=small hide=phone
+        Button.destructive "Deactivate" icon="person_off" size=small
+      Table p in shown columns=[{"key":"name","label":"Name"},{"key":"role","label":"Role","w":90},{"key":"teams","label":"Teams","w":170,"sort":false},{"key":"status","label":"Status","w":100},{"key":"menu","label":"","w":32,"sort":false}] sort=@sortKey select=@chosen empty="No members match. Clear the search or the filters." hide=phone
+        Row gap=10
+          Avatar "{p.name}"
+          Column grow
+            Text.rowTitle "{p.name}" maxLines=1 overflow=ellipsis onTap={openId=p.id}
+            Text.caption "{p.email}" maxLines=1 overflow=ellipsis
+        Text.muted "{p.role}"
+        Row gap=4
+          each t in p.teams
+            Tag "{t}" outline dot=false
+        Status "{p.status}" tone="{p.status == 'Active' ? 'success' : (p.status == 'Invited' ? 'warning' : 'neutral')}" pill
+        IconButton "more_horiz" tooltip="Actions for {p.name}" onTap={openId=p.id; open rowMenu}
+      Column border=line radius=8 clip=antiAlias show=phone
+        each p in shown
+          ListRow "{p.name}" "{p.email}" meta="{p.status}" avatar="{p.name}" selected={contains(chosen, p.id)} onTap={openId=p.id}
+      Pager @page pages=5 summary="1–{length(shown)} of 50 members"
+    Footer show=phone visible={length(chosen) > 0}
+      BulkBar count={length(chosen)} noun="" onClear={chosen=[]}
+        Button.destructive "Deactivate" icon="person_off" size=small
+  Pane w=340 hide=tablet visible={openId != ""}
+    PaneHeader "Member" onClose={openId=""}
+    Column gap=4 pad=[20,16,20,16]
+      Row gap=12 middle pad=[0,0,0,12]
+        Avatar "{cur.name}" size=40
+        Column grow
+          Text.heading "{cur.name}"
+          Text.caption "{cur.role} · joined Mar 2024"
+      Property "Email" "{cur.email}"
+      Property "Role"
+        Select items=["Owner","Admin","Member"] value={cur.role} w=fill
+      Property "Teams"
+        Tag "Platform" hue="sky"
+        Tag "Operations" hue="amber"
+      Property "Status"
+        Status "{cur.status}" tone="success"
+      Property "Last active" "{cur.last}"
+      Property "Two-factor" "Enabled"
+    Column gap=10 pad=[20,8,20,16] border-top=line
+      Text.overline "RECENT ACTIVITY"
+      Text.small "Changed Elena Voss's role to Admin · 2 days ago"
+      Text.small "Invited Adrian Price · 4 days ago"
+      Text.small "Created the Operations team · last week"
+Menu#rowMenu
+  MenuItem "View details" icon="visibility" onTap={close}
+  MenuItem "Change role" icon="badge" onTap={close}
+  MenuItem "Resend invite" icon="send" onTap={close}
+  Divider
+  MenuItem "Deactivate" icon="person_off" danger onTap={close}
+Dialog#invite "Invite members" "They get an email with a link to join Northstar Studio." w=520
+  Input "Email addresses" "name@company.com, another@company.com" multiline
+  Field "Role" "Members see everything; admins also manage people and billing."
+    Select items=["Member","Admin","Owner"] value="Member" w=fill
+  Actions
+    Button.ghost "Cancel" onTap={close}
+    Button "Send invites" icon="send" onTap={close; toast "Invites sent"}

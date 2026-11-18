@@ -3,9 +3,9 @@ component Brand "The product's mark and name at the head of a sidebar or the sta
   param note="" doc="A line under the name (the workspace, the person)."
   param icon="" doc="A Material icon name for the mark."
   preview "Default" 232x44 name="Northstar" note="Admin console" icon="grid_view"
-Row#brand gap=10 middle pad=[6,4,6,10] w=fill
+Row#brand gap=10 middle pad=[6,4,6,10] w=hug
   Column#mark w=28 h=28 radius=7 fill=accent center middle visible={props.icon != ''}
     Icon#markGlyph "{props.icon == '' ? 'circle' : props.icon}" size=16 color=onAccent
-  Column#words gap=0 grow
+  Column#words gap=0 grow min700.tablet.visible=false
     Text#brandName "{props.name}" size=15 weight=700 letterSpacing=-0.2 color=ink maxLines=1 overflow=ellipsis
     Text#brandNote "{props.note}" style=meta maxLines=1 overflow=ellipsis visible={props.note != ''}

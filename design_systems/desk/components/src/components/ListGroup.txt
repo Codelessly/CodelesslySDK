@@ -1,0 +1,7 @@
+component ListGroup "The label over a group of a list's rows (Today, Yesterday, Earlier): small spaced capitals in the caption ink on the chrome's fill, a rule under it."
+  param label="Today" required doc="The group's name (shown in capitals)."
+  param meta="" doc="At its end (a count)."
+  preview "Default" 380x28 label="Today"
+Row#group gap=8 middle pad=[20,7,16,7] w=fill fill=chrome border-bottom=line
+  Text#groupLabel "{upper(props.label)}" style=overline grow
+  Text#groupMeta "{props.meta}" style=caption visible={props.meta != ''}

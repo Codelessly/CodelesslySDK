@@ -1,0 +1,76 @@
+state folder="inbox"
+state view="All mail"
+state openId="m1"
+state q=""
+state reading=false
+state mail=[{"id":"m1","from":"Maya Chen","subject":"Studio visit on Thursday","snippet":"Hi Jamie, Thursday at 10:30 works for the studio visit. We'll meet you at the north entrance.","time":"10:42 AM","day":"Today","unread":false,"starred":true,"files":true},{"id":"m2","from":"Nora Patel","subject":"November print invoice","snippet":"Hi Jamie, here is the invoice for the November proofs, with the paper upgrade.","time":"9:18 AM","day":"Today","unread":true,"files":true},{"id":"m3","from":"Eli Vargas","subject":"Homepage review notes","snippet":"I left three notes on the homepage draft. The general direction is right.","time":"8:54 AM","day":"Today","unread":true,"starred":true},{"id":"m4","from":"Common Ground","subject":"Your sample box has arrived","snippet":"Your package is waiting at the front desk. We'll hold it for five days.","time":"8:03 AM","day":"Today","unread":true},{"id":"m5","from":"Amira Bello","subject":"A few things for this week","snippet":"Morning! I moved our production check-in to 2 PM so we can all make it.","time":"4:36 PM","day":"Yesterday"},{"id":"m6","from":"Owen Brooks","subject":"Harbor Street selects","snippet":"The first edit is ready. I marked four selects from the shoot for review.","time":"2:21 PM","day":"Yesterday","unread":true,"files":true},{"id":"m7","from":"Ruth Kim","subject":"Your material library loan","snippet":"Just a reminder that the oak, ash and painted birch samples are due back.","time":"11:08 AM","day":"Yesterday"},{"id":"m8","from":"Ben Okafor","subject":"Re: Winter brief","snippet":"The dates look good here. I'd leave one extra day between the two shoots.","time":"9:42 AM","day":"Yesterday"},{"id":"m9","from":"June Ito","subject":"Book launch next week","snippet":"We're setting up a small table of early copies at the studio on Friday.","time":"Nov 13","day":"Earlier"}]
+state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.subject), lower(q)))}
+state cur:map={coalesce(find(mail, 'id', openId), first(mail))}
+canvas "Mailbox" path="mailbox"
+App
+  Sidebar tablet.w=64 hide=phone
+    Brand "Postbox" icon="mail"
+    SideButton "Compose" icon="edit" shortcut="C" onTap={open compose}
+    NavSection "Mailbox"
+    NavItem "Inbox" icon="inbox" badge="4" selected={folder == "inbox"} onTap={folder="inbox"}
+    NavItem "Starred" icon="star_outline" selected={folder == "starred"} onTap={folder="starred"}
+    NavItem "Sent" icon="send" selected={folder == "sent"} onTap={folder="sent"}
+    NavItem "Drafts" icon="drafts" badge="1" selected={folder == "drafts"} onTap={folder="drafts"}
+    NavItem "Archive" icon="archive" selected={folder == "archive"} onTap={folder="archive"}
+    NavItem "Trash" icon="delete" selected={folder == "trash"} onTap={folder="trash"}
+    NavSection "Folders"
+    NavItem "Studio" icon="folder" badge="1"
+    NavItem "Receipts" icon="folder"
+    Footer
+      Account "Jamie Park" "jamie@northline.design"
+  Main w=380 tablet.w=320 phone.w=fill phone.visible={!reading}
+    Nav
+      Column
+        Text.barTitle "Inbox"
+        Text.caption "{length(mail)} messages, 4 unread"
+      IconButton "edit" tooltip="Compose (C)" onTap={open compose}
+    Column gap=10 pad=[16,12,16,12] border-bottom=line
+      SearchField @q hint="Search mail"
+      SegmentedButton @view items=["All mail","Unread","Starred"]
+    each m in shown
+      if index == 0 || at(shown, index - 1).day != m.day
+        ListGroup "{m.day}"
+      ListRow "{m.from}" "{m.subject}" preview="{m.snippet}" meta="{m.time}" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId == m.id} onTap={openId=m.id; reading=true}
+    if length(shown) == 0
+      Empty "No messages" "Nothing matches this view." icon="inbox"
+  Pane phone.w=fill phone.visible={reading}
+    Toolbar
+      IconButton "arrow_back" tooltip="Back to the list" show=phone onTap={reading=false}
+      IconButton "archive" tooltip="Archive (E)"
+      IconButton "drive_file_move" tooltip="Move to (V)"
+      IconButton "delete" tooltip="Delete (#)"
+      Separator
+      IconButton "{coalesce(cur.starred, false) ? 'star' : 'star_outline'}" tooltip="Star (S)"
+      Spacer
+      Text.caption "1 of {length(mail)}" hide=phone
+      IconButton "expand_less" tooltip="Newer (K)"
+      IconButton "expand_more" tooltip="Older (J)"
+    Column gap=20 pad=[48,32,48,48] tablet.pad=[28,24,28,32] phone.pad=[16,16,16,24] maxw=820
+      Text.heading2 "{cur.subject}" phone.size=20
+      Row gap=12 middle
+        Avatar "{cur.from}" size=36
+        Column grow
+          Text.strong "{cur.from}"
+          Text.caption "to me"
+        Text.caption "Tue, Nov 17, {cur.time}"
+      Divider
+      Text.reading "{cur.snippet} If the door is locked, give me a ring and I'll come down.\n\nI've attached the current notes and a short agenda. The two things I'd like to settle in person are the track lighting along the window wall and the finish for the entry millwork.\n\nSee you Thursday,\n{cur.from}"
+      Text.overline "2 ATTACHMENTS"
+      Grid cols=2 gap=8
+        FileTile "Site walk notes.txt" "164 KB"
+        FileTile "Studio visit agenda.pdf" "1.2 MB" icon="picture_as_pdf"
+      Row gap=8
+        Button.outline "Reply" icon="reply" onTap={open compose}
+        Button.outline "Forward" icon="forward"
+Dialog#compose "New message" w=640
+  Input "To" "name@example.com"
+  Input "Subject" ""
+  Input "Message" "Write your message…" multiline
+  Actions
+    Button.ghost "Discard" onTap={close}
+    Button "Send" icon="send" onTap={close; toast "Sent"}

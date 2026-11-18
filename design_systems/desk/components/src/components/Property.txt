@@ -6,4 +6,4 @@ Row#prop gap=12 middle w=fill minHeight=32
   Text#propLabel "{props.label}" size=12.5 color=ink3 w=112 maxLines=1 overflow=ellipsis
   Row#propValue gap=6 middle grow
     Text#propText "{props.text}" size=13 color=ink visible={props.text != ''} maxLines=2 overflow=ellipsis
-    Slot#propSlot
+    Slot#propSlot w=null h=null

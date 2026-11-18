@@ -7,7 +7,7 @@ component BoardColumn "A column of a board: on the well's fill, radius 10; its h
   event onAdd
   event onMenu
   preview "Default" 300x200 title="In progress" count=3 limit=2 hue="sky"
-Column#boardColumn gap=8 pad=[8,6,8,8] w=fill fill=well radius=10 border={props.limit > 0 && props.count > props.limit ? theme.colors.warningTintBorder : '#00000000'}
+Column#boardColumn gap=4 pad=[8,6,8,6] w=fill fill=well radius=10 border={props.limit > 0 && props.count > props.limit ? theme.colors.warningTintBorder : '#00000000'}
   Row#columnHead gap=8 middle pad=[6,4,2,2] w=fill
     box#columnDot w=8 h=8 radius=4 fill={props.hue == 'neutral' ? theme.colors.neutralDot : (props.hue == 'accent' ? theme.colors.accent : get(theme.colors, props.hue + 'Dot'))}
     Text#columnTitle "{props.title}" size=13 weight=600 color=ink maxLines=1
@@ -19,8 +19,8 @@ Column#boardColumn gap=8 pad=[8,6,8,8] w=fill fill=well radius=10 border={props.
       Text#columnLimitText "{props.count}/{props.limit}" size=12 tabularFigures=true weight={props.count > props.limit ? 600 : 400} color={props.count > props.limit ? theme.colors.warningInk : theme.colors.ink3}
     Row#columnMore pad=4 radius=5 hovered.fill=hoverOverlay onTap={emit onMenu}
       Icon#columnMoreGlyph "more_horiz" size=16 color=ink3
-  Column#columnCards gap=8 w=fill
-    Slot#columnSlot
+  Column#columnCards gap=0 w=fill
+    Slot#columnSlot w=null h=null
   Row#columnAdd gap=6 middle pad=[8,6,8,6] w=fill radius=6 visible={props.adds} hovered.fill=hoverOverlay onTap={emit onAdd}
     Icon#columnAddGlyph "add" size=16 color=ink3
     Text#columnAddText "Add a card" size=13 color=ink3

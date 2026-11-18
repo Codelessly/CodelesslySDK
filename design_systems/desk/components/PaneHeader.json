@@ -101,17 +101,6 @@
     "paneTitles",
     "paneActions",
     "paneClose"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 12
-      }
-     }
-    }
    ]
   },
   "paneAvatar": {
@@ -150,20 +139,6 @@
    "children": [
     "paneTitle",
     "paneNote"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "width": {
-        "fill": 0
-       },
-       "basis": 96,
-       "flex": 1
-      }
-     }
-    }
    ]
   },
   "paneTitle": {
@@ -222,15 +197,7 @@
    ]
   },
   "paneSlot": {
-   "type": "slot",
-   "layout": {
-    "width": {
-     "hug": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   }
+   "type": "slot"
   },
   "paneClose": {
    "type": "iconButton",

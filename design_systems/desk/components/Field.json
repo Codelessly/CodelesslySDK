@@ -1,0 +1,188 @@
+{
+ "schema": 3,
+ "id": "Field",
+ "roots": [
+  "field"
+ ],
+ "widget": {
+  "type": "Field",
+  "doc": "A labelled control in a form, for a control that has no label of its own (a Select, a DateTimeInput, a group of radios or tags): the label 12.5/500 in the secondary ink, the control (its lines under it) 6 below, a help line or an error under it.",
+  "children": "list",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Label",
+    "required": true,
+    "doc": "What the control is for."
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A help line under the control."
+   },
+   {
+    "key": "error",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "What is wrong (shown in red, in place of the help)."
+   },
+   {
+    "key": "required",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A red mark after the label."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    320,
+    72
+   ],
+   "props": {
+    "label": "Role",
+    "note": "What they can do in the workspace."
+   }
+  }
+ ],
+ "nodes": {
+  "field": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "fieldHead",
+    "fieldControl",
+    "fieldNote"
+   ]
+  },
+  "fieldHead": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 3,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "fieldLabel",
+    "fieldMark"
+   ]
+  },
+  "fieldLabel": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.label}",
+    "style": "fieldLabel"
+   }
+  },
+  "fieldMark": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "*",
+    "style": {
+     "from": "body",
+     "fontSize": 12.5,
+     "fontWeight": 600,
+     "color": "errorInk"
+    }
+   },
+   "bind": {
+    "visible": "${props.required}"
+   }
+  },
+  "fieldControl": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "fieldSlot"
+   ]
+  },
+  "fieldSlot": {
+   "type": "slot"
+  },
+  "fieldNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= props.error == '' ? props.note : props.error}",
+    "style": {
+     "from": "body",
+     "fontSize": 12
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.error == '' ? theme.colors.ink3 : theme.colors.errorInk}",
+    "visible": "${= props.note != '' || props.error != ''}"
+   }
+  }
+ }
+}

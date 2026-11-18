@@ -1,0 +1,2352 @@
+{
+ "schema": 3,
+ "roots": [
+  "mailbox",
+  "compose",
+  "mailbox_sidebar"
+ ],
+ "nodes": {
+  "mailbox": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 1440.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "surface"
+     }
+    ]
+   },
+   "name": "Mailbox",
+   "path": "mailbox"
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column1",
+    "column3",
+    "column6"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": 240,
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     12,
+     16,
+     12,
+     12
+    ]
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "sidebar"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": 64
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
+   "children": [
+    "Brand1",
+    "SideButton1",
+    "NavSection1",
+    "NavItem1",
+    "NavItem2",
+    "NavItem3",
+    "NavItem4",
+    "NavItem5",
+    "NavItem6",
+    "NavSection2",
+    "NavItem7",
+    "NavItem8",
+    "spacer1",
+    "column2"
+   ]
+  },
+  "Brand1": {
+   "type": "Brand",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Postbox",
+    "icon": "mail_outlined"
+   }
+  },
+  "SideButton1": {
+   "type": "SideButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "label": "Compose",
+    "icon": "edit_outlined",
+    "shortcut": "C"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "compose",
+       "presentation": "dialog",
+       "insets": [
+        16,
+        24,
+        16,
+        24
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "NavSection1": {
+   "type": "NavSection",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Mailbox"
+   }
+  },
+  "NavItem1": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Inbox",
+    "icon": "inbox_outlined",
+    "badge": "4"
+   },
+   "bind": {
+    "props.selected": "${= folder == \"inbox\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "inbox"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem2": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Starred",
+    "icon": "star_outline"
+   },
+   "bind": {
+    "props.selected": "${= folder == \"starred\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "starred"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem3": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Sent",
+    "icon": "send_outlined"
+   },
+   "bind": {
+    "props.selected": "${= folder == \"sent\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "sent"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem4": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Drafts",
+    "icon": "drafts_outlined",
+    "badge": "1"
+   },
+   "bind": {
+    "props.selected": "${= folder == \"drafts\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "drafts"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem5": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Archive",
+    "icon": "archive_outlined"
+   },
+   "bind": {
+    "props.selected": "${= folder == \"archive\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "archive"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem6": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Trash",
+    "icon": "delete_outlined"
+   },
+   "bind": {
+    "props.selected": "${= folder == \"trash\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "trash"
+      }
+     ]
+    }
+   ]
+  },
+  "NavSection2": {
+   "type": "NavSection",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Folders"
+   }
+  },
+  "NavItem7": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Studio",
+    "icon": "folder_outlined",
+    "badge": "1"
+   }
+  },
+  "NavItem8": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Receipts",
+    "icon": "folder_outlined"
+   }
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   }
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     0,
+     8,
+     0,
+     0
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "children": [
+    "Account1"
+   ]
+  },
+  "Account1": {
+   "type": "Account",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Jamie Park",
+    "note": "jamie@northline.design"
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "height": {
+     "fill": 0
+    },
+    "width": 380
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": 320
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       }
+      },
+      "bind": {
+       "visible": "${= !reading}"
+      }
+     }
+    }
+   ],
+   "children": [
+    "row2",
+    "divider1",
+    "column5",
+    "listView1",
+    "Empty1"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     24,
+     14,
+     24,
+     14
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center",
+    "spacing": 24
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ]
+   },
+   "children": [
+    "iconButton1",
+    "column4",
+    "iconButton2"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "spacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "menu_outlined"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "mailbox_sidebar",
+       "presentation": "dialog",
+       "cover": true
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "text2"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "flex": 1,
+       "basis": 96
+      }
+     }
+    }
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "barTitle"
+    },
+    "text": "Inbox"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "${= length(mail)} messages, 4 unread"
+   }
+  },
+  "iconButton2": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "edit_outlined"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "compose",
+       "presentation": "dialog",
+       "insets": [
+        16,
+        24,
+        16,
+        24
+       ]
+      }
+     ]
+    }
+   ],
+   "tooltip": "Compose (C)"
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     16,
+     12,
+     16,
+     12
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "children": [
+    "SearchField1",
+    "segmentedButton1"
+   ]
+  },
+  "SearchField1": {
+   "type": "SearchField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 34.0
+   },
+   "props": {
+    "value": "q",
+    "hint": "Search mail"
+   }
+  },
+  "segmentedButton1": {
+   "type": "segmentedButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "segments": [
+     {
+      "value": "All mail",
+      "label": "All mail"
+     },
+     {
+      "value": "Unread",
+      "label": "Unread"
+     },
+     {
+      "value": "Starred",
+      "label": "Starred"
+     }
+    ]
+   },
+   "bind": {
+    "props.selected": "${= [view]}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "view",
+       "value": "${result[0]}"
+      }
+     ]
+    }
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${shown}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "ListGroup1",
+    "ListRow1"
+   ]
+  },
+  "ListGroup1": {
+   "type": "ListGroup",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.label": "${item.day}",
+    "visible": "${= index == 0 || at(shown, index - 1).day != item.day}"
+   }
+  },
+  "ListRow1": {
+   "type": "ListRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.title": "${item.from}",
+    "props.subtitle": "${item.subject}",
+    "props.preview": "${item.snippet}",
+    "props.meta": "${item.time}",
+    "props.unread": "${= coalesce(item.unread, false)}",
+    "props.starred": "${= coalesce(item.starred, false)}",
+    "props.attachment": "${= coalesce(item.files, false)}",
+    "props.selected": "${= openId == item.id}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "openId",
+       "value": "${= item.id}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "reading",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "Empty1": {
+   "type": "Empty",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "No messages",
+    "note": "Nothing matches this view.",
+    "icon": "inbox_outlined"
+   },
+   "bind": {
+    "visible": "${= length(shown) == 0}"
+   }
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "left"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "bind": {
+       "visible": "${reading}"
+      },
+      "layout": {
+       "width": {
+        "fill": 0
+       }
+      }
+     }
+    }
+   ],
+   "children": [
+    "Toolbar1",
+    "column7"
+   ]
+  },
+  "Toolbar1": {
+   "type": "Toolbar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 48.0
+   },
+   "children": [
+    "iconButton3",
+    "iconButton4",
+    "iconButton5",
+    "iconButton6",
+    "Separator1",
+    "iconButton7",
+    "spacer2",
+    "text3",
+    "iconButton8",
+    "iconButton9"
+   ]
+  },
+  "iconButton3": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "arrow_back_outlined"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "reading",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ],
+   "tooltip": "Back to the list",
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "iconButton4": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "archive_outlined"
+   },
+   "tooltip": "Archive (E)"
+  },
+  "iconButton5": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "drive_file_move_outlined"
+   },
+   "tooltip": "Move to (V)"
+  },
+  "iconButton6": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "delete_outlined"
+   },
+   "tooltip": "Delete (#)"
+  },
+  "Separator1": {
+   "type": "Separator",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   }
+  },
+  "iconButton7": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.icon": "${= coalesce(cur.starred, false) ? 'star' : 'star_outline'}"
+   },
+   "tooltip": "Star (S)"
+  },
+  "spacer2": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "1 of ${= length(mail)}"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "iconButton8": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "expand_less_outlined"
+   },
+   "tooltip": "Newer (K)"
+  },
+  "iconButton9": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "expand_more_outlined"
+   },
+   "tooltip": "Older (J)"
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     48,
+     32,
+     48,
+     48
+    ],
+    "constraints": {
+     "maxWidth": 820
+    },
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 20,
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "padding": [
+        28,
+        24,
+        28,
+        32
+       ]
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "padding": [
+        16,
+        16,
+        16,
+        24
+       ]
+      }
+     }
+    }
+   ],
+   "children": [
+    "text4",
+    "row3",
+    "divider2",
+    "text8",
+    "text9",
+    "grid1",
+    "row4"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "heading2"
+    },
+    "text": "${cur.subject}"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 20
+       }
+      }
+     }
+    }
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Avatar1",
+    "column8",
+    "text7"
+   ]
+  },
+  "Avatar1": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": "medium"
+   },
+   "bind": {
+    "props.name": "${cur.from}"
+   }
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text5",
+    "text6"
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strong"
+    },
+    "text": "${cur.from}"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "to me"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "Tue, Nov 17, ${cur.time}"
+   }
+  },
+  "divider2": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "reading"
+    },
+    "text": "${cur.snippet} If the door is locked, give me a ring and I'll come down.\n\nI've attached the current notes and a short agenda. The two things I'd like to settle in person are the track lighting along the window wall and the finish for the entry millwork.\n\nSee you Thursday,\n${cur.from}"
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "overline"
+    },
+    "text": "2 ATTACHMENTS"
+   }
+  },
+  "grid1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "grid1Row1"
+   ]
+  },
+  "grid1Row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "FileTile1",
+    "FileTile2"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 8
+      }
+     }
+    }
+   ]
+  },
+  "FileTile1": {
+   "type": "FileTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "name": "Site walk notes.txt",
+    "note": "164 KB"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "basis": 300
+      }
+     }
+    }
+   ]
+  },
+  "FileTile2": {
+   "type": "FileTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "name": "Studio visit agenda.pdf",
+    "note": "1.2 MB",
+    "icon": "picture_as_pdf_outlined"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "basis": 300
+      }
+     }
+    }
+   ]
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "outlinedButton1",
+    "outlinedButton2"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Reply",
+    "icon": "reply_outlined"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "compose",
+       "presentation": "dialog",
+       "insets": [
+        16,
+        24,
+        16,
+        24
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Forward",
+    "icon": "forward_outlined"
+   }
+  },
+  "compose": {
+   "type": "canvas",
+   "name": "compose",
+   "slots": {
+    "body": "Dialog1"
+   },
+   "layout": {
+    "width": 640.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ]
+   }
+  },
+  "Dialog1": {
+   "type": "Dialog",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "New message"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onClose"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "textField1",
+    "textField2",
+    "textField3",
+    "Actions1"
+   ]
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "height": 54.0,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "To",
+     "hintText": "name@example.com"
+    }
+   }
+  },
+  "textField2": {
+   "type": "textField",
+   "layout": {
+    "height": 54.0,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Subject",
+     "hintText": ""
+    }
+   }
+  },
+  "textField3": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Message",
+     "hintText": "Write your message…"
+    },
+    "minLines": 3,
+    "maxLines": 6
+   }
+  },
+  "Actions1": {
+   "type": "Actions",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "children": [
+    "textButton1",
+    "filledButton1"
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Discard"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Send",
+    "icon": "send_outlined"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      },
+      {
+       "type": "showToast",
+       "message": "Sent"
+      }
+     ]
+    }
+   ]
+  },
+  "mailbox_sidebar": {
+   "type": "canvas",
+   "name": "mailbox_sidebar",
+   "slots": {
+    "body": "row5"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ]
+   }
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column9",
+    "column11"
+   ]
+  },
+  "column9": {
+   "type": "column",
+   "layout": {
+    "width": 300,
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     12,
+     16,
+     12,
+     12
+    ]
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "sidebar"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": 64
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
+   "children": [
+    "Brand2",
+    "SideButton2",
+    "NavSection3",
+    "NavItem9",
+    "NavItem10",
+    "NavItem11",
+    "NavItem12",
+    "NavItem13",
+    "NavItem14",
+    "NavSection4",
+    "NavItem15",
+    "NavItem16",
+    "spacer3",
+    "column10"
+   ]
+  },
+  "Brand2": {
+   "type": "Brand",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Postbox",
+    "icon": "mail_outlined"
+   }
+  },
+  "SideButton2": {
+   "type": "SideButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "label": "Compose",
+    "icon": "edit_outlined",
+    "shortcut": "C"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "compose",
+       "presentation": "dialog",
+       "insets": [
+        16,
+        24,
+        16,
+        24
+       ]
+      },
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "NavSection3": {
+   "type": "NavSection",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Mailbox"
+   }
+  },
+  "NavItem9": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Inbox",
+    "icon": "inbox_outlined",
+    "badge": "4"
+   },
+   "bind": {
+    "props.selected": "${= folder == \"inbox\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "inbox"
+      },
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem10": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Starred",
+    "icon": "star_outline"
+   },
+   "bind": {
+    "props.selected": "${= folder == \"starred\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "starred"
+      },
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem11": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Sent",
+    "icon": "send_outlined"
+   },
+   "bind": {
+    "props.selected": "${= folder == \"sent\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "sent"
+      },
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem12": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Drafts",
+    "icon": "drafts_outlined",
+    "badge": "1"
+   },
+   "bind": {
+    "props.selected": "${= folder == \"drafts\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "drafts"
+      },
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem13": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Archive",
+    "icon": "archive_outlined"
+   },
+   "bind": {
+    "props.selected": "${= folder == \"archive\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "archive"
+      },
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem14": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Trash",
+    "icon": "delete_outlined"
+   },
+   "bind": {
+    "props.selected": "${= folder == \"trash\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "trash"
+      },
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "NavSection4": {
+   "type": "NavSection",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Folders"
+   }
+  },
+  "NavItem15": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Studio",
+    "icon": "folder_outlined",
+    "badge": "1"
+   }
+  },
+  "NavItem16": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Receipts",
+    "icon": "folder_outlined"
+   }
+  },
+  "spacer3": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   }
+  },
+  "column10": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     0,
+     8,
+     0,
+     0
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "children": [
+    "Account2"
+   ]
+  },
+  "Account2": {
+   "type": "Account",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Jamie Park",
+    "note": "jamie@northline.design"
+   }
+  },
+  "column11": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "page_variables": [
+   {
+    "name": "folder",
+    "type": "text",
+    "value": "inbox"
+   },
+   {
+    "name": "view",
+    "type": "text",
+    "value": "All mail"
+   },
+   {
+    "name": "openId",
+    "type": "text",
+    "value": "m1"
+   },
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "reading",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "mail",
+    "type": "list",
+    "value": [
+     {
+      "id": "m1",
+      "from": "Maya Chen",
+      "subject": "Studio visit on Thursday",
+      "snippet": "Hi Jamie, Thursday at 10:30 works for the studio visit. We'll meet you at the north entrance.",
+      "time": "10:42 AM",
+      "day": "Today",
+      "unread": false,
+      "starred": true,
+      "files": true
+     },
+     {
+      "id": "m2",
+      "from": "Nora Patel",
+      "subject": "November print invoice",
+      "snippet": "Hi Jamie, here is the invoice for the November proofs, with the paper upgrade.",
+      "time": "9:18 AM",
+      "day": "Today",
+      "unread": true,
+      "files": true
+     },
+     {
+      "id": "m3",
+      "from": "Eli Vargas",
+      "subject": "Homepage review notes",
+      "snippet": "I left three notes on the homepage draft. The general direction is right.",
+      "time": "8:54 AM",
+      "day": "Today",
+      "unread": true,
+      "starred": true
+     },
+     {
+      "id": "m4",
+      "from": "Common Ground",
+      "subject": "Your sample box has arrived",
+      "snippet": "Your package is waiting at the front desk. We'll hold it for five days.",
+      "time": "8:03 AM",
+      "day": "Today",
+      "unread": true
+     },
+     {
+      "id": "m5",
+      "from": "Amira Bello",
+      "subject": "A few things for this week",
+      "snippet": "Morning! I moved our production check-in to 2 PM so we can all make it.",
+      "time": "4:36 PM",
+      "day": "Yesterday"
+     },
+     {
+      "id": "m6",
+      "from": "Owen Brooks",
+      "subject": "Harbor Street selects",
+      "snippet": "The first edit is ready. I marked four selects from the shoot for review.",
+      "time": "2:21 PM",
+      "day": "Yesterday",
+      "unread": true,
+      "files": true
+     },
+     {
+      "id": "m7",
+      "from": "Ruth Kim",
+      "subject": "Your material library loan",
+      "snippet": "Just a reminder that the oak, ash and painted birch samples are due back.",
+      "time": "11:08 AM",
+      "day": "Yesterday"
+     },
+     {
+      "id": "m8",
+      "from": "Ben Okafor",
+      "subject": "Re: Winter brief",
+      "snippet": "The dates look good here. I'd leave one extra day between the two shoots.",
+      "time": "9:42 AM",
+      "day": "Yesterday"
+     },
+     {
+      "id": "m9",
+      "from": "June Ito",
+      "subject": "Book launch next week",
+      "snippet": "We're setting up a small table of early copies at the studio on Friday.",
+      "time": "Nov 13",
+      "day": "Earlier"
+     }
+    ]
+   },
+   {
+    "name": "shown",
+    "type": "list",
+    "formula": "filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.subject), lower(q)))"
+   },
+   {
+    "name": "cur",
+    "type": "map",
+    "formula": "coalesce(find(mail, 'id', openId), first(mail))"
+   }
+  ]
+ }
+}

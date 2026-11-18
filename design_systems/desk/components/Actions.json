@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "Actions",
-  "doc": "The footer band of a dialog, a sheet or a form: a rule above it, the band's fill, its buttons at the end; a destructive button written first stays at the start (write Spacer after it).",
+  "doc": "The footer band of a dialog (its last line): a rule above it and the band's fill from edge to edge of the dialog, its buttons at the end. A destructive button written first stays at the start (write Spacer after it).",
   "children": "list"
  },
  "previews": [
@@ -21,31 +21,38 @@
  ],
  "nodes": {
   "actions": {
-   "type": "row",
+   "type": "stack",
    "layout": {
-    "padding": [
-     24,
-     12,
-     24,
-     12
-    ],
-    "margin": [
-     -24,
-     8,
-     -24,
-     0
-    ],
     "width": {
      "fill": 0
     },
+    "margin": [
+     0,
+     8,
+     0,
+     0
+    ],
     "height": {
      "hug": 0
     }
    },
-   "props": {
-    "spacing": 8,
-    "mainAxisAlignment": "end",
-    "crossAxisAlignment": "center"
+   "decoration": {
+    "clip": "none"
+   },
+   "children": [
+    "actionsBand",
+    "actionsRow"
+   ]
+  },
+  "actionsBand": {
+   "type": "box",
+   "layout": {
+    "x": -24,
+    "y": 0,
+    "width": 2400,
+    "height": {
+     "fill": 0
+    }
    },
    "decoration": {
     "fills": [
@@ -59,21 +66,35 @@
      }
     ],
     "strokeSides": "top"
+   }
+  },
+  "actionsRow": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     0,
+     14,
+     0,
+     14
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "mainAxisAlignment": "end",
+    "crossAxisAlignment": "center"
    },
    "children": [
     "actionsContent"
    ]
   },
   "actionsContent": {
-   "type": "slot",
-   "layout": {
-    "width": {
-     "hug": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   }
+   "type": "slot"
   }
  }
 }

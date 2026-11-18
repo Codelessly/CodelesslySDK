@@ -1,0 +1,13 @@
+component Field "A labelled control in a form, for a control that has no label of its own (a Select, a DateTimeInput, a group of radios or tags): the label 12.5/500 in the secondary ink, the control (its lines under it) 6 below, a help line or an error under it." children=list
+  param label="Label" required doc="What the control is for."
+  param note="" doc="A help line under the control."
+  param error="" doc="What is wrong (shown in red, in place of the help)."
+  param required:bool=false doc="A red mark after the label."
+  preview "Default" 320x72 label="Role" note="What they can do in the workspace."
+Column#field gap=6 w=fill
+  Row#fieldHead gap=3 middle
+    Text#fieldLabel "{props.label}" style=fieldLabel
+    Text#fieldMark "*" size=12.5 weight=600 color=errorInk visible={props.required}
+  Column#fieldControl gap=8 w=fill
+    Slot#fieldSlot w=null h=null
+  Text#fieldNote "{props.error == '' ? props.note : props.error}" size=12 color={props.error == '' ? theme.colors.ink3 : theme.colors.errorInk} visible={props.note != '' || props.error != ''}

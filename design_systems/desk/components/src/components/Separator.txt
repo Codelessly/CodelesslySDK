@@ -1,0 +1,4 @@
+component Separator "A vertical hairline between groups of a toolbar or a row of actions: 1 wide, 20 high, 4 of room each side."
+  preview "Default" 9x20
+Row#sep w=hug h=20 pad=[4,0,4,0]
+  box#sepLine w=1 h=20 fill=line

@@ -10,18 +10,18 @@ component TaskCard "A card on a board: its key in the mono face, a grip and a me
   param selected:bool=false doc="The open or focused card."
   event onMenu
   preview "Default" 280x120 key="STK-124" title="Polish the invite flow" labels=[{"label":"Design","hue":"violet"},{"label":"Product","hue":"green"}] due="Nov 19" checklist="2/4" assignee="Maya Chen"
-Column#card gap=8 pad=[12,10,10,12] w=fill fill=card border={props.selected ? theme.colors.accent : theme.colors.line} radius=8 hovered.border=lineStrong hovered.effects={theme.shadows.level2} effects={theme.shadows.level1}
+Column#card gap=6 pad=[12,9,10,11] margin=[0,0,0,8] w=fill fill=card border={props.selected ? theme.colors.accent : theme.colors.line} radius=8 hovered.border=lineStrong hovered.effects={theme.shadows.level2} effects={theme.shadows.level1}
   Row#cardTop gap=4 middle w=fill
     Text#cardKey "{props.key}" style=mono size=11.5 color=ink3 grow visible={props.key != ''}
     Spacer#cardSpacer visible={props.key == ''}
     Icon#cardGrip "drag_indicator" size=14 color=ink4
     Row#cardMore pad=3 radius=4 hovered.fill=hoverOverlay onTap={emit onMenu}
       Icon#cardMoreGlyph "more_horiz" size=16 color=ink3
-  Text#cardTitle "{props.title}" size=13 weight=600 color=ink height=1.4
+  Text#cardTitle "{props.title}" size=13 weight=600 color=ink height=1.35
   Row#cardLabels gap=4 wrap visible={length(props.labels) > 0}
     each l in props.labels
       Tag#cardLabel "{l.label}" hue="{coalesce(l.hue, 'neutral')}"
-  Row#cardMeta gap=12 middle w=fill pad=[0,2,0,0]
+  Row#cardMeta gap=12 middle w=fill h=20
     Row#cardDue gap=4 middle visible={props.due != ''}
       Icon#cardDueGlyph "{props.overdue ? 'error_outline' : 'calendar_today'}" size=14 color={props.overdue ? theme.colors.errorInk : theme.colors.ink3}
       Text#cardDueText "{props.due}" size=12 weight={props.overdue ? 600 : 400} color={props.overdue ? theme.colors.errorInk : theme.colors.ink3}

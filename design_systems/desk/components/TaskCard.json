@@ -133,9 +133,15 @@
    "layout": {
     "padding": [
      12,
+     9,
      10,
-     10,
-     12
+     11
+    ],
+    "margin": [
+     0,
+     0,
+     0,
+     8
     ],
     "width": {
      "fill": 0
@@ -145,7 +151,7 @@
     }
    },
    "props": {
-    "spacing": 8,
+    "spacing": 6,
     "crossAxisAlignment": "start"
    },
    "decoration": {
@@ -207,17 +213,6 @@
     "cardSpacer",
     "cardGrip",
     "cardMore"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 4
-      }
-     }
-    }
    ]
   },
   "cardKey": {
@@ -242,21 +237,7 @@
    },
    "bind": {
     "visible": "${= props.key != ''}"
-   },
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "width": {
-        "fill": 0
-       },
-       "basis": 96,
-       "flex": 1
-      }
-     }
-    }
-   ]
+   }
   },
   "cardSpacer": {
    "type": "spacer",
@@ -271,21 +252,7 @@
    },
    "bind": {
     "visible": "${= props.key == ''}"
-   },
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "width": {
-        "fill": 0
-       },
-       "basis": 0,
-       "flex": 1
-      }
-     }
-    }
-   ]
+   }
   },
   "cardGrip": {
    "type": "icon",
@@ -383,7 +350,7 @@
      "fontSize": 13,
      "fontWeight": 600,
      "color": "ink",
-     "height": 1.4
+     "height": 1.35
     }
    }
   },
@@ -470,15 +437,7 @@
     "width": {
      "fill": 0
     },
-    "padding": [
-     0,
-     2,
-     0,
-     0
-    ],
-    "height": {
-     "hug": 0
-    }
+    "height": 20
    },
    "props": {
     "spacing": 12,
@@ -490,17 +449,6 @@
     "cardComments",
     "cardMetaSpacer",
     "cardAssignee"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 12
-      }
-     }
-    }
    ]
   },
   "cardDue": {
@@ -523,17 +471,6 @@
    "children": [
     "cardDueGlyph",
     "cardDueText"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 4
-      }
-     }
-    }
    ]
   },
   "cardDueGlyph": {
@@ -597,17 +534,6 @@
    "children": [
     "cardCheckGlyph",
     "cardCheckText"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 4
-      }
-     }
-    }
    ]
   },
   "cardCheckGlyph": {
@@ -667,17 +593,6 @@
    "children": [
     "cardCommentsGlyph",
     "cardCommentsText"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 4
-      }
-     }
-    }
    ]
   },
   "cardCommentsGlyph": {
@@ -726,21 +641,7 @@
     "height": {
      "hug": 0
     }
-   },
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "width": {
-        "fill": 0
-       },
-       "basis": 0,
-       "flex": 1
-      }
-     }
-    }
-   ]
+   }
   },
   "cardAssignee": {
    "type": "Avatar",

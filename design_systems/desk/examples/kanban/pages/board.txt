@@ -1,0 +1,91 @@
+state view="Board"
+state q=""
+state col="In progress"
+state title="Polish the invite flow"
+state desc="Make it clear who an invitation is for, what access they'll get, and what happens after it's sent. Cover both first-time invites and resends."
+state cstatus="In progress"
+state assignee="Maya Chen"
+state checks=[{"t":"Update the role descriptions","done":true},{"t":"Add an inline error for duplicate invites","done":true},{"t":"Review the resend confirmation","done":false},{"t":"QA the flow on a narrow screen","done":false}]
+state cards=[{"key":"STK-128","title":"Map first-run friction points","col":"Backlog","labels":[{"label":"Research","hue":"amber"}],"due":"Nov 25","who":"Nadia Park"},{"key":"STK-131","title":"Design empty states for activity","col":"Backlog","labels":[{"label":"Design","hue":"violet"}],"due":"Nov 28","who":"Maya Chen","comments":2},{"key":"STK-135","title":"Add export for audit events","col":"Backlog","labels":[{"label":"Engineering","hue":"sky"}],"due":"Dec 1","who":"Sam Rao"},{"key":"STK-138","title":"Define workspace roles","col":"Backlog","labels":[{"label":"Product","hue":"green"}],"due":"Dec 3","who":"Jules Martin"},{"key":"STK-124","title":"Polish the invite flow","col":"In progress","labels":[{"label":"Design","hue":"violet"},{"label":"Product","hue":"green"}],"due":"Nov 19","check":"2/4","who":"Maya Chen","comments":3},{"key":"STK-126","title":"Fix duplicate billing emails","col":"In progress","labels":[{"label":"Bug","hue":"red"},{"label":"Engineering","hue":"sky"}],"due":"Nov 15","late":true,"who":"Sam Rao"},{"key":"STK-129","title":"Instrument activation events","col":"In progress","labels":[{"label":"Engineering","hue":"sky"}],"due":"Nov 21","who":"Jules Martin"},{"key":"STK-121","title":"Review keyboard onboarding","col":"In review","labels":[{"label":"Design","hue":"violet"}],"due":"Nov 18","who":"Nadia Park","comments":1},{"key":"STK-123","title":"Validate plan change copy","col":"In review","labels":[{"label":"Product","hue":"green"}],"due":"Nov 20","who":"Jules Martin"},{"key":"STK-114","title":"Ship workspace switcher","col":"Done","labels":[{"label":"Engineering","hue":"sky"}],"due":"Nov 12","check":"3/3","who":"Sam Rao"},{"key":"STK-117","title":"Document activation metrics","col":"Done","labels":[{"label":"Product","hue":"green"}],"due":"Nov 13","who":"Nadia Park"},{"key":"STK-119","title":"Refresh account settings icons","col":"Done","labels":[{"label":"Design","hue":"violet"}],"due":"Nov 14","who":"Maya Chen"}]
+state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}
+canvas "Board" path="board"
+App
+  Main
+    Nav
+      Row gap=12 middle
+        Brand "Stack" icon="layers"
+        Breadcrumb items=["Northstar Studio","Product delivery"] hide=phone
+      Account "Maya Chen" "Product designer" w=200 hide=phone
+    Column gap=16 pad=[32,24,32,16] tablet.pad=[24,20,24,12] phone.pad=[16,16,16,8]
+      PageHeader "Product delivery" "Plan, build, and ship with the product team."
+        Button "New card" icon="add" onTap={open card}
+      Tabs @view tabs=["Board","List","Archive"] icons=["view_kanban","list","inventory_2"]
+      Row gap=8 middle
+        SearchField @q hint="Search cards…" w=260 phone.w=fill
+        FilterButton "Labels" icon="label" hide=phone
+        FilterButton "Assignee" icon="person" count=1 hide=phone
+        FilterButton "Due date" icon="calendar_today" hide=phone
+        Spacer hide=phone
+        Text.caption "{length(shown)} cards" hide=phone
+      SegmentedButton @col items=["Backlog","In progress","In review","Done"] show=phone
+    Row gap=12 top pad=[32,4,32,32] tablet.pad=[24,4,24,24] phone.pad=[16,4,16,16] tablet.scroll
+      BoardColumn "Backlog" count={length(filter(shown, x => x.col == "Backlog"))} hue="slate" grow tablet.w=300 phone.w=358 phone.visible={col == "Backlog"} onAdd={open card}
+        each k in filter(shown, x => x.col == "Backlog")
+          TaskCard key="{k.key}" title="{k.title}" labels={k.labels} due="{k.due}" overdue={coalesce(k.late, false)} checklist="{coalesce(k.check, '')}" comments={coalesce(k.comments, 0)} assignee="{k.who}" onTap={open card}
+      BoardColumn "In progress" count={length(filter(shown, x => x.col == "In progress"))} limit=2 hue="sky" grow tablet.w=300 phone.w=358 phone.visible={col == "In progress"} onAdd={open card}
+        each k in filter(shown, x => x.col == "In progress")
+          TaskCard key="{k.key}" title="{k.title}" labels={k.labels} due="{k.due}" overdue={coalesce(k.late, false)} checklist="{coalesce(k.check, '')}" comments={coalesce(k.comments, 0)} assignee="{k.who}" onTap={open card}
+      BoardColumn "In review" count={length(filter(shown, x => x.col == "In review"))} limit=3 hue="violet" grow tablet.w=300 phone.w=358 phone.visible={col == "In review"} onAdd={open card}
+        each k in filter(shown, x => x.col == "In review")
+          TaskCard key="{k.key}" title="{k.title}" labels={k.labels} due="{k.due}" overdue={coalesce(k.late, false)} checklist="{coalesce(k.check, '')}" comments={coalesce(k.comments, 0)} assignee="{k.who}" onTap={open card}
+      BoardColumn "Done" count={length(filter(shown, x => x.col == "Done"))} hue="green" grow tablet.w=300 phone.w=358 phone.visible={col == "Done"} onAdd={open card}
+        each k in filter(shown, x => x.col == "Done")
+          TaskCard key="{k.key}" title="{k.title}" labels={k.labels} due="{k.due}" overdue={coalesce(k.late, false)} checklist="{coalesce(k.check, '')}" comments={coalesce(k.comments, 0)} assignee="{k.who}" onTap={open card}
+Dialog#card "Card details" overline="STK-124" w=780 guard={title != "Polish the invite flow"} guardText="Discard your changes?"
+  Row gap=24 top phone.direction=vertical
+    Column gap=16 grow
+      Input "Title" @title
+      Input "Description" @desc multiline
+      Column gap=8
+        Row gap=8 middle
+          Icon "checklist" size=16 color=ink3
+          Text.panelTitle "Checklist" grow
+          Text.caption "{count(checks, 'done', true)} of {length(checks)} complete"
+        Progress value={count(checks, 'done', true) / length(checks)}
+        each it in checks
+          Checkbox "{it.t}" @it.done
+        Row gap=8
+          Input "" "Add a checklist item…" grow
+          Button.outline "Add" icon="add"
+      Column gap=10
+        Row gap=8 middle
+          Icon "chat_bubble_outline" size=16 color=ink3
+          Text.panelTitle "Comments" grow
+          Text.caption "2"
+        Row gap=10 top
+          Avatar "Jules Martin" size=24
+          Column grow
+            Text.strong "Jules Martin" size=12.5
+            Text.small "Let's keep the invite link available after sending, in case the email gets missed."
+        Row gap=10 top
+          Avatar "Maya Chen" size=24
+          Column grow
+            Text.strong "Maya Chen" size=12.5
+            Text.small "Role copy is updated. I'll check the resend state in the next pass."
+    Column gap=14 w=240 phone.w=fill
+      Text.panelTitle "Properties"
+      Field "Status"
+        Select @cstatus items=["Backlog","In progress","In review","Done"] w=fill
+      Field "Assignee"
+        Select @assignee items=["Maya Chen","Jules Martin","Sam Rao","Nadia Park"] w=fill
+      Field "Due date"
+        DateTimeInput value="2026-11-19" w=fill
+      Field "Labels"
+        Row gap=4
+          Tag "Design" hue="violet" removable
+          Tag "Product" hue="green" removable
+  Actions
+    Button.outline "Delete card" icon="delete" color=errorInk onTap={confirm "Delete this card?" then {close}}
+    Spacer
+    Button.ghost "Cancel" onTap={close}
+    Button "Save changes" onTap={close; toast "Card saved"}

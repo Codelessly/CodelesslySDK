@@ -11,5 +11,5 @@ Row#paneHead gap=12 middle pad=[20,14,12,14] w=fill border-bottom=line
     Text#paneTitle "{props.title}" style=sectionTitle maxLines=1 overflow=ellipsis
     Text#paneNote "{props.note}" style=caption visible={props.note != ''} maxLines=1 overflow=ellipsis
   Row#paneActions gap=4 middle
-    Slot#paneSlot
+    Slot#paneSlot w=null h=null
   IconButton#paneClose "close" w=30 h=30 tooltip="Close (Esc)" visible={props.closable} onTap={emit onClose}

@@ -235,7 +235,7 @@ RADII = {"inner": 4, "control": 6, "controlXs": 4, "controlCompact": 6, "control
          "tag": 4, "badge": 999, "chip": 999, "card": 8, "tile": 8, "panel": 10, "menu": 8, "popup": 10, "dialog": 12,
          "sheet": 14, "progress": 999, "bar": 3, "avatar": 999, "full": 9999}
 
-SIZES = {"xs": 24, "compact": 28, "small": 30, "medium": 34, "large": 40,
+SIZES = {"xs": 24, "compact": 30, "small": 32, "medium": 34, "large": 40, "iconOnlyCompact": 16, "iconOnlySmall": 16, "iconOnlyMedium": 18,
          "control": 34, "controlDense": 30, "iconButton": 30,
          "icon": 16, "iconNav": 16, "iconEmpty": 24,
          "navItem": 32, "rowDense": 36, "row": 44, "rowRelaxed": 56, "tableHead": 36,

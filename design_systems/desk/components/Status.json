@@ -107,17 +107,6 @@
    "children": [
     "statusDot",
     "statusLabel"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 6
-      }
-     }
-    }
    ]
   },
   "statusDot": {

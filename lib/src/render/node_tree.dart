@@ -2687,10 +2687,19 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
 
   /// Whether a child of [parent] other than [id] fills its main axis.
   bool _siblingFills(Node parent, String id, bool isRow) {
-    for (final other in parent.children) {
-      if (other == id) continue;
-      final o = source.node(other);
-      if (o == null || !o.visible || o.type == 'spacer') continue;
+    // The siblings as laid out: what a component's slot placed in the row
+    // (a toolbar's buttons, its Spacer) is the caller's, not the
+    // definition's children.
+    final laidOut = <Node>[];
+    this.parent?.visitChildren((c) {
+      if (c is NodeBox && !identical(c, this) && c._node != null) laidOut.add(c._node!);
+    });
+    final siblings = laidOut.isNotEmpty ? laidOut : [for (final other in parent.children) if (other != id) source.node(other)];
+    for (final o in siblings) {
+      // A Spacer fills too: a text beside it keeps its size, or the two
+      // share the room and the Spacer pushes only half way (a toolbar's
+      // "1 of 9" left in the middle of the bar).
+      if (o == null || !o.visible) continue;
       if ((isRow ? o.hFit : o.vFit) == SizeFit.fill && (isRow ? o.layout.constraints.maxWidth : o.layout.constraints.maxHeight) == null) return true;
     }
     return false;

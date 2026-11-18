@@ -1,0 +1,120 @@
+{
+ "schema": 3,
+ "id": "ListGroup",
+ "roots": [
+  "group"
+ ],
+ "widget": {
+  "type": "ListGroup",
+  "doc": "The label over a group of a list's rows (Today, Yesterday, Earlier): small spaced capitals in the caption ink on the chrome's fill, a rule under it.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Today",
+    "required": true,
+    "doc": "The group's name (shown in capitals)."
+   },
+   {
+    "key": "meta",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "At its end (a count)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    380,
+    28
+   ],
+   "props": {
+    "label": "Today"
+   }
+  }
+ ],
+ "nodes": {
+  "group": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     20,
+     7,
+     16,
+     7
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "chrome"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "children": [
+    "groupLabel",
+    "groupMeta"
+   ]
+  },
+  "groupLabel": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= upper(props.label)}",
+    "style": "overline"
+   }
+  },
+  "groupMeta": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.meta}",
+    "style": "caption"
+   },
+   "bind": {
+    "visible": "${= props.meta != ''}"
+   }
+  }
+ }
+}

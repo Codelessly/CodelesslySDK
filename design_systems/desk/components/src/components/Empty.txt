@@ -9,4 +9,4 @@ Column#empty gap=0 center middle pad=[24,40,24,40] w=fill
   Text#emptyTitle "{props.title}" size=14 weight=600 color=ink textAlign=center pad=[0,14,0,0] maxw=320
   Text#emptyNote "{props.note}" style=muted textAlign=center maxw=320 pad=[0,4,0,0] visible={props.note != ''}
   Row#emptyActions gap=8 center pad=[0,16,0,0]
-    Slot#emptySlot
+    Slot#emptySlot w=null h=null

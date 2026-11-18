@@ -8,4 +8,4 @@ Column#panel w=fill fill=card border=line radius=10 clip=antiAlias
     Text#panelTitle "{props.title}" style=panelTitle
     Text#panelNote "{props.note}" style=caption visible={props.note != ''}
   Column#panelBody gap=12 w=fill pad={props.flush ? [0, 0, 0, 0] : [16, 16, 16, 16]}
-    Slot#panelSlot
+    Slot#panelSlot w=null h=null

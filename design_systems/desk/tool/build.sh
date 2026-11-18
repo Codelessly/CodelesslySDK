@@ -8,5 +8,5 @@ desk="$(cd "$(dirname "$0")/.." && pwd)"
 sdk="$(cd "$desk/../.." && pwd)"
 py="$(command -v python 2>/dev/null || command -v python3)"; "$py" -c "" 2>/dev/null || py=python
 "$py" "$desk/tool/build.py"
-bash "$sdk/tool/notation/notation.sh" expand "$desk/components/src"
+bash "$sdk/tool/notation/notation.sh" expand "$desk/components/src" --no-reflow
 "$py" "$desk/tool/build.py"

@@ -84,17 +84,6 @@
    "children": [
     "listView1",
     "avatarMore"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 8
-      }
-     }
-    }
    ]
   },
   "listView1": {

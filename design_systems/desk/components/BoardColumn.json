@@ -100,7 +100,7 @@
      8,
      6,
      8,
-     8
+     6
     ],
     "width": {
      "fill": 0
@@ -110,7 +110,7 @@
     }
    },
    "props": {
-    "spacing": 8,
+    "spacing": 4,
     "crossAxisAlignment": "start"
    },
    "decoration": {
@@ -162,17 +162,6 @@
     "columnSpacer",
     "columnLimit",
     "columnMore"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 8
-      }
-     }
-    }
    ]
   },
   "columnDot": {
@@ -278,21 +267,7 @@
     "height": {
      "hug": 0
     }
-   },
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "width": {
-        "fill": 0
-       },
-       "basis": 0,
-       "flex": 1
-      }
-     }
-    }
-   ]
+   }
   },
   "columnLimit": {
    "type": "row",
@@ -314,17 +289,6 @@
    "children": [
     "columnLimitGlyph",
     "columnLimitText"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 4
-      }
-     }
-    }
    ]
   },
   "columnLimitGlyph": {
@@ -444,7 +408,7 @@
     }
    },
    "props": {
-    "spacing": 8,
+    "spacing": 0,
     "crossAxisAlignment": "start"
    },
    "children": [
@@ -452,15 +416,7 @@
    ]
   },
   "columnSlot": {
-   "type": "slot",
-   "layout": {
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   }
+   "type": "slot"
   },
   "columnAdd": {
    "type": "row",
@@ -517,17 +473,6 @@
    "children": [
     "columnAddGlyph",
     "columnAddText"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "wrap": true,
-       "runSpacing": 6
-      }
-     }
-    }
    ]
   },
   "columnAddGlyph": {

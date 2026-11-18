@@ -9,4 +9,4 @@ Row#pageHead gap=16 middle w=fill
     Text#pageTitle "{props.title}" style=pageTitle phone.size=20
     Text#pageNote "{props.note}" style=muted visible={props.note != ''}
   Row#pageActions gap=8 middle
-    Slot#pageActionsSlot
+    Slot#pageActionsSlot w=null h=null
