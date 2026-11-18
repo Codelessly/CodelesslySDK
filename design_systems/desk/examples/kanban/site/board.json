@@ -749,8 +749,7 @@
    "actions": [
     {
      "trigger": {
-      "type": "event",
-      "event": "onMenu"
+      "type": "click"
      },
      "actions": [
       {
@@ -894,8 +893,7 @@
    "actions": [
     {
      "trigger": {
-      "type": "event",
-      "event": "onMenu"
+      "type": "click"
      },
      "actions": [
       {
@@ -1039,8 +1037,7 @@
    "actions": [
     {
      "trigger": {
-      "type": "event",
-      "event": "onMenu"
+      "type": "click"
      },
      "actions": [
       {
@@ -1183,8 +1180,7 @@
    "actions": [
     {
      "trigger": {
-      "type": "event",
-      "event": "onMenu"
+      "type": "click"
      },
      "actions": [
       {
@@ -1274,9 +1270,11 @@
     }
    ],
    "children": [
-    "flex1",
-    "Actions1"
-   ]
+    "flex1"
+   ],
+   "slots": {
+    "actions": "Actions1"
+   }
   },
   "flex1": {
    "type": "flex",

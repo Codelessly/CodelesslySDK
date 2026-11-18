@@ -1790,6 +1790,7 @@
   "row14": {
    "type": "row",
    "layout": {
+    "squeezable": true,
     "width": {
      "hug": 0
     },
@@ -1944,6 +1945,7 @@
   "row17": {
    "type": "row",
    "layout": {
+    "squeezable": true,
     "width": {
      "hug": 0
     },
@@ -3046,9 +3048,11 @@
    ],
    "children": [
     "textField1",
-    "Field1",
-    "Actions1"
-   ]
+    "Field1"
+   ],
+   "slots": {
+    "actions": "Actions1"
+   }
   },
   "textField1": {
    "type": "textField",
@@ -3241,25 +3245,6 @@
     ],
     "strokeSides": "right"
    },
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "width": 64
-      }
-     }
-    },
-    {
-     "maxWidth": 699,
-     "patch": {
-      "visible": false,
-      "bind": {
-       "visible": null
-      }
-     }
-    }
-   ],
    "children": [
     "Brand2",
     "NavSection3",

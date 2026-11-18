@@ -1602,9 +1602,11 @@
    "children": [
     "textField1",
     "textField2",
-    "textField3",
-    "Actions1"
-   ]
+    "textField3"
+   ],
+   "slots": {
+    "actions": "Actions1"
+   }
   },
   "textField1": {
    "type": "textField",
@@ -1792,25 +1794,6 @@
     ],
     "strokeSides": "right"
    },
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "width": 64
-      }
-     }
-    },
-    {
-     "maxWidth": 699,
-     "patch": {
-      "visible": false,
-      "bind": {
-       "visible": null
-      }
-     }
-    }
-   ],
    "children": [
     "Brand2",
     "SideButton2",
@@ -1863,6 +1846,9 @@
      },
      "actions": [
       {
+       "type": "closeModal"
+      },
+      {
        "type": "openModal",
        "to": "compose",
        "presentation": "dialog",
@@ -1872,9 +1858,6 @@
         16,
         24
        ]
-      },
-      {
-       "type": "closeModal"
       }
      ]
     }

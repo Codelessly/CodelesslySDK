@@ -53,7 +53,8 @@
     "Banner3",
     "Banner4",
     "row1",
-    "row2"
+    "row2",
+    "SaveBar1"
    ]
   },
   "PageHeader1": {
@@ -599,6 +600,33 @@
     "title": "A card with no key or labels",
     "assignee": "Jules Martin"
    }
+  },
+  "SaveBar1": {
+   "type": "SaveBar",
+   "layout": {
+    "width": 720,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "message": "3 permissions changed for Editors."
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "constraints": {
+        "maxWidth": 720
+       }
+      }
+     }
+    }
+   ]
   }
  }
 }

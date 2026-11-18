@@ -527,9 +527,11 @@
     }
    ],
    "children": [
-    "Banner1",
-    "Actions1"
-   ]
+    "Banner1"
+   ],
+   "slots": {
+    "actions": "Actions1"
+   }
   },
   "Banner1": {
    "type": "Banner",
