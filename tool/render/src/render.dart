@@ -12,7 +12,6 @@ import 'dart:ui' as ui;
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/controls/focus.dart' show ControlFocusNode, ControlFocusScope;
-import 'package:codelessly_sdk/src/render/controls/root.dart' show RenderControlRoot;
 import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabeledControl, firstTextUnder;
 import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/gestures.dart';
@@ -26,6 +25,9 @@ import 'package:codelessly_sdk/src/runtime/actions/wiring.dart' show viewportTri
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
 import 'package:codelessly_sdk/src/render/controls/buttons.dart' show RenderButton;
 import 'package:codelessly_sdk/src/render/controls/calendar.dart' show RenderCalendar;
+import 'package:codelessly_sdk/src/render/controls/dropdown.dart' show RenderDropdown;
+import 'package:codelessly_sdk/src/render/controls/menu.dart' show RenderMenu, RenderMenuRow;
+import 'package:codelessly_sdk/src/render/controls/slider.dart' show RenderSlider;
 import 'package:codelessly_sdk/src/widgets/collections_table.dart' show RenderRunningTable;
 import 'package:codelessly_sdk/src/render/controls/kit.dart' show RenderControl;
 import 'package:codelessly_sdk/src/render/controls/kit_bars.dart' show RenderItemBar;
@@ -958,6 +960,8 @@ Future<void> _renderAll(
               if (identical(b, focusedBox)) 'focused': true,
               if (b.instance != null) 'instance': '${b.instance}',
               if (componentInstanceOf(b.instance) != null) 'path': b.tree.pathOf(b.id, b.instance),
+              // What a step names with `@` (`quantity@increment`).
+              if (_partNames(b) case final parts when parts.isNotEmpty) 'parts': parts,
               'x': _rectOf(b).left.round(),
               'y': _rectOf(b).top.round(),
               'w': double.parse(b.size.width.toStringAsFixed(1)),
@@ -2105,6 +2109,10 @@ ui.Rect _rectOf(RenderBox b) {
   return (keys, keys.isEmpty ? step : Step(step.kind, target, step.value));
 }
 
+/// A step target's `@` part (`@2`, `@increment`, `@option:Alaska`,
+/// `@2026-11-23`).
+final _partSuffix = RegExp(r'@(\d+|increment|decrement|thumb|thumb-end|option:.*|\d{4}-\d{2}-\d{2})$');
+
 const _pointerSteps = {'tap', 'double-tap', 'long-press', 'right-click', 'hover', 'drag'};
 
 Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetController controller,
@@ -2236,11 +2244,68 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       if (cell == null) return (null, '--$verb $target: ${datePart[2]} is not in the month shown by "$id".');
       return (calendar!.localToGlobal(calendar!.cellRect(cell).center), null);
     }
+    // A built-in control's named part: a number field's minus and plus
+    // (`@decrement`, `@increment`), a slider's thumb (`@thumb`, a range's
+    // upper `@thumb-end`), an option of a dropdown (`@option:Alaska`; the
+    // dropdown is opened first when it is closed).
+    final named = RegExp(r'^(.*)@(increment|decrement|thumb|thumb-end|option:(.+))$').firstMatch(target);
+    if (named != null) {
+      final id = named[1]!, what = named[2]!;
+      final found = _locate(binding, id);
+      if (found.box == null) {
+        return (null, found.problem!.startsWith(_notShownHere) ? '$_notShownHere--$verb $target: ${found.problem!.substring(_notShownHere.length)}.' : _withCandidates(binding, id, '--$verb $target: ${found.problem}.'));
+      }
+      final box = found.box!;
+      final parts = _partNames(box);
+      String none() => '--$verb $target: "$id" has no part "@$what"${parts.isEmpty ? ' (it has no named parts)' : '; its parts: ${parts.join(', ')}'}.';
+      if (what == 'increment' || what == 'decrement') {
+        final field = _firstIn<RenderTextField>(box);
+        if (field == null || !(field.decoration.prefix?.button ?? false)) return (null, none());
+        await centerInView(box);
+        return (field.localToGlobal(field.buttonSlot(prefix: what == 'decrement').center), null);
+      }
+      if (what.startsWith('thumb')) {
+        final slider = _firstIn<RenderSlider>(box);
+        if (slider == null || (what == 'thumb-end' && !slider.isRange)) return (null, none());
+        await centerInView(box);
+        final f = what == 'thumb' ? slider.thumbCenter : slider.highThumbCenter;
+        final vertical = slider.node.prop(api.SliderProps.orientation) == api.Axis.vertical;
+        return (slider.localToGlobal(vertical ? ui.Offset(f.dy, slider.size.height - f.dx) : f), null);
+      }
+      final label = named[3]!.trim();
+      final dropdown = _firstIn<RenderDropdown>(box);
+      var rows = _openMenuRows(binding, label);
+      if (rows.isEmpty && dropdown != null && !dropdown.isOpen) {
+        // Closed: opened as a user does, by a press on it.
+        final at = reachable(box) ?? _rectOf(box).center;
+        await tester.tapAt(at);
+        await _settle(tester);
+        rows = _openMenuRows(binding, label);
+      }
+      if (rows.isEmpty) {
+        final open = _openMenuRows(binding, null).map((r) => r.item.label).toList();
+        return (
+          null,
+          '--$verb $target: no option "$label" ${open.isEmpty ? 'is shown (no dropdown or menu is open${dropdown == null ? ', and "$id" is no dropdown' : ''})' : 'in the open menu; its options: ${open.take(12).join(', ')}'}.',
+        );
+      }
+      return (rows.last.localToGlobal(rows.last.size.center(ui.Offset.zero)), null);
+    }
     // `<id>@<n>`: the n-th part (from 0) of a control with several: a
     // segment, a tab, a navigation destination.
     final part = RegExp(r'^(.*)@(\d+)$').firstMatch(target);
     final id = part == null ? target : part[1]!;
     final found = _locate(binding, id);
+    // A number field with a minus and a plus: @0 the minus, @1 the field,
+    // @2 the plus, as they are drawn.
+    if (part != null && found.box != null && int.parse(part[2]!) <= 2) {
+      final field = _firstIn<RenderTextField>(found.box!);
+      if (field != null && (field.decoration.prefix?.button ?? false) && _firstIn<RenderItemBar>(found.box!) == null) {
+        final n = int.parse(part[2]!);
+        if (n == 1) return pointAt(id, verb);
+        return pointAt('$id@${n == 0 ? 'decrement' : 'increment'}', verb);
+      }
+    }
     if (part != null && found.box != null) {
       final n = int.parse(part[2]!);
       RenderBox? control;
@@ -2286,7 +2351,15 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         }
       }
       if (control == null) {
-        return (null, '--$verb $target: "$id" has no parts to name with @: that is for a segmented button, a tab bar and a navigation bar. Tap it with --$verb $id.');
+        final names = _partNames(found.box!);
+        return (
+          null,
+          names.isNotEmpty
+              ? '--$verb $target: "$id" has no part @$n; its parts: ${names.join(', ')}.'
+              : '--$verb $target: "$id" has no parts to name with @: @<n> is for a segmented button, a tab bar and a navigation bar; '
+                  'a number field has @decrement and @increment, a slider @thumb, a dropdown @option:<label>, an inline calendar @<yyyy-MM-dd> '
+                  '(--dump-layout lists each node\'s "parts"). Tap it with --$verb $id.',
+        );
       }
       if (n >= rects.length) {
         return (null, '--$verb $target: "$id" has ${rects.length} part${rects.length == 1 ? '' : 's'} (@0 to @${rects.length - 1}).');
@@ -2335,6 +2408,9 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         }
       }
       if (owners.length == 1) return pointAt(owners.single, verb);
+      // An option of the open dropdown or menu by its label (`--tap Alaska`).
+      final rows = _openMenuRows(binding, id);
+      if (rows.isNotEmpty) return (rows.last.localToGlobal(rows.last.size.center(ui.Offset.zero)), null);
       // A button of the built-in confirm dialog (`confirmOk`, `confirmCancel`).
       for (final b in _builtIns(binding)) {
         if (b.id == id) return (b.box.localToGlobal(b.box.size.center(ui.Offset.zero)), null);
@@ -2409,7 +2485,7 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
               step.target.split('#').first.split('@').first);
         }
       }
-      await _unfocusFieldOutside(tester, _boxOf(binding, step.target.replaceFirst(RegExp(r'@\d+$'), '')));
+      await _unfocusFieldOutside(tester, _boxOf(binding, step.target.replaceFirst(_partSuffix, '')));
       await tester.tapAt(at);
       return null;
     case 'drag':
@@ -2780,6 +2856,61 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       return null;
   }
   return 'Unknown step ${step.kind}.';
+}
+
+/// The first render object of type [T] in [box] (it or under it).
+T? _firstIn<T>(RenderObject box) {
+  T? found;
+  void visit(RenderObject o) {
+    if (found != null) return;
+    if (o is T) {
+      found = o as T;
+      return;
+    }
+    o.visitChildren(visit);
+  }
+
+  visit(box);
+  return found;
+}
+
+/// The rows of the dropdowns and menus open on screen, in paint order;
+/// with [label], those whose label is it (letter case aside).
+List<RenderMenuRow> _openMenuRows(WidgetsBinding binding, String? label) {
+  final want = label?.trim().toLowerCase();
+  return [
+    for (final view in binding.renderViews)
+      for (final o in _descendants(view, skip: _offstage()))
+        if (o is RenderMenu && o.attached && o.hasSize)
+          for (final r in o.rows)
+            if (r.attached && r.hasSize && !r.size.isEmpty && (want == null || r.item.label.trim().toLowerCase() == want)) r,
+  ];
+}
+
+/// The parts a step names with `@` on the control drawn in node box [b]
+/// (not those of the nodes inside it): what `--dump-layout` lists as
+/// `parts`. Empty when it has none.
+List<String> _partNames(NodeBox b) {
+  RenderObject? control;
+  void visit(RenderObject o) {
+    if (control != null || (o is NodeBox && !identical(o, b))) return;
+    if (o is RenderItemBar || o is RenderSegmentedButton || o is RenderTextField || o is RenderSlider || o is RenderDropdown || (o is RenderCalendar && o.inline)) {
+      control = o;
+      return;
+    }
+    o.visitChildren(visit);
+  }
+
+  visit(b);
+  return switch (control) {
+    final RenderItemBar bar => [for (var i = 0; i < bar.itemRects.length; i++) '@$i'],
+    final RenderSegmentedButton s => [for (var i = 0; i < s.segmentRects.length; i++) '@$i'],
+    final RenderTextField f when f.decoration.prefix?.button ?? false => const ['@decrement', '@increment'],
+    final RenderSlider s => s.isRange ? const ['@thumb', '@thumb-end'] : const ['@thumb'],
+    final RenderDropdown d => [for (final l in d.spec.labels) '@option:$l'],
+    RenderCalendar() => const ['@<yyyy-MM-dd>'],
+    _ => const [],
+  };
 }
 
 /// Puts the keyboard focus on the first control or press target inside
