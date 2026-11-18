@@ -755,12 +755,12 @@ Future<void> _renderAll(
       // page's top, whatever a step scrolled it to.
       RenderDesignScroll? fullPage;
       if (args.fullPage) {
-        var page = _pageScroll(binding);
+        var page = _pageScroll(binding, fullPage: true);
         if (page != null && page.pixels.abs() > 0.01) {
           page.jumpTo(0);
           await _settle(tester);
           collect();
-          page = _pageScroll(binding);
+          page = _pageScroll(binding, fullPage: true);
         }
         if (page != null && page.maxScrollExtent >= 1) fullPage = page;
       }
@@ -946,6 +946,7 @@ Future<void> _renderAll(
       // size's hover adds it again (Flutter's mouse tracker asserts on a
       // device added twice).
       await _removeMouse();
+      await _releaseHeld();
       await tester.pumpWidget(const SizedBox());
       await tester.pump(const Duration(seconds: 10));
       collect();
@@ -957,6 +958,17 @@ Future<void> _renderAll(
 
 /// The mouse `--hover` steps move, while a capture is made.
 TestGesture? _mouse;
+
+/// A `--drag <id>=<dx>,<dy>,hold` still pressed: the capture shows the drag
+/// in progress (a row swiped part of the way, its actions showing). The next
+/// step, or the end of the capture, lets go.
+TestGesture? _held;
+
+Future<void> _releaseHeld() async {
+  final g = _held;
+  _held = null;
+  if (g != null) await g.up();
+}
 
 Future<void> _removeMouse() async {
   final m = _mouse;
@@ -1869,7 +1881,7 @@ String? _canvasOf(NodeBox b) {
 /// The page's scroll view: of the vertical ones a user can scroll that have
 /// something to scroll, the one with the largest viewport (outermost on a
 /// tie).
-RenderDesignScroll? _pageScroll(WidgetsBinding binding) {
+RenderDesignScroll? _pageScroll(WidgetsBinding binding, {bool fullPage = false}) {
   RenderDesignScroll? best;
   final skip = _offstage();
   for (final view in binding.renderViews) {
@@ -1880,6 +1892,13 @@ RenderDesignScroll? _pageScroll(WidgetsBinding binding) {
         if (best == null || o.size.width * o.size.height > best.size.width * best.size.height) best = o;
       }
     }
+  }
+  // A pane of a window (a mail list beside its reader, each scrolling on
+  // its own) is not the page: the window is captured as it is, not the
+  // pane's length with the rest cut or repeated (test 9, mail).
+  if (best != null && fullPage) {
+    final view = binding.renderViews.first.size;
+    if (best.size.width < view.width * 0.6) return null;
   }
   return best;
 }
@@ -1935,6 +1954,7 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     GlobalKey<NavigatorState> navigator, Codelessly codelessly,
     {required void Function(String code, String message, String? nodeId) warn, List<String> screens = const []}) async {
   final binding = tester.binding;
+  await _releaseHeld();
   ui.Rect viewRect() => ui.Offset.zero & (tester.view.physicalSize / tester.view.devicePixelRatio);
 
   // The render objects hit at [p], innermost first.
@@ -2217,7 +2237,9 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       return null;
     case 'drag':
       // To a point (dx,dy from where it is pressed) or onto another node.
-      final by = RegExp(r'^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$').firstMatch(step.value ?? '');
+      // `,hold` after the distance: not let go (see [_held]).
+      final hold = RegExp(r',\s*hold\s*$').hasMatch(step.value ?? '');
+      final by = RegExp(r'^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*(?:,\s*hold\s*)?$').firstMatch(step.value ?? '');
       ui.Offset? onto;
       if (by == null) {
         if ((step.value ?? '').trim().isEmpty) return '--drag ${step.target}: say where to: --drag ${step.target}=<dx>,<dy> or --drag ${step.target}=<nodeId>.';
@@ -2256,6 +2278,11 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       for (var i = 1; i <= moves; i++) {
         await g.moveTo(ui.Offset.lerp(from, to, i / moves)!, timeStamp: Duration(milliseconds: 16 * i));
         await tester.pump(const Duration(milliseconds: 16));
+      }
+      if (hold) {
+        _held = g;
+        await tester.pump(const Duration(milliseconds: 300));
+        return null;
       }
       await g.up(timeStamp: const Duration(milliseconds: 16 * moves));
       return null;
