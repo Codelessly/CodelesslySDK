@@ -1690,7 +1690,7 @@ Map<RenderObject, String> _liveRegions(WidgetsBinding binding) {
 /// `#n` for the n-th copy of a node a list repeats.
 String _stepName(WidgetsBinding binding, NodeBox b) {
   final path = b.tree.pathOf(b.id, b.instance);
-  final copies = [for (final o in _boxes(binding)) if (o.id == b.id && identical(o.tree, b.tree) && o.tree.pathOf(o.id, o.instance) == path) o];
+  final copies = [for (final o in _boxes(binding)) if (o.id == b.id && identical(o.tree, b.tree) && o.tree.pathOf(o.id, o.instance) == path && (_shown(o) || identical(o, b))) o];
   if (copies.length < 2) return path;
   return '$path#${copies.indexWhere((o) => identical(o, b))}';
 }
@@ -1831,6 +1831,64 @@ String? _canvasNameOf(NodeBox b) {
 /// When two different nodes answer to an id and exactly one of them passes
 /// [prefer] (`--type`: the one with a text field in it), that one is meant.
 ({NodeBox? box, String? problem}) _locate(WidgetsBinding binding, String id, {bool Function(NodeBox)? prefer}) {
+  final exact = _locateExact(binding, id, prefer: prefer);
+  if (exact.box != null || !(exact.problem ?? '').startsWith('no node ') || id.contains('#')) return exact;
+  // A node inside a component instance named without the calls above it
+  // (`joinSeason/action`, `action` for `FieldSeason1/joinSeason/action`):
+  // the node whose full path ends with what was written, when one node on
+  // screen has such a path; several are named by their full paths.
+  final matches = <String, List<NodeBox>>{};
+  for (final b in _boxes(binding)) {
+    if (componentInstanceOf(b.instance) == null) continue;
+    final path = b.tree.pathOf(b.id, b.instance);
+    final plain = path.replaceAll(RegExp(r'#\d+'), '');
+    if (plain == id || plain.endsWith('/$id')) (matches[plain] ??= []).add(b);
+  }
+  if (matches.isEmpty) return exact;
+  if (matches.length > 1) {
+    return (
+      box: null,
+      problem: 'ambiguous: ${matches.length} nodes on screen have a path ending "$id": ${matches.keys.join(', ')}. Name the one meant by its full path',
+    );
+  }
+  final copies = matches.values.single;
+  final shown = [for (final b in copies) if (_shown(b)) b];
+  if (shown.isEmpty) return (box: null, problem: '$_notShownHere"$id" is hidden here (visible false, or a media rule hides it at this width)');
+  final view = Offset.zero & binding.renderViews.first.size;
+  return (box: shown.where((b) => _rectOf(b).overlaps(view)).firstOrNull ?? shown.last, problem: null);
+}
+
+/// [path] (a component's node by its call ids, `cards#2/cta`) with each
+/// `#n` turned from the n-th copy shown into the n-th copy [tree] made: a
+/// step counts the copies a list shows, not those a condition hides
+/// (`--tap message#9` was the tenth row of the data, hidden or not: test 10,
+/// mail). Unchanged when a copy is not found (the lookup says so).
+String _rawCopies(RenderTree tree, String path) {
+  if (!path.contains('#')) return path;
+  final segments = path.split('/');
+  for (var d = 0; d < segments.length; d++) {
+    final hash = segments[d].lastIndexOf('#');
+    final n = hash < 0 ? null : int.tryParse(segments[d].substring(hash + 1));
+    if (n == null) continue;
+    final name = segments[d].substring(0, hash);
+    final before = segments.take(d).join('/');
+    var seen = -1;
+    for (var k = 0; k < 10000; k++) {
+      final copy = tree.boxAtPath('${before.isEmpty ? '' : '$before/'}$name#$k');
+      if (copy == null) break;
+      if (copy.attached && copy.hasSize && _shown(copy)) seen++;
+      if (seen == n) {
+        segments[d] = '$name#$k';
+        break;
+      }
+    }
+  }
+  return segments.join('/');
+}
+
+/// [_locate] for a node named as it is: by its id or name, its full path,
+/// or segment by segment.
+({NodeBox? box, String? problem}) _locateExact(WidgetsBinding binding, String id, {bool Function(NodeBox)? prefer}) {
   final boxes = _boxes(binding);
   (String, int?) split(String segment) {
     final hash = segment.lastIndexOf('#');
@@ -1849,7 +1907,7 @@ String? _canvasNameOf(NodeBox b) {
       (id.contains('/') || boxes.any((b) => b.id != first && b.tree.isInstanceRoot(b.id, b.instance) && b.tree.pathOf(b.id, b.instance) == first));
   if (byPath) {
     for (final b in boxes) {
-      final found = b.tree.boxAtPath(id);
+      final found = b.tree.boxAtPath(_rawCopies(b.tree, id));
       if (found != null && found.attached && found.hasSize) {
         // A component's node a media rule or a binding hides here (laid out
         // with no size, or not drawn) is skipped at this size, as a page's.
@@ -1897,8 +1955,18 @@ String? _canvasNameOf(NodeBox b) {
           return (box: null, problem: "ambiguous: copies of ${trees.length} different nodes on screen are \"$name\" (a page's and a component's, or two components'). Name the one meant by its path: ${names.take(4).join(' or ')}");
         }
       }
-      if (index >= all.length) return (box: null, problem: '"$upTo": there are ${all.length} copies of "$name" on screen (#0 to #${all.length - 1})');
-      chosen = all[index];
+      // The copies shown: a copy a condition hides (`if` in a list, a
+      // filter) is not counted, as a reader does not see it.
+      final shown = [for (final b in all) if (_shown(b)) b];
+      if (shown.isEmpty) return (box: null, problem: '$_notShownHere"$upTo": no copy of "$name" is shown here (visible false, or a media rule hides them at this width)');
+      if (index >= shown.length) {
+        return (
+          box: null,
+          problem: '"$upTo": there are ${shown.length} copies of "$name" on screen (#0 to #${shown.length - 1})'
+              '${shown.length < all.length ? '; #n counts the copies shown, not the ${all.length - shown.length} hidden' : ''}',
+        );
+      }
+      chosen = shown[index];
     } else {
       // Two different nodes answer to the id (a page's and a component's,
       // a page's and a modal's): say which to write. Copies a list repeats
@@ -2106,6 +2174,45 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     }
   }
 
+  // Whether anything along [path] reacts to a tap: a node's tap reaction,
+  // or a widget inside the node hit (a button, an input) that handles taps.
+  bool reactsToTap(List<RenderObject> path) {
+    var inWidget = true;
+    RenderControl? control;
+    for (final o in path) {
+      // A control drawn by the SDK (a button, a switch, a field, a tab bar)
+      // takes the tap itself: it changes its value, opens its menu or
+      // picker, or fires its node's reactions. Only a control that does
+      // nothing on its own (a button, an action chip, a list tile) needs a
+      // reaction on its node.
+      if (o is RenderControl && control == null && o.enabled && o.takesInput) {
+        control = o;
+        if (o is! RenderButton && o is! RenderListTile) return true;
+      }
+      if (o is RenderCalendar && o.inline) return true;
+      // A table sorts from its headers and selects its rows itself; its cell
+      // template is usually a text with no reaction of its own.
+      if (o is RenderRunningTable) return true;
+      if (o is NodeBox && control != null) {
+        if (o.source.node(o.id)?.actions.isNotEmpty ?? false) return true;
+        // A reorder handle: a press focuses it, for Alt and the arrows.
+        if (o.source.node(o.id)?.behaviors.reorderHandle ?? false) return true;
+        control = null;
+      }
+      if (o is NodeBox) inWidget = false;
+      if (o is RenderReactions && o.triggers.intersection(const {
+        api.TriggerType.click, api.TriggerType.doubleTap, api.TriggerType.longPress, api.TriggerType.hold, //
+        api.TriggerType.pointerDown, api.TriggerType.pointerUp, api.TriggerType.secondaryClick,
+      }).isNotEmpty) {
+        return true;
+      }
+      if (inWidget && o is RenderPointerListener && (o.onPointerDown != null || o.onPointerUp != null)) return true;
+      if (inWidget && o is RenderSemanticsGestureHandler && o.onTap != null) return true;
+      if (o is RenderEditable) return true;
+    }
+    return false;
+  }
+
   // Where to put the pointer for [id], or the problem.
   Future<(ui.Offset?, String?)> pointAt(String target, String verb) async {
     // An inline calendar has one node but many dates: name the ISO day.
@@ -2113,7 +2220,9 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     if (datePart != null) {
       final id = datePart[1]!, day = DateTime.tryParse(datePart[2]!);
       final found = _locate(binding, id);
-      if (found.box == null) return (null, '--$verb $target: ${found.problem}.');
+      if (found.box == null) {
+        return (null, found.problem!.startsWith(_notShownHere) ? '$_notShownHere--$verb $target: ${found.problem!.substring(_notShownHere.length)}.' : _withCandidates(binding, id, '--$verb $target: ${found.problem}.'));
+      }
       RenderCalendar? calendar;
       void visit(RenderObject o) {
         if (o is RenderCalendar && o.inline) calendar = o;
@@ -2247,6 +2356,10 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     final r = _rectOf(box).intersect(viewRect());
     if (r.isEmpty) return (null, '--$verb $id: the node is outside the screen and nothing scrolls it into view; scroll to it first (--scroll).');
     final over = hitAt(r.center).whereType<NodeBox>().firstOrNull;
+    // A node drawn for show inside one that takes the press (a Table's
+    // checkbox, `ignorePointer`, in a row that selects): the press lands on
+    // the node around it there, as a click on it does in a browser.
+    if (over != null && _isInside(box, over) && reactsToTap(hitAt(r.center))) return (r.center, null);
     if (over != null && _isInside(box, over)) {
       return (
         null,
@@ -2261,45 +2374,6 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
           : '--$verb $id: the node is covered by "${over.id}" (${over.node?.type}) wherever it shows; nothing was ${verb == 'tap' ? 'tapped' : 'hovered'}. '
               'Scroll it from under what overlays it (--scroll), or tap the covering node if that is what was meant.',
     );
-  }
-
-  // Whether anything along [path] reacts to a tap: a node's tap reaction,
-  // or a widget inside the node hit (a button, an input) that handles taps.
-  bool reactsToTap(List<RenderObject> path) {
-    var inWidget = true;
-    RenderControl? control;
-    for (final o in path) {
-      // A control drawn by the SDK (a button, a switch, a field, a tab bar)
-      // takes the tap itself: it changes its value, opens its menu or
-      // picker, or fires its node's reactions. Only a control that does
-      // nothing on its own (a button, an action chip, a list tile) needs a
-      // reaction on its node.
-      if (o is RenderControl && control == null && o.enabled && o.takesInput) {
-        control = o;
-        if (o is! RenderButton && o is! RenderListTile) return true;
-      }
-      if (o is RenderCalendar && o.inline) return true;
-      // A table sorts from its headers and selects its rows itself; its cell
-      // template is usually a text with no reaction of its own.
-      if (o is RenderRunningTable) return true;
-      if (o is NodeBox && control != null) {
-        if (o.source.node(o.id)?.actions.isNotEmpty ?? false) return true;
-        // A reorder handle: a press focuses it, for Alt and the arrows.
-        if (o.source.node(o.id)?.behaviors.reorderHandle ?? false) return true;
-        control = null;
-      }
-      if (o is NodeBox) inWidget = false;
-      if (o is RenderReactions && o.triggers.intersection(const {
-        api.TriggerType.click, api.TriggerType.doubleTap, api.TriggerType.longPress, api.TriggerType.hold, //
-        api.TriggerType.pointerDown, api.TriggerType.pointerUp, api.TriggerType.secondaryClick,
-      }).isNotEmpty) {
-        return true;
-      }
-      if (inWidget && o is RenderPointerListener && (o.onPointerDown != null || o.onPointerUp != null)) return true;
-      if (inWidget && o is RenderSemanticsGestureHandler && o.onTap != null) return true;
-      if (o is RenderEditable) return true;
-    }
-    return false;
   }
 
   // The text field (a [RenderTextField]) inside node [id].
