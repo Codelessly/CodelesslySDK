@@ -60,8 +60,11 @@
 // them, as a page reads a define written after its last line. A
 // components/*.txt that is neither that nor a component, a second file of
 // one component, and a component JSON site.json lists that nothing writes
-// are said (an issue with the vocabulary closed): they were skipped with
-// no word. A page whose first line is one `### Name` is read without it.
+// are an issue in every mode, --open too: they were skipped with no word. A
+// definition or a component of a name the notation already has (`Card`,
+// `Rail`, `Shortcut`) is not used, the notation's word is, and that is an
+// issue at the definition. A page whose first line is one `### Name` is
+// read without it.
 import 'dart:convert';
 import 'dart:io';
 
@@ -130,12 +133,12 @@ Future<void> main(List<String> args) async {
     stderr.writeln(p);
   }
   if (whole && (site == null || site.manifest.isEmpty)) exit(2);
-  // What the site's components/ has that is not loaded: said, in every mode
-  // (an issue with the vocabulary closed).
+  // What the site's components/ has that is not loaded or not used: an
+  // issue in every mode, --open too (the owner's decision, 2026-11-18).
   var skippedIssues = 0;
   for (final s in site?.skipped ?? const <SkippedComponent>[]) {
     stderr.writeln(s.message);
-    if (!open) skippedIssues++;
+    skippedIssues++;
   }
   // --validate: nothing is written (no document, no record); what an expand
   // would say is printed on stdout as JSON (validationOf), and the exit
@@ -215,8 +218,7 @@ Future<void> main(List<String> args) async {
     final issues = [
       for (final i in result.issues) {'file': recordPath(file, dir), 'line': i.line, 'column': i.column, 'message': site?.placeDefinitionLine(i.message, text) ?? i.message},
       for (final m in more) {'file': recordPath(file, dir), 'message': m},
-      if (!open)
-        for (final s in skipped) {'file': s['file'], 'message': s['message']},
+      for (final s in skipped) {'file': s['file'], 'message': s['message']},
     ];
     stdout.writeln(const JsonEncoder.withIndent(' ').convert(validationOf(snap, issues: issues, skipped: skipped)));
     if (issues.isNotEmpty) exitCode = 1;
@@ -263,8 +265,7 @@ int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings,
   // With --validate stdout is the JSON alone: the lines go to stderr.
   final say = validate ? stderr : stdout;
   final found = <Map<String, Object?>>[
-    if (!settings.open)
-      for (final s in skipped) {'file': s['file'], 'message': s['message']},
+    for (final s in skipped) {'file': s['file'], 'message': s['message']},
   ];
   final snap = siteSnapshot(site, components: components, open: settings.open, dir: site.home);
   final held = <Placeholder>[];
@@ -325,7 +326,9 @@ int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings,
   // every page and component, written to no JSON of their own.
   for (final e in site.definitionFiles.entries) {
     final words = site.definedWords.entries.where((w) => w.value == e.key).map((w) => w.key).toList()..sort();
-    say.writeln('${rel(e.key)} -> ${words.isEmpty ? 'defines nothing' : 'defines ${words.join(', ')}'} (every page and component reads it)');
+    final builtIn = [for (final w in readPageDefinitions(e.value).words.keys) if (!words.contains(w)) w];
+    say.writeln('${rel(e.key)} -> ${words.isEmpty ? 'defines nothing used' : 'defines ${words.join(', ')} (every page and component reads it)'}'
+        '${builtIn.isEmpty ? '' : '; ${builtIn.join(', ')}: the notation\'s word, this definition not used'}');
   }
   final expanded = expandSitePages(expander, site, order: order);
   // Overlays two pages write with one id and draw differently are each

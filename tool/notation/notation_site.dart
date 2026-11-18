@@ -154,6 +154,16 @@ final class NotationSite {
           continue;
         }
         out[type] = (type: type, path: f.path, text: text);
+        // A component of a name the notation has: the notation's word is read
+        // where it is written (a frame word, a core type), so a bare call does
+        // not call it. Said at the component, once.
+        if (notationBuiltInWord(type, catalog: standardCatalog) case final what?) {
+          _skipped.add((
+            path: f.path,
+            type: type,
+            message: '${_name(f.path)}: line 1: ${notationBuiltInDefinition(type, what, kind: 'component')} To call this component, write `$type type=$type`.',
+          ));
+        }
       }
     }
     return out;
@@ -197,7 +207,8 @@ final class NotationSite {
   /// The words [definitionFiles] define, by the file that defines each.
   late final Map<String, String> definedWords = {
     for (final e in definitionFiles.entries)
-      for (final w in readPageDefinitions(e.value).words.keys) w: e.key,
+      for (final w in readPageDefinitions(e.value).words.keys)
+        if (notationBuiltInWord(w, catalog: standardCatalog) == null) w: e.key,
   };
 
   /// The component files the site does not load (a `components/*.txt` that
@@ -238,6 +249,20 @@ final class NotationSite {
         message: '${_name(path)}: line ${i + 1}: `${l.length > 50 ? '${l.substring(0, 47)}...' : l}` is in no definition, so it is not read: '
             'a file of definitions holds `define` (or `primitive`) lines, each with its lines indented under it.',
       ));
+    }
+    // A word the notation already has is the notation's: this definition of
+    // it is not used (the owner's decision, 2026-11-18).
+    for (final e in read.words.entries) {
+      if (notationBuiltInWord(e.key, catalog: standardCatalog) case final what?) {
+        for (final d in e.value) {
+          _skipped.add((path: path, type: e.key, message: '${_name(path)}: line ${d.line}: ${notationBuiltInDefinition(e.key, what, kind: d.primitive ? 'primitive' : 'definition')}'));
+        }
+      }
+    }
+    // A formula whose brackets do not match (the parser says it where a file
+    // is expanded; this one is read by every page, never expanded alone).
+    for (final i in notationBracketIssues(text)) {
+      _skipped.add((path: path, type: _stem(path), message: '${_name(path)}: line ${i.line}:${i.column}: ${i.message}'));
     }
   }
 

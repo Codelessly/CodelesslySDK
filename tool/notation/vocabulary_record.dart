@@ -55,6 +55,7 @@ import 'package:codelessly_api/notation.dart';
 
 import 'notation_site.dart';
 import 'vocabulary_words.dart';
+import 'package:codelessly_api/codelessly_api.dart' show standardCatalog;
 
 /// What a record's `record` field says.
 const recordMarker = 'codelessly notation vocabulary record';
@@ -159,6 +160,14 @@ final class RecordSnapshot {
   /// A definition the writer wrote outside the files expanded (a site's
   /// components/*.txt: a component, or `define` blocks).
   void definition(String word, RecordedDefinition d) => definitions[word] = d;
+
+  /// The words the writer defined that the notation already has, with what
+  /// it has (notationBuiltInWord): the definition is not used, the built-in
+  /// word is (resolution `built-in`, the definition kept).
+  Map<String, String> get builtIns => {
+        for (final w in definitions.keys)
+          if (notationBuiltInWord(w, catalog: standardCatalog) case final b?) w: b,
+      };
 }
 
 String _stamp(DateTime t) => '${t.toUtc().toIso8601String().split('.').first}Z';
@@ -231,7 +240,7 @@ Map<String, Object?> mergeRecord(Map<String, Object?>? old, RecordSnapshot now, 
   for (final e in now.definitions.entries) {
     final w = entry('type', null, e.key);
     final d = e.value;
-    w['definition'] = {'file': d.file, 'line': d.line, 'by': d.by, if (!d.loaded) 'loaded': false, 'current': true, 'text': d.text};
+    w['definition'] = {'file': d.file, 'line': d.line, 'by': d.by, if (!d.loaded) 'loaded': false, if (now.builtIns[e.key] case final b?) 'builtIn': b, 'current': true, 'text': d.text};
     w['last'] = t;
     if (!d.loaded) {
       // Every word's definition is shown; one the site did not load is said.
@@ -281,6 +290,12 @@ Map<String, Object?> mergeRecord(Map<String, Object?>? old, RecordSnapshot now, 
     ]..sort((a, b) => (b['uses'] as int) != (a['uses'] as int) ? (b['uses'] as int) - (a['uses'] as int) : '${b['last']}'.compareTo('${a['last']}'));
     if ((w['signatures'] as List).isEmpty) w.remove('signatures');
     final defined = map(w['definition'])['current'] == true;
+    // The writer defined a word the notation has: the notation's is used,
+    // the definition is kept, to see what the writer expected the word to be.
+    if (defined && map(w['definition'])['builtIn'] != null) {
+      w['resolved'] = 'built-in';
+      w['definedBy'] = map(w['definition'])['by'];
+    }
     w['status'] = uses > 0
         ? 'used'
         : defined

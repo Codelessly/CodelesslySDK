@@ -186,6 +186,28 @@ void main() {
       expect(site.placeDefinitionLine('page:6: Pill: "focusable" is not a flag the notation has.', 'Column\n'), startsWith('components/Pill.txt:'));
     });
 
+    test('a built-in word wins: a site\'s primitive or component named like one is not used, said at its file, and recorded built-in', () async {
+      // The kanban board's: every Shortcut line became a labelled box.
+      _write('components/Shortcut.txt', '// Listens for the key.\nprimitive Shortcut "key" onPress\n');
+      _write('components/Rail.txt', 'component Rail\nColumn\n  Text "rail"\n');
+      final site = await NotationSite.load(findSiteManifest(site: _root.path)!);
+      expect(site.skipped.map((s) => s.message), [
+        startsWith('components/Rail.txt: line 1: The notation already has Rail, a word of the page'),
+        allOf(startsWith('components/Shortcut.txt: line 2: The notation already has Shortcut, read as the notation\'s shortcut line'),
+            contains('So this primitive of Shortcut is not used')),
+      ]);
+      expect(site.definedWords.keys, isNot(contains('Shortcut')));
+      final text = File('${_root.path}/pages/home.txt').readAsStringSync();
+      final r = NotationExpander(site: site, settings: _settings()).expand(text, path: 'home.txt', screen: 'home');
+      expect([for (final u in r.vocabulary) if (u.kind == 'primitive') u.word], isEmpty);
+      expect([for (final u in r.vocabulary) if (u.kind == 'alias') u.word], contains('Shortcut'));
+      await _expand(time: DateTime.utc(2026, 11, 18, 9));
+      final w = _word('type', 'Shortcut');
+      expect((w['resolved'], w['status'], w['definedBy']), ('built-in', 'used', 'site'));
+      expect((w['definition'] as Map)['builtIn'], startsWith('Shortcut, read as'));
+      expect((w['definition'] as Map)['text'], contains('primitive Shortcut "key" onPress'));
+    });
+
     test('a second file of one component, and a component JSON site.json lists that nothing writes, are said', () async {
       _write('components/Tag2.txt', 'component Tag "Again."\nRow\n');
       _write('site/site.json', jsonEncode({'schema': 3, 'pages': ['home.json'], 'components': ['components/Tag.json', 'components/Ghost.json']}));
@@ -280,8 +302,9 @@ void main() {
       return;
     }
     _write('components/Masthead.txt', 'Nav\n  Brand "Slow Atlas"\n');
+    // A components file that cannot be loaded fails the expand, --open too.
     final open = await Process.run(dart.path, ['run', 'tool/notation/expand.dart', _root.path, '--open']);
-    expect(open.exitCode, 0, reason: '${open.stderr}');
+    expect(open.exitCode, 1, reason: '${open.stderr}');
     final said = '${open.stderr}';
     expect(said, contains('components/Masthead.txt is not read'));
     expect(said, contains('pages/about.txt: line 3:3: "Masthead" is a word the notation, the design system and the site do not have: a placeholder stands in for it'));
@@ -298,11 +321,18 @@ void main() {
     // validate writes nothing and prints JSON.
     File('${_root.path}/vocabulary.json').deleteSync();
     final v = await Process.run(dart.path, ['run', 'tool/notation/expand.dart', _root.path, '--open', '--validate']);
-    expect(v.exitCode, 0, reason: '${v.stderr}');
+    expect(v.exitCode, 1, reason: '${v.stderr}');
     final json = jsonDecode('${v.stdout}') as Map;
+    expect(json['ok'], isFalse);
     expect([for (final p in (json['placeholders'] as List).cast<Map>()) p['word']], unorderedEquals(['Masthead', 'MiniMonth']));
     expect((json['skipped'] as List).single, containsPair('file', 'components/Masthead.txt'));
     expect(File('${_root.path}/vocabulary.json').existsSync(), isFalse);
+    // A word nobody defined stays a placeholder and, with --open, a warning.
+    File('${_root.path}/components/Masthead.txt').deleteSync();
+    final placeholders = await Process.run(dart.path, ['run', 'tool/notation/expand.dart', _root.path, '--open']);
+    expect(placeholders.exitCode, 0, reason: '${placeholders.stderr}');
+    expect('${placeholders.stderr}', contains('placeholder: Masthead (type) pages/about.txt:3 (1 use)'));
+    File('${_root.path}/vocabulary.json').deleteSync();
     // --no-record saves none.
     await Process.run(dart.path, ['run', 'tool/notation/expand.dart', _root.path, '--open', '--no-record']);
     expect(File('${_root.path}/vocabulary.json').existsSync(), isFalse);
