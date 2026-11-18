@@ -50,7 +50,7 @@ App
         Row gap=10
           Avatar "{p.name}"
           Column grow
-            Text.rowTitle "{p.name}" maxLines=1 overflow=ellipsis onTap={openId=p.id}
+            Text.strong "{p.name}" maxLines=1 overflow=ellipsis onTap={openId=p.id}
             Text.caption "{p.email}" maxLines=1 overflow=ellipsis
         Text.muted "{p.role}"
         Row gap=4

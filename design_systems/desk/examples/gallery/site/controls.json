@@ -1,0 +1,1237 @@
+{
+ "schema": 3,
+ "roots": [
+  "controls"
+ ],
+ "nodes": {
+  "controls": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 1440.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "surface"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 32,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "window"
+     }
+    ]
+   },
+   "children": [
+    "PageHeader1",
+    "Panel1",
+    "Panel2",
+    "Panel3"
+   ]
+  },
+  "PageHeader1": {
+   "type": "PageHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Controls",
+    "note": "Buttons, fields, choices and toggles at Desk's control height; every one in its rest, hover, focus, selected and disabled looks."
+   }
+  },
+  "Panel1": {
+   "type": "Panel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Buttons",
+    "note": "Primary, secondary, outline, ghost, destructive; small and large; loading and disabled; icon only."
+   },
+   "children": [
+    "row1",
+    "row2"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "filledButton1",
+    "filledButton2",
+    "outlinedButton1",
+    "textButton1",
+    "filledButton3",
+    "filledButton4",
+    "filledButton5",
+    "outlinedButton2",
+    "iconButton1",
+    "iconButton2",
+    "iconButton3"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 8
+      }
+     }
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Primary",
+    "icon": "add_outlined"
+   }
+  },
+  "filledButton2": {
+   "type": "filledButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "tonal": true,
+    "label": "Secondary"
+   }
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Outline",
+    "icon": "download_outlined"
+   }
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Ghost"
+   }
+  },
+  "filledButton3": {
+   "type": "filledButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "backgroundColor": "#FFDC2626",
+     "foregroundColor": "#FFFFFFFF"
+    },
+    "label": "Delete",
+    "icon": "delete_outlined"
+   }
+  },
+  "filledButton4": {
+   "type": "filledButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Saving",
+    "loading": true
+   }
+  },
+  "filledButton5": {
+   "type": "filledButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Disabled",
+    "enabled": false
+   }
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Disabled",
+    "enabled": false
+   }
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "more_horiz_outlined"
+   },
+   "tooltip": "More"
+  },
+  "iconButton2": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "star_outline"
+   },
+   "tooltip": "Star"
+  },
+  "iconButton3": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "delete_outlined",
+    "enabled": false
+   },
+   "tooltip": "Delete"
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "filledButton6",
+    "outlinedButton3",
+    "filledButton7",
+    "outlinedButton4"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 8
+      }
+     }
+    }
+   ]
+  },
+  "filledButton6": {
+   "type": "filledButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Small"
+   }
+  },
+  "outlinedButton3": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Small"
+   }
+  },
+  "filledButton7": {
+   "type": "filledButton",
+   "layout": {
+    "height": 44.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Large"
+   }
+  },
+  "outlinedButton4": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 44.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Large",
+    "icon": "upload_outlined"
+   }
+  },
+  "Panel2": {
+   "type": "Panel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Fields",
+    "note": "Input, search, select, number, date, multi-line; a label and help for a control that has none."
+   },
+   "children": [
+    "row3",
+    "row4",
+    "textField5"
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "textField1",
+    "textField2",
+    "Field1",
+    "Field2",
+    "Field3"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": 240,
+    "height": 54.0
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Name",
+     "hintText": "Ada Mensah"
+    }
+   }
+  },
+  "textField2": {
+   "type": "textField",
+   "layout": {
+    "width": 240,
+    "height": 54.0
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Email",
+     "hintText": "you@company.com"
+    },
+    "validator": "Enter a work email"
+   }
+  },
+  "Field1": {
+   "type": "Field",
+   "layout": {
+    "width": 200,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Role",
+    "note": "What they can do."
+   },
+   "children": [
+    "dropdown1"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 200,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "dropdown1": {
+   "type": "dropdown",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 34.0
+   },
+   "props": {
+    "items": [
+     "Owner",
+     "Admin",
+     "Member"
+    ]
+   },
+   "bind": {
+    "props.value": "${role}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "role",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "Field2": {
+   "type": "Field",
+   "layout": {
+    "width": 140,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Seats"
+   },
+   "children": [
+    "textField3"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 140,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "textField3": {
+   "type": "textField",
+   "layout": {
+    "width": 112,
+    "height": 34.0
+   },
+   "props": {
+    "min": 1,
+    "max": 99,
+    "keyboardType": "number",
+    "steppers": true,
+    "textAlign": "center"
+   },
+   "bind": {
+    "props.initialValue": "${seats}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "seats",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "Field3": {
+   "type": "Field",
+   "layout": {
+    "width": 200,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Due date"
+   },
+   "children": [
+    "dateTimeInput1"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 200,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "dateTimeInput1": {
+   "type": "dateTimeInput",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 34.0
+   },
+   "props": {
+    "value": "2026-11-19"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "SearchField1",
+    "SearchField2",
+    "textField4"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "SearchField1": {
+   "type": "SearchField",
+   "layout": {
+    "width": 280,
+    "height": 34.0
+   },
+   "props": {
+    "value": "q",
+    "hint": "Search mail"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 280,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "SearchField2": {
+   "type": "SearchField",
+   "layout": {
+    "width": 280,
+    "height": 34.0
+   },
+   "props": {
+    "value": "q2",
+    "hint": "Search"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 280,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "textField4": {
+   "type": "textField",
+   "layout": {
+    "width": 200,
+    "height": 34.0
+   },
+   "props": {
+    "decoration": {
+     "labelText": "",
+     "hintText": "Disabled"
+    },
+    "enabled": false
+   }
+  },
+  "textField5": {
+   "type": "textField",
+   "layout": {
+    "width": 520,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Description",
+     "hintText": "Write a description…"
+    },
+    "minLines": 3,
+    "maxLines": 6
+   }
+  },
+  "Panel3": {
+   "type": "Panel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Choices and toggles",
+    "note": "Checkbox, radio, switch, segmented control, chips, slider, progress."
+   },
+   "children": [
+    "row5",
+    "row6",
+    "row7"
+   ]
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 20,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "checkbox1",
+    "checkbox2",
+    "radio1",
+    "radio2",
+    "switch1",
+    "segmentedButton1"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "checkbox1": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Remember me"
+   },
+   "bind": {
+    "props.value": "${agree}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "agree",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "checkbox2": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Disabled"
+   },
+   "bind": {
+    "disabled": "${= true}"
+   }
+  },
+  "radio1": {
+   "type": "radio",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Option A",
+    "value": "a"
+   },
+   "bind": {
+    "props.groupValue": "${pick}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "radio2": {
+   "type": "radio",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Option B",
+    "value": "b"
+   },
+   "bind": {
+    "props.groupValue": "${pick}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "switch1": {
+   "type": "switch",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Notify"
+   },
+   "bind": {
+    "props.value": "${on}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "on",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "segmentedButton1": {
+   "type": "segmentedButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "segments": [
+     {
+      "value": "Month",
+      "label": "Month"
+     },
+     {
+      "value": "Year",
+      "label": "Year"
+     }
+    ]
+   },
+   "bind": {
+    "props.selected": "${= [plan]}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "plan",
+       "value": "${result[0]}"
+      }
+     ]
+    }
+   ]
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "filterChip1",
+    "filterChip2",
+    "choiceChip1",
+    "inputChip1",
+    "FilterButton1",
+    "FilterButton2",
+    "KeyCap1",
+    "KeyCap2"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 8
+      }
+     }
+    }
+   ]
+  },
+  "filterChip1": {
+   "type": "filterChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Unread",
+    "selected": true
+   }
+  },
+  "filterChip2": {
+   "type": "filterChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Starred"
+   }
+  },
+  "choiceChip1": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "All mail",
+    "selected": true
+   }
+  },
+  "inputChip1": {
+   "type": "inputChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "ada@x.io"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "deleted"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "q",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "FilterButton1": {
+   "type": "FilterButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Labels",
+    "icon": "label_outlined"
+   }
+  },
+  "FilterButton2": {
+   "type": "FilterButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Assignee",
+    "icon": "person_outlined",
+    "count": 2
+   }
+  },
+  "KeyCap1": {
+   "type": "KeyCap",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   },
+   "props": {
+    "label": "Ctrl K"
+   }
+  },
+  "KeyCap2": {
+   "type": "KeyCap",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   },
+   "props": {
+    "label": "/"
+   }
+  },
+  "row7": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "slider1",
+    "progressBar1"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "slider1": {
+   "type": "slider",
+   "layout": {
+    "width": 240,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "min": 0,
+    "max": 100
+   },
+   "bind": {
+    "props.value": "${vol}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "vol",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "progressBar1": {
+   "type": "progressBar",
+   "layout": {
+    "width": 240,
+    "height": 6
+   },
+   "props": {
+    "value": 0.45,
+    "max": 1,
+    "borderRadius": 999,
+    "color": "primary",
+    "backgroundColor": "track"
+   }
+  }
+ },
+ "variables": {
+  "controls": [
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "q2",
+    "type": "text",
+    "value": "invoice"
+   },
+   {
+    "name": "role",
+    "type": "text",
+    "value": "Admin"
+   },
+   {
+    "name": "on",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "agree",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "pick",
+    "type": "text",
+    "value": "b"
+   },
+   {
+    "name": "plan",
+    "type": "text",
+    "value": "Month"
+   },
+   {
+    "name": "seats",
+    "type": "integer",
+    "value": 12
+   },
+   {
+    "name": "vol",
+    "type": "integer",
+    "value": 40
+   }
+  ]
+ }
+}

@@ -1,0 +1,604 @@
+{
+ "schema": 3,
+ "roots": [
+  "feedback"
+ ],
+ "nodes": {
+  "feedback": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 1440.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "surface"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 32,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 20,
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "window"
+     }
+    ]
+   },
+   "children": [
+    "PageHeader1",
+    "Banner1",
+    "Banner2",
+    "Banner3",
+    "Banner4",
+    "row1",
+    "row2"
+   ]
+  },
+  "PageHeader1": {
+   "type": "PageHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Feedback",
+    "note": "Banners, empty states, loading, progress and a board's parts."
+   }
+  },
+  "Banner1": {
+   "type": "Banner",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "message": "You are viewing an archived board.",
+    "lead": "Read only."
+   }
+  },
+  "Banner2": {
+   "type": "Banner",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "message": "Your changes were saved.",
+    "tone": "success",
+    "dismissible": true
+   }
+  },
+  "Banner3": {
+   "type": "Banner",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "message": "Your trial ends in 3 days.",
+    "tone": "warning",
+    "dismissible": true
+   },
+   "children": [
+    "outlinedButton1"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Upgrade"
+   }
+  },
+  "Banner4": {
+   "type": "Banner",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "message": "The sync failed: the server did not answer.",
+    "tone": "danger"
+   },
+   "children": [
+    "outlinedButton2"
+   ]
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Retry",
+    "icon": "refresh_outlined"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column2",
+    "column3",
+    "column4"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 16
+      }
+     }
+    }
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": 380,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "Empty1"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 280,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "Empty1": {
+   "type": "Empty",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "No messages",
+    "note": "Mail you receive shows up here.",
+    "icon": "inbox_outlined"
+   },
+   "children": [
+    "outlinedButton3"
+   ]
+  },
+  "outlinedButton3": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Refresh",
+    "icon": "refresh_outlined"
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": 380,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "Empty2"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 280,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "Empty2": {
+   "type": "Empty",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "No results for “invoice”",
+    "note": "Try another word, or clear the filters.",
+    "icon": "search_outlined"
+   },
+   "children": [
+    "textButton1"
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Clear filters"
+   }
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "Skeleton1",
+    "Skeleton2",
+    "Skeleton3",
+    "progressBar1"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 360,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "Skeleton1": {
+   "type": "Skeleton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "lines": 2,
+    "avatar": true
+   }
+  },
+  "Skeleton2": {
+   "type": "Skeleton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "lines": 2,
+    "avatar": true
+   }
+  },
+  "Skeleton3": {
+   "type": "Skeleton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "lines": 3
+   }
+  },
+  "progressBar1": {
+   "type": "progressBar",
+   "layout": {
+    "height": 6,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "value": 0.62,
+    "max": 1,
+    "borderRadius": 999,
+    "color": "primary",
+    "backgroundColor": "track"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "BoardColumn1",
+    "BoardColumn2"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "BoardColumn1": {
+   "type": "BoardColumn",
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "In progress",
+    "count": 3,
+    "limit": 2,
+    "hue": "sky"
+   },
+   "children": [
+    "TaskCard1",
+    "TaskCard2"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 280,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "TaskCard1": {
+   "type": "TaskCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "key": "STK-124",
+    "title": "Polish the invite flow",
+    "labels": [
+     {
+      "label": "Design",
+      "hue": "violet"
+     },
+     {
+      "label": "Product",
+      "hue": "green"
+     }
+    ],
+    "due": "Nov 19",
+    "checklist": "2/4",
+    "comments": 3,
+    "assignee": "Maya Chen"
+   }
+  },
+  "TaskCard2": {
+   "type": "TaskCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "key": "STK-126",
+    "title": "Fix duplicate billing emails",
+    "labels": [
+     {
+      "label": "Bug",
+      "hue": "red"
+     }
+    ],
+    "due": "Nov 15",
+    "overdue": true,
+    "assignee": "Sam Rao",
+    "selected": true
+   }
+  },
+  "BoardColumn2": {
+   "type": "BoardColumn",
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Done",
+    "count": 1,
+    "hue": "green"
+   },
+   "children": [
+    "TaskCard3"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 280,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "TaskCard3": {
+   "type": "TaskCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "A card with no key or labels",
+    "assignee": "Jules Martin"
+   }
+  }
+ }
+}

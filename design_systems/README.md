@@ -23,6 +23,7 @@ are another design system.
 |---|---|
 | `ssui/` | Soft SaaS UI, rebuilt from `soft_saas_ui`'s source values by `ssui/tool/generate.py`. The default. `ssui/PARITY.md` lists which of its 164 source components are here. |
 | `paper/` | A second one, to prove the drop-in: written by `tool/new_design_system.py` from `tool/brands/paper.json`. Warm paper, near-black ink, teal accent, square corners. |
+| `desk/` | Desktop apps, made from scratch for a pointer and a large window: its own tokens, outline icons, and the app shell, toolbar, table, list, board and dialog parts written in the notation (`desk/components/src`). Its guides are `desk/README.md`, `desk/DESIGN.md` and `desk/TO-MOBILE.md`. |
 | `harbor/` | A third, to prove density and type as brand choices (`tool/brands/harbor.json`): comfortable density, type a tenth larger, round corners, indigo accent. |
 
 ## Making another

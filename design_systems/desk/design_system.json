@@ -195,21 +195,21 @@
    },
    "pageTitle": {
     "fontFamily": "Inter",
-    "fontSize": 24,
+    "fontSize": 28,
     "fontWeight": 700,
-    "height": 1.25,
+    "height": 1.2,
     "color": "primaryText",
     "leadingDistribution": "even",
-    "letterSpacing": -0.4
+    "letterSpacing": -0.7
    },
    "title": {
     "fontFamily": "Inter",
-    "fontSize": 24,
+    "fontSize": 28,
     "fontWeight": 700,
-    "height": 1.25,
+    "height": 1.2,
     "color": "primaryText",
     "leadingDistribution": "even",
-    "letterSpacing": -0.4
+    "letterSpacing": -0.7
    },
    "heading1": {
     "fontFamily": "Inter",

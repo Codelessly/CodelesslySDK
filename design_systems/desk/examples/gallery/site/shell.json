@@ -1,0 +1,1512 @@
+{
+ "schema": 3,
+ "roots": [
+  "shell",
+  "shell_sidebar"
+ ],
+ "nodes": {
+  "shell": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 1440.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "surface"
+     }
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column1",
+    "column3",
+    "column4",
+    "column8"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": 240,
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     12,
+     16,
+     12,
+     12
+    ]
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "sidebar"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "children": [
+    "Brand1",
+    "SideButton1",
+    "NavSection1",
+    "NavItem1",
+    "NavItem2",
+    "NavItem3",
+    "NavSection2",
+    "NavItem4",
+    "NavItem5",
+    "spacer1",
+    "column2"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "Brand1": {
+   "type": "Brand",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Tenant",
+    "note": "Northstar Studio",
+    "icon": "hub_outlined"
+   }
+  },
+  "SideButton1": {
+   "type": "SideButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "label": "New issue",
+    "icon": "add_outlined",
+    "shortcut": "C"
+   }
+  },
+  "NavSection1": {
+   "type": "NavSection",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "People & access"
+   }
+  },
+  "NavItem1": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Members",
+    "icon": "group_outlined",
+    "badge": "50"
+   },
+   "bind": {
+    "props.selected": "${= tab == \"members\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "members"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem2": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Roles",
+    "icon": "shield_outlined",
+    "shortcut": "G R"
+   },
+   "bind": {
+    "props.selected": "${= tab == \"roles\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "roles"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem3": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Teams",
+    "icon": "workspaces_outlined"
+   },
+   "bind": {
+    "props.selected": "${= tab == \"teams\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "teams"
+      }
+     ]
+    }
+   ]
+  },
+  "NavSection2": {
+   "type": "NavSection",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Workspace"
+   }
+  },
+  "NavItem4": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Billing",
+    "icon": "credit_card_outlined"
+   }
+  },
+  "NavItem5": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Delete workspace",
+    "icon": "delete_outlined",
+    "danger": true
+   }
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   }
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     0,
+     8,
+     0,
+     0
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "children": [
+    "NavItem6",
+    "Account1"
+   ]
+  },
+  "NavItem6": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Keyboard shortcuts",
+    "icon": "keyboard_outlined",
+    "shortcut": "?"
+   }
+  },
+  "Account1": {
+   "type": "Account",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Amara Okafor",
+    "note": "Workspace owner"
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": 64,
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     12,
+     16,
+     12,
+     12
+    ]
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "sidebar"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "children": [
+    "Brand2",
+    "SideButton2",
+    "NavItem7",
+    "NavItem8",
+    "NavItem9"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "Brand2": {
+   "type": "Brand",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Tenant",
+    "icon": "hub_outlined",
+    "rail": true
+   }
+  },
+  "SideButton2": {
+   "type": "SideButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "label": "New issue",
+    "icon": "add_outlined",
+    "rail": true
+   }
+  },
+  "NavItem7": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Members",
+    "icon": "group_outlined",
+    "selected": true,
+    "rail": true
+   }
+  },
+  "NavItem8": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Roles",
+    "icon": "shield_outlined",
+    "rail": true
+   }
+  },
+  "NavItem9": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Teams",
+    "icon": "workspaces_outlined",
+    "rail": true
+   }
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row2",
+    "divider1",
+    "column5"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     24,
+     14,
+     24,
+     14
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center",
+    "spacing": 24
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ]
+   },
+   "children": [
+    "iconButton1",
+    "Breadcrumb1",
+    "row3"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "spacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "menu_outlined"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "shell_sidebar",
+       "presentation": "dialog",
+       "cover": true
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "Breadcrumb1": {
+   "type": "Breadcrumb",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "items": [
+     "Workspace",
+     "Settings",
+     "Members"
+    ]
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "SearchField1",
+    "iconButton2"
+   ]
+  },
+  "SearchField1": {
+   "type": "SearchField",
+   "layout": {
+    "width": 240,
+    "height": 34.0
+   },
+   "props": {
+    "value": "q",
+    "hint": "Search",
+    "shortcut": "Ctrl K"
+   }
+  },
+  "iconButton2": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "notifications_outlined"
+   },
+   "tooltip": "Notifications"
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "padding": 32,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 20,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "PageHeader1",
+    "Tabs1",
+    "column6"
+   ]
+  },
+  "PageHeader1": {
+   "type": "PageHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Members",
+    "note": "Manage workspace access, roles and invitations.",
+    "overline": "Workspace"
+   },
+   "children": [
+    "outlinedButton1",
+    "filledButton1"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Export",
+    "icon": "download_outlined"
+   }
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Invite members",
+    "icon": "add_outlined"
+   }
+  },
+  "Tabs1": {
+   "type": "Tabs",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 40.0
+   },
+   "props": {
+    "value": "view",
+    "tabs": [
+     "Board",
+     "List",
+     "Archive"
+    ],
+    "icons": [
+     "view_kanban",
+     "list",
+     "inventory_2"
+    ],
+    "counts": [
+     "12",
+     "",
+     ""
+    ]
+   }
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 8,
+    "clip": "antiAlias"
+   },
+   "children": [
+    "Toolbar1",
+    "column7"
+   ]
+  },
+  "Toolbar1": {
+   "type": "Toolbar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 48.0
+   },
+   "props": {
+    "band": true
+   },
+   "children": [
+    "iconButton3",
+    "iconButton4",
+    "iconButton5",
+    "Separator1",
+    "iconButton6",
+    "spacer2",
+    "text1",
+    "iconButton7",
+    "iconButton8"
+   ]
+  },
+  "iconButton3": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "archive_outlined"
+   },
+   "tooltip": "Archive"
+  },
+  "iconButton4": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "drive_file_move_outlined"
+   },
+   "tooltip": "Move"
+  },
+  "iconButton5": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "delete_outlined"
+   },
+   "tooltip": "Delete"
+  },
+  "Separator1": {
+   "type": "Separator",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   }
+  },
+  "iconButton6": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "star_outline"
+   },
+   "tooltip": "Star"
+  },
+  "spacer2": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "1 of 9"
+   }
+  },
+  "iconButton7": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "expand_less_outlined"
+   },
+   "tooltip": "Newer"
+  },
+  "iconButton8": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "expand_more_outlined"
+   },
+   "tooltip": "Older"
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "padding": 20,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text2"
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "A pane's toolbar: icon buttons 30 square with 16 outline glyphs, a separator between groups, a Spacer pushing the pager to the end."
+   }
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "width": 320,
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "left"
+   },
+   "children": [
+    "PaneHeader1",
+    "column9"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "PaneHeader1": {
+   "type": "PaneHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Inspector",
+    "note": "A side pane's head"
+   }
+  },
+  "column9": {
+   "type": "column",
+   "layout": {
+    "padding": 20,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "Property1",
+    "Property2",
+    "Property3"
+   ]
+  },
+  "Property1": {
+   "type": "Property",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Owner",
+    "text": "Amara Okafor"
+   }
+  },
+  "Property2": {
+   "type": "Property",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Status"
+   },
+   "children": [
+    "Status1"
+   ]
+  },
+  "Status1": {
+   "type": "Status",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Active",
+    "tone": "success"
+   }
+  },
+  "Property3": {
+   "type": "Property",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Teams"
+   },
+   "children": [
+    "Tag1",
+    "Tag2"
+   ]
+  },
+  "Tag1": {
+   "type": "Tag",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   },
+   "props": {
+    "label": "Platform",
+    "outline": true,
+    "dot": false
+   }
+  },
+  "Tag2": {
+   "type": "Tag",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20.0
+   },
+   "props": {
+    "label": "Design",
+    "outline": true,
+    "dot": false
+   }
+  },
+  "shell_sidebar": {
+   "type": "canvas",
+   "name": "shell_sidebar",
+   "slots": {
+    "body": "row4"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ]
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column10",
+    "column12"
+   ]
+  },
+  "column10": {
+   "type": "column",
+   "layout": {
+    "width": 300,
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     12,
+     16,
+     12,
+     12
+    ]
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "sidebar"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "children": [
+    "Brand3",
+    "SideButton3",
+    "NavSection3",
+    "NavItem10",
+    "NavItem11",
+    "NavItem12",
+    "NavSection4",
+    "NavItem13",
+    "NavItem14",
+    "spacer3",
+    "column11"
+   ]
+  },
+  "Brand3": {
+   "type": "Brand",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Tenant",
+    "note": "Northstar Studio",
+    "icon": "hub_outlined"
+   }
+  },
+  "SideButton3": {
+   "type": "SideButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "label": "New issue",
+    "icon": "add_outlined",
+    "shortcut": "C"
+   }
+  },
+  "NavSection3": {
+   "type": "NavSection",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "People & access"
+   }
+  },
+  "NavItem10": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Members",
+    "icon": "group_outlined",
+    "badge": "50"
+   },
+   "bind": {
+    "props.selected": "${= tab == \"members\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "members"
+      },
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem11": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Roles",
+    "icon": "shield_outlined",
+    "shortcut": "G R"
+   },
+   "bind": {
+    "props.selected": "${= tab == \"roles\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "roles"
+      },
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "NavItem12": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Teams",
+    "icon": "workspaces_outlined"
+   },
+   "bind": {
+    "props.selected": "${= tab == \"teams\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "teams"
+      },
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "NavSection4": {
+   "type": "NavSection",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Workspace"
+   }
+  },
+  "NavItem13": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Billing",
+    "icon": "credit_card_outlined"
+   }
+  },
+  "NavItem14": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Delete workspace",
+    "icon": "delete_outlined",
+    "danger": true
+   }
+  },
+  "spacer3": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   }
+  },
+  "column11": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     0,
+     8,
+     0,
+     0
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "children": [
+    "NavItem15",
+    "Account2"
+   ]
+  },
+  "NavItem15": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32.0
+   },
+   "props": {
+    "label": "Keyboard shortcuts",
+    "icon": "keyboard_outlined",
+    "shortcut": "?"
+   }
+  },
+  "Account2": {
+   "type": "Account",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Amara Okafor",
+    "note": "Workspace owner"
+   }
+  },
+  "column12": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "page_variables": [
+   {
+    "name": "tab",
+    "type": "text",
+    "value": "members"
+   },
+   {
+    "name": "view",
+    "type": "text",
+    "value": "Board"
+   },
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

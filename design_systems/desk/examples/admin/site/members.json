@@ -1722,7 +1722,7 @@
       "decoration": {
        "fills": [
         {
-         "color": "#FFE9EFFD"
+         "color": "activeTint"
         }
        ]
       }
@@ -1861,7 +1861,7 @@
    },
    "props": {
     "style": {
-     "from": "rowTitle"
+     "from": "strong"
     },
     "text": "${item.name}",
     "maxLines": 1,

@@ -1,0 +1,32 @@
+Column gap=24 pad=32 h=fill fill=window
+  PageHeader "Overlays" "A dialog over the page (its title bar, a body padded 24, the footer band), a menu, a popover's surface, a tooltip, a toast."
+    Button.outline "Menu" icon="more_horiz" onTap={open more}
+    Button "Open dialog" onTap={open confirm}
+  Row gap=24 top
+    Column w=240
+      MenuPopover heading="Move to"
+        MenuItem "Archive" icon="archive" shortcut="E"
+        MenuItem "Snooze" icon="schedule" shortcut="H"
+        MenuItem "Sort by date" icon="sort" checked
+        Divider
+        MenuItem "Delete" icon="delete" shortcut="Del" danger
+    Column w=320 gap=10 pad=16 fill=raisedBackground border=line radius=10 effects={theme.shadows.level3}
+      Text.panelTitle "A popover"
+      Text.small "A small panel by what opened it: the raised surface, a hairline, radius 10, the menu's shadow."
+      Row gap=8 end
+        Button.ghost "Later" size=small
+        Button "Got it" size=small
+    Column gap=8
+      Button.outline "Hover me" tooltip="A tooltip: ink fill, 12/500, after 400 ms"
+      Text.caption "Tooltips are the theme's tooltip colours."
+Dialog#confirm "Deactivate 3 members?" "They lose access at once and are signed out of every session. You can reactivate them later." w=480
+  Banner "Amara Okafor is an owner: ownership moves to you." tone="warning"
+  Actions
+    Button.ghost "Cancel" onTap={close}
+    Button.destructive "Deactivate 3" onTap={close; toast "Deactivated"}
+Menu#more
+  MenuItem "Rename" icon="edit" shortcut="F2"
+  MenuItem "Duplicate" icon="content_copy" shortcut="Ctrl D"
+  Divider
+  MenuItem "Delete" icon="delete" danger
+on load={open confirm}

@@ -35,6 +35,15 @@
     },
     "default": "",
     "doc": "A Material icon name for the mark."
+   },
+   {
+    "key": "rail",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Folded to its icon (a collapsed sidebar); a tablet's width folds it too."
    }
   ]
  },
@@ -136,15 +145,9 @@
     "spacing": 0,
     "crossAxisAlignment": "start"
    },
-   "media": [
-    {
-     "minWidth": 700,
-     "maxWidth": 1023,
-     "patch": {
-      "visible": false
-     }
-    }
-   ],
+   "bind": {
+    "visible": "${= !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+   },
    "children": [
     "brandName",
     "brandNote"

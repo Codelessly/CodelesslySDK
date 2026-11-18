@@ -1,6 +1,7 @@
 component NavSection "The label over a group of sidebar items: small spaced capitals in the caption ink, with room above that parts the groups."
   param label="Section" required doc="The group's name (written as it reads; shown in capitals)."
+  param rail:bool=false doc="Folded to its icon (a collapsed sidebar); a tablet's width folds it too."
   preview "Default" 232x36 label="Mailbox"
-Column#section pad=[10,18,10,6] min700.tablet.pad=[8,10,8,10] w=fill
-  Text#label "{upper(props.label)}" style=overline min700.tablet.visible=false
-  box#rule h=1 w=fill fill=line visible=false min700.tablet.visible=true
+Column#section pad={(props.rail || (screen.width >= 700 && screen.width < 1024)) ? [8, 10, 8, 10] : [10, 18, 10, 6]} w=fill
+  Text#label "{upper(props.label)}" style=overline visible={!(props.rail || (screen.width >= 700 && screen.width < 1024))}
+  box#rule h=1 w=fill fill=line visible={(props.rail || (screen.width >= 700 && screen.width < 1024))}

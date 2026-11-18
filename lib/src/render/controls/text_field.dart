@@ -259,7 +259,12 @@ class TextFieldConfig {
     c.maxLines = max;
     c.minLines = min;
     // The text's size follows the box's step of the scale (a fixed height).
-    final scale = vFit == SizeFit.fixed && c.oneLine ? tokens.scaleFor(n.layout.height.value) : ControlScale.compact;
+    // A label drawn above the box is in the node's height too: the step is
+    // the box's (a labelled 34 field is 54 high, and drew its text at the
+    // large step's 15).
+    final labelled = (n.prop(TextFieldProps.decoration).labelText ?? '').trim().isNotEmpty;
+    final boxHeight = n.layout.height.value - (labelled ? kFieldLabelGap + 14 : 0);
+    final scale = vFit == SizeFit.fixed && c.oneLine ? tokens.scaleFor(boxHeight) : ControlScale.compact;
     final own = n.behaviors.defaultTextStyle;
     final inheritedStyle = TextStyle(fontFamily: inherited?.fontFamily);
     final ownDefault = own == null || own.isEmpty ? null : ownStyle(own);

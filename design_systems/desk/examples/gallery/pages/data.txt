@@ -1,0 +1,64 @@
+state sortKey="name"
+state chosen=["o2"]
+state page=2
+state orders=[{"id":"o1","name":"Ada Byron","email":"ada@lovelace.io","status":"Paid","total":"$1,240.00"},{"id":"o2","name":"Lin Chen","email":"lin@chen.dev","status":"Due","total":"$312.50"},{"id":"o3","name":"Sam Rao","email":"sam@rao.co","status":"Overdue","total":"$89.00"}]
+state none=[]
+Column gap=24 pad=32 h=fill scroll fill=window
+  PageHeader "Data" "Tables, list rows, stats, statuses, tags, people and the bars that act on what is chosen."
+  Grid cols=4 gap=12
+    Stat "Revenue" "$48.2k" delta="+12%" note="this month"
+    Stat "Orders" "1,284" delta="+4%" tone="success"
+    Stat "Refunds" "23" delta="-2" tone="warning"
+    Stat "Disputes" "2" tone="danger"
+  BulkBar count={length(chosen)} onClear={chosen=[]}
+    Button.outline "Mark paid" icon="check" size=small
+    Button.destructive "Void" size=small
+  Table o in orders columns=[{"key":"name","label":"Customer"},{"key":"status","label":"Status","w":140},{"key":"total","label":"Total","w":120,"align":"end"},{"key":"menu","label":"","w":40,"sort":false}] sort=@sortKey select=@chosen
+    Row gap=10
+      Avatar "{o.name}"
+      Column
+        Text.strong "{o.name}"
+        Text.caption "{o.email}"
+    Status "{o.status}" tone="{o.status == 'Paid' ? 'success' : (o.status == 'Due' ? 'warning' : 'danger')}" pill
+    Text "{o.total}" tabularFigures=true
+    IconButton "more_horiz" tooltip="Actions"
+  Pager @page pages=5 summary="11–20 of 50 orders"
+  Row gap=16 top
+    Column w=420 gap=12
+      Text.overline "A COMPACT TABLE, AND AN EMPTY ONE"
+      Table o in orders columns=["Name","Status","Total"] compact
+      Table o in none columns=["Name","Status","Total"] empty="No orders match. Clear the filters."
+    Column w=380 border=line radius=8 clip=antiAlias
+      ListGroup "Today" meta="3"
+      ListRow "Maya Chen" "Studio visit on Thursday" preview="Hi Jamie, Thursday at 10:30 works for the studio visit." meta="10:42 AM" selected starred
+      ListRow "Nora Patel" "November print invoice" preview="Here is the invoice for the November proofs." meta="9:18 AM" unread attachment
+      ListRow "Eli Vargas" "Homepage review notes" meta="8:54 AM" avatar="Eli Vargas"
+    Column grow gap=12
+      Row gap=10 middle
+        Status "Active" tone="success"
+        Status "Invited" tone="warning"
+        Status "Suspended" tone="danger"
+        Status "Syncing" tone="info"
+        Status "Inactive"
+      Row gap=6 middle
+        Status "Active" tone="success" pill
+        Status "Invited" tone="warning" pill
+        Status "Failed" tone="danger" pill
+        Badge.neutral "12"
+        Badge.primary "New"
+      Row gap=6 middle
+        Tag "Design" hue="violet"
+        Tag "Bug" hue="red"
+        Tag "Research" hue="amber"
+        Tag "Engineering" hue="sky"
+        Tag "Platform" outline dot=false
+        Tag "ada@x.io" removable
+      Row gap=10 middle
+        Avatar "Maya Chen" size=20
+        Avatar "Jules Martin"
+        Avatar "Sam Rao" size=36
+        AvatarGroup names=["Maya Chen","Jules Martin","Sam Rao","Ola Berg","Ken Ito"]
+      FileTile "Site walk notes.txt" "164 KB"
+      Panel "Member" "A titled section with labelled values"
+        Property "Role" "Admin"
+        Property "Two-factor" "Enabled"

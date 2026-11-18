@@ -1,0 +1,64 @@
+state q=""
+state q2="invoice"
+state role="Admin"
+state on=true
+state agree=true
+state pick="b"
+state plan="Month"
+state seats=12
+state vol=40
+Column gap=24 pad=32 h=fill scroll fill=window
+  PageHeader "Controls" "Buttons, fields, choices and toggles at Desk's control height; every one in its rest, hover, focus, selected and disabled looks."
+  Panel "Buttons" "Primary, secondary, outline, ghost, destructive; small and large; loading and disabled; icon only."
+    Row gap=8 middle
+      Button "Primary" icon="add"
+      Button.secondary "Secondary"
+      Button.outline "Outline" icon="download"
+      Button.ghost "Ghost"
+      Button.destructive "Delete" icon="delete"
+      Button "Saving" loading=true
+      Button "Disabled" enabled=false
+      Button.outline "Disabled" enabled=false
+      IconButton "more_horiz" tooltip="More"
+      IconButton "star_outline" tooltip="Star"
+      IconButton "delete" tooltip="Delete" enabled=false
+    Row gap=8 middle
+      Button "Small" size=small
+      Button.outline "Small" size=small
+      Button "Large" size=large
+      Button.outline "Large" size=large icon="upload"
+  Panel "Fields" "Input, search, select, number, date, multi-line; a label and help for a control that has none."
+    Row gap=12 top
+      Input "Name" "Ada Mensah" w=240
+      Input "Email" "you@company.com" w=240 validator={"Enter a work email"}
+      Field "Role" "What they can do." w=200
+        Select @role items=["Owner","Admin","Member"] w=fill
+      Field "Seats" w=140
+        NumberInput @seats min=1 max=99
+      Field "Due date" w=200
+        DateTimeInput value="2026-11-19" w=fill
+    Row gap=12 middle
+      SearchField @q hint="Search mail" w=280
+      SearchField @q2 hint="Search" w=280
+      Input "" "Disabled" enabled=false w=200
+    Input "Description" "Write a description…" multiline w=520
+  Panel "Choices and toggles" "Checkbox, radio, switch, segmented control, chips, slider, progress."
+    Row gap=20 middle
+      Checkbox "Remember me" @agree
+      Checkbox "Disabled" enabled=false
+      Radio "Option A" @pick value="a"
+      Radio "Option B" @pick value="b"
+      Toggle "Notify" @on
+      SegmentedButton @plan items=["Month","Year"]
+    Row gap=8 middle
+      FilterChip "Unread" selected=true
+      FilterChip "Starred"
+      ChoiceChip "All mail" selected=true
+      InputChip "ada@x.io" onDeleted={q=""}
+      FilterButton "Labels" icon="label"
+      FilterButton "Assignee" icon="person" count=2
+      KeyCap "Ctrl K"
+      KeyCap "/"
+    Row gap=24 middle
+      Slider @vol min=0 max=100 w=240
+      Progress value=0.45 w=240

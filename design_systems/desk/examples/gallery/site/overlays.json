@@ -1,0 +1,711 @@
+{
+ "schema": 3,
+ "roots": [
+  "overlays",
+  "confirm",
+  "more"
+ ],
+ "nodes": {
+  "overlays": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 1440.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "surface"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "load"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "confirm",
+       "presentation": "dialog",
+       "insets": [
+        16,
+        24,
+        16,
+        24
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 32,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "window"
+     }
+    ]
+   },
+   "children": [
+    "PageHeader1",
+    "row1"
+   ]
+  },
+  "PageHeader1": {
+   "type": "PageHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Overlays",
+    "note": "A dialog over the page (its title bar, a body padded 24, the footer band), a menu, a popover's surface, a tooltip, a toast."
+   },
+   "children": [
+    "outlinedButton1",
+    "filledButton1"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Menu",
+    "icon": "more_horiz_outlined"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "more",
+       "presentation": "popover",
+       "anchor": "trigger",
+       "placement": "belowStart",
+       "anchorGap": 6
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Open dialog"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "confirm",
+       "presentation": "dialog",
+       "insets": [
+        16,
+        24,
+        16,
+        24
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column2",
+    "column3",
+    "column4"
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 24
+      }
+     }
+    }
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": 240,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "MenuPopover1"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 240,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "MenuPopover1": {
+   "type": "MenuPopover",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "heading": "Move to"
+   },
+   "children": [
+    "MenuItem1",
+    "MenuItem2",
+    "MenuItem3",
+    "divider1",
+    "MenuItem4"
+   ]
+  },
+  "MenuItem1": {
+   "type": "MenuItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Archive",
+    "icon": "archive_outlined",
+    "shortcut": "E"
+   }
+  },
+  "MenuItem2": {
+   "type": "MenuItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Snooze",
+    "icon": "schedule_outlined",
+    "shortcut": "H"
+   }
+  },
+  "MenuItem3": {
+   "type": "MenuItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Sort by date",
+    "icon": "sort_outlined",
+    "checked": true
+   }
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "MenuItem4": {
+   "type": "MenuItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Delete",
+    "icon": "delete_outlined",
+    "shortcut": "Del",
+    "danger": true
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": 320,
+    "padding": 16,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "raisedBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 10
+   },
+   "bind": {
+    "decoration.effects": "${theme.shadows.level3}"
+   },
+   "children": [
+    "text1",
+    "text2",
+    "row2"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 280,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "panelTitle"
+    },
+    "text": "A popover"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "small"
+    },
+    "text": "A small panel by what opened it: the raised surface, a hairline, radius 10, the menu's shadow."
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "mainAxisAlignment": "end",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "textButton1",
+    "filledButton2"
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Later"
+   }
+  },
+  "filledButton2": {
+   "type": "filledButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Got it"
+   }
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "outlinedButton2",
+    "text3"
+   ]
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Hover me"
+   },
+   "tooltip": "A tooltip: ink fill, 12/500, after 400 ms"
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "Tooltips are the theme's tooltip colours."
+   }
+  },
+  "confirm": {
+   "type": "canvas",
+   "name": "confirm",
+   "slots": {
+    "body": "Dialog1"
+   },
+   "layout": {
+    "width": 480.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ]
+   }
+  },
+  "Dialog1": {
+   "type": "Dialog",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Deactivate 3 members?",
+    "note": "They lose access at once and are signed out of every session. You can reactivate them later."
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onClose"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "Banner1",
+    "Actions1"
+   ]
+  },
+  "Banner1": {
+   "type": "Banner",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "message": "Amara Okafor is an owner: ownership moves to you.",
+    "tone": "warning"
+   }
+  },
+  "Actions1": {
+   "type": "Actions",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "children": [
+    "textButton2",
+    "filledButton3"
+   ]
+  },
+  "textButton2": {
+   "type": "textButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Cancel"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton3": {
+   "type": "filledButton",
+   "layout": {
+    "height": 34.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "backgroundColor": "#FFDC2626",
+     "foregroundColor": "#FFFFFFFF"
+    },
+    "label": "Deactivate 3"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      },
+      {
+       "type": "showToast",
+       "message": "Deactivated"
+      }
+     ]
+    }
+   ]
+  },
+  "more": {
+   "type": "canvas",
+   "name": "more",
+   "slots": {
+    "body": "MenuPopover2"
+   },
+   "layout": {
+    "width": 228.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ]
+   }
+  },
+  "MenuPopover2": {
+   "type": "MenuPopover",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "children": [
+    "MenuItem5",
+    "MenuItem6",
+    "divider2",
+    "MenuItem7"
+   ]
+  },
+  "MenuItem5": {
+   "type": "MenuItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Rename",
+    "icon": "edit_outlined",
+    "shortcut": "F2"
+   }
+  },
+  "MenuItem6": {
+   "type": "MenuItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Duplicate",
+    "icon": "content_copy_outlined",
+    "shortcut": "Ctrl D"
+   }
+  },
+  "divider2": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "MenuItem7": {
+   "type": "MenuItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Delete",
+    "icon": "delete_outlined",
+    "danger": true
+   }
+  }
+ }
+}

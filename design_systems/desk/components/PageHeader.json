@@ -132,7 +132,7 @@
       "props": {
        "style": {
         "from": "pageTitle",
-        "fontSize": 20
+        "fontSize": 22
        }
       }
      }

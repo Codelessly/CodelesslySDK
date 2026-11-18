@@ -17,6 +17,15 @@
     "default": "Section",
     "required": true,
     "doc": "The group's name (written as it reads; shown in capitals)."
+   },
+   {
+    "key": "rail",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Folded to its icon (a collapsed sidebar); a tablet's width folds it too."
    }
   ]
  },
@@ -36,12 +45,6 @@
   "section": {
    "type": "column",
    "layout": {
-    "padding": [
-     10,
-     18,
-     10,
-     6
-    ],
     "width": {
      "fill": 0
     },
@@ -52,22 +55,9 @@
    "props": {
     "crossAxisAlignment": "start"
    },
-   "media": [
-    {
-     "minWidth": 700,
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "padding": [
-        8,
-        10,
-        8,
-        10
-       ]
-      }
-     }
-    }
-   ],
+   "bind": {
+    "layout.padding": "${= (props.rail || (screen.width >= 700 && screen.width < 1024)) ? [8, 10, 8, 10] : [10, 18, 10, 6]}"
+   },
    "children": [
     "label",
     "rule"
@@ -87,15 +77,9 @@
     "text": "${= upper(props.label)}",
     "style": "overline"
    },
-   "media": [
-    {
-     "minWidth": 700,
-     "maxWidth": 1023,
-     "patch": {
-      "visible": false
-     }
-    }
-   ]
+   "bind": {
+    "visible": "${= !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+   }
   },
   "rule": {
    "type": "box",
@@ -112,16 +96,9 @@
      }
     ]
    },
-   "visible": false,
-   "media": [
-    {
-     "minWidth": 700,
-     "maxWidth": 1023,
-     "patch": {
-      "visible": true
-     }
-    }
-   ]
+   "bind": {
+    "visible": "${= (props.rail || (screen.width >= 700 && screen.width < 1024))}"
+   }
   }
  }
 }

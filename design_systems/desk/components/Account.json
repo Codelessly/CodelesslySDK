@@ -35,6 +35,15 @@
     },
     "default": true,
     "doc": "A chevron at its end (it opens a menu)."
+   },
+   {
+    "key": "rail",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Folded to its icon (a collapsed sidebar); a tablet's width folds it too."
    }
   ]
  },
@@ -55,12 +64,6 @@
   "account": {
    "type": "row",
    "layout": {
-    "padding": [
-     8,
-     6,
-     8,
-     6
-    ],
     "width": {
      "fill": 0
     },
@@ -69,11 +72,14 @@
     }
    },
    "props": {
-    "spacing": 10,
     "crossAxisAlignment": "center"
    },
    "decoration": {
     "radius": 6
+   },
+   "bind": {
+    "props.spacing": "${= (props.rail || (screen.width >= 700 && screen.width < 1024)) ? 0 : 10}",
+    "layout.padding": "${= (props.rail || (screen.width >= 700 && screen.width < 1024)) ? [6, 6, 6, 6] : [8, 6, 8, 6]}"
    },
    "states": {
     "hovered": {
@@ -88,25 +94,6 @@
      }
     }
    },
-   "media": [
-    {
-     "minWidth": 700,
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "spacing": 0
-      },
-      "layout": {
-       "padding": [
-        6,
-        6,
-        6,
-        6
-       ]
-      }
-     }
-    }
-   ],
    "children": [
     "accountAvatar",
     "accountWords",
@@ -145,15 +132,9 @@
     "spacing": 0,
     "crossAxisAlignment": "start"
    },
-   "media": [
-    {
-     "minWidth": 700,
-     "maxWidth": 1023,
-     "patch": {
-      "visible": false
-     }
-    }
-   ],
+   "bind": {
+    "visible": "${= !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+   },
    "children": [
     "accountName",
     "accountNote"
@@ -217,20 +198,8 @@
     "color": "ink4"
    },
    "bind": {
-    "visible": "${props.chevron}"
-   },
-   "media": [
-    {
-     "minWidth": 700,
-     "maxWidth": 1023,
-     "patch": {
-      "visible": false,
-      "bind": {
-       "visible": null
-      }
-     }
-    }
-   ]
+    "visible": "${= props.chevron && !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+   }
   }
  }
 }

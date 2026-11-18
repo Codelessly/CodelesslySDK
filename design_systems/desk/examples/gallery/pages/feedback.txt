@@ -1,0 +1,26 @@
+Column gap=20 pad=32 h=fill scroll fill=window
+  PageHeader "Feedback" "Banners, empty states, loading, progress and a board's parts."
+  Banner "You are viewing an archived board." lead="Read only."
+  Banner "Your changes were saved." tone="success" dismissible
+  Banner "Your trial ends in 3 days." tone="warning" dismissible
+    Button.outline "Upgrade" size=small
+  Banner "The sync failed: the server did not answer." tone="danger"
+    Button.outline "Retry" icon="refresh" size=small
+  Row gap=16 top
+    Column w=380 border=line radius=8
+      Empty "No messages" "Mail you receive shows up here." icon="inbox"
+        Button.outline "Refresh" icon="refresh"
+    Column w=380 border=line radius=8
+      Empty "No results for “invoice”" "Try another word, or clear the filters." icon="search"
+        Button.ghost "Clear filters"
+    Column grow gap=16 pad=16 border=line radius=8
+      Skeleton lines=2 avatar
+      Skeleton lines=2 avatar
+      Skeleton lines=3
+      Progress value=0.62
+  Row gap=12 top
+    BoardColumn "In progress" count=3 limit=2 hue="sky" w=300
+      TaskCard key="STK-124" title="Polish the invite flow" labels=[{"label":"Design","hue":"violet"},{"label":"Product","hue":"green"}] due="Nov 19" checklist="2/4" comments=3 assignee="Maya Chen"
+      TaskCard key="STK-126" title="Fix duplicate billing emails" labels=[{"label":"Bug","hue":"red"}] due="Nov 15" overdue assignee="Sam Rao" selected
+    BoardColumn "Done" count=1 hue="green" w=300
+      TaskCard title="A card with no key or labels" assignee="Jules Martin"

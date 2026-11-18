@@ -35,6 +35,15 @@
     },
     "default": "",
     "doc": "Its key, as a key cap at its end."
+   },
+   {
+    "key": "rail",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Folded to its icon (a collapsed sidebar); a tablet's width folds it too."
    }
   ]
  },
@@ -56,12 +65,6 @@
   "side": {
    "type": "row",
    "layout": {
-    "padding": [
-     12,
-     0,
-     8,
-     0
-    ],
     "width": {
      "fill": 0
     },
@@ -86,6 +89,7 @@
     ]
    },
    "bind": {
+    "layout.padding": "${= (props.rail || (screen.width >= 700 && screen.width < 1024)) ? [12, 0, 12, 0] : [12, 0, 8, 0]}",
     "decoration.effects": "${theme.shadows.level1}"
    },
    "tooltip": "${props.label}",
@@ -102,22 +106,6 @@
      }
     }
    },
-   "media": [
-    {
-     "minWidth": 700,
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "padding": [
-        12,
-        0,
-        12,
-        0
-       ]
-      }
-     }
-    }
-   ],
    "children": [
     "sideGlyph",
     "sideLabel",
@@ -163,15 +151,9 @@
      "color": "onAccent"
     }
    },
-   "media": [
-    {
-     "minWidth": 700,
-     "maxWidth": 1023,
-     "patch": {
-      "visible": false
-     }
-    }
-   ]
+   "bind": {
+    "visible": "${= !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+   }
   },
   "sideKey": {
    "type": "row",
@@ -206,20 +188,8 @@
     ]
    },
    "bind": {
-    "visible": "${= props.shortcut != ''}"
+    "visible": "${= props.shortcut != '' && !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
    },
-   "media": [
-    {
-     "minWidth": 700,
-     "maxWidth": 1023,
-     "patch": {
-      "visible": false,
-      "bind": {
-       "visible": null
-      }
-     }
-    }
-   ],
    "children": [
     "sideKeyText"
    ]

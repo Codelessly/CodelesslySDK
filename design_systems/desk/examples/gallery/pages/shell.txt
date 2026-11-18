@@ -1,0 +1,56 @@
+state tab="members"
+state view="Board"
+state q=""
+App
+  Sidebar
+    Brand "Tenant" "Northstar Studio" icon="hub"
+    SideButton "New issue" icon="add" shortcut="C"
+    NavSection "People & access"
+    NavItem "Members" icon="group" badge="50" selected={tab == "members"} onTap={tab="members"}
+    NavItem "Roles" icon="shield" shortcut="G R" selected={tab == "roles"} onTap={tab="roles"}
+    NavItem "Teams" icon="workspaces" selected={tab == "teams"} onTap={tab="teams"}
+    NavSection "Workspace"
+    NavItem "Billing" icon="credit_card"
+    NavItem "Delete workspace" icon="delete" danger
+    Footer
+      NavItem "Keyboard shortcuts" icon="keyboard" shortcut="?"
+      Account "Amara Okafor" "Workspace owner"
+  Sidebar w=64
+    Brand "Tenant" icon="hub" rail
+    SideButton "New issue" icon="add" rail
+    NavItem "Members" icon="group" selected=true rail
+    NavItem "Roles" icon="shield" rail
+    NavItem "Teams" icon="workspaces" rail
+  Main
+    Nav
+      Breadcrumb items=["Workspace","Settings","Members"]
+      Row gap=8 middle
+        SearchField @q hint="Search" shortcut="Ctrl K" w=240
+        IconButton "notifications" tooltip="Notifications"
+    Column gap=20 pad=32
+      PageHeader "Members" "Manage workspace access, roles and invitations." overline="Workspace"
+        Button.outline "Export" icon="download"
+        Button "Invite members" icon="add"
+      Tabs @view tabs=["Board","List","Archive"] icons=["view_kanban","list","inventory_2"] counts=["12","",""]
+      Column border=line radius=8 clip=antiAlias
+        Toolbar band=true
+          IconButton "archive" tooltip="Archive"
+          IconButton "drive_file_move" tooltip="Move"
+          IconButton "delete" tooltip="Delete"
+          Separator
+          IconButton "star_outline" tooltip="Star"
+          Spacer
+          Text.caption "1 of 9"
+          IconButton "expand_less" tooltip="Newer"
+          IconButton "expand_more" tooltip="Older"
+        Column pad=20
+          Text.muted "A pane's toolbar: icon buttons 30 square with 16 outline glyphs, a separator between groups, a Spacer pushing the pager to the end."
+  Pane w=320
+    PaneHeader "Inspector" "A side pane's head"
+    Column gap=4 pad=20
+      Property "Owner" "Amara Okafor"
+      Property "Status"
+        Status "Active" tone="success"
+      Property "Teams"
+        Tag "Platform" outline dot=false
+        Tag "Design" outline dot=false

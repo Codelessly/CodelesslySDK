@@ -1,5 +1,5 @@
 {
   "schema": 3,
-  "pages": ["parts.json"],
+  "pages": ["shell.json", "controls.json", "data.json", "overlays.json", "feedback.json"],
   "designSystem": "../../.."
 }

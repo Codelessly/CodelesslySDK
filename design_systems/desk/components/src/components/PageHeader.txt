@@ -6,7 +6,7 @@ component PageHeader "The head of a page in an app: the title 24/700 with a line
 Row#pageHead gap=16 middle w=fill
   Column#pageTitles gap=4 grow
     Text#pageOverline "{props.overline}" style=metaStrong visible={props.overline != ''}
-    Text#pageTitle "{props.title}" style=pageTitle phone.size=20
+    Text#pageTitle "{props.title}" style=pageTitle phone.size=22
     Text#pageNote "{props.note}" style=muted visible={props.note != ''}
   Row#pageActions gap=8 middle
     Slot#pageActionsSlot w=null h=null

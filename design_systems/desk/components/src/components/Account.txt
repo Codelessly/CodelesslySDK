@@ -2,10 +2,11 @@ component Account "The signed-in person at a sidebar's foot or in a top bar: the
   param name="Jamie Park" required doc="Their name."
   param note="" doc="A line under it (their email or role)."
   param chevron:bool=true doc="A chevron at its end (it opens a menu)."
+  param rail:bool=false doc="Folded to its icon (a collapsed sidebar); a tablet's width folds it too."
   preview "Default" 232x44 name="Jamie Park" note="jamie@northline.design"
-Row#account gap=10 min700.tablet.gap=0 middle pad=[8,6,8,6] min700.tablet.pad=[6,6,6,6] w=fill radius=6 hovered.fill=hoverOverlay
+Row#account gap={(props.rail || (screen.width >= 700 && screen.width < 1024)) ? 0 : 10} middle pad={(props.rail || (screen.width >= 700 && screen.width < 1024)) ? [6, 6, 6, 6] : [8, 6, 8, 6]} w=fill radius=6 hovered.fill=hoverOverlay
   Avatar#accountAvatar "{props.name}" size=28
-  Column#accountWords gap=0 grow min700.tablet.visible=false
+  Column#accountWords gap=0 grow visible={!(props.rail || (screen.width >= 700 && screen.width < 1024))}
     Text#accountName "{props.name}" size=13 weight=500 color=ink maxLines=1 overflow=ellipsis
     Text#accountNote "{props.note}" style=meta maxLines=1 overflow=ellipsis visible={props.note != ''}
-  Icon#accountChevron "unfold_more" size=16 color=ink4 visible={props.chevron} min700.tablet.visible=false
+  Icon#accountChevron "unfold_more" size=16 color=ink4 visible={props.chevron && !(props.rail || (screen.width >= 700 && screen.width < 1024))}

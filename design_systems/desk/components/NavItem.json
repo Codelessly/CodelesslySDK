@@ -62,6 +62,15 @@
     },
     "default": false,
     "doc": "A destructive item (Delete): red ink."
+   },
+   {
+    "key": "rail",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Folded to its icon (a collapsed sidebar); a tablet's width folds it too."
    }
   ]
  },
@@ -96,12 +105,6 @@
   "item": {
    "type": "row",
    "layout": {
-    "padding": [
-     10,
-     0,
-     8,
-     0
-    ],
     "width": {
      "fill": 0
     },
@@ -115,6 +118,7 @@
     "radius": 6
    },
    "bind": {
+    "layout.padding": "${= (props.rail || (screen.width >= 700 && screen.width < 1024)) ? [12, 0, 12, 0] : [10, 0, 8, 0]}",
     "selected": "${= props.selected}"
    },
    "tooltip": "${props.label}",
@@ -153,22 +157,6 @@
      }
     }
    },
-   "media": [
-    {
-     "minWidth": 700,
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "padding": [
-        12,
-        0,
-        12,
-        0
-       ]
-      }
-     }
-    }
-   ],
    "children": [
     "glyph",
     "name",
@@ -217,18 +205,10 @@
     "overflow": "ellipsis"
    },
    "bind": {
+    "visible": "${= !(props.rail || (screen.width >= 700 && screen.width < 1024))}",
     "props.style.fontWeight": "${= props.selected ? 600 : 500}",
     "props.style.color": "${= props.danger ? theme.colors.errorInk : (props.selected ? theme.colors.accentText : theme.colors.ink2)}"
-   },
-   "media": [
-    {
-     "minWidth": 700,
-     "maxWidth": 1023,
-     "patch": {
-      "visible": false
-     }
-    }
-   ]
+   }
   },
   "count": {
    "type": "row",
@@ -258,21 +238,9 @@
     ]
    },
    "bind": {
-    "visible": "${= props.badge != ''}",
+    "visible": "${= props.badge != '' && !(props.rail || (screen.width >= 700 && screen.width < 1024))}",
     "decoration.fills[0].color": "${= props.selected ? theme.colors.accentTintBorder : theme.colors.subtleFill}"
    },
-   "media": [
-    {
-     "minWidth": 700,
-     "maxWidth": 1023,
-     "patch": {
-      "visible": false,
-      "bind": {
-       "visible": null
-      }
-     }
-    }
-   ],
    "children": [
     "countText"
    ]
@@ -334,20 +302,8 @@
     ]
    },
    "bind": {
-    "visible": "${= props.shortcut != ''}"
+    "visible": "${= props.shortcut != '' && !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
    },
-   "media": [
-    {
-     "minWidth": 700,
-     "maxWidth": 1023,
-     "patch": {
-      "visible": false,
-      "bind": {
-       "visible": null
-      }
-     }
-    }
-   ],
    "children": [
     "keyText"
    ]

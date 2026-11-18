@@ -200,9 +200,7 @@
     "width": {
      "fill": 0
     },
-    "height": {
-     "hug": 0
-    }
+    "height": 18
    },
    "props": {
     "spacing": 4,
@@ -273,7 +271,7 @@
   "cardMore": {
    "type": "row",
    "layout": {
-    "padding": 3,
+    "padding": 2,
     "width": {
      "hug": 0
     },
@@ -437,7 +435,7 @@
     "width": {
      "fill": 0
     },
-    "height": 20
+    "height": 18
    },
    "props": {
     "spacing": 12,
