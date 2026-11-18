@@ -211,9 +211,24 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, Po
       return true;
     }
     final route = ModalRoute.of(c);
-    final modal = route is PopupRoute || (route is CodelesslyRouteTransitionRoute && route.modal);
-    if (route == null || !modal || !route.isCurrent) return false;
-    Navigator.of(c).pop(result);
+    bool isModal(Route<Object?>? r) => r is PopupRoute || (r is CodelesslyRouteTransitionRoute && r.modal);
+    if (route == null || !isModal(route)) return false;
+    final navigator = Navigator.of(c);
+    if (!route.isCurrent) {
+      // This modal is already closing (an earlier `close` of the same chain
+      // closed it): the next `close` closes the modal it was over, as
+      // `close; close` reads (test 9, mail: only the top one closed).
+      if (route.isActive) return false;
+      Route<Object?>? top;
+      navigator.popUntil((r) {
+        top = r;
+        return true;
+      });
+      if (!isModal(top)) return false;
+      navigator.pop(result);
+      return true;
+    }
+    navigator.pop(result);
     return true;
   }
 

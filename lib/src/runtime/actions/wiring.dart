@@ -706,6 +706,10 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
 
   ControlFocusNode? _focus;
 
+  /// Its place in the Tab order when it is pressed (a node with a click
+  /// reaction); null when it takes no focus.
+  ControlFocusNode? get pressFocus => _focus;
+
   /// Its place in the root's focus order while it is a press target; null
   /// otherwise.
   ControlFocusNode? get focusNode => _focus;

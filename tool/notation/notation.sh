@@ -50,6 +50,11 @@
 # package), resolves dependencies when they are stale, and runs
 # tool/notation/<command>.dart with the rest of the arguments.
 set -e
+# The notation's arguments are files and words, never a bare `/`: Git Bash's
+# rewriting of POSIX paths for Dart is what they need. MSYS2_ARG_CONV_EXCL='*',
+# which `tool/codelessly render` needs for `--key /`, turned it off and Dart
+# looked for /c/Users/... ("Could not find file .../expand.dart": test 9).
+unset MSYS2_ARG_CONV_EXCL MSYS_NO_PATHCONV
 sdk="$(cd "$(dirname "$0")/../.." && pwd)"
 cmd="${1:-}"
 case "$cmd" in

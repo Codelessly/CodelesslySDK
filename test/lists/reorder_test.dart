@@ -193,6 +193,29 @@ void main() {
       expect(order(), ['s0', 's2', 's1', 's3', 's4']);
     });
 
+    // Test 9, kanban 6: cards that open on a tap, reordered with no Handle;
+    // Tab reached a card and Alt and an arrow moved nothing.
+    testWidgets('with no handle, a row that is a Tab stop moves by Alt and an arrow, and keeps its own Enter', (tester) async {
+      await pumpList(tester, {'start': 'press', 'apply': 'variable', 'keyboard': true}, rowExtra: {
+        'actions': [
+          reaction('click', [
+            {'type': 'setVariable', 'variable': 'last', 'value': r'opened ${item.id}'},
+          ]),
+        ],
+      });
+      final keys = Keyboard(tester);
+      await keys.tab();
+      expect(keys.focusedId, 'row');
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+      await tester.pumpAndSettle();
+      expect(order(), ['s1', 's0', 's2', 's3', 's4']);
+      expect(keys.focusedId, 'row');
+      await keys.enter();
+      expect(s['last'], 'opened s0', reason: 'the focus followed the moved row, and Enter still opens it');
+    });
+
     testWidgets('leaves an item in place when its condition refuses the move', (tester) async {
       await pumpList(tester, {'start': 'press', 'apply': 'variable', 'canReorderIf': r'${= !item.locked}'});
       final listeners =

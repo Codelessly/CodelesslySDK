@@ -18,6 +18,7 @@ import 'package:flutter/rendering.dart' show CustomSemanticsAction, SemanticsSer
 import 'package:flutter/services.dart';
 
 import '../render/convert.dart';
+import '../render/controls/focus.dart' show ControlFocusNode;
 import '../render/controls/kit.dart' show RenderControl;
 import '../render/node_tree.dart';
 import '../render/recipe.dart';
@@ -125,6 +126,28 @@ RenderControl? _handleControl(ListRuntime r, String handle, List<Object?> items,
   return _controlUnder(box?.contentBox ?? box);
 }
 
+/// The Tab stop of the first pressed node in [object]'s subtree that takes
+/// the focus itself (a row with a click reaction), if any.
+ControlFocusNode? _pressFocusUnder(RenderObject? object) {
+  if (object is RenderReactions && object.pressFocus != null && object.pressFocus!.canFocus) return object.pressFocus;
+  ControlFocusNode? found;
+  object?.visitChildren((child) { found ??= _pressFocusUnder(child); });
+  return found;
+}
+
+/// Row [index]'s stop: its Handle's control ([isHandle]), else the row's
+/// pressed node (a card with onTap), else the first control in it.
+ControlFocusNode? _rowStop(ListRuntime r, String handle, List<Object?> items, int index, {required bool isHandle}) {
+  final control = _handleControl(r, handle, items, index);
+  if (isHandle) return control?.focusNode;
+  final box = r.tree.boxOf(handle, instance: _rowInstance(r, _rowKey(items, index)));
+  return _pressFocusUnder(box) ?? control?.focusNode;
+}
+
+/// Focuses row [index]'s stop.
+void _focusRow(ListRuntime r, String handle, List<Object?> items, int index, {bool isHandle = true}) =>
+    _rowStop(r, handle, items, index, isHandle: isHandle)?.requestFocus(highlight: true);
+
 RenderControl? _controlUnder(RenderObject? object) {
   if (object is RenderControl) return object;
   RenderControl? found;
@@ -132,14 +155,30 @@ RenderControl? _controlUnder(RenderObject? object) {
   return found;
 }
 
-void _wireHandle(ListRuntime r, String handle, List<Object?> items, int index, bool Function(KeyEvent) onKey) {
+/// The keys a stop had before a list wired its moves to it (a row's own
+/// press keeps Enter and Space).
+final Expando<bool Function(KeyEvent)> _ownKeys = Expando('ownKeys');
+
+/// Wires Alt and the arrows on row [index]'s stop to [onKey]: its Handle
+/// ([isHandle]), else the row itself (a card that is tapped, reached by
+/// Tab). A list reordered by the keyboard with no Handle was moved by
+/// nothing the Tab order reached (test 9, kanban 6: a focused card with Alt
+/// and an arrow did not move).
+void _wireHandle(ListRuntime r, String handle, List<Object?> items, int index, bool Function(KeyEvent) onKey, {bool isHandle = true}) {
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    final control = _handleControl(r, handle, items, index);
-    if (control == null) return;
-    final item = items.elementAtOrNull(index);
-    final name = item is Map ? item['name'] ?? item['title'] ?? item['id'] : item;
-    control.semanticsLabel = name == null ? 'Reorder item' : 'Reorder $name';
-    control.focusNode.onKey = onKey;
+    if (isHandle) {
+      final control = _handleControl(r, handle, items, index);
+      if (control == null) return;
+      final item = items.elementAtOrNull(index);
+      final name = item is Map ? item['name'] ?? item['title'] ?? item['id'] : item;
+      control.semanticsLabel = name == null ? 'Reorder item' : 'Reorder $name';
+      control.focusNode.onKey = onKey;
+      return;
+    }
+    final focus = _rowStop(r, handle, items, index, isHandle: false);
+    if (focus == null) return;
+    final own = _ownKeys[focus] ??= focus.onKey ?? (_) => false;
+    focus.onKey = (event) => onKey(event) || own(event);
   });
 }
 
@@ -337,8 +376,8 @@ class _ReorderListViewState extends State<ReorderListView> {
         itemBuilder: (context, index) {
           final value = widget.items.elementAtOrNull(index);
           final locked = model != null && !_r.holds(model.canReorderIf, item: value, index: index);
-          if (widget.handle case final handle? when !locked && (model?.keyboard ?? false)) {
-            _wireHandle(_r, handle, widget.items, index, (event) {
+          if ((widget.handle ?? widget.itemId) case final handle when !locked && (model?.keyboard ?? false)) {
+            _wireHandle(isHandle: widget.handle != null, _r, handle, widget.items, index, (event) {
               if (event is! KeyDownEvent || !HardwareKeyboard.instance.isAltPressed) return false;
               final back = vertical ? LogicalKeyboardKey.arrowUp : LogicalKeyboardKey.arrowLeft;
               final forward = vertical ? LogicalKeyboardKey.arrowDown : LogicalKeyboardKey.arrowRight;
@@ -350,7 +389,7 @@ class _ReorderListViewState extends State<ReorderListView> {
                   'Moved to ${index + delta + 1} of $count',
                   Directionality.maybeOf(context) ?? TextDirection.ltr);
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (mounted) _handleControl(_r, handle, _r.data ?? const [], index + delta)?.focusNode.requestFocus(highlight: true);
+                  if (mounted) _focusRow(_r, handle, _r.data ?? const [], index + delta, isHandle: widget.handle != null);
                 });
               });
               return true;
@@ -697,10 +736,11 @@ class GroupReorderListState extends State<GroupReorderList> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!destination.mounted) return;
       final handle = destination.widget.handle;
-      if (handle == null) {
-        destination._focusFor(to).requestFocus();
+      final focus = _rowStop(destination._r, handle ?? destination.widget.itemId, destination.widget.items, to, isHandle: handle != null);
+      if (focus != null) {
+        focus.requestFocus(highlight: true);
       } else {
-        _handleControl(destination._r, handle, destination.widget.items, to)?.focusNode.requestFocus(highlight: true);
+        destination._focusFor(to).requestFocus();
       }
     });
     return true;
@@ -802,8 +842,8 @@ class GroupReorderListState extends State<GroupReorderList> {
     final key = _itemKeys.putIfAbsent(index, GlobalKey.new);
     final item = KeyedSubtree(key: key, child: _row(index));
     final locked = !_r.holds(widget.model.canReorderIf, item: value, index: index);
-    if (widget.handle case final handle? when !locked && widget.model.keyboard) {
-      _wireHandle(_r, handle, widget.items, index, (event) {
+    if ((widget.handle ?? widget.itemId) case final handle when !locked && widget.model.keyboard) {
+      _wireHandle(isHandle: widget.handle != null, _r, handle, widget.items, index, (event) {
         if (event is! KeyDownEvent || !HardwareKeyboard.instance.isAltPressed) return false;
         final key = event.logicalKey;
         if (key == LogicalKeyboardKey.arrowUp && index > 0) {
@@ -813,7 +853,7 @@ class GroupReorderListState extends State<GroupReorderList> {
               'Moved to $index of ${widget.items.length}',
               Directionality.maybeOf(context) ?? TextDirection.ltr);
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) _handleControl(_r, handle, _r.data ?? const [], index - 1)?.focusNode.requestFocus(highlight: true);
+              if (mounted) _focusRow(_r, handle, _r.data ?? const [], index - 1, isHandle: widget.handle != null);
             });
           });
           return true;
@@ -825,7 +865,7 @@ class GroupReorderListState extends State<GroupReorderList> {
               'Moved to ${index + 2} of ${widget.items.length}',
               Directionality.maybeOf(context) ?? TextDirection.ltr);
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) _handleControl(_r, handle, _r.data ?? const [], index + 1)?.focusNode.requestFocus(highlight: true);
+              if (mounted) _focusRow(_r, handle, _r.data ?? const [], index + 1, isHandle: widget.handle != null);
             });
           });
           return true;

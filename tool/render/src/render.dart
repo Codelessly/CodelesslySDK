@@ -755,12 +755,12 @@ Future<void> _renderAll(
       // page's top, whatever a step scrolled it to.
       RenderDesignScroll? fullPage;
       if (args.fullPage) {
-        var page = _pageScroll(binding);
+        var page = _pageScroll(binding, fullPage: true);
         if (page != null && page.pixels.abs() > 0.01) {
           page.jumpTo(0);
           await _settle(tester);
           collect();
-          page = _pageScroll(binding);
+          page = _pageScroll(binding, fullPage: true);
         }
         if (page != null && page.maxScrollExtent >= 1) fullPage = page;
       }
@@ -946,6 +946,7 @@ Future<void> _renderAll(
       // size's hover adds it again (Flutter's mouse tracker asserts on a
       // device added twice).
       await _removeMouse();
+      await _releaseHeld();
       await tester.pumpWidget(const SizedBox());
       await tester.pump(const Duration(seconds: 10));
       collect();
@@ -957,6 +958,17 @@ Future<void> _renderAll(
 
 /// The mouse `--hover` steps move, while a capture is made.
 TestGesture? _mouse;
+
+/// A `--drag <id>=<dx>,<dy>,hold` still pressed: the capture shows the drag
+/// in progress (a row swiped part of the way, its actions showing). The next
+/// step, or the end of the capture, lets go.
+TestGesture? _held;
+
+Future<void> _releaseHeld() async {
+  final g = _held;
+  _held = null;
+  if (g != null) await g.up();
+}
 
 Future<void> _removeMouse() async {
   final m = _mouse;
@@ -1097,17 +1109,25 @@ List<String> _screens(
   final out = <String>[];
   for (final w in wanted) {
     String? hit = published.screens.containsKey(w) ? w : published.layoutOfCanvas[w];
+    // An overlay each of two pages has as its own is named as written on
+    // both (`nav` is nav--board and nav--list: tool/notation/site_overlays.dart):
+    // not one of them picked.
+    final own = <String>{};
     if (hit == null) {
       for (final d in docs.values) {
         for (final e in (api.readMap(d['nodes']) ?? const {}).entries) {
           final n = api.readMap(e.value);
           if (n?['type'] != 'canvas') continue;
           final props = api.readMap(n!['props']) ?? const {};
+          if (n['name'] == w && e.key.startsWith('$w--')) own.add(e.key);
           if (n['name'] == w || props['screen'] == w || n['path'] == w) hit ??= published.layoutOfCanvas[e.key];
         }
       }
     }
-    if (hit == null) {
+    if (own.length > 1) {
+      issue(RuntimeIssue('unknown_screen_arg', 'error',
+          '--screen "$w" is the overlay each of ${own.length} pages has as its own (they draw it differently): ${(own.toList()..sort()).join(', ')}. Name the one meant.'));
+    } else if (hit == null) {
       issue(RuntimeIssue('unknown_screen_arg', 'error', '--screen "$w" names no canvas, screen or layout. Screens: ${all.join(', ')}.'));
     } else if (!out.contains(hit)) {
       out.add(hit);
@@ -1723,6 +1743,24 @@ String? _canvasOf(NodeBox b) {
   return null;
 }
 
+/// The id a step names canvas box [b] by: the id written on its page for
+/// an overlay site expansion made the page's own (`nav--board` is the
+/// board page's `Drawer#nav`, its name `nav`: tool/notation/site_overlays.dart),
+/// else its id. One page's overlays are on screen at a time, so the written
+/// id names one.
+String _canvasWord(NodeBox b) {
+  final name = b.node?.name ?? '';
+  return name.isNotEmpty && b.id.startsWith('$name--') ? name : b.id;
+}
+
+/// [_canvasOf] as a step names it ([_canvasWord]).
+String? _canvasNameOf(NodeBox b) {
+  for (RenderObject? p = b; p != null; p = p.parent) {
+    if (p is NodeBox && p.node?.type == 'canvas') return _canvasWord(p);
+  }
+  return null;
+}
+
 /// Node [id] on screen, or why there is none, or that two nodes answer to
 /// it. [id] is a node id or `name` (`saved`), `<id>#<n>` for a list's n-th
 /// copy, or a path: a component's node by its call ids (`footer/saved`), a
@@ -1744,7 +1782,7 @@ String? _canvasOf(NodeBox b) {
   // A path from a canvas (`list/row#1`) is the page's own node, read
   // segment by segment below: as a component's path it reached a component's
   // node of the same id (test 9, kanban 9: a filter chip for a table's row).
-  final fromCanvas = id.contains('/') && boxes.any((b) => b.id == first && b.node?.type == 'canvas');
+  final fromCanvas = id.contains('/') && boxes.any((b) => b.node?.type == 'canvas' && (b.id == first || _canvasWord(b) == first));
   final byPath = !fromCanvas &&
       (id.contains('/') || boxes.any((b) => b.id != first && b.tree.isInstanceRoot(b.id, b.instance) && b.tree.pathOf(b.id, b.instance) == first));
   if (byPath) {
@@ -1793,7 +1831,7 @@ String? _canvasOf(NodeBox b) {
         if (i > 0 && chosen?.node?.type == 'canvas' && own.isNotEmpty) {
           all = own;
         } else {
-          final names = {for (final b in all) componentInstanceOf(b.instance) == null ? '${_canvasOf(b) ?? '<canvas id>'}/$name#$index' : '${b.tree.pathOf(b.id, b.instance).replaceAll(RegExp(r'#\d+$'), '')}#$index'};
+          final names = {for (final b in all) componentInstanceOf(b.instance) == null ? '${_canvasNameOf(b) ?? '<canvas id>'}/$name#$index' : '${b.tree.pathOf(b.id, b.instance).replaceAll(RegExp(r'#\d+$'), '')}#$index'};
           return (box: null, problem: "ambiguous: copies of ${trees.length} different nodes on screen are \"$name\" (a page's and a component's, or two components'). Name the one meant by its path: ${names.take(4).join(' or ')}");
         }
       }
@@ -1836,11 +1874,11 @@ String? _canvasOf(NodeBox b) {
           for (final b in kinds.values)
             paths.length == kinds.length
                 ? b.tree.pathOf(b.id, b.instance)
-                : '${b.tree.pathOf(b.id, b.instance)} (on canvas ${_canvasOf(b) ?? '?'})',
+                : '${b.tree.pathOf(b.id, b.instance)} (on canvas ${_canvasNameOf(b) ?? '?'})',
         ];
         final write = [
           for (final b in kinds.values)
-            componentInstanceOf(b.instance) == null ? '${_canvasOf(b) ?? '<canvas id>'}/$name' : b.tree.pathOf(b.id, b.instance),
+            componentInstanceOf(b.instance) == null ? '${_canvasNameOf(b) ?? '<canvas id>'}/$name' : b.tree.pathOf(b.id, b.instance),
         ];
         return (
           box: null,
@@ -1869,7 +1907,7 @@ String? _canvasOf(NodeBox b) {
 /// The page's scroll view: of the vertical ones a user can scroll that have
 /// something to scroll, the one with the largest viewport (outermost on a
 /// tie).
-RenderDesignScroll? _pageScroll(WidgetsBinding binding) {
+RenderDesignScroll? _pageScroll(WidgetsBinding binding, {bool fullPage = false}) {
   RenderDesignScroll? best;
   final skip = _offstage();
   for (final view in binding.renderViews) {
@@ -1880,6 +1918,13 @@ RenderDesignScroll? _pageScroll(WidgetsBinding binding) {
         if (best == null || o.size.width * o.size.height > best.size.width * best.size.height) best = o;
       }
     }
+  }
+  // A pane of a window (a mail list beside its reader, each scrolling on
+  // its own) is not the page: the window is captured as it is, not the
+  // pane's length with the rest cut or repeated (test 9, mail).
+  if (best != null && fullPage) {
+    final view = binding.renderViews.first.size;
+    if (best.size.width < view.width * 0.6) return null;
   }
   return best;
 }
@@ -1935,6 +1980,7 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     GlobalKey<NavigatorState> navigator, Codelessly codelessly,
     {required void Function(String code, String message, String? nodeId) warn, List<String> screens = const []}) async {
   final binding = tester.binding;
+  await _releaseHeld();
   ui.Rect viewRect() => ui.Offset.zero & (tester.view.physicalSize / tester.view.devicePixelRatio);
 
   // The render objects hit at [p], innermost first.
@@ -2217,7 +2263,9 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       return null;
     case 'drag':
       // To a point (dx,dy from where it is pressed) or onto another node.
-      final by = RegExp(r'^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$').firstMatch(step.value ?? '');
+      // `,hold` after the distance: not let go (see [_held]).
+      final hold = RegExp(r',\s*hold\s*$').hasMatch(step.value ?? '');
+      final by = RegExp(r'^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*(?:,\s*hold\s*)?$').firstMatch(step.value ?? '');
       ui.Offset? onto;
       if (by == null) {
         if ((step.value ?? '').trim().isEmpty) return '--drag ${step.target}: say where to: --drag ${step.target}=<dx>,<dy> or --drag ${step.target}=<nodeId>.';
@@ -2256,6 +2304,11 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       for (var i = 1; i <= moves; i++) {
         await g.moveTo(ui.Offset.lerp(from, to, i / moves)!, timeStamp: Duration(milliseconds: 16 * i));
         await tester.pump(const Duration(milliseconds: 16));
+      }
+      if (hold) {
+        _held = g;
+        await tester.pump(const Duration(milliseconds: 300));
+        return null;
       }
       await g.up(timeStamp: const Duration(milliseconds: 16 * moves));
       return null;

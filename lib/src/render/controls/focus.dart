@@ -603,33 +603,50 @@ class ControlFocusScope {
     return true;
   }
 
-  /// The nodes the focus can be on, in reading order: rows from the top
-  /// (boxes that overlap vertically are a row), left to right in a row; a
-  /// box around another comes before it. A group's members are all here
-  /// ([stops] has one of them).
+  /// The nodes the focus can be on, in the order of the tree (the order of
+  /// the document's lines, as a web page's Tab follows its DOM): a box
+  /// around another comes before it; a sidebar's stops all come before the
+  /// main column's beside it. (By position on screen, as before, the order
+  /// went from a lane's header to the sidebar beside it and back, and
+  /// changed with the window's size: test 9, admin 5 and kanban 5.) A
+  /// group's members are all here ([stops] has one of them).
   List<ControlFocusNode> get order {
-    final placed = <(ControlFocusNode, Rect)>[
+    final placed = <ControlFocusNode>[
       for (final n in _nodes)
-        if (n.owner.attached && n.owner.hasSize && n.canFocus && reachable(n.owner))
-          (n, MatrixUtils.transformRect(n.owner.getTransformTo(null), Offset.zero & n.owner.size)),
+        if (n.owner.attached && n.owner.hasSize && n.canFocus && reachable(n.owner)) n,
     ];
-    bool around(RenderObject outer, RenderObject inner) {
-      for (RenderObject? p = inner.parent; p != null; p = p.parent) {
-        if (identical(p, outer)) return true;
-      }
-      return false;
+    if (placed.length < 2) return placed;
+    // Each node's ancestors, the root first.
+    final chains = <ControlFocusNode, List<RenderObject>>{
+      for (final n in placed)
+        n: [
+          for (RenderObject? p = n.owner; p != null; p = p.parent) p,
+        ].reversed.toList(),
+    };
+    // The place of each child among its parent's, as the parent visits them.
+    final places = <RenderObject, Map<RenderObject, int>>{};
+    int placeOf(RenderObject parent, RenderObject child) {
+      final map = places.putIfAbsent(parent, () {
+        final m = <RenderObject, int>{};
+        parent.visitChildren((c) => m[c] = m.length);
+        return m;
+      });
+      return map[child] ?? 0;
     }
 
-    placed.sort((a, b) {
-      final ra = a.$2, rb = b.$2;
-      // A press target around other stops is reached before them.
-      if (_contains(ra, rb) && around(a.$1.owner, b.$1.owner)) return -1;
-      if (_contains(rb, ra) && around(b.$1.owner, a.$1.owner)) return 1;
-      final sameRow = ra.center.dy >= rb.top && ra.center.dy <= rb.bottom || rb.center.dy >= ra.top && rb.center.dy <= ra.bottom;
-      if (!sameRow) return ra.top.compareTo(rb.top);
-      return ra.left.compareTo(rb.left);
-    });
-    return [for (final p in placed) p.$1];
+    int compare(ControlFocusNode a, ControlFocusNode b) {
+      final ca = chains[a]!, cb = chains[b]!;
+      var i = 0;
+      while (i < ca.length && i < cb.length && identical(ca[i], cb[i])) {
+        i++;
+      }
+      if (i == ca.length) return i == cb.length ? 0 : -1; // a is around b
+      if (i == cb.length) return 1;
+      if (i == 0) return 0; // two roots
+      return placeOf(ca[i - 1], ca[i]).compareTo(placeOf(cb[i - 1], cb[i]));
+    }
+
+    return placed..sort(compare);
   }
 
   static bool _contains(Rect outer, Rect inner) =>

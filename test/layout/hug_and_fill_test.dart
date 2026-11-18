@@ -247,6 +247,40 @@ void main() {
       expect(r['label']!.width, 300 - r['value']!.width);
     });
 
+    // Test 9, kanban 3: a lane head "In progress · 5 / 4 · Spacer · menu".
+    testWidgets('a text beside a Spacer keeps its own width; the Spacer takes what is left', (tester) async {
+      Json text(String t) => {
+            'type': 'text',
+            'props': {'text': t, 'style': {'fontSize': 13, 'color': '#FF000000'}},
+            'layout': {'squeezable': true, 'width': {'hug': 0}, 'height': {'hug': 0}},
+          };
+      final r = await _rectsOf(tester, {
+        'r': {'type': 'row', 'children': ['title', 'count', 'gap', 'menu'], 'layout': {'width': 300, 'height': {'hug': 0}}},
+        'title': text('In progress'),
+        'count': text('5 / 4'),
+        'gap': {'type': 'spacer', 'layout': {'width': {'fill': 0}, 'height': {'hug': 0}}},
+        'menu': {'type': 'box', 'layout': {'width': 28, 'height': 28}},
+      });
+      expect(r['title']!.height, lessThan(20), reason: 'one line');
+      expect(r['menu']!.right, 300);
+      expect(r['gap']!.width, 300 - 28 - r['title']!.width - r['count']!.width);
+    });
+
+    testWidgets('beside a Spacer, texts still give way when the row runs out of room', (tester) async {
+      final r = await _rectsOf(tester, {
+        'r': {'type': 'row', 'children': ['title', 'gap', 'menu'], 'layout': {'width': 120, 'height': {'hug': 0}}},
+        'title': {
+          'type': 'text',
+          'props': {'text': 'A title much longer than the row is wide', 'style': {'fontSize': 13, 'color': '#FF000000'}},
+          'layout': {'squeezable': true, 'width': {'hug': 0}, 'height': {'hug': 0}},
+        },
+        'gap': {'type': 'spacer', 'layout': {'width': {'fill': 0}, 'height': {'hug': 0}}},
+        'menu': {'type': 'box', 'layout': {'width': 28, 'height': 28}},
+      });
+      expect(r['title']!.height, greaterThan(20), reason: 'it wraps: $r');
+      expect(r['menu']!.right, lessThanOrEqualTo(120.5), reason: 'nothing runs past the row: $r');
+    });
+
     testWidgets('fill-width children of a hugging column are as wide as its widest other child', (tester) async {
       final r = await _rectsOf(tester, {
         'r': {

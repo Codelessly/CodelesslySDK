@@ -2696,10 +2696,16 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     });
     final siblings = laidOut.isNotEmpty ? laidOut : [for (final other in parent.children) if (other != id) source.node(other)];
     for (final o in siblings) {
-      // A Spacer fills too: a text beside it keeps its size, or the two
-      // share the room and the Spacer pushes only half way (a toolbar's
-      // "1 of 9" left in the middle of the bar).
       if (o == null || !o.visible) continue;
+      // A Spacer takes what is left once the texts beside it have their own
+      // width, as CSS's margin-left:auto: shared with it as a second
+      // flexible child, "In progress" wrapped to two lines with room to
+      // spare (test 9, kanban 3). When the row runs out of room the texts
+      // still give way (the row's squeeze).
+      if (o.type == 'spacer') {
+        if (_spacerMainFit(o, isRow) == SizeFit.fill) return true;
+        continue;
+      }
       if ((isRow ? o.hFit : o.vFit) == SizeFit.fill && (isRow ? o.layout.constraints.maxWidth : o.layout.constraints.maxHeight) == null) return true;
     }
     return false;

@@ -172,7 +172,9 @@ PublishBundle _bundle() {
       }),
     ),
     // A menu whose first item opens the dialog.
-    _overlay('menu', 'Share', first: _press('Invite', [_open('dialog', 'dialog')])),
+    _overlay('menu', 'Share', first: _press('Invite', [_open('dialog', 'dialog')]), second: _press('Keep', [_open('keep', 'dialog')])),
+    // Over the menu: `close; close` closes both (test 9, mail).
+    _overlay('keep', 'Keep the draft?', first: _press('Close both', [{'type': 'closeModal'}, {'type': 'closeModal'}])),
     // A menu whose first line asks before it acts, then closes the menu.
     _overlay('askMenu', 'Clip', variables: [v('cleared', '')], first: _press('Clear all', [
       {
@@ -511,6 +513,24 @@ void main() {
     await settle(tester);
     expect(keys.topOverlay, isNull);
     expect(keys.focusedId, 'openMenu');
+  });
+
+  testWidgets('close; close closes the overlay and the one it is over', (tester) async {
+    await _show(tester);
+    final keys = Keyboard(tester);
+    await _tabTo(keys, 'openMenu');
+    await keys.enter();
+    await settle(tester);
+    expect(keys.focusedId, 'menu-a');
+    await keys.tab();
+    expect(keys.focusedId, 'menu-b');
+    await keys.enter();
+    await settle(tester);
+    expect(keys.focusedId, 'keep-a');
+    await keys.enter();
+    await settle(tester);
+    expect(keys.topOverlay, isNull, reason: 'both closed');
+    expect(find.text('Share'), findsNothing);
   });
 
   testWidgets('when the opener is gone the focus goes to what opened its overlay', (tester) async {
