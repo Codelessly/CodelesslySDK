@@ -53,6 +53,11 @@ void _toggleRecipe(NodeBuilder b, Node n, List<RenderBox> chain, ToggleKind kind
   final box = b.obtain<RenderToggle>('toggle', RenderToggle.new)
     ..interactive = interactive
     ..configure(kind, n, ControlTokens.of(b), Size(l.width.value, l.height.value))
+    // `semanticLabel`: the name a screen reader says, not shown.
+    ..semanticsLabel = switch (n.spec?.props.where((p) => p.key == 'semanticLabel').firstOrNull) {
+      final def? => switch (n.props.get(def)) { final String s when s.isNotEmpty => s, _ => null },
+      null => null,
+    }
     ..group = group?.key
     ..onChanged = interactive
         ? (value) {

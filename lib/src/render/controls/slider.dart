@@ -50,6 +50,11 @@ void sliderRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
   final box = b.obtain<RenderSlider>('slider', RenderSlider.new)
     ..interactive = interactive
     ..configure(n, ControlTokens.of(b), Size(l.width.value, l.height.value))
+    // `semanticLabel`: the name a screen reader says, not shown.
+    ..semanticsLabel = switch (n.spec?.props.where((p) => p.key == 'semanticLabel').firstOrNull) {
+      final def? => switch (n.props.get(def)) { final String s when s.isNotEmpty => s, _ => null },
+      null => null,
+    }
     ..rightToLeft = n.behaviors.textDirection == api.TextDirection.rtl
     ..customPaint = paint
     ..onChanged = interactive ? (v) => fireTrigger(b, 'changed', event: {'value': v}) : null
