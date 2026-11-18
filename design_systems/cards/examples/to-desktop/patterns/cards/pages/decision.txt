@@ -1,0 +1,8 @@
+state decision=""
+Column h=fill scroll pad=12 fill=page
+  ChatCard "Delete 214 old files?" icon="delete_sweep_rounded" tone="danger"
+    Details rows=[["Folder","Shared Drive / Archive"],["Files","214"]]
+    Callout "This cannot be undone" "Deleted files skip the trash." tone="danger" icon="warning_rounded"
+    Row gap=10
+      ActionButton "Deny" tone="quiet" grow onPressed={decision="Denied"}
+      ActionButton "Approve deletion" tone="danger" grow=2 onPressed={decision="Approved"}

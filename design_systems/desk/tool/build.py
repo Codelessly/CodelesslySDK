@@ -241,7 +241,7 @@ SIZES = {"xs": 24, "compact": 30, "small": 32, "medium": 34, "large": 40, "iconO
          "navItem": 32, "rowDense": 36, "row": 44, "rowRelaxed": 56, "tableHead": 36,
          "topBar": 52, "toolbar": 48, "badge": 20, "tag": 20, "avatar": 28, "avatarSmall": 20, "avatarLarge": 36,
          "dialogSmall": 420, "dialogMedium": 560, "dialogLarge": 760, "drawer": 420, "menu": 220,
-         "sidebar": 240, "rail": 60, "pane": 360, "inspector": 340,
+         "sidebar": 240, "rail": 64, "pane": 360, "inspector": 340,
          "content": 1200, "narrow": 720, "reading": 680, "progress": 6, "ring": 4, "focusRing": 2}
 
 SHADOWS_LIGHT = {

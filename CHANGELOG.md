@@ -35,6 +35,19 @@ Needs codelessly_api's fixes-36-1 (its Unreleased entry).
   w=440`, `Sheet#info stops=[0.5,0.9]`) is on every page that calls it, so `open basket` from inside the component
   shows it at its side, width and stops (round 10, R28). `expand <site folder>` passes the components' overlays to
   the pages as it passes their key lines.
+Needs codelessly_api's unreleased reflow (track C: a desktop page written in one pass works on a tablet and a
+phone by itself).
+
+- **Desk's narrow forms** (definitions): `PageHeader` puts its actions under the title on a phone (the title broke
+  mid-word beside them); `BulkBar` puts its actions on a line under the count on a phone (the count was squeezed
+  to nothing); `Breadcrumb` shows its last step alone narrower than a desktop (it overflowed the top bar at 834).
+- **Desk's rail is 64** (`sizes.rail`, was 60): the width its guide and its examples write, and the width the
+  notation now gives an app's `Sidebar` written with no rule on a tablet.
+- **`design_systems/desk/TO-MOBILE.md`** says what now happens by itself and what a writer still writes.
+- **`design_systems/cards/TO-DESKTOP.md`**: the other pass, from a Cards (mobile-first) screen to a desktop page
+  on Desk, with two screens taken across (`design_systems/cards/examples/to-desktop`), and
+  **`design_systems/NAMES.md`**: the parts Desk and Cards share under other names or shapes, what one has and the
+  other lacks, and options for one set of names (nothing renamed).
 
 ## 36.0.0
 

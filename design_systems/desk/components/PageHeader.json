@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "PageHeader",
-  "doc": "The head of a page in an app: the title 24/700 with a line under it in the secondary ink, an optional overline or breadcrumb above, and its lines under it (the page's actions) at the end.",
+  "doc": "The head of a page in an app: the title 24/700 with a line under it in the secondary ink, an optional overline or breadcrumb above, and its lines under it (the page's actions) at the end; on a phone the actions go under the title.",
   "children": "list",
   "props": [
    {
@@ -67,6 +67,17 @@
     "spacing": 16,
     "crossAxisAlignment": "center"
    },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 12
+      }
+     }
+    }
+   ],
    "children": [
     "pageTitles",
     "pageActions"
@@ -87,6 +98,16 @@
     "spacing": 4,
     "crossAxisAlignment": "start"
    },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "basis": 600
+      }
+     }
+    }
+   ],
    "children": [
     "pageOverline",
     "pageTitle",

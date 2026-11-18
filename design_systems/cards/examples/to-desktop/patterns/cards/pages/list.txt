@@ -1,0 +1,6 @@
+state openId=""
+state mails=[{"id":"a","from":"Maya Chen","subject":"Studio visit","time":"10:42"},{"id":"b","from":"Nora Patel","subject":"Invoice","time":"9:18"}]
+Column h=fill scroll pad=12 fill=page
+  ChatCard "Inbox" "2 unread" icon="inbox_rounded"
+    each m in mails
+      ConversationRow name="{m.from}" subject="{m.subject}" time="{m.time}" unread=true onPressed={openId=m.id}

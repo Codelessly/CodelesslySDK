@@ -1,0 +1,5 @@
+{
+ "schema": 3,
+ "pages": ["invoices.json"],
+ "designSystem": "../../../../.."
+}

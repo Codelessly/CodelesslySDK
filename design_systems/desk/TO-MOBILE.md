@@ -6,30 +6,34 @@ notation that says it, and who does it: **Desk** (its words fold by themselves),
 rules it gives a page expanded at a desktop's width, see responsive.md) or **you** (a rule you must write).
 Write the desktop page first, then go down this page once.
 
-The reference screens show each pattern: `examples/mail` (sidebar, list and reading panes, toolbar, dialog),
-`examples/admin` (rail, stats, filter bar, table, bulk bar, inspector, row menu), `examples/kanban` (top bar,
-tabs, filter bar, board, card dialog), each at 1440x900, 834x1112 and 390x844.
+Most of it now happens by itself. A desktop page written with no rule for other widths (the reference screens with
+every `tablet.`, `phone.`, `hide=` and `show=` taken out, and the one-pass builds of tests 10 and 11) renders at 834
+and 390 with no overflow; what is left for you is what to show, not how to fit it.
+
+The reference screens show each pattern written by hand: `examples/mail` (sidebar, list and reading panes,
+toolbar, dialog), `examples/admin` (rail, stats, filter bar, table, bulk bar, inspector, row menu),
+`examples/kanban` (top bar, tabs, filter bar, board, card dialog), each at 1440x900, 834x1112 and 390x844.
 
 | Desktop | 834 | 390 | Who |
 |---|---|---|---|
-| Sidebar, 240 | a rail, 64: icons with tooltips, group labels become rules | gone; a menu button in the top bar opens it as a drawer | you write `Sidebar tablet.w=64 hide=phone`; Desk folds Brand, SideButton, NavSection, NavItem, Account; the expander makes the drawer and its button |
-| Sidebar, written with no rule | gone (menu button) | gone (menu button, drawer) | the expander |
+| Sidebar, 240, written with no rule | a rail, 64: icons with tooltips, group labels become rules | gone; a menu button in the top bar opens it as a drawer | Desk and the expander: Desk's `sizes.rail` makes the rail, Desk folds Brand, SideButton, NavSection, NavItem, Account, the expander makes the drawer and its button. Write `Sidebar tablet.w=64 hide=phone` only to say it yourself |
 | Sidebar, your own drawer | as you write it | your `Drawer#nav` and your `IconButton "menu" show=phone onTap={open nav}` | you: a page that writes a `Drawer` line, or `App keep`, gets no drawer and no button from the expander |
-| List pane + detail pane (mail) | both, the list 320 | one pane at a time: the list; a tap opens the detail full screen with a back button | you: `Main w=380 tablet.w=320 phone.w=fill phone.visible={!reading}`, `Pane phone.w=fill phone.visible={reading}`, `IconButton "arrow_back" show=phone onTap={reading=false}` |
-| Inspector pane | hidden | hidden, or a full-screen page as the detail above | you: `Pane w=340 hide=tablet` (or the detail pattern) |
-| Top bar (`Nav` in Main) | as is | the menu button at its start; secondary parts hidden | the expander adds the button; you write `hide=phone` on a breadcrumb or an account |
-| Page header with actions | as is | the title 22; the actions wrap under it; secondary actions hidden | Desk (the size), the expander (the wrap), you (`hide=phone` on Export) |
+| List pane + detail pane (mail): `Main w=380` of rows whose tap sets what the `Pane` shows | both, beside the rail | one pane at a time: the list; a tap opens the detail full screen with a back button | the expander. Write your own (`Main … phone.visible={!reading}`, `Pane phone.visible={reading}`, a back button) only for a back of your own; a list whose rows select nothing shows alone on a phone |
+| Inspector pane (`Pane w=340` after Main) | hidden | hidden | the expander; for the detail as a page on a phone write the list's pattern above |
+| Top bar (`Nav` in Main) | as is; a `Breadcrumb` shows its last step alone | the menu button at its start; a bar whose title, search and buttons do not fit takes more lines (a brand, a breadcrumb and an `Account w=200` take three) | Desk (the breadcrumb), the expander (the button, the wrap); you write `hide=phone` on what a phone should not show (an account) |
+| Page header with actions | as is | the title 22; the actions under it | Desk (`PageHeader`'s own narrow form); you write `hide=phone` on secondary actions (Export) |
 | Tabs | as is | as is (they scroll if they must) | Desk |
-| Filter bar | as is | the search field the full width; filters hidden or moved to a sheet; the count hidden | you: `SearchField … phone.w=fill`, `hide=phone` on filters, `Spacer hide=phone` |
-| Toolbar of icon buttons | as is | as is, with a back button first in a detail pane | Desk; you write the back button |
-| Stats in a Grid of 4 | 2 columns | 2 columns | the expander makes 2 on a tablet and 1 on a phone; for 2 on a phone repeat them with an `each` and write `phone.cols=2` |
-| Table | as is (the first column narrower) | stacked rows: a ListRow per record | you: `Table … hide=phone` and `Column show=phone` + `each` + `ListRow` (the expander keeps what columns fit, which is rarely enough) |
-| Bulk bar over a table | as is | a bottom bar pinned at the foot of the screen | you: `BulkBar … hide=phone`, and `Footer show=phone visible={…}` holding a `BulkBar` |
+| Filter bar (`Row gap=8` of a SearchField, Selects, a Spacer, a count) | as is | the bar wraps: the search and the selects share the lines, the spacer goes | the expander; you write `hide=phone` on filters a phone should not have, `phone.w=fill` on the search for a line of its own |
+| Toolbar of icon buttons | as is | as is, closed up (2 apart); with a back button first in a detail pane | Desk; more than about nine buttons still do not fit a phone: `hide=phone` on the rare ones |
+| Stats in a Grid of 4 | 2 columns | 1 column | the expander; for 2 on a phone write `phone.cols=2` (with the cells repeated by an `each`) |
+| Table | the columns that have no room beside the sidebar are left out, from the last | the name, the checkbox, the menu and the columns that fit (two or three) | the Table word; order the columns by what a phone should keep (it keeps them from the left), or say `"hide":"phone"` on a column yourself. Stacked rows on a phone are yours: `Table … hide=phone` and `Column show=phone` + `each` + `ListRow` |
+| Bulk bar over a table | as is | the count, then the actions on a line under it | Desk (`BulkBar`'s narrow form); pinned at the foot of the screen is yours: `BulkBar … hide=phone` and `Footer show=phone visible={…}` holding a `BulkBar` |
 | Row actions (a `more_horiz` button) | as is | as is (Desk shows row actions at rest, not on hover, so touch needs nothing) | Desk |
-| Board of columns | columns 300 wide, the board scrolls sideways | one column at a time, a segmented switcher over it | you: `BoardColumn … grow tablet.w=300 phone.w=358 phone.visible={col == "…"}`, the board `Row … tablet.scroll`, `SegmentedButton @col items=[…] show=phone` |
+| Board of columns | the board scrolls sideways | the board scrolls sideways, about a column and a half in view | the expander; one column at a time is yours: `BoardColumn … grow tablet.w=300 phone.w=358 phone.visible={col == "…"}`, the board `Row … tablet.scroll`, `SegmentedButton @col items=[…] show=phone` |
 | Dialog | as is | 16 from the screen's edges, the body scrolls, the Actions band at its end | Desk (the scroll), the expander (the insets) |
 | Menu, popover | as is | as is, by what opened it | the expander |
 | Reading width (`maxw=820`) | the pane's width, padded 24 | the screen, padded 16 | you: `tablet.pad=… phone.pad=…` |
+| A pane a splitter sizes (`w={listW}`) | as you write it (`tablet.w=275`) | as you write it (`phone.w=fill`): the rule holds over the binding | you |
 
 ## The drawer the expander makes
 
@@ -43,14 +47,18 @@ every width), or make the reading pane a `Pane` and write no `Main`.
 
 ## The rules, as you write them
 
+What you still write is a choice of what to show. A detail pane with a back button of your own:
+
 ```notation
 App
-  Sidebar tablet.w=64 hide=phone
+  Sidebar
   Main w=380 tablet.w=320 phone.w=fill phone.visible={!reading}
   Pane phone.w=fill phone.visible={reading}
     Toolbar
       IconButton "arrow_back" tooltip="Back" show=phone onTap={reading=false}
 ```
+
+A table as stacked rows on a phone:
 
 ```notation
 Table p in shown columns=[…] select=@chosen hide=phone
@@ -58,6 +66,8 @@ Column border=line radius=8 clip=antiAlias show=phone
   each p in shown
     ListRow "{p.name}" "{p.email}" meta="{p.status}" avatar="{p.name}" onTap={openId=p.id}
 ```
+
+A bulk bar pinned at the foot of a phone's screen:
 
 ```notation
 Main
@@ -74,13 +84,15 @@ the class of defect by having one ground: the page is the window's colour from t
 not painted, and only the well behind board columns is grey. Do not give a page a fill of its own, and do not give
 its header one: what sits in the header then always sits on what the header sits on.
 
-## What this pass could not make automatic
+## What is still not automatic
 
-- A rail on a tablet needs `tablet.w=64 hide=phone` on the Sidebar: a design system cannot add rules to the
-  notation's own Sidebar line (only its own words), and without them the expander drops the sidebar.
-- A table becomes stacked rows only when written twice (a Table and a list). A Table that turns into rows of its
-  own on a phone would be the notation's (the Table word is being reworked on another branch).
+- A table becomes stacked rows only when written twice (a Table and a list); by itself it keeps the columns that
+  fit, from the left.
 - A dialog cannot become a bottom sheet on a phone: an overlay's presentation is one for every width. Write
   `Sheet#id` for a phone-only flow if the sheet matters.
-- One column of a board at a time, the detail pane over the list, the inspector as a page: each is a state the
-  app keeps (`col`, `reading`, `openId`), so each is written.
+- One column of a board at a time, the inspector as a page: each is a state the app keeps (`col`, `openId`), so
+  each is written.
+- A box of a fixed height whose text wraps onto more lines on a phone (an event in a week's day column, `h=36`)
+  overflows there: give it `phone.h=…` or no height.
+- A toolbar of more icon buttons than a phone holds (about nine) overflows: hide the rare ones on a phone.
+- Which filters, actions and columns a phone shows is yours: by itself a phone shows them all, wrapped.
