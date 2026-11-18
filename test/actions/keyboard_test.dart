@@ -60,7 +60,11 @@ void main() {
             'result': {'key': '/', 'character': '?', 'shift': true, 'meta': false, 'alt': false},
           });
       expect(s.read('count'), 1);
-      expect(runtimeKeyEventMatches(KeyCombo.tryParse('u'), 'U', character: 'U', shift: true), isTrue);
+      // A letter is its own key with Shift or without: `u` is not Shift+U
+      // (a writer's `key j` and `key shift+j` are two shortcuts); Caps Lock's U is u.
+      expect(runtimeKeyEventMatches(KeyCombo.tryParse('u'), 'U', character: 'U', shift: true), isFalse);
+      expect(runtimeKeyEventMatches(KeyCombo.tryParse('shift+u'), 'U', character: 'U', shift: true), isTrue);
+      expect(runtimeKeyEventMatches(KeyCombo.tryParse('u'), 'U', character: 'U'), isTrue);
       expect(runtimeKeyEventMatches(KeyCombo.tryParse('?'), '/', character: '?', meta: true), isFalse);
       expect(typesText('a'), isTrue);
       expect(typesText('\r'), isFalse);
