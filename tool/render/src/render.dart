@@ -382,10 +382,18 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       components: [for (final t in components.types) components[t]!.document.toJson()],
       theme: prepareTheme(themeJson ?? const {}, defaultFamily: 'Roboto'),
       fonts: declared);
-  final fileOfNode = <String, String>{
-    for (final e in docs.entries)
-      for (final id in (api.readMap(e.value['nodes']) ?? const {}).keys) id: e.key,
-  };
+  // A page's nodes before a component's of the same id (a page's row3 was
+  // reported in a component's file: test 9, admin 4 and kanban 9); a node
+  // box is placed by its canvas or its component instead ([_fileOf]).
+  final fileOfNode = <String, String>{};
+  for (final pages in [true, false]) {
+    for (final e in docs.entries) {
+      if ((api.readMap(e.value[api.kWidgetKey]) == null) != pages) continue;
+      for (final id in (api.readMap(e.value['nodes']) ?? const {}).keys) {
+        fileOfNode.putIfAbsent(id, () => e.key);
+      }
+    }
+  }
 
   // Tests draw shadows without blur unless told otherwise (an app blurs them).
   debugDisableShadows = false;
@@ -1733,8 +1741,12 @@ String? _canvasOf(NodeBox b) {
   // A node inside a component, by path: `plans/card1/cta`; a call by its
   // id (its box is its definition root's): `send`, `sizes#3`.
   final first = id.split('/').first.split('#').first;
-  final byPath = id.contains('/') ||
-      boxes.any((b) => b.id != first && b.tree.isInstanceRoot(b.id, b.instance) && b.tree.pathOf(b.id, b.instance) == first);
+  // A path from a canvas (`list/row#1`) is the page's own node, read
+  // segment by segment below: as a component's path it reached a component's
+  // node of the same id (test 9, kanban 9: a filter chip for a table's row).
+  final fromCanvas = id.contains('/') && boxes.any((b) => b.id == first && b.node?.type == 'canvas');
+  final byPath = !fromCanvas &&
+      (id.contains('/') || boxes.any((b) => b.id != first && b.tree.isInstanceRoot(b.id, b.instance) && b.tree.pathOf(b.id, b.instance) == first));
   if (byPath) {
     for (final b in boxes) {
       final found = b.tree.boxAtPath(id);
@@ -1772,6 +1784,19 @@ String? _canvasOf(NodeBox b) {
       return (box: null, problem: i == 0 ? 'no node "$name" is on screen' : 'no node "$name" is inside "${segments.take(i).join('/')}"');
     }
     if (index != null) {
+      // The n-th copy of one node: copies of a page's and a component's
+      // nodes of one id (a generated `listView1Item`) are not counted
+      // together; under a canvas the page's own, else said.
+      final trees = {for (final b in all) '${identityHashCode(b.tree)}|${b.tree.pathOf(b.id, b.instance).replaceAll(RegExp(r'#\d+'), '')}'};
+      if (trees.length > 1) {
+        final own = [for (final b in all) if (componentInstanceOf(b.instance) == null) b];
+        if (i > 0 && chosen?.node?.type == 'canvas' && own.isNotEmpty) {
+          all = own;
+        } else {
+          final names = {for (final b in all) componentInstanceOf(b.instance) == null ? '${_canvasOf(b) ?? '<canvas id>'}/$name#$index' : '${b.tree.pathOf(b.id, b.instance).replaceAll(RegExp(r'#\d+$'), '')}#$index'};
+          return (box: null, problem: "ambiguous: copies of ${trees.length} different nodes on screen are \"$name\" (a page's and a component's, or two components'). Name the one meant by its path: ${names.take(4).join(' or ')}");
+        }
+      }
       if (index >= all.length) return (box: null, problem: '"$upTo": there are ${all.length} copies of "$name" on screen (#0 to #${all.length - 1})');
       chosen = all[index];
     } else {
@@ -2753,7 +2778,7 @@ List<RuntimeIssue> _check(
     if (r.width <= 0 && r.height <= 0) continue;
     final component = componentInstanceOf(b.instance);
     // A node of a component is its definition's (ids are local to it).
-    final file = component == null ? fileOfNode[b.id] : fileOfComponent(component.component);
+    final file = component == null ? fileOfNode[_canvasOf(b) ?? b.id] ?? fileOfNode[b.id] : fileOfComponent(component.component);
     // What of it can be seen: its box within every ancestor's clip.
     final clip = _visibleClip(b);
     final seen = clip == null ? r : r.intersect(clip);
@@ -3070,7 +3095,7 @@ String formatReport(RenderReport report) {
 /// instance (ids are local to their document), else its page's.
 String? _fileOf(NodeBox b, Map<String, String> fileOfNode, Map<String, api.Json> docs) {
   final c = componentInstanceOf(b.instance);
-  if (c == null) return fileOfNode[b.id];
+  if (c == null) return fileOfNode[_canvasOf(b) ?? b.id] ?? fileOfNode[b.id];
   return docs.entries.where((e) => api.readMap(e.value[api.kWidgetKey])?['type'] == c.component).firstOrNull?.key;
 }
 
