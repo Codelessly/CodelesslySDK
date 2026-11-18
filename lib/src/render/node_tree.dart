@@ -2689,8 +2689,29 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     final parentRow = _slot.parent?.isRow ?? true;
     // A child with a basis takes the main size its line gives it.
     final basis = n.layout.basis != null;
-    final fh = flexes(n.hFit) && !(basis && parentRow), fv = flexes(n.vFit) && !(basis && !parentRow);
+    var fh = flexes(n.hFit) && !(basis && parentRow), fv = flexes(n.vFit) && !(basis && !parentRow);
     if (!fh && !fv) return;
+    // Along the run, a child that fills with no design number (`{"fill": 0}`:
+    // what an agent writes, `phone.w=fill`) takes the whole line where the
+    // line has a length (CSS: `width: 100%` in a wrapping row), its content's
+    // size where it has none. One with a design number keeps it (below).
+    // Round 11b: `Row top phone.wrap=true` over `Card w=392 phone.w=fill` and
+    // `Column grow phone.w=fill` drew the card 32 wide and the column 0.
+    final design = parentRow ? n.layout.width.value : n.layout.height.value;
+    if ((parentRow ? fh : fv) && design <= 0) {
+      chain.add(_obtain<RenderFitBox>('runLine', () => RenderFitBox())
+        ..width = parentRow ? n.outerWidth : null
+        ..height = parentRow ? null : n.outerHeight
+        ..fillWidth = parentRow
+        ..fillHeight = !parentRow
+        ..aspectRatio = null);
+      if (parentRow) {
+        fh = false;
+      } else {
+        fv = false;
+      }
+      if (!fh && !fv) return;
+    }
     if (!n.isFlex || _subtreeBlocksIntrinsics(n)) {
       final c = BoxConstraints.tightFor(width: fh ? n.outerWidth : null, height: fv ? n.outerHeight : null);
       chain.add(_obtain<RenderConstrainedBox>('runSized', () => RenderConstrainedBox(additionalConstraints: c))
