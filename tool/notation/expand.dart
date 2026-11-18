@@ -42,12 +42,29 @@
 // With --open the vocabulary is open (codelessly_api
 // docs/design/19-open-vocabulary.md): a word the notation does not have is
 // not an error, it stands in (a type) or is left out (a parameter, a flag,
-// an event, an action verb), and every such word is recorded. --vocabulary
-// <file.json> writes the record (each use: its kind, the word, the line it
-// is on, and for a type what it was given); without it the uses are listed
-// on stderr. The aliases (names read as a word we have) are the built-in
-// ones and the design system's vocabulary.json; --aliases <file.json> adds a
-// table over both.
+// an event, an action verb), and each is said on stderr (a placeholder with
+// what to write), without failing the expand. The aliases (names read as a
+// word we have) are the built-in ones and the design system's
+// vocabulary.json; --aliases <file.json> adds a table over both.
+//
+// Every expand, open or closed, saves the vocabulary record
+// (vocabulary_record.dart says what it holds): every word the files used
+// and how each resolved, kept across expands. A site's (the folder, or one
+// of its files) is <the site's folder>/vocabulary.json and VOCABULARY.md; a
+// file of no site's is <file without .txt>.vocabulary.json and
+// .VOCABULARY.md beside it; --vocabulary <file.json> puts it there instead;
+// --no-record saves nothing. It does not change what is expanded.
+//
+// A site's components/*.txt that starts with `define <Name> …` (or
+// `primitive`) is the site's definitions: every page and component reads
+// them, as a page reads a define written after its last line. A
+// components/*.txt that is neither that nor a component, a second file of
+// one component, and a component JSON site.json lists that nothing writes
+// are an issue in every mode, --open too: they were skipped with no word. A
+// definition or a component of a name the notation already has (`Card`,
+// `Rail`, `Shortcut`) is not used, the notation's word is, and that is an
+// issue at the definition. A page whose first line is one `### Name` is
+// read without it.
 import 'dart:convert';
 import 'dart:io';
 
@@ -56,10 +73,12 @@ import 'package:codelessly_api/notation.dart';
 
 import 'notation_site.dart';
 import 'vocabulary.dart' show loadVocabulary;
+import 'formula_check.dart';
+import 'vocabulary_record.dart';
 
 const _usage = 'usage: expand.dart <file.txt> [--design-system <folder>] [--named] [--nearest-colors] [--id <canvas id>] [--width <canvas width>] [--no-reflow] '
-    '[--site <site.json or folder>] [--no-site] [--out <file.json>] [--open [--vocabulary <file.json>]] [--aliases <file.json>]\n'
-    '       expand.dart <site folder or site.json> [--width <page width>] [--no-reflow] [--design-system <folder>] [--named] [--nearest-colors]';
+    '[--site <site.json or folder>] [--no-site] [--out <file.json>] [--open] [--vocabulary <file.json> | --no-record] [--aliases <file.json>]\n'
+    '       expand.dart <site folder or site.json> [--width <page width>] [--no-reflow] [--design-system <folder>] [--named] [--nearest-colors] [--open] [--vocabulary <file.json> | --no-record]';
 
 Future<void> main(List<String> args) async {
   String? opt(String name) {
@@ -114,6 +133,22 @@ Future<void> main(List<String> args) async {
     stderr.writeln(p);
   }
   if (whole && (site == null || site.manifest.isEmpty)) exit(2);
+  // What the site's components/ has that is not loaded or not used: an
+  // issue in every mode, --open too (the owner's decision, 2026-11-18).
+  var skippedIssues = 0;
+  for (final s in site?.skipped ?? const <SkippedComponent>[]) {
+    stderr.writeln(s.message);
+    skippedIssues++;
+  }
+  // --validate: nothing is written (no document, no record); what an expand
+  // would say is printed on stdout as JSON (validationOf), and the exit
+  // status is the expand's.
+  final validate = args.contains('--validate');
+  final skipped = [
+    for (final s in site?.skipped ?? const <SkippedComponent>[]) {'file': site == null ? s.path : recordPath(s.path, site.home), 'message': s.message},
+  ];
+  final record = !args.contains('--no-record') && !validate;
+  final components = {for (final c in ds?.list ?? const <DesignSystemComponent>[]) c.type, for (final c in site?.designSystem?.list ?? const <DesignSystemComponent>[]) c.type};
 
   ExpandSettings settings(double width) => (
         width: width,
@@ -125,7 +160,8 @@ Future<void> main(List<String> args) async {
       );
 
   if (whole) {
-    exit(_expandSite(site!, ds, settings(double.tryParse(opt('--width') ?? '') ?? 1440)));
+    exit(_expandSite(site!, ds, settings(double.tryParse(opt('--width') ?? '') ?? 1440),
+        skippedIssues: skippedIssues, record: record ? opt('--vocabulary') ?? '${site.home}/vocabulary.json' : null, components: components, validate: validate, skipped: skipped));
   }
 
   final file = target;
@@ -154,8 +190,13 @@ Future<void> main(List<String> args) async {
   for (final (type, r) in expander.failedComponents) {
     stderr.writeln('${site!.sources[type]!.path}: the component $type does not expand cleanly (${r.issues.length} issue${r.issues.length == 1 ? '' : 's'}; first: ${r.issues.first}): expand it alone to see them all.');
   }
-  for (final issue in result.issues) {
-    stderr.writeln('$file: $issue');
+  final text = File(file).readAsStringSync();
+  // A formula the engine cannot parse gives nothing: said where it was
+  // written (formula_check.dart), unless an issue of its line said it.
+  more.addAll(formulaNotes(document, {file: text, for (final e in site?.definitionFiles.entries ?? const <MapEntry<String, String>>[]) e.key: e.value},
+      said: {for (final i in result.issues) '$file:${i.line}'}));
+  for (final i in result.issues) {
+    stderr.writeln('$file: line ${i.line}:${i.column}: ${site?.placeDefinitionLine(i.message, text) ?? i.message}');
   }
   for (final m in more) {
     stderr.writeln('$file: $m');
@@ -164,8 +205,39 @@ Future<void> main(List<String> args) async {
     stderr.writeln('$file: no site.json was found beside this file or above it, so no site\'s components are known: '
         'put the file in the site\'s folder (pages/ or components/ beside site/site.json), or name the site with --site <site.json or folder>.');
   }
-  if (opt('--vocabulary') case final record?) {
-    File(record).writeAsStringSync('${const JsonEncoder.withIndent(' ').convert([for (final u in result.vocabulary) u.toJson()])}\n');
+  // What the file ends with that is not an issue: a placeholder, a word left
+  // out, a page split by `###` lines.
+  final notes = [...vocabularyNotes(result, site: site), if (componentTypeOf(text) == null) ?pageHeadingsNote(text)];
+  for (final n in notes) {
+    stderr.writeln('$file: $n');
+  }
+  if (validate) {
+    final dir = site?.home ?? File(file).parent.path;
+    final snap = siteSnapshot(site, components: components, open: open, dir: dir)
+      ..file(recordPath(file, dir), text, result, notes: notes, extra: site?.definitionText, page: componentTypeOf(text) ?? opt('--id') ?? pageName ?? 'screen');
+    final issues = [
+      for (final i in result.issues) {'file': recordPath(file, dir), 'line': i.line, 'column': i.column, 'message': site?.placeDefinitionLine(i.message, text) ?? i.message},
+      for (final m in more) {'file': recordPath(file, dir), 'message': m},
+      for (final s in skipped) {'file': s['file'], 'message': s['message']},
+    ];
+    stdout.writeln(const JsonEncoder.withIndent(' ').convert(validationOf(snap, issues: issues, skipped: skipped)));
+    if (issues.isNotEmpty) exitCode = 1;
+    return;
+  }
+  if (record) {
+    // The record: the site's, or the file's own beside it.
+    final dir = site?.home ?? File(file).parent.path;
+    final path = opt('--vocabulary') ?? (site != null ? '$dir/vocabulary.json' : '${file.replaceFirst(RegExp(r'\.txt$'), '')}.vocabulary.json');
+    final snap = siteSnapshot(site, components: components, open: open, dir: dir)
+      ..file(recordPath(file, dir), text, result, notes: notes, extra: site?.definitionText, page: componentTypeOf(text) ?? opt('--id') ?? pageName ?? 'screen');
+    final mdPath = opt('--vocabulary') == null && site == null ? '${file.replaceFirst(RegExp(r'\.txt$'), '')}.VOCABULARY.md' : null;
+    final saved = saveRecord(path, snap, mdPath: mdPath);
+    final held = placeholdersOf(result, file, text: text);
+    if (held.isNotEmpty || leftOutOf(result) > 0) {
+      for (final l in placeholderLines(held, leftOut: leftOutOf(result), record: saved)) {
+        stderr.writeln(l);
+      }
+    }
   } else if (open) {
     for (final u in result.vocabulary) {
       stderr.writeln('$file: vocabulary: $u');
@@ -180,13 +252,24 @@ Future<void> main(List<String> args) async {
   } else {
     stdout.writeln(json);
   }
-  if (result.issues.isNotEmpty || more.isNotEmpty) exitCode = 1;
+  if (result.issues.isNotEmpty || more.isNotEmpty || skippedIssues > 0) exitCode = 1;
 }
 
 /// Expands every notation component and page of [site]; the exit status.
-int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings) {
+/// [skippedIssues]: the component files not loaded that count as issues.
+/// [record]: where the vocabulary record goes (null: none).
+int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings,
+    {int skippedIssues = 0, String? record, Set<String> components = const {}, bool validate = false, List<Map<String, Object?>> skipped = const []}) {
   final expander = NotationExpander(site: site, designSystem: ds, settings: settings);
-  var issues = 0;
+  var issues = skippedIssues;
+  // With --validate stdout is the JSON alone: the lines go to stderr.
+  final say = validate ? stderr : stdout;
+  final found = <Map<String, Object?>>[
+    for (final s in skipped) {'file': s['file'], 'message': s['message']},
+  ];
+  final snap = siteSnapshot(site, components: components, open: settings.open, dir: site.home);
+  final held = <Placeholder>[];
+  var leftOut = 0;
   const encoder = JsonEncoder.withIndent(' ');
   String rel(String path) {
     final p = File(path).absolute.path.replaceAll(r'\', '/');
@@ -195,14 +278,38 @@ int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings) {
   }
 
   void report(String source, String out, NotationResult r, Json document, List<String> more) {
-    File(out).parent.createSync(recursive: true);
-    File(out).writeAsStringSync(encoder.convert(document));
+    final text = File(source).readAsStringSync();
+    // A formula the engine cannot parse gives nothing: said where it was
+    // written (formula_check.dart), unless an issue of its line said it.
+    more = [
+      ...more,
+      ...formulaNotes(document, {rel(source): text, for (final e in site.definitionFiles.entries) rel(e.key): e.value},
+          said: {for (final i in r.issues) '${rel(source)}:${i.line}'}),
+    ];
+    final notes = [...vocabularyNotes(r, site: site), if (componentTypeOf(text) == null) ?pageHeadingsNote(text)];
+    final type = componentTypeOf(text);
+    snap.file(recordPath(source, site.home), text, r, notes: notes, extra: site.definitionText, page: type ?? pageNameOf(source));
+    held.addAll(placeholdersOf(r, rel(source), text: text));
+    leftOut += leftOutOf(r);
+    if (!validate) {
+      File(out).parent.createSync(recursive: true);
+      File(out).writeAsStringSync(encoder.convert(document));
+    }
     final n = r.issues.length + more.length;
-    stdout.writeln('${rel(source)} -> ${rel(out)}${n == 0 ? '' : ' ($n issue${n == 1 ? '' : 's'})'}');
     for (final i in r.issues) {
-      stderr.writeln('${rel(source)}: $i');
+      found.add({'file': recordPath(source, site.home), 'line': i.line, 'column': i.column, 'message': site.placeDefinitionLine(i.message, text)});
     }
     for (final m in more) {
+      found.add({'file': recordPath(source, site.home), 'message': m});
+    }
+    say.writeln('${rel(source)} -> ${rel(out)}${n == 0 ? '' : ' ($n issue${n == 1 ? '' : 's'})'}');
+    for (final i in r.issues) {
+      stderr.writeln('${rel(source)}: line ${i.line}:${i.column}: ${site.placeDefinitionLine(i.message, text)}');
+    }
+    for (final m in more) {
+      stderr.writeln('${rel(source)}: $m');
+    }
+    for (final m in notes) {
       stderr.writeln('${rel(source)}: $m');
     }
     issues += n;
@@ -215,6 +322,14 @@ int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings) {
     issues++;
   }
   final listed = site.componentRefs;
+  // The site's definitions (components/*.txt of `define` blocks): read by
+  // every page and component, written to no JSON of their own.
+  for (final e in site.definitionFiles.entries) {
+    final words = site.definedWords.entries.where((w) => w.value == e.key).map((w) => w.key).toList()..sort();
+    final builtIn = [for (final w in readPageDefinitions(e.value).words.keys) if (!words.contains(w)) w];
+    say.writeln('${rel(e.key)} -> ${words.isEmpty ? 'defines nothing used' : 'defines ${words.join(', ')} (every page and component reads it)'}'
+        '${builtIn.isEmpty ? '' : '; ${builtIn.join(', ')}: the notation\'s word, this definition not used'}');
+  }
   final expanded = expandSitePages(expander, site, order: order);
   // Overlays two pages write with one id and draw differently are each
   // page's own (site_overlays.dart): before, one page's was every page's
@@ -229,6 +344,7 @@ int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings) {
     report(c.path, site.componentOut(c.type), expanded.componentResults[c.type]!, c.document, about(c.path));
     if (readStrings(site.manifest['components']).isNotEmpty && !listed.containsKey(c.type)) {
       stderr.writeln('${rel(c.path)}: site.json\'s components do not list ${c.type}: add "components/${c.type}.json" there, or the site does not have it.');
+      found.add({'file': recordPath(c.path, site.home), 'message': 'site.json\'s components do not list ${c.type}.'});
       issues++;
     }
   }
@@ -236,6 +352,7 @@ int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings) {
     report(p.path, site.pageOut(p.path), expanded.results[i], p.document, about(p.path));
     if (!site.screens.contains(p.name)) {
       stderr.writeln('${rel(p.path)}: site.json\'s pages do not list ${p.name}: add "${p.name}.json" there, or the site does not have it.');
+      found.add({'file': recordPath(p.path, site.home), 'message': 'site.json\'s pages do not list ${p.name}.'});
       issues++;
     }
   }
@@ -243,7 +360,30 @@ int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings) {
   for (final e in said.entries) {
     for (final m in e.value) {
       stderr.writeln('${rel(e.key)}: $m');
+      found.add({'file': recordPath(e.key, site.home), 'message': m});
       issues++;
+    }
+  }
+  if (validate) {
+    stdout.writeln(const JsonEncoder.withIndent(' ').convert(validationOf(snap, issues: found, skipped: skipped)));
+    if (held.isNotEmpty || leftOut > 0) {
+      for (final l in placeholderLines(held, leftOut: leftOut)) {
+        stderr.writeln(l);
+      }
+    }
+    return issues == 0 ? 0 : 1;
+  }
+  if (record != null) {
+    final saved = saveRecord(record, snap, whole: true);
+    stdout.writeln('vocabulary record: ${rel(saved)}');
+    if (held.isNotEmpty || leftOut > 0) {
+      for (final l in placeholderLines(held, leftOut: leftOut, record: rel(saved))) {
+        stderr.writeln(l);
+      }
+    }
+  } else if (held.isNotEmpty || leftOut > 0) {
+    for (final l in placeholderLines(held, leftOut: leftOut)) {
+      stderr.writeln(l);
     }
   }
   if (order.isEmpty && site.pageSources.isEmpty) {

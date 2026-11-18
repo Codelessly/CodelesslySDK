@@ -24,6 +24,11 @@
 // the folder given, or the first file's). With --sites it also writes, for
 // each file, <sites>/<file>/<screen>.json and a site.json, ready for
 // tool/render/render.sh.
+//
+// Given writers' site folders (pages/, components/, site/site.json, and
+// drafts/), the vocabulary records `expand` saves (vocabulary.json), or a
+// folder holding them, it writes the harvest across runs instead:
+// vocabulary_sites.dart.
 import 'dart:convert';
 import 'dart:io';
 
@@ -31,6 +36,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_api/notation.dart';
 
 import 'vocabulary_harvest.dart';
+import 'vocabulary_sites.dart';
 import 'vocabulary_words.dart';
 
 /// The aliases of the design system at [dir] (its vocabulary.json) over the
@@ -256,8 +262,15 @@ Future<void> main(List<String> args) async {
     }
   }
   if (given.isEmpty) {
-    stderr.writeln('usage: vocabulary.dart <folder or files> [--design-system <folder>] [--aliases <file.json>] [--no-aliases] [--width <canvas width>] [--out <dir>] [--sites <dir>]');
+    stderr.writeln('usage: vocabulary.dart <folder or files> [--design-system <folder>] [--aliases <file.json>] [--no-aliases] [--width <canvas width>] [--out <dir>] [--sites <dir>]\n'
+        '       vocabulary.dart <site folder | vocabulary.json | folder of them>... [--design-system <folder>] [--aliases <file.json>] [--out <dir>]');
     exit(2);
+  }
+  // Writers' site folders and the records expand saved: the harvest across
+  // runs (vocabulary_sites.dart).
+  if (areSitesOrRecords(given)) {
+    await harvestSites(given, out: opt('--out'), designSystem: opt('--design-system'), aliasesFile: opt('--aliases'));
+    return;
   }
   final sdk = File.fromUri(Platform.script).parent.parent.parent.path;
   final dsDir = opt('--design-system') ?? '$sdk/design_systems/cards';

@@ -7,7 +7,7 @@
 //
 //   {"mcpServers": {"codelessly": {"command": "/path/to/CodelesslySDK/tool/codelessly", "args": ["mcp"]}}}
 //
-// Tools: codelessly_docs, codelessly_render (the report, the outline and the PNGs),
+// Tools: codelessly_docs, codelessly_render (the report, the outline and the PNGs), codelessly_validate (notation expanded, writing nothing: issues and placeholder words as JSON),
 // codelessly_flatten, codelessly_states. The first render or states call starts the render server
 // (tool/render/serve.sh) when it is down, so later calls cost about a second; CODELESSLY_MCP_NO_SERVER=1 keeps every
 // run separate. Inline documents are written under $CODELESSLY_MCP_WORK (default: a temp folder), one folder per
@@ -119,6 +119,24 @@ final tools = <Map<String, Object?>>[
     },
   },
   {
+    'name': 'codelessly_validate',
+    'description': 'Expand notation (a site folder with pages/ and components/, or one .txt) without writing anything, '
+        'and return as JSON: "issues" (file, line, column, message), "placeholders" (each word that stood in for a '
+        'word the notation, the design system and the site do not have: word, kind, signatures, where, nodes, '
+        'resolution; with open=false a type refused), "words" (every other word beyond the core that did not resolve, '
+        'or that the writer defined) and "skipped" (component files not loaded). A placeholder is a warning with '
+        'open=true ("ok" stays true): define the word, or it is recorded for support.',
+    'inputSchema': {
+      'type': 'object',
+      'required': ['path'],
+      'properties': {
+        'path': {'type': 'string', 'description': 'A site folder (pages/, components/, site/site.json) or a notation .txt file.'},
+        'open': {'type': 'boolean', 'description': 'The open vocabulary (expand --open): unknown words stand in. Default true.'},
+        'designSystem': {'type': 'string', 'description': 'A design system folder (design_system.json), optional.'},
+      },
+    },
+  },
+  {
     'name': 'codelessly_states',
     'description': 'Render every state listed in a states manifest (tool/codelessly states --help describes it), '
         'compare each with its reference, and return the summary (worst first) and a contact sheet.',
@@ -203,6 +221,18 @@ Future<(List<Map<String, Object?>>, bool)> _call(String name, Map args) async {
         }
       }
       return (content, code == 2);
+    case 'codelessly_validate':
+      final path = absolute('${args['path'] ?? ''}');
+      if (!FileSystemEntity.isFileSync(path) && !FileSystemEntity.isDirectorySync(path)) throw UsageError('No such file or folder: $path');
+      final script = '${sdkRoot.path}/tool/notation/notation.sh';
+      final r = await Process.run(Platform.isWindows ? 'bash' : script, [
+        if (Platform.isWindows) script,
+        'validate', path,
+        if (args['open'] != false) '--open',
+        if (args['designSystem'] case final String ds when ds.isNotEmpty) ...['--design-system', absolute(ds)],
+      ]);
+      final json = '${r.stdout}'.trim();
+      return ([_text(json.isEmpty ? '${r.stderr}' : json)], json.isEmpty);
     case 'codelessly_flatten':
       final size = parseSize((args['size'] as String?) ?? '390x844');
       final doc = flatten(args['tree'], size: size, screen: args['screen'] as String?);
@@ -269,7 +299,7 @@ Future<void> _handle(Map msg) async {
 Future<int> mcpMain(List<String> argv) async {
   if (argv.contains('-h') || argv.contains('--help')) {
     stdout.writeln('tool/codelessly mcp: the toolkit as an MCP server on stdio (codelessly_docs, '
-        'codelessly_render, codelessly_flatten, codelessly_states).');
+        'codelessly_render, codelessly_validate, codelessly_flatten, codelessly_states).');
     return 0;
   }
   // One request at a time, in order, as the Python server answered them.
