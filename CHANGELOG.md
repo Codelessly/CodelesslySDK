@@ -1,3 +1,11 @@
+## Unreleased
+
+### Behaviour changes (read before upgrading)
+
+- **Render, placeholder_word**: a stand-in the expand drew as nothing (a behaviour with no picture, or a line
+  beside the App or Page at the top of a page) is said as drawing nothing and taking no room, with no node; a
+  primitive wrapped round lines as those lines with no box.
+
 ## 36.0.0
 
 Needs codelessly_api 36.0.0.
