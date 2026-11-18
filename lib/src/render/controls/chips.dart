@@ -5,15 +5,15 @@
 //
 // | Part | SSUI |
 // |---|---|
-// | surface | a pill 24 high (20 at a height of 20 or less), `tertiaryBackground`, 1 px `primaryBorder` |
+// | surface | a rounded rectangle 24 high (20 at a height of 20 or less), radius the theme's `chip` (else `control`, else 6), the theme's ink at 6 % (10 % in dark; or the theme's `chipFill`), no hairline |
 // | label | 12/500 (11 at 20), line height 1.2, `onSurface`, centered |
-// | avatar, check mark | 12, 6 before the label |
+// | avatar, check mark (when written) | 12, 6 before the label |
 // | delete icon (inputChip) | an x, 12, 6 after the label |
-// | selected | `activeTint`, `primaryTintBorder`, `primary` ink |
+// | selected | the theme's accent (`primary`), its ink (`onPrimary`); no check mark unless `showCheckmark` |
 // | hover, press, focus, disabled | the kit's overlays, ring and 50 % |
 //
-// A selectable chip always keeps the check mark's room, so selecting never
-// resizes it; unselected, its label is centered in that width. A badge over a
+// A selectable chip that shows a check mark keeps its room, so selecting
+// never resizes it; unselected, its label is centered in that width. A badge over a
 // child is Flutter's (a dot or a count at its alignment, in `error`); with no
 // child it is SSUI's Badge: a tinted label 20 high, a pill for a count.
 import 'dart:math' as math;
@@ -30,6 +30,7 @@ import '../node_tree.dart' show NodeBox, Slot, SlotKind, fireTrigger, runTrigger
 import '../paint/icon_glyph.dart';
 import '../paint/icon_names.dart';
 import '../recipe.dart';
+import '../control_theme.dart' show contrastRatio;
 import 'buttons.dart' show outlinedBorder;
 import 'kit.dart';
 import 'tokens.dart';
@@ -614,13 +615,20 @@ class RenderChip extends RenderControl implements LabeledControl {
   _ChipLook _lookFor({required bool selected}) {
     final s = spec, t = s.tokens;
     final on = selected && s.showsSelection;
-    Color? fill = t.tertiaryBackground;
+    // At rest a tint of the theme's ink over what it sits on (or the
+    // theme's own `chipFill`), no hairline; chosen, the theme's accent with
+    // its ink on it: a row of chips used as tabs or filters reads as the
+    // site's, on a cream page as on a white one, in dark as in light.
+    Color? fill = t.neutral('chipFill', t.dark ? .1 : .06);
     var ink = t.onSurface;
-    var side = BorderSide(color: t.primaryBorder);
+    var side = BorderSide(color: fill, width: 0);
     if (on) {
-      fill = t.activeTint;
-      ink = t.primary;
-      side = BorderSide(color: t.primaryTintBorder);
+      fill = t.primary;
+      ink = t.onAccent;
+      // An accent close to what it sits on (a dark green on a dark page)
+      // keeps the chosen chip apart with a hairline of the ink.
+      final under = t.backdrop ?? t.surface;
+      side = contrastRatio(fill, under) < 1.6 ? BorderSide(color: t.onSurface.withValues(alpha: .45)) : BorderSide(color: fill, width: 0);
     }
     final own = on ? (s.selectedColor ?? s.background) : s.background;
     if (own != null) {
@@ -645,7 +653,8 @@ class RenderChip extends RenderControl implements LabeledControl {
 
   /// Its outline.
   OutlinedBorder get shape =>
-      spec.shape ?? (spec.plain ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)) : const StadiumBorder());
+      spec.shape ??
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(spec.plain ? 8 : spec.tokens.radius('chip', spec.tokens.radius('control', 6))));
 
   /// Where its check mark (or avatar) is, in its own coordinates.
   Rect get leadRect => _leadRect;

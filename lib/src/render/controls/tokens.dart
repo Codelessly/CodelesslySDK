@@ -62,7 +62,11 @@ class ControlScale {
 /// The tokens one control draws with.
 @immutable
 class ControlTokens {
-  ControlTokens._(this.theme, {required this.dark, this.backdrop, this.buttonRadius});
+  ControlTokens._(this.theme, {required this.dark, this.backdrop, this.buttonRadius, this.ownColors = const {}});
+
+  /// The color names the document's own theme gives (a site's, a design
+  /// system's), not SSUI's defaults: what [neutral] takes as written.
+  final Set<String> ownColors;
 
   /// The document's own `buttonRadius` (SSUI's is its `radii`, per step).
   final double? buttonRadius;
@@ -80,7 +84,7 @@ class ControlTokens {
       // A theme with its own surface is dark where that surface is.
       if (own.surface != null && s != null) dark = s.flutter.computeLuminance() < .18;
     }
-    return ControlTokens._(merged, dark: dark, backdrop: backdrop, buttonRadius: theme.buttonRadius);
+    return ControlTokens._(merged, dark: dark, backdrop: backdrop, buttonRadius: theme.buttonRadius, ownColors: {...own.colors.keys});
   }
 
   /// [t] with no `onSurface`, so the ink is chosen for the surface.
@@ -255,6 +259,25 @@ class ControlTokens {
 
   /// A radius from the theme's `radii`, else [fallback].
   double radius(String name, double fallback) => theme.radii[name] ?? fallback;
+
+  /// A neutral of the document's palette: its theme's color [name] when it
+  /// gives one, else the ink at [inkAlpha] (a tint of whatever it is drawn
+  /// on: a cream page's, a dark band's), never SSUI's grey.
+  Color neutral(String name, double inkAlpha) =>
+      ownColors.contains(name) ? (theme.color(name)?.flutter ?? onSurface.withValues(alpha: inkAlpha)) : onSurface.withValues(alpha: inkAlpha);
+
+  /// The accent as ink on what the control sits on (a chosen tab's label):
+  /// the theme's `accentText` when it gives one, else [primary] where it
+  /// reads (3:1 over the backdrop or the surface), else [onSurface].
+  Color get accentInk {
+    if (ownColors.contains('accentText')) return theme.color('accentText')!.flutter;
+    final under = backdrop ?? surface;
+    return contrastRatio(primary, under) >= 3 ? primary : onSurface;
+  }
+
+  /// The ink on the accent (a chosen chip's label): the theme's `onPrimary`,
+  /// else what reads on [primary].
+  Color get onAccent => readableOn(primary, theme.onPrimary?.flutter ?? onColor(primary));
 
   /// A label color that reads on [fill] when the theme's choice does not.
   Color readableOn(Color fill, Color preferred) =>

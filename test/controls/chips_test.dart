@@ -53,7 +53,7 @@ Offset _labelOffCenter(RenderTree tree, String id) {
 
 void main() {
   group('with nothing styled', () {
-    testWidgets('each chip is SSUI\'s: a 24 px pill as wide as its content, tinted fill, hairline, label centered',
+    testWidgets('each chip is 24 px, a rounded rectangle (not a pill) as wide as its content, a tint of the ink, no hairline, label centered',
         (tester) async {
       final (tree, _) = await _show(tester, {
         for (final type in ['chip', 'actionChip', 'choiceChip', 'filterChip', 'inputChip']) type: {'type': type, 'props': {'label': 'Design'}},
@@ -61,9 +61,10 @@ void main() {
       for (final type in ['chip', 'actionChip', 'choiceChip', 'filterChip', 'inputChip']) {
         final c = _chip(tree, type);
         expect(rectOf(tree, type).height, 24, reason: type);
-        expect(c.shape, isA<StadiumBorder>(), reason: '$type is a pill');
-        expect(c.fillColor, const Color(0xFFF3F4F6), reason: '$type: SSUI\'s tertiaryBackground');
-        expect(c.borderSide.color, const Color(0xFFE5E7EB), reason: '$type: SSUI\'s primaryBorder');
+        expect(c.shape, isA<RoundedRectangleBorder>(), reason: '$type is no pill');
+        expect((c.shape as RoundedRectangleBorder).borderRadius, BorderRadius.circular(7), reason: '$type: SSUI\'s control radius');
+        expect(c.fillColor, const Color(0xFF111827).withValues(alpha: .06), reason: '$type: the ink at 6 %, not a grey');
+        expect(c.borderSide.width, 0, reason: '$type: no hairline');
         expect(c.labelColor, const Color(0xFF111827));
         // An input chip centers its label and x together.
         expect(_labelOffCenter(tree, type).dx.abs(), lessThan(type == 'inputChip' ? 9.5 : .75), reason: '$type: label centered');
@@ -73,25 +74,61 @@ void main() {
       final plain = rectOf(tree, 'chip').width;
       expect(rectOf(tree, 'actionChip').width, plain);
       expect(plain, closeTo(_chip(tree, 'chip').labelWidths.whole + 22, .01), reason: '10 px inside a 1 px hairline');
-      // A selectable chip keeps its check mark's room; an input chip its x.
-      expect(rectOf(tree, 'filterChip').width, closeTo(plain + 12 + 6, .01));
-      expect(rectOf(tree, 'inputChip').width, closeTo(plain + 12 + 6 + 12 + 6, .01));
+      // No check mark unless written, so no room for one; an input chip keeps its x.
+      expect(rectOf(tree, 'filterChip').width, closeTo(plain, .01));
+      expect(rectOf(tree, 'inputChip').width, closeTo(plain + 12 + 6, .01));
     });
 
-    testWidgets('dark mode takes SSUI\'s dark tokens', (tester) async {
+    testWidgets('chosen, a chip is the accent with its ink: SSUI\'s in dark, a site\'s own on a cream page', (tester) async {
       final (tree, _) = await _show(tester, {
         'c': {'type': 'filterChip', 'props': {'label': 'On', 'selected': true}},
+        'o': {'type': 'choiceChip', 'props': {'label': 'Off'}},
       }, dark: true, fill: '#FF1C1C1C');
       final c = _chip(tree, 'c');
-      expect(c.labelColor, const Color(0xFF3B82F6), reason: 'SSUI\'s dark primary');
+      expect(c.fillColor, const Color(0xFF3B82F6), reason: 'SSUI\'s dark primary');
+      expect(c.labelColor, const Color(0xFFFFFFFF));
+      expect(_chip(tree, 'o').fillColor, const Color(0xFFFFFFFF).withValues(alpha: .1), reason: 'the dark ink at 10 %');
+    });
+
+    testWidgets('on a site\'s theme (a dark green accent, a cream page) a chosen chip is its accent and its ink; a writer\'s own look wins', (tester) async {
+      final (site, _) = await _show(tester, {
+        'all': {'type': 'choiceChip', 'props': {'label': 'All stories', 'selected': true}},
+        'cities': {'type': 'choiceChip', 'props': {'label': 'Cities'}},
+      }, fill: '#FFF7F4E9', theme: {
+        'primary': 'forest',
+        'onPrimary': 'paper',
+        'colors': {'forest': '#FF234C40', 'paper': '#FFF7F4E9', 'ink': '#FF172822'},
+      });
+      expect(_chip(site, 'all').fillColor, const Color(0xFF234C40));
+      expect(_chip(site, 'all').labelColor, const Color(0xFFF7F4E9));
+      expect(_chip(site, 'all').showsCheck, isFalse, reason: 'no check mark unless written');
+      expect(_chip(site, 'cities').fillColor!.a, closeTo(.06, .001), reason: 'a tint of the ink over the cream, no grey');
+    });
+
+    testWidgets('a writer\'s own colors, check mark and shape win', (tester) async {
+      final (own, _) = await _show(tester, {
+        'x': {
+          'type': 'choiceChip',
+          'props': {
+            'label': 'Mine',
+            'selected': true,
+            'selectedColor': '#FFAA0000',
+            'showCheckmark': true,
+            'shape': {'type': 'roundedRectangle', 'borderRadius': 2},
+          },
+        },
+      });
+      expect(_chip(own, 'x').fillColor, const Color(0xFFAA0000));
+      expect(_chip(own, 'x').showsCheck, isTrue);
+      expect((_chip(own, 'x').shape as RoundedRectangleBorder).borderRadius, BorderRadius.circular(2));
     });
   });
 
   testWidgets('selecting never resizes a chip: the check mark\'s room is kept, and what shows stays centered', (tester) async {
     final (tree, _) = await _show(tester, {
-      'off': {'type': 'filterChip', 'props': {'label': 'Engineering'}},
-      'on': {'type': 'filterChip', 'props': {'label': 'Engineering', 'selected': true}},
-      'choice': {'type': 'choiceChip', 'props': {'label': 'Engineering', 'selected': true}},
+      'off': {'type': 'filterChip', 'props': {'label': 'Engineering', 'showCheckmark': true}},
+      'on': {'type': 'filterChip', 'props': {'label': 'Engineering', 'selected': true, 'showCheckmark': true}},
+      'choice': {'type': 'choiceChip', 'props': {'label': 'Engineering', 'selected': true, 'showCheckmark': true}},
     });
     expect(rectOf(tree, 'on').size, rectOf(tree, 'off').size);
     expect(rectOf(tree, 'choice').size, rectOf(tree, 'off').size);
@@ -105,9 +142,9 @@ void main() {
     final left = on.leadRect.left;
     expect((left - (on.size.width - right)).abs(), lessThan(1.5));
     expect(on.labelWidths.laidOut, closeTo(on.labelWidths.whole, .5), reason: 'the label is never cut');
-    expect(on.fillColor, const Color(0x242563EB), reason: 'SSUI\'s activeTint');
-    expect(on.labelColor, const Color(0xFF2563EB));
-    expect(on.borderSide.color, const Color(0x472563EB), reason: 'SSUI\'s primaryTintBorder');
+    expect(on.fillColor, const Color(0xFF2563EB), reason: 'the accent');
+    expect(on.labelColor, const Color(0xFFFFFFFF), reason: 'its ink');
+    expect(on.borderSide.width, 0);
   });
 
   testWidgets('a chip narrower than its content draws it whole from its start', (tester) async {

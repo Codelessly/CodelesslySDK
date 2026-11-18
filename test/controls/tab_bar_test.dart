@@ -61,9 +61,9 @@ void main() {
       final tabs = bar.itemRects;
       expect(tabs.first.left, 12, reason: 'SSUI\'s 12 px side padding');
       expect(tabs[1].left - tabs[0].right, 16);
-      expect(bar.labelColorOf(0), const Color(0xFF111827), reason: 'selected: primaryText');
-      expect(bar.labelColorOf(1), const Color(0xFF4B5563), reason: 'unselected: secondaryText');
-      expect(bar.divider, (color: const Color(0xFFE5E7EB), height: 1.0));
+      expect(bar.labelColorOf(0), const Color(0xFF2563EB), reason: 'selected: the accent, as its line');
+      expect(bar.labelColorOf(1), const Color(0xFF111827).withValues(alpha: .68), reason: 'unselected: the ink at 68 %');
+      expect(bar.divider, (color: const Color(0xFF111827).withValues(alpha: .12), height: 1.0));
       expect(bar.indicatorColor, const Color(0xFF2563EB));
       final ind = bar.indicatorRect!;
       expect(ind.height, 2);
@@ -83,9 +83,17 @@ void main() {
       expect(r.height, 36);
       expect(r.width, greaterThan(150));
       final bar = _bar(tree, 'bar');
-      expect(bar.labelColorOf(0), const Color(0xFFFFFFFF));
-      expect(bar.divider!.color, const Color(0xFF383838));
+      expect(bar.labelColorOf(0), const Color(0xFF3B82F6), reason: 'the dark accent');
+      expect(bar.divider!.color, const Color(0xFFFFFFFF).withValues(alpha: .12));
       expect(bar.indicatorColor, const Color(0xFF3B82F6));
+    });
+
+    testWidgets('on a site\'s theme the chosen tab is its accent; an accent that does not read on the page is the ink', (tester) async {
+      final (tree, _) = await _show(tester, {'bar': _tabBar({'tabs': _three})}, theme: {'primary': '#FF234C40'});
+      expect(_bar(tree, 'bar').labelColorOf(0), const Color(0xFF234C40));
+      final (pale, _) = await _show(tester, {'bar': _tabBar({'tabs': _three})}, theme: {'primary': '#FFFDE68A'});
+      expect(_bar(pale, 'bar').labelColorOf(0), const Color(0xFF111827), reason: 'a pale yellow on white: the ink');
+      expect(_bar(pale, 'bar').indicatorColor, const Color(0xFFFDE68A));
     });
 
     testWidgets('every label is centered in the bar, at 36 and at 48 high, with icons too', (tester) async {
@@ -137,8 +145,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
       final end = bar.indicatorRect!;
       expect(end.left, closeTo(bar.labels[2].glyphs.first.left, 1.5));
-      expect(bar.labelColorOf(2), const Color(0xFF111827));
-      expect(bar.labelColorOf(0), const Color(0xFF4B5563));
+      expect(bar.labelColorOf(2), const Color(0xFF2563EB));
+      expect(bar.labelColorOf(0), const Color(0xFF111827).withValues(alpha: .68));
     });
 
     testWidgets('a mouse over an unselected tab darkens its label (SSUI\'s hovered tab)', (tester) async {
@@ -151,7 +159,7 @@ void main() {
       await tester.pump();
       expect(bar.hoveredIndex, 1);
       expect(bar.labelColorOf(1), const Color(0xFF111827));
-      expect(bar.labelColorOf(2), const Color(0xFF4B5563));
+      expect(bar.labelColorOf(2), const Color(0xFF111827).withValues(alpha: .68));
     });
 
     testWidgets('Tab focuses the bar with SSUI\'s ring; Left and Right move between tabs, Enter and Space pick', (tester) async {

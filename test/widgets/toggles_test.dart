@@ -659,14 +659,14 @@ void main() {
       expect(b.segmentRects.map((r) => r.width), everyElement(closeTo((96 - 4) / 3, 0.01)));
     });
 
-    testWidgets('by default is SSUI\'s segmented control, its segments the node\'s height less the well\'s inset', (tester) async {
+    testWidgets('by default is SSUI\'s segmented control in the theme\'s colors, its segments the node\'s height less the well\'s inset', (tester) async {
       final tree = await _showSegmented(tester, {}, width: 200, height: 32);
       expect(tester.takeException(), isNull);
       final b = control(tree, 'seg');
       expect(b.size, const Size(200, 32));
       expect(b.segmentRects.map((r) => r.height), everyElement(28));
-      expect(b.trackColor, const Color(0xFFF3F4F6), reason: 'SSUI\'s subtleFill');
-      expect(b.selectedColor, const Color(0xFFFFFFFF));
+      expect(b.trackColor, const Color(0xFF111827).withValues(alpha: .06), reason: 'the ink at 6 %');
+      expect(b.selectedColor, const Color(0xFF2563EB), reason: 'the accent');
     });
   });
 

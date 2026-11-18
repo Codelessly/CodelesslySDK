@@ -536,7 +536,7 @@ class RenderPagination extends RenderBox implements MouseTrackerAnnotation, Labe
     if (n == null) return;
     final canvas = context.canvas;
     final radius = Radius.circular(n.prop(PaginationProps.cornerRadius));
-    final borderColor = n.prop(PaginationProps.borderColor)?.flutter ?? _tokens?.primaryBorder ?? const Color(0xFFE5E7EB);
+    final borderColor = n.prop(PaginationProps.borderColor)?.flutter ?? _tokens?.neutral('primaryBorder', .14) ?? const Color(0xFFE5E7EB);
     final borderWidth = n.prop(PaginationProps.borderWidth);
     final fill = n.prop(PaginationProps.buttonColor)?.flutter;
     final dim = n.prop(PaginationProps.disabledOpacity);

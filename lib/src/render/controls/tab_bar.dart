@@ -5,9 +5,9 @@
 //
 // | Part | SSUI | Prop over it |
 // |---|---|---|
-// | bar | 36 high when it hugs (`sizes.panelHeader`), 12 px side padding, a 1 px `primaryBorder` hairline along the bottom | node padding, `dividerColor`, `dividerHeight` |
+// | bar | 36 high when it hugs (`sizes.panelHeader`), 12 px side padding, a 1 px hairline along the bottom (the theme's `primaryBorder`, else its ink at 12 %) | node padding, `dividerColor`, `dividerHeight` |
 // | tabs | as wide as their label, 16 apart from the start | `tabAlignment` (fill, center, start, startOffset), `labelPadding`, `isScrollable` |
-// | label | 12 px, weight 500, `secondaryText`; selected: weight 600, `primaryText`; hovered: `primaryText` | `labelStyle`, `unselectedLabelStyle`, `labelColor`, `unselectedLabelColor` |
+// | label | 12 px, weight 500, the ink at 68 % (the theme's `secondaryText`); selected: weight 600, the accent where it reads (the theme's `accentText`, else `primary`, else the ink); hovered: the ink | `labelStyle`, `unselectedLabelStyle`, `labelColor`, `unselectedLabelColor` |
 // | indicator | a 2 px `primary` underline the label's width, rounded 1 px on top, over the hairline | `indicatorStyle` (underline, filled, border, none), `indicatorColor`, `indicatorWeight`, `indicatorSize`, `indicatorPadding`, `indicatorShape`, `indicatorRadius` |
 //
 // The indicator moves between tabs over SSUI's 150 ms ease (on a ticker of
@@ -311,10 +311,11 @@ class RenderTabBar extends RenderItemBar implements LabeledControl {
   /// Tab [i]'s label color now.
   Color labelColorOf(int i) {
     final s = spec;
-    if (i == selectedIndex) return s.labelStyle.color ?? s.labelColor ?? _t.onSurface;
+    // The chosen tab in the accent (as its line), the others in the ink.
+    if (i == selectedIndex) return s.labelStyle.color ?? s.labelColor ?? _t.accentInk;
     final own = s.unselectedLabelStyle.color ?? s.unselectedLabelColor;
     if (own != null) return own;
-    return i == hoveredIndex || i == focusedIndex ? _t.onSurface : _t.secondaryText;
+    return i == hoveredIndex || i == focusedIndex ? _t.onSurface : _t.neutral('secondaryText', .68);
   }
 
   double _lineHeight(int i) {
@@ -589,7 +590,7 @@ class RenderTabBar extends RenderItemBar implements LabeledControl {
   ({Color color, double height})? get divider {
     final h = spec.dividerHeight ?? 1;
     if (h <= 0) return null;
-    return (color: spec.dividerColor ?? _t.primaryBorder, height: h);
+    return (color: spec.dividerColor ?? _t.neutral('primaryBorder', .12), height: h);
   }
 
   @override

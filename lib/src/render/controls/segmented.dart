@@ -1,11 +1,10 @@
 // The segmented button as a render object (`segmentedButton`), with no
-// Material widget in its path. Unstyled it is SSUI's segmented control
-// (design_systems/ssui: SoftSaaSSegmentedControl / SoftSaaSSegmentedTrack):
-// a well (`subtleFill`; `secondaryBackground` with a `primaryBorder` hairline
-// in dark), radius 7, its segments inset 2 px with radius 5, the selected
-// one raised (`primaryBackground` with a `primaryBorder` hairline in light,
-// `tertiaryBackground` in dark) in `onSurface`, the others in
-// `secondaryText`. A hugging one is a control of the scale (28 high; its
+// Material widget in its path. Unstyled it has SSUI's segmented control's
+// anatomy (design_systems/ssui: SoftSaaSSegmentedControl) in the document's
+// colors: a well of the theme's ink at 6 % (10 % in dark) over what it sits
+// on, radius 7 (the theme's control radius), its segments inset 2 px with
+// radius 5, the selected one the theme's accent with its ink (`onPrimary`),
+// the others the ink at 68 %. A hugging one is a control of the scale (28 high; its
 // segments the scale's padding and font); a sized one takes its box, the
 // metrics of the nearest step and its width shared between the segments.
 //
@@ -448,30 +447,34 @@ class RenderSegmentedButton extends RenderControl implements LabeledControl {
   Color? _c(api.Color? c) => c?.flutter;
 
   /// The well's fill.
-  Color get trackColor => _c(node.prop(SegmentedButtonProps.backgroundColor)) ?? (_tokens.dark ? _tokens.secondaryBackground : _tokens.subtleFill);
+  /// A tint of the theme's ink over what it sits on (or the theme's own
+  /// `segmentedTrack`), never SSUI's grey.
+  Color get trackColor => _c(node.prop(SegmentedButtonProps.backgroundColor)) ?? _tokens.neutral('segmentedTrack', _tokens.dark ? .1 : .06);
 
   /// The well's outline (null: none).
   BorderSide? get trackSide {
     final own = node.prop(SegmentedButtonProps.side);
     if (own != null) return borderSideOf(own);
-    return _tokens.dark ? BorderSide(color: _tokens.primaryBorder) : null;
+    return null;
   }
 
-  /// The selected segment's fill.
-  Color get selectedColor =>
-      _c(node.prop(SegmentedButtonProps.selectedBackgroundColor)) ??
-      (_tokens.dark ? _tokens.tertiaryBackground : _tokens.primaryBackground);
+  /// The selected segment's fill: the theme's accent.
+  Color get selectedColor => _c(node.prop(SegmentedButtonProps.selectedBackgroundColor)) ?? _tokens.primary;
 
-  /// The selected segment's hairline (light only, as SSUI's).
-  BorderSide? get _selectedSide =>
-      _tokens.dark || node.prop(SegmentedButtonProps.selectedBackgroundColor) != null ? null : BorderSide(color: _tokens.primaryBorder);
+  /// The selected segment's hairline: none (its fill is the accent).
+  BorderSide? get _selectedSide => null;
 
   /// The label color of segment [i] now.
   Color labelColorOf(int i) {
     final on = _selected.contains(_segments[i].value);
-    if (on) return _c(node.prop(SegmentedButtonProps.selectedForegroundColor)) ?? _tokens.onSurface;
-    if (hoveredSegment == i && _segments[i].enabled && enabled) return _c(node.prop(SegmentedButtonProps.selectedForegroundColor)) ?? _tokens.onSurface;
-    return _c(node.prop(SegmentedButtonProps.foregroundColor)) ?? _tokens.secondaryText;
+    if (on) {
+      final own = _c(node.prop(SegmentedButtonProps.selectedForegroundColor));
+      if (own != null) return own;
+      final fill = _c(node.prop(SegmentedButtonProps.selectedBackgroundColor));
+      return fill == null ? _tokens.onAccent : _tokens.readableOn(fill, _tokens.onSurface);
+    }
+    if (hoveredSegment == i && _segments[i].enabled && enabled) return _c(node.prop(SegmentedButtonProps.foregroundColor)) ?? _tokens.onSurface;
+    return _c(node.prop(SegmentedButtonProps.foregroundColor)) ?? _tokens.neutral('secondaryText', .68);
   }
 
   double get _radius {

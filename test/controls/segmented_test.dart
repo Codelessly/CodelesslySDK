@@ -32,7 +32,7 @@ const _days = [
 ];
 
 void main() {
-  testWidgets('with nothing styled it is SSUI\'s segmented control: 28 high, segments inset 2, the selection raised',
+  testWidgets('with nothing styled it is SSUI\'s segmented control in the theme\'s colors: 28 high, segments inset 2, the selection the accent',
       (tester) async {
     final (tree, _) = await _show(tester, {'seg': hugging('segmentedButton', {'segments': _days, 'selected': ['w']})});
     final s = _seg(tree);
@@ -40,11 +40,30 @@ void main() {
     expect(s.segmentRects.map((r) => r.height), everyElement(24));
     expect(s.segmentRects.first.left, 2);
     expect(s.segmentRects.last.right, s.size.width - 2);
-    expect(s.trackColor, const Color(0xFFF3F4F6));
-    expect(s.selectedColor, const Color(0xFFFFFFFF));
+    expect(s.trackColor, const Color(0xFF111827).withValues(alpha: .06), reason: 'the ink at 6 %, not a grey');
+    expect(s.selectedColor, const Color(0xFF2563EB), reason: 'the accent');
     expect(s.raised, ['w']);
-    expect(s.labelColorOf(1), const Color(0xFF111827));
-    expect(s.labelColorOf(0), const Color(0xFF4B5563), reason: 'SSUI\'s secondaryText');
+    expect(s.labelColorOf(1), const Color(0xFFFFFFFF), reason: 'the accent\'s ink');
+    expect(s.labelColorOf(0), const Color(0xFF111827).withValues(alpha: .68), reason: 'the ink at 68 %');
+  });
+
+  testWidgets('on a site\'s theme (a dark green accent on a cream page) the selection is its accent and its ink; a writer\'s colors win', (tester) async {
+    final theme = {
+      'primary': 'forest',
+      'onPrimary': 'paper',
+      'colors': {'forest': '#FF234C40', 'paper': '#FFF7F4E9'},
+    };
+    final (tree, _) = await _show(tester, {'seg': hugging('segmentedButton', {'segments': _days, 'selected': ['w']})}, fill: '#FFF7F4E9', theme: theme);
+    final s = _seg(tree);
+    expect(s.selectedColor, const Color(0xFF234C40));
+    expect(s.labelColorOf(1), const Color(0xFFF7F4E9));
+    expect(s.trackColor.a, closeTo(.06, .001));
+    final (own, _) = await _show(tester, {
+      'seg': hugging('segmentedButton', {'segments': _days, 'selected': ['w'], 'selectedBackgroundColor': '#FFFFFFFF', 'backgroundColor': '#FFEEEEEE'}),
+    });
+    expect(_seg(own).selectedColor, const Color(0xFFFFFFFF));
+    expect(_seg(own).trackColor, const Color(0xFFEEEEEE));
+    expect(_seg(own).labelColorOf(1), const Color(0xFF111827), reason: 'the ink that reads on the writer\'s fill');
   });
 
   for (final (name, layout) in [
@@ -166,12 +185,12 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('in dark mode the well is SSUI\'s secondary background with a hairline', (tester) async {
+  testWidgets('in dark mode the well is the light ink at 10 % and the selection the dark accent', (tester) async {
     final (tree, _) = await _show(tester, {'seg': hugging('segmentedButton', {'segments': _days, 'selected': ['w']})},
         dark: true, fill: '#FF141414');
     final s = _seg(tree);
-    expect(s.trackColor, const Color(0xFF1C1C1C));
-    expect(s.trackSide?.color, const Color(0xFF383838));
-    expect(s.selectedColor, const Color(0xFF383838));
+    expect(s.trackColor, const Color(0xFFFFFFFF).withValues(alpha: .1));
+    expect(s.trackSide, isNull);
+    expect(s.selectedColor, const Color(0xFF3B82F6));
   });
 }
