@@ -155,7 +155,8 @@ Options:
                           writes it later does not change the capture.
   --now <ISO time>        The time now() returns (2026-11-13T09:00:00Z): clocks
                           and countdowns are the same in every run.
-  --scroll <nodeId|screen>=<px>   Scroll a scrolling node (or the page) to px.
+  --scroll <nodeId|screen>=<px>   Scroll a scrolling node (or the page) to px;
+                          or =x,y (--scroll reading=0,650).
   --navigate <screen>     Push a screen: a canvas id, a screen name or a URL path,
                           with a query string for its params (speaker?id=ada,
                           /project?id=7): the screen reads them as \${route.id}.

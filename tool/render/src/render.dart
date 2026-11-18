@@ -2727,29 +2727,57 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       _writeVariable(binding, controller, step.target, _stepValue(step));
       return null;
     case 'scroll':
-      final px = double.tryParse(step.value ?? '');
-      if (px == null) return '--scroll ${step.target}=${step.value}: the amount is not a number.';
-      RenderDesignScroll? scroll;
+      // One offset (along the way the node scrolls), or `x,y` (the
+      // horizontal offset and the vertical one: `--scroll reading=0,650`).
+      final amount = RegExp(r'^\s*(-?\d+(?:\.\d+)?)\s*(?:,\s*(-?\d+(?:\.\d+)?)\s*)?$').firstMatch(step.value ?? '');
+      if (amount == null) {
+        return '--scroll ${step.target}=${step.value}: say how far: one offset in pixels (--scroll ${step.target}=650, along the way it scrolls), '
+            'or x,y (--scroll ${step.target}=0,650).';
+      }
+      final one = amount[2] == null ? double.parse(amount[1]!) : null;
+      final x = amount[2] == null ? null : double.parse(amount[1]!), y = amount[2] == null ? null : double.parse(amount[2]!);
+      // The offset for a scroll view along [axis].
+      double? along(Axis axis) => one ?? (axis == Axis.vertical ? y : x);
       if (step.target == 'screen' || step.target.isEmpty) {
-        scroll = _pageScroll(binding);
-      } else {
-        final found = _locate(binding, step.target);
-        final b = found.box;
-        if (b == null) return '--scroll ${step.target}: ${found.problem}.';
-        scroll = _descendants(b).whereType<RenderDesignScroll>().firstOrNull;
-        if (scroll == null) {
-          // A list or other Flutter scrollable inside the node.
-          final positions = [
-            for (final e in find.byType(Scrollable).evaluate())
-              if ((e.renderObject as RenderBox?) != null && _isInside(e.renderObject!, b)) (e as StatefulElement).state as ScrollableState,
-          ];
-          if (positions.isEmpty) return '--scroll ${step.target}: the node does not scroll (set props.scrollable: true).';
-          positions.first.position.jumpTo(px);
+        final page = _pageScroll(binding);
+        if (page == null) {
+          // A page that fits its window: nothing to scroll, nothing wrong.
+          warn('scroll_nothing',
+              '--scroll ${step.target}=${step.value}: nothing on the screen scrolls (the page fits the window at this size), so the step did nothing.', null);
           return null;
         }
+        page.jumpTo(along(page.axis)!);
+        return null;
       }
-      if (scroll == null) return '--scroll ${step.target}: nothing on the screen scrolls.';
-      scroll.jumpTo(px);
+      final found = _locate(binding, step.target);
+      final b = found.box;
+      if (b == null) {
+        return found.problem!.startsWith(_notShownHere)
+            ? '$_notShownHere--scroll ${step.target}: ${found.problem!.substring(_notShownHere.length)}.'
+            : _withCandidates(binding, step.target, '--scroll ${step.target}: ${found.problem}.');
+      }
+      final scrolls = _descendants(b).whereType<RenderDesignScroll>().toList();
+      if (scrolls.isNotEmpty) {
+        // With x,y: the first that scrolls each way; one offset: the first.
+        final targets = one != null
+            ? [scrolls.first]
+            : [
+                if (scrolls.where((s) => s.axis == Axis.horizontal).firstOrNull case final h? when x != 0 || !scrolls.any((s) => s.axis == Axis.vertical)) h,
+                if (scrolls.where((s) => s.axis == Axis.vertical).firstOrNull case final v?) v,
+              ];
+        for (final s in targets) {
+          s.jumpTo(along(s.axis)!);
+        }
+        return null;
+      }
+      // A list or other Flutter scrollable inside the node.
+      final positions = [
+        for (final e in find.byType(Scrollable).evaluate())
+          if ((e.renderObject as RenderBox?) != null && _isInside(e.renderObject!, b)) (e as StatefulElement).state as ScrollableState,
+      ];
+      if (positions.isEmpty) return '--scroll ${step.target}: the node does not scroll (set props.scrollable: true).';
+      final position = positions.first.position;
+      position.jumpTo(along(axisDirectionToAxis(position.axisDirection))!);
       return null;
     case 'navigate':
       // A URL path (`/project?id=x`), a canvas id or a screen name, with a
