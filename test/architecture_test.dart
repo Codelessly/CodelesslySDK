@@ -154,8 +154,11 @@ const Map<String, Map<String, String>> renderStatics = {
   // is a question about the whole app (a dialog over a menu over a page are
   // three roots), as Flutter's FocusManager is one.
   'render/controls/focus.dart': {'_open': 'ControlFocusLayer: the open modal overlays, in the order they opened'},
-  // Debug counters, off unless a tool turns them on.
+  // Debug counters, off unless a tool turns them on; and the trees showing,
+  // which an action in an overlay asks for a node of the page under it (a
+  // menu's scrollTo: one root per overlay, as the focus layers above).
   'render/node_tree.dart': {
+    '_live': 'RenderTree.live: the trees not disposed, a screen\'s and each overlay\'s over it',
     'debugApplyCounts': 'applies per node id while NodeBox.debugCountApplies',
     'debugInPlaceCounts': 'in-place updates per node id while NodeBox.debugCountApplies',
     'debugPaintCounts': 'paints per node id while NodeBox.debugCountPaints',
