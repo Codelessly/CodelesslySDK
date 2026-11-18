@@ -10,6 +10,12 @@
 // construction: what its words do not say is a `{…}` tail on that line).
 // --check does that parse and compares, and says how many lines still need a
 // tail: the exit status is 1 when the document read back differs.
+//
+// A site's page or component that site expansion gave an overlay of its own
+// (`nav--board`, site_overlays.dart) prints as it was written (`Drawer#nav`
+// prints `Canvas#nav "nav"`, its opens `to=nav`; a component's event for it
+// its open): --check compares with that, which expands to the site's
+// document again.
 import 'dart:convert';
 import 'dart:io';
 
@@ -70,7 +76,11 @@ Future<void> main(List<String> args) async {
     stderr.writeln('${files.single} is not a layout document (no "nodes").');
     exit(2);
   }
-  final Map<String, Object?> document = json;
+  // A site's page whose overlay site expansion made its own (`nav--board`,
+  // site_overlays.dart) prints as it was written (`Drawer#nav`, `open nav`),
+  // and a component's events for such an overlay as its `open`: the print is
+  // the page's notation, which expands to the same document again.
+  final document = unscopeOverlays(json);
   final text = Catalog.run(catalog, () => printNotation(document, catalog: catalog));
   if (opt('--out') case final out?) {
     File(out).writeAsStringSync('$text\n');
