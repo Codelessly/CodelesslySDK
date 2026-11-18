@@ -64,6 +64,10 @@ String? findSiteManifest({String? site, String? out, String? file}) {
 /// `component` line), its file and its text.
 typedef ComponentSource = ({String type, String path, String text});
 
+/// A component file the site does not load: its path, the type it would
+/// have been (its `define`'s word, else its file name) and what to write.
+typedef SkippedComponent = ({String path, String type, String message});
+
 /// A site as `expand` reads it ([load]).
 final class NotationSite {
   NotationSite._(this.manifestPath, this.manifest, this.problems);
@@ -106,8 +110,20 @@ final class NotationSite {
   /// folder it is in when that is the site's project (`my-site/site/`).
   List<String> get _homes => [dir, File(dir).parent.path];
 
+  /// The folder the site's notation is written in: the one of [_homes]
+  /// that holds `pages/` or `components/` (the writer's site folder, where
+  /// `expand` keeps the vocabulary record), else the manifest's folder.
+  String get home {
+    bool notation(String d) => Directory(d).existsSync() && Directory(d).listSync().any((f) => f is File && f.path.endsWith('.txt'));
+    for (final h in _homes) {
+      if (notation('$h/pages') || notation('$h/components')) return h;
+    }
+    return dir;
+  }
+
   /// The components written in the notation (`components/*.txt` in the
-  /// site's folder or beside it), by type.
+  /// site's folder or beside it), by type. A file that is not one is in
+  /// [skipped], with why.
   late final Map<String, ComponentSource> sources = () {
     final out = <String, ComponentSource>{};
     for (final home in _homes) {
@@ -117,12 +133,130 @@ final class NotationSite {
       for (final f in files) {
         final text = f.readAsStringSync();
         final type = componentTypeOf(text);
-        if (type == null) continue;
-        out.putIfAbsent(type, () => (type: type, path: f.path, text: text));
+        if (type == null) {
+          // A file of `define` (or `primitive`) blocks is the site's
+          // definitions: every page and component reads them, as a page
+          // reads its own written after its last screen.
+          if (_isDefinitions(text)) {
+            _definitionFiles[f.path] = text;
+            _checkDefinitions(f.path, text);
+          } else {
+            _skipped.add((path: f.path, type: _stem(f.path), message: _notAComponent(f.path, text)));
+          }
+          continue;
+        }
+        if (out[type] case final first?) {
+          _skipped.add((
+            path: f.path,
+            type: type,
+            message: '${_name(f.path)} writes component $type, which ${_name(first.path)} already writes: this file is not read. Give one of them another name.',
+          ));
+          continue;
+        }
+        out[type] = (type: type, path: f.path, text: text);
       }
     }
     return out;
   }();
+
+  final List<SkippedComponent> _skipped = [];
+  final Map<String, String> _definitionFiles = {};
+
+  /// The `components/*.txt` that are `define` (or `primitive`) blocks, by
+  /// path: each word they define is the site's, read by every page and
+  /// component as a definition a page writes after its last screen
+  /// (codelessly_api docs/design/20-defined-words.md). Its signature line
+  /// is its signature: its strings, parameters with their defaults, `@`
+  /// and events. A page's own definition of the word is read over it.
+  Map<String, String> get definitionFiles {
+    sources;
+    return _definitionFiles;
+  }
+
+  /// [definitionFiles] as one text, for [parseNotation]'s `definitions`;
+  /// null when there are none (the expansion is then as before).
+  late final String? definitionText = definitionFiles.isEmpty ? null : definitionFiles.values.join('\n');
+
+  /// [message] (an issue of [text], a file of the site) with a line of the
+  /// site's definitions, which the parser names `page:63:` (a line of
+  /// [definitionText]), named by its file: `components/KanbanCard.txt:2:`.
+  /// A word [text] defines itself is its own line, left as it is.
+  String placeDefinitionLine(String message, String text) {
+    if (definitionFiles.isEmpty) return message;
+    final m = RegExp(r'page:(\d+): ([A-Za-z_][A-Za-z0-9_]*):').firstMatch(message);
+    if (m == null || readPageDefinitions(text).words.containsKey(m[2])) return message;
+    var line = int.parse(m[1]!);
+    for (final e in definitionFiles.entries) {
+      final n = const LineSplitter().convert(e.value).length + (e.value.endsWith('\n') ? 1 : 0);
+      if (line <= n) return message.replaceRange(m.start, m.start + 'page:${m[1]}'.length, '${_name(e.key)}:$line');
+      line -= n;
+    }
+    return message;
+  }
+
+  /// The words [definitionFiles] define, by the file that defines each.
+  late final Map<String, String> definedWords = {
+    for (final e in definitionFiles.entries)
+      for (final w in readPageDefinitions(e.value).words.keys) w: e.key,
+  };
+
+  /// The component files the site does not load (a `components/*.txt` that
+  /// is neither a component nor definitions, a second file of one type, a
+  /// component JSON site.json lists that is not there or does not read),
+  /// and what a file of definitions has wrong, each with what to write.
+  /// Before, each was skipped with no word (test 10: a `define Masthead` in
+  /// components/ drew a placeholder on every page).
+  List<SkippedComponent> get skipped {
+    sources;
+    expanded;
+    return _skipped;
+  }
+
+  /// Whether [text] is definitions: its first line that is not blank or a
+  /// `//` comment starts with `define ` or `primitive `.
+  static bool _isDefinitions(String text) {
+    final first = const LineSplitter().convert(text).map((l) => l.trim()).where((l) => l.isNotEmpty && !l.startsWith('//')).firstOrNull;
+    return first != null && RegExp(r'^(define|primitive)\s+[A-Za-z_]').hasMatch(first);
+  }
+
+  /// Says what a file of definitions has wrong: what a definition cannot
+  /// read, and a line at the margin that is in no definition (it is not
+  /// read: a file of definitions draws nothing itself).
+  void _checkDefinitions(String path, String text) {
+    final read = readPageDefinitions(text);
+    for (final p in read.problems) {
+      _skipped.add((path: path, type: _stem(path), message: '${_name(path)}: line ${p.line}: ${p.message}'));
+    }
+    final lines = const LineSplitter().convert(text);
+    for (var i = 0; i < lines.length; i++) {
+      final l = lines[i];
+      if (l.trim().isEmpty || l.startsWith(' ') || l.startsWith('\t') || l.startsWith('//')) continue;
+      if (RegExp(r'^(define|primitive)\s').hasMatch(l)) continue;
+      _skipped.add((
+        path: path,
+        type: _stem(path),
+        message: '${_name(path)}: line ${i + 1}: `${l.length > 50 ? '${l.substring(0, 47)}...' : l}` is in no definition, so it is not read: '
+            'a file of definitions holds `define` (or `primitive`) lines, each with its lines indented under it.',
+      ));
+    }
+  }
+
+  /// Why the component file at [path] is not read: what its first line is
+  /// and what to write.
+  static String _notAComponent(String path, String text) {
+    final first = const LineSplitter().convert(text).map((l) => l.trim()).where((l) => l.isNotEmpty && !l.startsWith('//')).firstOrNull;
+    final name = _name(path);
+    if (first == null) return '$name is empty: it is not read. A component file starts with `component ${_stem(path)}` (or `define ${_stem(path)} …`).';
+    return '$name is not read: its first line is `${first.length > 60 ? '${first.substring(0, 57)}...' : first}`, neither `component <Name>` nor `define <Name> …`. '
+        'Write `define ${_stem(path)}` (its strings, parameters and events as a line would use it) above its lines indented under it, '
+        'or `component ${_stem(path)}` with `param` lines (docs/reference/notation/components.md).';
+  }
+
+  /// [path] as `components/<file>`.
+  static String _name(String path) {
+    final parts = path.replaceAll(r'\', '/').split('/');
+    return parts.length < 2 ? path : '${parts[parts.length - 2]}/${parts.last}';
+  }
 
   /// The pages written in the notation (`pages/*.txt` in the site's folder
   /// or beside it), in file order.
@@ -169,12 +303,33 @@ final class NotationSite {
     final out = <String, LayoutDocument>{};
     for (final e in componentRefs.entries) {
       final f = File('$dir/${e.value}');
-      if (!f.existsSync()) continue;
+      // Written from its notation by `expand` when it is not there yet; one
+      // that nothing writes is said.
+      if (sources.containsKey(e.key)) {
+        if (!f.existsSync()) continue;
+      } else if (!f.existsSync()) {
+        // A word the site's definitions give needs no JSON.
+        if (!definedWords.containsKey(e.key) && !_skipped.any((s) => s.type == e.key)) {
+          _skipped.add((
+            path: f.path,
+            type: e.key,
+            message: 'site.json lists ${e.value}, which is not there, and no components/*.txt writes `component ${e.key}`: a call to ${e.key} has nothing to draw.',
+          ));
+        }
+        continue;
+      }
       try {
         final d = LayoutDocument.fromJson(jsonDecode(f.readAsStringSync()));
-        if (d.isComponent) out[d.componentType!] = d;
-      } on Object {
+        if (d.isComponent) {
+          out[d.componentType!] = d;
+        } else if (!sources.containsKey(e.key)) {
+          _skipped.add((path: f.path, type: e.key, message: '${e.value} is not a component document (no component head): it is not read.'));
+        }
+      } on Object catch (error) {
         // A component file that does not read is left to its own expand.
+        if (!sources.containsKey(e.key)) {
+          _skipped.add((path: f.path, type: e.key, message: '${e.value} does not read as a component document (${'$error'.split('\n').first}): it is not read.'));
+        }
       }
     }
     return out;
@@ -378,14 +533,19 @@ final class NotationExpander {
         .open(openVocabulary: settings.open, vocabulary: settings.aliases)
         .withScreens(s?.screens ?? const [])
         .withOwnComponents(s == null ? const [] : {...s.sources.keys, ...s.expanded.keys});
-    return Catalog.run(catalog, () => parseNotation(text, catalog: catalog, options: options));
+    // The site's definitions (components/*.txt of `define` blocks) hold in
+    // every text, as an answer's definitions after its last screen do.
+    return Catalog.run(catalog, () => parseNotation(text, catalog: catalog, options: options, definitions: s?.definitionText));
   }
 
-  /// Expands [text] (the file at [path]) as the canvas [screen].
+  /// Expands [text] (the file at [path]) as the canvas [screen]. A page
+  /// whose first line is one `### Name` (as the open prompt writes a
+  /// screen) is read without it: the file names the page
+  /// ([pageHeadings] says when there are several).
   NotationResult expand(String text, {required String path, required String screen}) {
     final self = componentTypeOf(text);
     final library = _libraryFor(self);
-    return _expand(text, library, screen: screen);
+    return _expand(self == null ? withoutScreenHeading(text) : text, library, screen: screen);
   }
 
   /// The notation components that did not expand cleanly while reading
@@ -395,6 +555,42 @@ final class NotationExpander {
       if (e.value.issues.isNotEmpty) yield (e.key, e.value);
     }
   }
+}
+
+final _screenHeading = RegExp(r'^###\s+\S');
+
+/// The lines of [text] that are a `### Name` screen heading (1-based).
+List<int> pageHeadings(String text) {
+  final lines = const LineSplitter().convert(text);
+  return [for (var i = 0; i < lines.length; i++) if (_screenHeading.hasMatch(lines[i])) i + 1];
+}
+
+/// [text] without its screen heading when it has exactly one and it is its
+/// first line that is not blank or a comment (the open prompt writes each
+/// screen under `### Name`; a site's page file is one screen, named by its
+/// file). The line is left blank, so every other line keeps its number.
+String withoutScreenHeading(String text) {
+  final at = pageHeadings(text);
+  if (at.length != 1) return text;
+  final lines = text.split('\n');
+  for (var i = 0; i < at.single - 1; i++) {
+    final t = lines[i].trim();
+    if (t.isNotEmpty && !t.startsWith('//')) return text;
+  }
+  lines[at.single - 1] = lines[at.single - 1].endsWith('\r') ? '\r' : '';
+  return lines.join('\n');
+}
+
+/// What to say of a page whose `### Name` lines split it into several
+/// screens (a site's page file is one): one message, or null.
+String? pageHeadingsNote(String text) {
+  final at = pageHeadings(text);
+  if (at.length < 2 && withoutScreenHeading(text) != text) return null;
+  if (at.isEmpty) return null;
+  return at.length == 1
+      ? 'line ${at.single}: `###` names a screen only on a page\'s first line; here it is not read. Drop it (the file\'s name names the page).'
+      : 'lines ${at.join(', ')}: `### Name` lines split this file into ${at.length} screens, and a page file is one screen, named by its file: '
+          'write each screen in its own pages/<name>.txt and drop the `###` lines.';
 }
 
 /// The name of the page in notation file [path]: its file name, its canvas
