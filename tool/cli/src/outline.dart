@@ -148,34 +148,52 @@ List<String> outlineCapture(List entries, DocumentTree tree, List<Map> diags, {i
   return lines;
 }
 
-/// The diagnostics of one capture (`home@390x844`, `home@390x844-saved`...) in a render's [out] folder.
-List<Map> captureDiagnostics(String out, String capture) {
+/// The diagnostics of one capture (`home@390x844`, `home@390x844-saved`...) in a render's [out] folder: those of
+/// the diagnostics file whose `images` list it (else, a file of no capture, the one whose label the capture
+/// ends with), at its size and of its screen (or of the screen its run started on, for a capture named after the
+/// screen it navigated to). [since]: only files written since then (this invocation's).
+List<Map> captureDiagnostics(String out, String capture, {DateTime? since}) {
   final found = <Map>[];
   final files = Directory(out).listSync().whereType<File>().where((f) {
     final n = f.uri.pathSegments.last;
-    return n.startsWith('diagnostics') && n.endsWith('.json');
+    return n.startsWith('diagnostics') && n.endsWith('.json') && _writtenSince(f, since);
   }).toList()
     ..sort((a, b) => a.path.compareTo(b.path));
   final at = capture.indexOf('@');
   final screen = at < 0 ? capture : capture.substring(0, at);
   final size = at < 0 ? '' : capture.substring(at + 1).split('-').first;
   for (final f in files) {
-    final stem = f.uri.pathSegments.last.replaceFirst(RegExp(r'\.json$'), '');
-    final label = stem.startsWith('diagnostics-') ? stem.substring('diagnostics-'.length) : null;
-    if (label != null && !capture.endsWith('-$label') && !capture.contains('-$label')) continue;
     Object? data;
     try {
       data = jsonDecode(f.readAsStringSync());
     } catch (_) {
       continue;
     }
-    for (final d in ((data as Map?)?['diagnostics'] as List? ?? const []).cast<Map>()) {
+    if (data is! Map) continue;
+    final images = (data['images'] as List?)?.map((i) => '$i').toList() ?? const <String>[];
+    if (images.isNotEmpty) {
+      if (!images.contains('$capture.png')) continue;
+    } else {
+      final stem = f.uri.pathSegments.last.replaceFirst(RegExp(r'\.json$'), '');
+      final label = stem.startsWith('diagnostics-') ? stem.substring('diagnostics-'.length) : null;
+      if (label != null && !capture.endsWith('-$label') && !capture.contains('-$label')) continue;
+    }
+    final started = (data['startedOn'] as Map?)?['$capture.png'];
+    for (final d in (data['diagnostics'] as List? ?? const []).cast<Map>()) {
       if (d['size'] != null && d['size'] != size) continue;
-      if (d['screen'] != null && !screen.startsWith('${d['screen']}')) continue;
+      if (d['screen'] != null && !screen.startsWith('${d['screen']}') && d['screen'] != started) continue;
       found.add(d);
     }
   }
   return found;
+}
+
+/// Whether [f] was written at or after [since] (null: any time). Times are
+/// compared to the second, as some file systems keep no finer.
+bool _writtenSince(File f, DateTime? since) {
+  if (since == null) return true;
+  final from = DateTime.fromMillisecondsSinceEpoch(since.millisecondsSinceEpoch ~/ 1000 * 1000);
+  return !f.lastModifiedSync().isBefore(from);
 }
 
 /// The name of the capture a `*.layout.json` file is for.
@@ -184,22 +202,25 @@ String captureOf(String layoutFile) {
   return n.endsWith('.png.layout.json') ? n.substring(0, n.length - '.png.layout.json'.length) : n.replaceFirst('.layout.json', '');
 }
 
-List<File> layoutFiles(String out) => (Directory(out).existsSync() ? Directory(out).listSync() : <FileSystemEntity>[])
+/// The `*.layout.json` files in [out]; with [since], only those written since then (one invocation's, not
+/// those earlier runs left in the folder).
+List<File> layoutFiles(String out, {DateTime? since}) => (Directory(out).existsSync() ? Directory(out).listSync() : <FileSystemEntity>[])
     .whereType<File>()
-    .where((f) => f.path.endsWith('.layout.json'))
+    .where((f) => f.path.endsWith('.layout.json') && _writtenSince(f, since))
     .toList()
   ..sort((a, b) => a.path.compareTo(b.path));
 
 /// Every capture's outline in [out], as text (or JSON).
-String outlineText(String out, List<String> documents, {List<String> only = const [], int? depth, bool json = false}) {
+/// [since]: only the captures written since then (`tool/codelessly render --outline`: that invocation's).
+String outlineText(String out, List<String> documents, {List<String> only = const [], int? depth, bool json = false, DateTime? since}) {
   final tree = DocumentTree.load(documents);
   final result = <String, List<String>>{};
   final text = StringBuffer();
-  for (final f in layoutFiles(out)) {
+  for (final f in layoutFiles(out, since: since)) {
     final capture = captureOf(f.path);
     if (only.isNotEmpty && !only.any(capture.contains)) continue;
     final entries = jsonDecode(f.readAsStringSync()) as List;
-    final diags = captureDiagnostics(out, capture);
+    final diags = captureDiagnostics(out, capture, since: since);
     final lines = outlineCapture(entries, tree, diags, maxDepth: depth);
     result[capture] = lines;
     final errors = diags.where((d) => d['severity'] == 'error').length;

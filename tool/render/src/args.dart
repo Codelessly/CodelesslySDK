@@ -196,7 +196,9 @@ Options:
                           <dir> (the rest of the URL as the path), so they show:
                           https://cdn.example.com/art/=assets/art. Repeatable.
   --label <text>          Append -<text> to the PNG names (state screenshots);
-                          diagnostics go to diagnostics-<text>.json.
+                          diagnostics go to diagnostics-<text>.json (with the
+                          --screen and non-default --sizes before the label:
+                          diagnostics-home@1440x900-<text>.json).
   --state <label> <steps> One run, several states: each --state starts a state
                           named <label> (as --label) with the steps after it,
                           from a fresh start; what comes before the first

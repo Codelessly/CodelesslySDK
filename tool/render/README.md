@@ -16,11 +16,17 @@ It:
 1. **publishes** the documents as the editor does: each document is a page; canvases that share `props.screen`
    are one screen with a canvas per breakpoint (`props.breakpoint`); every other canvas is a screen of its own;
 2. **renders** every screen with `CodelesslyWidget` (bindings, variables, conditions, breakpoints and reactions
-   run as in a published app) at each size, writing `<out>/<screen>@<w>x<h>.png`;
+   run as in a published app) at each size, writing `<out>/<screen>@<w>x<h>.png` (after a `--navigate`, or a tap
+   that navigates, `<screen>` is the screen the capture shows);
 3. **reports** what only rendering shows (below), tied to node ids;
-4. writes everything to `<out>/diagnostics.json` (`<out>/diagnostics-<label>.json` with `--label`, so one run per
-   state keeps each state's) and **exits 1 when there are errors**, 0 when there are only warnings or none, 2 for
-   bad arguments.
+4. writes everything to `<out>/diagnostics.json` and **exits 1 when there are errors**, 0 when there are only
+   warnings or none, 2 for bad arguments. The file's name carries what the run was limited to, as a PNG's does, so
+   runs of one label on other screens or at other sizes keep each its own: the `--screen` (several joined by `+`),
+   then `@` and the `--sizes` when they are not the default ones, then the `--label`: `diagnostics-<label>.json`,
+   `diagnostics-home-<label>.json` (`--screen home`), `diagnostics-home@1440x900-<label>.json` (`--screen home
+   --sizes 1440x900`), `diagnostics@390x844.json`. Its `images` lists the PNGs it is about; a capture named after a
+   screen it navigated to is under `startedOn` with the screen its run started on (what its diagnostics' `screen`
+   says).
 
 A directory with a `site.json` is a site of pages and components (codelessly_api guide §19): its pages (the
 manifest's `pages`, else its `.json` files), its components (the manifest's `components`, else the files under
@@ -40,7 +46,8 @@ Paths (the documents, `--out`, `--fonts`) are taken relative to the directory th
 that `cd`s into the SDK first passes absolute ones, or its PNGs land in the SDK's checkout. In Git Bash on Windows
 a value starting with `/` is rewritten to a Windows path before the command sees it (`--key /` arrives as
 `C:/Program Files/Git/`): run the command with `MSYS2_ARG_CONV_EXCL='*'` set (not `MSYS_NO_PATHCONV=1`, which
-also stops the paths the tools need from being converted). `--outline` and `--sheet` are options of `tool/codelessly render`, which runs this command.
+also stops the paths the tools need from being converted). `--outline` and `--sheet` are options of `tool/codelessly render`, which runs this command; `--outline` prints the
+outline of the captures that run made (not of the files earlier runs left in `--out`).
 
 A directory is every `.json` file in it (not those starting with `_`, nor `diagnostics*.json`), as the pages of one
 site: navigation may name a canvas of another page.
@@ -74,10 +81,10 @@ site: navigation may name a canvas of another page.
 | `--set <name>=<json>` | Set a variable of the screen in view (after `--navigate`, of the screen navigated to): `--set annual=true`, `--set 'email="a@b.co"'`. It holds: when nothing but `--wait` and other `--set` steps comes after it, a timer or `load` reaction that writes the variable later does not change the capture (it is set again before the capture, with a `set_overwritten` warning). |
 | `--now <ISO time>` | The time `now()` (and `nowMs()`) returns for the whole run: `--now 2026-11-13T09:00:00Z`. A clock or countdown a timer writes from `now()` shows that time; check before, during and after an event without a test-only variable. |
 | `--scroll <id or screen>=<px>` | Scroll a scrolling node, or the page, to an offset. |
-| `--navigate <screen>` | Push a screen: a canvas id, a screen name or a URL path (`/project`, `speaker.html`), with a query string for its params: `--navigate speaker?id=ada`, `--navigate /project?id=soft-signal`. The screen reads them as `${route.id}`, as from a `navigate` action's `params`. A screen no such name finds is an error listing the screens. Later steps act on the screen navigated to. |
+| `--navigate <screen>` | Push a screen: a canvas id, a screen name or a URL path (`/project`, `speaker.html`), with a query string for its params: `--navigate speaker?id=ada`, `--navigate /project?id=soft-signal`. The screen reads them as `${route.id}`, as from a `navigate` action's `params`. A screen no such name finds is an error listing the screens. Later steps act on the screen navigated to, and the capture is named after it (`speaker@390x844.png`, not the starting screen's name; `--compare` looks for its reference). |
 | `--wait <ms>` | Let time pass (animations, delays, toasts). |
-| `--label <text>` | Add `-<text>` to the PNG names and write `diagnostics-<text>.json`, to keep states apart. |
-| `--state <label> <steps>` | Several states in one run: each `--state` starts a state named `<label>` (its PNGs and `diagnostics-<label>.json` as `--label` names them) with the steps after it, up to the next `--state`, each from a fresh start; what comes before the first `--state` (sizes, screens, `--full-page`, `--dump-layout`) is every state's. One start of Flutter and one compile for a whole drive: `--state empty --state added --tap add --state removed --tap add --tap remove`. The report has a `== state <label>` part per state; the exit status is the worst. Runs on one SDK checkout still take turns (Flutter's test runner rewrites the checkout's `build/` as it starts): a drive written as one run with `--state` takes its turn once, and `tool/codelessly serve` keeps one renderer up so each turn costs the rendering alone. |
+| `--label <text>` | Add `-<text>` to the PNG names and the diagnostics file's (`diagnostics-<text>.json`; with `--screen home`, `diagnostics-home-<text>.json`), to keep states apart. |
+| `--state <label> <steps>` | Several states in one run: each `--state` starts a state named `<label>` (its PNGs and `diagnostics-<label>.json` as `--label` names them) with the steps after it, up to the next `--state`, each from a fresh start; what comes before the first `--state` (sizes, screens, `--full-page`, `--dump-layout`) is every state's (so its diagnostics file is named with them too: `diagnostics-home-<label>.json` with `--screen home`). One start of Flutter and one compile for a whole drive: `--state empty --state added --tap add --state removed --tap add --tap remove`. The report has a `== state <label>` part per state; the exit status is the worst. Runs on one SDK checkout still take turns (Flutter's test runner rewrites the checkout's `build/` as it starts): a drive written as one run with `--state` takes its turn once, and `tool/codelessly serve` keeps one renderer up so each turn costs the rendering alone. |
 | `--compare <png or dir>` | Compare each capture with a reference screenshot: the file, or in a directory the PNG of the same size (`390x844`) whose name is exactly the screen and the state (the `--label`; without one, `default` or no state), the parts separated by `--`, `-`, `_`, `@` or `.`: `section--saved--390x844.png` for `--label saved`, never `section--saved-empty--390x844.png`. Writes `<png>.compare.png` (the capture left, the reference right) and `<png>.diff.png` (the capture dimmed, differing pixels red), and prints the share of matching pixels, the height difference, the first differing row and the vertical bands where they differ, each with the offset at which it matches the reference when it is only shifted. Images of different heights compare; a reference of another width is scaled to the capture's. The figures go to the diagnostics file's `comparisons`. |
 | `--compare-map <screen>=<name>` | Compare a screen under the name its reference has (`--compare-map home=index`), or a screen and state (`--compare-map home-empty=index--no-results`). Repeatable. |
 | `--image-map <url prefix>=<folder>` | Read network images whose URL starts with the prefix from the folder (the rest of the URL, decoded and without its query, is the file's path there) and inline them, as local paths are: `--image-map https://cdn.example.com/art/=assets/art`. For documents that name published image URLs whose files you have (a reference app's assets). A mapped URL with no file there is `image_failed`, naming the path. For URLs no prefix covers (a storage bucket's tokens), name a table instead: `--image-map asset_urls.json=assets/art`, a JSON object pairing each file (relative to the folder) with its URL, either way round, as an asset upload writes it; a URL also matches without its query. Repeatable. |

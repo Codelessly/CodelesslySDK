@@ -103,8 +103,12 @@ void main() {
     });
 
     testWidgets('after --navigate the capture is the destination page once, at its own height', (tester) async {
-      final report = await runRender(tester, run(const [Step('navigate', 'detail')]));
+      final report = await runRender(tester, run(const [Step('navigate', 'detail')], label: 'opened'));
       expect(report.errors, 0, reason: '${report.diagnostics}');
+      // Named after the screen it shows, not the one the run started on.
+      expect(report.images.single.split('/').last, 'detail@390x844-opened.png');
+      final json = jsonDecode(File('${out.path}/diagnostics-long@390x844-opened.json').readAsStringSync()) as Map;
+      expect(json['startedOn'], {'detail@390x844-opened.png': 'long'});
       final p = await pixelsOf(tester, report.images.single);
       expect(p.height, 1400);
       expect(runsOf(rowsOf(p, 195, 0x000000)), [(0, 400)]);
@@ -167,7 +171,7 @@ void main() {
       expect(codes(report, 'error'), isEmpty, reason: '${report.diagnostics}');
       final saved = File('${out.path}/downloads/tools@390x844-saved/brief.txt');
       expect(saved.readAsStringSync(), 'Day 1: Zurich');
-      final json = jsonDecode(File('${out.path}/diagnostics-saved.json').readAsStringSync()) as Map;
+      final json = jsonDecode(File('${out.path}/diagnostics-tools@390x844-saved.json').readAsStringSync()) as Map;
       expect((json['downloads'] as List).single['fileName'], 'brief.txt');
       // The chain went on after it.
       final p = await pixelsOf(tester, report.images.single);

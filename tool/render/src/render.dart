@@ -135,6 +135,10 @@ final class RenderReport {
   /// and a live region's (a toast, a text marked `live`) when it changed,
   /// each with its politeness and the step after which it was said.
   final List<api.Json> announcements = [];
+
+  /// The screen a capture's run started on, by the capture's file name,
+  /// when the capture is named after another (a screen navigated to).
+  final Map<String, String> startedOn = {};
   int get errors => diagnostics.where((d) => d['severity'] == 'error').length;
   int get warnings => diagnostics.where((d) => d['severity'] == 'warning').length;
 }
@@ -182,7 +186,7 @@ List<({String name, String path, String text})> loadInputs(List<String> inputs) 
     if (type == FileSystemEntityType.directory) {
       files.addAll(Directory(input).listSync().whereType<File>().where((f) {
         final base = f.uri.pathSegments.last;
-        return base.endsWith('.json') && !base.startsWith('_') && !RegExp(r'^diagnostics(-.*)?\.json$').hasMatch(base);
+        return base.endsWith('.json') && !base.startsWith('_') && !RegExp(r'^diagnostics([-@].*)?\.json$').hasMatch(base);
       }).toList()
         ..sort((a, b) => a.path.compareTo(b.path)));
     } else if (type == FileSystemEntityType.file) {
@@ -874,7 +878,16 @@ Future<void> _renderAll(
             'or `--fonts system` for the system\'s fonts).',
             nodeId: fontUsers[m.family.toLowerCase()]?.firstOrNull));
       }
-      final name = '${_fileSafe(label)}@$sizeName${args.theme == null ? '' : '-${args.theme}'}${args.label == null ? '' : '-${_fileSafe(args.label!)}'}.png';
+      // Named after the screen it shows: after a --navigate (or a tap that
+      // navigates) the page navigated to, not the one the run started on.
+      var shown = label;
+      if (pages.shown?.name case final String route when codelessly.publishModel != null) {
+        // ignore: invalid_use_of_visible_for_testing_member
+        final resolved = CodelesslyWidget.resolveScreen(codelessly.publishModel!, route.replaceFirst(RegExp(r'^/+'), ''));
+        if (resolved != null) shown = _screenName(published, docs, resolved.$1);
+      }
+      final name = '${_fileSafe(shown)}@$sizeName${args.theme == null ? '' : '-${args.theme}'}${args.label == null ? '' : '-${_fileSafe(args.label!)}'}.png';
+      if (shown != label) report.startedOn[name] = label;
       final file = '${args.out}/$name';
       final ro = boundary.currentContext!.findRenderObject()! as RenderRepaintBoundary;
       final page = fullPage;
@@ -907,7 +920,7 @@ Future<void> _renderAll(
           issue(RuntimeIssue('compare_failed', 'warning',
               '--compare: no reference for $name in $reference${found.candidates.isEmpty ? '' : ' among ${found.candidates.map((c) => c.split('/').last).join(', ')}'}: '
               'a reference matches when its name is the screen, the state (the --label, else default or none) and the size, exactly; '
-              'name the file, give the state the --label the reference names, or map the names with --compare-map ${label.toLowerCase()}=<reference name>.',
+              'name the file, give the state the --label the reference names, or map the names with --compare-map ${shown.toLowerCase()}=<reference name>.',
               screen: label, size: sizeName));
         } else {
           try {
@@ -3416,15 +3429,26 @@ NodeBox? _focusedBox() {
   return null;
 }
 
-/// Where a run's diagnostics go: `diagnostics.json`, or with a label
-/// `diagnostics-<label>.json` (one run per state keeps each state's).
-String diagnosticsFileName(String? label) => label == null ? 'diagnostics.json' : 'diagnostics-${_fileSafe(label)}.json';
+/// Where a run's diagnostics go: `diagnostics.json`, with the screens
+/// [screens] names (`--screen`) and the sizes when they are not the default
+/// ones, as a PNG names them, then the label: `diagnostics-<label>.json`,
+/// `diagnostics-home-<label>.json`, `diagnostics-home@1440x900-<label>.json`,
+/// `diagnostics@390x844.json`. Runs of one label on other screens or at other
+/// sizes keep each its own.
+String diagnosticsFileName(String? label, {List<String> screens = const [], List<ui.Size>? sizes}) {
+  final screen = screens.map(_fileSafe).join('+');
+  final sized = sizes == null || _sameSizes(sizes, RenderArgs.defaultSizes) ? '' : '@${sizes.map((z) => '${z.width.round()}x${z.height.round()}').join('+')}';
+  final where = screen.isEmpty ? sized : '-$screen$sized';
+  return 'diagnostics$where${label == null ? '' : '-${_fileSafe(label)}'}.json';
+}
+
+bool _sameSizes(List<ui.Size> a, List<ui.Size> b) => a.length == b.length && [for (var i = 0; i < a.length; i++) a[i] == b[i]].every((x) => x);
 
 RenderReport _finish(RenderReport report, RenderArgs args) {
   // Errors first, then warnings; each group in document order.
   report.diagnostics.sort((a, b) => (a['severity'] == 'error' ? 0 : 1).compareTo(b['severity'] == 'error' ? 0 : 1));
   Directory(args.out).createSync(recursive: true);
-  File('${args.out}/${diagnosticsFileName(args.label)}').writeAsStringSync(const JsonEncoder.withIndent('  ').convert({
+  File('${args.out}/${diagnosticsFileName(args.label, screens: args.screens, sizes: args.sizes)}').writeAsStringSync(const JsonEncoder.withIndent('  ').convert({
     'errors': report.errors,
     'warnings': report.warnings,
     'images': [for (final i in report.images) i.split('/').last],
@@ -3433,6 +3457,9 @@ RenderReport _finish(RenderReport report, RenderArgs args) {
     if (report.clipboard.isNotEmpty) 'clipboard': report.clipboard,
     if (report.focus.isNotEmpty) 'focus': report.focus,
     if (report.announcements.isNotEmpty) 'announcements': report.announcements,
+    // A capture named after the screen navigated to: the screen its run
+    // started on (what its diagnostics' `screen` says).
+    if (report.startedOn.isNotEmpty) 'startedOn': report.startedOn,
     'diagnostics': report.diagnostics,
   }));
   return report;
