@@ -23,6 +23,9 @@ Needs codelessly_api's fixes-36-1 (its Unreleased entry).
 
 ### Fixed
 
+- **A list that keeps its end in view, with a padding of its own** (`ListView … stickToEnd={follow}
+  pad=[28,24,28,16]`): the padding wrapped the list's two halves and hid the key its viewport is centred by, and
+  Flutter's assertion drew the error box where the messages go (round 11b, team-chat's thread, at every size).
 - **A theme font that loads after the first layout reaches the controls' own texts**: a checkbox's and a toggle's
   label, a field's hint (and every label a control draws through `ControlLabel`) are measured again when the
   platform's fonts change, as a paragraph is; the tree asks for the theme's family at 400, 500, 600 and 700 (the

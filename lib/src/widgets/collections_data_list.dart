@@ -635,7 +635,10 @@ class DataListViewState extends State<DataListView> {
               if (padding == EdgeInsets.zero)
                 sliver
               else
-                SliverPadding(padding: _paddingFor(padding, sliver, parts, axis), sliver: sliver),
+                // (With the sliver's key: the viewport's center is found by it.
+                // A padded list that keeps its end in view, stickToEnd with
+                // pad=, asserted and drew nothing: round 11b, team-chat.)
+                SliverPadding(key: sliver.key, padding: _paddingFor(padding, sliver, parts, axis), sliver: sliver),
           ],
         );
       },
