@@ -975,6 +975,21 @@ class RenderGridItems extends RenderCollection implements MeasuresContent {
   /// With [shrinkWrapRows]: cells stretch to their row's longest item.
   bool intrinsicRows = true;
 
+  /// How long an item laid out in a row of [cross] wants that row: its
+  /// intrinsic extent where it can be measured ([intrinsicRows]), else (or
+  /// when something inside cannot say one: a LayoutBuilder a component
+  /// holds) its laid-out length. Never an exception a writer sees.
+  double _rowExtentOf(RenderBox it, double cross, bool vertical) {
+    final laidOut = RenderCollection.main(it.size, axis);
+    if (!intrinsicRows) return laidOut;
+    try {
+      return vertical ? it.getMaxIntrinsicHeight(cross) : it.getMaxIntrinsicWidth(cross);
+    } on FlutterError {
+      intrinsicRows = false;
+      return laidOut;
+    }
+  }
+
   /// With [shrinkWrapRows]: an item that fills the rows' axis is measured
   /// at its content (false for an item that can't be laid out unbounded
   /// that way: it takes its design length).
@@ -1134,13 +1149,7 @@ class RenderGridItems extends RenderCollection implements MeasuresContent {
           // IntrinsicHeight around the row: its longest item's intrinsic
           // extent at the cell's width, where the items can be measured;
           // else their laid-out lengths.
-          extent = intrinsicRows
-              ? row.fold<double>(
-                  0,
-                  (s, it) =>
-                      math.max(s, vertical ? it.getMaxIntrinsicHeight(cellCross) : it.getMaxIntrinsicWidth(cellCross)),
-                )
-              : row.fold<double>(0, (s, it) => math.max(s, RenderCollection.main(it.size, axis)));
+          extent = row.fold<double>(0, (s, it) => math.max(s, _rowExtentOf(it, cellCross, vertical)));
           for (final it in row) {
             it.layout(BoxConstraints.tight(RenderCollection.sizeOf(extent, cellCross, axis)), parentUsesSize: true);
           }
@@ -1310,9 +1319,7 @@ class RenderGridItems extends RenderCollection implements MeasuresContent {
           RenderCollection.constraintsOf(minMain: 0, maxMain: double.infinity, minCross: w, maxCross: w, axis: axis),
           parentUsesSize: true,
         );
-        return intrinsicRows
-            ? (vertical ? it.getMaxIntrinsicHeight(w) : it.getMaxIntrinsicWidth(w))
-            : RenderCollection.main(it.size, axis);
+        return _rowExtentOf(it, w, vertical);
       }
 
       for (final (i, c) in cells.indexed) {
