@@ -1109,17 +1109,25 @@ List<String> _screens(
   final out = <String>[];
   for (final w in wanted) {
     String? hit = published.screens.containsKey(w) ? w : published.layoutOfCanvas[w];
+    // An overlay each of two pages has as its own is named as written on
+    // both (`nav` is nav--board and nav--list: tool/notation/site_overlays.dart):
+    // not one of them picked.
+    final own = <String>{};
     if (hit == null) {
       for (final d in docs.values) {
         for (final e in (api.readMap(d['nodes']) ?? const {}).entries) {
           final n = api.readMap(e.value);
           if (n?['type'] != 'canvas') continue;
           final props = api.readMap(n!['props']) ?? const {};
+          if (n['name'] == w && e.key.startsWith('$w--')) own.add(e.key);
           if (n['name'] == w || props['screen'] == w || n['path'] == w) hit ??= published.layoutOfCanvas[e.key];
         }
       }
     }
-    if (hit == null) {
+    if (own.length > 1) {
+      issue(RuntimeIssue('unknown_screen_arg', 'error',
+          '--screen "$w" is the overlay each of ${own.length} pages has as its own (they draw it differently): ${(own.toList()..sort()).join(', ')}. Name the one meant.'));
+    } else if (hit == null) {
       issue(RuntimeIssue('unknown_screen_arg', 'error', '--screen "$w" names no canvas, screen or layout. Screens: ${all.join(', ')}.'));
     } else if (!out.contains(hit)) {
       out.add(hit);
@@ -1735,6 +1743,24 @@ String? _canvasOf(NodeBox b) {
   return null;
 }
 
+/// The id a step names canvas box [b] by: the id written on its page for
+/// an overlay site expansion made the page's own (`nav--board` is the
+/// board page's `Drawer#nav`, its name `nav`: tool/notation/site_overlays.dart),
+/// else its id. One page's overlays are on screen at a time, so the written
+/// id names one.
+String _canvasWord(NodeBox b) {
+  final name = b.node?.name ?? '';
+  return name.isNotEmpty && b.id.startsWith('$name--') ? name : b.id;
+}
+
+/// [_canvasOf] as a step names it ([_canvasWord]).
+String? _canvasNameOf(NodeBox b) {
+  for (RenderObject? p = b; p != null; p = p.parent) {
+    if (p is NodeBox && p.node?.type == 'canvas') return _canvasWord(p);
+  }
+  return null;
+}
+
 /// Node [id] on screen, or why there is none, or that two nodes answer to
 /// it. [id] is a node id or `name` (`saved`), `<id>#<n>` for a list's n-th
 /// copy, or a path: a component's node by its call ids (`footer/saved`), a
@@ -1756,7 +1782,7 @@ String? _canvasOf(NodeBox b) {
   // A path from a canvas (`list/row#1`) is the page's own node, read
   // segment by segment below: as a component's path it reached a component's
   // node of the same id (test 9, kanban 9: a filter chip for a table's row).
-  final fromCanvas = id.contains('/') && boxes.any((b) => b.id == first && b.node?.type == 'canvas');
+  final fromCanvas = id.contains('/') && boxes.any((b) => b.node?.type == 'canvas' && (b.id == first || _canvasWord(b) == first));
   final byPath = !fromCanvas &&
       (id.contains('/') || boxes.any((b) => b.id != first && b.tree.isInstanceRoot(b.id, b.instance) && b.tree.pathOf(b.id, b.instance) == first));
   if (byPath) {
@@ -1805,7 +1831,7 @@ String? _canvasOf(NodeBox b) {
         if (i > 0 && chosen?.node?.type == 'canvas' && own.isNotEmpty) {
           all = own;
         } else {
-          final names = {for (final b in all) componentInstanceOf(b.instance) == null ? '${_canvasOf(b) ?? '<canvas id>'}/$name#$index' : '${b.tree.pathOf(b.id, b.instance).replaceAll(RegExp(r'#\d+$'), '')}#$index'};
+          final names = {for (final b in all) componentInstanceOf(b.instance) == null ? '${_canvasNameOf(b) ?? '<canvas id>'}/$name#$index' : '${b.tree.pathOf(b.id, b.instance).replaceAll(RegExp(r'#\d+$'), '')}#$index'};
           return (box: null, problem: "ambiguous: copies of ${trees.length} different nodes on screen are \"$name\" (a page's and a component's, or two components'). Name the one meant by its path: ${names.take(4).join(' or ')}");
         }
       }
@@ -1848,11 +1874,11 @@ String? _canvasOf(NodeBox b) {
           for (final b in kinds.values)
             paths.length == kinds.length
                 ? b.tree.pathOf(b.id, b.instance)
-                : '${b.tree.pathOf(b.id, b.instance)} (on canvas ${_canvasOf(b) ?? '?'})',
+                : '${b.tree.pathOf(b.id, b.instance)} (on canvas ${_canvasNameOf(b) ?? '?'})',
         ];
         final write = [
           for (final b in kinds.values)
-            componentInstanceOf(b.instance) == null ? '${_canvasOf(b) ?? '<canvas id>'}/$name' : b.tree.pathOf(b.id, b.instance),
+            componentInstanceOf(b.instance) == null ? '${_canvasNameOf(b) ?? '<canvas id>'}/$name' : b.tree.pathOf(b.id, b.instance),
         ];
         return (
           box: null,

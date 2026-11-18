@@ -18,6 +18,10 @@ class DocumentTree {
   final Map<String, String> types = {};
   final Map<String, String> parents = {};
 
+  /// The name of each canvas that has one: for an overlay site expansion made a page's own (`nav--board`), the id
+  /// as written on that page (`nav`: tool/notation/site_overlays.dart).
+  final Map<String, String> canvasNames = {};
+
   static DocumentTree load(List<String> paths) {
     final t = DocumentTree();
     final files = <File>[];
@@ -48,6 +52,7 @@ class DocumentTree {
         final n = e.value;
         if (n is! Map) continue;
         t.types.putIfAbsent('${e.key}', () => '${n['type'] ?? '?'}');
+        if (n['type'] == 'canvas' && n['name'] is String) t.canvasNames.putIfAbsent('${e.key}', () => n['name'] as String);
         final kids = [
           ...?(n['children'] as List?),
           ...?(n['slots'] as Map?)?.values,
@@ -111,6 +116,10 @@ List<String> outlineCapture(List entries, DocumentTree tree, List<Map> diags, {i
       tail = '  "${t.length > 70 ? '${t.substring(0, 70)}...' : t}"';
     }
     if (e['w'] == 0 || e['h'] == 0) tail += '  (empty: draws nothing)';
+    // An overlay made the page's own: the id its page wrote, which steps may name.
+    if (tree.canvasNames[bid] case final String name when kind == 'canvas' && name.isNotEmpty && bid.startsWith('$name--')) {
+      tail += '  (#$name as written on page ${bid.substring(name.length + 2)}: its own, as two pages draw "$name" differently)';
+    }
     lines.add('${_pad('${'  ' * depth}$kind $lid', 44)} ${_pad(box, 22)}$tail'.trimRight());
     for (final key in {lid, bid}) {
       if (byNode.containsKey(key) && shown.add(key)) {
