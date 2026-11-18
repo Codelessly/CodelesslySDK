@@ -2292,7 +2292,9 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       final dropdown = _firstIn<RenderDropdown>(box);
       var rows = _openMenuRows(binding, label);
       if (rows.isEmpty && dropdown != null && !dropdown.isOpen) {
-        // Closed: opened as a user does, by a press on it.
+        // Closed: opened as a user does, by a press on it (scrolled into
+        // view first).
+        if (reachable(box) == null) await centerInView(box);
         final at = reachable(box) ?? _rectOf(box).center;
         await tester.tapAt(at);
         await _settle(tester);
