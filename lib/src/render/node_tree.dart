@@ -453,6 +453,16 @@ class RenderTree {
   set textDefault(api.TextStyle? value) {
     if (value == _textDefault) return;
     _textDefault = value;
+    // The controls draw their own texts (a tab's label, a checkbox's, a
+    // field's hint, a calendar's days) in it with no text style of their
+    // own: its usual weights are asked for here, as a text node asks for
+    // its own (round 11b: a theme font with no file drew them as boxes in
+    // the render command, the texts beside them in the fallback).
+    if (value?.fontFamily case final String family when family.isNotEmpty) {
+      for (final w in const [400, 500, 600, 700]) {
+        FontDemand.need(family, w, false);
+      }
+    }
     for (final b in _boxes.values.toList()) {
       if (!identical(_boxes[b.key], b)) continue;
       b._applied = null;

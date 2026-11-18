@@ -508,8 +508,31 @@ class ControlLabel {
   double? _laidOutFor;
   double _glyphCenter = 0;
 
+  /// How many times the platform's fonts have changed (a family loaded
+  /// after a first layout): a label laid out before lays out again, as a
+  /// paragraph does (round 11b: a theme font loaded late left a checkbox's
+  /// and a toggle's labels in the test font's boxes).
+  static int get fontEpoch {
+    if (!_listening) {
+      _listening = true;
+      PaintingBinding.instance.systemFonts.addListener(() => _fontEpoch++);
+    }
+    return _fontEpoch;
+  }
+
+  static int _fontEpoch = 0;
+  static bool _listening = false;
+  int _epoch = -1;
+
   /// Lays it out at most [maxWidth] wide.
   void layout(double maxWidth) {
+    final epoch = fontEpoch;
+    if (epoch != _epoch) {
+      _epoch = epoch;
+      _laidOutFor = null;
+      _riseFor = null;
+      _painter.markNeedsLayout();
+    }
     if (_laidOutFor == maxWidth) return;
     _laidOutFor = maxWidth;
     _painter.layout(maxWidth: maxWidth.isFinite ? maxWidth : double.infinity);

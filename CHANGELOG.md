@@ -23,6 +23,13 @@ Needs codelessly_api's fixes-36-1 (its Unreleased entry).
 
 ### Fixed
 
+- **A theme font that loads after the first layout reaches the controls' own texts**: a checkbox's and a toggle's
+  label, a field's hint (and every label a control draws through `ControlLabel`) are measured again when the
+  platform's fonts change, as a paragraph is; the tree asks for the theme's family at 400, 500, 600 and 700 (the
+  weights controls draw in). Round 11b, 5 builds: a theme naming a font with no file (Lato, Arial, sans-serif)
+  drew those labels in the render command as the test font's black boxes (docs-site's tabs, nonprofit's
+  Gift Aid, notes-app's Pin, meal-planner's search hint, seat-booking's calendar), while the texts beside them
+  were drawn in the fallback. In an app, a web font that arrived late left them in the first font.
 - **A toolbar's title beside small texts**: squeezable texts beside a child that fills keep their own width and the
   filling child takes the room left, whatever order the row's boxes are applied in. A row drawn again at another
   size (the render tool's second size, a window resized) had the small texts decide before the title was there:
