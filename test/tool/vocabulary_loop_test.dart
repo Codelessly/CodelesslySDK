@@ -97,7 +97,9 @@ void main() {
     // clearable is an Input's own now.
     expect(of('universal'), contains('Waveform.color'));
     expect(of('flag'), isEmpty);
-    expect(of('verb'), ['Button.haptic', 'ListTile.vibrate']);
+    // haptic is an action of the catalog, and every action is a verb by its type name (codelessly_api
+    // docs/design/22, 2.3): only vibrate, which is no action, is recorded.
+    expect(of('verb'), ['ListTile.vibrate']);
     expect(of('variant'), ['Button.Button.danger']);
     // Cards' Rating no longer needs a label (Review 6, D30).
     expect(of('missing'), isEmpty);
