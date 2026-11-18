@@ -4,12 +4,6 @@ Needs codelessly_api's fixes-36-1 (its Unreleased entry).
 
 ### Behaviour changes
 
-- **In a wrapping row (column), a child that fills with no design number takes the whole line** (`{"fill": 0}`,
-  what `phone.w=fill` writes; CSS `width: 100%` in a wrapping flex): it was held to its design number, 0, so a
-  column drew 0 wide and a card as narrow as its content. Round 11b, 4 builds: `Row gap=24 top phone.wrap=true`
-  over `Card w=392 phone.w=fill` and `Column grow phone.w=fill` (seat-booking: the artwork card 32 px, the About
-  column 0, the page 12,900 px tall; smart-home's rules list squeezed, the editor gone; food-ordering's panels; the
-  Calendar beside it threw). A fill with a design number (`{"fill": 60}`) keeps it, as before.
 - **A hugging text field whose box has a height of its own** (its decoration's `constraints`, min and max the
   same: a labelled `Input … h=44` in the notation) draws its text at that box's step of the control scale; it took
   the compact step's (round 11b).

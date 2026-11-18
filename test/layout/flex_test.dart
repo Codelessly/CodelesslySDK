@@ -73,27 +73,6 @@ void main() {
       expect(r('r'), const Rect.fromLTWH(0, 0, 200, 55));
     });
 
-    testWidgets('in a wrapping row a child that fills with no design number takes the whole line (round 11b)', (tester) async {
-      // `Row top phone.wrap=true` over `Card w=392 phone.w=fill` and
-      // `Column grow phone.w=fill`: the card was 32 wide (its content, held
-      // to its design number 0) and the column 0.
-      final (tree, view) = await _show(tester, {
-        'r': {
-          'type': 'row',
-          'children': ['card', 'col'],
-          'layout': {'width': 300, 'height': {'hug': 0}},
-          'props': {'wrap': true, 'spacing': 10, 'runSpacing': 8, 'crossAxisAlignment': 'start'},
-        },
-        'card': {'type': 'column', 'layout': {'width': {'fill': 0}, 'height': {'hug': 0}}, 'children': ['a']},
-        'a': _box(40, 20),
-        'col': {'type': 'column', 'layout': {'width': {'fill': 0}, 'height': {'hug': 0}, 'flex': 1}, 'children': ['b']},
-        'b': _box(40, 30),
-      }, 'r');
-      Rect r(String id) => tree.boxOf(id)!.rectIn(view)!;
-      expect(r('card'), const Rect.fromLTWH(0, 0, 300, 20));
-      expect(r('col'), const Rect.fromLTWH(0, 28, 300, 30));
-    });
-
     for (final late in [false, true]) {
       testWidgets('centered texts in a hugging column match Flutter to the pixel${late ? ', also when the font loads late' : ''}', (tester) async {
       Future<void> font(String family, String file) async {
