@@ -32,7 +32,7 @@ import 'tokens.dart';
 /// The two looks of an expanding control.
 enum ExpansionKind { accordion, tile }
 
-/// The recipe of `accordion`: its first child is the header, its second the
+/// The recipe of `accordion`: its first child is the header, the others the
 /// content.
 void accordionRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
   String? at(int i) {
@@ -40,7 +40,13 @@ void accordionRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
     return id != null && b.nodeOf(id) != null ? id : null;
   }
 
-  final header = at(0), content = at(1);
+  // Every child after the header is what it opens, in order (it drew only
+  // the first of them: a docs sidebar's group showed one link of three,
+  // round 11).
+  final header = at(0);
+  final content = [
+    for (var i = 1; i < n.children.length; i++) ?at(i),
+  ];
   _expansion(
     b,
     n,
@@ -51,7 +57,7 @@ void accordionRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
       header: null,
       crossAxis: crossAxisAlignment(n.prop(AccordionProps.crossAxisAlignment)),
     ),
-    roles: {?header: 'title', ?content: 'body'},
+    roles: {?header: 'title', for (final c in content) c: 'body'},
     expanded: n.prop(AccordionProps.expanded),
   );
 }

@@ -348,6 +348,26 @@ void main() {
           'children': [header, content],
         };
 
+    testWidgets('every child after the header is in the content, in order (it drew only the first: round 11)', (tester) async {
+      final (tree, _) = await _show(tester, {
+        'faq': {
+          'type': 'accordion',
+          'layout': {'width': 368, 'height': {'hug': 0}},
+          'props': {'expanded': true},
+          'children': ['q', 'a', 'b', 'c'],
+        },
+        'q': _text('Get started'),
+        'a': _text('Introduction'),
+        'b': _text('Installation'),
+        'c': _text('First diff'),
+      });
+      final a = rectOf(tree, 'a'), b = rectOf(tree, 'b'), c = rectOf(tree, 'c');
+      expect(a.height, greaterThan(0));
+      expect(b.top, greaterThanOrEqualTo(a.bottom));
+      expect(c.top, greaterThanOrEqualTo(b.bottom));
+      expect(rectOf(tree, 'faq').bottom, greaterThan(c.bottom));
+    });
+
     testWidgets('SSUI\'s Accordion: a tinted header panel with a chevron, the content in a panel under it', (tester) async {
       final (tree, _) = await _show(tester, {
         'faq': accordion('q', 'a'),

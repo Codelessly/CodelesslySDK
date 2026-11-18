@@ -13,6 +13,8 @@
 - **A fill with the most it gets, in a stack** (`Column w=fill maxw=730`) is as wide as the stack up to that: it was
   nothing wide (a headline one letter per line).
 - **A ring (`circularProgressIndicator`) that fills its place** is a circle of its shortest side: it drew nothing.
+- **An accordion draws every child after its header**, in order: it drew only the first (a docs sidebar's group
+  showed one link of three).
 
 ## 36.0.0
 
