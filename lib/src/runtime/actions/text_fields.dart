@@ -70,7 +70,7 @@ class TextFieldHandle {
       if (sameComponent == null && component != null && componentInstanceOf(box.instance) == component) sameComponent = handle;
       if (related == null && (within(box.instance, instance) || within(instance, box.instance))) related = handle;
     }
-    return related ?? sameComponent ?? of(tree, id) ?? _anyOf(tree, id);
+    return related ?? sameComponent ?? of(tree, id);
   }
 
   /// The field node [id] shows anywhere in [tree], a component instance's

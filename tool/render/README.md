@@ -34,6 +34,12 @@ A manifest that names a design system (`"designSystem": "../design_systems/ssui"
 `site.json`) gets its components (callable by type, rendered as the site's own; `--components-all`
 renders them too), its tokens as the base theme the site's `theme` is merged over, and its fonts.
 
+Paths (the documents, `--out`, `--fonts`) are taken relative to the directory the command is run in: a script
+that `cd`s into the SDK first passes absolute ones, or its PNGs land in the SDK's checkout. In Git Bash on Windows
+a value starting with `/` is rewritten to a Windows path before the command sees it (`--key /` arrives as
+`C:/Program Files/Git/`): run the command with `MSYS2_ARG_CONV_EXCL='*'` set (not `MSYS_NO_PATHCONV=1`, which
+also stops the paths the tools need from being converted). `--outline` and `--sheet` are options of `tool/codelessly render`, which runs this command.
+
 A directory is every `.json` file in it (not those starting with `_`, nor `diagnostics*.json`), as the pages of one
 site: navigation may name a canvas of another page.
 
