@@ -10,6 +10,9 @@ import 'package:flutter/rendering.dart';
 import '../convert.dart';
 import 'image_fill.dart';
 
+/// What a [RenderNodePaint] layer paints of its decoration.
+enum NodePaintPart { all, fills, strokes }
+
 /// Paints fills and/or strokes of a box decoration, at the size its parent
 /// gives it.
 class RenderNodePaint extends RenderBox with ImageClient {
@@ -32,6 +35,16 @@ class RenderNodePaint extends RenderBox with ImageClient {
   set foreground(bool v) {
     if (v == _foreground) return;
     _foreground = v;
+    markNeedsPaint();
+  }
+
+  /// Which of the fills and strokes this layer paints (the foreground's are
+  /// [foreground]'s): a box whose border is drawn over its content paints
+  /// its fills under the content and its strokes in a layer over it.
+  NodePaintPart _part = NodePaintPart.all;
+  set part(NodePaintPart v) {
+    if (v == _part) return;
+    _part = v;
     markNeedsPaint();
   }
 
@@ -87,10 +100,12 @@ class RenderNodePaint extends RenderBox with ImageClient {
       }
       return;
     }
-    for (final p in decoration.visibleFills) {
-      _fill(canvas, fillShape, p);
+    if (_part != NodePaintPart.strokes) {
+      for (final p in decoration.visibleFills) {
+        _fill(canvas, fillShape, p);
+      }
     }
-    final strokes = decoration.visibleStrokes.toList();
+    final strokes = _part == NodePaintPart.fills ? const <api.Paint>[] : decoration.visibleStrokes.toList();
     if (strokes.isEmpty) return;
     final w = decoration.strokeWidth;
     // Inside: the stroke's outer edge on the box edge; outside: its inner.

@@ -105,7 +105,13 @@ class FieldAffix {
     this.minWidth = 0,
     this.tappable = false,
     this.alwaysVisible = true,
+    this.button = false,
   });
+
+  /// A number field's minus or plus button ([FieldDecoration.steppers]):
+  /// a square slot as wide as the box is high, ruled off from the value.
+  factory FieldAffix.stepper({required bool plus}) =>
+      FieldAffix(icon: _glyph({'name': plus ? 'add' : 'remove'}), tappable: true, button: true);
 
   /// The glyph (an icon prop, as an `icon` node's).
   final Json icon;
@@ -133,6 +139,10 @@ class FieldAffix {
   /// Whether the text shows while the field is empty and unfocused
   /// (Flutter's `prefixText` doesn't; an icon always shows).
   final bool alwaysVisible;
+
+  /// A button in the box (a stepper's): its whole slot takes the press, it
+  /// is ruled off from the content and tinted under the pointer.
+  final bool button;
 
   bool get hasIcon => icon.isNotEmpty && icon['show'] != false;
   bool get hasText => text.isNotEmpty;
@@ -175,7 +185,8 @@ class FieldAffix {
       other.padding == padding &&
       other.minWidth == minWidth &&
       other.tappable == tappable &&
-      other.alwaysVisible == alwaysVisible;
+      other.alwaysVisible == alwaysVisible &&
+      other.button == button;
 
   @override
   int get hashCode => Object.hash(text, iconSize, iconColor, padding, minWidth, tappable);
@@ -330,6 +341,7 @@ class FieldDecoration {
     double focusRingWidth = 0,
     Color? focusRingColor,
     String Function(String? text)? text,
+    bool steppers = false,
   }) {
     final t = text ?? (s) => s ?? '';
     String? error;
@@ -359,7 +371,7 @@ class FieldDecoration {
       // field's count against its limit.
       counter: d.counterText == null ? (counterFallback ?? '') : t(d.counterText),
       counterStyle: style(d.counterStyle),
-      prefix: FieldAffix.of(
+      prefix: steppers ? FieldAffix.stepper(plus: false) : FieldAffix.of(
         d.prefixIcon,
         t(d.prefixText),
         d.prefixStyle,
@@ -367,7 +379,7 @@ class FieldDecoration {
         constraints: d.prefixIconConstraints,
         alwaysVisible: always,
       ),
-      suffix: FieldAffix.of(
+      suffix: steppers ? FieldAffix.stepper(plus: true) : FieldAffix.of(
         d.suffixIcon,
         t(d.suffixText),
         d.suffixStyle,
@@ -827,6 +839,7 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl,
   /// on the leading side.
   double _affixWidth(FieldAffix? a, ControlScale s, {required bool prefix}) {
     if (a == null) return 0;
+    if (a.button) return s.height;
     final pad = _padding(s);
     final outer = prefix ? pad.left : pad.right;
     var w = 0.0;
@@ -1008,7 +1021,10 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl,
     if (d.prefix case final FieldAffix a) {
       final slot = _affixWidth(a, s, prefix: true);
       var x = boxRect.left;
-      if (a.hasIcon) {
+      if (a.button) {
+        final size = _iconSize(a, s);
+        _prefixIconRect = Rect.fromLTWH(x + (slot - size) / 2, boxRect.center.dy - size / 2, size, size);
+      } else if (a.hasIcon) {
         final size = _iconSize(a, s);
         final p = a.padding;
         x += p == null ? pad.left : p.left;
@@ -1024,7 +1040,10 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl,
     if (d.suffix case final FieldAffix a) {
       final slot = _affixWidth(a, s, prefix: false);
       var x = boxRect.right;
-      if (a.hasIcon) {
+      if (a.button) {
+        final size = _iconSize(a, s);
+        _suffixIconRect = Rect.fromLTWH(x - (slot + size) / 2, boxRect.center.dy - size / 2, size, size);
+      } else if (a.hasIcon) {
         final size = _iconSize(a, s);
         final p = a.padding;
         x -= p == null ? pad.right : p.right;
@@ -1113,10 +1132,14 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl,
   /// Which part of the frame [local] is on.
   FieldFramePart partAt(Offset local) {
     final d = decoration;
-    if (d.prefix?.tappable ?? false) {
+    if (d.prefix?.button ?? false) {
+      if (buttonSlot(prefix: true).contains(local)) return FieldFramePart.prefixIcon;
+    } else if (d.prefix?.tappable ?? false) {
       if (_prefixIconRect.inflate(6).contains(local)) return FieldFramePart.prefixIcon;
     }
-    if (d.suffix?.tappable ?? false) {
+    if (d.suffix?.button ?? false) {
+      if (buttonSlot(prefix: false).contains(local)) return FieldFramePart.suffixIcon;
+    } else if (d.suffix?.tappable ?? false) {
       if (_suffixIconRect.inflate(6).contains(local)) return FieldFramePart.suffixIcon;
     }
     if (boxRect.contains(local)) return FieldFramePart.box;
@@ -1124,6 +1147,28 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl,
     if (local.dy > boxRect.bottom) return FieldFramePart.below;
     return FieldFramePart.none;
   }
+
+  /// The slot of a button affix (its whole height of the box, as wide as
+  /// the box is high), at the start for the prefix (the end in RTL).
+  Rect buttonSlot({required bool prefix}) {
+    final w = math.min(boxRect.height, boxRect.width / 3);
+    final atStart = prefix != _rtl;
+    return atStart ? Rect.fromLTWH(boxRect.left, boxRect.top, w, boxRect.height) : Rect.fromLTWH(boxRect.right - w, boxRect.top, w, boxRect.height);
+  }
+
+  /// Whether a button affix can't be pressed now (a stepper at its bound).
+  bool affixDisabled({required bool prefix}) => false;
+
+  FieldFramePart? _hoverPart;
+
+  /// The part of the frame under the pointer (a button affix is tinted).
+  set hoverPart(FieldFramePart? v) {
+    if (v == _hoverPart) return;
+    _hoverPart = v;
+    markNeedsPaint();
+  }
+
+  FieldFramePart? get hoverPart => hovered ? _hoverPart : null;
 
   // --- paint ----------------------------------------------------------------------------
 
@@ -1192,8 +1237,35 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl,
       final at = prefix ? _prefixTextAt : _suffixTextAt;
       p.paint(canvas, offset + Offset(at.dx, contentRect.top + (contentLineHeight - p.height) / 2));
     }
+    // A button affix (a stepper's minus and plus): tinted under the pointer,
+    // ruled off from the value by a hairline of the border's color.
+    for (final (a, prefix) in [(d.prefix, true), (d.suffix, false)]) {
+      if (a == null || !a.button) continue;
+      final slot = buttonSlot(prefix: prefix).shift(offset);
+      final part = prefix ? FieldFramePart.prefixIcon : FieldFramePart.suffixIcon;
+      if (hoverPart == part && enabled && !affixDisabled(prefix: prefix)) {
+        canvas
+          ..save()
+          ..clipRRect(shape)
+          ..drawRect(slot, Paint()..color = d.tokens.hoverOverlay)
+          ..restore();
+      }
+      final rule = decoration.borderFor(focused: false, hovered: false, enabled: enabled && d.enabled);
+      final x = (prefix != _rtl) ? slot.right - .5 : slot.left + .5;
+      canvas.drawLine(Offset(x, slot.top), Offset(x, slot.bottom),
+          Paint()
+            ..color = rule.side.color.a > 0 ? rule.side.color : d.tokens.primaryBorder
+            ..strokeWidth = 1);
+    }
     for (final g in _frameChildren) {
-      context.paintChild(g, offset + (g.parentData! as BoxParentData).offset);
+      final dim = (identical(g, _prefixGlyph) && (d.prefix?.button ?? false) && affixDisabled(prefix: true)) ||
+          (identical(g, _suffixGlyph) && (d.suffix?.button ?? false) && affixDisabled(prefix: false));
+      final at = offset + (g.parentData! as BoxParentData).offset;
+      if (dim) {
+        context.pushOpacity(at, 90, (context, offset) => context.paintChild(g, offset));
+      } else {
+        context.paintChild(g, at);
+      }
     }
     // The hint and the content, inside the box.
     final clip = d.collapsed ? (Offset.zero & size) : boxRect;

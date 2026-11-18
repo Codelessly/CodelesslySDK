@@ -1910,6 +1910,16 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
         ..painter = SpreadShadowPainter(shadows: spread, borderRadius: radius!));
     }
     final plan = _PaintPlan.of(n);
+    // A border inside the box of a node that holds content is drawn over that
+    // content, as a design tool draws a frame's stroke (and as CSS keeps the
+    // content inside the border): a child's own fill (a table's rows, a field
+    // set between two buttons, a header band) never paints over the box's
+    // sides, and the rounded corners it clips to stay outlined.
+    final strokesOver = content != null &&
+        d.strokeAlign == api.StrokeAlign.inside &&
+        d.strokeWidth > 0 &&
+        d.visibleStrokes.isNotEmpty &&
+        d.shape != api.DecorationShape.circle;
     chain.add(_obtain<RenderNodeDecoration>('decoration', () => RenderNodeDecoration(decoration: const BoxDecoration()))
       ..decoration = BoxDecoration(
         boxShadow: [for (final sh in shadows) if (!spread.contains(sh)) sh],
@@ -1919,7 +1929,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
         // One decoration, as a Container's: Flutter tucks the fill under an
         // opaque border, so its anti-aliased edge doesn't show past the
         // border (painted apart, a light sliver showed at fractional edges).
-        border: plan.native ? plan.border : null,
+        border: plan.native && !strokesOver ? plan.border : null,
       )
       // A node that paints a fill is opaque to pointers, as Flutter's
       // Container(color:) is; one without lets them through its gaps to what
@@ -1963,8 +1973,15 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
               : null
           ..decoration = d
           ..foreground = false
+          ..part = strokesOver ? NodePaintPart.fills : NodePaintPart.all
           ..clipped = clipBehavior == Clip.antiAlias || clipBehavior == Clip.antiAliasWithSaveLayer,
       );
+    }
+    if (strokesOver) {
+      over.add(_obtain<RenderNodePaint>('overStroke', RenderNodePaint.new)
+        ..decoration = d
+        ..foreground = false
+        ..part = NodePaintPart.strokes);
     }
     if (canStack && plan.foreground) {
       over.add(_obtain<RenderNodePaint>('over', RenderNodePaint.new)

@@ -204,6 +204,9 @@ class TextFieldConfig {
   late final bool numberField;
   late final double? numberMin, numberMax;
   late final double numberStep;
+
+  /// A minus and a plus button inside the box (`steppers`, a number field).
+  late final bool steppers;
   late final String semanticLabel;
   late final TextInputAction? inputAction;
   late final TextCapitalization capitalization;
@@ -310,6 +313,7 @@ class TextFieldConfig {
     c.numberMin = n.prop(TextFieldProps.min);
     c.numberMax = n.prop(TextFieldProps.max);
     c.numberStep = n.prop(TextFieldProps.step);
+    c.steppers = n.prop(TextFieldProps.steppers);
     c.semanticLabel = n.prop(TextFieldProps.semanticLabel);
     c.inputAction = switch (n.prop(TextFieldProps.textInputAction)) {
       null => null,
@@ -640,6 +644,7 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
         counterFallback: c.otpLength == 0 && (c.maxLength ?? 0) > 0 ? '${editor.text.runes.length}/${c.maxLength}' : null,
         focusRingWidth: c.focusRingWidth,
         focusRingColor: c.focusRingColor,
+        steppers: c.steppers,
         text: _interactive ? null : fieldPreviewText);
   }
 
@@ -851,10 +856,29 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
   // --- pointer -----------------------------------------------------------------------------------
 
   @override
-  MouseCursor get cursor => _interactive && enabled ? SystemMouseCursors.text : MouseCursor.defer;
+  MouseCursor get cursor => !_interactive || !enabled
+      ? MouseCursor.defer
+      : _onButton(hoverPart)
+          ? (affixDisabled(prefix: hoverPart == FieldFramePart.prefixIcon) ? SystemMouseCursors.basic : SystemMouseCursors.click)
+          : SystemMouseCursors.text;
+
+  bool _onButton(FieldFramePart? part) =>
+      (part == FieldFramePart.prefixIcon && (decoration.prefix?.button ?? false)) ||
+      (part == FieldFramePart.suffixIcon && (decoration.suffix?.button ?? false));
+
+  /// A stepper's minus at the least value, its plus at the most.
+  @override
+  bool affixDisabled({required bool prefix}) {
+    final c = _config;
+    if (c == null || !c.steppers) return false;
+    final value = double.tryParse(editor.text);
+    if (value == null) return false;
+    return prefix ? (c.numberMin != null && value <= c.numberMin!) : (c.numberMax != null && value >= c.numberMax!);
+  }
 
   @override
   void handleEvent(PointerEvent event, covariant BoxHitTestEntry entry) {
+    if (_interactive && event is PointerHoverEvent) hoverPart = partAt(entry.localPosition);
     if (!_interactive || !enabled || event is! PointerDownEvent) return;
     final part = partAt(entry.localPosition);
     if (part == FieldFramePart.prefixIcon || part == FieldFramePart.suffixIcon) {
@@ -867,7 +891,15 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
   }
 
   bool _affixPrefix = true;
-  void _affixTapped() => onAffixTap?.call(_affixPrefix);
+  void _affixTapped() {
+    // A stepper's button steps the number (not past its bound), as Up and
+    // Down do; the affix's own reactions run after.
+    if (_config?.steppers ?? false) {
+      if (affixDisabled(prefix: _affixPrefix)) return;
+      _stepNumber(_affixPrefix ? -1 : 1);
+    }
+    onAffixTap?.call(_affixPrefix);
+  }
 
   Offset? _dragFrom;
 
