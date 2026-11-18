@@ -560,6 +560,11 @@ class _BoxReactions {
   bool _key(KeyEvent e) {
     final n = _node;
     if (n == null || _disposed || !box.attached) return false;
+    // What is under an open overlay takes no key (the overlays' contract):
+    // a page's shortcuts, and an App's onKeyDown, wait while a dialog, a
+    // sheet or a menu is over it (round 10, R13: a page's Enter ran while a
+    // chooser was open). The overlay's own keys run.
+    if (!_onTopLayer()) return false;
     final repeat = e is KeyRepeatEvent;
     final down = e is KeyDownEvent || repeat;
     final type = down ? TriggerType.keyDown : TriggerType.keyUp;
@@ -606,6 +611,17 @@ class _BoxReactions {
         'typing': typing,
       },
     });
+    return true;
+  }
+
+  /// Whether this node is on the overlay that holds the keyboard
+  /// ([ControlFocusLayer.top]), or on the page when none is open.
+  bool _onTopLayer() {
+    final top = ControlFocusLayer.top;
+    if (top == null) return true;
+    for (RenderObject? at = box; at != null; at = at.parent) {
+      if (at is RenderControlRoot) return identical(at.focus.layer, top);
+    }
     return true;
   }
 

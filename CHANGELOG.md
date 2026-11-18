@@ -2,6 +2,15 @@
 
 Needs codelessly_api's fixes-36-1 (its Unreleased entry).
 
+### Behaviour changes
+
+- **What is under an open overlay takes no key**: a page's `key` lines and a node's `onKeyDown` (an `App`'s) wait
+  while a dialog, a sheet, a drawer or a menu is open over the page; the overlay's own keys run (round 10, R13: a
+  page's Enter ran while a chooser was open). It is what the overlays' contract says ("Tab and Shift+Tab stay
+  inside the top overlay; what is under it takes no key"); the page's handlers, which listen to the whole
+  keyboard, did not keep it. A document whose page shortcut was meant to act over its own dialog now acts only
+  when the dialog is closed (write the key under the dialog: `Dialog#id` … `key j onPress={…}`).
+
 ### Fixed
 
 - **Render driver, `--wait`**: `now()` and `nowMs()` move with the test's clock, as the timers do: a clock or a
