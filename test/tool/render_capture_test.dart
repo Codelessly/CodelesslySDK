@@ -81,19 +81,15 @@ void main() {
       expect(runsOf(rowsOf(p, 300, 0xFF0000)), [(0, 60)]);
     });
 
-    testWidgets('an open modal is drawn once, over the first window, and the page below it is not dimmed', (tester) async {
+    testWidgets('with a modal open the capture is the window as it shows, the modal once and its scrim over all of it', (tester) async {
       final report = await runRender(tester, run(const [Step('tap', 'open')]));
       expect(report.errors, 0, reason: '${report.diagnostics}');
       final p = await pixelsOf(tester, report.images.single);
-      expect(p.height, 60 + 50 + 2400);
-      // The dialog (blue, 100 high) once, in the first window.
+      // Not the whole page (its scrim dimmed only the first window of a taller picture: test 9, kanban).
+      expect(p.height, 844);
       final blue = runsOf(rowsOf(p, 195, 0x0000FF));
       expect(blue, hasLength(1));
       expect(blue.single.$2, 100);
-      expect(blue.single.$1, lessThan(844));
-      // Below the first window the page shows as it is, undimmed.
-      expect(rgbAt(p, 195, 1200), 0x404040);
-      expect(rgbAt(p, 195, 2400), 0x808080);
     });
 
     testWidgets('after a tap that navigates, the capture is the destination page at its own height', (tester) async {
