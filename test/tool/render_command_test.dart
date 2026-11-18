@@ -42,7 +42,8 @@ void main() {
     expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
     final pngs = out.listSync().map((f) => f.uri.pathSegments.last).where((n) => n.endsWith('.png')).toSet();
     expect(pngs, {'home@390x844.png', 'home@1440x900.png', 'contact@390x844.png', 'contact@1440x900.png'});
-    final json = jsonDecode(File('${out.path}/diagnostics.json').readAsStringSync()) as Map;
+    // Named with the sizes the run was limited to, so a run at other sizes keeps its own.
+    final json = jsonDecode(File('${out.path}/diagnostics@390x844+1440x900.json').readAsStringSync()) as Map;
     expect(json['errors'], 0);
   });
 
@@ -77,7 +78,9 @@ void main() {
           steps: const [Step('tap', 'd-go')], label: 'contact'),
     );
     expect(report.errors, 0, reason: '${report.diagnostics}');
-    expect(File('${out.path}/home@1440x900-contact.png').existsSync(), isTrue);
+    // Named after the screen it shows (the tap navigated to contact), not the one the run started on.
+    expect(File('${out.path}/contact@1440x900-contact.png').existsSync(), isTrue);
+    expect(File('${out.path}/home@1440x900-contact.png').existsSync(), isFalse);
   });
 
   testWidgets('the children of a node moved by its motion do not overflow it; a child laid out past its parent does', (tester) async {
