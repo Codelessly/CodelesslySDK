@@ -15,6 +15,9 @@
 - **A ring (`circularProgressIndicator`) that fills its place** is a circle of its shortest side: it drew nothing.
 - **An accordion draws every child after its header**, in order: it drew only the first (a docs sidebar's group
   showed one link of three).
+- **A control's label falls back for the symbols its font lacks** (← → ↗ ⌘), as every text does: in the render
+  tool's pictures a button's or a chip's arrows drew as missing-glyph boxes. (Emoji draw from the system symbol font
+  where it has them, in one colour: the tool has no colour emoji font on Windows.)
 
 ## 36.0.0
 
