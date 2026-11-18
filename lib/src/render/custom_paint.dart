@@ -32,6 +32,10 @@ import 'recipe.dart';
 
 /// Adds node [n]'s `customPaint` layer to [chain] (just outside its
 /// content: its painter under the content, its foreground painter over it).
+/// A node that draws a box of its own (a fill, a border) draws the painter
+/// over that box and under its children ([RenderCustomPainterUnder], placed
+/// by the node's shell), as CSS draws a background, then the content: drawn
+/// before the box, an opaque fill hid it whole.
 void customPaintLayers(NodeBuilder b, Node n, List<RenderBox> chain) {
   final paint = n.behaviors.customPaint;
   if (paint == null) return;
@@ -39,8 +43,33 @@ void customPaintLayers(NodeBuilder b, Node n, List<RenderBox> chain) {
   chain.add(
     b.obtain<RenderCustomPaintLayer>('customPaint', RenderCustomPaintLayer.new)
       ..configure(paint, values is ExpressionValues ? values : null, textDefault: n.behaviors.defaultTextStyle)
-      ..drawnByContent = false,
+      ..drawnByContent = false
+      ..painterUnder = null,
   );
+}
+
+/// Draws [source]'s `painter` list where it sits: in a node's shell, over the
+/// node's own fill and border and under its content. Sized by its parent
+/// (the shell's stack, filled); takes no pointer (the layer hit-tests).
+class RenderCustomPainterUnder extends RenderBox {
+  RenderCustomPaintLayer? _source;
+  set source(RenderCustomPaintLayer? v) {
+    if (identical(v, _source)) return;
+    _source = v;
+    markNeedsPaint();
+  }
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  Size computeDryLayout(covariant BoxConstraints constraints) => constraints.biggest.isFinite ? constraints.biggest : constraints.smallest;
+
+  @override
+  bool hitTestSelf(Offset position) => false;
+
+  @override
+  void paint(PaintingContext context, Offset offset) => _source?._paintUnder(this, context, offset);
 }
 
 /// [event] (a pointer trigger's, `{"result": {...}}`) with what node box
@@ -989,6 +1018,24 @@ class RenderCustomPaintLayer extends RenderProxyBox with ImageClient {
   /// draws only its child. Set by the control's recipe after [configure].
   bool drawnByContent = false;
 
+  /// What draws the `painter` list over the node's own box (its shell's
+  /// [RenderCustomPainterUnder]), or null: the layer draws it, before its
+  /// child. Set by the shell after [customPaintLayers].
+  RenderCustomPainterUnder? painterUnder;
+
+  /// Whether there is a `painter` list to draw.
+  bool get hasPainter => _painter.isNotEmpty;
+
+  void _paintUnder(RenderObject drawnIn, PaintingContext context, Offset offset) {
+    if (_paint == null || !hasSize || drawnByContent || !identical(painterUnder, drawnIn)) return;
+    if (_recordedSize != size) {
+      _clear();
+      _recordedSize = size;
+    }
+    _drawnIn = drawnIn;
+    _paintList(context, offset, _painter);
+  }
+
   /// The render object that last drew the lists ([drawFor]): repainted when a
   /// value they read changes.
   RenderObject? _drawnIn;
@@ -1106,7 +1153,7 @@ class RenderCustomPaintLayer extends RenderProxyBox with ImageClient {
     }
     if (paint.isComplex) context.setIsComplexHint();
     if (paint.willChange) context.setWillChangeHint();
-    _paintList(context, offset, _painter);
+    if (painterUnder == null) _paintList(context, offset, _painter);
     super.paint(context, offset);
     _paintList(context, offset, _foreground);
     _showUrls();

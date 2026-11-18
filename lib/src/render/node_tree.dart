@@ -27,7 +27,7 @@ import 'control_theme.dart' show ControlTheme, backdropOf;
 import 'controls/focus.dart' show FocusGate;
 import 'controls/tokens.dart' show ControlTokens;
 import 'convert.dart';
-import 'custom_paint.dart' show customPaintLayers;
+import 'custom_paint.dart' show RenderCustomPaintLayer, RenderCustomPainterUnder, customPaintLayers;
 import 'layout/control_line.dart' show ControlLineDecoration;
 import 'layout/margin_box.dart';
 import 'layout/scaffold_slots.dart';
@@ -2035,6 +2035,19 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
         ..decoration = d
         ..foreground = true
         ..clipped = clipBehavior == Clip.antiAlias || clipBehavior == Clip.antiAliasWithSaveLayer);
+    }
+    // A custom paint's painter over the node's own fill and border, under
+    // its content (custom_paint.dart): drawn before them, a fill hid it.
+    final customPaint = chain.whereType<RenderCustomPaintLayer>().lastOrNull;
+    if (customPaint != null && !customPaint.drawnByContent) {
+      final ownBox = d.visibleFills.isNotEmpty || (d.visibleStrokes.isNotEmpty && d.strokeWidth > 0);
+      if (canStack && ownBox && customPaint.hasPainter) {
+        final drawer = _obtain<RenderCustomPainterUnder>('painterUnder', RenderCustomPainterUnder.new)..source = customPaint;
+        customPaint.painterUnder = drawer;
+        under.add(drawer);
+      } else {
+        customPaint.painterUnder = null;
+      }
     }
     if (canStack && tree.animates && n.behaviors.inkWell != null) under.add(inkOverlay(this, n, radius));
     if (content == null && under.isEmpty && over.isEmpty) return;

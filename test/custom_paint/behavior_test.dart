@@ -30,7 +30,7 @@ RenderCustomPaintLayer _layer(NodeTree tree, String id) {
 const _red = Color(0xFFFF0000), _blue = Color(0xFF0000FF), _green = Color(0xFF00FF00), _white = Color(0xFFFFFFFF);
 
 void main() {
-  testWidgets('the painter draws behind the content and the foreground painter over it', (tester) async {
+  testWidgets("the painter draws over the node's own fill and under its children, the foreground painter over them", (tester) async {
     pixelRatioOne(tester);
     final doc = LayoutDocument.fromJson({
       'roots': ['s'],
@@ -55,8 +55,9 @@ void main() {
     final tree = paintTree(doc);
     addTearDown(tree.dispose);
     final px = await shot(tester, NodeView(tree: tree, rootId: 's'));
-    // The node's own fill is its content: it covers the painter.
-    expect(_at(px, 5, 5), _white, reason: 'the decoration paints over the painter');
+    // The painter is drawn over the node's own fill, under its children (as
+    // CSS draws a background, then the content): a fill no longer hides it.
+    expect(_at(px, 5, 5), _red, reason: "the painter over the node's own fill");
     expect(_at(px, 20, 20), _blue, reason: 'the child over the painter');
     expect(_at(px, 30, 30), _green, reason: 'the foreground painter over the child');
 
