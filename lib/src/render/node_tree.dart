@@ -912,11 +912,20 @@ class RenderTree {
         if (!copies.contains(c)) copies.add(c);
       }
       if (n >= copies.length) return null;
-      // The n-th on screen (top to bottom, then left to right), as a
-      // person counts them; the order they were made in otherwise.
-      final at = {for (final c in copies) c: _topLeftOf(found.firstWhere((b) => _copyAt(b, d) == c))};
-      if (at.values.every((o) => o != null)) {
-        copies.sort((a, b) => at[a]!.dy != at[b]!.dy ? at[a]!.dy.compareTo(at[b]!.dy) : at[a]!.dx.compareTo(at[b]!.dx));
+      // The n-th in the document's order: by each copy's place in the lists
+      // it is in, the outermost first (a board's cards column by column, as
+      // the each lines write them). Copies no list numbers: the n-th on
+      // screen (top to bottom, then left to right); else the order they
+      // were made in. (Counted on screen, the cards of a board went row by
+      // row across its columns: test 9, kanban.)
+      final first = {for (final c in copies) c: found.firstWhere((b) => _copyAt(b, d) == c)};
+      if (first.values.every((b) => b.attached)) {
+        copies.sort((a, b) => _treeOrder(first[a]!, first[b]!));
+      } else {
+        final at = {for (final c in copies) c: _topLeftOf(found.firstWhere((b) => _copyAt(b, d) == c))};
+        if (at.values.every((o) => o != null)) {
+          copies.sort((a, b) => at[a]!.dy != at[b]!.dy ? at[a]!.dy.compareTo(at[b]!.dy) : at[a]!.dx.compareTo(at[b]!.dx));
+        }
       }
       found = [for (final b in found) if (_copyAt(b, d) == copies[n]) b];
     }
@@ -937,6 +946,27 @@ class RenderTree {
       ];
 
   static Offset? _topLeftOf(NodeBox b) => b.attached && b.hasSize ? b.localToGlobal(Offset.zero) : null;
+
+  /// Which of [a] and [b] comes first in the render tree (depth first, a
+  /// list's items in its order): the document's order of their copies.
+  static int _treeOrder(RenderObject a, RenderObject b) {
+    List<RenderObject> up(RenderObject o) => [for (RenderObject? p = o; p != null; p = p.parent) p].reversed.toList();
+    final pa = up(a), pb = up(b);
+    var i = 0;
+    while (i < pa.length && i < pb.length && identical(pa[i], pb[i])) {
+      i++;
+    }
+    if (i == 0 || i >= pa.length || i >= pb.length) return pa.length.compareTo(pb.length);
+    final parent = pa[i - 1];
+    var order = 0, seen = 0;
+    parent.visitChildren((c) {
+      seen++;
+      if (order != 0) return;
+      if (identical(c, pa[i])) order = -1;
+      if (identical(c, pb[i])) order = 1;
+    });
+    return seen == 0 ? 0 : order;
+  }
 
   /// [b]'s path without copy indexes.
   String _plainPath(NodeBox b) {

@@ -614,21 +614,28 @@ class DataListViewState extends State<DataListView> {
     Widget list = LayoutBuilder(
       builder: (context, constraints) {
         final bounded = axis == Axis.vertical ? constraints.hasBoundedHeight : constraints.hasBoundedWidth;
+        final shrink = !bounded || widget.hugMain;
+        // A list as long as its items (no height: stickToEnd with nothing to
+        // stick in) has no end to keep in view: its items in order, with no
+        // anchor (a shrink-wrapped viewport cannot have one: it threw).
+        final parts = shrink && center != null
+            ? [_sliverList(_delegate(items, onBuilt: (index) => _onItemBuilt(index, items.length))), if (footer != null) SliverToBoxAdapter(child: footer)]
+            : all;
         return CustomScrollView(
           controller: scrollController,
           scrollDirection: axis,
           reverse: _node.prop(CollectionScrollProps.reverse),
-          shrinkWrap: !bounded || widget.hugMain,
-          center: center,
+          shrinkWrap: shrink,
+          center: shrink ? null : center,
           physics: _withSnapping(refreshable ? const AlwaysScrollableScrollPhysics().applyTo(widget.physics) : widget.physics),
           scrollCacheExtent: cache == null ? null : ScrollCacheExtent.pixels(cache),
           clipBehavior: clip(_node.prop(CollectionScrollProps.clipBehavior)),
           slivers: [
-            for (final sliver in all)
+            for (final sliver in parts)
               if (padding == EdgeInsets.zero)
                 sliver
               else
-                SliverPadding(padding: _paddingFor(padding, sliver, all, axis), sliver: sliver),
+                SliverPadding(padding: _paddingFor(padding, sliver, parts, axis), sliver: sliver),
           ],
         );
       },
@@ -706,8 +713,14 @@ class DataListViewState extends State<DataListView> {
     if (sticky) {
       SchedulerBinding.instance.addPostFrameCallback((_) => _syncLatestFocus());
       final colors = Theme.of(context).colorScheme;
-      list = Stack(children: [
-        Positioned.fill(child: list),
+      final inner = list;
+      // A list as tall as its items (no height of its own, in a column
+      // that scrolls) has no end to stick to nor to jump to: it is its
+      // items (a Stack over it had no bound: the list threw).
+      list = LayoutBuilder(builder: (context, constraints) => !(axis == Axis.vertical ? constraints.hasBoundedHeight : constraints.hasBoundedWidth)
+          ? inner
+          : Stack(children: [
+        Positioned.fill(child: inner),
         if (!_atEnd) PositionedDirectional(
           end: 12,
           bottom: 12,
@@ -731,7 +744,7 @@ class DataListViewState extends State<DataListView> {
             )),
           ),
         ),
-      ]);
+      ]));
     }
     return list;
   }

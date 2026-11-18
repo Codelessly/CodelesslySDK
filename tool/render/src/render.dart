@@ -22,7 +22,6 @@ import 'package:flutter/services.dart'
 import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk/src/runtime/gestures/drag_and_drop.dart' show RenderDragSource;
 import 'package:codelessly_sdk/src/runtime/actions/wiring.dart' show viewportTriggersPaused;
-import 'package:codelessly_sdk/src/render/components.dart' show outerInstanceOf;
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
 import 'package:codelessly_sdk/src/render/controls/buttons.dart' show RenderButton;
 import 'package:codelessly_sdk/src/render/controls/calendar.dart' show RenderCalendar;
@@ -1550,30 +1549,6 @@ Set<RenderObject> _offstage() {
 
 /// Every node box on screen, in paint order (later ones are on top); not
 /// those of a page covered by another.
-/// [boxes] (copies of one node) in the document's order: by the index of
-/// each list copy they are in, the outermost list first; as they were
-/// otherwise.
-List<NodeBox> _inDocumentOrder(List<NodeBox> boxes) {
-  List<int> places(NodeBox b) {
-    final out = <int>[];
-    for (Object? i = b.instance; i != null; i = outerInstanceOf(i)) {
-      if (i case (String _, Object? _, String _, int k)) out.insert(0, k);
-    }
-    return out;
-  }
-
-  final keyed = [for (final (n, b) in boxes.indexed) (places(b), n, b)];
-  keyed.sort((a, b) {
-    for (var i = 0; i < math.min(a.$1.length, b.$1.length); i++) {
-      final c = a.$1[i].compareTo(b.$1[i]);
-      if (c != 0) return c;
-    }
-    final l = a.$1.length.compareTo(b.$1.length);
-    return l != 0 ? l : a.$2.compareTo(b.$2);
-  });
-  return [for (final k in keyed) k.$3];
-}
-
 List<NodeBox> _boxes(WidgetsBinding binding) {
   final skip = _offstage();
   return [
@@ -1889,10 +1864,6 @@ String? _canvasNameOf(NodeBox b) {
         }
       }
       if (index >= all.length) return (box: null, problem: '"$upTo": there are ${all.length} copies of "$name" on screen (#0 to #${all.length - 1})');
-      // Counted in the document's order: by the copies' places in their
-      // lists, the outer list first (a board's cards column by column),
-      // not by the order their boxes were made in.
-      all = _inDocumentOrder(all);
       chosen = all[index];
     } else {
       // Two different nodes answer to the id (a page's and a component's,
