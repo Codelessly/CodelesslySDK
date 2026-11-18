@@ -5,6 +5,7 @@
 //   tool/codelessly docs <words...>              search needs, topics and names; prints the best section
 //   tool/codelessly docs --list <words...>       only the matches, best first (--json for data)
 //   tool/codelessly docs --starter               the path of STARTER.md (the base an agent reads in full first)
+//   tool/codelessly docs --notation ...          the same over the notation's reference (docs/reference/notation)
 //
 // The reference is generated from the API's declarations (CodelesslyAPI/tool/reference/generate.dart), so a
 // section printed here is what the renderer implements. Sections are cut at the next heading of
@@ -169,20 +170,28 @@ class Reference {
 (int, String) docsText(List<String> argv) {
   final a = Args(argv, valued: {'--ref', '--max-lines'});
   if (a.help) return (0, _doc);
-  final ref = Reference(findReference(a['--ref']));
+  // --notation: the notation's reference (docs/reference/notation), whose base is NOTATION.md.
+  final found = findReference(a['--ref']);
+  final notation = a.has('--notation') && File('${found.path}/notation/index.json').existsSync();
+  if (a.has('--notation') && !notation && !File('${found.path}/NOTATION.md').existsSync()) {
+    return (1, 'This codelessly_api has no notation reference (docs/reference/notation).');
+  }
+  final ref = Reference(notation ? Directory('${found.path}/notation') : found);
+  final base = File('${ref.root.path}/NOTATION.md').existsSync() ? 'NOTATION.md' : 'STARTER.md';
+  final flag = base == 'NOTATION.md' && a.has('--notation') ? ' --notation' : '';
   final out = StringBuffer();
-  if (a.has('--starter')) return (0, '${ref.root.path}/STARTER.md');
+  if (a.has('--starter')) return (0, '${ref.root.path}/$base');
   if (a.positional.isEmpty) {
     out
       ..writeln('codelessly_api ${ref.index['version']} reference at ${ref.root.path}')
-      ..writeln('Read STARTER.md in full first (the base); open a page or a section when you need it.\n');
+      ..writeln('Read $base in full first (the base); open a page or a section when you need it.\n');
     for (final t in ref.topics) {
       if (!'${t['anchor']}'.startsWith('page-')) continue;
       final summary = '${t['summary'] ?? ''}';
       out.writeln('  ${'${t['topic']}'.padRight(14)} ${'${t['file']}'.padRight(16)} '
           '${summary.length > 110 ? summary.substring(0, 110) : summary}');
     }
-    out.writeln('\n`tool/codelessly docs <words>` searches every need, topic and name.');
+    out.writeln('\n`tool/codelessly docs$flag <words>` searches every need, topic and name.');
     return (0, out.toString());
   }
   final q = a.positional.join(' ');
@@ -202,24 +211,24 @@ class Reference {
   var hit = ref.exact(q);
   final matches = hit == null ? ref.search(a.positional) : const <DocMatch>[];
   if (hit == null) {
-    if (matches.isEmpty) return (1, 'Nothing in the reference matches "$q". `tool/codelessly docs` lists the pages.');
+    if (matches.isEmpty) return (1, 'Nothing in the reference matches "$q". `tool/codelessly docs$flag` lists the pages.');
     hit = (matches.first.file, matches.first.anchor);
   }
   final (file, anchor) = hit;
   final body = ref.section(file, anchor);
   final maxLines = int.tryParse(a['--max-lines'] ?? '') ?? 220;
-  out.writeln('<!-- $file#$anchor (tool/codelessly docs $anchor) -->');
+  out.writeln('<!-- $file#$anchor (tool/codelessly docs$flag $anchor) -->');
   if (!a.has('--full') && body.length > maxLines) {
     out
       ..writeln(body.take(maxLines).join('\n'))
-      ..writeln('\n... ${body.length - maxLines} more lines: tool/codelessly docs $anchor --full');
+      ..writeln('\n... ${body.length - maxLines} more lines: tool/codelessly docs$flag $anchor --full');
   } else {
     out.writeln(body.join('\n'));
   }
   if (matches.length > 1) {
     out.writeln('\nAlso matching:');
     for (final m in matches.skip(1).take(5)) {
-      out.writeln('  tool/codelessly docs ${m.anchor.padRight(48)} (${m.kind}: ${m.label.length > 60 ? m.label.substring(0, 60) : m.label})');
+      out.writeln('  tool/codelessly docs$flag ${m.anchor.padRight(48)} (${m.kind}: ${m.label.length > 60 ? m.label.substring(0, 60) : m.label})');
     }
   }
   return (0, out.toString());
@@ -236,4 +245,5 @@ tool/codelessly docs <anchor | name>         one section: forms-validation-and-a
 tool/codelessly docs <words...>              search needs, topics and names; prints the best section
 tool/codelessly docs --list <words...>       only the matches, best first (--json for data)
 tool/codelessly docs --starter               the path of STARTER.md (the base an agent reads in full first)
+tool/codelessly docs --notation ...          the same over the notation's reference (its base: NOTATION.md)
 Options: --ref <dir> (the docs/reference folder), --full (a long section whole), --max-lines n (default 220).''';
