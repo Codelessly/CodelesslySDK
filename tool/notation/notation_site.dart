@@ -392,3 +392,16 @@ final class NotationExpander {
     }
   }
 }
+
+/// What is wrong with the canvases of page [name] (its expansion [r]) given
+/// [canvasOf], the canvases of the pages before it by id (added to): a page
+/// and its overlays are screens of the whole site, so an id two pages give
+/// a canvas makes one screen of the two (test 9, kanban 9: the board's
+/// `Drawer#nav` showed the archive page's sidebar, with no word).
+List<String> canvasClashes(Map<String, String> canvasOf, String name, NotationResult r) => [
+      for (final id in readStrings(r.document['roots']))
+        if (canvasOf.putIfAbsent(id, () => name) case final other when other != name)
+          '${id != name ? 'the overlay' : 'the page'} "$id" has the id of ${other == id ? 'the page' : 'an overlay of'} $other: '
+              'a page and its overlays are screens of the whole site, so the two are one and only one of them is shown. '
+              '${id != name ? 'Give this one an id of its own (#$id${name[0].toUpperCase()}${name.substring(1).replaceAll(RegExp(r'[^A-Za-z0-9]'), '')}) and open it by that.' : 'Rename the overlay on $other.'}',
+    ];

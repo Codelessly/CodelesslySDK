@@ -102,4 +102,43 @@ void main() {
     final plain = Catalog.run(standardCatalog, () => parseNotation('Text "a"\n', catalog: standardCatalog, options: const NotationOptions(reflow: false)));
     expect(jsonEncode(r.document), jsonEncode(plain.document));
   });
+
+  test("two pages' overlays of one id are said (they are one screen of the site)", () async {
+    _write('pages/board.txt', '''Column
+  Button "Menu" onTap={open nav}
+Drawer#nav
+  Text "board"
+''');
+    _write('pages/archive.txt', '''Column
+  Button "Menu" onTap={open nav}
+Drawer#nav
+  Text "archive"
+''');
+    final site = await NotationSite.load(findSiteManifest(file: '${_root.path}/pages/board.txt')!);
+    final expander = NotationExpander(site: site, settings: _settings());
+    final canvasOf = <String, String>{};
+    final clashes = [
+      for (final page in ['archive', 'board'])
+        ...canvasClashes(canvasOf, page, expander.expand(File('${_root.path}/pages/$page.txt').readAsStringSync(), path: '$page.txt', screen: page)),
+    ];
+    expect(clashes.single, allOf(contains('the overlay "nav" has the id of an overlay of archive'), contains('#navBoard')));
+  });
+
+  test("a component's key lines are the page's that calls it", () async {
+    _write('components/ConsoleNav.txt', '''component ConsoleNav "The sidebar."
+Column#nv
+  Text "nav"
+key alt+1 onPress={go home}
+''');
+    _write('pages/keys.txt', '''Row
+  ConsoleNav
+  Text "page"
+''');
+    final site = await NotationSite.load(findSiteManifest(file: '${_root.path}/pages/keys.txt')!);
+    final expander = NotationExpander(site: site, settings: _settings());
+    final r = expander.expand(File('${_root.path}/pages/keys.txt').readAsStringSync(), path: 'keys.txt', screen: 'keys');
+    expect(r.issues, isEmpty);
+    final screen = _nodes(r)['keys']! as Map;
+    expect(jsonEncode(screen['actions']), allOf(contains('"key":"alt+1"'), contains('"to":"home"')));
+  });
 }

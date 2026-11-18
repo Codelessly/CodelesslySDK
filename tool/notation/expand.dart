@@ -191,10 +191,19 @@ int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings) {
       issues++;
     }
   }
+  // The canvases of the site's pages by id, and the page each is from: an
+  // overlay is a screen of the whole site, so two pages' `Drawer#nav` were
+  // one (the board's drawer showed the archive page's sidebar: test 9,
+  // kanban 9), with no word.
+  final canvasOf = <String, String>{};
   for (final page in site.pageSources) {
     final name = File(page).uri.pathSegments.last.replaceFirst(RegExp(r'\.txt$'), '');
     final r = expander.expand(File(page).readAsStringSync(), path: page, screen: name);
     report(page, site.pageOut(page), r);
+    for (final clash in canvasClashes(canvasOf, name, r)) {
+      stderr.writeln('${rel(page)}: $clash');
+      issues++;
+    }
     if (!site.screens.contains(name)) {
       stderr.writeln('${rel(page)}: site.json\'s pages do not list $name: add "$name.json" there, or the site does not have it.');
       issues++;
