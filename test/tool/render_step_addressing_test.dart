@@ -250,9 +250,15 @@ void main() {
 
   group('a node inside a component instance', () {
     testWidgets('by its own id, or the end of its path, when one node on screen has it', (tester) async {
-      final report = await runSite(tester, ['FieldSeason1'], const [Step('tap', 'action'), Step('tap', 'joinSeason/action'), Step('tap', 'FieldSeason1/joinSeason/action')]);
+      final report = await runSite(tester, ['FieldSeason1'], const [
+        Step('tap', 'action'),
+        Step('tap', 'joinSeason/action'),
+        Step('tap', 'FieldSeason1/joinSeason/action'),
+        // The root of the inner component, by its call and its own id.
+        Step('tap', 'joinSeason/fa'),
+      ]);
       expect(report.errors, 0, reason: '${report.diagnostics}');
-      expect(labelOf(report), 'hits 3');
+      expect(labelOf(report), 'hits 4');
     });
 
     testWidgets('several instances have it: the error lists their full paths', (tester) async {

@@ -1860,7 +1860,10 @@ String? _canvasNameOf(NodeBox b) {
     if (componentInstanceOf(b.instance) == null) continue;
     final path = b.tree.pathOf(b.id, b.instance);
     final plain = path.replaceAll(RegExp(r'#\d+'), '');
-    if (plain == id || plain.endsWith('/$id')) (matches[plain] ??= []).add(b);
+    // A component's root is named by its call (`FieldSeason1/joinSeason`),
+    // or by its call and its own id (`joinSeason/action`).
+    final forms = [plain, if (b.tree.isInstanceRoot(b.id, b.instance)) '$plain/${b.id}'];
+    if (forms.any((f) => f == id || f.endsWith('/$id'))) (matches[plain] ??= []).add(b);
   }
   if (matches.isEmpty) return exact;
   if (matches.length > 1) {
@@ -1980,7 +1983,7 @@ String _rawCopies(RenderTree tree, String path) {
       if (index >= shown.length) {
         return (
           box: null,
-          problem: '"$upTo": there are ${shown.length} copies of "$name" on screen (#0 to #${shown.length - 1})'
+          problem: '"$upTo": ${shown.length == 1 ? 'there is 1 copy' : 'there are ${shown.length} copies'} of "$name" on screen (#0 to #${shown.length - 1})'
               '${shown.length < all.length ? '; #n counts the copies shown, not the ${all.length - shown.length} hidden' : ''}',
         );
       }
