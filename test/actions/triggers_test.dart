@@ -4,6 +4,7 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/internals.dart';
 import 'package:codelessly_sdk/src/render/controls/segmented.dart' show RenderSegmentedButton;
 import 'package:codelessly_sdk/src/runtime/actions/text_fields.dart' show TextFieldHandle;
+import 'package:codelessly_sdk/src/runtime/actions/wiring.dart' show viewportTriggersPaused;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -588,6 +589,19 @@ void main() {
       s.scope.set('gap', 900);
       await tester.pump();
       await tester.pump();
+      expect((s['shown'], s['hidden']), (1, 1));
+
+      // While a full-page capture passes the page through the window, nothing
+      // enters or leaves it (a list that loads more at its end loaded at every slice).
+      viewportTriggersPaused = true;
+      addTearDown(() => viewportTriggersPaused = false);
+      s.scope.set('gap', 0);
+      await tester.pump();
+      await tester.pump();
+      s.scope.set('gap', 900);
+      await tester.pump();
+      await tester.pump();
+      viewportTriggersPaused = false;
       expect((s['shown'], s['hidden']), (1, 1));
     });
   }

@@ -124,6 +124,9 @@ Options:
                           name (props.screen), a canvas name or path. Repeatable.
   --full-page             Capture the whole page from its top (whatever the steps
                           scrolled it to), not the window where they left it.
+                          A dialog, drawer or menu open over it is captured at the
+                          window's size; lists that load more as their end comes
+                          into view load no more while the page is captured.
   --fonts <dir|system>    Font files (.ttf, .otf, .woff; read by their real family,
                           weight and style), searched recursively: a font package
                           folder (node_modules/@fontsource/<family>), a site's fonts.

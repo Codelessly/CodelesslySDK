@@ -1220,7 +1220,7 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
 
   void _checkViewport() {
     final fraction = _visibleFraction;
-    if (fraction == null || !attached || !hasSize) return;
+    if (fraction == null || !attached || !hasSize || viewportTriggersPaused) return;
     final visible = visibleShare(this);
     final inView = fraction <= 0 ? visible > 0 : visible >= fraction - 1e-6;
     if (inView == _inView) return;
@@ -1243,6 +1243,12 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
   /// ones only, so both fire whenever watched.
   Set<TriggerType> get _triggersAll => const {TriggerType.enterViewport, TriggerType.exitViewport};
 }
+
+/// While true, no box enters or leaves the viewport: what is in view stays
+/// as it was. A full-page capture (tool/render) scrolls the page through the
+/// window to draw it; a list that loads more when its end comes into view
+/// would load again at every slice, and the page it draws grow under it.
+bool viewportTriggersPaused = false;
 
 /// Checks the watched boxes after each frame.
 abstract final class _ViewportWatcher {

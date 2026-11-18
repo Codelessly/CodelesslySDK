@@ -21,6 +21,8 @@ import 'package:flutter/services.dart'
     show FontLoader, LogicalKeyboardKey, MethodCall, SystemChannels, TextEditingValue, TextInputAction, TextSelection;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk/src/runtime/gestures/drag_and_drop.dart' show RenderDragSource;
+import 'package:codelessly_sdk/src/runtime/actions/wiring.dart' show viewportTriggersPaused;
+import 'package:codelessly_sdk/src/render/components.dart' show outerInstanceOf;
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
 import 'package:codelessly_sdk/src/render/controls/buttons.dart' show RenderButton;
 import 'package:codelessly_sdk/src/render/controls/calendar.dart' show RenderCalendar;
@@ -762,7 +764,10 @@ Future<void> _renderAll(
           collect();
           page = _pageScroll(binding, fullPage: true);
         }
-        if (page != null && page.maxScrollExtent >= 1) fullPage = page;
+        // A dialog, a drawer or a menu open over the page is captured as the
+        // window shows it: its scrim covers the window, not a picture
+        // taller than it (it dimmed only the first window's height).
+        if (page != null && page.maxScrollExtent >= 1 && !_overlayOver(page)) fullPage = page;
       }
 
       // Counters still counting (animate ... animateTo on a variable, one
@@ -1315,6 +1320,10 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
     }
   }
 
+  // What comes into view as the page passes through the window is not a
+  // reader scrolling: a list that loads more at its end loads once, as the
+  // page was when captured, not again at every slice.
+  viewportTriggersPaused = true;
   try {
     var target = view.height;
     for (var guard = 0; guard < 1000; guard++) {
@@ -1379,6 +1388,7 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
     }
     page.jumpTo(0);
     await _settle(tester);
+    viewportTriggersPaused = false;
   }
   final total = (window.height + max).ceilToDouble();
   final recorder = ui.PictureRecorder();
@@ -1471,6 +1481,25 @@ List<NodeBox> _fixedAround(WidgetsBinding binding, NodeBox page) {
   return out;
 }
 
+/// Whether a route is open over the one [page] is in (a dialog, a drawer, a
+/// menu): an onstage entry after it in its navigator's theater.
+bool _overlayOver(RenderObject page) {
+  for (final (theater, ro) in _theaters()) {
+    final onstage = <Element>[];
+    theater.debugVisitOnstageChildren(onstage.add);
+    final i = onstage.indexWhere((e) {
+      final r = e.renderObject;
+      if (r == null) return false;
+      for (RenderObject? p = page; p != null && !identical(p, ro); p = p.parent) {
+        if (identical(p, r)) return true;
+      }
+      return false;
+    });
+    if (i >= 0) return i < onstage.length - 1;
+  }
+  return false;
+}
+
 /// The overlays' theaters (each navigator's stack of routes).
 List<(Element, RenderObject)> _theaters() {
   final out = <(Element, RenderObject)>[];
@@ -1521,6 +1550,30 @@ Set<RenderObject> _offstage() {
 
 /// Every node box on screen, in paint order (later ones are on top); not
 /// those of a page covered by another.
+/// [boxes] (copies of one node) in the document's order: by the index of
+/// each list copy they are in, the outermost list first; as they were
+/// otherwise.
+List<NodeBox> _inDocumentOrder(List<NodeBox> boxes) {
+  List<int> places(NodeBox b) {
+    final out = <int>[];
+    for (Object? i = b.instance; i != null; i = outerInstanceOf(i)) {
+      if (i case (String _, Object? _, String _, int k)) out.insert(0, k);
+    }
+    return out;
+  }
+
+  final keyed = [for (final (n, b) in boxes.indexed) (places(b), n, b)];
+  keyed.sort((a, b) {
+    for (var i = 0; i < math.min(a.$1.length, b.$1.length); i++) {
+      final c = a.$1[i].compareTo(b.$1[i]);
+      if (c != 0) return c;
+    }
+    final l = a.$1.length.compareTo(b.$1.length);
+    return l != 0 ? l : a.$2.compareTo(b.$2);
+  });
+  return [for (final k in keyed) k.$3];
+}
+
 List<NodeBox> _boxes(WidgetsBinding binding) {
   final skip = _offstage();
   return [
@@ -1836,6 +1889,10 @@ String? _canvasNameOf(NodeBox b) {
         }
       }
       if (index >= all.length) return (box: null, problem: '"$upTo": there are ${all.length} copies of "$name" on screen (#0 to #${all.length - 1})');
+      // Counted in the document's order: by the copies' places in their
+      // lists, the outer list first (a board's cards column by column),
+      // not by the order their boxes were made in.
+      all = _inDocumentOrder(all);
       chosen = all[index];
     } else {
       // Two different nodes answer to the id (a page's and a component's,
@@ -2009,6 +2066,20 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       for (var j = 0; j < 5; j++)
         for (var i = 0; i < 5; i++) ui.Offset(r.left + r.width * (i + 0.5) / 5, r.top + r.height * (j + 0.5) / 5),
     ];
+    // A point where nothing inside it that takes a press of its own (a link
+    // in a table's row: the name that opens a pane) is over it comes first:
+    // a step that names the row means the row.
+    bool own(ui.Offset p) {
+      for (final h in hitAt(p)) {
+        if (identical(h, box)) return true;
+        if (h is NodeBox && _takesTap(h)) return false;
+      }
+      return false;
+    }
+
+    for (final p in points) {
+      if (own(p)) return p;
+    }
     for (final p in points) {
       if (hitAt(p).contains(box)) return p;
     }
