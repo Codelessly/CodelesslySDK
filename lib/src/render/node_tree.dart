@@ -2014,7 +2014,12 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
       // lies under it (a row of black keys over the white ones).
       ..opaque = d.fills.any((f) => f.visible)
       ..drawsBox = d.visibleFills.isNotEmpty || (d.visibleStrokes.isNotEmpty && d.strokeWidth > 0) || shadows.isNotEmpty);
-    final clipBehavior = clip(d.clip);
+    // A stack that does not scroll cuts what is in it at its edge when it
+    // says so (`Stack … clip`, `clipBehavior=hardEdge`), as a row or a column
+    // does: its children are placed, and drew past it (round 11b: clip-editor's
+    // timeline ran past its frame, story-reader's next card over the footer).
+    final stackClip = n.type == 'stack' && !n.scrolls && n.props.has(ScrollProps.clipBehavior) ? clip(n.prop(ScrollProps.clipBehavior)) : Clip.none;
+    final clipBehavior = clip(d.clip) == Clip.none ? stackClip : clip(d.clip);
     if (clipBehavior != Clip.none) {
       if (circle) {
         chain.add(_obtain<RenderClipOval>('clipOval', () => RenderClipOval(clipper: const _CircleClipper(), clipBehavior: clipBehavior))

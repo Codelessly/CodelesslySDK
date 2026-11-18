@@ -4,6 +4,10 @@ Needs codelessly_api's fixes-36-1 (its Unreleased entry).
 
 ### Behaviour changes
 
+- **A stack that does not scroll and has a `clipBehavior`** (the notation's `Stack … clip`) cuts what is in it at
+  its edge, its corners' radius too, as a row or a column does; it drew its children past it (round 11b:
+  clip-editor's timeline ran past its frame, story-reader's next card drew over the footer). A stack with none
+  (the default) is as it was: what is placed past its edge shows.
 - **A hugging text field whose box has a height of its own** (its decoration's `constraints`, min and max the
   same: a labelled `Input … h=44` in the notation) draws its text at that box's step of the control scale; it took
   the compact step's (round 11b).
