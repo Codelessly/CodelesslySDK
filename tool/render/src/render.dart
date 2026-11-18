@@ -468,8 +468,13 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     }
     return null;
   });
-  // `--now`: the time now() returns.
+  // `--now`: the time now() returns. Without it, now() is the test's clock,
+  // which `--wait` (and every settle) moves as it moves the timers: a clock
+  // or a deadline written from now() passes with them (round 10, R22: a
+  // timer ticked through a nine-second wait while now() stood still).
   FormulaClock.pinned = args.now;
+  final testClock = tester.binding.clock;
+  FormulaClock.source = testClock.now;
   // Icons named without a codepoint (a bound name) draw from the font.
   IconSources.codepointOf = (name, style) =>
       codepoints[style == 'filled' ? '${name}_baseline' : '${name}_$style'] ?? codepoints[name];
@@ -498,6 +503,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     FlutterError.onError = previousOnError;
     IconSources.codepointOf = null;
     FormulaClock.pinned = null;
+    FormulaClock.source = null;
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
     _errorDetails.clear();
     _errorLog.clear();

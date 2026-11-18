@@ -22,6 +22,11 @@ class FormulaClock extends ChangeNotifier {
   static DateTime? get pinned => FormulaTime.pinned;
   static set pinned(DateTime? value) => FormulaTime.pinned = value;
 
+  /// Where the time comes from when nothing is pinned ([FormulaTime.source]):
+  /// null, the device clock.
+  static DateTime Function()? get source => FormulaTime.source;
+  static set source(DateTime Function()? value) => FormulaTime.source = value;
+
   /// The pinned instant, or the device clock for live formulas.
   static DateTime now() => FormulaTime.now();
 

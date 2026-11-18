@@ -25,6 +25,13 @@ abstract final class FormulaTime {
   /// Optional instant pinned by an editor or preview for deterministic dates.
   static DateTime? pinned;
 
-  /// The pinned instant, or the device clock for live formulas.
-  static DateTime now() => pinned ?? DateTime.now();
+  /// Where the time comes from when nothing is pinned: null, the device
+  /// clock. A host that runs time itself sets it (the render tool, whose
+  /// `--wait` lets the test's clock pass, so `now()` moves with the timers
+  /// that run in that time: round 10, R22).
+  static DateTime Function()? source;
+
+  /// The pinned instant, or the clock of [source], or the device clock for
+  /// live formulas.
+  static DateTime now() => pinned ?? source?.call() ?? DateTime.now();
 }

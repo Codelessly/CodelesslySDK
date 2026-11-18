@@ -4,6 +4,10 @@ Needs codelessly_api's fixes-36-1 (its Unreleased entry).
 
 ### Fixed
 
+- **Render driver, `--wait`**: `now()` and `nowMs()` move with the test's clock, as the timers do: a clock or a
+  deadline written from `now()` is that much later after the wait (round 10, R22, 14 runs: a nine-second wait left a
+  countdown at 10:00 while its timer ticked). `--now` still pins it for the whole run. `FormulaClock.source` (and
+  `FormulaTime.source`) let a host that runs time itself give the time formulas read.
 - **Notation tools, a site's components**: an overlay a component writes after its tree (`Drawer#basket … right
   w=440`, `Sheet#info stops=[0.5,0.9]`) is on every page that calls it, so `open basket` from inside the component
   shows it at its side, width and stops (round 10, R28). `expand <site folder>` passes the components' overlays to
