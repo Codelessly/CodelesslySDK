@@ -39,12 +39,11 @@ void main() {
     Map<String, Object?> issue(String code, String screen) =>
         {'code': code, 'severity': 'warning', 'message': code, 'nodeId': 'x', 'screen': screen, 'size': '390x844'};
 
-    test('lists only the captures written since it started, each with its own diagnostics file\'s problems', () {
-      final earlier = DateTime.now().subtract(const Duration(hours: 1));
-      // An earlier run's capture and its diagnostics, left in the folder.
-      write('home@390x844-dark.png.layout.json', [], at: earlier);
-      write('diagnostics-home-dark.json', {'images': ['home@390x844-dark.png'], 'diagnostics': [issue('old_issue', 'home')]}, at: earlier);
-      final started = DateTime.now().subtract(const Duration(seconds: 1));
+    test('lists only the captures its run wrote, each with its own diagnostics file\'s problems', () {
+      // An earlier run's capture and its diagnostics, left in the folder a moment before (the same second).
+      write('home@390x844-dark.png.layout.json', []);
+      write('diagnostics-home-dark.json', {'images': ['home@390x844-dark.png'], 'diagnostics': [issue('old_issue', 'home')]});
+      final before = snapshotOf(out.path);
       // This run: another screen, the same label; a capture after --navigate.
       write('about@390x844-dark.png.layout.json', []);
       write('detail@390x844-dark.png.layout.json', []);
@@ -57,11 +56,15 @@ void main() {
         'startedOn': {'detail@390x844-dark.png': 'start'},
         'diagnostics': [issue('detail_issue', 'start')],
       });
-      final text = outlineText(out.path, const [], since: started);
+      final fresh = writtenAfter(before);
+      final text = outlineText(out.path, const [], fresh: fresh);
       expect(text, allOf(contains('== about@390x844-dark'), contains('== detail@390x844-dark'), isNot(contains('home@390x844-dark'))));
-      expect(captureDiagnostics(out.path, 'about@390x844-dark', since: started).map((d) => d['code']), ['about_issue']);
-      expect(captureDiagnostics(out.path, 'detail@390x844-dark', since: started).map((d) => d['code']), ['detail_issue']);
-      // Without a start (tool/codelessly outline <dir>), every capture in the folder.
+      expect(captureDiagnostics(out.path, 'about@390x844-dark', fresh: fresh).map((d) => d['code']), ['about_issue']);
+      expect(captureDiagnostics(out.path, 'detail@390x844-dark', fresh: fresh).map((d) => d['code']), ['detail_issue']);
+      // A capture of the earlier run that this run wrote again is this run's.
+      write('home@390x844-dark.png.layout.json', [], at: DateTime.now().add(const Duration(seconds: 5)));
+      expect(outlineText(out.path, const [], fresh: fresh), contains('== home@390x844-dark'));
+      // Without a run (tool/codelessly outline <dir>), every capture in the folder.
       expect(outlineText(out.path, const []), contains('== home@390x844-dark'));
     });
   });

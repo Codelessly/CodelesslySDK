@@ -64,10 +64,10 @@ Future<int> renderMain(List<String> argv) async {
   }
   if (outline && !args.contains('--dump-layout')) args.add('--dump-layout');
   // The outline is of this invocation's captures, not those earlier runs left in --out.
-  final started = DateTime.now();
+  final before = snapshotOf(out);
   final code = await runInherited(renderScript, args);
   if (code != 2) {
-    if (outline) stdout.write('\n${outlineText(out, docs, since: started)}');
+    if (outline) stdout.write('\n${outlineText(out, docs, fresh: writtenAfter(before))}');
     if (wantSheet) {
       final (_, text) = await sheet([out], '$out/sheet.png');
       stdout.write(text.split('\n').where((l) => l.startsWith('wrote ') || l.startsWith('No PNGs')).map((l) => '$l\n').join());
