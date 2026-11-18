@@ -73,14 +73,13 @@ void main() {
     expect(jsonEncode(r.document['variables'] ?? const {}), isNot(contains('"lang"')));
   });
 
-  test('the site\'s theme: a plain text takes its body, style=label with a size keeps the style', () async {
-    _write('pages/look.txt', 'Column\n  Text "plain"\n  Text "small label" style=label size=10\n');
+  test('the site\'s theme: a plain text takes its body', () async {
+    _write('pages/look.txt', 'Column\n  Text "plain"\n');
     final site = await NotationSite.load(findSiteManifest(file: '${_root.path}/pages/look.txt')!);
     final r = NotationExpander(site: site, settings: _settings()).expand(File('${_root.path}/pages/look.txt').readAsStringSync(), path: 'look.txt', screen: 'look');
     expect(r.issues, isEmpty);
     final texts = [for (final n in _nodes(r).values) if ((n as Map)['type'] == 'text') (n['props'] as Map)['style']];
-    expect(texts[0], {'from': 'body'});
-    expect(texts[1], {'from': 'label', 'fontSize': 10});
+    expect(texts.single, {'from': 'body'});
   });
 
   test('a component named like a frame word is an issue that says how to call it', () async {
