@@ -253,6 +253,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   // 2. Fonts and assets. A font handler left by an earlier run in this
   // process would load into a disposed instance.
   FontDemand.handler = null;
+  FontDemand.symbolFallback = const [];
   _mouse = null;
   final root = flutterRoot ?? Platform.environment['FLUTTER_ROOT'] ?? '';
   unreadFonts.clear();
@@ -274,6 +275,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
         file: api.SiteManifest.fileName));
   }
   final fetcher = DirectoryFontFetcher(faces);
+  final symbolFont = systemSymbolFont();
   await tester.runAsync(() async {
     // The default family and the icon font, registered up front.
     for (final family in const ['Roboto', 'Material Icons']) {
@@ -284,6 +286,13 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
         loader.addFont(Future.value(File(p).readAsBytesSync().buffer.asByteData()));
       }
       await loader.load();
+    }
+    // The symbols the default fonts lack (← → ↑ ↓ ↵ ⌘ ✓), from the system's
+    // symbol font: every style falls back to it, as a device's text does.
+    if (symbolFont case final path?) {
+      final loader = FontLoader(symbolFamily)..addFont(Future.value(File(path).readAsBytesSync().buffer.asByteData()));
+      await loader.load();
+      FontDemand.symbolFallback = const [symbolFamily];
     }
   });
   final codepoints = materialCodepoints(root);
@@ -2671,14 +2680,19 @@ List<RuntimeIssue> _check(
   final boxes = _boxes(binding);
   // The glyphs a family has: its regular face's (else Roboto's).
   Set<int>? coverage(String? family) {
-    final fam = (family == null || family.isEmpty) ? 'Roboto' : family;
+    var fam = (family == null || family.isEmpty) ? 'Roboto' : family;
+    if (monospaceFamilies.contains(fam.toLowerCase()) && DirectoryFontFetcher(faces).match(fam, 400, false) == null) fam = 'Roboto Mono';
     // The file the fetcher serves for the family's regular face.
     final face = DirectoryFontFetcher(faces).match(fam, 400, false);
     final used = face != null && face.family.toLowerCase() == fam.toLowerCase()
         ? face
         : faces.where((f) => f.family == 'Roboto' && !f.italic).firstOrNull;
     if (used == null) return null;
-    return _coverage.putIfAbsent(used.path, () => fontCoverage(used.path));
+    final own = _coverage.putIfAbsent(used.path, () => fontCoverage(used.path));
+    // What the symbol font every style falls back to draws.
+    final symbols = FontDemand.symbolFallback.isEmpty ? null : systemSymbolFont();
+    if (symbols == null || own == null) return own;
+    return _coverage.putIfAbsent('${used.path}+$symbols', () => {...own, ...?fontCoverage(symbols)});
   }
   if (boxes.isEmpty) {
     out.add(RuntimeIssue('empty_screen', 'warning', 'Screen "$screen" drew no nodes.', screen: screen, size: size));

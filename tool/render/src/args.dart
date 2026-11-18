@@ -128,7 +128,9 @@ Options:
                           weight and style), searched recursively: a font package
                           folder (node_modules/@fontsource/<family>), a site's fonts.
                           `system`: the system's font directories. Repeatable.
-                          Roboto and Material Icons are built in.
+                          Roboto, Roboto Mono (monospace) and Material Icons are
+                          built in; symbols they lack (arrows) fall back to the
+                          system's symbol font.
   --theme <mode>          Start in this theme mode: light, dark or system (the
                           device's: light), as a setThemeMode action sets it;
                           named colors, text styles and controls follow. PNGs
