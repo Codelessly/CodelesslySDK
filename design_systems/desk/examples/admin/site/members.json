@@ -1149,7 +1149,7 @@
     "strokeSides": "bottom"
    },
    "sticky": {
-    "offset": 16
+    "offset": 0
    },
    "children": [
     "row5",
@@ -1785,16 +1785,6 @@
    },
    "children": [
     "row14"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "flex": 255.0
-      }
-     }
-    }
    ]
   },
   "row14": {
@@ -1915,19 +1905,6 @@
    },
    "children": [
     "text9"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "width": {
-        "fill": 0
-       },
-       "flex": 90
-      }
-     }
-    }
    ]
   },
   "text9": {
@@ -1962,25 +1939,6 @@
    },
    "children": [
     "row17"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "width": {
-        "fill": 0
-       },
-       "flex": 170
-      }
-     }
-    },
-    {
-     "maxWidth": 699,
-     "patch": {
-      "visible": false
-     }
-    }
    ]
   },
   "row17": {
@@ -2071,25 +2029,6 @@
    },
    "children": [
     "Status1"
-   ],
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "width": {
-        "fill": 0
-       },
-       "flex": 100
-      }
-     }
-    },
-    {
-     "maxWidth": 699,
-     "patch": {
-      "visible": false
-     }
-    }
    ]
   },
   "Status1": {
