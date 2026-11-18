@@ -649,9 +649,6 @@ class ControlFocusScope {
     return placed..sort(compare);
   }
 
-  static bool _contains(Rect outer, Rect inner) =>
-      outer.left <= inner.left + .5 && outer.top <= inner.top + .5 && outer.right >= inner.right - .5 && outer.bottom >= inner.bottom - .5;
-
   /// The group [node] is a member of (the nearest one around it).
   ControlFocusGroup? groupOf(ControlFocusNode node) {
     if (_groups.isEmpty) return null;
