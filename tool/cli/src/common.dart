@@ -68,7 +68,8 @@ String get serveScript => '${sdkRoot.path}/tool/render/serve.sh';
 
 /// Runs a command; returns its exit status and its stdout and stderr together, as the person would read them.
 Future<(int, String)> runCaptured(String exe, List<String> args, {String? cwd, Duration? timeout}) async {
-  final p = await Process.start(exe, args, workingDirectory: cwd);
+  final script = Platform.isWindows && exe.endsWith('.sh');
+  final p = await Process.start(script ? 'bash' : exe, script ? [exe, ...args] : args, workingDirectory: cwd);
   final out = StringBuffer();
   final done = Future.wait([
     p.stdout.transform(utf8.decoder).forEach(out.write),
@@ -84,7 +85,9 @@ Future<(int, String)> runCaptured(String exe, List<String> args, {String? cwd, D
 
 /// Runs a command with this process's terminal: its output shows as it comes.
 Future<int> runInherited(String exe, List<String> args, {String? cwd}) async {
-  final p = await Process.start(exe, args, workingDirectory: cwd, mode: ProcessStartMode.inheritStdio);
+  // Windows cannot start a shell script: bash runs it.
+  final script = Platform.isWindows && exe.endsWith('.sh');
+  final p = await Process.start(script ? 'bash' : exe, script ? [exe, ...args] : args, workingDirectory: cwd, mode: ProcessStartMode.inheritStdio);
   return p.exitCode;
 }
 
