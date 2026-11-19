@@ -79,4 +79,16 @@ void main() {
     final box = tree.boxOf('box')!;
     expect(box.localToGlobal(Offset.zero).dx + box.size.width, lessThanOrEqualTo(358.5));
   });
+
+  testWidgets('a row of texts squeezed onto more lines says that height when measured (a grid row that hugs it)', (tester) async {
+    final tree = await _show(
+      tester,
+      _doc({
+        'long': _text('A much longer title of a card that needs to give way to the other', 13),
+        'short': _text('Short label at the end of it', 13),
+      }, align: 'start'),
+    );
+    final row = tree.boxOf('row')!;
+    expect(row.getMaxIntrinsicHeight(358), greaterThanOrEqualTo(row.size.height - 0.5));
+  });
 }
