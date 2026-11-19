@@ -1,13 +1,13 @@
 #!/bin/bash
 # The compact notation's tools, runnable from a fresh checkout:
 #
-#   tool/notation/notation.sh prompt [--design-system <folder>] [--width <canvas width>] [--open [--no-define] [--no-glossary | --glossary=names|signatures]]
-#   tool/notation/notation.sh expand <file.txt> [--design-system <folder>] [--named] [--nearest-colors] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--site <site.json or folder>] [--no-site] [--out <file.json>] [--open] [--vocabulary <file.json> | --no-record] [--aliases <file.json>]
-#   tool/notation/notation.sh expand <site folder> [--width <page width, default 1440>] [--no-reflow] [--design-system <folder>] [--open] [--vocabulary <file.json> | --no-record]
+#   tool/notation/notation.sh prompt [--design-system <folder>] [--width <canvas width>] [--open [--no-define] [--no-glossary | --glossary=names|signatures]] [--dictionary <folder>]...
+#   tool/notation/notation.sh expand <file.txt> [--design-system <folder>] [--named] [--nearest-colors] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--site <site.json or folder>] [--no-site] [--out <file.json>] [--open] [--vocabulary <file.json> | --no-record] [--aliases <file.json>] [--dictionary <folder>]...
+#   tool/notation/notation.sh expand <site folder> [--width <page width, default 1440>] [--no-reflow] [--design-system <folder>] [--open] [--vocabulary <file.json> | --no-record] [--dictionary <folder>]...
 #   tool/notation/notation.sh validate <site folder | file.txt> [--open] [the options of expand]
 #   tool/notation/notation.sh vocabulary <folder or files> [--design-system <folder>] [--aliases <file.json>] [--no-aliases] [--out <dir>] [--sites <dir>]
 #   tool/notation/notation.sh vocabulary <site folder | vocabulary.json | folder of them>... [--design-system <folder>] [--aliases <file.json>] [--out <dir>]
-#   tool/notation/notation.sh print <document.json> [--design-system <folder>] [--out <file.txt>] [--check]
+#   tool/notation/notation.sh print <document.json> [--design-system <folder>] [--out <file.txt>] [--check] [--dictionary <folder>]...
 #   tool/notation/notation.sh apply <document.json> <ops.json> [--design-system <folder>] [--out <file.json>]
 #   tool/notation/notation.sh migrate <file or folder>... [--check] [--stdout] [--design-system <folder>]... [--site <site.json>] [--notation | --markdown | --dart | --python | --json | --html] [--from 32]
 #
@@ -43,6 +43,16 @@
 # (with their drafts/), records, or a folder of them, writes the harvest
 # across runs: every word beyond the core, by runs and apps, its shapes,
 # how it resolved, the writers' definitions, ranked candidates to support.
+#
+# A dictionary is a folder of definitions (a <Word>.txt each, a `define`)
+# kept apart from any one site: prompt, expand, validate and print read the
+# folders --dictionary names (written again for each further one) or, with
+# none written, those CODELESSLY_DICTIONARY lists (separated as in PATH;
+# --no-dictionary reads none), and a site's site.json adds its own
+# ("dictionary": ["../words"]). A word is read from the first that defines
+# it: the page's own define, the site's, the design system's, then the
+# dictionaries in order (tool/notation/dictionary.dart). The record names
+# the dictionary's folder a word came from; the prompt lists their words.
 #
 # A components/*.txt that starts with `define Name …` (or `primitive`) is the
 # site's definitions, read by every page and component as a define after a

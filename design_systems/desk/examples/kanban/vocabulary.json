@@ -1,0 +1,5822 @@
+{
+ "record": "codelessly notation vocabulary record",
+ "version": 1,
+ "about": "Every word the notation files here used, with how each resolved, kept across expands. Written by tool/notation/notation.sh expand (codelessly_api docs/design/19-open-vocabulary.md, section 15); --no-record leaves it alone.",
+ "first": "2026-11-19T05:06:53Z",
+ "last": "2026-11-19T08:02:54Z",
+ "expands": [
+  {
+   "at": "2026-11-19T05:06:53Z",
+   "vocabulary": "closed",
+   "files": 1
+  },
+  {
+   "at": "2026-11-19T06:53:07Z",
+   "vocabulary": "closed",
+   "files": 1
+  },
+  {
+   "at": "2026-11-19T08:02:54Z",
+   "vocabulary": "closed",
+   "files": 1
+  }
+ ],
+ "summary": {
+  "status": {
+   "used": 151,
+   "no longer used": 8
+  },
+  "used": {
+   "type": {
+    "component": 13,
+    "core": 17
+   },
+   "text": {
+    "component": 10,
+    "core": 8
+   },
+   "parameter": {
+    "component": 31,
+    "core": 29
+   },
+   "flag": {
+    "component": 5,
+    "core": 17
+   },
+   "event": {
+    "component": 2,
+    "core": 1
+   },
+   "variant": {
+    "core": 6
+   },
+   "verb": {
+    "core": 4
+   },
+   "function": {
+    "core": 6
+   },
+   "statement": {
+    "core": 2
+   }
+  }
+ },
+ "placeholders": [],
+ "files": {
+  "pages/board.txt": {
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "expands": 3
+  }
+ },
+ "words": [
+  {
+   "kind": "type",
+   "word": "Account",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Account \"text\" \"text\" hide= w=",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "Account \"Maya Chen\" \"Product designer\" w=200 hide=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      18
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Account \"text\" \"text\" hide= w=": 1
+     }
+    }
+   },
+   "seen": {
+    "Account \"text\" \"text\" hide= w=": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Actions",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Actions ...",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "Actions",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      87
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Actions ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Actions ...": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "BoardColumn",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "signatures": [
+    {
+     "signature": "BoardColumn \"text\" count= hue= phone.visible= grow phone.w=358 tablet.w=300 onAdd ...",
+     "uses": 2,
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "BoardColumn \"text\" count= hue= limit= phone.visible= grow phone.w=358 tablet.w=300 onAdd ...",
+     "uses": 2,
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "BoardColumn \"text\" \"text\" count= hue= == grow phone.visible={col phone.w=358 tablet.w=300 } onAdd ...",
+     "uses": 0,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    },
+    {
+     "signature": "BoardColumn \"text\" \"text\" count= hue= limit= == grow phone.visible={col phone.w=358 tablet.w=300 } onAdd ...",
+     "uses": 0,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    }
+   ],
+   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      32,
+      35,
+      38,
+      41
+     ],
+     "how": {
+      "component": 4
+     },
+     "signatures": {
+      "BoardColumn \"text\" count= hue= phone.visible= grow phone.w=358 tablet.w=300 onAdd ...": 2,
+      "BoardColumn \"text\" count= hue= limit= phone.visible= grow phone.w=358 tablet.w=300 onAdd ...": 2
+     }
+    }
+   },
+   "seen": {
+    "BoardColumn \"text\" \"text\" count= hue= == grow phone.visible={col phone.w=358 tablet.w=300 } onAdd ...": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    },
+    "BoardColumn \"text\" \"text\" count= hue= limit= == grow phone.visible={col phone.w=358 tablet.w=300 } onAdd ...": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    },
+    "BoardColumn \"text\" count= hue= phone.visible= grow phone.w=358 tablet.w=300 onAdd ...": {
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    "BoardColumn \"text\" count= hue= limit= phone.visible= grow phone.w=358 tablet.w=300 onAdd ...": {
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Brand",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Brand \"text\" icon=",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "Brand \"Stack\" icon=\"layers\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      16
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Brand \"text\" icon=": 1
+     }
+    }
+   },
+   "seen": {
+    "Brand \"text\" icon=": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Breadcrumb",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Breadcrumb hide= items=",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "Breadcrumb items=[\"Northstar Studio\",\"Product delivery\"] hide=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      17
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Breadcrumb hide= items=": 1
+     }
+    }
+   },
+   "seen": {
+    "Breadcrumb hide= items=": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Dialog",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Dialog \"text\" guard= guardText= overline= w= ...",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "Dialog#card \"Card details\" overline=\"STK-124\" w=780 guard={title != \"Polish the invite flow\"} guardText=\"Discard your changes?\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      44
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Dialog \"text\" guard= guardText= overline= w= ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Dialog \"text\" guard= guardText= overline= w= ...": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Field",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "signatures": [
+    {
+     "signature": "Field \"text\" ...",
+     "uses": 4,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "Field \"Status\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      77,
+      79,
+      81,
+      83
+     ],
+     "how": {
+      "component": 4
+     },
+     "signatures": {
+      "Field \"text\" ...": 4
+     }
+    }
+   },
+   "seen": {
+    "Field \"text\" ...": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "FilterButton",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 3
+   },
+   "uses": 3,
+   "signatures": [
+    {
+     "signature": "FilterButton \"text\" hide= icon=",
+     "uses": 2,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "FilterButton \"text\" count= hide= icon=",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "FilterButton \"Labels\" icon=\"label\" hide=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      25,
+      26,
+      27
+     ],
+     "how": {
+      "component": 3
+     },
+     "signatures": {
+      "FilterButton \"text\" hide= icon=": 2,
+      "FilterButton \"text\" count= hide= icon=": 1
+     }
+    }
+   },
+   "seen": {
+    "FilterButton \"text\" hide= icon=": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    "FilterButton \"text\" count= hide= icon=": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "PageHeader",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "PageHeader \"text\" \"text\" ...",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "PageHeader \"Product delivery\" \"Plan, build, and ship with the product team.\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      20
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "PageHeader \"text\" \"text\" ...": 1
+     }
+    }
+   },
+   "seen": {
+    "PageHeader \"text\" \"text\" ...": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "SearchField",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "SearchField @ hint= w= phone.w=fill",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "SearchField @q hint=\"Search cards…\" w=260 phone.w=fill",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      24
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "SearchField @ hint= w= phone.w=fill": 1
+     }
+    }
+   },
+   "seen": {
+    "SearchField @ hint= w= phone.w=fill": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Tabs",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Tabs @ icons= tabs=",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "Tabs @view tabs=[\"Board\",\"List\",\"Archive\"] icons=[\"view_kanban\",\"list\",\"inventory_2\"]",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      22
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Tabs @ icons= tabs=": 1
+     }
+    }
+   },
+   "seen": {
+    "Tabs @ icons= tabs=": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Tag",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 2
+   },
+   "uses": 2,
+   "signatures": [
+    {
+     "signature": "Tag \"text\" hue= removable",
+     "uses": 2,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "Tag \"Design\" hue=\"violet\" removable",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      85,
+      86
+     ],
+     "how": {
+      "component": 2
+     },
+     "signatures": {
+      "Tag \"text\" hue= removable": 2
+     }
+    }
+   },
+   "seen": {
+    "Tag \"text\" hue= removable": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "TaskCard",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "signatures": [
+    {
+     "signature": "TaskCard assignee= checklist= comments= due= key= labels= overdue= title= onTap",
+     "uses": 4,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      34,
+      37,
+      40,
+      43
+     ],
+     "how": {
+      "component": 4
+     },
+     "signatures": {
+      "TaskCard assignee= checklist= comments= due= key= labels= overdue= title= onTap": 4
+     }
+    }
+   },
+   "seen": {
+    "TaskCard assignee= checklist= comments= due= key= labels= overdue= title= onTap": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "text",
+   "on": "Account",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Account \"Maya Chen\" \"Product designer\" w=200 hide=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      18
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Account",
+   "word": "text2",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Account \"Maya Chen\" \"Product designer\" w=200 hide=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      18
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "BoardColumn",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      32,
+      35,
+      38,
+      41
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Brand",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Brand \"Stack\" icon=\"layers\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      16
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Dialog",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Dialog#card \"Card details\" overline=\"STK-124\" w=780 guard={title != \"Polish the invite flow\"} guardText=\"Discard your changes?\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      44
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Field",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "Field \"Status\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      77,
+      79,
+      81,
+      83
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "FilterButton",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 3
+   },
+   "uses": 3,
+   "example": "FilterButton \"Labels\" icon=\"label\" hide=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      25,
+      26,
+      27
+     ],
+     "how": {
+      "component": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "PageHeader",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "PageHeader \"Product delivery\" \"Plan, build, and ship with the product team.\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      20
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "PageHeader",
+   "word": "text2",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "PageHeader \"Product delivery\" \"Plan, build, and ship with the product team.\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      20
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Tag",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 2
+   },
+   "uses": 2,
+   "example": "Tag \"Design\" hue=\"violet\" removable",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      85,
+      86
+     ],
+     "how": {
+      "component": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Account",
+   "word": "hide",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Account \"Maya Chen\" \"Product designer\" w=200 hide=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      18
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Account",
+   "word": "w",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Account \"Maya Chen\" \"Product designer\" w=200 hide=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      18
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "BoardColumn",
+   "word": "count",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      32,
+      35,
+      38,
+      41
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "BoardColumn",
+   "word": "hue",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      32,
+      35,
+      38,
+      41
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "BoardColumn",
+   "word": "limit",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 2
+   },
+   "uses": 2,
+   "example": "BoardColumn \"In progress\" count={length(filter(shown, x => x.col == \"In progress\"))} limit=2 hue=\"sky\" grow tablet.w=300 phone.w=358 phone.visible={col == \"In progress\"} onAdd={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      35,
+      38
+     ],
+     "how": {
+      "component": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "BoardColumn",
+   "word": "phone.visible",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
+   "first": "2026-11-19T06:53:07Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      32,
+      35,
+      38,
+      41
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Brand",
+   "word": "icon",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Brand \"Stack\" icon=\"layers\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      16
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Breadcrumb",
+   "word": "hide",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Breadcrumb items=[\"Northstar Studio\",\"Product delivery\"] hide=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      17
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Breadcrumb",
+   "word": "items",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Breadcrumb items=[\"Northstar Studio\",\"Product delivery\"] hide=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      17
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Dialog",
+   "word": "guard",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Dialog#card \"Card details\" overline=\"STK-124\" w=780 guard={title != \"Polish the invite flow\"} guardText=\"Discard your changes?\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      44
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Dialog",
+   "word": "guardText",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Dialog#card \"Card details\" overline=\"STK-124\" w=780 guard={title != \"Polish the invite flow\"} guardText=\"Discard your changes?\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      44
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Dialog",
+   "word": "overline",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Dialog#card \"Card details\" overline=\"STK-124\" w=780 guard={title != \"Polish the invite flow\"} guardText=\"Discard your changes?\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      44
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Dialog",
+   "word": "w",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Dialog#card \"Card details\" overline=\"STK-124\" w=780 guard={title != \"Polish the invite flow\"} guardText=\"Discard your changes?\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      44
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "FilterButton",
+   "word": "count",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "FilterButton \"Assignee\" icon=\"person\" count=1 hide=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      26
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "FilterButton",
+   "word": "hide",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 3
+   },
+   "uses": 3,
+   "example": "FilterButton \"Labels\" icon=\"label\" hide=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      25,
+      26,
+      27
+     ],
+     "how": {
+      "component": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "FilterButton",
+   "word": "icon",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 3
+   },
+   "uses": 3,
+   "example": "FilterButton \"Labels\" icon=\"label\" hide=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      25,
+      26,
+      27
+     ],
+     "how": {
+      "component": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "SearchField",
+   "word": "@",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "SearchField @q hint=\"Search cards…\" w=260 phone.w=fill",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      24
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "SearchField",
+   "word": "hint",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "SearchField @q hint=\"Search cards…\" w=260 phone.w=fill",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      24
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "SearchField",
+   "word": "w",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "SearchField @q hint=\"Search cards…\" w=260 phone.w=fill",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      24
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Tabs",
+   "word": "@",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Tabs @view tabs=[\"Board\",\"List\",\"Archive\"] icons=[\"view_kanban\",\"list\",\"inventory_2\"]",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      22
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Tabs",
+   "word": "icons",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Tabs @view tabs=[\"Board\",\"List\",\"Archive\"] icons=[\"view_kanban\",\"list\",\"inventory_2\"]",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      22
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Tabs",
+   "word": "tabs",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Tabs @view tabs=[\"Board\",\"List\",\"Archive\"] icons=[\"view_kanban\",\"list\",\"inventory_2\"]",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      22
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Tag",
+   "word": "hue",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 2
+   },
+   "uses": 2,
+   "example": "Tag \"Design\" hue=\"violet\" removable",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      85,
+      86
+     ],
+     "how": {
+      "component": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "TaskCard",
+   "word": "assignee",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      34,
+      37,
+      40,
+      43
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "TaskCard",
+   "word": "checklist",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      34,
+      37,
+      40,
+      43
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "TaskCard",
+   "word": "comments",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      34,
+      37,
+      40,
+      43
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "TaskCard",
+   "word": "due",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      34,
+      37,
+      40,
+      43
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "TaskCard",
+   "word": "key",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      34,
+      37,
+      40,
+      43
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "TaskCard",
+   "word": "labels",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      34,
+      37,
+      40,
+      43
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "TaskCard",
+   "word": "overdue",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      34,
+      37,
+      40,
+      43
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "TaskCard",
+   "word": "title",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      34,
+      37,
+      40,
+      43
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "BoardColumn",
+   "word": "grow",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      32,
+      35,
+      38,
+      41
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "BoardColumn",
+   "word": "phone.w=358",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      32,
+      35,
+      38,
+      41
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "BoardColumn",
+   "word": "tablet.w=300",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      32,
+      35,
+      38,
+      41
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "SearchField",
+   "word": "phone.w=fill",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "SearchField @q hint=\"Search cards…\" w=260 phone.w=fill",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      24
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Tag",
+   "word": "removable",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 2
+   },
+   "uses": 2,
+   "example": "Tag \"Design\" hue=\"violet\" removable",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      85,
+      86
+     ],
+     "how": {
+      "component": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "event",
+   "on": "BoardColumn",
+   "word": "onAdd",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      32,
+      35,
+      38,
+      41
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "event",
+   "on": "TaskCard",
+   "word": "onTap",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      34,
+      37,
+      40,
+      43
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "type",
+   "word": "App",
+   "status": "used",
+   "resolved": "core",
+   "origin": "code",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "App ...",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "App",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      12
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "App ...": 1
+     }
+    }
+   },
+   "seen": {
+    "App ...": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Avatar",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "signatures": [
+    {
+     "signature": "Avatar \"text\" size=",
+     "uses": 2,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "Avatar \"Jules Martin\" size=24",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      66,
+      71
+     ],
+     "how": {
+      "core": 2
+     },
+     "signatures": {
+      "Avatar \"text\" size=": 2
+     }
+    }
+   },
+   "seen": {
+    "Avatar \"text\" size=": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Button",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 5
+   },
+   "uses": 5,
+   "signatures": [
+    {
+     "signature": "Button \"text\" onTap",
+     "uses": 2,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "Button \"text\" icon= onTap",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "Button \"text\" icon=",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "Button \"text\" color= icon= onTap",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "Button \"New card\" icon=\"add\" onTap={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      21,
+      59,
+      88,
+      90,
+      91
+     ],
+     "how": {
+      "core": 5
+     },
+     "signatures": {
+      "Button \"text\" icon= onTap": 1,
+      "Button \"text\" icon=": 1,
+      "Button \"text\" color= icon= onTap": 1,
+      "Button \"text\" onTap": 2
+     }
+    }
+   },
+   "seen": {
+    "Button \"text\" icon= onTap": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    "Button \"text\" icon=": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    "Button \"text\" color= icon= onTap": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    "Button \"text\" onTap": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Checkbox",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Checkbox \"text\" @",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "Checkbox \"{it.t}\" @it.done",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      56
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Checkbox \"text\" @": 1
+     }
+    }
+   },
+   "seen": {
+    "Checkbox \"text\" @": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Column",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 7
+   },
+   "uses": 7,
+   "signatures": [
+    {
+     "signature": "Column gap= ...",
+     "uses": 2,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "Column grow ...",
+     "uses": 2,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "Column gap= grow ...",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "Column gap= w= phone.w=fill ...",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "Column gap= pad= phone.pad= tablet.pad= ...",
+     "uses": 1,
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "Column gap= pad= phone.pad=[16,16,16,8] tablet.pad=[24,20,24,12] ...",
+     "uses": 0,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    }
+   ],
+   "example": "Column gap=16 pad=[32,24,32,16] tablet.pad=[24,20,24,12] phone.pad=[16,16,16,8]",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      19,
+      46,
+      49,
+      60,
+      67,
+      72,
+      75
+     ],
+     "how": {
+      "core": 7
+     },
+     "signatures": {
+      "Column gap= pad= phone.pad= tablet.pad= ...": 1,
+      "Column gap= grow ...": 1,
+      "Column gap= ...": 2,
+      "Column grow ...": 2,
+      "Column gap= w= phone.w=fill ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Column gap= pad= phone.pad=[16,16,16,8] tablet.pad=[24,20,24,12] ...": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    },
+    "Column gap= grow ...": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    "Column gap= ...": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    "Column grow ...": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    "Column gap= w= phone.w=fill ...": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    "Column gap= pad= phone.pad= tablet.pad= ...": {
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "DateTimeInput",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "DateTimeInput value= w=",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "DateTimeInput value=\"2026-11-19\" w=fill",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      82
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "DateTimeInput value= w=": 1
+     }
+    }
+   },
+   "seen": {
+    "DateTimeInput value= w=": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Icon",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "signatures": [
+    {
+     "signature": "Icon \"text\" color= size=",
+     "uses": 2,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "Icon \"checklist\" size=16 color=ink3",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      51,
+      62
+     ],
+     "how": {
+      "core": 2
+     },
+     "signatures": {
+      "Icon \"text\" color= size=": 2
+     }
+    }
+   },
+   "seen": {
+    "Icon \"text\" color= size=": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Input",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "signatures": [
+    {
+     "signature": "Input \"text\" @",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "Input \"text\" @ multiline",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "Input \"text\" \"text\" grow",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "Input \"Title\" @title",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      47,
+      48,
+      58
+     ],
+     "how": {
+      "core": 3
+     },
+     "signatures": {
+      "Input \"text\" @": 1,
+      "Input \"text\" @ multiline": 1,
+      "Input \"text\" \"text\" grow": 1
+     }
+    }
+   },
+   "seen": {
+    "Input \"text\" @": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    "Input \"text\" @ multiline": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    "Input \"text\" \"text\" grow": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Main",
+   "status": "used",
+   "resolved": "core",
+   "origin": "code",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Main ...",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "Main",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      13
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Main ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Main ...": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Nav",
+   "status": "used",
+   "resolved": "core",
+   "origin": "code",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Nav ...",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "Nav",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      14
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Nav ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Nav ...": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Progress",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Progress value=",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "Progress value={count(checks, 'done', true) / length(checks)}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      54
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Progress value=": 1
+     }
+    }
+   },
+   "seen": {
+    "Progress value=": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Row",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 10
+   },
+   "uses": 10,
+   "signatures": [
+    {
+     "signature": "Row gap= middle ...",
+     "uses": 4,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "Row gap= ...",
+     "uses": 2,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "Row gap= top ...",
+     "uses": 2,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "Row gap= phone.direction=vertical top ...",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "Row gap= pad= phone.pad= tablet.pad= tablet.scroll top ...",
+     "uses": 1,
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "Row gap= pad= phone.pad=[16,4,16,16] tablet.pad=[24,4,24,24] tablet.scroll top ...",
+     "uses": 0,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    }
+   ],
+   "example": "Row gap=12 middle",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      15,
+      23,
+      31,
+      45,
+      50,
+      57,
+      61,
+      65,
+      70,
+      84
+     ],
+     "how": {
+      "core": 10
+     },
+     "signatures": {
+      "Row gap= middle ...": 4,
+      "Row gap= pad= phone.pad= tablet.pad= tablet.scroll top ...": 1,
+      "Row gap= phone.direction=vertical top ...": 1,
+      "Row gap= ...": 2,
+      "Row gap= top ...": 2
+     }
+    }
+   },
+   "seen": {
+    "Row gap= middle ...": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    "Row gap= pad= phone.pad=[16,4,16,16] tablet.pad=[24,4,24,24] tablet.scroll top ...": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    },
+    "Row gap= phone.direction=vertical top ...": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    "Row gap= ...": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    "Row gap= top ...": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    "Row gap= pad= phone.pad= tablet.pad= tablet.scroll top ...": {
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "SegmentedButton",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "SegmentedButton @ items= show=",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "SegmentedButton @col items=[\"Backlog\",\"In progress\",\"In review\",\"Done\"] show=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      30
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "SegmentedButton @ items= show=": 1
+     }
+    }
+   },
+   "seen": {
+    "SegmentedButton @ items= show=": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Select",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "signatures": [
+    {
+     "signature": "Select @ items= w=",
+     "uses": 2,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "Select @cstatus items=[\"Backlog\",\"In progress\",\"In review\",\"Done\"] w=fill",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      78,
+      80
+     ],
+     "how": {
+      "core": 2
+     },
+     "signatures": {
+      "Select @ items= w=": 2
+     }
+    }
+   },
+   "seen": {
+    "Select @ items= w=": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Spacer",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "signatures": [
+    {
+     "signature": "Spacer hide=",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "Spacer",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "Spacer hide=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      28,
+      89
+     ],
+     "how": {
+      "core": 2
+     },
+     "signatures": {
+      "Spacer hide=": 1,
+      "Spacer": 1
+     }
+    }
+   },
+   "seen": {
+    "Spacer hide=": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    "Spacer": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Text",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 10
+   },
+   "uses": 10,
+   "signatures": [
+    {
+     "signature": "Text \"text\"",
+     "uses": 5,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "Text \"text\" grow",
+     "uses": 2,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "Text \"text\" size=",
+     "uses": 2,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    {
+     "signature": "Text \"text\" hide=",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "Text.caption \"{length(shown)} cards\" hide=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      29,
+      52,
+      53,
+      63,
+      64,
+      68,
+      69,
+      73,
+      74,
+      76
+     ],
+     "how": {
+      "core": 10
+     },
+     "signatures": {
+      "Text \"text\" hide=": 1,
+      "Text \"text\" grow": 2,
+      "Text \"text\"": 5,
+      "Text \"text\" size=": 2
+     }
+    }
+   },
+   "seen": {
+    "Text \"text\" hide=": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    "Text \"text\" grow": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    "Text \"text\"": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    },
+    "Text \"text\" size=": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "canvas",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "canvas \"text\" path=",
+     "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   ],
+   "example": "canvas \"Board\" path=\"board\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "canvas \"text\" path=": 1
+     }
+    }
+   },
+   "seen": {
+    "canvas \"text\" path=": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   }
+  },
+  {
+   "kind": "text",
+   "on": "Avatar",
+   "word": "text1",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Avatar \"Jules Martin\" size=24",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      66,
+      71
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Button",
+   "word": "text1",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 5
+   },
+   "uses": 5,
+   "example": "Button \"New card\" icon=\"add\" onTap={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      21,
+      59,
+      88,
+      90,
+      91
+     ],
+     "how": {
+      "core": 5
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Checkbox",
+   "word": "text1",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Checkbox \"{it.t}\" @it.done",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      56
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Icon",
+   "word": "text1",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Icon \"checklist\" size=16 color=ink3",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      51,
+      62
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Input",
+   "word": "text1",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "example": "Input \"Title\" @title",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      47,
+      48,
+      58
+     ],
+     "how": {
+      "core": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Input",
+   "word": "text2",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Input \"\" \"Add a checklist item…\" grow",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      58
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Text",
+   "word": "text1",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 10
+   },
+   "uses": 10,
+   "example": "Text.caption \"{length(shown)} cards\" hide=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      29,
+      52,
+      53,
+      63,
+      64,
+      68,
+      69,
+      73,
+      74,
+      76
+     ],
+     "how": {
+      "core": 10
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "canvas",
+   "word": "text1",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "canvas \"Board\" path=\"board\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Avatar",
+   "word": "size",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Avatar \"Jules Martin\" size=24",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      66,
+      71
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Button",
+   "word": "color",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Button.outline \"Delete card\" icon=\"delete\" color=errorInk onTap={confirm \"Delete this card?\" then {close}}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      88
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Button",
+   "word": "icon",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "example": "Button \"New card\" icon=\"add\" onTap={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      21,
+      59,
+      88
+     ],
+     "how": {
+      "core": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Checkbox",
+   "word": "@",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Checkbox \"{it.t}\" @it.done",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      56
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "gap",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 5
+   },
+   "uses": 5,
+   "example": "Column gap=16 pad=[32,24,32,16] tablet.pad=[24,20,24,12] phone.pad=[16,16,16,8]",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      19,
+      46,
+      49,
+      60,
+      75
+     ],
+     "how": {
+      "core": 5
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "pad",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Column gap=16 pad=[32,24,32,16] tablet.pad=[24,20,24,12] phone.pad=[16,16,16,8]",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      19
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "phone.pad",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Column gap=16 pad=[32,24,32,16] tablet.pad=[24,20,24,12] phone.pad=[16,16,16,8]",
+   "first": "2026-11-19T06:53:07Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      19
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "tablet.pad",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Column gap=16 pad=[32,24,32,16] tablet.pad=[24,20,24,12] phone.pad=[16,16,16,8]",
+   "first": "2026-11-19T06:53:07Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      19
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "w",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Column gap=14 w=240 phone.w=fill",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      75
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "DateTimeInput",
+   "word": "value",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "DateTimeInput value=\"2026-11-19\" w=fill",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      82
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "DateTimeInput",
+   "word": "w",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "DateTimeInput value=\"2026-11-19\" w=fill",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      82
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Icon",
+   "word": "color",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Icon \"checklist\" size=16 color=ink3",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      51,
+      62
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Icon",
+   "word": "size",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Icon \"checklist\" size=16 color=ink3",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      51,
+      62
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Input",
+   "word": "@",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Input \"Title\" @title",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      47,
+      48
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Progress",
+   "word": "value",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Progress value={count(checks, 'done', true) / length(checks)}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      54
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Row",
+   "word": "gap",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 10
+   },
+   "uses": 10,
+   "example": "Row gap=12 middle",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      15,
+      23,
+      31,
+      45,
+      50,
+      57,
+      61,
+      65,
+      70,
+      84
+     ],
+     "how": {
+      "core": 10
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Row",
+   "word": "pad",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Row gap=12 top pad=[32,4,32,32] tablet.pad=[24,4,24,24] phone.pad=[16,4,16,16] tablet.scroll",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      31
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Row",
+   "word": "phone.pad",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Row gap=12 top pad=[32,4,32,32] tablet.pad=[24,4,24,24] phone.pad=[16,4,16,16] tablet.scroll",
+   "first": "2026-11-19T06:53:07Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      31
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Row",
+   "word": "tablet.pad",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Row gap=12 top pad=[32,4,32,32] tablet.pad=[24,4,24,24] phone.pad=[16,4,16,16] tablet.scroll",
+   "first": "2026-11-19T06:53:07Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      31
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "SegmentedButton",
+   "word": "@",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "SegmentedButton @col items=[\"Backlog\",\"In progress\",\"In review\",\"Done\"] show=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      30
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "SegmentedButton",
+   "word": "items",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "SegmentedButton @col items=[\"Backlog\",\"In progress\",\"In review\",\"Done\"] show=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      30
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "SegmentedButton",
+   "word": "show",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "SegmentedButton @col items=[\"Backlog\",\"In progress\",\"In review\",\"Done\"] show=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      30
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Select",
+   "word": "@",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Select @cstatus items=[\"Backlog\",\"In progress\",\"In review\",\"Done\"] w=fill",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      78,
+      80
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Select",
+   "word": "items",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Select @cstatus items=[\"Backlog\",\"In progress\",\"In review\",\"Done\"] w=fill",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      78,
+      80
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Select",
+   "word": "w",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Select @cstatus items=[\"Backlog\",\"In progress\",\"In review\",\"Done\"] w=fill",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      78,
+      80
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Spacer",
+   "word": "hide",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Spacer hide=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      28
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Text",
+   "word": "hide",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Text.caption \"{length(shown)} cards\" hide=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      29
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Text",
+   "word": "size",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Text.strong \"Jules Martin\" size=12.5",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      68,
+      73
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "canvas",
+   "word": "path",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "canvas \"Board\" path=\"board\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Column",
+   "word": "grow",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "example": "Column gap=16 grow",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      46,
+      67,
+      72
+     ],
+     "how": {
+      "core": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Column",
+   "word": "phone.w=fill",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Column gap=14 w=240 phone.w=fill",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      75
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Input",
+   "word": "grow",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Input \"\" \"Add a checklist item…\" grow",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      58
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Input",
+   "word": "multiline",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Input \"Description\" @desc multiline",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      48
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Row",
+   "word": "middle",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 4
+   },
+   "uses": 4,
+   "example": "Row gap=12 middle",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      15,
+      23,
+      50,
+      61
+     ],
+     "how": {
+      "core": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Row",
+   "word": "phone.direction=vertical",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Row gap=24 top phone.direction=vertical",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      45
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Row",
+   "word": "tablet.scroll",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Row gap=12 top pad=[32,4,32,32] tablet.pad=[24,4,24,24] phone.pad=[16,4,16,16] tablet.scroll",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      31
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Row",
+   "word": "top",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 4
+   },
+   "uses": 4,
+   "example": "Row gap=12 top pad=[32,4,32,32] tablet.pad=[24,4,24,24] phone.pad=[16,4,16,16] tablet.scroll",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      31,
+      45,
+      65,
+      70
+     ],
+     "how": {
+      "core": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Text",
+   "word": "grow",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Text.panelTitle \"Checklist\" grow",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      52,
+      63
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "'",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      10
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "+",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      10
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "=>",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      10
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "c",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      10
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "c.key),",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      10
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "contains(lower(c.title",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      10
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "lower(q)))}",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      10
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "shown:list={filter(cards,",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      10
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "event",
+   "on": "Button",
+   "word": "onTap",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 4
+   },
+   "uses": 4,
+   "example": "Button \"New card\" icon=\"add\" onTap={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      21,
+      88,
+      90,
+      91
+     ],
+     "how": {
+      "core": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Button",
+   "word": "ghost",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Button.ghost \"Cancel\" onTap={close}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      90
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Button",
+   "word": "outline",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Button.outline \"Add\" icon=\"add\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      59,
+      88
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Text",
+   "word": "caption",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "example": "Text.caption \"{length(shown)} cards\" hide=phone",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      29,
+      53,
+      64
+     ],
+     "how": {
+      "core": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Text",
+   "word": "panelTitle",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "example": "Text.panelTitle \"Checklist\" grow",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      52,
+      63,
+      76
+     ],
+     "how": {
+      "core": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Text",
+   "word": "small",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Text.small \"Let's keep the invite link available after sending, in case the email gets missed.\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      69,
+      74
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Text",
+   "word": "strong",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Text.strong \"Jules Martin\" size=12.5",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      68,
+      73
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "verb",
+   "word": "close",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "close",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      90,
+      91
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "verb",
+   "word": "confirm",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "confirm \"Delete this card?\" then {close}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      88
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "verb",
+   "word": "open",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 9
+   },
+   "uses": 9,
+   "example": "open card",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      21,
+      32,
+      34,
+      35,
+      37,
+      38,
+      40,
+      41,
+      43
+     ],
+     "how": {
+      "core": 9
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "verb",
+   "word": "toast",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "toast \"Card saved\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      91
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "function",
+   "word": "coalesce",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 8
+   },
+   "uses": 8,
+   "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      34,
+      37,
+      40,
+      43
+     ],
+     "how": {
+      "core": 8
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "function",
+   "word": "contains",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      10
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "function",
+   "word": "count",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Progress value={count(checks, 'done', true) / length(checks)}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      54
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "function",
+   "word": "filter",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 5
+   },
+   "uses": 5,
+   "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      10,
+      32,
+      35,
+      38,
+      41
+     ],
+     "how": {
+      "core": 5
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "function",
+   "word": "length",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 5
+   },
+   "uses": 5,
+   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      32,
+      35,
+      38,
+      41,
+      54
+     ],
+     "how": {
+      "core": 5
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "function",
+   "word": "lower",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      10
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "statement",
+   "word": "each",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 5
+   },
+   "uses": 5,
+   "example": "each k in filter(shown, x => x.col == \"Backlog\")",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      33,
+      36,
+      39,
+      42,
+      55
+     ],
+     "how": {
+      "core": 5
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "statement",
+   "word": "state",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 10
+   },
+   "uses": 10,
+   "example": "state view=\"Board\"",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T08:02:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T08:02:54Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+     ],
+     "how": {
+      "core": 10
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "BoardColumn",
+   "word": "text2",
+   "status": "no longer used",
+   "resolved": "component",
+   "how": {},
+   "uses": 0,
+   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T05:06:53Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    }
+   },
+   "files": {},
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "BoardColumn",
+   "word": "==",
+   "status": "no longer used",
+   "resolved": "component",
+   "how": {},
+   "uses": 0,
+   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T05:06:53Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    }
+   },
+   "files": {},
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "BoardColumn",
+   "word": "phone.visible={col",
+   "status": "no longer used",
+   "resolved": "component",
+   "how": {},
+   "uses": 0,
+   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T05:06:53Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    }
+   },
+   "files": {},
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "BoardColumn",
+   "word": "}",
+   "status": "no longer used",
+   "resolved": "component",
+   "how": {},
+   "uses": 0,
+   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T05:06:53Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    }
+   },
+   "files": {},
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Column",
+   "word": "phone.pad=[16,16,16,8]",
+   "status": "no longer used",
+   "resolved": "core",
+   "how": {},
+   "uses": 0,
+   "example": "Column gap=16 pad=[32,24,32,16] tablet.pad=[24,20,24,12] phone.pad=[16,16,16,8]",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T05:06:53Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    }
+   },
+   "files": {},
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Column",
+   "word": "tablet.pad=[24,20,24,12]",
+   "status": "no longer used",
+   "resolved": "core",
+   "how": {},
+   "uses": 0,
+   "example": "Column gap=16 pad=[32,24,32,16] tablet.pad=[24,20,24,12] phone.pad=[16,16,16,8]",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T05:06:53Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    }
+   },
+   "files": {},
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Row",
+   "word": "phone.pad=[16,4,16,16]",
+   "status": "no longer used",
+   "resolved": "core",
+   "how": {},
+   "uses": 0,
+   "example": "Row gap=12 top pad=[32,4,32,32] tablet.pad=[24,4,24,24] phone.pad=[16,4,16,16] tablet.scroll",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T05:06:53Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    }
+   },
+   "files": {},
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Row",
+   "word": "tablet.pad=[24,4,24,24]",
+   "status": "no longer used",
+   "resolved": "core",
+   "how": {},
+   "uses": 0,
+   "example": "Row gap=12 top pad=[32,4,32,32] tablet.pad=[24,4,24,24] phone.pad=[16,4,16,16] tablet.scroll",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T05:06:53Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    }
+   },
+   "files": {},
+   "seen": {}
+  }
+ ]
+}

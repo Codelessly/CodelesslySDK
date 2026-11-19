@@ -302,6 +302,12 @@ class CodelesslyFlexParentData extends FlexParentData {
   /// of the room left on its line (0: none).
   int grow = 0;
 
+  /// A hugging child that may be squeezed (`layout.squeezable`) and is
+  /// laid out at its own size: when the children cannot fit even at their
+  /// least, it gives way below that (as a Flexible would), so what is beside
+  /// it stays in the row.
+  bool squeezable = false;
+
   @override
   String toString() => '${super.toString()}; collapsed=$collapsed${basis == null ? '' : '; basis=$basis grow=$grow'}';
 }
@@ -688,8 +694,23 @@ class RenderCodelesslyFlex extends RenderFlex implements ControlLineReporter {
     final double overflow = used - available;
     if (overflow <= precisionErrorTolerance) return;
     // Content that can't fit even at its minimum stays at its natural size
-    // and overflows visibly, rather than clipping lines of text.
-    if (overflow > capacity) return;
+    // and overflows visibly, rather than clipping lines of text; but a child
+    // that may be squeezed gives way below its least (a heading beside a
+    // control: the control stays in the row, as when the heading was a
+    // Flexible).
+    if (overflow > capacity) {
+      var below = 0.0;
+      for (final e in extents.entries) {
+        if ((e.key.parentData! as CodelesslyFlexParentData).squeezable) below += e.value.$2;
+      }
+      if (below <= 0 || overflow > capacity + below) return;
+      for (final e in extents.entries.toList()) {
+        if ((e.key.parentData! as CodelesslyFlexParentData).squeezable) {
+          capacity += e.value.$2;
+          extents[e.key] = (e.value.$1, 0);
+        }
+      }
+    }
 
     // Each child gives up a share of the overflow in proportion to how far
     // it can shrink, so none goes below its min-content size. Flex factors
@@ -1041,12 +1062,45 @@ class RenderCodelesslyFlex extends RenderFlex implements ControlLineReporter {
   @override
   double computeMinIntrinsicHeight(double width) => direction == Axis.vertical
       ? _mainIntrinsic(() => super.computeMinIntrinsicHeight(width))
-      : _lineIntrinsicHeight(width, super.computeMinIntrinsicHeight(_crossExtent(width)), max: false);
+      : _lineIntrinsicHeight(width, math.max(super.computeMinIntrinsicHeight(_crossExtent(width)), _squeezedHeight(width, max: false)), max: false);
 
   @override
   double computeMaxIntrinsicHeight(double width) => direction == Axis.vertical
       ? _mainIntrinsic(() => super.computeMaxIntrinsicHeight(width))
-      : _lineIntrinsicHeight(width, super.computeMaxIntrinsicHeight(_crossExtent(width)), max: true);
+      : _lineIntrinsicHeight(width, math.max(super.computeMaxIntrinsicHeight(_crossExtent(width)), _squeezedHeight(width, max: true)), max: true);
+
+  /// A row that squeezes, of children laid out at their own widths: how tall
+  /// it is at [width] once the squeeze has narrowed them as its layout does
+  /// (each gives up a share of the overflow in proportion to how far it can
+  /// shrink). [RenderFlex] measured them at their own widths, one line each,
+  /// and a grid's row that hugs it was too short for them. 0 where a child
+  /// flexes or the row fits.
+  double _squeezedHeight(double width, {required bool max}) {
+    if (!_squeeze || !width.isFinite) return 0;
+    final kids = <RenderBox>[];
+    for (RenderBox? c = firstChild; c != null; c = childAfter(c)) {
+      final data = c.parentData! as CodelesslyFlexParentData;
+      if ((data.flex ?? 0) > 0) return 0;
+      if (!data.collapsed) kids.add(c);
+    }
+    final available = _crossExtent(width);
+    final natural = [for (final c in kids) c.getMaxIntrinsicWidth(double.infinity)];
+    final used = natural.fold<double>(0, (a, b) => a + b);
+    final overflow = used - available;
+    if (overflow <= precisionErrorTolerance) return 0;
+    final floors = [for (var i = 0; i < kids.length; i++) math.min(natural[i], kids[i].getMinIntrinsicWidth(double.infinity))];
+    var capacity = 0.0;
+    for (var i = 0; i < kids.length; i++) {
+      capacity += natural[i] - floors[i];
+    }
+    if (capacity <= 0 || overflow > capacity) return 0;
+    var tallest = 0.0;
+    for (var i = 0; i < kids.length; i++) {
+      final w = natural[i] - (natural[i] - floors[i]) * overflow / capacity;
+      tallest = math.max(tallest, max ? kids[i].getMaxIntrinsicHeight(w) : kids[i].getMinIntrinsicHeight(w));
+    }
+    return tallest;
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

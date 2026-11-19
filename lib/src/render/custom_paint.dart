@@ -42,7 +42,7 @@ void customPaintLayers(NodeBuilder b, Node n, List<RenderBox> chain) {
   final values = b.tree.bindings?.valuesFor(b.source, b.id, b.instance);
   chain.add(
     b.obtain<RenderCustomPaintLayer>('customPaint', RenderCustomPaintLayer.new)
-      ..configure(paint, values is ExpressionValues ? values : null, textDefault: n.behaviors.defaultTextStyle)
+      ..configure(paint, values is ExpressionValues ? values : null, textDefault: n.behaviors.defaultTextStyle, theme: b.tree.theme)
       ..drawnByContent = false
       ..painterUnder = null,
   );
@@ -140,11 +140,16 @@ List<double>? _toNums(Object? v) {
   return out;
 }
 
-Color? _toColor(Object? v) => switch (v) {
-  final int i => Color(i),
-  final String s => api.Color.fromJson(s.trim())?.flutter,
-  _ => null,
-};
+/// [v] as a color: a number, a hex text, or the name of one of the theme's
+/// colors ([named]; a name worked out by an expression, `stroke={props.ink}`
+/// with `ink="tealDot"`, was not resolved and drew transparent).
+Color? _toColor(Object? v, [api.Color? Function(String name)? named]) {
+  if (v is int) return Color(v);
+  if (v is! String) return null;
+  final text = v.trim();
+  if (api.Color.fromHex(text) case final api.Color c) return c.flutter;
+  return api.Color.isName(text) ? named?.call(text)?.flutter : null;
+}
 
 /// A list a repeat goes through: a list, a map's values, or JSON text.
 List<Object?>? _toList(Object? v) => switch (v) {
@@ -181,8 +186,11 @@ typedef _F<T> = T Function(_Scope s);
 
 /// Compiles a draw list, collecting the names its expressions read.
 class _Compiler {
-  _Compiler(this.values);
+  _Compiler(this.values, [this.named]);
   final ExpressionValues? values;
+
+  /// A theme color by its name.
+  final api.Color? Function(String name)? named;
   api.TextStyle? textDefault;
   Set<String> names = {};
 
@@ -304,7 +312,7 @@ class _Compiler {
     return (s, bounds) {
       final v = s.eval(src);
       if (v is String || v is int) {
-        final c = _toColor(v);
+        final c = _toColor(v, named);
         return c == null ? null : _Ink(Paint()..color = c, true, const []);
       }
       final p = api.DrawPaint.fromJson(v);
@@ -316,7 +324,7 @@ class _Compiler {
     final color = switch (p.color) {
       final api.Expr<api.Color> c when c.source != null => () {
           _read(c.source!);
-          return (_Scope s) => _toColor(s.eval(c.source!)) ?? const Color(0xFF000000);
+          return (_Scope s) => _toColor(s.eval(c.source!), named) ?? const Color(0xFF000000);
         }(),
       final c => () {
           final v = c.value!.flutter;
@@ -931,6 +939,7 @@ class RenderCustomPaintLayer extends RenderProxyBox with ImageClient {
   api.CustomPaint? _paint;
   ExpressionValues? _values;
   api.TextStyle? _textDefault;
+  api.ThemeTokens? _theme;
   List<_Segment> _painter = const [], _foreground = const [];
   final Map<String, Listenable> _watched = {};
   Size? _recordedSize;
@@ -948,13 +957,15 @@ class RenderCustomPaintLayer extends RenderProxyBox with ImageClient {
   /// literals draw).
   /// [textDefault]: the default text style the node inherits (its
   /// `defaultTextStyle`), under the paragraphs' styles.
-  void configure(api.CustomPaint paint, ExpressionValues? values, {api.TextStyle? textDefault}) {
-    if (paint == _paint && values == _values && textDefault == _textDefault) return;
+  /// [theme]: the theme a color an expression names is read from.
+  void configure(api.CustomPaint paint, ExpressionValues? values, {api.TextStyle? textDefault, api.ThemeTokens? theme}) {
+    if (paint == _paint && values == _values && textDefault == _textDefault && identical(theme, _theme)) return;
     _paint = paint;
     _values = values;
     _textDefault = textDefault;
+    _theme = theme;
     _unwatch();
-    final compiler = _Compiler(values)..textDefault = textDefault;
+    final compiler = _Compiler(values, theme == null ? null : (name) => theme.color(name) ?? theme.notationRole(name))..textDefault = textDefault;
     List<_Segment> compile(List<api.DrawOp> ops) {
       final out = <_Segment>[];
       for (final o in ops) {

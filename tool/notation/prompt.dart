@@ -2,12 +2,17 @@
 // (package:codelessly_api/notation.dart): the grammar, the words, and, with
 // a design system, its components.
 //
-//   dart run tool/notation/prompt.dart [--design-system <folder>] [--width <canvas width>] [--open [--no-define] [--no-glossary | --glossary=names|signatures]]
+//   dart run tool/notation/prompt.dart [--design-system <folder>] [--width <canvas width>] [--open [--no-define] [--no-glossary | --glossary=names|signatures]] [--dictionary <folder>]...
+//
+// With dictionaries (dictionary.dart: --dictionary, CODELESSLY_DICTIONARY)
+// the prompt lists their words after its own, one line each as a line uses
+// it.
 import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_api/notation.dart' show NotationVocabulary, definitionLines, readDefinitions;
 
+import 'dictionary.dart';
 import 'vocabulary.dart' show loadDefinitionTexts;
 
 /// What the open prompt says last: the words written are recorded, and
@@ -68,6 +73,8 @@ Future<void> main(List<String> args) async {
     }
   }
   final catalog = ds?.catalogOver(standardCatalog) ?? standardCatalog;
+  final dictionaries = dictionaryFolders(args);
+  if (!dictionaryFoldersExist(dictionaries)) exit(2);
   // The words the design system defines in the notation (its
   // vocabulary/*.txt): the taught prompt lists their signatures, as it lists
   // components; the open prompt does not (a definition gives a meaning to
@@ -78,7 +85,9 @@ Future<void> main(List<String> args) async {
     () => notationPrompt(
       catalog: catalog,
       // The design system's defined words, for the glossary to name.
-      options: ds == null ? NotationOptions(width: width) : NotationOptions.fromDesignSystem(ds, width: width).define(loadDefinitionTexts(args[i + 1])),
+      options: withDictionaryOptions(
+          ds == null ? NotationOptions(width: width) : NotationOptions.fromDesignSystem(ds, width: width).define(loadDefinitionTexts(args[i + 1])), dictionaries,
+          say: stderr.writeln),
       designSystem: ds,
       open: open,
       define: define,

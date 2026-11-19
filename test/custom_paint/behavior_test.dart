@@ -300,4 +300,23 @@ void main() {
     print('48×48 board: first frame ${first}ms, a generation ${step}ms (debug test runner)');
     expect(step, lessThan(2000), reason: 'a sanity bound, not a benchmark');
   });
+
+  testWidgets('a paint worked out to the name of a theme color draws in that color', (tester) async {
+    pixelRatioOne(tester);
+    final scope = VariableScope([const Variable(name: 'ink', type: VariableType.text, value: 'tealDot')]);
+    final tree = NodeTree(
+      DocumentSource(paintDoc({
+        'viewBox': [2, 2],
+        'painter': [
+          {'op': 'rect', 'rect': [0, 0, 2, 2], 'paint': r'${ink}'},
+        ],
+      })),
+      binder: NodeBinder(scope: scope),
+    )..theme = ThemeTokens.fromJson({
+        'colors': {'tealDot': '#FF0000FF'},
+      });
+    addTearDown(tree.dispose);
+    final px = await shot(tester, NodeView(tree: tree, rootId: 'b'));
+    expect(_at(px, 30, 30), _blue);
+  });
 }

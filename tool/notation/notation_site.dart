@@ -25,6 +25,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_api/notation.dart';
 
 import '../render/src/site.dart' show sitePath;
+import 'dictionary.dart';
 import 'site_overlays.dart';
 
 export 'site_overlays.dart';
@@ -94,6 +95,12 @@ final class NotationSite {
   /// The ids of its pages (each page reference's file stem).
   late final List<String> screens = [
     for (final p in SiteManifest.pageRefs(manifest['pages'])) _stem(p),
+  ];
+
+  /// The dictionaries the manifest names (`dictionary`: folders of
+  /// definitions, relative to it), as paths.
+  late final List<String> dictionaries = [
+    for (final d in SiteManifest.fromJson(manifest).dictionary) File(d).isAbsolute ? d : '$dir/$d',
   ];
 
   /// The design system the manifest names (`designSystem`), loaded; null
@@ -475,6 +482,10 @@ final class NotationExpander {
   /// The site's notation components expanded so far, by type.
   final Map<String, LayoutDocument> _fromSource = {};
 
+  /// [settings]' vocabulary with the site's dictionaries under the ones it
+  /// has (site.json's `dictionary`): what each file is read with.
+  late final NotationVocabulary _vocabulary = withDictionaries(settings.aliases, site?.dictionaries ?? const [], say: stderr.writeln);
+
   /// The results of the components expanded so far, by type.
   final Map<String, NotationResult> componentResults = {};
 
@@ -561,7 +572,7 @@ final class NotationExpander {
                 // A site with no design system: what the notation draws by
                 // itself is in the theme's roles, light or dark as it is shown.
                 roles: ds == null))
-        .open(openVocabulary: settings.open, vocabulary: settings.aliases)
+        .open(openVocabulary: settings.open, vocabulary: _vocabulary)
         .withScreens(s?.screens ?? const [])
         .withOwnComponents(s == null ? const [] : {...s.sources.keys, ...s.expanded.keys});
     // The site's definitions (components/*.txt of `define` blocks) hold in

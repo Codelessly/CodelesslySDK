@@ -1,3 +1,81 @@
+## 38.0.0
+
+Needs codelessly_api 38.0.0, whose entry lists what the notation now draws differently.
+
+### Behaviour changes (read before upgrading)
+
+**The notation's shorthand words**
+
+- **`Heading`, `H1`–`H4`, `Title`, `Brand`, `Logo`, `Link`, `NavItem`, `NavSection`, `SidebarFooter`, `IconTile`,
+  `Dots`, `ConfirmDialog`, `Shortcut`, `computed` and their other names are no longer the notation's** (see
+  codelessly_api's 38.0.0 entry): `expand` says each as an unknown word, or a placeholder with `--open`, unless a
+  definition gives it. A design system's component of one of these names is called as before: Desk's `NavItem`,
+  `NavSection`, `Brand` and `MenuItem`, so Desk's and Cards' reference screens draw as they did. To keep writing
+  them, read a dictionary that defines them (Added); the definitions, ready to copy, are in codelessly_api's
+  notation reference (`docs/reference/notation/components.md`).
+
+**Layout**
+
+- **Squeezable texts side by side in a row keep their own widths while they fit**, and give way in proportion
+  when they do not (CSS's `flex-shrink`), in a row that squeezes its children (`squeezeChildren`, the default). As
+  flexible children of equal flex they took an equal share each, so a heading beside a short count wrapped at half
+  the row with room to spare. Where they cannot fit even at their least, they give way below it, so what is
+  beside them stays in the row, as before. Measured (a grid's row that hugs it), the row is as tall as the
+  squeezed texts' lines. A row with `squeezeChildren: false` is unchanged.
+- **A grid whose rows shrink-wrap (`shrinkWrapRows`) and that gives a `mainAxisExtent`** has rows at least that
+  long (CSS's `grid-auto-rows: minmax(extent, auto)`); the extent was not read and rows were as short as their
+  content (a timetable's slots 16 px high).
+
+**Controls and charts**
+
+- **An inline calendar given less height than its rows need** fits its six rows of days inside its box (down to
+  20 px a row); its rows stayed 48 px and painted past the box.
+- **A line chart draws a series written without a `kind` as a line** (`chartType: line`, `series: [{"field":
+  "first"}]`); it was a bar, which a line chart does not draw, so the chart had no lines.
+- **A ring filled to a value (`circularProgressIndicator` with a `value`) shows its track** when it names no
+  `backgroundColor`: the theme's `track`, else a progress bar's tenth of grey. It drew the arc alone. A spinner
+  (no value) is unchanged.
+
+**Dialogs**
+
+- **A confirm action's built-in dialog takes a design system's dialog**: the corner of `radii.dialog` (before
+  `radii.popup`), and with a `dialogTitle` text style its title at that size, its message at `body`'s, its
+  buttons at `sizes.control` and its cancel outlined in `secondaryBorder`. Desk's confirm drew the runtime's own
+  18 / 15 / 44 px and a text cancel beside Desk's outlined buttons. A theme with no dialog of its own is unchanged
+  but for `radii.dialog`.
+
+**The vocabulary record**
+
+- **A word read from a dictionary resolves as a `definition` whose `definedBy` and `origin` are the dictionary's
+  folder name** (`words` for `--dictionary ../words`), not `design system`.
+
+### Added
+
+- **A design at a width.** A page written with the notation's `at <width>` blocks (codelessly_api's 38.0.0 entry)
+  renders as it is, with no change here: each design shows at its widths. Across a width bound the text typed into
+  a field is kept (both copies of the field bind the same variable); the focus and the caret are not (the copy
+  shown is another field, and the hidden one loses the focus), and each copy of a scrolling list keeps its own
+  scroll position. An action that names a copied field (`focus search`) reaches the copy that is shown.
+- **Render tool: `--modals`** captures the screens only ever opened as a modal (an `openModal` names them, no
+  `navigate` does), each alone, in a run that captures every screen. Without it each such screen is named in a
+  `modal_screen_not_captured` info line, with how to capture it.
+- **Dictionaries.** `tool/notation/notation.sh` (`prompt`, `expand`, `validate`, `print`) and `tool/codelessly
+  notation` and `validate` read the folders of definitions `--dictionary <folder>` names (written again for each
+  further folder), or, with none written, those `CODELESSLY_DICTIONARY` lists (separated as in `PATH`;
+  `--no-dictionary` reads none); a site's `site.json` adds its own (`"dictionary": ["../words"]`, relative to
+  it). A word is read from the first that defines it: the page's own `define`, the site's, the design system's,
+  then the dictionaries in order. `prompt` lists their words, one line each as a line uses it; the MCP server's
+  `codelessly_validate` takes `dictionary` (a list of folders).
+- **The vocabulary record says where the meaning of a word is written**: `origin` is `base`, `code` (a word of
+  the page's frames the expander writes out) or the name of the dictionary it was read from.
+
+### Fixed
+
+- A custom paint's color worked out to the name of a theme color (`stroke={props.ink}` with `ink="tealDot"`)
+  draws in that color; it was transparent.
+- No `value_not_computed` warning for a word such as `null` that is in the data a text reads (a site's
+  variables, a component's parameters) though not in the page's document.
+
 ## 37.0.0
 
 Needs codelessly_api 37.0.0, whose entry lists what the notation now draws differently.

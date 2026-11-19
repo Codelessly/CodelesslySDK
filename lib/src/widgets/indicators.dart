@@ -139,7 +139,11 @@ void _circularProgressIndicator(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..style = SpinnerStyle.arc
     ..value = n.prop(CircularProgressIndicatorProps.value)
     ..color = n.prop(CircularProgressIndicatorProps.color)?.flutter ?? tokens.primary
-    ..track = n.prop(CircularProgressIndicatorProps.backgroundColor)?.flutter
+    // A ring filled to a value shows the rest of its circle (the theme's
+    // track), as a progress bar does; it was the arc alone. A spinner
+    // keeps none.
+    ..track = n.prop(CircularProgressIndicatorProps.backgroundColor)?.flutter ??
+        (n.prop(CircularProgressIndicatorProps.value) != null ? tokens.track : null)
     // Unset: SSUI's (2 px, inside the square, round ends).
     ..strokeWidth = n.props.has(CircularProgressIndicatorProps.strokeWidth) ? n.prop(CircularProgressIndicatorProps.strokeWidth) : null
     ..strokeAlign = n.props.has(CircularProgressIndicatorProps.strokeAlign) ? n.prop(CircularProgressIndicatorProps.strokeAlign) : -1

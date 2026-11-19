@@ -557,6 +557,7 @@ Future<void> _renderAll(
 }) async {
   // 3. Which screens.
   final screens = _screens(published, docs, args.screens, (s) => issue(s),
+      includeModals: args.modals,
       components: [if (components != null) for (final t in components.types) components[t]!.document.toJson()]);
   final recorder = _Recorder();
   // A formula an action works out that does not parse or fails (an unknown
@@ -1175,6 +1176,7 @@ List<String> _screens(
   List<String> wanted,
   void Function(RuntimeIssue) issue, {
   List<api.Json> components = const [],
+  bool includeModals = false,
 }) {
   final all = published.screens.keys.toList();
   if (wanted.isEmpty) {
@@ -1201,10 +1203,21 @@ List<String> _screens(
           !navigated.contains(layout);
     }
 
-    return [
-      for (final s in all)
-        if (!model.overlayLayoutIds.contains(s) && !model.backdropLayoutIds.contains(s) && !onlyModal(s)) s,
-    ];
+    final out = <String>[];
+    for (final s in all) {
+      if (model.overlayLayoutIds.contains(s) || model.backdropLayoutIds.contains(s)) continue;
+      if (onlyModal(s) && !includeModals) {
+        // Said, so a run that captures every screen knows what it left out.
+        final name = _screenName(published, docs, s);
+        issue(RuntimeIssue('modal_screen_not_captured', 'info',
+            'Screen "$name" is only ever opened as a modal (an openModal names it, no navigate does): not captured. '
+            '--screen $name captures it alone; --modals captures every such screen.',
+            screen: name));
+        continue;
+      }
+      out.add(s);
+    }
+    return out;
   }
   final out = <String>[];
   for (final w in wanted) {

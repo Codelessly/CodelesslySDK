@@ -28,9 +28,16 @@
 //                    system's), site (the site's own component), alias (`to`
 //                    what it was read as), definition (`definedBy`: page, a
 //                    define in the file itself; site, a define in
-//                    components/*.txt; design system), universal, primitive,
+//                    components/*.txt; a dictionary's folder name, a word
+//                    read from a dictionary (--dictionary, site.json's
+//                    `dictionary`); design system), universal, primitive,
 //                    unread, refused (`messages`: the issues that refused
 //                    it), unknown (a placeholder stands in, or it is left out)
+//   origin           for a word the notation has (resolved core) or a
+//                    dictionary's: where its meaning is written, base (the
+//                    renderer and parser implement it), code (a word of the
+//                    page's frames the expander writes out in Dart) or the
+//                    dictionary's folder name (a definition in base words)
 //   uses, files      its uses now, and by file the lines they are on
 //   signatures       a type's shapes as written (`MiniMonth "text" @ days=
 //                    onPick ...`), each with its uses now and when it was
@@ -137,12 +144,12 @@ final class RecordSnapshot {
     }
     files[path] = FileWords(path, words, {
       for (final w in words.words.values)
-        if (w.kind == 'type' && w.how.containsKey('definition'))
+        if ((w.kind == 'type' || w.kind == 'statement') && w.how.containsKey('definition'))
           w.word: own.words.containsKey(w.word)
               ? 'page'
               : siteDefined.contains(w.word)
                   ? 'site'
-                  : 'design system',
+                  : w.dictionary ?? 'design system',
     }, notes, issues: [for (final i in result.issues) '$i'], placeholders: [
       for (final p in placeholdersOf(result, path, text: text))
         {
@@ -219,8 +226,9 @@ Map<String, Object?> mergeRecord(Map<String, Object?>? old, RecordSnapshot now, 
         if (cw.signatures.isNotEmpty) 'signatures': cw.signatures,
         if (cw.messages.isNotEmpty) 'messages': cw.messages.toList(),
         if (cw.to.isNotEmpty) 'to': cw.to.toList()..sort(),
-        if (fw.definedBy[cw.word] case final by? when cw.kind == 'type') 'definedBy': by,
+        if (fw.definedBy[cw.word] case final by? when cw.kind == 'type' || cw.kind == 'statement') 'definedBy': by,
       };
+      if (cw.origin case final o?) e['origin'] = o;
       e['last'] = t;
       e['example'] = cw.example;
       for (final r in cw.how.keys) {
@@ -364,7 +372,7 @@ Map<String, Object?> mergeRecord(Map<String, Object?>? old, RecordSnapshot now, 
     'words': [
       for (final w in sorted)
         {
-          for (final k in const ['kind', 'on', 'word', 'status', 'resolved', 'how', 'to', 'definedBy', 'uses', 'messages', 'signatures', 'definition', 'example', 'first', 'last', 'history', 'files', 'seen'])
+          for (final k in const ['kind', 'on', 'word', 'status', 'resolved', 'origin', 'how', 'to', 'definedBy', 'uses', 'messages', 'signatures', 'definition', 'example', 'first', 'last', 'history', 'files', 'seen'])
             if (w[k] != null) k: w[k],
         },
     ],

@@ -23,8 +23,10 @@ state sel=1
 state msgs=[$_rows]
 App
   Sidebar
-    Brand "Postbox" icon="mail"
-    NavItem "Inbox" icon="inbox" selected
+    Text.strong "Postbox"
+    Row w=fill gap=10 middle pad=[10,7,10,7] radius=6
+      Icon "inbox" size=18
+      Text "Inbox"
   Pane#list w=320 pad=0 gap=0
     each m in msgs
       Row#msg pad=[16,12,16,12] gap=12 border-bottom=#FFE5E7EB fill={sel==m.id?"#142563EB":"#00000000"} onTap={sel=m.id}
@@ -33,7 +35,7 @@ App
           Text.muted "{m.subject}"
   Main#detail
     Nav
-      Heading#title "{find(msgs,x=>x.id==sel).subject}" level=1
+      Text.heading3#title "{find(msgs,x=>x.id==sel).subject}"
       Button "Reply"
     Column pad=24
       Text "{find(msgs,x=>x.id==sel).from}"

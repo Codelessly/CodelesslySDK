@@ -72,6 +72,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_api/notation.dart';
 
 import 'notation_site.dart';
+import 'dictionary.dart';
 import 'vocabulary.dart' show loadVocabulary;
 import 'formula_check.dart';
 import 'vocabulary_record.dart';
@@ -86,7 +87,7 @@ Future<void> main(List<String> args) async {
     return i < 0 || i + 1 >= args.length ? null : args[i + 1];
   }
 
-  final valued = {'--design-system', '--id', '--width', '--site', '--out', '--vocabulary', '--aliases'};
+  final valued = {'--design-system', '--id', '--width', '--site', '--out', '--vocabulary', '--aliases', '--dictionary'};
   final positional = <String>[];
   for (var i = 0; i < args.length; i++) {
     if (valued.contains(args[i])) {
@@ -122,6 +123,17 @@ Future<void> main(List<String> args) async {
     stderr.writeln('The alias table does not load: $e');
     exit(2);
   }
+  // The dictionaries --dictionary names (or CODELESSLY_DICTIONARY lists),
+  // under the design system's definitions; a site's own are added under
+  // these as it is expanded (NotationExpander).
+  final dictionaries = dictionaryFolders(args);
+  for (final d in dictionaries) {
+    if (!FileSystemEntity.isDirectorySync(d)) {
+      stderr.writeln('--dictionary $d: no such folder.');
+      exit(2);
+    }
+  }
+  final words = withDictionaries(aliases, dictionaries, say: stderr.writeln);
 
   final sitePath = args.contains('--no-site') && !whole
       ? null
@@ -156,7 +168,7 @@ Future<void> main(List<String> args) async {
         named: args.contains('--named'),
         nearestColors: args.contains('--nearest-colors'),
         open: open,
-        aliases: aliases,
+        aliases: words,
       );
 
   if (whole) {

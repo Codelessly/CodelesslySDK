@@ -985,6 +985,11 @@ class RenderGridItems extends RenderCollection implements MeasuresContent {
   bool masonryShortest = false;
 
   /// With [shrinkWrapRows]: cells stretch to their row's longest item.
+  /// A row is at least [mainAxisExtent] long when it is given (CSS's
+  /// `grid-auto-rows: minmax(extent, auto)`): a timetable's slots stay their
+  /// length when what is in them is shorter.
+  double get _leastRow => shrinkWrapRows ? (mainAxisExtent ?? 0) : 0;
+
   bool intrinsicRows = true;
 
   /// How long an item laid out in a row of [cross] wants that row: its
@@ -1161,7 +1166,7 @@ class RenderGridItems extends RenderCollection implements MeasuresContent {
           // IntrinsicHeight around the row: its longest item's intrinsic
           // extent at the cell's width, where the items can be measured;
           // else their laid-out lengths.
-          extent = row.fold<double>(0, (s, it) => math.max(s, _rowExtentOf(it, cellCross, vertical)));
+          extent = row.fold<double>(_leastRow, (s, it) => math.max(s, _rowExtentOf(it, cellCross, vertical)));
           for (final it in row) {
             it.layout(BoxConstraints.tight(RenderCollection.sizeOf(extent, cellCross, axis)), parentUsesSize: true);
           }
@@ -1323,7 +1328,7 @@ class RenderGridItems extends RenderCollection implements MeasuresContent {
     final items = children;
     final rows = cells.fold<int>(0, (n, c) => math.max(n, c.main + c.mainSpan));
     double across(GridCell c) => c.crossSpan * cellCross + (c.crossSpan - 1) * crossAxisSpacing;
-    final extents = List<double>.filled(rows, shrinkWrapRows ? 0 : fixedRow);
+    final extents = List<double>.filled(rows, shrinkWrapRows ? _leastRow : fixedRow);
     if (shrinkWrapRows) {
       double natural(RenderBox it, GridCell c) {
         final w = across(c);

@@ -1,0 +1,7254 @@
+{
+ "record": "codelessly notation vocabulary record",
+ "version": 1,
+ "about": "Every word the notation files here used, with how each resolved, kept across expands. Written by tool/notation/notation.sh expand (codelessly_api docs/design/19-open-vocabulary.md, section 15); --no-record leaves it alone.",
+ "first": "2026-11-19T05:04:54Z",
+ "last": "2026-11-19T08:02:13Z",
+ "expands": [
+  {
+   "at": "2026-11-19T05:04:54Z",
+   "vocabulary": "closed",
+   "files": 1
+  },
+  {
+   "at": "2026-11-19T06:52:19Z",
+   "vocabulary": "closed",
+   "files": 1
+  },
+  {
+   "at": "2026-11-19T08:02:13Z",
+   "vocabulary": "closed",
+   "files": 1
+  }
+ ],
+ "summary": {
+  "status": {
+   "used": 197,
+   "no longer used": 2
+  },
+  "used": {
+   "type": {
+    "component": 19,
+    "core": 20
+   },
+   "text": {
+    "component": 22,
+    "core": 7
+   },
+   "parameter": {
+    "component": 26,
+    "core": 39
+   },
+   "flag": {
+    "component": 4,
+    "core": 31
+   },
+   "event": {
+    "component": 5,
+    "core": 3
+   },
+   "variant": {
+    "core": 9
+   },
+   "verb": {
+    "core": 4
+   },
+   "function": {
+    "core": 6
+   },
+   "statement": {
+    "core": 2
+   }
+  }
+ },
+ "placeholders": [],
+ "files": {
+  "pages/members.txt": {
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "expands": 3
+  }
+ },
+ "words": [
+  {
+   "kind": "type",
+   "word": "Account",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Account \"text\" \"text\"",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Account \"Amara Okafor\" \"Workspace owner\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      28
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Account \"text\" \"text\"": 1
+     }
+    }
+   },
+   "seen": {
+    "Account \"text\" \"text\"": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Actions",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Actions ...",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Actions",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      101
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Actions ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Actions ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Brand",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Brand \"text\" \"text\" icon=",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Brand \"Tenant\" \"Northstar Studio\" icon=\"hub\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      16
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Brand \"text\" \"text\" icon=": 1
+     }
+    }
+   },
+   "seen": {
+    "Brand \"text\" \"text\" icon=": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Breadcrumb",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Breadcrumb items=",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Breadcrumb items=[\"Workspace\",\"Members\"]",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      31
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Breadcrumb items=": 1
+     }
+    }
+   },
+   "seen": {
+    "Breadcrumb items=": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "BulkBar",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 2
+   },
+   "uses": 2,
+   "signatures": [
+    {
+     "signature": "BulkBar count= hide= visible= onClear ...",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "BulkBar count= noun= onClear ...",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "BulkBar count={length(chosen)} visible={length(chosen) > 0} hide=phone onClear={chosen=[]}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      45,
+      66
+     ],
+     "how": {
+      "component": 2
+     },
+     "signatures": {
+      "BulkBar count= hide= visible= onClear ...": 1,
+      "BulkBar count= noun= onClear ...": 1
+     }
+    }
+   },
+   "seen": {
+    "BulkBar count= hide= visible= onClear ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "BulkBar count= noun= onClear ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Dialog",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Dialog \"text\" \"text\" w= ...",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Dialog#invite \"Invite members\" \"They get an email with a link to join Northstar Studio.\" w=520",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      97
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Dialog \"text\" \"text\" w= ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Dialog \"text\" \"text\" w= ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Field",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Field \"text\" \"text\" ...",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Field \"Role\" \"Members see everything; admins also manage people and billing.\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      99
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Field \"text\" \"text\" ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Field \"text\" \"text\" ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "ListRow",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "ListRow \"text\" \"text\" avatar= meta= selected= onTap",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "ListRow \"{p.name}\" \"{p.email}\" meta=\"{p.status}\" avatar=\"{p.name}\" selected={contains(chosen, p.id)} onTap={openId=p.id}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      63
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "ListRow \"text\" \"text\" avatar= meta= selected= onTap": 1
+     }
+    }
+   },
+   "seen": {
+    "ListRow \"text\" \"text\" avatar= meta= selected= onTap": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "MenuItem",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "signatures": [
+    {
+     "signature": "MenuItem \"text\" icon= onTap",
+     "uses": 3,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "MenuItem \"text\" icon= danger onTap",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "MenuItem \"View details\" icon=\"visibility\" onTap={close}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      92,
+      93,
+      94,
+      96
+     ],
+     "how": {
+      "component": 4
+     },
+     "signatures": {
+      "MenuItem \"text\" icon= onTap": 3,
+      "MenuItem \"text\" icon= danger onTap": 1
+     }
+    }
+   },
+   "seen": {
+    "MenuItem \"text\" icon= onTap": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "MenuItem \"text\" icon= danger onTap": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "NavItem",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 8
+   },
+   "uses": 8,
+   "signatures": [
+    {
+     "signature": "NavItem \"text\" icon= selected= onTap",
+     "uses": 6,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "NavItem \"text\" badge= icon= selected= onTap",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "NavItem \"text\" icon= shortcut=",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "NavItem \"Members\" icon=\"group\" badge=\"50\" selected={tab == \"members\"} onTap={tab=\"members\"}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      18,
+      19,
+      20,
+      21,
+      23,
+      24,
+      25,
+      27
+     ],
+     "how": {
+      "component": 8
+     },
+     "signatures": {
+      "NavItem \"text\" badge= icon= selected= onTap": 1,
+      "NavItem \"text\" icon= selected= onTap": 6,
+      "NavItem \"text\" icon= shortcut=": 1
+     }
+    }
+   },
+   "seen": {
+    "NavItem \"text\" badge= icon= selected= onTap": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "NavItem \"text\" icon= selected= onTap": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "NavItem \"text\" icon= shortcut=": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "NavSection",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 2
+   },
+   "uses": 2,
+   "signatures": [
+    {
+     "signature": "NavSection \"text\"",
+     "uses": 2,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "NavSection \"People & access\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      17,
+      22
+     ],
+     "how": {
+      "component": 2
+     },
+     "signatures": {
+      "NavSection \"text\"": 2
+     }
+    }
+   },
+   "seen": {
+    "NavSection \"text\"": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "PageHeader",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "PageHeader \"text\" \"text\" ...",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "PageHeader \"Members\" \"Manage workspace access, roles and invitations.\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      33
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "PageHeader \"text\" \"text\" ...": 1
+     }
+    }
+   },
+   "seen": {
+    "PageHeader \"text\" \"text\" ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Pager",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Pager @ pages= summary=",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Pager @page pages=5 summary=\"1–{length(shown)} of 50 members\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      64
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Pager @ pages= summary=": 1
+     }
+    }
+   },
+   "seen": {
+    "Pager @ pages= summary=": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "PaneHeader",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "PaneHeader \"text\" onClose",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "PaneHeader \"Member\" onClose={openId=\"\"}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      69
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "PaneHeader \"text\" onClose": 1
+     }
+    }
+   },
+   "seen": {
+    "PaneHeader \"text\" onClose": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Property",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 6
+   },
+   "uses": 6,
+   "signatures": [
+    {
+     "signature": "Property \"text\" \"text\"",
+     "uses": 3,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "Property \"text\" ...",
+     "uses": 3,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Property \"Email\" \"{cur.email}\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      76,
+      77,
+      79,
+      82,
+      84,
+      85
+     ],
+     "how": {
+      "component": 6
+     },
+     "signatures": {
+      "Property \"text\" \"text\"": 3,
+      "Property \"text\" ...": 3
+     }
+    }
+   },
+   "seen": {
+    "Property \"text\" \"text\"": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "Property \"text\" ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "SearchField",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "SearchField @ hint= w= phone.w=fill",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "SearchField @q hint=\"Search name or email\" w=280 phone.w=fill",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      40
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "SearchField @ hint= w= phone.w=fill": 1
+     }
+    }
+   },
+   "seen": {
+    "SearchField @ hint= w= phone.w=fill": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Stat",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Stat \"text\" \"text\" delta= tone=",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Stat \"{s.label}\" \"{s.n}\" tone=\"{s.tone}\" delta=\"{s.delta}\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      38
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Stat \"text\" \"text\" delta= tone=": 1
+     }
+    }
+   },
+   "seen": {
+    "Stat \"text\" \"text\" delta= tone=": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Status",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 2
+   },
+   "uses": 2,
+   "signatures": [
+    {
+     "signature": "Status \"text\" tone= pill",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "Status \"text\" tone=",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Status \"{p.status}\" tone=\"{p.status == 'Active' ? 'success' : (p.status == 'Invited' ? 'warning' : 'neutral')}\" pill",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      59,
+      83
+     ],
+     "how": {
+      "component": 2
+     },
+     "signatures": {
+      "Status \"text\" tone= pill": 1,
+      "Status \"text\" tone=": 1
+     }
+    }
+   },
+   "seen": {
+    "Status \"text\" tone= pill": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "Status \"text\" tone=": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Tag",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 3
+   },
+   "uses": 3,
+   "signatures": [
+    {
+     "signature": "Tag \"text\" hue=",
+     "uses": 2,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "Tag \"text\" dot= outline",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Tag \"{t}\" outline dot=false",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      58,
+      80,
+      81
+     ],
+     "how": {
+      "component": 3
+     },
+     "signatures": {
+      "Tag \"text\" dot= outline": 1,
+      "Tag \"text\" hue=": 2
+     }
+    }
+   },
+   "seen": {
+    "Tag \"text\" dot= outline": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "Tag \"text\" hue=": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "text",
+   "on": "Account",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Account \"Amara Okafor\" \"Workspace owner\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      28
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Account",
+   "word": "text2",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Account \"Amara Okafor\" \"Workspace owner\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      28
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Brand",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Brand \"Tenant\" \"Northstar Studio\" icon=\"hub\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      16
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Brand",
+   "word": "text2",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Brand \"Tenant\" \"Northstar Studio\" icon=\"hub\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      16
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Dialog",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Dialog#invite \"Invite members\" \"They get an email with a link to join Northstar Studio.\" w=520",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      97
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Dialog",
+   "word": "text2",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Dialog#invite \"Invite members\" \"They get an email with a link to join Northstar Studio.\" w=520",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      97
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Field",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Field \"Role\" \"Members see everything; admins also manage people and billing.\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      99
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Field",
+   "word": "text2",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Field \"Role\" \"Members see everything; admins also manage people and billing.\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      99
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "ListRow",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "ListRow \"{p.name}\" \"{p.email}\" meta=\"{p.status}\" avatar=\"{p.name}\" selected={contains(chosen, p.id)} onTap={openId=p.id}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      63
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "ListRow",
+   "word": "text2",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "ListRow \"{p.name}\" \"{p.email}\" meta=\"{p.status}\" avatar=\"{p.name}\" selected={contains(chosen, p.id)} onTap={openId=p.id}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      63
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "MenuItem",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "MenuItem \"View details\" icon=\"visibility\" onTap={close}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      92,
+      93,
+      94,
+      96
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "NavItem",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 8
+   },
+   "uses": 8,
+   "example": "NavItem \"Members\" icon=\"group\" badge=\"50\" selected={tab == \"members\"} onTap={tab=\"members\"}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      18,
+      19,
+      20,
+      21,
+      23,
+      24,
+      25,
+      27
+     ],
+     "how": {
+      "component": 8
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "NavSection",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 2
+   },
+   "uses": 2,
+   "example": "NavSection \"People & access\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      17,
+      22
+     ],
+     "how": {
+      "component": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "PageHeader",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "PageHeader \"Members\" \"Manage workspace access, roles and invitations.\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      33
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "PageHeader",
+   "word": "text2",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "PageHeader \"Members\" \"Manage workspace access, roles and invitations.\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      33
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "PaneHeader",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "PaneHeader \"Member\" onClose={openId=\"\"}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      69
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Property",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 6
+   },
+   "uses": 6,
+   "example": "Property \"Email\" \"{cur.email}\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      76,
+      77,
+      79,
+      82,
+      84,
+      85
+     ],
+     "how": {
+      "component": 6
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Property",
+   "word": "text2",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 3
+   },
+   "uses": 3,
+   "example": "Property \"Email\" \"{cur.email}\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      76,
+      84,
+      85
+     ],
+     "how": {
+      "component": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Stat",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Stat \"{s.label}\" \"{s.n}\" tone=\"{s.tone}\" delta=\"{s.delta}\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      38
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Stat",
+   "word": "text2",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Stat \"{s.label}\" \"{s.n}\" tone=\"{s.tone}\" delta=\"{s.delta}\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      38
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Status",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 2
+   },
+   "uses": 2,
+   "example": "Status \"{p.status}\" tone=\"{p.status == 'Active' ? 'success' : (p.status == 'Invited' ? 'warning' : 'neutral')}\" pill",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      59,
+      83
+     ],
+     "how": {
+      "component": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Tag",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 3
+   },
+   "uses": 3,
+   "example": "Tag \"{t}\" outline dot=false",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      58,
+      80,
+      81
+     ],
+     "how": {
+      "component": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Brand",
+   "word": "icon",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Brand \"Tenant\" \"Northstar Studio\" icon=\"hub\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      16
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Breadcrumb",
+   "word": "items",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Breadcrumb items=[\"Workspace\",\"Members\"]",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      31
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "BulkBar",
+   "word": "count",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 2
+   },
+   "uses": 2,
+   "example": "BulkBar count={length(chosen)} visible={length(chosen) > 0} hide=phone onClear={chosen=[]}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      45,
+      66
+     ],
+     "how": {
+      "component": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "BulkBar",
+   "word": "hide",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "BulkBar count={length(chosen)} visible={length(chosen) > 0} hide=phone onClear={chosen=[]}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      45
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "BulkBar",
+   "word": "noun",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "BulkBar count={length(chosen)} noun=\"\" onClear={chosen=[]}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      66
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "BulkBar",
+   "word": "visible",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "BulkBar count={length(chosen)} visible={length(chosen) > 0} hide=phone onClear={chosen=[]}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      45
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Dialog",
+   "word": "w",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Dialog#invite \"Invite members\" \"They get an email with a link to join Northstar Studio.\" w=520",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      97
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "ListRow",
+   "word": "avatar",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "ListRow \"{p.name}\" \"{p.email}\" meta=\"{p.status}\" avatar=\"{p.name}\" selected={contains(chosen, p.id)} onTap={openId=p.id}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      63
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "ListRow",
+   "word": "meta",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "ListRow \"{p.name}\" \"{p.email}\" meta=\"{p.status}\" avatar=\"{p.name}\" selected={contains(chosen, p.id)} onTap={openId=p.id}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      63
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "ListRow",
+   "word": "selected",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "ListRow \"{p.name}\" \"{p.email}\" meta=\"{p.status}\" avatar=\"{p.name}\" selected={contains(chosen, p.id)} onTap={openId=p.id}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      63
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "MenuItem",
+   "word": "icon",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "MenuItem \"View details\" icon=\"visibility\" onTap={close}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      92,
+      93,
+      94,
+      96
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "NavItem",
+   "word": "badge",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "NavItem \"Members\" icon=\"group\" badge=\"50\" selected={tab == \"members\"} onTap={tab=\"members\"}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      18
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "NavItem",
+   "word": "icon",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 8
+   },
+   "uses": 8,
+   "example": "NavItem \"Members\" icon=\"group\" badge=\"50\" selected={tab == \"members\"} onTap={tab=\"members\"}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      18,
+      19,
+      20,
+      21,
+      23,
+      24,
+      25,
+      27
+     ],
+     "how": {
+      "component": 8
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "NavItem",
+   "word": "selected",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 7
+   },
+   "uses": 7,
+   "example": "NavItem \"Members\" icon=\"group\" badge=\"50\" selected={tab == \"members\"} onTap={tab=\"members\"}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      18,
+      19,
+      20,
+      21,
+      23,
+      24,
+      25
+     ],
+     "how": {
+      "component": 7
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "NavItem",
+   "word": "shortcut",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "NavItem \"Keyboard shortcuts\" icon=\"keyboard\" shortcut=\"?\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      27
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Pager",
+   "word": "@",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Pager @page pages=5 summary=\"1–{length(shown)} of 50 members\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      64
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Pager",
+   "word": "pages",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Pager @page pages=5 summary=\"1–{length(shown)} of 50 members\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      64
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Pager",
+   "word": "summary",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Pager @page pages=5 summary=\"1–{length(shown)} of 50 members\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      64
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "SearchField",
+   "word": "@",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "SearchField @q hint=\"Search name or email\" w=280 phone.w=fill",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      40
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "SearchField",
+   "word": "hint",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "SearchField @q hint=\"Search name or email\" w=280 phone.w=fill",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      40
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "SearchField",
+   "word": "w",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "SearchField @q hint=\"Search name or email\" w=280 phone.w=fill",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      40
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Stat",
+   "word": "delta",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Stat \"{s.label}\" \"{s.n}\" tone=\"{s.tone}\" delta=\"{s.delta}\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      38
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Stat",
+   "word": "tone",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Stat \"{s.label}\" \"{s.n}\" tone=\"{s.tone}\" delta=\"{s.delta}\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      38
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Status",
+   "word": "tone",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 2
+   },
+   "uses": 2,
+   "example": "Status \"{p.status}\" tone=\"{p.status == 'Active' ? 'success' : (p.status == 'Invited' ? 'warning' : 'neutral')}\" pill",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      59,
+      83
+     ],
+     "how": {
+      "component": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Tag",
+   "word": "dot",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Tag \"{t}\" outline dot=false",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      58
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Tag",
+   "word": "hue",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 2
+   },
+   "uses": 2,
+   "example": "Tag \"Platform\" hue=\"sky\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      80,
+      81
+     ],
+     "how": {
+      "component": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "MenuItem",
+   "word": "danger",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "MenuItem \"Deactivate\" icon=\"person_off\" danger onTap={close}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      96
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "SearchField",
+   "word": "phone.w=fill",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "SearchField @q hint=\"Search name or email\" w=280 phone.w=fill",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      40
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Status",
+   "word": "pill",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Status \"{p.status}\" tone=\"{p.status == 'Active' ? 'success' : (p.status == 'Invited' ? 'warning' : 'neutral')}\" pill",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      59
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Tag",
+   "word": "outline",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Tag \"{t}\" outline dot=false",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      58
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "event",
+   "on": "BulkBar",
+   "word": "onClear",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 2
+   },
+   "uses": 2,
+   "example": "BulkBar count={length(chosen)} visible={length(chosen) > 0} hide=phone onClear={chosen=[]}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      45,
+      66
+     ],
+     "how": {
+      "component": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "event",
+   "on": "ListRow",
+   "word": "onTap",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "ListRow \"{p.name}\" \"{p.email}\" meta=\"{p.status}\" avatar=\"{p.name}\" selected={contains(chosen, p.id)} onTap={openId=p.id}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      63
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "event",
+   "on": "MenuItem",
+   "word": "onTap",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "MenuItem \"View details\" icon=\"visibility\" onTap={close}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      92,
+      93,
+      94,
+      96
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "event",
+   "on": "NavItem",
+   "word": "onTap",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 7
+   },
+   "uses": 7,
+   "example": "NavItem \"Members\" icon=\"group\" badge=\"50\" selected={tab == \"members\"} onTap={tab=\"members\"}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      18,
+      19,
+      20,
+      21,
+      23,
+      24,
+      25
+     ],
+     "how": {
+      "component": 7
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "event",
+   "on": "PaneHeader",
+   "word": "onClose",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "PaneHeader \"Member\" onClose={openId=\"\"}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      69
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "type",
+   "word": "App",
+   "status": "used",
+   "resolved": "core",
+   "origin": "code",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "App ...",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "App",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      14
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "App ...": 1
+     }
+    }
+   },
+   "seen": {
+    "App ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Avatar",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "signatures": [
+    {
+     "signature": "Avatar \"text\"",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "Avatar \"text\" size=",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Avatar \"{p.name}\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      51,
+      72
+     ],
+     "how": {
+      "core": 2
+     },
+     "signatures": {
+      "Avatar \"text\"": 1,
+      "Avatar \"text\" size=": 1
+     }
+    }
+   },
+   "seen": {
+    "Avatar \"text\"": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "Avatar \"text\" size=": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Button",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 8
+   },
+   "uses": 8,
+   "signatures": [
+    {
+     "signature": "Button \"text\" icon= size=",
+     "uses": 3,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "Button \"text\" icon= onTap",
+     "uses": 2,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "Button \"text\" hide= icon=",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "Button \"text\" hide= icon= size=",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "Button \"text\" onTap",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Button.outline \"Export\" icon=\"download\" hide=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      34,
+      35,
+      46,
+      47,
+      48,
+      67,
+      102,
+      103
+     ],
+     "how": {
+      "core": 8
+     },
+     "signatures": {
+      "Button \"text\" hide= icon=": 1,
+      "Button \"text\" icon= onTap": 2,
+      "Button \"text\" icon= size=": 3,
+      "Button \"text\" hide= icon= size=": 1,
+      "Button \"text\" onTap": 1
+     }
+    }
+   },
+   "seen": {
+    "Button \"text\" hide= icon=": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "Button \"text\" icon= onTap": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "Button \"text\" icon= size=": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "Button \"text\" hide= icon= size=": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "Button \"text\" onTap": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Column",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 6
+   },
+   "uses": 6,
+   "signatures": [
+    {
+     "signature": "Column grow ...",
+     "uses": 2,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "Column border= clip= radius= show= ...",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "Column gap= pad= ...",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "Column border-top= gap= pad= ...",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "Column gap= pad= phone.pad= tablet.pad= ...",
+     "uses": 1,
+     "first": "2026-11-19T06:52:19Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "Column gap= pad= phone.pad=[16,16,16,24] tablet.pad=[24,20,24,24] ...",
+     "uses": 0,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T05:04:54Z"
+    }
+   ],
+   "example": "Column gap=20 pad=[32,28,32,32] tablet.pad=[24,20,24,24] phone.pad=[16,16,16,24]",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      32,
+      52,
+      61,
+      70,
+      73,
+      86
+     ],
+     "how": {
+      "core": 6
+     },
+     "signatures": {
+      "Column gap= pad= phone.pad= tablet.pad= ...": 1,
+      "Column grow ...": 2,
+      "Column border= clip= radius= show= ...": 1,
+      "Column gap= pad= ...": 1,
+      "Column border-top= gap= pad= ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Column gap= pad= phone.pad=[16,16,16,24] tablet.pad=[24,20,24,24] ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T05:04:54Z"
+    },
+    "Column grow ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "Column border= clip= radius= show= ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "Column gap= pad= ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "Column border-top= gap= pad= ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "Column gap= pad= phone.pad= tablet.pad= ...": {
+     "first": "2026-11-19T06:52:19Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Divider",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Divider",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Divider",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      95
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Divider": 1
+     }
+    }
+   },
+   "seen": {
+    "Divider": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Footer",
+   "status": "used",
+   "resolved": "core",
+   "origin": "code",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "signatures": [
+    {
+     "signature": "Footer ...",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "Footer show= visible= ...",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Footer",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      26,
+      65
+     ],
+     "how": {
+      "core": 2
+     },
+     "signatures": {
+      "Footer ...": 1,
+      "Footer show= visible= ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Footer ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "Footer show= visible= ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Grid",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Grid cols= gap= phone.cols=2 ...",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Grid cols=4 gap=12 phone.cols=2",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      36
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Grid cols= gap= phone.cols=2 ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Grid cols= gap= phone.cols=2 ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "IconButton",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "IconButton \"text\" tooltip= onTap",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "IconButton \"more_horiz\" tooltip=\"Actions for {p.name}\" onTap={openId=p.id; open rowMenu}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      60
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "IconButton \"text\" tooltip= onTap": 1
+     }
+    }
+   },
+   "seen": {
+    "IconButton \"text\" tooltip= onTap": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Input",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Input \"text\" \"text\" multiline",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Input \"Email addresses\" \"name@company.com, another@company.com\" multiline",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      98
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Input \"text\" \"text\" multiline": 1
+     }
+    }
+   },
+   "seen": {
+    "Input \"text\" \"text\" multiline": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Main",
+   "status": "used",
+   "resolved": "core",
+   "origin": "code",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Main ...",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Main",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      29
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Main ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Main ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Menu",
+   "status": "used",
+   "resolved": "core",
+   "origin": "code",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Menu ...",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Menu#rowMenu",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      91
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Menu ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Menu ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Nav",
+   "status": "used",
+   "resolved": "core",
+   "origin": "code",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Nav ...",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Nav",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      30
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Nav ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Nav ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Pane",
+   "status": "used",
+   "resolved": "core",
+   "origin": "code",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Pane hide= visible= w= ...",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Pane w=340 hide=tablet visible={openId != \"\"}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      68
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Pane hide= visible= w= ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Pane hide= visible= w= ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Row",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 4
+   },
+   "uses": 4,
+   "signatures": [
+    {
+     "signature": "Row gap= ...",
+     "uses": 3,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "Row gap= pad= middle ...",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Row gap=8",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      39,
+      50,
+      56,
+      71
+     ],
+     "how": {
+      "core": 4
+     },
+     "signatures": {
+      "Row gap= ...": 3,
+      "Row gap= pad= middle ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Row gap= ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "Row gap= pad= middle ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Select",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 4
+   },
+   "uses": 4,
+   "signatures": [
+    {
+     "signature": "Select @ hide= items= w=",
+     "uses": 2,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "Select items= value= w=",
+     "uses": 2,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Select @role items=[\"All roles\",\"Owner\",\"Admin\",\"Member\"] w=140 hide=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      41,
+      42,
+      78,
+      100
+     ],
+     "how": {
+      "core": 4
+     },
+     "signatures": {
+      "Select @ hide= items= w=": 2,
+      "Select items= value= w=": 2
+     }
+    }
+   },
+   "seen": {
+    "Select @ hide= items= w=": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "Select items= value= w=": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Sidebar",
+   "status": "used",
+   "resolved": "core",
+   "origin": "code",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Sidebar hide= tablet.w=64 ...",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Sidebar tablet.w=64 hide=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      15
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Sidebar hide= tablet.w=64 ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Sidebar hide= tablet.w=64 ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Spacer",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Spacer hide=",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Spacer hide=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      43
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Spacer hide=": 1
+     }
+    }
+   },
+   "seen": {
+    "Spacer hide=": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Table",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Table columns= empty= hide= select=@ sort=@ in p shown ...",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Table p in shown columns=[{\"key\":\"name\",\"label\":\"Name\"},{\"key\":\"role\",\"label\":\"Role\",\"w\":90},{\"key\":\"teams\",\"label\":\"Teams\",\"w\":170,\"sort\":false},{\"key\":\"status\",\"label\":\"Status\",\"w\":100},{\"key\":\"m...",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      49
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Table columns= empty= hide= select=@ sort=@ in p shown ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Table columns= empty= hide= select=@ sort=@ in p shown ...": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Text",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 10
+   },
+   "uses": 10,
+   "signatures": [
+    {
+     "signature": "Text \"text\"",
+     "uses": 7,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "Text \"text\" hide=",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "Text \"text\" maxLines= overflow= onTap",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    {
+     "signature": "Text \"text\" maxLines= overflow=",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "Text.caption \"{length(shown)} of {length(members)}\" hide=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      44,
+      53,
+      54,
+      55,
+      74,
+      75,
+      87,
+      88,
+      89,
+      90
+     ],
+     "how": {
+      "core": 10
+     },
+     "signatures": {
+      "Text \"text\" hide=": 1,
+      "Text \"text\" maxLines= overflow= onTap": 1,
+      "Text \"text\" maxLines= overflow=": 1,
+      "Text \"text\"": 7
+     }
+    }
+   },
+   "seen": {
+    "Text \"text\" hide=": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "Text \"text\" maxLines= overflow= onTap": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "Text \"text\" maxLines= overflow=": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    },
+    "Text \"text\"": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "canvas",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "canvas \"text\" path=",
+     "uses": 1,
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   ],
+   "example": "canvas \"Members\" path=\"members\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      13
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "canvas \"text\" path=": 1
+     }
+    }
+   },
+   "seen": {
+    "canvas \"text\" path=": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   }
+  },
+  {
+   "kind": "text",
+   "on": "Avatar",
+   "word": "text1",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Avatar \"{p.name}\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      51,
+      72
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Button",
+   "word": "text1",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 8
+   },
+   "uses": 8,
+   "example": "Button.outline \"Export\" icon=\"download\" hide=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      34,
+      35,
+      46,
+      47,
+      48,
+      67,
+      102,
+      103
+     ],
+     "how": {
+      "core": 8
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "IconButton",
+   "word": "text1",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "IconButton \"more_horiz\" tooltip=\"Actions for {p.name}\" onTap={openId=p.id; open rowMenu}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      60
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Input",
+   "word": "text1",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Input \"Email addresses\" \"name@company.com, another@company.com\" multiline",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      98
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Input",
+   "word": "text2",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Input \"Email addresses\" \"name@company.com, another@company.com\" multiline",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      98
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Text",
+   "word": "text1",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 10
+   },
+   "uses": 10,
+   "example": "Text.caption \"{length(shown)} of {length(members)}\" hide=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      44,
+      53,
+      54,
+      55,
+      74,
+      75,
+      87,
+      88,
+      89,
+      90
+     ],
+     "how": {
+      "core": 10
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "canvas",
+   "word": "text1",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "canvas \"Members\" path=\"members\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      13
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Avatar",
+   "word": "size",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Avatar \"{cur.name}\" size=40",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      72
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Button",
+   "word": "hide",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Button.outline \"Export\" icon=\"download\" hide=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      34,
+      47
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Button",
+   "word": "icon",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 7
+   },
+   "uses": 7,
+   "example": "Button.outline \"Export\" icon=\"download\" hide=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      34,
+      35,
+      46,
+      47,
+      48,
+      67,
+      103
+     ],
+     "how": {
+      "core": 7
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Button",
+   "word": "size",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 4
+   },
+   "uses": 4,
+   "example": "Button.outline \"Change role\" icon=\"badge\" size=small",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      46,
+      47,
+      48,
+      67
+     ],
+     "how": {
+      "core": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "border",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Column border=line radius=8 clip=antiAlias show=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      61
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "border-top",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Column gap=10 pad=[20,8,20,16] border-top=line",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      86
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "clip",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Column border=line radius=8 clip=antiAlias show=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      61
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "gap",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "example": "Column gap=20 pad=[32,28,32,32] tablet.pad=[24,20,24,24] phone.pad=[16,16,16,24]",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      32,
+      70,
+      86
+     ],
+     "how": {
+      "core": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "pad",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "example": "Column gap=20 pad=[32,28,32,32] tablet.pad=[24,20,24,24] phone.pad=[16,16,16,24]",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      32,
+      70,
+      86
+     ],
+     "how": {
+      "core": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "phone.pad",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Column gap=20 pad=[32,28,32,32] tablet.pad=[24,20,24,24] phone.pad=[16,16,16,24]",
+   "first": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T06:52:19Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      32
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "radius",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Column border=line radius=8 clip=antiAlias show=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      61
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "show",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Column border=line radius=8 clip=antiAlias show=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      61
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "tablet.pad",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Column gap=20 pad=[32,28,32,32] tablet.pad=[24,20,24,24] phone.pad=[16,16,16,24]",
+   "first": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T06:52:19Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      32
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Footer",
+   "word": "show",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Footer show=phone visible={length(chosen) > 0}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      65
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Footer",
+   "word": "visible",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Footer show=phone visible={length(chosen) > 0}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      65
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Grid",
+   "word": "cols",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Grid cols=4 gap=12 phone.cols=2",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      36
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Grid",
+   "word": "gap",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Grid cols=4 gap=12 phone.cols=2",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      36
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "IconButton",
+   "word": "tooltip",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "IconButton \"more_horiz\" tooltip=\"Actions for {p.name}\" onTap={openId=p.id; open rowMenu}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      60
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Pane",
+   "word": "hide",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Pane w=340 hide=tablet visible={openId != \"\"}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      68
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Pane",
+   "word": "visible",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Pane w=340 hide=tablet visible={openId != \"\"}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      68
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Pane",
+   "word": "w",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Pane w=340 hide=tablet visible={openId != \"\"}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      68
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Row",
+   "word": "gap",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 4
+   },
+   "uses": 4,
+   "example": "Row gap=8",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      39,
+      50,
+      56,
+      71
+     ],
+     "how": {
+      "core": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Row",
+   "word": "pad",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Row gap=12 middle pad=[0,0,0,12]",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      71
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Select",
+   "word": "@",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Select @role items=[\"All roles\",\"Owner\",\"Admin\",\"Member\"] w=140 hide=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      41,
+      42
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Select",
+   "word": "hide",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Select @role items=[\"All roles\",\"Owner\",\"Admin\",\"Member\"] w=140 hide=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      41,
+      42
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Select",
+   "word": "items",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 4
+   },
+   "uses": 4,
+   "example": "Select @role items=[\"All roles\",\"Owner\",\"Admin\",\"Member\"] w=140 hide=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      41,
+      42,
+      78,
+      100
+     ],
+     "how": {
+      "core": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Select",
+   "word": "value",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Select items=[\"Owner\",\"Admin\",\"Member\"] value={cur.role} w=fill",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      78,
+      100
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Select",
+   "word": "w",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 4
+   },
+   "uses": 4,
+   "example": "Select @role items=[\"All roles\",\"Owner\",\"Admin\",\"Member\"] w=140 hide=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      41,
+      42,
+      78,
+      100
+     ],
+     "how": {
+      "core": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Sidebar",
+   "word": "hide",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Sidebar tablet.w=64 hide=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      15
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Spacer",
+   "word": "hide",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Spacer hide=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      43
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Table",
+   "word": "columns",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Table p in shown columns=[{\"key\":\"name\",\"label\":\"Name\"},{\"key\":\"role\",\"label\":\"Role\",\"w\":90},{\"key\":\"teams\",\"label\":\"Teams\",\"w\":170,\"sort\":false},{\"key\":\"status\",\"label\":\"Status\",\"w\":100},{\"key\":\"m...",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      49
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Table",
+   "word": "empty",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Table p in shown columns=[{\"key\":\"name\",\"label\":\"Name\"},{\"key\":\"role\",\"label\":\"Role\",\"w\":90},{\"key\":\"teams\",\"label\":\"Teams\",\"w\":170,\"sort\":false},{\"key\":\"status\",\"label\":\"Status\",\"w\":100},{\"key\":\"m...",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      49
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Table",
+   "word": "hide",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Table p in shown columns=[{\"key\":\"name\",\"label\":\"Name\"},{\"key\":\"role\",\"label\":\"Role\",\"w\":90},{\"key\":\"teams\",\"label\":\"Teams\",\"w\":170,\"sort\":false},{\"key\":\"status\",\"label\":\"Status\",\"w\":100},{\"key\":\"m...",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      49
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Table",
+   "word": "select",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Table p in shown columns=[{\"key\":\"name\",\"label\":\"Name\"},{\"key\":\"role\",\"label\":\"Role\",\"w\":90},{\"key\":\"teams\",\"label\":\"Teams\",\"w\":170,\"sort\":false},{\"key\":\"status\",\"label\":\"Status\",\"w\":100},{\"key\":\"m...",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      49
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Table",
+   "word": "sort",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Table p in shown columns=[{\"key\":\"name\",\"label\":\"Name\"},{\"key\":\"role\",\"label\":\"Role\",\"w\":90},{\"key\":\"teams\",\"label\":\"Teams\",\"w\":170,\"sort\":false},{\"key\":\"status\",\"label\":\"Status\",\"w\":100},{\"key\":\"m...",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      49
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Text",
+   "word": "hide",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Text.caption \"{length(shown)} of {length(members)}\" hide=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      44
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Text",
+   "word": "maxLines",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Text.strong \"{p.name}\" maxLines=1 overflow=ellipsis onTap={openId=p.id}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      53,
+      54
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Text",
+   "word": "overflow",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Text.strong \"{p.name}\" maxLines=1 overflow=ellipsis onTap={openId=p.id}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      53,
+      54
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "canvas",
+   "word": "path",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "canvas \"Members\" path=\"members\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      13
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Column",
+   "word": "grow",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Column grow",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      52,
+      73
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Grid",
+   "word": "phone.cols=2",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Grid cols=4 gap=12 phone.cols=2",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      36
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Input",
+   "word": "multiline",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Input \"Email addresses\" \"name@company.com, another@company.com\" multiline",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      98
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Row",
+   "word": "middle",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Row gap=12 middle pad=[0,0,0,12]",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      71
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Sidebar",
+   "word": "tablet.w=64",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Sidebar tablet.w=64 hide=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      15
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Table",
+   "word": "in",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Table p in shown columns=[{\"key\":\"name\",\"label\":\"Name\"},{\"key\":\"role\",\"label\":\"Role\",\"w\":90},{\"key\":\"teams\",\"label\":\"Teams\",\"w\":170,\"sort\":false},{\"key\":\"status\",\"label\":\"Status\",\"w\":100},{\"key\":\"m...",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      49
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Table",
+   "word": "p",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Table p in shown columns=[{\"key\":\"name\",\"label\":\"Name\"},{\"key\":\"role\",\"label\":\"Role\",\"w\":90},{\"key\":\"teams\",\"label\":\"Teams\",\"w\":170,\"sort\":false},{\"key\":\"status\",\"label\":\"Status\",\"w\":100},{\"key\":\"m...",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      49
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Table",
+   "word": "shown",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Table p in shown columns=[{\"key\":\"name\",\"label\":\"Name\"},{\"key\":\"role\",\"label\":\"Role\",\"w\":90},{\"key\":\"teams\",\"label\":\"Teams\",\"w\":170,\"sort\":false},{\"key\":\"status\",\"label\":\"Status\",\"w\":100},{\"key\":\"m...",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      49
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "&&",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "'",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "'All",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "'id',",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state cur:map={coalesce(find(members, 'id', openId), {})}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      12
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "(role",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "(status",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "+",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "==",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 4
+   },
+   "uses": 4,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "=>",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "contains(lower(m.name",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "cur:map={coalesce(find(members,",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state cur:map={coalesce(find(members, 'id', openId), {})}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      12
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "lower(q)))}",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "m",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "m.email),",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "m.role",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "m.status",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "openId),",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state cur:map={coalesce(find(members, 'id', openId), {})}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      12
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "role)",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "roles'",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "shown:list={filter(members,",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "status)",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "statuses'",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "||",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "event",
+   "on": "Button",
+   "word": "onTap",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "example": "Button \"Invite members\" icon=\"add\" onTap={open invite}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      35,
+      102,
+      103
+     ],
+     "how": {
+      "core": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "event",
+   "on": "IconButton",
+   "word": "onTap",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "IconButton \"more_horiz\" tooltip=\"Actions for {p.name}\" onTap={openId=p.id; open rowMenu}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      60
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "event",
+   "on": "Text",
+   "word": "onTap",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Text.strong \"{p.name}\" maxLines=1 overflow=ellipsis onTap={openId=p.id}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      53
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Button",
+   "word": "destructive",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Button.destructive \"Deactivate\" icon=\"person_off\" size=small",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      48,
+      67
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Button",
+   "word": "ghost",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Button.ghost \"Cancel\" onTap={close}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      102
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Button",
+   "word": "outline",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "example": "Button.outline \"Export\" icon=\"download\" hide=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      34,
+      46,
+      47
+     ],
+     "how": {
+      "core": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Text",
+   "word": "caption",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "example": "Text.caption \"{length(shown)} of {length(members)}\" hide=phone",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      44,
+      54,
+      75
+     ],
+     "how": {
+      "core": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Text",
+   "word": "heading",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Text.heading \"{cur.name}\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      74
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Text",
+   "word": "muted",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Text.muted \"{p.role}\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      55
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Text",
+   "word": "overline",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Text.overline \"RECENT ACTIVITY\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      87
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Text",
+   "word": "small",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "example": "Text.small \"Changed Elena Voss's role to Admin · 2 days ago\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      88,
+      89,
+      90
+     ],
+     "how": {
+      "core": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Text",
+   "word": "strong",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Text.strong \"{p.name}\" maxLines=1 overflow=ellipsis onTap={openId=p.id}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      53
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "verb",
+   "word": "close",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 6
+   },
+   "uses": 6,
+   "example": "close",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      92,
+      93,
+      94,
+      96,
+      102,
+      103
+     ],
+     "how": {
+      "core": 6
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "verb",
+   "word": "open",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "open invite",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      35,
+      60
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "verb",
+   "word": "set",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 13
+   },
+   "uses": 13,
+   "example": "tab=\"members\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      18,
+      19,
+      20,
+      21,
+      23,
+      24,
+      25,
+      45,
+      53,
+      60,
+      63,
+      66,
+      69
+     ],
+     "how": {
+      "core": 13
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "verb",
+   "word": "toast",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "toast \"Invites sent\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      103
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "function",
+   "word": "coalesce",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state cur:map={coalesce(find(members, 'id', openId), {})}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      12
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "function",
+   "word": "contains",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11,
+      63
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "function",
+   "word": "filter",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "function",
+   "word": "find",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state cur:map={coalesce(find(members, 'id', openId), {})}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      12
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "function",
+   "word": "length",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 4
+   },
+   "uses": 4,
+   "example": "BulkBar count={length(chosen)} visible={length(chosen) > 0} hide=phone onClear={chosen=[]}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      45,
+      65,
+      66
+     ],
+     "how": {
+      "core": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "function",
+   "word": "lower",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "statement",
+   "word": "each",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "example": "each s in stats",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      37,
+      57,
+      62
+     ],
+     "how": {
+      "core": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "statement",
+   "word": "state",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 12
+   },
+   "uses": 12,
+   "example": "state tab=\"members\"",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T08:02:13Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T08:02:13Z"
+    }
+   },
+   "files": {
+    "pages/members.txt": {
+     "lines": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+     ],
+     "how": {
+      "core": 12
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Column",
+   "word": "phone.pad=[16,16,16,24]",
+   "status": "no longer used",
+   "resolved": "core",
+   "how": {},
+   "uses": 0,
+   "example": "Column gap=20 pad=[32,28,32,32] tablet.pad=[24,20,24,24] phone.pad=[16,16,16,24]",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T05:04:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T05:04:54Z"
+    }
+   },
+   "files": {},
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Column",
+   "word": "tablet.pad=[24,20,24,24]",
+   "status": "no longer used",
+   "resolved": "core",
+   "how": {},
+   "uses": 0,
+   "example": "Column gap=20 pad=[32,28,32,32] tablet.pad=[24,20,24,24] phone.pad=[16,16,16,24]",
+   "first": "2026-11-19T05:04:54Z",
+   "last": "2026-11-19T05:04:54Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:04:54Z",
+     "last": "2026-11-19T05:04:54Z"
+    }
+   },
+   "files": {},
+   "seen": {}
+  }
+ ]
+}

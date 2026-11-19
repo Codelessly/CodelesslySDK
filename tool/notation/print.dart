@@ -2,14 +2,16 @@
 // expand.dart, so a UI that exists as a document is read (and edited) in the
 // form it would be written in.
 //
-//   dart run tool/notation/print.dart <document.json> [--design-system <folder>] [--out <file.txt>] [--check]
+//   dart run tool/notation/print.dart <document.json> [--design-system <folder>] [--out <file.txt>] [--check] [--dictionary <folder>]...
 //
 // With --design-system (a folder holding design_system.json) a call of one
 // of its components prints as that component's word. The print parses back
 // to the same document (codelessly_api's printNotation is exact by
 // construction: what its words do not say is a `{…}` tail on that line).
 // --check does that parse and compares, and says how many lines still need a
-// tail: the exit status is 1 when the document read back differs.
+// tail: the exit status is 1 when the document read back differs. The print
+// is in base lines; --check reads it back with the dictionaries
+// (dictionary.dart) as expand would.
 //
 // A site's page or component that site expansion gave an overlay of its own
 // (`nav--board`, site_overlays.dart) prints as it was written (`Drawer#nav`
@@ -22,6 +24,7 @@ import 'dart:io';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_api/notation.dart';
 
+import 'dictionary.dart';
 import 'notation_site.dart';
 
 Future<void> main(List<String> args) async {
@@ -32,10 +35,10 @@ Future<void> main(List<String> args) async {
 
   final files = [
     for (var i = 0; i < args.length; i++)
-      if (!args[i].startsWith('--') && (i == 0 || !const {'--design-system', '--out'}.contains(args[i - 1]))) args[i],
+      if (!args[i].startsWith('--') && (i == 0 || !const {'--design-system', '--out', '--dictionary'}.contains(args[i - 1]))) args[i],
   ];
   if (files.length != 1 || !File(files.single).existsSync()) {
-    stderr.writeln('usage: print.dart <document.json> [--design-system <folder>] [--out <file.txt>] [--check]');
+    stderr.writeln('usage: print.dart <document.json> [--design-system <folder>] [--out <file.txt>] [--check] [--dictionary <folder>]...');
     exit(2);
   }
   var catalog = standardCatalog;
@@ -89,7 +92,10 @@ Future<void> main(List<String> args) async {
   }
   if (!args.contains('--check')) return;
 
-  final back = Catalog.run(catalog, () => parseNotation(text, catalog: catalog, options: notationOptionsFor(document)));
+  final dictionaries = dictionaryFolders(args);
+  if (!dictionaryFoldersExist(dictionaries)) exit(2);
+  final options = withDictionaryOptions(notationOptionsFor(document), dictionaries, say: stderr.writeln);
+  final back = Catalog.run(catalog, () => parseNotation(text, catalog: catalog, options: options));
   for (final issue in back.issues) {
     stderr.writeln('${files.single}: ${issue.message}');
   }
