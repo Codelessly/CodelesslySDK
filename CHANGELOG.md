@@ -68,6 +68,13 @@ the share panel and the page's address. Needs codelessly_api 39.0.0.
   preview: the spec's shape and these classes may change in any release, and a Codelessly document cannot hold a
   graph yet.
 
+### Removed
+
+- `tool/notation/notation.sh migrate` (and `migrate.dart`, `migrate_bind.dart`, `expand_all.dart --migrate`), which
+  rewrote notation files from the grammar of 33 and earlier (`bind=name`, `key:value`, `-> actions`): rewrite such
+  a file with 38.0.0's tool before upgrading. The notation still says `bind=` is not read, with the line as it is
+  written now.
+
 ### Tools
 
 - `tool/codelessly render` reports a document that is not of schema 3 as `schema_unsupported` (an error naming the

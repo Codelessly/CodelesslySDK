@@ -9,7 +9,6 @@
 #   tool/notation/notation.sh vocabulary <site folder | vocabulary.json | folder of them>... [--design-system <folder>] [--aliases <file.json>] [--out <dir>]
 #   tool/notation/notation.sh print <document.json> [--design-system <folder>] [--out <file.txt>] [--check] [--dictionary <folder>]...
 #   tool/notation/notation.sh apply <document.json> <ops.json> [--design-system <folder>] [--out <file.json>]
-#   tool/notation/notation.sh migrate <file or folder>... [--check] [--stdout] [--design-system <folder>]... [--site <site.json>] [--notation | --markdown | --dart | --python | --json | --html] [--from 32]
 #
 # --open is the open vocabulary (codelessly_api docs/design/19-open-vocabulary.md):
 # prompt --open teaches the grammar and the core only, and asks for every
@@ -78,14 +77,6 @@
 # to the same document (--check does that, and counts the lines whose fields
 # the notation still has no word for).
 #
-# migrate rewrites files, in place, to the grammar codelessly_api reads now:
-# a variable bound as `@name` (`bind=name`, `bindEnd=name` and a block's
-# `key=name` rewritten; a state line added for each variable a screen binds
-# and nothing declares), in notation files, Markdown, Dart, Python, JSON and
-# HTML, a folder at a time; --check lists what is still to rewrite. --from 32
-# first rewrites the grammar read up to 32.x (key:value, =name, key:=expression,
-# -> actions). The head of migrate.dart says what each form becomes.
-#
 # It finds Flutter's dart, makes the SDK use the codelessly_api checked out
 # beside it (../CodelesslyAPI: the notation is newer than the published
 # package), resolves dependencies when they are stale, and runs
@@ -99,9 +90,9 @@ unset MSYS2_ARG_CONV_EXCL MSYS_NO_PATHCONV
 sdk="$(cd "$(dirname "$0")/../.." && pwd)"
 cmd="${1:-}"
 case "$cmd" in
-  prompt|expand|print|apply|migrate|vocabulary) shift ;;
+  prompt|expand|print|apply|vocabulary) shift ;;
   validate) shift; set -- "$@" --validate; cmd=expand ;;
-  *) echo "usage: tool/notation/notation.sh prompt|expand|validate|print|apply|migrate|vocabulary [arguments] (see the head of this file)" >&2; exit 2 ;;
+  *) echo "usage: tool/notation/notation.sh prompt|expand|validate|print|apply|vocabulary [arguments] (see the head of this file)" >&2; exit 2 ;;
 esac
 
 # Flutter's dart, codelessly_api from the checkout beside the SDK (the same

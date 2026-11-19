@@ -10,10 +10,6 @@ final _older = RegExp(
     r'''migrate2to3|migrateSchema|migratePublish|migrateJson|migrateNode|MigrationReport|kOldestSchemaVersion|schemaOf\(|schema[- ]2\b|schema2|["']schema["']\s*:\s*2\b|schema:\s*2\b|["']legacy\.|core/migrate''',
     caseSensitive: false);
 
-/// The notation's own rewrite from its 33 grammar to 34's (`bind=` to `@`):
-/// not a schema.
-const _notationRewrite = {'tool/notation/migrate.dart', 'tool/notation/migrate_bind.dart', 'tool/notation/expand_all.dart', 'tool/notation/notation.sh'};
-
 Iterable<File> _files(String dir, bool Function(String) take) sync* {
   if (!Directory(dir).existsSync()) return;
   for (final f in Directory(dir).listSync(recursive: true).whereType<File>()) {
@@ -31,7 +27,7 @@ void main() {
         final p = f.path.replaceAll(r'\', '/');
         final lines = f.readAsLinesSync();
         for (var i = 0; i < lines.length; i++) {
-          final hit = _older.hasMatch(lines[i]) || (!_notationRewrite.contains(p) && RegExp('migrat', caseSensitive: false).hasMatch(lines[i]));
+          final hit = _older.hasMatch(lines[i]) || RegExp('migrat', caseSensitive: false).hasMatch(lines[i]);
           if (hit) found.add('$p:${i + 1}: ${lines[i].trim()}');
         }
       }
