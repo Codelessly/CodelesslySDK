@@ -602,6 +602,13 @@ ButtonSpec chromeButton({
       focusColor: foreground.withValues(alpha: .10),
     );
 
-/// A font glyph of the MaterialIcons font as a button's icon.
-Map<String, Object?> chromeGlyph(String name, int codepoint) =>
-    {'type': 'MATERIAL_ICON', 'name': name, 'codepoint': codepoint, 'render': 'glyph'};
+/// A glyph of the MaterialIcons font as a button's icon. [icon] is a
+/// constant `IconData`: a build that keeps only the icon font's glyphs it
+/// finds in the app's constants (`--tree-shake-icons`, the default of a
+/// release build) keeps this one.
+Map<String, Object?> chromeGlyph(String name, IconData icon) => {
+      'type': 'MATERIAL_ICON',
+      'name': name,
+      'codepoint': icon.codePoint,
+      'render': 'glyph',
+    };

@@ -8,6 +8,7 @@ import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show Json, ShowToastAction, ToastPosition, ToastStyle;
 import 'package:flutter/material.dart';
 
+import '../../render/control_theme.dart' show chromeGlyph;
 import '../../render/node_view.dart' show ControlButton, ControlHost;
 import '../../render/paint/icon_names.dart';
 import '../../render/paint/shell_constants.dart';
@@ -650,4 +651,4 @@ class _ToastBelowRouteState extends State<ToastBelowRoute> {
 }
 
 /// The close button's icon: the MaterialIcons font's glyph.
-const Json _closeIcon = {'type': 'MATERIAL_ICON', 'name': 'close', 'codepoint': ShellGlyphs.close, 'render': 'glyph'};
+final Json _closeIcon = chromeGlyph('close', const IconData(ShellGlyphs.close, fontFamily: ShellGlyphs.font));

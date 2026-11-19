@@ -751,8 +751,11 @@ class DataListViewState extends State<DataListView> {
                   spec: chromeButton(
                     tokens: chromeTokensOf(context),
                     icon: axis == Axis.vertical
-                        ? chromeGlyph('arrow_downward', ShellGlyphs.arrowDownward)
-                        : chromeGlyph('arrow_forward', ShellGlyphs.arrowForward),
+                        ? chromeGlyph('arrow_downward', const IconData(ShellGlyphs.arrowDownward, fontFamily: ShellGlyphs.font))
+                        : chromeGlyph(
+                            'arrow_forward',
+                            const IconData(ShellGlyphs.arrowForward, fontFamily: ShellGlyphs.font, matchTextDirection: true),
+                          ),
                     iconSize: 24,
                     foreground: buttons?.foregroundColor?.resolve(const <WidgetState>{}) ?? colors.primary,
                     background: colors.surfaceContainerHigh,

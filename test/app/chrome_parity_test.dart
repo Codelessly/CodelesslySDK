@@ -274,7 +274,7 @@ void main() {
               focusable: false,
               spec: chromeButton(
                 tokens: chromeTokensOf(context),
-                icon: chromeGlyph('arrow_downward', ShellGlyphs.arrowDownward),
+                icon: chromeGlyph('arrow_downward', const IconData(ShellGlyphs.arrowDownward, fontFamily: ShellGlyphs.font)),
                 iconSize: 24,
                 foreground: buttons.foregroundColor!.resolve(const {})!,
                 background: theme.colorScheme.surfaceContainerHigh,

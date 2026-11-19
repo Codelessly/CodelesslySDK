@@ -619,9 +619,9 @@ class MediaPlayerButton extends StatelessWidget {
   }
 }
 
-final api.Json playArrowGlyph = chromeGlyph('play_arrow', ShellGlyphs.playArrow);
-final api.Json playCircleGlyph = chromeGlyph('play_circle', ShellGlyphs.playCircle);
-final api.Json pauseCircleGlyph = chromeGlyph('pause_circle', ShellGlyphs.pauseCircle);
+final api.Json playArrowGlyph = chromeGlyph('play_arrow', _Glyph.playArrow);
+final api.Json playCircleGlyph = chromeGlyph('play_circle', _Glyph.playCircle);
+final api.Json pauseCircleGlyph = chromeGlyph('pause_circle', _Glyph.pauseCircle);
 
 /// The audio player's seek bar: a 3 px track (the played part 5) and a
 /// 12 px thumb in the theme's accent, 12 px in from each side. With nothing
@@ -835,6 +835,9 @@ class _MediaWebViewState extends State<MediaWebView> {
 
 /// The icons drawn here, from the MaterialIcons font.
 abstract final class _Glyph {
+  static const playArrow = IconData(ShellGlyphs.playArrow, fontFamily: ShellGlyphs.font);
+  static const playCircle = IconData(ShellGlyphs.playCircle, fontFamily: ShellGlyphs.font);
+  static const pauseCircle = IconData(ShellGlyphs.pauseCircle, fontFamily: ShellGlyphs.font);
   static const errorOutline = IconData(ShellGlyphs.errorOutline, fontFamily: ShellGlyphs.font);
   static const audiotrackOutlined = IconData(ShellGlyphs.audiotrackOutlined, fontFamily: ShellGlyphs.font);
   static const chatBubbleOutline = IconData(ShellGlyphs.chatBubbleOutline, fontFamily: ShellGlyphs.font);
