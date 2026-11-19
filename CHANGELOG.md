@@ -4,6 +4,10 @@
 
 - **An inline calendar given less height than its rows need** fits its six rows of days inside its box (down to
   20 px a row); its rows stayed 48 px and painted past the box.
+- **Squeezable texts side by side in a row keep their own widths while they fit**, and give way in proportion
+  when they do not (CSS's `flex-shrink`), in a row that squeezes its children (`squeezeChildren`, the default). As
+  flexible children of equal flex they took an equal share each, so a heading beside a short count wrapped at half
+  the row with room to spare. A row with `squeezeChildren: false` is unchanged.
 
 ### Fixed
 

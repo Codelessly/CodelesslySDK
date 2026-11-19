@@ -2737,7 +2737,16 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
       // of room. Beside a sibling that fills, the room is that sibling's: it
       // keeps its own size (a label that grows, then its value at the end),
       // instead of sharing the row with it as a second flexible child.
-      if (mainFit == SizeFit.hug && n.layout.squeezable && !parentNode.wraps && !_siblingFills(parentNode, n.id, isRow)) {
+      // In a row that squeezes its children (the default) the squeeze
+      // gives the room: each keeps its own width while they fit, and gives
+      // way in proportion when they do not, as CSS's flex-shrink. As
+      // flexible children of equal flex, two texts that fitted took half
+      // the row each ("Kitchens near" cut beside "6 kitchens").
+      if (mainFit == SizeFit.hug &&
+          n.layout.squeezable &&
+          !parentNode.wraps &&
+          !parentNode.prop(FlexProps.squeezeChildren) &&
+          !_siblingFills(parentNode, n.id, isRow)) {
         (flex, fit) = (flexValue, FlexFit.loose);
       }
       // Collapsed: no flex, no gaps (flex 0).
