@@ -21,6 +21,7 @@ import '../render/surface_roles.dart';
 typedef _Role = Color Function(SurfaceRoles s);
 
 Color _primary(SurfaceRoles s) => s.primary;
+Color _fill(SurfaceRoles s) => s.fill;
 Color _onSurface(SurfaceRoles s) => s.onSurface;
 Color _surface(SurfaceRoles s) => s.surface;
 Color _muted(SurfaceRoles s) => s.muted;
@@ -65,7 +66,7 @@ final Map<String, List<(api.PropDef<api.Color?>, _Role)>> themedIndicatorColors 
     (PlotChartProps.selectionHaloColor, _alpha(_onSurface, .18)),
   ],
   BarChartProps.spec.type: [
-    (BarChartProps.color, _primary),
+    (BarChartProps.color, _fill),
     (BarChartProps.emptyColor, _hairline),
     (BarChartProps.gridColor, _hairline),
     (BarChartProps.baselineColor, _outline),

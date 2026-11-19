@@ -45,6 +45,7 @@ Color onColor(Color background, {Iterable<Color?> preferred = const []}) {
 /// | [surface] | the surface given, else `tokens.surface`, else the theme's ground where it is dark (`paper`), else paper (white; near-black in dark mode) |
 /// | [onSurface] | `tokens.onSurface` when it reads on the surface (3:1), else ink |
 /// | [primary] | `tokens.primary` when it reads on the surface, else [onSurface] |
+/// | [fill] | `tokens.primary` as a filled shape (a chart's bars): where it shows on the surface at all (1.5:1), else [onSurface] |
 /// | [muted], [outline], [hairline] | [onSurface] at 68 %, 45 %, 18 % over the surface |
 /// | [error] | `tokens.error`, else a neutral red |
 typedef SurfaceRoles = ({
@@ -52,6 +53,7 @@ typedef SurfaceRoles = ({
   Color surface,
   Color onSurface,
   Color primary,
+  Color fill,
   Color muted,
   Color outline,
   Color hairline,
@@ -80,6 +82,9 @@ SurfaceRoles surfaceRoles(api.ThemeTokens tokens, {bool dark = false, Color? sur
     // What controls draw straight on the surface: the brand color where it
     // reads there, else the surface's ink.
     primary: brand != null && brand.a > .9 && contrastRatio(brand, on) >= 3 ? brand : onSurface,
+    // A filled shape needs no text's contrast: an amber or a lime brand is
+    // still the bars' color on white (they were drawn in ink, black slabs).
+    fill: brand != null && brand.a > .9 && contrastRatio(brand, on) >= 1.5 ? brand : onSurface,
     muted: mix(.68),
     outline: mix(.45),
     hairline: mix(.18),

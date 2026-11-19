@@ -540,6 +540,7 @@ SurfaceRoles rolesOfScheme(ColorScheme scheme) => (
       surface: scheme.surface,
       onSurface: scheme.onSurface,
       primary: scheme.primary,
+      fill: scheme.primary,
       muted: scheme.onSurfaceVariant,
       outline: scheme.outline,
       hairline: scheme.outlineVariant,

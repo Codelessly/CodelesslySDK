@@ -749,8 +749,10 @@ class BarChartPainter extends NodePainter {
     final emptyHeight = p(BarChartProps.emptyHeight);
     final barRadius = Radius.circular(p(BarChartProps.barRadius));
     final dimmed = p(BarChartProps.dimmedOpacity);
-    final maxBar = p(BarChartProps.maxBarWidth);
-    final bar = maxBar == null ? column : math.min(column, maxBar);
+    // With no limit written a bar is at most 56 wide, in the middle of its
+    // column: a few values in a wide card were slabs a third of it each.
+    final maxBar = p(BarChartProps.maxBarWidth) ?? 56;
+    final bar = math.min(column, maxBar);
     for (var i = 0; i < count; i++) {
       final left = i * (column + barGap) + (column - bar) / 2;
       final value = values[i];
