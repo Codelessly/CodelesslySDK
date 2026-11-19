@@ -86,7 +86,7 @@ const runtimeCodes = <(String, String, String)>[
   ('unknown_screen_arg', 'error', '--screen names no canvas, screen or layout.'),
   ('render_exception', 'error', 'Flutter threw while building, laying out or painting the screen.'),
   ('action_error', 'error', 'An action chain failed (a load reaction, or one an interaction ran).'),
-  ('formula_failed', 'warning', 'A formula an action works out does not parse, or fails as it is worked out (an unknown field or function, a list function given a text): the action got null. The message gives the expression and why.'),
+  ('formula_failed', 'warning', 'A formula does not parse, or fails as it is worked out (an unknown field or function, a list function given a text). One an action works out: the action got null; the message gives the expression and why. One a node reads when the screen is drawn (its condition, its list, its text, a value) or one of a variable: the node draws without it (a condition is no, a list has no rows, a text is blank); the message names the node, the formula and why.'),
   ('interaction_failed', 'error', 'A --tap/--hover/--focus/--type/--scroll/--set/--navigate step could not be applied (no such node, not on screen, covered by another node: the message names it).'),
   ('step_skipped', 'warning', 'A step names a node not shown at this size (hidden by a media rule or a binding, or on another breakpoint\'s canvas): it is skipped at this size, the other steps run and the capture is made. One note per size.'),
   ('tap_no_reaction', 'warning', 'A --tap hit its node, but neither it nor anything around it reacts to a tap (no click reaction, no button or input): nothing happens.'),
@@ -111,8 +111,8 @@ const runtimeCodes = <(String, String, String)>[
   ('formula_invalid', 'warning', 'A formula of a node (a binding, a value, an action) or of a variable does not parse, so it gives nothing where it is used: a list with no rows, a text with no value. The message names the node, the field, the expression and why it does not parse (an unbalanced bracket, a stray word).'),
   ('transparent_background', 'warning', 'At least 2% of a capture has nothing painted behind it: there a reader sees the host\'s background (black in an app with none, the page\'s color in a browser), not the document\'s. Give the screen\'s canvas a fill.'),
   ('set_overwritten', 'warning', 'A reaction (a timer, a load) wrote a variable a --set step set, after the step: the capture shows the --set value. Pin a clock with --now.'),
+  ('theme_name_unknown', 'warning', 'A node names a color the theme does not have, writes theme.<name> as a value\'s text, or reads theme.<name> in a formula where the theme gives no such value: it draws nothing there. The message names the node, the name and what the theme has.'),
   ('formula_runaway', 'error', 'A formula made more calls of the page\'s own functions in one evaluation than can be meant (functions that call each other without end): the calls past the limit gave nothing, and what reads the formula is drawn without its value. The message names the function.'),
-  ('formula_failed', 'warning', 'A formula a node reads (its condition, its list, its text, a value, an action) or a variable\'s could not be worked out when the screen ran (a function given what it cannot take, an unknown function): the node draws without it. The message names the node, the formula and why.'),
   ('screen_timeout', 'error', 'A screen took longer than --screen-timeout (120 s) at one size: past the limit the functions its formulas call gave nothing, the capture is not what the page shows, and the run went on to the next screen.'),
   ('site_now', 'warning', 'site.json\'s "now" (the time now() gives in a render of the site, when no --now is passed) is not an ISO 8601 time: the run starts at the real time.'),
   ('placeholder_word', 'warning', 'A word the notation, the design system and the site do not have stood in as a placeholder when the page was expanded with an open vocabulary (or, closed, was refused and draws nothing): the message names the word, its kind, its line and the shape it was written in. Define it, or it is recorded for support: read from the vocabulary record `notation.sh expand` saves beside the site (vocabulary.json).'),
@@ -315,6 +315,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   // The site's theme: its named colors and text styles.
   final themeJson = api.readMap(site.manifest?['theme']);
   if (docs.isEmpty) return _finish(report, args);
+  _themeNames(docs, manifest?.theme ?? api.ThemeTokens.none, issue);
 
   // 2. Fonts and assets. A font handler left by an earlier run in this
   // process would load into a disposed instance.
@@ -1203,7 +1204,7 @@ void _formulasFailed(Map<String, String> failed, Map<String, api.Json> docs, Map
                   : reads(api.readMap(node['props'])?['text'], f.key)
                       ? 'shows no text for it'
                       : reads(node['actions'], f.key)
-                          ? 'does nothing there when its action runs'
+                          ? 'action'
                           : what;
         }
         if (!nodes.contains(n.key)) nodes.add(n.key);
@@ -1221,6 +1222,8 @@ void _formulasFailed(Map<String, String> failed, Map<String, api.Json> docs, Map
       }
       if (variable == null) continue;
     }
+    // One an action works out is said where the action ran.
+    if (what == 'action') continue;
     if (++said > 12) break;
     final formula = f.key.length > 160 ? '${f.key.substring(0, 160)}â€¦' : f.key;
     final why = f.value.replaceFirst(RegExp(r'^(Bad state|Exception|Invalid argument\(s\)|FormatException|Unsupported operation): '), '');
@@ -1236,6 +1239,110 @@ void _formulasFailed(Map<String, String> failed, Map<String, api.Json> docs, Map
         screen: screen,
         size: size));
   }
+}
+
+/// Says each name of the theme a document uses that the theme does not
+/// have: a color written by a name it has none of (`"color": "amberTint"`),
+/// written as the text `theme.amberTint`, or read in a formula as
+/// `theme.<name>` where the theme gives no such value. Each draws nothing.
+void _themeNames(Map<String, api.Json> docs, api.ThemeTokens theme, void Function(RuntimeIssue) issue) {
+  final has = [
+    ...theme.colors.keys,
+    for (final r in const ['primary', 'onPrimary', 'surface', 'onSurface', 'error', 'success', 'warning'])
+      if (theme.color(r) != null && !theme.colors.containsKey(r)) r,
+  ];
+  String list() => has.isEmpty ? 'The theme names no colors' : 'The theme has ${has.take(14).join(', ')}${has.length > 14 ? ' and ${has.length - 14} more' : ''}';
+  final values = themeValues(theme, dark: false);
+  final dark = themeValues(theme, dark: true);
+  bool given(String path) {
+    Object? a = values, b = dark;
+    for (final k in path.split('.')) {
+      a = a is Map ? a[k] : null;
+      b = b is Map ? b[k] : null;
+    }
+    return a != null || b != null;
+  }
+
+  String more(List<String> ids) => ids.toSet().length > 1 ? ' (and ${ids.toSet().length - 1} more)' : '';
+  final read = RegExp(r'(?<![A-Za-z0-9_.])theme\.([A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*)');
+  for (final d in docs.entries) {
+    final api.LayoutDocument doc;
+    try {
+      doc = api.LayoutDocument.fromJson(d.value);
+    } catch (_) {
+      continue;
+    }
+    // A color named that the theme has none of.
+    for (final e in api.unknownThemeColors(doc, theme).entries) {
+      issue(RuntimeIssue(
+          'theme_name_unknown',
+          'warning',
+          '"${e.value.first}"${more(e.value)} names the color "${e.key}", which the theme does not have: it draws nothing there. '
+              '${list()}. Write one of them, a color (#FF2563EB), or add "${e.key}" to the theme\'s colors.',
+          nodeId: e.value.first,
+          file: d.key));
+    }
+    // `theme.<name>` written as a value's text, or read where the theme gives nothing.
+    final asText = <String, List<String>>{}, asRead = <String, List<String>>{};
+    void scan(String id, Object? value) {
+      switch (value) {
+        case final String s when RegExp(r'^theme\.[A-Za-z_][A-Za-z0-9_.]*$').hasMatch(s):
+          (asText[s] ??= []).add(id);
+        case final String s when s.contains(r'${') && s.contains('theme.'):
+          for (final m in read.allMatches(s)) {
+            if (!given(m[1]!)) (asRead[m[1]!] ??= []).add(id);
+          }
+        case final List<Object?> l:
+          for (final v in l) {
+            scan(id, v);
+          }
+        case final Map<Object?, Object?> m:
+          for (final v in m.values) {
+            scan(id, v);
+          }
+        default:
+      }
+    }
+
+    for (final n in (api.readMap(d.value['nodes']) ?? const <String, Object?>{}).entries) {
+      scan(n.key, n.value);
+    }
+    for (final e in asText.entries) {
+      final name = e.key.split('.').last;
+      issue(RuntimeIssue(
+          'theme_name_unknown',
+          'warning',
+          '"${e.value.first}"${more(e.value)} is written "${e.key}" where a value is read: that is a text, not the theme\'s value, and it draws nothing. '
+              'A color of the theme is its name alone ("$name"${has.contains(name) ? '' : ', which this theme does not have: ${list()}'}); in a formula it is theme.colors.$name.',
+          nodeId: e.value.first,
+          file: d.key));
+    }
+    for (final e in asRead.entries) {
+      final name = e.key.split('.').last;
+      issue(RuntimeIssue(
+          'theme_name_unknown',
+          'warning',
+          '"${e.value.first}"${more(e.value)} reads theme.${e.key} in a formula, and the theme gives no such value: what reads it gets nothing. '
+              '${has.contains(name) ? 'The theme\'s color "$name" is read as theme.colors.$name' : '${list()}: each is read as theme.colors.<name> (its roles as theme.primary, theme.surface)'}.',
+          nodeId: e.value.first,
+          file: d.key));
+    }
+  }
+}
+
+/// For an icon name the renderer does not know: the name without a style's
+/// ending it does know (`lock_outline` â†’ `lock`), as " (lock is one)"; else
+/// nothing.
+String _iconNear(String name) {
+  for (final ending in const ['_outlined', '_outline', '_rounded', '_round', '_sharp', '_filled', '_fill']) {
+    if (!name.endsWith(ending)) continue;
+    final base = name.substring(0, name.length - ending.length);
+    if (base.isEmpty) continue;
+    for (final candidate in [base, '${base}_outlined', '${base}_outline']) {
+      if (candidate != name && IconSources.glyphOf({'type': 'MATERIAL_ICON', 'name': candidate, 'style': 'filled'}) != null) return ' ("$candidate" is one)';
+    }
+  }
+  return '';
 }
 
 Future<void> _settle(WidgetTester tester) async {
@@ -3556,7 +3663,33 @@ List<RuntimeIssue> _check(
       final image = icon['image'] ?? icon['svg'];
       if (glyph != null && image == null && IconSources.glyphOf(icon) == null) {
         out.add(RuntimeIssue('icon_not_drawn', 'warning',
-            'Icon "${nameOf(b)}" draws nothing: ${icon.isEmpty ? 'it names no icon' : '${jsonEncode(icon)} is not a Material icon the renderer knows'}. '
+            'Icon "${nameOf(b)}" draws nothing: ${icon.isEmpty ? 'it names no icon' : '${jsonEncode(icon)} is not a Material icon the renderer knows${_iconNear('${icon['name'] ?? ''}')}'}. '
+            'Write a Material icon name ("search", "arrow_forward", "menu"), as listed at fonts.google.com/icons.',
+            nodeId: nameOf(b), screen: screen, size: size, file: file));
+      }
+    }
+    // The icons of a control (an IconButton's, a Button's, a field's) that
+    // name no glyph: the control is drawn without them, and nothing said so.
+    if (node.type != 'icon' && b.drawn) {
+      final named = <String>{};
+      void scan(Object? value) {
+        if (value is Map) {
+          final type = value['type'];
+          if (type == 'MATERIAL_ICON' && value['name'] is String && value['image'] == null && value['svg'] == null) {
+            final icon = value.cast<String, Object?>();
+            if ((value['name'] as String).isNotEmpty && !(value['name'] as String).contains(r'${') && IconSources.glyphOf(icon) == null) named.add(value['name'] as String);
+            return;
+          }
+          value.values.forEach(scan);
+        } else if (value is List) {
+          value.forEach(scan);
+        }
+      }
+
+      scan(api.readMap(node.toJson()['props']));
+      for (final name in named) {
+        out.add(RuntimeIssue('icon_not_drawn', 'warning',
+            '"${nameOf(b)}" (${node.type}) draws no icon for "$name": it is not a Material icon the renderer knows${_iconNear(name)}. '
             'Write a Material icon name ("search", "arrow_forward", "menu"), as listed at fonts.google.com/icons.',
             nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
