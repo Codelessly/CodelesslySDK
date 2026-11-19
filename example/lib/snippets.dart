@@ -25,6 +25,16 @@ void quickstartSlug() {
   runApp(MaterialApp(home: CodelesslyWidget(codelessly: codelessly)));
 }
 
+/// A project as a whole app with no Material: a plain `WidgetsApp`.
+void quickstartPlainApp() {
+  final codelessly = Codelessly(config: const CodelesslyConfig(slug: 'my-project'));
+
+  runApp(WidgetsApp(
+    color: const Color(0xFF2F6BFF),
+    onGenerateRoute: CodelesslyWidget.onGenerateRoute(codelessly),
+  ));
+}
+
 /// A project token, on Firebase, with live updates.
 Future<void> quickstartToken() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -713,8 +723,8 @@ Codelessly stagingSlug() => Codelessly(
       loader: HttpPublishLoader.firebaseStorage(projectId: 'my-project', bucket: '<bucket>', bundle: true),
     );
 
-/// The project's theme, for the app's own widgets.
-ThemeData projectTheme(Codelessly codelessly) => themeDataOf(codelessly.publishModel!.theme);
+/// The project's theme colors, for the app's own widgets.
+SurfaceRoles projectColors(Codelessly codelessly) => surfaceRoles(codelessly.publishModel!.theme);
 
 /// What layouts read as `theme` in dark mode: `theme.surface`,
 /// `theme.colors.brandBlue`, `theme.text.title.fontSize`, `theme.isDark`.

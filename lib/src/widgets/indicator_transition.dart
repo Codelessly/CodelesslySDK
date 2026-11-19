@@ -1,24 +1,9 @@
 // Data-change motion for the indicator types whose contract includes animate.
 // Reuse the render object so bound values can change without restarting from 0.
-import 'package:codelessly_api/core.dart'
-    show
-        Node,
-        ProgressBarProps,
-        RadialGaugeProps,
-        GaugeMeterProps,
-        BarChartProps,
-        ChartProps,
-        LineChartProps,
-        PlotChartProps;
-import 'package:flutter/foundation.dart' show listEquals;
-import 'package:flutter/gestures.dart';
+import 'package:codelessly_api/core.dart' show Node, ProgressBarProps, RadialGaugeProps, GaugeMeterProps;
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart'
-    show MouseCursor, MouseTrackerAnnotation, PointerEnterEventListener, PointerExitEventListener;
 import 'package:flutter/scheduler.dart';
 
-import 'chart_transition.dart';
-import 'indicators_charts.dart' show ChartSeriesPainter, LineChartPainter;
 import 'indicators_paint.dart';
 
 typedef IndicatorPainterFactory = NodePainter Function(Node node);
@@ -26,7 +11,7 @@ typedef IndicatorPainterFactory = NodePainter Function(Node node);
 /// An indicator's painter, updated at paint time without widget rebuilds or
 /// layout. Initial values and design-canvas edits are drawn at rest; runtime
 /// changes use the node's animate/animationDuration contract.
-class RenderIndicatorTransition extends RenderCustomPaint implements MouseTrackerAnnotation {
+class RenderIndicatorTransition extends RenderCustomPaint {
   RenderIndicatorTransition() {
     _ticker = Ticker(_tick, debugLabel: 'indicator data transition');
   }
@@ -51,29 +36,15 @@ class RenderIndicatorTransition extends RenderCustomPaint implements MouseTracke
     final enabled = interactive && _animated(node);
     final duration = _duration(node);
     final old = _target;
-    final changed =
-        old != null &&
-        (isDataChart(node)
-            ? chartDataChanges(old, node)
-            : !listEquals(_values(old), _values(node)));
-    _interactive = interactive;
-    if (old == null && enabled && duration > 0 && _animatesIn(node)) {
-      // Grows in from zero the first time it shows (starts once attached).
-      _from = chartZeroed(node);
-      _target = node;
-      _progress = 0;
-      _durationMs = duration;
-    } else if (old == null || !enabled || duration <= 0 || !_hasAttached) {
+    final changed = old != null && _value(old) != _value(node);
+    if (old == null || !enabled || duration <= 0 || !_hasAttached) {
       _ticker.stop();
       _from = _target = node;
       _progress = 1;
     } else if (changed) {
       // Retarget a running feed from the value actually on screen, never
       // from the previous wave's destination.
-      final displayed = _sample();
-      _from = isDataChart(node)
-          ? chartDataFrame(displayed, node, 0)
-          : displayed;
+      _from = _sample();
       _target = node;
       _progress = 0;
       _durationMs = duration;
@@ -83,99 +54,24 @@ class RenderIndicatorTransition extends RenderCustomPaint implements MouseTracke
       // A label, color or another unrelated prop can change while values
       // glide. Use its new style without restarting the data transition.
       _target = node;
-      if (_from != null && isDataChart(node)) {
-        _from = chartTransitionRestyle(_from!, node);
-      }
       if (_progress == 1) _from = node;
-    }
-    // Clearing data, removing the only changing series, or switching a chart
-    // model can leave nothing to interpolate. Do not keep a no-op ticker.
-    if (_progress < 1 &&
-        isDataChart(node) &&
-        _from != null &&
-        !chartDataChanges(_from!, node)) {
-      _ticker.stop();
-      _progress = 1;
-      _from = node;
     }
     painter = factory(_sample());
     isComplex = true;
     willChange = _ticker.isActive;
   }
 
-  Node _sample() => _hovered(_sampleData());
-
-  // --- hover: a chart with selectOnHover selects the category under the
-  // pointer (its dimming and tooltip follow), a line chart with
-  // scrubEnabled the nearest point (its cursor and tooltip); off the
-  // chart, its own selection again.
-  bool _interactive = false;
-  int _hover = -1;
-  double? _hoverX;
-
-  bool get _hoverable =>
-      _interactive &&
-      switch (_target?.type) {
-        'chart' => _target!.prop(ChartProps.selectOnHover),
-        'lineChart' => _target!.prop(LineChartProps.scrubEnabled),
-        _ => false,
-      };
-
-  Node _hovered(Node n) {
-    if (!_hoverable) return n;
-    if (n.type == 'lineChart') return _hoverX == null ? n : n.withProp(LineChartProps.selectedX, _hoverX);
-    return _hover >= 0 ? n.withProp(ChartProps.selectedIndex, _hover) : n;
-  }
-
-  void _setHover(int index, [double? x]) {
-    if (index == _hover && x == _hoverX) return;
-    _hover = index;
-    _hoverX = x;
-    if (_target != null) painter = _factory!(_sample());
-  }
-
-  @override
-  bool hitTestSelf(Offset position) => _hoverable || super.hitTestSelf(position);
-
-  @override
-  void handleEvent(PointerEvent event, covariant HitTestEntry entry) {
-    if (_hoverable && (event is PointerHoverEvent || event is PointerMoveEvent || event is PointerDownEvent)) {
-      if (_target!.type == 'lineChart') {
-        _setHover(-1, LineChartPainter(_target!).xAt(event.localPosition, size));
-      } else {
-        _setHover(ChartSeriesPainter(_target!).categoryAt(event.localPosition, size));
-      }
-    }
-  }
-
-  @override
-  MouseCursor get cursor => MouseCursor.defer;
-
-  @override
-  PointerEnterEventListener? get onEnter => null;
-
-  @override
-  PointerExitEventListener? get onExit => (_) => _setHover(-1);
-
-  @override
-  bool get validForMouseTracker => attached;
-
-  Node _sampleData() {
+  Node _sample() {
     final target = _target!;
     if (_progress >= 1 || _from == null) return target;
-    if (isDataChart(target)) return chartDataFrame(_from!, target, _progress);
-    final a = _values(_from!), b = _values(target);
-    final values = List<double?>.generate(b.length, (i) {
-      final to = b[i];
-      if (to == null) return null;
-      final from = i < a.length ? a[i] ?? 0 : 0;
-      return from + (to - from) * _progress;
-    });
+    final to = _value(target);
+    if (to == null) return target;
+    final from = _value(_from!) ?? 0;
+    final value = from + (to - from) * _progress;
     return switch (target.type) {
-      'progressBar' => target.withProp(ProgressBarProps.value, values.single!),
-      'radialGauge' => target.withProp(RadialGaugeProps.value, values.single!),
-      'gaugeMeter' => target.withProp(GaugeMeterProps.value, values.single!),
-      'barChart' => target.withProp(BarChartProps.values, values),
+      'progressBar' => target.withProp(ProgressBarProps.value, value),
+      'radialGauge' => target.withProp(RadialGaugeProps.value, value),
+      'gaugeMeter' => target.withProp(GaugeMeterProps.value, value),
       _ => target,
     };
   }
@@ -223,16 +119,6 @@ bool _animated(Node n) => switch (n.type) {
   'progressBar' => n.prop(ProgressBarProps.animate),
   'radialGauge' => n.prop(RadialGaugeProps.animate),
   'gaugeMeter' => n.prop(GaugeMeterProps.animate),
-  'barChart' => n.prop(BarChartProps.animate),
-  'chart' => n.prop(ChartProps.animate),
-  'lineChart' => n.prop(LineChartProps.animate),
-  'plotChart' => n.prop(PlotChartProps.animate),
-  _ => false,
-};
-
-bool _animatesIn(Node n) => switch (n.type) {
-  'chart' => n.prop(ChartProps.animateIn),
-  'lineChart' => n.prop(LineChartProps.animateIn),
   _ => false,
 };
 
@@ -240,17 +126,12 @@ int _duration(Node n) => switch (n.type) {
   'progressBar' => n.prop(ProgressBarProps.animationDuration),
   'radialGauge' => n.prop(RadialGaugeProps.animationDuration),
   'gaugeMeter' => n.prop(GaugeMeterProps.animationDuration),
-  'barChart' => n.prop(BarChartProps.animationDuration),
-  'chart' => n.prop(ChartProps.animationDuration),
-  'lineChart' => n.prop(LineChartProps.animationDuration),
-  'plotChart' => n.prop(PlotChartProps.animationDuration),
   _ => 0,
 };
 
-List<double?> _values(Node n) => switch (n.type) {
-  'progressBar' => [n.prop(ProgressBarProps.value)],
-  'radialGauge' => [n.prop(RadialGaugeProps.value)],
-  'gaugeMeter' => [n.prop(GaugeMeterProps.value)],
-  'barChart' => n.prop(BarChartProps.values),
-  _ => const [],
+double? _value(Node n) => switch (n.type) {
+  'progressBar' => n.prop(ProgressBarProps.value),
+  'radialGauge' => n.prop(RadialGaugeProps.value),
+  'gaugeMeter' => n.prop(GaugeMeterProps.value),
+  _ => null,
 };

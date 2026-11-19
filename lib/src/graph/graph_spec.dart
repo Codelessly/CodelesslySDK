@@ -50,6 +50,12 @@ class GraphBandSpec {
 /// sessions take no room), labeled from [label], under a viewport.
 class GraphXSpec {
   const GraphXSpec({
+    this.grid = true,
+    this.scale = 'index',
+    this.field = '',
+    this.min,
+    this.max,
+    this.tickValues = const [],
     this.label = 't',
     this.format = 'MMM d',
     this.barSpacing = 8,
@@ -131,7 +137,28 @@ class GraphXSpec {
   final double morph;
   final List<GraphBandSpec> bands;
 
+  /// Whether a line is drawn up each pane at every x tick.
+  final bool grid;
+
+  /// `index`: rows evenly spaced, one place each. `linear`: each row where
+  /// its [field]'s number is between [min] and [max] (the rows' own least
+  /// and most when not given); the view is that stretch, and does not move.
+  final String scale;
+  final String field;
+  final double? min, max;
+  bool get linear => scale == 'linear';
+
+  /// The ticks themselves, when the graph does not choose them: on a linear
+  /// scale values, on rows their places.
+  final List<GraphTick> tickValues;
+
   factory GraphXSpec.fromJson(Json j) => GraphXSpec(
+        grid: _b(j['grid'], true),
+        scale: _s(j['scale'], 'index'),
+        field: _s(j['field'], ''),
+        min: _dn(j['min']),
+        max: _dn(j['max']),
+        tickValues: GraphTick.list(j['tickValues']),
         label: _s(j['label'], 't'),
         format: _s(j['format'], 'MMM d'),
         barSpacing: _d(j['barSpacing'], 8),
@@ -154,6 +181,12 @@ class GraphXSpec {
       );
 
   Json toJson() => {
+        if (!grid) 'grid': grid,
+        if (scale != 'index') 'scale': scale,
+        if (field.isNotEmpty) 'field': field,
+        if (min != null) 'min': min,
+        if (max != null) 'max': max,
+        if (tickValues.isNotEmpty) 'tickValues': [for (final t in tickValues) t.toJson()],
         'label': label,
         'format': format,
         'barSpacing': barSpacing,
@@ -189,7 +222,25 @@ class GraphYSpec {
     this.width = 56,
     this.labels = true,
     this.decimals = 2,
+    this.side = 'right',
+    this.prefix = '',
+    this.suffix = '',
+    this.ticks = 5,
+    this.tickValues = const [],
   });
+
+  /// `right` or `left`: where the axis gutter is (one side for the graph:
+  /// left when any pane says so).
+  final String side;
+
+  /// Written before and after each label (`$`, `k`, `%`).
+  final String prefix, suffix;
+
+  /// About how many round ticks the axis has.
+  final int ticks;
+
+  /// The ticks themselves, when the graph does not choose them.
+  final List<GraphTick> tickValues;
 
   /// `visible`: fitted to the rows in view (autoscale). `data`: to all rows.
   /// `fixed`: [min] to [max].
@@ -226,6 +277,11 @@ class GraphYSpec {
       width: _d(j['width'], 56),
       labels: _b(j['labels'], true),
       decimals: j['decimals'] is int ? j['decimals']! as int : 2,
+      side: _s(j['side'], 'right'),
+      prefix: _s(j['prefix'], ''),
+      suffix: _s(j['suffix'], ''),
+      ticks: j['ticks'] is int ? j['ticks']! as int : 5,
+      tickValues: GraphTick.list(j['tickValues']),
     );
   }
 
@@ -239,6 +295,97 @@ class GraphYSpec {
         'width': width,
         'labels': labels,
         'decimals': decimals,
+        if (side != 'right') 'side': side,
+        if (prefix.isNotEmpty) 'prefix': prefix,
+        if (suffix.isNotEmpty) 'suffix': suffix,
+        if (ticks != 5) 'ticks': ticks,
+        if (tickValues.isNotEmpty) 'tickValues': [for (final t in tickValues) t.toJson()],
+      };
+}
+
+/// A tick an axis is told to have: a value, and what is written at it (its
+/// own number when no label is given). Written `12` or `{value, label}`.
+class GraphTick {
+  const GraphTick(this.value, [this.label]);
+  final double value;
+  final String? label;
+
+  static List<GraphTick> list(Object? v) => [
+        for (final t in _l(v))
+          if (t is num)
+            GraphTick(t.toDouble())
+          else if (t is Map && (t['value'] ?? t['x'] ?? t['y']) is num)
+            GraphTick(((t['value'] ?? t['x'] ?? t['y'])! as num).toDouble(), t['label']?.toString()),
+      ];
+
+  Object toJson() => label == null ? value : {'value': value, 'label': label};
+}
+
+/// Something drawn on a pane at a place of its scales, over the marks: a
+/// line up the pane ([x] alone), a line across it ([y] alone), a dot ([x]
+/// and [y]) or a tinted stretch of the x scale ([from] to [to]). On a linear
+/// x scale a place is a value; on rows, a row's key.
+class GraphGuideSpec {
+  const GraphGuideSpec({
+    this.x,
+    this.y,
+    this.from,
+    this.to,
+    this.color = const Color(0xFF9CA3AF),
+    this.line = 'solid',
+    this.width = 1,
+    this.label = '',
+    this.labelColor,
+    this.radius = 3.5,
+    this.fill,
+    this.below = false,
+  });
+
+  final Object? x, from, to;
+  final double? y;
+  final Color color;
+
+  /// `solid`, `dashed` or `dotted`.
+  final String line;
+  final double width;
+  final String label;
+  final Color? labelColor;
+
+  /// A dot's radius, and its inside when it is not the dot's own color.
+  final double radius;
+  final Color? fill;
+
+  /// A dot's label is under it.
+  final bool below;
+
+  factory GraphGuideSpec.fromJson(Json j) => GraphGuideSpec(
+        x: j['x'],
+        y: _dn(j['y']),
+        from: j['from'],
+        to: j['to'],
+        color: graphColor(j['color'], const Color(0xFF9CA3AF)),
+        line: _s(j['line'], 'solid'),
+        width: _d(j['width'], 1),
+        label: _s(j['label'], ''),
+        labelColor: j['labelColor'] == null ? null : graphColor(j['labelColor'], const Color(0xFF6B7280)),
+        radius: _d(j['radius'], 3.5),
+        fill: j['fill'] == null ? null : graphColor(j['fill'], const Color(0xFFFFFFFF)),
+        below: _b(j['below'], false),
+      );
+
+  Json toJson() => {
+        if (x != null) 'x': x,
+        if (y != null) 'y': y,
+        if (from != null) 'from': from,
+        if (to != null) 'to': to,
+        'color': _hex(color),
+        'line': line,
+        'width': width,
+        if (label.isNotEmpty) 'label': label,
+        if (labelColor != null) 'labelColor': _hex(labelColor!),
+        'radius': radius,
+        if (fill != null) 'fill': _hex(fill!),
+        if (below) 'below': below,
       };
 }
 
@@ -265,7 +412,24 @@ class GraphMarkSpec {
     this.endDot = 0,
     this.endDotColor,
     this.pulse = false,
+    this.name = '',
+    this.stack,
+    this.radius = 0,
+    this.colorField = '',
+    this.colors = const [],
+    this.inner = 0,
+    this.gap = 0,
+    this.startAngle = 0,
+    this.labels = false,
+    this.fillTo,
   });
+
+  /// A bar's value is written over it.
+  final bool labels;
+
+  /// An area's color at the bottom of the pane, when it is not its own
+  /// (its fill runs from one to the other).
+  final Color? fillTo;
 
   final String type;
   final String y, open, high, low, close;
@@ -291,6 +455,28 @@ class GraphMarkSpec {
   final double endDot;
   final Color? endDotColor;
   final bool pulse;
+
+  /// What a tooltip and a legend call the mark; empty for its field.
+  final String name;
+
+  /// Bars with the same stack stand on one another; bars with none (or
+  /// another) stand side by side in the row's place.
+  final String? stack;
+
+  /// A bar's corner radius (the top of a stack's last bar).
+  final double radius;
+
+  /// A row field holding the row's own color (a slice's, a bar's).
+  final String colorField;
+
+  /// An arc's colors, row by row, where [colorField] gives none.
+  final List<Color> colors;
+
+  /// An arc: the hole's share of the radius (0: a pie), the room between
+  /// slices and where the first starts (degrees, clockwise from the top).
+  final double inner, gap, startAngle;
+
+  String get label => name.isEmpty ? valueField : name;
 
   /// A candle, or a bar with open and close, is colored by its direction.
   bool get byDirection => open.isNotEmpty && close.isNotEmpty;
@@ -324,6 +510,16 @@ class GraphMarkSpec {
         endDot: _d(j['endDot'], 0),
         endDotColor: j['endDotColor'] == null ? null : graphColor(j['endDotColor'], const Color(0xFF2962FF)),
         pulse: _b(j['pulse'], false),
+        name: _s(j['name'], ''),
+        stack: j['stack'] is String ? j['stack']! as String : null,
+        radius: _d(j['radius'], 0),
+        colorField: _s(j['colorField'], ''),
+        colors: [for (final c in _l(j['colors'])) graphColor(c, const Color(0xFF2962FF))],
+        inner: _d(j['inner'], 0),
+        gap: _d(j['gap'], 0),
+        startAngle: _d(j['startAngle'], 0),
+        labels: _b(j['labels'], false),
+        fillTo: j['fillTo'] == null ? null : graphColor(j['fillTo'], const Color(0x00000000)),
       );
 
   Json toJson() => {
@@ -346,6 +542,16 @@ class GraphMarkSpec {
         'endDot': endDot,
         if (endDotColor != null) 'endDotColor': _hex(endDotColor!),
         'pulse': pulse,
+        if (name.isNotEmpty) 'name': name,
+        if (stack != null) 'stack': stack,
+        if (radius != 0) 'radius': radius,
+        if (colorField.isNotEmpty) 'colorField': colorField,
+        if (colors.isNotEmpty) 'colors': [for (final c in colors) _hex(c)],
+        if (inner != 0) 'inner': inner,
+        if (gap != 0) 'gap': gap,
+        if (startAngle != 0) 'startAngle': startAngle,
+        if (labels) 'labels': labels,
+        if (fillTo != null) 'fillTo': _hex(fillTo!),
       };
 }
 
@@ -429,7 +635,16 @@ class GraphPaneSpec {
     this.marks = const [],
     this.priceLines = const [],
     this.markers = const [],
+    this.coord = 'rect',
+    this.guides = const [],
   });
+
+  final List<GraphGuideSpec> guides;
+
+  /// `rect` (marks over the x scale) or `polar` (the rows round a center:
+  /// `arc` marks; no axes, and the x viewport does not move it).
+  final String coord;
+  bool get polar => coord == 'polar';
 
   /// Its share of the graph's height.
   final double grow;
@@ -444,6 +659,8 @@ class GraphPaneSpec {
         marks: [for (final m in _l(j['marks'])) GraphMarkSpec.fromJson(_m(m))],
         priceLines: [for (final m in _l(j['priceLines'])) GraphPriceLineSpec.fromJson(_m(m))],
         markers: [for (final m in _l(j['markers'])) GraphMarkerSpec.fromJson(_m(m))],
+        coord: _s(j['coord'], 'rect'),
+        guides: [for (final g in _l(j['guides'])) GraphGuideSpec.fromJson(_m(g))],
       );
 
   Json toJson() => {
@@ -452,6 +669,8 @@ class GraphPaneSpec {
         'marks': [for (final m in marks) m.toJson()],
         if (priceLines.isNotEmpty) 'priceLines': [for (final l in priceLines) l.toJson()],
         if (markers.isNotEmpty) 'markers': [for (final m in markers) m.toJson()],
+        if (coord != 'rect') 'coord': coord,
+        if (guides.isNotEmpty) 'guides': [for (final g in guides) g.toJson()],
       };
 }
 
@@ -645,6 +864,86 @@ class GraphStyleSpec {
       };
 }
 
+/// The selection: the row (or the one bar or slice) under the pointer, or
+/// pinned by a tap. The graph draws it apart from the rest and says what it
+/// holds in a tooltip; a page reads it as state (`selection`).
+class GraphSelectionSpec {
+  const GraphSelectionSpec({
+    this.on = 'none',
+    this.by = 'row',
+    this.dim = 0.35,
+    this.band,
+    this.grow = 4,
+    this.dot = 4,
+    this.tooltip = true,
+    this.title = '',
+    this.tooltipFill = const Color(0xFF111827),
+    this.tooltipText = const Color(0xFFFFFFFF),
+    this.total = false,
+  });
+
+  /// `none`, `hover` (the pointer selects, and leaving clears), `tap` (a
+  /// tap selects and stays; a tap on it again or on nothing clears) or
+  /// `both` (hover, and a tap pins what is under it).
+  final String on;
+
+  /// `row`: everything the row has (a tooltip row per mark). `mark`: the
+  /// one bar of a group or stack under the pointer.
+  final String by;
+
+  /// The opacity of what is not selected while something is (1: as it is).
+  final double dim;
+
+  /// A fill behind the selected row, the height of the pane; null for none.
+  final Color? band;
+
+  /// How much thicker a selected slice is drawn.
+  final double grow;
+
+  /// A dot of this radius on each line at the selected row (0: none).
+  final double dot;
+
+  /// Whether a tooltip is drawn, its first line ([title]: a row field,
+  /// empty for the x label) and its colors.
+  final bool tooltip;
+  final String title;
+  final Color tooltipFill, tooltipText;
+
+  /// A last tooltip row with the sum of the row's marks.
+  final bool total;
+
+  bool get hover => on == 'hover' || on == 'both';
+  bool get tap => on == 'tap' || on == 'both';
+
+  factory GraphSelectionSpec.fromJson(Json j) => GraphSelectionSpec(
+        on: _s(j['on'], 'none'),
+        by: _s(j['by'], 'row'),
+        dim: _d(j['dim'], 0.35),
+        band: j['band'] == null ? null : graphColor(j['band'], const Color(0x14000000)),
+        grow: _d(j['grow'], 4),
+        dot: _d(j['dot'], 4),
+        tooltip: _b(j['tooltip'], true),
+        title: _s(j['title'], ''),
+        tooltipFill: graphColor(j['tooltipFill'], const Color(0xFF111827)),
+        tooltipText: graphColor(j['tooltipText'], const Color(0xFFFFFFFF)),
+        total: _b(j['total'], false),
+      );
+
+  Json toJson() => {
+        'on': on,
+        'by': by,
+        'dim': dim,
+        if (band != null) 'band': _hex(band!),
+        'grow': grow,
+        'dot': dot,
+        'tooltip': tooltip,
+        if (title.isNotEmpty) 'title': title,
+        'tooltipFill': _hex(tooltipFill),
+        'tooltipText': _hex(tooltipText),
+        'total': total,
+      };
+}
+
 /// A graph.
 class GraphSpec {
   const GraphSpec({
@@ -655,7 +954,16 @@ class GraphSpec {
     this.crosshair = const GraphCrosshairSpec(),
     this.interactions = const GraphInteractionsSpec(),
     this.style = const GraphStyleSpec(),
+    this.selection = const GraphSelectionSpec(),
+    this.animate = 0,
+    this.animateIn = false,
   });
+
+  /// How long (ms) the marks take to move to new values when the rows
+  /// change (0: at once), and whether they grow from zero when the graph
+  /// first shows.
+  final double animate;
+  final bool animateIn;
 
   /// The row field that names a row across updates (its time): how an
   /// update is told from an append and from older rows put before.
@@ -666,6 +974,7 @@ class GraphSpec {
   final GraphCrosshairSpec crosshair;
   final GraphInteractionsSpec interactions;
   final GraphStyleSpec style;
+  final GraphSelectionSpec selection;
 
   factory GraphSpec.fromJson(Json j) => GraphSpec(
         key: _s(j['key'], 't'),
@@ -675,6 +984,9 @@ class GraphSpec {
         crosshair: GraphCrosshairSpec.fromJson(_m(j['crosshair'])),
         interactions: GraphInteractionsSpec.fromJson(_m(j['interactions'])),
         style: GraphStyleSpec.fromJson(_m(j['style'])),
+        selection: GraphSelectionSpec.fromJson(_m(j['selection'])),
+        animate: _d(j['animate'], 0),
+        animateIn: _b(j['animateIn'], false),
       );
 
   Json toJson() => {
@@ -686,5 +998,8 @@ class GraphSpec {
         'crosshair': crosshair.toJson(),
         'interactions': interactions.toJson(),
         'style': style.toJson(),
+        if (selection.on != 'none') 'selection': selection.toJson(),
+        if (animate > 0) 'animate': animate,
+        if (animateIn) 'animateIn': animateIn,
       };
 }

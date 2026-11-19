@@ -6,7 +6,7 @@
 // What the user does is published as JSON ([state]): `view` and `cursor`,
 // for a page's variables to hold, as any control's value is.
 import 'dart:math' as math;
-import 'dart:ui' show Offset, Rect, Size;
+import 'dart:ui' show Color, Offset, Rect, Size;
 
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart' show DateFormat;
@@ -44,6 +44,34 @@ class GraphCursor {
   /// The price at [y] on [pane]'s scale (the magnet field's, when snapped).
   final double value;
   final Json row;
+}
+
+/// What is under a point: a row, and with a selection by mark the one bar
+/// or slice of it.
+class GraphHit {
+  const GraphHit({required this.pane, required this.index, this.mark});
+
+  final int pane, index;
+
+  /// The mark's place in its pane; null for the whole row.
+  final int? mark;
+
+  @override
+  bool operator ==(Object other) =>
+      other is GraphHit && other.pane == pane && other.index == index && other.mark == mark;
+  @override
+  int get hashCode => Object.hash(pane, index, mark);
+  @override
+  String toString() => 'GraphHit(pane $pane, row $index, mark $mark)';
+}
+
+/// A slice of an arc mark: where it starts and how far it turns (radians,
+/// clockwise from the top), without the gap beside it.
+class GraphSlice {
+  const GraphSlice(this.index, this.start, this.sweep, this.color);
+  final int index;
+  final double start, sweep;
+  final Color color;
 }
 
 class GraphEngine extends ChangeNotifier {
@@ -107,12 +135,19 @@ class GraphEngine extends ChangeNotifier {
     for (var i = 0; i < pane; i++) {
       top += _panesHeight * spec.panes[i].grow / total;
     }
-    return Rect.fromLTWH(0, top, plotWidth, total == 0 ? 0 : _panesHeight * spec.panes[pane].grow / total);
+    return Rect.fromLTWH(plotLeft, top, plotWidth, total == 0 ? 0 : _panesHeight * spec.panes[pane].grow / total);
   }
+
+  /// Whether the y axis is left of the plots (any pane says so).
+  bool get axisLeft => spec.panes.any((p) => p.y.side == 'left');
+
+  /// The plots' left and right edges.
+  double get plotLeft => axisLeft ? yAxisWidth : 0;
+  double get plotRight => plotLeft + plotWidth;
 
   Rect yAxisRect(int pane) {
     final plot = plotRect(pane);
-    return Rect.fromLTWH(plot.right, plot.top, yAxisWidth, plot.height);
+    return Rect.fromLTWH(axisLeft ? 0 : plot.right, plot.top, yAxisWidth, plot.height);
   }
 
   Rect get xAxisRect => Rect.fromLTWH(0, _panesBottom, size.width, spec.x.axisHeight);
@@ -122,7 +157,8 @@ class GraphEngine extends ChangeNotifier {
     for (var i = 0; i < spec.panes.length; i++) {
       final plot = plotRect(i);
       if (p.dy >= plot.top && p.dy < plot.bottom) {
-        return GraphZone(p.dx < plot.right ? GraphZoneKind.plot : GraphZoneKind.yAxis, i);
+        final inPlot = p.dx >= plot.left && p.dx < plot.right;
+        return GraphZone(inPlot ? GraphZoneKind.plot : GraphZoneKind.yAxis, i);
       }
     }
     return const GraphZone(GraphZoneKind.none);
@@ -130,18 +166,127 @@ class GraphEngine extends ChangeNotifier {
 
   // --- x ---------------------------------------------------------------------
 
-  double get from => viewport.from(count, plotWidth);
-  double get to => viewport.to(count);
-  (int, int) get visible => viewport.visible(count, plotWidth);
+  /// Whether rows are placed by a number of theirs (GraphXSpec.scale), not
+  /// one place each.
+  bool get linear => spec.x.linear;
+
+  /// A linear scale's stretch: the spec's, else the rows' least and most.
+  (double, double) get _xDomain => _linearDomain ??= () {
+        var lo = double.infinity, hi = double.negativeInfinity;
+        for (final r in rows) {
+          if (r[spec.x.field] case final num v when v.isFinite) {
+            lo = math.min(lo, v.toDouble());
+            hi = math.max(hi, v.toDouble());
+          }
+        }
+        // Bars stand whole: half a row's room past the first and the last.
+        var room = 0.0;
+        if (spec.panes.any((p) => p.marks.any((m) => m.type == 'bar'))) {
+          var least = double.infinity;
+          for (var i = 1; i < rows.length; i++) {
+            final p = rows[i - 1][spec.x.field], q = rows[i][spec.x.field];
+            if (p is num && q is num && q != p) least = math.min(least, (q - p).abs().toDouble());
+          }
+          room = least.isFinite ? least / 2 : 0.5;
+        }
+        final a = spec.x.min ?? (lo.isFinite ? lo - room : 0), b = spec.x.max ?? (hi.isFinite ? hi + room : 1);
+        return b > a ? (a, b) : (a, a + 1);
+      }();
+  (double, double)? _linearDomain;
+
+  /// The positions at the plot's left and right edges: on a linear scale
+  /// its whole stretch, or the part of it the user has moved to.
+  double get from => linear ? (_linearView ?? _xDomain).$1 : viewport.from(count, plotWidth);
+  double get to => linear ? (_linearView ?? _xDomain).$2 : viewport.to(count);
+  (double, double)? _linearView;
+
+  /// The first and last rows in view (on a linear scale with none in view,
+  /// the last is before the first).
+  (int, int) get visible {
+    if (!linear) return viewport.visible(count, plotWidth);
+    if (_linearView == null) return (0, count - 1);
+    var first = count, last = -1;
+    for (var i = 0; i < count; i++) {
+      final p = pos(i);
+      if (p >= from && p <= to) {
+        if (i < first) first = i;
+        last = i;
+      }
+    }
+    return (first, last);
+  }
+
+  /// Sets the part of a linear scale in view, kept on the scale (unless
+  /// the spec lets the view past it) and no closer than a thousandth of it.
+  void _setLinear(double lo, double hi) {
+    final (a, b) = _xDomain;
+    var span = math.max(hi - lo, (b - a) / 1000);
+    if (!spec.x.overscroll) {
+      span = math.min(span, b - a);
+      lo = lo.clamp(a, b - span).toDouble();
+    }
+    _linearView = (lo - a).abs() < 1e-12 && (span - (b - a)).abs() < 1e-12 ? null : (lo, lo + span);
+    _changed();
+  }
+
+  /// Pixels a position apart.
+  double get _spacing => linear ? plotWidth / (to - from) : viewport.barSpacing;
+
+  /// A row's position: its place, or on a linear scale its number.
+  double pos(int index) {
+    if (!linear) return index.toDouble();
+    final v = index >= 0 && index < count ? rows[index][spec.x.field] : null;
+    return v is num ? v.toDouble() : double.nan;
+  }
 
   /// A position's pixel.
-  double xOf(num index) => (index - from) * viewport.barSpacing;
+  double xOf(num position) => plotLeft + (position - from) * _spacing;
+
+  /// A row's pixel.
+  double xOfRow(int index) => xOf(pos(index));
 
   /// The position under a pixel.
-  double indexAt(double px) => from + px / viewport.barSpacing;
+  double indexAt(double px) => from + (px - plotLeft) / _spacing;
+
+  /// The row nearest a pixel (on rows, the place under it: it may be past
+  /// either end).
+  int rowAt(double px) {
+    final at = indexAt(px);
+    if (!linear) return at.round();
+    var best = -1;
+    var off = double.infinity;
+    for (var i = 0; i < count; i++) {
+      final d = (pos(i) - at).abs();
+      if (d < off) {
+        off = d;
+        best = i;
+      }
+    }
+    return best;
+  }
+
+  /// A place the spec names: a number on a linear scale, a row's key on
+  /// rows. Null when it names none.
+  double? place(Object? at) {
+    if (at == null) return null;
+    if (linear) return at is num ? at.toDouble() : null;
+    return indexOfKey(at)?.toDouble();
+  }
 
   /// A candle's or bar's width.
-  double get barWidth => math.max(1, (viewport.barSpacing * 0.72).floorToDouble());
+  double get barWidth => math.max(1, (slotWidth * 0.72).floorToDouble());
+
+  /// The room a row has: a place, or on a linear scale the least stretch
+  /// between two rows next to one another.
+  double get slotWidth {
+    if (!linear) return viewport.barSpacing;
+    var least = double.infinity;
+    for (var i = 1; i < count; i++) {
+      final d = (pos(i) - pos(i - 1)).abs();
+      if (d > 0 && d < least) least = d;
+    }
+    return least.isFinite ? least * _spacing : plotWidth / 4;
+  }
 
   /// The positions with a time label: every step-th row, the step the
   /// smallest round one whose labels stand 80 px apart.
@@ -151,7 +296,11 @@ class GraphEngine extends ChangeNotifier {
   // The calendar unit the ticks are at: 0 years, 1 months, 2 days, 3 hours.
   int _tickLevel = 1;
 
-  DateTime? _rowTime(int index) => switch (rows[index][spec.x.label]) {
+  /// A row's time: its label read as one, under a date pattern (an x scale
+  /// with no format writes its labels as they are).
+  DateTime? _rowTime(int index) => spec.x.format.isEmpty
+      ? null
+      : switch (rows[index][spec.x.label]) {
         final num ms => DateTime.fromMillisecondsSinceEpoch(ms.toInt(), isUtc: true),
         final String s => DateTime.tryParse(s),
         _ => null,
@@ -224,13 +373,23 @@ class GraphEngine extends ChangeNotifier {
   }
 
   List<num> _xTicks() {
+    if (spec.x.tickValues.isNotEmpty) {
+      return [
+        for (final t in spec.x.tickValues)
+          if (t.value >= from - 1e-9 && t.value <= to + 1e-9) t.value,
+      ];
+    }
     if (count == 0) return const [];
+    if (linear) {
+      final step = _niceStep((to - from) / math.max(1, plotWidth / 90));
+      return [for (var k = (from / step - 1e-9).ceil(); k * step <= to + step * 1e-9; k++) k * step];
+    }
     if (spec.x.ticks == 'calendar') return _calendarTicks();
     var step = spec.x.tickEvery ?? 1;
     if (spec.x.tickEvery == null) {
       for (final s in const [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000]) {
         step = s;
-        if (s * viewport.barSpacing >= 80) break;
+        if (s * viewport.barSpacing >= (spec.x.fit == 'none' ? 80 : 40)) break;
       }
     }
     // A fitted view labels the positions its rows have not reached yet.
@@ -239,8 +398,30 @@ class GraphEngine extends ChangeNotifier {
     // A label hard against the left edge would be cut: it is left out.
     return [
       for (var i = (first / step).ceil() * step; i <= last; i += step)
-        if (xOf(i) >= 16) i,
+        if (xOf(i) - plotLeft >= 16) i,
     ];
+  }
+
+  /// A round step no smaller than [raw]: 1, 2 or 5 times a power of ten.
+  double _niceStep(double raw) {
+    if (!(raw > 0) || !raw.isFinite) return 1;
+    final mag = math.pow(10, (math.log(raw) / math.ln10).floor()).toDouble();
+    return [1, 2, 5, 10].map((m) => m * mag).firstWhere((s) => s >= raw * 0.999);
+  }
+
+  String _number(num v) {
+    final r = v.roundToDouble();
+    if ((v - r).abs() < 1e-9) return r.toInt().toString();
+    return v.toStringAsFixed(2).replaceFirst(RegExp(r'0+$'), '');
+  }
+
+  /// What is written at an x tick: the spec's label for it, the row's
+  /// label, or on a linear scale the number.
+  String xTickText(num position) {
+    for (final t in spec.x.tickValues) {
+      if ((t.value - position).abs() < 1e-9 && t.label != null) return t.label!;
+    }
+    return linear ? _number(position) : xTickLabel(position.round());
   }
 
   final _formats = <String, DateFormat>{};
@@ -268,7 +449,7 @@ class GraphEngine extends ChangeNotifier {
     if (y.domain == 'fixed' && y.min != null && y.max != null) return (y.min!, y.max!);
     final (first, last) = y.domain == 'data' ? (0, count - 1) : visible;
     // A morph is drawn on the scale of where it is going.
-    final rows = _target ?? this.rows;
+    final rows = _target ?? _tweenTo ?? this.rows;
     var lo = double.infinity, hi = double.negativeInfinity;
     void take(double? v) {
       if (v == null || !v.isFinite) return;
@@ -277,8 +458,19 @@ class GraphEngine extends ChangeNotifier {
     }
 
     var fromZero = false;
+    // A stack reaches the sum of its bars.
+    for (final group in barGroups(pane)) {
+      if (group.length < 2) continue;
+      for (var i = first; i <= last; i++) {
+        var sum = 0.0;
+        for (final g in group) {
+          if (rows[i][p.marks[g].y] case final num v when v.isFinite) sum += v;
+        }
+        take(sum);
+      }
+    }
     for (final m in p.marks) {
-      if (m.overlay != null) continue;
+      if (m.overlay != null || m.type == 'arc') continue;
       if (m.type == 'bar') {
         fromZero = true;
         take(0);
@@ -365,11 +557,25 @@ class GraphEngine extends ChangeNotifier {
     return null;
   }
 
-  /// A percent scale's ticks (round percents); null for the scale's own.
-  List<num>? yTicks(int pane) {
-    final base = spec.panes[pane].y.mode == 'percent' ? percentBase(pane) : null;
-    if (base == null) return null;
+  /// A pane's y ticks: round values about five apart (a percent scale's:
+  /// round percents).
+  List<num> yTicks(int pane) {
+    final y = spec.panes[pane].y;
+    final base = y.mode == 'percent' ? percentBase(pane) : null;
     final (lo, hi) = yDomain(pane);
+    if (y.tickValues.isNotEmpty) {
+      return [
+        for (final t in y.tickValues)
+          if (t.value >= lo - 1e-9 && t.value <= hi + 1e-9) t.value,
+      ];
+    }
+    if (base == null) {
+      final span = hi - lo;
+      if (!(span > 0) || !span.isFinite || y.ticks <= 0) return const [];
+      final step = _niceStep(span / y.ticks);
+      // Whole steps, so a tick is 0.3 and never 0.30000000000000004.
+      return [for (var k = (lo / step - 1e-9).ceil(); k * step <= hi + step * 1e-9; k++) k * step];
+    }
     final a = (lo / base - 1) * 100, b = (hi / base - 1) * 100;
     final raw = (b - a) / 5, mag = math.pow(10, (math.log(raw) / math.ln10).floor()).toDouble();
     final step = [1, 2, 5, 10].map((m) => m * mag).firstWhere((s) => s >= raw);
@@ -377,6 +583,14 @@ class GraphEngine extends ChangeNotifier {
   }
 
   String yLabel(int pane, num value) {
+    final y = spec.panes[pane].y;
+    for (final t in y.tickValues) {
+      if ((t.value - value).abs() < 1e-9 && t.label != null) return t.label!;
+    }
+    return '${y.prefix}${_yNumber(pane, value)}${y.suffix}';
+  }
+
+  String _yNumber(int pane, num value) {
     final y = spec.panes[pane].y;
     if (y.mode == 'percent') {
       final base = percentBase(pane);
@@ -423,10 +637,17 @@ class GraphEngine extends ChangeNotifier {
   /// are followed (a view at the end) or left off screen (a view back in
   /// history); older rows put before move nothing; a row with a known key is
   /// an update in place.
-  void setData(List<Json> data) {
+  ///
+  /// With [tween] (and a spec that animates), the marks move from the
+  /// values on screen to the new ones as [tweenTo] is turned from 0 to 1,
+  /// rows told apart by the spec's key (a row not there before grows from
+  /// zero).
+  void setData(List<Json> data, {bool tween = false}) {
     final key = spec.key;
     final lastKey = count == 0 ? null : rows.last[key];
     final firstKey = count == 0 ? null : rows.first[key];
+    final before = tween && spec.animate > 0 && plotWidth > 0 ? {for (final r in rows) r[key]: r} : null;
+    _tweenFrom = _tweenTo = null;
     _source = data;
     rows = applyGraphTransforms(data, spec.transforms);
     if (lastKey != null) {
@@ -448,7 +669,64 @@ class GraphEngine extends ChangeNotifier {
       return;
     }
     _morphFrom = null;
+    if (before != null && count > 0) {
+      _tweenFrom = before;
+      _tweenTo = rows;
+      _settle();
+      tweenTo(0);
+      return;
+    }
     _settle();
+  }
+
+  // A tween under way (GraphSpec.animate): the rows the graph showed, by
+  // key, and the rows it is going to.
+  Map<Object?, Json>? _tweenFrom;
+  List<Json>? _tweenTo;
+  bool get tweening => _tweenTo != null;
+
+  /// Starts the marks from zero (GraphSpec.animateIn): [tweenTo] turned from
+  /// 0 to 1 grows them to their values.
+  void enter() {
+    if (count == 0 || morphing) return;
+    _tweenFrom = const {};
+    _tweenTo = _tweenTo ?? rows;
+    tweenTo(0);
+  }
+
+  /// The row fields the marks draw.
+  Set<String> get _markFields => {
+        for (final p in spec.panes)
+          for (final m in p.marks) ...m.fields.where((f) => f.isNotEmpty),
+      };
+
+  /// A tween's progress, 0 to 1: each mark's value between what it was and
+  /// what it is, on the scale of where it is going.
+  void tweenTo(double t) {
+    final to = _tweenTo, from = _tweenFrom;
+    if (to == null || from == null) return;
+    if (t >= 1) {
+      rows = to;
+      _tweenFrom = _tweenTo = null;
+      _changed();
+      return;
+    }
+    final fields = _markFields;
+    final key = spec.key;
+    rows = [
+      for (final r in to)
+        {
+          ...r,
+          for (final f in fields)
+            if (r[f] case final num now when now.isFinite)
+              f: () {
+                final was = from[r[key]]?[f];
+                final a = was is num && was.isFinite ? was.toDouble() : 0.0;
+                return a + (now - a) * t;
+              }(),
+        },
+    ];
+    _changed();
   }
 
   /// The mark a morph moves: the crosshair's, else the first.
@@ -472,7 +750,7 @@ class GraphEngine extends ChangeNotifier {
     final (lo, hi) = yDomain(pane);
     _morphFrom = [
       for (var i = 0; i < count; i++)
-        if (rows[i][m.valueField] case final num v) (xOf(i) / plotWidth, (v - lo) / (hi - lo)),
+        if (rows[i][m.valueField] case final num v) ((xOfRow(i) - plotLeft) / plotWidth, (v - lo) / (hi - lo)),
     ];
     if (_morphFrom!.isEmpty) _morphFrom = null;
   }
@@ -511,7 +789,7 @@ class GraphEngine extends ChangeNotifier {
           {
             ...target[i],
             m.valueField: () {
-              final was = _morphHeightAt(xOf(i) / plotWidth), now = (v - lo) / (hi - lo);
+              final was = _morphHeightAt((xOfRow(i) - plotLeft) / plotWidth), now = (v - lo) / (hi - lo);
               return lo + (was + (now - was) * t) * (hi - lo);
             }(),
           }
@@ -521,13 +799,27 @@ class GraphEngine extends ChangeNotifier {
     _changed();
   }
 
-  void panBy(double dx) => _setViewport(viewport.pan(dx));
+  void panBy(double dx) =>
+      linear ? _setLinear(from - dx / _spacing, to - dx / _spacing) : _setViewport(viewport.pan(dx));
 
   /// [px] is from the plot's left.
-  void zoomAt(double px, double factor) => _setViewport(
-      viewport.zoomAt(px, factor, plotWidth, min: spec.x.minBarSpacing, max: spec.x.maxBarSpacing));
+  void zoomAt(double px, double factor) {
+    if (linear) {
+      // The position under the pointer stays under it.
+      final at = indexAt(px), lo = at - (at - from) / factor;
+      return _setLinear(lo, lo + (to - from) / factor);
+    }
+    _setViewport(
+        viewport.zoomAt(px - plotLeft, factor, plotWidth, min: spec.x.minBarSpacing, max: spec.x.maxBarSpacing));
+  }
 
-  void resetX() => _setViewport(GraphViewport(barSpacing: spec.x.barSpacing, rightOffset: spec.x.rightOffset));
+  void resetX() {
+    if (linear) {
+      _linearView = null;
+      return _changed();
+    }
+    _setViewport(GraphViewport(barSpacing: spec.x.barSpacing, rightOffset: spec.x.rightOffset));
+  }
 
   /// Scales a pane's y about its middle: autoscale goes off.
   void scaleY(int pane, double factor) {
@@ -564,8 +856,8 @@ class GraphEngine extends ChangeNotifier {
 
   GraphCursor? _cursorAt(Offset p) {
     _pointer = p;
-    if (count == 0 || !spec.crosshair.enabled || p.dx < 0 || p.dx > plotWidth) return null;
-    final index = indexAt(p.dx).round().clamp(0, count - 1);
+    if (count == 0 || !spec.crosshair.enabled || p.dx < plotLeft || p.dx > plotRight) return null;
+    final index = rowAt(p.dx).clamp(0, count - 1);
     final row = rows[index];
     final zone = zoneAt(p);
     var pane = zone.pane < 0 ? spec.panes.length - 1 : zone.pane;
@@ -578,12 +870,18 @@ class GraphEngine extends ChangeNotifier {
         y = yOf(home, v.toDouble());
       }
     }
-    return GraphCursor(index: index, pane: pane, x: xOf(index), y: y, value: valueAt(pane, y), row: row);
+    return GraphCursor(index: index, pane: pane, x: xOfRow(index), y: y, value: valueAt(pane, y), row: row);
   }
 
   /// Sets the view from state: `{barSpacing, rightOffset}`, or `{last: n}`
   /// for the last n rows across the plot.
   void applyView(Json view, {bool notify = true}) {
+    if (linear) {
+      // `{from, to}`: a stretch of the scale.
+      final lo = view['from'], hi = view['to'];
+      if (lo is num && hi is num && hi > lo) _setLinear(lo.toDouble(), hi.toDouble());
+      return;
+    }
     if (view['last'] case final num n) {
       if (plotWidth <= 0) {
         _pendingView = view;
@@ -606,7 +904,16 @@ class GraphEngine extends ChangeNotifier {
 
   void _settle() {
     final fit = spec.x.fit;
-    if (fit != 'none' && plotWidth > 0 && count > 0) {
+    if (linear) {
+      // The rows may have moved the scale's ends: the view stays on it.
+      if (_linearView case (final lo, final hi)) {
+        _linearDomain = null;
+        final (a, b) = _xDomain;
+        final span = math.min(hi - lo, b - a);
+        final at = spec.x.overscroll ? lo : lo.clamp(a, b - span).toDouble();
+        _linearView = (at, at + span);
+      }
+    } else if (fit != 'none' && plotWidth > 0 && count > 0) {
       // Every position across the plot: the view is not the user's.
       final slots = math.max(2, math.max(spec.x.slots ?? count, count));
       viewport = fit == 'points'
@@ -624,7 +931,7 @@ class GraphEngine extends ChangeNotifier {
       viewport = viewport.clamp(count, plotWidth);
     }
     _changed();
-    if (!_askedHistory && spec.x.moreHistory && count > 0 && plotWidth > 0 && from < spec.x.historyThreshold) {
+    if (!_askedHistory && !linear && spec.x.moreHistory && count > 0 && plotWidth > 0 && from < spec.x.historyThreshold) {
       _askedHistory = true;
       onNeedHistory?.call(viewState);
     }
@@ -634,9 +941,275 @@ class GraphEngine extends ChangeNotifier {
     _domains.clear();
     _ticks = null;
     _keys = null;
+    _linearDomain = null;
     // The pointer has not moved, the rows under it have.
     if (cursor != null && _pointer != null) cursor = _cursorAt(_pointer!);
+    if (_hoverAt != null) _hover = hitAt(_hoverAt!);
+    if (_pinned != null && _pinned!.index >= count) _pinned = null;
     notifyListeners();
+  }
+
+  // --- bars, slices and the selection -------------------------------------
+
+  /// A pane's bars by their place in the row: marks with the same stack are
+  /// one group (one on another), every other bar a group of its own. The
+  /// numbers are the marks' places in the pane. Overlay bars (volume under
+  /// a price) are not grouped: each is drawn across the row.
+  List<List<int>> barGroups(int pane) {
+    final marks = spec.panes[pane].marks;
+    final groups = <List<int>>[];
+    final byStack = <String, List<int>>{};
+    for (var i = 0; i < marks.length; i++) {
+      final m = marks[i];
+      if (m.type != 'bar' || m.overlay != null) continue;
+      final stack = m.stack;
+      if (stack == null) {
+        groups.add([i]);
+      } else if (byStack[stack] case final list?) {
+        list.add(i);
+      } else {
+        groups.add(byStack[stack] = [i]);
+      }
+    }
+    return groups;
+  }
+
+  /// A row's bars on a pane: each drawn mark's place and its box, in the
+  /// graph's own pixels.
+  List<(int, Rect)> barRects(int pane, int index) {
+    final marks = spec.panes[pane].marks;
+    final row = rows[index];
+    final out = <(int, Rect)>[];
+    final center = xOfRow(index);
+    final plot = plotRect(pane);
+    for (var i = 0; i < marks.length; i++) {
+      final m = marks[i];
+      if (m.type != 'bar' || m.overlay == null) continue;
+      if (row[m.y] case final num v when v.isFinite) {
+        final (_, hi) = overlayDomain(pane, m);
+        final h = v / hi * plot.height;
+        out.add((i, Rect.fromLTRB(center - barWidth / 2, plot.bottom - h, center + barWidth / 2, plot.bottom)));
+      }
+    }
+    final groups = barGroups(pane);
+    if (groups.isEmpty) return out;
+    final gap = groups.length > 1 ? math.min(2.0, barWidth / (groups.length * 4)) : 0.0;
+    final w = (barWidth - gap * (groups.length - 1)) / groups.length;
+    final zero = yOf(pane, 0);
+    for (var g = 0; g < groups.length; g++) {
+      final left = center - barWidth / 2 + g * (w + gap);
+      var up = 0.0, down = 0.0;
+      for (final i in groups[g]) {
+        if (row[marks[i].y] case final num v when v.isFinite && v != 0) {
+          final a = v > 0 ? up : down;
+          final b = a + v;
+          if (v > 0) {
+            up = b;
+          } else {
+            down = b;
+          }
+          final ya = yOf(pane, a), yb = yOf(pane, b);
+          final r = Rect.fromLTRB(left, math.min(ya, yb), left + w, math.max(ya, yb));
+          // A bar too thin to see still shows where it is.
+          out.add((i, r.height < 1 ? Rect.fromLTRB(r.left, zero - 1, r.right, zero) : r));
+        }
+      }
+    }
+    return out;
+  }
+
+  /// A row's color for a mark: its own field's, the mark's list's, or the
+  /// mark's.
+  Color markColor(GraphMarkSpec m, int index) {
+    if (m.colorField.isNotEmpty && index < count) {
+      if (rows[index][m.colorField] case final String s) return graphColor(s, m.color);
+    }
+    if (m.colors.isNotEmpty) return m.colors[index % m.colors.length];
+    return m.color;
+  }
+
+  /// An arc mark's circle on its pane: center, outer radius and the hole's.
+  (Offset, double, double) arcGeometry(int pane, GraphMarkSpec m) {
+    final plot = plotRect(pane);
+    final box = Rect.fromLTWH(plot.left, plot.top, plot.width + yAxisWidth, plot.height);
+    final room = spec.selection.on == 'none' ? 0.0 : spec.selection.grow;
+    final outer = math.max(0.0, math.min(box.width, box.height) / 2 - room);
+    return (box.center, outer, outer * m.inner.clamp(0.0, 0.98));
+  }
+
+  /// An arc mark's slices: each row's share of the turn (a negative or
+  /// missing value has none).
+  List<GraphSlice> slices(GraphMarkSpec m) {
+    final values = [
+      for (final r in rows)
+        if (r[m.y] case final num v when v.isFinite && v > 0) v.toDouble() else 0.0,
+    ];
+    final total = values.fold(0.0, (a, b) => a + b);
+    if (total <= 0) return const [];
+    final gap = values.where((v) => v > 0).length > 1 ? m.gap * math.pi / 180 : 0.0;
+    var at = m.startAngle * math.pi / 180;
+    final out = <GraphSlice>[];
+    for (var i = 0; i < values.length; i++) {
+      final sweep = values[i] / total * 2 * math.pi;
+      if (sweep > gap) out.add(GraphSlice(i, at + gap / 2, sweep - gap, markColor(m, i)));
+      at += sweep;
+    }
+    return out;
+  }
+
+  /// What is under [p]; null for nothing.
+  GraphHit? hitAt(Offset p) {
+    if (count == 0) return null;
+    final byMark = spec.selection.by == 'mark';
+    for (var pane = 0; pane < spec.panes.length; pane++) {
+      final s = spec.panes[pane];
+      final plot = plotRect(pane);
+      if (p.dy < plot.top || p.dy >= plot.bottom) continue;
+      if (s.polar) {
+        for (var k = 0; k < s.marks.length; k++) {
+          final m = s.marks[k];
+          if (m.type != 'arc') continue;
+          final (center, outer, inner) = arcGeometry(pane, m);
+          final d = p - center;
+          if (d.distance > outer + spec.selection.grow || d.distance < inner) continue;
+          // Clockwise from the top.
+          final angle = math.atan2(d.dx, -d.dy);
+          for (final slice in slices(m)) {
+            final turned = (angle - slice.start) % (2 * math.pi);
+            if (turned <= slice.sweep) return GraphHit(pane: pane, index: slice.index, mark: k);
+          }
+        }
+        return null;
+      }
+      if (p.dx < plot.left || p.dx > plot.right) return null;
+      final index = rowAt(p.dx);
+      if (index < 0 || index >= count) return null;
+      if (!byMark) return GraphHit(pane: pane, index: index);
+      (int, double)? best;
+      for (final (k, r) in barRects(pane, index)) {
+        if (p.dx < r.left || p.dx > r.right) continue;
+        final off = p.dy < r.top ? r.top - p.dy : (p.dy > r.bottom ? p.dy - r.bottom : 0.0);
+        if (best == null || off < best.$2) best = (k, off);
+      }
+      return best == null ? null : GraphHit(pane: pane, index: index, mark: best.$1);
+    }
+    return null;
+  }
+
+  GraphHit? _hover, _pinned;
+  Offset? _hoverAt;
+
+  /// Where the pointer is while it selects; null once it left.
+  Offset? get pointer => _hover == null ? null : _hoverAt;
+
+  /// What is selected: under the pointer, else pinned by a tap.
+  GraphHit? get selection => _hover ?? _pinned;
+  bool get pinned => _pinned != null;
+
+  /// The pointer is at [p] (null: it left).
+  void hover(Offset? p) {
+    _hoverAt = spec.selection.hover ? p : null;
+    final next = _hoverAt == null ? null : hitAt(_hoverAt!);
+    if (next == _hover) return;
+    _hover = next;
+    notifyListeners();
+  }
+
+  /// A tap at [p]: it pins what is there; on what is pinned, or on nothing,
+  /// it lets go.
+  void tap(Offset p) {
+    if (!spec.selection.tap) return;
+    final hit = hitAt(p);
+    final next = hit == _pinned ? null : hit;
+    if (next == _pinned) return;
+    _pinned = next;
+    notifyListeners();
+  }
+
+  /// Sets the pinned selection from state: `{index}` or `{index, mark}`
+  /// (the mark's place in its pane); null lets go.
+  void select(Json? value) {
+    GraphHit? next;
+    if (value?['index'] case final num i when i >= 0 && i < count) {
+      final pane = ((value?['pane'] as num?)?.toInt() ?? 0).clamp(0, spec.panes.length - 1);
+      next = GraphHit(pane: pane, index: i.toInt(), mark: (value?['mark'] as num?)?.toInt());
+    }
+    if (next == _pinned) return;
+    _pinned = next;
+    notifyListeners();
+  }
+
+  /// How much of itself a row's mark shows: all of it, or the selection's
+  /// dim while another is selected.
+  double emphasis(int pane, int mark, int index) {
+    final sel = selection;
+    if (sel == null) return 1;
+    final on = sel.index == index && (sel.mark == null || (sel.pane == pane && sel.mark == mark));
+    return on ? 1 : spec.selection.dim.clamp(0.0, 1.0);
+  }
+
+  /// The marks a tooltip lists for the selection: color, name and value.
+  List<(Color, String, double)> selectionRows() {
+    final sel = selection;
+    if (sel == null || sel.index >= count) return const [];
+    final row = rows[sel.index];
+    final out = <(Color, String, double)>[];
+    final seen = <(int, String)>{};
+    for (var p = 0; p < spec.panes.length; p++) {
+      final marks = spec.panes[p].marks;
+      for (var k = 0; k < marks.length; k++) {
+        if (sel.mark != null && (sel.pane != p || sel.mark != k)) continue;
+        final m = marks[k];
+        // An area and the line along its top are one thing to read: the line.
+        if (sel.mark == null && m.type == 'area' && marks.any((o) => o.type == 'line' && o.valueField == m.valueField)) continue;
+        if (sel.mark == null && !seen.add((p, m.valueField))) continue;
+        if (row[m.valueField] case final num v when v.isFinite) {
+          out.add((markColor(m, sel.index), m.label, v.toDouble()));
+        }
+      }
+    }
+    return out;
+  }
+
+  /// Where a tooltip points: the top of the selected row's place, or the
+  /// middle of the selected slice's outer edge.
+  Offset? get selectionAnchor {
+    final sel = selection;
+    if (sel == null || sel.index >= count) return null;
+    final pane = spec.panes[sel.pane];
+    if (pane.polar) {
+      final k = sel.mark ?? pane.marks.indexWhere((m) => m.type == 'arc');
+      if (k < 0) return null;
+      final m = pane.marks[k];
+      final (center, outer, _) = arcGeometry(sel.pane, m);
+      for (final s in slices(m)) {
+        if (s.index != sel.index) continue;
+        final mid = s.start + s.sweep / 2;
+        return center + Offset(math.sin(mid), -math.cos(mid)) * outer;
+      }
+      return center;
+    }
+    return Offset(xOfRow(sel.index), plotRect(sel.pane).top);
+  }
+
+  Json? get selectionState {
+    final sel = selection;
+    if (sel == null || sel.index >= count) return null;
+    final row = rows[sel.index];
+    final mark = sel.mark == null ? null : spec.panes[sel.pane].marks[sel.mark!];
+    final value = mark == null ? null : row[mark.valueField];
+    return {
+      'index': sel.index,
+      'key': row[spec.key],
+      'label': xLabel(sel.index),
+      'pane': sel.pane,
+      'mark': sel.mark,
+      'name': mark?.label,
+      'field': mark?.valueField,
+      'value': value is num ? value : null,
+      'pinned': _hover == null && _pinned != null,
+      'row': row,
+    };
   }
 
   // --- state -----------------------------------------------------------------
@@ -674,5 +1247,5 @@ class GraphEngine extends ChangeNotifier {
         };
 
   /// What a page binds: `view` and `cursor`.
-  Json get state => {'view': viewState, 'cursor': cursorState};
+  Json get state => {'view': viewState, 'cursor': cursorState, 'selection': selectionState};
 }

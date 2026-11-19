@@ -1,5 +1,6 @@
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/render/control_theme.dart' show ThemeTokensScope, rolesOf;
 import 'package:flutter/material.dart' hide TextStyle;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -96,7 +97,7 @@ void main() {
           {'colors': {}, 'text': {}, 'isDark': true, 'brightness': 'dark', 'mode': 'system', 'hasDark': false});
     });
 
-    testWidgets('the theme follows the device\'s light or dark mode: bound colors, text and the Material theme', (tester) async {
+    testWidgets('the theme follows the device\'s light or dark mode: bound colors, text and the chrome\'s tokens', (tester) async {
       addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
       tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
       final app = Codelessly.fromBundle(_bundle(_theme), fonts: const NoFontFetcher());
@@ -108,7 +109,8 @@ void main() {
 
       String text() => controller.tree!.boxOf('label')!.node!.prop(TextProps.text);
       Object? fill() => controller.tree!.boxOf('card')!.node!.toJson()['decoration'];
-      Brightness material() => Theme.of(tester.element(find.byType(NodeView))).brightness;
+      Brightness material() =>
+          ThemeTokensScope.maybeOf(tester.element(find.byType(NodeView)))!.dark ? Brightness.dark : Brightness.light;
 
       expect(controller.scope!.read('theme.isDark'), isFalse);
       expect(text(), 'light #FF666666 28');
@@ -139,7 +141,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(controller.scope!.read('theme.isDark'), isTrue);
       expect(controller.scope!.read('theme.primary'), '#FF2F6BFF');
-      expect(Theme.of(tester.element(find.byType(NodeView))).brightness, Brightness.light);
+      expect(ThemeTokensScope.maybeOf(tester.element(find.byType(NodeView)))!.dark, isFalse);
     });
 
     testWidgets('the app\'s theme decides nothing: the device\'s mode and the project\'s tokens do', (tester) async {
@@ -156,10 +158,38 @@ void main() {
       ));
       await tester.pumpAndSettle();
       expect(controller.scope!.read('theme.isDark'), isFalse, reason: 'the device is light');
-      final theme = Theme.of(tester.element(find.byType(NodeView)));
-      expect(theme.brightness, Brightness.light);
-      expect(theme.colorScheme.primary, const Color(0xFF2F6BFF));
-      expect(theme.colorScheme.surface, const Color(0xFFFFFFFF));
+      final view = tester.element(find.byType(NodeView));
+      expect(ThemeTokensScope.maybeOf(view)!.dark, isFalse);
+      expect(rolesOf(view).primary, const Color(0xFF2F6BFF));
+      expect(rolesOf(view).surface, const Color(0xFFFFFFFF));
+      // The app's own theme is still the app's, above the layout.
+      expect(Theme.of(view).brightness, Brightness.dark);
+    });
+
+    testWidgets('the SDK puts no Theme above a layout and needs none: its tokens are what the chrome reads', (tester) async {
+      final app = Codelessly.fromBundle(_bundle(_theme), fonts: const NoFontFetcher());
+      addTearDown(app.dispose);
+      // A plain app: no Material theme anywhere.
+      await tester.pumpWidget(WidgetsApp(
+        color: const Color(0xFF000000),
+        builder: (context, _) => CodelesslyWidget(codelessly: app),
+      ));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(Theme), findsNothing);
+      final view = tester.element(find.byType(NodeView));
+      expect(rolesOf(view).primary, const Color(0xFF2F6BFF));
+      expect(ThemeTokensScope.maybeOf(view)!.tokens.fontFamily, 'Inter');
+      // In a Material app the only Theme is the app's own.
+      await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: app)));
+      await tester.pumpAndSettle();
+      final own = tester.element(find.byType(NodeView));
+      expect(
+        find.ancestor(of: find.byType(NodeView), matching: find.byType(Theme)),
+        findsNWidgets(find.ancestor(of: find.byType(CodelesslyWidget), matching: find.byType(Theme)).evaluate().length),
+        reason: 'no Theme between the CodelesslyWidget and its layout',
+      );
+      expect(rolesOf(own).primary, const Color(0xFF2F6BFF));
     });
 
     testWidgets('a project\'s own variable named theme wins over the built-in one', (tester) async {

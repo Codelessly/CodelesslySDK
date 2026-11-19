@@ -1,6 +1,6 @@
 import 'package:codelessly_api/core.dart' as api;
 
-export '../render/control_theme.dart' show colorOf, kControlRadius, kInk, kInkOnDark, kPaper, kPaperDark, kSurfaceRadius, themeDataOf;
+export '../render/control_theme.dart' show colorOf, kControlRadius, kInk, kInkOnDark, kPaper, kPaperDark, kSurfaceRadius;
 
 /// The value of the `theme` name layouts read: [tokens] for a light or
 /// [dark] screen ([api.ThemeTokens.forBrightness]):

@@ -1,4 +1,5 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/render/control_theme.dart' show rolesOf;
 import 'package:codelessly_sdk/src/widgets/registry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -140,7 +141,7 @@ class _RenderBoard extends RenderProxyBox with RenderObjectWithLayoutCallbackMix
 
 void main() {
   testWidgets(
-      "an embedded widget sees the app's media query, navigator, overlay, focus and text direction, but not its theme",
+      "an embedded widget sees the app's media query, navigator, overlay, focus, text direction and theme, and the layout's tokens",
       (tester) async {
     _registerRecipes();
     _registerIslandField();
@@ -155,9 +156,11 @@ void main() {
     final appContext = tester.element(find.byType(NodeView));
     final p = _probes['p']!, inner = _probes['inner']!;
     for (final c in [p, inner]) {
-      // The layout's controls never take the app's colors: neutral ink here.
-      expect(Theme.of(c).colorScheme.primary, isNot(Theme.of(appContext).colorScheme.primary));
-      expect(Theme.of(c).colorScheme.primary, kInk);
+      // The app's own widget finds the app's theme, as anywhere in the app;
+      // the layout's tokens are beside it (neutral ink here).
+      expect(Theme.of(c).colorScheme.primary, Theme.of(appContext).colorScheme.primary);
+      expect(rolesOf(c).primary, kInk);
+      expect(DefaultTextStyle.of(c).style.color, kInk);
       expect(MediaQuery.sizeOf(c), MediaQuery.sizeOf(appContext));
       expect(Navigator.of(c), same(Navigator.of(appContext)));
       expect(Overlay.of(c), same(Overlay.of(appContext)));
@@ -173,14 +176,15 @@ void main() {
     expect(_Tag.of(inner), 'holder');
     expect(inner.findAncestorWidgetOfExactType<NodeChild>(), isNotNull);
 
-    // An inherited change above the view reaches every island (the app's
-    // theme changing reaches none: they keep the layout's).
+    // An inherited change above the view reaches every island, the app's
+    // theme among them.
     final builds = Map.of(_probeBuilds);
     final blue = ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue));
     await tester.pumpWidget(_app(tree, theme: blue, tag: 'app2'));
     await tester.pumpAndSettle();
-    expect(Theme.of(_probes['p']!).colorScheme.primary, kInk);
-    expect(Theme.of(_probes['inner']!).colorScheme.primary, kInk);
+    expect(Theme.of(_probes['p']!).colorScheme.primary, blue.colorScheme.primary);
+    expect(Theme.of(_probes['inner']!).colorScheme.primary, blue.colorScheme.primary);
+    expect(rolesOf(_probes['p']!).primary, kInk);
     expect(_Tag.of(_probes['p']!), 'app2');
     expect(_probeBuilds['p']!, greaterThan(builds['p']!));
     expect(_probeBuilds['inner']!, greaterThan(builds['inner']!));

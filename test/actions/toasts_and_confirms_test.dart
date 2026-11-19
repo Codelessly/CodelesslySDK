@@ -2,9 +2,12 @@ import 'dart:async';
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/internals.dart';
+import 'package:codelessly_sdk/src/render/control_theme.dart' show rolesOf;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../support/shell_controls.dart';
 
 // Toasts and the confirm dialog (the action's `look`, bound colors and sizes, the button's actions,
 // a designed dialog's answer).
@@ -155,13 +158,10 @@ void main() {
         expect(positioned.left, 16);
         expect(tester.getRect(toast).left, lessThan(30));
         expect(find.byType(Transform), findsWidgets);
-        final button = tester.widget<TextButton>(find.byKey(const ValueKey('codelessly-toast-action')));
-        expect(button.style!.backgroundColor!.resolve({}), Colors.white);
-        expect(button.style!.side!.resolve({}), const BorderSide(color: Colors.black, width: 2));
-        expect(
-          (button.style!.shape!.resolve({}) as RoundedRectangleBorder).borderRadius,
-          BorderRadius.circular(6),
-        );
+        final button = shellButtonBox(tester, find.byKey(const ValueKey('codelessly-toast-action')));
+        expect(button.fillColor, Colors.white);
+        expect(button.borderSide, const BorderSide(color: Colors.black, width: 2));
+        expect((button.shape as RoundedRectangleBorder).borderRadius, BorderRadius.circular(6));
         expect(find.byKey(const ValueKey('codelessly-toast-close')), findsOneWidget);
       });
 
@@ -183,7 +183,7 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 300));
         await tester.pump(const Duration(milliseconds: 300));
-        await tester.tap(find.text('Undo'));
+        await tester.tap(shellButton('Undo'));
         await tester.pump();
         expect(h['restored'], 'yes');
         await tester.pump(const Duration(milliseconds: 300));
@@ -244,14 +244,14 @@ void main() {
         expect(find.text('TEAM'), findsOneWidget);
         expect(find.text('They lose access.'), findsOneWidget);
         // Destructive: the confirm button takes the error color.
-        final ok = tester.widget<FilledButton>(find.byKey(const ValueKey('codelessly-confirm-ok')));
-        expect(ok.style!.backgroundColor!.resolve({}), Theme.of(h.context!).colorScheme.error);
-        await tester.tap(find.text('Remove'));
+        final ok = shellButtonBox(tester, find.byKey(const ValueKey('codelessly-confirm-ok')));
+        expect(ok.fillColor, rolesOf(h.context!).error);
+        await tester.tap(shellButton('Remove'));
         await tester.pumpAndSettle();
         expect(h['out'], 'removed');
         unawaited(h.run(ask));
         await tester.pumpAndSettle();
-        await tester.tap(find.text('Cancel'));
+        await tester.tap(shellButton('Cancel'));
         await tester.pumpAndSettle();
         expect(h['out'], 'kept');
       });
@@ -295,8 +295,8 @@ void main() {
         expect(tester.getSize(ok).height, 52);
         // Expanded: the two buttons share the row.
         expect(tester.getSize(ok).width, closeTo(tester.getSize(cancel).width, 0.5));
-        expect(tester.widget<FilledButton>(ok).style!.backgroundColor!.resolve({}), const Color(0xFFE0B000));
-        expect(tester.widget<TextButton>(cancel).style!.backgroundColor!.resolve({}), const Color(0xFF444444));
+        expect(shellButtonBox(tester, ok).fillColor, const Color(0xFFE0B000));
+        expect(shellButtonBox(tester, cancel).fillColor, const Color(0xFF444444));
         // Centered: the title centers.
         expect(tester.widget<Text>(find.text('Reset?')).textAlign, TextAlign.center);
         await tester.tap(cancel);
@@ -353,10 +353,7 @@ void main() {
                 ],
               },
             ];
-        bool focused(String key) {
-          final button = find.byKey(ValueKey(key));
-          return Focus.of(tester.element(find.descendant(of: button, matching: find.byType(Text)).first)).hasFocus;
-        }
+        bool focused(String key) => shellButtonBox(tester, find.byKey(ValueKey(key))).focusNode.hasFocus;
 
         Future<void> press(LogicalKeyboardKey key) async {
           await tester.sendKeyEvent(key);
@@ -408,7 +405,7 @@ void main() {
         expect(find.byKey(const ValueKey('Codelessly bottom sheet')), findsOneWidget);
         expect(find.byKey(const ValueKey('Codelessly sheet drag handle')), findsOneWidget);
         expect(tester.getRect(find.byKey(const ValueKey('Codelessly bottom sheet'))).bottom, 800);
-        await tester.tap(find.text('OK'));
+        await tester.tap(shellButton('OK'));
         await tester.pumpAndSettle();
         expect(h['out'], 'ok');
       });

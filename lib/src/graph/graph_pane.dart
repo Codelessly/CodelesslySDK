@@ -18,12 +18,10 @@ import 'graphic/src/encode/color.dart';
 import 'graphic/src/encode/gradient.dart';
 import 'graphic/src/encode/shape.dart';
 import 'graphic/src/encode/size.dart';
-import 'graphic/src/graffiti/element/element.dart';
 import 'graphic/src/graffiti/element/label.dart';
 import 'graphic/src/guide/axis/axis.dart';
 import 'graphic/src/mark/area.dart';
 import 'graphic/src/mark/custom.dart';
-import 'graphic/src/mark/interval.dart';
 import 'graphic/src/mark/line.dart';
 import 'graphic/src/mark/mark.dart';
 import 'graphic/src/scale/continuous.dart';
@@ -57,7 +55,7 @@ class GraphPane {
   /// The fields on the pane's own y scale.
   List<String> get _fields => {
         for (final m in _spec.marks)
-          if (m.overlay == null) ...m.fields.where((f) => f.isNotEmpty),
+          if (m.overlay == null && m.type != 'arc') ...m.fields.where((f) => f.isNotEmpty),
       }.toList();
 
   /// The marks on a scale of their own.
@@ -91,22 +89,44 @@ class GraphPane {
       );
 
   Chart<Json> _chart(List<Json> rows) {
-    final style = engine.spec.style;
-    final text = TextStyle(fontSize: style.fontSize, color: style.text, fontFamily: style.fontFamily);
-    final grid = PaintStyle(strokeColor: style.grid, strokeWidth: 1);
     final fields = _fields;
     Variable<Json, num> number(String f, {bool labeled = false}) => Variable(
           accessor: (Json r) => r[f] is num ? r[f]! as num : double.nan,
           scale: LinearScale(formatter: (v) => engine.yLabel(index, v)),
         );
+    // Bars and slices are drawn by the graph's painter, under these.
+    final marks = <Mark>[
+      for (final m in _spec.marks)
+        if (m.type == 'bar' || m.type == 'arc')
+          ...const <Mark>[]
+        else if (_segmented.contains(m))
+          for (final band in engine.spec.x.bands) _partMark(m, band)
+        else
+          _mark(m),
+    ];
+    // A pane of bars alone still has its axes: a line nobody sees holds them.
+    if (marks.isEmpty && fields.isNotEmpty) {
+      marks.add(LineMark(
+        position: Varset('_i') * Varset(fields.first),
+        color: ColorEncode(value: const Color(0x00000000)),
+        size: SizeEncode(value: 0),
+      ));
+    }
     return Chart<Json>(
       data: rows,
-      padding: (_) => EdgeInsets.only(right: engine.yAxisWidth, bottom: _last ? engine.spec.x.axisHeight : 0),
+      padding: (_) => EdgeInsets.only(
+        left: engine.axisLeft ? engine.yAxisWidth : 0,
+        right: engine.axisLeft ? 0 : engine.yAxisWidth,
+        bottom: _last ? engine.spec.x.axisHeight : 0,
+      ),
       coord: RectCoord(),
       variables: {
         '_i': Variable(
-          accessor: (Json r) => r['_i']! as num,
-          scale: LinearScale(formatter: (v) => engine.xTickLabel(v.round())),
+          // A row's position: its place, or on a linear scale its number.
+          accessor: (Json r) => engine.linear
+              ? (r[engine.spec.x.field] is num ? r[engine.spec.x.field]! as num : double.nan)
+              : r['_i']! as num,
+          scale: LinearScale(formatter: (v) => engine.xTickText(v)),
         ),
         for (final f in fields) f: number(f),
         for (final m in _overlays)
@@ -118,30 +138,9 @@ class GraphPane {
               scale: LinearScale(formatter: (v) => engine.yLabel(index, v)),
             ),
       },
-      marks: [
-        for (final m in _spec.marks)
-          if (_segmented.contains(m))
-            for (final band in engine.spec.x.bands) _partMark(m, band)
-          else
-            _mark(m),
-      ],
-      axes: [
-        AxisGuide(
-          dim: Dim.x,
-          variable: '_i',
-          grid: grid,
-          label: _last && engine.spec.x.labels ? LabelStyle(textStyle: text, offset: const Offset(0, 6)) : null,
-        ),
-        if (fields.isNotEmpty)
-          AxisGuide(
-            dim: Dim.y,
-            variable: fields.first,
-            position: 1,
-            flip: true,
-            grid: grid,
-            label: _spec.y.labels ? LabelStyle(textStyle: text, offset: const Offset(6, 0)) : null,
-          ),
-      ],
+      marks: marks,
+      // The grid and the axes' labels are the graph painter's.
+      axes: const [],
     );
   }
 
@@ -162,22 +161,16 @@ class GraphPane {
           color: ColorEncode(encoder: direction),
           size: SizeEncode(encoder: (_) => engine.barWidth),
         );
-      case 'bar':
-        return IntervalMark(
-          position: x * Varset(m.y),
-          color: m.byDirection ? ColorEncode(encoder: direction) : ColorEncode(value: m.color),
-          size: SizeEncode(encoder: (_) => engine.barWidth),
-        );
       case 'area':
         return AreaMark(
           position: x * Varset(m.y),
-          color: m.fade ? null : ColorEncode(value: m.color.withValues(alpha: m.fillOpacity)),
-          gradient: m.fade
+          color: m.fade || m.fillTo != null ? null : ColorEncode(value: m.color.withValues(alpha: m.color.a * m.fillOpacity)),
+          gradient: m.fade || m.fillTo != null
               ? GradientEncode(
                   value: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [m.color.withValues(alpha: m.fillOpacity), m.color.withValues(alpha: 0)],
+                    colors: [m.color.withValues(alpha: m.color.a * m.fillOpacity), m.fillTo ?? m.color.withValues(alpha: 0)],
                   ),
                 )
               : null,

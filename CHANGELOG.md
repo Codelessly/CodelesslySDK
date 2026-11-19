@@ -62,6 +62,144 @@ failed, a name the theme does not have, a child drawn over what follows it. Need
 - **`parent.parent.item`** (the outermost item in a list three deep) reads that item; it read nothing, so a
   condition on it drew no row.
 - **The notation's `go page`** names a page written in the site's folder when `site.json` lists no pages.
+## Unreleased
+
+### Behaviour changes (read before upgrading)
+
+**Theme**
+
+The SDK no longer uses Flutter's Material theme at all. It reads no `Theme` and puts none above a layout: a
+layout, and the runtime's own dialogs, toasts, sheets, players and lists, draw with the project's theme tokens
+and nothing else. A project looks the same in a `MaterialApp`, a `CupertinoApp` and a plain `WidgetsApp`.
+
+- **Nothing of your app's theme colours anything of the SDK's.** The loading spinner (`CodelesslyLoadingScreen`)
+  took your app theme's primary colour before a project had loaded; it is the project's primary, or a neutral
+  ink. A dialog's barrier is black at 54% unless the action sets a scrim; your `DialogTheme.barrierColor` is
+  not read.
+- **`themeDataOf` is removed.** For the project's colours in your own widgets use `surfaceRoles(tokens)` (see
+  Added); the theming guide shows a `ThemeData` built from them.
+- **`FeedbackTheme` is no longer a `ThemeExtension`** (its `lerp` is gone), and a `FeedbackTheme` in your
+  `ThemeData.extensions` is not looked for. `ResolvedFeedbackTheme.themeData` is removed
+  (`ResolvedFeedbackTheme.tokens` gives the look as theme tokens), and `ResolvedFeedbackTheme.resolve` takes
+  the theme's colour roles and font instead of a `ThemeData`.
+- **A widget of your own shown inside a layout (an external component, a registered widget) finds your app's
+  theme**, where it found one the SDK made from the project's tokens. In an app with no Material theme it finds
+  none, as anywhere else in that app. It still gets the layout's default text style and icon colour.
+- **A widget of your own inside a layout is no longer on a `Material`.** One that needs a Material ancestor (an
+  `InkWell`, a `TextField`, a `ListTile`) must bring its own `Material`.
+- **The confirm dialog's shadow is the theme's** (its largest shadow token), where it was Material's elevation.
+  A dialog look with shadows of its own is unchanged.
+- **The audio player's background and text are the theme's**: its tertiary background, its text colours and
+  its font. The sizes of the text are the same.
+
+**Screens, dialogs and sheets**
+
+- **Your app's `ThemeData.pageTransitionsTheme` (and `ThemeData.platform`) no longer change how a project's
+  screens come and go.** A screen with no transition of its own plays the SDK's page transition
+  (`CodelesslyConfig.pageTransitions`, see Added): by default the platform's, which is what an app with an
+  untouched theme played before. An app that customised its theme's page transitions and wants them for the
+  project's screens passes them in; the navigation guide has the few lines that do it.
+- **On Android the system's back swipe plays the screen's own way out under the finger**, as far as the first
+  15% of it, then leaves or comes back. It played Material's predictive-back look (the screen shrinking in a
+  rounded frame). Only apps with `android:enableOnBackInvokedCallback` are affected.
+- **On the web a screen opened through `CodelesslyWidget.onGenerateRoute` (your own `pushNamed`, a link) has no
+  page transition**, as a `navigate` action's screen already had none there. It played the transition of the
+  visitor's operating system.
+- **`CodelesslyPageRoute` is no longer a `MaterialPageRoute`** (it is a `PageRoute`): `route is
+  MaterialPageRoute` is false for a project's screens, and a paywall and a full-screen modal open in a
+  `CodelesslyPageRoute` too. `seeThroughPageTransitions` is removed, with
+  `SeeThroughZoomPageTransitionsBuilder` (`internals.dart`): above backdrop screens the SDK's transitions paint
+  nothing behind the screens by themselves.
+- **Behind two screens while they move, Android's transition and the desktop's scrim are the project's surface
+  color**, not your app theme's.
+- **A dialog comes and goes as the SDK's other presented layouts do**: it fades in and grows from 96% over
+  320 ms, and leaves over 200 ms. It faded over 150 ms both ways, as Material's dialog does. This is every
+  `openModal` dialog with no blur or scale of its own, and `confirm`.
+- **A plain bottom sheet moves as the SDK's sheets do**: up over 320 ms and down over 200 ms on the SDK's curve
+  (it was 250 ms on Material's), and a downward fling of 400 px a second closes it (it was 700). It is as wide as
+  the screen unless the action sets `sheetWidth`, which a plain sheet now follows; it was never wider than 640.
+  It still follows a finger, and closes when let go under half way.
+- **A dialog's barrier and pull to refresh are called "Dismiss" and "Refresh"** to a screen reader in every app.
+  In a Material app they were your app's Material localization. `CodelesslyConfig.labels` gives them, and the
+  other words of the runtime's own chrome, in your language (see Added).
+
+**Chrome**
+
+The runtime's own chrome looked like Material's. It is drawn with the SDK's stock controls now, in the project's
+theme (or a design system's), as the same control in a screen is.
+
+- **Buttons.** The toast's action and close button, the confirm dialog's answers, the players' play buttons, a
+  swiped row's Undo and a chat list's jump-to-latest button are the SDK's buttons with nothing of Material's over
+  them: the theme's hover and press layers, and a focus ring when the keyboard is on one (it was a tint). Their
+  colours, fonts, radii and the dialog's button height are still the feedback look's (`FeedbackTheme`, a
+  toast's or a confirm's own style).
+  - The toast's action is as wide as its label and padding (it was at least 48), and the close button's cross is
+    the icon size of the SDK's 36 px button (16; it was 18).
+  - The audio player's play button is the SDK's 44 px icon button in the theme's secondary text colour (it was
+    40 px, in the primary colour). The video player's is the SDK's small floating button at 44 px: the primary
+    colour, with its shadow.
+  - A list's jump-to-latest button is the SDK's small floating button, 44 px (it was 48 px on a tonal surface).
+- **The Undo bar** is the theme's inverse surface (the tooltip's colours), with the theme's panel radius and
+  shadow and 13 px text. It was Material's dark grey snackbar.
+- **The audio seek bar** is the SDK's slider, as an unstyled `slider` draws: its track, its thumb and its
+  disabled look. It was a 3 px track with a taller played part and a 12 px thumb.
+- **The loading spinner** is the SDK's spinner as an unstyled `circularProgressIndicator` draws it: a 24 px
+  ring, its arc a steady 30% turning once every 900 ms, in the theme's primary colour. The loading screen
+  (`CodelesslyLoadingScreen`), a paginated list's default loading footer and an audio player that is getting
+  ready showed Material's `CircularProgressIndicator` (36 px on the loading screen, its arc growing and
+  shrinking). A `loadingBuilder` of your own is unchanged.
+- **Pull to refresh** shows the SDK's spinner on a 36 px disc in the theme's raised surface, with its hairline
+  border and shadow. The arc fills from the top as the list is pulled, then turns while the list refreshes. It
+  was Material's 40 px white disc and its arc with an arrowhead. The pull that brings it down, where it rests
+  and how long it takes to leave are unchanged; `refreshColor`, `refreshBackgroundColor` and
+  `refreshDisplacement` apply as before.
+- **The line between a list's items** (`separator: divider`) is the SDK's divider: a `dividerThickness` of 0
+  draws no line (it drew a hairline of one device pixel), and a line thicker than the gap between the items is
+  centered on the gap (it grew out of one side). Any other line is unchanged.
+- **The players' and the chat list's buttons show no tooltip.** Hovering (or holding) the video and audio play
+  buttons and a list's jump-to-latest button showed "Play video", "Pause audio", "Jump to latest". They no longer
+  do; a screen reader still reads those names.
+- **The keyboard reaches the toast's, the Undo bar's and the players' buttons as it reaches a screen's controls.**
+  They are in the SDK's own focus order now (Tab, Shift+Tab, Enter and Space), where they were stops of Flutter's.
+  In the confirm dialog the focus still starts on the yes (on Cancel when it is destructive), Tab moves between
+  the two, Enter presses, Escape cancels. A revealed swipe action is no longer a Tab stop of its own: the row's
+  keys run its actions, as before. The audio seek bar takes the arrow keys, Page Up and Page Down, Home and End.
+
+### Added
+
+- **`CodelesslyConfig.pageTransitions`: the page transition of a project's screens.**
+  `CodelesslyPageTransitions.platform` (the default) plays Android's fade forwards, iOS's and macOS's slide with
+  its back swipe from the edge, the zoom on Windows and Linux, and none on the web. Each can be chosen by name on
+  every platform (`fadeForwards`, `cupertino`, `zoom`, `none`). `CodelesslyPageTransitions.animated(...)`
+  takes **any transition of the animation system**: a `RouteTransition`, with a preset (`sharedAxisX`,
+  `fadeThrough`, `iosPush`, `circularReveal`...) or its own `enter` and `exit` poses, curves and durations,
+  played as a `navigate` action's `routeTransition` is. A subclass of your own draws anything else. A
+  `navigate` action's own `transition` or `routeTransition` still wins for that navigation.
+- **`CodelesslyConfig.labels`: the words a screen reader hears for the runtime's own chrome** (`CodelesslyLabels`:
+  a dialog's barrier, a toast's close button, pull to refresh, jump to latest, the players' buttons, the seek bar),
+  English unless you give your own.
+- **`surfaceRoles(tokens)`: the colours an unstyled control draws in** (`SurfaceRoles`: surface, onSurface,
+  primary, muted, outline, hairline, error), from a project's theme tokens, for your own widgets.
+
+### Fixed
+
+- **The package is tested and documented for any app shell.** Its tests run under a plain `WidgetsApp` as well
+  as a `MaterialApp`; the README and the quickstart have a `WidgetsApp` sample and say what the SDK needs from
+  the app around it (a `Navigator`, and the Material icon font for icons); the example app is a plain
+  `WidgetsApp`, with a `MaterialApp` variant in `example/lib/main_material.dart`.
+- **A host app that is not a Material app can open dialogs and sheets, and show a reorderable list.** Under a
+  plain `WidgetsApp` (no `MaterialLocalizations` above the SDK) an `openModal` (a dialog, a cover, a bottom
+  sheet), a `confirm` and a list with `reorder` failed with "No MaterialLocalizations found". Each is a route or a
+  list of the SDK's own now, the same in every app.
+
+### Changed
+
+- **No file of the package imports Flutter's Material or Cupertino library** (23 did). An app that does not use
+  Material itself carries about 430 KB less of it (Android arm64: 104 KB of `flutter/src/material`, from
+  432 KB; 16 KB of `flutter/src/cupertino`, from 47 KB; none of `material_color_utilities`, from 72 KB). What
+  is left in such an app comes from the plugins the package depends on (`video_player`, `webview_flutter`,
+  `in_app_purchase`), which import Material themselves. A Material app carries about 300 KB less.
+  `docs/design/no-material.md` has the measurements.
 
 ## 39.0.0
 

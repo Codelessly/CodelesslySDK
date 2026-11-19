@@ -8,9 +8,9 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:codelessly_api/core.dart' show HeroFlightShuttle, HeroPlaceholder;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
-import '../../render/control_theme.dart' show CodelesslyThemeTokens, kPaper, kPaperDark;
+import '../../render/control_theme.dart' show ThemeTokensScope, kPaper, kPaperDark, rolesOf;
 import '../../render/hero.dart';
 import '../../render/node_tree.dart';
 import '../../render/play.dart' show FlightRegistry;
@@ -177,11 +177,12 @@ class _Flight {
     _route = route;
     _curved = CurvedAnimation(parent: route, curve: Curves.fastOutSlowIn, reverseCurve: Curves.fastOutSlowIn.flipped);
     // The destination's path, as Flutter flies on the destination hero's
-    // tween: an arc, a straight line for a container, else Material's arc.
+    // tween: an arc, a straight line for a container, else two corners on
+    // quarter-circle arcs.
     _tween = switch (destination.flightShuttle) {
       HeroFlightShuttle.arc => HeroArcRectTween(begin: from, end: to),
       HeroFlightShuttle.containerTransform => RectTween(begin: from, end: to),
-      _ => MaterialRectArcTween(begin: from, end: to),
+      _ => HeroCornerArcRectTween(begin: from, end: to),
     };
     bottom.flying = true;
     top.flying = true;
@@ -265,10 +266,9 @@ class _Flight {
         // The container the two drawings fade on, as the card grows.
         // The layout's surface: the flight is in the app's overlay, whose
         // theme isn't the layout's.
-        final theme = Theme.of(context);
-        final surface = theme.extension<CodelesslyThemeTokens>() != null
-            ? theme.colorScheme.surface
-            : (theme.brightness == Brightness.dark ? kPaperDark : kPaper);
+        final surface = ThemeTokensScope.maybeOf(context) != null
+            ? rolesOf(context).surface
+            : (MediaQuery.maybePlatformBrightnessOf(context) == Brightness.dark ? kPaperDark : kPaper);
         stack = ColoredBox(color: surface, child: stack);
       }
       shuttle = clipped(stack, morph: true);
@@ -311,7 +311,7 @@ class _Flight {
         );
       });
     }
-    return Material(type: MaterialType.transparency, child: shuttle);
+    return shuttle;
   }
 }
 
@@ -332,6 +332,114 @@ class HeroArcRectTween extends RectTween {
     final u = 1 - t;
     final c = c0 * (u * u) + control * (2 * u * t) + c1 * (t * t);
     return Rect.fromCenter(center: c, width: lerpDouble(b.width, e.width, t)!, height: lerpDouble(b.height, e.height, t)!);
+  }
+}
+
+/// The default path of a flight: the two corners of the box on the diagonal
+/// nearest its direction of travel each go along a circular arc
+/// ([_PointArc]), and the box is what they span. What Flutter's own hero
+/// flies on in a Material app.
+class HeroCornerArcRectTween extends RectTween {
+  HeroCornerArcRectTween({super.begin, super.end});
+
+  _PointArc? _first, _second;
+
+  static Offset _corner(Rect r, int id) => switch (id) {
+        0 => r.topLeft,
+        1 => r.topRight,
+        2 => r.bottomLeft,
+        _ => r.bottomRight,
+      };
+
+  // The diagonals, as (from corner, to corner): the first that lies most
+  // along the centers' travel is flown.
+  static const _diagonals = [(0, 3), (3, 0), (1, 2), (2, 1)];
+
+  void _initialize(Rect b, Rect e) {
+    final travel = e.center - b.center;
+    var best = _diagonals.first;
+    double? bestSupport;
+    for (final d in _diagonals) {
+      final delta = _corner(b, d.$2) - _corner(b, d.$1);
+      final length = delta.distance;
+      final support = travel.dx * delta.dx / length + travel.dy * delta.dy / length;
+      if (bestSupport == null || support > bestSupport) {
+        best = d;
+        bestSupport = support;
+      }
+    }
+    _first = _PointArc(_corner(b, best.$1), _corner(e, best.$1));
+    _second = _PointArc(_corner(b, best.$2), _corner(e, best.$2));
+  }
+
+  @override
+  set begin(Rect? value) {
+    if (value != begin) _first = null;
+    super.begin = value;
+  }
+
+  @override
+  set end(Rect? value) {
+    if (value != end) _first = null;
+    super.end = value;
+  }
+
+  @override
+  Rect? lerp(double t) {
+    final b = begin, e = end;
+    if (b == null || e == null) return super.lerp(t);
+    if (t == 0) return b;
+    if (t == 1) return e;
+    if (_first == null) _initialize(b, e);
+    return Rect.fromPoints(_first!.at(t), _second!.at(t));
+  }
+}
+
+/// A point's way from [begin] to [end] on a circular arc of at most a
+/// quarter turn: the circle's center is level with the end when the way is
+/// taller than wide, else in line with the beginning. A way that is (within
+/// 2 px) straight across or straight down is a straight line.
+class _PointArc {
+  _PointArc(this.begin, this.end) {
+    final delta = end - begin;
+    final dx = delta.dx.abs(), dy = delta.dy.abs();
+    final distance = delta.distance;
+    if (dx <= 2 || dy <= 2) return;
+    final corner = Offset(end.dx, begin.dy);
+    double sweep(double radius) => 2 * math.asin(distance / (2 * radius));
+    if (dx < dy) {
+      final r = _radius = distance * distance / (corner - begin).distance / 2;
+      _center = Offset(end.dx + r * (begin.dx - end.dx).sign, end.dy);
+      if (begin.dx < end.dx) {
+        _from = sweep(r) * (begin.dy - end.dy).sign;
+        _to = 0;
+      } else {
+        _from = math.pi + sweep(r) * (end.dy - begin.dy).sign;
+        _to = math.pi;
+      }
+    } else {
+      final r = _radius = distance * distance / (corner - end).distance / 2;
+      _center = Offset(begin.dx, begin.dy + (end.dy - begin.dy).sign * r);
+      if (begin.dy < end.dy) {
+        _from = -math.pi / 2;
+        _to = _from! + sweep(r) * (end.dx - begin.dx).sign;
+      } else {
+        _from = math.pi / 2;
+        _to = _from! + sweep(r) * (begin.dx - end.dx).sign;
+      }
+    }
+  }
+
+  final Offset begin, end;
+  double _radius = 0;
+  Offset _center = Offset.zero;
+  double? _from, _to;
+
+  Offset at(double t) {
+    final from = _from, to = _to;
+    if (from == null || to == null) return Offset.lerp(begin, end, t)!;
+    final angle = lerpDouble(from, to, t)!;
+    return _center + Offset(math.cos(angle) * _radius, math.sin(angle) * _radius);
   }
 }
 

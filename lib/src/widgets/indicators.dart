@@ -17,6 +17,7 @@ import 'package:codelessly_api/core.dart'
         BarcodeProps,
         ChartProps,
         GaugeMeterProps,
+        GraphProps,
         LineChartProps,
         PlotChartProps,
         ProgressBarProps,
@@ -27,10 +28,10 @@ import '../render/surface_roles.dart';
 import '../render/controls/spinner.dart';
 import '../render/controls/tokens.dart';
 import '../render/convert.dart';
+import 'graph.dart';
 import 'indicator_theme.dart';
 import '../render/recipe.dart';
 import 'indicator_transition.dart';
-import 'indicators_charts.dart';
 import 'indicators_paint.dart';
 
 /// Recipes for the indicators group, by node type.
@@ -40,12 +41,23 @@ final Map<String, WidgetRecipe> indicatorsRecipes = {
   ProgressBarProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, ProgressBarPainter.new),
   RadialGaugeProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, RadialGaugePainter.new),
   GaugeMeterProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, GaugeMeterPainter.new),
-  ChartProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, ChartSeriesPainter.new),
-  PlotChartProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, PlotChartPainter.new),
-  BarChartProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, BarChartPainter.new),
-  LineChartProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, LineChartPainter.new),
+  // The chart types are words over the graph (chart_words.dart).
+  ChartProps.spec.type: _chartWord,
+  PlotChartProps.spec.type: _chartWord,
+  BarChartProps.spec.type: _chartWord,
+  LineChartProps.spec.type: _chartWord,
+  GraphProps.spec.type: (b, n, chain) {
+    chain.add(_indicatorFit(b, n));
+    addGraph(b, n, chain);
+  },
   BarcodeProps.spec.type: (b, n, chain) => _painted(b, n, chain, BarcodePainter(_themed(b, n))),
 };
+
+/// A chart type, drawn as the graph it says, in the theme's colors.
+void _chartWord(NodeBuilder b, Node n, List<RenderBox> chain) {
+  chain.add(_indicatorFit(b, n));
+  addChartGraph(b, _themed(b, n), chain);
+}
 
 /// The size a drawn indicator has along an axis it hugs: it has no content
 /// to measure, so each type has a size of its own (a bar 6 high, a chart
@@ -54,6 +66,7 @@ Size _naturalSize(Node n) => switch (n.type) {
       'progressBar' => const Size(200, 6),
       'barcode' => const Size(200, 80),
       'radialGauge' || 'gaugeMeter' => const Size(120, 120),
+      'graph' => const Size(320, 200),
       _ => const Size(280, 140),
     };
 

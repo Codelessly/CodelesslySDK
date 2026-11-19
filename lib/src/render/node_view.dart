@@ -1,10 +1,16 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart' show HardwareKeyboard;
+import 'package:codelessly_api/core.dart' show Node;
 import 'package:flutter/widgets.dart';
 
+import 'controls/buttons.dart';
 import 'controls/focus.dart';
 import 'controls/root.dart';
+import 'controls/slider.dart';
+import 'controls/spinner.dart';
+import 'controls/tokens.dart';
 import 'islands.dart';
+import 'labels.dart';
 import 'node_tree.dart';
 
 /// Hosts the render tree of one node of a [RenderTree] (a screen, or any
@@ -70,6 +76,21 @@ class ControlFocusLayerScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(ControlFocusLayerScope oldWidget) => !identical(oldWidget.layer, layer);
+}
+
+/// The words a screen reader hears for the runtime's own chrome under it
+/// ([CodelesslyLabels]): a layout's host puts the project's there.
+class CodelesslyLabelsScope extends InheritedWidget {
+  const CodelesslyLabelsScope({super.key, required this.labels, required super.child});
+
+  final CodelesslyLabels labels;
+
+  /// The labels at [context]: the nearest scope's, else English.
+  static CodelesslyLabels of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<CodelesslyLabelsScope>()?.labels ?? const CodelesslyLabels();
+
+  @override
+  bool updateShouldNotify(CodelesslyLabelsScope oldWidget) => labels != oldWidget.labels;
 }
 
 /// Key events for a root from Flutter's `FocusManager` (its early handlers,
@@ -162,5 +183,165 @@ class RenderNodeView extends RenderControlRoot with RenderObjectWithLayoutCallba
   void dispose() {
     child = null;
     super.dispose();
+  }
+}
+
+/// The SDK's spinner ([RenderSpinner]) where the surroundings are still
+/// widgets (a loading screen, a list's loading footer, a player getting
+/// ready): its arc in [color], turning in a square of [diameter] or of the
+/// size it is given.
+class SpinnerView extends LeafRenderObjectWidget {
+  const SpinnerView({super.key, required this.color, this.diameter = 24, this.value});
+
+  final Color color;
+  final double diameter;
+
+  /// The part of the ring that is drawn, from the top (0–1), standing
+  /// still; null: the arc turns.
+  final double? value;
+
+  @override
+  RenderSpinner createRenderObject(BuildContext context) => RenderSpinner()
+    ..color = color
+    ..diameter = diameter
+    ..value = value
+    ..animating = TickerMode.valuesOf(context).enabled;
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSpinner renderObject) => renderObject
+    ..color = color
+    ..diameter = diameter
+    ..value = value
+    ..animating = TickerMode.valuesOf(context).enabled;
+}
+
+/// A root for the SDK's controls where the surroundings are widgets and no
+/// [NodeView] is above them (a toast in the app's overlay, the confirm
+/// dialog in its route): the controls under it ([ControlButton],
+/// [ControlSlider]) share its focus order and take keys as a screen's do.
+/// Inside a modal route it joins the route's [ControlFocusLayerScope], so
+/// the keyboard stays in the dialog.
+class ControlHost extends SingleChildRenderObjectWidget {
+  const ControlHost({super.key, required super.child});
+
+  @override
+  RenderControlRoot createRenderObject(BuildContext context) {
+    final keyboard = FocusManagerKeyboard();
+    final root = RenderControlRoot(keyboard: keyboard);
+    keyboard.scope = root.focus;
+    return root..focus.layer = ControlFocusLayerScope.maybeOf(context);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderControlRoot renderObject) =>
+      renderObject.focus.layer = ControlFocusLayerScope.maybeOf(context);
+}
+
+/// One of the SDK's buttons ([RenderButton]) as a widget: [spec] is what it
+/// shows, [onPressed] what a press does (null: it draws and takes no press).
+/// It needs a root above it: a [NodeView] (a list's row, a player) or a
+/// [ControlHost].
+class ControlButton extends LeafRenderObjectWidget {
+  const ControlButton({
+    super.key,
+    required this.spec,
+    this.onPressed,
+    this.semanticsLabel,
+    this.focusWhenShown = false,
+    this.interactive = true,
+    this.focusable = true,
+  });
+
+  final ButtonSpec spec;
+  final VoidCallback? onPressed;
+
+  /// What a screen reader says (else the label).
+  final String? semanticsLabel;
+
+  /// Whether the focus starts on it when it is first shown (a dialog's
+  /// default answer: Enter presses it). It shows as focused only when the
+  /// keyboard is what the user is on.
+  final bool focusWhenShown;
+
+  /// Whether it takes pointers and the focus; else it only draws (a
+  /// player's button on a design canvas).
+  final bool interactive;
+
+  /// Whether Tab stops on it (false: what is around it is the stop, and
+  /// presses it).
+  final bool focusable;
+
+  @override
+  RenderButton createRenderObject(BuildContext context) {
+    final button = RenderButton().._apply(this, context);
+    if (focusWhenShown) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!button.attached) return;
+        final keyboard = FocusManager.instance.highlightMode == FocusHighlightMode.traditional ||
+            (button.focusNode.scope?.layer?.usedKeyboard ?? false);
+        button.focusNode.requestFocus(highlight: keyboard);
+      });
+    }
+    return button;
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderButton renderObject) => renderObject._apply(this, context);
+}
+
+extension on RenderButton {
+  void _apply(ControlButton w, BuildContext context) {
+    this
+      ..interactive = w.interactive
+      ..spec = w.spec
+      ..enabled = w.spec.enabled
+      ..busy = w.spec.loading
+      ..autofocus = w.spec.autofocus
+      ..onPressed = w.onPressed
+      ..semanticsLabel = w.semanticsLabel
+      ..semanticsDirection = Directionality.maybeOf(context) ?? TextDirection.ltr;
+    focusNode.canRequestFocus = w.interactive && w.spec.enabled && w.focusable;
+  }
+}
+
+/// The SDK's slider ([RenderSlider]) as a widget: [node] is a `slider`
+/// node's props (its value, range, sizes and colors), [onChanged] is told
+/// each value a drag, a tap or a key gives. Not [interactive], it draws and
+/// takes no input; not [enabled], it is drawn as a disabled one.
+/// It needs a root above it, as [ControlButton] does.
+class ControlSlider extends LeafRenderObjectWidget {
+  const ControlSlider({
+    super.key,
+    required this.node,
+    required this.tokens,
+    this.onChanged,
+    this.interactive = true,
+    this.enabled = true,
+    this.semanticsLabel,
+  });
+
+  final Node node;
+  final ControlTokens tokens;
+  final ValueChanged<double>? onChanged;
+  final bool interactive;
+  final bool enabled;
+  final String? semanticsLabel;
+
+  @override
+  RenderSlider createRenderObject(BuildContext context) => RenderSlider().._apply(this, context);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSlider renderObject) => renderObject._apply(this, context);
+}
+
+extension on RenderSlider {
+  void _apply(ControlSlider w, BuildContext context) {
+    this
+      ..interactive = w.interactive
+      ..configure(w.node, w.tokens, Size.zero)
+      ..enabled = w.enabled
+      ..semanticsLabel = w.semanticsLabel
+      ..onChanged = w.interactive ? w.onChanged : null;
+    focusNode.canRequestFocus = w.interactive && w.enabled;
   }
 }

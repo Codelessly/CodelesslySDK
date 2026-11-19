@@ -120,8 +120,20 @@ secondary Firebase app and its anonymous user; that combination is not covered b
 for your projects, or load one of them by slug or bundle.
 
 **Can I use it without `MaterialApp`?**
-Navigation actions need a `Navigator` above the widget. Beyond that, the SDK is tested under `MaterialApp`; other
-app shells (`CupertinoApp`, `WidgetsApp`) are not covered by its tests.
+Yes. The package imports neither Flutter's Material library nor its Cupertino library, and its tests run under a
+plain `WidgetsApp` as well as under a `MaterialApp`: screens, navigation, dialogs, sheets, toasts, lists and
+the players. `CupertinoApp` is not run in its tests; it gives the SDK the same things a `WidgetsApp` does.
+Navigation actions, dialogs and sheets need a `Navigator` above the widget, and icons need the Material icon
+font (`uses-material-design: true` in your `pubspec.yaml`: the font file, not the library). The
+[quickstart](02-quickstart.md) has a `WidgetsApp` sample, and the example app is one.
+
+**Icons show as empty boxes.**
+The app does not ship the Material icon font. Add `uses-material-design: true` under `flutter:` in your
+`pubspec.yaml`.
+
+**A widget of mine inside a layout throws "No Material widget found".**
+The SDK puts no `Material` around your widgets. Wrap the widget in a `Material` of your own (see
+[custom widgets](12-custom-widgets.md)).
 
 **Is server-side rendering or Flutter-less rendering supported?**
 No. The SDK renders with Flutter.

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../app/support.dart' show settle;
+import '../support/shell_controls.dart';
 
 class _Coded implements Exception {
   final String code = 'permission-denied';
@@ -240,7 +241,7 @@ void main() {
         expect(find.text('Could not save. Try again.'), findsOneWidget);
         cloud.fail = false;
         files.fail = false;
-        await tester.tap(find.text('Retry'));
+        await tester.tap(shellButton('Retry'));
         await settle(tester);
         expect(controller.read('saved'), 'yes');
         expect(controller.read('errorCount'), 1);
@@ -414,14 +415,14 @@ void main() {
       expect(cloud.writes, 1);
       // Still failing: the chain runs again (a second write) and the error
       // reaction hears it again.
-      await tester.tap(find.text('Retry'));
+      await tester.tap(shellButton('Retry'));
       await settle(tester);
       expect(cloud.writes, 2);
       expect(controller.read('errorCount'), 2);
       expect(controller.read('saved'), 'no');
       // Back online: Retry runs the same chain to the end.
       cloud.fail = false;
-      await tester.tap(find.text('Retry').last);
+      await tester.tap(shellButton('Retry').last);
       await settle(tester);
       expect(cloud.writes, 3);
       expect(controller.read('saved'), 'yes');

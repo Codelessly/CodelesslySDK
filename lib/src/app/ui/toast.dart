@@ -6,9 +6,12 @@ import 'dart:math' as math;
 
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show Json, ShowToastAction, ToastPosition, ToastStyle;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
+import '../../render/control_theme.dart' show ThemeTokensScope, chromeGlyph;
+import '../../render/node_view.dart' show CodelesslyLabelsScope, ControlButton, ControlHost;
 import '../../render/paint/icon_names.dart';
+import '../../render/paint/shell_constants.dart';
 import 'feedback_icon.dart';
 import 'feedback_theme.dart';
 
@@ -156,6 +159,7 @@ abstract final class CodelesslyToast {
     final theme = FeedbackTheme.of(context);
     final bound = request.bound;
     final hasButton = request.actionLabel.trim().isNotEmpty && request.onAction != null;
+    final dismissLabel = CodelesslyLabelsScope.of(context).dismiss;
 
     hide();
     // A toast shown from a dialog or sheet (its "Password needed") sits
@@ -164,10 +168,10 @@ abstract final class CodelesslyToast {
     late final OverlayEntry entry;
     // The toast's buttons take the layout's look, not the app's theme the
     // overlay is in.
-    final themeData = theme.themeData;
     entry = OverlayEntry(
-      builder: (context) => Theme(data: themeData, child: _ToastView(
+      builder: (context) => ThemeTokensScope.withDefaults(tokens: theme.tokens, dark: theme.dark, child: _ToastView(
         shownOver: shownOver,
+        dismissLabel: dismissLabel,
         action: action,
         message: request.message,
         title: request.title.trim().isEmpty ? '' : request.title,
@@ -215,7 +219,11 @@ class _ToastView extends StatefulWidget {
     required this.breakpoints,
     required this.onDone,
     this.shownOver = const [],
+    this.dismissLabel = 'Dismiss',
   });
+
+  /// What a screen reader calls the close button.
+  final String dismissLabel;
 
   /// The dialogs and sheets already open when it was shown: their barriers
   /// don't cover it.
@@ -448,20 +456,22 @@ class _ToastViewState extends State<_ToastView> {
           if (hasButton) ...[
             const SizedBox(width: 8),
             _withShadows(
-              TextButton(
+              ConstrainedBox(
                 key: const ValueKey('codelessly-toast-action'),
-                onPressed: _onActionPressed,
-                style: TextButton.styleFrom(
-                  foregroundColor: actionColor,
-                  backgroundColor: bound['actionBackgroundColor'] ?? look.color('actionBackgroundColor'),
-                  minimumSize: const Size(48, 36),
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  // The action's own font size wins over the message's.
-                  textStyle: actionLook?.fontSize != null ? actionStyle : actionStyle.copyWith(fontSize: fontSize),
-                  side: look.side('actionBorder'),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(actionRadius)),
+                constraints: const BoxConstraints(minHeight: 36),
+                child: ControlButton(
+                  onPressed: _onActionPressed,
+                  spec: theme.button(
+                    label: widget.actionLabel,
+                    foreground: actionColor,
+                    background: bound['actionBackgroundColor'] ?? look.color('actionBackgroundColor'),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    // The action's own font size wins over the message's.
+                    style: actionLook?.fontSize != null ? actionStyle : actionStyle.copyWith(fontSize: fontSize),
+                    side: look.side('actionBorder'),
+                    radius: actionRadius,
+                  ),
                 ),
-                child: Text(widget.actionLabel),
               ),
               actionShadows,
               actionRadius,
@@ -469,21 +479,13 @@ class _ToastViewState extends State<_ToastView> {
           ],
           if (hasClose) ...[
             SizedBox(width: hasButton ? 0 : 8),
-            Semantics(
-              button: true,
-              label: 'Dismiss',
-              excludeSemantics: true,
-              child: IconButton(
-                key: const ValueKey('codelessly-toast-close'),
+            SizedBox.square(
+              key: const ValueKey('codelessly-toast-close'),
+              dimension: 36,
+              child: ControlButton(
                 onPressed: _close,
-                iconSize: 18,
-                color: closeColor,
-                constraints: const BoxConstraints.tightFor(width: 36, height: 36),
-                padding: EdgeInsets.zero,
-                style: IconButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(buttonRadius)),
-                ),
-                icon: const Icon(Icons.close),
+                semanticsLabel: widget.dismissLabel,
+                spec: theme.button(icon: _closeIcon, foreground: closeColor, radius: buttonRadius),
               ),
             ),
           ],
@@ -525,10 +527,9 @@ class _ToastViewState extends State<_ToastView> {
               'end' => Alignment.centerRight,
               _ => Alignment.center,
             },
-            child: Material(
-              type: MaterialType.transparency,
-              child: rotation == 0 ? toast : Transform.rotate(angle: rotation * math.pi / 180, child: toast),
-            ),
+            child: ControlHost(
+                child: rotation == 0 ? toast : Transform.rotate(angle: rotation * math.pi / 180, child: toast),
+              ),
           ),
         ),
       ),
@@ -649,3 +650,6 @@ class _ToastBelowRouteState extends State<ToastBelowRoute> {
   @override
   Widget build(BuildContext context) => widget.child;
 }
+
+/// The close button's icon: the MaterialIcons font's glyph.
+final Json _closeIcon = chromeGlyph('close', const IconData(ShellGlyphs.close, fontFamily: ShellGlyphs.font));

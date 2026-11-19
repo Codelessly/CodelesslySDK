@@ -34,7 +34,8 @@ Without a `Navigator` above the widget, navigation actions do nothing.
 
 *URL paths and query parameters become route params. The page is an illustration.*
 
-Give the project's screens to `MaterialApp`:
+Give the project's screens to your app. `MaterialApp` here; `CupertinoApp` and `WidgetsApp` take the same
+`onGenerateRoute`:
 
 ```dart
 MaterialApp(
@@ -158,6 +159,52 @@ codelessly.route.addListener(() {
 
 `codelessly.route` holds the screen shown last by any widget of the instance: use it for analytics or to sync
 your own UI (a selected tab).
+
+## Page transitions
+
+A `navigate` action says how its screen comes in (`transition`, or a `routeTransition` of the animation system).
+A screen opened with neither plays the project's page transition, which you set once:
+
+```dart
+// The platform's (the default): Android's fade forwards, iOS's slide with its back swipe, the desktop's zoom,
+// none on the web.
+CodelesslyConfig(pageTransitions: CodelesslyPageTransitions.platform)
+
+// One of them on every platform.
+CodelesslyConfig(pageTransitions: CodelesslyPageTransitions.cupertino)
+
+// Any transition of the animation system: a preset, or your own enter and exit.
+CodelesslyConfig(
+  pageTransitions: CodelesslyPageTransitions.animated(
+    RouteTransition(preset: RouteTransitionPreset.sharedAxisX, durationMs: 350),
+  ),
+)
+```
+
+The SDK does not read your app's `ThemeData.pageTransitionsTheme`. A Material app that wants its theme's
+transitions for the project's screens gives them as a `CodelesslyPageTransitions` of its own:
+
+```dart
+class ThemePageTransitions extends CodelesslyPageTransitions {
+  const ThemePageTransitions();
+
+  @override
+  Duration get duration => const Duration(milliseconds: 450); // your builders' longest
+
+  @override
+  Widget buildEntering(PageRoute<Object?> route, BuildContext context, Animation<double> animation, Widget child) =>
+      Theme.of(context).pageTransitionsTheme.buildTransitions(route, context, animation, kAlwaysDismissedAnimation, child);
+
+  @override
+  Widget buildCovered(BuildContext context, Animation<double> secondaryAnimation, Widget child, {Color? fill}) {
+    final theme = Theme.of(context);
+    final covered = theme.pageTransitionsTheme.delegatedTransition(theme.platform);
+    return covered?.call(context, kAlwaysCompleteAnimation, secondaryAnimation, true, child) ?? child;
+  }
+}
+
+CodelesslyConfig(pageTransitions: const ThemePageTransitions())
+```
 
 ## Back
 

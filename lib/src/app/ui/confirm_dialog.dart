@@ -2,13 +2,17 @@
 // designed one (a screen named by the action's `dialog`).
 import 'dart:convert';
 import 'dart:math' as math;
+import 'dart:ui' show SemanticsRole;
 
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show ConfirmAction, Json, ModalPresentation;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import '../../render/control_theme.dart' show ThemeTokensScope;
 
 import '../../render/convert.dart';
+import '../../render/node_view.dart' show ControlButton, ControlHost;
 import '../../render/paint/icon_names.dart';
+import '../../render/paint/shell_constants.dart';
 import 'feedback_icon.dart';
 import 'feedback_theme.dart';
 import 'presentation_route.dart';
@@ -298,7 +302,7 @@ Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request, {do
       context: context,
       presentation: presentation,
       barrierDismissible: action.barrierDismissible,
-      barrierColor: barrierColor ?? Theme.of(context).dialogTheme.barrierColor ?? Colors.black54,
+      barrierColor: barrierColor ?? ShellColors.black54,
       sheetWidth: look.number('sheetWidth'),
       sheetMargin: look.numberOr('sheetMargin', 0),
       cornerRadius: look.number('radius'),
@@ -308,9 +312,8 @@ Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request, {do
     ));
     return answer == true;
   }
-  final confirmed = await showDialog<bool>(
+  final confirmed = await showShellDialog<bool>(
     context: context,
-    useRootNavigator: false,
     barrierDismissible: action.barrierDismissible,
     barrierColor: barrierColor,
     builder: buildDialog,
@@ -467,7 +470,6 @@ class ThemedConfirmDialog extends StatelessWidget {
     final buttonCorner = buttonRadius ?? theme.buttonRadius;
     final buttonSide = buttonBorder ?? theme.buttonBorder ?? BorderSide.none;
     final buttonShadowList = buttonShadows ?? theme.buttonShadows ?? const <BoxShadow>[];
-    final buttonShape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(buttonCorner));
     final buttonText = applyTextStyle(buttonStyle, theme.buttonStyle.copyWith(fontSize: theme.messageSize ?? 15, height: 1.2));
     // A button's own text color wins over the color both buttons' text
     // style gives (a brass confirm with dark text beside a light cancel).
@@ -500,42 +502,48 @@ class ThemedConfirmDialog extends StatelessWidget {
     // The focus starts on the yes, so Enter answers what was asked; on a
     // destructive one it starts on Cancel, so Enter does no harm. Enter and
     // Space press the focused button, Tab moves between them, Escape cancels.
-    final cancel = TextButton(
-      key: const ValueKey('codelessly-confirm-cancel'),
-      autofocus: destructive,
-      onPressed: () => Navigator.of(context).pop(false),
-      style: TextButton.styleFrom(
-        foregroundColor: onCancel,
-        backgroundColor: cancelColor,
-        textStyle: buttonText,
-        shape: buttonShape,
-        side: cancelBorder ?? (cancelColor == null ? theme.cancelBorder : null) ?? buttonSide,
-        visualDensity: buttonHeight == null ? null : VisualDensity.standard,
-        minimumSize: buttonSize,
-        maximumSize: buttonMaxSize,
-        tapTargetSize: buttonHeight == null ? null : MaterialTapTargetSize.shrinkWrap,
-        padding: buttonPadding,
-      ),
-      child: Text(cancelLabel),
+    final buttonBox = BoxConstraints(
+      minWidth: buttonSize.width,
+      minHeight: buttonSize.height,
+      maxWidth: math.max(buttonSize.width, buttonMaxSize.width),
+      maxHeight: math.max(buttonSize.height, buttonMaxSize.height),
     );
-    final confirm = FilledButton(
-      key: const ValueKey('codelessly-confirm-ok'),
-      autofocus: !destructive,
-      onPressed: () => Navigator.of(context).pop(true),
-      style: FilledButton.styleFrom(
-        backgroundColor: gradient == null ? confirmFill : Colors.transparent,
-        shadowColor: gradient == null ? null : Colors.transparent,
-        foregroundColor: onConfirm,
-        textStyle: buttonText,
-        shape: buttonShape,
-        side: confirmBorder ?? buttonSide,
-        visualDensity: buttonHeight == null ? null : VisualDensity.standard,
-        minimumSize: buttonSize,
-        maximumSize: buttonMaxSize,
-        tapTargetSize: buttonHeight == null ? null : MaterialTapTargetSize.shrinkWrap,
-        padding: buttonPadding,
+    BorderSide? sideOf(BorderSide side) => side == BorderSide.none ? null : side;
+    final cancel = ConstrainedBox(
+      key: const ValueKey('codelessly-confirm-cancel'),
+      constraints: buttonBox,
+      child: ControlButton(
+        focusWhenShown: destructive,
+        onPressed: () => Navigator.of(context).pop(false),
+        spec: theme.button(
+          label: cancelLabel,
+          foreground: onCancel,
+          background: cancelColor,
+          style: buttonText,
+          radius: buttonCorner,
+          side: sideOf(cancelBorder ?? (cancelColor == null ? theme.cancelBorder : null) ?? buttonSide),
+          padding: buttonPadding,
+          wrapLabel: true,
+        ),
       ),
-      child: Text(confirmLabel),
+    );
+    final confirm = ConstrainedBox(
+      key: const ValueKey('codelessly-confirm-ok'),
+      constraints: buttonBox,
+      child: ControlButton(
+        focusWhenShown: !destructive,
+        onPressed: () => Navigator.of(context).pop(true),
+        spec: theme.button(
+          label: confirmLabel,
+          foreground: onConfirm,
+          background: gradient == null ? confirmFill : ShellColors.transparent,
+          style: buttonText,
+          radius: buttonCorner,
+          side: sideOf(confirmBorder ?? buttonSide),
+          padding: buttonPadding,
+          wrapLabel: true,
+        ),
+      ),
     );
     final textAlign = centered ? TextAlign.center : TextAlign.start;
     Widget? leading = icon == null
@@ -572,7 +580,8 @@ class ThemedConfirmDialog extends StatelessWidget {
         : (cancelColor != null ? withShadow(cancel) : cancel);
     final buttons = [cancelled, withShadow(filledConfirm)];
 
-    final Widget content = Semantics(
+    // The buttons are the SDK's controls: this is their root.
+    final Widget content = ControlHost(child: Semantics(
       scopesRoute: true,
       namesRoute: true,
       explicitChildNodes: true,
@@ -642,7 +651,7 @@ class ThemedConfirmDialog extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
 
     // Shadows of its own replace the dialog's elevation: drawn around a box
     // that carries its fill and outline.
@@ -664,26 +673,25 @@ class ThemedConfirmDialog extends StatelessWidget {
       );
     }
 
-    return Theme(
-      data: theme.themeData,
+    return ThemeTokensScope.withDefaults(
+      tokens: theme.tokens,
+      dark: theme.dark,
       child: switch (presentation) {
         ModalPresentation.bottomSheet || ModalPresentation.adaptive => SizedBox(
             width: double.infinity,
-            child: Material(
+            child: ColoredBox(
               color: surface,
               child: SafeArea(top: false, child: Padding(padding: const EdgeInsets.only(top: 8), child: content)),
             ),
           ),
-        ModalPresentation.sideSheet => Material(
+        ModalPresentation.sideSheet => ColoredBox(
             color: surface,
             child: SafeArea(left: false, child: Align(alignment: Alignment.topLeft, child: content)),
           ),
-        _ => Dialog(
-            backgroundColor: dialogShadows != null ? Colors.transparent : surface,
-            surfaceTintColor: Colors.transparent,
-            shadowColor: dialogShadows != null ? Colors.transparent : null,
-            elevation: dialogShadows != null ? 0 : 8,
-            insetPadding: insets ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        _ => _DialogSurface(
+            color: dialogShadows != null ? ShellColors.transparent : surface,
+            shadows: dialogShadows != null ? const [] : theme.controlTokens.shadows('level4'),
+            insets: insets ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(radius),
               side: dialogShadows == null ? dialogSide ?? BorderSide.none : BorderSide.none,
@@ -693,4 +701,49 @@ class ThemedConfirmDialog extends StatelessWidget {
       },
     );
   }
+}
+
+/// A dialog's surface in the middle of the screen: at least 280 wide,
+/// [insets] from the screen's edges and above the keyboard (it moves up
+/// over 100 ms as the keyboard comes), in [shape] with [shadows].
+class _DialogSurface extends StatelessWidget {
+  const _DialogSurface({
+    required this.color,
+    required this.shadows,
+    required this.insets,
+    required this.shape,
+    required this.child,
+  });
+
+  final Color color;
+  final List<BoxShadow> shadows;
+  final EdgeInsets insets;
+  final ShapeBorder shape;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+        role: SemanticsRole.dialog,
+        child: AnimatedPadding(
+          padding: MediaQuery.viewInsetsOf(context) + insets,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.decelerate,
+          child: MediaQuery.removeViewInsets(
+            removeLeft: true,
+            removeTop: true,
+            removeRight: true,
+            removeBottom: true,
+            context: context,
+            child: Align(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 280),
+                child: DecoratedBox(
+                  decoration: ShapeDecoration(color: color, shape: shape, shadows: shadows),
+                  child: child,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
 }

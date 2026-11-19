@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fields.dart';
 import '../support/keyboard.dart';
+import '../support/shell_controls.dart';
 import '../support/screen.dart' show v;
 import 'support.dart';
 
@@ -567,11 +568,11 @@ void main() {
     expect(keys.routeName, 'Delete it?');
     final cancel = find.byKey(const ValueKey('codelessly-confirm-cancel'));
     expect(cancel, findsOneWidget);
-    final cancelLabel = find.descendant(of: cancel, matching: find.text('Cancel')).first;
-    expect(Focus.of(tester.element(cancelLabel)).hasFocus, isTrue, reason: 'Cancel is the safe initial choice');
-    // The page under it takes no key.
+    expect(shellButtonBox(tester, cancel).focusNode.hasFocus, isTrue, reason: 'Cancel is the safe initial choice');
+    // The page under it takes no key: Tab stays on the dialog's buttons.
     await keys.tab();
-    expect(keys.focused, isNull);
+    expect(keys.focusedText, 'OK');
+    expect(keys.inOverlay, isTrue);
     await keys.escape();
     await settle(tester);
     expect(find.text('Delete it?'), findsNothing);
@@ -590,9 +591,8 @@ void main() {
       await settle(tester);
       expect(keys.routeName, 'Delete it?');
       final cancel = find.byKey(const ValueKey('codelessly-confirm-cancel'));
-      final cancelLabel = find.descendant(of: cancel, matching: find.text('Cancel')).first;
-      expect(Focus.of(tester.element(cancelLabel)).hasFocus, isTrue);
-      expect(tester.getSemantics(cancel).hasFlag(SemanticsFlag.isButton), isTrue);
+      expect(shellButtonBox(tester, cancel).focusNode.hasFocus, isTrue);
+      expect(tester.getSemantics(shellButtonIn(cancel)).hasFlag(SemanticsFlag.isButton), isTrue);
       expect(tester.takeException(), isNull);
       await keys.enter();
       await settle(tester);
@@ -609,8 +609,8 @@ void main() {
     await tapNode(tester, controller, 'openConfirm');
     final cancel = find.byKey(const ValueKey('codelessly-confirm-cancel'));
     final ok = find.byKey(const ValueKey('codelessly-confirm-ok'));
-    expect(tester.getSemantics(cancel).hasFlag(SemanticsFlag.isButton), isTrue);
-    expect(tester.getSemantics(ok).hasFlag(SemanticsFlag.isButton), isTrue);
+    expect(tester.getSemantics(shellButtonIn(cancel)).hasFlag(SemanticsFlag.isButton), isTrue);
+    expect(tester.getSemantics(shellButtonIn(ok)).hasFlag(SemanticsFlag.isButton), isTrue);
     await tester.tap(cancel);
     await settle(tester);
     expect(keys.topOverlay, isNull);

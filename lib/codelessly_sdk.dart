@@ -16,6 +16,9 @@
 /// }
 /// ```
 ///
+/// Any app will do: a `MaterialApp`, a `CupertinoApp` or a plain `WidgetsApp`. This package imports neither
+/// Flutter's Material library nor its Cupertino library, and takes nothing from the app's theme.
+///
 /// Where the publish comes from:
 ///
 /// * a public slug, over HTTP: `Codelessly(config: CodelesslyConfig(slug: ...))`;
@@ -144,7 +147,7 @@ export 'src/runtime/http_image_loader.dart';
 export 'src/render/convert.dart' show textStyle, FontDemand;
 export 'src/render/paint/image_fill.dart' show imagesPendingUnder;
 export 'src/text_defaults.dart' show kTextBase;
-export 'src/render/node_view.dart' hide FocusManagerKeyboard, RenderNodeView;
+export 'src/render/node_view.dart' hide ControlButton, ControlHost, FocusManagerKeyboard, RenderNodeView, SpinnerView;
 export 'src/render/hero.dart' show HeroMarks, RenderHeroMark;
 export 'src/app/ui/hero_flights.dart' show HeroMarkPaint;
 export 'src/render/play.dart' show FlightRegistry, RenderFlightBox;
@@ -219,11 +222,11 @@ export 'src/widgets/collections_swipe.dart' show SwipeActionsBox;
 export 'src/app/app_identity.dart' hide ScreenIdentity;
 export 'src/app/automations.dart';
 export 'src/app/back_guard.dart' hide BackGuard;
-export 'src/app/backdrop_screens.dart'
-    hide SeeThroughZoomPageTransitionsBuilder;
+export 'src/app/backdrop_screens.dart';
 export 'src/app/codelessly.dart';
 export 'src/app/codelessly_widget.dart' hide CodelesslyTranslucentRoute;
 export 'src/app/config.dart';
+export 'src/render/labels.dart';
 export 'src/app/fonts.dart' hide FontRegistrationCache;
 export 'src/app/loader.dart' hide PublishAssetSource;
 export 'src/app/managed_components.dart'
@@ -235,12 +238,13 @@ export 'src/app/hosted_plugins.dart';
 export 'src/features/hosted/hosted.dart' show hostedPluginFeature;
 export 'src/app/navigation.dart' hide CanvasLocationMatch;
 export 'src/app/overlay_screens.dart';
-export 'src/app/page_transitions.dart' hide CodelesslyPageTransitionRoute;
+export 'src/app/page_transitions.dart' hide CodelesslyPageTransitionRoute, CodelesslyPageTransitionsScope;
 export 'src/app/paywalls.dart';
 export 'src/app/persisted_variables.dart';
 export 'src/app/presenter.dart';
 export 'src/app/runtime.dart'
     hide BoundSource, MapValueScope, ScreenActionContext;
+export 'src/render/surface_roles.dart' show SurfaceRoles, surfaceRoles;
 export 'src/app/theme.dart'
     show
         kControlRadius,
@@ -249,7 +253,6 @@ export 'src/app/theme.dart'
         kPaper,
         kPaperDark,
         kSurfaceRadius,
-        themeDataOf,
         themeValues;
 export 'src/app/viewport.dart'
     hide CanvasBox, CanvasSizingScope, CanvasViewport;

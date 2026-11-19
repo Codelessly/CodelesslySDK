@@ -20,7 +20,7 @@
 // nearest render ancestor that a [IslandOwnerElement] owns. When a node moves
 // under another owner (a list item, a node inside an island), its island's
 // elements move with it, keeping their state.
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -44,14 +44,13 @@ class IslandEnvironment {
   /// inherited widgets reach islands without it.
   final Widget Function(Widget child)? wrap;
 
-  /// [child] under the environment: a transparent Material (inputs and ink
-  /// need one), with the ambient widgets an app normally provides added only
+  /// [child] under the environment: with the ambient widgets an app normally provides added only
   /// where the app has none; not focusable or tappable unless [interactive].
   Widget apply(Widget child) {
     if (!interactive) child = ExcludeFocus(child: IgnorePointer(child: child));
     // An island's scroll views are its own, not the app's primary one.
     child = PrimaryScrollController.none(
-      child: Material(type: MaterialType.transparency, child: child),
+      child: child,
     );
     child = _Ambient(child: child);
     return wrap?.call(child) ?? child;

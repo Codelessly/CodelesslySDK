@@ -4,7 +4,7 @@
 // theme's roles (indicator_theme.dart). With no theme they are the neutral
 // set (ink and greys), never a palette of their own.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/render/control_theme.dart' show themeDataOf;
+import 'package:codelessly_sdk/src/render/control_theme.dart' show surfaceRoles;
 import 'package:flutter/material.dart' hide TextStyle;
 import 'package:flutter/rendering.dart' show RenderRepaintBoundary;
 import 'package:flutter_test/flutter_test.dart';
@@ -91,7 +91,7 @@ void main() {
     final session = UiSession(document: _document);
     addTearDown(session.dispose);
     final pixels = await _render(tester, session);
-    final primary = themeDataOf(ThemeTokens.none).colorScheme.primary.toARGB32();
+    final primary = surfaceRoles(ThemeTokens.none).primary.toARGB32();
     expect(_count(pixels, primary), greaterThan(800), reason: 'the neutral primary (ink)');
     final colored = {for (final e in pixels.entries) if (e.value > 20 && !_neutral(e.key)) e.key.toRadixString(16): e.value};
     expect(colored, isEmpty, reason: 'every color drawn is a grey or ink');

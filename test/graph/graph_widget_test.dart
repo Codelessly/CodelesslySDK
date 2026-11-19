@@ -88,7 +88,7 @@ Future<void> slowDrag(WidgetTester tester, Offset from, Offset delta) async {
   await tester.pumpAndSettle();
 }
 
-GraphEngine engineOf(WidgetTester tester) => tester.state<CodelesslyGraphState>(find.byType(CodelesslyGraph)).engine;
+GraphEngine engineOf(WidgetTester tester) => tester.renderObject<RenderGraph>(find.byType(CodelesslyGraph)).engine;
 
 Future<void> loadFont() async {
   final root = Platform.environment['FLUTTER_ROOT'] ?? File(Platform.resolvedExecutable).parent.parent.parent.parent.parent.path;

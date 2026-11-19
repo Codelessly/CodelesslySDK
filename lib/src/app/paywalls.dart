@@ -5,7 +5,7 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:ui' show PlatformDispatcher;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../services/services.dart';
 import 'codelessly.dart';
@@ -114,7 +114,8 @@ class CodelesslyPaywalls {
     onEvent('paywall_view', null);
 
     late final Route<PaywallResult> route;
-    route = MaterialPageRoute<PaywallResult>(
+    route = CodelesslyPageRoute.of<PaywallResult>(
+      codelessly: codelessly,
       fullscreenDialog: true,
       settings: RouteSettings(name: 'paywall/${paywall.placement.id}'),
       builder: (_) => CodelesslyWidget(

@@ -7,7 +7,6 @@ import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart'
     show
         ArcFit,
-        BarChartProps,
         BarcodeErrorCorrection,
         BarcodeProps,
         BarcodeSymbology,
@@ -19,7 +18,6 @@ import 'package:codelessly_api/core.dart'
         ProgressBarProps,
         ProgressBarShape,
         RadialGaugeProps;
-import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart' show CustomPainter;
 
@@ -666,165 +664,6 @@ class GaugeMeterPainter extends NodePainter {
       );
     }
   }
-}
-
-// --- bar chart ------------------------------------------------------------------
-
-/// A bar chart: the bars in equal
-/// columns over a baseline, grid lines with labels in a right gutter, and a
-/// row of labels under the baseline.
-class BarChartPainter extends NodePainter {
-  BarChartPainter(super.n) : super(repaint: PaintingBinding.instance.systemFonts);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (size.isEmpty) return;
-    final values = p(BarChartProps.values);
-    final labels = p(BarChartProps.labels);
-    final highlight = p(BarChartProps.highlight);
-    final color = c(BarChartProps.color);
-    final palette = p(BarChartProps.colors);
-    var max = p(BarChartProps.max);
-    if (max <= 0) max = values.whereType<double>().fold(0, (a, b) => b > a ? b : a);
-    final hasLabels = labels.any((l) => l.isNotEmpty);
-    final gridLabels = p(BarChartProps.gridLabels);
-    final gridLabelWidth = p(BarChartProps.gridLabelWidth);
-    final labelsLeft = p(BarChartProps.gridLabelsLeft);
-    final right = gridLabels.isNotEmpty && !labelsLeft ? gridLabelWidth : 0.0;
-    // With the grid labels on the left, the plot starts after them.
-    final plotLeft = gridLabels.isNotEmpty && labelsLeft ? gridLabelWidth : 0.0;
-    final fontSize = p(BarChartProps.labelFontSize);
-    final labelGap = p(BarChartProps.labelGap);
-    final style = textStyle(api.TextStyle(
-      fontFamily: p(BarChartProps.labelFontFamily),
-      fontWeight: p(BarChartProps.labelFontWeight),
-      fontSize: fontSize,
-      color: p(BarChartProps.labelColor),
-    ), n.behaviors.defaultTextStyle).copyWith(height: 1.2);
-    final gridStyle = textStyle(api.TextStyle(
-      fontFamily: p(BarChartProps.labelFontFamily),
-      fontWeight: p(BarChartProps.gridLabelFontWeight) ?? p(BarChartProps.labelFontWeight),
-      fontSize: p(BarChartProps.gridLabelFontSize) ?? fontSize,
-      color: p(BarChartProps.gridLabelColor) ?? p(BarChartProps.labelColor),
-    ), n.behaviors.defaultTextStyle).copyWith(height: 1);
-    final gridFontSize = p(BarChartProps.gridLabelFontSize) ?? fontSize;
-    final labelHeight = p(BarChartProps.labelAreaHeight) ?? (hasLabels ? fontSize * 1.2 + labelGap : 0.0);
-    final showValues = p(BarChartProps.showValues);
-    final valueFontSize = p(BarChartProps.valueFontSize) ?? fontSize;
-    // Room above the top grid line (by default, the tallest bar's value).
-    final valueRoom = p(BarChartProps.plotTopInset) ?? (showValues ? valueFontSize * 1.2 + 4 : 0.0);
-    final height = math.max(0.0, size.height - labelHeight - 1);
-    final plotHeight = math.max(0.0, height - valueRoom);
-    // Bars scale to the plot less the headroom kept above a full bar.
-    final barScale = math.max(0.0, plotHeight - p(BarChartProps.barHeadroom));
-    final width = math.max(0.0, size.width - right - plotLeft);
-    canvas.save();
-    canvas.translate(plotLeft, 0);
-
-    // Grid lines and their labels.
-    final gridLines = p(BarChartProps.gridLines);
-    final gridPaint = Paint()..color = c(BarChartProps.gridColor);
-    // One label more than the grid lines labels the baseline first.
-    final labelsBaseline = gridLabels.length > gridLines;
-    for (var g = labelsBaseline ? 0 : 1; g <= gridLines; g++) {
-      final bottom = plotHeight * g / gridLines - 0.5;
-      if (g > 0) canvas.drawRect(Rect.fromLTWH(0, height - bottom - 1, width, 1), gridPaint);
-      final at = labelsBaseline ? g : g - 1;
-      if (gridLabels.isNotEmpty && at < gridLabels.length) {
-        final tp = TextPainter(
-          text: TextSpan(text: gridLabels[at], style: gridStyle),
-          textDirection: TextDirection.ltr,
-          maxLines: 1,
-        )..layout(maxWidth: math.max(0, gridLabelWidth - 6));
-        final labelBottom = plotHeight * g / gridLines - gridFontSize / 2;
-        tp.paint(canvas, Offset(labelsLeft ? -plotLeft : size.width - plotLeft - (gridLabelWidth - 6), height - labelBottom - tp.height));
-        tp.dispose();
-      }
-    }
-
-    // Bars, in equal columns with gaps between.
-    final barGap = p(BarChartProps.barGap);
-    final count = values.length;
-    final column = count == 0 ? 0.0 : math.max(0.0, (width - barGap * (count - 1)) / count);
-    final emptyHeight = p(BarChartProps.emptyHeight);
-    final barRadius = Radius.circular(p(BarChartProps.barRadius));
-    final dimmed = p(BarChartProps.dimmedOpacity);
-    final maxBar = p(BarChartProps.maxBarWidth);
-    final bar = maxBar == null ? column : math.min(column, maxBar);
-    for (var i = 0; i < count; i++) {
-      final left = i * (column + barGap) + (column - bar) / 2;
-      final value = values[i];
-      if (value == null) {
-        canvas.drawRect(Rect.fromLTWH(left, height - emptyHeight, bar, emptyHeight),
-            Paint()..color = c(BarChartProps.emptyColor));
-        continue;
-      }
-      final h = max <= 0 ? 0.0 : (barScale * (value / max).clamp(0.0, 1.0)).clamp(emptyHeight, height).toDouble();
-      final baseColor = i < palette.length ? palette[i].flutter : color;
-      final barColor = highlight == null || highlight < 0 || i == highlight
-          ? baseColor
-          : baseColor.withValues(alpha: baseColor.a * dimmed);
-      canvas.drawRRect(
-        RRect.fromRectAndCorners(Rect.fromLTWH(left, height - h, bar, h), topLeft: barRadius, topRight: barRadius),
-        Paint()..color = barColor,
-      );
-      if (showValues) {
-        final text = barValueText(value, p(BarChartProps.valueDecimals), p(BarChartProps.valueSuffix));
-        final tp = TextPainter(
-          text: TextSpan(
-            text: text,
-            style: style.copyWith(
-                fontSize: valueFontSize,
-                fontWeight: FontWeight.w600,
-                color: i == highlight ? c(BarChartProps.highlightLabelColor) : null),
-          ),
-          textDirection: TextDirection.ltr,
-          maxLines: 1,
-        )..layout();
-        tp.paint(canvas, Offset(left + (bar - tp.width) / 2, height - h - tp.height - p(BarChartProps.valueGap)));
-        tp.dispose();
-      }
-    }
-
-    // Baseline.
-    canvas.drawRect(Rect.fromLTWH(0, height, width, 1), Paint()..color = c(BarChartProps.baselineColor));
-
-    // Labels under the bars.
-    if (hasLabels) {
-      final top = height + 1 + labelGap;
-      for (var i = 0; i < count; i++) {
-        final text = i < labels.length ? labels[i] : '';
-        if (text.isEmpty) continue;
-        final spacing = p(BarChartProps.labelLetterSpacing);
-        final labelStyle = spacing == 0 ? style : style.copyWith(letterSpacing: spacing);
-        final tp = TextPainter(
-          text: TextSpan(
-            text: text,
-            style: i == highlight && p(BarChartProps.highlightLabels)
-                ? labelStyle.copyWith(color: c(BarChartProps.highlightLabelColor))
-                : labelStyle,
-          ),
-          textDirection: TextDirection.ltr,
-          textAlign: TextAlign.center,
-          maxLines: 1,
-        )..layout();
-        final left = i * (column + barGap);
-        tp.paint(canvas, Offset(left + (column - tp.width) / 2, top));
-        tp.dispose();
-      }
-    }
-    canvas.restore();
-  }
-}
-
-/// A bar chart's value label: [decimals] places (null: whole numbers
-/// bare, others with one), then [suffix].
-@visibleForTesting
-String barValueText(double value, int? decimals, String suffix) {
-  final number = decimals != null
-      ? value.toStringAsFixed(decimals.clamp(0, 6))
-      : value == value.roundToDouble() ? value.round().toString() : value.toStringAsFixed(1);
-  return number + suffix;
 }
 
 // --- barcode --------------------------------------------------------------------
