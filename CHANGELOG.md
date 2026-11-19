@@ -1,3 +1,52 @@
+## 40.0.0
+
+What a page draws on a phone and by default: a text that keeps its words whole, controls at a web page's size,
+fields that read on the ground they stand on, bar charts in the theme's colour. With CodelesslyAPI 40.0.0. Read the
+first section before upgrading.
+
+### Behaviour changes (read before upgrading)
+
+**Text**
+
+- **A text never breaks inside a word.** Where its box is narrower than its longest word, the text is drawn
+  smaller so that the word fits, down to 65 % of its size; a word still too long keeps its line and fades out at
+  the box's edge. It was broken wherever the line ended, in a narrow column a letter a line. A text of one line
+  (`maxLines: 1`), one with `scaleDown`, and one whose words fit are as before.
+
+**Controls**
+
+- **A control 40 high is a step of its own**: a label of 14 with 16 at its sides (it took the 36 step's 13 and
+  12), an icon button's glyph 18, a menu row 36. The 44 step's side padding is 18 (14 before).
+- **A field, a select or a picker on a ground of another brightness than the theme's `surface`** (a light card in
+  a theme whose `surface` is dark) is drawn for that ground: its fill and ink are made from it. It took the dark
+  surface as its fill, with dark ink.
+
+**Charts**
+
+- **A bar chart's bars are at most 56 wide** when the node gives no `maxBarWidth`, each in the middle of its
+  column. They were as wide as their columns.
+- **A bar chart with no `color` is the theme's primary wherever that shows on the surface** (1.5:1). A light
+  primary (an amber, a lime) was replaced by the ink, since it does not read as text there.
+
+**Formulas**
+
+- **`money(value, "USD")`**: a currency's three-letter code where the symbol goes is that currency's symbol
+  (`$9.00`); it printed the code before the figure.
+
+### Desk
+
+- `Tabs` scroll sideways, with a fade at the edge, where the row has no room for them all. They were cut.
+- `Property`: its label is as wide as its words (112 at least, 220 at most); it was cut at 112 beside free room.
+- `ListRow`: its description says how tall it is (44 with one line, 66 with two, 87 with a `preview`) and that no
+  height is written on it; its previews are at those heights.
+
+### Tools
+
+- **The render command draws a text that names no family in the theme's `fontFamily`**, as an app does. It gave
+  such a text Roboto by name, so a site whose theme names a serif was drawn in Roboto while the run reported the
+  serif as fetched.
+- `text_clipped` says when a text was drawn smaller, or cut, to keep a word whole, and at what share of its size.
+
 ## 39.0.0
 
 Schema 3 is the only schema the SDK loads; a sheet's resting stop in a variable, a file picked without an upload,

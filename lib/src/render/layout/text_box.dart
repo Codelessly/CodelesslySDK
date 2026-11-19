@@ -98,8 +98,8 @@ class RenderWholeWords extends RenderProxyBox {
     child.layout(constraints, parentUsesSize: true);
     final RenderBox? p = _paragraphOf(child);
     // One line as laid out: no word was broken.
-    // (By its font size: a line is under twice it, two lines over.)
-    final bool oneLine = p is RenderParagraph && (p.maxLines == 1 || child.size.height <= _fontSize(p.text) * 2);
+    // (By its font size: a line is under 1.9 of it, two lines over.)
+    final bool oneLine = p is RenderParagraph && (p.maxLines == 1 || child.size.height < _fontSize(p.text) * 1.9);
     final double? word = oneLine ? null : _wordWidth(child, constraints.maxWidth);
     if (word == null) {
       size = child.size;

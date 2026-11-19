@@ -28,7 +28,7 @@ void main() {
 
   test('the control scale: a height picks its nearest step', () {
     final t = ControlTokens.resolve(ThemeTokens.none, dark: false);
-    expect([for (final h in const <double>[20, 24, 28, 31, 36, 40, 48]) t.scaleFor(h).name], ['xs', 'xs', 'compact', 'small', 'medium', 'medium', 'large']);
+    expect([for (final h in const <double>[20, 24, 28, 31, 36, 40, 48]) t.scaleFor(h).name], ['xs', 'xs', 'compact', 'small', 'medium', 'regular', 'large']);
     expect(t.radiusFor(t.scaleFor(24)), 5);
     expect(t.radiusFor(t.scaleFor(28)), 7);
     expect(ControlTokens.resolve(ThemeTokens.fromJson({'buttonRadius': 12}), dark: false).radiusFor(t.scaleFor(24)), 12);

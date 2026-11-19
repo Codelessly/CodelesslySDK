@@ -295,7 +295,7 @@ void main() {
       expect(f.boxRect.bottom, 60);
       expect(f.boxRect.top, closeTo(f.labelRect.height + kFieldLabelGap, .01));
       expect(f.contentRect.center.dy, closeTo(f.boxRect.center.dy, .01));
-      expect(f.scale.name, 'medium', reason: 'a 39 px box is nearest the 36 step');
+      expect(f.scale.name, 'regular', reason: 'a 39 px box is nearest the 40 step');
     });
 
     testWidgets('a hugging field is as wide as content wider than its least width', (tester) async {

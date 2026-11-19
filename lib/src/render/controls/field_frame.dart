@@ -896,9 +896,14 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl,
     return p + q;
   }
 
-  double _naturalWidth() {
-    const s = ControlScale.compact;
+  /// The width it takes when it hugs. [height] is the height it is held to,
+  /// when it is: its sides (padding, a chevron's or an icon's slot) are
+  /// those of the step it is drawn at there. Measured at the default step, a
+  /// field 40 high was narrower than its own value, which was cut.
+  double _naturalWidth([double? height]) {
     final d = decoration;
+    final box = height == null || !height.isFinite ? null : height - _labelExtent;
+    final s = box != null && box >= 20 ? d.tokens.scaleFor(box) : ControlScale.compact;
     final content = math.max(contentNaturalWidth(), _hintNaturalWidth);
     var w = math.max(_hugWidth, content + _sides(s) + (d.collapsed ? 0 : 2));
     if (d.label.isNotEmpty) {
@@ -932,7 +937,7 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl,
   }
 
   Size _sizeFor(BoxConstraints c) {
-    final width = c.hasTightWidth ? c.maxWidth : c.constrainWidth(_naturalWidth());
+    final width = c.hasTightWidth ? c.maxWidth : c.constrainWidth(_naturalWidth(c.hasTightHeight ? c.maxHeight : null));
     final label = _labelExtent;
     final double height;
     if (c.hasTightHeight) {
@@ -944,10 +949,10 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl,
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) => _naturalWidth();
+  double computeMinIntrinsicWidth(double height) => _naturalWidth(height);
 
   @override
-  double computeMaxIntrinsicWidth(double height) => _naturalWidth();
+  double computeMaxIntrinsicWidth(double height) => _naturalWidth(height);
 
   @override
   double computeMinIntrinsicHeight(double width) {
