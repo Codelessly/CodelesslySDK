@@ -180,9 +180,9 @@ class MarkScene {
     if (_animateElements || _animateClip) {
       _controller!.reset();
       if (transition!.repeat) {
-        _controller!.repeat(reverse: transition!.repeatReverse);
+        _controller.repeat(reverse: transition!.repeatReverse);
       } else {
-        _controller!.forward();
+        _controller.forward();
       }
     } else {
       // Multiple setState in one sync circle will be merged.

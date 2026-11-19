@@ -57,6 +57,17 @@ the share panel and the page's address. Needs codelessly_api 39.0.0.
   repeatable; without it nothing is picked, as when the chooser is closed. A `share` action copies its link there,
   listed under `copied to the clipboard`.
 
+- **A graph, as a preview** (`package:codelessly_sdk/graph.dart`): `CodelesslyGraph` draws an interactive chart
+  from a JSON spec and a list of rows, with no closures in the spec: panes of marks (lines, areas, bars, candles)
+  over one x axis the person drives, transforms that work out further columns (`sma`, `ema`, `rsi`, `stddev`),
+  price lines, session bands and markers. It pans, flicks, zooms by wheel and pinch, scales an axis by a drag,
+  fits the y scale to the rows in view, shows a crosshair that snaps to the rows, follows new rows, and asks for
+  older ones as the view reaches the first (`onNeedHistory`). Its viewport and cursor are state it gives the app
+  (`onState`) and takes back (`view`). `GraphEngine` and `GraphSpec` are the same without a widget. It is drawn
+  by a copy of the graphic package kept inside the SDK (MIT), and adds the `vector_math` dependency. This is a
+  preview: the spec's shape and these classes may change in any release, and a Codelessly document cannot hold a
+  graph yet.
+
 ### Tools
 
 - `tool/codelessly render` reports a document that is not of schema 3 as `schema_unsupported` (an error naming the

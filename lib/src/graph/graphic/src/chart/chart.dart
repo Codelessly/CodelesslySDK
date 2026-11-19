@@ -18,8 +18,6 @@ import 'package:codelessly_sdk/src/graph/graphic/src/util/collection.dart';
 import 'package:codelessly_sdk/src/graph/graphic/src/variable/transform/transform.dart';
 import 'package:codelessly_sdk/src/graph/graphic/src/variable/variable.dart';
 
-import 'view.dart';
-
 /// A widget to display the chart.
 ///
 /// Specifications details of data visualization are seen in this class properties.
