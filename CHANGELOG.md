@@ -22,6 +22,8 @@
 
 ### Fixed
 
+- A custom paint's color worked out to the name of a theme color (`stroke={props.ink}` with `ink="tealDot"`)
+  draws in that color; it was transparent.
 - No `value_not_computed` warning for a word such as `null` that is in the data a text reads (a site's
   variables, a component's parameters) though not in the page's document.
 
