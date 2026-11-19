@@ -214,7 +214,7 @@ class _SwipeActionsBoxState extends State<SwipeActionsBox>
                   ),
             child: Material(
               color: action.background.flutter,
-              child: InkWell(
+              child: _ActionTarget(
                 onTap: () => _run(action, offset.sign),
                 child: Semantics(
                   button: true,
@@ -493,4 +493,36 @@ class _Glyph extends LeafRenderObjectWidget {
       renderObject
         ..icon = icon
         ..color = color;
+}
+
+/// A revealed action's press target: a tap runs it, and a mouse over it
+/// shows a faint layer of the theme's hover color and the click cursor.
+class _ActionTarget extends StatefulWidget {
+  const _ActionTarget({required this.onTap, required this.child});
+
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  State<_ActionTarget> createState() => _ActionTargetState();
+}
+
+class _ActionTargetState extends State<_ActionTarget> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) => MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onTap,
+          child: DecoratedBox(
+            position: DecorationPosition.foreground,
+            decoration: BoxDecoration(color: _hovered ? Theme.of(context).hoverColor : null),
+            child: widget.child,
+          ),
+        ),
+      );
 }

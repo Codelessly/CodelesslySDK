@@ -175,11 +175,15 @@ class RenderNodeView extends RenderControlRoot with RenderObjectWithLayoutCallba
 /// ready): an arc in [color] turning in a square of [diameter], or of the
 /// size it is given.
 class SpinnerView extends LeafRenderObjectWidget {
-  const SpinnerView({super.key, required this.color, this.diameter = 36, this.strokeWidth = 4});
+  const SpinnerView({super.key, required this.color, this.diameter = 36, this.strokeWidth = 4, this.value});
 
   final Color color;
   final double diameter;
   final double strokeWidth;
+
+  /// The part of the ring that is drawn, from the top (0–1), standing
+  /// still; null: the arc turns.
+  final double? value;
 
   @override
   RenderSpinner createRenderObject(BuildContext context) => RenderSpinner()
@@ -188,6 +192,7 @@ class SpinnerView extends LeafRenderObjectWidget {
     ..strokeWidth = strokeWidth
     ..strokeAlign = 0
     ..strokeCap = StrokeCap.square
+    ..value = value
     ..animating = TickerMode.valuesOf(context).enabled;
 
   @override
@@ -195,6 +200,7 @@ class SpinnerView extends LeafRenderObjectWidget {
     ..color = color
     ..diameter = diameter
     ..strokeWidth = strokeWidth
+    ..value = value
     ..animating = TickerMode.valuesOf(context).enabled;
 }
 
@@ -232,6 +238,7 @@ class ControlButton extends LeafRenderObjectWidget {
     this.semanticsLabel,
     this.focusWhenShown = false,
     this.interactive = true,
+    this.focusable = true,
   });
 
   final ButtonSpec spec;
@@ -248,6 +255,10 @@ class ControlButton extends LeafRenderObjectWidget {
   /// Whether it takes pointers and the focus; else it only draws (a
   /// player's button on a design canvas).
   final bool interactive;
+
+  /// Whether Tab stops on it (false: what is around it is the stop, and
+  /// presses it).
+  final bool focusable;
 
   @override
   RenderButton createRenderObject(BuildContext context) {
@@ -278,6 +289,7 @@ extension on RenderButton {
       ..onPressed = w.onPressed
       ..semanticsLabel = w.semanticsLabel
       ..semanticsDirection = Directionality.maybeOf(context) ?? TextDirection.ltr;
+    focusNode.canRequestFocus = w.interactive && w.spec.enabled && w.focusable;
   }
 }
 

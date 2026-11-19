@@ -17,8 +17,9 @@ import 'package:flutter/scheduler.dart';
 
 import '../render/convert.dart';
 import '../render/controls/focus.dart';
+import '../render/control_theme.dart' show chromeButton, chromeGlyph, chromeTokensOf;
 import '../render/controls/root.dart';
-import '../render/node_view.dart' show SpinnerView;
+import '../render/node_view.dart' show ControlButton, SpinnerView;
 import '../render/paint/shell_constants.dart';
 import '../render/recipe.dart';
 import '../runtime/lists/pagination.dart';
@@ -652,7 +653,7 @@ class DataListViewState extends State<DataListView> {
     list = NotificationListener<ScrollNotification>(onNotification: _onOwnScroll, child: list);
 
     if (refreshable) {
-      list = RefreshIndicator(
+      list = PullToRefresh(
         onRefresh: _refresh,
         color: model?.refreshColor?.flutter,
         backgroundColor: model?.refreshBackgroundColor?.flutter,
@@ -718,6 +719,7 @@ class DataListViewState extends State<DataListView> {
     if (sticky) {
       SchedulerBinding.instance.addPostFrameCallback((_) => _syncLatestFocus());
       final colors = Theme.of(context).colorScheme;
+      final buttons = Theme.of(context).iconButtonTheme.style;
       final inner = list;
       // A list as tall as its items (no height of its own, in a column
       // that scrolls) has no end to stick to nor to jump to: it is its
@@ -737,14 +739,27 @@ class DataListViewState extends State<DataListView> {
             onTap: _jumpToLatest,
             child: ExcludeSemantics(child: Focus(
               descendantsAreFocusable: false,
-              child: IconButton.filledTonal(
+              // The stop is the list's own (the semantics above): not the
+              // button's.
+              child: SizedBox.square(
                 key: const ValueKey('followListLatest'),
-                tooltip: 'Jump to latest',
-                onPressed: _jumpToLatest,
-                icon: Icon(axis == Axis.vertical ? _Glyph.arrowDownward : _Glyph.arrowForward),
-                style: IconButton.styleFrom(minimumSize: const Size(48, 48), backgroundColor: colors.surfaceContainerHigh)
-                    .copyWith(side: WidgetStatePropertyAll(_latestFocus?.showsHighlight == true
-                        ? BorderSide(color: colors.primary, width: 2) : BorderSide.none)),
+                dimension: 48,
+                child: ControlButton(
+                  focusable: false,
+                  onPressed: _jumpToLatest,
+                  semanticsLabel: 'Jump to latest',
+                  spec: chromeButton(
+                    tokens: chromeTokensOf(context),
+                    icon: axis == Axis.vertical
+                        ? chromeGlyph('arrow_downward', ShellGlyphs.arrowDownward)
+                        : chromeGlyph('arrow_forward', ShellGlyphs.arrowForward),
+                    iconSize: 24,
+                    foreground: buttons?.foregroundColor?.resolve(const <WidgetState>{}) ?? colors.primary,
+                    background: colors.surfaceContainerHigh,
+                    shape: buttons?.shape?.resolve(const <WidgetState>{}),
+                    side: _latestFocus?.showsHighlight == true ? BorderSide(color: colors.primary, width: 2) : null,
+                  ),
+                ),
               ),
             )),
           ),
@@ -924,7 +939,24 @@ class UndoBar extends StatelessWidget {
           child: Row(
             children: [
               Expanded(child: Text(message, style: const TextStyle(color: ShellColors.white, fontSize: 14))),
-              TextButton(onPressed: onUndo, child: const Text('Undo')),
+              ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 64, minHeight: 40),
+                child: Builder(builder: (context) {
+                  final theme = Theme.of(context);
+                  final style = theme.textButtonTheme.style;
+                  return ControlButton(
+                    onPressed: onUndo,
+                    spec: chromeButton(
+                      tokens: chromeTokensOf(context),
+                      label: 'Undo',
+                      foreground: style?.foregroundColor?.resolve(const <WidgetState>{}) ?? theme.colorScheme.primary,
+                      style: theme.textTheme.labelLarge ?? const TextStyle(),
+                      shape: style?.shape?.resolve(const <WidgetState>{}),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                  );
+                }),
+              ),
             ],
           ),
         ),
@@ -1038,8 +1070,226 @@ class ItemSnapPhysics extends ScrollPhysics {
   bool get allowImplicitScrolling => false;
 }
 
-/// The icons drawn here, from the MaterialIcons font.
-abstract final class _Glyph {
-  static const arrowDownward = IconData(ShellGlyphs.arrowDownward, fontFamily: ShellGlyphs.font);
-  static const arrowForward = IconData(ShellGlyphs.arrowForward, fontFamily: ShellGlyphs.font, matchTextDirection: true);
+/// Pull to refresh for a vertical list: dragging [child]'s scroll view past
+/// its start brings a round indicator down from the top (an arc that fills
+/// as the drag goes); let go far enough (a quarter of the list's height) and
+/// it stays at [displacement], turning, while [onRefresh] runs, then shrinks
+/// away. Let go sooner and it goes back up.
+class PullToRefresh extends StatefulWidget {
+  const PullToRefresh({
+    super.key,
+    required this.onRefresh,
+    required this.child,
+    this.color,
+    this.backgroundColor,
+    this.displacement = 40,
+  });
+
+  final Future<void> Function() onRefresh;
+  final Widget child;
+
+  /// The arc (null: the theme's primary).
+  final Color? color;
+
+  /// The disc (null: the theme's surface).
+  final Color? backgroundColor;
+
+  /// How far under the list's top the indicator rests while refreshing.
+  final double displacement;
+
+  @override
+  State<PullToRefresh> createState() => _PullToRefreshState();
+}
+
+enum _Pull { drag, armed, snap, refresh, done, canceled }
+
+class _PullToRefreshState extends State<PullToRefresh> with TickerProviderStateMixin<PullToRefresh> {
+  // The part of the list's height a drag covers to arm it; how far past
+  // its resting place the drag can take the indicator.
+  static const _dragExtent = 0.25;
+  static const _overshoot = 1.5;
+  static const _snap = Duration(milliseconds: 150);
+  static const _leave = Duration(milliseconds: 200);
+
+  late final AnimationController _position = AnimationController(vsync: this);
+  late final AnimationController _scale = AnimationController(vsync: this);
+  late final Animation<double> _positionFactor = _position.drive(Tween<double>(begin: 0, end: _overshoot));
+  late final Animation<double> _scaleFactor = _scale.drive(Tween<double>(begin: 1, end: 0));
+
+  _Pull? _status;
+  double? _dragOffset;
+
+  @override
+  void dispose() {
+    _position.dispose();
+    _scale.dispose();
+    super.dispose();
+  }
+
+  // The arc fades in over the drag up to its resting place: fully there, it
+  // is armed.
+  double get _ink => (_position.value * _overshoot).clamp(0.0, 1.0);
+
+  bool _atStart(ScrollMetrics m) =>
+      (m.axisDirection == AxisDirection.up && m.extentAfter == 0) || (m.axisDirection == AxisDirection.down && m.extentBefore == 0);
+
+  bool _onScroll(ScrollNotification n) {
+    if (n.depth != 0) return false;
+    final vertical = n.metrics.axisDirection == AxisDirection.down || n.metrics.axisDirection == AxisDirection.up;
+    if (n is ScrollStartNotification && n.dragDetails != null && _atStart(n.metrics) && _status == null && vertical) {
+      _dragOffset = 0;
+      _scale.value = 0;
+      _position.value = 0;
+      setState(() => _status = _Pull.drag);
+      return false;
+    }
+    final dragging = _status == _Pull.drag || _status == _Pull.armed;
+    if (!vertical) {
+      if (dragging) _dismiss(_Pull.canceled);
+    } else if (n is ScrollUpdateNotification) {
+      if (dragging) {
+        final delta = n.scrollDelta ?? 0;
+        _dragOffset = _dragOffset! + (n.metrics.axisDirection == AxisDirection.down ? -delta : delta);
+        _checkDrag(n.metrics.viewportDimension);
+      }
+      if (_status == _Pull.armed && n.dragDetails == null) _show();
+    } else if (n is OverscrollNotification) {
+      if (dragging) {
+        _dragOffset = _dragOffset! + (n.metrics.axisDirection == AxisDirection.down ? -n.overscroll : n.overscroll);
+        _checkDrag(n.metrics.viewportDimension);
+      }
+    } else if (n is ScrollEndNotification) {
+      if (_status == _Pull.armed) {
+        if (_position.value < 1) {
+          _dismiss(_Pull.canceled);
+        } else {
+          _show();
+        }
+      } else if (_status == _Pull.drag) {
+        _dismiss(_Pull.canceled);
+      }
+    }
+    return false;
+  }
+
+  // While it is dragged the list's own overscroll glow stays away.
+  bool _onGlow(OverscrollIndicatorNotification n) {
+    if (n.depth != 0 || !n.leading || _status != _Pull.drag) return false;
+    n.disallowIndicator();
+    return true;
+  }
+
+  void _checkDrag(double extent) {
+    var value = extent <= 0 ? 0.0 : _dragOffset! / (extent * _dragExtent);
+    if (_status == _Pull.armed) value = math.max(value, 1 / _overshoot);
+    _position.value = value.clamp(0.0, 1.0);
+    if (_status == _Pull.drag && _ink >= 1) _status = _Pull.armed;
+  }
+
+  Future<void> _dismiss(_Pull to) async {
+    await Future<void>.value();
+    if (!mounted) return;
+    setState(() => _status = to);
+    if (to == _Pull.done) {
+      await _scale.animateTo(1, duration: _leave);
+    } else {
+      await _position.animateTo(0, duration: _leave);
+    }
+    if (mounted && _status == to) {
+      _dragOffset = null;
+      setState(() => _status = null);
+    }
+  }
+
+  void _show() {
+    _status = _Pull.snap;
+    _position.animateTo(1 / _overshoot, duration: _snap).then<void>((_) {
+      if (!mounted || _status != _Pull.snap) return;
+      setState(() => _status = _Pull.refresh);
+      widget.onRefresh().whenComplete(() {
+        if (mounted && _status == _Pull.refresh) _dismiss(_Pull.done);
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final child = NotificationListener<ScrollNotification>(
+      onNotification: _onScroll,
+      child: NotificationListener<OverscrollIndicatorNotification>(onNotification: _onGlow, child: widget.child),
+    );
+    final theme = Theme.of(context);
+    final color = widget.color ?? theme.colorScheme.primary;
+    final turning = _status == _Pull.refresh || _status == _Pull.done;
+    return Stack(
+      children: [
+        child,
+        if (_status != null)
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SizeTransition(
+              alignment: const AlignmentDirectional(-1, 1),
+              sizeFactor: _positionFactor,
+              child: Padding(
+                padding: EdgeInsets.only(top: widget.displacement),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: ScaleTransition(
+                    scale: _scaleFactor,
+                    child: AnimatedBuilder(
+                      animation: _position,
+                      builder: (context, _) => Semantics(
+                        label: Localizations.of<MaterialLocalizations>(context, MaterialLocalizations)
+                                ?.refreshIndicatorSemanticLabel ??
+                            'Refresh',
+                        child: Padding(
+                          key: const ValueKey('Codelessly pull to refresh'),
+                          padding: const EdgeInsets.all(4),
+                          child: CustomPaint(
+                            painter: _RefreshDisc(
+                              color: widget.backgroundColor ?? theme.canvasColor,
+                              shadow: theme.shadowColor,
+                            ),
+                            child: SizedBox.square(
+                              dimension: 41,
+                              child: Center(
+                                child: SpinnerView(
+                                  diameter: 17,
+                                  strokeWidth: 2.5,
+                                  color: turning ? color : color.withValues(alpha: color.a * _ink),
+                                  value: turning ? null : _position.value * .75,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// The indicator's disc, lifted a little off the list.
+class _RefreshDisc extends CustomPainter {
+  const _RefreshDisc({required this.color, required this.shadow});
+
+  final Color color, shadow;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final disc = Path()..addOval(Offset.zero & size);
+    canvas.drawShadow(disc, shadow, 2, color.a < 1);
+    canvas.drawPath(disc, Paint()..color = color);
+  }
+
+  @override
+  bool shouldRepaint(_RefreshDisc old) => old.color != color || old.shadow != shadow;
 }

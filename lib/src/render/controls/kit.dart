@@ -493,6 +493,16 @@ class ControlLabel {
 
   String get text => _text;
 
+  /// Whether its line (the font's leading included) is what is centered,
+  /// as Flutter's `Text` centers in a button; else its glyphs are.
+  set centersLine(bool value) {
+    if (value == _centersLine) return;
+    _centersLine = value;
+    _laidOutFor = null;
+  }
+
+  bool _centersLine = false;
+
   /// How many lines it takes at most: one, cut with an ellipsis, or (null)
   /// as many as its width needs.
   set maxLines(int? value) {
@@ -557,7 +567,7 @@ class ControlLabel {
     if (_laidOutFor == maxWidth) return;
     _laidOutFor = maxWidth;
     _painter.layout(maxWidth: maxWidth.isFinite ? maxWidth : double.infinity);
-    if (_text.isEmpty) {
+    if (_text.isEmpty || _centersLine) {
       _glyphCenter = _painter.height / 2;
       return;
     }

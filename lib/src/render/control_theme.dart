@@ -595,6 +595,8 @@ ButtonSpec chromeButton({
       padding: padding,
       enabled: enabled,
       wrapLabel: wrapLabel,
+      // Placed as the Text of the Material button it took the place of.
+      centersLine: true,
       hoverColor: foreground.withValues(alpha: .06),
       splashColor: foreground.withValues(alpha: .10),
       focusColor: foreground.withValues(alpha: .10),

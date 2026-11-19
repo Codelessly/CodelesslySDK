@@ -302,9 +302,9 @@ class _MediaVideoState extends State<MediaVideo> {
             alignment: Alignment.bottomCenter,
             child: ValueListenableBuilder<VideoPlayerValue>(
               valueListenable: c,
-              builder: (context, value, _) => _PlayerButton(
+              builder: (context, value, _) => MediaPlayerButton(
                 label: value.isPlaying ? 'Pause video' : 'Play video',
-                icon: value.isPlaying ? _pauseCircle : _playCircle,
+                icon: value.isPlaying ? pauseCircleGlyph : playCircleGlyph,
                 onPressed: () => value.isPlaying ? c.pause() : c.play(),
               ),
             ),
@@ -538,15 +538,15 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
       color: colors.surfaceContainerHigh,
       child: Row(children: [
         if (widget.preview || _url.isEmpty)
-          _PlayerButton(label: 'Play audio', icon: _playArrow)
+          MediaPlayerButton(label: 'Play audio', icon: playArrowGlyph)
         else if (_failed || player == null)
           const Icon(_Glyph.errorOutline, semanticLabel: 'Audio unavailable')
         else if (!_ready)
           SpinnerView(color: ProgressIndicatorTheme.of(context).color ?? colors.primary)
         else if (controls)
-          _PlayerButton(
+          MediaPlayerButton(
             label: _playing ? 'Pause audio' : 'Play audio',
-            icon: _playing ? _pauseCircle : _playCircle,
+            icon: _playing ? pauseCircleGlyph : playCircleGlyph,
             onPressed: () => _run(_playing ? player.pause : player.play),
           )
         else
@@ -564,7 +564,7 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
                 SizedBox(
                   width: double.infinity,
                   height: 24,
-                  child: _SeekBar(
+                  child: MediaSeekBar(
                     value: _position.inMilliseconds.clamp(0, _duration.inMilliseconds).toDouble(),
                     max: _duration.inMilliseconds > 0 ? _duration.inMilliseconds.toDouble() : 1,
                     onChanged: _ready && _duration > Duration.zero && player != null
@@ -586,8 +586,8 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
 /// A player's round button: a 24 px glyph in a 40 px button, in the theme's
 /// accent; with nothing to press ([onPressed] null) it is drawn faint and
 /// takes no input.
-class _PlayerButton extends StatelessWidget {
-  const _PlayerButton({required this.label, required this.icon, this.onPressed});
+class MediaPlayerButton extends StatelessWidget {
+  const MediaPlayerButton({required this.label, required this.icon, this.onPressed});
 
   /// What a screen reader says.
   final String label;
@@ -619,16 +619,16 @@ class _PlayerButton extends StatelessWidget {
   }
 }
 
-final api.Json _playArrow = chromeGlyph('play_arrow', ShellGlyphs.playArrow);
-final api.Json _playCircle = chromeGlyph('play_circle', ShellGlyphs.playCircle);
-final api.Json _pauseCircle = chromeGlyph('pause_circle', ShellGlyphs.pauseCircle);
+final api.Json playArrowGlyph = chromeGlyph('play_arrow', ShellGlyphs.playArrow);
+final api.Json playCircleGlyph = chromeGlyph('play_circle', ShellGlyphs.playCircle);
+final api.Json pauseCircleGlyph = chromeGlyph('pause_circle', ShellGlyphs.pauseCircle);
 
 /// The audio player's seek bar: a 3 px track (the played part 5) and a
 /// 12 px thumb in the theme's accent, 12 px in from each side. With nothing
 /// to seek ([onChanged] null) it is drawn faint, its thumb 10 px, and takes
 /// no input.
-class _SeekBar extends StatelessWidget {
-  const _SeekBar({required this.value, required this.max, this.onChanged});
+class MediaSeekBar extends StatelessWidget {
+  const MediaSeekBar({required this.value, required this.max, this.onChanged});
 
   final double value, max;
   final ValueChanged<double>? onChanged;

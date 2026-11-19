@@ -110,6 +110,7 @@ class ButtonSpec {
     this.focusColor,
     this.splashColor,
     this.wrapLabel = false,
+    this.centersLine = false,
   });
 
   final ButtonKind kind;
@@ -147,6 +148,10 @@ class ButtonSpec {
   /// the button growing taller with it (a dialog's answer); else it is one
   /// line, cut with an ellipsis.
   final bool wrapLabel;
+
+  /// Whether the label's line (its leading included) is centered in the
+  /// button, as Flutter's `Text` is; else its glyphs are (SSUI's buttons).
+  final bool centersLine;
 
   bool get hasIcon => icon.isNotEmpty && icon['show'] != false;
 
@@ -244,7 +249,8 @@ class ButtonSpec {
       other.hoverColor == hoverColor &&
       other.focusColor == focusColor &&
       other.splashColor == splashColor &&
-      other.wrapLabel == wrapLabel;
+      other.wrapLabel == wrapLabel &&
+      other.centersLine == centersLine;
 
   @override
   int get hashCode => Object.hash(kind, label, background, foreground, enabled, padding, fabType);
@@ -350,7 +356,9 @@ class RenderButton extends RenderControl implements LabeledControl {
     if (v == _spec) return;
     _spec = v;
     transitionDuration = Duration(milliseconds: v.tokens.controlMs);
-    _label.maxLines = v.wrapLabel ? null : 1;
+    _label
+      ..maxLines = v.wrapLabel ? null : 1
+      ..centersLine = v.centersLine;
     _syncIcon();
     markNeedsLayout();
     markNeedsSemanticsUpdate();
@@ -467,8 +475,9 @@ class RenderButton extends RenderControl implements LabeledControl {
     return c.constrainHeight(_naturalHeight);
   }
 
-  // A wrapped label's lines start together (the block is centered).
-  TextAlign get _labelAlign => spec.wrapLabel ? TextAlign.start : spec.align;
+  // A wrapped label's lines start together (the block is centered); a
+  // label placed as Flutter's Text is laid out as one is, from its start.
+  TextAlign get _labelAlign => spec.wrapLabel || spec.centersLine ? TextAlign.start : spec.align;
 
   /// Its size in [c]: its natural width at its height, and with a label
   /// that wraps, tall enough for the label's lines.

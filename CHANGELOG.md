@@ -7,6 +7,19 @@
   `CircularProgressIndicator`. They show a ring of the same size, stroke and colour (the theme's primary) whose arc
   is a steady 30% of the ring, turning once every 900 ms, where Material's arc grew and shrank as it turned. A
   `loadingBuilder` of your own is unchanged.
+- **Pull to refresh shows the SDK's own arc.** The indicator is the same disc with the same shadow, in the same
+  place, brought down by the same pull and gone after the same time. Inside it, Material's arc with an arrowhead is
+  now an arc that fills from the top as the list is pulled, then a steady 30% of the ring turning while the list
+  refreshes. `refreshColor`, `refreshBackgroundColor` and `refreshDisplacement` apply as before.
+- **The players' and the chat list's buttons show no tooltip.** Hovering (or holding) the video and audio play
+  buttons and a list's jump-to-latest button showed "Play video", "Pause audio", "Jump to latest". They no longer
+  do; a screen reader still reads those names.
+- **The keyboard reaches the toast's, the Undo bar's and the players' buttons as it reaches a screen's controls.**
+  They are in the SDK's own focus order now (Tab, Shift+Tab, Enter and Space), where they were stops of Flutter's.
+  The confirm dialog is unchanged to a user: the focus starts on the yes (on Cancel when it is destructive), Tab
+  moves between the two, Enter presses, Escape cancels. A revealed swipe action is no longer a Tab stop of its own:
+  the row's keys run its actions, as before. The audio seek bar takes the arrow keys, Page Up and Page Down, Home
+  and End.
 
 ### Fixed
 
@@ -18,6 +31,11 @@
 
 ### Changed
 
+- **The runtime's own buttons and the audio seek bar are the SDK's controls**: the toast's action and close button,
+  the confirm dialog's two answers, the video and audio players' play button, the audio seek bar, a swiped row's
+  Undo, and a chat list's jump-to-latest button. Each is drawn to the same pixels as the Material control it took
+  the place of, in the document's theme or a design system's; a tint that comes with a hover or a press eases in
+  over the theme's control time.
 - **Less of Flutter's Material library is used** (19 files of the package import it, from 23). The plain colors,
   the icons of the players, the toast and the data list, the line between a list's items (`separator: divider`)
   and a hero's default flight path are the SDK's own code now, and draw the same pixels. An app that does not use
