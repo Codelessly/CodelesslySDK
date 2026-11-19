@@ -133,6 +133,12 @@ final tools = <Map<String, Object?>>[
         'path': {'type': 'string', 'description': 'A site folder (pages/, components/, site/site.json) or a notation .txt file.'},
         'open': {'type': 'boolean', 'description': 'The open vocabulary (expand --open): unknown words stand in. Default true.'},
         'designSystem': {'type': 'string', 'description': 'A design system folder (design_system.json), optional.'},
+        'dictionary': {
+          'type': 'array',
+          'items': {'type': 'string'},
+          'description': 'Dictionaries: folders of definitions (a <Word>.txt each, a define), read in order after the '
+              'page\'s, the site\'s and the design system\'s definitions. Default: those CODELESSLY_DICTIONARY lists.',
+        },
       },
     },
   },
@@ -230,6 +236,7 @@ Future<(List<Map<String, Object?>>, bool)> _call(String name, Map args) async {
         'validate', path,
         if (args['open'] != false) '--open',
         if (args['designSystem'] case final String ds when ds.isNotEmpty) ...['--design-system', absolute(ds)],
+        for (final d in (args['dictionary'] as List?) ?? const []) ...['--dictionary', absolute('$d')],
       ]);
       final json = '${r.stdout}'.trim();
       return ([_text(json.isEmpty ? '${r.stderr}' : json)], json.isEmpty);

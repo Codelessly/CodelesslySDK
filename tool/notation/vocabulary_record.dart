@@ -28,16 +28,16 @@
 //                    system's), site (the site's own component), alias (`to`
 //                    what it was read as), definition (`definedBy`: page, a
 //                    define in the file itself; site, a define in
-//                    components/*.txt; dictionary, the notation's built-in
-//                    dictionary (codelessly_api docs/design/23); design
-//                    system), universal, primitive,
+//                    components/*.txt; a dictionary's folder name, a word
+//                    read from a dictionary (--dictionary, site.json's
+//                    `dictionary`); design system), universal, primitive,
 //                    unread, refused (`messages`: the issues that refused
 //                    it), unknown (a placeholder stands in, or it is left out)
-//   origin           for a word the notation has (resolved core, or a
-//                    definition of the dictionary): where its meaning is
-//                    written, base (the renderer and parser implement it),
-//                    dictionary (a definition in base words) or code (a word
-//                    the expander still rewrites in Dart: a page word)
+//   origin           for a word the notation has (resolved core) or a
+//                    dictionary's: where its meaning is written, base (the
+//                    renderer and parser implement it), code (a word of the
+//                    page's frames the expander writes out in Dart) or the
+//                    dictionary's folder name (a definition in base words)
 //   uses, files      its uses now, and by file the lines they are on
 //   signatures       a type's shapes as written (`MiniMonth "text" @ days=
 //                    onPick ...`), each with its uses now and when it was
@@ -149,9 +149,7 @@ final class RecordSnapshot {
               ? 'page'
               : siteDefined.contains(w.word)
                   ? 'site'
-                  : w.dictionary
-                      ? 'dictionary'
-                      : 'design system',
+                  : w.dictionary ?? 'design system',
     }, notes, issues: [for (final i in result.issues) '$i'], placeholders: [
       for (final p in placeholdersOf(result, path, text: text))
         {
