@@ -696,7 +696,7 @@ class FormulaEvaluator {
     FormulaFunctionDoc(
       'regexReplace',
       'regexReplace(text, pattern, to)',
-      r'regexReplace("WILLOW PHARMACY 044", " [0-9]+$", "") → WILLOW PHARMACY; \$1 in to inserts a group',
+      r'regexReplace("WILLOW PHARMACY 044", " [0-9]+$", "") → WILLOW PHARMACY; $1 in to inserts a group',
     ),
     FormulaFunctionDoc(
       'titleCase',
@@ -3078,9 +3078,12 @@ final Map<String, _Function> _functions = {
     if (pattern.isEmpty) return text;
     final String to = FormulaEvaluator.stringify(_arg(a, 2));
     try {
-      // `$1`, `${name}` insert groups; `$$` is a literal dollar.
+      // `$1`, `${name}` insert groups; `$$` is a literal dollar. A backslash
+      // before the reference (`\$1`, as the reference showed it, and as a
+      // writer escapes a `$` elsewhere) is read with it: it was kept, so
+      // `\$1` gave a backslash and the group ("B\5" for "B5").
       return text.replaceAllMapped(RegExp(pattern), (m) {
-        return to.replaceAllMapped(RegExp(r'\$\$|\$(\d+)|\$\{(\w+)\}'), (g) {
+        return to.replaceAllMapped(RegExp(r'\$\$|\\?\$(\d+)|\\?\$\{(\w+)\}'), (g) {
           if (g[0] == r'$$') return r'$';
           if (g[1] != null) {
             final int i = int.parse(g[1]!);

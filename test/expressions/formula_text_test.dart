@@ -31,6 +31,12 @@ void main() {
           'WILLOW PHARMACY',
         );
         expect(eval("regexReplace('A #12 B #7', '#[0-9]+', 'n')"), 'A n B n');
+        // A group in the replacement, with or without a backslash before
+        // its `$` (the reference showed `\$1`; it gave "B\5" for "B5").
+        expect(eval(r"regexReplace('B5-C5', '([^*/+%-])-', '$1+-')"), 'B5+-C5');
+        expect(eval(r"regexReplace('B5-C5', '([^*/+%-])-', '\$1+-')"), 'B5+-C5');
+        expect(eval(r"regexReplace('SUM(B5:B14)', '([A-Z]*[(][^()]*[)])', '|\$1|')"), '|SUM(B5:B14)|');
+        expect(eval(r"regexReplace('7', '([0-9])', '$$$1')"), r'$7');
       });
 
       test('regexReplace inserts numbered and named groups', () {
