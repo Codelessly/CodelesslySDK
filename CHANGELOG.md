@@ -1,3 +1,11 @@
+## Unreleased
+
+**A design at a width.** A page written with the notation's `at <width>` blocks (codelessly_api's Unreleased
+entry) renders as it is, with no change here: each design shows at its widths. Across a width bound the text typed
+into a field is kept (both copies of the field bind the same variable); the focus and the caret are not (the copy
+shown is another field, and the hidden one loses the focus), and each copy of a scrolling list keeps its own scroll
+position. An action that names a copied field (`focus search`) reaches the copy that is shown.
+
 ## 37.0.0
 
 Needs codelessly_api 37.0.0, whose entry lists what the notation now draws differently.
