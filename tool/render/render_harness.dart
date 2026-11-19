@@ -16,12 +16,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'src/args.dart';
 import 'src/fonts.dart';
+import 'src/google_fonts.dart' show renderUsesGoogleFonts;
 import 'src/sheet.dart';
 import 'src/render.dart';
 
 void main() {
   final argsFile = Platform.environment['CODELESSLY_RENDER_ARGS'];
   final serveDir = Platform.environment['CODELESSLY_RENDER_SERVE'];
+  // The command draws a family no file provides from Google Fonts (cached).
+  renderUsesGoogleFonts = true;
   testWidgets('render', (tester) async {
     if (serveDir != null) return _serve(tester, serveDir);
     if (argsFile == null) return; // Not run by render.sh.

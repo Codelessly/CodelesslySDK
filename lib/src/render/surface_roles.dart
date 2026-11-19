@@ -42,7 +42,7 @@ Color onColor(Color background, {Iterable<Color?> preferred = const []}) {
 ///
 /// | Role | From |
 /// |---|---|
-/// | [surface] | the surface given, else `tokens.surface`, else paper (white; near-black in dark mode) |
+/// | [surface] | the surface given, else `tokens.surface`, else the theme's ground where it is dark (`paper`), else paper (white; near-black in dark mode) |
 /// | [onSurface] | `tokens.onSurface` when it reads on the surface (3:1), else ink |
 /// | [primary] | `tokens.primary` when it reads on the surface, else [onSurface] |
 /// | [muted], [outline], [hairline] | [onSurface] at 68 %, 45 %, 18 % over the surface |
@@ -64,9 +64,13 @@ typedef SurfaceRoles = ({
 SurfaceRoles surfaceRoles(api.ThemeTokens tokens, {bool dark = false, Color? surface}) {
   // A role that names a theme color (`"primary": "forest"`) is that color.
   tokens = tokens.resolvedRoles();
-  final on = surface ?? colorOf(tokens.surface) ?? (dark ? kPaperDark : kPaper);
+  // A theme with no surface of its own on a dark ground (a site's `paper`
+  // and `ink`): its ground and its ink, so a menu, a tooltip, a picker drawn
+  // over it is dark as the page is (a light ground keeps paper, as before).
+  final darkGround = tokens.surface == null && tokens.groundIsDark;
+  final on = surface ?? colorOf(tokens.surface) ?? (darkGround ? colorOf(tokens.ground) : null) ?? (dark ? kPaperDark : kPaper);
   final isDark = isDarkSurface(on);
-  final onSurface = onColor(on, preferred: [colorOf(tokens.onSurface)]);
+  final onSurface = onColor(on, preferred: [colorOf(tokens.onSurface), if (darkGround) colorOf(tokens.color('ink'))]);
   Color mix(double t) => Color.lerp(on, onSurface, t)!;
   final brand = colorOf(tokens.primary);
   return (

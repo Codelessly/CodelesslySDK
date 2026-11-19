@@ -58,7 +58,7 @@ typedef Page = ({String name, Json json});
             ThemeRefs(t).node(m, Catalog.current.widget(readString(m['type']) ?? '') ?? library.catalog.widget(readString(m['type']) ?? '')),
     ];
     final ids = <String>[];
-    for (final f in fontsUsedBy([...nodes, ...named])) {
+    for (final f in [...fontsUsedBy([...nodes, ...named]), ...themeFontsUsedBy(tokens, nodes)]) {
       if (declared[f.family.toLowerCase()] case final List<PublishFont> files) {
         for (final d in files) {
           modelFonts[d.id] = {'family': d.family, 'weight': d.weight, if (d.italic) 'italic': true, 'url': d.url};
@@ -200,6 +200,33 @@ typedef Page = ({String name, Json json});
 String _slug(String name) {
   final s = name.trim().toLowerCase().replaceAll(RegExp(r'[^\p{L}\p{N}]+', unicode: true), '-').replaceAll(RegExp(r'^-+|-+$'), '');
   return s.isEmpty ? 'screen' : s;
+}
+
+/// The theme's own families ([ThemeTokens.fontFamily], `titleFontFamily`)
+/// at each weight a text style of [nodes] that names no family asks for
+/// (and 400): what those texts are drawn in, which an app then fetches
+/// with the page and not only once they are drawn. Roboto, the default,
+/// is left out.
+List<({String family, int weight, bool italic})> themeFontsUsedBy(ThemeTokens theme, Iterable<Object?> nodes) {
+  final families = {
+    for (final f in [theme.fontFamily, theme.titleFontFamily])
+      if (f != null && f.isNotEmpty && f.toLowerCase() != 'roboto') f,
+  };
+  if (families.isEmpty) return const [];
+  final weights = <int>{400};
+  void walk(Object? v) {
+    if (v is Map) {
+      if (v['fontWeight'] != null && v['fontFamily'] == null) {
+        if (readInt(v['fontWeight']) case final int w) weights.add(w);
+      }
+      v.values.forEach(walk);
+    } else if (v is List) {
+      v.forEach(walk);
+    }
+  }
+
+  nodes.forEach(walk);
+  return [for (final f in families) for (final w in weights) (family: f, weight: w, italic: false)];
 }
 
 /// The font families, weights and styles the text of [nodes] (node JSON)
