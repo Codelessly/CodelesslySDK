@@ -76,6 +76,19 @@ final class CorpusWord {
   /// The messages of the issues that refused it.
   final messages = <String>{};
 
+  /// Whether a use was read from the notation's built-in dictionary
+  /// (codelessly_api docs/design/23): a definition the notation has.
+  bool dictionary = false;
+
+  /// Where the notation's meaning of the word is written, for a word it has
+  /// (codelessly_api notationWordOrigin): `base`, `dictionary` or `code` (a
+  /// word the expander still rewrites in Dart); null for any other.
+  String? get origin => dictionary
+      ? 'dictionary'
+      : (kind == 'type' || kind == 'statement') && resolved == 'core'
+          ? notationWordOrigin(word)
+          : null;
+
   int get uses => how.values.fold(0, (a, b) => a + b);
 
   /// How most of its uses resolved.
@@ -86,6 +99,7 @@ final class CorpusWord {
         if (on != null) 'on': on,
         'word': word,
         'resolved': resolved,
+        if (origin != null) 'origin': origin,
         if (how.length > 1) 'how': how,
         if (to.isNotEmpty) 'to': (to.toList()..sort()).join(', '),
         'files': files.length,
@@ -135,6 +149,7 @@ String countLine(Map<String, Object?> count) {
 final class _LineRecord {
   String? type; // unknown, alias or definition
   String? typeTo;
+  bool dictionary = false; // a definition of the built-in dictionary
   final unknown = <String>{}; // kind:word
   final alias = <String, String>{}; // kind:word -> to
   final universal = <String>{}; // kind:word
@@ -165,8 +180,9 @@ final class CorpusWords {
   /// The key of a word in [words].
   static String keyOf(String kind, String? on, String word) => '$kind ${on ?? ''} $word';
 
-  void _add(String kind, String? on, String word, String how, String file, String example, {String? to, int? line, String? signature, String? message}) {
+  void _add(String kind, String? on, String word, String how, String file, String example, {String? to, int? line, String? signature, String? message, bool dictionary = false}) {
     final w = words.putIfAbsent(keyOf(kind, on, word), () => CorpusWord(kind, on, word));
+    if (dictionary) w.dictionary = true;
     w.how[how] = (w.how[how] ?? 0) + 1;
     if (to != null && to.isNotEmpty) w.to.add(to);
     w.files.add(file);
@@ -211,6 +227,7 @@ final class CorpusWords {
         case 'definition' || 'primitive':
           r.type = u.kind;
           r.typeTo = u.to;
+          r.dictionary = u.of == 'dictionary';
         case 'universal':
           r.universal.add('${u.of}:${u.word}');
         case 'alias':
@@ -273,12 +290,14 @@ final class CorpusWords {
       // Adds a word that [how] may have found refused, with the message.
       void add(String kind, String? on, String word, String resolved, {String? to, String? signature}) {
         final message = resolved == 'refused' ? refusedAs : null;
-        _add(kind, on, word, resolved, file, line, to: to, line: at, signature: signature, message: message);
+        _add(kind, on, word, resolved, file, line, to: to, line: at, signature: signature, message: message, dictionary: resolved == 'definition' && r.dictionary && (kind == 'type' || kind == 'statement'));
         refusedAs = null;
       }
 
       if (vocabularyStatements.contains(parts.word)) {
-        add('statement', null, parts.word, r.type == 'alias' ? 'alias' : 'core', to: r.type == 'alias' ? r.typeTo : null);
+        // A statement word of the built-in dictionary (computed) is a definition.
+        final defined = r.type == 'definition';
+        add('statement', null, parts.word, r.type == 'alias' ? 'alias' : defined ? 'definition' : 'core', to: r.type == 'alias' || defined ? r.typeTo : null);
         if (parts.word == 'state' || parts.word == 'project') {
           for (final p in parts.parts.where((p) => p.kind == 'word')) {
             add('flag', parts.word, p.raw, how('flag', p.raw, 'core'), to: r.alias['flag:${p.raw}']);

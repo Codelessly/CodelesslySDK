@@ -40,6 +40,10 @@
   draws in that color; it was transparent.
 - No `value_not_computed` warning for a word such as `null` that is in the data a text reads (a site's
   variables, a component's parameters) though not in the page's document.
+- **The vocabulary record says where the notation's meaning of a word is written**: `origin` is `base`,
+  `dictionary` (a definition the notation ships in its base words) or `code` (a word the expander still rewrites,
+  such as the page words). A word read from the notation's dictionary resolves as a `definition` with `definedBy:
+  dictionary`, not `design system`; `computed` is one.
 
 ## 37.0.0
 
