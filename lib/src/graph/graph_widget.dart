@@ -8,7 +8,7 @@
 // that loads older rows).
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/scheduler.dart';
@@ -45,6 +45,12 @@ class CodelesslyGraphState extends State<CodelesslyGraph> with TickerProviderSta
   late final AnimationController _fling;
   double _flung = 0;
 
+  /// Turns while a mark has a pulsing end dot.
+  late final AnimationController _pulse;
+
+  /// Runs a line's move to new rows (GraphXSpec.morph).
+  late final AnimationController _morph;
+
   // The gesture under way.
   GraphZone _zone = const GraphZone(GraphZoneKind.none);
   double _scale = 1;
@@ -64,19 +70,40 @@ class CodelesslyGraphState extends State<CodelesslyGraph> with TickerProviderSta
         _flung = _fling.value;
         engine.panBy(d);
       });
+    _pulse = AnimationController(vsync: this, duration: const Duration(milliseconds: 1600))
+      ..addListener(() => _repaint.value++);
+    _morph = AnimationController(vsync: this)
+      ..addListener(() => engine.morphTo(Curves.easeInOut.transform(_morph.value)));
+    _syncPulse();
+  }
+
+  void _syncPulse() {
+    final pulses = engine.spec.panes.any((p) => p.marks.any((m) => m.pulse && m.endDot > 0));
+    if (pulses && !_pulse.isAnimating) _pulse.repeat();
+    if (!pulses && _pulse.isAnimating) _pulse.stop();
   }
 
   @override
   void didUpdateWidget(CodelesslyGraph oldWidget) {
     final old = oldWidget;
     super.didUpdateWidget(oldWidget);
-    if (!identical(widget.spec, old.spec) && !mapEquals(widget.spec, old.spec)) {
+    final newData = !identical(widget.data, old.data);
+    // The line on screen, before its spec and rows change.
+    if (newData) engine.captureMorph();
+    if (!identical(widget.spec, old.spec) && !const DeepCollectionEquality().equals(widget.spec, old.spec)) {
       _disposePanes();
       engine.spec = GraphSpec.fromJson(widget.spec);
+      _syncPulse();
     }
-    if (!identical(widget.data, old.data)) engine.setData(widget.data);
+    if (newData) {
+      engine.setData(widget.data);
+      if (engine.morphing) {
+        _morph.duration = Duration(milliseconds: engine.spec.x.morph.round());
+        _morph.forward(from: 0);
+      }
+    }
     final view = widget.view;
-    if (view != null && !mapEquals(view, old.view)) {
+    if (view != null && !const DeepCollectionEquality().equals(view, old.view)) {
       final same = view['last'] == null &&
           view['barSpacing'] == engine.viewport.barSpacing &&
           view['rightOffset'] == engine.viewport.rightOffset;
@@ -89,6 +116,8 @@ class CodelesslyGraphState extends State<CodelesslyGraph> with TickerProviderSta
     engine.removeListener(_onEngine);
     _disposePanes();
     _fling.dispose();
+    _pulse.dispose();
+    _morph.dispose();
     engine.dispose();
     _repaint.dispose();
     super.dispose();
@@ -196,7 +225,8 @@ class CodelesslyGraphState extends State<CodelesslyGraph> with TickerProviderSta
     }
   }
 
-  bool get _hover => const ['hover', 'both'].contains(engine.spec.crosshair.on);
+  bool get _touch => engine.spec.crosshair.on == 'touch';
+  bool get _hover => const ['hover', 'both', 'touch'].contains(engine.spec.crosshair.on);
   bool get _press => const ['longPress', 'both'].contains(engine.spec.crosshair.on);
 
   @override
@@ -212,7 +242,14 @@ class CodelesslyGraphState extends State<CodelesslyGraph> with TickerProviderSta
         onExit: (_) => _pressing ? null : engine.setCursor(null),
         child: Listener(
           onPointerSignal: _signal,
-          onPointerDown: (_) => _fling.stop(),
+          onPointerDown: (e) {
+            _fling.stop();
+            // A scrub: the cursor is under the finger from the moment it is down.
+            if (_touch) engine.setCursor(e.localPosition);
+          },
+          onPointerMove: (e) => _touch ? engine.setCursor(e.localPosition) : null,
+          onPointerUp: (e) => _touch && e.kind != PointerDeviceKind.mouse ? engine.setCursor(null) : null,
+          onPointerCancel: (_) => _touch ? engine.setCursor(null) : null,
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onScaleStart: _start,
@@ -259,30 +296,116 @@ class _GraphPainter extends CustomPainter {
         canvas.drawLine(plot.topLeft, Offset(size.width, plot.top), Paint()..color = style.separator);
       }
       for (final line in spec.panes[i].priceLines) {
-        final v = engine.priceLineValue(line);
-        if (v == null) continue;
-        final y = engine.yOf(i, v);
-        if (y < plot.top || y > plot.bottom) continue;
-        _line(canvas, Offset(0, y), Offset(plot.right, y), line.color, dashed: line.dashed);
-        if (line.tag) {
-          _tag(canvas, engine.yLabel(i, v), Offset(plot.right, y), line.color, const Color(0xFFFFFFFF), style.fontSize,
-              width: engine.yAxisWidth);
-        }
-        if (line.label.isNotEmpty) {
-          final tp = _text(line.label, line.color, style.fontSize);
-          tp.paint(canvas, Offset(plot.right - tp.width - 6, y - tp.height - 2));
-        }
+        _priceLine(canvas, i, plot, line);
+      }
+      for (final mark in spec.panes[i].marks) {
+        if (mark.endDot > 0) _endDot(canvas, i, plot, mark);
+      }
+      for (final marker in spec.panes[i].markers) {
+        _marker(canvas, plot, marker);
       }
     }
     final cursor = engine.cursor;
-    if (cursor == null) return;
+    if (cursor != null) _crosshair(canvas, cursor);
+  }
+
+  void _priceLine(Canvas canvas, int pane, Rect plot, GraphPriceLineSpec line) {
+    final engine = state.engine, style = engine.spec.style;
+    final v = engine.priceLineValue(line);
+    if (v == null) return;
+    final y = engine.yOf(pane, v);
+    if (y < plot.top || y > plot.bottom) return;
+    if (line.byBand && engine.spec.x.bands.isNotEmpty) {
+      // Band by band over the whole x scale, the one in use in its color.
+      final active = engine.activeGroup;
+      for (final band in engine.spec.x.bands) {
+        final a = engine.xOf(band.from).clamp(plot.left, plot.right).toDouble();
+        final b = engine.xOf(band.to).clamp(plot.left, plot.right).toDouble();
+        final color = band.group == active ? line.activeColor ?? line.color : line.color;
+        _line(canvas, Offset(a, y), Offset(b, y), color, style: line.line);
+      }
+    } else {
+      _line(canvas, Offset(0, y), Offset(plot.right, y), line.color, style: line.line);
+    }
+    if (line.tag) {
+      _tag(canvas, engine.yLabel(pane, v), Offset(plot.right, y), line.color, const Color(0xFFFFFFFF), style.fontSize,
+          width: engine.yAxisWidth, note: line.note);
+    }
+    if (line.label.isNotEmpty) {
+      final tp = _text(line.label, line.color, style.fontSize);
+      tp.paint(canvas, Offset(plot.right - tp.width - 6, y - tp.height - 2));
+    }
+  }
+
+  /// A lettered badge at the foot of the pane, on its row.
+  void _marker(Canvas canvas, Rect plot, GraphMarkerSpec marker) {
+    final engine = state.engine;
+    final index = engine.indexOfKey(marker.at);
+    if (index == null) return;
+    final x = engine.xOf(index);
+    if (x < plot.left + 9 || x > plot.right - 9) return;
+    final at = Offset(x, plot.bottom - 12);
+    canvas.drawCircle(at, 8.5, Paint()..color = engine.spec.style.background);
+    canvas.drawCircle(
+        at,
+        8,
+        Paint()
+          ..color = marker.color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1);
+    final tp = _text(marker.text, marker.color, 10);
+    tp.paint(canvas, at - Offset(tp.width / 2, tp.height / 2));
+  }
+
+  /// The dot on a mark's last row, with its ring swelling and fading.
+  void _endDot(Canvas canvas, int pane, Rect plot, GraphMarkSpec mark) {
+    final engine = state.engine;
+    if (engine.count == 0) return;
+    final v = engine.rows.last[mark.valueField];
+    if (v is! num) return;
+    final at = Offset(engine.xOf(engine.count - 1), engine.yOf(pane, v.toDouble()));
+    if (at.dx < plot.left - 1 || at.dx > plot.right + 1) return;
+    final color = mark.endDotColor ?? mark.color;
+    if (mark.pulse) {
+      final t = state._pulse.value;
+      canvas.drawCircle(at, mark.endDot * (1 + 2 * t), Paint()..color = color.withValues(alpha: 0.35 * (1 - t)));
+    }
+    canvas.drawCircle(at, mark.endDot, Paint()..color = color);
+  }
+
+  void _crosshair(Canvas canvas, GraphCursor cursor) {
+    final engine = state.engine, spec = engine.spec, style = spec.style, cross = spec.crosshair;
     final axis = engine.xAxisRect;
-    _line(canvas, Offset(cursor.x, 0), Offset(cursor.x, axis.top), style.crosshair, dashed: true);
-    _line(canvas, Offset(0, cursor.y), Offset(engine.plotWidth, cursor.y), style.crosshair, dashed: true);
-    _tag(canvas, engine.yLabel(cursor.pane, cursor.value), Offset(engine.plotWidth, cursor.y), style.tag, style.tagText,
-        style.fontSize,
-        width: engine.yAxisWidth);
-    final time = _text(engine.xLabel(cursor.index), style.tagText, style.fontSize);
+    final top = engine.plotRect(0).top;
+    if (cross.vertical) {
+      _line(canvas, Offset(cursor.x, top), Offset(cursor.x, axis.top), style.crosshair, style: cross.line);
+    }
+    if (cross.horizontal) {
+      _line(canvas, Offset(0, cursor.y), Offset(engine.plotWidth, cursor.y), style.crosshair, style: cross.line);
+    }
+    if (cross.dot > 0) {
+      final at = Offset(cursor.x, cursor.y);
+      if (cross.dotStroke > 0) {
+        canvas.drawCircle(at, cross.dot + cross.dotStroke / 2, Paint()..color = style.background);
+      }
+      canvas.drawCircle(
+          at, cross.dot - cross.dotStroke / 2, Paint()..color = engine.magnetMark?.color ?? style.crosshair);
+    }
+    if (cross.priceTag) {
+      _tag(canvas, engine.yLabel(cursor.pane, cursor.value), Offset(engine.plotWidth, cursor.y), style.tag,
+          style.tagText, style.fontSize,
+          width: engine.yAxisWidth);
+    }
+    if (cross.timeLabel == 'none') return;
+    final label = engine.xLabel(cursor.index, cross.timeFormat.isEmpty ? null : cross.timeFormat);
+    if (cross.timeLabel == 'top') {
+      // Plain text over the line, kept inside the plot.
+      final time = _text(label, style.text, style.fontSize);
+      final left = (cursor.x - time.width / 2).clamp(0.0, math.max(0.0, engine.plotWidth - time.width)).toDouble();
+      time.paint(canvas, Offset(left, math.max(0, (top - time.height) / 2)));
+      return;
+    }
+    final time = _text(label, style.tagText, style.fontSize);
     final w = time.width + 12;
     final left = (cursor.x - w / 2).clamp(0.0, math.max(0.0, engine.plotWidth - w)).toDouble();
     canvas.drawRRect(
@@ -293,34 +416,43 @@ class _GraphPainter extends CustomPainter {
   }
 
   TextPainter _text(String text, Color color, double size) => TextPainter(
-        text: TextSpan(text: text, style: TextStyle(color: color, fontSize: size, fontFamily: state.engine.spec.style.fontFamily)),
+        text: TextSpan(
+            text: text, style: TextStyle(color: color, fontSize: size, fontFamily: state.engine.spec.style.fontFamily)),
         textDirection: TextDirection.ltr,
       )..layout();
 
   /// A value's tag on the price axis, its middle at [at].
-  void _tag(Canvas canvas, String text, Offset at, Color fill, Color color, double size, {required double width}) {
+  /// With a [note], a second line under the value (the tag grows down).
+  void _tag(Canvas canvas, String text, Offset at, Color fill, Color color, double size,
+      {required double width, String note = ''}) {
+    if (width <= 0) return;
     final tp = _text(text, color, size);
+    final second = note.isEmpty ? null : _text(note, color, size - 1);
     final h = tp.height + 6;
     canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(at.dx, at.dy - h / 2, width, h), const Radius.circular(3)),
+      RRect.fromRectAndRadius(
+          Rect.fromLTWH(at.dx, at.dy - h / 2, width, h + (second?.height ?? 0)), const Radius.circular(3)),
       Paint()..color = fill,
     );
     tp.paint(canvas, Offset(at.dx + 6, at.dy - tp.height / 2));
+    second?.paint(canvas, Offset(at.dx + 6, at.dy + tp.height / 2));
   }
 
-  void _line(Canvas canvas, Offset a, Offset b, Color color, {bool dashed = false}) {
+  /// A 1 px line: `solid`, `dashed` (3 on, 3 off) or `dotted` (1 on, 1 off).
+  void _line(Canvas canvas, Offset a, Offset b, Color color, {String style = 'solid'}) {
     final paint = Paint()
       ..color = color
       ..strokeWidth = 1;
-    if (!dashed) {
+    final length = (b - a).distance;
+    if (length == 0) return;
+    if (style == 'solid') {
       canvas.drawLine(a, b, paint);
       return;
     }
-    final length = (b - a).distance;
-    if (length == 0) return;
+    final on = style == 'dotted' ? 1.0 : 3.0, off = style == 'dotted' ? 1.0 : 3.0;
     final step = (b - a) / length;
-    for (var d = 0.0; d < length; d += 6) {
-      canvas.drawLine(a + step * d, a + step * math.min(d + 3.0, length).toDouble(), paint);
+    for (var d = 0.0; d < length; d += on + off) {
+      canvas.drawLine(a + step * d, a + step * math.min(d + on, length).toDouble(), paint);
     }
   }
 

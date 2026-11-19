@@ -66,6 +66,12 @@ class GraphEngine extends ChangeNotifier {
 
   List<Json> _source = const [];
 
+  // A morph under way (GraphXSpec.morph): the line the graph showed, as
+  // shares of the plot's width and height, and the rows it is going to.
+  List<(double, double)>? _morphFrom;
+  List<Json>? _target;
+  bool get morphing => _target != null;
+
   /// The rows, with the transforms' fields and `_i`, each one's position.
   List<Json> rows = const [];
   int get count => rows.length;
@@ -87,12 +93,14 @@ class GraphEngine extends ChangeNotifier {
 
   double get yAxisWidth => spec.panes.fold(0.0, (w, p) => math.max(w, p.y.width));
   double get plotWidth => math.max(0, size.width - yAxisWidth);
-  double get _panesHeight => math.max(0, size.height - spec.x.axisHeight);
+  double get _top => spec.style.topInset;
+  double get _panesHeight => math.max(0, size.height - spec.x.axisHeight - _top);
+  double get _panesBottom => _top + _panesHeight;
 
   /// A pane's plot.
   Rect plotRect(int pane) {
     final total = spec.panes.fold(0.0, (s, p) => s + p.grow);
-    var top = 0.0;
+    var top = _top;
     for (var i = 0; i < pane; i++) {
       top += _panesHeight * spec.panes[i].grow / total;
     }
@@ -104,10 +112,10 @@ class GraphEngine extends ChangeNotifier {
     return Rect.fromLTWH(plot.right, plot.top, yAxisWidth, plot.height);
   }
 
-  Rect get xAxisRect => Rect.fromLTWH(0, _panesHeight, size.width, spec.x.axisHeight);
+  Rect get xAxisRect => Rect.fromLTWH(0, _panesBottom, size.width, spec.x.axisHeight);
 
   GraphZone zoneAt(Offset p) {
-    if (p.dy >= _panesHeight) return const GraphZone(GraphZoneKind.xAxis);
+    if (p.dy >= _panesBottom) return const GraphZone(GraphZoneKind.xAxis);
     for (var i = 0; i < spec.panes.length; i++) {
       final plot = plotRect(i);
       if (p.dy >= plot.top && p.dy < plot.bottom) {
@@ -134,28 +142,110 @@ class GraphEngine extends ChangeNotifier {
 
   /// The positions with a time label: every step-th row, the step the
   /// smallest round one whose labels stand 80 px apart.
-  List<num> get xTicks {
-    if (count == 0) return const [];
-    var step = 1;
-    for (final s in const [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000]) {
-      step = s;
-      if (s * viewport.barSpacing >= 80) break;
+  List<num> get xTicks => _ticks ??= _xTicks();
+  List<num>? _ticks;
+
+  // The calendar unit the ticks are at: 0 years, 1 months, 2 days, 3 hours.
+  int _tickLevel = 1;
+
+  DateTime? _rowTime(int index) => switch (rows[index][spec.x.label]) {
+        final num ms => DateTime.fromMillisecondsSinceEpoch(ms.toInt(), isUtc: true),
+        final String s => DateTime.tryParse(s),
+        _ => null,
+      };
+
+  /// A position's time: its row's, or past the last row (the rest of a
+  /// session not over yet) the time it will have at the rows' own step.
+  DateTime? _time(int index) {
+    if (index < count) return _rowTime(index);
+    if (count < 2) return null;
+    final last = _rowTime(count - 1), before = _rowTime(count - 2);
+    if (last == null || before == null) return null;
+    return last.add(last.difference(before) * (index - (count - 1)));
+  }
+
+  int _bucket(DateTime t, int level) => switch (level) {
+        0 => t.year,
+        1 => t.year * 12 + t.month,
+        2 => t.millisecondsSinceEpoch ~/ 86400000,
+        _ => t.millisecondsSinceEpoch ~/ 3600000,
+      };
+
+  /// Calendar ticks: the rows that start an hour, a day, a month or a year,
+  /// at the finest of those whose labels stand apart.
+  List<num> _calendarTicks() {
+    final (first, last) = visible;
+    final most = plotWidth / 70;
+    var ticks = const <num>[];
+    for (var level = 3; level >= 0; level--) {
+      _tickLevel = level;
+      ticks = [
+        for (var i = math.max(first, 1); i <= last; i++)
+          if (_time(i) case final t? when _time(i - 1) != null && _bucket(t, level) != _bucket(_time(i - 1)!, level)) i,
+      ];
+      if (ticks.length <= most) {
+        // A coarser unit that starts at the same rows names them better
+        // (daily rows each start an hour, but they are days).
+        for (var coarser = level - 1; coarser >= 0; coarser--) {
+          final same = [
+            for (var i = math.max(first, 1); i <= last; i++)
+              if (_time(i) case final t?
+                  when _time(i - 1) != null && _bucket(t, coarser) != _bucket(_time(i - 1)!, coarser))
+                i,
+          ];
+          if (same.length != ticks.length) break;
+          _tickLevel = coarser;
+        }
+        break;
+      }
     }
-    final first = math.max(0, from.ceil()), last = math.min(count - 1, to.floor());
-    return [for (var i = (first / step).ceil() * step; i <= last; i += step) i];
+    return ticks;
+  }
+
+  /// A tick's label: its own unit, or the larger one it also starts (a
+  /// year at January, a month at its first day).
+  String xTickLabel(int index) {
+    if (spec.x.ticks != 'calendar') return xLabel(index);
+    if (index < 0 || index >= count) return '';
+    final t = _time(index);
+    if (t == null) return xLabel(index);
+    final before = index > 0 ? _time(index - 1) : null;
+    bool starts(int level) => before != null && _bucket(t, level) != _bucket(before, level);
+    final pattern = switch (_tickLevel) {
+      0 => 'yyyy',
+      1 => starts(0) ? 'yyyy' : 'MMM',
+      2 => starts(1) ? 'MMM' : 'd',
+      _ => starts(2) ? 'd' : 'HH:mm',
+    };
+    return xLabel(index, pattern);
+  }
+
+  List<num> _xTicks() {
+    if (count == 0) return const [];
+    if (spec.x.ticks == 'calendar') return _calendarTicks();
+    var step = spec.x.tickEvery ?? 1;
+    if (spec.x.tickEvery == null) {
+      for (final s in const [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000]) {
+        step = s;
+        if (s * viewport.barSpacing >= 80) break;
+      }
+    }
+    // A fitted view labels the positions its rows have not reached yet.
+    final end = spec.x.fit == 'none' ? count - 1 : math.max(count, spec.x.slots ?? count) - 1;
+    final first = math.max(0, from.ceil()), last = math.min(end, to.floor());
+    // A label hard against the left edge would be cut: it is left out.
+    return [
+      for (var i = (first / step).ceil() * step; i <= last; i += step)
+        if (xOf(i) >= 16) i,
+    ];
   }
 
   final _formats = <String, DateFormat>{};
 
   String xLabel(int index, [String? format]) {
-    if (index < 0 || index >= count) return '';
-    final v = rows[index][spec.x.label];
-    final time = switch (v) {
-      final num ms => DateTime.fromMillisecondsSinceEpoch(ms.toInt(), isUtc: true),
-      final String s => DateTime.tryParse(s),
-      _ => null,
-    };
-    if (time == null) return v?.toString() ?? '';
+    if (index < 0) return '';
+    final time = _time(index);
+    if (time == null) return index < count ? rows[index][spec.x.label]?.toString() ?? '' : '';
     final pattern = format ?? spec.x.format;
     return (_formats[pattern] ??= DateFormat(pattern)).format(time);
   }
@@ -174,6 +264,8 @@ class GraphEngine extends ChangeNotifier {
     final p = spec.panes[pane], y = p.y;
     if (y.domain == 'fixed' && y.min != null && y.max != null) return (y.min!, y.max!);
     final (first, last) = y.domain == 'data' ? (0, count - 1) : visible;
+    // A morph is drawn on the scale of where it is going.
+    final rows = _target ?? this.rows;
     var lo = double.infinity, hi = double.negativeInfinity;
     void take(double? v) {
       if (v == null || !v.isFinite) return;
@@ -183,6 +275,7 @@ class GraphEngine extends ChangeNotifier {
 
     var fromZero = false;
     for (final m in p.marks) {
+      if (m.overlay != null) continue;
       if (m.type == 'bar') {
         fromZero = true;
         take(0);
@@ -203,6 +296,45 @@ class GraphEngine extends ChangeNotifier {
     final span = hi - lo;
     // Bars stand on zero: no room under it.
     return (fromZero && lo == 0 ? 0 : lo - span * y.marginBottom, hi + span * y.marginTop);
+  }
+
+  /// The domain of a mark on a scale of its own (GraphMarkSpec.overlay): from
+  /// zero, its largest value in view at the top of its share of the pane.
+  (double, double) overlayDomain(int pane, GraphMarkSpec mark) {
+    final (first, last) = visible;
+    var hi = 0.0;
+    for (var i = first; i <= last; i++) {
+      if (rows[i][mark.valueField] case final num v when v.isFinite) hi = math.max(hi, v.toDouble());
+    }
+    return (0, (hi == 0 ? 1 : hi) / mark.overlay!.clamp(0.01, 1));
+  }
+
+  /// The band a position is in; null for none.
+  GraphBandSpec? bandAt(num index) {
+    final bands = spec.x.bands;
+    for (final b in bands) {
+      // A band ends where the next starts; the last holds its own end.
+      if (index >= b.from && (index < b.to || (identical(b, bands.last) && index <= b.to))) return b;
+    }
+    return null;
+  }
+
+  /// The band in use: the cursor's, else the last row's.
+  String? get activeBand => count == 0 ? null : bandAt(cursor?.index ?? count - 1)?.id;
+
+  /// The group of the band in use.
+  String? get activeGroup => count == 0 ? null : bandAt(cursor?.index ?? count - 1)?.group;
+
+  /// The mark the crosshair snaps to (the first with the magnet field).
+  GraphMarkSpec? get magnetMark {
+    final magnet = spec.crosshair.magnet;
+    if (magnet.isEmpty) return null;
+    for (final p in spec.panes) {
+      for (final m in p.marks) {
+        if (m.fields.contains(magnet)) return m;
+      }
+    }
+    return null;
   }
 
   double yOf(int pane, double value) {
@@ -257,6 +389,12 @@ class GraphEngine extends ChangeNotifier {
     return value.toStringAsFixed(y.decimals);
   }
 
+  Map<Object?, int>? _keys;
+
+  /// The position of the row with this key; null for none.
+  int? indexOfKey(Object? key) =>
+      (_keys ??= {for (var i = 0; i < count; i++) rows[i][spec.key]: i})[key];
+
   /// A price line's value: its own, or its field in the last row.
   double? priceLineValue(GraphPriceLineSpec line) {
     if (line.value != null) return line.value;
@@ -296,7 +434,84 @@ class GraphEngine extends ChangeNotifier {
       }
     }
     _askedHistory = false;
+    if (_morphFrom != null && count > 0 && plotWidth > 0) {
+      _target = rows;
+      _settle();
+      morphTo(0);
+      return;
+    }
+    _morphFrom = null;
     _settle();
+  }
+
+  /// The mark a morph moves: the crosshair's, else the first.
+  (int, GraphMarkSpec)? get _morphMark {
+    final magnet = magnetMark;
+    for (var p = 0; p < spec.panes.length; p++) {
+      for (final m in spec.panes[p].marks) {
+        if (magnet == null || identical(m, magnet)) return (p, m);
+      }
+    }
+    return null;
+  }
+
+  /// Remembers the line on screen, before new rows (and a new spec) are
+  /// set: the next [setData] starts from it instead of jumping.
+  void captureMorph() {
+    _morphFrom = null;
+    final mark = _morphMark;
+    if (spec.x.morph <= 0 || mark == null || count == 0 || plotWidth <= 0 || morphing) return;
+    final (pane, m) = mark;
+    final (lo, hi) = yDomain(pane);
+    _morphFrom = [
+      for (var i = 0; i < count; i++)
+        if (rows[i][m.valueField] case final num v) (xOf(i) / plotWidth, (v - lo) / (hi - lo)),
+    ];
+    if (_morphFrom!.isEmpty) _morphFrom = null;
+  }
+
+  double _morphHeightAt(double share) {
+    final from = _morphFrom!;
+    if (share <= from.first.$1) return from.first.$2;
+    for (var i = 1; i < from.length; i++) {
+      final (b, bh) = from[i];
+      if (share <= b) {
+        final (a, ah) = from[i - 1];
+        return b == a ? bh : ah + (bh - ah) * (share - a) / (b - a);
+      }
+    }
+    return from.last.$2;
+  }
+
+  /// A morph's progress, 0 to 1: each point of the new line is drawn
+  /// between where the old line was above it and where it belongs.
+  void morphTo(double t) {
+    final target = _target, mark = _morphMark;
+    if (target == null) return;
+    if (t >= 1 || mark == null || _morphFrom == null) {
+      rows = target;
+      _target = null;
+      _morphFrom = null;
+      _changed();
+      return;
+    }
+    final (pane, m) = mark;
+    _domains.clear();
+    final (lo, hi) = yDomain(pane);
+    rows = [
+      for (var i = 0; i < target.length; i++)
+        if (target[i][m.valueField] case final num v)
+          {
+            ...target[i],
+            m.valueField: () {
+              final was = _morphHeightAt(xOf(i) / plotWidth), now = (v - lo) / (hi - lo);
+              return lo + (was + (now - was) * t) * (hi - lo);
+            }(),
+          }
+        else
+          target[i],
+    ];
+    _changed();
   }
 
   void panBy(double dx) => _setViewport(viewport.pan(dx));
@@ -347,7 +562,7 @@ class GraphEngine extends ChangeNotifier {
     final row = rows[index];
     final zone = zoneAt(p);
     var pane = zone.pane < 0 ? spec.panes.length - 1 : zone.pane;
-    var y = p.dy.clamp(0.0, _panesHeight);
+    var y = p.dy.clamp(_top, _panesBottom);
     final magnet = spec.crosshair.magnet;
     if (magnet.isNotEmpty) {
       final home = spec.panes.indexWhere((s) => s.marks.any((m) => m.fields.contains(magnet)));
@@ -383,7 +598,16 @@ class GraphEngine extends ChangeNotifier {
   }
 
   void _settle() {
-    if (spec.x.clamp) viewport = viewport.clamp(count, plotWidth);
+    final fit = spec.x.fit;
+    if (fit != 'none' && plotWidth > 0 && count > 0) {
+      // Every position across the plot: the view is not the user's.
+      final slots = math.max(2, math.max(spec.x.slots ?? count, count));
+      viewport = fit == 'points'
+          ? GraphViewport(barSpacing: plotWidth / (slots - 1), rightOffset: slots - count - 0.5)
+          : GraphViewport(barSpacing: plotWidth / slots, rightOffset: (slots - count).toDouble());
+    } else if (spec.x.clamp) {
+      viewport = viewport.clamp(count, plotWidth);
+    }
     _changed();
     if (!_askedHistory && count > 0 && plotWidth > 0 && from < spec.x.historyThreshold) {
       _askedHistory = true;
@@ -393,6 +617,8 @@ class GraphEngine extends ChangeNotifier {
 
   void _changed() {
     _domains.clear();
+    _ticks = null;
+    _keys = null;
     // The pointer has not moved, the rows under it have.
     if (cursor != null && _pointer != null) cursor = _cursorAt(_pointer!);
     notifyListeners();
@@ -423,6 +649,8 @@ class GraphEngine extends ChangeNotifier {
       ? null
       : {
           'index': cursor!.index,
+          'x': cursor!.x,
+          'y': cursor!.y,
           'key': cursor!.row[spec.key],
           'value': cursor!.value,
           'pane': cursor!.pane,

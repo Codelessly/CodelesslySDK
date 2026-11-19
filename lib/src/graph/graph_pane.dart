@@ -15,6 +15,7 @@ import 'graphic/src/chart/view.dart';
 import 'graphic/src/common/dim.dart';
 import 'graphic/src/coord/rect.dart';
 import 'graphic/src/encode/color.dart';
+import 'graphic/src/encode/gradient.dart';
 import 'graphic/src/encode/shape.dart';
 import 'graphic/src/encode/size.dart';
 import 'graphic/src/graffiti/element/element.dart';
@@ -53,16 +54,51 @@ class GraphPane {
   Size _sizeOf(Rect plot) =>
       Size(plot.width + engine.yAxisWidth, plot.height + (_last ? engine.spec.x.axisHeight : 0));
 
-  /// The fields on the pane's y scale.
+  /// The fields on the pane's own y scale.
   List<String> get _fields => {
-        for (final m in _spec.marks) ...m.fields.where((f) => f.isNotEmpty),
+        for (final m in _spec.marks)
+          if (m.overlay == null) ...m.fields.where((f) => f.isNotEmpty),
       }.toList();
+
+  /// The marks on a scale of their own.
+  Iterable<GraphMarkSpec> get _overlays => _spec.marks.where((m) => m.overlay != null);
+
+  /// The marks drawn band by band.
+  Iterable<GraphMarkSpec> get _segmented =>
+      _spec.marks.where((m) => m.segmentBy.isNotEmpty && m.overlay == null && engine.spec.x.bands.isNotEmpty);
+
+  /// A segmented mark's value in one band: the variable of that part of
+  /// its line.
+  String _part(GraphMarkSpec m, GraphBandSpec band) => '${m.y}@${band.id}';
+
+  /// A row's value for a band's part: its own while it is in the band, and
+  /// the first row after it too, so the parts meet with no gap.
+  num _partValue(GraphMarkSpec m, GraphBandSpec band, Json r) {
+    final i = r['_i']! as int;
+    final inBand = r[m.segmentBy] == band.id || (i > 0 && engine.rows[i - 1][m.segmentBy] == band.id);
+    return inBand && r[m.y] is num ? r[m.y]! as num : double.nan;
+  }
+
+  /// One band's part of a line, dimmed while another band is in use.
+  Mark _partMark(GraphMarkSpec m, GraphBandSpec band) => LineMark(
+        position: Varset('_i') * Varset(_part(m, band)),
+        color: ColorEncode(
+          encoder: (_) =>
+              band.id == engine.activeBand ? m.color : m.color.withValues(alpha: m.color.a * m.dimInactive),
+        ),
+        size: SizeEncode(value: m.width),
+        shape: ShapeEncode(value: BasicLineShape(smooth: m.curved)),
+      );
 
   Chart<Json> _chart(List<Json> rows) {
     final style = engine.spec.style;
     final text = TextStyle(fontSize: style.fontSize, color: style.text, fontFamily: style.fontFamily);
     final grid = PaintStyle(strokeColor: style.grid, strokeWidth: 1);
     final fields = _fields;
+    Variable<Json, num> number(String f, {bool labeled = false}) => Variable(
+          accessor: (Json r) => r[f] is num ? r[f]! as num : double.nan,
+          scale: LinearScale(formatter: (v) => engine.yLabel(index, v)),
+        );
     return Chart<Json>(
       data: rows,
       padding: (_) => EdgeInsets.only(right: engine.yAxisWidth, bottom: _last ? engine.spec.x.axisHeight : 0),
@@ -70,21 +106,31 @@ class GraphPane {
       variables: {
         '_i': Variable(
           accessor: (Json r) => r['_i']! as num,
-          scale: LinearScale(formatter: (v) => engine.xLabel(v.round())),
+          scale: LinearScale(formatter: (v) => engine.xTickLabel(v.round())),
         ),
-        for (final f in fields)
-          f: Variable(
-            accessor: (Json r) => r[f] is num ? r[f]! as num : double.nan,
-            scale: LinearScale(formatter: (v) => engine.yLabel(index, v)),
-          ),
+        for (final f in fields) f: number(f),
+        for (final m in _overlays)
+          if (!fields.contains(m.valueField)) m.valueField: number(m.valueField),
+        for (final m in _segmented)
+          for (final band in engine.spec.x.bands)
+            _part(m, band): Variable(
+              accessor: (Json r) => _partValue(m, band, r),
+              scale: LinearScale(formatter: (v) => engine.yLabel(index, v)),
+            ),
       },
-      marks: [for (final m in _spec.marks) _mark(m)],
+      marks: [
+        for (final m in _spec.marks)
+          if (_segmented.contains(m))
+            for (final band in engine.spec.x.bands) _partMark(m, band)
+          else
+            _mark(m),
+      ],
       axes: [
         AxisGuide(
           dim: Dim.x,
           variable: '_i',
           grid: grid,
-          label: _last ? LabelStyle(textStyle: text, offset: const Offset(0, 6)) : null,
+          label: _last && engine.spec.x.labels ? LabelStyle(textStyle: text, offset: const Offset(0, 6)) : null,
         ),
         if (fields.isNotEmpty)
           AxisGuide(
@@ -93,7 +139,7 @@ class GraphPane {
             position: 1,
             flip: true,
             grid: grid,
-            label: LabelStyle(textStyle: text, offset: const Offset(6, 0)),
+            label: _spec.y.labels ? LabelStyle(textStyle: text, offset: const Offset(6, 0)) : null,
           ),
       ],
     );
@@ -106,6 +152,7 @@ class GraphPane {
       final open = row[m.open], close = row[m.close];
       return open is num && close is num && close < open ? m.downColor : m.upColor;
     }
+
     final x = Varset('_i');
     switch (m.type) {
       case 'candle':
@@ -124,7 +171,16 @@ class GraphPane {
       case 'area':
         return AreaMark(
           position: x * Varset(m.y),
-          color: ColorEncode(value: m.color.withValues(alpha: m.fillOpacity)),
+          color: m.fade ? null : ColorEncode(value: m.color.withValues(alpha: m.fillOpacity)),
+          gradient: m.fade
+              ? GradientEncode(
+                  value: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [m.color.withValues(alpha: m.fillOpacity), m.color.withValues(alpha: 0)],
+                  ),
+                )
+              : null,
           shape: ShapeEncode(value: BasicAreaShape(smooth: m.curved)),
         );
       default:
@@ -154,13 +210,17 @@ class GraphPane {
     final a = (first - 1).clamp(0, engine.count), b = (last + 2).clamp(0, engine.count);
     final (lo, hi) = engine.yDomain(index);
     final y = ScaleWindow(lo, hi, engine.yTicks(index));
-    return (
-      a < b ? engine.rows.sublist(a, b) : const [],
-      {
-        '_i': ScaleWindow(engine.from, engine.to, engine.xTicks),
-        for (final f in _fields) f: y,
-      },
-    );
+    final windows = {
+      '_i': ScaleWindow(engine.from, engine.to, engine.xTicks),
+      for (final f in _fields) f: y,
+      for (final m in _segmented)
+        for (final band in engine.spec.x.bands) _part(m, band): y,
+    };
+    for (final m in _overlays) {
+      final (oLo, oHi) = engine.overlayDomain(index, m);
+      windows.putIfAbsent(m.valueField, () => ScaleWindow(oLo, oHi));
+    }
+    return (a < b ? engine.rows.sublist(a, b) : const [], windows);
   }
 
   void paint(Canvas canvas) => _view.graffiti.paint(canvas);
