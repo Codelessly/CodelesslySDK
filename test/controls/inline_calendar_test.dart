@@ -239,4 +239,25 @@ Page
     expect(session.values['arrival'], '2026-11-22');
     expect(session.values['departure'], '2026-11-23');
   });
+
+  testWidgets('an inline calendar given less height than its rows need fits its rows inside its box', (tester) async {
+    tester.view.physicalSize = const Size(390, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final doc = columnDoc({
+      'stay': {
+        'type': 'calendar',
+        'layout': {'width': {'fill': 0}, 'height': 235},
+        'props': {'start': '2026-11-20', 'end': '', 'label': 'Days'},
+      },
+    }, width: 390, height: 900);
+    final (tree, _) = runningTree(doc);
+    addTearDown(tree.dispose);
+    await tester.pumpWidget(NodeView(tree: tree, rootId: 'col', interactive: true));
+    await tester.pump();
+    final calendar = _calendar(tree);
+    expect(calendar.size.height, 235);
+    expect(calendar.cellRect(41).bottom, lessThanOrEqualTo(235));
+    expect(calendar.cellHeight, lessThan(48));
+  });
 }

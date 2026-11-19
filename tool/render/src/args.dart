@@ -22,6 +22,7 @@ final class RenderArgs {
     this.sizes = defaultSizes,
     this.screens = const [],
     this.fullPage = false,
+    this.modals = false,
     this.steps = const [],
     this.fontDirs = const [],
     this.label,
@@ -45,6 +46,10 @@ final class RenderArgs {
   final List<Size> sizes;
   final List<String> screens;
   final bool fullPage;
+
+  /// `--modals`: with no `--screen`, the screens only ever opened as a modal
+  /// are captured too (each alone, as `--screen` names one).
+  final bool modals;
   final List<Step> steps;
   final List<String> fontDirs;
   final String? label;
@@ -100,6 +105,7 @@ final class RenderArgs {
         sizes: sizes ?? this.sizes,
         screens: screens ?? this.screens,
         fullPage: fullPage,
+        modals: modals,
         steps: steps,
         fontDirs: fontDirs,
         label: label,
@@ -129,6 +135,9 @@ Options:
   --sizes <WxH,...>       Screen sizes (default 390x844,834x1112,1440x900).
   --screen <id|name>      Only this screen: a canvas id, a layout id, a screen
                           name (props.screen), a canvas name or path. Repeatable.
+  --modals                Also capture the screens only ever opened as a modal
+                          (an openModal names them and no navigate does), each
+                          alone; without it each is named in an info line.
   --full-page             Capture the whole page from its top (whatever the steps
                           scrolled it to), not the window where they left it.
                           A dialog, drawer or menu open over it is captured at the
@@ -241,7 +250,7 @@ RenderArgs parseArgs(List<String> argv) {
   final screens = <String>[];
   final steps = <Step>[];
   final fonts = <String>[];
-  var fullPage = false, dumpLayout = false, componentsAll = false;
+  var fullPage = false, dumpLayout = false, componentsAll = false, modals = false;
   String? label, component, props, slots, compare, theme;
   DateTime? now;
   final compareMap = <String, String>{};
@@ -271,6 +280,8 @@ RenderArgs parseArgs(List<String> argv) {
         googleFonts = false;
       case '--full-page':
         fullPage = true;
+      case '--modals':
+        modals = true;
       case '--dump-layout':
         dumpLayout = true;
       case '--fonts':
@@ -333,6 +344,7 @@ RenderArgs parseArgs(List<String> argv) {
     sizes: sizes,
     screens: screens,
     fullPage: fullPage,
+    modals: modals,
     steps: steps,
     fontDirs: fonts,
     label: label,

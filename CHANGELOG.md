@@ -1,3 +1,46 @@
+## Unreleased
+
+### Behaviour changes
+
+- **An inline calendar given less height than its rows need** fits its six rows of days inside its box (down to
+  20 px a row); its rows stayed 48 px and painted past the box.
+- **Squeezable texts side by side in a row keep their own widths while they fit**, and give way in proportion
+  when they do not (CSS's `flex-shrink`), in a row that squeezes its children (`squeezeChildren`, the default). As
+  flexible children of equal flex they took an equal share each, so a heading beside a short count wrapped at half
+  the row with room to spare. Where they cannot fit even at their least, they give way below it, so what is
+  beside them stays in the row, as before. Measured (a grid's row that hugs it), the row is as tall as the
+  squeezed texts' lines. A row with `squeezeChildren: false` is unchanged.
+
+- **A grid whose rows shrink-wrap (`shrinkWrapRows`) and that gives a `mainAxisExtent`** has rows at least that
+  long (CSS's `grid-auto-rows: minmax(extent, auto)`); the extent was not read and rows were as short as their
+  content (a timetable's slots 16 px high).
+
+- **A line chart draws a series written without a `kind` as a line** (`chartType: line`, `series: [{"field":
+  "first"}]`); it was a bar, which a line chart does not draw, so the chart had no lines.
+
+- **A ring filled to a value (`circularProgressIndicator` with a `value`) shows its track** when it names no
+  `backgroundColor`: the theme's `track`, else a progress bar's tenth of grey. It drew the arc alone. A spinner
+  (no value) is unchanged.
+
+- **A confirm action's built-in dialog takes a design system's dialog**: the corner of `radii.dialog` (before
+  `radii.popup`), and with a `dialogTitle` text style its title at that size, its message at `body`'s, its
+  buttons at `sizes.control` and its cancel outlined in `secondaryBorder`. Desk's confirm drew the runtime's own
+  18 / 15 / 44 px and a text cancel beside Desk's outlined buttons. A theme with no dialog of its own is unchanged
+  but for `radii.dialog`.
+
+### Added
+
+- **Render tool: `--modals`** captures the screens only ever opened as a modal (an `openModal` names them, no
+  `navigate` does), each alone, in a run that captures every screen. Without it each such screen is named in a
+  `modal_screen_not_captured` info line, with how to capture it.
+
+### Fixed
+
+- A custom paint's color worked out to the name of a theme color (`stroke={props.ink}` with `ink="tealDot"`)
+  draws in that color; it was transparent.
+- No `value_not_computed` warning for a word such as `null` that is in the data a text reads (a site's
+  variables, a component's parameters) though not in the page's document.
+
 ## 37.0.0
 
 Needs codelessly_api 37.0.0, whose entry lists what the notation now draws differently.

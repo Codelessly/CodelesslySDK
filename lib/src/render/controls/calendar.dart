@@ -90,7 +90,13 @@ class RenderCalendar extends RenderBox implements MouseTrackerAnnotation {
   static const double gridWidth = 220;
   double get headerHeight => inline ? 36 : 28;
   double get weekdayHeight => inline ? 28 : 24;
-  double get cellHeight => inline ? 48 : 28;
+  double get cellHeight => inline ? _inlineCell : 28;
+
+  /// An inline grid's rows: 48 high, less when the box it is given is not
+  /// that tall (`Calendar h=235`), so the six rows stay inside it (down to
+  /// [minInlineCell]; they kept 48 and painted past the box).
+  double _inlineCell = 48;
+  static const double minInlineCell = 20;
   static const double gap = 2, headerGap = 4;
 
   /// Rows of days: always six, so the panel never changes height.
@@ -505,7 +511,13 @@ class RenderCalendar extends RenderBox implements MouseTrackerAnnotation {
       );
 
   @override
-  void performLayout() => size = computeDryLayout(constraints);
+  void performLayout() {
+    _inlineCell = 48;
+    size = computeDryLayout(constraints);
+    if (inline && size.height < _bodyTop + _bodyHeight) {
+      _inlineCell = math.max(minInlineCell, (size.height - _bodyTop - weekdayHeight - (rows - 1) * gap) / rows);
+    }
+  }
 
   // --- pointer ------------------------------------------------------------------
 
