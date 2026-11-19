@@ -225,8 +225,8 @@ final class NotationSite {
   /// The words [definitionFiles] define, by the file that defines each.
   late final Map<String, String> definedWords = {
     for (final e in definitionFiles.entries)
-      for (final w in readPageDefinitions(e.value).words.keys)
-        if (notationBuiltInWord(w, catalog: standardCatalog) == null) w: e.key,
+      for (final w in readPageDefinitions(e.value).words.entries)
+        if (notationBuiltInWord(w.key, catalog: standardCatalog, primitive: w.value.every((d) => d.primitive)) == null) w.key: e.key,
   };
 
   /// The component files the site does not load (a `components/*.txt` that
@@ -271,7 +271,7 @@ final class NotationSite {
     // A word the notation already has is the notation's: this definition of
     // it is not used (the owner's decision, 2026-11-18).
     for (final e in read.words.entries) {
-      if (notationBuiltInWord(e.key, catalog: standardCatalog) case final what?) {
+      if (notationBuiltInWord(e.key, catalog: standardCatalog, primitive: e.value.every((d) => d.primitive)) case final what?) {
         for (final d in e.value) {
           _skipped.add((path: path, type: e.key, message: '${_name(path)}: line ${d.line}: ${notationBuiltInDefinition(e.key, what, kind: d.primitive ? 'primitive' : 'definition')}'));
         }
