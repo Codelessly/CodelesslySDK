@@ -7,7 +7,8 @@
 - **Squeezable texts side by side in a row keep their own widths while they fit**, and give way in proportion
   when they do not (CSS's `flex-shrink`), in a row that squeezes its children (`squeezeChildren`, the default). As
   flexible children of equal flex they took an equal share each, so a heading beside a short count wrapped at half
-  the row with room to spare. A row with `squeezeChildren: false` is unchanged.
+  the row with room to spare. Where they cannot fit even at their least, they give way below it, so what is
+  beside them stays in the row, as before. A row with `squeezeChildren: false` is unchanged.
 
 - **A grid whose rows shrink-wrap (`shrinkWrapRows`) and that gives a `mainAxisExtent`** has rows at least that
   long (CSS's `grid-auto-rows: minmax(extent, auto)`); the extent was not read and rows were as short as their

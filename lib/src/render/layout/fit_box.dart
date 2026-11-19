@@ -302,6 +302,12 @@ class CodelesslyFlexParentData extends FlexParentData {
   /// of the room left on its line (0: none).
   int grow = 0;
 
+  /// A hugging child that may be squeezed (`layout.squeezable`) and is
+  /// laid out at its own size: when the children cannot fit even at their
+  /// least, it gives way below that (as a Flexible would), so what is beside
+  /// it stays in the row.
+  bool squeezable = false;
+
   @override
   String toString() => '${super.toString()}; collapsed=$collapsed${basis == null ? '' : '; basis=$basis grow=$grow'}';
 }
@@ -688,8 +694,23 @@ class RenderCodelesslyFlex extends RenderFlex implements ControlLineReporter {
     final double overflow = used - available;
     if (overflow <= precisionErrorTolerance) return;
     // Content that can't fit even at its minimum stays at its natural size
-    // and overflows visibly, rather than clipping lines of text.
-    if (overflow > capacity) return;
+    // and overflows visibly, rather than clipping lines of text; but a child
+    // that may be squeezed gives way below its least (a heading beside a
+    // control: the control stays in the row, as when the heading was a
+    // Flexible).
+    if (overflow > capacity) {
+      var below = 0.0;
+      for (final e in extents.entries) {
+        if ((e.key.parentData! as CodelesslyFlexParentData).squeezable) below += e.value.$2;
+      }
+      if (below <= 0 || overflow > capacity + below) return;
+      for (final e in extents.entries.toList()) {
+        if ((e.key.parentData! as CodelesslyFlexParentData).squeezable) {
+          capacity += e.value.$2;
+          extents[e.key] = (e.value.$1, 0);
+        }
+      }
+    }
 
     // Each child gives up a share of the overflow in proportion to how far
     // it can shrink, so none goes below its min-content size. Flex factors

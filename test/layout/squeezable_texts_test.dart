@@ -2,7 +2,7 @@
 // that squeezes its children: each keeps its own width while they fit, and
 // they give way in proportion when they do not (CSS's flex-shrink).
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:flutter/material.dart' show Directionality, Size, TextDirection;
+import 'package:flutter/material.dart' show Directionality, Offset, Size, TextDirection;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../controls/support.dart';
@@ -66,5 +66,17 @@ void main() {
     final long = tree.boxOf('long')!, short = tree.boxOf('short')!;
     expect(long.size.width + 8 + short.size.width, lessThanOrEqualTo(358.5));
     expect(long.size.width, greaterThan(short.size.width));
+  });
+
+  testWidgets('a text that cannot fit even at its least gives way below it, so what is beside it stays in the row', (tester) async {
+    final tree = await _show(
+      tester,
+      _doc({
+        'word': _text('Unbreakablewordthatisverylong', 20),
+        'box': {'type': 'box', 'layout': {'width': 120, 'height': 20}},
+      }),
+    );
+    final box = tree.boxOf('box')!;
+    expect(box.localToGlobal(Offset.zero).dx + box.size.width, lessThanOrEqualTo(358.5));
   });
 }

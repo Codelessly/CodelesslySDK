@@ -2755,8 +2755,11 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
       // that fills the main axis.
       final basis = parentNode.wraps ? n.layout.basis : null;
       final grow = basis != null && mainFit == SizeFit.fill ? flexValue : 0;
-      if (pd.flex != flex || pd.fit != fit || pd.collapsed != _collapsed || pd.basis != basis || pd.grow != grow) {
+      // Laid out at its own size and squeezed by the row (see above).
+      final squeezed = mainFit == SizeFit.hug && n.layout.squeezable && flex == null;
+      if (pd.flex != flex || pd.fit != fit || pd.collapsed != _collapsed || pd.basis != basis || pd.grow != grow || pd.squeezable != squeezed) {
         pd
+          ..squeezable = squeezed
           ..flex = flex
           ..fit = fit
           ..collapsed = _collapsed
