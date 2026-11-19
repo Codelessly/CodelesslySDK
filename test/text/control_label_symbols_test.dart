@@ -7,6 +7,8 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // A label lays out again when the platform's fonts change, which it hears from the binding.
+  TestWidgetsFlutterBinding.ensureInitialized();
   tearDown(() => FontDemand.symbolFallback = const []);
 
   test('a control label takes the symbol fallback every text style has', () {
