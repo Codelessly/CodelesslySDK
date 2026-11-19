@@ -311,6 +311,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   }
   // The site's theme: its named colors and text styles.
   final themeJson = api.readMap(site.manifest?['theme']);
+  final textFamily = switch (themeJson?['fontFamily']) { final String f when f.trim().isNotEmpty => f, _ => 'Roboto' };
   if (docs.isEmpty) return _finish(report, args);
 
   // 2. Fonts and assets. A font handler left by an earlier run in this
@@ -407,7 +408,11 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   for (final e in docs.entries) {
     // Relative image paths start from the site's folder (as at run time),
     // else from the document's.
-    final p = prepare(e.value, dir: siteDir ?? dirs[e.key]!, docDir: dirs[e.key], defaultFamily: 'Roboto', codepoints: codepoints);
+    // A text that names no family is drawn in the theme's own, as an app
+    // draws it; Roboto where the theme names none. (Given Roboto by name
+    // here, it hid the theme's: a serif site was drawn in Roboto while the
+    // run said the serif was fetched.)
+    final p = prepare(e.value, dir: siteDir ?? dirs[e.key]!, docDir: dirs[e.key], defaultFamily: textFamily, codepoints: codepoints);
     for (final img in p.images) {
       if (_valueAt(p.json, img.path) case final String v when v.startsWith('data:image/svg')) svgSources[v] = img.url;
     }
