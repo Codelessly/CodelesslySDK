@@ -30,6 +30,8 @@ plain `WidgetsApp` (uses no Material itself), one under `MaterialApp`.
 | routes of the SDK's own (17 files importing) | MaterialApp | 225,145 | 30,908 | 71,915 |
 | the chrome on the stock controls (17 files importing) | WidgetsApp | 165,403 | 30,111 | 71,916 |
 | the chrome on the stock controls (17 files importing) | MaterialApp | 225,005 | 30,899 | 71,919 |
+| no file importing | WidgetsApp | 104,375 | 15,957 | 0 |
+| no file importing | MaterialApp | 180,068 | 30,616 | 71,851 |
 
 Of the 166 KB of `flutter/src/material` left for the plain host (and 30 KB of Cupertino), about 138 KB is the
 theme (`ThemeData`, `ColorScheme`, `Typography` and the component themes `themeDataOf` fills in), 8 KB ink and
@@ -100,3 +102,16 @@ confirm dialog, which no `NodeView` is above: their focus order and keys are the
 
 `themeDataOf`, `FeedbackTheme`, `ResolvedFeedbackTheme`. Every README and guide example uses `MaterialApp`.
 (`CodelesslyPageRoute`'s base class and `seeThroughPageTransitions` went with the routes.)
+
+## Now: no file imports Material
+
+Every use listed above is gone. The SDK builds no `ThemeData`, installs no `Theme` and reads none; the widgets
+around a screen (a player, a list's footer, a toast, a dialog) find the project's theme tokens in a
+`ThemeTokensScope` (`render/control_theme.dart`) that the screen, a session's view, a toast and a dialog put
+above what they show, and that a route or overlay entry opened from under one carries along. The scope is not
+exported: a host neither sets nor reads it.
+
+What a plain host still carries of Material (104 KB) and Cupertino (16 KB) comes from plugins the package depends
+on, which import Material themselves: `video_player` (it builds a `ThemeData`), `webview_flutter` and its
+platform packages, `in_app_purchase_android`, `in_app_purchase_storekit`, `file_selector_android`,
+`url_launcher_web`. They are not replaced here.

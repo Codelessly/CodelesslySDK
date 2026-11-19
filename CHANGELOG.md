@@ -2,6 +2,32 @@
 
 ### Behaviour changes (read before upgrading)
 
+**Theme**
+
+The SDK no longer uses Flutter's Material theme at all. It reads no `Theme` and puts none above a layout: a
+layout, and the runtime's own dialogs, toasts, sheets, players and lists, draw with the project's theme tokens
+and nothing else. A project looks the same in a `MaterialApp`, a `CupertinoApp` and a plain `WidgetsApp`.
+
+- **Nothing of your app's theme colours anything of the SDK's.** The loading spinner (`CodelesslyLoadingScreen`)
+  took your app theme's primary colour before a project had loaded; it is the project's primary, or a neutral
+  ink. A dialog's barrier is black at 54% unless the action sets a scrim; your `DialogTheme.barrierColor` is
+  not read.
+- **`themeDataOf` is removed.** For the project's colours in your own widgets use `surfaceRoles(tokens)` (see
+  Added); the theming guide shows a `ThemeData` built from them.
+- **`FeedbackTheme` is no longer a `ThemeExtension`** (its `lerp` is gone), and a `FeedbackTheme` in your
+  `ThemeData.extensions` is not looked for. `ResolvedFeedbackTheme.themeData` is removed
+  (`ResolvedFeedbackTheme.tokens` gives the look as theme tokens), and `ResolvedFeedbackTheme.resolve` takes
+  the theme's colour roles and font instead of a `ThemeData`.
+- **A widget of your own shown inside a layout (an external component, a registered widget) finds your app's
+  theme**, where it found one the SDK made from the project's tokens. In an app with no Material theme it finds
+  none, as anywhere else in that app. It still gets the layout's default text style and icon colour.
+- **A widget of your own inside a layout is no longer on a `Material`.** One that needs a Material ancestor (an
+  `InkWell`, a `TextField`, a `ListTile`) must bring its own `Material`.
+- **The confirm dialog's shadow is the theme's** (its largest shadow token), where it was Material's elevation.
+  A dialog look with shadows of its own is unchanged.
+- **The audio player's background and text are the theme's**: its tertiary background, its text colours and
+  its font. The sizes of the text are the same.
+
 **Screens, dialogs and sheets**
 
 - **Your app's `ThemeData.pageTransitionsTheme` (and `ThemeData.platform`) no longer change how a project's
@@ -88,6 +114,8 @@ theme (or a design system's), as the same control in a screen is.
 - **`CodelesslyConfig.labels`: the words a screen reader hears for the runtime's own chrome** (`CodelesslyLabels`:
   a dialog's barrier, a toast's close button, pull to refresh, jump to latest, the players' buttons, the seek bar),
   English unless you give your own.
+- **`surfaceRoles(tokens)`: the colours an unstyled control draws in** (`SurfaceRoles`: surface, onSurface,
+  primary, muted, outline, hairline, error), from a project's theme tokens, for your own widgets.
 
 ### Fixed
 
@@ -98,13 +126,12 @@ theme (or a design system's), as the same control in a screen is.
 
 ### Changed
 
-- **Less of Flutter's Material library is used** (17 files of the package import it, from 23). The plain colors,
-  the icons of the players, the toast and the data list and a hero's default flight path are the SDK's own code
-  now, and draw the same pixels. With the buttons, the
-  slider, the indicators and the routes above, an app that does not use Material itself carries about 280 KB less
-  of Material and Cupertino (Android arm64: 166 KB of `flutter/src/material`, from 432 KB; 30 KB of
-  `flutter/src/cupertino`, from 47 KB), and a Material app about 260 KB less. `docs/design/no-material.md` lists what is left and what it
-  costs.
+- **No file of the package imports Flutter's Material or Cupertino library** (23 did). An app that does not use
+  Material itself carries about 430 KB less of it (Android arm64: 104 KB of `flutter/src/material`, from
+  432 KB; 16 KB of `flutter/src/cupertino`, from 47 KB; none of `material_color_utilities`, from 72 KB). What
+  is left in such an app comes from the plugins the package depends on (`video_player`, `webview_flutter`,
+  `in_app_purchase`), which import Material themselves. A Material app carries about 300 KB less.
+  `docs/design/no-material.md` has the measurements.
 
 ## 39.0.0
 
