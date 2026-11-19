@@ -21,6 +21,7 @@ import '../support/keyboard.dart';
 import '../support/screen.dart' as harness;
 
 LayoutDocument _doc(Map<String, Object?> nodes) => LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['s'],
       'nodes': {
         's': {'type': 'stack', 'children': nodes.keys.toList(), 'layout': {'width': 400, 'height': 300}},
@@ -53,7 +54,7 @@ Iterable<Widget> _islandWidgets(NodeTree tree) sync* {
 T _widget<T extends Widget>(NodeTree tree) => _islandWidgets(tree).whereType<T>().single;
 
 Future<(VariableScope, NodeTree)> show(WidgetTester tester, Map<String, Object?> field, List<Variable> vars) async {
-  final doc = LayoutDocument.fromJson({'roots': ['f'], 'nodes': {'f': field}});
+  final doc = LayoutDocument.fromJson({'schema': 3, 'roots': ['f'], 'nodes': {'f': field}});
   final scope = VariableScope(vars);
   final values = NodeValues(DocumentSource(doc));
   final tree = NodeTree(values, binder: NodeBinder(scope: scope));
@@ -136,6 +137,7 @@ void main() {
 
   testWidgets('a fixed-height field shows its focused border when focused', (tester) async {
     final doc = LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['p'],
       'nodes': {
         'p': {'type': 'stack', 'children': ['f'], 'layout': {'width': 400, 'height': 200}},
@@ -387,6 +389,7 @@ void main() {
     final tokens = ControlTokens.resolve(api.ThemeTokens.none, dark: false);
     TextFieldConfig config(Map<String, Object?> props, {Object height = 48}) => TextFieldConfig.of(
         LayoutDocument.fromJson({
+          'schema': 3,
           'roots': ['f'],
           'nodes': {'f': {'type': 'textField', 'layout': {'width': 200, 'height': height}, 'props': props}},
         })['f']!,

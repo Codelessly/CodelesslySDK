@@ -106,6 +106,7 @@ Iterable<RenderObject> _all(RenderObject o) sync* {
 
 Future<RenderIndicatorTransition> _show(WidgetTester tester, Map<String, Object?> chart) async {
   final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({
+    'schema': 3,
     'roots': ['c'],
     'nodes': {'c': chart},
   })), environment: const IslandEnvironment(interactive: true));

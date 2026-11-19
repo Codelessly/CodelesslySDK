@@ -17,6 +17,7 @@ Variable v(String name, Object? value, VariableType type) => Variable(name: name
 
 Future<(NodeTree, VariableScope)> show(WidgetTester tester, {String pan = 'multiTouch'}) async {
   final doc = LayoutDocument.fromJson({
+    'schema': 3,
     'roots': ['root'],
     'nodes': {
       'root': {
@@ -140,6 +141,7 @@ Future<Board> board(
   bool interactive = true,
 }) async {
   final doc = LayoutDocument.fromJson({
+    'schema': 3,
     'roots': ['board'],
     'nodes': {
       'board': {
@@ -290,6 +292,7 @@ void main() {
 
   testWidgets('a double tap zooms to the tapped point, and another zooms out', (tester) async {
     final doc = LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['board'],
       'nodes': {
         'board': {
@@ -299,7 +302,7 @@ void main() {
         },
         'p': {
           'type': 'box',
-          'zoomable': true,
+          'transformGesture': {'target': 'content', 'pan': 'whenZoomed'},
           'layout': {'width': 200, 'height': 200, 'x': {'start': 100}, 'y': {'start': 100}},
         },
       },
@@ -441,6 +444,7 @@ void main() {
 
   testWidgets('a reset action springs it back', (tester) async {
     final doc = LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['board'],
       'nodes': {
         'board': {
@@ -460,7 +464,7 @@ void main() {
             {
               'trigger': {'type': 'click'},
               'actions': [
-                {'type': 'controlDrag', 'node': 'p', 'command': 'reset'},
+                {'type': 'controlTransform', 'node': 'p'},
               ],
             },
           ],
@@ -497,11 +501,12 @@ void main() {
 
   testWidgets('on the design canvas nothing zooms or pans', (tester) async {
     final doc = LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['p'],
       'nodes': {
         'p': {
           'type': 'box',
-          'zoomable': true,
+          'transformGesture': {'target': 'content', 'pan': 'whenZoomed'},
           'layout': {'width': 200, 'height': 200},
         },
       },
@@ -581,6 +586,7 @@ void main() {
   group('on the design canvas', () {
     testWidgets('a node\'s saved zoom and position show on the design canvas', (tester) async {
       final doc = LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['s'],
         'nodes': {
           's': {'type': 'stack', 'children': ['cap'], 'layout': {'width': 300, 'height': 300}},

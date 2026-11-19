@@ -7,6 +7,7 @@ import 'package:flutter/material.dart' hide Axis;
 import 'package:flutter_test/flutter_test.dart';
 
 Map<String, Object?> doc(String align) => {
+      'schema': 3,
       'roots': ['frame'],
       'nodes': {
         'frame': {

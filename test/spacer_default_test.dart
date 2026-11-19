@@ -21,6 +21,7 @@ void main() {
       ));
       final want = {for (final k in ['a', 'b', 'c']) k: tester.getRect(find.byKey(ValueKey(k)))};
       final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['frame'],
         'nodes': {
           'frame': {'type': 'stack', 'children': ['f'], 'layout': {'width': 800, 'height': 800}},

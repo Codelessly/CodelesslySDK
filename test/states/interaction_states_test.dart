@@ -9,6 +9,7 @@ import '../lists/support.dart' as lists;
 import '../support/screen.dart' as harness;
 
 LayoutDocument page(Map<String, Map<String, Object?>> nodes) => LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['s'],
       'nodes': {
         's': {'type': 'stack', 'children': nodes.keys.toList(), 'layout': {'width': 400, 'height': 300}},

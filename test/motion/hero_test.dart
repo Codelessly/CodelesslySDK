@@ -12,6 +12,7 @@ Map<String, Object?> at(double x, double y, double w, double h) =>
 
 NodeTree screen(Map<String, Object?> hero, Map<String, Object?> layout, {Map<String, Object?> extra = const {}}) =>
     NodeTree(DocumentSource(LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['r'],
       'nodes': {
         'r': {
@@ -58,7 +59,7 @@ const fill = {
 NodeTree tree(Map<String, Object?> nodes, List<Variable> variables) {
   final scope = VariableScope(variables);
   return NodeTree(
-    DocumentSource(LayoutDocument.fromJson({'roots': ['r'], 'nodes': nodes})),
+    DocumentSource(LayoutDocument.fromJson({'schema': 3, 'roots': ['r'], 'nodes': nodes})),
     binder: NodeBinder(scope: scope, logic: const LayoutLogic()),
   );
 }

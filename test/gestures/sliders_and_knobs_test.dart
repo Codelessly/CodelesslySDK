@@ -58,11 +58,12 @@ Future<Screen> plate(
   List<Variable> variables = const [],
   List<Json> actions = const [],
   Map<String, Json> inside = const {},
-  Json drag = const {},
+  Json trackExtra = const {},
   Json bind = const {},
   bool interactive = true,
 }) async {
   final doc = LayoutDocument.fromJson({
+    'schema': 3,
     'roots': ['plate'],
     'nodes': {
       'plate': {
@@ -84,7 +85,7 @@ Future<Screen> plate(
             {'color': '#FF2196F3'},
           ],
         },
-        'drag': {...drag, 'track': track},
+        'track': {...track, ...trackExtra},
         'actions': actions,
         'bind': bind,
       },
@@ -137,9 +138,8 @@ const Json fader = {
   'min': -48,
   'max': 6,
   'step': 0.5,
-  'defaultValue': 0,
   'y2': -250,
-  'jumpOnTap': true,
+  'allowedInteraction': 'tapAndSlide',
 };
 
 void main() {
@@ -238,7 +238,7 @@ void main() {
   testWidgets('a handle on an arc follows the pointer\'s angle and turns with it', (tester) async {
     final s = await plate(
       tester,
-      {'shape': 'arc', 'variable': 'bpm', 'min': 30, 'max': 250, 'step': 1, 'defaultValue': 120},
+      {'shape': 'arc', 'variable': 'bpm', 'min': 30, 'max': 250, 'step': 1},
       size: const Size(120, 120),
       at: const Offset(140, 140),
       variables: [v('bpm', 140)],
@@ -279,7 +279,8 @@ void main() {
   testWidgets('a slider set not to write leaves the variable to its reactions', (tester) async {
     final s = await plate(
       tester,
-      {...fader, 'write': false},
+      {for (final e in fader.entries) if (e.key != 'variable') e.key: e.value},
+      bind: {'track.value': r'${accent}'},
       variables: [v('accent', -48), v('seen', 0)],
       actions: [
         reaction('changed', [setTo('seen', r'${result.value}')]),
@@ -302,7 +303,7 @@ void main() {
       tester,
       {...fader, 'variable': ''},
       variables: [v('level', -21), v('seen', 0)],
-      bind: {'drag.track.value': r'${level}'},
+      bind: {'track.value': r'${level}'},
       actions: [
         reaction('changed', [setTo('level', r'${result.value}')]),
       ],
@@ -319,7 +320,7 @@ void main() {
   });
 
   testWidgets('a disabled slider does not move', (tester) async {
-    final s = await plate(tester, fader, variables: [v('accent', -48)], drag: {'enabled': false});
+    final s = await plate(tester, fader, variables: [v('accent', -48)], trackExtra: {'enabled': false});
     final gesture = await tester.startGesture(const Offset(200, 311));
     await gesture.moveBy(const Offset(0, -125));
     await tester.pump();
@@ -350,7 +351,7 @@ void main() {
         'step': 1,
         'input': 'horizontal',
         'pixelsPerRange': 2000,
-        'momentum': true,
+        'physics': {'friction': 0.9257},
         'x2': 0,
         'y2': 0,
       },
@@ -371,6 +372,7 @@ void main() {
 
   testWidgets('an action can step a slider as a drag would', (tester) async {
     final doc = {
+      'schema': 3,
       'roots': ['plate'],
       'nodes': {
         'plate': {
@@ -381,14 +383,14 @@ void main() {
         'k': {
           'type': 'box',
           'layout': {'width': 40, 'height': 22, 'x': {'start': 180}, 'y': {'start': 300}},
-          'drag': {'track': fader},
+          'track': fader,
         },
         'nudge': {
           'type': 'box',
           'layout': {'width': 40, 'height': 40},
           'actions': [
             reaction('click', [
-              {'type': 'controlDrag', 'node': 'k', 'command': 'step', 'steps': r'${by}'},
+              {'type': 'controlTrack', 'node': 'k', 'steps': r'${by}'},
             ]),
           ],
         },
@@ -499,10 +501,9 @@ void main() {
       'max': 40,
       'step': 1,
       'startAngle': 0,
-      'endAngle': 360,
-      'endless': true,
-      'momentum': true,
-      'smooth': true,
+      'sweepAngle': 360,
+      'clamp': false,
+      'physics': {'friction': 0.9257},
     };
 
     Future<Screen> face(WidgetTester t, Json track, {double start = 0}) => plate(
@@ -536,7 +537,7 @@ void main() {
     }
 
     testWidgets('keeps counting past a full turn', (t) async {
-      final s = await face(t, {...dial, 'momentum': false});
+      final s = await face(t, {for (final e in dial.entries) if (e.key != 'physics') e.key: e.value});
       for (var k = 0; k < 5; k++) {
         await arc(t, k * 180.0, 180, steps: 30, ms: 40);
         await t.pumpAndSettle();

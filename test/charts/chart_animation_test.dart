@@ -79,6 +79,7 @@ LayoutDocument _doc(
   int duration = 1000,
   String color = '#FF000000',
 }) => LayoutDocument.fromJson({
+  'schema': 3,
   'roots': ['indicator'],
   'nodes': {
     'indicator': {

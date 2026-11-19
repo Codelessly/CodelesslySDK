@@ -13,6 +13,7 @@ import '../support/screen.dart' as harness;
 
 LayoutDocument doc(double width, Object sliderWidth) =>
     LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['row'],
       'nodes': {
         'row': {
@@ -102,7 +103,7 @@ void main() {
 
   group('a ruler slider', () {
     Future<NodeTree> show(WidgetTester tester, {double value = 5}) async {
-      final doc = LayoutDocument.fromJson({'roots': ['s'], 'nodes': {
+      final doc = LayoutDocument.fromJson({'schema': 3, 'roots': ['s'], 'nodes': {
         's': {'type': 'slider', 'layout': {'width': 200, 'height': 30}, 'props': {
           'min': -10, 'max': 10, 'value': value, 'trackShape': 'ruler', 'thumbShape': 'pointer', 'padding': 0,
           'activeTrackColor': '#FFFF0000', 'inactiveTrackColor': '#FFFFFFFF', 'thumbColor': '#FF0000FF',
@@ -134,7 +135,7 @@ void main() {
       tester.view.physicalSize = const Size(300, 60);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
-      final doc = LayoutDocument.fromJson({'roots': ['s'], 'nodes': {
+      final doc = LayoutDocument.fromJson({'schema': 3, 'roots': ['s'], 'nodes': {
         's': {
           'type': 'slider',
           'layout': {'width': 300, 'height': 40},

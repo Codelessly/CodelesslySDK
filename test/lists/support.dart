@@ -39,7 +39,7 @@ Future<Screen> show(
   ThemeData? theme,
   TextDirection direction = TextDirection.ltr,
 }) async {
-  final doc = LayoutDocument.fromJson({'roots': [root], 'nodes': nodes});
+  final doc = LayoutDocument.fromJson({'schema': 3, 'roots': [root], 'nodes': nodes});
   final scope = VariableScope(variables);
   declarePaginationVariables(scope, doc.nodes.values);
   final values = NodeValues(DocumentSource(doc));

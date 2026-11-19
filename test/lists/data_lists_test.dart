@@ -11,7 +11,7 @@ import 'support.dart' as lists;
 
 Future<(NodeTree, RenderObject)> show(WidgetTester tester, Map<String, Map<String, Object?>> nodes, String root,
     {double width = 800, double height = 600}) async {
-  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'roots': [root], 'nodes': nodes})));
+  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'schema': 3, 'roots': [root], 'nodes': nodes})));
   addTearDown(tree.dispose);
   await tester.pumpWidget(MaterialApp(
       home: Align(

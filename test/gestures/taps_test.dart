@@ -17,6 +17,7 @@ void main() {
   group('taps through empty space', () {
     testWidgets('a tap passes through an undecorated stack to the node under it', (tester) async {
       final doc = LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['screen'],
         'nodes': {
           'screen': {'type': 'stack', 'children': ['under', 'overlay'], 'layout': {'width': 400, 'height': 400}},

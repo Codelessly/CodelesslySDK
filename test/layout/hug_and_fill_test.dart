@@ -28,7 +28,7 @@ Map<String, Map<String, Object?>> _nodes({required bool tall, double b = 30}) =>
     };
 
 LayoutDocument _doc({required bool tall, double b = 30}) =>
-    LayoutDocument.fromJson({'roots': ['r'], 'nodes': _nodes(tall: tall, b: b)});
+    LayoutDocument.fromJson({'schema': 3, 'roots': ['r'], 'nodes': _nodes(tall: tall, b: b)});
 
 Future<Map<String, Rect>> _rects(WidgetTester tester, NodeTree tree) async {
   final view = tester.renderObject(find.byType(NodeView));
@@ -51,7 +51,7 @@ Future<NodeTree> _show(WidgetTester tester, DocumentSource source) async {
 // same across for a column that hugs its width.
 
 Future<Map<String, Rect>> _rectsOf(WidgetTester tester, Map<String, Map<String, Object?>> nodes, {String root = 'r'}) async {
-  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'roots': [root], 'nodes': nodes})));
+  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'schema': 3, 'roots': [root], 'nodes': nodes})));
   addTearDown(tree.dispose);
   await tester.pumpWidget(MaterialApp(
     home: Align(alignment: Alignment.topLeft, child: NodeView(key: UniqueKey(), tree: tree, rootId: root)),
@@ -127,6 +127,7 @@ void main() {
       final vars = ValuesScope({'tip': 'One line.'});
       addTearDown(vars.dispose);
       final doc = LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['r'],
         'nodes': {
           'r': {

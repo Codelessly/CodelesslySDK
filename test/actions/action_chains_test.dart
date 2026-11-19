@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import '../support/legacy.dart';
 
 import '../support/recording_ui.dart';
 import '../support/screen.dart' as harness;
@@ -19,7 +18,7 @@ Variable v(String name, Object? value, [VariableType type = VariableType.text]) 
     Variable(name: name, type: type, value: type.coerce(value));
 
 /// A node whose `click` runs [actions] (JSON).
-Node clickNode(List<Json> actions, {String trigger = 'click', Map<String, Object?> extra = const {}}) => migratedNode({
+Node clickNode(List<Json> actions, {String trigger = 'click', Map<String, Object?> extra = const {}}) => Node.fromJson({
       'type': 'box',
       'actions': [
         {'trigger': {'type': trigger, ...extra}, 'actions': actions},
@@ -67,7 +66,7 @@ class SocketLike implements Exception {
 // persisted variables and the back block (canvas blockBack and its
 // backPressed reactions).
 
-Node tapNode(List<Json> actions) => migratedNode({
+Node tapNode(List<Json> actions) => Node.fromJson({
       'type': 'box',
       'actions': [
         {'trigger': {'type': 'click'}, 'actions': actions},
@@ -119,7 +118,7 @@ Map<String, Json> _nodes() => {
     };
 
 Future<VariableScope> _host(WidgetTester tester, ValueNotifier<int> mode) async {
-  final doc = LayoutDocument.fromJson({'roots': ['col'], 'nodes': _nodes()});
+  final doc = LayoutDocument.fromJson({'schema': 3, 'roots': ['col'], 'nodes': _nodes()});
   final scope = VariableScope([const Variable(name: 'state', value: 'loading')]);
   final values = NodeValues(DocumentSource(doc));
   final tree = NodeTree(values, binder: NodeBinder(scope: scope));
@@ -312,7 +311,7 @@ void main() {
 
     test('all reactions to a trigger run, in order', () async {
       final h = Harness(variables: [v('log', '')]);
-      final node = migratedNode({
+      final node = Node.fromJson({
         'type': 'box',
         'actions': [
           {'trigger': {'type': 'click'}, 'actions': [setVar('log', r'${log}a')]},
@@ -641,12 +640,12 @@ void main() {
     });
   });
 
-  group('a variable set with a duration', () {
+  group('a variable animated to a value', () {
     testWidgets('glides a number to its value while the chain waits', (tester) async {
       final h = ScopeHarness(variables: [v('t', 0, VariableType.decimal), v('after', '')]);
       var done = false;
       unawaited(h.click([
-        {'type': 'setVariable', 'variable': 't', 'value': '10', 'animateMs': '1000'},
+        {'type': 'animate', 'variable': 't', 'command': 'animateTo', 'target': '10', 'duration': '1000', 'curve': 'linear'},
         {'type': 'setVariable', 'variable': 'after', 'value': 'yes'},
       ]).then((_) => done = true));
       await tester.pump();
@@ -661,9 +660,7 @@ void main() {
     });
 
     testWidgets('a number animated with a spring overshoots and settles on its target', (tester) async {
-      // The legacy glide decodes as `animate` (animateTo); a spring drives it
-      // instead of a duration.
-      expect(legacyAction({'type': 'setVariable', 'variable': 't', 'value': '1', 'animateMs': '300'}), isA<AnimateAction>());
+      // A spring drives it instead of a duration.
       final h = ScopeHarness(variables: [v('t', 0, VariableType.decimal)]);
       var done = false;
       unawaited(h.click([
@@ -688,24 +685,24 @@ void main() {
     testWidgets('sets text at once', (tester) async {
       final h = ScopeHarness(variables: [v('s', 'a')]);
       await h.click([
-        {'type': 'setVariable', 'variable': 's', 'value': 'b', 'animateMs': '500'},
+        {'type': 'setVariable', 'variable': 's', 'value': 'b'},
       ]);
       expect(h['s'], 'b');
     });
   });
 
-  group('an animate-variable action', () {
+  group('an animate action on a variable', () {
     testWidgets('plays to the end while the chain waits, and can be paused, moved, resumed and stopped', (tester) async {
       final h = ScopeHarness(variables: [v('t', 0, VariableType.decimal), v('n', 0, VariableType.integer)]);
       var played = false;
       unawaited(h.click([
-        {'type': 'animateVariable', 'variable': 't', 'from': '0', 'to': '100', 'durationMs': 1000},
+        {'type': 'animate', 'variable': 't', 'command': 'animateTo', 'from': '0', 'target': '100', 'duration': '1000'},
       ]).then((_) => played = true));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 250));
       expect(h['t'] as double, closeTo(25, 1));
       await h.click([
-        {'type': 'animateVariable', 'variable': 't', 'mode': 'pause'},
+        {'type': 'animate', 'variable': 't', 'command': 'stop', 'target': '1', 'duration': '1000'},
       ]);
       await tester.pump(const Duration(milliseconds: 300));
       final paused = h['t'] as double;
@@ -715,11 +712,11 @@ void main() {
       // Seek sets the value; resume goes on from there (half way: half the
       // time left).
       await h.click([
-        {'type': 'animateVariable', 'variable': 't', 'mode': 'seek', 'to': '50'},
+        {'type': 'animate', 'variable': 't', 'command': 'set', 'target': '50', 'duration': '1000'},
       ]);
       expect(h['t'], 50.0);
       unawaited(h.click([
-        {'type': 'animateVariable', 'variable': 't', 'mode': 'resume'},
+        {'type': 'animate', 'variable': 't', 'target': '1', 'duration': '1000'},
       ]));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 520));
@@ -729,12 +726,12 @@ void main() {
 
       // An integer variable holds whole numbers; stop leaves it where it is.
       unawaited(h.click([
-        {'type': 'animateVariable', 'variable': 'n', 'to': '10', 'durationMs': 1000},
+        {'type': 'animate', 'variable': 'n', 'command': 'animateTo', 'target': '10', 'duration': '1000'},
       ]));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 330));
       await h.click([
-        {'type': 'animateVariable', 'variable': 'n', 'mode': 'stop'},
+        {'type': 'animate', 'variable': 'n', 'command': 'stop', 'target': '1', 'duration': '1000'},
       ]);
       final stopped = h['n'];
       expect(stopped, isA<int>());
@@ -745,19 +742,19 @@ void main() {
     testWidgets('takes its length from a formula', (tester) async {
       final h = ScopeHarness(variables: [v('t', 7, VariableType.decimal), v('total', 24, VariableType.decimal)]);
       unawaited(h.click([
-        {'type': 'animateVariable', 'variable': 't', 'to': r'${total}', 'duration': r'${= (total - t) * 1000}'},
+        {'type': 'animate', 'variable': 't', 'command': 'animateTo', 'target': r'${total}', 'duration': r'${= (total - t) * 1000}'},
       ]));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1000));
       expect(h['t'] as double, closeTo(8, 0.1), reason: 'one second of a 17 s play');
-      await h.click([{'type': 'animateVariable', 'variable': 't', 'mode': 'stop'}]);
+      await h.click([{'type': 'animate', 'variable': 't', 'command': 'stop', 'target': '1', 'duration': '1000'}]);
     });
 
     testWidgets('skips a computed or missing variable', (tester) async {
       final h = ScopeHarness(variables: [const Variable(name: 'c', type: VariableType.decimal, formula: '1 + 1')]);
       await h.click([
-        {'type': 'animateVariable', 'variable': 'c', 'to': '5'},
-        {'type': 'animateVariable', 'variable': 'nope', 'to': '5'},
+        {'type': 'animate', 'variable': 'c', 'command': 'animateTo', 'target': '5', 'duration': '1000'},
+        {'type': 'animate', 'variable': 'nope', 'command': 'animateTo', 'target': '5', 'duration': '1000'},
       ]);
       expect(h.errors, isEmpty);
     });
@@ -822,7 +819,7 @@ void main() {
 
   group('the back button', () {
     Json layout(String id, {Json canvas = const {}, List<Json> variables = const []}) => {
-          'schema': 2,
+          'schema': 3,
           'id': id,
           'roots': ['$id-c'],
           'nodes': {
@@ -839,8 +836,9 @@ void main() {
         };
 
     PublishBundle bundle() => PublishBundle.fromJson({
-          'schema': 2,
+          'schema': 3,
           'model': {
+            'schema': 3,
             'projectId': 'p',
             'entryLayoutId': 'home',
             'layouts': {

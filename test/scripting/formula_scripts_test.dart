@@ -50,8 +50,9 @@ final scripts = [
 ];
 
 PublishBundle bundle(Map<String, String> texts) => PublishBundle.fromJson({
-      'schema': 2,
+      'schema': 3,
       'model': {
+        'schema': 3,
         'projectId': 'p',
         'entryLayoutId': 'home',
         'layouts': {
@@ -64,7 +65,7 @@ PublishBundle bundle(Map<String, String> texts) => PublishBundle.fromJson({
       },
       'layouts': {
         'home': {
-          'schema': 2,
+          'schema': 3,
           'id': 'home',
           'roots': ['c'],
           'nodes': {
@@ -128,8 +129,9 @@ Future<CodelesslyWidgetController> pump(WidgetTester tester, Map<String, String>
 
 PublishBundle _bundle({String modelFormula = 'script.results(wave)'}) =>
     PublishBundle.fromJson({
-      'schema': 2,
+      'schema': 3,
       'model': {
+        'schema': 3,
         'projectId': 'tally',
         'entryLayoutId': 'home',
         'layouts': {
@@ -142,7 +144,7 @@ PublishBundle _bundle({String modelFormula = 'script.results(wave)'}) =>
       },
       'layouts': {
         'home': {
-          'schema': 2,
+          'schema': 3,
           'id': 'home',
           'roots': ['canvas'],
           'nodes': {
@@ -161,16 +163,19 @@ PublishBundle _bundle({String modelFormula = 'script.results(wave)'}) =>
                       'value': '1',
                     },
                     {
-                      'type': 'setVariable',
+                      'type': 'animate',
                       'variable': 'countVotes',
-                      'value': r'${model.totalVotes}',
-                      'animateMs': '650',
+                      'command': 'animateTo',
+                      'target': r'${model.totalVotes}',
+                      'duration': '650',
+                      'curve': 'linear',
                     },
                     {
-                      'type': 'animateVariable',
+                      'type': 'animate',
                       'variable': 'countTurnout',
-                      'to': r'${model.turnout}',
-                      'durationMs': 650,
+                      'command': 'animateTo',
+                      'target': r'${model.turnout}',
+                      'duration': '650',
                     },
                   ],
                 },
@@ -318,7 +323,7 @@ void main() {
         parent:app,
       );
       final screen=VariableScope(const [],parent:scripts);scripts.reader=screen;
-      final doc=LayoutDocument.fromJson({'roots':['list'],'nodes':{
+      final doc=LayoutDocument.fromJson({'schema': 3, 'roots':['list'],'nodes':{
         'list':{'type':'listView','children':['label'],'layout':{'width':400,'height':400},'bind':{'data':r'${view.history}'}},
         'label':{'type':'text','layout':{'width':400,'height':40},'props':{'text':r'${item}'}},
       }});

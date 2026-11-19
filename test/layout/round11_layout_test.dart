@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 Future<(NodeTree, RenderObject)> _show(WidgetTester tester, Map<String, Map<String, Object?>> nodes, String root, {Map<String, Object?> variables = const {}}) async {
   final scope = VariableScope([for (final e in variables.entries) Variable(name: e.key, type: VariableType.list, value: e.value)]);
-  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'roots': [root], 'nodes': nodes})), binder: NodeBinder(scope: scope));
+  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'schema': 3, 'roots': [root], 'nodes': nodes})), binder: NodeBinder(scope: scope));
   addTearDown(tree.dispose);
   await tester.pumpWidget(MaterialApp(home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: root))));
   return (tree, tester.renderObject(find.byType(NodeView)));

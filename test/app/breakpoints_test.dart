@@ -28,7 +28,7 @@ Map<String, Object?> _box(String name, {List<String> children = const []}) => {
 /// text bound to `${screen.breakpoint}` in each.
 PublishBundle bundleWith(Breakpoints breakpoints, {Map<String, num> minWidths = const {}}) {
   final layout = PublishLayout.fromJson({
-    'schema': 2,
+    'schema': 3,
     'id': 'home',
     'roots': ['c', 'x'],
     'nodes': {

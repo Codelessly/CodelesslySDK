@@ -35,7 +35,7 @@ Json _label(String text) => {
 /// and `<id>-b`.
 PublishLayout _overlay(String id, String title, {Json canvasProps = const {}, Json canvasBind = const {}, List<Json> canvasActions = const [], Json? first, Json? second, List<Variable> variables = const []}) =>
     PublishLayout.fromJson({
-      'schema': 2,
+      'schema': 3,
       'id': '$id-layout',
       'roots': [id],
       'variables': {
@@ -67,7 +67,7 @@ PublishLayout _overlay(String id, String title, {Json canvasProps = const {}, Js
 /// A sheet whose content scrolls: a title and forty lines, as the notation's
 /// `Sheet stops=[...]` expands (a column as tall as the sheet, scrolling).
 PublishLayout _scrollingSheet() => PublishLayout.fromJson({
-      'schema': 2,
+      'schema': 3,
       'id': 'tall-layout',
       'roots': ['tall'],
       'nodes': {
@@ -94,7 +94,7 @@ Json _open(String to, String presentation, {Json extra = const {}}) =>
 
 PublishBundle _bundle() {
   final home = PublishLayout.fromJson({
-    'schema': 2,
+    'schema': 3,
     'id': 'home-layout',
     'roots': ['home'],
     'variables': {

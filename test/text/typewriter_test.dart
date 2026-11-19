@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 LayoutDocument page(Map<String, Map<String, Object?>> nodes) => LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['s'],
       'nodes': {
         's': {'type': 'stack', 'children': nodes.keys.toList(), 'layout': {'width': 400, 'height': 300}},

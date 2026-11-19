@@ -24,6 +24,7 @@ Future<Map<int, Rect>> _items(
   int first = 0,
 }) async {
   final doc = LayoutDocument.fromJson({
+    'schema': 3,
     'roots': ['s'],
     'nodes': {
       's': {
@@ -104,7 +105,7 @@ Map<String, Json> pages({
 
 Future<(NodeTree, RenderObject)> show(WidgetTester tester, Map<String, Map<String, Object?>> nodes, String root,
     {double width = 800, double height = 600}) async {
-  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'roots': [root], 'nodes': nodes})));
+  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'schema': 3, 'roots': [root], 'nodes': nodes})));
   addTearDown(tree.dispose);
   await tester.pumpWidget(MaterialApp(
       home: Align(
@@ -139,7 +140,7 @@ Map<String, Object?> box(double w, double h) => {
 const book = {
   'paintOrder': 'reverse',
   'pageMotion': {'shiftX': -1},
-  'pageMotionBefore': {'shiftX': 1, 'rotateY': -100, 'originX': -1, 'perspective': 0.9, 'backfaceHidden': true},
+  'pageMotionBefore': {'shiftX': 1, 'rotateY': -100, 'alignment': [-1, 0], 'perspective': 0.9, 'backfaceHidden': true},
 };
 
 Map<String, Json> turningPages() => {

@@ -23,6 +23,7 @@ void main() {
     const value = TextStyle(fontFamily: 'HintMono', fontSize: 30, height: 1.35);
     const hint = TextStyle(fontFamily: 'HintMono', fontSize: 16, height: 1.35);
     final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['f'],
       'nodes': {
         'f': {

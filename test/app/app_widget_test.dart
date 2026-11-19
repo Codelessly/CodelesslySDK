@@ -535,7 +535,7 @@ void main() {
       for (final size in ['fill', 'fixed']) {
         testWidgets('a $bodyType used as a screen\'s body ($size size) runs its click reactions', (tester) async {
           final layout = PublishLayout.fromJson({
-            'schema': 2,
+            'schema': 3,
             'id': 'home',
             'roots': ['c'],
             'nodes': {

@@ -1,6 +1,5 @@
 // A text style without a height: schema 3 takes the font's own line height,
-// as Flutter's `Text` does (`height: null`); a schema-2 document keeps 1.33
-// through the migration (`defaultTextStyle` on its top-level nodes); the
+// as Flutter's `Text` does (`height: null`); the
 // nearest `defaultTextStyle` (Flutter's `DefaultTextStyle`) is inherited.
 import 'package:codelessly_api/codelessly_api.dart' show LayoutDocument;
 import 'package:codelessly_sdk/codelessly_sdk.dart';

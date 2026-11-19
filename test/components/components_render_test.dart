@@ -10,7 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Json chip({String text = r'${props.label}', List<Json> extraActions = const []}) => {
-      'schema': 2,
+      'schema': 3,
       'id': 'Chip',
       'roots': ['chip'],
       'widget': {
@@ -64,7 +64,7 @@ Json chip({String text = r'${props.label}', List<Json> extraActions = const []})
     };
 
 Json page(Map<String, Json> calls, {List<String>? order, Map<String, Json> more = const {}}) => {
-      'schema': 2,
+      'schema': 3,
       'roots': ['col'],
       'nodes': {
         'col': {
@@ -291,7 +291,7 @@ void main() {
 
   testWidgets('a component can be a list\'s item template and hold a list', (tester) async {
     final list = {
-      'schema': 2,
+      'schema': 3,
       'roots': ['col'],
       'nodes': {
         'col': {'type': 'column', 'children': ['list'], 'layout': {'width': 400, 'height': {'hug': 600}}},
@@ -318,7 +318,7 @@ void main() {
 
   testWidgets('a component can call another component and hold a list', (tester) async {
     final outer = {
-      'schema': 2,
+      'schema': 3,
       'roots': ['box'],
       'widget': {
         'type': 'Pair',
@@ -369,7 +369,7 @@ void main() {
 
   testWidgets('a component that calls itself stops at the depth limit', (tester) async {
     final loop = {
-      'schema': 2,
+      'schema': 3,
       'roots': ['r'],
       'widget': {'type': 'Loop'},
       'nodes': {

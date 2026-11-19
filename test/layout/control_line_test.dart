@@ -99,7 +99,7 @@ bool _overlaps(Rect a, Rect b) => a.top < b.bottom && b.top < a.bottom;
 // --- documents written as JSON ------------------------------------------------------
 
 Future<NodeTree> _show(WidgetTester tester, Map<String, Map<String, Object?>> nodes, {String root = 'row'}) async {
-  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'roots': [root], 'nodes': nodes})));
+  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'schema': 3, 'roots': [root], 'nodes': nodes})));
   addTearDown(tree.dispose);
   await tester.pumpWidget(MaterialApp(
       home: Align(alignment: Alignment.topLeft, child: SizedBox(width: 600, child: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: root))))));

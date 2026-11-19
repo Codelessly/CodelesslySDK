@@ -63,7 +63,7 @@ Json _text(String name, String text) => {
     };
 
 Json _layout(String id, Map<String, Json> body, {List<Json> canvasActions = const [], List<Json> variables = const []}) => {
-      'schema': 2,
+      'schema': 3,
       'id': id,
       'roots': ['$id-canvas'],
       if (variables.isNotEmpty) 'variables': {'$id-canvas': variables},
@@ -89,7 +89,7 @@ Json _layout(String id, Map<String, Json> body, {List<Json> canvasActions = cons
 
 PublishBundle _bundle() => PublishBundle.fromJson({
       'model': {
-        'schema': 2,
+        'schema': 3,
         'projectId': 'test_store_demo',
         'entryLayoutId': 'home',
         'layouts': {

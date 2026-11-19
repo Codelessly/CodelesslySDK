@@ -18,6 +18,7 @@ import 'package:flutter_test/flutter_test.dart';
 // running); a box's stroke can rule a pair of opposite sides.
 
 Map<String, Object?> table({bool stretch = true}) => {
+      'schema': 3,
       'roots': ['t'],
       'nodes': {
         't': {
@@ -95,6 +96,7 @@ Future<List<int>> _shot(WidgetTester tester, Widget child) async {
 // edge across its width: a landscape box's vignette darkens as Flutter's.
 
 LayoutDocument _doc(double? radius, {List<double>? transform}) => LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['canvas'],
       'nodes': {
         'canvas': {'type': 'canvas', 'slots': {'body': 'box'}, 'layout': {'width': 200, 'height': 100}},
@@ -143,6 +145,7 @@ void main() {
   group('fills and borders', () {
     testWidgets('a fill and a border paint as a Flutter Container does, at a fractional width', (tester) async {
       final doc = LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['b'],
         'nodes': {
           'b': {
@@ -176,6 +179,7 @@ void main() {
     ]) {
       testWidgets('a border set to $sides draws exactly those sides', (tester) async {
         final doc = {
+          'schema': 3,
           'roots': ['b'],
           'nodes': {
             'b': {
@@ -214,6 +218,7 @@ void main() {
   group('corners and shapes', () {
     testWidgets('a box with elliptical corners paints and clips to them', (tester) async {
       final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['s'],
         'nodes': {
           's': {'type': 'stack', 'children': ['solid', 'gradient'], 'layout': {'width': 400, 'height': 200}},
@@ -260,6 +265,7 @@ void main() {
       tester.view.physicalSize = const Size(200, 200);
       addTearDown(tester.view.reset);
       final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['b'],
         'nodes': {
           'b': {

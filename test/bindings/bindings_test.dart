@@ -15,6 +15,7 @@ import '../support/screen.dart' as harness;
 
 LayoutDocument page(Map<String, Map<String, Object?>> nodes, {String root = 'col', Map<String, Object?> extra = const {}}) =>
     LayoutDocument.fromJson({
+      'schema': 3,
       'roots': [root],
       'nodes': nodes,
       ...extra,
@@ -67,6 +68,7 @@ String paragraphText(NodeTree tree, String id) {
 // show with a fill bound on a row that has none at design time.
 
 LayoutDocument doc(Map<String, Object?> decoration, Map<String, Object?> bind) => LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['row'],
       'nodes': {
         'row': {
@@ -97,6 +99,7 @@ Future<(VariableScope, NodeTree)> _show(
   final tree = NodeTree(
     DocumentSource(
       LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['root'],
         'nodes': nodes,
       }),
@@ -477,6 +480,7 @@ void main() {
     for (final (interactive, tickers) in [(false, true), (true, true), (false, false)]) {
       testWidgets('a list item\'s bound border follows its item\'s data (interactive: $interactive, tickers: $tickers)', (tester) async {
         final doc = LayoutDocument.fromJson({
+          'schema': 3,
           'roots': ['l'],
           'nodes': {
             'l': {'type': 'listView', 'children': ['f'], 'layout': {'width': 220, 'height': {'hug': 40}}, 'props': {'scrollable': false}, 'bind': {'data': r'${rows}'}},

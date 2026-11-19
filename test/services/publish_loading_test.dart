@@ -1,8 +1,8 @@
 // FirestorePublishLoader over fake_cloud_firestore, with documents written
 // in the editor's exact format
 // (the editor's page storage package, publish.dart): the model
-// at `publish/{p}` with `schema: 2` and privacy fields, each layout at
-// `publish/{p}/layouts/{id}` with `schema: 2`, a large one with its nodes
+// at `publish/{p}` with `schema: 3` and privacy fields, each layout at
+// `publish/{p}/layouts/{id}` with `schema: 3`, a large one with its nodes
 // gzipped in `compressedNodes`.
 import 'dart:async';
 import 'dart:convert';
@@ -24,7 +24,7 @@ String encodeGzipJson(Object? json) => base64Encode(const GZipEncoder().encodeBy
 /// the editor's page storage `encodeStoredLayout` (with [compress] forcing what
 /// it does past 900 KiB).
 Json encodeStoredLayout(Json layout, {bool compress = false}) {
-  final out = {...layout, 'schema': 2};
+  final out = {...layout, 'schema': 3};
   if (!compress) return out;
   final nodes = out.remove('nodes');
   out['compressedNodes'] = encodeGzipJson({'nodes': nodes});
@@ -42,7 +42,7 @@ Future<void> writePublish(FakeFirebaseFirestore db, String projectId, PublishBun
         .doc('$collection/$projectId/layouts/${l.id}')
         .set(encodeStoredLayout({...l.toJson(), ...privacy}, compress: compressed.contains(l.id)));
   }
-  await db.doc('$collection/$projectId').set({...bundle.model.toJson(), 'schema': 2, ...privacy, ...extraModel});
+  await db.doc('$collection/$projectId').set({...bundle.model.toJson(), 'schema': 3, ...privacy, ...extraModel});
 }
 
 class FakeProjectAuth implements ProjectAuth {
@@ -142,7 +142,7 @@ void main() {
     final loader = FirestorePublishLoader(db, projectId: 'old');
     await expectLater(
         loader.loadModel(PublishSource.publish),
-        throwsA(isA<PublishLoadException>().having((e) => e.message, 'message', contains('not in the current format'))));
+        throwsA(isA<PublishLoadException>().having((e) => e.message, 'message', contains('has no "schema"; codelessly_api reads schema 3 only'))));
     await expectLater(loader.loadLayout(PublishSource.publish, 'l'), throwsA(isA<PublishLoadException>()));
     await expectLater(loader.loadLayout(PublishSource.publish, 'missing'),
         throwsA(isA<PublishLoadException>().having((e) => e.message, 'message', contains('does not exist'))));
@@ -175,7 +175,7 @@ void main() {
     final model = rigcheck.model.toJson();
     final layouts = {...(model['layouts']! as Map).cast<String, Object?>()};
     layouts[layoutId] = {...(layouts[layoutId]! as Map).cast<String, Object?>(), 'lastUpdated': t};
-    await db.doc('publish/p1').set({...model, 'layouts': layouts, 'lastUpdated': t, 'schema': 2, ...privacy});
+    await db.doc('publish/p1').set({...model, 'layouts': layouts, 'lastUpdated': t, 'schema': 3, ...privacy});
     await pumpEventQueue();
 
     expect(notified, greaterThan(0));

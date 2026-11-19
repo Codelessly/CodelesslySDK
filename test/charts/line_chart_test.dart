@@ -14,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 Future<RenderCustomPaint> _paintOf(WidgetTester tester, List<Map<String, Object?>> data) async {
   final doc = LayoutDocument.fromJson({
+    'schema': 3,
     'roots': ['root'],
     'nodes': {
       'root': {'type': 'column', 'children': ['c'], 'layout': {'width': 400, 'height': 300}},
@@ -101,6 +102,7 @@ Iterable<RenderObject> _all(RenderObject o) sync* {
 
 Future<RenderCustomPaint> _referencePaintOf(WidgetTester tester, Map<String, Object?> line) async {
   final doc = LayoutDocument.fromJson({
+    'schema': 3,
     'roots': ['root'],
     'nodes': {
       'root': {'type': 'column', 'children': ['line'], 'layout': {'width': 300, 'height': 200}},
@@ -148,6 +150,7 @@ Node _lines(List<Map<String, Object?>> data, {String? xField}) => _node('chart',
 /// Renders [n] at 300 × 180 on white and returns the image's pixels.
 Future<(int, ByteDataReader)> _render(WidgetTester tester, Node n) async {
   final source = DocumentSource(LayoutDocument.fromJson({
+    'schema': 3,
     'roots': ['n'],
     'nodes': {'n': n.toJson()..remove('id')},
   }));
@@ -214,6 +217,7 @@ void main() {
     testWidgets('hovering a line chart that scrubs selects the nearest point', (tester) async {
       final tree = NodeTree(
           DocumentSource(LayoutDocument.fromJson({
+            'schema': 3,
             'roots': ['l'],
             'nodes': {
               'l': _line({'scrubEnabled': true}),
@@ -244,6 +248,7 @@ void main() {
 
   testWidgets('a line chart with values below its minimum stays inside its box', (tester) async {
     final doc = LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['root'],
       'nodes': {
         'root': {'type': 'column', 'children': ['line'], 'layout': {'width': 300, 'height': 400}},

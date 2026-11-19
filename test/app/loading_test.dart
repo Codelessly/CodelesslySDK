@@ -21,6 +21,7 @@ void main() {
 
     test('variables start at their published values', () {
       final layout = PublishLayout.fromJson({
+        'schema': 3,
         'id': 'l',
         'roots': ['c'],
         'nodes': {'c': {'type': 'canvas'}},

@@ -62,6 +62,7 @@ void _registerRecipes() {
 }
 
 LayoutDocument _doc(Map<String, Map<String, Object?>> nodes, {List<String>? children}) => LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['s'],
       'nodes': {
         's': {
@@ -331,6 +332,7 @@ void main() {
   group('an app\'s own host', () {
     testWidgets('an app\'s own host shows nodes and their embedded widgets', (tester) async {
       final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['s'],
         'nodes': {
           's': {'type': 'stack', 'children': ['f'], 'layout': {'width': 300, 'height': 100}},

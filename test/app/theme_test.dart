@@ -27,7 +27,7 @@ final _theme = ThemeTokens.fromJson({
 
 PublishBundle _bundle(ThemeTokens theme) {
   final layout = PublishLayout.fromJson({
-    'schema': 2,
+    'schema': 3,
     'id': 'home',
     'roots': ['canvas'],
     'nodes': {

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart' as m show Axis;
 import 'package:flutter_test/flutter_test.dart';
 
 Map<String, Object?> doc({Map<String, Object?> extra = const {}}) => {
+      'schema': 3,
       'roots': ['frame'],
       'nodes': {
         'frame': {

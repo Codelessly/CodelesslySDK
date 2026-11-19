@@ -276,6 +276,7 @@ void main() {
       'scrolling writes its position to variables and reports when it ends, also after an animated scroll-to',
       (tester) async {
         final doc = LayoutDocument.fromJson({
+          'schema': 3,
           'roots': ['body'],
           'nodes': {
             'body': {

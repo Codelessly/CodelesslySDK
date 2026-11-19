@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final model = PublishModel.fromJson({
+    'schema': 3,
     'projectId': 'p',
     'entryLayoutId': 'home',
     'layouts': {
@@ -45,7 +46,7 @@ void main() {
     expect(CodelesslyAppIdentity.resolve(model, layoutId: 'about').title, 'About · Hive');
     expect(CodelesslyAppIdentity.parseColor('#FFAA0080'), const Color(0x80FFAA00));
     expect(CodelesslyAppIdentity.parseColor('nope'), isNull);
-    final none = PublishModel.fromJson({'projectId': 'p', 'layouts': {}});
+    final none = PublishModel.fromJson({'schema': 3, 'projectId': 'p', 'layouts': {}});
     expect(CodelesslyAppIdentity.resolve(none, fallbackName: 'App').title, 'App');
   });
 

@@ -27,7 +27,7 @@ Map<String, Json> grid({Json cellExtra = const {}}) => {
     };
 
 Future<(NodeTree, VariableScope)> show(WidgetTester tester, {Json cellExtra = const {}}) async {
-  final doc = LayoutDocument.fromJson({'roots': ['grid'], 'nodes': grid(cellExtra: cellExtra)});
+  final doc = LayoutDocument.fromJson({'schema': 3, 'roots': ['grid'], 'nodes': grid(cellExtra: cellExtra)});
   final scope = VariableScope([
     v('cells', [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1], VariableType.list),
     v('pal', ['#00000000', '#FF55358A', '#FF3B7CA3'], VariableType.list),
@@ -104,6 +104,7 @@ void main() {
     for (final interactive in [false, true]) {
       testWidgets('the items of an inner list read their own data (interactive: $interactive)', (tester) async {
         final doc = LayoutDocument.fromJson({
+          'schema': 3,
           'roots': ['tiles'],
           'nodes': {
             'tiles': {

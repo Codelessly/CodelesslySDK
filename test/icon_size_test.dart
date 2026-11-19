@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   Future<RenderIconGlyph> glyphOf(WidgetTester tester, Json icon) async {
     final doc = LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['root'],
       'nodes': {
         'root': {'type': 'column', 'children': ['icon'], 'layout': {'width': 100, 'height': 100}, 'props': {'crossAxisAlignment': 'start'}},

@@ -21,15 +21,13 @@ const dir = 'examples/relay-pricing';
 
 Json read(String path) => jsonDecode(File('$dir/$path').readAsStringSync()) as Json;
 
-/// The site published as written (schema 2), or rewritten as schema 3 first
-/// ([schema3]: what `tool/migrate.dart --write` does to its files).
-PublishBundle publishRelay({bool schema3 = false}) {
-  Json load(Json j) => schema3 ? migrateJson2to3(j)! as Json : j;
-  final site = load(read('site.json'));
-  final pages = [for (final p in (site['pages']! as List).cast<String>()) (name: p, json: load(read(p)))];
+/// The site published as written.
+PublishBundle publishRelay() {
+  final site = read('site.json');
+  final pages = [for (final p in (site['pages']! as List).cast<String>()) (name: p, json: read(p))];
   final components = [
     for (final f in Directory('$dir/components').listSync().whereType<File>().toList()..sort((a, b) => a.path.compareTo(b.path)))
-      load(jsonDecode(f.readAsStringSync()) as Json),
+      jsonDecode(f.readAsStringSync()) as Json,
   ];
   return publishPages(pages,
           variables: publishVariables(site), components: components, theme: site['theme'] as Json?, projectId: 'relay')
