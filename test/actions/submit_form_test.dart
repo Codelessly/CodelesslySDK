@@ -23,8 +23,7 @@ void main(){
  test('a submission its validator rejects is not stored and runs no success actions',()async{final h=FormHarness(runner:Validator({'valid':false,'errors':{'age':'Must be 18+'}}));await h.submit({'validationScript':'validate'});expect(h.scope.read('responses'),isEmpty);expect(h.scope.read('success'),false);expect(h.scope.read('errors'),{'age':'Must be 18+'});expect((h.scope.read('result') as Map)['error'],containsPair('code','validation_failed'));});
  test('a submission with nowhere to go, or with values that are not a record, fails and changes nothing',()async{final h=FormHarness();await h.submit({'responseVariable':'missing'});expect(h.scope.read('responses'),isEmpty);expect((h.scope.read('result') as Map)['error'],containsPair('code','invalid_response_variable'));await h.submit({'payload':'42'});expect(h.scope.read('responses'),isEmpty);expect((h.scope.read('result') as Map)['ok'],false);});
 
- group('a submission saved for the removed newsletter services',(){
-  // A layout saved before the built-in Mailchimp service was removed.
+ group('a submission to a service other than the local one',(){
   const legacy={'type':'submitForm','service':'mailchimp','emailField':'email','apiKey':'secret-us1','dataCenter':'us1','listId':'list','firstNameField':'first'};
   Future<List<Object>> noNetwork(Future<void> Function() body)async{
    final requests=<Object>[];

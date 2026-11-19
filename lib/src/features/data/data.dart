@@ -254,9 +254,8 @@ Future<void> _cloudFiles(ActionDef action, ActionRun run) async {
 
 // --- forms ---------------------------------------------------------------------------
 
-/// A form submission. Only the local service runs: an older layout's
-/// built-in newsletter service (or an unknown one), decoded as
-/// [FormService.unsupported], sends nothing and fails as
+/// A form submission. Only the local service runs: any other service,
+/// decoded as [FormService.unsupported], sends nothing and fails as
 /// `unsupported_service` through the same result and callbacks.
 ///
 /// Validation finishes before any response is stored. Persisting the
