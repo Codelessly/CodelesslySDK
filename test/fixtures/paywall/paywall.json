@@ -1,7 +1,7 @@
 {
-  "schema": 2,
+  "schema": 3,
   "model": {
-    "schema": 2,
+    "schema": 3,
     "projectId": "paywall_demo",
     "entryLayoutId": "home",
     "layouts": {
@@ -51,7 +51,7 @@
   },
   "layouts": {
     "home": {
-      "schema": 2,
+      "schema": 3,
       "id": "home",
       "roots": [
         "home-canvas"
@@ -63,12 +63,15 @@
           "layout": {
             "width": 390,
             "height": 844
+          },
+          "defaultTextStyle": {
+            "height": 1.33
           }
         }
       }
     },
     "paywall": {
-      "schema": 2,
+      "schema": 3,
       "id": "paywall",
       "roots": [
         "paywall-canvas"
@@ -83,6 +86,9 @@
           "layout": {
             "width": 390,
             "height": 844
+          },
+          "defaultTextStyle": {
+            "height": 1.33
           }
         },
         "paywall-column": {

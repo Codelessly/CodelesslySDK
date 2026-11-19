@@ -1,2 +1,16 @@
-{"schema": 2, "pages": ["pages/home.json"],
- "variables": [{"name": "brand", "type": "map", "value": {"name": "Acme", "accent": "#FF2962FF"}}]}
+{
+ "schema": 3,
+ "pages": [
+  "pages/home.json"
+ ],
+ "variables": [
+  {
+   "name": "brand",
+   "type": "map",
+   "value": {
+    "name": "Acme",
+    "accent": "#FF2962FF"
+   }
+  }
+ ]
+}

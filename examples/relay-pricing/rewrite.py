@@ -1,5 +1,7 @@
 # Throwaway: rewrites Relay pricing (m05 c2 saas-landing-B) as a site of
 # a page of section calls plus one document per component.
+# It writes schema 2, which codelessly_api no longer reads: the files here were converted to
+# schema 3 once (codelessly_api's tool/schema2to3). Run that conversion over what this writes.
 import json, os, re, sys, copy
 src = sys.argv[1]; out = sys.argv[2]
 d = json.load(open(src))

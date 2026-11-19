@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Writes the reference site's two pages (home.json, contact.json) as Codelessly layout documents."""
+"""Writes the reference site's two pages (home.json, contact.json) as Codelessly layout documents.
+
+It writes schema 2, which codelessly_api no longer reads: home.json and contact.json were converted to schema 3
+once (codelessly_api's tool/schema2to3). Run that conversion over what this writes before using it."""
 import json, sys
 
 OUT = sys.argv[1]

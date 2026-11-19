@@ -2,7 +2,7 @@
   "id": "sign_in",
   "semver": "1.0.0",
   "definition": {
-    "schema": 2,
+    "schema": 3,
     "id": "sign_in",
     "name": "Sign in",
     "size": [
@@ -10,7 +10,7 @@
       420
     ],
     "document": {
-      "schema": 2,
+      "schema": 3,
       "roots": [
         "root"
       ],
@@ -46,6 +46,9 @@
           "props": {
             "spacing": 12,
             "crossAxisAlignment": "stretch"
+          },
+          "defaultTextStyle": {
+            "height": 1.33
           }
         },
         "header": {

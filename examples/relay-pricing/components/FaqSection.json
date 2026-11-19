@@ -1,5 +1,5 @@
 {
- "schema": 2,
+ "schema": 3,
  "id": "FaqSection",
  "roots": [
   "faqSec"
@@ -74,7 +74,10 @@
       }
      }
     }
-   ]
+   ],
+   "defaultTextStyle": {
+    "height": 1.33
+   }
   },
   "faqIn": {
    "type": "flex",

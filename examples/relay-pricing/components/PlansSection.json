@@ -1,5 +1,5 @@
 {
- "schema": 2,
+ "schema": 3,
  "id": "PlansSection",
  "roots": [
   "plansSec"
@@ -99,7 +99,10 @@
       }
      }
     }
-   ]
+   ],
+   "defaultTextStyle": {
+    "height": 1.33
+   }
   },
   "plansIn": {
    "type": "column",

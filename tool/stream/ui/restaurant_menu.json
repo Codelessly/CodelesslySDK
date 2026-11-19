@@ -1,5 +1,5 @@
 {
- "schema": 2,
+ "schema": 3,
  "id": "menu-page",
  "roots": [
   "menu"
@@ -21,6 +21,9 @@
       "color": "#FFF4EFE5"
      }
     ]
+   },
+   "defaultTextStyle": {
+    "height": 1.33
    }
   },
   "root": {
@@ -990,13 +993,13 @@
    }
   },
   "starLunch": {
-   "type": "box",
+   "type": "path",
    "layout": {
     "width": 10,
     "height": 10
    },
    "props": {
-    "path": "M5 0 L6.2 3.8 L10 5 L6.2 6.2 L5 10 L3.8 6.2 L0 5 L3.8 3.8 Z"
+    "data": "M5 0 L6.2 3.8 L10 5 L6.2 6.2 L5 10 L3.8 6.2 L0 5 L3.8 3.8 Z"
    },
    "decoration": {
     "fills": [
@@ -1046,13 +1049,13 @@
    }
   },
   "starDinner": {
-   "type": "box",
+   "type": "path",
    "layout": {
     "width": 10,
     "height": 10
    },
    "props": {
-    "path": "M5 0 L6.2 3.8 L10 5 L6.2 6.2 L5 10 L3.8 6.2 L0 5 L3.8 3.8 Z"
+    "data": "M5 0 L6.2 3.8 L10 5 L6.2 6.2 L5 10 L3.8 6.2 L0 5 L3.8 3.8 Z"
    },
    "decoration": {
     "fills": [
@@ -3056,14 +3059,14 @@
    }
   },
   "asterisk": {
-   "type": "box",
+   "type": "path",
    "layout": {
     "width": 18,
     "height": 18
    },
    "props": {
-    "path": "M9 0 L9 18 M0 9 L18 9 M2.6 2.6 L15.4 15.4 M15.4 2.6 L2.6 15.4",
-    "strokeJoin": "round"
+    "strokeJoin": "round",
+    "data": "M9 0 L9 18 M0 9 L18 9 M2.6 2.6 L15.4 15.4 M15.4 2.6 L2.6 15.4"
    },
    "decoration": {
     "strokes": [

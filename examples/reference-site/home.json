@@ -1,5 +1,5 @@
 {
- "schema": 2,
+ "schema": 3,
  "roots": [
   "m-home",
   "t-home",
@@ -3005,7 +3005,7 @@
     "color": "#FF475569"
    },
    "bind": {
-    "layout.rotation": "${= openFaq == index ? 180 : 0}"
+    "motion.rotate": "${= openFaq == index ? 180 : 0}"
    }
   },
   "m-faq-item-head": {
@@ -3353,7 +3353,7 @@
     }
    },
    "props": {
-    "text": "\u00a9 2026 Lumen Labs. All rights reserved.",
+    "text": "© 2026 Lumen Labs. All rights reserved.",
     "style": {
      "fontFamily": "Inter",
      "fontSize": 13,
@@ -3475,6 +3475,9 @@
       "color": "#FFFFFFFF"
      }
     ]
+   },
+   "defaultTextStyle": {
+    "height": 1.33
    }
   },
   "t-logo-mark": {
@@ -6407,7 +6410,7 @@
     "color": "#FF475569"
    },
    "bind": {
-    "layout.rotation": "${= openFaq == index ? 180 : 0}"
+    "motion.rotate": "${= openFaq == index ? 180 : 0}"
    }
   },
   "t-faq-item-head": {
@@ -6755,7 +6758,7 @@
     }
    },
    "props": {
-    "text": "\u00a9 2026 Lumen Labs. All rights reserved.",
+    "text": "© 2026 Lumen Labs. All rights reserved.",
     "style": {
      "fontFamily": "Inter",
      "fontSize": 13,
@@ -6876,6 +6879,9 @@
       "color": "#FFFFFFFF"
      }
     ]
+   },
+   "defaultTextStyle": {
+    "height": 1.33
    }
   },
   "d-logo-mark": {
@@ -9808,7 +9814,7 @@
     "color": "#FF475569"
    },
    "bind": {
-    "layout.rotation": "${= openFaq == index ? 180 : 0}"
+    "motion.rotate": "${= openFaq == index ? 180 : 0}"
    }
   },
   "d-faq-item-head": {
@@ -10156,7 +10162,7 @@
     }
    },
    "props": {
-    "text": "\u00a9 2026 Lumen Labs. All rights reserved.",
+    "text": "© 2026 Lumen Labs. All rights reserved.",
     "style": {
      "fontFamily": "Inter",
      "fontSize": 13,
@@ -10277,6 +10283,9 @@
       "color": "#FFFFFFFF"
      }
     ]
+   },
+   "defaultTextStyle": {
+    "height": 1.33
    }
   }
  },

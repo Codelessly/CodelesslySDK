@@ -1,5 +1,5 @@
 {
- "schema": 2,
+ "schema": 3,
  "id": "SiteFooter",
  "roots": [
   "foot"
@@ -69,7 +69,10 @@
       }
      }
     }
-   ]
+   ],
+   "defaultTextStyle": {
+    "height": 1.33
+   }
   },
   "footIn": {
    "type": "column",
@@ -165,13 +168,13 @@
    }
   },
   "logoFMark": {
-   "type": "box",
+   "type": "path",
    "layout": {
     "width": 34,
     "height": 30
    },
    "props": {
-    "path": "M0 30L3.5 15H10L6.5 30Z M10 30L15.3 7H21.8L16.5 30Z M20 30L26.9 0H33.4L26.5 30Z"
+    "data": "M0 30L3.5 15H10L6.5 30Z M10 30L15.3 7H21.8L16.5 30Z M20 30L26.9 0H33.4L26.5 30Z"
    },
    "decoration": {
     "fills": [

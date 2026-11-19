@@ -1,5 +1,5 @@
 {
- "schema": 2,
+ "schema": 3,
  "roots": [
   "boom"
  ],
@@ -19,6 +19,9 @@
       "color": "#FFFFFFFF"
      }
     ]
+   },
+   "defaultTextStyle": {
+    "height": 1.33
    }
   },
   "grid": {
