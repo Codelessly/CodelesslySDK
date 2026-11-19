@@ -8,6 +8,7 @@ import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show Json, ShowToastAction, ToastPosition, ToastStyle;
 import 'package:flutter/material.dart';
 
+import '../../render/node_view.dart' show ControlButton, ControlHost;
 import '../../render/paint/icon_names.dart';
 import '../../render/paint/shell_constants.dart';
 import 'feedback_icon.dart';
@@ -449,20 +450,22 @@ class _ToastViewState extends State<_ToastView> {
           if (hasButton) ...[
             const SizedBox(width: 8),
             _withShadows(
-              TextButton(
+              ConstrainedBox(
                 key: const ValueKey('codelessly-toast-action'),
-                onPressed: _onActionPressed,
-                style: TextButton.styleFrom(
-                  foregroundColor: actionColor,
-                  backgroundColor: bound['actionBackgroundColor'] ?? look.color('actionBackgroundColor'),
-                  minimumSize: const Size(48, 36),
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  // The action's own font size wins over the message's.
-                  textStyle: actionLook?.fontSize != null ? actionStyle : actionStyle.copyWith(fontSize: fontSize),
-                  side: look.side('actionBorder'),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(actionRadius)),
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 36),
+                child: ControlButton(
+                  onPressed: _onActionPressed,
+                  spec: theme.button(
+                    label: widget.actionLabel,
+                    foreground: actionColor,
+                    background: bound['actionBackgroundColor'] ?? look.color('actionBackgroundColor'),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    // The action's own font size wins over the message's.
+                    style: actionLook?.fontSize != null ? actionStyle : actionStyle.copyWith(fontSize: fontSize),
+                    side: look.side('actionBorder'),
+                    radius: actionRadius,
+                  ),
                 ),
-                child: Text(widget.actionLabel),
               ),
               actionShadows,
               actionRadius,
@@ -470,21 +473,13 @@ class _ToastViewState extends State<_ToastView> {
           ],
           if (hasClose) ...[
             SizedBox(width: hasButton ? 0 : 8),
-            Semantics(
-              button: true,
-              label: 'Dismiss',
-              excludeSemantics: true,
-              child: IconButton(
-                key: const ValueKey('codelessly-toast-close'),
+            SizedBox.square(
+              key: const ValueKey('codelessly-toast-close'),
+              dimension: 36,
+              child: ControlButton(
                 onPressed: _close,
-                iconSize: 18,
-                color: closeColor,
-                constraints: const BoxConstraints.tightFor(width: 36, height: 36),
-                padding: EdgeInsets.zero,
-                style: IconButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(buttonRadius)),
-                ),
-                icon: const Icon(_Glyph.close),
+                semanticsLabel: 'Dismiss',
+                spec: theme.button(icon: _closeIcon, iconSize: 18, foreground: closeColor, radius: buttonRadius),
               ),
             ),
           ],
@@ -528,7 +523,10 @@ class _ToastViewState extends State<_ToastView> {
             },
             child: Material(
               type: MaterialType.transparency,
-              child: rotation == 0 ? toast : Transform.rotate(angle: rotation * math.pi / 180, child: toast),
+              // The buttons are the SDK's controls: this is their root.
+              child: ControlHost(
+                child: rotation == 0 ? toast : Transform.rotate(angle: rotation * math.pi / 180, child: toast),
+              ),
             ),
           ),
         ),
@@ -651,7 +649,5 @@ class _ToastBelowRouteState extends State<ToastBelowRoute> {
   Widget build(BuildContext context) => widget.child;
 }
 
-/// The icons drawn here, from the MaterialIcons font.
-abstract final class _Glyph {
-  static const close = IconData(ShellGlyphs.close, fontFamily: ShellGlyphs.font);
-}
+/// The close button's icon: the MaterialIcons font's glyph.
+const Json _closeIcon = {'type': 'MATERIAL_ICON', 'name': 'close', 'codepoint': ShellGlyphs.close, 'render': 'glyph'};

@@ -4,6 +4,7 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/shell_controls.dart';
 import 'support.dart';
 
 // A host app that is not a Material app: a plain WidgetsApp, with no
@@ -129,7 +130,7 @@ void main() {
         await _press(tester, host, {'type': 'confirm', 'title': 'Remove it?', 'message': 'It cannot be undone.'});
         expect(tester.takeException(), isNull);
         expect(find.text('Remove it?'), findsOneWidget);
-        await tester.tap(find.text('Cancel'));
+        await tester.tap(shellButton('Cancel'));
         await settle(tester);
         expect(tester.takeException(), isNull);
         expect(find.text('Remove it?'), findsNothing);
@@ -151,7 +152,7 @@ void main() {
         });
         expect(tester.takeException(), isNull);
         expect(find.text('Saved'), findsOneWidget);
-        expect(find.text('View'), findsOneWidget);
+        expect(shellButton('View'), findsOneWidget);
         await tester.pump(const Duration(seconds: 5));
         await settle(tester);
         expect(tester.takeException(), isNull);

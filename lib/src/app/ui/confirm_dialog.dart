@@ -8,6 +8,7 @@ import 'package:codelessly_api/core.dart' show ConfirmAction, Json, ModalPresent
 import 'package:flutter/material.dart';
 
 import '../../render/convert.dart';
+import '../../render/node_view.dart' show ControlButton, ControlHost;
 import '../../render/paint/icon_names.dart';
 import '../../render/paint/shell_constants.dart';
 import 'feedback_icon.dart';
@@ -467,7 +468,6 @@ class ThemedConfirmDialog extends StatelessWidget {
     final buttonCorner = buttonRadius ?? theme.buttonRadius;
     final buttonSide = buttonBorder ?? theme.buttonBorder ?? BorderSide.none;
     final buttonShadowList = buttonShadows ?? theme.buttonShadows ?? const <BoxShadow>[];
-    final buttonShape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(buttonCorner));
     final buttonText = applyTextStyle(buttonStyle, theme.buttonStyle.copyWith(fontSize: theme.messageSize ?? 15, height: 1.2));
     // A button's own text color wins over the color both buttons' text
     // style gives (a brass confirm with dark text beside a light cancel).
@@ -500,42 +500,48 @@ class ThemedConfirmDialog extends StatelessWidget {
     // The focus starts on the yes, so Enter answers what was asked; on a
     // destructive one it starts on Cancel, so Enter does no harm. Enter and
     // Space press the focused button, Tab moves between them, Escape cancels.
-    final cancel = TextButton(
-      key: const ValueKey('codelessly-confirm-cancel'),
-      autofocus: destructive,
-      onPressed: () => Navigator.of(context).pop(false),
-      style: TextButton.styleFrom(
-        foregroundColor: onCancel,
-        backgroundColor: cancelColor,
-        textStyle: buttonText,
-        shape: buttonShape,
-        side: cancelBorder ?? (cancelColor == null ? theme.cancelBorder : null) ?? buttonSide,
-        visualDensity: buttonHeight == null ? null : VisualDensity.standard,
-        minimumSize: buttonSize,
-        maximumSize: buttonMaxSize,
-        tapTargetSize: buttonHeight == null ? null : MaterialTapTargetSize.shrinkWrap,
-        padding: buttonPadding,
-      ),
-      child: Text(cancelLabel),
+    final buttonBox = BoxConstraints(
+      minWidth: buttonSize.width,
+      minHeight: buttonSize.height,
+      maxWidth: math.max(buttonSize.width, buttonMaxSize.width),
+      maxHeight: math.max(buttonSize.height, buttonMaxSize.height),
     );
-    final confirm = FilledButton(
-      key: const ValueKey('codelessly-confirm-ok'),
-      autofocus: !destructive,
-      onPressed: () => Navigator.of(context).pop(true),
-      style: FilledButton.styleFrom(
-        backgroundColor: gradient == null ? confirmFill : ShellColors.transparent,
-        shadowColor: gradient == null ? null : ShellColors.transparent,
-        foregroundColor: onConfirm,
-        textStyle: buttonText,
-        shape: buttonShape,
-        side: confirmBorder ?? buttonSide,
-        visualDensity: buttonHeight == null ? null : VisualDensity.standard,
-        minimumSize: buttonSize,
-        maximumSize: buttonMaxSize,
-        tapTargetSize: buttonHeight == null ? null : MaterialTapTargetSize.shrinkWrap,
-        padding: buttonPadding,
+    BorderSide? sideOf(BorderSide side) => side == BorderSide.none ? null : side;
+    final cancel = ConstrainedBox(
+      key: const ValueKey('codelessly-confirm-cancel'),
+      constraints: buttonBox,
+      child: ControlButton(
+        focusWhenShown: destructive,
+        onPressed: () => Navigator.of(context).pop(false),
+        spec: theme.button(
+          label: cancelLabel,
+          foreground: onCancel,
+          background: cancelColor,
+          style: buttonText,
+          radius: buttonCorner,
+          side: sideOf(cancelBorder ?? (cancelColor == null ? theme.cancelBorder : null) ?? buttonSide),
+          padding: buttonPadding,
+          wrapLabel: true,
+        ),
       ),
-      child: Text(confirmLabel),
+    );
+    final confirm = ConstrainedBox(
+      key: const ValueKey('codelessly-confirm-ok'),
+      constraints: buttonBox,
+      child: ControlButton(
+        focusWhenShown: !destructive,
+        onPressed: () => Navigator.of(context).pop(true),
+        spec: theme.button(
+          label: confirmLabel,
+          foreground: onConfirm,
+          background: gradient == null ? confirmFill : ShellColors.transparent,
+          style: buttonText,
+          radius: buttonCorner,
+          side: sideOf(confirmBorder ?? buttonSide),
+          padding: buttonPadding,
+          wrapLabel: true,
+        ),
+      ),
     );
     final textAlign = centered ? TextAlign.center : TextAlign.start;
     Widget? leading = icon == null
@@ -572,7 +578,8 @@ class ThemedConfirmDialog extends StatelessWidget {
         : (cancelColor != null ? withShadow(cancel) : cancel);
     final buttons = [cancelled, withShadow(filledConfirm)];
 
-    final Widget content = Semantics(
+    // The buttons are the SDK's controls: this is their root.
+    final Widget content = ControlHost(child: Semantics(
       scopesRoute: true,
       namesRoute: true,
       explicitChildNodes: true,
@@ -642,7 +649,7 @@ class ThemedConfirmDialog extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
 
     // Shadows of its own replace the dialog's elevation: drawn around a box
     // that carries its fill and outline.

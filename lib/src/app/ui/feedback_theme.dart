@@ -6,6 +6,9 @@ import 'package:codelessly_api/core.dart' show ButtonProps, LayoutDocument, Node
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 
+import '../../render/controls/buttons.dart' show ButtonKind, ButtonSpec;
+import '../../render/controls/tokens.dart' show ControlTokens;
+
 import '../../runtime/actions/look.dart';
 
 export '../../runtime/actions/look.dart';
@@ -500,6 +503,62 @@ class ResolvedFeedbackTheme {
       );
 
   static api.Color _api(Color c) => api.Color(c.toARGB32());
+
+  /// The tokens of the SDK's own controls in a dialog or a toast (their
+  /// font, their timing): this look's colors, fonts and radii. A focused
+  /// button shows its tint and no ring, as the dialog's buttons always have.
+  ControlTokens get controlTokens => ControlTokens.resolve(
+        api.ThemeTokens(
+          primary: _api(primary),
+          onPrimary: _api(onPrimary),
+          surface: _api(surface),
+          onSurface: _api(onSurface),
+          error: _api(error),
+          fontFamily: bodyStyle.fontFamily,
+          titleFontFamily: titleStyle.fontFamily,
+          radius: radius,
+          buttonRadius: buttonRadius,
+          colors: const {'focusBorder': api.Color(0x00000000)},
+        ),
+        dark: ThemeData.estimateBrightnessForColor(surface) == Brightness.dark,
+      );
+
+  /// One of the look's buttons, as the SDK's button draws it: [label] (or
+  /// an [icon] alone) in [foreground] and [style] on [background], with a
+  /// faint layer of the foreground when hovered, more when pressed or
+  /// focused.
+  ButtonSpec button({
+    String label = '',
+    Map<String, Object?> icon = const {},
+    double? iconSize,
+    required Color foreground,
+    Color? background,
+    TextStyle style = const TextStyle(),
+    BorderSide? side,
+    required double radius,
+    EdgeInsets? padding,
+    bool enabled = true,
+    bool wrapLabel = false,
+  }) =>
+      ButtonSpec(
+        kind: label.isEmpty ? ButtonKind.icon : ButtonKind.text,
+        tokens: controlTokens,
+        label: label,
+        icon: icon,
+        iconSize: iconSize,
+        iconColor: foreground,
+        foreground: foreground,
+        background: background,
+        labelStyle: style,
+        side: side,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
+        padding: padding,
+        enabled: enabled,
+        wrapLabel: wrapLabel,
+        hoverColor: foreground.withValues(alpha: .06),
+        splashColor: foreground.withValues(alpha: .10),
+        focusColor: foreground.withValues(alpha: .10),
+      );
 }
 
 /// Provides the [FeedbackTheme] of the layout below it.

@@ -2,6 +2,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart' show HardwareKeyboard;
 import 'package:flutter/widgets.dart';
 
+import 'controls/buttons.dart';
 import 'controls/focus.dart';
 import 'controls/root.dart';
 import 'controls/spinner.dart';
@@ -192,4 +193,82 @@ class SpinnerView extends LeafRenderObjectWidget {
     ..diameter = diameter
     ..strokeWidth = strokeWidth
     ..animating = TickerMode.valuesOf(context).enabled;
+}
+
+/// A root for the SDK's controls where the surroundings are widgets and no
+/// [NodeView] is above them (a toast in the app's overlay, the confirm
+/// dialog in its route): the controls under it ([ControlButton],
+/// [ControlSlider]) share its focus order and take keys as a screen's do.
+/// Inside a modal route it joins the route's [ControlFocusLayerScope], so
+/// the keyboard stays in the dialog.
+class ControlHost extends SingleChildRenderObjectWidget {
+  const ControlHost({super.key, required super.child});
+
+  @override
+  RenderControlRoot createRenderObject(BuildContext context) {
+    final keyboard = FocusManagerKeyboard();
+    final root = RenderControlRoot(keyboard: keyboard);
+    keyboard.scope = root.focus;
+    return root..focus.layer = ControlFocusLayerScope.maybeOf(context);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderControlRoot renderObject) =>
+      renderObject.focus.layer = ControlFocusLayerScope.maybeOf(context);
+}
+
+/// One of the SDK's buttons ([RenderButton]) as a widget: [spec] is what it
+/// shows, [onPressed] what a press does (null: it draws and takes no press).
+/// It needs a root above it: a [NodeView] (a list's row, a player) or a
+/// [ControlHost].
+class ControlButton extends LeafRenderObjectWidget {
+  const ControlButton({
+    super.key,
+    required this.spec,
+    this.onPressed,
+    this.semanticsLabel,
+    this.focusWhenShown = false,
+  });
+
+  final ButtonSpec spec;
+  final VoidCallback? onPressed;
+
+  /// What a screen reader says (else the label).
+  final String? semanticsLabel;
+
+  /// Whether the focus starts on it when it is first shown (a dialog's
+  /// default answer: Enter presses it). It shows as focused only when the
+  /// keyboard is what the user is on.
+  final bool focusWhenShown;
+
+  @override
+  RenderButton createRenderObject(BuildContext context) {
+    final button = RenderButton().._apply(this, context);
+    if (focusWhenShown) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!button.attached) return;
+        final keyboard = FocusManager.instance.highlightMode == FocusHighlightMode.traditional ||
+            (button.focusNode.scope?.layer?.usedKeyboard ?? false);
+        button.focusNode.requestFocus(highlight: keyboard);
+      });
+    }
+    return button;
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderButton renderObject) => renderObject._apply(this, context);
+}
+
+extension on RenderButton {
+  void _apply(ControlButton w, BuildContext context) {
+    this
+      ..interactive = true
+      ..spec = w.spec
+      ..enabled = w.spec.enabled
+      ..busy = w.spec.loading
+      ..autofocus = w.spec.autofocus
+      ..onPressed = w.onPressed
+      ..semanticsLabel = w.semanticsLabel
+      ..semanticsDirection = Directionality.maybeOf(context) ?? TextDirection.ltr;
+  }
 }
