@@ -16,10 +16,12 @@ Android arm64, `flutter build apk --release --analyze-size --target-platform and
 of Dart code in `libapp.so` by library. Two hosts, each rendering one local document with the SDK: one under a
 plain `WidgetsApp` (uses no Material itself), one under `MaterialApp`.
 
-| Release | Host | `flutter/src/material` | `flutter/src/cupertino` | `material_color_utilities` |
+| Code | Host | `flutter/src/material` | `flutter/src/cupertino` | `material_color_utilities` |
 |---|---|---|---|---|
 | 38.0.0 | WidgetsApp | 432,161 | 47,161 | 71,935 |
 | 38.0.0 | MaterialApp | 466,505 | 48,039 | 71,949 |
+| 19 files importing | WidgetsApp | 408,605 | 43,959 | 71,928 |
+| 19 files importing | MaterialApp | 448,246 | 47,818 | 71,950 |
 
 Third-party dependencies import the framework's `material.dart` themselves (`video_player`, `webview_flutter` and
 its platform packages, `in_app_purchase`'s platform packages, `url_launcher_web`). They are not replaced by this
