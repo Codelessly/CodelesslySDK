@@ -14,9 +14,9 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
-import 'graph_engine.dart';
-import 'graph_pane.dart';
-import 'graph_spec.dart';
+import '../graph/graph_engine.dart';
+import '../graph/graph_pane.dart';
+import '../graph/graph_spec.dart';
 
 class CodelesslyGraph extends StatefulWidget {
   const CodelesslyGraph({

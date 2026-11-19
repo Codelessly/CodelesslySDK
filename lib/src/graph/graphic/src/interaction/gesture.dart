@@ -1,7 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:codelessly_sdk/src/graph/graphic/src/chart/chart.dart';
 import 'package:codelessly_sdk/src/graph/graphic/src/dataflow/operator.dart';
 

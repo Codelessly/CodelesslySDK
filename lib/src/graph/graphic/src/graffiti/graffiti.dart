@@ -1,4 +1,5 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'scene.dart';
 import 'transition.dart';
