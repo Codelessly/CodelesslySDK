@@ -1,5 +1,20 @@
 ## Unreleased
 
+Needs the codelessly_api of the same release.
+
+### Behaviour changes (read before upgrading)
+
+- **A theme with no `surface` on a dark ground** (a site's dark `paper` and its `ink`): the controls and the
+  runtime's menus, tooltips, pickers and dialogs take that ground as their surface and the theme's `ink` as their
+  text (`surfaceRoles`, `themeDataOf`); they took white paper and near-black ink. A light ground, and a theme that
+  names its `surface` (every design system here), draw as before.
+- **Notation tools, a site with no design system** (`expand <site folder>`): what the notation draws by itself is
+  written in the theme's roles (`line`, `card`, `band`, `hoverFill`, `quietText`...: codelessly_api's
+  `ThemeTokens.notationRoles`), each light or dark as the site is shown, so its dark mode needs no design system.
+  A light site draws as before.
+
+## Unreleased
+
 Needs codelessly_api's fixes-36-1 (its Unreleased entry).
 
 ### Behaviour changes

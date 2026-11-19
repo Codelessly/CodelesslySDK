@@ -88,6 +88,14 @@ elsewhere, so a layout bound to the theme needs no conditions for dark mode. A p
 values also gets a dark theme in dark mode (for its controls and the runtime's dialogs and toasts); one without
 stays light, as designed.
 
+A site written in the notation with no design system needs nothing more: what the notation draws by itself (a
+card, a hairline, a table's header band, a sidebar's items, a dialog's and a drawer's panel) is written in the
+theme's roles (`line`, `card`, `band`, `quietText`... : codelessly_api's `ThemeTokens.notationRoles`), each light
+on a light ground and made from the theme's `ink` and `paper` on a dark one, so a theme with a dark `paper` draws
+dark, and one with light colors and `dark` ones switches. Name a role in the theme's `colors` to choose it yourself.
+The controls and the runtime's menus, tooltips and pickers take a dark `paper` as their surface and the theme's
+`ink` as their text where the theme names no `surface`.
+
 Which mode: the device's (`MediaQuery.platformBrightness`, `theme.isDark`), never your app's theme's.
 `${screen.isDark}` (also `${screen.dark}`) and `${screen.brightness}` are the device's too. Nodes whose colors are fixed values don't change with the mode;
 bind them to the theme, or use `screen.isDark` / `theme.isDark` in conditions and variants.

@@ -557,7 +557,10 @@ final class NotationExpander {
                 componentScreenOverlays: merged == null ? const {} : NotationOptions.fromDesignSystem(merged).componentScreenOverlays,
               )
             : NotationOptions.fromDesignSystem(merged,
-                screen: screen, width: settings.width, named: named, nearestColors: settings.nearestColors, reflow: settings.reflow, projectVariables: variables))
+                screen: screen, width: settings.width, named: named, nearestColors: settings.nearestColors, reflow: settings.reflow, projectVariables: variables,
+                // A site with no design system: what the notation draws by
+                // itself is in the theme's roles, light or dark as it is shown.
+                roles: ds == null))
         .open(openVocabulary: settings.open, vocabulary: settings.aliases)
         .withScreens(s?.screens ?? const [])
         .withOwnComponents(s == null ? const [] : {...s.sources.keys, ...s.expanded.keys});
