@@ -167,6 +167,7 @@ class _DashboardPageState extends State<DashboardPage> {
   void initState() {
     super.initState();
     final doc = LayoutDocument.fromJson({
+      'schema': 3,
       'roots': [widget.root],
       'nodes': widget.nodes ?? dashboardNodes,
     });
