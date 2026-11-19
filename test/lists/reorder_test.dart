@@ -56,7 +56,7 @@ void main() {
 
     testWidgets('dragging an item moves it and updates the variable', (tester) async {
       await pumpList(tester, {'start': 'press', 'apply': 'variable'});
-      expect(find.byType(ReorderableListView), findsOneWidget);
+      expect(find.byType(SliverReorderableList), findsOneWidget);
       final drag = await tester.startGesture(row(0));
       await tester.pump(kPressTimeout);
       await drag.moveBy(const Offset(0, 20));
@@ -257,7 +257,7 @@ void main() {
     testWidgets('stays at rest on the design canvas', (tester) async {
       s = await show(tester, list({'start': 'press'}),
           variables: [v('songs', songs(), VariableType.list), v('last', '')], interactive: false);
-      expect(find.byType(ReorderableListView), findsNothing);
+      expect(find.byType(SliverReorderableList), findsNothing);
     });
   });
 
