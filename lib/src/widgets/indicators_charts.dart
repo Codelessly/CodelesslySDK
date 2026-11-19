@@ -136,7 +136,14 @@ class ChartSeriesPainter extends NodePainter {
       };
 
   List<Map<String, Object?>> get data => p(ChartProps.data);
-  List<ChartSeries> get series => p(ChartProps.series);
+  /// The series as drawn: in a line chart a series of the default kind
+  /// (`bar`, which a line chart never draws) is a line; it drew nothing.
+  List<ChartSeries> get series {
+    final all = p(ChartProps.series);
+    if (chartType != ChartType.line || all.every((s) => s.kind != ChartSeriesKind.bar)) return all;
+    return [for (final s in all) s.kind == ChartSeriesKind.bar ? s.withKind(ChartSeriesKind.line) : s];
+  }
+
   int get selectedIndex => p(ChartProps.selectedIndex);
   ChartType get chartType => p(ChartProps.chartType);
 

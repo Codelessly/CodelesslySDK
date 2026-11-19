@@ -13,6 +13,9 @@
   long (CSS's `grid-auto-rows: minmax(extent, auto)`); the extent was not read and rows were as short as their
   content (a timetable's slots 16 px high).
 
+- **A line chart draws a series written without a `kind` as a line** (`chartType: line`, `series: [{"field":
+  "first"}]`); it was a bar, which a line chart does not draw, so the chart had no lines.
+
 ### Fixed
 
 ## 37.0.0
