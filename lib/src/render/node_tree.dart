@@ -453,6 +453,16 @@ class RenderTree {
   set textDefault(api.TextStyle? value) {
     if (value == _textDefault) return;
     _textDefault = value;
+    // The controls draw their own texts (a tab's label, a checkbox's, a
+    // field's hint, a calendar's days) in it with no text style of their
+    // own: its usual weights are asked for here, as a text node asks for
+    // its own (round 11b: a theme font with no file drew them as boxes in
+    // the render command, the texts beside them in the fallback).
+    if (value?.fontFamily case final String family when family.isNotEmpty) {
+      for (final w in const [400, 500, 600, 700]) {
+        FontDemand.need(family, w, false);
+      }
+    }
     for (final b in _boxes.values.toList()) {
       if (!identical(_boxes[b.key], b)) continue;
       b._applied = null;
@@ -2004,7 +2014,12 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
       // lies under it (a row of black keys over the white ones).
       ..opaque = d.fills.any((f) => f.visible)
       ..drawsBox = d.visibleFills.isNotEmpty || (d.visibleStrokes.isNotEmpty && d.strokeWidth > 0) || shadows.isNotEmpty);
-    final clipBehavior = clip(d.clip);
+    // A stack that does not scroll cuts what is in it at its edge when it
+    // says so (`Stack … clip`, `clipBehavior=hardEdge`), as a row or a column
+    // does: its children are placed, and drew past it (round 11b: clip-editor's
+    // timeline ran past its frame, story-reader's next card over the footer).
+    final stackClip = n.type == 'stack' && !n.scrolls && n.props.has(ScrollProps.clipBehavior) ? clip(n.prop(ScrollProps.clipBehavior)) : Clip.none;
+    final clipBehavior = clip(d.clip) == Clip.none ? stackClip : clip(d.clip);
     if (clipBehavior != Clip.none) {
       if (circle) {
         chain.add(_obtain<RenderClipOval>('clipOval', () => RenderClipOval(clipper: const _CircleClipper(), clipBehavior: clipBehavior))

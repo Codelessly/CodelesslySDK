@@ -164,6 +164,14 @@ class PickerSpec {
   /// the plain field, with its calendar and chevron.
   bool get decorated => decoration.toJson().keys.any((k) => k != 'labelText' && k != 'hintText');
 
+  /// Whether the decoration names its icons or its padding: a decoration
+  /// that names only its label, hint, fill, border and corners
+  /// (`DatePicker … fill=paper border=rule radius=10`) keeps the calendar (or
+  /// the clock) and the chevron; its fill and border are the field's.
+  bool get ownIcons => decoration.toJson().keys.any((k) => !_frameKeys.contains(k));
+
+  static const _frameKeys = {'labelText', 'hintText', 'filled', 'fillColor', 'border', 'enabledBorder', 'focusedBorder', 'hoverColor', 'focusColor'};
+
   /// [n]'s picker in [tokens], reading names and now from [locale].
   factory PickerSpec.of(Node n, ControlTokens tokens, PickerLocale locale, {api.TextStyle? inherited}) {
     final padding = n.layout.padding == api.EdgeInsets.zero ? null : n.layout.padding.flutter;
@@ -468,8 +476,8 @@ class RenderPickerField extends RenderControl implements LabeledControl {
 
   double _iconSize(ControlScale scale) => spec.bare ? 16 : scale.iconSize;
 
-  bool get _leadingIcon => !spec.bare && (spec.decorated ? _prefix != null : true);
-  bool get _trailingIcon => spec.bare || (spec.decorated ? _suffix != null : true);
+  bool get _leadingIcon => !spec.bare && (spec.ownIcons ? _prefix != null : true);
+  bool get _trailingIcon => spec.bare || (spec.ownIcons ? _suffix != null : true);
 
   double get _naturalHeight {
     final t = spec.tokens;
@@ -610,7 +618,7 @@ class RenderPickerField extends RenderControl implements LabeledControl {
     // A border of the node's own color keeps it; one without takes SSUI's
     // state color.
     final color = s.color?.flutter ?? ssuiColor;
-    return (type: own.type, side: BorderSide(color: color, width: _focusedLook && s.color == null ? 1.5 : s.width), radius: own.borderRadius.flutter);
+    return (type: own.type, side: BorderSide(color: color, width: _focusedLook && s.color == null ? 1.5 : s.width), radius: own.fields.has(api.InputBorderFields.borderRadius) ? own.borderRadius.flutter : radius);
   }
 
   @override

@@ -64,6 +64,20 @@ void main() {
       return found!;
     }
 
+    testWidgets('with a padding of its own it opens at its end too (round 11b: it asserted, no message drawn)', (tester) async {
+      final doc = chat();
+      doc['list'] = {
+        ...doc['list']!,
+        'layout': <String, Object?>{'width': 300, 'height': 400, 'padding': [28, 24, 28, 16]},
+      };
+      final s = await lists.show(tester, doc, variables: [lists.v('messages', messages(0, 30), VariableType.list)]);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      final p = position(tester);
+      expect(p.pixels, p.maxScrollExtent);
+      expect(topRow(tester, s), isNotEmpty);
+    });
+
     testWidgets('opens at its end and follows new messages while there', (tester) async {
       final s = await lists.show(tester, chat(), variables: [lists.v('messages', messages(0, 30), VariableType.list)]);
       await tester.pumpAndSettle();

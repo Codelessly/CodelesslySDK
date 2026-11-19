@@ -252,7 +252,11 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   for (final i in args.inputs) {
     if (!File('$i/${api.SiteManifest.fileName}').existsSync()) continue;
     for (final p in manifest?.pages ?? const <String>[]) {
-      if (!File('$i/$p').existsSync()) {
+      // (A page named without its extension, `"pages": ["month"]`, is
+      // `month.json`, as site.md says and the site loads it: round 11b,
+      // calendar-app, clip-editor and admin-console had a warning for every
+      // page of a site that drew them all.)
+      if (!File('$i/$p').existsSync() && (p.contains('.') || !File('$i/$p.json').existsSync())) {
         issue(RuntimeIssue('page_not_written', 'warning', '$p is listed in site.json, file not written yet.', file: p));
       }
     }

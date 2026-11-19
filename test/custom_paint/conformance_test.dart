@@ -130,6 +130,18 @@ final _cases = <_Case>[
     )..layout();
     tp.paint(c, const Offset(30, 30) - Offset(tp.width / 2, tp.height / 2));
   }),
+  _c('paragraph centered across its maxWidth (round 11b: a map pin\'s price sat at its left)', {
+    'painter': [
+      {'op': 'paragraph', 'text': 'Hi', 'offset': [0, 10], 'maxWidth': 60, 'textAlign': 'center', 'style': {'fontSize': 16, 'color': '#FF212121'}},
+    ],
+  }, (c, s) {
+    final tp = TextPainter(
+      text: TextSpan(text: 'Hi', style: textStyle(const api.TextStyle(fontSize: 16, color: api.Color(0xFF212121)))),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    )..layout(minWidth: 60, maxWidth: 60);
+    tp.paint(c, const Offset(0, 10));
+  }),
   _c('paragraph whose font size and letter spacing are expressions (a label that grows with the zoom)', {
     'painter': [
       {

@@ -396,7 +396,15 @@ class RenderToggle extends RenderControl implements LabeledControl {
         final side = hug || n.prop(RadioProps.compact) ? size.shortestSide : size.shortestSide * 18 / 32;
         return Rect.fromCenter(center: box.center, width: side, height: side);
       case ToggleKind.switchToggle:
-        if (n.prop(SwitchProps.fillTrack) || _design.width <= 0 || _design.height <= 0) return box;
+        if (n.prop(SwitchProps.fillTrack) || (_design.width <= 0 && _design.height <= 0)) return box;
+        // One side given (`Toggle h=44`: a row's height, a touch target):
+        // SSUI's 36 × 20 track in the middle of it. The track filled the
+        // 36 × 44 box, taller than wide, and drew as a ring (round 11b,
+        // smart-home, four screens).
+        if (_design.width <= 0 || _design.height <= 0) {
+          final w = math.min(36.0, size.width), h = math.min(w * 20 / 36, size.height);
+          return Rect.fromCenter(center: box.center, width: h * 36 / 20, height: h);
+        }
         // SSUI's 36 × 20 track at Material's share of the node's width.
         var w = size.width * 52 / 59, h = w * 20 / 36;
         if (h > size.height) {

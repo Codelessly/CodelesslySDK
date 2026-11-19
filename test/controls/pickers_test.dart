@@ -159,6 +159,30 @@ void main() {
       expect(f.border!.side.color, const Color(0xFFD3CDC0));
       expect(f.border!.radius.topLeft.x, 10);
     });
+    testWidgets('a decoration of a fill, a border and corners keeps the clock and the chevron (round 11b)', (tester) async {
+      // `TimePicker @at fill=… border=… radius=10`: the line's keys style the
+      // field; its icons stay (they went with any decoration).
+      final (tree, _) = await _show(tester, {
+        'time': {
+          'type': 'timePicker',
+          'layout': {'width': 200, 'height': 40},
+          'props': {
+            'value': '09:30',
+            'decoration': {
+              'filled': true,
+              'fillColor': '#FFFFF7E6',
+              'border': {'type': 'outline', 'borderSide': {'color': '#FFE0A040'}},
+            },
+          },
+        },
+      });
+      final f = _field(tree, 'time');
+      expect(f.fillColor, const Color(0xFFFFF7E6));
+      expect(f.border!.side.color, const Color(0xFFE0A040));
+      expect(f.border!.radius.topLeft.x, greaterThan(0), reason: 'no corners written: the control radius');
+      final g = f.labels.single.glyphs;
+      expect(g.first.left - rectOf(tree, 'time').left, greaterThan(12), reason: 'the clock before the value (6 without it)');
+    });
   });
 
   group('the popup', () {

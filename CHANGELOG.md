@@ -4,6 +4,20 @@ Needs codelessly_api's fixes-36-1 (its Unreleased entry).
 
 ### Behaviour changes
 
+- **A stack that does not scroll and has a `clipBehavior`** (the notation's `Stack … clip`) cuts what is in it at
+  its edge, its corners' radius too, as a row or a column does; it drew its children past it (round 11b:
+  clip-editor's timeline ran past its frame, story-reader's next card drew over the footer). A stack with none
+  (the default) is as it was: what is placed past its edge shows.
+- **A hugging text field whose box has a height of its own** (its decoration's `constraints`, min and max the
+  same: a labelled `Input … h=44` in the notation) draws its text at that box's step of the control scale; it took
+  the compact step's (round 11b).
+- **A date or time picker whose decoration names only its fill, border and corners keeps its calendar (clock)
+  and chevron** (round 11b: `DatePicker … fill=… border=… radius=10`): any decoration took them away, as a
+  decoration that draws the field itself. A decoration that names icons, padding or anything else is as it was.
+  A decoration's border with no corners takes the control radius (it was square).
+- **A dropdown with no frame of its own (`underline: false`) has its value in the middle of its box**, level
+  with the chevron, as Flutter's DropdownButton; it sat at the box's top (round 11b: a Select framed by its
+  node's box, 36 high).
 - **What is under an open overlay takes no key**: a page's `key` lines and a node's `onKeyDown` (an `App`'s) wait
   while a dialog, a sheet, a drawer or a menu is open over the page; the overlay's own keys run (round 10, R13: a
   page's Enter ran while a chooser was open). It is what the overlays' contract says ("Tab and Shift+Tab stay
@@ -13,6 +27,25 @@ Needs codelessly_api's fixes-36-1 (its Unreleased entry).
 
 ### Fixed
 
+- **A paint `paragraph` with `textAlign` and `maxWidth`** is aligned across its `maxWidth`, as a text box of that
+  width is: laid out to its words' width alone, `textAlign=center` had nothing to centre in (round 11b,
+  property-listings: the map's price pins sat at the left of their pills).
+- **Render command, a page listed without its extension** (`"pages": ["month", "week"]`, which site.md allows and
+  the site loads as `month.json`): no `page_not_written` warning when that file is there (round 11b: calendar-app,
+  clip-editor, admin-console had one for every page of a site that drew them all).
+- **A switch given one side only** (`Toggle h=44`, a row's height or a touch target) draws SSUI's 36 × 20 track
+  in the middle of its box; the track filled the 36 × 44 box, taller than wide, and drew as a ring (round 11b,
+  smart-home: every toggle on four screens).
+- **A list that keeps its end in view, with a padding of its own** (`ListView … stickToEnd={follow}
+  pad=[28,24,28,16]`): the padding wrapped the list's two halves and hid the key its viewport is centred by, and
+  Flutter's assertion drew the error box where the messages go (round 11b, team-chat's thread, at every size).
+- **A theme font that loads after the first layout reaches the controls' own texts**: a checkbox's and a toggle's
+  label, a field's hint (and every label a control draws through `ControlLabel`) are measured again when the
+  platform's fonts change, as a paragraph is; the tree asks for the theme's family at 400, 500, 600 and 700 (the
+  weights controls draw in). Round 11b, 5 builds: a theme naming a font with no file (Lato, Arial, sans-serif)
+  drew those labels in the render command as the test font's black boxes (docs-site's tabs, nonprofit's
+  Gift Aid, notes-app's Pin, meal-planner's search hint, seat-booking's calendar), while the texts beside them
+  were drawn in the fallback. In an app, a web font that arrived late left them in the first font.
 - **A toolbar's title beside small texts**: squeezable texts beside a child that fills keep their own width and the
   filling child takes the room left, whatever order the row's boxes are applied in. A row drawn again at another
   size (the render tool's second size, a window resized) had the small texts decide before the title was there:

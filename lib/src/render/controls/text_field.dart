@@ -279,7 +279,15 @@ class TextFieldConfig {
     // large step's 15).
     final labelled = (n.prop(TextFieldProps.decoration).labelText ?? '').trim().isNotEmpty;
     final boxHeight = n.layout.height.value - (labelled ? kFieldLabelGap + 14 : 0);
-    final scale = vFit == SizeFit.fixed && c.oneLine ? tokens.scaleFor(boxHeight) : ControlScale.compact;
+    // A hugging field whose box has a height of its own (its decoration's
+    // constraints, `Input "Name" h=44` in the notation): that box's step.
+    final ownBox = n.prop(TextFieldProps.decoration).constraints;
+    final boxOwn = ownBox.minHeight != null && ownBox.minHeight == ownBox.maxHeight ? ownBox.minHeight : null;
+    final scale = vFit == SizeFit.fixed && c.oneLine
+        ? tokens.scaleFor(boxHeight)
+        : vFit == SizeFit.hug && c.oneLine && boxOwn != null
+            ? tokens.scaleFor(boxOwn)
+            : ControlScale.compact;
     final own = n.behaviors.defaultTextStyle;
     final inheritedStyle = TextStyle(fontFamily: inherited?.fontFamily);
     final ownDefault = own == null || own.isEmpty ? null : ownStyle(own);

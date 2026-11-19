@@ -1007,8 +1007,19 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl,
     return ControlInsets(math.min(above, size.height), math.max(0, size.height - above - box));
   }
 
+  int _fontEpoch = -1;
+
   @override
   void performLayout() {
+    // Fonts loaded since the last layout (a theme's family asked for late):
+    // its texts are measured again, as a paragraph's are.
+    final epoch = ControlLabel.fontEpoch;
+    if (epoch != _fontEpoch) {
+      _fontEpoch = epoch;
+      for (final p in [_label, _hint, _below, _counter, _prefixText, _suffixText]) {
+        p.markNeedsLayout();
+      }
+    }
     final d = decoration;
     size = _sizeFor(constraints);
     final width = size.width;

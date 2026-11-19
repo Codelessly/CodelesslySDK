@@ -320,4 +320,16 @@ void main() {
       expect(mid, closeTo(d.boxRect.center.dy, .75), reason: '$h');
     }
   });
+
+  testWidgets('with no frame of its own (underline false) its value is in the middle of a taller box (round 11b)', (tester) async {
+    final (tree, _) = await _show(tester, {
+      's': {
+        ..._select(value: 'Banana', height: 36, props: {'underline': false}),
+        'decoration': {'fills': [{'color': '#FFFFFFFF'}], 'strokes': [{'color': '#FFE2E3ED'}], 'radius': 7},
+      },
+    });
+    final d = _dropdown(tree, 's');
+    final g = d.labels.single.glyphs;
+    expect((g.first.top + g.first.bottom) / 2, closeTo(d.chevronRect.center.dy, 1), reason: 'level with the chevron');
+  });
 }
