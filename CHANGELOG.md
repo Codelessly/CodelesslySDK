@@ -1,3 +1,68 @@
+## 40.0.0
+
+Documents that drew wrongly or held the renderer draw now, and a render says what a picture cannot: a formula that
+failed, a name the theme does not have, a child drawn over what follows it. Needs codelessly_api 40.0.0.
+
+### Behaviour changes
+
+- **A condition is no for nothing.** A `visible` binding whose value is nothing (a name nothing has, a formula
+  that failed), `""`, `0`, an empty list or an empty map hides the node; a text or a record shows it. Before, any
+  value that was not true, false or a number left the node as written, so both `if length(x)==0` and
+  `if length(x)>0` drew when the formula failed, and `if parent && parent.body` drew with no parent.
+- **A child that fills its Stack and is placed off its start is drawn there** (`h=fill y={…}`: a page of a stage,
+  the Stack's size, moved by its place). It covered the Stack whatever its `x` or `y` said. A place of 0 is as
+  before.
+- **A function a formula calls is worked out once for the same arguments within one evaluation**, unless it read
+  something that differs from call to call (`random`, `pick`, `newId`, `now`, `nowMs`, a script). A body that
+  writes an argument's expression several times no longer costs the product of them.
+- **A formula that makes more than 200,000 calls of the page's own functions in one evaluation is cut off**: the
+  calls past that give nothing (`FormulaFunction.maxCalls`; `FormulaFunction.onRunaway` is told the function).
+  Functions that call each other without end returned after minutes or never.
+- **A computed variable read while another is worked out is kept** when no cycle was met under it: a variable
+  twelve others read in turn, each for every item of a list, is worked out once a change, not once a read.
+- **`regexReplace` reads a group written `\$1`** as `$1` (the backslash was kept in the result).
+- **A one-line text field whose text is taller than the kit's box** (a title at `fontSize` 44) is as tall as its
+  line; it was cut to the default height.
+- **A line chart's y axis title stays inside the chart**: one wider than the axis labels was cut at its first
+  letters.
+- **A calendar given less height than its rows ask for** keeps each day's note (a mark, a price) in the day's own
+  cell; the notes fell on the days under them.
+
+### Added
+
+- **`render --screen-timeout <seconds>`** (default 120): the most real time one screen at one size may take. Past
+  it the page's own functions and computed variables give nothing, the screen is reported as an error
+  (`screen_timeout`) and the run goes on to the next. `FormulaFunction.deadline` is the limit a host sets.
+- **A site names its date**: `"now"` in `site.json` is the `--now` of every render and state of the site when none
+  is passed.
+- **`FormulaEvaluator.onFailure`** is told each formula that could not be worked out, with why;
+  **`FormulaEvaluator.truthy`** is whether a value counts as yes where a condition is read.
+- **Render diagnostics**:
+  - `formula_failed` also names a node whose formula failed when the screen was drawn (its condition, its list,
+    its text, a value) or a variable's, with the formula and why;
+  - `formula_runaway`: a formula cut off at the call limit, naming the function;
+  - `theme_name_unknown`: a color the theme does not have, `theme.<name>` written as a value's text, or
+    `theme.<name>` read in a formula where the theme gives no such value;
+  - `icon_not_drawn` also for a control's icon (an `IconButton`'s, a `Button`'s, a field's) that names no glyph,
+    and names a known icon of the same name without its style's ending;
+  - `paints_outside`: a node drawn past the bottom or the right edge of a Stack (or a box) that does not clip,
+    over something after it, with by how much;
+  - `site_now`: a `"now"` in `site.json` that is not a time.
+
+### Fixed
+
+- **A render with no `--now` starts at the real time**, as its documentation said: `now()` and `today()` gave 1
+  January 2015 (31 December 2014 in zones west of Greenwich), so calendars, countdowns and "today" lists were
+  empty. `--wait` still moves the clock; `--now` and a site's `"now"` pin it.
+- **A Stack with `fit=contain` (or `cover`) and no size of its own along an axis** (`w=fill`) scales its content's
+  size. Its frame was not a number, the picture was blank and the render's layout dump failed on it
+  ("Infinity or NaN toInt").
+- **A box that fills, measured with no bound and with nothing in it that sizes it** (a filling tile in a cell of a
+  grid whose rows hug) no longer fails the layout with "A Stack requires bounded constraints".
+- **`parent.parent.item`** (the outermost item in a list three deep) reads that item; it read nothing, so a
+  condition on it drew no row.
+- **The notation's `go page`** names a page written in the site's folder when `site.json` lists no pages.
+
 ## 39.0.0
 
 Schema 3 is the only schema the SDK loads; a sheet's resting stop in a variable, a file picked without an upload,
