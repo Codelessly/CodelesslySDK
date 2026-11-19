@@ -22,6 +22,9 @@
 
 ### Fixed
 
+- No `value_not_computed` warning for a word such as `null` that is in the data a text reads (a site's
+  variables, a component's parameters) though not in the page's document.
+
 ## 37.0.0
 
 Needs codelessly_api 37.0.0, whose entry lists what the notation now draws differently.

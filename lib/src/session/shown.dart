@@ -212,7 +212,7 @@ List<EditDiagnostic> shownDiagnostics(RenderObject root, LayoutDocument document
           // Words the UI's own text or data has ("null check failed", a
           // template's "{name}") are what was written, not a value that
           // failed.
-          if (i.code != 'value_not_computed' || !written(o.text.toPlainText())) i,
+          if (i.code != 'value_not_computed' || !(written(o.text.toPlainText()) || _fromData(box, o.text.toPlainText()))) i,
       ];
       final text = o.text.toPlainText().trim();
       if (text.isNotEmpty && !issues.any((i) => i.code == EditCodes.textNoColor.name)) {
@@ -341,6 +341,30 @@ void _checkNode(NodeBox b, Node n, LayoutDocument document, void Function(EditCo
   _checkTextValues(b, n, written, report, nodePath);
   _checkLabel(b.id, n, written, report, nodePath);
   if (_repeaters.contains(n.type)) _checkList(b, n, written, document, report, nodePath);
+}
+
+/// Whether the broken-looking word in [text] (`null`, `NaN`…) is in the data
+/// [box]'s text reads (a list in the site's variables, a component's
+/// parameter): written there, not a value that failed. The document checked
+/// is a page's; its data can be the site's.
+bool _fromData(NodeBox box, String text) {
+  final m = _brokenValue.firstMatch(text);
+  if (m == null) return false;
+  final values = box.tree.bindings?.valuesFor(box.source, box.id, box.instance);
+  if (values is! ExpressionValues) return false;
+  final node = box.source.node(box.id)?.toJson();
+  final expr = readMap(node?['bind'])?['props.text'] ?? readMap(node?['props'])?['text'];
+  if (expr is! String || !expr.contains(r'${')) return false;
+  final around = jsonEncode(text.substring(m.start < 6 ? 0 : m.start - 6, m.end + 6 > text.length ? text.length : m.end + 6));
+  final needle = around.substring(1, around.length - 1);
+  try {
+    for (final name in values.namesRead(expr)) {
+      // A variable worked out from a formula is what failed, not data.
+      if (values.variable(name)?.isComputed ?? false) continue;
+      if (jsonEncode(values.read(name)).contains(needle)) return true;
+    }
+  } catch (_) {}
+  return false;
 }
 
 /// A text written with values in it (`Total: ${money(total)}`) one of which

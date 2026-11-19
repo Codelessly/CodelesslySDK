@@ -41,4 +41,16 @@ Card gap=8
 ''');
     expect(codes, isNot(contains('value_not_computed')));
   });
+
+  testWidgets('a word of the data a text reads (a reference that says "or null") is not a value that failed', (tester) async {
+    // The data is set at load, as a site's data is given with the page: the
+    // page's document does not have the words.
+    final codes = await _codes(tester, '''
+state ret=""
+on load={ret="Updated text, or nu" + "ll if nothing matched."}
+Card gap=8
+  Text "Returns · {ret}"
+''');
+    expect(codes, isNot(contains('value_not_computed')));
+  });
 }
