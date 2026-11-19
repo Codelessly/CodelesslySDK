@@ -21,6 +21,9 @@
 - **The confirm's `Dialog`** became the layout around a `Material` that still draws its fill and elevation
   shadow (the `Material` wrappers go with the theme).
 - **The page fill** is the project's theme surface (`pageFillOf`), read when a transition starts.
+- **Less left the build than section 6 expected**: 13 KB for a plain host (35 KB for a Material one), not 31 KB.
+  Dialogs, sheets and the reorderable list are gone from it, but Flutter's page transitions (48 KB) stay while
+  the SDK still builds a `ThemeData`, whose default `PageTransitionsTheme` names them.
 
 The design as it was agreed:
 

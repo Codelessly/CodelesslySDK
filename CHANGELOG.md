@@ -81,9 +81,9 @@
 - **Less of Flutter's Material library is used** (17 files of the package import it, from 23). The plain colors,
   the icons of the players, the toast and the data list, the line between a list's items (`separator: divider`)
   and a hero's default flight path are the SDK's own code now, and draw the same pixels. With the buttons, the
-  slider and the indicators above, an app that does not use Material itself carries about 270 KB less of Material
-  and Cupertino (Android arm64: 179 KB of `flutter/src/material`, from 432 KB; 30 KB of `flutter/src/cupertino`,
-  from 47 KB), and a Material app about 220 KB less. `docs/design/no-material.md` lists what is left and what it
+  slider, the indicators and the routes above, an app that does not use Material itself carries about 280 KB less
+  of Material and Cupertino (Android arm64: 166 KB of `flutter/src/material`, from 432 KB; 30 KB of
+  `flutter/src/cupertino`, from 47 KB), and a Material app about 260 KB less. `docs/design/no-material.md` lists what is left and what it
   costs.
 
 ## 39.0.0

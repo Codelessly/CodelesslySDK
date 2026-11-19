@@ -24,10 +24,17 @@ plain `WidgetsApp` (uses no Material itself), one under `MaterialApp`.
 | plain utilities gone (19 files importing) | MaterialApp | 448,246 | 47,818 | 71,950 |
 | shell chrome on the SDK's controls (19 files importing) | WidgetsApp | 179,326 | 30,310 | 71,935 |
 | shell chrome on the SDK's controls (19 files importing) | MaterialApp | 261,147 | 31,125 | 71,934 |
+| the same on 39.0.0 | WidgetsApp | 178,814 | 30,311 | 71,921 |
+| the same on 39.0.0 | MaterialApp | 260,570 | 31,120 | 71,923 |
+| routes of the SDK's own (17 files importing) | WidgetsApp | 165,547 | 30,114 | 71,916 |
+| routes of the SDK's own (17 files importing) | MaterialApp | 225,145 | 30,908 | 71,915 |
 
-Of the 179 KB left for the plain host, 166 KB is the theme (`ThemeData`, `ColorScheme`, `Typography` and the
-component themes `themeDataOf` fills in), 27 KB routes and page transitions, 8 KB ink and the `Material` surface,
-4 KB dialogs and sheets.
+Of the 166 KB of `flutter/src/material` left for the plain host (and 30 KB of Cupertino), about 138 KB is the
+theme (`ThemeData`, `ColorScheme`, `Typography` and the component themes `themeDataOf` fills in), 8 KB ink and
+the `Material` surface. Flutter's own page transitions are still in the build, though no route of the SDK's
+plays them: `ThemeData` holds a `PageTransitionsTheme` by default, which keeps
+`material/page_transitions_theme.dart` (22 KB), `cupertino/route.dart` (16 KB) and
+`material/predictive_back_page_transitions_builder.dart` (10 KB). They leave with `ThemeData`.
 
 Third-party dependencies import the framework's `material.dart` themselves (`video_player`, `webview_flutter` and
 its platform packages, `in_app_purchase`'s platform packages, `url_launcher_web`). They are not replaced by this
