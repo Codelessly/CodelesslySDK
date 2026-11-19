@@ -2,7 +2,7 @@
 
 [Guide](README.md) · Next: [Quickstart](02-quickstart.md)
 
-![Diagram: the Codelessly Editor publishes JSON data with "schema": 2, which the SDK loads, renders and runs inside a Flutter app](images/01-introduction/hero.png)
+![Diagram: the Codelessly Editor publishes JSON data with "schema": 3, which the SDK loads, renders and runs inside a Flutter app](images/01-introduction/hero.png)
 
 *A publish changes what running apps show, without an app release.*
 
