@@ -1,0 +1,206 @@
+import 'dart:async';
+import 'dart:math';
+
+import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
+
+import 'operator.dart';
+
+/// A dataflow graph for reactive processing of data.
+class Dataflow {
+  /// the current rank record for [_rank].
+  int _currentRank = 0;
+
+  /// The touched operators need to evaluate.
+  final Set<Operator> _touched = {};
+
+  /// The consume operators.
+  final Set<Operator> _consumes = {};
+
+  /// The operators has evaluated in this pulse.
+  final Set<Operator> _runed = {};
+
+  /// The evaluation heap.
+  final HeapPriorityQueue<Operator> _heap = HeapPriorityQueue(
+    (a, b) => a.rank - b.rank,
+  );
+
+  ///The list of subscriptions this Dataflow currently listens to.
+  final List<StreamSubscription<dynamic>> _streamSubscriptions = [];
+
+  /// The [Future] instance when this dataflow is running.
+  ///
+  /// It is usefull to check whether this dataflow is running.
+  Future<Dataflow>? _running;
+
+  /// Add an operator to this dataflow.
+  O add<O extends Operator>(O op) {
+    _rank(op);
+    if (op.runInit) {
+      _touch(op);
+    }
+
+    if (op.consume) {
+      _consumes.add(op);
+    }
+
+    assert(
+      op.rank > op.sources.values.fold<int>(-1, (rank, p) => max(rank, p.rank)),
+    );
+
+    return op;
+  }
+
+  /// Sets the [Operator.rank] by the order added to this dataflow.
+  void _rank(Operator op) {
+    op.rank = _currentRank++;
+  }
+
+  /// Adds an operator to [_touched].
+  void _touch(Operator op) {
+    _touched.add(op);
+  }
+
+  /// Update an operator's value directly.
+  ///
+  /// An operator can only be updated by it's stream.
+  void _update<V>(
+    Operator<V> op,
+    V value,
+  ) {
+    if (op.update(value)) {
+      // If operator value is modified, touches its targets.
+
+      for (var target in op.targets) {
+        _touch(target);
+      }
+    }
+  }
+
+  /// Initially calculate this dataflow.
+  ///
+  /// This is used by [run] in initialization.
+  @protected
+  Future<Dataflow> init() async {
+    // Which operators to run in initialization is only determined by Whether it's
+    // a start (runInit is false).
+    for (var op in _touched) {
+      op.run();
+    }
+    // Codelessly fork: upstream left every operator marked as run and
+    // touched, so the first pulse after initialization evaluated nothing.
+    for (var op in _touched) {
+      op.runed = false;
+    }
+    _touched.clear();
+
+    return this;
+  }
+
+  /// Dispose of all the listeners.
+  /// This function should be called whenever the parent widget of this view rebuilds.
+  void dispose() {
+    for (var subscription in _streamSubscriptions) {
+      subscription.cancel();
+    }
+  }
+
+  /// Evaluates the touched operators.
+  ///
+  /// This is used by [run].
+  @protected
+  Future<Dataflow> evaluate() async {
+    flush();
+    return this;
+  }
+
+  /// Sets [op]'s value from outside (a viewport, a window of data), touching
+  /// what reads it. Nothing runs until [flush].
+  ///
+  /// Codelessly fork: upstream only lets a stream set an operator, a
+  /// microtask later.
+  void set<V>(Operator<V> op, V value) => _update(op, value);
+
+  /// Evaluates the touched operators now, in this call.
+  ///
+  /// Codelessly fork: upstream evaluates in a future, so a drag is drawn a
+  /// frame late and a test has to pump for it.
+  @mustCallSuper
+  void flush() {
+    for (var op in _touched) {
+      _enqueue(op);
+    }
+    _touched.clear();
+
+    while (_heap.isNotEmpty) {
+      final op = _heap.removeFirst();
+
+      final updated = op.run();
+
+      _runed.add(op);
+
+      if (updated) {
+        for (var target in op.targets) {
+          _enqueue(target);
+        }
+      }
+    }
+
+    for (var op in _consumes) {
+      op.update(null);
+    }
+
+    for (var op in _runed) {
+      op.runed = false;
+    }
+    _runed.clear();
+  }
+
+  /// Evaluates this dataflow.
+  ///
+  /// Call this method only when initialization or any operator is touched.
+  Future<void> run({bool init = false}) async {
+    while (_running != null) {
+      await _running;
+    }
+
+    final rst = init ? this.init() : evaluate();
+
+    _running = rst.then(
+      (_) {
+        _running = null;
+        return this;
+      },
+      onError: (error) {
+        _running = null;
+        throw error;
+      },
+    );
+  }
+
+  /// Enqueues an operator to the evaluation heap.
+  void _enqueue(Operator op) {
+    _heap.add(op);
+  }
+
+  /// Binds a stream to an operator.
+  ///
+  /// The streams are the only way to communicate with outside for this dataflow.
+  ///
+  /// An operator can only be binded to one stream.
+  ///
+  /// The value changed to null will also trigger a communication. But the consume
+  /// operator's value turning to null after running will not.
+  void bindStream<V>(
+    StreamController<V?> stream,
+    Operator<V> target,
+  ) {
+    assert(target.stream == null);
+    // adds streamSubscription to list, to dispose later.
+    _streamSubscriptions.add(stream.stream.listen((value) {
+      _update(target, value);
+      run();
+    }));
+    target.stream = stream;
+  }
+}

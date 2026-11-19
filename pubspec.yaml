@@ -40,6 +40,8 @@ dependencies:
   codelessly_api: ^37.0.0
   file_selector: ^1.1.0
   collection: ^1.19.1
+  # The graph engine's matrices (lib/src/graph/graphic, a fork of graphic).
+  vector_math: ^2.1.4
   crypto: ^3.0.6
   flutter_svg: ^2.3.2
   http: ^1.6.0
