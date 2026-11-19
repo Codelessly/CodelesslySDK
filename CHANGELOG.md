@@ -1,3 +1,67 @@
+## 39.0.0
+
+Schema 3 is the only schema the SDK loads; a sheet's resting stop in a variable, a file picked without an upload,
+the share panel and the page's address. Needs codelessly_api 39.0.0.
+
+### Behaviour changes (read before upgrading)
+
+**Schema 2 documents are refused**
+
+- **Documents of schema 2 are no longer loaded.** Every loader (Firestore, HTTP, an asset bundle, memory) refuses
+  a publish model, layout, component or bundle of any schema other than 3, or with no `"schema"`, with a
+  `PublishLoadException` that names the schema it found and the one it reads: `The publish model of project [p1]
+  is in schema 2; codelessly_api reads schema 3 only.`, `Layout [home] is in schema 2; ...`, `The bundle is in
+  schema 2; ...`. A schema newer than 3 says the same and adds `Update codelessly_sdk.`
+- **What to do with one: convert it with 38.0.0 before upgrading.** 38.0.0 is the last release that reads schema
+  2: with it, load each publish model, layout, component and bundle (a bundled asset too) and save what `toJson`
+  gives, which is schema 3 (codelessly_api's 39.0.0 entry says how). A project published again from the Codelessly
+  Editor is schema 3 already. Then upgrade: nothing that is schema 2 is read any more, in memory or otherwise.
+- **A `setValue` path of schema 2** (`loops[0].duration`, `drag.track.value`...) is no longer recognised and
+  refused with a hint: it is a path like any other, and sets nothing the node reads.
+- **The `clock` trigger is gone** (it was read as a `timer`); write `timer`.
+- **A signature pad's `signLineOffset` and `showSignMark` are no longer read**: write `signLineBottom` and
+  `signLineMark`.
+
+**Sheets**
+
+- **A notation `Sheet` with a stop over nine tenths rises to it** (`stops=[0.5,1]`: the whole window), since
+  codelessly_api 39.0.0 makes the sheet as tall as its highest stop. It stopped at its half stop: the higher one
+  was dropped.
+
+### Added
+
+- **The stop a bottom sheet rests at, in a variable** (`openModal`'s `stopVariable`; the notation's `Sheet#id
+  stops=[0.5,1] stop=@name`). The sheet writes the stop (as `snapHeights` gives it: `0.5`, `1`) as it opens and
+  when a drag, its handle or Alt and the arrows move it to another; setting the variable moves the open sheet to
+  the nearest stop; a sheet opened while the variable holds one of its stops opens there; the variable is `0`
+  once the sheet has closed. An app's own `ActionUi` binds it by implementing `SheetStopUi` (`openSheet`, given a
+  `SheetStop` to read, write and listen to); without it the sheet opens as before and binds nothing.
+- **`pickFile`** opens the platform's file chooser (the `file_selector` the SDK already uses; the browser's on the
+  web) and gives the picked file's record as `${result}`: `{name, size, type, data}`, `data` a `data:` URL an
+  image shows and a `cloudFiles` action uploads as its `source`. `accept`, `multiple`, `content` (`dataUrl`,
+  `text`, `none`) and `maxSizeMB` are its fields; picking nothing ends the chain without an error. `Services`'
+  `filePicker` (or the app shell's own picker) is asked; a `TypedFilePicker` is offered the accepted kinds
+  (`PlatformFilePicker` is one), any other picker is asked for images or any file and what it gives is checked.
+  `mimeTypeOfFileName`, `acceptedKinds` and `fileAccepted` are exported.
+- **`share`** opens the device's share panel with a text, a link and a title, through `Services`' new `sharer`
+  (`Sharer`). `PlatformSharer`, the default, is the browser's `navigator.share` on the web. On Android, iOS,
+  macOS, Windows and Linux the SDK has no share panel of its own (it adds no plugin for one): give `Services(sharer:
+  ...)` your app's (a few lines over a share plugin), or the action copies the link (with no link, the text) to
+  the clipboard and `${result.copied}` is true, as it does in a browser without `navigator.share`.
+  `${result.shared}` says the panel took it. `RecordingSharer` records shares in tests.
+- **`screen.url`**: the address of the page as shown. In a browser, its URL; elsewhere the location the screen's
+  route was opened with (`/trip/coast?day=2`, as `CodelesslyWidget.onGenerateRoute` names routes and as a link
+  into the app opens them), or empty when it has none. A dialog or sheet has the address of the page it was opened
+  from. In a `CodelesslyView` too.
+- **Render tool: `--pick-file <path>`** is the file a `pickFile` action (or a `cloudFiles` upload) picks in a run,
+  repeatable; without it nothing is picked, as when the chooser is closed. A `share` action copies its link there,
+  listed under `copied to the clipboard`.
+
+### Tools
+
+- `tool/codelessly render` reports a document that is not of schema 3 as `schema_unsupported` (an error naming the
+  schema it has) and does not render it. `notation print` refuses such a document with the same message.
+
 ## 38.0.0
 
 Needs codelessly_api 38.0.0, whose entry lists what the notation now draws differently.

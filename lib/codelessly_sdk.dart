@@ -170,7 +170,7 @@ export 'src/scripting/script_runner.dart';
 export 'src/scripting/sandbox/script_sandbox.dart';
 export 'src/runtime/contracts.dart';
 export 'src/runtime/expressions/expressions.dart';
-export 'src/app/navigator_ui.dart' hide NavigatorActionUi, PopoverLayout;
+export 'src/app/navigator_ui.dart' hide NavigatorActionUi, PopoverLayout, PageLocationScope, pageLocationOf, pageUrlOf, debugBrowserUrl;
 export 'src/app/ui/capture_scope.dart' show CodelesslyCaptureScope;
 export 'src/app/ui/confirm_dialog.dart'
     show

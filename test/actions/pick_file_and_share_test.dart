@@ -8,7 +8,7 @@ import 'dart:convert';
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/internals.dart';
-import 'package:codelessly_sdk/src/app/page_location.dart';
+import 'package:codelessly_sdk/src/app/navigator_ui.dart' show debugBrowserUrl;
 import 'package:codelessly_sdk/src/runtime/actions/action_error.dart' show CodedFailure;
 import 'package:codelessly_sdk/src/render/controls/kit.dart' show firstTextUnder;
 import 'package:flutter/material.dart';
