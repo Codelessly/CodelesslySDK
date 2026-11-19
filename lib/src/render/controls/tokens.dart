@@ -206,6 +206,10 @@ class ControlTokens {
   Color get hoverOverlay => _c('hoverOverlay', dark ? const Color(0x14FFFFFF) : const Color(0x0A000000));
   Color get pressedOverlay => _c('pressedOverlay', dark ? const Color(0x24FFFFFF) : const Color(0x14000000));
 
+  /// The track a progress indicator fills: the theme's `track`, else a
+  /// progress bar's own (a tenth of grey).
+  Color get track => _c('track', const Color(0x197F7F7F));
+
   /// The overlay of a hovered or pressed filled control (SSUI darkens a
   /// fill in light mode and lightens it in dark).
   Color filledOverlay({required bool pressed}) =>

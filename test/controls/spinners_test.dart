@@ -53,6 +53,29 @@ void main() {
     expect(spin.spinning, isFalse, reason: 'it stops when it leaves the tree');
   });
 
+  testWidgets('a ring filled to a value with no background shows its track; a spinner none', (tester) async {
+    final (tree, _) = runningTree(columnDoc({
+      'spin': {'type': 'circularProgressIndicator'},
+      'ring': {'type': 'circularProgressIndicator', 'props': {'value': .4}},
+    }, theme: null));
+    addTearDown(tree.dispose);
+    await tester.pumpWidget(NodeView(tree: tree, rootId: 'col', interactive: true));
+    expect(_spinner(tree, 'ring').track, const Color(0xFFE5E7EB), reason: 'the track of the default theme');
+    expect(_spinner(tree, 'spin').track, isNull);
+    // A theme's track.
+    final (themed, _) = runningTree(
+      columnDoc({
+        'ring': {'type': 'circularProgressIndicator', 'props': {'value': .4}},
+      }),
+      theme: ThemeTokens.fromJson({
+        'colors': {'track': '#FFDDE3EA'},
+      }),
+    );
+    addTearDown(themed.dispose);
+    await tester.pumpWidget(NodeView(tree: themed, rootId: 'col', interactive: true));
+    expect(_spinner(themed, 'ring').track, const Color(0xFFDDE3EA));
+  });
+
   testWidgets('an activity indicator with animating false holds still', (tester) async {
     final (tree, _) = runningTree(columnDoc({
       'wheel': {'type': 'activityIndicator', 'props': {'animating': false, 'radius': 8}},

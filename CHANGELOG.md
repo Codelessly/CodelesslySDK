@@ -16,6 +16,10 @@
 - **A line chart draws a series written without a `kind` as a line** (`chartType: line`, `series: [{"field":
   "first"}]`); it was a bar, which a line chart does not draw, so the chart had no lines.
 
+- **A ring filled to a value (`circularProgressIndicator` with a `value`) shows its track** when it names no
+  `backgroundColor`: the theme's `track`, else a progress bar's tenth of grey. It drew the arc alone. A spinner
+  (no value) is unchanged.
+
 ### Fixed
 
 ## 37.0.0
