@@ -32,7 +32,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// The layers: the directories of lib/src. A file directly in lib/src is in
 /// the `leaf` layer (small utilities any layer may import).
-const layers = ['render', 'widgets', 'runtime', 'services', 'scripting', 'features', 'session', 'app', 'leaf'];
+const layers = ['render', 'widgets', 'runtime', 'services', 'scripting', 'features', 'session', 'app', 'graph', 'leaf'];
 
 /// The layers from the bottom up, as the levels of the vocabulary stack
 /// (docs/design/12-agent-first-flutter.md §3 of codelessly_api):
@@ -40,6 +40,7 @@ const layers = ['render', 'widgets', 'runtime', 'services', 'scripting', 'featur
 /// | Layer | Level |
 /// |---|---|
 /// | `leaf`, `render` (but `render/controls`) | 0 core: boxes, text, layout, paint |
+/// | `graph` | 0 core: graphs, drawn (it imports no other layer) |
 /// | `render/controls` | 1 widgets: the controls, drawn |
 /// | `runtime` | 2 state: variables, formulas, conditions, actions |
 /// | `widgets` | 1 and 4: one recipe per type, bound through the runtime |
@@ -47,7 +48,7 @@ const layers = ['render', 'widgets', 'runtime', 'services', 'scripting', 'featur
 /// | `app`, `session` | the host: a published project, a session an agent writes into |
 ///
 /// A file imports only its own layer and the ones before it here.
-const layerOrder = ['leaf', 'render', 'runtime', 'widgets', 'scripting', 'services', 'features', 'app', 'session'];
+const layerOrder = ['leaf', 'graph', 'render', 'runtime', 'widgets', 'scripting', 'services', 'features', 'app', 'session'];
 
 /// The imports that go up [layerOrder], kept until they are turned around:
 /// file (under lib/src) → the imports it may still have, each with why.
@@ -181,6 +182,9 @@ const widgetImportRatchet = {
   'src/app/backdrop_screens.dart',
   'src/app/codelessly.dart',
   'src/app/codelessly_widget.dart',
+  // The graph's host in a widget app (its gestures and tickers); the graph
+  // itself (lib/src/graph) imports no widget library.
+  'src/app/graph_widget.dart',
   'src/app/host_lifecycle.dart',
   'src/app/navigator_ui.dart',
   'src/app/overlay_screens.dart',
