@@ -73,6 +73,58 @@ void main() {
     expect(plan['x'], 125);
   });
 
+  testWidgets('a box that fills, in a cell of a grid whose rows hug: measured with no bound, it has no size of its own and no error', (tester) async {
+    final file = File('${out.path}/page.json')
+      ..writeAsStringSync(jsonEncode(_page({
+        'col': {
+          'type': 'column',
+          'children': ['grid'],
+          'layout': {'width': {'fill': 0}, 'height': {'hug': 0}},
+        },
+        'grid': {
+          'type': 'gridView',
+          'layout': {'width': {'fill': 0}, 'height': {'hug': 0}},
+          'props': {'crossAxisCount': 2, 'shrinkWrapRows': true, 'physics': 'never', 'mainAxisExtent': 120},
+          'bind': {'data': r'${rows}'},
+          'children': ['cell'],
+        },
+        'cell': {
+          'type': 'column',
+          'layout': {'width': {'fill': 0}, 'height': {'fill': 0}},
+          'children': ['art', 'label'],
+        },
+        // A decorated box with nothing in it that sizes it, growing in the cell.
+        'art': {
+          'type': 'stack',
+          'layout': {'width': {'fill': 0}, 'height': {'fill': 0}, 'flex': 1},
+          'decoration': {
+            'fills': [
+              {'color': '#FF336699'},
+            ],
+          },
+        },
+        'label': {
+          'type': 'text',
+          'layout': {'width': {'fill': 0}, 'height': {'hug': 0}},
+          'props': {'text': r'${item.title}', 'style': {'color': '#FF000000'}},
+        },
+      }, variables: [
+        {
+          'name': 'rows',
+          'type': 'list',
+          'value': [
+            {'title': 'a'},
+            {'title': 'b'},
+          ],
+        },
+      ])));
+    final report = await runRender(tester, RenderArgs(inputs: [file.path], out: '${out.path}/o', sizes: const [Size(800, 600)], dumpLayout: true));
+    expect(report.errors, 0, reason: '${report.diagnostics}');
+    final art = boxes('page@800x600').firstWhere((b) => b['id'] == 'art');
+    expect(art['w'], 400);
+    expect(art['h'], greaterThan(90));
+  });
+
   testWidgets('a screen over --screen-timeout is an error of that screen (screen_timeout), and the run goes on', (tester) async {
     final file = File('${out.path}/page.json')
       ..writeAsStringSync(jsonEncode(_page({

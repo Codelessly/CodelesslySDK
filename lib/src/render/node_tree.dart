@@ -2091,7 +2091,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     // would with no decoration, so a size the parent forces (a fixed child
     // stretched between two pins) reaches it instead of its design size.
     final stack = _obtain<RenderStack>('shellStack',
-        () => RenderStack(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none, fit: StackFit.passthrough));
+        () => RenderShellStack(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none, fit: StackFit.passthrough));
     _stackExtras[stack] = (under, over);
     if (content == null) {
       _innerChains[stack] = const [];
@@ -2107,7 +2107,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
           ..textDirection = directionOf(n)
         ..padding = padding);
       inner.add(_obtain<RenderStack>('padStack',
-          () => RenderStack(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none)));
+          () => RenderShellStack(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none)));
     }
     content(inner);
     _innerChains[stack] = inner;
@@ -3326,5 +3326,29 @@ class _LiveTextSemantics extends RenderProxyBox {
     config
       ..isSemanticBoundary = true
       ..liveRegion = true;
+  }
+}
+
+/// A node's shell: a Stack that, given no bound along an axis while nothing
+/// in it sizes it (every child is pinned to it: a box that fills, measured
+/// at its content in a row of a grid that hugs), is as small as it may be
+/// along that axis. Flutter's Stack takes the largest size there, which is
+/// no size ("A Stack requires bounded constraints").
+class RenderShellStack extends RenderStack {
+  RenderShellStack({super.alignment, super.textDirection, super.clipBehavior, super.fit});
+
+  @override
+  BoxConstraints get constraints {
+    final c = super.constraints;
+    if (c.hasBoundedWidth && c.hasBoundedHeight) return c;
+    for (var child = firstChild; child != null; child = childAfter(child)) {
+      if (!(child.parentData! as StackParentData).isPositioned) return c;
+    }
+    return BoxConstraints(
+      minWidth: c.minWidth,
+      maxWidth: c.hasBoundedWidth ? c.maxWidth : c.minWidth,
+      minHeight: c.minHeight,
+      maxHeight: c.hasBoundedHeight ? c.maxHeight : c.minHeight,
+    );
   }
 }
