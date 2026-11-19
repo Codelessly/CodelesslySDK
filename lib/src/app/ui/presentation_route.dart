@@ -5,7 +5,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:codelessly_api/core.dart' show Breakpoints, CanvasProps, ModalPresentation;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart' show RenderProxyBox;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -59,10 +59,7 @@ Future<T?> showShellDialog<T>({
     settings: routeSettings,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierDismissLabel(context),
-    barrierColor: barrierColor ??
-        DialogTheme.of(context).barrierColor ??
-        Theme.of(context).dialogTheme.barrierColor ??
-        ShellColors.black54,
+    barrierColor: barrierColor ?? ShellColors.black54,
     transitionDuration: PresentationRoute.enterDuration,
     traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
     transitionBuilder: (context, animation, _, child) {

@@ -713,8 +713,8 @@ Codelessly stagingSlug() => Codelessly(
       loader: HttpPublishLoader.firebaseStorage(projectId: 'my-project', bucket: '<bucket>', bundle: true),
     );
 
-/// The project's theme, for the app's own widgets.
-ThemeData projectTheme(Codelessly codelessly) => themeDataOf(codelessly.publishModel!.theme);
+/// The project's theme colors, for the app's own widgets.
+SurfaceRoles projectColors(Codelessly codelessly) => surfaceRoles(codelessly.publishModel!.theme);
 
 /// What layouts read as `theme` in dark mode: `theme.surface`,
 /// `theme.colors.brandBlue`, `theme.text.title.fontSize`, `theme.isDark`.

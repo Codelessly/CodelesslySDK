@@ -23,7 +23,7 @@ import 'typewriter.dart';
 import 'hero.dart';
 import 'play.dart';
 import 'contracts.dart';
-import 'control_theme.dart' show ControlTheme, backdropOf;
+import 'control_theme.dart' show ThemeTokensScope, backdropOf;
 import 'controls/focus.dart' show FocusGate;
 import 'controls/tokens.dart' show ControlTokens;
 import 'convert.dart';
@@ -1633,11 +1633,12 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
       final inner = build;
       build = (context) => TextDefaultScope(style: style, child: inner(context));
     }
-    // Its Material widgets take the layout's theme, made for what they're
-    // drawn on (ControlTheme): never Material's defaults or the app's.
+    // Its widgets take the layout's theme tokens, for what they're drawn
+    // on, and the text style and icon color those give: never the app's.
     final surface = backdropOf(source.node, source.parentOf, id);
     final themed = build;
-    build = (context) => ControlTheme(surface: surface, child: Builder(builder: themed));
+    build = (context) => ThemeTokensScope.withDefaults(
+        tokens: tree.theme, dark: tree.dark, surface: surface, child: Builder(builder: themed));
     // Its widgets lay out in the node's direction (Flutter's Directionality:
     // a ListView runs from the right, a text field types right to left).
     if (_node?.behaviors.textDirection case final api.TextDirection dir) {

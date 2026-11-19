@@ -38,7 +38,8 @@ answer to "what does a control look like", plus the named colors and text styles
 
 A project has theme tokens, published with it: `primary`, `onPrimary`, `surface`, `onSurface`, `error`,
 `success`, `warning`, `fontFamily`, `titleFontFamily`, `radius` and `buttonRadius`. Each `CodelesslyWidget`
-wraps its layout in a `Theme` built from them, where every color role is a token or derived from one:
+draws its layout, and the runtime's own dialogs, toasts and sheets, with them. Every color role is a token or
+derived from one:
 
 | Role | From |
 |---|---|
@@ -53,13 +54,28 @@ wraps its layout in a `Theme` built from them, where every color role is a token
 Controls choose their text and marks for what they sit on: an unstyled text button on a dark band of a light
 page is labeled light, and one with a fill of its own but no label color gets one that reads on that fill.
 Nothing splashes or casts a shadow unless a node asks for it (its `elevation`). Your app's theme is not used
-inside the layout and is not changed outside it.
+inside the layout and is not changed outside it: the SDK reads no `Theme` and puts none above its layouts, so
+it looks the same in a `MaterialApp`, a `CupertinoApp` and a plain `WidgetsApp`.
 
-`themeDataOf(tokens)` is that conversion, if you want the same `ThemeData` for your own widgets:
+`surfaceRoles(tokens)` gives those colors, if you want them for your own widgets (in a Material app, for
+your own `ThemeData`):
 
 ```dart
-final theme = themeDataOf(codelessly.publishModel!.theme);
+final tokens = codelessly.publishModel!.theme;
+final roles = surfaceRoles(tokens);
+final theme = ThemeData(
+  colorScheme: ColorScheme.light(
+    primary: roles.primary,
+    surface: roles.surface,
+    onSurface: roles.onSurface,
+    error: roles.error,
+  ),
+  fontFamily: tokens.fontFamily,
+);
 ```
+
+A widget of your own shown inside a layout (an external component) finds the theme of your app above it, as
+anywhere else in your app, and the layout's default text style and icon color around it.
 
 ## The theme in expressions
 

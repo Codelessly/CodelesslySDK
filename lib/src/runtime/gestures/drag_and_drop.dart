@@ -30,7 +30,7 @@ import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show CollectionScrollProps, Json, ListViewProps, Node, jsonEquality;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/physics.dart' show SpringSimulation;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -724,7 +724,7 @@ class _SourceDrag implements Drag {
         child: feedback,
       );
     }
-    feedback = Material(type: MaterialType.transparency, child: feedback);
+    feedback = feedback;
     if (model.dragAnchor == api.DragAnchor.center) {
       feedback = FractionalTranslation(translation: const Offset(-0.5, -0.5), child: feedback);
     }

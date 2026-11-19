@@ -4,7 +4,8 @@ import 'dart:async' show unawaited;
 
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show Json, SwipeAction, SwipeActions;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import '../render/control_theme.dart' show rolesOf;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter/services.dart'
@@ -212,7 +213,7 @@ class _SwipeActionsBoxState extends State<SwipeActionsBox>
                     widget.actionWidth,
                     offset.abs() / math.max(1, shown.length),
                   ),
-            child: Material(
+            child: ColoredBox(
               color: action.background.flutter,
               child: _ActionTarget(
                 onTap: () => _run(action, offset.sign),
@@ -313,7 +314,7 @@ class _SwipeFocus extends SingleChildRenderObjectWidget {
         ..label = label
         ..actions = actions
         ..direction = direction
-        ..ringColor = Theme.of(context).colorScheme.primary;
+        ..ringColor = rolesOf(context).primary;
 
   @override
   void updateRenderObject(
@@ -326,7 +327,7 @@ class _SwipeFocus extends SingleChildRenderObjectWidget {
     ..label = label
     ..actions = actions
     ..direction = direction
-    ..ringColor = Theme.of(context).colorScheme.primary;
+    ..ringColor = rolesOf(context).primary;
 }
 
 class _RenderSwipeFocus extends RenderProxyBox {
@@ -520,7 +521,7 @@ class _ActionTargetState extends State<_ActionTarget> {
           onTap: widget.onTap,
           child: DecoratedBox(
             position: DecorationPosition.foreground,
-            decoration: BoxDecoration(color: _hovered ? Theme.of(context).hoverColor : null),
+            decoration: BoxDecoration(color: _hovered ? rolesOf(context).onSurface.withValues(alpha: .04) : null),
             child: widget.child,
           ),
         ),

@@ -6,7 +6,8 @@ import 'dart:ui' show SemanticsRole;
 
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show ConfirmAction, Json, ModalPresentation;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import '../../render/control_theme.dart' show ThemeTokensScope;
 
 import '../../render/convert.dart';
 import '../../render/node_view.dart' show ControlButton, ControlHost;
@@ -301,7 +302,7 @@ Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request, {do
       context: context,
       presentation: presentation,
       barrierDismissible: action.barrierDismissible,
-      barrierColor: barrierColor ?? Theme.of(context).dialogTheme.barrierColor ?? ShellColors.black54,
+      barrierColor: barrierColor ?? ShellColors.black54,
       sheetWidth: look.number('sheetWidth'),
       sheetMargin: look.numberOr('sheetMargin', 0),
       cornerRadius: look.number('radius'),
@@ -672,25 +673,24 @@ class ThemedConfirmDialog extends StatelessWidget {
       );
     }
 
-    final themeData = theme.themeData;
-    return Theme(
-      data: themeData,
+    return ThemeTokensScope.withDefaults(
+      tokens: theme.tokens,
+      dark: theme.dark,
       child: switch (presentation) {
         ModalPresentation.bottomSheet || ModalPresentation.adaptive => SizedBox(
             width: double.infinity,
-            child: Material(
+            child: ColoredBox(
               color: surface,
               child: SafeArea(top: false, child: Padding(padding: const EdgeInsets.only(top: 8), child: content)),
             ),
           ),
-        ModalPresentation.sideSheet => Material(
+        ModalPresentation.sideSheet => ColoredBox(
             color: surface,
             child: SafeArea(left: false, child: Align(alignment: Alignment.topLeft, child: content)),
           ),
         _ => _DialogSurface(
             color: dialogShadows != null ? ShellColors.transparent : surface,
-            shadowColor: dialogShadows != null ? ShellColors.transparent : themeData.dialogTheme.shadowColor,
-            elevation: dialogShadows != null ? 0 : 8,
+            shadows: dialogShadows != null ? const [] : theme.controlTokens.shadows('level4'),
             insets: insets ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(radius),
@@ -705,21 +705,18 @@ class ThemedConfirmDialog extends StatelessWidget {
 
 /// A dialog's surface in the middle of the screen: at least 280 wide,
 /// [insets] from the screen's edges and above the keyboard (it moves up
-/// over 100 ms as the keyboard comes), in [shape] with a shadow of
-/// [elevation].
+/// over 100 ms as the keyboard comes), in [shape] with [shadows].
 class _DialogSurface extends StatelessWidget {
   const _DialogSurface({
     required this.color,
-    required this.shadowColor,
-    required this.elevation,
+    required this.shadows,
     required this.insets,
     required this.shape,
     required this.child,
   });
 
   final Color color;
-  final Color? shadowColor;
-  final double elevation;
+  final List<BoxShadow> shadows;
   final EdgeInsets insets;
   final ShapeBorder shape;
   final Widget child;
@@ -740,12 +737,8 @@ class _DialogSurface extends StatelessWidget {
             child: Align(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minWidth: 280),
-                child: Material(
-                  color: color,
-                  elevation: elevation,
-                  shadowColor: shadowColor,
-                  surfaceTintColor: ShellColors.transparent,
-                  shape: shape,
+                child: DecoratedBox(
+                  decoration: ShapeDecoration(color: color, shape: shape, shadows: shadows),
                   child: child,
                 ),
               ),

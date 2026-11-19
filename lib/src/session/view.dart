@@ -12,9 +12,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' hide NavigationMode;
 
 import '../app/viewport.dart' show CanvasSizing, CanvasViewport, CanvasViewportBox;
-import 'package:flutter/material.dart' show Theme;
 
-import '../app/theme.dart' show themeDataOf, themeValues;
+import '../app/theme.dart' show themeValues;
+import '../render/control_theme.dart' show ThemeTokensScope;
 import '../render/components.dart' show ComponentRegistry, componentInstanceOf;
 import '../render/source.dart' show NodeSource;
 import '../render/contracts.dart' show ImageBytesLoader;
@@ -313,8 +313,9 @@ class _CodelesslyViewState extends State<CodelesslyView> {
       _components.theme = shown;
       _values.set('theme', themeValues(tokens, dark: dark));
     }
-    return Theme(
-        data: themeDataOf(shown, brightness: dark ? Brightness.dark : Brightness.light),
+    return ThemeTokensScope.withDefaults(
+        tokens: shown,
+        dark: dark,
         child: LayoutBuilder(builder: (context, constraints) {
       final id = _canvasId();
       _shown = id;

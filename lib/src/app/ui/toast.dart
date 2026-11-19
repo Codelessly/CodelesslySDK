@@ -6,9 +6,9 @@ import 'dart:math' as math;
 
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show Json, ShowToastAction, ToastPosition, ToastStyle;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
-import '../../render/control_theme.dart' show chromeGlyph;
+import '../../render/control_theme.dart' show ThemeTokensScope, chromeGlyph;
 import '../../render/node_view.dart' show CodelesslyLabelsScope, ControlButton, ControlHost;
 import '../../render/paint/icon_names.dart';
 import '../../render/paint/shell_constants.dart';
@@ -168,9 +168,8 @@ abstract final class CodelesslyToast {
     late final OverlayEntry entry;
     // The toast's buttons take the layout's look, not the app's theme the
     // overlay is in.
-    final themeData = theme.themeData;
     entry = OverlayEntry(
-      builder: (context) => Theme(data: themeData, child: _ToastView(
+      builder: (context) => ThemeTokensScope.withDefaults(tokens: theme.tokens, dark: theme.dark, child: _ToastView(
         shownOver: shownOver,
         dismissLabel: dismissLabel,
         action: action,
@@ -528,13 +527,9 @@ class _ToastViewState extends State<_ToastView> {
               'end' => Alignment.centerRight,
               _ => Alignment.center,
             },
-            child: Material(
-              type: MaterialType.transparency,
-              // The buttons are the SDK's controls: this is their root.
-              child: ControlHost(
+            child: ControlHost(
                 child: rotation == 0 ? toast : Transform.rotate(angle: rotation * math.pi / 180, child: toast),
               ),
-            ),
           ),
         ),
       ),

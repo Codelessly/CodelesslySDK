@@ -241,6 +241,7 @@ export 'src/app/persisted_variables.dart';
 export 'src/app/presenter.dart';
 export 'src/app/runtime.dart'
     hide BoundSource, MapValueScope, ScreenActionContext;
+export 'src/render/surface_roles.dart' show SurfaceRoles, surfaceRoles;
 export 'src/app/theme.dart'
     show
         kControlRadius,
@@ -249,7 +250,6 @@ export 'src/app/theme.dart'
         kPaper,
         kPaperDark,
         kSurfaceRadius,
-        themeDataOf,
         themeValues;
 export 'src/app/viewport.dart'
     hide CanvasBox, CanvasSizingScope, CanvasViewport;

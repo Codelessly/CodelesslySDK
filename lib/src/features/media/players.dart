@@ -10,7 +10,7 @@ import 'package:codelessly_api/codelessly_api.dart'
     show AudioPlayerProps, EmbeddedVideoProps, EmbeddedVideoSource, Node, VideoProps, WebViewGesture, WebViewProps, WebViewSourceType;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:video_player/video_player.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -535,18 +535,17 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
     final description = _node.prop(AudioPlayerProps.description);
     final controls = _node.prop(AudioPlayerProps.showControls);
     final labels = CodelesslyLabelsScope.of(context);
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
+    final tokens = chromeTokensOf(context);
     final player = _player;
     return ColoredBox(
-      color: colors.surfaceContainerHigh,
+      color: tokens.tertiaryBackground,
       child: Row(children: [
         if (widget.preview || _url.isEmpty)
           MediaPlayerButton(label: labels.playAudio, icon: playArrowGlyph)
         else if (_failed || player == null)
           const Icon(_Glyph.errorOutline, semanticLabel: 'Audio unavailable')
         else if (!_ready)
-          Padding(padding: const EdgeInsets.all(10), child: SpinnerView(color: chromeTokensOf(context).primary))
+          Padding(padding: const EdgeInsets.all(10), child: SpinnerView(color: tokens.primary))
         else if (controls)
           MediaPlayerButton(
             label: _playing ? labels.pauseAudio : labels.playAudio,
@@ -563,7 +562,7 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
               Text(description.isNotEmpty ? description : 'Audio',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleSmall?.copyWith(color: colors.onSurface)),
+                  style: TextStyle(color: tokens.onSurface, fontFamily: tokens.fontFamily, fontSize: 14, fontWeight: FontWeight.w500, height: 20 / 14)),
               if (!_failed && controls)
                 SizedBox(
                   width: double.infinity,
@@ -578,7 +577,7 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
                 ),
               if (!_failed && controls)
                 Text('${_clock(_position)} / ${_duration > Duration.zero ? _clock(_duration) : '--:--'}',
-                    style: theme.textTheme.labelSmall),
+                    style: TextStyle(color: tokens.secondaryText, fontFamily: tokens.fontFamily, fontSize: 11, fontWeight: FontWeight.w500, height: 16 / 11)),
             ],
           ),
         ),

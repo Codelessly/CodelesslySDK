@@ -8,9 +8,9 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:codelessly_api/core.dart' show HeroFlightShuttle, HeroPlaceholder;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
-import '../../render/control_theme.dart' show CodelesslyThemeTokens, kPaper, kPaperDark;
+import '../../render/control_theme.dart' show ThemeTokensScope, kPaper, kPaperDark, rolesOf;
 import '../../render/hero.dart';
 import '../../render/node_tree.dart';
 import '../../render/play.dart' show FlightRegistry;
@@ -266,10 +266,9 @@ class _Flight {
         // The container the two drawings fade on, as the card grows.
         // The layout's surface: the flight is in the app's overlay, whose
         // theme isn't the layout's.
-        final theme = Theme.of(context);
-        final surface = theme.extension<CodelesslyThemeTokens>() != null
-            ? theme.colorScheme.surface
-            : (theme.brightness == Brightness.dark ? kPaperDark : kPaper);
+        final surface = ThemeTokensScope.maybeOf(context) != null
+            ? rolesOf(context).surface
+            : (MediaQuery.maybePlatformBrightnessOf(context) == Brightness.dark ? kPaperDark : kPaper);
         stack = ColoredBox(color: surface, child: stack);
       }
       shuttle = clipped(stack, morph: true);
@@ -312,7 +311,7 @@ class _Flight {
         );
       });
     }
-    return Material(type: MaterialType.transparency, child: shuttle);
+    return shuttle;
   }
 }
 

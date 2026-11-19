@@ -3,15 +3,17 @@
 // none (SSUI) leaves the screen as it draws itself.
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_sdk/src/app/navigator_ui.dart' show popupSurface;
-import 'package:codelessly_sdk/src/render/control_theme.dart' show CodelesslyThemeTokens;
+import 'package:codelessly_sdk/src/render/control_theme.dart' show ThemeTokensScope;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<Widget> _wrapped(WidgetTester tester, api.ThemeTokens tokens, Brightness brightness) async {
   late Widget out;
   const content = SizedBox(width: 100, height: 60);
-  await tester.pumpWidget(Theme(
-    data: ThemeData(extensions: [CodelesslyThemeTokens(tokens, brightness)]),
+  final dark = brightness == Brightness.dark;
+  await tester.pumpWidget(ThemeTokensScope(
+    tokens: tokens.forBrightness(dark: dark),
+    dark: dark,
     child: Builder(builder: (context) {
       out = popupSurface(context, content);
       return Directionality(textDirection: TextDirection.ltr, child: out);

@@ -13,7 +13,7 @@ import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart'
     show CollectionScrollProps, CollectionSlots, ListApply, ListReorder, ListViewProps, Node, ReorderPlaceholder, ReorderStart, TriggerType;
 import 'package:flutter/gestures.dart' show ImmediateMultiDragGestureRecognizer;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart' show CustomSemanticsAction, SemanticsService;
 import 'package:flutter/services.dart';
 
@@ -362,7 +362,7 @@ class _ReorderListViewState extends State<ReorderListView> {
         // The dragged row is drawn with boxes of its own (the row's stay
         // in the list), in its nodes' `dragged` state.
         proxyDecorator: (child, index, animation) => decorateReorderProxy(
-            Material(type: MaterialType.transparency, child: _proxy(index)), animation, model),
+            _proxy(index), animation, model),
         onReorderStart: (index) {
           _setDragged(_r, widget.itemId, _proxyInstance(index), true);
           _r.fire(TriggerType.dragStart.name, event: {'index': index, 'item': widget.items.elementAtOrNull(index)});
@@ -905,13 +905,10 @@ class GroupReorderListState extends State<GroupReorderList> {
     );
     final instance = ProvidedItem('dragged', _r.b.instance, _r.node.id, _rowKey(widget.items, index));
     Size? size;
-    Widget feedback() => Material(
-          type: MaterialType.transparency,
-          child: SizedBox.fromSize(
+    Widget feedback() => SizedBox.fromSize(
             size: size,
             child: decorateReorderProxy(_row(index, tag: 'dragged'), const AlwaysStoppedAnimation(1), widget.model),
-          ),
-        );
+          );
 
     void started() {
       _setDragged(_r, widget.itemId, instance, true);

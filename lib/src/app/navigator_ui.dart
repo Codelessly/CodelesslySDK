@@ -15,7 +15,7 @@ import 'package:codelessly_api/core.dart'
         RouteTransition,
         ShowToastAction;
 import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
-import 'package:flutter/material.dart' hide NavigationMode;
+import 'package:flutter/widgets.dart' hide NavigationMode;
 import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:flutter/services.dart' show KeyDownEvent, LogicalKeyboardKey;
 import 'package:codelessly_api/core.dart' show NavigationMode;
@@ -29,7 +29,7 @@ import 'ui/presentation_route.dart';
 import 'ui/presentation_scope.dart';
 import 'ui/route_transition.dart';
 import 'ui/toast.dart';
-import '../render/control_theme.dart' show CodelesslyThemeTokens;
+import '../render/control_theme.dart' show ThemeTokensScope, rolesOf;
 import '../render/convert.dart' show boxShadow;
 import '../render/controls/focus.dart' show ControlFocusLayer;
 import '../render/node_view.dart' show ControlFocusLayerScope;
@@ -345,10 +345,9 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, Po
 /// the theme names it: a menu is of the control family, and a dialog's
 /// corner on a surface three rows tall reads as a bubble.
 Widget popupSurface(BuildContext context, Widget content, {bool menu = false}) {
-  final own = Theme.of(context).extension<CodelesslyThemeTokens>();
-  final radius = (menu ? own?.tokens.radii['menu'] : null) ?? own?.tokens.radii['popup'];
-  if (own == null || radius == null) return content;
-  final tokens = own.tokens.forBrightness(dark: own.brightness == Brightness.dark);
+  final tokens = ThemeTokensScope.maybeOf(context)?.tokens;
+  final radius = (menu ? tokens?.radii['menu'] : null) ?? tokens?.radii['popup'];
+  if (tokens == null || radius == null) return content;
   final r = BorderRadius.circular(radius);
   return DecoratedBox(
     decoration: BoxDecoration(
@@ -404,12 +403,9 @@ Future<Object?> showScreenModal(
         // Covers the screen, as without a transition: the screen it shows
         // fills it, at the device size.
         if (cover) {
-          return Material(
-            type: MaterialType.transparency,
-            child: CanvasSizingScope(sizing: CanvasSizing.fill, child: SizedBox.expand(child: content)),
-          );
+          return CanvasSizingScope(sizing: CanvasSizing.fill, child: SizedBox.expand(child: content));
         }
-        return SafeArea(child: Align(alignment: alignment, child: Material(type: MaterialType.transparency, child: content)));
+        return SafeArea(child: Align(alignment: alignment, child: content));
       },
     ));
   }
@@ -440,7 +436,7 @@ Future<Object?> showScreenModal(
       enterScale: enterScale,
       builder: (_) => sheet || presentation == ModalPresentation.sideSheet
           ? content
-          : Align(alignment: alignment, child: Material(type: MaterialType.transparency, child: content)),
+          : Align(alignment: alignment, child: content),
     ));
   }
   if (presentation == ModalPresentation.fullScreen) {
@@ -459,17 +455,14 @@ Future<Object?> showScreenModal(
       useSafeArea: false,
       barrierDismissible: barrierDismissible,
       barrierColor: scrim,
-      builder: (_) => Material(
-        type: MaterialType.transparency,
-        child: CanvasSizingScope(sizing: CanvasSizing.fill, child: SizedBox.expand(child: content)),
-      ),
+      builder: (_) => CanvasSizingScope(sizing: CanvasSizing.fill, child: SizedBox.expand(child: content)),
     );
   }
   return showShellDialog<Object?>(
     context: context,
     barrierDismissible: barrierDismissible,
     barrierColor: scrim,
-    builder: (_) => Align(alignment: alignment, child: Material(type: MaterialType.transparency, child: _TallDialogScroll(child: content))),
+    builder: (_) => Align(alignment: alignment, child: _TallDialogScroll(child: content)),
   );
 }
 
@@ -573,10 +566,7 @@ Future<Object?> showAnchoredModal(
     routeSettings: popover ? const RouteSettings(name: popoverRouteName) : null,
     builder: (_) => CustomSingleChildLayout(
       delegate: layout,
-      child: Material(
-        type: MaterialType.transparency,
-        child: ModalFocus(dismissible: barrierDismissible, popover: true, child: shown),
-      ),
+      child: ModalFocus(dismissible: barrierDismissible, popover: true, child: shown),
     ),
   );
 }
@@ -588,8 +578,8 @@ Widget _arrowContent(
 ) => CustomPaint(
   foregroundPainter: _PopoverArrowPainter(
     layout,
-    Theme.of(context).colorScheme.surface,
-    Theme.of(context).colorScheme.outlineVariant,
+    rolesOf(context).surface,
+    rolesOf(context).hairline,
   ),
   child: Padding(
     padding: const EdgeInsets.symmetric(vertical: 8),
@@ -757,12 +747,9 @@ class _HoverCardSession {
                 explicitChildNodes: true,
                 child: ControlFocusLayerScope(
                   layer: _layer!,
-                  child: Material(
-                    type: MaterialType.transparency,
-                    child: action.popoverArrow
+                  child: action.popoverArrow
                         ? _arrowContent(context, inherited, layout)
                         : inherited,
-                  ),
                 ),
               ),
             ),

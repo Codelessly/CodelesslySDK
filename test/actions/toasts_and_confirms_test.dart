@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/internals.dart';
+import 'package:codelessly_sdk/src/render/control_theme.dart' show rolesOf;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -244,7 +245,7 @@ void main() {
         expect(find.text('They lose access.'), findsOneWidget);
         // Destructive: the confirm button takes the error color.
         final ok = shellButtonBox(tester, find.byKey(const ValueKey('codelessly-confirm-ok')));
-        expect(ok.fillColor, Theme.of(h.context!).colorScheme.error);
+        expect(ok.fillColor, rolesOf(h.context!).error);
         await tester.tap(shellButton('Remove'));
         await tester.pumpAndSettle();
         expect(h['out'], 'removed');

@@ -18,7 +18,8 @@ import 'package:codelessly_api/codelessly_api.dart'
         PublishModel,
         RouteTransition,
         TriggerType;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import '../render/control_theme.dart' show ThemeTokensScope, rolesOf;
 import 'package:flutter/rendering.dart' show RendererBinding;
 
 import '../render/node_tree.dart';
@@ -1342,10 +1343,7 @@ class _LayoutViewState extends State<_LayoutView> {
     // What a captureScreenshot action of this screen captures.
     CaptureRegistry.bindLayout(_screen.tree, () => boundaryOf(_captureKey));
     content = RepaintBoundary(key: _captureKey, child: content);
-    content = Theme(
-      data: themeDataOf(theme.forBrightness(dark: dark), brightness: dark ? Brightness.dark : Brightness.light),
-      child: content,
-    );
+    content = ThemeTokensScope.withDefaults(tokens: theme.forBrightness(dark: dark), dark: dark, child: content);
     final mq = MediaQuery.maybeOf(context);
     if (mq != null) {
       content = MediaQuery(
@@ -1524,7 +1522,7 @@ class CodelesslyLoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      Center(child: SpinnerView(color: ProgressIndicatorTheme.of(context).color ?? Theme.of(context).colorScheme.primary));
+      Center(child: SpinnerView(color: rolesOf(context).primary));
 }
 
 /// What shows when a layout fails to load.

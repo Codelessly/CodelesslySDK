@@ -11,13 +11,13 @@ import 'dart:math' as math;
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart'
     show CollectionScrollProps, CollectionSlots, Node, Pagination, PaginationMode, SwipeAction;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart' show RenderAbstractViewport, ScrollCacheExtent;
 import 'package:flutter/scheduler.dart';
 
 import '../render/convert.dart';
 import '../render/controls/focus.dart';
-import '../render/control_theme.dart' show chromeButton, chromeGlyph, chromeTokensOf;
+import '../render/control_theme.dart' show chromeButton, chromeGlyph, chromeTokensOf, rolesOf;
 import '../render/controls/buttons.dart' show ButtonKind;
 import '../render/controls/root.dart';
 import '../render/node_view.dart' show CodelesslyLabelsScope, ControlButton, SpinnerView;
@@ -978,7 +978,7 @@ class _DefaultLoadingFooter extends StatelessWidget {
         child: Center(
           child: SizedBox.square(
             dimension: 24,
-            child: SpinnerView(color: ProgressIndicatorTheme.of(context).color ?? Theme.of(context).colorScheme.primary),
+            child: SpinnerView(color: rolesOf(context).primary),
           ),
         ),
       );
@@ -996,7 +996,7 @@ class _DefaultErrorFooter extends StatelessWidget {
           children: [
             const Text("Couldn't load more."),
             const SizedBox(height: 4),
-            Text('Tap to retry', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+            Text('Tap to retry', style: TextStyle(color: rolesOf(context).primary)),
           ],
         ),
       );

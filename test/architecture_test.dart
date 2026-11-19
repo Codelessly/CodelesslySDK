@@ -141,9 +141,6 @@ const Map<String, Map<String, String>> renderStatics = {
     '_byTree': 'HeroMarks: the shared elements of every tree on screen; a flight pairs marks of two trees (exported)',
   },
   // Caches of pure work, by its input.
-  'render/control_theme.dart': {
-    '_made': 'the controls\' ThemeData by tokens, mode and surface (64 at most): islands ask on every rebuild',
-  },
   'render/paint/image_fill.dart': {
     '_entries': 'PaintImages: the loaded images by URL, shared by every tree as Flutter\'s image cache is (exported)',
     '_svgBytes': 'the bytes of the SVGs fetched, by URL',
@@ -242,7 +239,7 @@ const coreWidgetImports = 16;
 /// and `cupertino_ui` packages). It only goes down, to zero: an app that
 /// uses neither then carries neither because of this package
 /// (docs/design/no-material.md).
-const materialImports = 17;
+const materialImports = 0;
 
 /// One import or export directive: [target] is `dart:x`, `package:x/...`, or
 /// a path under lib/src (`render/convert.dart`) for a file of this package.
