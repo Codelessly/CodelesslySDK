@@ -92,10 +92,21 @@ final class NotationSite {
     for (final v in Variable.declarationsFromJson(manifest['variables'])) v.name: {'type': v.type.name, ...v.toJson()},
   };
 
-  /// The ids of its pages (each page reference's file stem).
-  late final List<String> screens = [
+  /// The ids of the pages the manifest lists (each page reference's file
+  /// stem).
+  late final List<String> listedScreens = [
     for (final p in SiteManifest.pageRefs(manifest['pages'])) _stem(p),
   ];
+
+  /// The ids of its pages: the ones the manifest lists and the ones written
+  /// in the notation (`pages/*.txt`), which a manifest with no `pages`
+  /// leaves to the folder. A bare `go album` names the page `album` whether
+  /// or not site.json lists it (with none listed it read a variable or a
+  /// loop's item of that name instead: `"to": "${= item}"`).
+  late final List<String> screens = {
+    ...listedScreens,
+    for (final p in pageSources) _stem(p),
+  }.toList();
 
   /// The dictionaries the manifest names (`dictionary`: folders of
   /// definitions, relative to it), as paths.
