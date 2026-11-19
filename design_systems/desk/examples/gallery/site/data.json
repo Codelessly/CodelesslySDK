@@ -257,6 +257,18 @@
      ]
     }
    ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "height": {
+        "hug": 44
+       }
+      }
+     }
+    }
+   ],
    "children": [
     "outlinedButton1",
     "filledButton1"
@@ -477,7 +489,7 @@
    },
    "props": {
     "size": 14,
-    "color": "#FF2563EB"
+    "color": "primary"
    },
    "bind": {
     "visible": "${= replace(sortKey, '-', '') == 'name'}",
@@ -529,6 +541,17 @@
      ]
     }
    ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
    "children": [
     "text2",
     "icon3",
@@ -568,7 +591,7 @@
    },
    "props": {
     "size": 14,
-    "color": "#FF2563EB"
+    "color": "primary"
    },
    "bind": {
     "visible": "${= replace(sortKey, '-', '') == 'status'}",
@@ -621,6 +644,17 @@
      ]
     }
    ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
    "children": [
     "text3",
     "icon5",
@@ -660,7 +694,7 @@
    },
    "props": {
     "size": 14,
-    "color": "#FF2563EB"
+    "color": "primary"
    },
    "bind": {
     "visible": "${= replace(sortKey, '-', '') == 'total'}",
@@ -1054,6 +1088,17 @@
     "spacing": 8,
     "crossAxisAlignment": "center"
    },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
    "children": [
     "Status1"
    ]
@@ -1089,6 +1134,17 @@
     "spacing": 8,
     "crossAxisAlignment": "center"
    },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
    "children": [
     "text7"
    ]
@@ -2700,7 +2756,7 @@
    },
    "props": {
     "name": "Maya Chen",
-    "size": "xs"
+    "size": 20
    }
   },
   "Avatar3": {
@@ -2729,7 +2785,7 @@
    },
    "props": {
     "name": "Sam Rao",
-    "size": "medium"
+    "size": 36
    }
   },
   "AvatarGroup1": {

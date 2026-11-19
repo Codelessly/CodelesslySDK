@@ -1282,7 +1282,7 @@
    },
    "props": {
     "size": 14,
-    "color": "#FF2563EB"
+    "color": "primary"
    },
    "bind": {
     "visible": "${= replace(sortKey, '-', '') == 'name'}",
@@ -1384,7 +1384,7 @@
    },
    "props": {
     "size": 14,
-    "color": "#FF2563EB"
+    "color": "primary"
    },
    "bind": {
     "visible": "${= replace(sortKey, '-', '') == 'role'}",
@@ -1534,7 +1534,7 @@
    },
    "props": {
     "size": 14,
-    "color": "#FF2563EB"
+    "color": "primary"
    },
    "bind": {
     "visible": "${= replace(sortKey, '-', '') == 'status'}",
@@ -2591,7 +2591,7 @@
     }
    },
    "props": {
-    "size": "medium"
+    "size": 40
    },
    "bind": {
     "props.name": "${cur.name}"

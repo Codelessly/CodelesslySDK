@@ -111,7 +111,7 @@
     }
    },
    "props": {
-    "size": "small"
+    "size": 28
    },
    "bind": {
     "props.name": "${props.name}"

@@ -652,7 +652,7 @@
     }
    },
    "props": {
-    "size": "xs"
+    "size": 20
    },
    "bind": {
     "props.name": "${= props.assignee == '' ? '?' : props.assignee}",

@@ -212,7 +212,7 @@
     }
    },
    "props": {
-    "size": "small"
+    "size": 32
    },
    "bind": {
     "props.name": "${= props.avatar == '' ? '?' : props.avatar}",

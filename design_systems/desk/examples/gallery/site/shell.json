@@ -75,6 +75,25 @@
     ],
     "strokeSides": "right"
    },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": 64
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
    "children": [
     "Brand1",
     "SideButton1",
@@ -87,14 +106,6 @@
     "NavItem5",
     "spacer1",
     "column2"
-   ],
-   "media": [
-    {
-     "maxWidth": 699,
-     "patch": {
-      "visible": false
-     }
-    }
    ]
   },
   "Brand1": {
@@ -527,7 +538,9 @@
      "maxWidth": 699,
      "patch": {
       "props": {
-       "spacing": 12
+       "spacing": 12,
+       "wrap": true,
+       "runSpacing": 12
       }
      }
     }
@@ -590,7 +603,21 @@
      "Settings",
      "Members"
     ]
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 100,
+       "flex": 1
+      }
+     }
+    }
+   ]
   },
   "row3": {
    "type": "row",
@@ -609,6 +636,20 @@
    "children": [
     "SearchField1",
     "iconButton2"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 280,
+       "flex": 1
+      }
+     }
+    }
    ]
   },
   "SearchField1": {

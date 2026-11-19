@@ -1265,7 +1265,7 @@
     }
    },
    "props": {
-    "size": "medium"
+    "size": 36
    },
    "bind": {
     "props.name": "${cur.from}"
