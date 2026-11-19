@@ -1,4 +1,4 @@
-// A legacy motion's clocks on the one animation player: a spin speeding up
+// Clocks on the one animation player: a spin speeding up
 // over its ramp and winding down when paused, a counted loop ending where
 // Flutter's repeat(count:) ends, and a motion transition through keyframes
 // (a card that swells as it turns over).
@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Map<String, Object?> doc(Map<String, Object?> node) => {
+      'schema': 3,
       'roots': ['s'],
       'nodes': {
         's': {'type': 'stack', 'children': ['b'], 'layout': {'width': 400, 'height': 300}},
@@ -28,7 +29,10 @@ Future<(NodeTree, DocumentSource, RenderObject)> show(WidgetTester tester, Map<S
 void main() {
   testWidgets('a spin speeds up over its ramp and winds down when paused', (tester) async {
     Map<String, Object?> node(bool paused) => {
-          'motion': {'spin': 1, 'spinRamp': 1000, 'paused': paused},
+          'motion': <String, Object?>{},
+          'animations': [
+            {'id': 'spin', 'preset': 'spin', 'params': {'perSecond': 1}, if (paused) 'paused': true, 'ramp': 1000},
+          ],
         };
     final (tree, source, _) = await show(tester, node(false));
     final spin = tree.boxOf('b')!.animations!.clockOf('spin')!;
@@ -58,7 +62,13 @@ void main() {
 
   testWidgets('a counted restart loop ends at its start (rest)', (tester) async {
     final (tree, _, view) = await show(tester, {
-      'motion': {'translateX': 50, 'loop': 'restart', 'repeat': 2, 'duration': 200, 'curve': 'linear'},
+      'motion': {'translateX': 50},
+      'animations': [
+        {'id': 'loop', 'preset': 'loop', 'params': {'from': {'translateX': 0}}, 'duration': 200, 'curve': 'linear', 'repeat': {'count': 2}},
+      ],
+      'transitions': [
+        {'property': 'motion', 'duration': 200},
+      ],
     });
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -70,7 +80,10 @@ void main() {
 
   testWidgets('a motion transition passes its keyframes on any change (a swell as it turns)', (tester) async {
     Map<String, Object?> node(double turn) => {
-          'motion': {'rotateY': turn, 'perspective': 0, 'duration': 400, 'curve': 'linear', 'keyframes': [{'t': 0.5, 'scale': 2}]},
+          'motion': {'rotateY': turn, 'perspective': 0},
+          'transitions': [
+            {'property': 'motion', 'duration': 400, 'keyframes': [{'at': 0.5, 'value': {'scale': 2}}], 'interpolation': 'monotoneCubic'},
+          ],
         };
     final (tree, source, view) = await show(tester, node(0));
     await tester.pump();

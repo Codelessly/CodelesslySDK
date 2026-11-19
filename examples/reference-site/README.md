@@ -12,7 +12,6 @@ A two-page responsive site written directly as Codelessly layout documents, usin
   fields validated with variables and `visible` bindings, and a success state (with a toast). It reads
   `${route.plan}` when a pricing card opens it.
 - `assets/hero.png`: the hero image (a path relative to the document, inlined by the render command).
-- `build.py`: the script the JSON was written with (`python3 build.py .`); the JSON is the deliverable.
 - `screenshots/`: full pages at three sizes, and states: the mobile menu open, annual billing, an FAQ answer open,
   a hovered button, the form's errors and its success state.
 

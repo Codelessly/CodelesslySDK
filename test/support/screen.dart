@@ -43,7 +43,7 @@ Future<Screen> show(
   bool interactive = true,
   Services? services,
 }) async {
-  final doc = LayoutDocument.fromJson({'roots': [root], 'nodes': nodes});
+  final doc = LayoutDocument.fromJson({'schema': 3, 'roots': [root], 'nodes': nodes});
   final scope = VariableScope(variables);
   final values = NodeValues(DocumentSource(doc));
   final tree = NodeTree(values, binder: NodeBinder(scope: scope));

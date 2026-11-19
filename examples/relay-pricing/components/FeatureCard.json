@@ -1,5 +1,5 @@
 {
- "schema": 2,
+ "schema": 3,
  "id": "FeatureCard",
  "roots": [
   "fc"
@@ -72,6 +72,9 @@
      }
     ],
     "radius": 6
+   },
+   "defaultTextStyle": {
+    "height": 1.33
    }
   },
   "fcNum": {

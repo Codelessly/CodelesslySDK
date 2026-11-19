@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Map<String, Object?> _doc(Map<String, Object?> nodes, {double w = 300, double h = 200}) => {
+      'schema': 3,
       'roots': ['s'],
       'nodes': {
         's': {'type': 'stack', 'children': [for (final k in nodes.keys) k], 'layout': {'width': w, 'height': h}},

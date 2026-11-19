@@ -78,6 +78,7 @@ Map<String, Offset> cells(WidgetTester tester) {
 // running); a box's stroke can rule a pair of opposite sides.
 
 Map<String, Object?> stretchTable({bool stretch = true}) => {
+  'schema': 3,
   'roots': ['t'],
   'nodes': {
     't': {

@@ -143,8 +143,7 @@ class RenderSignaturePad extends RenderBox {
     return glyph;
   }
 
-  // showSignMark is an older name for signLineMark: either off hides it.
-  static bool _showMark(Node n) => n.prop(SignatureProps.showSignMark) && n.prop(SignatureProps.signLineMark);
+  static bool _showMark(Node n) => n.prop(SignatureProps.signLineMark);
 
   bool get _draws {
     final n = _node;
@@ -210,7 +209,6 @@ class RenderSignaturePad extends RenderBox {
       dashed: n.prop(SignatureProps.signLineStyle) == api.SignLineStyle.dashed,
       dash: n.prop(SignatureProps.signLineDash),
       gap: n.prop(SignatureProps.signLineGap),
-      signLineOffset: n.prop(SignatureProps.signLineOffset),
       signLineBottom: n.prop(SignatureProps.signLineBottom),
       signLineInset: n.prop(SignatureProps.signLineInset),
       showMark: _showMark(n),

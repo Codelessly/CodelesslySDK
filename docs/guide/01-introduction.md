@@ -2,7 +2,7 @@
 
 [Guide](README.md) · Next: [Quickstart](02-quickstart.md)
 
-![Diagram: the Codelessly Editor publishes JSON data with "schema": 2, which the SDK loads, renders and runs inside a Flutter app](images/01-introduction/hero.png)
+![Diagram: the Codelessly Editor publishes JSON data with "schema": 3, which the SDK loads, renders and runs inside a Flutter app](images/01-introduction/hero.png)
 
 *A publish changes what running apps show, without an app release.*
 
@@ -14,7 +14,7 @@ that data back into Flutter UI inside your app.
 
 ```
 Codelessly Editor ──publish──▶ published project ──load──▶ Codelessly SDK ──▶ Flutter UI in your app
- (design, logic)               (JSON, "schema": 2)         (render + run)
+ (design, logic)               (JSON, "schema": 3)         (render + run)
 ```
 
 Because the UI is data, a publish changes what running apps show without an app release.
@@ -89,7 +89,7 @@ call, and **services** you plug in. The rest of this guide is about those.
 
 ## The publish format
 
-The Editor publishes in the format `"schema": 2`, and the SDK reads that format. A document without it fails to load
-with a clear error ([Troubleshooting](15-troubleshooting.md)).
+The SDK reads the format `"schema": 3`, and only that one. A document of another schema, or without one, fails to load
+with a clear error that names the schema it has ([Troubleshooting](15-troubleshooting.md)).
 
 Next: [Quickstart](02-quickstart.md)

@@ -1,7 +1,7 @@
 // A publish bundle written by hand: one screen with a bound text, a screen
 // variable, and a button whose reaction changes the variable and calls a
 // function of the app. Publishes from the Codelessly Editor have this same
-// shape (`"schema": 2`); see the codelessly_api package for the model.
+// shape (`"schema": 3`); see the codelessly_api package for the model.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 
 /// The id of the bundle's only layout.
@@ -13,7 +13,7 @@ PublishBundle helloBundle() => PublishBundle.fromJson(_json);
 
 const Map<String, Object?> _json = {
   'model': {
-    'schema': 2,
+    'schema': 3,
     'projectId': 'hello-project',
     'entryLayoutId': helloLayoutId,
     'layouts': {
@@ -26,7 +26,7 @@ const Map<String, Object?> _json = {
   },
   'layouts': {
     helloLayoutId: {
-      'schema': 2,
+      'schema': 3,
       'id': helloLayoutId,
       'roots': ['home'],
       // The screen's variables, by canvas.

@@ -25,6 +25,7 @@ Future<Map<int, Rect>> _items(
   int first = 0,
 }) async {
   final doc = LayoutDocument.fromJson({
+    'schema': 3,
     'roots': ['s'],
     'nodes': {
       's': {
@@ -83,6 +84,7 @@ Variable _v(String name, Object? value, VariableType type) =>
 Future<List<Rect>> _spacedItems(WidgetTester tester, Map<String, Object?> list, {NodeBinder? binder}) async {
   final tree = NodeTree(
     DocumentSource(LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['v'],
       'nodes': {
         'v': {'type': 'listView', ...list, 'children': ['it']},
@@ -208,6 +210,7 @@ void main() {
     // A column: the list (flexible), then a box that follows its last item.
     Future<(Rect list, Rect after)> layout(int count, {bool interactive = true}) async {
       final doc = LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['c'],
         'nodes': {
           'c': {
@@ -401,6 +404,7 @@ void main() {
     for (final preview in [false, true]) {
       testWidgets('a list bound to no data shows no items in ${preview ? 'a design preview' : 'a running app'}', (tester) async {
         final doc = LayoutDocument.fromJson({
+          'schema': 3,
           'roots': ['list'],
           'nodes': {
             'list': {

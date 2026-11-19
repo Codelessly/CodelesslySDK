@@ -155,7 +155,7 @@ List<({String name, Json page, double? width, double? height})> componentPages(
       width: set.width,
       height: set.height,
       page: {
-        'schema': 2,
+        'schema': 3,
         'id': canvas,
         'roots': [canvas],
         if (variables.isNotEmpty) 'variables': {canvas: variables},

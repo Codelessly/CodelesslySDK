@@ -83,7 +83,7 @@ void main() {
 
     testWidgets('a navigate action with a transition opens its screen with it', (tester) async {
       Json layout(String id, {List<Json> actions = const []}) => {
-            'schema': 2,
+            'schema': 3,
             'id': id,
             'roots': ['$id-c'],
             'nodes': {
@@ -98,8 +98,9 @@ void main() {
             },
           };
       final bundle = PublishBundle.fromJson({
-        'schema': 2,
+        'schema': 3,
         'model': {
+          'schema': 3,
           'projectId': 'p',
           'entryLayoutId': 'home',
           'layouts': {

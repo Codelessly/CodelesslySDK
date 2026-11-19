@@ -169,6 +169,7 @@ error: write the site page by page. The codes:
 | Code | Severity | Meaning |
 |---|---|---|
 | `invalid_json` | error | A file is not valid JSON (with line and column). |
+| `schema_unsupported` | error | A document is not of schema 3, the only one read; the message names the schema it has. It is not rendered. |
 | `page_not_written` | warning | A page `site.json` lists has no file yet: once per file. |
 | `design_system_missing` | error | The design system `site.json` names (`"designSystem"`, a folder relative to it, or an absolute path) has no readable `design_system.json`. |
 | `no_documents` | error | No `.json` documents at the paths given. |

@@ -89,7 +89,7 @@ Node _click(List<Json> actions) => Node.fromJson({
 }, id: 'button')!;
 PublishBundle _bundle(List<Json> actions, {bool brokenHandler = false, bool retryFailed = false}) {
   final layout = PublishLayout.fromJson({
-    'schema': 2,
+    'schema': 3,
     'id': 'home',
     'roots': ['canvas'],
     'variables': {

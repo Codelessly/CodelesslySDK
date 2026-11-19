@@ -1,5 +1,5 @@
 {
- "schema": 2,
+ "schema": 3,
  "id": "function_plot",
  "roots": [
   "plot"
@@ -177,6 +177,9 @@
       }
      }
     ]
+   },
+   "defaultTextStyle": {
+    "height": 1.33
    }
   }
  },

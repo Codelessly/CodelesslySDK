@@ -22,6 +22,7 @@ const _svg = 'data:image/svg+xml;base64,'
     'PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCI+PHJlY3Qgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIi8+PC9zdmc+';
 
 Map<String, Object?> _doc(Map<String, Object?> nodes, {double w = 300, double h = 200}) => {
+      'schema': 3,
       'roots': ['s'],
       'nodes': {
         's': {'type': 'stack', 'children': [for (final k in nodes.keys) k], 'layout': {'width': w, 'height': h}},
@@ -57,6 +58,7 @@ const png =
 
 /// A layout whose `art` box draws an image fill with [url], binding [bind].
 LayoutDocument doc(String url, {Map<String, Object?> bind = const {}}) => LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['art'],
       'nodes': {
         'art': {
@@ -190,6 +192,7 @@ void main() {
           const Variable(id: 'playing', name: 'playing', type: VariableType.boolean, value: false),
         ]);
         final doc = LayoutDocument.fromJson({
+          'schema': 3,
           'roots': ['root'],
           'nodes': {
             'root': {'type': 'column', 'children': ['icon'], 'layout': {'width': 100, 'height': 100}},
@@ -226,6 +229,7 @@ void main() {
 
       testWidgets('an icon shows a stand-in glyph while its image is unavailable', (tester) async {
         final doc = LayoutDocument.fromJson({
+          'schema': 3,
           'roots': ['i'],
           'nodes': {
             'i': {
@@ -258,6 +262,7 @@ void main() {
         ]);
         addTearDown(vars.dispose);
         final doc = LayoutDocument.fromJson({
+          'schema': 3,
           'roots': ['b'],
           'nodes': {
             'b': {

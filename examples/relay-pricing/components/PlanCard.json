@@ -1,5 +1,5 @@
 {
- "schema": 2,
+ "schema": 3,
  "id": "PlanCard",
  "roots": [
   "pc"
@@ -81,6 +81,9 @@
    },
    "props": {
     "crossAxisAlignment": "stretch"
+   },
+   "defaultTextStyle": {
+    "height": 1.33
    }
   },
   "pcBadge": {

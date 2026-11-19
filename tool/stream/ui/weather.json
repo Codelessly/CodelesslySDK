@@ -1,5 +1,5 @@
 {
- "schema": 2,
+ "schema": 3,
  "roots": [
   "weather"
  ],
@@ -15,6 +15,9 @@
     "height": {
      "hug": 420
     }
+   },
+   "defaultTextStyle": {
+    "height": 1.33
    }
   },
   "wxCard": {
@@ -129,7 +132,7 @@
     }
    },
    "props": {
-    "text": "Lisbon \u00b7 Now",
+    "text": "Lisbon · Now",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 14,
@@ -149,7 +152,7 @@
     }
    },
    "props": {
-    "text": "19\u00b0",
+    "text": "19°",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 56,
@@ -170,7 +173,7 @@
     }
    },
    "props": {
-    "text": "Partly cloudy \u00b7 H 21\u00b0 L 14\u00b0",
+    "text": "Partly cloudy · H 21° L 14°",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 14,
@@ -292,7 +295,7 @@
     }
    },
    "props": {
-    "text": "19\u00b0",
+    "text": "19°",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 15,
@@ -365,7 +368,7 @@
     }
    },
    "props": {
-    "text": "21\u00b0",
+    "text": "21°",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 15,
@@ -438,7 +441,7 @@
     }
    },
    "props": {
-    "text": "21\u00b0",
+    "text": "21°",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 15,
@@ -511,7 +514,7 @@
     }
    },
    "props": {
-    "text": "20\u00b0",
+    "text": "20°",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 15,
@@ -584,7 +587,7 @@
     }
    },
    "props": {
-    "text": "17\u00b0",
+    "text": "17°",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 15,
@@ -675,7 +678,7 @@
     }
    },
    "props": {
-    "text": "13\u00b0",
+    "text": "13°",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 14,
@@ -744,7 +747,7 @@
     }
    },
    "props": {
-    "text": "17\u00b0",
+    "text": "17°",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 14,
@@ -815,7 +818,7 @@
     }
    },
    "props": {
-    "text": "14\u00b0",
+    "text": "14°",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 14,
@@ -884,7 +887,7 @@
     }
    },
    "props": {
-    "text": "19\u00b0",
+    "text": "19°",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 14,
@@ -955,7 +958,7 @@
     }
    },
    "props": {
-    "text": "15\u00b0",
+    "text": "15°",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 14,
@@ -1024,7 +1027,7 @@
     }
    },
    "props": {
-    "text": "23\u00b0",
+    "text": "23°",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 14,

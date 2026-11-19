@@ -1,5 +1,5 @@
 {
- "schema": 2,
+ "schema": 3,
  "roots": [
   "contact"
  ],
@@ -91,7 +91,7 @@
     }
    },
    "props": {
-    "text": "\u2190 Back to home",
+    "text": "← Back to home",
     "style": {
      "fontFamily": "Inter",
      "fontSize": 15,
@@ -1002,6 +1002,9 @@
       "color": "#FFF1F5F9"
      }
     ]
+   },
+   "defaultTextStyle": {
+    "height": 1.33
    }
   }
  },

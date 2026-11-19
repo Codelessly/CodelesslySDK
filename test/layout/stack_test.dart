@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 // what a squeezing row can take from its children.
 
 Future<(NodeTree, RenderObject)> _show(WidgetTester tester, Map<String, Map<String, Object?>> nodes, String root) async {
-  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'roots': [root], 'nodes': nodes})));
+  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'schema': 3, 'roots': [root], 'nodes': nodes})));
   addTearDown(tree.dispose);
   await tester.pumpWidget(MaterialApp(home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: root))));
   return (tree, tester.renderObject(find.byType(NodeView)));
@@ -64,6 +64,7 @@ void main() {
   group('a fitted stack', () {
     testWidgets('scales its content from its design size into its box', (tester) async {
       final doc = LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['s'],
         'nodes': {
           's': {'type': 'stack', 'children': ['board'], 'layout': {'width': 400, 'height': 300}},

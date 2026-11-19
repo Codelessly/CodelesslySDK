@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../lists/support.dart' as lists;
 
 LayoutDocument _doc(Map<String, Object?> nodes) => LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['s'],
       'nodes': {
         's': {'type': 'stack', 'children': nodes.keys.toList(), 'layout': {'width': 400, 'height': 300}},
@@ -200,6 +201,7 @@ void _inWrappingRow() {
   for (final type in ['dateTimeInput', 'datePicker', 'timePicker', 'textField', 'dropdown']) for (final wrap in [true, false]) {
     testWidgets('a $type of a hugging width in a ${wrap ? 'wrapping ' : ''}row takes its own width, not the row\'s', (tester) async {
       final doc = LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['row'],
         'nodes': {
           'row': {

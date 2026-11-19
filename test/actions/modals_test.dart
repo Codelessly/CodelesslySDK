@@ -104,7 +104,7 @@ class PickerUi extends NoActionUi {
 Future<NodeView> _open(WidgetTester tester, {required bool cover, Map<String, Object?>? transition}) async {
   setScreen(tester, const Size(1194, 834));
   final home = PublishLayout.fromJson({
-    'schema': 2,
+    'schema': 3,
     'id': 'home',
     'roots': ['h'],
     'nodes': {
@@ -124,7 +124,7 @@ Future<NodeView> _open(WidgetTester tester, {required bool cover, Map<String, Ob
     },
   });
   final flash = PublishLayout.fromJson({
-    'schema': 2,
+    'schema': 3,
     'id': 'flash',
     'roots': ['m'],
     'nodes': {
@@ -333,7 +333,7 @@ void main() {
 
     testWidgets('date and time pickers open in the root\'s overlay layer: nothing is pushed on a navigator', (tester) async {
       final root = GlobalKey<NavigatorState>(), nested = GlobalKey<NavigatorState>();
-      final doc = LayoutDocument.fromJson({'roots': ['fields'], 'nodes': {
+      final doc = LayoutDocument.fromJson({'schema': 3, 'roots': ['fields'], 'nodes': {
         'fields': {'type': 'column', 'children': ['date', 'time'], 'layout': {'width': 300, 'height': 160}},
         'date': {'type': 'datePicker', 'layout': {'width': 300, 'height': 50}, 'props': {'value': '2026-11-09'}},
         'time': {'type': 'timePicker', 'layout': {'width': 300, 'height': 50}, 'props': {'value': '08:00'}},
@@ -447,7 +447,7 @@ void main() {
     testWidgets('a modal shows the canvas for the screen\'s width', (tester) async {
       setScreen(tester, const Size(1000, 900));
       final home = PublishLayout.fromJson({
-        'schema': 2,
+        'schema': 3,
         'id': 'home',
         'roots': ['h'],
         'nodes': {
@@ -471,7 +471,7 @@ void main() {
         },
       });
       final dialog = PublishLayout.fromJson({
-        'schema': 2,
+        'schema': 3,
         'id': 'dialog',
         'roots': ['m', 'd'],
         'nodes': {
@@ -520,7 +520,7 @@ void main() {
       testWidgets('a sheet that asks for a drag handle shows it at its top', (tester) async {
         setScreen(tester, const Size(390, 844));
         final home = PublishLayout.fromJson({
-          'schema': 2,
+          'schema': 3,
           'id': 'home',
           'roots': ['h'],
           'nodes': {
@@ -547,7 +547,7 @@ void main() {
           },
         });
         final sheet = PublishLayout.fromJson({
-          'schema': 2,
+          'schema': 3,
           'id': 'tutorial',
           'roots': ['m'],
           'nodes': {
@@ -583,7 +583,7 @@ void main() {
       Future<String?> shownAs(WidgetTester tester, Size size) async {
         setScreen(tester, size);
         final home = PublishLayout.fromJson({
-          'schema': 2,
+          'schema': 3,
           'id': 'home',
           'roots': ['h'],
           'nodes': {
@@ -602,7 +602,7 @@ void main() {
           },
         });
         final sheet = PublishLayout.fromJson({
-          'schema': 2,
+          'schema': 3,
           'id': 'tutorial',
           'roots': ['m'],
           'nodes': {

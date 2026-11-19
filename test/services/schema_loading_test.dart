@@ -1,7 +1,7 @@
-// Published apps in production hold schema 2: every loader (Firestore, HTTP,
-// an asset bundle, memory) loads it, migrated to schema 3 in memory, and
-// loads schema 3 the same; nothing is written back. A stored document in a
-// schema newer than this SDK reads is refused, saying so.
+// Every loader (Firestore, HTTP, an asset bundle, memory) loads schema 3,
+// the one schema this SDK reads. A stored document of any other schema, or
+// with none, is refused with a PublishLoadException that names the schema
+// found and the one read (a newer one also names the update).
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -17,10 +17,8 @@ typedef Json = Map<String, Object?>;
 
 const layoutId = 'home';
 
-/// A schema-2 layout, with keys only schema 2 has (read through the
-/// migration).
-Json layout2() => {
-      'schema': 2,
+Json layout({Object? schema = 3}) => {
+      'schema': ?schema,
       'id': layoutId,
       'roots': ['canvas'],
       'nodes': {
@@ -32,17 +30,8 @@ Json layout2() => {
         'card': {
           'type': 'box',
           'layout': {'width': 120, 'height': 80},
-          'loops': [
-            {'type': 'pulse', 'scaleTo': 1.1, 'duration': 800},
-          ],
-          'drag': {'release': 'dismiss', 'directions': ['left', 'right']},
-          'actions': [
-            {
-              'trigger': {'type': 'clock', 'every': 1000},
-              'actions': [
-                {'type': 'playAnimation', 'node': 'card', 'animation': 'loop0'},
-              ],
-            },
+          'animations': [
+            {'id': 'pulse', 'preset': 'pulse', 'params': {'scaleTo': 1.1}, 'duration': 800},
           ],
         },
         'label': {
@@ -53,8 +42,8 @@ Json layout2() => {
       },
     };
 
-Json model2() => {
-      'schema': 2,
+Json model({Object? schema = 3}) => {
+      'schema': ?schema,
       'projectId': 'p1',
       'entryLayoutId': layoutId,
       'entryCanvasId': 'canvas',
@@ -63,13 +52,9 @@ Json model2() => {
       },
     };
 
-Json bundle(int schema) {
-  final b = {'schema': 2, 'model': model2(), 'layouts': {layoutId: layout2()}};
-  return schema == 2 ? b : migratePublish2to3(b);
-}
+Json bundle({Object? schema = 3}) => {'schema': ?schema, 'model': model(schema: schema), 'layouts': {layoutId: layout(schema: schema)}};
 
-/// What schema 2 must decode to: the migrated document, as JSON.
-Json expected() => LayoutDocument.fromJson(migrate2to3(layout2()), catalog: standardCatalog).toJson();
+Json expected() => LayoutDocument.fromJson(layout(), catalog: standardCatalog).toJson();
 
 class _Assets extends CachingAssetBundle {
   _Assets(this.files);
@@ -79,80 +64,103 @@ class _Assets extends CachingAssetBundle {
   Future<ByteData> load(String key) async => ByteData.sublistView(Uint8List.fromList(utf8.encode(files[key]!)));
 }
 
+HttpPublishLoader _http(Json b, {required bool asBundle}) => HttpPublishLoader(
+    projectId: 'p1',
+    baseUrl: 'https://x.test/',
+    bundle: asBundle,
+    client: MockClient((r) async {
+      final path = r.url.path;
+      final body = path.endsWith('/layouts/$layoutId.json')
+          ? (b['layouts'] as Map)[layoutId]
+          : asBundle
+              ? b
+              : b['model'];
+      return http.Response(jsonEncode(body), 200);
+    }));
+
+Matcher _refused(String message) => throwsA(isA<PublishLoadException>().having((e) => e.message, 'message', message));
+
 void main() {
-  test('the expected document is schema 3 and has no legacy key', () {
-    final json = expected();
-    expect(json['schema'], 3);
-    final card = (json['nodes'] as Map)['card'] as Map;
-    expect(card.keys, isNot(contains('loops')));
-    expect(card.keys, isNot(contains('drag')));
-  });
-
-  for (final schema in [2, 3]) {
-    group('a schema-$schema document', () {
-      test('loads from memory', () async {
-        final loader = MemoryPublishLoader(PublishBundle.fromJson(bundle(schema), catalog: standardCatalog));
-        final layout = await loader.loadLayout(PublishSource.publish, layoutId);
-        expect(layout.document.toJson(), expected());
-        expect((await loader.loadModel(PublishSource.publish)).toJson()['schema'], 3);
-      });
-
-      test('loads from the asset bundle', () async {
-        final loader = AssetPublishLoader('a.json', bundle: _Assets({'a.json': jsonEncode(bundle(schema))}));
-        expect((await loader.loadLayout(PublishSource.publish, layoutId)).document.toJson(), expected());
-      });
-
-      test('loads over HTTP, from files and from a bundle', () async {
-        final b = bundle(schema);
-        for (final asBundle in [false, true]) {
-          final client = MockClient((r) async {
-            final path = r.url.path;
-            final body = path.endsWith('/layouts/$layoutId.json')
-                ? (b['layouts'] as Map)[layoutId]
-                : asBundle
-                    ? b
-                    : b['model'];
-            return http.Response(jsonEncode(body), 200);
-          });
-          final loader = HttpPublishLoader(projectId: 'p1', baseUrl: 'https://x.test/', bundle: asBundle, client: client);
-          expect((await loader.loadModel(PublishSource.publish)).projectId, 'p1');
-          expect((await loader.loadLayout(PublishSource.publish, layoutId)).document.toJson(), expected(), reason: 'bundle: $asBundle');
-        }
-      });
-
-      test('loads from Firestore, migrated in memory and not written back', () async {
-        final db = FakeFirebaseFirestore();
-        final b = bundle(schema);
-        await db.doc('publish/p1').set(b['model'] as Json);
-        await db.doc('publish/p1/layouts/$layoutId').set((b['layouts'] as Map)[layoutId] as Json);
-        final loader = FirestorePublishLoader(db, projectId: 'p1');
-        expect((await loader.loadModel(PublishSource.publish)).projectId, 'p1');
-        expect((await loader.loadLayout(PublishSource.publish, layoutId)).document.toJson(), expected());
-        final stored = (await db.doc('publish/p1/layouts/$layoutId').get()).data()!;
-        expect(stored['schema'], schema);
-      });
+  group('a schema-3 document', () {
+    test('loads from memory', () async {
+      final loader = MemoryPublishLoader(PublishBundle.fromJson(bundle(), catalog: standardCatalog));
+      expect((await loader.loadLayout(PublishSource.publish, layoutId)).document.toJson(), expected());
+      expect((await loader.loadModel(PublishSource.publish)).toJson()['schema'], 3);
     });
-  }
 
-  test('a stored document newer than this SDK reads is refused, saying so', () async {
-    final db = FakeFirebaseFirestore();
-    await db.doc('publish/p1').set({...model2(), 'schema': 4});
-    await expectLater(FirestorePublishLoader(db, projectId: 'p1').loadModel(PublishSource.publish),
-        throwsA(isA<PublishLoadException>().having((e) => e.message, 'message', contains('newer than this SDK'))));
+    test('loads from the asset bundle', () async {
+      final loader = AssetPublishLoader('a.json', bundle: _Assets({'a.json': jsonEncode(bundle())}));
+      expect((await loader.loadLayout(PublishSource.publish, layoutId)).document.toJson(), expected());
+    });
+
+    test('loads over HTTP, from files and from a bundle', () async {
+      for (final asBundle in [false, true]) {
+        final loader = _http(bundle(), asBundle: asBundle);
+        expect((await loader.loadModel(PublishSource.publish)).projectId, 'p1');
+        expect((await loader.loadLayout(PublishSource.publish, layoutId)).document.toJson(), expected(), reason: 'bundle: $asBundle');
+      }
+    });
+
+    test('loads from Firestore', () async {
+      final db = FakeFirebaseFirestore();
+      await db.doc('publish/p1').set(model());
+      await db.doc('publish/p1/layouts/$layoutId').set(layout());
+      final loader = FirestorePublishLoader(db, projectId: 'p1');
+      expect((await loader.loadModel(PublishSource.publish)).projectId, 'p1');
+      expect((await loader.loadLayout(PublishSource.publish, layoutId)).document.toJson(), expected());
+    });
   });
 
-  test('a bundle newer than this SDK reads is refused, saying so', () async {
-    final bundle = {
-      'schema': 4,
-      'model': {...model2(), 'schema': 4},
-      'layouts': {layoutId: layout2()},
-    };
-    final loader = HttpPublishLoader(
-        projectId: 'p1',
-        baseUrl: 'http://x',
-        bundle: true,
-        client: MockClient((_) async => http.Response(jsonEncode(bundle), 200)));
-    await expectLater(loader.loadModel(PublishSource.publish),
-        throwsA(isA<PublishLoadException>().having((e) => e.message, 'message', contains('newer than this SDK'))));
+  group('a schema-2 document is refused, naming the schema found and the one read', () {
+    test('from Firestore', () async {
+      final db = FakeFirebaseFirestore();
+      await db.doc('publish/p1').set(model(schema: 2));
+      await db.doc('publish/p1/layouts/$layoutId').set(layout(schema: 2));
+      final loader = FirestorePublishLoader(db, projectId: 'p1');
+      await expectLater(loader.loadModel(PublishSource.publish),
+          _refused('The publish model of project [p1] is in schema 2; codelessly_api reads schema 3 only.'));
+      await expectLater(loader.loadLayout(PublishSource.publish, layoutId),
+          _refused('Layout [home] is in schema 2; codelessly_api reads schema 3 only.'));
+    });
+
+    test('over HTTP, from files and from a bundle', () async {
+      await expectLater(_http(bundle(schema: 2), asBundle: false).loadModel(PublishSource.publish),
+          _refused('The publish model of project [p1] is in schema 2; codelessly_api reads schema 3 only.'));
+      await expectLater(_http(bundle(schema: 2), asBundle: true).loadModel(PublishSource.publish),
+          _refused('The bundle is in schema 2; codelessly_api reads schema 3 only.'));
+    });
+
+    test('from the asset bundle, and a bundle whose model or layout is schema 2', () async {
+      final loader = AssetPublishLoader('a.json', bundle: _Assets({'a.json': jsonEncode(bundle(schema: 2))}));
+      await expectLater(loader.loadModel(PublishSource.publish), _refused('The bundle is in schema 2; codelessly_api reads schema 3 only.'));
+      expect(() => decodeBundleJson({'model': model(schema: 2), 'layouts': {layoutId: layout()}}),
+          _refused("The bundle's publish model is in schema 2; codelessly_api reads schema 3 only."));
+      expect(() => decodeBundleJson({'model': model(), 'layouts': {layoutId: layout(schema: 2)}}),
+          _refused('Layout [home] of the bundle is in schema 2; codelessly_api reads schema 3 only.'));
+    });
+
+    test('in memory, by codelessly_api as it decodes', () {
+      expect(() => PublishBundle.fromJson(bundle(schema: 2), catalog: standardCatalog),
+          throwsA(isA<UnsupportedSchemaException>().having((e) => e.message, 'message', 'The bundle is in schema 2; codelessly_api reads schema 3 only.')));
+    });
+  });
+
+  test('a stored document with no schema is refused, saying so', () async {
+    final db = FakeFirebaseFirestore();
+    await db.doc('publish/p1').set(model(schema: null));
+    await expectLater(FirestorePublishLoader(db, projectId: 'p1').loadModel(PublishSource.publish),
+        _refused('The publish model of project [p1] has no "schema"; codelessly_api reads schema 3 only ("schema": 3).'));
+  });
+
+  test('a stored document newer than this SDK reads is refused, naming the update', () async {
+    final db = FakeFirebaseFirestore();
+    await db.doc('publish/p1').set(model(schema: 4));
+    await expectLater(FirestorePublishLoader(db, projectId: 'p1').loadModel(PublishSource.publish),
+        _refused('The publish model of project [p1] is in schema 4; codelessly_api reads schema 3 only. Update codelessly_sdk.'));
+  });
+
+  test('a bundle newer than this SDK reads is refused, naming the update', () async {
+    await expectLater(_http(bundle(schema: 4), asBundle: true).loadModel(PublishSource.publish),
+        _refused('The bundle is in schema 4; codelessly_api reads schema 3 only. Update codelessly_sdk.'));
   });
 }

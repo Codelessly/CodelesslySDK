@@ -1,5 +1,5 @@
 {
-  "schema": 2,
+  "schema": 3,
   "id": "acme.stars",
   "semver": "1.0.0",
   "minSdk": "24.0.0",
@@ -75,7 +75,10 @@
                 "s3",
                 "s4",
                 "s5"
-              ]
+              ],
+              "defaultTextStyle": {
+                "height": 1.33
+              }
             },
             "s1": {
               "type": "icon",
@@ -172,7 +175,8 @@
                 "props.color": "${props.color}"
               }
             }
-          }
+          },
+          "schema": 3
         }
       }
     },

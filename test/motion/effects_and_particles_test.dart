@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../lists/support.dart' as lists;
-import '../support/legacy.dart';
 
 // Keyframed one-shot effects (a hop with squash and stretch, a fly-away and
 // back) and image particles (petals, seeds, raindrops).
@@ -54,6 +53,7 @@ Map<String, Object?> at(double x, double y, double w, double h) =>
 class Screen {
   Screen(Map<String, Object?> nodes, {List<Variable> variables = const []}) : scope = VariableScope(variables) {
     final doc = LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['r'],
       'nodes': {
         'r': {
@@ -80,7 +80,7 @@ class Screen {
   }
 
   Future<void> run(List<Json> actions) => const CodelesslyActions().run(
-        migratedNode({
+        Node.fromJson({
           'type': 'box',
           'actions': [
             {'trigger': {'type': 'click'}, 'actions': actions},
@@ -126,11 +126,11 @@ void main() {
             'type': 'box',
             'layout': {'width': 100, 'height': 100, 'x': {'start': 150}, 'y': {'start': 250}},
             'decoration': {'fills': [{'color': '#FF00AA00'}]},
-            'effectAnimations': [
-              {'name': 'hop', 'type': 'keyframes', 'duration': 1000, 'keyframes': hop},
+            'animations': [
+              {'id': 'hop', 'preset': 'keyframes', 'params': {'frames': hop}, 'duration': 1000},
             ],
             'particles': {'shapes': ['image'], 'image': 'https://example.com/petal.png', 'count': 8},
-            'bind': {'effectAnimations[0].playKey': r'${taps}', 'particles.playKey': r'${taps}'},
+            'bind': {'animations.hop.playKey': r'${taps}', 'particles.playKey': r'${taps}'},
           },
         },
         root: 'col',
@@ -172,8 +172,8 @@ void main() {
     testWidgets('a play action plays the named effect and the next action waits for it', (tester) async {
       final s = Screen({
         'n': box({
-          'effectAnimations': [
-            {'name': 'nudge', 'type': 'shake', 'duration': 400, 'cycles': 2},
+          'animations': [
+            {'id': 'nudge', 'preset': 'shake', 'params': {'cycles': 2}, 'duration': 400},
           ],
         }),
       });
@@ -181,7 +181,7 @@ void main() {
       expect(s.rectOf(tester, 'n').left, 100);
       var done = false;
       unawaited(s.run([
-        {'type': 'playAnimation', 'node': 'n', 'animation': 'nudge'},
+        {'type': 'animate', 'node': 'n', 'animation': 'nudge', 'from': '0'},
       ]).then((_) => done = true));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
@@ -197,10 +197,10 @@ void main() {
     testWidgets('a bound cue plays the effect when it changes, not when it first shows', (tester) async {
       final s = Screen({
         'n': box({
-          'effectAnimations': [
-            {'name': 'pop', 'type': 'pop', 'duration': 400, 'delay': 100},
+          'animations': [
+            {'id': 'pop', 'preset': 'pop', 'duration': 400, 'delay': 100},
           ],
-          'bind': {'effectAnimations[0].playKey': r'${hits}'},
+          'bind': {'animations.pop.playKey': r'${hits}'},
         }),
       }, variables: [const Variable(name: 'hits', type: VariableType.integer, value: 0)]);
       await s.pump(tester);
@@ -221,8 +221,8 @@ void main() {
     testWidgets('an effect set to play on appear plays as the node shows, and never on the design canvas', (tester) async {
       final s = Screen({
         'n': box({
-          'effectAnimations': [
-            {'name': 'in', 'type': 'wiggle', 'duration': 600, 'playOnAppear': true},
+          'animations': [
+            {'id': 'in', 'preset': 'wiggle', 'duration': 600, 'autoplay': true},
           ],
         }),
       });
@@ -235,8 +235,8 @@ void main() {
 
       final canvas = Screen({
         'n': box({
-          'effectAnimations': [
-            {'name': 'in', 'type': 'wiggle', 'duration': 600, 'playOnAppear': true},
+          'animations': [
+            {'id': 'in', 'preset': 'wiggle', 'duration': 600, 'autoplay': true},
           ],
         }),
       });
@@ -273,8 +273,8 @@ void main() {
     testWidgets('a node flies in from where the node sharing its flight key was', (tester) async {
       FlightRegistry.reset();
       final s = Screen({
-        'a': box({'layout': at(0, 0, 40, 40), 'flightKey': r'tile', 'bind': {'visible': r'${!moved}'}}),
-        'b': box({'layout': at(200, 200, 80, 80), 'flightKey': r'tile', 'bind': {'visible': r'${moved}'}}),
+        'a': box({'layout': at(0, 0, 40, 40), 'hero': {'tag': 'tile', 'flies': 'inPlace'}, 'bind': {'visible': r'${!moved}'}}),
+        'b': box({'layout': at(200, 200, 80, 80), 'hero': {'tag': 'tile', 'flies': 'inPlace'}, 'bind': {'visible': r'${moved}'}}),
       }, variables: [const Variable(name: 'moved', type: VariableType.boolean, value: false)]);
       await s.pump(tester);
       s.scope.set('moved', true);

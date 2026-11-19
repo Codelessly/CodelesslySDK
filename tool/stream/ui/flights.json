@@ -1,5 +1,5 @@
 {
- "schema": 2,
+ "schema": 3,
  "roots": [
   "flights"
  ],
@@ -15,6 +15,9 @@
     "height": {
      "hug": 520
     }
+   },
+   "defaultTextStyle": {
+    "height": 1.33
    }
   },
   "fcCard": {
@@ -150,7 +153,7 @@
     }
    },
    "props": {
-    "text": "London \u2192 Lisbon",
+    "text": "London → Lisbon",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 18,
@@ -170,7 +173,7 @@
     }
    },
    "props": {
-    "text": "Fri 14 Nov \u00b7 1 adult \u00b7 Economy",
+    "text": "Fri 14 Nov · 1 adult · Economy",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 13,
@@ -329,7 +332,7 @@
     }
    },
    "props": {
-    "text": "07:10 \u2192 09:55",
+    "text": "07:10 → 09:55",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 16,
@@ -349,7 +352,7 @@
     }
    },
    "props": {
-    "text": "TAP Air Portugal \u00b7 Direct \u00b7 2h 45m",
+    "text": "TAP Air Portugal · Direct · 2h 45m",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 12,
@@ -390,7 +393,7 @@
     }
    },
    "props": {
-    "text": "\u00a384",
+    "text": "£84",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 18,
@@ -577,7 +580,7 @@
     }
    },
    "props": {
-    "text": "11:40 \u2192 14:20",
+    "text": "11:40 → 14:20",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 16,
@@ -597,7 +600,7 @@
     }
    },
    "props": {
-    "text": "British Airways \u00b7 Direct \u00b7 2h 40m",
+    "text": "British Airways · Direct · 2h 40m",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 12,
@@ -638,7 +641,7 @@
     }
    },
    "props": {
-    "text": "\u00a3129",
+    "text": "£129",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 18,
@@ -825,7 +828,7 @@
     }
    },
    "props": {
-    "text": "18:05 \u2192 21:00",
+    "text": "18:05 → 21:00",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 16,
@@ -845,7 +848,7 @@
     }
    },
    "props": {
-    "text": "easyJet \u00b7 Direct \u00b7 2h 55m",
+    "text": "easyJet · Direct · 2h 55m",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 12,
@@ -885,7 +888,7 @@
     }
    },
    "props": {
-    "text": "\u00a397",
+    "text": "£97",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 18,
@@ -962,7 +965,7 @@
     }
    },
    "props": {
-    "text": "\u00a384",
+    "text": "£84",
     "style": {
      "fontFamily": "DM Sans",
      "fontSize": 20,
@@ -971,7 +974,7 @@
     }
    },
    "bind": {
-    "props.text": "${= \"\u00a3\" + prices[selected]}"
+    "props.text": "${= \"£\" + prices[selected]}"
    }
   },
   "fcCta": {

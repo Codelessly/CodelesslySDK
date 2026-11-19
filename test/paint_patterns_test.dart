@@ -15,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// The RGBA pixels of a [w] × [h] box painted with [fills].
 Future<(ByteData, int)> _pixels(WidgetTester tester, List<Json> fills, {double w = 400, double h = 300}) async {
   final doc = LayoutDocument.fromJson({
+    'schema': 3,
     'roots': ['b'],
     'nodes': {
       'b': {'type': 'box', 'layout': {'width': w, 'height': h}, 'decoration': {'fills': fills}},

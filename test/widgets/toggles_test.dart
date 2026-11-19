@@ -98,6 +98,7 @@ Future<_Screen> _show(
 }) async {
   final source = DocumentSource(
     LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['root'],
       'nodes': {
         'root': {
@@ -222,6 +223,7 @@ RenderSegmentedButton control(NodeTree tree, [String id = 'tabs']) => controlIn<
 
 Future<NodeTree> _showSegmented(WidgetTester tester, Map<String, Object?> props, {double width = 96, double height = 28}) async {
   final source = DocumentSource(LayoutDocument.fromJson({
+    'schema': 3,
     'roots': ['seg'],
     'nodes': {
       'seg': {
@@ -278,6 +280,7 @@ Map<String, Object?> _switch({bool value = false, Map<String, Object?> props = c
 
 Future<RenderToggle> _showSwitch(WidgetTester tester, Map<String, Object?> node) async {
   final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({
+    'schema': 3,
     'roots': ['s'],
     'nodes': {'s': node},
   })));
@@ -294,7 +297,7 @@ const _border = {'inactiveThumbBorderColor': '#FFDDDDDD', 'activeThumbBorderColo
 
 Future<(NodeTree, RenderObject)> show(WidgetTester tester, Map<String, Map<String, Object?>> nodes, String root,
     {double width = 800, double height = 600}) async {
-  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'roots': [root], 'nodes': nodes})));
+  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'schema': 3, 'roots': [root], 'nodes': nodes})));
   addTearDown(tree.dispose);
   await tester.pumpWidget(MaterialApp(
       home: Align(
@@ -314,7 +317,7 @@ void main() {
       await lists.show(tester, _pad({}));
       final p = _painter(tester);
       expect(p.dashed, isFalse);
-      expect(p.signLineOffset, isNull);
+      expect(p.signLineBottom, isNull);
       expect(p.signLineInset, 20);
       expect(p.signLineWidth, 1);
       expect(p.markGlyph, isTrue);
@@ -331,9 +334,9 @@ void main() {
       await lists.show(
         tester,
         _pad({
-          'signLineOffset': 50,
+          'signLineBottom': 50,
           'signLineInset': 24,
-          'showSignMark': false,
+          'signLineMark': false,
           'caption': 'SIGN ABOVE THE LINE',
           'captionStyle': {'fontWeight': 800, 'fontSize': 11, 'letterSpacing': 1.4, 'color': '#FF5E5E66'},
           'captionGap': 10,
@@ -569,6 +572,7 @@ void main() {
       (tester) async {
         final source = DocumentSource(
           LayoutDocument.fromJson({
+            'schema': 3,
             'roots': ['tabs'],
             'nodes': {
               'tabs': {
@@ -618,6 +622,7 @@ void main() {
     ) async {
       final source = DocumentSource(
         LayoutDocument.fromJson({
+          'schema': 3,
           'roots': ['tabs'],
           'nodes': {
             'tabs': {

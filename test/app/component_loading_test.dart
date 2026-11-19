@@ -26,7 +26,7 @@ import '../../tool/render/src/publish.dart';
 import 'support.dart';
 
 Json badge() => {
-      'schema': 2,
+      'schema': 3,
       'id': 'Badge',
       'roots': ['b'],
       'widget': {
@@ -45,7 +45,7 @@ Json badge() => {
     };
 
 Json card({String prefix = 'Card'}) => {
-      'schema': 2,
+      'schema': 3,
       'id': 'Card',
       'roots': ['card'],
       'widget': {
@@ -70,7 +70,7 @@ Json card({String prefix = 'Card'}) => {
     };
 
 Json home({List<String> calls = const ['c1', 'c2'], String type = 'Card'}) => {
-      'schema': 2,
+      'schema': 3,
       'roots': ['home'],
       'nodes': {
         'home': {
@@ -350,9 +350,9 @@ void main() {
   test('components load from Firestore, each from its own document and a large one compressed', () async {
     final bundle = publish([home()], [card(), badge()]);
     final FirebaseFirestore db = FakeFirebaseFirestore();
-    await db.doc('publish/p').set({...bundle.model.toJson(), 'schema': 2});
+    await db.doc('publish/p').set({...bundle.model.toJson(), 'schema': 3});
     for (final l in bundle.layouts.values) {
-      await db.doc('publish/p/layouts/${l.id}').set({...l.toJson(), 'schema': 2});
+      await db.doc('publish/p/layouts/${l.id}').set({...l.toJson(), 'schema': 3});
     }
     await db.doc('publish/p/components/Card').set(bundle.components['Card']!.toJson());
     // The editor compresses a document too large for Firestore as it does a

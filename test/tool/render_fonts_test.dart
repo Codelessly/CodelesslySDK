@@ -80,7 +80,7 @@ void main() {
         .writeAsBytesSync(woffOf(File('../references/strata/assets/fonts/Manrope-Regular.ttf').readAsBytesSync()));
     File('${files.path}/fraunces-latin-600-normal.woff2').writeAsBytesSync([0x77, 0x4F, 0x46, 0x32, ...List.filled(60, 0)]);
     File('${dir.path}/page.json').writeAsStringSync('''
-{"schema": 2, "roots": ["c"], "nodes": {
+{"schema": 3, "roots": ["c"], "nodes": {
  "c": {"type": "canvas", "slots": {"body": "col"}, "layout": {"width": 390, "height": 300}},
  "col": {"type": "column", "children": ["a", "b"], "layout": {"width": {"fill": 390}, "height": {"fill": 300}}},
  "a": {"type": "text", "layout": {"width": {"hug": 10}, "height": {"hug": 10}}, "props": {"text": "Manrope", "style": {"fontFamily": "Manrope", "fontWeight": 400, "color": "#FF000000"}}},

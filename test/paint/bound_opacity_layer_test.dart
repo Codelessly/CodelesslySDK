@@ -38,6 +38,7 @@ void main() {
     final scope = VariableScope([Variable(id: 'o', name: 'o', type: VariableType.decimal, value: 1.0)]);
     final tree = NodeTree(
       DocumentSource(LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['col'],
         'nodes': {
           'col': {'type': 'column', 'children': ['bound', 'fixed', 'constant', 'plain'], 'layout': {'width': 100, 'height': {'hug': 80}}},
@@ -52,15 +53,15 @@ void main() {
             'layout': {'width': 60, 'height': 30},
             'decoration': {'fills': [{'color': '#00000000'}], 'strokes': [{'color': '#FFE9D9B4'}], 'strokeWidth': 1.4, 'radius': 4},
             'bind': {'opacity': r'${= 1}'},
-            'states': {'pressed': {'@constant': {'scale': 0.97}}},
-            'transitions': {'style': {'duration': 120}},
+            'states': {'pressed': {'@constant': {'motion': {'scale': 0.97}}}},
+            'transitions': [{'property': 'opacity', 'duration': 120}, {'property': 'motion.scale', 'duration': 120}, {'property': 'decoration.fills', 'duration': 120}, {'property': 'visible', 'duration': 120}],
           },
           'plain': {
             'type': 'row',
             'layout': {'width': 60, 'height': 30},
             'decoration': {'fills': [{'color': '#00000000'}], 'strokes': [{'color': '#FFE9D9B4'}], 'strokeWidth': 1.4, 'radius': 4},
-            'states': {'pressed': {'@plain': {'scale': 0.97}}},
-            'transitions': {'style': {'duration': 120}},
+            'states': {'pressed': {'@plain': {'motion': {'scale': 0.97}}}},
+            'transitions': [{'property': 'opacity', 'duration': 120}, {'property': 'motion.scale', 'duration': 120}, {'property': 'decoration.fills', 'duration': 120}, {'property': 'visible', 'duration': 120}],
           },
           'fixed': {
             'type': 'box',

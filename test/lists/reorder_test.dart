@@ -128,7 +128,7 @@ void main() {
             'type': 'box',
             'layout': {'width': 50, 'height': 50},
             'decoration': {'fills': [{'color': '#FF000000'}]},
-            'drag': {'reorder': true},
+            'reorderHandle': true,
           },
         },
       );

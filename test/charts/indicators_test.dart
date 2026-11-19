@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// [nodes] placed freeform at (10, 10) in a 400×300 stack.
 LayoutDocument _doc(Map<String, Map<String, Object?>> nodes) => LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['s'],
       'nodes': {
         's': {'type': 'stack', 'children': [...nodes.keys], 'layout': {'width': 400, 'height': 300}},
@@ -60,6 +61,7 @@ void main() {
 
   testWidgets('a spinner in a row is centered and as wide as it is tall', (tester) async {
     final doc = LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['r'],
       'nodes': {
         'r': {'type': 'row', 'children': ['spin', 'ios'], 'layout': {'width': 200, 'height': 48}},

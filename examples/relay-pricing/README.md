@@ -75,7 +75,6 @@ components/FaqSection.json     the questions                             (own va
 components/FaqItem.json        one question: the FAQ list's item template (item, index, open: a variable)
 components/FinalCta.json       the closing call to action
 components/SiteFooter.json     the footer
-rewrite.py                     the throwaway script that split the original (kept to show how)
 ```
 
 What went where:

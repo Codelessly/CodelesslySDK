@@ -1,6 +1,5 @@
 // A published app lays out text without a line height at its font's own
-// height, as Flutter does, in a schema-3 layout; a schema-2 layout keeps
-// 1.33 through the migration.
+// height, as Flutter does.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -8,9 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'support.dart' show settle;
 
-PublishBundle _bundle({required int schema}) {
+PublishBundle _bundle() {
   final layout = PublishLayout.fromJson({
-    'schema': schema,
+    'schema': 3,
     'id': 'home',
     'roots': ['canvas'],
     'nodes': {
@@ -42,11 +41,9 @@ PublishBundle _bundle({required int schema}) {
 }
 
 void main() {
-  for (final schema in [3, 2]) {
-    testWidgets(
-        'a published app lays out text without a line height in a schema-$schema layout '
-        '${schema == 3 ? "at the font's own height" : "at 1.33, as before"}', (tester) async {
-      final app = Codelessly.fromBundle(_bundle(schema: schema),
+  {
+    testWidgets("a published app lays out text without a line height at the font's own height", (tester) async {
+      final app = Codelessly.fromBundle(_bundle(),
           config: CodelesslyConfig(services: Services(analytics: const NoAnalytics())), fonts: const NoFontFetcher());
       final controller = CodelesslyWidgetController();
       await tester.pumpWidget(MaterialApp(
@@ -65,11 +62,7 @@ void main() {
       }
       walk(tester.renderObject(find.byType(NodeView)));
       final label = paragraphs.firstWhere((p) => p.text.toPlainText() == 'Backlog').size.height;
-      if (schema == 3) {
-        expect(label, flutter);
-      } else {
-        expect(label, closeTo(15 * 1.33, 0.5));
-      }
+      expect(label, flutter);
       await tester.pumpWidget(const SizedBox());
       controller.dispose();
       app.dispose();

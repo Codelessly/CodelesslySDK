@@ -7,6 +7,7 @@ import 'package:flutter/material.dart' hide Axis;
 import 'package:flutter_test/flutter_test.dart';
 
 Map<String, Object?> doc({bool appBar = true, bool bottom = true, bool fab = true}) => {
+      'schema': 3,
       'roots': ['c'],
       'nodes': {
         'c': {

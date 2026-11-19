@@ -176,7 +176,7 @@ void main() {
     expect(r.issues, isEmpty);
     final home = PublishLayout.fromJson({'id': 'home', ...r.document});
     final other = PublishLayout.fromJson({
-      'schema': 2,
+      'schema': 3,
       'id': 'other',
       'roots': ['o'],
       'nodes': {

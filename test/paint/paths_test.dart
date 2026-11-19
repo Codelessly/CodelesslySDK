@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 // stroke stays in the box's pixels.
 
 LayoutDocument _doc(bool scale) => LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['canvas'],
       'nodes': {
         'canvas': {'type': 'canvas', 'slots': {'body': 'line'}, 'layout': {'width': 100, 'height': 100}},
@@ -54,42 +55,11 @@ Future<int> _alphaAt(WidgetTester tester, bool scale, Offset at) async {
 // strokePath.fillColor fills the shape its points enclose, behind the line
 // (a hand-drawn box with its own wobble), fading in as the line draws.
 
-/// [node] (30.0.0's spellings) in a schema-2 document of its own, loaded
-/// (migrated) and drawn at [size] by a running app's binder.
-Future<RenderRepaintBoundary> _showNode(WidgetTester tester, Map<String, Object?> node, Size size) async {
-  tester.view.devicePixelRatio = 1;
-  tester.view.physicalSize = size;
-  addTearDown(tester.view.reset);
-  final doc = LayoutDocument.fromJson({
-    'schema': 2,
-    'roots': ['n'],
-    'nodes': {'n': node},
-  });
-  final tree = NodeTree(DocumentSource(doc), binder: NodeBinder(scope: VariableScope(const [])));
-  addTearDown(tree.dispose);
-  final key = GlobalKey();
-  await tester.pumpWidget(MaterialApp(
-    home: Align(alignment: Alignment.topLeft, child: RepaintBoundary(key: key, child: NodeView(tree: tree, rootId: 'n'))),
-  ));
-  return key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
-}
-
-/// The RGBA of each of [at] in what [boundary] draws.
-Future<List<int>> _pixels(WidgetTester tester, RenderRepaintBoundary boundary, List<Offset> at) async {
-  final width = boundary.size.width.toInt();
-  final bytes = (await tester.runAsync(() async {
-    final image = await boundary.toImage();
-    final data = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-    image.dispose();
-    return data!;
-  }))!;
-  return [for (final p in at) ...[for (var c = 0; c < 4; c++) bytes.getUint8((p.dy.toInt() * width + p.dx.toInt()) * 4 + c)]];
-}
-
 // Painting and islands of the media group: image fills, SVG paths (the
 // `path` widget and a box's path), icons, and the players' islands.
 
 Map<String, Object?> _doc2(Map<String, Object?> nodes, {double w = 300, double h = 200}) => {
+      'schema': 3,
       'roots': ['s'],
       'nodes': {
         's': {'type': 'stack', 'children': [for (final k in nodes.keys) k], 'layout': {'width': w, 'height': h}},
@@ -112,7 +82,7 @@ Future<NodeTree> _show(WidgetTester tester, Map<String, Object?> json, {bool int
 
 Future<(NodeTree, RenderObject)> show(WidgetTester tester, Map<String, Map<String, Object?>> nodes, String root,
     {double width = 800, double height = 600}) async {
-  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'roots': [root], 'nodes': nodes})));
+  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'schema': 3, 'roots': [root], 'nodes': nodes})));
   addTearDown(tree.dispose);
   await tester.pumpWidget(MaterialApp(
       home: Align(
@@ -184,70 +154,6 @@ void main() {
             ..path(color: const Color(0xFF0000FF), style: PaintingStyle.stroke, strokeWidth: 2));
     });
 
-    testWidgets('a box shaped by a path is a path node: it fills inside the path and strokes along it, unclipped', (tester) async {
-      final tree = await _show(tester, _doc2({
-        'b': {
-          'type': 'box',
-          'layout': {'width': 100, 'height': 100},
-          'decoration': {
-            'fills': [{'color': '#FFFF0000'}],
-            'strokes': [{'color': '#FF000000'}],
-            'strokeWidth': 4,
-            'clip': 'hardEdge',
-            'effects': [{'type': 'dropShadow', 'color': '#FF000000', 'blurRadius': 4}],
-          },
-          'props': {'path': 'M0 0 L100 0 L0 100 Z', 'strokeJoin': 'round'},
-        },
-      }));
-      expect((tree.source as DocumentSource).document.nodes['b']!.type, 'path');
-      final shape = renderOf<RenderShapePath>(tree.boxOf('b')!).single;
-      expect(shape, isNot(paints..something((m, _) => m == #drawShadow || m == #clipRect || m == #clipPath)));
-      expect(
-          shape,
-          paints
-            ..path(color: const Color(0xFF000000))
-            ..path(color: const Color(0xFF000000), style: PaintingStyle.stroke, strokeWidth: 4)
-            ..path(color: const Color(0xFFFF0000), includes: const [Offset(10, 10)], excludes: const [Offset(90, 90)])
-            ..path(color: const Color(0xFF000000), style: PaintingStyle.stroke, strokeWidth: 4));
-    });
-
-    // With shadows the per-shape colors have no exact custom paint form: the
-    // migration keeps them as `legacy.props.subpathColors` and reports it.
-    testWidgets('a path\'s shapes colored in turn are custom paint path ops, each color times the fill\'s alpha', (tester) async {
-      final b = await _showNode(tester, {
-        'type': 'path',
-        'layout': {'width': 30, 'height': 10},
-        'props': {
-          'data': 'M0 0 H10 V10 H0 Z M20 0 H30 V10 H20 Z',
-          'subpathColors': ['#FFFF0000', '#FF0000FF'],
-        },
-        'decoration': {'fills': [{'color': '#80FFFFFF'}]},
-      }, const Size(30, 10));
-      final px = await _pixels(tester, b, const [Offset(5, 5), Offset(15, 5), Offset(25, 5)]);
-      expect(px.sublist(0, 4), [128, 0, 0, 128], reason: 'the first shape');
-      expect(px.sublist(4, 8), [0, 0, 0, 0], reason: 'between the shapes');
-      expect(px.sublist(8, 12), [0, 0, 128, 128], reason: 'the second shape');
-    });
-
-    testWidgets('a per-shape gradient is a custom paint path op per shape, laid out in that shape', (tester) async {
-      final b = await _showNode(tester, {
-        'type': 'path',
-        'layout': {'width': 30, 'height': 10},
-        'props': {'data': 'M0 0 H10 V10 H0 Z M20 0 H30 V10 H20 Z'},
-        'decoration': {
-          'fills': [
-            {'type': 'linear', 'gradientPerSubpath': true, 'stops': [
-              {'position': 0, 'color': '#FF000000'}, {'position': 1, 'color': '#FFFFFFFF'}]},
-          ],
-        },
-      }, const Size(30, 10));
-      final px = await _pixels(tester, b, const [Offset(0, 5), Offset(9, 5), Offset(20, 5), Offset(29, 5)]);
-      // Each shape runs from dark at its left to light at its right.
-      expect(px[0], lessThan(30));
-      expect(px[4], greaterThan(220));
-      expect(px[8], lessThan(30));
-      expect(px[12], greaterThan(220));
-    });
   });
 
 }

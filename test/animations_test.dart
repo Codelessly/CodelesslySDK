@@ -14,7 +14,6 @@ import 'package:flutter/scheduler.dart' show Ticker;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/screen.dart' show reaction, show, v;
-import 'support/legacy.dart';
 
 Json box(String id, Json extra, {double x = 0, double y = 0, double size = 40}) => {
       id: {
@@ -49,7 +48,7 @@ RenderAnimations playerOf(NodeTree tree, String id) => tree.boxOf(id)!.animation
 
 /// A plain tree (no bindings), drawn running or as a design canvas.
 Future<NodeTree> plain(WidgetTester tester, Map<String, Json> nodes, {bool interactive = true}) async {
-  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'roots': ['s'], 'nodes': nodes})));
+  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'schema': 3, 'roots': ['s'], 'nodes': nodes})));
   addTearDown(tree.dispose);
   await tester.pumpWidget(MaterialApp(
     home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 's', interactive: interactive)),
@@ -235,7 +234,7 @@ void main() {
       expect(s['done'], 'yes');
       // Reverse from a command elsewhere.
       await const CodelesslyActions().run(
-          migratedNode({
+          Node.fromJson({
             'type': 'box',
             'actions': [
               reaction('click', [
@@ -260,19 +259,40 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
     });
 
-    testWidgets('a motion\'s pulse key plays its keyframes there and back', (tester) async {
+    testWidgets('an animation on a play key plays its keyframes there and back', (tester) async {
       final s = await show(
           tester,
           stack([
             box('k', {
-              'motion': {
-                'duration': 400,
-                'curve': 'linear',
-                'keyframes': [
-                  {'t': 0.5, 'translateX': 40},
-                ],
-              },
-              'bind': {'motion.pulseKey': r'${bump}'},
+              'motion': <String, Object?>{},
+              'animations': [
+                {
+                  'id': 'pulse',
+                  'duration': 400,
+                  'curve': 'linear',
+                  'autoplay': false,
+                  'tracks': [
+                    {
+                      'id': 'translateX',
+                      'path': 'motion.translateX',
+                      'keyframes': [
+                        {'at': 0.5, 'value': 40.0},
+                      ],
+                    },
+                  ],
+                },
+              ],
+              'transitions': [
+                {
+                  'property': 'motion',
+                  'duration': 400,
+                  'keyframes': [
+                    {'at': 0.5, 'value': {'translateX': 40}},
+                  ],
+                  'interpolation': 'monotoneCubic',
+                },
+              ],
+              'bind': {'animations.pulse.playKey': r'${bump}'},
             }),
           ]),
           root: 's',
@@ -377,13 +397,21 @@ void main() {
     });
   });
 
-  testWidgets('an older loop and the same loop written as an animation draw the same', (tester) async {
+  testWidgets('a pulse preset and the same loop written as tracks draw the same', (tester) async {
     final legacy = await plain(
         tester,
         stack([
           box('l', {
-            'loops': [
-              {'type': 'pulse', 'scaleFrom': 0.5, 'opacityFrom': 0.2, 'duration': 600, 'reverse': true, 'lag': 150, 'curve': 'easeInOut'},
+            'animations': [
+              {
+                'id': 'loop0',
+                'preset': 'pulse',
+                'params': {'scaleFrom': 0.5, 'opacityFrom': 0.2},
+                'duration': 600,
+                'curve': 'easeInOut',
+                'repeat': {'reverse': true},
+                'phase': 0.875,
+              },
             ],
           }, x: 100, y: 100),
         ]));

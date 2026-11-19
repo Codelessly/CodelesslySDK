@@ -106,6 +106,7 @@ void main() {
     final registry = ComponentRegistry(feature.components);
     final scope = VariableScope([const Variable(name: 'closed', type: VariableType.text, value: '')]);
     final doc = LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['c'],
       'nodes': {
         'c': {'type': 'column', 'children': ['p'], 'layout': {'width': 300, 'height': {'hug': 200}}},
@@ -152,7 +153,7 @@ void main() {
       'l': const PublishLayoutInfo(id: 'l', canvases: [PublishCanvas(id: 'c')]),
     }).withPlugins([ref]);
     final layout = PublishLayout.fromJson({
-      'schema': 2,
+      'schema': 3,
       'id': 'l',
       'roots': ['c'],
       'nodes': {
@@ -198,6 +199,7 @@ void main() {
 }
 
 LayoutDocument _page(Catalog catalog, {required double value}) => LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['c'],
       'nodes': {
         'c': {'type': 'stack', 'children': ['r'], 'layout': {'width': 300, 'height': 100}},
@@ -217,7 +219,7 @@ List<String> _glyphs(RenderTree tree, {String call = 'r'}) => [
 /// A plugin with a panel: a title, a `children` slot with a default, a
 /// close button firing `onClose` with the title.
 Json _panelPackage() => {
-      'schema': 2,
+      'schema': 3,
       'id': 'acme.ui',
       'catalog': {
         'widgets': [
@@ -233,6 +235,7 @@ Json _panelPackage() => {
         'widgets': {
           'acme.panel': {
             'document': {
+              'schema': 3,
               'roots': ['root'],
               'nodes': {
                 'root': {'type': 'column', 'children': ['head', 'body', 'close'], 'layout': {'width': 300, 'height': {'hug': 100}}},

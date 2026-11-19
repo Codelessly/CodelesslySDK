@@ -93,8 +93,7 @@ use git worktrees for runs in parallel.
 
 - **codelessly_api** (`CodelesslyAPI/`): `tool/reference/generate.dart` generates `docs/reference` (the base, the
   pages, `index.json`, `catalog.json`, `document.schema.json`, the `ui_apply`/`ui_read` tool schemas) from the
-  declarations; `tool/migrate.dart` and the migration corpus upgrade older documents; `tool/name_conformance.dart`
-  checks names.
+  declarations; `tool/name_conformance.dart` checks names.
 - **The editor** (`CodelesslyEditor/`): the editor MCP server (`packages/codelessly_editor_mcp`, with `ed.mjs` and
   `bridge.mjs` for shells) drives a live editor: projects, pages, publishing. Its `docs/ai_tools.md` inventories
   every tool across the repositories, including the reference-app parity workflow.

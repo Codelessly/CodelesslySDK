@@ -1,5 +1,5 @@
 {
- "schema": 2,
+ "schema": 3,
  "id": "Chip",
  "roots": [
   "chip"
@@ -113,7 +113,10 @@
       }
      ]
     }
-   ]
+   ],
+   "defaultTextStyle": {
+    "height": 1.33
+   }
   },
   "lead": {
    "type": "slot",

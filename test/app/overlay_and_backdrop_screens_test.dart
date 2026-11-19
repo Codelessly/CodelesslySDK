@@ -19,7 +19,7 @@ import 'support.dart';
 /// `${id}Button` at the top (or the bottom) that runs [click] when tapped.
 PublishLayout _screen(String id, {List<Map<String, Object?>> click = const [], bool overlay = false, bool atBottom = false}) =>
     PublishLayout.fromJson({
-      'schema': 2,
+      'schema': 3,
       'id': id,
       'roots': ['${id}C'],
       'nodes': {
@@ -94,7 +94,7 @@ PublishLayout _backdropScreen(
   Map<String, String>? boxBind,
   String boxColor = '#FF334455',
 }) => PublishLayout.fromJson({
-  'schema': 2,
+  'schema': 3,
   'id': id,
   'roots': ['${id}C'],
   'nodes': {

@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// rect.
 Future<Map<String, Rect?>> _render(WidgetTester tester, Map<String, Object?> nodes) async {
   final doc = LayoutDocument.fromJson({
+    'schema': 3,
     'roots': ['s'],
     'nodes': {
       's': {'type': 'stack', 'children': [for (final e in nodes.entries) if ((e.value as Map)['_child'] != true) e.key],
