@@ -237,6 +237,13 @@ const hostAdapterPaths = ['src/app/', 'src/session/view.dart', 'src/features/med
 /// goes down: lower it with the list.
 const coreWidgetImports = 16;
 
+/// The files under lib that import Flutter's Material or Cupertino library
+/// (`package:flutter/material.dart`, `cupertino.dart`, or the `material_ui`
+/// and `cupertino_ui` packages). It only goes down, to zero: an app that
+/// uses neither then carries neither because of this package
+/// (docs/design/no-material.md).
+const materialImports = 23;
+
 /// One import or export directive: [target] is `dart:x`, `package:x/...`, or
 /// a path under lib/src (`render/convert.dart`) for a file of this package.
 typedef Directive = ({String file, String target});
@@ -443,5 +450,25 @@ void main() {
       'widget-library imports: ${importing.length} files (${core.length} in the core, '
       '${importing.length - core.length} in the host adapter and the plugin players)',
     );
+  });
+
+  test('the files importing Material or Cupertino only shrink, to none', () {
+    final library = RegExp(
+      r'''^\s*(?:import|export)\s+['"]package:(?:flutter/(?:material|cupertino)\.dart|material_ui/|cupertino_ui/)''',
+    );
+    final importing = <String>[];
+    for (final f in Directory('lib').listSync(recursive: true).whereType<File>()) {
+      if (!f.path.endsWith('.dart')) continue;
+      if (f.readAsLinesSync().any(library.hasMatch)) importing.add(f.path.replaceAll(r'\', '/'));
+    }
+    importing.sort();
+    expect(
+      importing.length,
+      lessThanOrEqualTo(materialImports),
+      reason: 'a new import of Material or Cupertino: ${importing.join(', ')}',
+    );
+    expect(importing.length, materialImports, reason: 'fewer now: lower materialImports to ${importing.length}');
+    // ignore: avoid_print
+    print('Material or Cupertino imports: ${importing.length} files');
   });
 }
