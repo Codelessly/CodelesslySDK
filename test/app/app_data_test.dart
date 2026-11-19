@@ -52,7 +52,7 @@ Json _load(String scope, {bool onlyUnread = false}) => {
     };
 
 PublishLayout _screen(String id, String text, Json load) => PublishLayout.fromJson({
-      'schema': 2,
+      'schema': 3,
       'id': id,
       'roots': ['$id-canvas'],
       'nodes': {
@@ -124,7 +124,7 @@ Node _node(List<Json> actions) => Node.fromJson({
 }, id: 'action')!;
 PublishBundle _authBundle() {
   final layout = PublishLayout.fromJson({
-    'schema': 2,
+    'schema': 3,
     'id': 'home',
     'roots': ['canvas'],
     'variables': {

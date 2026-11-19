@@ -29,7 +29,7 @@ Object? evalNow(String formula) => FormulaEvaluator.evaluate(formula, (_) => nul
 
 PublishBundle _bundle({required List<Variable> variables, required String text}) {
   final layout = PublishLayout.fromJson({
-    'schema': 2,
+    'schema': 3,
     'id': 'home',
     'roots': ['canvas'],
     'variables': {

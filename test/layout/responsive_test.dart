@@ -8,6 +8,7 @@ LayoutDocument _doc({
   double x = -525,
   double y = -28,
 }) => LayoutDocument.fromJson({
+  'schema': 3,
   'roots': ['canvas'],
   'nodes': {
     'canvas': {
@@ -119,6 +120,7 @@ void main() {
       'a centered child that fills respects its maximum width',
       (tester) async {
         final doc = LayoutDocument.fromJson({
+          'schema': 3,
           'roots': ['root'],
           'nodes': {
             'root': {
@@ -149,6 +151,7 @@ void main() {
       'a fixed child wider than its parent overhangs evenly when centered',
       (tester) async {
         final doc = LayoutDocument.fromJson({
+          'schema': 3,
           'roots': ['root'],
           'nodes': {
             'root': {

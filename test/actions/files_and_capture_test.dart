@@ -344,6 +344,7 @@ void main() {
       'a print action scrolls its node into view and sends only that node\'s picture to the print dialog',
       (tester) async {
         final document = LayoutDocument.fromJson({
+          'schema': 3,
           'roots': ['root'],
           'nodes': {
             'root': {

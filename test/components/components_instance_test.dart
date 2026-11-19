@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// A definition whose button sets its own label's text (set value).
 Json toggle() => {
-      'schema': 2,
+      'schema': 3,
       'id': 'Toggle',
       'roots': ['t'],
       'widget': {'type': 'Toggle', 'props': <Json>[]},
@@ -35,7 +35,7 @@ Json toggle() => {
 
 /// A definition that repeats its `children` slot once per item of a list.
 Json repeater() => {
-      'schema': 2,
+      'schema': 3,
       'id': 'Repeater',
       'roots': ['r'],
       'widget': {
@@ -61,7 +61,7 @@ Json repeater() => {
 
 /// A definition with a persisted counter.
 Json counter() => {
-      'schema': 2,
+      'schema': 3,
       'id': 'Counter',
       'roots': ['c'],
       'widget': {'type': 'Counter', 'props': <Json>[]},
@@ -89,7 +89,7 @@ Json counter() => {
     };
 
 Json page(Map<String, Json> nodes, List<String> children, {List<Json> variables = const []}) => {
-      'schema': 2,
+      'schema': 3,
       'roots': ['col'],
       'nodes': {
         'col': {'type': 'column', 'children': children, 'layout': {'width': 400, 'height': {'hug': 600}}},
@@ -192,7 +192,7 @@ void main() {
 
   testWidgets('instance scopes are released when their instances leave the tree: 1,000 mounted and unmounted', (tester) async {
     Json card() => {
-          'schema': 2,
+          'schema': 3,
           'id': 'Card',
           'roots': ['k'],
           'widget': {

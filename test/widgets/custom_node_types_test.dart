@@ -17,6 +17,7 @@ void _rating(NodeBuilder b, Node n, List<RenderBox> chain) {
 }
 
 LayoutDocument _doc({int stars = 3}) => LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['s'],
       'nodes': {
         's': {'type': 'stack', 'children': ['r', 'd'], 'layout': {'width': 300, 'height': 200}},

@@ -52,15 +52,14 @@ abstract interface class LivePublishLoader implements PublishLoader {
   Stream<PublishModel> watchModel(PublishSource source);
 }
 
-/// The stored-document marker of publish data (`schema`): a document at a
-/// publish path without it is in an older format, which this SDK can't
-/// read. Schema 2 (what published apps hold) and 3 load; a schema-2 document
-/// is migrated to 3 in memory when it decodes (`migrate2to3`), never written
-/// back.
+/// The stored-document marker of publish data (`schema`): this SDK loads
+/// schema 3 ([kSchemaVersion]) only. A document of any other schema, or
+/// without one, is refused with a [PublishLoadException] naming the schema
+/// found and the one read.
 const String kStoredSchemaField = 'schema';
 
-/// The stored schemas this SDK loads: 2 (migrated in memory) and 3.
-const Set<int> kLoadableSchemas = {2, kSchemaVersion};
+/// The stored schemas this SDK loads: 3.
+const Set<int> kLoadableSchemas = {kSchemaVersion};
 
 /// Where a stored layout too large for one Firestore document keeps its
 /// nodes: `{"nodes": {...}}` (and any field Firestore couldn't store as it
@@ -71,13 +70,16 @@ const String kCompressedNodesField = 'compressedNodes';
 /// Throws unless [data] (a stored publish document) is in the current format.
 void _requireCurrentFormat(Map<String, Object?> data, String what) {
   final schema = data[kStoredSchemaField];
-  if (schema is num && kLoadableSchemas.contains(schema.toInt())) return;
-  if (schema is num && schema.toInt() > kSchemaVersion) {
-    throw PublishLoadException('$what is in schema ${schema.toInt()}, newer than this SDK reads (2 and 3). '
-        'Update codelessly_sdk.');
-  }
-  throw PublishLoadException('$what is not in the current format (no "schema": 2 or 3). Publish the project '
-      'again from the Codelessly Editor.');
+  if (schema is num && schema == kSchemaVersion) return;
+  throw _unsupportedSchema(schema, what);
+}
+
+/// The [PublishLoadException] for [schema] (a stored document's, null when
+/// it has none): codelessly_api's message ([UnsupportedSchemaException]), and
+/// for a newer schema the update that reads it.
+PublishLoadException _unsupportedSchema(Object? schema, String what) {
+  final message = UnsupportedSchemaException(schema, what: what).message;
+  return PublishLoadException(schema is num && schema > kSchemaVersion ? '$message Update codelessly_sdk.' : message);
 }
 
 /// A stored publish model document ([PublishSource.modelPath]) as a
@@ -263,15 +265,25 @@ class MemoryPublishLoader implements PublishLoader, PluginSource, PublishAssetSo
 /// Decodes a bundle file: JSON, gzipped or not.
 PublishBundle decodeBundle(List<int> bytes) => decodeBundleJson(decodeJsonBytes(bytes));
 
-/// A bundle's JSON as a [PublishBundle]. A bundle (or its model) in a schema
-/// newer than this SDK reads is refused, as a stored document is.
+/// A bundle's JSON as a [PublishBundle]. A bundle, its model or one of its
+/// layouts of a schema other than 3 is refused, as a stored document is (a
+/// bundle may leave its own `schema` out).
 PublishBundle decodeBundleJson(Object? json) {
   if (json is Map) {
+    if (json.containsKey(kStoredSchemaField) && json[kStoredSchemaField] != kSchemaVersion) {
+      throw _unsupportedSchema(json[kStoredSchemaField], 'The bundle');
+    }
     final model = json['model'];
-    for (final schema in [json[kStoredSchemaField], if (model is Map) model[kStoredSchemaField]]) {
-      if (schema is num && schema.toInt() > kSchemaVersion) {
-        throw PublishLoadException('The bundle is in schema ${schema.toInt()}, newer than this SDK reads (2 and 3). '
-            'Update codelessly_sdk.');
+    if (model is Map && model[kStoredSchemaField] != kSchemaVersion) {
+      throw _unsupportedSchema(model[kStoredSchemaField], "The bundle's publish model");
+    }
+    final layouts = json['layouts'];
+    if (layouts is Map) {
+      for (final e in layouts.entries) {
+        final layout = e.value;
+        if (layout is Map && layout[kStoredSchemaField] != kSchemaVersion) {
+          throw _unsupportedSchema(layout[kStoredSchemaField], 'Layout [${e.key}] of the bundle');
+        }
       }
     }
   }
@@ -330,6 +342,9 @@ class AssetPublishLoader implements PublishLoader, PluginSource, PublishAssetSou
         try {
           final data = await (_assets ?? rootBundle).load(asset);
           return decodeBundle(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
+        } on PublishLoadException {
+          _bundle = null;
+          rethrow;
         } catch (e) {
           _bundle = null;
           throw PublishLoadException('Could not load bundle asset [$asset]', e);
@@ -462,7 +477,7 @@ class HttpPublishLoader implements PublishLoader, PluginSource, PublishAssetSour
   @override
   Future<PublishModel> loadModel(PublishSource source) async {
     if (bundle) return (await _bundle(source)).model;
-    return PublishModel.fromJson(await _get('${source.modelPath(projectId)}.json'));
+    return decodeStoredPublishModel(_object(await _get('${source.modelPath(projectId)}.json'), 'The publish model'), projectId: projectId);
   }
 
   @override
@@ -472,7 +487,8 @@ class HttpPublishLoader implements PublishLoader, PluginSource, PublishAssetSour
       if (layout == null) throw PublishLoadException('Layout [$layoutId] is not in the bundle');
       return layout;
     }
-    return PublishLayout.fromJson(await _get('${source.layoutPath(projectId, layoutId)}.json'), catalog: standardCatalog);
+    return decodeStoredPublishLayout(_object(await _get('${source.layoutPath(projectId, layoutId)}.json'), 'Layout [$layoutId]'),
+        layoutId: layoutId);
   }
 
   @override
@@ -481,6 +497,12 @@ class HttpPublishLoader implements PublishLoader, PluginSource, PublishAssetSour
     final json = await _get('${source.componentPath(projectId, type)}.json');
     if (json is! Map) throw PublishLoadException('Component [$type] is not a JSON object');
     return decodeStoredPublishComponent(json.cast<String, Object?>(), type: type);
+  }
+
+  /// [json] as a JSON object, or a [PublishLoadException] naming [what].
+  static Map<String, Object?> _object(Object? json, String what) {
+    if (json is! Map) throw PublishLoadException('$what is not a JSON object');
+    return json.cast<String, Object?>();
   }
 
   /// A [bundle]'s embedded version, else `plugins/{id}/versions/{n}.json`

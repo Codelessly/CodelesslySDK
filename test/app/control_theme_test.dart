@@ -213,7 +213,7 @@ void main() {
     }
 
     Future<NodeTree> show(WidgetTester tester, Map<String, Json> nodes, {ThemeData? appTheme}) async {
-      final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'roots': ['band'], 'nodes': nodes})));
+      final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'schema': 3, 'roots': ['band'], 'nodes': nodes})));
       addTearDown(tree.dispose);
       await tester.pumpWidget(MaterialApp(
         theme: appTheme,

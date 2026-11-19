@@ -53,7 +53,7 @@ flat map:
 
 | Key | Meaning |
 |---|---|
-| `schema` | Always 3 (`kSchemaVersion`). A schema-2 document (or one with none) loads, migrated in memory (`migrate2to3`). |
+| `schema` | Always 3 (`kSchemaVersion`). Required: a document of any other schema, or with none, is refused when it is read (`UnsupportedSchemaException`). |
 | `id` | The layout's id (optional). |
 | `roots` | Canvas ids, in order: the screens of this page. |
 | `nodes` | Every node, by id: `{"<id>": {"type": ..., ...}}`. A node's id is its key here. |

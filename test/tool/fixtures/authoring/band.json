@@ -1,5 +1,5 @@
 {
- "schema": 2,
+ "schema": 3,
  "roots": [
   "home"
  ],
@@ -19,6 +19,9 @@
       "color": "#FFFFFFFF"
      }
     ]
+   },
+   "defaultTextStyle": {
+    "height": 1.33
    }
   },
   "page": {
@@ -241,7 +244,7 @@
      {
       "label": "SSO",
       "values": [
-       "\u2013",
+       "–",
        "Yes",
        "Yes"
       ]

@@ -11,6 +11,7 @@ Future<NodeTree> pump(WidgetTester tester, Map<String, Object?> nodes, {double w
   tester.view.physicalSize = Size(width, 1000);
   addTearDown(tester.view.reset);
   final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({
+    'schema': 3,
     'roots': ['frame'],
     'nodes': {
       'frame': {'type': 'stack', 'children': ['w'], 'layout': {'width': width, 'height': 1000}},

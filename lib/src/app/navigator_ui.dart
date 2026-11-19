@@ -14,6 +14,7 @@ import 'package:codelessly_api/core.dart'
         OpenModalAction,
         RouteTransition,
         ShowToastAction;
+import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:flutter/material.dart' hide NavigationMode;
 import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:flutter/services.dart' show KeyDownEvent, LogicalKeyboardKey;
@@ -46,7 +47,7 @@ typedef ScreenBuilder = Widget? Function(String destination, Json params);
 ///
 /// [context] gives the context the actions run near (a NodeView's, a
 /// screen's); it's read when an action runs, so it can be any later one.
-class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, PopoverUi {
+class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, PopoverUi, SheetStopUi {
   @override
   bool get popoverOnTop {
     final c = _context;
@@ -127,7 +128,13 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, Po
   }
 
   @override
-  Future<Object?> openModal(OpenModalAction action, {Json params = const {}}) async {
+  Future<Object?> openModal(OpenModalAction action, {Json params = const {}}) => _open(action, params, null);
+
+  @override
+  Future<Object?> openSheet(OpenModalAction action, {Json params = const {}, required SheetStop stop}) =>
+      _open(action, params, stop);
+
+  Future<Object?> _open(OpenModalAction action, Json params, SheetStop? stop) async {
     final c = _context;
     if (c == null) return null;
     final sheetBelowWidth = action.sheetBelowWidthIn(_breakpoints);
@@ -136,8 +143,10 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, Po
         (action.presentation == ModalPresentation.adaptive && (width == null || width < sheetBelowWidth));
     final content = ((sheet ? sheetModal : null) ?? modal)?.call(action.to, params);
     if (content == null) return null;
-    // Preserve inherited localizations and themes across both modal routes.
-    final inherited = InheritedTheme.captureAll(c, Localizations.override(context: c, child: content));
+    // Preserve inherited localizations and themes across both modal routes;
+    // the modal is at its page's location (`screen.url`).
+    final inherited = InheritedTheme.captureAll(
+        c, Localizations.override(context: c, child: PageLocationScope(location: pageLocationOf(c), child: content)));
     // Insets keep space around a dialog; a bottom sheet sits on the screen's
     // edge (an adaptive modal used both ways keeps its sheet flush).
     final modalContent = sheet
@@ -189,6 +198,7 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, Po
         sheetRadius: action.sheetRadius,
         maxHeightFactor: action.maxHeightFactor == 1 ? null : action.maxHeightFactor,
         snapHeights: action.snapHeights,
+        sheetStop: stop,
         barrierBlur: action.barrierBlur,
         enterScale: action.enterScale,
         sheetBelowWidth: sheetBelowWidth,
@@ -365,6 +375,7 @@ Future<Object?> showScreenModal(
   double? sheetRadius,
   double? maxHeightFactor,
   List<double> snapHeights = const [],
+  SheetStop? sheetStop,
   double barrierBlur = 0,
   double enterScale = 1,
   bool cover = false,
@@ -417,6 +428,7 @@ Future<Object?> showScreenModal(
       cornerRadius: sheetRadius,
       maxHeightFactor: maxHeightFactor ?? 1,
       snapHeights: snapHeights,
+      sheetStop: sheetStop,
       showDragHandle: showDragHandle || snapHeights.isNotEmpty,
       barrierBlur: barrierBlur,
       enterScale: enterScale,
@@ -912,3 +924,39 @@ class PopoverLayout extends SingleChildLayoutDelegate {
       old.textDirection != textDirection;
 }
 
+// --- where the screen on show is: the location its route was opened with,
+// and its address (`screen.url`) ------------------------------------------------
+
+/// Gives what is under it the location of the page it was opened from: a
+/// dialog or a sheet is at its page's location (its own route has none).
+class PageLocationScope extends InheritedWidget {
+  const PageLocationScope({super.key, required this.location, required super.child});
+
+  final String location;
+
+  @override
+  bool updateShouldNotify(PageLocationScope oldWidget) => oldWidget.location != location;
+}
+
+/// The location of the page [context] is on: what its route is named when
+/// that is a path (`/trip/coast?day=2`, as the app's routes are named and
+/// as a link opens them), else that of the page a modal was opened from;
+/// empty when there is none.
+String pageLocationOf(BuildContext context) {
+  final name = ModalRoute.of(context)?.settings.name;
+  if (name != null && name.startsWith('/')) return name;
+  return context.dependOnInheritedWidgetOfExactType<PageLocationScope>()?.location ?? '';
+}
+
+/// In a test, the address a browser would show; null: the platform's.
+@visibleForTesting
+String? debugBrowserUrl;
+
+/// `screen.url`, the address of the page [context] is on: in a browser the
+/// address it shows; elsewhere the page's location ([pageLocationOf]), which
+/// a link into the app opens, or empty.
+String pageUrlOf(BuildContext context) {
+  final location = pageLocationOf(context);
+  if (debugBrowserUrl case final String url) return url;
+  return kIsWeb ? Uri.base.toString() : location;
+}

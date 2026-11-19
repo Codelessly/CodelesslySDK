@@ -25,7 +25,7 @@ import '../support/fields.dart';
 void main() {
   {
     testWidgets('a timer whose interval is a formula follows it, and stops when its node goes', (tester) async {
-      final s=await harness.show(tester,harness.counter(actions:[harness.reaction('clock',[harness.add('count')],extra:{'every':r'${= 1000 / speed}'})]),variables:[harness.v('count',0,VariableType.integer),harness.v('speed',10,VariableType.integer)]);
+      final s=await harness.show(tester,harness.counter(actions:[harness.reaction('timer',[harness.add('count')],extra:{'intervalMs':r'${= 1000 / speed}'})]),variables:[harness.v('count',0,VariableType.integer),harness.v('speed',10,VariableType.integer)]);
       await tester.pump(const Duration(milliseconds:250));expect(s['count'],2);
       s.scope.set('speed',20);await tester.pump(const Duration(milliseconds:150));expect(s['count'],5);
       s.scope.set('speed',0);await tester.pump(const Duration(seconds:1));expect(s['count'],5);
@@ -36,7 +36,7 @@ void main() {
 
 
     testWidgets('a timer runs only while its condition holds', (tester) async {
-      final nodes=harness.counter();nodes['other']={...nodes['other']!, 'actions':[harness.reaction('clock',[harness.add('ticks')],extra:{'every':r'${period}','runWhen':r'${playing}'})]};
+      final nodes=harness.counter();nodes['other']={...nodes['other']!, 'actions':[harness.reaction('timer',[harness.add('ticks')],extra:{'intervalMs':r'${period}','when':r'${playing}'})]};
       final s=await harness.show(tester,nodes,variables:[harness.v('count',0,VariableType.integer),harness.v('ticks',0,VariableType.integer),harness.v('period',100,VariableType.integer),harness.v('playing',false,VariableType.boolean)]);
       await tester.pump(const Duration(milliseconds:350));expect(s['ticks'],0);
       s.scope.set('playing',true);await tester.pump(const Duration(milliseconds:100));expect(s['ticks'],1);
@@ -283,6 +283,7 @@ void main() {
         modal: (to, params) => SizedBox(key: ValueKey(to), width: 120, height: 80),
       );
       final doc = LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['col'],
         'nodes': harness.counter(actions: [
           harness.reaction('click', [

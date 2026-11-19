@@ -18,7 +18,7 @@ PublishLayout screen(
   List<String> children = const [],
 }) =>
     PublishLayout.fromJson({
-      'schema': 2,
+      'schema': 3,
       'id': id,
       'roots': ['$id-canvas'],
       'variables': {

@@ -20,6 +20,7 @@ const _long = 'A long line of words that wraps onto many more lines than '
 
 Future<NodeTree> _show(WidgetTester tester, Map<String, Object?> text, {Map<String, Object?> col = const {}}) async {
   final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({
+    'schema': 3,
     'roots': ['c'],
     'nodes': {
       'c': {
@@ -76,7 +77,7 @@ Future<Uint8List> _pixels(WidgetTester tester, GlobalKey key) async {
 
 Future<(NodeTree, RenderObject)> show(WidgetTester tester, Map<String, Map<String, Object?>> nodes, String root,
     {double width = 800, double height = 600}) async {
-  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'roots': [root], 'nodes': nodes})));
+  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'schema': 3, 'roots': [root], 'nodes': nodes})));
   addTearDown(tree.dispose);
   await tester.pumpWidget(MaterialApp(
       home: Align(
@@ -137,6 +138,7 @@ void main() {
         final bytes = File('../references/lantern_v2/assets/fonts/IMFellEnglishSC-Regular.ttf').readAsBytesSync();
         await tester.runAsync(() => (FontLoader('FellSCP')..addFont(Future.value(ByteData.sublistView(Uint8List.fromList(bytes))))).load());
         final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({
+          'schema': 3,
           'roots': ['t'],
           'nodes': {
             't': {'type': 'text', 'layout': {'width': {'hug': 0}, 'height': {'hug': 0}},
@@ -178,7 +180,7 @@ void main() {
   group('styled runs', () {
    for(final ranges in [[{'start':6,'end':12,'style':{'color':'#FF7056D8'}}],[{'start':2,'end':8,'style':{'fontWeight':700}},{'start':5,'end':10,'style':{'color':'#FF7056D8'}}]]){
     testWidgets('partial and overlapping style runs keep every character: $ranges',(tester)async{
-     final tree=NodeTree(DocumentSource(LayoutDocument.fromJson({'roots':['t'],'nodes':{'t':{'type':'text','layout':{'width':300,'height':60},'props':{'text':'hello cheers!','style':{'fontSize':24},'runs':ranges}}}})));
+     final tree=NodeTree(DocumentSource(LayoutDocument.fromJson({'schema': 3, 'roots':['t'],'nodes':{'t':{'type':'text','layout':{'width':300,'height':60},'props':{'text':'hello cheers!','style':{'fontSize':24},'runs':ranges}}}})));
      addTearDown(tree.dispose);
      await tester.pumpWidget(MaterialApp(home:NodeView(tree:tree,rootId:'t')));
      final paragraphs=<RenderParagraph>[];

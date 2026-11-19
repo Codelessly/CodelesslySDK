@@ -12,12 +12,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const Map<String, Object?> swipeCard = {
-  'release': 'dismiss',
-  'directions': ['left', 'right', 'up'],
-  'rotateFactor': 15,
-  'originY': 1.6,
-  'distanceThreshold': 0.35,
-  'resistance': 0.7,
+  'dismissible': {
+    'directions': ['left', 'right', 'up'],
+    'dismissThresholds': {'left': 0.35, 'right': 0.35, 'up': 0.35, 'down': 0.35},
+    'flingVelocity': 800,
+    'resistance': 0.7,
+    'movementDuration': 320,
+    'curve': 'easeIn',
+    'returnDuration': 450,
+    'returnCurve': 'spring',
+  },
 };
 
 class Shown {
@@ -46,10 +50,11 @@ class Shown {
 }
 
 /// A 400×600 stack with node `card` ([w]×[h] at [x], [y]) holding a text
-/// that reads `${drag}`; [actions] are the card's reactions.
+/// that reads `${drag}`, with [behavior] (its dismissible or pan); [actions]
+/// are the card's reactions.
 Future<Shown> show(
   WidgetTester tester, {
-  Map<String, Object?> drag = swipeCard,
+  Map<String, Object?> behavior = swipeCard,
   double x = 0,
   double y = 0,
   double w = 200,
@@ -60,6 +65,7 @@ Future<Shown> show(
   Map<String, Object?> extra = const {},
 }) async {
   final doc = api.LayoutDocument.fromJson({
+    'schema': 3,
     'roots': ['s'],
     'nodes': {
       's': {
@@ -72,7 +78,7 @@ Future<Shown> show(
         'children': ['label'],
         'layout': {'width': w, 'height': h, 'x': {'start': x}, 'y': {'start': y}},
         'decoration': {'fills': [{'color': '#FF2196F3'}]},
-        'drag': drag,
+        ...behavior,
         'actions': actions,
         'bind': bind,
         ...extra,
@@ -118,7 +124,7 @@ void main() {
     final m = s.drag().debugTransform;
     // Moved right by 60 (DragStartBehavior.down: no slop lost).
     expect(m.getTranslation().x, greaterThan(30));
-    // Not tilted: the migration keeps rotateFactor as legacy.dismissible.rotateFactor, unread.
+    // Not tilted.
     expect(math.atan2(m.storage[1], m.storage[0]), 0);
     final values = s.values();
     expect(values.dragging, isTrue);
@@ -212,9 +218,8 @@ void main() {
   });
 
   testWidgets('a pan writes its position to variables and reports each move', (tester) async {
-    final s = await show(tester, drag: {
-      'xVariable': 'x',
-      'yVariable': 'y',
+    final s = await show(tester, behavior: {
+      'pan': {'xVariable': 'x', 'yVariable': 'y'},
     }, actions: [
       react('drag', [record('lastDx', r'${result.dx}')]),
     ], variables: [
@@ -258,9 +263,10 @@ void main() {
 
   testWidgets('on the design canvas rests and takes no drag', (tester) async {
     final doc = api.LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['card'],
       'nodes': {
-        'card': {'type': 'box', 'layout': {'width': 100, 'height': 100}, 'drag': swipeCard},
+        'card': {'type': 'box', 'layout': {'width': 100, 'height': 100}, ...swipeCard},
       },
     });
     final tree = NodeTree(DocumentSource(doc));
@@ -280,8 +286,8 @@ void main() {
 
   group('settling', () {
     // A 100×100 node laid out at (150, 450) in a 400×600 parent.
-    Future<Shown> pump(WidgetTester tester, Map<String, Object?> drag) => show(tester,
-        drag: drag,
+    Future<Shown> pump(WidgetTester tester, Map<String, Object?> pan) => show(tester,
+        behavior: {'pan': pan},
         x: 150,
         y: 450,
         w: 100,

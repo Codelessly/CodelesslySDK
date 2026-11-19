@@ -13,7 +13,7 @@ are made in the Editor and run by the SDK; your app takes part through **functio
 |---|---|
 | Pointer | `click`, `doubleTap`, `longPress`, `hold`, `secondaryClick`, `pointerDown`, `pointerUp`, `hover`, `cursorEnter`, `cursorExit`, `swipeLeft`, `swipeRight`, `swipeUp`, `swipeDown`, `drag`, `dragEnd`, `wheel`, `pinch` |
 | Inputs | `changed`, `changeEnd`, `submitted`, `editingComplete`, `focusGained`, `focusLost` |
-| Screen | `load`, `valueChanged` (a variable), `timer` (`intervalMs` a number or an expression; the legacy `clock` reads as it), `frame` (every frame while `when` holds: `${result.dt}`), `keyDown`, `keyUp`, `backPressed` |
+| Screen | `load`, `valueChanged` (a variable), `timer` (`intervalMs` a number or an expression), `frame` (every frame while `when` holds: `${result.dt}`), `keyDown`, `keyUp`, `backPressed` |
 | Scrolling | `scroll`, `scrollEnd`, `enterViewport`, `exitViewport` |
 | Lists | `refresh`, `swipeAction`, `reorder` |
 | Drag and drop | `dragStart`, `dragCancel`, `dragCompleted`, `drop`, `dragEnter`, `dragExit`, `dragHover`, `dropRejected`, `dropFull` |
@@ -23,14 +23,15 @@ are made in the Editor and run by the SDK; your app takes part through **functio
 | Area | Actions |
 |---|---|
 | Navigation | `navigate` (push, pop, replace, reset), `openModal` (dialog, sheets, full screen, popover, banner), `closeModal`, `openLink` |
-| State | `setVariable`, `animate` on a number `variable` (the legacy `animateVariable` reads as it), `setValue` (a node's properties), `setVariant`, `setStorage` |
+| State | `setVariable`, `animate` on a number `variable`, `setValue` (a node's properties), `setVariant`, `setStorage` |
 | Flow | `if`, `forEach`, `delay`, `confirm` |
 | Your code and the app | `callFunction`, `runScript`, `emitEvent` |
 | Data | `callApi`, `loadCloudData`, `reloadCloudData`, `cloudData`, `cloudDocuments`, `cloudBatch`, `cloudFiles`, `paginate` |
 | Accounts and purchases | `auth`, `paywall` |
 | Feedback | `showToast`, `haptic`, `playSound`, `speak`, `copyToClipboard` |
-| Inputs and motion | `submitForm`, `editText`, `focus`, `scrollTo`, `animate` (a node's `animations`: `forward`, `reverse`, `stop`, `animateTo`...; the legacy `playAnimation` reads as it), `controlDrag` |
+| Inputs and motion | `submitForm`, `editText`, `focus`, `scrollTo`, `animate` (a node's `animations`: `forward`, `reverse`, `stop`, `animateTo`...), `controlDrag` |
 | Capture | `captureScreenshot` |
+| Files and sharing | `downloadFile`, `pickFile` (the device's file chooser: `${result}` is the picked file's `{name, size, type, data}`, nothing is uploaded; `Services(filePicker: ...)` replaces the chooser), `share` (the device's share panel; the browser's on the web, elsewhere the app's own `Services(sharer: ...)`, and with none the link is copied: `${result.copied}`) |
 
 How a chain runs:
 
@@ -153,7 +154,7 @@ Everything else is a feature, a `CodelesslyFeature` in its own folder under `lib
 | `authFeature` | `auth` | `auth` | |
 | `dataFeature` | `callApi`, `setStorage`, `cloudData`, `cloudDocuments`, `cloudBatch`, `cloudFiles`, `loadCloudData`, `reloadCloudData`, `submitForm` | `storage` | |
 | `commerceFeature` | `paywall` | `entitlements` | |
-| `mediaFeature` | `speak`, `playSound`, `print`, `downloadFile` | `speech` | `media.probe`, `media.import`, `media.export`, `media.cancelExport` |
+| `mediaFeature` | `speak`, `playSound`, `print`, `downloadFile`, `pickFile`, `share`, `captureScreenshot`, `preloadImages` | `speech` | `media.probe`, `media.import`, `media.export`, `media.cancelExport` |
 | `engageFeature` | | `usage` (automations) | |
 
 `CodelesslyActions()` installs all five (`kFirstPartyFeatures`), so a default `Codelessly` runs everything.

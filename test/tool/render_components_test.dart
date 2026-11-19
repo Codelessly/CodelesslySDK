@@ -125,14 +125,14 @@ void main() {
     testWidgets('a call to a component the site lacks: the render reports it', (tester) async {
       final dir = Directory('${out.path}/site')..createSync();
       File('${dir.path}/home.json').writeAsStringSync(jsonEncode({
-        'schema': 2,
+        'schema': 3,
         'roots': ['home'],
         'nodes': {
           'home': {'type': 'canvas', 'slots': {'body': 'c'}, 'layout': {'width': 390, 'height': 844}},
           'c': {'type': 'Missing', 'layout': {'width': 100, 'height': 40}},
         },
       }));
-      File('${dir.path}/site.json').writeAsStringSync('{"schema": 2}');
+      File('${dir.path}/site.json').writeAsStringSync('{"schema": 3}');
       final report = await runRender(tester, RenderArgs(inputs: [dir.path], out: '${out.path}/o', sizes: const [Size(390, 844)]));
       expect(codes(report), contains('component_missing'));
       expect(report.diagnostics.firstWhere((d) => d['code'] == 'component_missing')['nodeId'], 'c');

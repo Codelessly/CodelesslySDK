@@ -13,6 +13,7 @@ void main() {
   group('a font that loads late', () {
     testWidgets('hugging rows and columns re-measure their text when its font loads', (tester) async {
       final source = DocumentSource(LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['root'],
         'nodes': {
           'root': {'type': 'row', 'children': ['nav'], 'layout': {'width': 800, 'height': 52}},

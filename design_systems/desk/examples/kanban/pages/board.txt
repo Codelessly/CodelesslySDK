@@ -30,17 +30,21 @@ App
       SegmentedButton @col items=["Backlog","In progress","In review","Done"] show=phone
     Row gap=12 top pad=[32,4,32,32] tablet.pad=[24,4,24,24] phone.pad=[16,4,16,16] tablet.scroll
       BoardColumn "Backlog" count={length(filter(shown, x => x.col == "Backlog"))} hue="slate" grow tablet.w=300 phone.w=358 phone.visible={col == "Backlog"} onAdd={open card}
-        each k in filter(shown, x => x.col == "Backlog")
-          TaskCard key="{k.key}" title="{k.title}" labels={k.labels} due="{k.due}" overdue={coalesce(k.late, false)} checklist="{coalesce(k.check, '')}" comments={coalesce(k.comments, 0)} assignee="{k.who}" onTap={open card}
+        Column w=fill gap=8 minHeight=48 radius=8 drop=cards onDrop={cards=map(cards, c => c.key == result.data ? set(c, "col", "Backlog") : c)}
+          each k in filter(shown, x => x.col == "Backlog")
+            TaskCard drag=cards({k.key}) key="{k.key}" title="{k.title}" labels={k.labels} due="{k.due}" overdue={coalesce(k.late, false)} checklist="{coalesce(k.check, '')}" comments={coalesce(k.comments, 0)} assignee="{k.who}" onTap={open card}
       BoardColumn "In progress" count={length(filter(shown, x => x.col == "In progress"))} limit=2 hue="sky" grow tablet.w=300 phone.w=358 phone.visible={col == "In progress"} onAdd={open card}
-        each k in filter(shown, x => x.col == "In progress")
-          TaskCard key="{k.key}" title="{k.title}" labels={k.labels} due="{k.due}" overdue={coalesce(k.late, false)} checklist="{coalesce(k.check, '')}" comments={coalesce(k.comments, 0)} assignee="{k.who}" onTap={open card}
+        Column w=fill gap=8 minHeight=48 radius=8 drop=cards onDrop={cards=map(cards, c => c.key == result.data ? set(c, "col", "In progress") : c)}
+          each k in filter(shown, x => x.col == "In progress")
+            TaskCard drag=cards({k.key}) key="{k.key}" title="{k.title}" labels={k.labels} due="{k.due}" overdue={coalesce(k.late, false)} checklist="{coalesce(k.check, '')}" comments={coalesce(k.comments, 0)} assignee="{k.who}" onTap={open card}
       BoardColumn "In review" count={length(filter(shown, x => x.col == "In review"))} limit=3 hue="violet" grow tablet.w=300 phone.w=358 phone.visible={col == "In review"} onAdd={open card}
-        each k in filter(shown, x => x.col == "In review")
-          TaskCard key="{k.key}" title="{k.title}" labels={k.labels} due="{k.due}" overdue={coalesce(k.late, false)} checklist="{coalesce(k.check, '')}" comments={coalesce(k.comments, 0)} assignee="{k.who}" onTap={open card}
+        Column w=fill gap=8 minHeight=48 radius=8 drop=cards onDrop={cards=map(cards, c => c.key == result.data ? set(c, "col", "In review") : c)}
+          each k in filter(shown, x => x.col == "In review")
+            TaskCard drag=cards({k.key}) key="{k.key}" title="{k.title}" labels={k.labels} due="{k.due}" overdue={coalesce(k.late, false)} checklist="{coalesce(k.check, '')}" comments={coalesce(k.comments, 0)} assignee="{k.who}" onTap={open card}
       BoardColumn "Done" count={length(filter(shown, x => x.col == "Done"))} hue="green" grow tablet.w=300 phone.w=358 phone.visible={col == "Done"} onAdd={open card}
-        each k in filter(shown, x => x.col == "Done")
-          TaskCard key="{k.key}" title="{k.title}" labels={k.labels} due="{k.due}" overdue={coalesce(k.late, false)} checklist="{coalesce(k.check, '')}" comments={coalesce(k.comments, 0)} assignee="{k.who}" onTap={open card}
+        Column w=fill gap=8 minHeight=48 radius=8 drop=cards onDrop={cards=map(cards, c => c.key == result.data ? set(c, "col", "Done") : c)}
+          each k in filter(shown, x => x.col == "Done")
+            TaskCard drag=cards({k.key}) key="{k.key}" title="{k.title}" labels={k.labels} due="{k.due}" overdue={coalesce(k.late, false)} checklist="{coalesce(k.check, '')}" comments={coalesce(k.comments, 0)} assignee="{k.who}" onTap={open card}
 Dialog#card "Card details" overline="STK-124" w=780 guard={title != "Polish the invite flow"} guardText="Discard your changes?"
   Row gap=24 top phone.direction=vertical
     Column gap=16 grow

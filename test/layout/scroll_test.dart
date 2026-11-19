@@ -383,18 +383,15 @@ void main() {
               'x': {'start': 20},
               'y': {'start': 0},
             },
-            'drag': {
-              'track': {
-                'variable': 'trim',
-                'min': 0,
-                'max': 10,
-                'step': .1,
-                'fineStep': .01,
-                'x1': 0,
-                'y1': 0,
-                'x2': 0,
-                'y2': 80,
-              },
+            'track': {
+              'variable': 'trim',
+              'min': 0,
+              'max': 10,
+              'step': .1,
+              'x1': 0,
+              'y1': 0,
+              'x2': 0,
+              'y2': 80,
             },
           },
           'after': {

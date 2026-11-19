@@ -173,7 +173,7 @@ See the model's DESIGN.md §5.4 and §5.3.
 
 * Loading (`app/loader.dart`, `services/firebase/publish_loader.dart`): the
   publish is read from the publish paths (`publish/{project}`, its
-  `layouts/{id}`; `publish_preview`, `templates`), in the current format (`schema: 2`,
+  `layouts/{id}`; `publish_preview`, `templates`), in the current format (`schema: 3`, the only one read;
   `compressedNodes`: `decodeStoredPublishModel`,
   `decodeStoredPublishLayout`). `FirestorePublishLoader` authenticates with
   the project token (`ProjectAuth`, the `verifyProjectAuthToken` backend

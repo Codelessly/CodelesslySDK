@@ -2,12 +2,10 @@
 // and result, its context's services, UI and node tree), without
 // BuildContext.
 import 'dart:async';
-
 import 'dart:convert';
 import 'dart:ui' as ui show TextDirection;
 
 import 'package:codelessly_api/core.dart';
-import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter/rendering.dart' as rendering show Axis;
 import 'package:flutter/rendering.dart' show MatrixUtils, Rect, RenderObject, RenderViewportBase;
 import 'package:flutter/scheduler.dart' show SchedulerBinding, timeDilation;
@@ -36,7 +34,7 @@ import 'runner.dart';
 import 'script_host.dart';
 import 'form_fields.dart';
 import 'text_fields.dart';
-import 'ui.dart' show ThemeModeUi;
+import 'ui.dart' show SheetStop, SheetStopUi, ThemeModeUi;
 import 'values.dart';
 import 'variable_animator.dart';
 export 'files.dart' show pickFiles, sourceFiles;
@@ -59,6 +57,31 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
 
 /// The core action types, one case each: exhaustive, so a core type added
 /// to the API without a handler doesn't compile.
+/// Shows [a]'s screen as a modal. A sheet with a `stopVariable` reads,
+/// writes and follows that variable where the UI can ([SheetStopUi]); it is
+/// 0 again once the sheet has closed.
+Future<Object?> _openModal(OpenModalAction a, ActionRun run) async {
+  final ui = run.host.ui;
+  final name = a.stopVariable.trim();
+  final params = run.json(a.params);
+  if (name.isEmpty || a.snapHeights.isEmpty || ui is! SheetStopUi) return ui.openModal(a, params: params);
+  final scope = run.context.scope;
+  final stop = SheetStop(
+    read: () => switch (scope.read(name)) {
+      final num n => n.toDouble(),
+      final String s => double.tryParse(s.trim()),
+      _ => null,
+    },
+    write: (value) => setVariableIn(scope, name, value == value.roundToDouble() ? value.toInt() : value),
+    changes: watchName(scope, name),
+  );
+  try {
+    return await (ui as SheetStopUi).openSheet(a, params: params, stop: stop);
+  } finally {
+    setVariableIn(scope, name, 0);
+  }
+}
+
 Future<void> _handleCore(CoreAction a, ActionRun run) async {
   switch (a) {
     case NavigateAction():
@@ -85,7 +108,7 @@ Future<void> _handleCore(CoreAction a, ActionRun run) async {
       await run.host.ui.navigate(action, params: run.json(a.params), baseParams: run.json(a.baseParams));
     case OpenModalAction():
       if (a.anchor == ModalAnchor.node) RevealAnchor.named = await _namedAnchor(a, run);
-      final result = await run.host.ui.openModal(a, params: run.json(a.params));
+      final result = await _openModal(a, run);
       if (result != null) run.result = result;
     case CloseModalAction():
       run.host.ui.closeModal(a.result == null ? null : run.evaluateJson(a.result));
@@ -414,29 +437,7 @@ void _haptic(HapticKind kind) {
 /// others go in the context's node values. Inside a component instance the
 /// node is that instance's (ids are local to its definition): its values are
 /// set on that instance's box only.
-/// The schema-2 paths and 30.0.0 spellings a `setValue` named, said once each.
-final Set<String> _schema2PathsSaid = {};
-
-/// [values] without the schema-2 paths and 30.0.0's spellings (an action's
-/// paths are not migrated): each is refused, with the path to write, said
-/// once.
-List<NodeValue> _currentValues(String nodeId, List<NodeValue> values) {
-  if (!values.any((v) => olderSchemaPathHint(v.path) != null)) return values;
-  final out = <NodeValue>[];
-  for (final v in values) {
-    final hint = olderSchemaPathHint(v.path);
-    if (hint == null) {
-      out.add(v);
-    } else if (_schema2PathsSaid.add('$nodeId/${v.path}')) {
-      final what = schema2PathHint(v.path) != null ? 'a schema-2 path, which schema 3' : '30.0.0\'s spelling, which 30.1.0';
-      debugPrint('Codelessly: setValue on $nodeId: "${v.path}" is $what does not read (nothing set); write $hint.');
-    }
-  }
-  return out;
-}
-
 void _setValue(String nodeId, List<NodeValue> values, ActionRun run) {
-  values = _currentValues(nodeId, values);
   final tree = run.host.tree;
   final inInstance = tree == null
       ? const <NodeBox>[]

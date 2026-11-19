@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 // shimmer; loop phases; drag tracks parked, relative and in their parent.
 
 Map<String, Object?> doc(Map<String, Map<String, Object?>> nodes) => {
+      'schema': 3,
       'roots': ['s'],
       'nodes': {
         's': {'type': 'stack', 'children': nodes.keys.toList(), 'layout': {'width': 400, 'height': 300}},
@@ -80,6 +81,7 @@ class Shown {
 
 Future<Shown> showCard(WidgetTester tester, Map<String, Json> nodes, {List<Variable> variables = const []}) async {
   final doc = LayoutDocument.fromJson({
+    'schema': 3,
     'roots': ['s'],
     'nodes': {
       's': {
@@ -168,6 +170,7 @@ Map<String, Json> flipCard(Json flip) => {
 
 void main() {
   Map<String, Object?> cardDoc({bool flipped = false}) => {
+        'schema': 3,
         'roots': ['s'],
         'nodes': {
           's': {'type': 'stack', 'children': ['card'], 'layout': {'width': 400, 'height': 300}},

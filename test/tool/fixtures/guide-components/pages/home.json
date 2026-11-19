@@ -1,5 +1,5 @@
 {
- "schema": 2,
+ "schema": 3,
  "id": "home",
  "roots": [
   "home"
@@ -35,6 +35,9 @@
       "color": "#FFFFFFFF"
      }
     ]
+   },
+   "defaultTextStyle": {
+    "height": 1.33
    }
   },
   "col": {

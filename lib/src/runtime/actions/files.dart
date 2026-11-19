@@ -1,6 +1,6 @@
 // Files an action takes: chosen by the person, or given as `data:` URLs.
 // Shared by the features that upload or import files.
-import '../../services/file_picking.dart' show FilePicker;
+import '../../services/file_picking.dart' show FilePicker, TypedFilePicker;
 import 'action_error.dart' show CodedFailure;
 import 'runner.dart';
 import 'ui.dart' show OptionalFilePicker, PickedFile;
@@ -8,10 +8,15 @@ import 'ui.dart' show OptionalFilePicker, PickedFile;
 /// Lets the person choose files: the app shell's picker when it gives one
 /// (an [ActionUi] with one), else the services'
 /// [FilePicker] (the platform's file dialog). Without either, none.
-Future<List<PickedFile>> pickFiles(ActionRun run, {required bool images, required bool multiple}) {
+///
+/// [accept] (a pickFile action's kinds: MIME types and extensions) is what
+/// a [TypedFilePicker] offers; any other picker is asked for [images] or
+/// for any file.
+Future<List<PickedFile>> pickFiles(ActionRun run, {required bool images, required bool multiple, List<String> accept = const []}) {
   final ui = run.host.ui;
   final picker = run.service<FilePicker>();
   if (ui case final OptionalFilePicker own when !own.picksFiles && picker != null) {
+    if (picker is TypedFilePicker && accept.isNotEmpty) return picker.pickTypes(accept, multiple: multiple);
     return picker.pick(images: images, multiple: multiple);
   }
   return ui.pickFiles(images: images, multiple: multiple);

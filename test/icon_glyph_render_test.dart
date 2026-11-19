@@ -54,6 +54,7 @@ void main() {
   ]) {
     testWidgets('$name $style at $size draws as Flutter\'s Icon', (tester) async {
       final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['n'],
         'nodes': {
           'n': {

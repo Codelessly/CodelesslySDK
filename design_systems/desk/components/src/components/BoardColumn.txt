@@ -19,7 +19,7 @@ Column#boardColumn gap=4 pad=[8,6,8,6] w=fill fill=well radius=10 border={props.
       Text#columnLimitText "{props.count}/{props.limit}" size=12 tabularFigures=true weight={props.count > props.limit ? 600 : 400} color={props.count > props.limit ? theme.colors.warningInk : theme.colors.ink3}
     Row#columnMore pad=4 radius=5 hovered.fill=hoverOverlay onTap={emit onMenu}
       Icon#columnMoreGlyph "more_horiz" size=16 color=ink3
-  Column#columnCards gap=0 w=fill
+  Column#columnCards gap=8 w=fill
     Slot#columnSlot w=null h=null
   Row#columnAdd gap=6 middle pad=[8,6,8,6] w=fill radius=6 visible={props.adds} hovered.fill=hoverOverlay onTap={emit onAdd}
     Icon#columnAddGlyph "add" size=16 color=ink3

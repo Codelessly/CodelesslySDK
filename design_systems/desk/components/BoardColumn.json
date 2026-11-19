@@ -408,7 +408,7 @@
     }
    },
    "props": {
-    "spacing": 0,
+    "spacing": 8,
     "crossAxisAlignment": "start"
    },
    "children": [

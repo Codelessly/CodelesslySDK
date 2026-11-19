@@ -80,6 +80,7 @@ final class RuntimeIssue {
 /// severity and meaning (for the README and the reference).
 const runtimeCodes = <(String, String, String)>[
   ('invalid_json', 'error', 'A file is not valid JSON (the message gives the line and column).'),
+  ('schema_unsupported', 'error', 'A document is not of schema 3 (`"schema": 3`), the only one read: the message names the schema it has. It is not rendered.'),
   ('page_not_written', 'warning', 'A page site.json lists has no file yet: one note per file.'),
   ('no_documents', 'error', 'No .json documents were found at the paths given.'),
   ('unknown_screen_arg', 'error', '--screen names no canvas, screen or layout.'),
@@ -241,6 +242,10 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     try {
       final j = jsonDecode(i.text);
       if (j is! Map) throw const FormatException('the top level is not an object');
+      if (j['schema'] != api.kSchemaVersion) {
+        issue(RuntimeIssue('schema_unsupported', 'error', api.UnsupportedSchemaException(j['schema']).message, file: i.name));
+        continue;
+      }
       docs[i.name] = j.cast<String, Object?>();
       dirs[i.name] = File(i.path).parent.path;
     } catch (e) {
@@ -579,6 +584,11 @@ Future<void> _renderAll(
       // storage action, the theme mode): fresh for each capture, and handed
       // on to the app a --reload step starts.
       var storage = MemoryLocalStorage();
+      // `--pick-file`: what a file chooser gives (a headless run has none).
+      final picker = FixedFilePicker([
+        for (final path in args.pickFiles)
+          PickedFile(name: path.split(RegExp(r'[\\/]')).last, bytes: File(path).readAsBytesSync(), contentType: mimeTypeOfFileName(path)),
+      ]);
       Codelessly start() => Codelessly(
             // The site's files (declared fonts), read from its folder.
             loader: MemoryPublishLoader(published.bundle, readAsset: siteDir == null ? null : (path) async {
@@ -588,7 +598,7 @@ Future<void> _renderAll(
             components: components,
             fonts: fetcher,
             config: CodelesslyConfig(
-                services: Services(analytics: recorder, exports: exporter, storage: storage), fontTimeout: const Duration(seconds: 5)),
+                services: Services(analytics: recorder, exports: exporter, storage: storage, filePicker: picker), fontTimeout: const Duration(seconds: 5)),
           );
       var codelessly = start();
       var controller = CodelesslyWidgetController();

@@ -1,5 +1,5 @@
 {
- "schema": 2,
+ "schema": 3,
  "id": "pricing",
  "roots": [
   "pricing"
@@ -35,6 +35,9 @@
       "color": "#FF080D0E"
      }
     ]
+   },
+   "defaultTextStyle": {
+    "height": 1.33
    }
   },
   "root": {

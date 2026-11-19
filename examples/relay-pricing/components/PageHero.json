@@ -1,5 +1,5 @@
 {
- "schema": 2,
+ "schema": 3,
  "id": "PageHero",
  "roots": [
   "ph"
@@ -108,7 +108,10 @@
       }
      }
     }
-   ]
+   ],
+   "defaultTextStyle": {
+    "height": 1.33
+   }
   },
   "phIn": {
    "type": "column",

@@ -250,9 +250,7 @@ A layout is data, so an agent can write one. Five things in this repository are 
   model is told to write it. Everything after a node's text is `key=value`; a value worked out from the state is
   in braces (`visible={seats > 2}`, `"{seats} seats"`); `@seats` is the variable itself, read and written (bare,
   the control's value; `key=@name` another property), declared by a `state` line; what a node does is an event
-  with its actions in braces (`onTap={seats=seats+1}`). A file written for 33 (`bind=seats`) is rewritten with
-  `tool/notation/notation.sh migrate <file.txt>`; one written before 33.0.0 (`min:1`, `=seats`, `-> emit upgrade`)
-  with `--from 32` added. The
+  with its actions in braces (`onTap={seats=seats+1}`). The
   script uses the codelessly_api checked out beside this repository
   (`../CodelesslyAPI`, its master branch): the notation is newer than the published package.
 - **A render tool** ([`tool/render`](https://github.com/Codelessly/CodelesslySDK/tree/master/tool/render)). It

@@ -685,6 +685,49 @@
     }
    ],
    "children": [
+    "column3"
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "constraints": {
+     "minHeight": 48
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 8
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "drop"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "cards",
+       "value": "${= map(cards, c => c.key == result.data ? set(c, \"col\", \"Backlog\") : c)}"
+      }
+     ]
+    }
+   ],
+   "dropTarget": {
+    "accepts": [
+     "cards"
+    ]
+   },
+   "children": [
     "listView1"
    ]
   },
@@ -700,7 +743,7 @@
    },
    "props": {
     "scrollable": false,
-    "spacing": 0
+    "spacing": 8
    },
    "bind": {
     "data": "${= filter(shown, x => x.col == \"Backlog\")}"
@@ -765,7 +808,11 @@
       }
      ]
     }
-   ]
+   ],
+   "draggable": {
+    "group": "cards",
+    "data": "${item.key}"
+   }
   },
   "BoardColumn2": {
    "type": "BoardColumn",
@@ -829,6 +876,49 @@
     }
    ],
    "children": [
+    "column4"
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "constraints": {
+     "minHeight": 48
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 8
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "drop"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "cards",
+       "value": "${= map(cards, c => c.key == result.data ? set(c, \"col\", \"In progress\") : c)}"
+      }
+     ]
+    }
+   ],
+   "dropTarget": {
+    "accepts": [
+     "cards"
+    ]
+   },
+   "children": [
     "listView2"
    ]
   },
@@ -844,7 +934,7 @@
    },
    "props": {
     "scrollable": false,
-    "spacing": 0
+    "spacing": 8
    },
    "bind": {
     "data": "${= filter(shown, x => x.col == \"In progress\")}"
@@ -909,7 +999,11 @@
       }
      ]
     }
-   ]
+   ],
+   "draggable": {
+    "group": "cards",
+    "data": "${item.key}"
+   }
   },
   "BoardColumn3": {
    "type": "BoardColumn",
@@ -973,6 +1067,49 @@
     }
    ],
    "children": [
+    "column5"
+   ]
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "constraints": {
+     "minHeight": 48
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 8
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "drop"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "cards",
+       "value": "${= map(cards, c => c.key == result.data ? set(c, \"col\", \"In review\") : c)}"
+      }
+     ]
+    }
+   ],
+   "dropTarget": {
+    "accepts": [
+     "cards"
+    ]
+   },
+   "children": [
     "listView3"
    ]
   },
@@ -988,7 +1125,7 @@
    },
    "props": {
     "scrollable": false,
-    "spacing": 0
+    "spacing": 8
    },
    "bind": {
     "data": "${= filter(shown, x => x.col == \"In review\")}"
@@ -1053,7 +1190,11 @@
       }
      ]
     }
-   ]
+   ],
+   "draggable": {
+    "group": "cards",
+    "data": "${item.key}"
+   }
   },
   "BoardColumn4": {
    "type": "BoardColumn",
@@ -1116,6 +1257,49 @@
     }
    ],
    "children": [
+    "column6"
+   ]
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "constraints": {
+     "minHeight": 48
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 8
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "drop"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "cards",
+       "value": "${= map(cards, c => c.key == result.data ? set(c, \"col\", \"Done\") : c)}"
+      }
+     ]
+    }
+   ],
+   "dropTarget": {
+    "accepts": [
+     "cards"
+    ]
+   },
+   "children": [
     "listView4"
    ]
   },
@@ -1131,7 +1315,7 @@
    },
    "props": {
     "scrollable": false,
-    "spacing": 0
+    "spacing": 8
    },
    "bind": {
     "data": "${= filter(shown, x => x.col == \"Done\")}"
@@ -1196,7 +1380,11 @@
       }
      ]
     }
-   ]
+   ],
+   "draggable": {
+    "group": "cards",
+    "data": "${item.key}"
+   }
   },
   "card": {
    "type": "canvas",
@@ -1302,11 +1490,11 @@
     }
    ],
    "children": [
-    "column3",
-    "column8"
+    "column7",
+    "column12"
    ]
   },
-  "column3": {
+  "column7": {
    "type": "column",
    "layout": {
     "flex": 1,
@@ -1324,8 +1512,8 @@
    "children": [
     "textField1",
     "textField2",
-    "column4",
-    "column5"
+    "column8",
+    "column9"
    ]
   },
   "textField1": {
@@ -1394,7 +1582,7 @@
     }
    ]
   },
-  "column4": {
+  "column8": {
    "type": "column",
    "layout": {
     "width": {
@@ -1621,7 +1809,7 @@
     "icon": "add_outlined"
    }
   },
-  "column5": {
+  "column9": {
    "type": "column",
    "layout": {
     "width": {
@@ -1730,7 +1918,7 @@
    },
    "children": [
     "Avatar1",
-    "column6"
+    "column10"
    ]
   },
   "Avatar1": {
@@ -1748,7 +1936,7 @@
     "size": 24
    }
   },
-  "column6": {
+  "column10": {
    "type": "column",
    "layout": {
     "flex": 1,
@@ -1818,7 +2006,7 @@
    },
    "children": [
     "Avatar2",
-    "column7"
+    "column11"
    ]
   },
   "Avatar2": {
@@ -1836,7 +2024,7 @@
     "size": 24
    }
   },
-  "column7": {
+  "column11": {
    "type": "column",
    "layout": {
     "flex": 1,
@@ -1890,7 +2078,7 @@
     "text": "Role copy is updated. I'll check the resend state in the next pass."
    }
   },
-  "column8": {
+  "column12": {
    "type": "column",
    "layout": {
     "width": 240,

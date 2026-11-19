@@ -1,12 +1,8 @@
 // Expands many notation files at once, for comparing two parsers (or a file
-// before and after `format`): the proof that a change to the grammar, or a
-// conversion, leaves the documents as they were.
+// before and after `format`): the proof that a change to the grammar leaves
+// the documents as they were.
 //
-//   dart run tool/notation/expand_all.dart <list.txt> <out folder> [--migrate]
-//
-// With --migrate each file is rewritten from the original grammar first (as
-// `notation.sh migrate` writes it, knowing every design system here), in
-// memory.
+//   dart run tool/notation/expand_all.dart <list.txt> <out folder>
 //
 // <list.txt> names one notation file per line, optionally followed by a tab
 // and the key to file its result under (else the path itself): a converted
@@ -23,8 +19,6 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_api/notation.dart';
 import 'package:crypto/crypto.dart';
 
-import 'migrate.dart' show migrateNotation;
-
 Future<void> main(List<String> args) async {
   if (args.length < 2) {
     stderr.writeln('usage: expand_all.dart <list.txt> <out folder>');
@@ -35,15 +29,6 @@ Future<void> main(List<String> args) async {
     final f = File('$sdk/design_systems/cards/$ref');
     return f.existsSync() ? f.readAsStringSync() : null;
   });
-  final catalogs = [
-    ds.catalogOver(standardCatalog),
-    for (final name in const ['ssui', 'skip', 'harbor', 'paper'])
-      (await DesignSystem.load((ref) async {
-        final f = File('$sdk/design_systems/$name/$ref');
-        return f.existsSync() ? f.readAsStringSync() : null;
-      }))
-          .catalogOver(standardCatalog),
-  ];
   final out = Directory(args[1])..createSync(recursive: true);
   final index = StringBuffer();
   var n = 0;
@@ -51,11 +36,7 @@ Future<void> main(List<String> args) async {
     if (line.trim().isEmpty) continue;
     final parts = line.split('\t');
     final path = parts[0], key = parts.length > 1 ? parts[1] : parts[0];
-    var text = File(path).readAsStringSync();
-    if (args.contains('--migrate')) {
-      text = migrateNotation(text, catalogs: catalogs);
-      if (migrateNotation(text, catalogs: catalogs) != text) stderr.writeln('$path: migrating it twice changes it again');
-    }
+    final text = File(path).readAsStringSync();
     n++;
     for (final config in const ['card', 'page']) {
       final catalog = config == 'page' ? ds.catalogOver(standardCatalog) : standardCatalog;

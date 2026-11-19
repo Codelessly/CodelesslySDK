@@ -38,6 +38,7 @@ void main() {
     final vars = VariableScope([const Variable(id: 'n', name: 'n', type: VariableType.text, value: '1,204')]);
     final tree = NodeTree(
       DocumentSource(LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['t'],
         'nodes': {
           't': {

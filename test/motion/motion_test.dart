@@ -13,6 +13,7 @@ import '../lists/support.dart' as lists;
 import '../support/screen.dart' as harness;
 
 LayoutDocument page(Map<String, Map<String, Object?>> nodes) => LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['s'],
       'nodes': {
         's': {'type': 'stack', 'children': nodes.keys.toList(), 'layout': {'width': 400, 'height': 300}},
@@ -34,6 +35,7 @@ Future<(NodeTree, RenderObject)> show(WidgetTester tester, LayoutDocument doc, {
 // shimmer; loop phases; drag tracks parked, relative and in their parent.
 
 Map<String, Object?> doc(Map<String, Map<String, Object?>> nodes) => {
+      'schema': 3,
       'roots': ['s'],
       'nodes': {
         's': {'type': 'stack', 'children': nodes.keys.toList(), 'layout': {'width': 400, 'height': 300}},
@@ -85,10 +87,10 @@ Map<String, Map<String, Object?>> card({bool flipped = false, Map<String, Object
       'back': {'type': 'box', 'layout': {'width': 100, 'height': 60}, 'decoration': {'fills': [{'color': '#FF0000FF'}]}},
     };
 
-// An entrance held until its page settles (`motion.enterHeld`, bound), and
-// replayed when `motion.replayKey` changes.
+// An entrance held until its page settles (`animations.enter.paused`,
+// bound), and replayed when its `playKey` changes.
 
-// motion.replayKey: a change of the key replays the entrance (after its
+// A play key: a change of the key replays the entrance (after its
 // delay, through its keyframes), as Rota's auto-fill drops shifts into
 // their cells one after another and a refused drop shakes its chip.
 
@@ -99,6 +101,7 @@ Future<(VariableScope, NodeTree, RenderObject)> _show(WidgetTester tester, Map<S
   ]);
   final tree = NodeTree(
     DocumentSource(LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['s'],
       'nodes': {
         's': {'type': 'stack', 'children': nodes.keys.toList(), 'layout': {'width': 400, 'height': 300}},
@@ -127,9 +130,7 @@ Map<String, Json> figure(double width, double height, {List<double>? viewBox, do
         'type': 'box',
         'layout': {'width': 10, 'height': 10},
         'motion': {
-          'path': 'M0 0 L320 0 L320 180',
-          'pathProgress': progress,
-          'pathViewBox': ?viewBox,
+          'path': {'path': 'M0 0 L320 0 L320 180', 'viewBox': ?viewBox, 'progress': progress},
         },
       },
     };
@@ -150,21 +151,25 @@ void main() {
           'm': {
             'type': 'box',
             'layout': {'width': 40, 'height': 20, 'x': {'start': 10}, 'y': {'start': 10}},
-            'motion': {'translateX': 30, 'scale': 2, 'duration': 500, 'enter': true},
+            'motion': {'translateX': 30, 'scale': 2},
+            'animations': [
+              {'id': 'enter', 'preset': 'enter', 'params': {'from': {'translateX': 0, 'scale': 1}}, 'duration': 500, 'curve': 'easeInOut', 'autoplay': true},
+            ],
+            'transitions': [
+              {'property': 'motion', 'duration': 500, 'curve': 'easeInOut'},
+            ],
           },
           'l': {
             'type': 'box',
             'layout': {'width': 40, 'height': 40, 'x': {'start': 100}, 'y': {'start': 100}},
-            'loops': [
-              {'type': 'scale', 'scaleFrom': 0.5, 'duration': 300}
+            'animations': [
+              {'id': 'loop0', 'preset': 'scale', 'params': {'scaleFrom': 0.5}, 'duration': 300},
             ],
           },
           'k': {
             'type': 'box',
             'layout': {'width': 20, 'height': 20, 'x': {'start': 200}, 'y': {'start': 200}},
-            'drag': {
-              'track': {'variable': 'v', 'x2': 100, 'y2': 0, 'max': 10, 'value': 5}
-            },
+            'track': {'variable': 'v', 'x2': 100, 'y2': 0, 'max': 10, 'value': 5},
           },
         }));
     // At its values (an entrance doesn't wait at its start), scaled about
@@ -185,13 +190,19 @@ void main() {
           'm': {
             'type': 'box',
             'layout': {'width': 40, 'height': 20},
-            'motion': {'translateX': 100, 'duration': 1000, 'curve': 'linear', 'enter': true},
+            'motion': {'translateX': 100},
+            'animations': [
+              {'id': 'enter', 'preset': 'enter', 'params': {'from': {'translateX': 0}}, 'duration': 1000, 'curve': 'linear', 'autoplay': true},
+            ],
+            'transitions': [
+              {'property': 'motion', 'duration': 1000},
+            ],
           },
           'l': {
             'type': 'box',
             'layout': {'width': 40, 'height': 40, 'x': {'start': 100}, 'y': {'start': 100}},
-            'loops': [
-              {'type': 'scale', 'scaleFrom': 0.5, 'duration': 1000, 'reverse': true}
+            'animations': [
+              {'id': 'loop0', 'preset': 'scale', 'params': {'scaleFrom': 0.5}, 'repeat': {'reverse': true}},
             ],
           },
         }),
@@ -232,12 +243,18 @@ void main() {
                 {'type': 'backgroundBlur', 'blurRadius': 10}
               ]
             },
-            'strokePath': {
-              'points': [
-                [0, 0],
-                [100, 40]
+            'customPaint': {
+              'painter': [
+                {
+                  'op': 'path',
+                  'id': 'strokePath',
+                  'points': [
+                    [0, 0],
+                    [100, 40]
+                  ],
+                  'paint': {'color': '#FFFFFFFF', 'style': 'stroke', 'strokeWidth': 4, 'strokeCap': 'round', 'strokeJoin': 'round'},
+                },
               ],
-              'xUnit': 'pixels',
             },
           },
         }));
@@ -253,7 +270,13 @@ void main() {
           tester,
           {
             'w': box({
-              'motion': {'translateX': 40, 'loop': 'swing', 'duration': 1000},
+              'motion': {'translateX': 40},
+              'animations': [
+                {'id': 'loop', 'preset': 'loop', 'params': {'from': {'translateX': 0}, 'mode': 'swing'}, 'duration': 1000, 'curve': 'linear', 'repeat': <String, Object?>{}},
+              ],
+              'transitions': [
+                {'property': 'motion', 'duration': 1000, 'curve': 'easeInOut'},
+              ],
             }, x: 100),
           },
           interactive: true);
@@ -270,8 +293,22 @@ void main() {
     testWidgets('a loop starts at its phase, holds while paused and carries on when resumed', (tester) async {
       Map<String, Map<String, Object?>> nodes(bool paused) => {
             'p': box({
-              'motion': {'translateX': 100, 'loop': 'restart', 'duration': 1000, 'curve': 'linear', 'phase': 0.25,
-                         'paused': paused},
+              'motion': {'translateX': 100},
+              'animations': [
+                {
+                  'id': 'loop',
+                  'preset': 'loop',
+                  'params': {'from': {'translateX': 0}},
+                  'duration': 1000,
+                  'curve': 'linear',
+                  'repeat': <String, Object?>{},
+                  if (paused) 'paused': true,
+                  'phase': 0.25,
+                },
+              ],
+              'transitions': [
+                {'property': 'motion', 'duration': 1000},
+              ],
             }),
           };
       final (tree, view, source) = await showMotion(tester, nodes(false), interactive: true);
@@ -298,9 +335,11 @@ void main() {
               {'color': '#FF888888'}
             ]
           },
-          'motion': {
-            'shimmer': {'duration': 1000}
-          },
+          'motion': <String, Object?>{},
+          'animations': [
+            {'id': 'shimmer', 'preset': 'shimmer', 'duration': 1000},
+          ],
+          'shimmer': <String, Object?>{},
         }),
       });
       expect(tree.boxOf('s'), isNotNull);
@@ -321,13 +360,14 @@ void main() {
           'm': {
             'type': 'box',
             'layout': {'width': 40, 'height': 20, 'x': {'start': 0}, 'y': {'start': 100}},
-            'motion': {
-              'enter': true,
-              'enterFrom': {'translateX': -100, 'opacity': 0},
-              'duration': 1000,
-              'curve': 'linear',
-            },
-            'bind': {'motion.enterHeld': r'${= !settled}', 'motion.replayKey': r'${visit}'},
+            'motion': <String, Object?>{},
+            'bind': {'animations.enter.paused': r'${= !settled}', 'animations.enter.playKey': r'${visit}'},
+            'animations': [
+              {'id': 'enter', 'preset': 'enter', 'params': {'from': {'translateX': -100, 'opacity': 0}}, 'duration': 1000, 'curve': 'linear', 'autoplay': true},
+            ],
+            'transitions': [
+              {'property': 'motion', 'duration': 1000},
+            ],
           },
         },
         variables: [lists.v('settled', false, api.VariableType.boolean), lists.v('visit', 'a')],
@@ -362,8 +402,14 @@ void main() {
         'chip': {
           'type': 'box',
           'layout': {'width': 40, 'height': 20, 'x': {'start': 0}, 'y': {'start': 100}},
-          'motion': {'enter': true, 'enterFrom': {'translateY': -100}, 'duration': 400, 'delay': 200, 'curve': 'linear'},
-          'bind': {'motion.replayKey': r"${= 'fill' + stamp}"},
+          'motion': <String, Object?>{},
+          'bind': {'animations.enter.playKey': r"${= 'fill' + stamp}"},
+          'animations': [
+            {'id': 'enter', 'preset': 'enter', 'params': {'from': {'translateY': -100}}, 'duration': 400, 'delay': 200, 'curve': 'linear', 'autoplay': true},
+          ],
+          'transitions': [
+            {'property': 'motion', 'duration': 400, 'delay': 200},
+          ],
         },
       });
       double top() => tree.boxOf('chip')!.rectIn(view)!.top;
@@ -394,6 +440,7 @@ void main() {
       ]);
       final tree = NodeTree(
         DocumentSource(LayoutDocument.fromJson({
+          'schema': 3,
           'roots': ['list'],
           'nodes': {
             'list': {
@@ -406,8 +453,14 @@ void main() {
               'type': 'text',
               'props': {'text': r'${item}'},
               'layout': {'width': 200, 'height': 40},
-              'motion': {'enter': true, 'enterFrom': {'translateY': -100}, 'duration': 400, 'curve': 'linear'},
-              'bind': {'motion.replayKey': r"${= 'fill' + stamp}"},
+              'motion': <String, Object?>{},
+              'bind': {'animations.enter.playKey': r"${= 'fill' + stamp}"},
+              'animations': [
+                {'id': 'enter', 'preset': 'enter', 'params': {'from': {'translateY': -100}}, 'duration': 400, 'curve': 'linear', 'autoplay': true},
+              ],
+              'transitions': [
+                {'property': 'motion', 'duration': 400},
+              ],
             },
           },
         })),
@@ -438,15 +491,35 @@ void main() {
         'chip': {
           'type': 'box',
           'layout': {'width': 40, 'height': 20, 'x': {'start': 100}, 'y': {'start': 0}},
-          'motion': {
-            'duration': 400,
-            'curve': 'linear',
-            'keyframes': [
-              {'t': 0.25, 'translateX': -8},
-              {'t': 0.75, 'translateX': 8},
-            ],
-          },
-          'bind': {'motion.replayKey': r'${shake}'},
+          'motion': <String, Object?>{},
+          'bind': {'animations.enter.playKey': r'${shake}'},
+          'animations': [
+            {
+              'id': 'enter',
+              'preset': 'enter',
+              'params': {
+                'from': <String, Object?>{},
+                'frames': [
+                  {'t': 0.25, 'translateX': -8},
+                  {'t': 0.75, 'translateX': 8},
+                ],
+              },
+              'duration': 400,
+              'curve': 'linear',
+              'autoplay': false,
+            },
+          ],
+          'transitions': [
+            {
+              'property': 'motion',
+              'duration': 400,
+              'keyframes': [
+                {'at': 0.25, 'value': {'translateX': -8}},
+                {'at': 0.75, 'value': {'translateX': 8}},
+              ],
+              'interpolation': 'monotoneCubic',
+            },
+          ],
         },
       });
       double left() => tree.boxOf('chip')!.rectIn(view)!.left;
@@ -483,6 +556,7 @@ void main() {
 
     testWidgets('a bound, looping motion along a path moves the node', (tester) async {
       final doc = LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['s'],
         'nodes': {
           's': {'type': 'stack', 'children': ['t'], 'layout': {'width': 400, 'height': 300}},
@@ -490,9 +564,21 @@ void main() {
             'type': 'box',
             'layout': {'width': 20, 'height': 10, 'x': {'start': -10}, 'y': {'start': -5}},
             'decoration': {'fills': [{'color': '#FF000000'}]},
-            'motion': {'path': 'M0 0 L1 0', 'orientToPath': true, 'orientUpright': true, 'loop': 'restart', 'duration': 5000,
-                       'curve': 'linear', 'keyframes': []},
-            'bind': {'motion.path': r'${trip.path}', 'motion.duration': r'${trip.ms}', 'motion.keyframes': r'${trip.keys}'},
+            'motion': {
+              'path': {'path': 'M0 0 L1 0', 'orient': 'upright'},
+            },
+            'bind': {
+              'motion.path.path': r'${trip.path}',
+              'animations.loop.duration': r'${trip.ms}',
+              'transitions[0].duration': r'${trip.ms}',
+              'animations.loop.params.frames': r'${trip.keys}',
+            },
+            'animations': [
+              {'id': 'loop', 'preset': 'loop', 'params': {'from': <String, Object?>{}}, 'duration': 5000, 'curve': 'linear', 'repeat': <String, Object?>{}},
+            ],
+            'transitions': [
+              {'property': 'motion', 'duration': 5000},
+            ],
           },
         },
       });
@@ -524,8 +610,9 @@ void main() {
 
     testWidgets('a node moving along a path at an even pace covers equal track in equal time', (tester) async {
       // 100 px straight then 100 px on the diagonal, with the train's motion:
-      // length pacing, oriented and upright, a linear looping run.
+      // oriented and upright, a linear looping run.
       final doc = LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['s'],
         'nodes': {
           's': {'type': 'stack', 'children': ['t'], 'layout': {'width': 400, 'height': 300}},
@@ -533,9 +620,36 @@ void main() {
             'type': 'box',
             'layout': {'width': 20, 'height': 10, 'x': {'start': -10}, 'y': {'start': -5}},
             'decoration': {'fills': [{'color': '#FF000000'}]},
-            'motion': {'path': 'M0 100 L100 100 L160 180', 'pathPacing': 'length', 'orientToPath': true, 'orientUpright': true,
-                       'uprightMirror': true, 'loop': 'restart', 'duration': 2000, 'curve': 'linear',
-                       'keyframes': [{'t': 0, 'pathProgress': 0}, {'t': 1, 'pathProgress': 1}]},
+            'motion': {
+              'path': {'path': 'M0 100 L100 100 L160 180', 'orient': 'upright'},
+            },
+            'animations': [
+              {
+                'id': 'loop',
+                'preset': 'loop',
+                'params': {
+                  'from': <String, Object?>{},
+                  'frames': [
+                    {'t': 0, 'pathProgress': 0},
+                    {'t': 1, 'pathProgress': 1},
+                  ],
+                },
+                'duration': 2000,
+                'curve': 'linear',
+                'repeat': <String, Object?>{},
+              },
+            ],
+            'transitions': [
+              {
+                'property': 'motion',
+                'duration': 2000,
+                'keyframes': [
+                  {'at': 0, 'value': {'path.progress': 0}},
+                  {'at': 1, 'value': {'path.progress': 1}},
+                ],
+                'interpolation': 'monotoneCubic',
+              },
+            ],
           },
         },
       });
@@ -561,6 +675,7 @@ void main() {
 
     testWidgets('a looping motion hidden by a binding starts again when shown', (tester) async {
       final doc = LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['s'],
         'nodes': {
           's': {'type': 'stack', 'children': ['t'], 'layout': {'width': 400, 'height': 300}},
@@ -568,8 +683,15 @@ void main() {
             'type': 'box',
             'layout': {'width': 20, 'height': 10, 'x': {'start': -10}, 'y': {'start': -5}},
             'decoration': {'fills': [{'color': '#FF000000'}]},
-            'motion': {'path': 'M0 100 L200 100', 'loop': 'restart', 'duration': 2000, 'curve': 'linear', 'pathProgress': 1,
-                       'enterFrom': {'pathProgress': 0}},
+            'motion': {
+              'path': {'path': 'M0 100 L200 100', 'progress': 1},
+            },
+            'animations': [
+              {'id': 'loop', 'preset': 'loop', 'params': {'from': {'pathProgress': 0}}, 'duration': 2000, 'curve': 'linear', 'repeat': <String, Object?>{}},
+            ],
+            'transitions': [
+              {'property': 'motion', 'duration': 2000},
+            ],
             'bind': {'visible': r'${shown}'},
           },
         },
@@ -595,13 +717,16 @@ void main() {
   group('reduced motion', () {
     Future<RenderAnimations> show(WidgetTester tester) async {
       final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['g'],
         'nodes': {
           'g': {
             'type': 'box',
             'layout': {'width': 64, 'height': 64},
             'decoration': {'fills': [{'color': '#FFFF0000'}]},
-            'loops': [{'type': 'flicker', 'duration': 600, 'opacityFrom': 0.5, 'opacityTo': 0.9}],
+            'animations': [
+              {'id': 'loop0', 'preset': 'flicker', 'params': {'opacityFrom': 0.5, 'opacityTo': 0.9}, 'duration': 600},
+            ],
           },
         },
       })));

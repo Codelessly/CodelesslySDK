@@ -1,19 +1,11 @@
 // The JSON documents in this repository (test fixtures, benchmark bundles)
-// decode and encode byte for byte as they did before catalogs existed
-// (codelessly_api without the catalog work, at the base it merged onto): each line of fixtures/catalog_corpus.digests is
-// `file#pointer kind digest`, the digest of a value's encoding after a decode
-// (tool/corpus_roundtrip.dart in codelessly_api makes the same lines).
+// decode and encode byte for byte as they did when the digests were taken:
+// each line of fixtures/catalog_corpus.digests is `file#pointer kind digest`,
+// the digest of a value's encoding after a decode. A change to how a document,
+// a node, a reaction or an action decodes or encodes shows here. To take them
+// again after a change made on purpose:
 //
-// 30.1.0's one-way migration steps moved fields, so the encoding of the
-// documents holding one changed on purpose: the 178 lines of the five files
-// whose documents have a node rotation, a node scale (a state's included) or
-// a hero's flight look (petri_bench_full, event_desktop_bound,
-// event_desktop_tip, ninefold_board, strata_tabs), and strata_tabs' document
-// and its diagram_0 node again for its stroke path (a custom paint path op),
-// were taken again with them; the others are as taken before catalogs.
-// After 30.1.0, step `states.target` resolved the state patches that named
-// their node `self` (event_desktop_bound, event_desktop_tip: 8 lines, taken
-// again).
+//   UPDATE_CATALOG_CORPUS=1 flutter test test/catalog_corpus_test.dart
 import 'dart:convert';
 import 'dart:io';
 
@@ -30,10 +22,6 @@ String _digest(Object? json) {
   return '${h.toUnsigned(64).toRadixString(16)}:${s.length}';
 }
 
-/// Schema-2 reaction [r] migrated (as a box's reaction).
-Json _migrated(Map r) =>
-    readMap((migrateNode({'type': 'box', 'actions': [r]})['actions'] as List).single)!;
-
 /// What a file's documents, nodes, reactions and actions encode to, as the
 /// digest lines.
 List<String> _lines(String path, Catalog catalog) {
@@ -42,34 +30,20 @@ List<String> _lines(String path, Catalog catalog) {
     if (v is Map) {
       final nodes = v['nodes'];
       if (nodes is Map && nodes.values.any((n) => n is Map && n['type'] is String)) {
-        // The digests were taken in schema 2: a document now encodes as
-        // schema 3, and (migrated when it decodes) otherwise the same but for
-        // the fields 30.1.0 moved (above).
         final doc = LayoutDocument.fromJson(v, catalog: catalog).toJson();
-        if (doc['schema'] == kSchemaVersion) doc['schema'] = 2;
-        // Schema 2's line height, which the migration writes on the
-        // top-level nodes (step text.lineHeight), is what it drew anyway.
-        for (final e in (doc['nodes'] as Map).entries) {
-          final n = e.value as Map;
-          if (jsonEncode(n['defaultTextStyle']) == '{"height":1.33}' && (nodes[e.key] as Map?)?['defaultTextStyle'] == null) {
-            n.remove('defaultTextStyle');
-          }
-        }
         out.add('$path#$at doc ${_digest(doc)}');
       }
-      // A node, reaction or action alone is schema 2 too: migrated first.
       if (v['type'] is String && v['layout'] is Map) {
-        out.add('$path#$at node ${_digest(Node.fromJson(migrateNode(readMap(v)!), catalog: catalog)?.toJson())}');
+        out.add('$path#$at node ${_digest(Node.fromJson(v, catalog: catalog)?.toJson())}');
       }
       final acts = v['actions'];
       if (acts is List) {
         for (var i = 0; i < acts.length; i++) {
           final a = acts[i];
           if (a is Map && a['trigger'] != null) {
-            out.add('$path#$at/actions/$i reaction ${_digest(Reaction.fromJson(_migrated(a), catalog: catalog)?.toJson())}');
+            out.add('$path#$at/actions/$i reaction ${_digest(Reaction.fromJson(a, catalog: catalog)?.toJson())}');
           } else if (a is Map && a['type'] is String) {
-            final r = _migrated({'trigger': {'type': 'click'}, 'actions': [a]});
-            out.add('$path#$at/actions/$i action ${_digest(ActionDef.fromJson((r['actions'] as List).single, catalog: catalog)?.toJson())}');
+            out.add('$path#$at/actions/$i action ${_digest(ActionDef.fromJson(a, catalog: catalog)?.toJson())}');
           }
         }
       }
@@ -92,11 +66,16 @@ List<String> _lines(String path, Catalog catalog) {
 }
 
 void main() {
-  test('every document in the repository encodes as it did before catalogs', () {
-    final expected = File('test/fixtures/catalog_corpus.digests').readAsLinesSync().where((l) => l.isNotEmpty).toList();
+  test('every document in the repository encodes as it did when the digests were taken', () {
+    final digests = File('test/fixtures/catalog_corpus.digests');
+    final expected = digests.readAsLinesSync().where((l) => l.isNotEmpty).toList();
     final files = {for (final l in expected) l.substring(0, l.indexOf('#'))};
     expect(files.length, greaterThanOrEqualTo(10));
     final actual = [for (final f in files) ..._lines(f, standardCatalog)];
+    if (Platform.environment['UPDATE_CATALOG_CORPUS'] == '1') {
+      digests.writeAsStringSync('${actual.join('\n')}\n');
+      return;
+    }
     expect(actual.length, expected.length);
     final mismatched = [
       for (var i = 0; i < actual.length; i++)

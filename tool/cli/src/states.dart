@@ -30,9 +30,9 @@ List<String> stepArgs(Object? steps) => [
         },
     ];
 
-const _pathOptions = {'--fonts', '--compare', '--slots', '--design-system'};
+const _pathOptions = {'--fonts', '--compare', '--slots', '--design-system', '--pick-file'};
 
-/// Paths after --fonts, --compare, --slots, --design-system (and an --image-map's folder and table) are relative
+/// Paths after --fonts, --compare, --slots, --design-system, --pick-file (and an --image-map's folder and table) are relative
 /// to the manifest.
 List<String> absolutizeArgs(String base, List<String> args) => [
       for (var i = 0; i < args.length; i++)

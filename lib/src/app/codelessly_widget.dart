@@ -785,6 +785,9 @@ class _LayoutViewState extends State<_LayoutView> {
       // bottom sheet, whose drag handle sits over its top edge.
       'modal': widget.sizing != CanvasSizing.fill,
       'sheet': widget.sizing == CanvasSizing.fillWidth,
+      // The page's address: a browser's, else the location a link opens it
+      // with, or empty.
+      'url': pageUrlOf(context),
       // Whether the app draws backdrop screens right beneath this one: a
       // screen can then hide its own background (`${= !screen.backdrop}`)
       // and keep it for the design board, where no backdrop is drawn. Not

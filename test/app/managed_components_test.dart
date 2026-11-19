@@ -14,6 +14,7 @@ ManagedComponentVersion version(int n, String semver, {String title = 'Sign in',
     'definition': {
       'name': 'Sign in',
       'document': {
+        'schema': 3,
         'roots': ['root'],
         'nodes': {
           'root': {

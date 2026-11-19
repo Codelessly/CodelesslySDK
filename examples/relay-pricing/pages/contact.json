@@ -1,5 +1,5 @@
 {
- "schema": 2,
+ "schema": 3,
  "id": "contact",
  "roots": [
   "contact"
@@ -41,6 +41,9 @@
       "color": "bg"
      }
     ]
+   },
+   "defaultTextStyle": {
+    "height": 1.33
    }
   },
   "contactRoot": {

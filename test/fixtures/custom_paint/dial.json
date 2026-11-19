@@ -1,5 +1,5 @@
 {
- "schema": 2,
+ "schema": 3,
  "id": "dial",
  "roots": [
   "dial"
@@ -132,6 +132,9 @@
       "paint": "#FFE74C3C"
      }
     ]
+   },
+   "defaultTextStyle": {
+    "height": 1.33
    }
   }
  },

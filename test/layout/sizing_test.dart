@@ -20,6 +20,7 @@ Future<Size> _size(WidgetTester tester, String cross, Object width) async {
   tester.view.physicalSize = const Size(390, 844);
   addTearDown(tester.view.reset);
   final doc = LayoutDocument.fromJson({
+    'schema': 3,
     'roots': ['canvas'],
     'nodes': {
       'canvas': {'type': 'canvas', 'slots': {'body': 'col'}, 'layout': {'width': 390, 'height': 844}},

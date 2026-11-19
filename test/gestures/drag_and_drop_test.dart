@@ -129,7 +129,7 @@ Future<Board> pump(WidgetTester tester,
     }
     (nodes['board']! as Map)['children'] = ['col_a', 'col_b'];
   }
-  final doc = api.LayoutDocument.fromJson({'roots': ['board'], 'nodes': nodes});
+  final doc = api.LayoutDocument.fromJson({'schema': 3, 'roots': ['board'], 'nodes': nodes});
   final values = ValuesScope({'drag': dragIdleValues});
   final scope = VariableScope([
     const Variable(name: 'cards', type: VariableType.list, value: [
@@ -393,6 +393,7 @@ void main() {
             ],
           };
       final doc = api.LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['s'],
         'nodes': {
           's': {
@@ -513,6 +514,7 @@ void main() {
       addTearDown(tester.view.reset);
       final scope = VariableScope(const []);
       final doc = api.LayoutDocument.fromJson({
+        'schema': 3,
         'roots': ['board'],
         'nodes': {
           'board': {

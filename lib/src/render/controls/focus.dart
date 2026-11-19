@@ -28,7 +28,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 /// Where a root's key events come from, and its bridge to the host's own
-/// focus (an island's text field during the migration).
+/// focus (an island's text field).
 abstract interface class ControlKeyboard {
   /// Starts sending key events to [handler] (true: handled).
   void attach(bool Function(KeyEvent event) handler);

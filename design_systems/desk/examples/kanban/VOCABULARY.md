@@ -2,7 +2,7 @@
 
 Written by `tool/notation/notation.sh expand` at every expand (codelessly_api docs/design/19-open-vocabulary.md, section 15); vocabulary.json beside it holds every word with its lines, signatures and history. Do not edit: expand again.
 
-3 expands from 2026-11-19T05:06:53Z to 2026-11-19T08:02:54Z; words: 151 used, 8 no longer used.
+6 expands from 2026-11-19T05:06:53Z to 2026-11-19T19:07:09Z; words: 159 used, 8 no longer used.
 
 ## Placeholders and words left out (0)
 
@@ -28,48 +28,48 @@ Names read as a word we have.
 
 None.
 
-## Other words beyond the core (61)
+## Other words beyond the core (62)
 
 A design system's components, universal words, and words a definition names and never reads.
 
 | kind | word | how | uses | where | signature | what was said |
 |---|---|---|---|---|---|---|
 | type | Account | component | 1 | pages/board.txt:18 | `Account "text" "text" hide= w=` |  |
-| type | Actions | component | 1 | pages/board.txt:87 | `Actions ...` |  |
-| type | BoardColumn | component | 4 | pages/board.txt:32,35,38,41 | `BoardColumn "text" count= hue= phone.visible= grow phone.w=358 tablet.w=300 onAdd ... / BoardColumn "text" count= hue= limit= phone.visible= grow phone.w=358 tablet.w=300 onAdd ... / BoardColumn "text" "text" count= hue= == grow phone.visible={col phone.w=358 tablet.w=300 } onAdd ...` |  |
+| type | Actions | component | 1 | pages/board.txt:91 | `Actions ...` |  |
+| type | BoardColumn | component | 4 | pages/board.txt:32,36,40,44 | `BoardColumn "text" count= hue= phone.visible= grow phone.w=358 tablet.w=300 onAdd ... / BoardColumn "text" count= hue= limit= phone.visible= grow phone.w=358 tablet.w=300 onAdd ... / BoardColumn "text" "text" count= hue= == grow phone.visible={col phone.w=358 tablet.w=300 } onAdd ...` |  |
 | type | Brand | component | 1 | pages/board.txt:16 | `Brand "text" icon=` |  |
 | type | Breadcrumb | component | 1 | pages/board.txt:17 | `Breadcrumb hide= items=` |  |
-| type | Dialog | component | 1 | pages/board.txt:44 | `Dialog "text" guard= guardText= overline= w= ...` |  |
-| type | Field | component | 4 | pages/board.txt:77,79,81,83 | `Field "text" ...` |  |
+| type | Dialog | component | 1 | pages/board.txt:48 | `Dialog "text" guard= guardText= overline= w= ...` |  |
+| type | Field | component | 4 | pages/board.txt:81,83,85,87 | `Field "text" ...` |  |
 | type | FilterButton | component | 3 | pages/board.txt:25,26,27 | `FilterButton "text" hide= icon= / FilterButton "text" count= hide= icon=` |  |
 | type | PageHeader | component | 1 | pages/board.txt:20 | `PageHeader "text" "text" ...` |  |
 | type | SearchField | component | 1 | pages/board.txt:24 | `SearchField @ hint= w= phone.w=fill` |  |
 | type | Tabs | component | 1 | pages/board.txt:22 | `Tabs @ icons= tabs=` |  |
-| type | Tag | component | 2 | pages/board.txt:85,86 | `Tag "text" hue= removable` |  |
-| type | TaskCard | component | 4 | pages/board.txt:34,37,40,43 | `TaskCard assignee= checklist= comments= due= key= labels= overdue= title= onTap` |  |
+| type | Tag | component | 2 | pages/board.txt:89,90 | `Tag "text" hue= removable` |  |
+| type | TaskCard | component | 4 | pages/board.txt:35,39,43,47 | `TaskCard assignee= checklist= comments= drag= due= key= labels= overdue= title= onTap / TaskCard assignee= checklist= comments= due= key= labels= overdue= title= onTap` |  |
 | text | Account.text1 | component | 1 | pages/board.txt:18 |  |  |
 | text | Account.text2 | component | 1 | pages/board.txt:18 |  |  |
-| text | BoardColumn.text1 | component | 4 | pages/board.txt:32,35,38,41 |  |  |
+| text | BoardColumn.text1 | component | 4 | pages/board.txt:32,36,40,44 |  |  |
 | text | Brand.text1 | component | 1 | pages/board.txt:16 |  |  |
-| text | Dialog.text1 | component | 1 | pages/board.txt:44 |  |  |
-| text | Field.text1 | component | 4 | pages/board.txt:77,79,81,83 |  |  |
+| text | Dialog.text1 | component | 1 | pages/board.txt:48 |  |  |
+| text | Field.text1 | component | 4 | pages/board.txt:81,83,85,87 |  |  |
 | text | FilterButton.text1 | component | 3 | pages/board.txt:25,26,27 |  |  |
 | text | PageHeader.text1 | component | 1 | pages/board.txt:20 |  |  |
 | text | PageHeader.text2 | component | 1 | pages/board.txt:20 |  |  |
-| text | Tag.text1 | component | 2 | pages/board.txt:85,86 |  |  |
+| text | Tag.text1 | component | 2 | pages/board.txt:89,90 |  |  |
 | parameter | Account.hide | component | 1 | pages/board.txt:18 |  |  |
 | parameter | Account.w | component | 1 | pages/board.txt:18 |  |  |
-| parameter | BoardColumn.count | component | 4 | pages/board.txt:32,35,38,41 |  |  |
-| parameter | BoardColumn.hue | component | 4 | pages/board.txt:32,35,38,41 |  |  |
-| parameter | BoardColumn.limit | component | 2 | pages/board.txt:35,38 |  |  |
-| parameter | BoardColumn.phone.visible | component | 4 | pages/board.txt:32,35,38,41 |  |  |
+| parameter | BoardColumn.count | component | 4 | pages/board.txt:32,36,40,44 |  |  |
+| parameter | BoardColumn.hue | component | 4 | pages/board.txt:32,36,40,44 |  |  |
+| parameter | BoardColumn.limit | component | 2 | pages/board.txt:36,40 |  |  |
+| parameter | BoardColumn.phone.visible | component | 4 | pages/board.txt:32,36,40,44 |  |  |
 | parameter | Brand.icon | component | 1 | pages/board.txt:16 |  |  |
 | parameter | Breadcrumb.hide | component | 1 | pages/board.txt:17 |  |  |
 | parameter | Breadcrumb.items | component | 1 | pages/board.txt:17 |  |  |
-| parameter | Dialog.guard | component | 1 | pages/board.txt:44 |  |  |
-| parameter | Dialog.guardText | component | 1 | pages/board.txt:44 |  |  |
-| parameter | Dialog.overline | component | 1 | pages/board.txt:44 |  |  |
-| parameter | Dialog.w | component | 1 | pages/board.txt:44 |  |  |
+| parameter | Dialog.guard | component | 1 | pages/board.txt:48 |  |  |
+| parameter | Dialog.guardText | component | 1 | pages/board.txt:48 |  |  |
+| parameter | Dialog.overline | component | 1 | pages/board.txt:48 |  |  |
+| parameter | Dialog.w | component | 1 | pages/board.txt:48 |  |  |
 | parameter | FilterButton.count | component | 1 | pages/board.txt:26 |  |  |
 | parameter | FilterButton.hide | component | 3 | pages/board.txt:25,26,27 |  |  |
 | parameter | FilterButton.icon | component | 3 | pages/board.txt:25,26,27 |  |  |
@@ -79,22 +79,23 @@ A design system's components, universal words, and words a definition names and 
 | parameter | Tabs.@ | component | 1 | pages/board.txt:22 |  |  |
 | parameter | Tabs.icons | component | 1 | pages/board.txt:22 |  |  |
 | parameter | Tabs.tabs | component | 1 | pages/board.txt:22 |  |  |
-| parameter | Tag.hue | component | 2 | pages/board.txt:85,86 |  |  |
-| parameter | TaskCard.assignee | component | 4 | pages/board.txt:34,37,40,43 |  |  |
-| parameter | TaskCard.checklist | component | 4 | pages/board.txt:34,37,40,43 |  |  |
-| parameter | TaskCard.comments | component | 4 | pages/board.txt:34,37,40,43 |  |  |
-| parameter | TaskCard.due | component | 4 | pages/board.txt:34,37,40,43 |  |  |
-| parameter | TaskCard.key | component | 4 | pages/board.txt:34,37,40,43 |  |  |
-| parameter | TaskCard.labels | component | 4 | pages/board.txt:34,37,40,43 |  |  |
-| parameter | TaskCard.overdue | component | 4 | pages/board.txt:34,37,40,43 |  |  |
-| parameter | TaskCard.title | component | 4 | pages/board.txt:34,37,40,43 |  |  |
-| flag | BoardColumn.grow | component | 4 | pages/board.txt:32,35,38,41 |  |  |
-| flag | BoardColumn.phone.w=358 | component | 4 | pages/board.txt:32,35,38,41 |  |  |
-| flag | BoardColumn.tablet.w=300 | component | 4 | pages/board.txt:32,35,38,41 |  |  |
+| parameter | Tag.hue | component | 2 | pages/board.txt:89,90 |  |  |
+| parameter | TaskCard.assignee | component | 4 | pages/board.txt:35,39,43,47 |  |  |
+| parameter | TaskCard.checklist | component | 4 | pages/board.txt:35,39,43,47 |  |  |
+| parameter | TaskCard.comments | component | 4 | pages/board.txt:35,39,43,47 |  |  |
+| parameter | TaskCard.drag | component | 4 | pages/board.txt:35,39,43,47 |  |  |
+| parameter | TaskCard.due | component | 4 | pages/board.txt:35,39,43,47 |  |  |
+| parameter | TaskCard.key | component | 4 | pages/board.txt:35,39,43,47 |  |  |
+| parameter | TaskCard.labels | component | 4 | pages/board.txt:35,39,43,47 |  |  |
+| parameter | TaskCard.overdue | component | 4 | pages/board.txt:35,39,43,47 |  |  |
+| parameter | TaskCard.title | component | 4 | pages/board.txt:35,39,43,47 |  |  |
+| flag | BoardColumn.grow | component | 4 | pages/board.txt:32,36,40,44 |  |  |
+| flag | BoardColumn.phone.w=358 | component | 4 | pages/board.txt:32,36,40,44 |  |  |
+| flag | BoardColumn.tablet.w=300 | component | 4 | pages/board.txt:32,36,40,44 |  |  |
 | flag | SearchField.phone.w=fill | component | 1 | pages/board.txt:24 |  |  |
-| flag | Tag.removable | component | 2 | pages/board.txt:85,86 |  |  |
-| event | BoardColumn.onAdd | component | 4 | pages/board.txt:32,35,38,41 |  |  |
-| event | TaskCard.onTap | component | 4 | pages/board.txt:34,37,40,43 |  |  |
+| flag | Tag.removable | component | 2 | pages/board.txt:89,90 |  |  |
+| event | BoardColumn.onAdd | component | 4 | pages/board.txt:32,36,40,44 |  |  |
+| event | TaskCard.onTap | component | 4 | pages/board.txt:35,39,43,47 |  |  |
 
 ## No longer used (7)
 
@@ -114,7 +115,7 @@ Words an earlier expand saw that no file uses now, with how they resolved then.
 
 ## Core words
 
-17 types, 8 texts, 29 parameters, 17 flags, 1 event, 6 variants, 4 verbs, 6 functions, 2 statements: in vocabulary.json.
+17 types, 8 texts, 32 parameters, 17 flags, 2 events, 6 variants, 5 verbs, 8 functions, 2 statements: in vocabulary.json.
 
 ## Said at the last expand of each file (0)
 

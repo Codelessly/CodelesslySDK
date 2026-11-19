@@ -33,6 +33,7 @@ void main() {
   testWidgets("the painter draws over the node's own fill and under its children, the foreground painter over them", (tester) async {
     pixelRatioOne(tester);
     final doc = LayoutDocument.fromJson({
+      'schema': 3,
       'roots': ['s'],
       'nodes': {
         's': {

@@ -248,8 +248,9 @@ void main() {
 
     testWidgets('a tap in a running app runs its layout\'s script', (tester) async {
       final bundle = PublishBundle.fromJson({
-        'schema': 2,
+        'schema': 3,
         'model': {
+          'schema': 3,
           'projectId': 'p',
           'entryLayoutId': 'home',
           'layouts': {
@@ -262,7 +263,7 @@ void main() {
         },
         'layouts': {
           'home': {
-            'schema': 2,
+            'schema': 3,
             'id': 'home',
             'roots': ['c'],
             'nodes': {

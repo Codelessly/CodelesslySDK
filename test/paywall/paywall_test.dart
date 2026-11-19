@@ -198,7 +198,7 @@ Node actionNode(List<Json> values) => Node.fromJson({'type': 'box', 'actions': [
 ]}, id: 'action')!;
 PublishBundle bundle() {
   PublishLayout layout(String id, List<Json> click) => PublishLayout.fromJson({
-    'schema': 2, 'id': id, 'roots': ['${id}Canvas'], 'nodes': {
+    'schema': 3, 'id': id, 'roots': ['${id}Canvas'], 'nodes': {
       '${id}Canvas': {'type': 'canvas', 'slots': {'body': '${id}Body'}, 'layout': {'width': 390, 'height': 844}},
       '${id}Body': {'type': 'stack', 'layout': {'width': {'fill': 390}, 'height': {'fill': 844}}, 'children': ['${id}Button']},
       '${id}Button': {'type': 'box', 'decoration': {'fills': [{'color': '#FF334455'}]}, 'layout': {'width': 100, 'height': 50}, 'actions': [
@@ -243,7 +243,7 @@ Json _text(String name, String text) => {
     };
 
 Json _layout(String id, Map<String, Json> body) => {
-      'schema': 2,
+      'schema': 3,
       'id': id,
       'roots': ['$id-canvas'],
       'nodes': {
@@ -267,7 +267,7 @@ Json _layout(String id, Map<String, Json> body) => {
 
 PublishBundle _bundle(Json open) => PublishBundle.fromJson({
       'model': {
-        'schema': 2,
+        'schema': 3,
         'projectId': 'open_paywall_demo',
         'entryLayoutId': 'home',
         'layouts': {

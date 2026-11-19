@@ -49,7 +49,7 @@ for a in "$@"; do
     continue
   fi
   case "$a" in
-    --out|--fonts|--slots|--compare|--sheet|--sheet-base) expect_path=1; prev="$a"; args+=("$a") ;;
+    --out|--fonts|--slots|--compare|--sheet|--sheet-base|--pick-file) expect_path=1; prev="$a"; args+=("$a") ;;
     --design-system) want_ds=1 ;;
     --*) args+=("$a") ;;
     *)

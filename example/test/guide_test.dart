@@ -14,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// `item/:id`.
 PublishBundle twoScreens() => PublishBundle.fromJson({
       'model': {
-        'schema': 2,
+        'schema': 3,
         'projectId': 'test-project',
         'entryLayoutId': 'home',
         'layoutIDMap': {'start': 'home'},
@@ -33,7 +33,7 @@ PublishBundle twoScreens() => PublishBundle.fromJson({
       },
       'layouts': {
         'home': {
-          'schema': 2,
+          'schema': 3,
           'id': 'home',
           'roots': ['home-canvas'],
           'nodes': {
@@ -77,7 +77,7 @@ PublishBundle twoScreens() => PublishBundle.fromJson({
           },
         },
         'details': {
-          'schema': 2,
+          'schema': 3,
           'id': 'details',
           'roots': ['details-canvas'],
           'paths': {'details-canvas': 'item/:id'},
@@ -158,7 +158,7 @@ PublishBundle withPaywall() {
     'layouts': {
       for (final e in base.layouts.entries) e.key: e.value.toJson(),
       'paywall': {
-        'schema': 2,
+        'schema': 3,
         'id': 'paywall',
         'roots': ['paywall-canvas'],
         'nodes': {
@@ -189,7 +189,7 @@ PublishBundle withPaywall() {
 /// came (`timeAgo`), colored by the theme.
 PublishBundle sharedCards() {
   Json screen(String id) => {
-        'schema': 2,
+        'schema': 3,
         'id': id,
         'roots': ['$id-canvas'],
         'nodes': {
@@ -230,7 +230,7 @@ PublishBundle sharedCards() {
       };
   return PublishBundle.fromJson({
     'model': {
-      'schema': 2,
+      'schema': 3,
       'projectId': 'shared',
       'entryLayoutId': 'list',
       'layouts': {
@@ -260,7 +260,7 @@ PublishBundle sharedCards() {
 
 /// A canvas [id] that is one box: a tap anywhere on it runs [onClick].
 Json tapScreen(String id, List<Json> onClick, {List<Json> variables = const []}) => {
-      'schema': 2,
+      'schema': 3,
       'id': id,
       'roots': ['$id-canvas'],
       'variables': {'$id-canvas': variables},
@@ -341,7 +341,7 @@ PublishBundle withPresentations() {
 /// [markAllRead] button.
 PublishBundle liveCards() => PublishBundle.fromJson({
       'model': {
-        'schema': 2,
+        'schema': 3,
         'projectId': 'test-project',
         'entryLayoutId': 'cards',
         'layouts': {
@@ -354,7 +354,7 @@ PublishBundle liveCards() => PublishBundle.fromJson({
       },
       'layouts': {
         'cards': {
-          'schema': 2,
+          'schema': 3,
           'id': 'cards',
           'roots': ['cards-canvas'],
           'variables': {
