@@ -20,8 +20,14 @@ plain `WidgetsApp` (uses no Material itself), one under `MaterialApp`.
 |---|---|---|---|---|
 | 38.0.0 | WidgetsApp | 432,161 | 47,161 | 71,935 |
 | 38.0.0 | MaterialApp | 466,505 | 48,039 | 71,949 |
-| 19 files importing | WidgetsApp | 408,605 | 43,959 | 71,928 |
-| 19 files importing | MaterialApp | 448,246 | 47,818 | 71,950 |
+| plain utilities gone (19 files importing) | WidgetsApp | 408,605 | 43,959 | 71,928 |
+| plain utilities gone (19 files importing) | MaterialApp | 448,246 | 47,818 | 71,950 |
+| shell chrome on the SDK's controls (19 files importing) | WidgetsApp | 179,326 | 30,310 | 71,935 |
+| shell chrome on the SDK's controls (19 files importing) | MaterialApp | 261,147 | 31,125 | 71,934 |
+
+Of the 179 KB left for the plain host, 166 KB is the theme (`ThemeData`, `ColorScheme`, `Typography` and the
+component themes `themeDataOf` fills in), 27 KB routes and page transitions, 8 KB ink and the `Material` surface,
+4 KB dialogs and sheets.
 
 Third-party dependencies import the framework's `material.dart` themselves (`video_player`, `webview_flutter` and
 its platform packages, `in_app_purchase`'s platform packages, `url_launcher_web`). They are not replaced by this
