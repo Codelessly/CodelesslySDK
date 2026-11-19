@@ -359,10 +359,13 @@ class CodelesslyWidget extends StatefulWidget {
     if (transition != null) {
       return CodelesslyRouteTransitionRoute<T>(transition: transition, settings: settings, anchor: anchor, builder: build);
     }
-    final page = webTransition(pageTransition);
-    if (page == PageTransition.platform) return CodelesslyPageRoute.of<T>(codelessly: codelessly, settings: settings, builder: build);
+    // The project's page transition (the platform's unless its config says
+    // otherwise: none on the web).
+    if (pageTransition == PageTransition.platform) {
+      return CodelesslyPageRoute.of<T>(codelessly: codelessly, settings: settings, builder: build);
+    }
     return CodelesslyPageTransitionRoute<T>(
-      transition: page,
+      transition: pageTransition,
       settings: settings,
       transitionMs: transitionMs,
       reverseTransitionMs: reverseTransitionMs,
