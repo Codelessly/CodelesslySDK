@@ -12,7 +12,7 @@ state sort="Edited"
 Page
   Section
     Row between
-      Heading "Notes"
+      Text.heading2 "Notes"
       SortMenu#sorter @sort options=["Edited","Created","Title"]
     Text#picked "Sorted by {sort}"
 ''';

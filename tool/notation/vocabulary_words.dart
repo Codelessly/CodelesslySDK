@@ -76,18 +76,18 @@ final class CorpusWord {
   /// The messages of the issues that refused it.
   final messages = <String>{};
 
-  /// Whether a use was read from the notation's built-in dictionary
-  /// (codelessly_api docs/design/23): a definition the notation has.
-  bool dictionary = false;
+  /// The dictionary a use was read from (`--dictionary`, a site's
+  /// `dictionary`): its folder's name; null when none was.
+  String? dictionary;
 
-  /// Where the notation's meaning of the word is written, for a word it has
-  /// (codelessly_api notationWordOrigin): `base`, `dictionary` or `code` (a
-  /// word the expander still rewrites in Dart); null for any other.
-  String? get origin => dictionary
-      ? 'dictionary'
-      : (kind == 'type' || kind == 'statement') && resolved == 'core'
+  /// Where the meaning of the word is written: the dictionary's folder name
+  /// for a word read from one, else, for a word the notation has
+  /// (codelessly_api notationWordOrigin), `base` or `code` (a word of the
+  /// page's frames the expander writes out in Dart); null for any other.
+  String? get origin => dictionary ??
+      ((kind == 'type' || kind == 'statement') && resolved == 'core'
           ? notationWordOrigin(word)
-          : null;
+          : null);
 
   int get uses => how.values.fold(0, (a, b) => a + b);
 
@@ -149,7 +149,7 @@ String countLine(Map<String, Object?> count) {
 final class _LineRecord {
   String? type; // unknown, alias or definition
   String? typeTo;
-  bool dictionary = false; // a definition of the built-in dictionary
+  String? dictionary; // the dictionary a definition was read from
   final unknown = <String>{}; // kind:word
   final alias = <String, String>{}; // kind:word -> to
   final universal = <String>{}; // kind:word
@@ -180,9 +180,9 @@ final class CorpusWords {
   /// The key of a word in [words].
   static String keyOf(String kind, String? on, String word) => '$kind ${on ?? ''} $word';
 
-  void _add(String kind, String? on, String word, String how, String file, String example, {String? to, int? line, String? signature, String? message, bool dictionary = false}) {
+  void _add(String kind, String? on, String word, String how, String file, String example, {String? to, int? line, String? signature, String? message, String? dictionary}) {
     final w = words.putIfAbsent(keyOf(kind, on, word), () => CorpusWord(kind, on, word));
-    if (dictionary) w.dictionary = true;
+    if (dictionary != null) w.dictionary = dictionary;
     w.how[how] = (w.how[how] ?? 0) + 1;
     if (to != null && to.isNotEmpty) w.to.add(to);
     w.files.add(file);
@@ -227,7 +227,9 @@ final class CorpusWords {
         case 'definition' || 'primitive':
           r.type = u.kind;
           r.typeTo = u.to;
-          r.dictionary = u.of == 'dictionary';
+          // A page's own definition says `page`, or `page, over …`; a
+          // dictionary's names its folder.
+          r.dictionary = u.of != null && !u.of!.startsWith('page') ? u.of : null;
         case 'universal':
           r.universal.add('${u.of}:${u.word}');
         case 'alias':
@@ -290,12 +292,12 @@ final class CorpusWords {
       // Adds a word that [how] may have found refused, with the message.
       void add(String kind, String? on, String word, String resolved, {String? to, String? signature}) {
         final message = resolved == 'refused' ? refusedAs : null;
-        _add(kind, on, word, resolved, file, line, to: to, line: at, signature: signature, message: message, dictionary: resolved == 'definition' && r.dictionary && (kind == 'type' || kind == 'statement'));
+        _add(kind, on, word, resolved, file, line, to: to, line: at, signature: signature, message: message, dictionary: resolved == 'definition' && (kind == 'type' || kind == 'statement') ? r.dictionary : null);
         refusedAs = null;
       }
 
       if (vocabularyStatements.contains(parts.word)) {
-        // A statement word of the built-in dictionary (computed) is a definition.
+        // A statement word a dictionary defines (computed) is a definition.
         final defined = r.type == 'definition';
         add('statement', null, parts.word, r.type == 'alias' ? 'alias' : defined ? 'definition' : 'core', to: r.type == 'alias' || defined ? r.typeTo : null);
         if (parts.word == 'state' || parts.word == 'project') {

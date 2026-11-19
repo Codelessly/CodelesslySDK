@@ -4,6 +4,16 @@ Needs codelessly_api 38.0.0, whose entry lists what the notation now draws diffe
 
 ### Behaviour changes (read before upgrading)
 
+**The notation's shorthand words**
+
+- **`Heading`, `H1`–`H4`, `Title`, `Brand`, `Logo`, `Link`, `NavItem`, `NavSection`, `SidebarFooter`, `IconTile`,
+  `Dots`, `ConfirmDialog`, `Shortcut`, `computed` and their other names are no longer the notation's** (see
+  codelessly_api's 38.0.0 entry): `expand` says each as an unknown word, or a placeholder with `--open`, unless a
+  definition gives it. A design system's component of one of these names is called as before: Desk's `NavItem`,
+  `NavSection`, `Brand` and `MenuItem`, so Desk's and Cards' reference screens draw as they did. To keep writing
+  them, read a dictionary that defines them (Added); the definitions, ready to copy, are in codelessly_api's
+  notation reference (`docs/reference/notation/components.md`).
+
 **Layout**
 
 - **Squeezable texts side by side in a row keep their own widths while they fit**, and give way in proportion
@@ -36,8 +46,8 @@ Needs codelessly_api 38.0.0, whose entry lists what the notation now draws diffe
 
 **The vocabulary record**
 
-- **A word read from the notation's dictionary resolves as a `definition` with `definedBy: dictionary`**, not
-  `design system`; `computed` is one.
+- **A word read from a dictionary resolves as a `definition` whose `definedBy` and `origin` are the dictionary's
+  folder name** (`words` for `--dictionary ../words`), not `design system`.
 
 ### Added
 
@@ -49,9 +59,15 @@ Needs codelessly_api 38.0.0, whose entry lists what the notation now draws diffe
 - **Render tool: `--modals`** captures the screens only ever opened as a modal (an `openModal` names them, no
   `navigate` does), each alone, in a run that captures every screen. Without it each such screen is named in a
   `modal_screen_not_captured` info line, with how to capture it.
-- **The vocabulary record says where the notation's meaning of a word is written**: `origin` is `base`,
-  `dictionary` (a definition the notation ships in its base words) or `code` (a word the expander still rewrites,
-  such as the page words).
+- **Dictionaries.** `tool/notation/notation.sh` (`prompt`, `expand`, `validate`, `print`) and `tool/codelessly
+  notation` and `validate` read the folders of definitions `--dictionary <folder>` names (written again for each
+  further folder), or, with none written, those `CODELESSLY_DICTIONARY` lists (separated as in `PATH`;
+  `--no-dictionary` reads none); a site's `site.json` adds its own (`"dictionary": ["../words"]`, relative to
+  it). A word is read from the first that defines it: the page's own `define`, the site's, the design system's,
+  then the dictionaries in order. `prompt` lists their words, one line each as a line uses it; the MCP server's
+  `codelessly_validate` takes `dictionary` (a list of folders).
+- **The vocabulary record says where the meaning of a word is written**: `origin` is `base`, `code` (a word of
+  the page's frames the expander writes out) or the name of the dictionary it was read from.
 
 ### Fixed
 

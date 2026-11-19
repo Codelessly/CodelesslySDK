@@ -24,14 +24,14 @@ state q=""
 state n=2 persist
 state stars=4
 state view=""
-Shortcut "ctrl+k" onPress={open palette}
+key ctrl+k onPress={open palette}
 App
   Sidebar
-    Brand "Proscenium" icon="theater_comedy"
-    NavItem "Seats" icon="event_seat" selected={true}
+    Text.strong "Proscenium"
+    Text "Seats"
   Main
     Nav
-      Heading "Choose your seats"
+      Text.heading3 "Choose your seats"
       Row gap=8
         Input#find "Find a row" @q clearable
         Button.danger "Clear" disabled={n==0} onTap={n=0; haptic}
@@ -74,12 +74,12 @@ void main() {
   test('Cards has its own aliases, over the built-in ones', () {
     expect(aliases.parameters['Tabs'], {'items': 'tabs'});
     expect(aliases.flags['Rating'], {'readonly': 'readOnly'});
-    expect(aliases.types.keys, containsAll(['Shortcut', 'RangeSlider', 'ConfirmDialog']));
+    expect(aliases.types.keys, containsAll(['RangeSlider', 'QRCode']));
     expect(aliases.parameters['*'], {'disabled': '!enabled', 'readonly': 'readOnly'});
     // Cards' own names for its words (the vocabulary loop's Review 5, D25), and none of the built-in ones.
     final own = loadVocabulary(dir: 'design_systems/cards', builtIn: false).types.keys;
     expect(own, containsAll(['StarRating', 'Map']));
-    expect(own, isNot(contains('Shortcut')));
+    expect(own, isNot(contains('RangeSlider')));
   });
 
   test('an open page with Cards: nothing is an issue, and every word is recorded', () {
@@ -103,7 +103,7 @@ void main() {
     expect(of('variant'), ['Button.Button.danger']);
     // Cards' Rating no longer needs a label (Review 6, D30).
     expect(of('missing'), isEmpty);
-    expect(of('alias').toSet(), {'state.persist', 'Shortcut', 'Button.disabled', 'Rating.readonly', 'Tabs.items', 'ListTile.subtitle'});
+    expect(of('alias').toSet(), {'state.persist', 'Button.disabled', 'Rating.readonly', 'Tabs.items', 'ListTile.subtitle'});
     final seat = r.vocabulary.firstWhere((u) => u.word == 'SeatMap');
     expect(seat.path, ['App', 'Main', 'Column']);
     expect(seat.children, ['Legend', 'Text']);
