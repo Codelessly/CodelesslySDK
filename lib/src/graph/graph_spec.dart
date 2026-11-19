@@ -955,7 +955,15 @@ class GraphSpec {
     this.interactions = const GraphInteractionsSpec(),
     this.style = const GraphStyleSpec(),
     this.selection = const GraphSelectionSpec(),
+    this.animate = 0,
+    this.animateIn = false,
   });
+
+  /// How long (ms) the marks take to move to new values when the rows
+  /// change (0: at once), and whether they grow from zero when the graph
+  /// first shows.
+  final double animate;
+  final bool animateIn;
 
   /// The row field that names a row across updates (its time): how an
   /// update is told from an append and from older rows put before.
@@ -977,6 +985,8 @@ class GraphSpec {
         interactions: GraphInteractionsSpec.fromJson(_m(j['interactions'])),
         style: GraphStyleSpec.fromJson(_m(j['style'])),
         selection: GraphSelectionSpec.fromJson(_m(j['selection'])),
+        animate: _d(j['animate'], 0),
+        animateIn: _b(j['animateIn'], false),
       );
 
   Json toJson() => {
@@ -989,5 +999,7 @@ class GraphSpec {
         'interactions': interactions.toJson(),
         'style': style.toJson(),
         if (selection.on != 'none') 'selection': selection.toJson(),
+        if (animate > 0) 'animate': animate,
+        if (animateIn) 'animateIn': animateIn,
       };
 }

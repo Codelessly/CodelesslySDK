@@ -60,8 +60,8 @@ final Map<String, Json> dashboardNodes = {
         {'month': 'Jul', 'web': 66, 'store': 28, 'partners': 19},
         {'month': 'Aug', 'web': 78, 'store': 31, 'partners': 24},
       ],
-      'x': {'label': 'month', 'fit': 'bars', 'axisHeight': 24, 'grid': false},
-      'y': {'width': 44, 'decimals': 0},
+      'xAxis': {'label': 'month', 'fit': 'bars', 'axisHeight': 24, 'grid': false},
+      'yAxis': {'width': 44, 'decimals': 0},
       'marks': [
         {'type': 'bar', 'y': 'web', 'name': 'Web', 'color': '#FF2563EB', 'stack': 'r', 'radius': 4},
         {'type': 'bar', 'y': 'store', 'name': 'Store', 'color': '#FF60A5FA', 'stack': 'r', 'radius': 4},
@@ -94,8 +94,8 @@ final Map<String, Json> dashboardNodes = {
         {'source': 'Email', 'share': 9},
         {'source': 'Other', 'share': 4},
       ],
-      'x': {'label': 'source', 'axisHeight': 0},
-      'y': {'width': 0, 'decimals': 0},
+      'xAxis': {'label': 'source', 'axisHeight': 0},
+      'yAxis': {'width': 0, 'decimals': 0},
       'marks': [
         {
           'type': 'arc',
@@ -127,10 +127,10 @@ final Map<String, Json> dashboardNodes = {
             'signups': 90 + (d * 13) % 60 + d * 2,
           },
       ],
-      'x': {'label': 'day', 'format': '', 'fit': 'points', 'axisHeight': 24, 'grid': false, 'tickEvery': 5},
+      'xAxis': {'label': 'day', 'format': '', 'fit': 'points', 'axisHeight': 24, 'grid': false, 'tickEvery': 5},
       'panes': [
         {
-          'y': {'width': 52, 'decimals': 0, 'include': [0]},
+          'yAxis': {'width': 52, 'decimals': 0, 'include': [0]},
           'marks': [
             {'type': 'area', 'y': 'sessions', 'name': 'Sessions', 'color': '#FF2563EB', 'fade': true, 'fillOpacity': 0.22},
             {'type': 'line', 'y': 'sessions', 'name': 'Sessions', 'color': '#FF2563EB', 'width': 2},

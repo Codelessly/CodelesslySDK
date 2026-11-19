@@ -179,17 +179,55 @@ class GraphEngine extends ChangeNotifier {
             hi = math.max(hi, v.toDouble());
           }
         }
-        final a = spec.x.min ?? (lo.isFinite ? lo : 0), b = spec.x.max ?? (hi.isFinite ? hi : 1);
+        // Bars stand whole: half a row's room past the first and the last.
+        var room = 0.0;
+        if (spec.panes.any((p) => p.marks.any((m) => m.type == 'bar'))) {
+          var least = double.infinity;
+          for (var i = 1; i < rows.length; i++) {
+            final p = rows[i - 1][spec.x.field], q = rows[i][spec.x.field];
+            if (p is num && q is num && q != p) least = math.min(least, (q - p).abs().toDouble());
+          }
+          room = least.isFinite ? least / 2 : 0.5;
+        }
+        final a = spec.x.min ?? (lo.isFinite ? lo - room : 0), b = spec.x.max ?? (hi.isFinite ? hi + room : 1);
         return b > a ? (a, b) : (a, a + 1);
       }();
   (double, double)? _linearDomain;
 
-  /// The positions at the plot's left and right edges.
-  double get from => linear ? _xDomain.$1 : viewport.from(count, plotWidth);
-  double get to => linear ? _xDomain.$2 : viewport.to(count);
+  /// The positions at the plot's left and right edges: on a linear scale
+  /// its whole stretch, or the part of it the user has moved to.
+  double get from => linear ? (_linearView ?? _xDomain).$1 : viewport.from(count, plotWidth);
+  double get to => linear ? (_linearView ?? _xDomain).$2 : viewport.to(count);
+  (double, double)? _linearView;
 
-  /// The first and last rows in view.
-  (int, int) get visible => linear ? (0, count - 1) : viewport.visible(count, plotWidth);
+  /// The first and last rows in view (on a linear scale with none in view,
+  /// the last is before the first).
+  (int, int) get visible {
+    if (!linear) return viewport.visible(count, plotWidth);
+    if (_linearView == null) return (0, count - 1);
+    var first = count, last = -1;
+    for (var i = 0; i < count; i++) {
+      final p = pos(i);
+      if (p >= from && p <= to) {
+        if (i < first) first = i;
+        last = i;
+      }
+    }
+    return (first, last);
+  }
+
+  /// Sets the part of a linear scale in view, kept on the scale (unless
+  /// the spec lets the view past it) and no closer than a thousandth of it.
+  void _setLinear(double lo, double hi) {
+    final (a, b) = _xDomain;
+    var span = math.max(hi - lo, (b - a) / 1000);
+    if (!spec.x.overscroll) {
+      span = math.min(span, b - a);
+      lo = lo.clamp(a, b - span).toDouble();
+    }
+    _linearView = (lo - a).abs() < 1e-12 && (span - (b - a)).abs() < 1e-12 ? null : (lo, lo + span);
+    _changed();
+  }
 
   /// Pixels a position apart.
   double get _spacing => linear ? plotWidth / (to - from) : viewport.barSpacing;
@@ -236,7 +274,19 @@ class GraphEngine extends ChangeNotifier {
   }
 
   /// A candle's or bar's width.
-  double get barWidth => math.max(1, (viewport.barSpacing * 0.72).floorToDouble());
+  double get barWidth => math.max(1, (slotWidth * 0.72).floorToDouble());
+
+  /// The room a row has: a place, or on a linear scale the least stretch
+  /// between two rows next to one another.
+  double get slotWidth {
+    if (!linear) return viewport.barSpacing;
+    var least = double.infinity;
+    for (var i = 1; i < count; i++) {
+      final d = (pos(i) - pos(i - 1)).abs();
+      if (d > 0 && d < least) least = d;
+    }
+    return least.isFinite ? least * _spacing : plotWidth / 4;
+  }
 
   /// The positions with a time label: every step-th row, the step the
   /// smallest round one whose labels stand 80 px apart.
@@ -399,7 +449,7 @@ class GraphEngine extends ChangeNotifier {
     if (y.domain == 'fixed' && y.min != null && y.max != null) return (y.min!, y.max!);
     final (first, last) = y.domain == 'data' ? (0, count - 1) : visible;
     // A morph is drawn on the scale of where it is going.
-    final rows = _target ?? this.rows;
+    final rows = _target ?? _tweenTo ?? this.rows;
     var lo = double.infinity, hi = double.negativeInfinity;
     void take(double? v) {
       if (v == null || !v.isFinite) return;
@@ -587,10 +637,17 @@ class GraphEngine extends ChangeNotifier {
   /// are followed (a view at the end) or left off screen (a view back in
   /// history); older rows put before move nothing; a row with a known key is
   /// an update in place.
-  void setData(List<Json> data) {
+  ///
+  /// With [tween] (and a spec that animates), the marks move from the
+  /// values on screen to the new ones as [tweenTo] is turned from 0 to 1,
+  /// rows told apart by the spec's key (a row not there before grows from
+  /// zero).
+  void setData(List<Json> data, {bool tween = false}) {
     final key = spec.key;
     final lastKey = count == 0 ? null : rows.last[key];
     final firstKey = count == 0 ? null : rows.first[key];
+    final before = tween && spec.animate > 0 && plotWidth > 0 ? {for (final r in rows) r[key]: r} : null;
+    _tweenFrom = _tweenTo = null;
     _source = data;
     rows = applyGraphTransforms(data, spec.transforms);
     if (lastKey != null) {
@@ -612,7 +669,64 @@ class GraphEngine extends ChangeNotifier {
       return;
     }
     _morphFrom = null;
+    if (before != null && count > 0) {
+      _tweenFrom = before;
+      _tweenTo = rows;
+      _settle();
+      tweenTo(0);
+      return;
+    }
     _settle();
+  }
+
+  // A tween under way (GraphSpec.animate): the rows the graph showed, by
+  // key, and the rows it is going to.
+  Map<Object?, Json>? _tweenFrom;
+  List<Json>? _tweenTo;
+  bool get tweening => _tweenTo != null;
+
+  /// Starts the marks from zero (GraphSpec.animateIn): [tweenTo] turned from
+  /// 0 to 1 grows them to their values.
+  void enter() {
+    if (count == 0 || morphing) return;
+    _tweenFrom = const {};
+    _tweenTo = _tweenTo ?? rows;
+    tweenTo(0);
+  }
+
+  /// The row fields the marks draw.
+  Set<String> get _markFields => {
+        for (final p in spec.panes)
+          for (final m in p.marks) ...m.fields.where((f) => f.isNotEmpty),
+      };
+
+  /// A tween's progress, 0 to 1: each mark's value between what it was and
+  /// what it is, on the scale of where it is going.
+  void tweenTo(double t) {
+    final to = _tweenTo, from = _tweenFrom;
+    if (to == null || from == null) return;
+    if (t >= 1) {
+      rows = to;
+      _tweenFrom = _tweenTo = null;
+      _changed();
+      return;
+    }
+    final fields = _markFields;
+    final key = spec.key;
+    rows = [
+      for (final r in to)
+        {
+          ...r,
+          for (final f in fields)
+            if (r[f] case final num now when now.isFinite)
+              f: () {
+                final was = from[r[key]]?[f];
+                final a = was is num && was.isFinite ? was.toDouble() : 0.0;
+                return a + (now - a) * t;
+              }(),
+        },
+    ];
+    _changed();
   }
 
   /// The mark a morph moves: the crosshair's, else the first.
@@ -685,13 +799,27 @@ class GraphEngine extends ChangeNotifier {
     _changed();
   }
 
-  void panBy(double dx) => _setViewport(viewport.pan(dx));
+  void panBy(double dx) =>
+      linear ? _setLinear(from - dx / _spacing, to - dx / _spacing) : _setViewport(viewport.pan(dx));
 
   /// [px] is from the plot's left.
-  void zoomAt(double px, double factor) => _setViewport(
-      viewport.zoomAt(px - plotLeft, factor, plotWidth, min: spec.x.minBarSpacing, max: spec.x.maxBarSpacing));
+  void zoomAt(double px, double factor) {
+    if (linear) {
+      // The position under the pointer stays under it.
+      final at = indexAt(px), lo = at - (at - from) / factor;
+      return _setLinear(lo, lo + (to - from) / factor);
+    }
+    _setViewport(
+        viewport.zoomAt(px - plotLeft, factor, plotWidth, min: spec.x.minBarSpacing, max: spec.x.maxBarSpacing));
+  }
 
-  void resetX() => _setViewport(GraphViewport(barSpacing: spec.x.barSpacing, rightOffset: spec.x.rightOffset));
+  void resetX() {
+    if (linear) {
+      _linearView = null;
+      return _changed();
+    }
+    _setViewport(GraphViewport(barSpacing: spec.x.barSpacing, rightOffset: spec.x.rightOffset));
+  }
 
   /// Scales a pane's y about its middle: autoscale goes off.
   void scaleY(int pane, double factor) {
@@ -748,6 +876,12 @@ class GraphEngine extends ChangeNotifier {
   /// Sets the view from state: `{barSpacing, rightOffset}`, or `{last: n}`
   /// for the last n rows across the plot.
   void applyView(Json view, {bool notify = true}) {
+    if (linear) {
+      // `{from, to}`: a stretch of the scale.
+      final lo = view['from'], hi = view['to'];
+      if (lo is num && hi is num && hi > lo) _setLinear(lo.toDouble(), hi.toDouble());
+      return;
+    }
     if (view['last'] case final num n) {
       if (plotWidth <= 0) {
         _pendingView = view;
@@ -771,7 +905,14 @@ class GraphEngine extends ChangeNotifier {
   void _settle() {
     final fit = spec.x.fit;
     if (linear) {
-      // The view is the scale's own stretch: nothing to settle.
+      // The rows may have moved the scale's ends: the view stays on it.
+      if (_linearView case (final lo, final hi)) {
+        _linearDomain = null;
+        final (a, b) = _xDomain;
+        final span = math.min(hi - lo, b - a);
+        final at = spec.x.overscroll ? lo : lo.clamp(a, b - span).toDouble();
+        _linearView = (at, at + span);
+      }
     } else if (fit != 'none' && plotWidth > 0 && count > 0) {
       // Every position across the plot: the view is not the user's.
       final slots = math.max(2, math.max(spec.x.slots ?? count, count));

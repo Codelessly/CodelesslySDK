@@ -48,8 +48,8 @@ Json _bars({Json selection = const {'on': 'both'}, List<Json>? actions}) => {
           {'month': 'Mar', 'web': 20, 'store': 40},
           {'month': 'Apr', 'web': 10, 'store': 5},
         ],
-        'x': {'label': 'month', 'fit': 'bars', 'axisHeight': 24},
-        'y': {'width': 40, 'decimals': 0},
+        'xAxis': {'label': 'month', 'fit': 'bars', 'axisHeight': 24},
+        'yAxis': {'width': 40, 'decimals': 0},
         'marks': [
           {'type': 'bar', 'y': 'web', 'name': 'Web', 'stack': 's'},
           {'type': 'bar', 'y': 'store', 'name': 'Store', 'stack': 's'},
@@ -136,8 +136,8 @@ void main() {
               {'label': 'Food', 'web': 25},
               {'label': 'Other', 'web': 15},
             ],
-            'x': {'label': 'label', 'axisHeight': 0},
-            'y': {'width': 0},
+            'xAxis': {'label': 'label', 'axisHeight': 0},
+            'yAxis': {'width': 0},
             'marks': [
               {'type': 'arc', 'y': 'web', 'inner': 0.6, 'colors': ['#FF2563EB', '#FF719AF2', '#FFA8C1F7']},
             ],

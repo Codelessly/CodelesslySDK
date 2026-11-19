@@ -134,7 +134,7 @@ class GraphPainter {
   void _band(Canvas canvas, int pane, Rect plot) {
     final sel = engine.selection, color = _spec.selection.band;
     if (sel == null || color == null || _spec.panes[sel.pane].polar) return;
-    final x = engine.xOfRow(sel.index), half = engine.viewport.barSpacing / 2;
+    final x = engine.xOfRow(sel.index), half = engine.slotWidth / 2;
     canvas.drawRect(Rect.fromLTRB(x - half, plot.top, x + half, plot.bottom), Paint()..color = color);
   }
 

@@ -56,6 +56,7 @@ ChartGraph barChartGraph(Node n) {
     selected: highlight == null ? null : {'index': highlight},
     spec: {
       'key': 'i',
+      'animate': p(BarChartProps.animate) ? p(BarChartProps.animationDuration) : 0,
       'x': {
         'label': 'label',
         'format': '',
@@ -147,6 +148,8 @@ ChartGraph seriesChartGraph(Node n) {
       selected: selected,
       spec: {
         'key': '_row',
+        'animate': p(ChartProps.animate) ? p(ChartProps.animationDuration) : 0,
+        'animateIn': p(ChartProps.animateIn),
         'x': {'label': labelField, 'format': '', 'axisHeight': 0},
         'panes': [
           {
@@ -182,6 +185,8 @@ ChartGraph seriesChartGraph(Node n) {
     selected: selected,
     spec: {
       'key': '_row',
+      'animate': p(ChartProps.animate) ? p(ChartProps.animationDuration) : 0,
+      'animateIn': p(ChartProps.animateIn),
       'x': {
         'label': labelField,
         'format': '',
@@ -293,6 +298,8 @@ ChartGraph lineChartGraph(Node n) {
     selected: at < 0 ? null : {'index': at},
     spec: {
       'key': xField,
+      'animate': p(LineChartProps.animate) ? p(LineChartProps.animationDuration) : 0,
+      'animateIn': p(LineChartProps.animateIn),
       'x': {
         'scale': 'linear',
         'field': xField,
@@ -448,6 +455,7 @@ ChartGraph plotChartGraph(Node n) {
     selected: at < 0 ? null : {'index': at},
     spec: {
       'key': 'x',
+      'animate': p(PlotChartProps.animate) ? p(PlotChartProps.animationDuration) : 0,
       'x': {
         'scale': 'linear',
         'field': 'x',

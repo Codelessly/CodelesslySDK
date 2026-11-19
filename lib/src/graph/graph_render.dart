@@ -44,6 +44,8 @@ class RenderGraph extends RenderBox implements TickerProvider, MouseTrackerAnnot
     _pulse = AnimationController(vsync: this, duration: const Duration(milliseconds: 1600))..addListener(markNeedsPaint);
     _morph = AnimationController(vsync: this)
       ..addListener(() => engine.morphTo(Curves.easeInOut.transform(_morph.value)));
+    _tween = AnimationController(vsync: this)
+      ..addListener(() => engine.tweenTo(Curves.easeOutCubic.transform(_tween.value)));
     _scaleGesture = ScaleGestureRecognizer(debugOwner: this)
       ..onStart = _start
       ..onUpdate = _update
@@ -91,14 +93,28 @@ class RenderGraph extends RenderBox implements TickerProvider, MouseTrackerAnnot
   List<Json> get data => _data;
   set data(List<Json> value) {
     if (identical(value, _data) || _same.equals(value, _data)) return;
-    _data = value;
     // The line on screen, before its rows change.
     engine.captureMorph();
-    engine.setData(value);
+    _setRows(value);
+  }
+
+  /// New rows: a line morphs to them (GraphXSpec.morph), or the marks move
+  /// to their new values (GraphSpec.animate), while the graph is running.
+  void _setRows(List<Json> value) {
+    _data = value;
+    _tween.stop();
+    engine.setData(value, tween: _interactive && attached);
     if (engine.morphing) {
       _morph.duration = Duration(milliseconds: engine.spec.x.morph.round());
       _morph.forward(from: 0);
+    } else if (engine.tweening) {
+      _runTween();
     }
+  }
+
+  void _runTween() {
+    _tween.duration = Duration(milliseconds: math.max(1, engine.spec.animate.round()));
+    _tween.forward(from: 0);
   }
 
   /// Sets the spec and the rows at once: a line morphs from what the old
@@ -107,13 +123,7 @@ class RenderGraph extends RenderBox implements TickerProvider, MouseTrackerAnnot
     final newData = !(identical(data, _data) || _same.equals(data, _data));
     if (newData) engine.captureMorph();
     this.spec = spec;
-    if (!newData) return;
-    _data = data;
-    engine.setData(data);
-    if (engine.morphing) {
-      _morph.duration = Duration(milliseconds: engine.spec.x.morph.round());
-      _morph.forward(from: 0);
-    }
+    if (newData) _setRows(data);
   }
 
   Json? _view;
@@ -155,7 +165,10 @@ class RenderGraph extends RenderBox implements TickerProvider, MouseTrackerAnnot
 
   // --- tickers ---------------------------------------------------------------
 
-  late final AnimationController _fling, _pulse, _morph;
+  late final AnimationController _fling, _pulse, _morph, _tween;
+
+  /// Whether the graph has been shown (its marks grow in once).
+  bool _entered = false;
   double _flung = 0;
   final _tickers = <Ticker>{};
 
@@ -198,6 +211,7 @@ class RenderGraph extends RenderBox implements TickerProvider, MouseTrackerAnnot
     _fling.dispose();
     _pulse.dispose();
     _morph.dispose();
+    _tween.dispose();
     _scaleGesture.dispose();
     _doubleTapGesture.dispose();
     _tapGesture.dispose();
@@ -260,6 +274,13 @@ class RenderGraph extends RenderBox implements TickerProvider, MouseTrackerAnnot
   void performResize() {
     super.performResize();
     engine.resize(size);
+    if (!_entered && !size.isEmpty) {
+      _entered = true;
+      if (_interactive && engine.spec.animateIn && engine.spec.animate > 0 && engine.count > 0) {
+        engine.enter();
+        if (engine.tweening) _runTween();
+      }
+    }
   }
 
   @override

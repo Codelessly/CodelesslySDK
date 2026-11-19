@@ -2,7 +2,7 @@
 // the graph's render object in the node's fit box. What the user does is
 // reported as the node's `changed` (the view, the cursor, the selection) and
 // `scroll` (the view) triggers, as any control reports its value.
-import 'package:codelessly_api/core.dart' show GraphProps, Node;
+import 'package:codelessly_api/core.dart' show GraphCrosshair, GraphProps, Node;
 import 'package:flutter/rendering.dart';
 
 import '../graph/graph_render.dart';
@@ -12,29 +12,37 @@ import '../render/recipe.dart';
 import 'chart_words.dart' show chartGraphOf;
 
 /// The graph spec node [n] says. A graph with one pane writes its marks, y
-/// and coord on the node itself. On a page a graph has no ground of its
-/// own: its background is clear unless its style says one.
+/// axis, coord and guides on the node itself. On a page a graph has no
+/// ground of its own: its background is clear unless its style says one.
 Json graphSpecOf(Node n) {
   final panes = n.prop(GraphProps.panes);
-  final style = n.prop(GraphProps.style);
+  final crosshair = n.prop(GraphProps.crosshair);
   return {
     'key': n.prop(GraphProps.rowKey),
-    'x': n.prop(GraphProps.x),
+    'animate': n.prop(GraphProps.animationDuration),
+    'animateIn': n.prop(GraphProps.animateIn),
+    'x': n.prop(GraphProps.xAxis).toJson(),
     'panes': panes.isNotEmpty
-        ? panes
+        ? [
+            for (final p in panes)
+              {
+                for (final e in p.toJson().entries) e.key == 'yAxis' ? 'y' : e.key: e.value,
+              },
+          ]
         : [
             {
               'coord': n.prop(GraphProps.coord),
-              'y': n.prop(GraphProps.y),
-              'marks': n.prop(GraphProps.marks),
-              'guides': n.prop(GraphProps.guides),
+              'y': n.prop(GraphProps.yAxis).toJson(),
+              'marks': [for (final m in n.prop(GraphProps.marks)) m.toJson()],
+              'guides': [for (final g in n.prop(GraphProps.guides)) g.toJson()],
             },
           ],
-    'transforms': n.prop(GraphProps.transforms),
-    'selection': n.prop(GraphProps.selection),
-    'crosshair': n.prop(GraphProps.crosshair),
-    'interactions': n.prop(GraphProps.interactions),
-    'style': {'background': '#00000000', ...style},
+    'transforms': [for (final t in n.prop(GraphProps.transforms)) t.toJson()],
+    'selection': n.prop(GraphProps.selection).toJson(),
+    // A node's crosshair is off unless it says so (the engine's is on).
+    'crosshair': {...crosshair.toJson(), 'enabled': crosshair.get(GraphCrosshair.enabledDef)},
+    'interactions': n.prop(GraphProps.interactions).toJson(),
+    'style': {'background': '#00000000', ...n.prop(GraphProps.style).toJson()},
   };
 }
 
