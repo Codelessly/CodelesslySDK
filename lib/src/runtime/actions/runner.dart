@@ -71,6 +71,15 @@ class ActionsCanceled implements Exception {
   String toString() => 'The actions were canceled.';
 }
 
+/// A chain ended quietly by one of its actions, which left nothing for the
+/// rest to run on (no file was picked): not a failure, and nothing is said.
+class ActionsEnded extends ActionsCanceled {
+  const ActionsEnded();
+
+  @override
+  String toString() => 'The actions ended.';
+}
+
 /// A chain stopped by an outcome the person chose (a cancelled purchase,
 /// nothing to restore): not a failure, so nothing is logged as an error,
 /// but the screen's actionError reaction still hears it, with [code], to
@@ -377,6 +386,8 @@ class CoreActions implements ActionRunner {
         context.failed.last = () => _run(node, reactions, context, event, ActionCancellation(), instance);
         context.onActionErrorEvent?.call(actionErrorEvent(stop, action: 'paywall', retryable: true));
       }
+    } on ActionsEnded {
+      // An action ended the chain (nothing was picked): the rest doesn't run.
     } on ActionsCanceled {
       // The node left: the rest doesn't run. Said in debug builds, so a
       // chain that stops for this isn't a mystery.

@@ -1,4 +1,5 @@
 // The render command's arguments.
+import 'dart:io' show File;
 import 'dart:ui' show Size;
 
 /// One interaction, applied in order before the capture.
@@ -36,6 +37,7 @@ final class RenderArgs {
     this.compareMap = const {},
     this.now,
     this.imageMap = const {},
+    this.pickFiles = const [],
     this.googleFonts = true,
   });
 
@@ -93,6 +95,10 @@ final class RenderArgs {
   /// `assets/art`), so images a document names by URL show in the capture.
   final Map<String, String> imageMap;
 
+  /// `--pick-file`: the files the person "chooses" when a `pickFile` action (or a `cloudFiles` upload) opens the
+  /// file chooser, which a headless run has not: each a path. None: nothing is picked, as when the chooser is closed.
+  final List<String> pickFiles;
+
   /// Whether a family no file provides is fetched from Google Fonts (and
   /// kept in the cache); `--no-google-fonts` turns it off (the cache is
   /// still read).
@@ -119,6 +125,7 @@ final class RenderArgs {
         compareMap: compareMap,
         now: now,
         imageMap: imageMap,
+        pickFiles: pickFiles,
         googleFonts: googleFonts,
       );
 }
@@ -216,6 +223,10 @@ Options:
   --image-map <url>=<dir> Read network images whose URL starts with <url> from
                           <dir> (the rest of the URL as the path), so they show:
                           https://cdn.example.com/art/=assets/art. Repeatable.
+  --pick-file <path>      The file a pickFile action (or a cloudFiles upload)
+                          picks when it opens the file chooser. Repeatable (a
+                          pickFile with multiple takes them all). Without it
+                          nothing is picked, as when the chooser is closed.
   --label <text>          Append -<text> to the PNG names (state screenshots);
                           diagnostics go to diagnostics-<text>.json (with the
                           --screen and non-default --sizes before the label:
@@ -255,6 +266,7 @@ RenderArgs parseArgs(List<String> argv) {
   DateTime? now;
   final compareMap = <String, String>{};
   final imageMap = <String, String>{};
+  final pickFiles = <String>[];
   var googleFonts = true;
   String next(int i, String flag) {
     if (i + 1 >= argv.length) throw FormatException('$flag needs a value.');
@@ -314,6 +326,10 @@ RenderArgs parseArgs(List<String> argv) {
         final eq = v.lastIndexOf('=');
         if (eq <= 0 || eq == v.length - 1) throw FormatException('--image-map takes <url prefix>=<folder>, got "$v".');
         imageMap[v.substring(0, eq).trim()] = v.substring(eq + 1).trim();
+      case '--pick-file':
+        final v = next(i++, a);
+        if (!File(v).existsSync()) throw FormatException('--pick-file: no file at "$v".');
+        pickFiles.add(v);
       case '--now':
         final v = next(i++, a);
         now = DateTime.tryParse(v);
@@ -358,6 +374,7 @@ RenderArgs parseArgs(List<String> argv) {
     compareMap: compareMap,
     now: now,
     imageMap: imageMap,
+    pickFiles: pickFiles,
     googleFonts: googleFonts,
   );
 }

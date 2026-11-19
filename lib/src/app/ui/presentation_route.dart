@@ -14,6 +14,7 @@ import '../../render/controls/focus.dart';
 import '../../render/controls/kit.dart' show firstTextUnder;
 import '../../render/layout/design_scroll.dart' show ScrollDragGate;
 import '../../render/node_view.dart';
+import '../../runtime/actions/ui.dart' show SheetStop;
 
 /// The width below which an adaptive modal with no breakpoint of its own is
 /// a bottom sheet: the project's second breakpoint's min width (a sheet on
@@ -41,6 +42,7 @@ class PresentationRoute<T> extends PopupRoute<T> {
     this.cornerRadius,
     this.maxHeightFactor = 1,
     this.snapHeights = const [],
+    this.sheetStop,
     this.insets = EdgeInsets.zero,
     this.showDragHandle = false,
     this.barrierDismissible = true,
@@ -80,6 +82,10 @@ class PresentationRoute<T> extends PopupRoute<T> {
   /// The most of the screen's height a bottom sheet takes.
   final double maxHeightFactor;
   final List<double> snapHeights;
+
+  /// The variable that holds the stop of [snapHeights] a bottom sheet
+  /// rests at, read and written; null: none.
+  final SheetStop? sheetStop;
 
   /// Inset of a side sheet from the screen's edges.
   final EdgeInsets insets;
@@ -122,6 +128,7 @@ class PresentationRoute<T> extends PopupRoute<T> {
             cornerRadius: cornerRadius ?? bottomSheetRadius,
             maxHeightFactor: maxHeightFactor,
             snapHeights: snapHeights,
+            stop: sheetStop,
             showDragHandle: showDragHandle,
             builder: builder,
           ),
@@ -164,7 +171,9 @@ class PresentationRoute<T> extends PopupRoute<T> {
 }
 
 class _BottomSheet extends StatefulWidget {
-  const _BottomSheet({this.width, this.margin = 0, required this.cornerRadius, required this.maxHeightFactor, required this.snapHeights, required this.showDragHandle, required this.builder});
+  const _BottomSheet({this.width, this.margin = 0, required this.cornerRadius, required this.maxHeightFactor, required this.snapHeights, this.stop, required this.showDragHandle, required this.builder});
+
+  final SheetStop? stop;
 
   final double? width;
   final double margin;
@@ -186,12 +195,54 @@ class _BottomSheetState extends State<_BottomSheet> {
   void initState() {
     super.initState();
     HardwareKeyboard.instance.addHandler(_handleKey);
+    // A sheet opened while its variable holds one of its stops opens there;
+    // the variable then holds the stop it rests at.
+    final stops = _stops;
+    if (widget.stop case final stop? when stops.isNotEmpty) {
+      final at = stop.read();
+      if (at != null) {
+        final i = stops.indexWhere((s) => (s - at).abs() < 1e-6);
+        if (i >= 0) _stop = i;
+      }
+      stop.changes?.addListener(_stopSet);
+      SchedulerBinding.instance.addPostFrameCallback((_) => _writeStop());
+    }
   }
 
   @override
   void dispose() {
+    widget.stop?.changes?.removeListener(_stopSet);
     HardwareKeyboard.instance.removeHandler(_handleKey);
     super.dispose();
+  }
+
+  /// Whether the sheet is on its way out: its variable is the page's again.
+  bool get _closing => ModalRoute.of(context)?.isActive != true || ModalRoute.of(context)?.animation?.status == AnimationStatus.reverse;
+
+  /// The variable takes the stop the sheet rests at.
+  void _writeStop() {
+    final stop = widget.stop;
+    final stops = _stops;
+    if (stop == null || stops.isEmpty || !mounted || _closing) return;
+    final at = stops[_stop.clamp(0, stops.length - 1)];
+    if (stop.read() case final double now when (now - at).abs() < 1e-6) return;
+    stop.write(at);
+  }
+
+  /// The variable was set: the sheet moves to the stop nearest it (and the
+  /// variable takes that stop when it named none).
+  void _stopSet() {
+    final stops = _stops;
+    final at = widget.stop?.read();
+    if (!mounted || stops.isEmpty || at == null || at <= 0 || _closing) return;
+    final nearest = [for (var i = 0; i < stops.length; i++) i].reduce((a, b) => (stops[a] - at).abs() <= (stops[b] - at).abs() ? a : b);
+    if (nearest != _stop || _dragHeight != null) {
+      setState(() {
+        _stop = nearest;
+        _dragHeight = null;
+      });
+    }
+    if ((stops[nearest] - at).abs() >= 1e-6) SchedulerBinding.instance.addPostFrameCallback((_) => _writeStop());
   }
 
   bool _handleKey(KeyEvent event) {
@@ -208,6 +259,7 @@ class _BottomSheetState extends State<_BottomSheet> {
     final stops = _stops;
     if (stops.isEmpty) return;
     setState(() { _stop = (_stop + delta).clamp(0, stops.length - 1); _dragHeight = null; });
+    _writeStop();
   }
 
   /// The height the sheet's stops are shares of (set as it builds).
@@ -253,6 +305,7 @@ class _BottomSheetState extends State<_BottomSheet> {
       _stop = stop;
       _dragHeight = null;
     });
+    _writeStop();
     return true;
   }
 

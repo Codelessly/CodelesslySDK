@@ -22,6 +22,7 @@ import '../render/node_tree.dart' show NodeBox, ResponsiveWidth;
 import '../runtime/contracts.dart' show CodelesslyServices;
 import '../render/node_view.dart';
 import '../app/navigator_ui.dart';
+import '../app/page_location.dart' show pageUrlOf;
 import '../runtime/actions/actions.dart';
 import '../runtime/expressions/bindings.dart' show NodeBinder;
 import '../runtime/expressions/engine.dart' show Expressions;
@@ -293,7 +294,10 @@ class _CodelesslyViewState extends State<CodelesslyView> {
   Widget build(BuildContext context) {
     final mq = MediaQuery.maybeOf(context);
     if (mq != null) {
-      final screen = screenValues(mq.size.width, mq.size.height, dark: mq.platformBrightness == Brightness.dark);
+      final screen = {
+        ...screenValues(mq.size.width, mq.size.height, dark: mq.platformBrightness == Brightness.dark),
+        'url': pageUrlOf(context),
+      };
       if (!jsonEquality.equals(screen, _values['screen'])) _values.set('screen', screen);
     }
     // The session's theme for the screen's mode: named colors and text
@@ -439,6 +443,16 @@ class _SessionUi extends NavigatorActionUi {
     _openModals++;
     try {
       return await super.openModal(action, params: params);
+    } finally {
+      _openModals--;
+    }
+  }
+
+  @override
+  Future<Object?> openSheet(OpenModalAction action, {Json params = const {}, required SheetStop stop}) async {
+    _openModals++;
+    try {
+      return await super.openSheet(action, params: params, stop: stop);
     } finally {
       _openModals--;
     }

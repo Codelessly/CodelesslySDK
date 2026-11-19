@@ -31,6 +31,7 @@ are made in the Editor and run by the SDK; your app takes part through **functio
 | Feedback | `showToast`, `haptic`, `playSound`, `speak`, `copyToClipboard` |
 | Inputs and motion | `submitForm`, `editText`, `focus`, `scrollTo`, `animate` (a node's `animations`: `forward`, `reverse`, `stop`, `animateTo`...), `controlDrag` |
 | Capture | `captureScreenshot` |
+| Files and sharing | `downloadFile`, `pickFile` (the device's file chooser: `${result}` is the picked file's `{name, size, type, data}`, nothing is uploaded; `Services(filePicker: ...)` replaces the chooser), `share` (the device's share panel; the browser's on the web, elsewhere the app's own `Services(sharer: ...)`, and with none the link is copied: `${result.copied}`) |
 
 How a chain runs:
 
@@ -153,7 +154,7 @@ Everything else is a feature, a `CodelesslyFeature` in its own folder under `lib
 | `authFeature` | `auth` | `auth` | |
 | `dataFeature` | `callApi`, `setStorage`, `cloudData`, `cloudDocuments`, `cloudBatch`, `cloudFiles`, `loadCloudData`, `reloadCloudData`, `submitForm` | `storage` | |
 | `commerceFeature` | `paywall` | `entitlements` | |
-| `mediaFeature` | `speak`, `playSound`, `print`, `downloadFile` | `speech` | `media.probe`, `media.import`, `media.export`, `media.cancelExport` |
+| `mediaFeature` | `speak`, `playSound`, `print`, `downloadFile`, `pickFile`, `share`, `captureScreenshot`, `preloadImages` | `speech` | `media.probe`, `media.import`, `media.export`, `media.cancelExport` |
 | `engageFeature` | | `usage` (automations) | |
 
 `CodelesslyActions()` installs all five (`kFirstPartyFeatures`), so a default `Codelessly` runs everything.

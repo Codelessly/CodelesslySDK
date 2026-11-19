@@ -19,6 +19,7 @@ import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:flutter/services.dart' show KeyDownEvent, LogicalKeyboardKey;
 import 'package:codelessly_api/core.dart' show NavigationMode;
 
+import 'page_location.dart';
 import 'viewport.dart' show CanvasSizing, CanvasSizingScope;
 import 'ui/confirm_dialog.dart';
 import 'ui/feedback_theme.dart';
@@ -46,7 +47,7 @@ typedef ScreenBuilder = Widget? Function(String destination, Json params);
 ///
 /// [context] gives the context the actions run near (a NodeView's, a
 /// screen's); it's read when an action runs, so it can be any later one.
-class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, PopoverUi {
+class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, PopoverUi, SheetStopUi {
   @override
   bool get popoverOnTop {
     final c = _context;
@@ -127,7 +128,13 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, Po
   }
 
   @override
-  Future<Object?> openModal(OpenModalAction action, {Json params = const {}}) async {
+  Future<Object?> openModal(OpenModalAction action, {Json params = const {}}) => _open(action, params, null);
+
+  @override
+  Future<Object?> openSheet(OpenModalAction action, {Json params = const {}, required SheetStop stop}) =>
+      _open(action, params, stop);
+
+  Future<Object?> _open(OpenModalAction action, Json params, SheetStop? stop) async {
     final c = _context;
     if (c == null) return null;
     final sheetBelowWidth = action.sheetBelowWidthIn(_breakpoints);
@@ -136,8 +143,10 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, Po
         (action.presentation == ModalPresentation.adaptive && (width == null || width < sheetBelowWidth));
     final content = ((sheet ? sheetModal : null) ?? modal)?.call(action.to, params);
     if (content == null) return null;
-    // Preserve inherited localizations and themes across both modal routes.
-    final inherited = InheritedTheme.captureAll(c, Localizations.override(context: c, child: content));
+    // Preserve inherited localizations and themes across both modal routes;
+    // the modal is at its page's location (`screen.url`).
+    final inherited = InheritedTheme.captureAll(
+        c, Localizations.override(context: c, child: PageLocationScope(location: pageLocationOf(c), child: content)));
     // Insets keep space around a dialog; a bottom sheet sits on the screen's
     // edge (an adaptive modal used both ways keeps its sheet flush).
     final modalContent = sheet
@@ -189,6 +198,7 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, Po
         sheetRadius: action.sheetRadius,
         maxHeightFactor: action.maxHeightFactor == 1 ? null : action.maxHeightFactor,
         snapHeights: action.snapHeights,
+        sheetStop: stop,
         barrierBlur: action.barrierBlur,
         enterScale: action.enterScale,
         sheetBelowWidth: sheetBelowWidth,
@@ -365,6 +375,7 @@ Future<Object?> showScreenModal(
   double? sheetRadius,
   double? maxHeightFactor,
   List<double> snapHeights = const [],
+  SheetStop? sheetStop,
   double barrierBlur = 0,
   double enterScale = 1,
   bool cover = false,
@@ -417,6 +428,7 @@ Future<Object?> showScreenModal(
       cornerRadius: sheetRadius,
       maxHeightFactor: maxHeightFactor ?? 1,
       snapHeights: snapHeights,
+      sheetStop: sheetStop,
       showDragHandle: showDragHandle || snapHeights.isNotEmpty,
       barrierBlur: barrierBlur,
       enterScale: enterScale,

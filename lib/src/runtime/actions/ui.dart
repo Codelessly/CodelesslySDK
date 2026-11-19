@@ -55,6 +55,31 @@ abstract interface class PopoverUi {
   bool get popoverOnTop;
 }
 
+/// The stop a bottom sheet rests at, kept in a variable
+/// (`OpenModalAction.stopVariable`): what the sheet reads, writes and
+/// listens to, with no knowledge of scopes.
+@immutable
+class SheetStop {
+  const SheetStop({required this.read, required this.write, this.changes});
+
+  /// The variable's value now, when it is a number.
+  final double? Function() read;
+
+  /// Sets the variable (to the stop the sheet rests at).
+  final void Function(double stop) write;
+
+  /// Notifies when the variable changes; null when nothing declares it.
+  final Listenable? changes;
+}
+
+/// Optional: a UI whose bottom sheets keep the stop they rest at in a
+/// variable. Kept separate from ActionUi so an app's own UI needs nothing
+/// new: without it the sheet opens with `openModal` and binds nothing.
+abstract interface class SheetStopUi {
+  /// As [ActionUi.openModal], the sheet reading and writing [stop].
+  Future<Object?> openSheet(OpenModalAction action, {Json params = const {}, required SheetStop stop});
+}
+
 /// The UI effects of actions, implemented by the app shell.
 abstract interface class ActionUi {
   /// Moves between screens as [action] says ([NavigateAction.mode]), with

@@ -4,16 +4,21 @@
 // import this: `mediaFeature` registers it through the plugin seam
 // (runtime/actions/feature.dart).
 import 'dart:async';
+import 'dart:convert' show utf8;
 
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:just_audio/just_audio.dart' as audio;
 
+import '../../runtime/actions/action_error.dart' show CodedFailure;
 import '../../runtime/actions/feature.dart';
 import '../../runtime/actions/files.dart';
 import '../../runtime/actions/runner.dart';
 import '../../runtime/contracts.dart';
 import '../../runtime/expressions/scopes.dart';
 import '../../services/file_exports.dart' show FileExporter;
+import '../../services/file_picking.dart' show acceptedKinds, fileAccepted, mimeTypeOfFileName;
+import '../../services/sharing.dart';
 import '../../services/storage.dart' show CloudFileStorage, MemoryFileStorage;
 import 'capture.dart';
 import 'media_export.dart';
@@ -23,7 +28,7 @@ import 'printing.dart';
 import 'sound.dart';
 import 'speech.dart';
 
-/// Speech, sound, printing, file saving, screenshots, image preloading, the
+/// Speech, sound, printing, file saving and picking, sharing, screenshots, image preloading, the
 /// video, audio and web view node types, and the `media.*` functions: the
 /// API's media library ([mediaCatalog]) run.
 const CodelesslyFeature mediaFeature = CodelesslyFeature(
@@ -33,6 +38,8 @@ const CodelesslyFeature mediaFeature = CodelesslyFeature(
     PlaySoundAction.typeName: _playSound,
     PrintAction.typeName: _print,
     DownloadFileAction.typeName: _downloadFile,
+    PickFileAction.typeName: _pickFile,
+    ShareAction.typeName: _share,
     PreloadImagesAction.typeName: preloadImagesAction,
     CaptureScreenshotAction.typeName: captureScreenshotAction,
   },
@@ -56,6 +63,58 @@ Future<void> _downloadFile(ActionDef action, ActionRun run) async {
   run.result = {
     'saved': await exports.saveText(fileName: run.text(a.fileName), text: run.text(a.text), mimeType: run.text(a.mimeType)),
   };
+}
+
+/// `pickFile`: the person chooses files on the device and `${result}` is
+/// what was picked, a record (or with `multiple` a list of them) of the
+/// file's name, size, type and its content as the action says. Nothing is
+/// uploaded. Picking nothing ends the chain quietly.
+Future<void> _pickFile(ActionDef action, ActionRun run) async {
+  final a = action as PickFileAction;
+  final accept = acceptedKinds(run.text(a.accept));
+  final images = accept.isNotEmpty && accept.every((k) => k.startsWith('image/'));
+  final picked = await pickFiles(run, images: images, multiple: a.multiple, accept: accept);
+  if (run.isCanceled) throw const ActionsCanceled();
+  if (picked.isEmpty) throw const ActionsEnded();
+  final records = <Json>[];
+  for (final f in a.multiple ? picked : picked.take(1)) {
+    final type = switch (f.contentType) {
+      final String t when t.isNotEmpty => t,
+      _ => mimeTypeOfFileName(f.name) ?? '',
+    };
+    if (!fileAccepted(accept, f.name, type)) {
+      throw CodedFailure('invalid-file-type', '${f.name} is not one of ${accept.join(', ')}');
+    }
+    if (f.bytes.length > a.maxSizeMB * 1024 * 1024) {
+      final mb = a.maxSizeMB == a.maxSizeMB.roundToDouble() ? '${a.maxSizeMB.round()}' : '${a.maxSizeMB}';
+      throw CodedFailure('file-too-large', '${f.name} is larger than $mb MB');
+    }
+    records.add({
+      'name': f.name,
+      'size': f.bytes.length,
+      'type': type,
+      if (a.content == PickedFileContent.dataUrl)
+        'data': Uri.dataFromBytes(f.bytes, mimeType: type.isEmpty ? 'application/octet-stream' : type).toString(),
+      if (a.content == PickedFileContent.text) 'text': utf8.decode(f.bytes, allowMalformed: true),
+    });
+  }
+  run.result = a.multiple ? records : records.first;
+}
+
+/// `share`: the device's share panel takes the text, the link and the
+/// title; where there is none the link (or with no link the text) is copied
+/// to the clipboard. `${result}` is `{shared, copied}`.
+Future<void> _share(ActionDef action, ActionRun run) async {
+  final a = action as ShareAction;
+  final text = run.text(a.text).trim(), url = run.text(a.url).trim(), title = run.text(a.title).trim();
+  if (text.isEmpty && url.isEmpty) throw const CodedFailure('nothing-to-share', 'share needs a text or a url');
+  final outcome = await (run.service<Sharer>()?.share(text: text, url: url, title: title) ?? Future.value(ShareOutcome.unavailable));
+  if (outcome == ShareOutcome.unavailable) {
+    await Clipboard.setData(ClipboardData(text: url.isNotEmpty ? url : text));
+    run.result = {'shared': false, 'copied': true};
+    return;
+  }
+  run.result = {'shared': outcome == ShareOutcome.shared, 'copied': false};
 }
 
 // --- speech and sound ---------------------------------------------------------------

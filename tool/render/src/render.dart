@@ -584,6 +584,11 @@ Future<void> _renderAll(
       // storage action, the theme mode): fresh for each capture, and handed
       // on to the app a --reload step starts.
       var storage = MemoryLocalStorage();
+      // `--pick-file`: what a file chooser gives (a headless run has none).
+      final picker = FixedFilePicker([
+        for (final path in args.pickFiles)
+          PickedFile(name: path.split(RegExp(r'[\\/]')).last, bytes: File(path).readAsBytesSync(), contentType: mimeTypeOfFileName(path)),
+      ]);
       Codelessly start() => Codelessly(
             // The site's files (declared fonts), read from its folder.
             loader: MemoryPublishLoader(published.bundle, readAsset: siteDir == null ? null : (path) async {
@@ -593,7 +598,7 @@ Future<void> _renderAll(
             components: components,
             fonts: fetcher,
             config: CodelesslyConfig(
-                services: Services(analytics: recorder, exports: exporter, storage: storage), fontTimeout: const Duration(seconds: 5)),
+                services: Services(analytics: recorder, exports: exporter, storage: storage, filePicker: picker), fontTimeout: const Duration(seconds: 5)),
           );
       var codelessly = start();
       var controller = CodelesslyWidgetController();

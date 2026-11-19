@@ -25,6 +25,7 @@ import 'purchases.dart';
 import 'printing.dart';
 import '../scripting/script_runner.dart';
 import 'scripts.dart';
+import 'sharing.dart';
 import 'sound.dart';
 import 'speech.dart';
 import 'storage.dart';
@@ -48,6 +49,7 @@ export 'media_probe.dart';
 export 'purchases.dart';
 export 'printing.dart';
 export 'scripts.dart';
+export 'sharing.dart';
 export 'sound.dart';
 export 'speech.dart';
 export 'storage.dart';
@@ -75,6 +77,7 @@ class Services implements CodelesslyServices, ServiceLocator, PaywallsSource {
     LinkOpener? links,
     FileExporter? exports,
     FilePicker? filePicker,
+    Sharer? sharer,
     ScriptRunner? scripts,
     MediaExportService? mediaExport,
     PrintService? printing,
@@ -95,6 +98,7 @@ class Services implements CodelesslyServices, ServiceLocator, PaywallsSource {
         links = links ?? const PlatformLinkOpener(),
         exports = exports ?? const PlatformFileExporter(),
         filePicker = filePicker ?? const PlatformFilePicker(),
+        sharer = sharer ?? const PlatformSharer(),
         scripts = scripts ?? const SandboxScriptRunner(),
         mediaExport = mediaExport ?? MediaExportService(),
         printing = printing ?? const PlatformPrintService();
@@ -151,7 +155,7 @@ class Services implements CodelesslyServices, ServiceLocator, PaywallsSource {
   T? service<T extends Object>() {
     for (final Object? s in <Object?>[
       api, cache, fileCache, storage, auth, cloud, files, analytics, purchases, paywalls, sound, speech,
-      mediaExport, links, printing, exports, filePicker, scripts, config, _lists, ...extras,
+      mediaExport, links, printing, exports, filePicker, sharer, scripts, config, _lists, ...extras,
     ]) {
       if (s is T) return s;
     }
@@ -207,9 +211,14 @@ class Services implements CodelesslyServices, ServiceLocator, PaywallsSource {
   /// Saves generated files with the browser or platform save picker.
   final FileExporter exports;
 
-  /// Lets the person choose files for an upload (a cloudFiles action
+  /// Lets the person choose files (a pickFile action, a cloudFiles upload
   /// without a `source`): the platform's file dialog by default.
   final FilePicker filePicker;
+
+  /// The device's share panel (a share action): the browser's on the web;
+  /// elsewhere none unless the app gives one, and the action copies to the
+  /// clipboard.
+  final Sharer sharer;
 
   /// Runs scripts (run script actions): the platform's sandbox by default
   /// (no engine without package:codelessly_quickjs on a device).
