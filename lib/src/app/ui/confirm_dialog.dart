@@ -237,7 +237,7 @@ Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request, {do
           maxWidth: layout.maxWidth,
           insets: layout.insets,
           padding: layout.padding,
-          buttonHeight: layout.buttonHeight,
+          buttonHeight: layout.buttonHeight ?? theme.buttonHeight,
           theme: theme,
           presentation: presentation,
           title: request.title,
@@ -468,7 +468,7 @@ class ThemedConfirmDialog extends StatelessWidget {
     final buttonSide = buttonBorder ?? theme.buttonBorder ?? BorderSide.none;
     final buttonShadowList = buttonShadows ?? theme.buttonShadows ?? const <BoxShadow>[];
     final buttonShape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(buttonCorner));
-    final buttonText = applyTextStyle(buttonStyle, theme.buttonStyle.copyWith(fontSize: 15, height: 1.2));
+    final buttonText = applyTextStyle(buttonStyle, theme.buttonStyle.copyWith(fontSize: theme.messageSize ?? 15, height: 1.2));
     // A button's own text color wins over the color both buttons' text
     // style gives (a brass confirm with dark text beside a light cancel).
     final onConfirm = confirmTextColor ?? buttonStyle?.color?.flutter ?? ResolvedFeedbackTheme.onColor(confirmFill);
@@ -509,7 +509,7 @@ class ThemedConfirmDialog extends StatelessWidget {
         backgroundColor: cancelColor,
         textStyle: buttonText,
         shape: buttonShape,
-        side: cancelBorder ?? buttonSide,
+        side: cancelBorder ?? (cancelColor == null ? theme.cancelBorder : null) ?? buttonSide,
         visualDensity: buttonHeight == null ? null : VisualDensity.standard,
         minimumSize: buttonSize,
         maximumSize: buttonMaxSize,
@@ -605,7 +605,7 @@ class ThemedConfirmDialog extends StatelessWidget {
               Text(
                 title,
                 textAlign: textAlign,
-                style: applyTextStyle(titleStyle, theme.titleStyle.copyWith(fontSize: 18, height: 1.3, color: onSurface)),
+                style: applyTextStyle(titleStyle, theme.titleStyle.copyWith(fontSize: theme.titleSize ?? 18, height: 1.3, color: onSurface)),
               ),
             if (title.isNotEmpty && message.isNotEmpty) SizedBox(height: titleMessageGap ?? messageGap),
             if (message.isNotEmpty)
@@ -616,7 +616,7 @@ class ThemedConfirmDialog extends StatelessWidget {
                     textAlign: textAlign,
                     style: applyTextStyle(
                       messageStyle,
-                      theme.bodyStyle.copyWith(fontSize: 15, height: 1.45, color: onSurface.withValues(alpha: 0.74)),
+                      theme.bodyStyle.copyWith(fontSize: theme.messageSize ?? 15, height: 1.45, color: onSurface.withValues(alpha: 0.74)),
                     ),
                   ),
                 ),

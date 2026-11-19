@@ -20,6 +20,12 @@
   `backgroundColor`: the theme's `track`, else a progress bar's tenth of grey. It drew the arc alone. A spinner
   (no value) is unchanged.
 
+- **A confirm action's built-in dialog takes a design system's dialog**: the corner of `radii.dialog` (before
+  `radii.popup`), and with a `dialogTitle` text style its title at that size, its message at `body`'s, its
+  buttons at `sizes.control` and its cancel outlined in `secondaryBorder`. Desk's confirm drew the runtime's own
+  18 / 15 / 44 px and a text cancel beside Desk's outlined buttons. A theme with no dialog of its own is unchanged
+  but for `radii.dialog`.
+
 ### Added
 
 - **Render tool: `--modals`** captures the screens only ever opened as a modal (an `openModal` names them, no

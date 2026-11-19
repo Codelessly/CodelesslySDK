@@ -38,7 +38,19 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
     this.shadows,
     this.buttonBorder,
     this.buttonShadows,
+    this.titleSize,
+    this.messageSize,
+    this.buttonHeight,
+    this.cancelBorder,
   });
+
+  /// A design system's sizes for a dialog's title and message, and its
+  /// buttons' height (null: the runtime's own, 18, 15 and 44).
+  final double? titleSize, messageSize, buttonHeight;
+
+  /// The outline of a dialog's cancel button (a design system's secondary
+  /// button); null: a text button.
+  final BorderSide? cancelBorder;
 
   /// Fonts (no size or color) of messages, titles and button labels.
   final TextStyle? bodyStyle, titleStyle, buttonStyle;
@@ -76,6 +88,10 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
       shadows: shadows ?? other.shadows,
       buttonBorder: buttonBorder ?? other.buttonBorder,
       buttonShadows: buttonShadows ?? other.buttonShadows,
+      titleSize: titleSize ?? other.titleSize,
+      messageSize: messageSize ?? other.messageSize,
+      buttonHeight: buttonHeight ?? other.buttonHeight,
+      cancelBorder: cancelBorder ?? other.cancelBorder,
     );
   }
 
@@ -107,9 +123,20 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
       error: color(tokens.error),
       success: color(tokens.success),
       warning: color(tokens.warning),
-      // A theme's look for what floats (`radii.popup`, `shadows.popup`) and
-      // its large control's corner when it gives no one buttonRadius.
-      radius: tokens.radii['popup'] ?? tokens.radius,
+      // A theme's look for what floats (`radii.dialog`, else `radii.popup`,
+      // `shadows.popup`) and its large control's corner when it gives no one
+      // buttonRadius.
+      radius: tokens.radii['dialog'] ?? tokens.radii['popup'] ?? tokens.radius,
+      // A design system's dialog: its title and body sizes, its control
+      // height, and its secondary button's outline (Desk drew the runtime's
+      // own 18 / 15 / 44 and a text button beside its outlined ones).
+      titleSize: tokens.textStyles['dialogTitle']?.fontSize,
+      messageSize: tokens.textStyles['dialogTitle'] == null ? null : tokens.textStyles['body']?.fontSize,
+      buttonHeight: tokens.textStyles['dialogTitle'] == null ? null : tokens.sizes['control'],
+      cancelBorder: switch (tokens.textStyles['dialogTitle'] == null ? null : tokens.color('secondaryBorder') ?? tokens.color('primaryBorder')) {
+        final api.Color c => BorderSide(color: c.flutter),
+        _ => null,
+      },
       buttonRadius: tokens.buttonRadius ?? tokens.radii['controlLarge'],
       shadows: switch (tokens.shadows['popup']) {
         final List<api.Effect> e => [for (final s in e) if (s.visible) boxShadow(s)],
@@ -276,6 +303,10 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
     List<BoxShadow>? shadows,
     BorderSide? buttonBorder,
     List<BoxShadow>? buttonShadows,
+    double? titleSize,
+    double? messageSize,
+    double? buttonHeight,
+    BorderSide? cancelBorder,
   }) =>
       FeedbackTheme(
         bodyStyle: bodyStyle ?? this.bodyStyle,
@@ -294,6 +325,10 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
         shadows: shadows ?? this.shadows,
         buttonBorder: buttonBorder ?? this.buttonBorder,
         buttonShadows: buttonShadows ?? this.buttonShadows,
+        titleSize: titleSize ?? this.titleSize,
+        messageSize: messageSize ?? this.messageSize,
+        buttonHeight: buttonHeight ?? this.buttonHeight,
+        cancelBorder: cancelBorder ?? this.cancelBorder,
       );
 
   @override
@@ -316,6 +351,10 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
       shadows: BoxShadow.lerpList(shadows, other.shadows, t),
       buttonBorder: t < 0.5 ? buttonBorder : other.buttonBorder,
       buttonShadows: BoxShadow.lerpList(buttonShadows, other.buttonShadows, t),
+      titleSize: t < 0.5 ? titleSize : other.titleSize,
+      messageSize: t < 0.5 ? messageSize : other.messageSize,
+      buttonHeight: t < 0.5 ? buttonHeight : other.buttonHeight,
+      cancelBorder: t < 0.5 ? cancelBorder : other.cancelBorder,
     );
   }
 
@@ -337,7 +376,11 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
       other.border == border &&
       listEquals(other.shadows, shadows) &&
       other.buttonBorder == buttonBorder &&
-      listEquals(other.buttonShadows, buttonShadows);
+      listEquals(other.buttonShadows, buttonShadows) &&
+      other.titleSize == titleSize &&
+      other.messageSize == messageSize &&
+      other.buttonHeight == buttonHeight &&
+      other.cancelBorder == cancelBorder;
 
   @override
   int get hashCode => Object.hash(
@@ -357,6 +400,7 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
         shadows == null ? null : Object.hashAll(shadows!),
         buttonBorder,
         buttonShadows == null ? null : Object.hashAll(buttonShadows!),
+        Object.hash(titleSize, messageSize, buttonHeight, cancelBorder),
       );
 }
 
@@ -381,6 +425,10 @@ class ResolvedFeedbackTheme {
     required this.shadows,
     required this.buttonBorder,
     required this.buttonShadows,
+    this.titleSize,
+    this.messageSize,
+    this.buttonHeight,
+    this.cancelBorder,
   });
 
   factory ResolvedFeedbackTheme.resolve(FeedbackTheme t, ThemeData theme) {
@@ -412,6 +460,10 @@ class ResolvedFeedbackTheme {
       shadows: t.shadows,
       buttonBorder: t.buttonBorder,
       buttonShadows: t.buttonShadows,
+      titleSize: t.titleSize,
+      messageSize: t.messageSize,
+      buttonHeight: t.buttonHeight,
+      cancelBorder: t.cancelBorder,
     );
   }
 
@@ -422,6 +474,8 @@ class ResolvedFeedbackTheme {
   final List<BoxShadow>? shadows;
   final BorderSide? buttonBorder;
   final List<BoxShadow>? buttonShadows;
+  final double? titleSize, messageSize, buttonHeight;
+  final BorderSide? cancelBorder;
 
   /// Ink or near-white, whichever reads on [background].
   static Color onColor(Color background) => theme.onColor(background);
