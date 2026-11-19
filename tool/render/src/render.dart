@@ -112,6 +112,7 @@ const runtimeCodes = <(String, String, String)>[
   ('transparent_background', 'warning', 'At least 2% of a capture has nothing painted behind it: there a reader sees the host\'s background (black in an app with none, the page\'s color in a browser), not the document\'s. Give the screen\'s canvas a fill.'),
   ('set_overwritten', 'warning', 'A reaction (a timer, a load) wrote a variable a --set step set, after the step: the capture shows the --set value. Pin a clock with --now.'),
   ('theme_name_unknown', 'warning', 'A node names a color the theme does not have, writes theme.<name> as a value\'s text, or reads theme.<name> in a formula where the theme gives no such value: it draws nothing there. The message names the node, the name and what the theme has.'),
+  ('paints_outside', 'warning', 'A node is drawn past the bottom or the right edge of its Stack (or box), which does not clip, over something after it: the Stack is as big as it is written, not as what is placed in it. The message names the node, by how much, and what it covers.'),
   ('formula_runaway', 'error', 'A formula made more calls of the page\'s own functions in one evaluation than can be meant (functions that call each other without end): the calls past the limit gave nothing, and what reads the formula is drawn without its value. The message names the function.'),
   ('screen_timeout', 'error', 'A screen took longer than --screen-timeout (120 s) at one size: past the limit the functions its formulas call gave nothing, the capture is not what the page shows, and the run went on to the next screen.'),
   ('site_now', 'warning', 'site.json\'s "now" (the time now() gives in a render of the site, when no --now is passed) is not an ISO 8601 time: the run starts at the real time.'),
@@ -3594,6 +3595,43 @@ List<RuntimeIssue> _check(
     parentBox ??= pid == null ? null : byKey['$pid|${b.instance}'];
     final parent = parentBox?.node ?? (pid == null ? null : b.source.node(pid));
     final parentName = parentBox == null ? pid : nameOf(parentBox);
+    // Past a Stack or a box that does not clip, over what follows it: the
+    // child is drawn there (a Stack does not grow with what is placed in
+    // it), and the picture is wrong with nothing said.
+    if (parentBox != null && parent != null && (parent.type == 'stack' || parent.type == 'box') && parent.decoration.clip == api.Clip.none && !seen.isEmpty && b.drawn) {
+      final pr = _rectOf(parentBox);
+      final below = seen.bottom - pr.bottom, right = seen.right - pr.right;
+      final vertical = below >= right;
+      final by = vertical ? below : right;
+      if (by >= 8 && !scrollsAlong(b, !vertical, upTo: parentBox) && !scrollsAlong(parentBox, !vertical)) {
+        final strip = vertical ? Rect.fromLTRB(seen.left, pr.bottom, seen.right, seen.bottom) : Rect.fromLTRB(pr.right, seen.top, seen.right, seen.bottom);
+        NodeBox? over;
+        for (final o in boxes) {
+          if (identical(o, b) || identical(o, parentBox) || !o.drawn) continue;
+          final on = o.node;
+          if (on == null || on.type == 'canvas') continue;
+          final or = _rectOf(o);
+          if (or.isEmpty || or.intersect(strip).isEmpty || or.intersect(strip).width < 2 || or.intersect(strip).height < 2) continue;
+          // What follows the Stack: not in it, and not around it.
+          if (_isInside(o, parentBox) || _isInside(parentBox, o) || _isInside(b, o)) continue;
+          // A leaf that shows something (a text, an icon, a control), not a frame both are in.
+          if (on.children.isNotEmpty) continue;
+          over = o;
+          break;
+        }
+        if (over != null) {
+          out.add(RuntimeIssue(
+              'paints_outside',
+              'warning',
+              '"${nameOf(b)}" (${node.type}) is drawn ${by.toStringAsFixed(0)} px past the ${vertical ? 'bottom' : 'right edge'} of "$parentName" (${parent.type}, ${pr.width.toStringAsFixed(0)} by ${pr.height.toStringAsFixed(0)}), which does not clip, over "${nameOf(over)}" after it. '
+                  'A ${parent.type == 'stack' ? 'Stack' : 'box'} is as big as it is written, not as what is placed in it: give it the ${vertical ? 'height' : 'width'} its content needs, place the child inside it, or cut it at its edge (clip=true).',
+              nodeId: nameOf(b),
+              screen: screen,
+              size: size,
+              file: file));
+        }
+      }
+    }
     // A collapsed accordion or expansion tile clips its content by design.
     final collapses = parent?.type == 'accordion' || parent?.type == 'expansionTile';
     if (parentBox != null && parent != null && parent.type != 'canvas' && parent.type != 'stack' && !collapses && !seen.isEmpty) {
