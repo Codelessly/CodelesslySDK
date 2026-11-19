@@ -19,6 +19,7 @@ import '../../render/source.dart' show NodeSource;
 import '../actions/variable_animator.dart';
 import '../contracts.dart';
 import 'component_scopes.dart';
+import 'formula.dart' show FormulaEvaluator;
 import 'engine.dart';
 import 'formula_clock.dart';
 import 'node_scopes.dart';
@@ -352,7 +353,13 @@ class NodeBinder implements TreeBindings, InstanceBindings {
       if (b.visible case final BoundProperty v) {
         reads.addAll(v.reads);
         clock = v.clock?.finer(clock) ?? clock;
-        visible = BindValue.boolean(v.valueIn(engine, s));
+        // A condition holds when its value is something: nothing (a name
+        // nothing has, a formula that failed), "", 0 and an empty list are
+        // no. (Nothing left the node as written, so `if a` and `if !a` both
+        // drew when a failed, and `if parent && parent.body` drew for no
+        // parent; a text was neither yes nor no, so it drew too.)
+        final value = v.valueIn(engine, s);
+        visible = BindValue.boolean(value) ?? FormulaEvaluator.truthy(value);
       }
       if (b.data case final BoundProperty d) {
         reads.addAll(d.reads);

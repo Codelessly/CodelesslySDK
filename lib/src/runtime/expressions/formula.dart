@@ -201,7 +201,18 @@ class FormulaEvaluator {
     }
   }
 
+  /// Whether [value] counts as yes where a condition is read: nothing,
+  /// false, 0, "" (and "false"), an empty list and an empty map are no.
+  static bool truthy(Object? value) => _truthy(value);
+
+  /// Told each formula that could not be worked out (it does not parse, or
+  /// it failed: a function given what it cannot take, an unknown function)
+  /// with why: what reads it gets nothing. For a tool that draws a page and
+  /// says what went wrong in it; null: nobody is told.
+  static void Function(String expression, String why)? onFailure;
+
   static void _failed(String expression, String why) {
+    onFailure?.call(expression, why);
     final hook = onActionFailure;
     if (hook == null) return;
     final action = Zone.current[#codelesslyAction];

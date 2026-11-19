@@ -655,6 +655,10 @@ class ItemScope extends NamedScope {
               if (o._item is Map) ...(o._item as Map).cast<String, Object?>(),
               'item': o._item,
               'index': o._index,
+              // The item around that one, in a list three deep
+              // (`parent.parent.item`): it read as nothing, so a condition
+              // on the outermost item drew no row.
+              if (o._outer() != null) 'parent': o.valueOf('parent', reader),
             }) ??
             const <String, Object?>{},
         _ => null,

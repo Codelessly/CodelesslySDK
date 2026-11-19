@@ -112,6 +112,7 @@ const runtimeCodes = <(String, String, String)>[
   ('transparent_background', 'warning', 'At least 2% of a capture has nothing painted behind it: there a reader sees the host\'s background (black in an app with none, the page\'s color in a browser), not the document\'s. Give the screen\'s canvas a fill.'),
   ('set_overwritten', 'warning', 'A reaction (a timer, a load) wrote a variable a --set step set, after the step: the capture shows the --set value. Pin a clock with --now.'),
   ('formula_runaway', 'error', 'A formula made more calls of the page\'s own functions in one evaluation than can be meant (functions that call each other without end): the calls past the limit gave nothing, and what reads the formula is drawn without its value. The message names the function.'),
+  ('formula_failed', 'warning', 'A formula a node reads (its condition, its list, its text, a value, an action) or a variable\'s could not be worked out when the screen ran (a function given what it cannot take, an unknown function): the node draws without it. The message names the node, the formula and why.'),
   ('screen_timeout', 'error', 'A screen took longer than --screen-timeout (120 s) at one size: past the limit the functions its formulas call gave nothing, the capture is not what the page shows, and the run went on to the next screen.'),
   ('site_now', 'warning', 'site.json\'s "now" (the time now() gives in a render of the site, when no --now is passed) is not an ISO 8601 time: the run starts at the real time.'),
   ('placeholder_word', 'warning', 'A word the notation, the design system and the site do not have stood in as a placeholder when the page was expanded with an open vocabulary (or, closed, was refused and draws nothing): the message names the word, its kind, its line and the shape it was written in. Define it, or it is recorded for support: read from the vocabulary record `notation.sh expand` saves beside the site (vocabulary.json).'),
@@ -600,7 +601,13 @@ Future<void> _renderAll(
       final runaway = <String>{};
       FormulaFunction.deadline = DateTime.now().add(args.screenTimeout);
       FormulaFunction.onRunaway = runaway.add;
+      // The formulas that could not be worked out while the screen ran,
+      // each with why: said at its end, with the nodes that read them.
+      final failed = <String, String>{};
+      FormulaEvaluator.onFailure = (expression, why) => failed.putIfAbsent(expression.trim(), () => why);
       void timeLimit() {
+        FormulaEvaluator.onFailure = null;
+        _formulasFailed(failed, docs, fileOfNode, issue, label, sizeName, late: screenClock.elapsed > args.screenTimeout);
         final names = <String>{};
         for (final body in runaway) {
           String? name;
@@ -1163,6 +1170,73 @@ String _firstLine(String s) {
 }
 
 String _fileSafe(String s) => s.replaceAll(RegExp(r'[^A-Za-z0-9_.-]+'), '_');
+
+/// Says each formula of [failed] (formula â†’ why) that a node of [docs]
+/// reads: the node, the formula, why, and what the node shows without it.
+void _formulasFailed(Map<String, String> failed, Map<String, api.Json> docs, Map<String, String> fileOfNode, void Function(RuntimeIssue) issue, String screen, String size,
+    {required bool late}) {
+  if (failed.isEmpty || late) return;
+  bool reads(Object? value, String formula) => switch (value) {
+        final String s => s.contains(formula),
+        final List<Object?> l => l.any((e) => reads(e, formula)),
+        final Map<Object?, Object?> m => m.values.any((e) => reads(e, formula)),
+        _ => false,
+      };
+  var said = 0;
+  for (final f in failed.entries) {
+    if (f.key.length < 2) continue;
+    // Where it is read: a condition, a list's data, a text, another value.
+    final nodes = <String>[];
+    var what = 'draws without its value';
+    String? file;
+    for (final doc in docs.entries) {
+      for (final n in (api.readMap(doc.value['nodes']) ?? const <String, Object?>{}).entries) {
+        final node = api.readMap(n.value);
+        if (node == null || !reads(node, f.key)) continue;
+        if (nodes.isEmpty) {
+          file = doc.key;
+          final bind = api.readMap(node['bind']) ?? const <String, Object?>{};
+          what = reads(bind['visible'], f.key)
+              ? 'is not shown (its condition is no)'
+              : reads(bind['data'], f.key)
+                  ? 'has no rows'
+                  : reads(api.readMap(node['props'])?['text'], f.key)
+                      ? 'shows no text for it'
+                      : reads(node['actions'], f.key)
+                          ? 'does nothing there when its action runs'
+                          : what;
+        }
+        if (!nodes.contains(n.key)) nodes.add(n.key);
+      }
+    }
+    // One of a variable's (a computed value others read) names the variable.
+    String? variable;
+    if (nodes.isEmpty) {
+      for (final doc in docs.values) {
+        for (final scope in (api.readMap(doc['variables']) ?? const <String, Object?>{}).values) {
+          for (final v in api.readList(scope) ?? const []) {
+            if (v is Map && reads(v['formula'] ?? v['value'], f.key)) variable ??= '${v['name']}';
+          }
+        }
+      }
+      if (variable == null) continue;
+    }
+    if (++said > 12) break;
+    final formula = f.key.length > 160 ? '${f.key.substring(0, 160)}â€¦' : f.key;
+    final why = f.value.replaceFirst(RegExp(r'^(Bad state|Exception|Invalid argument\(s\)|FormatException|Unsupported operation): '), '');
+    issue(RuntimeIssue(
+        'formula_failed',
+        'warning',
+        nodes.isEmpty
+            ? 'The formula of the variable "$variable" failed when the screen ran: {$formula}: ${_firstLine(why)}. What reads "$variable" gets nothing. Write it so that it works for the values it meets (coalesce(x, â€¦) for one that may be missing).'
+            : '"${nodes.first}"${nodes.length > 1 ? ' (and ${nodes.length - 1} more)' : ''} $what: its formula {$formula} failed when the screen ran: ${_firstLine(why)}. '
+                'Write it so that it works for the values it meets (coalesce(x, â€¦) for one that may be missing, a function the formulas have).',
+        nodeId: nodes.firstOrNull,
+        file: file,
+        screen: screen,
+        size: size));
+  }
+}
 
 Future<void> _settle(WidgetTester tester) async {
   for (var i = 0; i < 8; i++) {
