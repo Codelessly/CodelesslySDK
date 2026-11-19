@@ -1,158 +1,94 @@
-## Unreleased
+## 37.0.0
 
-Needs the codelessly_api of the same release.
+Needs codelessly_api 37.0.0, whose entry lists what the notation now draws differently.
 
 ### Behaviour changes (read before upgrading)
 
-- **Render tool, fonts from Google Fonts**: a family that is neither among the command's own faces, the `--fonts`
-  directories nor the site's declared files is fetched from Google Fonts by family, weight and style (the SDK's
-  `HttpFontFetcher`, as an app fetches it), kept in a cache directory (`CODELESSLY_FONT_CACHE`, else
-  `.dart_tool/codelessly_google_fonts`; a second run needs no network) and drawn; it was drawn in Roboto, or in a
-  face of its class on the machine. A family Google Fonts does not have is drawn in an open face fetched the same
-  way, the same on every machine: Georgia in Gelasio, Times New Roman in Tinos, Arial and Helvetica in Arimo,
-  Courier New in Cousine, another serif in Gelasio, a slab in Roboto Slab, a script in Dancing Script (a monospace
-  face is Roboto Mono and a sans Roboto, as before). `--no-google-fonts` (or `CODELESSLY_NO_GOOGLE_FONTS=1`) fetches
-  nothing; then, or when a fetch fails (no network), the cache is read and the family falls back to the machine's
-  face of its class as before, and the `font_fallback` warning says so. A render never fails for a font.
-- **A site's theme family is one of its pages' fonts** (the render tool's publish, `publishPages`): the family the
-  theme names for all its text (`"fontFamily"`, `"titleFontFamily"`) at each weight the pages' texts use, so an app
-  fetches it from Google Fonts with the page; it was fetched only once drawn. A family `site.json` declares a file
-  for is read from that file, as before.
-- **A theme with no `surface` on a dark ground** (a site's dark `paper` and its `ink`): the controls and the
-  runtime's menus, tooltips, pickers and dialogs take that ground as their surface and the theme's `ink` as their
-  text (`surfaceRoles`, `themeDataOf`); they took white paper and near-black ink. A light ground, and a theme that
-  names its `surface` (every design system here), draw as before.
-- **Notation tools, a site with no design system** (`expand <site folder>`): what the notation draws by itself is
-  written in the theme's roles (`line`, `card`, `band`, `hoverFill`, `quietText`...: codelessly_api's
-  `ThemeTokens.notationRoles`), each light or dark as the site is shown, so its dark mode needs no design system.
-  A light site draws as before.
+**Text fields**
 
-## Unreleased
+- **A multi-line field with an action of its own** (`textInputAction` `send`, `done`…) takes Enter itself: Enter is
+  the action and Shift+Enter a new line (while an IME composes, Enter stays the IME's). A text area with no action
+  is unchanged.
+- **Sending from a multi-line field keeps the focus.**
+- **A box around a text field with a focused look of its own** (`focused.border=…`) is focused while the field has
+  the focus, as CSS's `:focus-within`.
+- **A field with no border keeps its border's radius for its fill.**
+- **A hugging text field whose box has a height of its own** draws its text at that box's step of the control
+  scale.
 
-Needs codelessly_api's fixes-36-1 (its Unreleased entry).
+**Controls**
 
-### Behaviour changes
+- **A date or time picker whose decoration names only its fill, border and corners keeps its icons.** A
+  decoration's border with no corners takes the control radius.
+- **A dropdown with no frame of its own (`underline: false`) has its value in the middle of its box.**
+- **A switch given one side only** (`Toggle h=44`) draws the standard 36 × 20 track in the middle of its box.
 
-- **A stack that does not scroll and has a `clipBehavior`** (the notation's `Stack … clip`) cuts what is in it at
-  its edge, its corners' radius too, as a row or a column does; it drew its children past it (round 11b:
-  clip-editor's timeline ran past its frame, story-reader's next card drew over the footer). A stack with none
-  (the default) is as it was: what is placed past its edge shows.
-- **A hugging text field whose box has a height of its own** (its decoration's `constraints`, min and max the
-  same: a labelled `Input … h=44` in the notation) draws its text at that box's step of the control scale; it took
-  the compact step's (round 11b).
-- **A date or time picker whose decoration names only its fill, border and corners keeps its calendar (clock)
-  and chevron** (round 11b: `DatePicker … fill=… border=… radius=10`): any decoration took them away, as a
-  decoration that draws the field itself. A decoration that names icons, padding or anything else is as it was.
-  A decoration's border with no corners takes the control radius (it was square).
-- **A dropdown with no frame of its own (`underline: false`) has its value in the middle of its box**, level
-  with the chevron, as Flutter's DropdownButton; it sat at the box's top (round 11b: a Select framed by its
-  node's box, 36 high).
-- **What is under an open overlay takes no key**: a page's `key` lines and a node's `onKeyDown` (an `App`'s) wait
-  while a dialog, a sheet, a drawer or a menu is open over the page; the overlay's own keys run (round 10, R13: a
-  page's Enter ran while a chooser was open). It is what the overlays' contract says ("Tab and Shift+Tab stay
-  inside the top overlay; what is under it takes no key"); the page's handlers, which listen to the whole
-  keyboard, did not keep it. A document whose page shortcut was meant to act over its own dialog now acts only
-  when the dialog is closed (write the key under the dialog: `Dialog#id` … `key j onPress={…}`).
+**Layout**
+
+- **A stack that does not scroll and has a `clipBehavior`** clips what is in it, its corners' radius too.
+- **A list's copies that are hidden take no gap.**
+- **A fill with a `maxWidth`, in a stack,** is as wide as the stack up to that.
+- **Squeezable texts beside a child that fills keep their own width** and the filling child takes the room left,
+  whatever order the row's boxes are applied in.
+
+**Keys**
+
+- **What is under an open overlay takes no key.** A page's `key` lines and a node's `onKeyDown` wait while a dialog,
+  a sheet, a drawer or a menu is open; the overlay's own keys run. A page shortcut that was meant to act over its
+  own dialog now needs to be written under the dialog.
+
+**Themes and fonts**
+
+- **A theme with no `surface` on a dark ground**: controls, menus, tooltips, pickers and dialogs take that ground
+  as their surface and the theme's `ink` as their text. A light ground, and a theme that names its `surface`, are
+  unchanged.
+- **A site's theme family is one of its pages' fonts**: the family the theme names (`"fontFamily"`,
+  `"titleFontFamily"`) is declared at each weight the pages' texts use, so an app fetches it with the page.
+- **A theme font that loads after the first layout reaches the controls' own texts** (a checkbox's and a toggle's
+  label, a field's hint).
+
+**Render tool**
+
+- **Fonts from Google Fonts.** A family that is neither among the tool's own faces, the `--fonts` directories nor
+  the site's declared files is fetched from Google Fonts and kept in a cache (`CODELESSLY_FONT_CACHE`, else
+  `.dart_tool/codelessly_google_fonts`). A family Google Fonts does not have is drawn in an open face, the same on
+  every machine: Georgia in Gelasio, Times New Roman in Tinos, Arial and Helvetica in Arimo, Courier New in
+  Cousine, another serif in Gelasio, a slab in Roboto Slab, a script in Dancing Script. `--no-google-fonts` (or
+  `CODELESSLY_NO_GOOGLE_FONTS=1`) fetches nothing; then, or when a fetch fails, the family falls back to the
+  machine's face of its class and the `font_fallback` warning says so. A render never fails for a font, and no
+  font file is added to the package.
+- **`placeholder_word`** says when a stand-in draws nothing and takes no room.
+- **`--wait`**: `now()` and `nowMs()` move with the run's clock. `--now` still pins it.
+
+**Desk**
+
+- **Narrow forms**: `PageHeader` puts its actions under the title on a phone, `BulkBar` puts its actions on a
+  second line, and `Breadcrumb` shows its last step below a desktop's width.
+- **Avatars inside Desk's components are the sizes its design gives**: 20 on a `TaskCard`, 32 on a `ListRow`, 36 on
+  a `PaneHeader` (they all drew at 28: the component's numeric `size` was not passed through).
+- **Desk's rail is 64** (`sizes.rail`, was 60), and an app's `Sidebar` with no rule for other widths is a rail on a
+  tablet and a drawer on a phone.
+
+### Added
+
+- **`design_systems/cards/TO-DESKTOP.md`**: taking a Cards screen to a desktop page on Desk, with two screens taken
+  across. **`design_systems/NAMES.md`**: the parts Desk and Cards share under other names or shapes.
+  `design_systems/desk/TO-MOBILE.md` says what now happens by itself.
+- **Render driver**: `--tap "Text"` taps the line of an open menu, popover or dialog that shows that text; a step
+  on a row of a list hidden at this size is skipped with a note.
+- **`FormulaClock.source`** lets a host that runs time itself give the time formulas read.
+- **Notation tools**: an overlay a site's component writes after its tree is on every page that calls it;
+  `notation.sh prompt --open` says how a theme names its font.
 
 ### Fixed
 
-- **A paint `paragraph` with `textAlign` and `maxWidth`** is aligned across its `maxWidth`, as a text box of that
-  width is: laid out to its words' width alone, `textAlign=center` had nothing to centre in (round 11b,
-  property-listings: the map's price pins sat at the left of their pills).
-- **Render command, a page listed without its extension** (`"pages": ["month", "week"]`, which site.md allows and
-  the site loads as `month.json`): no `page_not_written` warning when that file is there (round 11b: calendar-app,
-  clip-editor, admin-console had one for every page of a site that drew them all).
-- **A switch given one side only** (`Toggle h=44`, a row's height or a touch target) draws SSUI's 36 × 20 track
-  in the middle of its box; the track filled the 36 × 44 box, taller than wide, and drew as a ring (round 11b,
-  smart-home: every toggle on four screens).
-- **A list that keeps its end in view, with a padding of its own** (`ListView … stickToEnd={follow}
-  pad=[28,24,28,16]`): the padding wrapped the list's two halves and hid the key its viewport is centred by, and
-  Flutter's assertion drew the error box where the messages go (round 11b, team-chat's thread, at every size).
-- **A theme font that loads after the first layout reaches the controls' own texts**: a checkbox's and a toggle's
-  label, a field's hint (and every label a control draws through `ControlLabel`) are measured again when the
-  platform's fonts change, as a paragraph is; the tree asks for the theme's family at 400, 500, 600 and 700 (the
-  weights controls draw in). Round 11b, 5 builds: a theme naming a font with no file (Lato, Arial, sans-serif)
-  drew those labels in the render command as the test font's black boxes (docs-site's tabs, nonprofit's
-  Gift Aid, notes-app's Pin, meal-planner's search hint, seat-booking's calendar), while the texts beside them
-  were drawn in the fallback. In an app, a web font that arrived late left them in the first font.
-- **A toolbar's title beside small texts**: squeezable texts beside a child that fills keep their own width and the
-  filling child takes the room left, whatever order the row's boxes are applied in. A row drawn again at another
-  size (the render tool's second size, a window resized) had the small texts decide before the title was there:
-  they shared the row with it as flexible children, the subject got a third of its room and Close sat mid-bar
-  (support desk, test 11: "in some runs the subject was cut to ~130 px").
-- **Render driver, a menu's line by its text**: `--tap "Leo Marsh"` taps the line of the menu (popover, dialog)
-  open over the page that shows that text first, as an open dropdown's option is tapped by its label; it was "not
-  on screen" for a `MenuItem "{a}"` (support desk, test 11). Two lines that show it are said.
-- **Render driver, a row of a list hidden at this size**: `--tap queue-row#0` where the list is under `hide=phone`
-  is skipped there with the `step_skipped` note, as a node hidden itself is; it was `interaction_failed` (support
-  desk, test 11: every drive had to be split into a desktop run and a phone run).
-- **`scrollTo` from an overlay reaches the page under it**: a Menu's item (a dialog's button) that runs
-  `scrollTo node=threadEnd` scrolls the page to it; it looked only inside the overlay and said `no node "threadEnd"
-  is on screen` (support desk, test 11; round 10, R48). `RenderTree.live` lists the trees showing.
-- **Render driver, `--wait`**: `now()` and `nowMs()` move with the test's clock, as the timers do: a clock or a
-  deadline written from `now()` is that much later after the wait (round 10, R22, 14 runs: a nine-second wait left a
-  countdown at 10:00 while its timer ticked). `--now` still pins it for the whole run. `FormulaClock.source` (and
-  `FormulaTime.source`) let a host that runs time itself give the time formulas read.
-- **Notation tools, a site's components**: an overlay a component writes after its tree (`Drawer#basket … right
-  w=440`, `Sheet#info stops=[0.5,0.9]`) is on every page that calls it, so `open basket` from inside the component
-  shows it at its side, width and stops (round 10, R28). `expand <site folder>` passes the components' overlays to
-  the pages as it passes their key lines.
-Needs codelessly_api's unreleased reflow (track C: a desktop page written in one pass works on a tablet and a
-phone by itself).
-
-- **Desk's narrow forms** (definitions): `PageHeader` puts its actions under the title on a phone (the title broke
-  mid-word beside them); `BulkBar` puts its actions on a line under the count on a phone (the count was squeezed
-  to nothing); `Breadcrumb` shows its last step alone narrower than a desktop (it overflowed the top bar at 834).
-- **Desk's rail is 64** (`sizes.rail`, was 60): the width its guide and its examples write, and the width the
-  notation now gives an app's `Sidebar` written with no rule on a tablet.
-- **`design_systems/desk/TO-MOBILE.md`** says what now happens by itself and what a writer still writes.
-- **`design_systems/cards/TO-DESKTOP.md`**: the other pass, from a Cards (mobile-first) screen to a desktop page
-  on Desk, with two screens taken across (`design_systems/cards/examples/to-desktop`), and
-  **`design_systems/NAMES.md`**: the parts Desk and Cards share under other names or shapes, what one has and the
-  other lacks, and options for one set of names (nothing renamed).
-Text input: the pass after round 11, where the notation's text inputs drew worse than the web baseline's
-([docs/research/text-input-round-11.md](docs/research/text-input-round-11.md)). With the codelessly_api of the same
-pass (a composer in a row of buttons, a field among icon buttons, `fill`/`border`/`radius` on an `Input`).
-
-### Behaviour changes (read before upgrading)
-
-- **A multi-line field with an action of its own** (`textInputAction` `send`, `done`…) takes Enter itself, also
-  while the platform's text input is connected: Enter is the action, Shift+Enter a new line (while an IME composes,
-  Enter stays the IME's). Connected, Enter went to the platform, which sent the action on Enter and Shift+Enter alike
-  (desktop) or typed a new line on both (web). A text area (no action, or `newline`) is as it was.
-- **Sending from a multi-line field keeps the focus** (`send`), ready for the next message, as a chat's composer
-  does; the other actions let it go as before.
-- **A box around a text field with a focused look of its own** (`focused.border=…`) is focused while the field
-  has the focus, as CSS's `:focus-within` (the `focused` state is "the node, or an input in it"): a composer's frame
-  rings as the web's does. It was focused only when it took the focus itself.
-- **A field with no border keeps its border's radius for its fill** (`border: {type: none, borderRadius: 20}`, a
-  filled pill): the fill took the control step's radius.
-### Behaviour changes (read before upgrading)
-
-- **Render, placeholder_word**: a stand-in the expand drew as nothing (a behaviour with no picture, or a line
-  beside the App or Page at the top of a page) is said as drawing nothing and taking no room, with no node; a
-  primitive wrapped round lines as those lines with no box.
-- **Render tool: a family no file provides falls back by its class**: a serif (Georgia, Playfair Display, Noto
-  Serif…) to the first serif the system has (Georgia, Times New Roman, Garamond, Book Antiqua; DejaVu or Liberation
-  Serif on Linux), a slab (Roboto Slab) to a slab (Rockwell) else a serif, a script to a script (Brush Script, Freestyle
-  Script) else a serif, a named mono (IBM Plex Mono) to Roboto Mono; it was Roboto for all. The `font_fallback`
-  warning says which face drew it. The faces are the machine's, so pictures can differ between machines where a site
-  names a family it does not ship.
-- **`notation.sh prompt --open`, the site note** says how a theme names its font: `"fontFamily"` (and
-  `"titleFontFamily"`, a text style's own `"fontFamily"`).
-
-### Fixed
-
-- **A list's copies an `if` hides take no gap**: the gaps are between the copies that show (a board's lanes, each
-  showing its own of the board's cards, started each lane lower than the one before: a staircase).
-- **A fill with the most it gets, in a stack** (`Column w=fill maxw=730`) is as wide as the stack up to that: it was
-  nothing wide (a headline one letter per line).
-- **A ring (`circularProgressIndicator`) that fills its place** is a circle of its shortest side: it drew nothing.
-- **An accordion draws every child after its header**, in order: it drew only the first (a docs sidebar's group
-  showed one link of three).
-- **A control's label falls back for the symbols its font lacks** (← → ↗ ⌘), as every text does: in the render
-  tool's pictures a button's or a chip's arrows drew as missing-glyph boxes. (Emoji draw from the system symbol font
-  where it has them, in one colour: the tool has no colour emoji font on Windows.)
+- An accordion draws every child after its header.
+- A ring (`circularProgressIndicator`) that fills its place draws.
+- A control's label falls back for the symbols its font lacks (← → ↗ ⌘).
+- A paint `paragraph` with `textAlign` and `maxWidth` is aligned across its `maxWidth`.
+- A list that keeps its end in view, with a padding of its own, no longer fails.
+- `scrollTo` from an overlay reaches the page under it.
+- The render command gives no `page_not_written` warning for a page listed without its extension.
 
 ## 36.0.0
 
