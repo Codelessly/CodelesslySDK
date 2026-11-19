@@ -24,6 +24,7 @@ import 'package:codelessly_sdk/src/runtime/gestures/drag_and_drop.dart' show Ren
 import 'package:codelessly_sdk/src/runtime/actions/wiring.dart' show viewportTriggersPaused;
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
 import 'package:codelessly_sdk/src/render/controls/buttons.dart' show RenderButton;
+import 'package:codelessly_sdk/src/render/layout/text_box.dart' show RenderWholeWords;
 import 'package:codelessly_sdk/src/render/controls/calendar.dart' show RenderCalendar;
 import 'package:codelessly_sdk/src/render/controls/dropdown.dart' show RenderDropdown;
 import 'package:codelessly_sdk/src/render/controls/menu.dart' show RenderMenu, RenderMenuRow;
@@ -3507,6 +3508,18 @@ List<RuntimeIssue> _check(
       if (p.didExceedMaxLines && !cut) {
         out.add(RuntimeIssue('text_truncated', 'warning', 'Text "${nameOf(b)}" ("$short") is cut at maxLines: set "overflow": "ellipsis" if that is meant, or give it more lines.',
             nodeId: nameOf(b), screen: screen, size: size, file: file));
+      }
+      // A text whose longest word is wider than its box is drawn smaller,
+      // then cut at the box's edge (RenderWholeWords): said as what it is.
+      final whole = _descendants(b).whereType<RenderWholeWords>().firstOrNull;
+      if (whole != null && (whole.scale < 1 || whole.clips)) {
+        final word = p.getMinIntrinsicWidth(double.infinity);
+        out.add(RuntimeIssue('text_clipped', 'warning',
+            'Text "${nameOf(b)}" ("$short") has a word ${word.toStringAsFixed(0)} px wide in a box ${b.size.width.toStringAsFixed(0)} wide: '
+            '${whole.clips ? 'it is drawn at ${(whole.scale * 100).round()} % of its size and still cut at the box\'s edge' : 'the text is drawn at ${(whole.scale * 100).round()} % of its size so that the word fits'}. '
+            'Give the text more width (a fill or larger width) or a smaller font size.',
+            nodeId: nameOf(b), screen: screen, size: size, file: file));
+        continue;
       }
       final needH = p.getMaxIntrinsicHeight(b.size.width);
       final needW = p.getMinIntrinsicWidth(double.infinity);

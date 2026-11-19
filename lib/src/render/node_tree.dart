@@ -2593,6 +2593,11 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
         ..configure(tw, plainText(span), animates: tree.animates, textDefault: n.behaviors.defaultTextStyle));
     }
     if (n.prop(TextProps.live)) chain.add(_obtain<_LiveTextSemantics>('liveText', _LiveTextSemantics.new));
+    // A word is never broken across lines: where its box is narrower than
+    // its longest word, the text is drawn smaller, then cut (text_box.dart).
+    if (n.prop(TextProps.maxLines) != 1 && !n.prop(TextProps.scaleDown) && n.behaviors.typewriter == null) {
+      chain.add(_obtain<RenderWholeWords>('wholeWords', RenderWholeWords.new));
+    }
     chain.add(paragraph);
   }
 
