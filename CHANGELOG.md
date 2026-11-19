@@ -1,3 +1,12 @@
+## Unreleased
+
+### Behaviour changes
+
+- **An inline calendar given less height than its rows need** fits its six rows of days inside its box (down to
+  20 px a row); its rows stayed 48 px and painted past the box.
+
+### Fixed
+
 ## 37.0.0
 
 Needs codelessly_api 37.0.0, whose entry lists what the notation now draws differently.
