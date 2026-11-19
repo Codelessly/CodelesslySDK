@@ -113,7 +113,7 @@ void main() {
       final base = e.rows[e.visible.$1]['c']! as double;
       expect(e.yLabel(0, base), '0.0%');
       expect(e.yLabel(0, base * 1.05), '+5.0%');
-      final ticks = e.yTicks(0)!;
+      final ticks = e.yTicks(0);
       expect(ticks, isNotEmpty);
       // Round percents.
       for (final t in ticks) {

@@ -1,4 +1,5 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/graph.dart' show RenderGraph;
 import 'package:codelessly_sdk/src/render/controls/spinner.dart';
 import 'package:codelessly_sdk/src/widgets/indicators_paint.dart';
 import 'package:flutter/material.dart';
@@ -108,6 +109,12 @@ void main() {
       final rect = tree.boxOf(n.id)!.rectIn(view)!;
       expect(rect.topLeft, const Offset(10, 10), reason: n.id);
       expect(rect.size, Size(n.layout.width.value, n.layout.height.value), reason: n.id);
+      // A chart type is a word over the graph, drawn by the graph.
+      if (const {'chart', 'barChart', 'lineChart', 'plotChart'}.contains(n.type)) {
+        final graph = _descendants(tree.boxOf(n.id)!).whereType<RenderGraph>().single;
+        expect(graph.size, rect.size, reason: n.id);
+        continue;
+      }
       final paint = _descendants(tree.boxOf(n.id)!).whereType<RenderCustomPaint>().single;
       expect(paint.painter, isA<NodePainter>());
     }

@@ -3,6 +3,7 @@
 library;
 
 export 'src/graph/graph_engine.dart';
+export 'src/graph/graph_render.dart';
 export 'src/graph/graph_spec.dart';
 export 'src/graph/graph_transforms.dart' show applyGraphTransforms, ema, rsi, sma, stddev;
 export 'src/graph/graph_viewport.dart';

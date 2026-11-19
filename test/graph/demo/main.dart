@@ -6,6 +6,8 @@ import 'package:codelessly_sdk/graph.dart';
 import 'package:flutter/widgets.dart';
 
 import '../replicas/robinhood.dart';
+import 'chart_words.dart';
+import 'dashboard.dart';
 import '../replicas/tradingview.dart';
 import '../replicas/webull.dart';
 import '../stock.dart';
@@ -20,8 +22,12 @@ class GraphDemo extends StatefulWidget {
 }
 
 class _GraphDemoState extends State<GraphDemo> {
-  static const tabs = ['Robinhood', 'Webull', 'TradingView', 'Prototype'];
+  static const tabs = ['Dashboard', 'Chart words', 'Robinhood', 'Webull', 'TradingView', 'Prototype'];
   static const hints = [
+    'A document of three graph nodes. Hover a bar, a slice or the line: it is drawn apart, a tooltip says what it holds, and the '
+        'text above it reads the selection the graph publishes. Tap to pin; tap it again to let go.',
+    'The chart types documents already use (barChart, chart, lineChart, plotChart), unchanged, each drawn by the graph. '
+        'Hover the stacked bars, the donut, the line and the plot.',
     'Hover or touch the line: it snaps to the nearest point and the header follows. The ranges below swap the data.',
     'Hover: lines through the pointer, tags on both axes, a card up and left of it. The ranges above swap the data.',
     'Drag to pan, wheel to zoom about the pointer, drag the price axis to scale it (double click it to fit again), '
@@ -75,9 +81,11 @@ class _GraphDemoState extends State<GraphDemo> {
                     child: Align(
                       alignment: Alignment.topLeft,
                       child: switch (tab) {
-                        0 => const RobinhoodPage(key: Key('robinhood'), fontFamily: 'Roboto'),
-                        1 => const WebullPage(key: Key('webull'), fontFamily: 'Roboto'),
-                        2 => const TradingViewPage(key: Key('tradingview'), fontFamily: 'Roboto'),
+                        0 => const DashboardPage(key: Key('dashboard')),
+                        1 => DashboardPage(key: const Key('words'), nodes: chartWordNodes),
+                        2 => const RobinhoodPage(key: Key('robinhood'), fontFamily: 'Roboto'),
+                        3 => const WebullPage(key: Key('webull'), fontFamily: 'Roboto'),
+                        4 => const TradingViewPage(key: Key('tradingview'), fontFamily: 'Roboto'),
                         _ => const _Prototype(key: Key('prototype')),
                       },
                     ),
