@@ -25,6 +25,16 @@ void quickstartSlug() {
   runApp(MaterialApp(home: CodelesslyWidget(codelessly: codelessly)));
 }
 
+/// A project as a whole app with no Material: a plain `WidgetsApp`.
+void quickstartPlainApp() {
+  final codelessly = Codelessly(config: const CodelesslyConfig(slug: 'my-project'));
+
+  runApp(WidgetsApp(
+    color: const Color(0xFF2F6BFF),
+    onGenerateRoute: CodelesslyWidget.onGenerateRoute(codelessly),
+  ));
+}
+
 /// A project token, on Firebase, with live updates.
 Future<void> quickstartToken() async {
   WidgetsFlutterBinding.ensureInitialized();

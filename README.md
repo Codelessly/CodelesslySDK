@@ -17,7 +17,11 @@ final codelessly = Codelessly(config: const CodelesslyConfig(slug: 'my-project')
 runApp(MaterialApp(home: CodelesslyWidget(codelessly: codelessly)));
 ```
 
+It works in any Flutter app: a `MaterialApp`, a `CupertinoApp` or a plain `WidgetsApp`. The package imports
+neither Flutter's Material library nor its Cupertino library, and a project looks the same in all three.
+
 - [Install](#install)
+- [Any Flutter app](#any-flutter-app)
 - [Quickstart](#quickstart): by [slug](#1-a-published-slug-http), by [project token](#2-a-project-token-firebase-live-updates), or [offline](#3-a-bundle-shipped-with-the-app-offline)
 - [`CodelesslyWidget` essentials](#codelesslywidget-essentials)
 - [UI written by an agent](#ui-written-by-an-agent)
@@ -121,6 +125,36 @@ A bundle already in memory works the same way: `Codelessly.fromBundle(PublishBun
 [Loading modes and caching](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/04-loading-and-caching.md)
 says where a bundle file comes from.
 
+## Any Flutter app
+
+The quickstarts above use `MaterialApp`. Nothing in the SDK needs it. A project as a whole app, with no Material:
+
+```dart
+import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:flutter/widgets.dart';
+
+void main() {
+  final codelessly = Codelessly(config: const CodelesslyConfig(slug: 'my-project'));
+
+  runApp(WidgetsApp(
+    color: const Color(0xFF2F6BFF),
+    onGenerateRoute: CodelesslyWidget.onGenerateRoute(codelessly),
+  ));
+}
+```
+
+What the SDK needs from the app around it:
+
+- **A `Navigator` above the widget**, for navigation actions, dialogs and sheets. `onGenerateRoute` (as above),
+  `home` or `routes` gives an app one.
+- **The Material icon font**, for icons: `uses-material-design: true` under `flutter:` in your `pubspec.yaml`.
+  That is the font file only (tree-shaken to the icons used), not the Material library.
+
+The SDK reads no `Theme` and puts none above a layout: everything it draws, its own dialogs, toasts and sheets
+included, takes the project's theme. Your app's theme is yours, and a widget of your own shown inside a layout
+finds it as anywhere else in your app. The [example](example) is a plain `WidgetsApp`, with a `MaterialApp`
+variant beside it (`example/lib/main_material.dart`).
+
 ## `CodelesslyWidget` essentials
 
 ![CodelesslyWidget with every essential parameter; layoutId picks the screen, params are read as route, data as data](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/docs/guide/images/readme/widget-essentials.png)
@@ -189,7 +223,8 @@ final codelessly = Codelessly(
 ```
 
 **Navigation.** Navigation actions push the project's screens on the nearest `Navigator`. A project that is the
-whole app gives its screens to `MaterialApp`, so each has its URL path:
+whole app gives its screens to your app (`MaterialApp`, `CupertinoApp` or `WidgetsApp`), so each has its URL
+path:
 
 ```dart
 MaterialApp(onGenerateRoute: CodelesslyWidget.onGenerateRoute(codelessly))

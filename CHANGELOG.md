@@ -119,6 +119,10 @@ theme (or a design system's), as the same control in a screen is.
 
 ### Fixed
 
+- **The package is tested and documented for any app shell.** Its tests run under a plain `WidgetsApp` as well
+  as a `MaterialApp`; the README and the quickstart have a `WidgetsApp` sample and say what the SDK needs from
+  the app around it (a `Navigator`, and the Material icon font for icons); the example app is a plain
+  `WidgetsApp`, with a `MaterialApp` variant in `example/lib/main_material.dart`.
 - **A host app that is not a Material app can open dialogs and sheets, and show a reorderable list.** Under a
   plain `WidgetsApp` (no `MaterialLocalizations` above the SDK) an `openModal` (a dialog, a cover, a bottom
   sheet), a `confirm` and a list with `reorder` failed with "No MaterialLocalizations found". Each is a route or a

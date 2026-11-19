@@ -16,6 +16,9 @@
 /// }
 /// ```
 ///
+/// Any app will do: a `MaterialApp`, a `CupertinoApp` or a plain `WidgetsApp`. This package imports neither
+/// Flutter's Material library nor its Cupertino library, and takes nothing from the app's theme.
+///
 /// Where the publish comes from:
 ///
 /// * a public slug, over HTTP: `Codelessly(config: CodelesslyConfig(slug: ...))`;

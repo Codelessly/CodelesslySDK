@@ -34,7 +34,8 @@ Without a `Navigator` above the widget, navigation actions do nothing.
 
 *URL paths and query parameters become route params. The page is an illustration.*
 
-Give the project's screens to `MaterialApp`:
+Give the project's screens to your app. `MaterialApp` here; `CupertinoApp` and `WidgetsApp` take the same
+`onGenerateRoute`:
 
 ```dart
 MaterialApp(

@@ -115,3 +115,8 @@ What a plain host still carries of Material (104 KB) and Cupertino (16 KB) comes
 on, which import Material themselves: `video_player` (it builds a `ThemeData`), `webview_flutter` and its
 platform packages, `in_app_purchase_android`, `in_app_purchase_storekit`, `file_selector_android`,
 `url_launcher_web`. They are not replaced here.
+
+The README, the quickstart and the troubleshooting page say so, with a `WidgetsApp` sample; the example app
+(`example/lib/main.dart`) is a plain `WidgetsApp`, and `example/lib/main_material.dart` shows the same screens under
+a `MaterialApp`. A plain host needs a `Navigator` and, for icons, the Material icon font
+(`uses-material-design: true`: the font file, not the library).

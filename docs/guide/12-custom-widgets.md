@@ -45,6 +45,9 @@ MaterialApp(
   the `Navigator`, so placing it in `MaterialApp.builder` (or above `MaterialApp`) covers them; wrapping a single
   `CodelesslyWidget` covers only that widget.
 - A builder id with no builder shows a `Placeholder`.
+- Your widget finds your app's own theme, as anywhere else in your app; the SDK puts no `Theme` and no
+  `Material` around it. A widget that needs a Material ancestor (an `InkWell`, a `TextField`, a `ListTile`)
+  wraps itself in a `Material`. Around it are the layout's default text style and icon color.
 - A builder gets a `BuildContext` only. To give the widget data, read it from your own state (a provider, an
   inherited widget), or have the layout call a [function](06-actions-and-functions.md) that updates that state.
   The node's props are not passed to the builder.
