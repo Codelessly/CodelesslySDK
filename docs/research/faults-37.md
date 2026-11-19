@@ -83,3 +83,39 @@ own Material imports at the same time, and the test suite and Desk's examples ru
 behind the media players, the page transitions, the confirm dialog's and toast's routes and the collections'
 reorder and swipe). The size saved is the one copy of Material an app carries (about 190 KB) once the host has
 moved too; while a host still imports `flutter/material.dart`, it carries both either way.
+
+## The builds rendered again
+
+Every build a fault was found in, its notation unchanged, expanded and rendered at 1440x900, 834x1112 and 390x844
+with 37.0.0 and with these fixes (errors and warnings summed over the three sizes):
+
+| Brief | Arm | Errors before | Errors after | Warnings before | Warnings after |
+|---|---|---:|---:|---:|---:|
+| admin-console | 6-write-api | 0 | 0 | 1 | 1 |
+| admin-console | 7-write-api-desk | 0 | 0 | 79 | 79 |
+| calendar-app | 6-write-api | 3 | 3 | 3 | 3 |
+| calendar-app | 7-write-api-desk | 75 | 82 | 5 | 7 |
+| clip-editor | 7-write-api-desk | 3 | 2 | 3 | 3 |
+| conference | 6-write-api | 0 | 0 | 5 | 5 |
+| docs-site | 6-write-api | 0 | 0 | 6 | 6 |
+| flashcards | 6-write-api | 3 | 3 | 0 | 0 |
+| flashcards | 7-write-api-desk | 9 | 9 | 0 | 0 |
+| food-ordering | 6-write-api | 0 | 0 | 11 | 10 |
+| food-ordering | 7-write-api-desk | 0 | 0 | 0 | 0 |
+| kanban-board | 7-write-api-desk | 0 | 0 | 0 | 0 |
+| magazine | 6-write-api | 0 | 0 | 13 | 12 |
+| mail-client | 7-write-api-desk | 0 | 0 | 1 | 1 |
+| music-player | 7-write-api-desk | 0 | 12 | 0 | 2 |
+| nonprofit | 6-write-api | 0 | 0 | 5 | 5 |
+| photo-library | 7-write-api-desk | 0 | 0 | 0 | 0 |
+| seat-booking | 7-write-api-desk | 0 | 0 | 1 | 1 |
+| story-reader | 6-write-api | 0 | 0 | 3 | 3 |
+| support-desk | 7-write-api-desk | 0 | 0 | 1 | 1 |
+| team-chat | 6-write-api | 0 | 0 | 1 | 1 |
+| travel-guide | 6-write-api | 0 | 0 | 29 | 1 |
+| all | | 93 | 111 | 167 | 141 |
+
+Where errors rose: calendar-app 7 (+7), the month's day cells now fill their rows of a written height, and at a
+phone's (86 px less padding) a day with two events needs 82 of 79: reported now, drawn past the row before as
+well. music-player 7 (+12), the artists' and library's artwork now draws (it was 0 tall), and the writer's
+`childAspectRatio=0.82` cell is 2.5 px short of the artwork and two lines of text at 834.
