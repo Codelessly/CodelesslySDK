@@ -160,5 +160,18 @@ void _modalScreens() {
     expect(report.errors, 0, reason: '${report.diagnostics}');
     final pngs = out.listSync().map((f) => f.uri.pathSegments.last).where((n) => n.endsWith('.png')).toSet();
     expect(pngs, {'home@390x844.png'});
+    // Each is named, with how to capture it.
+    final skipped = [for (final d in report.diagnostics) if (d['code'] == 'modal_screen_not_captured') d];
+    expect(skipped, isNotEmpty);
+    expect(skipped.every((d) => d['severity'] == 'info' && '${d['message']}'.contains('--modals')), isTrue);
+    // --modals captures them too, each alone.
+    final all = Directory.systemTemp.createTempSync('render_modals_all');
+    addTearDown(() => all.deleteSync(recursive: true));
+    final withModals = await runRender(tester, RenderArgs(inputs: ['$fixtures/modals'], out: all.path, sizes: const [Size(390, 844)], modals: true));
+    expect(withModals.errors, 0, reason: '${withModals.diagnostics}');
+    final shots = all.listSync().map((f) => f.uri.pathSegments.last).where((n) => n.endsWith('.png')).toSet();
+    expect(shots, contains('home@390x844.png'));
+    expect(shots.length, 1 + skipped.length);
+    expect(parseArgs(['site', '--out', 'o', '--modals']).modals, isTrue);
   });
 }

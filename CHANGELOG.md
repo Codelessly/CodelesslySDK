@@ -20,6 +20,12 @@
   `backgroundColor`: the theme's `track`, else a progress bar's tenth of grey. It drew the arc alone. A spinner
   (no value) is unchanged.
 
+### Added
+
+- **Render tool: `--modals`** captures the screens only ever opened as a modal (an `openModal` names them, no
+  `navigate` does), each alone, in a run that captures every screen. Without it each such screen is named in a
+  `modal_screen_not_captured` info line, with how to capture it.
+
 ### Fixed
 
 - A custom paint's color worked out to the name of a theme color (`stroke={props.ink}` with `ink="tealDot"`)
