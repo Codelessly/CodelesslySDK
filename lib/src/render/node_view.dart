@@ -1,11 +1,14 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart' show HardwareKeyboard;
+import 'package:codelessly_api/core.dart' show Node;
 import 'package:flutter/widgets.dart';
 
 import 'controls/buttons.dart';
 import 'controls/focus.dart';
 import 'controls/root.dart';
+import 'controls/slider.dart';
 import 'controls/spinner.dart';
+import 'controls/tokens.dart';
 import 'islands.dart';
 import 'node_tree.dart';
 
@@ -228,6 +231,7 @@ class ControlButton extends LeafRenderObjectWidget {
     this.onPressed,
     this.semanticsLabel,
     this.focusWhenShown = false,
+    this.interactive = true,
   });
 
   final ButtonSpec spec;
@@ -240,6 +244,10 @@ class ControlButton extends LeafRenderObjectWidget {
   /// default answer: Enter presses it). It shows as focused only when the
   /// keyboard is what the user is on.
   final bool focusWhenShown;
+
+  /// Whether it takes pointers and the focus; else it only draws (a
+  /// player's button on a design canvas).
+  final bool interactive;
 
   @override
   RenderButton createRenderObject(BuildContext context) {
@@ -262,7 +270,7 @@ class ControlButton extends LeafRenderObjectWidget {
 extension on RenderButton {
   void _apply(ControlButton w, BuildContext context) {
     this
-      ..interactive = true
+      ..interactive = w.interactive
       ..spec = w.spec
       ..enabled = w.spec.enabled
       ..busy = w.spec.loading
@@ -270,5 +278,52 @@ extension on RenderButton {
       ..onPressed = w.onPressed
       ..semanticsLabel = w.semanticsLabel
       ..semanticsDirection = Directionality.maybeOf(context) ?? TextDirection.ltr;
+  }
+}
+
+/// The SDK's slider ([RenderSlider]) as a widget: [node] is a `slider`
+/// node's props (its value, range, sizes and colors), [onChanged] is told
+/// each value a drag, a tap or a key gives. [seekBar] draws a player's seek
+/// bar ([RenderSeekBar]). Not [interactive], it draws and takes no input.
+/// It needs a root above it, as [ControlButton] does.
+class ControlSlider extends LeafRenderObjectWidget {
+  const ControlSlider({
+    super.key,
+    required this.node,
+    required this.tokens,
+    this.onChanged,
+    this.seekBar = false,
+    this.seekColors,
+    this.interactive = true,
+    this.semanticsLabel,
+  });
+
+  final Node node;
+  final ControlTokens tokens;
+  final ValueChanged<double>? onChanged;
+  final bool seekBar;
+
+  /// A seek bar's played part, rail and thumb, over the node's colors.
+  final ({Color active, Color rail, Color thumb})? seekColors;
+  final bool interactive;
+  final String? semanticsLabel;
+
+  @override
+  RenderSlider createRenderObject(BuildContext context) =>
+      (seekBar ? RenderSeekBar() : RenderSlider()).._apply(this, context);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSlider renderObject) => renderObject._apply(this, context);
+}
+
+extension on RenderSlider {
+  void _apply(ControlSlider w, BuildContext context) {
+    this
+      ..interactive = w.interactive
+      ..configure(w.node, w.tokens, Size.zero)
+      ..semanticsLabel = w.semanticsLabel
+      ..onChanged = w.interactive ? w.onChanged : null;
+    focusNode.canRequestFocus = w.interactive;
+    if (this case final RenderSeekBar bar) bar.colors = w.seekColors;
   }
 }

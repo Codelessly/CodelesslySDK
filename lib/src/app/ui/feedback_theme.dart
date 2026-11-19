@@ -6,7 +6,7 @@ import 'package:codelessly_api/core.dart' show ButtonProps, LayoutDocument, Node
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 
-import '../../render/controls/buttons.dart' show ButtonKind, ButtonSpec;
+import '../../render/controls/buttons.dart' show ButtonSpec;
 import '../../render/controls/tokens.dart' show ControlTokens;
 
 import '../../runtime/actions/look.dart';
@@ -14,7 +14,7 @@ import '../../runtime/actions/look.dart';
 export '../../runtime/actions/look.dart';
 
 import '../../render/control_theme.dart' as theme show onColor;
-import '../../render/control_theme.dart' show contrastRatio, kInk, kInkOnDark, themeDataOf;
+import '../../render/control_theme.dart' show chromeButton, contrastRatio, kInk, kInkOnDark, themeDataOf;
 import '../../render/convert.dart';
 
 /// The look of the runtime's own dialogs and toasts. A layout provides one
@@ -540,24 +540,19 @@ class ResolvedFeedbackTheme {
     bool enabled = true,
     bool wrapLabel = false,
   }) =>
-      ButtonSpec(
-        kind: label.isEmpty ? ButtonKind.icon : ButtonKind.text,
+      chromeButton(
         tokens: controlTokens,
         label: label,
         icon: icon,
         iconSize: iconSize,
-        iconColor: foreground,
         foreground: foreground,
         background: background,
-        labelStyle: style,
+        style: style,
         side: side,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
         padding: padding,
         enabled: enabled,
         wrapLabel: wrapLabel,
-        hoverColor: foreground.withValues(alpha: .06),
-        splashColor: foreground.withValues(alpha: .10),
-        focusColor: foreground.withValues(alpha: .10),
       );
 }
 

@@ -8,6 +8,8 @@
 // app the layout is shown in.
 import 'package:codelessly_api/core.dart' as api;
 import 'package:flutter/material.dart';
+import 'controls/buttons.dart' show ButtonKind, ButtonSpec;
+import 'controls/tokens.dart' show ControlTokens;
 import 'paint/shell_constants.dart';
 
 import 'surface_roles.dart';
@@ -546,3 +548,58 @@ SurfaceRoles rolesOfScheme(ColorScheme scheme) => (
       hairline: scheme.outlineVariant,
       error: scheme.error,
     );
+
+/// The tokens of the SDK's own controls where the runtime's chrome is drawn
+/// under the SDK's theme (a player's controls, a list's Undo bar): the
+/// theme's tokens. A focused control there shows its tint and no ring, as
+/// that chrome always has.
+ControlTokens chromeTokensOf(BuildContext context) {
+  final theme = Theme.of(context);
+  final own = theme.extension<CodelesslyThemeTokens>()?.tokens ?? const api.ThemeTokens();
+  return ControlTokens.resolve(
+    own.mergedWith(const api.ThemeTokens(colors: {'focusBorder': api.Color(0x00000000)})),
+    dark: theme.brightness == Brightness.dark,
+  );
+}
+
+/// One of the chrome's buttons, as the SDK's button draws it: [label] (or
+/// an [icon] alone, [iconSize] square) in [foreground] and [style] on
+/// [background], with a faint layer of the foreground when hovered, more
+/// when pressed or focused; nothing of a variant's own look.
+ButtonSpec chromeButton({
+  required ControlTokens tokens,
+  String label = '',
+  Map<String, Object?> icon = const {},
+  double? iconSize,
+  required Color foreground,
+  Color? background,
+  TextStyle style = const TextStyle(),
+  BorderSide? side,
+  OutlinedBorder? shape,
+  EdgeInsets? padding,
+  bool enabled = true,
+  bool wrapLabel = false,
+}) =>
+    ButtonSpec(
+      kind: label.isEmpty ? ButtonKind.icon : ButtonKind.text,
+      tokens: tokens,
+      label: label,
+      icon: icon,
+      iconSize: iconSize,
+      iconColor: foreground,
+      foreground: foreground,
+      background: background,
+      labelStyle: style,
+      side: side,
+      shape: shape,
+      padding: padding,
+      enabled: enabled,
+      wrapLabel: wrapLabel,
+      hoverColor: foreground.withValues(alpha: .06),
+      splashColor: foreground.withValues(alpha: .10),
+      focusColor: foreground.withValues(alpha: .10),
+    );
+
+/// A font glyph of the MaterialIcons font as a button's icon.
+Map<String, Object?> chromeGlyph(String name, int codepoint) =>
+    {'type': 'MATERIAL_ICON', 'name': name, 'codepoint': codepoint, 'render': 'glyph'};

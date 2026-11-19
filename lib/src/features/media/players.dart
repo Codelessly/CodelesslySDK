@@ -18,7 +18,8 @@ import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 import '../../render/convert.dart';
-import '../../render/node_view.dart' show SpinnerView;
+import '../../render/control_theme.dart' show chromeButton, chromeGlyph, chromeTokensOf;
+import '../../render/node_view.dart' show ControlButton, ControlSlider, SpinnerView;
 import '../../render/paint/shell_constants.dart';
 import 'embedded_player.dart';
 import 'embedded_media_protocol.dart';
@@ -301,9 +302,9 @@ class _MediaVideoState extends State<MediaVideo> {
             alignment: Alignment.bottomCenter,
             child: ValueListenableBuilder<VideoPlayerValue>(
               valueListenable: c,
-              builder: (context, value, _) => IconButton(
-                tooltip: value.isPlaying ? 'Pause video' : 'Play video',
-                icon: Icon(value.isPlaying ? _Glyph.pauseCircle : _Glyph.playCircle),
+              builder: (context, value, _) => _PlayerButton(
+                label: value.isPlaying ? 'Pause video' : 'Play video',
+                icon: value.isPlaying ? _pauseCircle : _playCircle,
                 onPressed: () => value.isPlaying ? c.pause() : c.play(),
               ),
             ),
@@ -537,16 +538,16 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
       color: colors.surfaceContainerHigh,
       child: Row(children: [
         if (widget.preview || _url.isEmpty)
-          const IconButton.filledTonal(tooltip: 'Play audio', onPressed: null, icon: Icon(_Glyph.playArrow))
+          _PlayerButton(label: 'Play audio', icon: _playArrow)
         else if (_failed || player == null)
           const Icon(_Glyph.errorOutline, semanticLabel: 'Audio unavailable')
         else if (!_ready)
           SpinnerView(color: ProgressIndicatorTheme.of(context).color ?? colors.primary)
         else if (controls)
-          IconButton(
-            tooltip: _playing ? 'Pause audio' : 'Play audio',
+          _PlayerButton(
+            label: _playing ? 'Pause audio' : 'Play audio',
+            icon: _playing ? _pauseCircle : _playCircle,
             onPressed: () => _run(_playing ? player.pause : player.play),
-            icon: Icon(_playing ? _Glyph.pauseCircle : _Glyph.playCircle),
           )
         else
           const Icon(_Glyph.audiotrackOutlined, semanticLabel: 'Audio'),
@@ -561,27 +562,14 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
                   style: theme.textTheme.titleSmall?.copyWith(color: colors.onSurface)),
               if (!_failed && controls)
                 SizedBox(
+                  width: double.infinity,
                   height: 24,
-                  child: SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      trackHeight: 3,
-                      thumbShape: const RoundSliderThumbShape(
-                          enabledThumbRadius: 6, disabledThumbRadius: 5, elevation: 0, pressedElevation: 0),
-                      overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
-                      activeTrackColor: colors.primary,
-                      thumbColor: colors.primary,
-                      inactiveTrackColor: colors.surfaceContainerHighest,
-                      disabledActiveTrackColor: colors.onSurface.withValues(alpha: 0.24),
-                      disabledInactiveTrackColor: colors.onSurface.withValues(alpha: 0.12),
-                      disabledThumbColor: colors.onSurfaceVariant,
-                    ),
-                    child: Slider(
-                      value: _position.inMilliseconds.clamp(0, _duration.inMilliseconds).toDouble(),
-                      max: _duration.inMilliseconds > 0 ? _duration.inMilliseconds.toDouble() : 1,
-                      onChanged: _ready && _duration > Duration.zero && player != null
-                          ? (v) => _run(() => player.seek(Duration(milliseconds: v.round())))
-                          : null,
-                    ),
+                  child: _SeekBar(
+                    value: _position.inMilliseconds.clamp(0, _duration.inMilliseconds).toDouble(),
+                    max: _duration.inMilliseconds > 0 ? _duration.inMilliseconds.toDouble() : 1,
+                    onChanged: _ready && _duration > Duration.zero && player != null
+                        ? (v) => _run(() => player.seek(Duration(milliseconds: v.round())))
+                        : null,
                   ),
                 ),
               if (!_failed && controls)
@@ -591,6 +579,92 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
           ),
         ),
       ]),
+    );
+  }
+}
+
+/// A player's round button: a 24 px glyph in a 40 px button, in the theme's
+/// accent; with nothing to press ([onPressed] null) it is drawn faint and
+/// takes no input.
+class _PlayerButton extends StatelessWidget {
+  const _PlayerButton({required this.label, required this.icon, this.onPressed});
+
+  /// What a screen reader says.
+  final String label;
+  final api.Json icon;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final style = theme.iconButtonTheme.style;
+    final foreground = onPressed == null
+        ? theme.disabledColor
+        : style?.foregroundColor?.resolve(const <WidgetState>{}) ?? theme.colorScheme.primary;
+    return SizedBox.square(
+      dimension: 40,
+      child: ControlButton(
+        onPressed: onPressed,
+        interactive: onPressed != null,
+        semanticsLabel: label,
+        spec: chromeButton(
+          tokens: chromeTokensOf(context),
+          icon: icon,
+          iconSize: 24,
+          foreground: foreground,
+          shape: style?.shape?.resolve(const <WidgetState>{}),
+        ),
+      ),
+    );
+  }
+}
+
+final api.Json _playArrow = chromeGlyph('play_arrow', ShellGlyphs.playArrow);
+final api.Json _playCircle = chromeGlyph('play_circle', ShellGlyphs.playCircle);
+final api.Json _pauseCircle = chromeGlyph('pause_circle', ShellGlyphs.pauseCircle);
+
+/// The audio player's seek bar: a 3 px track (the played part 5) and a
+/// 12 px thumb in the theme's accent, 12 px in from each side. With nothing
+/// to seek ([onChanged] null) it is drawn faint, its thumb 10 px, and takes
+/// no input.
+class _SeekBar extends StatelessWidget {
+  const _SeekBar({required this.value, required this.max, this.onChanged});
+
+  final double value, max;
+  final ValueChanged<double>? onChanged;
+
+  static Object _color(Color c) => api.Color(c.toARGB32()).toJson();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final enabled = onChanged != null;
+    return ControlSlider(
+      seekBar: true,
+      interactive: enabled,
+      tokens: chromeTokensOf(context),
+      onChanged: onChanged,
+      semanticsLabel: 'Position',
+      seekColors: (
+        active: enabled ? colors.primary : colors.onSurface.withValues(alpha: 0.24),
+        rail: enabled ? colors.surfaceContainerHighest : colors.onSurface.withValues(alpha: 0.12),
+        thumb: enabled ? colors.primary : colors.onSurfaceVariant,
+      ),
+      node: Node.fromJson(<String, Object?>{
+        'type': 'slider',
+        'props': {
+          'value': value,
+          'max': max,
+          'inverted': Directionality.maybeOf(context) == TextDirection.rtl,
+          'trackHeight': 3,
+          'padding': {'left': 12, 'right': 12},
+          'thumbRadius': enabled ? 6 : 5,
+          'overlayRadius': 12,
+          'overlayColor': _color(colors.primary.withValues(alpha: .10)),
+          // (A thumb color of its own: no ring round the thumb.)
+          'thumbColor': _color(colors.primary),
+        },
+      }, id: 'seek')!,
     );
   }
 }
@@ -768,8 +842,5 @@ abstract final class _Glyph {
   static const languageRounded = IconData(ShellGlyphs.languageRounded, fontFamily: ShellGlyphs.font);
   static const mapOutlined = IconData(ShellGlyphs.mapOutlined, fontFamily: ShellGlyphs.font);
   static const movieOutlined = IconData(ShellGlyphs.movieOutlined, fontFamily: ShellGlyphs.font);
-  static const pauseCircle = IconData(ShellGlyphs.pauseCircle, fontFamily: ShellGlyphs.font);
-  static const playArrow = IconData(ShellGlyphs.playArrow, fontFamily: ShellGlyphs.font);
   static const playCircleFill = IconData(ShellGlyphs.playCircleFill, fontFamily: ShellGlyphs.font);
-  static const playCircle = IconData(ShellGlyphs.playCircle, fontFamily: ShellGlyphs.font);
 }
