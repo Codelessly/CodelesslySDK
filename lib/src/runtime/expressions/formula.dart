@@ -3466,6 +3466,7 @@ class _ScriptCall extends _Node {
     if (scripts is! FormulaScripts) {
       throw StateError('Scripts are not available here');
     }
+    FormulaFunction._impure++;
     return scripts.callScript(name, [for (final arg in args) arg.eval(resolve)]);
   }
 
@@ -3548,12 +3549,129 @@ class FormulaFunction {
 
   static int _depth = 0;
 
+  /// The most calls of functions one evaluation makes (a formula read by a
+  /// binding, with every function it calls and they call): past it every
+  /// further call of that evaluation gives null at once, so functions that
+  /// call each other without end (each call making several more: [maxDepth]
+  /// deep, that is more calls than can ever run) end in a moment instead of
+  /// holding the frame for good. [onRunaway] is told, once an evaluation.
+  static int maxCalls = 200000;
+
+  /// Told the body of the function whose call went past [maxCalls], or past
+  /// [deadline].
+  static void Function(String body)? onRunaway;
+
+  /// When set, a moment past which every function call gives null at once
+  /// (a tool that draws a screen within a time limit); null: none.
+  static DateTime? get deadline => _deadline;
+  static set deadline(DateTime? value) {
+    _deadline = value;
+    _late = false;
+  }
+
+  /// Whether [deadline] has passed (looked up every so many asks).
+  static bool get pastDeadline {
+    if (_deadline != null && !_late && (++_ticks & 0xFF) == 0) _late = !DateTime.now().isBefore(_deadline!);
+    return _late;
+  }
+
+  static DateTime? _deadline;
+  static bool _late = false;
+  static int _calls = 0, _ticks = 0;
+  static bool _ranAway = false;
+
+  bool _over() {
+    if (_depth == 0) {
+      _calls = 0;
+      _ranAway = false;
+    }
+    _calls++;
+    if (_deadline != null && !_late && (++_ticks & 0xFF) == 0) _late = !DateTime.now().isBefore(_deadline!);
+    if (_calls <= maxCalls && !_late) return false;
+    if (!_ranAway) {
+      _ranAway = true;
+      onRunaway?.call(body);
+    }
+    return true;
+  }
+
   static final RegExp _part = RegExp(r'\.([a-zA-Z_][a-zA-Z0-9_]*)|\[(\d+)\]');
 
-  /// The result of the body for [arguments].
+  /// How many values that are not the same on every call (a random number,
+  /// a new id, the time, a script's) have been read so far.
+  static int _impure = 0;
+
+  /// The results of the calls made so far in the evaluation being worked
+  /// out, by function and arguments; and the lists and maps passed, by
+  /// identity, each with the number it is named by in a key.
+  static final Map<String, Object?> _memo = {};
+  static final Map<Object, int> _ids = Map.identity();
+
+  /// What names this function called with [arguments], or null when a call
+  /// of them is not kept (a function passed, a long text).
+  String? _memoKey(List<Object?> arguments) {
+    final key = StringBuffer(body);
+    for (final a in arguments) {
+      key.write('\u0001');
+      switch (a) {
+        case null:
+          key.write('n');
+        case final String s when s.length <= 400:
+          key
+            ..write('s')
+            ..write(s);
+        case final num n:
+          key
+            ..write('#')
+            ..write(n);
+        case final bool b:
+          key.write(b ? 't' : 'f');
+        // A short list of plain values by what it holds (the tokens of an
+        // expression, cut again at each step); any other by which it is.
+        case final List<Object?> l when l.length <= 48 && l.every((e) => e is String && e.length <= 64 || e is num || e is bool || e == null):
+          key.write('l');
+          for (final e in l) {
+            key
+              ..write(e is String ? 's' : e is num ? '#' : '')
+              ..write(e)
+              ..write('\u0002');
+          }
+        case List<Object?>() || Map<Object?, Object?>():
+          key
+            ..write('i')
+            ..write(_ids[a] ??= _ids.length);
+        default:
+          return null;
+      }
+    }
+    return key.toString();
+  }
+
+  /// The result of the body for [arguments]. Within one evaluation a call
+  /// with the arguments of an earlier one gives that one's result without
+  /// working it out again (a body that writes an argument's expression
+  /// three times, in functions nine deep, is 3 to the 9th calls otherwise),
+  /// unless the earlier call read something that differs from call to call.
   Object? call(List<Object?> arguments) {
+    if (_depth == 0) {
+      _memo.clear();
+      _ids.clear();
+    }
+    if (_late) return null;
+    final key = _memoKey(arguments);
+    if (key != null && _memo.containsKey(key)) {
+      if (_deadline != null && (++_ticks & 0xFF) == 0) _late = !DateTime.now().isBefore(_deadline!);
+      return _memo[key];
+    }
+    final impure = _impure;
+    final value = _run(arguments);
+    if (key != null && impure == _impure && _calls <= maxCalls && !_late && _depth < maxDepth - 1 && _memo.length < 200000) _memo[key] = value;
+    return value;
+  }
+
+  Object? _run(List<Object?> arguments) {
     final _Node? node = FormulaEvaluator._parse(body);
-    if (node == null || _depth >= maxDepth) return null;
+    if (node == null || _depth >= maxDepth || _over()) return null;
     _depth++;
     try {
       final Object? value = node.eval((path) {
@@ -3694,8 +3812,12 @@ class _Call extends _Node {
           ? arg(1)?.eval(resolve)
           : arg(2)?.eval(resolve);
     }
+    if (_differs.contains(name)) FormulaFunction._impure++;
     return _functions[name]!([for (final arg in args) arg.eval(resolve)]);
   }
+
+  /// The functions whose value is not the same on every call.
+  static const _differs = {'random', 'pick', 'newId', 'now', 'nowMs', 'shuffle', 'uuid'};
 
   @override
   Iterable<_Node> get children => args;

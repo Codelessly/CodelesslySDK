@@ -111,6 +111,8 @@ const runtimeCodes = <(String, String, String)>[
   ('formula_invalid', 'warning', 'A formula of a node (a binding, a value, an action) or of a variable does not parse, so it gives nothing where it is used: a list with no rows, a text with no value. The message names the node, the field, the expression and why it does not parse (an unbalanced bracket, a stray word).'),
   ('transparent_background', 'warning', 'At least 2% of a capture has nothing painted behind it: there a reader sees the host\'s background (black in an app with none, the page\'s color in a browser), not the document\'s. Give the screen\'s canvas a fill.'),
   ('set_overwritten', 'warning', 'A reaction (a timer, a load) wrote a variable a --set step set, after the step: the capture shows the --set value. Pin a clock with --now.'),
+  ('formula_runaway', 'error', 'A formula made more calls of the page\'s own functions in one evaluation than can be meant (functions that call each other without end): the calls past the limit gave nothing, and what reads the formula is drawn without its value. The message names the function.'),
+  ('screen_timeout', 'error', 'A screen took longer than --screen-timeout (120 s) at one size: past the limit the functions its formulas call gave nothing, the capture is not what the page shows, and the run went on to the next screen.'),
   ('site_now', 'warning', 'site.json\'s "now" (the time now() gives in a render of the site, when no --now is passed) is not an ISO 8601 time: the run starts at the real time.'),
   ('placeholder_word', 'warning', 'A word the notation, the design system and the site do not have stood in as a placeholder when the page was expanded with an open vocabulary (or, closed, was refused and draws nothing): the message names the word, its kind, its line and the shape it was written in. Define it, or it is recorded for support: read from the vocabulary record `notation.sh expand` saves beside the site (vocabulary.json).'),
   ('component_missing', 'error', 'A call rendered without its component\'s definition (or nested past the depth limit): an empty box of its size. The message names the call by path.'),
@@ -591,6 +593,49 @@ Future<void> _renderAll(
         ..screen = label
         ..size = sizeName;
       clipboardAt = (label, sizeName);
+      // The screen's time limit. Functions that call each other without end
+      // are cut off by their count (FormulaFunction.maxCalls) and, past the
+      // limit, at once: the screen ends, both are said, the run goes on.
+      final screenClock = Stopwatch()..start();
+      final runaway = <String>{};
+      FormulaFunction.deadline = DateTime.now().add(args.screenTimeout);
+      FormulaFunction.onRunaway = runaway.add;
+      void timeLimit() {
+        final names = <String>{};
+        for (final body in runaway) {
+          String? name;
+          for (final doc in docs.values) {
+            for (final scope in (api.readMap(doc['variables']) ?? const <String, Object?>{}).values) {
+              for (final v in api.readList(scope) ?? const []) {
+                if (v is Map && '${v['value']}'.contains(body)) name ??= '${v['name']}';
+              }
+            }
+          }
+          names.add(name == null ? '{${body.length > 80 ? '${body.substring(0, 80)}â€¦' : body}}' : '"$name" ({${body.length > 80 ? '${body.substring(0, 80)}â€¦' : body}})');
+        }
+        final over = screenClock.elapsed > args.screenTimeout;
+        if (names.isNotEmpty && !over) {
+          issue(RuntimeIssue(
+              'formula_runaway',
+              'error',
+              'A formula made more than ${FormulaFunction.maxCalls} calls of the functions the page defines in one evaluation, so its calls after that gave nothing and what reads it is drawn without its value: ${names.join(', ')}. '
+                  'Functions that call each other need an end every path reaches (a depth or a pass count that goes down, checked first); a value worked out for every cell from every other is kept in a variable an action writes, not recomputed by each reader.',
+              screen: label,
+              size: sizeName));
+        }
+        if (over) {
+          issue(RuntimeIssue(
+              'screen_timeout',
+              'error',
+              'Screen "$label" at $sizeName took ${screenClock.elapsed.inSeconds} s, over the limit of ${args.screenTimeout.inSeconds} s (--screen-timeout): past the limit the functions its formulas call gave nothing, so the capture is not what the page shows'
+                  '${names.isEmpty ? '' : '. The time went to ${names.join(', ')}'}. The run went on to the next screen.',
+              screen: label,
+              size: sizeName));
+        }
+        FormulaFunction.deadline = null;
+        FormulaFunction.onRunaway = null;
+      }
+
       // What the app keeps on the device (a variable marked saved, a
       // storage action, the theme mode): fresh for each capture, and handed
       // on to the app a --reload step starts.
@@ -735,6 +780,7 @@ Future<void> _renderAll(
             screen: label, size: sizeName));
         await tester.pumpWidget(const SizedBox());
         await tester.pump(const Duration(seconds: 10));
+        timeLimit();
         controller.dispose();
         codelessly.dispose();
         continue;
@@ -1037,8 +1083,9 @@ Future<void> _renderAll(
               if (componentInstanceOf(b.instance) != null) 'path': b.tree.pathOf(b.id, b.instance),
               // What a step names with `@` (`quantity@increment`).
               if (_partNames(b) case final parts when parts.isNotEmpty) 'parts': parts,
-              'x': _rectOf(b).left.round(),
-              'y': _rectOf(b).top.round(),
+              // (A box under a transform that is not a number has no place: 0.)
+              'x': _rectOf(b).left.isFinite ? _rectOf(b).left.round() : 0,
+              'y': _rectOf(b).top.isFinite ? _rectOf(b).top.round() : 0,
               'w': double.parse(b.size.width.toStringAsFixed(1)),
               'h': double.parse(b.size.height.toStringAsFixed(1)),
               // What a text shows, as drawn: a check reads values from it.
@@ -1068,6 +1115,7 @@ Future<void> _renderAll(
       await tester.pumpWidget(const SizedBox());
       await tester.pump(const Duration(seconds: 10));
       collect();
+      timeLimit();
       controller.dispose();
       codelessly.dispose();
     }

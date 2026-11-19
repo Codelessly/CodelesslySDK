@@ -2411,14 +2411,31 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
 
   void _freeform(Node n, List<RenderBox> chain, {List<String>? children}) {
     // A fitted board: laid out at its design size, then scaled into the box.
-    final fit = n.type == 'stack' ? n.prop(api.StackProps.fit) : null;
+    var fit = n.type == 'stack' ? n.prop(api.StackProps.fit) : null;
+    // The board's design size: the Stack's own, and along an axis where it
+    // has none (`w=fill`, `h=hug`: no size of its own to scale from) its
+    // content's. With neither there is nothing to fit (a board of no size
+    // scaled to a box is a transform of infinities: the frame is not a
+    // number anywhere under it).
+    var boardSize = n.innerSize;
+    if (fit != null && (boardSize.width <= 0 || boardSize.height <= 0)) {
+      var w = 0.0, h = 0.0;
+      for (final id in children ?? n.children) {
+        final c = nodeOf(id);
+        if (c == null) continue;
+        w = math.max(w, c.designSize.width);
+        h = math.max(h, c.designSize.height);
+      }
+      boardSize = Size(boardSize.width > 0 ? boardSize.width : w, boardSize.height > 0 ? boardSize.height : h);
+      if (boardSize.width <= 0 || boardSize.height <= 0 || !boardSize.isFinite) fit = null;
+    }
     if (fit != null) {
-      chain.add(_obtain<RenderFillBounds>('boardFill', RenderFillBounds.new)..fallback = n.innerSize);
+      chain.add(_obtain<RenderFillBounds>('boardFill', RenderFillBounds.new)..fallback = boardSize);
       chain.add(_obtain<RenderFittedBox>('boardFit', () => RenderFittedBox(textDirection: directionOf(n), clipBehavior: Clip.hardEdge))
           ..textDirection = directionOf(n)
         ..fit = BoxFit.values.byName(fit.name)
         ..alignment = n.prop(api.StackProps.fitAlignment).flutter);
-      final board = BoxConstraints.tight(n.innerSize);
+      final board = BoxConstraints.tight(boardSize);
       chain.add(_obtain<RenderConstrainedBox>('boardSize', () => RenderConstrainedBox(additionalConstraints: board))
         ..additionalConstraints = board);
     }
@@ -2426,7 +2443,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
         'freeform', () => RenderFreeformLayout(wrapsWidth: false, wrapsHeight: false, designSize: Size.zero))
       ..wrapsWidth = fit == null && n.hFit == SizeFit.hug
       ..wrapsHeight = fit == null && n.vFit == SizeFit.hug
-      ..designSize = n.innerSize
+      ..designSize = fit == null ? n.innerSize : boardSize
       ..textDirection = directionOf(n);
     _syncChildren(layout, children ?? n.children, Slot(SlotKind.freeform, n));
     chain.add(layout);

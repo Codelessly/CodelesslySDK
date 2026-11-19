@@ -331,6 +331,10 @@ class VariableScope extends NamedScope {
   final Map<String, (int, Object?)> _cache = {};
   final Set<String> _computing = {};
 
+  /// How many reads of a variable that was being worked out (a cycle) have
+  /// been answered with nothing, in any scope.
+  static int _cycles = 0;
+
   /// Each computed variable's last value worked out with every script it
   /// calls answered.
   final Map<String, Object?> _lastValue = {};
@@ -352,7 +356,16 @@ class VariableScope extends NamedScope {
       final cached = _sharedCache[v.name];
       if (cached != null && cached.$1 == _globalVersion) return cached.$2;
     }
-    if (!_computing.add(v.name)) return null;
+    if (!_computing.add(v.name)) {
+      _cycles++;
+      return null;
+    }
+    // Past a tool's time limit for the screen nothing more is worked out.
+    if (FormulaFunction.pastDeadline) {
+      _computing.remove(v.name);
+      return _lastValue[v.name];
+    }
+    final cycles = _cycles;
     try {
       // A script the formula calls with new arguments (the clock's next
       // minute) answers from a worker later, so the formula reads null for a
@@ -367,11 +380,16 @@ class VariableScope extends NamedScope {
       } else {
         _lastValue[v.name] = value;
       }
-      // Only a top-level read: one inside a cycle saw a partial value. Nor
-      // one made while a script it calls is still answering: the next read
-      // works it out again with the answer.
-      if (local && !pending && _computing.length == 1) _cache[v.name] = (_version, value);
-      if (shared && !pending && _computing.length == 1) _sharedCache[v.name] = (_globalVersion, value);
+      // A top-level read, or one made while another variable is worked out
+      // that met no cycle under it (one inside a cycle saw a partial
+      // value): a variable twelve others read in turn, each for every item
+      // of a list, is worked out once, not once a read (the twelfth was the
+      // list's length to the twelfth times). Nor one made while a script it
+      // calls is still answering: the next read works it out again with the
+      // answer.
+      final whole = _computing.length == 1 || cycles == _cycles;
+      if (local && !pending && whole) _cache[v.name] = (_version, value);
+      if (shared && !pending && whole) _sharedCache[v.name] = (_globalVersion, value);
       return value;
     } finally {
       _computing.remove(v.name);
