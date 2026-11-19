@@ -360,7 +360,7 @@ class CodelesslyWidget extends StatefulWidget {
       return CodelesslyRouteTransitionRoute<T>(transition: transition, settings: settings, anchor: anchor, builder: build);
     }
     final page = webTransition(pageTransition);
-    if (page == PageTransition.platform) return CodelesslyPageRoute<T>(settings: settings, builder: build);
+    if (page == PageTransition.platform) return CodelesslyPageRoute.of<T>(codelessly: codelessly, settings: settings, builder: build);
     return CodelesslyPageTransitionRoute<T>(
       transition: page,
       settings: settings,
@@ -383,6 +383,7 @@ class CodelesslyWidget extends StatefulWidget {
         final model = codelessly.publishModel;
         final named = model == null || name == '/' ? name : '/${CanvasLocation.named(model, name.substring(name.startsWith('/') ? 1 : 0))}';
         return CodelesslyPageRoute.of<void>(
+          codelessly: codelessly,
           translucent: model != null && name != '/' && CanvasLocation.isTranslucent(model, named),
           settings: named == name ? settings : RouteSettings(name: named, arguments: settings.arguments),
           builder: (_) => CodelesslyWidget(
@@ -1330,6 +1331,11 @@ class _LayoutViewState extends State<_LayoutView> {
     final dark = _dark && (theme.hasDark || theme.mode == api.ThemeMode.dark);
     content = FeedbackThemeScope(theme: _feedbackTheme(dark), child: KeyedSubtree(key: _chromeKey, child: content));
     content = CodelesslyLabelsScope(labels: config.labels, child: content);
+    content = CodelesslyPageTransitionsScope(
+      transitions: config.pageTransitions,
+      fill: () => pageFillOf(_codelessly),
+      child: content,
+    );
     // What a captureScreenshot action of this screen captures.
     CaptureRegistry.bindLayout(_screen.tree, () => boundaryOf(_captureKey));
     content = RepaintBoundary(key: _captureKey, child: content);
@@ -1389,44 +1395,94 @@ class _ScreenUi extends NavigatorActionUi implements ThemeModeUi {
       view._navigate(NavigationRequest.fromAction(action, params: params, baseParams: baseParams));
 }
 
-/// The route a screen opens in: the platform's page transition, flying the
-/// shared elements of the screens it moves between.
-class CodelesslyPageRoute<T> extends MaterialPageRoute<T> with CodelesslyHeroRoute<T> {
-  CodelesslyPageRoute({required super.builder, super.settings, super.fullscreenDialog});
+/// The route a screen opens in: it plays the project's page transition
+/// ([CodelesslyPageTransitions]: the platform's unless
+/// [CodelesslyConfig.pageTransitions] says otherwise), flying the shared
+/// elements of the screens it moves between.
+///
+/// Above backdrop screens ([CodelesslyBackdropHost]) the transition paints
+/// nothing behind the screens (no scrim, no surface color), which would
+/// cover the backdrop while they move.
+class CodelesslyPageRoute<T> extends PageRoute<T> with CodelesslyHeroRoute<T>, CodelesslyPageTransitionsRoute<T> {
+  CodelesslyPageRoute({
+    required this.builder,
+    super.settings,
+    super.fullscreenDialog,
+    super.allowSnapshotting,
+    this.maintainState = true,
+    this.transitions = CodelesslyPageTransitions.platform,
+    this.fill,
+  });
 
-  /// The theme's page transition; above backdrop screens
-  /// ([CodelesslyBackdropHost]) without the scrim or surface color it paints
-  /// behind the screens, which would cover the backdrop while they move.
+  final WidgetBuilder builder;
+
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    if (!CodelesslyBackdropHost.showsBackdrop(context)) return super.buildTransitions(context, animation, secondaryAnimation, child);
-    return seeThroughPageTransitions(Theme.of(context).pageTransitionsTheme)
-        .buildTransitions<T>(this, context, animation, secondaryAnimation, child);
-  }
+  final CodelesslyPageTransitions transitions;
+
+  /// Painted behind two screens while they move, where the transition
+  /// shows what is behind them (null: nothing).
+  @override
+  final Color Function()? fill;
 
   @override
-  DelegatedTransitionBuilder? get delegatedTransition => _delegatedTransition;
+  final bool maintainState;
 
-  /// What the route beneath plays while this one comes in or leaves (the
-  /// theme's), see-through above backdrop screens.
-  static Widget? _delegatedTransition(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    bool allowSnapshotting,
-    Widget? child,
-  ) {
-    final theme = Theme.of(context);
-    var transitions = theme.pageTransitionsTheme;
-    if (CodelesslyBackdropHost.showsBackdrop(context)) transitions = seeThroughPageTransitions(transitions);
-    return transitions.delegatedTransition(theme.platform)?.call(context, animation, secondaryAnimation, allowSnapshotting, child);
+  @override
+  bool get opaque => true;
+
+  @override
+  Color? get barrierColor => null;
+
+  @override
+  String? get barrierLabel => null;
+
+  @override
+  bool seeThroughAt(BuildContext context) => CodelesslyBackdropHost.showsBackdrop(context);
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) =>
+      Semantics(scopesRoute: true, explicitChildNodes: true, child: builder(context));
+
+  /// The route of a screen of [codelessly] at [settings]: a
+  /// [CodelesslyTranslucentRoute] when [translucent] (a screen published
+  /// so, [ScreenRoute.translucent]); else a page playing the project's page
+  /// transition ([CodelesslyConfig.pageTransitions]): one of the animation
+  /// system's ([AnimatedPageTransitions]) in the route that plays those.
+  static PageRoute<T> of<T>({
+    required WidgetBuilder builder,
+    Codelessly? codelessly,
+    CodelesslyPageTransitions? transitions,
+    Color Function()? fill,
+    RouteSettings? settings,
+    bool translucent = false,
+    bool fullscreenDialog = false,
+  }) {
+    if (translucent) return CodelesslyTranslucentRoute<T>(builder: builder, settings: settings);
+    final play = transitions ?? codelessly?.config.pageTransitions ?? CodelesslyPageTransitions.platform;
+    if (play case AnimatedPageTransitions(:final transition)) {
+      return CodelesslyRouteTransitionRoute<T>(transition: transition, settings: settings, builder: builder);
+    }
+    return CodelesslyPageRoute<T>(
+      builder: builder,
+      settings: settings,
+      fullscreenDialog: fullscreenDialog,
+      transitions: play,
+      fill: fill ?? (codelessly == null ? null : () => pageFillOf(codelessly)),
+    );
   }
+}
 
-  /// The route of a screen at [settings]: a [CodelesslyTranslucentRoute]
-  /// when [translucent] (a screen published so, [ScreenRoute.translucent]),
-  /// else a page.
-  static PageRoute<T> of<T>({required WidgetBuilder builder, RouteSettings? settings, bool translucent = false}) =>
-      translucent ? CodelesslyTranslucentRoute<T>(builder: builder, settings: settings) : CodelesslyPageRoute<T>(builder: builder, settings: settings);
+/// The surface of [codelessly]'s project in the mode it shows now: what is
+/// behind two of its screens while a page transition moves them.
+Color pageFillOf(Codelessly codelessly) {
+  final theme = codelessly.publishModel?.theme ?? ThemeTokens.none;
+  final mode = codelessly.themeMode;
+  final wantsDark = mode == api.ThemeMode.dark ||
+      (mode == api.ThemeMode.system &&
+          WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark);
+  final dark = wantsDark && (theme.hasDark || theme.mode == api.ThemeMode.dark);
+  final surface = theme.forBrightness(dark: dark).surface;
+  return surface == null ? (dark ? kPaperDark : kPaper) : Color(surface.value);
 }
 
 /// The route of a screen drawn over the one beneath it, which stays visible

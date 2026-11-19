@@ -20,6 +20,8 @@ import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:flutter/services.dart' show KeyDownEvent, LogicalKeyboardKey;
 import 'package:codelessly_api/core.dart' show NavigationMode;
 
+import 'codelessly_widget.dart' show CodelesslyPageRoute;
+import 'page_transitions.dart' show CodelesslyPageTransitionsScope;
 import 'viewport.dart' show CanvasSizing, CanvasSizingScope;
 import 'ui/confirm_dialog.dart';
 import 'ui/feedback_theme.dart';
@@ -442,7 +444,13 @@ Future<Object?> showScreenModal(
     ));
   }
   if (presentation == ModalPresentation.fullScreen) {
-    return Navigator.of(context).push<Object?>(MaterialPageRoute(fullscreenDialog: true, builder: (_) => content));
+    final project = CodelesslyPageTransitionsScope.maybeOf(context);
+    return Navigator.of(context).push<Object?>(CodelesslyPageRoute.of<Object?>(
+      transitions: project?.transitions,
+      fill: project?.fill,
+      fullscreenDialog: true,
+      builder: (_) => content,
+    ));
   }
   if (cover && !sheet) {
     // Covers the screen: the screen it shows fills it, at the device size.

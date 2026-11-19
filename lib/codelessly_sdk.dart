@@ -219,8 +219,7 @@ export 'src/widgets/collections_swipe.dart' show SwipeActionsBox;
 export 'src/app/app_identity.dart' hide ScreenIdentity;
 export 'src/app/automations.dart';
 export 'src/app/back_guard.dart' hide BackGuard;
-export 'src/app/backdrop_screens.dart'
-    hide SeeThroughZoomPageTransitionsBuilder;
+export 'src/app/backdrop_screens.dart';
 export 'src/app/codelessly.dart';
 export 'src/app/codelessly_widget.dart' hide CodelesslyTranslucentRoute;
 export 'src/app/config.dart';
@@ -236,7 +235,7 @@ export 'src/app/hosted_plugins.dart';
 export 'src/features/hosted/hosted.dart' show hostedPluginFeature;
 export 'src/app/navigation.dart' hide CanvasLocationMatch;
 export 'src/app/overlay_screens.dart';
-export 'src/app/page_transitions.dart' hide CodelesslyPageTransitionRoute;
+export 'src/app/page_transitions.dart' hide CodelesslyPageTransitionRoute, CodelesslyPageTransitionsScope;
 export 'src/app/paywalls.dart';
 export 'src/app/persisted_variables.dart';
 export 'src/app/presenter.dart';

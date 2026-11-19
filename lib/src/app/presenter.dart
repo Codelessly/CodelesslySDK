@@ -234,7 +234,8 @@ class CodelesslyPresenter {
         }
       }
 
-      route = CodelesslyPageRoute<Object?>(
+      route = CodelesslyPageRoute.of<Object?>(
+        codelessly: codelessly,
         fullscreenDialog: true,
         settings: RouteSettings(name: '/present/$layoutId'),
         builder: (_) => ModalFocus(

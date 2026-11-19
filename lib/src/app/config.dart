@@ -8,6 +8,7 @@ import '../runtime/actions/context.dart' show AppFunction;
 import '../runtime/actions/runner.dart' show CoreActions;
 import '../features/first_party.dart' show CodelesslyActions;
 import '../runtime/expressions/engine.dart' show Expressions;
+import 'page_transitions.dart' show CodelesslyPageTransitions;
 import 'runtime.dart';
 
 /// How a [Codelessly] instance runs: which project and publish it shows, and
@@ -44,6 +45,7 @@ class CodelesslyConfig {
     this.maxTextScaleFactor = 1,
     this.fontTimeout = const Duration(seconds: 2),
     this.labels = const CodelesslyLabels(),
+    this.pageTransitions = CodelesslyPageTransitions.platform,
     this.debugLog = false,
   }) : assert(maxTextScaleFactor >= 1);
 
@@ -111,6 +113,13 @@ class CodelesslyConfig {
   /// unless given here, in the app's language.
   final CodelesslyLabels labels;
 
+  /// How a screen with no transition of its own comes and goes: the
+  /// platform's ([CodelesslyPageTransitions.platform]), a native one by
+  /// name, or any transition of the animation system
+  /// (`CodelesslyPageTransitions.animated(RouteTransition(...))`). A
+  /// navigate action's own `transition` or `routeTransition` wins.
+  final CodelesslyPageTransitions pageTransitions;
+
   /// Reserved: the SDK doesn't read it yet. Errors go to the services'
   /// analytics ([Services.analytics]; printed in debug builds).
   final bool debugLog;
@@ -154,6 +163,7 @@ class CodelesslyConfig {
     double? maxTextScaleFactor,
     Duration? fontTimeout,
     CodelesslyLabels? labels,
+    CodelesslyPageTransitions? pageTransitions,
     bool? debugLog,
   }) =>
       CodelesslyConfig(
@@ -171,6 +181,7 @@ class CodelesslyConfig {
         maxTextScaleFactor: maxTextScaleFactor ?? this.maxTextScaleFactor,
         fontTimeout: fontTimeout ?? this.fontTimeout,
         labels: labels ?? this.labels,
+        pageTransitions: pageTransitions ?? this.pageTransitions,
         debugLog: debugLog ?? this.debugLog,
       );
 }
