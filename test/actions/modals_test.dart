@@ -254,8 +254,8 @@ void main() {
     expect(tester.getSize(find.byKey(const ValueKey('sheet newCard'))).width, 640);
     // A dialog's insets don't push a sheet off the screen's edge.
     expect(tester.getBottomLeft(find.byKey(const ValueKey('sheet newCard'))).dy, 600);
-    // No tinted Material surface behind the screen's own.
-    expect(tester.widget<BottomSheet>(find.byType(BottomSheet)).backgroundColor, Colors.transparent);
+    // No surface of the sheet's behind the screen's own.
+    expect(find.byType(BottomSheet), findsNothing);
     Navigator.of(appContext).pop();
     await tester.pumpAndSettle();
     await tester.tapAt(s.center('button'), buttons: kSecondaryButton);

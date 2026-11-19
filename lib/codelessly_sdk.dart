@@ -224,6 +224,7 @@ export 'src/app/backdrop_screens.dart'
 export 'src/app/codelessly.dart';
 export 'src/app/codelessly_widget.dart' hide CodelesslyTranslucentRoute;
 export 'src/app/config.dart';
+export 'src/render/labels.dart';
 export 'src/app/fonts.dart' hide FontRegistrationCache;
 export 'src/app/loader.dart' hide PublishAssetSource;
 export 'src/app/managed_components.dart'

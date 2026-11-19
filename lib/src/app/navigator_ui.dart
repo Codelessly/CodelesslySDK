@@ -417,12 +417,12 @@ Future<Object?> showScreenModal(
   // and a gap over the screen's own surface.)
   final presented = presentation == ModalPresentation.sideSheet ||
       (sheet && (maxHeightFactor != null || sheetRadius != null || showDragHandle || snapHeights.isNotEmpty || sheetMargin > 0)) ||
-      (!sheet && presentation == ModalPresentation.dialog && (barrierBlur > 0 || enterScale != 1)) ||
-      // Material's sheet needs Material's localizations: a host app without
-      // them gets the SDK's own sheet.
-      (sheet && !hasMaterialLocalizations(context));
-  if (presented) {
+      (!sheet && presentation == ModalPresentation.dialog && (barrierBlur > 0 || enterScale != 1));
+  // A bottom sheet with none of those: the plain one.
+  final plainSheet = sheet && !presented;
+  if (presented || plainSheet) {
     return Navigator.of(context).push<Object?>(PresentationRoute<Object?>(
+      plainSheet: plainSheet,
       context: context,
       presentation: sheet ? ModalPresentation.bottomSheet : presentation,
       barrierDismissible: barrierDismissible,
@@ -440,25 +440,6 @@ Future<Object?> showScreenModal(
           ? content
           : Align(alignment: alignment, child: Material(type: MaterialType.transparency, child: content)),
     ));
-  }
-  if (sheet) {
-    return showModalBottomSheet<Object?>(
-      context: context,
-      isScrollControlled: true,
-      isDismissible: barrierDismissible,
-      showDragHandle: showDragHandle,
-      barrierColor: scrim,
-      // The screen draws its own surface (its fills, radius and shadow): a
-      // tinted Material sheet behind it showed above a screen whose content
-      // sits at the bottom of its canvas.
-      backgroundColor: ShellColors.transparent,
-      elevation: 0,
-      // The keyboard pushes the sheet up (a composer at its bottom).
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-        child: content,
-      ),
-    );
   }
   if (presentation == ModalPresentation.fullScreen) {
     return Navigator.of(context).push<Object?>(MaterialPageRoute(fullscreenDialog: true, builder: (_) => content));

@@ -19,7 +19,7 @@ import '../render/convert.dart';
 import '../render/controls/focus.dart';
 import '../render/control_theme.dart' show chromeButton, chromeGlyph, chromeTokensOf;
 import '../render/controls/root.dart';
-import '../render/node_view.dart' show ControlButton, SpinnerView;
+import '../render/node_view.dart' show CodelesslyLabelsScope, ControlButton, SpinnerView;
 import '../render/paint/shell_constants.dart';
 import '../render/recipe.dart';
 import '../runtime/lists/pagination.dart';
@@ -155,7 +155,7 @@ class DataListViewState extends State<DataListView> {
     if (identical(_latestFocus?.owner, owner) && identical(_latestFocus?.scope, root.focus)) return;
     _latestFocus?.leave();
     _latestFocus = ControlFocusNode(owner, onActivate: _jumpToLatest, onFocusChange: (_) => _redrawLatestFocus())
-      ..label = (() => 'Jump to latest')
+      ..label = (() => mounted ? CodelesslyLabelsScope.of(context).jumpToLatest : 'Jump to latest')
       ..onHighlightChange = _redrawLatestFocus
       ..join(root.focus);
   }
@@ -733,7 +733,7 @@ class DataListViewState extends State<DataListView> {
           bottom: 12,
           child: Semantics(
             key: _latestKey,
-            label: 'Jump to latest',
+            label: CodelesslyLabelsScope.of(context).jumpToLatest,
             button: true,
             focused: _latestFocus?.hasFocus ?? false,
             onTap: _jumpToLatest,
@@ -747,7 +747,7 @@ class DataListViewState extends State<DataListView> {
                 child: ControlButton(
                   focusable: false,
                   onPressed: _jumpToLatest,
-                  semanticsLabel: 'Jump to latest',
+                  semanticsLabel: CodelesslyLabelsScope.of(context).jumpToLatest,
                   spec: chromeButton(
                     tokens: chromeTokensOf(context),
                     icon: axis == Axis.vertical
@@ -1244,9 +1244,7 @@ class _PullToRefreshState extends State<PullToRefresh> with TickerProviderStateM
                     child: AnimatedBuilder(
                       animation: _position,
                       builder: (context, _) => Semantics(
-                        label: Localizations.of<MaterialLocalizations>(context, MaterialLocalizations)
-                                ?.refreshIndicatorSemanticLabel ??
-                            'Refresh',
+                        label: CodelesslyLabelsScope.of(context).refresh,
                         child: Padding(
                           key: const ValueKey('Codelessly pull to refresh'),
                           padding: const EdgeInsets.all(4),

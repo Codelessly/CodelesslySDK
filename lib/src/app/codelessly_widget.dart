@@ -1329,6 +1329,7 @@ class _LayoutViewState extends State<_LayoutView> {
     final theme = _tokens;
     final dark = _dark && (theme.hasDark || theme.mode == api.ThemeMode.dark);
     content = FeedbackThemeScope(theme: _feedbackTheme(dark), child: KeyedSubtree(key: _chromeKey, child: content));
+    content = CodelesslyLabelsScope(labels: config.labels, child: content);
     // What a captureScreenshot action of this screen captures.
     CaptureRegistry.bindLayout(_screen.tree, () => boundaryOf(_captureKey));
     content = RepaintBoundary(key: _captureKey, child: content);

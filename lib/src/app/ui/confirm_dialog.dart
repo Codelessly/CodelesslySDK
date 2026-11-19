@@ -2,6 +2,7 @@
 // designed one (a screen named by the action's `dialog`).
 import 'dart:convert';
 import 'dart:math' as math;
+import 'dart:ui' show SemanticsRole;
 
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show ConfirmAction, Json, ModalPresentation;
@@ -671,8 +672,9 @@ class ThemedConfirmDialog extends StatelessWidget {
       );
     }
 
+    final themeData = theme.themeData;
     return Theme(
-      data: theme.themeData,
+      data: themeData,
       child: switch (presentation) {
         ModalPresentation.bottomSheet || ModalPresentation.adaptive => SizedBox(
             width: double.infinity,
@@ -685,12 +687,11 @@ class ThemedConfirmDialog extends StatelessWidget {
             color: surface,
             child: SafeArea(left: false, child: Align(alignment: Alignment.topLeft, child: content)),
           ),
-        _ => Dialog(
-            backgroundColor: dialogShadows != null ? ShellColors.transparent : surface,
-            surfaceTintColor: ShellColors.transparent,
-            shadowColor: dialogShadows != null ? ShellColors.transparent : null,
+        _ => _DialogSurface(
+            color: dialogShadows != null ? ShellColors.transparent : surface,
+            shadowColor: dialogShadows != null ? ShellColors.transparent : themeData.dialogTheme.shadowColor,
             elevation: dialogShadows != null ? 0 : 8,
-            insetPadding: insets ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+            insets: insets ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(radius),
               side: dialogShadows == null ? dialogSide ?? BorderSide.none : BorderSide.none,
@@ -700,4 +701,56 @@ class ThemedConfirmDialog extends StatelessWidget {
       },
     );
   }
+}
+
+/// A dialog's surface in the middle of the screen: at least 280 wide,
+/// [insets] from the screen's edges and above the keyboard (it moves up
+/// over 100 ms as the keyboard comes), in [shape] with a shadow of
+/// [elevation].
+class _DialogSurface extends StatelessWidget {
+  const _DialogSurface({
+    required this.color,
+    required this.shadowColor,
+    required this.elevation,
+    required this.insets,
+    required this.shape,
+    required this.child,
+  });
+
+  final Color color;
+  final Color? shadowColor;
+  final double elevation;
+  final EdgeInsets insets;
+  final ShapeBorder shape;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+        role: SemanticsRole.dialog,
+        child: AnimatedPadding(
+          padding: MediaQuery.viewInsetsOf(context) + insets,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.decelerate,
+          child: MediaQuery.removeViewInsets(
+            removeLeft: true,
+            removeTop: true,
+            removeRight: true,
+            removeBottom: true,
+            context: context,
+            child: Align(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 280),
+                child: Material(
+                  color: color,
+                  elevation: elevation,
+                  shadowColor: shadowColor,
+                  surfaceTintColor: ShellColors.transparent,
+                  shape: shape,
+                  child: child,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
 }

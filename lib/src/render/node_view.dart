@@ -10,6 +10,7 @@ import 'controls/slider.dart';
 import 'controls/spinner.dart';
 import 'controls/tokens.dart';
 import 'islands.dart';
+import 'labels.dart';
 import 'node_tree.dart';
 
 /// Hosts the render tree of one node of a [RenderTree] (a screen, or any
@@ -75,6 +76,21 @@ class ControlFocusLayerScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(ControlFocusLayerScope oldWidget) => !identical(oldWidget.layer, layer);
+}
+
+/// The words a screen reader hears for the runtime's own chrome under it
+/// ([CodelesslyLabels]): a layout's host puts the project's there.
+class CodelesslyLabelsScope extends InheritedWidget {
+  const CodelesslyLabelsScope({super.key, required this.labels, required super.child});
+
+  final CodelesslyLabels labels;
+
+  /// The labels at [context]: the nearest scope's, else English.
+  static CodelesslyLabels of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<CodelesslyLabelsScope>()?.labels ?? const CodelesslyLabels();
+
+  @override
+  bool updateShouldNotify(CodelesslyLabelsScope oldWidget) => labels != oldWidget.labels;
 }
 
 /// Key events for a root from Flutter's `FocusManager` (its early handlers,

@@ -9,7 +9,7 @@ import 'package:codelessly_api/core.dart' show Json, ShowToastAction, ToastPosit
 import 'package:flutter/material.dart';
 
 import '../../render/control_theme.dart' show chromeGlyph;
-import '../../render/node_view.dart' show ControlButton, ControlHost;
+import '../../render/node_view.dart' show CodelesslyLabelsScope, ControlButton, ControlHost;
 import '../../render/paint/icon_names.dart';
 import '../../render/paint/shell_constants.dart';
 import 'feedback_icon.dart';
@@ -159,6 +159,7 @@ abstract final class CodelesslyToast {
     final theme = FeedbackTheme.of(context);
     final bound = request.bound;
     final hasButton = request.actionLabel.trim().isNotEmpty && request.onAction != null;
+    final dismissLabel = CodelesslyLabelsScope.of(context).dismiss;
 
     hide();
     // A toast shown from a dialog or sheet (its "Password needed") sits
@@ -171,6 +172,7 @@ abstract final class CodelesslyToast {
     entry = OverlayEntry(
       builder: (context) => Theme(data: themeData, child: _ToastView(
         shownOver: shownOver,
+        dismissLabel: dismissLabel,
         action: action,
         message: request.message,
         title: request.title.trim().isEmpty ? '' : request.title,
@@ -218,7 +220,11 @@ class _ToastView extends StatefulWidget {
     required this.breakpoints,
     required this.onDone,
     this.shownOver = const [],
+    this.dismissLabel = 'Dismiss',
   });
+
+  /// What a screen reader calls the close button.
+  final String dismissLabel;
 
   /// The dialogs and sheets already open when it was shown: their barriers
   /// don't cover it.
@@ -479,7 +485,7 @@ class _ToastViewState extends State<_ToastView> {
               dimension: 36,
               child: ControlButton(
                 onPressed: _close,
-                semanticsLabel: 'Dismiss',
+                semanticsLabel: widget.dismissLabel,
                 spec: theme.button(icon: _closeIcon, iconSize: 18, foreground: closeColor, radius: buttonRadius),
               ),
             ),

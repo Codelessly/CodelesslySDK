@@ -19,7 +19,7 @@ import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 import '../../render/convert.dart';
 import '../../render/control_theme.dart' show chromeButton, chromeGlyph, chromeTokensOf;
-import '../../render/node_view.dart' show ControlButton, ControlSlider, SpinnerView;
+import '../../render/node_view.dart' show CodelesslyLabelsScope, ControlButton, ControlSlider, SpinnerView;
 import '../../render/paint/shell_constants.dart';
 import 'embedded_player.dart';
 import 'embedded_media_protocol.dart';
@@ -266,6 +266,7 @@ class _MediaVideoState extends State<MediaVideo> {
   Widget build(BuildContext context) {
     final c = _controller;
     final node = widget.node;
+    final labels = CodelesslyLabelsScope.of(context);
     final fit = boxFit(node.prop(VideoProps.fit));
     final poster = node.prop(VideoProps.poster);
     final posterImage = poster.isEmpty
@@ -303,7 +304,7 @@ class _MediaVideoState extends State<MediaVideo> {
             child: ValueListenableBuilder<VideoPlayerValue>(
               valueListenable: c,
               builder: (context, value, _) => MediaPlayerButton(
-                label: value.isPlaying ? 'Pause video' : 'Play video',
+                label: value.isPlaying ? labels.pauseVideo : labels.playVideo,
                 icon: value.isPlaying ? pauseCircleGlyph : playCircleGlyph,
                 onPressed: () => value.isPlaying ? c.pause() : c.play(),
               ),
@@ -531,6 +532,7 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
     }
     final description = _node.prop(AudioPlayerProps.description);
     final controls = _node.prop(AudioPlayerProps.showControls);
+    final labels = CodelesslyLabelsScope.of(context);
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final player = _player;
@@ -538,14 +540,14 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
       color: colors.surfaceContainerHigh,
       child: Row(children: [
         if (widget.preview || _url.isEmpty)
-          MediaPlayerButton(label: 'Play audio', icon: playArrowGlyph)
+          MediaPlayerButton(label: labels.playAudio, icon: playArrowGlyph)
         else if (_failed || player == null)
           const Icon(_Glyph.errorOutline, semanticLabel: 'Audio unavailable')
         else if (!_ready)
           SpinnerView(color: ProgressIndicatorTheme.of(context).color ?? colors.primary)
         else if (controls)
           MediaPlayerButton(
-            label: _playing ? 'Pause audio' : 'Play audio',
+            label: _playing ? labels.pauseAudio : labels.playAudio,
             icon: _playing ? pauseCircleGlyph : playCircleGlyph,
             onPressed: () => _run(_playing ? player.pause : player.play),
           )
@@ -644,7 +646,7 @@ class MediaSeekBar extends StatelessWidget {
       interactive: enabled,
       tokens: chromeTokensOf(context),
       onChanged: onChanged,
-      semanticsLabel: 'Position',
+      semanticsLabel: CodelesslyLabelsScope.of(context).seek,
       seekColors: (
         active: enabled ? colors.primary : colors.onSurface.withValues(alpha: 0.24),
         rail: enabled ? colors.surfaceContainerHighest : colors.onSurface.withValues(alpha: 0.12),

@@ -1,6 +1,7 @@
 import 'package:codelessly_api/codelessly_api.dart' show Catalog, PublishSource, standardCatalog;
 import 'package:flutter/foundation.dart';
 
+import '../render/labels.dart';
 import '../render/recipe.dart' show WidgetRecipe;
 import '../runtime/contracts.dart';
 import '../runtime/actions/context.dart' show AppFunction;
@@ -42,6 +43,7 @@ class CodelesslyConfig {
     this.recipes = const {},
     this.maxTextScaleFactor = 1,
     this.fontTimeout = const Duration(seconds: 2),
+    this.labels = const CodelesslyLabels(),
     this.debugLog = false,
   }) : assert(maxTextScaleFactor >= 1);
 
@@ -104,6 +106,11 @@ class CodelesslyConfig {
   /// they arrive).
   final Duration fontTimeout;
 
+  /// What a screen reader calls the parts of the runtime's own chrome (a
+  /// dialog's barrier, pull to refresh, the players' buttons...): English
+  /// unless given here, in the app's language.
+  final CodelesslyLabels labels;
+
   /// Reserved: the SDK doesn't read it yet. Errors go to the services'
   /// analytics ([Services.analytics]; printed in debug builds).
   final bool debugLog;
@@ -146,6 +153,7 @@ class CodelesslyConfig {
     Map<String, WidgetRecipe>? recipes,
     double? maxTextScaleFactor,
     Duration? fontTimeout,
+    CodelesslyLabels? labels,
     bool? debugLog,
   }) =>
       CodelesslyConfig(
@@ -162,6 +170,7 @@ class CodelesslyConfig {
         recipes: recipes ?? this.recipes,
         maxTextScaleFactor: maxTextScaleFactor ?? this.maxTextScaleFactor,
         fontTimeout: fontTimeout ?? this.fontTimeout,
+        labels: labels ?? this.labels,
         debugLog: debugLog ?? this.debugLog,
       );
 }
