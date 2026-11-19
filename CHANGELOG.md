@@ -9,6 +9,10 @@
   flexible children of equal flex they took an equal share each, so a heading beside a short count wrapped at half
   the row with room to spare. A row with `squeezeChildren: false` is unchanged.
 
+- **A grid whose rows shrink-wrap (`shrinkWrapRows`) and that gives a `mainAxisExtent`** has rows at least that
+  long (CSS's `grid-auto-rows: minmax(extent, auto)`); the extent was not read and rows were as short as their
+  content (a timetable's slots 16 px high).
+
 ### Fixed
 
 ## 37.0.0

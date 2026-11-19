@@ -109,4 +109,38 @@ void main() {
     await tester.pumpAndSettle();
     expect(s.tree.boxesOf('card').map((b) => b.size.height).toList(), [110.0, 110.0, 110.0, 140.0], reason: 'and shrinks again');
   });
+
+  testWidgets('rows that shrink-wrap are at least the extent written (CSS minmax(extent, auto))', (tester) async {
+    tester.view.physicalSize = const Size(600, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final s = await show(tester, {
+      'col': {'type': 'column', 'children': ['grid'], 'layout': {'width': 600, 'height': {'hug': 600}}},
+      'grid': {
+        'type': 'gridView',
+        'children': ['cell'],
+        'layout': {'width': {'fill': 600}, 'height': {'hug': 400}},
+        'props': {'shrinkWrapRows': true, 'mainAxisExtent': 60, 'crossAxisCount': 3, 'physics': 'never', 'mainAxisSpacing': 8},
+        'bind': {'data': r'${= [20, 90]}'},
+      },
+      'cell': {'type': 'box', 'layout': {'width': {'fill': 100}, 'height': {'fill': 0}}, 'bind': {'layout.constraints': r'${= {"minHeight": item}}'}},
+    });
+    await tester.pumpAndSettle();
+    final cells = s.tree.boxesOf('cell').map((b) => b.size.height).toList();
+    // The row: 60 written, 90 the taller cell's.
+    expect(cells, [90.0, 90.0]);
+    final short = await show(tester, {
+      'col': {'type': 'column', 'children': ['grid'], 'layout': {'width': 600, 'height': {'hug': 600}}},
+      'grid': {
+        'type': 'gridView',
+        'children': ['cell'],
+        'layout': {'width': {'fill': 600}, 'height': {'hug': 400}},
+        'props': {'shrinkWrapRows': true, 'mainAxisExtent': 60, 'crossAxisCount': 3, 'physics': 'never'},
+        'bind': {'data': r'${= [1, 2]}'},
+      },
+      'cell': {'type': 'box', 'layout': {'width': {'fill': 100}, 'height': 16}},
+    });
+    await tester.pumpAndSettle();
+    expect(short.tree.boxOf('grid')!.size.height, 60);
+  });
 }
