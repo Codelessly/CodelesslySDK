@@ -3,7 +3,7 @@
 // the web.
 import 'package:codelessly_api/codelessly_api.dart' show PageTransition;
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import 'ui/hero_flights.dart';
 

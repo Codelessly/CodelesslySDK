@@ -1,3 +1,27 @@
+## Unreleased
+
+### Behaviour changes (read before upgrading)
+
+- **The loading spinner is the SDK's own arc.** The loading screen (`CodelesslyLoadingScreen`), a paginated
+  list's default loading footer and an audio player that is getting ready showed Material's
+  `CircularProgressIndicator`. They show a ring of the same size, stroke and colour (the theme's primary) whose arc
+  is a steady 30% of the ring, turning once every 900 ms, where Material's arc grew and shrank as it turned. A
+  `loadingBuilder` of your own is unchanged.
+
+### Fixed
+
+- **A host app that is not a Material app can open dialogs and sheets.** Under a plain `WidgetsApp` (no
+  `MaterialLocalizations` above the SDK) an `openModal` (a dialog, a cover, a bottom sheet) and a `confirm` failed
+  with "No MaterialLocalizations found". They open now: the barrier's screen-reader label is English ("Dismiss")
+  there, and a bottom sheet is the SDK's own sheet (the one a sized, rounded or snapping sheet already was). In a
+  Material app nothing changes: the label is still your app's localization, the sheet still Material's.
+
+### Changed
+
+- **Less of Flutter's Material library is used** (19 files of the package import it, from 23). The plain colors,
+  the icons of the players, the toast and the data list, the line between a list's items (`separator: divider`)
+  and a hero's default flight path are the SDK's own code now, and draw the same pixels. An app does not get
+  smaller from this yet: `docs/design/no-material.md` lists what is left and what it costs.
 ## 39.0.0
 
 Schema 3 is the only schema the SDK loads; a sheet's resting stop in a variable, a file picked without an upload,

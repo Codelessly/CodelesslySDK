@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 import 'codelessly.dart';
 import 'codelessly_widget.dart';
+import '../render/paint/shell_constants.dart';
 
 /// Marks the widgets of a backdrop screen.
 ///
@@ -174,10 +175,10 @@ PageTransitionsTheme seeThroughPageTransitions(PageTransitionsTheme theme) => Pa
         if (theme.builders[platform] != null || platform != TargetPlatform.iOS)
           platform: switch (theme.builders[platform]) {
             null || ZoomPageTransitionsBuilder() => const SeeThroughZoomPageTransitionsBuilder(),
-            FadeForwardsPageTransitionsBuilder() => const FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
-            PredictiveBackPageTransitionsBuilder() => const PredictiveBackPageTransitionsBuilder(fallbackColor: Colors.transparent),
+            FadeForwardsPageTransitionsBuilder() => const FadeForwardsPageTransitionsBuilder(backgroundColor: ShellColors.transparent),
+            PredictiveBackPageTransitionsBuilder() => const PredictiveBackPageTransitionsBuilder(fallbackColor: ShellColors.transparent),
             PredictiveBackFullscreenPageTransitionsBuilder() =>
-              const PredictiveBackFullscreenPageTransitionsBuilder(fallbackColor: Colors.transparent),
+              const PredictiveBackFullscreenPageTransitionsBuilder(fallbackColor: ShellColors.transparent),
             final b => b,
           },
     });

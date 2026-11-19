@@ -18,6 +18,8 @@ import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 import '../../render/convert.dart';
+import '../../render/node_view.dart' show SpinnerView;
+import '../../render/paint/shell_constants.dart';
 import 'embedded_player.dart';
 import 'embedded_media_protocol.dart';
 
@@ -270,9 +272,9 @@ class _MediaVideoState extends State<MediaVideo> {
         : Image.network(poster, fit: fit, gaplessPlayback: true, errorBuilder: (_, _, _) => const SizedBox.shrink());
     final Widget content;
     if (widget.preview || _url.isEmpty) {
-      content = posterImage ?? const Center(child: Icon(Icons.movie_outlined, semanticLabel: 'Video preview'));
+      content = posterImage ?? const Center(child: Icon(_Glyph.movieOutlined, semanticLabel: 'Video preview'));
     } else if (_failed || c == null) {
-      content = posterImage ?? const Center(child: Icon(Icons.error_outline, semanticLabel: 'Video unavailable'));
+      content = posterImage ?? const Center(child: Icon(_Glyph.errorOutline, semanticLabel: 'Video unavailable'));
     } else if (!_ready) {
       // The poster (or nothing) while loading: no spinner over the picture.
       content = posterImage ?? const SizedBox.expand();
@@ -301,7 +303,7 @@ class _MediaVideoState extends State<MediaVideo> {
               valueListenable: c,
               builder: (context, value, _) => IconButton(
                 tooltip: value.isPlaying ? 'Pause video' : 'Play video',
-                icon: Icon(value.isPlaying ? Icons.pause_circle : Icons.play_circle),
+                icon: Icon(value.isPlaying ? _Glyph.pauseCircle : _Glyph.playCircle),
                 onPressed: () => value.isPlaying ? c.pause() : c.play(),
               ),
             ),
@@ -343,7 +345,7 @@ class MediaEmbeddedVideo extends StatelessWidget {
     final thumbnail = cloud.isNotEmpty ? cloud : api.readString(metadata['thumbnail_url']);
     final title = api.readString(metadata['title']) ?? '';
     return ColoredBox(
-      color: Colors.black,
+      color: ShellColors.black,
       child: Stack(fit: StackFit.expand, children: [
         if (thumbnail != null && thumbnail.isNotEmpty)
           Image.network(thumbnail, fit: BoxFit.cover, errorBuilder: (_, _, _) => const SizedBox.shrink()),
@@ -355,11 +357,11 @@ class MediaEmbeddedVideo extends StatelessWidget {
             child: Text(title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 18, fontWeight: FontWeight.w300)),
+                style: TextStyle(color: ShellColors.white.withValues(alpha: 0.8), fontSize: 18, fontWeight: FontWeight.w300)),
           ),
         Center(
           child: Icon(
-            Icons.play_circle_fill,
+            _Glyph.playCircleFill,
             color: node.prop(EmbeddedVideoProps.source) == EmbeddedVideoSource.youtube
                 ? const Color(0xFFFF0000)
                 : const Color(0xFF1AB7EA),
@@ -523,7 +525,7 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
   Widget build(BuildContext context) {
     if (_node.prop(AudioPlayerProps.background)) {
       return widget.preview
-          ? const FittedBox(child: Icon(Icons.graphic_eq, semanticLabel: 'Background audio'))
+          ? const FittedBox(child: Icon(_Glyph.graphicEq, semanticLabel: 'Background audio'))
           : const SizedBox.shrink();
     }
     final description = _node.prop(AudioPlayerProps.description);
@@ -535,19 +537,19 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
       color: colors.surfaceContainerHigh,
       child: Row(children: [
         if (widget.preview || _url.isEmpty)
-          const IconButton.filledTonal(tooltip: 'Play audio', onPressed: null, icon: Icon(Icons.play_arrow))
+          const IconButton.filledTonal(tooltip: 'Play audio', onPressed: null, icon: Icon(_Glyph.playArrow))
         else if (_failed || player == null)
-          const Icon(Icons.error_outline, semanticLabel: 'Audio unavailable')
+          const Icon(_Glyph.errorOutline, semanticLabel: 'Audio unavailable')
         else if (!_ready)
-          const CircularProgressIndicator()
+          SpinnerView(color: ProgressIndicatorTheme.of(context).color ?? colors.primary)
         else if (controls)
           IconButton(
             tooltip: _playing ? 'Pause audio' : 'Play audio',
             onPressed: () => _run(_playing ? player.pause : player.play),
-            icon: Icon(_playing ? Icons.pause_circle : Icons.play_circle),
+            icon: Icon(_playing ? _Glyph.pauseCircle : _Glyph.playCircle),
           )
         else
-          const Icon(Icons.audiotrack_outlined, semanticLabel: 'Audio'),
+          const Icon(_Glyph.audiotrackOutlined, semanticLabel: 'Audio'),
         Expanded(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -604,14 +606,14 @@ class WebViewPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.blue)),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: ShellColors.blue)),
       child: Container(
         margin: const EdgeInsets.all(8),
         alignment: Alignment.center,
-        decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(6)),
+        decoration: BoxDecoration(color: ShellColors.blue50, borderRadius: BorderRadius.circular(6)),
         child: FractionallySizedBox(
           child: LayoutBuilder(
-            builder: (context, c) => Icon(icon, color: Colors.blue, size: math.min(c.maxWidth, c.maxHeight)),
+            builder: (context, c) => Icon(icon, color: ShellColors.blue, size: math.min(c.maxWidth, c.maxHeight)),
           ),
         ),
       ),
@@ -645,9 +647,9 @@ class MediaWebViewNode extends StatelessWidget {
       final embed = api.readString(node.prop(WebViewProps.embed)['type']);
       return WebViewPreview(
         icon: switch (embed) {
-          'googleMaps' => Icons.map_outlined,
-          'twitter' => Icons.chat_bubble_outline,
-          _ => Icons.language_rounded,
+          'googleMaps' => _Glyph.mapOutlined,
+          'twitter' => _Glyph.chatBubbleOutline,
+          _ => _Glyph.languageRounded,
         },
       );
     }
@@ -755,4 +757,19 @@ class _MediaWebViewState extends State<MediaWebView> {
       },
     );
   }
+}
+
+/// The icons drawn here, from the MaterialIcons font.
+abstract final class _Glyph {
+  static const errorOutline = IconData(ShellGlyphs.errorOutline, fontFamily: ShellGlyphs.font);
+  static const audiotrackOutlined = IconData(ShellGlyphs.audiotrackOutlined, fontFamily: ShellGlyphs.font);
+  static const chatBubbleOutline = IconData(ShellGlyphs.chatBubbleOutline, fontFamily: ShellGlyphs.font);
+  static const graphicEq = IconData(ShellGlyphs.graphicEq, fontFamily: ShellGlyphs.font);
+  static const languageRounded = IconData(ShellGlyphs.languageRounded, fontFamily: ShellGlyphs.font);
+  static const mapOutlined = IconData(ShellGlyphs.mapOutlined, fontFamily: ShellGlyphs.font);
+  static const movieOutlined = IconData(ShellGlyphs.movieOutlined, fontFamily: ShellGlyphs.font);
+  static const pauseCircle = IconData(ShellGlyphs.pauseCircle, fontFamily: ShellGlyphs.font);
+  static const playArrow = IconData(ShellGlyphs.playArrow, fontFamily: ShellGlyphs.font);
+  static const playCircleFill = IconData(ShellGlyphs.playCircleFill, fontFamily: ShellGlyphs.font);
+  static const playCircle = IconData(ShellGlyphs.playCircle, fontFamily: ShellGlyphs.font);
 }

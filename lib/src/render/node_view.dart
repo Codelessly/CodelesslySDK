@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 
 import 'controls/focus.dart';
 import 'controls/root.dart';
+import 'controls/spinner.dart';
 import 'islands.dart';
 import 'node_tree.dart';
 
@@ -163,4 +164,32 @@ class RenderNodeView extends RenderControlRoot with RenderObjectWithLayoutCallba
     child = null;
     super.dispose();
   }
+}
+
+/// The SDK's spinner ([RenderSpinner]) where the surroundings are still
+/// widgets (a loading screen, a list's loading footer, a player getting
+/// ready): an arc in [color] turning in a square of [diameter], or of the
+/// size it is given.
+class SpinnerView extends LeafRenderObjectWidget {
+  const SpinnerView({super.key, required this.color, this.diameter = 36, this.strokeWidth = 4});
+
+  final Color color;
+  final double diameter;
+  final double strokeWidth;
+
+  @override
+  RenderSpinner createRenderObject(BuildContext context) => RenderSpinner()
+    ..color = color
+    ..diameter = diameter
+    ..strokeWidth = strokeWidth
+    ..strokeAlign = 0
+    ..strokeCap = StrokeCap.square
+    ..animating = TickerMode.valuesOf(context).enabled;
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSpinner renderObject) => renderObject
+    ..color = color
+    ..diameter = diameter
+    ..strokeWidth = strokeWidth
+    ..animating = TickerMode.valuesOf(context).enabled;
 }

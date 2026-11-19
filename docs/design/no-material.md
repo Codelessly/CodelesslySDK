@@ -25,21 +25,21 @@ Third-party dependencies import the framework's `material.dart` themselves (`vid
 its platform packages, `in_app_purchase`'s platform packages, `url_launcher_web`). They are not replaced by this
 work; what they keep in a build is measured once the SDK's own uses are gone.
 
-## What is left (23 files import Material)
+## What is left (19 files import Material)
 
-Three of the 23 use no Material symbol: `app/page_transitions.dart`, `app/ui/route_transition.dart`,
-`widgets/media.dart`.
+It started at 23. The four that no longer do: `app/page_transitions.dart`, `app/ui/route_transition.dart` and
+`widgets/media.dart` (they used no Material symbol), and `widgets/collections.dart`.
 
-### Plain utilities
+### Gone
 
-| Use | Where | Replacement |
+| Was | Where | Now |
 |---|---|---|
-| `Colors.*` (45) | `render/control_theme.dart` (22), `app/navigator_ui.dart`, `app/ui/confirm_dialog.dart`, `app/ui/presentation_route.dart`, `app/backdrop_screens.dart`, `features/media/players.dart`, `features/media/embedded_player_native.dart`, `widgets/collections_data_list.dart` | constants of the SDK's own |
-| `Icons.*` (17) | `features/media/players.dart` (13), `features/media/embedded_player_native.dart`, `app/ui/toast.dart`, `widgets/collections_data_list.dart` (2) | codepoints from `render/paint/material_icon_codepoints.dart` |
-| `CircularProgressIndicator` (3) | `app/codelessly_widget.dart` (the loading screen), `features/media/players.dart` (audio getting ready), `widgets/collections_data_list.dart` (the loading footer) | `render/controls/spinner.dart` |
-| `Divider`, `VerticalDivider` | `widgets/collections.dart` (the line between a list's items) | `RenderDivider` (`widgets/material.dart`) |
-| `MaterialRectArcTween` | `app/ui/hero_flights.dart` (a flight's default path) | the same path, of the SDK's own |
-| `MaterialLocalizations.of` | `app/ui/presentation_route.dart` (the barrier's label); also read inside `showDialog`, `showModalBottomSheet` and `DialogRoute` | an explicit label; a host without Material's localizations throws today |
+| `Colors.*` (45) | `render/control_theme.dart`, `app/navigator_ui.dart`, `app/ui/confirm_dialog.dart`, `app/ui/presentation_route.dart`, `app/backdrop_screens.dart`, `features/media/players.dart`, `features/media/embedded_player_native.dart`, `widgets/collections_data_list.dart` | `ShellColors` (`render/paint/shell_constants.dart`), the same values |
+| `Icons.*` (17) | `features/media/players.dart`, `features/media/embedded_player_native.dart`, `app/ui/toast.dart`, `widgets/collections_data_list.dart` | `ShellGlyphs`: the same codepoints of the MaterialIcons font, held to `material_icon_codepoints.dart` by a test. Still drawn by Flutter's `Icon` (a widgets-library widget), and the font is still the host's `uses-material-design` font |
+| `CircularProgressIndicator` (3) | the loading screen, an audio player getting ready, a list's loading footer | `SpinnerView` (`render/node_view.dart`) over `RenderSpinner`: the same size, stroke and colour; the arc is a steady 30% of the ring where Material's grew and shrank |
+| `Divider`, `VerticalDivider` | `widgets/collections.dart` (the line between a list's items) | `ListSeparatorLine` over `RenderDivider` (`asBorder`), the same pixels (`test/app/own_drawing_test.dart`) |
+| `MaterialRectArcTween` | `app/ui/hero_flights.dart` (a flight's default path) | `HeroCornerArcRectTween`, the same path |
+| `MaterialLocalizations.of` (throws without them) | `app/ui/presentation_route.dart`, and inside `showDialog` and `showModalBottomSheet` | `barrierDismissLabel`: the host's localization where it has one, else English. `showShellDialog` pushes the dialog route itself in a host without Material's localizations, and a bottom sheet there is the SDK's `PresentationRoute` (`test/app/plain_host_test.dart`). The lookup still names `MaterialLocalizations`; it goes with the routes |
 
 ### Shell chrome built from Material controls
 

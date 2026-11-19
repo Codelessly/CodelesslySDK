@@ -8,6 +8,7 @@
 // app the layout is shown in.
 import 'package:codelessly_api/core.dart' as api;
 import 'package:flutter/material.dart';
+import 'paint/shell_constants.dart';
 
 import 'surface_roles.dart';
 
@@ -189,7 +190,7 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
     inverseSurface: onSurface,
     onInverseSurface: surface,
     inversePrimary: onColor(onSurface, preferred: [brand, surface]),
-    surfaceTint: Colors.transparent,
+    surfaceTint: ShellColors.transparent,
   );
 
   final colors = _colorOnly(onSurface);
@@ -240,7 +241,7 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
         overlayColor: stateLayer(foreground),
         elevation: const WidgetStatePropertyAll(0),
         shadowColor: const WidgetStatePropertyAll(shadow),
-        surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+        surfaceTintColor: const WidgetStatePropertyAll(ShellColors.transparent),
         side: side == null
             ? null
             : WidgetStateProperty.resolveWith(
@@ -249,11 +250,11 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
         splashFactory: NoSplash.splashFactory,
       );
   final filled = button(background: fill, foreground: onFill);
-  final plain = button(background: Colors.transparent, foreground: accent);
-  final outlined = button(background: Colors.transparent, foreground: accent, side: BorderSide(color: outline));
+  final plain = button(background: ShellColors.transparent, foreground: accent);
+  final outlined = button(background: ShellColors.transparent, foreground: accent, side: BorderSide(color: outline));
   final menuStyle = MenuStyle(
     backgroundColor: WidgetStatePropertyAll(surface),
-    surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+    surfaceTintColor: const WidgetStatePropertyAll(ShellColors.transparent),
     shadowColor: const WidgetStatePropertyAll(shadow),
     elevation: WidgetStatePropertyAll(popupElevation),
     side: WidgetStatePropertyAll(BorderSide(color: outlineVariant)),
@@ -274,8 +275,8 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
     textTheme: titled,
     primaryTextTheme: titled,
     splashFactory: NoSplash.splashFactory,
-    splashColor: Colors.transparent,
-    highlightColor: Colors.transparent,
+    splashColor: ShellColors.transparent,
+    highlightColor: ShellColors.transparent,
     hoverColor: onSurface.withValues(alpha: .04),
     focusColor: onSurface.withValues(alpha: .10),
     applyElevationOverlayColor: false,
@@ -312,7 +313,7 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
       hoverElevation: 0,
       highlightElevation: 0,
       disabledElevation: 0,
-      splashColor: Colors.transparent,
+      splashColor: ShellColors.transparent,
       hoverColor: onFill.withValues(alpha: .06),
       focusColor: onFill.withValues(alpha: .10),
       shape: buttonShape,
@@ -322,7 +323,7 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
       pressElevation: 0,
       shadowColor: shadow,
       selectedShadowColor: shadow,
-      surfaceTintColor: Colors.transparent,
+      surfaceTintColor: ShellColors.transparent,
       checkmarkColor: onSurface,
       shape: buttonShape,
     ),
@@ -341,7 +342,7 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
     switchTheme: SwitchThemeData(
       overlayColor: stateLayer(onSurface),
       thumbIcon: const WidgetStatePropertyAll<Icon?>(Icon(null)),
-      trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+      trackOutlineColor: const WidgetStatePropertyAll(ShellColors.transparent),
       trackOutlineWidth: const WidgetStatePropertyAll(0),
       thumbColor: WidgetStateProperty.resolveWith((s) {
         final on = s.contains(WidgetState.selected);
@@ -368,7 +369,7 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
     progressIndicatorTheme: ProgressIndicatorThemeData(
       color: accent,
       linearTrackColor: mix(.12),
-      circularTrackColor: Colors.transparent,
+      circularTrackColor: ShellColors.transparent,
     ),
     // A square underline of the tab's width, not Material's rounded pill.
     tabBarTheme: TabBarThemeData(
@@ -383,7 +384,7 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: surface,
-      surfaceTintColor: Colors.transparent,
+      surfaceTintColor: ShellColors.transparent,
       shadowColor: shadow,
       elevation: 0,
       indicatorColor: selected,
@@ -401,38 +402,38 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
     appBarTheme: AppBarTheme(
       backgroundColor: surface,
       foregroundColor: onSurface,
-      surfaceTintColor: Colors.transparent,
+      surfaceTintColor: ShellColors.transparent,
       shadowColor: shadow,
       elevation: 0,
       scrolledUnderElevation: 0,
     ),
-    bottomAppBarTheme: BottomAppBarThemeData(color: surface, surfaceTintColor: Colors.transparent, elevation: 0),
+    bottomAppBarTheme: BottomAppBarThemeData(color: surface, surfaceTintColor: ShellColors.transparent, elevation: 0),
     cardTheme: CardThemeData(
       color: surface,
-      surfaceTintColor: Colors.transparent,
+      surfaceTintColor: ShellColors.transparent,
       shadowColor: shadow,
       elevation: 0,
       shape: cardShape,
     ),
     dialogTheme: DialogThemeData(
       backgroundColor: surface,
-      surfaceTintColor: Colors.transparent,
+      surfaceTintColor: ShellColors.transparent,
       shadowColor: shadow,
       elevation: popupElevation,
-      barrierColor: Colors.black54,
+      barrierColor: ShellColors.black54,
       shape: surfaceShape,
     ),
     drawerTheme: DrawerThemeData(
       backgroundColor: surface,
-      surfaceTintColor: Colors.transparent,
+      surfaceTintColor: ShellColors.transparent,
       shadowColor: shadow,
       elevation: 0,
-      scrimColor: Colors.black54,
+      scrimColor: ShellColors.black54,
     ),
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: surface,
       modalBackgroundColor: surface,
-      surfaceTintColor: Colors.transparent,
+      surfaceTintColor: ShellColors.transparent,
       shadowColor: shadow,
       elevation: 0,
       modalElevation: popupElevation,
@@ -440,7 +441,7 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
     ),
     popupMenuTheme: PopupMenuThemeData(
       color: surface,
-      surfaceTintColor: Colors.transparent,
+      surfaceTintColor: ShellColors.transparent,
       shadowColor: shadow,
       elevation: popupElevation,
       shape: surfaceShape,
@@ -449,7 +450,7 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
     dropdownMenuTheme: DropdownMenuThemeData(menuStyle: menuStyle),
     datePickerTheme: DatePickerThemeData(
       backgroundColor: surface,
-      surfaceTintColor: Colors.transparent,
+      surfaceTintColor: ShellColors.transparent,
       shadowColor: shadow,
       elevation: popupElevation,
       headerBackgroundColor: surface,

@@ -144,7 +144,7 @@ export 'src/runtime/http_image_loader.dart';
 export 'src/render/convert.dart' show textStyle, FontDemand;
 export 'src/render/paint/image_fill.dart' show imagesPendingUnder;
 export 'src/text_defaults.dart' show kTextBase;
-export 'src/render/node_view.dart' hide FocusManagerKeyboard, RenderNodeView;
+export 'src/render/node_view.dart' hide FocusManagerKeyboard, RenderNodeView, SpinnerView;
 export 'src/render/hero.dart' show HeroMarks, RenderHeroMark;
 export 'src/app/ui/hero_flights.dart' show HeroMarkPaint;
 export 'src/render/play.dart' show FlightRegistry, RenderFlightBox;

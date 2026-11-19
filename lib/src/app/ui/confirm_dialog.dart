@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 
 import '../../render/convert.dart';
 import '../../render/paint/icon_names.dart';
+import '../../render/paint/shell_constants.dart';
 import 'feedback_icon.dart';
 import 'feedback_theme.dart';
 import 'presentation_route.dart';
@@ -298,7 +299,7 @@ Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request, {do
       context: context,
       presentation: presentation,
       barrierDismissible: action.barrierDismissible,
-      barrierColor: barrierColor ?? Theme.of(context).dialogTheme.barrierColor ?? Colors.black54,
+      barrierColor: barrierColor ?? Theme.of(context).dialogTheme.barrierColor ?? ShellColors.black54,
       sheetWidth: look.number('sheetWidth'),
       sheetMargin: look.numberOr('sheetMargin', 0),
       cornerRadius: look.number('radius'),
@@ -308,9 +309,8 @@ Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request, {do
     ));
     return answer == true;
   }
-  final confirmed = await showDialog<bool>(
+  final confirmed = await showShellDialog<bool>(
     context: context,
-    useRootNavigator: false,
     barrierDismissible: action.barrierDismissible,
     barrierColor: barrierColor,
     builder: buildDialog,
@@ -523,8 +523,8 @@ class ThemedConfirmDialog extends StatelessWidget {
       autofocus: !destructive,
       onPressed: () => Navigator.of(context).pop(true),
       style: FilledButton.styleFrom(
-        backgroundColor: gradient == null ? confirmFill : Colors.transparent,
-        shadowColor: gradient == null ? null : Colors.transparent,
+        backgroundColor: gradient == null ? confirmFill : ShellColors.transparent,
+        shadowColor: gradient == null ? null : ShellColors.transparent,
         foregroundColor: onConfirm,
         textStyle: buttonText,
         shape: buttonShape,
@@ -679,9 +679,9 @@ class ThemedConfirmDialog extends StatelessWidget {
             child: SafeArea(left: false, child: Align(alignment: Alignment.topLeft, child: content)),
           ),
         _ => Dialog(
-            backgroundColor: dialogShadows != null ? Colors.transparent : surface,
-            surfaceTintColor: Colors.transparent,
-            shadowColor: dialogShadows != null ? Colors.transparent : null,
+            backgroundColor: dialogShadows != null ? ShellColors.transparent : surface,
+            surfaceTintColor: ShellColors.transparent,
+            shadowColor: dialogShadows != null ? ShellColors.transparent : null,
             elevation: dialogShadows != null ? 0 : 8,
             insetPadding: insets ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
             shape: RoundedRectangleBorder(

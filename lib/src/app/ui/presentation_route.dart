@@ -14,6 +14,7 @@ import '../../render/controls/focus.dart';
 import '../../render/controls/kit.dart' show firstTextUnder;
 import '../../render/layout/design_scroll.dart' show ScrollDragGate;
 import '../../render/node_view.dart';
+import '../../render/paint/shell_constants.dart';
 import '../../runtime/actions/ui.dart' show SheetStop;
 
 /// The width below which an adaptive modal with no breakpoint of its own is
@@ -29,6 +30,59 @@ ModalPresentation resolvePresentation(ModalPresentation presentation, double? wi
     presentation == ModalPresentation.adaptive
         ? (width != null && width < sheetBelowWidth ? ModalPresentation.bottomSheet : ModalPresentation.dialog)
         : presentation;
+
+/// What a screen reader calls the barrier behind a dialog or a sheet: the
+/// host app's own wording where it has Material's localizations, else
+/// English. Never throws for a host without them.
+String barrierDismissLabel(BuildContext context) =>
+    Localizations.of<MaterialLocalizations>(context, MaterialLocalizations)?.modalBarrierDismissLabel ?? 'Dismiss';
+
+/// Whether the host app has Material's localizations above [context].
+bool hasMaterialLocalizations(BuildContext context) =>
+    Localizations.of<MaterialLocalizations>(context, MaterialLocalizations) != null;
+
+/// Opens [builder]'s content as a dialog over the nearest navigator, behind
+/// a barrier of [barrierColor] (null: the theme's, else black at 54%).
+///
+/// In a host app with Material's localizations this is Flutter's
+/// `showDialog`. In one without them (a plain `WidgetsApp`), where
+/// `showDialog` cannot be called, the same dialog route is pushed with an
+/// English barrier label.
+Future<T?> showShellDialog<T>({
+  required BuildContext context,
+  required WidgetBuilder builder,
+  bool barrierDismissible = true,
+  Color? barrierColor,
+  bool useSafeArea = true,
+  RouteSettings? routeSettings,
+}) {
+  if (hasMaterialLocalizations(context)) {
+    return showDialog<T>(
+      context: context,
+      useRootNavigator: false,
+      barrierDismissible: barrierDismissible,
+      barrierColor: barrierColor,
+      useSafeArea: useSafeArea,
+      routeSettings: routeSettings,
+      builder: builder,
+    );
+  }
+  final navigator = Navigator.of(context);
+  return navigator.push<T>(DialogRoute<T>(
+    context: context,
+    builder: builder,
+    themes: InheritedTheme.capture(from: context, to: navigator.context),
+    barrierColor: barrierColor ??
+        DialogTheme.of(context).barrierColor ??
+        Theme.of(context).dialogTheme.barrierColor ??
+        ShellColors.black54,
+    barrierDismissible: barrierDismissible,
+    barrierLabel: barrierDismissLabel(context),
+    useSafeArea: useSafeArea,
+    settings: routeSettings,
+    traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
+  ));
+}
 
 /// Presents [builder]'s content as [presentation] says, with a barrier that
 /// [barrierDismissible] lets the user tap to close it.
@@ -46,13 +100,13 @@ class PresentationRoute<T> extends PopupRoute<T> {
     this.insets = EdgeInsets.zero,
     this.showDragHandle = false,
     this.barrierDismissible = true,
-    this.barrierColor = Colors.black54,
+    this.barrierColor = ShellColors.black54,
     this.barrierBlur = 0,
     this.enterScale = 0.96,
     double sheetBelowWidth = 0,
     super.settings,
   })  : presentation = resolvePresentation(presentation, MediaQuery.maybeSizeOf(context)?.width, sheetBelowWidth: sheetBelowWidth),
-        _barrierLabel = MaterialLocalizations.of(context).modalBarrierDismissLabel,
+        _barrierLabel = barrierDismissLabel(context),
         _themes = InheritedTheme.capture(from: context, to: Navigator.of(context).context);
 
   static const enterDuration = Duration(milliseconds: 320);

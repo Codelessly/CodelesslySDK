@@ -18,6 +18,8 @@ import 'package:flutter/scheduler.dart';
 import '../render/convert.dart';
 import '../render/controls/focus.dart';
 import '../render/controls/root.dart';
+import '../render/node_view.dart' show SpinnerView;
+import '../render/paint/shell_constants.dart';
 import '../render/recipe.dart';
 import '../runtime/lists/pagination.dart';
 import 'collections_data_list_model.dart';
@@ -739,7 +741,7 @@ class DataListViewState extends State<DataListView> {
                 key: const ValueKey('followListLatest'),
                 tooltip: 'Jump to latest',
                 onPressed: _jumpToLatest,
-                icon: Icon(axis == Axis.vertical ? Icons.arrow_downward : Icons.arrow_forward),
+                icon: Icon(axis == Axis.vertical ? _Glyph.arrowDownward : _Glyph.arrowForward),
                 style: IconButton.styleFrom(minimumSize: const Size(48, 48), backgroundColor: colors.surfaceContainerHigh)
                     .copyWith(side: WidgetStatePropertyAll(_latestFocus?.showsHighlight == true
                         ? BorderSide(color: colors.primary, width: 2) : BorderSide.none)),
@@ -892,7 +894,7 @@ class _SectionIndexBarState extends State<SectionIndexBar> {
                     ),
                     child: Text(
                       '${keys[touching] ?? ''}',
-                      style: const TextStyle(fontSize: 40, fontWeight: FontWeight.w700, color: Colors.white)
+                      style: const TextStyle(fontSize: 40, fontWeight: FontWeight.w700, color: ShellColors.white)
                           .merge(widget.bubbleStyle),
                     ),
                   ),
@@ -921,7 +923,7 @@ class UndoBar extends StatelessWidget {
           padding: const EdgeInsets.only(left: 16),
           child: Row(
             children: [
-              Expanded(child: Text(message, style: const TextStyle(color: Colors.white, fontSize: 14))),
+              Expanded(child: Text(message, style: const TextStyle(color: ShellColors.white, fontSize: 14))),
               TextButton(onPressed: onUndo, child: const Text('Undo')),
             ],
           ),
@@ -933,9 +935,14 @@ class _DefaultLoadingFooter extends StatelessWidget {
   const _DefaultLoadingFooter();
 
   @override
-  Widget build(BuildContext context) => const Padding(
-        padding: EdgeInsets.all(16),
-        child: Center(child: SizedBox.square(dimension: 24, child: CircularProgressIndicator(strokeWidth: 2.5))),
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: Center(
+          child: SizedBox.square(
+            dimension: 24,
+            child: SpinnerView(strokeWidth: 2.5, color: ProgressIndicatorTheme.of(context).color ?? Theme.of(context).colorScheme.primary),
+          ),
+        ),
       );
 }
 
@@ -1029,4 +1036,10 @@ class ItemSnapPhysics extends ScrollPhysics {
 
   @override
   bool get allowImplicitScrolling => false;
+}
+
+/// The icons drawn here, from the MaterialIcons font.
+abstract final class _Glyph {
+  static const arrowDownward = IconData(ShellGlyphs.arrowDownward, fontFamily: ShellGlyphs.font);
+  static const arrowForward = IconData(ShellGlyphs.arrowForward, fontFamily: ShellGlyphs.font, matchTextDirection: true);
 }

@@ -1463,7 +1463,8 @@ class CodelesslyLoadingScreen extends StatelessWidget {
   const CodelesslyLoadingScreen({super.key});
 
   @override
-  Widget build(BuildContext context) => const Center(child: CircularProgressIndicator());
+  Widget build(BuildContext context) =>
+      Center(child: SpinnerView(color: ProgressIndicatorTheme.of(context).color ?? Theme.of(context).colorScheme.primary));
 }
 
 /// What shows when a layout fails to load.

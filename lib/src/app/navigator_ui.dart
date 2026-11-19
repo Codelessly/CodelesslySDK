@@ -31,6 +31,7 @@ import '../render/control_theme.dart' show CodelesslyThemeTokens;
 import '../render/convert.dart' show boxShadow;
 import '../render/controls/focus.dart' show ControlFocusLayer;
 import '../render/node_view.dart' show ControlFocusLayerScope;
+import '../render/paint/shell_constants.dart';
 import '../runtime/actions/ui.dart';
 
 /// Builds the route that shows screen [destination] (a canvas or layout id)
@@ -394,7 +395,7 @@ Future<Object?> showScreenModal(
       transition: routeTransition,
       anchor: RevealAnchor(tap: RevealAnchor.lastTap),
       dismissibleBarrier: barrierDismissible,
-      fallbackBarrierColor: scrim ?? (fullScreen ? Colors.black : Colors.black54),
+      fallbackBarrierColor: scrim ?? (fullScreen ? ShellColors.black : ShellColors.black54),
       builder: (_) {
         if (sheet) return Align(alignment: Alignment.bottomCenter, child: content);
         if (fullScreen) return content;
@@ -416,13 +417,16 @@ Future<Object?> showScreenModal(
   // and a gap over the screen's own surface.)
   final presented = presentation == ModalPresentation.sideSheet ||
       (sheet && (maxHeightFactor != null || sheetRadius != null || showDragHandle || snapHeights.isNotEmpty || sheetMargin > 0)) ||
-      (!sheet && presentation == ModalPresentation.dialog && (barrierBlur > 0 || enterScale != 1));
+      (!sheet && presentation == ModalPresentation.dialog && (barrierBlur > 0 || enterScale != 1)) ||
+      // Material's sheet needs Material's localizations: a host app without
+      // them gets the SDK's own sheet.
+      (sheet && !hasMaterialLocalizations(context));
   if (presented) {
     return Navigator.of(context).push<Object?>(PresentationRoute<Object?>(
       context: context,
       presentation: sheet ? ModalPresentation.bottomSheet : presentation,
       barrierDismissible: barrierDismissible,
-      barrierColor: scrim ?? Colors.black54,
+      barrierColor: scrim ?? ShellColors.black54,
       sheetWidth: sheetWidth,
       sheetMargin: sheetMargin,
       cornerRadius: sheetRadius,
@@ -447,7 +451,7 @@ Future<Object?> showScreenModal(
       // The screen draws its own surface (its fills, radius and shadow): a
       // tinted Material sheet behind it showed above a screen whose content
       // sits at the bottom of its canvas.
-      backgroundColor: Colors.transparent,
+      backgroundColor: ShellColors.transparent,
       elevation: 0,
       // The keyboard pushes the sheet up (a composer at its bottom).
       builder: (context) => Padding(
@@ -461,9 +465,8 @@ Future<Object?> showScreenModal(
   }
   if (cover && !sheet) {
     // Covers the screen: the screen it shows fills it, at the device size.
-    return showDialog<Object?>(
+    return showShellDialog<Object?>(
       context: context,
-      useRootNavigator: false,
       useSafeArea: false,
       barrierDismissible: barrierDismissible,
       barrierColor: scrim,
@@ -473,9 +476,8 @@ Future<Object?> showScreenModal(
       ),
     );
   }
-  return showDialog<Object?>(
+  return showShellDialog<Object?>(
     context: context,
-    useRootNavigator: false,
     barrierDismissible: barrierDismissible,
     barrierColor: scrim,
     builder: (_) => Align(alignment: alignment, child: Material(type: MaterialType.transparency, child: _TallDialogScroll(child: content))),
@@ -574,11 +576,10 @@ Future<Object?> showAnchoredModal(
   final layout = PopoverLayout(anchor: local, placement: placement, gap: gap, offset: offset,
       reserve: reserve, textDirection: Directionality.of(context));
   final shown = arrow ? _arrowContent(context, content, layout) : content;
-  return showDialog<Object?>(
+  return showShellDialog<Object?>(
     context: context,
-    useRootNavigator: false,
     barrierDismissible: barrierDismissible,
-    barrierColor: barrierColor == null ? Colors.transparent : Color(barrierColor.value),
+    barrierColor: barrierColor == null ? ShellColors.transparent : Color(barrierColor.value),
     useSafeArea: false,
     routeSettings: popover ? const RouteSettings(name: popoverRouteName) : null,
     builder: (_) => CustomSingleChildLayout(

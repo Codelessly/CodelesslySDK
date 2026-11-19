@@ -9,6 +9,7 @@ import 'package:codelessly_api/core.dart' show Json, ShowToastAction, ToastPosit
 import 'package:flutter/material.dart';
 
 import '../../render/paint/icon_names.dart';
+import '../../render/paint/shell_constants.dart';
 import 'feedback_icon.dart';
 import 'feedback_theme.dart';
 
@@ -483,7 +484,7 @@ class _ToastViewState extends State<_ToastView> {
                 style: IconButton.styleFrom(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(buttonRadius)),
                 ),
-                icon: const Icon(Icons.close),
+                icon: const Icon(_Glyph.close),
               ),
             ),
           ],
@@ -648,4 +649,9 @@ class _ToastBelowRouteState extends State<ToastBelowRoute> {
 
   @override
   Widget build(BuildContext context) => widget.child;
+}
+
+/// The icons drawn here, from the MaterialIcons font.
+abstract final class _Glyph {
+  static const close = IconData(ShellGlyphs.close, fontFamily: ShellGlyphs.font);
 }

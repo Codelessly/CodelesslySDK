@@ -242,7 +242,7 @@ const coreWidgetImports = 16;
 /// and `cupertino_ui` packages). It only goes down, to zero: an app that
 /// uses neither then carries neither because of this package
 /// (docs/design/no-material.md).
-const materialImports = 23;
+const materialImports = 19;
 
 /// One import or export directive: [target] is `dart:x`, `package:x/...`, or
 /// a path under lib/src (`render/convert.dart`) for a file of this package.

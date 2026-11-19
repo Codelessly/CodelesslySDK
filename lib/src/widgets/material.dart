@@ -95,6 +95,12 @@ class RenderDivider extends RenderBox {
     markNeedsPaint();
   }
 
+  /// Whether the line is drawn as a border is (the line between a list's
+  /// items): a thickness of 0 is a hairline of one device pixel, and a line
+  /// thicker than this box grows out of one side of it. Else the line is
+  /// centered, and a thickness of 0 draws nothing.
+  bool asBorder = false;
+
   double _indent = 0, _endIndent = 0;
   set indent(double v) {
     if (v == _indent) return;
@@ -123,6 +129,7 @@ class RenderDivider extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    if (asBorder) return _paintAsBorder(context.canvas, offset);
     if (_thickness <= 0) return;
     final paint = Paint()..color = _color;
     final Rect r;
@@ -134,6 +141,41 @@ class RenderDivider extends RenderBox {
       r = Rect.fromLTRB(_indent, y, math.max(_indent, size.width - _endIndent), y + _thickness);
     }
     context.canvas.drawRect(r.shift(offset), paint);
+  }
+
+  // As Flutter's Divider and VerticalDivider: a box [_thickness] across (no
+  // more than this is), centered, whose bottom (standing: left) border is
+  // the line. A line thicker than the box grows up (standing: to the right)
+  // out of it; a border of no width is a hairline.
+  void _paintAsBorder(Canvas canvas, Offset offset) {
+    if (_thickness < 0) return;
+    final across = _vertical ? size.width : size.height;
+    final box = math.min(_thickness, across);
+    final near = (across - box) / 2, far = near + box;
+    final start = _indent;
+    final end = math.max(_indent, (_vertical ? size.height : size.width) - _endIndent);
+    final paint = Paint()..color = _color;
+    if (_thickness == 0) {
+      paint
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0;
+      final path = Path();
+      if (_vertical) {
+        path
+          ..moveTo(offset.dx + near, offset.dy + end)
+          ..lineTo(offset.dx + near, offset.dy + start);
+      } else {
+        path
+          ..moveTo(offset.dx + end, offset.dy + far)
+          ..lineTo(offset.dx + start, offset.dy + far);
+      }
+      canvas.drawPath(path, paint);
+      return;
+    }
+    final r = _vertical
+        ? Rect.fromLTRB(near, start, near + _thickness, end)
+        : Rect.fromLTRB(start, far - _thickness, end, far);
+    canvas.drawRect(r.shift(offset), paint);
   }
 }
 
