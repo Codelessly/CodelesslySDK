@@ -33,10 +33,11 @@ Third-party dependencies import the framework's `material.dart` themselves (`vid
 its platform packages, `in_app_purchase`'s platform packages, `url_launcher_web`). They are not replaced by this
 work; what they keep in a build is measured once the SDK's own uses are gone.
 
-## What is left (19 files import Material)
+## What is left (17 files import Material)
 
-It started at 23. The four that no longer do: `app/page_transitions.dart`, `app/ui/route_transition.dart` and
-`widgets/media.dart` (they used no Material symbol), and `widgets/collections.dart`.
+It started at 23. The six that no longer do: `app/page_transitions.dart`, `app/ui/route_transition.dart` and
+`widgets/media.dart` (they used no Material symbol), `widgets/collections.dart`, `app/backdrop_screens.dart` and
+`app/paywalls.dart`.
 
 ### Gone
 
@@ -64,15 +65,17 @@ A `ControlHost` (`render/node_view.dart`) is the root (`RenderControlRoot`) of t
 confirm dialog, which no `NodeView` is above: their focus order and keys are the SDK's own, in the dialog's
 `ControlFocusLayer`.
 
-### Routes
+### Routes (gone: `no-material-routes.md` has the design and what was built)
 
-| Use | Where |
+| Was | Now |
 |---|---|
-| `showDialog` (4) | `app/navigator_ui.dart` (3), `app/ui/confirm_dialog.dart` |
-| `showModalBottomSheet` | `app/navigator_ui.dart` |
-| `MaterialPageRoute` (3) | `app/codelessly_widget.dart` (`CodelesslyPageRoute extends MaterialPageRoute`), `app/navigator_ui.dart`, `app/paywalls.dart` |
-| `PageTransitionsTheme`, its builders, `DualTransitionBuilder` | `app/backdrop_screens.dart` |
-| `ReorderableListView` | `widgets/collections_reorder.dart` |
+| `showDialog` (4), `DialogRoute` | `showShellDialog` (`app/ui/presentation_route.dart`): a `RawDialogRoute` with the same 150 ms fade and barrier, in every host |
+| `Dialog` (the confirm's surface) | `_DialogSurface` (`app/ui/confirm_dialog.dart`): the same insets, minimum width and keyboard padding, around the `Material` that still draws its fill and shadow |
+| `showModalBottomSheet` | `PresentationRoute(plainSheet: true)`: Material's width, timing, curve and closing rules |
+| `MaterialPageRoute` (3) | `CodelesslyPageRoute extends PageRoute`, playing a `CodelesslyPageTransitions` (`app/page_transitions.dart`): the three native transitions rebuilt and held to Flutter's frame for frame (`test/app/page_transitions_test.dart`), or any `RouteTransition` of the animation system |
+| `PageTransitionsTheme`, its builders (`seeThroughPageTransitions`) | gone: the SDK's transitions take the fill behind the screens, none above a backdrop |
+| `ReorderableListView` | a `CustomScrollView` with the widgets layer's `SliverReorderableList` (`widgets/collections_reorder.dart`) |
+| `MaterialLocalizations` (the barrier's and pull to refresh's words) | `CodelesslyLabels` (`render/labels.dart`), from `CodelesslyConfig.labels` |
 
 ### The theme
 
@@ -86,5 +89,5 @@ confirm dialog, which no `NodeView` is above: their focus order and keys are the
 
 ### Public API that exposes a Material type
 
-`themeDataOf`, `FeedbackTheme`, `ResolvedFeedbackTheme`, `CodelesslyPageRoute` (its base class),
-`seeThroughPageTransitions(PageTransitionsTheme)`. Every README and guide example uses `MaterialApp`.
+`themeDataOf`, `FeedbackTheme`, `ResolvedFeedbackTheme`. Every README and guide example uses `MaterialApp`.
+(`CodelesslyPageRoute`'s base class and `seeThroughPageTransitions` went with the routes.)

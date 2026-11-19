@@ -1,4 +1,28 @@
-# No Material, stage 3: routes (a design to agree before building)
+# No Material, stage 3: routes
+
+**Built as agreed below, with these differences:**
+
+- **Any animation as the page transition.** `CodelesslyPageTransitions.animated(RouteTransition)` makes any
+  transition of the animation system the project's page transition; its screens open in the route that plays a
+  `navigate` action's `routeTransition` (`CodelesslyRouteTransitionRoute`). The native ones are options beside
+  it, each by name.
+- **The transitions' shape.** `CodelesslyPageTransitions` has `buildEntering` (the incoming screen's half) and
+  `buildCovered` (the half of the screen beneath, with the fill behind the two), in place of one `build` and a
+  `delegatedTransition`: the route composes them and gives the covered half to a route of another kind beneath it.
+- **The system back swipe covers the first 15% of the way out.** Flutter's route handlers jump back to the start
+  when the gesture commits; the SDK's own commit leaves from where the gesture left the screen instead.
+- **The iOS back swipe is its own small detector** (`_BackSwipe`), not `RouteDragDismiss`, which is tied to the
+  route-transition route.
+- **The zoom is compared with Flutter's default (with its snapshots)** and matches to one color level in one
+  frame of sixteen; the fade forwards and the iOS slide (both directions, and the rising dialog) match exactly.
+- **The reorderable list needed no words.** Flutter 3.50's `ReorderableListView` adds no screen-reader actions
+  of its own: the move actions are the widgets layer's and use the host's `WidgetsLocalizations`, as before. So
+  `CodelesslyLabels` has no move words.
+- **The confirm's `Dialog`** became the layout around a `Material` that still draws its fill and elevation
+  shadow (the `Material` wrappers go with the theme).
+- **The page fill** is the project's theme surface (`pageFillOf`), read when a transition starts.
+
+The design as it was agreed:
 
 Part of `no-material.md`. This stage takes Material out of how screens, dialogs and sheets open and of the
 reorderable list. Nothing here is built yet. Each numbered decision has a recommendation and what it costs; the

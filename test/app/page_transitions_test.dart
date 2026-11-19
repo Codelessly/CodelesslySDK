@@ -374,4 +374,39 @@ void main() {
       expect(find.text('One'), findsOneWidget);
     });
   });
+
+  // The navigation guide's adapter: a Material app's own theme transitions
+  // for a project's screens.
+  group('a host\'s own transitions (the guide\'s adapter)', () {
+    for (final (name, builder, duration) in <(String, PageTransitionsBuilder, Duration)>[
+      ('zoom', const ZoomPageTransitionsBuilder(), const Duration(milliseconds: 300)),
+      ('fade forwards', const FadeForwardsPageTransitionsBuilder(), const Duration(milliseconds: 450)),
+      ('Cupertino', const CupertinoPageTransitionsBuilder(), const Duration(milliseconds: 500)),
+    ]) {
+      testWidgets('plays the theme\'s $name as a MaterialPageRoute does', (tester) async {
+        final theme = _themeWith(builder);
+        final flutter = await _film(tester, _material, duration: duration, theme: theme);
+        final own = await _film(tester, _own(_ThemePageTransitions(duration)), duration: duration, theme: theme);
+        _expectSameFilm(own, flutter);
+      });
+    }
+  });
+}
+
+class _ThemePageTransitions extends CodelesslyPageTransitions {
+  const _ThemePageTransitions(this.duration);
+
+  @override
+  final Duration duration;
+
+  @override
+  Widget buildEntering(PageRoute<Object?> route, BuildContext context, Animation<double> animation, Widget child) =>
+      Theme.of(context).pageTransitionsTheme.buildTransitions(route, context, animation, kAlwaysDismissedAnimation, child);
+
+  @override
+  Widget buildCovered(BuildContext context, Animation<double> secondaryAnimation, Widget child, {Color? fill}) {
+    final theme = Theme.of(context);
+    final covered = theme.pageTransitionsTheme.delegatedTransition(theme.platform);
+    return covered?.call(context, kAlwaysCompleteAnimation, secondaryAnimation, true, child) ?? child;
+  }
 }

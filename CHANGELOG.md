@@ -2,6 +2,35 @@
 
 ### Behaviour changes (read before upgrading)
 
+**Screens, dialogs and sheets**
+
+- **Your app's `ThemeData.pageTransitionsTheme` (and `ThemeData.platform`) no longer change how a project's
+  screens come and go.** A screen with no transition of its own plays the SDK's page transition
+  (`CodelesslyConfig.pageTransitions`, see Added): by default the platform's, which is what an app with an
+  untouched theme played before. An app that customised its theme's page transitions and wants them for the
+  project's screens passes them in; the navigation guide has the few lines that do it.
+- **On Android the system's back swipe plays the screen's own way out under the finger**, as far as the first
+  15% of it, then leaves or comes back. It played Material's predictive-back look (the screen shrinking in a
+  rounded frame). Only apps with `android:enableOnBackInvokedCallback` are affected.
+- **On the web a screen opened through `CodelesslyWidget.onGenerateRoute` (your own `pushNamed`, a link) has no
+  page transition**, as a `navigate` action's screen already had none there. It played the transition of the
+  visitor's operating system.
+- **`CodelesslyPageRoute` is no longer a `MaterialPageRoute`** (it is a `PageRoute`): `route is
+  MaterialPageRoute` is false for a project's screens, and a paywall and a full-screen modal open in a
+  `CodelesslyPageRoute` too. `seeThroughPageTransitions` is removed, with
+  `SeeThroughZoomPageTransitionsBuilder` (`internals.dart`): above backdrop screens the SDK's transitions paint
+  nothing behind the screens by themselves.
+- **Behind two screens while they move, Android's transition and the desktop's scrim are the project's surface
+  color**, not your app theme's.
+- **A plain bottom sheet follows a finger and settles as the SDK's sheets do.** It looks, opens and closes as
+  before (at most 640 wide, 250 ms up, closed by a downward fling or a release under half way); the feel of the
+  drag in between is not Material's.
+- **A dialog's barrier and pull to refresh are called "Dismiss" and "Refresh"** to a screen reader in every app.
+  In a Material app they were your app's Material localization. `CodelesslyConfig.labels` gives them, and the
+  other words of the runtime's own chrome, in your language (see Added).
+
+**Chrome**
+
 - **The loading spinner is the SDK's own arc.** The loading screen (`CodelesslyLoadingScreen`), a paginated
   list's default loading footer and an audio player that is getting ready showed Material's
   `CircularProgressIndicator`. They show a ring of the same size, stroke and colour (the theme's primary) whose arc
@@ -21,13 +50,26 @@
   the row's keys run its actions, as before. The audio seek bar takes the arrow keys, Page Up and Page Down, Home
   and End.
 
+### Added
+
+- **`CodelesslyConfig.pageTransitions`: the page transition of a project's screens.**
+  `CodelesslyPageTransitions.platform` (the default) plays Android's fade forwards, iOS's and macOS's slide with
+  its back swipe from the edge, the zoom on Windows and Linux, and none on the web. Each can be chosen by name on
+  every platform (`fadeForwards`, `cupertino`, `zoom`, `none`). `CodelesslyPageTransitions.animated(...)`
+  takes **any transition of the animation system**: a `RouteTransition`, with a preset (`sharedAxisX`,
+  `fadeThrough`, `iosPush`, `circularReveal`...) or its own `enter` and `exit` poses, curves and durations,
+  played as a `navigate` action's `routeTransition` is. A subclass of your own draws anything else. A
+  `navigate` action's own `transition` or `routeTransition` still wins for that navigation.
+- **`CodelesslyConfig.labels`: the words a screen reader hears for the runtime's own chrome** (`CodelesslyLabels`:
+  a dialog's barrier, a toast's close button, pull to refresh, jump to latest, the players' buttons, the seek bar),
+  English unless you give your own.
+
 ### Fixed
 
-- **A host app that is not a Material app can open dialogs and sheets.** Under a plain `WidgetsApp` (no
-  `MaterialLocalizations` above the SDK) an `openModal` (a dialog, a cover, a bottom sheet) and a `confirm` failed
-  with "No MaterialLocalizations found". They open now: the barrier's screen-reader label is English ("Dismiss")
-  there, and a bottom sheet is the SDK's own sheet (the one a sized, rounded or snapping sheet already was). In a
-  Material app nothing changes: the label is still your app's localization, the sheet still Material's.
+- **A host app that is not a Material app can open dialogs and sheets, and show a reorderable list.** Under a
+  plain `WidgetsApp` (no `MaterialLocalizations` above the SDK) an `openModal` (a dialog, a cover, a bottom
+  sheet), a `confirm` and a list with `reorder` failed with "No MaterialLocalizations found". Each is a route or a
+  list of the SDK's own now, the same in every app, and looks as it did in a Material app.
 
 ### Changed
 
@@ -36,7 +78,7 @@
   Undo, and a chat list's jump-to-latest button. Each is drawn to the same pixels as the Material control it took
   the place of, in the document's theme or a design system's; a tint that comes with a hover or a press eases in
   over the theme's control time.
-- **Less of Flutter's Material library is used** (19 files of the package import it, from 23). The plain colors,
+- **Less of Flutter's Material library is used** (17 files of the package import it, from 23). The plain colors,
   the icons of the players, the toast and the data list, the line between a list's items (`separator: divider`)
   and a hero's default flight path are the SDK's own code now, and draw the same pixels. With the buttons, the
   slider and the indicators above, an app that does not use Material itself carries about 270 KB less of Material
