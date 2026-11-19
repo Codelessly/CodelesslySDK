@@ -304,8 +304,14 @@ class _GraphPainter extends CustomPainter {
       for (final mark in spec.panes[i].marks) {
         if (mark.endDot > 0) _endDot(canvas, i, plot, mark);
       }
+      // Zoomed out, badges that would sit on one another are left out.
+      double? badge;
       for (final marker in spec.panes[i].markers) {
-        _marker(canvas, plot, marker);
+        final index = engine.indexOfKey(marker.at);
+        if (index == null) continue;
+        final x = engine.xOf(index);
+        if (badge != null && (x - badge).abs() < 20) continue;
+        if (_marker(canvas, plot, marker)) badge = x;
       }
     }
     final cursor = engine.cursor;
@@ -341,12 +347,13 @@ class _GraphPainter extends CustomPainter {
   }
 
   /// A lettered badge at the foot of the pane, on its row.
-  void _marker(Canvas canvas, Rect plot, GraphMarkerSpec marker) {
+  /// Whether it was drawn (it is in the plot).
+  bool _marker(Canvas canvas, Rect plot, GraphMarkerSpec marker) {
     final engine = state.engine;
     final index = engine.indexOfKey(marker.at);
-    if (index == null) return;
+    if (index == null) return false;
     final x = engine.xOf(index);
-    if (x < plot.left + 9 || x > plot.right - 9) return;
+    if (x < plot.left + 9 || x > plot.right - 9) return false;
     final at = Offset(x, plot.bottom - 12);
     canvas.drawCircle(at, 8.5, Paint()..color = engine.spec.style.background);
     canvas.drawCircle(
@@ -358,6 +365,7 @@ class _GraphPainter extends CustomPainter {
           ..strokeWidth = 1);
     final tp = _text(marker.text, marker.color, 10);
     tp.paint(canvas, at - Offset(tp.width / 2, tp.height / 2));
+    return true;
   }
 
   /// The dot on a mark's last row, with its ring swelling and fading.

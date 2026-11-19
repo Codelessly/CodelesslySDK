@@ -87,6 +87,9 @@ class GraphEngine extends ChangeNotifier {
   /// first row: the page's action loads older rows and sets them as data.
   void Function(Json view)? onNeedHistory;
   bool _askedHistory = false;
+
+  /// Older rows have been asked for and have not come yet.
+  bool get loadingHistory => _askedHistory && spec.x.moreHistory;
   Json? _pendingView;
 
   // --- layout ----------------------------------------------------------------
@@ -423,6 +426,7 @@ class GraphEngine extends ChangeNotifier {
   void setData(List<Json> data) {
     final key = spec.key;
     final lastKey = count == 0 ? null : rows.last[key];
+    final firstKey = count == 0 ? null : rows.first[key];
     _source = data;
     rows = applyGraphTransforms(data, spec.transforms);
     if (lastKey != null) {
@@ -433,7 +437,10 @@ class GraphEngine extends ChangeNotifier {
         viewport = viewport.afterAppend(count - 1 - at, follow: spec.x.follow == 'end');
       }
     }
-    _askedHistory = false;
+    // Older rows have come (or the rows are other rows altogether): the
+    // graph may ask again. A new row at the end answers nothing, so a
+    // request under way is not sent twice.
+    if (count == 0 || rows.first[key] != firstKey) _askedHistory = false;
     if (_morphFrom != null && count > 0 && plotWidth > 0) {
       _target = rows;
       _settle();
@@ -605,11 +612,19 @@ class GraphEngine extends ChangeNotifier {
       viewport = fit == 'points'
           ? GraphViewport(barSpacing: plotWidth / (slots - 1), rightOffset: slots - count - 0.5)
           : GraphViewport(barSpacing: plotWidth / slots, rightOffset: (slots - count).toDouble());
+    } else if (!spec.x.overscroll && plotWidth > 0 && count > 0) {
+      // The view never shows a stretch with no rows: zooming out stops when
+      // the rows there are fill the plot, and panning stops at the first
+      // row and at the last (with the spec's room right of it).
+      final room = math.max(0.0, spec.x.rightOffset);
+      final spacing = math.max(viewport.barSpacing, plotWidth / (count + room));
+      final least = math.min(plotWidth / spacing - count, room);
+      viewport = GraphViewport(barSpacing: spacing, rightOffset: viewport.rightOffset.clamp(least, room));
     } else if (spec.x.clamp) {
       viewport = viewport.clamp(count, plotWidth);
     }
     _changed();
-    if (!_askedHistory && count > 0 && plotWidth > 0 && from < spec.x.historyThreshold) {
+    if (!_askedHistory && spec.x.moreHistory && count > 0 && plotWidth > 0 && from < spec.x.historyThreshold) {
       _askedHistory = true;
       onNeedHistory?.call(viewState);
     }
@@ -638,6 +653,7 @@ class GraphEngine extends ChangeNotifier {
       'firstKey': last < first ? null : rows[first][spec.key],
       'lastKey': last < first ? null : rows[last][spec.key],
       'atEnd': viewport.atEnd,
+      'loadingHistory': loadingHistory,
       'auto': [for (var i = 0; i < spec.panes.length; i++) yAuto(i)],
       'domains': [
         for (var i = 0; i < spec.panes.length; i++) [yDomain(i).$1, yDomain(i).$2],

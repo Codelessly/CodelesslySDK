@@ -492,6 +492,45 @@ void main() {
       expect(engine.spec.panes.first.priceLines.first.color, wasUp ? tradingViewDown : tradingViewUp);
     });
 
+    testWidgets('dragging back never runs out: older bars keep loading until there are none', (tester) async {
+      await show(tester, const TradingViewPage(history: 1300));
+      final engine = engineOf(tester);
+      expect(engine.count, 400);
+      expect(find.byKey(const Key('loading')), findsNothing);
+
+      // One long drag back, in steps, while loads come and go under it.
+      final finger = await tester.startGesture(at(tester, 100, 250));
+      var sawLoading = false;
+      final counts = <int>{};
+      for (var i = 0; i < 300; i++) {
+        final before = (engine.viewState['firstKey'], engine.viewState['lastKey']);
+        final was = engine.count;
+        await finger.moveBy(const Offset(40, 0));
+        await tester.pump(const Duration(milliseconds: 50));
+        sawLoading |= find.byKey(const Key('loading')).evaluate().isNotEmpty;
+        counts.add(engine.count);
+        // A frame in which older bars arrived moved nothing but the drag.
+        if (engine.count != was) {
+          final moved = (engine.viewState['first']! as int) - (was == engine.count ? 0 : engine.count - was);
+          expect(moved, lessThanOrEqualTo(engine.indexOfKey(before.$1)! - (engine.count - was) + 1));
+          expect(engine.indexOfKey(before.$1), isNotNull);
+        }
+      }
+      await tester.pump(const Duration(seconds: 1));
+      await finger.up();
+      await tester.pumpAndSettle();
+
+      // 400, then 300 more at a time, to all 1300; then it stops asking.
+      expect(counts, {400, 700, 1000, 1300});
+      expect(sawLoading, isTrue);
+      expect(page(tester).loads, 3);
+      expect(page(tester).moreHistory, isFalse);
+      expect(engine.spec.x.moreHistory, isFalse);
+      expect(find.byKey(const Key('loading')), findsNothing);
+      // The view is at the very first bars now.
+      expect(engine.visible.$1, 0);
+    });
+
     testWidgets('time labels are at the months, a year at its January; closer in, at the days', (tester) async {
       await show(tester, const TradingViewPage());
       final engine = engineOf(tester);

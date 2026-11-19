@@ -180,6 +180,51 @@ void main() {
     });
   });
 
+  group('scrolling back without end', () {
+    test('a request under way is not sent again when a new row arrives', () {
+      final e = engineOf(stockRows(500));
+      final asked = <Json>[];
+      e.onNeedHistory = asked.add;
+      e.panBy(100000);
+      expect(asked, hasLength(1));
+      expect(e.viewState['loadingHistory'], isTrue);
+      // A live row while the older ones are on their way.
+      e.setData(stockRows(501));
+      e.panBy(100000);
+      expect(asked, hasLength(1));
+      expect(e.viewState['loadingHistory'], isTrue);
+      // They arrive: loading is over, and the next edge asks again.
+      e.setData(stockRows(701, start: -200));
+      expect(e.viewState['loadingHistory'], isFalse);
+      e.panBy(100000);
+      expect(asked, hasLength(2));
+    });
+
+    test('load after load, the view never jumps', () {
+      final e = engineOf(stockRows(300));
+      var start = 0;
+      e.onNeedHistory = (_) => start -= 200;
+      for (var i = 0; i < 4; i++) {
+        e.panBy(100000);
+        final before = (e.viewState['firstKey'], e.viewState['lastKey']);
+        e.setData(stockRows(300 - start, start: start));
+        expect((e.viewState['firstKey'], e.viewState['lastKey']), before, reason: 'load ${i + 1}');
+      }
+      expect(e.count, 1100);
+    });
+
+    test('with no more history the graph stops asking', () {
+      final spec = stockSpec();
+      (spec['x']! as Json)['moreHistory'] = false;
+      final e = engineOf(stockRows(500), spec: spec);
+      final asked = <Json>[];
+      e.onNeedHistory = asked.add;
+      e.panBy(100000);
+      expect(asked, isEmpty);
+      expect(e.viewState['loadingHistory'], isFalse);
+    });
+  });
+
   group('cursor', () {
     test('the cursor is the row under the pointer, at its close', () {
       final e = engineOf(stockRows(500));

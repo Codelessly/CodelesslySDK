@@ -41,13 +41,24 @@ List<Json> tradingViewBars(int days, {int seed = 21}) {
   ];
 }
 
-Json tradingViewSpec({required List<Json> rows, String? fontFamily, String countdown = ''}) {
+Json tradingViewSpec({required List<Json> rows, String? fontFamily, String countdown = '', bool moreHistory = true}) {
   final last = rows.last;
   final up = (last['c']! as double) >= (last['o']! as double);
   return {
     'type': 'graph',
     'key': 't',
-    'x': {'label': 't', 'format': 'MMM d', 'ticks': 'calendar', 'barSpacing': 6, 'rightOffset': 5, 'axisHeight': 28},
+    'x': {
+      'label': 't',
+      'format': 'MMM d',
+      'ticks': 'calendar',
+      'barSpacing': 6,
+      'rightOffset': 5,
+      'axisHeight': 28,
+      // Older bars are asked for a screen and more before the first one is
+      // reached, so a drag back never runs out of bars.
+      'historyThreshold': 200,
+      'moreHistory': moreHistory,
+    },
     'panes': [
       {
         'y': {
@@ -71,8 +82,12 @@ Json tradingViewSpec({required List<Json> rows, String? fontFamily, String count
         ],
         // Earnings and dividends, on their days.
         'markers': [
-          for (var i = rows.length - 20; i > 0; i -= 63) {'at': rows[i]['t'], 'text': 'E', 'color': _hex(tradingViewDown)},
-          for (var i = rows.length - 48; i > 0; i -= 63) {'at': rows[i]['t'], 'text': 'D', 'color': '#FF2962FF'},
+          // By the day itself, so a badge stays on its day as older bars load.
+          for (final r in rows)
+            if (((r['t']! as int) ~/ 86400000) % 63 == 5)
+              {'at': r['t'], 'text': 'E', 'color': _hex(tradingViewDown)}
+            else if (((r['t']! as int) ~/ 86400000) % 63 == 40)
+              {'at': r['t'], 'text': 'D', 'color': '#FF2962FF'},
         ],
       },
     ],
@@ -93,21 +108,48 @@ Json tradingViewSpec({required List<Json> rows, String? fontFamily, String count
 String tradingViewVolume(num v) => '${(v / 1e6).toStringAsFixed(2)} M';
 
 class TradingViewPage extends StatefulWidget {
-  const TradingViewPage({super.key, this.fontFamily});
+  const TradingViewPage({super.key, this.fontFamily, this.history = 2800, this.loadDelay = const Duration(milliseconds: 350)});
   final String? fontFamily;
+
+  /// The bars there are in all (the page shows the last 400 and loads the
+  /// rest as the view goes back), and how long a load takes.
+  final int history;
+  final Duration loadDelay;
 
   @override
   State<TradingViewPage> createState() => TradingViewPageState();
 }
 
 class TradingViewPageState extends State<TradingViewPage> {
-  List<Json> rows = tradingViewBars(400);
+  /// Every bar the "server" has; [rows] is the part loaded so far.
+  late final List<Json> all = tradingViewBars(widget.history);
+  late List<Json> rows = all.sublist(all.length - 400);
+  int loads = 0;
+
+  /// How many of [all], from its end, are loaded.
+  int loaded = 400;
+
+  bool get moreHistory => loaded < all.length;
+  bool get loading => (graph['view'] as Json?)?['loadingHistory'] == true;
+
+  /// The graph asks for older bars: 300 more come after a moment, put
+  /// before the ones there are.
+  Future<void> loadOlder() async {
+    loads++;
+    await Future<void>.delayed(widget.loadDelay);
+    if (!mounted) return;
+    final from = (all.length - loaded - 300).clamp(0, all.length);
+    setState(() {
+      rows = [...all.sublist(from, all.length - loaded), ...rows];
+      loaded = all.length - from;
+    });
+  }
   Json graph = const {};
 
   /// The time to the bar's close, as the page's clock would write it.
   String countdown = '03:17:11';
 
-  Json get spec => tradingViewSpec(rows: rows, fontFamily: widget.fontFamily, countdown: countdown);
+  Json get spec => tradingViewSpec(rows: rows, fontFamily: widget.fontFamily, countdown: countdown, moreHistory: moreHistory);
 
   void setCountdown(String next) => setState(() => countdown = next);
   Json get view => graph['view']! as Json;
@@ -142,7 +184,12 @@ class TradingViewPageState extends State<TradingViewPage> {
         child: Stack(
           children: [
             Positioned.fill(
-              child: CodelesslyGraph(spec: spec, data: rows, onState: (s) => setState(() => graph = s)),
+              child: CodelesslyGraph(
+                spec: spec,
+                data: rows,
+                onState: (s) => setState(() => graph = s),
+                onNeedHistory: (_) => loadOlder(),
+              ),
             ),
             Positioned(
               left: 10,
@@ -160,6 +207,7 @@ class TradingViewPageState extends State<TradingViewPage> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
+                        if (loading) Text('Loading older bars\u2026  ', key: const Key('loading'), style: text(12, const Color(0xFF787B86))),
                         Text('Vol ', style: text(12, tradingViewInk)),
                         Text(tradingViewVolume(bar['v']! as num),
                             key: const Key('volume'), style: text(12, barUp ? tradingViewUp : tradingViewDown)),

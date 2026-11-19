@@ -58,9 +58,11 @@ class GraphXSpec {
     this.rightOffset = 3,
     this.follow = 'end',
     this.clamp = true,
+    this.overscroll = false,
     this.axisHeight = 24,
     this.labels = true,
     this.historyThreshold = 10,
+    this.moreHistory = true,
     this.fit = 'none',
     this.slots,
     this.tickEvery,
@@ -87,6 +89,12 @@ class GraphXSpec {
 
   /// The view keeps some rows in it however far it is dragged.
   final bool clamp;
+
+  /// false: the view stays on the rows there are. Zooming out stops when
+  /// they fill the plot, and panning stops at the first row and at the last
+  /// (with [rightOffset] of room). true: it may be dragged and zoomed past
+  /// them, over empty plot (as [clamp] allows).
+  final bool overscroll;
   final double axisHeight;
 
   /// Whether the time axis writes its labels.
@@ -94,6 +102,10 @@ class GraphXSpec {
 
   /// Rows from the first one at which the graph asks for older rows.
   final double historyThreshold;
+
+  /// Whether there are rows older than the first: the page sets it false
+  /// once it has loaded them all, and the graph stops asking.
+  final bool moreHistory;
 
   /// `none`: the viewport is the user's. `points`: every position fits
   /// across the plot, the first on its left edge and the last on its right
@@ -128,9 +140,11 @@ class GraphXSpec {
         rightOffset: _d(j['rightOffset'], 3),
         follow: _s(j['follow'], 'end'),
         clamp: _b(j['clamp'], true),
+        overscroll: _b(j['overscroll'], false),
         axisHeight: _d(j['axisHeight'], 24),
         labels: _b(j['labels'], true),
         historyThreshold: _d(j['historyThreshold'], 10),
+        moreHistory: _b(j['moreHistory'], true),
         fit: _s(j['fit'], 'none'),
         slots: j['slots'] is int ? j['slots']! as int : null,
         tickEvery: j['tickEvery'] is int ? j['tickEvery']! as int : null,
@@ -148,9 +162,11 @@ class GraphXSpec {
         'rightOffset': rightOffset,
         'follow': follow,
         'clamp': clamp,
+        'overscroll': overscroll,
         'axisHeight': axisHeight,
         'labels': labels,
         'historyThreshold': historyThreshold,
+        'moreHistory': moreHistory,
         'fit': fit,
         if (slots != null) 'slots': slots,
         if (tickEvery != null) 'tickEvery': tickEvery,

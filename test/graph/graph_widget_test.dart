@@ -166,10 +166,65 @@ void main() {
     await tester.pump();
     expect(page.viewState['barSpacing']! as double, greaterThan(8));
     expect(engine.indexAt(300), closeTo(under, 1e-6));
+    // Out again, from back in the rows (at the last row the view has no
+    // room to give on the right, and the zoom is about that edge instead).
+    engine.panBy(1600);
+    final back = engine.indexAt(300);
     await tester.sendEventToBinding(pointer.scroll(const Offset(0, 900)));
     await tester.pump();
     expect(page.viewState['barSpacing']! as double, lessThan(8));
-    expect(engine.indexAt(300), closeTo(under, 1e-6));
+    expect(engine.indexAt(300), closeTo(back, 1e-6));
+  });
+
+  testWidgets('zooming out stops when the rows fill the plot; no stretch of it is ever empty', (tester) async {
+    final page = await pump(tester);
+    final engine = engineOf(tester);
+    final pointer = TestPointer(1, PointerDeviceKind.mouse)..hover(at(tester, 300, 150));
+    for (var i = 0; i < 12; i++) {
+      await tester.sendEventToBinding(pointer.scroll(const Offset(0, 1500)));
+    }
+    await tester.pump();
+    // 500 rows and the 3 rows of room the spec keeps on the right, across
+    // the 800 px plot: the first row on the left edge, no further out.
+    expect(page.viewState['barSpacing']! as double, closeTo(800 / 503, 1e-9));
+    expect(engine.from, closeTo(-0.5, 1e-9));
+    expect(engine.to, closeTo(502.5, 1e-9));
+    expect(engine.visible, (0, 499));
+    // Nor can it be dragged off the rows, either way.
+    await slowDrag(tester, at(tester, 400, 150), const Offset(300, 0));
+    expect(engine.from, closeTo(-0.5, 1e-9));
+    await slowDrag(tester, at(tester, 400, 150), const Offset(-300, 0));
+    expect(engine.to, closeTo(502.5, 1e-9));
+    // Zoomed in, a drag past the last row stops with the same room.
+    for (var i = 0; i < 6; i++) {
+      await tester.sendEventToBinding(pointer.scroll(const Offset(0, -600)));
+    }
+    await tester.pump();
+    engine.panBy(-1000000);
+    await tester.pump();
+    expect(page.viewState['rightOffset'], 3);
+    expect(page.viewState['last'], 499);
+  });
+
+  testWidgets('a few rows fill the plot from the start', (tester) async {
+    final page = await pump(tester, rows: stockRows(40));
+    final engine = engineOf(tester);
+    expect(page.viewState['barSpacing']! as double, closeTo(800 / 43, 1e-9));
+    expect(engine.visible, (0, 39));
+    expect(engine.from, closeTo(-0.5, 1e-9));
+  });
+
+  testWidgets('a spec may let the view past its rows (overscroll)', (tester) async {
+    final spec = stockSpec();
+    (spec['x']! as Json)['overscroll'] = true;
+    final page = await pump(tester, spec: spec);
+    final pointer = TestPointer(1, PointerDeviceKind.mouse)..hover(at(tester, 300, 150));
+    for (var i = 0; i < 12; i++) {
+      await tester.sendEventToBinding(pointer.scroll(const Offset(0, 1500)));
+    }
+    await tester.pump();
+    expect(page.viewState['barSpacing'], 0.5);
+    expect(engineOf(tester).from, lessThan(-100));
   });
 
   testWidgets('two fingers zoom about their middle', (tester) async {
