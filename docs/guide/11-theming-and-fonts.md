@@ -117,6 +117,12 @@ The default `HttpFontFetcher` downloads:
 
 Fonts are fetched once per run. They are not cached on disk by the SDK.
 
+A site written in the notation is published the same way: the families its texts and its theme's text styles name,
+and the family its theme names for all its text (`"fontFamily": "Fraunces"`, `"titleFontFamily"`) at the weights its
+texts use, are the layouts' fonts, so a Google Font draws with no font file shipped. A family the site declares in
+`site.json`'s `fonts` is read from its file instead. The render command fetches the same families from Google Fonts
+and keeps them in a cache (tool/render/README.md, Fonts).
+
 ### Fonts shipped with the app
 
 For offline apps, or to avoid the first-run download, ship the fonts.

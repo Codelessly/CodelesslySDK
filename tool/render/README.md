@@ -62,6 +62,7 @@ site: navigation may name a canvas of another page.
 | `--full-page` | Capture the whole page: its own scroll view (the largest one a user can scroll, at least 60 % of the window's width: a window of panes that each scroll, a mail list beside its reader, is captured at the window's size; lists and decorations that do not scroll add nothing) over its whole extent, while the window keeps the size asked for, as a browser's full-page screenshot does. What stands beside that scroll view (an app frame's sidebar, a rail) is as tall as the window: its content shows once, in the first window, and its background (its fill and border) carries on to the capture's bottom, so nothing under it is left unpainted. `${screen.height}` and anything sized or pinned to the window (a drawer pinned to the window's top and bottom) stay as on the device. What a reader sees once is drawn once: content fixed to the window over the page (a header, a drawer, a bar pinned to the bottom, a canvas's bottom bar or floating button) is drawn where a user first sees it, in the first window; with anything open over the page (a modal, dialog, drawer, sheet, dropdown menu or toast) the capture is the window as it shows, its dimmed backdrop over all of it, not the whole page; a list that loads more as its end comes into view (`onEnterViewport` on a sentinel) loads nothing more while the page passes through the window to be drawn; a page laid out differently once it scrolls (a header that shrinks on a `scroll` reaction) continues below the first window as laid out scrolled, with no rows lost or doubled at a seam; a `sticky` node is drawn once, in its place in the page (not pinned at the top of every window); after `--navigate` or a tap that navigates, the capture is the page navigated to, at its own height (a page covered by another is never measured or drawn). The capture always starts at the page's top, whatever a step scrolled it to (a `--tap` scrolls its node into view first); without `--full-page` the capture is the window where the steps left the page, which is how to see a sticky header pinned. `--dump-layout` gives every box where the PNG draws it. |
 | (default faces) | Roboto (text that names no family), Roboto Mono (`monospace`, `mono`, `ui-monospace`, and the notation's `Text.mono`: no `font_fallback` for them) and Material Icons, from the Flutter SDK; every style falls back last to the system's symbol font (Segoe UI Symbol, Apple Symbols, DejaVu Sans or Noto Sans Symbols 2, whichever is there) for the arrows, `↵`, `⌘` and marks the others lack, as a device's own fallback fonts draw them. Without one, those are `missing_glyph`. |
 | `--fonts <dir>` | Font files (`.ttf`, `.otf`, `.woff`), searched recursively and read by the family, weight and style inside each file: a font package folder (`node_modules/@fontsource/<family>`, or the whole `node_modules/@fontsource`), a site's fonts folder, or `system` (the system's font directories). Repeatable. Of a package's subset files for one face (`latin`, `latin-ext`, `cyrillic`...), the one with Latin text's characters is used. `.woff2` is not read (it is reported, with the `.woff` to use instead). |
+| `--no-google-fonts` | Fetch nothing from Google Fonts (also `CODELESSLY_NO_GOOGLE_FONTS=1`, for CI): a family no file provides is drawn from the cache (`CODELESSLY_FONT_CACHE`, else `.dart_tool/codelessly_google_fonts`) or falls back to a face of its class on this machine ([Fonts](#fonts)). |
 | `--theme <mode>` | `light`, `dark` or `system`: the theme mode the site starts in, as a `setThemeMode` action sets it (named colors, text styles and controls follow). PNG names end `-<mode>`; a later `--tap` on the site's switch changes it. |
 | `--tap <id>` | Tap the node where it shows. `<id>#<n>` taps the n-th copy (from 0) of a node a list repeats, counting only the copies shown (a copy a condition or a filter hides is not counted: `message#0` is the first row a reader sees); `<template>#<n>/<id>` the node inside a list's n-th copy (`evCard#0/evReserve`, the same node as `evReserve#0`). `<id>@<n>` taps the n-th part (from 0) of a control with several: a segment of a `segmentedButton`, a tab of a `tabBar` or `tabs`, a destination of a `navigationBar` or `bottomNavigationBar` (`--tap billing@1`). A unique part `id` or `value` in a control's `tabs`, `segments` or `destinations` can be tapped directly (`--tap stay` for a tab with `"id": "stay"`). `@<n>` also counts the numbered parts of a design system's control that take a tap (`--tap sorter@1` for a Segments call `sorter`, whose cells are `cell0`, `cell1`...). A tap on a block that takes no tap itself goes to the one part inside it that does (`--tap dates` for the one field of a picker); with several, the warning names them. A step whose node is not found, or takes no tap, names the nodes it may have meant (`Perhaps: datePicker1, datePicker2`): the parts inside the block it names, else the nodes whose name is like it. A node drawn for show inside one that takes the press (a Table's row checkbox, `ignorePointer`) is tapped where it shows, so its row gets the press, as in a browser. A list row's swipe action, once a `--drag` revealed it, is tapped by its id or label (`--tap delete`, `--tap Delete`), or under its row when several show (`--tap ListRow1#0/delete`). A focused text field elsewhere is unfocused first, as a click outside a field does in a browser (its blur reactions run before the tap's). The built-in confirm dialog's buttons are `confirmOk` and `confirmCancel` (`--tap confirmOk`; `--dump-layout` lists them with their text). Modifier keys held through the tap go before the target: `--tap shift+row#3`, `--tap ctrl+row#5` (`mod+`: Control, Command on a Mac; `alt+`, `meta+`), as on `--double-tap`, `--long-press`, `--right-click`, `--hover` and `--drag` (`--drag alt+clip=40,0`); the reaction reads them as `result.shift`, `result.ctrl`, `result.meta` (Control or Command), `result.alt`. |
 | `--tap <calendar>@<yyyy-MM-dd>` | Tap a visible day in an inline `calendar` (for example `--tap stay@2026-11-23`). Repeat to pick the range end. A day of another month is an error: tap the calendar's next-month arrow first. |
@@ -213,17 +214,46 @@ the file (its `name` and `OS/2` tables), so file names do not matter. It always 
 Flutter SDK ships: 100, 300, 400, 500, 700, 900) and the Material Icons font, from the Flutter SDK's cache.
 
 Text that names no family is drawn in Roboto, the default family of a Flutter app on Android and on the web (in
-an app it is the platform's font). A family the command does not have is drawn in Roboto and reported as
-`font_fallback`, whose message names the family, weight and style asked for, the weights the family has, the
-directories searched and any file of that family found but not read; a missing weight next to one the family has
-(600 when there are 500 and 700) is drawn with the nearest and not reported. A variable font (a file with a `wght` axis) has every weight of
+an app it is the platform's font).
+
+**Google Fonts.** A family that is neither among the command's own faces, the `--fonts` directories nor the site's
+declared files is fetched from Google Fonts by family, weight and style, as an app fetches it (the SDK's
+`HttpFontFetcher`: the Google Fonts CSS API's TrueType file), and drawn. Each file is kept in a cache directory,
+`CODELESSLY_FONT_CACHE` or else `.dart_tool/codelessly_google_fonts` in the SDK checkout, so a second run needs no
+network; the families the pages ask for are fetched before the first screen is drawn. `--no-google-fonts` (or
+`CODELESSLY_NO_GOOGLE_FONTS=1`, for CI) fetches nothing: the cache is still read. A fetch that fails (no network)
+never fails a render: the family falls back as below, and its `font_fallback` warning says Google Fonts gave no
+file for it.
+
+A family Google Fonts does not have (a system or commercial face) is drawn in an open face fetched the same way,
+the same on every machine:
+
+| Asked for | Drawn in |
+|---|---|
+| Georgia | Gelasio (Georgia's metrics) |
+| Times New Roman, Times | Tinos (Times New Roman's metrics) |
+| Arial, Helvetica, Helvetica Neue | Arimo (Arial's metrics) |
+| Courier New, Courier | Cousine (Courier New's metrics) |
+| another serif (by its name: `serif`, Garamond, Baskerville, Didot…) | Gelasio |
+| a slab (Rockwell, Museo Slab…) | Roboto Slab |
+| a script (Brush Script, Freestyle Script, `cursive`…) | Dancing Script |
+| a monospace face | Roboto Mono (built in) |
+| a sans | Roboto (built in) |
+
+Only where fetching is off or fails (and the cache has no file) is it the machine's own face of the class: a serif
+the first of Georgia, Times New Roman, Garamond, Book Antiqua (DejaVu or Liberation Serif on Linux), a slab Rockwell
+else a serif, a script Brush Script or Freestyle Script else a serif; Roboto for a sans. Such a picture can differ
+between machines. A family drawn in another face is reported as `font_fallback`, whose message names the family,
+weight and style asked for, the weights the family has, where the command looked (Google Fonts among them) and
+any file of that family found but not read; a missing weight next to one the family has (600 when there are 500
+and 700) is drawn with the nearest and not reported. A variable font (a file with a `wght` axis) has every weight of
 its axis, whether declared once in `site.json` or found under `--fonts`.
 
 Web fonts: a `.woff` file is decoded by the command (its tables are zlib streams) and read as the TrueType or
 OpenType file it wraps. A `.woff2` file (Brotli-compressed) is not read: it is reported, and an npm
 `@fontsource/<family>` package has a `.woff` of every face beside its `.woff2`, so `--fonts
 node_modules/@fontsource/<family>` works as it is. `--fonts system` adds the system's font directories
-(`/usr/share/fonts`, `~/.fonts`, `/Library/Fonts`, `C:\Windows\Fonts`...). The command downloads nothing.
+(`/usr/share/fonts`, `~/.fonts`, `/Library/Fonts`, `C:\Windows\Fonts`...). Besides Google Fonts' files (above), the command downloads nothing.
 
 ## Images
 

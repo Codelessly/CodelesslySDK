@@ -15,6 +15,7 @@ import 'package:codelessly_api/codelessly_api.dart' show FontFamily, PublishFont
 import 'package:codelessly_sdk/codelessly_sdk.dart' show FontFetcher;
 import 'package:codelessly_sdk/src/app/site_files.dart' show sfntOf;
 
+import 'google_fonts.dart' show googleStandInOf;
 import 'site.dart' show sitePath;
 
 export 'package:codelessly_sdk/src/app/site_files.dart' show sfntOf;
@@ -366,6 +367,14 @@ class DirectoryFontFetcher implements FontFetcher {
     }
     return null;
   }
+  /// The open face [family] is drawn in when it has no file and Google
+  /// Fonts none of it ([googleStandInOf]), when that face is among [faces]
+  /// (fetched, or in the cache): the same on every machine.
+  FontFace? openStandIn(String family, int weight, bool italic) {
+    final alt = googleStandInOf(family);
+    return alt == null ? null : match(alt, weight, italic);
+  }
+
   final List<FontMiss> misses = [];
 
   /// The face for [family] nearest [weight] and [italic]; null when the
@@ -417,7 +426,7 @@ class DirectoryFontFetcher implements FontFetcher {
     // A named monospace face no file provides (IBM Plex Mono) is drawn in
     // Roboto Mono, as `monospace` is, and said.
     final mono = generic == null && fontClassOf(font.family) == FontClass.mono ? match('Roboto Mono', font.weight, font.italic) : null;
-    final face = match(font.family, font.weight, font.italic) ?? generic ?? mono ?? classFace(font.family, font.weight, font.italic) ?? match('Roboto', font.weight, font.italic);
+    final face = match(font.family, font.weight, font.italic) ?? generic ?? openStandIn(font.family, font.weight, font.italic) ?? mono ?? classFace(font.family, font.weight, font.italic) ?? match('Roboto', font.weight, font.italic);
     if (face == null || (generic == null || !identical(face, generic)) && (face.family.toLowerCase() != font.family.toLowerCase() ||
         face.weight != font.weight || face.italic != font.italic)) {
       final miss = (

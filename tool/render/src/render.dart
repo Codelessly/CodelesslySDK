@@ -44,6 +44,7 @@ import 'package:codelessly_sdk/src/render/controls/text_field.dart' show RenderT
 import 'args.dart';
 import 'compare.dart';
 import 'fonts.dart';
+import 'google_fonts.dart';
 import 'prepare.dart';
 import 'publish.dart';
 import 'site.dart';
@@ -434,6 +435,19 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       components: [for (final t in components.types) components[t]!.document.toJson()],
       theme: prepareTheme(themeJson ?? const {}, defaultFamily: 'Roboto'),
       fonts: declared);
+  // The families the pages use that no file here provides, from Google
+  // Fonts (as an app has them), or the open face that stands for them; kept
+  // in the cache, so a second run needs no network.
+  final google = renderUsesGoogleFonts
+      ? GoogleFontCache(dir: GoogleFontCache.defaultDir(Directory.current.path), enabled: args.googleFonts && !GoogleFontCache.offByEnvironment)
+      : null;
+  googleFonts = google;
+  if (google != null) {
+    await tester.runAsync(() => addGoogleFonts(faces, [
+          for (final f in published.bundle.model.fonts.values)
+            if (f.url == null) (family: f.family, weight: f.weight, italic: f.italic),
+        ], google));
+  }
   // A page's nodes before a component's of the same id (a page's row3 was
   // reported in a component's file: test 9, admin 4 and kanban 9); a node
   // box is placed by its canvas or its component instead ([_fileOf]).
@@ -875,6 +889,12 @@ Future<void> _renderAll(
         ];
         final looked = [
           'the built-in Roboto and Material Icons',
+          if (googleFonts != null)
+            !googleFonts!.enabled
+              ? 'not Google Fonts (fetching is off: --no-google-fonts or CODELESSLY_NO_GOOGLE_FONTS; the cache was read)'
+              : googleFonts!.failed.contains(m.family)
+                  ? 'Google Fonts, which gave no file for it (not a Google Fonts family, or no network)'
+                  : 'Google Fonts',
           if (fontUsers.isNotEmpty) 'site.json\'s fonts',
           if (args.fontDirs.isNotEmpty) fontDirsOf(args.fontDirs).join(', ') else 'no --fonts directory',
         ].join('; ');
@@ -1091,6 +1111,10 @@ Future<void> _countersSettled(WidgetTester tester) async {
     await tester.pump(const Duration(milliseconds: 100));
   }
 }
+
+/// This run's Google Fonts ([GoogleFontCache]): what the report says of a
+/// family it could not fetch.
+GoogleFontCache? googleFonts;
 
 /// Waits (bounded, 10 s) until none of this run's font fetches is in flight
 /// and what they fetched is registered, pumping so the text that asked for

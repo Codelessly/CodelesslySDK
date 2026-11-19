@@ -35,6 +35,7 @@ final class RenderArgs {
     this.compareMap = const {},
     this.now,
     this.imageMap = const {},
+    this.googleFonts = true,
   });
 
   static const defaultSizes = [Size(390, 844), Size(834, 1112), Size(1440, 900)];
@@ -87,6 +88,11 @@ final class RenderArgs {
   /// `assets/art`), so images a document names by URL show in the capture.
   final Map<String, String> imageMap;
 
+  /// Whether a family no file provides is fetched from Google Fonts (and
+  /// kept in the cache); `--no-google-fonts` turns it off (the cache is
+  /// still read).
+  final bool googleFonts;
+
   /// These arguments with other [sizes] and [screens].
   RenderArgs copyWith({List<Size>? sizes, List<String>? screens}) => RenderArgs(
         inputs: inputs,
@@ -107,6 +113,7 @@ final class RenderArgs {
         compareMap: compareMap,
         now: now,
         imageMap: imageMap,
+        googleFonts: googleFonts,
       );
 }
 
@@ -134,6 +141,10 @@ Options:
                           Roboto, Roboto Mono (monospace) and Material Icons are
                           built in; symbols they lack (arrows) fall back to the
                           system's symbol font.
+  --no-google-fonts       Fetch nothing from Google Fonts (also CODELESSLY_NO_GOOGLE_FONTS=1):
+                          a family no file provides is drawn from the cache
+                          (CODELESSLY_FONT_CACHE, else .dart_tool/codelessly_google_fonts)
+                          or falls back to a face of its class on this machine.
   --theme <mode>          Start in this theme mode: light, dark or system (the
                           device's: light), as a setThemeMode action sets it;
                           named colors, text styles and controls follow. PNGs
@@ -235,6 +246,7 @@ RenderArgs parseArgs(List<String> argv) {
   DateTime? now;
   final compareMap = <String, String>{};
   final imageMap = <String, String>{};
+  var googleFonts = true;
   String next(int i, String flag) {
     if (i + 1 >= argv.length) throw FormatException('$flag needs a value.');
     return argv[i + 1];
@@ -255,6 +267,8 @@ RenderArgs parseArgs(List<String> argv) {
         ];
       case '--screen':
         screens.add(next(i++, a));
+      case '--no-google-fonts':
+        googleFonts = false;
       case '--full-page':
         fullPage = true;
       case '--dump-layout':
@@ -332,6 +346,7 @@ RenderArgs parseArgs(List<String> argv) {
     compareMap: compareMap,
     now: now,
     imageMap: imageMap,
+    googleFonts: googleFonts,
   );
 }
 

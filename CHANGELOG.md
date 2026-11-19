@@ -4,6 +4,20 @@ Needs the codelessly_api of the same release.
 
 ### Behaviour changes (read before upgrading)
 
+- **Render tool, fonts from Google Fonts**: a family that is neither among the command's own faces, the `--fonts`
+  directories nor the site's declared files is fetched from Google Fonts by family, weight and style (the SDK's
+  `HttpFontFetcher`, as an app fetches it), kept in a cache directory (`CODELESSLY_FONT_CACHE`, else
+  `.dart_tool/codelessly_google_fonts`; a second run needs no network) and drawn; it was drawn in Roboto, or in a
+  face of its class on the machine. A family Google Fonts does not have is drawn in an open face fetched the same
+  way, the same on every machine: Georgia in Gelasio, Times New Roman in Tinos, Arial and Helvetica in Arimo,
+  Courier New in Cousine, another serif in Gelasio, a slab in Roboto Slab, a script in Dancing Script (a monospace
+  face is Roboto Mono and a sans Roboto, as before). `--no-google-fonts` (or `CODELESSLY_NO_GOOGLE_FONTS=1`) fetches
+  nothing; then, or when a fetch fails (no network), the cache is read and the family falls back to the machine's
+  face of its class as before, and the `font_fallback` warning says so. A render never fails for a font.
+- **A site's theme family is one of its pages' fonts** (the render tool's publish, `publishPages`): the family the
+  theme names for all its text (`"fontFamily"`, `"titleFontFamily"`) at each weight the pages' texts use, so an app
+  fetches it from Google Fonts with the page; it was fetched only once drawn. A family `site.json` declares a file
+  for is read from that file, as before.
 - **A theme with no `surface` on a dark ground** (a site's dark `paper` and its `ink`): the controls and the
   runtime's menus, tooltips, pickers and dialogs take that ground as their surface and the theme's `ink` as their
   text (`surfaceRoles`, `themeDataOf`); they took white paper and near-black ink. A light ground, and a theme that
