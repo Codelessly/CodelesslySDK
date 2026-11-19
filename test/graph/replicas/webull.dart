@@ -87,7 +87,7 @@ Json webullSpec({required List<Json> rows, required double baseline, bool day = 
         ],
       },
     ],
-    'crosshair': {'on': 'hover', 'line': 'dashed', 'timeFormat': day ? 'MM/dd HH:mm' : 'MM/dd/yyyy'},
+    'crosshair': {'on': 'touch', 'line': 'dashed', 'timeFormat': day ? 'MM/dd HH:mm' : 'MM/dd/yyyy'},
     'interactions': {
       'dragPan': false,
       'wheelZoom': false,

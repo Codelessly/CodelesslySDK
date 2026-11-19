@@ -318,6 +318,23 @@ void main() {
       expect(find.byKey(const Key('card')), findsNothing);
     });
 
+    testWidgets('a finger does what the mouse does: the card from the moment it is down, gone when it lifts', (tester) async {
+      await show(tester, const WebullPage());
+      final engine = engineOf(tester);
+      final finger = await tester.startGesture(at(tester, engine.xOf(87), 200));
+      await tester.pump();
+      expect(page(tester).cursor!['index'], 87);
+      expect(find.byKey(const Key('card')), findsOneWidget);
+      for (var i = 0; i < 4; i++) {
+        await finger.moveBy(const Offset(10, 0));
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(page(tester).cursor!['index'], greaterThan(87));
+      await finger.up();
+      await tester.pump();
+      expect(find.byKey(const Key('card')), findsNothing);
+    });
+
     testWidgets('a month: a row a day, each change from the day before', (tester) async {
       await show(tester, const WebullPage());
       await tester.tap(find.byKey(const Key('range-1M')));
@@ -382,6 +399,59 @@ void main() {
       await tester.pump();
       expect(engine.viewport.barSpacing, greaterThan(6));
       expect(engine.indexAt(300), closeTo(under, 1e-6));
+    });
+
+    testWidgets('a mouse drag pans as a finger does, and the crosshair stays under the mouse', (tester) async {
+      await show(tester, const TradingViewPage());
+      final engine = engineOf(tester);
+      final last = engine.visible.$2;
+      final pointer = await mouse(tester);
+      await pointer.moveTo(at(tester, 300, 250));
+      await tester.pump();
+      final hovered = (page(tester).graph['cursor']! as Json)['index']! as int;
+      await pointer.down(at(tester, 300, 250));
+      for (var i = 0; i < 10; i++) {
+        await pointer.moveBy(const Offset(20, 0));
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      await tester.pump(const Duration(seconds: 1));
+      // The view moved by the drag (less the slop before it starts).
+      expect(engine.visible.$2, inInclusiveRange(last - 34, last - 28));
+      // The lines are where the mouse is now; the bar that was under it at
+      // the start has come along with it.
+      final cursor = page(tester).graph['cursor']! as Json;
+      expect(cursor['x'], closeTo(engine.xOf(cursor['index']! as int), 1e-9));
+      expect(((cursor['x']! as double) - 500).abs(), lessThan(engine.viewport.barSpacing));
+      expect((cursor['index']! as int) - hovered, inInclusiveRange(-1, 4));
+      await pointer.up();
+      await tester.pumpAndSettle();
+      expect(page(tester).graph['cursor'], isNotNull, reason: 'a mouse still hovers after it lets go');
+    });
+
+    testWidgets('a finger: a drag pans, a long press brings the crosshair, lifting clears it', (tester) async {
+      await show(tester, const TradingViewPage());
+      final engine = engineOf(tester);
+      final last = engine.visible.$2;
+      final finger = await tester.startGesture(at(tester, 300, 250));
+      for (var i = 0; i < 10; i++) {
+        await finger.moveBy(const Offset(20, 0));
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      await tester.pump(const Duration(seconds: 1));
+      expect(page(tester).graph['cursor'], isNull, reason: 'a drag is a pan, not a crosshair');
+      await finger.up();
+      await tester.pumpAndSettle();
+      expect(engine.visible.$2, lessThanOrEqualTo(last - 25));
+      final view = engine.viewport;
+      final press = await tester.startGesture(at(tester, 300, 250));
+      await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+      expect(page(tester).graph['cursor'], isNotNull);
+      await press.moveBy(const Offset(60, 0));
+      await tester.pump();
+      expect(engine.viewport, view, reason: 'a held finger scrubs: nothing pans');
+      await press.up();
+      await tester.pump();
+      expect(page(tester).graph['cursor'], isNull);
     });
 
     testWidgets('the price axis dragged is in hand; a double tap fits it again', (tester) async {

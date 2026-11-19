@@ -247,7 +247,10 @@ class CodelesslyGraphState extends State<CodelesslyGraph> with TickerProviderSta
             // A scrub: the cursor is under the finger from the moment it is down.
             if (_touch) engine.setCursor(e.localPosition);
           },
-          onPointerMove: (e) => _touch ? engine.setCursor(e.localPosition) : null,
+          // A mouse with its button down sends no hover: the crosshair
+          // follows it through a drag all the same.
+          onPointerMove: (e) =>
+              _touch || (_hover && e.kind == PointerDeviceKind.mouse) ? engine.setCursor(e.localPosition) : null,
           onPointerUp: (e) => _touch && e.kind != PointerDeviceKind.mouse ? engine.setCursor(null) : null,
           onPointerCancel: (_) => _touch ? engine.setCursor(null) : null,
           child: GestureDetector(
