@@ -53,7 +53,7 @@ The notation's own words, in Desk's look:
 | `Brand "Postbox" "Workspace" icon="mail"` | The mark (an accent tile, a white glyph) and the name at the sidebar's head. |
 | `NavSection "Mailbox"` | A group label: 11/600 spaced capitals. |
 | `NavItem "Inbox" icon="inbox" badge="4" shortcut="G I" selected={…}` | A 32 row: outline icon, label 13/500; selected: the accent tint and ink; a count in a soft pill. On a tablet's rail: the icon alone. |
-| `Footer` (in a Sidebar) | Pinned at the sidebar's foot over a rule. |
+| `Footer` (in a Sidebar) | Pinned at the sidebar's foot over a rule. Written straight under the `Sidebar`, as its last lines. |
 | `Button`, `.outline`, `.ghost`, `.destructive`, `.secondary` | 34 high, 13/500; primary is the accent; outline is the white secondary; `size=small` 32; `loading=true`; `enabled=false`. |
 | `IconButton "archive" tooltip="Archive (E)"` | 30 square, 16 outline glyph in the secondary ink, the hover fill. |
 | `Input`, `Select`, `NumberInput`, `DateTimeInput`, `Checkbox`, `Radio`, `Toggle`, `SegmentedButton`, `Slider`, `Progress` | Controls at the control height with Desk's lines and accent (a chosen segment, like a chosen `ChoiceChip` or `FilterChip`, is filled with the accent; chips are rounded rectangles of 6, not pills). |
@@ -86,7 +86,7 @@ Desk's own words (components):
 | `Property "Role" "Admin"` (or lines under it) | A labelled value in an inspector. |
 | `Field "Role" "help"` + a control (`required`, `error=`) | A label and help for a control that has none (a Select). |
 | `PaneHeader "Amara Okafor" "note" avatar="…" onClose={…}` | The head of an inspector pane, with its close button. |
-| `ListRow "Maya Chen" "Subject" preview="…" meta="10:42 AM" unread selected` | A row of a list pane (mail, feed): two or three lines, the time, unread dot, selected bar. |
+| `ListRow "Maya Chen" "Subject" preview="…" meta="10:42 AM" unread selected` | A row of a list pane (mail, feed): two or three lines, the time, unread dot, selected bar. As tall as its lines (66 with two, 87 with a `preview`): write no `h` on it. |
 | `ListGroup "Today"` | The label over a group of a list's rows. |
 | `BulkBar count={n} onClear={…}` + action lines | What acts on the chosen rows; show it while something is chosen. |
 | `SaveBar message="3 permissions changed" onSave={…} onDiscard={…}` | Unsaved changes: a warning dot, the message, Discard and Save; in a `Footer` of Main, `visible={dirty}`. |

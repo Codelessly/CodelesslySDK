@@ -516,8 +516,8 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'money',
-      'money(value, symbol, decimals) or money(value, decimals)',
-      r'money(price) → $1,234.50',
+      'money(value, symbol, decimals) or money(value, decimals); a currency code as the symbol is that currency\'s symbol',
+      r'money(price) → $1,234.50; money(9, "USD") → $9.00',
     ),
     FormulaFunctionDoc(
       'currency',
@@ -1366,6 +1366,11 @@ String _fixed(Object? value, Object? digits) =>
 /// "$38" but "$38.50".
 String _money(Object? value, Object? symbol, Object? decimals) {
   if (symbol is num) (symbol, decimals) = (null, symbol);
+  // A currency's code where its symbol goes (`money(9, 'USD')`): the symbol
+  // that currency is written with, not the code before the figure (USD9.00).
+  if (symbol is String && RegExp(r'^[A-Z]{3}$').hasMatch(symbol)) {
+    symbol = _currencyFormats[symbol]?.symbol ?? symbol;
+  }
   final bool auto =
       decimals is String && decimals.trim().toLowerCase() == 'auto';
   final num amount = _num(value);

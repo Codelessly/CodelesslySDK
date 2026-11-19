@@ -1,11 +1,11 @@
-component Tabs "Views of one page (Board, List, Archive): labels 13/500 in a row over a rule, the current one in the accent with a 2 px accent line under it; an outline icon before each when `icons` gives them. The current label is kept in your variable."
+component Tabs "Views of one page (Board, List, Archive): labels 13/500 in a row over a rule, the current one in the accent with a 2 px accent line under it; an outline icon before each when `icons` gives them. More tabs than the row holds scroll sideways. The current label is kept in your variable."
   param tabs:List<String>=["Overview","Activity","Settings"] required doc="The labels."
   param value:ValueNotifier<String>="" doc="The name of your text variable holding the current tab."
   param icons:List<String>=[] doc="An icon name per tab (optional)."
   param counts:List<String>=[] doc="A count per tab (optional; empty text: none)."
   event onChanged:String
   preview "Default" 420x40 tabs=["Board","List","Archive"] value="Board" icons=["view_kanban","list","inventory_2"]
-Row#tabsBar gap=20 w=fill h=40 border-bottom=line
+Row#tabsBar gap=20 w=fill h=40 border-bottom=line scroll
   each t in props.tabs
     Column#tab h=40 w=hug stretch selected={t == props.value} onTap={setVariable variable=props.value value={t}; emit onChanged t}
       Row#tabInner gap=6 middle grow pad=[2,0,2,0]

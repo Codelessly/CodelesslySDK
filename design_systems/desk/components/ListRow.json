@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "ListRow",
-  "doc": "A row of a list pane (a mailbox, a feed, search results): a title, a second line and an optional third in the quiet ink, the time or a figure at its end, an avatar before. unread: a dot in the gutter and the first two lines heavier. selected: the accent tint and a 3 px accent bar at its start. Under the pointer: the hover fill. A rule under it.",
+  "doc": "A row of a list pane (a mailbox, a feed, search results): a title, a second line and an optional third in the quiet ink, the time or a figure at its end, an avatar before. unread: a dot in the gutter and the first two lines heavier. selected: the accent tint and a 3 px accent bar at its start. Under the pointer: the hover fill. A rule under it. It is as tall as its lines (44 with one, 66 with two, 87 with a preview): write no height on it.",
   "props": [
    {
     "key": "title",
@@ -97,7 +97,7 @@
    "name": "Unread",
    "size": [
     380,
-    72
+    88
    ],
    "props": {
     "title": "Nora Patel",
@@ -112,7 +112,7 @@
    "name": "Selected",
    "size": [
     380,
-    72
+    88
    ],
    "props": {
     "title": "Maya Chen",

@@ -1,4 +1,4 @@
-component ListRow "A row of a list pane (a mailbox, a feed, search results): a title, a second line and an optional third in the quiet ink, the time or a figure at its end, an avatar before. unread: a dot in the gutter and the first two lines heavier. selected: the accent tint and a 3 px accent bar at its start. Under the pointer: the hover fill. A rule under it."
+component ListRow "A row of a list pane (a mailbox, a feed, search results): a title, a second line and an optional third in the quiet ink, the time or a figure at its end, an avatar before. unread: a dot in the gutter and the first two lines heavier. selected: the accent tint and a 3 px accent bar at its start. Under the pointer: the hover fill. A rule under it. It is as tall as its lines (44 with one, 66 with two, 87 with a preview): write no height on it."
   param title="Title" required doc="The first line (a sender, a name)."
   param subtitle="" doc="The second line (a subject)."
   param preview="" doc="A third line, one line long (a snippet)."
@@ -8,8 +8,8 @@ component ListRow "A row of a list pane (a mailbox, a feed, search results): a t
   param selected:bool=false doc="The open one."
   param starred:bool=false doc="A star after the second line."
   param attachment:bool=false doc="A paper clip after the second line."
-  preview "Unread" 380x72 title="Nora Patel" subtitle="November print invoice" preview="Hi Jamie, here is the invoice for the November proofs." meta="9:18 AM" unread=true attachment=true
-  preview "Selected" 380x72 title="Maya Chen" subtitle="Studio visit on Thursday" preview="Hi Jamie, Thursday at 10:30 works for the studio visit." meta="10:42 AM" selected=true starred=true
+  preview "Unread" 380x88 title="Nora Patel" subtitle="November print invoice" preview="Hi Jamie, here is the invoice for the November proofs." meta="9:18 AM" unread=true attachment=true
+  preview "Selected" 380x88 title="Maya Chen" subtitle="Studio visit on Thursday" preview="Hi Jamie, Thursday at 10:30 works for the studio visit." meta="10:42 AM" selected=true starred=true
 Stack#row w=fill selected={props.selected} selected.fill=accentTint hovered.fill=hoverOverlay border-bottom=line
   Row#rowInner gap=10 top pad=[20,12,16,12] w=fill
     Avatar#rowAvatar "{props.avatar == '' ? '?' : props.avatar}" size=32 visible={props.avatar != ''}

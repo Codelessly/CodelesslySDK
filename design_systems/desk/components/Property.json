@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "Property",
-  "doc": "A labelled value in an inspector or a details list: the label 12.5 in the caption ink in a column 112 wide, the value (its text, or the lines under it) beside it; 32 high at least.",
+  "doc": "A labelled value in an inspector or a details list: the label 12.5 in the caption ink in a column 112 wide (wider, up to 220, when the label is longer), the value (its text, or the lines under it) beside it; 32 high at least.",
   "children": "list",
   "props": [
    {
@@ -69,7 +69,13 @@
   "propLabel": {
    "type": "text",
    "layout": {
-    "width": 112,
+    "width": {
+     "hug": 0
+    },
+    "constraints": {
+     "minWidth": 112,
+     "maxWidth": 220
+    },
     "height": {
      "hug": 0
     }

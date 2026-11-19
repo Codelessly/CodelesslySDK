@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "Tabs",
-  "doc": "Views of one page (Board, List, Archive): labels 13/500 in a row over a rule, the current one in the accent with a 2 px accent line under it; an outline icon before each when `icons` gives them. The current label is kept in your variable.",
+  "doc": "Views of one page (Board, List, Archive): labels 13/500 in a row over a rule, the current one in the accent with a 2 px accent line under it; an outline icon before each when `icons` gives them. More tabs than the row holds scroll sideways. The current label is kept in your variable.",
   "props": [
    {
     "key": "tabs",
@@ -108,7 +108,10 @@
    },
    "props": {
     "spacing": 20,
-    "crossAxisAlignment": "center"
+    "scrollable": true,
+    "scrollDirection": "horizontal",
+    "crossAxisAlignment": "center",
+    "edgeFade": 12
    },
    "decoration": {
     "strokes": [
@@ -129,7 +132,7 @@
      "hug": 0
     },
     "height": {
-     "hug": 0
+     "fill": 0
     }
    },
    "props": {
