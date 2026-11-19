@@ -1,3 +1,26 @@
+## Unreleased
+
+Schema 3 is the only schema the SDK loads. Needs the codelessly_api of the same release.
+
+### Behaviour changes (read before upgrading)
+
+- **Documents of schema 2 are no longer loaded.** Every loader (Firestore, HTTP, an asset bundle, memory) refuses
+  a publish model, layout, component or bundle of any schema other than 3, or with no `"schema"`, with a
+  `PublishLoadException` that names the schema it found and the one it reads: `The publish model of project [p1]
+  is in schema 2; codelessly_api reads schema 3 only.`, `Layout [home] is in schema 2; ...`, `The bundle is in
+  schema 2; ...`. A schema newer than 3 says the same and adds `Update codelessly_sdk.` Nothing that was schema 2
+  is read any more, in memory or otherwise: published data must be schema 3.
+- **A `setValue` path of schema 2** (`loops[0].duration`, `drag.track.value`...) is no longer recognised and
+  refused with a hint: it is a path like any other, and sets nothing the node reads.
+- **The `clock` trigger is gone** (it was read as a `timer`); write `timer`.
+- **A signature pad's `signLineOffset` and `showSignMark` are no longer read**: write `signLineBottom` and
+  `signLineMark`.
+
+### Tools
+
+- `tool/codelessly render` reports a document that is not of schema 3 as `schema_unsupported` (an error naming the
+  schema it has) and does not render it. `notation print` refuses such a document with the same message.
+
 ## 37.0.0
 
 Needs codelessly_api 37.0.0, whose entry lists what the notation now draws differently.

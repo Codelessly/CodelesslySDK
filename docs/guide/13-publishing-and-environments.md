@@ -17,7 +17,7 @@ Pressing **Publish** in the Codelessly Editor writes the project's screens where
 | The bundle (model and every layout in one file) | Storage file `publish/{slug}.json`, for a project with a slug | Slug mode, and `site.codelessly.com/<slug>` |
 
 Everything a screen needs travels with it: its nodes, variables, conditions, reactions and scripts, the fonts it
-uses, the APIs it calls, the project's theme and breakpoints. Every document carries `"schema": 2`.
+uses, the APIs it calls, the project's theme and breakpoints. Every document carries `"schema": 3`, the one schema the SDK reads.
 
 A running app on a token picks a publish up live. An app on a slug gets it on its next start.
 
