@@ -36,7 +36,7 @@ Json _row(String child) => {
 
 Codelessly _app() {
   final home = PublishLayout.fromJson({
-    'schema': 2,
+    'schema': 3,
     'id': 'home',
     'roots': ['h'],
     'variables': {

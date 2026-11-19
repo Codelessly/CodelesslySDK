@@ -25,7 +25,7 @@ Json _button(Json action) => {
 
 Codelessly _app(Json action) {
   final home = PublishLayout.fromJson({
-    'schema': 2,
+    'schema': 3,
     'id': 'home',
     'roots': ['h'],
     'nodes': {
@@ -34,7 +34,7 @@ Codelessly _app(Json action) {
     },
   });
   final sheet = PublishLayout.fromJson({
-    'schema': 2,
+    'schema': 3,
     'id': 'sheet',
     'roots': ['m'],
     'nodes': {
