@@ -1646,7 +1646,10 @@ class LineChartPainter extends NodePainter {
     final title = p(LineChartProps.yAxisTitle);
     if (title.isNotEmpty) {
       final tp = _layout(title, inked(textStyle(p(LineChartProps.axisTitleStyle), n.behaviors.defaultTextStyle)));
-      tp.paint(canvas, Offset(plot.left - tp.width - 10, plot.top - 20));
+      // Right-aligned to the labels' column, and never left of the chart's
+      // own edge: a title wider than the labels ("Minutes" over "40") was
+      // cut at its first letters.
+      tp.paint(canvas, Offset(math.max(0.0, plot.left - tp.width - 10), plot.top - 20));
       tp.dispose();
     }
 

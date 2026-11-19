@@ -757,10 +757,15 @@ class RenderCalendar extends RenderBox implements MouseTrackerAnnotation {
           color: look.ink.withValues(alpha: look.ink.a * alpha),
         ),
       );
+      // A day's number over its note. In a calendar given less height than
+      // its rows ask for (`h=237` with marks) the two share the cell it
+      // has: at their full places the note fell on the day under it.
+      final tight = inline && r.height < 44;
+      final numberHeight = tight ? math.max(12.0, r.height * .6) : 21.0;
       paintCentered(
         canvas,
         p,
-        inline ? Rect.fromLTWH(r.left, r.top + 2, r.width, 21) : r,
+        inline ? Rect.fromLTWH(r.left, r.top + (tight ? 0 : 2), r.width, numberHeight) : r,
       );
       p.dispose();
       if (inline) {
@@ -778,7 +783,9 @@ class RenderCalendar extends RenderBox implements MouseTrackerAnnotation {
           paintCentered(
             canvas,
             q,
-            Rect.fromLTWH(r.left + 1, r.top + 24, r.width - 2, 20),
+            tight
+                ? Rect.fromLTWH(r.left + 1, r.top + numberHeight - 3, r.width - 2, math.max(6.0, r.height - numberHeight + 3))
+                : Rect.fromLTWH(r.left + 1, r.top + 24, r.width - 2, 20),
           );
           q.dispose();
         }
