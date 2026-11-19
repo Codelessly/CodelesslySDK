@@ -76,6 +76,10 @@ Future<void> main(List<String> args) async {
     stderr.writeln('${files.single} is not a layout document (no "nodes").');
     exit(2);
   }
+  if (json['schema'] != kSchemaVersion) {
+    stderr.writeln('${files.single}: ${UnsupportedSchemaException(json['schema']).message}');
+    exit(2);
+  }
   // A site's page whose overlay site expansion made its own (`nav--board`,
   // site_overlays.dart) prints as it was written (`Drawer#nav`, `open nav`),
   // and a component's events for such an overlay as its `open`: the print is

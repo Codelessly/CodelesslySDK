@@ -67,7 +67,6 @@ class SignaturePainter extends CustomPainter {
     this.dashed = false,
     this.dash = 6,
     this.gap = 6,
-    this.signLineOffset,
     this.signLineInset = 20,
     this.showMark = true,
     this.markGlyph = true,
@@ -93,7 +92,7 @@ class SignaturePainter extends CustomPainter {
   /// The × at the line's start (with [showMark]: either off hides it).
   final bool signLineMark;
 
-  /// From the bottom; null is [signLineOffset] (else 24% of the height).
+  /// From the bottom; null is 24% of the height.
   final double? signLineBottom;
 
   /// The placeholder under the line at its start, not at
@@ -130,8 +129,6 @@ class SignaturePainter extends CustomPainter {
   final bool dashed;
   final double dash, gap;
 
-  /// From the bottom; null is 24% of the height.
-  final double? signLineOffset;
   final double signLineInset;
 
   /// The line has a mark at its start.
@@ -183,7 +180,7 @@ class SignaturePainter extends CustomPainter {
       g.dispose();
     }
     return SignLineGeometry(
-      offset: signLineBottom ?? signLineOffset,
+      offset: signLineBottom,
       inset: signLineInset,
       markWidth: w,
       markHeight: h,

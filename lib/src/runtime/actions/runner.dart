@@ -330,8 +330,7 @@ class CoreActions implements ActionRunner {
 
   bool _matchesReaction(Reaction reaction, String trigger, Json event) {
     final t = reaction.trigger;
-    // The legacy clock is a timer now.
-    if (t.type.name != trigger && !(trigger == 'clock' && t.type == TriggerType.timer)) return false;
+    if (t.type.name != trigger) return false;
     // A component call's handler of one of its events.
     if (t.type == TriggerType.event) return t.event.isNotEmpty && t.event == event['event'];
     if (t.type != TriggerType.keyDown && t.type != TriggerType.keyUp) return true;

@@ -2,12 +2,10 @@
 // and result, its context's services, UI and node tree), without
 // BuildContext.
 import 'dart:async';
-
 import 'dart:convert';
 import 'dart:ui' as ui show TextDirection;
 
 import 'package:codelessly_api/core.dart';
-import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter/rendering.dart' as rendering show Axis;
 import 'package:flutter/rendering.dart' show MatrixUtils, Rect, RenderObject, RenderViewportBase;
 import 'package:flutter/scheduler.dart' show SchedulerBinding, timeDilation;
@@ -414,29 +412,7 @@ void _haptic(HapticKind kind) {
 /// others go in the context's node values. Inside a component instance the
 /// node is that instance's (ids are local to its definition): its values are
 /// set on that instance's box only.
-/// The schema-2 paths and 30.0.0 spellings a `setValue` named, said once each.
-final Set<String> _schema2PathsSaid = {};
-
-/// [values] without the schema-2 paths and 30.0.0's spellings (an action's
-/// paths are not migrated): each is refused, with the path to write, said
-/// once.
-List<NodeValue> _currentValues(String nodeId, List<NodeValue> values) {
-  if (!values.any((v) => olderSchemaPathHint(v.path) != null)) return values;
-  final out = <NodeValue>[];
-  for (final v in values) {
-    final hint = olderSchemaPathHint(v.path);
-    if (hint == null) {
-      out.add(v);
-    } else if (_schema2PathsSaid.add('$nodeId/${v.path}')) {
-      final what = schema2PathHint(v.path) != null ? 'a schema-2 path, which schema 3' : '30.0.0\'s spelling, which 30.1.0';
-      debugPrint('Codelessly: setValue on $nodeId: "${v.path}" is $what does not read (nothing set); write $hint.');
-    }
-  }
-  return out;
-}
-
 void _setValue(String nodeId, List<NodeValue> values, ActionRun run) {
-  values = _currentValues(nodeId, values);
   final tree = run.host.tree;
   final inInstance = tree == null
       ? const <NodeBox>[]

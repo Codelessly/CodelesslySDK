@@ -2568,8 +2568,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
       ..heightFactor = vFit == SizeFit.fill || vFit == SizeFit.fixed ? null : 1);
     // Padding: space inside the text's box around its lines, as Flutter's
     // Padding(child: Text) (a Container's padding): a hugging text grows by
-    // it, a fixed one keeps its size with the lines inset. Schema 2 ignored
-    // it; the migration drops it from schema-2 texts (step text.padding).
+    // it, a fixed one keeps its size with the lines inset.
     final padding = n.layout.padding.flutter;
     if (padding != EdgeInsets.zero) {
       chain.add(_obtain<RenderPadding>('textPad', () => RenderPadding(padding: padding, textDirection: directionOf(n)))
