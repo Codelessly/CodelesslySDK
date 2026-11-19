@@ -80,8 +80,9 @@ void main() {
     }, variables: [
       {'name': 'position', 'type': 'integer', 'value': 1},
     ]);
-    expect([b['cover']!['x'], b['cover']!['y'], b['cover']!['w'], b['cover']!['h']], [0, 0, 400, 120]);
-    expect([b['page2']!['x'], b['page2']!['y'], b['page2']!['w'], b['page2']!['h']], [0, 50, 400, 120]);
+    final sx = b['stage']!['x'] as num, sy = b['stage']!['y'] as num;
+    expect([b['cover']!['x'] - sx, b['cover']!['y'] - sy, b['cover']!['w'], b['cover']!['h']], [0, 0, 400, 120]);
+    expect([b['page2']!['x'] - sx, b['page2']!['y'] - sy, b['page2']!['w'], b['page2']!['h']], [0, 50, 400, 120]);
   });
 
   testWidgets('a one-line field whose text is taller than the kit\'s box is as tall as its line', (tester) async {
