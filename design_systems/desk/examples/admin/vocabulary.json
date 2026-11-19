@@ -3,7 +3,7 @@
  "version": 1,
  "about": "Every word the notation files here used, with how each resolved, kept across expands. Written by tool/notation/notation.sh expand (codelessly_api docs/design/19-open-vocabulary.md, section 15); --no-record leaves it alone.",
  "first": "2026-11-19T05:04:54Z",
- "last": "2026-11-19T06:52:19Z",
+ "last": "2026-11-19T08:02:13Z",
  "expands": [
   {
    "at": "2026-11-19T05:04:54Z",
@@ -12,6 +12,11 @@
   },
   {
    "at": "2026-11-19T06:52:19Z",
+   "vocabulary": "closed",
+   "files": 1
+  },
+  {
+   "at": "2026-11-19T08:02:13Z",
    "vocabulary": "closed",
    "files": 1
   }
@@ -60,8 +65,8 @@
  "files": {
   "pages/members.txt": {
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
-   "expands": 2
+   "last": "2026-11-19T08:02:13Z",
+   "expands": 3
   }
  },
  "words": [
@@ -79,16 +84,16 @@
      "signature": "Account \"text\" \"text\"",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Account \"Amara Okafor\" \"Workspace owner\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -107,7 +112,7 @@
    "seen": {
     "Account \"text\" \"text\"": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -125,16 +130,16 @@
      "signature": "Actions ...",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Actions",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -153,7 +158,7 @@
    "seen": {
     "Actions ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -171,16 +176,16 @@
      "signature": "Brand \"text\" \"text\" icon=",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Brand \"Tenant\" \"Northstar Studio\" icon=\"hub\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -199,7 +204,7 @@
    "seen": {
     "Brand \"text\" \"text\" icon=": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -217,16 +222,16 @@
      "signature": "Breadcrumb items=",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Breadcrumb items=[\"Workspace\",\"Members\"]",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -245,7 +250,7 @@
    "seen": {
     "Breadcrumb items=": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -263,22 +268,22 @@
      "signature": "BulkBar count= hide= visible= onClear ...",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "BulkBar count= noun= onClear ...",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "BulkBar count={length(chosen)} visible={length(chosen) > 0} hide=phone onClear={chosen=[]}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -299,11 +304,11 @@
    "seen": {
     "BulkBar count= hide= visible= onClear ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "BulkBar count= noun= onClear ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -321,16 +326,16 @@
      "signature": "Dialog \"text\" \"text\" w= ...",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Dialog#invite \"Invite members\" \"They get an email with a link to join Northstar Studio.\" w=520",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -349,7 +354,7 @@
    "seen": {
     "Dialog \"text\" \"text\" w= ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -367,16 +372,16 @@
      "signature": "Field \"text\" \"text\" ...",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Field \"Role\" \"Members see everything; admins also manage people and billing.\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -395,7 +400,7 @@
    "seen": {
     "Field \"text\" \"text\" ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -413,16 +418,16 @@
      "signature": "ListRow \"text\" \"text\" avatar= meta= selected= onTap",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "ListRow \"{p.name}\" \"{p.email}\" meta=\"{p.status}\" avatar=\"{p.name}\" selected={contains(chosen, p.id)} onTap={openId=p.id}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -441,7 +446,7 @@
    "seen": {
     "ListRow \"text\" \"text\" avatar= meta= selected= onTap": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -459,22 +464,22 @@
      "signature": "MenuItem \"text\" icon= onTap",
      "uses": 3,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "MenuItem \"text\" icon= danger onTap",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "MenuItem \"View details\" icon=\"visibility\" onTap={close}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -497,11 +502,11 @@
    "seen": {
     "MenuItem \"text\" icon= onTap": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "MenuItem \"text\" icon= danger onTap": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -519,28 +524,28 @@
      "signature": "NavItem \"text\" icon= selected= onTap",
      "uses": 6,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "NavItem \"text\" badge= icon= selected= onTap",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "NavItem \"text\" icon= shortcut=",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "NavItem \"Members\" icon=\"group\" badge=\"50\" selected={tab == \"members\"} onTap={tab=\"members\"}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -568,15 +573,15 @@
    "seen": {
     "NavItem \"text\" badge= icon= selected= onTap": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "NavItem \"text\" icon= selected= onTap": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "NavItem \"text\" icon= shortcut=": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -594,16 +599,16 @@
      "signature": "NavSection \"text\"",
      "uses": 2,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "NavSection \"People & access\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -623,7 +628,7 @@
    "seen": {
     "NavSection \"text\"": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -641,16 +646,16 @@
      "signature": "PageHeader \"text\" \"text\" ...",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "PageHeader \"Members\" \"Manage workspace access, roles and invitations.\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -669,7 +674,7 @@
    "seen": {
     "PageHeader \"text\" \"text\" ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -687,16 +692,16 @@
      "signature": "Pager @ pages= summary=",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Pager @page pages=5 summary=\"1–{length(shown)} of 50 members\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -715,7 +720,7 @@
    "seen": {
     "Pager @ pages= summary=": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -733,16 +738,16 @@
      "signature": "PaneHeader \"text\" onClose",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "PaneHeader \"Member\" onClose={openId=\"\"}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -761,7 +766,7 @@
    "seen": {
     "PaneHeader \"text\" onClose": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -779,22 +784,22 @@
      "signature": "Property \"text\" \"text\"",
      "uses": 3,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "Property \"text\" ...",
      "uses": 3,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Property \"Email\" \"{cur.email}\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -819,11 +824,11 @@
    "seen": {
     "Property \"text\" \"text\"": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "Property \"text\" ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -841,16 +846,16 @@
      "signature": "SearchField @ hint= w= phone.w=fill",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "SearchField @q hint=\"Search name or email\" w=280 phone.w=fill",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -869,7 +874,7 @@
    "seen": {
     "SearchField @ hint= w= phone.w=fill": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -887,16 +892,16 @@
      "signature": "Stat \"text\" \"text\" delta= tone=",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Stat \"{s.label}\" \"{s.n}\" tone=\"{s.tone}\" delta=\"{s.delta}\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -915,7 +920,7 @@
    "seen": {
     "Stat \"text\" \"text\" delta= tone=": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -933,22 +938,22 @@
      "signature": "Status \"text\" tone= pill",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "Status \"text\" tone=",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Status \"{p.status}\" tone=\"{p.status == 'Active' ? 'success' : (p.status == 'Invited' ? 'warning' : 'neutral')}\" pill",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -969,11 +974,11 @@
    "seen": {
     "Status \"text\" tone= pill": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "Status \"text\" tone=": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -991,22 +996,22 @@
      "signature": "Tag \"text\" hue=",
      "uses": 2,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "Tag \"text\" dot= outline",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Tag \"{t}\" outline dot=false",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1028,11 +1033,11 @@
    "seen": {
     "Tag \"text\" dot= outline": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "Tag \"text\" hue=": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -1048,11 +1053,11 @@
    "uses": 1,
    "example": "Account \"Amara Okafor\" \"Workspace owner\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1079,11 +1084,11 @@
    "uses": 1,
    "example": "Account \"Amara Okafor\" \"Workspace owner\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1110,11 +1115,11 @@
    "uses": 1,
    "example": "Brand \"Tenant\" \"Northstar Studio\" icon=\"hub\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1141,11 +1146,11 @@
    "uses": 1,
    "example": "Brand \"Tenant\" \"Northstar Studio\" icon=\"hub\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1172,11 +1177,11 @@
    "uses": 1,
    "example": "Dialog#invite \"Invite members\" \"They get an email with a link to join Northstar Studio.\" w=520",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1203,11 +1208,11 @@
    "uses": 1,
    "example": "Dialog#invite \"Invite members\" \"They get an email with a link to join Northstar Studio.\" w=520",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1234,11 +1239,11 @@
    "uses": 1,
    "example": "Field \"Role\" \"Members see everything; admins also manage people and billing.\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1265,11 +1270,11 @@
    "uses": 1,
    "example": "Field \"Role\" \"Members see everything; admins also manage people and billing.\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1296,11 +1301,11 @@
    "uses": 1,
    "example": "ListRow \"{p.name}\" \"{p.email}\" meta=\"{p.status}\" avatar=\"{p.name}\" selected={contains(chosen, p.id)} onTap={openId=p.id}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1327,11 +1332,11 @@
    "uses": 1,
    "example": "ListRow \"{p.name}\" \"{p.email}\" meta=\"{p.status}\" avatar=\"{p.name}\" selected={contains(chosen, p.id)} onTap={openId=p.id}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1358,11 +1363,11 @@
    "uses": 4,
    "example": "MenuItem \"View details\" icon=\"visibility\" onTap={close}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1392,11 +1397,11 @@
    "uses": 8,
    "example": "NavItem \"Members\" icon=\"group\" badge=\"50\" selected={tab == \"members\"} onTap={tab=\"members\"}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1430,11 +1435,11 @@
    "uses": 2,
    "example": "NavSection \"People & access\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1462,11 +1467,11 @@
    "uses": 1,
    "example": "PageHeader \"Members\" \"Manage workspace access, roles and invitations.\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1493,11 +1498,11 @@
    "uses": 1,
    "example": "PageHeader \"Members\" \"Manage workspace access, roles and invitations.\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1524,11 +1529,11 @@
    "uses": 1,
    "example": "PaneHeader \"Member\" onClose={openId=\"\"}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1555,11 +1560,11 @@
    "uses": 6,
    "example": "Property \"Email\" \"{cur.email}\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1591,11 +1596,11 @@
    "uses": 3,
    "example": "Property \"Email\" \"{cur.email}\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1624,11 +1629,11 @@
    "uses": 1,
    "example": "Stat \"{s.label}\" \"{s.n}\" tone=\"{s.tone}\" delta=\"{s.delta}\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1655,11 +1660,11 @@
    "uses": 1,
    "example": "Stat \"{s.label}\" \"{s.n}\" tone=\"{s.tone}\" delta=\"{s.delta}\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1686,11 +1691,11 @@
    "uses": 2,
    "example": "Status \"{p.status}\" tone=\"{p.status == 'Active' ? 'success' : (p.status == 'Invited' ? 'warning' : 'neutral')}\" pill",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1718,11 +1723,11 @@
    "uses": 3,
    "example": "Tag \"{t}\" outline dot=false",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1751,11 +1756,11 @@
    "uses": 1,
    "example": "Brand \"Tenant\" \"Northstar Studio\" icon=\"hub\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1782,11 +1787,11 @@
    "uses": 1,
    "example": "Breadcrumb items=[\"Workspace\",\"Members\"]",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1813,11 +1818,11 @@
    "uses": 2,
    "example": "BulkBar count={length(chosen)} visible={length(chosen) > 0} hide=phone onClear={chosen=[]}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1845,11 +1850,11 @@
    "uses": 1,
    "example": "BulkBar count={length(chosen)} visible={length(chosen) > 0} hide=phone onClear={chosen=[]}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1876,11 +1881,11 @@
    "uses": 1,
    "example": "BulkBar count={length(chosen)} noun=\"\" onClear={chosen=[]}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1907,11 +1912,11 @@
    "uses": 1,
    "example": "BulkBar count={length(chosen)} visible={length(chosen) > 0} hide=phone onClear={chosen=[]}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1938,11 +1943,11 @@
    "uses": 1,
    "example": "Dialog#invite \"Invite members\" \"They get an email with a link to join Northstar Studio.\" w=520",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -1969,11 +1974,11 @@
    "uses": 1,
    "example": "ListRow \"{p.name}\" \"{p.email}\" meta=\"{p.status}\" avatar=\"{p.name}\" selected={contains(chosen, p.id)} onTap={openId=p.id}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2000,11 +2005,11 @@
    "uses": 1,
    "example": "ListRow \"{p.name}\" \"{p.email}\" meta=\"{p.status}\" avatar=\"{p.name}\" selected={contains(chosen, p.id)} onTap={openId=p.id}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2031,11 +2036,11 @@
    "uses": 1,
    "example": "ListRow \"{p.name}\" \"{p.email}\" meta=\"{p.status}\" avatar=\"{p.name}\" selected={contains(chosen, p.id)} onTap={openId=p.id}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2062,11 +2067,11 @@
    "uses": 4,
    "example": "MenuItem \"View details\" icon=\"visibility\" onTap={close}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2096,11 +2101,11 @@
    "uses": 1,
    "example": "NavItem \"Members\" icon=\"group\" badge=\"50\" selected={tab == \"members\"} onTap={tab=\"members\"}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2127,11 +2132,11 @@
    "uses": 8,
    "example": "NavItem \"Members\" icon=\"group\" badge=\"50\" selected={tab == \"members\"} onTap={tab=\"members\"}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2165,11 +2170,11 @@
    "uses": 7,
    "example": "NavItem \"Members\" icon=\"group\" badge=\"50\" selected={tab == \"members\"} onTap={tab=\"members\"}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2202,11 +2207,11 @@
    "uses": 1,
    "example": "NavItem \"Keyboard shortcuts\" icon=\"keyboard\" shortcut=\"?\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2233,11 +2238,11 @@
    "uses": 1,
    "example": "Pager @page pages=5 summary=\"1–{length(shown)} of 50 members\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2264,11 +2269,11 @@
    "uses": 1,
    "example": "Pager @page pages=5 summary=\"1–{length(shown)} of 50 members\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2295,11 +2300,11 @@
    "uses": 1,
    "example": "Pager @page pages=5 summary=\"1–{length(shown)} of 50 members\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2326,11 +2331,11 @@
    "uses": 1,
    "example": "SearchField @q hint=\"Search name or email\" w=280 phone.w=fill",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2357,11 +2362,11 @@
    "uses": 1,
    "example": "SearchField @q hint=\"Search name or email\" w=280 phone.w=fill",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2388,11 +2393,11 @@
    "uses": 1,
    "example": "SearchField @q hint=\"Search name or email\" w=280 phone.w=fill",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2419,11 +2424,11 @@
    "uses": 1,
    "example": "Stat \"{s.label}\" \"{s.n}\" tone=\"{s.tone}\" delta=\"{s.delta}\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2450,11 +2455,11 @@
    "uses": 1,
    "example": "Stat \"{s.label}\" \"{s.n}\" tone=\"{s.tone}\" delta=\"{s.delta}\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2481,11 +2486,11 @@
    "uses": 2,
    "example": "Status \"{p.status}\" tone=\"{p.status == 'Active' ? 'success' : (p.status == 'Invited' ? 'warning' : 'neutral')}\" pill",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2513,11 +2518,11 @@
    "uses": 1,
    "example": "Tag \"{t}\" outline dot=false",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2544,11 +2549,11 @@
    "uses": 2,
    "example": "Tag \"Platform\" hue=\"sky\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2576,11 +2581,11 @@
    "uses": 1,
    "example": "MenuItem \"Deactivate\" icon=\"person_off\" danger onTap={close}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2607,11 +2612,11 @@
    "uses": 1,
    "example": "SearchField @q hint=\"Search name or email\" w=280 phone.w=fill",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2638,11 +2643,11 @@
    "uses": 1,
    "example": "Status \"{p.status}\" tone=\"{p.status == 'Active' ? 'success' : (p.status == 'Invited' ? 'warning' : 'neutral')}\" pill",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2669,11 +2674,11 @@
    "uses": 1,
    "example": "Tag \"{t}\" outline dot=false",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2700,11 +2705,11 @@
    "uses": 2,
    "example": "BulkBar count={length(chosen)} visible={length(chosen) > 0} hide=phone onClear={chosen=[]}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2732,11 +2737,11 @@
    "uses": 1,
    "example": "ListRow \"{p.name}\" \"{p.email}\" meta=\"{p.status}\" avatar=\"{p.name}\" selected={contains(chosen, p.id)} onTap={openId=p.id}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2763,11 +2768,11 @@
    "uses": 4,
    "example": "MenuItem \"View details\" icon=\"visibility\" onTap={close}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2797,11 +2802,11 @@
    "uses": 7,
    "example": "NavItem \"Members\" icon=\"group\" badge=\"50\" selected={tab == \"members\"} onTap={tab=\"members\"}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2834,11 +2839,11 @@
    "uses": 1,
    "example": "PaneHeader \"Member\" onClose={openId=\"\"}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2868,16 +2873,16 @@
      "signature": "App ...",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "App",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2896,7 +2901,7 @@
    "seen": {
     "App ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -2915,22 +2920,22 @@
      "signature": "Avatar \"text\"",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "Avatar \"text\" size=",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Avatar \"{p.name}\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -2951,11 +2956,11 @@
    "seen": {
     "Avatar \"text\"": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "Avatar \"text\" size=": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -2974,40 +2979,40 @@
      "signature": "Button \"text\" icon= size=",
      "uses": 3,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "Button \"text\" icon= onTap",
      "uses": 2,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "Button \"text\" hide= icon=",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "Button \"text\" hide= icon= size=",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "Button \"text\" onTap",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Button.outline \"Export\" icon=\"download\" hide=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -3037,23 +3042,23 @@
    "seen": {
     "Button \"text\" hide= icon=": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "Button \"text\" icon= onTap": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "Button \"text\" icon= size=": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "Button \"text\" hide= icon= size=": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "Button \"text\" onTap": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -3072,31 +3077,31 @@
      "signature": "Column grow ...",
      "uses": 2,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "Column border= clip= radius= show= ...",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "Column gap= pad= ...",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "Column border-top= gap= pad= ...",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "Column gap= pad= phone.pad= tablet.pad= ...",
      "uses": 1,
      "first": "2026-11-19T06:52:19Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "Column gap= pad= phone.pad=[16,16,16,24] tablet.pad=[24,20,24,24] ...",
@@ -3107,11 +3112,11 @@
    ],
    "example": "Column gap=20 pad=[32,28,32,32] tablet.pad=[24,20,24,24] phone.pad=[16,16,16,24]",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -3143,23 +3148,23 @@
     },
     "Column grow ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "Column border= clip= radius= show= ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "Column gap= pad= ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "Column border-top= gap= pad= ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "Column gap= pad= phone.pad= tablet.pad= ...": {
      "first": "2026-11-19T06:52:19Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -3178,16 +3183,16 @@
      "signature": "Divider",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Divider",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -3206,7 +3211,7 @@
    "seen": {
     "Divider": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -3225,22 +3230,22 @@
      "signature": "Footer ...",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "Footer show= visible= ...",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Footer",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -3261,11 +3266,11 @@
    "seen": {
     "Footer ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "Footer show= visible= ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -3284,16 +3289,16 @@
      "signature": "Grid cols= gap= phone.cols=2 ...",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Grid cols=4 gap=12 phone.cols=2",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -3312,7 +3317,7 @@
    "seen": {
     "Grid cols= gap= phone.cols=2 ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -3331,16 +3336,16 @@
      "signature": "IconButton \"text\" tooltip= onTap",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "IconButton \"more_horiz\" tooltip=\"Actions for {p.name}\" onTap={openId=p.id; open rowMenu}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -3359,7 +3364,7 @@
    "seen": {
     "IconButton \"text\" tooltip= onTap": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -3378,16 +3383,16 @@
      "signature": "Input \"text\" \"text\" multiline",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Input \"Email addresses\" \"name@company.com, another@company.com\" multiline",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -3406,7 +3411,7 @@
    "seen": {
     "Input \"text\" \"text\" multiline": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -3425,16 +3430,16 @@
      "signature": "Main ...",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Main",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -3453,7 +3458,7 @@
    "seen": {
     "Main ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -3472,16 +3477,16 @@
      "signature": "Menu ...",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Menu#rowMenu",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -3500,7 +3505,7 @@
    "seen": {
     "Menu ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -3519,16 +3524,16 @@
      "signature": "Nav ...",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Nav",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -3547,7 +3552,7 @@
    "seen": {
     "Nav ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -3566,16 +3571,16 @@
      "signature": "Pane hide= visible= w= ...",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Pane w=340 hide=tablet visible={openId != \"\"}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -3594,7 +3599,7 @@
    "seen": {
     "Pane hide= visible= w= ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -3613,22 +3618,22 @@
      "signature": "Row gap= ...",
      "uses": 3,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "Row gap= pad= middle ...",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Row gap=8",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -3651,11 +3656,11 @@
    "seen": {
     "Row gap= ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "Row gap= pad= middle ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -3674,22 +3679,22 @@
      "signature": "Select @ hide= items= w=",
      "uses": 2,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "Select items= value= w=",
      "uses": 2,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Select @role items=[\"All roles\",\"Owner\",\"Admin\",\"Member\"] w=140 hide=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -3712,11 +3717,11 @@
    "seen": {
     "Select @ hide= items= w=": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "Select items= value= w=": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -3735,16 +3740,16 @@
      "signature": "Sidebar hide= tablet.w=64 ...",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Sidebar tablet.w=64 hide=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -3763,7 +3768,7 @@
    "seen": {
     "Sidebar hide= tablet.w=64 ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -3782,16 +3787,16 @@
      "signature": "Spacer hide=",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Spacer hide=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -3810,7 +3815,7 @@
    "seen": {
     "Spacer hide=": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -3828,16 +3833,16 @@
      "signature": "Table columns= empty= hide= select=@ sort=@ in p shown ...",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Table p in shown columns=[{\"key\":\"name\",\"label\":\"Name\"},{\"key\":\"role\",\"label\":\"Role\",\"w\":90},{\"key\":\"teams\",\"label\":\"Teams\",\"w\":170,\"sort\":false},{\"key\":\"status\",\"label\":\"Status\",\"w\":100},{\"key\":\"m...",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -3856,7 +3861,7 @@
    "seen": {
     "Table columns= empty= hide= select=@ sort=@ in p shown ...": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -3875,34 +3880,34 @@
      "signature": "Text \"text\"",
      "uses": 7,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "Text \"text\" hide=",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "Text \"text\" maxLines= overflow= onTap",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     {
      "signature": "Text \"text\" maxLines= overflow=",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "Text.caption \"{length(shown)} of {length(members)}\" hide=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -3933,19 +3938,19 @@
    "seen": {
     "Text \"text\" hide=": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "Text \"text\" maxLines= overflow= onTap": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "Text \"text\" maxLines= overflow=": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     },
     "Text \"text\"": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -3963,16 +3968,16 @@
      "signature": "canvas \"text\" path=",
      "uses": 1,
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    ],
    "example": "canvas \"Members\" path=\"members\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -3991,7 +3996,7 @@
    "seen": {
     "canvas \"text\" path=": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    }
   },
@@ -4007,11 +4012,11 @@
    "uses": 2,
    "example": "Avatar \"{p.name}\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4039,11 +4044,11 @@
    "uses": 8,
    "example": "Button.outline \"Export\" icon=\"download\" hide=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4077,11 +4082,11 @@
    "uses": 1,
    "example": "IconButton \"more_horiz\" tooltip=\"Actions for {p.name}\" onTap={openId=p.id; open rowMenu}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4108,11 +4113,11 @@
    "uses": 1,
    "example": "Input \"Email addresses\" \"name@company.com, another@company.com\" multiline",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4139,11 +4144,11 @@
    "uses": 1,
    "example": "Input \"Email addresses\" \"name@company.com, another@company.com\" multiline",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4170,11 +4175,11 @@
    "uses": 10,
    "example": "Text.caption \"{length(shown)} of {length(members)}\" hide=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4210,11 +4215,11 @@
    "uses": 1,
    "example": "canvas \"Members\" path=\"members\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4241,11 +4246,11 @@
    "uses": 1,
    "example": "Avatar \"{cur.name}\" size=40",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4272,11 +4277,11 @@
    "uses": 2,
    "example": "Button.outline \"Export\" icon=\"download\" hide=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4304,11 +4309,11 @@
    "uses": 7,
    "example": "Button.outline \"Export\" icon=\"download\" hide=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4341,11 +4346,11 @@
    "uses": 4,
    "example": "Button.outline \"Change role\" icon=\"badge\" size=small",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4375,11 +4380,11 @@
    "uses": 1,
    "example": "Column border=line radius=8 clip=antiAlias show=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4406,11 +4411,11 @@
    "uses": 1,
    "example": "Column gap=10 pad=[20,8,20,16] border-top=line",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4437,11 +4442,11 @@
    "uses": 1,
    "example": "Column border=line radius=8 clip=antiAlias show=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4468,11 +4473,11 @@
    "uses": 3,
    "example": "Column gap=20 pad=[32,28,32,32] tablet.pad=[24,20,24,24] phone.pad=[16,16,16,24]",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4501,11 +4506,11 @@
    "uses": 3,
    "example": "Column gap=20 pad=[32,28,32,32] tablet.pad=[24,20,24,24] phone.pad=[16,16,16,24]",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4534,11 +4539,11 @@
    "uses": 1,
    "example": "Column gap=20 pad=[32,28,32,32] tablet.pad=[24,20,24,24] phone.pad=[16,16,16,24]",
    "first": "2026-11-19T06:52:19Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T06:52:19Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4565,11 +4570,11 @@
    "uses": 1,
    "example": "Column border=line radius=8 clip=antiAlias show=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4596,11 +4601,11 @@
    "uses": 1,
    "example": "Column border=line radius=8 clip=antiAlias show=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4627,11 +4632,11 @@
    "uses": 1,
    "example": "Column gap=20 pad=[32,28,32,32] tablet.pad=[24,20,24,24] phone.pad=[16,16,16,24]",
    "first": "2026-11-19T06:52:19Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T06:52:19Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4658,11 +4663,11 @@
    "uses": 1,
    "example": "Footer show=phone visible={length(chosen) > 0}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4689,11 +4694,11 @@
    "uses": 1,
    "example": "Footer show=phone visible={length(chosen) > 0}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4720,11 +4725,11 @@
    "uses": 1,
    "example": "Grid cols=4 gap=12 phone.cols=2",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4751,11 +4756,11 @@
    "uses": 1,
    "example": "Grid cols=4 gap=12 phone.cols=2",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4782,11 +4787,11 @@
    "uses": 1,
    "example": "IconButton \"more_horiz\" tooltip=\"Actions for {p.name}\" onTap={openId=p.id; open rowMenu}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4813,11 +4818,11 @@
    "uses": 1,
    "example": "Pane w=340 hide=tablet visible={openId != \"\"}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4844,11 +4849,11 @@
    "uses": 1,
    "example": "Pane w=340 hide=tablet visible={openId != \"\"}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4875,11 +4880,11 @@
    "uses": 1,
    "example": "Pane w=340 hide=tablet visible={openId != \"\"}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4906,11 +4911,11 @@
    "uses": 4,
    "example": "Row gap=8",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4940,11 +4945,11 @@
    "uses": 1,
    "example": "Row gap=12 middle pad=[0,0,0,12]",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -4971,11 +4976,11 @@
    "uses": 2,
    "example": "Select @role items=[\"All roles\",\"Owner\",\"Admin\",\"Member\"] w=140 hide=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5003,11 +5008,11 @@
    "uses": 2,
    "example": "Select @role items=[\"All roles\",\"Owner\",\"Admin\",\"Member\"] w=140 hide=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5035,11 +5040,11 @@
    "uses": 4,
    "example": "Select @role items=[\"All roles\",\"Owner\",\"Admin\",\"Member\"] w=140 hide=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5069,11 +5074,11 @@
    "uses": 2,
    "example": "Select items=[\"Owner\",\"Admin\",\"Member\"] value={cur.role} w=fill",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5101,11 +5106,11 @@
    "uses": 4,
    "example": "Select @role items=[\"All roles\",\"Owner\",\"Admin\",\"Member\"] w=140 hide=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5135,11 +5140,11 @@
    "uses": 1,
    "example": "Sidebar tablet.w=64 hide=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5166,11 +5171,11 @@
    "uses": 1,
    "example": "Spacer hide=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5197,11 +5202,11 @@
    "uses": 1,
    "example": "Table p in shown columns=[{\"key\":\"name\",\"label\":\"Name\"},{\"key\":\"role\",\"label\":\"Role\",\"w\":90},{\"key\":\"teams\",\"label\":\"Teams\",\"w\":170,\"sort\":false},{\"key\":\"status\",\"label\":\"Status\",\"w\":100},{\"key\":\"m...",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5228,11 +5233,11 @@
    "uses": 1,
    "example": "Table p in shown columns=[{\"key\":\"name\",\"label\":\"Name\"},{\"key\":\"role\",\"label\":\"Role\",\"w\":90},{\"key\":\"teams\",\"label\":\"Teams\",\"w\":170,\"sort\":false},{\"key\":\"status\",\"label\":\"Status\",\"w\":100},{\"key\":\"m...",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5259,11 +5264,11 @@
    "uses": 1,
    "example": "Table p in shown columns=[{\"key\":\"name\",\"label\":\"Name\"},{\"key\":\"role\",\"label\":\"Role\",\"w\":90},{\"key\":\"teams\",\"label\":\"Teams\",\"w\":170,\"sort\":false},{\"key\":\"status\",\"label\":\"Status\",\"w\":100},{\"key\":\"m...",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5290,11 +5295,11 @@
    "uses": 1,
    "example": "Table p in shown columns=[{\"key\":\"name\",\"label\":\"Name\"},{\"key\":\"role\",\"label\":\"Role\",\"w\":90},{\"key\":\"teams\",\"label\":\"Teams\",\"w\":170,\"sort\":false},{\"key\":\"status\",\"label\":\"Status\",\"w\":100},{\"key\":\"m...",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5321,11 +5326,11 @@
    "uses": 1,
    "example": "Table p in shown columns=[{\"key\":\"name\",\"label\":\"Name\"},{\"key\":\"role\",\"label\":\"Role\",\"w\":90},{\"key\":\"teams\",\"label\":\"Teams\",\"w\":170,\"sort\":false},{\"key\":\"status\",\"label\":\"Status\",\"w\":100},{\"key\":\"m...",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5352,11 +5357,11 @@
    "uses": 1,
    "example": "Text.caption \"{length(shown)} of {length(members)}\" hide=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5383,11 +5388,11 @@
    "uses": 2,
    "example": "Text.strong \"{p.name}\" maxLines=1 overflow=ellipsis onTap={openId=p.id}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5415,11 +5420,11 @@
    "uses": 2,
    "example": "Text.strong \"{p.name}\" maxLines=1 overflow=ellipsis onTap={openId=p.id}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5447,11 +5452,11 @@
    "uses": 1,
    "example": "canvas \"Members\" path=\"members\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5478,11 +5483,11 @@
    "uses": 2,
    "example": "Column grow",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5510,11 +5515,11 @@
    "uses": 1,
    "example": "Grid cols=4 gap=12 phone.cols=2",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5541,11 +5546,11 @@
    "uses": 1,
    "example": "Input \"Email addresses\" \"name@company.com, another@company.com\" multiline",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5572,11 +5577,11 @@
    "uses": 1,
    "example": "Row gap=12 middle pad=[0,0,0,12]",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5603,11 +5608,11 @@
    "uses": 1,
    "example": "Sidebar tablet.w=64 hide=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5634,11 +5639,11 @@
    "uses": 1,
    "example": "Table p in shown columns=[{\"key\":\"name\",\"label\":\"Name\"},{\"key\":\"role\",\"label\":\"Role\",\"w\":90},{\"key\":\"teams\",\"label\":\"Teams\",\"w\":170,\"sort\":false},{\"key\":\"status\",\"label\":\"Status\",\"w\":100},{\"key\":\"m...",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5665,11 +5670,11 @@
    "uses": 1,
    "example": "Table p in shown columns=[{\"key\":\"name\",\"label\":\"Name\"},{\"key\":\"role\",\"label\":\"Role\",\"w\":90},{\"key\":\"teams\",\"label\":\"Teams\",\"w\":170,\"sort\":false},{\"key\":\"status\",\"label\":\"Status\",\"w\":100},{\"key\":\"m...",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5696,11 +5701,11 @@
    "uses": 1,
    "example": "Table p in shown columns=[{\"key\":\"name\",\"label\":\"Name\"},{\"key\":\"role\",\"label\":\"Role\",\"w\":90},{\"key\":\"teams\",\"label\":\"Teams\",\"w\":170,\"sort\":false},{\"key\":\"status\",\"label\":\"Status\",\"w\":100},{\"key\":\"m...",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5727,11 +5732,11 @@
    "uses": 2,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5758,11 +5763,11 @@
    "uses": 2,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5789,11 +5794,11 @@
    "uses": 2,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5820,11 +5825,11 @@
    "uses": 1,
    "example": "state cur:map={coalesce(find(members, 'id', openId), {})}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5851,11 +5856,11 @@
    "uses": 1,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5882,11 +5887,11 @@
    "uses": 1,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5913,11 +5918,11 @@
    "uses": 2,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5944,11 +5949,11 @@
    "uses": 4,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -5975,11 +5980,11 @@
    "uses": 1,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6006,11 +6011,11 @@
    "uses": 1,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6037,11 +6042,11 @@
    "uses": 1,
    "example": "state cur:map={coalesce(find(members, 'id', openId), {})}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6068,11 +6073,11 @@
    "uses": 1,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6099,11 +6104,11 @@
    "uses": 1,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6130,11 +6135,11 @@
    "uses": 1,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6161,11 +6166,11 @@
    "uses": 1,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6192,11 +6197,11 @@
    "uses": 1,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6223,11 +6228,11 @@
    "uses": 1,
    "example": "state cur:map={coalesce(find(members, 'id', openId), {})}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6254,11 +6259,11 @@
    "uses": 1,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6285,11 +6290,11 @@
    "uses": 1,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6316,11 +6321,11 @@
    "uses": 1,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6347,11 +6352,11 @@
    "uses": 1,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6378,11 +6383,11 @@
    "uses": 1,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6409,11 +6414,11 @@
    "uses": 2,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6440,11 +6445,11 @@
    "uses": 3,
    "example": "Button \"Invite members\" icon=\"add\" onTap={open invite}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6473,11 +6478,11 @@
    "uses": 1,
    "example": "IconButton \"more_horiz\" tooltip=\"Actions for {p.name}\" onTap={openId=p.id; open rowMenu}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6504,11 +6509,11 @@
    "uses": 1,
    "example": "Text.strong \"{p.name}\" maxLines=1 overflow=ellipsis onTap={openId=p.id}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6535,11 +6540,11 @@
    "uses": 2,
    "example": "Button.destructive \"Deactivate\" icon=\"person_off\" size=small",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6567,11 +6572,11 @@
    "uses": 1,
    "example": "Button.ghost \"Cancel\" onTap={close}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6598,11 +6603,11 @@
    "uses": 3,
    "example": "Button.outline \"Export\" icon=\"download\" hide=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6631,11 +6636,11 @@
    "uses": 3,
    "example": "Text.caption \"{length(shown)} of {length(members)}\" hide=phone",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6664,11 +6669,11 @@
    "uses": 1,
    "example": "Text.heading \"{cur.name}\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6695,11 +6700,11 @@
    "uses": 1,
    "example": "Text.muted \"{p.role}\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6726,11 +6731,11 @@
    "uses": 1,
    "example": "Text.overline \"RECENT ACTIVITY\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6757,11 +6762,11 @@
    "uses": 3,
    "example": "Text.small \"Changed Elena Voss's role to Admin · 2 days ago\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6790,11 +6795,11 @@
    "uses": 1,
    "example": "Text.strong \"{p.name}\" maxLines=1 overflow=ellipsis onTap={openId=p.id}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6820,11 +6825,11 @@
    "uses": 6,
    "example": "close",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6855,11 +6860,11 @@
    "uses": 2,
    "example": "open invite",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6886,11 +6891,11 @@
    "uses": 13,
    "example": "tab=\"members\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6928,11 +6933,11 @@
    "uses": 1,
    "example": "toast \"Invites sent\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6958,11 +6963,11 @@
    "uses": 1,
    "example": "state cur:map={coalesce(find(members, 'id', openId), {})}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -6988,11 +6993,11 @@
    "uses": 2,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -7019,11 +7024,11 @@
    "uses": 1,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -7049,11 +7054,11 @@
    "uses": 1,
    "example": "state cur:map={coalesce(find(members, 'id', openId), {})}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -7079,11 +7084,11 @@
    "uses": 4,
    "example": "BulkBar count={length(chosen)} visible={length(chosen) > 0} hide=phone onClear={chosen=[]}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -7111,11 +7116,11 @@
    "uses": 2,
    "example": "state shown:list={filter(members, m => (role == 'All roles' || m.role == role) && (status == 'All statuses' || m.status == status) && contains(lower(m.name + ' ' + m.email), lower(q)))}",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -7142,11 +7147,11 @@
    "uses": 3,
    "example": "each s in stats",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {
@@ -7175,11 +7180,11 @@
    "uses": 12,
    "example": "state tab=\"members\"",
    "first": "2026-11-19T05:04:54Z",
-   "last": "2026-11-19T06:52:19Z",
+   "last": "2026-11-19T08:02:13Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:04:54Z",
-     "last": "2026-11-19T06:52:19Z"
+     "last": "2026-11-19T08:02:13Z"
     }
    },
    "files": {

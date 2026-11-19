@@ -2,7 +2,7 @@
 
 Written by `tool/notation/notation.sh expand` at every expand (codelessly_api docs/design/19-open-vocabulary.md, section 15); vocabulary.json beside it holds every word with its lines, signatures and history. Do not edit: expand again.
 
-2 expands from 2026-11-19T05:04:54Z to 2026-11-19T06:52:19Z; words: 197 used, 2 no longer used.
+3 expands from 2026-11-19T05:04:54Z to 2026-11-19T08:02:13Z; words: 197 used, 2 no longer used.
 
 ## Placeholders and words left out (0)
 
