@@ -68,6 +68,15 @@ the share panel and the page's address. Needs codelessly_api 39.0.0.
   preview: the spec's shape and these classes may change in any release, and a Codelessly document cannot hold a
   graph yet.
 
+### Desk
+
+- **A `BoardColumn`'s cards are 8 apart**, as its description says: cards written under it touched. Cards made
+  by an `each` go in a `Column w=fill gap=8` under the column, with the `each` in it (a gap does not reach into
+  an `each` from outside it); Desk's guide says so.
+- **The kanban example's cards drag between columns**: each column's cards are in a Column that takes a dropped
+  card (`drop=cards onDrop={…}`) and each card is dragged (`drag=cards({k.key})`). Its pictures are rebuilt, with
+  one of a card dropped on another column (`board@1440x900-light-dragged.png`), and the gallery's feedback page.
+
 ### Removed
 
 - `tool/notation/notation.sh migrate` (and `migrate.dart`, `migrate_bind.dart`, `expand_all.dart --migrate`), which

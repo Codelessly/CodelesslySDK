@@ -187,8 +187,10 @@ Table p in shown columns=[{"key":"name","label":"Name"},{"key":"role","label":"R
 
 - A list pane (mail, notifications, results): `ListGroup` labels and `ListRow`s, each with `selected` and,
   where it applies, `unread`, `starred`, `attachment`, `meta`.
-- A board: a `Row gap=12 top` of `BoardColumn`s (one line each, `grow`), each with its `TaskCard`s under it
-  through an `each`. A card's labels are `labels=[{"label":"Design","hue":"violet"}]`.
+- A board: a `Row gap=12 top` of `BoardColumn`s (one line each, `grow`), each with its `TaskCard`s under it, 8
+  apart. Cards from data go in a `Column w=fill gap=8` under the column with the `each` in it (a gap does not
+  reach into an `each` from outside it); that Column is where a dragged card drops: `drop=cards onDrop={…}` on
+  it, `drag=cards({k.key})` on the card. A card's labels are `labels=[{"label":"Design","hue":"violet"}]`.
 - A card on a page: `Card` (hairline, radius 8) or, with a title and a rule, `Panel`.
 - Figures: `Stat`s in a `Grid cols=4 gap=12`.
 

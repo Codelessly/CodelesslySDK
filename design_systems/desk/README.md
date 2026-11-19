@@ -91,7 +91,7 @@ Desk's own words (components):
 | `BulkBar count={n} onClear={…}` + action lines | What acts on the chosen rows; show it while something is chosen. |
 | `SaveBar message="3 permissions changed" onSave={…} onDiscard={…}` | Unsaved changes: a warning dot, the message, Discard and Save; in a `Footer` of Main, `visible={dirty}`. |
 | `Pager @page pages=5 summary="1–10 of 50"` | A table's foot: what is shown, previous and next. |
-| `BoardColumn "In progress" count=3 limit=2 hue="sky"` + cards | A column of a board: its head, its cards, Add a card. |
+| `BoardColumn "In progress" count=3 limit=2 hue="sky"` + cards | A column of a board: its head, its cards 8 apart, Add a card. Cards under an `each` go in a `Column w=fill gap=8` (the drop target of a dragged card). |
 | `TaskCard key="STK-124" title="…" labels=[…] due="Nov 19" assignee="…"` | A card on a board, with its meta row. |
 | `FileTile "notes.txt" "164 KB"` | An attachment, with a download button. |
 | `Actions` + buttons | The footer band of a dialog: destructive first, `Spacer`, then Cancel and the primary. |
@@ -108,7 +108,7 @@ Desk's own words (components):
 |---|---|
 | `mail/` | A mail client's mailbox: sidebar, a list pane, a reading pane; a compose dialog. `-reading` at 390: the reading pane full screen with its back button. |
 | `admin/` | An admin console's members page: stats, a filter bar, a table with selection and a bulk bar, an inspector, a row menu (`-row-menu`), an invite dialog. |
-| `kanban/` | A board: top bar, page header, tabs, a filter bar, four columns of cards; the card's dialog (`-dialog`). |
+| `kanban/` | A board: top bar, page header, tabs, a filter bar, four columns of cards that drag between columns (`-dragged`: the first card dropped on In review); the card's dialog (`-dialog`). |
 | `gallery/` | Every part by family, a page each at 1440 (light and dark): `shell` (sidebar, rail, top bar, page header, tabs, toolbar, inspector), `controls` (buttons, fields, choices, toggles), `data` (stats, bulk bar, tables, list rows, statuses, tags, avatars, files, panels), `overlays` (dialog, menu, popover, tooltip), `feedback` (banners, empty states, skeletons, progress, board columns and cards). |
 | `compare/` | Each reference screen beside the native web build of the same brief and the last DSL build. |
 
