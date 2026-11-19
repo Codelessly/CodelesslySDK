@@ -2875,6 +2875,23 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
       final relative = pos.relative;
       // A fill child pinned to both edges fills the space between its
       // insets; pinned to one edge (or none) it fills the container.
+      // A fill child placed off the container's start (`h=fill
+      // y={(index - page) * stage.height}`: a page of a stage, moved by
+      // its place) is the container's length from there. (It filled the
+      // container where it stood, whatever its place said.)
+      if (expands && !pos.isStretch && pos.start != null && pos.start != 0 && pos.end == null) {
+        return FreeformAxisPlacement(
+          mode: FreeformAxisMode.fill,
+          start: start,
+          extent: extent,
+          parentExtent: parentExtent,
+          clamp: !isScrollAxis,
+          expands: true,
+          preserveDesignOverflow: false,
+          growsWithContent: grows,
+          fillFrom: pos.start!,
+        );
+      }
       if (expands && !(pos.isStretch && !isScrollAxis)) return at(FreeformAxisMode.fill);
       if (isScrollAxis) return at(FreeformAxisMode.start);
       if (pos.isStretch && !wraps) {

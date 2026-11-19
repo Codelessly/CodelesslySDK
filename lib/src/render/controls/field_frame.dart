@@ -924,7 +924,10 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl,
       final padV = d.contentPadding != null ? pad.vertical : math.max(0.0, _defaultBoxHeight - line);
       h = math.max(_defaultBoxHeight, contentHeightFor(contentWidth) + padV);
     } else {
-      h = d.contentPadding != null ? math.max(_defaultBoxHeight, line + pad.vertical) : _defaultBoxHeight;
+      // A line taller than the kit's box (a title field at fontSize 44)
+      // has a box of its own height and a little room: it was cut to the
+      // default's.
+      h = d.contentPadding != null ? math.max(_defaultBoxHeight, line + pad.vertical) : math.max(_defaultBoxHeight, line + 8);
     }
     final c = d.constraints;
     if (c != null) h = c.constrainHeight(h);
