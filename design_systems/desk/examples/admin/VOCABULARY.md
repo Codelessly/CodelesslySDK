@@ -2,7 +2,7 @@
 
 Written by `tool/notation/notation.sh expand` at every expand (codelessly_api docs/design/19-open-vocabulary.md, section 15); vocabulary.json beside it holds every word with its lines, signatures and history. Do not edit: expand again.
 
-1 expands from 2026-11-19T05:04:54Z to 2026-11-19T05:04:54Z; words: 197 used.
+2 expands from 2026-11-19T05:04:54Z to 2026-11-19T06:52:19Z; words: 197 used, 2 no longer used.
 
 ## Placeholders and words left out (0)
 
@@ -111,17 +111,20 @@ A design system's components, universal words, and words a definition names and 
 | event | NavItem.onTap | component | 7 | pages/members.txt:18,19,20,21,23,24,25 |  |  |
 | event | PaneHeader.onClose | component | 1 | pages/members.txt:69 |  |  |
 
-## No longer used (0)
+## No longer used (2)
 
 Words an earlier expand saw that no file uses now, with how they resolved then.
 
-None.
+| kind | word | how | uses | where | signature | first, last seen | what was said |
+|---|---|---|---|---|---|---|---|
+| flag | Column.phone.pad=[16,16,16,24] | core | 0 |  |  | 2026-11-19T05:04:54Z – 2026-11-19T05:04:54Z |  |
+| flag | Column.tablet.pad=[24,20,24,24] | core | 0 |  |  | 2026-11-19T05:04:54Z – 2026-11-19T05:04:54Z |  |
 
 ## Definitions (0)
 
 ## Core words
 
-20 types, 7 texts, 37 parameters, 33 flags, 3 events, 9 variants, 4 verbs, 6 functions, 2 statements: in vocabulary.json.
+20 types, 7 texts, 39 parameters, 31 flags, 3 events, 9 variants, 4 verbs, 6 functions, 2 statements: in vocabulary.json.
 
 ## Said at the last expand of each file (0)
 

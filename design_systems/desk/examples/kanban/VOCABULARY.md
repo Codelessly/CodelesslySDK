@@ -2,7 +2,7 @@
 
 Written by `tool/notation/notation.sh expand` at every expand (codelessly_api docs/design/19-open-vocabulary.md, section 15); vocabulary.json beside it holds every word with its lines, signatures and history. Do not edit: expand again.
 
-1 expands from 2026-11-19T05:06:53Z to 2026-11-19T05:06:53Z; words: 154 used.
+2 expands from 2026-11-19T05:06:53Z to 2026-11-19T06:53:07Z; words: 151 used, 8 no longer used.
 
 ## Placeholders and words left out (0)
 
@@ -28,7 +28,7 @@ Names read as a word we have.
 
 None.
 
-## Other words beyond the core (64)
+## Other words beyond the core (61)
 
 A design system's components, universal words, and words a definition names and never reads.
 
@@ -36,7 +36,7 @@ A design system's components, universal words, and words a definition names and 
 |---|---|---|---|---|---|---|
 | type | Account | component | 1 | pages/board.txt:18 | `Account "text" "text" hide= w=` |  |
 | type | Actions | component | 1 | pages/board.txt:87 | `Actions ...` |  |
-| type | BoardColumn | component | 4 | pages/board.txt:32,35,38,41 | `BoardColumn "text" "text" count= hue= == grow phone.visible={col phone.w=358 tablet.w=300 } onAdd ... / BoardColumn "text" "text" count= hue= limit= == grow phone.visible={col phone.w=358 tablet.w=300 } onAdd ...` |  |
+| type | BoardColumn | component | 4 | pages/board.txt:32,35,38,41 | `BoardColumn "text" count= hue= phone.visible= grow phone.w=358 tablet.w=300 onAdd ... / BoardColumn "text" count= hue= limit= phone.visible= grow phone.w=358 tablet.w=300 onAdd ... / BoardColumn "text" "text" count= hue= == grow phone.visible={col phone.w=358 tablet.w=300 } onAdd ...` |  |
 | type | Brand | component | 1 | pages/board.txt:16 | `Brand "text" icon=` |  |
 | type | Breadcrumb | component | 1 | pages/board.txt:17 | `Breadcrumb hide= items=` |  |
 | type | Dialog | component | 1 | pages/board.txt:44 | `Dialog "text" guard= guardText= overline= w= ...` |  |
@@ -50,7 +50,6 @@ A design system's components, universal words, and words a definition names and 
 | text | Account.text1 | component | 1 | pages/board.txt:18 |  |  |
 | text | Account.text2 | component | 1 | pages/board.txt:18 |  |  |
 | text | BoardColumn.text1 | component | 4 | pages/board.txt:32,35,38,41 |  |  |
-| text | BoardColumn.text2 | component | 4 | pages/board.txt:32,35,38,41 |  |  |
 | text | Brand.text1 | component | 1 | pages/board.txt:16 |  |  |
 | text | Dialog.text1 | component | 1 | pages/board.txt:44 |  |  |
 | text | Field.text1 | component | 4 | pages/board.txt:77,79,81,83 |  |  |
@@ -63,6 +62,7 @@ A design system's components, universal words, and words a definition names and 
 | parameter | BoardColumn.count | component | 4 | pages/board.txt:32,35,38,41 |  |  |
 | parameter | BoardColumn.hue | component | 4 | pages/board.txt:32,35,38,41 |  |  |
 | parameter | BoardColumn.limit | component | 2 | pages/board.txt:35,38 |  |  |
+| parameter | BoardColumn.phone.visible | component | 4 | pages/board.txt:32,35,38,41 |  |  |
 | parameter | Brand.icon | component | 1 | pages/board.txt:16 |  |  |
 | parameter | Breadcrumb.hide | component | 1 | pages/board.txt:17 |  |  |
 | parameter | Breadcrumb.items | component | 1 | pages/board.txt:17 |  |  |
@@ -88,28 +88,33 @@ A design system's components, universal words, and words a definition names and 
 | parameter | TaskCard.labels | component | 4 | pages/board.txt:34,37,40,43 |  |  |
 | parameter | TaskCard.overdue | component | 4 | pages/board.txt:34,37,40,43 |  |  |
 | parameter | TaskCard.title | component | 4 | pages/board.txt:34,37,40,43 |  |  |
-| flag | BoardColumn.== | component | 4 | pages/board.txt:32,35,38,41 |  |  |
 | flag | BoardColumn.grow | component | 4 | pages/board.txt:32,35,38,41 |  |  |
-| flag | BoardColumn.phone.visible={col | component | 4 | pages/board.txt:32,35,38,41 |  |  |
 | flag | BoardColumn.phone.w=358 | component | 4 | pages/board.txt:32,35,38,41 |  |  |
 | flag | BoardColumn.tablet.w=300 | component | 4 | pages/board.txt:32,35,38,41 |  |  |
-| flag | BoardColumn.} | component | 4 | pages/board.txt:32,35,38,41 |  |  |
 | flag | SearchField.phone.w=fill | component | 1 | pages/board.txt:24 |  |  |
 | flag | Tag.removable | component | 2 | pages/board.txt:85,86 |  |  |
 | event | BoardColumn.onAdd | component | 4 | pages/board.txt:32,35,38,41 |  |  |
 | event | TaskCard.onTap | component | 4 | pages/board.txt:34,37,40,43 |  |  |
 
-## No longer used (0)
+## No longer used (7)
 
 Words an earlier expand saw that no file uses now, with how they resolved then.
 
-None.
+| kind | word | how | uses | where | signature | first, last seen | what was said |
+|---|---|---|---|---|---|---|---|
+| flag | BoardColumn.== | component | 0 |  |  | 2026-11-19T05:06:53Z – 2026-11-19T05:06:53Z |  |
+| flag | BoardColumn.phone.visible={col | component | 0 |  |  | 2026-11-19T05:06:53Z – 2026-11-19T05:06:53Z |  |
+| flag | BoardColumn.} | component | 0 |  |  | 2026-11-19T05:06:53Z – 2026-11-19T05:06:53Z |  |
+| flag | Column.phone.pad=[16,16,16,8] | core | 0 |  |  | 2026-11-19T05:06:53Z – 2026-11-19T05:06:53Z |  |
+| flag | Column.tablet.pad=[24,20,24,12] | core | 0 |  |  | 2026-11-19T05:06:53Z – 2026-11-19T05:06:53Z |  |
+| flag | Row.phone.pad=[16,4,16,16] | core | 0 |  |  | 2026-11-19T05:06:53Z – 2026-11-19T05:06:53Z |  |
+| flag | Row.tablet.pad=[24,4,24,24] | core | 0 |  |  | 2026-11-19T05:06:53Z – 2026-11-19T05:06:53Z |  |
 
 ## Definitions (0)
 
 ## Core words
 
-17 types, 8 texts, 25 parameters, 21 flags, 1 event, 6 variants, 4 verbs, 6 functions, 2 statements: in vocabulary.json.
+17 types, 8 texts, 29 parameters, 17 flags, 1 event, 6 variants, 4 verbs, 6 functions, 2 statements: in vocabulary.json.
 
 ## Said at the last expand of each file (0)
 

@@ -3,17 +3,23 @@
  "version": 1,
  "about": "Every word the notation files here used, with how each resolved, kept across expands. Written by tool/notation/notation.sh expand (codelessly_api docs/design/19-open-vocabulary.md, section 15); --no-record leaves it alone.",
  "first": "2026-11-19T05:06:53Z",
- "last": "2026-11-19T05:06:53Z",
+ "last": "2026-11-19T06:53:07Z",
  "expands": [
   {
    "at": "2026-11-19T05:06:53Z",
+   "vocabulary": "closed",
+   "files": 1
+  },
+  {
+   "at": "2026-11-19T06:53:07Z",
    "vocabulary": "closed",
    "files": 1
   }
  ],
  "summary": {
   "status": {
-   "used": 154
+   "used": 151,
+   "no longer used": 8
   },
   "used": {
    "type": {
@@ -21,16 +27,16 @@
     "core": 17
    },
    "text": {
-    "component": 11,
+    "component": 10,
     "core": 8
    },
    "parameter": {
-    "component": 30,
-    "core": 25
+    "component": 31,
+    "core": 29
    },
    "flag": {
-    "component": 8,
-    "core": 21
+    "component": 5,
+    "core": 17
    },
    "event": {
     "component": 2,
@@ -54,8 +60,8 @@
  "files": {
   "pages/board.txt": {
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
-   "expands": 1
+   "last": "2026-11-19T06:53:07Z",
+   "expands": 2
   }
  },
  "words": [
@@ -73,16 +79,16 @@
      "signature": "Account \"text\" \"text\" hide= w=",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "Account \"Maya Chen\" \"Product designer\" w=200 hide=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -101,7 +107,7 @@
    "seen": {
     "Account \"text\" \"text\" hide= w=": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -119,16 +125,16 @@
      "signature": "Actions ...",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "Actions",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -147,7 +153,7 @@
    "seen": {
     "Actions ...": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -162,25 +168,37 @@
    "uses": 4,
    "signatures": [
     {
-     "signature": "BoardColumn \"text\" \"text\" count= hue= == grow phone.visible={col phone.w=358 tablet.w=300 } onAdd ...",
+     "signature": "BoardColumn \"text\" count= hue= phone.visible= grow phone.w=358 tablet.w=300 onAdd ...",
      "uses": 2,
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T06:53:07Z"
+    },
+    {
+     "signature": "BoardColumn \"text\" count= hue= limit= phone.visible= grow phone.w=358 tablet.w=300 onAdd ...",
+     "uses": 2,
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T06:53:07Z"
+    },
+    {
+     "signature": "BoardColumn \"text\" \"text\" count= hue= == grow phone.visible={col phone.w=358 tablet.w=300 } onAdd ...",
+     "uses": 0,
      "first": "2026-11-19T05:06:53Z",
      "last": "2026-11-19T05:06:53Z"
     },
     {
      "signature": "BoardColumn \"text\" \"text\" count= hue= limit= == grow phone.visible={col phone.w=358 tablet.w=300 } onAdd ...",
-     "uses": 2,
+     "uses": 0,
      "first": "2026-11-19T05:06:53Z",
      "last": "2026-11-19T05:06:53Z"
     }
    ],
    "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -195,8 +213,8 @@
       "component": 4
      },
      "signatures": {
-      "BoardColumn \"text\" \"text\" count= hue= == grow phone.visible={col phone.w=358 tablet.w=300 } onAdd ...": 2,
-      "BoardColumn \"text\" \"text\" count= hue= limit= == grow phone.visible={col phone.w=358 tablet.w=300 } onAdd ...": 2
+      "BoardColumn \"text\" count= hue= phone.visible= grow phone.w=358 tablet.w=300 onAdd ...": 2,
+      "BoardColumn \"text\" count= hue= limit= phone.visible= grow phone.w=358 tablet.w=300 onAdd ...": 2
      }
     }
    },
@@ -208,6 +226,14 @@
     "BoardColumn \"text\" \"text\" count= hue= limit= == grow phone.visible={col phone.w=358 tablet.w=300 } onAdd ...": {
      "first": "2026-11-19T05:06:53Z",
      "last": "2026-11-19T05:06:53Z"
+    },
+    "BoardColumn \"text\" count= hue= phone.visible= grow phone.w=358 tablet.w=300 onAdd ...": {
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T06:53:07Z"
+    },
+    "BoardColumn \"text\" count= hue= limit= phone.visible= grow phone.w=358 tablet.w=300 onAdd ...": {
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -225,16 +251,16 @@
      "signature": "Brand \"text\" icon=",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "Brand \"Stack\" icon=\"layers\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -253,7 +279,7 @@
    "seen": {
     "Brand \"text\" icon=": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -271,16 +297,16 @@
      "signature": "Breadcrumb hide= items=",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "Breadcrumb items=[\"Northstar Studio\",\"Product delivery\"] hide=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -299,7 +325,7 @@
    "seen": {
     "Breadcrumb hide= items=": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -317,16 +343,16 @@
      "signature": "Dialog \"text\" guard= guardText= overline= w= ...",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "Dialog#card \"Card details\" overline=\"STK-124\" w=780 guard={title != \"Polish the invite flow\"} guardText=\"Discard your changes?\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -345,7 +371,7 @@
    "seen": {
     "Dialog \"text\" guard= guardText= overline= w= ...": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -363,16 +389,16 @@
      "signature": "Field \"text\" ...",
      "uses": 4,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "Field \"Status\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -394,7 +420,7 @@
    "seen": {
     "Field \"text\" ...": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -412,22 +438,22 @@
      "signature": "FilterButton \"text\" hide= icon=",
      "uses": 2,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     {
      "signature": "FilterButton \"text\" count= hide= icon=",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "FilterButton \"Labels\" icon=\"label\" hide=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -449,11 +475,11 @@
    "seen": {
     "FilterButton \"text\" hide= icon=": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     "FilterButton \"text\" count= hide= icon=": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -471,16 +497,16 @@
      "signature": "PageHeader \"text\" \"text\" ...",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "PageHeader \"Product delivery\" \"Plan, build, and ship with the product team.\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -499,7 +525,7 @@
    "seen": {
     "PageHeader \"text\" \"text\" ...": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -517,16 +543,16 @@
      "signature": "SearchField @ hint= w= phone.w=fill",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "SearchField @q hint=\"Search cards…\" w=260 phone.w=fill",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -545,7 +571,7 @@
    "seen": {
     "SearchField @ hint= w= phone.w=fill": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -563,16 +589,16 @@
      "signature": "Tabs @ icons= tabs=",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "Tabs @view tabs=[\"Board\",\"List\",\"Archive\"] icons=[\"view_kanban\",\"list\",\"inventory_2\"]",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -591,7 +617,7 @@
    "seen": {
     "Tabs @ icons= tabs=": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -609,16 +635,16 @@
      "signature": "Tag \"text\" hue= removable",
      "uses": 2,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "Tag \"Design\" hue=\"violet\" removable",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -638,7 +664,7 @@
    "seen": {
     "Tag \"text\" hue= removable": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -656,16 +682,16 @@
      "signature": "TaskCard assignee= checklist= comments= due= key= labels= overdue= title= onTap",
      "uses": 4,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -687,7 +713,7 @@
    "seen": {
     "TaskCard assignee= checklist= comments= due= key= labels= overdue= title= onTap": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -703,11 +729,11 @@
    "uses": 1,
    "example": "Account \"Maya Chen\" \"Product designer\" w=200 hide=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -734,11 +760,11 @@
    "uses": 1,
    "example": "Account \"Maya Chen\" \"Product designer\" w=200 hide=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -765,45 +791,11 @@
    "uses": 4,
    "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
-    }
-   },
-   "files": {
-    "pages/board.txt": {
-     "lines": [
-      32,
-      35,
-      38,
-      41
-     ],
-     "how": {
-      "component": 4
-     }
-    }
-   },
-   "seen": {}
-  },
-  {
-   "kind": "text",
-   "on": "BoardColumn",
-   "word": "text2",
-   "status": "used",
-   "resolved": "component",
-   "how": {
-    "component": 4
-   },
-   "uses": 4,
-   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
-   "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
-   "history": {
-    "component": {
-     "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -833,11 +825,11 @@
    "uses": 1,
    "example": "Brand \"Stack\" icon=\"layers\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -864,11 +856,11 @@
    "uses": 1,
    "example": "Dialog#card \"Card details\" overline=\"STK-124\" w=780 guard={title != \"Polish the invite flow\"} guardText=\"Discard your changes?\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -895,11 +887,11 @@
    "uses": 4,
    "example": "Field \"Status\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -929,11 +921,11 @@
    "uses": 3,
    "example": "FilterButton \"Labels\" icon=\"label\" hide=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -962,11 +954,11 @@
    "uses": 1,
    "example": "PageHeader \"Product delivery\" \"Plan, build, and ship with the product team.\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -993,11 +985,11 @@
    "uses": 1,
    "example": "PageHeader \"Product delivery\" \"Plan, build, and ship with the product team.\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1024,11 +1016,11 @@
    "uses": 2,
    "example": "Tag \"Design\" hue=\"violet\" removable",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1056,11 +1048,11 @@
    "uses": 1,
    "example": "Account \"Maya Chen\" \"Product designer\" w=200 hide=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1087,11 +1079,11 @@
    "uses": 1,
    "example": "Account \"Maya Chen\" \"Product designer\" w=200 hide=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1118,11 +1110,11 @@
    "uses": 4,
    "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1152,11 +1144,11 @@
    "uses": 4,
    "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1186,11 +1178,11 @@
    "uses": 2,
    "example": "BoardColumn \"In progress\" count={length(filter(shown, x => x.col == \"In progress\"))} limit=2 hue=\"sky\" grow tablet.w=300 phone.w=358 phone.visible={col == \"In progress\"} onAdd={open card}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1208,6 +1200,40 @@
   },
   {
    "kind": "parameter",
+   "on": "BoardColumn",
+   "word": "phone.visible",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 4
+   },
+   "uses": 4,
+   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
+   "first": "2026-11-19T06:53:07Z",
+   "last": "2026-11-19T06:53:07Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T06:53:07Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      32,
+      35,
+      38,
+      41
+     ],
+     "how": {
+      "component": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
    "on": "Brand",
    "word": "icon",
    "status": "used",
@@ -1218,11 +1244,11 @@
    "uses": 1,
    "example": "Brand \"Stack\" icon=\"layers\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1249,11 +1275,11 @@
    "uses": 1,
    "example": "Breadcrumb items=[\"Northstar Studio\",\"Product delivery\"] hide=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1280,11 +1306,11 @@
    "uses": 1,
    "example": "Breadcrumb items=[\"Northstar Studio\",\"Product delivery\"] hide=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1311,11 +1337,11 @@
    "uses": 1,
    "example": "Dialog#card \"Card details\" overline=\"STK-124\" w=780 guard={title != \"Polish the invite flow\"} guardText=\"Discard your changes?\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1342,11 +1368,11 @@
    "uses": 1,
    "example": "Dialog#card \"Card details\" overline=\"STK-124\" w=780 guard={title != \"Polish the invite flow\"} guardText=\"Discard your changes?\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1373,11 +1399,11 @@
    "uses": 1,
    "example": "Dialog#card \"Card details\" overline=\"STK-124\" w=780 guard={title != \"Polish the invite flow\"} guardText=\"Discard your changes?\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1404,11 +1430,11 @@
    "uses": 1,
    "example": "Dialog#card \"Card details\" overline=\"STK-124\" w=780 guard={title != \"Polish the invite flow\"} guardText=\"Discard your changes?\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1435,11 +1461,11 @@
    "uses": 1,
    "example": "FilterButton \"Assignee\" icon=\"person\" count=1 hide=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1466,11 +1492,11 @@
    "uses": 3,
    "example": "FilterButton \"Labels\" icon=\"label\" hide=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1499,11 +1525,11 @@
    "uses": 3,
    "example": "FilterButton \"Labels\" icon=\"label\" hide=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1532,11 +1558,11 @@
    "uses": 1,
    "example": "SearchField @q hint=\"Search cards…\" w=260 phone.w=fill",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1563,11 +1589,11 @@
    "uses": 1,
    "example": "SearchField @q hint=\"Search cards…\" w=260 phone.w=fill",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1594,11 +1620,11 @@
    "uses": 1,
    "example": "SearchField @q hint=\"Search cards…\" w=260 phone.w=fill",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1625,11 +1651,11 @@
    "uses": 1,
    "example": "Tabs @view tabs=[\"Board\",\"List\",\"Archive\"] icons=[\"view_kanban\",\"list\",\"inventory_2\"]",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1656,11 +1682,11 @@
    "uses": 1,
    "example": "Tabs @view tabs=[\"Board\",\"List\",\"Archive\"] icons=[\"view_kanban\",\"list\",\"inventory_2\"]",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1687,11 +1713,11 @@
    "uses": 1,
    "example": "Tabs @view tabs=[\"Board\",\"List\",\"Archive\"] icons=[\"view_kanban\",\"list\",\"inventory_2\"]",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1718,11 +1744,11 @@
    "uses": 2,
    "example": "Tag \"Design\" hue=\"violet\" removable",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1750,11 +1776,11 @@
    "uses": 4,
    "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1784,11 +1810,11 @@
    "uses": 4,
    "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1818,11 +1844,11 @@
    "uses": 4,
    "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1852,11 +1878,11 @@
    "uses": 4,
    "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1886,11 +1912,11 @@
    "uses": 4,
    "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1920,11 +1946,11 @@
    "uses": 4,
    "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1954,11 +1980,11 @@
    "uses": 4,
    "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -1988,11 +2014,11 @@
    "uses": 4,
    "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -2013,40 +2039,6 @@
   {
    "kind": "flag",
    "on": "BoardColumn",
-   "word": "==",
-   "status": "used",
-   "resolved": "component",
-   "how": {
-    "component": 4
-   },
-   "uses": 4,
-   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
-   "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
-   "history": {
-    "component": {
-     "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
-    }
-   },
-   "files": {
-    "pages/board.txt": {
-     "lines": [
-      32,
-      35,
-      38,
-      41
-     ],
-     "how": {
-      "component": 4
-     }
-    }
-   },
-   "seen": {}
-  },
-  {
-   "kind": "flag",
-   "on": "BoardColumn",
    "word": "grow",
    "status": "used",
    "resolved": "component",
@@ -2056,45 +2048,11 @@
    "uses": 4,
    "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
-    }
-   },
-   "files": {
-    "pages/board.txt": {
-     "lines": [
-      32,
-      35,
-      38,
-      41
-     ],
-     "how": {
-      "component": 4
-     }
-    }
-   },
-   "seen": {}
-  },
-  {
-   "kind": "flag",
-   "on": "BoardColumn",
-   "word": "phone.visible={col",
-   "status": "used",
-   "resolved": "component",
-   "how": {
-    "component": 4
-   },
-   "uses": 4,
-   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
-   "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
-   "history": {
-    "component": {
-     "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -2124,11 +2082,11 @@
    "uses": 4,
    "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -2158,45 +2116,11 @@
    "uses": 4,
    "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
-    }
-   },
-   "files": {
-    "pages/board.txt": {
-     "lines": [
-      32,
-      35,
-      38,
-      41
-     ],
-     "how": {
-      "component": 4
-     }
-    }
-   },
-   "seen": {}
-  },
-  {
-   "kind": "flag",
-   "on": "BoardColumn",
-   "word": "}",
-   "status": "used",
-   "resolved": "component",
-   "how": {
-    "component": 4
-   },
-   "uses": 4,
-   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
-   "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
-   "history": {
-    "component": {
-     "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -2226,11 +2150,11 @@
    "uses": 1,
    "example": "SearchField @q hint=\"Search cards…\" w=260 phone.w=fill",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -2257,11 +2181,11 @@
    "uses": 2,
    "example": "Tag \"Design\" hue=\"violet\" removable",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -2289,11 +2213,11 @@
    "uses": 4,
    "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -2323,11 +2247,11 @@
    "uses": 4,
    "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "component": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -2350,6 +2274,7 @@
    "word": "App",
    "status": "used",
    "resolved": "core",
+   "origin": "code",
    "how": {
     "core": 1
    },
@@ -2359,16 +2284,16 @@
      "signature": "App ...",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "App",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -2387,7 +2312,7 @@
    "seen": {
     "App ...": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -2396,6 +2321,7 @@
    "word": "Avatar",
    "status": "used",
    "resolved": "core",
+   "origin": "base",
    "how": {
     "core": 2
    },
@@ -2405,16 +2331,16 @@
      "signature": "Avatar \"text\" size=",
      "uses": 2,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "Avatar \"Jules Martin\" size=24",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -2434,7 +2360,7 @@
    "seen": {
     "Avatar \"text\" size=": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -2443,6 +2369,7 @@
    "word": "Button",
    "status": "used",
    "resolved": "core",
+   "origin": "base",
    "how": {
     "core": 5
    },
@@ -2452,34 +2379,34 @@
      "signature": "Button \"text\" onTap",
      "uses": 2,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     {
      "signature": "Button \"text\" icon= onTap",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     {
      "signature": "Button \"text\" icon=",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     {
      "signature": "Button \"text\" color= icon= onTap",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "Button \"New card\" icon=\"add\" onTap={open card}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -2505,19 +2432,19 @@
    "seen": {
     "Button \"text\" icon= onTap": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     "Button \"text\" icon=": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     "Button \"text\" color= icon= onTap": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     "Button \"text\" onTap": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -2526,6 +2453,7 @@
    "word": "Checkbox",
    "status": "used",
    "resolved": "core",
+   "origin": "base",
    "how": {
     "core": 1
    },
@@ -2535,16 +2463,16 @@
      "signature": "Checkbox \"text\" @",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "Checkbox \"{it.t}\" @it.done",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -2563,7 +2491,7 @@
    "seen": {
     "Checkbox \"text\" @": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -2572,6 +2500,7 @@
    "word": "Column",
    "status": "used",
    "resolved": "core",
+   "origin": "base",
    "how": {
     "core": 7
    },
@@ -2581,40 +2510,46 @@
      "signature": "Column gap= ...",
      "uses": 2,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     {
      "signature": "Column grow ...",
      "uses": 2,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
-    },
-    {
-     "signature": "Column gap= pad= phone.pad=[16,16,16,8] tablet.pad=[24,20,24,12] ...",
-     "uses": 1,
-     "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     {
      "signature": "Column gap= grow ...",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     {
      "signature": "Column gap= w= phone.w=fill ...",
      "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T06:53:07Z"
+    },
+    {
+     "signature": "Column gap= pad= phone.pad= tablet.pad= ...",
+     "uses": 1,
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T06:53:07Z"
+    },
+    {
+     "signature": "Column gap= pad= phone.pad=[16,16,16,8] tablet.pad=[24,20,24,12] ...",
+     "uses": 0,
      "first": "2026-11-19T05:06:53Z",
      "last": "2026-11-19T05:06:53Z"
     }
    ],
    "example": "Column gap=16 pad=[32,24,32,16] tablet.pad=[24,20,24,12] phone.pad=[16,16,16,8]",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -2632,7 +2567,7 @@
       "core": 7
      },
      "signatures": {
-      "Column gap= pad= phone.pad=[16,16,16,8] tablet.pad=[24,20,24,12] ...": 1,
+      "Column gap= pad= phone.pad= tablet.pad= ...": 1,
       "Column gap= grow ...": 1,
       "Column gap= ...": 2,
       "Column grow ...": 2,
@@ -2647,19 +2582,23 @@
     },
     "Column gap= grow ...": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     "Column gap= ...": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     "Column grow ...": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     "Column gap= w= phone.w=fill ...": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
+    },
+    "Column gap= pad= phone.pad= tablet.pad= ...": {
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -2668,6 +2607,7 @@
    "word": "DateTimeInput",
    "status": "used",
    "resolved": "core",
+   "origin": "base",
    "how": {
     "core": 1
    },
@@ -2677,16 +2617,16 @@
      "signature": "DateTimeInput value= w=",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "DateTimeInput value=\"2026-11-19\" w=fill",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -2705,7 +2645,7 @@
    "seen": {
     "DateTimeInput value= w=": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -2714,6 +2654,7 @@
    "word": "Icon",
    "status": "used",
    "resolved": "core",
+   "origin": "base",
    "how": {
     "core": 2
    },
@@ -2723,16 +2664,16 @@
      "signature": "Icon \"text\" color= size=",
      "uses": 2,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "Icon \"checklist\" size=16 color=ink3",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -2752,7 +2693,7 @@
    "seen": {
     "Icon \"text\" color= size=": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -2761,6 +2702,7 @@
    "word": "Input",
    "status": "used",
    "resolved": "core",
+   "origin": "base",
    "how": {
     "core": 3
    },
@@ -2770,28 +2712,28 @@
      "signature": "Input \"text\" @",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     {
      "signature": "Input \"text\" @ multiline",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     {
      "signature": "Input \"text\" \"text\" grow",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "Input \"Title\" @title",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -2814,15 +2756,15 @@
    "seen": {
     "Input \"text\" @": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     "Input \"text\" @ multiline": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     "Input \"text\" \"text\" grow": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -2831,6 +2773,7 @@
    "word": "Main",
    "status": "used",
    "resolved": "core",
+   "origin": "code",
    "how": {
     "core": 1
    },
@@ -2840,16 +2783,16 @@
      "signature": "Main ...",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "Main",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -2868,7 +2811,7 @@
    "seen": {
     "Main ...": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -2877,6 +2820,7 @@
    "word": "Nav",
    "status": "used",
    "resolved": "core",
+   "origin": "code",
    "how": {
     "core": 1
    },
@@ -2886,16 +2830,16 @@
      "signature": "Nav ...",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "Nav",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -2914,7 +2858,7 @@
    "seen": {
     "Nav ...": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -2923,6 +2867,7 @@
    "word": "Progress",
    "status": "used",
    "resolved": "core",
+   "origin": "base",
    "how": {
     "core": 1
    },
@@ -2932,16 +2877,16 @@
      "signature": "Progress value=",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "Progress value={count(checks, 'done', true) / length(checks)}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -2960,7 +2905,7 @@
    "seen": {
     "Progress value=": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -2969,6 +2914,7 @@
    "word": "Row",
    "status": "used",
    "resolved": "core",
+   "origin": "base",
    "how": {
     "core": 10
    },
@@ -2978,40 +2924,46 @@
      "signature": "Row gap= middle ...",
      "uses": 4,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     {
      "signature": "Row gap= ...",
      "uses": 2,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     {
      "signature": "Row gap= top ...",
      "uses": 2,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
-    },
-    {
-     "signature": "Row gap= pad= phone.pad=[16,4,16,16] tablet.pad=[24,4,24,24] tablet.scroll top ...",
-     "uses": 1,
-     "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     {
      "signature": "Row gap= phone.direction=vertical top ...",
      "uses": 1,
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T06:53:07Z"
+    },
+    {
+     "signature": "Row gap= pad= phone.pad= tablet.pad= tablet.scroll top ...",
+     "uses": 1,
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T06:53:07Z"
+    },
+    {
+     "signature": "Row gap= pad= phone.pad=[16,4,16,16] tablet.pad=[24,4,24,24] tablet.scroll top ...",
+     "uses": 0,
      "first": "2026-11-19T05:06:53Z",
      "last": "2026-11-19T05:06:53Z"
     }
    ],
    "example": "Row gap=12 middle",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3033,7 +2985,7 @@
      },
      "signatures": {
       "Row gap= middle ...": 4,
-      "Row gap= pad= phone.pad=[16,4,16,16] tablet.pad=[24,4,24,24] tablet.scroll top ...": 1,
+      "Row gap= pad= phone.pad= tablet.pad= tablet.scroll top ...": 1,
       "Row gap= phone.direction=vertical top ...": 1,
       "Row gap= ...": 2,
       "Row gap= top ...": 2
@@ -3043,7 +2995,7 @@
    "seen": {
     "Row gap= middle ...": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     "Row gap= pad= phone.pad=[16,4,16,16] tablet.pad=[24,4,24,24] tablet.scroll top ...": {
      "first": "2026-11-19T05:06:53Z",
@@ -3051,15 +3003,19 @@
     },
     "Row gap= phone.direction=vertical top ...": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     "Row gap= ...": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     "Row gap= top ...": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
+    },
+    "Row gap= pad= phone.pad= tablet.pad= tablet.scroll top ...": {
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -3068,6 +3024,7 @@
    "word": "SegmentedButton",
    "status": "used",
    "resolved": "core",
+   "origin": "base",
    "how": {
     "core": 1
    },
@@ -3077,16 +3034,16 @@
      "signature": "SegmentedButton @ items= show=",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "SegmentedButton @col items=[\"Backlog\",\"In progress\",\"In review\",\"Done\"] show=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3105,7 +3062,7 @@
    "seen": {
     "SegmentedButton @ items= show=": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -3114,6 +3071,7 @@
    "word": "Select",
    "status": "used",
    "resolved": "core",
+   "origin": "base",
    "how": {
     "core": 2
    },
@@ -3123,16 +3081,16 @@
      "signature": "Select @ items= w=",
      "uses": 2,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "Select @cstatus items=[\"Backlog\",\"In progress\",\"In review\",\"Done\"] w=fill",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3152,7 +3110,7 @@
    "seen": {
     "Select @ items= w=": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -3161,6 +3119,7 @@
    "word": "Spacer",
    "status": "used",
    "resolved": "core",
+   "origin": "base",
    "how": {
     "core": 2
    },
@@ -3170,22 +3129,22 @@
      "signature": "Spacer hide=",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     {
      "signature": "Spacer",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "Spacer hide=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3206,11 +3165,11 @@
    "seen": {
     "Spacer hide=": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     "Spacer": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -3219,6 +3178,7 @@
    "word": "Text",
    "status": "used",
    "resolved": "core",
+   "origin": "base",
    "how": {
     "core": 10
    },
@@ -3228,34 +3188,34 @@
      "signature": "Text \"text\"",
      "uses": 5,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     {
      "signature": "Text \"text\" grow",
      "uses": 2,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     {
      "signature": "Text \"text\" size=",
      "uses": 2,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     {
      "signature": "Text \"text\" hide=",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "Text.caption \"{length(shown)} cards\" hide=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3286,19 +3246,19 @@
    "seen": {
     "Text \"text\" hide=": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     "Text \"text\" grow": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     "Text \"text\"": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     },
     "Text \"text\" size=": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -3316,16 +3276,16 @@
      "signature": "canvas \"text\" path=",
      "uses": 1,
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    ],
    "example": "canvas \"Board\" path=\"board\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3344,7 +3304,7 @@
    "seen": {
     "canvas \"text\" path=": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    }
   },
@@ -3360,11 +3320,11 @@
    "uses": 2,
    "example": "Avatar \"Jules Martin\" size=24",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3392,11 +3352,11 @@
    "uses": 5,
    "example": "Button \"New card\" icon=\"add\" onTap={open card}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3427,11 +3387,11 @@
    "uses": 1,
    "example": "Checkbox \"{it.t}\" @it.done",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3458,11 +3418,11 @@
    "uses": 2,
    "example": "Icon \"checklist\" size=16 color=ink3",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3490,11 +3450,11 @@
    "uses": 3,
    "example": "Input \"Title\" @title",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3523,11 +3483,11 @@
    "uses": 1,
    "example": "Input \"\" \"Add a checklist item…\" grow",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3554,11 +3514,11 @@
    "uses": 10,
    "example": "Text.caption \"{length(shown)} cards\" hide=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3594,11 +3554,11 @@
    "uses": 1,
    "example": "canvas \"Board\" path=\"board\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3625,11 +3585,11 @@
    "uses": 2,
    "example": "Avatar \"Jules Martin\" size=24",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3657,11 +3617,11 @@
    "uses": 1,
    "example": "Button.outline \"Delete card\" icon=\"delete\" color=errorInk onTap={confirm \"Delete this card?\" then {close}}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3688,11 +3648,11 @@
    "uses": 3,
    "example": "Button \"New card\" icon=\"add\" onTap={open card}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3721,11 +3681,11 @@
    "uses": 1,
    "example": "Checkbox \"{it.t}\" @it.done",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3752,11 +3712,11 @@
    "uses": 5,
    "example": "Column gap=16 pad=[32,24,32,16] tablet.pad=[24,20,24,12] phone.pad=[16,16,16,8]",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3787,11 +3747,73 @@
    "uses": 1,
    "example": "Column gap=16 pad=[32,24,32,16] tablet.pad=[24,20,24,12] phone.pad=[16,16,16,8]",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      19
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "phone.pad",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Column gap=16 pad=[32,24,32,16] tablet.pad=[24,20,24,12] phone.pad=[16,16,16,8]",
+   "first": "2026-11-19T06:53:07Z",
+   "last": "2026-11-19T06:53:07Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T06:53:07Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      19
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "tablet.pad",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Column gap=16 pad=[32,24,32,16] tablet.pad=[24,20,24,12] phone.pad=[16,16,16,8]",
+   "first": "2026-11-19T06:53:07Z",
+   "last": "2026-11-19T06:53:07Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3818,11 +3840,11 @@
    "uses": 1,
    "example": "Column gap=14 w=240 phone.w=fill",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3849,11 +3871,11 @@
    "uses": 1,
    "example": "DateTimeInput value=\"2026-11-19\" w=fill",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3880,11 +3902,11 @@
    "uses": 1,
    "example": "DateTimeInput value=\"2026-11-19\" w=fill",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3911,11 +3933,11 @@
    "uses": 2,
    "example": "Icon \"checklist\" size=16 color=ink3",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3943,11 +3965,11 @@
    "uses": 2,
    "example": "Icon \"checklist\" size=16 color=ink3",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -3975,11 +3997,11 @@
    "uses": 2,
    "example": "Input \"Title\" @title",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4007,11 +4029,11 @@
    "uses": 1,
    "example": "Progress value={count(checks, 'done', true) / length(checks)}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4038,11 +4060,11 @@
    "uses": 10,
    "example": "Row gap=12 middle",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4078,11 +4100,73 @@
    "uses": 1,
    "example": "Row gap=12 top pad=[32,4,32,32] tablet.pad=[24,4,24,24] phone.pad=[16,4,16,16] tablet.scroll",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      31
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Row",
+   "word": "phone.pad",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Row gap=12 top pad=[32,4,32,32] tablet.pad=[24,4,24,24] phone.pad=[16,4,16,16] tablet.scroll",
+   "first": "2026-11-19T06:53:07Z",
+   "last": "2026-11-19T06:53:07Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T06:53:07Z"
+    }
+   },
+   "files": {
+    "pages/board.txt": {
+     "lines": [
+      31
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Row",
+   "word": "tablet.pad",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Row gap=12 top pad=[32,4,32,32] tablet.pad=[24,4,24,24] phone.pad=[16,4,16,16] tablet.scroll",
+   "first": "2026-11-19T06:53:07Z",
+   "last": "2026-11-19T06:53:07Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T06:53:07Z",
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4109,11 +4193,11 @@
    "uses": 1,
    "example": "SegmentedButton @col items=[\"Backlog\",\"In progress\",\"In review\",\"Done\"] show=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4140,11 +4224,11 @@
    "uses": 1,
    "example": "SegmentedButton @col items=[\"Backlog\",\"In progress\",\"In review\",\"Done\"] show=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4171,11 +4255,11 @@
    "uses": 1,
    "example": "SegmentedButton @col items=[\"Backlog\",\"In progress\",\"In review\",\"Done\"] show=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4202,11 +4286,11 @@
    "uses": 2,
    "example": "Select @cstatus items=[\"Backlog\",\"In progress\",\"In review\",\"Done\"] w=fill",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4234,11 +4318,11 @@
    "uses": 2,
    "example": "Select @cstatus items=[\"Backlog\",\"In progress\",\"In review\",\"Done\"] w=fill",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4266,11 +4350,11 @@
    "uses": 2,
    "example": "Select @cstatus items=[\"Backlog\",\"In progress\",\"In review\",\"Done\"] w=fill",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4298,11 +4382,11 @@
    "uses": 1,
    "example": "Spacer hide=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4329,11 +4413,11 @@
    "uses": 1,
    "example": "Text.caption \"{length(shown)} cards\" hide=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4360,11 +4444,11 @@
    "uses": 2,
    "example": "Text.strong \"Jules Martin\" size=12.5",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4392,11 +4476,11 @@
    "uses": 1,
    "example": "canvas \"Board\" path=\"board\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4423,11 +4507,11 @@
    "uses": 3,
    "example": "Column gap=16 grow",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4447,37 +4531,6 @@
   {
    "kind": "flag",
    "on": "Column",
-   "word": "phone.pad=[16,16,16,8]",
-   "status": "used",
-   "resolved": "core",
-   "how": {
-    "core": 1
-   },
-   "uses": 1,
-   "example": "Column gap=16 pad=[32,24,32,16] tablet.pad=[24,20,24,12] phone.pad=[16,16,16,8]",
-   "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
-   "history": {
-    "core": {
-     "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
-    }
-   },
-   "files": {
-    "pages/board.txt": {
-     "lines": [
-      19
-     ],
-     "how": {
-      "core": 1
-     }
-    }
-   },
-   "seen": {}
-  },
-  {
-   "kind": "flag",
-   "on": "Column",
    "word": "phone.w=fill",
    "status": "used",
    "resolved": "core",
@@ -4487,48 +4540,17 @@
    "uses": 1,
    "example": "Column gap=14 w=240 phone.w=fill",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
     "pages/board.txt": {
      "lines": [
       75
-     ],
-     "how": {
-      "core": 1
-     }
-    }
-   },
-   "seen": {}
-  },
-  {
-   "kind": "flag",
-   "on": "Column",
-   "word": "tablet.pad=[24,20,24,12]",
-   "status": "used",
-   "resolved": "core",
-   "how": {
-    "core": 1
-   },
-   "uses": 1,
-   "example": "Column gap=16 pad=[32,24,32,16] tablet.pad=[24,20,24,12] phone.pad=[16,16,16,8]",
-   "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
-   "history": {
-    "core": {
-     "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
-    }
-   },
-   "files": {
-    "pages/board.txt": {
-     "lines": [
-      19
      ],
      "how": {
       "core": 1
@@ -4549,11 +4571,11 @@
    "uses": 1,
    "example": "Input \"\" \"Add a checklist item…\" grow",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4580,11 +4602,11 @@
    "uses": 1,
    "example": "Input \"Description\" @desc multiline",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4611,11 +4633,11 @@
    "uses": 4,
    "example": "Row gap=12 middle",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4645,79 +4667,17 @@
    "uses": 1,
    "example": "Row gap=24 top phone.direction=vertical",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
     "pages/board.txt": {
      "lines": [
       45
-     ],
-     "how": {
-      "core": 1
-     }
-    }
-   },
-   "seen": {}
-  },
-  {
-   "kind": "flag",
-   "on": "Row",
-   "word": "phone.pad=[16,4,16,16]",
-   "status": "used",
-   "resolved": "core",
-   "how": {
-    "core": 1
-   },
-   "uses": 1,
-   "example": "Row gap=12 top pad=[32,4,32,32] tablet.pad=[24,4,24,24] phone.pad=[16,4,16,16] tablet.scroll",
-   "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
-   "history": {
-    "core": {
-     "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
-    }
-   },
-   "files": {
-    "pages/board.txt": {
-     "lines": [
-      31
-     ],
-     "how": {
-      "core": 1
-     }
-    }
-   },
-   "seen": {}
-  },
-  {
-   "kind": "flag",
-   "on": "Row",
-   "word": "tablet.pad=[24,4,24,24]",
-   "status": "used",
-   "resolved": "core",
-   "how": {
-    "core": 1
-   },
-   "uses": 1,
-   "example": "Row gap=12 top pad=[32,4,32,32] tablet.pad=[24,4,24,24] phone.pad=[16,4,16,16] tablet.scroll",
-   "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
-   "history": {
-    "core": {
-     "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
-    }
-   },
-   "files": {
-    "pages/board.txt": {
-     "lines": [
-      31
      ],
      "how": {
       "core": 1
@@ -4738,11 +4698,11 @@
    "uses": 1,
    "example": "Row gap=12 top pad=[32,4,32,32] tablet.pad=[24,4,24,24] phone.pad=[16,4,16,16] tablet.scroll",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4769,11 +4729,11 @@
    "uses": 4,
    "example": "Row gap=12 top pad=[32,4,32,32] tablet.pad=[24,4,24,24] phone.pad=[16,4,16,16] tablet.scroll",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4803,11 +4763,11 @@
    "uses": 2,
    "example": "Text.panelTitle \"Checklist\" grow",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4835,11 +4795,11 @@
    "uses": 2,
    "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4866,11 +4826,11 @@
    "uses": 2,
    "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4897,11 +4857,11 @@
    "uses": 1,
    "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4928,11 +4888,11 @@
    "uses": 1,
    "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4959,11 +4919,11 @@
    "uses": 1,
    "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -4990,11 +4950,11 @@
    "uses": 1,
    "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5021,11 +4981,11 @@
    "uses": 1,
    "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5052,11 +5012,11 @@
    "uses": 1,
    "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5083,11 +5043,11 @@
    "uses": 4,
    "example": "Button \"New card\" icon=\"add\" onTap={open card}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5117,11 +5077,11 @@
    "uses": 1,
    "example": "Button.ghost \"Cancel\" onTap={close}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5148,11 +5108,11 @@
    "uses": 2,
    "example": "Button.outline \"Add\" icon=\"add\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5180,11 +5140,11 @@
    "uses": 3,
    "example": "Text.caption \"{length(shown)} cards\" hide=phone",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5213,11 +5173,11 @@
    "uses": 3,
    "example": "Text.panelTitle \"Checklist\" grow",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5246,11 +5206,11 @@
    "uses": 2,
    "example": "Text.small \"Let's keep the invite link available after sending, in case the email gets missed.\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5278,11 +5238,11 @@
    "uses": 2,
    "example": "Text.strong \"Jules Martin\" size=12.5",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5309,11 +5269,11 @@
    "uses": 2,
    "example": "close",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5340,11 +5300,11 @@
    "uses": 1,
    "example": "confirm \"Delete this card?\" then {close}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5370,11 +5330,11 @@
    "uses": 9,
    "example": "open card",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5408,11 +5368,11 @@
    "uses": 1,
    "example": "toast \"Card saved\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5438,11 +5398,11 @@
    "uses": 8,
    "example": "TaskCard key=\"{k.key}\" title=\"{k.title}\" labels={k.labels} due=\"{k.due}\" overdue={coalesce(k.late, false)} checklist=\"{coalesce(k.check, '')}\" comments={coalesce(k.comments, 0)} assignee=\"{k.who}\" ...",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5471,11 +5431,11 @@
    "uses": 1,
    "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5501,11 +5461,11 @@
    "uses": 1,
    "example": "Progress value={count(checks, 'done', true) / length(checks)}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5531,11 +5491,11 @@
    "uses": 5,
    "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5565,11 +5525,11 @@
    "uses": 5,
    "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5599,11 +5559,11 @@
    "uses": 2,
    "example": "state shown:list={filter(cards, c => contains(lower(c.title + ' ' + c.key), lower(q)))}",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5623,17 +5583,18 @@
    "word": "each",
    "status": "used",
    "resolved": "core",
+   "origin": "base",
    "how": {
     "core": 5
    },
    "uses": 5,
    "example": "each k in filter(shown, x => x.col == \"Backlog\")",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5657,17 +5618,18 @@
    "word": "state",
    "status": "used",
    "resolved": "core",
+   "origin": "base",
    "how": {
     "core": 10
    },
    "uses": 10,
    "example": "state view=\"Board\"",
    "first": "2026-11-19T05:06:53Z",
-   "last": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T06:53:07Z",
    "history": {
     "core": {
      "first": "2026-11-19T05:06:53Z",
-     "last": "2026-11-19T05:06:53Z"
+     "last": "2026-11-19T06:53:07Z"
     }
    },
    "files": {
@@ -5689,6 +5651,166 @@
      }
     }
    },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "BoardColumn",
+   "word": "text2",
+   "status": "no longer used",
+   "resolved": "component",
+   "how": {},
+   "uses": 0,
+   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T05:06:53Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    }
+   },
+   "files": {},
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "BoardColumn",
+   "word": "==",
+   "status": "no longer used",
+   "resolved": "component",
+   "how": {},
+   "uses": 0,
+   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T05:06:53Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    }
+   },
+   "files": {},
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "BoardColumn",
+   "word": "phone.visible={col",
+   "status": "no longer used",
+   "resolved": "component",
+   "how": {},
+   "uses": 0,
+   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T05:06:53Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    }
+   },
+   "files": {},
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "BoardColumn",
+   "word": "}",
+   "status": "no longer used",
+   "resolved": "component",
+   "how": {},
+   "uses": 0,
+   "example": "BoardColumn \"Backlog\" count={length(filter(shown, x => x.col == \"Backlog\"))} hue=\"slate\" grow tablet.w=300 phone.w=358 phone.visible={col == \"Backlog\"} onAdd={open card}",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T05:06:53Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    }
+   },
+   "files": {},
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Column",
+   "word": "phone.pad=[16,16,16,8]",
+   "status": "no longer used",
+   "resolved": "core",
+   "how": {},
+   "uses": 0,
+   "example": "Column gap=16 pad=[32,24,32,16] tablet.pad=[24,20,24,12] phone.pad=[16,16,16,8]",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T05:06:53Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    }
+   },
+   "files": {},
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Column",
+   "word": "tablet.pad=[24,20,24,12]",
+   "status": "no longer used",
+   "resolved": "core",
+   "how": {},
+   "uses": 0,
+   "example": "Column gap=16 pad=[32,24,32,16] tablet.pad=[24,20,24,12] phone.pad=[16,16,16,8]",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T05:06:53Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    }
+   },
+   "files": {},
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Row",
+   "word": "phone.pad=[16,4,16,16]",
+   "status": "no longer used",
+   "resolved": "core",
+   "how": {},
+   "uses": 0,
+   "example": "Row gap=12 top pad=[32,4,32,32] tablet.pad=[24,4,24,24] phone.pad=[16,4,16,16] tablet.scroll",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T05:06:53Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    }
+   },
+   "files": {},
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Row",
+   "word": "tablet.pad=[24,4,24,24]",
+   "status": "no longer used",
+   "resolved": "core",
+   "how": {},
+   "uses": 0,
+   "example": "Row gap=12 top pad=[32,4,32,32] tablet.pad=[24,4,24,24] phone.pad=[16,4,16,16] tablet.scroll",
+   "first": "2026-11-19T05:06:53Z",
+   "last": "2026-11-19T05:06:53Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T05:06:53Z",
+     "last": "2026-11-19T05:06:53Z"
+    }
+   },
+   "files": {},
    "seen": {}
   }
  ]
