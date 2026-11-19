@@ -80,6 +80,7 @@ double _fontSize(ControlScale s) => switch (s.name) {
       'compact' => 12,
       'small' => 12.5,
       'medium' => 13,
+      'regular' => 14,
       _ => 15,
     };
 

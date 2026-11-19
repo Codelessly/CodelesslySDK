@@ -88,6 +88,7 @@ double fieldSidePadding(ControlScale s) => switch (s.name) {
 /// 32 at `medium`, 36 at `large` (`softSaaSMenuRowHeight`).
 double menuRowHeight(ControlScale s) => switch (s.name) {
       'medium' => 32,
+      'regular' => 36,
       'large' => 36,
       _ => 28,
     };

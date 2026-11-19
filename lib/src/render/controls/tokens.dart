@@ -43,7 +43,11 @@ class ControlScale {
     ControlScale('compact', 28, 10, 12, 14, 6, 'control'),
     ControlScale('small', 32, 12, 12, 14, 6, 'control'),
     ControlScale('medium', 36, 12, 13, 16, 6, 'control'),
-    ControlScale('large', 44, 14, 15, 18, 8, 'control'),
+    // A page's control (40): a label of 14 with 16 at its sides, as a web
+    // page's button is (at the 36 step's 13 and 12 it read as an app's
+    // button in a taller box).
+    ControlScale('regular', 40, 16, 14, 16, 8, 'control'),
+    ControlScale('large', 44, 18, 15, 18, 8, 'control'),
   ];
 
   /// The theme radius of this step alone, when the theme has one
@@ -56,7 +60,7 @@ class ControlScale {
 
   /// The icon of an icon-only control at this step (SSUI's
   /// `SoftSaaSIconButton.iconSizeFor`).
-  double get iconOnlySize => switch (name) { 'xs' => 12, 'compact' => 14, 'small' || 'medium' => 16, _ => 20 };
+  double get iconOnlySize => switch (name) { 'xs' => 12, 'compact' => 14, 'small' || 'medium' => 16, 'regular' => 18, _ => 20 };
 }
 
 /// The tokens one control draws with.
@@ -154,7 +158,12 @@ class ControlTokens {
     // On a band whose brightness is not the screen's (a dark hero on a light
     // page, a light card on a dark one), the control is drawn for the band:
     // its neutral colors are made from what it sits on.
-    if (backdrop != null && backdrop.a > .9 && (backdrop.computeLuminance() < .18) != b.tree.dark) {
+    // The theme's own `surface` says what its neutrals are made for: a dark
+    // surface in a light theme (a site whose panels are dark) gave every
+    // field on a light card a near-black fill and dark ink.
+    final ground = b.tree.theme.forBrightness(dark: b.tree.dark).surface?.flutter;
+    final madeForDark = ground == null ? b.tree.dark : ground.computeLuminance() < .18;
+    if (backdrop != null && backdrop.a > .9 && (backdrop.computeLuminance() < .18) != madeForDark) {
       final onBand = b.tree.theme.mergedWith(api.ThemeTokens(surface: api.Color(backdrop.toARGB32()), colors: const {}));
       final t = ControlTokens.resolve(_withoutOnSurface(onBand), dark: backdrop.computeLuminance() < .18, backdrop: backdrop);
       return t;
