@@ -111,6 +111,7 @@ const runtimeCodes = <(String, String, String)>[
   ('formula_invalid', 'warning', 'A formula of a node (a binding, a value, an action) or of a variable does not parse, so it gives nothing where it is used: a list with no rows, a text with no value. The message names the node, the field, the expression and why it does not parse (an unbalanced bracket, a stray word).'),
   ('transparent_background', 'warning', 'At least 2% of a capture has nothing painted behind it: there a reader sees the host\'s background (black in an app with none, the page\'s color in a browser), not the document\'s. Give the screen\'s canvas a fill.'),
   ('set_overwritten', 'warning', 'A reaction (a timer, a load) wrote a variable a --set step set, after the step: the capture shows the --set value. Pin a clock with --now.'),
+  ('site_now', 'warning', 'site.json\'s "now" (the time now() gives in a render of the site, when no --now is passed) is not an ISO 8601 time: the run starts at the real time.'),
   ('placeholder_word', 'warning', 'A word the notation, the design system and the site do not have stood in as a placeholder when the page was expanded with an open vocabulary (or, closed, was refused and draws nothing): the message names the word, its kind, its line and the shape it was written in. Define it, or it is recorded for support: read from the vocabulary record `notation.sh expand` saves beside the site (vocabulary.json).'),
   ('component_missing', 'error', 'A call rendered without its component\'s definition (or nested past the depth limit): an empty box of its size. The message names the call by path.'),
 ];
@@ -505,9 +506,19 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   // which `--wait` (and every settle) moves as it moves the timers: a clock
   // or a deadline written from now() passes with them (round 10, R22: a
   // timer ticked through a nine-second wait while now() stood still).
-  FormulaClock.pinned = args.now;
+  // The test's clock starts at its binding's epoch (1 January 2015), not
+  // today: now() is the real time the run started at plus what the test's
+  // clock has moved since. A site names the day its seed data is written
+  // for (`"now"` in site.json): that is the run's `--now` when none is passed.
+  final siteNow = manifest?.now;
+  final siteTime = siteNow == null ? null : DateTime.tryParse(siteNow);
+  if (siteNow != null && siteTime == null) {
+    issue(RuntimeIssue('site_now', 'warning', 'site.json\'s "now" is "$siteNow", which is not an ISO 8601 time (2026-11-16T09:00:00): the run starts at the real time. Write it as one, or pass --now.'));
+  }
+  FormulaClock.pinned = args.now ?? siteTime;
   final testClock = tester.binding.clock;
-  FormulaClock.source = testClock.now;
+  final startedAt = DateTime.now(), clockStart = testClock.now();
+  FormulaClock.source = () => startedAt.add(testClock.now().difference(clockStart));
   // Icons named without a codepoint (a bound name) draw from the font.
   IconSources.codepointOf = (name, style) =>
       codepoints[style == 'filled' ? '${name}_baseline' : '${name}_$style'] ?? codepoints[name];
