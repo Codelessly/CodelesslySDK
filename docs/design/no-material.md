@@ -28,6 +28,8 @@ plain `WidgetsApp` (uses no Material itself), one under `MaterialApp`.
 | the same on 39.0.0 | MaterialApp | 260,570 | 31,120 | 71,923 |
 | routes of the SDK's own (17 files importing) | WidgetsApp | 165,547 | 30,114 | 71,916 |
 | routes of the SDK's own (17 files importing) | MaterialApp | 225,145 | 30,908 | 71,915 |
+| the chrome on the stock controls (17 files importing) | WidgetsApp | 165,403 | 30,111 | 71,916 |
+| the chrome on the stock controls (17 files importing) | MaterialApp | 225,005 | 30,899 | 71,919 |
 
 Of the 166 KB of `flutter/src/material` left for the plain host (and 30 KB of Cupertino), about 138 KB is the
 theme (`ThemeData`, `ColorScheme`, `Typography` and the component themes `themeDataOf` fills in), 8 KB ink and
