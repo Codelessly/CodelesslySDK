@@ -22,33 +22,58 @@
   nothing behind the screens by themselves.
 - **Behind two screens while they move, Android's transition and the desktop's scrim are the project's surface
   color**, not your app theme's.
-- **A plain bottom sheet follows a finger and settles as the SDK's sheets do.** It looks, opens and closes as
-  before (at most 640 wide, 250 ms up, closed by a downward fling or a release under half way); the feel of the
-  drag in between is not Material's.
+- **A dialog comes and goes as the SDK's other presented layouts do**: it fades in and grows from 96% over
+  320 ms, and leaves over 200 ms. It faded over 150 ms both ways, as Material's dialog does. This is every
+  `openModal` dialog with no blur or scale of its own, and `confirm`.
+- **A plain bottom sheet moves as the SDK's sheets do**: up over 320 ms and down over 200 ms on the SDK's curve
+  (it was 250 ms on Material's), and a downward fling of 400 px a second closes it (it was 700). It is as wide as
+  the screen unless the action sets `sheetWidth`, which a plain sheet now follows; it was never wider than 640.
+  It still follows a finger, and closes when let go under half way.
 - **A dialog's barrier and pull to refresh are called "Dismiss" and "Refresh"** to a screen reader in every app.
   In a Material app they were your app's Material localization. `CodelesslyConfig.labels` gives them, and the
   other words of the runtime's own chrome, in your language (see Added).
 
 **Chrome**
 
-- **The loading spinner is the SDK's own arc.** The loading screen (`CodelesslyLoadingScreen`), a paginated
-  list's default loading footer and an audio player that is getting ready showed Material's
-  `CircularProgressIndicator`. They show a ring of the same size, stroke and colour (the theme's primary) whose arc
-  is a steady 30% of the ring, turning once every 900 ms, where Material's arc grew and shrank as it turned. A
-  `loadingBuilder` of your own is unchanged.
-- **Pull to refresh shows the SDK's own arc.** The indicator is the same disc with the same shadow, in the same
-  place, brought down by the same pull and gone after the same time. Inside it, Material's arc with an arrowhead is
-  now an arc that fills from the top as the list is pulled, then a steady 30% of the ring turning while the list
-  refreshes. `refreshColor`, `refreshBackgroundColor` and `refreshDisplacement` apply as before.
+The runtime's own chrome looked like Material's. It is drawn with the SDK's stock controls now, in the project's
+theme (or a design system's), as the same control in a screen is.
+
+- **Buttons.** The toast's action and close button, the confirm dialog's answers, the players' play buttons, a
+  swiped row's Undo and a chat list's jump-to-latest button are the SDK's buttons with nothing of Material's over
+  them: the theme's hover and press layers, and a focus ring when the keyboard is on one (it was a tint). Their
+  colours, fonts, radii and the dialog's button height are still the feedback look's (`FeedbackTheme`, a
+  toast's or a confirm's own style).
+  - The toast's action is as wide as its label and padding (it was at least 48), and the close button's cross is
+    the icon size of the SDK's 36 px button (16; it was 18).
+  - The audio player's play button is the SDK's 44 px icon button in the theme's secondary text colour (it was
+    40 px, in the primary colour). The video player's is the SDK's small floating button at 44 px: the primary
+    colour, with its shadow.
+  - A list's jump-to-latest button is the SDK's small floating button, 44 px (it was 48 px on a tonal surface).
+- **The Undo bar** is the theme's inverse surface (the tooltip's colours), with the theme's panel radius and
+  shadow and 13 px text. It was Material's dark grey snackbar.
+- **The audio seek bar** is the SDK's slider, as an unstyled `slider` draws: its track, its thumb and its
+  disabled look. It was a 3 px track with a taller played part and a 12 px thumb.
+- **The loading spinner** is the SDK's spinner as an unstyled `circularProgressIndicator` draws it: a 24 px
+  ring, its arc a steady 30% turning once every 900 ms, in the theme's primary colour. The loading screen
+  (`CodelesslyLoadingScreen`), a paginated list's default loading footer and an audio player that is getting
+  ready showed Material's `CircularProgressIndicator` (36 px on the loading screen, its arc growing and
+  shrinking). A `loadingBuilder` of your own is unchanged.
+- **Pull to refresh** shows the SDK's spinner on a 36 px disc in the theme's raised surface, with its hairline
+  border and shadow. The arc fills from the top as the list is pulled, then turns while the list refreshes. It
+  was Material's 40 px white disc and its arc with an arrowhead. The pull that brings it down, where it rests
+  and how long it takes to leave are unchanged; `refreshColor`, `refreshBackgroundColor` and
+  `refreshDisplacement` apply as before.
+- **The line between a list's items** (`separator: divider`) is the SDK's divider: a `dividerThickness` of 0
+  draws no line (it drew a hairline of one device pixel), and a line thicker than the gap between the items is
+  centered on the gap (it grew out of one side). Any other line is unchanged.
 - **The players' and the chat list's buttons show no tooltip.** Hovering (or holding) the video and audio play
   buttons and a list's jump-to-latest button showed "Play video", "Pause audio", "Jump to latest". They no longer
   do; a screen reader still reads those names.
 - **The keyboard reaches the toast's, the Undo bar's and the players' buttons as it reaches a screen's controls.**
   They are in the SDK's own focus order now (Tab, Shift+Tab, Enter and Space), where they were stops of Flutter's.
-  The confirm dialog is unchanged to a user: the focus starts on the yes (on Cancel when it is destructive), Tab
-  moves between the two, Enter presses, Escape cancels. A revealed swipe action is no longer a Tab stop of its own:
-  the row's keys run its actions, as before. The audio seek bar takes the arrow keys, Page Up and Page Down, Home
-  and End.
+  In the confirm dialog the focus still starts on the yes (on Cancel when it is destructive), Tab moves between
+  the two, Enter presses, Escape cancels. A revealed swipe action is no longer a Tab stop of its own: the row's
+  keys run its actions, as before. The audio seek bar takes the arrow keys, Page Up and Page Down, Home and End.
 
 ### Added
 
@@ -69,18 +94,13 @@
 - **A host app that is not a Material app can open dialogs and sheets, and show a reorderable list.** Under a
   plain `WidgetsApp` (no `MaterialLocalizations` above the SDK) an `openModal` (a dialog, a cover, a bottom
   sheet), a `confirm` and a list with `reorder` failed with "No MaterialLocalizations found". Each is a route or a
-  list of the SDK's own now, the same in every app, and looks as it did in a Material app.
+  list of the SDK's own now, the same in every app.
 
 ### Changed
 
-- **The runtime's own buttons and the audio seek bar are the SDK's controls**: the toast's action and close button,
-  the confirm dialog's two answers, the video and audio players' play button, the audio seek bar, a swiped row's
-  Undo, and a chat list's jump-to-latest button. Each is drawn to the same pixels as the Material control it took
-  the place of, in the document's theme or a design system's; a tint that comes with a hover or a press eases in
-  over the theme's control time.
 - **Less of Flutter's Material library is used** (17 files of the package import it, from 23). The plain colors,
-  the icons of the players, the toast and the data list, the line between a list's items (`separator: divider`)
-  and a hero's default flight path are the SDK's own code now, and draw the same pixels. With the buttons, the
+  the icons of the players, the toast and the data list and a hero's default flight path are the SDK's own code
+  now, and draw the same pixels. With the buttons, the
   slider, the indicators and the routes above, an app that does not use Material itself carries about 280 KB less
   of Material and Cupertino (Android arm64: 166 KB of `flutter/src/material`, from 432 KB; 30 KB of
   `flutter/src/cupertino`, from 47 KB), and a Material app about 260 KB less. `docs/design/no-material.md` lists what is left and what it

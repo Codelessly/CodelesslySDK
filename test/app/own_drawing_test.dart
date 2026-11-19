@@ -75,17 +75,16 @@ void main() {
     }
   });
 
-  group('the line between a list\'s items draws what Divider and VerticalDivider draw', () {
+  // The SDK's divider: a line that fits its gap is where Flutter's Divider
+  // and VerticalDivider put theirs.
+  group('the line between a list\'s items, where it fits its gap, draws what Divider and VerticalDivider draw', () {
     const color = Color(0xFF336699);
     for (final direction in TextDirection.values) {
       for (final (thickness, extent, indent, endIndent) in [
         (1.0, 16.0, 0.0, 0.0),
         (1.0, 9.0, 12.0, 4.0),
         (2.5, 16.0, 7.5, 0.0),
-        (0.0, 8.0, 3.0, 20.0),
         (4.0, 4.0, 0.0, 30.0),
-        (1.0, 0.0, 0.0, 0.0),
-        (6.0, 2.0, 5.0, 5.0),
         (1.0, 16.0, 80.0, 80.0),
       ]) {
         testWidgets('${direction.name}: $thickness thick in $extent, indents $indent and $endIndent', (tester) async {
@@ -129,6 +128,18 @@ void main() {
         });
       }
     }
+
+    testWidgets('a line of no thickness draws nothing', (tester) async {
+      final none = await _pixels(tester, const SizedBox());
+      final line = await _pixels(
+        tester,
+        const Column(children: [
+          SizedBox(height: 10.25),
+          ListSeparatorLine(vertical: false, extent: 8, thickness: 0, color: Color(0xFF336699)),
+        ]),
+      );
+      expect(line, none);
+    });
 
     testWidgets('it is as long as it is allowed, and only its indents long where nothing bounds it', (tester) async {
       await tester.pumpWidget(const Directionality(

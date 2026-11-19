@@ -459,7 +459,7 @@ class _ToastViewState extends State<_ToastView> {
             _withShadows(
               ConstrainedBox(
                 key: const ValueKey('codelessly-toast-action'),
-                constraints: const BoxConstraints(minWidth: 48, minHeight: 36),
+                constraints: const BoxConstraints(minHeight: 36),
                 child: ControlButton(
                   onPressed: _onActionPressed,
                   spec: theme.button(
@@ -486,7 +486,7 @@ class _ToastViewState extends State<_ToastView> {
               child: ControlButton(
                 onPressed: _close,
                 semanticsLabel: widget.dismissLabel,
-                spec: theme.button(icon: _closeIcon, iconSize: 18, foreground: closeColor, radius: buttonRadius),
+                spec: theme.button(icon: _closeIcon, foreground: closeColor, radius: buttonRadius),
               ),
             ),
           ],

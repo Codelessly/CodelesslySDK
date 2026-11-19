@@ -210,7 +210,8 @@ void main() {
         final dialog = routes.pushed.last as ModalRoute<dynamic>;
         expect(dialog, isA<RawDialogRoute<dynamic>>());
         expect(dialog.barrierLabel, 'Fermer');
-        expect(dialog.transitionDuration, const Duration(milliseconds: 150));
+        expect(dialog.transitionDuration, const Duration(milliseconds: 320));
+        expect(dialog.reverseTransitionDuration, const Duration(milliseconds: 200));
       });
 
       testWidgets('a reorderable list reorders', (tester) async {

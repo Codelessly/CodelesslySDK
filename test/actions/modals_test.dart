@@ -250,8 +250,8 @@ void main() {
     appContext = tester.element(find.byType(NodeView));
     await tester.tapAt(s.center('button'));
     await tester.pumpAndSettle();
-    // The sheet's own width (Material 3 caps it at 640; a phone is narrower).
-    expect(tester.getSize(find.byKey(const ValueKey('sheet newCard'))).width, 640);
+    // As wide as the screen (800 here), with no width of the action's.
+    expect(tester.getSize(find.byKey(const ValueKey('sheet newCard'))).width, 800);
     // A dialog's insets don't push a sheet off the screen's edge.
     expect(tester.getBottomLeft(find.byKey(const ValueKey('sheet newCard'))).dy, 600);
     // No surface of the sheet's behind the screen's own.

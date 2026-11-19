@@ -188,14 +188,13 @@ class RenderNodeView extends RenderControlRoot with RenderObjectWithLayoutCallba
 
 /// The SDK's spinner ([RenderSpinner]) where the surroundings are still
 /// widgets (a loading screen, a list's loading footer, a player getting
-/// ready): an arc in [color] turning in a square of [diameter], or of the
+/// ready): its arc in [color], turning in a square of [diameter] or of the
 /// size it is given.
 class SpinnerView extends LeafRenderObjectWidget {
-  const SpinnerView({super.key, required this.color, this.diameter = 36, this.strokeWidth = 4, this.value});
+  const SpinnerView({super.key, required this.color, this.diameter = 24, this.value});
 
   final Color color;
   final double diameter;
-  final double strokeWidth;
 
   /// The part of the ring that is drawn, from the top (0–1), standing
   /// still; null: the arc turns.
@@ -205,9 +204,6 @@ class SpinnerView extends LeafRenderObjectWidget {
   RenderSpinner createRenderObject(BuildContext context) => RenderSpinner()
     ..color = color
     ..diameter = diameter
-    ..strokeWidth = strokeWidth
-    ..strokeAlign = 0
-    ..strokeCap = StrokeCap.square
     ..value = value
     ..animating = TickerMode.valuesOf(context).enabled;
 
@@ -215,7 +211,6 @@ class SpinnerView extends LeafRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderSpinner renderObject) => renderObject
     ..color = color
     ..diameter = diameter
-    ..strokeWidth = strokeWidth
     ..value = value
     ..animating = TickerMode.valuesOf(context).enabled;
 }
@@ -311,8 +306,8 @@ extension on RenderButton {
 
 /// The SDK's slider ([RenderSlider]) as a widget: [node] is a `slider`
 /// node's props (its value, range, sizes and colors), [onChanged] is told
-/// each value a drag, a tap or a key gives. [seekBar] draws a player's seek
-/// bar ([RenderSeekBar]). Not [interactive], it draws and takes no input.
+/// each value a drag, a tap or a key gives. Not [interactive], it draws and
+/// takes no input; not [enabled], it is drawn as a disabled one.
 /// It needs a root above it, as [ControlButton] does.
 class ControlSlider extends LeafRenderObjectWidget {
   const ControlSlider({
@@ -320,25 +315,20 @@ class ControlSlider extends LeafRenderObjectWidget {
     required this.node,
     required this.tokens,
     this.onChanged,
-    this.seekBar = false,
-    this.seekColors,
     this.interactive = true,
+    this.enabled = true,
     this.semanticsLabel,
   });
 
   final Node node;
   final ControlTokens tokens;
   final ValueChanged<double>? onChanged;
-  final bool seekBar;
-
-  /// A seek bar's played part, rail and thumb, over the node's colors.
-  final ({Color active, Color rail, Color thumb})? seekColors;
   final bool interactive;
+  final bool enabled;
   final String? semanticsLabel;
 
   @override
-  RenderSlider createRenderObject(BuildContext context) =>
-      (seekBar ? RenderSeekBar() : RenderSlider()).._apply(this, context);
+  RenderSlider createRenderObject(BuildContext context) => RenderSlider().._apply(this, context);
 
   @override
   void updateRenderObject(BuildContext context, RenderSlider renderObject) => renderObject._apply(this, context);
@@ -349,9 +339,9 @@ extension on RenderSlider {
     this
       ..interactive = w.interactive
       ..configure(w.node, w.tokens, Size.zero)
+      ..enabled = w.enabled
       ..semanticsLabel = w.semanticsLabel
       ..onChanged = w.interactive ? w.onChanged : null;
-    focusNode.canRequestFocus = w.interactive;
-    if (this case final RenderSeekBar bar) bar.colors = w.seekColors;
+    focusNode.canRequestFocus = w.interactive && w.enabled;
   }
 }

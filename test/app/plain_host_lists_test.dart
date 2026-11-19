@@ -157,7 +157,7 @@ void main() {
         await settle(tester);
         expect(tester.takeException(), isNull);
         expect(latest, findsOneWidget);
-        expect(tester.getSize(latest), const Size(48, 48));
+        expect(tester.getSize(latest), const Size(44, 44));
         await tester.tap(latest);
         await settle(tester);
         expect(tester.takeException(), isNull);
@@ -196,7 +196,7 @@ void main() {
         await _show(tester, host);
         expect(tester.takeException(), isNull);
         expect(find.byType(MediaPlayerButton), findsOneWidget);
-        expect(tester.getSize(find.byType(MediaPlayerButton)), const Size(40, 40));
+        expect(tester.getSize(find.byType(MediaPlayerButton)), const Size(44, 44));
         expect(find.byType(MediaSeekBar), findsOneWidget);
         expect(tester.getSize(find.byType(MediaSeekBar)).height, 24);
       });

@@ -505,8 +505,7 @@ class ResolvedFeedbackTheme {
   static api.Color _api(Color c) => api.Color(c.toARGB32());
 
   /// The tokens of the SDK's own controls in a dialog or a toast (their
-  /// font, their timing): this look's colors, fonts and radii. A focused
-  /// button shows its tint and no ring, as the dialog's buttons always have.
+  /// font, their timing, their states): this look's colors, fonts and radii.
   ControlTokens get controlTokens => ControlTokens.resolve(
         api.ThemeTokens(
           primary: _api(primary),
@@ -518,19 +517,15 @@ class ResolvedFeedbackTheme {
           titleFontFamily: titleStyle.fontFamily,
           radius: radius,
           buttonRadius: buttonRadius,
-          colors: const {'focusBorder': api.Color(0x00000000)},
         ),
         dark: ThemeData.estimateBrightnessForColor(surface) == Brightness.dark,
       );
 
-  /// One of the look's buttons, as the SDK's button draws it: [label] (or
-  /// an [icon] alone) in [foreground] and [style] on [background], with a
-  /// faint layer of the foreground when hovered, more when pressed or
-  /// focused.
+  /// One of the look's buttons, the SDK's stock button: [label] (or an
+  /// [icon] alone) in [foreground] and [style] on [background].
   ButtonSpec button({
     String label = '',
     Map<String, Object?> icon = const {},
-    double? iconSize,
     required Color foreground,
     Color? background,
     TextStyle style = const TextStyle(),
@@ -544,7 +539,6 @@ class ResolvedFeedbackTheme {
         tokens: controlTokens,
         label: label,
         icon: icon,
-        iconSize: iconSize,
         foreground: foreground,
         background: background,
         style: style,

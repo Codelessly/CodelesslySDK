@@ -551,27 +551,29 @@ SurfaceRoles rolesOfScheme(ColorScheme scheme) => (
 
 /// The tokens of the SDK's own controls where the runtime's chrome is drawn
 /// under the SDK's theme (a player's controls, a list's Undo bar): the
-/// theme's tokens. A focused control there shows its tint and no ring, as
-/// that chrome always has.
-ControlTokens chromeTokensOf(BuildContext context) {
+/// theme's tokens; drawn [on] a color of the chrome's own, the tokens that
+/// read on it.
+ControlTokens chromeTokensOf(BuildContext context, {Color? on}) {
   final theme = Theme.of(context);
   final own = theme.extension<CodelesslyThemeTokens>()?.tokens ?? const api.ThemeTokens();
+  if (on == null) return ControlTokens.resolve(own, dark: theme.brightness == Brightness.dark);
   return ControlTokens.resolve(
-    own.mergedWith(const api.ThemeTokens(colors: {'focusBorder': api.Color(0x00000000)})),
-    dark: theme.brightness == Brightness.dark,
+    own.mergedWith(api.ThemeTokens(surface: api.Color(on.toARGB32()), colors: const {})),
+    dark: on.computeLuminance() < .18,
+    backdrop: on,
   );
 }
 
-/// One of the chrome's buttons, as the SDK's button draws it: [label] (or
-/// an [icon] alone, [iconSize] square) in [foreground] and [style] on
-/// [background], with a faint layer of the foreground when hovered, more
-/// when pressed or focused; nothing of a variant's own look.
+/// One of the chrome's buttons: the SDK's stock button of [kind] (a text
+/// button with a [label], an icon button without one), its sizes, states
+/// and focus ring the tokens'. [foreground], [background], [style], [side],
+/// [shape] and [padding] are what the chrome's own look sets over it.
 ButtonSpec chromeButton({
   required ControlTokens tokens,
+  ButtonKind? kind,
   String label = '',
   Map<String, Object?> icon = const {},
-  double? iconSize,
-  required Color foreground,
+  Color? foreground,
   Color? background,
   TextStyle style = const TextStyle(),
   BorderSide? side,
@@ -579,14 +581,13 @@ ButtonSpec chromeButton({
   EdgeInsets? padding,
   bool enabled = true,
   bool wrapLabel = false,
+  api.FloatingActionButtonType fabType = api.FloatingActionButtonType.regular,
 }) =>
     ButtonSpec(
-      kind: label.isEmpty ? ButtonKind.icon : ButtonKind.text,
+      kind: kind ?? (label.isEmpty ? ButtonKind.icon : ButtonKind.text),
       tokens: tokens,
       label: label,
       icon: icon,
-      iconSize: iconSize,
-      iconColor: foreground,
       foreground: foreground,
       background: background,
       labelStyle: style,
@@ -595,11 +596,7 @@ ButtonSpec chromeButton({
       padding: padding,
       enabled: enabled,
       wrapLabel: wrapLabel,
-      // Placed as the Text of the Material button it took the place of.
-      centersLine: true,
-      hoverColor: foreground.withValues(alpha: .06),
-      splashColor: foreground.withValues(alpha: .10),
-      focusColor: foreground.withValues(alpha: .10),
+      fabType: fabType,
     );
 
 /// A glyph of the MaterialIcons font as a button's icon. [icon] is a

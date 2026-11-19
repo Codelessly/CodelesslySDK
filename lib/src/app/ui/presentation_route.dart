@@ -55,7 +55,7 @@ Future<T?> showShellDialog<T>({
   final themes = InheritedTheme.capture(from: context, to: navigator.context);
   final direction = Directionality.of(context);
   final media = MediaQuery.maybeOf(context);
-  return navigator.push<T>(RawDialogRoute<T>(
+  return navigator.push<T>(_ShellDialogRoute<T>(
     settings: routeSettings,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierDismissLabel(context),
@@ -63,10 +63,15 @@ Future<T?> showShellDialog<T>({
         DialogTheme.of(context).barrierColor ??
         Theme.of(context).dialogTheme.barrierColor ??
         ShellColors.black54,
-    transitionDuration: dialogFadeDuration,
+    transitionDuration: PresentationRoute.enterDuration,
     traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
-    transitionBuilder: (context, animation, _, child) =>
-        FadeTransition(opacity: animation.drive(CurveTween(curve: Curves.easeOut)), child: child),
+    transitionBuilder: (context, animation, _, child) {
+      final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
+      return FadeTransition(
+        opacity: curved,
+        child: ScaleTransition(scale: Tween<double>(begin: 0.96, end: 1).animate(curved), child: child),
+      );
+    },
     pageBuilder: (routeContext, _, _) {
       Widget dialog = themes.wrap(Builder(builder: builder));
       if (media != null) dialog = MediaQuery(data: media, child: dialog);
@@ -78,8 +83,24 @@ Future<T?> showShellDialog<T>({
   ));
 }
 
-/// How long a dialog takes to fade in, and out.
-const Duration dialogFadeDuration = Duration(milliseconds: 150);
+/// A dialog's route: it comes as every presented layout does (it fades in
+/// and grows from 96% over [PresentationRoute.enterDuration]) and goes over
+/// [PresentationRoute.exitDuration].
+class _ShellDialogRoute<T> extends RawDialogRoute<T> {
+  _ShellDialogRoute({
+    required super.pageBuilder,
+    super.barrierDismissible,
+    super.barrierColor,
+    super.barrierLabel,
+    super.transitionDuration,
+    super.transitionBuilder,
+    super.settings,
+    super.traversalEdgeBehavior,
+  });
+
+  @override
+  Duration get reverseTransitionDuration => PresentationRoute.exitDuration;
+}
 
 /// Presents [builder]'s content as [presentation] says, with a barrier that
 /// [barrierDismissible] lets the user tap to close it.
@@ -110,13 +131,10 @@ class PresentationRoute<T> extends PopupRoute<T> {
   static const enterDuration = Duration(milliseconds: 320);
   static const exitDuration = Duration(milliseconds: 200);
 
-  /// A plain bottom sheet ([plainSheet]): how long it takes to come up, how
-  /// wide it is at most, the curve it comes and goes on, and the downward
-  /// fling (px a second) that closes it.
-  static const plainSheetEnterDuration = Duration(milliseconds: 250);
-  static const double plainSheetMaxWidth = 640;
-  static const Curve plainSheetCurve = Cubic(0.0, 0.0, 0.2, 1.0);
-  static const double plainSheetFling = 700;
+  /// A plain bottom sheet ([plainSheet]): the curve it comes and goes on,
+  /// and the downward fling (px a second) that closes it.
+  static const Curve plainSheetCurve = Curves.easeOutCubic;
+  static const double plainSheetFling = 400;
   static const double defaultSheetWidth = 400;
   static const double bottomSheetRadius = 10;
   static const Size dragHandleSize = Size(40, 4);
@@ -158,9 +176,8 @@ class PresentationRoute<T> extends PopupRoute<T> {
   final double enterScale;
 
   /// A bottom sheet with nothing of its own set (no radius, handle, stops,
-  /// margin or height limit): at most [plainSheetMaxWidth] wide and not
-  /// clipped, it comes up from its own height over
-  /// [plainSheetEnterDuration], follows a finger that drags it, and closes
+  /// margin or height limit): not clipped, it comes up from its own height,
+  /// follows a finger that drags it, and closes
   /// when it is let go under half way or flung down.
   final bool plainSheet;
 
@@ -209,7 +226,7 @@ class PresentationRoute<T> extends PopupRoute<T> {
   String? get barrierLabel => _barrierLabel;
 
   @override
-  Duration get transitionDuration => _plain ? plainSheetEnterDuration : enterDuration;
+  Duration get transitionDuration => enterDuration;
 
   @override
   Duration get reverseTransitionDuration => exitDuration;
@@ -221,7 +238,7 @@ class PresentationRoute<T> extends PopupRoute<T> {
       explicitChildNodes: true,
       child: switch (presentation) {
         ModalPresentation.bottomSheet || ModalPresentation.adaptive => _BottomSheet(
-            width: _plain ? plainSheetMaxWidth : sheetWidth,
+            width: sheetWidth,
             margin: sheetMargin,
             plain: _plain ? (place: _sheet, onDragStart: _sheetDragStart, onDragBy: _sheetDragBy, onDragEnd: _sheetDragEnd) : null,
             cornerRadius: cornerRadius ?? bottomSheetRadius,

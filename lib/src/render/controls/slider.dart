@@ -87,47 +87,6 @@ String? sliderLabel(Node n, double value) {
   return label.replaceAll(r'${value}', digits > 0 ? value.toStringAsFixed(digits) : value.round().toString());
 }
 
-extension on Rect {
-  Rect inflateY(double dy) => Rect.fromLTRB(left, top - dy, right, bottom + dy);
-}
-
-/// A player's seek bar: a slider whose thumb's center runs the whole track
-/// and whose played part is 2 px taller than the rest.
-class RenderSeekBar extends RenderSlider {
-  /// Its colors as given (a node's are 8 bits a channel: a color mixed
-  /// from two others is kept whole here); null: the node's.
-  ({Color active, Color rail, Color thumb})? get colors => _colors;
-  ({Color active, Color rail, Color thumb})? _colors;
-  set colors(({Color active, Color rail, Color thumb})? value) {
-    if (value == _colors) return;
-    _colors = value;
-    markNeedsPaint();
-  }
-
-  @override
-  Color get activeTrackColor => _colors?.active ?? super.activeTrackColor;
-
-  @override
-  Color get inactiveTrackColor => _colors?.rail ?? super.inactiveTrackColor;
-
-  @override
-  Color get thumbColor => _colors?.thumb ?? super.thumbColor;
-
-  @override
-  bool get thumbTravelsTrack => true;
-
-  @override
-  double get activeTrackGrowth => 2;
-
-  // The contact shadow of a thumb lying flat on the track: a faint darker
-  // rim, as the seek bar has always had.
-  @override
-  void paintUnderThumb(Canvas canvas, Offset center, double radius) {
-    final path = Path()..addArc(Rect.fromCircle(center: center, radius: radius), 0, math.pi * 2);
-    canvas.drawShadow(path, const Color(0xFF000000), 0, true);
-  }
-}
-
 /// A slider: its track, thumb, ticks and value, dragged, tapped and moved by
 /// keys.
 class RenderSlider extends RenderControl {
@@ -460,20 +419,9 @@ class RenderSlider extends RenderControl {
   /// ruler's pointer: the whole track).
   ({double start, double end}) get _travel {
     final r = trackRect;
-    final half = thumbTravelsTrack ? 0.0 : thumbSize.width / 2;
+    final half = _ruler ? 0.0 : thumbSize.width / 2;
     return (start: r.left + half, end: math.max(r.left + half, r.right - half));
   }
-
-  /// Whether the thumb's center runs the whole track, end to end (a ruler's
-  /// pointer, a seek bar's thumb); else the thumb stays inside it.
-  bool get thumbTravelsTrack => _ruler;
-
-  /// How much taller than the rest the active part of the track is drawn
-  /// (a seek bar's played part: 2); 0: the same height.
-  double get activeTrackGrowth => 0;
-
-  /// Painted under a round thumb, before it (nothing).
-  void paintUnderThumb(Canvas canvas, Offset center, double radius) {}
 
   /// The frame's x of [t] (0–1 of the range).
   double _x(double t) {
@@ -612,28 +560,6 @@ class RenderSlider extends RenderControl {
       canvas.drawRect(Rect.fromLTRB(math.min(zero, thumb.dx), base + 1, math.max(zero, thumb.dx), base + 4), active);
       return;
     }
-    final grow = activeTrackGrowth;
-    if (grow > 0) {
-      // Two parts that meet under the thumb: the rest of the track from just
-      // before the thumb's center, then the active part, taller, to just
-      // after it (each drawn only where it is longer than its round end).
-      final h = track.height;
-      final activeFromEnd = n.prop(SliderProps.fillFromEnd) != _reversed;
-      final thin = Radius.circular(h / 2), thick = Radius.circular((h + grow) / 2);
-      final before = Rect.fromLTRB(track.left, track.top, thumb.dx + h / 2, track.bottom);
-      final after = Rect.fromLTRB(thumb.dx - h / 2, track.top, track.right, track.bottom);
-      if (thumb.dx < track.right - h / 2) {
-        canvas.drawRRect(
-            activeFromEnd ? RRect.fromRectAndRadius(after.inflateY(grow / 2), thick) : RRect.fromRectAndRadius(after, thin),
-            activeFromEnd ? active : inactive);
-      }
-      if (thumb.dx > track.left + h / 2) {
-        canvas.drawRRect(
-            activeFromEnd ? RRect.fromRectAndRadius(before, thin) : RRect.fromRectAndRadius(before.inflateY(grow / 2), thick),
-            activeFromEnd ? inactive : active);
-      }
-      return;
-    }
     final radius = Radius.circular(kind == api.SliderTrackShape.rectangle ? 0 : track.height / 2);
     RRect rr(Rect r) => RRect.fromRectAndRadius(r, radius);
     // The active part runs from the start (the end when filling from the
@@ -724,7 +650,6 @@ class RenderSlider extends RenderControl {
       case api.SliderThumbShape.circle:
         final r = _thumbRadius;
         if (r <= 0) return;
-        paintUnderThumb(canvas, c, r);
         canvas.drawCircle(c, r, Paint()..color = thumbColor);
         // A ring of the node's stroke, else SSUI's hairline round its white
         // thumb on a light page (not round a thumb color of the node's).

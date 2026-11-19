@@ -849,8 +849,7 @@ api.ListSeparator listSeparator(Node n) {
 /// list is wide, with a [thickness] line through its middle ([vertical]: a
 /// standing line, between the items of a horizontal list). [indent] is at
 /// the line's start: the right of a lying line in a right-to-left layout.
-/// A thickness of 0 is a hairline, one device pixel. Drawn as Flutter's
-/// `Divider` and `VerticalDivider` draw.
+/// The SDK's divider ([RenderDivider]).
 class ListSeparatorLine extends LeafRenderObjectWidget {
   const ListSeparatorLine({
     super.key,
@@ -870,7 +869,7 @@ class ListSeparatorLine extends LeafRenderObjectWidget {
   final double endIndent;
 
   @override
-  RenderDivider createRenderObject(BuildContext context) => RenderDivider()..asBorder = true.._apply(this, context);
+  RenderDivider createRenderObject(BuildContext context) => RenderDivider().._apply(this, context);
 
   @override
   void updateRenderObject(BuildContext context, RenderDivider renderObject) => renderObject._apply(this, context);

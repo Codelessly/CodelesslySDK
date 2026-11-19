@@ -18,6 +18,7 @@ import 'package:flutter/scheduler.dart';
 import '../render/convert.dart';
 import '../render/controls/focus.dart';
 import '../render/control_theme.dart' show chromeButton, chromeGlyph, chromeTokensOf;
+import '../render/controls/buttons.dart' show ButtonKind;
 import '../render/controls/root.dart';
 import '../render/node_view.dart' show CodelesslyLabelsScope, ControlButton, SpinnerView;
 import '../render/paint/shell_constants.dart';
@@ -718,8 +719,7 @@ class DataListViewState extends State<DataListView> {
     }
     if (sticky) {
       SchedulerBinding.instance.addPostFrameCallback((_) => _syncLatestFocus());
-      final colors = Theme.of(context).colorScheme;
-      final buttons = Theme.of(context).iconButtonTheme.style;
+      final tokens = chromeTokensOf(context);
       final inner = list;
       // A list as tall as its items (no height of its own, in a column
       // that scrolls) has no end to stick to nor to jump to: it is its
@@ -743,24 +743,22 @@ class DataListViewState extends State<DataListView> {
               // button's.
               child: SizedBox.square(
                 key: const ValueKey('followListLatest'),
-                dimension: 48,
+                dimension: 44,
                 child: ControlButton(
                   focusable: false,
                   onPressed: _jumpToLatest,
                   semanticsLabel: CodelesslyLabelsScope.of(context).jumpToLatest,
                   spec: chromeButton(
-                    tokens: chromeTokensOf(context),
+                    tokens: tokens,
+                    kind: ButtonKind.fab,
+                    fabType: api.FloatingActionButtonType.small,
                     icon: axis == Axis.vertical
                         ? chromeGlyph('arrow_downward', const IconData(ShellGlyphs.arrowDownward, fontFamily: ShellGlyphs.font))
                         : chromeGlyph(
                             'arrow_forward',
                             const IconData(ShellGlyphs.arrowForward, fontFamily: ShellGlyphs.font, matchTextDirection: true),
                           ),
-                    iconSize: 24,
-                    foreground: buttons?.foregroundColor?.resolve(const <WidgetState>{}) ?? colors.primary,
-                    background: colors.surfaceContainerHigh,
-                    shape: buttons?.shape?.resolve(const <WidgetState>{}),
-                    side: _latestFocus?.showsHighlight == true ? BorderSide(color: colors.primary, width: 2) : null,
+                    side: _latestFocus?.showsHighlight == true ? BorderSide(color: tokens.focusBorder, width: 2) : null,
                   ),
                 ),
               ),
@@ -933,37 +931,42 @@ class UndoBar extends StatelessWidget {
   final VoidCallback onUndo;
 
   @override
-  Widget build(BuildContext context) => Material(
-        color: const Color(0xFF323232),
-        elevation: 6,
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.only(left: 16),
-          child: Row(
-            children: [
-              Expanded(child: Text(message, style: const TextStyle(color: ShellColors.white, fontSize: 14))),
-              ConstrainedBox(
-                constraints: const BoxConstraints(minWidth: 64, minHeight: 40),
-                child: Builder(builder: (context) {
-                  final theme = Theme.of(context);
-                  final style = theme.textButtonTheme.style;
-                  return ControlButton(
-                    onPressed: onUndo,
-                    spec: chromeButton(
-                      tokens: chromeTokensOf(context),
-                      label: 'Undo',
-                      foreground: style?.foregroundColor?.resolve(const <WidgetState>{}) ?? theme.colorScheme.primary,
-                      style: theme.textTheme.labelLarge ?? const TextStyle(),
-                      shape: style?.shape?.resolve(const <WidgetState>{}),
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                    ),
-                  );
-                }),
+  Widget build(BuildContext context) {
+    // The bar is the theme's inverse surface (a tooltip's): the button's
+    // states are the tokens' on it.
+    final theme = chromeTokensOf(context);
+    final tokens = chromeTokensOf(context, on: theme.tooltipBackground);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.tooltipBackground,
+        borderRadius: BorderRadius.circular(theme.radius('panel', 8)),
+        boxShadow: theme.shadows('level3'),
+      ),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(14, 6, 6, 6),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                message,
+                style: TextStyle(
+                  color: theme.tooltipText,
+                  fontSize: 13,
+                  fontFamily: theme.fontFamily,
+                  decoration: TextDecoration.none,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
-            ],
-          ),
+            ),
+            ControlButton(
+              onPressed: onUndo,
+              spec: chromeButton(tokens: tokens, label: 'Undo', foreground: theme.tooltipText),
+            ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 }
 
 class _DefaultLoadingFooter extends StatelessWidget {
@@ -975,7 +978,7 @@ class _DefaultLoadingFooter extends StatelessWidget {
         child: Center(
           child: SizedBox.square(
             dimension: 24,
-            child: SpinnerView(strokeWidth: 2.5, color: ProgressIndicatorTheme.of(context).color ?? Theme.of(context).colorScheme.primary),
+            child: SpinnerView(color: ProgressIndicatorTheme.of(context).color ?? Theme.of(context).colorScheme.primary),
           ),
         ),
       );
@@ -1074,8 +1077,8 @@ class ItemSnapPhysics extends ScrollPhysics {
 }
 
 /// Pull to refresh for a vertical list: dragging [child]'s scroll view past
-/// its start brings a round indicator down from the top (an arc that fills
-/// as the drag goes); let go far enough (a quarter of the list's height) and
+/// its start brings a round indicator down from the top (the SDK's spinner
+/// on a disc, its arc filling as the drag goes); let go far enough (a quarter of the list's height) and
 /// it stays at [displacement], turning, while [onRefresh] runs, then shrinks
 /// away. Let go sooner and it goes back up.
 class PullToRefresh extends StatefulWidget {
@@ -1094,7 +1097,7 @@ class PullToRefresh extends StatefulWidget {
   /// The arc (null: the theme's primary).
   final Color? color;
 
-  /// The disc (null: the theme's surface).
+  /// The disc (null: the theme's raised surface).
   final Color? backgroundColor;
 
   /// How far under the list's top the indicator rests while refreshing.
@@ -1221,8 +1224,8 @@ class _PullToRefreshState extends State<PullToRefresh> with TickerProviderStateM
       onNotification: _onScroll,
       child: NotificationListener<OverscrollIndicatorNotification>(onNotification: _onGlow, child: widget.child),
     );
-    final theme = Theme.of(context);
-    final color = widget.color ?? theme.colorScheme.primary;
+    final tokens = chromeTokensOf(context);
+    final color = widget.color ?? tokens.primary;
     final turning = _status == _Pull.refresh || _status == _Pull.done;
     return Stack(
       children: [
@@ -1248,17 +1251,18 @@ class _PullToRefreshState extends State<PullToRefresh> with TickerProviderStateM
                         child: Padding(
                           key: const ValueKey('Codelessly pull to refresh'),
                           padding: const EdgeInsets.all(4),
-                          child: CustomPaint(
-                            painter: _RefreshDisc(
-                              color: widget.backgroundColor ?? theme.canvasColor,
-                              shadow: theme.shadowColor,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: widget.backgroundColor ?? tokens.raisedBackground,
+                              border: Border.all(color: tokens.primaryBorder),
+                              boxShadow: tokens.shadows('level2'),
                             ),
                             child: SizedBox.square(
-                              dimension: 41,
+                              dimension: 36,
                               child: Center(
                                 child: SpinnerView(
-                                  diameter: 17,
-                                  strokeWidth: 2.5,
+                                  diameter: 16,
                                   color: turning ? color : color.withValues(alpha: color.a * _ink),
                                   value: turning ? null : _position.value * .75,
                                 ),
@@ -1276,21 +1280,4 @@ class _PullToRefreshState extends State<PullToRefresh> with TickerProviderStateM
       ],
     );
   }
-}
-
-/// The indicator's disc, lifted a little off the list.
-class _RefreshDisc extends CustomPainter {
-  const _RefreshDisc({required this.color, required this.shadow});
-
-  final Color color, shadow;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final disc = Path()..addOval(Offset.zero & size);
-    canvas.drawShadow(disc, shadow, 2, color.a < 1);
-    canvas.drawPath(disc, Paint()..color = color);
-  }
-
-  @override
-  bool shouldRepaint(_RefreshDisc old) => old.color != color || old.shadow != shadow;
 }

@@ -52,21 +52,21 @@ It started at 23. The six that no longer do: `app/page_transitions.dart`, `app/u
 |---|---|---|
 | `Colors.*` (45) | `render/control_theme.dart`, `app/navigator_ui.dart`, `app/ui/confirm_dialog.dart`, `app/ui/presentation_route.dart`, `app/backdrop_screens.dart`, `features/media/players.dart`, `features/media/embedded_player_native.dart`, `widgets/collections_data_list.dart` | `ShellColors` (`render/paint/shell_constants.dart`), the same values |
 | `Icons.*` (17) | `features/media/players.dart`, `features/media/embedded_player_native.dart`, `app/ui/toast.dart`, `widgets/collections_data_list.dart` | `ShellGlyphs`: the same codepoints of the MaterialIcons font, held to `material_icon_codepoints.dart` by a test. Still drawn by Flutter's `Icon` (a widgets-library widget), and the font is still the host's `uses-material-design` font |
-| `CircularProgressIndicator` (3) | the loading screen, an audio player getting ready, a list's loading footer | `SpinnerView` (`render/node_view.dart`) over `RenderSpinner`: the same size, stroke and colour; the arc is a steady 30% of the ring where Material's grew and shrank |
-| `Divider`, `VerticalDivider` | `widgets/collections.dart` (the line between a list's items) | `ListSeparatorLine` over `RenderDivider` (`asBorder`), the same pixels (`test/app/own_drawing_test.dart`) |
+| `CircularProgressIndicator` (3) | the loading screen, an audio player getting ready, a list's loading footer | `SpinnerView` (`render/node_view.dart`): the SDK's stock spinner (`RenderSpinner`), 24 px |
+| `Divider`, `VerticalDivider` | `widgets/collections.dart` (the line between a list's items) | `ListSeparatorLine`: the SDK's divider (`RenderDivider`) |
 | `MaterialRectArcTween` | `app/ui/hero_flights.dart` (a flight's default path) | `HeroCornerArcRectTween`, the same path |
 | `MaterialLocalizations.of` (throws without them) | `app/ui/presentation_route.dart`, and inside `showDialog` and `showModalBottomSheet` | `barrierDismissLabel`: the host's localization where it has one, else English. `showShellDialog` pushes the dialog route itself in a host without Material's localizations, and a bottom sheet there is the SDK's `PresentationRoute` (`test/app/plain_host_test.dart`). The lookup still names `MaterialLocalizations`; it goes with the routes |
-| `TextButton`, `FilledButton`, `IconButton` (14) | `app/ui/confirm_dialog.dart`, `app/ui/toast.dart`, `features/media/players.dart`, `widgets/collections_data_list.dart` (the Undo bar, jump to latest) | `ControlButton` (`render/node_view.dart`) over `RenderButton`, its look given by `chromeButton` (`render/control_theme.dart`): no variant's look, the label placed as Flutter's `Text` was (`ButtonSpec.centersLine`), a dialog's long answer wrapping (`wrapLabel`). The same pixels at rest (`test/app/chrome_parity_test.dart`) |
-| `Slider`, `SliderTheme` | `features/media/players.dart` (the audio seek bar) | `ControlSlider` over `RenderSeekBar` (`render/controls/slider.dart`): the thumb's center runs the whole track, the played part is 2 px taller. The same pixels at rest, both directions, seekable or not |
-| `RefreshIndicator` | `widgets/collections_data_list.dart` (pull to refresh) | `PullToRefresh`, there: the same drag, distances, timings, disc and shadow; the arc is the SDK's spinner (it fills as the list is pulled, then a steady 30% turning) |
+| `TextButton`, `FilledButton`, `IconButton` (14) | `app/ui/confirm_dialog.dart`, `app/ui/toast.dart`, `features/media/players.dart`, `widgets/collections_data_list.dart` (the Undo bar, jump to latest) | `ControlButton` over `RenderButton`: the stock button of its kind (`chromeButton`), with the tokens' sizes, states and focus ring; a dialog's or a toast's own colours, font and radius over it |
+| `Slider`, `SliderTheme` | `features/media/players.dart` (the audio seek bar) | `ControlSlider` over `RenderSlider`: the stock slider |
+| `RefreshIndicator` | `widgets/collections_data_list.dart` (pull to refresh) | `PullToRefresh`, there: the stock spinner on a disc of the tokens' raised surface, border and shadow; the pull that arms it and its timings are its own |
 | `InkWell` | `widgets/collections_swipe.dart` (a swipe row's action) | a tap target of its own (`_ActionTarget`): the tap, the click cursor, the theme's hover tint |
 
 ### Still Material around them
 
-The controls above are the SDK's, but what holds them is not yet: the confirm dialog is still a `Dialog` in a
-`showDialog` route, the Undo bar and a swipe row's action still sit on a `Material` (its color, its elevation, its
-default text style), and the look of each (`chromeButton`'s colors, the seek bar's) is still read from the
-`ThemeData` the SDK installs. Those go with the routes and the theme, below.
+The controls above are the SDK's stock ones, with nothing of Material's look over them. What holds some of them
+is not the SDK's yet: the confirm dialog's surface and a toast still sit on a `Material` (its color, its
+elevation, its default text style), and the chrome's tokens are still found through the `ThemeData` the SDK
+installs (`chromeTokensOf`). Those go with the theme, below.
 
 A `ControlHost` (`render/node_view.dart`) is the root (`RenderControlRoot`) of the controls of a toast and of the
 confirm dialog, which no `NodeView` is above: their focus order and keys are the SDK's own, in the dialog's
@@ -78,7 +78,7 @@ confirm dialog, which no `NodeView` is above: their focus order and keys are the
 |---|---|
 | `showDialog` (4), `DialogRoute` | `showShellDialog` (`app/ui/presentation_route.dart`): a `RawDialogRoute` with the same 150 ms fade and barrier, in every host |
 | `Dialog` (the confirm's surface) | `_DialogSurface` (`app/ui/confirm_dialog.dart`): the same insets, minimum width and keyboard padding, around the `Material` that still draws its fill and shadow |
-| `showModalBottomSheet` | `PresentationRoute(plainSheet: true)`: Material's width, timing, curve and closing rules |
+| `showModalBottomSheet` | `PresentationRoute(plainSheet: true)`: the SDK's sheet timing and width, following a finger and closing under half way |
 | `MaterialPageRoute` (3) | `CodelesslyPageRoute extends PageRoute`, playing a `CodelesslyPageTransitions` (`app/page_transitions.dart`): the three native transitions rebuilt and held to Flutter's frame for frame (`test/app/page_transitions_test.dart`), or any `RouteTransition` of the animation system |
 | `PageTransitionsTheme`, its builders (`seeThroughPageTransitions`) | gone: the SDK's transitions take the fill behind the screens, none above a backdrop |
 | `ReorderableListView` | a `CustomScrollView` with the widgets layer's `SliverReorderableList` (`widgets/collections_reorder.dart`) |

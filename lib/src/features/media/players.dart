@@ -19,6 +19,7 @@ import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 import '../../render/convert.dart';
 import '../../render/control_theme.dart' show chromeButton, chromeGlyph, chromeTokensOf;
+import '../../render/controls/buttons.dart' show ButtonKind;
 import '../../render/node_view.dart' show CodelesslyLabelsScope, ControlButton, ControlSlider, SpinnerView;
 import '../../render/paint/shell_constants.dart';
 import 'embedded_player.dart';
@@ -304,6 +305,7 @@ class _MediaVideoState extends State<MediaVideo> {
             child: ValueListenableBuilder<VideoPlayerValue>(
               valueListenable: c,
               builder: (context, value, _) => MediaPlayerButton(
+                floating: true,
                 label: value.isPlaying ? labels.pauseVideo : labels.playVideo,
                 icon: value.isPlaying ? pauseCircleGlyph : playCircleGlyph,
                 onPressed: () => value.isPlaying ? c.pause() : c.play(),
@@ -544,7 +546,7 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
         else if (_failed || player == null)
           const Icon(_Glyph.errorOutline, semanticLabel: 'Audio unavailable')
         else if (!_ready)
-          SpinnerView(color: ProgressIndicatorTheme.of(context).color ?? colors.primary)
+          Padding(padding: const EdgeInsets.all(10), child: SpinnerView(color: chromeTokensOf(context).primary))
         else if (controls)
           MediaPlayerButton(
             label: _playing ? labels.pauseAudio : labels.playAudio,
@@ -585,90 +587,68 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
   }
 }
 
-/// A player's round button: a 24 px glyph in a 40 px button, in the theme's
-/// accent; with nothing to press ([onPressed] null) it is drawn faint and
-/// takes no input.
+/// A player's button, 44 px: the SDK's icon button, or ([floating], over a
+/// video's picture) its small floating button. With
+/// nothing to press ([onPressed] null) it is drawn disabled and takes no
+/// input.
 class MediaPlayerButton extends StatelessWidget {
-  const MediaPlayerButton({required this.label, required this.icon, this.onPressed});
+  const MediaPlayerButton({required this.label, required this.icon, this.onPressed, this.floating = false});
 
   /// What a screen reader says.
   final String label;
   final api.Json icon;
   final VoidCallback? onPressed;
+  final bool floating;
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final style = theme.iconButtonTheme.style;
-    final foreground = onPressed == null
-        ? theme.disabledColor
-        : style?.foregroundColor?.resolve(const <WidgetState>{}) ?? theme.colorScheme.primary;
-    return SizedBox.square(
-      dimension: 40,
-      child: ControlButton(
-        onPressed: onPressed,
-        interactive: onPressed != null,
-        semanticsLabel: label,
-        spec: chromeButton(
-          tokens: chromeTokensOf(context),
-          icon: icon,
-          iconSize: 24,
-          foreground: foreground,
-          shape: style?.shape?.resolve(const <WidgetState>{}),
+  Widget build(BuildContext context) => SizedBox.square(
+        dimension: 44,
+        child: ControlButton(
+          onPressed: onPressed,
+          interactive: onPressed != null,
+          semanticsLabel: label,
+          spec: chromeButton(
+            tokens: chromeTokensOf(context),
+            kind: floating ? ButtonKind.fab : ButtonKind.icon,
+            fabType: api.FloatingActionButtonType.small,
+            icon: icon,
+            enabled: onPressed != null,
+          ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 final api.Json playArrowGlyph = chromeGlyph('play_arrow', _Glyph.playArrow);
 final api.Json playCircleGlyph = chromeGlyph('play_circle', _Glyph.playCircle);
 final api.Json pauseCircleGlyph = chromeGlyph('pause_circle', _Glyph.pauseCircle);
 
-/// The audio player's seek bar: a 3 px track (the played part 5) and a
-/// 12 px thumb in the theme's accent, 12 px in from each side. With nothing
-/// to seek ([onChanged] null) it is drawn faint, its thumb 10 px, and takes
-/// no input.
+/// The audio player's seek bar: the SDK's slider. With nothing to seek
+/// ([onChanged] null) it is drawn disabled and takes no input.
 class MediaSeekBar extends StatelessWidget {
   const MediaSeekBar({required this.value, required this.max, this.onChanged});
 
   final double value, max;
   final ValueChanged<double>? onChanged;
 
-  static Object _color(Color c) => api.Color(c.toARGB32()).toJson();
-
   @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final enabled = onChanged != null;
-    return ControlSlider(
-      seekBar: true,
-      interactive: enabled,
-      tokens: chromeTokensOf(context),
-      onChanged: onChanged,
-      semanticsLabel: CodelesslyLabelsScope.of(context).seek,
-      seekColors: (
-        active: enabled ? colors.primary : colors.onSurface.withValues(alpha: 0.24),
-        rail: enabled ? colors.surfaceContainerHighest : colors.onSurface.withValues(alpha: 0.12),
-        thumb: enabled ? colors.primary : colors.onSurfaceVariant,
-      ),
-      node: Node.fromJson(<String, Object?>{
-        'type': 'slider',
-        'props': {
-          'value': value,
-          'max': max,
-          'inverted': Directionality.maybeOf(context) == TextDirection.rtl,
-          'trackHeight': 3,
-          'padding': {'left': 12, 'right': 12},
-          'thumbRadius': enabled ? 6 : 5,
-          'overlayRadius': 12,
-          'overlayColor': _color(colors.primary.withValues(alpha: .10)),
-          // (A thumb color of its own: no ring round the thumb.)
-          'thumbColor': _color(colors.primary),
-        },
-      }, id: 'seek')!,
-    );
-  }
+  Widget build(BuildContext context) => Padding(
+      // Clear of the player's end edge.
+      padding: const EdgeInsetsDirectional.only(end: 12),
+      child: ControlSlider(
+        interactive: onChanged != null,
+        enabled: onChanged != null,
+        tokens: chromeTokensOf(context),
+        onChanged: onChanged,
+        semanticsLabel: CodelesslyLabelsScope.of(context).seek,
+        node: Node.fromJson(<String, Object?>{
+          'type': 'slider',
+          'props': {
+            'value': value,
+            'max': max,
+            'inverted': Directionality.maybeOf(context) == TextDirection.rtl,
+          },
+        }, id: 'seek')!,
+      ));
 }
 
 // --- web view ------------------------------------------------------------------
